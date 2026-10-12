@@ -649,6 +649,15 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 }
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
 
+                // windowAutoTuning, as Linux (tcp_grow_window(), also for out-of-order
+                // data): each data segment grows the offer by max(2 * MSS, 2 * its
+                // length), up to the clamp
+                if (state->rcv_ssthresh > 0 && state->rcv_ssthresh < state->window_clamp && payloadLength > 0) {
+                    uint32_t increase = std::max<uint32_t>(2 * state->snd_mss, 2 * payloadLength);
+                    state->rcv_ssthresh += std::min(state->window_clamp - state->rcv_ssthresh, increase);
+                    EV_DETAIL << "Window auto-tuning: the offer grows to " << state->rcv_ssthresh << "\n";
+                }
+
                 // RFC 5681, page 8:
                 // "3.2 Fast Retransmit/Fast Recovery
                 // (...)

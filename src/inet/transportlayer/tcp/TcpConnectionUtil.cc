@@ -887,6 +887,13 @@ void TcpConnection::configureStateVariables()
     double receiveBufferSize = tcpMain->par("receiveBufferSize");
     state->rcvBufferSize = receiveBufferSize > 0 ? (uint32_t)receiveBufferSize : 0;
     state->acceptBeyondBufferAtEmptyQueue = tcpMain->par("acceptBeyondBufferAtEmptyQueue");
+    // window auto-tuning (Linux tcp_grow_window()): the offer starts at the advertised
+    // window and grows toward half the receive buffer (tcp_win_from_space() at the
+    // default scaling ratio)
+    if (tcpMain->par("windowAutoTuning").boolValue() && state->rcvBufferSize > 0) {
+        state->rcv_ssthresh = advertisedWindow;
+        state->window_clamp = std::max(advertisedWindow, state->rcvBufferSize / 2);
+    }
     // a receive buffer smaller than the advertised window limits the first offer too
     if (state->rcvBufferSize > 0 && state->rcv_wnd > state->rcvBufferSize)
         state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
@@ -2274,7 +2281,9 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 state->rcv_wnd_scale = state->ws_manual_scale;
             }
             else {
-                ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
+                // the largest window that the connection can offer: the advertised window,
+                // or with windowAutoTuning the window that auto-tuning can reach
+                ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + std::max(state->maxRcvBuffer, state->window_clamp) - state->rcv_nxt;
                 state->rcv_wnd_scale = 0;
 
                 while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
@@ -2503,9 +2512,12 @@ uint16_t TcpConnection::updateRcvWnd()
     // With a receive buffer apart from the advertised window, the window also limits
     // the offer: the advertised window less the in-order data that the application did
     // not read. The out-of-order data uses only the buffer.
+    // With windowAutoTuning, the window that auto-tuning reached takes the place of the
+    // advertised window.
     if (state->rcvBufferSize > 0) {
+        uint32_t window = state->rcv_ssthresh > 0 ? std::min(state->rcv_ssthresh, state->window_clamp) : state->maxRcvBuffer;
         uint32_t unread = receiveQueue->getAcknowledgedDataLength();
-        win = std::min(win, state->maxRcvBuffer > unread ? state->maxRcvBuffer - unread : 0);
+        win = std::min(win, window > unread ? window - unread : 0);
     }
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:

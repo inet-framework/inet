@@ -1,0 +1,61 @@
+%description:
+Tests windowAutoTuning, as Linux (tcp_grow_window()). The server offers 4000
+bytes first and has a receive buffer of 24000 bytes. Each data segment grows
+the offer by max(2 * MSS, 2 * its length) = 2000 bytes, up to the clamp of half
+the buffer, 12000 bytes.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 30000"
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.advertisedWindow = 4000
+*.srv_tcp.receiveBufferSize = 24000B
+*.srv_tcp.windowAutoTuning = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 4000   Option(s): MaxSegSize
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: A ack 501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[1.001 A003] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 
+[1.003 B002] A.1000 < B.2000: A ack 1001 win 6000 
+[1.005 A004] A.1000 > B.2000: A 1001:2001(1000) ack 501 win 16384 
+[1.005 A005] A.1000 > B.2000: A 2001:3001(1000) ack 501 win 16384 
+[1.007 B003] A.1000 < B.2000: A ack 2001 win 8000 
+[1.007 B004] A.1000 < B.2000: A ack 3001 win 10000 
+[1.009 A006] A.1000 > B.2000: A 3001:4001(1000) ack 501 win 16384 
+[1.009 A007] A.1000 > B.2000: A 4001:5001(1000) ack 501 win 16384 
+[1.009 A008] A.1000 > B.2000: A 5001:6001(1000) ack 501 win 16384 
+[1.009 A009] A.1000 > B.2000: A 6001:7001(1000) ack 501 win 16384 
+[1.011 B005] A.1000 < B.2000: A ack 4001 win 12000 
+[1.011 B006] A.1000 < B.2000: A ack 5001 win 12000 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -240,6 +240,8 @@ struct TcpStateVariables
     uint32_t maxRcvBuffer = 0;    // maximal amount of bytes in tcp receive queue
     uint32_t rcvBufferSize = 0;   // the receive buffer apart from the advertised window (receiveBufferSize); 0: the buffer is maxRcvBuffer
     bool acceptBeyondBufferAtEmptyQueue = false; // from the acceptBeyondBufferAtEmptyQueue parameter
+    uint32_t rcv_ssthresh = 0;    // windowAutoTuning: the window that the receiver offers at most now, which grows toward window_clamp (Linux rcv_ssthresh); 0: no auto-tuning
+    uint32_t window_clamp = 0;    // windowAutoTuning: the largest window that rcv_ssthresh can reach (Linux window_clamp)
     uint32_t usedRcvBuffer = 0;    // current amount of used bytes in tcp receive queue
     uint32_t freeRcvBuffer = 0;    // current amount of free bytes in tcp receive queue
     uint32_t tcpRcvQueueDrops = 0;    // number of drops in tcp receive queue
