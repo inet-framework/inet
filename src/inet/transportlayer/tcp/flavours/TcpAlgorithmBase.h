@@ -167,6 +167,12 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
      */
     virtual bool processWindowUpdate();
 
+    /** Whether data waits to be sent: the send queue has data from snd_una on. */
+    virtual bool isDataWaiting() const;
+
+    /** Starts the persist timer, whose first probe comes after one RTO (RFC 9293 SHLD-29). */
+    virtual void startPersistTimer();
+
     /** The duplicate-ACK test: ackNo == snd_una, no data, and unacked data. */
     virtual bool isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength);
 

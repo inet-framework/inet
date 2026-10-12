@@ -415,6 +415,13 @@ void TcpAlgorithmBase::processPersistTimer(TcpEventCode& event)
     // successive probes (SHLD-30)." The first interval is the RTO (see
     // receivedAckForUnackedData()), and each probe doubles it, up to
     // maxPersistTimeout; as Linux tcp_probe_timer().
+    // no data waits for the window, so there is nothing to probe: the timer stops
+    // (Linux tcp_probe_timer()), and a later send starts it again (sendData())
+    if (!isDataWaiting()) {
+        EV_INFO << "PERSIST timer expired, but no data waits: no probe\n";
+        return;
+    }
+
     state->persist_timeout = state->persist_timeout * 2;
     if (state->persist_timeout > maxPersistTimeout)
         state->persist_timeout = maxPersistTimeout;
@@ -610,7 +617,27 @@ bool TcpAlgorithmBase::sendData(bool sendCommandInvoked)
     // Send window is effectively the minimum of the congestion window (cwnd)
     // and the advertised window (snd_wnd).
     //
-    return conn->sendData(state->snd_cwnd);
+    bool sent = conn->sendData(state->snd_cwnd);
+
+    // Data that a zero window stops, with nothing in flight, starts the persist timer,
+    // as Linux tcp_check_probe_timer(): also after a zero window of the SYN-ACK, or when
+    // the application sends after the window closed
+    if (state->snd_wnd == 0 && !rexmitTimer->isScheduled() && !persistTimer->isScheduled() && isDataWaiting()) {
+        EV_INFO << "Data waits for a zero window, therefore PERSIST timer is started.\n";
+        startPersistTimer();
+    }
+    return sent;
+}
+
+bool TcpAlgorithmBase::isDataWaiting() const
+{
+    return conn->getSendQueue()->getBytesAvailable(state->snd_una) > 0;
+}
+
+void TcpAlgorithmBase::startPersistTimer()
+{
+    state->persist_timeout = state->rexmit_timeout; // the first probe after one RTO (SHLD-29)
+    conn->scheduleAfter(state->persist_timeout, persistTimer);
 }
 
 void TcpAlgorithmBase::sendCommandInvoked()
@@ -828,13 +855,14 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
                 EV_INFO << "Received zero-sized window and REXMIT timer is running therefore PERSIST timer is not started.\n";
         }
         else {
-            if (!persistTimer->isScheduled()) {
-                EV_INFO << "Received zero-sized window therefore PERSIST timer is started.\n";
-                state->persist_timeout = state->rexmit_timeout; // the first probe after one RTO (SHLD-29)
-                conn->scheduleAfter(state->persist_timeout, persistTimer);
-            }
-            else
+            if (persistTimer->isScheduled())
                 EV_INFO << "Received zero-sized window and PERSIST timer is already running.\n";
+            else if (!isDataWaiting())
+                EV_INFO << "Received zero-sized window, but no data waits, therefore PERSIST timer is not started.\n";
+            else {
+                EV_INFO << "Received zero-sized window therefore PERSIST timer is started.\n";
+                startPersistTimer();
+            }
         }
     }
     else { // received non zero-sized window?

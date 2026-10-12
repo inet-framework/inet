@@ -1,0 +1,65 @@
+%description:
+Tests that the persist timer runs only while data waits for a zero window. The
+window of the server closes at t=1.4, when the client has sent all of its data,
+so the client sends no probe. The application sends 1000 bytes more at t=10:
+the zero window stops them, so the persist timer starts, and the first probe
+comes one RTO later, at t=11. The server reads at t=20, and the ACK of the next
+probe opens the window.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 30s
+*.cli_app.sendScript="1.0 2000; 10.0 1000"
+*.*_tcp.mss = 1000
+*.srv_tcp.advertisedWindow = 2000
+*.srv_app.autoRead=false
+*.srv_app.readScript="20 10000"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.205 A004] A.1000 > B.2000: A 1001:2001(1000) ack 501 win 16384 
+[1.407 B003] A.1000 < B.2000: A ack 2001 win 0 
+[11.001 A005] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[11.003 B004] A.1000 < B.2000: A ack 2001 win 0 
+[13.001 A006] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[13.003 B005] A.1000 < B.2000: A ack 2001 win 0 
+[17.001 A007] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[17.003 B006] A.1000 < B.2000: A ack 2001 win 0 
+[25.001 A008] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[25.003 B007] A.1000 < B.2000: A ack 2001 win 2000 
+[25.005 A009] A.1000 > B.2000: A 2001:3001(1000) ack 501 win 16384 
+[25.207 B008] A.1000 < B.2000: A ack 3001 win 1000 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Received zero-sized window, but no data waits, therefore PERSIST timer is not started.
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Data waits for a zero window, therefore PERSIST timer is started.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
