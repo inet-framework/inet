@@ -62,7 +62,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S11 ✅ | `topic/tcp-connection-lifecycle` | 15 (part), 16 (part), 22 (part), 23 (part), 26 (part), 30, 38, 39 (part), 73, 74 | +198 −36 | reset after a full close, SYN-ACK re-send, FIN read clamp, STATUS before open, the simultaneous open, a forked connection, the SYN-ACK TSecr check, `syncookiesAlways` |
 | S12 ✅ | `topic/tcp-fast-open` | 15 (part), 16 (part), 23 (part), 26 (part), 27 (part), 39 (part), 43, 44, new | +868 −72 | TCP Fast Open (RFC 7413), and the option writing and the MSS rules that it needs (D-42 to D-50) |
 | S13 ✅ | `topic/tcp-accecn` | 13 (part), 23 (part), 27, 48 (part), 64 (part), 65 (part), new | +877 −122 | Accurate ECN (RFC 9768), the ECN repairs that it needs, `ecnMarkAll`; DCTCP counts its bytes also in a fast recovery (D-51 to D-60) |
-| S14 | `topic/tcp-receive-buffer` | 28, 29, 35, new work | +400 −3 | the receive buffer apart from the advertised window, zero-copy, `TCP_NOTSENT_LOWAT`, the receive buffer of a socket before open (D-4) |
+| S14 ✅ | `topic/tcp-receive-buffer` | 28, 29, 35, new | +353 −9 | the receive buffer apart from the advertised window, the Linux receive memory behind parameters, the window and the buffer of one socket (D-4), MSG_ZEROCOPY, the send buffer chrono, SO_TIMESTAMPING, `TCP_NOTSENT_LOWAT` (D-61 to D-64) |
 | S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout, no new fast recovery before the recovery point of a timeout (D-34, proposed) |
 | S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
@@ -177,7 +177,8 @@ plan gives a reason for.
   open command, as `tcpAlgorithmClass` does. S14 adds this, because S14 also brings
   `receiveBufferSize`, which has the same problem. inet-gpl's `PacketDrillApp` then changes. A
   `@mutable` `timestampSupport` for the host-wide sysctl `net.ipv4.tcp_timestamps` is decided at
-  S14 too; nothing in INET needs it before then. Commit 3 does not land.
+  S14 too; nothing in INET needs it before then. Commit 3 does not land. S14 adds the open
+  command and the `@mutable` `timestampSupport` (D-63).
 - **D-5 — The connection keeps its SACK recovery until its last caller goes.** Source commit 10
   deleted `TcpConnectionSackUtil.cc`, but `TcpConnection` kept the declarations of its seven
   virtual functions, and the flavours and the connection kept calling them. `make` still passes,
@@ -587,6 +588,44 @@ plan gives a reason for.
   (MUST; only ECT pure ACKs can carry them, which needs `ecnMarkAll`). Section 3.1.4.1: a cache of
   failed AccECN attempts (SHOULD). DCTCP requests ECN only by `tcpEcnMode`, while Linux requests it
   for DCTCP by itself.
+- **D-61 — The receive buffer keeps the default offer of master.** Commit 28 separates the receive
+  buffer (`receiveBufferSize`, Linux `sk_rcvbuf`) from the advertised window. It also changed the
+  default offer to the window less the unread in-order data, so that out-of-order data no longer
+  made the offer smaller. RFC 9293 section 3.8.6.2.2 counts the data that waits in the buffer, and
+  Linux counts the out-of-order queue (`sk_rmem_alloc`), so S14 keeps the offer of master. With
+  `receiveBufferSize`, the buffer limits the acceptance and the offer. The source took the larger
+  of the buffer and the window as the limit, so a smaller buffer had no effect. The parameter is
+  not `@mutable` (the source: `@mutable`): a socket sets its own buffer in its open command (D-63).
+- **D-62 — The Linux receive memory is off by default.** Each Linux behavior of commit 28 has a
+  parameter, default off, which inet-gpl turns on: `acceptBeyondBufferAtEmptyQueue`
+  (`tcp_data_queue()`; the source accepted such a segment always, and master drops it),
+  `windowAutoTuning` (`tcp_grow_window()`) and `windowShrinkAllowed` (`tcp_shrink_window=1`). The
+  growth of the buffer of an owned connection (`tcp_clamp_window()`) comes with
+  `windowAutoTuning`, as in Linux; the source grew the buffer in each mode, so
+  `receiveBufferSize` did not limit a plain connection. The automatic window scale covers the
+  clamp of the auto-tuning; the source used the advertised window, so the offer stopped at 65535
+  bytes. The charge of the buffer at the Linux skb truesize runs in each mode, as in the source;
+  only `windowShrinkAllowed` and the growth read it. Later stages bring the rest of commit 28: the
+  flag of a segment beyond the offered edge (`overWindowAcceptPending`) comes with its reader, the
+  adaptive delayed ACK of commit 31 (S15); the acceptance up to the highest edge ever offered
+  (`rcv_mwnd_seq`, commit 47), the upper limit of the growth (`tcp_rmem[2]`) and the lock by
+  SO_RCVBUF come with the receive buffer memory (S18).
+- **D-63 — The window and the buffer of one socket travel in its open command (D-4).**
+  `TcpSocket::setAdvertisedWindow()` and `setReceiveBufferSize()` set them for the next
+  `connect()` or `listen()`, as `setTCPAlgorithmClass()` does; -1 takes the module parameters. A
+  connection with its own window takes an automatic window scale, because Linux sets the scale
+  from the buffer of the socket. A connection that a listening socket forks takes the values of
+  that socket. A change of the buffer of an open connection waits for S18. `timestampSupport` is
+  `@mutable` for the host-wide sysctl `net.ipv4.tcp_timestamps`, and each connection reads it at
+  its open, as `tcpEcnMode` (D-53). The source made the window and the scale `@mutable` too.
+- **D-64 — The socket options of commits 29 and 35 follow Linux on a tun device.** A zero-copy
+  completion goes to the application when its last byte goes out, not at its ACK: the tun device
+  of packetdrill copies the data (`SO_EE_CODE_ZEROCOPY_COPIED`), and INET has no pages to keep.
+  The receive timestamp is the time of the delivery to the application, as the contract of S3
+  says. The send buffer chrono also stops at the ACK of all data, as Linux stops each chrono when
+  its queues are empty (`tcp_chrono_stop()`); the source stopped it only at a send or a command, so the time ran on. The
+  mark of `TCP_NOTSENT_LOWAT` comes from the socket option, else from the parameter
+  `notsentLowat`, as in the source.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -1573,28 +1612,78 @@ gates pass.
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | add: `receiveBufferSize`, a receive buffer apart from the advertised window | — | 28 (part) |
-| 2 | add: the Linux acceptance of a segment beyond the buffer at an empty queue | — | 28 (part) |
+| 1 | add: `receiveBufferSize`, a receive buffer apart from the window | — | 28 (part) |
+| 2 | add: the Linux acceptance of a segment beyond the buffer | — | 28 (part) |
 | 3 | add: receive window auto-tuning, selected by `windowAutoTuning` | — | 28 (part) |
-| 4 | add: an offer that follows the free buffer, selected by `windowShrinkAllowed` | — | 28 (part) |
-| 5 | add: the growth of the buffer of an owned socket under out-of-order data | — | 28 (part) |
-| 6 | add: the receive buffer and the window of one socket in its open command (D-4) | — | new |
+| 4 | add: `windowShrinkAllowed`, an offer that follows the free buffer | — | 28 (part) |
+| 5 | add: the growth of the receive buffer of an owned connection | — | 28 (part) |
+| 6 | add: the window and the receive buffer of one socket | — | new (D-4, D-63) |
 | 7 | add: MSG_ZEROCOPY completions | — | 29 (part) |
-| 8 | add: the time that the send buffer limits the sender (`sndbufLimited`) | — | 29 (part) |
-| 9 | add: the receive timestamp of delivered data (SO_TIMESTAMPING) | — | 29 (part) |
+| 8 | add: the time that the send buffer limits the sender | — | 29 (part) |
+| 9 | add: the delivery time of received data (SO_TIMESTAMPING) | — | 29 (part) |
 | 10 | add: TCP_NOTSENT_LOWAT, a low-water mark on unsent bytes | — | 35 |
-| 11 | change: `timestampSupport` is `@mutable`, as the host-wide sysctl (D-4) | — | new |
+| 11 | change: `timestampSupport` is `@mutable`, as the host-wide sysctl | — | new (D-4, D-63) |
 
 Commit 28 separates the receive buffer from the advertised window, but it also changes the
-default offer: the buffer minus the unread in-order data, so that out-of-order data no longer
-makes it smaller. Master counts the out-of-order data as used buffer, as RFC 9293 section
-3.8.6.2.2 does with the data that waits in the buffer, and as Linux does (`sk_rmem_alloc` holds
-the out-of-order queue); the source imitates a buffer that is larger than the window. S14 keeps
-the default of master. With `receiveBufferSize`, the out-of-order data uses the buffer, and the
-offer is the smaller of the window less the unread data and the free buffer. The acceptance of an
-in-order segment beyond the buffer at an empty queue (Linux `tcp_data_queue()`) is a Linux
-behavior; master drops such a segment, and step 2 adds the Linux behavior with a parameter.
-Steps 3 to 5 model the receive memory of Linux (`tcp_grow_window()`, `tcp_shrink_window=1` with
-the skb truesize, `tcp_clamp_window()`), each off by default. Step 6 is the open command of D-4.
-Commits 29 and 35 give the socket options whose contract S3 landed; STATUS gets `skRcvbuf`
-(step 5) and `sndbufLimited` (step 8).
+default offer, so that out-of-order data no longer makes it smaller. S14 keeps the default of
+master (D-61). The acceptance of an in-order segment beyond the buffer at an empty queue (Linux
+`tcp_data_queue()`) is a Linux behavior; master drops such a segment, and step 2 adds the Linux
+behavior with a parameter. Steps 3 to 5 model the receive memory of Linux (`tcp_grow_window()`,
+`tcp_shrink_window=1` with the skb truesize, `tcp_clamp_window()`), each off by default (D-62).
+Step 6 is the open command of D-4, and step 11 is the sysctl of D-4 (D-63). Commits 29 and 35 give
+the socket options whose contract S3 landed (D-64); STATUS gets `skRcvbuf` (step 5) and
+`sndbufLimited` (step 8).
+
+Items for later stages: (S15, S16) The persist timer of master runs on when the send buffer is
+empty, so a run with a zero window does not end; the tests of S14 with a zero window set
+`sim-time-limit`. (S15) The flag of a segment beyond the offered edge comes with the adaptive
+delayed ACK (D-62). (S18) The acceptance up to the highest edge ever offered, the upper limit of
+the growth of the buffer, the lock by SO_RCVBUF, and a change of the buffer of an open connection
+(D-62, D-63); the source sends that change with `TcpSocket::setReceiveBufferSize()`, and S18 adds
+it to the function of S14, which sets the buffer of the next open, as Linux SO_RCVBUF acts before
+and after the open. (inet-gpl) Its configuration sets `acceptBeyondBufferAtEmptyQueue = true`.
+`PacketDrillApp` changes the module parameters for SO_RCVBUF before the open; it can use
+`setAdvertisedWindow()` and `setReceiveBufferSize()` of its socket only when it builds against
+master after S18, because the source has no such calls. A run can check both only after S18.
+
+### S14 — `topic/tcp-receive-buffer` — landed 2026-10-12
+
+The owner reviewed and approved S14 on 2026-10-12.
+
+S14 brings the receive buffer apart from the advertised window, the Linux receive memory behind
+parameters, the window and the buffer of one socket (D-4), and the socket options of commits 29
+and 35, whose contract S3 landed. Each addition is off by default or waits for a call of the
+application, so no CI row moves. Where the source is wrong or incomplete, S14 deviates from it
+(D-61 to D-64).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: receiveBufferSize, a receive buffer apart from the window` | — | 28 (part) | — |
+| `tcp: add: the Linux acceptance of a segment beyond the buffer` | — | 28 (part) | — |
+| `tcp: add: receive window auto-tuning, selected by windowAutoTuning` | — | 28 (part) | — |
+| `tcp: add: windowShrinkAllowed, an offer that follows the free buffer` | — | 28 (part) | — |
+| `tcp: add: the growth of the receive buffer of an owned connection` | — | 28 (part) | — |
+| `tcp: add: the window and the receive buffer of one socket` | — | new (D-63) | — |
+| `tcp: add: MSG_ZEROCOPY completions` | — | 29 (part) | — |
+| `tcp: add: the time that the send buffer limits the sender` | — | 29 (part) | — |
+| `tcp: add: the delivery time of received data (SO_TIMESTAMPING)` | — | 29 (part) | — |
+| `tcp: add: TCP_NOTSENT_LOWAT, a low-water mark on unsent bytes` | — | 35 | — |
+| `tcp: change: timestampSupport is @mutable, as the host-wide sysctl` | — | new (D-63) | — |
+
+New tests: `tcp_rcvbuf_1` and `_2`, `tcp_rcvbuf_accept_1`, `tcp_rcvbuf_autotune_1`,
+`tcp_rcvbuf_shrink_1`, `tcp_rcvbuf_grow_1` and `_2`, `tcp_socket_rcvbuf_1` and `_2`,
+`tcp_zerocopy_1`, `tcp_sndbuf_limited_1`, `tcp_rx_timestamp_1` and `_2`, `tcp_notsent_lowat_1`
+and `_2`, and `tcp_timestamp_sysctl_1`. The test client gets the parameters `owned`,
+`socketAdvertisedWindow`, `socketReceiveBufferSize`, `zerocopy`, `writerBlockedScript`,
+`timestamping`, `notsentLowat` and `tcpParScript`, and a second status line with `skRcvbuf` and
+`sndbufLimited`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (492 at the first code commit, 506 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 122 and serializer 4 pass at the head. The new
+tests of each code commit fail with the source of the commit before; there, the test library of
+`tcp_socket_rcvbuf_1` and `_2` does not compile, because it calls the new socket functions. The
+CI fingerprint job runs at each code commit, and no row moves. The TCP fingerprint rows run in
+debug at the head with no runtime error (the `tyf` ingredient differs in 52 rows, as on master;
+the lwIP rows need a build with lwIP). The six gates pass.
