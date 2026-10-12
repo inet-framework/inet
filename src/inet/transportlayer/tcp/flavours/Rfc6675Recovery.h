@@ -50,6 +50,12 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
     virtual bool isLost(uint32_t seqNum);
 
     /**
+     * RFC 6675 section 5.1: whether an RTO during a loss recovery still blocks a new
+     * recovery, which it does until snd_una reaches the RecoveryPoint of the RTO.
+     */
+    virtual bool isRecoveryBlockedAfterRto();
+
+    /**
      * RFC 8985 RACK: advance the RACK reference to the most recently sent
      * delivered segment and mark earlier-sent, still-unacked segments as lost
      * once RACK.rtt + reo_wnd has elapsed. Returns the number of newly lost bytes.

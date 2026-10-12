@@ -5,9 +5,10 @@ segment and its fast retransmission, and it delays the new segment
 2001:2501 of the fast recovery by 2.995 s. The timeout at t=4 comes
 during the fast recovery. The receiver then SACKs the delayed segment,
 which the sender sent once, but F-RTO is not active, and the sender keeps
-the reduction. (After the timeout, the duplicate ACK of t=4.002 starts a
-new fast recovery at once. RFC 6675 section 5.1 forbids this, see
-decision D-34 of the staged landing.)
+the reduction. After the timeout, the duplicate ACK of t=4.002 starts no new
+fast recovery, because RFC 6675 section 5.1 forbids a new recovery until the
+ACK reaches the RecoveryPoint of the timeout (decision D-34 of the staged
+landing); the ACK of t=4.003 then completes the recovery of the timeout.
 %inifile: omnetpp.ini
 [General]
 record-vector-results = false
@@ -63,6 +64,13 @@ F-RTO: no detection, the timeout comes during a loss recovery
 
 %not-contains: stdout
 F-RTO: spurious
+
+%# RFC 6675 section 5.1: no new fast recovery at the duplicate ACK of t=4.002
+%contains: stdout
+No new loss recovery before the RecoveryPoint of the RTO (RFC 6675 section 5.1)
+
+%contains: stdout
+tcpdump finished, A:9 B:6 segments
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

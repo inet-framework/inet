@@ -291,6 +291,14 @@ void Rfc6675Recovery::receivedDuplicateAck()
     // TCP MUST increase DupAcks by one and take the following steps:
     //"
     if (!state->lossRecovery) {
+        // RFC 6675 section 5.1: after an RTO during a loss recovery, "a new recovery
+        // phase (as described in Section 5) MUST NOT be initiated until HighACK is
+        // greater than or equal to the new value of RecoveryPoint"
+        if (isRecoveryBlockedAfterRto()) {
+            EV_INFO << "No new loss recovery before the RecoveryPoint of the RTO (RFC 6675 section 5.1)\n";
+            return;
+        }
+
         //"
         // (1) If DupAcks >= DupThresh, go to step (4).
         //     Note: This check covers the case when a TCP receives SACK
@@ -952,10 +960,19 @@ void Rfc6675Recovery::reoTimeout()
     // RACK marked further bytes lost while no ACK was arriving. If we are not yet
     // recovering, this is the fast-retransmit trigger RACK exists to provide;
     // otherwise just push out whatever the scoreboard now says is missing.
-    if (!state->lossRecovery)
-        step4();
+    if (!state->lossRecovery) {
+        if (!isRecoveryBlockedAfterRto()) // RFC 6675 section 5.1, as in receivedDuplicateAck()
+            step4();
+    }
     else
         stepC();
+}
+
+bool Rfc6675Recovery::isRecoveryBlockedAfterRto()
+{
+    if (state->recoveryAfterRtoBlocked && seqGE(state->snd_una, state->recoveryPoint))
+        state->recoveryAfterRtoBlocked = false;
+    return state->recoveryAfterRtoBlocked;
 }
 
 void Rfc6675Recovery::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)

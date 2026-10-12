@@ -392,6 +392,7 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
         // timeout hook of the recovery, so that the hook can see the fast recovery.
         if (state->lossRecovery) {
             state->recoveryPoint = state->snd_max; // HighData = snd_max
+            state->recoveryAfterRtoBlocked = true;
             EV_DETAIL << "Loss Recovery terminated.\n";
         }
     }
