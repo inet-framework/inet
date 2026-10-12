@@ -202,6 +202,7 @@ simple Tcp extends SimpleModule like ITcp
         @class(Tcp);
         string checksumMode @enum("declared", "computed") = default("declared");
         int advertisedWindow = default(14 * this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+        double receiveBufferSize @unit(B) = default(-1B); // the receive buffer, apart from the advertised window (Linux sk_rcvbuf): the unread data and the out-of-order data use it, and the offered window is the smaller of its free space and the advertised window less the unread data; -1B: the buffer is the advertised window, as before
         bool delayedAcksEnabled = default(false); // Delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)

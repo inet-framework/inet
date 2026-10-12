@@ -1,0 +1,57 @@
+%description:
+Tests receiveBufferSize larger than the advertised window. The server offers
+4000 bytes and has a receive buffer of 8000 bytes. The tester removes A007 and
+A009, so out-of-order data waits in the buffer. When the retransmission A011
+fills the first hole, B008 still offers the whole window (4000), because the
+out-of-order data uses only the buffer. Without receiveBufferSize, the buffer is
+the window, and the offer would be 3000.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 12000"
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.sackSupport = true
+*.srv_tcp.advertisedWindow = 4000
+*.tcptester.script="a7 delete; a9 delete"
+*.srv_tcp.receiveBufferSize = 8000B
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.009 A007] A.1000 > B.2000: A 4001:5001(1000) ack 501 win 16384 # deleting
+[1.009 A008] A.1000 > B.2000: A 5001:6001(1000) ack 501 win 16384 
+[1.009 A009] A.1000 > B.2000: A 6001:7001(1000) ack 501 win 16384 # deleting
+[1.011 B005] A.1000 < B.2000: A ack 4001 win 4000 
+[1.011 B006] A.1000 < B.2000: A ack 4001 win 4000   Option(s): NOP NOP SACK[5001,6001)
+[1.013 A010] A.1000 > B.2000: A 7001:8001(1000) ack 501 win 16384 
+[1.015 B007] A.1000 < B.2000: A ack 4001 win 4000   Option(s): NOP NOP SACK[7001,8001)[5001,6001)
+[2.013 A011] A.1000 > B.2000: A 4001:5001(1000) ack 501 win 16384 
+[2.015 B008] A.1000 < B.2000: A ack 6001 win 4000   Option(s): NOP NOP SACK[7001,8001)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

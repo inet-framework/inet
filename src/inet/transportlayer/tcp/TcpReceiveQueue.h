@@ -104,6 +104,12 @@ class INET_API TcpReceiveQueue : public cObject
     virtual uint32_t getAmountOfBufferedBytes();
 
     /**
+     * Returns the number of in-order bytes that the application did not read yet:
+     * the data from the start of the queue up to the first gap.
+     */
+    virtual uint32_t getAcknowledgedDataLength() const { return B(reorderBuffer.getAvailableDataLength()).get(); }
+
+    /**
      * Returns the number of bytes currently free (=available) in queue. freeRcvBuffer = maxRcvBuffer - usedRcvBuffer
      */
     virtual uint32_t getAmountOfFreeBytes(uint32_t maxRcvBuffer);

@@ -131,7 +131,8 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
         payloadSeq += delta;
         payloadLength -= delta;
     }
-    return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + state->maxRcvBuffer);
+    uint32_t bufferSize = state->rcvBufferSize > 0 ? state->rcvBufferSize : state->maxRcvBuffer;
+    return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + bufferSize);
 }
 
 TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader)

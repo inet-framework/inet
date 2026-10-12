@@ -884,6 +884,11 @@ void TcpConnection::configureStateVariables()
     }
 
     state->maxRcvBuffer = advertisedWindow;
+    double receiveBufferSize = tcpMain->par("receiveBufferSize");
+    state->rcvBufferSize = receiveBufferSize > 0 ? (uint32_t)receiveBufferSize : 0;
+    // a receive buffer smaller than the advertised window limits the first offer too
+    if (state->rcvBufferSize > 0 && state->rcv_wnd > state->rcvBufferSize)
+        state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
@@ -2474,9 +2479,11 @@ uint32_t TcpConnection::getTSecr(const Ptr<const TcpHeader>& tcpHeader) const
 
 void TcpConnection::updateRcvQueueVars()
 {
-    // update receive queue related state variables
-    state->freeRcvBuffer = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
-    state->usedRcvBuffer = state->maxRcvBuffer - state->freeRcvBuffer;
+    // update receive queue related state variables: the unread and the out-of-order
+    // data use the receive buffer (receiveBufferSize, else the advertised window)
+    uint32_t bufferSize = state->rcvBufferSize > 0 ? state->rcvBufferSize : state->maxRcvBuffer;
+    state->freeRcvBuffer = receiveQueue->getAmountOfFreeBytes(bufferSize);
+    state->usedRcvBuffer = bufferSize - state->freeRcvBuffer;
 
     // update receive queue related statistics
     emit(tcpRcvQueueBytesSignal, state->usedRcvBuffer);
@@ -2491,6 +2498,14 @@ uint16_t TcpConnection::updateRcvWnd()
     // update receive queue related state variables and statistics
     updateRcvQueueVars();
     win = state->freeRcvBuffer;
+
+    // With a receive buffer apart from the advertised window, the window also limits
+    // the offer: the advertised window less the in-order data that the application did
+    // not read. The out-of-order data uses only the buffer.
+    if (state->rcvBufferSize > 0) {
+        uint32_t unread = receiveQueue->getAcknowledgedDataLength();
+        win = std::min(win, state->maxRcvBuffer > unread ? state->maxRcvBuffer - unread : 0);
+    }
 
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:
     // Don't advertise less than one full-sized segment to avoid SWS
