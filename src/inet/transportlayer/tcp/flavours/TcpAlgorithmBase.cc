@@ -881,7 +881,10 @@ bool TcpAlgorithmBase::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t paylo
 
 void TcpAlgorithmBase::countDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
-    if (isDuplicateAck(tcpHeader, payloadLength)) {
+    // The ACK of a zero-window probe is no duplicate ACK: only the probe octet is in
+    // flight, and the persist timer repeats it. BSD counts a duplicate ACK only while
+    // its retransmission timer runs.
+    if (isDuplicateAck(tcpHeader, payloadLength) && !persistTimer->isScheduled()) {
         state->dupacks++;
         conn->emit(dupAcksSignal, state->dupacks);
         receivedDuplicateAck();

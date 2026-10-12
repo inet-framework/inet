@@ -1739,32 +1739,35 @@ void TcpConnection::sendKeepAliveProbe()
 
 bool TcpConnection::sendProbe()
 {
-    // we'll start sending from snd_max
-    state->snd_nxt = state->snd_max;
-
-    // check we have 1 byte to send
-    if (sendQueue->getBytesAvailable(state->snd_nxt) == 0) {
+    // RFC 9293 section 3.8.6.1: "The sending TCP peer must regularly transmit at least
+    // one octet of new data (if available), or retransmit to the receiving TCP peer even
+    // if the send window is zero, in order to "probe" the window." The probe is the
+    // first unacknowledged octet: new data at the first probe, and the same octet again
+    // at the later ones, as BSD sends it in its persist state. snd_nxt stays at snd_una,
+    // so the octet goes again with the data when the window opens. The probe starts no
+    // retransmission timer: the persist timer repeats it, so the connection stays open
+    // as long as the peer answers (MUST-37).
+    if (sendQueue->getBytesAvailable(state->snd_una) == 0) {
         EV_WARN << "Cannot send probe because send buffer is empty\n";
         return false;
     }
 
-    uint32_t old_snd_nxt = state->snd_nxt;
-
-    EV_INFO << "Sending 1 byte as probe, with seq=" << state->snd_nxt << "\n";
+    EV_INFO << "Sending 1 byte as probe, with seq=" << state->snd_una << "\n";
+    state->snd_nxt = state->snd_una;
+    bool afterRto = state->afterRto; // the probe octet is the octet at snd_una (see sendSegment())
+    state->afterRto = false;
     sendingWindowProbe = true; // no ECT and no CWR (RFC 3168 section 6.1.6)
     sendSegment(1);
     sendingWindowProbe = false;
-
-    // remember highest seq sent (snd_nxt may be set back on retransmission,
-    // but we'll need snd_max to check validity of ACKs -- they must ack
-    // something we really sent)
-    state->snd_max = state->snd_nxt;
+    state->afterRto = afterRto;
+    if (seqGreater(state->snd_nxt, state->snd_max))
+        state->snd_max = state->snd_nxt;
+    state->snd_nxt = state->snd_una;
 
     emit(unackedSignal, state->snd_max - state->snd_una);
 
     // notify
     tcpAlgorithm->ackSent();
-    tcpAlgorithm->dataSent(old_snd_nxt);
 
     return true;
 }

@@ -1,10 +1,10 @@
 %description:
-Tests that the persist timer does not change the RTO. The server offers 2000
-bytes and reads nothing until t=20, so its window is zero after two segments,
-and the client probes the window. The persist intervals follow their table
-(5, 5, 6, 12 s), and the RTO of the client stays its measured value: the
-first retransmission of a probe octet doubles it from 1 s. The persist timer
-wrote its limit of 5 s into the RTO.
+Tests the zero-window probe of RFC 9293 section 3.8.6.1. The server offers 2000
+bytes and reads nothing until t=20, so its window is zero after two segments.
+Each probe of the client is the first unacknowledged octet, 2001: new data the
+first time, and the same octet again later. The probes start no retransmission
+timer, and their ACKs are no duplicate ACKs. The persist intervals follow their
+table (5, 5, 6, 12 s).
 
 %inifile: omnetpp.ini
 [General]
@@ -42,17 +42,20 @@ while($sor = <FILE>)
 %contains: postrun-command(1).out
 [6.409 A005] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
 [6.411 B004] A.1000 < B.2000: A ack 2001 win 0 
-[7.409 A006] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
-[7.411 B005] A.1000 < B.2000: A ack 2001 win 0 
-[9.409 A007] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
-[9.411 B006] A.1000 < B.2000: A ack 2001 win 0 
-[9.413 A008] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
-[9.415 B007] A.1000 < B.2000: A ack 2001 win 0 
-[11.409 A009] A.1000 > B.2000: A 2002:2003(1) ack 501 win 16384 
-[11.411 B008] A.1000 < B.2000: A ack 2001 win 0 
+[11.409 A006] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[11.411 B005] A.1000 < B.2000: A ack 2001 win 0 
+[16.409 A007] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[16.411 B006] A.1000 < B.2000: A ack 2001 win 0 
+[22.409 A008] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[22.411 B007] A.1000 < B.2000: A ack 2001 win 2000 
+[34.409 A009] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[34.411 B008] A.1000 < B.2000: A ack 2002 win 1999 
 %#--------------------------------------------------------------------------------------------------------------
-%contains: stdout
-increasing RTO from 1s  to 2s
+%not-contains: stdout
+Performing retransmission
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Duplicate ACK
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
