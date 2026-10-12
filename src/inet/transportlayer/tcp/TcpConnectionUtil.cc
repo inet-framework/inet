@@ -240,6 +240,8 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     tcpAlgorithm = check_and_cast<TcpAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
     tcpAlgorithm->setConnection(this);
 
+    socketAdvertisedWindow = listenerConn->socketAdvertisedWindow;
+    socketReceiveBufferSize = listenerConn->socketReceiveBufferSize;
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
@@ -844,6 +846,9 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
     rexmitQueue = new TcpSackRexmitQueue();
     rexmitQueue->setConnection(this);
 
+    socketAdvertisedWindow = openCmd->getAdvertisedWindow();
+    socketReceiveBufferSize = openCmd->getReceiveBufferSize();
+
     // create algorithm
     const char *tcpAlgorithmClass = openCmd->getTcpAlgorithmClass();
 
@@ -861,9 +866,11 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
 
 void TcpConnection::configureStateVariables()
 {
-    uint32_t advertisedWindow = tcpMain->par("advertisedWindow");
+    // the window of the socket, from its open command, takes the place of the module
+    // parameters, with an automatic window scale (D-4)
+    uint32_t advertisedWindow = socketAdvertisedWindow >= 0 ? (uint32_t)socketAdvertisedWindow : (uint32_t)tcpMain->par("advertisedWindow").intValue();
     state->ws_support = tcpMain->par("windowScalingSupport");
-    int windowScalingFactor = tcpMain->par("windowScalingFactor");
+    int windowScalingFactor = socketAdvertisedWindow >= 0 ? -1 : (int)tcpMain->par("windowScalingFactor");
     if (windowScalingFactor < -1 || windowScalingFactor > 14)
         throw cRuntimeError("Invalid parameter value windowScalingFactor=%d -- valid values are 0..14, and -1 for automatic selection based on advertisedWindow", windowScalingFactor);
     if (state->ws_support) {
@@ -885,7 +892,7 @@ void TcpConnection::configureStateVariables()
     }
 
     state->maxRcvBuffer = advertisedWindow;
-    double receiveBufferSize = tcpMain->par("receiveBufferSize");
+    double receiveBufferSize = socketReceiveBufferSize >= 0 ? (double)socketReceiveBufferSize : tcpMain->par("receiveBufferSize").doubleValue();
     state->rcvBufferSize = receiveBufferSize > 0 ? (uint32_t)receiveBufferSize : 0;
     state->acceptBeyondBufferAtEmptyQueue = tcpMain->par("acceptBeyondBufferAtEmptyQueue");
     // window auto-tuning (Linux tcp_grow_window()): the offer starts at the advertised

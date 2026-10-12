@@ -128,6 +128,8 @@ class TcpOpenCommand extends TcpCommand
     bool autoRead = true;  // true: TCPs sends up arrived data automatically. false: should use read command
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
     bool fastOpen = false; // active open only: attempt TCP Fast Open (RFC 7413) -- attach data to the SYN if a cookie is already cached for remoteAddr, else request one
+    int advertisedWindow = -1; // the advertised window of this connection in bytes (TcpSocket::setAdvertisedWindow()), with an automatic window scale; -1: the parameters of the Tcp module
+    int receiveBufferSize = -1; // the receive buffer of this connection in bytes (TcpSocket::setReceiveBufferSize()); -1: the receiveBufferSize parameter of the Tcp module
 }
 
 //

@@ -217,6 +217,8 @@ class INET_API TcpSocket : public ISocket
     void *userData = nullptr;
     cGate *gateToTcp = nullptr;
     std::string tcpAlgorithmClass;
+    int advertisedWindow = -1;
+    int receiveBufferSize = -1;
 
     ChunkQueue *receiveQueue = nullptr;
 
@@ -342,6 +344,21 @@ class INET_API TcpSocket : public ISocket
      * Sets the tcpAlgorithmClass parameter of the next connect() or listen() call.
      */
     void setTCPAlgorithmClass(const char *tcpAlgorithmClass) { this->tcpAlgorithmClass = tcpAlgorithmClass; }
+
+    /**
+     * Sets the advertised window of the next connect() or listen() call, in bytes, in
+     * place of the advertisedWindow parameter of the Tcp module; the window scale then
+     * follows this window, as Linux sets it from the buffer of the socket. -1: the
+     * parameters of the Tcp module.
+     */
+    void setAdvertisedWindow(int advertisedWindow) { this->advertisedWindow = advertisedWindow; }
+
+    /**
+     * Sets the receive buffer of the next connect() or listen() call, in bytes, in place
+     * of the receiveBufferSize parameter of the Tcp module (as SO_RCVBUF before connect()
+     * or listen()). -1: the parameter of the Tcp module.
+     */
+    void setReceiveBufferSize(int receiveBufferSize) { this->receiveBufferSize = receiveBufferSize; }
 
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen
