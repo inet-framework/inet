@@ -1940,7 +1940,7 @@ void TcpConnection::process_TIMEOUT_FIN_WAIT_2()
 void TcpConnection::startSynRexmitTimer()
 {
     state->syn_rexmit_count = 0;
-    state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT;
+    state->syn_rexmit_timeout = tcpMain->par("initialRto"); // RFC 6298 section 2.1, also for the SYN (section 5.7)
     rescheduleAfter(state->syn_rexmit_timeout, synRexmitTimer);
 }
 

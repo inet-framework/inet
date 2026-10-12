@@ -28,6 +28,11 @@ class INET_API TcpAlgorithm : public cObject
   protected:
     TcpConnection *conn; // we belong to this connection
     TcpStateVariables *state; // our state variables
+    simtime_t initialRto; // the RTO before the first RTT measurement (initialRto parameter)
+    simtime_t minRexmitTimeout; // the lower limit of the RTO
+    simtime_t maxRexmitTimeout; // the upper limit of the RTO
+    int maxRexmitCount = 0; // the retransmissions of one segment, after which the connection aborts
+    simtime_t delayedAckTimeout; // the longest delay of an ACK
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected
@@ -68,9 +73,18 @@ class INET_API TcpAlgorithm : public cObject
     /**
      * Should be redefined to initialize the object: create timers, etc.
      * This method is necessary because the TcpConnection ptr is not
-     * available in the constructor yet.
+     * available in the constructor yet. Subclasses call it first: it reads the
+     * timer parameters of the Tcp module.
      */
-    virtual void initialize() {}
+    virtual void initialize()
+    {
+        cModule *tcpMain = conn->getTcpMain();
+        initialRto = tcpMain->par("initialRto");
+        minRexmitTimeout = tcpMain->par("minRexmitTimeout");
+        maxRexmitTimeout = tcpMain->par("maxRexmitTimeout");
+        maxRexmitCount = tcpMain->par("maxRexmitCount");
+        delayedAckTimeout = tcpMain->par("delayedAckTimeout");
+    }
 
     /**
      * Called when the connection is going to ESTABLISHED from SYN_SENT or

@@ -35,7 +35,6 @@ class TcpAlgorithm;
 //@{
 #define TCP_TIMEOUT_CONN_ESTAB        75  // 75 seconds
 #define TCP_TIMEOUT_FIN_WAIT_2        600  // 10 minutes
-#define TCP_TIMEOUT_SYN_REXMIT        3  // initially 3 seconds
 #define TCP_TIMEOUT_SYN_REXMIT_MAX    240  // 4 mins (will only be used with SYN+ACK: with SYN CONN_ESTAB occurs sooner)
 //@}
 

@@ -14,27 +14,9 @@
 namespace inet {
 namespace tcp {
 
-//
-// Some constants below. MIN_REXMIT_TIMEOUT is the minimum allowed retransmit
-// interval.  It is currently one second but e.g. a FreeBSD kernel comment says
-// it "will ultimately be reduced to 3 ticks for algorithmic stability,
-// leaving the 200ms variance to deal with delayed-acks, protocol overheads.
-// A 1 second minimum badly breaks throughput on any network faster then
-// a modem that has minor but continuous packet loss unrelated to congestion,
-// such as on a wireless network."
-//
-// RFC 1122, page 95:
-// "A TCP SHOULD implement a delayed ACK, but an ACK should not
-// be excessively delayed; in particular, the delay MUST be
-// less than 0.5 seconds, and in a stream of full-sized
-// segments there SHOULD be an ACK for at least every second
-// segment."
+// The retransmission and delayed ACK timers take their values from the
+// parameters of the Tcp module (TcpAlgorithm::initialize()).
 
-#define DELAYED_ACK_TIMEOUT    0.2   // 200ms (RFC 1122: MUST be less than 0.5 seconds)
-#define MAX_REXMIT_COUNT       12   // 12 retries
-#define MIN_REXMIT_TIMEOUT     1.0   // 1s
-//#define MIN_REXMIT_TIMEOUT    0.6   // 600ms (3 ticks)
-#define MAX_REXMIT_TIMEOUT     240   // 2 * MSL (RFC 1122)
 #define MIN_PERSIST_TIMEOUT    5   // 5s
 #define MAX_PERSIST_TIMEOUT    60   // 60s
 #define TLP_MAX_ACK_DELAY      0.2   // 200ms: RFC 8985 TLP.max_ack_delay, as Linux (TCP_RTO_MIN)
@@ -103,6 +85,8 @@ void TcpAlgorithmBase::initialize()
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
     tlpTimer->setContextPointer(conn);
+
+    state->rexmit_timeout = initialRto;
 }
 
 void TcpAlgorithmBase::established(bool active)
@@ -289,8 +273,8 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     // However, retransmission is actually more complicated than that
     // in RFC 793 above, we'll leave it to subclasses (e.g. TcpTahoe, TcpReno).
     //
-    if (++state->rexmit_count > MAX_REXMIT_COUNT) {
-        EV_DETAIL << "Retransmission count exceeds " << MAX_REXMIT_COUNT << ", aborting connection\n";
+    if (++state->rexmit_count > maxRexmitCount) {
+        EV_DETAIL << "Retransmission count exceeds " << maxRexmitCount << ", aborting connection\n";
         conn->signalConnectionTimeout();
         event = TCP_E_ABORT; // TODO maybe rather introduce a TCP_E_TIMEDOUT event
         return;
@@ -307,8 +291,8 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
 
     // restart the retransmission timer with twice the latest RTO value, or with the max, whichever is smaller
     state->rexmit_timeout += state->rexmit_timeout;
-    if (state->rexmit_timeout > MAX_REXMIT_TIMEOUT)
-        state->rexmit_timeout = MAX_REXMIT_TIMEOUT;
+    if (state->rexmit_timeout > maxRexmitTimeout)
+        state->rexmit_timeout = maxRexmitTimeout;
 
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
 
@@ -469,10 +453,10 @@ void TcpAlgorithmBase::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
     // assign RTO (here: rexmit_timeout) a new value
     simtime_t rto = srtt + 4 * rttvar;
 
-    if (rto > MAX_REXMIT_TIMEOUT)
-        rto = MAX_REXMIT_TIMEOUT;
-    else if (rto < MIN_REXMIT_TIMEOUT)
-        rto = MIN_REXMIT_TIMEOUT;
+    if (rto > maxRexmitTimeout)
+        rto = maxRexmitTimeout;
+    else if (rto < minRexmitTimeout)
+        rto = minRexmitTimeout;
 
     state->rexmit_timeout = rto;
 
@@ -560,15 +544,17 @@ void TcpAlgorithmBase::receiveSeqChanged()
                 EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", (delayed ACK enabled, but ack_now is set) sending ACK now\n";
                 conn->sendAck();
             }
-            // RFC 1122, page 96: "in a stream of full-sized segments there SHOULD be an ACK for at least every second segment."
-            else if (state->full_sized_segment_counter >= 2) {
+            // RFC 9293 section 3.8.6.3: "the delay MUST be less than 0.5 seconds (MUST-40).
+            // An ACK SHOULD be generated for at least every second full-sized segment"
+            // (SHLD-19); delayedAckTimeout and delayedAckFrameCount set both.
+            else if (state->full_sized_segment_counter >= state->delayedAckFrameCount) {
                 EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", (delayed ACK enabled, but full_sized_segment_counter=" << state->full_sized_segment_counter << ") sending ACK now\n";
                 conn->sendAck();
             }
             else {
                 EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", (delayed ACK enabled and full_sized_segment_counter=" << state->full_sized_segment_counter << ") scheduling ACK\n";
                 if (!delayedAckTimer->isScheduled()) // schedule delayed ACK timer if not already running
-                    conn->scheduleAfter(DELAYED_ACK_TIMEOUT, delayedAckTimer);
+                    conn->scheduleAfter(delayedAckTimeout, delayedAckTimer);
             }
         }
     }
