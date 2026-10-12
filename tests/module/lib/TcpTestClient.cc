@@ -208,6 +208,8 @@ void TcpTestClient::handleMessage(cMessage *msg)
         EV_INFO_C("testing") << getFullName() << ": " << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind());
         if (auto packet = dynamic_cast<Packet *>(msg))
             EV_INFO_C("testing") << ", " << packet->getByteLength() << " bytes";
+        if (auto completionInfo = dynamic_cast<TcpZerocopyCompletionInfo *>(msg->getControlInfo()))
+            EV_INFO_C("testing") << ", id " << completionInfo->getZerocopyId();
         EV_INFO_C("testing") << "\n";
     }
     for (auto& extraSocket : extraSockets) {
@@ -252,7 +254,10 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             break;
         }
         case TEST_SEND:
-            socket.send(check_and_cast<Packet *>(msg));
+            if (par("zerocopy"))
+                socket.sendZerocopy(check_and_cast<Packet *>(msg));
+            else
+                socket.send(check_and_cast<Packet *>(msg));
             scheduleNextSend();
             break;
         case TEST_CLOSE:

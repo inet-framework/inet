@@ -10,6 +10,7 @@
 #define __INET_TCPCONNECTION_H
 
 #include <deque>
+#include <map>
 
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/IcmpType_m.h"
@@ -167,6 +168,11 @@ class INET_API TcpConnection : public SimpleModule
     // not a module parameter)
     int socketAdvertisedWindow = -1;
     int socketReceiveBufferSize = -1;
+    // MSG_ZEROCOPY: the pending completions, by the sequence number that ends the data
+    // of each zero-copy SEND, and the id of the next one (per connection from 0, as the
+    // ids of Linux SO_ZEROCOPY)
+    std::map<uint32_t, uint32_t> zerocopySeqNums;
+    uint32_t nextZerocopyId = 0;
     // the application owns the connection (Linux sk->sk_socket): false for a connection
     // that the application did not accept yet, as TcpSetOwnedCommand tells
     bool appOwned = true;

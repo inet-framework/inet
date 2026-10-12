@@ -29,6 +29,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -1456,6 +1457,21 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         state->snd_nxt = state->snd_fin_seq + 1;
     }
 
+    // MSG_ZEROCOPY: a completion for each zero-copy SEND whose data went out now; one
+    // segment can complete several small SENDs. As Linux on a device that copies the
+    // data (a tun device), TCP is then done with the buffer of the application.
+    while (!zerocopySeqNums.empty() && !seqGreater(zerocopySeqNums.begin()->first, state->snd_nxt)) {
+        uint32_t zerocopyId = zerocopySeqNums.begin()->second;
+        zerocopySeqNums.erase(zerocopySeqNums.begin());
+        EV_INFO << "Notifying app: ZEROCOPY_COMPLETION id=" << zerocopyId << "\n";
+        auto *indication = new Indication("ZerocopyCompletion", TCP_I_ZEROCOPY_COMPLETION);
+        auto *completionInfo = new TcpZerocopyCompletionInfo();
+        completionInfo->setZerocopyId(zerocopyId);
+        indication->addTag<SocketInd>()->setSocketId(socketId);
+        indication->setControlInfo(completionInfo);
+        sendToApp(indication);
+    }
+
     // copy the region of tcpHeader to rexmitQueue; without SACK, the queue
     // still records what is in flight
     rexmitQueue->enqueueSentData(old_snd_nxt, state->snd_nxt);
@@ -1524,7 +1540,16 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
         state->busyStartTime = simTime();
     }
 
+    bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
     sendQueue->enqueueAppData(packet);
+
+    // MSG_ZEROCOPY: the completion of this SEND waits until its last byte goes out
+    if (zerocopy) {
+        uint32_t endSeq = sendQueue->getBufferEndSeq();
+        zerocopySeqNums[endSeq] = nextZerocopyId;
+        EV_DETAIL << "MSG_ZEROCOPY: completion " << nextZerocopyId << " at sequence number " << endSeq << "\n";
+        nextZerocopyId++;
+    }
 }
 
 int TcpConnection::deriveLinuxCaState() const
