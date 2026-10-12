@@ -269,6 +269,7 @@ simple Tcp extends SimpleModule like ITcp
         int maxRexmitCount = default(12); // the retransmissions of one segment, after which the connection aborts
         double maxRexmitTimeout @unit(s) = default(240s); // the upper limit of the retransmission timeout (RFC 6298 section 2.5: at least 60 s)
         double minRexmitTimeout @unit(s) = default(1s); // the lower limit of the retransmission timeout (RFC 6298 section 2.4: 1 s; Linux: 200 ms)
+        bool rtoVarianceFloor = default(false); // false: RTO = SRTT + 4*RTTVAR, rounded up to minRexmitTimeout (RFC 6298 sections 2.3 and 2.4); true: RTO = SRTT + max(4*RTTVAR, minRexmitTimeout), as Linux (tcp_set_rto()), whose minimum limits the variance term
         bool seedRttFromHandshake = default(false); // Seed the RTT estimator (srtt/rttvar/RTO) from the SYN<->SYN-ACK exchange, as Linux does. The first-flight RTO becomes RTT-scaled instead of the initial RTO.
         bool sendMssOption = default(true); // send the MSS option in the SYN and the SYN-ACK; false: leave it out, as some peers do (the other side then assumes the default send MSS of RFC 9293 MUST-15)
         bool syncookiesAlways = default(false); // model Linux tcp_syncookies=2 (a SYN cookie on every passive open): the cookie quantizes the MSS of the peer down to the IPv4 msstab {536, 1300, 1440, 1460} of net/ipv4/syncookies.c; the other options stay exact

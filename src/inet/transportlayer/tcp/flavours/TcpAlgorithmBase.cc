@@ -450,13 +450,19 @@ void TcpAlgorithmBase::rttMeasurementComplete(simtime_t tSent, simtime_t tAcked)
         rttvar += g * (fabs(err) - rttvar);
     }
 
-    // assign RTO (here: rexmit_timeout) a new value
-    simtime_t rto = srtt + 4 * rttvar;
-
+    // RFC 6298 sections 2.3 and 2.4: RTO = SRTT + 4*RTTVAR, rounded up to the
+    // minimum. With rtoVarianceFloor, Linux tcp_set_rto() instead: the minimum
+    // limits the variance term, RTO = SRTT + max(4*RTTVAR, minimum).
+    simtime_t rto;
+    if (rtoVarianceFloor)
+        rto = srtt + std::max(4 * rttvar, minRexmitTimeout);
+    else {
+        rto = srtt + 4 * rttvar;
+        if (rto < minRexmitTimeout)
+            rto = minRexmitTimeout;
+    }
     if (rto > maxRexmitTimeout)
         rto = maxRexmitTimeout;
-    else if (rto < minRexmitTimeout)
-        rto = minRexmitTimeout;
 
     state->rexmit_timeout = rto;
 
