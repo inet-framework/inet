@@ -1805,3 +1805,27 @@ calls the new socket functions. The CI fingerprint job runs at each code commit,
 above moves. The TCP fingerprint rows run in debug at the head with no runtime error (the `tyf`
 ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six gates
 pass.
+
+### S15b — `topic/tcp-zero-window`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: the persist timer no longer changes the RTO | — | 32 (part) |
+| 2 | fix: a zero-window probe sends the first unacknowledged octet again | — | new |
+| 3 | change: the first zero-window probe after one RTO, then at doubled intervals | B15 | 32 (part), 34 (part) |
+| 4 | fix: a window update that opens the window ends the persist state | B14 | 13 (part), 84 |
+| 5 | fix: the persist timer starts when data waits for a zero window | — | new |
+| 6 | fix: the persist timer stops when no data waits | — | new |
+| 7 | add: the zero-window probe of Linux, selected by `zeroWindowProbe` | — | 34 (part) |
+
+A test of master shows how its zero-window probing fails. Each probe is one new octet beyond the
+closed window, so `snd_max` grows with each probe. The probe starts the retransmission timer, which
+then sends the probe octets again with a doubled RTO, and the persist timer writes its own interval
+into the RTO (5 s). The first probe comes after 5 s, not after one RTO. A window update that opens
+the window is ignored, so the persist timer keeps probing after the window is open, and the data
+that waits is never sent. RFC 9293 section 3.8.6.1 asks for one octet of new data as the probe, or a
+retransmission, the first probe after one RTO and exponential intervals (SHLD-29, SHLD-30), and that
+the connection stays open while the peer answers the probes (MUST-37). Steps 1 to 6 repair master to
+that; the probe without data of the source (Linux `tcp_xmit_probe_skb()`) comes with a parameter
+(step 7). The source keeps the window update of commit 84 only for an ACK when nothing is in flight;
+with the probe octet of the RFC in flight, step 4 also covers that case.
