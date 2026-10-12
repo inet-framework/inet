@@ -32,6 +32,7 @@ simple TcpTestClient like IApp
         int socketAdvertisedWindow = default(-1); // the advertised window of the first connection, in bytes (TcpSocket::setAdvertisedWindow()); -1: the parameters of the Tcp module
         int socketReceiveBufferSize = default(-1); // the receive buffer of the first connection, in bytes (TcpSocket::setReceiveBufferSize()); -1: the parameter of the Tcp module
         string writerBlockedScript = default(""); // "time 1; time 0; ..." -- at each time, tell TCP that the application writer is blocked on the send buffer (1) or not (0) (TcpSocket::setWriterBlocked())
+        int notsentLowat = default(-1); // the TCP_NOTSENT_LOWAT of the first connection, in bytes (TcpSocket::setNotsentLowat()), sent after its open; -1: none
         bool timestamping = default(false); // ask TCP for the time of the delivery of the data (SO_TIMESTAMPING, TcpSocket::setTimestamping()), which logIndications logs
         bool zerocopy = default(false); // the SENDs of the first connection ask for a completion (MSG_ZEROCOPY, TcpSocket::sendZerocopy()), which logIndications logs
         string readScript = default(""); // with autoRead=false: "time bytes; time bytes; ..." -- at each time, issue a READ of at most that many bytes

@@ -349,6 +349,8 @@ struct TcpStateVariables
     simtime_t busyTimeAccumulated = 0;
     simtime_t rwndLimitedStartTime;   // set to -1 in configureStateVariables()
     simtime_t rwndLimitedAccumulated = 0;
+    uint32_t notsentLowat = (uint32_t)-1; // TCP_NOTSENT_LOWAT, the low-water mark on the unsent bytes; -1: off
+    bool notsentLowatUpdate = true; // false while the unsent bytes are above notsentLowat: TCP_I_SEND_MSG follows when they fall to it
     simtime_t sndbufLimitedStartTime; // set to -1 in configureStateVariables()
     simtime_t sndbufLimitedAccumulated = 0; // the time that the send buffer limited the sender (Linux TCP_CHRONO_SNDBUF_LIMITED)
 

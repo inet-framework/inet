@@ -210,6 +210,11 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
 
     if ((state->sendQueueLimit > 0) && (sendQueue->getBytesAvailable(state->snd_una) > state->sendQueueLimit))
         state->queueUpdate = false;
+
+    // TCP_NOTSENT_LOWAT: the unsent bytes (from snd_nxt) exceed the mark, so the next
+    // TCP_I_SEND_MSG waits until the sending brings them to the mark
+    if (state->notsentLowat != (uint32_t)-1 && sendQueue->getBytesAvailable(state->snd_nxt) > state->notsentLowat)
+        state->notsentLowatUpdate = false;
 }
 
 void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCommand, cMessage *msg)
@@ -263,6 +268,12 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     }
     else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
+    }
+    else if (auto cmd = dynamic_cast<TcpSetNotsentLowatCommand *>(tcpCommand)) {
+        // the command can come before the open: configureStateVariables() takes it then
+        notsentLowatSockopt = cmd->getValue();
+        if (state != nullptr)
+            state->notsentLowat = notsentLowatSockopt < 0 ? (uint32_t)-1 : (uint32_t)notsentLowatSockopt;
     }
     else if (auto cmd = dynamic_cast<TcpSetTimestampingCommand *>(tcpCommand)) {
         rxTimestampingEnabled = cmd->getEnabled();

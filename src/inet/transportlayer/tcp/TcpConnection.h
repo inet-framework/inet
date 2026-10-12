@@ -9,6 +9,7 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
+#include <climits>
 #include <deque>
 #include <map>
 
@@ -177,6 +178,9 @@ class INET_API TcpConnection : public SimpleModule
     // (TcpRxTimestampInd), as TcpSetTimestampingCommand asks; a member, because the
     // command can come before the open
     bool rxTimestampingEnabled = false;
+    // TCP_NOTSENT_LOWAT from TcpSetNotsentLowatCommand, which can come before the open;
+    // INT_MIN: no command, so the notsentLowat parameter
+    int notsentLowatSockopt = INT_MIN;
     // the application writer waits for space in the send buffer (Linux SOCK_NOSPACE), as
     // TcpSetWriterBlockedCommand tells; it drives the send buffer limited time
     bool writerBlocked = false;

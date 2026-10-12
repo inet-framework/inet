@@ -259,6 +259,8 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
                 socket.setOwned(false);
             if (par("timestamping").boolValue())
                 socket.setTimestamping(true);
+            if ((int)par("notsentLowat") >= 0)
+                socket.setNotsentLowat(par("notsentLowat"));
             scheduleNextSend();
             delete msg;
             break;

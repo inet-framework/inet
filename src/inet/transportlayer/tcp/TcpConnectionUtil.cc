@@ -994,6 +994,11 @@ void TcpConnection::configureStateVariables()
     // sendData() call says otherwise (enqueueSendCommandData(), sendData()).
     state->busyStartTime = -1;
     state->rwndLimitedStartTime = -1;
+
+    // TCP_NOTSENT_LOWAT: a TcpSetNotsentLowatCommand before the open takes the place of
+    // the parameter
+    int notsentLowat = notsentLowatSockopt != INT_MIN ? notsentLowatSockopt : (int)tcpMain->par("notsentLowat").intValue();
+    state->notsentLowat = notsentLowat < 0 ? (uint32_t)-1 : (uint32_t)notsentLowat;
     state->sndbufLimitedStartTime = -1;
 
     WATCH_EXPR("snd_nxt", state->snd_nxt);
@@ -1500,6 +1505,15 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         // Tell upper layer readiness to accept more data
         sendIndicationToApp(TCP_I_SEND_MSG, abated);
         state->queueUpdate = true;
+    }
+
+    // TCP_NOTSENT_LOWAT: the unsent bytes are at the mark again
+    if (state->notsentLowat != (uint32_t)-1 && !state->notsentLowatUpdate) {
+        uint32_t notsentBytes = sendQueue->getBytesAvailable(state->snd_nxt);
+        if (notsentBytes <= state->notsentLowat) {
+            sendIndicationToApp(TCP_I_SEND_MSG, notsentBytes);
+            state->notsentLowatUpdate = true;
+        }
     }
 
     // remember highest seq sent (snd_nxt may be set back on retransmission,
