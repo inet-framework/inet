@@ -187,6 +187,9 @@ class INET_API TcpConnection : public SimpleModule
     // an accepted segment ends beyond the right edge of the last offered window
     // (acceptBeyondBufferAtEmptyQueue); adaptiveDelayedAcks then sends no ACK at once
     bool overWindowAcceptPending = false;
+    // SO_KEEPALIVE of this connection (TcpSocket::setKeepAlive()), also from before the
+    // open; -1: the keepAliveEnabled parameter
+    int keepAliveSockopt = -1;
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */

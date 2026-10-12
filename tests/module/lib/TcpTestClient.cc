@@ -33,11 +33,12 @@ class INET_API TcpTestClient : public cSimpleModule
     Commands commands;
     Commands readCommands; // with autoRead=false: when to READ, and how many bytes
     Commands writerBlockedCommands; // when to tell TCP that the writer is blocked (1) or not (0)
+    Commands keepAliveCommands; // when to turn keepalive on (1) or off (0)
     std::list<std::pair<std::string, std::string>> tcpParCommands; // tcpParScript: the parameters to set, in time order
     static const int NUM_EXTRA = 2; // the optional second and third connection (tOpen2, tOpen3)
     Commands extraCommands[NUM_EXTRA]; // the SEND of each extra connection
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
 
     int ctr;
 
@@ -186,6 +187,9 @@ void TcpTestClient::initialize()
     parseScript(par("writerBlockedScript"), writerBlockedCommands);
     for (const auto& command : writerBlockedCommands)
         scheduleAt(command.tSend, new cMessage("WriterBlocked", TEST_WRITER_BLOCKED));
+    parseScript(par("keepAliveScript"), keepAliveCommands);
+    for (const auto& command : keepAliveCommands)
+        scheduleAt(command.tSend, new cMessage("KeepAlive", TEST_KEEPALIVE));
     if (tClose > 0)
         scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
 
@@ -302,6 +306,11 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             delete msg;
             break;
         }
+        case TEST_KEEPALIVE:
+            socket.setKeepAlive(keepAliveCommands.front().numBytes != 0);
+            keepAliveCommands.pop_front();
+            delete msg;
+            break;
         case TEST_WRITER_BLOCKED:
             socket.setWriterBlocked(writerBlockedCommands.front().numBytes != 0);
             writerBlockedCommands.pop_front();

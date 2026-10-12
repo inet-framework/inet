@@ -283,6 +283,12 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
         EV_DETAIL << "The application writer is " << (writerBlocked ? "blocked on the send buffer" : "not blocked") << "\n";
         updateSndbufLimitedChrono();
     }
+    else if (auto cmd = dynamic_cast<TcpSetKeepAliveCommand *>(tcpCommand)) {
+        // the command can come before the open: initConnection() takes it then
+        keepAliveSockopt = cmd->getEnabled() ? 1 : 0;
+        if (tcpAlgorithm != nullptr)
+            tcpAlgorithm->setKeepAlive(cmd->getEnabled());
+    }
     else if (auto cmd = dynamic_cast<TcpSetOwnedCommand *>(tcpCommand)) {
         appOwned = cmd->getOwned();
         EV_DETAIL << "The application " << (appOwned ? "owns" : "does not own") << " the connection\n";

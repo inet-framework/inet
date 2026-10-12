@@ -314,6 +314,15 @@ void TcpSocket::setNoDelay(bool nodelay)
     sendToTcp(request);
 }
 
+void TcpSocket::setKeepAlive(bool enabled)
+{
+    auto request = new Request("setKeepAlive", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetKeepAliveCommand();
+    cmd->setEnabled(enabled);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
 void TcpSocket::setOwned(bool owned)
 {
     auto request = new Request("setOwned", TCP_C_SETOPTION);

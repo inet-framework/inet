@@ -105,6 +105,12 @@ class INET_API TcpAlgorithm : public cObject
     virtual void connectionClosed() = 0;
 
     /**
+     * Turns keepalive on or off for this connection (TcpSocket::setKeepAlive()).
+     * A flavour without keepalive ignores it.
+     */
+    virtual void setKeepAlive(bool enabled) {}
+
+    /**
      * Place to process timers specific to this TcpAlgorithm class.
      * TcpConnection will invoke this method on any timer (self-message)
      * it doesn't recognize (that is, any timer other than the 2MSL,

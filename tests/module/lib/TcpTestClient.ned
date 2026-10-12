@@ -33,6 +33,7 @@ simple TcpTestClient like IApp
         int socketReceiveBufferSize = default(-1); // the receive buffer of the first connection, in bytes (TcpSocket::setReceiveBufferSize()); -1: the parameter of the Tcp module
         int socketSynRetries = default(-1); // the SYN retries of the first connection (TcpSocket::setSynRetries()); -1: the parameter of the Tcp module
         string tcpParScript = default(""); // "time name value; ..." -- at each time, set a parameter of the Tcp module of this application, as a harness that changes a sysctl; the parameter must be @mutable
+        string keepAliveScript = default(""); // "time 1; time 0; ..." -- at each time, turn keepalive on (1) or off (0) for the first connection (TcpSocket::setKeepAlive()), also before its open
         string writerBlockedScript = default(""); // "time 1; time 0; ..." -- at each time, tell TCP that the application writer is blocked on the send buffer (1) or not (0) (TcpSocket::setWriterBlocked())
         int notsentLowat = default(-1); // the TCP_NOTSENT_LOWAT of the first connection, in bytes (TcpSocket::setNotsentLowat()), sent after its open; -1: none
         bool timestamping = default(false); // ask TCP for the time of the delivery of the data (SO_TIMESTAMPING, TcpSocket::setTimestamping()), which logIndications logs

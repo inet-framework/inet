@@ -235,6 +235,13 @@ class TcpSetOwnedCommand extends TcpSetOptionCommand
     bool owned = true;
 }
 
+// SO_KEEPALIVE: keepalive on or off for this connection (RFC 9293 MUST-24), before
+// or after the open, in place of the keepAliveEnabled parameter of the Tcp module
+class TcpSetKeepAliveCommand extends TcpSetOptionCommand
+{
+    bool enabled = true;
+}
+
 // The application writer's blocked-on-send-buffer state (Linux SOCK_NOSPACE
 // while a blocking write waits in sk_stream_wait_memory): while set AND the
 // send queue has run dry, the connection accumulates SNDBUF_LIMITED chrono

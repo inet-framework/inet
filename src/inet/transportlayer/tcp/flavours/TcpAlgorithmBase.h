@@ -131,6 +131,8 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void connectionClosed() override;
 
+    virtual void setKeepAlive(bool enabled) override;
+
     /**
      * Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers.
      */

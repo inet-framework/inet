@@ -245,9 +245,12 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     socketAdvertisedWindow = listenerConn->socketAdvertisedWindow;
     socketReceiveBufferSize = listenerConn->socketReceiveBufferSize;
     socketSynRetries = listenerConn->socketSynRetries;
+    keepAliveSockopt = listenerConn->keepAliveSockopt;
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
+    if (keepAliveSockopt >= 0)
+        tcpAlgorithm->setKeepAlive(keepAliveSockopt != 0);
 
     // put it into LISTEN, with our localAddr/localPort
     state->active = false;
@@ -868,6 +871,8 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
+    if (keepAliveSockopt >= 0)
+        tcpAlgorithm->setKeepAlive(keepAliveSockopt != 0);
 }
 
 void TcpConnection::configureStateVariables()

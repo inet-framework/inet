@@ -190,6 +190,24 @@ void TcpAlgorithmBase::established(bool active)
     }
 }
 
+void TcpAlgorithmBase::setKeepAlive(bool enabled)
+{
+    // as Linux tcp_set_keepalive(): a connection that has completed its handshake
+    // starts the idle time now; before that, established() starts it
+    state->keepalive_enabled = enabled;
+    if (!enabled)
+        cancelEvent(keepAliveTimer);
+    else if (!keepAliveTimer->isScheduled()) {
+        int fsmState = conn->getFsmState();
+        if (fsmState == TCP_S_ESTABLISHED || fsmState == TCP_S_CLOSE_WAIT || fsmState == TCP_S_FIN_WAIT_1
+            || fsmState == TCP_S_FIN_WAIT_2 || fsmState == TCP_S_CLOSING || fsmState == TCP_S_LAST_ACK)
+        {
+            state->keepalive_probes_sent = 0;
+            conn->scheduleAfter(state->keepalive_idle_time, keepAliveTimer);
+        }
+    }
+}
+
 void TcpAlgorithmBase::connectionClosed()
 {
     cancelEvent(rexmitTimer);
