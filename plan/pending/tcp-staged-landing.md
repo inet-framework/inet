@@ -63,7 +63,8 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S12 ✅ | `topic/tcp-fast-open` | 15 (part), 16 (part), 23 (part), 26 (part), 27 (part), 39 (part), 43, 44, new | +868 −72 | TCP Fast Open (RFC 7413), and the option writing and the MSS rules that it needs (D-42 to D-50) |
 | S13 ✅ | `topic/tcp-accecn` | 13 (part), 23 (part), 27, 48 (part), 64 (part), 65 (part), new | +877 −122 | Accurate ECN (RFC 9768), the ECN repairs that it needs, `ecnMarkAll`; DCTCP counts its bytes also in a fast recovery (D-51 to D-60) |
 | S14 ✅ | `topic/tcp-receive-buffer` | 28, 29, 35, new | +353 −9 | the receive buffer apart from the advertised window, the Linux receive memory behind parameters, the window and the buffer of one socket (D-4), MSG_ZEROCOPY, the send buffer chrono, SO_TIMESTAMPING, `TCP_NOTSENT_LOWAT` (D-61 to D-64) |
-| S15 | `topic/tcp-timers` | 31, 32, 33, 34 (part), 77 | +441 −94 | adaptive delayed ACK, timer parameters, keepalive, loss marking at a timeout, no new fast recovery before the recovery point of a timeout (D-34, proposed) |
+| S15 | `topic/tcp-timers` | 18 (part), 26 (part), 28 (part), 31, 32 (part), 33, 68 (part), 77, new | +450 −40 (about) | the timer parameters, the RTO of Linux, the SYN retries, a FIN that keeps a running retransmission timer, adaptive delayed ACK, keepalive, no new fast recovery before the recovery point of a timeout (D-34) |
+| S15b | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +150 −40 (about) | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
 | S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
@@ -1687,3 +1688,32 @@ tests of each code commit fail with the source of the commit before; there, the 
 CI fingerprint job runs at each code commit, and no row moves. The TCP fingerprint rows run in
 debug at the head with no runtime error (the `tyf` ingredient differs in 52 rows, as on master;
 the lwIP rows need a build with lwIP). The six gates pass.
+
+### S15 — `topic/tcp-timers`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: the timer constants as parameters, with the values of master | — | 31 (part), 32 (part) |
+| 2 | add: `rtoVarianceFloor`, the RTO of Linux | — | 68 (part) |
+| 3 | add: `synRetries` and `synLinearTimeouts`, and the SYN timer under `maxRexmitTimeout` | — | 32 (part) |
+| 4 | add: the SYN retries of one socket (TCP_SYNCNT, D-4) | — | new |
+| 5 | add: an RTO of 3 s after a SYN timeout (RFC 6298 section 5.7) | — | 77 |
+| 6 | add: `sendDataWithFirstAck` | — | 32 (part) |
+| 7 | change: a FIN starts the retransmission timer only when it does not run | — | 26 (part) |
+| 8 | add: adaptive delayed ACKs, selected by `adaptiveDelayedAcks` | — | 28 (part), 31 (part) |
+| 9 | add: the time of the last received data in STATUS | — | 18 (part) |
+| 10 | add: keepalive (RFC 9293 section 3.8.4) | — | 33 |
+| 11 | add: keepalive for each connection (MUST-24) | — | new |
+| 12 | fix: no new fast recovery before the recovery point of a timeout (D-34) | — | new |
+
+S15 had commits 31 to 34 and 77. The loss marking of commit 34 landed with S5e, and its zero-window
+probe goes to S15b with the persist timing of commit 32 and the window update of commit 84 (B14,
+B15). The timing parameters keep the values of master: S19 changes the defaults (the initial RTO
+of 1 s of RFC 6298 section 2.1, which the source pins back to 3 s in its tests). Commit 32 changed
+the RTO to the formula of Linux, and commit 68 put the formula of RFC 6298 back as the default with
+`rtoVarianceFloor`; S15 brings only the parameter. `synLinearTimeouts` is 0 by default, as RFC 6298
+section 5.5 doubles the timer at each expiry (the source: 4, as Linux). The source changes the
+module parameter `synRetries` at run time for the socket option TCP_SYNCNT, and it has no switch of
+keepalive for one connection, which RFC 9293 MUST-24 requires; steps 4 and 11 add them as socket
+calls. Step 7 follows RFC 6298 section 5.1: master restarts the timer at each FIN, also with data
+in flight. Step 12 is D-34.
