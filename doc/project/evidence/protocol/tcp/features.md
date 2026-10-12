@@ -2,21 +2,11 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `TCP-F-*` · **Stands on:** [standards.md](standards.md), [catalog.md](../../standard/rfc9293/catalog.md)
 
-Step 4 artifact of the standards test workflow. The catalog is flat, fine-grained, and per
-document. This document is the high-level view above it: the capabilities that the in-scope
-set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of each,
-and the cross reference into the catalog.
+Step 4 artifact of the standards test workflow. The catalog is flat, fine-grained, and per document. This document is the high-level view above it: the capabilities that the in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of each, and the cross reference into the catalog.
 
-The in-scope set holds three documents: RFC 9293 for the protocol, RFC 6298 for the
-retransmission timer, and RFC 5681 for congestion control. The map spans them in one file,
-as it was designed to: the level 4 pass added ten features here without a new file.
+The in-scope set holds three documents: RFC 9293 for the protocol, RFC 6298 for the retransmission timer, and RFC 5681 for congestion control. The map spans them in one file, as it was designed to: the level 4 pass added ten features here without a new file.
 
-The feature list comes from the standard text only. The support of each feature — what the
-run actually showed — is **not** in this document. It lives in the coverage ledger,
-[`coverage.md`](../../model/tcp/coverage.md). Keeping it out is deliberate: this map states
-which capabilities the standard defines, so a new run must never force an edit here. The
-comparison against the standards that the model claims to implement is
-[`conformance.md`](../../model/tcp/conformance.md).
+The feature list comes from the standard text only. The support of each feature — what the run actually showed — is **not** in this document. It lives in the coverage ledger, [`coverage.md`](../../model/tcp/coverage.md). Keeping it out is deliberate: this map states which capabilities the standard defines, so a new run must never force an edit here. The comparison against the standards that the model claims to implement is [`conformance.md`](../../model/tcp/conformance.md).
 
 ## Index
 
@@ -74,133 +64,74 @@ comparison against the standards that the model claims to implement is
 | [TCP-F-RESTART-IDLE](#tcp-f-restart-idle) | optional (keyword) | RFC 5681 §4.1 | RFC5681-IDLE-1 |
 | [TCP-F-DELAYED-ACK](#tcp-f-delayed-ack) | mandatory (keyword) | RFC 5681 §4.2 | RFC5681-ACK-1, RFC5681-ACK-2 |
 
-Twenty-three features, twenty-one mandatory and two optional. What a run showed about them is in
-[`coverage.md`](../../model/tcp/coverage.md). The first nine describe one connection from
-open to close, the stream it carries, the window that paces it, the checksum that guards it,
-and the reset that answers a connection that is not there. The four that the level 3 pass
-added describe the same connection under attack or under a fault: a segment that does not
-fit, a reset a third party could have forged, a window that moves backward, and an error
-that the layer below reports. The ten that the level 4 pass added describe the two control
-loops: four for the retransmission timer of RFC 6298, and six for the congestion window of
-RFC 5681. The options and the selective acknowledgment extensions are still other
-documents' features and a later level.
+Twenty-three features, twenty-one mandatory and two optional. What a run showed about them is in [`coverage.md`](../../model/tcp/coverage.md). The first nine describe one connection from open to close, the stream it carries, the window that paces it, the checksum that guards it, and the reset that answers a connection that is not there. The four that the level 3 pass added describe the same connection under attack or under a fault: a segment that does not fit, a reset a third party could have forged, a window that moves backward, and an error that the layer below reports. The ten that the level 4 pass added describe the two control loops: four for the retransmission timer of RFC 6298, and six for the congestion window of RFC 5681. The options and the selective acknowledgment extensions are still other documents' features and a later level.
 
-Two of the ten are `optional`, and both for the same reason: every core statement behind
-them says `should`. RFC 6298 states its initial value and its lower bound as a `should`,
-and RFC 5681 states the restart of an idle connection as a `should`. A model that departs
-from either does not violate its document, so a check of one records a deviation rather
-than a defect.
+Two of the ten are `optional`, and both for the same reason: every core statement behind them says `should`. RFC 6298 states its initial value and its lower bound as a `should`, and RFC 5681 states the restart of an idle connection as a `should`. A model that departs from either does not violate its document, so a check of one records a deviation rather than a defect.
 
 ## TCP-F-ESTABLISH
 
 **A connection opens with the three-way handshake.**
 
-- **Sources** — RFC 9293 §3.5, `rfc9293.txt:1223-1225` and Figure 6,
-  `rfc9293.txt:1260-1268`. RFC 9293 governs; RFC 793 is obsolete.
-- **Level** — mandatory (reason: only path). The handshake is the only procedure the
-  document gives for a normal open, and the state machine admits no other path to
-  ESTABLISHED.
-- **Description** — the initiator sends a SYN, the responder answers with a SYN that also
-  acknowledges, and the initiator acknowledges in turn. Each side learns the other's
-  initial sequence number. The SYN may carry the maximum segment size option.
-- **Checks** — core: RFC9293-EST-1 (the three segments in order), RFC9293-EST-2 (the
-  SYN-ACK acknowledges the initial sequence number plus one). Supporting: RFC9293-ISS-1
-  (each side picks its own initial sequence number), RFC9293-OPT-1 (the MSS option in the
-  SYN, a `should`).
+- **Sources** — RFC 9293 §3.5, `rfc9293.txt:1223-1225` and Figure 6, `rfc9293.txt:1260-1268`. RFC 9293 governs; RFC 793 is obsolete.
+- **Level** — mandatory (reason: only path). The handshake is the only procedure the document gives for a normal open, and the state machine admits no other path to ESTABLISHED.
+- **Description** — the initiator sends a SYN, the responder answers with a SYN that also acknowledges, and the initiator acknowledges in turn. Each side learns the other's initial sequence number. The SYN may carry the maximum segment size option.
+- **Checks** — core: RFC9293-EST-1 (the three segments in order), RFC9293-EST-2 (the SYN-ACK acknowledges the initial sequence number plus one). Supporting: RFC9293-ISS-1 (each side picks its own initial sequence number), RFC9293-OPT-1 (the MSS option in the SYN, a `should`).
 
 ## TCP-F-SEQUENCE
 
 **Sequence numbers count data octets, and the SYN and the FIN each occupy one.**
 
 - **Sources** — RFC 9293 §3.4, `rfc9293.txt:988-992`; §4 Glossary, `rfc9293.txt:3971-3974`.
-- **Level** — mandatory (reason: only path). Every acknowledgment arithmetic in the
-  document rests on it.
-- **Description** — the SYN counts before the first data octet and the FIN counts after the
-  last, so a peer acknowledges each of them with a plus-one. A pure ACK counts for nothing.
-- **Checks** — core: RFC9293-SEQ-1 (the SYN occupies one), RFC9293-FIN-1 (the FIN occupies
-  one). Supporting: RFC9293-SEQ-2 (a pure ACK occupies none), RFC9293-ISS-2 (the initial
-  sequence number generator).
-- **Note** — this feature is the reason the other features work. It is checked only through
-  them, never on its own, which is the normal shape for an arithmetic rule.
+- **Level** — mandatory (reason: only path). Every acknowledgment arithmetic in the document rests on it.
+- **Description** — the SYN counts before the first data octet and the FIN counts after the last, so a peer acknowledges each of them with a plus-one. A pure ACK counts for nothing.
+- **Checks** — core: RFC9293-SEQ-1 (the SYN occupies one), RFC9293-FIN-1 (the FIN occupies one). Supporting: RFC9293-SEQ-2 (a pure ACK occupies none), RFC9293-ISS-2 (the initial sequence number generator).
+- **Note** — this feature is the reason the other features work. It is checked only through them, never on its own, which is the normal shape for an arithmetic rule.
 
 ## TCP-F-ACKNOWLEDGE
 
 **The receiver acknowledges the next sequence number it expects.**
 
 - **Sources** — RFC 9293 §3.1, `rfc9293.txt:337-339`; §3.8.6.3, `rfc9293.txt:2326-2329`.
-- **Level** — mandatory (reason: only path, and the word "always"). The field definition is
-  unconditional once a connection is established: "Once a connection is established, this
-  is always sent."
-- **Description** — the acknowledgment is cumulative. It names the first octet the receiver
-  has not yet accepted, so one acknowledgment covers everything before it. A receiver may
-  delay it, but by less than half a second.
-- **Checks** — core: RFC9293-ACK-1 (after N octets, the acknowledgment is S plus N, and
-  after a whole stream it is the end of the stream). Supporting: RFC9293-ACK-2 (every
-  established segment carries the ACK bit), RFC9293-ACKD-1 (the delay bound, a timing
-  statement for level 4).
+- **Level** — mandatory (reason: only path, and the word "always"). The field definition is unconditional once a connection is established: "Once a connection is established, this is always sent."
+- **Description** — the acknowledgment is cumulative. It names the first octet the receiver has not yet accepted, so one acknowledgment covers everything before it. A receiver may delay it, but by less than half a second.
+- **Checks** — core: RFC9293-ACK-1 (after N octets, the acknowledgment is S plus N, and after a whole stream it is the end of the stream). Supporting: RFC9293-ACK-2 (every established segment carries the ACK bit), RFC9293-ACKD-1 (the delay bound, a timing statement for level 4).
 
 ## TCP-F-TERMINATE
 
 **A connection closes with a FIN in each direction, and each FIN is acknowledged.**
 
 - **Sources** — RFC 9293 §3.6 Figure 12, `rfc9293.txt:1590-1606`.
-- **Level** — mandatory (reason: only path). The figure is the normal close, and the state
-  machine reaches CLOSED through it.
-- **Description** — the close is independent per direction. One side may finish sending
-  while the other still sends, which is why two FIN segments appear rather than one
-  exchange.
-- **Checks** — core: RFC9293-FIN-2 (the FIN, its acknowledgment, the peer FIN, and its
-  acknowledgment).
+- **Level** — mandatory (reason: only path). The figure is the normal close, and the state machine reaches CLOSED through it.
+- **Description** — the close is independent per direction. One side may finish sending while the other still sends, which is why two FIN segments appear rather than one exchange.
+- **Checks** — core: RFC9293-FIN-2 (the FIN, its acknowledgment, the peer FIN, and its acknowledgment).
 
 ## TCP-F-DATA-TRANSFER
 
-**A byte stream is carried in segments no larger than the effective maximum segment size
-and delivered in order.**
+**A byte stream is carried in segments no larger than the effective maximum segment size and delivered in order.**
 
-- **Sources** — RFC 9293 §2.1, `rfc9293.txt:243-244`; §3.7.1, `rfc9293.txt:1745-1747`;
-  §3.8, `rfc9293.txt:1891-1892`.
-- **Level** — mandatory (reason: keyword; RFC9293-SEG-1 is a MUST, and the ordered stream
-  is the service the document exists to define).
-- **Description** — the sender cuts the stream into segments of at most the effective send
-  MSS, 536 octets by default over IPv4, and the receiver acknowledges the stream
-  cumulatively, so that an acknowledgment of its end means every octet arrived in order.
-- **Checks** — core: RFC9293-DATA-1 (the whole stream is acknowledged), RFC9293-SEG-1 (a
-  segment is no larger than the effective send MSS). Supporting: RFC9293-ACK-2,
-  RFC9293-PSH-1 (the last segment of a send carries PSH).
-- **Bound** — in the absence of loss. Recovery from loss is the retransmission machinery,
-  which needs a dropped segment to show: level 3 for the mechanism, level 4 for its timer.
+- **Sources** — RFC 9293 §2.1, `rfc9293.txt:243-244`; §3.7.1, `rfc9293.txt:1745-1747`; §3.8, `rfc9293.txt:1891-1892`.
+- **Level** — mandatory (reason: keyword; RFC9293-SEG-1 is a MUST, and the ordered stream is the service the document exists to define).
+- **Description** — the sender cuts the stream into segments of at most the effective send MSS, 536 octets by default over IPv4, and the receiver acknowledges the stream cumulatively, so that an acknowledgment of its end means every octet arrived in order.
+- **Checks** — core: RFC9293-DATA-1 (the whole stream is acknowledged), RFC9293-SEG-1 (a segment is no larger than the effective send MSS). Supporting: RFC9293-ACK-2, RFC9293-PSH-1 (the last segment of a send carries PSH).
+- **Bound** — in the absence of loss. Recovery from loss is the retransmission machinery, which needs a dropped segment to show: level 3 for the mechanism, level 4 for its timer.
 
 ## TCP-F-FLOW-CONTROL
 
 **The receiver advertises a window, and the sender sends no new data beyond it.**
 
-- **Sources** — RFC 9293 §3.1, `rfc9293.txt:391-395`; §3.8.6, `rfc9293.txt:2114-2122` and
-  `rfc9293.txt:2155-2157`.
-- **Level** — mandatory (reason: only path). The window is the only mechanism the base
-  document gives a receiver to pace a sender; congestion control belongs to RFC 5681.
-- **Description** — every segment carries the number of octets its sender is willing to
-  accept beyond the acknowledged one. The peer may send new data only up to that edge.
-  When the window is smaller than a segment, the window and not the segment size bounds
-  what the sender transmits.
-- **Checks** — core: RFC9293-WND-1 (the window field and its meaning), RFC9293-WND-2 (the
-  sender stays within the advertised window). Supporting: RFC9293-ZWP-1 (zero-window
-  probing, a timer matter for level 4).
+- **Sources** — RFC 9293 §3.1, `rfc9293.txt:391-395`; §3.8.6, `rfc9293.txt:2114-2122` and `rfc9293.txt:2155-2157`.
+- **Level** — mandatory (reason: only path). The window is the only mechanism the base document gives a receiver to pace a sender; congestion control belongs to RFC 5681.
+- **Description** — every segment carries the number of octets its sender is willing to accept beyond the acknowledged one. The peer may send new data only up to that edge. When the window is smaller than a segment, the window and not the segment size bounds what the sender transmits.
+- **Checks** — core: RFC9293-WND-1 (the window field and its meaning), RFC9293-WND-2 (the sender stays within the advertised window). Supporting: RFC9293-ZWP-1 (zero-window probing, a timer matter for level 4).
 
 ## TCP-F-CHECKSUM
 
 **Every segment carries a checksum; the sender generates it and the receiver checks it.**
 
 - **Sources** — RFC 9293 §3.1, `rfc9293.txt:458-459`.
-- **Level** — mandatory (reason: keyword, MUST-2 and MUST-3). Unlike UDP, TCP never lets
-  the checksum be absent.
-- **Description** — the checksum covers a pseudo header, the TCP header and the data. The
-  sender must generate it; the receiver must check it and discard on failure.
-- **Checks** — core: RFC9293-CKSUM-1 (the sender generates it), RFC9293-CKSUM-2 (the
-  receiver checks it: a wrong checksum is discarded). The second needs a corrupted segment
-  in flight; the level 3 pass supplies it. The first has two halves, and level 3 separates
-  them: that a segment carries a checksum at all, which level 2 established, and that the
-  value is the one the document defines, which needs the value to be computed from the
-  segment on the wire.
+- **Level** — mandatory (reason: keyword, MUST-2 and MUST-3). Unlike UDP, TCP never lets the checksum be absent.
+- **Description** — the checksum covers a pseudo header, the TCP header and the data. The sender must generate it; the receiver must check it and discard on failure.
+- **Checks** — core: RFC9293-CKSUM-1 (the sender generates it), RFC9293-CKSUM-2 (the receiver checks it: a wrong checksum is discarded). The second needs a corrupted segment in flight; the level 3 pass supplies it. The first has two halves, and level 3 separates them: that a segment carries a checksum at all, which level 2 established, and that the value is the one the document defines, which needs the value to be computed from the segment on the wire.
 
 ## TCP-F-HEADER
 
@@ -208,59 +139,36 @@ and delivered in order.**
 
 - **Sources** — RFC 9293 §3.1, `rfc9293.txt:341-345`.
 - **Level** — mandatory (reason: only path). The header format is the protocol.
-- **Description** — the offset points to the data; a header without options is five words,
-  and a header with options is still a whole number of words.
-- **Checks** — core: RFC9293-HDR-1. Supporting: RFC9293-OPT-1 (an MSS option makes the SYN
-  six words).
+- **Description** — the offset points to the data; a header without options is five words, and a header with options is still a whole number of words.
+- **Checks** — core: RFC9293-HDR-1. Supporting: RFC9293-OPT-1 (an MSS option makes the SYN six words).
 
 ## TCP-F-RESET
 
 **A segment for a connection that does not exist is answered with a reset.**
 
 - **Sources** — RFC 9293 §3.5.2, `rfc9293.txt:1468-1471`; §3.10.7.1, `rfc9293.txt:3287-3289`.
-- **Level** — mandatory (reason: only path). The document gives exactly one response to a
-  segment for a closed port, and states it as a rule of the state machine.
-- **Description** — a SYN to a port with no listener is answered with a segment that carries
-  RST and ACK, sequence number zero, and an acknowledgment of the SYN's sequence number plus
-  one. The connection attempt ends.
-- **Checks** — core: RFC9293-RST-1. Supporting: RFC9293-RST-3, that a reset draws no reset
-  in return.
-- **Bound** — the closed-port case only. A reset that arrives on a live connection belongs
-  to [TCP-F-RESET-VALIDATION](#tcp-f-reset-validation), which the level 3 pass added.
+- **Level** — mandatory (reason: only path). The document gives exactly one response to a segment for a closed port, and states it as a rule of the state machine.
+- **Description** — a SYN to a port with no listener is answered with a segment that carries RST and ACK, sequence number zero, and an acknowledgment of the SYN's sequence number plus one. The connection attempt ends.
+- **Checks** — core: RFC9293-RST-1. Supporting: RFC9293-RST-3, that a reset draws no reset in return.
+- **Bound** — the closed-port case only. A reset that arrives on a live connection belongs to [TCP-F-RESET-VALIDATION](#tcp-f-reset-validation), which the level 3 pass added.
 
 ## TCP-F-SEGMENT-ACCEPTANCE
 
-**A segment outside the receive window is not delivered; it draws an empty acknowledgment
-and never a reset.**
+**A segment outside the receive window is not delivered; it draws an empty acknowledgment and never a reset.**
 
-- **Sources** — RFC 9293 §3.5.2, `rfc9293.txt:1492-1499`; §3.10.7.4,
-  `rfc9293.txt:3491-3530`.
-- **Level** — mandatory (reason: only path). The acceptance test is the gate every received
-  segment passes, and the document gives one answer for a segment that fails it.
-- **Description** — a receiver compares the sequence number of each segment with its window.
-  A segment that falls outside carries no data the receiver can use, so nothing goes up to
-  the program. The receiver answers with an empty acknowledgment that repeats where the
-  stream stands, which lets an honest peer that lost its place recover. It does not answer
-  with a reset: a reset would let anyone who can guess a connection destroy it.
-- **Checks** — core: RFC9293-SEGA-1 (the acceptance test), RFC9293-SEGA-2 (the empty
-  acknowledgment, and the state that does not change), RFC9293-RST-2 (no reset when it is
-  not clear).
+- **Sources** — RFC 9293 §3.5.2, `rfc9293.txt:1492-1499`; §3.10.7.4, `rfc9293.txt:3491-3530`.
+- **Level** — mandatory (reason: only path). The acceptance test is the gate every received segment passes, and the document gives one answer for a segment that fails it.
+- **Description** — a receiver compares the sequence number of each segment with its window. A segment that falls outside carries no data the receiver can use, so nothing goes up to the program. The receiver answers with an empty acknowledgment that repeats where the stream stands, which lets an honest peer that lost its place recover. It does not answer with a reset: a reset would let anyone who can guess a connection destroy it.
+- **Checks** — core: RFC9293-SEGA-1 (the acceptance test), RFC9293-SEGA-2 (the empty acknowledgment, and the state that does not change), RFC9293-RST-2 (no reset when it is not clear).
 
 ## TCP-F-RESET-VALIDATION
 
 **A reset ends the connection only when its sequence number is in the window.**
 
-- **Sources** — RFC 9293 §3.5.3, `rfc9293.txt:1509-1521`; §3.10.7.4,
-  `rfc9293.txt:3559-3561`.
-- **Level** — mandatory (reason: only path). The document gives one rule for deciding
-  whether a reset counts, and the connection either ends or does not.
-- **Description** — a reset is a single segment that ends a connection, so a receiver checks
-  where it claims to sit in the stream before it obeys. A reset whose sequence number lies
-  in the window is obeyed and the connection goes to CLOSED. One that lies outside is
-  dropped without a word. The two halves are one feature: a stack that obeys every reset is
-  open to anyone who can guess the ports, and a stack that obeys none never closes.
-- **Checks** — core: RFC9293-RSTP-1 (the window rule), RFC9293-RSTP-2 (a valid reset
-  aborts).
+- **Sources** — RFC 9293 §3.5.3, `rfc9293.txt:1509-1521`; §3.10.7.4, `rfc9293.txt:3559-3561`.
+- **Level** — mandatory (reason: only path). The document gives one rule for deciding whether a reset counts, and the connection either ends or does not.
+- **Description** — a reset is a single segment that ends a connection, so a receiver checks where it claims to sit in the stream before it obeys. A reset whose sequence number lies in the window is obeyed and the connection goes to CLOSED. One that lies outside is dropped without a word. The two halves are one feature: a stack that obeys every reset is open to anyone who can guess the ports, and a stack that obeys none never closes.
+- **Checks** — core: RFC9293-RSTP-1 (the window rule), RFC9293-RSTP-2 (a valid reset aborts).
 
 ## TCP-F-WINDOW-ROBUSTNESS
 
@@ -268,12 +176,8 @@ and never a reset.**
 
 - **Sources** — RFC 9293 §3.8.6, `rfc9293.txt:2143-2162`.
 - **Level** — mandatory (reason: keyword, MUST-34).
-- **Description** — a receiver should never shrink its window, and a sender must not depend
-  on that. When the right edge moves backward, the usable window can turn negative. The
-  sender stops sending new data, keeps the connection, and retransmits what is still
-  unacknowledged.
-- **Checks** — core: RFC9293-WND-4 (the sender is robust). Supporting: RFC9293-WND-3 (a
-  receiver should not shrink), RFC9293-WND-5 (no new data past the new edge).
+- **Description** — a receiver should never shrink its window, and a sender must not depend on that. When the right edge moves backward, the usable window can turn negative. The sender stops sending new data, keeps the connection, and retransmits what is still unacknowledged.
+- **Checks** — core: RFC9293-WND-4 (the sender is robust). Supporting: RFC9293-WND-3 (a receiver should not shrink), RFC9293-WND-5 (no new data past the new edge).
 
 ## TCP-F-ICMP-HANDLING
 
@@ -281,159 +185,93 @@ and never a reset.**
 
 - **Sources** — RFC 9293 §3.9.2.2, `rfc9293.txt:2826-2867`.
 - **Level** — mandatory (reason: keyword, MUST-54, MUST-55 and MUST-56).
-- **Description** — the layer below reports failures that a connection cannot see for
-  itself. TCP directs each report to the connection named in the quoted header and then
-  weighs it. A soft error says the path is troubled, and the connection must survive it. A
-  hard error says the path is gone, and the connection should end. A Source Quench is
-  discarded without a trace.
-- **Checks** — core: RFC9293-ICMP-1 (the report reaches the right connection),
-  RFC9293-ICMP-2 (Source Quench is discarded), RFC9293-ICMP-3 (a soft error does not
-  abort). Supporting: RFC9293-ICMP-4 (a hard error should abort; the document itself notes
-  that many implementations do not).
+- **Description** — the layer below reports failures that a connection cannot see for itself. TCP directs each report to the connection named in the quoted header and then weighs it. A soft error says the path is troubled, and the connection must survive it. A hard error says the path is gone, and the connection should end. A Source Quench is discarded without a trace.
+- **Checks** — core: RFC9293-ICMP-1 (the report reaches the right connection), RFC9293-ICMP-2 (Source Quench is discarded), RFC9293-ICMP-3 (a soft error does not abort). Supporting: RFC9293-ICMP-4 (a hard error should abort; the document itself notes that many implementations do not).
 
 ## TCP-F-RTO-ESTIMATOR
 
 **The retransmission timeout follows a smoothed estimate of the round-trip time.**
 
-- **Sources** — RFC 6298 §2.2, `rfc6298.txt:133-139`; §2.3, `rfc6298.txt:141-155`; §4,
-  `rfc6298.txt:213-215`. RFC 6298 governs; RFC 2988 is obsolete.
-- **Level** — mandatory (reason: keyword). "the host MUST set SRTT <- R" and "a host MUST
-  set RTTVAR <- ..." and "a host MUST update RTO <- SRTT + max (G, K*RTTVAR)".
-- **Description** — the sender keeps a smoothed round-trip time and a variance. The first
-  measurement seeds them, each later measurement updates the variance and then the smoothed
-  value, and the timeout is the smoothed value plus four times the variance.
-- **Checks** — core: RFC6298-FIRST-1 (the seed), RFC6298-UPD-1 (the update and its order),
-  RFC6298-RTO-1 (the formula). Supporting: RFC6298-UPD-2 (the gains, a `should`),
-  RFC6298-GRAN-1 (a zero variance term).
+- **Sources** — RFC 6298 §2.2, `rfc6298.txt:133-139`; §2.3, `rfc6298.txt:141-155`; §4, `rfc6298.txt:213-215`. RFC 6298 governs; RFC 2988 is obsolete.
+- **Level** — mandatory (reason: keyword). "the host MUST set SRTT <- R" and "a host MUST set RTTVAR <- ..." and "a host MUST update RTO <- SRTT + max (G, K*RTTVAR)".
+- **Description** — the sender keeps a smoothed round-trip time and a variance. The first measurement seeds them, each later measurement updates the variance and then the smoothed value, and the timeout is the smoothed value plus four times the variance.
+- **Checks** — core: RFC6298-FIRST-1 (the seed), RFC6298-UPD-1 (the update and its order), RFC6298-RTO-1 (the formula). Supporting: RFC6298-UPD-2 (the gains, a `should`), RFC6298-GRAN-1 (a zero variance term).
 
 ## TCP-F-RTO-BOUNDS
 
 **The timeout starts at one second and never falls below it.**
 
-- **Sources** — RFC 6298 §2.1, `rfc6298.txt:122-125`; §2.4, `rfc6298.txt:157-158`; §2.5,
-  `rfc6298.txt:179-180`.
-- **Level** — optional (reason: keyword). Every core statement is a `should`: "the sender
-  SHOULD set RTO <- 1 second" and "the RTO SHOULD be rounded up to 1 second". The upper
-  bound is a `may`.
-- **Description** — before any measurement the timeout is one second, and a computed
-  timeout below one second is raised to one second. An upper bound is permitted if it is at
-  least sixty seconds.
-- **Checks** — core: RFC6298-INIT-1 (the initial value), RFC6298-MIN-1 (the lower bound).
-  Supporting: RFC6298-MAX-1 (the upper bound).
-- **Note** — the lower bound hides the estimator on a fast link, so a check of
-  TCP-F-RTO-ESTIMATOR needs a delay large enough to lift the result above one second.
+- **Sources** — RFC 6298 §2.1, `rfc6298.txt:122-125`; §2.4, `rfc6298.txt:157-158`; §2.5, `rfc6298.txt:179-180`.
+- **Level** — optional (reason: keyword). Every core statement is a `should`: "the sender SHOULD set RTO <- 1 second" and "the RTO SHOULD be rounded up to 1 second". The upper bound is a `may`.
+- **Description** — before any measurement the timeout is one second, and a computed timeout below one second is raised to one second. An upper bound is permitted if it is at least sixty seconds.
+- **Checks** — core: RFC6298-INIT-1 (the initial value), RFC6298-MIN-1 (the lower bound). Supporting: RFC6298-MAX-1 (the upper bound).
+- **Note** — the lower bound hides the estimator on a fast link, so a check of TCP-F-RTO-ESTIMATOR needs a delay large enough to lift the result above one second.
 
 ## TCP-F-RTO-BACKOFF
 
 **An expiry retransmits the earliest segment and doubles the timeout.**
 
-- **Sources** — RFC 6298 §5, `rfc6298.txt:237-239`; §5.4, `rfc6298.txt:258-259`; §5.5,
-  `rfc6298.txt:261-263`; §5.7, `rfc6298.txt:269-272`.
-- **Level** — mandatory (reason: keyword). "An implementation MUST manage the
-  retransmission timer(s) in such a way that a segment is never retransmitted too early"
-  and "The host MUST set RTO <- RTO * 2".
-- **Description** — when the timer expires the sender retransmits the earliest
-  unacknowledged segment and doubles the timeout, so repeated loss spaces the attempts
-  farther apart. A later clean measurement collapses the timeout again.
-- **Checks** — core: RFC6298-EARLY-1 (never earlier than one timeout), RFC6298-BACK-1 (the
-  doubling), RFC6298-EXP-1 (the earliest segment). Supporting: RFC6298-COLL-1 (the
-  collapse), RFC6298-SYN-1 (three seconds after a lost SYN), RFC6298-TMR-1, RFC6298-TMR-2,
-  RFC6298-TMR-3 (the recommended timer management).
-- **Note** — RFC6298-SYN-1 is the one rule that RFC 6298 introduced over RFC 2988. A model
-  written against the older text is the likely place to find a gap.
+- **Sources** — RFC 6298 §5, `rfc6298.txt:237-239`; §5.4, `rfc6298.txt:258-259`; §5.5, `rfc6298.txt:261-263`; §5.7, `rfc6298.txt:269-272`.
+- **Level** — mandatory (reason: keyword). "An implementation MUST manage the retransmission timer(s) in such a way that a segment is never retransmitted too early" and "The host MUST set RTO <- RTO * 2".
+- **Description** — when the timer expires the sender retransmits the earliest unacknowledged segment and doubles the timeout, so repeated loss spaces the attempts farther apart. A later clean measurement collapses the timeout again.
+- **Checks** — core: RFC6298-EARLY-1 (never earlier than one timeout), RFC6298-BACK-1 (the doubling), RFC6298-EXP-1 (the earliest segment). Supporting: RFC6298-COLL-1 (the collapse), RFC6298-SYN-1 (three seconds after a lost SYN), RFC6298-TMR-1, RFC6298-TMR-2, RFC6298-TMR-3 (the recommended timer management).
+- **Note** — RFC6298-SYN-1 is the one rule that RFC 6298 introduced over RFC 2988. A model written against the older text is the likely place to find a gap.
 
 ## TCP-F-RTT-SAMPLING
 
 **A retransmitted segment gives no round-trip sample.**
 
 - **Sources** — RFC 6298 §3, `rfc6298.txt:184-200`.
-- **Level** — mandatory (reason: keyword). "TCP MUST use Karn's algorithm" and "RTT samples
-  MUST NOT be made using segments that were retransmitted".
-- **Description** — an acknowledgment of a retransmitted segment is ambiguous, because it
-  may answer either transmission, so it yields no measurement. The timestamp option removes
-  the ambiguity and lifts the restriction.
-- **Checks** — core: RFC6298-KARN-1 (no sample from a retransmission). Supporting:
-  RFC6298-SAMP-1 (at least one measurement per round trip).
+- **Level** — mandatory (reason: keyword). "TCP MUST use Karn's algorithm" and "RTT samples MUST NOT be made using segments that were retransmitted".
+- **Description** — an acknowledgment of a retransmitted segment is ambiguous, because it may answer either transmission, so it yields no measurement. The timestamp option removes the ambiguity and lifts the restriction.
+- **Checks** — core: RFC6298-KARN-1 (no sample from a retransmission). Supporting: RFC6298-SAMP-1 (at least one measurement per round trip).
 
 ## TCP-F-CONGESTION-WINDOW
 
 **A congestion window paces the sender, through slow start and congestion avoidance.**
 
-- **Sources** — RFC 5681 §3.1, `rfc5681.txt:209-217`, `rfc5681.txt:287-295`,
-  `rfc5681.txt:312-321`. RFC 5681 governs; RFC 2581 and RFC 2001 are obsolete.
-- **Level** — mandatory (reason: keyword). "The slow start and congestion avoidance
-  algorithms MUST be used by a TCP sender" and "cwnd MUST NOT be increased by more than
-  SMSS bytes per RTT".
-- **Description** — the sender keeps a congestion window beside the window the receiver
-  advertises, and sends no more than the smaller of the two. Below the threshold the window
-  grows by about one segment per acknowledgment; above it, by about one segment per round
-  trip.
-- **Checks** — core: RFC5681-USE-1 (both algorithms are used), RFC5681-SS-2 (the slow start
-  bound), RFC5681-CA-2 (the congestion avoidance bound). Supporting: RFC5681-WIN-1 (the
-  smaller of the two windows), RFC5681-SS-1 (which algorithm runs), RFC5681-CA-1 (the
-  principle), RFC5681-SSTH-1 (the initial threshold).
+- **Sources** — RFC 5681 §3.1, `rfc5681.txt:209-217`, `rfc5681.txt:287-295`, `rfc5681.txt:312-321`. RFC 5681 governs; RFC 2581 and RFC 2001 are obsolete.
+- **Level** — mandatory (reason: keyword). "The slow start and congestion avoidance algorithms MUST be used by a TCP sender" and "cwnd MUST NOT be increased by more than SMSS bytes per RTT".
+- **Description** — the sender keeps a congestion window beside the window the receiver advertises, and sends no more than the smaller of the two. Below the threshold the window grows by about one segment per acknowledgment; above it, by about one segment per round trip.
+- **Checks** — core: RFC5681-USE-1 (both algorithms are used), RFC5681-SS-2 (the slow start bound), RFC5681-CA-2 (the congestion avoidance bound). Supporting: RFC5681-WIN-1 (the smaller of the two windows), RFC5681-SS-1 (which algorithm runs), RFC5681-CA-1 (the principle), RFC5681-SSTH-1 (the initial threshold).
 
 ## TCP-F-INITIAL-WINDOW
 
 **The congestion window starts at a bounded number of segments.**
 
 - **Sources** — RFC 5681 §3.1, `rfc5681.txt:241-255`.
-- **Level** — mandatory (reason: keyword). "IW, the initial value of cwnd, MUST be set
-  using the following guidelines as an upper bound" and two `MUST NOT` statements.
-- **Description** — the initial window is two, three, or four segments, by the segment
-  size. The handshake segments do not enlarge it, and a lost SYN forces it down to one
-  segment.
-- **Checks** — core: RFC5681-IW-1 (the table), RFC5681-IW-2 (the handshake does not count),
-  RFC5681-IW-3 (one segment after a lost SYN).
-- **Note** — the table gives an upper bound. A smaller initial window conforms, so a check
-  must fail only a window that is too large.
+- **Level** — mandatory (reason: keyword). "IW, the initial value of cwnd, MUST be set using the following guidelines as an upper bound" and two `MUST NOT` statements.
+- **Description** — the initial window is two, three, or four segments, by the segment size. The handshake segments do not enlarge it, and a lost SYN forces it down to one segment.
+- **Checks** — core: RFC5681-IW-1 (the table), RFC5681-IW-2 (the handshake does not count), RFC5681-IW-3 (one segment after a lost SYN).
+- **Note** — the table gives an upper bound. A smaller initial window conforms, so a check must fail only a window that is too large.
 
 ## TCP-F-LOSS-RESPONSE
 
 **A timeout halves the threshold and drops the window to one segment.**
 
 - **Sources** — RFC 5681 §3.1, `rfc5681.txt:374-387`, `rfc5681.txt:403-409`.
-- **Level** — mandatory (reason: keyword). "the value of ssthresh MUST be set to no more
-  than the value given in equation (4)" and "cwnd MUST be set to no more than the loss
-  window, LW, which equals 1 full-sized segment".
-- **Description** — on a timeout the threshold falls to half the data in flight, with a
-  floor of two segments, and the window falls to one segment, so the sender re-enters slow
-  start. A repeated timeout on the same segment leaves the threshold alone.
-- **Checks** — core: RFC5681-LOSS-1 (the threshold formula), RFC5681-LOSS-3 (the window
-  falls to one segment). Supporting: RFC5681-LOSS-2 (a repeated timeout holds the
-  threshold).
-- **Note** — the formula uses the data in flight, not the congestion window. RFC 5681 calls
-  the substitution "an easy mistake to make" — `rfc5681.txt:399-401`.
+- **Level** — mandatory (reason: keyword). "the value of ssthresh MUST be set to no more than the value given in equation (4)" and "cwnd MUST be set to no more than the loss window, LW, which equals 1 full-sized segment".
+- **Description** — on a timeout the threshold falls to half the data in flight, with a floor of two segments, and the window falls to one segment, so the sender re-enters slow start. A repeated timeout on the same segment leaves the threshold alone.
+- **Checks** — core: RFC5681-LOSS-1 (the threshold formula), RFC5681-LOSS-3 (the window falls to one segment). Supporting: RFC5681-LOSS-2 (a repeated timeout holds the threshold).
+- **Note** — the formula uses the data in flight, not the congestion window. RFC 5681 calls the substitution "an easy mistake to make" — `rfc5681.txt:399-401`.
 
 ## TCP-F-FAST-RETRANSMIT
 
 **Three duplicate acknowledgments repair a loss without a timeout.**
 
-- **Sources** — RFC 5681 §3.2, `rfc5681.txt:438-444`, `rfc5681.txt:483-496`,
-  `rfc5681.txt:525-527`.
-- **Level** — mandatory (reason: keyword). The algorithm as a whole is a `should`, but its
-  steps are not: "a TCP MUST set ssthresh", "The lost segment ... MUST be retransmitted and
-  cwnd set to ssthresh plus 3*SMSS", and "a TCP MUST set cwnd to ssthresh".
-- **Description** — the third duplicate acknowledgment tells the sender that one segment is
-  gone while later ones arrive. The sender retransmits at once, lowers the threshold,
-  inflates the window by the segments that left the network, and deflates it when the
-  repair is acknowledged.
-- **Checks** — core: RFC5681-FR-1 (the three duplicates), RFC5681-FR-2 (the threshold),
-  RFC5681-FR-3 (the inflation by three segments), RFC5681-FR-5 (the deflation). Supporting:
-  RFC5681-FR-4 (one segment per further duplicate), RFC5681-ACK-2 (the receiver half).
-- **Note** — the five steps are one episode. A single scenario shows them in order, which
-  is why they belong to one feature rather than five.
+- **Sources** — RFC 5681 §3.2, `rfc5681.txt:438-444`, `rfc5681.txt:483-496`, `rfc5681.txt:525-527`.
+- **Level** — mandatory (reason: keyword). The algorithm as a whole is a `should`, but its steps are not: "a TCP MUST set ssthresh", "The lost segment ... MUST be retransmitted and cwnd set to ssthresh plus 3*SMSS", and "a TCP MUST set cwnd to ssthresh".
+- **Description** — the third duplicate acknowledgment tells the sender that one segment is gone while later ones arrive. The sender retransmits at once, lowers the threshold, inflates the window by the segments that left the network, and deflates it when the repair is acknowledged.
+- **Checks** — core: RFC5681-FR-1 (the three duplicates), RFC5681-FR-2 (the threshold), RFC5681-FR-3 (the inflation by three segments), RFC5681-FR-5 (the deflation). Supporting: RFC5681-FR-4 (one segment per further duplicate), RFC5681-ACK-2 (the receiver half).
+- **Note** — the five steps are one episode. A single scenario shows them in order, which is why they belong to one feature rather than five.
 
 ## TCP-F-RESTART-IDLE
 
 **An idle period reduces the window before transmission starts again.**
 
 - **Sources** — RFC 5681 §4.1, `rfc5681.txt:575`, `rfc5681.txt:585-587`.
-- **Level** — optional (reason: keyword). "a TCP SHOULD set cwnd to no more than RW before
-  beginning transmission".
-- **Description** — a sender that has not sent for longer than the retransmission timeout
-  no longer knows the state of the path, so it returns the window to the smaller of the
-  initial window and the current window.
+- **Level** — optional (reason: keyword). "a TCP SHOULD set cwnd to no more than RW before beginning transmission".
+- **Description** — a sender that has not sent for longer than the retransmission timeout no longer knows the state of the path, so it returns the window to the smaller of the initial window and the current window.
 - **Checks** — core: RFC5681-IDLE-1.
 
 ## TCP-F-DELAYED-ACK
@@ -441,17 +279,10 @@ and never a reset.**
 **An acknowledgment is delayed, but never beyond 500 ms or a second segment.**
 
 - **Sources** — RFC 5681 §4.2, `rfc5681.txt:591-596`, `rfc5681.txt:637-640`.
-- **Level** — mandatory (reason: keyword). "an ACK ... MUST be generated within 500 ms of
-  the arrival of the first unacknowledged packet".
-- **Description** — a receiver may hold an acknowledgment back to carry it with data or
-  with a later acknowledgment, but not past a second full-sized segment and not past half a
-  second. A segment above a gap is acknowledged at once, to start the fast retransmit of
-  the sender.
-- **Checks** — core: RFC5681-ACK-1 (the two bounds), RFC5681-ACK-2 (an out-of-order segment
-  is acknowledged at once).
-- **Note** — the 500 ms bound is the one statement of this pass that needs a tolerance. It
-  is the boundary between a check the protocol suite can carry and a check that belongs to
-  the statistical suite.
+- **Level** — mandatory (reason: keyword). "an ACK ... MUST be generated within 500 ms of the arrival of the first unacknowledged packet".
+- **Description** — a receiver may hold an acknowledgment back to carry it with data or with a later acknowledgment, but not past a second full-sized segment and not past half a second. A segment above a gap is acknowledged at once, to start the fast retransmit of the sender.
+- **Checks** — core: RFC5681-ACK-1 (the two bounds), RFC5681-ACK-2 (an out-of-order segment is acknowledged at once).
+- **Note** — the 500 ms bound is the one statement of this pass that needs a tolerance. It is the boundary between a check the protocol suite can carry and a check that belongs to the statistical suite.
 
 ## Coverage of the catalog
 
@@ -486,14 +317,6 @@ The two documents of the level 4 pass have their own areas:
 | RFC 5681, fast retransmit and fast recovery | TCP-F-FAST-RETRANSMIT |
 | RFC 5681, further rules | TCP-F-RESTART-IDLE, TCP-F-DELAYED-ACK |
 
-Every area of all three catalogs appears in the map: 35 entries of RFC 9293, 18 of
-RFC 6298 and 21 of RFC 5681, and each one appears in a feature.
+Every area of all three catalogs appears in the map: 35 entries of RFC 9293, 18 of RFC 6298 and 21 of RFC 5681, and each one appears in a feature.
 
-Out of scope in the map, because the catalogs put them out of scope: the options other than
-MSS, keep-alives, the simultaneous cases, silly window avoidance, and the TIME-WAIT
-duration. Retransmission and congestion control left this list when RFC 6298 and RFC 5681
-entered the in-scope set. Urgent data is a judgment call recorded here: the document
-requires the mechanism (MUST-30 to MUST-32), and discourages its use; no ordinary transfer
-exercises it, so it is not a normal-path mechanism for level 2 and waits for level 5. Congestion control and the retransmission
-timer need RFC 5681 and RFC 6298 in the in-scope set first; see
-[`standards.md`](standards.md#override-table).
+Out of scope in the map, because the catalogs put them out of scope: the options other than MSS, keep-alives, the simultaneous cases, silly window avoidance, and the TIME-WAIT duration. Retransmission and congestion control left this list when RFC 6298 and RFC 5681 entered the in-scope set. Urgent data is a judgment call recorded here: the document requires the mechanism (MUST-30 to MUST-32), and discourages its use; no ordinary transfer exercises it, so it is not a normal-path mechanism for level 2 and waits for level 5. Congestion control and the retransmission timer need RFC 5681 and RFC 6298 in the in-scope set first; see [`standards.md`](standards.md#override-table).

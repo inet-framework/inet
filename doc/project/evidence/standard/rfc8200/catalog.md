@@ -2,31 +2,17 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC8200-*` · **Stands on:** [standards.md](../../protocol/ipv6/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow, for one document of
-the in-scope set: RFC 8200. It lists statements of that document that a test can check.
-The catalog comes from the RFC text only. It contains no simulation model names and no code
-references — that mapping happens in later steps.
+This document is the step 3 artifact of the standards test workflow, for one document of the in-scope set: RFC 8200. It lists statements of that document that a test can check. The catalog comes from the RFC text only. It contains no simulation model names and no code references — that mapping happens in later steps.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc8200.txt`](../../../../../../standards/RFC/rfc8200.txt) —
-  Internet Protocol, Version 6 (IPv6) Specification, July 2017. Downloaded
-  2026-09-09 from <https://www.rfc-editor.org/rfc/rfc8200.txt>.
+- [`standards/RFC/rfc8200.txt`](../../../../../../standards/RFC/rfc8200.txt) — Internet Protocol, Version 6 (IPv6) Specification, July 2017. Downloaded 2026-09-09 from <https://www.rfc-editor.org/rfc/rfc8200.txt>.
 
-RFC 8200 delegates error reports to ICMPv6. Those statements belong to RFC 4443 and live in
-[`rfc4443/catalog.md`](../rfc4443/catalog.md). The documents of the in-scope set, their
-relatives, and the override rows are in
-[`standards.md`](../../protocol/ipv6/standards.md). A feature that spans both documents is
-in [`features.md`](../../protocol/ipv6/features.md).
+RFC 8200 delegates error reports to ICMPv6. Those statements belong to RFC 4443 and live in [`rfc4443/catalog.md`](../rfc4443/catalog.md). The documents of the in-scope set, their relatives, and the override rows are in [`standards.md`](../../protocol/ipv6/standards.md). A feature that spans both documents is in [`features.md`](../../protocol/ipv6/features.md).
 
-Quotes are verbatim. A reference such as `rfc8200.txt:348` points to a line of that
-file.
+Quotes are verbatim. A reference such as `rfc8200.txt:348` points to a line of that file.
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`ipv6/coverage.md`](../../model/ipv6/coverage.md). Keeping it out is deliberate: this
-catalog states what the standard says, so a new test or a new run must never force an edit
-here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`ipv6/coverage.md`](../../model/ipv6/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
 ## Index
 
@@ -67,19 +53,14 @@ here.
 
 ## How to read an entry
 
-- **Strength** — the word the RFC uses: `must`, `must not`, `should`, `should not`, `may`,
-  or `description` for normative prose without a keyword. RFC 8200 writes its rules in
-  lowercase and cites no RFC 2119; the words carry their plain meaning.
+- **Strength** — the word the RFC uses: `must`, `must not`, `should`, `should not`, `may`, or `description` for normative prose without a keyword. RFC 8200 writes its rules in lowercase and cites no RFC 2119; the words carry their plain meaning.
 - **Class** — how a test can observe the statement:
   - `wire` — fields of packets on a link between two nodes.
   - `end-to-end` — what the destination accepts and delivers upward.
   - `error-signal` — an ICMPv6 message that reports a failure.
   - `internal` — state inside a module; not visible from outside.
   - `encoding` — the exact bit layout of a field; a serializer concern.
-- **Overridden by** — appears only when a later document of the in-scope set changes the
-  statement. Four entries carry it since RFC 8504 entered the in-scope set: the overlap
-  rule, the atomic fragment, the unrecognized next header, and the first fragment's header
-  chain. The entry and its ID stay; a test targets the entry that governs.
+- **Overridden by** — appears only when a later document of the in-scope set changes the statement. Four entries carry it since RFC 8504 entered the in-scope set: the overlap rule, the atomic fragment, the unrecognized next header, and the first fragment's header chain. The entry and its ID stay; a test targets the entry that governs.
 
 ## Header format
 
@@ -103,9 +84,7 @@ here.
 > count.)" — §3, `rfc8200.txt:327-332`
 
 - Strength: description. Class: wire.
-- Check idea: for a UDP datagram with a known data size and no extension headers, the
-  payload length equals 8 plus the size of the data. For a fragment, it equals the fragment
-  header plus the piece.
+- Check idea: for a UDP datagram with a known data size and no extension headers, the payload length equals 8 plus the size of the data. For a fragment, it equals the fragment header plus the piece.
 
 ### RFC8200-HDR-3
 
@@ -116,13 +95,11 @@ here.
 > `rfc8200.txt:343-346`
 
 - Strength: description. Class: wire.
-- Check idea: a packet that carries UDP shows 17; a fragment shows 44, and its fragment
-  header shows 17.
+- Check idea: a packet that carries UDP shows 17; a fragment shows 44, and its fragment header shows 17.
 
 ### RFC8200-HDR-4
 
-**The source and destination address fields carry the originator and the intended
-recipient of the packet.**
+**The source and destination address fields carry the originator and the intended recipient of the packet.**
 
 > "Source Address      128-bit address of the originator of the packet.  See [RFC4291]." —
 > §3, `rfc8200.txt:357-358`
@@ -131,21 +108,18 @@ recipient of the packet.**
 > 4.4." — §3, `rfc8200.txt:360-363`
 
 - Strength: description. Class: wire.
-- Check idea: a packet sent from host A to host B carries host A's address as source and
-  host B's as destination on every link, and a gateway does not rewrite them.
+- Check idea: a packet sent from host A to host B carries host A's address as source and host B's as destination on every link, and a gateway does not rewrite them.
 
 ### RFC8200-DLV-1
 
-**At the destination, normal demultiplexing on the next header field invokes the module
-for the upper-layer header.**
+**At the destination, normal demultiplexing on the next header field invokes the module for the upper-layer header.**
 
 > "At the destination node, normal demultiplexing on the Next Header field of the IPv6
 > header invokes the module to process the first extension header, or the upper-layer
 > header if no extension header is present." — §4, `rfc8200.txt:455-458`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a packet with next header 17 is handed to UDP at the destination, and UDP
-  hands the data to the program.
+- Check idea: a packet with next header 17 is handed to UDP at the destination, and UDP hands the data to the program.
 
 ## Hop limit
 
@@ -157,21 +131,17 @@ for the upper-layer header.**
 > the packet." — §3, `rfc8200.txt:348-349`
 
 - Strength: description. Class: wire.
-- Check idea: compare the hop limit on the link before a gateway with the hop limit on the
-  link after it. The value decreases by exactly 1.
+- Check idea: compare the hop limit on the link before a gateway with the hop limit on the link after it. The value decreases by exactly 1.
 
 ### RFC8200-HL-2
 
-**When forwarding, a node discards a packet whose hop limit was zero on receipt or reaches
-zero when decremented.**
+**When forwarding, a node discards a packet whose hop limit was zero on receipt or reaches zero when decremented.**
 
 > "When forwarding, the packet is discarded if Hop Limit was zero when received or is
 > decremented to zero." — §3, `rfc8200.txt:349-352`
 
-- Strength: description. Class: wire (absence after the gateway) plus error-signal
-  ([RFC4443-TE-1](../rfc4443/catalog.md#rfc4443-te-1)).
-- Check idea: send a packet whose hop limit is 1. Nothing crosses the link after the
-  gateway, and the destination never receives it.
+- Strength: description. Class: wire (absence after the gateway) plus error-signal ([RFC4443-TE-1](../rfc4443/catalog.md#rfc4443-te-1)).
+- Check idea: send a packet whose hop limit is 1. Nothing crosses the link after the gateway, and the destination never receives it.
 
 ### RFC8200-HL-3
 
@@ -181,17 +151,13 @@ zero when decremented.**
 > equal to zero; it should process the packet normally." — §3, `rfc8200.txt:352-355`
 
 - Strength: should. Class: end-to-end.
-- Check idea: a packet whose hop limit is exactly the hop count of the path arrives at the
-  destination with hop limit 1 and is delivered; the rule that discards is a forwarding
-  rule. The exact case, a packet that arrives with hop limit 0, needs a rewrite on the last
-  link.
+- Check idea: a packet whose hop limit is exactly the hop count of the path arrives at the destination with hop limit 1 and is delivered; the rule that discards is a forwarding rule. The exact case, a packet that arrives with hop limit 0, needs a rewrite on the last link.
 
 ## Extension headers
 
 ### RFC8200-EXT-1
 
-**Nodes along the path do not process, insert, or delete extension headers, except the
-hop-by-hop options header.**
+**Nodes along the path do not process, insert, or delete extension headers, except the hop-by-hop options header.**
 
 > "Extension headers (except for the Hop-by-Hop Options header) are not processed,
 > inserted, or deleted by any node along a packet's delivery path, until the packet reaches
@@ -199,8 +165,7 @@ hop-by-hop options header.**
 > Destination Address field of the IPv6 header." — §4, `rfc8200.txt:424-428`
 
 - Strength: description. Class: wire.
-- Check idea: a fragment header that leaves the source appears unchanged on the link after
-  the gateway.
+- Check idea: a fragment header that leaves the source appears unchanged on the link after the gateway.
 
 ### RFC8200-EXT-2
 
@@ -216,8 +181,7 @@ hop-by-hop options header.**
 
 ### RFC8200-EXT-3
 
-**A destination that meets an unrecognized next header value should discard the packet and
-send Parameter Problem code 1 with the pointer at the offending field.**
+**A destination that meets an unrecognized next header value should discard the packet and send Parameter Problem code 1 with the pointer at the offending field.**
 
 > "If, as a result of processing a header, the destination node is required to proceed to
 > the next header but the Next Header value in the current header is unrecognized by the
@@ -229,10 +193,8 @@ send Parameter Problem code 1 with the pointer at the offending field.**
 > `rfc8200.txt:465-473`
 
 - Strength: should. Class: end-to-end (absence) plus error-signal.
-- Overridden by: [RFC8504-NR-6](../rfc8504/catalog.md#rfc8504-nr-6), which makes the
-  action a must and extends it to an unrecognized upper-layer protocol.
-- Check idea: deliver a packet whose next header is an unassigned protocol number. Nothing
-  is delivered, and the source receives type 4 code 1.
+- Overridden by: [RFC8504-NR-6](../rfc8504/catalog.md#rfc8504-nr-6), which makes the action a must and extends it to an unrecognized upper-layer protocol.
+- Check idea: deliver a packet whose next header is an unassigned protocol number. Nothing is delivered, and the source receives type 4 code 1.
 
 ## Fragmentation
 
@@ -244,15 +206,12 @@ send Parameter Problem code 1 with the pointer at the offending field.**
 > routers along a packet's delivery path -- see Section 5.)" — §4.5,
 > `rfc8200.txt:817-819`
 
-- Strength: description. Class: wire (absence of fragments after a gateway) plus
-  error-signal ([RFC4443-PTB-1](../rfc4443/catalog.md#rfc4443-ptb-1)).
-- Check idea: a packet larger than the MTU of the link after the gateway produces no
-  fragment on that link and no copy of itself; the gateway reports instead.
+- Strength: description. Class: wire (absence of fragments after a gateway) plus error-signal ([RFC4443-PTB-1](../rfc4443/catalog.md#rfc4443-ptb-1)).
+- Check idea: a packet larger than the MTU of the link after the gateway produces no fragment on that link and no copy of itself; the gateway reports instead.
 
 ### RFC8200-FRAG-2
 
-**The identification of a fragmented packet differs from that of any packet fragmented
-recently with the same source and destination.**
+**The identification of a fragmented packet differs from that of any packet fragmented recently with the same source and destination.**
 
 > "For every packet that is to be fragmented, the source node generates an Identification
 > value.  The Identification must be different than that of any other fragmented packet
@@ -260,13 +219,11 @@ recently with the same source and destination.**
 > `rfc8200.txt:864-867`
 
 - Strength: must. Class: wire.
-- Check idea: two fragmented packets of one flow, sent close together, carry two different
-  identifications in their fragment headers.
+- Check idea: two fragmented packets of one flow, sent close together, carry two different identifications in their fragment headers.
 
 ### RFC8200-FRAG-3
 
-**The fragments fit the path MTU, and every fragment but the last is a multiple of 8
-octets long.**
+**The fragments fit the path MTU, and every fragment but the last is a multiple of 8 octets long.**
 
 > "The Fragmentable Part of the original packet is divided into fragments.  The lengths of
 > the fragments must be chosen such that the resulting fragment packets fit within the MTU
@@ -275,15 +232,11 @@ octets long.**
 > `rfc8200.txt:933-937`
 
 - Strength: must (fit the MTU); description (the multiple of 8). Class: wire.
-- Check idea: with a known original size and a known link MTU at the source, every fragment
-  packet is at most the MTU long, and the piece of every fragment but the last is a
-  multiple of 8.
+- Check idea: with a known original size and a known link MTU at the source, every fragment packet is at most the MTU long, and the piece of every fragment but the last is a multiple of 8.
 
 ### RFC8200-FRAG-4
 
-**The first fragment packet consists of the per-fragment headers with the payload length
-of the fragment and next header 44, a fragment header with the original next header,
-offset 0, M = 1 and the identification, then the upper-layer header and the first piece.**
+**The first fragment packet consists of the per-fragment headers with the payload length of the fragment and next header 44, a fragment header with the original next header, offset 0, M = 1 and the identification, then the upper-layer header and the first piece.**
 
 > "The first fragment packet is composed of: (1) The Per-Fragment headers of the original
 > packet, with the Payload Length of the original IPv6 header changed to contain the
@@ -298,17 +251,12 @@ offset 0, M = 1 and the identification, then the upper-layer header and the firs
 > headers must be in the first fragment. [...] (4) The first fragment." — §4.5,
 > `rfc8200.txt:988-1023`
 
-- Strength: description, with one must (the upper-layer header is in the first fragment).
-  Class: wire.
-- Check idea: the first fragment on the source's link shows next header 44, a payload
-  length of 8 plus the piece, a fragment header with next header 17, offset 0 and M = 1,
-  and the UDP header behind it.
+- Strength: description, with one must (the upper-layer header is in the first fragment). Class: wire.
+- Check idea: the first fragment on the source's link shows next header 44, a payload length of 8 plus the piece, a fragment header with next header 17, offset 0 and M = 1, and the UDP header behind it.
 
 ### RFC8200-FRAG-5
 
-**A subsequent fragment packet consists of the per-fragment headers, a fragment header with
-the offset in 8-octet units, M = 0 on the last fragment, and the same identification, then
-the piece.**
+**A subsequent fragment packet consists of the per-fragment headers, a fragment header with the offset in 8-octet units, M = 0 on the last fragment, and the same identification, then the piece.**
 
 > "The subsequent fragment packets are composed of: (1) The Per-Fragment headers of the
 > original packet, with the Payload Length of the original IPv6 header changed to contain
@@ -321,9 +269,7 @@ the piece.**
 > fragment itself." — §4.5, `rfc8200.txt:1025-1048`
 
 - Strength: description. Class: wire.
-- Check idea: the last fragment shows the identification of the first, an offset equal to
-  the length of the earlier pieces in 8-octet units, M = 0, and a payload length of 8 plus
-  its piece.
+- Check idea: the last fragment shows the identification of the first, an offset equal to the length of the earlier pieces in 8-octet units, M = 0, and a payload length of 8 plus its piece.
 
 ### RFC8200-FRAG-6
 
@@ -333,29 +279,24 @@ the piece.**
 > original packet." — §4.5, `rfc8200.txt:1050-1051`
 
 - Strength: must not. Class: wire.
-- Check idea: the offsets and piece lengths of the fragments tile the fragmentable part
-  without a gap and without an overlap; the pieces add up to its length.
+- Check idea: the offsets and piece lengths of the fragments tile the fragmentable part without a gap and without an overlap; the pieces add up to its length.
 
 ## Reassembly
 
 ### RFC8200-REASM-1
 
-**A packet is reassembled only from fragments that share its source, destination, and
-identification.**
+**A packet is reassembled only from fragments that share its source, destination, and identification.**
 
 > "An original packet is reassembled only from fragment packets that have the same Source
 > Address, Destination Address, and Fragment Identification." — §4.5,
 > `rfc8200.txt:1083-1085`
 
 - Strength: description. Class: end-to-end.
-- Check idea: the fragments of one packet are delivered as that packet; fragments of two
-  packets do not mix.
+- Check idea: the fragments of one packet are delivered as that packet; fragments of two packets do not mix.
 
 ### RFC8200-REASM-2
 
-**The reassembled packet consists of the per-fragment headers of the first fragment, the
-pieces placed by offset, without the fragment header, with the next header and the payload
-length recomputed.**
+**The reassembled packet consists of the per-fragment headers of the first fragment, the pieces placed by offset, without the fragment header, with the next header and the payload length recomputed.**
 
 > "The Per-Fragment headers of the reassembled packet consists of all headers up to, but
 > not including, the Fragment header of the first fragment packet (that is, the packet
@@ -368,13 +309,11 @@ length recomputed.**
 > `rfc8200.txt:1130-1131`
 
 - Strength: description. Class: end-to-end.
-- Check idea: the destination hands UDP a datagram whose length equals the original
-  fragmentable part, and the fragment header is gone.
+- Check idea: the destination hands UDP a datagram whose length equals the original fragmentable part, and the fragment header is gone.
 
 ### RFC8200-REASM-3
 
-**Reassembly is abandoned after 60 seconds, and Time Exceeded code 1 is sent if the first
-fragment arrived.**
+**Reassembly is abandoned after 60 seconds, and Time Exceeded code 1 is sent if the first fragment arrived.**
 
 > "If insufficient fragments are received to complete reassembly of a packet within 60
 > seconds of the reception of the first-arriving fragment of that packet, reassembly of
@@ -383,14 +322,12 @@ fragment arrived.**
 > zero) has been received, an ICMP Time Exceeded -- Fragment Reassembly Time Exceeded
 > message should be sent to the source of that fragment." — §4.5, `rfc8200.txt:1145-1152`
 
-- Strength: must (abandon and discard); should (the report). Class: internal with an
-  error-signal effect.
+- Strength: must (abandon and discard); should (the report). Class: internal with an error-signal effect.
 - Note: a timer; level 4 by the level table of the guide.
 
 ### RFC8200-REASM-4
 
-**A non-final fragment whose length is not a multiple of 8 octets is discarded, and
-Parameter Problem code 0 should be sent.**
+**A non-final fragment whose length is not a multiple of 8 octets is discarded, and Parameter Problem code 0 should be sent.**
 
 > "If the length of a fragment, as derived from the fragment packet's Payload Length field,
 > is not a multiple of 8 octets and the M flag of that fragment is 1, then that fragment
@@ -398,10 +335,8 @@ Parameter Problem code 0 should be sent.**
 > source of the fragment, pointing to the Payload Length field of the fragment packet." —
 > §4.5, `rfc8200.txt:1154-1159`
 
-- Strength: must (discard); should (the report). Class: end-to-end (absence) plus
-  error-signal.
-- Check idea: shorten a non-final fragment by a few octets. Nothing is delivered, and the
-  source receives type 4 code 0.
+- Strength: must (discard); should (the report). Class: end-to-end (absence) plus error-signal.
+- Check idea: shorten a non-final fragment by a few octets. Nothing is delivered, and the source receives type 4 code 0.
 
 ### RFC8200-REASM-5
 
@@ -413,8 +348,7 @@ Parameter Problem code 0 should be sent.**
 > next page of the text.
 
 - Strength: must. Class: end-to-end (absence).
-- Overridden by: [RFC8504-NR-3](../rfc8504/catalog.md#rfc8504-nr-3), which adds
-  "silently" and forbids the creation of overlapping fragments.
+- Overridden by: [RFC8504-NR-3](../rfc8504/catalog.md#rfc8504-nr-3), which adds "silently" and forbids the creation of overlapping fragments.
 - Check idea: deliver two fragments whose pieces overlap. Nothing reaches the upper layer.
 
 ### RFC8200-REASM-6
@@ -429,15 +363,12 @@ Parameter Problem code 0 should be sent.**
 > processed independently." — §4.5, `rfc8200.txt:1133-1140`
 
 - Strength: should. Class: end-to-end.
-- Overridden by: [RFC8504-NR-4](../rfc8504/catalog.md#rfc8504-nr-4), which keeps the
-  receiver rule and forbids a source to generate such a fragment.
-- Check idea: deliver a fragment with offset 0 and M = 0. Its content is handed upward as a
-  whole packet.
+- Overridden by: [RFC8504-NR-4](../rfc8504/catalog.md#rfc8504-nr-4), which keeps the receiver rule and forbids a source to generate such a fragment.
+- Check idea: deliver a fragment with offset 0 and M = 0. Its content is handed upward as a whole packet.
 
 ### RFC8200-REASM-7
 
-**A first fragment that does not include all headers through the upper-layer header should
-be discarded, with Parameter Problem code 3.**
+**A first fragment that does not include all headers through the upper-layer header should be discarded, with Parameter Problem code 3.**
 
 > "If the first fragment does not include all headers through an Upper-Layer header, then
 > that fragment should be discarded and an ICMP Parameter Problem, Code 3, message should
@@ -445,14 +376,12 @@ be discarded, with Parameter Problem code 3.**
 > `rfc8200.txt:1168-1171`
 
 - Strength: should. Class: end-to-end (absence) plus error-signal.
-- Overridden by: [RFC8504-NR-8](../rfc8504/catalog.md#rfc8504-nr-8), which makes the
-  sender's half a must.
+- Overridden by: [RFC8504-NR-8](../rfc8504/catalog.md#rfc8504-nr-8), which makes the sender's half a must.
 - Note: needs a crafted first fragment shorter than its upper-layer header; a later pass.
 
 ### RFC8200-REASM-8
 
-**A fragment whose length and offset would push the reassembled payload past 65,535 octets
-is discarded, and Parameter Problem code 0 should be sent.**
+**A fragment whose length and offset would push the reassembled payload past 65,535 octets is discarded, and Parameter Problem code 0 should be sent.**
 
 > "If the length and offset of a fragment are such that the Payload Length of the packet
 > reassembled from that fragment would exceed 65,535 octets, then that fragment must be
@@ -460,10 +389,8 @@ is discarded, and Parameter Problem code 0 should be sent.**
 > the fragment, pointing to the Fragment Offset field of the fragment packet." — §4.5,
 > `rfc8200.txt:1161-1166`
 
-- Strength: must (discard); should (the report). Class: end-to-end (absence) plus
-  error-signal.
-- Check idea: deliver a fragment whose offset is the largest the field can carry. Nothing is
-  delivered, and the source receives type 4 code 0.
+- Strength: must (discard); should (the report). Class: end-to-end (absence) plus error-signal.
+- Check idea: deliver a fragment whose offset is the largest the field can carry. Nothing is delivered, and the source receives type 4 code 0.
 
 ## Packet size
 
@@ -476,10 +403,8 @@ is discarded, and Parameter Problem code 0 should be sent.**
 > packet in one piece, link-specific fragmentation and reassembly must be provided at a
 > layer below IPv6." — §5, `rfc8200.txt:1378-1382`
 
-- Strength: description (a property of links); must (for links below it). Class: wire,
-  as a scenario constraint.
-- Note: no check chooses an MTU below 1280 for an IPv6 link. This is a rule for the mockup
-  rather than for a node.
+- Strength: description (a property of links); must (for links below it). Class: wire, as a scenario constraint.
+- Note: no check chooses an MTU below 1280 for an IPv6 link. This is a rule for the mockup rather than for a node.
 
 ### RFC8200-MTU-2
 
@@ -489,13 +414,11 @@ is discarded, and Parameter Problem code 0 should be sent.**
 > packets as large as that link's MTU." — §5, `rfc8200.txt:1390-1391`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a packet as large as the link MTU, 1500 octets on Ethernet, crosses both
-  links whole and is delivered.
+- Check idea: a packet as large as the link MTU, 1500 octets on Ethernet, crosses both links whole and is delivered.
 
 ### RFC8200-MTU-3
 
-**A node should discover the path MTU; a minimal node may send no more than 1280 octets
-instead.**
+**A node should discover the path MTU; a minimal node may send no more than 1280 octets instead.**
 
 > "It is strongly recommended that IPv6 nodes implement Path MTU Discovery [RFC8201], in
 > order to discover and take advantage of path MTUs greater than 1280 octets.  However, a
@@ -504,8 +427,7 @@ instead.**
 > §5, `rfc8200.txt:1393-1398`
 
 - Strength: should (strongly recommended); may. Class: wire.
-- Note: path MTU discovery is RFC 8201 and level 4. The check of this pass establishes
-  only the message it starts from ([RFC4443-PTB-1](../rfc4443/catalog.md#rfc4443-ptb-1)).
+- Note: path MTU discovery is RFC 8201 and level 4. The check of this pass establishes only the message it starts from ([RFC4443-PTB-1](../rfc4443/catalog.md#rfc4443-ptb-1)).
 
 ### RFC8200-MTU-4
 
@@ -516,13 +438,11 @@ instead.**
 > than 1500 octets." — §5, `rfc8200.txt:1414-1416`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a 1500-octet packet fragmented at the source is delivered whole at the
-  destination.
+- Check idea: a 1500-octet packet fragmented at the source is delivered whole at the destination.
 
 ### RFC8200-MTU-5
 
-**A protocol that relies on fragmentation should not send more than 1500 octets without
-assurance that the destination reassembles it.**
+**A protocol that relies on fragmentation should not send more than 1500 octets without assurance that the destination reassembles it.**
 
 > "An upper-layer protocol or application that depends on IPv6 fragmentation to send
 > packets larger than the MTU of a path should not send packets larger than 1500 octets
@@ -536,8 +456,7 @@ assurance that the destination reassembles it.**
 
 ### RFC8200-CKSUM-1
 
-**A node that originates a UDP packet over IPv6 computes the UDP checksum, writes FFFF for
-a zero result, and a receiver discards a UDP packet with a zero checksum.**
+**A node that originates a UDP packet over IPv6 computes the UDP checksum, writes FFFF for a zero result, and a receiver discards a UDP packet with a zero checksum.**
 
 > "Unlike IPv4, the default behavior when UDP packets are originated by an IPv6 node is
 > that the UDP checksum is not optional.  That is, whenever originating a UDP packet, an
@@ -546,8 +465,7 @@ a zero result, and a receiver discards a UDP packet with a zero checksum.**
 > UDP header.  IPv6 receivers must discard UDP packets containing a zero checksum and
 > should log the error." — §8.1, `rfc8200.txt:1530-1537`
 
-- Strength: must (compute; discard zero); should (log). Class: wire (the field is never
-  zero) plus end-to-end (the discard, which needs a crafted datagram; level 3).
+- Strength: must (compute; discard zero); should (log). Class: wire (the field is never zero) plus end-to-end (the discard, which needs a crafted datagram; level 3).
 - Check idea: every UDP datagram a node originates over IPv6 carries a non-zero checksum.
 
 ### RFC8200-CKSUM-2
@@ -565,12 +483,6 @@ a zero result, and a receiver discards a UDP packet with a zero checksum.**
 
 ## Out of scope in this catalog
 
-The extension headers other than the fragment header, their order and their options (§4.1
-to §4.4, §4.6 to §4.8), the flow label (§6, RFC 6437), the traffic class (§7, RFC 2474 and
-RFC 3168), the maximum packet lifetime note (§8.2, which states that no lifetime is
-enforced), the maximum upper-layer payload size (§8.3, a rule for the transport protocol),
-the response to routing headers (§8.4), the jumbo payload (RFC 2675), and the security
-considerations. Each becomes a catalog entry in a later pass.
+The extension headers other than the fragment header, their order and their options (§4.1 to §4.4, §4.6 to §4.8), the flow label (§6, RFC 6437), the traffic class (§7, RFC 2474 and RFC 3168), the maximum packet lifetime note (§8.2, which states that no lifetime is enforced), the maximum upper-layer payload size (§8.3, a rule for the transport protocol), the response to routing headers (§8.4), the jumbo payload (RFC 2675), and the security considerations. Each becomes a catalog entry in a later pass.
 
-The error reports that RFC 8200 delegates to ICMPv6 are in
-[`rfc4443/catalog.md`](../rfc4443/catalog.md).
+The error reports that RFC 8200 delegates to ICMPv6 are in [`rfc4443/catalog.md`](../rfc4443/catalog.md).

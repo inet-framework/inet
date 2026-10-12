@@ -2,9 +2,7 @@
 
 > **Kind:** report · **Status:** snapshot 2026-09-24 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/rip/standards.md), [features.md](../../protocol/rip/features.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow. Part 1 records what the model intends: which
-standards it claims to implement, mapped onto the standards map. Part 2 crosses the claims
-with the feature support of the ledger, feature by feature.
+Step 8 artifact of the standards test workflow. Part 1 records what the model intends: which standards it claims to implement, mapped onto the standards map. Part 2 crosses the claims with the feature support of the ledger, feature by feature.
 
 Run record of the ledger state that part 2 comes from:
 
@@ -17,9 +15,7 @@ Run record of the ledger state that part 2 comes from:
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/rip$'`
 
-Part 1 was first read by the level 1 pass, at src `16dc528e10`. The RIP code is the same in
-both trees; the two trees differ only in seven files of IEEE 802.11 and one line of
-`src/inet/common/InitStages.cc`.
+Part 1 was first read by the level 1 pass, at src `16dc528e10`. The RIP code is the same in both trees; the two trees differ only in seven files of IEEE 802.11 and one line of `src/inet/common/InitStages.cc`.
 
 ## Part 1 — the claims
 
@@ -39,9 +35,7 @@ Every place in the model that names a standard of the RIP family:
 | RFC 2453 | [`RipPacketSerializer.cc:29`](../../../../../src/inet/routing/rip/RipPacketSerializer.cc) | The "must be zero" field of the header. |
 | RFC 1058, RFC 2080 | [`RipPacketSerializer.cc:15-18`](../../../../../src/inet/routing/rip/RipPacketSerializer.cc) | A TODO: "The inet::Rip uses RipPacket and RipEntry for IPv4 (RIPv2, see RFC 1058) and for IPv6 (RIPng, see RFC 2080). The serializer accepts only RFC1058 packets with IPv4 addresses." |
 
-The documentation comment also states three limits (`Rip.ned:27-30`): the hop-count metric
-only, a diameter below 16, and the "counting to infinity" recovery. These are the limits of
-the protocol itself, as RFC 2453 §3.2 states them, and not limits of the model.
+The documentation comment also states three limits (`Rip.ned:27-30`): the hop-count metric only, a diameter below 16, and the "counting to infinity" recovery. These are the limits of the protocol itself, as RFC 2453 §3.2 states them, and not limits of the model.
 
 Mapped onto the standards map, [`standards.md`](../../protocol/rip/standards.md#document-list):
 
@@ -57,11 +51,7 @@ Mapped onto the standards map, [`standards.md`](../../protocol/rip/standards.md#
 
 ### The claims that the code makes
 
-The guide counts code as a claim: an effort for a behavior claims it. The level 2 pass read
-the code only to decide the status of each statement in the ledger, and these are the claims
-it found beyond the named documents. None enters part 2 on its own, because part 2 works on
-documents, not on lines of code; they decide the `owed`, `later` and `no check` rows of
-[`coverage.md`](coverage.md#statement-coverage).
+The guide counts code as a claim: an effort for a behavior claims it. The level 2 pass read the code only to decide the status of each statement in the ledger, and these are the claims it found beyond the named documents. None enters part 2 on its own, because part 2 works on documents, not on lines of code; they decide the `owed`, `later` and `no check` rows of [`coverage.md`](coverage.md#statement-coverage).
 
 | Behavior | Code | What it decides |
 | --- | --- | --- |
@@ -76,9 +66,7 @@ documents, not on lines of code; they decide the `owed`, `later` and `no check` 
 
 ## Part 2 — the conformance matrix
 
-A feature is `claimed` when the claims of part 1 cover its governing source document. The
-model claims RFC 2453 and RFC 2080 as wholes, so every feature of the map is claimed. The
-support comes from [`coverage.md`](coverage.md#feature-support).
+A feature is `claimed` when the claims of part 1 cover its governing source document. The model claims RFC 2453 and RFC 2080 as wholes, so every feature of the map is claimed. The support comes from [`coverage.md`](coverage.md#feature-support).
 
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
@@ -102,30 +90,16 @@ support comes from [`coverage.md`](coverage.md#feature-support).
 | [RIP-F-HOST-ROUTES](../../protocol/rip/features.md#rip-f-host-routes) | optional | yes | untested | `unverified` — owed at level 2 |
 | [RIP-F-VERSION-1-INTERWORKING](../../protocol/rip/features.md#rip-f-version-1-interworking) | mandatory | yes | untested | `unverified` — level 5; the code makes no effort for version 1 beyond the TODO of `Rip.h:77-78` |
 
-Seven features are `confirmed`, six `partial` and six `unverified`. No feature is a `defect`
-in the sense of the matrix: every mandatory feature that failed a check passed another one.
-The statement-level defects sit inside features that otherwise work, which is the case the
-guide describes; [`results.md`](results.md#the-model-gaps) holds all six.
+Seven features are `confirmed`, six `partial` and six `unverified`. No feature is a `defect` in the sense of the matrix: every mandatory feature that failed a check passed another one. The statement-level defects sit inside features that otherwise work, which is the case the guide describes; [`results.md`](results.md#the-model-gaps) holds all six.
 
 ### How to read the matrix
 
-- **RIP version 2 alone** would read differently: of the six `partial` verdicts, only
-  RIP-F-ROUTE-EXPIRY holds a failure of RFC 2453. The other five `partial` verdicts are RIPng
-  failures, gaps 1 to 3, and the RIPng next hop entry of level 3.
-- **RIP-F-ROUTE-EXPIRY** is the feature where both documents fail, and the reason is the same
-  code: the timeout is looked at only when an update goes out (gap 4), a network the router
-  itself lost is never purged (gap 5), and a learned route is purged 300 s after the last
-  entry from its next hop, not 120 s after the deletion (gap 6). Together, gaps 5 and 6 keep
-  every withdrawn network in every update of the RIP domain for good.
-- **The `unverified` verdicts** are the level 3 work and the owed checks, not verdicts on the
-  model.
+- **RIP version 2 alone** would read differently: of the six `partial` verdicts, only RIP-F-ROUTE-EXPIRY holds a failure of RFC 2453. The other five `partial` verdicts are RIPng failures, gaps 1 to 3, and the RIPng next hop entry of level 3.
+- **RIP-F-ROUTE-EXPIRY** is the feature where both documents fail, and the reason is the same code: the timeout is looked at only when an update goes out (gap 4), a network the router itself lost is never purged (gap 5), and a learned route is purged 300 s after the last entry from its next hop, not 120 s after the deletion (gap 6). Together, gaps 5 and 6 keep every withdrawn network in every update of the RIP domain for good.
+- **The `unverified` verdicts** are the level 3 work and the owed checks, not verdicts on the model.
 
 ## Headlines for the next pass
 
-1. **Two mandatory features are `unverified` and claimed in code**: RIP-F-RESPONSE-VALIDATION
-   and RIP-F-ROUTE-TAG. Level 3 reaches both with crafted responses.
-2. **The six gaps** of [`results.md`](results.md#the-model-gaps) are repairs, not tests: none is
-   declared, so the suite stays red until they are repaired. After a repair of gap 3, the
-   check of RFC2080-TIMER-7 reaches its own observation for the first time.
-3. **The obsolete claim of level 1 stands**: the serializer names RFC 1058 for the version 2
-   layout.
+1. **Two mandatory features are `unverified` and claimed in code**: RIP-F-RESPONSE-VALIDATION and RIP-F-ROUTE-TAG. Level 3 reaches both with crafted responses.
+2. **The six gaps** of [`results.md`](results.md#the-model-gaps) are repairs, not tests: none is declared, so the suite stays red until they are repaired. After a repair of gap 3, the check of RFC2080-TIMER-7 reaches its own observation for the first time.
+3. **The obsolete claim of level 1 stands**: the serializer names RFC 1058 for the version 2 layout.

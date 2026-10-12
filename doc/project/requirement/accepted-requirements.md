@@ -2,36 +2,21 @@
 
 > **Kind:** what · **Status:** current · **Seal:** by requirement, complete · **Owns:** `R-*` · **Stands on:** nothing; this is the top of the chain
 
-What INET must do, from the perspective of the **simulation user**: a researcher or engineer who
-builds, configures, runs and analyzes network simulations, without necessarily writing C++.
+What INET must do, from the perspective of the **simulation user**: a researcher or engineer who builds, configures, runs and analyzes network simulations, without necessarily writing C++.
 
-A requirement here describes something a user can *do*, or something INET *does for them*. It does
-not prescribe how any of it is built — that is [design/decisions.md](../design/decisions.md), and
-what a change is checked against is [rule/architecture.md](../rule/architecture.md).
+A requirement here describes something a user can *do*, or something INET *does for them*. It does not prescribe how any of it is built — that is [design/decisions.md](../design/decisions.md), and what a change is checked against is [rule/architecture.md](../rule/architecture.md).
 
-Each requirement carries a stable identifier `R-<AREA>-<NAME>` that is permanent across its life. The
-identifier names the requirement and not its position, so a regroup or a rewording breaks no
-citation, and each identifier is a heading, so a citation links to the requirement itself:
-[R-RUN-REPRO](accepted-requirements.md#r-run-repro).
+Each requirement carries a stable identifier `R-<AREA>-<NAME>` that is permanent across its life. The identifier names the requirement and not its position, so a regroup or a rewording breaks no citation, and each identifier is a heading, so a citation links to the requirement itself: [R-RUN-REPRO](accepted-requirements.md#r-run-repro).
 
-Which test, example or showcase demonstrates each requirement is
-[evidence/claim-coverage.md](../evidence/claim-coverage.md). A requirement that is proposed and not
-yet accepted lives in [candidate-requirements.md](candidate-requirements.md); this document stays
-short and easy to argue for, and nothing lands here until it is clearly right on its own merit.
+Which test, example or showcase demonstrates each requirement is [evidence/claim-coverage.md](../evidence/claim-coverage.md). A requirement that is proposed and not yet accepted lives in [candidate-requirements.md](candidate-requirements.md); this document stays short and easy to argue for, and nothing lands here until it is clearly right on its own merit.
 
 ## The seal
 
-This document declares `Seal: by requirement, complete`, so **every requirement carries a flag**:
-🔒 closed, ⬜ open on purpose. The flag opens the statement rather than the heading, because the
-heading is the citation anchor and must not change
-([SR-FLAG-PLACEMENT](../rule/sealing.md#sr-flag-placement)).
+This document declares `Seal: by requirement, complete`, so **every requirement carries a flag**: 🔒 closed, ⬜ open on purpose. The flag opens the statement rather than the heading, because the heading is the citation anchor and must not change ([SR-FLAG-PLACEMENT](../rule/sealing.md#sr-flag-placement)).
 
-**Do not change a closed requirement in any way** — not its words, not as part of a larger task. A
-closed requirement changes only when the user gives explicit permission for that requirement in the
-conversation. A requirement starts open; the flag closes in the same change that settles the wording.
+**Do not change a closed requirement in any way** — not its words, not as part of a larger task. A closed requirement changes only when the user gives explicit permission for that requirement in the conversation. A requirement starts open; the flag closes in the same change that settles the wording.
 
-Every requirement is ⬜ today: considered, and deliberately still open. None has been through a
-document audit.
+Every requirement is ⬜ today: considered, and deliberately still open. None has been through a document audit.
 
 ## Modeling Scope (R-SCOPE)
 

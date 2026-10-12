@@ -2,40 +2,22 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `MLD-F-*` · **Stands on:** [standards.md](standards.md), [rfc9777/catalog.md](../../standard/rfc9777/catalog.md), [rfc2710/catalog.md](../../standard/rfc2710/catalog.md)
 
-Step 4 artifact of the standards test workflow. The catalogs are flat, fine-grained, and per
-document. This document is the high-level view above them: the capabilities that the
-in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of
-each, and the cross reference into the catalogs.
+Step 4 artifact of the standards test workflow. The catalogs are flat, fine-grained, and per document. This document is the high-level view above them: the capabilities that the in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of each, and the cross reference into the catalogs.
 
 The map reads in two directions:
 
-- **Down** — which checks tell whether a feature works. A `core` check is one the feature
-  cannot work without. A `supporting` check is a detail or an edge case.
-- **Up** — which features the simulation model supports. Step 7 writes the answer into
-  [`coverage.md`](../../model/mld/coverage.md), and step 8 compares it with the claims of the
-  model in [`conformance.md`](../../model/mld/conformance.md).
+- **Down** — which checks tell whether a feature works. A `core` check is one the feature cannot work without. A `supporting` check is a detail or an edge case.
+- **Up** — which features the simulation model supports. Step 7 writes the answer into [`coverage.md`](../../model/mld/coverage.md), and step 8 compares it with the claims of the model in [`conformance.md`](../../model/mld/conformance.md).
 
-The feature list comes from the standard texts only. The support of each feature — what the
-run actually showed — is **not** in this document. It lives in the coverage ledger,
-[`coverage.md`](../../model/mld/coverage.md).
+The feature list comes from the standard texts only. The support of each feature — what the run actually showed — is **not** in this document. It lives in the coverage ledger, [`coverage.md`](../../model/mld/coverage.md).
 
 ## How this map decides the level
 
-The rule of the guide: `mandatory` when any core statement says `must` or `shall`, or when the
-mechanism is the only path the document gives to a state or an outcome; `optional` when every
-core statement says `may` or `should`; `unstated` otherwise.
+The rule of the guide: `mandatory` when any core statement says `must` or `shall`, or when the mechanism is the only path the document gives to a state or an outcome; `optional` when every core statement says `may` or `should`; `unstated` otherwise.
 
-One refinement, which the DHCP, RIP, ND and IGMP maps state too: **a conditional keyword does not
-raise the level of a feature.** RFC 9777 says that an SSM-aware router "SHOULD ignore" some
-records; the rule holds only once a router is SSM-aware, which the in-scope set does not require.
-The level comes from the statement that decides whether the mechanism has to exist at all, and
-each feature names it.
+One refinement, which the DHCP, RIP, ND and IGMP maps state too: **a conditional keyword does not raise the level of a feature.** RFC 9777 says that an SSM-aware router "SHOULD ignore" some records; the rule holds only once a router is SSM-aware, which the in-scope set does not require. The level comes from the statement that decides whether the mechanism has to exist at all, and each feature names it.
 
-A second refinement, which the IGMP map states too: **a keyword of the base document can make a
-companion behavior mandatory.** RFC 9777 says that an MLDv2 host and router "MUST" operate in
-version 1 compatibility mode (RFC9777-COMPL-1, COMPR-12), and RFC 2710 describes that mode with
-state diagrams that have no keyword of their own. The two version 1 features take their level
-from the keyword of RFC 9777, and say so.
+A second refinement, which the IGMP map states too: **a keyword of the base document can make a companion behavior mandatory.** RFC 9777 says that an MLDv2 host and router "MUST" operate in version 1 compatibility mode (RFC9777-COMPL-1, COMPR-12), and RFC 2710 describes that mode with state diagrams that have no keyword of their own. The two version 1 features take their level from the keyword of RFC 9777, and say so.
 
 ## Index
 
@@ -269,6 +251,4 @@ from the keyword of RFC 9777, and say so.
 
 ## Coverage of the catalog entries
 
-Every one of the 388 entries of the two catalogs is in at least one feature above, as core
-or as supporting: RFC 9777 with 307 and RFC 2710 with
-81.
+Every one of the 388 entries of the two catalogs is in at least one feature above, as core or as supporting: RFC 9777 with 307 and RFC 2710 with 81.

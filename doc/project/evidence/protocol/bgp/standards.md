@@ -2,20 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around the Border Gateway Protocol version 4, records which document governs each contested
-clause, and pins the set that the next pass tests against. BGP-4 has one base document, with a
-long chain of updates: twelve documents currently update it, and several more documents define
-companion mechanisms it can carry.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around the Border Gateway Protocol version 4, records which document governs each contested clause, and pins the set that the next pass tests against. BGP-4 has one base document, with a long chain of updates: twelve documents currently update it, and several more documents define companion mechanisms it can carry.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -24,8 +17,7 @@ claims of the model. It writes no catalog, no feature map and no test.
 | level 4, Dynamics | RFC 4271 §8 timer events (ConnectRetryTimer, HoldTimer, KeepaliveTimer) and §9.2.1 (MinASOriginationIntervalTimer, MinRouteAdvertisementIntervalTimer); RFC 9687 | every BGP timer, including the two damping timers of the base document and the newest addition, a sender-side hold timer |
 | level 5, Complete | RFC 4724; RFC 8654; RFC 6286; RFC 1997; RFC 7911; RFC 4456; RFC 5065 (AS confederations) | optional capabilities and attributes: graceful restart, larger messages, the AS-wide identifier relaxation, communities, multiple paths, route reflection, and confederations |
 
-What a pass actually reached is not recorded here. It is in
-[`model/bgp/coverage.md`](../../model/bgp/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/bgp/coverage.md`](../../model/bgp/coverage.md#achieved-level).
 
 ## Document list
 
@@ -54,22 +46,13 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc4271.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4271.txt) —
-  <https://www.rfc-editor.org/rfc/rfc4271.txt>, downloaded 2026-09-23.
-- `rfc4760.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4760.txt) —
-  <https://www.rfc-editor.org/rfc/rfc4760.txt>, downloaded 2026-09-23.
-- `rfc5492.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5492.txt) —
-  <https://www.rfc-editor.org/rfc/rfc5492.txt>, downloaded 2026-09-23.
-- `rfc6793.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6793.txt) —
-  <https://www.rfc-editor.org/rfc/rfc6793.txt>, downloaded 2026-09-23.
-- `rfc8212.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8212.txt) —
-  <https://www.rfc-editor.org/rfc/rfc8212.txt>, downloaded 2026-09-23.
+- `rfc4271.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4271.txt) — <https://www.rfc-editor.org/rfc/rfc4271.txt>, downloaded 2026-09-23.
+- `rfc4760.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4760.txt) — <https://www.rfc-editor.org/rfc/rfc4760.txt>, downloaded 2026-09-23.
+- `rfc5492.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5492.txt) — <https://www.rfc-editor.org/rfc/rfc5492.txt>, downloaded 2026-09-23.
+- `rfc6793.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6793.txt) — <https://www.rfc-editor.org/rfc/rfc6793.txt>, downloaded 2026-09-23.
+- `rfc8212.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8212.txt) — <https://www.rfc-editor.org/rfc/rfc8212.txt>, downloaded 2026-09-23.
 
-All five downloaded documents use the keywords of RFC 2119. Counts of whole-word matches: RFC 4271
-has `MUST` on 98 lines, `MUST NOT` on 9, `SHOULD` on 77, `SHALL` on 32, `MAY` on 38. RFC 4760 has
-`MUST` on 10 lines and `SHOULD` on 10. RFC 5492 has `MUST` on 11 lines and `SHOULD` on 6.
-RFC 6793 has `MUST` on 23 lines, `SHALL` on 12. RFC 8212 has `MUST` once and `SHALL` three
-times, all in its two-paragraph change to RFC 4271 §9.1 and §9.1.3.
+All five downloaded documents use the keywords of RFC 2119. Counts of whole-word matches: RFC 4271 has `MUST` on 98 lines, `MUST NOT` on 9, `SHOULD` on 77, `SHALL` on 32, `MAY` on 38. RFC 4760 has `MUST` on 10 lines and `SHOULD` on 10. RFC 5492 has `MUST` on 11 lines and `SHOULD` on 6. RFC 6793 has `MUST` on 23 lines, `SHALL` on 12. RFC 8212 has `MUST` once and `SHALL` three times, all in its two-paragraph change to RFC 4271 §9.1 and §9.1.3.
 
 ## Override table
 
@@ -80,8 +63,7 @@ times, all in its two-paragraph change to RFC 4271 §9.1 and §9.1.3.
 | Uniqueness scope of the BGP Identifier | RFC 4271 §4.2, `rfc4271.txt:238-243`: the BGP Identifier is "the same for every local interface and BGP peer", with no scope stated for its uniqueness | RFC 6286 §3, "Remarks": relaxes the requirement from a globally unique value to one unique within the Autonomous System | RFC 6286 | no; folds into the RFC 4271 field with no independent wire behavior, see the out-of-scope table |
 | The Optional Parameters Length field of the OPEN message | RFC 4271 §4.2, one octet, limiting the optional-parameter list to 255 octets | RFC 9072 §3, an implementation "MUST accept an OPEN message that uses" an extended, backward-compatible encoding once the list would exceed 255 octets | RFC 9072, only when the optional-parameter list is long enough to need it | no; level 3, see the target-level table |
 
-RFC 4271 obsoletes RFC 1771 as a whole; no clause-level conflict exists between the two, because
-RFC 1771 is superseded in full.
+RFC 4271 obsoletes RFC 1771 as a whole; no clause-level conflict exists between the two, because RFC 1771 is superseded in full.
 
 ## In-scope set
 

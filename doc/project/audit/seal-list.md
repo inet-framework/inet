@@ -2,23 +2,15 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [sealing.md](../rule/sealing.md)
 
-The authoritative list of **sealed paths**, and a generated index of the seal flags inside the
-documents. The rules that govern sealing are `SR-*` in [sealing.md](../rule/sealing.md).
+The authoritative list of **sealed paths**, and a generated index of the seal flags inside the documents. The rules that govern sealing are `SR-*` in [sealing.md](../rule/sealing.md).
 
-**Default: unsealed** ([SR-DEFAULT-OPEN](../rule/sealing.md#sr-default-open)). Every path is freely
-modifiable unless it matches an entry below. `🔒` marks each entry for scanning; absence from this
-list *is* the unsealed state, and there are no open rows to maintain.
+**Default: unsealed** ([SR-DEFAULT-OPEN](../rule/sealing.md#sr-default-open)). Every path is freely modifiable unless it matches an entry below. `🔒` marks each entry for scanning; absence from this list *is* the unsealed state, and there are no open rows to maintain.
 
 ## Sealed paths
 
-Paths are relative to `src/inet/`. An entry is either a **file** (no trailing slash) — that one file
-is sealed — or a **folder** (trailing `/`), which is **recursive**: every file under it, at any
-depth, including files added later
-([SR-FOLDER-RECURSIVE](../rule/sealing.md#sr-folder-recursive)).
+Paths are relative to `src/inet/`. An entry is either a **file** (no trailing slash) — that one file is sealed — or a **folder** (trailing `/`), which is **recursive**: every file under it, at any depth, including files added later ([SR-FOLDER-RECURSIVE](../rule/sealing.md#sr-folder-recursive)).
 
-Every row cites the audit report that earned it
-([SR-CITE-THE-AUDIT](../rule/sealing.md#sr-cite-the-audit)). The report names the rules it checked and
-the commit it examined; without it a seal is a claim with no evidence.
+Every row cites the audit report that earned it ([SR-CITE-THE-AUDIT](../rule/sealing.md#sr-cite-the-audit)). The report names the rules it checked and the commit it examined; without it a seal is a claim with no evidence.
 
 ### Packet subsystem — the packet API
 
@@ -26,19 +18,9 @@ the commit it examined; without it a seal is a claim with no evidence.
 | --- | --- | --- | --- | --- |
 | 🔒 | `common/packet/` *(recursive)* | `audit/subsystem/common-packet.md`, 2026-07-20 | AR-ORG-DOMAINS, AR-ORG-VIS-SPLIT | AS-01, AV-ORG-01, AV-ORG-02 |
 
-The packet and chunk API and its implementation, the umbrella behind
-[`common/packet/PacketAPI.h`](../../../src/inet/common/packet/PacketAPI.h): the chunks (`chunk/`,
-including `ChunkAPI.h`), `Packet`, `ChunkBuffer`, `ChunkQueue`, `Message`, the reassembly and reorder
-buffers, `PacketFilter`, and the region-tag, serializer, dissector, printer and recorder subtrees.
-Frozen as a unit: this is INET's most-depended-upon value-type surface, and its representation, chunk
-algebra and introspection contracts are settled. New packet files land under this seal by default.
+The packet and chunk API and its implementation, the umbrella behind [`common/packet/PacketAPI.h`](../../../src/inet/common/packet/PacketAPI.h): the chunks (`chunk/`, including `ChunkAPI.h`), `Packet`, `ChunkBuffer`, `ChunkQueue`, `Message`, the reassembly and reorder buffers, `PacketFilter`, and the region-tag, serializer, dissector, printer and recorder subtrees. Frozen as a unit: this is INET's most-depended-upon value-type surface, and its representation, chunk algebra and introspection contracts are settled. New packet files land under this seal by default.
 
-**This row does not yet satisfy [SR-AUDIT-FIRST](../rule/sealing.md#sr-audit-first).** Its audit found
-eight `AR-ORG-DOMAINS` couplings, and two of the three ledger clusters it cites — `AV-ORG-01` and
-`AV-ORG-02` — are still `Open (decide)`, not sanctioned. A seal over an unsanctioned violation is
-exactly what that rule forbids. Either the two clusters get sanctioned as `AS-*` rows, or the
-couplings are inverted, or the seal comes off. Recorded here rather than quietly left, because the
-registry is the place a reader checks.
+**This row does not yet satisfy [SR-AUDIT-FIRST](../rule/sealing.md#sr-audit-first).** Its audit found eight `AR-ORG-DOMAINS` couplings, and two of the three ledger clusters it cites — `AV-ORG-01` and `AV-ORG-02` — are still `Open (decide)`, not sanctioned. A seal over an unsanctioned violation is exactly what that rule forbids. Either the two clusters get sanctioned as `AS-*` rows, or the couplings are inverted, or the seal comes off. Recorded here rather than quietly left, because the registry is the place a reader checks.
 
 <!--
 To seal more, append a group heading and rows here in review order:
@@ -55,8 +37,7 @@ Add the row in the same commit that records the compliant state (SR-RECORD-IN-CO
 
 ## Sealed documents
 
-A whole-document seal is declared in the document's own header, as `**Seal:** whole; closed`. This
-section indexes them so the registry stays one place to look.
+A whole-document seal is declared in the document's own header, as `**Seal:** whole; closed`. This section indexes them so the registry stays one place to look.
 
 | | Document | Audit |
 | --- | --- | --- |
@@ -90,12 +71,8 @@ section indexes them so the registry stays one place to look.
 | `rule/testing.md` | by rule | 0 | 0 | 14 |
 <!-- END SEAL INDEX -->
 
-Nothing is closed yet, and that is the honest state: no document in this set has been audited against
-[documentation.md](../rule/documentation.md). The requirements are the one document that carries
-flags on every unit, because it declares `by requirement, complete` — its 30 requirements are all ⬜,
-which reads as *considered, and deliberately still open*.
+Nothing is closed yet, and that is the honest state: no document in this set has been audited against [documentation.md](../rule/documentation.md). The requirements are the one document that carries flags on every unit, because it declares `by requirement, complete` — its 30 requirements are all ⬜, which reads as *considered, and deliberately still open*.
 
 ## Auditing
 
-A path reaches this list through [guide/audit-a-subsystem.md](../guide/audit-a-subsystem.md), and
-never any other way. The states a path passes through are in [README.md](README.md).
+A path reaches this list through [guide/audit-a-subsystem.md](../guide/audit-a-subsystem.md), and never any other way. The states a path passes through are in [README.md](README.md).

@@ -2,9 +2,7 @@
 
 > **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/arp/standards.md), [features.md](../../protocol/arp/features.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow. The tests tell what the model does. This
-document adds what the model intends: which standards it claims to implement, and how the
-claim compares with the feature support that [`coverage.md`](coverage.md) measured.
+Step 8 artifact of the standards test workflow. The tests tell what the model does. This document adds what the model intends: which standards it claims to implement, and how the claim compares with the feature support that [`coverage.md`](coverage.md) measured.
 
 - Date: 2026-09-23 18:26 +0200
 - INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
@@ -14,8 +12,7 @@ claim compares with the feature support that [`coverage.md`](coverage.md) measur
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/arp$'`
-- Ledger state: [`coverage.md`](coverage.md#feature-support), 8 features supported,
-  1 untested.
+- Ledger state: [`coverage.md`](coverage.md#feature-support), 8 features supported, 1 untested.
 
 ## Part 1 — the claims
 
@@ -31,9 +28,7 @@ Every place in the model that names a standard of the ARP family:
 | RFC 5227 | [`Arp.cc:485-486`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc) | "A client should send out 'ARP Probe' to probe the newly received IPv4 address. Refer to RFC 5227, IPv4 Address Conflict Detection", above `sendArpProbe`. |
 | RFC 1122 §6.4 | [`ch-ipv4.rst:157-158`](../../../../../doc/src/users-guide/ch-ipv4.rst) | The user guide cites RFC 1122 §6.4 for computing a hardware address from a broadcast or multicast protocol address, which is the case where ARP is not used at all. |
 
-The user guide also states two scope decisions without citing a document
-([`ch-ipv4.rst:147-158`](../../../../../doc/src/users-guide/ch-ipv4.rst)): the module does
-IPv4-to-MAC translation only, and it does not do the reverse direction, RARP.
+The user guide also states two scope decisions without citing a document ([`ch-ipv4.rst:147-158`](../../../../../doc/src/users-guide/ch-ipv4.rst)): the module does IPv4-to-MAC translation only, and it does not do the reverse direction, RARP.
 
 Mapped onto the standards map, [`standards.md`](../../protocol/arp/standards.md#document-list):
 
@@ -46,24 +41,13 @@ Mapped onto the standards map, [`standards.md`](../../protocol/arp/standards.md#
 | RFC 903 | no, level 5 | named, and declined | The opcode enum names it, and the model throws on both of its opcodes, which is a deliberate refusal. The user guide says the same in words. |
 | RFC 1868 | no, level 5 | named | One citation, on the reply opcode. The model implements nothing of UNARP. |
 
-**The finding of the survey.** The model implements the Address Resolution Protocol and it
-never claims a document in a place a reader would look. The documentation comment of the
-`Arp` module, which is what the module reference publishes, names the protocol by its name
-and no standard by its number. The two RFC 826 citations are both in a comment that a reader
-of the documentation never sees, and one of them is hedged: "a'la". This is a documentation
-task, and it is cheap — the code follows RFC 826 step by step, so the claim would be true.
+**The finding of the survey.** The model implements the Address Resolution Protocol and it never claims a document in a place a reader would look. The documentation comment of the `Arp` module, which is what the module reference publishes, names the protocol by its name and no standard by its number. The two RFC 826 citations are both in a comment that a reader of the documentation never sees, and one of them is hedged: "a'la". This is a documentation task, and it is cheap — the code follows RFC 826 step by step, so the claim would be true.
 
-The second half of the finding is larger. The model meets five requirements of RFC 1122 that
-RFC 826 does not state — the cache flush, the configurable lifetime, the request rate, the
-saved datagram, and the silence after a failure — and it claims none of them. Two of the five
-it exceeds. A reader of the model has no way to learn that it was built to a second document,
-and a reader of RFC 1122 has no way to learn that the model answers it.
+The second half of the finding is larger. The model meets five requirements of RFC 1122 that RFC 826 does not state — the cache flush, the configurable lifetime, the request rate, the saved datagram, and the silence after a failure — and it claims none of them. Two of the five it exceeds. A reader of the model has no way to learn that it was built to a second document, and a reader of RFC 1122 has no way to learn that the model answers it.
 
 ## Part 2 — the conformance matrix
 
-Feature by feature, not test by test. A feature is `claimed` when the claims of part 1 cover
-its governing source document. The verdict combines the claim, the support value of the
-ledger, and the level of the feature, by the table of the guide.
+Feature by feature, not test by test. A feature is `claimed` when the claims of part 1 cover its governing source document. The verdict combines the claim, the support value of the ledger, and the level of the feature, by the table of the guide.
 
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
@@ -81,21 +65,7 @@ Four confirmed, four undocumented, one unverified. No `defect` and no `partial`.
 
 The headlines for the next pass, by the rule of the guide:
 
-1. **The one `partial`, repaired by `0b4f3b0777`.** `ARP-F-INPUT-VALIDATION` was mandatory
-   and claimed, with three failing checks, until this commit. All three were the same defect
-   in shape: RFC 826 asks for a silent discard and the model stopped the run. It discards the
-   packet now, and the feature reads `confirmed`. The details and the two gap numbers are in
-   [`results.md`](results.md#the-failures).
-2. **The four `undocumented`.** These are a documentation task for the model and not a test
-   task. Each one is a requirement of RFC 1122 that the model meets and never names. The
-   cheapest fix is one sentence in the documentation comment of the `Arp` module, which today
-   names no document at all.
-3. **The one `unverified`.** `ARP-F-GENERALIZATION` is optional, so it is a coverage gap and
-   not a model verdict. It needs a second hardware type, and the packet class of the model
-   has no field for one; see gap 2 in [`results.md`](results.md#the-failures).
-4. **The claim outside the set.** RFC 5227 is claimed in a comment and is out of scope until
-   level 4. The two methods that answer it, `Arp::sendArpProbe` and
-   `Arp::sendArpGratuitous`, had no caller anywhere in the tree on 2026-09-11, so the claim
-   rested on code that nothing ran. Since `bdde132792` the DHCP client calls `sendArpProbe`
-   (`DhcpClient.cc:768`); `sendArpGratuitous` still has no caller. That is the first question
-   of the level 4 pass.
+1. **The one `partial`, repaired by `0b4f3b0777`.** `ARP-F-INPUT-VALIDATION` was mandatory and claimed, with three failing checks, until this commit. All three were the same defect in shape: RFC 826 asks for a silent discard and the model stopped the run. It discards the packet now, and the feature reads `confirmed`. The details and the two gap numbers are in [`results.md`](results.md#the-failures).
+2. **The four `undocumented`.** These are a documentation task for the model and not a test task. Each one is a requirement of RFC 1122 that the model meets and never names. The cheapest fix is one sentence in the documentation comment of the `Arp` module, which today names no document at all.
+3. **The one `unverified`.** `ARP-F-GENERALIZATION` is optional, so it is a coverage gap and not a model verdict. It needs a second hardware type, and the packet class of the model has no field for one; see gap 2 in [`results.md`](results.md#the-failures).
+4. **The claim outside the set.** RFC 5227 is claimed in a comment and is out of scope until level 4. The two methods that answer it, `Arp::sendArpProbe` and `Arp::sendArpGratuitous`, had no caller anywhere in the tree on 2026-09-11, so the claim rested on code that nothing ran. Since `bdde132792` the DHCP client calls `sendArpProbe` (`DhcpClient.cc:768`); `sendArpGratuitous` still has no caller. That is the first question of the level 4 pass.

@@ -2,39 +2,22 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `MPLS-F-*` · **Stands on:** [standards.md](standards.md), [rfc3031/catalog.md](../../standard/rfc3031/catalog.md), [rfc3032/catalog.md](../../standard/rfc3032/catalog.md), [rfc3443/catalog.md](../../standard/rfc3443/catalog.md), [rfc5462/catalog.md](../../standard/rfc5462/catalog.md)
 
-Step 4 artifact of the standards test workflow. The catalogs are flat, fine-grained, and per
-document. This document is the high-level view above them: the capabilities that the
-in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of
-each, and the cross reference into the catalogs.
+Step 4 artifact of the standards test workflow. The catalogs are flat, fine-grained, and per document. This document is the high-level view above them: the capabilities that the in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of each, and the cross reference into the catalogs.
 
 The map reads in two directions:
 
-- **Down** — which checks tell whether a feature works. A `core` check is one the feature
-  cannot work without. A `supporting` check is a detail or an edge case.
-- **Up** — which features the simulation model supports. Step 7 writes the answer into
-  [`coverage.md`](../../model/mpls/coverage.md), and step 8 compares it with the claims of the
-  model in [`conformance.md`](../../model/mpls/conformance.md).
+- **Down** — which checks tell whether a feature works. A `core` check is one the feature cannot work without. A `supporting` check is a detail or an edge case.
+- **Up** — which features the simulation model supports. Step 7 writes the answer into [`coverage.md`](../../model/mpls/coverage.md), and step 8 compares it with the claims of the model in [`conformance.md`](../../model/mpls/conformance.md).
 
-The feature list comes from the standard texts only. The support of each feature — what the
-run actually showed — is **not** in this document. It lives in the coverage ledger,
-[`coverage.md`](../../model/mpls/coverage.md).
+The feature list comes from the standard texts only. The support of each feature — what the run actually showed — is **not** in this document. It lives in the coverage ledger, [`coverage.md`](../../model/mpls/coverage.md).
 
 ## How this map decides the level
 
-The rule of the guide: `mandatory` when any core statement says `must` or `shall`, or when the
-mechanism is the only path the document gives to a state or an outcome; `optional` when every
-core statement says `may` or `should`; `unstated` otherwise.
+The rule of the guide: `mandatory` when any core statement says `must` or `shall`, or when the mechanism is the only path the document gives to a state or an outcome; `optional` when every core statement says `may` or `should`; `unstated` otherwise.
 
-One refinement, which the earlier maps state too: **a conditional keyword does not raise the
-level of a feature.** A rule that holds "if" an LSR does an optional thing takes the level of that
-thing.
+One refinement, which the earlier maps state too: **a conditional keyword does not raise the level of a feature.** A rule that holds "if" an LSR does an optional thing takes the level of that thing.
 
-A second refinement matters more here than in any earlier map: **most of RFC 3031, RFC 3443 and
-RFC 5462 is written without keywords.** RFC 3031 defines the architecture in terms, and RFC 3443
-states its TTL rules as descriptions. Where a feature is the only way the documents give to do
-something — the one encoding of a label stack entry, the one forwarding step of a labeled
-packet, the one encoding on a LAN — the level is `mandatory` by the "only path" rule of the
-guide, and the feature says so.
+A second refinement matters more here than in any earlier map: **most of RFC 3031, RFC 3443 and RFC 5462 is written without keywords.** RFC 3031 defines the architecture in terms, and RFC 3443 states its TTL rules as descriptions. Where a feature is the only way the documents give to do something — the one encoding of a label stack entry, the one forwarding step of a labeled packet, the one encoding on a LAN — the level is `mandatory` by the "only path" rule of the guide, and the feature says so.
 
 ## Index
 
@@ -202,7 +185,4 @@ guide, and the feature says so.
 
 ## Coverage of the catalog entries
 
-Every one of the 157 entries of the four catalogs is in at least one feature above, as core
-or as supporting: RFC 3031 with 49, RFC 3032 with
-81, RFC 3443 with
-24 and RFC 5462 with 3.
+Every one of the 157 entries of the four catalogs is in at least one feature above, as core or as supporting: RFC 3031 with 49, RFC 3032 with 81, RFC 3443 with 24 and RFC 5462 with 3.

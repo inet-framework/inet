@@ -2,18 +2,13 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [quality.md](../rule/quality.md), [testing.md](../rule/testing.md)
 
-How to review a working-tree diff, staged diff, individual commit, commit range, integrated branch,
-or pull-request code change for correctness and rule compliance. For a branch or pull request, also
-apply [review-a-pull-request.md](review-a-pull-request.md) to its commit series and `PR-*` rules.
+How to review a working-tree diff, staged diff, individual commit, commit range, integrated branch, or pull-request code change for correctness and rule compliance. For a branch or pull request, also apply [review-a-pull-request.md](review-a-pull-request.md) to its commit series and `PR-*` rules.
 
-Correctness review and rule compliance are two passes over the same scope. Inspect the changed
-contracts independently first; then run the canonical tier-4 checklists. This keeps checklist wording
-from becoming the only search strategy without weakening the rule-backed gate.
+Correctness review and rule compliance are two passes over the same scope. Inspect the changed contracts independently first; then run the canonical tier-4 checklists. This keeps checklist wording from becoming the only search strategy without weakening the rule-backed gate.
 
 ## 1. Establish the target
 
-Resolve an exact base and head, or state an explicit working-tree or staged scope. Do not review an
-assumed pull-request description or a stale line range. Record:
+Resolve an exact base and head, or state an explicit working-tree or staged scope. Do not review an assumed pull-request description or a stale line range. Record:
 
 - the reviewed commit, range, or working-tree state;
 - every changed file and any generated input it changes;
@@ -21,9 +16,7 @@ assumed pull-request description or a stale line range. Record:
 - the effective configurations that reach the changed behavior; and
 - the relevant standard and revision when the change implements normative behavior.
 
-For a working tree, distinguish unstaged changes, staged changes, and untracked files. For a branch,
-use its merge base rather than an arbitrary ancestor. Keep the exact identifiers in the report so
-another reviewer can reproduce the scope.
+For a working tree, distinguish unstaged changes, staged changes, and untracked files. For a branch, use its merge base rather than an arbitrary ancestor. Keep the exact identifiers in the report so another reviewer can reproduce the scope.
 
 ## 2. Inventory changed contracts
 
@@ -41,25 +34,13 @@ Classify each change by the contracts it can affect:
 - build integration; and
 - test behavior.
 
-For the API contract, the change summary's `--usage` pass has already asked the two questions that
-[AR-EXT-MINIMAL-SURFACE](../rule/architecture.md#ar-ext-minimal-surface) and
-[AR-EXT-VIRTUAL-IS-A-PROMISE](../rule/architecture.md#ar-ext-virtual-is-a-promise) put to every new
-member: is it called, and is it overridden. Carry its *Questions for the review* into this pass.
+For the API contract, the change summary's `--usage` pass has already asked the two questions that [AR-EXT-MINIMAL-SURFACE](../rule/architecture.md#ar-ext-minimal-surface) and [AR-EXT-VIRTUAL-IS-A-PROMISE](../rule/architecture.md#ar-ext-virtual-is-a-promise) put to every new member: is it called, and is it overridden. Carry its *Questions for the review* into this pass.
 
-Use the inventory to select callers, configurations, generated consumers, standards evidence, and
-tests. A changed file can participate in several contracts, and a contract can span several artifact
-kinds.
+Use the inventory to select callers, configurations, generated consumers, standards evidence, and tests. A changed file can participate in several contracts, and a contract can span several artifact kinds.
 
-For IEEE 802.11 state and component communication, use the
-[model architecture](../design/ieee80211-model-architecture.md) to assess the affected contracts.
-For each new or changed state item, identify its **kind, decision authority, writer, readers,
-lifetime, and dependencies**. For each notification, identify the **completed fact and independent
-consumer**. Check evidence at the affected transition, including cleanup and consistent reads.
+For IEEE 802.11 state and component communication, use the [model architecture](../design/ieee80211-model-architecture.md) to assess the affected contracts. For each new or changed state item, identify its **kind, decision authority, writer, readers, lifetime, and dependencies**. For each notification, identify the **completed fact and independent consumer**. Check evidence at the affected transition, including cleanup and consistent reads.
 
-A new store, interface, cache, or signal needs a concrete responsibility and consumer. If the change
-requires a different architectural contract, assess its justification and the corresponding design
-document update explicitly. Do not accept an incidental implementation choice as an unexplained
-change to the architecture, or require new abstractions solely for possible future uses.
+A new store, interface, cache, or signal needs a concrete responsibility and consumer. If the change requires a different architectural contract, assess its justification and the corresponding design document update explicitly. Do not accept an incidental implementation choice as an unexplained change to the architecture, or require new abstractions solely for possible future uses.
 
 ## 3. Perform an independent correctness pass
 
@@ -74,8 +55,7 @@ Review the changed contract before running the rule checklist. Trace, as applica
 - configuration and generated consumers; and
 - direct test coverage.
 
-Follow pre-existing code only where the change calls it, depends on it, changes its contract, or
-makes its behavior newly reachable. Do not turn a diff review into an unrelated subsystem audit.
+Follow pre-existing code only where the change calls it, depends on it, changes its contract, or makes its behavior newly reachable. Do not turn a diff review into an unrelated subsystem audit.
 
 ## 4. Prove each correctness finding
 
@@ -90,9 +70,7 @@ A correctness finding requires all six elements:
 | Connection to the change | How did the reviewed change introduce, expose, or make the defect relevant? |
 | Focused verification | What is the smallest check that fails before and passes after the correction? |
 
-Do not report pattern-matched suspicion as a defect. If the evidence proves the defect but not the
-precise repair, state the correction direction at the owning contract or boundary instead of
-inventing a one-line fix.
+Do not report pattern-matched suspicion as a defect. If the evidence proves the defect but not the precise repair, state the correction direction at the owning contract or boundary instead of inventing a one-line fix.
 
 ## 5. Derive severity from impact
 
@@ -104,21 +82,13 @@ Derive severity from the proved defect's:
 - blast radius; and
 - recoverability.
 
-Use the repository's applicable severity labels, if any, only after evaluating those facts. A label
-from a historical checklist or the apparent importance of a prompt does not determine severity.
-Questions, missing evidence, and optional hardening do not carry defect severity.
+Use the repository's applicable severity labels, if any, only after evaluating those facts. A label from a historical checklist or the apparent importance of a prompt does not determine severity. Questions, missing evidence, and optional hardening do not carry defect severity.
 
 ## 6. Run the compliance pass
 
-After the independent correctness pass, run the
-[general tier-4 checklist](../enforcement/checklist/general.md). Add the
-[IEEE 802.11 checklist](../enforcement/checklist/ieee80211.md) when its documented scope applies.
-Respect the canonical exception ledgers, scope each verdict to the reviewed diff, and do not report a
-pre-existing deviation as a new violation.
+After the independent correctness pass, run the [general tier-4 checklist](../enforcement/checklist/general.md). Add the [IEEE 802.11 checklist](../enforcement/checklist/ieee80211.md) when its documented scope applies. Respect the canonical exception ledgers, scope each verdict to the reviewed diff, and do not report a pre-existing deviation as a new violation.
 
-Every tier-4 checklist item is backed by its cited canonical rule. The checklists do not replace the
-correctness pass, and a correctness concern without a rule violation does not become a checklist
-`FLAG`.
+Every tier-4 checklist item is backed by its cited canonical rule. The checklists do not replace the correctness pass, and a correctness concern without a rule violation does not become a checklist `FLAG`.
 
 ## 7. Use one reporting taxonomy
 
@@ -131,9 +101,7 @@ correctness pass, and a correctness concern without a rule violation does not be
 | **Residual risk / untested path** | A bounded review gap that is not a proved defect. |
 | **PR `PARTIAL`** | A verdict used only in a composite pull-request `PR-*` rule report when part of a rule passes and part does not; it is never a tier-4 checklist verdict. |
 
-When one mechanism is both a runtime defect and a canonical rule violation, report the correctness
-finding once. The corresponding checklist row briefly references that finding instead of duplicating
-its proof and correction direction.
+When one mechanism is both a runtime defect and a canonical rule violation, report the correctness finding once. The corresponding checklist row briefly references that finding instead of duplicating its proof and correction direction.
 
 ## 8. Write the report
 
@@ -146,8 +114,4 @@ Present the result in this order:
 5. not-verified items and residual risks; and
 6. canonical checklist output.
 
-For each finding, identify the exact file and line, give the six-part proof compactly, state the
-smallest correction direction, and name the focused verification. Record exact commands, working
-directory, configuration, run and seed where applicable, filters, exit statuses, and relevant
-artifacts for validation that was performed. Say directly when no actionable correctness finding
-remains; do not invent a low-value comment to avoid an empty review.
+For each finding, identify the exact file and line, give the six-part proof compactly, state the smallest correction direction, and name the focused verification. Record exact commands, working directory, configuration, run and seed where applicable, filters, exit statuses, and relevant artifacts for validation that was performed. Say directly when no actionable correctness finding remains; do not invent a low-value comment to avoid an empty review.

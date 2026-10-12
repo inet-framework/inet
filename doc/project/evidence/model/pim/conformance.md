@@ -2,9 +2,7 @@
 
 > **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/pim/standards.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the
-model intends: which standards it claims to implement, mapped onto the standards map. Part 2,
-the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
+Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the model intends: which standards it claims to implement, mapped onto the standards map. Part 2, the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
 
 Read record — no build, no run:
 
@@ -33,10 +31,7 @@ Every place in the model that names a standard of the PIM family:
 | RFC 2460, obsolete | [`PimPacket.msg:130`](../../../../../src/inet/routing/pim/PimPacket.msg); [`Pim.cc:45`](../../../../../src/inet/routing/pim/Pim.cc) | Two identical comments: "For IPv6, the checksum also includes the IPv6 'pseudo-header', as specified in RFC 2460, Section 8.1 [5]." RFC 2460 is obsoleted by RFC 8200; see the finding below. This document is not part of the PIM family, it is cited only for the IPv6 pseudo-header layout. |
 | a stated limitation | [`PimSm.ned:40-44`](../../../../../src/inet/routing/pim/modes/PimSm.ned) | "Limitations: Only one global RP is supported and it must be specified statically. PIM Bootstrap and RP discovery are not yet implemented. Switchover to the shortest path tree is not supported. Source specific excludes in the shared tree are not supported." Three items, not two; see the facts below. |
 
-No comment, NED documentation, or line of the user's guide names RFC 8736, RFC 9436 or RFC 5059:
-a tree-wide search for each number returns nothing outside this table. No line of
-`doc/src/users-guide/*.rst` names PIM by an RFC number at all; the one PIM mention in the user's
-guide is a bare cross-reference to the protocol name (`ch-networks.rst:58`).
+No comment, NED documentation, or line of the user's guide names RFC 8736, RFC 9436 or RFC 5059: a tree-wide search for each number returns nothing outside this table. No line of `doc/src/users-guide/*.rst` names PIM by an RFC number at all; the one PIM mention in the user's guide is a bare cross-reference to the protocol name (`ch-networks.rst:58`).
 
 Mapped onto the standards map, [`standards.md`](../../protocol/pim/standards.md#document-list):
 
@@ -52,49 +47,13 @@ Mapped onto the standards map, [`standards.md`](../../protocol/pim/standards.md#
 | RFC 2460 | no, not part of the family, obsolete | **yes**, twice, for one clause | **A second obsolete claim.** Both citations name RFC 2460 §8.1 for the IPv6 pseudo-header; RFC 8200 obsoleted it in 2017 without renumbering that clause. |
 | RFC 8200 | no, not part of the family | no | Nothing names the current document for the same clause. |
 
-**The finding of the survey.** The model claims both base documents, and it claims them
-inconsistently within the same source tree. The two places a reader of the module reference
-looks first — `PimSm.ned`'s documentation comment and `PimSm.h`'s Doxygen comment, plus the
-compound module's own comment in `Pim.h` — name RFC 4601, obsoleted by RFC 7761 in 2016. Three
-source comments inside `PimBase.cc` and `PimDm.cc`, which a reader of the generated
-documentation does not see, correctly name RFC 7761 for the same protocol. PIM-DM's claim has no
-such split: `PimDm.ned` and `PimDm.h` both name RFC 3973, which has no successor.
+**The finding of the survey.** The model claims both base documents, and it claims them inconsistently within the same source tree. The two places a reader of the module reference looks first — `PimSm.ned`'s documentation comment and `PimSm.h`'s Doxygen comment, plus the compound module's own comment in `Pim.h` — name RFC 4601, obsoleted by RFC 7761 in 2016. Three source comments inside `PimBase.cc` and `PimDm.cc`, which a reader of the generated documentation does not see, correctly name RFC 7761 for the same protocol. PIM-DM's claim has no such split: `PimDm.ned` and `PimDm.h` both name RFC 3973, which has no successor.
 
-A second, unrelated obsolete claim sits in the checksum code: two identical comments cite
-RFC 2460 for the IPv6 pseudo-header layout, and RFC 2460 was obsoleted by RFC 8200 in 2017. This
-citation is outside the PIM family — it is a general IPv6 citation borrowed for a checksum
-procedure — but it is still a citation of a superseded document, the same shape of finding as the
-RFC 4601 claim, so this survey counts two obsolete claims for PIM, not one.
+A second, unrelated obsolete claim sits in the checksum code: two identical comments cite RFC 2460 for the IPv6 pseudo-header layout, and RFC 2460 was obsoleted by RFC 8200 in 2017. This citation is outside the PIM family — it is a general IPv6 citation borrowed for a checksum procedure — but it is still a citation of a superseded document, the same shape of finding as the RFC 4601 claim, so this survey counts two obsolete claims for PIM, not one.
 
 ## Facts for the level 2 pass
 
-1. **`PimSm.ned`'s "Limitations:" section states three omissions, not two.** Besides the two the
-   survey lead named — no switch to the shortest-path tree, and no source-specific excludes on
-   the shared tree — a third sentence precedes them: "Only one global RP is supported and it
-   must be specified statically. PIM Bootstrap and RP discovery are not yet implemented."
-   (`PimSm.ned:40-41`). All three are stated limitations in the module's own published
-   documentation, not code comments, so all three are declarable absences by the third
-   principle of the guide: a check of any of them fails, and the failure is expected.
-2. **The Bootstrap and Candidate-RP-Advertisement message types have a reserved type code and a
-   receive path, but no message class.** `PimPacket.msg:32,36` reserves `Bootstrap = 4` and
-   `CandidateRPAdvertisement = 8` in the `PimPacketType` enum, and `PimSm.cc:249-254` has a
-   `case` for each: `case Bootstrap: delete pk; break;` and the same for
-   `CandidateRPAdvertisement`. Neither type has a dedicated message class in `PimPacket.msg`
-   (compare `PimHello`, `PimJoinPrune`, `PimAssert`, `PimGraft`, `PimStateRefresh`,
-   `PimRegister`, `PimRegisterStop`, all of which do). A packet of either type is received,
-   recognized by its type code, and discarded unconditionally, with no parse. This matches the
-   stated limitation of fact 1 — "PIM Bootstrap and RP discovery are not yet implemented" — so a
-   level 2 or later check that sends a Bootstrap message and observes silence tests a declared
-   absence, and one that expects a Candidate-RP-Advertisement reply has no message class to
-   build the stimulus with: an **untestable claim** only if the module documentation had not
-   already declared the absence; here it is a plain declared absence instead.
-3. **RFC 7761 §4.7 makes static RP configuration the one mandatory group-to-RP mapping
-   mechanism** ("A PIM router MUST support the static configuration of group-to-RP mappings",
-   `rfc7761.txt:5477-5478`) and lists Bootstrap, embedded-RP and Cisco's Auto-RP as three
-   alternatives it does not mandate. The model implements the mandatory one (a single global
-   `RP` parameter) and one of the three alternatives (embedded-RP); this is consistent scope,
-   not a partial claim.
-4. **RFC 2460 is not a PIM-family document**, so it does not appear in
-   [`standards.md`](../../protocol/pim/standards.md)'s in-scope or out-of-scope tables by that
-   test alone; it is recorded here because the citation names a superseded document, which is
-   the level 1 headline this pass looks for regardless of which family the document belongs to.
+1. **`PimSm.ned`'s "Limitations:" section states three omissions, not two.** Besides the two the survey lead named — no switch to the shortest-path tree, and no source-specific excludes on the shared tree — a third sentence precedes them: "Only one global RP is supported and it must be specified statically. PIM Bootstrap and RP discovery are not yet implemented." (`PimSm.ned:40-41`). All three are stated limitations in the module's own published documentation, not code comments, so all three are declarable absences by the third principle of the guide: a check of any of them fails, and the failure is expected.
+2. **The Bootstrap and Candidate-RP-Advertisement message types have a reserved type code and a receive path, but no message class.** `PimPacket.msg:32,36` reserves `Bootstrap = 4` and `CandidateRPAdvertisement = 8` in the `PimPacketType` enum, and `PimSm.cc:249-254` has a `case` for each: `case Bootstrap: delete pk; break;` and the same for `CandidateRPAdvertisement`. Neither type has a dedicated message class in `PimPacket.msg` (compare `PimHello`, `PimJoinPrune`, `PimAssert`, `PimGraft`, `PimStateRefresh`, `PimRegister`, `PimRegisterStop`, all of which do). A packet of either type is received, recognized by its type code, and discarded unconditionally, with no parse. This matches the stated limitation of fact 1 — "PIM Bootstrap and RP discovery are not yet implemented" — so a level 2 or later check that sends a Bootstrap message and observes silence tests a declared absence, and one that expects a Candidate-RP-Advertisement reply has no message class to build the stimulus with: an **untestable claim** only if the module documentation had not already declared the absence; here it is a plain declared absence instead.
+3. **RFC 7761 §4.7 makes static RP configuration the one mandatory group-to-RP mapping mechanism** ("A PIM router MUST support the static configuration of group-to-RP mappings", `rfc7761.txt:5477-5478`) and lists Bootstrap, embedded-RP and Cisco's Auto-RP as three alternatives it does not mandate. The model implements the mandatory one (a single global `RP` parameter) and one of the three alternatives (embedded-RP); this is consistent scope, not a partial claim.
+4. **RFC 2460 is not a PIM-family document**, so it does not appear in [`standards.md`](../../protocol/pim/standards.md)'s in-scope or out-of-scope tables by that test alone; it is recorded here because the citation names a superseded document, which is the level 1 headline this pass looks for regardless of which family the document belongs to.

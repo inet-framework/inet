@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc4301/catalog.md](../../standard/rfc4301/catalog.md), [rfc4302/catalog.md](../../standard/rfc4302/catalog.md), [rfc4303/catalog.md](../../standard/rfc4303/catalog.md), [features.md](../../protocol/ipsec/features.md)
 
-The single place that holds the changing state of the IPsec workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the IPsec workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -35,11 +33,7 @@ The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
 | `later` | it needs a toolset of a higher level — a crafted or replayed packet at level 3, the state of a node or a counter near 2^32 at level 4, a key management protocol or the algorithm itself at level 5 |
 | `no check` | the model does not claim the behavior, or a permission that no observation can fail, so [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) asks for no test |
 
-A verdict belongs to the test. Where a test fails at a later observation and the observation
-of a statement held, the row says PASS and names the observation in the note; where a failure
-kept a test from the observation a statement needs, the row says FAIL and says so. A PASS
-"with no weight" is a pass that the model cannot fail, because the receiver never checks the
-ICV; level 3 gives it weight.
+A verdict belongs to the test. Where a test fails at a later observation and the observation of a statement held, the row says PASS and names the observation in the note; where a failure kept a test from the observation a statement needs, the row says FAIL and says so. A PASS "with no weight" is a pass that the model cannot fail, because the receiver never checks the ICV; level 3 gives it weight.
 
 | Status | RFC 4301 | RFC 4302 | RFC 4303 | Together |
 | --- | --- | --- | --- | --- |
@@ -864,12 +858,7 @@ ICV; level 3 gives it weight.
 
 ## The coverage debt: the checks this pass owes
 
-Six statements are `owed`: the model claims the behavior, and no check of this pass reaches it.
-All six need the same thing, a packet with an IPv6 extension header before the IPsec header, and
-one later level 2 check serves them all. The model says that it inserts AH and ESP "after the
-base header" (`IPsec.ned:44-46`), so the check would show where they go when a Hop-by-Hop or a
-Destination Options header is there, and which headers the selectors skip to find the next
-layer protocol.
+Six statements are `owed`: the model claims the behavior, and no check of this pass reaches it. All six need the same thing, a packet with an IPv6 extension header before the IPsec header, and one later level 2 check serves them all. The model says that it inserts AH and ESP "after the base header" (`IPsec.ned:44-46`), so the check would show where they go when a Hop-by-Hop or a Destination Options header is there, and which headers the selectors skip to find the next layer protocol.
 
 | Statement | Strength | What a check needs |
 | --- | --- | --- |
@@ -880,18 +869,11 @@ layer protocol.
 | [RFC4302-LOC-6](../../standard/rfc4302/catalog.md#rfc4302-loc-6) | description | a packet with a Hop-by-Hop or Destination Options header |
 | [RFC4303-LOC-7](../../standard/rfc4303/catalog.md#rfc4303-loc-7) | description | a packet with a Hop-by-Hop or Destination Options header |
 
-The `later` statements are not debt of this level: 260 need a crafted or replayed packet, a
-counter near 2^32, the state of a node, a key management protocol or the algorithm itself.
-The 206 `no check` statements are behaviors that the model does not claim — multicast, a
-gateway and tunnel mode beyond one host pair, extended sequence numbers, nested SAs, the ICMP
-report of a discard, more than one SPD, a change of the SPD at run time, the ICV over options —
-and permissions that no observation can fail.
+The `later` statements are not debt of this level: 260 need a crafted or replayed packet, a counter near 2^32, the state of a node, a key management protocol or the algorithm itself. The 206 `no check` statements are behaviors that the model does not claim — multicast, a gateway and tunnel mode beyond one host pair, extended sequence numbers, nested SAs, the ICMP report of a discard, more than one SPD, a change of the SPD at run time, the ICV over options — and permissions that no observation can fail.
 
 ## Feature support
 
-The rule of the guide: `supported` when every core statement passed, `partial` when some passed
-and some failed or have no check, `not supported` when every core statement that ran failed,
-`untested` when no core statement has a check.
+The rule of the guide: `supported` when every core statement passed, `partial` when some passed and some failed or have no check, `not supported` when every core statement that ran failed, `untested` when no core statement has a check.
 
 | Feature | Level | Support | Why |
 | --- | --- | --- | --- |
@@ -925,19 +907,13 @@ and some failed or have no check, `not supported` when every core statement that
 | [IPSEC-F-ESP-DUMMY-PACKETS](../../protocol/ipsec/features.md#ipsec-f-esp-dummy-packets) | mandatory | not supported | every core statement that ran failed (4) |
 | [IPSEC-F-MULTICAST](../../protocol/ipsec/features.md#ipsec-f-multicast) | optional | untested | no core statement has a check: no check |
 
-- **IPSEC-F-TRANSPORT-MODE is partial because of one statement**, RFC4301-SA-50: a host supports
-  transport mode and tunnel mode, and the model has only the first ([gap 8](results.md#gap-8-unimplemented-feature--no-tunnel-mode)).
-  Every rule of transport mode itself passed.
-- **IPSEC-F-AH-INTEGRITY is partial with no failure**, and its passes have no weight: the
-  receiver never checks the ICV, and the two core statements of a failed ICV are level 3.
-- **Four mandatory features are untested or not supported only because a statement needs a later
-  level**: the named SPD entries and anti-replay have no core check at level 2, as
-  [`checks.md`](../../protocol/ipsec/checks.md#statements-this-pass-wrote-no-check-for) says.
+- **IPSEC-F-TRANSPORT-MODE is partial because of one statement**, RFC4301-SA-50: a host supports transport mode and tunnel mode, and the model has only the first ([gap 8](results.md#gap-8-unimplemented-feature--no-tunnel-mode)). Every rule of transport mode itself passed.
+- **IPSEC-F-AH-INTEGRITY is partial with no failure**, and its passes have no weight: the receiver never checks the ICV, and the two core statements of a failed ICV are level 3.
+- **Four mandatory features are untested or not supported only because a statement needs a later level**: the named SPD entries and anti-replay have no core check at level 2, as [`checks.md`](../../protocol/ipsec/checks.md#statements-this-pass-wrote-no-check-for) says.
 
 ## Achieved level
 
-**Level 2, reached, for the normal path.** Target: level 2, from
-[`standards.md`](../../protocol/ipsec/standards.md#target-level).
+**Level 2, reached, for the normal path.** Target: level 2, from [`standards.md`](../../protocol/ipsec/standards.md#target-level).
 
 | Half of the criterion | State | Evidence |
 | --- | --- | --- |
@@ -961,7 +937,4 @@ and some failed or have no check, `not supported` when every core statement that
 
 ## Out of scope
 
-The sections of the three documents outside the in-scope set are listed at the end of each
-catalog: [RFC 4301](../../standard/rfc4301/catalog.md#out-of-scope-in-this-catalog),
-[RFC 4302](../../standard/rfc4302/catalog.md#out-of-scope-in-this-catalog) and
-[RFC 4303](../../standard/rfc4303/catalog.md#out-of-scope-in-this-catalog).
+The sections of the three documents outside the in-scope set are listed at the end of each catalog: [RFC 4301](../../standard/rfc4301/catalog.md#out-of-scope-in-this-catalog), [RFC 4302](../../standard/rfc4302/catalog.md#out-of-scope-in-this-catalog) and [RFC 4303](../../standard/rfc4303/catalog.md#out-of-scope-in-this-catalog).

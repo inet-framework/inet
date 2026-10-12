@@ -2,18 +2,11 @@
 
 > **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [results.md](results.md), [test-anatomy.md](../../../design/test-anatomy.md)
 
-Step 9 artifact of the standards test workflow. For each check, this document records the
-category the check belongs to, confirmed after the run, and the reason. The categories and
-what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories);
-the rule that the category must match the claim is
-[TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
+Step 9 artifact of the standards test workflow. For each check, this document records the category the check belongs to, confirmed after the run, and the reason. The categories and what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories); the rule that the category must match the claim is [TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
 
 ## The decision, per check
 
-All 34 checks of this pass are **protocol tests**, and their 37 tests are all in
-`tests/protocol/nd/`. The prediction that step 3 made from the observation class held for every
-one of them: Neighbor Discovery is a protocol of messages between neighbors, so `wire` dominates
-the catalogs, and a `wire` or `end-to-end` statement maps to a protocol test.
+All 34 checks of this pass are **protocol tests**, and their 37 tests are all in `tests/protocol/nd/`. The prediction that step 3 made from the observation class held for every one of them: Neighbor Discovery is a protocol of messages between neighbors, so `wire` dominates the catalogs, and a `wire` or `end-to-end` statement maps to a protocol test.
 
 | Check | Observation class of its statements | Category | Reason |
 | --- | --- | --- | --- |
@@ -52,39 +45,21 @@ the catalogs, and a `wire` or `end-to-end` statement maps to a protocol test.
 | [Groups joined before Duplicate Address Detection](../../protocol/nd/checks/multicast.md#groups-joined-before-duplicate-address-detection) | wire, end-to-end | protocol test | An MLD Report on the link before a solicitation. |
 | [All-routers group of a router](../../protocol/nd/checks/multicast.md#all-routers-group-of-a-router) | end-to-end | protocol test | An MLD Report of the router on the link. |
 
-The check of the link-local address targets two statements of class `internal` and one of
-class `encoding`, and it reaches all three on the wire: the tentative address shows as the
-absence of packets from it for 1 s, and the layout of the link-local address shows in the
-target of the solicitation. The check of address resolution failure holds the one
-`error-signal` statement, the Destination Unreachable that the router sends on the other link.
+The check of the link-local address targets two statements of class `internal` and one of class `encoding`, and it reaches all three on the wire: the tentative address shows as the absence of packets from it for 1 s, and the layout of the link-local address shows in the target of the solicitation. The check of address resolution failure holds the one `error-signal` statement, the Destination Unreachable that the router sends on the other link.
 
 ### The checks with a time window, and why they are not statistical tests
 
-Five checks compare instants: the solicitations 4 s apart, the answer within 3.5 s, the
-unsolicited advertisements at most 16 s apart and then 198 to 600 s apart, the retransmissions
-2 to 3 s or 1 to 1.5 s apart, and the address tentative for 1 s. Each one tests a bound that the
-standard gives as a figure, and one run can break a bound. None of them tests the shape of a
-distribution; that half of RFC4861-HOST-47, ADV-22, ADV-32, HOST-6 and RFC4862-DAD-14 is a
-statistical test, and the ledger records it as `later`.
+Five checks compare instants: the solicitations 4 s apart, the answer within 3.5 s, the unsolicited advertisements at most 16 s apart and then 198 to 600 s apart, the retransmissions 2 to 3 s or 1 to 1.5 s apart, and the address tentative for 1 s. Each one tests a bound that the standard gives as a figure, and one run can break a bound. None of them tests the shape of a distribution; that half of RFC4861-HOST-47, ADV-22, ADV-32, HOST-6 and RFC4862-DAD-14 is a statistical test, and the ledger records it as `later`.
 
-The upper bound of a retransmission window reads "about every RetransTimer" as at most one and a
-half times the timer. That is a reading of the text, and the checks say so in their notes.
+The upper bound of a retransmission window reads "about every RetransTimer" as at most one and a half times the timer. That is a reading of the text, and the checks say so in their notes.
 
 ### The checks that read the octets
 
-Most field checks read the message as it holds its fields. The Reserved fields and the options
-are the exception: the checks read them from the octets that the serializer writes, with
-`ndBytesOf` of [`NdChecks.h`](../../../../../tests/protocol/nd/NdChecks.h), because the Redirect
-of the model has no Reserved field and the model has no class for the Redirected Header option.
-A wrong layout of those parts would show. The whole bit layout, and the deserializer, are a
-serializer test (below).
+Most field checks read the message as it holds its fields. The Reserved fields and the options are the exception: the checks read them from the octets that the serializer writes, with `ndBytesOf` of [`NdChecks.h`](../../../../../tests/protocol/nd/NdChecks.h), because the Redirect of the model has no Reserved field and the model has no class for the Redirected Header option. A wrong layout of those parts would show. The whole bit layout, and the deserializer, are a serializer test (below).
 
 ### The management module of two tests
 
-`Rfc4861RaFields` and `Rfc4861RetransTimerFromRouter` set AdvReachableTime and AdvRetransTimer
-with `NdRouterVariables` of [`NdChecks.h`](../../../../../tests/protocol/nd/NdChecks.h), because
-the model has no parameter for them. The module plays the system management of RFC 4861
-§6.2.1; it changes no behavior of the model, and the two tests stay protocol tests.
+`Rfc4861RaFields` and `Rfc4861RetransTimerFromRouter` set AdvReachableTime and AdvRetransTimer with `NdRouterVariables` of [`NdChecks.h`](../../../../../tests/protocol/nd/NdChecks.h), because the model has no parameter for them. The module plays the system management of RFC 4861 §6.2.1; it changes no behavior of the model, and the two tests stay protocol tests.
 
 ## The statements that belong in another suite
 
@@ -97,6 +72,4 @@ the model has no parameter for them. The module plays the system management of R
 
 ## A category this pass did not need
 
-No check needs a module test: every checked behavior shows in a message on a link or in a
-forwarded packet. No check needs a fingerprint test: the pass locks behaviors to the standard,
-not trajectories to a reference run.
+No check needs a module test: every checked behavior shows in a message on a link or in a forwarded packet. No check needs a fingerprint test: the pass locks behaviors to the standard, not trajectories to a reference run.

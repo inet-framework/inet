@@ -2,43 +2,24 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC2080-*` · **Stands on:** [standards.md](../../protocol/rip/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow for the IPv6 base
-document of the in-scope set: RFC 2080, RIPng for IPv6, of January 1997. The catalog comes
-from the RFC text only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow for the IPv6 base document of the in-scope set: RFC 2080, RIPng for IPv6, of January 1997. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc2080.txt`](../../../../../../standards/RFC/rfc2080.txt) —
-  RIPng for IPv6, January 1997. Downloaded 2026-09-23 from
-  <https://www.rfc-editor.org/rfc/rfc2080.txt>.
+- [`standards/RFC/rfc2080.txt`](../../../../../../standards/RFC/rfc2080.txt) — RIPng for IPv6, January 1997. Downloaded 2026-09-23 from <https://www.rfc-editor.org/rfc/rfc2080.txt>.
 
-The IPv4 twin of this document is RFC 2453, in [`rfc2453/catalog.md`](../rfc2453/catalog.md).
-RFC 2080 is the older of the two, and it takes the theory of the protocol from RFC 1058
-without restating it; §2 of RFC 2080 holds every rule. The family of documents and the
-in-scope set are in [`standards.md`](../../protocol/rip/standards.md). The features these
-statements build are in [`features.md`](../../protocol/rip/features.md).
+The IPv4 twin of this document is RFC 2453, in [`rfc2453/catalog.md`](../rfc2453/catalog.md). RFC 2080 is the older of the two, and it takes the theory of the protocol from RFC 1058 without restating it; §2 of RFC 2080 holds every rule. The family of documents and the in-scope set are in [`standards.md`](../../protocol/rip/standards.md). The features these statements build are in [`features.md`](../../protocol/rip/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`rip/coverage.md`](../../model/rip/coverage.md). Keeping it out is deliberate: this catalog
-states what the standard says, so a new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`rip/coverage.md`](../../model/rip/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc2080.txt:247-249` points to lines of that
-file. Where a quote crosses a page break of the RFC, the reference names both line groups.
+Quotes are verbatim. A reference such as `rfc2080.txt:247-249` points to lines of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
 ## How to read an entry
 
 - **ID** — `RFC2080-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into the text.
-- **Strength** — the word the document uses. RFC 2080 does not use the keywords of RFC 2119:
-  its "must", "should" and "may" are all in lower case. The entry records the word as
-  written: `must`, `must not`, `should`, `should not`, `may`, or `description` for a
-  normative sentence with no keyword. Where the text says "required", "preferred" or
-  "strongly discouraged", the entry names the word.
-- **Class** — how a test can observe the statement: `wire` (fields of messages on a link),
-  `end-to-end` (what a router accepts and acts on, seen in what it sends or forwards
-  afterwards), `error-signal` (a report message), `internal` (state inside a router),
-  `encoding` (the exact bit layout).
+- **Strength** — the word the document uses. RFC 2080 does not use the keywords of RFC 2119: its "must", "should" and "may" are all in lower case. The entry records the word as written: `must`, `must not`, `should`, `should not`, `may`, or `description` for a normative sentence with no keyword. Where the text says "required", "preferred" or "strongly discouraged", the entry names the word.
+- **Class** — how a test can observe the statement: `wire` (fields of messages on a link), `end-to-end` (what a router accepts and acts on, seen in what it sends or forwards afterwards), `error-signal` (a report message), `internal` (state inside a router), `encoding` (the exact bit layout).
 - **Check idea** — one or two sentences, still without implementation names.
 
 ## Index
@@ -159,8 +140,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > the RIPng port." — §2.1, `rfc2080.txt:250-253`
 
 - Strength: description. Class: wire.
-- Check idea: a periodic update and a triggered update carry source port 521 and
-  destination port 521.
+- Check idea: a periodic update and a triggered update carry source port 521 and destination port 521.
 
 ### RFC2080-MSG-4
 
@@ -170,8 +150,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > port from which the request came." — §2.1, `rfc2080.txt:253-254`
 
 - Strength: description. Class: wire.
-- Check idea: the response to a whole-table request that came from port 521 goes to port
-  521.
+- Check idea: the response to a whole-table request that came from port 521 goes to port 521.
 
 ### RFC2080-MSG-5
 
@@ -194,8 +173,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:295`
 
 - Strength: description. Class: encoding.
-- Check idea: the octets of a message: one octet of command, one of version, two zero
-  octets, then entries of 20 octets each, with the metric in the last octet.
+- Check idea: the octets of a message: one octet of command, one of version, two zero octets, then entries of 20 octets each, with the metric in the last octet.
 
 ### RFC2080-MSG-7
 
@@ -252,8 +230,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > of the RIPng header, and the size of an RTE." — `rfc2080.txt:363-366`
 
 - Strength: description. Class: wire.
-- Check idea: a router whose table does not fit into one message of the link MTU sends its
-  update in more than one message, and no message is larger than the MTU allows.
+- Check idea: a router whose table does not fit into one message of the link MTU sends its update in more than one message, and no message is larger than the MTU allows.
 
 ## Metric
 
@@ -265,8 +242,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > is an integer between 1 and 15, inclusive." — §2, `rfc2080.txt:184-185`
 
 - Strength: description. Class: wire.
-- Check idea: the metric that a router advertises for a network it reaches is between 1
-  and 15.
+- Check idea: the metric that a router advertises for a network it reaches is between 1 and 15.
 
 ### RFC2080-MET-2
 
@@ -276,8 +252,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > the system administrator to set the metric of each network." — §2, `rfc2080.txt:187-188`
 
 - Strength: should. Class: wire.
-- Check idea: a network with a configured cost of 3 is advertised with metric 3 by the
-  router that is directly connected to it.
+- Check idea: a network with a configured cost of 3 is advertised with metric 3 by the router that is directly connected to it.
 
 ### RFC2080-MET-3
 
@@ -287,8 +262,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > cost of that network." — §2, `rfc2080.txt:218-219`
 
 - Strength: description. Class: wire.
-- Check idea: a router advertises each network it is attached to with the cost of that
-  network, 1 when no cost is configured.
+- Check idea: a router advertises each network it is attached to with the cost of that network, 1 when no cost is configured.
 
 ### RFC2080-MET-4
 
@@ -300,8 +274,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:356-358`
 
 - Strength: description. Class: wire.
-- Check idea: no route entry of any update carries a metric of 0, or a metric above 16 other
-  than the 0xFF of a next hop entry.
+- Check idea: no route entry of any update carries a metric of 0, or a metric above 16 other than the 0xFF of a next hop entry.
 
 ### RFC2080-MET-5
 
@@ -312,8 +285,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > greater than infinity, use infinity." — §2.4.2, `rfc2080.txt:652-654`
 
 - Strength: description. Class: wire.
-- Check idea: in a chain of routers, each router advertises a remote prefix with a metric
-  one higher than the router before it.
+- Check idea: in a chain of routers, each router advertises a remote prefix with a metric one higher than the router before it.
 
 ## Routing table
 
@@ -336,8 +308,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > RTE." — §2.4.2, `rfc2080.txt:678-680`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a host behind a router reaches a network two routers away, which is possible
-  only when each router forwards to the router it learned the route from.
+- Check idea: a host behind a router reaches a network two routers away, which is possible only when each router forwards to the router it learned the route from.
 
 ## Route tag
 
@@ -349,8 +320,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > preserved and readvertised with a route." — §2.1, `rfc2080.txt:326-327`
 
 - Strength: must. Class: wire.
-- Check idea: a response offers a prefix with tag 7; the receiver advertises the prefix on
-  with tag 7.
+- Check idea: a response offers a prefix with tag 7; the receiver advertises the prefix on with tag 7.
 
 ### RFC2080-TAG-2
 
@@ -375,8 +345,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > encountered." — §2.1.1, `rfc2080.txt:381-384`
 
 - Strength: description. Class: encoding.
-- Check idea: a message with two next hop entries; the receiver uses the first next hop for
-  the routes between them and the second for the rest.
+- Check idea: a message with two next hop entries; the receiver uses the first next hop for the routes between them and the second for the rest.
 
 ### RFC2080-NH-2
 
@@ -408,8 +377,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > of the RIPng advertisement." — §2.1.1, `rfc2080.txt:410-412`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a next hop entry of all zeros; the receiver forwards to the sender of the
-  update.
+- Check idea: a next hop entry of all zeros; the receiver forwards to the sender of the update.
 
 ### RFC2080-NH-5
 
@@ -431,8 +399,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > taken." — §2.1.1, `rfc2080.txt:417-420`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a permission; it lets a receiver forward through the sender of an update even
-  when a next hop entry names another router.
+- Check idea: a permission; it lets a receiver forward through the sender of an update even when a next hop entry names another router.
 
 ### RFC2080-NH-7
 
@@ -442,8 +409,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > it should be treated as 0:0:0:0:0:0:0:0." — §2.1.1, `rfc2080.txt:420-421`
 
 - Strength: should. Class: end-to-end.
-- Check idea: a next hop entry names a global address; the receiver forwards to the sender
-  of the update.
+- Check idea: a next hop entry names a global address; the receiver forwards to the sender of the update.
 
 ## Addressing
 
@@ -457,8 +423,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > essentially ignored." — §2.2, `rfc2080.txt:428-431`
 
 - Strength: description. Class: wire.
-- Check idea: a default route is advertised with prefix length 0, and its prefix is all
-  zeros.
+- Check idea: a default route is advertised with prefix length 0, and its prefix is all zeros.
 
 ### RFC2080-ADDR-2
 
@@ -468,8 +433,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > the same manner as any other destination prefix." — §2.2, `rfc2080.txt:444-445`
 
 - Strength: description. Class: wire.
-- Check idea: a default route that one router originates reaches the next router and is
-  advertised on with the metric increased.
+- Check idea: a default route that one router originates reaches the next router and is advertised on with the metric increased.
 
 ### RFC2080-ADDR-3
 
@@ -494,8 +458,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > network are omitted from updates sent on that network." — §2.6, `rfc2080.txt:877-880`
 
 - Strength: description. Class: wire.
-- Check idea: a route learned on a network does not appear with a finite metric in the
-  updates that the router sends on that network.
+- Check idea: a route learned on a network does not appear with a finite metric in the updates that the router sends on that network.
 
 ### RFC2080-SH-2
 
@@ -507,8 +470,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > reachable.  This is the preferred method of operation;" — §2.6, `rfc2080.txt:882-885`
 
 - Strength: description ("the preferred method"). Class: wire.
-- Check idea: the update on the network where a route was learned holds that route with
-  metric 16.
+- Check idea: the update on the network where a route was learned holds that route with metric 16.
 
 ### RFC2080-SH-3
 
@@ -520,8 +482,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:885-887`
 
 - Strength: should. Class: wire.
-- Check idea: the same network run three times, once with each setting on the interface;
-  the reverse route is sent with its metric, left out, and sent with metric 16.
+- Check idea: the same network run three times, once with each setting on the interface; the reverse route is sent with its metric, left out, and sent with metric 16.
 
 ## Timers
 
@@ -535,8 +496,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:464-466`
 
 - Strength: description. Class: wire.
-- Check idea: the unsolicited responses of a router on a link come about 30 seconds apart,
-  and each one holds every route of its table that split horizon lets through.
+- Check idea: the unsolicited responses of a router on a link come about 30 seconds apart, and each one holds every route of its table that split horizon lets through.
 
 ### RFC2080-TIMER-2
 
@@ -549,8 +509,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > the update period (i.e. 30)." — `rfc2080.txt:480-482`
 
 - Strength: must ("required"). Class: wire.
-- Check idea: the intervals between the periodic updates of a router stay between 15 and 45
-  seconds. Whether the offset is random is a distribution.
+- Check idea: the intervals between the periodic updates of a router stay between 15 and 45 seconds. Whether the offset is random is a distribution.
 
 ### RFC2080-TIMER-3
 
@@ -563,8 +522,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > route is finally removed from the routing table." — §2.3, `rfc2080.txt:485-489`
 
 - Strength: description. Class: wire.
-- Check idea: after its neighbor goes silent, a route first appears with metric 16 in the
-  updates and later disappears from them.
+- Check idea: after its neighbor goes silent, a route first appears with metric 16 in the updates and later disappears from them.
 
 ### RFC2080-TIMER-4
 
@@ -577,8 +535,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > begins for that route." — §2.3, `rfc2080.txt:491-495`
 
 - Strength: description. Class: wire.
-- Check idea: a neighbor stops without notice; 180 seconds after its last update, the route
-  through it is withdrawn with metric 16, and not earlier.
+- Check idea: a neighbor stops without notice; 180 seconds after its last update, the route through it is withdrawn with metric 16, and not earlier.
 
 ### RFC2080-TIMER-5
 
@@ -592,8 +549,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > response." — `rfc2080.txt:524`
 
 - Strength: description. Class: wire.
-- Check idea: when a route is deleted, the router sends an update with the route at metric
-  16 soon after, without waiting for the next periodic update.
+- Check idea: when a route is deleted, the router sends an update with the route at metric 16 soon after, without waiting for the next periodic update.
 
 ### RFC2080-TIMER-6
 
@@ -604,8 +560,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > expires, the route is deleted from the routing table." — §2.3, `rfc2080.txt:526-528`
 
 - Strength: description. Class: wire.
-- Check idea: after a deletion, every periodic update for 120 seconds holds the route at
-  metric 16, and the updates after that do not hold it.
+- Check idea: after a deletion, every periodic update for 120 seconds holds the route at metric 16, and the updates after that do not hold it.
 
 ### RFC2080-TIMER-7
 
@@ -617,9 +572,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > must be cleared." — §2.3, `rfc2080.txt:530-533`
 
 - Strength: must. Class: wire.
-- Check idea: a route is deleted and comes back before 120 seconds pass; the router still
-  advertises it with a finite metric after the instant when the old garbage collection
-  would have expired.
+- Check idea: a route is deleted and comes back before 120 seconds pass; the router still advertises it with a finite metric after the instant when the old garbage collection would have expired.
 
 ## Request messages
 
@@ -647,8 +600,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > directly attached network." — §2.4.1, `rfc2080.txt:551-556`
 
 - Strength: should (the requester), description (the answer). Class: wire.
-- Check idea: a request from port 5000 of a host; the answer goes to that host and port 5000,
-  from a global source address.
+- Check idea: a request from port 5000 of a host; the answer goes to that host and port 5000, from a global source address.
 
 ### RFC2080-REQ-3
 
@@ -671,8 +623,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > requesting address/port." — §2.4.1, `rfc2080.txt:567-572`
 
 - Strength: description. Class: wire.
-- Check idea: the request of a router that starts has this form, and its neighbor answers
-  with its table, sent to the address and port of the requester.
+- Check idea: the request of a router that starts has this form, and its neighbor answers with its table, sent to the address and port of the requester.
 
 ### RFC2080-REQ-5
 
@@ -687,8 +638,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > Response and send the datagram back to the requestor." — §2.4.1, `rfc2080.txt:573-579`
 
 - Strength: description. Class: wire.
-- Check idea: a request for two prefixes, one known and one unknown; the response holds the
-  known metric and 16, in the same order.
+- Check idea: a request for two prefixes, one known and one unknown; the response holds the known metric and 16, in the same order.
 
 ### RFC2080-REQ-6
 
@@ -700,8 +650,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > this reason, Split Horizon must be done." — `rfc2080.txt:591-592`
 
 - Strength: must. Class: wire.
-- Check idea: the answer to the request of a router that starts does not advertise, with a
-  finite metric, a route learned from that router.
+- Check idea: the answer to the request of a router that starts does not advertise, with a finite metric, a route learned from that router.
 
 ### RFC2080-REQ-7
 
@@ -713,8 +662,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:584-586`
 
 - Strength: description. Class: wire.
-- Check idea: a specific request from a neighbor for a route that the answering router
-  learned from that neighbor; the answer holds the finite metric.
+- Check idea: a specific request from a neighbor for a route that the answering router learned from that neighbor; the answer holds the finite metric.
 
 ### RFC2080-REQ-8
 
@@ -724,8 +672,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > for a complete routing table." — §2.4.1, `rfc2080.txt:588-590`
 
 - Strength: description. Class: wire.
-- Check idea: a router with two networks sends a whole-table request on each of them when
-  it starts.
+- Check idea: a router with two networks sends a whole-table request on each of them when it starts.
 
 ## Response messages
 
@@ -737,8 +684,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:606`
 
 - Strength: description. Class: end-to-end.
-- Check idea: none of its own; the checks of periodic, triggered and requested responses
-  each show one cause.
+- Check idea: none of its own; the checks of periodic, triggered and requested responses each show one cause.
 
 ### RFC2080-RESP-2
 
@@ -748,8 +694,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:609-610`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a response from port 5000 that offers a new prefix; the receiver does not
-  advertise the prefix.
+- Check idea: a response from port 5000 that offers a new prefix; the receiver does not advertise the prefix.
 
 ### RFC2080-RESP-3
 
@@ -761,8 +706,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > a link-local address." — §2.4.2, `rfc2080.txt:610-613`
 
 - Strength: should (check), must (the condition). Class: end-to-end.
-- Check idea: a response from a global source address; the receiver does not take its
-  routes.
+- Check idea: a response from a global source address; the receiver does not take its routes.
 
 ### RFC2080-RESP-4
 
@@ -772,8 +716,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > datagrams must be ignored." — §2.4.2, `rfc2080.txt:624-625`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a response with the source address of the receiver and a changed metric;
-  the receiver does not act on it.
+- Check idea: a response with the source address of the receiver and a changed metric; the receiver does not act on it.
 
 ### RFC2080-RESP-5
 
@@ -783,8 +726,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > set to 255" — §2.4.2, `rfc2080.txt:625-627`
 
 - Strength: must. Class: wire.
-- Check idea: every periodic update and every triggered update carries hop limit 255 in its
-  IPv6 header.
+- Check idea: every periodic update and every triggered update carries hop limit 255 in its IPv6 header.
 
 ### RFC2080-RESP-6
 
@@ -797,8 +739,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > require the hop count test to be done." — `rfc2080.txt:631-633`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a multicast update from port 521 with hop limit 254 offers a new prefix; the
-  receiver does not take it.
+- Check idea: a multicast update from port 521 with hop limit 254 offers a new prefix; the receiver does not take it.
 
 ### RFC2080-RESP-7
 
@@ -814,8 +755,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:643-649`
 
 - Strength: description, should (no link-local prefix). Class: end-to-end.
-- Check idea: a response with four entries: a multicast prefix, a link-local prefix, a
-  metric of 17, and a valid prefix; only the valid prefix is learned.
+- Check idea: a response with four entries: a multicast prefix, a link-local prefix, a metric of 17, and a valid prefix; only the valid prefix is learned.
 
 ### RFC2080-RESP-8
 
@@ -826,8 +766,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > six items of "Adding a route to the routing table consists of:", `rfc2080.txt:661-688`
 
 - Strength: description. Class: wire.
-- Check idea: a router learns a new prefix from a neighbor and advertises it on its other
-  links with the metric increased by the cost.
+- Check idea: a router learns a new prefix from a neighbor and advertises it on its other links with the metric increased by the cost.
 
 ### RFC2080-RESP-9
 
@@ -838,8 +777,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > adding a route which unusable)." — §2.4.2, `rfc2080.txt:659-661`
 
 - Strength: description. Class: wire.
-- Check idea: a prefix offered only with metric 16 never appears in the updates of the
-  receiver.
+- Check idea: a prefix offered only with metric 16 never appears in the updates of the receiver.
 
 ### RFC2080-RESP-10
 
@@ -864,8 +802,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > infinity or restart the timeout — `rfc2080.txt:698-705`
 
 - Strength: description. Class: wire.
-- Check idea: a route gets worse at its next hop, and the receiver takes the worse metric;
-  a better path appears through another neighbor, and the receiver takes it.
+- Check idea: a route gets worse at its next hop, and the receiver takes the worse metric; a better path appears through another neighbor, and the receiver takes it.
 
 ### RFC2080-RESP-12
 
@@ -877,8 +814,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > process is not started." — §2.4.2, `rfc2080.txt:708-711`
 
 - Strength: description. Class: wire.
-- Check idea: a withdrawn route that keeps arriving with metric 16 still leaves the updates
-  120 seconds after the first withdrawal.
+- Check idea: a withdrawn route that keeps arriving with metric 16 still leaves the updates 120 seconds after the first withdrawal.
 
 ### RFC2080-RESP-13
 
@@ -890,8 +826,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > heuristic is optional, but highly recommended." — §2.4.2, `rfc2080.txt:722-725`
 
 - Strength: should ("optional, but highly recommended"). Class: wire.
-- Check idea: two equal paths; the current next hop goes silent; the router switches to the
-  other path before the timeout expires.
+- Check idea: two equal paths; the current next hop goes silent; the router switches to the other path before the timeout expires.
 
 ### RFC2080-RESP-14
 
@@ -901,8 +836,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > the current route." — §2.4.2, `rfc2080.txt:734-735`
 
 - Strength: description. Class: wire.
-- Check idea: a router with two paths of different length keeps the shorter one when the
-  longer one is advertised.
+- Check idea: a router with two paths of different length keeps the shorter one when the longer one is advertised.
 
 ## Output processing
 
@@ -915,8 +849,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > of the requestor)." — §2.5, `rfc2080.txt:743-745`
 
 - Strength: description. Class: wire.
-- Check idea: the answer to the request of a router that starts goes to the unicast address
-  of that router.
+- Check idea: the answer to the request of a router that starts goes to the unicast address of that router.
 
 ### RFC2080-OUT-2
 
@@ -928,8 +861,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > an update is triggered." — §2.5, `rfc2080.txt:747-752`
 
 - Strength: description. Class: wire.
-- Check idea: a new prefix, a changed metric and a deleted prefix each give a triggered
-  update before the next periodic one.
+- Check idea: a new prefix, a changed metric and a deleted prefix each give a triggered update before the next periodic one.
 
 ### RFC2080-OUT-3
 
@@ -944,8 +876,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > the all-rip-routers multicast group." — `rfc2080.txt:762-764`
 
 - Strength: description. Class: wire.
-- Check idea: a router with two networks sends each periodic update on both of them, to
-  FF02::9.
+- Check idea: a router with two networks sends each periodic update on both of them, to FF02::9.
 
 ## Triggered updates
 
@@ -957,8 +888,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > to limit the frequency of triggered updates." — §2.5.1, `rfc2080.txt:778-779`
 
 - Strength: must ("requires"). Class: wire.
-- Check idea: many route changes in a short time give fewer triggered updates than changes,
-  and two triggered updates on one network are at least one second apart.
+- Check idea: many route changes in a short time give fewer triggered updates than changes, and two triggered updates on one network are at least one second apart.
 
 ### RFC2080-TRIG-2
 
@@ -972,8 +902,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > and 5 seconds." — §2.5.1, `rfc2080.txt:779-781`, `rfc2080.txt:790-792`
 
 - Strength: should. Class: wire.
-- Check idea: the intervals between consecutive triggered updates lie between 1 and 5
-  seconds. That the value is random is a distribution.
+- Check idea: the intervals between consecutive triggered updates lie between 1 and 5 seconds. That the value is random is a distribution.
 
 ### RFC2080-TRIG-3
 
@@ -984,8 +913,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:792-793`
 
 - Strength: may. Class: wire.
-- Check idea: a permission; a change just before a periodic update may give no separate
-  triggered update.
+- Check idea: a permission; a change just before a periodic update may give no separate triggered update.
 
 ### RFC2080-TRIG-4
 
@@ -997,10 +925,8 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > implementor; however, sending complete routing updates is strongly
 > discouraged." — §2.5.1, `rfc2080.txt:797-801`
 
-- Strength: must (the changed routes), may (more), "strongly discouraged" (the whole table).
-  Class: wire.
-- Check idea: when one route changes in a table of several, the triggered update holds that
-  route and not the whole table.
+- Strength: must (the changed routes), may (more), "strongly discouraged" (the whole table). Class: wire.
+- Check idea: when one route changes in a table of several, the triggered update holds that route and not the whole table.
 
 ### RFC2080-TRIG-5
 
@@ -1012,8 +938,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > normal updates" — §2.5.1, `rfc2080.txt:801-804`
 
 - Strength: should (every network), description (split horizon). Class: wire.
-- Check idea: a deleted prefix appears in triggered updates on each network of the router,
-  subject to split horizon.
+- Check idea: a deleted prefix appears in triggered updates on each network of the router, subject to split horizon.
 
 ### RFC2080-TRIG-6
 
@@ -1036,8 +961,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > generated, the route change flags should be cleared." — §2.5.1, `rfc2080.txt:808-809`
 
 - Strength: should. Class: wire.
-- Check idea: two changes some seconds apart; the second triggered update does not repeat
-  the route of the first one.
+- Check idea: two changes some seconds apart; the second triggered update does not repeat the route of the first one.
 
 ### RFC2080-TRIG-8
 
@@ -1049,8 +973,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > applied to all updates." — §2.5.1, `rfc2080.txt:816-819`
 
 - Strength: must. Class: wire.
-- Check idea: a triggered update has the same header, ports, addresses, hop limit and entry
-  rules as a periodic one.
+- Check idea: a triggered update has the same header, ports, addresses, hop limit and entry rules as a periodic one.
 
 ## Generating a response
 
@@ -1065,8 +988,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:826-829`
 
 - Strength: must. Class: wire.
-- Check idea: every periodic and triggered update carries a link-local source address of
-  the interface it leaves.
+- Check idea: every periodic and triggered update carries a link-local source address of the interface it leaves.
 
 ### RFC2080-GEN-2
 
@@ -1079,8 +1001,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > longer valid." — §2.5.2, `rfc2080.txt:846-850`
 
 - Strength: must (one source), should (a stable choice). Class: wire.
-- Check idea: an interface with two link-local addresses; all updates on it carry the same
-  one of them as source.
+- Check idea: an interface with two link-local addresses; all updates on it carry the same one of them as source.
 
 ### RFC2080-GEN-3
 
@@ -1092,8 +1013,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > `rfc2080.txt:856-858`
 
 - Strength: description. Class: wire.
-- Check idea: every update carries version 1, command 2 and zero in the two unused octets
-  of the header.
+- Check idea: every update carries version 1, command 2 and zero in the two unused octets of the header.
 
 ### RFC2080-GEN-4
 
@@ -1104,8 +1024,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > the current Response and start a new one." — §2.5.2, `rfc2080.txt:859-861`
 
 - Strength: description. Class: wire.
-- Check idea: a router with more routes than one message of the link MTU holds sends them
-  in several messages, and together they hold every route.
+- Check idea: a router with more routes than one message of the link MTU holds sends them in several messages, and together they hold every route.
 
 ### RFC2080-GEN-5
 
@@ -1129,8 +1048,7 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > 2.1." — §2.5.2, `rfc2080.txt:864-870`
 
 - Strength: description. Class: wire.
-- Check idea: the entry of a route carries its prefix, its prefix length and its current
-  metric.
+- Check idea: the entry of a route carries its prefix, its prefix length and its current metric.
 
 ### RFC2080-GEN-7
 
@@ -1140,26 +1058,14 @@ file. Where a quote crosses a page break of the RFC, the reference names both li
 > are infinite." — §2.5.2, `rfc2080.txt:870-871`
 
 - Strength: must. Class: wire.
-- Check idea: a deleted prefix, and a prefix that poisoned reverse sets to 16, both appear in
-  the updates with metric 16.
+- Check idea: a deleted prefix, and a prefix that poisoned reverse sets to 16, both appear in the updates with metric 16.
 
 ## Out of scope in this catalog
 
-The entries above hold every "must", "should" and "may" of §2 that states a behavior of a
-router, and every field of the message. What is left out, and why:
+The entries above hold every "must", "should" and "may" of §2 that states a behavior of a router, and every field of the message. What is left out, and why:
 
-- **§1**, `rfc2080.txt:71-164`: the introduction, the pointer to the theory of RFC 1058, and
-  the limits of the protocol. They demand nothing.
-- **The deployment statements**: RIPng "should be implemented only in routers",
-  `rfc2080.txt:178-179`; every router of an AS must take part, and a router must leak routes
-  between IGPs, `rfc2080.txt:240-243`; default routes should not leave the AS,
-  `rfc2080.txt:454-458`; a list of neighbors for networks without broadcast is left to the
-  implementor, `rfc2080.txt:765-771`; the uses of the route tag, `rfc2080.txt:349-350`. They
-  say how a network is set up, not what a message holds.
-- **The interlocking of input and output**, `rfc2080.txt:811-814`. It is a condition on
-  concurrent input and output processing inside one router, and no message exchange can
-  observe it.
-- **§3, the control functions**, `rfc2080.txt:902-942`. The text calls them "not part of the
-  protocol per se" and optional.
-- **§4, the security considerations**, `rfc2080.txt:958-963`. They delegate to the IPv6
-  security documents and demand nothing of RIPng.
+- **§1**, `rfc2080.txt:71-164`: the introduction, the pointer to the theory of RFC 1058, and the limits of the protocol. They demand nothing.
+- **The deployment statements**: RIPng "should be implemented only in routers", `rfc2080.txt:178-179`; every router of an AS must take part, and a router must leak routes between IGPs, `rfc2080.txt:240-243`; default routes should not leave the AS, `rfc2080.txt:454-458`; a list of neighbors for networks without broadcast is left to the implementor, `rfc2080.txt:765-771`; the uses of the route tag, `rfc2080.txt:349-350`. They say how a network is set up, not what a message holds.
+- **The interlocking of input and output**, `rfc2080.txt:811-814`. It is a condition on concurrent input and output processing inside one router, and no message exchange can observe it.
+- **§3, the control functions**, `rfc2080.txt:902-942`. The text calls them "not part of the protocol per se" and optional.
+- **§4, the security considerations**, `rfc2080.txt:958-963`. They delegate to the IPv6 security documents and demand nothing of RIPng.

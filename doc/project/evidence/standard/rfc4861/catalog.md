@@ -2,57 +2,30 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC4861-*` · **Stands on:** [standards.md](../../protocol/nd/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow for RFC 4861, Neighbor Discovery for IP version 6 (IPv6), of
-September 2007, a document of the in-scope set of Neighbor Discovery. The catalog comes from the RFC
-text only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow for RFC 4861, Neighbor Discovery for IP version 6 (IPv6), of September 2007, a document of the in-scope set of Neighbor Discovery. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc4861.txt`](../../../../../../standards/RFC/rfc4861.txt) —
-  Neighbor Discovery for IP version 6 (IPv6), September 2007. Downloaded 2026-09-23 from
-  <https://www.rfc-editor.org/rfc/rfc4861.txt>.
+- [`standards/RFC/rfc4861.txt`](../../../../../../standards/RFC/rfc4861.txt) — Neighbor Discovery for IP version 6 (IPv6), September 2007. Downloaded 2026-09-23 from <https://www.rfc-editor.org/rfc/rfc4861.txt>.
 
-The other documents of the in-scope set have catalogs of their own:
-[`rfc4862/catalog.md`](../rfc4862/catalog.md) (stateless address autoconfiguration),
-[`rfc5942/catalog.md`](../rfc5942/catalog.md) (the on-link determination, which replaces two
-bullets of the definition in §2.1 of this document) and
-[`rfc6980/catalog.md`](../rfc6980/catalog.md) (no fragmentation of Neighbor Discovery messages).
+The other documents of the in-scope set have catalogs of their own: [`rfc4862/catalog.md`](../rfc4862/catalog.md) (stateless address autoconfiguration), [`rfc5942/catalog.md`](../rfc5942/catalog.md) (the on-link determination, which replaces two bullets of the definition in §2.1 of this document) and [`rfc6980/catalog.md`](../rfc6980/catalog.md) (no fragmentation of Neighbor Discovery messages).
 
-The in-scope sections are §4, §6, §7.2 and §8. Three flaws of the text itself show in the
-entries, and the entries quote the text as it stands: §7.2.6 counts RetransTimer in seconds
-where the rest of the document counts it in milliseconds (RFC4861-AR-58); the default of
-MinRtrAdvInterval for a small MaxRtrAdvInterval breaks the upper bound that the same section
-sets (RFC4861-RCFG-6); and §6.2.3 names the variable "CurHopLimit" that §6.2.1 calls
-AdvCurHopLimit (RFC4861-ADV-7).
+The in-scope sections are §4, §6, §7.2 and §8. Three flaws of the text itself show in the entries, and the entries quote the text as it stands: §7.2.6 counts RetransTimer in seconds where the rest of the document counts it in milliseconds (RFC4861-AR-58); the default of MinRtrAdvInterval for a small MaxRtrAdvInterval breaks the upper bound that the same section sets (RFC4861-RCFG-6); and §6.2.3 names the variable "CurHopLimit" that §6.2.1 calls AdvCurHopLimit (RFC4861-ADV-7).
 
-The family of documents and the in-scope set are in
-[`standards.md`](../../protocol/nd/standards.md). The features these statements build are in
-[`features.md`](../../protocol/nd/features.md).
+The family of documents and the in-scope set are in [`standards.md`](../../protocol/nd/standards.md). The features these statements build are in [`features.md`](../../protocol/nd/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`nd/coverage.md`](../../model/nd/coverage.md). Keeping it out is deliberate: this catalog
-states what the standard says, so a new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`nd/coverage.md`](../../model/nd/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc4861.txt:1203-1205` points to lines of that
-file. Where a quote crosses a page break of the RFC, the reference names both line groups.
+Quotes are verbatim. A reference such as `rfc4861.txt:1203-1205` points to lines of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
-The entries were drafted section by section and merged; the sections are the areas below, in
-the order of the document.
+The entries were drafted section by section and merged; the sections are the areas below, in the order of the document.
 
 ## How to read an entry
 
 - **ID** — `RFC4861-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into the text.
-- **Strength** — the word the document uses. RFC 4861 uses the keywords of RFC 2119 in capitals;
-  the entry records `must`, `must not`, `should`, `should not` or `may` for them, and
-  `description` for a normative sentence with no keyword. Where the text writes a keyword in
-  lower case, the entry records the word and says so, for example `must (lower case)`; a
-  "might" stays `description`. An entry with two keywords names what each one covers.
-- **Class** — how a test can observe the statement: `wire` (fields of messages on a link, or
-  the presence or absence of a message), `end-to-end` (what a node accepts and acts on, seen
-  in what it sends or forwards afterwards), `error-signal` (an ICMPv6 error report),
-  `internal` (state inside a node), `encoding` (the exact bit layout).
+- **Strength** — the word the document uses. RFC 4861 uses the keywords of RFC 2119 in capitals; the entry records `must`, `must not`, `should`, `should not` or `may` for them, and `description` for a normative sentence with no keyword. Where the text writes a keyword in lower case, the entry records the word and says so, for example `must (lower case)`; a "might" stays `description`. An entry with two keywords names what each one covers.
+- **Class** — how a test can observe the statement: `wire` (fields of messages on a link, or the presence or absence of a message), `end-to-end` (what a node accepts and acts on, seen in what it sends or forwards afterwards), `error-signal` (an ICMPv6 error report), `internal` (state inside a node), `encoding` (the exact bit layout).
 - **Check idea** — one or two sentences, still without implementation names.
 
 ## Index
@@ -473,8 +446,7 @@ the order of the document.
 > generate Router Advertisements quickly." — §4.1, `rfc4861.txt:982-983`
 
 - Strength: description. Class: wire.
-- Check idea: a host attaches to a link with a router and sends a Router Solicitation. The
-  router answers with a Router Advertisement before its next periodic one is due.
+- Check idea: a host attaches to a link with a router and sends a Router Solicitation. The router answers with a Router Advertisement before its next periodic one is due.
 
 ### RFC4861-RS-2
 
@@ -485,8 +457,7 @@ the order of the document.
 > `rfc4861.txt:990`; "|   Options ..." — `rfc4861.txt:992`
 
 - Strength: description. Class: encoding.
-- Check idea: decode a Router Solicitation of a host. The ICMP message has one octet of Type,
-  one of Code, two of Checksum, four of Reserved, and then the options.
+- Check idea: decode a Router Solicitation of a host. The ICMP message has one octet of Type, one of Code, two of Checksum, four of Reserved, and then the options.
 
 ### RFC4861-RS-3
 
@@ -498,8 +469,7 @@ the order of the document.
 > to the sending interface." — §4.1, `rfc4861.txt:997-1000`
 
 - Strength: description. Class: wire.
-- Check idea: a host with a link-local address sends a Router Solicitation from that address. A
-  host with no address sends it from the unspecified address (::).
+- Check idea: a host with a link-local address sends a Router Solicitation from that address. A host with no address sends it from the unspecified address (::).
 
 ### RFC4861-RS-4
 
@@ -509,8 +479,7 @@ the order of the document.
 > Typically the all-routers multicast address." — §4.1, `rfc4861.txt:1002-1003`
 
 - Strength: description. Class: wire.
-- Check idea: capture the Router Solicitations of a host. Their Destination Address is ff02::2,
-  the all-routers multicast address.
+- Check idea: capture the Router Solicitations of a host. Their Destination Address is ff02::2, the all-routers multicast address.
 
 ### RFC4861-RS-5
 
@@ -519,8 +488,7 @@ the order of the document.
 > "Hop Limit      255" — §4.1, `rfc4861.txt:1005`
 
 - Strength: description. Class: wire.
-- Check idea: capture the Router Solicitations of a host. Each one has Hop Limit 255 in the IP
-  header.
+- Check idea: capture the Router Solicitations of a host. Each one has Hop Limit 255 in the IP header.
 
 ### RFC4861-RS-6
 
@@ -547,8 +515,7 @@ the order of the document.
 > "Checksum       The ICMP checksum.  See [ICMPv6]." — §4.1, `rfc4861.txt:1021`
 
 - Strength: description. Class: wire.
-- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Router
-  Solicitation. The result is equal to the Checksum field.
+- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Router Solicitation. The result is equal to the Checksum field.
 
 ### RFC4861-RS-9
 
@@ -558,8 +525,7 @@ the order of the document.
 > zero by the sender" — §4.1, `rfc4861.txt:1023-1024`
 
 - Strength: must. Class: wire.
-- Check idea: capture the Router Solicitations of a host. The Reserved field of each one is
-  zero.
+- Check idea: capture the Router Solicitations of a host. The Reserved field of each one is zero.
 
 ### RFC4861-RS-10
 
@@ -569,8 +535,7 @@ the order of the document.
 > receiver." — `rfc4861.txt:1024-1025`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends a Router Solicitation with a nonzero Reserved field to a router. The
-  router answers with a Router Advertisement, as it does for a Reserved field of zero.
+- Check idea: host A sends a Router Solicitation with a nonzero Reserved field to a router. The router answers with a Router Advertisement, as it does for a Reserved field of zero.
 
 ### RFC4861-RS-11
 
@@ -580,8 +545,7 @@ the order of the document.
 > is the unspecified address." — §4.1, `rfc4861.txt:1029-1030`
 
 - Strength: must not. Class: wire.
-- Check idea: a host with no address sends a Router Solicitation from ::. The message has no
-  Source Link-Layer Address option.
+- Check idea: a host with no address sends a Router Solicitation from ::. The message has no Source Link-Layer Address option.
 
 ### RFC4861-RS-12
 
@@ -592,9 +556,7 @@ the order of the document.
 > be included on link layers that have addresses." — `rfc4861.txt:1030-1031`
 
 - Strength: should. Class: wire.
-- Check idea: on an Ethernet link, a host with a link-local address sends a Router
-  Solicitation. The message carries a Source Link-Layer Address option with the MAC address of
-  the host.
+- Check idea: on an Ethernet link, a host with a link-local address sends a Router Solicitation. The message carries a Source Link-Layer Address option with the MAC address of the host.
 
 ### RFC4861-RS-13
 
@@ -605,9 +567,7 @@ the order of the document.
 > and continue processing the message." — §4.1, `rfc4861.txt:1033-1035`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends a Router Solicitation with an option of an unknown type before its
-  Source Link-Layer Address option. The router answers with a Router Advertisement and sends no
-  ICMPv6 error.
+- Check idea: host A sends a Router Solicitation with an option of an unknown type before its Source Link-Layer Address option. The router answers with a Router Advertisement and sends no ICMPv6 error.
 
 ## Router Advertisement message
 
@@ -619,9 +579,7 @@ the order of the document.
 > response to Router Solicitations." — §4.2, `rfc4861.txt:1039-1040`
 
 - Strength: description. Class: wire.
-- Check idea: a router on a link with no other traffic sends Router Advertisements at
-  intervals. After a host sends a Router Solicitation, the router also sends a Router
-  Advertisement.
+- Check idea: a router on a link with no other traffic sends Router Advertisements at intervals. After a host sends a Router Solicitation, the router also sends a Router Advertisement.
 
 ### RFC4861-RA-2
 
@@ -634,9 +592,7 @@ the order of the document.
 > `rfc4861.txt:1051`; "|   Options ..." — `rfc4861.txt:1053`
 
 - Strength: description. Class: encoding.
-- Check idea: decode a Router Advertisement. After Type, Code and Checksum come Cur Hop Limit (8
-  bits), M and O (1 bit each) and Reserved (6 bits). Router Lifetime (16 bits), Reachable Time
-  (32 bits), Retrans Timer (32 bits) and the options follow.
+- Check idea: decode a Router Advertisement. After Type, Code and Checksum come Cur Hop Limit (8 bits), M and O (1 bit each) and Reserved (6 bits). Router Lifetime (16 bits), Reachable Time (32 bits), Retrans Timer (32 bits) and the options follow.
 
 ### RFC4861-RA-3
 
@@ -647,9 +603,7 @@ the order of the document.
 > interface from which this message is sent." — §4.2, `rfc4861.txt:1058-1060`
 
 - Strength: must. Class: wire.
-- Check idea: a router with a global address on each of two interfaces sends Router
-  Advertisements on both links. The Source Address on each link is the link-local address of
-  that interface.
+- Check idea: a router with a global address on each of two interfaces sends Router Advertisements on both links. The Source Address on each link is the link-local address of that interface.
 
 ### RFC4861-RA-4
 
@@ -660,8 +614,7 @@ the order of the document.
 > Solicitation or the all-nodes multicast address." — §4.2, `rfc4861.txt:1071-1073`
 
 - Strength: description. Class: wire.
-- Check idea: a periodic Router Advertisement goes to ff02::1. A Router Advertisement in answer
-  to a Router Solicitation from host A goes to ff02::1 or to the source address of host A.
+- Check idea: a periodic Router Advertisement goes to ff02::1. A Router Advertisement in answer to a Router Solicitation from host A goes to ff02::1 or to the source address of host A.
 
 ### RFC4861-RA-5
 
@@ -670,8 +623,7 @@ the order of the document.
 > "Hop Limit      255" — §4.2, `rfc4861.txt:1075`
 
 - Strength: description. Class: wire.
-- Check idea: capture the Router Advertisements of a router. Each one has Hop Limit 255 in the
-  IP header.
+- Check idea: capture the Router Advertisements of a router. Each one has Hop Limit 255 in the IP header.
 
 ### RFC4861-RA-6
 
@@ -698,8 +650,7 @@ the order of the document.
 > "Checksum       The ICMP checksum.  See [ICMPv6]." — §4.2, `rfc4861.txt:1083`
 
 - Strength: description. Class: wire.
-- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Router
-  Advertisement. The result is equal to the Checksum field.
+- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Router Advertisement. The result is equal to the Checksum field.
 
 ### RFC4861-RA-9
 
@@ -710,8 +661,7 @@ the order of the document.
 > header for outgoing IP packets." — §4.2, `rfc4861.txt:1085-1087`
 
 - Strength: should (lower case). Class: end-to-end.
-- Check idea: a router advertises Cur Hop Limit 32. After it receives the Router Advertisement,
-  a host sends its packets with Hop Limit 32.
+- Check idea: a router advertises Cur Hop Limit 32. After it receives the Router Advertisement, a host sends its packets with Hop Limit 32.
 
 ### RFC4861-RA-10
 
@@ -721,8 +671,7 @@ the order of the document.
 > means unspecified (by this router)." — §4.2, `rfc4861.txt:1087-1088`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises Cur Hop Limit 0. A host keeps the Hop Limit that it used
-  before the Router Advertisement.
+- Check idea: a router advertises Cur Hop Limit 0. A host keeps the Hop Limit that it used before the Router Advertisement.
 
 ### RFC4861-RA-11
 
@@ -733,8 +682,7 @@ the order of the document.
 > Dynamic Host Configuration Protocol [DHCPv6]." — §4.2, `rfc4861.txt:1090-1092`
 
 - Strength: description. Class: wire.
-- Check idea: a router configured for managed address configuration sends Router
-  Advertisements with M = 1. A router without that configuration sends M = 0.
+- Check idea: a router configured for managed address configuration sends Router Advertisements with M = 1. A router without that configuration sends M = 0.
 
 ### RFC4861-RA-12
 
@@ -745,8 +693,7 @@ the order of the document.
 > available via DHCPv6." — §4.2, `rfc4861.txt:1098-1100`
 
 - Strength: description. Class: wire.
-- Check idea: a router configured to announce other configuration sends Router Advertisements
-  with O = 1. A router without that configuration sends O = 0.
+- Check idea: a router configured to announce other configuration sends Router Advertisements with O = 1. A router without that configuration sends O = 0.
 
 ### RFC4861-RA-13
 
@@ -756,8 +703,7 @@ the order of the document.
 > zero by the sender" — §4.2, `rfc4861.txt:1107-1108`
 
 - Strength: must. Class: wire.
-- Check idea: capture the Router Advertisements of a router. The 6 bits after the O flag are
-  zero in each one.
+- Check idea: capture the Router Advertisements of a router. The 6 bits after the O flag are zero in each one.
 
 ### RFC4861-RA-14
 
@@ -767,9 +713,7 @@ the order of the document.
 > receiver." — `rfc4861.txt:1108-1109`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with nonzero Reserved bits and a Prefix
-  Information option. A host still puts the router in its default router list and uses the
-  prefix.
+- Check idea: a router sends a Router Advertisement with nonzero Reserved bits and a Prefix Information option. A host still puts the router in its default router list and uses the prefix.
 
 ### RFC4861-RA-15
 
@@ -780,9 +724,7 @@ the order of the document.
 > with the default router in units of seconds." — §4.2, `rfc4861.txt:1111-1113`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises Router Lifetime 30 and then sends no more Router
-  Advertisements. A host sends off-link packets to the router for 30 s, and after that time it
-  stops.
+- Check idea: a router advertises Router Lifetime 30 and then sends no more Router Advertisements. A host sends off-link packets to the router for 30 s, and after that time it stops.
 
 ### RFC4861-RA-16
 
@@ -794,8 +736,7 @@ the order of the document.
 > Section 6 limit the lifetime to 9000 seconds." — §4.2, `rfc4861.txt:1113-1116`
 
 - Strength: should (lower case). Class: end-to-end.
-- Check idea: host A receives a Router Advertisement with Router Lifetime 65535. The host keeps
-  the router as default router for 65535 s and does not cut the value to 9000 s.
+- Check idea: host A receives a Router Advertisement with Router Lifetime 65535. The host keeps the router as default router for 65535 s and does not cut the value to 9000 s.
 
 ### RFC4861-RA-17
 
@@ -807,8 +748,7 @@ the order of the document.
 > router list." — §4.2, `rfc4861.txt:1116-1118`, `rfc4861.txt:1127`
 
 - Strength: should not. Class: end-to-end.
-- Check idea: the only router on a link advertises Router Lifetime 0. A host sends no off-link
-  packet to that router.
+- Check idea: the only router on a link advertises Router Lifetime 0. A host sends no off-link packet to that router.
 
 ### RFC4861-RA-18
 
@@ -822,8 +762,7 @@ the order of the document.
 > lifetime fields." — `rfc4861.txt:1130-1132`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises Router Lifetime 0 with a Prefix Information option, L = 1. A
-  host still treats the prefix as on-link for the Valid Lifetime of the option.
+- Check idea: a router advertises Router Lifetime 0 with a Prefix Information option, L = 1. A host still treats the prefix as on-link for the Valid Lifetime of the option.
 
 ### RFC4861-RA-19
 
@@ -836,8 +775,7 @@ the order of the document.
 > Detection algorithm (see Section 7.3)." — §4.2, `rfc4861.txt:1134-1138`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises Reachable Time 10000. Host A confirms neighbor B, then sends
-  to B again after 20 s. Host A starts Neighbor Unreachability Detection for B.
+- Check idea: a router advertises Reachable Time 10000. Host A confirms neighbor B, then sends to B again after 20 s. Host A starts Neighbor Unreachability Detection for B.
 
 ### RFC4861-RA-20
 
@@ -847,8 +785,7 @@ the order of the document.
 > zero means unspecified (by this router)." — §4.2, `rfc4861.txt:1138-1139`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises Reachable Time 10000 and later Reachable Time 0. A host keeps
-  the value 10000 as the base for its reachable time.
+- Check idea: a router advertises Reachable Time 10000 and later Reachable Time 0. A host keeps the value 10000 as the base for its reachable time.
 
 ### RFC4861-RA-21
 
@@ -861,8 +798,7 @@ the order of the document.
 > (see Sections 7.2 and 7.3)." — §4.2, `rfc4861.txt:1141-1145`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises Retrans Timer 2000. A host resolves an address that does not
-  answer. Its Neighbor Solicitations are 2 s apart.
+- Check idea: a router advertises Retrans Timer 2000. A host resolves an address that does not answer. Its Neighbor Solicitations are 2 s apart.
 
 ### RFC4861-RA-22
 
@@ -872,8 +808,7 @@ the order of the document.
 > unspecified (by this router)." — §4.2, `rfc4861.txt:1145-1146`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises Retrans Timer 2000 and later Retrans Timer 0. A host still
-  sends its retransmitted Neighbor Solicitations 2 s apart.
+- Check idea: a router advertises Retrans Timer 2000 and later Retrans Timer 0. A host still sends its retransmitted Neighbor Solicitations 2 s apart.
 
 ### RFC4861-RA-23
 
@@ -885,8 +820,7 @@ the order of the document.
 > link layers that have addresses." — §4.2, `rfc4861.txt:1150-1153`
 
 - Strength: description. Class: wire.
-- Check idea: on an Ethernet link, capture a Router Advertisement with this option. The address
-  in the option is the MAC address of the router interface on that link.
+- Check idea: on an Ethernet link, capture a Router Advertisement with this option. The address in the option is the MAC address of the router interface on that link.
 
 ### RFC4861-RA-24
 
@@ -897,9 +831,7 @@ the order of the document.
 > across multiple link-layer addresses." — §4.2, `rfc4861.txt:1153-1155`
 
 - Strength: may. Class: wire.
-- Check idea: a router configured to omit the option sends Router Advertisements with no Source
-  Link-Layer Address option. A host then resolves the router address with a Neighbor
-  Solicitation.
+- Check idea: a router configured to omit the option sends Router Advertisements with no Source Link-Layer Address option. A host then resolves the router address with a Neighbor Solicitation.
 
 ### RFC4861-RA-25
 
@@ -910,8 +842,7 @@ the order of the document.
 > run IP over the particular link type)." — §4.2, `rfc4861.txt:1157-1159`
 
 - Strength: should. Class: wire.
-- Check idea: on a link type with a variable MTU, capture the Router Advertisements of a router.
-  Each one carries an MTU option.
+- Check idea: on a link type with a variable MTU, capture the Router Advertisements of a router. Each one carries an MTU option.
 
 ### RFC4861-RA-26
 
@@ -921,8 +852,7 @@ the order of the document.
 > on other links." — §4.2, `rfc4861.txt:1159-1160`
 
 - Strength: may. Class: wire.
-- Check idea: on an Ethernet link, a router with a configured link MTU sends an MTU option. A
-  host accepts a Router Advertisement with or without the option.
+- Check idea: on an Ethernet link, a router with a configured link MTU sends an MTU option. A host accepts a Router Advertisement with or without the option.
 
 ### RFC4861-RA-27
 
@@ -937,8 +867,7 @@ the order of the document.
 > links to which they attach." — `rfc4861.txt:1165-1169`
 
 - Strength: should. Class: wire.
-- Check idea: a router has two on-link prefixes on one interface. Its Router Advertisements on
-  that link carry a Prefix Information option for each prefix, and none for fe80::/64.
+- Check idea: a router has two on-link prefixes on one interface. Its Router Advertisements on that link carry a Prefix Information option for each prefix, and none for fe80::/64.
 
 ### RFC4861-RA-28
 
@@ -949,9 +878,7 @@ the order of the document.
 > and continue processing the message." — §4.2, `rfc4861.txt:1183-1185`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with an option of an unknown type before a
-  Prefix Information option. A host still uses the router as default router and uses the
-  prefix, and it sends no ICMPv6 error.
+- Check idea: a router sends a Router Advertisement with an option of an unknown type before a Prefix Information option. A host still uses the router as default router and uses the prefix, and it sends no ICMPv6 error.
 
 ## Neighbor Solicitation message
 
@@ -964,8 +891,7 @@ the order of the document.
 > the target." — §4.3, `rfc4861.txt:1189-1191`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a packet to host B and does not know the link-layer address of B.
-  Host A sends a Neighbor Solicitation for B that carries the link-layer address of A.
+- Check idea: host A sends a packet to host B and does not know the link-layer address of B. Host A sends a Neighbor Solicitation for B that carries the link-layer address of A.
 
 ### RFC4861-NS-2
 
@@ -976,9 +902,7 @@ the order of the document.
 > reachability of a neighbor." — §4.3, `rfc4861.txt:1191-1193`
 
 - Strength: description. Class: wire.
-- Check idea: for address resolution, host A sends its Neighbor Solicitation to a multicast
-  address. For a reachability probe of a known neighbor, host A sends it to the unicast address
-  of the neighbor.
+- Check idea: for address resolution, host A sends its Neighbor Solicitation to a multicast address. For a reachability probe of a known neighbor, host A sends it to the unicast address of the neighbor.
 
 ### RFC4861-NS-3
 
@@ -990,8 +914,7 @@ the order of the document.
 > `rfc4861.txt:1205`; "|   Options ..." — `rfc4861.txt:1210`
 
 - Strength: description. Class: encoding.
-- Check idea: decode a Neighbor Solicitation. After Type, Code and Checksum come 4 octets of
-  Reserved, 16 octets of Target Address, and then the options.
+- Check idea: decode a Neighbor Solicitation. After Type, Code and Checksum come 4 octets of Reserved, 16 octets of Target Address, and then the options.
 
 ### RFC4861-NS-4
 
@@ -1004,8 +927,7 @@ the order of the document.
 > unspecified address." — §4.3, `rfc4861.txt:1215-1219`
 
 - Strength: description. Class: wire.
-- Check idea: a Neighbor Solicitation for address resolution has an address of the interface as
-  source. A Neighbor Solicitation for Duplicate Address Detection has the source ::.
+- Check idea: a Neighbor Solicitation for address resolution has an address of the interface as source. A Neighbor Solicitation for Duplicate Address Detection has the source ::.
 
 ### RFC4861-NS-5
 
@@ -1017,8 +939,7 @@ the order of the document.
 > address." — §4.3, `rfc4861.txt:1220-1223`
 
 - Strength: description. Class: wire.
-- Check idea: a multicast Neighbor Solicitation goes to ff02::1:ffXX:XXXX, where XX:XXXX are the
-  low 24 bits of the target. A unicast Neighbor Solicitation goes to the target address.
+- Check idea: a multicast Neighbor Solicitation goes to ff02::1:ffXX:XXXX, where XX:XXXX are the low 24 bits of the target. A unicast Neighbor Solicitation goes to the target address.
 
 ### RFC4861-NS-6
 
@@ -1027,8 +948,7 @@ the order of the document.
 > "Hop Limit      255" — §4.3, `rfc4861.txt:1224`
 
 - Strength: description. Class: wire.
-- Check idea: capture the Neighbor Solicitations of a host and of a router. Each one has Hop
-  Limit 255 in the IP header.
+- Check idea: capture the Neighbor Solicitations of a host and of a router. Each one has Hop Limit 255 in the IP header.
 
 ### RFC4861-NS-7
 
@@ -1055,8 +975,7 @@ the order of the document.
 > "Checksum       The ICMP checksum.  See [ICMPv6]." — §4.3, `rfc4861.txt:1239`
 
 - Strength: description. Class: wire.
-- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Neighbor
-  Solicitation. The result is equal to the Checksum field.
+- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Neighbor Solicitation. The result is equal to the Checksum field.
 
 ### RFC4861-NS-10
 
@@ -1066,8 +985,7 @@ the order of the document.
 > zero by the sender" — §4.3, `rfc4861.txt:1241-1242`
 
 - Strength: must. Class: wire.
-- Check idea: capture the Neighbor Solicitations of a host. The Reserved field of each one is
-  zero.
+- Check idea: capture the Neighbor Solicitations of a host. The Reserved field of each one is zero.
 
 ### RFC4861-NS-11
 
@@ -1077,8 +995,7 @@ the order of the document.
 > receiver." — `rfc4861.txt:1242-1243`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends a Neighbor Solicitation for host B with a nonzero Reserved field.
-  Host B answers with a Neighbor Advertisement.
+- Check idea: host A sends a Neighbor Solicitation for host B with a nonzero Reserved field. Host B answers with a Neighbor Advertisement.
 
 ### RFC4861-NS-12
 
@@ -1087,8 +1004,7 @@ the order of the document.
 > "Target Address The IP address of the target of the solicitation." — §4.3, `rfc4861.txt:1245`
 
 - Strength: description. Class: wire.
-- Check idea: host A resolves the address of host B. The Target Address of the Neighbor
-  Solicitation is the address of B.
+- Check idea: host A resolves the address of host B. The Target Address of the Neighbor Solicitation is the address of B.
 
 ### RFC4861-NS-13
 
@@ -1097,8 +1013,7 @@ the order of the document.
 > "It MUST NOT be a multicast address." — §4.3, `rfc4861.txt:1246`
 
 - Strength: must not. Class: wire.
-- Check idea: capture the Neighbor Solicitations of a host for address resolution, reachability
-  probes and Duplicate Address Detection. No Target Address is a multicast address.
+- Check idea: capture the Neighbor Solicitations of a host for address resolution, reachability probes and Duplicate Address Detection. No Target Address is a multicast address.
 
 ### RFC4861-NS-14
 
@@ -1109,8 +1024,7 @@ the order of the document.
 > unspecified address." — §4.3, `rfc4861.txt:1251-1253`
 
 - Strength: must not. Class: wire.
-- Check idea: a host runs Duplicate Address Detection for a new address. Its Neighbor
-  Solicitations from :: carry no Source Link-Layer Address option.
+- Check idea: a host runs Duplicate Address Detection for a new address. Its Neighbor Solicitations from :: carry no Source Link-Layer Address option.
 
 ### RFC4861-NS-15
 
@@ -1121,8 +1035,7 @@ the order of the document.
 > multicast solicitations" — `rfc4861.txt:1253-1255`
 
 - Strength: must. Class: wire.
-- Check idea: on an Ethernet link, host A resolves the address of host B. The multicast Neighbor
-  Solicitation carries a Source Link-Layer Address option with the MAC address of A.
+- Check idea: on an Ethernet link, host A resolves the address of host B. The multicast Neighbor Solicitation carries a Source Link-Layer Address option with the MAC address of A.
 
 ### RFC4861-NS-16
 
@@ -1132,8 +1045,7 @@ the order of the document.
 > unicast solicitations." — §4.3, `rfc4861.txt:1255-1256`
 
 - Strength: should. Class: wire.
-- Check idea: on an Ethernet link, host A probes the reachability of neighbor B. The unicast
-  Neighbor Solicitation carries a Source Link-Layer Address option with the MAC address of A.
+- Check idea: on an Ethernet link, host A probes the reachability of neighbor B. The unicast Neighbor Solicitation carries a Source Link-Layer Address option with the MAC address of A.
 
 ### RFC4861-NS-17
 
@@ -1144,9 +1056,7 @@ the order of the document.
 > and continue processing the message." — §4.3, `rfc4861.txt:1258-1260`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends a Neighbor Solicitation for host B with an option of an unknown type
-  before its Source Link-Layer Address option. Host B answers with a Neighbor Advertisement and
-  sends no ICMPv6 error.
+- Check idea: host A sends a Neighbor Solicitation for host B with an option of an unknown type before its Source Link-Layer Address option. Host B answers with a Neighbor Advertisement and sends no ICMPv6 error.
 
 ## Neighbor Advertisement message
 
@@ -1159,9 +1069,7 @@ the order of the document.
 > to (unreliably) propagate new information quickly." — §4.4, `rfc4861.txt:1264-1266`
 
 - Strength: description. Class: wire.
-- Check idea: host B answers a Neighbor Solicitation from host A with a Neighbor Advertisement.
-  When the link-layer address of B changes, B sends a Neighbor Advertisement with no
-  solicitation.
+- Check idea: host B answers a Neighbor Solicitation from host A with a Neighbor Advertisement. When the link-layer address of B changes, B sends a Neighbor Advertisement with no solicitation.
 
 ### RFC4861-NA-2
 
@@ -1173,8 +1081,7 @@ the order of the document.
 > `rfc4861.txt:1278`; "|   Options ..." — `rfc4861.txt:1283`
 
 - Strength: description. Class: encoding.
-- Check idea: decode a Neighbor Advertisement. After Type, Code and Checksum come the R, S and O
-  flags and 29 bits of Reserved. Then come 16 octets of Target Address and the options.
+- Check idea: decode a Neighbor Advertisement. After Type, Code and Checksum come the R, S and O flags and 29 bits of Reserved. Then come 16 octets of Target Address and the options.
 
 ### RFC4861-NA-3
 
@@ -1185,8 +1092,7 @@ the order of the document.
 > advertisement is sent." — §4.4, `rfc4861.txt:1297-1299`
 
 - Strength: description. Class: wire.
-- Check idea: host B answers a Neighbor Solicitation. The Source Address of the Neighbor
-  Advertisement is an address of the interface of B on that link.
+- Check idea: host B answers a Neighbor Solicitation. The Source Address of the Neighbor Advertisement is an address of the interface of B on that link.
 
 ### RFC4861-NA-4
 
@@ -1199,8 +1105,7 @@ the order of the document.
 > address, the all-nodes multicast address." — §4.4, `rfc4861.txt:1300-1304`
 
 - Strength: description. Class: wire.
-- Check idea: host B answers a Neighbor Solicitation from host A to the address of A. Host B
-  answers a Duplicate Address Detection solicitation from :: to ff02::1.
+- Check idea: host B answers a Neighbor Solicitation from host A to the address of A. Host B answers a Duplicate Address Detection solicitation from :: to ff02::1.
 
 ### RFC4861-NA-5
 
@@ -1210,8 +1115,7 @@ the order of the document.
 > nodes multicast address." — §4.4, `rfc4861.txt:1306-1307`
 
 - Strength: description. Class: wire.
-- Check idea: the link-layer address of host B changes. The unsolicited Neighbor Advertisements
-  of B go to ff02::1.
+- Check idea: the link-layer address of host B changes. The unsolicited Neighbor Advertisements of B go to ff02::1.
 
 ### RFC4861-NA-6
 
@@ -1220,8 +1124,7 @@ the order of the document.
 > "Hop Limit      255" — §4.4, `rfc4861.txt:1309`
 
 - Strength: description. Class: wire.
-- Check idea: capture the solicited and unsolicited Neighbor Advertisements of a node. Each one
-  has Hop Limit 255 in the IP header.
+- Check idea: capture the solicited and unsolicited Neighbor Advertisements of a node. Each one has Hop Limit 255 in the IP header.
 
 ### RFC4861-NA-7
 
@@ -1248,8 +1151,7 @@ the order of the document.
 > "Checksum       The ICMP checksum.  See [ICMPv6]." — §4.4, `rfc4861.txt:1317`
 
 - Strength: description. Class: wire.
-- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Neighbor
-  Advertisement. The result is equal to the Checksum field.
+- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Neighbor Advertisement. The result is equal to the Checksum field.
 
 ### RFC4861-NA-10
 
@@ -1259,8 +1161,7 @@ the order of the document.
 > the sender is a router." — §4.4, `rfc4861.txt:1319-1320`
 
 - Strength: description. Class: wire.
-- Check idea: a router and a host each answer a Neighbor Solicitation. The Neighbor
-  Advertisement of the router has R = 1, and that of the host has R = 0.
+- Check idea: a router and a host each answer a Neighbor Solicitation. The Neighbor Advertisement of the router has R = 1, and that of the host has R = 0.
 
 ### RFC4861-NA-11
 
@@ -1271,8 +1172,7 @@ the order of the document.
 > router that changes to a host." — §4.4, `rfc4861.txt:1320-1322`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host A uses router R as its default router. Router R then sends a Neighbor
-  Advertisement with R = 0, and host A no longer sends off-link packets to R.
+- Check idea: host A uses router R as its default router. Router R then sends a Neighbor Advertisement with R = 0, and host A no longer sends off-link packets to R.
 
 ### RFC4861-NA-12
 
@@ -1283,8 +1183,7 @@ the order of the document.
 > Neighbor Solicitation from the Destination address." — §4.4, `rfc4861.txt:1324-1326`
 
 - Strength: description. Class: wire.
-- Check idea: host B answers a Neighbor Solicitation from host A. The Neighbor Advertisement goes
-  to A and has S = 1.
+- Check idea: host B answers a Neighbor Solicitation from host A. The Neighbor Advertisement goes to A and has S = 1.
 
 ### RFC4861-NA-13
 
@@ -1294,8 +1193,7 @@ the order of the document.
 > for Neighbor Unreachability Detection." — §4.4, `rfc4861.txt:1327-1328`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host A probes neighbor B with a unicast Neighbor Solicitation, and B answers with S
-  = 1. Host A sends no more probes to B.
+- Check idea: host A probes neighbor B with a unicast Neighbor Solicitation, and B answers with S = 1. Host A sends no more probes to B.
 
 ### RFC4861-NA-14
 
@@ -1306,8 +1204,7 @@ the order of the document.
 > unsolicited unicast advertisements." — §4.4, `rfc4861.txt:1328-1330`
 
 - Strength: must not. Class: wire.
-- Check idea: capture the answer of host B to a Duplicate Address Detection solicitation, which
-  goes to ff02::1, and the unsolicited Neighbor Advertisements of B. Each one has S = 0.
+- Check idea: capture the answer of host B to a Duplicate Address Detection solicitation, which goes to ff02::1, and the unsolicited Neighbor Advertisements of B. Each one has S = 0.
 
 ### RFC4861-NA-15
 
@@ -1318,8 +1215,7 @@ the order of the document.
 > entry and update the cached link-layer address." — §4.4, `rfc4861.txt:1332-1334`
 
 - Strength: should (lower case). Class: end-to-end.
-- Check idea: host A has the link-layer address L1 of host B in its cache. Host A receives a
-  Neighbor Advertisement for B with O = 1 and address L2, and then sends to B at L2.
+- Check idea: host A has the link-layer address L1 of host B in its cache. Host A receives a Neighbor Advertisement for B with O = 1 and address L2, and then sends to B at L2.
 
 ### RFC4861-NA-16
 
@@ -1331,9 +1227,7 @@ the order of the document.
 > no link-layer address is known." — §4.4, `rfc4861.txt:1335-1338`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host A has address L1 of host B in its cache. It receives an advertisement for B
-  with O = 0 and address L2, and still sends to L1. Host A resolves host C, receives an answer
-  with O = 0, and sends to the address in that answer.
+- Check idea: host A has address L1 of host B in its cache. It receives an advertisement for B with O = 0 and address L2, and still sends to L1. Host A resolves host C, receives an answer with O = 0, and sends to the address in that answer.
 
 ### RFC4861-NA-17
 
@@ -1344,8 +1238,7 @@ the order of the document.
 > addresses and in solicited proxy advertisements." — §4.4, `rfc4861.txt:1338-1340`
 
 - Strength: should not. Class: wire.
-- Check idea: a node answers a Neighbor Solicitation for an anycast address that it holds, and a
-  proxy answers for an address that it serves. Each Neighbor Advertisement has O = 0.
+- Check idea: a node answers a Neighbor Solicitation for an anycast address that it holds, and a proxy answers for an address that it serves. Each Neighbor Advertisement has O = 0.
 
 ### RFC4861-NA-18
 
@@ -1355,8 +1248,7 @@ the order of the document.
 > and in unsolicited advertisements." — §4.4, `rfc4861.txt:1341-1342`
 
 - Strength: should. Class: wire.
-- Check idea: host B answers a Neighbor Solicitation for its own unicast address, and later sends
-  unsolicited Neighbor Advertisements. Each Neighbor Advertisement has O = 1.
+- Check idea: host B answers a Neighbor Solicitation for its own unicast address, and later sends unsolicited Neighbor Advertisements. Each Neighbor Advertisement has O = 1.
 
 ### RFC4861-NA-19
 
@@ -1366,8 +1258,7 @@ the order of the document.
 > zero by the sender" — §4.4, `rfc4861.txt:1351-1352`
 
 - Strength: must. Class: wire.
-- Check idea: capture the Neighbor Advertisements of a node. The 29 bits after the O flag are
-  zero in each one.
+- Check idea: capture the Neighbor Advertisements of a node. The 29 bits after the O flag are zero in each one.
 
 ### RFC4861-NA-20
 
@@ -1377,8 +1268,7 @@ the order of the document.
 > receiver." — `rfc4861.txt:1352-1353`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host B answers the Neighbor Solicitation of host A with a nonzero Reserved field.
-  Host A completes address resolution and sends its queued packet to B.
+- Check idea: host B answers the Neighbor Solicitation of host A with a nonzero Reserved field. Host A completes address resolution and sends its queued packet to B.
 
 ### RFC4861-NA-21
 
@@ -1390,8 +1280,7 @@ the order of the document.
 > prompted this advertisement." — §4.4, `rfc4861.txt:1355-1358`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a Neighbor Solicitation with Target Address X to host B. The Neighbor
-  Advertisement of B has Target Address X.
+- Check idea: host A sends a Neighbor Solicitation with Target Address X to host B. The Neighbor Advertisement of B has Target Address X.
 
 ### RFC4861-NA-22
 
@@ -1402,8 +1291,7 @@ the order of the document.
 > has changed." — §4.4, `rfc4861.txt:1358-1360`
 
 - Strength: description. Class: wire.
-- Check idea: the link-layer address of host B changes. The unsolicited Neighbor Advertisements
-  of B carry the IP addresses of B as Target Address.
+- Check idea: the link-layer address of host B changes. The unsolicited Neighbor Advertisements of B carry the IP addresses of B as Target Address.
 
 ### RFC4861-NA-23
 
@@ -1413,8 +1301,7 @@ the order of the document.
 > multicast address." — §4.4, `rfc4861.txt:1360-1361`
 
 - Strength: must not. Class: wire.
-- Check idea: capture the solicited and unsolicited Neighbor Advertisements of a node. No Target
-  Address is a multicast address.
+- Check idea: capture the solicited and unsolicited Neighbor Advertisements of a node. No Target Address is a multicast address.
 
 ### RFC4861-NA-24
 
@@ -1427,8 +1314,7 @@ the order of the document.
 > solicitations" — `rfc4861.txt:1373-1374`
 
 - Strength: must. Class: wire.
-- Check idea: on an Ethernet link, host B answers a multicast Neighbor Solicitation. The Neighbor
-  Advertisement carries a Target Link-Layer Address option with the MAC address of B.
+- Check idea: on an Ethernet link, host B answers a multicast Neighbor Solicitation. The Neighbor Advertisement carries a Target Link-Layer Address option with the MAC address of B.
 
 ### RFC4861-NA-25
 
@@ -1439,8 +1325,7 @@ the order of the document.
 > option SHOULD be included." — §4.4, `rfc4861.txt:1369-1371`
 
 - Strength: should. Class: wire.
-- Check idea: on an Ethernet link, host B answers a unicast reachability probe from host A. The
-  Neighbor Advertisement carries a Target Link-Layer Address option with the MAC address of B.
+- Check idea: on an Ethernet link, host B answers a unicast reachability probe from host A. The Neighbor Advertisement carries a Target Link-Layer Address option with the MAC address of B.
 
 ### RFC4861-NA-26
 
@@ -1451,9 +1336,7 @@ the order of the document.
 > and continue processing the message." — §4.4, `rfc4861.txt:1388-1390`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host B answers a Neighbor Solicitation of host A with an option of an unknown type
-  before the Target Link-Layer Address option. Host A completes address resolution and sends no
-  ICMPv6 error.
+- Check idea: host B answers a Neighbor Solicitation of host A with an option of an unknown type before the Target Link-Layer Address option. Host A completes address resolution and sends no ICMPv6 error.
 
 ## Redirect message
 
@@ -1467,8 +1350,7 @@ the order of the document.
 > the destination is in fact a neighbor." — §4.5, `rfc4861.txt:1409-1412`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a packet for destination D to router R1, and router R2 on the same
-  link is the better first hop. Router R1 forwards the packet and sends a Redirect to A.
+- Check idea: host A sends a packet for destination D to router R1, and router R2 on the same link is the better first hop. Router R1 forwards the packet and sends a Redirect to A.
 
 ### RFC4861-RDM-2
 
@@ -1481,8 +1363,7 @@ the order of the document.
 > `rfc4861.txt:1434`; "|   Options ..." — `rfc4861.txt:1439`
 
 - Strength: description. Class: encoding.
-- Check idea: decode a Redirect. After Type, Code and Checksum come 4 octets of Reserved, 16
-  octets of Target Address, 16 octets of Destination Address, and then the options.
+- Check idea: decode a Redirect. After Type, Code and Checksum come 4 octets of Reserved, 16 octets of Target Address, 16 octets of Destination Address, and then the options.
 
 ### RFC4861-RDM-3
 
@@ -1493,8 +1374,7 @@ the order of the document.
 > interface from which this message is sent." — §4.5, `rfc4861.txt:1444-1446`
 
 - Strength: must. Class: wire.
-- Check idea: a router with a global address on the link of host A sends a Redirect to A. The
-  Source Address is the link-local address of the router interface.
+- Check idea: a router with a global address on the link of host A sends a Redirect to A. The Source Address is the link-local address of the router interface.
 
 ### RFC4861-RDM-4
 
@@ -1505,8 +1385,7 @@ the order of the document.
 > redirect." — §4.5, `rfc4861.txt:1448-1450`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a packet from address S that causes a Redirect. The IP Destination
-  Address of the Redirect is S.
+- Check idea: host A sends a packet from address S that causes a Redirect. The IP Destination Address of the Redirect is S.
 
 ### RFC4861-RDM-5
 
@@ -1542,8 +1421,7 @@ the order of the document.
 > "Checksum       The ICMP checksum.  See [ICMPv6]." — §4.5, `rfc4861.txt:1469`
 
 - Strength: description. Class: wire.
-- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Redirect.
-  The result is equal to the Checksum field.
+- Check idea: compute the ICMPv6 checksum, with the IPv6 pseudo-header, over a captured Redirect. The result is equal to the Checksum field.
 
 ### RFC4861-RDM-9
 
@@ -1563,8 +1441,7 @@ the order of the document.
 > receiver." — `rfc4861.txt:1472-1473`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1 sends host A a Redirect to router R2 with a nonzero Reserved field. Host
-  A sends its next packet for that destination to R2.
+- Check idea: router R1 sends host A a Redirect to router R2 with a nonzero Reserved field. Host A sends its next packet for that destination to R2.
 
 ### RFC4861-RDM-11
 
@@ -1575,8 +1452,7 @@ the order of the document.
 > the ICMP Destination Address." — §4.5, `rfc4861.txt:1475-1477`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a packet for destination D to router R1, and router R2 is the better
-  first hop. The Redirect of R1 has Destination Address D and names R2 as Target Address.
+- Check idea: host A sends a packet for destination D to router R1, and router R2 is the better first hop. The Redirect of R1 has Destination Address D and names R2 as Target Address.
 
 ### RFC4861-RDM-12
 
@@ -1591,8 +1467,7 @@ the order of the document.
 > Address field." — `rfc4861.txt:1477-1481`
 
 - Strength: must. Class: wire.
-- Check idea: host A sends a packet through router R to host D, which is on the same link as A.
-  The Redirect of R has Target Address D and Destination Address D.
+- Check idea: host A sends a packet through router R to host D, which is on the same link as A. The Redirect of R has Target Address D and Destination Address D.
 
 ### RFC4861-RDM-13
 
@@ -1604,8 +1479,7 @@ the order of the document.
 > uniquely identify routers." — §4.5, `rfc4861.txt:1481-1484`
 
 - Strength: must. Class: wire.
-- Check idea: router R2 has a global address and a link-local address on the link of host A.
-  The Redirect of router R1 to R2 has the link-local address of R2 as Target Address.
+- Check idea: router R2 has a global address and a link-local address on the link of host A. The Redirect of router R1 to R2 has the link-local address of R2 as Target Address.
 
 ### RFC4861-RDM-14
 
@@ -1616,8 +1490,7 @@ the order of the document.
 > redirected to the target." — §4.5, `rfc4861.txt:1486-1488`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a packet for destination D that causes a Redirect. The ICMP
-  Destination Address field of the Redirect is D, the IP Destination Address of that packet.
+- Check idea: host A sends a packet for destination D that causes a Redirect. The ICMP Destination Address field of the Redirect is D, the IP Destination Address of that packet.
 
 ### RFC4861-RDM-15
 
@@ -1628,8 +1501,7 @@ the order of the document.
 > be included (if known)." — §4.5, `rfc4861.txt:1492-1494`
 
 - Strength: should. Class: wire.
-- Check idea: router R1 has the link-layer address of router R2 in its cache and redirects host A
-  to R2. The Redirect carries a Target Link-Layer Address option with the MAC address of R2.
+- Check idea: router R1 has the link-layer address of router R2 in its cache and redirects host A to R2. The Redirect carries a Target Link-Layer Address option with the MAC address of R2.
 
 ### RFC4861-RDM-16
 
@@ -1643,8 +1515,7 @@ the order of the document.
 > included in Redirect messages." — §4.5, `rfc4861.txt:1494-1499`
 
 - Strength: must. Class: wire.
-- Check idea: on an NBMA link where hosts have no other way to learn link-layer addresses, a
-  router redirects a host. Each Redirect carries a Target Link-Layer Address option.
+- Check idea: on an NBMA link where hosts have no other way to learn link-layer addresses, a router redirects a host. Each Redirect carries a Target Link-Layer Address option.
 
 ### RFC4861-RDM-17
 
@@ -1657,8 +1528,7 @@ the order of the document.
 > [IPv6]." — §4.5, `rfc4861.txt:1501-1505`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a 1400-octet packet that causes a Redirect. The Redirect is 1280
-  octets or less, and its Redirected Header option holds the first part of that packet.
+- Check idea: host A sends a 1400-octet packet that causes a Redirect. The Redirect is 1280 octets or less, and its Redirected Header option holds the first part of that packet.
 
 ## Options
 
@@ -1670,8 +1540,7 @@ the order of the document.
 > which may appear multiple times in the same message." — §4.6, `rfc4861.txt:1521-1522`
 
 - Strength: may (lower case). Class: encoding.
-- Check idea: a router sends a Router Advertisement with two Prefix Information options. A host
-  uses both prefixes.
+- Check idea: a router sends a Router Advertisement with two Prefix Information options. A host uses both prefixes.
 
 ### RFC4861-OPT-2
 
@@ -1682,8 +1551,7 @@ the order of the document.
 > 64-bit boundaries." — §4.6, `rfc4861.txt:1522-1524`
 
 - Strength: should (lower case). Class: encoding.
-- Check idea: decode the options of captured Neighbor Discovery messages. The size of each option
-  is a multiple of 8 octets.
+- Check idea: decode the options of captured Neighbor Discovery messages. The size of each option is a multiple of 8 octets.
 
 ### RFC4861-OPT-3
 
@@ -1692,8 +1560,7 @@ the order of the document.
 > "All options are of the form:" — §4.6, `rfc4861.txt:1524`; "|     Type      |    Length     |              ...              |" — `rfc4861.txt:1529`
 
 - Strength: description. Class: encoding.
-- Check idea: decode the options of captured Neighbor Discovery messages. Each option starts with
-  one octet of Type and one octet of Length.
+- Check idea: decode the options of captured Neighbor Discovery messages. Each option starts with one octet of Type and one octet of Length.
 
 ### RFC4861-OPT-4
 
@@ -1703,8 +1570,7 @@ the order of the document.
 > options defined in this document are:" — §4.6, `rfc4861.txt:1536-1537`; "Source Link-Layer Address                    1" — `rfc4861.txt:1541`; "Target Link-Layer Address                    2" — `rfc4861.txt:1542`; "Prefix Information                           3" — `rfc4861.txt:1543`; "Redirected Header                            4" — `rfc4861.txt:1544`; "MTU                                          5" — `rfc4861.txt:1545`
 
 - Strength: description. Class: wire.
-- Check idea: capture a Router Solicitation, a Router Advertisement, a Neighbor Advertisement and
-  a Redirect. Each option has the Type value of its kind in this table.
+- Check idea: capture a Router Solicitation, a Router Advertisement, a Neighbor Advertisement and a Redirect. Each option has the Type value of its kind in this table.
 
 ### RFC4861-OPT-5
 
@@ -1715,8 +1581,7 @@ the order of the document.
 > 8 octets." — §4.6, `rfc4861.txt:1547-1549`
 
 - Strength: description. Class: encoding.
-- Check idea: decode captured options. A Source Link-Layer Address option of 8 octets has Length
-  1, and a Prefix Information option of 32 octets has Length 4.
+- Check idea: decode captured options. A Source Link-Layer Address option of 8 octets has Length 1, and a Prefix Information option of 32 octets has Length 4.
 
 ### RFC4861-OPT-6
 
@@ -1727,8 +1592,7 @@ the order of the document.
 > option with length zero." — §4.6, `rfc4861.txt:1549-1551`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends host B a Neighbor Solicitation with an option of Length 0. Host B
-  sends no Neighbor Advertisement and no ICMPv6 error.
+- Check idea: host A sends host B a Neighbor Solicitation with an option of Length 0. Host B sends no Neighbor Advertisement and no ICMPv6 error.
 
 ### RFC4861-OPT-7
 
@@ -1737,8 +1601,7 @@ the order of the document.
 > "|     Type      |    Length     |    Link-Layer Address ..." — §4.6.1, `rfc4861.txt:1558`
 
 - Strength: description. Class: encoding.
-- Check idea: decode a Source Link-Layer Address option. One octet of Type and one octet of
-  Length come before the link-layer address.
+- Check idea: decode a Source Link-Layer Address option. One octet of Type and one octet of Length come before the link-layer address.
 
 ### RFC4861-OPT-8
 
@@ -1749,9 +1612,7 @@ the order of the document.
 > 2 for Target Link-layer Address" — §4.6.1, `rfc4861.txt:1563-1565`
 
 - Strength: description. Class: wire.
-- Check idea: capture Neighbor Solicitations, Router Solicitations and Router Advertisements, and
-  their link-layer address options have Type 1. In Neighbor Advertisements and Redirects, the
-  Type is 2.
+- Check idea: capture Neighbor Solicitations, Router Solicitations and Router Advertisements, and their link-layer address options have Type 1. In Neighbor Advertisements and Redirects, the Type is 2.
 
 ### RFC4861-OPT-9
 
@@ -1776,8 +1637,7 @@ the order of the document.
 > operates over different link layers." — `rfc4861.txt:1583-1586`
 
 - Strength: description. Class: encoding.
-- Check idea: on an Ethernet link, decode a link-layer address option. The field holds the 48-bit
-  MAC address of the node in the order that RFC 2464 specifies.
+- Check idea: on an Ethernet link, decode a link-layer address option. The field holds the 48-bit MAC address of the node in the order that RFC 2464 specifies.
 
 ### RFC4861-OPT-11
 
@@ -1789,8 +1649,7 @@ the order of the document.
 > Solicitation, and Router Advertisement packets." — §4.6.1, `rfc4861.txt:1590-1593`
 
 - Strength: description. Class: wire.
-- Check idea: capture Neighbor Solicitations, Router Solicitations and Router Advertisements with
-  this option. The address in the option is the MAC address of the sender.
+- Check idea: capture Neighbor Solicitations, Router Solicitations and Router Advertisements with this option. The address in the option is the MAC address of the sender.
 
 ### RFC4861-OPT-12
 
@@ -1801,8 +1660,7 @@ the order of the document.
 > Neighbor Advertisement and Redirect packets." — §4.6.1, `rfc4861.txt:1595-1597`
 
 - Strength: description. Class: wire.
-- Check idea: capture Neighbor Advertisements and Redirects with this option. The address in the
-  option is the MAC address of the target of the message.
+- Check idea: capture Neighbor Advertisements and Redirects with this option. The address in the option is the MAC address of the target of the message.
 
 ### RFC4861-OPT-13
 
@@ -1812,8 +1670,7 @@ the order of the document.
 > Neighbor Discovery messages." — §4.6.1, `rfc4861.txt:1599-1600`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host B sends host A a Neighbor Advertisement that also carries a Source Link-Layer
-  Address option with a false address. Host A does not use that false address.
+- Check idea: host B sends host A a Neighbor Advertisement that also carries a Source Link-Layer Address option with a false address. Host A does not use that false address.
 
 ### RFC4861-OPT-14
 
@@ -1827,9 +1684,7 @@ the order of the document.
 > `rfc4861.txt:1618`
 
 - Strength: description. Class: encoding.
-- Check idea: decode a Prefix Information option. The fields are Type, Length, Prefix Length (8
-  bits each), L, A (1 bit each), Reserved1 (6 bits), three 32-bit fields, and the 16-octet
-  Prefix.
+- Check idea: decode a Prefix Information option. The fields are Type, Length, Prefix Length (8 bits each), L, A (1 bit each), Reserved1 (6 bits), three 32-bit fields, and the 16-octet Prefix.
 
 ### RFC4861-OPT-15
 
@@ -1847,8 +1702,7 @@ the order of the document.
 > "Length         4" — §4.6.2, `rfc4861.txt:1635`
 
 - Strength: description. Class: wire.
-- Check idea: capture the Prefix Information options of a router. Each one has Length 4, which
-  is 32 octets.
+- Check idea: capture the Prefix Information options of a router. Each one has Length 4, which is 32 octets.
 
 ### RFC4861-OPT-17
 
@@ -1859,8 +1713,7 @@ the order of the document.
 > from 0 to 128." — §4.6.2, `rfc4861.txt:1637-1639`
 
 - Strength: description. Class: encoding.
-- Check idea: a router advertises the prefix 2001:db8:1::/64. Its Prefix Information option has
-  Prefix Length 64.
+- Check idea: a router advertises the prefix 2001:db8:1::/64. Its Prefix Information option has Prefix Length 64.
 
 ### RFC4861-OPT-18
 
@@ -1872,8 +1725,7 @@ the order of the document.
 > information option)." — §4.6.2, `rfc4861.txt:1639-1642`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises 2001:db8::/48 with L = 1, and a host resolves 2001:db8:0:5::1
-  directly. With 2001:db8::/64, the host sends that packet to the router.
+- Check idea: a router advertises 2001:db8::/48 with L = 1, and a host resolves 2001:db8:0:5::1 directly. With 2001:db8::/64, the host sends that packet to the router.
 
 ### RFC4861-OPT-19
 
@@ -1883,8 +1735,7 @@ the order of the document.
 > prefix can be used for on-link determination." — §4.6.2, `rfc4861.txt:1647-1648`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises the prefix P with L = 1. A host sends a packet to an address in
-  P directly, after it resolves that address with a Neighbor Solicitation.
+- Check idea: a router advertises the prefix P with L = 1. A host sends a packet to an address in P directly, after it resolves that address with a Neighbor Solicitation.
 
 ### RFC4861-OPT-20
 
@@ -1899,8 +1750,7 @@ the order of the document.
 > previous indication that the address is on-link." — §4.6.2, `rfc4861.txt:1648-1654`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: a router advertises the prefix P with L = 1, and later with L = 0. The host still
-  sends packets for addresses in P directly to the destinations.
+- Check idea: a router advertises the prefix P with L = 1, and later with L = 0. The host still sends packets for addresses in P directly to the destinations.
 
 ### RFC4861-OPT-21
 
@@ -1912,8 +1762,7 @@ the order of the document.
 > [ADDRCONF]." — §4.6.2, `rfc4861.txt:1656-1659`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises a /64 prefix with A = 1, and a host forms an address in it and
-  runs Duplicate Address Detection. With A = 0, the host forms no address in the prefix.
+- Check idea: a router advertises a /64 prefix with A = 1, and a host forms an address in it and runs Duplicate Address Detection. With A = 0, the host forms no address in the prefix.
 
 ### RFC4861-OPT-22
 
@@ -1923,8 +1772,7 @@ the order of the document.
 > by the sender" — §4.6.2, `rfc4861.txt:1661-1662`
 
 - Strength: must. Class: wire.
-- Check idea: capture the Prefix Information options of a router. The 6 bits after the A flag
-  are zero in each one.
+- Check idea: capture the Prefix Information options of a router. The 6 bits after the A flag are zero in each one.
 
 ### RFC4861-OPT-23
 
@@ -1933,8 +1781,7 @@ the order of the document.
 > "Reserved1      6-bit unused field." — §4.6.2, `rfc4861.txt:1661`; "and MUST be ignored by the receiver." — `rfc4861.txt:1662`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router advertises a prefix with L = 1, A = 1 and nonzero Reserved1 bits. A host
-  treats the prefix as on-link and forms an address in it.
+- Check idea: a router advertises a prefix with L = 1, A = 1 and nonzero Reserved1 bits. A host treats the prefix as on-link and forms an address in it.
 
 ### RFC4861-OPT-24
 
@@ -1947,9 +1794,7 @@ the order of the document.
 > determination." — §4.6.2, `rfc4861.txt:1664-1668`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises the prefix P with L = 1 and Valid Lifetime 30, and later
-  Router Advertisements omit P. A host treats P as on-link for 30 s, and after that it sends
-  packets for P to the router.
+- Check idea: a router advertises the prefix P with L = 1 and Valid Lifetime 30, and later Router Advertisements omit P. A host treats P as on-link for 30 s, and after that it sends packets for P to the router.
 
 ### RFC4861-OPT-25
 
@@ -1959,8 +1804,7 @@ the order of the document.
 > (0xffffffff) represents infinity." — §4.6.2, `rfc4861.txt:1668-1669`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises the prefix P with L = 1 and Valid Lifetime 0xffffffff, and
-  later Router Advertisements omit P. A host treats P as on-link with no time limit.
+- Check idea: a router advertises the prefix P with L = 1 and Valid Lifetime 0xffffffff, and later Router Advertisements omit P. A host treats P as on-link with no time limit.
 
 ### RFC4861-OPT-26
 
@@ -1974,9 +1818,7 @@ the order of the document.
 > preferred [ADDRCONF]." — §4.6.2, `rfc4861.txt:1672-1677`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises a prefix with A = 1, Preferred Lifetime 20 and Valid Lifetime
-  60. After 20 s, a host no longer uses the address from that prefix as source of new
-  communication.
+- Check idea: a router advertises a prefix with A = 1, Preferred Lifetime 20 and Valid Lifetime 60. After 20 s, a host no longer uses the address from that prefix as source of new communication.
 
 ### RFC4861-OPT-27
 
@@ -1986,9 +1828,7 @@ the order of the document.
 > (0xffffffff) represents infinity." — §4.6.2, `rfc4861.txt:1677-1678`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises a prefix with A = 1 and both lifetimes 0xffffffff, and later
-  Router Advertisements omit it. The address of a host from that prefix stays preferred with no
-  time limit.
+- Check idea: a router advertises a prefix with A = 1 and both lifetimes 0xffffffff, and later Router Advertisements omit it. The address of a host from that prefix stays preferred with no time limit.
 
 ### RFC4861-OPT-28
 
@@ -1999,8 +1839,7 @@ the order of the document.
 > addresses that are no longer valid." — §4.6.2, `rfc4861.txt:1687-1689`
 
 - Strength: must not. Class: wire.
-- Check idea: capture the Prefix Information options of a router with several configured
-  lifetimes. In each option, Preferred Lifetime is less than or equal to Valid Lifetime.
+- Check idea: capture the Prefix Information options of a router with several configured lifetimes. In each option, Preferred Lifetime is less than or equal to Valid Lifetime.
 
 ### RFC4861-OPT-29
 
@@ -2010,8 +1849,7 @@ the order of the document.
 > zero by the sender" — §4.6.2, `rfc4861.txt:1691-1692`
 
 - Strength: must. Class: wire.
-- Check idea: capture the Prefix Information options of a router. The Reserved2 field of each
-  one is zero.
+- Check idea: capture the Prefix Information options of a router. The Reserved2 field of each one is zero.
 
 ### RFC4861-OPT-30
 
@@ -2021,8 +1859,7 @@ the order of the document.
 > receiver." — `rfc4861.txt:1692-1693`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router advertises a prefix with L = 1, A = 1 and a nonzero Reserved2 field. A
-  host treats the prefix as on-link and forms an address in it.
+- Check idea: a router advertises a prefix with L = 1, A = 1 and a nonzero Reserved2 field. A host treats the prefix as on-link and forms an address in it.
 
 ### RFC4861-OPT-31
 
@@ -2033,8 +1870,7 @@ the order of the document.
 > leading bits in the prefix." — §4.6.2, `rfc4861.txt:1695-1697`
 
 - Strength: description. Class: encoding.
-- Check idea: a router advertises 2001:db8:1::/64. The option holds 2001:db8:1:: in the 16
-  octets of Prefix, with Prefix Length 64.
+- Check idea: a router advertises 2001:db8:1::/64. The option holds 2001:db8:1:: in the 16 octets of Prefix, with Prefix Length 64.
 
 ### RFC4861-OPT-32
 
@@ -2057,8 +1893,7 @@ the order of the document.
 > the receiver." — §4.6.2, `rfc4861.txt:1697-1700`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router advertises the Prefix 2001:db8:1::abcd with Prefix Length 64 and L = 1. A
-  host treats 2001:db8:1::/64 as on-link, as for a Prefix with zero low bits.
+- Check idea: a router advertises the Prefix 2001:db8:1::abcd with Prefix Length 64 and L = 1. A host treats 2001:db8:1::/64 as on-link, as for a Prefix with zero low bits.
 
 ### RFC4861-OPT-34
 
@@ -2068,8 +1903,7 @@ the order of the document.
 > option for the link-local prefix" — §4.6.2, `rfc4861.txt:1700-1701`
 
 - Strength: should not. Class: wire.
-- Check idea: capture the Router Advertisements of a router. No Prefix Information option holds
-  fe80::/64.
+- Check idea: capture the Router Advertisements of a router. No Prefix Information option holds fe80::/64.
 
 ### RFC4861-OPT-35
 
@@ -2079,8 +1913,7 @@ the order of the document.
 > ignore such a prefix option." — §4.6.2, `rfc4861.txt:1701-1702`
 
 - Strength: should. Class: end-to-end.
-- Check idea: a router advertises fe80::/64 with L = 1, A = 1 and Valid Lifetime 10. A host forms
-  no new address, and after 10 s it still resolves link-local addresses directly.
+- Check idea: a router advertises fe80::/64 with L = 1, A = 1 and Valid Lifetime 10. A host forms no new address, and after 10 s it still resolves link-local addresses directly.
 
 ### RFC4861-OPT-36
 
@@ -2091,9 +1924,7 @@ the order of the document.
 > silently ignored for other messages." — §4.6.2, `rfc4861.txt:1707-1709`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A receives a Neighbor Advertisement that also carries a Prefix Information
-  option with L = 1. Host A processes the advertisement and does not treat the prefix as
-  on-link.
+- Check idea: host A receives a Neighbor Advertisement that also carries a Prefix Information option with L = 1. Host A processes the advertisement and does not treat the prefix as on-link.
 
 ### RFC4861-OPT-37
 
@@ -2105,8 +1936,7 @@ the order of the document.
 > `rfc4861.txt:1721`
 
 - Strength: description. Class: encoding.
-- Check idea: decode a Redirected Header option. One octet of Type, one octet of Length and 6
-  octets of Reserved come before the IP header of the redirected packet.
+- Check idea: decode a Redirected Header option. One octet of Type, one octet of Length and 6 octets of Reserved come before the IP header of the redirected packet.
 
 ### RFC4861-OPT-38
 
@@ -2115,8 +1945,7 @@ the order of the document.
 > "Type           4" — §4.6.3, `rfc4861.txt:1727`
 
 - Strength: description. Class: wire.
-- Check idea: capture the Redirects of a router. The Redirected Header option in each one has
-  Type 4.
+- Check idea: capture the Redirects of a router. The Redirected Header option in each one has Type 4.
 
 ### RFC4861-OPT-39
 
@@ -2125,8 +1954,7 @@ the order of the document.
 > "Length         The length of the option in units of 8 octets." — §4.6.3, `rfc4861.txt:1729`
 
 - Strength: description. Class: wire.
-- Check idea: decode the Redirected Header option of a captured Redirect. Length multiplied by 8
-  is equal to the size of the option in octets.
+- Check idea: decode the Redirected Header option of a captured Redirect. Length multiplied by 8 is equal to the size of the option in octets.
 
 ### RFC4861-OPT-40
 
@@ -2136,8 +1964,7 @@ the order of the document.
 > to zero by the sender" — §4.6.3, `rfc4861.txt:1731-1732`
 
 - Strength: must. Class: wire.
-- Check idea: capture the Redirects of a router. The 6 Reserved octets of each Redirected Header
-  option are zero.
+- Check idea: capture the Redirects of a router. The 6 Reserved octets of each Redirected Header option are zero.
 
 ### RFC4861-OPT-41
 
@@ -2147,8 +1974,7 @@ the order of the document.
 > receiver." — `rfc4861.txt:1732-1733`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1 sends host A a Redirect to router R2 whose Redirected Header option has
-  nonzero Reserved octets. Host A sends its next packet for that destination to R2.
+- Check idea: router R1 sends host A a Redirect to router R2 whose Redirected Header option has nonzero Reserved octets. Host A sends its next packet for that destination to R2.
 
 ### RFC4861-OPT-42
 
@@ -2163,8 +1989,7 @@ the order of the document.
 > that is being redirected." — `rfc4861.txt:1750-1752`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a 100-octet packet and a 1400-octet packet that each cause a Redirect.
-  The first option holds the whole packet, and the second Redirect is 1280 octets or less.
+- Check idea: host A sends a 100-octet packet and a 1400-octet packet that each cause a Redirect. The first option holds the whole packet, and the second Redirect is 1280 octets or less.
 
 ### RFC4861-OPT-43
 
@@ -2174,8 +1999,7 @@ the order of the document.
 > Neighbor Discovery messages." — §4.6.3, `rfc4861.txt:1754-1755`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host B answers a Neighbor Solicitation of host A with a Neighbor Advertisement that
-  also carries a Redirected Header option. Host A completes address resolution as usual.
+- Check idea: host B answers a Neighbor Solicitation of host A with a Neighbor Advertisement that also carries a Redirected Header option. Host A completes address resolution as usual.
 
 ### RFC4861-OPT-44
 
@@ -2186,8 +2010,7 @@ the order of the document.
 > `rfc4861.txt:1764`
 
 - Strength: description. Class: encoding.
-- Check idea: decode an MTU option. It is 8 octets long: Type, Length, 2 octets of Reserved, and
-  4 octets of MTU.
+- Check idea: decode an MTU option. It is 8 octets long: Type, Length, 2 octets of Reserved, and 4 octets of MTU.
 
 ### RFC4861-OPT-45
 
@@ -2225,8 +2048,7 @@ the order of the document.
 > receiver." — `rfc4861.txt:1774-1775`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router advertises an MTU option with MTU 1400 and a nonzero Reserved field. A host
-  sends no packet larger than 1400 octets on the link.
+- Check idea: a router advertises an MTU option with MTU 1400 and a nonzero Reserved field. A host sends no packet larger than 1400 octets on the link.
 
 ### RFC4861-OPT-49
 
@@ -2239,8 +2061,7 @@ the order of the document.
 > not well known." — `rfc4861.txt:1781-1784`
 
 - Strength: description. Class: end-to-end.
-- Check idea: on an Ethernet link, a router advertises an MTU option with MTU 1400. A host sends
-  no packet larger than 1400 octets on the link.
+- Check idea: on an Ethernet link, a router advertises an MTU option with MTU 1400. A host sends no packet larger than 1400 octets on the link.
 
 ### RFC4861-OPT-50
 
@@ -2250,8 +2071,7 @@ the order of the document.
 > Neighbor Discovery messages." — §4.6.4, `rfc4861.txt:1786-1787`
 
 - Strength: must. Class: end-to-end.
-- Check idea: on an Ethernet link, host A receives a Neighbor Advertisement that also carries an
-  MTU option with MTU 1300. Host A keeps its link MTU of 1500.
+- Check idea: on an Ethernet link, host A receives a Neighbor Advertisement that also carries an MTU option with MTU 1300. Host A keeps its link MTU of 1500.
 ## Validation of router discovery messages
 
 ### RFC4861-RVAL-1
@@ -2264,9 +2084,7 @@ the order of the document.
 > messages." — §6.2.6, `rfc4861.txt:2660-2661`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host B sends a valid Router Solicitation with a Source Link-Layer Address
-  option to host A. Host A sends no Router Advertisement, and a later packet from A to B
-  still starts with a Neighbor Solicitation.
+- Check idea: host B sends a valid Router Solicitation with a Source Link-Layer Address option to host A. Host A sends no Router Advertisement, and a later packet from A to B still starts with a Neighbor Solicitation.
 
 ### RFC4861-RVAL-2
 
@@ -2278,8 +2096,7 @@ the order of the document.
 > could not possibly have been forwarded by a router." — §6.1.1, `rfc4861.txt:2145-2146`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation with Hop Limit 254 to a router. The router
-  sends no Router Advertisement in reply. The same message with Hop Limit 255 gets a reply.
+- Check idea: a host sends a Router Solicitation with Hop Limit 254 to a router. The router sends no Router Advertisement in reply. The same message with Hop Limit 255 gets a reply.
 
 ### RFC4861-RVAL-3
 
@@ -2290,8 +2107,7 @@ the order of the document.
 > "ICMP Checksum is valid." — §6.1.1, `rfc4861.txt:2148`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation with a wrong ICMP checksum. The router sends
-  no Router Advertisement in reply.
+- Check idea: a host sends a Router Solicitation with a wrong ICMP checksum. The router sends no Router Advertisement in reply.
 
 ### RFC4861-RVAL-4
 
@@ -2302,8 +2118,7 @@ the order of the document.
 > "ICMP Code is 0." — §6.1.1, `rfc4861.txt:2150`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation with Code 1. The router sends no Router
-  Advertisement in reply.
+- Check idea: a host sends a Router Solicitation with Code 1. The router sends no Router Advertisement in reply.
 
 ### RFC4861-RVAL-5
 
@@ -2314,8 +2129,7 @@ the order of the document.
 > "ICMP length (derived from the IP length) is 8 or more octets." — §6.1.1, `rfc4861.txt:2152`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation with an ICMP length of 4 octets. The router
-  sends no Router Advertisement in reply.
+- Check idea: a host sends a Router Solicitation with an ICMP length of 4 octets. The router sends no Router Advertisement in reply.
 
 ### RFC4861-RVAL-6
 
@@ -2326,8 +2140,7 @@ the order of the document.
 > "All included options have a length that is greater than zero." — §6.1.1, `rfc4861.txt:2154`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation with an option whose Length field is 0. The
-  router sends no Router Advertisement in reply.
+- Check idea: a host sends a Router Solicitation with an option whose Length field is 0. The router sends no Router Advertisement in reply.
 
 ### RFC4861-RVAL-7
 
@@ -2339,8 +2152,7 @@ the order of the document.
 > source link-layer address option in the message." — §6.1.1, `rfc4861.txt:2156-2157`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation from the unspecified address with a Source
-  Link-Layer Address option. The router sends no Router Advertisement in reply.
+- Check idea: a host sends a Router Solicitation from the unspecified address with a Source Link-Layer Address option. The router sends no Router Advertisement in reply.
 
 ### RFC4861-RVAL-8
 
@@ -2350,9 +2162,7 @@ the order of the document.
 > MUST be ignored." — §6.1.1, `rfc4861.txt:2159-2160`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation with a non-zero Reserved field and an option
-  of an unknown type. The router replies with a Router Advertisement, as for a normal
-  solicitation.
+- Check idea: a host sends a Router Solicitation with a non-zero Reserved field and an option of an unknown type. The router replies with a Router Advertisement, as for a normal solicitation.
 
 ### RFC4861-RVAL-9
 
@@ -2364,9 +2174,7 @@ the order of the document.
 > Source Link-Layer Address option." — §6.1.1, `rfc4861.txt:2164-2167`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation with a Prefix Information option and an MTU
-  option. The router replies as for a normal solicitation, and it takes no information from
-  the two options.
+- Check idea: a host sends a Router Solicitation with a Prefix Information option and an MTU option. The router replies as for a normal solicitation, and it takes no information from the two options.
 
 ### RFC4861-RVAL-10
 
@@ -2377,9 +2185,7 @@ the order of the document.
 > "IP Source Address is a link-local address." — §6.1.2, `rfc4861.txt:2177`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with a non-zero Router Lifetime and a
-  Prefix Information option from a global address. The host does not use that router for
-  off-link packets, and it does not treat the prefix as on-link.
+- Check idea: a router sends a Router Advertisement with a non-zero Router Lifetime and a Prefix Information option from a global address. The host does not use that router for off-link packets, and it does not treat the prefix as on-link.
 
 ### RFC4861-RVAL-11
 
@@ -2391,8 +2197,7 @@ the order of the document.
 > routers." — §6.1.2, `rfc4861.txt:2177-2180`
 
 - Strength: must (lower case). Class: wire.
-- Check idea: every Router Advertisement and every Redirect that a router sends on a link has
-  the link-local address of the router on that link as its IP source address.
+- Check idea: every Router Advertisement and every Redirect that a router sends on a link has the link-local address of the router on that link as its IP source address.
 
 ### RFC4861-RVAL-12
 
@@ -2404,9 +2209,7 @@ the order of the document.
 > could not possibly have been forwarded by a router." — §6.1.2, `rfc4861.txt:2191-2192`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with Hop Limit 254, a non-zero Router
-  Lifetime and a Prefix Information option. The host does not use that router, and it does
-  not treat the prefix as on-link.
+- Check idea: a router sends a Router Advertisement with Hop Limit 254, a non-zero Router Lifetime and a Prefix Information option. The host does not use that router, and it does not treat the prefix as on-link.
 
 ### RFC4861-RVAL-13
 
@@ -2417,8 +2220,7 @@ the order of the document.
 > "ICMP Checksum is valid." — §6.1.2, `rfc4861.txt:2194`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with a wrong ICMP checksum. The host does
-  not use that router and takes no prefix from the message.
+- Check idea: a router sends a Router Advertisement with a wrong ICMP checksum. The host does not use that router and takes no prefix from the message.
 
 ### RFC4861-RVAL-14
 
@@ -2429,8 +2231,7 @@ the order of the document.
 > "ICMP Code is 0." — §6.1.2, `rfc4861.txt:2196`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with Code 1. The host does not use that
-  router and takes no prefix from the message.
+- Check idea: a router sends a Router Advertisement with Code 1. The host does not use that router and takes no prefix from the message.
 
 ### RFC4861-RVAL-15
 
@@ -2441,8 +2242,7 @@ the order of the document.
 > "ICMP length (derived from the IP length) is 16 or more octets." — §6.1.2, `rfc4861.txt:2198`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with an ICMP length of 12 octets. The host
-  does not use that router.
+- Check idea: a router sends a Router Advertisement with an ICMP length of 12 octets. The host does not use that router.
 
 ### RFC4861-RVAL-16
 
@@ -2453,8 +2253,7 @@ the order of the document.
 > "All included options have a length that is greater than zero." — §6.1.2, `rfc4861.txt:2200`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with an option whose Length field is 0.
-  The host does not use that router and takes no prefix from the message.
+- Check idea: a router sends a Router Advertisement with an option whose Length field is 0. The host does not use that router and takes no prefix from the message.
 
 ### RFC4861-RVAL-17
 
@@ -2464,9 +2263,7 @@ the order of the document.
 > MUST be ignored." — §6.1.2, `rfc4861.txt:2202-2203`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with a non-zero Reserved field and an
-  option of an unknown type. The host uses the router and the prefixes of the message as
-  for a normal advertisement.
+- Check idea: a router sends a Router Advertisement with a non-zero Reserved field and an option of an unknown type. The host uses the router and the prefixes of the message as for a normal advertisement.
 
 ### RFC4861-RVAL-18
 
@@ -2478,9 +2275,7 @@ the order of the document.
 > the Source Link-Layer Address, Prefix Information and MTU options." — §6.1.2, `rfc4861.txt:2207-2210`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a router sends a Router Advertisement with a Target Link-Layer Address option
-  and a Redirected Header option. The host uses the router and the prefixes of the message
-  as for a normal advertisement.
+- Check idea: a router sends a Router Advertisement with a Target Link-Layer Address option and a Redirected Header option. The host uses the router and the prefixes of the message as for a normal advertisement.
 
 ## Router configuration variables
 
@@ -2492,8 +2287,7 @@ the order of the document.
 > configured by system management." — §6.2.1, `rfc4861.txt:2219-2220`
 
 - Strength: must. Class: internal.
-- Check idea: set each variable of the list to a value other than its default on one
-  interface. The Router Advertisements of that interface carry the configured values.
+- Check idea: set each variable of the list to a value other than its default on one interface. The Router Advertisements of that interface carry the configured values.
 
 ### RFC4861-RCFG-2
 
@@ -2507,8 +2301,7 @@ the order of the document.
 > operates over different link layers." — §6.2.1, `rfc4861.txt:2365-2367`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: on a link type whose own document gives other defaults, a router without
-  explicit configuration sends Router Advertisements with those defaults.
+- Check idea: on a link type whose own document gives other defaults, a router without explicit configuration sends Router Advertisements with those defaults.
 
 ### RFC4861-RCFG-3
 
@@ -2521,8 +2314,7 @@ the order of the document.
 > "Default: FALSE" — §6.2.1, `rfc4861.txt:2254`
 
 - Strength: description. Class: internal.
-- Check idea: a node without configuration forwards no packet from one interface to another,
-  and its Neighbor Advertisements have the Router flag zero.
+- Check idea: a node without configuration forwards no packet from one interface to another, and its Neighbor Advertisements have the Router flag zero.
 
 ### RFC4861-RCFG-4
 
@@ -2540,8 +2332,7 @@ the order of the document.
 > Advertisements." — §6.2.1, `rfc4861.txt:2263-2267`
 
 - Strength: must. Class: wire.
-- Check idea: a node that forwards packets but has no configured value of AdvSendAdvertisements sends
-  no Router Advertisement, periodic or in reply to a Router Solicitation.
+- Check idea: a node that forwards packets but has no configured value of AdvSendAdvertisements sends no Router Advertisement, periodic or in reply to a Router Solicitation.
 
 ### RFC4861-RCFG-5
 
@@ -2555,8 +2346,7 @@ the order of the document.
 > "Default: 600 seconds" — §6.2.1, `rfc4861.txt:2275`
 
 - Strength: must. Class: wire.
-- Check idea: a router with the default value never leaves more than 600 seconds between two
-  unsolicited Router Advertisements. A router refuses a value of 3 or of 1801 seconds.
+- Check idea: a router with the default value never leaves more than 600 seconds between two unsolicited Router Advertisements. A router refuses a value of 3 or of 1801 seconds.
 
 ### RFC4861-RCFG-6
 
@@ -2573,9 +2363,7 @@ the order of the document.
 > Default is MaxRtrAdvInterval." — §6.2.1, `rfc4861.txt:2284-2286`
 
 - Strength: must. Class: wire.
-- Check idea: with MaxRtrAdvInterval 600 and no other configured value, no two unsolicited Router
-  Advertisements are closer than 198 seconds. A router refuses a value of 2 seconds, or a
-  value above 0.75 × MaxRtrAdvInterval.
+- Check idea: with MaxRtrAdvInterval 600 and no other configured value, no two unsolicited Router Advertisements are closer than 198 seconds. A router refuses a value of 2 seconds, or a value above 0.75 × MaxRtrAdvInterval.
 
 ### RFC4861-RCFG-7
 
@@ -2588,8 +2376,7 @@ the order of the document.
 > "Default: FALSE" — §6.2.1, `rfc4861.txt:2293`
 
 - Strength: description. Class: wire.
-- Check idea: a router with the default value sends Router Advertisements with the M flag
-  zero. With AdvManagedFlag TRUE, the M flag is one.
+- Check idea: a router with the default value sends Router Advertisements with the M flag zero. With AdvManagedFlag TRUE, the M flag is one.
 
 ### RFC4861-RCFG-8
 
@@ -2602,8 +2389,7 @@ the order of the document.
 > "Default: FALSE" — §6.2.1, `rfc4861.txt:2308`
 
 - Strength: description. Class: wire.
-- Check idea: a router with the default value sends Router Advertisements with the O flag
-  zero. With AdvOtherConfigFlag TRUE, the O flag is one.
+- Check idea: a router with the default value sends Router Advertisements with the O flag zero. With AdvOtherConfigFlag TRUE, the O flag is one.
 
 ### RFC4861-RCFG-9
 
@@ -2615,8 +2401,7 @@ the order of the document.
 > "Default: 0" — §6.2.1, `rfc4861.txt:2314`
 
 - Strength: description. Class: wire.
-- Check idea: a router with the default value sends Router Advertisements without an MTU
-  option. With AdvLinkMTU 1400, each advertisement carries an MTU option of 1400.
+- Check idea: a router with the default value sends Router Advertisements without an MTU option. With AdvLinkMTU 1400, each advertisement carries an MTU option of 1400.
 
 ### RFC4861-RCFG-10
 
@@ -2631,8 +2416,7 @@ the order of the document.
 > "Default: 0" — §6.2.1, `rfc4861.txt:2323`
 
 - Strength: must. Class: wire.
-- Check idea: a router with the default value sends Router Advertisements with Reachable Time
-  0. A router refuses a value of 3,600,001 milliseconds.
+- Check idea: a router with the default value sends Router Advertisements with Reachable Time 0. A router refuses a value of 3,600,001 milliseconds.
 
 ### RFC4861-RCFG-11
 
@@ -2645,8 +2429,7 @@ the order of the document.
 > "Default: 0" — §6.2.1, `rfc4861.txt:2330`
 
 - Strength: description. Class: wire.
-- Check idea: a router with the default value sends Router Advertisements with Retrans Timer
-  0. With AdvRetransTimer 2000, the field is 2000.
+- Check idea: a router with the default value sends Router Advertisements with Retrans Timer 0. With AdvRetransTimer 2000, the field is 2000.
 
 ### RFC4861-RCFG-12
 
@@ -2663,9 +2446,7 @@ the order of the document.
 > of implementation." — §6.2.1, `rfc4861.txt:2339-2341`
 
 - Strength: should (lower case). Class: wire.
-- Check idea: a router with the default value sends Router Advertisements whose Cur Hop Limit
-  is the default hop limit of the Assigned Numbers registry. With AdvCurHopLimit 100, the
-  field is 100.
+- Check idea: a router with the default value sends Router Advertisements whose Cur Hop Limit is the default hop limit of the Assigned Numbers registry. With AdvCurHopLimit 100, the field is 100.
 
 ### RFC4861-RCFG-13
 
@@ -2681,9 +2462,7 @@ the order of the document.
 > "Default: 3 * MaxRtrAdvInterval" — §6.2.1, `rfc4861.txt:2373`
 
 - Strength: must. Class: wire.
-- Check idea: a router with default values sends Router Advertisements with Router Lifetime
-  1800. A router refuses a value of 9001 seconds, or a non-zero value below
-  MaxRtrAdvInterval.
+- Check idea: a router with default values sends Router Advertisements with Router Lifetime 1800. A router refuses a value of 9001 seconds, or a non-zero value below MaxRtrAdvInterval.
 
 ### RFC4861-RCFG-14
 
@@ -2698,9 +2477,7 @@ the order of the document.
 > interface from which the advertisement is sent." — §6.2.1, `rfc4861.txt:2380-2382`
 
 - Strength: description. Class: wire.
-- Check idea: a router with two global prefixes on an interface and no prefix configuration
-  sends Router Advertisements with one Prefix Information option for each of the two
-  prefixes.
+- Check idea: a router with two global prefixes on an interface and no prefix configuration sends Router Advertisements with one Prefix Information option for each of the two prefixes.
 
 ### RFC4861-RCFG-15
 
@@ -2710,8 +2487,7 @@ the order of the document.
 > list of advertised prefixes." — §6.2.1, `rfc4861.txt:2383-2384`
 
 - Strength: should not. Class: wire.
-- Check idea: no Router Advertisement of the router carries a Prefix Information option for
-  the prefix fe80::/64.
+- Check idea: no Router Advertisement of the router carries a Prefix Information option for the prefix fe80::/64.
 
 ### RFC4861-RCFG-16
 
@@ -2727,8 +2503,7 @@ the order of the document.
 > advertisements)." — §6.2.1, `rfc4861.txt:2404-2406`
 
 - Strength: description. Class: wire.
-- Check idea: a router with the default value sends the Valid Lifetime 2592000 in every
-  Router Advertisement. A configured infinite lifetime appears as 0xffffffff.
+- Check idea: a router with the default value sends the Valid Lifetime 2592000 in every Router Advertisement. A configured infinite lifetime appears as 0xffffffff.
 
 ### RFC4861-RCFG-17
 
@@ -2744,8 +2519,7 @@ the order of the document.
 > consecutive advertisements." — §6.2.1, `rfc4861.txt:2401-2402`
 
 - Strength: may. Class: wire.
-- Check idea: with a lifetime that decrements in real time, the Valid Lifetime of consecutive Router
-  Advertisements drops by the time between them and reaches zero at the configured time.
+- Check idea: with a lifetime that decrements in real time, the Valid Lifetime of consecutive Router Advertisements drops by the time between them and reaches zero at the configured time.
 
 ### RFC4861-RCFG-18
 
@@ -2758,8 +2532,7 @@ the order of the document.
 > "Default: TRUE" — §6.2.1, `rfc4861.txt:2420`
 
 - Strength: description. Class: wire.
-- Check idea: a router with the default value sends Prefix Information options with the L
-  flag set.
+- Check idea: a router with the default value sends Prefix Information options with the L flag set.
 
 ### RFC4861-RCFG-19
 
@@ -2775,8 +2548,7 @@ the order of the document.
 > advertisements)." — §6.2.1, `rfc4861.txt:2444-2446`
 
 - Strength: description. Class: wire.
-- Check idea: a router with the default value sends the Preferred Lifetime 604800 in every
-  Router Advertisement. A configured infinite lifetime appears as 0xffffffff.
+- Check idea: a router with the default value sends the Preferred Lifetime 604800 in every Router Advertisement. A configured infinite lifetime appears as 0xffffffff.
 
 ### RFC4861-RCFG-20
 
@@ -2793,8 +2565,7 @@ the order of the document.
 > consecutive advertisements." — §6.2.1, `rfc4861.txt:2441-2442`
 
 - Strength: may. Class: wire.
-- Check idea: with a lifetime that decrements in real time, the Preferred Lifetime of consecutive Router
-  Advertisements drops by the time between them and reaches zero at the configured time.
+- Check idea: with a lifetime that decrements in real time, the Preferred Lifetime of consecutive Router Advertisements drops by the time between them and reaches zero at the configured time.
 
 ### RFC4861-RCFG-21
 
@@ -2804,8 +2575,7 @@ the order of the document.
 > larger than AdvValidLifetime." — §6.2.1, `rfc4861.txt:2446-2447`
 
 - Strength: must not. Class: wire.
-- Check idea: no Prefix Information option of a router has a Preferred Lifetime above its
-  Valid Lifetime. A router refuses a configuration with a larger preferred lifetime.
+- Check idea: no Prefix Information option of a router has a Preferred Lifetime above its Valid Lifetime. A router refuses a configuration with a larger preferred lifetime.
 
 ### RFC4861-RCFG-22
 
@@ -2818,8 +2588,7 @@ the order of the document.
 > "Default: TRUE" — §6.2.1, `rfc4861.txt:2454`
 
 - Strength: description. Class: wire.
-- Check idea: a router with the default value sends Prefix Information options with the A
-  flag set.
+- Check idea: a router with the default value sends Prefix Information options with the A flag set.
 
 ### RFC4861-RCFG-23
 
@@ -2834,9 +2603,7 @@ the order of the document.
 > ReachableTime value as described in Section 6.3.2." — §6.2.1, `rfc4861.txt:2471-2474`
 
 - Strength: must. Class: end-to-end.
-- Check idea: the packets that a router originates carry its CurHopLimit. Its Neighbor
-  Solicitation retransmissions are RetransTimer apart. The time that its neighbor entries
-  stay reachable varies between MIN_RANDOM_FACTOR and MAX_RANDOM_FACTOR times the base value.
+- Check idea: the packets that a router originates carry its CurHopLimit. Its Neighbor Solicitation retransmissions are RetransTimer apart. The time that its neighbor entries stay reachable varies between MIN_RANDOM_FACTOR and MAX_RANDOM_FACTOR times the base value.
 
 ## Router behavior
 
@@ -2851,9 +2618,7 @@ the order of the document.
 > not an advertising interface." — §6.2.2, `rfc4861.txt:2480-2484`
 
 - Strength: must not. Class: wire.
-- Check idea: a router has two interfaces; one has AdvSendAdvertisements FALSE. No Router
-  Advertisement appears on the link of that interface, periodic or in reply to a Router
-  Solicitation.
+- Check idea: a router has two interfaces; one has AdvSendAdvertisements FALSE. No Router Advertisement appears on the link of that interface, periodic or in reply to a Router Solicitation.
 
 ### RFC4861-ADV-2
 
@@ -2871,9 +2636,7 @@ the order of the document.
 > AdvSendAdvertisements flag is TRUE." — §6.2.2, `rfc4861.txt:2496-2498`
 
 - Strength: may (lower case). Class: wire.
-- Check idea: change the AdvSendAdvertisements flag of an enabled interface from FALSE to
-  TRUE at run time. The router starts to send Router Advertisements on that link, with the
-  initial short intervals.
+- Check idea: change the AdvSendAdvertisements flag of an enabled interface from FALSE to TRUE at run time. The router starts to send Router Advertisements on that link, with the initial short intervals.
 
 ### RFC4861-ADV-3
 
@@ -2883,8 +2646,7 @@ the order of the document.
 > advertising interface." — §6.2.2, `rfc4861.txt:2500-2501`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends a Router Solicitation to the all-routers multicast address. The
-  router receives it and replies with a Router Advertisement.
+- Check idea: a host sends a Router Solicitation to the all-routers multicast address. The router receives it and replies with a Router Advertisement.
 
 ### RFC4861-ADV-4
 
@@ -2894,8 +2656,7 @@ the order of the document.
 > out its advertising interfaces." — §6.2.3, `rfc4861.txt:2507-2508`
 
 - Strength: description. Class: wire.
-- Check idea: a router with one advertising interface sends Router Advertisements at
-  intervals, and one more in reply to a Router Solicitation.
+- Check idea: a router with one advertising interface sends Router Advertisements at intervals, and one more in reply to a Router Solicitation.
 
 ### RFC4861-ADV-5
 
@@ -2908,8 +2669,7 @@ the order of the document.
 > AdvDefaultLifetime." — §6.2.3, `rfc4861.txt:2512-2513`
 
 - Strength: description. Class: wire.
-- Check idea: with AdvDefaultLifetime 1000, every Router Advertisement of the interface has
-  Router Lifetime 1000.
+- Check idea: with AdvDefaultLifetime 1000, every Router Advertisement of the interface has Router Lifetime 1000.
 
 ### RFC4861-ADV-6
 
@@ -2922,8 +2682,7 @@ the order of the document.
 > and AdvOtherConfigFlag, respectively." — §6.2.3, `rfc4861.txt:2515-2516`
 
 - Strength: description. Class: wire.
-- Check idea: with AdvManagedFlag TRUE and AdvOtherConfigFlag FALSE, every Router
-  Advertisement has the M flag set and the O flag clear; then swap the two values.
+- Check idea: with AdvManagedFlag TRUE and AdvOtherConfigFlag FALSE, every Router Advertisement has the M flag set and the O flag clear; then swap the two values.
 
 ### RFC4861-ADV-7
 
@@ -2936,8 +2695,7 @@ the order of the document.
 > CurHopLimit." — §6.2.3, `rfc4861.txt:2527-2528`
 
 - Strength: description. Class: wire.
-- Check idea: with a configured hop limit of 100, every Router Advertisement has Cur Hop
-  Limit 100.
+- Check idea: with a configured hop limit of 100, every Router Advertisement has Cur Hop Limit 100.
 
 ### RFC4861-ADV-8
 
@@ -2950,8 +2708,7 @@ the order of the document.
 > AdvReachableTime." — §6.2.3, `rfc4861.txt:2530-2531`
 
 - Strength: description. Class: wire.
-- Check idea: with AdvReachableTime 20000, every Router Advertisement has Reachable Time
-  20000.
+- Check idea: with AdvReachableTime 20000, every Router Advertisement has Reachable Time 20000.
 
 ### RFC4861-ADV-9
 
@@ -2976,8 +2733,7 @@ the order of the document.
 > interfaces." — §6.2.3, `rfc4861.txt:2538-2541`
 
 - Strength: description (the option content), may (the omission). Class: wire.
-- Check idea: when a Router Advertisement carries a Source Link-Layer Address option, the
-  option holds the link-layer address of the interface that sends it.
+- Check idea: when a Router Advertisement carries a Source Link-Layer Address option, the option holds the link-layer address of the interface that sends it.
 
 ### RFC4861-ADV-11
 
@@ -2988,8 +2744,7 @@ the order of the document.
 > option is not sent." — §6.2.3, `rfc4861.txt:2543-2545`
 
 - Strength: description. Class: wire.
-- Check idea: with AdvLinkMTU 1400, every Router Advertisement carries an MTU option of 1400.
-  With AdvLinkMTU 0, no Router Advertisement carries an MTU option.
+- Check idea: with AdvLinkMTU 1400, every Router Advertisement carries an MTU option of 1400. With AdvLinkMTU 0, no Router Advertisement carries an MTU option.
 
 ### RFC4861-ADV-12
 
@@ -3001,8 +2756,7 @@ the order of the document.
 > as follows:" — §6.2.3, `rfc4861.txt:2547-2550`
 
 - Strength: description. Class: wire.
-- Check idea: with three prefixes in AdvPrefixList, a Router Advertisement carries exactly
-  three Prefix Information options, one for each prefix.
+- Check idea: with three prefixes in AdvPrefixList, a Router Advertisement carries exactly three Prefix Information options, one for each prefix.
 
 ### RFC4861-ADV-13
 
@@ -3015,8 +2769,7 @@ the order of the document.
 > "In the "on-link" flag: the entry's AdvOnLinkFlag." — §6.2.3, `rfc4861.txt:2552`
 
 - Strength: description. Class: wire.
-- Check idea: one prefix has AdvOnLinkFlag TRUE and one has FALSE. The L flags of the two
-  Prefix Information options are set and clear.
+- Check idea: one prefix has AdvOnLinkFlag TRUE and one has FALSE. The L flags of the two Prefix Information options are set and clear.
 
 ### RFC4861-ADV-14
 
@@ -3030,8 +2783,7 @@ the order of the document.
 > AdvValidLifetime." — §6.2.3, `rfc4861.txt:2554-2555`
 
 - Strength: description. Class: wire.
-- Check idea: with a fixed AdvValidLifetime of 7200 for a prefix, its Prefix Information
-  option has Valid Lifetime 7200.
+- Check idea: with a fixed AdvValidLifetime of 7200 for a prefix, its Prefix Information option has Valid Lifetime 7200.
 
 ### RFC4861-ADV-15
 
@@ -3045,8 +2797,7 @@ the order of the document.
 > entry's AdvAutonomousFlag." — §6.2.3, `rfc4861.txt:2557-2558`
 
 - Strength: description. Class: wire.
-- Check idea: one prefix has AdvAutonomousFlag TRUE and one has FALSE. The A flags of the
-  two Prefix Information options are set and clear.
+- Check idea: one prefix has AdvAutonomousFlag TRUE and one has FALSE. The A flags of the two Prefix Information options are set and clear.
 
 ### RFC4861-ADV-16
 
@@ -3060,8 +2811,7 @@ the order of the document.
 > AdvPreferredLifetime." — §6.2.3, `rfc4861.txt:2560-2561`
 
 - Strength: description. Class: wire.
-- Check idea: with a fixed AdvPreferredLifetime of 3600 for a prefix, its Prefix Information
-  option has Preferred Lifetime 3600.
+- Check idea: with a fixed AdvPreferredLifetime of 3600 for a prefix, its Prefix Information option has Preferred Lifetime 3600.
 
 ### RFC4861-ADV-17
 
@@ -3074,8 +2824,7 @@ the order of the document.
 > outgoing advertisements to zero." — §6.2.3, `rfc4861.txt:2563-2567`
 
 - Strength: description. Class: wire.
-- Check idea: a router with AdvDefaultLifetime 0 and one prefix sends Router Advertisements
-  with Router Lifetime 0 and the Prefix Information option.
+- Check idea: a router with AdvDefaultLifetime 0 and one prefix sends Router Advertisements with Router Lifetime 0 and the Prefix Information option.
 
 ### RFC4861-ADV-18
 
@@ -3085,8 +2834,7 @@ the order of the document.
 > unsolicited Router Advertisements." — §6.2.3, `rfc4861.txt:2569-2570`
 
 - Strength: may. Class: wire.
-- Check idea: a host accepts unsolicited Router Advertisements that omit the prefix options,
-  and it keeps the prefixes that it learned before.
+- Check idea: a host accepts unsolicited Router Advertisements that omit the prefix options, and it keeps the prefixes that it learned before.
 
 ### RFC4861-ADV-19
 
@@ -3099,9 +2847,7 @@ the order of the document.
 > system initialization." — §6.2.3, `rfc4861.txt:2572-2574`, `rfc4861.txt:2583-2585`
 
 - Strength: should. Class: wire.
-- Check idea: the reply to a Router Solicitation and the first initial unsolicited Router
-  Advertisements carry every configured option: the Source Link-Layer Address, the MTU and
-  all prefixes.
+- Check idea: the reply to a Router Solicitation and the first initial unsolicited Router Advertisements carry every configured option: the Source Link-Layer Address, the MTU and all prefixes.
 
 ### RFC4861-ADV-20
 
@@ -3112,9 +2858,7 @@ the order of the document.
 > containing a subset of the options." — §6.2.3, `rfc4861.txt:2587-2589`
 
 - Strength: description. Class: wire.
-- Check idea: a router has more prefixes than one advertisement can hold within the link MTU.
-  No Router Advertisement exceeds the link MTU, and together the advertisements carry all
-  prefixes.
+- Check idea: a router has more prefixes than one advertisement can hold within the link MTU. No Router Advertisement exceeds the link MTU, and together the advertisements carry all prefixes.
 
 ### RFC4861-ADV-21
 
@@ -3123,8 +2867,7 @@ the order of the document.
 > "A host MUST NOT send Router Advertisement messages at any time." — §6.2.4, `rfc4861.txt:2593`
 
 - Strength: must not. Class: wire.
-- Check idea: a host runs on a link for a long time and receives Router Solicitations. It
-  sends no Router Advertisement.
+- Check idea: a host runs on a link for a long time and receives Router Solicitations. It sends no Router Advertisement.
 
 ### RFC4861-ADV-22
 
@@ -3141,9 +2884,7 @@ the order of the document.
 > advertisement to be sent and a new random value to be chosen." — §6.2.4, `rfc4861.txt:2595-2603`
 
 - Strength: description. Class: wire.
-- Check idea: record many unsolicited Router Advertisements after the initial ones. Each
-  interval lies between MinRtrAdvInterval and MaxRtrAdvInterval, and the intervals vary.
-  Two interfaces of one router have independent intervals.
+- Check idea: record many unsolicited Router Advertisements after the initial ones. Each interval lies between MinRtrAdvInterval and MaxRtrAdvInterval, and the intervals vary. Two interfaces of one router have independent intervals.
 
 ### RFC4861-ADV-23
 
@@ -3156,9 +2897,7 @@ the order of the document.
 > to MAX_INITIAL_RTR_ADVERT_INTERVAL instead." — §6.2.4, `rfc4861.txt:2605-2609`
 
 - Strength: should. Class: wire.
-- Check idea: with the default intervals, an interface becomes an advertising interface. The
-  first MAX_INITIAL_RTR_ADVERTISEMENTS advertisements come at most
-  MAX_INITIAL_RTR_ADVERT_INTERVAL apart; the later ones follow the normal intervals.
+- Check idea: with the default intervals, an interface becomes an advertising interface. The first MAX_INITIAL_RTR_ADVERTISEMENTS advertisements come at most MAX_INITIAL_RTR_ADVERT_INTERVAL apart; the later ones follow the normal intervals.
 
 ### RFC4861-ADV-24
 
@@ -3173,9 +2912,7 @@ the order of the document.
 > same rules as when an interface becomes an advertising interface." — §6.2.4, `rfc4861.txt:2614-2620`
 
 - Strength: may. Class: wire.
-- Check idea: add a prefix to a router at run time. The router sends at most
-  MAX_INITIAL_RTR_ADVERTISEMENTS advertisements at intervals of at most
-  MAX_INITIAL_RTR_ADVERT_INTERVAL, then returns to the normal intervals.
+- Check idea: add a prefix to a router at run time. The router sends at most MAX_INITIAL_RTR_ADVERTISEMENTS advertisements at intervals of at most MAX_INITIAL_RTR_ADVERT_INTERVAL, then returns to the normal intervals.
 
 ### RFC4861-ADV-25
 
@@ -3192,9 +2929,7 @@ the order of the document.
 > Advertisements on the interface with a Router Lifetime field of zero." — §6.2.5, `rfc4861.txt:2641-2643`
 
 - Strength: should. Class: wire.
-- Check idea: change AdvSendAdvertisements of an advertising interface to FALSE. The router
-  sends one to MAX_FINAL_RTR_ADVERTISEMENTS multicast Router Advertisements with Router
-  Lifetime 0, then no more.
+- Check idea: change AdvSendAdvertisements of an advertising interface to FALSE. The router sends one to MAX_FINAL_RTR_ADVERTISEMENTS multicast Router Advertisements with Router Lifetime 0, then no more.
 
 ### RFC4861-ADV-26
 
@@ -3206,8 +2941,7 @@ the order of the document.
 > advertising interfaces)." — §6.2.5, `rfc4861.txt:2644-2647`
 
 - Strength: should. Class: wire.
-- Check idea: turn off IP forwarding on a router with two interfaces; only one of them is an advertising interface.
-  The node reports on both links that it leaves the all-routers group.
+- Check idea: turn off IP forwarding on a router with two interfaces; only one of them is an advertising interface. The node reports on both links that it leaves the all-routers group.
 
 ### RFC4861-ADV-27
 
@@ -3218,8 +2952,7 @@ the order of the document.
 > have the Router flag set to zero." — §6.2.5, `rfc4861.txt:2647-2649`
 
 - Strength: must. Class: wire.
-- Check idea: turn off IP forwarding on a router. Each Neighbor Advertisement that the node
-  sends afterwards has the Router flag zero.
+- Check idea: turn off IP forwarding on a router. Each Neighbor Advertisement that the node sends afterwards has the Router flag zero.
 
 ### RFC4861-ADV-28
 
@@ -3233,8 +2966,7 @@ the order of the document.
 > to zero." — §6.2.5, `rfc4861.txt:2651-2656`
 
 - Strength: must. Class: wire.
-- Check idea: turn off IP forwarding, and keep AdvSendAdvertisements TRUE. Every later Router
-  Advertisement of the node has Router Lifetime 0.
+- Check idea: turn off IP forwarding, and keep AdvSendAdvertisements TRUE. Every later Router Advertisement of the node has Router Lifetime 0.
 
 ### RFC4861-ADV-29
 
@@ -3245,8 +2977,7 @@ the order of the document.
 > an advertising interface." — §6.2.6, `rfc4861.txt:2663-2665`
 
 - Strength: description. Class: wire.
-- Check idea: a host sends a valid Router Solicitation. The router sends a Router
-  Advertisement within MAX_RA_DELAY_TIME, before its next periodic one is due.
+- Check idea: a host sends a valid Router Solicitation. The router sends a Router Advertisement within MAX_RA_DELAY_TIME, before its next periodic one is due.
 
 ### RFC4861-ADV-30
 
@@ -3258,9 +2989,7 @@ the order of the document.
 > the usual case is to multicast the response to the all-nodes group." — §6.2.6, `rfc4861.txt:2665-2668`
 
 - Strength: may. Class: wire.
-- Check idea: the reply to a Router Solicitation from a unicast address goes to that address
-  or to the all-nodes address. The reply to a solicitation from the unspecified address goes
-  to the all-nodes address.
+- Check idea: the reply to a Router Solicitation from a unicast address goes to that address or to the all-nodes address. The reply to a solicitation from the unspecified address goes to the all-nodes address.
 
 ### RFC4861-ADV-31
 
@@ -3271,8 +3000,7 @@ the order of the document.
 > (see Section 6.2.4)." — §6.2.6, `rfc4861.txt:2669-2671`
 
 - Strength: description. Class: wire.
-- Check idea: after a multicast reply to a Router Solicitation, the next unsolicited Router
-  Advertisement comes between MinRtrAdvInterval and MaxRtrAdvInterval after the reply.
+- Check idea: after a multicast reply to a Router Solicitation, the next unsolicited Router Advertisement comes between MinRtrAdvInterval and MaxRtrAdvInterval after the reply.
 
 ### RFC4861-ADV-32
 
@@ -3285,8 +3013,7 @@ the order of the document.
 > first solicitation.)" — §6.2.6, `rfc4861.txt:2673-2677`
 
 - Strength: must. Class: wire.
-- Check idea: send many Router Solicitations, far apart. Each reply comes between 0 and
-  MAX_RA_DELAY_TIME after its solicitation, and the delays vary.
+- Check idea: send many Router Solicitations, far apart. Each reply comes between 0 and MAX_RA_DELAY_TIME after its solicitation, and the delays vary.
 
 ### RFC4861-ADV-33
 
@@ -3297,8 +3024,7 @@ the order of the document.
 > more than one advertisement every MIN_DELAY_BETWEEN_RAS seconds." — §6.2.6, `rfc4861.txt:2677-2679`
 
 - Strength: must. Class: wire.
-- Check idea: several hosts send Router Solicitations in quick succession. No two multicast
-  Router Advertisements of the router are closer than MIN_DELAY_BETWEEN_RAS.
+- Check idea: several hosts send Router Solicitations in quick succession. No two multicast Router Advertisements of the router are closer than MIN_DELAY_BETWEEN_RAS.
 
 ### RFC4861-ADV-34
 
@@ -3312,8 +3038,7 @@ the order of the document.
 > delay and send the advertisement at the already-scheduled time." — §6.2.6, `rfc4861.txt:2697-2701`
 
 - Strength: description (the text says "might"). Class: wire.
-- Check idea: a host sends a Router Solicitation shortly before a periodic advertisement is
-  due. The router sends one advertisement at the scheduled time, not a second one.
+- Check idea: a host sends a Router Solicitation shortly before a periodic advertisement is due. The router sends one advertisement at the scheduled time, not a second one.
 
 ### RFC4861-ADV-35
 
@@ -3330,9 +3055,7 @@ the order of the document.
 > time given by the random value." — §6.2.6, `rfc4861.txt:2710-2711`
 
 - Strength: description (the text says "might"). Class: wire.
-- Check idea: a host sends a Router Solicitation 1 second after a multicast advertisement.
-  The reply comes between MIN_DELAY_BETWEEN_RAS and MIN_DELAY_BETWEEN_RAS plus
-  MAX_RA_DELAY_TIME after that advertisement.
+- Check idea: a host sends a Router Solicitation 1 second after a multicast advertisement. The reply comes between MIN_DELAY_BETWEEN_RAS and MIN_DELAY_BETWEEN_RAS plus MAX_RA_DELAY_TIME after that advertisement.
 
 ### RFC4861-ADV-36
 
@@ -3346,9 +3069,7 @@ the order of the document.
 > frequently than indicated by MinRtrAdvInterval." — §6.2.6, `rfc4861.txt:2713-2718`
 
 - Strength: must not. Class: wire.
-- Check idea: with no solicitations after the initial phase, no two unsolicited multicast
-  Router Advertisements are closer than MinRtrAdvInterval. With solicitations, replies may
-  come closer.
+- Check idea: with no solicitations after the initial phase, no two unsolicited multicast Router Advertisements are closer than MinRtrAdvInterval. With solicitations, replies may come closer.
 
 ### RFC4861-ADV-37
 
@@ -3358,9 +3079,7 @@ the order of the document.
 > address MUST NOT update the router's Neighbor Cache" — §6.2.6, `rfc4861.txt:2720-2721`
 
 - Strength: must not. Class: internal.
-- Check idea: a host sends a Router Solicitation from the unspecified address. The router
-  makes no Neighbor Cache entry; a later unicast packet from the router to the host starts
-  with a Neighbor Solicitation.
+- Check idea: a host sends a Router Solicitation from the unspecified address. The router makes no Neighbor Cache entry; a later unicast packet from the router to the host starts with a Neighbor Solicitation.
 
 ### RFC4861-ADV-38
 
@@ -3376,9 +3095,7 @@ the order of the document.
 > MUST also be set to STALE." — §6.2.6, `rfc4861.txt:2721-2728`
 
 - Strength: should (the address), must (the state). Class: internal.
-- Check idea: the router has a REACHABLE entry for host A. Host A sends a Router Solicitation
-  with a new link-layer address. The next unicast frame from the router to A goes to the new
-  address, and the router later probes A as for a STALE entry.
+- Check idea: the router has a REACHABLE entry for host A. Host A sends a Router Solicitation with a new link-layer address. The next unicast frame from the router to A goes to the new address, and the router later probes A as for a STALE entry.
 
 ### RFC4861-ADV-39
 
@@ -3390,9 +3107,7 @@ the order of the document.
 > specified in Section 7.3.3." — §6.2.6, `rfc4861.txt:2728-2731`
 
 - Strength: description. Class: internal.
-- Check idea: host A, unknown to the router, sends a Router Solicitation with a Source
-  Link-Layer Address option. The router then sends a unicast packet to A without a Neighbor
-  Solicitation before it.
+- Check idea: host A, unknown to the router, sends a Router Solicitation with a Source Link-Layer Address option. The router then sends a unicast packet to A without a Neighbor Solicitation before it.
 
 ### RFC4861-ADV-40
 
@@ -3404,9 +3119,7 @@ the order of the document.
 > unicast router advertisement." — §6.2.6, `rfc4861.txt:2731-2734`
 
 - Strength: may (lower case). Class: wire.
-- Check idea: an unknown host sends a Router Solicitation from a unicast address without a
-  Source Link-Layer Address option. The reply goes to the all-nodes address, or to the host
-  after address resolution.
+- Check idea: an unknown host sends a Router Solicitation from a unicast address without a Source Link-Layer Address option. The reply goes to the all-nodes address, or to the host after address resolution.
 
 ### RFC4861-ADV-41
 
@@ -3418,8 +3131,7 @@ the order of the document.
 > flag MUST be set to FALSE." — §6.2.6, `rfc4861.txt:2734-2737`
 
 - Strength: must. Class: internal.
-- Check idea: node A sends Neighbor Advertisements with the Router flag set, then a Router
-  Solicitation. After that, the router treats A as a host, not as a router.
+- Check idea: node A sends Neighbor Advertisements with the Router flag set, then a Router Solicitation. After that, the router treats A as a host, not as a router.
 
 ### RFC4861-ADV-42
 
@@ -3432,8 +3144,7 @@ the order of the document.
 > network management." — §6.2.7, `rfc4861.txt:2753-2757`
 
 - Strength: should. Class: internal.
-- Check idea: router B advertises an MTU option that differs from the one of router A on the
-  same link. Router A records an inconsistency in its log.
+- Check idea: router B advertises an MTU option that differs from the one of router A on the same link. Router A records an inconsistency in its log.
 
 ### RFC4861-ADV-43
 
@@ -3451,9 +3162,7 @@ the order of the document.
 > "Preferred and Valid Lifetimes for the same prefix." — §6.2.7, `rfc4861.txt:2772`
 
 - Strength: should. Class: internal.
-- Check idea: router B differs from router A in one field at a time: Cur Hop Limit, M, O,
-  Reachable Time, Retrans Timer, MTU, and the lifetimes of one prefix. Router A logs each
-  difference. A value of zero in B gives no log entry.
+- Check idea: router B differs from router A in one field at a time: Cur Hop Limit, M, O, Reachable Time, Retrans Timer, MTU, and the lifetimes of one prefix. Router A logs each difference. A value of zero in B gives no log entry.
 
 ### RFC4861-ADV-44
 
@@ -3469,11 +3178,8 @@ the order of the document.
 > clocks between the routers such comparison SHOULD allow some time
 > skew." — §6.2.7, `rfc4861.txt:2772-2780`
 
-- Strength: must (lower case), should (the skew). Class:
-  internal.
-- Check idea: routers A and B advertise one prefix with lifetimes that decrement to the same
-  end time, sent at different moments. Router A logs no inconsistency. A different end time
-  gives a log entry.
+- Strength: must (lower case), should (the skew). Class: internal.
+- Check idea: routers A and B advertise one prefix with lifetimes that decrement to the same end time, sent at different moments. Router A logs no inconsistency. A different end time gives a log entry.
 
 ### RFC4861-ADV-45
 
@@ -3487,8 +3193,7 @@ the order of the document.
 > another with each received advertisement." — §6.2.7, `rfc4861.txt:2782-2787`
 
 - Strength: should. Class: internal.
-- Check idea: router B advertises other prefixes than router A, and Reachable Time 0 where A
-  advertises 30000. Router A logs nothing.
+- Check idea: router B advertises other prefixes than router A, and Reachable Time 0 where A advertises 30000. Router A logs nothing.
 
 ### RFC4861-ADV-46
 
@@ -3500,8 +3205,7 @@ the order of the document.
 > when redirecting to that router." — §6.2.8, `rfc4861.txt:2808-2811`
 
 - Strength: must (lower case). Class: wire.
-- Check idea: router A redirects a host to router B on the same link. The Target Address of
-  the Redirect equals the source address of the Router Advertisements of router B.
+- Check idea: router A redirects a host to router B on the same link. The Target Address of the Redirect equals the source address of the Router Advertisements of router B.
 
 ### RFC4861-ADV-47
 
@@ -3517,10 +3221,7 @@ the order of the document.
 > interface." — §6.2.8, `rfc4861.txt:2817-2823`
 
 - Strength: should. Class: wire.
-- Check idea: change the link-local address of an advertising interface. The router sends
-  multicast Router Advertisements from the old address with Router Lifetime 0, and then
-  multicast Router Advertisements from the new address. The hosts use the new address as
-  default router.
+- Check idea: change the link-local address of an advertising interface. The router sends multicast Router Advertisements from the old address with Router Lifetime 0, and then multicast Router Advertisements from the new address. The hosts use the new address as default router.
 
 ## Host behavior
 
@@ -3535,9 +3236,7 @@ the order of the document.
 > unspecified." — §6.3.2, `rfc4861.txt:2839-2843`
 
 - Strength: description. Class: end-to-end.
-- Check idea: on a link without a router, a host sends packets with the default hop limit.
-  After a Router Advertisement with Cur Hop Limit 100, it uses 100. On a link where all
-  routers send Cur Hop Limit 0, it keeps the default.
+- Check idea: on a link without a router, a host sends packets with the default hop limit. After a Router Advertisement with Cur Hop Limit 100, it uses 100. On a link where all routers send Cur Hop Limit 0, it keeps the default.
 
 ### RFC4861-HOST-2
 
@@ -3548,8 +3247,7 @@ the order of the document.
 > layers." — §6.3.2, `rfc4861.txt:2845-2847`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: on a link type whose own document gives other defaults, a host without Router
-  Advertisements uses those defaults.
+- Check idea: on a link type whose own document gives other defaults, a host without Router Advertisements uses those defaults.
 
 ### RFC4861-HOST-3
 
@@ -3561,8 +3259,7 @@ the order of the document.
 > the particular link layer (e.g., [IPv6-ETHER])." — §6.3.2, `rfc4861.txt:2865-2868`
 
 - Strength: description. Class: end-to-end.
-- Check idea: on an Ethernet link without an MTU option, a host sends packets of up to 1500
-  octets, and it fragments larger ones.
+- Check idea: on an Ethernet link without an MTU option, a host sends packets of up to 1500 octets, and it fragments larger ones.
 
 ### RFC4861-HOST-4
 
@@ -3575,8 +3272,7 @@ the order of the document.
 > time of implementation." — §6.3.2, `rfc4861.txt:2873-2875`
 
 - Strength: description. Class: wire.
-- Check idea: a host that has received no Router Advertisement sends packets whose Hop Limit
-  is the default hop limit of the Assigned Numbers registry.
+- Check idea: a host that has received no Router Advertisement sends packets whose Hop Limit is the default hop limit of the Assigned Numbers registry.
 
 ### RFC4861-HOST-5
 
@@ -3588,9 +3284,7 @@ the order of the document.
 > "Default: REACHABLE_TIME milliseconds." — §6.3.2, `rfc4861.txt:2881`
 
 - Strength: description. Class: internal.
-- Check idea: without Router Advertisements, the time that a neighbor entry of a host stays
-  REACHABLE after a confirmation lies between MIN_RANDOM_FACTOR and MAX_RANDOM_FACTOR times
-  REACHABLE_TIME.
+- Check idea: without Router Advertisements, the time that a neighbor entry of a host stays REACHABLE after a confirmation lies between MIN_RANDOM_FACTOR and MAX_RANDOM_FACTOR times REACHABLE_TIME.
 
 ### RFC4861-HOST-6
 
@@ -3608,8 +3302,7 @@ the order of the document.
 > received." — §6.3.2, `rfc4861.txt:2886-2893`
 
 - Strength: should (lower case). Class: internal.
-- Check idea: measure how long neighbor entries stay REACHABLE on many hosts, or on one host
-  over many hours. The times lie between the two factors times the base, and they differ.
+- Check idea: measure how long neighbor entries stay REACHABLE on many hosts, or on one host over many hours. The times lie between the two factors times the base, and they differ.
 
 ### RFC4861-HOST-7
 
@@ -3622,8 +3315,7 @@ the order of the document.
 > "Default: RETRANS_TIMER milliseconds" — §6.3.2, `rfc4861.txt:2900`
 
 - Strength: description. Class: wire.
-- Check idea: without Router Advertisements, a host resolves an address that nobody owns. Its
-  Neighbor Solicitations are RETRANS_TIMER apart.
+- Check idea: without Router Advertisements, a host resolves an address that nobody owns. Its Neighbor Solicitations are RETRANS_TIMER apart.
 
 ### RFC4861-HOST-8
 
@@ -3633,8 +3325,7 @@ the order of the document.
 > capable interfaces." — §6.3.3, `rfc4861.txt:2904-2905`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a host with two interfaces receives a Router Advertisement to the all-nodes
-  address on each link, and it uses each router on its link.
+- Check idea: a host with two interfaces receives a Router Advertisement to the all-nodes address on each link, and it uses each router on its link.
 
 ### RFC4861-HOST-9
 
@@ -3646,8 +3337,7 @@ the order of the document.
 > previous advertisement or from another source." — §6.3.4, `rfc4861.txt:2924-2927`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: router A advertises prefix P1, and router B advertises prefix P2. After both
-  advertisements, the host treats P1 and P2 as on-link and uses both routers.
+- Check idea: router A advertises prefix P1, and router B advertises prefix P2. After both advertisements, the host treats P1 and P2 as on-link and uses both routers.
 
 ### RFC4861-HOST-10
 
@@ -3660,8 +3350,7 @@ the order of the document.
 > the most recently received information is considered authoritative." — §6.3.4, `rfc4861.txt:2927-2931`
 
 - Strength: description. Class: end-to-end.
-- Check idea: router A advertises MTU 1400, then router B advertises MTU 1300. The host then
-  sends packets of at most 1300 octets.
+- Check idea: router A advertises MTU 1400, then router B advertises MTU 1300. The host then sends packets of at most 1300 octets.
 
 ### RFC4861-HOST-11
 
@@ -3676,8 +3365,7 @@ the order of the document.
 > first Router Advertisement was received." — §6.3.4, `rfc4861.txt:2933-2939`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: router A advertises Cur Hop Limit 100, then router B advertises Cur Hop Limit
-  0. The host keeps Hop Limit 100 in its packets.
+- Check idea: router A advertises Cur Hop Limit 100, then router B advertises Cur Hop Limit 0. The host keeps Hop Limit 100 in its packets.
 
 ### RFC4861-HOST-12
 
@@ -3692,9 +3380,7 @@ the order of the document.
 > Lifetime field." — §6.3.4, `rfc4861.txt:2947-2951`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router sends one Router Advertisement with Router Lifetime 30. The host sends
-  off-link packets through the router for 30 seconds, and no longer. An advertisement with
-  Router Lifetime 0 from a new router adds no default router.
+- Check idea: a router sends one Router Advertisement with Router Lifetime 30. The host sends off-link packets through the router for 30 seconds, and no longer. An advertisement with Router Lifetime 0 from a new router adds no default router.
 
 ### RFC4861-HOST-13
 
@@ -3708,8 +3394,7 @@ the order of the document.
 > received advertisement." — §6.3.4, `rfc4861.txt:2953-2956`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router sends Router Lifetime 30, and 20 seconds later again Router Lifetime
-  30. The host uses the router until 50 seconds after the first advertisement.
+- Check idea: a router sends Router Lifetime 30, and 20 seconds later again Router Lifetime 30. The host uses the router until 50 seconds after the first advertisement.
 
 ### RFC4861-HOST-14
 
@@ -3722,8 +3407,7 @@ the order of the document.
 > time-out the entry as specified in Section 6.3.5." — §6.3.4, `rfc4861.txt:2958-2960`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a host uses router A and router B. Router A sends Router Lifetime 0. The next
-  off-link packets of the host go through router B.
+- Check idea: a host uses router A and router B. Router A sends Router Lifetime 0. The next off-link packets of the host go through router B.
 
 ### RFC4861-HOST-15
 
@@ -3735,8 +3419,7 @@ the order of the document.
 > addresses and SHOULD retain more." — §6.3.4, `rfc4861.txt:2962-2965`
 
 - Strength: may (not all), must (two), should (more). Class: end-to-end.
-- Check idea: three routers advertise on a link. The router in use fails. The host sends its
-  next off-link packets through another advertised router, without a new advertisement.
+- Check idea: three routers advertise on a link. The router in use fails. The host sends its next off-link packets through another advertised router, without a new advertisement.
 
 ### RFC4861-HOST-16
 
@@ -3746,8 +3429,7 @@ the order of the document.
 > its CurHopLimit variable to the received value." — §6.3.4, `rfc4861.txt:2979-2980`
 
 - Strength: should. Class: wire.
-- Check idea: a router advertises Cur Hop Limit 100. The packets that the host sends
-  afterwards have Hop Limit 100.
+- Check idea: a router advertises Cur Hop Limit 100. The packets that the host sends afterwards have Hop Limit 100.
 
 ### RFC4861-HOST-17
 
@@ -3761,9 +3443,7 @@ the order of the document.
 > MAX_RANDOM_FACTOR times the BaseReachableTime." — §6.3.4, `rfc4861.txt:2982-2987`
 
 - Strength: should. Class: internal.
-- Check idea: a router advertises Reachable Time 10000. The time that a neighbor entry of the
-  host stays REACHABLE after a confirmation then lies between MIN_RANDOM_FACTOR and
-  MAX_RANDOM_FACTOR times 10000 milliseconds.
+- Check idea: a router advertises Reachable Time 10000. The time that a neighbor entry of the host stays REACHABLE after a confirmation then lies between MIN_RANDOM_FACTOR and MAX_RANDOM_FACTOR times 10000 milliseconds.
 
 ### RFC4861-HOST-18
 
@@ -3775,8 +3455,7 @@ the order of the document.
 > a new random value gets re-computed at least once every few hours." — §6.3.4, `rfc4861.txt:2991-2994`
 
 - Strength: should. Class: internal.
-- Check idea: a router advertises the same Reachable Time for a day. The time that neighbor
-  entries of the host stay REACHABLE changes at least once every few hours.
+- Check idea: a router advertises the same Reachable Time for a day. The time that neighbor entries of the host stay REACHABLE changes at least once every few hours.
 
 ### RFC4861-HOST-19
 
@@ -3786,8 +3465,7 @@ the order of the document.
 > field, if the received value is non-zero." — §6.3.4, `rfc4861.txt:2996-2997`
 
 - Strength: should. Class: wire.
-- Check idea: a router advertises Retrans Timer 2000. The host resolves an address that
-  nobody owns, and its Neighbor Solicitations are 2 seconds apart.
+- Check idea: a router advertises Retrans Timer 2000. The host resolves an address that nobody owns, and its Neighbor Solicitations are 2 seconds apart.
 
 ### RFC4861-HOST-20
 
@@ -3801,9 +3479,7 @@ the order of the document.
 > IsRouter flag in the Neighbor Cache entry MUST be set to TRUE." — §6.3.4, `rfc4861.txt:2999-3004`
 
 - Strength: should (the address), must (the IsRouter flag). Class: internal.
-- Check idea: a router sends a Router Advertisement with a Source Link-Layer Address option.
-  The host sends its first off-link packet to that link-layer address without a Neighbor
-  Solicitation before it.
+- Check idea: a router sends a Router Advertisement with a Source Link-Layer Address option. The host sends its first off-link packet to that link-layer address without a Neighbor Solicitation before it.
 
 ### RFC4861-HOST-21
 
@@ -3814,9 +3490,7 @@ the order of the document.
 > Cache entry exists, its IsRouter flag MUST be set to TRUE." — §6.3.4, `rfc4861.txt:3004-3006`
 
 - Strength: must. Class: internal.
-- Check idea: the host has an entry for node R from a Neighbor Advertisement with the Router
-  flag zero. R sends a Router Advertisement without the option. The host then treats R as a
-  router.
+- Check idea: the host has an entry for node R from a Neighbor Advertisement with the Router flag zero. R sends a Router Advertisement without the option. The host then treats R as a router.
 
 ### RFC4861-HOST-22
 
@@ -3827,9 +3501,7 @@ the order of the document.
 > specified in Section 7.3.3." — §6.3.4, `rfc4861.txt:3009-3011`
 
 - Strength: must. Class: internal.
-- Check idea: after the first Router Advertisement with the option, the host sends a packet
-  through the router. After DELAY_FIRST_PROBE_TIME, the host probes the router with a
-  unicast Neighbor Solicitation.
+- Check idea: after the first Router Advertisement with the option, the host sends a packet through the router. After DELAY_FIRST_PROBE_TIME, the host probes the router with a unicast Neighbor Solicitation.
 
 ### RFC4861-HOST-23
 
@@ -3840,9 +3512,7 @@ the order of the document.
 > MUST also be set to STALE." — §6.3.4, `rfc4861.txt:3011-3013`
 
 - Strength: must. Class: internal.
-- Check idea: the host has a REACHABLE entry for the router. The router sends a Router
-  Advertisement with a new link-layer address. The host sends to the new address, and it
-  probes the router as for a STALE entry.
+- Check idea: the host has a REACHABLE entry for the router. The router sends a Router Advertisement with a new link-layer address. The host sends to the new address, and it probes the router as for a STALE entry.
 
 ### RFC4861-HOST-24
 
@@ -3854,8 +3524,7 @@ the order of the document.
 > specified in the link-type-specific document (e.g., [IPv6-ETHER])." — §6.3.4, `rfc4861.txt:3015-3018`
 
 - Strength: should. Class: end-to-end.
-- Check idea: on Ethernet, an MTU option of 1400 makes the host send packets of at most 1400
-  octets. An MTU option of 1000 or of 9000 changes nothing.
+- Check idea: on Ethernet, an MTU option of 1400 makes the host send packets of at most 1400 octets. An MTU option of 1000 or of 9000 changes nothing.
 
 ### RFC4861-HOST-25
 
@@ -3866,9 +3535,7 @@ the order of the document.
 > considered on-link." — §6.3.4, `rfc4861.txt:3020-3022`
 
 - Strength: should (lower case). Class: end-to-end.
-- Check idea: a router advertises prefix P with the L flag set. The host sends a packet to an
-  address in P directly: it sends a Neighbor Solicitation for that address, not a packet to
-  the router.
+- Check idea: a router advertises prefix P with the L flag set. The host sends a packet to an address in P directly: it sends a Neighbor Solicitation for that address, not a packet to the router.
 
 ### RFC4861-HOST-26
 
@@ -3880,8 +3547,7 @@ the order of the document.
 > addresses covered by the prefix are off-link." — §6.3.4, `rfc4861.txt:3022-3023`, `rfc4861.txt:3031-3033`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: router A advertises prefix P with L set. Router B then advertises P with L
-  zero. The host still sends packets to addresses in P directly.
+- Check idea: router A advertises prefix P with L set. Router B then advertises P with L zero. The host still sends packets to addresses in P directly.
 
 ### RFC4861-HOST-27
 
@@ -3892,8 +3558,7 @@ the order of the document.
 > L-bit set and the Lifetime set to zero." — §6.3.4, `rfc4861.txt:3033-3035`
 
 - Strength: description. Class: end-to-end.
-- Check idea: router A advertises P with L set, then with L set and Valid Lifetime 0. The
-  host then sends packets to addresses in P through a default router.
+- Check idea: router A advertises P with L set, then with L set and Valid Lifetime 0. The host then sends packets to addresses in P through a default router.
 
 ### RFC4861-HOST-28
 
@@ -3907,8 +3572,7 @@ the order of the document.
 > change this behavior." — §6.3.4, `rfc4861.txt:3035-3040`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises prefix P only with L zero. The host sends packets to
-  addresses in P through the default router.
+- Check idea: a router advertises prefix P only with L zero. The host sends packets to addresses in P through the default router.
 
 ### RFC4861-HOST-29
 
@@ -3920,8 +3584,7 @@ the order of the document.
 > Prefix Information option." — §6.3.4, `rfc4861.txt:3048-3049`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises fe80::/64 with L set and Valid Lifetime 0. The host still
-  reaches link-local neighbors directly.
+- Check idea: a router advertises fe80::/64 with L set and Valid Lifetime 0. The host still reaches link-local neighbors directly.
 
 ### RFC4861-HOST-30
 
@@ -3936,8 +3599,7 @@ the order of the document.
 > Information option." — §6.3.4, `rfc4861.txt:3051-3055`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises prefix P once with Valid Lifetime 30. The host sends to
-  addresses in P directly for 30 seconds, then through the default router.
+- Check idea: a router advertises prefix P once with Valid Lifetime 30. The host sends to addresses in P directly for 30 seconds, then through the default router.
 
 ### RFC4861-HOST-31
 
@@ -3951,9 +3613,7 @@ the order of the document.
 > Information option." — §6.3.4, `rfc4861.txt:3057-3060`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises P with Valid Lifetime 30, and 20 seconds later with Valid
-  Lifetime 30 again. The host treats P as on-link until 50 seconds after the first
-  advertisement.
+- Check idea: a router advertises P with Valid Lifetime 30, and 20 seconds later with Valid Lifetime 30 again. The host treats P as on-link until 50 seconds after the first advertisement.
 
 ### RFC4861-HOST-32
 
@@ -3965,8 +3625,7 @@ the order of the document.
 > the prefix immediately (see Section 6.3.5)." — §6.3.4, `rfc4861.txt:3060-3061`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises P with a long lifetime, then with Valid Lifetime 0. The
-  host at once sends packets to addresses in P through the default router.
+- Check idea: a router advertises P with a long lifetime, then with Valid Lifetime 0. The host at once sends packets to addresses in P through the default router.
 
 ### RFC4861-HOST-33
 
@@ -3979,8 +3638,7 @@ the order of the document.
 > silently ignore the option." — §6.3.4, `rfc4861.txt:3063-3065`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises an unknown prefix P with Valid Lifetime 0. The host sends
-  packets to addresses in P through the default router.
+- Check idea: a router advertises an unknown prefix P with Valid Lifetime 0. The host sends packets to addresses in P through the default router.
 
 ### RFC4861-HOST-34
 
@@ -3993,8 +3651,7 @@ the order of the document.
 > not impose such a check on the prefix lifetime values." — §6.3.4, `rfc4861.txt:3070-3074`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router advertises P with Valid Lifetime 3600, then with Valid Lifetime 10.
-  The host stops to treat P as on-link after 10 seconds.
+- Check idea: a router advertises P with Valid Lifetime 3600, then with Valid Lifetime 10. The host stops to treat P as on-link after 10 seconds.
 
 ### RFC4861-HOST-35
 
@@ -4008,8 +3665,7 @@ the order of the document.
 > with other flags in the prefix option." — §6.3.4, `rfc4861.txt:3074-3077`, `rfc4861.txt:3087-3088`
 
 - Strength: may (lower case). Class: end-to-end.
-- Check idea: a router advertises a /48 prefix with the L and A flags set. The host sends
-  packets to any address in the /48 directly.
+- Check idea: a router advertises a /48 prefix with the L and A flags set. The host sends packets to any address in the /48 directly.
 
 ### RFC4861-HOST-36
 
@@ -4020,8 +3676,7 @@ the order of the document.
 > updated, however." — §6.3.5, `rfc4861.txt:3099-3101`
 
 - Strength: description. Class: end-to-end.
-- Check idea: prefix P expires. The host sends packets to a new address in P through the
-  default router.
+- Check idea: prefix P expires. The host sends packets to a new address in P through the default router.
 
 ### RFC4861-HOST-37
 
@@ -4031,8 +3686,7 @@ the order of the document.
 > that entry is discarded." — §6.3.5, `rfc4861.txt:3105-3106`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a router sends Router Lifetime 30 and then no more advertisements. After 30
-  seconds, the host sends no off-link packet through that router.
+- Check idea: a router sends Router Lifetime 30 and then no more advertisements. After 30 seconds, the host sends no off-link packet through that router.
 
 ### RFC4861-HOST-38
 
@@ -4044,8 +3698,7 @@ the order of the document.
 > again rather than continue sending traffic to the (deleted) router." — §6.3.5, `rfc4861.txt:3106-3109`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a host sends to off-link destination D through router A. Router A sends Router
-  Lifetime 0. The next packets to D go through router B.
+- Check idea: a host sends to off-link destination D through router A. Router A sends Router Lifetime 0. The next packets to D go through router B.
 
 ### RFC4861-HOST-39
 
@@ -4061,8 +3714,7 @@ the order of the document.
 > Destination Cache caused by Redirect messages." — §6.3.6, `rfc4861.txt:3116-3123`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a host with two reachable default routers sends many packets to destination D.
-  All packets to D go through the same router.
+- Check idea: a host with two reachable default routers sends many packets to destination D. All packets to D go through the same router.
 
 ### RFC4861-HOST-40
 
@@ -4074,8 +3726,7 @@ the order of the document.
 > INCOMPLETE state, or for which no Neighbor Cache entry exists)." — §6.3.6, `rfc4861.txt:3128-3131`
 
 - Strength: should. Class: end-to-end.
-- Check idea: router A does not answer Neighbor Solicitations, and router B is REACHABLE. The
-  host sends packets to new off-link destinations through router B.
+- Check idea: router A does not answer Neighbor Solicitations, and router B is REACHABLE. The host sends packets to new off-link destinations through router B.
 
 ### RFC4861-HOST-41
 
@@ -4088,8 +3739,7 @@ the order of the document.
 > selected." — §6.3.6, `rfc4861.txt:3143-3147`
 
 - Strength: should. Class: end-to-end.
-- Check idea: three routers advertise and then stop to answer. The host sends to new
-  off-link destinations, and it probes the three routers in turn before it repeats one.
+- Check idea: three routers advertise and then stop to answer. The host sends to new off-link destinations, and it probes the three routers in turn before it repeats one.
 
 ### RFC4861-HOST-42
 
@@ -4101,9 +3751,7 @@ the order of the document.
 > RTR_SOLICITATION_INTERVAL seconds." — §6.3.7, `rfc4861.txt:3160-3163`
 
 - Strength: should. Class: wire.
-- Check idea: a host starts on a link without a router. It sends at most
-  MAX_RTR_SOLICITATIONS Router Solicitations, and no two are closer than
-  RTR_SOLICITATION_INTERVAL.
+- Check idea: a host starts on a link without a router. It sends at most MAX_RTR_SOLICITATIONS Router Solicitations, and no two are closer than RTR_SOLICITATION_INTERVAL.
 
 ### RFC4861-HOST-43
 
@@ -4123,8 +3771,7 @@ the order of the document.
 > time." — §6.3.7, `rfc4861.txt:3178-3179`
 
 - Strength: may (lower case). Class: wire.
-- Check idea: disable and enable the interface of a host, or move the host to another link.
-  The host sends Router Solicitations again.
+- Check idea: disable and enable the interface of a host, or move the host to another link. The host sends Router Solicitations again.
 
 ### RFC4861-HOST-44
 
@@ -4144,8 +3791,7 @@ the order of the document.
 > interface's unicast addresses or the unspecified address." — §6.3.7, `rfc4861.txt:3182-3183`
 
 - Strength: description. Class: wire.
-- Check idea: the source address of every Router Solicitation of a host is a unicast address
-  of the interface that sends it, or the unspecified address.
+- Check idea: the source address of every Router Solicitation of a host is a unicast address of the interface that sends it, or the unspecified address.
 
 ### RFC4861-HOST-46
 
@@ -4156,8 +3802,7 @@ the order of the document.
 > address, if the IP source address is not the unspecified address." — §6.3.7, `rfc4861.txt:3183-3185`
 
 - Strength: should. Class: wire.
-- Check idea: each Router Solicitation with a unicast source address carries a Source
-  Link-Layer Address option that holds the link-layer address of the interface.
+- Check idea: each Router Solicitation with a unicast source address carries a Source Link-Layer Address option that holds the link-layer address of the interface.
 
 ### RFC4861-HOST-47
 
@@ -4168,9 +3813,7 @@ the order of the document.
 > MAX_RTR_SOLICITATION_DELAY." — §6.3.7, `rfc4861.txt:3187-3189`
 
 - Strength: should. Class: wire.
-- Check idea: many hosts start on one link at the same time. The first Router Solicitation
-  of each comes between 0 and MAX_RTR_SOLICITATION_DELAY after the start, and the delays
-  vary.
+- Check idea: many hosts start on one link at the same time. The first Router Solicitation of each comes between 0 and MAX_RTR_SOLICITATION_DELAY after the start, and the delays vary.
 
 ### RFC4861-HOST-48
 
@@ -4182,8 +3825,7 @@ the order of the document.
 > again before sending the first Router Solicitation message." — §6.3.7, `rfc4861.txt:3199-3202`
 
 - Strength: description. Class: wire.
-- Check idea: a host delays its Duplicate Address Detection by a random time after start.
-  Its first Router Solicitation can follow without a second random delay.
+- Check idea: a host delays its Duplicate Address Detection by a random time after start. Its first Router Solicitation can follow without a second random delay.
 
 ### RFC4861-HOST-49
 
@@ -4195,9 +3837,7 @@ the order of the document.
 > send a Router Solicitation immediately, without random delays." — §6.3.7, `rfc4861.txt:3210-3212`
 
 - Strength: may. Class: wire.
-- Check idea: a host attaches to a new link and gets a link-layer indication of the move. Its
-  first Router Solicitation may come without delay; a test accepts any delay from 0 to
-  MAX_RTR_SOLICITATION_DELAY.
+- Check idea: a host attaches to a new link and gets a link-layer indication of the move. Its first Router Solicitation may come without delay; a test accepts any delay from 0 to MAX_RTR_SOLICITATION_DELAY.
 
 ### RFC4861-HOST-50
 
@@ -4209,8 +3849,7 @@ the order of the document.
 > the next time one of the above events occurs." — §6.3.7, `rfc4861.txt:3222-3225`
 
 - Strength: must. Class: wire.
-- Check idea: a host sends its first Router Solicitation, and a router replies with Router
-  Lifetime 1800. The host sends no more Router Solicitations on that interface.
+- Check idea: a host sends its first Router Solicitation, and a router replies with Router Lifetime 1800. The host sends no more Router Solicitations on that interface.
 
 ### RFC4861-HOST-51
 
@@ -4221,8 +3860,7 @@ the order of the document.
 > advertisement is received prior to having sent a solicitation." — §6.3.7, `rfc4861.txt:3225-3227`
 
 - Strength: should. Class: wire.
-- Check idea: a router sends an unsolicited Router Advertisement during the initial delay of
-  a host. The host still sends one Router Solicitation.
+- Check idea: a router sends an unsolicited Router Advertisement during the initial delay of a host. The host still sends one Router Solicitation.
 
 ### RFC4861-HOST-52
 
@@ -4236,9 +3874,7 @@ the order of the document.
 > Advertisements messages in the event that routers appear on the link." — §6.3.7, `rfc4861.txt:3231-3236`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a host sends MAX_RTR_SOLICITATIONS solicitations without an answer. Later a
-  router starts and sends an unsolicited Router Advertisement. The host then uses that
-  router.
+- Check idea: a host sends MAX_RTR_SOLICITATIONS solicitations without an answer. Later a router starts and sends an unsolicited Router Advertisement. The host then uses that router.
 ## Address resolution
 
 ### RFC4861-AR-1
@@ -4252,8 +3888,7 @@ the order of the document.
 > `rfc4861.txt:3367`
 
 - Strength: description. Class: wire.
-- Check idea: host A has a Neighbor Cache entry for on-link host B. A sends a packet to B and a
-  packet to an off-link destination. No NS for B or for the off-link destination appears.
+- Check idea: host A has a Neighbor Cache entry for on-link host B. A sends a packet to B and a packet to an off-link destination. No NS for B or for the off-link destination appears.
 
 ### RFC4861-AR-2
 
@@ -4263,8 +3898,7 @@ the order of the document.
 > performed on multicast addresses." — §7.2, `rfc4861.txt:3367-3368`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a packet to a multicast group on the link. No NS appears, and the
-  frame goes to the link-layer multicast address that maps the group.
+- Check idea: host A sends a packet to a multicast group on the link. No NS appears, and the frame goes to the link-layer multicast address that maps the group.
 
 ### RFC4861-AR-3
 
@@ -4280,9 +3914,7 @@ the order of the document.
 > `rfc4861.txt:3370-3376`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: node B has no entry at host A. B sends A a unicast NS, a Router Advertisement or a
-  Redirect, each without a link-layer address option. Before A sends a unicast packet to B, A
-  sends a multicast NS for B.
+- Check idea: node B has no entry at host A. B sends A a unicast NS, a Router Advertisement or a Redirect, each without a link-layer address option. Before A sends a unicast packet to B, A sends a multicast NS for B.
 
 ### RFC4861-AR-4
 
@@ -4294,9 +3926,7 @@ the order of the document.
 > addresses assigned to the interface." — §7.2.1, `rfc4861.txt:3383-3386`
 
 - Strength: must. Class: end-to-end.
-- Check idea: enable the interface of host A with two addresses. A answers an NS sent to the
-  solicited-node address of each address, and A answers an Echo Request sent to the all-nodes
-  address.
+- Check idea: enable the interface of host A with two addresses. A answers an NS sent to the solicited-node address of each address, and A answers an Echo Request sent to the all-nodes address.
 
 ### RFC4861-AR-5
 
@@ -4309,9 +3939,7 @@ the order of the document.
 > addresses, respectively." — §7.2.1, `rfc4861.txt:3388-3392`
 
 - Strength: must. Class: wire.
-- Check idea: add an address to host A, then remove it. The MLD messages of A join the
-  solicited-node group of the new address, and later leave it. Between the two, A answers an
-  NS for the new address sent to that group.
+- Check idea: add an address to host A, then remove it. The MLD messages of A join the solicited-node group of the new address, and later leave it. Between the two, A answers an NS for the new address sent to that group.
 
 ### RFC4861-AR-6
 
@@ -4322,8 +3950,7 @@ the order of the document.
 > [MLDv2] protocols." — §7.2.1, `rfc4861.txt:3392-3394`
 
 - Strength: description. Class: wire.
-- Check idea: enable the interface of host A. An MLD or MLDv2 report for each solicited-node
-  address of A appears on the link.
+- Check idea: enable the interface of host A. An MLD or MLDv2 report for each solicited-node address of A appears on the link.
 
 ### RFC4861-AR-7
 
@@ -4336,9 +3963,7 @@ the order of the document.
 > `rfc4861.txt:3394-3397`
 
 - Strength: must not. Class: wire.
-- Check idea: host A has two addresses with the same low-order 24 bits. Remove one of them. A
-  sends no MLD message that leaves the group, and A still answers an NS for the other address
-  sent to that group.
+- Check idea: host A has two addresses with the same low-order 24 bits. Remove one of them. A sends no MLD message that leaves the group, and A still answers an NS for the other address sent to that group.
 
 ### RFC4861-AR-8
 
@@ -4352,8 +3977,7 @@ the order of the document.
 > `rfc4861.txt:3401-3405`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a first packet to on-link host B. An NS with Target Address B leaves
-  A before the packet. The entry of A for B stays INCOMPLETE until an NA arrives.
+- Check idea: host A sends a first packet to on-link host B. An NS with Target Address B leaves A before the packet. The entry of A for B stays INCOMPLETE until an NA arrives.
 
 ### RFC4861-AR-9
 
@@ -4364,8 +3988,7 @@ the order of the document.
 > corresponding to the target address." — §7.2.2, `rfc4861.txt:3405-3407`
 
 - Strength: description. Class: wire.
-- Check idea: host A resolves host B. The IP Destination Address of the NS is the
-  solicited-node multicast address of B.
+- Check idea: host A resolves host B. The IP Destination Address of the NS is the solicited-node multicast address of B.
 
 ### RFC4861-AR-10
 
@@ -4377,8 +4000,7 @@ the order of the document.
 > solicitation." — §7.2.2, `rfc4861.txt:3409-3412`
 
 - Strength: should. Class: wire.
-- Check idea: host A has two addresses on its interface and sends a packet to host B from the
-  second address. The IP Source Address of the NS is the second address.
+- Check idea: host A has two addresses on its interface and sends a packet to host B from the second address. The IP Source Address of the NS is the second address.
 
 ### RFC4861-AR-11
 
@@ -4388,9 +4010,7 @@ the order of the document.
 > interface should be used." — §7.2.2, `rfc4861.txt:3412-3413`
 
 - Strength: should (lower case). Class: wire.
-- Check idea: router R1 forwards a packet from another link to host B, which it has not
-  resolved. The IP Source Address of the NS is an address of the interface of R1 on the link
-  of B.
+- Check idea: router R1 forwards a packet from another link to host B, which it has not resolved. The IP Source Address of the NS is an address of the interface of R1 on the link of B.
 
 ### RFC4861-AR-12
 
@@ -4401,8 +4021,7 @@ the order of the document.
 > one) as a Source Link-Layer Address option." — §7.2.2, `rfc4861.txt:3427-3429`
 
 - Strength: must. Class: wire.
-- Check idea: host A resolves host B. The multicast NS carries a Source Link-Layer Address
-  option with the link-layer address of A.
+- Check idea: host A resolves host B. The multicast NS carries a Source Link-Layer Address option with the link-layer address of A.
 
 ### RFC4861-AR-13
 
@@ -4415,9 +4034,7 @@ the order of the document.
 > Address option." — `rfc4861.txt:3433-3435`
 
 - Strength: should (include), may (omit on a unicast NS). Class: wire.
-- Check idea: host A sends a unicast NS to host B, for example a reachability probe. Record if
-  the NS carries the Source Link-Layer Address option. When it is present, it holds the
-  link-layer address of A.
+- Check idea: host A sends a unicast NS to host B, for example a reachability probe. Record if the NS carries the Source Link-Layer Address option. When it is present, it holds the link-layer address of A.
 
 ### RFC4861-AR-14
 
@@ -4428,8 +4045,7 @@ the order of the document.
 > address resolution to complete." — §7.2.2, `rfc4861.txt:3440-3442`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends packets to hosts B and C, which it has not resolved, at the same
-  time. After the NA of each neighbor, the queued packets for that neighbor arrive at it.
+- Check idea: host A sends packets to hosts B and C, which it has not resolved, at the same time. After the NA of each neighbor, the queued packets for that neighbor arrive at it.
 
 ### RFC4861-AR-15
 
@@ -4439,8 +4055,7 @@ the order of the document.
 > packet, and MAY contain more." — §7.2.2, `rfc4861.txt:3442-3443`
 
 - Strength: must (one packet), may (more). Class: end-to-end.
-- Check idea: host A sends one packet to host B, which answers the NS only after a
-  retransmission. The packet arrives at B.
+- Check idea: host A sends one packet to host B, which answers the NS only after a retransmission. The packet arrives at B.
 
 ### RFC4861-AR-16
 
@@ -4450,8 +4065,7 @@ the order of the document.
 > per neighbor SHOULD be limited to some small value." — §7.2.2, `rfc4861.txt:3443-3444`
 
 - Strength: should. Class: end-to-end.
-- Check idea: host A sends many packets to host B before B answers the NS. After the NA, B
-  receives only a small number of them.
+- Check idea: host A sends many packets to host B before B answers the NS. After the NA, B receives only a small number of them.
 
 ### RFC4861-AR-17
 
@@ -4462,8 +4076,7 @@ the order of the document.
 > `rfc4861.txt:3444-3445`
 
 - Strength: should. Class: end-to-end.
-- Check idea: host A sends numbered packets to host B before B answers the NS, more than the
-  queue holds. After the NA, B receives the most recent packets, and the oldest ones are lost.
+- Check idea: host A sends numbered packets to host B before B answers the NS, more than the queue holds. After the NA, B receives the most recent packets, and the oldest ones are lost.
 
 ### RFC4861-AR-18
 
@@ -4474,8 +4087,7 @@ the order of the document.
 > `rfc4861.txt:3445-3446`
 
 - Strength: description. Class: wire.
-- Check idea: host B answers the NS of host A. The queued packets leave A to the link-layer
-  address of B.
+- Check idea: host B answers the NS of host A. The queued packets leave A to the link-layer address of B.
 
 ### RFC4861-AR-19
 
@@ -4487,8 +4099,7 @@ the order of the document.
 > `rfc4861.txt:3448-3450`
 
 - Strength: should. Class: wire.
-- Check idea: host A sends one packet to host B, which does not answer. A sends more NS
-  messages for B at intervals of about RetransTimer.
+- Check idea: host A sends one packet to host B, which does not answer. A sends more NS messages for B at intervals of about RetransTimer.
 
 ### RFC4861-AR-20
 
@@ -4498,8 +4109,7 @@ the order of the document.
 > neighbor every RetransTimer milliseconds." — §7.2.2, `rfc4861.txt:3451-3452`
 
 - Strength: must. Class: wire.
-- Check idea: host A sends many packets in a short time to host B, which does not answer. The
-  interval between two NS messages for B is never less than RetransTimer.
+- Check idea: host A sends many packets in a short time to host B, which does not answer. The interval between two NS messages for B is never less than RetransTimer.
 
 ### RFC4861-AR-21
 
@@ -4509,8 +4119,7 @@ the order of the document.
 > solicitations, address resolution has failed." — §7.2.2, `rfc4861.txt:3454-3455`
 
 - Strength: description. Class: wire.
-- Check idea: host A resolves host B, which does not answer. A sends MAX_MULTICAST_SOLICIT NS
-  messages for B (3 by default), and then no more for that resolution.
+- Check idea: host A resolves host B, which does not answer. A sends MAX_MULTICAST_SOLICIT NS messages for B (3 by default), and then no more for that resolution.
 
 ### RFC4861-AR-22
 
@@ -4522,9 +4131,7 @@ the order of the document.
 > `rfc4861.txt:3455-3457`
 
 - Strength: must. Class: error-signal.
-- Check idea: router R1 forwards packets from host S to host B, which does not answer. After
-  the last NS, S receives one Destination Unreachable, code 3 (Address Unreachable), for each
-  queued packet.
+- Check idea: router R1 forwards packets from host S to host B, which does not answer. After the last NS, S receives one Destination Unreachable, code 3 (Address Unreachable), for each queued packet.
 
 ### RFC4861-AR-23
 
@@ -4544,8 +4151,7 @@ the order of the document.
 > `rfc4861.txt:3461-3468`, `rfc4861.txt:3479-3480`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A receives a valid NS for an address that A does not have and is not a
-  proxy for. A sends no NA, and its Neighbor Cache does not change.
+- Check idea: host A receives a valid NS for an address that A does not have and is not a proxy for. A sends no NA, and its Neighbor Cache does not change.
 
 ### RFC4861-AR-24
 
@@ -4558,9 +4164,7 @@ the order of the document.
 > Address of the solicitation." — §7.2.3, `rfc4861.txt:3484-3488`
 
 - Strength: should. Class: end-to-end.
-- Check idea: host A has no entry for host B. B sends a multicast NS for A with a Source
-  Link-Layer Address option. A sends its unicast NA to that link-layer address with no NS of
-  its own.
+- Check idea: host A has no entry for host B. B sends a multicast NS for A with a Source Link-Layer Address option. A sends its unicast NA to that link-layer address with no NS of its own.
 
 ### RFC4861-AR-25
 
@@ -4571,8 +4175,7 @@ the order of the document.
 > as specified in Section 7.3.3." — §7.2.3, `rfc4861.txt:3488-3490`
 
 - Strength: should. Class: internal.
-- Check idea: after that NS, the entry of A for B is STALE. A sends a packet to B and gets no
-  reachability confirmation. After DELAY_FIRST_PROBE_TIME, A sends a unicast NS to B.
+- Check idea: after that NS, the entry of A for B is STALE. A sends a packet to B and gets no reachability confirmation. After DELAY_FIRST_PROBE_TIME, A sends a unicast NS to B.
 
 ### RFC4861-AR-26
 
@@ -4585,8 +4188,7 @@ the order of the document.
 > STALE." — §7.2.3, `rfc4861.txt:3490-3494`
 
 - Strength: description (replace the address), must (set STALE). Class: internal.
-- Check idea: host A has a REACHABLE entry for host B with link-layer address X. B sends an NS
-  with Source Link-Layer Address Y. A sends its next frames for B to Y, and the entry is STALE.
+- Check idea: host A has a REACHABLE entry for host B with link-layer address X. B sends an NS with Source Link-Layer Address Y. A sends its next frames for B to Y, and the entry is STALE.
 
 ### RFC4861-AR-27
 
@@ -4596,8 +4198,7 @@ the order of the document.
 > to FALSE." — §7.2.3, `rfc4861.txt:3496-3497`
 
 - Strength: should. Class: internal.
-- Check idea: router R1 has no entry at host A. R1 sends A an NS with a Source Link-Layer
-  Address option. The new entry of A for R1 has IsRouter FALSE.
+- Check idea: router R1 has no entry at host A. R1 sends A an NS with a Source Link-Layer Address option. The new entry of A for R1 has IsRouter FALSE.
 
 ### RFC4861-AR-28
 
@@ -4607,9 +4208,7 @@ the order of the document.
 > IsRouter flag MUST NOT be modified." — §7.2.3, `rfc4861.txt:3502-3503`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: host A uses router R1 as its default router, and the entry for R1 has IsRouter
-  TRUE. R1 sends A an NS. A keeps R1 in its Default Router List and continues to send
-  off-link traffic through R1.
+- Check idea: host A uses router R1 as its default router, and the entry for R1 has IsRouter TRUE. R1 sends A an NS. A keeps R1 in its Default Router List and continues to send off-link traffic through R1.
 
 ### RFC4861-AR-29
 
@@ -4619,8 +4218,7 @@ the order of the document.
 > create or update the Neighbor Cache entry." — §7.2.3, `rfc4861.txt:3505-3506`
 
 - Strength: must not. Class: internal.
-- Check idea: host A receives an NS from the unspecified address for one of its addresses.
-  The Neighbor Cache of A does not change.
+- Check idea: host A receives an NS from the unspecified address for one of its addresses. The Neighbor Cache of A does not change.
 
 ### RFC4861-AR-30
 
@@ -4631,8 +4229,7 @@ the order of the document.
 > `rfc4861.txt:3508-3509`
 
 - Strength: description. Class: wire.
-- Check idea: host A receives a valid NS for its address with a Source Link-Layer Address
-  option. A creates the entry for the source, and then an NA leaves A.
+- Check idea: host A receives a valid NS for its address with a Source Link-Layer Address option. A creates the entry for the source, and then an NA leaves A.
 
 ### RFC4861-AR-31
 
@@ -4653,8 +4250,7 @@ the order of the document.
 > of the solicitation." — §7.2.4, `rfc4861.txt:3514-3516`
 
 - Strength: description. Class: wire.
-- Check idea: host B sends an NS for an address of host A. The Target Address of the NA of A
-  is the same as the Target Address of the NS.
+- Check idea: host B sends an NS for an address of host A. The Target Address of the NA of A is the same as the Target Address of the NS.
 
 ### RFC4861-AR-33
 
@@ -4667,8 +4263,7 @@ the order of the document.
 > `rfc4861.txt:3516-3519`
 
 - Strength: may. Class: wire.
-- Check idea: host B sends a unicast NS to host A. Record if the NA of A carries a Target
-  Link-Layer Address option. B accepts the NA in both cases.
+- Check idea: host B sends a unicast NS to host A. Record if the NA of A carries a Target Link-Layer Address option. B accepts the NA in both cases.
 
 ### RFC4861-AR-34
 
@@ -4680,8 +4275,7 @@ the order of the document.
 > `rfc4861.txt:3519-3521`
 
 - Strength: must. Class: wire.
-- Check idea: host B sends a multicast NS for an address of host A. The NA of A carries a
-  Target Link-Layer Address option with the link-layer address of A.
+- Check idea: host B sends a multicast NS for an address of host A. The NA of A carries a Target Link-Layer Address option with the link-layer address of A.
 
 ### RFC4861-AR-35
 
@@ -4691,8 +4285,7 @@ the order of the document.
 > one; otherwise, it MUST set the flag to zero." — §7.2.4, `rfc4861.txt:3522-3523`
 
 - Strength: must. Class: wire.
-- Check idea: a router and a host each answer an NS. The NA of the router has Router flag 1,
-  and the NA of the host has Router flag 0.
+- Check idea: a router and a host each answer an NS. The NA of the router has Router flag 1, and the NA of the host has Router flag 0.
 
 ### RFC4861-AR-36
 
@@ -4704,9 +4297,7 @@ the order of the document.
 > be set to zero." — §7.2.4, `rfc4861.txt:3535-3538`
 
 - Strength: should. Class: wire.
-- Check idea: a node answers an NS for its anycast address. A proxy answers an NS for a proxied
-  address. A host answers a unicast NS with an NA without a Target Link-Layer Address option.
-  Each NA has Override flag 0.
+- Check idea: a node answers an NS for its anycast address. A proxy answers an NS for a proxied address. A host answers a unicast NS with an NA without a Target Link-Layer Address option. Each NA has Override flag 0.
 
 ### RFC4861-AR-37
 
@@ -4715,8 +4306,7 @@ the order of the document.
 > "Otherwise, the Override flag SHOULD be set to one." — §7.2.4, `rfc4861.txt:3538`
 
 - Strength: should. Class: wire.
-- Check idea: host A answers a multicast NS for its own unicast address. The NA has Override
-  flag 1.
+- Check idea: host A answers a multicast NS for its own unicast address. The NA has Override flag 1.
 
 ### RFC4861-AR-38
 
@@ -4727,8 +4317,7 @@ the order of the document.
 > advertisement to the all-nodes address." — §7.2.4, `rfc4861.txt:3544-3546`
 
 - Strength: must. Class: wire.
-- Check idea: host B sends an NS from the unspecified address for an address of host A. A
-  sends an NA with Solicited flag 0 to the all-nodes multicast address.
+- Check idea: host B sends an NS from the unspecified address for an address of host A. A sends an NA with Solicited flag 0 to the all-nodes multicast address.
 
 ### RFC4861-AR-39
 
@@ -4739,8 +4328,7 @@ the order of the document.
 > Address of the solicitation." — §7.2.4, `rfc4861.txt:3546-3548`
 
 - Strength: must. Class: wire.
-- Check idea: host B sends an NS from its own address for an address of host A. A sends an NA
-  with Solicited flag 1, and its IP Destination Address is the address of B.
+- Check idea: host B sends an NS from its own address for an address of host A. A sends an NA with Solicited flag 1, and its IP Destination Address is the address of B.
 
 ### RFC4861-AR-40
 
@@ -4751,8 +4339,7 @@ the order of the document.
 > MAX_ANYCAST_DELAY_TIME seconds." — §7.2.4, `rfc4861.txt:3550-3552`
 
 - Strength: should. Class: wire.
-- Check idea: host B sends several NS messages for an anycast address of host A. The delay from
-  each NS to its NA is random, and it is not more than MAX_ANYCAST_DELAY_TIME (1 second).
+- Check idea: host B sends several NS messages for an anycast address of host A. The delay from each NS to its NA is random, and it is not more than MAX_ANYCAST_DELAY_TIME (1 second).
 
 ### RFC4861-AR-41
 
@@ -4767,8 +4354,7 @@ the order of the document.
 > multicast Neighbor Solicitation)." — §7.2.4, `rfc4861.txt:3554-3560`
 
 - Strength: description. Class: wire.
-- Check idea: host B has no entry at host A. B sends A a unicast NS without a Source Link-Layer
-  Address option. A sends a multicast NS for B before its NA to B.
+- Check idea: host B has no entry at host A. B sends A a unicast NS without a Source Link-Layer Address option. A sends a multicast NS for B before its NA to B.
 
 ### RFC4861-AR-42
 
@@ -4780,8 +4366,7 @@ the order of the document.
 > `rfc4861.txt:3564-3566`
 
 - Strength: should. Class: end-to-end.
-- Check idea: host B sends an unsolicited NA to host A, which has no entry for B. A creates no
-  entry: its first packet to B later comes after a multicast NS for B.
+- Check idea: host B sends an unsolicited NA to host A, which has no entry for B. A creates no entry: its first packet to B later comes after a multicast NS for B.
 
 ### RFC4861-AR-43
 
@@ -4794,8 +4379,7 @@ the order of the document.
 > advertisement." — §7.2.5, `rfc4861.txt:3576-3580`
 
 - Strength: should. Class: end-to-end.
-- Check idea: host A resolves host B, and an NA for B without a Target Link-Layer Address
-  option arrives. A keeps the queued packet and continues to send NS messages for B.
+- Check idea: host A resolves host B, and an NA for B without a Target Link-Layer Address option arrives. A keeps the queued packet and continues to send NS messages for B.
 
 ### RFC4861-AR-44
 
@@ -4808,8 +4392,7 @@ the order of the document.
 > resolution." — `rfc4861.txt:3599-3600`
 
 - Strength: description. Class: wire.
-- Check idea: host A resolves host B, and an NA with a Target Link-Layer Address option
-  arrives. The queued packets leave A to that link-layer address.
+- Check idea: host A resolves host B, and an NA with a Target Link-Layer Address option arrives. The queued packets leave A to that link-layer address.
 
 ### RFC4861-AR-45
 
@@ -4820,8 +4403,7 @@ the order of the document.
 > `rfc4861.txt:3593-3594`
 
 - Strength: description. Class: internal.
-- Check idea: host A resolves host B. A solicited NA makes the entry REACHABLE. An unsolicited
-  NA makes it STALE, and A probes B with a unicast NS after its next packet to B.
+- Check idea: host A resolves host B. A solicited NA makes the entry REACHABLE. An unsolicited NA makes it STALE, and A probes B with a unicast NS after its next packet to B.
 
 ### RFC4861-AR-46
 
@@ -4831,8 +4413,7 @@ the order of the document.
 > flag in the received advertisement." — §7.2.5, `rfc4861.txt:3596-3597`
 
 - Strength: description. Class: internal.
-- Check idea: host A resolves router R1, and the NA of R1 has Router flag 1. The entry of A
-  for R1 has IsRouter TRUE.
+- Check idea: host A resolves router R1, and the NA of R1 has Router flag 1. The entry of A for R1 has IsRouter TRUE.
 
 ### RFC4861-AR-47
 
@@ -4842,8 +4423,7 @@ the order of the document.
 > INCOMPLETE state." — §7.2.5, `rfc4861.txt:3602-3603`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host A resolves host B, and B answers with Override flag 0 and a Target
-  Link-Layer Address option. A accepts the address and sends the queued packets.
+- Check idea: host A resolves host B, and B answers with Override flag 0 and a Target Link-Layer Address option. A accepts the address and sends the queued packets.
 
 ### RFC4861-AR-48
 
@@ -4860,9 +4440,7 @@ the order of the document.
 > do not update the entry in any other way." — §7.2.5, `rfc4861.txt:3605-3613`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host A has a REACHABLE entry for host B with address X. B sends an NA with
-  Override flag 0 and Target Link-Layer Address Y. A keeps X, and the entry becomes STALE: A
-  later probes X with a unicast NS.
+- Check idea: host A has a REACHABLE entry for host B with address X. B sends an NA with Override flag 0 and Target Link-Layer Address Y. A keeps X, and the entry becomes STALE: A later probes X with a unicast NS.
 
 ### RFC4861-AR-49
 
@@ -4875,8 +4453,7 @@ the order of the document.
 > MUST NOT update the cache." — `rfc4861.txt:3614-3615`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: host A has a STALE entry for host B with address X. B sends an NA with Override
-  flag 0 and address Y. A continues to send frames for B to X, and the entry stays STALE.
+- Check idea: host A has a STALE entry for host B with address X. B sends an NA with Override flag 0 and address Y. A continues to send frames for B to X, and the entry stays STALE.
 
 ### RFC4861-AR-50
 
@@ -4892,8 +4469,7 @@ the order of the document.
 > from the already recorded address)." — §7.2.5, `rfc4861.txt:3617-3624`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A has an entry for host B with address X. B sends an NA with Override flag 1
-  and address Y. A sends its next frames for B to Y.
+- Check idea: host A has an entry for host B with address X. B sends an NA with Override flag 1 and address Y. A sends its next frames for B to Y.
 
 ### RFC4861-AR-51
 
@@ -4903,9 +4479,7 @@ the order of the document.
 > set to REACHABLE." — §7.2.5, `rfc4861.txt:3626-3627`
 
 - Strength: must. Class: internal.
-- Check idea: host A has a STALE entry for host B and probes B with a unicast NS. B answers
-  with a solicited NA. The entry becomes REACHABLE, and A sends no more probes to B for the
-  reachable time.
+- Check idea: host A has a STALE entry for host B and probes B with a unicast NS. B answers with a solicited NA. The entry becomes REACHABLE, and A sends no more probes to B for the reachable time.
 
 ### RFC4861-AR-52
 
@@ -4917,9 +4491,7 @@ the order of the document.
 > unchanged." — §7.2.5, `rfc4861.txt:3627-3630`
 
 - Strength: must. Class: internal.
-- Check idea: host A has a REACHABLE entry for host B with address X. An unsolicited NA from B
-  with Override flag 1 and address Y makes the entry STALE. The same NA with address X leaves
-  the entry REACHABLE.
+- Check idea: host A has a REACHABLE entry for host B with address X. An unsolicited NA from B with Override flag 1 and address Y makes the entry STALE. The same NA with address X leaves the entry REACHABLE.
 
 ### RFC4861-AR-53
 
@@ -4942,9 +4514,7 @@ the order of the document.
 > sends the next packet." — §7.2.5, `rfc4861.txt:3647-3650`
 
 - Strength: should (lower case). Class: end-to-end.
-- Check idea: host B sends host A an unsolicited NA with Override flag 1 and a new address Y.
-  After A sends its next packet to B, A probes Y with a unicast NS, unless it gets a
-  reachability confirmation first.
+- Check idea: host B sends host A an unsolicited NA with Override flag 1 and a new address Y. After A sends its next packet to B, A probes Y with a unicast NS, unless it gets a reachability confirmation first.
 
 ### RFC4861-AR-55
 
@@ -4954,8 +4524,7 @@ the order of the document.
 > Router flag in the received advertisement." — §7.2.5, `rfc4861.txt:3654-3655`
 
 - Strength: must. Class: internal.
-- Check idea: host A has an entry for node B with IsRouter FALSE. B sends an NA with Router
-  flag 1 and Override flag 1. The entry has IsRouter TRUE.
+- Check idea: host A has an entry for node B with IsRouter FALSE. B sends an NA with Router flag 1 and Override flag 1. The entry has IsRouter TRUE.
 
 ### RFC4861-AR-56
 
@@ -4969,8 +4538,7 @@ the order of the document.
 > specified in Section 7.3.3." — §7.2.5, `rfc4861.txt:3655-3660`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A uses router R1 as its default router, and router R2 is also in its list.
-  R1 sends an NA with Router flag 0. A no longer sends off-link traffic through R1; it uses R2.
+- Check idea: host A uses router R1 as its default router, and router R2 is also in its list. R1 sends an NA with Router flag 0. A no longer sends off-link traffic through R1; it uses R2.
 
 ### RFC4861-AR-57
 
@@ -4984,8 +4552,7 @@ the order of the document.
 > multicast address." — §7.2.6, `rfc4861.txt:3674-3679`
 
 - Strength: may. Class: wire.
-- Check idea: change the link-layer address of host A. A sends at most
-  MAX_NEIGHBOR_ADVERTISEMENT (3) unsolicited NAs to the all-nodes multicast address.
+- Check idea: change the link-layer address of host A. A sends at most MAX_NEIGHBOR_ADVERTISEMENT (3) unsolicited NAs to the all-nodes multicast address.
 
 ### RFC4861-AR-58
 
@@ -4995,8 +4562,7 @@ the order of the document.
 > least RetransTimer seconds." — §7.2.6, `rfc4861.txt:3679-3680`
 
 - Strength: must. Class: wire.
-- Check idea: change the link-layer address of host A. The interval between two unsolicited
-  NAs of A is RetransTimer or more.
+- Check idea: change the link-layer address of host A. The interval between two unsolicited NAs of A is RetransTimer or more.
 
 ### RFC4861-AR-59
 
@@ -5007,8 +4573,7 @@ the order of the document.
 > option is filled with the new link-layer address." — §7.2.6, `rfc4861.txt:3682-3684`
 
 - Strength: description. Class: wire.
-- Check idea: change the link-layer address of host A. Each unsolicited NA of A has an address
-  of that interface as Target Address and the new link-layer address in the option.
+- Check idea: change the link-layer address of host A. Each unsolicited NA of A has an address of that interface as Target Address and the new link-layer address in the option.
 
 ### RFC4861-AR-60
 
@@ -5019,8 +4584,7 @@ the order of the document.
 > Unreachability Detection algorithm." — §7.2.6, `rfc4861.txt:3684-3686`
 
 - Strength: must. Class: wire.
-- Check idea: change the link-layer address of host A. Each unsolicited NA of A has Solicited
-  flag 0.
+- Check idea: change the link-layer address of host A. Each unsolicited NA of A has Solicited flag 0.
 
 ### RFC4861-AR-61
 
@@ -5031,8 +4595,7 @@ the order of the document.
 > `rfc4861.txt:3686-3687`
 
 - Strength: must. Class: wire.
-- Check idea: change the link-layer address of a router and of a host. The unsolicited NAs of
-  the router have Router flag 1, and those of the host have Router flag 0.
+- Check idea: change the link-layer address of a router and of a host. The unsolicited NAs of the router have Router flag 1, and those of the host have Router flag 0.
 
 ### RFC4861-AR-62
 
@@ -5042,8 +4605,7 @@ the order of the document.
 > Override flag MAY be set to either zero or one." — §7.2.6, `rfc4861.txt:3687-3688`
 
 - Strength: may. Class: wire.
-- Check idea: change the link-layer address of host A and record the Override flag of its
-  unsolicited NAs. The values 0 and 1 are both correct.
+- Check idea: change the link-layer address of host A and record the Override flag of its unsolicited NAs. The values 0 and 1 are both correct.
 
 ### RFC4861-AR-63
 
@@ -5057,8 +4619,7 @@ the order of the document.
 > their caches." — §7.2.6, `rfc4861.txt:3688-3693`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host B has a REACHABLE entry for host A. A sends an unsolicited NA with Override
-  flag 1 and a new address. B sends its next frames for A to the new address, and B probes it.
+- Check idea: host B has a REACHABLE entry for host A. A sends an unsolicited NA with Override flag 1 and a new address. B sends its next frames for A to the new address, and B probes it.
 
 ### RFC4861-AR-64
 
@@ -5071,9 +4632,7 @@ the order of the document.
 > address, choosing instead to probe the cached address." — `rfc4861.txt:3693-3694`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host B has a REACHABLE entry for host A. A sends an unsolicited NA with Override
-  flag 0 and a new address. B keeps the old address, and after its next packet to A it probes
-  the old address with a unicast NS.
+- Check idea: host B has a REACHABLE entry for host A. A sends an unsolicited NA with Override flag 0 and a new address. B keeps the old address, and after its next packet to A it probes the old address with a unicast NS.
 
 ### RFC4861-AR-65
 
@@ -5084,8 +4643,7 @@ the order of the document.
 > `rfc4861.txt:3703-3704`
 
 - Strength: may. Class: wire.
-- Check idea: host A has three addresses and changes its link-layer address. Record the
-  unsolicited NAs of A; there can be one for each address.
+- Check idea: host A has three addresses and changes its link-layer address. Record the unsolicited NAs of A; there can be one for each address.
 
 ### RFC4861-AR-66
 
@@ -5097,8 +4655,7 @@ the order of the document.
 > advertisements being lost due to congestion." — §7.2.6, `rfc4861.txt:3704-3707`
 
 - Strength: should. Class: wire.
-- Check idea: host A has three addresses and changes its link-layer address. A small delay
-  separates the unsolicited NAs for the different addresses.
+- Check idea: host A has three addresses and changes its link-layer address. A small delay separates the unsolicited NAs for the different addresses.
 
 ### RFC4861-AR-67
 
@@ -5109,8 +4666,7 @@ the order of the document.
 > other mechanisms) to proxy for an address." — §7.2.6, `rfc4861.txt:3709-3711`
 
 - Strength: may. Class: wire.
-- Check idea: configure router R1 as proxy for address P. Record if R1 multicasts an
-  unsolicited NA for P with its own link-layer address.
+- Check idea: configure router R1 as proxy for address P. Record if R1 multicasts an unsolicited NA for P with its own link-layer address.
 
 ### RFC4861-AR-68
 
@@ -5121,8 +4677,7 @@ the order of the document.
 > node's link-layer address changes." — §7.2.6, `rfc4861.txt:3720-3722`
 
 - Strength: may. Class: wire.
-- Check idea: host A holds an anycast address and changes its link-layer address. Record if A
-  multicasts an unsolicited NA for the anycast address with the new link-layer address.
+- Check idea: host A holds an anycast address and changes its link-layer address. Record if A multicasts an unsolicited NA for the anycast address with the new link-layer address.
 
 ## Anycast and proxy advertisements
 
@@ -5138,9 +4693,7 @@ the order of the document.
 > special processing takes place." — §7.2.7, `rfc4861.txt:3734-3739`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host A sends a packet to an anycast address that host B holds. A sends a
-  multicast NS to the solicited-node address of the anycast address, as for a unicast address,
-  and then sends the packet to B.
+- Check idea: host A sends a packet to an anycast address that host B holds. A sends a multicast NS to the solicited-node address of the anycast address, as for a unicast address, and then sends the packet to B.
 
 ### RFC4861-ANY-2
 
@@ -5154,8 +4707,7 @@ the order of the document.
 > congestion." — §7.2.7, `rfc4861.txt:3741-3746`
 
 - Strength: should. Class: wire.
-- Check idea: host A sends several NS messages for an anycast address of host B. The delay from
-  each NS to the NA of B is random, and it is not more than MAX_ANYCAST_DELAY_TIME.
+- Check idea: host A sends several NS messages for an anycast address of host B. The delay from each NS to the NA of B is random, and it is not more than MAX_ANYCAST_DELAY_TIME.
 
 ### RFC4861-ANY-3
 
@@ -5167,8 +4719,7 @@ the order of the document.
 > most recently received advertisement." — §7.2.7, `rfc4861.txt:3746-3749`
 
 - Strength: should. Class: wire.
-- Check idea: hosts B and C hold the same anycast address, and host A resolves it. Both NAs
-  have Override flag 0, and A sends its packets to the node whose NA arrives first.
+- Check idea: hosts B and C hold the same anycast address, and host A resolves it. Both NAs have Override flag 0, and A sends its packets to the node whose NA arrives first.
 
 ### RFC4861-ANY-4
 
@@ -5179,8 +4730,7 @@ the order of the document.
 > address becomes invalid." — §7.2.7, `rfc4861.txt:3759-3761`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host A sends to an anycast address that hosts B and C hold, and it uses B. B
-  leaves the link. The probes of A fail, A resolves the address again, and C gets the packets.
+- Check idea: host A sends to an anycast address that hosts B and C hold, and it uses B. B leaves the link. The probes of A fail, A resolves the address again, and C gets the packets.
 
 ### RFC4861-ANY-5
 
@@ -5192,8 +4742,7 @@ the order of the document.
 > `rfc4861.txt:3765-3767`
 
 - Strength: may. Class: wire.
-- Check idea: configure router R1 as proxy for off-link node M. Host A resolves M. R1 answers
-  with an NA that holds the link-layer address of R1, and the packets of A for M go to R1.
+- Check idea: configure router R1 as proxy for off-link node M. Host A resolves M. R1 answers with an NA that holds the link-layer address of R1, and the packets of A for M go to R1.
 
 ### RFC4861-ANY-6
 
@@ -5204,8 +4753,7 @@ the order of the document.
 > proxying." — §7.2.8, `rfc4861.txt:3772-3774`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1 is proxy for address P. Host A sends an NS for P to the solicited-node
-  address of P. R1 answers it.
+- Check idea: router R1 is proxy for address P. Host A sends an NS for P to the solicited-node address of P. R1 answers it.
 
 ### RFC4861-ANY-7
 
@@ -5215,8 +4763,7 @@ the order of the document.
 > protocol such as [MLD] or [MLDv2]." — §7.2.8, `rfc4861.txt:3774-3775`
 
 - Strength: should. Class: wire.
-- Check idea: configure router R1 as proxy for address P. An MLD or MLDv2 report of R1 for the
-  solicited-node address of P appears on the link.
+- Check idea: configure router R1 as proxy for address P. An MLD or MLDv2 report of R1 for the solicited-node address of P appears on the link.
 
 ### RFC4861-ANY-8
 
@@ -5226,9 +4773,7 @@ the order of the document.
 > Override flag set to zero." — §7.2.8, `rfc4861.txt:3777-3778`
 
 - Strength: must. Class: wire.
-- Check idea: router R1 is proxy for host M, and M is also on the link. Host A resolves M. The
-  NA of R1 has Override flag 0, and A sends its packets for M to the link-layer address in the
-  NA of M.
+- Check idea: router R1 is proxy for host M, and M is also on the link. Host A resolves M. The NA of R1 has Override flag 0, and A sends its packets for M to the link-layer address in the NA of M.
 
 ### RFC4861-ANY-9
 
@@ -5240,8 +4785,7 @@ the order of the document.
 > by the node itself." — §7.2.8, `rfc4861.txt:3781-3784`
 
 - Strength: may. Class: wire.
-- Check idea: configure router R1 as proxy for address P. Record the Override flag of the
-  unsolicited NAs of R1 for P; the value 1 is correct.
+- Check idea: configure router R1 as proxy for address P. Record the Override flag of the unsolicited NAs of R1 for P; the value 1 is correct.
 
 ### RFC4861-ANY-10
 
@@ -5255,9 +4799,7 @@ the order of the document.
 > is not necessary." — §7.2.8, `rfc4861.txt:3786-3791`
 
 - Strength: should (lower case). Class: wire.
-- Check idea: routers R1 and R2 are both proxy for address P, and host A sends several NS
-  messages for P. The delay from each NS to each proxy NA is random, and it is not more than
-  MAX_ANYCAST_DELAY_TIME.
+- Check idea: routers R1 and R2 are both proxy for address P, and host A sends several NS messages for P. The delay from each NS to each proxy NA is random, and it is not more than MAX_ANYCAST_DELAY_TIME.
 
 ## Validation of Redirect messages
 
@@ -5270,8 +4812,7 @@ the order of the document.
 > "- IP Source Address is a link-local address." — `rfc4861.txt:4100`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends packets for destination D through router R1. R1 sends A a Redirect
-  for D to router R2 from a global address of R1. A continues to send packets for D to R1.
+- Check idea: host A sends packets for destination D through router R1. R1 sends A a Redirect for D to router R2 from a global address of R1. A continues to send packets for D to R1.
 
 ### RFC4861-RDVAL-2
 
@@ -5283,8 +4824,7 @@ the order of the document.
 > routers." — §8.1, `rfc4861.txt:4100-4103`
 
 - Strength: must (lower case). Class: wire.
-- Check idea: router R1 has global addresses on the link and sends Redirects. The IP Source
-  Address of each Redirect is the link-local address of R1.
+- Check idea: router R1 has global addresses on the link and sends Redirects. The IP Source Address of each Redirect is the link-local address of R1.
 
 ### RFC4861-RDVAL-3
 
@@ -5296,8 +4836,7 @@ the order of the document.
 > could not possibly have been forwarded by a router." — `rfc4861.txt:4105-4106`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1, the first hop of host A for D, sends a Redirect for D with Hop Limit
-  254 and all other fields valid. A continues to send packets for D to R1.
+- Check idea: router R1, the first hop of host A for D, sends a Redirect for D with Hop Limit 254 and all other fields valid. A continues to send packets for D to R1.
 
 ### RFC4861-RDVAL-4
 
@@ -5308,8 +4847,7 @@ the order of the document.
 > "- ICMP Checksum is valid." — `rfc4861.txt:4108`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1, the first hop of host A for D, sends a Redirect for D with a wrong
-  ICMP Checksum. A continues to send packets for D to R1.
+- Check idea: router R1, the first hop of host A for D, sends a Redirect for D with a wrong ICMP Checksum. A continues to send packets for D to R1.
 
 ### RFC4861-RDVAL-5
 
@@ -5320,8 +4858,7 @@ the order of the document.
 > "- ICMP Code is 0." — `rfc4861.txt:4110`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1, the first hop of host A for D, sends a Redirect for D with Code 1. A
-  continues to send packets for D to R1.
+- Check idea: router R1, the first hop of host A for D, sends a Redirect for D with Code 1. A continues to send packets for D to R1.
 
 ### RFC4861-RDVAL-6
 
@@ -5332,8 +4869,7 @@ the order of the document.
 > "- ICMP length (derived from the IP length) is 40 or more octets." — `rfc4861.txt:4112`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1, the first hop of host A for D, sends a Redirect for D that is cut to
-  32 octets of ICMP length. A continues to send packets for D to R1.
+- Check idea: router R1, the first hop of host A for D, sends a Redirect for D that is cut to 32 octets of ICMP length. A continues to send packets for D to R1.
 
 ### RFC4861-RDVAL-7
 
@@ -5345,8 +4881,7 @@ the order of the document.
 > first-hop router for the specified ICMP Destination Address." — `rfc4861.txt:4114-4115`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends packets for D through router R1. Router R2 sends A a Redirect for D
-  to R2. A continues to send packets for D to R1.
+- Check idea: host A sends packets for D through router R1. Router R2 sends A a Redirect for D to R2. A continues to send packets for D to R1.
 
 ### RFC4861-RDVAL-8
 
@@ -5358,8 +4893,7 @@ the order of the document.
 > not contain a multicast address." — `rfc4861.txt:4117-4118`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends packets to a multicast group G through router R1. R1 sends A a
-  Redirect for G to router R2. A continues to send packets for G as before.
+- Check idea: host A sends packets to a multicast group G through router R1. R1 sends A a Redirect for G to router R2. A continues to send packets for G as before.
 
 ### RFC4861-RDVAL-9
 
@@ -5372,8 +4906,7 @@ the order of the document.
 > Address (when redirected to the on-link destination)." — `rfc4861.txt:4120-4122`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1, the first hop of host A for D, sends a Redirect for D whose Target
-  Address is a global address of router R2. A continues to send packets for D to R1.
+- Check idea: router R1, the first hop of host A for D, sends a Redirect for D whose Target Address is a global address of router R2. A continues to send packets for D to R1.
 
 ### RFC4861-RDVAL-10
 
@@ -5384,8 +4917,7 @@ the order of the document.
 > "- All included options have a length that is greater than zero." — `rfc4861.txt:4124`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1, the first hop of host A for D, sends a Redirect for D with an option of
-  length 0. A continues to send packets for D to R1.
+- Check idea: router R1, the first hop of host A for D, sends a Redirect for D with an option of length 0. A continues to send packets for D to R1.
 
 ### RFC4861-RDVAL-11
 
@@ -5395,9 +4927,7 @@ the order of the document.
 > MUST be ignored." — §8.1, `rfc4861.txt:4126-4127`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1, the first hop of host A for D, sends a valid Redirect for D to router
-  R2 with a Reserved field that is not zero and an option of unknown type. A sends its next
-  packets for D to R2.
+- Check idea: router R1, the first hop of host A for D, sends a valid Redirect for D to router R2 with a Reserved field that is not zero and an option of unknown type. A sends its next packets for D to R2.
 
 ### RFC4861-RDVAL-12
 
@@ -5408,9 +4938,7 @@ the order of the document.
 > normal." — §8.1, `rfc4861.txt:4131-4133`
 
 - Strength: must. Class: end-to-end.
-- Check idea: router R1 sends host A a valid Redirect for D to router R2 that also carries a
-  Prefix Information option and an MTU option. A sends its next packets for D to R2, adds no
-  prefix and keeps its link MTU.
+- Check idea: router R1 sends host A a valid Redirect for D to router R2 that also carries a Prefix Information option and an MTU option. A sends its next packets for D to R2, adds no prefix and keeps its link MTU.
 
 ### RFC4861-RDVAL-13
 
@@ -5421,8 +4949,7 @@ the order of the document.
 > `rfc4861.txt:4133-4134`
 
 - Strength: may (lower case). Class: wire.
-- Check idea: record the Redirects of router R1. Each option in them is a Target Link-Layer
-  Address option or a Redirected Header option.
+- Check idea: record the Redirects of router R1. Each option in them is a Target Link-Layer Address option or a Redirected Header option.
 
 ### RFC4861-RDVAL-14
 
@@ -5434,9 +4961,7 @@ the order of the document.
 > Target Address is on-link." — §8.1, `rfc4861.txt:4136-4139`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: host B is on the link of host A, but its address is outside every on-link prefix.
-  Router R1 sends A a valid Redirect with Target Address and Destination Address both B. A
-  sends its next packets for B directly to B.
+- Check idea: host B is on the link of host A, but its address is outside every on-link prefix. Router R1 sends A a valid Redirect with Target Address and Destination Address both B. A sends its next packets for B directly to B.
 
 ## Router sending Redirects
 
@@ -5451,8 +4976,7 @@ the order of the document.
 > Destination Address." — §8, `rfc4861.txt:4066-4070`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends packets for on-link host B through router R1. R1 sends A a Redirect
-  whose Target Address and Destination Address are both B.
+- Check idea: host A sends packets for on-link host B through router R1. R1 sends A a Redirect whose Target Address and Destination Address are both B.
 
 ### RFC4861-RDR-2
 
@@ -5464,8 +4988,7 @@ the order of the document.
 > address." — §8, `rfc4861.txt:4072-4075`
 
 - Strength: must. Class: wire.
-- Check idea: router R1 has a route to destination D with a global address of router R2 as next
-  hop. A Redirect from R1 for D has the link-local address of R2 as Target Address.
+- Check idea: router R1 has a route to destination D with a global address of router R2 as next hop. A Redirect from R1 for D has the link-local address of R2 as Target Address.
 
 ### RFC4861-RDR-3
 
@@ -5488,8 +5011,7 @@ the order of the document.
 > address." — §8.2, `rfc4861.txt:4153-4167`
 
 - Strength: should. Class: wire.
-- Check idea: host A sends packets for destination D through router R1, and router R2 on the
-  same link is a better first hop for D. R1 forwards the packet and sends A a Redirect for D.
+- Check idea: host A sends packets for destination D through router R1, and router R2 on the same link is a better first hop for D. R1 forwards the packet and sends A a Redirect for D.
 
 ### RFC4861-RDR-4
 
@@ -5502,8 +5024,7 @@ the order of the document.
 > router, that router's link-local address MUST be used." — `rfc4861.txt:4172-4174`
 
 - Strength: must. Class: wire.
-- Check idea: router R1 redirects host A for destination D to router R2. The Target Address of
-  the Redirect is the link-local address of R2.
+- Check idea: router R1 redirects host A for destination D to router R2. The Target Address of the Redirect is the link-local address of R2.
 
 ### RFC4861-RDR-5
 
@@ -5514,8 +5035,7 @@ the order of the document.
 > same value as the Destination Address field." — §8.2, `rfc4861.txt:4174-4176`
 
 - Strength: must. Class: wire.
-- Check idea: router R1 redirects host A for on-link host B. The Target Address and the
-  Destination Address of the Redirect are both the address of B.
+- Check idea: router R1 redirects host A for on-link host B. The Target Address and the Destination Address of the Redirect are both the address of B.
 
 ### RFC4861-RDR-6
 
@@ -5525,8 +5045,7 @@ the order of the document.
 > invoking IP packet." — §8.2, `rfc4861.txt:4178-4179`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a packet for destination D through router R1, and R1 sends a
-  Redirect. The Destination Address field of the Redirect is D.
+- Check idea: host A sends a packet for destination D through router R1, and R1 sends a Redirect. The Destination Address field of the Redirect is D.
 
 ### RFC4861-RDR-7
 
@@ -5538,8 +5057,7 @@ the order of the document.
 > target, if known." — §8.2, `rfc4861.txt:4181-4184`
 
 - Strength: description. Class: wire.
-- Check idea: router R1 has a Neighbor Cache entry for router R2 and redirects host A to R2.
-  The Redirect carries a Target Link-Layer Address option with the link-layer address of R2.
+- Check idea: router R1 has a Neighbor Cache entry for router R2 and redirects host A to R2. The Redirect carries a Target Link-Layer Address option with the link-layer address of R2.
 
 ### RFC4861-RDR-8
 
@@ -5550,9 +5068,7 @@ the order of the document.
 > required to support IPv6 as specified in [IPv6]." — §8.2, `rfc4861.txt:4186-4188`
 
 - Strength: description. Class: wire.
-- Check idea: host A sends a 1400-octet packet that causes a Redirect. The Redirect is not
-  larger than 1280 octets, and its Redirected Header option fills it up to that limit, in
-  units of 8 octets.
+- Check idea: host A sends a 1400-octet packet that causes a Redirect. The Redirect is not larger than 1280 octets, and its Redirected Header option fills it up to that limit, in units of 8 octets.
 
 ### RFC4861-RDR-9
 
@@ -5565,8 +5081,7 @@ the order of the document.
 > messages." — §8.2, `rfc4861.txt:4190-4194`
 
 - Strength: must. Class: wire.
-- Check idea: host A ignores Redirects and sends a fast packet stream for D through router R1.
-  R1 sends Redirects at a limited rate, not one Redirect for each packet.
+- Check idea: host A ignores Redirects and sends a fast packet stream for D through router R1. R1 sends Redirects at a limited rate, not one Redirect for each packet.
 
 ### RFC4861-RDR-10
 
@@ -5576,8 +5091,7 @@ the order of the document.
 > Redirect." — §8.2, `rfc4861.txt:4197-4198`
 
 - Strength: must not. Class: end-to-end.
-- Check idea: router R1 receives a Redirect for destination D to router R2. R1 continues to
-  forward packets for D to the same next hop as before.
+- Check idea: router R1 receives a Redirect for destination D to router R2. R1 continues to forward packets for D to the same next hop as before.
 
 ## Host receiving Redirects
 
@@ -5590,8 +5104,7 @@ the order of the document.
 > `rfc4861.txt:4209-4210`
 
 - Strength: should. Class: wire.
-- Check idea: router R1 redirects host A for destination D to router R2. The next packets of A
-  for D go to R2.
+- Check idea: router R1 redirects host A for destination D to router R2. The next packets of A for D go to R2.
 
 ### RFC4861-RDH-2
 
@@ -5601,8 +5114,7 @@ the order of the document.
 > implementation SHOULD create such an entry." — §8.3, `rfc4861.txt:4211-4212`
 
 - Strength: should. Class: end-to-end.
-- Check idea: host A has not sent to destination D yet, and R1 is its default router. R1 sends
-  A a valid Redirect for D to router R2. The first packet of A for D goes to R2.
+- Check idea: host A has not sent to destination D yet, and R1 is its default router. R1 sends A a valid Redirect for D to router R2. The first packet of A for D goes to R2.
 
 ### RFC4861-RDH-3
 
@@ -5614,8 +5126,7 @@ the order of the document.
 > Target Link-Layer Address option." — §8.3, `rfc4861.txt:4214-4217`
 
 - Strength: description. Class: end-to-end.
-- Check idea: host A has no entry for router R2. A Redirect for D to R2 carries the link-layer
-  address of R2. A sends its next packet for D to that link-layer address with no NS.
+- Check idea: host A has no entry for router R2. A Redirect for D to R2 carries the link-layer address of R2. A sends its next packet for D to that link-layer address with no NS.
 
 ### RFC4861-RDH-4
 
@@ -5626,9 +5137,7 @@ the order of the document.
 > as specified in Section 7.3.3." — §8.3, `rfc4861.txt:4217-4219`
 
 - Strength: must. Class: internal.
-- Check idea: after that Redirect, the new entry of A for R2 is STALE. A sends a packet for D
-  and gets no reachability confirmation. After DELAY_FIRST_PROBE_TIME, A sends a unicast NS to
-  R2.
+- Check idea: after that Redirect, the new entry of A for R2 is STALE. A sends a packet for D and gets no reachability confirmation. After DELAY_FIRST_PROBE_TIME, A sends a unicast NS to R2.
 
 ### RFC4861-RDH-5
 
@@ -5641,8 +5150,7 @@ the order of the document.
 > unchanged." — §8.3, `rfc4861.txt:4219-4223`
 
 - Strength: must. Class: internal.
-- Check idea: host A has a REACHABLE entry for router R2 with address X. A Redirect to R2 with
-  address Y makes the entry STALE with Y. A Redirect to R2 with address X leaves it REACHABLE.
+- Check idea: host A has a REACHABLE entry for router R2 with address X. A Redirect to R2 with address Y makes the entry STALE with Y. A Redirect to R2 with address X leaves it REACHABLE.
 
 ### RFC4861-RDH-6
 
@@ -5652,9 +5160,7 @@ the order of the document.
 > treat the Target as on-link." — §8.3, `rfc4861.txt:4225-4226`
 
 - Strength: must. Class: end-to-end.
-- Check idea: host A sends packets for host B through router R1. R1 sends a Redirect with
-  Target Address and Destination Address both B. A resolves B with an NS and sends its next
-  packets directly to B.
+- Check idea: host A sends packets for host B through router R1. R1 sends a Redirect with Target Address and Destination Address both B. A resolves B with an NS and sends its next packets directly to B.
 
 ### RFC4861-RDH-7
 
@@ -5665,8 +5171,7 @@ the order of the document.
 > the target." — §8.3, `rfc4861.txt:4226-4228`
 
 - Strength: must. Class: internal.
-- Check idea: router R1 redirects host A for destination D to router R2. After the Redirect,
-  the entry of A for R2 has IsRouter TRUE.
+- Check idea: router R1 redirects host A for destination D to router R2. After the Redirect, the entry of A for R2 has IsRouter TRUE.
 
 ### RFC4861-RDH-8
 
@@ -5679,8 +5184,7 @@ the order of the document.
 > leave the flag unchanged." — §8.3, `rfc4861.txt:4228-4232`
 
 - Strength: should (lower case). Class: internal.
-- Check idea: router R1 sends host A a Redirect with Target Address and Destination Address
-  both B. A new entry for B has IsRouter FALSE. An entry for B with IsRouter TRUE keeps TRUE.
+- Check idea: router R1 sends host A a Redirect with Target Address and Destination Address both B. A new entry for B has IsRouter FALSE. An entry for B with IsRouter TRUE keeps TRUE.
 
 ### RFC4861-RDH-9
 
@@ -5694,9 +5198,7 @@ the order of the document.
 > `rfc4861.txt:4236-4240`
 
 - Strength: should (lower case). Class: end-to-end.
-- Check idea: host A sends two flows with different Flow Labels to destination D through router
-  R1. R1 sends a Redirect to router R2 whose Redirected Header holds a packet of one flow. The
-  packets of both flows then go to R2.
+- Check idea: host A sends two flows with different Flow Labels to destination D through router R1. R1 sends a Redirect to router R2 whose Redirected Header holds a packet of one flow. The packets of both flows then go to R2.
 
 ### RFC4861-RDH-10
 
@@ -5705,159 +5207,93 @@ the order of the document.
 > "A host MUST NOT send Redirect messages." — §8.3, `rfc4861.txt:4242`
 
 - Strength: must not. Class: wire.
-- Check idea: record all ICMPv6 messages that hosts send in a scenario where a host receives
-  packets for a destination that a neighbor serves better. No host sends a Redirect.
+- Check idea: record all ICMPv6 messages that hosts send in a scenario where a host receives packets for a destination that a neighbor serves better. No host sends a Redirect.
 
 ## Out of scope in this catalog
 
-The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of §4, §6,
-§7.2 and §8, and every field of every message and option. What the catalog leaves out:
+The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of §4, §6, §7.2 and §8, and every field of every message and option. What the catalog leaves out:
 
-- **The sections outside the in-scope set.** §1 to §3 (introduction, terminology, overview),
-  §5 (the conceptual model of a host), §7.1 (the validation of Neighbor Solicitations and
-  Advertisements, level 3), §7.3 (Neighbor Unreachability Detection, level 4), and §9 to §13
-  (option processing, protocol constants, security, renumbering, IANA). See
-  [`standards.md`](../../protocol/nd/standards.md#target-level) for the level at which each one
-  enters.
-- **The flags of other protocols.** §4 defines no flag of Mobile IPv6 or SEND; the H flag of a
-  Router Advertisement and the R flag of a Prefix Information option come from RFC 6275. The
-  Reserved fields are cataloged whole.
+- **The sections outside the in-scope set.** §1 to §3 (introduction, terminology, overview), §5 (the conceptual model of a host), §7.1 (the validation of Neighbor Solicitations and Advertisements, level 3), §7.3 (Neighbor Unreachability Detection, level 4), and §9 to §13 (option processing, protocol constants, security, renumbering, IANA). See [`standards.md`](../../protocol/nd/standards.md#target-level) for the level at which each one enters.
+- **The flags of other protocols.** §4 defines no flag of Mobile IPv6 or SEND; the H flag of a Router Advertisement and the R flag of a Prefix Information option come from RFC 6275. The Reserved fields are cataloged whole.
 
 Within the in-scope sections, these parts have no entry, with the reason:
 
 In §4:
 
 - `rfc4861.txt:977-978` — introduction of §4; pure explanation.
-- `rfc4861.txt:1094-1096` — "the O flag is redundant and can be ignored" when M is set: the
-  use of the flags by a DHCPv6 client belongs to DHCPv6, another protocol.
+- `rfc4861.txt:1094-1096` — "the O flag is redundant and can be ignored" when M is set: the use of the flags by a DHCPv6 client belongs to DHCPv6, another protocol.
 - `rfc4861.txt:1100-1102` — examples of other configuration information (DNS); examples.
-- `rfc4861.txt:1104-1105` — note that neither M nor O means no information through DHCPv6;
-  informative note about another protocol.
-- `rfc4861.txt:1169-1173` — reason for the SHOULD of RFC4861-RA-27 (multihomed hosts); pure
-  explanation.
-- `rfc4861.txt:1375-1386` — reason for the Target Link-Layer Address rules of RFC4861-NA-24 and
-  RFC4861-NA-25 ("recursion", race condition); pure explanation. The keyword line 1373 is in
-  RFC4861-NA-24.
+- `rfc4861.txt:1104-1105` — note that neither M nor O means no information through DHCPv6; informative note about another protocol.
+- `rfc4861.txt:1169-1173` — reason for the SHOULD of RFC4861-RA-27 (multihomed hosts); pure explanation.
+- `rfc4861.txt:1375-1386` — reason for the Target Link-Layer Address rules of RFC4861-NA-24 and RFC4861-NA-25 ("recursion", race condition); pure explanation. The keyword line 1373 is in RFC4861-NA-24.
 - `rfc4861.txt:1587` — "For instance, [IPv6-ETHER]."; a reference only.
-- `rfc4861.txt:1642-1645` — the Prefix Length also serves address autoconfiguration, with more
-  limits there; that use belongs to RFC 4862 (ADDRCONF), another protocol.
-- `rfc4861.txt:1669-1670` — "The Valid Lifetime is also used by [ADDRCONF]."; the use belongs to
-  RFC 4862, another protocol.
+- `rfc4861.txt:1642-1645` — the Prefix Length also serves address autoconfiguration, with more limits there; that use belongs to RFC 4862 (ADDRCONF), another protocol.
+- `rfc4861.txt:1669-1670` — "The Valid Lifetime is also used by [ADDRCONF]."; the use belongs to RFC 4862, another protocol.
 - `rfc4861.txt:1678` — "See [ADDRCONF]."; a reference only.
-- `rfc4861.txt:1705-1707` — first sentence of the Prefix Information description; a summary of
-  the fields that RFC4861-OPT-19 and RFC4861-OPT-21 catalog.
-- `rfc4861.txt:1799-1808` — bridged links of different technologies and the use of the MTU
-  option there; pure explanation of a configuration choice.
-- `rfc4861.txt:985-986`, `1042-1043`, `1195-1196`, `1268-1269`, `1416-1417`, `1526-1527`,
-  `1555-1556`, `1604-1605`, `1713-1714`, `1759-1760` — bit rulers and frame lines of the format
-  diagrams; the field rows of each diagram are in the layout entries.
-- `rfc4861.txt:1047`, `1107-1109`, `1607`, `1661-1662` — a flag reserved for another protocol:
-  none is in this range. RFC 4861 defines only M and O plus 6 Reserved bits in the Router
-  Advertisement, and only L and A plus 6 Reserved1 bits in the Prefix Information option. The
-  Home Agent (H) flag and the Router Address (R) flag of Mobile IPv6 are not in the text; the
-  entries catalog the Reserved and Reserved1 fields whole (RFC4861-RA-13, RFC4861-RA-14,
-  RFC4861-OPT-22, RFC4861-OPT-23).
+- `rfc4861.txt:1705-1707` — first sentence of the Prefix Information description; a summary of the fields that RFC4861-OPT-19 and RFC4861-OPT-21 catalog.
+- `rfc4861.txt:1799-1808` — bridged links of different technologies and the use of the MTU option there; pure explanation of a configuration choice.
+- `rfc4861.txt:985-986`, `1042-1043`, `1195-1196`, `1268-1269`, `1416-1417`, `1526-1527`, `1555-1556`, `1604-1605`, `1713-1714`, `1759-1760` — bit rulers and frame lines of the format diagrams; the field rows of each diagram are in the layout entries.
+- `rfc4861.txt:1047`, `1107-1109`, `1607`, `1661-1662` — a flag reserved for another protocol: none is in this range. RFC 4861 defines only M and O plus 6 Reserved bits in the Router Advertisement, and only L and A plus 6 Reserved1 bits in the Prefix Information option. The Home Agent (H) flag and the Router Address (R) flag of Mobile IPv6 are not in the text; the entries catalog the Reserved and Reserved1 fields whole (RFC4861-RA-13, RFC4861-RA-14, RFC4861-OPT-22, RFC4861-OPT-23).
 
 In §6:
 
-- `rfc4861.txt:2099-2120` — §6 introduction: an overview of Router Discovery and Prefix
-  Discovery. The behaviors come again as statements in §6.2 and §6.3. The lower-case "must"
-  of line 2112 concerns Stateless Address Autoconfiguration [ADDRCONF], another protocol.
-- `rfc4861.txt:2160-2162` and `rfc4861.txt:2203-2205` — a remark on future changes of the
-  protocol (lower-case "may"); no behavior of a node today.
-- `rfc4861.txt:2169-2170` and `rfc4861.txt:2212-2213` — terminology: the definitions of
-  "valid solicitation" and "valid advertisement".
-- `rfc4861.txt:2220-2224` and `rfc4861.txt:2833-2837` — the variable names are for
-  demonstration only, and the defaults are for convenience; no behavior.
-- `rfc4861.txt:2228-2230` and `rfc4861.txt:2847-2848` — the reason for the link-layer
-  override rule (RFC4861-RCFG-2, RFC4861-HOST-2).
-- `rfc4861.txt:2367-2371` — an example for the override of the Router Lifetime limits
-  (point-to-point links).
+- `rfc4861.txt:2099-2120` — §6 introduction: an overview of Router Discovery and Prefix Discovery. The behaviors come again as statements in §6.2 and §6.3. The lower-case "must" of line 2112 concerns Stateless Address Autoconfiguration [ADDRCONF], another protocol.
+- `rfc4861.txt:2160-2162` and `rfc4861.txt:2203-2205` — a remark on future changes of the protocol (lower-case "may"); no behavior of a node today.
+- `rfc4861.txt:2169-2170` and `rfc4861.txt:2212-2213` — terminology: the definitions of "valid solicitation" and "valid advertisement".
+- `rfc4861.txt:2220-2224` and `rfc4861.txt:2833-2837` — the variable names are for demonstration only, and the defaults are for convenience; no behavior.
+- `rfc4861.txt:2228-2230` and `rfc4861.txt:2847-2848` — the reason for the link-layer override rule (RFC4861-RCFG-2, RFC4861-HOST-2).
+- `rfc4861.txt:2367-2371` — an example for the override of the Router Lifetime limits (point-to-point links).
 - `rfc4861.txt:2386` — "Each prefix has an associated:", a heading of the list.
-- `rfc4861.txt:2422-2424` and `rfc4861.txt:2430-2432` — context and a pointer: the two
-  variables AdvPreferredLifetime and AdvAutonomousFlag come from [ADDRCONF]. The defaults and
-  the rules that this text states are in RFC4861-RCFG-19 to RFC4861-RCFG-22.
-- `rfc4861.txt:2456-2459`, `rfc4861.txt:2461-2463` — summary and explanation: hosts take the
-  router variables from Router Advertisements (the host side is in §6.3); routers may lack
-  the host variables.
+- `rfc4861.txt:2422-2424` and `rfc4861.txt:2430-2432` — context and a pointer: the two variables AdvPreferredLifetime and AdvAutonomousFlag come from [ADDRCONF]. The defaults and the rules that this text states are in RFC4861-RCFG-19 to RFC4861-RCFG-22.
+- `rfc4861.txt:2456-2459`, `rfc4861.txt:2461-2463` — summary and explanation: hosts take the router variables from Router Advertisements (the host side is in §6.3); routers may lack the host variables.
 - `rfc4861.txt:2476` — a pointer to §10 (protocol constants).
 - `rfc4861.txt:2501-2503` — a summary of §6.2.6 and §6.2.7, which are cataloged there.
 - `rfc4861.txt:2570-2572` — an example for RFC4861-ADV-18 (lower-case "may").
 - `rfc4861.txt:2609-2612` — the reason for the short initial intervals.
-- `rfc4861.txt:2789-2790` — other actions on a received Router Advertisement are out of
-  scope.
-- `rfc4861.txt:2794-2808` (up to "first-hop router.") — explanation: the link-local address
-  of a router should rarely change (lower-case "should", advice with no checkable
-  behavior); nodes identify a router by its source address; the example about Redirect
-  messages restates the Redirect validation of §8.1.
-- `rfc4861.txt:2813-2815` — the benefit of link-local addresses on renumbering (lower-case
-  "should").
-- `rfc4861.txt:2829` — §6.3.1 "None.": a host has no configuration variables; nothing to
-  check.
+- `rfc4861.txt:2789-2790` — other actions on a received Router Advertisement are out of scope.
+- `rfc4861.txt:2794-2808` (up to "first-hop router.") — explanation: the link-local address of a router should rarely change (lower-case "should", advice with no checkable behavior); nodes identify a router by its source address; the example about Redirect messages restates the Redirect validation of §8.1.
+- `rfc4861.txt:2813-2815` — the benefit of link-local addresses on renumbering (lower-case "should").
+- `rfc4861.txt:2829` — §6.3.1 "None.": a host has no configuration variables; nothing to check.
 - `rfc4861.txt:2921-2924` — explanation: several routers and DHCPv6 can supply information.
 - `rfc4861.txt:2940-2942` — the reason for RFC4861-HOST-11.
 - `rfc4861.txt:2966-2977` — the reason for RFC4861-HOST-15.
 - `rfc4861.txt:2987-2989` — the reason for the random ReachableTime.
 - `rfc4861.txt:3006-3009` — explanation: NUD uses the IsRouter flag (§7.3).
-- `rfc4861.txt:3040-3043` — a pointer to the definition of "on-link" in §2.1, and a remark
-  on prefixes with L zero (lower-case "would").
-- `rfc4861.txt:3067-3070` — what [ADDRCONF] does with prefix lifetimes: another protocol.
-  The statement of this text is RFC4861-HOST-34.
-- `rfc4861.txt:3090-3095` — an implementation note (separate "on-link" and "addrconf"
-  functions).
+- `rfc4861.txt:3040-3043` — a pointer to the definition of "on-link" in §2.1, and a remark on prefixes with L zero (lower-case "would").
+- `rfc4861.txt:3067-3070` — what [ADDRCONF] does with prefix lifetimes: another protocol. The statement of this text is RFC4861-HOST-34.
+- `rfc4861.txt:3090-3095` — an implementation note (separate "on-link" and "addrconf" functions).
 - `rfc4861.txt:3101-3103` — explanation: NUD recovers from reachability problems (§7.3).
 - `rfc4861.txt:3113-3116` — introduction and a pointer to §7.3.
 - `rfc4861.txt:3131-3134` — a pointer to implementation hints in [LD-SHRE].
 - `rfc4861.txt:3149-3154` — the reason for the round-robin order.
 - `rfc4861.txt:3158-3160` — the motivation for Router Solicitations.
-- `rfc4861.txt:3189-3191`, `rfc4861.txt:3199` (first sentence part) — the reason for the
-  initial random delay.
-- `rfc4861.txt:3205-3210`, `rfc4861.txt:3212-3220` — Mobile IPv6 context around
-  RFC4861-HOST-49: movement detection of mobile nodes, the risk of solicitation storms,
-  and a note that the strength of link-layer hints is out of scope.
+- `rfc4861.txt:3189-3191`, `rfc4861.txt:3199` (first sentence part) — the reason for the initial random delay.
+- `rfc4861.txt:3205-3210`, `rfc4861.txt:3212-3220` — Mobile IPv6 context around RFC4861-HOST-49: movement detection of mobile nodes, the risk of solicitation storms, and a note that the strength of link-layer hints is out of scope.
 - `rfc4861.txt:3228-3229` — the reason for RFC4861-HOST-51.
 - Flags reserved for Mobile IPv6 and SEND: this range mentions none.
 
 In §7.2 and §8:
 
-- `rfc4861.txt:3353-3356` — §7.2 heading and the definition of address resolution;
-  explanation.
-- `rfc4861.txt:3376-3379` — "This is particularly relevant for unicast responses to
-  solicitations..."; explanation of RFC4861-AR-3.
+- `rfc4861.txt:3353-3356` — §7.2 heading and the definition of address resolution; explanation.
+- `rfc4861.txt:3376-3379` — "This is particularly relevant for unicast responses to solicitations..."; explanation of RFC4861-AR-3.
 - `rfc4861.txt:3413-3425` — why the NS uses the source of the prompting packet; rationale.
-- `rfc4861.txt:3431-3433` — "Including the source link-layer address in a multicast
-  solicitation is required..."; rationale of RFC4861-AR-12, no new behavior.
+- `rfc4861.txt:3431-3433` — "Including the source link-layer address in a multicast solicitation is required..."; rationale of RFC4861-AR-12, no new behavior.
 - `rfc4861.txt:3435-3438` — why a unicast NS can omit the option; rationale.
-- `rfc4861.txt:3482-3484` — a tentative Target Address is processed "as described in
-  [ADDRCONF]"; the behavior belongs to Duplicate Address Detection of RFC 4862, not to this
-  document.
+- `rfc4861.txt:3482-3484` — a tentative Target Address is processed "as described in [ADDRCONF]"; the behavior belongs to Duplicate Address Detection of RFC 4862, not to this document.
 - `rfc4861.txt:3497-3502` — why a new entry from an NS has IsRouter FALSE; rationale.
 - `rfc4861.txt:3539-3542` — why the Override flag is set this way; rationale.
-- `rfc4861.txt:3567-3574` — why no entry is created for an NA, and the introduction to the
-  state-dependent rules; explanation.
-- `rfc4861.txt:3633-3647` — why a solicited NA confirms the forward path and an unsolicited NA
-  can carry urgent information; explanation (the normative sentence after it is
-  RFC4861-AR-54).
-- `rfc4861.txt:3650-3652` — "There is no need to update the state for unsolicited
-  advertisements that do not change the contents of the cache."; restates the "remains
-  unchanged" rule of RFC4861-AR-52.
+- `rfc4861.txt:3567-3574` — why no entry is created for an NA, and the introduction to the state-dependent rules; explanation.
+- `rfc4861.txt:3633-3647` — why a solicited NA confirms the forward path and an unsolicited NA can carry urgent information; explanation (the normative sentence after it is RFC4861-AR-54).
+- `rfc4861.txt:3650-3652` — "There is no need to update the state for unsolicited advertisements that do not change the contents of the cache."; restates the "remains unchanged" rule of RFC4861-AR-52.
 - `rfc4861.txt:3660-3662` — why IsRouter changes are tracked; rationale.
 - `rfc4861.txt:3664-3670` — summary of the NA receipt rules; explanation.
-- `rfc4861.txt:3711-3718` — a mechanism to stop several proxies from multicasting NAs for one
-  address; the text states that "This is a requirement on other protocols", and the Home Agent
-  of [MIPv6] is an example. Belongs to other protocols.
-- `rfc4861.txt:3724-3730` — unsolicited NAs are only a performance optimization; informative
-  note.
-- `rfc4861.txt:3767-3770` — example of a mobile node, and "the mechanisms used by proxy are
-  essentially the same as the mechanisms used with anycast addresses"; explanation.
-- `rfc4861.txt:3778-3781` — why a proxy NA has Override flag 0; rationale (the effect is in the
-  check idea of RFC4861-ANY-8).
+- `rfc4861.txt:3711-3718` — a mechanism to stop several proxies from multicasting NAs for one address; the text states that "This is a requirement on other protocols", and the Home Agent of [MIPv6] is an example. Belongs to other protocols.
+- `rfc4861.txt:3724-3730` — unsolicited NAs are only a performance optimization; informative note.
+- `rfc4861.txt:3767-3770` — example of a mobile node, and "the mechanisms used by proxy are essentially the same as the mechanisms used with anycast addresses"; explanation.
+- `rfc4861.txt:3778-3781` — why a proxy NA has Override flag 0; rationale (the effect is in the check idea of RFC4861-ANY-8).
 - `rfc4861.txt:4063-4064` — introduction of §8; explanation.
-- `rfc4861.txt:4075-4079` — static routes should name the next-hop router by its link-local
-  address, and "all IPv6 routing protocols must somehow exchange the link-local addresses";
-  configuration guidance and a requirement on routing protocols, not on Neighbor Discovery.
+- `rfc4861.txt:4075-4079` — static routes should name the next-hop router by its link-local address, and "all IPv6 routing protocols must somehow exchange the link-local addresses"; configuration guidance and a requirement on routing protocols, not on Neighbor Discovery.
 - `rfc4861.txt:4127-4129` — future backward-compatible changes; informative.
 - `rfc4861.txt:4141-4142` — definition of "valid redirect"; terminology.
-- `rfc4861.txt:4194-4195` — pointer to [ICMPv6] for details of ICMP rate limiting;
-  informative.
+- `rfc4861.txt:4194-4195` — pointer to [ICMPv6] for details of ICMP rate limiting; informative.
 - `rfc4861.txt:4232-4234` — later NAs and RAs correct the IsRouter flag; explanation.

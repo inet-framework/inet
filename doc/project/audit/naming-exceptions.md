@@ -1,21 +1,15 @@
 # Naming Exceptions and Violations
 
 > **Kind:** ledger · **Status:** current · **Seal:** by row · **Owns:** `NS-*`, `NV-*` · **Stands on:** [rule/naming.md](../rule/naming.md), [README.md](README.md)
-Known places where the INET code base departs from [naming-conventions.md](../rule/naming.md).
-That document states the **target** rules; this one is the ledger of reality against them, so the
-conventions can stay clean and prescriptive while the deviations are tracked (and, where
-appropriate, worked off) here.
+
+Known places where the INET code base departs from [naming-conventions.md](../rule/naming.md). That document states the **target** rules; this one is the ledger of reality against them, so the conventions can stay clean and prescriptive while the deviations are tracked (and, where appropriate, worked off) here.
 
 Every entry has one of two **dispositions**:
 
-- **Sanctioned** (`NS-*`) — a deliberate, permanent exception that will *not* be changed (an
-  established name too costly to rename, or a form that intentionally mirrors an outside standard).
-- **Violation** (`NV-*`) — the name does not follow the convention and is a **rename candidate**.
-  Each carries a suggested fix and a status (`Open` / `In progress` / `Done`). Fixing one means
-  renaming the offending things and moving the row to `Done` (keep the id; do not reuse it).
+- **Sanctioned** (`NS-*`) — a deliberate, permanent exception that will *not* be changed (an established name too costly to rename, or a form that intentionally mirrors an outside standard).
+- **Violation** (`NV-*`) — the name does not follow the convention and is a **rename candidate**. Each carries a suggested fix and a status (`Open` / `In progress` / `Done`). Fixing one means renaming the offending things and moving the row to `Done` (keep the id; do not reuse it).
 
-Ids are stable references you can cite in a commit or PR that does the rename. New audits append
-here — see *Auditing* at the bottom.
+Ids are stable references you can cite in a commit or PR that does the rename. New audits append here — see *Auditing* at the bottom.
 
 ---
 
@@ -101,15 +95,11 @@ here — see *Auditing* at the bottom.
 
 ## Auditing
 
-When auditing a file or area against [naming-conventions.md](../rule/naming.md), record what you
-find here rather than fixing it silently in place:
+When auditing a file or area against [naming-conventions.md](../rule/naming.md), record what you find here rather than fixing it silently in place:
 
-1. For each name that breaks a rule, add a row: if it is a deliberate, permanent choice, add it to
-   **Sanctioned** with the reason; otherwise add it to **Open violations** with a suggested rename and
-   `Status = Open`.
+1. For each name that breaks a rule, add a row: if it is a deliberate, permanent choice, add it to **Sanctioned** with the reason; otherwise add it to **Open violations** with a suggested rename and `Status = Open`.
 2. Cite the rule it departs from and the exact location(s).
-3. When a rename actually happens, set the row's `Status` to `Done` (keep the id) and land the rename
-   as its own reviewable change.
+3. When a rename actually happens, set the row's `Status` to `Done` (keep the id) and land the rename as its own reviewable change.
 4. Log the audited area below so coverage is visible.
 
 ### Audit coverage

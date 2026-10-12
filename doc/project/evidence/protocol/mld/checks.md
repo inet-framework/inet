@@ -2,33 +2,22 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc9777/catalog.md](../../standard/rfc9777/catalog.md), [rfc2710/catalog.md](../../standard/rfc2710/catalog.md), [features.md](features.md)
 
-Step 5 artifact of the standards test workflow. The procedures come from the specification
-only. They name no simulation model and no code. This file holds the common mockups, the
-rules every check obeys, and the index. The checks themselves live in one file per feature
-group under [`checks/`](checks); the section names are the anchors that the coverage ledger
-links to.
+Step 5 artifact of the standards test workflow. The procedures come from the specification only. They name no simulation model and no code. This file holds the common mockups, the rules every check obeys, and the index. The checks themselves live in one file per feature group under [`checks/`](checks); the section names are the anchors that the coverage ledger links to.
 
-The checks are the twins of the IGMP checks of
-[`igmp/checks.md`](../igmp/checks.md): MLDv2 is the IPv6 form of IGMPv3, and MLDv1 of IGMPv2.
-Where the two protocols agree, the checks agree, so that a difference in their verdicts is a
-difference of the models.
+The checks are the twins of the IGMP checks of [`igmp/checks.md`](../igmp/checks.md): MLDv2 is the IPv6 form of IGMPv3, and MLDv1 of IGMPv2. Where the two protocols agree, the checks agree, so that a difference in their verdicts is a difference of the models.
 
 ## Common mockups
 
-Every link is an Ethernet link. The routers run MLDv2 unless a mockup says otherwise, with the
-default of every timer and counter; the hosts run MLDv2 too, except where a mockup names an
-older host. Every node forms its link-local addresses from its interface identifiers.
+Every link is an Ethernet link. The routers run MLDv2 unless a mockup says otherwise, with the default of every timer and counter; the hosts run MLDv2 too, except where a mockup names an older host. Every node forms its link-local addresses from its interface identifiers.
 
 | Link | Prefix | Global addresses |
 | --- | --- | --- |
 | L1 | 2001:db8:1::/64 | A 2001:db8:1::10, B 2001:db8:1::11, C 2001:db8:1::12 |
 | L2 | 2001:db8:2::/64 | S1 2001:db8:2::10, S2 2001:db8:2::11 |
 
-The multicast addresses are G = ff0e::1:1, H = ff0e::1:2 and K = ff0e::1:3, of global scope and
-outside the SSM range.
+The multicast addresses are G = ff0e::1:1, H = ff0e::1:2 and K = ff0e::1:3, of global scope and outside the SSM range.
 
-**The link.** Router R and hosts A and B on L1, through a switch. R is the only router, so it is
-the querier.
+**The link.** Router R and hosts A and B on L1, through a switch. R is the only router, so it is the querier.
 
 ```
         R
@@ -38,10 +27,7 @@ the querier.
     A       B
 ```
 
-**The link with a source.** The link, and a second interface of R on L2 with the sources S1 and
-S2. A source that the check names sends one UDP datagram to its multicast address every 0.5
-seconds, from the start to the end of the run. R forwards multicast traffic from L2 to L1 as MLD
-suggests; "forwarding" in the checks is the arrival of those datagrams on L1.
+**The link with a source.** The link, and a second interface of R on L2 with the sources S1 and S2. A source that the check names sends one UDP datagram to its multicast address every 0.5 seconds, from the start to the end of the run. R forwards multicast traffic from L2 to L1 as MLD suggests; "forwarding" in the checks is the arrival of those datagrams on L1.
 
 ```
   S1   S2
@@ -55,17 +41,13 @@ suggests; "forwarding" in the checks is the arrival of those datagrams on L1.
    A     B
 ```
 
-**The two routers.** Routers R1 and R2 and host A on L1. The interface identifier of R1 on L1 is
-lower than that of R2, so the link-local address of R1 is the lower one (RFC9777-RQRY-11).
+**The two routers.** Routers R1 and R2 and host A on L1. The interface identifier of R1 on L1 is lower than that of R2, so the link-local address of R1 is the lower one (RFC9777-RQRY-11).
 
-**The link with an older querier.** The link with a source, but R runs MLDv1 (RFC 2710), so its
-Queries are MLDv1 Queries.
+**The link with an older querier.** The link with a source, but R runs MLDv1 (RFC 2710), so its Queries are MLDv1 Queries.
 
-**The link with an older host.** The link with a source, and a third host C on L1 that runs
-MLDv1 only.
+**The link with an older host.** The link with a source, and a third host C on L1 that runs MLDv1 only.
 
-**The two routers of different versions.** The two routers, where R1 runs MLDv2 and R2 runs
-MLDv1.
+**The two routers of different versions.** The two routers, where R1 runs MLDv2 and R2 runs MLDv1.
 
 ### The default values
 
@@ -89,33 +71,14 @@ The checks use the defaults of RFC 9777 §9:
 
 ## Rules every check obeys
 
-- **An observation names the link and the sender.** "On L1, from A" means the MLD messages that
-  A sends onto L1, as they leave A. The message is read from the frame; the addresses, the Hop
-  Limit and the options from the IPv6 header and its extension headers.
-- **A start of listening, a stop and a source list are local requests of a host.** "A starts to
-  listen to G" is a request to receive traffic of G from all sources, EXCLUDE({}); "A listens to
-  G for S1" is INCLUDE({S1}); "A stops" ends a request. The listening state of an interface is
-  the union of its requests, as RFC 9777 §4 defines it.
-- **One observation confirms the stimulus.** Each procedure has an observation that shows the
-  situation the rule needs — the start of listening, the Query, the stop — before the observation
-  that checks the rule.
-- **A random delay of the standard is a window, not a value.** Where the standard gives a random
-  delay, the check tests its bounds and never a value drawn from it. An answer that leaves less
-  than 1 millisecond after the Query that it answers leaves "at the instant of the Query": the
-  margin only absorbs the transmission of the Query.
-- **Start instants are fixed where a timer is under test**, so that the instant under test does
-  not fall on another event of the same node by chance.
-- **The fields of the header come last** in a check that also observes behavior, so that a wrong
-  field does not keep the behavior from a verdict; a check never puts two rules into one
-  observation when one could hide the other.
-- **A node joins or leaves L1 through its link.** Where a check needs a node that comes up late
-  or stops, the link between the node and L1 is broken until the node joins L1, or breaks when
-  the node leaves L1. The node then hears nothing from L1, and L1 hears nothing from the node.
-  The restart of a node is outside MLD, so no check stops a node.
-- **One Report starts one query sequence.** Where a check reads the Queries that a
-  State-Change Report of a host starts, that host sends each State-Change Report once: its
-  Robustness Variable is 1. Each repetition of the Report would start the sequence again
-  (RFC 9777 §7.6.3).
+- **An observation names the link and the sender.** "On L1, from A" means the MLD messages that A sends onto L1, as they leave A. The message is read from the frame; the addresses, the Hop Limit and the options from the IPv6 header and its extension headers.
+- **A start of listening, a stop and a source list are local requests of a host.** "A starts to listen to G" is a request to receive traffic of G from all sources, EXCLUDE({}); "A listens to G for S1" is INCLUDE({S1}); "A stops" ends a request. The listening state of an interface is the union of its requests, as RFC 9777 §4 defines it.
+- **One observation confirms the stimulus.** Each procedure has an observation that shows the situation the rule needs — the start of listening, the Query, the stop — before the observation that checks the rule.
+- **A random delay of the standard is a window, not a value.** Where the standard gives a random delay, the check tests its bounds and never a value drawn from it. An answer that leaves less than 1 millisecond after the Query that it answers leaves "at the instant of the Query": the margin only absorbs the transmission of the Query.
+- **Start instants are fixed where a timer is under test**, so that the instant under test does not fall on another event of the same node by chance.
+- **The fields of the header come last** in a check that also observes behavior, so that a wrong field does not keep the behavior from a verdict; a check never puts two rules into one observation when one could hide the other.
+- **A node joins or leaves L1 through its link.** Where a check needs a node that comes up late or stops, the link between the node and L1 is broken until the node joins L1, or breaks when the node leaves L1. The node then hears nothing from L1, and L1 hears nothing from the node. The restart of a node is outside MLD, so no check stops a node.
+- **One Report starts one query sequence.** Where a check reads the Queries that a State-Change Report of a host starts, that host sends each State-Change Report once: its Robustness Variable is 1. Each repetition of the Report would start the sequence again (RFC 9777 §7.6.3).
 
 ## Index
 
@@ -156,56 +119,28 @@ The checks use the defaults of RFC 9777 §9:
 
 ## Statements this pass wrote no check for
 
-Level 2 asks for a core check of every mandatory feature, and the checks above give one to every
-mandatory feature except message validation, whose statements all need a crafted message. The
-statements below have no check in this pass. This section says **what a check would need**. It
-says nothing about the simulation model: whether the absence of a check is acceptable is a
-judgment about what the model claims, and that judgment lives in the coverage ledger.
+Level 2 asks for a core check of every mandatory feature, and the checks above give one to every mandatory feature except message validation, whose statements all need a crafted message. The statements below have no check in this pass. This section says **what a check would need**. It says nothing about the simulation model: whether the absence of a check is acceptable is a judgment about what the model claims, and that judgment lives in the coverage ledger.
 
-**A crafted message**, the toolset of level 3: every validity rule of a received message —
-RFC9777-GEN-8, QRY-3, QRY-6, QRY-9, QRY-20, QRY-21, QRY-27, QRY-30, REP-3, REP-6, REP-16 to
-REP-18, REP-33, REP-35, REP-36, REP-42, LSN-4, LQRY-1, RREP-1, RQRY-1, VER-2 and RFC2710-NODE-6,
-NODE-9, ROUTER-2, ROUTER-13, ROUTER-14, ROUTER-16; a TO_IN record at a router in INCLUDE
-mode, which normal listeners do not produce (RFC9777-RREP-23).
+**A crafted message**, the toolset of level 3: every validity rule of a received message — RFC9777-GEN-8, QRY-3, QRY-6, QRY-9, QRY-20, QRY-21, QRY-27, QRY-30, REP-3, REP-6, REP-16 to REP-18, REP-33, REP-35, REP-36, REP-42, LSN-4, LQRY-1, RREP-1, RQRY-1, VER-2 and RFC2710-NODE-6, NODE-9, ROUTER-2, ROUTER-13, ROUTER-14, ROUTER-16; a TO_IN record at a router in INCLUDE mode, which normal listeners do not produce (RFC9777-RREP-23).
 
-**SSM-aware systems**, level 5 by the standards map (RFC 4604): RFC9777-REP-24, REP-28, RREP-2,
-RREP-3, COMPL-12 to COMPL-14, COMPR-10, COMPR-11.
+**SSM-aware systems**, level 5 by the standards map (RFC 4604): RFC9777-REP-24, REP-28, RREP-2, RREP-3, COMPL-12 to COMPL-14, COMPR-10, COMPR-11.
 
-**State inside a node**, the toolset of level 4: a variable or a notation that no message shows
-(RFC9777-RQ-1, RQ-5, RQ-6, RREP-4, RST-10, RST-16, RST-19, RFC2710-TIMER-4), and a warning or a
-log entry (RFC9777-COMPR-6, COMPR-8, COMPR-9).
+**State inside a node**, the toolset of level 4: a variable or a notation that no message shows (RFC9777-RQ-1, RQ-5, RQ-6, RREP-4, RST-10, RST-16, RST-19, RFC2710-TIMER-4), and a warning or a log entry (RFC9777-COMPR-6, COMPR-8, COMPR-9).
 
-**A permission that no observation can fail**: a router may forward excluded sources onto a
-transit link (RFC9777-FWD-2); a host may let an MLDv1 Report suppress its own Version 2 Report
-(RFC9777-COMPL-15).
+**A permission that no observation can fail**: a router may forward excluded sources onto a transit link (RFC9777-FWD-2); a host may let an MLDv1 Report suppress its own Version 2 Report (RFC9777-COMPL-15).
 
 **A larger mockup or a second message path**, work for a later level 2 pass:
 
-- systems with non-default values, and a non-querier that adopts the QRV and the QQIC of the
-  querier (RFC9777-TIMER-1, QRY-14, QRY-16, RFC2710-TIMER-1);
+- systems with non-default values, and a non-querier that adopts the QRV and the QQIC of the querier (RFC9777-TIMER-1, QRY-14, QRY-16, RFC2710-TIMER-1);
 - a second router that hears a Query with the S flag set (RFC9777-QRY-12, RQRY-5);
-- many sources or many addresses, beyond the size of one message (RFC9777-QRY-18, REP-43 to
-  REP-45);
+- many sources or many addresses, beyond the size of one message (RFC9777-QRY-18, REP-43 to REP-45);
 - a node that reports before it has a link-local address (RFC9777-REP-37 to REP-39);
-- a change that allows and blocks sources at once (RFC9777-REP-32), and a filter-mode change
-  followed by a source change within the repetitions (LSN-20, LSN-21);
-- two specific Queries for one address within one Maximum Response Delay, or a Query that meets a
-  pending response (RFC9777-LQRY-5, LQRY-8, LQRY-9, RFC2710-NODE-23), and a stop of listening in
-  the Delaying Listener state (RFC2710-NODE-18);
-- a node that hears an MLDv1 Query for an address it does not listen to (RFC2710-NODE-5), and the
-  scope rules of MLDv1 for reserved, node-local and link-local addresses (RFC2710-NODE-25,
-  NODE-26);
-- a system in EXCLUDE mode with blocked sources, which puts source records into the EXCLUDE state
-  of the router (RFC9777-LTIM-9, RST-12, RST-30 to RST-36, FWD-6, FWD-7, RREP-18, RREP-24 to
-  RREP-26, RSW-2);
-- a run longer than the Multicast Address Listening Interval with an INCLUDE-mode listener that
-  answers the Queries (RFC9777-RST-24);
-- the end of the MLDv1 mode of an address after the Older Version Host Present Interval
-  (RFC9777-COMPR-17, COMPR-18, TIMER-19);
-- an MLDv1 address that times out, and two MLDv1 routers, for the non-querier state machine
-  (RFC2710-ROUTER-17, ROUTER-25, ROUTER-27, ROUTER-30, ROUTER-32, ROUTER-34 to ROUTER-39,
-  TIMER-8, TIMER-9), and the Unsolicited Report Interval of an MLDv1-only node
-  (RFC2710-TIMER-16).
+- a change that allows and blocks sources at once (RFC9777-REP-32), and a filter-mode change followed by a source change within the repetitions (LSN-20, LSN-21);
+- two specific Queries for one address within one Maximum Response Delay, or a Query that meets a pending response (RFC9777-LQRY-5, LQRY-8, LQRY-9, RFC2710-NODE-23), and a stop of listening in the Delaying Listener state (RFC2710-NODE-18);
+- a node that hears an MLDv1 Query for an address it does not listen to (RFC2710-NODE-5), and the scope rules of MLDv1 for reserved, node-local and link-local addresses (RFC2710-NODE-25, NODE-26);
+- a system in EXCLUDE mode with blocked sources, which puts source records into the EXCLUDE state of the router (RFC9777-LTIM-9, RST-12, RST-30 to RST-36, FWD-6, FWD-7, RREP-18, RREP-24 to RREP-26, RSW-2);
+- a run longer than the Multicast Address Listening Interval with an INCLUDE-mode listener that answers the Queries (RFC9777-RST-24);
+- the end of the MLDv1 mode of an address after the Older Version Host Present Interval (RFC9777-COMPR-17, COMPR-18, TIMER-19);
+- an MLDv1 address that times out, and two MLDv1 routers, for the non-querier state machine (RFC2710-ROUTER-17, ROUTER-25, ROUTER-27, ROUTER-30, ROUTER-32, ROUTER-34 to ROUTER-39, TIMER-8, TIMER-9), and the Unsolicited Report Interval of an MLDv1-only node (RFC2710-TIMER-16).
 
-The statements that no check targets because a check above shows them are in the ledger as
-`covered`, with the check that shows them.
+The statements that no check targets because a check above shows them are in the ledger as `covered`, with the check that shows them.

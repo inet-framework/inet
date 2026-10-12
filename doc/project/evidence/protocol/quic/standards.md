@@ -2,23 +2,15 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around QUIC, records which document governs each contested clause, and pins the exact set
-that the current pass tests against.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around QUIC, records which document governs each contested clause, and pins the exact set that the current pass tests against.
 
-The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`),
-retrieved 2026-09-08.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`), retrieved 2026-09-08.
 
-QUIC differs from the three protocols already in this tree in one way that shapes the whole
-pass: **the base document is not self-sufficient.** RFC 9000 defines the transport, but its
-handshake is defined in terms of TLS, which RFC 9001 supplies, and its loss detection and
-congestion control live in RFC 9002. None of the three is obsolete, and none updates
-another; they are one specification published in three parts.
+QUIC differs from the three protocols already in this tree in one way that shapes the whole pass: **the base document is not self-sufficient.** RFC 9000 defines the transport, but its handshake is defined in terms of TLS, which RFC 9001 supplies, and its loss detection and congestion control live in RFC 9002. None of the three is obsolete, and none updates another; they are one specification published in three parts.
 
 ## Target level
 
-**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-The in-scope set is RFC 9000 alone. The level table:
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). The in-scope set is RFC 9000 alone. The level table:
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -26,8 +18,7 @@ The in-scope set is RFC 9000 alone. The level table:
 | level 4, Dynamics | RFC 9002 | loss detection and congestion control, and with them the idle timeout, the probe timeout and the acknowledgment delay bound |
 | level 5, Complete | RFC 9001, RFC 8999, RFC 9368, RFC 9369 | the cryptographic handshake, the version-independent properties, version negotiation, and QUIC version 2 |
 
-What the pass actually reached is not recorded here. It is in
-[`model/quic/coverage.md`](../../model/quic/coverage.md#achieved-level).
+What the pass actually reached is not recorded here. It is in [`model/quic/coverage.md`](../../model/quic/coverage.md#achieved-level).
 
 ## Document list
 
@@ -43,12 +34,9 @@ What the pass actually reached is not recorded here. It is in
 
 Source of the text:
 
-- `rfc9000.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9000.txt) —
-  <https://www.rfc-editor.org/rfc/rfc9000.txt>, downloaded 2026-09-08.
+- `rfc9000.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9000.txt) — <https://www.rfc-editor.org/rfc/rfc9000.txt>, downloaded 2026-09-08.
 
-RFC 9000 has not been updated or obsoleted since publication. Unlike RFC 791 and RFC 793,
-its 1980s-era ambiguity problem does not arise: it uses RFC 2119 keywords throughout, and
-its requirements are numbered by section rather than by a requirement-summary table.
+RFC 9000 has not been updated or obsoleted since publication. Unlike RFC 791 and RFC 793, its 1980s-era ambiguity problem does not arise: it uses RFC 2119 keywords throughout, and its requirements are numbered by section rather than by a requirement-summary table.
 
 ## Override table
 
@@ -59,9 +47,7 @@ its requirements are numbered by section rather than by a requirement-summary ta
 | The version field and connection identifiers across versions | RFC 9000 §17.2 for version 1 | RFC 8999, the invariants, as amended by RFC 9368 | RFC 8999 for what holds across versions | no |
 | The wire image of a second version | RFC 9000 §17, version 1 | RFC 9369, version 2 | RFC 9369 for that version | no |
 
-No row is in scope, so no catalog entry carries an `Overridden by` field. The first row is
-the one that shapes this pass: a simulation model that does not implement TLS still carries
-the packets that the handshake needs, and the catalog holds only the carriage.
+No row is in scope, so no catalog entry carries an `Overridden by` field. The first row is the one that shapes this pass: a simulation model that does not implement TLS still carries the packets that the handshake needs, and the catalog holds only the carriage.
 
 ## In-scope set
 

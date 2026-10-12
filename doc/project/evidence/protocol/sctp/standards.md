@@ -2,22 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around the Stream Control Transmission Protocol, records which document governs each
-contested clause, and pins the set that the next pass tests against. SCTP has one current base
-document, one immediately superseded predecessor, several extensions each in a separate
-document, and a handful of relatives that touch SCTP without being about SCTP.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around the Stream Control Transmission Protocol, records which document governs each contested clause, and pins the set that the next pass tests against. SCTP has one current base document, one immediately superseded predecessor, several extensions each in a separate document, and a handful of relatives that touch SCTP without being about SCTP.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test. RFC 9260 is large
-(133 pages); this pass pins a clause slice for level 2 and puts the rest of the document, and
-the whole of every extension, in the out-of-scope table below.
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test. RFC 9260 is large (133 pages); this pass pins a clause slice for level 2 and puts the rest of the document, and the whole of every extension, in the out-of-scope table below.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -26,8 +17,7 @@ the whole of every extension, in the out-of-scope table below.
 | level 4, Dynamics | nothing new | §7 (congestion control: slow start, congestion avoidance, fast retransmit) and the retransmission timer of §8 (RTO, its backoff, the heartbeat) are control loops and timers, not single values |
 | level 5, Complete | RFC 3758 (PR-SCTP), RFC 5061 (ASCONF), RFC 4895 (AUTH), RFC 6525 (stream reconfiguration), RFC 9260 §11 (the upper-layer interface, not wire-observable) | each extension is optional, lives in its own document, and needs its own scenario on top of the base association |
 
-What a pass actually reached is not recorded here. It is in
-[`model/sctp/coverage.md`](../../model/sctp/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/sctp/coverage.md`](../../model/sctp/coverage.md#achieved-level).
 
 ## Document list
 
@@ -53,22 +43,13 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the text:
 
-- `rfc9260.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9260.txt) —
-  <https://www.rfc-editor.org/rfc/rfc9260.txt>, downloaded 2026-09-23.
+- `rfc9260.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9260.txt) — <https://www.rfc-editor.org/rfc/rfc9260.txt>, downloaded 2026-09-23.
 
-Every other document of this family is not downloaded in this pass: the four errata/registration
-documents RFC 9260 already folds in (RFC 4460, RFC 6096, RFC 7053, RFC 8540), the two older
-generations (RFC 4960, RFC 2960), the generic registry and math documents (RFC 6335,
-RFC 1982), the still-standing extension RFC 8899, and the four level-5 extensions. None of them
-is in the level-2 in-scope set; see the out-of-scope table.
+Every other document of this family is not downloaded in this pass: the four errata/registration documents RFC 9260 already folds in (RFC 4460, RFC 6096, RFC 7053, RFC 8540), the two older generations (RFC 4960, RFC 2960), the generic registry and math documents (RFC 6335, RFC 1982), the still-standing extension RFC 8899, and the four level-5 extensions. None of them is in the level-2 in-scope set; see the out-of-scope table.
 
-RFC 9260 states its own lineage in its introduction: "This document obsoletes [RFC4960]. In
-addition to that, it incorporates the specification of the chunk flags registry from [RFC6096]
-and the specification of the I bit of DATA chunks from [RFC7053]. Therefore, [RFC6096] and
-[RFC7053] are also obsoleted by this document." (`rfc9260.txt:271-276`).
+RFC 9260 states its own lineage in its introduction: "This document obsoletes [RFC4960]. In addition to that, it incorporates the specification of the chunk flags registry from [RFC6096] and the specification of the I bit of DATA chunks from [RFC7053]. Therefore, [RFC6096] and [RFC7053] are also obsoleted by this document." (`rfc9260.txt:271-276`).
 
-RFC 9260 uses the keywords of RFC 2119 and RFC 8174, upper case, with the boilerplate at
-`rfc9260.txt:827`. `MUST` is on 329 lines, `SHOULD` on 216, `MAY` on 98, `SHALL` on 2.
+RFC 9260 uses the keywords of RFC 2119 and RFC 8174, upper case, with the boilerplate at `rfc9260.txt:827`. `MUST` is on 329 lines, `SHOULD` on 216, `MAY` on 98, `SHALL` on 2.
 
 ## Override table
 
@@ -78,9 +59,7 @@ RFC 9260 uses the keywords of RFC 2119 and RFC 8174, upper case, with the boiler
 | The CRC32c checksum appendix | RFC 4960 Appendix B carried the algorithm | RFC 9260 renumbers it to **Appendix A**, `rfc9260.txt:263` (table of contents) and `rfc9260.txt:6966` (the appendix itself); the procedure that uses it is §6.8, `rfc9260.txt:4308-4340` | RFC 9260 Appendix A and §6.8 | yes, level 2 |
 | The chunk-flags registry | RFC 4960 left chunk-flag meaning to each chunk type, informally | RFC 6096 (2011) gave it a registry; folded into RFC 9260, `rfc9260.txt:274-276` | RFC 9260, no separate document | yes, level 2, as part of the chunk format |
 
-The three rows above are not conflicts between documents still in force; they are cases where
-RFC 9260 absorbed a separate document. A test that names "RFC 4960 Appendix B" for the checksum
-targets an appendix letter that no longer exists in the governing text.
+The three rows above are not conflicts between documents still in force; they are cases where RFC 9260 absorbed a separate document. A test that names "RFC 4960 Appendix B" for the checksum targets an appendix letter that no longer exists in the governing text.
 
 ## In-scope set
 

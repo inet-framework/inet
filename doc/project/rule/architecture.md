@@ -2,31 +2,15 @@
 
 > **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `AR-*` · **Stands on:** [accepted-requirements.md](../requirement/accepted-requirements.md), [decisions.md](../design/decisions.md)
 
-What the structure of the INET code base must respect, so that models stay composable,
-extensible and maintainable. These rules are the developer's side of
-[accepted-requirements.md](../requirement/accepted-requirements.md): that document says what INET
-must do for a simulation user, and this one says how the code must be built to make it possible and
-to keep it possible.
+What the structure of the INET code base must respect, so that models stay composable, extensible and maintainable. These rules are the developer's side of [accepted-requirements.md](../requirement/accepted-requirements.md): that document says what INET must do for a simulation user, and this one says how the code must be built to make it possible and to keep it possible.
 
-A rule has a stable identifier `AR-<AREA>-<NAME>`, a one-line statement, and one or two paragraphs of
-reason. The identifier names the rule and not its position, so a regroup breaks no citation. Each
-identifier is a heading, so a citation links to the rule itself:
-[AR-ORG-DOMAINS](architecture.md#ar-org-domains).
+A rule has a stable identifier `AR-<AREA>-<NAME>`, a one-line statement, and one or two paragraphs of reason. The identifier names the rule and not its position, so a regroup breaks no citation. Each identifier is a heading, so a citation links to the rule itself: [AR-ORG-DOMAINS](architecture.md#ar-org-domains).
 
-The rules come from the INET Developer's Guide and from the lessons of day-to-day INET and OMNeT++
-work. Why the code is built this way, and what each choice costs, is in
-[decisions.md](../design/decisions.md). What a rule is worth as a group of rules is
-§*What the rules produce together* of that document.
+The rules come from the INET Developer's Guide and from the lessons of day-to-day INET and OMNeT++ work. Why the code is built this way, and what each choice costs, is in [decisions.md](../design/decisions.md). What a rule is worth as a group of rules is §*What the rules produce together* of that document.
 
-**Each rule closes with the tier it is enforced at**, in the ladder that
-[enforcement/README.md](../enforcement/README.md) defines. `T1` will not build, `T2` fails a test,
-`T3` a script flags it, `T4` an agent reviewer flags it, `T5` a human decides.
+**Each rule closes with the tier it is enforced at**, in the ladder that [enforcement/README.md](../enforcement/README.md) defines. `T1` will not build, `T2` fails a test, `T3` a script flags it, `T4` an agent reviewer flags it, `T5` a human decides.
 
-A protocol family that concentrates extra risk gets its own extension. The first is
-[domain/ieee80211.md](../domain/ieee80211.md), whose `AR-WLAN-*` rules apply in addition to
-everything here under the IEEE 802.11 subtrees. Known departures from these rules are in
-[audit/architecture-exceptions.md](../audit/architecture-exceptions.md), as `AS-*` sanctioned
-exceptions and `AV-*` open violations.
+A protocol family that concentrates extra risk gets its own extension. The first is [domain/ieee80211.md](../domain/ieee80211.md), whose `AR-WLAN-*` rules apply in addition to everything here under the IEEE 802.11 subtrees. Known departures from these rules are in [audit/architecture-exceptions.md](../audit/architecture-exceptions.md), as `AS-*` sanctioned exceptions and `AV-*` open violations.
 
 ## Index
 
@@ -138,132 +122,55 @@ Every rule in document order. The identifier links to the rule; the statement is
 
 **Layered, domain-partitioned source tree with acyclic dependencies**
 
-Source code is organized by protocol layer and functional domain; cross-cutting
-infrastructure lives in a shared `common` package, and dependencies point strictly from
-protocols toward infrastructure, never the reverse.
+Source code is organized by protocol layer and functional domain; cross-cutting infrastructure lives in a shared `common` package, and dependencies point strictly from protocols toward infrastructure, never the reverse.
 
-The tree under `src/inet` mirrors the OSI-style layering — `physicallayer`, `linklayer`,
-`networklayer`, `transportlayer`, `routing`, `applications` — plus orthogonal domains such
-as `mobility`, `power`, `clock`, and `node`. A developer looking for a protocol can find it
-from its layer and name alone (AODV under `routing/aodv`, TCP under `transportlayer/tcp`),
-and a NED package name always matches its directory. This predictable partitioning is what
-lets contributors add a protocol without reading the whole framework, and it is only
-sustainable if the dependency direction is disciplined: shared abstractions (addresses,
-packet chunks, tags, the queueing contracts) sit in `common` and know nothing about the
-protocols that use them, so that an individual protocol can be built, understood, and
-reasoned about without pulling in unrelated layers.
+The tree under `src/inet` mirrors the OSI-style layering — `physicallayer`, `linklayer`, `networklayer`, `transportlayer`, `routing`, `applications` — plus orthogonal domains such as `mobility`, `power`, `clock`, and `node`. A developer looking for a protocol can find it from its layer and name alone (AODV under `routing/aodv`, TCP under `transportlayer/tcp`), and a NED package name always matches its directory. This predictable partitioning is what lets contributors add a protocol without reading the whole framework, and it is only sustainable if the dependency direction is disciplined: shared abstractions (addresses, packet chunks, tags, the queueing contracts) sit in `common` and know nothing about the protocols that use them, so that an individual protocol can be built, understood, and reasoned about without pulling in unrelated layers.
 
 *Enforced at T1→T3 — NED package=directory (compiler) → include-graph layering script.*
 
 ### AR-ORG-CONTRACTS
 
-**Every extensible role is a separate paired contract whose implementations preserve its
-caller-visible semantics.**
+**Every extensible role is a separate paired contract whose implementations preserve its caller-visible semantics.**
 
-Every role that is meant to be substitutable is defined first as a contract — a paired C++
-interface and NED `moduleinterface` — kept separate from the reusable base implementations
-and from the concrete models that realize them.
+Every role that is meant to be substitutable is defined first as a contract — a paired C++ interface and NED `moduleinterface` — kept separate from the reusable base implementations and from the concrete models that realize them.
 
-INET's flexibility rests on `like`-typed submodules, and the thing after `like` is always an
-interface such as `IApp`, `IMacProtocol`, `IRadio`, `IMobility`, `IClock`, or `IPacketQueue`,
-held in a `contract` subpackage. The interface fixes the gate/parameter shape and the C++ API
-that all implementations must honor, while `*Base` modules and classes provide shared
-machinery that concrete models opt into by extension. Keeping the three concerns — contract,
-base, concrete — in distinct artifacts means an alternative implementation can be dropped in
-with confidence that it satisfies the same contract, and that the contract can be documented
-and reasoned about independently of any one implementation (`IInterfaceTable`, for example,
-lets the interface table be replaced without recompiling the modules that use it).
+INET's flexibility rests on `like`-typed submodules, and the thing after `like` is always an interface such as `IApp`, `IMacProtocol`, `IRadio`, `IMobility`, `IClock`, or `IPacketQueue`, held in a `contract` subpackage. The interface fixes the gate/parameter shape and the C++ API that all implementations must honor, while `*Base` modules and classes provide shared machinery that concrete models opt into by extension. Keeping the three concerns — contract, base, concrete — in distinct artifacts means an alternative implementation can be dropped in with confidence that it satisfies the same contract, and that the contract can be documented and reasoned about independently of any one implementation (`IInterfaceTable`, for example, lets the interface table be replaced without recompiling the modules that use it).
 
-A new interface needs a concrete substitution requirement. Identify an existing or expected
-alternative implementation. A documented extension point for external models also satisfies this
-requirement when its replacement role is clear.
-One current implementation is sufficient when that replacement role is clear. Speculative
-flexibility alone does not justify an interface. Check existing contracts under
-[AR-EXT-REUSE](#ar-ext-reuse) before you define another role.
+A new interface needs a concrete substitution requirement. Identify an existing or expected alternative implementation. A documented extension point for external models also satisfies this requirement when its replacement role is clear. One current implementation is sufficient when that replacement role is clear. Speculative flexibility alone does not justify an interface. Check existing contracts under [AR-EXT-REUSE](#ar-ext-reuse) before you define another role.
 
-The paired contract also declares the meaning of each caller-visible operation and which outcome
-distinctions exist. Where applicable, those distinctions may include a valid empty result, absence
-or unsupported capability, invalid or out-of-range input, refusal, and failure. Implementations,
-adapters, and callers preserve every distinction that the contract declares. A default
-implementation, return value, or argument must not silently collapse or change those declared
-semantics according to the selected implementation or the caller's static type.
+The paired contract also declares the meaning of each caller-visible operation and which outcome distinctions exist. Where applicable, those distinctions may include a valid empty result, absence or unsupported capability, invalid or out-of-range input, refusal, and failure. Implementations, adapters, and callers preserve every distinction that the contract declares. A default implementation, return value, or argument must not silently collapse or change those declared semantics according to the selected implementation or the caller's static type.
 
-*Enforced at T1 — NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3);
-T4 for the substitution requirement and semantic substitutability.*
+*Enforced at T1 — NED `like`/`moduleinterface` + C++ virtuals; contract-package purity → lint (T3); T4 for the substitution requirement and semantic substitutability.*
 
 ### AR-ORG-CONTRACT-PURITY
 
 **A contract declares the role and nothing else**
 
-A C++ interface or a NED `moduleinterface` states what an implementation must provide, and carries
-no code of its own. No utility function, no helper for implementors, no convenience for callers, and
-no policy — only the operations that make up the role, plus the identities its observations use.
+A C++ interface or a NED `moduleinterface` states what an implementation must provide, and carries no code of its own. No utility function, no helper for implementors, no convenience for callers, and no policy — only the operations that make up the role, plus the identities its observations use.
 
-A contract has two audiences and it belongs to neither of them: the **implementor**, who must satisfy
-every member, and the **caller**, who may rely on every member. Every symbol in the contract is
-therefore a promise to both. A static helper is a promise to neither — an implementation cannot
-override it, a caller cannot substitute it, and it is in the header only because the header was a
-convenient namespace. It also drags the contract's dependencies along with it: the moment a helper
-touches a concrete frame or a concrete mode, every implementor of the interface, present and future,
-must compile against them.
+A contract has two audiences and it belongs to neither of them: the **implementor**, who must satisfy every member, and the **caller**, who may rely on every member. Every symbol in the contract is therefore a promise to both. A static helper is a promise to neither — an implementation cannot override it, a caller cannot substitute it, and it is in the header only because the header was a convenient namespace. It also drags the contract's dependencies along with it: the moment a helper touches a concrete frame or a concrete mode, every implementor of the interface, present and future, must compile against them.
 
-**In C++ the test is mechanical: a class named `I<Stem>` holds no method body.** Only pure virtual
-declarations (`= 0;`), a virtual destructor, and the declarations below. Not a no-op default
-(`virtual void f() {}`), not a one-line forwarder, not a `const_cast` convenience. The destructor is
-the one body a C++ interface cannot avoid, and it is the only one.
+**In C++ the test is mechanical: a class named `I<Stem>` holds no method body.** Only pure virtual declarations (`= 0;`), a virtual destructor, and the declarations below. Not a no-op default (`virtual void f() {}`), not a one-line forwarder, not a `const_cast` convenience. The destructor is the one body a C++ interface cannot avoid, and it is the only one.
 
-**A default body is not a small exception; it is the failure mode.** `IIndicatorFigure::getNumSeries()`
-had a default body returning 1. When it was renamed to `getNumItems()`, every implementation outside
-INET kept compiling, its override was silently never called again, and each figure reported one item
-(`audit/pull-request/pr-1125.md` F-2). A pure virtual would have made every one of those a compile
-error. The default body is what turned a loud break into a quiet one — and it was put there, as such
-comments always say, "for backward compatibility".
+**A default body is not a small exception; it is the failure mode.** `IIndicatorFigure::getNumSeries()` had a default body returning 1. When it was renamed to `getNumItems()`, every implementation outside INET kept compiling, its override was silently never called again, and each figure reported one item (`audit/pull-request/pr-1125.md` F-2). A pure virtual would have made every one of those a compile error. The default body is what turned a loud break into a quiet one — and it was put there, as such comments always say, "for backward compatibility".
 
-**Where a default goes: `<Stem>Base`.** INET already pairs 58 interfaces with a `<Stem>Base` class,
-and 206 `*Base` classes exist. That is the designed place for shared machinery and for a default an
-implementor may not care about. An implementor that wants the defaults extends the Base; one that
-implements the interface directly accepts that every new method is a compile error — which is the
-correct trade, because the *interface* stays honest and the *Base* absorbs evolution. There is no
-`*Default` suffix in INET and none should be introduced; the Base is the default.
+**Where a default goes: `<Stem>Base`.** INET already pairs 58 interfaces with a `<Stem>Base` class, and 206 `*Base` classes exist. That is the designed place for shared machinery and for a default an implementor may not care about. An implementor that wants the defaults extends the Base; one that implements the interface directly accepts that every new method is a compile error — which is the correct trade, because the *interface* stays honest and the *Base* absorbs evolution. There is no `*Default` suffix in INET and none should be introduced; the Base is the default.
 
-The line to draw is **behavior**, not file size. A contract may declare the identities its role's
-observations use — `static simsignal_t datarateSelectedSignal` is part of the vocabulary the contract
-defines, which is why seven contract headers under `linklayer/ieee80211/mac/contract/` each have a
-small `.cc` that does nothing but define theirs. The printable form of an enum the contract itself
-declares is the same case — `IRadio::getRadioModeName` names `IRadio::RadioMode`, and a caller and an
-implementor need the same word for it. A function with logic in it is a different thing, even when it
-is short.
+The line to draw is **behavior**, not file size. A contract may declare the identities its role's observations use — `static simsignal_t datarateSelectedSignal` is part of the vocabulary the contract defines, which is why seven contract headers under `linklayer/ieee80211/mac/contract/` each have a small `.cc` that does nothing but define theirs. The printable form of an enum the contract itself declares is the same case — `IRadio::getRadioModeName` names `IRadio::RadioMode`, and a caller and an implementor need the same word for it. A function with logic in it is a different thing, even when it is short.
 
-The tree already reads this way. A sweep of all 176 contract headers found eight static non-signal
-members, in two files, and every one is an enum-naming helper of that second kind
-(`audit/sweep/contract-purity.md`). This rule writes down what INET does; it does not ask for a
-change.
+The tree already reads this way. A sweep of all 176 contract headers found eight static non-signal members, in two files, and every one is an enum-naming helper of that second kind (`audit/sweep/contract-purity.md`). This rule writes down what INET does; it does not ask for a change.
 
-Where does the helper go? If it serves the **implementors**, it belongs in the `*Base` class they
-already extend ([AR-ORG-CONTRACTS](#ar-org-contracts) keeps contract, base and concrete apart for
-exactly this). If it serves the **callers**, it belongs with the callers, or in a utility of its own.
-If it encodes a **policy** — when to attach details to a signal, which frames carry a per-station
-value — then it is a modeling decision, and it belongs to the module that owns that decision, not to
-the interface that names the role.
+Where does the helper go? If it serves the **implementors**, it belongs in the `*Base` class they already extend ([AR-ORG-CONTRACTS](#ar-org-contracts) keeps contract, base and concrete apart for exactly this). If it serves the **callers**, it belongs with the callers, or in a utility of its own. If it encodes a **policy** — when to attach details to a signal, which frames carry a per-station value — then it is a modeling decision, and it belongs to the module that owns that decision, not to the interface that names the role.
 
-*Enforced at T3 — [check-interfaces.sh](../enforcement/check-interfaces.sh) fails on any body, data
-member or non-virtual function in a class named `I<Stem>`, and on an `I<Stem>` class with no pure
-virtual at all; T4 for a NED `moduleinterface`, and for a helper hiding under another name.*
+*Enforced at T3 — [check-interfaces.sh](../enforcement/check-interfaces.sh) fails on any body, data member or non-virtual function in a class named `I<Stem>`, and on an `I<Stem>` class with no pure virtual at all; T4 for a NED `moduleinterface`, and for a helper hiding under another name.*
 
 ### AR-ORG-VIS-SPLIT
 
 **Model logic, visualization, and instrumentation live in separate packages**
 
-Model logic, visualization, and infrastructure are separate packages; protocol code contains
-no visualization or instrumentation logic.
+Model logic, visualization, and infrastructure are separate packages; protocol code contains no visualization or instrumentation logic.
 
-A protocol module computes protocol behavior and emits signals; it never draws on the canvas,
-never formats a figure, and never records a statistic itself. Visualizers are independent
-modules that subscribe to the model from the outside, so that turning visualization on or off,
-or swapping a 2D canvas visualizer for a 3D OSG one, cannot change a single simulated bit. This
-separation keeps the protocol code small and focused, lets visualization evolve on its own
-schedule, and guarantees the neutrality property that users depend on (see AR-OBS-SIGNALS):
-observation is always additive and side-effect free.
+A protocol module computes protocol behavior and emits signals; it never draws on the canvas, never formats a figure, and never records a statistic itself. Visualizers are independent modules that subscribe to the model from the outside, so that turning visualization on or off, or swapping a 2D canvas visualizer for a 3D OSG one, cannot change a single simulated bit. This separation keeps the protocol code small and focused, lets visualization evolve on its own schedule, and guarantees the neutrality property that users depend on (see AR-OBS-SIGNALS): observation is always additive and side-effect free.
 
 *Enforced at T3+T4 — `#include visualizer/` check (T3) + agent review for vis logic in protocol code.*
 
@@ -271,18 +178,9 @@ observation is always additive and side-effect free.
 
 **Build on the OMNeT++ kernel; do not reimplement or patch its facilities**
 
-INET is a model library layered on the OMNeT++ simulation kernel and respects that boundary in
-one direction: general discrete-event capabilities belong in the kernel and INET consumes them,
-rather than growing private reimplementations or in-place patches of kernel internals.
+INET is a model library layered on the OMNeT++ simulation kernel and respects that boundary in one direction: general discrete-event capabilities belong in the kernel and INET consumes them, rather than growing private reimplementations or in-place patches of kernel internals.
 
-Event scheduling and lifecycle hooks, coroutine suspend/resume, conditional breakpoints and
-run-until control, RNG streams, and the signal mechanism are all facilities of general use to
-any simulation model, not INET-specific concerns. When INET needs such a capability that the
-kernel lacks, the architecturally correct response is to generalize it *into* the kernel — so
-every model benefits and the kernel is not shaped around one library's specifics — not to bolt
-a one-off mechanism onto INET or hand-patch kernel source. Keeping this boundary clean avoids a
-whole class of bugs where an INET-local reimplementation silently drifts from kernel semantics,
-and it keeps INET's own code focused on network modeling.
+Event scheduling and lifecycle hooks, coroutine suspend/resume, conditional breakpoints and run-until control, RNG streams, and the signal mechanism are all facilities of general use to any simulation model, not INET-specific concerns. When INET needs such a capability that the kernel lacks, the architecturally correct response is to generalize it *into* the kernel — so every model benefits and the kernel is not shaped around one library's specifics — not to bolt a one-off mechanism onto INET or hand-patch kernel source. Keeping this boundary clean avoids a whole class of bugs where an INET-local reimplementation silently drifts from kernel semantics, and it keeps INET's own code focused on network modeling.
 
 ## Module Design (AR-MOD)
 
@@ -292,17 +190,9 @@ and it keeps INET's own code focused on network modeling.
 
 **Build behavior from small single-purpose modules, structure from compound modules**
 
-Functionality is built by composing small, single-purpose modules: behavior lives in simple
-modules, structure lives in compound modules, and composition is preferred over inheritance.
+Functionality is built by composing small, single-purpose modules: behavior lives in simple modules, structure lives in compound modules, and composition is preferred over inheritance.
 
-INET treats the module graph, not the class hierarchy, as the primary unit of reuse. A simple
-module does one thing in C++ (`handleMessage`/`activity`); a compound module wires such pieces
-into a larger capability without adding behavior of its own. Complex devices and protocol stacks
-are therefore assembled from many cooperating small parts rather than from a few large
-multi-purpose classes — a radio decomposes into antenna, transmitter, receiver, and energy
-consumer; a network interface into queue, classifier, MAC, and PHY. This keeps each part
-independently testable and replaceable, and it means new behavior is usually obtained by
-re-wiring or substituting a submodule rather than by editing or subclassing an existing one.
+INET treats the module graph, not the class hierarchy, as the primary unit of reuse. A simple module does one thing in C++ (`handleMessage`/`activity`); a compound module wires such pieces into a larger capability without adding behavior of its own. Complex devices and protocol stacks are therefore assembled from many cooperating small parts rather than from a few large multi-purpose classes — a radio decomposes into antenna, transmitter, receiver, and energy consumer; a network interface into queue, classifier, MAC, and PHY. This keeps each part independently testable and replaceable, and it means new behavior is usually obtained by re-wiring or substituting a submodule rather than by editing or subclassing an existing one.
 
 *Enforced at T1+T4 — NED composition (compiler); agent review for composition-over-inheritance.*
 
@@ -310,16 +200,9 @@ re-wiring or substituting a submodule rather than by editing or subclassing an e
 
 **Submodules are interface-typed with replaceable defaults and can be omitted**
 
-Submodules are declared against module interfaces with replaceable default types, and optional
-submodules can be omitted entirely through configuration.
+Submodules are declared against module interfaces with replaceable default types, and optional submodules can be omitted entirely through configuration.
 
-The canonical NED idiom is `radio: <default("Ieee80211Radio")> like IRadio` — a slot typed by
-contract, filled by a sensible default, overridable to any conforming type from the ini file
-without touching NED or C++. Optionality is first-class too: submodules guarded by
-`if typename != ""` (or realized by an `OmittedModule`) disappear from the model when
-unconfigured, so a node carries a clock, an energy model, or a given protocol only when the
-scenario asks for it. Substitutability and omittability together are what make the same node
-type serve wired, wireless, and specialized scenarios by configuration alone.
+The canonical NED idiom is `radio: <default("Ieee80211Radio")> like IRadio` — a slot typed by contract, filled by a sensible default, overridable to any conforming type from the ini file without touching NED or C++. Optionality is first-class too: submodules guarded by `if typename != ""` (or realized by an `OmittedModule`) disappear from the model when unconfigured, so a node carries a clock, an energy model, or a given protocol only when the scenario asks for it. Substitutability and omittability together are what make the same node type serve wired, wireless, and specialized scenarios by configuration alone.
 
 *Enforced at T1 — NED `like` / default type / `if typename` (compiler).*
 
@@ -327,19 +210,9 @@ type serve wired, wireless, and specialized scenarios by configuration alone.
 
 **The same concern is offered at multiple, configuration-selectable levels of detail**
 
-A modeled concern is offered at several levels of fidelity — statistical vs. detailed, flat vs.
-layered, scalar vs. multi-dimensional — selectable by configuration, so a study trades accuracy
-against simulation performance without changing the surrounding model.
+A modeled concern is offered at several levels of fidelity — statistical vs. detailed, flat vs. layered, scalar vs. multi-dimensional — selectable by configuration, so a study trades accuracy against simulation performance without changing the surrounding model.
 
-"Scalable level of detail" is an explicit, first-class design goal of INET, most visible in the
-physical layer (a signal may be described in the packet, bit, symbol, sample, or analog domain,
-and the analog domain ranges from a simple range-based model to a time- and frequency-varying
-one) but present throughout: error representation (AR-PKT-ERRORS), the escalating statistics
-tiers, and alternative protocol implementations behind one interface. The architectural
-requirement is that fidelity be a *dimension the user chooses*, not a value hardcoded into the
-model — a coarse model and a detailed model of the same thing present the same contract so they
-are interchangeable, and no part of the framework forces worst-case fidelity on a study that
-does not need it.
+"Scalable level of detail" is an explicit, first-class design goal of INET, most visible in the physical layer (a signal may be described in the packet, bit, symbol, sample, or analog domain, and the analog domain ranges from a simple range-based model to a time- and frequency-varying one) but present throughout: error representation (AR-PKT-ERRORS), the escalating statistics tiers, and alternative protocol implementations behind one interface. The architectural requirement is that fidelity be a *dimension the user chooses*, not a value hardcoded into the model — a coarse model and a detailed model of the same thing present the same contract so they are interchangeable, and no part of the framework forces worst-case fidelity on a study that does not need it.
 
 *Enforced at T4→T5 — agent flags hardcoded fidelity; whether a level is worth adding is human judgment.*
 
@@ -347,17 +220,9 @@ does not need it.
 
 **Nodes assembled from shared per-layer bases; services found by lookup, not path**
 
-Network nodes are assembled incrementally from shared per-layer base modules, and node-scoped
-services are located by lookup within the enclosing node rather than by hardcoded module paths.
+Network nodes are assembled incrementally from shared per-layer base modules, and node-scoped services are located by lookup within the enclosing node rather than by hardcoded module paths.
 
-Node types form a shallow extension chain — `NodeBase` (mobility, clock, energy) →
-`ApplicationLayerNodeBase` (full stack) → `StandardHost` — so that a new node variant reuses the
-common scaffolding instead of re-declaring it. Just as important, a module never assumes where
-its collaborators sit: it finds the interface table, routing table, or clock through a
-module-path parameter resolved with helpers like `absPath()` and `^`, defaulting relative to the
-enclosing `@node`. Because lookup is relative and parameterized rather than absolute, the same
-protocol module works unchanged whether the node has one interface or ten, and renaming or
-restructuring a node does not silently break its internals.
+Node types form a shallow extension chain — `NodeBase` (mobility, clock, energy) → `ApplicationLayerNodeBase` (full stack) → `StandardHost` — so that a new node variant reuses the common scaffolding instead of re-declaring it. Just as important, a module never assumes where its collaborators sit: it finds the interface table, routing table, or clock through a module-path parameter resolved with helpers like `absPath()` and `^`, defaulting relative to the enclosing `@node`. Because lookup is relative and parameterized rather than absolute, the same protocol module works unchanged whether the node has one interface or ten, and renaming or restructuring a node does not silently break its internals.
 
 ## Packet Representation (AR-PKT)
 
@@ -367,18 +232,9 @@ restructuring a node does not silently break its internals.
 
 **Packet content is typed, immutable, shared chunks manipulated as views**
 
-Packet content is represented as typed, immutable, shared chunks, and packet operations create
-views rather than copying or destroying the underlying data.
+Packet content is represented as typed, immutable, shared chunks, and packet operations create views rather than copying or destroying the underlying data.
 
-A `Packet` carries a tree of `Chunk` objects (byte/bit counts, raw bytes, field-based headers,
-slices, sequences); chunks are created via `makeShared` and shared among packets through
-reference-counted pointers, so duplication, buffering, and encapsulation stay cheap. As a packet
-moves through the layers, headers and trailers are *popped* by advancing independent front/back
-offsets rather than by mutating stored data, so the full content remains available for logging,
-PCAP export, or re-inspection. Immutability is enforced once a chunk is shared, so a packet
-handed to several modules cannot be mutated out from under any of them. Modeling packet contents
-as first-class typed objects — rather than opaque byte buffers or ad-hoc C++ structs — is the
-foundation that the serializer, dissector, tagging, and generic buffer facilities all build on.
+A `Packet` carries a tree of `Chunk` objects (byte/bit counts, raw bytes, field-based headers, slices, sequences); chunks are created via `makeShared` and shared among packets through reference-counted pointers, so duplication, buffering, and encapsulation stay cheap. As a packet moves through the layers, headers and trailers are *popped* by advancing independent front/back offsets rather than by mutating stored data, so the full content remains available for logging, PCAP export, or re-inspection. Immutability is enforced once a chunk is shared, so a packet handed to several modules cannot be mutated out from under any of them. Modeling packet contents as first-class typed objects — rather than opaque byte buffers or ad-hoc C++ structs — is the foundation that the serializer, dissector, tagging, and generic buffer facilities all build on.
 
 *Enforced at T1/T2 — Chunk types (compiler) + runtime immutability asserts (debug).*
 
@@ -386,19 +242,9 @@ foundation that the serializer, dissector, tagging, and generic buffer facilitie
 
 **Every header supports both field-based and raw-byte form via registered serializers**
 
-Every protocol header supports both a structured field-based representation and a raw-byte
-representation, bridged by registered serializers, so models can interoperate with real network
-data.
+Every protocol header supports both a structured field-based representation and a raw-byte representation, bridged by registered serializers, so models can interoperate with real network data.
 
-A header can exist as a convenient typed object during simulation and, on demand, be serialized
-to the exact bytes that would appear on the wire (or reconstructed from captured bytes).
-Serializers are separate classes from the headers themselves, registered in a
-`ChunkSerializerRegistry`, so the packet API can convert between representations without the
-protocol logic knowing how, and "how data is structured for debugging" stays independent of "how
-it is encoded on the wire." This dual representation is what enables hardware emulation and PCAP
-import/export, cross-checking against real implementations, and fingerprinting over actual packet
-content (AR-QUAL-FINGERPRINT's `PACKET_DATA` ingredient), while still letting everyday model code
-work with readable fields.
+A header can exist as a convenient typed object during simulation and, on demand, be serialized to the exact bytes that would appear on the wire (or reconstructed from captured bytes). Serializers are separate classes from the headers themselves, registered in a `ChunkSerializerRegistry`, so the packet API can convert between representations without the protocol logic knowing how, and "how data is structured for debugging" stays independent of "how it is encoded on the wire." This dual representation is what enables hardware emulation and PCAP import/export, cross-checking against real implementations, and fingerprinting over actual packet content (AR-QUAL-FINGERPRINT's `PACKET_DATA` ingredient), while still letting everyday model code work with readable fields.
 
 *Enforced at T2 — serializer registry + fingerprint `D` ingredient → serializer-completeness test.*
 
@@ -406,20 +252,9 @@ work with readable fields.
 
 **Metadata travels in tags, never in wire content, and stops at the transmission boundary**
 
-Packet metadata travels in tags attached to packets or to byte regions, never encoded in wire
-content, and tags do not cross the physical transmission boundary.
+Packet metadata travels in tags attached to packets or to byte regions, never encoded in wire content, and tags do not cross the physical transmission boundary.
 
-Protocols routinely need out-of-band information — which interface a packet came in on, what
-transport protocol it belongs to, a requested transmission power, a socket identity, an
-encapsulation or dispatch request — that is emphatically not part of the bytes on the wire. INET
-carries this as typed `Tag`/`Req`/`Ind` objects on the packet (or on a region of it), with
-directionality mirroring OSI service primitives: *requests* flow from higher layers to lower,
-*indications* from lower to higher. Region tags attach to sub-ranges of the data and are
-preserved through splitting, reordering, and recombination as if attached to each bit, with
-equivalent adjacent regions merged automatically. Because tags model in-node state rather than
-transmitted data, physical-layer protocols strip them at the point of transmission: what the
-receiver gets is the wire content, from which it re-derives its own tags. This boundary keeps the
-simulation honest about what information is actually available where.
+Protocols routinely need out-of-band information — which interface a packet came in on, what transport protocol it belongs to, a requested transmission power, a socket identity, an encapsulation or dispatch request — that is emphatically not part of the bytes on the wire. INET carries this as typed `Tag`/`Req`/`Ind` objects on the packet (or on a region of it), with directionality mirroring OSI service primitives: *requests* flow from higher layers to lower, *indications* from lower to higher. Region tags attach to sub-ranges of the data and are preserved through splitting, reordering, and recombination as if attached to each bit, with equivalent adjacent regions merged automatically. Because tags model in-node state rather than transmitted data, physical-layer protocols strip them at the point of transmission: what the receiver gets is the wire content, from which it re-derives its own tags. This boundary keeps the simulation honest about what information is actually available where.
 
 *Enforced at T1/T2 — tag API (compiler); PHY strips tags (tested).*
 
@@ -429,14 +264,7 @@ simulation honest about what information is actually available where.
 
 Transmission errors are representable at several levels of fidelity, selectable per use case.
 
-The same corrupted transmission can be modeled coarsely (a whole-packet error flag), at chunk
-granularity (a good compromise), or by actually flipping bits in raw chunks (most accurate),
-letting a study trade physical realism against simulation cost. A MAC that only needs to know
-"was this frame received correctly?" pays nothing for bit-level fidelity, while a physical-layer
-study that cares about capture, interference, and partial corruption can opt into it via
-configurable receiver parameters. Making error fidelity a selectable dimension — rather than a
-fixed assumption baked into the packet — is a specific instance of AR-MOD-FIDELITY applied to the
-error model.
+The same corrupted transmission can be modeled coarsely (a whole-packet error flag), at chunk granularity (a good compromise), or by actually flipping bits in raw chunks (most accurate), letting a study trade physical realism against simulation cost. A MAC that only needs to know "was this frame received correctly?" pays nothing for bit-level fidelity, while a physical-layer study that cares about capture, interference, and partial corruption can opt into it via configurable receiver parameters. Making error fidelity a selectable dimension — rather than a fixed assumption baked into the packet — is a specific instance of AR-MOD-FIDELITY applied to the error model.
 
 *Enforced at T1 — chunk/error API (compiler).*
 
@@ -444,22 +272,9 @@ error model.
 
 **Physical transmissions are modeled as immutable Signals distinct from packets**
 
-A physical transmission is represented by a `Signal` that encapsulates a `Packet` together with
-an analog-domain description, and each stage of physical-layer processing produces an immutable
-result.
+A physical transmission is represented by a `Signal` that encapsulates a `Packet` together with an analog-domain description, and each stage of physical-layer processing produces an immutable result.
 
-The digital content a protocol manipulates (`Packet`) is architecturally distinct from the
-physical phenomenon that carries it (`Signal` = packet + duration, power, and other analog
-attributes, describable across the packet/bit/symbol/sample/analog domains). A single centralized
-transmission-medium model owns all radios, transmissions, interference, and receptions — both
-because reception depends on shared computations (path loss, interference across all concurrent
-signals) that pairwise radio logic could not do consistently, and because centralization enables
-optimistic parallel computation that can be invalidated and redone as the scenario changes. Every
-step of the pipeline (transmitted signal → arrival → reception → interference → SNIR → reception
-decision) yields a data structure that is not mutated afterward, so the physical facts of a
-transmission remain auditable and cannot be corrupted by a later stage. The error decision itself
-is a separate, optional, replaceable receiver component, since the literature offers many
-competing error models and none should be architecturally privileged.
+The digital content a protocol manipulates (`Packet`) is architecturally distinct from the physical phenomenon that carries it (`Signal` = packet + duration, power, and other analog attributes, describable across the packet/bit/symbol/sample/analog domains). A single centralized transmission-medium model owns all radios, transmissions, interference, and receptions — both because reception depends on shared computations (path loss, interference across all concurrent signals) that pairwise radio logic could not do consistently, and because centralization enables optimistic parallel computation that can be invalidated and redone as the scenario changes. Every step of the pipeline (transmitted signal → arrival → reception → interference → SNIR → reception decision) yields a data structure that is not mutated afterward, so the physical facts of a transmission remain auditable and cannot be corrupted by a later stage. The error decision itself is a separate, optional, replaceable receiver component, since the literature offers many competing error models and none should be architecturally privileged.
 
 ## Protocol Interaction (AR-COM)
 
@@ -469,17 +284,9 @@ competing error models and none should be architecturally privileged.
 
 **Modules declare the protocols and services they provide in a global registry**
 
-At initialization, each module registers the protocols it handles and the services it provides for
-them into a global registry, and message dispatch is driven by these registrations.
+At initialization, each module registers the protocols it handles and the services it provides for them into a global registry, and message dispatch is driven by these registrations.
 
-Rather than hardwiring "TCP output goes to gate 3," a module calls `registerProtocol` in its
-`initialize` method to declare that it serves (or consumes) a given protocol, informing the
-connected dispatchers of its presence; the dispatch machinery then consults these registrations to
-route packets. Protocol identity is a first-class registered value, not a gate index or a magic
-string buried in connection code, and the same protocol may register only once per dispatcher so
-that dispatching is never ambiguous. This registration-driven approach decouples *what* a module
-does for a protocol from *where* it sits in the node, and it is the mechanism that makes protocol
-dispatch (AR-COM-DISPATCH) and no-core-change extensibility (AR-EXT-NOCORE) possible.
+Rather than hardwiring "TCP output goes to gate 3," a module calls `registerProtocol` in its `initialize` method to declare that it serves (or consumes) a given protocol, informing the connected dispatchers of its presence; the dispatch machinery then consults these registrations to route packets. Protocol identity is a first-class registered value, not a gate index or a magic string buried in connection code, and the same protocol may register only once per dispatcher so that dispatching is never ambiguous. This registration-driven approach decouples *what* a module does for a protocol from *where* it sits in the node, and it is the mechanism that makes protocol dispatch (AR-COM-DISPATCH) and no-core-change extensibility (AR-EXT-NOCORE) possible.
 
 *Enforced at T1/T2 — registration macros (compiler) + runtime "register once" check.*
 
@@ -487,18 +294,9 @@ dispatch (AR-COM-DISPATCH) and no-core-change extensibility (AR-EXT-NOCORE) poss
 
 **Address peers by protocol/service, not by wiring topology**
 
-Modules address their peers by protocol and service rather than by wiring topology, so the same
-protocol module works unchanged under different node compositions.
+Modules address their peers by protocol and service rather than by wiring topology, so the same protocol module works unchanged under different node compositions.
 
-A packet moving up or down the stack is steered by `MessageDispatcher` modules that read the
-packet's protocol tags (`DispatchProtocolReq`, `EncapsulationProtocolReq`) and the service
-registry, so a sender says "deliver this to the IPv4 layer," not "send out gate 2 to the module I
-happen to be wired to." Dispatchers require no manual configuration — they discover registered
-protocols and peek into packets — and they let protocol components be connected in one-to-many and
-many-to-many arrangements, so a simple host can use a linear stack while a complex node (e.g. a
-TSN device) freely interconnects protocols outside strict layering. Because routing between layers
-is by identity, a node can insert a shaper, filter, or extra protocol into the path without every
-neighbor being rewired, and one protocol implementation serves many different node structures.
+A packet moving up or down the stack is steered by `MessageDispatcher` modules that read the packet's protocol tags (`DispatchProtocolReq`, `EncapsulationProtocolReq`) and the service registry, so a sender says "deliver this to the IPv4 layer," not "send out gate 2 to the module I happen to be wired to." Dispatchers require no manual configuration — they discover registered protocols and peek into packets — and they let protocol components be connected in one-to-many and many-to-many arrangements, so a simple host can use a linear stack while a complex node (e.g. a TSN device) freely interconnects protocols outside strict layering. Because routing between layers is by identity, a node can insert a shaper, filter, or extra protocol into the path without every neighbor being rewired, and one protocol implementation serves many different node structures.
 
 *Enforced at T2 — MessageDispatcher + tags at runtime (tested).*
 
@@ -506,20 +304,9 @@ neighbor being rewired, and one protocol implementation serves many different no
 
 **Applications use socket-style callback APIs, not raw message exchange**
 
-Applications interact with protocols through socket-style APIs with callback interfaces rather
-than through raw OMNeT++ message exchange.
+Applications interact with protocols through socket-style APIs with callback interfaces rather than through raw OMNeT++ message exchange.
 
-Writing an application against bare `send`/`handleMessage` to a transport protocol means
-re-encoding that protocol's command/indication conventions by hand, which is error-prone and
-duplicated across every app. INET instead provides `UdpSocket`, `TcpSocket`, and peers that expose
-a familiar bind/connect/send/close API and deliver events through a callback (`ICallback`)
-interface; all sockets implement common `ISocket`/`INetworkSocket` interfaces so generic
-infrastructure (e.g. `SocketMap`) can manage them uniformly, and a node-unique socket id is
-round-tripped through `SocketReq`/`SocketInd` tags so any in-flight packet can be correlated back
-to its socket. Sockets must be explicitly closed before deletion, because closing is a protocol
-operation that releases resources on the local node, the peer, or elsewhere — not a
-memory-management detail. The socket is a thin, uniform façade over message passing; it adds no
-protocol behavior but makes the common case of *using* a protocol far simpler and more consistent.
+Writing an application against bare `send`/`handleMessage` to a transport protocol means re-encoding that protocol's command/indication conventions by hand, which is error-prone and duplicated across every app. INET instead provides `UdpSocket`, `TcpSocket`, and peers that expose a familiar bind/connect/send/close API and deliver events through a callback (`ICallback`) interface; all sockets implement common `ISocket`/`INetworkSocket` interfaces so generic infrastructure (e.g. `SocketMap`) can manage them uniformly, and a node-unique socket id is round-tripped through `SocketReq`/`SocketInd` tags so any in-flight packet can be correlated back to its socket. Sockets must be explicitly closed before deletion, because closing is a protocol operation that releases resources on the local node, the peer, or elsewhere — not a memory-management detail. The socket is a thin, uniform façade over message passing; it adds no protocol behavior but makes the common case of *using* a protocol far simpler and more consistent.
 
 *Enforced at T1+T4 — socket API provided (compiler); agent review that apps use sockets, not raw messages.*
 
@@ -527,20 +314,9 @@ protocol behavior but makes the common case of *using* a protocol far simpler an
 
 **Required same-instant, same-node coordination uses direct typed calls, not zero-time messages**
 
-When one submodule requires another to perform a command or answer a query at the same simulation
-instant, the interaction is expressed as a direct, typed C++ call, not as a message sent with zero
-delay.
+When one submodule requires another to perform a command or answer a query at the same simulation instant, the interaction is expressed as a direct, typed C++ call, not as a message sent with zero delay.
 
-Message passing models an interaction whose delivery is itself a simulator event, whether because
-time passes, the physical medium is crossed, or an explicit event boundary matters. Using `send()`
-or `scheduleAt(simTime())` merely to disguise same-instant control flow between sibling submodules
-is a category error that inflates the event count, obscures causality, and forces even trivial
-passthroughs to carry message classes and dispatch code they do not need. For required same-instant
-intra-node coordination INET uses direct calls through typed references and the service/socket and
-queueing APIs, with `Enter_Method` establishing the correct module context. A fire-and-forget
-announcement of a completed fact to independent consumers follows AR-COM-NOTIFY. This separation
-reserves scheduler events for modeled deliveries and event boundaries, keeps the event trajectory
-meaningful, and avoids turning procedure calls into scheduler plumbing.
+Message passing models an interaction whose delivery is itself a simulator event, whether because time passes, the physical medium is crossed, or an explicit event boundary matters. Using `send()` or `scheduleAt(simTime())` merely to disguise same-instant control flow between sibling submodules is a category error that inflates the event count, obscures causality, and forces even trivial passthroughs to carry message classes and dispatch code they do not need. For required same-instant intra-node coordination INET uses direct calls through typed references and the service/socket and queueing APIs, with `Enter_Method` establishing the correct module context. A fire-and-forget announcement of a completed fact to independent consumers follows AR-COM-NOTIFY. This separation reserves scheduler events for modeled deliveries and event boundaries, keeps the event trajectory meaningful, and avoids turning procedure calls into scheduler plumbing.
 
 *Enforced at T3+T4 — lint for `scheduleAt(simTime())`/zero-delay send + agent review; runtime zero-delay hook (T2).*
 
@@ -548,24 +324,9 @@ meaningful, and avoids turning procedure calls into scheduler plumbing.
 
 **Behavior-driving signals publish completed facts, not commands or listener-ordered coordination**
 
-A module may emit a declared signal to announce a completed occurrence or state change to zero or
-more independent consumers. Emission is synchronous and fire-and-forget: the publisher restores its
-own invariants before `emit()`, completes its operation without requiring a particular listener,
-reply or acknowledgement, and does not transfer ownership. A behavioral listener may drive its own
-reaction through the ordinary model contracts; when that listener is a module, it establishes its
-module context with `Enter_Method` or `Enter_Method_Silent`. It treats object and details payloads
-as borrowed and immutable, does not retain them beyond the callback unless the declared contract
-guarantees a longer lifetime, and does not depend on its position in the listener invocation order
-or on replay. Successive emissions retain normal simulator causality and may form an ordered stream
-of facts.
+A module may emit a declared signal to announce a completed occurrence or state change to zero or more independent consumers. Emission is synchronous and fire-and-forget: the publisher restores its own invariants before `emit()`, completes its operation without requiring a particular listener, reply or acknowledgement, and does not transfer ownership. A behavioral listener may drive its own reaction through the ordinary model contracts; when that listener is a module, it establishes its module context with `Enter_Method` or `Enter_Method_Silent`. It treats object and details payloads as borrowed and immutable, does not retain them beyond the callback unless the declared contract guarantees a longer lifetime, and does not depend on its position in the listener invocation order or on replay. Successive emissions retain normal simulator causality and may form an ordered stream of facts.
 
-The signal name and payload type are declared in NED, and the subscription source, scope and
-lifecycle are explicit in configuration or initialization. Because names are global and signals
-propagate through the module hierarchy, a listener subscribes at the narrowest useful scope and
-filters the source wherever unrelated emitters can merge. A command, query, return value, required
-handshake, ownership transfer, buffering, modeled delay, or coordination whose correctness depends
-on relative invocation order among consumers uses a typed direct or service API, or messages and
-gates when it belongs to the simulated event trajectory.
+The signal name and payload type are declared in NED, and the subscription source, scope and lifecycle are explicit in configuration or initialization. Because names are global and signals propagate through the module hierarchy, a listener subscribes at the narrowest useful scope and filters the source wherever unrelated emitters can merge. A command, query, return value, required handshake, ownership transfer, buffering, modeled delay, or coordination whose correctness depends on relative invocation order among consumers uses a typed direct or service API, or messages and gates when it belongs to the simulated event trajectory.
 
 *Enforced at T1/T2+T4 — NED signal/type checking + kernel listener-list checks + agent review of notification semantics.*
 
@@ -573,49 +334,23 @@ gates when it belongs to the simulated event trajectory.
 
 ### AR-LIFE-STAGES
 
-**Models slot into one global multi-stage initialization order, and their effective stage count
-covers every stage they handle.**
+**Models slot into one global multi-stage initialization order, and their effective stage count covers every stage they handle.**
 
-Cross-module initialization follows one globally defined stage sequence; each stage has a
-documented contract, and new models slot into existing stages rather than inventing their own
-ordering.
+Cross-module initialization follows one globally defined stage sequence; each stage has a documented contract, and new models slot into existing stages rather than inventing their own ordering.
 
-Bringing up a network node has ordering constraints — interfaces must exist before addresses are
-assigned, addresses before routes, routes before applications start — that no single module can
-enforce alone. INET uses OMNeT++'s multi-stage `initialize(stage)` with a framework-wide set of
-named stages (local, link-layer, network-address, routing, application, …) so every module knows
-which stage to do which part of its setup in; network interfaces, for instance, self-register into
-the node's `InterfaceTable` in the link-layer stage. A new protocol does not invent a private
-bring-up protocol; it declares what it needs in each existing stage. This shared contract is what
-lets independently authored modules initialize correctly in one another's presence.
+Bringing up a network node has ordering constraints — interfaces must exist before addresses are assigned, addresses before routes, routes before applications start — that no single module can enforce alone. INET uses OMNeT++'s multi-stage `initialize(stage)` with a framework-wide set of named stages (local, link-layer, network-address, routing, application, …) so every module knows which stage to do which part of its setup in; network interfaces, for instance, self-register into the node's `InterfaceTable` in the link-layer stage. A new protocol does not invent a private bring-up protocol; it declares what it needs in each existing stage. This shared contract is what lets independently authored modules initialize correctly in one another's presence.
 
-The effective `numInitStages()` of a concrete module includes its inherited implementation. It must
-return a count greater than the highest stage handled by that module or any of its base classes. A
-derived `initialize(stage)` that handles a later stage than its inherited count therefore overrides
-`numInitStages()` and preserves the base requirement as well as its own. Otherwise OMNeT++ never
-calls the apparently valid later-stage branch, and compilation gives no warning.
+The effective `numInitStages()` of a concrete module includes its inherited implementation. It must return a count greater than the highest stage handled by that module or any of its base classes. A derived `initialize(stage)` that handles a later stage than its inherited count therefore overrides `numInitStages()` and preserves the base requirement as well as its own. Otherwise OMNeT++ never calls the apparently valid later-stage branch, and compilation gives no warning.
 
-*Enforced at T1/T2+T4 — `INITSTAGE_*` / `Define_InitStage_Dependency` compile and runtime ordering
-checks apply; initialization tests exercise the required stage; agent review compares the effective
-inherited `numInitStages()` with every handled stage.*
+*Enforced at T1/T2+T4 — `INITSTAGE_*` / `Define_InitStage_Dependency` compile and runtime ordering checks apply; initialization tests exercise the required stage; agent review compares the effective inherited `numInitStages()` with every handled stage.*
 
 ### AR-LIFE-OPERATIONS
 
 **Shutdown/restart/crash via a common lifecycle protocol, scriptable**
 
-Modules that support shutdown, restart, or crash implement the common lifecycle-operation protocol
-and are controllable from scripted scenarios.
+Modules that support shutdown, restart, or crash implement the common lifecycle-operation protocol and are controllable from scripted scenarios.
 
-Studying failures, reboots, and energy-driven sleep requires that "turning a node off" be a
-well-defined, staged operation rather than an ad-hoc hack — and it does not come for free: each
-affected component must explicitly program what happens (TCP forgets its connections, the routing
-table clears its routes, interfaces go down and silently discard traffic). Modules opt in with
-`@lifecycleSupport` and handle the shared start/shutdown/crash operations, with a `NodeStatus`
-submodule tracking up/down state for others to query and display; a graceful shutdown differs from
-a crash in that a crash performs no orderly teardown. Because these operations are triggered
-through the scenario/lifecycle machinery (and can be driven by the power model when a battery
-depletes), transient and failure behavior can be scripted to occur at chosen simulation times,
-which is essential for reliability and resilience studies.
+Studying failures, reboots, and energy-driven sleep requires that "turning a node off" be a well-defined, staged operation rather than an ad-hoc hack — and it does not come for free: each affected component must explicitly program what happens (TCP forgets its connections, the routing table clears its routes, interfaces go down and silently discard traffic). Modules opt in with `@lifecycleSupport` and handle the shared start/shutdown/crash operations, with a `NodeStatus` submodule tracking up/down state for others to query and display; a graceful shutdown differs from a crash in that a crash performs no orderly teardown. Because these operations are triggered through the scenario/lifecycle machinery (and can be driven by the power model when a battery depletes), transient and failure behavior can be scripted to occur at chosen simulation times, which is essential for reliability and resilience studies.
 
 ## Composable Packet Processing (AR-QUEUE)
 
@@ -625,17 +360,9 @@ which is essential for reliability and resilience studies.
 
 **Standard push/pull source/sink contracts let processing elements chain arbitrarily**
 
-Packet-processing elements implement standard push/pull source and sink contracts, so queues,
-filters, schedulers, shapers, classifiers, and similar elements compose into arbitrary chains.
+Packet-processing elements implement standard push/pull source and sink contracts, so queues, filters, schedulers, shapers, classifiers, and similar elements compose into arbitrary chains.
 
-The `queueing` package defines a small set of interfaces (packet source, packet sink, and their
-active/passive push/pull variants) that every processing element speaks. Because a `PacketQueue`,
-a `PacketFilter`, a `PacketScheduler`, a token-bucket shaper, and a classifier all present the same
-connectors, they can be strung together in any order to express a device's datapath — an Ethernet
-egress pipeline, a DiffServ block, a TSN gate array — declaratively in NED. This turns what would
-otherwise be bespoke per-protocol buffering code into a reusable algebra of interchangeable parts,
-and it is the same abstraction that lets an application talk to a queue through a direct reference
-(AR-COM-DIRECT) rather than through messages.
+The `queueing` package defines a small set of interfaces (packet source, packet sink, and their active/passive push/pull variants) that every processing element speaks. Because a `PacketQueue`, a `PacketFilter`, a `PacketScheduler`, a token-bucket shaper, and a classifier all present the same connectors, they can be strung together in any order to express a device's datapath — an Ethernet egress pipeline, a DiffServ block, a TSN gate array — declaratively in NED. This turns what would otherwise be bespoke per-protocol buffering code into a reusable algebra of interchangeable parts, and it is the same abstraction that lets an application talk to a queue through a direct reference (AR-COM-DIRECT) rather than through messages.
 
 *Enforced at T1 — queueing `I*` contracts (compiler).*
 
@@ -643,15 +370,9 @@ and it is the same abstraction that lets an application talk to a queue through 
 
 **Processing contracts support progressive transfer (preemption, cut-through)**
 
-The processing contracts support progressive packet transfer, so preemption and cut-through
-behavior are expressible.
+The processing contracts support progressive packet transfer, so preemption and cut-through behavior are expressible.
 
-Modern link layers do not always treat a frame as an indivisible unit: frame preemption interrupts
-a low-priority frame mid-transmission, and cut-through forwarding begins sending a frame before it
-has been fully received. The queueing/streaming contracts model a packet being handed over
-progressively rather than atomically, so these behaviors fall out of the same composable framework
-instead of requiring special-case code. Supporting partial/streamed transfer at the contract level
-is what lets INET model TSN and cut-through switches within the ordinary datapath abstraction.
+Modern link layers do not always treat a frame as an indivisible unit: frame preemption interrupts a low-priority frame mid-transmission, and cut-through forwarding begins sending a frame before it has been fully received. The queueing/streaming contracts model a packet being handed over progressively rather than atomically, so these behaviors fall out of the same composable framework instead of requiring special-case code. Supporting partial/streamed transfer at the contract level is what lets INET model TSN and cut-through switches within the ordinary datapath abstraction.
 
 ## Observability (AR-OBS)
 
@@ -661,19 +382,11 @@ is what lets INET model TSN and cut-through switches within the ordinary datapat
 
 **Models expose behavior via declared signals; recording/visualization only subscribe**
 
-Models expose observable behavior by emitting declared signals, and statistics recording and
-visualization subscribe to those signals and never participate in protocol logic.
+Models expose observable behavior by emitting declared signals, and statistics recording and visualization subscribe to those signals and never participate in protocol logic.
 
-A module publishes what happens (packet sent, queue length changed, throughput updated) by emitting
-`@signal`-declared signals; separate result-recording and visualization machinery listens. The
-producer of an event is decoupled from every consumer of it, so adding a new statistic or a new
-visualizer requires no change to the protocol, and — crucially — the act of observing is guaranteed
-not to perturb the simulation. This one-way, subscribe-from-outside discipline is the mechanism
-behind both AR-ORG-VIS-SPLIT and the user-facing neutrality guarantee.
+A module publishes what happens (packet sent, queue length changed, throughput updated) by emitting `@signal`-declared signals; separate result-recording and visualization machinery listens. The producer of an event is decoupled from every consumer of it, so adding a new statistic or a new visualizer requires no change to the protocol, and — crucially — the act of observing is guaranteed not to perturb the simulation. This one-way, subscribe-from-outside discipline is the mechanism behind both AR-ORG-VIS-SPLIT and the user-facing neutrality guarantee.
 
-This rule governs observational consumers. The same declared signal may also have behavioral
-listeners under AR-COM-NOTIFY, but attaching or removing a recorder, visualizer or analyzer must not
-alter those listeners or any modeled state transition.
+This rule governs observational consumers. The same declared signal may also have behavioral listeners under AR-COM-NOTIFY, but attaching or removing a recorder, visualizer or analyzer must not alter those listeners or any modeled state transition.
 
 *Enforced at T1/T2 — NED `@signal`/`@statistic` (compiler) + fingerprint neutrality.*
 
@@ -681,15 +394,9 @@ alter those listeners or any modeled state transition.
 
 **A module's external interface is defined in NED, the single source of truth**
 
-A module's external interface — parameters, gates, signals, and statistics — is declared in its NED
-definition, which is the single source of truth, and other documentation must not duplicate it.
+A module's external interface — parameters, gates, signals, and statistics — is declared in its NED definition, which is the single source of truth, and other documentation must not duplicate it.
 
-Parameters (with units and defaults), gates (with labels), emitted `@signal`s, and recorded
-`@statistic`s are all formally part of the NED type, from which the INET Reference is generated. The
-Developer's Guide and prose docs deliberately do not restate them, both to avoid drift and because
-the NED declaration is the artifact tools actually consume (the IDE, the documentation generator,
-the statistics configuration). Treating NED as authoritative means a module's contract with the
-outside world is machine-readable, always current, and defined in exactly one place.
+Parameters (with units and defaults), gates (with labels), emitted `@signal`s, and recorded `@statistic`s are all formally part of the NED type, from which the INET Reference is generated. The Developer's Guide and prose docs deliberately do not restate them, both to avoid drift and because the NED declaration is the artifact tools actually consume (the IDE, the documentation generator, the statistics configuration). Treating NED as authoritative means a module's contract with the outside world is machine-readable, always current, and defined in exactly one place.
 
 *Enforced at T1+T4 — NED authoritative, reference generated from it; agent review for prose duplicating NED.*
 
@@ -697,18 +404,9 @@ outside world is machine-readable, always current, and defined in exactly one pl
 
 **Each protocol registers dissection, printing, and filtering support**
 
-Each protocol registers support for the common introspection tooling — packet dissection, printing,
-and filtering — alongside its implementation.
+Each protocol registers support for the common introspection tooling — packet dissection, printing, and filtering — alongside its implementation.
 
-Beyond its own logic, a protocol contributes a registered `*ProtocolDissector`, `*ProtocolPrinter`,
-and serializer so that generic tools can take any packet apart *according to protocol logic rather
-than current representation*, render it readably, and filter on its fields without knowing the
-protocol in advance; an authoritative `PacketProtocolTag` on every packet anchors this analysis,
-since raw bytes alone cannot reveal the protocol. This is why the packet inspector, the textual
-packet representation, and expression-based packet filters (`nodeFilter`/`interfaceFilter`/
-`packetFilter`) work uniformly across the whole framework. The requirement is that introspection
-support ships *with* each protocol as a registered capability, not as a central switch statement
-that every new protocol would have to be threaded into.
+Beyond its own logic, a protocol contributes a registered `*ProtocolDissector`, `*ProtocolPrinter`, and serializer so that generic tools can take any packet apart *according to protocol logic rather than current representation*, render it readably, and filter on its fields without knowing the protocol in advance; an authoritative `PacketProtocolTag` on every packet anchors this analysis, since raw bytes alone cannot reveal the protocol. This is why the packet inspector, the textual packet representation, and expression-based packet filters (`nodeFilter`/`interfaceFilter`/ `packetFilter`) work uniformly across the whole framework. The requirement is that introspection support ships *with* each protocol as a registered capability, not as a central switch statement that every new protocol would have to be threaded into.
 
 *Enforced at T3+T4 — dissector/printer-completeness test + agent review.*
 
@@ -716,18 +414,9 @@ that every new protocol would have to be threaded into.
 
 **End-to-end measurement is enabled by region tags that survive packet transformation**
 
-Cross-module, end-to-end measurements are supported by attaching flow membership to packet data on a
-per-bit basis via region tags that survive fragmentation, aggregation, reordering, and
-re-encapsulation.
+Cross-module, end-to-end measurements are supported by attaching flow membership to packet data on a per-bit basis via region tags that survive fragmentation, aggregation, reordering, and re-encapsulation.
 
-A single protocol module can only measure what it locally handles, so quantities like end-to-end
-latency or total queueing time along a path cannot be computed by any one module. INET builds
-per-flow tracking on the region-tag mechanism (AR-PKT-TAGS): data is classified into a named flow on
-entry and out of it on exit, and because region tags are preserved through every transformation of
-the data as if attached to each individual bit — with equivalent adjacent regions merged
-automatically — the flow identity follows the actual bytes across modules and nodes. This is the
-architectural mechanism that makes whole-network, multi-layer measurements possible without every
-protocol having to cooperate explicitly.
+A single protocol module can only measure what it locally handles, so quantities like end-to-end latency or total queueing time along a path cannot be computed by any one module. INET builds per-flow tracking on the region-tag mechanism (AR-PKT-TAGS): data is classified into a named flow on entry and out of it on exit, and because region tags are preserved through every transformation of the data as if attached to each individual bit — with equivalent adjacent regions merged automatically — the flow identity follows the actual bytes across modules and nodes. This is the architectural mechanism that makes whole-network, multi-layer measurements possible without every protocol having to cooperate explicitly.
 
 ## Configuration & Parameterization (AR-CFG)
 
@@ -737,18 +426,9 @@ protocol having to cooperate explicitly.
 
 **Structure is inferred, not repeated; configuration stays DRY**
 
-Facts that can be derived from the model are derived rather than restated, and configuration is
-defined once and propagated, so the same fact is never stated in two places that can drift apart.
+Facts that can be derived from the model are derived rather than restated, and configuration is defined once and propagated, so the same fact is never stated in two places that can drift apart.
 
-The number of wired interfaces on a host is inferred from the number of links attached to it;
-addresses and routes are computed by configurators; per-submodule parameters are set once at the
-enclosing scope and propagated with parameter patterns and `absPath()`/`^` references rather than
-repeated at each site. Configuration composition follows the same discipline — abstract base configs
-with `extends`, sensible NED `default()`s — so a scenario states only what makes it different, and a
-configurator that optimizes a derived structure (e.g. routing tables) must preserve the invariant
-that any packet routed by the unoptimized structure is still routed identically. INET's scale
-(thousands of parameters across a node graph) makes redundant configuration a real source of silent
-inconsistency; inference and single-point definition are the defenses.
+The number of wired interfaces on a host is inferred from the number of links attached to it; addresses and routes are computed by configurators; per-submodule parameters are set once at the enclosing scope and propagated with parameter patterns and `absPath()`/`^` references rather than repeated at each site. Configuration composition follows the same discipline — abstract base configs with `extends`, sensible NED `default()`s — so a scenario states only what makes it different, and a configurator that optimizes a derived structure (e.g. routing tables) must preserve the invariant that any packet routed by the unoptimized structure is still routed identically. INET's scale (thousands of parameters across a node graph) makes redundant configuration a real source of silent inconsistency; inference and single-point definition are the defenses.
 
 *Enforced at T1+T4 — NED gate/size inference (compiler); agent review for DRY.*
 
@@ -756,18 +436,9 @@ inconsistency; inference and single-point definition are the defenses.
 
 **Parameters are typed, unit-annotated, single-meaning, and default-provided**
 
-A module parameter carries its type and (for physical quantities) its unit, provides a sensible
-default, and has exactly one meaning; a user-supplied override and a system-computed value are
-distinct, unambiguously named fields.
+A module parameter carries its type and (for physical quantities) its unit, provides a sensible default, and has exactly one meaning; a user-supplied override and a system-computed value are distinct, unambiguously named fields.
 
-Physical quantities are always declared with `@unit(s)`, `@unit(bps)`, `@unit(m)`, etc., so values
-are dimensionally checked and never bare numbers, and every parameter supplies a `default()` so that
-minimal configurations still run. Crucially, one field never means two things: an
-"override-if-set-else-compute" value must be split into the override and the resolved value, so that
-"what value will actually be used here?" is always answerable, and an API parameter has one explicit
-shape rather than a meaning inferred from its runtime content. These rules keep INET's very large
-configuration surface legible and tool-checkable, and they eliminate the ambiguity that otherwise
-turns configuration into guesswork.
+Physical quantities are always declared with `@unit(s)`, `@unit(bps)`, `@unit(m)`, etc., so values are dimensionally checked and never bare numbers, and every parameter supplies a `default()` so that minimal configurations still run. Crucially, one field never means two things: an "override-if-set-else-compute" value must be split into the override and the resolved value, so that "what value will actually be used here?" is always answerable, and an API parameter has one explicit shape rather than a meaning inferred from its runtime content. These rules keep INET's very large configuration surface legible and tool-checkable, and they eliminate the ambiguity that otherwise turns configuration into guesswork.
 
 ## Extensibility (AR-EXT)
 
@@ -777,9 +448,7 @@ turns configuration into guesswork.
 
 **Reuse existing mechanisms unless the required behavior justifies an addition**
 
-Each new mechanism creates a maintenance obligation. Assess the relevant existing mechanisms before
-you propose an addition. This applies to each new class, interface, or signal. Apply the same check
-to other additions, such as parameters and public methods.
+Each new mechanism creates a maintenance obligation. Assess the relevant existing mechanisms before you propose an addition. This applies to each new class, interface, or signal. Apply the same check to other additions, such as parameters and public methods.
 
 A justified addition states:
 
@@ -787,10 +456,7 @@ A justified addition states:
 - The caller, observer, or documented external extension that needs it.
 - The specific reason that an existing mechanism cannot meet the need cleanly.
 
-Reuse must preserve the existing contract. Similar names or code do not establish the same meaning.
-Choose the smallest complete design that respects
-[AR-MOD-COMPOSITION](#ar-mod-composition) and the existing state owner under
-[QR-STATE-OWNER](quality.md#qr-state-owner).
+Reuse must preserve the existing contract. Similar names or code do not establish the same meaning. Choose the smallest complete design that respects [AR-MOD-COMPOSITION](#ar-mod-composition) and the existing state owner under [QR-STATE-OWNER](quality.md#qr-state-owner).
 
 *Enforced at T4 — agent review through the [general checklist](../enforcement/checklist/general.md).*
 
@@ -798,16 +464,9 @@ Choose the smallest complete design that respects
 
 **New protocols are added purely through existing contracts and registration points**
 
-New protocols are added purely through the existing contract and registration points; adding one
-requires no modification of core code.
+New protocols are added purely through the existing contract and registration points; adding one requires no modification of core code.
 
-The combination of interface-typed slots (AR-MOD-PLUGGABLE), the protocol/service registry
-(AR-COM-REGISTRY), registered serializers/dissectors (AR-OBS-INTROSPECTION), and attachable core
-data (AR-EXT-ATTACH) means a new protocol is *registered into* the framework rather than *patched
-into* it. A contributor implements the relevant interfaces, registers the protocol and its helpers,
-and the existing dispatch, packet, and tooling machinery picks it up. The core never grows a
-dependency on the new protocol, which keeps the framework open for extension while closed for
-modification.
+The combination of interface-typed slots (AR-MOD-PLUGGABLE), the protocol/service registry (AR-COM-REGISTRY), registered serializers/dissectors (AR-OBS-INTROSPECTION), and attachable core data (AR-EXT-ATTACH) means a new protocol is *registered into* the framework rather than *patched into* it. A contributor implements the relevant interfaces, registers the protocol and its helpers, and the existing dispatch, packet, and tooling machinery picks it up. The core never grows a dependency on the new protocol, which keeps the framework open for extension while closed for modification.
 
 *Enforced at T3+T4 — feature-off build (core→optional deps) + agent review "no core edits for a new protocol".*
 
@@ -815,16 +474,9 @@ modification.
 
 **Shared core structures are extended by attaching protocol-specific data**
 
-Shared core data structures are extended by attaching protocol-specific data to them, so the core
-never depends on optional protocols.
+Shared core data structures are extended by attaching protocol-specific data to them, so the core never depends on optional protocols.
 
-When a protocol needs to hang extra state on a shared object — a per-interface data block for IPv4
-or IPv6, extra routing state, protocol-specific packet metadata — it attaches its own data to the
-core structure instead of the core structure being edited to know about that protocol. The generic
-container (`NetworkInterface`, for example) defines an attachment mechanism; the protocol defines and
-owns the attached type, using composition because it cannot add data by subclassing a shared module.
-This inverts the usual dependency: `common` structures stay ignorant of the layers above them, so an
-optional protocol can be compiled out entirely without leaving dangling references in the core.
+When a protocol needs to hang extra state on a shared object — a per-interface data block for IPv4 or IPv6, extra routing state, protocol-specific packet metadata — it attaches its own data to the core structure instead of the core structure being edited to know about that protocol. The generic container (`NetworkInterface`, for example) defines an attachment mechanism; the protocol defines and owns the attached type, using composition because it cannot add data by subclassing a shared module. This inverts the usual dependency: `common` structures stay ignorant of the layers above them, so an optional protocol can be compiled out entirely without leaving dangling references in the core.
 
 *Enforced at T1/T3 — attachment API (compiler) + feature-off build.*
 
@@ -832,78 +484,37 @@ optional protocol can be compiled out entirely without leaving dangling referenc
 
 **Optional functionality is partitioned into independently disableable features**
 
-Optional functionality is partitioned into independently disableable features with declared
-dependencies, and code touching an optional subsystem is guarded so everything else builds without
-it.
+Optional functionality is partitioned into independently disableable features with declared dependencies, and code touching an optional subsystem is guarded so everything else builds without it.
 
-INET ships a feature model: coherent chunks of functionality (a protocol family, emulation, a
-visualizer set) are declared as features with explicit inter-feature dependencies and can be switched
-off, in which case their sources are excluded from the build. For this to hold, code in other
-subsystems must not hard-depend on an optional feature's symbols; interaction goes through the
-contracts and registries so that a disabled feature leaves the rest compilable and runnable. This is
-what lets a user build exactly the subset they need and keeps the framework from collapsing into one
-monolithic must-build-everything blob.
+INET ships a feature model: coherent chunks of functionality (a protocol family, emulation, a visualizer set) are declared as features with explicit inter-feature dependencies and can be switched off, in which case their sources are excluded from the build. For this to hold, code in other subsystems must not hard-depend on an optional feature's symbols; interaction goes through the contracts and registries so that a disabled feature leaves the rest compilable and runnable. This is what lets a user build exactly the subset they need and keeps the framework from collapsing into one monolithic must-build-everything blob.
 
 ### AR-EXT-MINIMAL-SURFACE
 
 **A member is as private as its callers allow**
 
-A function is `public` because something outside the class calls it, `protected` because a subclass
-does, and `private` otherwise. Visibility is decided by the callers that exist, not by the callers
-that might.
+A function is `public` because something outside the class calls it, `protected` because a subclass does, and `private` otherwise. Visibility is decided by the callers that exist, not by the callers that might.
 
-Every public member is a promise to every user of the class, inside the tree and out: *this will
-keep existing, keep its meaning, and keep its signature*. A member made public without a caller is a
-promise made for nothing, and it costs what every promise costs — it cannot be renamed, removed or
-re-signed without a release note ([RR-BREAK-MIGRATE](release.md#rr-break-migrate)) and a deprecation
-cycle ([RR-DEPRECATE-FIRST](release.md#rr-deprecate-first)). Making it public later, when a caller
-appears, costs nothing. The asymmetry decides the default.
+Every public member is a promise to every user of the class, inside the tree and out: *this will keep existing, keep its meaning, and keep its signature*. A member made public without a caller is a promise made for nothing, and it costs what every promise costs — it cannot be renamed, removed or re-signed without a release note ([RR-BREAK-MIGRATE](release.md#rr-break-migrate)) and a deprecation cycle ([RR-DEPRECATE-FIRST](release.md#rr-deprecate-first)). Making it public later, when a caller appears, costs nothing. The asymmetry decides the default.
 
-Two shapes need a second look rather than a verdict. **A public function whose only caller is a
-test** is either a test of behavior that happens to need a seam, or a test reaching into the
-implementation; the second kind pins the implementation and breaks on every refactor
-([TR-CAT-MATCH](testing.md#tr-cat-match)). **A public setter on a value that is otherwise built once**
-is usually a value type asking to be immutable. Both are questions for the author, not findings.
+Two shapes need a second look rather than a verdict. **A public function whose only caller is a test** is either a test of behavior that happens to need a seam, or a test reaching into the implementation; the second kind pins the implementation and breaks on every refactor ([TR-CAT-MATCH](testing.md#tr-cat-match)). **A public setter on a value that is otherwise built once** is usually a value type asking to be immutable. Both are questions for the author, not findings.
 
-**An override is exempt.** Its visibility is fixed by the base class, and changing it there is a
-different decision.
+**An override is exempt.** Its visibility is fixed by the base class, and changing it there is a different decision.
 
-*Enforced at T3 — `opp_summarize_changes --usage` marks every added public function that nothing
-calls, or that only a test calls; T4 for the answer.*
+*Enforced at T3 — `opp_summarize_changes --usage` marks every added public function that nothing calls, or that only a test calls; T4 for the answer.*
 
 ### AR-EXT-VIRTUAL-IS-A-PROMISE
 
-**A function is virtual because someone overrides it, or because the class says what an override
-would do**
+**A function is virtual because someone overrides it, or because the class says what an override would do**
 
-`virtual` is not a modifier; it is a contract. It says *a subclass may replace this, and I will call
-the replacement* — and once said, it cannot be unsaid: removing `virtual` silently stops calling
-every override outside the tree, which is the same quiet break as a default body in an interface
-([AR-ORG-CONTRACT-PURITY](#ar-org-contract-purity)). So a virtual is either **fulfilling** a promise
-— it overrides a base — or **making** one, and a promise made is a promise documented.
+`virtual` is not a modifier; it is a contract. It says *a subclass may replace this, and I will call the replacement* — and once said, it cannot be unsaid: removing `virtual` silently stops calling every override outside the tree, which is the same quiet break as a default body in an interface ([AR-ORG-CONTRACT-PURITY](#ar-org-contract-purity)). So a virtual is either **fulfilling** a promise — it overrides a base — or **making** one, and a promise made is a promise documented.
 
-INET has 9986 virtual member declarations against 6503 non-virtual — 60 % — because OMNeT++ models
-are extended by subclassing, and a model author cannot know which step a user will need to replace.
-That is a real reason, and it is why this rule does not say *never*. It says: **make it on purpose**.
-A new virtual that nothing in the tree overrides, on a function whose comment does not say what an
-override is for, is a promise made by reflex. It also drags the class toward the inheritance-based
-extension that [AR-MOD-COMPOSITION](#ar-mod-composition) argues against — the more of a class is
-virtual, the more its subclasses depend on its internals.
+INET has 9986 virtual member declarations against 6503 non-virtual — 60 % — because OMNeT++ models are extended by subclassing, and a model author cannot know which step a user will need to replace. That is a real reason, and it is why this rule does not say *never*. It says: **make it on purpose**. A new virtual that nothing in the tree overrides, on a function whose comment does not say what an override is for, is a promise made by reflex. It also drags the class toward the inheritance-based extension that [AR-MOD-COMPOSITION](#ar-mod-composition) argues against — the more of a class is virtual, the more its subclasses depend on its internals.
 
-The test a reviewer applies: *if a user overrode this, what would they be trying to do, and would the
-class still work?* If the answer is a sentence, put it in the comment and keep the `virtual`. If the
-answer is "I don't know", it is not an extension point yet.
+The test a reviewer applies: *if a user overrode this, what would they be trying to do, and would the class still work?* If the answer is a sentence, put it in the comment and keep the `virtual`. If the answer is "I don't know", it is not an extension point yet.
 
-**A private helper is the common case.** A step of an algorithm that is `virtual` so the algorithm
-could in principle be varied is a `private` non-virtual until someone varies it. The
-[template-method](#ar-mod-composition) shape — a non-virtual public entry that calls private
-virtuals — is the disciplined form of the same idea, and it names its extension points by making
-*only* those virtual.
+**A private helper is the common case.** A step of an algorithm that is `virtual` so the algorithm could in principle be varied is a `private` non-virtual until someone varies it. The [template-method](#ar-mod-composition) shape — a non-virtual public entry that calls private virtuals — is the disciplined form of the same idea, and it names its extension points by making *only* those virtual.
 
-*Enforced at T3 — `opp_summarize_changes --usage` marks every added virtual that nothing in the tree
-overrides and that does not itself override; T4 for whether the comment says what an override is
-for. A framework hook fulfilled — `initialize`, `handleMessage`, `receiveSignal`, `stop` — is never
-marked.*
+*Enforced at T3 — `opp_summarize_changes --usage` marks every added virtual that nothing in the tree overrides and that does not itself override; T4 for whether the comment says what an override is for. A framework hook fulfilled — `initialize`, `handleMessage`, `receiveSignal`, `stop` — is never marked.*
 
 ## Build & Project Structure (AR-BUILD)
 
@@ -913,17 +524,9 @@ marked.*
 
 **Build output is relocatable and out-of-tree**
 
-Compiling INET and generating derived sources must be able to place all artifacts outside the source
-tree, in a relocatable location keyed by build mode and configuration, so that multiple build
-variants and version combinations coexist without clobbering one another or polluting the checkout.
+Compiling INET and generating derived sources must be able to place all artifacts outside the source tree, in a relocatable location keyed by build mode and configuration, so that multiple build variants and version combinations coexist without clobbering one another or polluting the checkout.
 
-Generated message sources (`_m.cc`/`_m.h`), object files, shared libraries, and executables should
-land in a per-configuration output directory, not scattered through `src/`. A build must be a pure
-function of a pinned source state plus a build configuration — reproducible into a fresh output
-directory, depending on no mutable state in the tree and leaving none behind. This is the property
-that makes debug and release builds, several OMNeT++/INET version pairs, concurrent git worktrees,
-and parallel CI jobs tractable instead of a source of clobbering, stale-artifact, and
-wrong-commit-tested bugs.
+Generated message sources (`_m.cc`/`_m.h`), object files, shared libraries, and executables should land in a per-configuration output directory, not scattered through `src/`. A build must be a pure function of a pinned source state plus a build configuration — reproducible into a fresh output directory, depending on no mutable state in the tree and leaving none behind. This is the property that makes debug and release builds, several OMNeT++/INET version pairs, concurrent git worktrees, and parallel CI jobs tractable instead of a source of clobbering, stale-artifact, and wrong-commit-tested bugs.
 
 *Enforced at T2/T3 — CI clean/isolated build (opp_ci from a pinned commit).*
 
@@ -931,17 +534,9 @@ wrong-commit-tested bugs.
 
 **Build configuration is declarative with a single source of truth**
 
-The information needed to build INET is described declaratively in one authoritative, introspectable
-place, not duplicated across several build mechanisms and never hardcoded to a particular machine.
+The information needed to build INET is described declaratively in one authoritative, introspectable place, not duplicated across several build mechanisms and never hardcoded to a particular machine.
 
-Include paths, compiler and linker flags, enabled features, the OMNeT++ toolchain location, and the
-output layout should be discoverable from a single source that IDEs, CI, and external build drivers
-can query, rather than reverse-engineered from a hand-written Makefile, generated makefiles, and
-feature fragments that all have to agree. Build scripts must not bake in machine-specific values such
-as absolute home paths or `-march=native`. When several mechanisms encode the same facts, any of them
-can be silently wrong; a single introspectable description lets any tool ask "how is this built?" and
-get a trustworthy answer. Feature selection (AR-EXT-FEATURES) is one dimension of this configuration
-and is expressed the same declarative way.
+Include paths, compiler and linker flags, enabled features, the OMNeT++ toolchain location, and the output layout should be discoverable from a single source that IDEs, CI, and external build drivers can query, rather than reverse-engineered from a hand-written Makefile, generated makefiles, and feature fragments that all have to agree. Build scripts must not bake in machine-specific values such as absolute home paths or `-march=native`. When several mechanisms encode the same facts, any of them can be silently wrong; a single introspectable description lets any tool ask "how is this built?" and get a trustworthy answer. Feature selection (AR-EXT-FEATURES) is one dimension of this configuration and is expressed the same declarative way.
 
 ## Quality & Conventions (AR-QUAL)
 
@@ -949,22 +544,11 @@ and is expressed the same declarative way.
 
 ### AR-QUAL-FINGERPRINT
 
-**Behavioral regressions are guarded by trajectory fingerprints; a baseline changes in a deliberate,
-reviewable step**
+**Behavioral regressions are guarded by trajectory fingerprints; a baseline changes in a deliberate, reviewable step**
 
-Behavioral regressions are guarded by simulation-trajectory fingerprints, and a change that alters
-behavior on purpose updates the recorded expectations in the same step, with a stated reason.
+Behavioral regressions are guarded by simulation-trajectory fingerprints, and a change that alters behavior on purpose updates the recorded expectations in the same step, with a stated reason.
 
-A fingerprint is a hash over the simulation's event trajectory (module paths, timing, packet data,
-per configurable "ingredients"), so any unintended change in behavior shows up as a broken
-fingerprint test on CI and in pull requests. INET extends the standard OMNeT++ ingredients with
-network-aware ones (a cross-node communication filter, node/interface path, packet data) so a
-fingerprint can be scoped to exactly the behavior under test. When a change legitimately alters
-behavior, the workflow is to regenerate the baseline CSVs and to commit them together with the source
-change that moves them, under a message that says which behavior moved and why the new values are
-right — never to quietly weaken the test — so that "the fingerprint changed" is always a conscious,
-auditable decision ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)). This regime is only meaningful because model behavior is deterministic
-(AR-QUAL-DETERMINISM).
+A fingerprint is a hash over the simulation's event trajectory (module paths, timing, packet data, per configurable "ingredients"), so any unintended change in behavior shows up as a broken fingerprint test on CI and in pull requests. INET extends the standard OMNeT++ ingredients with network-aware ones (a cross-node communication filter, node/interface path, packet data) so a fingerprint can be scoped to exactly the behavior under test. When a change legitimately alters behavior, the workflow is to regenerate the baseline CSVs and to commit them together with the source change that moves them, under a message that says which behavior moved and why the new values are right — never to quietly weaken the test — so that "the fingerprint changed" is always a conscious, auditable decision ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)). This regime is only meaningful because model behavior is deterministic (AR-QUAL-DETERMINISM).
 
 *Enforced at T2 ✔ — fingerprint tests on CI.*
 
@@ -972,15 +556,9 @@ auditable decision ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)). Thi
 
 **Contributions ship with tests in the category matching their nature**
 
-Contributions ship with tests in the categories matching their nature — unit, module behavior,
-statistical, validation — in addition to fingerprint coverage.
+Contributions ship with tests in the categories matching their nature — unit, module behavior, statistical, validation — in addition to fingerprint coverage.
 
-The `tests` tree is stratified by kind: C++ unit tests for algorithmic pieces, module/behavior tests
-for protocol interactions, statistical tests for stochastic properties, and validation tests against
-external references or standards. A change is expected to bring the kind of test that actually
-exercises what it introduces, rather than leaning on fingerprints alone (which detect *that* behavior
-changed, not *whether it is correct*). Matching test type to the nature of the code is what gives the
-suite both regression safety and genuine correctness evidence.
+The `tests` tree is stratified by kind: C++ unit tests for algorithmic pieces, module/behavior tests for protocol interactions, statistical tests for stochastic properties, and validation tests against external references or standards. A change is expected to bring the kind of test that actually exercises what it introduces, rather than leaning on fingerprints alone (which detect *that* behavior changed, not *whether it is correct*). Matching test type to the nature of the code is what gives the suite both regression safety and genuine correctness evidence.
 
 *Enforced at T2+T4 — test suites on CI; coverage/mutation gate + agent review that a change ships matching tests.*
 
@@ -988,19 +566,9 @@ suite both regression safety and genuine correctness evidence.
 
 **Model code is deterministic and exactly reproducible**
 
-A simulation produces identical results from identical inputs, run after run, regardless of memory
-layout, container iteration order, allocation addresses, or thread scheduling.
+A simulation produces identical results from identical inputs, run after run, regardless of memory layout, container iteration order, allocation addresses, or thread scheduling.
 
-Model code must not let observable behavior depend on nondeterministic artifacts: no iterating a
-pointer-keyed hash container in a way that affects the trajectory, no tie-breaking events by an
-allocation or thread-assigned counter, no reliance on undocumented enumeration order. All
-stochasticity flows through the OMNeT++ RNG framework with explicit stream assignment, and any
-ordering assumption that affects the outcome (topology enumeration, per-event draw order, tie-breaking
-keys) is made explicit and structurally derived from causal/model state rather than left emergent.
-Determinism is not a nicety — it is the precondition for the fingerprint regime (AR-QUAL-FINGERPRINT)
-to mean anything and for results to be scientifically reproducible (the user-facing R-RUN-REPRO); a
-single nondeterministic tie-break can turn a green suite intermittently red for reasons unrelated to
-any real change, and it is the first thing that must hold for parallel execution to be sound.
+Model code must not let observable behavior depend on nondeterministic artifacts: no iterating a pointer-keyed hash container in a way that affects the trajectory, no tie-breaking events by an allocation or thread-assigned counter, no reliance on undocumented enumeration order. All stochasticity flows through the OMNeT++ RNG framework with explicit stream assignment, and any ordering assumption that affects the outcome (topology enumeration, per-event draw order, tie-breaking keys) is made explicit and structurally derived from causal/model state rather than left emergent. Determinism is not a nicety — it is the precondition for the fingerprint regime (AR-QUAL-FINGERPRINT) to mean anything and for results to be scientifically reproducible (the user-facing R-RUN-REPRO); a single nondeterministic tie-break can turn a green suite intermittently red for reasons unrelated to any real change, and it is the first thing that must hold for parallel execution to be sound.
 
 *Enforced at T2 ✔ — fingerprint stability (same seed → same fingerprint; parallel-safe).*
 
@@ -1008,18 +576,9 @@ any real change, and it is the first thing that must hold for parallel execution
 
 **Framework-wide naming conventions make a component's role legible from its name**
 
-Modules, packages, signals, and packet types follow the framework-wide naming conventions, so a
-component's role is recognizable from its name alone.
+Modules, packages, signals, and packet types follow the framework-wide naming conventions, so a component's role is recognizable from its name alone.
 
-INET encodes a large amount of semantics into names: singular lowercase package names; module
-suffixes/prefixes like `I*` (interface), `*Base`, `*Layer`, `*Inserter`/`*Checker`, `*Table`,
-`*Configurator`, `Ext*`, `Ieee*`; class suffixes like `*Chunk`, `*Serializer`, `*ProtocolDissector`;
-packet names ending `*Header`/`*Frame`; tags ending `*Tag`/`*Req`/`*Ind`; and signals like
-`*SentSignal`/`*ChangedSignal`. Following these conventions is a hard requirement, not a style
-preference, because both humans and tooling infer a component's category and how to compose it from
-the name, and structurally similar entities must not drift onto different conventions. An
-off-convention name is effectively mislabeled and undermines discoverability across a framework this
-large.
+INET encodes a large amount of semantics into names: singular lowercase package names; module suffixes/prefixes like `I*` (interface), `*Base`, `*Layer`, `*Inserter`/`*Checker`, `*Table`, `*Configurator`, `Ext*`, `Ieee*`; class suffixes like `*Chunk`, `*Serializer`, `*ProtocolDissector`; packet names ending `*Header`/`*Frame`; tags ending `*Tag`/`*Req`/`*Ind`; and signals like `*SentSignal`/`*ChangedSignal`. Following these conventions is a hard requirement, not a style preference, because both humans and tooling infer a component's category and how to compose it from the name, and structurally similar entities must not drift onto different conventions. An off-convention name is effectively mislabeled and undermines discoverability across a framework this large.
 
 *Enforced at T3+T4 — `clang-tidy` (C++) + agent review for NED/`.msg`/semantic names.*
 
@@ -1027,16 +586,9 @@ large.
 
 **Visual conventions are consistent and complete: one distinguishing icon per category**
 
-INET modules carry `@display` icons that convey their role at a glance, and this visual vocabulary is
-as disciplined as the naming vocabulary: semantically distinct categories get distinct icons, size
-variants simplify the glyph rather than merely rescaling it, and no module is left without an icon.
+INET modules carry `@display` icons that convey their role at a glance, and this visual vocabulary is as disciplined as the naming vocabulary: semantically distinct categories get distinct icons, size variants simplify the glyph rather than merely rescaling it, and no module is left without an icon.
 
-When a single generic icon stands for a hundred unrelated module types it carries no information, and
-a module with no icon at all is invisible to the visual reasoning that the graphical editor and network
-diagrams are meant to support. Consistent, complete iconography is the visual counterpart of
-AR-QUAL-NAMING — part of how a framework this large stays navigable to the humans composing simulations
-from it — and it must be maintained as a first-class convention, not left to accrete ad hoc as modules
-are added.
+When a single generic icon stands for a hundred unrelated module types it carries no information, and a module with no icon at all is invisible to the visual reasoning that the graphical editor and network diagrams are meant to support. Consistent, complete iconography is the visual counterpart of AR-QUAL-NAMING — part of how a framework this large stays navigable to the humans composing simulations from it — and it must be maintained as a first-class convention, not left to accrete ad hoc as modules are added.
 
 *Enforced at T3+T4 — "every module has an icon" coverage check + agent review.*
 
@@ -1044,19 +596,9 @@ are added.
 
 **Common log-level semantics; programming errors are exceptions, never just logged**
 
-Log output follows the common level semantics and formatting rules, and programming errors raise
-exceptions rather than being merely logged.
+Log output follows the common level semantics and formatting rules, and programming errors raise exceptions rather than being merely logged.
 
-INET uses OMNeT++'s logging levels with agreed, audience-based meanings: `info` treats the module as a
-black box (public inputs, outputs, and decisions, for people who know the protocol's interface),
-`detail` treats it as a white box (internal state and timers, for maintainers who know the
-implementation), with `error`/`warn`/`debug`/`trace` around them — mirroring the public-interface vs.
-internal-implementation split found elsewhere in the architecture. A given verbosity therefore yields
-comparable, filterable output across modules, and log statements never carry simulation-affecting side
-effects. Crucially, a *programming error* — a violated invariant, an impossible state, a misused API —
-must throw (via `check_and_cast`, `ASSERT`, or an explicit exception) so it fails loudly and stops the
-run, instead of being downgraded to a log line a user might never see. Logging communicates what the
-model is doing; exceptions enforce what the code requires.
+INET uses OMNeT++'s logging levels with agreed, audience-based meanings: `info` treats the module as a black box (public inputs, outputs, and decisions, for people who know the protocol's interface), `detail` treats it as a white box (internal state and timers, for maintainers who know the implementation), with `error`/`warn`/`debug`/`trace` around them — mirroring the public-interface vs. internal-implementation split found elsewhere in the architecture. A given verbosity therefore yields comparable, filterable output across modules, and log statements never carry simulation-affecting side effects. Crucially, a *programming error* — a violated invariant, an impossible state, a misused API — must throw (via `check_and_cast`, `ASSERT`, or an explicit exception) so it fails loudly and stops the run, instead of being downgraded to a log line a user might never see. Logging communicates what the model is doing; exceptions enforce what the code requires.
 
 *Enforced at T3+T4 — `-Werror`/`clang-tidy` + agent review that programming errors throw, not log.*
 
@@ -1064,16 +606,9 @@ model is doing; exceptions enforce what the code requires.
 
 **Test coverage maps to model structure, and baseline changes carry provenance**
 
-It is possible to determine which tests exercise a given part of the model, and each accepted change to
-a test baseline is traceable to the code change that justified it.
+It is possible to determine which tests exercise a given part of the model, and each accepted change to a test baseline is traceable to the code change that justified it.
 
-Because INET's correctness is guarded largely by simulation tests, developers need to compute the blast
-radius of a change without rerunning the entire matrix — through the fingerprint suite's descriptive
-tags and a dependable mapping from source files and NED packages to the configs that instantiate them.
-Test-baseline artifacts (fingerprint and statistical stores) should be structured so that long-lived
-parallel development branches do not inherently conflict over them, and every baseline update should be
-attributable to the specific change that caused it. Traceability turns the test suite from an opaque
-pass/fail gate into a tool that tells developers what to run and explains why a baseline moved.
+Because INET's correctness is guarded largely by simulation tests, developers need to compute the blast radius of a change without rerunning the entire matrix — through the fingerprint suite's descriptive tags and a dependable mapping from source files and NED packages to the configs that instantiate them. Test-baseline artifacts (fingerprint and statistical stores) should be structured so that long-lived parallel development branches do not inherently conflict over them, and every baseline update should be attributable to the specific change that caused it. Traceability turns the test suite from an opaque pass/fail gate into a tool that tells developers what to run and explains why a baseline moved.
 
 *Enforced at T3 — fingerprint tags + source→config mapping (partial).*
 
@@ -1081,20 +616,8 @@ pass/fail gate into a tool that tells developers what to run and explains why a 
 
 **Quality rules are machine-checked, not just documented**
 
-Every architectural requirement that *can* be mechanically verified is backed by an automated check —
-a compiler constraint, a test, or a lint/architecture rule that runs in CI — and the project's
-standing goal is to push each requirement up the enforcement ladder (from review-only, toward
-automated, toward can't-even-build) rather than leaving it as prose.
+Every architectural requirement that *can* be mechanically verified is backed by an automated check — a compiler constraint, a test, or a lint/architecture rule that runs in CI — and the project's standing goal is to push each requirement up the enforcement ladder (from review-only, toward automated, toward can't-even-build) rather than leaving it as prose.
 
-A rule that lives only in a document is advisory: a contributor — human or, increasingly, an AI agent —
-optimizes for whatever gate actually blocks the merge, not for the paragraph. The architecture is
-therefore responsible for making the right thing the path of least resistance and the wrong thing
-*fail loudly*: an illegal dependency should not compile, a behavioral regression should break a
-fingerprint, an off-convention name should trip the linter. And "review" is itself a ladder: rules
-that no static check can express but that remain *judgeable* — visualization logic leaking into a
-protocol, a zero-time message standing in for a procedure call, prose that duplicates a NED
-declaration — are enforceable by an **agent reviewer** run as a CI gate, leaving only genuine design
-judgment (is a fidelity level worth adding?) to a human. Which gate covers which rule is the gate
-inventory of [enforcement/README.md](../enforcement/README.md).
+A rule that lives only in a document is advisory: a contributor — human or, increasingly, an AI agent — optimizes for whatever gate actually blocks the merge, not for the paragraph. The architecture is therefore responsible for making the right thing the path of least resistance and the wrong thing *fail loudly*: an illegal dependency should not compile, a behavioral regression should break a fingerprint, an off-convention name should trip the linter. And "review" is itself a ladder: rules that no static check can express but that remain *judgeable* — visualization logic leaking into a protocol, a zero-time message standing in for a procedure call, prose that duplicates a NED declaration — are enforceable by an **agent reviewer** run as a CI gate, leaving only genuine design judgment (is a fidelity level worth adding?) to a human. Which gate covers which rule is the gate inventory of [enforcement/README.md](../enforcement/README.md).
 
 *Enforced at T3 — the gate inventory itself; measured by how many rules above reach T1 to T4.*

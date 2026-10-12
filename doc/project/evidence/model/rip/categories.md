@@ -2,18 +2,11 @@
 
 > **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [results.md](results.md), [test-anatomy.md](../../../design/test-anatomy.md)
 
-Step 9 artifact of the standards test workflow. For each check, this document records the
-category the check belongs to, confirmed after the run, and the reason. The categories and
-what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories);
-the rule that the category must match the claim is
-[TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
+Step 9 artifact of the standards test workflow. For each check, this document records the category the check belongs to, confirmed after the run, and the reason. The categories and what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories); the rule that the category must match the claim is [TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
 
 ## The decision, per check
 
-All 30 checks of this pass are **protocol tests**, and all 30 are in `tests/protocol/rip/`.
-The prediction that step 3 made from the observation class held for every one of them: RIP is
-a protocol of messages between neighbors, so `wire` dominates both catalogs, and a `wire`
-statement maps to a protocol test.
+All 30 checks of this pass are **protocol tests**, and all 30 are in `tests/protocol/rip/`. The prediction that step 3 made from the observation class held for every one of them: RIP is a protocol of messages between neighbors, so `wire` dominates both catalogs, and a `wire` statement maps to a protocol test.
 
 | Check | Observation class of its statements | Category | Reason |
 | --- | --- | --- | --- |
@@ -50,26 +43,13 @@ statement maps to a protocol test.
 
 ### The checks with a time window, and why they are not statistical tests
 
-Seven kinds of check compare instants: the periodic interval, the triggered update within
-6 s, the rate of triggered updates, the expiry at 180 s, and the three garbage collections of
-120 s. Each one tests a bound that the standard gives as a fixed figure — 30 s with an offset
-of at most 5 or 15 s, 180 s, 120 s, 1 to 5 s — and one run can break a bound. None of them
-tests the shape of a distribution. That half of RFC2453-TIMER-2, RFC2080-TIMER-2,
-RFC2453-TRIG-3 and RFC2080-TRIG-2, the randomness of the offset and of the timer, is a
-statistical test, and the ledger records it as `later`.
+Seven kinds of check compare instants: the periodic interval, the triggered update within 6 s, the rate of triggered updates, the expiry at 180 s, and the three garbage collections of 120 s. Each one tests a bound that the standard gives as a fixed figure — 30 s with an offset of at most 5 or 15 s, 180 s, 120 s, 1 to 5 s — and one run can break a bound. None of them tests the shape of a distribution. That half of RFC2453-TIMER-2, RFC2080-TIMER-2, RFC2453-TRIG-3 and RFC2080-TRIG-2, the randomness of the offset and of the timer, is a statistical test, and the ledger records it as `later`.
 
-The expiry check needed one decision that a statistical test would have made for it: the start
-of R2 is fixed 15 s after R1, so that the expiry falls between two periodic updates of R2.
-With the default random start, the first run of the check passed by chance; see
-[gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent).
+The expiry check needed one decision that a statistical test would have made for it: the start of R2 is fixed 15 s after R1, so that the expiry falls between two periodic updates of R2. With the default random start, the first run of the check passed by chance; see [gap 4](results.md#gap-4-defect--the-timeout-is-looked-at-only-when-an-update-is-sent).
 
 ### The checks that read the header, not the octets
 
-The field checks read the RIP header and the entries as the message holds them, not as bytes.
-The model has a serializer for RIP version 2 only, so a byte-level check of RIPng is not
-possible at all; for RIP version 2 the bit layout is a serializer test (below). A field read
-from the message — a command, a version, a metric, a prefix length — is still a `wire`
-observation: it is what the receiver of the message acts on.
+The field checks read the RIP header and the entries as the message holds them, not as bytes. The model has a serializer for RIP version 2 only, so a byte-level check of RIPng is not possible at all; for RIP version 2 the bit layout is a serializer test (below). A field read from the message — a command, a version, a metric, a prefix length — is still a `wire` observation: it is what the receiver of the message acts on.
 
 ## The statements that belong in another suite
 
@@ -81,7 +61,4 @@ observation: it is what the receiver of the message acts on.
 
 ## A category this pass did not need
 
-No check needs a module test: every checked behavior shows in a message on a link or in a
-forwarded datagram, and no statement of the in-scope set is `internal` without a message that
-shows it. No check needs a fingerprint test: the pass locks behaviors to the standard, not
-trajectories to a reference run.
+No check needs a module test: every checked behavior shows in a message on a link or in a forwarded datagram, and no statement of the in-scope set is `internal` without a message that shows it. No check needs a fingerprint test: the pass locks behaviors to the standard, not trajectories to a reference run.

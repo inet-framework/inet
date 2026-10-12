@@ -2,15 +2,7 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc8200/catalog.md](../../standard/rfc8200/catalog.md), [rfc4443/catalog.md](../../standard/rfc4443/catalog.md), [features.md](features.md)
 
-Step 5 artifact of the standards test workflow (see
-[derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)).
-The procedures come from the specification only. They name no simulation model and no code.
-This file holds the common mockup, the rules every check obeys, and the index. The checks
-themselves live in one file per feature under [`checks/`](checks); the section names are
-the anchors that the coverage ledger links to. The catalog entries are in
-[`rfc8200/catalog.md`](../../standard/rfc8200/catalog.md),
-[`rfc4443/catalog.md`](../../standard/rfc4443/catalog.md) and
-[`rfc8504/catalog.md`](../../standard/rfc8504/catalog.md).
+Step 5 artifact of the standards test workflow (see [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)). The procedures come from the specification only. They name no simulation model and no code. This file holds the common mockup, the rules every check obeys, and the index. The checks themselves live in one file per feature under [`checks/`](checks); the section names are the anchors that the coverage ledger links to. The catalog entries are in [`rfc8200/catalog.md`](../../standard/rfc8200/catalog.md), [`rfc4443/catalog.md`](../../standard/rfc4443/catalog.md) and [`rfc8504/catalog.md`](../../standard/rfc8504/catalog.md).
 
 ## Index
 
@@ -55,36 +47,22 @@ A ----------- R ----------- B
     link 1        link 2
 ```
 
-- The links are Ethernet with an MTU of 1500 octets unless a check says otherwise. No
-  check sets an MTU below 1280 octets on any link (RFC8200-MTU-1).
-- Every node has one IPv6 address per link from one flat address plan, and the router
-  knows the route to each host. Router discovery, address configuration and neighbor
-  discovery run before the first datagram: their messages appear on the wire in every
-  scenario, and no check judges them.
-- A small application on host A sends one UDP datagram to host B. Timing: host A sends
-  5 seconds after the start, when the addresses of every node are usable. All expected
-  events occur within 1 second of that send. Observation stops after 10 seconds.
-- Each check states its own scenario constants: data size, sender hop limit, and the MTU
-  of a link. Unless a check says otherwise, the sender hop limit is 64.
-- Every node computes the UDP checksum of the datagrams it sends. A simulation model may
-  offer a mode that assumes checksums correct without computing them; the checks run with
-  that mode off, because one observation reads the value.
+- The links are Ethernet with an MTU of 1500 octets unless a check says otherwise. No check sets an MTU below 1280 octets on any link (RFC8200-MTU-1).
+- Every node has one IPv6 address per link from one flat address plan, and the router knows the route to each host. Router discovery, address configuration and neighbor discovery run before the first datagram: their messages appear on the wire in every scenario, and no check judges them.
+- A small application on host A sends one UDP datagram to host B. Timing: host A sends 5 seconds after the start, when the addresses of every node are usable. All expected events occur within 1 second of that send. Observation stops after 10 seconds.
+- Each check states its own scenario constants: data size, sender hop limit, and the MTU of a link. Unless a check says otherwise, the sender hop limit is 64.
+- Every node computes the UDP checksum of the datagrams it sends. A simulation model may offer a mode that assumes checksums correct without computing them; the checks run with that mode off, because one observation reads the value.
 
 ### Variants for the level 3 checks
 
-**With a relay.** A transparent relay T is spliced into link 2 next to host B. The relay
-forwards every frame unchanged unless the check tells it to rewrite one field of one
-packet, or to shorten one packet. IPv6 has no header checksum, so a rewrite of a header
-field needs no recompute; a rewrite inside UDP or ICMPv6 is stated with its checksum
-consequence. "On link 2" means before the relay; "at host B's interface" means after it.
+**With a relay.** A transparent relay T is spliced into link 2 next to host B. The relay forwards every frame unchanged unless the check tells it to rewrite one field of one packet, or to shorten one packet. IPv6 has no header checksum, so a rewrite of a header field needs no recompute; a rewrite inside UDP or ICMPv6 is stated with its checksum consequence. "On link 2" means before the relay; "at host B's interface" means after it.
 
 ```
 A ----------- R ------ T ------ B
     link 1          link 2
 ```
 
-**On one link.** Host A and host B share one link, without a router. The multicast check
-uses it, because a link-local multicast does not cross a router.
+**On one link.** Host A and host B share one link, without a router. The multicast check uses it, because a link-local multicast does not cross a router.
 
 ```
 A ----------- B
@@ -93,16 +71,7 @@ A ----------- B
 
 ### Rules every check obeys
 
-- **One observation confirms the stimulus.** A packet with the crafted field is observed
-  where it enters the node under test.
-- **A discard is observed where the decision is made.** The router of this mockup reports
-  every discard it makes with an ICMPv6 message, so the origination of that message at the
-  router is the record of the decision. A host that discards silently, as the level 3 rules
-  require, leaves no record at all; there the arrival of the crafted packet at the host's
-  interface is the anchor, which precedes the decision, and the absence watch opens at
-  that moment.
-- **Silence has two halves.** "Silently discard" means that nothing goes upward and nothing
-  goes back. Every silent-discard check watches both.
-- **A `may` or a `should` is not a violation when absent.** Where a check asserts the
-  cooperative behavior of a should, its notes say so, and the ledger keeps the strengths
-  apart.
+- **One observation confirms the stimulus.** A packet with the crafted field is observed where it enters the node under test.
+- **A discard is observed where the decision is made.** The router of this mockup reports every discard it makes with an ICMPv6 message, so the origination of that message at the router is the record of the decision. A host that discards silently, as the level 3 rules require, leaves no record at all; there the arrival of the crafted packet at the host's interface is the anchor, which precedes the decision, and the absence watch opens at that moment.
+- **Silence has two halves.** "Silently discard" means that nothing goes upward and nothing goes back. Every silent-discard check watches both.
+- **A `may` or a `should` is not a violation when absent.** Where a check asserts the cooperative behavior of a should, its notes say so, and the ledger keeps the strengths apart.

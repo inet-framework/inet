@@ -2,54 +2,30 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC4301-*` · **Stands on:** [standards.md](../../protocol/ipsec/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow for RFC 4301, Security Architecture for the Internet Protocol, of
-December 2005, a document of the in-scope set of IPsec. The catalog comes from the RFC text
-only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow for RFC 4301, Security Architecture for the Internet Protocol, of December 2005, a document of the in-scope set of IPsec. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc4301.txt`](../../../../../../standards/RFC/rfc4301.txt) —
-  Security Architecture for the Internet Protocol, December 2005. Downloaded 2026-09-23 from
-  <https://www.rfc-editor.org/rfc/rfc4301.txt>.
+- [`standards/RFC/rfc4301.txt`](../../../../../../standards/RFC/rfc4301.txt) — Security Architecture for the Internet Protocol, December 2005. Downloaded 2026-09-23 from <https://www.rfc-editor.org/rfc/rfc4301.txt>.
 
-The two companion documents of the in-scope set have catalogs of their own:
-[`rfc4302/catalog.md`](../rfc4302/catalog.md) (the Authentication Header) and
-[`rfc4303/catalog.md`](../rfc4303/catalog.md) (the Encapsulating Security Payload).
+The two companion documents of the in-scope set have catalogs of their own: [`rfc4302/catalog.md`](../rfc4302/catalog.md) (the Authentication Header) and [`rfc4303/catalog.md`](../rfc4303/catalog.md) (the Encapsulating Security Payload).
 
-The in-scope sections are §3.1 and §3.2, §4 to §4.4.2, §5.1, §5.2 and §10. §4.4.3 (the Peer
-Authorization Database) and §4.5 (key management) belong to the key management protocol, which
-enters at level 5.
+The in-scope sections are §3.1 and §3.2, §4 to §4.4.2, §5.1, §5.2 and §10. §4.4.3 (the Peer Authorization Database) and §4.5 (key management) belong to the key management protocol, which enters at level 5.
 
-The family of documents and the in-scope set are in
-[`standards.md`](../../protocol/ipsec/standards.md). The features these statements build are in
-[`features.md`](../../protocol/ipsec/features.md).
+The family of documents and the in-scope set are in [`standards.md`](../../protocol/ipsec/standards.md). The features these statements build are in [`features.md`](../../protocol/ipsec/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`ipsec/coverage.md`](../../model/ipsec/coverage.md). Keeping it out is deliberate: this catalog
-states what the standard says, so a new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`ipsec/coverage.md`](../../model/ipsec/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc4301.txt:1203-1205` points to lines of that
-file. Where a quote crosses a page break of the RFC, the reference names both line groups.
+Quotes are verbatim. A reference such as `rfc4301.txt:1203-1205` points to lines of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
-The entries were drafted section by section and merged; the sections are the areas below, in
-the order of the document.
+The entries were drafted section by section and merged; the sections are the areas below, in the order of the document.
 
 ## How to read an entry
 
 - **ID** — `RFC4301-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into the text.
-- **Strength** — the word the document uses. RFC 4301 uses the keywords of RFC 2119 in capitals;
-  the entry records `must`, `must not`, `should`, `should not` or `may` for them (`must` for
-  REQUIRED), and `description` for a normative sentence with no keyword. Where the text writes a
-  keyword in lower case, the entry records the word and says so, for example `must (lower
-  case)`. An entry with two keywords names what each one covers. A step of a numbered procedure
-  that states an action is an entry of its own.
-- **Class** — how a test can observe the statement: `wire` (fields of a header on a link, or
-  the presence or absence of a packet), `end-to-end` (what an implementation accepts, delivers
-  or discards, seen in what it sends or delivers afterwards), `error-signal` (an ICMP error
-  report), `internal` (state or a database inside an implementation, an audit log), `encoding`
-  (the exact bit layout, sizes and alignment).
+- **Strength** — the word the document uses. RFC 4301 uses the keywords of RFC 2119 in capitals; the entry records `must`, `must not`, `should`, `should not` or `may` for them (`must` for REQUIRED), and `description` for a normative sentence with no keyword. Where the text writes a keyword in lower case, the entry records the word and says so, for example `must (lower case)`. An entry with two keywords names what each one covers. A step of a numbered procedure that states an action is an entry of its own.
+- **Class** — how a test can observe the statement: `wire` (fields of a header on a link, or the presence or absence of a packet), `end-to-end` (what an implementation accepts, delivers or discards, seen in what it sends or delivers afterwards), `error-signal` (an ICMP error report), `internal` (state or a database inside an implementation, an audit log), `encoding` (the exact bit layout, sizes and alignment).
 - **Check idea** — one or two sentences, still without implementation names.
 
 ## Index
@@ -1240,9 +1216,7 @@ the order of the document.
 > boundary. This includes IPsec management traffic such as IKE." — §4.4.1, `rfc4301.txt:1059-1062`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: send both IPsec-protected traffic and traffic not protected by IPsec, including
-  IKE traffic, across the IPsec boundary and check that the SPD or its cache is consulted for
-  each packet.
+- Check idea: send both IPsec-protected traffic and traffic not protected by IPsec, including IKE traffic, across the IPsec boundary and check that the SPD or its cache is consulted for each packet.
 
 ### RFC4301-SPD-2
 
@@ -1252,8 +1226,7 @@ the order of the document.
 > `rfc4301.txt:1071`
 
 - Strength: must. Class: internal.
-- Check idea: inspect an IPsec implementation and check that it maintains at least one
-  Security Policy Database.
+- Check idea: inspect an IPsec implementation and check that it maintains at least one Security Policy Database.
 
 ### RFC4301-SPD-3
 
@@ -1263,8 +1236,7 @@ the order of the document.
 > implementation operates." — §4.4.1, `rfc4301.txt:1071-1073`
 
 - Strength: may. Class: internal.
-- Check idea: inspect an IPsec implementation configured with more than one SPD and check that
-  this is an allowed configuration.
+- Check idea: inspect an IPsec implementation configured with more than one SPD and check that this is an allowed configuration.
 
 ### RFC4301-SPD-4
 
@@ -1275,8 +1247,7 @@ the order of the document.
 > §4.4.1, `rfc4301.txt:1075-1077`
 
 - Strength: must. Class: internal.
-- Check idea: configure an IPsec implementation with multiple SPDs and check that it applies an
-  explicit selection function that picks one SPD for outbound traffic.
+- Check idea: configure an IPsec implementation with multiple SPDs and check that it applies an explicit selection function that picks one SPD for outbound traffic.
 
 ### RFC4301-SPD-5
 
@@ -1288,8 +1259,7 @@ the order of the document.
 > `rfc4301.txt:1080-1081`
 
 - Strength: description. Class: internal.
-- Check idea: invoke the SPD selection function with an outbound packet and its local metadata,
-  such as the arrival interface, and check that it returns an SPD identifier.
+- Check idea: invoke the SPD selection function with an outbound packet and its local metadata, such as the arrival interface, and check that it returns an SPD identifier.
 
 ### RFC4301-SPD-6
 
@@ -1299,8 +1269,7 @@ the order of the document.
 > control policy." — §4.4.1, `rfc4301.txt:1087-1088`
 
 - Strength: must. Class: internal.
-- Check idea: have a user or administrator place SPD entries in a chosen order and check that
-  the SPD keeps that order.
+- Check idea: have a user or administrator place SPD entries in a chosen order and check that the SPD keeps that order.
 
 ### RFC4301-SPD-7
 
@@ -1312,9 +1281,7 @@ the order of the document.
 > `rfc4301.txt:1095-1097`, `rfc4301.txt:1097-1099`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: present the SPD with traffic destined for IPsec protection and traffic destined to
-  bypass IPsec, at a sender and at a receiver, and check that the SPD produces the correct
-  choice for each.
+- Check idea: present the SPD with traffic destined for IPsec protection and traffic destined to bypass IPsec, at a sender and at a receiver, and check that the SPD produces the correct choice for each.
 
 ### RFC4301-SPD-8
 
@@ -1324,8 +1291,7 @@ the order of the document.
 > IPsec, or PROTECT using IPsec." — §4.4.1, `rfc4301.txt:1099-1100`
 
 - Strength: description. Class: internal.
-- Check idea: submit an outbound datagram and an inbound datagram to the SPD and check that the
-  decision returned is one of DISCARD, BYPASS, or PROTECT.
+- Check idea: submit an outbound datagram and an inbound datagram to the SPD and check that the decision returned is one of DISCARD, BYPASS, or PROTECT.
 
 ### RFC4301-SPD-9
 
@@ -1335,8 +1301,7 @@ the order of the document.
 > the specified direction)." — §4.4.1, `rfc4301.txt:1100-1102`
 
 - Strength: description. Class: end-to-end.
-- Check idea: send traffic that matches a DISCARD entry toward the IPsec boundary and check that
-  the traffic does not cross it.
+- Check idea: send traffic that matches a DISCARD entry toward the IPsec boundary and check that the traffic does not cross it.
 
 ### RFC4301-SPD-10
 
@@ -1346,8 +1311,7 @@ the order of the document.
 > IPsec protection." — §4.4.1, `rfc4301.txt:1102-1104`
 
 - Strength: description. Class: wire.
-- Check idea: send traffic that matches a BYPASS entry across the IPsec boundary and check that
-  it crosses unmodified, without IPsec protection.
+- Check idea: send traffic that matches a BYPASS entry across the IPsec boundary and check that it crosses unmodified, without IPsec protection.
 
 ### RFC4301-SPD-11
 
@@ -1358,9 +1322,7 @@ the order of the document.
 > options, and the cryptographic algorithms to be used." — §4.4.1, `rfc4301.txt:1104-1108`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: inspect an SPD entry with the PROTECT action and check that it states the security
-  protocol, mode, security service options, and cryptographic algorithms for the matching
-  traffic.
+- Check idea: inspect an SPD entry with the PROTECT action and check that it states the security protocol, mode, security service options, and cryptographic algorithms for the matching traffic.
 
 ### RFC4301-SPD-12
 
@@ -1372,8 +1334,7 @@ the order of the document.
 > discarded." — §4.4.1, `rfc4301.txt:1112-1114`, `rfc4301.txt:1114-1115`, `rfc4301.txt:1115-1116`
 
 - Strength: description. Class: internal.
-- Check idea: inspect the SPD of an IPsec implementation and check that its entries fall into
-  the SPD-S, SPD-O, and SPD-I parts as defined.
+- Check idea: inspect the SPD of an IPsec implementation and check that its entries fall into the SPD-S, SPD-O, and SPD-I parts as defined.
 
 ### RFC4301-SPD-13
 
@@ -1383,8 +1344,7 @@ the order of the document.
 > packet MUST be discarded." — §4.4.1, `rfc4301.txt:1132-1134`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send inbound traffic that is checked against SPD-I and matches no SPD-I entry, and
-  check that the implementation discards it.
+- Check idea: send inbound traffic that is checked against SPD-I and matches no SPD-I entry, and check that the implementation discards it.
 
 ### RFC4301-SPD-14
 
@@ -1395,8 +1355,7 @@ the order of the document.
 > SPD-S must be checked." — §4.4.1, `rfc4301.txt:1135-1137`, `rfc4301.txt:1137-1138`
 
 - Strength: must, should (lower case). Class: internal.
-- Check idea: for outbound traffic, look up SPD-S and SPD-O in each order and check that the
-  implementation performs the second lookup whenever the first lookup finds no match.
+- Check idea: for outbound traffic, look up SPD-S and SPD-O in each order and check that the implementation performs the second lookup whenever the first lookup finds no match.
 
 ### RFC4301-SPD-15
 
@@ -1407,8 +1366,7 @@ the order of the document.
 > `rfc4301.txt:1139-1140`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a non-decorrelated, ordered SPD and check that its SPD-S, SPD-I, and SPD-O
-  entries sit in one interleaved, ordered list searched by a single lookup.
+- Check idea: inspect a non-decorrelated, ordered SPD and check that its SPD-S, SPD-I, and SPD-O entries sit in one interleaved, ordered list searched by a single lookup.
 
 ### RFC4301-SPD-16
 
@@ -1418,8 +1376,7 @@ the order of the document.
 > is keyed by a list of one or more selectors." — §4.4.1, `rfc4301.txt:1144-1145`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry and check that it names one of BYPASS, DISCARD, or PROTECT
-  and lists the selectors that key it.
+- Check idea: inspect an SPD entry and check that it names one of BYPASS, DISCARD, or PROTECT and lists the selectors that key it.
 
 ### RFC4301-SPD-17
 
@@ -1429,8 +1386,7 @@ the order of the document.
 > unmatched, and discards it." — §4.4.1, `rfc4301.txt:1151-1152`
 
 - Strength: should. Class: internal.
-- Check idea: send a packet that matches no explicit SPD entry and check that the SPD's final
-  entry discards it.
+- Check idea: send a packet that matches no explicit SPD entry and check that the SPD's final entry discards it.
 
 ### RFC4301-SPD-18
 
@@ -1442,8 +1398,7 @@ the order of the document.
 > `rfc4301.txt:1154-1155`, `rfc4301.txt:1157-1159`
 
 - Strength: must. Class: internal.
-- Check idea: ask a user or administrator to create an SPD-I entry for inbound traffic to be
-  bypassed or discarded and check that the SPD accepts an entry built from selector values.
+- Check idea: ask a user or administrator to create an SPD-I entry for inbound traffic to be bypassed or discarded and check that the SPD accepts an entry built from selector values.
 
 ### RFC4301-SPD-19
 
@@ -1455,8 +1410,7 @@ the order of the document.
 > `rfc4301.txt:1154-1155`, `rfc4301.txt:1161-1163`
 
 - Strength: must. Class: internal.
-- Check idea: ask a user or administrator to create an SPD-O entry for outbound traffic to be
-  bypassed or discarded and check that the SPD accepts an entry built from selector values.
+- Check idea: ask a user or administrator to create an SPD-O entry for outbound traffic to be bypassed or discarded and check that the SPD accepts an entry built from selector values.
 
 ### RFC4301-SPD-20
 
@@ -1469,9 +1423,7 @@ the order of the document.
 > (e.g., algorithms, modes, etc.)." — §4.4.1, `rfc4301.txt:1154-1155`, `rfc4301.txt:1165-1169`
 
 - Strength: must. Class: internal.
-- Check idea: ask a user or administrator to create an SPD-S entry for traffic to be protected
-  and check that the SPD accepts the selector values, the SA-creation controls, and the
-  protection parameters.
+- Check idea: ask a user or administrator to create an SPD-S entry for traffic to be protected and check that the SPD accepts the selector values, the SA-creation controls, and the protection parameters.
 
 ### RFC4301-SPD-21
 
@@ -1484,8 +1436,7 @@ the order of the document.
 > `rfc4301.txt:1183-1185`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD-S entry and check that it carries a PFP flag and bits stating
-  whether the SA lookup uses the local and remote IP addresses together with the SPI.
+- Check idea: inspect an SPD-S entry and check that it carries a PFP flag and bits stating whether the SA lookup uses the local and remote IP addresses together with the SPI.
 
 ### RFC4301-SPD-22
 
@@ -1496,8 +1447,7 @@ the order of the document.
 > `rfc4301.txt:1189-1191`
 
 - Strength: description. Class: internal.
-- Check idea: compare the outbound and inbound SPD-S entries for the same flow and check that
-  the Local and Remote address and port values are swapped between them.
+- Check idea: compare the outbound and inbound SPD-S entries for the same flow and check that the Local and Remote address and port values are swapped between them.
 
 ### RFC4301-SPD-23
 
@@ -1508,8 +1458,7 @@ the order of the document.
 > protocols." — §4.4.1, `rfc4301.txt:1193-1194`, `rfc4301.txt:1194-1197`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry for ICMP traffic and check that it follows the same
-  Local/Remote and selector structure used for other protocols.
+- Check idea: inspect an SPD entry for ICMP traffic and check that it follows the same Local/Remote and selector structure used for other protocols.
 
 ### RFC4301-SPD-24
 
@@ -1521,9 +1470,7 @@ the order of the document.
 > `rfc4301.txt:1200-1202`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry that matches ICMP or Mobility Header traffic and check that it
-  expresses access control through message type/code or Mobility Header type instead of port
-  values.
+- Check idea: inspect an SPD entry that matches ICMP or Mobility Header traffic and check that it expresses access control through message type/code or Mobility Header type instead of port values.
 
 ### RFC4301-SPD-25
 
@@ -1533,9 +1480,7 @@ the order of the document.
 > to permit unidirectional flows if required." — §4.4.1, `rfc4301.txt:1202-1204`
 
 - Strength: description. Class: internal.
-- Check idea: configure separate SPD-I and SPD-O entries that permit traffic in only one
-  direction and check that the SPD allows the unidirectional flow while blocking the reverse
-  direction.
+- Check idea: configure separate SPD-I and SPD-O entries that permit traffic in only one direction and check that the SPD allows the unidirectional flow while blocking the reverse direction.
 
 ### RFC4301-SPD-26
 
@@ -1546,8 +1491,7 @@ the order of the document.
 > `rfc4301.txt:1210-1212`
 
 - Strength: description. Class: internal.
-- Check idea: create an SPD entry with a selector set to ANY and check that it matches packets
-  with any field value and packets where the field is absent or obscured.
+- Check idea: create an SPD entry with a selector set to ANY and check that it matches packets with any field value and packets where the field is absent or obscured.
 
 ### RFC4301-SPD-27
 
@@ -1559,8 +1503,7 @@ the order of the document.
 > `rfc4301.txt:1212-1216`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: create an SPD entry with a selector set to OPAQUE and check that it matches
-  packets whose corresponding field cannot be examined.
+- Check idea: create an SPD entry with a selector set to OPAQUE and check that it matches packets whose corresponding field cannot be examined.
 
 ### RFC4301-SPD-28
 
@@ -1572,8 +1515,7 @@ the order of the document.
 > `rfc4301.txt:1217-1220`
 
 - Strength: description. Class: internal.
-- Check idea: compare an SPD entry that uses ANY against one that uses OPAQUE for the same
-  selector and check that ANY also matches the packets that OPAQUE matches.
+- Check idea: compare an SPD entry that uses ANY against one that uses OPAQUE for the same selector and check that ANY also matches the packets that OPAQUE matches.
 
 ### RFC4301-SPD-29
 
@@ -1584,8 +1526,7 @@ the order of the document.
 > §4.4.1, `rfc4301.txt:1224-1226`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry's selectors and check that each one states whether the new
-  SAD entry takes its value from the packet or from the SPD entry.
+- Check idea: inspect an SPD entry's selectors and check that each one states whether the new SAD entry takes its value from the packet or from the SPD entry.
 
 ### RFC4301-SPD-30
 
@@ -1597,8 +1538,7 @@ the order of the document.
 > port, or ICMP type/code, or Mobility Header type)." — §4.4.1, `rfc4301.txt:1241-1246`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: configure an SPD entry with IPsec processing and set the PFP flag on one of its
-  selectors and check that the SPD entry accepts the flag for that selector.
+- Check idea: configure an SPD entry with IPsec processing and set the PFP flag on one of its selectors and check that the SPD entry accepts the flag for that selector.
 
 ### RFC4301-SPD-31
 
@@ -1610,9 +1550,7 @@ the order of the document.
 > `rfc4301.txt:1248-1249`
 
 - Strength: should (lower case). Class: internal.
-- Check idea: create SAs from SPD entries with the PFP flag set and with it cleared for a
-  selector, and check that the SA's value comes from the packet when the flag is set and from
-  the SPD entry when it is cleared.
+- Check idea: create SAs from SPD entries with the PFP flag set and with it cleared for a selector, and check that the SA's value comes from the packet when the flag is set and from the SPD entry when it is cleared.
 
 ### RFC4301-SPD-32
 
@@ -1622,8 +1560,7 @@ the order of the document.
 > system administrator to manage the SPD." — §4.4.1, `rfc4301.txt:1282-1284`
 
 - Strength: must. Class: internal.
-- Check idea: inspect an IPsec implementation and check that it offers a management interface
-  through which a user or administrator can manage the SPD.
+- Check idea: inspect an IPsec implementation and check that it offers a management interface through which a user or administrator can manage the SPD.
 
 ### RFC4301-SPD-33
 
@@ -1634,8 +1571,7 @@ the order of the document.
 > `rfc4301.txt:1284-1286`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: through the management interface, specify the security processing for a class of
-  traffic and check that packets crossing the IPsec boundary receive that processing.
+- Check idea: through the management interface, specify the security processing for a class of traffic and check that packets crossing the IPsec boundary receive that processing.
 
 ### RFC4301-SPD-34
 
@@ -1645,8 +1581,7 @@ the order of the document.
 > selectors defined in Section 4.4.1.1" — §4.4.1, `rfc4301.txt:1297-1299`
 
 - Strength: must. Class: internal.
-- Check idea: through the management interface, create an SPD entry using the defined selector
-  types and check that the SPD accepts it.
+- Check idea: through the management interface, create an SPD entry using the defined selector types and check that the SPD accepts it.
 
 ### RFC4301-SPD-35
 
@@ -1656,8 +1591,7 @@ the order of the document.
 > `rfc4301.txt:1299-1300`
 
 - Strength: must. Class: internal.
-- Check idea: through the management interface, set a total order on the SPD entries and check
-  that the interface reports that same order back.
+- Check idea: through the management interface, set a total order on the SPD entries and check that the interface reports that same order back.
 
 ### RFC4301-SPD-36
 
@@ -1667,8 +1601,7 @@ the order of the document.
 > `rfc4301.txt:1305-1306`
 
 - Strength: may. Class: internal.
-- Check idea: in a host system that allows application-created policy, have an application
-  request an SPD entry and check that the SPD accepts it.
+- Check idea: in a host system that allows application-created policy, have an application request an SPD entry and check that the SPD accepts it.
 
 ### RFC4301-SPD-37
 
@@ -1678,9 +1611,7 @@ the order of the document.
 > override (default) system policies." — §4.4.1, `rfc4301.txt:1308-1309`
 
 - Strength: must. Class: internal.
-- Check idea: as the system administrator, set whether a user or application may override the
-  default system policy and check that the setting is honored when a user or application
-  attempts an override.
+- Check idea: as the system administrator, set whether a user or application may override the default system policy and check that the setting is honored when a user or application attempts an override.
 
 ### RFC4301-SPD-38
 
@@ -1690,8 +1621,7 @@ the order of the document.
 > MUST support." — §4.4.1, `rfc4301.txt:1313-1314`
 
 - Strength: must. Class: internal.
-- Check idea: inspect an IPsec implementation's SPD and check that it supports every SPD element
-  this document defines.
+- Check idea: inspect an IPsec implementation's SPD and check that it supports every SPD element this document defines.
 
 ### RFC4301-SPD-39
 
@@ -1703,9 +1633,7 @@ the order of the document.
 > `rfc4301.txt:1334-1338`
 
 - Strength: must. Class: internal.
-- Check idea: decorrelate an SPD entry into several resulting entries and check that they are
-  linked together and placed into the caches and the SAD as one group when one of them triggers
-  an SA.
+- Check idea: decorrelate an SPD entry into several resulting entries and check that they are linked together and placed into the caches and the SAD as one group when one of them triggers an SA.
 
 ### RFC4301-SPD-40
 
@@ -1716,8 +1644,7 @@ the order of the document.
 > intent of both peers." — §4.4.1, `rfc4301.txt:1387-1390`
 
 - Strength: should. Class: internal.
-- Check idea: give a responder with a decorrelated SPD a set of traffic selector proposals and
-  check that it matches them against the decorrelated entries.
+- Check idea: give a responder with a decorrelated SPD a set of traffic selector proposals and check that it matches them against the decorrelated entries.
 
 ### RFC4301-SPD-41
 
@@ -1727,8 +1654,7 @@ the order of the document.
 > correlated entries." — §4.4.1, `rfc4301.txt:1390-1391`
 
 - Strength: should. Class: internal.
-- Check idea: give a responder with a correlated SPD a set of traffic selector proposals and
-  check that it matches them against the correlated entries.
+- Check idea: give a responder with a correlated SPD a set of traffic selector proposals and check that it matches them against the correlated entries.
 
 ### RFC4301-SPD-42
 
@@ -1739,9 +1665,7 @@ the order of the document.
 > control policy expressed in the SPD." — §4.4.1, `rfc4301.txt:1396-1398`, `rfc4301.txt:1407-1409`
 
 - Strength: must. Class: internal.
-- Check idea: with a non-decorrelated SPD, present inbound traffic arriving on an SA and check
-  that the implementation performs an ordered search of the SPD, instead of using a cache, to
-  verify consistency with the access control policy.
+- Check idea: with a non-decorrelated SPD, present inbound traffic arriving on an SA and check that the implementation performs an ordered search of the SPD, instead of using a cache, to verify consistency with the access control policy.
 
 ### RFC4301-SPD-43
 
@@ -1751,8 +1675,7 @@ the order of the document.
 > SPD-S cache." — §4.4.1, `rfc4301.txt:1395-1396`
 
 - Strength: description. Class: internal.
-- Check idea: provide an implementation with a decorrelated SPD and check that its SPD-S cache
-  is populated from the decorrelated entries.
+- Check idea: provide an implementation with a decorrelated SPD and check that its SPD-S cache is populated from the decorrelated entries.
 
 ### RFC4301-SPD-44
 
@@ -1763,8 +1686,7 @@ the order of the document.
 > change on extant SAs" — §4.4.1, `rfc4301.txt:1413-1414`, `rfc4301.txt:1415-1416`
 
 - Strength: should. Class: internal.
-- Check idea: change the SPD while the system is running, with existing SAs present, and check
-  that the implementation evaluates the effect of the change on those SAs.
+- Check idea: change the SPD while the system is running, with existing SAs present, and check that the implementation evaluates the effect of the change on those SAs.
 
 ### RFC4301-SPD-45
 
@@ -1775,9 +1697,7 @@ the order of the document.
 > `rfc4301.txt:1416-1418`
 
 - Strength: should. Class: internal.
-- Check idea: as a user or administrator, configure the action to take on an SA affected by an
-  SPD change and check that the implementation applies that configured action, such as deleting
-  the SA or leaving it unchanged.
+- Check idea: as a user or administrator, configure the action to take on an SA affected by an SPD change and check that the implementation applies that configured action, such as deleting the SA or leaving it unchanged.
 
 ## Selectors
 
@@ -1789,8 +1709,7 @@ the order of the document.
 > facilitate control of SA granularity." — §4.4.1.1, `rfc4301.txt:1431-1433`
 
 - Strength: must. Class: internal.
-- Check idea: inspect an IPsec implementation and check that it supports every selector
-  parameter this section defines.
+- Check idea: inspect an IPsec implementation and check that it supports every selector parameter this section defines.
 
 ### RFC4301-SEL-2
 
@@ -1800,8 +1719,7 @@ the order of the document.
 > address types." — §4.4.1.1, `rfc4301.txt:1433-1435`
 
 - Strength: should (lower case). Class: internal.
-- Check idea: inspect a selector's Local and Remote address values and check that both use the
-  same IP version.
+- Check idea: inspect a selector's Local and Remote address values and check that both use the same IP version.
 
 ### RFC4301-SEL-3
 
@@ -1812,8 +1730,7 @@ the order of the document.
 > packet fragmentation." — §4.4.1.1, `rfc4301.txt:1435-1438`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: present a fragmented packet whose port, ICMP type/code, or Mobility Header type
-  field is inaccessible and check that the matching selector can be labeled OPAQUE.
+- Check idea: present a fragmented packet whose port, ICMP type/code, or Mobility Header type field is inaccessible and check that the matching selector can be labeled OPAQUE.
 
 ### RFC4301-SEL-4
 
@@ -1826,8 +1743,7 @@ the order of the document.
 > `rfc4301.txt:1440-1441`, `rfc4301.txt:1441-1445`
 
 - Strength: description. Class: internal.
-- Check idea: configure the Remote IP Address selector as a single address, as a list of
-  addresses, and as a range of addresses, and check that the SPD entry accepts each form.
+- Check idea: configure the Remote IP Address selector as a single address, as a list of addresses, and as a range of addresses, and check that the SPD entry accepts each form.
 
 ### RFC4301-SEL-5
 
@@ -1841,9 +1757,7 @@ the order of the document.
 > §4.4.1.1, `rfc4301.txt:1449-1450`, `rfc4301.txt:1450-1454`, `rfc4301.txt:1464-1465`
 
 - Strength: description. Class: internal.
-- Check idea: configure the Local IP Address selector as a single address, as a list of
-  addresses, and as a range of addresses, and check that the SPD entry accepts each form and
-  treats it as the address this implementation protects.
+- Check idea: configure the Local IP Address selector as a single address, as a list of addresses, and as a range of addresses, and check that the SPD entry accepts each form and treats it as the address this implementation protects.
 
 ### RFC4301-SEL-6
 
@@ -1854,8 +1768,7 @@ the order of the document.
 > §4.4.1.1, `rfc4301.txt:1467-1469`
 
 - Strength: should (lower case). Class: internal.
-- Check idea: attempt to configure an SPD entry with a multicast Local or Remote address and
-  check that the SPD does not accept it as an ordinary unicast selector entry.
+- Check idea: attempt to configure an SPD entry with a multicast Local or Remote address and check that the SPD does not accept it as an ordinary unicast selector entry.
 
 ### RFC4301-SEL-7
 
@@ -1866,8 +1779,7 @@ the order of the document.
 > `rfc4301.txt:1477-1479`
 
 - Strength: description. Class: internal.
-- Check idea: inspect the Next Layer Protocol selector of an SPD entry and check that its value
-  is a single protocol number, ANY, or, on an IPv6 entry, OPAQUE.
+- Check idea: inspect the Next Layer Protocol selector of an SPD entry and check that its value is a single protocol number, ANY, or, on an IPv6 entry, OPAQUE.
 
 ### RFC4301-SEL-8
 
@@ -1877,9 +1789,7 @@ the order of the document.
 > §4.4.1.1, `rfc4301.txt:1479-1481`
 
 - Strength: description. Class: internal.
-- Check idea: send a packet with one or more IP extension headers and check that the
-  implementation identifies the Next Layer Protocol as the protocol following the last
-  extension header.
+- Check idea: send a packet with one or more IP extension headers and check that the implementation identifies the Next Layer Protocol as the protocol following the last extension header.
 
 ### RFC4301-SEL-9
 
@@ -1889,8 +1799,7 @@ the order of the document.
 > which IPv6 extension headers to skip." — §4.4.1.1, `rfc4301.txt:1481-1483`
 
 - Strength: should. Class: internal.
-- Check idea: look for a configuration mechanism that selects which IPv6 extension headers to
-  skip and check that it is present and lets the administrator change the skip list.
+- Check idea: look for a configuration mechanism that selects which IPv6 extension headers to skip and check that it is present and lets the administrator change the skip list.
 
 ### RFC4301-SEL-10
 
@@ -1901,8 +1810,7 @@ the order of the document.
 > (Destination Options)." — §4.4.1.1, `rfc4301.txt:1483-1486`
 
 - Strength: should. Class: internal.
-- Check idea: inspect the default extension-header skip list of a newly configured
-  implementation and check that it includes protocol numbers 0, 43, 44, and 60.
+- Check idea: inspect the default extension-header skip list of a newly configured implementation and check that it includes protocol numbers 0, 43, 44, and 60.
 
 ### RFC4301-SEL-11
 
@@ -1912,9 +1820,7 @@ the order of the document.
 > view, IPsec treats AH and ESP as Next Layer Protocols." — §4.4.1.1, `rfc4301.txt:1486-1488`
 
 - Strength: description. Class: internal.
-- Check idea: inspect the default extension-header skip list and check that it excludes
-  protocol numbers 50 and 51, and check that a selector lookup can match on AH or ESP as the
-  Next Layer Protocol.
+- Check idea: inspect the default extension-header skip list and check that it excludes protocol numbers 50 and 51, and check that a selector lookup can match on AH or ESP as the Next Layer Protocol.
 
 ### RFC4301-SEL-12
 
@@ -1925,8 +1831,7 @@ the order of the document.
 > values." — §4.4.1.1, `rfc4301.txt:1493-1494`, `rfc4301.txt:1494-1496`
 
 - Strength: description. Class: internal.
-- Check idea: configure an SPD entry for a two-port protocol and check that it accepts Local and
-  Remote Port selectors, each as a list of value ranges.
+- Check idea: configure an SPD entry for a two-port protocol and check that it accepts Local and Remote Port selectors, each as a list of value ranges.
 
 ### RFC4301-SEL-13
 
@@ -1937,8 +1842,7 @@ the order of the document.
 > MUST be supported." — §4.4.1.1, `rfc4301.txt:1496-1499`
 
 - Strength: must. Class: internal.
-- Check idea: configure a port selector with the value OPAQUE and check that the SPD entry
-  accepts it.
+- Check idea: configure a port selector with the value OPAQUE and check that the SPD entry accepts it.
 
 ### RFC4301-SEL-14
 
@@ -1949,8 +1853,7 @@ the order of the document.
 > fragments." — §4.4.1.1, `rfc4301.txt:1499-1500`, `rfc4301.txt:1500-1502`
 
 - Strength: description. Class: internal.
-- Check idea: send a non-initial fragment against an SPD entry whose port selector is a specific
-  value and check that it does not match.
+- Check idea: send a non-initial fragment against an SPD entry whose port selector is a specific value and check that it does not match.
 
 ### RFC4301-SEL-15
 
@@ -1960,8 +1863,7 @@ the order of the document.
 > MUST be discarded." — §4.4.1.1, `rfc4301.txt:1502-1504`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a fragment without port fields toward an SA that requires a specific port
-  value and check that the implementation discards the fragment.
+- Check idea: send a fragment without port fields toward an SA that requires a specific port value and check that the implementation discards the fragment.
 
 ### RFC4301-SEL-16
 
@@ -1972,8 +1874,7 @@ the order of the document.
 > particular mobility message." — §4.4.1.1, `rfc4301.txt:1507-1509`, `rfc4301.txt:1509-1510`
 
 - Strength: description. Class: internal.
-- Check idea: configure an SPD entry whose Next Layer Protocol is the Mobility Header and check
-  that it accepts an 8-bit MH type selector.
+- Check idea: configure an SPD entry whose Next Layer Protocol is the Mobility Header and check that it accepts an 8-bit MH type selector.
 
 ### RFC4301-SEL-17
 
@@ -1983,8 +1884,7 @@ the order of the document.
 > §4.4.1.1, `rfc4301.txt:1510`, `rfc4301.txt:1519`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: send a fragmented Mobility Header packet and check that the implementation treats
-  the MH type selector as unavailable.
+- Check idea: send a fragmented Mobility Header packet and check that the implementation treats the MH type selector as unavailable.
 
 ### RFC4301-SEL-18
 
@@ -1996,8 +1896,7 @@ the order of the document.
 > specific subtype for an ICMP message." — §4.4.1.1, `rfc4301.txt:1524-1528`
 
 - Strength: description. Class: internal.
-- Check idea: configure an SPD entry whose Next Layer Protocol is ICMP and check that it accepts
-  an 8-bit message type value, or ANY, and an 8-bit code value.
+- Check idea: configure an SPD entry whose Next Layer Protocol is ICMP and check that it accepts an 8-bit message type value, or ANY, and an 8-bit code value.
 
 ### RFC4301-SEL-19
 
@@ -2007,9 +1906,7 @@ the order of the document.
 > code, and ANY type and ANY code." — §4.4.1.1, `rfc4301.txt:1531-1533`
 
 - Strength: description. Class: internal.
-- Check idea: configure ICMP type/code selectors in each of the three forms and check that the
-  SPD entry accepts a single type with a code range, a single type with ANY code, and ANY type
-  with ANY code.
+- Check idea: configure ICMP type/code selectors in each of the three forms and check that the SPD entry accepts a single type with a code range, a single type with ANY code, and ANY type with ANY code.
 
 ### RFC4301-SEL-20
 
@@ -2021,9 +1918,7 @@ the order of the document.
 > `rfc4301.txt:1533-1536`, `rfc4301.txt:1538-1539`
 
 - Strength: must. Class: internal.
-- Check idea: configure a policy entry with Type and Code ranges and send ICMP packets with Type
-  and Code values inside and outside the computed bound, and check that the implementation
-  matches exactly the packets that satisfy the formula.
+- Check idea: configure a policy entry with Type and Code ranges and send ICMP packets with Type and Code values inside and outside the computed bound, and check that the implementation matches exactly the packets that satisfy the formula.
 
 ### RFC4301-SEL-21
 
@@ -2033,8 +1928,7 @@ the order of the document.
 > packet." — §4.4.1.1, `rfc4301.txt:1541-1542`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: send a fragmented ICMP packet and check that the implementation treats the message
-  type and code selector as unavailable.
+- Check idea: send a fragmented ICMP packet and check that the implementation treats the message type and code selector as unavailable.
 
 ### RFC4301-SEL-22
 
@@ -2045,8 +1939,7 @@ the order of the document.
 > §4.4.1.1, `rfc4301.txt:1545-1547`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: inspect a named SPD entry and check that its Name value is a symbolic identifier
-  configured locally, not extracted from a packet field.
+- Check idea: inspect a named SPD entry and check that its Name value is a symbolic identifier configured locally, not extracted from a packet field.
 
 ### RFC4301-SEL-23
 
@@ -2060,9 +1953,7 @@ the order of the document.
 > §4.4.1.1, `rfc4301.txt:1550-1553`, `rfc4301.txt:1555-1557`, `rfc4301.txt:1557-1559`
 
 - Strength: description. Class: internal.
-- Check idea: select a named SPD entry as a responder and check that the created SAD entry's
-  Remote IP address is the initiator's source address, overriding any address value in the SPD
-  entry.
+- Check idea: select a named SPD entry as a responder and check that the created SAD entry's Remote IP address is the initiator's source address, overriding any address value in the SPD entry.
 
 ### RFC4301-SEL-24
 
@@ -2072,8 +1963,7 @@ the order of the document.
 > `rfc4301.txt:1559-1560`
 
 - Strength: must. Class: internal.
-- Check idea: inspect an IPsec implementation acting as a responder and check that it supports
-  named SPD entries of the four identifier types.
+- Check idea: inspect an IPsec implementation acting as a responder and check that it supports named SPD entries of the four identifier types.
 
 ### RFC4301-SEL-25
 
@@ -2087,9 +1977,7 @@ the order of the document.
 > `rfc4301.txt:1564-1566`, `rfc4301.txt:1575`, `rfc4301.txt:1576`, `rfc4301.txt:1577`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: select a named SPD entry as an initiator and check that the created SPD cache
-  entry and outbound SAD entry take the local address from the initiator's IP source address,
-  and that the inbound SAD entry takes the remote address from it.
+- Check idea: select a named SPD entry as an initiator and check that the created SPD cache entry and outbound SAD entry take the local address from the initiator's IP source address, and that the inbound SAD entry takes the remote address from it.
 
 ### RFC4301-SEL-26
 
@@ -2099,9 +1987,7 @@ the order of the document.
 > applicable to other implementations." — §4.4.1.1, `rfc4301.txt:1579-1580`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a multi-user, native host implementation and check whether it offers the
-  initiator's named-SPD-entry substitution as an optional feature, and check that a non-host
-  implementation does not offer it.
+- Check idea: inspect a multi-user, native host implementation and check whether it offers the initiator's named-SPD-entry substitution as an optional feature, and check that a non-host implementation does not offer it.
 
 ### RFC4301-SEL-27
 
@@ -2111,8 +1997,7 @@ the order of the document.
 > Remote IP address." — §4.4.1.1, `rfc4301.txt:1586-1587`
 
 - Strength: description. Class: internal.
-- Check idea: configure an SPD entry with both a name and Local or Remote IP address values and
-  check that the SPD accepts both together.
+- Check idea: configure an SPD entry with both a name and Local or Remote IP address values and check that the SPD accepts both together.
 
 ### RFC4301-SEL-28
 
@@ -2122,8 +2007,7 @@ the order of the document.
 > four types:" — §4.4.1.1, `rfc4301.txt:1589-1590`
 
 - Strength: description. Class: internal.
-- Check idea: configure a responder's named SPD entry with each of the four identifier types and
-  check that the SPD accepts each one.
+- Check idea: configure a responder's named SPD entry with each of the four identifier types and check that the SPD accepts each one.
 
 ### RFC4301-SEL-29
 
@@ -2134,8 +2018,7 @@ the order of the document.
 > `rfc4301.txt:1609-1610`, `rfc4301.txt:1612-1613`
 
 - Strength: description. Class: internal.
-- Check idea: configure an initiator's named SPD entry with a byte-string identifier and check
-  that the identifier never appears in transmitted traffic.
+- Check idea: configure an initiator's named SPD entry with a byte-string identifier and check that the identifier never appears in transmitted traffic.
 
 ## The structure of an SPD entry
 
@@ -2147,8 +2030,7 @@ the order of the document.
 > intent aligns with the IKE "mix and match" semantics." — §4.4.1.2, `rfc4301.txt:1649-1651`
 
 - Strength: must not. Class: internal.
-- Check idea: create an SPD entry with multiple selector sets whose intent does not match the
-  IKE mix-and-match semantics and check that the implementation rejects it or forbids it.
+- Check idea: create an SPD entry with multiple selector sets whose intent does not match the IKE mix-and-match semantics and check that the implementation rejects it or forbids it.
 
 ### RFC4301-SPDE-2
 
@@ -2159,8 +2041,7 @@ the order of the document.
 > semantics." — §4.4.1.2, `rfc4301.txt:1651-1654`
 
 - Strength: may. Class: internal.
-- Check idea: create an SPD entry with multiple selector sets whose syntax conflicts with the
-  IKE semantics and check whether the implementation issues a warning.
+- Check idea: create an SPD entry with multiple selector sets whose syntax conflicts with the IKE semantics and check whether the implementation issues a warning.
 
 ### RFC4301-SPDE-3
 
@@ -2170,8 +2051,7 @@ the order of the document.
 > Header type." — §4.4.1.2, `rfc4301.txt:1660-1661`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry selector for ICMP type/code or Mobility Header type and check
-  that it carries no Remote/Local label.
+- Check idea: inspect an SPD entry selector for ICMP type/code or Mobility Header type and check that it carries no Remote/Local label.
 
 ### RFC4301-SPDE-4
 
@@ -2182,8 +2062,7 @@ the order of the document.
 > list for that selector." — §4.4.1.2, `rfc4301.txt:1662-1665`
 
 - Strength: may, must (lower case). Class: internal.
-- Check idea: configure a selector's value list with OPAQUE or ANY together with another value,
-  or repeated more than once, and check that the SPD entry rejects the list.
+- Check idea: configure a selector's value list with OPAQUE or ANY together with another value, or repeated more than once, and check that the SPD entry rejects the list.
 
 ### RFC4301-SPDE-5
 
@@ -2194,9 +2073,7 @@ the order of the document.
 > §4.4.1.2, `rfc4301.txt:1665-1666`, `rfc4301.txt:1668`, `rfc4301.txt:1669`
 
 - Strength: description. Class: encoding.
-- Check idea: observe the range values an implementation sends via IKEv2 for a selector
-  configured as ANY or OPAQUE, and check that ANY appears as the range 0 to max and OPAQUE as
-  the range max to 0.
+- Check idea: observe the range values an implementation sends via IKEv2 for a selector configured as ANY or OPAQUE, and check that ANY appears as the range 0 to max and OPAQUE as the range max to 0.
 
 ### RFC4301-SPDE-6
 
@@ -2205,8 +2082,7 @@ the order of the document.
 > "Name -- a list of IDs. This quasi-selector is optional." — §4.4.1.2, `rfc4301.txt:1674`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry with no Name value and check that the SPD entry is still
-  valid, since the Name field is optional.
+- Check idea: inspect an SPD entry with no Name value and check that the SPD entry is still valid, since the Name field is optional.
 
 ### RFC4301-SPDE-7
 
@@ -2216,8 +2092,7 @@ the order of the document.
 > §4.4.1.2, `rfc4301.txt:1675-1676`
 
 - Strength: must. Class: internal.
-- Check idea: configure an SPD entry's Name field with each name form described for the
-  responder and the initiator cases and check that the implementation accepts them.
+- Check idea: configure an SPD entry's Name field with each name form described for the responder and the initiator cases and check that the implementation accepts them.
 
 ### RFC4301-SPDE-8
 
@@ -2228,8 +2103,7 @@ the order of the document.
 > entry." — §4.4.1.2, `rfc4301.txt:1687-1690`
 
 - Strength: description. Class: internal.
-- Check idea: inspect the PFP flags of an SPD entry with several selector sets and check that
-  one Next Layer Protocol flag governs that selector across all its selector sets.
+- Check idea: inspect the PFP flags of an SPD entry with several selector sets and check that one Next Layer Protocol flag governs that selector across all its selector sets.
 
 ### RFC4301-SPDE-9
 
@@ -2241,9 +2115,7 @@ the order of the document.
 > `rfc4301.txt:1690-1694`
 
 - Strength: description. Class: internal.
-- Check idea: create an SA from an SPD entry with a PFP flag set and with it cleared, and check
-  that the SA's selector value comes from the packet in the first case and from the SPD entry in
-  the second.
+- Check idea: create an SA from an SPD entry with a PFP flag set and with it cleared, and check that the SA's selector value comes from the packet in the first case and from the SPD entry in the second.
 
 ### RFC4301-SPDE-10
 
@@ -2255,8 +2127,7 @@ the order of the document.
 > on the next layer protocol)" — §4.4.1.2, `rfc4301.txt:1698-1705`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry and check that it carries a separate PFP flag for each of the
-  five listed selectors.
+- Check idea: inspect an SPD entry and check that it carries a separate PFP flag for each of the five listed selectors.
 
 ### RFC4301-SPDE-11
 
@@ -2269,8 +2140,7 @@ the order of the document.
 > type (depending on the next layer protocol)" — §4.4.1.2, `rfc4301.txt:1707-1716`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry's selector sets and check that each one carries the five
-  listed selector fields.
+- Check idea: inspect an SPD entry's selector sets and check that each one carries the five listed selector fields.
 
 ### RFC4301-SPDE-12
 
@@ -2282,8 +2152,7 @@ the order of the document.
 > `rfc4301.txt:1718-1720`, `rfc4301.txt:1723-1725`
 
 - Strength: description. Class: internal.
-- Check idea: configure an SPD entry with several selector sets naming different Next Layer
-  Protocol values and check that the resulting SA covers traffic of each protocol.
+- Check idea: configure an SPD entry with several selector sets naming different Next Layer Protocol values and check that the resulting SA covers traffic of each protocol.
 
 ### RFC4301-SPDE-13
 
@@ -2294,8 +2163,7 @@ the order of the document.
 > §4.4.1.2, `rfc4301.txt:1727-1730`
 
 - Strength: description. Class: internal.
-- Check idea: inspect an SPD entry with several selector sets and check that it carries one
-  processing action shared by all of them.
+- Check idea: inspect an SPD entry with several selector sets and check that it carries one processing action shared by all of them.
 
 ### RFC4301-SPDE-14
 
@@ -2304,8 +2172,7 @@ the order of the document.
 > "IPsec mode -- tunnel or transport" — §4.4.1.2, `rfc4301.txt:1732`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a PROTECT SPD entry and check that its IPsec mode field states tunnel or
-  transport.
+- Check idea: inspect a PROTECT SPD entry and check that its IPsec mode field states tunnel or transport.
 
 ### RFC4301-SPDE-15
 
@@ -2317,8 +2184,7 @@ the order of the document.
 > externally to IPsec." — §4.4.1.2, `rfc4301.txt:1743-1746`, `rfc4301.txt:1746-1748`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: configure a tunnel-mode PROTECT entry on a non-mobile host with multiple
-  interfaces and check that the local tunnel address is a statically configured value.
+- Check idea: configure a tunnel-mode PROTECT entry on a non-mobile host with multiple interfaces and check that the local tunnel address is a statically configured value.
 
 ### RFC4301-SPDE-16
 
@@ -2328,8 +2194,7 @@ the order of the document.
 > §4.4.1.2, `rfc4301.txt:1749-1750`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a tunnel-mode PROTECT entry and check that it carries a remote tunnel
-  address value.
+- Check idea: inspect a tunnel-mode PROTECT entry and check that it carries a remote tunnel address value.
 
 ### RFC4301-SPDE-17
 
@@ -2339,8 +2204,7 @@ the order of the document.
 > `rfc4301.txt:1752-1753`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a PROTECT entry's SA and check that its Extended Sequence Number field
-  states whether extended sequence numbers are in use.
+- Check idea: inspect a PROTECT entry's SA and check that its Extended Sequence Number field states whether extended sequence numbers are in use.
 
 ### RFC4301-SPDE-18
 
@@ -2350,8 +2214,7 @@ the order of the document.
 > `rfc4301.txt:1754-1755`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a PROTECT entry's SA and check that its stateful fragment checking field
-  states whether that checking is in use.
+- Check idea: inspect a PROTECT entry's SA and check that its stateful fragment checking field states whether that checking is in use.
 
 ### RFC4301-SPDE-19
 
@@ -2360,8 +2223,7 @@ the order of the document.
 > "Bypass DF bit (T/F) -- applicable to tunnel mode SAs" — §4.4.1.2, `rfc4301.txt:1757`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a tunnel-mode PROTECT entry and check that its Bypass DF bit field is set
-  to true or false.
+- Check idea: inspect a tunnel-mode PROTECT entry and check that its Bypass DF bit field is set to true or false.
 
 ### RFC4301-SPDE-20
 
@@ -2371,8 +2233,7 @@ the order of the document.
 > DSCP values -- applicable to tunnel mode SAs" — §4.4.1.2, `rfc4301.txt:1758-1760`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a tunnel-mode PROTECT entry and check that its DSCP field either bypasses
-  the DSCP value or maps it through an array of unprotected values.
+- Check idea: inspect a tunnel-mode PROTECT entry and check that its DSCP field either bypasses the DSCP value or maps it through an array of unprotected values.
 
 ### RFC4301-SPDE-21
 
@@ -2391,8 +2252,7 @@ the order of the document.
 > combined mode, ordered by decreasing priority" — §4.4.1.2, `rfc4301.txt:1762-1764`
 
 - Strength: description. Class: internal.
-- Check idea: inspect a PROTECT entry's algorithms field and check that it lists the AH, ESP, and
-  combined-mode algorithms in decreasing priority order.
+- Check idea: inspect a PROTECT entry's algorithms field and check that it lists the AH, ESP, and combined-mode algorithms in decreasing priority order.
 
 ## NLP: Fields of the next layer protocols
 
@@ -4090,14 +3950,9 @@ the order of the document.
 
 ## Out of scope in this catalog
 
-The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of
-§3.1, §3.2, §4 to §4.4.2, §5 to §5.2 and §10, and every field of every header. What the catalog leaves out:
+The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of §3.1, §3.2, §4 to §4.4.2, §5 to §5.2 and §10, and every field of every header. What the catalog leaves out:
 
-- **The sections outside the in-scope set.** §1 and §2 (introduction, design objectives),
-  §3.3 (where IPsec can be implemented), §4.4.3 to §4.6 (the PAD, key management, multicast
-  SAs), §6 to §9 (ICMP processing, fragments, path MTU, auditing) and §11 to §14. See
-  [`standards.md`](../../protocol/ipsec/standards.md#target-level) for the level at which each
-  one enters.
+- **The sections outside the in-scope set.** §1 and §2 (introduction, design objectives), §3.3 (where IPsec can be implemented), §4.4.3 to §4.6 (the PAD, key management, multicast SAs), §6 to §9 (ICMP processing, fragments, path MTU, auditing) and §11 to §14. See [`standards.md`](../../protocol/ipsec/standards.md#target-level) for the level at which each one enters.
 
 Within the in-scope sections, these parts have no entry, with the reason:
 
@@ -4146,67 +4001,39 @@ In §3.1 to §4.4:
 
 In §4.4.1 to §4.4.1.2:
 
-- 1050-1058: background on what an SA is and a scope statement for the SPD's form and
-  interface; no checkable statement.
-- 1073-1074: comparison to the superseded RFC 2401, stating the absence of a per-interface SPD
-  requirement; not testable.
-- 1083-1086: rationale for the SPD being an ordered database; the operative MUST is cataloged as
-  RFC4301-SPD-6.
+- 1050-1058: background on what an SA is and a scope statement for the SPD's form and interface; no checkable statement.
+- 1073-1074: comparison to the superseded RFC 2401, stating the absence of a per-interface SPD requirement; not testable.
+- 1083-1086: rationale for the SPD being an ordered database; the operative MUST is cataloged as RFC4301-SPD-6.
 - 1088-1091: rationale for why no canonical order can be imposed on SPD entries.
-- 1127-1131: descriptive elaboration of how a single SPD or partial SPDs compose SPD-S/SPD-O/
-  SPD-I; not an independent requirement beyond RFC4301-SPD-12.
-- 1249-1252: informative note on IKEv2 negotiating a subset of SPD selector values in the
-  non-PFP case; describes IKE, not an SPD requirement.
-- 1252-1255: "is a local matter" statement about whether one PFP flag or several cover related
-  selectors; not testable.
-- 1257-1278: the worked PFP example (192.0.2.1-192.0.2.10 case) and its table; illustrative
-  example only.
-- 1286-1287, 1295-1297: parenthetical noting a native host socket-interface implementation may
-  not need per-packet SPD consultation; an optional relief, not an independent requirement.
+- 1127-1131: descriptive elaboration of how a single SPD or partial SPDs compose SPD-S/SPD-O/ SPD-I; not an independent requirement beyond RFC4301-SPD-12.
+- 1249-1252: informative note on IKEv2 negotiating a subset of SPD selector values in the non-PFP case; describes IKE, not an SPD requirement.
+- 1252-1255: "is a local matter" statement about whether one PFP flag or several cover related selectors; not testable.
+- 1257-1278: the worked PFP example (192.0.2.1-192.0.2.10 case) and its table; illustrative example only.
+- 1286-1287, 1295-1297: parenthetical noting a native host socket-interface implementation may not need per-packet SPD consultation; an optional relief, not an independent requirement.
 - 1300-1303: analogy between SPD selectors and firewall ACLs/packet filters; rationale only.
 - 1306-1307: parenthetical placing the signaling of application SPD requests out of scope.
-- 1309-1313: statement that the management interface's form is unspecified and may differ by
-  implementation; not testable.
-- 1318-1329: rationale for decorrelation as an optional performance technique, not required by
-  this RFC.
+- 1309-1313: statement that the management interface's form is unspecified and may differ by implementation; not testable.
+- 1318-1329: rationale for decorrelation as an optional performance technique, not required by this RFC.
 - 1330-1334: note on SPD terminology and a pointer to the Appendix B decorrelation algorithm.
 - 1338-1354: the worked decorrelation example (entry A decorrelating into A1/A2/A3).
-- 1356-1380: the three options for what an initiator sends a peer via an SA management protocol
-  (IKE) when using a decorrelated SPD, and their tradeoffs; describes IKE message content
-  choices, not an IPsec-traffic-observable requirement.
-- 1382-1386: introductory sentence to responder matching, leading into RFC4301-SPD-40 and
-  RFC4301-SPD-41.
-- 1392-1393: note that IKEv2 with a decorrelated SPD offers the best chance of a "narrowed"
-  response; an informative IKE benefit, not a requirement.
+- 1356-1380: the three options for what an initiator sends a peer via an SA management protocol (IKE) when using a decorrelated SPD, and their tradeoffs; describes IKE message content choices, not an IPsec-traffic-observable requirement.
+- 1382-1386: introductory sentence to responder matching, leading into RFC4301-SPD-40 and RFC4301-SPD-41.
+- 1392-1393: note that IKEv2 with a decorrelated SPD offers the best chance of a "narrowed" response; an informative IKE benefit, not a requirement.
 - 1422-1431: background and example on SA granularity (fine- vs coarse-grained SAs).
-- 1445-1447: rationale for Remote address ranges supporting a shared SA behind a security
-  gateway.
-- 1469-1475: elaboration of the GSPD's differing structure and the outbound/inbound multicast
-  asymmetry; out of scope of the SPD itself.
-- 1520-1522: describes how IKE encodes the Mobility Header type in its own 16-bit port
-  selector; an IKE encoding detail, not IPsec traffic behavior.
-- 1529-1531: describes how IKE encodes the ICMP type and code in its own 16-bit selector; an IKE
-  encoding detail.
-- 1553-1554: describes the name being carried in the IKE ID payload during negotiation; an IKE
-  protocol detail.
-- 1581-1583: note that the initiator's name is local only and not carried by the key management
-  protocol, and a cross-reference to name forms used in the initiator context; informative.
-- 1592-1607: the four detailed examples of responder identifier types (a-d), with their IKEv2
-  ID-payload correspondences; illustrative detail already generalized in RFC4301-SEL-28.
-- 1615-1622: background on how the IPsec implementation context (native host socket interface
-  vs. BITS/BITW/security gateway) affects how often the SPD is consulted; descriptive.
+- 1445-1447: rationale for Remote address ranges supporting a shared SA behind a security gateway.
+- 1469-1475: elaboration of the GSPD's differing structure and the outbound/inbound multicast asymmetry; out of scope of the SPD itself.
+- 1520-1522: describes how IKE encodes the Mobility Header type in its own 16-bit port selector; an IKE encoding detail, not IPsec traffic behavior.
+- 1529-1531: describes how IKE encodes the ICMP type and code in its own 16-bit selector; an IKE encoding detail.
+- 1553-1554: describes the name being carried in the IKE ID payload during negotiation; an IKE protocol detail.
+- 1581-1583: note that the initiator's name is local only and not carried by the key management protocol, and a cross-reference to name forms used in the initiator context; informative.
+- 1592-1607: the four detailed examples of responder identifier types (a-d), with their IKEv2 ID-payload correspondences; illustrative detail already generalized in RFC4301-SEL-28.
+- 1615-1622: background on how the IPsec implementation context (native host socket interface vs. BITS/BITW/security gateway) affects how often the SPD is consulted; descriptive.
 - 1633-1635: pointer to the Appendix C ASN.1 example of an SPD entry.
-- 1637-1648: rationale for why the SPD text is written to map to IKE payloads, and the
-  described mismatch between SPD semantics and the concurrently published IKEv2; background for
-  RFC4301-SPDE-1.
-- 1656-1660: description of optional management-GUI conveniences (address prefixes, symbolic
-  names) and a note not to confuse them with the SPD selector "Name"; not testable.
+- 1637-1648: rationale for why the SPD text is written to map to IKE payloads, and the described mismatch between SPD semantics and the concurrently published IKEv2; background for RFC4301-SPDE-1.
+- 1656-1660: description of optional management-GUI conveniences (address prefixes, symbolic names) and a note not to confuse them with the SPD selector "Name"; not testable.
 - 1671-1672: lead-in sentence to the SPD entry field list; no independent claim.
-- 1695-1698: "is a local matter" statement about whether a single PFP flag or separate flags
-  cover related selectors; not testable.
-- 1766-1767: "It is a local matter as to what information is kept with regard to handling
-  extant SAs when the SPD is changed."; explicitly leaves the behavior unspecified, not
-  testable.
+- 1695-1698: "is a local matter" statement about whether a single PFP flag or separate flags cover related selectors; not testable.
+- 1766-1767: "It is a local matter as to what information is kept with regard to handling extant SAs when the SPD is changed."; explicitly leaves the behavior unspecified, not testable.
 
 In §4.4.1.3 to §4.4.2.2:
 

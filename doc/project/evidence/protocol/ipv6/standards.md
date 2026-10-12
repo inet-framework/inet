@@ -2,22 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around IPv6, records which document governs each contested clause, and pins the exact set
-that the current pass tests against. Every later artifact of this folder is bound to the
-in-scope set below.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around IPv6, records which document governs each contested clause, and pins the exact set that the current pass tests against. Every later artifact of this folder is bound to the in-scope set below.
 
-The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`),
-retrieved 2026-09-09. The relationship words are the ones of the workflow: `base`,
-`updates`, `obsoletes`, `amends`, `companion`.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-09. The relationship words are the ones of the workflow: `base`, `updates`, `obsoletes`, `amends`, `companion`.
 
 ## Target level
 
-**Level 3 — Edge** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-Level 3 adds the negative requirements, the error reports, and the crafted or corrupted
-input, and it brings in the document where those rules live for IPv6: the node
-requirements. The in-scope set below therefore holds three documents, and the two documents
-of level 2 are in scope in full where they were in scope in part.
+**Level 3 — Edge** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). Level 3 adds the negative requirements, the error reports, and the crafted or corrupted input, and it brings in the document where those rules live for IPv6: the node requirements. The in-scope set below therefore holds three documents, and the two documents of level 2 are in scope in full where they were in scope in part.
 
 The level decides which documents the next pass must add:
 
@@ -26,8 +17,7 @@ The level decides which documents the next pass must add:
 | level 4, Dynamics | RFC 8201 (path MTU discovery), the reassembly timer of RFC 8200 §4.5, the rate limit of RFC 4443 §2.4 (f) | control loops and timers |
 | level 5, Complete | RFC 4291, RFC 4861, RFC 4862, RFC 6437, RFC 2474, RFC 3168, RFC 2675, RFC 9673, RFC 4884 | addressing, neighbor discovery, the flow label, the traffic class, jumbograms, the hop-by-hop procedures, extended ICMP |
 
-What the pass actually reached is not recorded here. It is in
-[`model/ipv6/coverage.md`](../../model/ipv6/coverage.md#achieved-level).
+What the pass actually reached is not recorded here. It is in [`model/ipv6/coverage.md`](../../model/ipv6/coverage.md#achieved-level).
 
 ## Document list
 
@@ -50,44 +40,22 @@ What the pass actually reached is not recorded here. It is in
 | RFC 7739 | Security Implications of Predictable Fragment Identification Values | February 2016 | Informational | `companion` (identification algorithms; cited by RFC 8200 §4.5) | no |
 | RFC 6936 | Applicability Statement for IPv6 UDP Datagrams with Zero Checksums | May 2013 | Proposed Standard | `companion` (the exception to the mandatory UDP checksum) | no |
 
-Sources of the three texts. Each one is in the `standards` project, outside the INET tree,
-and every quote in this tree cites it by file name and line number:
+Sources of the three texts. Each one is in the `standards` project, outside the INET tree, and every quote in this tree cites it by file name and line number:
 
-- `rfc8200.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8200.txt) —
-  <https://www.rfc-editor.org/rfc/rfc8200.txt>, downloaded 2026-09-09.
-- `rfc4443.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4443.txt) —
-  <https://www.rfc-editor.org/rfc/rfc4443.txt>, downloaded 2026-09-09.
-- `rfc8504.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8504.txt) —
-  <https://www.rfc-editor.org/rfc/rfc8504.txt>, downloaded 2026-09-09.
+- `rfc8200.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8200.txt) — <https://www.rfc-editor.org/rfc/rfc8200.txt>, downloaded 2026-09-09.
+- `rfc4443.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4443.txt) — <https://www.rfc-editor.org/rfc/rfc4443.txt>, downloaded 2026-09-09.
+- `rfc8504.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc8504.txt) — <https://www.rfc-editor.org/rfc/rfc8504.txt>, downloaded 2026-09-09.
 
 Four relationship notes, because the register alone gives the wrong picture:
 
-- **RFC 8200 replaced RFC 2460 in 2017**, and RFC 2460 had nine updates folded into it
-  (among them RFC 5722 on overlapping fragments, RFC 6946 on atomic fragments, and RFC 7112
-  on oversized header chains). An implementation that cites RFC 2460 cites a text that no
-  longer governs; the hop limit rule for a destination node and the reassembly rules are
-  among the clauses that changed. This is the first thing the conformance document has to
-  look for.
-- **RFC 4443 is the ICMP of IPv6, and it is not optional.** Where RFC 792 says a gateway
-  "may" report, RFC 4443 says a router "MUST" send Packet Too Big and Time Exceeded. The
-  error reports of the base mechanisms are therefore mandatory features in IPv6, unlike
-  IPv4.
-- **RFC 8504 is a Best Current Practice, not a standard, and it mostly points.** Most of
-  its sentences say which document a node MUST or SHOULD implement; a few state a behavior
-  of their own, and those sharpen RFC 8200 §4.5 (overlapping and atomic fragments, the
-  header chain of a first fragment, unrecognized next headers). The catalog holds both
-  kinds; the pointing kind gets the class `implementation`.
-- **Neighbor Discovery (RFC 4861) and address autoconfiguration (RFC 4862) are out of the
-  set but present in every scenario.** They are the ARP of IPv6: address resolution,
-  router discovery and duplicate address detection run before the first datagram can
-  leave a host. The checks tolerate their messages on the wire and do not judge them.
+- **RFC 8200 replaced RFC 2460 in 2017**, and RFC 2460 had nine updates folded into it (among them RFC 5722 on overlapping fragments, RFC 6946 on atomic fragments, and RFC 7112 on oversized header chains). An implementation that cites RFC 2460 cites a text that no longer governs; the hop limit rule for a destination node and the reassembly rules are among the clauses that changed. This is the first thing the conformance document has to look for.
+- **RFC 4443 is the ICMP of IPv6, and it is not optional.** Where RFC 792 says a gateway "may" report, RFC 4443 says a router "MUST" send Packet Too Big and Time Exceeded. The error reports of the base mechanisms are therefore mandatory features in IPv6, unlike IPv4.
+- **RFC 8504 is a Best Current Practice, not a standard, and it mostly points.** Most of its sentences say which document a node MUST or SHOULD implement; a few state a behavior of their own, and those sharpen RFC 8200 §4.5 (overlapping and atomic fragments, the header chain of a first fragment, unrecognized next headers). The catalog holds both kinds; the pointing kind gets the class `implementation`.
+- **Neighbor Discovery (RFC 4861) and address autoconfiguration (RFC 4862) are out of the set but present in every scenario.** They are the ARP of IPv6: address resolution, router discovery and duplicate address detection run before the first datagram can leave a host. The checks tolerate their messages on the wire and do not judge them.
 
 ## Override table
 
-One row per clause-level conflict. `Governs` names the document a test must follow when the
-two texts disagree. The RFC 8200 and RFC 4443 references are line numbers of the
-downloaded files; the other references are clause numbers, because those texts are not
-downloaded.
+One row per clause-level conflict. `Governs` names the document a test must follow when the two texts disagree. The RFC 8200 and RFC 4443 references are line numbers of the downloaded files; the other references are clause numbers, because those texts are not downloaded.
 
 | Area | Base clause | Later clause | Governs | In scope now |
 | --- | --- | --- | --- | --- |
@@ -100,8 +68,7 @@ downloaded.
 | Fragment identification algorithm | RFC 8200 §4.5, `rfc8200.txt:864-879` (low reuse frequency) | RFC 7739 §5 (recommended algorithms; informational) | RFC 8200 (RFC 7739 is guidance) | no |
 | UDP zero checksum | RFC 8200 §8.1, `rfc8200.txt:1530-1537` (a zero checksum is discarded) | RFC 6936 (an exception for tunnel encapsulations, per port) | RFC 8200, with the RFC 6936 exception | no |
 
-Every in-scope row is an `Overridden by` cross reference in the RFC 8200 catalog. The other
-rows become one on the day their document enters the in-scope set.
+Every in-scope row is an `Overridden by` cross reference in the RFC 8200 catalog. The other rows become one on the day their document enters the in-scope set.
 
 ## In-scope set
 
@@ -113,11 +80,9 @@ The current pass tests against these exact documents:
 | RFC 4443 | March 2006, Internet Standard, no revision since (RFC 4884 extends the error message format, out of scope) | §2 (the general rules) and §3 (the error messages); not §4 (the informational messages) | [`rfc4443/catalog.md`](../../standard/rfc4443/catalog.md) |
 | RFC 8504 | January 2019, Best Current Practice 220, no revision since | §5.1, §5.2, §5.7, §5.8: the IP layer; not §5.3 (limits a host may set), the neighbor discovery and addressing sections, and §6 to §17 | [`rfc8504/catalog.md`](../../standard/rfc8504/catalog.md) |
 
-The three documents revise by replacement, never in place, so the document identity pins the
-version by itself.
+The three documents revise by replacement, never in place, so the document identity pins the version by itself.
 
-RFC 8504 is a multi-protocol document, like RFC 1122. Only the IP-layer sections named above
-enter the IPv6 set; the parts that stay out, with the reason:
+RFC 8504 is a multi-protocol document, like RFC 1122. Only the IP-layer sections named above enter the IPv6 set; the parts that stay out, with the reason:
 
 | RFC 8504 part | Reason it is out of the IPv6 set |
 | --- | --- |

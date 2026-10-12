@@ -2,19 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around the Ad hoc On-Demand Distance Vector routing protocol, records which document governs
-each contested clause, and pins the set that the next pass tests against. AODV has one base
-document and one companion that neither updates nor obsoletes it.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around the Ad hoc On-Demand Distance Vector routing protocol, records which document governs each contested clause, and pins the set that the next pass tests against. AODV has one base document and one companion that neither updates nor obsoletes it.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -23,8 +17,7 @@ claims of the model. It writes no catalog, no feature map and no test.
 | level 4, Dynamics | nothing new | §6.9 and §6.10 hold the periodic hello message and the local-connectivity check it supports; §6.3 holds the expanding-ring search backoff; RFC 5148 governs the jitter the standard applies to periodic and forwarded messages |
 | level 5, Complete | RFC 3561 §6.12, §6.13, §6.14, §7, §8 | local repair is a path the standard itself marks optional; actions after reboot is a full restart scenario; multiple interfaces, subnet aggregation and interaction with a wired network are each a separate mode of operation |
 
-What a pass actually reached is not recorded here. It is in
-[`model/aodv/coverage.md`](../../model/aodv/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/aodv/coverage.md`](../../model/aodv/coverage.md#achieved-level).
 
 ## Document list
 
@@ -35,29 +28,14 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc3561.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3561.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3561.txt>, downloaded 2026-09-23.
-- `rfc5148.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5148.txt) —
-  <https://www.rfc-editor.org/rfc/rfc5148.txt>, downloaded 2026-09-23.
+- `rfc3561.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3561.txt) — <https://www.rfc-editor.org/rfc/rfc3561.txt>, downloaded 2026-09-23.
+- `rfc5148.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5148.txt) — <https://www.rfc-editor.org/rfc/rfc5148.txt>, downloaded 2026-09-23.
 
-Neither document has an `obsoletes`, `obsoleted_by`, `updates` or `updated_by` entry in the
-register. AODV is the one protocol of this pass whose family carries no later document at
-all: what RFC 3561 says in 2003 is still the whole of the base text today.
+Neither document has an `obsoletes`, `obsoleted_by`, `updates` or `updated_by` entry in the register. AODV is the one protocol of this pass whose family carries no later document at all: what RFC 3561 says in 2003 is still the whole of the base text today.
 
-**Both documents carry a status below Internet Standard, and that bounds what their keywords
-mean.** RFC 3561 has the status Experimental. The document itself says an Experimental
-specification "does not specify an Internet standard of any kind". A `must` or `should` inside
-it states what an implementation needs to do to interoperate with another AODV
-implementation. It does not carry the weight of an IETF-wide requirement the way a `must` in
-an Internet Standard does. RFC 5148 has the status Informational. It is not on the standards
-track at all; its `should` and `may` words state advice for a protocol designer, not a
-requirement on a conforming implementation. A later pass keeps this distinction when it turns
-a clause into a mandatory or optional feature.
+**Both documents carry a status below Internet Standard, and that bounds what their keywords mean.** RFC 3561 has the status Experimental. The document itself says an Experimental specification "does not specify an Internet standard of any kind". A `must` or `should` inside it states what an implementation needs to do to interoperate with another AODV implementation. It does not carry the weight of an IETF-wide requirement the way a `must` in an Internet Standard does. RFC 5148 has the status Informational. It is not on the standards track at all; its `should` and `may` words state advice for a protocol designer, not a requirement on a conforming implementation. A later pass keeps this distinction when it turns a clause into a mandatory or optional feature.
 
-Both documents use the keywords of RFC 2119, in upper case
-(`rfc3561.txt:1914`, `rfc5148.txt:134` and `rfc5148.txt:516`). In RFC 3561, `MUST` is on 32
-lines, `SHOULD` on 34, `MAY` on 14, and `SHALL` does not appear. In RFC 5148, `MUST` is on 4
-lines, `SHOULD` on 18, `MAY` on 9, and `SHALL` on 1.
+Both documents use the keywords of RFC 2119, in upper case (`rfc3561.txt:1914`, `rfc5148.txt:134` and `rfc5148.txt:516`). In RFC 3561, `MUST` is on 32 lines, `SHOULD` on 34, `MAY` on 14, and `SHALL` does not appear. In RFC 5148, `MUST` is on 4 lines, `SHOULD` on 18, `MAY` on 9, and `SHALL` on 1.
 
 ## Override table
 
@@ -65,8 +43,7 @@ lines, `SHOULD` on 18, `MAY` on 9, and `SHALL` on 1.
 | --- | --- | --- | --- | --- |
 | Jitter on periodic and forwarded messages | RFC 3561 defines the periodic Hello message (§6.9) and the forwarding of a request or a reply, but the word "jitter" does not appear anywhere in the document | RFC 5148 §5, `rfc5148.txt:231-472`: a general jitter mechanism for a periodic message (§5.1), an externally triggered message (§5.2) and a forwarded message (§5.3), with the bound on the jitter value in §5.4, `rfc5148.txt:435-445`: it "MUST NOT be negative", "MUST NOT be greater than MESSAGE_INTERVAL/2", and "SHOULD NOT be greater than MESSAGE_INTERVAL/4" | RFC 5148 for the jitter mechanism; RFC 3561 for which AODV messages it applies to | yes, as background; the mechanism itself is level 4 |
 
-This is not a conflict between the two documents; RFC 5148 fills a gap RFC 3561 leaves open.
-No clause of RFC 5148 contradicts a clause of RFC 3561.
+This is not a conflict between the two documents; RFC 5148 fills a gap RFC 3561 leaves open. No clause of RFC 5148 contradicts a clause of RFC 3561.
 
 ## In-scope set
 

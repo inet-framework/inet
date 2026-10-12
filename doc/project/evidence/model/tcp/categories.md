@@ -2,86 +2,51 @@
 
 > **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [results.md](results.md), [test-anatomy.md](../../../design/test-anatomy.md)
 
-Step 9 artifact of the standards test workflow. For each check, this document records the
-test category and the reason. The categories and what each one can establish are
-[test-anatomy.md](../../../design/test-anatomy.md#the-categories); the mapping from
-observation class to category is in the guide, step 9. The category was predicted at step 3
-from the observation class of each statement, and confirmed after the run recorded in
-[`results.md`](results.md).
+Step 9 artifact of the standards test workflow. For each check, this document records the test category and the reason. The categories and what each one can establish are [test-anatomy.md](../../../design/test-anatomy.md#the-categories); the mapping from observation class to category is in the guide, step 9. The category was predicted at step 3 from the observation class of each statement, and confirmed after the run recorded in [`results.md`](results.md).
 
 ## Decisions for the checks of pass 2, level 2
 
 ### Connection establishment (RFC9293-EST-1, EST-2, SEQ-1, HDR-1, CKSUM-1; ISS-1, OPT-1) → protocol test
 
-Every statement is about segments on a link: which control bits are set, in which order,
-what the acknowledgment field holds, how long the header is, whether a checksum is present.
-The expectations are relative to captured values, so the check needs no state inside the
-module. Whether the checksum value is *right* is an encoding statement; a serializer unit
-test is its home.
+Every statement is about segments on a link: which control bits are set, in which order, what the acknowledgment field holds, how long the header is, whether a checksum is present. The expectations are relative to captured values, so the check needs no state inside the module. Whether the checksum value is *right* is an encoding statement; a serializer unit test is its home.
 
 ### Data transfer (RFC9293-DATA-1, SEG-1, ACK-1; ACK-2) → protocol test
 
-The segment size, the sequence numbers and the final cumulative acknowledgment are wire
-values. The decisive observation, an acknowledgment of the octet after the last one sent,
-is a single segment. The delivery to the program is implied by it and not observed
-separately.
+The segment size, the sequence numbers and the final cumulative acknowledgment are wire values. The decisive observation, an acknowledgment of the octet after the last one sent, is a single segment. The delivery to the program is implied by it and not observed separately.
 
 ### Connection termination (RFC9293-FIN-1, FIN-2) → protocol test
 
-The four segments of the close are ordinary packets on the link. The connection state
-behind them is internal and not observed; a check of the state machine itself is a module
-test with a state signal.
+The four segments of the close are ordinary packets on the link. The connection state behind them is internal and not observed; a check of the state machine itself is a module test with a state signal.
 
 ### Flow control (RFC9293-WND-1, WND-2; ACKD-1) → protocol test
 
-The advertised window, the size of the bounded segment, and the absence of new data during
-the acknowledgment delay are all wire observations, and the timing they rely on — 0.15 s
-of silence against a 0.2 s delay — is a scenario constant, not a distribution. That is why
-this check stays a protocol test although it touches a timer: it uses the timer as a fixed
-condition, it does not measure it. The bound on the delay itself, RFC9293-ACKD-1, is a
-distribution and a statistical test at level 4.
+The advertised window, the size of the bounded segment, and the absence of new data during the acknowledgment delay are all wire observations, and the timing they rely on — 0.15 s of silence against a 0.2 s delay — is a scenario constant, not a distribution. That is why this check stays a protocol test although it touches a timer: it uses the timer as a fixed condition, it does not measure it. The bound on the delay itself, RFC9293-ACKD-1, is a distribution and a statistical test at level 4.
 
 ### Connection reset (RFC9293-RST-1) → protocol test
 
-The reset is an ordinary segment on the link with fully determined fields, and the
-abandonment of the attempt is an absence. Nothing internal is needed.
+The reset is an ordinary segment on the link with fully determined fields, and the abandonment of the attempt is an absence. Nothing internal is needed.
 
 ## Decisions for the checks of pass 3, level 3
 
-Every check of this pass is a **protocol test with interception**, and one adds a gateway.
-The reason is the same for all of them and is what defines the level: the event under test
-is one that no program can produce. A relay on the path makes it, and the observation stays
-where it was, on the wire and at the ends.
+Every check of this pass is a **protocol test with interception**, and one adds a gateway. The reason is the same for all of them and is what defines the level: the event under test is one that no program can produce. A relay on the path makes it, and the observation stays where it was, on the wire and at the ends.
 
 ### Checksum discard, out-of-window segment, blind reset, valid reset, no reset for a reset → protocol test with interception
 
-Each needs one crafted segment: a wrong checksum, a moved sequence number, a reset that fits
-the window or does not, a reset where a SYN was. The answers are ordinary wire observations,
-and the absences — no reset, no acknowledgment, no further segment — are the same class the
-level 2 checks already used.
+Each needs one crafted segment: a wrong checksum, a moved sequence number, a reset that fits the window or does not, a reset where a SYN was. The answers are ordinary wire observations, and the absences — no reset, no acknowledgment, no further segment — are the same class the level 2 checks already used.
 
 ### Shrunk window, no new data past a shrunk edge → protocol test with interception
 
-The peer that shrinks the window is the relay. The first check reads an outcome at the end
-of the connection; the second reads a decision at the sending module, because an interface
-reports a send when the transmission ends and that is too late to be ordered against an
-arrival.
+The peer that shrinks the window is the relay. The first check reads an outcome at the end of the connection; the second reads a decision at the sending module, because an interface reports a send when the transmission ends and that is too late to be ordered against an arrival.
 
 ### No window shrink → protocol test
 
-No interception. A receiver is compared with itself over a whole transfer, which needs a
-predicate that remembers what it has seen and no captured value.
+No interception. A receiver is compared with itself over a whole transfer, which needs a predicate that remembers what it has seen and no captured value.
 
 ### Soft ICMP error, Source Quench → protocol test with interception and a gateway
 
-Neither report is forged. The relay makes a condition — a time to live of 1 — and a real
-gateway writes the message. The Source Quench check then rewrites the type of that real
-message, which needs a second relay, because a relay holds one rule at a time.
+Neither report is forged. The relay makes a condition — a time to live of 1 — and a real gateway writes the message. The Source Quench check then rewrites the type of that real message, which needs a second relay, because a relay holds one rule at a time.
 
-This is worth keeping as a pattern: where a check needs a report from the network, it is
-better to make the condition and let the network write the report than to build the message.
-The report then carries what a real one carries, and the quoted header matches the connection
-without any care from the test.
+This is worth keeping as a pattern: where a check needs a report from the network, it is better to make the condition and let the network write the report than to build the message. The report then carries what a real one carries, and the quoted header matches the connection without any care from the test.
 
 ## Category guidance for the open catalog entries
 
@@ -100,23 +65,10 @@ without any care from the test.
 
 ## Pass 4: the category predicted for the control loops was wrong
 
-Step 3 of pass 3 predicted a statistical test for both RFC 6298 and RFC 5681, because a
-timer value and a window trajectory look like distributions. Writing the ten checks settled
-it the other way: **all ten are protocol tests**, and none needed a statistical one.
+Step 3 of pass 3 predicted a statistical test for both RFC 6298 and RFC 5681, because a timer value and a window trajectory look like distributions. Writing the ten checks settled it the other way: **all ten are protocol tests**, and none needed a statistical one.
 
-The reason is worth recording, because it will decide the category of the next control loop
-that enters the in-scope set. A standard states its rules as **one value at one moment**, or
-as **a relation between two consecutive values**. The initial timeout is a value; the
-doubling is a ratio of two intervals; the slow-start bound is a relation between consecutive
-publications; Karn's rule is the absence of one. None of those is a distribution. A
-statistical test would be the right category for a question the standard does not ask, such
-as how the throughput settles.
+The reason is worth recording, because it will decide the category of the next control loop that enters the in-scope set. A standard states its rules as **one value at one moment**, or as **a relation between two consecutive values**. The initial timeout is a value; the doubling is a ratio of two intervals; the slow-start bound is a relation between consecutive publications; Karn's rule is the absence of one. None of those is a distribution. A statistical test would be the right category for a question the standard does not ask, such as how the throughput settles.
 
-What the checks did need was **interception**, in eight of the ten, and the ability to judge
-an event rather than filter for it. That is a toolset question, not a category one.
+What the checks did need was **interception**, in eight of the ten, and the ability to judge an event rather than filter for it. That is a toolset question, not a category one.
 
-One category decision did change. The estimator's own values — the timeout after each
-expiry, and the threshold before any loss — are not observable at the boundary this suite
-uses, because the model publishes a control variable only where it recomputes it. A
-**module test** with a state signal would reach them, and it is the right category for the
-half of the backoff check this pass could not make.
+One category decision did change. The estimator's own values — the timeout after each expiry, and the threshold before any loss — are not observable at the boundary this suite uses, because the model publishes a control variable only where it recomputes it. A **module test** with a state signal would reach them, and it is the right category for the half of the backoff check this pass could not make.

@@ -2,25 +2,15 @@
 
 > **Kind:** rule · **Status:** current · **Seal:** whole · **Owns:** `SR-*` · **Stands on:** [architecture.md](architecture.md), [naming.md](naming.md), [documentation.md](documentation.md)
 
-A **seal** says: *this was audited, it complied, and it is now frozen against AI change.* Sealing is
-the terminal state of the enforcement pipeline, not a shortcut around it. A change is checked
-mechanically by the gates in [enforcement/](../enforcement/README.md), semantically by the
-[agent-review checklist](../enforcement/checklist/general.md), and its known deviations are tracked
-in the two ledgers. Sealing records the result: *this has passed the gate and is now frozen, so later
-broad tasks cannot silently churn it.*
+A **seal** says: *this was audited, it complied, and it is now frozen against AI change.* Sealing is the terminal state of the enforcement pipeline, not a shortcut around it. A change is checked mechanically by the gates in [enforcement/](../enforcement/README.md), semantically by the [agent-review checklist](../enforcement/checklist/general.md), and its known deviations are tracked in the two ledgers. Sealing records the result: *this has passed the gate and is now frozen, so later broad tasks cannot silently churn it.*
 
-This document is the **policy**. What is sealed right now lives in three places, and §*SR-STATE-WHERE*
-says which.
+This document is the **policy**. What is sealed right now lives in three places, and §*SR-STATE-WHERE* says which.
 
 ## The rule that overrides every other instruction
 
-**A sealed path and a closed unit MUST NOT be modified by an AI in any way — no edits, no
-reformatting, no "while I'm here" cleanups, no incidental change as part of a larger task — unless
-the user gives explicit permission for that specific path or unit in the current conversation.**
+**A sealed path and a closed unit MUST NOT be modified by an AI in any way — no edits, no reformatting, no "while I'm here" cleanups, no incidental change as part of a larger task — unless the user gives explicit permission for that specific path or unit in the current conversation.**
 
-This overrides every other instruction, including a broad task that would otherwise touch it. If a
-change you are asked to make needs a sealed path, STOP, say that the path is sealed, and ask for
-permission before you proceed.
+This overrides every other instruction, including a broad task that would otherwise touch it. If a change you are asked to make needs a sealed path, STOP, say that the path is sealed, and ask for permission before you proceed.
 
 ## Index
 
@@ -64,11 +54,7 @@ Every sealing rule in document order.
 
 **Everything is unsealed by default.**
 
-Nothing is sealed unless it matches an entry in [audit/seal-list.md](../audit/seal-list.md) or
-carries a `🔒` flag. Absence *is* the unsealed state; there are no rows to maintain for the things that
-are not sealed. The sealed list is an allowlist of the small, settled part of the tree that has been
-driven all the way to a reviewed, compliant, frozen state, so that scarce review attention moves
-forward instead of re-touching settled ground.
+Nothing is sealed unless it matches an entry in [audit/seal-list.md](../audit/seal-list.md) or carries a `🔒` flag. Absence *is* the unsealed state; there are no rows to maintain for the things that are not sealed. The sealed list is an allowlist of the small, settled part of the tree that has been driven all the way to a reviewed, compliant, frozen state, so that scarce review attention moves forward instead of re-touching settled ground.
 
 *Enforced at T4 — agent review, and the loud rule at the head of this document.*
 
@@ -82,8 +68,7 @@ forward instead of re-touching settled ground.
 | a whole document | `rule/sealing.md`, `design/decisions.md` |
 | a unit in a document | one `R-*` requirement, one section of an anatomy, one `NR-*` rule, one sanctioned ledger row |
 
-The third scope is what lets a document settle one requirement at a time instead of waiting until
-every word of it is final.
+The third scope is what lets a document settle one requirement at a time instead of waiting until every word of it is final.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh).*
 
@@ -99,9 +84,7 @@ Each scope keeps its state where a reader already looks:
 | a whole document | the `Seal` field of its header |
 | a unit in a document | an inline flag on the unit |
 
-`seal-list.md` therefore owns the paths, and holds a **generated** index of the document flags with
-their counts. Nobody keeps two lists by hand, and the index cannot drift, because
-`check-seals.sh --write` rewrites it from the tree.
+`seal-list.md` therefore owns the paths, and holds a **generated** index of the document flags with their counts. Nobody keeps two lists by hand, and the index cannot drift, because `check-seals.sh --write` rewrites it from the tree.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) compares the index against the tree.*
 
@@ -109,13 +92,9 @@ their counts. Nobody keeps two lists by hand, and the index cannot drift, becaus
 
 **A folder entry seals every file under it, at any depth, including files added later.**
 
-A folder entry is written with a trailing `/`. A file is sealed if, and only if, the list holds that
-exact file *or* holds any ancestor directory of it as a folder entry.
+A folder entry is written with a trailing `/`. A file is sealed if, and only if, the list holds that exact file *or* holds any ancestor directory of it as a folder entry.
 
-Two consequences are worth spelling out. **Adding a new file under a sealed folder is itself a
-modification of the sealed subtree**, and needs permission like any edit. And sealing a subsystem as
-a folder is the way to freeze it as a unit and keep new files in it frozen by default — which is the
-point.
+Two consequences are worth spelling out. **Adding a new file under a sealed folder is itself a modification of the sealed subtree**, and needs permission like any edit. And sealing a subsystem as a folder is the way to freeze it as a unit and keep new files in it frozen by default — which is the point.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) resolves ancestors.*
 
@@ -123,9 +102,7 @@ point.
 
 **A generated file follows the seal of the source it is generated from.**
 
-A folder seal covers the `*_m.h` and `*_m.cc` pair because they sit beside their `.msg`. A seal on a
-lone `.msg` covers its generated pair by intent. Never hand-edit a generated pair in any case, sealed
-or not — see [NR-GEN](naming.md#nr-gen).
+A folder seal covers the `*_m.h` and `*_m.cc` pair because they sit beside their `.msg`. A seal on a lone `.msg` covers its generated pair by intent. Never hand-edit a generated pair in any case, sealed or not — see [NR-GEN](naming.md#nr-gen).
 
 *Enforced at T4 — agent review.*
 
@@ -133,10 +110,7 @@ or not — see [NR-GEN](naming.md#nr-gen).
 
 **The seal covers the text of the unit and its identifier. It does not cover its position.**
 
-A regroup that moves a closed unit without changing one word of it is allowed, and it lands as a
-mechanical commit under [PR-SPLIT-MECHANICAL](pull-request.md#pr-split-mechanical). This is what
-makes stable identifiers worth having: a document can be reordered while every closed unit and every
-citation to it survives.
+A regroup that moves a closed unit without changing one word of it is allowed, and it lands as a mechanical commit under [PR-SPLIT-MECHANICAL](pull-request.md#pr-split-mechanical). This is what makes stable identifiers worth having: a document can be reordered while every closed unit and every citation to it survives.
 
 *Enforced at T4 — agent review: did the words change, or only the order?*
 
@@ -152,9 +126,7 @@ citation to it survives.
 | `⬜` | **Open on purpose.** The unit was looked at and left open: still under discussion, or waiting for a decision. |
 | `🔒` | **Closed.** The unit was audited, it complies, and the user froze it. |
 
-The default keeps the cost at zero, so a document carries flags only on the units that need them.
-`⬜` is not maintenance work; it is a statement. Use it to mark the frontier — the units being worked
-on now — so a reader can tell *we left this open* from *we never got here*.
+The default keeps the cost at zero, so a document carries flags only on the units that need them. `⬜` is not maintenance work; it is a statement. Use it to mark the frontier — the units being worked on now — so a reader can tell *we left this open* from *we never got here*.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) rejects any other glyph.*
 
@@ -162,8 +134,7 @@ on now — so a reader can tell *we left this open* from *we never got here*.
 
 **A flag never goes in a heading.**
 
-A heading is the citation anchor. `[NR-NED-GATE](naming.md#nr-ned-gate)` must not break because a
-rule closed. The flag goes on the body instead:
+A heading is the citation anchor. `[NR-NED-GATE](naming.md#nr-ned-gate)` must not break because a rule closed. The flag goes on the body instead:
 
 | Unit | Placement |
 | --- | --- |
@@ -192,9 +163,7 @@ rule closed. The flag goes on the body instead:
 | `by requirement`, `by rule`, `by decision` | each item that owns an identifier |
 | `by row` | each row of a table |
 
-A `by <unit>` value may add `, complete`. Then **every** unit must carry a flag, and the gate fails
-when one does not. Use `complete` where the frontier itself is information — the requirements are the
-case — and leave it off everywhere else.
+A `by <unit>` value may add `, complete`. Then **every** unit must carry a flag, and the gate fails when one does not. Use `complete` where the frontier itself is information — the requirements are the case — and leave it off everywhere else.
 
 A flag in a document that declares `none`, or on a unit kind the header did not declare, is an error.
 
@@ -204,9 +173,7 @@ A flag in a document that declares `none`, or on a unit kind the header did not 
 
 **When every unit of a document is closed, promote the document to a whole seal.**
 
-The header becomes `**Seal:** whole; closed` and the inline flags come out, in the same commit. A
-document does not carry both forms: the promotion is what keeps a settled document quiet instead of
-speckled with a flag on every heading.
+The header becomes `**Seal:** whole; closed` and the inline flags come out, in the same commit. A document does not carry both forms: the promotion is what keeps a settled document quiet instead of speckled with a flag on every heading.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) reports a `by <unit>` document whose units are all closed.*
 
@@ -216,17 +183,9 @@ speckled with a flag on every heading.
 
 **Nothing seals before it has been audited and complies.**
 
-Do not offer to seal, and never say "seal as-is", until the audit has been reported. **Audit the
-moment you introduce a path as the next thing to seal** — before you invite review and before you
-offer to seal. For a folder, the audit covers the whole subtree.
+Do not offer to seal, and never say "seal as-is", until the audit has been reported. **Audit the moment you introduce a path as the next thing to seal** — before you invite review and before you offer to seal. For a folder, the audit covers the whole subtree.
 
-The audit checks against [architecture.md](architecture.md), [naming.md](naming.md),
-[quality.md](quality.md), the domain document when one applies, and the gates that apply. Present the
-result first. A path seals once it complies, **or** once a specific non-compliance is explicitly
-accepted by the user — recorded as an `AS-*` row in
-[audit/architecture-exceptions.md](../audit/architecture-exceptions.md) or an `NS-*` row in
-[audit/naming-exceptions.md](../audit/naming-exceptions.md). **Do not seal over an unsanctioned
-violation** (`AV-*` or `NV-*`): repair it, or get it sanctioned first.
+The audit checks against [architecture.md](architecture.md), [naming.md](naming.md), [quality.md](quality.md), the domain document when one applies, and the gates that apply. Present the result first. A path seals once it complies, **or** once a specific non-compliance is explicitly accepted by the user — recorded as an `AS-*` row in [audit/architecture-exceptions.md](../audit/architecture-exceptions.md) or an `NS-*` row in [audit/naming-exceptions.md](../audit/naming-exceptions.md). **Do not seal over an unsanctioned violation** (`AV-*` or `NV-*`): repair it, or get it sanctioned first.
 
 [guide/audit-a-subsystem.md](../guide/audit-a-subsystem.md) is the procedure.
 
@@ -236,11 +195,7 @@ violation** (`AV-*` or `NV-*`): repair it, or get it sanctioned first.
 
 **Every seal names the audit report that earned it.**
 
-A path row names its report under `audit/` at the repository root; a closed unit
-names one in the same row or in the seal index. The name is a path and not a link, because the
-folder is not in git — see [audit/README.md](../audit/README.md#where-a-report-lives). The report names the rules it checked and the
-commit it examined. Without that citation a seal is a claim with no evidence, and nobody can tell
-whether it is still true.
+A path row names its report under `audit/` at the repository root; a closed unit names one in the same row or in the seal index. The name is a path and not a link, because the folder is not in git — see [audit/README.md](../audit/README.md#where-a-report-lives). The report names the rules it checked and the commit it examined. Without that citation a seal is a claim with no evidence, and nobody can tell whether it is still true.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) rejects a seal row with no report.*
 
@@ -248,62 +203,41 @@ whether it is still true.
 
 **Record a seal in the same commit that records the compliant state.**
 
-Add the path to [audit/seal-list.md](../audit/seal-list.md), with a trailing `/` for a recursive
-folder and no trailing slash for a single file. Keep the list grouped and ordered as that document
-describes, and do not silently drop an entry.
+Add the path to [audit/seal-list.md](../audit/seal-list.md), with a trailing `/` for a recursive folder and no trailing slash for a single file. Keep the list grouped and ordered as that document describes, and do not silently drop an entry.
 
 *Enforced at T4 — agent review of the diff.*
 
 ### SR-RULE-CHANGE-STALES
 
-**When a rule changes in a way that changes what compliance means, every seal whose report cites that
-rule is marked for re-audit.**
+**When a rule changes in a way that changes what compliance means, every seal whose report cites that rule is marked for re-audit.**
 
-A seal is a statement about a moment: *this complied, against these rules, on this date*. A rule that
-moves afterwards can make the statement false without anyone touching the code. The reports name the
-rules they checked, so the affected rows can be found and marked `re-audit`.
+A seal is a statement about a moment: *this complied, against these rules, on this date*. A rule that moves afterwards can make the statement false without anyone touching the code. The reports name the rules they checked, so the affected rows can be found and marked `re-audit`.
 
-The judgment of *material* is the author's: a reworded sentence that means the same thing stales
-nothing; a rule that gains a clause, changes a tier, or narrows an exception stales every seal that
-cites it. When in doubt, mark it — a re-audit is cheap next to a seal that is quietly wrong.
+The judgment of *material* is the author's: a reworded sentence that means the same thing stales nothing; a rule that gains a clause, changes a tier, or narrows an exception stales every seal that cites it. When in doubt, mark it — a re-audit is cheap next to a seal that is quietly wrong.
 
-Without this rule the seal list slowly becomes a list of old opinions, which is worse than no list,
-because it is trusted.
+Without this rule the seal list slowly becomes a list of old opinions, which is worse than no list, because it is trusted.
 
 *Enforced at T3 — [check-seals.sh](../enforcement/check-seals.sh) can find the rows; deciding *material* is T5.*
 
 ### SR-PR-APPROVAL
 
-**A pull request that changes a path sealed before the branch began needs trusted approval bound to
-the exact reviewed head.**
+**A pull request that changes a path sealed before the branch began needs trusted approval bound to the exact reviewed head.**
 
-Permission in the current conversation authorizes an AI to prepare the named change; it does not by
-itself give pull-request CI a trustworthy fact to consume. The pull-request description records that
-permission for review, but content controlled by the branch cannot authorize itself. Merge
-authorization therefore comes from a required base-branch workflow and protected environment whose
-required reviewer sees the sealed paths and immutable head commit detected by trusted checker code.
+Permission in the current conversation authorizes an AI to prepare the named change; it does not by itself give pull-request CI a trustworthy fact to consume. The pull-request description records that permission for review, but content controlled by the branch cannot authorize itself. Merge authorization therefore comes from a required base-branch workflow and protected environment whose required reviewer sees the sealed paths and immutable head commit detected by trusted checker code.
 
-The approval covers only that workflow run and head commit. Adding or replacing a commit triggers a
-new check and requires a new decision. An absent, unconfigured, rejected or stale approval fails
-closed. This merge authorization does not retroactively replace the current-conversation permission
-an AI needed before modifying the sealed path.
+The approval covers only that workflow run and head commit. Adding or replacing a commit triggers a new check and requires a new decision. An absent, unconfigured, rejected or stale approval fails closed. This merge authorization does not retroactively replace the current-conversation permission an AI needed before modifying the sealed path.
 
-*Enforced at T3 — [check-source-seals.sh](../enforcement/check-source-seals.sh) and the protected
-pull-request workflow; T5 — the required reviewer grants the approval.*
+*Enforced at T3 — [check-source-seals.sh](../enforcement/check-source-seals.sh) and the protected pull-request workflow; T5 — the required reviewer grants the approval.*
 
 ### SR-VIOLATION-IN-SEALED
 
 **A violation found in a sealed path is reported, not repaired.**
 
-The seal is a claim that the path complied *when it was sealed*. It is not a guarantee that the claim
-is still perfect. When you find a violation in a sealed path:
+The seal is a claim that the path complied *when it was sealed*. It is not a guarantee that the claim is still perfect. When you find a violation in a sealed path:
 
 1. **Report it** — the file, the location, and the rule it breaks.
-2. **Ask permission before you repair it.** The seal holds until the user grants permission for that
-   path. Do not touch it meanwhile, and do not fold the repair into an unrelated task.
-3. Once permission is given and the repair lands, the path stays sealed: it was re-audited and
-   re-complied in that same commit. If the user instead accepts the deviation, record it as an `AS-*`
-   or `NS-*` row and leave the seal.
+2. **Ask permission before you repair it.** The seal holds until the user grants permission for that path. Do not touch it meanwhile, and do not fold the repair into an unrelated task.
+3. Once permission is given and the repair lands, the path stays sealed: it was re-audited and re-complied in that same commit. If the user instead accepts the deviation, record it as an `AS-*` or `NS-*` row and leave the seal.
 
 *Enforced at T4 — agent review.*
 
@@ -311,14 +245,10 @@ is still perfect. When you find a violation in a sealed path:
 
 **Removing an entry unseals it, and that is a deliberate act with a reason in the commit.**
 
-Unsealing is not a shortcut around the rule at the head of this document. Ask for it explicitly, and
-record why. To edit one file inside a recursively sealed folder without unsealing the whole subtree,
-get permission for that one file instead of deleting the folder entry.
+Unsealing is not a shortcut around the rule at the head of this document. Ask for it explicitly, and record why. To edit one file inside a recursively sealed folder without unsealing the whole subtree, get permission for that one file instead of deleting the folder entry.
 
 *Enforced at T5 — the user unseals.*
 
 ## What sealing does not replace
 
-Sealing composes with the gates and the ledgers; it does not stand in for either. The gates run on
-every change and catch a regression. The ledgers track the known deviations. Sealing marks the parts
-of the tree that have been driven all the way to a reviewed, compliant, frozen state.
+Sealing composes with the gates and the ledgers; it does not stand in for either. The gates run on every change and catch a regression. The ledgers track the known deviations. Sealing marks the parts of the tree that have been driven all the way to a reviewed, compliant, frozen state.

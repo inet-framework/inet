@@ -2,14 +2,11 @@
 
 > **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `TR-*` · **Stands on:** [architecture.md](architecture.md), [test-anatomy.md](../design/test-anatomy.md)
 
-Which test backs which claim, when a recorded expectation may change, and what CI must run. What the
-twelve test categories *are* is [design/test-anatomy.md](../design/test-anatomy.md); this document
-says what a change owes them.
+Which test backs which claim, when a recorded expectation may change, and what CI must run. What the twelve test categories *are* is [design/test-anatomy.md](../design/test-anatomy.md); this document says what a change owes them.
 
 **A fingerprint detects a difference in selected ingredients; it does not establish correctness.** A model can produce a stable fingerprint while it retains a defect. Use fingerprints for regression evidence within the selected runs and direct checks for the specific behavior claim.
 
-A rule has a stable identifier `TR-<AREA>`, and the identifier is the heading:
-[TR-CAT-MATCH](testing.md#tr-cat-match).
+A rule has a stable identifier `TR-<AREA>`, and the identifier is the heading: [TR-CAT-MATCH](testing.md#tr-cat-match).
 
 ## Index
 
@@ -76,32 +73,19 @@ For example, a hypothetical module test drives a production sender and checks th
 
 ### TR-FOCUSED-EVIDENCE
 
-**Validation runs the cases directly related to the changed contract through explicit filters, and
-records enough context to reproduce the result.**
+**Validation runs the cases directly related to the changed contract through explicit filters, and records enough context to reproduce the result.**
 
-Select cases from the changed paths, symbols and behavioral contracts, in the category required by
-[TR-CAT-MATCH](#tr-cat-match), and state that mapping. Invoke the test runner with an explicit case,
-tag or filter. An unfiltered category or repository-wide suite is useful integration coverage, but
-it is not a substitute for evidence that reaches the changed behavior. If no directly related case
-exists, report that coverage gap instead of hiding it inside a broader green suite; new behavior
-still owes a test under [TR-SHIP-WITH](#tr-ship-with).
+Select cases from the changed paths, symbols and behavioral contracts, in the category required by [TR-CAT-MATCH](#tr-cat-match), and state that mapping. Invoke the test runner with an explicit case, tag or filter. An unfiltered category or repository-wide suite is useful integration coverage, but it is not a substitute for evidence that reaches the changed behavior. If no directly related case exists, report that coverage gap instead of hiding it inside a broader green suite; new behavior still owes a test under [TR-SHIP-WITH](#tr-ship-with).
 
-A reported result includes the working directory, the exact build and test commands, build mode,
-configuration, run and seed where applicable, explicit filter, exit status, and the paths of any
-logs, captures or result artifacts used to support the claim. When compiled INET source or
-generated-code inputs changed, rebuild the matching INET library before the test so the executable
-and generated sources are current with the source tree.
+A reported result includes the working directory, the exact build and test commands, build mode, configuration, run and seed where applicable, explicit filter, exit status, and the paths of any logs, captures or result artifacts used to support the claim. When compiled INET source or generated-code inputs changed, rebuild the matching INET library before the test so the executable and generated sources are current with the source tree.
 
-*Enforced at T4 — agent review of the change-to-test mapping, command scope, library freshness and
-reported evidence.*
+*Enforced at T4 — agent review of the change-to-test mapping, command scope, library freshness and reported evidence.*
 
 ### TR-SHIP-WITH
 
 **New behavior ships with its test, in the same pull request.**
 
-Not in a follow-up, and not in an issue. A test written later is written against the code as it
-turned out, not against the behavior that was intended, and it will pass over a defect that was in
-the code from the start. The test is also the only durable statement of what the change was *for*.
+Not in a follow-up, and not in an issue. A test written later is written against the code as it turned out, not against the behavior that was intended, and it will pass over a defect that was in the code from the start. The test is also the only durable statement of what the change was *for*.
 
 *Enforced at T4 — agent review; T2 once coverage is gated.*
 
@@ -109,11 +93,7 @@ the code from the start. The test is also the only durable statement of what the
 
 **A fingerprint is never the only test of new behavior.**
 
-A fingerprint says the trajectory differs from the recorded one. It cannot say which of the two is
-right, and for new behavior there is no recorded one at all — the first baseline simply records
-whatever the new code does, including its bugs. Fingerprints are the net that catches an *unintended*
-change; the claim needs its own test. See
-[REJ-09](../design/rejected-designs.md#rej-09) for the case in full.
+A fingerprint says the trajectory differs from the recorded one. It cannot say which of the two is right, and for new behavior there is no recorded one at all — the first baseline simply records whatever the new code does, including its bugs. Fingerprints are the net that catches an *unintended* change; the claim needs its own test. See [REJ-09](../design/rejected-designs.md#rej-09) for the case in full.
 
 *Enforced at T4 — agent review.*
 
@@ -121,10 +101,7 @@ change; the claim needs its own test. See
 
 **A claim about the real world is checked against something outside INET.**
 
-An analytical result, a measurement, a reference implementation, or a figure from the standard or a
-paper. A model checked only against itself is checked against nothing: it will reproduce its own
-error exactly. The external reference and the tolerance both go in the test, so a later reader can
-judge whether the agreement is good.
+An analytical result, a measurement, a reference implementation, or a figure from the standard or a paper. A model checked only against itself is checked against nothing: it will reproduce its own error exactly. The external reference and the tolerance both go in the test, so a later reader can judge whether the agreement is good.
 
 *Enforced at T2 — the validation suite; T5 for whether the reference is the right one.*
 
@@ -132,75 +109,43 @@ judge whether the agreement is good.
 
 ### TR-BASELINE-DELIBERATE
 
-**A recorded expectation changes only after its exact scope and reason receive explicit approval,
-never as a side effect of another change.**
+**A recorded expectation changes only after its exact scope and reason receive explicit approval, never as a side effect of another change.**
 
-A fingerprint `.csv`, a statistical baseline, an expected output: each is a claim that *these values
-are correct*. Regenerating one to make CI green is the single fastest way to lose every regression
-guarantee the suite provides, and it is invisible in a large diff. Before regeneration, present the
-specific baselines or configurations that would move, the behavior that caused the movement, and
-why the new values would be right; the human responsible for accepting the change approves that
-proposal explicitly. Approval of the source change is not implicit approval to rewrite its recorded
-expectations.
+A fingerprint `.csv`, a statistical baseline, an expected output: each is a claim that *these values are correct*. Regenerating one to make CI green is the single fastest way to lose every regression guarantee the suite provides, and it is invisible in a large diff. Before regeneration, present the specific baselines or configurations that would move, the behavior that caused the movement, and why the new values would be right; the human responsible for accepting the change approves that proposal explicitly. Approval of the source change is not implicit approval to rewrite its recorded expectations.
 
-The defence continues in the commit message: the commit that moves the values states which behavior
-moved and why the new values are right
-([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)).
+The defence continues in the commit message: the commit that moves the values states which behavior moved and why the new values are right ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)).
 
-*Enforced at T5 for explicit approval; T4 for review of the message against the moved values; T3 for
-a baseline-only commit that gives no reason.*
+*Enforced at T5 for explicit approval; T4 for review of the message against the moved values; T3 for a baseline-only commit that gives no reason.*
 
 ### TR-BASELINE-PROVENANCE
 
 **A baseline change names the commit that causes it and the reason the new values are right.**
 
-"Fingerprints updated" is not a reason. Name the change, say which behavior moved, and say why the
-new trajectory is the correct one — a standard clause, a repaired defect, a deliberate model change.
-Two years later this line is the only thing that can tell a bisecting developer whether the change
-was intended.
+"Fingerprints updated" is not a reason. Name the change, say which behavior moved, and say why the new trajectory is the correct one — a standard clause, a repaired defect, a deliberate model change. Two years later this line is the only thing that can tell a bisecting developer whether the change was intended.
 
-**Account for every row that moves.** Not the set as a whole: each row, traced from the change to
-the behavior that row records. A row that moves and cannot be explained from the diff is the
-finding — **an unexplained row is an unintended change until somebody shows otherwise.** A
-fingerprint says only that the trajectory differs; it cannot say which of the two is right, so the
-explanation is the only thing standing between a deliberate change and a regression that rode along
-with it.
+**Account for every row that moves.** Not the set as a whole: each row, traced from the change to the behavior that row records. A row that moves and cannot be explained from the diff is the finding — **an unexplained row is an unintended change until somebody shows otherwise.** A fingerprint says only that the trajectory differs; it cannot say which of the two is right, so the explanation is the only thing standing between a deliberate change and a regression that rode along with it.
 
-Rows that share one explanation are named together. *"The 31 rows under `examples/inet/` all carry
-TCP traffic with the default algorithm, which this commit changes from `TcpReno` to `TcpCubic`"* is
-one explanation for 31 rows and it is complete. What is not complete is a count.
+Rows that share one explanation are named together. *"The 31 rows under `examples/inet/` all carry TCP traffic with the default algorithm, which this commit changes from `TcpReno` to `TcpCubic`"* is one explanation for 31 rows and it is complete. What is not complete is a count.
 
 *Enforced at T4 — agent review of the message against the diff, row group by row group.*
 
 ### TR-BASELINE-COMMIT
 
-**A baseline update travels with the commit that changes the behavior. It stands alone only when no
-single commit causes it.**
+**A baseline update travels with the commit that changes the behavior. It stands alone only when no single commit causes it.**
 
-The rule is [PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline); it is repeated here because it is
-a test rule as much as a commit rule. The test suite is the reason for this form. A commit that moves
-a trajectory and leaves the recorded values behind fails its own fingerprint test, so `git bisect`
-over the suite names it as the first bad commit and teaches the next developer something false.
+The rule is [PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline); it is repeated here because it is a test rule as much as a commit rule. The test suite is the reason for this form. A commit that moves a trajectory and leaves the recorded values behind fails its own fingerprint test, so `git bisect` over the suite names it as the first bad commit and teaches the next developer something false.
 
-A re-record that no single commit causes — a compiler, tool or solver version change, or drift from
-outside the branch — keeps a commit of its own, because there is no commit beside it to hold the
-reason.
+A re-record that no single commit causes — a compiler, tool or solver version change, or drift from outside the branch — keeps a commit of its own, because there is no commit beside it to hold the reason.
 
-*Enforced at T3 — a baseline-only commit that stands directly after the source commit that moves the
-values; T4 for the reason itself.*
+*Enforced at T3 — a baseline-only commit that stands directly after the source commit that moves the values; T4 for the reason itself.*
 
 ## Determinism
 
 ### TR-DETERMINISTIC
 
-**The same seed gives the same trajectory: on every platform, in every build mode, at every thread
-count.**
+**The same seed gives the same trajectory: on every platform, in every build mode, at every thread count.**
 
-Determinism is the precondition for every other guarantee in this document. A fingerprint over a
-non-deterministic model is noise, a bug report that cannot be reproduced cannot be repaired, and a
-published result that nobody can re-run is not a result. Anything that varies between runs —
-iteration over a container ordered by pointer value, a time or a hostname read at run time, a
-floating-point path that depends on thread count — is a defect, not a quirk.
+Determinism is the precondition for every other guarantee in this document. A fingerprint over a non-deterministic model is noise, a bug report that cannot be reproduced cannot be repaired, and a published result that nobody can re-run is not a result. Anything that varies between runs — iteration over a container ordered by pointer value, a time or a hostname read at run time, a floating-point path that depends on thread count — is a defect, not a quirk.
 
 *Enforced at T2 — fingerprint stability across seeds, modes and platforms.*
 
@@ -208,26 +153,17 @@ floating-point path that depends on thread count — is a defect, not a quirk.
 
 **A model draws only from the random number generators the kernel gives it.**
 
-No `rand()`, no `std::random_device`, no static generator of its own. The number and the order of the
-draws are part of the result: a model that takes one extra draw in a branch changes every later draw
-in the run, so a refactor that "cannot change behavior" does.
+No `rand()`, no `std::random_device`, no static generator of its own. The number and the order of the draws are part of the result: a model that takes one extra draw in a branch changes every later draw in the run, so a refactor that "cannot change behavior" does.
 
 *Enforced at T3 — a grep for the forbidden generators; T2 by fingerprint drift.*
 
 ### TR-SELF-CONTAINED
 
-**A test uses only its declared inputs and test infrastructure, and does not depend on another
-test's execution.**
+**A test uses only its declared inputs and test infrastructure, and does not depend on another test's execution.**
 
-No file from another test's output, no fixed absolute path, no network, and no dependence on the
-order the suite happens to run in. A test that passes only after its neighbour has run is a test that
-will fail alone, in parallel, and on the machine of whoever is trying to reproduce a defect.
+No file from another test's output, no fixed absolute path, no network, and no dependence on the order the suite happens to run in. A test that passes only after its neighbour has run is a test that will fail alone, in parallel, and on the machine of whoever is trying to reproduce a defect.
 
-Declared infrastructure includes the matching INET build, shared suite fixtures and support
-libraries, and a separately provisioned statistical baseline checkout. Provision these before
-execution and record their versions; test execution must not fetch an unspecified network input.
-Generated work directories, logs and comparison diagnostics may be retained as evidence, but must
-not become undeclared inputs to later tests.
+Declared infrastructure includes the matching INET build, shared suite fixtures and support libraries, and a separately provisioned statistical baseline checkout. Provision these before execution and record their versions; test execution must not fetch an unspecified network input. Generated work directories, logs and comparison diagnostics may be retained as evidence, but must not become undeclared inputs to later tests.
 
 *Enforced at T2 — the suite runs in parallel and in isolation.*
 
@@ -237,9 +173,7 @@ not become undeclared inputs to later tests.
 
 **CI builds and tests every commit of a branch, not only its head.**
 
-`git bisect` is the fastest tool for a regression nobody can explain, and one broken middle commit
-makes it useless. This is the mechanical half of
-[PR-SERIES-BUILDS](pull-request.md#pr-series-builds), which is otherwise a rule that nothing checks.
+`git bisect` is the fastest tool for a regression nobody can explain, and one broken middle commit makes it useless. This is the mechanical half of [PR-SERIES-BUILDS](pull-request.md#pr-series-builds), which is otherwise a rule that nothing checks.
 
 *Enforced at T2 — not yet configured; the workflows test the head only.*
 
@@ -247,10 +181,7 @@ makes it useless. This is the mechanical half of
 
 **A feature is built with its neighbours switched off, not only in the full build.**
 
-The full build hides every accidental dependency, because everything a model reaches for happens to
-be present. The feature-off build is the only check that
-[AR-EXT-FEATURES](architecture.md#ar-ext-features) and the dependency direction of
-[AR-ORG-DOMAINS](architecture.md#ar-org-domains) are still real.
+The full build hides every accidental dependency, because everything a model reaches for happens to be present. The feature-off build is the only check that [AR-EXT-FEATURES](architecture.md#ar-ext-features) and the dependency direction of [AR-ORG-DOMAINS](architecture.md#ar-org-domains) are still real.
 
 *Enforced at T3 — the feature workflow and `inet_featuretool`.*
 
@@ -258,9 +189,6 @@ be present. The feature-off build is the only check that
 
 **A flaky test is repaired, or disabled with an issue number. It is never re-run until it passes.**
 
-A re-run until green teaches the whole project that a red CI means nothing, and from then on a real
-regression is waved through with the same reflex. A test that is flaky is either testing something
-non-deterministic — which is a model defect under
-[TR-DETERMINISTIC](#tr-deterministic) — or testing it wrongly. Both are worth finding.
+A re-run until green teaches the whole project that a red CI means nothing, and from then on a real regression is waved through with the same reflex. A test that is flaky is either testing something non-deterministic — which is a model defect under [TR-DETERMINISTIC](#tr-deterministic) — or testing it wrongly. Both are worth finding.
 
 *Enforced at T5 — human discipline; nothing can check this one.*

@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc9777/catalog.md](../../standard/rfc9777/catalog.md), [rfc2710/catalog.md](../../standard/rfc2710/catalog.md), [features.md](../../protocol/mld/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the MLD workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the MLD workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -35,9 +33,7 @@ The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
 | `later` | it needs a toolset of a higher level — a crafted message at level 3, the state of a node at level 4, an SSM-aware system at level 5 |
 | `no check` | a permission that no observation can fail, so [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) asks for no test |
 
-A verdict belongs to the test. Where a test fails at a later observation and the observation
-of a statement held, the row says PASS and names the observation in the note; where a failure
-kept a test from the observation a statement needs, the row says FAIL and says so.
+A verdict belongs to the test. Where a test fails at a later observation and the observation of a statement held, the row says PASS and names the observation in the note; where a failure kept a test from the observation a statement needs, the row says FAIL and says so.
 
 | Status | RFC 9777 | RFC 2710 | Together |
 | --- | --- | --- | --- |
@@ -448,11 +444,7 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 
 ## The coverage debt: the checks this pass owes
 
-Fifty-eight statements that the model claims have no check yet. Each needs a normal exchange
-only, in a larger mockup or with a second path of messages, so each is level 2 work for a later
-pass. The closing list of
-[`checks.md`](../../protocol/mld/checks.md#statements-this-pass-wrote-no-check-for) holds the
-same needs in the words of the standard.
+Fifty-eight statements that the model claims have no check yet. Each needs a normal exchange only, in a larger mockup or with a second path of messages, so each is level 2 work for a later pass. The closing list of [`checks.md`](../../protocol/mld/checks.md#statements-this-pass-wrote-no-check-for) holds the same needs in the words of the standard.
 
 | What the check needs | Statements |
 | --- | --- |
@@ -468,19 +460,11 @@ same needs in the words of the standard.
 | a node that hears an MLDv1 Query for an address it does not listen to, and the scope rules of MLDv1 for reserved, node-local and link-local addresses | RFC2710-NODE-5, NODE-25, NODE-26 |
 | an MLDv1 address that times out, and two MLDv1 routers, for the non-querier state machine, and the Unsolicited Report Interval of an MLDv1-only node | RFC2710-ROUTER-17, ROUTER-25, ROUTER-27, ROUTER-30, ROUTER-32, ROUTER-34, ROUTER-35, ROUTER-36, ROUTER-37, ROUTER-38, ROUTER-39, TIMER-8, TIMER-9, TIMER-16 |
 
-Three groups of them will fail when their checks exist, from what the code shows: the forwarding
-in EXCLUDE mode with blocked sources, RFC9777-FWD-6 and FWD-7, because the forwarding asks for the
-address only ([gap 15](results.md#gap-15-defect--the-forwarding-asks-for-a-listener-of-the-address-not-of-the-source));
-a non-querier that adopts the QRV and the QQIC, RFC9777-QRY-14 and QRY-16, because the Queries
-carry zero in both fields ([gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic));
-and the MLDv1 checks with an MLDv2 querier on the link, because the MLDv1 node stops the
-simulation on its Queries ([gap 16](results.md#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query)).
+Three groups of them will fail when their checks exist, from what the code shows: the forwarding in EXCLUDE mode with blocked sources, RFC9777-FWD-6 and FWD-7, because the forwarding asks for the address only ([gap 15](results.md#gap-15-defect--the-forwarding-asks-for-a-listener-of-the-address-not-of-the-source)); a non-querier that adopts the QRV and the QQIC, RFC9777-QRY-14 and QRY-16, because the Queries carry zero in both fields ([gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic)); and the MLDv1 checks with an MLDv2 querier on the link, because the MLDv1 node stops the simulation on its Queries ([gap 16](results.md#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query)).
 
 ## Feature support
 
-The rule of the guide, per feature: `supported` when every core check ran and passed,
-`partial` when at least one passed and at least one failed or has no check, `not supported`
-when every core check that ran failed, `untested` when no core check exists.
+The rule of the guide, per feature: `supported` when every core check ran and passed, `partial` when at least one passed and at least one failed or has no check, `not supported` when every core check that ran failed, `untested` when no core check exists.
 
 | Feature | Level | Support | Core statements that fail or have no check |
 | --- | --- | --- | --- |
@@ -505,16 +489,11 @@ when every core check that ran failed, `untested` when no core check exists.
 | [MLD-F-SSM-AWARE](../../protocol/mld/features.md#mld-f-ssm-aware) | optional | untested | RFC9777-REP-24, REP-28, RREP-2, RREP-3 are `later` |
 | [MLD-F-TIMER-CONFIGURATION](../../protocol/mld/features.md#mld-f-timer-configuration) | mandatory | partial | RFC9777-TIMER-3 fails ([gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic)); RFC9777-TIMER-1, RFC2710-TIMER-1 are `owed`; RFC2710-TIMER-4 is `later` |
 
-Two features are supported, fifteen partial, two not supported, and one untested. The two that
-are not supported are MLD-F-MESSAGE-VALIDATION, whose one core statement with a verdict,
-RFC2710-NODE-2, fails on gap 16, and MLD-F-ROUTER-COMPATIBILITY, whose core statements fail on
-the missing MLDv1 mode (gap 17) or are not reached because gap 16 stops the run. The untested
-feature is the optional MLD-F-SSM-AWARE, which is level 5.
+Two features are supported, fifteen partial, two not supported, and one untested. The two that are not supported are MLD-F-MESSAGE-VALIDATION, whose one core statement with a verdict, RFC2710-NODE-2, fails on gap 16, and MLD-F-ROUTER-COMPATIBILITY, whose core statements fail on the missing MLDv1 mode (gap 17) or are not reached because gap 16 stops the run. The untested feature is the optional MLD-F-SSM-AWARE, which is level 5.
 
 ## Achieved level
 
-**Level 2, reached.** Target: level 2, from
-[`standards.md`](../../protocol/mld/standards.md#target-level).
+**Level 2, reached.** Target: level 2, from [`standards.md`](../../protocol/mld/standards.md#target-level).
 
 The exit criterion of level 2 has two halves, and both hold:
 
@@ -523,13 +502,9 @@ The exit criterion of level 2 has two halves, and both hold:
 | Every normal-path mandatory mechanism of the base documents appears as a feature | holds | the catalogs hold every normative statement of RFC 9777 §5 to §9 and of the node and router state diagrams of RFC 2710 §5 to §7, 388 entries; the feature map has 20 features and places every entry |
 | Every mandatory feature has a core check that ran and has a verdict | holds | the 19 mandatory features have core checks that ran: 47 tests, 21 PASS, 26 FAIL |
 
-The verdict of MLD-F-MESSAGE-VALIDATION comes from its one core statement on the normal path,
-RFC2710-NODE-2; its other statements need a crafted message, level 3.
+The verdict of MLD-F-MESSAGE-VALIDATION comes from its one core statement on the normal path, RFC2710-NODE-2; its other statements need a crafted message, level 3.
 
-A level is a measure of how deeply the pass looked, not of how well the model did. Twenty-six
-tests fail, and seventeen gaps of the model stand behind them; the level holds because each of
-those checks ran. Three of them stop at the start on gap 16, so the router half of the MLDv1
-interoperation has statements without a verdict inside a reached level.
+A level is a measure of how deeply the pass looked, not of how well the model did. Twenty-six tests fail, and seventeen gaps of the model stand behind them; the level holds because each of those checks ran. Three of them stop at the start on gap 16, so the router half of the MLDv1 interoperation has statements without a verdict inside a reached level.
 
 | Level | State | What it needs |
 | --- | --- | --- |
@@ -539,8 +514,7 @@ interoperation has statements without a verdict inside a reached level.
 | 4, Dynamics | partial | the delays and intervals with a bound have a check with a stated window, but the random halves and the state inside a node (RFC9777-RQ-1, RQ-5, RQ-6, RST-10, RST-16, RST-19) have no test |
 | 5, Complete | not started | RFC 4604, the SSM-aware behavior, and the other documents of the register |
 
-Per feature, the level reached is level 2 for the nineteen features with a core check that ran,
-and level 1 for MLD-F-SSM-AWARE, whose checks are level 5.
+Per feature, the level reached is level 2 for the nineteen features with a core check that ran, and level 1 for MLD-F-SSM-AWARE, whose checks are level 5.
 
 ## Pass log
 
@@ -549,12 +523,8 @@ and level 1 for MLD-F-SSM-AWARE, whose checks are level 5.
 | 1 | 2026-09-23 | **1, reached** | RFC 9777 and RFC 2710 downloaded; the standards map; the claims of the model | no run; one obsolete claim (RFC 3810, claimed at `Mldv2.ned:12`); one RFC 9777 formula change found relative to the model's default (Multicast Address Listening Interval, shared with the same gap in IGMP); the `Mldv2.ned` "Parity gaps" comment found stale on all three of its own points, not the one already known; `Mldv1` still crashes on an unrecognized message type where `Mldv2` already discards it silently |
 | 2 | 2026-09-24 | **2, reached** | catalogs of RFC 9777 (307) and RFC 2710 (81); 20 features; 32 checks; 47 tests; the conformance matrix | 21 PASS, 26 FAIL, one of them declared expected; seventeen gaps of the model, sixteen defects and one missing feature; 58 statements owed |
 
-The read record of pass 1 named commit `e360ca980e` of the wave 0 branch; its trees, src
-`16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
+The read record of pass 1 named commit `e360ca980e` of the wave 0 branch; its trees, src `16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
 
 ## Out of scope
 
-The areas that the catalogs leave out, and why, are at the end of each catalog:
-[RFC 9777](../../standard/rfc9777/catalog.md#out-of-scope-in-this-catalog),
-[RFC 2710](../../standard/rfc2710/catalog.md#out-of-scope-in-this-catalog). The documents
-outside the in-scope set are in [`standards.md`](../../protocol/mld/standards.md#in-scope-set).
+The areas that the catalogs leave out, and why, are at the end of each catalog: [RFC 9777](../../standard/rfc9777/catalog.md#out-of-scope-in-this-catalog), [RFC 2710](../../standard/rfc2710/catalog.md#out-of-scope-in-this-catalog). The documents outside the in-scope set are in [`standards.md`](../../protocol/mld/standards.md#in-scope-set).

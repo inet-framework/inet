@@ -2,11 +2,7 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc826/catalog.md](../../standard/rfc826/catalog.md), [rfc1122/catalog.md](../../standard/rfc1122/catalog.md), [rfc5494/catalog.md](../../standard/rfc5494/catalog.md), [features.md](features.md)
 
-Step 5 artifact of the standards test workflow. The procedures come from the specification
-only. They name no simulation model and no code. This file holds the common mockups, the
-rules every check obeys, and the index. The checks themselves live in one file per feature
-under [`checks/`](checks); the section names are the anchors that the coverage ledger links
-to.
+Step 5 artifact of the standards test workflow. The procedures come from the specification only. They name no simulation model and no code. This file holds the common mockups, the rules every check obeys, and the index. The checks themselves live in one file per feature under [`checks/`](checks); the section names are the anchors that the coverage ledger links to.
 
 ## Index
 
@@ -29,10 +25,7 @@ to.
 | [The request rate](checks/flood-prevention.md#the-request-rate) | `checks/flood-prevention.md` | RFC1122-AFLOOD-1 |
 | [No destination unreachable](checks/no-error-report.md#no-destination-unreachable) | `checks/no-error-report.md` | RFC1122-ANOERR-1 |
 
-Sixteen checks. Ten of them need observation alone and belong to level 2. Six need a
-crafted packet that no program can send, and those are the level 3 half: the five checks of
-[`input-validation.md`](checks/input-validation.md) after the first one, and the two of
-[`cache.md`](checks/cache.md).
+Sixteen checks. Ten of them need observation alone and belong to level 2. Six need a crafted packet that no program can send, and those are the level 3 half: the five checks of [`input-validation.md`](checks/input-validation.md) after the first one, and the two of [`cache.md`](checks/cache.md).
 
 ## Statements that no check carries
 
@@ -58,9 +51,7 @@ Three mockups serve the sixteen checks.
              link 1
 ```
 
-**The shared link.** Three hosts on one Ethernet segment, joined by a switch S. A broadcast
-from any host reaches both others; a frame addressed to one hardware address reaches that
-host alone.
+**The shared link.** Three hosts on one Ethernet segment, joined by a switch S. A broadcast from any host reaches both others; a frame addressed to one hardware address reaches that host alone.
 
 ```
    host A  ----\
@@ -68,58 +59,30 @@ host alone.
    host B  ----/                    \---  host C
 ```
 
-- The switch is a station of the link layer only. It has no protocol address, it answers no
-  ARP packet, and it forwards every frame. It stands in for the cable of RFC 826, which
-  knew no switch: on a cable every station receives a broadcast, and the switch gives the
-  same effect for three hosts.
-- Host C exists so that a third protocol address exists on the link. In some checks it
-  sends and receives nothing.
+- The switch is a station of the link layer only. It has no protocol address, it answers no ARP packet, and it forwards every frame. It stands in for the cable of RFC 826, which knew no switch: on a cable every station receives a broadcast, and the switch gives the same effect for three hosts.
+- Host C exists so that a third protocol address exists on the link. In some checks it sends and receives nothing.
 
-**The absent neighbour.** The pair, and host A sends to a protocol address on the link that
-no station owns.
+**The absent neighbour.** The pair, and host A sends to a protocol address on the link that no station owns.
 
 ```
    host A  ------------  host B          (10.0.0.99: nobody)
              link 1
 ```
 
-- The address is a real address of the link, so routing sends the datagram out of link 1
-  and asks for a resolution. No station answers, ever.
+- The address is a real address of the link, so routing sends the datagram out of link 1 and asks for a resolution. No station answers, ever.
 
 ## Rules every check obeys
 
-- The hosts are joined by an Ethernet link. Every ARP packet on it therefore has hardware
-  space 1 and hardware length 6 (RFC826-FMT-2), and the protocol resolved is IPv4, so the
-  protocol length is 4.
-- The addresses come from the scenario, not from the check. A check names a host, and reads
-  the addresses of that host from the host itself. This keeps a check independent of the
-  numbering the run chose.
-- ARP has no error message of any kind, so every discard check is an absence: the receiver
-  puts no ARP packet on the link, and it hands nothing up. An absence check must also show
-  that its stimulus arrived; otherwise a scenario that sends nothing passes it.
-- Every check makes one observation confirm the stimulus. For an injected packet that is
-  the packet at the interface of the receiving host. For a normal exchange it is the request
-  on the link.
-- The traffic is UDP over IPv4, 100 octets of data, from port 4000 to port 5000. Nothing in
-  ARP depends on the transport, the port or the size; one shape serves every check so that
-  a reader can compare two checks line by line.
-- Timing: a sender starts at 0.1 s. Every expected event of a level 2 check occurs within
-  1 second, and observation stops after 1 second. The two checks that measure a time — the
-  cache flush and the request rate — say what their own limit is.
-- The address resolution of the hosts is the one under test. No check may replace it with a
-  table that the scenario fills in advance, because that table is the thing being checked.
-  The only exception is a check that watches the traffic of a switch, and none of these
-  sixteen does.
+- The hosts are joined by an Ethernet link. Every ARP packet on it therefore has hardware space 1 and hardware length 6 (RFC826-FMT-2), and the protocol resolved is IPv4, so the protocol length is 4.
+- The addresses come from the scenario, not from the check. A check names a host, and reads the addresses of that host from the host itself. This keeps a check independent of the numbering the run chose.
+- ARP has no error message of any kind, so every discard check is an absence: the receiver puts no ARP packet on the link, and it hands nothing up. An absence check must also show that its stimulus arrived; otherwise a scenario that sends nothing passes it.
+- Every check makes one observation confirm the stimulus. For an injected packet that is the packet at the interface of the receiving host. For a normal exchange it is the request on the link.
+- The traffic is UDP over IPv4, 100 octets of data, from port 4000 to port 5000. Nothing in ARP depends on the transport, the port or the size; one shape serves every check so that a reader can compare two checks line by line.
+- Timing: a sender starts at 0.1 s. Every expected event of a level 2 check occurs within 1 second, and observation stops after 1 second. The two checks that measure a time — the cache flush and the request rate — say what their own limit is.
+- The address resolution of the hosts is the one under test. No check may replace it with a table that the scenario fills in advance, because that table is the thing being checked. The only exception is a check that watches the traffic of a switch, and none of these sixteen does.
 
 ## Why a crafted packet is needed at all
 
-Ten of the sixteen checks watch a normal exchange. The other six ask what a host does with
-a packet it cannot use, and a program cannot produce such a packet: the address resolution
-module builds every ARP packet itself, from its own addresses and from the address that
-routing gave it. There is no interface through which anything else reaches the field values.
+Ten of the sixteen checks watch a normal exchange. The other six ask what a host does with a packet it cannot use, and a program cannot produce such a packet: the address resolution module builds every ARP packet itself, from its own addresses and from the address that routing gave it. There is no interface through which anything else reaches the field values.
 
-The six checks therefore put a packet on the receiving host's interface as if it had come
-from the link. Four of them craft a field that no conforming station on this link would
-send — an opcode reserved for experiments, a hardware space reserved for experiments, a
-protocol space of another protocol — and two craft a well-formed packet from a station that
-is not there, which is how a table entry can be made to change without a second host.
+The six checks therefore put a packet on the receiving host's interface as if it had come from the link. Four of them craft a field that no conforming station on this link would send — an opcode reserved for experiments, a hardware space reserved for experiments, a protocol space of another protocol — and two craft a well-formed packet from a station that is not there, which is how a table entry can be made to change without a second host.

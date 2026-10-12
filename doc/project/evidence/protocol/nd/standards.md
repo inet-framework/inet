@@ -2,23 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around IPv6 Neighbor Discovery, records which document governs each contested clause, and
-pins the set that the next pass tests against. Neighbor Discovery has two base documents:
-the discovery and resolution protocol itself, and stateless address autoconfiguration, which
-depends on it. [`ipv6/standards.md`](../ipv6/standards.md#document-list) names both as
-protocols of their own and leaves them out of the IPv6 pass for that reason; this document is
-where they get their own map.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around IPv6 Neighbor Discovery, records which document governs each contested clause, and pins the set that the next pass tests against. Neighbor Discovery has two base documents: the discovery and resolution protocol itself, and stateless address autoconfiguration, which depends on it. [`ipv6/standards.md`](../ipv6/standards.md#document-list) names both as protocols of their own and leaves them out of the IPv6 pass for that reason; this document is where they get their own map.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
-claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the
-feature map, the checks and the tests of the normal path.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the feature map, the checks and the tests of the normal path.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -27,8 +17,7 @@ feature map, the checks and the tests of the normal path.
 | level 4, Dynamics | RFC 4861 §6.2.6 and §6.3.4 (the randomized Router Advertisement interval and reachable-time jitter); RFC 7048 (relaxed Neighbor Unreachability Detection timing); RFC 7559 (Router Solicitation retransmission after loss); RFC 8319 (raised bounds on the Router Advertisement interval and router lifetime) | the timers and the control loops: Neighbor Unreachability Detection, the periodic and jittered Router Advertisement, the retransmission of a lost solicitation |
 | level 5, Complete | RFC 4429 (optimistic Duplicate Address Detection); RFC 7527 (enhanced DAD, loopback detection); RFC 8028 (first-hop router selection in a multi-prefix network); RFC 9131 (gratuitous Neighbor Discovery); RFC 9762 (the DHCPv6 prefix-delegation flag); RFC 9685, RFC 9926 (6LoWPAN and RPL neighbor-discovery extensions); anycast targets, and multiple global addresses from different advertised prefixes | the optional alternatives and the specialized scenarios: an address used before DAD completes, a second detection layer, a host with more than one upstream router, a router that helps a new neighbor, a constrained 6LoWPAN network |
 
-What a pass actually reached is not recorded here. It is in
-[`model/nd/coverage.md`](../../model/nd/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/nd/coverage.md`](../../model/nd/coverage.md#achieved-level).
 
 ## Document list
 
@@ -55,33 +44,19 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc4861.txt`, `rfc4862.txt`, `rfc5942.txt`, `rfc6980.txt` in
-  [`standards/RFC/`](../../../../../../standards/RFC/rfc4861.txt), the `standards` project beside
-  the INET tree — `https://www.rfc-editor.org/rfc/rfcNNNN.txt`, downloaded 2026-09-23.
-- `rfc4443.txt` is not fetched again; the ipv6 pass owns it at
-  [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt).
+- `rfc4861.txt`, `rfc4862.txt`, `rfc5942.txt`, `rfc6980.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4861.txt), the `standards` project beside the INET tree — `https://www.rfc-editor.org/rfc/rfcNNNN.txt`, downloaded 2026-09-23.
+- `rfc4443.txt` is not fetched again; the ipv6 pass owns it at [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt).
 
-Both documents postdate RFC 2119 and use its keywords throughout: `grep -c '\bMUST\b'
-rfc4861.txt` counts 151 lines, `\bSHOULD\b` counts 65, `\bMAY\b` counts 23. RFC 4862 counts 17
-`MUST` lines, 11 `SHOULD` lines and 5 `MAY` lines. RFC 5942 and RFC 6980 also use the
-keywords; RFC 6980 §5 is the one clause this pass quotes, and it is a `MUST NOT`.
+Both documents postdate RFC 2119 and use its keywords throughout: `grep -c '\bMUST\b' rfc4861.txt` counts 151 lines, `\bSHOULD\b` counts 65, `\bMAY\b` counts 23. RFC 4862 counts 17 `MUST` lines, 11 `SHOULD` lines and 5 `MAY` lines. RFC 5942 and RFC 6980 also use the keywords; RFC 6980 §5 is the one clause this pass quotes, and it is a `MUST NOT`.
 
 Two relationship notes the register alone does not give:
 
-- **RFC 4429 updates two obsoleted documents.** Its own header says `Updates: 2461, 2462`,
-  because it predates RFC 4861 and RFC 4862 by over a year. RFC 7527 later updates "RFCs 4429,
-  4861, and 4862" in the same sentence, which is the register's confirmation that RFC 4429
-  travels with the current pair, not with the obsoleted one.
-- **RFC 4861 and RFC 4862 are Draft Standard, not Internet Standard**, and nothing has
-  reclassified them since 2007. This is the maturity level the IETF used before the 2011
-  process change (RFC 6410) collapsed three stages into two; it does not mean the document is
-  provisional. No later document proposes to obsolete either one.
+- **RFC 4429 updates two obsoleted documents.** Its own header says `Updates: 2461, 2462`, because it predates RFC 4861 and RFC 4862 by over a year. RFC 7527 later updates "RFCs 4429, 4861, and 4862" in the same sentence, which is the register's confirmation that RFC 4429 travels with the current pair, not with the obsoleted one.
+- **RFC 4861 and RFC 4862 are Draft Standard, not Internet Standard**, and nothing has reclassified them since 2007. This is the maturity level the IETF used before the 2011 process change (RFC 6410) collapsed three stages into two; it does not mean the document is provisional. No later document proposes to obsolete either one.
 
 ## Override table
 
-One row per clause-level conflict. `Governs` names the document a test must follow when the
-two texts disagree. Line references are into the downloaded files; a clause reference stands for
-a document that is not downloaded.
+One row per clause-level conflict. `Governs` names the document a test must follow when the two texts disagree. Line references are into the downloaded files; a clause reference stands for a document that is not downloaded.
 
 | Area | Base clause | Later clause | Governs | In scope now |
 | --- | --- | --- | --- | --- |
@@ -94,14 +69,7 @@ a document that is not downloaded.
 | Creating a Neighbor Cache entry and sending an unsolicited NA | RFC 4861 §7.2.3 creates an entry only on receiving a solicitation with a Source Link-Layer Address option; §7.2.6 already makes an unsolicited NA on address assignment optional | RFC 9131: routers SHOULD proactively create an entry when a new address appears on-link, and nodes SHOULD send an unsolicited NA on assigning a new address | RFC 9131 | no; level 5 — every new rule is a `SHOULD`, and the router side needs configuration; RFC 4861 §7.2.6 already gives the host side an optional path to the same unsolicited NA, so a level 5 pass has to separate the two mechanisms |
 | The Prefix Information Option's reserved flag bits | RFC 4861 §4.6.2 leaves six bits reserved with no registry | RFC 8425: creates an IANA registry for those bits; states no new host or router behavior | RFC 8425 | no; administrative only, no behavior to test |
 
-RFC 7559, RFC 8028, RFC 9685, RFC 9762 and RFC 9926 update RFC 4861 without contesting a
-clause a level 2 pass would check: RFC 7559 adds a retry timer around an already-optional
-step (level 4); RFC 8028 is host-internal router selection among several already-valid
-routers, needing a multi-router, multi-prefix mockup (level 5); RFC 9685 and RFC 9926 extend
-the option set for 6LoWPAN and RPL routers, a constrained-network protocol family of its own
-(level 5); RFC 9762 defines one new PIO flag bit that only changes behavior when a DHCPv6
-prefix-delegation deployment sets it (level 5). None of them removes or negates a clause of
-the level 2 in-scope set.
+RFC 7559, RFC 8028, RFC 9685, RFC 9762 and RFC 9926 update RFC 4861 without contesting a clause a level 2 pass would check: RFC 7559 adds a retry timer around an already-optional step (level 4); RFC 8028 is host-internal router selection among several already-valid routers, needing a multi-router, multi-prefix mockup (level 5); RFC 9685 and RFC 9926 extend the option set for 6LoWPAN and RPL routers, a constrained-network protocol family of its own (level 5); RFC 9762 defines one new PIO flag bit that only changes behavior when a DHCPv6 prefix-delegation deployment sets it (level 5). None of them removes or negates a clause of the level 2 in-scope set.
 
 ## In-scope set
 
@@ -114,9 +82,7 @@ The set that a level 2 pass tests against:
 | RFC 5942 | July 2010, Proposed Standard; §6 (the on-link override) | [`standard/rfc5942/catalog.md`](../../standard/rfc5942/catalog.md) |
 | RFC 6980 | August 2013, Proposed Standard; §5 (the fragmentation prohibition) | [`standard/rfc6980/catalog.md`](../../standard/rfc6980/catalog.md) |
 
-RFC 4443 stays a background companion, exactly as in the ipv6 pass: every ND message is an
-ICMPv6 message, and the checks tolerate its general rules without re-deriving them; see
-[`ipv6/standards.md`](../ipv6/standards.md#document-list).
+RFC 4443 stays a background companion, exactly as in the ipv6 pass: every ND message is an ICMPv6 message, and the checks tolerate its general rules without re-deriving them; see [`ipv6/standards.md`](../ipv6/standards.md#document-list).
 
 Out of scope, with the reason:
 

@@ -2,29 +2,20 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [checks.md](../checks.md), [rfc9776/catalog.md](../../../standard/rfc9776/catalog.md)
 
-The common mockups, the rules and the index are in [`checks.md`](../checks.md). The
-procedures come from the specification only. They name no simulation model and no code.
+The common mockups, the rules and the index are in [`checks.md`](../checks.md). The procedures come from the specification only. They name no simulation model and no code.
 
 ## Response to a General Query
 
-Checks: **RFC9776-HQRY-1**, **HQRY-3**, **HQRY-5**, **HQRY-10**, **REP-18**, **REP-19**,
-**REP-20** (description), **HQRY-12** (must not); covers **RFC9776-HQRY-2** (must (lower case)),
-**HQRY-11**, **HOST-7** (description).
+Checks: **RFC9776-HQRY-1**, **HQRY-3**, **HQRY-5**, **HQRY-10**, **REP-18**, **REP-19**, **REP-20** (description), **HQRY-12** (must not); covers **RFC9776-HQRY-2** (must (lower case)), **HQRY-11**, **HOST-7** (description).
 
 ### Requirement
 
-RFC 9776 §5.2: a system answers a General Query after a random delay in (0, Max Response Time],
-never at once, with one Current-State Record for each group of the interface: MODE_IS_EXCLUDE
-with the blocked sources, or MODE_IS_INCLUDE with the wanted sources, packed into as few Reports
-as possible.
+RFC 9776 §5.2: a system answers a General Query after a random delay in (0, Max Response Time], never at once, with one Current-State Record for each group of the interface: MODE_IS_EXCLUDE with the blocked sources, or MODE_IS_INCLUDE with the wanted sources, packed into as few Reports as possible.
 
 ### Scenario constants
 
-- The link. From 10 seconds on, host A joins G, and joins H for S1: its state is EXCLUDE({}) for
-  G and INCLUDE({S1}) for H. A also joins K at 10 seconds and leaves K at 20 seconds, so at the
-  Query it has no reception state for K: INCLUDE({}) (RFC9776-HOST-7).
-- The General Query under test is the second startup Query of R, 31.25 seconds after the first,
-  with a Max Response Time of 10 seconds.
+- The link. From 10 seconds on, host A joins G, and joins H for S1: its state is EXCLUDE({}) for G and INCLUDE({S1}) for H. A also joins K at 10 seconds and leaves K at 20 seconds, so at the Query it has no reception state for K: INCLUDE({}) (RFC9776-HOST-7).
+- The General Query under test is the second startup Query of R, 31.25 seconds after the first, with a Max Response Time of 10 seconds.
 - Observation lasts 50 seconds from the start.
 
 ### Procedure
@@ -35,13 +26,10 @@ as possible.
 
 ### Expected observations
 
-1. On L1, from R, after 10 seconds, a General Query. Record its instant. This confirms the
-   stimulus.
-2. On L1, from A, after that Query and within its Max Response Time of 10 seconds, a Report with
-   Current-State Records (RFC9776-HQRY-1, HQRY-3, HQRY-5, HQRY-10, REP-18).
+1. On L1, from R, after 10 seconds, a General Query. Record its instant. This confirms the stimulus.
+2. On L1, from A, after that Query and within its Max Response Time of 10 seconds, a Report with Current-State Records (RFC9776-HQRY-1, HQRY-3, HQRY-5, HQRY-10, REP-18).
 3. That Report does not leave at the instant of the Query (RFC9776-HQRY-12).
-4. It holds a MODE_IS_EXCLUDE record for G with no sources and a MODE_IS_INCLUDE record for H with
-   the source S1 (RFC9776-HQRY-10, REP-19, REP-20).
+4. It holds a MODE_IS_EXCLUDE record for G with no sources and a MODE_IS_INCLUDE record for H with the source S1 (RFC9776-HQRY-10, REP-19, REP-20).
 5. It holds no record for K (RFC9776-HQRY-10).
 
 ## Response to a Group-Specific Query
@@ -50,14 +38,11 @@ Checks: **RFC9776-HQRY-6**, **HQRY-13** (description); covers **RFC9776-HQRY-4**
 
 ### Requirement
 
-RFC 9776 §5.2: a system that has state for the queried group answers a Group-Specific Query with
-one Current-State Record for the group after a random delay within the Max Response Time of the
-Query; a system without state for the group sends nothing.
+RFC 9776 §5.2: a system that has state for the queried group answers a Group-Specific Query with one Current-State Record for the group after a random delay within the Max Response Time of the Query; a system without state for the group sends nothing.
 
 ### Scenario constants
 
-- The link. Hosts A and B join G at 10 seconds; B leaves G at 50 seconds, so that R sends
-  Group-Specific Queries for G with a Max Response Time of 1 second.
+- The link. Hosts A and B join G at 10 seconds; B leaves G at 50 seconds, so that R sends Group-Specific Queries for G with a Max Response Time of 1 second.
 - Observation lasts 60 seconds from the start.
 
 ### Procedure
@@ -68,29 +53,21 @@ Query; a system without state for the group sends nothing.
 
 ### Expected observations
 
-1. On L1, from R, after 50 seconds, a Group-Specific Query for G. Record its instant. This
-   confirms the stimulus.
-2. On L1, from A, within 1 second of that Query and not at its instant, a Report with a
-   MODE_IS_EXCLUDE record for G and no sources (RFC9776-HQRY-6, HQRY-13).
+1. On L1, from R, after 50 seconds, a Group-Specific Query for G. Record its instant. This confirms the stimulus.
+2. On L1, from A, within 1 second of that Query and not at its instant, a Report with a MODE_IS_EXCLUDE record for G and no sources (RFC9776-HQRY-6, HQRY-13).
 3. No Report with a Current-State Record for G leaves B after the leave (RFC9776-HQRY-13).
 
 ## Response to a Group-and-Source-Specific Query
 
-Checks: **RFC9776-HQRY-7**, **HQRY-14**, **HQRY-15**, **HQRY-17** (description); covers
-**RFC9776-HQRY-9**, **HQRY-18** (description).
+Checks: **RFC9776-HQRY-7**, **HQRY-14**, **HQRY-15**, **HQRY-17** (description); covers **RFC9776-HQRY-9**, **HQRY-18** (description).
 
 ### Requirement
 
-RFC 9776 §5.2 and Table 5: a system answers a Group-and-Source-Specific Query for sources B with
-a Current-State Record that the table builds from its state; from INCLUDE(A) it reports
-IS_IN(A ∩ B). A record with no sources is not sent.
+RFC 9776 §5.2 and Table 5: a system answers a Group-and-Source-Specific Query for sources B with a Current-State Record that the table builds from its state; from INCLUDE(A) it reports IS_IN(A ∩ B). A record with no sources is not sent.
 
 ### Scenario constants
 
-- The link. Host A joins G for S1 from 10 seconds on: INCLUDE({S1}). Host B joins G for S1 from
-  10 to 50 seconds and for S2 from 10 to 55 seconds. Its leave of S1 at 50 seconds makes R send
-  Group-and-Source-Specific Queries for G and S1, which A wants; its leave of S2 at 55 seconds
-  makes R send them for G and S2, which A does not want.
+- The link. Host A joins G for S1 from 10 seconds on: INCLUDE({S1}). Host B joins G for S1 from 10 to 50 seconds and for S2 from 10 to 55 seconds. Its leave of S1 at 50 seconds makes R send Group-and-Source-Specific Queries for G and S1, which A wants; its leave of S2 at 55 seconds makes R send them for G and S2, which A does not want.
 - Observation lasts 65 seconds from the start.
 
 ### Procedure
@@ -101,13 +78,8 @@ IS_IN(A ∩ B). A record with no sources is not sent.
 
 ### Expected observations
 
-1. On L1, from R, after 50 seconds, a Group-and-Source-Specific Query for G with the source S1.
-   Record its instant. This confirms the stimulus.
-2. On L1, from A, within 1 second of that Query, a Report with a Current-State Record for G
-   (RFC9776-HQRY-7, HQRY-14).
+1. On L1, from R, after 50 seconds, a Group-and-Source-Specific Query for G with the source S1. Record its instant. This confirms the stimulus.
+2. On L1, from A, within 1 second of that Query, a Report with a Current-State Record for G (RFC9776-HQRY-7, HQRY-14).
 3. The record is MODE_IS_INCLUDE with the source S1 only (RFC9776-HQRY-15).
-4. On L1, from R, after 55 seconds, a Group-and-Source-Specific Query for G with the source S2.
-   This confirms the stimulus of observation 5.
-5. No Report of A with a Current-State Record for G leaves A within 1 second of that Query, and
-   no Report of A in the window holds a Current-State Record for G with no sources
-   (RFC9776-HQRY-17).
+4. On L1, from R, after 55 seconds, a Group-and-Source-Specific Query for G with the source S2. This confirms the stimulus of observation 5.
+5. No Report of A with a Current-State Record for G leaves A within 1 second of that Query, and no Report of A in the window holds a Current-State Record for G with no sources (RFC9776-HQRY-17).

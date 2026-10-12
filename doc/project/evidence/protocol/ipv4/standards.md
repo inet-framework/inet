@@ -2,21 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around IPv4, records which document governs each contested clause, and pins the exact set
-that the current pass tests against. Every later artifact of this folder is bound to the
-in-scope set below.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around IPv4, records which document governs each contested clause, and pins the exact set that the current pass tests against. Every later artifact of this folder is bound to the in-scope set below.
 
-The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`),
-retrieved 2026-09-08 and checked again 2026-09-09. The relationship words are the ones of
-the workflow: `base`, `updates`, `obsoletes`, `amends`, `companion`.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`), retrieved 2026-09-08 and checked again 2026-09-09. The relationship words are the ones of the workflow: `base`, `updates`, `obsoletes`, `amends`, `companion`.
 
 ## Target level
 
-**Level 3 — Edge** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-Level 3 adds the negative requirements, the error reports, and the crafted or corrupted
-input, and it brings in the documents where those rules live: the host requirements and
-the identification errata. The in-scope set below therefore holds four documents.
+**Level 3 — Edge** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). Level 3 adds the negative requirements, the error reports, and the crafted or corrupted input, and it brings in the documents where those rules live: the host requirements and the identification errata. The in-scope set below therefore holds four documents.
 
 The level decides which documents the next pass must add:
 
@@ -25,8 +17,7 @@ The level decides which documents the next pass must add:
 | level 4, Dynamics | nothing new: the reassembly timer clauses of RFC 791 §3.2 and RFC 1122 §3.3.2 are already in the catalogs and wait for the statistical toolset | a timer is a distribution, not a value |
 | level 5, Complete | RFC 2474, RFC 1191, RFC 950, RFC 1812, RFC 4884, RFC 6633, RFC 6918 | the options, the type of service byte, the router requirements, and the ICMP messages the catalogs leave out |
 
-What the pass actually reached is not recorded here. It is in
-[`model/ipv4/coverage.md`](../../model/ipv4/coverage.md#achieved-level).
+What the pass actually reached is not recorded here. It is in [`model/ipv4/coverage.md`](../../model/ipv4/coverage.md#achieved-level).
 
 ## Document list
 
@@ -46,39 +37,22 @@ What the pass actually reached is not recorded here. It is in
 | RFC 1812 | Requirements for IP Version 4 Routers | June 1995 | Proposed Standard | `companion` (the router counterpart of RFC 1122) | no |
 | RFC 815 | IP Datagram Reassembly Algorithms | July 1982 | informational, legacy | `companion` (an algorithm, not a requirement) | no |
 
-Sources of the four texts. Each one is in the `standards` project, outside the INET tree,
-and every quote in this tree cites it by file name and line number:
+Sources of the four texts. Each one is in the `standards` project, outside the INET tree, and every quote in this tree cites it by file name and line number:
 
-- `rfc791.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc791.txt) —
-  <https://www.rfc-editor.org/rfc/rfc791.txt>, downloaded 2026-09-02.
-- `rfc792.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc792.txt) —
-  <https://www.rfc-editor.org/rfc/rfc792.txt>, downloaded 2026-09-02.
-- `rfc1122.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc1122.txt) —
-  <https://www.rfc-editor.org/rfc/rfc1122.txt>, downloaded 2026-09-09.
-- `rfc6864.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6864.txt) —
-  <https://www.rfc-editor.org/rfc/rfc6864.txt>, downloaded 2026-09-09.
+- `rfc791.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc791.txt) — <https://www.rfc-editor.org/rfc/rfc791.txt>, downloaded 2026-09-02.
+- `rfc792.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc792.txt) — <https://www.rfc-editor.org/rfc/rfc792.txt>, downloaded 2026-09-02.
+- `rfc1122.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc1122.txt) — <https://www.rfc-editor.org/rfc/rfc1122.txt>, downloaded 2026-09-09.
+- `rfc6864.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6864.txt) — <https://www.rfc-editor.org/rfc/rfc6864.txt>, downloaded 2026-09-09.
 
 Three relationship notes, because the register alone gives the wrong picture:
 
-- **RFC 1122 is not a formal update of RFC 791.** Its `Updates` header names RFC 793 only.
-  But its §3 restates the IPv4 host rules of RFC 791 with explicit MUST and SHOULD
-  keywords, so it governs the strength of several statements for a host. The workflow
-  therefore records it as a companion with override rows, not as an unrelated document.
-  RFC 1122 speaks for **hosts**. Its counterpart for routers is RFC 1812, which is out of
-  scope; where a check observes a gateway, the RFC 791 and RFC 792 text still governs the
-  gateway.
-- **RFC 6864 is a formal update** of RFC 791 and of RFC 1122. It replaces the
-  identification rule of RFC 791 §2.3 and the retransmission permission of RFC 1122
-  §3.2.1.5, and it restates the don't-fragment rule with a keyword.
-- **RFC 1191 is not a formal update of RFC 792.** It redefines the field that RFC 792
-  labels "unused" in the destination unreachable message (§4, `Router specification`), so
-  it governs the layout of exactly the message that check `dont-fragment` observes.
+- **RFC 1122 is not a formal update of RFC 791.** Its `Updates` header names RFC 793 only. But its §3 restates the IPv4 host rules of RFC 791 with explicit MUST and SHOULD keywords, so it governs the strength of several statements for a host. The workflow therefore records it as a companion with override rows, not as an unrelated document. RFC 1122 speaks for **hosts**. Its counterpart for routers is RFC 1812, which is out of scope; where a check observes a gateway, the RFC 791 and RFC 792 text still governs the gateway.
+- **RFC 6864 is a formal update** of RFC 791 and of RFC 1122. It replaces the identification rule of RFC 791 §2.3 and the retransmission permission of RFC 1122 §3.2.1.5, and it restates the don't-fragment rule with a keyword.
+- **RFC 1191 is not a formal update of RFC 792.** It redefines the field that RFC 792 labels "unused" in the destination unreachable message (§4, `Router specification`), so it governs the layout of exactly the message that check `dont-fragment` observes.
 
 ## Override table
 
-One row per clause-level conflict. `Governs` names the document a test must follow when the
-two texts disagree. The references into the four downloaded files are line numbers; the other
-references are clause numbers, because those texts are not downloaded.
+One row per clause-level conflict. `Governs` names the document a test must follow when the two texts disagree. The references into the four downloaded files are line numbers; the other references are clause numbers, because those texts are not downloaded.
 
 | Area | Base clause | Later clause | Governs | In scope now |
 | --- | --- | --- | --- | --- |
@@ -94,11 +68,7 @@ references are clause numbers, because those texts are not downloaded.
 | ICMP destination unreachable, unused field | RFC 792, `rfc792.txt:215` (code 4), unused word of the message | RFC 1191 §4 `Router specification` (low 16 bits become the next-hop MTU) | RFC 1191 | no |
 | ICMP source quench | RFC 792, source quench message; RFC 1122 §3.2.2.3 | RFC 6633 (deprecated; a host MUST silently discard) | RFC 6633 | no |
 
-Every in-scope row is an `Overridden by` cross reference in the catalog of the base
-document: the RFC 791 entries name the RFC 1122 or RFC 6864 entry that governs, and the
-RFC 1122 identification entry names the RFC 6864 entry. The RFC 792 entries carry no
-`Overridden by`, because the two messages they describe are gateway reports and RFC 1122
-governs hosts only; a note under each entry says so.
+Every in-scope row is an `Overridden by` cross reference in the catalog of the base document: the RFC 791 entries name the RFC 1122 or RFC 6864 entry that governs, and the RFC 1122 identification entry names the RFC 6864 entry. The RFC 792 entries carry no `Overridden by`, because the two messages they describe are gateway reports and RFC 1122 governs hosts only; a note under each entry says so.
 
 ## In-scope set
 
@@ -111,13 +81,9 @@ The current pass tests against these exact documents:
 | RFC 1122 | October 1989, Internet Standard, no revision since | §3.2.1 (IP), §3.2.2 (ICMP: the general rules and the error messages of §3.2.2.1, §3.2.2.4, §3.2.2.5), §3.3.2 (reassembly), §3.3.3 (fragmentation), §3.3.8 (error reporting) | [`rfc1122/catalog.md`](../../standard/rfc1122/catalog.md) |
 | RFC 6864 | February 2013, Proposed Standard, no revision since | the whole document; §4 holds the requirements | [`rfc6864/catalog.md`](../../standard/rfc6864/catalog.md) |
 
-The four documents revise by replacement, never in place, so the document identity pins
-the version by itself. A standard that revises in place (an IEEE edition, for example)
-needs the year in this table and in the file name of the downloaded text.
+The four documents revise by replacement, never in place, so the document identity pins the version by itself. A standard that revises in place (an IEEE edition, for example) needs the year in this table and in the file name of the downloaded text.
 
-RFC 1122 is a multi-protocol document: its §3 covers IP, ICMP and IGMP, and its §4 covers
-UDP and TCP. Only the sections named above enter the IPv4 set. The parts of §3 that stay
-out, with the reason:
+RFC 1122 is a multi-protocol document: its §3 covers IP, ICMP and IGMP, and its §4 covers UDP and TCP. Only the sections named above enter the IPv4 set. The parts of §3 that stay out, with the reason:
 
 | RFC 1122 part | Reason it is out of the IPv4 set |
 | --- | --- |

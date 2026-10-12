@@ -2,42 +2,24 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `IPSEC-F-*` · **Stands on:** [standards.md](standards.md), [rfc4301/catalog.md](../../standard/rfc4301/catalog.md), [rfc4302/catalog.md](../../standard/rfc4302/catalog.md), [rfc4303/catalog.md](../../standard/rfc4303/catalog.md)
 
-Step 4 artifact of the standards test workflow. The catalogs are flat, fine-grained, and per
-document. This document is the high-level view above them: the capabilities that the
-in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of
-each, and the cross reference into the catalogs.
+Step 4 artifact of the standards test workflow. The catalogs are flat, fine-grained, and per document. This document is the high-level view above them: the capabilities that the in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of each, and the cross reference into the catalogs.
 
 The map reads in two directions:
 
-- **Down** — which checks tell whether a feature works. A `core` check is one the feature
-  cannot work without. A `supporting` check is a detail or an edge case.
-- **Up** — which features the simulation model supports. Step 7 writes the answer into
-  [`coverage.md`](../../model/ipsec/coverage.md), and step 8 compares it with the claims of the
-  model in [`conformance.md`](../../model/ipsec/conformance.md).
+- **Down** — which checks tell whether a feature works. A `core` check is one the feature cannot work without. A `supporting` check is a detail or an edge case.
+- **Up** — which features the simulation model supports. Step 7 writes the answer into [`coverage.md`](../../model/ipsec/coverage.md), and step 8 compares it with the claims of the model in [`conformance.md`](../../model/ipsec/conformance.md).
 
-The feature list comes from the standard texts only. The support of each feature — what the
-run actually showed — is **not** in this document. It lives in the coverage ledger,
-[`coverage.md`](../../model/ipsec/coverage.md).
+The feature list comes from the standard texts only. The support of each feature — what the run actually showed — is **not** in this document. It lives in the coverage ledger, [`coverage.md`](../../model/ipsec/coverage.md).
 
 ## How this map decides the level
 
-The rule of the guide: `mandatory` when any core statement says `must` or `shall`, or when the
-mechanism is the only path the document gives to a state or an outcome; `optional` when every
-core statement says `may` or `should`; `unstated` otherwise.
+The rule of the guide: `mandatory` when any core statement says `must` or `shall`, or when the mechanism is the only path the document gives to a state or an outcome; `optional` when every core statement says `may` or `should`; `unstated` otherwise.
 
-One refinement, which the DHCP, RIP, ND and IGMP maps state too: **a conditional keyword does
-not raise the level of a feature.** RFC 4301 says that an implementation that supports multicast
-"MUST" support multicast SAs; the rule holds only once an implementation supports multicast,
-which the in-scope set does not require. The level comes from the statement that decides whether
-the mechanism has to exist at all, and each feature names it.
+One refinement, which the DHCP, RIP, ND and IGMP maps state too: **a conditional keyword does not raise the level of a feature.** RFC 4301 says that an implementation that supports multicast "MUST" support multicast SAs; the rule holds only once an implementation supports multicast, which the in-scope set does not require. The level comes from the statement that decides whether the mechanism has to exist at all, and each feature names it.
 
-A second refinement, new in this map: **the base document can make a whole companion optional.**
-RFC 4301 says that an implementation "MUST support ESP" and "MAY support AH" (RFC4301-OVW-5),
-and RFC 4302 makes every rule of AH a must for an implementation that offers AH (RFC4302-CONF-1).
-The two AH features are therefore `optional`, and each of their rules is a must once AH is there.
+A second refinement, new in this map: **the base document can make a whole companion optional.** RFC 4301 says that an implementation "MUST support ESP" and "MAY support AH" (RFC4301-OVW-5), and RFC 4302 makes every rule of AH a must for an implementation that offers AH (RFC4302-CONF-1). The two AH features are therefore `optional`, and each of their rules is a must once AH is there.
 
-A statement can be in more than one feature, when two features need it: RFC4301-SA-50, the rule
-that a host supports both modes, is core to the transport mode and to the tunnel mode.
+A statement can be in more than one feature, when two features need it: RFC4301-SA-50, the rule that a host supports both modes, is core to the transport mode and to the tunnel mode.
 
 ## Index
 
@@ -370,7 +352,4 @@ that a host supports both modes, is core to the transport mode and to the tunnel
 
 ## Coverage of the catalog entries
 
-Every one of the 797 entries of the three catalogs is in at least one feature above, as core
-or as supporting: RFC 4301 with 370, RFC 4302 with
-190 and RFC 4303 with
-237.
+Every one of the 797 entries of the three catalogs is in at least one feature above, as core or as supporting: RFC 4301 with 370, RFC 4302 with 190 and RFC 4303 with 237.

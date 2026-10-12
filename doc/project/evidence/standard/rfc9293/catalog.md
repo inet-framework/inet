@@ -2,28 +2,17 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC9293-*` · **Stands on:** [standards.md](../../protocol/tcp/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow, for one document of
-the in-scope set: RFC 9293, the August 2022 text that obsoletes RFC 793. It lists
-statements that a test can check. The catalog comes from the RFC text only. It contains no
-simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow, for one document of the in-scope set: RFC 9293, the August 2022 text that obsoletes RFC 793. It lists statements that a test can check. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc9293.txt`](../../../../../../standards/RFC/rfc9293.txt) —
-  Transmission Control Protocol (TCP), August 2022. Downloaded 2026-09-04
-  from <https://www.rfc-editor.org/rfc/rfc9293.txt>.
+- [`standards/RFC/rfc9293.txt`](../../../../../../standards/RFC/rfc9293.txt) — Transmission Control Protocol (TCP), August 2022. Downloaded 2026-09-04 from <https://www.rfc-editor.org/rfc/rfc9293.txt>.
 
-The family of TCP documents, and the reason this catalog quotes RFC 9293 and not RFC 793,
-are in [`standards.md`](../../protocol/tcp/standards.md). The features that these statements
-build are in [`features.md`](../../protocol/tcp/features.md).
+The family of TCP documents, and the reason this catalog quotes RFC 9293 and not RFC 793, are in [`standards.md`](../../protocol/tcp/standards.md). The features that these statements build are in [`features.md`](../../protocol/tcp/features.md).
 
-Quotes are verbatim. A reference such as `rfc9293.txt:337` points to a line of that
-file.
+Quotes are verbatim. A reference such as `rfc9293.txt:337` points to a line of that file.
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`tcp/coverage.md`](../../model/tcp/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a
-new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`tcp/coverage.md`](../../model/tcp/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
 ## Index
 
@@ -65,26 +54,15 @@ new test or a new run must never force an edit here.
 | [RFC9293-ICMP-3](#rfc9293-icmp-3) | A soft ICMP error does not abort the connection. |
 | [RFC9293-ICMP-4](#rfc9293-icmp-4) | A hard ICMP error should abort the connection. |
 
-The rows above the line come from the level 2 pass, which read the document for the normal
-path. The rows below come from the level 3 pass, which read it for the edges: the segment
-that does not fit, the reset a third party could forge, the window that moves backward, and
-the error the layer below reports.
+The rows above the line come from the level 2 pass, which read the document for the normal path. The rows below come from the level 3 pass, which read it for the edges: the segment that does not fit, the reset a third party could forge, the window that moves backward, and the error the layer below reports.
 
 ## How to read an entry
 
-- **Strength** — the word the RFC uses: `must`, `should`, `may`, or `description` for
-  normative prose without a keyword. RFC 9293 uses RFC 2119 keywords, and it also carries
-  much descriptive prose and figures that a test can check.
-- **Class** — `wire`, `end-to-end`, `error-signal`, `internal`, or `encoding`, as in
-  [`rfc791-catalog`](../rfc791/catalog.md#how-to-read-an-entry).
-- **Overridden by** — appears only when a later document of the in-scope set changes the
-  statement. No entry carries the field, because RFC 9293 is alone in the in-scope set. It
-  is itself the override of RFC 793; see the override table of
-  [`standards.md`](../../protocol/tcp/standards.md#override-table).
+- **Strength** — the word the RFC uses: `must`, `should`, `may`, or `description` for normative prose without a keyword. RFC 9293 uses RFC 2119 keywords, and it also carries much descriptive prose and figures that a test can check.
+- **Class** — `wire`, `end-to-end`, `error-signal`, `internal`, or `encoding`, as in [`rfc791-catalog`](../rfc791/catalog.md#how-to-read-an-entry).
+- **Overridden by** — appears only when a later document of the in-scope set changes the statement. No entry carries the field, because RFC 9293 is alone in the in-scope set. It is itself the override of RFC 793; see the override table of [`standards.md`](../../protocol/tcp/standards.md#override-table).
 
-Some rules of this document appear twice, once in the prose of §3.5 or §3.8 and once in the
-event processing of §3.10. Where that happens the entry quotes both places. Where the two
-carry different keywords, the weaker one governs and the entry says so.
+Some rules of this document appear twice, once in the prose of §3.5 or §3.8 and once in the event processing of §3.10. Where that happens the entry quotes both places. Where the two carry different keywords, the weaker one governs and the entry says so.
 
 ## Connection establishment
 
@@ -104,8 +82,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > — Figure 6, `rfc9293.txt:1260-1268`
 
 - Strength: description with a normative figure. Class: wire.
-- Check idea: open one connection and observe three segments in order on the link: SYN
-  without ACK, SYN with ACK, then ACK without SYN.
+- Check idea: open one connection and observe three segments in order on the link: SYN without ACK, SYN with ACK, then ACK without SYN.
 
 ### RFC9293-EST-2
 
@@ -116,8 +93,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > 101, acknowledging the SYN that occupied sequence 100." — §3.5, `rfc9293.txt:1272-1277`
 
 - Strength: description. Class: wire.
-- Check idea: capture the sequence number of the SYN, then require the acknowledgment field
-  of the SYN-ACK to equal that value plus one.
+- Check idea: capture the sequence number of the SYN, then require the acknowledgment field of the SYN-ACK to equal that value plus one.
 
 ### RFC9293-ISS-1
 
@@ -127,8 +103,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > that selects a new 32-bit ISN." — §3.4.1, `rfc9293.txt:1014-1016`
 
 - Strength: description. Class: wire.
-- Check idea: the SYN and the SYN-ACK carry two sequence numbers that the two sides pick
-  on their own. A test may observe both but must not assume a value for either.
+- Check idea: the SYN and the SYN-ACK carry two sequence numbers that the two sides pick on their own. A test may observe both but must not assume a value for either.
 
 ### RFC9293-ISS-2
 
@@ -144,13 +119,9 @@ carry different keywords, the weaker one governs and the entry says so.
 > connection's identifying parameters" — §3.4.1, `rfc9293.txt:1032-1042`
 
 - Strength: must for the clock (MUST-8); should for the pseudorandom part (SHLD-1).
-- Class: internal. A wire observation can see that two initial sequence numbers differ, but
-  it cannot establish that a generator is unpredictable. A check of the `SHOULD` needs the
-  generator itself, not the link.
-- Check idea: read the generator, and observe on the wire that successive connections do
-  not start from the same value.
-- Note: the two halves have different strengths, so a model may satisfy MUST-8 and not
-  SHLD-1 without violating the RFC. Record the two separately when this entry is promoted.
+- Class: internal. A wire observation can see that two initial sequence numbers differ, but it cannot establish that a generator is unpredictable. A check of the `SHOULD` needs the generator itself, not the link.
+- Check idea: read the generator, and observe on the wire that successive connections do not start from the same value.
+- Note: the two halves have different strengths, so a model may satisfy MUST-8 and not SHLD-1 without violating the RFC. Record the two separately when this entry is promoted.
 
 ## Sequence space
 
@@ -164,8 +135,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > includes both data and sequence space-occupying controls." — §3.4, `rfc9293.txt:988-992`
 
 - Strength: description. Class: wire.
-- Check idea: the acknowledgment of a SYN is the sequence number of that SYN plus one, and
-  the first data octet of the sender carries that same plus-one value.
+- Check idea: the acknowledgment of a SYN is the sequence number of that SYN plus one, and the first data octet of the sender carries that same plus-one value.
 
 ### RFC9293-SEQ-2
 
@@ -175,8 +145,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > the ACK does not occupy sequence number space" — §3.5, `rfc9293.txt:1279-1281`
 
 - Strength: description. Class: wire.
-- Check idea: the empty ACK that closes the handshake and the first data segment that
-  follows carry the same sequence number.
+- Check idea: the empty ACK that closes the handshake and the first data segment that follows carry the same sequence number.
 
 ## Acknowledgment
 
@@ -188,8 +157,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > the sender of the segment is expecting to receive." — §3.1, `rfc9293.txt:337-339`
 
 - Strength: description of the field. Class: wire.
-- Check idea: after a data segment of N octets at sequence number S arrives, the
-  acknowledgment that the receiver returns equals S plus N.
+- Check idea: after a data segment of N octets at sequence number S arrives, the acknowledgment that the receiver returns equals S plus N.
 
 ### RFC9293-ACK-2
 
@@ -211,8 +179,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > `rfc9293.txt:3971-3974`
 
 - Strength: description. Class: wire.
-- Check idea: the acknowledgment that answers a FIN equals the sequence number of that FIN
-  plus one.
+- Check idea: the acknowledgment that answers a FIN equals the sequence number of that FIN plus one.
 
 ### RFC9293-FIN-2
 
@@ -227,8 +194,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > — Figure 12, Normal Close Sequence, `rfc9293.txt:1590-1606`
 
 - Strength: description with a normative figure. Class: wire.
-- Check idea: the closing side sends FIN, the peer acknowledges it, the peer sends its own
-  FIN, and the closing side acknowledges that one.
+- Check idea: the closing side sends FIN, the peer acknowledges it, the peer sends its own FIN, and the closing side acknowledges that one.
 
 ## Data transfer and segment size
 
@@ -243,9 +209,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > — §3.8, `rfc9293.txt:1891-1892`
 
 - Strength: description; the service definition of the protocol. Class: end-to-end.
-- Check idea: after a sender transmits a block of known size on a path without loss, the
-  receiver's cumulative acknowledgment names the octet after the last one sent. That
-  acknowledgment cannot occur unless every earlier octet arrived in order.
+- Check idea: after a sender transmits a block of known size on a path without loss, the receiver's cumulative acknowledgment names the octet after the last one sent. That acknowledgment cannot occur unless every earlier octet arrived in order.
 
 ### RFC9293-SEG-1
 
@@ -261,8 +225,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > — §3.7.1, `rfc9293.txt:1741-1743`
 
 - Strength: must. Class: wire.
-- Check idea: a full segment of a long stream carries exactly the effective send MSS of
-  data, 536 octets by default, and no segment carries more.
+- Check idea: a full segment of a long stream carries exactly the effective send MSS of data, 536 octets by default, and no segment carries more.
 
 ### RFC9293-OPT-1
 
@@ -276,8 +239,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > (MAY-3)." — §3.7.1, `rfc9293.txt:1737-1739`
 
 - Strength: must for the implementation; should for sending it in a SYN. Class: wire.
-- Check idea: a SYN with a 24-octet header carries a 4-octet option; when the receive MSS is
-  the default, the option is a `may`, and its absence is not a violation.
+- Check idea: a SYN with a 24-octet header carries a 4-octet option; when the receive MSS is the default, the option is a `may`, and its absence is not a violation.
 
 ### RFC9293-PSH-1
 
@@ -288,10 +250,8 @@ carry different keywords, the weaker one governs and the entry says so.
 > and (2) MUST set the PSH bit in the last buffered segment (i.e., when there is no more
 > queued data to be sent) (MUST-61)." — §3.9.1.2, `rfc9293.txt:2486-2490`
 
-- Strength: may for the flag on the interface; must, under that condition, for the PSH
-  bit on the last segment. Class: wire.
-- Check idea: the segment that ends a send — the one whose last octet is the last octet the
-  application handed over — carries PSH.
+- Strength: may for the flag on the interface; must, under that condition, for the PSH bit on the last segment. Class: wire.
+- Check idea: the segment that ends a send — the one whose last octet is the last octet the application handed over — carries PSH.
 
 ## Window
 
@@ -322,10 +282,8 @@ carry different keywords, the weaker one governs and the entry says so.
 > normally the old unacknowledged data between SND.UNA and SND.UNA+SND.WND (SHLD-16)."
 > — §3.8.6, on a window that shrank, `rfc9293.txt:2155-2157`
 
-- Strength: description for the general rule; should for the shrunk-window case. Class:
-  wire.
-- Check idea: with a window smaller than a segment, the sender's segment carries exactly
-  the window's worth of data and no new data follows until the window moves.
+- Strength: description for the general rule; should for the shrunk-window case. Class: wire.
+- Check idea: with a window smaller than a segment, the sender's segment carries exactly the window's worth of data and no new data follows until the window moves.
 
 ### RFC9293-ZWP-1
 
@@ -349,8 +307,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > — §3.8.6.3, `rfc9293.txt:2326-2328`
 
 - Strength: should for the delay; must for its bound. Class: wire, with a timer.
-- Check idea: level 4 for the bound. At level 2 the statement licenses a scenario in which
-  the receiver delays its acknowledgment by less than the bound.
+- Check idea: level 4 for the bound. At level 2 the statement licenses a scenario in which the receiver delays its acknowledgment by less than the bound.
 
 ## Checksum
 
@@ -362,8 +319,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > `rfc9293.txt:458-459`
 
 - Strength: must. Class: wire.
-- Check idea: every segment on the wire carries a nonzero checksum. Whether the value is
-  right is an encoding statement for a serializer unit test.
+- Check idea: every segment on the wire carries a nonzero checksum. Whether the value is right is an encoding statement for a serializer unit test.
 
 ### RFC9293-CKSUM-2
 
@@ -372,8 +328,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > "and the receiver MUST check it (MUST-3)." — §3.1, `rfc9293.txt:459`
 
 - Strength: must. Class: wire (absence after a corrupted segment).
-- Check idea: a segment with a wrong checksum is not acknowledged and not delivered. Needs a
-  corrupted segment in flight: level 3.
+- Check idea: a segment with a wrong checksum is not acknowledged and not delivered. Needs a corrupted segment in flight: level 3.
 
 ## Header
 
@@ -386,8 +341,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > integer multiple of 32 bits long." — §3.1, `rfc9293.txt:341-345`
 
 - Strength: description. Class: wire.
-- Check idea: a segment without options has a header of 20 octets; a SYN with the MSS option
-  has 24; no header is shorter than 20.
+- Check idea: a segment without options has a header of 20 octets; a SYN with the MSS option has 24; no header is shorter than 20.
 
 ## Reset
 
@@ -403,9 +357,7 @@ carry different keywords, the weaker one governs and the entry says so.
 > <CTL=RST,ACK>" — §3.10.7.1, `rfc9293.txt:3287-3289`
 
 - Strength: description, as a rule of the state machine. Class: wire.
-- Check idea: a SYN to a port with no listener is answered by a segment with RST and ACK,
-  sequence number zero, and an acknowledgment of the SYN's sequence number plus one; the
-  attempt ends.
+- Check idea: a SYN to a port with no listener is answered by a segment with RST and ACK, sequence number zero, and an acknowledgment of the SYN's sequence number plus one; the attempt ends.
 
 ## Segment acceptance
 
@@ -419,13 +371,11 @@ carry different keywords, the weaker one governs and the entry says so.
 > "RCV.NXT =< SEG.SEQ < RCV.NXT+RCV.WND or RCV.NXT =< SEG.SEQ+SEG.LEN-1 < RCV.NXT+RCV.WND".
 
 - Strength: description, as a rule of the state machine. Class: end-to-end.
-- Check idea: give a segment a sequence number far above the right edge of the window. The
-  receiver does not deliver its data to the program.
+- Check idea: give a segment a sequence number far above the right edge of the window. The receiver does not deliver its data to the program.
 
 ### RFC9293-SEGA-2
 
-**An unacceptable segment draws an empty acknowledgment, and the connection does not
-change state.**
+**An unacceptable segment draws an empty acknowledgment, and the connection does not change state.**
 
 > "any unacceptable segment (out-of-window sequence number or unacceptable acknowledgment
 > number) must be responded to with an empty acknowledgment segment (without any user data)
@@ -437,27 +387,22 @@ change state.**
 > (unless the RST bit is set, if so drop the segment and return): <SEQ=SND.NXT>
 > <ACK=RCV.NXT><CTL=ACK>" — §3.10.7.4, `rfc9293.txt:3523-3527`
 
-- Strength: description in §3.5.2, `should` in §3.10.7.4. The two say the same thing about
-  the same event; the strength of the weaker one governs.
+- Strength: description in §3.5.2, `should` in §3.10.7.4. The two say the same thing about the same event; the strength of the weaker one governs.
 - Class: wire plus end-to-end (the connection lives on).
-- Check idea: send an out-of-window segment on a live connection. The answer is a segment
-  with ACK set, no data, and the acknowledgment field unchanged at the sequence number the
-  receiver still expects. The connection carries on afterwards.
+- Check idea: send an out-of-window segment on a live connection. The answer is a segment with ACK set, no data, and the acknowledgment field unchanged at the sequence number the receiver still expects. The connection carries on afterwards.
 
 ## Reset generation
 
 ### RFC9293-RST-2
 
-**A reset is not sent when it is not clear that the segment does not belong to the
-connection.**
+**A reset is not sent when it is not clear that the segment does not belong to the connection.**
 
 > "As a general rule, reset (RST) is sent whenever a segment arrives that apparently is not
 > intended for the current connection. A reset must not be sent if it is not clear that
 > this is the case." — §3.5.2, `rfc9293.txt:1462-1464`
 
 - Strength: must not. Class: wire (absence).
-- Check idea: an out-of-window segment on a live connection is answered, but never with a
-  reset. The rule guards a connection against a segment that a third party crafted.
+- Check idea: an out-of-window segment on a live connection is answered, but never with a reset. The rule guards a connection against a segment that a third party crafted.
 
 ### RFC9293-RST-3
 
@@ -471,8 +416,7 @@ connection.**
 > `rfc9293.txt:3523-3525`
 
 - Strength: description, as a rule of the state machine. Class: wire (absence).
-- Check idea: deliver a reset to a port on which nothing listens. Nothing comes back. Two
-  hosts that both answered a reset with a reset would exchange them without end.
+- Check idea: deliver a reset to a port on which nothing listens. Nothing comes back. Two hosts that both answered a reset with a reset would exchange them without end.
 
 ## Reset processing
 
@@ -489,11 +433,8 @@ connection.**
 > three checks that apply to a stack which implements the mitigation of RFC 5961; the
 > §3.5.3 rule above holds for every stack.
 
-- Strength: description, as a rule of the state machine. Class: end-to-end (the connection
-  lives on).
-- Check idea: deliver a reset whose sequence number lies far outside the window of a live
-  connection. The connection carries on and the data that follows still arrives. This is
-  what stops a blind reset from a third party who cannot see the sequence numbers.
+- Strength: description, as a rule of the state machine. Class: end-to-end (the connection lives on).
+- Check idea: deliver a reset whose sequence number lies far outside the window of a live connection. The connection carries on and the data that follows still arrives. This is what stops a blind reset from a third party who cannot see the sequence numbers.
 
 ### RFC9293-RSTP-2
 
@@ -505,8 +446,7 @@ connection.**
 > — §3.5.3, `rfc9293.txt:1515-1521`
 
 - Strength: description, as a rule of the state machine. Class: end-to-end.
-- Check idea: deliver a reset whose sequence number is the next one the receiver expects.
-  The connection ends, and no more data crosses it.
+- Check idea: deliver a reset whose sequence number is the next one the receiver expects. The connection ends, and no more data crosses it.
 
 ## Window shrinking
 
@@ -518,8 +458,7 @@ connection.**
 > left (SHLD-14)." — §3.8.6, `rfc9293.txt:2150-2151`
 
 - Strength: should not. Class: wire.
-- Check idea: read the right edge of the window, the acknowledgment number plus the window
-  field, in every segment a receiver sends. It never moves backward.
+- Check idea: read the right edge of the window, the acknowledgment number plus the window field, in every segment a receiver sends. It never moves backward.
 
 ### RFC9293-WND-4
 
@@ -530,9 +469,7 @@ connection.**
 > `rfc9293.txt:2151-2153`
 
 - Strength: must. Class: end-to-end.
-- Check idea: move the right edge of the window backward on a live connection, behind the
-  sequence number the sender has already reached. The sender carries on: it does not stop,
-  it does not fail, and the connection still finishes.
+- Check idea: move the right edge of the window backward on a live connection, behind the sequence number the sender has already reached. The sender carries on: it does not stop, it does not fail, and the connection still finishes.
 
 ### RFC9293-WND-5
 
@@ -543,8 +480,7 @@ connection.**
 > — §3.8.6, `rfc9293.txt:2155-2157`
 
 - Strength: should not. Class: wire (absence).
-- Check idea: after the right edge moves backward, no segment carrying new data goes past
-  the new edge. A retransmission of data already sent is allowed and is not new data.
+- Check idea: after the right edge moves backward, no segment carrying new data goes past the new edge. A retransmission of data already sent is allowed and is not new data.
 
 ## ICMP
 
@@ -558,8 +494,7 @@ connection.**
 > message." — §3.9.2.2, `rfc9293.txt:2828-2831`
 
 - Strength: must. Class: internal.
-- Check idea: what "act on" means is the subject of the three entries below. The choice of
-  connection happens inside the module, at the interface between the ICMP module and TCP.
+- Check idea: what "act on" means is the subject of the three entries below. The choice of connection happens inside the module, at the interface between the ICMP module and TCP.
 
 ### RFC9293-ICMP-2
 
@@ -569,8 +504,7 @@ connection.**
 > (MUST-55)." — §3.9.2.2, `rfc9293.txt:2841-2842`
 
 - Strength: must. Class: end-to-end (absence of a change) plus error-signal (absence).
-- Check idea: deliver a Source Quench for a live connection. Nothing changes: no answer, no
-  break in the flow.
+- Check idea: deliver a Source Quench for a live connection. Nothing changes: no answer, no break in the flow.
 
 ### RFC9293-ICMP-3
 
@@ -580,12 +514,10 @@ connection.**
 > MUST NOT abort the connection (MUST-56), and it SHOULD make the information available to
 > the application (SHLD-25)." — §3.9.2.2, `rfc9293.txt:2852-2854`
 
-The document lists the soft errors for IPv4 as "Destination Unreachable -- codes 0, 1, 5;
-Time Exceeded -- codes 0, 1; and Parameter Problem", §3.9.2.2, `rfc9293.txt:2845-2846`.
+The document lists the soft errors for IPv4 as "Destination Unreachable -- codes 0, 1, 5; Time Exceeded -- codes 0, 1; and Parameter Problem", §3.9.2.2, `rfc9293.txt:2845-2846`.
 
 - Strength: must not. Class: end-to-end.
-- Check idea: deliver a Destination Unreachable with code 0 for a live connection. The
-  connection stays open and the transfer finishes.
+- Check idea: deliver a Destination Unreachable with code 0 for a live connection. The connection stays open and the transfer finishes.
 
 ### RFC9293-ICMP-4
 
@@ -594,26 +526,15 @@ Time Exceeded -- codes 0, 1; and Parameter Problem", §3.9.2.2, `rfc9293.txt:284
 > "These are hard error conditions, so TCP implementations SHOULD abort the connection
 > (SHLD-26)." — §3.9.2.2, `rfc9293.txt:2859-2860`
 
-The document lists the hard errors as "Destination Unreachable -- codes 2-4", §3.9.2.2,
-`rfc9293.txt:2857`.
+The document lists the hard errors as "Destination Unreachable -- codes 2-4", §3.9.2.2, `rfc9293.txt:2857`.
 
 - Strength: should. Class: end-to-end.
-- Check idea: deliver a Destination Unreachable with code 3 for a live connection. The
-  connection ends. The document itself notes that many implementations do not do this in a
-  synchronized state, so silence here is a `declined` and not a defect.
+- Check idea: deliver a Destination Unreachable with code 3 for a live connection. The connection ends. The document itself notes that many implementations do not do this in a synchronized state, so silence here is a `declined` and not a defect.
 
 ## Out of scope in this catalog
 
-The state machine as a whole, retransmission and the retransmission timer, congestion
-control, the zero window beyond the probe statement, the options other than MSS (window
-scale, timestamps, SACK), urgent data, keep-alives, simultaneous open and simultaneous
-close, silly window avoidance, and the TIME-WAIT duration.
+The state machine as a whole, retransmission and the retransmission timer, congestion control, the zero window beyond the probe statement, the options other than MSS (window scale, timestamps, SACK), urgent data, keep-alives, simultaneous open and simultaneous close, silly window avoidance, and the TIME-WAIT duration.
 
-Every one of those needs either a companion document from
-[`standards.md`](../../protocol/tcp/standards.md) or a test class beyond a single wire
-observation.
+Every one of those needs either a companion document from [`standards.md`](../../protocol/tcp/standards.md) or a test class beyond a single wire observation.
 
-The level 3 pass took four subjects off this list, because RFC 9293 states each one and a
-relay on the path can produce the event: the acceptance rules for a received segment, reset
-handling on a live connection, the shrinking of the window, and the ICMP messages that reach
-a connection. They are entries of this catalog now.
+The level 3 pass took four subjects off this list, because RFC 9293 states each one and a relay on the path can produce the event: the acceptance rules for a received segment, reset handling on a live connection, the shrinking of the window, and the ICMP messages that reach a connection. They are entries of this catalog now.

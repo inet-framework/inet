@@ -2,11 +2,7 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc2131/catalog.md](../../standard/rfc2131/catalog.md), [rfc2132/catalog.md](../../standard/rfc2132/catalog.md), [rfc6842/catalog.md](../../standard/rfc6842/catalog.md), [features.md](features.md)
 
-Step 5 artifact of the standards test workflow. The procedures come from the specification
-only. They name no simulation model and no code. This file holds the common mockups, the
-rules every check obeys, and the index. The checks themselves live in one file per feature
-group under [`checks/`](checks); the section names are the anchors that the coverage ledger
-links to.
+Step 5 artifact of the standards test workflow. The procedures come from the specification only. They name no simulation model and no code. This file holds the common mockups, the rules every check obeys, and the index. The checks themselves live in one file per feature group under [`checks/`](checks); the section names are the anchors that the coverage ledger links to.
 
 ## Index
 
@@ -39,26 +35,11 @@ links to.
 | [Requested parameters returned](checks/parameters.md#requested-parameters-returned) | `checks/parameters.md` | RFC2131-SEL-4, RFC2132-PRL-1, RFC2132-MASK-1, RFC2132-ROUTER-1; covers SEL-5 |
 | [A parameter the server has no value for](checks/parameters.md#a-parameter-the-server-has-no-value-for) | `checks/parameters.md` | RFC2131-SEL-5 |
 
-Twenty-six checks. Ten of them need a fault or a crafted message and are therefore
-level 3: the three that inject a message ([Negative acknowledgement for a wrong
-subnet](checks/nak.md#negative-acknowledgement-for-a-wrong-subnet), [Silence for an unknown
-client](checks/nak.md#silence-for-an-unknown-client), [Inform answered without a
-lease](checks/inform.md#inform-answered-without-a-lease)), the two that inject a crafted
-reply at a client ([Foreign client identifier
-discarded](checks/client-identity.md#foreign-client-identifier-discarded), [Foreign
-transaction identifier discarded](checks/client-identity.md#foreign-transaction-identifier-discarded)),
-and the three that remove a reply from the path ([Rebinding at
-T2](checks/lease.md#rebinding-at-t2), [Lease expiry](checks/lease.md#lease-expiry),
-[Request repeated when the reply is
-lost](checks/retransmission.md#request-repeated-when-the-reply-is-lost)).
+Twenty-six checks. Ten of them need a fault or a crafted message and are therefore level 3: the three that inject a message ([Negative acknowledgement for a wrong subnet](checks/nak.md#negative-acknowledgement-for-a-wrong-subnet), [Silence for an unknown client](checks/nak.md#silence-for-an-unknown-client), [Inform answered without a lease](checks/inform.md#inform-answered-without-a-lease)), the two that inject a crafted reply at a client ([Foreign client identifier discarded](checks/client-identity.md#foreign-client-identifier-discarded), [Foreign transaction identifier discarded](checks/client-identity.md#foreign-transaction-identifier-discarded)), and the three that remove a reply from the path ([Rebinding at T2](checks/lease.md#rebinding-at-t2), [Lease expiry](checks/lease.md#lease-expiry), [Request repeated when the reply is lost](checks/retransmission.md#request-repeated-when-the-reply-is-lost)).
 
 ## Statements this pass wrote no check for
 
-Thirty-eight of the 132 statements of the in-scope set have no check in this pass. This section
-says, for each group, **what a check would need**. It says nothing about the simulation model:
-whether the absence of a check is acceptable is a judgment about what the model claims, and that
-judgment lives in the coverage ledger, which gives each of these statements `owed` or `no check`.
-A reader who wants to know which compares the two documents.
+Thirty-eight of the 132 statements of the in-scope set have no check in this pass. This section says, for each group, **what a check would need**. It says nothing about the simulation model: whether the absence of a check is acceptable is a judgment about what the model claims, and that judgment lives in the coverage ledger, which gives each of these statements `owed` or `no check`. A reader who wants to know which compares the two documents.
 
 | Group | Count | Statements | What a check would need |
 | --- | --- | --- | --- |
@@ -70,25 +51,20 @@ A reader who wants to know which compares the two documents.
 | **A sender that fills a field the scenarios leave empty** | 5 | DISC-6, OFF-7, ACK-7, DECL-8, INF-4 | An address hint in a DHCPDISCOVER, a probe before an offer and the absence of a second one, an announcement after an address goes into service, and a lease lookup that a reply cannot reveal. Each is a `MAY` or a `SHOULD` whose presence or absence the scenarios above do not arrange. |
 | **A field the messages of the scenarios have no room for** | 3 | RFC2132 MSGOPT-1, MAXSZ-1, VCLASS-1 | The `message`, `maximum DHCP message size` and `vendor class identifier` options. All three are a `MAY` for the sender, and no scenario above asks a node to send one, so a check would have to craft the option itself and would then assert only its own input. |
 
-The four groups at the top are the reachable ones: twelve need a richer mockup and four need a
-crafted message, and both are level 3 work. The rest wait for a statistical suite, a serializer
-suite, or a document that is out of scope.
+The four groups at the top are the reachable ones: twelve need a richer mockup and four need a crafted message, and both are level 3 work. The rest wait for a statistical suite, a serializer suite, or a document that is out of scope.
 
 ## Common mockups
 
-Six mockups serve the twenty-six checks. Every one of them is one IPv4 subnet, because DHCP
-without a relay agent is a protocol of one subnet.
+Six mockups serve the twenty-six checks. Every one of them is one IPv4 subnet, because DHCP without a relay agent is a protocol of one subnet.
 
-**The plain mockup.** One server S and one client C on one link. S has a fixed address and a
-pool of addresses to give out. C starts with no address at all.
+**The plain mockup.** One server S and one client C on one link. S has a fixed address and a pool of addresses to give out. C starts with no address at all.
 
 ```
    server S  ------------  client C
               link 1
 ```
 
-**The mockup with two clients.** A second client D joins link 1, so that two clients ask the
-same server, and so that a check can compare what the server sends to each of them.
+**The mockup with two clients.** A second client D joins link 1, so that two clients ask the same server, and so that a check can compare what the server sends to each of them.
 
 ```
    server S  ------  client C
@@ -96,9 +72,7 @@ same server, and so that a check can compare what the server sends to each of th
         +----------  client D
 ```
 
-**The mockup with an occupant.** A host O that is not a DHCP client holds, from the start,
-the address that the server will offer to C. O answers an address resolution request for
-that address, so C can discover the conflict.
+**The mockup with an occupant.** A host O that is not a DHCP client holds, from the start, the address that the server will offer to C. O answers an address resolution request for that address, so C can discover the conflict.
 
 ```
    server S  ------  client C
@@ -106,9 +80,7 @@ that address, so C can discover the conflict.
         +----------  host O   (holds the address S will offer)
 ```
 
-**The mockup with a relay on the path.** A relay T sits on link 1 and holds each frame for a
-moment. It can drop one frame, or change one field of one frame, and it passes everything
-else on without a change.
+**The mockup with a relay on the path.** A relay T sits on link 1 and holds each frame for a moment. It can drop one frame, or change one field of one frame, and it passes everything else on without a change.
 
 ```
    server S  ------  relay T  ------  client C
@@ -116,45 +88,24 @@ else on without a change.
 ```
 
 - The relay is not a node of the protocol: it has no address and it answers nothing.
-- What the relay does is what a fault on the path would do. No program can produce it, and
-  that is why the checks that use it are level 3.
+- What the relay does is what a fault on the path would do. No program can produce it, and that is why the checks that use it are level 3.
 
-**The mockup with no server.** Client C alone on a link, with a host at the far end that
-runs no DHCP. Nothing answers C.
+**The mockup with no server.** Client C alone on a link, with a host at the far end that runs no DHCP. Nothing answers C.
 
 ```
    client C  ------------  host E   (no DHCP)
               link 1
 ```
 
-**The mockup with an injector.** The plain mockup, plus the ability to put one crafted
-message onto link 1, addressed to the server or to the client. The message is built field by
-field, so it can hold a combination that no conforming node would send.
+**The mockup with an injector.** The plain mockup, plus the ability to put one crafted message onto link 1, addressed to the server or to the client. The message is built field by field, so it can hold a combination that no conforming node would send.
 
-- An injected message is not the work of a node of the mockup. It stands for a message from
-  a fourth party: another client, another server, or an attacker.
+- An injected message is not the work of a node of the mockup. It stands for a message from a fourth party: another client, another server, or an attacker.
 
 ## Rules every check obeys
 
-- **One observation confirms the stimulus.** Every check names one expected observation whose
-  only job is to prove that the scenario did what the procedure says. A configuration error
-  that voids the stimulus then fails the check instead of passing it for the wrong reason.
-  In a check that removes a reply from the path, the confirming observation is the reply
-  arriving at the relay; in a check that injects a message, it is the message reaching the
-  node it is addressed to.
-- **The scenario constants.** The subnet is 192.168.1.0/24. The server holds 192.168.1.1. It
-  gives out addresses from 192.168.1.100 upward. The lease is 300 seconds unless a check
-  says otherwise, so T1 falls at 150 seconds and T2 at 262.5 seconds. Every host is on one
-  Ethernet link of 100 Mbit per second.
-- **Timing.** Every check states its own observation window. A check of the first exchange
-  needs less than a second; a check of the lease needs a window past the expiry.
-- **Names of fields.** A check names a field as RFC 2131 names it — `op`, `xid`, `secs`,
-  `flags`, `ciaddr`, `yiaddr`, `giaddr`, `chaddr` — and an option by the name and the code
-  that RFC 2132 gives it, for example `server identifier` (54).
-- **An absent option.** Several statements of RFC 2131 demand that an option is *not* in a
-  message. A check of such a statement reads the option area of the message and states that
-  the code is not in it. An absence is as observable as a presence, and the checks say which
-  one they mean.
-- **Address resolution.** Where a check does not concern address resolution, the mockup
-  resolves addresses without traffic, so that the link carries only the messages under test.
-  The one check that needs an address resolution request says so.
+- **One observation confirms the stimulus.** Every check names one expected observation whose only job is to prove that the scenario did what the procedure says. A configuration error that voids the stimulus then fails the check instead of passing it for the wrong reason. In a check that removes a reply from the path, the confirming observation is the reply arriving at the relay; in a check that injects a message, it is the message reaching the node it is addressed to.
+- **The scenario constants.** The subnet is 192.168.1.0/24. The server holds 192.168.1.1. It gives out addresses from 192.168.1.100 upward. The lease is 300 seconds unless a check says otherwise, so T1 falls at 150 seconds and T2 at 262.5 seconds. Every host is on one Ethernet link of 100 Mbit per second.
+- **Timing.** Every check states its own observation window. A check of the first exchange needs less than a second; a check of the lease needs a window past the expiry.
+- **Names of fields.** A check names a field as RFC 2131 names it — `op`, `xid`, `secs`, `flags`, `ciaddr`, `yiaddr`, `giaddr`, `chaddr` — and an option by the name and the code that RFC 2132 gives it, for example `server identifier` (54).
+- **An absent option.** Several statements of RFC 2131 demand that an option is *not* in a message. A check of such a statement reads the option area of the message and states that the code is not in it. An absence is as observable as a presence, and the checks say which one they mean.
+- **Address resolution.** Where a check does not concern address resolution, the mockup resolves addresses without traffic, so that the link carries only the messages under test. The one check that needs an address resolution request says so.

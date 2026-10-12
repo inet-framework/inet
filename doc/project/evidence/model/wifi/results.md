@@ -6,14 +6,9 @@ Raw artifacts linked under `audit/` are local, Git-ignored evidence and are not 
 
 ## Deferred-repair expectations
 
-After the audit and rebase, the maintainer explicitly requested that the 12 failures from the
-18-test focused run be declared expected: their repairs are nontrivial and deferred to future
-contributions. This later decision supersedes the removal decision for those 12 tests only.
-The six repaired passing tests retain their PASS expectations. The maintainer subsequently extended the same decision to the separately added `Ac_Ldpc`
-test. The total deferred-repair scope is now 13 tests.
+After the audit and rebase, the maintainer explicitly requested that the 12 failures from the 18-test focused run be declared expected: their repairs are nontrivial and deferred to future contributions. This later decision supersedes the removal decision for those 12 tests only. The six repaired passing tests retain their PASS expectations. The maintainer subsequently extended the same decision to the separately added `Ac_Ldpc` test. The total deferred-repair scope is now 13 tests.
 
-Each restored declaration includes its concrete repair dependency in the test description.
-The scope is:
+Each restored declaration includes its concrete repair dependency in the test description. The scope is:
 
 - `WifiQosDelayedBa`
 - `N_ReverseDirection`
@@ -29,68 +24,35 @@ The scope is:
 - `Ac_Ampdu`
 - `N_Ampdu`
 
-This is an explicit maintainer-directed deferral, not evidence that the features work or that
-all 13 tests establish model defects. In particular, `Ac_80p80`, `Ac_MuMimo`, `Ac_Ldpc`, `N_LdpcCap`, and
-`N_ReverseDirection` retain their explicit testability-gap assertions. Declaring these five
-expected is an explicit exception to the guide's normal treatment of untestable claims;
-their diagnostic class is unchanged. `G_ErpProtection` still fails its association prerequisite.
+This is an explicit maintainer-directed deferral, not evidence that the features work or that all 13 tests establish model defects. In particular, `Ac_80p80`, `Ac_MuMimo`, `Ac_Ldpc`, `N_LdpcCap`, and `N_ReverseDirection` retain their explicit testability-gap assertions. Declaring these five expected is an explicit exception to the guide's normal treatment of untestable claims; their diagnostic class is unchanged. `G_ErpProtection` still fails its association prerequisite.
 
-The runner compares observed and expected verdicts and flags PASS against declared FAIL as
-unexpected. For the five explicit testability-gap assertions, future code support alone cannot
-produce PASS: the missing observation and faithful assertion must also be implemented.
+The runner compares observed and expected verdicts and flags PASS against declared FAIL as unexpected. For the five explicit testability-gap assertions, future code support alone cannot produce PASS: the missing observation and faithful assertion must also be implemented.
 
-The source inventory is now **30 expected-failure declarations**. Applying these expectations
-to the historical full-suite observations gives **45 PASS, 30 expected FAIL, 0 unexpected FAIL**;
-this is a reconciliation, not a new full-suite execution. The earlier run records remain historical evidence. The classification table below shows
-the current expectations, including the deferred-repair declarations.
+The source inventory is now **30 expected-failure declarations**. Applying these expectations to the historical full-suite observations gives **45 PASS, 30 expected FAIL, 0 unexpected FAIL**; this is a reconciliation, not a new full-suite execution. The earlier run records remain historical evidence. The classification table below shows the current expectations, including the deferred-repair declarations.
 
-Historical verification on the rebased tree (`270014a45b`, dirty; superseded by the
-committed-source verification below): `make MODE=debug -j$(nproc)`
-succeeded, then the exact 12-test debug selection reported **12 FAIL (expected)**, with no
-unexpected per-test verdicts. Run: 2026-09-17 17:10:51–17:11:36 +02:00; runner duration
-43.28s. Its exact command was:
+Historical verification on the rebased tree (`270014a45b`, dirty; superseded by the committed-source verification below): `make MODE=debug -j$(nproc)` succeeded, then the exact 12-test debug selection reported **12 FAIL (expected)**, with no unexpected per-test verdicts. Run: 2026-09-17 17:10:51–17:11:36 +02:00; runner duration 43.28s. Its exact command was:
 
 ```sh
 inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$' -f '/(WifiQosDelayedBa|N_ReverseDirection|N_LdpcCap|Ac_80p80|Ac_MuMimo|G_ErpProtection|B_Pbcc|B_ShortPreamble|N_Greenfield|Ac_MultiTidBa|Ac_Ampdu|N_Ampdu)\.test$' --log-file /home/user/omnetpp_ws/inet/audit/protocol/wifi/deferred-expectations/runner.log
 ```
 
-Command (`audit/protocol/wifi/deferred-expectations/command.json`),
-run metadata (`audit/protocol/wifi/deferred-expectations/run.json`),
-output (`audit/protocol/wifi/deferred-expectations/output.log`), and
-outcomes (`audit/protocol/wifi/deferred-expectations/outcomes.json`) are local artifacts.
-Build output is `/tmp/inet-wifi-deferred-build.log`. This run regenerates and compiles the selected
-tests; their assertions and simulation configuration are unchanged by this declaration update.
+Command (`audit/protocol/wifi/deferred-expectations/command.json`), run metadata (`audit/protocol/wifi/deferred-expectations/run.json`), output (`audit/protocol/wifi/deferred-expectations/output.log`), and outcomes (`audit/protocol/wifi/deferred-expectations/outcomes.json`) are local artifacts. Build output is `/tmp/inet-wifi-deferred-build.log`. This run regenerates and compiles the selected tests; their assertions and simulation configuration are unchanged by this declaration update.
 
-The focused CLI exits **1**, despite every individual failure being expected: an all-FAIL selection
-has aggregate FAIL, compared with aggregate expected PASS by `MultipleTaskResults`. This does
-not invalidate the observed individual classifications. A direct result-object check also confirms
-that observed PASS against expected FAIL has `expected == False`. The suite was not rerun in full.
-`git diff --check` and the seal-index check passed.
+The focused CLI exits **1**, despite every individual failure being expected: an all-FAIL selection has aggregate FAIL, compared with aggregate expected PASS by `MultipleTaskResults`. This does not invalidate the observed individual classifications. A direct result-object check also confirms that observed PASS against expected FAIL has `expected == False`. The suite was not rerun in full. `git diff --check` and the seal-index check passed.
 
-The subsequent focused `Ac_Ldpc` verification reported **FAIL (expected)** in 2.858s.
-Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$' -f '/Ac_Ldpc\.test$' --log-file /tmp/inet-wifi-ac-ldpc-expected.log`.
-Output: `/tmp/inet-wifi-ac-ldpc-expected-output.log`; CLI exit 1 has the same aggregate-result
-behavior described above. The test retains its explicit missing-observation diagnostic.
+The subsequent focused `Ac_Ldpc` verification reported **FAIL (expected)** in 2.858s. Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$' -f '/Ac_Ldpc\.test$' --log-file /tmp/inet-wifi-ac-ldpc-expected.log`. Output: `/tmp/inet-wifi-ac-ldpc-expected-output.log`; CLI exit 1 has the same aggregate-result behavior described above. The test retains its explicit missing-observation diagnostic.
 
 ## Reproducible verification of the deferred declarations
 
-The review verification ran all **13 affected tests** at committed source
-`4fb5592264d5469518de715f49b803da464bae67` (Git tree `dffbb6c14c269fd8cd88eb399a71671c1d15c825`).
-There were no tracked changes when the build/run started; unrelated untracked plans were not
-execution inputs. The subsequent review amendment changes only Markdown documentation and
-adds the referenced plan; executable sources, test definitions and configuration are identical.
-The input digest below provides an identity that survives the documentation-only amendment.
+The review verification ran all **13 affected tests** at committed source `4fb5592264d5469518de715f49b803da464bae67` (Git tree `dffbb6c14c269fd8cd88eb399a71671c1d15c825`). There were no tracked changes when the build/run started; unrelated untracked plans were not execution inputs. The subsequent review amendment changes only Markdown documentation and adds the referenced plan; executable sources, test definitions and configuration are identical. The input digest below provides an identity that survives the documentation-only amendment.
 
 - Working directory: `/home/user/omnetpp_ws/inet`.
 - Started: `2026-09-17T17:33:50.204175+02:00`; finished: `2026-09-17T17:34:23.165634+02:00`.
 - Build: debug, `src/libINET_dbg.so`; `make MODE=debug -j$(nproc)` succeeded (exit 0).
-- Environment: OMNeT++ 6.4.0aipre2, build `260526-7b9114f72c`; Ubuntu clang 21.1.8;
-  Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64. Normal OMNeT++/INET setup sourced.
+- Environment: OMNeT++ 6.4.0aipre2, build `260526-7b9114f72c`; Ubuntu clang 21.1.8; Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64. Normal OMNeT++/INET setup sourced.
 - Test configuration: `General`, seed-set 0, `WifiInfraNetwork`; unchanged per-test INI inputs.
-- Outcome: **13 FAIL (expected), 0 unexpected verdicts**, runner duration 29.866s; CLI exit 1
-  from the all-FAIL aggregation behavior described above. No generation/build/runtime errors.
-- Logs: `/tmp/wifi-pr-review-verification/build.log`, `runner.log`, and `output.log`.
-  These logs are supplementary local artifacts; the selector and source identity are recorded here.
+- Outcome: **13 FAIL (expected), 0 unexpected verdicts**, runner duration 29.866s; CLI exit 1 from the all-FAIL aggregation behavior described above. No generation/build/runtime errors.
+- Logs: `/tmp/wifi-pr-review-verification/build.log`, `runner.log`, and `output.log`. These logs are supplementary local artifacts; the selector and source identity are recorded here.
 
 Exact commands (from the repository root):
 
@@ -99,13 +61,9 @@ make MODE=debug -j$(nproc)
 MPLCONFIGDIR=/tmp/inet-matplotlib inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$' -f '/(WifiQosDelayedBa|N_ReverseDirection|N_LdpcCap|Ac_Ldpc|Ac_80p80|Ac_MuMimo|G_ErpProtection|B_Pbcc|B_ShortPreamble|N_Greenfield|Ac_MultiTidBa|Ac_Ampdu|N_Ampdu)\.test$' --log-file /tmp/wifi-pr-review-verification/runner.log
 ```
 
-For reproduction in a fresh checkout, create `/tmp/wifi-pr-review-verification` before running.
-The selector names each affected `.test` file; all 13 produced FAIL at their existing assertions,
-including five explicit testability-gap diagnostics. This verification supersedes the earlier
-separate 12-test and `Ac_Ldpc` runs for current declaration evidence.
+For reproduction in a fresh checkout, create `/tmp/wifi-pr-review-verification` before running. The selector names each affected `.test` file; all 13 produced FAIL at their existing assertions, including five explicit testability-gap diagnostics. This verification supersedes the earlier separate 12-test and `Ac_Ldpc` runs for current declaration evidence.
 
-The SHA-256 of tracked non-Markdown inputs under `src/`, `python/`, and `tests/protocol/` is
-`fddd3407956b49a1624e560cd71a6c2802a6878242380991ee4f2aa3446da65e`. Verify it on the amended branch with:
+The SHA-256 of tracked non-Markdown inputs under `src/`, `python/`, and `tests/protocol/` is `fddd3407956b49a1624e560cd71a6c2802a6878242380991ee4f2aa3446da65e`. Verify it on the amended branch with:
 
 ```python
 import hashlib
@@ -172,16 +130,9 @@ Negative-control output is preserved in `audit/protocol/wifi/2026-09-17`. These 
 
 ## Current classifications and expectations
 
-The expectation column reflects the current source declarations. **FAIL (deferred repair)**
-identifies the 13 maintainer-approved deferrals, including five explicit testability gaps;
-**FAIL (retained limitation/probe)** identifies the other 17 declarations. **PASS (default)**
-identifies the six repaired tests whose failure markers remain absent. This table covers those
-36 audited tests; the other 39 tests retain their default PASS expectations.
+The expectation column reflects the current source declarations. **FAIL (deferred repair)** identifies the 13 maintainer-approved deferrals, including five explicit testability gaps; **FAIL (retained limitation/probe)** identifies the other 17 declarations. **PASS (default)** identifies the six repaired tests whose failure markers remain absent. This table covers those 36 audited tests; the other 39 tests retain their default PASS expectations.
 
-A declaration does not change the diagnostic class or establish full feature support.
-Retained presence probes do not validate complete procedures or their triggers. The original
-removal patch (`audit/protocol/wifi/2026-09-17/expectation-changes.patch`) records
-history only; the later deferral decision supersedes it for the 12 restored declarations.
+A declaration does not change the diagnostic class or establish full feature support. Retained presence probes do not validate complete procedures or their triggers. The original removal patch (`audit/protocol/wifi/2026-09-17/expectation-changes.patch`) records history only; the later deferral decision supersedes it for the 12 restored declarations.
 
 | Source test | Observed / stage | Current expectation | Class | Evidence and follow-up |
 | --- | --- | --- | --- | --- |

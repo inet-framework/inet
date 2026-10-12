@@ -2,12 +2,9 @@
 
 > **Kind:** design · **Status:** current · **Seal:** by section · **Owns:** — · **Stands on:** [packet-anatomy.md](packet-anatomy.md), [node-anatomy.md](node-anatomy.md), [rule/architecture.md](../rule/architecture.md)
 
-Everything one protocol needs, across the four artifact kinds. This is the checklist behind
-[guide/add-a-protocol.md](../guide/add-a-protocol.md), and the reason a new protocol is an
-*extension* rather than a core edit ([D-EXTEND-BY-ATTACH](decisions.md#d-extend-by-attach)).
+Everything one protocol needs, across the four artifact kinds. This is the checklist behind [guide/add-a-protocol.md](../guide/add-a-protocol.md), and the reason a new protocol is an *extension* rather than a core edit ([D-EXTEND-BY-ATTACH](decisions.md#d-extend-by-attach)).
 
-Take one protocol stem `Foo`. From it, every name follows without a lookup
-([NR-NED-ROLE](../rule/naming.md#nr-ned-role)), and every part below has one place to live.
+Take one protocol stem `Foo`. From it, every name follows without a lookup ([NR-NED-ROLE](../rule/naming.md#nr-ned-role)), and every part below has one place to live.
 
 ## The parts
 
@@ -26,9 +23,7 @@ Take one protocol stem `Foo`. From it, every name follows without a lookup
 | the evidence | a test in the matching category | so the claim it makes is established |
 | the example | `examples/foo/` | so a user can run it |
 
-Nine of the twelve are registrations into a mechanism that already exists. That is the point: the
-cost of the next protocol falls because the mechanism was paid for once
-([D-EXTEND-BY-ATTACH](decisions.md#d-extend-by-attach)).
+Nine of the twelve are registrations into a mechanism that already exists. That is the point: the cost of the next protocol falls because the mechanism was paid for once ([D-EXTEND-BY-ATTACH](decisions.md#d-extend-by-attach)).
 
 ## What must not appear
 
@@ -43,28 +38,14 @@ cost of the next protocol falls because the mechanism was paid for once
 
 ## The behavior
 
-A protocol's behavior is composed from small modules where it can be, rather than accumulated in one
-([D-COMPOSE](decisions.md#d-compose)). Where the datapath is a chain — a queue, a shaper, a
-classifier, a scheduler — it is built from the queueing contracts rather than from bespoke code
-([D-QUEUEING](decisions.md#d-queueing)), which is what lets a TSN shaper sit in an Ethernet interface
-that never heard of it.
+A protocol's behavior is composed from small modules where it can be, rather than accumulated in one ([D-COMPOSE](decisions.md#d-compose)). Where the datapath is a chain — a queue, a shaper, a classifier, a scheduler — it is built from the queueing contracts rather than from bespoke code ([D-QUEUEING](decisions.md#d-queueing)), which is what lets a TSN shaper sit in an Ethernet interface that never heard of it.
 
-Normative behavior cites the standard, the revision and the clause
-([QR-CMT-STANDARD](../rule/quality.md#qr-cmt-standard)). A reader can then check the model against the
-clause instead of against intuition, which is the only way a protocol model can be reviewed at all.
+Normative behavior cites the standard, the revision and the clause ([QR-CMT-STANDARD](../rule/quality.md#qr-cmt-standard)). A reader can then check the model against the clause instead of against intuition, which is the only way a protocol model can be reviewed at all.
 
 ## What it emits
 
-A protocol declares signals and statistics in NED and emits each fact at the state transition that
-owns it. A declared signal may notify behavioral consumers when it satisfies
-[D-NOTIFY](decisions.md#d-notify). Recording, visualization and analysis remain external observers:
-the protocol does not record, draw or aggregate, and attaching an observer has no effect on the
-result ([D-OBSERVE](decisions.md#d-observe),
-[R-VIS-NEUTRAL](../requirement/accepted-requirements.md#r-vis-neutral)).
+A protocol declares signals and statistics in NED and emits each fact at the state transition that owns it. A declared signal may notify behavioral consumers when it satisfies [D-NOTIFY](decisions.md#d-notify). Recording, visualization and analysis remain external observers: the protocol does not record, draw or aggregate, and attaching an observer has no effect on the result ([D-OBSERVE](decisions.md#d-observe), [R-VIS-NEUTRAL](../requirement/accepted-requirements.md#r-vis-neutral)).
 
 ## Fidelity
 
-Where a concern is worth modeling at more than one level of detail, the levels fill the same
-interface-typed slot and the study picks in configuration
-([D-FIDELITY](decisions.md#d-fidelity)). A protocol that hardcodes its level of detail forces every
-future study to accept that choice.
+Where a concern is worth modeling at more than one level of detail, the levels fill the same interface-typed slot and the study picks in configuration ([D-FIDELITY](decisions.md#d-fidelity)). A protocol that hardcodes its level of detail forces every future study to accept that choice.

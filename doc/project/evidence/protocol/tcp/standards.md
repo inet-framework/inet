@@ -2,24 +2,15 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around TCP, records which document governs each contested clause, and pins the exact set
-that the current pass tests against.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around TCP, records which document governs each contested clause, and pins the exact set that the current pass tests against.
 
-The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`),
-retrieved 2026-09-08, and from the text of RFC 9293 itself.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`), retrieved 2026-09-08, and from the text of RFC 9293 itself.
 
-TCP differs from IPv4 in one important way. The 1981 base document, RFC 793, is **obsolete**.
-RFC 9293 replaced it in August 2022. A test that targets the 1981 text tests a document that
-no longer governs.
+TCP differs from IPv4 in one important way. The 1981 base document, RFC 793, is **obsolete**. RFC 9293 replaced it in August 2022. A test that targets the 1981 text tests a document that no longer governs.
 
 ## Target level
 
-**Level 4 — Dynamics** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-Levels 1 to 3 ran against RFC 9293 alone, which carries the reset and the error paths
-itself, so TCP needed no error-report companion. Level 4 adds the two control loops, and
-each one has its own document: RFC 6298 for the retransmission timer and RFC 5681 for
-congestion control.
+**Level 4 — Dynamics** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). Levels 1 to 3 ran against RFC 9293 alone, which carries the reset and the error paths itself, so TCP needed no error-report companion. Level 4 adds the two control loops, and each one has its own document: RFC 6298 for the retransmission timer and RFC 5681 for congestion control.
 
 The level decides which documents the next pass must add:
 
@@ -29,12 +20,9 @@ The level decides which documents the next pass must add:
 | level 4, Dynamics | RFC 6298, RFC 5681 | in scope now — the retransmission timer and the congestion window are the two control loops of TCP |
 | level 5, Complete | RFC 7323, RFC 2018, RFC 2883, **RFC 6675**, RFC 8257, RFC 3168 | the options, the loss-recovery extensions, and explicit congestion notification. RFC 6675 replaces RFC 3517, which an earlier version of this row named |
 
-TCP shows a property of the level system worth noting: a well-collected base document can
-carry a whole level on its own. RFC 9293 replaced a family of update documents, so level 3
-needs no new text, while IPv4 must bring in RFC 1122 to reach the same depth.
+TCP shows a property of the level system worth noting: a well-collected base document can carry a whole level on its own. RFC 9293 replaced a family of update documents, so level 3 needs no new text, while IPv4 must bring in RFC 1122 to reach the same depth.
 
-What the pass actually reached is not recorded here. It is in
-[`model/tcp/coverage.md`](../../model/tcp/coverage.md#achieved-level).
+What the pass actually reached is not recorded here. It is in [`model/tcp/coverage.md`](../../model/tcp/coverage.md#achieved-level).
 
 ## Document list
 
@@ -58,19 +46,13 @@ What the pass actually reached is not recorded here. It is in
 | RFC 1981 | Path MTU Discovery for IP version 6 | August 1996 | Draft Standard | **obsoleted by RFC 8201**; the model cites it 9 times | no |
 | RFC 2001 | TCP Slow Start, Congestion Avoidance, Fast Retransmit | January 1997 | Proposed Standard | **obsoleted by RFC 2581**, then by RFC 5681; the model cites it 5 times | no |
 
-The seven superseded rows are the outcome of a sweep of the model's own citations. The
-sweep and its counts are in
-[`model/tcp/conformance.md`](../../model/tcp/conformance.md#the-claimed-set-is-one-standards-generation-behind).
-Each `obsoletes` relation comes from the header of the replacing text.
+The seven superseded rows are the outcome of a sweep of the model's own citations. The sweep and its counts are in [`model/tcp/conformance.md`](../../model/tcp/conformance.md#the-claimed-set-is-one-standards-generation-behind). Each `obsoletes` relation comes from the header of the replacing text.
 
 Source of the texts:
 
-- `rfc9293.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9293.txt) —
-  <https://www.rfc-editor.org/rfc/rfc9293.txt>, downloaded 2026-09-08.
-- `rfc6298.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6298.txt) —
-  <https://www.rfc-editor.org/rfc/rfc6298.txt>, downloaded 2026-09-11.
-- `rfc5681.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5681.txt) —
-  <https://www.rfc-editor.org/rfc/rfc5681.txt>, downloaded 2026-09-11.
+- `rfc9293.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9293.txt) — <https://www.rfc-editor.org/rfc/rfc9293.txt>, downloaded 2026-09-08.
+- `rfc6298.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6298.txt) — <https://www.rfc-editor.org/rfc/rfc6298.txt>, downloaded 2026-09-11.
+- `rfc5681.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5681.txt) — <https://www.rfc-editor.org/rfc/rfc5681.txt>, downloaded 2026-09-11.
 
 RFC 9293 states its own place in the family, and this is the authority for the rows above:
 
@@ -96,10 +78,7 @@ RFC 9293 states its own place in the family, and this is the authority for the r
 | Selective acknowledgment | absent from RFC 793 | RFC 2018 | RFC 2018 | no |
 | Window scale and timestamps | RFC 793 16-bit window | RFC 7323 | RFC 7323 | no |
 
-The first two rows are in scope and they are already resolved: the catalog of this pass
-quotes RFC 9293, so no entry needs an `Overridden by` field. The value of the row is that it
-records **why** the catalog does not quote RFC 793, which is the document almost every text
-about TCP still cites.
+The first two rows are in scope and they are already resolved: the catalog of this pass quotes RFC 9293, so no entry needs an `Overridden by` field. The value of the row is that it records **why** the catalog does not quote RFC 793, which is the document almost every text about TCP still cites.
 
 ## In-scope set
 

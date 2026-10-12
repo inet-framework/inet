@@ -2,12 +2,7 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc791/catalog.md](../../standard/rfc791/catalog.md), [rfc792/catalog.md](../../standard/rfc792/catalog.md), [rfc1122/catalog.md](../../standard/rfc1122/catalog.md), [rfc6864/catalog.md](../../standard/rfc6864/catalog.md), [features.md](features.md)
 
-Step 5 artifact of the standards test workflow (see
-[derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)). The
-procedures come from the specification only. They name no simulation model and no code.
-This file holds the common mockup, the rules every check obeys, and the index. The checks
-themselves live in one file per feature under [`checks/`](checks); the section names are
-the anchors that the coverage ledger links to.
+Step 5 artifact of the standards test workflow (see [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)). The procedures come from the specification only. They name no simulation model and no code. This file holds the common mockup, the rules every check obeys, and the index. The checks themselves live in one file per feature under [`checks/`](checks); the section names are the anchors that the coverage ledger links to.
 
 ## Index
 
@@ -48,38 +43,27 @@ A ----------- R ----------- B
 ```
 
 - A small application on host A sends one UDP datagram to host B.
-- Timing: host A sends the datagram shortly after the start. All expected events occur
-  within 1 second. Observation stops after 1 second.
-- Each check states its own scenario constants: data size, sender TTL, the MTU of link 2,
-  and the DF flag.
-- Every node computes the header checksum of the datagrams it sends and forwards. A
-  simulation model may offer a mode that assumes checksums correct without computing them;
-  a check that reads or corrupts the checksum runs with that mode off.
+- Timing: host A sends the datagram shortly after the start. All expected events occur within 1 second. Observation stops after 1 second.
+- Each check states its own scenario constants: data size, sender TTL, the MTU of link 2, and the DF flag.
+- Every node computes the header checksum of the datagrams it sends and forwards. A simulation model may offer a mode that assumes checksums correct without computing them; a check that reads or corrupts the checksum runs with that mode off.
 
 ### Variants for the level 3 checks
 
-**With a relay.** A transparent relay T is spliced into link 2 next to host B. The relay
-forwards every frame unchanged unless the check tells it to hold one frame for a stated
-time or to rewrite one field of one datagram. When the relay rewrites a header field, it
-keeps the header checksum valid, as any deliberate rewriter would; only the checksum check
-corrupts the checksum itself. "On link 2" means before the relay; "at host B's interface"
-means after it.
+**With a relay.** A transparent relay T is spliced into link 2 next to host B. The relay forwards every frame unchanged unless the check tells it to hold one frame for a stated time or to rewrite one field of one datagram. When the relay rewrites a header field, it keeps the header checksum valid, as any deliberate rewriter would; only the checksum check corrupts the checksum itself. "On link 2" means before the relay; "at host B's interface" means after it.
 
 ```
 A ----------- R ------ T ------ B
     link 1          link 2
 ```
 
-**With two gateways.** A second gateway R2 stands between R1 and host B. Link 2 joins the
-two gateways and carries the small MTU; link 3 joins R2 and host B.
+**With two gateways.** A second gateway R2 stands between R1 and host B. Link 2 joins the two gateways and carries the small MTU; link 3 joins R2 and host B.
 
 ```
 A ----------- R1 ----------- R2 ----------- B
     link 1         link 2          link 3
 ```
 
-**On one link.** Host A and host B share one link, without a gateway. The broadcast check
-uses it, because a limited broadcast does not cross a gateway.
+**On one link.** Host A and host B share one link, without a gateway. The broadcast check uses it, because a limited broadcast does not cross a gateway.
 
 ```
 A ----------- B
@@ -88,16 +72,7 @@ A ----------- B
 
 ### Rules every check obeys
 
-- **One observation confirms the stimulus.** A datagram with the crafted field is observed
-  where it enters the node under test. A configuration error that voids the stimulus then
-  fails the check instead of a silent pass for the wrong reason.
-- **A discard is observed where the decision is made.** A silent discard leaves no datagram
-  to observe. Each check that expects one therefore observes the discard record of the node
-  at the moment of the decision, and only then opens its absence watches. An absence watch
-  that opens after the forbidden event would have happened proves nothing; see the note
-  under [TTL expiry](checks/ttl.md#ttl-expiry).
-- **Silence has two halves.** "Silently discard" means that nothing goes upward and nothing
-  goes back. Every silent-discard check watches both.
-- **A `may` is not a violation when absent.** Where a check asserts the cooperative
-  behavior of a `may` or a `should`, its notes say so, and the ledger keeps the strengths
-  apart.
+- **One observation confirms the stimulus.** A datagram with the crafted field is observed where it enters the node under test. A configuration error that voids the stimulus then fails the check instead of a silent pass for the wrong reason.
+- **A discard is observed where the decision is made.** A silent discard leaves no datagram to observe. Each check that expects one therefore observes the discard record of the node at the moment of the decision, and only then opens its absence watches. An absence watch that opens after the forbidden event would have happened proves nothing; see the note under [TTL expiry](checks/ttl.md#ttl-expiry).
+- **Silence has two halves.** "Silently discard" means that nothing goes upward and nothing goes back. Every silent-discard check watches both.
+- **A `may` is not a violation when absent.** Where a check asserts the cooperative behavior of a `may` or a `should`, its notes say so, and the ledger keeps the strengths apart.
