@@ -1,0 +1,72 @@
+%description:
+
+Tests the packetPendingDelay statistic of EthernetCsmaMac.
+
+Two pairs of nodes on EthernetCsmaMac send one frame each at t = 1 ms, so
+the first attempts of a pair collide. The nodes of pair "same" draw from two
+random number generators with the same seed, so they choose the same backoff,
+collide on every attempt and drop the frame: no delay is recorded. The nodes
+of pair "diff" draw different backoffs, so both frames get through after the
+collision, and each node records one delay greater than zero. The two delays
+differ by 153.6 us, three slot times of 51.2 us, the difference between the
+backoffs the two nodes drew.
+
+%file: test.ned
+
+import inet.node.ethernet.EthernetMultidropLink;
+import inet.node.ethernet.EthernetPlcaHost;
+
+network Test
+{
+    submodules:
+        same[2]: EthernetPlcaHost;
+        diff[2]: EthernetPlcaHost;
+    connections:
+        same[0].ethg++ <--> EthernetMultidropLink { length = 1m; } <--> same[1].ethg++;
+        diff[0].ethg++ <--> EthernetMultidropLink { length = 1m; } <--> diff[1].ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+cmdenv-express-mode = true
+record-vector-results = false
+
+num-rngs = 5
+*.same[0].**.rng-0 = 1
+*.same[1].**.rng-0 = 2
+*.diff[0].**.rng-0 = 3
+*.diff[1].**.rng-0 = 4
+seed-1-mt = 7
+seed-2-mt = 7
+seed-3-mt = 7
+seed-4-mt = 8
+
+**.eth[0].plca.typename = ""
+
+*.*[*].numApps = 1
+*.*[*].app[0].typename = "EthernetSourceApp"
+*.*[*].app[0].io.interface = "eth0"
+*.*[*].app[0].source.packetLength = 46B
+*.*[*].app[0].source.productionInterval = 10s
+*.*[*].app[0].source.initialProductionOffset = 1ms
+*.same[0].app[0].io.remoteAddress = "same[1]"
+*.same[1].app[0].io.remoteAddress = "same[0]"
+*.diff[0].app[0].io.remoteAddress = "diff[1]"
+*.diff[1].app[0].io.remoteAddress = "diff[0]"
+
+%contains: results/General-#0.sca
+scalar Test.same[0].eth[0].mac packetPendingDelay:count 0
+%contains: results/General-#0.sca
+scalar Test.same[1].eth[0].mac packetPendingDelay:count 0
+%contains: results/General-#0.sca
+statistic Test.diff[0].eth[0].mac packetPendingDelay:histogram
+field count 1
+field mean 0.000460825
+%contains: results/General-#0.sca
+statistic Test.diff[1].eth[0].mac packetPendingDelay:histogram
+field count 1
+field mean 0.000614425
