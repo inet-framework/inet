@@ -96,6 +96,13 @@ class INET_API TcpSackRexmitQueue
     virtual void discardUpTo(uint32_t seqNum);
 
     /**
+     * Forgets the transmission of the sequence numbers from seqNum to the end of the
+     * queue, which are unsent data again (the octet of a zero-window probe that the
+     * receiver did not accept).
+     */
+    virtual void discardFrom(uint32_t seqNum);
+
+    /**
      * Inserts sent data to the rexmit queue.
      */
     virtual void enqueueSentData(uint32_t fromSeqNum, uint32_t toSeqNum);

@@ -53,6 +53,26 @@ std::string TcpSackRexmitQueue::detailedInfo() const
     return out.str();
 }
 
+void TcpSackRexmitQueue::discardFrom(uint32_t seqNum)
+{
+    ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));
+
+    for (auto i = rexmitQueue.begin(); i != rexmitQueue.end(); ) {
+        if (seqGE(i->beginSeqNum, seqNum))
+            i = rexmitQueue.erase(i);
+        else {
+            if (seqGreater(i->endSeqNum, seqNum))
+                i->endSeqNum = seqNum;
+            ++i;
+        }
+    }
+    for (auto s = xmitSegmentStarts.begin(); s != xmitSegmentStarts.end(); )
+        s = seqGE(*s, seqNum) ? xmitSegmentStarts.erase(s) : std::next(s);
+    end = seqNum;
+
+    ASSERT(checkQueue());
+}
+
 void TcpSackRexmitQueue::discardUpTo(uint32_t seqNum)
 {
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));

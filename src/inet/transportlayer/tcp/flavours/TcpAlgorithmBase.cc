@@ -853,8 +853,34 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     //
 }
 
+bool TcpAlgorithmBase::processWindowUpdate()
+{
+    // An ACK that acknowledges no new data but opens the send window (a window update,
+    // or the ACK of a zero-window probe that the receiver did not accept) ends the
+    // persist state, and the waiting data goes at once (Linux FLAG_WIN_UPDATE, then
+    // tcp_data_snd_check()). Also with nothing in flight and no persist timer, as after
+    // a zero window of the SYN-ACK. Not with other data in flight, so that a duplicate
+    // ACK of a loss recovery does not come here.
+    if (state->snd_wnd > 0 && (state->snd_una == state->snd_max || persistTimer->isScheduled())) {
+        if (persistTimer->isScheduled()) {
+            EV_INFO << "The window update opens the window: cancelling the PERSIST timer\n";
+            cancelEvent(persistTimer);
+            // The ACK is below the probe octet, so the receiver did not accept it: the
+            // octet goes again as the first octet of the data.
+            conn->unsendWindowProbe();
+        }
+        sendData(false);
+        return true;
+    }
+    return false;
+}
+
 void TcpAlgorithmBase::receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength)
 {
+    // a window update is no duplicate ACK (RFC 5681 section 2, condition (e))
+    if (processWindowUpdate())
+        return;
+
     countDuplicateAck(tcpHeader, payloadLength);
 }
 

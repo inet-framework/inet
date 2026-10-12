@@ -352,6 +352,14 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: sends 1 bytes as "probe", called by the "persist" mechanism */
     virtual bool sendProbe();
 
+    /**
+     * Makes the octet of a zero-window probe that the receiver did not accept unsent
+     * data again: snd_max and snd_nxt go back to snd_una, and the retransmission queue
+     * forgets the octet. Only in the persist state, where the probe octet alone is in
+     * flight.
+     */
+    virtual void unsendWindowProbe();
+
     /** Utility: sends a keepalive probe, a segment without data with SEG.SEQ = SND.UNA - 1, which the peer answers with an ACK (RFC 9293 section 3.8.4) */
     virtual void sendKeepAliveProbe();
 

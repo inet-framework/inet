@@ -1,0 +1,64 @@
+%description:
+Tests a window update that opens a zero window (B14 of the staged landing). The
+server reads at t=20, and the ACK of the next probe (t=32.411) offers 2000
+bytes, below the probe octet, which the server did not accept. The client ends
+the persist state and sends at once, from the probe octet on, and the ACK is
+no duplicate ACK. The tester removes that segment: its retransmission comes
+after the measured RTO of 1 s, because the persist timer did not change the RTO.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 36s
+*.cli_app.sendScript="1.0 5000"
+*.*_tcp.mss = 1000
+*.srv_tcp.advertisedWindow = 2000
+*.srv_app.autoRead=false
+*.srv_app.readScript="20 10000"
+*.tcptester.script="a10 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[32.409 A009] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[32.411 B008] A.1000 < B.2000: A ack 2001 win 2000 
+[32.413 A010] A.1000 > B.2000: A 2001:3001(1000) ack 501 win 16384 # deleting
+[33.413 A011] A.1000 > B.2000: A 2001:3001(1000) ack 501 win 16384 
+[33.615 B009] A.1000 < B.2000: A ack 3001 win 1000 
+[33.617 A012] A.1000 > B.2000: A 3001:4001(1000) ack 501 win 16384 
+[33.819 B010] A.1000 < B.2000: A ack 4001 win 0 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+The window update opens the window: cancelling the PERSIST timer
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+increasing RTO from 1s  to 2s
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Duplicate ACK
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

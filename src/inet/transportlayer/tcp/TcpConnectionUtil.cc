@@ -1753,7 +1753,7 @@ bool TcpConnection::sendProbe()
     }
 
     EV_INFO << "Sending 1 byte as probe, with seq=" << state->snd_una << "\n";
-    state->snd_nxt = state->snd_una;
+    unsendWindowProbe(); // the earlier probe octet: each probe is the first transmission of it
     bool afterRto = state->afterRto; // the probe octet is the octet at snd_una (see sendSegment())
     state->afterRto = false;
     sendingWindowProbe = true; // no ECT and no CWR (RFC 3168 section 6.1.6)
@@ -1770,6 +1770,16 @@ bool TcpConnection::sendProbe()
     tcpAlgorithm->ackSent();
 
     return true;
+}
+
+void TcpConnection::unsendWindowProbe()
+{
+    if (seqGreater(state->snd_max, state->snd_una)) {
+        ASSERT(state->snd_max - state->snd_una == 1);
+        rexmitQueue->discardFrom(state->snd_una);
+        state->snd_max = state->snd_una;
+    }
+    state->snd_nxt = state->snd_una;
 }
 
 void TcpConnection::markOutstandingLostOnRto()
