@@ -64,7 +64,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S13 ✅ | `topic/tcp-accecn` | 13 (part), 23 (part), 27, 48 (part), 64 (part), 65 (part), new | +877 −122 | Accurate ECN (RFC 9768), the ECN repairs that it needs, `ecnMarkAll`; DCTCP counts its bytes also in a fast recovery (D-51 to D-60) |
 | S14 ✅ | `topic/tcp-receive-buffer` | 28, 29, 35, new | +353 −9 | the receive buffer apart from the advertised window, the Linux receive memory behind parameters, the window and the buffer of one socket (D-4), MSG_ZEROCOPY, the send buffer chrono, SO_TIMESTAMPING, `TCP_NOTSENT_LOWAT` (D-61 to D-64) |
 | S15 ✅ | `topic/tcp-timers` | 18 (part), 26 (part), 28 (part), 31, 32 (part), 33, 68 (part), 77, new | +483 −64 | the timer parameters, the RTO of Linux, the SYN retries, a FIN that keeps a running retransmission timer, adaptive delayed ACK, keepalive, no new fast recovery before the recovery point of a timeout (D-34) |
-| S15b | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +150 −40 (about) | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
+| S15b ✅ | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +186 −56 | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
 | S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
@@ -662,6 +662,28 @@ plan gives a reason for.
 - **D-69 — STATUS reports the last in-order data.** `lastDataRecvTime` is the arrival of the last
   in-order data, and before any data the end of the handshake, as Linux `icsk_ack.lrcvtime`, which
   `tcpi_last_data_recv` reports. The source reported the last segment of any kind.
+- **D-70 — The zero-window probe of RFC 9293 by default, the probe of Linux by parameter.** RFC 9293
+  section 3.8.6.1 asks for "at least one octet of new data (if available), or retransmit". The
+  probe of S15b is the first unacknowledged octet, the same octet at each probe, as BSD sends it in
+  its persist state; it starts no retransmission timer, and its ACK is no duplicate ACK, so the
+  connection stays open while the peer answers (MUST-37). `zeroWindowProbe = "linux"` selects the
+  probe of Linux without data at SND.UNA − 1, which the source has as its only probe. The source
+  also keeps `minPersistTimeout`, which nothing reads; S15b does not add it.
+- **D-71 — The persist timer runs only while data waits for a zero window.** Master started it at
+  each zero-window ACK, also without waiting data, and then it never stopped; it did not start when
+  a zero window stopped a later send. S15b starts it at a zero window only when data waits, and
+  after a send that the zero window stopped, and an expiry without data stops it, as Linux
+  `tcp_check_probe_timer()` and `tcp_probe_timer()`. The source has the same defects.
+- **D-72 — A pure ACK with SEG.ACK = SND.UNA updates the send window.** RFC 9293 section 3.10.7.4:
+  "If SND.UNA =< SEG.ACK =< SND.NXT, the send window should be updated". Master updated it only from
+  a pure ACK with data in flight; S15b, as the source, also with nothing in flight. A window update
+  ends the persist state, also with the probe octet in flight, which goes again as unsent data
+  (`TcpSackRexmitQueue::discardFrom()`), and it is no duplicate ACK (RFC 5681 section 2, condition
+  (e)). The rule of RFC 9293 also covers a data segment of the peer, but a first version that took
+  it moved six CI rows: a pure ACK of INET carries `snd_nxt`, which goes back during a
+  retransmission (BSD and Linux put the highest sequence number sent), so after a data segment of
+  the peer the window of its later pure ACKs looked old (SND.WL1), condition (e) failed, and a fast
+  retransmit did not come. Both repairs go together to a later stage.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -1811,21 +1833,63 @@ pass.
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
 | 1 | fix: the persist timer no longer changes the RTO | — | 32 (part) |
-| 2 | fix: a zero-window probe sends the first unacknowledged octet again | — | new |
-| 3 | change: the first zero-window probe after one RTO, then at doubled intervals | B15 | 32 (part), 34 (part) |
-| 4 | fix: a window update that opens the window ends the persist state | B14 | 13 (part), 84 |
-| 5 | fix: the persist timer starts when data waits for a zero window | — | new |
-| 6 | fix: the persist timer stops when no data waits | — | new |
-| 7 | add: the zero-window probe of Linux, selected by `zeroWindowProbe` | — | 34 (part) |
+| 2 | fix: a zero-window probe sends the first unacknowledged octet again | — | new (D-70) |
+| 3 | change: the first zero-window probe after one RTO, then doubled | B15 | 32 (part), 34 (part) |
+| 4 | fix: a window update that opens the window ends the persist state | B14 | 13 (part), 84 (D-72) |
+| 5 | fix: the persist timer runs only while data waits for a zero window | — | new (D-71) |
+| 6 | add: the zero-window probe of Linux, selected by `zeroWindowProbe` | — | 34 (part) |
 
 A test of master shows how its zero-window probing fails. Each probe is one new octet beyond the
 closed window, so `snd_max` grows with each probe. The probe starts the retransmission timer, which
-then sends the probe octets again with a doubled RTO, and the persist timer writes its own interval
-into the RTO (5 s). The first probe comes after 5 s, not after one RTO. A window update that opens
-the window is ignored, so the persist timer keeps probing after the window is open, and the data
-that waits is never sent. RFC 9293 section 3.8.6.1 asks for one octet of new data as the probe, or a
-retransmission, the first probe after one RTO and exponential intervals (SHLD-29, SHLD-30), and that
-the connection stays open while the peer answers the probes (MUST-37). Steps 1 to 6 repair master to
-that; the probe without data of the source (Linux `tcp_xmit_probe_skb()`) comes with a parameter
-(step 7). The source keeps the window update of commit 84 only for an ACK when nothing is in flight;
-with the probe octet of the RFC in flight, step 4 also covers that case.
+then sends the probe octets again with a doubled RTO, the ACKs of the probes count as duplicate
+ACKs, and the persist timer writes its own interval into the RTO (5 s). The first probe comes after
+5 s, not after one RTO. A window update that opens the window is ignored, so the persist timer keeps
+probing after the window is open, and the data that waits is never sent. RFC 9293 section 3.8.6.1
+asks for one octet of new data as the probe, or a retransmission, the first probe after one RTO and
+exponential intervals (SHLD-29, SHLD-30), and that the connection stays open while the peer answers
+the probes (MUST-37). Steps 1 to 5 repair master to that (D-70 to D-72); the probe without data of
+the source (Linux `tcp_xmit_probe_skb()`) comes with a parameter (step 6). The plan had the start
+and the stop of the persist timer as two steps; they are one rule, so step 5 has both.
+
+Items for later stages: (S16) a sender that has a window smaller than one segment sends one octet,
+as the tests of S15b show after the window closes again; commit 69 brings the rules of a small
+window. (any stage) The receiver sends no window update when the application reads; Linux does
+(`tcp_cleanup_rbuf()`), which RFC 9293 does not require, and neither master nor the source has it.
+(any stage) The ACK processing of a segment sends data before the text of the same segment is
+processed, so that data acknowledges the text later; Linux sends after the text. (S17) A pure ACK
+carries `snd_nxt`, which goes back during a retransmission; BSD and Linux use the highest sequence
+number sent. With that repair, a data segment of the peer can also update the send window (RFC 9293
+section 3.10.7.4, D-72). (inet-gpl) Its
+configuration sets `zeroWindowProbe = "linux"`; a run can check it only after S18.
+
+### S15b — `topic/tcp-zero-window` — landed 2026-10-13
+
+The owner reviewed and approved S15b on 2026-10-13.
+
+S15b repairs the zero-window probing of master: the persist timer no longer changes the RTO, the
+probe repeats one octet without the retransmission timer, the first probe comes after one RTO with
+doubled intervals, a window update ends the persist state, and the persist timer runs only while
+data waits. It adds the probe of Linux behind a parameter. No CI row moves. Where the source is
+wrong or incomplete, S15b deviates from it (D-70 to D-72).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: the persist timer no longer changes the RTO` | — | 32 (part) | — |
+| `tcp: fix: a zero-window probe sends the first unacknowledged octet again` | — | new (D-70) | — |
+| `tcp: change: the first zero-window probe after one RTO, then doubled` | B15 | 32 (part), 34 (part) | — |
+| `tcp: fix: a window update that opens the window ends the persist state` | B14 | 13 (part), 84 (D-72) | — |
+| `tcp: fix: the persist timer runs only while data waits for a zero window` | — | new (D-71) | — |
+| `tcp: add: the zero-window probe of Linux, selected by zeroWindowProbe` | — | 34 (part) | — |
+
+New tests: `tcp_persist_1` to `_4` and `tcp_persist_linux_1`, which also checks a window update
+with nothing in flight. `tcp_info_fields_2`, `tcp_ecn_ect_3`
+and `tcp_ecn_cwnd_1` follow the new probe times and the probe octet that no longer goes again.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (527 at the first code commit, 531 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 122 and serializer 4 pass at the head. The new and
+changed tests of each code commit fail with the source of the commit before. The CI fingerprint job
+runs at each code commit, and no row moves. The TCP fingerprint rows run in debug at the head with
+no runtime error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build
+with lwIP). The six gates pass.
