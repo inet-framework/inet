@@ -1,0 +1,55 @@
+%description:
+Tests synLinearTimeouts, as Linux net.ipv4.tcp_syn_linear_timeouts. With 2,
+the first two retransmissions of the SYN keep the initial timeout of 1 s, so
+the timeouts are 1, 1, 1, 2 s; then maxRexmitTimeout limits the next one to
+3 s (not 4 s). The tester removes the first five SYNs: they go at 0, 1, 2, 3
+and 5 s, and the sixth at 8 s opens the connection. Without the parameter, the
+timeout doubles at each expiry (RFC 6298 section 5.5).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_tcp.initialRto = 1s
+*.cli_tcp.synLinearTimeouts = 2
+*.cli_tcp.maxRexmitTimeout = 3s
+*.tcptester.script="a1 delete; a2 delete; a3 delete; a4 delete; a5 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
+[1.001 A002] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
+[2.001 A003] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
+[3.001 A004] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
+[5.001 A005] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
+[8.001 A006] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[8.003 B001] A.1000 < B.2000: A S 2000500:2000500(0) ack 1 win 16384   Option(s): MaxSegSize
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[8.005 A007] A.1000 > B.2000: A ack 2000501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

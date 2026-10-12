@@ -1946,8 +1946,10 @@ void TcpConnection::startSynRexmitTimer()
 
 void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
 {
-    if (++state->syn_rexmit_count > MAX_SYN_REXMIT_COUNT) {
-        EV_INFO << "Retransmission count during connection setup exceeds " << MAX_SYN_REXMIT_COUNT << ", giving up\n";
+    // synRetries: Linux net.ipv4.tcp_syn_retries, also for the SYN-ACK (INET has one
+    // value for both); an active open also ends at the CONN-ESTAB timeout
+    if (++state->syn_rexmit_count > state->synRetries) {
+        EV_INFO << "Retransmission count during connection setup exceeds " << state->synRetries << ", giving up\n";
         // Note ABORT will take the connection to closed, and cancel CONN-ESTAB timer as well
         event = TCP_E_ABORT;
         return;
@@ -1977,11 +1979,15 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
                 stateName(fsm.getState()));
     }
 
-    // reschedule timer
-    state->syn_rexmit_timeout *= 2;
-
-    if (state->syn_rexmit_timeout > TCP_TIMEOUT_SYN_REXMIT_MAX)
-        state->syn_rexmit_timeout = TCP_TIMEOUT_SYN_REXMIT_MAX;
+    // reschedule timer: RFC 6298 section 5.5 doubles it at each expiry. With
+    // synLinearTimeouts, as Linux net.ipv4.tcp_syn_linear_timeouts, the first
+    // retransmissions of a SYN keep the initial timeout. maxRexmitTimeout limits it,
+    // as the RTO of data (section 2.5).
+    if (!(fsm.getState() == TCP_S_SYN_SENT && state->syn_rexmit_count <= state->synLinearTimeouts))
+        state->syn_rexmit_timeout *= 2;
+    simtime_t maxRexmitTimeout = tcpMain->par("maxRexmitTimeout");
+    if (state->syn_rexmit_timeout > maxRexmitTimeout)
+        state->syn_rexmit_timeout = maxRexmitTimeout;
 
     scheduleAfter(state->syn_rexmit_timeout, synRexmitTimer);
 }

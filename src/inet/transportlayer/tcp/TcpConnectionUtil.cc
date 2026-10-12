@@ -923,6 +923,8 @@ void TcpConnection::configureStateVariables()
         state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
+    state->synRetries = tcpMain->par("synRetries");
+    state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
