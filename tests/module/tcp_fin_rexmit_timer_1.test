@@ -1,0 +1,50 @@
+%description:
+Tests that a FIN does not restart a running retransmission timer (RFC 6298
+section 5.1: "if the timer is not running, start it running"). The tester
+removes the data segment of t=1. The application closes at t=1.5, so the FIN
+goes while the data is in flight. The retransmission comes 3 s (the initial
+RTO) after the data segment, at t=4; when the FIN restarted the timer, it came
+at t=4.5.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 1000"
+*.cli_app.tClose=1.5s
+*.tcptester.script="a3 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 # deleting
+cli_tcp: ESTABLISHED --> FIN_WAIT_1  (on CLOSE)
+[1.501 A004] A.1000 > B.2000: A F ack 501 win 16384 
+[4.001 A005] A.1000 > B.2000: A F 1:1001(1000) ack 501 win 16384 
+srv_tcp: ESTABLISHED --> CLOSE_WAIT  (on RCV_FIN)
+[4.003 B002] A.1000 < B.2000: A ack 1002 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

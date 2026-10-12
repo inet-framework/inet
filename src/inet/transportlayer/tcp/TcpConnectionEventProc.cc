@@ -331,8 +331,12 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
                 EV_DETAIL << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 state->snd_nxt = state->snd_max;
                 sendFin();
-                tcpAlgorithm->restartRexmitTimer();
                 state->snd_max = ++state->snd_nxt;
+                // the FIN is new data on the wire: RFC 6298 section 5.1 starts the
+                // retransmission timer only when it does not run, and RFC 8985 section
+                // 7.2 arms the loss probe for the new tail (Linux
+                // tcp_event_new_data_sent()); this needs snd_max over the FIN
+                tcpAlgorithm->dataSent(state->snd_max - 1);
 
                 emit(unackedSignal, state->snd_max - state->snd_una);
 
