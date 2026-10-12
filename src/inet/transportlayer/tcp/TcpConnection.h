@@ -161,6 +161,9 @@ class INET_API TcpConnection : public SimpleModule
     uint64_t rcvBufOccupancy = 0; // the sum of the truesizes in rcvSkbChain
     uint8_t rcvScalingRatio = 128; // payload / truesize, in units of 1/256 (Linux TCP_DEFAULT_SCALING_RATIO)
     uint32_t rcvMssEstimate = 536; // the estimate of the received MSS that gates the ratio (Linux icsk_ack.rcv_mss)
+    // the application owns the connection (Linux sk->sk_socket): false for a connection
+    // that the application did not accept yet, as TcpSetOwnedCommand tells
+    bool appOwned = true;
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */

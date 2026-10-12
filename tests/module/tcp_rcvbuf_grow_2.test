@@ -1,0 +1,73 @@
+%description:
+Tests that the receive buffer of a connection that the application does not own
+does not grow, as Linux keeps the buffer of a connection that waits for
+accept(). The scenario is that of tcp_rcvbuf_grow_1, but the server application
+tells TCP that it does not own the connection (TcpSocket::setOwned(false)), so
+skRcvbuf stays 8000.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 20000"
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.sackSupport = true
+*.srv_tcp.advertisedWindow = 8000
+*.srv_tcp.receiveBufferSize = 8000B
+*.srv_tcp.windowAutoTuning = true
+*.srv_app.owned = false
+*.srv_app.statusRequestScript="0.5,3"
+*.tcptester.script="a12 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.013 A012] A.1000 > B.2000: A 9001:10001(1000) ack 501 win 16384 # deleting
+[1.013 A013] A.1000 > B.2000: A 10001:11001(1000) ack 501 win 16384 
+[1.013 A014] A.1000 > B.2000: A 11001:12001(1000) ack 501 win 16384 
+[1.013 A015] A.1000 > B.2000: A 12001:13001(1000) ack 501 win 16384 
+[1.013 A016] A.1000 > B.2000: A 13001:14001(1000) ack 501 win 16384 
+[1.013 A017] A.1000 > B.2000: A 14001:15001(1000) ack 501 win 16384 
+[1.015 B009] A.1000 < B.2000: A ack 8001 win 8000 
+[1.015 B010] A.1000 < B.2000: A ack 9001 win 8000 
+[1.015 B011] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,11001)
+[1.015 B012] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,12001)
+[1.015 B013] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,13001)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+The application does not own the connection
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+STATUS: skRcvbuf=8000
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+STATUS: skRcvbuf=18240
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+receive buffer grows
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

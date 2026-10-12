@@ -136,6 +136,7 @@ void TcpTestClient::printStatus(TcpStatusInfo *status)
             << " rwndLimited=" << status->getRwndLimited()
             << " deliveredBytes=" << status->getDeliveredBytes()
             << "\n";
+    EV_INFO << "STATUS: skRcvbuf=" << status->getSkRcvbuf() << "\n";
 }
 
 void TcpTestClient::initialize()
@@ -242,6 +243,8 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
                 socket.listen();
             else
                 socket.listenOnce();
+            if (!par("owned").boolValue())
+                socket.setOwned(false);
             scheduleNextSend();
             delete msg;
             break;

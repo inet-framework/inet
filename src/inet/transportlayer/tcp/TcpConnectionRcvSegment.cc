@@ -648,8 +648,19 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                                 tcpHeader->getSequenceNo() + payloadLength, dupStart, dupEnd);
                 }
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
-                if (payloadLength > 0)
+                if (payloadLength > 0) {
                     chargeRcvBuffer(payloadLength);
+                    // windowAutoTuning, as Linux (tcp_clamp_window()): when the charged
+                    // segments outgrow the receive buffer of a connection that the
+                    // application owns, the buffer grows; a connection that the
+                    // application did not accept yet keeps its buffer
+                    if (state->rcv_ssthresh > 0 && appOwned && !isToBeAccepted() && rcvBufOccupancy > state->rcvBufferSize) {
+                        state->rcvBufferSize = (uint32_t)std::min<uint64_t>(rcvBufOccupancy, UINT32_MAX);
+                        if (state->maxRcvBuffer < state->rcvBufferSize)
+                            state->maxRcvBuffer = state->rcvBufferSize;
+                        EV_DETAIL << "Window auto-tuning: the receive buffer grows to " << state->rcvBufferSize << "\n";
+                    }
+                }
 
                 // windowAutoTuning, as Linux (tcp_grow_window(), also for out-of-order
                 // data): each data segment grows the offer by max(2 * MSS, 2 * its

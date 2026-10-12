@@ -261,6 +261,10 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
     }
+    else if (auto cmd = dynamic_cast<TcpSetOwnedCommand *>(tcpCommand)) {
+        appOwned = cmd->getOwned();
+        EV_DETAIL << "The application " << (appOwned ? "owns" : "does not own") << " the connection\n";
+    }
     else
         throw cRuntimeError("Unknown subclass of TcpSetOptionCommand received from app: %s", tcpCommand->getClassName());
     delete tcpCommand;
@@ -446,6 +450,7 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setDeliveredCeBytes(state->deliveredCeBytes);
     statusInfo->setDeliveredE0Bytes(state->deliveredEct0Bytes);
     statusInfo->setDeliveredE1Bytes(state->deliveredEct1Bytes);
+    statusInfo->setSkRcvbuf(state->rcvBufferSize); // the receive buffer, which windowAutoTuning can grow (Linux SK_MEMINFO_RCVBUF)
     statusInfo->setSynDataAccepted(state->fastopenSynDataAccepted);
     statusInfo->setSndWndScale(state->snd_wnd_scale);
 
