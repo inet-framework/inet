@@ -479,6 +479,7 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     statusInfo->setSkRcvbuf(state->rcvBufferSize); // the receive buffer, which windowAutoTuning can grow (Linux SK_MEMINFO_RCVBUF)
     statusInfo->setSynDataAccepted(state->fastopenSynDataAccepted);
     statusInfo->setSndWndScale(state->snd_wnd_scale);
+    statusInfo->setLastDataRecvTime(state->lastDataRecvTime); // the last in-order data, or the end of the handshake (Linux tcpi_last_data_recv)
 
     // Congestion-window/RTO/RTT fields live on flavour-specific state variable
     // subclasses, one or two levels below the base TcpStateVariables* held as

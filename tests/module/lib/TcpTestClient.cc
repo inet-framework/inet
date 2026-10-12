@@ -140,6 +140,7 @@ void TcpTestClient::printStatus(TcpStatusInfo *status)
             << " deliveredBytes=" << status->getDeliveredBytes()
             << "\n";
     EV_INFO << "STATUS: skRcvbuf=" << status->getSkRcvbuf() << " sndbufLimited=" << status->getSndbufLimited() << "\n";
+    EV_INFO << "STATUS: lastDataRecvTime=" << status->getLastDataRecvTime() << "\n";
 }
 
 void TcpTestClient::initialize()

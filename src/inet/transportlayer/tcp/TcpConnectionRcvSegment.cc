@@ -897,6 +897,11 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
         // tcpAlgorithm decides when and how to do ACKs
         tcpAlgorithm->receiveSeqChanged();
+
+        // the arrival of the last in-order data, also data that fills a hole, but not a
+        // FIN alone (Linux icsk_ack.lrcvtime, which tcp_event_data_recv() sets)
+        if (payloadLength > 0)
+            state->lastDataRecvTime = simTime();
     }
 
     if ((fsm.getState() == TCP_S_ESTABLISHED || fsm.getState() == TCP_S_SYN_RCVD) &&
