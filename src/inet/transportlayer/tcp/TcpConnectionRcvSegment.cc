@@ -131,6 +131,12 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
         payloadSeq += delta;
         payloadLength -= delta;
     }
+    // As Linux (tcp_data_queue()), with acceptBeyondBufferAtEmptyQueue: an in-order segment
+    // at an empty receive queue is accepted whole, also beyond the buffer; the window is
+    // then zero until the application reads
+    if (state->acceptBeyondBufferAtEmptyQueue && payloadLength > 0 && payloadSeq == state->rcv_nxt
+        && receiveQueue->getAmountOfBufferedBytes() == 0)
+        return true;
     uint32_t bufferSize = state->rcvBufferSize > 0 ? state->rcvBufferSize : state->maxRcvBuffer;
     return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + bufferSize);
 }

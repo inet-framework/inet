@@ -886,6 +886,7 @@ void TcpConnection::configureStateVariables()
     state->maxRcvBuffer = advertisedWindow;
     double receiveBufferSize = tcpMain->par("receiveBufferSize");
     state->rcvBufferSize = receiveBufferSize > 0 ? (uint32_t)receiveBufferSize : 0;
+    state->acceptBeyondBufferAtEmptyQueue = tcpMain->par("acceptBeyondBufferAtEmptyQueue");
     // a receive buffer smaller than the advertised window limits the first offer too
     if (state->rcvBufferSize > 0 && state->rcv_wnd > state->rcvBufferSize)
         state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
@@ -2514,7 +2515,8 @@ uint16_t TcpConnection::updateRcvWnd()
 
     // Do not shrink window
     // (rcv_adv minus rcv_nxt) is the amount of space still available to the sender that was previously advertised
-    if (win < state->rcv_adv - state->rcv_nxt)
+    // (rcv_nxt can be beyond rcv_adv after acceptBeyondBufferAtEmptyQueue)
+    if (seqGreater(state->rcv_adv, state->rcv_nxt) && win < state->rcv_adv - state->rcv_nxt)
         win = state->rcv_adv - state->rcv_nxt;
 
     // Observe upper limit for advertised window on this connection
