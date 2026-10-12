@@ -61,9 +61,12 @@ network = inet.test.moduletest.lib.TestMLDNetwork
 %# First check that the join/set-filter were applied to the interface state
 %#
 %postrun-command: grep "TestMld: .*groups =" test.out > groups.out || true
+%# ff02::1:ff00:1 is the solicited-node multicast group of the interface's own address,
+%# joined when that address is assigned (RFC 4861 Section 7.2.1), so it is a member of
+%# every dump and of every Current-State Report below.
 %contains: groups.out
-TestMld: eth0: groups = ff3e::1 I 2001::1.
-TestMld: eth0: groups = ff3e::1 E 2001::2.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 I 2001::1.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 E 2001::2.
 
 %#
 %# Now check that the Mldv2 module responded to each General Query with a Current-State
@@ -75,10 +78,10 @@ TestMld: eth0: groups = ff3e::1 E 2001::2.
 %postrun-command: grep "TestMld: .*Received" test.out > received.out || true
 %contains-regex: received.out
 TestMld: Received: inet::Mldv2Report<ff3e::1=ALLOW \(2001::1\)>.
-(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=IS_IN \(2001::1\)>.
+(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff02::1:ff00:1=IS_EX, ff3e::1=IS_IN \(2001::1\)>.
 (?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=ALLOW \(2001::1\)>.
 (?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=TO_EX \(2001::2\)>.
-(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=IS_EX \(2001::2\)>.
+(?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff02::1:ff00:1=IS_EX, ff3e::1=IS_EX \(2001::2\)>.
 (?:.*\n)*?TestMld: Received: inet::Mldv2Report<ff3e::1=TO_EX \(2001::2\)>.
 
 %#
