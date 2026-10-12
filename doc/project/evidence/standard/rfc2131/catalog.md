@@ -2,54 +2,28 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC2131-*` · **Stands on:** [standards.md](../../protocol/dhcp/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow, for the base document
-of the in-scope set: RFC 2131, the Dynamic Host Configuration Protocol of March 1997. The
-catalog comes from the RFC text only. It contains no simulation model names and no code
-references.
+This document is the step 3 artifact of the standards test workflow, for the base document of the in-scope set: RFC 2131, the Dynamic Host Configuration Protocol of March 1997. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc2131.txt`](../../../../../../standards/RFC/rfc2131.txt) —
-  Dynamic Host Configuration Protocol, March 1997. Downloaded 2026-09-11
-  from <https://www.rfc-editor.org/rfc/rfc2131.txt>.
+- [`standards/RFC/rfc2131.txt`](../../../../../../standards/RFC/rfc2131.txt) — Dynamic Host Configuration Protocol, March 1997. Downloaded 2026-09-11 from <https://www.rfc-editor.org/rfc/rfc2131.txt>.
 
-The options that every DHCP message carries belong to RFC 2132 and live in
-[`rfc2132/catalog.md`](../rfc2132/catalog.md). The one later document that changes a rule
-of this text is RFC 6842, in [`rfc6842/catalog.md`](../rfc6842/catalog.md). The family of
-documents and the in-scope set are in
-[`standards.md`](../../protocol/dhcp/standards.md). The features these statements build
-are in [`features.md`](../../protocol/dhcp/features.md).
+The options that every DHCP message carries belong to RFC 2132 and live in [`rfc2132/catalog.md`](../rfc2132/catalog.md). The one later document that changes a rule of this text is RFC 6842, in [`rfc6842/catalog.md`](../rfc6842/catalog.md). The family of documents and the in-scope set are in [`standards.md`](../../protocol/dhcp/standards.md). The features these statements build are in [`features.md`](../../protocol/dhcp/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`dhcp/coverage.md`](../../model/dhcp/coverage.md). Keeping it out is deliberate: this
-catalog states what the standard says, so a new test or a new run must never force an edit
-here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`dhcp/coverage.md`](../../model/dhcp/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc2131.txt:1241` points to a line of that
-file. Where a quote crosses a page break of the RFC, the reference names
-both line groups.
+Quotes are verbatim. A reference such as `rfc2131.txt:1241` points to a line of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
 ## How to read an entry
 
 - **ID** — `RFC2131-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into that file.
-- **Strength** — the word the document uses. RFC 2131 §1.4 defines `MUST`, `MUST NOT`,
-  `SHOULD`, `SHOULD NOT` and `MAY` in capitals, `rfc2131.txt:243-293`. The document also
-  states rules in lowercase prose and in two tables. The entry records what is written:
-  `must`, `must not`, `should`, `should not`, `may`, or `description` for normative prose
-  with no keyword. Where the keyword is lowercase, the entry says so.
-- **Class** — how a test can observe the statement: `wire` (fields of messages on a link),
-  `end-to-end` (what a node accepts and acts on), `error-signal` (a report message),
-  `internal` (state inside a node), `encoding` (the exact bit layout).
+- **Strength** — the word the document uses. RFC 2131 §1.4 defines `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` in capitals, `rfc2131.txt:243-293`. The document also states rules in lowercase prose and in two tables. The entry records what is written: `must`, `must not`, `should`, `should not`, `may`, or `description` for normative prose with no keyword. Where the keyword is lowercase, the entry says so.
+- **Class** — how a test can observe the statement: `wire` (fields of messages on a link), `end-to-end` (what a node accepts and acts on), `error-signal` (a report message), `internal` (state inside a node), `encoding` (the exact bit layout).
 - **Check idea** — one or two sentences, still without implementation names.
 - **Overridden by** — present only when RFC 6842 changes the statement.
 
-Two tables of this document carry many of its rules. Table 3, `rfc2131.txt:1537-1590`,
-states which field and which option each server message uses. Table 5,
-`rfc2131.txt:2023-2109`, does the same for the client messages. Table 4,
-`rfc2131.txt:1833-1842`, states the field rules of a DHCPREQUEST per client state. A cell
-of a table is a statement, and this catalog gives each group of cells an entry.
+Two tables of this document carry many of its rules. Table 3, `rfc2131.txt:1537-1590`, states which field and which option each server message uses. Table 5, `rfc2131.txt:2023-2109`, does the same for the client messages. Table 4, `rfc2131.txt:1833-1842`, states the field rules of a DHCPREQUEST per client state. A cell of a table is a statement, and this catalog gives each group of cells an entry.
 
 ## Index
 
@@ -173,8 +147,7 @@ of a table is a statement, and this catalog gives each group of cells an entry.
 > — §3, `rfc2131.txt:682-684`
 
 - Strength: description. Class: wire.
-- Check idea: every message from the client carries `op` = 1 and every message from the
-  server carries `op` = 2.
+- Check idea: every message from the client carries `op` = 1 and every message from the server carries `op` = 2.
 
 ### RFC2131-MSG-2
 
@@ -185,8 +158,7 @@ of a table is a statement, and this catalog gives each group of cells an entry.
 > RFC 1497 [17])." — §3, `rfc2131.txt:686-688`
 
 - Strength: description. Class: encoding.
-- Check idea: the four octets at the start of the option area of every message are
-  99.130.83.99. The value is what tells a receiver that the area holds DHCP options.
+- Check idea: the four octets at the start of the option area of every message are 99.130.83.99. The value is what tells a receiver that the area holds DHCP options.
 
 ### RFC2131-MSG-3
 
@@ -197,9 +169,7 @@ of a table is a statement, and this catalog gives each group of cells an entry.
 > `rfc2131.txt:694-696`
 
 - Strength: must (lowercase in the text; the rule is absolute). Class: wire.
-- Check idea: each of the eight messages of table 2 carries option 53 with the value that
-  names it. The definition of the option is
-  [RFC2132-TYPE-1](../rfc2132/catalog.md#rfc2132-type-1).
+- Check idea: each of the eight messages of table 2 carries option 53 with the value that names it. The definition of the option is [RFC2132-TYPE-1](../rfc2132/catalog.md#rfc2132-type-1).
 
 ### RFC2131-MSG-4
 
@@ -220,13 +190,11 @@ of a table is a statement, and this catalog gives each group of cells an entry.
 > sent to the 'DHCP client' port (68)." — §4.1, `rfc2131.txt:1241-1244`
 
 - Strength: description. Class: wire.
-- Check idea: every message from a client carries UDP destination port 67 and every
-  message from a server carries UDP destination port 68.
+- Check idea: every message from a client carries UDP destination port 67 and every message from a server carries UDP destination port 68.
 
 ### RFC2131-MSG-6
 
-**A client must accept an `options` field of at least 312 octets, that is a message of 576
-octets.**
+**A client must accept an `options` field of at least 312 octets, that is a message of 576 octets.**
 
 > "A DHCP client must be prepared to receive DHCP messages with an 'options' field of at
 > least length 312 octets. This requirement implies that a DHCP client must be prepared to
@@ -234,8 +202,7 @@ octets.**
 > prepared to accept [3]." — §2, `rfc2131.txt:555-559,567`
 
 - Strength: must (lowercase, twice). Class: end-to-end.
-- Check idea: a server reply padded out to 576 octets reaches the client and configures it.
-  A client that drops the message fails the statement.
+- Check idea: a server reply padded out to 576 octets reaches the client and configures it. A client that drops the message fails the statement.
 
 ### RFC2131-MSG-7
 
@@ -245,8 +212,7 @@ octets.**
 > zero by clients and ignored by servers and relay agents." — §2, `rfc2131.txt:586-588`
 
 - Strength: must. Class: wire for the send half, end-to-end for the ignore half.
-- Check idea: the 15 low bits of `flags` are zero in every client message; a server that
-  gets a message with one of them set answers it as if the bit were not there.
+- Check idea: the 15 low bits of `flags` are zero in every client message; a server that gets a message with one of them set answers it as if the bit were not there.
 
 ### RFC2131-MSG-8
 
@@ -256,9 +222,7 @@ octets.**
 > agent." — table 1, `rfc2131.txt:528-529`
 
 - Strength: description. Class: wire.
-- Check idea: `hops` is 0 in every message that a client sends. Table 3 and table 5 repeat
-  the value 0 for every message of both sides, `rfc2131.txt:1542` and
-  `rfc2131.txt:2029`.
+- Check idea: `hops` is 0 in every message that a client sends. Table 3 and table 5 repeat the value 0 for every message of both sides, `rfc2131.txt:1542` and `rfc2131.txt:2029`.
 
 ### RFC2131-MSG-9
 
@@ -268,13 +232,11 @@ octets.**
 > have the source address field in the IP header set to 0." — §4.1, `rfc2131.txt:1267-1269`
 
 - Strength: must (lowercase). Class: wire.
-- Check idea: the IP header of the DHCPDISCOVER and of the DHCPREQUEST that follows it
-  carries source address 0.0.0.0.
+- Check idea: the IP header of the DHCPDISCOVER and of the DHCPREQUEST that follows it carries source address 0.0.0.0.
 
 ### RFC2131-MSG-10
 
-**Options that extend into `sname` or `file` need the `option overload` option and follow
-strict framing rules.**
+**Options that extend into `sname` or `file` need the `option overload` option and follow strict framing rules.**
 
 > "If the options in a DHCP message extend into the 'sname' and 'file' fields, the 'option
 > overload' option MUST appear in the 'options' field, with value 1, 2 or 3, as specified
@@ -288,8 +250,7 @@ strict framing rules.**
 > — §4.1, `rfc2131.txt:1298-1304`
 
 - Strength: must, seven times. Class: encoding.
-- Check idea: a serializer test. The rules state how the octets sit in three fields of one
-  message, and a check that watches a link can see only that the option area parsed.
+- Check idea: a serializer test. The rules state how the octets sit in three fields of one message, and a check that watches a link can see only that the option area parsed.
 
 ### RFC2131-MSG-11
 
@@ -300,9 +261,7 @@ strict framing rules.**
 > parameter list for configuration." — §4.1, `rfc2131.txt:1311-1314`
 
 - Strength: description. Class: encoding.
-- Check idea: no option code occurs twice in a message. RFC 3396 replaces the
-  concatenation half of this statement, and RFC 3396 is out of scope; see
-  [`standards.md`](../../protocol/dhcp/standards.md#override-table).
+- Check idea: no option code occurs twice in a message. RFC 3396 replaces the concatenation half of this statement, and RFC 3396 is out of scope; see [`standards.md`](../../protocol/dhcp/standards.md#override-table).
 
 ## Transaction identifier
 
@@ -315,8 +274,7 @@ strict framing rules.**
 > `rfc2131.txt:530-533`
 
 - Strength: description. Class: wire.
-- Check idea: the `xid` of a reply equals the `xid` of the request it answers, and the
-  value is not a fixed constant across two runs of one client.
+- Check idea: the `xid` of a reply equals the `xid` of the request it answers, and the value is not a fixed constant across two runs of one client.
 
 ### RFC2131-XID-2
 
@@ -326,13 +284,11 @@ strict framing rules.**
 > 'xid' identical to one used by another client." — §4.1, `rfc2131.txt:1335-1337`
 
 - Strength: must. Class: wire.
-- Check idea: two clients that start at the same moment on one subnet use two different
-  `xid` values.
+- Check idea: two clients that start at the same moment on one subnet use two different `xid` values.
 
 ### RFC2131-XID-3
 
-**A server copies the `xid` of the request into its reply, and the client reuses it in the
-DHCPREQUEST.**
+**A server copies the `xid` of the request into its reply, and the client reuses it in the DHCPREQUEST.**
 
 > "The server inserts the 'xid' field from the DHCPDISCOVER message into the 'xid' field of
 > the DHCPOFFER message and sends the DHCPOFFER message to the requesting client." — §4.3.1,
@@ -342,8 +298,7 @@ DHCPREQUEST.**
 > `rfc2131.txt:2116-2117`
 
 - Strength: description. Class: wire.
-- Check idea: one value of `xid` runs through the whole DHCPDISCOVER, DHCPOFFER,
-  DHCPREQUEST and DHCPACK exchange.
+- Check idea: one value of `xid` runs through the whole DHCPDISCOVER, DHCPOFFER, DHCPREQUEST and DHCPACK exchange.
 
 ### RFC2131-XID-4
 
@@ -354,8 +309,7 @@ DHCPREQUEST.**
 > arriving DHCPACK messages must be silently discarded." — §4.4.1, `rfc2131.txt:1990-1993`
 
 - Strength: must (lowercase, twice). Class: end-to-end.
-- Check idea: a crafted DHCPOFFER with a wrong `xid` reaches a client in SELECTING; the
-  client does not answer it and does not take the address it carries.
+- Check idea: a crafted DHCPOFFER with a wrong `xid` reaches a client in SELECTING; the client does not answer it and does not take the address it carries.
 
 ### RFC2131-XID-5
 
@@ -365,8 +319,7 @@ DHCPREQUEST.**
 > client's DHCPREQUEST message are silently discarded." — §4.4.5, `rfc2131.txt:2231-2232`
 
 - Strength: description with the word "silently"; the rule is absolute. Class: end-to-end.
-- Check idea: a crafted DHCPACK with a wrong `xid` reaches a client that renews; the client
-  stays in RENEWING and repeats its DHCPREQUEST.
+- Check idea: a crafted DHCPACK with a wrong `xid` reaches a client that renews; the client stays in RENEWING and repeats its DHCPREQUEST.
 
 ## Discovery
 
@@ -382,9 +335,7 @@ DHCPREQUEST.**
 > `rfc2131.txt:1986-1988`
 
 - Strength: description. Class: wire.
-- Check idea: the first message of a client that has no address is a DHCPDISCOVER with IP
-  destination 255.255.255.255, a broadcast link-layer destination address, and UDP
-  destination port 67.
+- Check idea: the first message of a client that has no address is a DHCPDISCOVER with IP destination 255.255.255.255, a broadcast link-layer destination address, and UDP destination port 67.
 
 ### RFC2131-DISC-2
 
@@ -405,8 +356,7 @@ DHCPREQUEST.**
 > delivery of DHCP reply messages." — §4.4.1, `rfc2131.txt:1976-1977`
 
 - Strength: must, with a condition. Class: wire.
-- Check idea: the `chaddr` field of the DHCPDISCOVER equals the MAC address of the
-  interface that sent it, and the `hlen` field is the length of that address.
+- Check idea: the `chaddr` field of the DHCPDISCOVER equals the MAC address of the interface that sent it, and the `hlen` field is the length of that address.
 
 ### RFC2131-DISC-4
 
@@ -416,8 +366,7 @@ DHCPREQUEST.**
 > use of DHCP at startup." — §4.4.1, `rfc2131.txt:1970-1971`
 
 - Strength: should. Class: wire, as a time.
-- Check idea: the first DHCPDISCOVER of a client leaves between one and ten seconds after
-  the client starts, and two clients that start together do not send at the same instant.
+- Check idea: the first DHCPDISCOVER of a client leaves between one and ten seconds after the client starts, and two clients that start together do not send at the same instant.
 
 ### RFC2131-DISC-5
 
@@ -436,24 +385,20 @@ DHCPREQUEST.**
 > IP address' and 'IP address lease time' options." — §4.4.1, `rfc2131.txt:1973-1975`
 
 - Strength: may. Class: wire.
-- Check idea: a client that is configured to ask for a named address carries option 50 with
-  that address in its DHCPDISCOVER. The absence of the option is not a violation.
+- Check idea: a client that is configured to ask for a named address carries option 50 with that address in its DHCPDISCOVER. The absence of the option is not a violation.
 
 ## Offer
 
 ### RFC2131-OFF-1
 
-**A server may answer a DHCPDISCOVER with a DHCPOFFER that carries a free address in
-`yiaddr`.**
+**A server may answer a DHCPDISCOVER with a DHCPOFFER that carries a free address in `yiaddr`.**
 
 > "Each server may respond with a DHCPOFFER message that includes an available network
 > address in the 'yiaddr' field (and other configuration parameters in DHCP options)."
 > — §3.1, `rfc2131.txt:720-722`
 
 - Strength: may for the answer; the content of the answer is description. Class: wire.
-- Check idea: a DHCPOFFER follows the DHCPDISCOVER, and its `yiaddr` is an address of the
-  subnet of the client that no other client holds. The permission is real: §4.2 says a
-  server need not answer at all, `rfc2131.txt:1389-1393`.
+- Check idea: a DHCPOFFER follows the DHCPDISCOVER, and its `yiaddr` is an address of the subnet of the client that no other client holds. The permission is real: §4.2 says a server need not answer at all, `rfc2131.txt:1389-1393`.
 
 ### RFC2131-OFF-2
 
@@ -461,8 +406,7 @@ DHCPREQUEST.**
 
 > "'xid' 'xid' from client DHCPDISCOVER message" — table 3, `rfc2131.txt:1543-1545`
 
-- Strength: description. Class: wire. The general rule is
-  [RFC2131-XID-3](#rfc2131-xid-3); this entry is the table cell for the DHCPOFFER.
+- Strength: description. Class: wire. The general rule is [RFC2131-XID-3](#rfc2131-xid-3); this entry is the table cell for the DHCPOFFER.
 - Check idea: the `xid` of the DHCPOFFER equals the `xid` of the DHCPDISCOVER it answers.
 
 ### RFC2131-OFF-3
@@ -472,8 +416,7 @@ DHCPREQUEST.**
 > "Server identifier MUST" — table 3, DHCPOFFER column, `rfc2131.txt:1586`
 
 - Strength: must. Class: wire.
-- Check idea: option 54 is present in the DHCPOFFER, and it holds an address of the server
-  that sent the message.
+- Check idea: option 54 is present in the DHCPOFFER, and it holds an address of the server that sent the message.
 
 ### RFC2131-OFF-4
 
@@ -486,24 +429,19 @@ DHCPREQUEST.**
 
 ### RFC2131-OFF-5
 
-**A DHCPOFFER carries no `requested IP address`, `parameter request list`, `client
-identifier` or `maximum message size` option.**
+**A DHCPOFFER carries no `requested IP address`, `parameter request list`, `client identifier` or `maximum message size` option.**
 
 > "Requested IP address MUST NOT ... Parameter request list MUST NOT ... Client identifier
 > MUST NOT ... Maximum message size MUST NOT" — table 3, DHCPOFFER column,
 > `rfc2131.txt:1577,1582,1584,1587`
 
 - Strength: must not, four times. Class: wire.
-- Overridden by [RFC6842-CLID-1](../rfc6842/catalog.md#rfc6842-clid-1), for the `client
-  identifier` row only: when the client sent one, the server must now return it. The other
-  three rows stand.
-- Check idea: options 50, 55 and 57 are absent from the DHCPOFFER. Option 61 is absent
-  when the client sent none, and present when the client sent one.
+- Overridden by [RFC6842-CLID-1](../rfc6842/catalog.md#rfc6842-clid-1), for the `client identifier` row only: when the client sent one, the server must now return it. The other three rows stand.
+- Check idea: options 50, 55 and 57 are absent from the DHCPOFFER. Option 61 is absent when the client sent none, and present when the client sent one.
 
 ### RFC2131-OFF-6
 
-**A DHCPOFFER carries `hops` 0, `secs` 0, `ciaddr` 0, and the `flags`, `giaddr` and
-`chaddr` of the DHCPDISCOVER.**
+**A DHCPOFFER carries `hops` 0, `secs` 0, `ciaddr` 0, and the `flags`, `giaddr` and `chaddr` of the DHCPDISCOVER.**
 
 > "'hops' 0 ... 'secs' 0 ... 'ciaddr' 0 ... 'flags' 'flags' from client DHCPDISCOVER
 > message ... 'giaddr' 'giaddr' from client DHCPDISCOVER message ... 'chaddr' 'chaddr'
@@ -511,8 +449,7 @@ identifier` or `maximum message size` option.**
 > `rfc2131.txt:1542,1546,1547,1553-1561`
 
 - Strength: description, as a table of values. Class: wire.
-- Check idea: the six fields of the DHCPOFFER hold the stated values, and the three that
-  come from the request equal the fields of the DHCPDISCOVER.
+- Check idea: the six fields of the DHCPOFFER hold the stated values, and the three that come from the request equal the fields of the DHCPDISCOVER.
 
 ### RFC2131-OFF-7
 
@@ -525,8 +462,7 @@ identifier` or `maximum message size` option.**
 > (the sentence crosses a page break)
 
 - Strength: should. Class: wire, as an ICMP echo request.
-- Check idea: an ICMP echo request for the address of `yiaddr` leaves the server between
-  the DHCPDISCOVER and the DHCPOFFER. Silence is a `declined`, not a defect.
+- Check idea: an ICMP echo request for the address of `yiaddr` leaves the server between the DHCPDISCOVER and the DHCPOFFER. Silence is a `declined`, not a defect.
 
 ### RFC2131-OFF-8
 
@@ -536,8 +472,7 @@ identifier` or `maximum message size` option.**
 > `rfc2131.txt:516-517`
 
 - Strength: description, with the word "always". Class: wire.
-- Check idea: the address inside option 54 of a DHCPOFFER equals the IP source address of
-  the datagram that carries it, when the server and the client share a subnet.
+- Check idea: the address inside option 54 of a DHCPOFFER equals the IP source address of the datagram that carries it, when the server and the client share a subnet.
 
 ## Request
 
@@ -552,13 +487,11 @@ identifier` or `maximum message size` option.**
 > `rfc2131.txt:1696-1697`
 
 - Strength: must. Class: wire.
-- Check idea: option 54 of the DHCPREQUEST holds the address that option 54 of the chosen
-  DHCPOFFER held.
+- Check idea: option 54 of the DHCPREQUEST holds the address that option 54 of the chosen DHCPOFFER held.
 
 ### RFC2131-REQ-2
 
-**A DHCPREQUEST from SELECTING carries the offered `yiaddr` in the `requested IP address`
-option.**
+**A DHCPREQUEST from SELECTING carries the offered `yiaddr` in the `requested IP address` option.**
 
 > "The 'requested IP address' option MUST be set to the value of 'yiaddr' in the DHCPOFFER
 > message from the server." — §3.1, `rfc2131.txt:854-856`
@@ -576,13 +509,11 @@ option.**
 > "ciaddr zero zero IP address IP address" — table 4, `rfc2131.txt:1839`
 
 - Strength: must. Class: wire.
-- Check idea: the `ciaddr` field of the DHCPREQUEST that answers a DHCPOFFER is 0.0.0.0.
-  The client has no address yet, so a non-zero value would be a claim it cannot make.
+- Check idea: the `ciaddr` field of the DHCPREQUEST that answers a DHCPOFFER is 0.0.0.0. The client has no address yet, so a non-zero value would be a claim it cannot make.
 
 ### RFC2131-REQ-4
 
-**The DHCPREQUEST from SELECTING is broadcast, and it repeats the `secs` value and the
-broadcast address of the DHCPDISCOVER.**
+**The DHCPREQUEST from SELECTING is broadcast, and it repeats the `secs` value and the broadcast address of the DHCPDISCOVER.**
 
 > "This DHCPREQUEST message is broadcast and relayed through DHCP/BOOTP relay agents. To
 > help ensure that any BOOTP relay agents forward the DHCPREQUEST message to the same set
@@ -591,8 +522,7 @@ broadcast address of the DHCPDISCOVER.**
 > IP broadcast address as the original DHCPDISCOVER message." — §3.1, `rfc2131.txt:856-862`
 
 - Strength: must. Class: wire.
-- Check idea: the DHCPREQUEST goes to 255.255.255.255, and its `secs` field holds the same
-  value as the `secs` field of the DHCPDISCOVER of the same transaction.
+- Check idea: the DHCPREQUEST goes to 255.255.255.255, and its `secs` field holds the same value as the `secs` field of the DHCPDISCOVER of the same transaction.
 
 ### RFC2131-REQ-5
 
@@ -607,13 +537,11 @@ broadcast address of the DHCPDISCOVER.**
 > DHCPREQUEST message." — §4.4.2, `rfc2131.txt:2143-2150`
 
 - Strength: must and must not. Class: wire.
-- Check idea: a client that restarts with a remembered address broadcasts a DHCPREQUEST
-  that carries option 50 with that address, carries no option 54, and has `ciaddr` 0.
+- Check idea: a client that restarts with a remembered address broadcasts a DHCPREQUEST that carries option 50 with that address, carries no option 54, and has `ciaddr` 0.
 
 ### RFC2131-REQ-6
 
-**A DHCPREQUEST from RENEWING is unicast, carries `ciaddr`, and carries neither `server
-identifier` nor `requested IP address`.**
+**A DHCPREQUEST from RENEWING is unicast, carries `ciaddr`, and carries neither `server identifier` nor `requested IP address`.**
 
 > "'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT be
 > filled in, 'ciaddr' MUST be filled in with client's IP address. ... This message will be
@@ -625,21 +553,18 @@ identifier` nor `requested IP address`.**
 > DHCPREQUEST to its current network address." — §4.4.5, `rfc2131.txt:2223-2226`
 
 - Strength: must and must not. Class: wire.
-- Check idea: the renewal message is a unicast to the leasing server whose `ciaddr` holds
-  the leased address, and it carries neither option 50 nor option 54.
+- Check idea: the renewal message is a unicast to the leasing server whose `ciaddr` holds the leased address, and it carries neither option 50 nor option 54.
 
 ### RFC2131-REQ-7
 
-**A DHCPREQUEST from REBINDING is broadcast, and carries the same fields as the one from
-RENEWING.**
+**A DHCPREQUEST from REBINDING is broadcast, and carries the same fields as the one from RENEWING.**
 
 > "'server identifier' MUST NOT be filled in, 'requested IP address' option MUST NOT be
 > filled in, 'ciaddr' MUST be filled in with client's IP address. ... This message MUST be
 > broadcast to the 0xffffffff IP broadcast address." — §4.3.2, `rfc2131.txt:1781-1785`
 
 - Strength: must and must not. Class: wire.
-- Check idea: the rebinding message goes to 255.255.255.255, its `ciaddr` holds the leased
-  address, and it carries neither option 50 nor option 54.
+- Check idea: the rebinding message goes to 255.255.255.255, its `ciaddr` holds the leased address, and it carries neither option 50 nor option 54.
 
 ### RFC2131-REQ-8
 
@@ -652,8 +577,7 @@ RENEWING.**
 > include that list in all subsequent messages." — §4.3.2, `rfc2131.txt:1672-1674`
 
 - Strength: must. Class: wire.
-- Check idea: option 55 of the DHCPREQUEST holds the same option codes as option 55 of the
-  DHCPDISCOVER of the same transaction.
+- Check idea: option 55 of the DHCPREQUEST holds the same option codes as option 55 of the DHCPDISCOVER of the same transaction.
 
 ### RFC2131-REQ-9
 
@@ -667,8 +591,7 @@ RENEWING.**
 > identifier' in all subsequent messages" — §4.2, `rfc2131.txt:1417-1419`
 
 - Strength: must. Class: wire.
-- Check idea: option 61 holds the same octets in the DHCPDISCOVER, the DHCPREQUEST and
-  every later message of one client.
+- Check idea: option 61 holds the same octets in the DHCPDISCOVER, the DHCPREQUEST and every later message of one client.
 
 ## Acknowledgement
 
@@ -680,10 +603,8 @@ RENEWING.**
 > persistent storage and responds with a DHCPACK message containing the configuration
 > parameters for the requesting client." — §3.1, `rfc2131.txt:869-872`
 
-- Strength: description; it is the only path from a DHCPREQUEST to a configured client.
-  Class: wire.
-- Check idea: a DHCPACK follows the DHCPREQUEST, and it comes from the server that option
-  54 of the DHCPREQUEST named.
+- Strength: description; it is the only path from a DHCPREQUEST to a configured client. Class: wire.
+- Check idea: a DHCPACK follows the DHCPREQUEST, and it comes from the server that option 54 of the DHCPREQUEST named.
 
 ### RFC2131-ACK-2
 
@@ -693,20 +614,17 @@ RENEWING.**
 > address." — §3.1, `rfc2131.txt:879-880`
 
 - Strength: description. Class: wire and end-to-end.
-- Check idea: the `yiaddr` of the DHCPACK equals the address the client asked for in option
-  50 of its DHCPREQUEST, and the client uses that address afterwards.
+- Check idea: the `yiaddr` of the DHCPACK equals the address the client asked for in option 50 of its DHCPREQUEST, and the client uses that address afterwards.
 
 ### RFC2131-ACK-3
 
-**A DHCPACK that answers a DHCPREQUEST carries the `IP address lease time` option; one that
-answers a DHCPINFORM carries none.**
+**A DHCPACK that answers a DHCPREQUEST carries the `IP address lease time` option; one that answers a DHCPINFORM carries none.**
 
 > "IP address lease time ... MUST (DHCPREQUEST) MUST NOT (DHCPINFORM)" — table 3, DHCPACK
 > column, `rfc2131.txt:1578-1579`
 
 - Strength: must and must not. Class: wire.
-- Check idea: option 51 is present in the DHCPACK that ends the four-message exchange, and
-  absent from the DHCPACK that answers a DHCPINFORM.
+- Check idea: option 51 is present in the DHCPACK that ends the four-message exchange, and absent from the DHCPACK that answers a DHCPINFORM.
 
 ### RFC2131-ACK-4
 
@@ -719,16 +637,14 @@ answers a DHCPINFORM carries none.**
 
 ### RFC2131-ACK-5
 
-**A DHCPACK carries no `requested IP address`, `parameter request list`, `client identifier`
-or `maximum message size` option.**
+**A DHCPACK carries no `requested IP address`, `parameter request list`, `client identifier` or `maximum message size` option.**
 
 > "Requested IP address MUST NOT ... Parameter request list MUST NOT ... Client identifier
 > MUST NOT ... Maximum message size MUST NOT" — table 3, DHCPACK column,
 > `rfc2131.txt:1577,1582,1584,1587`
 
 - Strength: must not, four times. Class: wire.
-- Overridden by [RFC6842-CLID-1](../rfc6842/catalog.md#rfc6842-clid-1), for the `client
-  identifier` row only. The other three rows stand.
+- Overridden by [RFC6842-CLID-1](../rfc6842/catalog.md#rfc6842-clid-1), for the `client identifier` row only. The other three rows stand.
 - Check idea: options 50, 55 and 57 are absent from the DHCPACK.
 
 ### RFC2131-ACK-6
@@ -740,8 +656,7 @@ or `maximum message size` option.**
 > `rfc2131.txt:876-878`
 
 - Strength: should not. Class: wire.
-- Check idea: the `yiaddr`, the lease time and the subnet mask of the DHCPACK equal the
-  ones of the DHCPOFFER of the same transaction.
+- Check idea: the `yiaddr`, the lease time and the subnet mask of the DHCPACK equal the ones of the DHCPOFFER of the same transaction.
 
 ### RFC2131-ACK-7
 
@@ -751,14 +666,11 @@ or `maximum message size` option.**
 > `rfc2131.txt:878-879`
 
 - Strength: should not. Class: wire, as the absence of an ICMP echo request.
-- Check idea: no ICMP echo request for `yiaddr` leaves the server between the DHCPREQUEST
-  and the DHCPACK. The check needs the probe of
-  [RFC2131-OFF-7](#rfc2131-off-7) to be visible first, or it passes for the wrong reason.
+- Check idea: no ICMP echo request for `yiaddr` leaves the server between the DHCPREQUEST and the DHCPACK. The check needs the probe of [RFC2131-OFF-7](#rfc2131-off-7) to be visible first, or it passes for the wrong reason.
 
 ### RFC2131-ACK-8
 
-**A DHCPACK carries the `xid`, `flags`, `giaddr` and `chaddr` of the DHCPREQUEST, `secs` 0
-and `hops` 0.**
+**A DHCPACK carries the `xid`, `flags`, `giaddr` and `chaddr` of the DHCPREQUEST, `secs` 0 and `hops` 0.**
 
 > "'hops' 0 ... 'xid' 'xid' from client DHCPREQUEST message ... 'secs' 0 ... 'ciaddr'
 > 'ciaddr' from DHCPREQUEST or 0 ... 'flags' 'flags' from client DHCPREQUEST message"
@@ -778,8 +690,7 @@ and `hops` 0.**
 > — §3.1, `rfc2131.txt:882-884`
 
 - Strength: should. Class: wire.
-- Check idea: a DHCPREQUEST for an address that the server has already given to another
-  client draws a DHCPNAK and no DHCPACK.
+- Check idea: a DHCPREQUEST for an address that the server has already given to another client draws a DHCPNAK and no DHCPACK.
 
 ### RFC2131-NAK-2
 
@@ -795,8 +706,7 @@ and `hops` 0.**
 > DHCPNAK message to the client." — §4.3.2, `rfc2131.txt:1725-1730`
 
 - Strength: should. Class: wire.
-- Check idea: a DHCPREQUEST from INIT-REBOOT that asks for an address of a foreign subnet
-  draws a DHCPNAK.
+- Check idea: a DHCPREQUEST from INIT-REBOOT that asks for an address of a foreign subnet draws a DHCPNAK.
 
 ### RFC2131-NAK-3
 
@@ -811,14 +721,11 @@ and `hops` 0.**
 > 0xffffffff." — §4.1, `rfc2131.txt:1281-1282`
 
 - Strength: must. Class: wire.
-- Check idea: the IP destination address of the DHCPNAK is 255.255.255.255 and its
-  link-layer destination address is the broadcast address, whatever the BROADCAST bit of
-  the request said.
+- Check idea: the IP destination address of the DHCPNAK is 255.255.255.255 and its link-layer destination address is the broadcast address, whatever the BROADCAST bit of the request said.
 
 ### RFC2131-NAK-4
 
-**When `giaddr` is set, the server sends the DHCPNAK to the relay agent and sets the
-broadcast bit.**
+**When `giaddr` is set, the server sends the DHCPNAK to the relay agent and sets the broadcast bit.**
 
 > "Otherwise, the server MUST send the DHCPNAK message to the IP address of the BOOTP relay
 > agent, as recorded in 'giaddr'." — §3.2, `rfc2131.txt:1028-1029`
@@ -828,13 +735,11 @@ broadcast bit.**
 > the DHCPNAK to the client" — §4.3.2, `rfc2131.txt:1757-1760`
 
 - Strength: must. Class: wire.
-- Check idea: the statement needs a relay agent on the path. Without one, `giaddr` is
-  always zero and the condition never holds.
+- Check idea: the statement needs a relay agent on the path. Without one, `giaddr` is always zero and the condition never holds.
 
 ### RFC2131-NAK-5
 
-**A DHCPNAK carries `yiaddr` 0, `ciaddr` 0, `siaddr` 0, and no lease time and no other
-configuration option.**
+**A DHCPNAK carries `yiaddr` 0, `ciaddr` 0, `siaddr` 0, and no lease time and no other configuration option.**
 
 > "'ciaddr' ... 0 ... 'yiaddr' ... 0 ... 'siaddr' ... 0" — table 3, DHCPNAK column,
 > `rfc2131.txt:1547-1552`
@@ -845,9 +750,7 @@ configuration option.**
 > `rfc2131.txt:1577-1588`
 
 - Strength: must not, six times, plus three field values as description. Class: wire.
-- Check idea: the DHCPNAK carries no option 50, 51, 52, 55 or 57, no configuration option
-  such as the subnet mask, and its three address fields are 0.0.0.0. The `All others MUST
-  NOT` row is the widest prohibition in the document.
+- Check idea: the DHCPNAK carries no option 50, 51, 52, 55 or 57, no configuration option such as the subnet mask, and its three address fields are 0.0.0.0. The `All others MUST NOT` row is the widest prohibition in the document.
 
 ### RFC2131-NAK-6
 
@@ -856,8 +759,7 @@ configuration option.**
 > "Server identifier MUST" — table 3, DHCPNAK column, `rfc2131.txt:1586`
 
 - Strength: must. Class: wire.
-- Check idea: option 54 is present in the DHCPNAK. It is the one option that the `All
-  others MUST NOT` row of [RFC2131-NAK-5](#rfc2131-nak-5) does not remove.
+- Check idea: option 54 is present in the DHCPNAK. It is the one option that the `All others MUST NOT` row of [RFC2131-NAK-5](#rfc2131-nak-5) does not remove.
 
 ### RFC2131-NAK-7
 
@@ -869,8 +771,7 @@ configuration option.**
 > `rfc2131.txt:1746-1749`
 
 - Strength: must. Class: wire, as an absence.
-- Check idea: a DHCPREQUEST from INIT-REBOOT that names an address of a client the server
-  never served draws no message at all: no DHCPNAK and no DHCPACK.
+- Check idea: a DHCPREQUEST from INIT-REBOOT that names an address of a client the server never served draws no message at all: no DHCPNAK and no DHCPACK.
 
 ### RFC2131-NAK-8
 
@@ -884,10 +785,8 @@ configuration option.**
 > this time using the (non-abbreviated) procedure described in section 3.1." — §3.2,
 > `rfc2131.txt:1048-1051`
 
-- Strength: description in §3.1, must (lowercase) in §3.2; it is the only path out of the
-  state. Class: wire.
-- Check idea: a DHCPNAK is followed by a DHCPDISCOVER from the same client, and the client
-  does not use the address it asked for.
+- Strength: description in §3.1, must (lowercase) in §3.2; it is the only path out of the state. Class: wire.
+- Check idea: a DHCPNAK is followed by a DHCPDISCOVER from the same client, and the client does not use the address it asked for.
 
 ## Lease and reacquisition
 
@@ -899,21 +798,18 @@ configuration option.**
 > of 0xffffffff is reserved to represent "infinity"." — §3.3, `rfc2131.txt:1096-1098`
 
 - Strength: description. Class: wire.
-- Check idea: the lease time in option 51 counts seconds; a lease that never ends carries
-  the value 4294967295.
+- Check idea: the lease time in option 51 counts seconds; a lease that never ends carries the value 4294967295.
 
 ### RFC2131-LEASE-2
 
-**The client computes the expiry as the send time of its DHCPREQUEST plus the lease of the
-DHCPACK.**
+**The client computes the expiry as the send time of its DHCPREQUEST plus the lease of the DHCPACK.**
 
 > "The client records the lease expiration time as the sum of the time at which the
 > original request was sent and the duration of the lease from the DHCPACK message."
 > — §4.4.1, `rfc2131.txt:2117-2119`
 
 - Strength: description. Class: internal.
-- Check idea: the instant at which the client gives the address up equals the send time of
-  the DHCPREQUEST plus the lease, and not the arrival time of the DHCPACK plus the lease.
+- Check idea: the instant at which the client gives the address up equals the send time of the DHCPREQUEST plus the lease, and not the arrival time of the DHCPACK plus the lease.
 
 ### RFC2131-LEASE-3
 
@@ -923,9 +819,7 @@ DHCPACK.**
 > client's lease will expire." — §4.4.5, `rfc2131.txt:2216-2218`
 
 - Strength: must. Class: wire for the values in the DHCPACK, internal for the times.
-- Check idea: options 58 and 59 of the DHCPACK hold values in the order T1 < T2 < lease,
-  and the renewal message leaves before the rebinding message, which leaves before the
-  expiry.
+- Check idea: options 58 and 59 of the DHCPACK hold values in the order T1 < T2 < lease, and the renewal message leaves before the rebinding message, which leaves before the expiry.
 
 ### RFC2131-LEASE-4
 
@@ -936,8 +830,7 @@ DHCPACK.**
 > `rfc2131.txt:2253-2255`
 
 - Strength: description. Class: wire and internal.
-- Check idea: with a DHCPACK that carries no option 58 and no option 59, the renewal
-  message leaves at half the lease and the rebinding message at 0.875 of it.
+- Check idea: with a DHCPACK that carries no option 58 and no option 59, the renewal message leaves at half the lease and the rebinding message at 0.875 of it.
 
 ### RFC2131-LEASE-5
 
@@ -947,8 +840,7 @@ DHCPACK.**
 > message to the server to extend its lease." — §4.4.5, `rfc2131.txt:2223-2225`
 
 - Strength: description; it is the only path out of BOUND at T1. Class: wire.
-- Check idea: a unicast DHCPREQUEST leaves the client at T1 after the DHCPACK, addressed to
-  the server that gave the lease.
+- Check idea: a unicast DHCPREQUEST leaves the client at T1 after the DHCPACK, addressed to the server that gave the lease.
 
 ### RFC2131-LEASE-6
 
@@ -958,13 +850,11 @@ DHCPACK.**
 > broadcast) a DHCPREQUEST message to extend its lease." — §4.4.5, `rfc2131.txt:2247-2249`
 
 - Strength: description; the only path. Class: wire.
-- Check idea: when the renewal at T1 stays unanswered, a broadcast DHCPREQUEST leaves the
-  client at T2.
+- Check idea: when the renewal at T1 stays unanswered, a broadcast DHCPREQUEST leaves the client at T2.
 
 ### RFC2131-LEASE-7
 
-**Without an answer the client waits half of the remaining time, at least 60 seconds,
-before it repeats.**
+**Without an answer the client waits half of the remaining time, at least 60 seconds, before it repeats.**
 
 > "In both RENEWING and REBINDING states, if the client receives no response to its
 > DHCPREQUEST message, the client SHOULD wait one-half of the remaining time until T2 (in
@@ -973,13 +863,11 @@ before it repeats.**
 > `rfc2131.txt:2265-2269`
 
 - Strength: should. Class: wire, as a time.
-- Check idea: the interval between two renewal messages is half of the time that is left
-  until T2, and it never falls below 60 seconds.
+- Check idea: the interval between two renewal messages is half of the time that is left until T2, and it never falls below 60 seconds.
 
 ### RFC2131-LEASE-8
 
-**When the lease expires the client goes to INIT and stops all other network processing at
-once.**
+**When the lease expires the client goes to INIT and stops all other network processing at once.**
 
 > "If the lease expires before the client receives a DHCPACK, the client moves to INIT
 > state, MUST immediately stop any other network processing and requests network
@@ -991,8 +879,7 @@ once.**
 > `rfc2131.txt:1213-1215`
 
 - Strength: must. Class: end-to-end and wire.
-- Check idea: after the expiry the client sends no datagram from the leased address, and a
-  DHCPDISCOVER leaves it.
+- Check idea: after the expiry the client sends no datagram from the leased address, and a DHCPDISCOVER leaves it.
 
 ### RFC2131-LEASE-9
 
@@ -1003,8 +890,7 @@ once.**
 > `rfc2131.txt:2276-2278`
 
 - Strength: must not. Class: wire.
-- Check idea: after a DHCPACK that carries a different `yiaddr`, no datagram leaves the
-  client with the earlier address as its IP source address.
+- Check idea: after a DHCPACK that carries a different `yiaddr`, no datagram leaves the client with the earlier address as its IP source address.
 
 ### RFC2131-LEASE-10
 
@@ -1014,8 +900,7 @@ once.**
 > synchronization of client reacquisition." — §4.4.5, `rfc2131.txt:2255-2257`
 
 - Strength: should. Class: wire, as a time.
-- Check idea: two clients with equal leases that were configured at the same instant do not
-  renew at the same instant.
+- Check idea: two clients with equal leases that were configured at the same instant do not renew at the same instant.
 
 ### RFC2131-LEASE-11
 
@@ -1026,8 +911,7 @@ once.**
 > `rfc2131.txt:2261-2263`
 
 - Strength: should. Class: wire.
-- Check idea: options 58 and 59 are present in the DHCPACK, and the value of a renewal
-  DHCPACK is not simply a copy of the value of the first one.
+- Check idea: options 58 and 59 are present in the DHCPACK, and the value of a renewal DHCPACK is not simply a copy of the value of the first one.
 
 ## Retransmission
 
@@ -1040,13 +924,11 @@ once.**
 > determine the delay between retransmissions." — §4.1, `rfc2131.txt:1316-1319`
 
 - Strength: must. Class: wire, as a time.
-- Check idea: with no server on the subnet, the intervals between the DHCPDISCOVER messages
-  of one client grow, and two clients do not repeat at the same instant.
+- Check idea: with no server on the subnet, the intervals between the DHCPDISCOVER messages of one client grow, and two clients do not repeat at the same instant.
 
 ### RFC2131-RETX-2
 
-**The first delay should be 4 seconds with a fuzz of one second, then 8, doubling to at
-most 64.**
+**The first delay should be 4 seconds with a fuzz of one second, then 8, doubling to at most 64.**
 
 > "For example, in a 10Mb/sec Ethernet internetwork, the delay before the first
 > retransmission SHOULD be 4 seconds randomized by the value of a uniform random number
@@ -1056,9 +938,7 @@ most 64.**
 > 64 seconds." — §4.1, `rfc2131.txt:1322-1330`
 
 - Strength: should. Class: wire, as a time.
-- Check idea: the first interval is in the range 3 to 5 seconds, the second in 7 to 9, and
-  no interval passes 64 seconds. The tolerance belongs to a statistical check, and that is
-  level 4 work.
+- Check idea: the first interval is in the range 3 to 5 seconds, the second in 7 to 9, and no interval passes 64 seconds. The tolerance belongs to a statistical check, and that is level 4 work.
 
 ### RFC2131-RETX-3
 
@@ -1072,8 +952,7 @@ most 64.**
 
 ### RFC2131-RETX-4
 
-**Without a DHCPACK and without a DHCPNAK the client repeats the DHCPREQUEST and then
-returns to INIT.**
+**Without a DHCPACK and without a DHCPNAK the client repeats the DHCPREQUEST and then returns to INIT.**
 
 > "The client times out and retransmits the DHCPREQUEST message if the client receives
 > neither a DHCPACK or a DHCPNAK message. ... If the client receives neither a DHCPACK or a
@@ -1081,8 +960,7 @@ returns to INIT.**
 > state and restarts the initialization process." — §3.1, `rfc2131.txt:913-925`
 
 - Strength: description. Class: wire.
-- Check idea: when the DHCPACK is removed from the path, a second DHCPREQUEST follows, and
-  after the repetitions a DHCPDISCOVER follows.
+- Check idea: when the DHCPACK is removed from the path, a second DHCPREQUEST follows, and after the repetitions a DHCPDISCOVER follows.
 
 ## Decline
 
@@ -1100,8 +978,7 @@ returns to INIT.**
 > `rfc2131.txt:2119-2123`
 
 - Strength: should. Class: wire, as an ARP request.
-- Check idea: an ARP request for the address of `yiaddr` leaves the client after the
-  DHCPACK and before the first datagram from that address.
+- Check idea: an ARP request for the address of `yiaddr` leaves the client after the DHCPACK and before the first datagram from that address.
 
 ### RFC2131-DECL-2
 
@@ -1115,8 +992,7 @@ returns to INIT.**
 > to the server." — §4.4.1, `rfc2131.txt:2135-2136`
 
 - Strength: must. Class: wire.
-- Check idea: when another node answers the ARP probe for `yiaddr`, a DHCPDECLINE leaves
-  the client and a DHCPDISCOVER follows it.
+- Check idea: when another node answers the ARP probe for `yiaddr`, a DHCPDECLINE leaves the client and a DHCPDISCOVER follows it.
 
 ### RFC2131-DECL-3
 
@@ -1127,8 +1003,7 @@ returns to INIT.**
 > `rfc2131.txt:906-908`
 
 - Strength: should. Class: wire, as a time.
-- Check idea: at least ten seconds pass between the DHCPDECLINE and the DHCPDISCOVER that
-  follows it.
+- Check idea: at least ten seconds pass between the DHCPDECLINE and the DHCPDISCOVER that follows it.
 
 ### RFC2131-DECL-4
 
@@ -1140,8 +1015,7 @@ returns to INIT.**
 > a possible configuration problem." — §4.3.3, `rfc2131.txt:1807-1811`
 
 - Strength: must. Class: internal, with an end-to-end consequence.
-- Check idea: after a DHCPDECLINE for one address, the next DHCPOFFER of that server
-  carries a different address.
+- Check idea: after a DHCPDECLINE for one address, the next DHCPOFFER of that server carries a different address.
 
 ### RFC2131-DECL-5
 
@@ -1155,8 +1029,7 @@ returns to INIT.**
 
 ### RFC2131-DECL-6
 
-**A DHCPDECLINE carries the `requested IP address` and `server identifier` options and no
-lease time.**
+**A DHCPDECLINE carries the `requested IP address` and `server identifier` options and no lease time.**
 
 > "Requested IP address ... MUST (DHCPDECLINE) ... IP address lease time ... MUST NOT ...
 > Vendor class identifier ... MUST NOT ... Server identifier ... MUST ... Parameter request
@@ -1166,13 +1039,11 @@ lease time.**
 > "'ciaddr' ... 0 (DHCPDECLINE)" — table 5, `rfc2131.txt:2038`
 
 - Strength: must and must not. Class: wire.
-- Check idea: the DHCPDECLINE carries option 50 with the refused address and option 54 with
-  the server, and carries no option 51, 55, 57 or 60.
+- Check idea: the DHCPDECLINE carries option 50 with the refused address and option 54 with the server, and carries no option 51, 55, 57 or 60.
 
 ### RFC2131-DECL-7
 
-**The ARP probe of the offered address carries the client's hardware address and sender
-address 0.**
+**The ARP probe of the offered address carries the client's hardware address and sender address 0.**
 
 > "When broadcasting an ARP request for the suggested address, the client must fill in its
 > own hardware address as the sender's hardware address, and 0 as the sender's IP address,
@@ -1180,8 +1051,7 @@ address 0.**
 > `rfc2131.txt:2123-2126`
 
 - Strength: must (lowercase). Class: wire.
-- Check idea: the ARP request of [RFC2131-DECL-1](#rfc2131-decl-1) carries sender protocol
-  address 0.0.0.0 and the sender hardware address of the client.
+- Check idea: the ARP request of [RFC2131-DECL-1](#rfc2131-decl-1) carries sender protocol address 0.0.0.0 and the sender hardware address of the client.
 
 ### RFC2131-DECL-8
 
@@ -1192,8 +1062,7 @@ address 0.**
 > `rfc2131.txt:2136-2138`
 
 - Strength: should. Class: wire.
-- Check idea: an ARP reply with the new address leaves the client after the DHCPACK, to the
-  broadcast address.
+- Check idea: an ARP reply with the new address leaves the client after the DHCPACK, to the broadcast address.
 
 ## Release
 
@@ -1205,8 +1074,7 @@ address 0.**
 > DHCPRELEASE message to the server." — §3.1, `rfc2131.txt:928-930`
 
 - Strength: may. Class: wire.
-- Check idea: a client that shuts down while it holds a lease sends a DHCPRELEASE. Silence
-  conforms as well; §4.4.6 says so, `rfc2131.txt:2284-2285`.
+- Check idea: a client that shuts down while it holds a lease sends a DHCPRELEASE. Silence conforms as well; §4.4.6 says so, `rfc2131.txt:2284-2285`.
 
 ### RFC2131-REL-2
 
@@ -1216,8 +1084,7 @@ address 0.**
 > same 'client identifier' in the DHCPRELEASE message." — §3.1, `rfc2131.txt:931-933`
 
 - Strength: must. Class: wire.
-- Check idea: option 61 of the DHCPRELEASE holds the same octets as option 61 of the
-  DHCPREQUEST that obtained the lease.
+- Check idea: option 61 of the DHCPRELEASE holds the same octets as option 61 of the DHCPREQUEST that obtained the lease.
 
 ### RFC2131-REL-3
 
@@ -1226,8 +1093,7 @@ address 0.**
 > "The client unicasts DHCPRELEASE messages to the server." — §4.4.4, `rfc2131.txt:2197`
 
 - Strength: description. Class: wire.
-- Check idea: the IP destination address of the DHCPRELEASE is the address of the server,
-  not the broadcast address.
+- Check idea: the IP destination address of the DHCPRELEASE is the address of the server, not the broadcast address.
 
 ### RFC2131-REL-4
 
@@ -1238,15 +1104,12 @@ address 0.**
 > for possible reuse in response to subsequent requests from the client." — §4.3.4,
 > `rfc2131.txt:1815-1818`
 
-- Strength: description for the first sentence, should for the second; the first is the
-  only path. Class: internal, with an end-to-end consequence.
-- Check idea: after a DHCPRELEASE, the server offers that same address to the next client
-  that asks.
+- Strength: description for the first sentence, should for the second; the first is the only path. Class: internal, with an end-to-end consequence.
+- Check idea: after a DHCPRELEASE, the server offers that same address to the next client that asks.
 
 ### RFC2131-REL-5
 
-**A DHCPRELEASE carries the address in `ciaddr` and the `server identifier` option, and no
-`requested IP address` and no lease time.**
+**A DHCPRELEASE carries the address in `ciaddr` and the `server identifier` option, and no `requested IP address` and no lease time.**
 
 > "Requested IP address ... MUST NOT (DHCPRELEASE) ... IP address lease time ... MUST NOT
 > ... Server identifier ... MUST" — table 5, DHCPRELEASE column, `rfc2131.txt:2082-2098`
@@ -1254,8 +1117,7 @@ address 0.**
 > "'ciaddr' ... client's network address (DHCPRELEASE)" — table 5, `rfc2131.txt:2038-2041`
 
 - Strength: must and must not. Class: wire.
-- Check idea: the `ciaddr` of the DHCPRELEASE holds the leased address, option 54 is
-  present, and options 50 and 51 are absent.
+- Check idea: the `ciaddr` of the DHCPRELEASE holds the leased address, option 54 is present, and options 50 and 51 are absent.
 
 ## Inform
 
@@ -1271,8 +1133,7 @@ address 0.**
 > request lease time parameters." — §4.4.3, `rfc2131.txt:2167-2168`
 
 - Strength: may for the message, should not for the lease request. Class: wire.
-- Check idea: a client with a statically configured address sends a DHCPINFORM whose
-  `ciaddr` holds that address.
+- Check idea: a client with a statically configured address sends a DHCPINFORM whose `ciaddr` holds that address.
 
 ### RFC2131-INF-2
 
@@ -1286,8 +1147,7 @@ address 0.**
 > of the DHCPINFORM message." — §3.4, `rfc2131.txt:1131-1133`
 
 - Strength: description in §4.3.5, should in §3.4. Class: wire.
-- Check idea: the DHCPACK that answers the DHCPINFORM is a unicast to the `ciaddr` of that
-  message.
+- Check idea: the DHCPACK that answers the DHCPINFORM is a unicast to the `ciaddr` of that message.
 
 ### RFC2131-INF-3
 
@@ -1297,8 +1157,7 @@ address 0.**
 > 'yiaddr'." — §4.3.5, `rfc2131.txt:1824-1825`
 
 - Strength: must not and should not. Class: wire.
-- Check idea: the DHCPACK that answers a DHCPINFORM carries no option 51, and its `yiaddr`
-  is 0.0.0.0.
+- Check idea: the DHCPACK that answers a DHCPINFORM carries no option 51, and its `yiaddr` is 0.0.0.0.
 
 ### RFC2131-INF-4
 
@@ -1313,8 +1172,7 @@ address 0.**
 > parameters." — §3.4, `rfc2131.txt:1127-1131`
 
 - Strength: must not. Class: internal, with an end-to-end consequence.
-- Check idea: a DHCPINFORM from a client that holds no lease still draws a DHCPACK, and the
-  server's pool of free addresses does not shrink.
+- Check idea: a DHCPINFORM from a client that holds no lease still draws a DHCPACK, and the server's pool of free addresses does not shrink.
 
 ### RFC2131-INF-5
 
@@ -1351,8 +1209,7 @@ address 0.**
 > BROADCAST bit to 0." — §4.1, `rfc2131.txt:1362-1369`
 
 - Strength: should, both halves. Class: wire.
-- Check idea: the top bit of the `flags` field of the DHCPDISCOVER and of the DHCPREQUEST
-  carries the value that matches what the client can receive.
+- Check idea: the top bit of the `flags` field of the DHCPDISCOVER and of the DHCPREQUEST carries the value that matches what the client can receive.
 
 ### RFC2131-BCAST-2
 
@@ -1373,8 +1230,7 @@ address 0.**
 > DHCPOFFER and DHCPACK messages to the address in 'ciaddr'." — §4.1, `rfc2131.txt:1273-1275`
 
 - Strength: description. Class: wire.
-- Check idea: the DHCPACK that answers a renewal is a unicast to the address in the
-  `ciaddr` of the renewal message.
+- Check idea: the DHCPACK that answers a renewal is a unicast to the address in the `ciaddr` of the renewal message.
 
 ### RFC2131-BCAST-4
 
@@ -1384,8 +1240,7 @@ address 0.**
 > broadcasts DHCPOFFER and DHCPACK messages to 0xffffffff." — §4.1, `rfc2131.txt:1276-1278`
 
 - Strength: description. Class: wire.
-- Check idea: with the BROADCAST bit set in the DHCPDISCOVER, the IP destination address of
-  the DHCPOFFER is 255.255.255.255.
+- Check idea: with the BROADCAST bit set in the DHCPDISCOVER, the IP destination address of the DHCPOFFER is 255.255.255.255.
 
 ### RFC2131-BCAST-5
 
@@ -1396,8 +1251,7 @@ address 0.**
 > 'yiaddr' address." — §4.1, `rfc2131.txt:1278-1280`
 
 - Strength: description. Class: wire.
-- Check idea: with the BROADCAST bit clear, the IP destination address of the DHCPOFFER is
-  the `yiaddr` it carries and the link-layer destination address is the `chaddr`.
+- Check idea: with the BROADCAST bit clear, the IP destination address of the DHCPOFFER is the `yiaddr` it carries and the link-layer destination address is the `chaddr`.
 
 ### RFC2131-BCAST-6
 
@@ -1413,8 +1267,7 @@ address 0.**
 > 'chaddr' field." — §4.1, `rfc2131.txt:1373-1382`
 
 - Strength: should. Class: wire.
-- Check idea: two clients on one subnet, one with the bit set and one with it clear, draw
-  two answers with two different destination addresses.
+- Check idea: two clients on one subnet, one with the bit set and one with it clear, draw two answers with two different destination addresses.
 
 ## Server identifier
 
@@ -1427,8 +1280,7 @@ address 0.**
 > `rfc2131.txt:1249-1251`
 
 - Strength: must. Class: internal, with an end-to-end consequence.
-- Check idea: a server with two addresses answers a DHCPREQUEST whose option 54 names
-  either one of them.
+- Check idea: a server with two addresses answers a DHCPREQUEST whose option 54 names either one of them.
 
 ### RFC2131-SRVID-2
 
@@ -1442,8 +1294,7 @@ address 0.**
 > that subnet as the 'server identifier'." — §4.1, `rfc2131.txt:1251-1258`
 
 - Strength: must, with a should for the common case. Class: wire.
-- Check idea: with a server that has two interfaces, option 54 of the DHCPOFFER holds the
-  address of the interface that faces the client.
+- Check idea: with a server that has two interfaces, option 54 of the DHCPOFFER holds the address of the interface that faces the client.
 
 ### RFC2131-SRVID-3
 
@@ -1453,8 +1304,7 @@ address 0.**
 > unicast requests to the DHCP server." — §4.1, `rfc2131.txt:1263-1265`
 
 - Strength: must. Class: wire.
-- Check idea: the IP destination address of the renewal DHCPREQUEST and of the DHCPRELEASE
-  equals the address that option 54 of the DHCPACK carried.
+- Check idea: the IP destination address of the renewal DHCPREQUEST and of the DHCPRELEASE equals the address that option 54 of the DHCPACK carried.
 
 ## Client identity
 
@@ -1470,8 +1320,7 @@ address 0.**
 
 ### RFC2131-ID-2
 
-**The server identifies the client by the `client identifier`, or by `chaddr` when there is
-none.**
+**The server identifies the client by the `client identifier`, or by `chaddr` when there is none.**
 
 > "If the client supplies a 'client identifier', the client MUST use the same 'client
 > identifier' in all subsequent messages, and the server MUST use that identifier to
@@ -1480,9 +1329,7 @@ none.**
 > `rfc2131.txt:1417-1422`
 
 - Strength: must. Class: internal, with an end-to-end consequence.
-- Check idea: a client that keeps its `client identifier` and changes its hardware address
-  gets the same address back; a client that carries no identifier and changes its hardware
-  address gets a new one.
+- Check idea: a client that keeps its `client identifier` and changes its hardware address gets the same address back; a client that carries no identifier and changes its hardware address gets a new one.
 
 ## Server selection rules
 
@@ -1499,8 +1346,7 @@ none.**
 > — §4.3.1, `rfc2131.txt:1472-1486`
 
 - Strength: should. Class: end-to-end.
-- Check idea: a client that asks again after a release gets its earlier address back, while
-  a client that never asked before gets a fresh one.
+- Check idea: a client that asks again after a release gets its earlier address back, while a client that never asked before gets a fresh one.
 
 ### RFC2131-SEL-2
 
@@ -1511,8 +1357,7 @@ none.**
 > — §4.3.1, `rfc2131.txt:1504-1506`
 
 - Strength: should not. Class: end-to-end.
-- Check idea: two clients send a DHCPDISCOVER one after the other and neither one answers;
-  the two DHCPOFFER messages carry two different addresses.
+- Check idea: two clients send a DHCPDISCOVER one after the other and neither one answers; the two DHCPOFFER messages carry two different addresses.
 
 ### RFC2131-SEL-3
 
@@ -1526,8 +1371,7 @@ none.**
 > policy) or select another lease." — §4.3.1, `rfc2131.txt:1526-1535`
 
 - Strength: description with a `may` for the last branch. Class: wire.
-- Check idea: with no option 51 in the DHCPDISCOVER, option 51 of the DHCPOFFER holds the
-  configured default of the server.
+- Check idea: with no option 51 in the DHCPDISCOVER, option 51 of the DHCPOFFER holds the configured default of the server.
 
 ### RFC2131-SEL-4
 
@@ -1541,13 +1385,11 @@ none.**
 > appropriate option in the 'option' field" — §4.3.1, `rfc2131.txt:1601-1614`
 
 - Strength: must. Class: wire.
-- Check idea: a client that asks for the subnet mask and the router in option 55 gets
-  option 1 and option 3 in the DHCPOFFER and in the DHCPACK.
+- Check idea: a client that asks for the subnet mask and the router in option 55 gets option 1 and option 3 in the DHCPOFFER and in the DHCPACK.
 
 ### RFC2131-SEL-5
 
-**The server omits a parameter it has no value for, and returns each requested parameter
-once.**
+**The server omits a parameter it has no value for, and returns each requested parameter once.**
 
 > "-- The server MUST NOT return a value for that parameter, The server MUST supply as many
 > of the requested parameters as possible and MUST omit any parameters it cannot provide.
@@ -1555,8 +1397,7 @@ once.**
 > the DHCP Options and BOOTP Vendor Extensions document." — §4.3.1, `rfc2131.txt:1622-1635`
 
 - Strength: must not and must. Class: wire.
-- Check idea: a client that asks for an option the server has no value for gets a reply
-  without that option code, and no option code occurs twice in the reply.
+- Check idea: a client that asks for an option the server has no value for gets a reply without that option code, and no option code occurs twice in the reply.
 
 ## Other
 
@@ -1569,36 +1410,16 @@ once.**
 > interfaces." — §3.6, `rfc2131.txt:1198-1200`
 
 - Strength: must (lowercase). Class: wire.
-- Check idea: a client with two interfaces sends one DHCPDISCOVER on each one, with a
-  `chaddr` of that interface, and configures the two interfaces from two separate
-  exchanges.
+- Check idea: a client with two interfaces sends one DHCPDISCOVER on each one, with a `chaddr` of that interface, and configures the two interfaces from two separate exchanges.
 
 ## Out of scope in this catalog
 
-The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of
-RFC 2131 that states a behavior of a client or of a server, and every field value of
-tables 1, 3, 4 and 5. What is left out, and why:
+The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of RFC 2131 that states a behavior of a client or of a server, and every field value of tables 1, 3, 4 and 5. What is left out, and why:
 
-- **The design goals of §1.6**, `rfc2131.txt:322-389`. They use the word "must" about the
-  protocol as a whole ("DHCP must work across routers"), not about a message. Each one
-  becomes a real requirement further down the document, and the entry is there.
-- **The administrative statements**: a host should not act as a server unless configured
-  to, `rfc2131.txt:102-103`; a server need not answer every message, `rfc2131.txt:1389-1393`;
-  a server may refuse an address for administrative reasons, `rfc2131.txt:1490-1493`; the
-  vendor class rules of §4.2, `rfc2131.txt:1410-1437`. These say what an administrator may
-  configure, not what the protocol does. The permission half is recorded where it weakens
-  a statement above, for example in [RFC2131-OFF-1](#rfc2131-off-1).
-- **The non-requirements**: "the correct operation of DHCP does not depend on the
-  transmission of DHCPRELEASE messages", `rfc2131.txt:2284-2285`, and "Servers need not
-  reserve the offered network address", `rfc2131.txt:722-724`. A statement that nothing is
-  required cannot fail.
-- **The three allocation mechanisms of §1**, `rfc2131.txt:124-147`. They name a policy of
-  the administrator, and the protocol is the same for all three.
-- **Appendix A**, the list of host configuration parameters. It points into RFC 1122 and
-  RFC 2132 and defines nothing itself.
-- **The security considerations of §7**, `rfc2131.txt:2398-2427`. The section states that
-  DHCP is insecure; it demands nothing.
-- **Everything about a relay agent** beyond the two entries that record it,
-  [RFC2131-NAK-4](#rfc2131-nak-4) and [RFC2131-BCAST-2](#rfc2131-bcast-2). RFC 2131
-  delegates the relay agent to RFC 1542, which is out of the in-scope set; see
-  [`standards.md`](../../protocol/dhcp/standards.md#in-scope-set).
+- **The design goals of §1.6**, `rfc2131.txt:322-389`. They use the word "must" about the protocol as a whole ("DHCP must work across routers"), not about a message. Each one becomes a real requirement further down the document, and the entry is there.
+- **The administrative statements**: a host should not act as a server unless configured to, `rfc2131.txt:102-103`; a server need not answer every message, `rfc2131.txt:1389-1393`; a server may refuse an address for administrative reasons, `rfc2131.txt:1490-1493`; the vendor class rules of §4.2, `rfc2131.txt:1410-1437`. These say what an administrator may configure, not what the protocol does. The permission half is recorded where it weakens a statement above, for example in [RFC2131-OFF-1](#rfc2131-off-1).
+- **The non-requirements**: "the correct operation of DHCP does not depend on the transmission of DHCPRELEASE messages", `rfc2131.txt:2284-2285`, and "Servers need not reserve the offered network address", `rfc2131.txt:722-724`. A statement that nothing is required cannot fail.
+- **The three allocation mechanisms of §1**, `rfc2131.txt:124-147`. They name a policy of the administrator, and the protocol is the same for all three.
+- **Appendix A**, the list of host configuration parameters. It points into RFC 1122 and RFC 2132 and defines nothing itself.
+- **The security considerations of §7**, `rfc2131.txt:2398-2427`. The section states that DHCP is insecure; it demands nothing.
+- **Everything about a relay agent** beyond the two entries that record it, [RFC2131-NAK-4](#rfc2131-nak-4) and [RFC2131-BCAST-2](#rfc2131-bcast-2). RFC 2131 delegates the relay agent to RFC 1542, which is out of the in-scope set; see [`standards.md`](../../protocol/dhcp/standards.md#in-scope-set).

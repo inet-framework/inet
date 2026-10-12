@@ -2,20 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around Protocol Independent Multicast, records which document governs each contested clause,
-and pins the set that the next pass tests against. PIM has two independent base documents for
-its two modes: Sparse Mode and Dense Mode. They describe different protocols that share a
-message header and an address-encoding format, not the same protocol for two address families.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around Protocol Independent Multicast, records which document governs each contested clause, and pins the set that the next pass tests against. PIM has two independent base documents for its two modes: Sparse Mode and Dense Mode. They describe different protocols that share a message header and an address-encoding format, not the same protocol for two address families.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -24,12 +17,9 @@ claims of the model. It writes no catalog, no feature map and no test.
 | level 4, Dynamics | RFC 7761 §4.10 and §4.11; RFC 3973 §4.8 | the Sparse Mode and Dense Mode timers: Join/Prune, Hello, Assert, Register-Suppression, and their Dense Mode counterparts, Prune, Graft-Retry, Source-Active and State-Refresh |
 | level 5, Complete | RFC 5059 | the Bootstrap Router mechanism, one of the three dynamic alternatives to static RP configuration that RFC 7761 §4.7 lists and does not mandate |
 
-`RFC 7761` Appendix A already removed the `(*,*,RP)` state, the PIM Multicast Border Router
-feature, and IPsec-based authentication from the base document; none of the three is testable
-material for any level of this protocol, current or future.
+`RFC 7761` Appendix A already removed the `(*,*,RP)` state, the PIM Multicast Border Router feature, and IPsec-based authentication from the base document; none of the three is testable material for any level of this protocol, current or future.
 
-What a pass actually reached is not recorded here. It is in
-[`model/pim/coverage.md`](../../model/pim/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/pim/coverage.md`](../../model/pim/coverage.md#achieved-level).
 
 ## Document list
 
@@ -48,26 +38,14 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc7761.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc7761.txt) —
-  <https://www.rfc-editor.org/rfc/rfc7761.txt>, downloaded 2026-09-23.
-- `rfc3973.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3973.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3973.txt>, downloaded 2026-09-23.
-- `rfc3956.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3956.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3956.txt>, downloaded 2026-09-23.
-- `rfc4607.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4607.txt) —
-  <https://www.rfc-editor.org/rfc/rfc4607.txt>, downloaded 2026-09-23.
+- `rfc7761.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc7761.txt) — <https://www.rfc-editor.org/rfc/rfc7761.txt>, downloaded 2026-09-23.
+- `rfc3973.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3973.txt) — <https://www.rfc-editor.org/rfc/rfc3973.txt>, downloaded 2026-09-23.
+- `rfc3956.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3956.txt) — <https://www.rfc-editor.org/rfc/rfc3956.txt>, downloaded 2026-09-23.
+- `rfc4607.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc4607.txt) — <https://www.rfc-editor.org/rfc/rfc4607.txt>, downloaded 2026-09-23.
 
-All four downloaded documents use the keywords of RFC 2119. Counts of whole-word matches: RFC 7761
-has `MUST` on 51 lines and `SHOULD` on 43; RFC 3973 has `MUST` on 129 lines and `SHOULD` on 37;
-RFC 3956 has `MUST` on 14 lines and `SHOULD` on 4; RFC 4607 has `MUST` on 18 lines and
-`SHOULD` on 9.
+All four downloaded documents use the keywords of RFC 2119. Counts of whole-word matches: RFC 7761 has `MUST` on 51 lines and `SHOULD` on 43; RFC 3973 has `MUST` on 129 lines and `SHOULD` on 37; RFC 3956 has `MUST` on 14 lines and `SHOULD` on 4; RFC 4607 has `MUST` on 18 lines and `SHOULD` on 9.
 
-RFC 3973 §4.7, `rfc3973.txt:2099-2101`, states its own deference to the Sparse Mode document:
-"All PIM-DM packets use the same format as PIM-SM packets. In the event of a discrepancy,
-PIM-SM ... should be considered the definitive specification." Keep one catalog for each
-document even so, because the two modes are different protocols with different message sets:
-PIM-DM has no Register, Register-Stop, or Bootstrap message, and PIM-SM has no Graft or
-Graft-Ack message.
+RFC 3973 §4.7, `rfc3973.txt:2099-2101`, states its own deference to the Sparse Mode document: "All PIM-DM packets use the same format as PIM-SM packets. In the event of a discrepancy, PIM-SM ... should be considered the definitive specification." Keep one catalog for each document even so, because the two modes are different protocols with different message sets: PIM-DM has no Register, Register-Stop, or Bootstrap message, and PIM-SM has no Graft or Graft-Ack message.
 
 | Mechanism | RFC 7761 (PIM-SM) | RFC 3973 (PIM-DM) |
 | --- | --- | --- |

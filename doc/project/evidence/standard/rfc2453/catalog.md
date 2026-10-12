@@ -2,53 +2,29 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC2453-*` · **Stands on:** [standards.md](../../protocol/rip/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow for the IPv4 base
-document of the in-scope set: RFC 2453, RIP Version 2, of November 1998. The catalog comes
-from the RFC text only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow for the IPv4 base document of the in-scope set: RFC 2453, RIP Version 2, of November 1998. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc2453.txt`](../../../../../../standards/RFC/rfc2453.txt) —
-  RIP Version 2, November 1998. Downloaded 2026-09-23 from
-  <https://www.rfc-editor.org/rfc/rfc2453.txt>.
+- [`standards/RFC/rfc2453.txt`](../../../../../../standards/RFC/rfc2453.txt) — RIP Version 2, November 1998. Downloaded 2026-09-23 from <https://www.rfc-editor.org/rfc/rfc2453.txt>.
 
-The IPv6 twin of this document is RFC 2080, in [`rfc2080/catalog.md`](../rfc2080/catalog.md).
-The two documents state the same mechanisms in parallel sections; the table in
-[`standards.md`](../../protocol/rip/standards.md#document-list) maps the sections onto each
-other. The family of documents and the in-scope set are in
-[`standards.md`](../../protocol/rip/standards.md). The features these statements build are
-in [`features.md`](../../protocol/rip/features.md).
+The IPv6 twin of this document is RFC 2080, in [`rfc2080/catalog.md`](../rfc2080/catalog.md). The two documents state the same mechanisms in parallel sections; the table in [`standards.md`](../../protocol/rip/standards.md#document-list) maps the sections onto each other. The family of documents and the in-scope set are in [`standards.md`](../../protocol/rip/standards.md). The features these statements build are in [`features.md`](../../protocol/rip/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`rip/coverage.md`](../../model/rip/coverage.md). Keeping it out is deliberate: this catalog
-states what the standard says, so a new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`rip/coverage.md`](../../model/rip/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc2453.txt:1085-1087` points to lines of that
-file. Where a quote crosses a page break of the RFC, the reference names both line groups.
+Quotes are verbatim. A reference such as `rfc2453.txt:1085-1087` points to lines of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
 ## How to read an entry
 
 - **ID** — `RFC2453-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into the text.
-- **Strength** — the word the document uses. RFC 2453 does not use the keywords of RFC 2119:
-  its "must", "should" and "may" are all in lower case. The entry records the word as
-  written: `must`, `must not`, `should`, `should not`, `may`, or `description` for a
-  normative sentence with no keyword. Where the text says "required", "highly recommended"
-  or "strongly discouraged", the entry names the word.
-- **Class** — how a test can observe the statement: `wire` (fields of messages on a link),
-  `end-to-end` (what a router accepts and acts on, seen in what it sends or forwards
-  afterwards), `error-signal` (a report message), `internal` (state inside a router),
-  `encoding` (the exact bit layout).
+- **Strength** — the word the document uses. RFC 2453 does not use the keywords of RFC 2119: its "must", "should" and "may" are all in lower case. The entry records the word as written: `must`, `must not`, `should`, `should not`, `may`, or `description` for a normative sentence with no keyword. Where the text says "required", "highly recommended" or "strongly discouraged", the entry names the word.
+- **Class** — how a test can observe the statement: `wire` (fields of messages on a link), `end-to-end` (what a router accepts and acts on, seen in what it sends or forwards afterwards), `error-signal` (a report message), `internal` (state inside a router), `encoding` (the exact bit layout).
 - **Check idea** — one or two sentences, still without implementation names.
 
-Two sentences of §3.4 quote "the router requirements RFC [11]", RFC 1812. They are
-statements of RFC 2453 all the same: RFC 2453 repeats the rule in its own text, and the
-catalog records it where it stands.
+Two sentences of §3.4 quote "the router requirements RFC [11]", RFC 1812. They are statements of RFC 2453 all the same: RFC 2453 repeats the rule in its own text, and the catalog records it where it stands.
 
-Section 3.9 of this document refers to "section 3.7.1", "section 3.7.2" and "section 3.8.1"
-for material that stands in §3.9.1, §3.9.2 and §3.10.1. The references are errors of the
-text; the catalog cites the section where the material stands.
+Section 3.9 of this document refers to "section 3.7.1", "section 3.7.2" and "section 3.8.1" for material that stands in §3.9.1, §3.9.2 and §3.10.1. The references are errors of the text; the catalog cites the section where the material stands.
 
 ## Index
 
@@ -175,8 +151,7 @@ text; the catalog cites the section where the material stands.
 > both the source and destination port equal to the RIP port." — §3.6, `rfc2453.txt:1088-1090`
 
 - Strength: description. Class: wire.
-- Check idea: a periodic update and a triggered update carry source port 520 and
-  destination port 520.
+- Check idea: a periodic update and a triggered update carry source port 520 and destination port 520.
 
 ### RFC2453-MSG-4
 
@@ -187,8 +162,7 @@ text; the catalog cites the section where the material stands.
 > which the request came." — §3.6, `rfc2453.txt:1090-1092`
 
 - Strength: description. Class: wire.
-- Check idea: the response to a whole-table request that came from port 520 goes to port
-  520; the response to a request from another port goes to that port.
+- Check idea: the response to a whole-table request that came from port 520 goes to port 520; the response to a request from another port goes to that port.
 
 ### RFC2453-MSG-5
 
@@ -210,8 +184,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1101`, `rfc2453.txt:1104`
 
 - Strength: description. Class: encoding.
-- Check idea: the octets of a message: one octet of command, one of version, two zero
-  octets, then entries of 20 octets each.
+- Check idea: the octets of a message: one octet of command, one of version, two zero octets, then entries of 20 octets each.
 
 ### RFC2453-MSG-7
 
@@ -220,8 +193,7 @@ text; the catalog cites the section where the material stands.
 > "There may be between 1 and 25 (inclusive) RIP entries." — §3.6, `rfc2453.txt:1127`
 
 - Strength: description. Class: wire.
-- Check idea: a router whose table has more than 25 routes sends its update in more than
-  one message, and no message holds more than 25 entries.
+- Check idea: a router whose table has more than 25 routes sends its update in more than one message, and no message holds more than 25 entries.
 
 ### RFC2453-MSG-8
 
@@ -265,8 +237,7 @@ text; the catalog cites the section where the material stands.
 > "Subnet Mask (4)", "Next Hop (4)" and "Metric (4)" — §4, `rfc2453.txt:1697-1709`
 
 - Strength: description. Class: encoding.
-- Check idea: the octets of a version 2 entry: two of address family, two of route tag, then
-  four each of address, subnet mask, next hop and metric.
+- Check idea: the octets of a version 2 entry: two of address family, two of route tag, then four each of address, subnet mask, next hop and metric.
 
 ### RFC2453-MSG-12
 
@@ -289,8 +260,7 @@ text; the catalog cites the section where the material stands.
 > and 15, inclusive." — §3.5, `rfc2453.txt:980-981`
 
 - Strength: description. Class: wire.
-- Check idea: the metric that a router advertises for a network it reaches is between 1
-  and 15.
+- Check idea: the metric that a router advertises for a network it reaches is between 1 and 15.
 
 ### RFC2453-MET-2
 
@@ -300,8 +270,7 @@ text; the catalog cites the section where the material stands.
 > administrator to set the metric of each network." — §3.5, `rfc2453.txt:983-984`
 
 - Strength: should. Class: wire.
-- Check idea: a network with a configured cost of 3 is advertised with metric 3 by the
-  router that is directly connected to it.
+- Check idea: a network with a configured cost of 3 is advertised with metric 3 by the router that is directly connected to it.
 
 ### RFC2453-MET-3
 
@@ -311,8 +280,7 @@ text; the catalog cites the section where the material stands.
 > cost of that network." — §3.5, `rfc2453.txt:1048-1049`
 
 - Strength: description. Class: wire.
-- Check idea: a router advertises each network it is attached to with the cost of that
-  network, 1 when no cost is configured.
+- Check idea: a router advertises each network it is attached to with the cost of that network, 1 when no cost is configured.
 
 ### RFC2453-MET-4
 
@@ -335,9 +303,7 @@ text; the catalog cites the section where the material stands.
 > greater than infinity, use infinity." — §3.9.2, `rfc2453.txt:1477-1479`
 
 - Strength: description. Class: wire.
-- Check idea: in a chain of routers, each router advertises a remote network with a metric
-  one higher than the router before it; a route that arrives with metric 15 over a network
-  of cost 1 or more is not advertised with a finite metric.
+- Check idea: in a chain of routers, each router advertises a remote network with a metric one higher than the router before it; a route that arrives with metric 15 over a network of cost 1 or more is not advertised with a finite metric.
 
 ## Routing table
 
@@ -350,9 +316,7 @@ text; the catalog cites the section where the material stands.
 > at `rfc2453.txt:1029-1044`
 
 - Strength: description. Class: internal.
-- Check idea: none of its own. Each item shows in the messages that other entries cover:
-  the metric in the updates, the next hop in the forwarding, the flag and the timers in the
-  triggered updates and the deletions.
+- Check idea: none of its own. Each item shows in the messages that other entries cover: the metric in the updates, the next hop in the forwarding, the flag and the timers in the triggered updates and the deletions.
 
 ### RFC2453-TABLE-2
 
@@ -362,8 +326,7 @@ text; the catalog cites the section where the material stands.
 > additionally contain a subnet mask." — §3.5, `rfc2453.txt:1055-1056`
 
 - Strength: must. Class: wire.
-- Check idea: two routes with the same network number and different mask lengths are
-  advertised as two entries with their two masks.
+- Check idea: two routes with the same network number and different mask lengths are advertised as two entries with their two masks.
 
 ### RFC2453-TABLE-3
 
@@ -373,8 +336,7 @@ text; the catalog cites the section where the material stands.
 > the datagram came" — §3.9.2, `rfc2453.txt:1495-1496`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a host behind a router reaches a network two routers away, which is possible
-  only when each router forwards to the router it learned the route from.
+- Check idea: a host behind a router reaches a network two routers away, which is possible only when each router forwards to the router it learned the route from.
 
 ## Addressing
 
@@ -387,8 +349,7 @@ text; the catalog cites the section where the material stands.
 > received in response messages" — §3.7, `rfc2453.txt:1198-1200`
 
 - Strength: may. Class: end-to-end.
-- Check idea: a response with a host route; the receiver either advertises it on or drops it,
-  and in neither case forwards to it through a wrong route.
+- Check idea: a response with a host route; the receiver either advertises it on or drops it, and in neither case forwards to it through a wrong route.
 
 ### RFC2453-ADDR-2
 
@@ -402,8 +363,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1230`, `rfc2453.txt:1239-1240`
 
 - Strength: must not. Class: wire.
-- Check idea: a router that sends version 1 on a link to another network advertises the
-  whole network, not its subnets. The statement holds for version 1 only.
+- Check idea: a router that sends version 1 on a link to another network advertises the whole network, not its subnets. The statement holds for version 1 only.
 
 ### RFC2453-ADDR-3
 
@@ -414,8 +374,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1247-1248`
 
 - Strength: description. Class: wire.
-- Check idea: the version 1 counterpart of RFC2453-ADDR-2: the update on a link to another
-  network holds one entry for the subnetted network.
+- Check idea: the version 1 counterpart of RFC2453-ADDR-2: the update on a link to another network holds one entry for the subnetted network.
 
 ### RFC2453-ADDR-4
 
@@ -426,9 +385,7 @@ text; the catalog cites the section where the material stands.
 > networks." — §3.7, `rfc2453.txt:1258-1260`
 
 - Strength: must not. Class: wire.
-- Check idea: a host route inside network N is absent from the updates that the border
-  router of N sends into another network. The sentence continues the subnet filtering of
-  version 1.
+- Check idea: a host route inside network N is absent from the updates that the border router of N sends into another network. The sentence continues the subnet filtering of version 1.
 
 ### RFC2453-ADDR-5
 
@@ -439,8 +396,7 @@ text; the catalog cites the section where the material stands.
 > ignore any received host routes." — §3.7, `rfc2453.txt:1263-1265`
 
 - Strength: should (support), must (ignore when not supported). Class: end-to-end.
-- Check idea: a host route arrives in a response; the receiver advertises it on, or leaves
-  it out of every later update and out of its forwarding.
+- Check idea: a host route arrives in a response; the receiver advertises it on, or leaves it out of every later update and out of its forwarding.
 
 ### RFC2453-ADDR-6
 
@@ -452,8 +408,7 @@ text; the catalog cites the section where the material stands.
 > this address." — `rfc2453.txt:1282-1284`
 
 - Strength: description. Class: wire.
-- Check idea: a default route that one router originates reaches the next router and is
-  advertised on with the metric increased, like any other route.
+- Check idea: a default route that one router originates reaches the next router and is advertised on with the metric increased, like any other route.
 
 ### RFC2453-ADDR-7
 
@@ -464,8 +419,7 @@ text; the catalog cites the section where the material stands.
 > which they are connected." — §3.7, `rfc2453.txt:1271-1273`
 
 - Strength: should. Class: wire.
-- Check idea: a router with a default route in its configuration advertises an entry for
-  0.0.0.0.
+- Check idea: a router with a default route in its configuration advertises an entry for 0.0.0.0.
 
 ### RFC2453-ADDR-8
 
@@ -478,8 +432,7 @@ text; the catalog cites the section where the material stands.
 > these match, the default route is used." — §3.7, `rfc2453.txt:1209-1213`
 
 - Strength: must. Class: end-to-end.
-- Check idea: the rule is the forwarding rule of IPv4; a check of it belongs to the
-  forwarding of IPv4 and not to the exchange of routes.
+- Check idea: the rule is the forwarding rule of IPv4; a check of it belongs to the forwarding of IPv4 and not to the exchange of routes.
 
 ## Split horizon
 
@@ -493,8 +446,7 @@ text; the catalog cites the section where the material stands.
 > reverse." — §3.4.3, `rfc2453.txt:886-889`
 
 - Strength: must (split horizon), should (poisoned reverse), may (the knob). Class: wire.
-- Check idea: a route learned from a neighbor is either absent from the updates to that
-  neighbor or present with metric 16; it never appears there with a finite metric.
+- Check idea: a route learned from a neighbor is either absent from the updates to that neighbor or present with metric 16; it never appears there with a finite metric.
 
 ### RFC2453-SH-2
 
@@ -507,8 +459,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:819-822`
 
 - Strength: description. Class: wire.
-- Check idea: with poisoned reverse, the update to the neighbor holds the route with metric
-  16; with simple split horizon, it does not hold the route.
+- Check idea: with poisoned reverse, the update to the neighbor holds the route with metric 16; with simple split horizon, it does not hold the route.
 
 ### RFC2453-SH-3
 
@@ -533,8 +484,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:833-835`
 
 - Strength: should. Class: wire.
-- Check idea: three routers on one LAN; a route that A learned from C is absent or has
-  metric 16 in the update that A multicasts on the LAN, which every router of the LAN hears.
+- Check idea: three routers on one LAN; a route that A learned from C is absent or has metric 16 in the update that A multicasts on the LAN, which every router of the LAN hears.
 
 ## Timers
 
@@ -547,8 +497,7 @@ text; the catalog cites the section where the material stands.
 > 3.9 on Split Horizon) to every neighboring router." — §3.8, `rfc2453.txt:1303-1305`
 
 - Strength: description. Class: wire.
-- Check idea: the unsolicited responses of a router on a link come about 30 seconds apart,
-  and each one holds every route of its table that split horizon lets through.
+- Check idea: the unsolicited responses of a router on a link come about 30 seconds apart, and each one holds every route of its table that split horizon lets through.
 
 ### RFC2453-TIMER-2
 
@@ -561,8 +510,7 @@ text; the catalog cites the section where the material stands.
 > seconds) each time it is set." — `rfc2453.txt:1318-1319`
 
 - Strength: must ("required"). Class: wire.
-- Check idea: the intervals between the periodic updates of a router stay between 25 and 35
-  seconds. Whether the offset is random is a distribution.
+- Check idea: the intervals between the periodic updates of a router stay between 25 and 35 seconds. Whether the offset is random is a distribution.
 
 ### RFC2453-TIMER-3
 
@@ -575,8 +523,7 @@ text; the catalog cites the section where the material stands.
 > route is finally removed from the routing table." — §3.8, `rfc2453.txt:1323-1327`
 
 - Strength: description. Class: wire.
-- Check idea: after its neighbor goes silent, a route first appears with metric 16 in the
-  updates and later disappears from them.
+- Check idea: after its neighbor goes silent, a route first appears with metric 16 in the updates and later disappears from them.
 
 ### RFC2453-TIMER-4
 
@@ -589,8 +536,7 @@ text; the catalog cites the section where the material stands.
 > begins for that route." — §3.8, `rfc2453.txt:1329-1333`
 
 - Strength: description. Class: wire.
-- Check idea: a neighbor stops without notice; 180 seconds after its last update, the route
-  through it is withdrawn with metric 16, and not earlier.
+- Check idea: a neighbor stops without notice; 180 seconds after its last update, the route through it is withdrawn with metric 16, and not earlier.
 
 ### RFC2453-TIMER-5
 
@@ -606,8 +552,7 @@ text; the catalog cites the section where the material stands.
 > response." — `rfc2453.txt:1359`
 
 - Strength: description. Class: wire.
-- Check idea: when a route is deleted, the router sends an update with the route at metric
-  16 soon after, without waiting for the next periodic update.
+- Check idea: when a route is deleted, the router sends an update with the route at metric 16 soon after, without waiting for the next periodic update.
 
 ### RFC2453-TIMER-6
 
@@ -618,8 +563,7 @@ text; the catalog cites the section where the material stands.
 > expires, the route is deleted from the routing table." — §3.8, `rfc2453.txt:1361-1363`
 
 - Strength: description. Class: wire.
-- Check idea: after a deletion, every periodic update for 120 seconds holds the route at
-  metric 16, and the updates after that do not hold it.
+- Check idea: after a deletion, every periodic update for 120 seconds holds the route at metric 16, and the updates after that do not hold it.
 
 ### RFC2453-TIMER-7
 
@@ -631,9 +575,7 @@ text; the catalog cites the section where the material stands.
 > must be cleared." — §3.8, `rfc2453.txt:1365-1368`
 
 - Strength: must. Class: wire.
-- Check idea: a route is deleted and comes back before 120 seconds pass; the router still
-  advertises it with a finite metric after the instant when the old garbage collection
-  would have expired.
+- Check idea: a route is deleted and comes back before 120 seconds pass; the router still advertises it with a finite metric after the instant when the old garbage collection would have expired.
 
 ## Request messages
 
@@ -647,8 +589,7 @@ text; the catalog cites the section where the material stands.
 > possible." — §3.9.1, `rfc2453.txt:1384-1387`
 
 - Strength: description. Class: wire.
-- Check idea: a router that starts sends a request from port 520 to the RIP multicast
-  address.
+- Check idea: a router that starts sends a request from port 520 to the RIP multicast address.
 
 ### RFC2453-REQ-2
 
@@ -660,8 +601,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1388-1391`
 
 - Strength: should (the requester), description (the answer). Class: wire.
-- Check idea: a request from port 5000 of a host; the answer goes to that host and port
-  5000.
+- Check idea: a request from port 5000 of a host; the answer goes to that host and port 5000.
 
 ### RFC2453-REQ-3
 
@@ -685,8 +625,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1394-1398`, `rfc2453.txt:1407`
 
 - Strength: description. Class: wire.
-- Check idea: the request of a router that starts has this form, and its neighbor answers
-  with its table, sent to the address and port of the requester.
+- Check idea: the request of a router that starts has this form, and its neighbor answers with its table, sent to the address and port of the requester.
 
 ### RFC2453-REQ-5
 
@@ -701,8 +640,7 @@ text; the catalog cites the section where the material stands.
 > send the datagram back to the requestor." — §3.9.1, `rfc2453.txt:1408-1414`
 
 - Strength: description. Class: wire.
-- Check idea: a request for two destinations, one known and one unknown; the response holds
-  the known metric and 16, in the same order.
+- Check idea: a request for two destinations, one known and one unknown; the response holds the known metric and 16, in the same order.
 
 ### RFC2453-REQ-6
 
@@ -714,8 +652,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1426-1427`
 
 - Strength: must. Class: wire.
-- Check idea: the answer to the request of a router that starts does not advertise, with a
-  finite metric, a route learned from that router.
+- Check idea: the answer to the request of a router that starts does not advertise, with a finite metric, a route learned from that router.
 
 ### RFC2453-REQ-7
 
@@ -727,8 +664,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1419-1421`
 
 - Strength: description. Class: wire.
-- Check idea: a specific request from a neighbor for a route that the answering router
-  learned from that neighbor; the answer holds the finite metric.
+- Check idea: a specific request from a neighbor for a route that the answering router learned from that neighbor; the answer holds the finite metric.
 
 ### RFC2453-REQ-8
 
@@ -739,8 +675,7 @@ text; the catalog cites the section where the material stands.
 > complete routing table." — §3.9.1, `rfc2453.txt:1423-1425`
 
 - Strength: description. Class: wire.
-- Check idea: a router with two networks sends a whole-table request on each of them when
-  it starts.
+- Check idea: a router with two networks sends a whole-table request on each of them when it starts.
 
 ## Response messages
 
@@ -752,8 +687,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1441`
 
 - Strength: description. Class: end-to-end.
-- Check idea: none of its own; the checks of periodic, triggered and requested responses
-  each show one cause.
+- Check idea: none of its own; the checks of periodic, triggered and requested responses each show one cause.
 
 ### RFC2453-RESP-2
 
@@ -763,8 +697,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1444-1445`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a response from port 5000 that offers a new route; the receiver does not
-  advertise the route.
+- Check idea: a response from port 5000 that offers a new route; the receiver does not advertise the route.
 
 ### RFC2453-RESP-3
 
@@ -776,8 +709,7 @@ text; the catalog cites the section where the material stands.
 > on a directly-connected network." — §3.9.2, `rfc2453.txt:1445-1448`
 
 - Strength: should (check), must (the condition). Class: end-to-end.
-- Check idea: a response whose source address is on no network of the receiver; the
-  receiver does not take its routes.
+- Check idea: a response whose source address is on no network of the receiver; the receiver does not take its routes.
 
 ### RFC2453-RESP-4
 
@@ -788,8 +720,7 @@ text; the catalog cites the section where the material stands.
 > ignored." — §3.9.2, `rfc2453.txt:1451-1453`
 
 - Strength: must. Class: end-to-end.
-- Check idea: a response with the source address of the receiver and a changed metric;
-  the receiver does not act on it.
+- Check idea: a response with the source address of the receiver and a changed metric; the receiver does not act on it.
 
 ### RFC2453-RESP-5
 
@@ -802,8 +733,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1471-1474`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a response with three entries: a multicast destination, a metric of 17, and a
-  valid route; only the valid route is learned.
+- Check idea: a response with three entries: a multicast destination, a metric of 17, and a valid route; only the valid route is learned.
 
 ### RFC2453-RESP-6
 
@@ -815,8 +745,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1486-1504`
 
 - Strength: description. Class: wire.
-- Check idea: a router learns a new network from a neighbor and advertises it on its other
-  links with the metric increased by the cost.
+- Check idea: a router learns a new network from a neighbor and advertises it on its other links with the metric increased by the cost.
 
 ### RFC2453-RESP-7
 
@@ -827,8 +756,7 @@ text; the catalog cites the section where the material stands.
 > in adding a route which is unusable)." — §3.9.2, `rfc2453.txt:1484-1486`
 
 - Strength: description. Class: wire.
-- Check idea: a network offered only with metric 16 never appears in the updates of the
-  receiver.
+- Check idea: a network offered only with metric 16 never appears in the updates of the receiver.
 
 ### RFC2453-RESP-8
 
@@ -853,8 +781,7 @@ text; the catalog cites the section where the material stands.
 > and start the deletion at infinity or restart the timeout — `rfc2453.txt:1522-1529`
 
 - Strength: description. Class: wire.
-- Check idea: a route gets worse at its next hop, and the receiver takes the worse metric;
-  a better path appears through another neighbor, and the receiver takes it.
+- Check idea: a route gets worse at its next hop, and the receiver takes the worse metric; a better path appears through another neighbor, and the receiver takes it.
 
 ### RFC2453-RESP-10
 
@@ -866,8 +793,7 @@ text; the catalog cites the section where the material stands.
 > process is not started." — §3.9.2, `rfc2453.txt:1532-1535`
 
 - Strength: description. Class: wire.
-- Check idea: a withdrawn route that keeps arriving with metric 16 still leaves the updates
-  120 seconds after the first withdrawal.
+- Check idea: a withdrawn route that keeps arriving with metric 16 still leaves the updates 120 seconds after the first withdrawal.
 
 ### RFC2453-RESP-11
 
@@ -879,8 +805,7 @@ text; the catalog cites the section where the material stands.
 > heuristic is optional, but highly recommended." — §3.9.2, `rfc2453.txt:1546-1549`
 
 - Strength: should ("optional, but highly recommended"). Class: wire.
-- Check idea: two equal paths; the current next hop goes silent; the router switches to the
-  other path before the timeout expires.
+- Check idea: two equal paths; the current next hop goes silent; the router switches to the other path before the timeout expires.
 
 ### RFC2453-RESP-12
 
@@ -890,8 +815,7 @@ text; the catalog cites the section where the material stands.
 > the current route." — §3.9.2, `rfc2453.txt:1551-1552`
 
 - Strength: description. Class: wire.
-- Check idea: a router with two paths of different length keeps the shorter one when the
-  longer one is advertised.
+- Check idea: a router with two paths of different length keeps the shorter one when the longer one is advertised.
 
 ## Output processing
 
@@ -903,8 +827,7 @@ text; the catalog cites the section where the material stands.
 > unicast to the requestor; see section 3.7.1)" — §3.10, `rfc2453.txt:1560-1561`
 
 - Strength: description. Class: wire.
-- Check idea: the answer to the request of a router that starts goes to the unicast address
-  of that router.
+- Check idea: the answer to the request of a router that starts goes to the unicast address of that router.
 
 ### RFC2453-OUT-2
 
@@ -919,8 +842,7 @@ text; the catalog cites the section where the material stands.
 > broadcast/multicast)." — §3.10, `rfc2453.txt:1575-1581`
 
 - Strength: description. Class: wire.
-- Check idea: a router with two networks sends each periodic update on both of them, to the
-  multicast address.
+- Check idea: a router with two networks sends each periodic update on both of them, to the multicast address.
 
 ## Triggered updates
 
@@ -934,8 +856,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:966-968`
 
 - Strength: must (deleted routes), may (new and changed routes). Class: wire.
-- Check idea: a network behind a router goes away; the router sends the route with metric
-  16 within a few seconds, well before the next periodic update.
+- Check idea: a network behind a router goes away; the router sends the route with metric 16 within a few seconds, well before the next periodic update.
 
 ### RFC2453-TRIG-2
 
@@ -948,8 +869,7 @@ text; the catalog cites the section where the material stands.
 > to limit the frequency of triggered updates." — §3.10.1, `rfc2453.txt:1595-1596`
 
 - Strength: must. Class: wire.
-- Check idea: many route changes in a short time give fewer triggered updates than changes,
-  and two triggered updates on one network are at least one second apart.
+- Check idea: many route changes in a short time give fewer triggered updates than changes, and two triggered updates on one network are at least one second apart.
 
 ### RFC2453-TRIG-3
 
@@ -963,8 +883,7 @@ text; the catalog cites the section where the material stands.
 > and 5 seconds." — §3.10.1, `rfc2453.txt:1596-1601`
 
 - Strength: should. Class: wire.
-- Check idea: the intervals between consecutive triggered updates lie between 1 and 5
-  seconds. That the value is random is a distribution.
+- Check idea: the intervals between consecutive triggered updates lie between 1 and 5 seconds. That the value is random is a distribution.
 
 ### RFC2453-TRIG-4
 
@@ -987,10 +906,8 @@ text; the catalog cites the section where the material stands.
 > discretion of the implementor; however, sending complete routing
 > updates is strongly discouraged." — §3.10.1, `rfc2453.txt:1606-1610`
 
-- Strength: must (the changed routes), may (more), "strongly discouraged" (the whole table).
-  Class: wire.
-- Check idea: when one route changes in a table of several, the triggered update holds that
-  route and not the whole table.
+- Strength: must (the changed routes), may (more), "strongly discouraged" (the whole table). Class: wire.
+- Check idea: when one route changes in a table of several, the triggered update holds that route and not the whole table.
 
 ### RFC2453-TRIG-6
 
@@ -1002,8 +919,7 @@ text; the catalog cites the section where the material stands.
 > updates as well as normal updates" — §3.10.1, `rfc2453.txt:1610-1613`
 
 - Strength: should (every network), description (split horizon). Class: wire.
-- Check idea: a deleted route appears in triggered updates on each network of the router,
-  subject to split horizon.
+- Check idea: a deleted route appears in triggered updates on each network of the router, subject to split horizon.
 
 ### RFC2453-TRIG-7
 
@@ -1027,8 +943,7 @@ text; the catalog cites the section where the material stands.
 > cleared." — §3.10.1, `rfc2453.txt:1617-1619`
 
 - Strength: should. Class: wire.
-- Check idea: two changes some seconds apart; the second triggered update does not repeat
-  the route of the first one.
+- Check idea: two changes some seconds apart; the second triggered update does not repeat the route of the first one.
 
 ### RFC2453-TRIG-9
 
@@ -1040,8 +955,7 @@ text; the catalog cites the section where the material stands.
 > applied to all updates." — §3.10.1, `rfc2453.txt:1636-1639`
 
 - Strength: must. Class: wire.
-- Check idea: a triggered update has the same header, ports, address and entry rules as a
-  periodic one.
+- Check idea: a triggered update has the same header, ports, address and entry rules as a periodic one.
 
 ## Generating a response
 
@@ -1077,8 +991,7 @@ text; the catalog cites the section where the material stands.
 > number of datagrams which make up a Response." — §3.10.2, `rfc2453.txt:1650-1653`
 
 - Strength: description. Class: wire.
-- Check idea: a router with 30 routes sends its periodic update as two messages, and neither
-  holds more than 25 entries; together they hold all 30.
+- Check idea: a router with 30 routes sends its periodic update as two messages, and neither holds more than 25 entries; together they hold all 30.
 
 ### RFC2453-GEN-4
 
@@ -1102,8 +1015,7 @@ text; the catalog cites the section where the material stands.
 > are infinite." — §3.10.2, `rfc2453.txt:1660-1661`
 
 - Strength: must. Class: wire.
-- Check idea: a deleted route, and a route that poisoned reverse sets to 16, both appear in
-  the updates with metric 16.
+- Check idea: a deleted route, and a route that poisoned reverse sets to 16, both appear in the updates with metric 16.
 
 ## Route tag
 
@@ -1115,8 +1027,7 @@ text; the catalog cites the section where the material stands.
 > must be preserved and readvertised with a route." — §4.2, `rfc2453.txt:1760-1761`
 
 - Strength: must. Class: wire.
-- Check idea: a response offers a route with tag 7; the receiver advertises the route on
-  with tag 7.
+- Check idea: a response offers a route with tag 7; the receiver advertises the route on with tag 7.
 
 ### RFC2453-TAG-2
 
@@ -1141,8 +1052,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1781-1783`
 
 - Strength: description. Class: wire.
-- Check idea: each entry of a version 2 update carries the mask of its network, for example
-  255.255.255.0 for a /24.
+- Check idea: each entry of a version 2 update carries the mask of its network, for example 255.255.255.0 for a /24.
 
 ### RFC2453-MASK-2
 
@@ -1157,8 +1067,7 @@ text; the catalog cites the section where the material stands.
 > not be advertised where they could be misinterpreted by RIP-1 routers".
 
 - Strength: must not, may not. Class: wire.
-- Check idea: a link with a version 1 router; the updates on it hold no subnet and no
-  supernet route. The statement needs a version 1 router in the network.
+- Check idea: a link with a version 1 router; the updates on it hold no subnet and no supernet route. The statement needs a version 1 router in the network.
 
 ## Next hop
 
@@ -1171,8 +1080,7 @@ text; the catalog cites the section where the material stands.
 > the originator of the RIP advertisement." — §4.4, `rfc2453.txt:1809-1811`
 
 - Strength: description. Class: end-to-end.
-- Check idea: an update with next hop 0.0.0.0; the receiver forwards to the sender of the
-  update.
+- Check idea: an update with next hop 0.0.0.0; the receiver forwards to the sender of the update.
 
 ### RFC2453-NH-2
 
@@ -1183,8 +1091,7 @@ text; the catalog cites the section where the material stands.
 > over which the advertisement is made." — §4.4, `rfc2453.txt:1811-1813`
 
 - Strength: must. Class: wire.
-- Check idea: every entry of an update carries next hop 0.0.0.0 or an address on the subnet
-  of the link that carries the update.
+- Check idea: every entry of an update carries next hop 0.0.0.0 or an address on the subnet of the link that carries the update.
 
 ### RFC2453-NH-3
 
@@ -1196,8 +1103,7 @@ text; the catalog cites the section where the material stands.
 > `rfc2453.txt:1818-1821`
 
 - Strength: description. Class: end-to-end.
-- Check idea: a permission; it lets a receiver forward through the sender of an update even
-  when the entry names another next hop.
+- Check idea: a permission; it lets a receiver forward through the sender of an update even when the entry names another next hop.
 
 ### RFC2453-NH-4
 
@@ -1207,8 +1113,7 @@ text; the catalog cites the section where the material stands.
 > as 0.0.0.0." — §4.4, `rfc2453.txt:1820-1822`
 
 - Strength: should. Class: end-to-end.
-- Check idea: a response names a next hop on a foreign subnet; the receiver forwards to the
-  sender of the response.
+- Check idea: a response names a next hop on a foreign subnet; the receiver forwards to the sender of the response.
 
 ## Multicast
 
@@ -1233,8 +1138,7 @@ text; the catalog cites the section where the material stands.
 > are not forwarded." — §4.5, `rfc2453.txt:1828-1830`
 
 - Strength: description. Class: wire.
-- Check idea: an update that one router multicasts on one network is not forwarded onto any
-  other network.
+- Check idea: an update that one router multicasts on one network is not forwarded onto any other network.
 
 ### RFC2453-MCAST-3
 
@@ -1245,8 +1149,7 @@ text; the catalog cites the section where the material stands.
 > should be accepted." — §4.5, `rfc2453.txt:1832-1834`
 
 - Strength: may (unicast), should (accept). Class: end-to-end.
-- Check idea: none at this level; a network without broadcast is outside the mockups of
-  this pass.
+- Check idea: none at this level; a network without broadcast is outside the mockups of this pass.
 
 ### RFC2453-MCAST-4
 
@@ -1271,30 +1174,14 @@ text; the catalog cites the section where the material stands.
 > messages, it should not respond to a RIP-1 Request." — §4.6, `rfc2453.txt:1843-1845`
 
 - Strength: should, should not. Class: wire.
-- Check idea: a version 1 request reaches a router; the answer is a version 1 response, or
-  no answer when the router sends version 2 only.
+- Check idea: a version 1 request reaches a router; the answer is a version 1 response, or no answer when the router sends version 2 only.
 
 ## Out of scope in this catalog
 
-The entries above hold every "must", "should" and "may" of §3 and of §4.2 to §4.6 that states
-a behavior of a router, and every field of the message. What is left out, and why:
+The entries above hold every "must", "should" and "may" of §3 and of §4.2 to §4.6 that states a behavior of a router, and every field of the message. What is left out, and why:
 
-- **The design discussion of §3.1 to §3.4.2**, `rfc2453.txt:158-808`. It explains the
-  distance vector algorithm and counting to infinity. The rules it motivates are stated
-  again in §3.5 to §3.10, and the entries are there. Two sentences of §3.4.3 and §3.4.4 that
-  state a rule of their own, the split horizon and triggered-update rules of RFC 1812, have
-  entries: [RFC2453-SH-1](#rfc2453-sh-1), [RFC2453-TRIG-1](#rfc2453-trig-1) and
-  [RFC2453-TRIG-2](#rfc2453-trig-2).
-- **The limits of §3.2**, `rfc2453.txt:236-269`: a diameter of 15, counting to infinity,
-  fixed metrics. They say what the protocol cannot do, and they demand nothing.
-- **The administrative statements**: every router of an AS must take part, and a router must
-  leak routes between IGPs, `rfc2453.txt:1078-1081`; routes to 0.0.0.0 should not leave the
-  AS, `rfc2453.txt:1284-1296`; a list of neighbors for networks without broadcast is left to
-  the implementor, `rfc2453.txt:1582-1588`; the uses of the route tag, `rfc2453.txt:1774-1777`.
-  They say how a network is set up, not what a message holds.
-- **The interlocking of input and output**, `rfc2453.txt:1631-1634`. It is a condition on
-  concurrent input and output processing inside one router, and no message exchange can
-  observe it.
-- **Authentication, §4.1**, `rfc2453.txt:1716-1756`, and **the compatibility of §5**,
-  `rfc2453.txt:1855-1961`: out of the in-scope set; see
-  [`standards.md`](../../protocol/rip/standards.md#in-scope-set).
+- **The design discussion of §3.1 to §3.4.2**, `rfc2453.txt:158-808`. It explains the distance vector algorithm and counting to infinity. The rules it motivates are stated again in §3.5 to §3.10, and the entries are there. Two sentences of §3.4.3 and §3.4.4 that state a rule of their own, the split horizon and triggered-update rules of RFC 1812, have entries: [RFC2453-SH-1](#rfc2453-sh-1), [RFC2453-TRIG-1](#rfc2453-trig-1) and [RFC2453-TRIG-2](#rfc2453-trig-2).
+- **The limits of §3.2**, `rfc2453.txt:236-269`: a diameter of 15, counting to infinity, fixed metrics. They say what the protocol cannot do, and they demand nothing.
+- **The administrative statements**: every router of an AS must take part, and a router must leak routes between IGPs, `rfc2453.txt:1078-1081`; routes to 0.0.0.0 should not leave the AS, `rfc2453.txt:1284-1296`; a list of neighbors for networks without broadcast is left to the implementor, `rfc2453.txt:1582-1588`; the uses of the route tag, `rfc2453.txt:1774-1777`. They say how a network is set up, not what a message holds.
+- **The interlocking of input and output**, `rfc2453.txt:1631-1634`. It is a condition on concurrent input and output processing inside one router, and no message exchange can observe it.
+- **Authentication, §4.1**, `rfc2453.txt:1716-1756`, and **the compatibility of §5**, `rfc2453.txt:1855-1961`: out of the in-scope set; see [`standards.md`](../../protocol/rip/standards.md#in-scope-set).

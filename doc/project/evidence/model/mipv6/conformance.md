@@ -2,9 +2,7 @@
 
 > **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/mipv6/standards.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the
-model intends: which standards it claims to implement, mapped onto the standards map. Part 2,
-the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
+Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the model intends: which standards it claims to implement, mapped onto the standards map. Part 2, the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
 
 Read record — no build, no run:
 
@@ -14,10 +12,7 @@ Read record — no build, no run:
 
 ## Part 1 — the claims
 
-Every place in the model that names a document of the Mobile IPv6 family (RFC 6275, RFC 3775,
-RFC 4877, RFC 5095, RFC 4283). `src/inet/networklayer/xmipv6/` no longer exists: its last commit,
-`8ca5680904`, renamed the module `xMIPv6` to `Mipv6` and flattened the `xMIPv6Support` wrapper
-into `Ipv6NetworkLayer`; the live code is entirely under `src/inet/networklayer/mipv6/`.
+Every place in the model that names a document of the Mobile IPv6 family (RFC 6275, RFC 3775, RFC 4877, RFC 5095, RFC 4283). `src/inet/networklayer/xmipv6/` no longer exists: its last commit, `8ca5680904`, renamed the module `xMIPv6` to `Mipv6` and flattened the `xMIPv6Support` wrapper into `Ipv6NetworkLayer`; the live code is entirely under `src/inet/networklayer/mipv6/`.
 
 | Claim | Where | What it says |
 | --- | --- | --- |
@@ -35,19 +30,9 @@ into `Ipv6NetworkLayer`; the live code is entirely under `src/inet/networklayer/
 | RFC 6275 | [`MobilityHeader.msg:40,104,142,148,149,156,162,163`](../../../../../src/inet/networklayer/mipv6/MobilityHeader.msg) | Field comments on the lifetime and cookie/token fields: "serialized in RFC 6275 units of 4 seconds", "8 octets on the wire (RFC 6275)". |
 | RFC 4283 | [`MobilityHeader.msg:60`](../../../../../src/inet/networklayer/mipv6/MobilityHeader.msg) | The `mobileNodeIdentifier` field: "Mobile Node Identifier option (NAI), RFC 4283". This field is shared with Proxy Mobile IPv6; see [`model/pmipv6/conformance.md`](../pmipv6/conformance.md) for the RFC 5213 fields of the same message classes. |
 
-`MobilityHeader.msg` and `MobilityHeaderSerializer.*` also carry the Proxy Mobile IPv6 option
-fields (`proxyRegistrationFlag`, `homeNetworkPrefix`, and the rest), cited to RFC 5213 throughout
-— RFC 5213 is not of the Mobile IPv6 family, so those citations are not rows of this table; they
-are mapped in [`model/pmipv6/conformance.md`](../pmipv6/conformance.md). `Mipv6.h:75` and
-`Mipv6.cc:2104` cite RFC 2473 for the tunnel management that this module took over from the
-former `Ipv6Tunneling` module; RFC 2473 is not of this family either, and that claim is mapped in
-[`model/ipv6tunnel/conformance.md`](../ipv6tunnel/conformance.md).
+`MobilityHeader.msg` and `MobilityHeaderSerializer.*` also carry the Proxy Mobile IPv6 option fields (`proxyRegistrationFlag`, `homeNetworkPrefix`, and the rest), cited to RFC 5213 throughout — RFC 5213 is not of the Mobile IPv6 family, so those citations are not rows of this table; they are mapped in [`model/pmipv6/conformance.md`](../pmipv6/conformance.md). `Mipv6.h:75` and `Mipv6.cc:2104` cite RFC 2473 for the tunnel management that this module took over from the former `Ipv6Tunneling` module; RFC 2473 is not of this family either, and that claim is mapped in [`model/ipv6tunnel/conformance.md`](../ipv6tunnel/conformance.md).
 
-Two more citations turned up in the same grep and are not claims of a document of any family:
-`Mipv6.cc:526` cites "RFC 3041" inside a block comment that quotes RFC 6275 §11.7.1 verbatim (RFC
-3041 is the old number for the IPv6 privacy-addresses extension, mentioned by the quoted clause
-itself, not by the model); `Mipv6.cc:2058` cites "RFC 8200" for the extension-header length rule
-inside an unrelated size computation. Neither is counted as a claim above.
+Two more citations turned up in the same grep and are not claims of a document of any family: `Mipv6.cc:526` cites "RFC 3041" inside a block comment that quotes RFC 6275 §11.7.1 verbatim (RFC 3041 is the old number for the IPv6 privacy-addresses extension, mentioned by the quoted clause itself, not by the model); `Mipv6.cc:2058` cites "RFC 8200" for the extension-header length rule inside an unrelated size computation. Neither is counted as a claim above.
 
 Mapped onto the standards map, [`standards.md`](../../protocol/mipv6/standards.md#document-list):
 
@@ -59,38 +44,11 @@ Mapped onto the standards map, [`standards.md`](../../protocol/mipv6/standards.m
 | RFC 5095 | no, out of the register family | no | Zero citations. |
 | RFC 4283 | no, level 2/5 companion | yes, once, for the field it defines | `MobilityHeader.msg:60`, exactly where the field is declared. |
 
-**The finding of the survey.** The model claims Mobile IPv6 twice, under two different RFC
-numbers, in the same code area (5,360 non-generated lines under
-`src/inet/networklayer/mipv6/`). Every comment a reader meets first — the class
-doc of `Mipv6.h`, the NED doc of `Mipv6.ned`, the two data-store modules, the home-agent node
-type, and both mentions in the users guide — names RFC 3775, obsoleted by RFC 6275 since 2011.
-The one place that already claims RFC 6275 is the part of the module a behavioral reader never
-opens: the serializer, added later (2024) and cited section by section against the current
-document. RFC 4283 is claimed exactly once, at the one field it defines, and nowhere else; RFC
-4877 and RFC 5095 are not claimed at all, which matches their absence from the register's
-relations to RFC 6275.
+**The finding of the survey.** The model claims Mobile IPv6 twice, under two different RFC numbers, in the same code area (5,360 non-generated lines under `src/inet/networklayer/mipv6/`). Every comment a reader meets first — the class doc of `Mipv6.h`, the NED doc of `Mipv6.ned`, the two data-store modules, the home-agent node type, and both mentions in the users guide — names RFC 3775, obsoleted by RFC 6275 since 2011. The one place that already claims RFC 6275 is the part of the module a behavioral reader never opens: the serializer, added later (2024) and cited section by section against the current document. RFC 4283 is claimed exactly once, at the one field it defines, and nowhere else; RFC 4877 and RFC 5095 are not claimed at all, which matches their absence from the register's relations to RFC 6275.
 
-For the level 2 pass, four facts from the code (the guide permits this look to decide the claim
-question, and the pass must check each one):
+For the level 2 pass, four facts from the code (the guide permits this look to decide the claim question, and the pass must check each one):
 
-1. The return-routability cookie and token fields exist and are populated in every message, but
-   the nonce input to `generateHomeToken`/`generateCareOfToken` is hardcoded to `0` at all four
-   call sites (`Mipv6.cc:982,983,1546,1567`), each marked `// TODO nonce`. The message sequence,
-   the field presence, and the cookie echo are real; the cryptographic content behind them is
-   not.
-2. `MobilityHeader.msg:46,106,136` mark "Mobility Options not defined" for `BindingUpdate`,
-   `BindingAcknowledgement` and `BindingError`: no field exists for Pad1, PadN, Binding Refresh
-   Advice, Alternate Care-of Address or Nonce Indices (RFC 6275 §6.2). One option has a
-   placeholder: `bindingAuthorizationData` (`MobilityHeader.msg:50,109`) is a plain `int`, not
-   the MAC-bearing option format of §6.2.7 — a field that exists with a placeholder value, which
-   the guide treats as a claim regardless of what a comment says.
-3. `Mipv6.cc:1122` calls `ipv6nd->sendUnsolicitedNa(ie)` after a de-registration Binding
-   Acknowledgement from the home agent, next to a comment that quotes RFC 6275 §11.5.4 verbatim
-   (`Mipv6.cc:1116-1121`). This is the only Neighbor-Advertisement-related call found under
-   `src/inet/networklayer/mipv6/`; a level 2 pass that builds a return-home check should read
-   this call in full first, and not assume what it covers.
-4. `Mipv6.cc:645`: "// TODO solve the HA DAD problem in a different way", next to a `sendTime`
-   parameter that already delays a message send. This is a stated deferral without a stated
-   reason — by the guide's table, a bare TODO is a claim, so a check that exercises this path and
-   fails is a defect, not an unimplemented feature, unless the level 2 pass finds a reason
-   elsewhere in the same function.
+1. The return-routability cookie and token fields exist and are populated in every message, but the nonce input to `generateHomeToken`/`generateCareOfToken` is hardcoded to `0` at all four call sites (`Mipv6.cc:982,983,1546,1567`), each marked `// TODO nonce`. The message sequence, the field presence, and the cookie echo are real; the cryptographic content behind them is not.
+2. `MobilityHeader.msg:46,106,136` mark "Mobility Options not defined" for `BindingUpdate`, `BindingAcknowledgement` and `BindingError`: no field exists for Pad1, PadN, Binding Refresh Advice, Alternate Care-of Address or Nonce Indices (RFC 6275 §6.2). One option has a placeholder: `bindingAuthorizationData` (`MobilityHeader.msg:50,109`) is a plain `int`, not the MAC-bearing option format of §6.2.7 — a field that exists with a placeholder value, which the guide treats as a claim regardless of what a comment says.
+3. `Mipv6.cc:1122` calls `ipv6nd->sendUnsolicitedNa(ie)` after a de-registration Binding Acknowledgement from the home agent, next to a comment that quotes RFC 6275 §11.5.4 verbatim (`Mipv6.cc:1116-1121`). This is the only Neighbor-Advertisement-related call found under `src/inet/networklayer/mipv6/`; a level 2 pass that builds a return-home check should read this call in full first, and not assume what it covers.
+4. `Mipv6.cc:645`: "// TODO solve the HA DAD problem in a different way", next to a `sendTime` parameter that already delays a message send. This is a stated deferral without a stated reason — by the guide's table, a bare TODO is a claim, so a check that exercises this path and fails is a defect, not an unimplemented feature, unless the level 2 pass finds a reason elsewhere in the same function.

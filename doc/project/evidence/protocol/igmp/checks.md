@@ -2,17 +2,11 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc9776/catalog.md](../../standard/rfc9776/catalog.md), [rfc2236/catalog.md](../../standard/rfc2236/catalog.md), [features.md](features.md)
 
-Step 5 artifact of the standards test workflow. The procedures come from the specification
-only. They name no simulation model and no code. This file holds the common mockups, the
-rules every check obeys, and the index. The checks themselves live in one file per feature
-group under [`checks/`](checks); the section names are the anchors that the coverage ledger
-links to.
+Step 5 artifact of the standards test workflow. The procedures come from the specification only. They name no simulation model and no code. This file holds the common mockups, the rules every check obeys, and the index. The checks themselves live in one file per feature group under [`checks/`](checks); the section names are the anchors that the coverage ledger links to.
 
 ## Common mockups
 
-Every link is an Ethernet link. The routers run IGMPv3 unless a mockup says otherwise, with the
-default of every timer and counter; the hosts run IGMPv3 too, except where a mockup names an
-older host.
+Every link is an Ethernet link. The routers run IGMPv3 unless a mockup says otherwise, with the default of every timer and counter; the hosts run IGMPv3 too, except where a mockup names an older host.
 
 | Link | Prefix | Addresses |
 | --- | --- | --- |
@@ -21,8 +15,7 @@ older host.
 
 The groups are G = 225.0.1.1, H = 225.0.1.2 and K = 225.0.1.3.
 
-**The link.** Router R and hosts A and B on L1, through a switch. R is the only router, so it is
-the querier.
+**The link.** Router R and hosts A and B on L1, through a switch. R is the only router, so it is the querier.
 
 ```
         R
@@ -32,10 +25,7 @@ the querier.
     A       B
 ```
 
-**The link with a source.** The link, and a second interface of R on L2 with the sources S1 and
-S2. A source that the check names sends one UDP datagram to its group every 0.5 seconds, from
-the start to the end of the run. R forwards multicast traffic from L2 to L1 as IGMP suggests;
-"forwarding" in the checks is the arrival of those datagrams on L1.
+**The link with a source.** The link, and a second interface of R on L2 with the sources S1 and S2. A source that the check names sends one UDP datagram to its group every 0.5 seconds, from the start to the end of the run. R forwards multicast traffic from L2 to L1 as IGMP suggests; "forwarding" in the checks is the arrival of those datagrams on L1.
 
 ```
   S1   S2
@@ -51,14 +41,11 @@ the start to the end of the run. R forwards multicast traffic from L2 to L1 as I
 
 **The two routers.** Routers R1 (10.0.1.1) and R2 (10.0.1.2) and host A on L1.
 
-**The link with an older querier.** The link with a source, but R runs IGMPv2 (RFC 2236), so its
-Queries are IGMPv2 Queries.
+**The link with an older querier.** The link with a source, but R runs IGMPv2 (RFC 2236), so its Queries are IGMPv2 Queries.
 
-**The link with an older host.** The link with a source, and a third host C on L1 that runs
-IGMPv2 only.
+**The link with an older host.** The link with a source, and a third host C on L1 that runs IGMPv2 only.
 
-**The two routers of different versions.** The two routers, where R1 runs IGMPv3 and R2 runs
-IGMPv2.
+**The two routers of different versions.** The two routers, where R1 runs IGMPv3 and R2 runs IGMPv2.
 
 ### The default values
 
@@ -82,35 +69,15 @@ The checks use the defaults of RFC 9776 §8:
 
 ## Rules every check obeys
 
-- **An observation names the link and the sender.** "On L1, from A" means the IGMP messages that
-  A sends onto L1, as they leave A. The message is read from the frame; the addresses, the TTL
-  and the options from the IPv4 header.
-- **A join, a leave and a source list are local requests of a host.** "A joins G" is a request
-  to receive traffic of G from all sources, EXCLUDE({}); "A joins G for S1" is INCLUDE({S1});
-  "A leaves G" ends a request. The interface state of a host is the union of its requests, as
-  RFC 9776 §3 defines it.
-- **One observation confirms the stimulus.** Each procedure has an observation that shows the
-  situation the rule needs — the join, the Query, the leave — before the observation that
-  checks the rule.
-- **A random delay of the standard is a window, not a value.** Where the standard gives a random
-  delay, the check tests its bounds and never a value drawn from it. An answer that leaves less
-  than 1 millisecond after the Query that it answers leaves "at the instant of the Query": the
-  margin only absorbs the transmission of the Query.
-- **Start instants are fixed where a timer is under test**, so that the instant under test does
-  not fall on another event of the same node by chance.
-- **Every node computes the IGMP checksum** of the messages it sends, because one observation
-  reads the value.
-- **The fields of the header come last** in a check that also observes behavior, so that a wrong
-  field does not keep the behavior from a verdict; a check never puts two rules into one
-  observation when one could hide the other.
-- **A node joins or leaves L1 through its link.** Where a check needs a node that comes up late
-  or stops, the link between the node and L1 is broken until the node joins L1, or breaks when
-  the node leaves L1. The node then hears nothing from L1, and L1 hears nothing from the node.
-  The restart of a node is outside IGMP, so no check stops a node.
-- **One Report starts one query sequence.** Where a check reads the Queries that a
-  State-Change Report of a host starts, that host sends each State-Change Report once: its
-  Robustness Variable is 1. Each repetition of the Report would start the sequence again
-  (RFC 9776 §6.6.3.1).
+- **An observation names the link and the sender.** "On L1, from A" means the IGMP messages that A sends onto L1, as they leave A. The message is read from the frame; the addresses, the TTL and the options from the IPv4 header.
+- **A join, a leave and a source list are local requests of a host.** "A joins G" is a request to receive traffic of G from all sources, EXCLUDE({}); "A joins G for S1" is INCLUDE({S1}); "A leaves G" ends a request. The interface state of a host is the union of its requests, as RFC 9776 §3 defines it.
+- **One observation confirms the stimulus.** Each procedure has an observation that shows the situation the rule needs — the join, the Query, the leave — before the observation that checks the rule.
+- **A random delay of the standard is a window, not a value.** Where the standard gives a random delay, the check tests its bounds and never a value drawn from it. An answer that leaves less than 1 millisecond after the Query that it answers leaves "at the instant of the Query": the margin only absorbs the transmission of the Query.
+- **Start instants are fixed where a timer is under test**, so that the instant under test does not fall on another event of the same node by chance.
+- **Every node computes the IGMP checksum** of the messages it sends, because one observation reads the value.
+- **The fields of the header come last** in a check that also observes behavior, so that a wrong field does not keep the behavior from a verdict; a check never puts two rules into one observation when one could hide the other.
+- **A node joins or leaves L1 through its link.** Where a check needs a node that comes up late or stops, the link between the node and L1 is broken until the node joins L1, or breaks when the node leaves L1. The node then hears nothing from L1, and L1 hears nothing from the node. The restart of a node is outside IGMP, so no check stops a node.
+- **One Report starts one query sequence.** Where a check reads the Queries that a State-Change Report of a host starts, that host sends each State-Change Report once: its Robustness Variable is 1. Each repetition of the Report would start the sequence again (RFC 9776 §6.6.3.1).
 
 ## Index
 
@@ -151,61 +118,30 @@ The checks use the defaults of RFC 9776 §8:
 
 ## Statements this pass wrote no check for
 
-Level 2 asks for a core check of every mandatory feature, and the checks above give one to every
-mandatory feature except message validation, whose statements all need a crafted message. The
-statements below have no check in this pass. This section says **what a check would need**. It
-says nothing about the simulation model: whether the absence of a check is acceptable is a
-judgment about what the model claims, and that judgment lives in the coverage ledger.
+Level 2 asks for a core check of every mandatory feature, and the checks above give one to every mandatory feature except message validation, whose statements all need a crafted message. The statements below have no check in this pass. This section says **what a check would need**. It says nothing about the simulation model: whether the absence of a check is acceptable is a judgment about what the model claims, and that judgment lives in the coverage ledger.
 
-**A crafted message**, the toolset of level 3: every validity rule of a received message —
-RFC9776-GEN-10, QRY-6, QRY-23, QRY-30, REP-3, REP-5, REP-15, REP-16, REP-30, REP-33, REP-36,
-VER-4, HOST-5 and RFC2236-HOST-7, HOST-8, HOST-11, HOST-14, ROUTER-20, ROUTER-23; an IGMPv2
-Group-Specific Query that reaches a host in IGMPv3 mode (RFC9776-COMPH-11); a Report of IGMPv3 in
-an order that normal members do not produce, a TO_IN record at a router in INCLUDE mode
-(RFC9776-RREP-23).
+**A crafted message**, the toolset of level 3: every validity rule of a received message — RFC9776-GEN-10, QRY-6, QRY-23, QRY-30, REP-3, REP-5, REP-15, REP-16, REP-30, REP-33, REP-36, VER-4, HOST-5 and RFC2236-HOST-7, HOST-8, HOST-11, HOST-14, ROUTER-20, ROUTER-23; an IGMPv2 Group-Specific Query that reaches a host in IGMPv3 mode (RFC9776-COMPH-11); a Report of IGMPv3 in an order that normal members do not produce, a TO_IN record at a router in INCLUDE mode (RFC9776-RREP-23).
 
-**A version 1 system**, level 5 by the standards map: a host or a router of RFC 1112 and every
-rule that only an IGMPv1 message reaches — RFC9776-GEN-7, VER-1, COMPH-5, COMPH-8, COMPH-14,
-COMPH-18 to COMPH-20, COMPR-3 to COMPR-5, COMPR-16, COMPR-19, COMPR-24, COMPR-31 to COMPR-33, and
-RFC2236-HOST-16, HOST-33 to HOST-40, ROUTER-17, ROUTER-21, ROUTER-26, ROUTER-31, ROUTER-36,
-ROUTER-40, ROUTER-42, ROUTER-45 to ROUTER-47.
+**A version 1 system**, level 5 by the standards map: a host or a router of RFC 1112 and every rule that only an IGMPv1 message reaches — RFC9776-GEN-7, VER-1, COMPH-5, COMPH-8, COMPH-14, COMPH-18 to COMPH-20, COMPR-3 to COMPR-5, COMPR-16, COMPR-19, COMPR-24, COMPR-31 to COMPR-33, and RFC2236-HOST-16, HOST-33 to HOST-40, ROUTER-17, ROUTER-21, ROUTER-26, ROUTER-31, ROUTER-36, ROUTER-40, ROUTER-42, ROUTER-45 to ROUTER-47.
 
-**SSM-aware systems**, level 5 by the standards map (RFC 4604): RFC9776-REP-21, REP-25, RREP-1 to
-RREP-4, COMPH-23 to COMPH-25, COMPH-27, COMPR-11, COMPR-12.
+**SSM-aware systems**, level 5 by the standards map (RFC 4604): RFC9776-REP-21, REP-25, RREP-1 to RREP-4, COMPH-23 to COMPH-25, COMPH-27, COMPR-11, COMPR-12.
 
-**State inside a node**, the toolset of level 4: a variable that no message shows
-(RFC9776-HOST-2, RQ-3, RQ-4) and a warning or a log entry (RFC9776-COMPR-7, COMPR-9, COMPR-10).
+**State inside a node**, the toolset of level 4: a variable that no message shows (RFC9776-HOST-2, RQ-3, RQ-4) and a warning or a log entry (RFC9776-COMPR-7, COMPR-9, COMPR-10).
 
-**A permission that no observation can fail**: a router may forward excluded sources onto a
-transit network (RFC9776-FWD-2); a host may let an older Report suppress its own record
-(RFC9776-COMPH-26); a host may skip the Leave when another host reported last
-(RFC2236-HOST-17).
+**A permission that no observation can fail**: a router may forward excluded sources onto a transit network (RFC9776-FWD-2); a host may let an older Report suppress its own record (RFC9776-COMPH-26); a host may skip the Leave when another host reported last (RFC2236-HOST-17).
 
 **A larger mockup or a second message path**, work for a later level 2 pass:
 
-- a value above the plain range of a code field: a Max Response Time above 12.7 seconds or a
-  Query Interval above 127 seconds, for the floating-point codes (RFC9776-QRY-4, QRY-17,
-  TIMER-14, TIMER-15), and a Robustness Variable above 7 (QRY-13);
-- systems with non-default values, and a non-querier that adopts the QRV and the QQIC of the
-  querier (RFC9776-TIMER-1, QRY-14, QRY-18);
+- a value above the plain range of a code field: a Max Response Time above 12.7 seconds or a Query Interval above 127 seconds, for the floating-point codes (RFC9776-QRY-4, QRY-17, TIMER-14, TIMER-15), and a Robustness Variable above 7 (QRY-13);
+- systems with non-default values, and a non-querier that adopts the QRV and the QQIC of the querier (RFC9776-TIMER-1, QRY-14, QRY-18);
 - a second router that hears a Query with the S flag set (RFC9776-QRY-10, QRY-11, RQRY-4);
-- many sources or many groups, beyond the size of one message (RFC9776-QRY-21, REP-37 to
-  REP-39);
+- many sources or many groups, beyond the size of one message (RFC9776-QRY-21, REP-37 to REP-39);
 - a system that reports before it has an address (RFC9776-REP-32);
-- a change that allows and blocks sources at once (RFC9776-REP-29), and a filter-mode change
-  followed by a source change within the repetitions (HOST-19, HOST-20);
-- two specific Queries for one group within one Max Response Time, or two changes within one
-  query period (RFC9776-HQRY-8, RREP-19), and a second IGMPv2 member that answers the Query after
-  a Leave (RFC2236-ROUTER-41), or a second Query within the delay of a host (HOST-23, HOST-30);
-- a system in EXCLUDE mode with blocked sources, which puts source records into the EXCLUDE state
-  of the router (RFC9776-HQRY-16, RST-5, RST-15 to RST-17, FWD-6, FWD-7, RREP-10, RREP-24 to
-  RREP-26, COMPR-30);
-- a run longer than the Group Membership Interval with an INCLUDE-mode member that answers the
-  Queries (RFC9776-RREP-8);
-- the end of the IGMPv2 mode of a group after the Older Host Present Interval (RFC9776-COMPR-20,
-  COMPR-21, TIMER-25);
-- an IGMPv2 group that times out, and two IGMPv2 routers, for the non-querier state machine
-  (RFC2236-ROUTER-29, ROUTER-37, ROUTER-48 to ROUTER-54).
+- a change that allows and blocks sources at once (RFC9776-REP-29), and a filter-mode change followed by a source change within the repetitions (HOST-19, HOST-20);
+- two specific Queries for one group within one Max Response Time, or two changes within one query period (RFC9776-HQRY-8, RREP-19), and a second IGMPv2 member that answers the Query after a Leave (RFC2236-ROUTER-41), or a second Query within the delay of a host (HOST-23, HOST-30);
+- a system in EXCLUDE mode with blocked sources, which puts source records into the EXCLUDE state of the router (RFC9776-HQRY-16, RST-5, RST-15 to RST-17, FWD-6, FWD-7, RREP-10, RREP-24 to RREP-26, COMPR-30);
+- a run longer than the Group Membership Interval with an INCLUDE-mode member that answers the Queries (RFC9776-RREP-8);
+- the end of the IGMPv2 mode of a group after the Older Host Present Interval (RFC9776-COMPR-20, COMPR-21, TIMER-25);
+- an IGMPv2 group that times out, and two IGMPv2 routers, for the non-querier state machine (RFC2236-ROUTER-29, ROUTER-37, ROUTER-48 to ROUTER-54).
 
-The statements that no check targets because a check above shows them are in the ledger as
-`covered`, with the check that shows them.
+The statements that no check targets because a check above shows them are in the ledger as `covered`, with the check that shows them.

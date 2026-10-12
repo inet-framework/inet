@@ -2,52 +2,30 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC9776-*` · **Stands on:** [standards.md](../../protocol/igmp/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow for RFC 9776, Internet Group Management Protocol, Version 3, of
-March 2025, a document of the in-scope set of IGMP. The catalog comes from the RFC text
-only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow for RFC 9776, Internet Group Management Protocol, Version 3, of March 2025, a document of the in-scope set of IGMP. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc9776.txt`](../../../../../../standards/RFC/rfc9776.txt) —
-  Internet Group Management Protocol, Version 3, March 2025. Downloaded 2026-09-23 from
-  <https://www.rfc-editor.org/rfc/rfc9776.txt>.
+- [`standards/RFC/rfc9776.txt`](../../../../../../standards/RFC/rfc9776.txt) — Internet Group Management Protocol, Version 3, March 2025. Downloaded 2026-09-23 from <https://www.rfc-editor.org/rfc/rfc9776.txt>.
 
-The other document of the in-scope set has a catalog of its own:
-[`rfc2236/catalog.md`](../rfc2236/catalog.md) (IGMPv2, whose host and router state diagrams the
-compatibility rules of §7 fall back to).
+The other document of the in-scope set has a catalog of its own: [`rfc2236/catalog.md`](../rfc2236/catalog.md) (IGMPv2, whose host and router state diagrams the compatibility rules of §7 fall back to).
 
-The in-scope sections are §4 to §8. RFC 9776 is the 2025 revision of RFC 3376; its Appendix C
-names the changes, two of which change timer formulas that §8 of this catalog quotes.
+The in-scope sections are §4 to §8. RFC 9776 is the 2025 revision of RFC 3376; its Appendix C names the changes, two of which change timer formulas that §8 of this catalog quotes.
 
-The family of documents and the in-scope set are in
-[`standards.md`](../../protocol/igmp/standards.md). The features these statements build are in
-[`features.md`](../../protocol/igmp/features.md).
+The family of documents and the in-scope set are in [`standards.md`](../../protocol/igmp/standards.md). The features these statements build are in [`features.md`](../../protocol/igmp/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`igmp/coverage.md`](../../model/igmp/coverage.md). Keeping it out is deliberate: this catalog
-states what the standard says, so a new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`igmp/coverage.md`](../../model/igmp/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc9776.txt:1203-1205` points to lines of that
-file. Where a quote crosses a page break of the RFC, the reference names both line groups.
+Quotes are verbatim. A reference such as `rfc9776.txt:1203-1205` points to lines of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
-The entries were drafted section by section and merged; the sections are the areas below, in
-the order of the document.
+The entries were drafted section by section and merged; the sections are the areas below, in the order of the document.
 
 ## How to read an entry
 
 - **ID** — `RFC9776-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into the text.
-- **Strength** — the word the document uses. RFC 9776 uses the keywords of RFC 2119 in capitals;
-  the entry records `must`, `must not`, `should`, `should not` or `may` for them, and
-  `description` for a normative sentence with no keyword. Where the text writes a keyword in
-  lower case, the entry records the word and says so, for example `must (lower case)`; a
-  "might" stays `description`. An entry with two keywords names what each one covers. A row of
-  a state table that states an action is an entry of its own.
-- **Class** — how a test can observe the statement: `wire` (fields of messages on a link, or
-  the presence or absence of a message), `end-to-end` (what a node accepts and acts on, seen
-  in what it sends or forwards afterwards), `error-signal` (an error report),
-  `internal` (state inside a node), `encoding` (the exact bit layout).
+- **Strength** — the word the document uses. RFC 9776 uses the keywords of RFC 2119 in capitals; the entry records `must`, `must not`, `should`, `should not` or `may` for them, and `description` for a normative sentence with no keyword. Where the text writes a keyword in lower case, the entry records the word and says so, for example `must (lower case)`; a "might" stays `description`. An entry with two keywords names what each one covers. A row of a state table that states an action is an entry of its own.
+- **Class** — how a test can observe the statement: `wire` (fields of messages on a link, or the presence or absence of a message), `end-to-end` (what a node accepts and acts on, seen in what it sends or forwards afterwards), `error-signal` (an error report), `internal` (state inside a node), `encoding` (the exact bit layout).
 - **Check idea** — one or two sentences, still without implementation names.
 
 ## Index
@@ -358,8 +336,7 @@ the order of the document.
 > `rfc9776.txt:446-447`
 
 - Strength: description. Class: wire.
-- Check idea: capture an IGMP message on the link and check that its enclosing IPv4 header
-  carries protocol number 2.
+- Check idea: capture an IGMP message on the link and check that its enclosing IPv4 header carries protocol number 2.
 
 ### RFC9776-GEN-2
 
@@ -369,8 +346,7 @@ the order of the document.
 > `rfc9776.txt:447-448`
 
 - Strength: description. Class: wire.
-- Check idea: capture an IGMP message on the link and check that the IP header Time-to-Live
-  field is 1.
+- Check idea: capture an IGMP message on the link and check that the IP header Time-to-Live field is 1.
 
 ### RFC9776-GEN-3
 
@@ -380,8 +356,7 @@ the order of the document.
 > `rfc9776.txt:448-449`
 
 - Strength: description. Class: wire.
-- Check idea: capture an IGMP message on the link and check that the IP header Type-of-Service
-  octet is 0xc0.
+- Check idea: capture an IGMP message on the link and check that the IP header Type-of-Service octet is 0xc0.
 
 ### RFC9776-GEN-4
 
@@ -390,8 +365,7 @@ the order of the document.
 > "carries an IP Router Alert option [RFC2113] in its IP header" — §4, `rfc9776.txt:449-450`
 
 - Strength: description. Class: wire.
-- Check idea: capture an IGMP message on the link and check that its IP header options include
-  the Router Alert option.
+- Check idea: capture an IGMP message on the link and check that its IP header options include the Router Alert option.
 
 ### RFC9776-GEN-5
 
@@ -401,8 +375,7 @@ the order of the document.
 > Query         |" — §4, `rfc9776.txt:457`, `rfc9776.txt:459`
 
 - Strength: description. Class: wire.
-- Check idea: capture a Membership Query sent on the link and check that its Type field is
-  0x11.
+- Check idea: capture a Membership Query sent on the link and check that its Type field is 0x11.
 
 ### RFC9776-GEN-6
 
@@ -412,13 +385,11 @@ the order of the document.
 > Membership Report |" — §4, `rfc9776.txt:457`, `rfc9776.txt:461`
 
 - Strength: description. Class: wire.
-- Check idea: capture an IGMPv3 Membership Report sent on the link and check that its Type
-  field is 0x22.
+- Check idea: capture an IGMPv3 Membership Report sent on the link and check that its Type field is 0x22.
 
 ### RFC9776-GEN-7
 
-**A system MUST support the IGMPv1 Membership Report message, type 0x12, for interoperation
-with an older IGMP version.**
+**A system MUST support the IGMPv1 Membership Report message, type 0x12, for interoperation with an older IGMP version.**
 
 > "An implementation of IGMPv3 MUST also support the following three message types, for
 > interoperation with previous versions of IGMP (see Section 7):" and "| Type Number (hex) |
@@ -426,34 +397,29 @@ with an older IGMP version.**
 > [RFC1112] |" — §4, `rfc9776.txt:466-468`, `rfc9776.txt:471`, `rfc9776.txt:473`
 
 - Strength: must. Class: end-to-end.
-- Check idea: put a system in an IGMPv1 compatibility scenario and check that it recognizes and
-  processes a message of type 0x12.
+- Check idea: put a system in an IGMPv1 compatibility scenario and check that it recognizes and processes a message of type 0x12.
 
 ### RFC9776-GEN-8
 
-**A system MUST support the IGMPv2 Membership Report message, type 0x16, for interoperation
-with an older IGMP version.**
+**A system MUST support the IGMPv2 Membership Report message, type 0x16, for interoperation with an older IGMP version.**
 
 > "An implementation of IGMPv3 MUST also support the following three message types, for
 > interoperation with previous versions of IGMP (see Section 7):" and "| 0x16              |
 > IGMPv2 Membership Report | [RFC2236] |" — §4, `rfc9776.txt:466-468`, `rfc9776.txt:475`
 
 - Strength: must. Class: end-to-end.
-- Check idea: put a system in an IGMPv2 compatibility scenario and check that it recognizes and
-  processes a message of type 0x16.
+- Check idea: put a system in an IGMPv2 compatibility scenario and check that it recognizes and processes a message of type 0x16.
 
 ### RFC9776-GEN-9
 
-**A system MUST support the IGMPv2 Leave Group message, type 0x17, for interoperation with an
-older IGMP version.**
+**A system MUST support the IGMPv2 Leave Group message, type 0x17, for interoperation with an older IGMP version.**
 
 > "An implementation of IGMPv3 MUST also support the following three message types, for
 > interoperation with previous versions of IGMP (see Section 7):" and "| 0x17              |
 > IGMPv2 Leave Group       | [RFC2236] |" — §4, `rfc9776.txt:466-468`, `rfc9776.txt:477`
 
 - Strength: must. Class: end-to-end.
-- Check idea: put a router in an IGMPv2 compatibility scenario and check that it recognizes and
-  processes a message of type 0x17.
+- Check idea: put a router in an IGMPv2 compatibility scenario and check that it recognizes and processes a message of type 0x17.
 
 ### RFC9776-GEN-10
 
@@ -462,33 +428,28 @@ older IGMP version.**
 > "Unrecognized message types MUST be silently ignored." — §4, `rfc9776.txt:482`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a system an IGMP message of an undefined type and check that the system
-  gives no error report and no visible reaction.
+- Check idea: send a system an IGMP message of an undefined type and check that the system gives no error report and no visible reaction.
 ## Membership Query message
 
 ### RFC9776-QRY-1
 
-**A multicast router sends a Membership Query to learn the multicast reception state of a
-neighboring interface.**
+**A multicast router sends a Membership Query to learn the multicast reception state of a neighboring interface.**
 
 > "Membership Queries are sent by IP multicast routers to query the multicast reception state
 > of neighboring interfaces." — §4.1, `rfc9776.txt:492-493`
 
 - Strength: description. Class: wire.
-- Check idea: observe the link during normal operation and check that Membership Query messages
-  originate only from a multicast router.
+- Check idea: observe the link during normal operation and check that Membership Query messages originate only from a multicast router.
 
 ### RFC9776-QRY-2
 
-**The Max Resp Code field states the maximum time allowed before a system sends its
-responding report.**
+**The Max Resp Code field states the maximum time allowed before a system sends its responding report.**
 
 > "The Max Resp Code field specifies the maximum time allowed before sending a responding
 > report." — §4.1.1, `rfc9776.txt:519-520`
 
 - Strength: description. Class: wire.
-- Check idea: send a Query with a given Max Resp Code and check that every responding report
-  arrives within the time the code represents.
+- Check idea: send a Query with a given Max Resp Code and check that every responding report arrives within the time the code represents.
 
 ### RFC9776-QRY-3
 
@@ -497,34 +458,29 @@ responding report.**
 > "If Max Resp Code < 128, Max Response Time = Max Resp Code" — §4.1.1, `rfc9776.txt:524`
 
 - Strength: description. Class: encoding.
-- Check idea: build a Query with a Max Resp Code under 128 and check that the resulting Max
-  Response Time equals the same number.
+- Check idea: build a Query with a Max Resp Code under 128 and check that the resulting Max Response Time equals the same number.
 
 ### RFC9776-QRY-4
 
-**A Max Resp Code of 128 or more codes the Max Response Time as a floating-point value: the
-mantissa combined with 0x10, shifted left by the exponent plus 3.**
+**A Max Resp Code of 128 or more codes the Max Response Time as a floating-point value: the mantissa combined with 0x10, shifted left by the exponent plus 3.**
 
 > "If Max Resp Code >= 128, Max Resp Code represents a floating-point value as follows:" and
 > "|1| exp | mant  |" and "Max Response Time = (mant | 0x10) << (exp + 3)" — §4.1.1,
 > `rfc9776.txt:526-527`, `rfc9776.txt:531`, `rfc9776.txt:534`
 
 - Strength: description. Class: encoding.
-- Check idea: build a Query with a Max Resp Code of 128 or more and check that the decoded Max
-  Response Time matches the exponent/mantissa formula.
+- Check idea: build a Query with a Max Resp Code of 128 or more and check that the decoded Max Response Time matches the exponent/mantissa formula.
 
 ### RFC9776-QRY-5
 
-**The Checksum field is the 16-bit one's complement of the one's complement sum of the whole
-IGMP message, computed with the Checksum field itself set to zero.**
+**The Checksum field is the 16-bit one's complement of the one's complement sum of the whole IGMP message, computed with the Checksum field itself set to zero.**
 
 > "The Checksum field is the 16-bit one's complement of the one's complement sum of the whole
 > IGMP message (the entire IP payload)." and "For computing the checksum, the Checksum field is
 > set to zero." — §4.1.2, `rfc9776.txt:546-547`, `rfc9776.txt:548`
 
 - Strength: description. Class: wire.
-- Check idea: capture a Query, recompute the checksum over the message with the Checksum field
-  zeroed, and check the result equals the field on the wire.
+- Check idea: capture a Query, recompute the checksum over the message with the Checksum field zeroed, and check the result equals the field on the wire.
 
 ### RFC9776-QRY-6
 
@@ -534,8 +490,7 @@ IGMP message, computed with the Checksum field itself set to zero.**
 > — §4.1.2, `rfc9776.txt:548-550`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a Query with a wrong checksum and check that the system does not act on its
-  content.
+- Check idea: send a Query with a wrong checksum and check that the system does not act on its content.
 
 ### RFC9776-QRY-7
 
@@ -549,15 +504,13 @@ IGMP message, computed with the Checksum field itself set to zero.**
 
 ### RFC9776-QRY-8
 
-**The Group Address field holds the queried multicast address when a router sends a
-Group-Specific or Group-and-Source Specific Query.**
+**The Group Address field holds the queried multicast address when a router sends a Group-Specific or Group-and-Source Specific Query.**
 
 > "set to the IP multicast address being queried when sending a Group-Specific Query or
 > Group-and-Source Specific Query" — §4.1.3, `rfc9776.txt:555-557`
 
 - Strength: description. Class: wire.
-- Check idea: trigger a Group-Specific Query for a given address and check that the Group
-  Address field carries that address.
+- Check idea: trigger a Group-Specific Query for a given address and check that the Group Address field carries that address.
 
 ### RFC9776-QRY-9
 
@@ -567,35 +520,29 @@ Group-Specific or Group-and-Source Specific Query.**
 > `rfc9776.txt:561-562`
 
 - Strength: description. Class: encoding.
-- Check idea: capture a Query and check that the Flags bits match the current IGMP Type Numbers
-  registry allocation.
+- Check idea: capture a Query and check that the Flags bits match the current IGMP Type Numbers registry allocation.
 
 ### RFC9776-QRY-10
 
-**When the S flag is set to one, a receiving router suppresses its normal timer updates for
-that Query.**
+**When the S flag is set to one, a receiving router suppresses its normal timer updates for that Query.**
 
 > "When set to one, the S flag indicates to any receiving multicast routers that they are to
 > suppress the normal timer updates they perform upon receiving a Query." — §4.1.5,
 > `rfc9776.txt:566-568`
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a Query with the S flag set to one to a router and check that the router
-  does not update its normal timers in response.
+- Check idea: send a Query with the S flag set to one to a router and check that the router does not update its normal timers in response.
 
 ### RFC9776-QRY-11
 
-**The S flag does not suppress Querier election or a router's own host-side processing of the
-Query.**
+**The S flag does not suppress Querier election or a router's own host-side processing of the Query.**
 
 > "It does not, however, suppress the Querier election or the" and "processing of a Query that
 > a router may be required" and "to perform as a consequence of itself being a group member." —
 > §4.1.5, `rfc9776.txt:568`, `rfc9776.txt:569-570`, `rfc9776.txt:570-571`
 
 - Strength: may (lower case). Class: end-to-end.
-- Check idea: send a Query with the S flag set to one to a router that is itself a group
-  member and check that the router still runs Querier election and its own group-member
-  response.
+- Check idea: send a Query with the S flag set to one to a router that is itself a group member and check that the router still runs Querier election and its own group-member response.
 
 ### RFC9776-QRY-12
 
@@ -605,8 +552,7 @@ Query.**
 > querier, i.e., the sender of the Query." — §4.1.6, `rfc9776.txt:575`, `rfc9776.txt:575-576`
 
 - Strength: description. Class: wire.
-- Check idea: configure a querier's Robustness Variable and check that the QRV field of its
-  Query carries the same value.
+- Check idea: configure a querier's Robustness Variable and check that the QRV field of its Query carries the same value.
 
 ### RFC9776-QRY-13
 
@@ -617,13 +563,11 @@ Query.**
 > `rfc9776.txt:578`
 
 - Strength: description. Class: wire.
-- Check idea: configure a querier's Robustness Variable above 7 and check that its Query
-  carries QRV zero.
+- Check idea: configure a querier's Robustness Variable above 7 and check that its Query carries QRV zero.
 
 ### RFC9776-QRY-14
 
-**A router adopts the QRV value of the most recently received Query as its own Robustness
-Variable, or the default value when that QRV was zero.**
+**A router adopts the QRV value of the most recently received Query as its own Robustness Variable, or the default value when that QRV was zero.**
 
 > "Routers adopt the QRV value from the most" and "recently received Query as their own
 > [Robustness Variable] value," and "unless that most recently received QRV was zero, in which
@@ -632,9 +576,7 @@ Variable, or the default value when that QRV was zero.**
 > `rfc9776.txt:579`, `rfc9776.txt:580`, `rfc9776.txt:581`, `rfc9776.txt:582`
 
 - Strength: description. Class: internal.
-- Check idea: send a router a Query with a non-zero QRV and check that the router's Robustness
-  Variable becomes that value; repeat with QRV zero and check the router uses its default or
-  configured value instead.
+- Check idea: send a router a Query with a non-zero QRV and check that the router's Robustness Variable becomes that value; repeat with QRV zero and check the router uses its default or configured value instead.
 
 ### RFC9776-QRY-15
 
@@ -644,8 +586,7 @@ Variable, or the default value when that QRV was zero.**
 > `rfc9776.txt:586`
 
 - Strength: description. Class: wire.
-- Check idea: configure a querier's Query Interval and check that the QQIC field of its Query
-  encodes that interval.
+- Check idea: configure a querier's Query Interval and check that the QQIC field of its Query encodes that interval.
 
 ### RFC9776-QRY-16
 
@@ -654,26 +595,22 @@ Variable, or the default value when that QRV was zero.**
 > "If QQIC < 128, QQI = QQIC" — §4.1.7, `rfc9776.txt:591`
 
 - Strength: description. Class: encoding.
-- Check idea: build a Query with a QQIC under 128 and check that the decoded Querier's Query
-  Interval equals the same number.
+- Check idea: build a Query with a QQIC under 128 and check that the decoded Querier's Query Interval equals the same number.
 
 ### RFC9776-QRY-17
 
-**A QQIC of 128 or more codes the Querier's Query Interval as a floating-point value: the
-mantissa combined with 0x10, shifted left by the exponent plus 3.**
+**A QQIC of 128 or more codes the Querier's Query Interval as a floating-point value: the mantissa combined with 0x10, shifted left by the exponent plus 3.**
 
 > "If QQIC >= 128, QQIC represents a floating-point value as follows:" and "|1| exp | mant  |"
 > and "QQI = (mant | 0x10) << (exp + 3)" — §4.1.7, `rfc9776.txt:593`, `rfc9776.txt:597`,
 > `rfc9776.txt:600`
 
 - Strength: description. Class: encoding.
-- Check idea: build a Query with a QQIC of 128 or more and check that the decoded QQI matches
-  the exponent/mantissa formula.
+- Check idea: build a Query with a QQIC of 128 or more and check that the decoded QQI matches the exponent/mantissa formula.
 
 ### RFC9776-QRY-18
 
-**A multicast router that is not the current querier adopts the QQI of the most recently
-received Query as its own Query Interval, or the default value when that QQI was zero.**
+**A multicast router that is not the current querier adopts the QQI of the most recently received Query as its own Query Interval, or the default value when that QQI was zero.**
 
 > "Multicast routers that are not the current querier adopt the QQI" and "value from the most
 > recently received Query as their own [Query" and "Interval] value, unless that most recently
@@ -682,9 +619,7 @@ received Query as its own Query Interval, or the default value when that QQI was
 > `rfc9776.txt:605`, `rfc9776.txt:606`, `rfc9776.txt:607`, `rfc9776.txt:608`
 
 - Strength: description. Class: internal.
-- Check idea: send a non-querier router a Query with a non-zero QQIC and check that the
-  router's Query Interval becomes the decoded value; repeat with QQIC zero and check the router
-  uses its default instead.
+- Check idea: send a non-querier router a Query with a non-zero QQIC and check that the router's Query Interval becomes the decoded value; repeat with QQIC zero and check the router uses its default instead.
 
 ### RFC9776-QRY-19
 
@@ -694,51 +629,42 @@ received Query as its own Query Interval, or the default value when that QQI was
 > Query." — §4.1.8, `rfc9776.txt:612`, `rfc9776.txt:613`
 
 - Strength: description. Class: wire.
-- Check idea: build a Query with a chosen count of source addresses and check that the Number
-  of Sources field equals that count.
+- Check idea: build a Query with a chosen count of source addresses and check that the Number of Sources field equals that count.
 
 ### RFC9776-QRY-20
 
-**The Number of Sources field is zero in a General Query or a Group Specific Query, and
-non-zero in a Group-and-Source Specific Query.**
+**The Number of Sources field is zero in a General Query or a Group Specific Query, and non-zero in a Group-and-Source Specific Query.**
 
 > "This number is zero in a General Query or" and "a Group Specific Query and non-zero in a
 > Group-and-Source Specific" and "Query." — §4.1.8, `rfc9776.txt:613`, `rfc9776.txt:614`,
 > `rfc9776.txt:615`
 
 - Strength: description. Class: wire.
-- Check idea: trigger a General Query and a Group Specific Query and check the Number of
-  Sources field is zero in each; trigger a Group-and-Source Specific Query and check the field
-  is non-zero.
+- Check idea: trigger a General Query and a Group Specific Query and check the Number of Sources field is zero in each; trigger a Group-and-Source Specific Query and check the field is non-zero.
 
 ### RFC9776-QRY-21
 
-**The Number of Sources is limited by the MTU of the network over which the Query is
-transmitted.**
+**The Number of Sources is limited by the MTU of the network over which the Query is transmitted.**
 
 > "This number is limited by the MTU of the network over which" and "the Query is transmitted."
 > — §4.1.8, `rfc9776.txt:615`, `rfc9776.txt:616`
 
 - Strength: description. Class: wire.
-- Check idea: request a Query with a source-address count that would exceed the link MTU and
-  check that no such oversized Query appears on the link.
+- Check idea: request a Query with a source-address count that would exceed the link MTU and check that no such oversized Query appears on the link.
 
 ### RFC9776-QRY-22
 
-**The Source Address fields of a Query are a vector of source addresses, one for each count in
-the Number of Sources field.**
+**The Source Address fields of a Query are a vector of source addresses, one for each count in the Number of Sources field.**
 
 > "The Source Address [i] fields are a vector of n IP unicast addresses," and "where n is the
 > value in the Number of Sources (N) field." — §4.1.9, `rfc9776.txt:625`, `rfc9776.txt:626`
 
 - Strength: description. Class: wire.
-- Check idea: build a Group-and-Source Specific Query with n sources and check that the message
-  carries exactly n Source Address fields, matching the Number of Sources field.
+- Check idea: build a Group-and-Source Specific Query with n sources and check that the message carries exactly n Source Address fields, matching the Number of Sources field.
 
 ### RFC9776-QRY-23
 
-**On a received Query with extra octets beyond the defined fields, a system MUST include those
-octets when it verifies the IGMP Checksum, but MUST otherwise ignore them.**
+**On a received Query with extra octets beyond the defined fields, a system MUST include those octets when it verifies the IGMP Checksum, but MUST otherwise ignore them.**
 
 > "If the Packet Length field in the IP header of a received Query" and "indicates that there
 > are additional octets of data present, beyond" and "the fields described here, IGMPv3
@@ -748,26 +674,22 @@ octets when it verifies the IGMP Checksum, but MUST otherwise ignore them.**
 > `rfc9776.txt:634`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a Query padded with trailing octets and a checksum computed over them, and
-  check the system accepts it while treating the trailing octets as having no other effect.
+- Check idea: send a Query padded with trailing octets and a checksum computed over them, and check the system accepts it while treating the trailing octets as having no other effect.
 
 ### RFC9776-QRY-24
 
-**When a system sends a Query, it MUST NOT include additional octets beyond the fields
-described in the format.**
+**When a system sends a Query, it MUST NOT include additional octets beyond the fields described in the format.**
 
 > "When sending a Query," and "an IGMPv3 implementation MUST NOT include additional octets
 > beyond" and "the fields described here." — §4.1.10, `rfc9776.txt:634`, `rfc9776.txt:635`,
 > `rfc9776.txt:636`
 
 - Strength: must. Class: wire.
-- Check idea: capture a Query a system sends and check that its length matches exactly the
-  defined fields, with no trailing octets.
+- Check idea: capture a Query a system sends and check that its length matches exactly the defined fields, with no trailing octets.
 
 ### RFC9776-QRY-25
 
-**A General Query is sent to learn the complete multicast reception state of the neighboring
-interfaces, with the Group Address and Number of Sources fields both zero.**
+**A General Query is sent to learn the complete multicast reception state of the neighboring interfaces, with the Group Address and Number of Sources fields both zero.**
 
 > "A General Query is sent by a multicast router to learn the" and "complete multicast
 > reception state of the neighboring interfaces" and "In a General Query, both the Group
@@ -775,13 +697,11 @@ interfaces, with the Group Address and Number of Sources fields both zero.**
 > `rfc9776.txt:642-643`, `rfc9776.txt:644`, `rfc9776.txt:645`, `rfc9776.txt:646`
 
 - Strength: description. Class: wire.
-- Check idea: trigger a General Query and check that both the Group Address and Number of
-  Sources fields are zero.
+- Check idea: trigger a General Query and check that both the Group Address and Number of Sources fields are zero.
 
 ### RFC9776-QRY-26
 
-**A Group Specific Query is sent to learn the reception state of one multicast address, with
-the Group Address field holding that address and the Number of Sources field zero.**
+**A Group Specific Query is sent to learn the reception state of one multicast address, with the Group Address field holding that address and the Number of Sources field zero.**
 
 > "A Group Specific Query is sent by a multicast router to learn the" and "reception state,
 > with respect to a single multicast address, of" and "the neighboring interfaces." and "In a
@@ -791,14 +711,11 @@ the Group Address field holding that address and the Number of Sources field zer
 > `rfc9776.txt:651`, `rfc9776.txt:652`
 
 - Strength: description. Class: wire.
-- Check idea: trigger a Group Specific Query for a chosen address and check the Group Address
-  field carries it while the Number of Sources field is zero.
+- Check idea: trigger a Group Specific Query for a chosen address and check the Group Address field carries it while the Number of Sources field is zero.
 
 ### RFC9776-QRY-27
 
-**A Group-and-Source Specific Query is sent to learn if any neighboring interface wants
-packets sent to a specified address from a specified list of sources, and it carries the
-address and the sources.**
+**A Group-and-Source Specific Query is sent to learn if any neighboring interface wants packets sent to a specified address from a specified list of sources, and it carries the address and the sources.**
 
 > "A Group-and-Source Specific Query is sent by a multicast router" and "to learn if any
 > neighboring interface desires reception of" and "packets sent to a specified multicast
@@ -809,13 +726,11 @@ address and the sources.**
 > `rfc9776.txt:659-660`, `rfc9776.txt:660`
 
 - Strength: description. Class: wire.
-- Check idea: trigger a Group-and-Source Specific Query for a chosen address and source list
-  and check the Group Address and Source Address fields carry them.
+- Check idea: trigger a Group-and-Source Specific Query for a chosen address and source list and check the Group Address and Source Address fields carry them.
 
 ### RFC9776-QRY-28
 
-**A General Query is sent to the IP destination address 224.0.0.1, the all-systems multicast
-address.**
+**A General Query is sent to the IP destination address 224.0.0.1, the all-systems multicast address.**
 
 > "In IGMPv3, General Queries are sent with an IP destination address of" and "224.0.0.1, the
 > all-systems multicast address." — §4.1.12, `rfc9776.txt:664`, `rfc9776.txt:664-665`
@@ -825,21 +740,18 @@ address.**
 
 ### RFC9776-QRY-29
 
-**A Group Specific or Group-and-Source Specific Query is sent to an IP destination address
-equal to the multicast address of interest.**
+**A Group Specific or Group-and-Source Specific Query is sent to an IP destination address equal to the multicast address of interest.**
 
 > "Group Specific and" and "Group-and-Source Specific Queries are sent with an IP destination"
 > and "address equal to the multicast address of interest." — §4.1.12, `rfc9776.txt:665`,
 > `rfc9776.txt:666`, `rfc9776.txt:667`
 
 - Strength: description. Class: wire.
-- Check idea: trigger a Group Specific Query for a chosen address and check the IP destination
-  address equals it.
+- Check idea: trigger a Group Specific Query for a chosen address and check the IP destination address equals it.
 
 ### RFC9776-QRY-30
 
-**A system MUST accept and process a Query whose IP Destination Address field contains any
-address assigned to the interface on which the Query arrives.**
+**A system MUST accept and process a Query whose IP Destination Address field contains any address assigned to the interface on which the Query arrives.**
 
 > "a" and "system MUST accept and process any Query whose IP Destination Address" and "field
 > contains any of the addresses (unicast or multicast) assigned" and "to the interface on which
@@ -847,22 +759,19 @@ address assigned to the interface on which the Query arrives.**
 > `rfc9776.txt:670`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a system a Query addressed to a unicast address assigned to its receiving
-  interface and check the system still processes the Query.
+- Check idea: send a system a Query addressed to a unicast address assigned to its receiving interface and check the system still processes the Query.
 ## Version 3 Membership Report message
 
 ### RFC9776-REP-1
 
-**A system sends an IGMPv3 Membership Report to tell neighboring routers its current or
-changed multicast reception state.**
+**A system sends an IGMPv3 Membership Report to tell neighboring routers its current or changed multicast reception state.**
 
 > "IGMPv3 Membership Reports are sent by IP systems to report (to" and "neighboring routers)
 > the current multicast reception state, or" and "changes in the multicast reception state, of
 > their interfaces." — §4.2, `rfc9776.txt:674`, `rfc9776.txt:675`, `rfc9776.txt:676`
 
 - Strength: description. Class: wire.
-- Check idea: observe the link during normal operation and check that IGMPv3 Membership
-  Reports originate only from a system reporting its own reception state.
+- Check idea: observe the link during normal operation and check that IGMPv3 Membership Reports originate only from a system reporting its own reception state.
 
 ### RFC9776-REP-2
 
@@ -880,21 +789,18 @@ changed multicast reception state.**
 > "ignored on" and "reception." — §4.2.1, `rfc9776.txt:739`, `rfc9776.txt:740`
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a system a Report with a non-zero Reserved field and check the system
-  processes the Report as if the field were zero.
+- Check idea: send a system a Report with a non-zero Reserved field and check the system processes the Report as if the field were zero.
 
 ### RFC9776-REP-4
 
-**The Checksum field is the 16-bit one's complement of the one's complement sum of the whole
-IGMP message, computed with the Checksum field itself set to zero.**
+**The Checksum field is the 16-bit one's complement of the one's complement sum of the whole IGMP message, computed with the Checksum field itself set to zero.**
 
 > "The Checksum field is the 16-bit one's complement of the one's" and "complement sum of the
 > whole IGMP message (the entire IP payload)." and "For computing the checksum, the Checksum
 > field is set to zero." — §4.2.2, `rfc9776.txt:744`, `rfc9776.txt:745`, `rfc9776.txt:746`
 
 - Strength: description. Class: wire.
-- Check idea: capture a Report, recompute the checksum over the message with the Checksum
-  field zeroed, and check the result equals the field on the wire.
+- Check idea: capture a Report, recompute the checksum over the message with the Checksum field zeroed, and check the result equals the field on the wire.
 
 ### RFC9776-REP-5
 
@@ -904,8 +810,7 @@ IGMP message, computed with the Checksum field itself set to zero.**
 > "message." — §4.2.2, `rfc9776.txt:746`, `rfc9776.txt:747`, `rfc9776.txt:748`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a router a Report with a wrong checksum and check the router does not act
-  on its content.
+- Check idea: send a router a Report with a wrong checksum and check the router does not act on its content.
 
 ### RFC9776-REP-6
 
@@ -915,8 +820,7 @@ IGMP message, computed with the Checksum field itself set to zero.**
 > `rfc9776.txt:752-753`
 
 - Strength: description. Class: encoding.
-- Check idea: capture a Report and check that the Flags bits match the current IGMP Type
-  Numbers registry allocation.
+- Check idea: capture a Report and check that the Flags bits match the current IGMP Type Numbers registry allocation.
 
 ### RFC9776-REP-7
 
@@ -926,26 +830,22 @@ IGMP message, computed with the Checksum field itself set to zero.**
 > this Report." — §4.2.4, `rfc9776.txt:757`, `rfc9776.txt:758`
 
 - Strength: description. Class: wire.
-- Check idea: build a Report with a chosen number of Group Records and check that the Number of
-  Group Records field equals that count.
+- Check idea: build a Report with a chosen number of Group Records and check that the Number of Group Records field equals that count.
 
 ### RFC9776-REP-8
 
-**A Group Record holds information about the sender's membership in one multicast group on the
-interface from which the Report is sent.**
+**A Group Record holds information about the sender's membership in one multicast group on the interface from which the Report is sent.**
 
 > "Each Group Record is a block of fields containing information" and "pertaining to the
 > sender's membership in a single multicast group on" and "the interface from which the Report
 > is sent." — §4.2.5, `rfc9776.txt:762`, `rfc9776.txt:763`, `rfc9776.txt:764`
 
 - Strength: description. Class: wire.
-- Check idea: capture a Report and check that each Group Record it carries pertains to a single
-  multicast address on the sending interface.
+- Check idea: capture a Report and check that each Group Record it carries pertains to a single multicast address on the sending interface.
 
 ### RFC9776-REP-9
 
-**The Aux Data Len field states the length of the Auxiliary Data field in 32-bit words, and
-zero means there is no auxiliary data.**
+**The Aux Data Len field states the length of the Auxiliary Data field in 32-bit words, and zero means there is no auxiliary data.**
 
 > "The Aux Data Len field contains the length of the Auxiliary Data" and "field in this Group
 > Record, in units of 32-bit words." and "It may contain" and "zero, to indicate the absence of
@@ -953,20 +853,17 @@ zero means there is no auxiliary data.**
 > `rfc9776.txt:774`
 
 - Strength: may (lower case). Class: encoding.
-- Check idea: build a Group Record with no auxiliary data and check that its Aux Data Len field
-  is zero.
+- Check idea: build a Group Record with no auxiliary data and check that its Aux Data Len field is zero.
 
 ### RFC9776-REP-10
 
-**The Number of Sources field states how many source addresses are present in this Group
-Record.**
+**The Number of Sources field states how many source addresses are present in this Group Record.**
 
 > "The Number of Sources (N) field specifies how many source addresses" and "are present in
 > this Group Record." — §4.2.8, `rfc9776.txt:778`, `rfc9776.txt:779`
 
 - Strength: description. Class: wire.
-- Check idea: build a Group Record with a chosen count of source addresses and check the Number
-  of Sources field equals that count.
+- Check idea: build a Group Record with a chosen count of source addresses and check the Number of Sources field equals that count.
 
 ### RFC9776-REP-11
 
@@ -976,26 +873,22 @@ Record.**
 > Record pertains." — §4.2.9, `rfc9776.txt:783`, `rfc9776.txt:784`
 
 - Strength: description. Class: wire.
-- Check idea: build a Group Record for a chosen multicast address and check the Multicast
-  Address field carries it.
+- Check idea: build a Group Record for a chosen multicast address and check the Multicast Address field carries it.
 
 ### RFC9776-REP-12
 
-**The Source Address fields of a Group Record are a vector of source addresses, one for each
-count in this record's Number of Sources field.**
+**The Source Address fields of a Group Record are a vector of source addresses, one for each count in this record's Number of Sources field.**
 
 > "The Source Address [i] fields are a vector of n IP unicast addresses," and "where n is the
 > value in this record's Number of Sources (N) field." — §4.2.10, `rfc9776.txt:788`,
 > `rfc9776.txt:789`
 
 - Strength: description. Class: wire.
-- Check idea: build a Group Record with n sources and check it carries exactly n Source Address
-  fields, matching its Number of Sources field.
+- Check idea: build a Group Record with n sources and check it carries exactly n Source Address fields, matching its Number of Sources field.
 
 ### RFC9776-REP-13
 
-**The Auxiliary Data field, when present, holds extra information about the Group Record, but
-IGMPv3 defines no auxiliary data.**
+**The Auxiliary Data field, when present, holds extra information about the Group Record, but IGMPv3 defines no auxiliary data.**
 
 > "The Auxiliary Data field, if present, contains additional information" and "pertaining to
 > this Group Record." and "The protocol specified in this" and "document, IGMPv3, does not
@@ -1003,21 +896,18 @@ IGMPv3 defines no auxiliary data.**
 > `rfc9776.txt:794`, `rfc9776.txt:795`
 
 - Strength: description. Class: wire.
-- Check idea: capture a Group Record and check that any Auxiliary Data it carries has no
-  defined meaning under this document.
+- Check idea: capture a Group Record and check that any Auxiliary Data it carries has no defined meaning under this document.
 
 ### RFC9776-REP-14
 
-**A system MUST NOT include auxiliary data in a Group Record it transmits, and MUST set the
-Aux Data Len field to zero.**
+**A system MUST NOT include auxiliary data in a Group Record it transmits, and MUST set the Aux Data Len field to zero.**
 
 > "implementations of IGMPv3 MUST NOT include any auxiliary data (i.e.," and "MUST set the Aux
 > Data Len field to zero) in any transmitted Group" — §4.2.11, `rfc9776.txt:796`,
 > `rfc9776.txt:797`
 
 - Strength: must. Class: wire.
-- Check idea: capture a Group Record a system sends and check the Aux Data Len field is zero
-  and no auxiliary data octets follow.
+- Check idea: capture a Group Record a system sends and check the Aux Data Len field is zero and no auxiliary data octets follow.
 
 ### RFC9776-REP-15
 
@@ -1027,13 +917,11 @@ Aux Data Len field to zero.**
 > `rfc9776.txt:798`, `rfc9776.txt:798-799`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a system a Group Record that carries auxiliary data and check the system's
-  processing of the record is unaffected by that data.
+- Check idea: send a system a Group Record that carries auxiliary data and check the system's processing of the record is unaffected by that data.
 
 ### RFC9776-REP-16
 
-**On a received Report with extra octets beyond the last Group Record, a system MUST include
-those octets when it verifies the IGMP Checksum, but MUST otherwise ignore them.**
+**On a received Report with extra octets beyond the last Group Record, a system MUST include those octets when it verifies the IGMP Checksum, but MUST otherwise ignore them.**
 
 > "If the Packet Length field in the IP header of a received Report" and "indicates that there
 > are additional octets of data present, beyond" and "the last Group Record, IGMPv3
@@ -1043,26 +931,22 @@ those octets when it verifies the IGMP Checksum, but MUST otherwise ignore them.
 > `rfc9776.txt:809`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a Report padded with trailing octets and a checksum computed over them, and
-  check the system accepts it while treating the trailing octets as having no other effect.
+- Check idea: send a Report padded with trailing octets and a checksum computed over them, and check the system accepts it while treating the trailing octets as having no other effect.
 
 ### RFC9776-REP-17
 
-**When a system sends a Report, it MUST NOT include additional octets beyond the last Group
-Record.**
+**When a system sends a Report, it MUST NOT include additional octets beyond the last Group Record.**
 
 > "When sending a" and "Report, an IGMPv3 implementation MUST NOT include additional octets"
 > and "beyond the last Group Record." — §4.2.12, `rfc9776.txt:809`, `rfc9776.txt:809-810`,
 > `rfc9776.txt:811`
 
 - Strength: must. Class: wire.
-- Check idea: capture a Report a system sends and check its length ends exactly at the last
-  Group Record, with no trailing octets.
+- Check idea: capture a Report a system sends and check its length ends exactly at the last Group Record, with no trailing octets.
 
 ### RFC9776-REP-18
 
-**A system sends a Current-State Record in a Report sent in response to a Query, to state its
-current reception state for one multicast address.**
+**A system sends a Current-State Record in a Report sent in response to a Query, to state its current reception state for one multicast address.**
 
 > "A Current-State Record is sent by a system in response to a Query" and "received on an
 > interface.  It reports the current reception state" and "of that interface, with respect to a
@@ -1070,13 +954,11 @@ current reception state for one multicast address.**
 > `rfc9776.txt:820`
 
 - Strength: description. Class: wire.
-- Check idea: send a system a Query and check that its responding Report carries a
-  Current-State Record for each multicast address of interest on that interface.
+- Check idea: send a system a Query and check that its responding Report carries a Current-State Record for each multicast address of interest on that interface.
 
 ### RFC9776-REP-19
 
-**A Current-State Record of type MODE_IS_INCLUDE means the interface's filter-mode is INCLUDE
-for the address, and the Source Address fields list the interface's non-empty source list.**
+**A Current-State Record of type MODE_IS_INCLUDE means the interface's filter-mode is INCLUDE for the address, and the Source Address fields list the interface's non-empty source list.**
 
 > "MODE_IS_INCLUDE - indicates that the interface has a filter-" and "mode of INCLUDE for the
 > specified multicast address." and "The" and "Source Address [i] fields in this Group Record
@@ -1085,13 +967,11 @@ for the address, and the Source Address fields list the interface's non-empty so
 > `rfc9776.txt:826`, `rfc9776.txt:827`, `rfc9776.txt:828`
 
 - Strength: description. Class: wire.
-- Check idea: set an interface to INCLUDE filter-mode with a non-empty source list for an
-  address and check its Current-State Record is MODE_IS_INCLUDE with that source list.
+- Check idea: set an interface to INCLUDE filter-mode with a non-empty source list for an address and check its Current-State Record is MODE_IS_INCLUDE with that source list.
 
 ### RFC9776-REP-20
 
-**A Current-State Record of type MODE_IS_EXCLUDE means the interface's filter-mode is EXCLUDE
-for the address, and the Source Address fields list the interface's non-empty source list.**
+**A Current-State Record of type MODE_IS_EXCLUDE means the interface's filter-mode is EXCLUDE for the address, and the Source Address fields list the interface's non-empty source list.**
 
 > "MODE_IS_EXCLUDE - indicates that the interface has a filter-" and "mode of EXCLUDE for the
 > specified multicast address." and "The" and "Source Address [i] fields in this Group Record
@@ -1100,13 +980,11 @@ for the address, and the Source Address fields list the interface's non-empty so
 > `rfc9776.txt:833`
 
 - Strength: description. Class: wire.
-- Check idea: set an interface to EXCLUDE filter-mode with a non-empty source list for an
-  address and check its Current-State Record is MODE_IS_EXCLUDE with that source list.
+- Check idea: set an interface to EXCLUDE filter-mode with a non-empty source list for an address and check its Current-State Record is MODE_IS_EXCLUDE with that source list.
 
 ### RFC9776-REP-21
 
-**An SSM-aware host SHOULD NOT send a MODE_IS_EXCLUDE record for a multicast address within the
-SSM address range, because SSM-aware routers ignore it.**
+**An SSM-aware host SHOULD NOT send a MODE_IS_EXCLUDE record for a multicast address within the SSM address range, because SSM-aware routers ignore it.**
 
 > "An SSM-aware host" and "SHOULD NOT send a" and "MODE_IS_EXCLUDE record type for multicast
 > addresses that fall" and "within the SSM address range as they will be ignored by SSM-" and
@@ -1114,14 +992,11 @@ SSM address range, because SSM-aware routers ignore it.**
 > `rfc9776.txt:835`, `rfc9776.txt:836`, `rfc9776.txt:837`
 
 - Strength: should not. Class: wire.
-- Check idea: set an SSM-aware host to EXCLUDE filter-mode for an address in the SSM range and
-  check that its Report does not carry a MODE_IS_EXCLUDE record for that address.
+- Check idea: set an SSM-aware host to EXCLUDE filter-mode for an address in the SSM range and check that its Report does not carry a MODE_IS_EXCLUDE record for that address.
 
 ### RFC9776-REP-22
 
-**A system sends a Filter-Mode-Change Record, in the Report from the interface where the
-change occurred, whenever a local request changes the interface's filter-mode between INCLUDE
-and EXCLUDE.**
+**A system sends a Filter-Mode-Change Record, in the Report from the interface where the change occurred, whenever a local request changes the interface's filter-mode between INCLUDE and EXCLUDE.**
 
 > "A Filter-Mode-Change Record is sent by a system whenever a local" and "invocation of
 > IPMulticastListen causes a change of the filter-mode" and "(i.e., a change from INCLUDE to
@@ -1132,13 +1007,11 @@ and EXCLUDE.**
 > `rfc9776.txt:844`
 
 - Strength: description. Class: wire.
-- Check idea: change an interface's filter-mode for an address from INCLUDE to EXCLUDE and
-  check that the next Report from that interface carries a Filter-Mode-Change Record for it.
+- Check idea: change an interface's filter-mode for an address from INCLUDE to EXCLUDE and check that the next Report from that interface carries a Filter-Mode-Change Record for it.
 
 ### RFC9776-REP-23
 
-**CHANGE_TO_INCLUDE_MODE means the interface has changed to INCLUDE filter-mode for the
-address, and the Source Address fields list the new non-empty source list.**
+**CHANGE_TO_INCLUDE_MODE means the interface has changed to INCLUDE filter-mode for the address, and the Source Address fields list the new non-empty source list.**
 
 > "CHANGE_TO_INCLUDE_MODE - indicates that the interface has" and "changed to INCLUDE
 > filter-mode for the specified multicast" and "address." and "The Source Address [i] fields in
@@ -1147,14 +1020,11 @@ address, and the Source Address fields list the new non-empty source list.**
 > `rfc9776.txt:849`, `rfc9776.txt:849`, `rfc9776.txt:850`, `rfc9776.txt:851`
 
 - Strength: description. Class: wire.
-- Check idea: change an interface from EXCLUDE to INCLUDE filter-mode for an address with a
-  non-empty source list and check the Report carries a CHANGE_TO_INCLUDE_MODE record with that
-  list.
+- Check idea: change an interface from EXCLUDE to INCLUDE filter-mode for an address with a non-empty source list and check the Report carries a CHANGE_TO_INCLUDE_MODE record with that list.
 
 ### RFC9776-REP-24
 
-**CHANGE_TO_EXCLUDE_MODE means the interface has changed to EXCLUDE filter-mode for the
-address, and the Source Address fields list the new non-empty source list.**
+**CHANGE_TO_EXCLUDE_MODE means the interface has changed to EXCLUDE filter-mode for the address, and the Source Address fields list the new non-empty source list.**
 
 > "CHANGE_TO_EXCLUDE_MODE - indicates that the interface has" and "changed to EXCLUDE
 > filter-mode for the specified multicast" and "address." and "The Source Address [i] fields in
@@ -1163,28 +1033,22 @@ address, and the Source Address fields list the new non-empty source list.**
 > `rfc9776.txt:856`
 
 - Strength: description. Class: wire.
-- Check idea: change an interface from INCLUDE to EXCLUDE filter-mode for an address with a
-  non-empty source list and check the Report carries a CHANGE_TO_EXCLUDE_MODE record with that
-  list.
+- Check idea: change an interface from INCLUDE to EXCLUDE filter-mode for an address with a non-empty source list and check the Report carries a CHANGE_TO_EXCLUDE_MODE record with that list.
 
 ### RFC9776-REP-25
 
-**An SSM-aware host SHOULD NOT send a CHANGE_TO_EXCLUDE_MODE record for a multicast address
-within the SSM address range.**
+**An SSM-aware host SHOULD NOT send a CHANGE_TO_EXCLUDE_MODE record for a multicast address within the SSM address range.**
 
 > "An SSM-aware host" and "SHOULD NOT send a CHANGE_TO_EXCLUDE_MODE record type for" and
 > "multicast addresses that fall within the SSM address range." — §4.2.13,
 > `rfc9776.txt:857`, `rfc9776.txt:858`, `rfc9776.txt:859`
 
 - Strength: should not. Class: wire.
-- Check idea: change an SSM-aware host to EXCLUDE filter-mode for an address in the SSM range
-  and check that no CHANGE_TO_EXCLUDE_MODE record for it appears in the Report.
+- Check idea: change an SSM-aware host to EXCLUDE filter-mode for an address in the SSM range and check that no CHANGE_TO_EXCLUDE_MODE record for it appears in the Report.
 
 ### RFC9776-REP-26
 
-**A system sends a Source-List-Change Record, in the Report from the interface where the
-change occurred, whenever a local request changes the interface's source list without
-changing its filter-mode.**
+**A system sends a Source-List-Change Record, in the Report from the interface where the change occurred, whenever a local request changes the interface's source list without changing its filter-mode.**
 
 > "A Source-List-Change Record is sent by a system whenever a local" and "invocation of
 > IPMulticastListen causes a change of the source-list" and "that is not coincident with a
@@ -1194,13 +1058,11 @@ changing its filter-mode.**
 > `rfc9776.txt:863`, `rfc9776.txt:864`, `rfc9776.txt:865`, `rfc9776.txt:866`
 
 - Strength: description. Class: wire.
-- Check idea: add a source to an interface's INCLUDE source list without changing filter-mode
-  and check the Report carries a Source-List-Change Record from that interface.
+- Check idea: add a source to an interface's INCLUDE source list without changing filter-mode and check the Report carries a Source-List-Change Record from that interface.
 
 ### RFC9776-REP-27
 
-**ALLOW_NEW_SOURCES lists, in the Source Address fields, the sources newly added to an INCLUDE
-list or removed from an EXCLUDE list.**
+**ALLOW_NEW_SOURCES lists, in the Source Address fields, the sources newly added to an INCLUDE list or removed from an EXCLUDE list.**
 
 > "ALLOW_NEW_SOURCES - indicates that the Source Address [i]" and "fields in this Group Record
 > contain a list of the additional" and "sources that the system wishes to receive, for packets
@@ -1211,13 +1073,11 @@ list or removed from an EXCLUDE list.**
 > `rfc9776.txt:872`, `rfc9776.txt:873`, `rfc9776.txt:874`, `rfc9776.txt:875`
 
 - Strength: description. Class: wire.
-- Check idea: add a source to an interface's INCLUDE list and check the Report carries an
-  ALLOW_NEW_SOURCES record listing that source.
+- Check idea: add a source to an interface's INCLUDE list and check the Report carries an ALLOW_NEW_SOURCES record listing that source.
 
 ### RFC9776-REP-28
 
-**BLOCK_OLD_SOURCES lists, in the Source Address fields, the sources removed from an INCLUDE
-list or added to an EXCLUDE list.**
+**BLOCK_OLD_SOURCES lists, in the Source Address fields, the sources removed from an INCLUDE list or added to an EXCLUDE list.**
 
 > "BLOCK_OLD_SOURCES - indicates that the Source Address [i]" and "fields in this Group Record
 > contain a list of the sources that" and "the system no longer wishes to receive, for packets
@@ -1228,14 +1088,11 @@ list or added to an EXCLUDE list.**
 > `rfc9776.txt:880`, `rfc9776.txt:881`, `rfc9776.txt:882`, `rfc9776.txt:883`
 
 - Strength: description. Class: wire.
-- Check idea: remove a source from an interface's INCLUDE list and check the Report carries a
-  BLOCK_OLD_SOURCES record listing that source.
+- Check idea: remove a source from an interface's INCLUDE list and check the Report carries a BLOCK_OLD_SOURCES record listing that source.
 
 ### RFC9776-REP-29
 
-**When a source-list change both allows new sources and blocks old sources for the same
-address, a system sends two Group Records for it: one ALLOW_NEW_SOURCES and one
-BLOCK_OLD_SOURCES.**
+**When a source-list change both allows new sources and blocks old sources for the same address, a system sends two Group Records for it: one ALLOW_NEW_SOURCES and one BLOCK_OLD_SOURCES.**
 
 > "If a change of source-list results in both allowing new sources and" and "blocking old
 > sources, then two Group Records are sent for the same" and "multicast address, one of type
@@ -1243,9 +1100,7 @@ BLOCK_OLD_SOURCES.**
 > `rfc9776.txt:886`, `rfc9776.txt:887`, `rfc9776.txt:888`
 
 - Strength: description. Class: wire.
-- Check idea: change an interface's INCLUDE source list by adding one source and removing
-  another at once, and check the Report carries both an ALLOW_NEW_SOURCES and a
-  BLOCK_OLD_SOURCES record for the address.
+- Check idea: change an interface's INCLUDE source list by adding one source and removing another at once, and check the Report carries both an ALLOW_NEW_SOURCES and a BLOCK_OLD_SOURCES record for the address.
 
 ### RFC9776-REP-30
 
@@ -1254,8 +1109,7 @@ BLOCK_OLD_SOURCES.**
 > "Unrecognized Record Type values MUST be silently ignored." — §4.2.13, `rfc9776.txt:893`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a router a Report that carries a Group Record with an undefined Record Type
-  and check that the router gives no error report and does not act on the record's content.
+- Check idea: send a router a Report that carries a Group Record with an undefined Record Type and check that the router gives no error report and does not act on the record's content.
 
 ### RFC9776-REP-31
 
@@ -1265,20 +1119,17 @@ BLOCK_OLD_SOURCES.**
 > subnet." — §4.2.14, `rfc9776.txt:897`, `rfc9776.txt:897-898`
 
 - Strength: description. Class: wire.
-- Check idea: capture a Report a system sends and check the IP source address is a valid
-  unicast address of the sending subnet.
+- Check idea: capture a Report a system sends and check the IP source address is a valid unicast address of the sending subnet.
 
 ### RFC9776-REP-32
 
-**A system that has not yet acquired an IP address MAY use 0.0.0.0 as its Report's source
-address.**
+**A system that has not yet acquired an IP address MAY use 0.0.0.0 as its Report's source address.**
 
 > "The 0.0.0.0 source address may be used by a" and "system that has not yet acquired an IP
 > address." — §4.2.14, `rfc9776.txt:898`, `rfc9776.txt:898-899`
 
 - Strength: may (lower case). Class: wire.
-- Check idea: have a system without an assigned IP address send a Report and check the IP
-  source address is 0.0.0.0.
+- Check idea: have a system without an assigned IP address send a Report and check the IP source address is 0.0.0.0.
 
 ### RFC9776-REP-33
 
@@ -1288,38 +1139,32 @@ address.**
 > `rfc9776.txt:901`, `rfc9776.txt:901-902`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a router a Report with source address 0.0.0.0 and check the router still
-  processes it.
+- Check idea: send a router a Report with source address 0.0.0.0 and check the router still processes it.
 
 ### RFC9776-REP-34
 
-**A Version 3 Report is sent to the IP destination address 224.0.0.22, to which every
-IGMPv3-capable multicast router listens.**
+**A Version 3 Report is sent to the IP destination address 224.0.0.22, to which every IGMPv3-capable multicast router listens.**
 
 > "Version 3 Reports are sent with an IP destination address of" and "224.0.0.22, to which all
 > IGMPv3-capable multicast routers listen." — §4.2.15, `rfc9776.txt:906`, `rfc9776.txt:906-907`
 
 - Strength: description. Class: wire.
-- Check idea: capture a Version 3 Report a system sends and check its IP destination address is
-  224.0.0.22.
+- Check idea: capture a Version 3 Report a system sends and check its IP destination address is 224.0.0.22.
 
 ### RFC9776-REP-35
 
-**A system operating in v1 or v2 compatibility mode sends its Report to the multicast group
-named in the Report's Group Address field.**
+**A system operating in v1 or v2 compatibility mode sends its Report to the multicast group named in the Report's Group Address field.**
 
 > "A" and "system that is operating in v1 or v2 compatibility modes sends v1 or" and "v2
 > Reports to the multicast group specified in the Group Address" and "field of the Report." —
 > §4.2.15, `rfc9776.txt:907`, `rfc9776.txt:908`, `rfc9776.txt:909`, `rfc9776.txt:909-910`
 
 - Strength: description. Class: wire.
-- Check idea: put a system in v2 compatibility mode for a group and check that its v2 Report's
-  IP destination address equals the group address in the Report.
+- Check idea: put a system in v2 compatibility mode for a group and check that its v2 Report's IP destination address equals the group address in the Report.
 
 ### RFC9776-REP-36
 
-**A system MUST accept and process a v1 or v2 Report whose IP Destination Address field
-contains any address assigned to the interface on which the Report arrives.**
+**A system MUST accept and process a v1 or v2 Report whose IP Destination Address field contains any address assigned to the interface on which the Report arrives.**
 
 > "a system MUST accept and process" and "any v1 or v2 Report whose IP Destination Address
 > field contains any" and "of the addresses (unicast or multicast) assigned to the interface
@@ -1327,13 +1172,11 @@ contains any address assigned to the interface on which the Report arrives.**
 > `rfc9776.txt:912`, `rfc9776.txt:913`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a system a v2 Report addressed to a unicast address assigned to its
-  receiving interface and check the system still processes the Report.
+- Check idea: send a system a v2 Report addressed to a unicast address assigned to its receiving interface and check the system still processes the Report.
 
 ### RFC9776-REP-37
 
-**When the Group Records required in a Report do not fit within the size limit of a single
-Report message, a system sends them in as many Report messages as needed.**
+**When the Group Records required in a Report do not fit within the size limit of a single Report message, a system sends them in as many Report messages as needed.**
 
 > "If the set of Group Records required in a report does not fit within" and "the size limit of
 > a single Report message (as determined by the MTU" and "of the network on which it will be
@@ -1342,14 +1185,11 @@ Report message, a system sends them in as many Report messages as needed.**
 > `rfc9776.txt:942`
 
 - Strength: description. Class: wire.
-- Check idea: give a system more Group Records than fit in one message and check that it sends
-  them split across several Report messages, together covering the whole set.
+- Check idea: give a system more Group Records than fit in one message and check that it sends them split across several Report messages, together covering the whole set.
 
 ### RFC9776-REP-38
 
-**When a single Group Record with a type other than MODE_IS_EXCLUDE or CHANGE_TO_EXCLUDE_MODE
-has too many source addresses for one message, a system splits it into several Group Records,
-each sent in a separate Report message.**
+**When a single Group Record with a type other than MODE_IS_EXCLUDE or CHANGE_TO_EXCLUDE_MODE has too many source addresses for one message, a system splits it into several Group Records, each sent in a separate Report message.**
 
 > "If a single Group Record contains so many source addresses that it" and "does not fit within
 > the size limit of a single Report message, and if" and "its Type is not MODE_IS_EXCLUDE or
@@ -1359,14 +1199,11 @@ each sent in a separate Report message.**
 > `rfc9776.txt:948`
 
 - Strength: description. Class: wire.
-- Check idea: build an ALLOW_NEW_SOURCES record with more sources than fit in one message and
-  check that the system splits it across several Group Records, each in its own Report message.
+- Check idea: build an ALLOW_NEW_SOURCES record with more sources than fit in one message and check that the system splits it across several Group Records, each in its own Report message.
 
 ### RFC9776-REP-39
 
-**When a single MODE_IS_EXCLUDE or CHANGE_TO_EXCLUDE_MODE Group Record has too many source
-addresses for one message, a system sends one Group Record with as many source addresses as
-fit and leaves out the rest.**
+**When a single MODE_IS_EXCLUDE or CHANGE_TO_EXCLUDE_MODE Group Record has too many source addresses for one message, a system sends one Group Record with as many source addresses as fit and leaves out the rest.**
 
 > "If its Type is MODE_IS_EXCLUDE or CHANGE_TO_EXCLUDE_MODE, a single" and "Group Record is
 > sent, containing as many source addresses as can fit," and "and the remaining source
@@ -1374,9 +1211,7 @@ fit and leaves out the rest.**
 > `rfc9776.txt:951`
 
 - Strength: description. Class: wire.
-- Check idea: build a MODE_IS_EXCLUDE record with more sources than fit in one message and
-  check the system sends a single Group Record holding as many sources as fit, with the rest
-  absent.
+- Check idea: build a MODE_IS_EXCLUDE record with more sources than fit in one message and check the system sends a single Group Record holding as many sources as fit, with the rest absent.
 
 ## Group member: action on change of interface state
 
@@ -3496,20 +3331,17 @@ fit and leaves out the rest.**
 
 ### RFC9776-TIMER-1
 
-**If a link uses non-default timer or counter settings, every system on that link MUST use the
-same settings.**
+**If a link uses non-default timer or counter settings, every system on that link MUST use the same settings.**
 
 > "If non-default settings" and "are used, they MUST be consistent among all systems on a
 > single link." — §8, `rfc9776.txt:2011`, `rfc9776.txt:2012`
 
 - Strength: must. Class: internal.
-- Check idea: configure two systems on the same link with matching non-default Query Interval
-  values and check both operate consistently; a mismatch is a defect this rule forbids.
+- Check idea: configure two systems on the same link with matching non-default Query Interval values and check both operate consistently; a mismatch is a defect this rule forbids.
 
 ### RFC9776-TIMER-2
 
-**The Robustness Variable tunes IGMP for expected packet loss; IGMP tolerates one less than the
-Robustness Variable packet losses. Default: 2.**
+**The Robustness Variable tunes IGMP for expected packet loss; IGMP tolerates one less than the Robustness Variable packet losses. Default: 2.**
 
 > "The Robustness Variable allows tuning for the expected packet loss on" and "a network." and
 > "IGMP is robust to (Robustness Variable -" and "1) packet losses." and "Default: 2." — §8.1,
@@ -3517,8 +3349,7 @@ Robustness Variable packet losses. Default: 2.**
 > `rfc9776.txt:2022`
 
 - Strength: description. Class: internal.
-- Check idea: read a system's configured Robustness Variable when not otherwise set and check
-  it equals 2.
+- Check idea: read a system's configured Robustness Variable when not otherwise set and check it equals 2.
 
 ### RFC9776-TIMER-3
 
@@ -3528,33 +3359,28 @@ Robustness Variable packet losses. Default: 2.**
 > `rfc9776.txt:2021`, `rfc9776.txt:2022`
 
 - Strength: must not (zero), should not (one). Class: internal.
-- Check idea: attempt to configure a system's Robustness Variable to zero and check the system
-  rejects it; attempt to configure it to one and check the system flags it as discouraged.
+- Check idea: attempt to configure a system's Robustness Variable to zero and check the system rejects it; attempt to configure it to one and check the system flags it as discouraged.
 
 ### RFC9776-TIMER-4
 
-**The Query Interval is the interval between General Queries sent by the Querier. Default: 125
-seconds.**
+**The Query Interval is the interval between General Queries sent by the Querier. Default: 125 seconds.**
 
 > "The Query Interval is the interval between General Queries sent by" and "the Querier.
 > Default: 125 seconds." — §8.2, `rfc9776.txt:2026`, `rfc9776.txt:2027`
 
 - Strength: description. Class: internal.
-- Check idea: read a querier's Query Interval when not otherwise configured and check it
-  equals 125 seconds, and that the querier's General Queries repeat at that interval.
+- Check idea: read a querier's Query Interval when not otherwise configured and check it equals 125 seconds, and that the querier's General Queries repeat at that interval.
 
 ### RFC9776-TIMER-5
 
-**The Query Response Interval uses the Max Response Time to calculate the Max Resp Code
-inserted into periodic General Queries. Default: 100, that is 10 seconds.**
+**The Query Response Interval uses the Max Response Time to calculate the Max Resp Code inserted into periodic General Queries. Default: 100, that is 10 seconds.**
 
 > "The Query Response Interval uses the Max Response Time to calculate" and "the Max Resp Code
 > that is inserted into the periodic General Queries." and "Default: 100 (10 seconds)." —
 > §8.3, `rfc9776.txt:2035`, `rfc9776.txt:2036`, `rfc9776.txt:2037`
 
 - Strength: description. Class: internal.
-- Check idea: read a querier's Query Response Interval when not otherwise configured and check
-  it equals 100, giving a Max Resp Code for 10 seconds in its periodic General Queries.
+- Check idea: read a querier's Query Response Interval when not otherwise configured and check it equals 100, giving a Max Resp Code for 10 seconds in its periodic General Queries.
 
 ### RFC9776-TIMER-6
 
@@ -3564,91 +3390,76 @@ inserted into periodic General Queries. Default: 100, that is 10 seconds.**
 > the [Query Interval]." — §8.3, `rfc9776.txt:2042`, `rfc9776.txt:2042-2043`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: configure a querier's Query Response Interval and Query Interval and check the
-  configured Query Response Interval, in seconds, is smaller than the Query Interval.
+- Check idea: configure a querier's Query Response Interval and Query Interval and check the configured Query Response Interval, in seconds, is smaller than the Query Interval.
 
 ### RFC9776-TIMER-7
 
-**The Group Membership Interval is the time a multicast router waits before it decides there
-are no more members of a group or a source on a network.**
+**The Group Membership Interval is the time a multicast router waits before it decides there are no more members of a group or a source on a network.**
 
 > "The Group Membership Interval is the amount of time that must pass" and "before a multicast
 > router decides there are no more members of a" and "group or a particular source on a
 > network." — §8.4, `rfc9776.txt:2047`, `rfc9776.txt:2048`, `rfc9776.txt:2049`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: stop all reports for a group on a network and check the router waits the Group
-  Membership Interval before it decides there are no more members.
+- Check idea: stop all reports for a group on a network and check the router waits the Group Membership Interval before it decides there are no more members.
 
 ### RFC9776-TIMER-8
 
-**The Group Membership Interval MUST be the Robustness Variable times the Query Interval, plus
-twice the Query Response Interval.**
+**The Group Membership Interval MUST be the Robustness Variable times the Query Interval, plus twice the Query Response Interval.**
 
 > "This value MUST be ([Robustness Variable] times [Query Interval])" and "plus (2 * [Query
 > Response Interval])." — §8.4, `rfc9776.txt:2051`, `rfc9776.txt:2052`
 
 - Strength: must. Class: internal.
-- Check idea: configure a router's Robustness Variable, Query Interval and Query Response
-  Interval and check the resulting Group Membership Interval matches the formula.
+- Check idea: configure a router's Robustness Variable, Query Interval and Query Response Interval and check the resulting Group Membership Interval matches the formula.
 
 ### RFC9776-TIMER-9
 
-**The Other Querier Present Interval is the time a multicast router waits before it decides
-there is no longer another router that should be the querier.**
+**The Other Querier Present Interval is the time a multicast router waits before it decides there is no longer another router that should be the querier.**
 
 > "The Other Querier Present Interval is the length of time that must" and "pass before a
 > multicast router decides that there is no longer" and "another multicast router that should
 > be the querier." — §8.5, `rfc9776.txt:2056`, `rfc9776.txt:2057`, `rfc9776.txt:2058`
 
 - Strength: must, should (lower case). Class: internal.
-- Check idea: stop Queries from the current querier on a network and check a non-querier router
-  waits the Other Querier Present Interval before it takes over.
+- Check idea: stop Queries from the current querier on a network and check a non-querier router waits the Other Querier Present Interval before it takes over.
 
 ### RFC9776-TIMER-10
 
-**The Other Querier Present Interval MUST be the Robustness Variable times the Query Interval,
-plus 0.5 times the Query Response Interval.**
+**The Other Querier Present Interval MUST be the Robustness Variable times the Query Interval, plus 0.5 times the Query Response Interval.**
 
 > "This value MUST" and "be ([Robustness Variable] times [Query Interval]) plus (0.5 times" and
 > "[Query Response Interval])." — §8.5, `rfc9776.txt:2058`, `rfc9776.txt:2059`,
 > `rfc9776.txt:2060`
 
 - Strength: must. Class: internal.
-- Check idea: configure a router's Robustness Variable, Query Interval and Query Response
-  Interval and check the resulting Other Querier Present Interval matches the formula.
+- Check idea: configure a router's Robustness Variable, Query Interval and Query Response Interval and check the resulting Other Querier Present Interval matches the formula.
 
 ### RFC9776-TIMER-11
 
-**The Startup Query Interval is the interval between General Queries a Querier sends on
-startup. Default: 1/4 times the Query Interval.**
+**The Startup Query Interval is the interval between General Queries a Querier sends on startup. Default: 1/4 times the Query Interval.**
 
 > "The Startup Query Interval is the interval between General Queries" and "sent by a Querier
 > on startup.  Default: 1/4 times [Query Interval]." — §8.6, `rfc9776.txt:2064`,
 > `rfc9776.txt:2065`
 
 - Strength: description. Class: internal.
-- Check idea: start a querier and check the interval between its first General Queries equals
-  one quarter of its configured Query Interval.
+- Check idea: start a querier and check the interval between its first General Queries equals one quarter of its configured Query Interval.
 
 ### RFC9776-TIMER-12
 
-**The Startup Query Count is the number of Queries a Querier sends out on startup, separated
-by the Startup Query Interval. Default: the Robustness Variable.**
+**The Startup Query Count is the number of Queries a Querier sends out on startup, separated by the Startup Query Interval. Default: the Robustness Variable.**
 
 > "The Startup Query Count is the number of Queries sent out on startup," and "separated by the
 > Startup Query Interval.  Default: [Robustness" and "Variable]." — §8.7, `rfc9776.txt:2069`,
 > `rfc9776.txt:2070`, `rfc9776.txt:2071`
 
 - Strength: description. Class: internal.
-- Check idea: start a querier with the default Robustness Variable and count the General
-  Queries it sends on startup before it falls back to the Query Interval.
+- Check idea: start a querier with the default Robustness Variable and count the General Queries it sends on startup before it falls back to the Query Interval.
 
 ### RFC9776-TIMER-13
 
-**The Last Member Query Interval is the Max Response Time used for the Max Resp Code of Group
-Specific Queries sent after a Leave Group message, and of Group-and-Source Specific Queries.
-Default: 10, that is 1 second.**
+**The Last Member Query Interval is the Max Response Time used for the Max Resp Code of Group Specific Queries sent after a Leave Group message, and of Group-and-Source Specific Queries. Default: 10, that is 1 second.**
 
 > "The Last Member Query Interval (LMQI) is the Max Response Time used" and "to calculate the
 > Max Resp Code that is inserted into Group Specific" and "Queries sent in response to Leave
@@ -3658,40 +3469,33 @@ Default: 10, that is 1 second.**
 > `rfc9776.txt:2077`, `rfc9776.txt:2078`, `rfc9776.txt:2079`, `rfc9776.txt:2079`
 
 - Strength: description. Class: internal.
-- Check idea: trigger a router's response to a Leave Group message and check its Group Specific
-  Query carries a Max Resp Code for 1 second.
+- Check idea: trigger a router's response to a Leave Group message and check its Group Specific Query carries a Max Resp Code for 1 second.
 
 ### RFC9776-TIMER-14
 
-**For a Last Member Query Interval greater than 12.8 seconds, only specific values are
-representable, matching the sequential Max Resp Code values.**
+**For a Last Member Query Interval greater than 12.8 seconds, only specific values are representable, matching the sequential Max Resp Code values.**
 
 > "Note that for values of LMQI greater than 12.8 seconds, a limited set" and "of values can be
 > represented, corresponding to sequential values of" and "Max Resp Code." — §8.8,
 > `rfc9776.txt:2081`, `rfc9776.txt:2082`, `rfc9776.txt:2083`
 
 - Strength: description. Class: encoding.
-- Check idea: configure a Last Member Query Interval above 12.8 seconds and check the resulting
-  Max Resp Code matches one of the values the exponential encoding can represent.
+- Check idea: configure a Last Member Query Interval above 12.8 seconds and check the resulting Max Resp Code matches one of the values the exponential encoding can represent.
 
 ### RFC9776-TIMER-15
 
-**When a system converts a configured time to a Max Resp Code, it uses the exact value if
-possible, or the next lower representable value otherwise.**
+**When a system converts a configured time to a Max Resp Code, it uses the exact value if possible, or the next lower representable value otherwise.**
 
 > "When converting a configured time to a Max Resp Code" and "value, it is recommended to use
 > the exact value, if possible, or the" and "next lower value if the requested value is not
 > exactly representable." — §8.8, `rfc9776.txt:2083`, `rfc9776.txt:2084`, `rfc9776.txt:2085`
 
 - Strength: description. Class: encoding.
-- Check idea: configure a Last Member Query Interval that is not exactly representable and
-  check the resulting Max Resp Code decodes to the next lower representable value.
+- Check idea: configure a Last Member Query Interval that is not exactly representable and check the resulting Max Resp Code decodes to the next lower representable value.
 
 ### RFC9776-TIMER-16
 
-**The Last Member Query Count is the number of Group Specific Queries, and also the number of
-Group-and-Source Specific Queries, a router sends before it assumes there are no more
-listeners. Default: the Robustness Variable.**
+**The Last Member Query Count is the number of Group Specific Queries, and also the number of Group-and-Source Specific Queries, a router sends before it assumes there are no more listeners. Default: the Robustness Variable.**
 
 > "The Last Member Query Count is the number of Group Specific Queries" and "sent before the
 > router assumes there are no local members." and "The Last" and "Member Query Count is also
@@ -3701,14 +3505,11 @@ listeners. Default: the Robustness Variable.**
 > `rfc9776.txt:2096`, `rfc9776.txt:2097`, `rfc9776.txt:2097`
 
 - Strength: description. Class: internal.
-- Check idea: trigger a router's last-member query sequence for a group and count the Group
-  Specific Queries it sends before it decides there are no more members; check the count equals
-  the Robustness Variable.
+- Check idea: trigger a router's last-member query sequence for a group and count the Group Specific Queries it sends before it decides there are no more members; check the count equals the Robustness Variable.
 
 ### RFC9776-TIMER-17
 
-**The Last Member Query Time is the Last Member Query Interval times the Last Member Query
-Count; it is not itself a tunable value, only its components are.**
+**The Last Member Query Time is the Last Member Query Interval times the Last Member Query Count; it is not itself a tunable value, only its components are.**
 
 > "The Last Member Query Time is the time value represented by [Last" and "Member Query
 > Interval] times [Last Member Query Count]." and "It is not a" and "tunable value, but it may
@@ -3716,201 +3517,139 @@ Count; it is not itself a tunable value, only its components are.**
 > `rfc9776.txt:2102`, `rfc9776.txt:2103`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: configure a router's Last Member Query Interval and Last Member Query Count and
-  check the total time of its last-member query sequence equals their product.
+- Check idea: configure a router's Last Member Query Interval and Last Member Query Count and check the total time of its last-member query sequence equals their product.
 
 ### RFC9776-TIMER-18
 
-**The Unsolicited Report Interval is the time between repetitions of a host's initial report of
-membership in a group. Default: 1 second.**
+**The Unsolicited Report Interval is the time between repetitions of a host's initial report of membership in a group. Default: 1 second.**
 
 > "The Unsolicited Report Interval is the time between repetitions of a" and "host's initial
 > report of membership in a group.  Default: 1 second." — §8.11, `rfc9776.txt:2107`,
 > `rfc9776.txt:2108`
 
 - Strength: description. Class: internal.
-- Check idea: have a host join a group and check its first unsolicited Report repeats after 1
-  second.
+- Check idea: have a host join a group and check its first unsolicited Report repeats after 1 second.
 
 ### RFC9776-TIMER-19
 
-**The Older Version Querier Present Interval is the timeout for a host to transition back to
-IGMPv3 mode after it receives an older version query.**
+**The Older Version Querier Present Interval is the timeout for a host to transition back to IGMPv3 mode after it receives an older version query.**
 
 > "The Older Version Querier Present Interval is the timeout for" and "transitioning a host
 > back to IGMPv3 mode once an older version query" and "is received." — §8.12,
 > `rfc9776.txt:2112`, `rfc9776.txt:2113`, `rfc9776.txt:2114`
 
 - Strength: description. Class: internal.
-- Check idea: stop older-version queries reaching a host and check the host returns to IGMPv3
-  mode once the Older Version Querier Present Interval has passed since the last one.
+- Check idea: stop older-version queries reaching a host and check the host returns to IGMPv3 mode once the Older Version Querier Present Interval has passed since the last one.
 
 ### RFC9776-TIMER-20
 
-**When a host receives an older version query, it sets its Older-Version-Querier-Present Timer
-to the Older Version Querier Present Interval.**
+**When a host receives an older version query, it sets its Older-Version-Querier-Present Timer to the Older Version Querier Present Interval.**
 
 > "When an older version query is received, hosts set" and "their Older-Version-Querier-Present
 > Timer to [Older Version Querier" and "Present Interval]." — §8.12, `rfc9776.txt:2114`,
 > `rfc9776.txt:2115`, `rfc9776.txt:2116`
 
 - Strength: description. Class: internal.
-- Check idea: send a host an older version query and check its Older-Version-Querier-Present
-  Timer is set to the Older Version Querier Present Interval.
+- Check idea: send a host an older version query and check its Older-Version-Querier-Present Timer is set to the Older Version Querier Present Interval.
 
 ### RFC9776-TIMER-21
 
-**A host SHOULD use the default values to calculate the Older Version Querier Present
-Interval, because it does not know the querying router's configured values.**
+**A host SHOULD use the default values to calculate the Older Version Querier Present Interval, because it does not know the querying router's configured values.**
 
 > "It is RECOMMENDED to use the default values for calculating the" and "interval value as
 > hosts do not know the values configured on the" and "querying routers." — §8.12,
 > `rfc9776.txt:2118`, `rfc9776.txt:2119`, `rfc9776.txt:2120`
 
 - Strength: should. Class: internal.
-- Check idea: give a host a non-default Robustness Variable and Query Interval, and check
-  whether it uses the default values, rather than its own, to calculate the Older Version
-  Querier Present Interval.
+- Check idea: give a host a non-default Robustness Variable and Query Interval, and check whether it uses the default values, rather than its own, to calculate the Older Version Querier Present Interval.
 
 ### RFC9776-TIMER-22
 
-**The Older Version Querier Present Interval SHOULD be the Robustness Variable times the Query
-Interval, plus 10 times the Max Response Time of the last received Query.**
+**The Older Version Querier Present Interval SHOULD be the Robustness Variable times the Query Interval, plus 10 times the Max Response Time of the last received Query.**
 
 > "This value SHOULD be [Robustness Variable] times" and "[Query Interval] plus (10 times the
 > Max Response Time in the last" and "received Query Message)." — §8.12, `rfc9776.txt:2120`,
 > `rfc9776.txt:2121`, `rfc9776.txt:2122`
 
 - Strength: should. Class: internal.
-- Check idea: send a host a Query with a known Max Response Time and check the host's resulting
-  Older Version Querier Present Interval matches the formula.
+- Check idea: send a host a Query with a known Max Response Time and check the host's resulting Older Version Querier Present Interval matches the formula.
 
 ### RFC9776-TIMER-23
 
-**The Older Host Present Interval is the timeout for a group to transition back to IGMPv3 mode
-after an older version report is sent for it.**
+**The Older Host Present Interval is the timeout for a group to transition back to IGMPv3 mode after an older version report is sent for it.**
 
 > "The Older Host Present Interval is the timeout for transitioning a" and "group back to
 > IGMPv3 mode once an older version report is sent for" and "that group." — §8.13,
 > `rfc9776.txt:2126`, `rfc9776.txt:2127`, `rfc9776.txt:2128`
 
 - Strength: description. Class: internal.
-- Check idea: stop older-version reports for a group reaching a router and check the router
-  returns the group to IGMPv3 mode once the Older Host Present Interval has passed since the
-  last one.
+- Check idea: stop older-version reports for a group reaching a router and check the router returns the group to IGMPv3 mode once the Older Host Present Interval has passed since the last one.
 
 ### RFC9776-TIMER-24
 
-**When a router receives an older version report, it sets its Older-Host-Present Timer to the
-Older Host Present Interval.**
+**When a router receives an older version report, it sets its Older-Host-Present Timer to the Older Host Present Interval.**
 
 > "When an older version report is received, routers set" and "their Older-Host-Present Timer
 > to [Older Host Present Interval]." — §8.13, `rfc9776.txt:2128`, `rfc9776.txt:2129`
 
 - Strength: description. Class: internal.
-- Check idea: send a router an older version report for a group and check its
-  Older-Host-Present Timer for that group is set to the Older Host Present Interval.
+- Check idea: send a router an older version report for a group and check its Older-Host-Present Timer for that group is set to the Older Host Present Interval.
 
 ### RFC9776-TIMER-25
 
-**The Older Host Present Interval MUST be the Robustness Variable times the Query Interval,
-plus the Query Response Interval.**
+**The Older Host Present Interval MUST be the Robustness Variable times the Query Interval, plus the Query Response Interval.**
 
 > "This value MUST be ([Robustness Variable] times [Query Interval])" and "plus [Query Response
 > Interval]." — §8.13, `rfc9776.txt:2131`, `rfc9776.txt:2132`
 
 - Strength: must. Class: internal.
-- Check idea: configure a router's Robustness Variable, Query Interval and Query Response
-  Interval and check the resulting Older Host Present Interval matches the formula.
+- Check idea: configure a router's Robustness Variable, Query Interval and Query Response Interval and check the resulting Older Host Present Interval matches the formula.
 
 ### RFC9776-TIMER-26
 
-**The Query Interval MUST be equal to or longer than the Max Response Time inserted in General
-Query messages.**
+**The Query Interval MUST be equal to or longer than the Max Response Time inserted in General Query messages.**
 
 > "The Query Interval MUST be equal to" and "or longer than the Max Response Time inserted in
 > General Query" and "Messages." — §8.14.2, `rfc9776.txt:2158`, `rfc9776.txt:2159`,
 > `rfc9776.txt:2160`
 
 - Strength: must. Class: internal.
-- Check idea: configure a querier's Query Interval and the Max Response Time of its General
-  Queries and check the Query Interval is never shorter than that Max Response Time.
+- Check idea: configure a querier's Query Interval and the Max Response Time of its General Queries and check the Query Interval is never shorter than that Max Response Time.
 
 ## Out of scope in this catalog
 
-The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of
-§4 to §8, and every field of every message. What the catalog leaves out:
+The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of §4 to §8, and every field of every message. What the catalog leaves out:
 
-- **The sections outside the in-scope set.** §1 to §3 (introduction, the service interface,
-  the reception state of a system), §9 to §11 (security, IANA, references) and the appendices.
-  See [`standards.md`](../../protocol/igmp/standards.md#target-level) for the level at which
-  each one enters.
+- **The sections outside the in-scope set.** §1 to §3 (introduction, the service interface, the reception state of a system), §9 to §11 (security, IANA, references) and the appendices. See [`standards.md`](../../protocol/igmp/standards.md#target-level) for the level at which each one enters.
 
 Within the in-scope sections, these parts have no entry, with the reason:
 
 In §4 and §8:
 
-- `444:450-451` — "IGMP message types are registered per [BCP57]." IANA registry
-  administration, not a testable node behavior.
-- `444:483-484` — "Other message types may be used by newer versions or extensions of IGMP, by
-  multicast routing protocols, or for other uses." Informative scope note about other
-  protocols and future extensions, not a requirement on this protocol's implementation.
-- `444:486-489` — "In this document, unless otherwise qualified, the capitalized words 'Query'
-  and 'Report' refer to..." Document notation, not a checkable statement.
-- `490:496-515` — Figure 1, the Query message diagram. Its fields are individually catalogued
-  under RFC9776-QRY-2 through RFC9776-QRY-22 (§4.1.1-4.1.9); the figure itself is not
-  separately catalogued to avoid duplicating those entries.
-- `490:538-542` — Paragraph on leave-latency and burstiness tuning rationale for Max Response
-  Time. Informative explanation, no independent checkable requirement.
-- `490:616-621` — The Ethernet/1500-octet MTU example ("For example, on an Ethernet..."
-  through "366 (1464/4)."). Illustrative arithmetic, not a general normative rule; the general
-  "limited by the MTU" clause is RFC9776-QRY-21.
-- `672:679-735` — Figures 4 and 5, the Report and Group Record diagrams. Fields individually
-  catalogued under RFC9776-REP-2 through RFC9776-REP-12 (§4.2.1-4.2.10).
-- `672:766-768` — §4.2.6 Record Type: "See Section 4.2.13, below." Pure cross-reference; the
-  actual Record Type values are catalogued under §4.2.13 (RFC9776-REP-18 to RFC9776-REP-30).
-- `672:799-801` — "The semantics and internal encoding of the Auxiliary Data field are to be
-  defined by any future version or extension of IGMP..." Forward-looking note about future
-  protocol extensions, not a requirement on this document.
-- `672:815-816` — "There are a number of different types of Group Records that may be included
-  in a Report message:" Introductory sentence with no independent checkable content.
-- `672:890-891` — "We use the term 'State-Change Record' to refer to either a Filter-Mode-Change
-  Record or a Source-List-Change Record." Pure terminology, not a checkable statement.
-- `672:899-900` — "Note that the 0.0.0.0 source address may simultaneously be used by multiple
-  systems on a LAN." Informative note explaining a consequence, not an independent requirement.
-- `672:915-936` — §4.2.16 Notation for Group Records (IS_IN, IS_EX, TO_IN, TO_EX, ALLOW,
-  BLOCK). Pure symbolic notation used elsewhere in the document (outside this range) to
-  describe protocol state tables; not itself a field, message, or behavior statement.
-- `672:952-954` — "though the choice of which sources to report is arbitrary, it is preferable
-  to report the same set of sources in each subsequent report..." Explicitly non-mandatory
-  ("arbitrary", "preferable") guidance, not a testable requirement.
-- `2009:2011` — "Most timers and counters are configurable." General scene-setting, no specific
-  timer named, not independently testable.
-- `2009:2013-2014` — "Note that parentheses are used to group expressions to make the algebra
-  clear." Typographic note about the document's own notation.
-- `2009:2019-2020` — "If a network is expected to be lossy, the Robustness Variable may be
-  increased." Administrator tuning motivation (lowercase "may"), informative, not an
-  independent requirement.
-- `2009:2029-2031` — "By varying the Query Interval, an administrator may tune the number of
-  IGMP messages..." Informative rationale for administrators.
-- `2009:2039-2041` — "By varying the [Query Response Interval], an administrator may tune the
-  burstiness..." Informative rationale for administrators.
-- `2009:2087-2089` — "This value may be tuned to modify the leave latency... A reduced value
-  results in reduced time to detect the loss..." Informative tuning rationale (lowercase
-  "may").
-- `2009:2136-2139` — §8.14 intro: "This section is meant to provide advice to network
-  administrators..." Explicitly framed as advice, not a requirement.
-- `2009:2141-2152` — §8.14.1 Robustness Variable. Explanatory/advisory restatement of §8.1 with
-  an example and lowercase administrator tuning guidance ("should be increased"); no
-  independent checkable requirement beyond RFC9776-TIMER-2/3.
-- `2009:2156-2158` — §8.14.2 first two sentences: "The overall level of periodic IGMP traffic is
-  inversely proportional to the Query Interval. A longer Query Interval results in a lower
-  overall level of IGMP traffic." Informative rationale preceding the MUST sentence, which is
-  catalogued as RFC9776-TIMER-26.
-- `2009:2162-2192` — §8.14.3 Max Response Time, including Table 15. Entirely advisory guidance
-  for optional dynamic tuning; it ends by stating "A router is not required to calculate these
-  populations or tune the Max Response Time dynamically; these are simply guidelines,"
-  confirming nothing here is a testable requirement.
+- `444:450-451` — "IGMP message types are registered per [BCP57]." IANA registry administration, not a testable node behavior.
+- `444:483-484` — "Other message types may be used by newer versions or extensions of IGMP, by multicast routing protocols, or for other uses." Informative scope note about other protocols and future extensions, not a requirement on this protocol's implementation.
+- `444:486-489` — "In this document, unless otherwise qualified, the capitalized words 'Query' and 'Report' refer to..." Document notation, not a checkable statement.
+- `490:496-515` — Figure 1, the Query message diagram. Its fields are individually catalogued under RFC9776-QRY-2 through RFC9776-QRY-22 (§4.1.1-4.1.9); the figure itself is not separately catalogued to avoid duplicating those entries.
+- `490:538-542` — Paragraph on leave-latency and burstiness tuning rationale for Max Response Time. Informative explanation, no independent checkable requirement.
+- `490:616-621` — The Ethernet/1500-octet MTU example ("For example, on an Ethernet..." through "366 (1464/4)."). Illustrative arithmetic, not a general normative rule; the general "limited by the MTU" clause is RFC9776-QRY-21.
+- `672:679-735` — Figures 4 and 5, the Report and Group Record diagrams. Fields individually catalogued under RFC9776-REP-2 through RFC9776-REP-12 (§4.2.1-4.2.10).
+- `672:766-768` — §4.2.6 Record Type: "See Section 4.2.13, below." Pure cross-reference; the actual Record Type values are catalogued under §4.2.13 (RFC9776-REP-18 to RFC9776-REP-30).
+- `672:799-801` — "The semantics and internal encoding of the Auxiliary Data field are to be defined by any future version or extension of IGMP..." Forward-looking note about future protocol extensions, not a requirement on this document.
+- `672:815-816` — "There are a number of different types of Group Records that may be included in a Report message:" Introductory sentence with no independent checkable content.
+- `672:890-891` — "We use the term 'State-Change Record' to refer to either a Filter-Mode-Change Record or a Source-List-Change Record." Pure terminology, not a checkable statement.
+- `672:899-900` — "Note that the 0.0.0.0 source address may simultaneously be used by multiple systems on a LAN." Informative note explaining a consequence, not an independent requirement.
+- `672:915-936` — §4.2.16 Notation for Group Records (IS_IN, IS_EX, TO_IN, TO_EX, ALLOW, BLOCK). Pure symbolic notation used elsewhere in the document (outside this range) to describe protocol state tables; not itself a field, message, or behavior statement.
+- `672:952-954` — "though the choice of which sources to report is arbitrary, it is preferable to report the same set of sources in each subsequent report..." Explicitly non-mandatory ("arbitrary", "preferable") guidance, not a testable requirement.
+- `2009:2011` — "Most timers and counters are configurable." General scene-setting, no specific timer named, not independently testable.
+- `2009:2013-2014` — "Note that parentheses are used to group expressions to make the algebra clear." Typographic note about the document's own notation.
+- `2009:2019-2020` — "If a network is expected to be lossy, the Robustness Variable may be increased." Administrator tuning motivation (lowercase "may"), informative, not an independent requirement.
+- `2009:2029-2031` — "By varying the Query Interval, an administrator may tune the number of IGMP messages..." Informative rationale for administrators.
+- `2009:2039-2041` — "By varying the [Query Response Interval], an administrator may tune the burstiness..." Informative rationale for administrators.
+- `2009:2087-2089` — "This value may be tuned to modify the leave latency... A reduced value results in reduced time to detect the loss..." Informative tuning rationale (lowercase "may").
+- `2009:2136-2139` — §8.14 intro: "This section is meant to provide advice to network administrators..." Explicitly framed as advice, not a requirement.
+- `2009:2141-2152` — §8.14.1 Robustness Variable. Explanatory/advisory restatement of §8.1 with an example and lowercase administrator tuning guidance ("should be increased"); no independent checkable requirement beyond RFC9776-TIMER-2/3.
+- `2009:2156-2158` — §8.14.2 first two sentences: "The overall level of periodic IGMP traffic is inversely proportional to the Query Interval. A longer Query Interval results in a lower overall level of IGMP traffic." Informative rationale preceding the MUST sentence, which is catalogued as RFC9776-TIMER-26.
+- `2009:2162-2192` — §8.14.3 Max Response Time, including Table 15. Entirely advisory guidance for optional dynamic tuning; it ends by stating "A router is not required to calculate these populations or tune the Max Response Time dynamically; these are simply guidelines," confirming nothing here is a testable requirement.
 
 In §5 to §7:
 

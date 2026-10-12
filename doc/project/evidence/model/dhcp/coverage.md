@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc2131/catalog.md](../../standard/rfc2131/catalog.md), [rfc2132/catalog.md](../../standard/rfc2132/catalog.md), [rfc6842/catalog.md](../../standard/rfc6842/catalog.md), [features.md](../../protocol/dhcp/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the DHCP workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the DHCP workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -21,11 +19,7 @@ State of the ledger, from this run:
 - Suite: 26 tests, 21 PASS, 5 FAIL (expected), 0 FAIL (unexpected), so the suite reports PASS
 - Target level: 3
 
-This run repeats a pass first run on 2026-09-11. The run records of that pass named two
-commits, `4e20c74e82` and `4acb050ab1`, that the landing rebase later removed from `master`;
-both held the src tree `182ba10a23`, the same tree every commit from `512d6c1b15` to
-`cae555ebc8` on `master` holds. This run is the same pass, on `master`, with a name a rebase
-cannot take away.
+This run repeats a pass first run on 2026-09-11. The run records of that pass named two commits, `4e20c74e82` and `4acb050ab1`, that the landing rebase later removed from `master`; both held the src tree `182ba10a23`, the same tree every commit from `512d6c1b15` to `cae555ebc8` on `master` holds. This run is the same pass, on `master`, with a name a rebase cannot take away.
 
 ## Statement coverage
 
@@ -39,15 +33,9 @@ cannot take away.
 | `later` | its category is another suite — a serializer unit test, or a statistical test at level 4 |
 | `no check` | the model does not claim the behavior, so [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) asks for no test |
 
-The two statuses that carry an obligation are `owed` and `later`, and they are different in kind.
-A `later` row waits for a suite this tree does not have; an `owed` row waits for nothing but the
-work. Fourteen rows are `owed`, and they are the coverage debt of this pass — see
-[the debt](#the-coverage-debt-the-checks-this-pass-owes).
+The two statuses that carry an obligation are `owed` and `later`, and they are different in kind. A `later` row waits for a suite this tree does not have; an `owed` row waits for nothing but the work. Fourteen rows are `owed`, and they are the coverage debt of this pass — see [the debt](#the-coverage-debt-the-checks-this-pass-owes).
 
-**No row says `untested`.** A statement whose check exists and fails carries the verdict of that
-check, and the cell says which observation the failure kept the check from reaching. Twelve rows
-are of that kind. Recording them as `untested` would tell a reader that nobody wrote a test, which
-is the opposite of what happened.
+**No row says `untested`.** A statement whose check exists and fails carries the verdict of that check, and the cell says which observation the failure kept the check from reaching. Twelve rows are of that kind. Recording them as `untested` would tell a reader that nobody wrote a test, which is the opposite of what happened.
 
 | Catalog ID | Status | Check section | Test file | Verdict |
 | --- | --- | --- | --- | --- |
@@ -184,8 +172,7 @@ is the opposite of what happened.
 | [RFC6842-CLID-2](../../standard/rfc6842/catalog.md#rfc6842-clid-2) | no check | — | — | needs a client that sends no `client identifier` option; the model's client always sends one |
 | [RFC6842-CLID-3](../../standard/rfc6842/catalog.md#rfc6842-clid-3) | selected | [foreign-client-identifier-discarded](../../protocol/dhcp/checks/client-identity.md#foreign-client-identifier-discarded) | `Rfc6842ForeignClientIdentifier.test` | **FAIL**, gap 6 |
 
-132 entries, one per catalog entry of the three in-scope documents: 106 for RFC 2131, 23 for
-RFC 2132 and 3 for RFC 6842.
+132 entries, one per catalog entry of the three in-scope documents: 106 for RFC 2131, 23 for RFC 2132 and 3 for RFC 6842.
 
 | Status | Count |
 | --- | --- |
@@ -195,33 +182,15 @@ RFC 2132 and 3 for RFC 6842.
 | `later` | 12 |
 | `no check` | 12 |
 
-Of the 94 rows a check targets or covers, **83 carry a PASS and nothing else and 11 carry a
-FAIL**. Fifteen rows moved from FAIL to PASS since the pass that first wrote them: XID-3, OFF-6,
-ACK-8, NAK-2, NAK-3, NAK-5, NAK-6, RETX-1, RETX-4, DECL-1, DECL-2, DECL-5, DECL-6, DECL-7 and
-SEL-5, repaired 2026-09-15 by `b72abc4696` (gaps 1, 2, 3, 4, 8, 10, 13, 14) and `bdde132792`
-(gap 11). Five
-of the 11 remaining FAIL rows are rows whose own observation the failure never reached; they
-carry the verdict of their test and say so. The 12 `later` rows split into 5 that need a
-statistical check with a stated tolerance, which is level 4, and 7 that belong to a serializer
-unit test.
+Of the 94 rows a check targets or covers, **83 carry a PASS and nothing else and 11 carry a FAIL**. Fifteen rows moved from FAIL to PASS since the pass that first wrote them: XID-3, OFF-6, ACK-8, NAK-2, NAK-3, NAK-5, NAK-6, RETX-1, RETX-4, DECL-1, DECL-2, DECL-5, DECL-6, DECL-7 and SEL-5, repaired 2026-09-15 by `b72abc4696` (gaps 1, 2, 3, 4, 8, 10, 13, 14) and `bdde132792` (gap 11). Five of the 11 remaining FAIL rows are rows whose own observation the failure never reached; they carry the verdict of their test and say so. The 12 `later` rows split into 5 that need a statistical check with a stated tolerance, which is level 4, and 7 that belong to a serializer unit test.
 
-A FAIL on a row says nothing about whether the test that found it is **declared** to fail. That
-is a separate question, and [`results.md`](results.md#the-rule-that-decides-the-declaration)
-answers it: the declaration is legal only where the model does not claim the behavior, which is
-true of all five of the failing tests now.
+A FAIL on a row says nothing about whether the test that found it is **declared** to fail. That is a separate question, and [`results.md`](results.md#the-rule-that-decides-the-declaration) answers it: the declaration is legal only where the model does not claim the behavior, which is true of all five of the failing tests now.
 
 ## The coverage debt: the checks this pass owes
 
-[The third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test)
-says that a behavior the model claims gets a check, and that code is a claim. Fourteen statements
-of the catalogs are claimed and have no check: the thirteen of the pass, and RFC2131-DECL-4, which
-became a claim when `bdde132792` gave the server the code for it. **This is a debt of the pass and not a property of
-the protocol**, and it is the single largest thing between this pass and level 3.
+[The third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) says that a behavior the model claims gets a check, and that code is a claim. Fourteen statements of the catalogs are claimed and have no check: the thirteen of the pass, and RFC2131-DECL-4, which became a claim when `bdde132792` gave the server the code for it. **This is a debt of the pass and not a property of the protocol**, and it is the single largest thing between this pass and level 3.
 
-The first version of this ledger recorded all thirteen as `no check`, with the reason "a check of
-two nodes on a link cannot observe it". That reason does not survive the principle: eleven of the
-thirteen need nothing but a richer mockup, and the other two need a crafted message the framework
-can already build.
+The first version of this ledger recorded all thirteen as `no check`, with the reason "a check of two nodes on a link cannot observe it". That reason does not survive the principle: eleven of the thirteen need nothing but a richer mockup, and the other two need a crafted message the framework can already build.
 
 | Statement | What the claim is, in the model | What a check needs |
 | --- | --- | --- |
@@ -240,32 +209,18 @@ can already build.
 | [BCAST-1](../../standard/rfc2131/catalog.md#rfc2131-bcast-1) | the client does set the bit, to false | a unicast reply injected before the client is configured |
 | [DECL-4](../../standard/rfc2131/catalog.md#rfc2131-decl-4) | since `bdde132792` the server marks a declined address as leased to nobody | a second client that asks for the declined address |
 
-Four mockups would clear twelve of the fourteen: **two clients** (XID-2, ID-1, SEL-2, NAK-1, DECL-4), **a
-second exchange** (ID-2, SEL-1), **two renewals** (LEASE-11), and **one crafted injection each**
-(XID-5, NAK-8, MSG-6, BCAST-1). The remaining two need a server with two addresses and a client
-with two interfaces.
+Four mockups would clear twelve of the fourteen: **two clients** (XID-2, ID-1, SEL-2, NAK-1, DECL-4), **a second exchange** (ID-2, SEL-1), **two renewals** (LEASE-11), and **one crafted injection each** (XID-5, NAK-8, MSG-6, BCAST-1). The remaining two need a server with two addresses and a client with two interfaces.
 
-The twelve rows that keep `no check` are the ones the model does not claim: the two relay agent
-rules, which the release notes exclude by name; the server's half of the release, which it drops
-without a code path; three options its message class has no field for; the probe it
-never sends and the announcement it never makes; the lease lookup it never does; the address hint
-its client never fills; and the RFC 6842 rule for a document it never names.
+The twelve rows that keep `no check` are the ones the model does not claim: the two relay agent rules, which the release notes exclude by name; the server's half of the release, which it drops without a code path; three options its message class has no field for; the probe it never sends and the announcement it never makes; the lease lookup it never does; the address hint its client never fills; and the RFC 6842 rule for a document it never names.
 
 ## Feature support
 
-The rule of step 7: `supported` when every core check ran and passed, `partial` when a core check
-passed and another core check failed as a model gap or did not run, `not supported` when every
-core check that ran failed as a model gap, `untested` when no core check exists.
+The rule of step 7: `supported` when every core check ran and passed, `partial` when a core check passed and another core check failed as a model gap or did not run, `not supported` when every core check that ran failed as a model gap, `untested` when no core check exists.
 
 Two readings this ledger applies, and names, because several rows depend on them:
 
-1. **A statement a check established only on a crafted message is not evidence about the model.**
-   The test wrote those octets itself. Such a row carries a PASS with the words "as the shape of
-   the crafted stimulus", and it does not count as a core check that passed. To count it would let
-   a test establish a feature by asserting its own input.
-2. **A feature whose checks all failed is `not supported`, never `untested`.** The run answered
-   the question and the answer was no. `untested` is only for a feature with no core check at all,
-   which here means a feature whose core statements are all `owed`.
+1. **A statement a check established only on a crafted message is not evidence about the model.** The test wrote those octets itself. Such a row carries a PASS with the words "as the shape of the crafted stimulus", and it does not count as a core check that passed. To count it would let a test establish a feature by asserting its own input.
+2. **A feature whose checks all failed is `not supported`, never `untested`.** The run answered the question and the answer was no. `untested` is only for a feature with no core check at all, which here means a feature whose core statements are all `owed`.
 
 | Feature | Core checks and their state | Support |
 | --- | --- | --- |
@@ -298,61 +253,24 @@ Twenty-four features: **14 supported, 6 partial, 2 not supported, 2 untested**.
 
 Reading the four groups together says something about the model that no single row does.
 
-1. **The normal path works, and it has grown.** Every feature of the ordinary exchange is
-   supported, and 2026-09-15 moved four more features into the group: the transaction
-   identifier, the offer, the retransmission strategy and the parameters.
-   A client gets an address, keeps it, renews it, rebinds it and gives it up at the right
-   instants, and now also probes it first and gives it back correctly when somebody else holds
-   it. The two reacquisition features and the expiry needed a relay on the path to reach at all,
-   and all three passed.
-2. **Six features are partial, and each fails on one field or lacks one check, not a mechanism.**
-   `DHCP-F-ACKNOWLEDGEMENT` fails only its `must not` half, gap 9. `DHCP-F-REPLY-DELIVERY` fails
-   only the broadcast-bit-clear case, gap 7. `DHCP-F-CLIENT-IDENTITY` fails only the two RFC 6842
-   halves, gaps 5 and 6. `DHCP-F-NAK` has no failing check left, only NAK-8, still `owed`.
-   `DHCP-F-DECLINE` passes every check it has, and DECL-4 is `owed`. `DHCP-F-DUPLICATE-DETECTION`
-   passes the client's probe; the server's probe, OFF-7, has no code. None of the six stops an
-   exchange.
-3. **Two features are not supported, both optional, and both absent by decision.**
-   `DHCP-F-RELEASE` and `DHCP-F-INFORM` say so in a comment. Neither mandatory feature is
-   unsupported any more: gap 10 and gap 11 are closed, and `DHCP-F-NAK` and `DHCP-F-DECLINE` left
-   this group on 2026-09-15.
-4. **Two features are untested, and both are this pass's debt.** Neither is untested for want of a
-   tool. `DHCP-F-INIT-REBOOT` has a state machine in the model and no check of it; address
-   selection has the preference code and no check of it. Both are in
-   [the debt table](#the-coverage-debt-the-checks-this-pass-owes).
+1. **The normal path works, and it has grown.** Every feature of the ordinary exchange is supported, and 2026-09-15 moved four more features into the group: the transaction identifier, the offer, the retransmission strategy and the parameters. A client gets an address, keeps it, renews it, rebinds it and gives it up at the right instants, and now also probes it first and gives it back correctly when somebody else holds it. The two reacquisition features and the expiry needed a relay on the path to reach at all, and all three passed.
+2. **Six features are partial, and each fails on one field or lacks one check, not a mechanism.** `DHCP-F-ACKNOWLEDGEMENT` fails only its `must not` half, gap 9. `DHCP-F-REPLY-DELIVERY` fails only the broadcast-bit-clear case, gap 7. `DHCP-F-CLIENT-IDENTITY` fails only the two RFC 6842 halves, gaps 5 and 6. `DHCP-F-NAK` has no failing check left, only NAK-8, still `owed`. `DHCP-F-DECLINE` passes every check it has, and DECL-4 is `owed`. `DHCP-F-DUPLICATE-DETECTION` passes the client's probe; the server's probe, OFF-7, has no code. None of the six stops an exchange.
+3. **Two features are not supported, both optional, and both absent by decision.** `DHCP-F-RELEASE` and `DHCP-F-INFORM` say so in a comment. Neither mandatory feature is unsupported any more: gap 10 and gap 11 are closed, and `DHCP-F-NAK` and `DHCP-F-DECLINE` left this group on 2026-09-15.
+4. **Two features are untested, and both are this pass's debt.** Neither is untested for want of a tool. `DHCP-F-INIT-REBOOT` has a state machine in the model and no check of it; address selection has the preference code and no check of it. Both are in [the debt table](#the-coverage-debt-the-checks-this-pass-owes).
 
-**The finding of the first pass is repaired.** Two mandatory features were unsupported because a
-complete mechanism sat behind a trigger that never fired: the DHCPNAK branch was unreachable for
-a foreign subnet, and `sendDecline` had no caller. `b72abc4696` and `bdde132792`, both
-2026-09-15, gave each mechanism its trigger. `DHCP-F-NAK` reads `partial` now, held there by
-`NAK-8`, still `owed`; `DHCP-F-DECLINE` reads `partial`, held there by `DECL-4`, `owed` since the
-same commit gave the server the code.
+**The finding of the first pass is repaired.** Two mandatory features were unsupported because a complete mechanism sat behind a trigger that never fired: the DHCPNAK branch was unreachable for a foreign subnet, and `sendDecline` had no caller. `b72abc4696` and `bdde132792`, both 2026-09-15, gave each mechanism its trigger. `DHCP-F-NAK` reads `partial` now, held there by `NAK-8`, still `owed`; `DHCP-F-DECLINE` reads `partial`, held there by `DECL-4`, `owed` since the same commit gave the server the code.
 
 ## Achieved level
 
-**Level 3 partial.** Target: level 3, from
-[`standards.md`](../../protocol/dhcp/standards.md#target-level).
+**Level 3 partial.** Target: level 3, from [`standards.md`](../../protocol/dhcp/standards.md#target-level).
 
-The exit criterion of level 3 is that the catalogs hold every mandatory statement of the in-scope
-documents, including each `MUST NOT`, and that each one has a check. The run half of the criterion
-asks that a check exists and ran, not that it passed.
+The exit criterion of level 3 is that the catalogs hold every mandatory statement of the in-scope documents, including each `MUST NOT`, and that each one has a check. The run half of the criterion asks that a check exists and ran, not that it passed.
 
-**Hold** — satisfied. The catalogs hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY`
-of RFC 2131 that states a behavior of a client or a server, every field value of its four tables,
-the whole of RFC 2132 §2 and §9 with the two RFC 1497 extensions an IPv4 host cannot work
-without, and all three statements of RFC 6842. What is left out is named with a reason at the end
-of each catalog, and the largest exclusion — the sixty per-parameter option definitions of
-RFC 2132 — is level 5 material that a serializer unit test owns.
+**Hold** — satisfied. The catalogs hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of RFC 2131 that states a behavior of a client or a server, every field value of its four tables, the whole of RFC 2132 §2 and §9 with the two RFC 1497 extensions an IPv4 host cannot work without, and all three statements of RFC 6842. What is left out is named with a reason at the end of each catalog, and the largest exclusion — the sixty per-parameter option definitions of RFC 2132 — is level 5 material that a serializer unit test owns.
 
-**Does not hold** — and the reason is now a short one. **Fourteen statements the model claims have
-no check.** That is the whole of what blocks the level: not the verdicts, which are a result, and
-not the toolset, which reaches twelve of the fourteen already. The debt table above says what each
-one needs, and four mockups clear twelve of them.
+**Does not hold** — and the reason is now a short one. **Fourteen statements the model claims have no check.** That is the whole of what blocks the level: not the verdicts, which are a result, and not the toolset, which reaches twelve of the fourteen already. The debt table above says what each one needs, and four mockups clear twelve of them.
 
-Two smaller groups stand beside it and neither blocks the level: 12 rows whose category is another
-suite, which step 9 sanctions, and 12 rows the model does not claim, which
-[the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test)
-sanctions.
+Two smaller groups stand beside it and neither blocks the level: 12 rows whose category is another suite, which step 9 sanctions, and 12 rows the model does not claim, which [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) sanctions.
 
 | Level | State | Evidence |
 | --- | --- | --- |
@@ -369,9 +287,7 @@ sanctions.
 | 1 | 2026-09-11 | **3, partial** | The first pass for this protocol, and it covers levels 1 to 3 in one go, because DHCP had no earlier pass. In-scope set RFC 2131, RFC 2132 and RFC 6842; 132 catalog entries; 24 features; 26 checks; 26 tests | 26 tests: 13 PASS, 5 FAIL (expected), 8 FAIL (unexpected), so the suite reports FAIL. 14 model gaps: 8 in claimed behavior and 6 outside it. 10 features supported, 7 partial, 5 not supported, 2 untested. 13 claimed statements owed a check, 12 belong to another suite, 13 the model does not claim; see [`results.md`](results.md) |
 | 2 | 2026-09-23 | **3, partial** | Re-run only, no new check. The run records of the pass named two commits that the landing rebase removed; this row gives the ledger a run on `master` | 26 tests: 21 PASS, 5 FAIL (expected), 0 FAIL (unexpected), so the suite reports PASS. Fifteen statement rows moved from FAIL to PASS since pass 1: XID-3 (gap 1), OFF-6 (gaps 2 and 8), ACK-8 (gaps 3 and 8), NAK-2/3/5/6 (gap 10), RETX-1 (gap 13), RETX-4 (gap 14), DECL-1/2/5/6/7 (gap 11) and SEL-5 (gap 4), repaired 2026-09-15 by `b72abc4696` and `bdde132792`. Six features moved to supported (transaction ID, offer, retransmission, parameters, decline, duplicate detection) and NAK moved from not supported to partial: now 16 supported, 4 partial, 2 not supported, 2 untested. 13 claimed statements still owed a check; see [`results.md`](results.md). RFC2131-DECL-4 moves from `no check` to `owed`: `bdde132792` gave the server the code, so the model claims it now; `DHCP-F-DECLINE` and `DHCP-F-DUPLICATE-DETECTION` read `partial` |
 
-Six checks of this pass were **split** out of a check the plan named, every one for the same
-reason: a wrong field would otherwise have taken the verdict of its neighbours with it. Recording
-them here keeps the count of 26 checks honest against the 20 the plan started with.
+Six checks of this pass were **split** out of a check the plan named, every one for the same reason: a wrong field would otherwise have taken the verdict of its neighbours with it. Recording them here keeps the count of 26 checks honest against the 20 the plan started with.
 
 | Split-out check | Split from | What the split saved |
 | --- | --- | --- |
@@ -385,16 +301,9 @@ them here keeps the count of 26 checks honest against the 20 the plan started wi
 
 What this pass left out, and where each part is recorded:
 
-- **RFC 951 and RFC 1542**, the BOOTP base and the relay agent, with the reason in
-  [`standards.md`](../../protocol/dhcp/standards.md#in-scope-set). The release notes exclude the
-  relay agent by name, so the two statements that need one keep `no check`.
-- **RFC 3396, RFC 4361, RFC 5494, RFC 3442, RFC 3942 and RFC 4833**, all level 5, each with a
-  reason in the standards map.
-- **The sixty per-parameter option definitions of RFC 2132**, level 5, with the reason at the end
-  of [`rfc2132/catalog.md`](../../standard/rfc2132/catalog.md#out-of-scope-in-this-catalog). Two
-  of them are in scope, the subnet mask and the router, and only because an IPv4 host cannot use
-  an address without them.
-- **The twelve `later` statements**: five for level 4 and seven for a serializer unit test suite
-  that this tree does not yet have.
+- **RFC 951 and RFC 1542**, the BOOTP base and the relay agent, with the reason in [`standards.md`](../../protocol/dhcp/standards.md#in-scope-set). The release notes exclude the relay agent by name, so the two statements that need one keep `no check`.
+- **RFC 3396, RFC 4361, RFC 5494, RFC 3442, RFC 3942 and RFC 4833**, all level 5, each with a reason in the standards map.
+- **The sixty per-parameter option definitions of RFC 2132**, level 5, with the reason at the end of [`rfc2132/catalog.md`](../../standard/rfc2132/catalog.md#out-of-scope-in-this-catalog). Two of them are in scope, the subnet mask and the router, and only because an IPv4 host cannot use an address without them.
+- **The twelve `later` statements**: five for level 4 and seven for a serializer unit test suite that this tree does not yet have.
 
 What this pass did **not** leave out on purpose, and owes: the fourteen `owed` statements above.

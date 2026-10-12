@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc4861/catalog.md](../../standard/rfc4861/catalog.md), [rfc4862/catalog.md](../../standard/rfc4862/catalog.md), [rfc5942/catalog.md](../../standard/rfc5942/catalog.md), [rfc6980/catalog.md](../../standard/rfc6980/catalog.md), [features.md](../../protocol/nd/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the ND workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the ND workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -35,9 +33,7 @@ The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
 | `later` | it needs a toolset of a higher level — a crafted message at level 3, a statistical test or the state of a node at level 4 — or its category is another suite |
 | `no check` | the model does not claim the behavior, so [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) asks for no test |
 
-A verdict belongs to the test. Where a test fails at a later observation and the observation
-of a statement held, the row says PASS and names the observation in the note; where a failure
-kept a test from the observation a statement needs, the row says FAIL and says so.
+A verdict belongs to the test. Where a test fails at a later observation and the observation of a statement held, the row says PASS and names the observation in the note; where a failure kept a test from the observation a statement needs, the row says FAIL and says so.
 
 | Status | RFC 4861 | RFC 4862 | RFC 5942 | RFC 6980 | Together |
 | --- | --- | --- | --- | --- | --- |
@@ -559,11 +555,7 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 
 ## The coverage debt: the checks this pass owes
 
-Eighty-eight statements that the model claims have no check yet. Each needs a normal exchange
-only, in a larger mockup or with a second path of messages, so each is level 2 work for a later
-pass. The closing list of
-[`checks.md`](../../protocol/nd/checks.md#statements-this-pass-wrote-no-check-for) holds the
-same needs in the words of the standard.
+Eighty-eight statements that the model claims have no check yet. Each needs a normal exchange only, in a larger mockup or with a second path of messages, so each is level 2 work for a later pass. The closing list of [`checks.md`](../../protocol/nd/checks.md#statements-this-pass-wrote-no-check-for) holds the same needs in the words of the standard.
 
 | What the check needs | Statements |
 | --- | --- |
@@ -585,15 +577,11 @@ same needs in the words of the standard.
 | other values of DupAddrDetectTransmits | RFC4862-DAD-3 |
 | two nodes that test one address at the same time, or a node that sees its own solicitation, and a duplicate global address | RFC4862-DAD-17, DAD-19, DAD-20, DAD-21, DAD-22, DAD-23, DAD-24 |
 
-One of them will fail when its check exists, from what the code shows: RFC4861-RCFG-1, because
-two router variables have no parameter
-([results.md](results.md#other-findings)).
+One of them will fail when its check exists, from what the code shows: RFC4861-RCFG-1, because two router variables have no parameter ([results.md](results.md#other-findings)).
 
 ## Feature support
 
-The rule of the guide, per feature: `supported` when every core check ran and passed,
-`partial` when at least one passed and at least one failed or has no check, `not supported`
-when every core check that ran failed, `untested` when no core check exists.
+The rule of the guide, per feature: `supported` when every core check ran and passed, `partial` when at least one passed and at least one failed or has no check, `not supported` when every core check that ran failed, `untested` when no core check exists.
 
 | Feature | Level | Support | Core statements that fail or have no check |
 | --- | --- | --- | --- |
@@ -621,14 +609,11 @@ when every core check that ran failed, `untested` when no core check exists.
 | [ND-F-ADDRESS-LIFETIME](../../protocol/nd/features.md#nd-f-address-lifetime) | mandatory | not supported | RFC4862-GLOB-22, GLOB-23 fail ([gap 11](results.md#gap-11-defect--an-expired-address-stays-in-use)); RFC4862-GLOB-16, GLOB-18 are `owed`; RFC4862-GLOB-24 is `later` |
 | [ND-F-NO-FRAGMENTATION](../../protocol/nd/features.md#nd-f-no-fragmentation) | mandatory | partial | RFC6980-FRAG-2, FRAG-3, FRAG-4, FRAG-5, FRAG-6 are `later` |
 
-Four features are supported, twelve partial, two not supported, and five untested. The two
-features that are not supported are ND-F-PARAMETER-DISCOVERY, whose three core checks fail
-on gaps 1, 3 and 4, and ND-F-ADDRESS-LIFETIME, whose two core checks fail on gap 11.
+Four features are supported, twelve partial, two not supported, and five untested. The two features that are not supported are ND-F-PARAMETER-DISCOVERY, whose three core checks fail on gaps 1, 3 and 4, and ND-F-ADDRESS-LIFETIME, whose two core checks fail on gap 11.
 
 ## Achieved level
 
-**Level 2, reached.** Target: level 2, from
-[`standards.md`](../../protocol/nd/standards.md#target-level).
+**Level 2, reached.** Target: level 2, from [`standards.md`](../../protocol/nd/standards.md#target-level).
 
 The exit criterion of level 2 has two halves, and both hold:
 
@@ -637,14 +622,9 @@ The exit criterion of level 2 has two halves, and both hold:
 | Every normal-path mandatory mechanism of the base documents appears as a feature | holds | the catalogs hold every normative statement of RFC 4861 §4, §6, §7.2 and §8, RFC 4862 §5, RFC 5942 §4 and §6 and RFC 6980 §5, 489 entries; the feature map has 23 features and places every entry |
 | Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 14 of the 15 mandatory features have core checks that ran: 37 tests, 22 PASS, 15 FAIL |
 
-The one mandatory feature without a core check has no normal path, so the criterion does not
-reach it at this level, and the ledger says so rather than count it: ND-F-MESSAGE-VALIDATION is
-the silent discard of a message that fails a validity check, and every such message is a
-crafted one, which is level 3.
+The one mandatory feature without a core check has no normal path, so the criterion does not reach it at this level, and the ledger says so rather than count it: ND-F-MESSAGE-VALIDATION is the silent discard of a message that fails a validity check, and every such message is a crafted one, which is level 3.
 
-A level is a measure of how deeply the pass looked, not of how well the model did. Fifteen
-tests fail, and eleven gaps of the model stand behind them; the level holds because each of
-those checks ran.
+A level is a measure of how deeply the pass looked, not of how well the model did. Fifteen tests fail, and eleven gaps of the model stand behind them; the level holds because each of those checks ran.
 
 | Level | State | What it needs |
 | --- | --- | --- |
@@ -654,9 +634,7 @@ those checks ran.
 | 4, Dynamics | partial | the delays and intervals with a bound have a check with a stated window, but the random halves, the random ReachableTime, Neighbor Unreachability Detection and the state of the Neighbor Cache have no test |
 | 5, Complete | not started | RFC 4429, RFC 7527, RFC 8028, RFC 9131 and the other documents of the register, and anycast, which the model declines |
 
-Per feature, the level reached is level 2 for the eighteen features with a core check that ran,
-level 1 for ND-F-MESSAGE-VALIDATION, whose checks are level 3, and level 1 for the four other
-untested features, whose checks are owed or declined.
+Per feature, the level reached is level 2 for the eighteen features with a core check that ran, level 1 for ND-F-MESSAGE-VALIDATION, whose checks are level 3, and level 1 for the four other untested features, whose checks are owed or declined.
 
 ## Pass log
 
@@ -665,14 +643,8 @@ untested features, whose checks are owed or declined.
 | 1 | 2026-09-23 | **1, reached** | RFC 4861, RFC 4862, RFC 5942 and RFC 6980 downloaded; the standards map; the claims of the model | no run; two obsolete claims (RFC 2461, RFC 2462), one claim outside the in-scope set (RFC 4429), one declined document with a stated reason (RFC 7527) |
 | 2 | 2026-09-24 | **2, reached** | catalogs of RFC 4861 (403), RFC 4862 (70), RFC 5942 (10) and RFC 6980 (6); 23 features; 34 checks; 37 tests; the conformance matrix | 22 PASS, 15 FAIL, none declared; eleven gaps of the model; 88 statements owed |
 
-The read record of pass 1 named commit `e360ca980e` of the wave 0 branch; its trees, src
-`16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
+The read record of pass 1 named commit `e360ca980e` of the wave 0 branch; its trees, src `16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
 
 ## Out of scope
 
-The areas that the catalogs leave out, and why, are at the end of each catalog:
-[RFC 4861](../../standard/rfc4861/catalog.md#out-of-scope-in-this-catalog),
-[RFC 4862](../../standard/rfc4862/catalog.md#out-of-scope-in-this-catalog),
-[RFC 5942](../../standard/rfc5942/catalog.md#out-of-scope-in-this-catalog),
-[RFC 6980](../../standard/rfc6980/catalog.md#out-of-scope-in-this-catalog). The documents
-outside the in-scope set are in [`standards.md`](../../protocol/nd/standards.md#in-scope-set).
+The areas that the catalogs leave out, and why, are at the end of each catalog: [RFC 4861](../../standard/rfc4861/catalog.md#out-of-scope-in-this-catalog), [RFC 4862](../../standard/rfc4862/catalog.md#out-of-scope-in-this-catalog), [RFC 5942](../../standard/rfc5942/catalog.md#out-of-scope-in-this-catalog), [RFC 6980](../../standard/rfc6980/catalog.md#out-of-scope-in-this-catalog). The documents outside the in-scope set are in [`standards.md`](../../protocol/nd/standards.md#in-scope-set).

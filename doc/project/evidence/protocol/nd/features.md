@@ -2,34 +2,20 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `ND-F-*` · **Stands on:** [standards.md](standards.md), [rfc4861/catalog.md](../../standard/rfc4861/catalog.md), [rfc4862/catalog.md](../../standard/rfc4862/catalog.md), [rfc5942/catalog.md](../../standard/rfc5942/catalog.md), [rfc6980/catalog.md](../../standard/rfc6980/catalog.md)
 
-Step 4 artifact of the standards test workflow. The catalogs are flat, fine-grained, and per
-document. This document is the high-level view above them: the capabilities that the
-in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of
-each, and the cross reference into the catalogs.
+Step 4 artifact of the standards test workflow. The catalogs are flat, fine-grained, and per document. This document is the high-level view above them: the capabilities that the in-scope set of [`standards.md`](standards.md#in-scope-set) defines, the requirement level of each, and the cross reference into the catalogs.
 
 The map reads in two directions:
 
-- **Down** — which checks tell whether a feature works. A `core` check is one the feature
-  cannot work without. A `supporting` check is a detail or an edge case.
-- **Up** — which features the simulation model supports. Step 7 writes the answer into
-  [`coverage.md`](../../model/nd/coverage.md), and step 8 compares it with the claims of the
-  model in [`conformance.md`](../../model/nd/conformance.md).
+- **Down** — which checks tell whether a feature works. A `core` check is one the feature cannot work without. A `supporting` check is a detail or an edge case.
+- **Up** — which features the simulation model supports. Step 7 writes the answer into [`coverage.md`](../../model/nd/coverage.md), and step 8 compares it with the claims of the model in [`conformance.md`](../../model/nd/conformance.md).
 
-The feature list comes from the standard texts only. The support of each feature — what the
-run actually showed — is **not** in this document. It lives in the coverage ledger,
-[`coverage.md`](../../model/nd/coverage.md).
+The feature list comes from the standard texts only. The support of each feature — what the run actually showed — is **not** in this document. It lives in the coverage ledger, [`coverage.md`](../../model/nd/coverage.md).
 
 ## How this map decides the level
 
-The rule of the guide: `mandatory` when any core statement says `must` or `shall`, or when the
-mechanism is the only path the document gives to a state or an outcome; `optional` when every
-core statement says `may` or `should`; `unstated` otherwise.
+The rule of the guide: `mandatory` when any core statement says `must` or `shall`, or when the mechanism is the only path the document gives to a state or an outcome; `optional` when every core statement says `may` or `should`; `unstated` otherwise.
 
-One refinement, which the DHCP and RIP maps state too: **a conditional keyword does not raise
-the level of a feature.** RFC 4861 says that a router "SHOULD send a redirect message" and then
-states with `MUST` what the Redirect holds; the `MUST` holds only once a Redirect is sent. The
-level comes from the statement that decides whether the mechanism has to exist at all, and
-each feature names it.
+One refinement, which the DHCP and RIP maps state too: **a conditional keyword does not raise the level of a feature.** RFC 4861 says that a router "SHOULD send a redirect message" and then states with `MUST` what the Redirect holds; the `MUST` holds only once a Redirect is sent. The level comes from the statement that decides whether the mechanism has to exist at all, and each feature names it.
 
 ## Index
 
@@ -296,7 +282,4 @@ each feature names it.
 
 ## Coverage of the catalog entries
 
-Every one of the 489 entries of the four catalogs is in at least one feature above, as core
-or as supporting: RFC 4861 with 403, RFC 4862 with
-70, RFC 5942 with 10 and RFC 6980 with
-6.
+Every one of the 489 entries of the four catalogs is in at least one feature above, as core or as supporting: RFC 4861 with 403, RFC 4862 with 70, RFC 5942 with 10 and RFC 6980 with 6.

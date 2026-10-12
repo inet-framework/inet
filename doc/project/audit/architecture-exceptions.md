@@ -1,23 +1,15 @@
 # Architecture Exceptions and Violations
 
 > **Kind:** ledger · **Status:** current · **Seal:** by row · **Owns:** `AS-*`, `AV-*` · **Stands on:** [rule/architecture.md](../rule/architecture.md), [README.md](README.md)
-Known places where the INET code base departs from the dependency-direction requirements in
-[architectural-requirements.md](../rule/architecture.md) — chiefly **AR-ORG-DOMAINS**
-(dependencies point protocols → infrastructure, never the reverse) and **AR-ORG-VIS-SPLIT** (model
-code must not depend on the visualizer). It is the architecture counterpart of
-[naming-exceptions.md](naming-exceptions.md), and it is seeded automatically from
-[`check-architecture.sh`](../enforcement/check-architecture.sh) — re-running that script *is* the audit.
+
+Known places where the INET code base departs from the dependency-direction requirements in [architectural-requirements.md](../rule/architecture.md) — chiefly **AR-ORG-DOMAINS** (dependencies point protocols → infrastructure, never the reverse) and **AR-ORG-VIS-SPLIT** (model code must not depend on the visualizer). It is the architecture counterpart of [naming-exceptions.md](naming-exceptions.md), and it is seeded automatically from [`check-architecture.sh`](../enforcement/check-architecture.sh) — re-running that script *is* the audit.
 
 Each entry has a **disposition**:
 
-- **Sanctioned** (`AS-*`) — a deliberate, accepted coupling. Sanctioned entries are added to the
-  allowlist in `check-architecture.sh` so the check stays quiet about them.
-- **Violation** (`AV-*`) — a real coupling to fix; the check keeps flagging it until it is inverted
-  or the offending type is relocated. Each has a suggested fix and a status (`Open` / `Done`).
+- **Sanctioned** (`AS-*`) — a deliberate, accepted coupling. Sanctioned entries are added to the allowlist in `check-architecture.sh` so the check stays quiet about them.
+- **Violation** (`AV-*`) — a real coupling to fix; the check keeps flagging it until it is inverted or the offending type is relocated. Each has a suggested fix and a status (`Open` / `Done`).
 
-The underlying tension is that `common/` legitimately holds framework-wide *value types* and *node
-abstractions*, but some of those historically live under a protocol layer, and some genuinely
-protocol-specific code has drifted into `common/`. The two need to be told apart.
+The underlying tension is that `common/` legitimately holds framework-wide *value types* and *node abstractions*, but some of those historically live under a protocol layer, and some genuinely protocol-specific code has drifted into `common/`. The two need to be told apart.
 
 ---
 
@@ -34,8 +26,7 @@ protocol-specific code has drifted into `common/`. The two need to be told apart
 
 ## Open violations
 
-Grouped by cluster (the check reports the individual `file:line` hits). Counts are from the
-2026-07-20 audit.
+Grouped by cluster (the check reports the individual `file:line` hits). Counts are from the 2026-07-20 audit.
 
 ### Node-structure coupling — *decide*
 
@@ -51,10 +42,7 @@ Grouped by cluster (the check reports the individual `file:line` hits). Counts a
 
 ### Implementation inside an interface — *fix* (AR-ORG-CONTRACT-PURITY)
 
-Found by [check-interfaces.sh](../enforcement/check-interfaces.sh) on 2026-09-07,
-`audit/sweep/interfaces.md`. A class named `I<Stem>` holds a body, a data
-member or a non-virtual helper. The repair is the same in every row: the body moves to `<Stem>Base`,
-and the interface declaration becomes pure. Where no Base exists, one is created.
+Found by [check-interfaces.sh](../enforcement/check-interfaces.sh) on 2026-09-07, `audit/sweep/interfaces.md`. A class named `I<Stem>` holds a body, a data member or a non-virtual helper. The repair is the same in every row: the body moves to `<Stem>Base`, and the interface declaration becomes pure. Where no Base exists, one is created.
 
 | Id | Coupling | Where | Suggested resolution | Status |
 |---|---|---|---|---|
@@ -75,13 +63,10 @@ and the interface declaration becomes pure. Where no Base exists, one is created
 
 ## Auditing
 
-Re-running [`check-architecture.sh`](../enforcement/check-architecture.sh) from the INET repo root reproduces the
-violation list. When it reports something new:
+Re-running [`check-architecture.sh`](../enforcement/check-architecture.sh) from the INET repo root reproduces the violation list. When it reports something new:
 
-1. If the coupling is a deliberate, accepted framework-wide dependency, add an `AS-*` row **and** add
-   the header to the allowlist in `check-architecture.sh`.
-2. Otherwise add an `AV-*` row with a suggested fix and `Status = Open`; when the coupling is inverted
-   or the type relocated, set `Status = Done` (keep the id).
+1. If the coupling is a deliberate, accepted framework-wide dependency, add an `AS-*` row **and** add the header to the allowlist in `check-architecture.sh`.
+2. Otherwise add an `AV-*` row with a suggested fix and `Status = Open`; when the coupling is inverted or the type relocated, set `Status = Done` (keep the id).
 
 ### Audit coverage
 

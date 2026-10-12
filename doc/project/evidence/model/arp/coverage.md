@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc826/catalog.md](../../standard/rfc826/catalog.md), [rfc1122/catalog.md](../../standard/rfc1122/catalog.md), [rfc5494/catalog.md](../../standard/rfc5494/catalog.md), [features.md](../../protocol/arp/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the ARP workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the ARP workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -22,11 +20,7 @@ State of the ledger, from this run:
 
 ## Statement coverage
 
-`Status` is the state of the workflow, not of the standard: `selected` (a check targets it),
-`covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet
-chosen), `later` (needs a toolset beyond the current level, or another test category),
-`no check` (no check of two nodes on a link can observe it; the reason is in
-[`checks.md`](../../protocol/arp/checks.md#statements-that-no-check-carries)).
+`Status` is the state of the workflow, not of the standard: `selected` (a check targets it), `covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet chosen), `later` (needs a toolset beyond the current level, or another test category), `no check` (no check of two nodes on a link can observe it; the reason is in [`checks.md`](../../protocol/arp/checks.md#statements-that-no-check-carries)).
 
 | Catalog ID | Status | Check section | Test file | Verdict |
 | --- | --- | --- | --- | --- |
@@ -70,17 +64,11 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC5494-NUM-4](../../standard/rfc5494/catalog.md#rfc5494-num-4) | covered | [packet-layout-on-the-wire](../../protocol/arp/checks/packet-format.md#packet-layout-on-the-wire) | Rfc826PacketLayout.test | PASS. The field holds 0x0800, the Ethertype of IPv4 |
 | [RFC5494-PROC-1](../../standard/rfc5494/catalog.md#rfc5494-proc-1) | no check | — | — | the statement binds IANA; no behaviour of a host follows from it |
 
-39 entries: 28 from RFC 826, 6 from the ARP part of RFC 1122, and 5 from RFC 5494. 35
-reached a test: 35 with a PASS. Three of them were defects; commit `0b4f3b0777` repaired all
-three on 2026-09-14. Four carry `no check`, each with its reason, and none of the four is
-mandatory: one is a `may` about a field the standard calls meaningless, one is overridden, one
-is a `should` about hardware that the in-scope set does not have, and one binds IANA.
+39 entries: 28 from RFC 826, 6 from the ARP part of RFC 1122, and 5 from RFC 5494. 35 reached a test: 35 with a PASS. Three of them were defects; commit `0b4f3b0777` repaired all three on 2026-09-14. Four carry `no check`, each with its reason, and none of the four is mandatory: one is a `may` about a field the standard calls meaningless, one is overridden, one is a `should` about hardware that the in-scope set does not have, and one binds IANA.
 
 ## Feature support
 
-The rule of step 7: `supported` when every core check ran and passed, `partial` when a core
-check passed and another core check failed as a model gap or did not run, `not supported`
-when every core check that ran failed as a model gap, `untested` when no core check ran.
+The rule of step 7: `supported` when every core check ran and passed, `partial` when a core check passed and another core check failed as a model gap or did not run, `not supported` when every core check that ran failed as a model gap, `untested` when no core check ran.
 
 | Feature | Core checks and their state | Support |
 | --- | --- | --- |
@@ -94,59 +82,28 @@ when every core check that ran failed as a model gap, `untested` when no core ch
 | [ARP-F-NO-ERROR-REPORT](../../protocol/arp/features.md#arp-f-no-error-report) | RFC1122-ANOERR-1 PASS | **supported** |
 | [ARP-F-GENERALIZATION](../../protocol/arp/features.md#arp-f-generalization) | RFC826-GEN-1 has no check | **untested** |
 
-Nine features: eight supported, one untested. The model does the normal
-exchange of ARP well, and it follows the reception algorithm of RFC 826 step by step,
-including the one step a reader is most likely to get wrong: the merge before the opcode.
-Two of the three things RFC 1122 adds are not only met but exceeded — every waiting datagram
-is saved, not only the latest, and the request rate lands exactly on the recommended one per
-second.
+Nine features: eight supported, one untested. The model does the normal exchange of ARP well, and it follows the reception algorithm of RFC 826 step by step, including the one step a reader is most likely to get wrong: the merge before the opcode. Two of the three things RFC 1122 adds are not only met but exceeded — every waiting datagram is saved, not only the latest, and the request rate lands exactly on the recommended one per second.
 
-Input validation is supported now. It was partial until commit `0b4f3b0777`: three checks
-failed in one shape repeated three times, because RFC 826 wants a packet the receiver cannot
-use to be discarded, and the model stopped the run instead. Two of the four questions of the
-reception algorithm were answered that way (RFC826-RECV-2 and RECV-3, one gap), and so was
-the opcode question for a value that is neither 1 nor 2 (RFC826-RECV-10, a second gap). The
-commit made the model discard the packet instead of stopping, and all three checks pass now.
+Input validation is supported now. It was partial until commit `0b4f3b0777`: three checks failed in one shape repeated three times, because RFC 826 wants a packet the receiver cannot use to be discarded, and the model stopped the run instead. Two of the four questions of the reception algorithm were answered that way (RFC826-RECV-2 and RECV-3, one gap), and so was the opcode question for a value that is neither 1 nor 2 (RFC826-RECV-10, a second gap). The commit made the model discard the packet instead of stopping, and all three checks pass now.
 
-`ARP-F-GENERALIZATION` is `untested` and not `not supported`. Its one core statement is a
-`should` about hardware other than the Ethernet, and the model has no field for a second
-hardware type, so no check of two nodes on one Ethernet link can reach it. No verdict is
-claimed where no check ran.
+`ARP-F-GENERALIZATION` is `untested` and not `not supported`. Its one core statement is a `should` about hardware other than the Ethernet, and the model has no field for a second hardware type, so no check of two nodes on one Ethernet link can reach it. No verdict is claimed where no check ran.
 
 Two bounds that this pass records for the next one:
 
-1. `RFC826-RECV-9` confirms "direct, and not broadcast" but not "on the same hardware". One
-   link cannot separate the interface from the link. A host with two interfaces would.
-2. `RFC826-RECV-5` and `RFC826-TABLE-2` hold for a host. Proxy ARP is on by default in the
-   model, so a node that can route answers for an address that is not its own. No check of
-   this pass meets it, because a host with one interface has no other interface to route out
-   of. The standards map files RFC 1027 at level 5.
+1. `RFC826-RECV-9` confirms "direct, and not broadcast" but not "on the same hardware". One link cannot separate the interface from the link. A host with two interfaces would.
+2. `RFC826-RECV-5` and `RFC826-TABLE-2` hold for a host. Proxy ARP is on by default in the model, so a node that can route answers for an address that is not its own. No check of this pass meets it, because a host with one interface has no other interface to route out of. The standards map files RFC 1027 at level 5.
 
 ## Achieved level
 
-**Level 3, reached.** Target: level 3, from
-[`standards.md`](../../protocol/arp/standards.md#target-level). Three model gaps found, and
-commit `0b4f3b0777` repaired all three.
+**Level 3, reached.** Target: level 3, from [`standards.md`](../../protocol/arp/standards.md#target-level). Three model gaps found, and commit `0b4f3b0777` repaired all three.
 
-The exit criterion of level 3 is that the catalogs hold every mandatory statement of the
-in-scope documents, including each MUST NOT, and that each one has a check.
+The exit criterion of level 3 is that the catalogs hold every mandatory statement of the in-scope documents, including each MUST NOT, and that each one has a check.
 
-**Hold** — the catalogs hold every checkable statement of RFC 826, all six statements of the
-three in-scope clauses of RFC 1122, and all five of RFC 5494. The mandatory statements of the
-set are six: the one `must` of RFC 826 that binds a sender (RFC826-REQ-1), the three MUSTs of
-RFC 1122 (ACACHE-1, AFLOOD-1, AUSE-1), and its one MUST NOT (ANOERR-1); RFC 5494 has none.
-Every one of the six has a check that ran, and all six passed.
+**Hold** — the catalogs hold every checkable statement of RFC 826, all six statements of the three in-scope clauses of RFC 1122, and all five of RFC 5494. The mandatory statements of the set are six: the one `must` of RFC 826 that binds a sender (RFC826-REQ-1), the three MUSTs of RFC 1122 (ACACHE-1, AFLOOD-1, AUSE-1), and its one MUST NOT (ANOERR-1); RFC 5494 has none. Every one of the six has a check that ran, and all six passed.
 
-**Run** — the original run: 16 tests, 13 PASS and 3 undeclared FAIL, so the suite reported
-FAIL. Commit `0b4f3b0777` repaired the three defects on 2026-09-14. The fresh run, on
-`master` commit `28536bd0a5`, confirms it: 16 tests, 16 PASS, 0 FAIL (expected), 0 FAIL
-(unexpected). The three failures were defects against statements whose strength is
-`description`, which is the strength of nearly every sentence of RFC 826. They did not hold
-the level back: the criterion asks that each mandatory statement have a check, and each one
-does. They are the findings of the pass.
+**Run** — the original run: 16 tests, 13 PASS and 3 undeclared FAIL, so the suite reported FAIL. Commit `0b4f3b0777` repaired the three defects on 2026-09-14. The fresh run, on `master` commit `28536bd0a5`, confirms it: 16 tests, 16 PASS, 0 FAIL (expected), 0 FAIL (unexpected). The three failures were defects against statements whose strength is `description`, which is the strength of nearly every sentence of RFC 826. They did not hold the level back: the criterion asks that each mandatory statement have a check, and each one does. They are the findings of the pass.
 
-A level reached with three gaps is the normal outcome and not a contradiction. The level
-measures the reach of the catalogs and of the checks; the gaps measure the model.
+A level reached with three gaps is the normal outcome and not a contradiction. The level measures the reach of the catalogs and of the checks; the gaps measure the model.
 
 | Level | State | Evidence |
 | --- | --- | --- |
@@ -165,14 +122,6 @@ measures the reach of the catalogs and of the checks; the gaps measure the model
 
 ## Out of scope
 
-What this pass left out: RFC 5227, which is level 4 because every requirement of its §2
-carries one of five time constants; RFC 1027 and proxy ARP, RFC 903 and RFC 1868, which are
-level 5; the parts of RFC 1122 §2 that are not about address translation, which belong to a
-pass on the Ethernet link layer; and the other hardware types of RFC826-GEN-1, which the
-model has no field for.
+What this pass left out: RFC 5227, which is level 4 because every requirement of its §2 carries one of five time constants; RFC 1027 and proxy ARP, RFC 903 and RFC 1868, which are level 5; the parts of RFC 1122 §2 that are not about address translation, which belong to a pass on the Ethernet link layer; and the other hardware types of RFC826-GEN-1, which the model has no field for.
 
-One thing this pass found and did not test, and the next pass should: `Arp::processArpPacket`
-throws on a packet whose sender protocol address is zero, which is the shape RFC 5227 calls
-an ARP Probe. That is the same gap as gap 1 and gap 2, from a third place in the same method,
-and its document is the one held back to level 4. The details are in
-[`results.md`](results.md#sharpening-candidates-for-the-next-pass).
+One thing this pass found and did not test, and the next pass should: `Arp::processArpPacket` throws on a packet whose sender protocol address is zero, which is the shape RFC 5227 calls an ARP Probe. That is the same gap as gap 1 and gap 2, from a third place in the same method, and its document is the one held back to level 4. The details are in [`results.md`](results.md#sharpening-candidates-for-the-next-pass).

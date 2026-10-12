@@ -2,13 +2,11 @@
 
 > **Kind:** report · **Status:** snapshot 2026-09-11 · **Seal:** none · **Owns:** — · **Stands on:** [rfc826/catalog.md](../../standard/rfc826/catalog.md), [rfc1122/catalog.md](../../standard/rfc1122/catalog.md), [rfc5494/catalog.md](../../standard/rfc5494/catalog.md), [checks.md](../../protocol/arp/checks.md)
 
-Step 7 artifact of the standards test workflow. This is the first document of the ARP
-workflow that may reference code.
+Step 7 artifact of the standards test workflow. This is the first document of the ARP workflow that may reference code.
 
 - Date: 2026-09-11 10:50 +0200
 - INET: branch `master`, commit `223ba89ce5`, tree clean
-- Trees: src `182ba10a23`, tests/protocol `e6d906c265` — the commit left master in the
-  landing rebase; the same src tree is on master from `512d6c1b15` to `cae555ebc8`
+- Trees: src `182ba10a23`, tests/protocol `e6d906c265` — the commit left master in the landing rebase; the same src tree is on master from `512d6c1b15` to `cae555ebc8`
 - OMNeT++: 6.4.0
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0 (++20260325083105+68994554ea12-1~exp1~20260325203127.404)
@@ -19,13 +17,9 @@ workflow that may reference code.
   cd tests/protocol/lib && MODE=debug ./build.sh
   inet_run_protocol_tests -p inet -w arp
   ```
-- Suite result: 16 TOTAL, 13 PASS, **3 FAIL (unexpected)**, so the suite reports FAIL.
-  This is what this pass run found. Commit `0b4f3b0777` repaired the three failures on
-  2026-09-14, and a fresh run on `master` confirms all 16 checks still pass; see
-  [`coverage.md`](coverage.md) for the later verdicts.
+- Suite result: 16 TOTAL, 13 PASS, **3 FAIL (unexpected)**, so the suite reports FAIL. This is what this pass run found. Commit `0b4f3b0777` repaired the three failures on 2026-09-14, and a fresh run on `master` confirms all 16 checks still pass; see [`coverage.md`](coverage.md) for the later verdicts.
 
-This is the first ARP pass. It targets level 3, so it did the work of levels 1, 2 and 3
-together, and there is no earlier verdict to repeat.
+This is the first ARP pass. It targets level 3, so it did the work of levels 1, 2 and 3 together, and there is no earlier verdict to repeat.
 
 ## Verdicts
 
@@ -57,68 +51,39 @@ Level 3, a crafted packet:
 
 ## The failures
 
-All three failures were **defects**, and none was declared expected. No test error and no
-specification misread came out of this pass; each test keeps its faithful assertion.
+All three failures were **defects**, and none was declared expected. No test error and no specification misread came out of this pass; each test keeps its faithful assertion.
 
 **All three are repaired, on 2026-09-14, and the suite is 16 PASS.** No test was edited.
 
-Reviewed against
-[the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test),
-a failure is declarable only where the model does not claim the behavior, and a claim is code. All
-three of these are code that exists and does the wrong thing:
-`ArpPacketSerializer::deserializeFields` tests the hardware space and the protocol space and calls
-`markIncorrect` when either fails (ArpPacketSerializer.cc:52 to 55), so the model **detects** both
-conditions RFC 826 asks it to detect; and `Arp::processArpPacket` has a `default:` branch for an
-opcode it does not know (Arp.cc:358). The detection and the branch are there, and what happens next
-is a stop.
+Reviewed against [the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test), a failure is declarable only where the model does not claim the behavior, and a claim is code. All three of these are code that exists and does the wrong thing: `ArpPacketSerializer::deserializeFields` tests the hardware space and the protocol space and calls `markIncorrect` when either fails (ArpPacketSerializer.cc:52 to 55), so the model **detects** both conditions RFC 826 asks it to detect; and `Arp::processArpPacket` has a `default:` branch for an opcode it does not know (Arp.cc:358). The detection and the branch are there, and what happens next is a stop.
 
-The three failures share one shape: RFC 826 asks for a silent discard, and the model stops
-the run instead. The reception algorithm of RFC 826 states the rule once, at its head:
+The three failures share one shape: RFC 826 asks for a silent discard, and the model stops the run instead. The reception algorithm of RFC 826 states the rule once, at its head:
 
 > "Negative conditionals indicate an end of processing and a discarding of the packet." —
 > `rfc826.txt:200-201`
 
-A station that stops is the strongest possible way to fail that sentence, and it is worse
-than a wrong reply: a wrong reply is a packet a neighbour can ignore, while a stop takes the
-station off the network.
+A station that stops is the strongest possible way to fail that sentence, and it is worse than a wrong reply: a wrong reply is a packet a neighbour can ignore, while a stop takes the station off the network.
 
 ### Gap 1 — an opcode the model does not know stopped the run. Repaired 2026-09-14.
 
-The default branch discards the packet and logs it. The table step above it has already
-run, which is what RFC 826 asks for. The two RARP branches still throw, and this repair
-leaves them: the evidence below reads them as a deliberate statement that the model does not
-do RARP. A neighbour can still stop a run with opcode 3 or 4, and no test covers that.
+The default branch discards the packet and logs it. The table step above it has already run, which is what RFC 826 asks for. The two RARP branches still throw, and this repair leaves them: the evidence below reads them as a deliberate statement that the model does not do RARP. A neighbour can still stop a run with opcode 3 or 4, and no test covers that.
 
 
-`Arp::processArpPacket` reads the opcode in a `switch` whose default branch throws
-([`src/inet/networklayer/arp/ipv4/Arp.cc:357-358`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)):
+`Arp::processArpPacket` reads the opcode in a `switch` whose default branch throws ([`src/inet/networklayer/arp/ipv4/Arp.cc:357-358`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)):
 
 ```cpp
 default:
     throw cRuntimeError("Unsupported opcode %d in received ARP packet", arp->getOpcode());
 ```
 
-The run ends with `Error: Unsupported opcode 24 in received ARP packet -- in module
-(inet::Arp) ArpSharedNet.hostB.ipv4.arp (id=128), at t=0.5s, event #2`. The two reverse
-opcodes of RFC 903 have their own branches, and both throw as well
-([`Arp.cc:351-355`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)), which is a
-deliberate statement that the model does not do RARP; the default branch is the one that
-this check is about, because RFC 5494 §3 makes 24 and 25 legal values that a neighbour may
-put on a link. RFC 826 wants the packet dropped after the table step, which the model has
-already done by the time it reaches the `switch`.
+The run ends with `Error: Unsupported opcode 24 in received ARP packet -- in module (inet::Arp) ArpSharedNet.hostB.ipv4.arp (id=128), at t=0.5s, event #2`. The two reverse opcodes of RFC 903 have their own branches, and both throw as well ([`Arp.cc:351-355`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)), which is a deliberate statement that the model does not do RARP; the default branch is the one that this check is about, because RFC 5494 §3 makes 24 and 25 legal values that a neighbour may put on a link. RFC 826 wants the packet dropped after the table step, which the model has already done by the time it reaches the `switch`.
 
 ### Gap 2 — a hardware space or a protocol space other than Ethernet and IPv4 stopped the run. Repaired 2026-09-14.
 
-`Arp::processArpPacket` peeks permissively now and reads the mark the serializer leaves,
-which is the answer RFC 826's first two questions want. A packet whose hardware space is not
-Ethernet or whose protocol space is not IPv4 is dropped with a `packetDropped` signal, which
-is the "end of processing" the algorithm states. The marking was always right; what was
-missing was the discard.
+`Arp::processArpPacket` peeks permissively now and reads the mark the serializer leaves, which is the answer RFC 826's first two questions want. A packet whose hardware space is not Ethernet or whose protocol space is not IPv4 is dropped with a `packetDropped` signal, which is the "end of processing" the algorithm states. The marking was always right; what was missing was the discard.
 
 
-The packet class of the model carries four fields of the layout of RFC 826 implicitly, and
-its own comment says so
-([`ArpPacket.msg:31-34`](../../../../../src/inet/networklayer/arp/ipv4/ArpPacket.msg)):
+The packet class of the model carries four fields of the layout of RFC 826 implicitly, and its own comment says so ([`ArpPacket.msg:31-34`](../../../../../src/inet/networklayer/arp/ipv4/ArpPacket.msg)):
 
 ```
 //   - hardwareType (not needed for modeling);
@@ -127,9 +92,7 @@ its own comment says so
 //   - protocol address length (4)
 ```
 
-The serializer writes the four constants and reads them back, and it marks the packet
-incorrect when either of the two spaces differs
-([`ArpPacketSerializer.cc:51-54`](../../../../../src/inet/networklayer/arp/ipv4/ArpPacketSerializer.cc)):
+The serializer writes the four constants and reads them back, and it marks the packet incorrect when either of the two spaces differs ([`ArpPacketSerializer.cc:51-54`](../../../../../src/inet/networklayer/arp/ipv4/ArpPacketSerializer.cc)):
 
 ```cpp
 if (stream.readUint16Be() != 1)
@@ -138,21 +101,11 @@ if (stream.readUint16Be() != ETHERTYPE_IPv4)
     arpPacket->markIncorrect();
 ```
 
-`Arp::processArpPacket` then peeks the packet with the default flags
-([`Arp.cc:231`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)), and a peek of an
-incorrect chunk is an error: `Error: Returning an incorrect chunk is not allowed according
-to the flags: 0`. Both crafted packets end the run the same way, at the same line, which is
-why the two tests name one gap.
+`Arp::processArpPacket` then peeks the packet with the default flags ([`Arp.cc:231`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)), and a peek of an incorrect chunk is an error: `Error: Returning an incorrect chunk is not allowed according to the flags: 0`. Both crafted packets end the run the same way, at the same line, which is why the two tests name one gap.
 
-The marking itself is right: the reception algorithm of RFC 826 asks exactly these two
-questions first, and `markIncorrect` is the answer to both. What is missing is the discard.
-The module never reads the mark, and no code path in it produces the "end of processing"
-that RFC 826 states.
+The marking itself is right: the reception algorithm of RFC 826 asks exactly these two questions first, and `markIncorrect` is the answer to both. What is missing is the discard. The module never reads the mark, and no code path in it produces the "end of processing" that RFC 826 states.
 
-A related consequence of the same design: the hardware space and the protocol space are not
-fields of the packet, so nothing in the model can put a second hardware type or a second
-protocol on a link. RFC826-GEN-1 is therefore not checkable against this model at all, and
-the ledger records it as `no check` with that reason.
+A related consequence of the same design: the hardware space and the protocol space are not fields of the packet, so nothing in the model can put a second hardware type or a second protocol on a link. RFC826-GEN-1 is therefore not checkable against this model at all, and the ledger records it as `no check` with that reason.
 
 ## Where the model implements each checked behaviour
 
@@ -170,63 +123,22 @@ the ledger records it as `no check` with that reason.
 | The silence after a failed resolution | `Ipv4::arpResolutionTimedOut`, [`Ipv4.cc:1188-1205`](../../../../../src/inet/networklayer/ipv4/Ipv4.cc). It records a packet drop with the reason `ADDRESS_RESOLUTION_FAILED` and sends nothing. |
 | The octets of the packet | `ArpPacketSerializer::serializeFields`, [`ArpPacketSerializer.cc:34-46`](../../../../../src/inet/networklayer/arp/ipv4/ArpPacketSerializer.cc). The order, the byte order and the widths are those of RFC 826, and the two spaces are the constants of gap 2. |
 
-Three observations about the model that no check turned into a verdict, and that the next
-pass should know:
+Three observations about the model that no check turned into a verdict, and that the next pass should know:
 
-- **The queue exceeds the requirement, and it is in the wrong layer.** RFC 1122 §2.3.2.2
-  asks the **link layer** to save **at least one** packet. The model keeps the queue in the
-  network layer, one `cPacketQueue` per unresolved address
-  ([`Ipv4.h:91`](../../../../../src/inet/networklayer/ipv4/Ipv4.h)), and it saves every
-  datagram, not only the latest. Both differences favour the model: the requirement is a
-  floor, and which layer holds the queue is invisible from a link.
-- **Proxy ARP is on by default.** `proxyArpInterfaces` defaults to `"*"`
-  ([`Arp.ned:45`](../../../../../src/inet/networklayer/arp/ipv4/Arp.ned)), so a node that can
-  route answers for an address that is not its own. That contradicts RFC826-TABLE-2, "hosts
-  don't transmit information about anyone other than themselves", and it is exactly what
-  RFC 1027 defines. The checks of this pass do not meet it: a host with one interface never
-  has another interface to route out of, so `addressRecognized` returns false, which is why
-  Rfc826ThirdStationRequest passes. A router mockup would meet it, and the standards map
-  files RFC 1027 at level 5.
-- **Two senders have no callers.** `Arp::sendArpGratuitous`
-  ([`Arp.cc:441-483`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)) and
-  `Arp::sendArpProbe` ([`Arp.cc:487-516`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc))
-  are public methods that nothing in the tree calls, and neither is part of the `IArp`
-  interface. The second one names RFC 5227 in its comment. They are the model's half-built
-  answer to the document that this pass left at level 4.
+- **The queue exceeds the requirement, and it is in the wrong layer.** RFC 1122 §2.3.2.2 asks the **link layer** to save **at least one** packet. The model keeps the queue in the network layer, one `cPacketQueue` per unresolved address ([`Ipv4.h:91`](../../../../../src/inet/networklayer/ipv4/Ipv4.h)), and it saves every datagram, not only the latest. Both differences favour the model: the requirement is a floor, and which layer holds the queue is invisible from a link.
+- **Proxy ARP is on by default.** `proxyArpInterfaces` defaults to `"*"` ([`Arp.ned:45`](../../../../../src/inet/networklayer/arp/ipv4/Arp.ned)), so a node that can route answers for an address that is not its own. That contradicts RFC826-TABLE-2, "hosts don't transmit information about anyone other than themselves", and it is exactly what RFC 1027 defines. The checks of this pass do not meet it: a host with one interface never has another interface to route out of, so `addressRecognized` returns false, which is why Rfc826ThirdStationRequest passes. A router mockup would meet it, and the standards map files RFC 1027 at level 5.
+- **Two senders have no callers.** `Arp::sendArpGratuitous` ([`Arp.cc:441-483`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)) and `Arp::sendArpProbe` ([`Arp.cc:487-516`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)) are public methods that nothing in the tree calls, and neither is part of the `IArp` interface. The second one names RFC 5227 in its comment. They are the model's half-built answer to the document that this pass left at level 4.
 
 ## What the run measured
 
 Two numbers are worth recording, because a later pass will compare against them.
 
-- **The request rate.** In Rfc1122ArpFloodPrevention the sending program offered a datagram
-  every 0.1 s for 10 s to an address nobody owns, and host A put **10 requests** on the link,
-  at t = 0.1, 1.1, 2.1, … 9.1 s. That is one request per second exactly, which is the rate
-  RFC 1122 §2.3.2.1 recommends. The bound of the check is 11. The mechanism is the retry
-  timer, not a rate limiter: three retries one second apart, then the resolution fails
-  (`arpResolutionFailed:count` is 3 for the run) and the next datagram starts a new one.
-  A host that sent its datagrams faster than the retry timer would still be limited, because
-  a second resolution for a pending address returns at once
-  ([`Arp.cc:408-412`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)).
-- **The packet on the wire.** The ARP data of a request is **28 octets** and the frame that
-  carries it is 46 octets before padding, with the Ethernet type 2054 (0x0806). The reply
-  has the same 28 octets, which is RFC826-FMT-6.
+- **The request rate.** In Rfc1122ArpFloodPrevention the sending program offered a datagram every 0.1 s for 10 s to an address nobody owns, and host A put **10 requests** on the link, at t = 0.1, 1.1, 2.1, … 9.1 s. That is one request per second exactly, which is the rate RFC 1122 §2.3.2.1 recommends. The bound of the check is 11. The mechanism is the retry timer, not a rate limiter: three retries one second apart, then the resolution fails (`arpResolutionFailed:count` is 3 for the run) and the next datagram starts a new one. A host that sent its datagrams faster than the retry timer would still be limited, because a second resolution for a pending address returns at once ([`Arp.cc:408-412`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)).
+- **The packet on the wire.** The ARP data of a request is **28 octets** and the frame that carries it is 46 octets before padding, with the Ethernet type 2054 (0x0806). The reply has the same 28 octets, which is RFC826-FMT-6.
 
 ## Sharpening candidates for the next pass
 
-1. **Level 4, RFC 5227.** The document that the standards map holds back. The model already
-   has `sendArpProbe` and `sendArpGratuitous` with no callers, so the first question of that
-   pass is whether the model can probe at all. A second question waits there too: a received
-   probe carries an all-zero sender protocol address, and `Arp::processArpPacket` throws on
-   one ([`Arp.cc:268-271`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)) — the same
-   shape as gap 1 and gap 2, from a third place in the same method.
-2. **A router mockup.** It would reach proxy ARP, `Arp::addressRecognized` with two
-   interfaces, and the reply on the interface that received the request, which one link
-   cannot separate from the link itself (see the notes of
-   [Reply field values](../../protocol/arp/checks/reply.md#reply-field-values)).
-3. **A module test for the discard.** Gap 1 and gap 2 are both a missing discard, and the
-   test that finds them can only watch a run stop. A module test could assert the state of
-   the table after each crafted packet, which is what a fixed model would leave unchanged.
-4. **The lengths at the receiving side.** RFC826-RECV-11 is checked on a sent packet only.
-   A crafted packet whose length fields disagree with its address fields would check the
-   permission from the other side, and the model has no field to read them from, so the
-   answer is already known.
+1. **Level 4, RFC 5227.** The document that the standards map holds back. The model already has `sendArpProbe` and `sendArpGratuitous` with no callers, so the first question of that pass is whether the model can probe at all. A second question waits there too: a received probe carries an all-zero sender protocol address, and `Arp::processArpPacket` throws on one ([`Arp.cc:268-271`](../../../../../src/inet/networklayer/arp/ipv4/Arp.cc)) — the same shape as gap 1 and gap 2, from a third place in the same method.
+2. **A router mockup.** It would reach proxy ARP, `Arp::addressRecognized` with two interfaces, and the reply on the interface that received the request, which one link cannot separate from the link itself (see the notes of [Reply field values](../../protocol/arp/checks/reply.md#reply-field-values)).
+3. **A module test for the discard.** Gap 1 and gap 2 are both a missing discard, and the test that finds them can only watch a run stop. A module test could assert the state of the table after each crafted packet, which is what a fixed model would leave unchanged.
+4. **The lengths at the receiving side.** RFC826-RECV-11 is checked on a sent packet only. A crafted packet whose length fields disagree with its address fields would check the permission from the other side, and the model has no field to read them from, so the answer is already known.

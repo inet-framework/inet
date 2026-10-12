@@ -2,19 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around the Address Resolution Protocol, records which document governs each contested
-clause, and pins the exact set that the current pass tests against.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around the Address Resolution Protocol, records which document governs each contested clause, and pins the exact set that the current pass tests against.
 
-The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`),
-retrieved 2026-09-11.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`), retrieved 2026-09-11.
 
 ## Target level
 
-**Level 3 — Edge** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-ARP had no evidence tree before this pass, so the pass does the work of levels 1, 2 and 3
-together. The in-scope set below holds the base document, the host requirements, and the
-document that updates the number spaces of the two fields a crafted packet plays with.
+**Level 3 — Edge** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). ARP had no evidence tree before this pass, so the pass does the work of levels 1, 2 and 3 together. The in-scope set below holds the base document, the host requirements, and the document that updates the number spaces of the two fields a crafted packet plays with.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -23,8 +17,7 @@ document that updates the number spaces of the two fields a crafted packet plays
 | level 4, Dynamics | RFC 5227 | the address conflict detection is a control loop with five timers. The retry timer and the cache timeout of level 3 also need a tolerance at level 4 |
 | level 5, Complete | RFC 1027, RFC 903, RFC 1868 | proxy ARP over a subnet gateway, the reverse protocol, and the UNARP extension |
 
-What the pass actually reached is not recorded here. It is in
-[`model/arp/coverage.md`](../../model/arp/coverage.md#achieved-level).
+What the pass actually reached is not recorded here. It is in [`model/arp/coverage.md`](../../model/arp/coverage.md#achieved-level).
 
 ## Document list
 
@@ -40,27 +33,14 @@ What the pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc826.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc826.txt) —
-  <https://www.rfc-editor.org/rfc/rfc826.txt>, downloaded 2026-09-11.
-- `rfc5494.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5494.txt) —
-  <https://www.rfc-editor.org/rfc/rfc5494.txt>, downloaded 2026-09-11.
+- `rfc826.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc826.txt) — <https://www.rfc-editor.org/rfc/rfc826.txt>, downloaded 2026-09-11.
+- `rfc5494.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5494.txt) — <https://www.rfc-editor.org/rfc/rfc5494.txt>, downloaded 2026-09-11.
 
-The RFC 1122 catalog is the one that IPv4 and UDP use. IPv4 owns the entries of §3 there,
-UDP owns the entries of §4.1, whose identifiers start with `U`, and this pass added the
-entries of §2.3 and §2.4, whose identifiers start with `A`. The scope statement of that
-catalog names all three protocols.
+The RFC 1122 catalog is the one that IPv4 and UDP use. IPv4 owns the entries of §3 there, UDP owns the entries of §4.1, whose identifiers start with `U`, and this pass added the entries of §2.3 and §2.4, whose identifiers start with `A`. The scope statement of that catalog names all three protocols.
 
-The in-scope set takes three clauses of §2 and not the whole of it, and the boundary is the
-subject and not the size. §2.3.2 is the ARP section, so it is in scope in full. §2.3.3 and
-§2.4 each hold one paragraph that speaks about address translation and several that speak
-about the Ethernet encapsulation and about the interface between IP and the link layer; a
-pass on the Ethernet link layer owns those, and this one names only the two paragraphs it
-takes. The catalog lists the rest as out of scope.
+The in-scope set takes three clauses of §2 and not the whole of it, and the boundary is the subject and not the size. §2.3.2 is the ARP section, so it is in scope in full. §2.3.3 and §2.4 each hold one paragraph that speaks about address translation and several that speak about the Ethernet encapsulation and about the interface between IP and the link layer; a pass on the Ethernet link layer owns those, and this one names only the two paragraphs it takes. The catalog lists the rest as out of scope.
 
-RFC 826 predates RFC 2119 by eleven years. It carries two `must` words in the whole
-document and no other keyword, so nearly every entry of its catalog has the strength
-`description`. The level of a feature therefore comes mostly from the "only path" rule of
-the guide, and not from a keyword. RFC 1122 is the document that gives ARP its keywords.
+RFC 826 predates RFC 2119 by eleven years. It carries two `must` words in the whole document and no other keyword, so nearly every entry of its catalog has the strength `description`. The level of a feature therefore comes mostly from the "only path" rule of the guide, and not from a keyword. RFC 1122 is the document that gives ARP its keywords.
 
 ## Override table
 
@@ -73,20 +53,9 @@ the guide, and not from a keyword. RFC 1122 is the document that gives ARP its k
 | A packet whose sender protocol address is zero | RFC 826 gives the field no special value; the reception algorithm treats it as any other address, `rfc826.txt:209-218` | RFC 5227 §2.1.1: an ARP Probe carries an all-zero sender protocol address on purpose, so that the probe cannot pollute the table of another host | RFC 5227 | no; level 4 |
 | Defending an address in use | RFC 826 knows no conflict: "hosts don't transmit information about anyone other than themselves", `rfc826.txt:459-460`, so a second host with the same address is outside its model | RFC 5227 §2.4: what a host does when it sees its own address in the sender field of another host | RFC 5227 | no; level 4 |
 
-The first three rows are the reason RFC 1122 is in the set. RFC 826 is a description of a
-mechanism, and RFC 1122 turns three of its open questions into requirements on a host.
-The fourth row is what makes a crafted opcode a checkable case: RFC 5494 reserves two
-opcode values for experiments, so a packet with opcode 24 is a well-defined packet that
-no conforming host answers, and not a corruption.
+The first three rows are the reason RFC 1122 is in the set. RFC 826 is a description of a mechanism, and RFC 1122 turns three of its open questions into requirements on a host. The fourth row is what makes a crafted opcode a checkable case: RFC 5494 reserves two opcode values for experiments, so a packet with opcode 24 is a well-defined packet that no conforming host answers, and not a corruption.
 
-The two RFC 5227 rows stay out of scope, and the reason is the level and not the subject.
-Address conflict detection is a control loop: a host probes an address a set number of
-times, waits a set time between probes, announces the address, and defends it at a limited
-rate. The guide files timers and control loops at level 4, and every requirement of RFC 5227
-§2 carries one of its five time constants. The ARP Probe packet shape belongs to that
-document, so this pass does not check it as such; a packet with an unusual sender address
-is checked at level 3 through the reception algorithm of RFC 826, which discards a packet
-that is not addressed to the receiver whatever its sender field holds.
+The two RFC 5227 rows stay out of scope, and the reason is the level and not the subject. Address conflict detection is a control loop: a host probes an address a set number of times, waits a set time between probes, announces the address, and defends it at a limited rate. The guide files timers and control loops at level 4, and every requirement of RFC 5227 §2 carries one of its five time constants. The ARP Probe packet shape belongs to that document, so this pass does not check it as such; a packet with an unusual sender address is checked at level 3 through the reception algorithm of RFC 826, which discards a packet that is not addressed to the receiver whatever its sender field holds.
 
 ## In-scope set
 

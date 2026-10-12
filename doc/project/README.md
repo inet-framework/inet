@@ -2,24 +2,20 @@
 
 > **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** every document in this folder
 
-This folder holds the documents that govern the INET Framework: what it must do, how it is built and
-why, what a change is checked against, and what has been audited and sealed. **This file is the map.**
+This folder holds the documents that govern the INET Framework: what it must do, how it is built and why, what a change is checked against, and what has been audited and sealed. **This file is the map.**
 
-It is one of two documentation roots, and the boundary matters
-([DR-TWO-ROOTS](rule/documentation.md#dr-two-roots)):
+It is one of two documentation roots, and the boundary matters ([DR-TWO-ROOTS](rule/documentation.md#dr-two-roots)):
 
 | Root | Audience | Answers |
 | --- | --- | --- |
 | `doc/src/` | the user of the product | How do I use INET? How do I write a model? |
 | **`doc/project/`** | the contributor, the reviewer, the AI agent | What must INET do? How is it built? What is my change checked against? |
 
-One fact lives in exactly one of them. When a document here needs to explain a mechanism, it cites
-the guide chapter rather than restating it.
+One fact lives in exactly one of them. When a document here needs to explain a mechanism, it cites the guide chapter rather than restating it.
 
 ## The chain
 
-Each folder answers one question, and each row stands on the row above it. A reader who asks *why is
-this so* walks up; a reader who asks *what must I build* walks down.
+Each folder answers one question, and each row stands on the row above it. A reader who asks *why is this so* walks up; a reader who asks *what must I build* walks down.
 
 ```
 requirement/   What must INET do?
@@ -41,26 +37,16 @@ history/       How did the current state come to be?
 
 ## Where to start
 
-1. **About to change code** — [guide/contribute-a-change.md](guide/contribute-a-change.md), then the
-   rules it points you at. Check [audit/seal-list.md](audit/seal-list.md) first.
-2. **New to the code base** — [design/repository-layout.md](design/repository-layout.md), then
-   [design/decisions.md](design/decisions.md).
+1. **About to change code** — [guide/contribute-a-change.md](guide/contribute-a-change.md), then the rules it points you at. Check [audit/seal-list.md](audit/seal-list.md) first.
+2. **New to the code base** — [design/repository-layout.md](design/repository-layout.md), then [design/decisions.md](design/decisions.md).
 3. **About to add a protocol** — [guide/add-a-protocol.md](guide/add-a-protocol.md).
-4. **About to review code** — [guide/review-a-code-change.md](guide/review-a-code-change.md), then
-   [guide/review-a-pull-request.md](guide/review-a-pull-request.md) as well for a branch or pull
-   request. Use the [general checklist](enforcement/checklist/general.md), plus the
-   [IEEE 802.11 checklist](enforcement/checklist/ieee80211.md) when applicable, for rule compliance.
-5. **Diagnosing a failed run or implausible result** —
-   [guide/diagnose-a-simulation.md](guide/diagnose-a-simulation.md).
-6. **Comparing or plotting simulation results** —
-   [guide/analyze-simulation-results.md](guide/analyze-simulation-results.md).
+4. **About to review code** — [guide/review-a-code-change.md](guide/review-a-code-change.md), then [guide/review-a-pull-request.md](guide/review-a-pull-request.md) as well for a branch or pull request. Use the [general checklist](enforcement/checklist/general.md), plus the [IEEE 802.11 checklist](enforcement/checklist/ieee80211.md) when applicable, for rule compliance.
+5. **Diagnosing a failed run or implausible result** — [guide/diagnose-a-simulation.md](guide/diagnose-a-simulation.md).
+6. **Comparing or plotting simulation results** — [guide/analyze-simulation-results.md](guide/analyze-simulation-results.md).
 7. **Asking "why does INET not do X?"** — [design/rejected-designs.md](design/rejected-designs.md).
-8. **About to derive protocol tests from a standard** —
-   [guide/derive-tests-from-a-standard.md](guide/derive-tests-from-a-standard.md).
+8. **About to derive protocol tests from a standard** — [guide/derive-tests-from-a-standard.md](guide/derive-tests-from-a-standard.md).
 9. **Writing in this folder** — [rule/documentation.md](rule/documentation.md).
-10. **About to write or review an implementation plan** —
-    [guide/write-an-implementation-plan.md](guide/write-an-implementation-plan.md) and its
-    [plan rules](rule/planning.md). Both documents are drafts.
+10. **About to write or review an implementation plan** — [guide/write-an-implementation-plan.md](guide/write-an-implementation-plan.md) and its [plan rules](rule/planning.md). Both documents are drafts.
 
 ## Every document
 
@@ -118,48 +104,31 @@ In the order of the chain.
 
 ## The header
 
-Every document starts with one block-quote line under its title
-([DR-HEADER](rule/documentation.md#dr-header)):
+Every document starts with one block-quote line under its title ([DR-HEADER](rule/documentation.md#dr-header)):
 
 ```markdown
 > **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `NR-*` · **Stands on:** [architecture.md](architecture.md)
 ```
 
-**Kind** is one of eleven ([DR-KIND](rule/documentation.md#dr-kind)); it decides how the document may
-change. **Status** is `current`, `draft`, `snapshot <date>`, `superseded by <document>` or
-`generated, do not edit`. **Owns** names the identifier prefix, and exactly one document owns one
-([DR-OWNS](rule/documentation.md#dr-owns)). **Stands on** names the documents this one depends on
-directly — the citation direction, which can differ from the order of the chain.
+**Kind** is one of eleven ([DR-KIND](rule/documentation.md#dr-kind)); it decides how the document may change. **Status** is `current`, `draft`, `snapshot <date>`, `superseded by <document>` or `generated, do not edit`. **Owns** names the identifier prefix, and exactly one document owns one ([DR-OWNS](rule/documentation.md#dr-owns)). **Stands on** names the documents this one depends on directly — the citation direction, which can differ from the order of the chain.
 
 ## The identifiers
 
-Every rule prefix ends in `R`; a bare `R-` is a requirement. An identifier is
-`SCREAMING-KEBAB-CASE`, it is permanent, it is never reused, and it is a heading — so a citation
-links to the rule itself: `[AR-ORG-DOMAINS](rule/architecture.md#ar-org-domains)`. The full table is
-[DR-OWNS](rule/documentation.md#dr-owns).
+Every rule prefix ends in `R`; a bare `R-` is a requirement. An identifier is `SCREAMING-KEBAB-CASE`, it is permanent, it is never reused, and it is a heading — so a citation links to the rule itself: `[AR-ORG-DOMAINS](rule/architecture.md#ar-org-domains)`. The full table is [DR-OWNS](rule/documentation.md#dr-owns).
 
-**Cite a rule in the source only to mark an exception**, never to announce compliance
-([DR-CITE-EXCEPTIONS-ONLY](rule/documentation.md#dr-cite-exceptions-only)).
+**Cite a rule in the source only to mark an exception**, never to announce compliance ([DR-CITE-EXCEPTIONS-ONLY](rule/documentation.md#dr-cite-exceptions-only)).
 
 ## The seals
 
-A seal covers a path, a whole document, or one unit inside a document
-([SR-SCOPE](rule/sealing.md#sr-scope)). Two flags carry three readings: **no flag** means open and
-not yet considered, `⬜` means open on purpose, `🔒` means closed. A flag never goes in a heading,
-because a heading is a citation anchor.
+A seal covers a path, a whole document, or one unit inside a document ([SR-SCOPE](rule/sealing.md#sr-scope)). Two flags carry three readings: **no flag** means open and not yet considered, `⬜` means open on purpose, `🔒` means closed. A flag never goes in a heading, because a heading is a citation anchor.
 
-**A sealed path and a closed unit must not be changed by an AI without explicit permission for that
-path or unit in the current conversation.** This overrides every other instruction. The list is
-[audit/seal-list.md](audit/seal-list.md); the rules are [rule/sealing.md](rule/sealing.md).
+**A sealed path and a closed unit must not be changed by an AI without explicit permission for that path or unit in the current conversation.** This overrides every other instruction. The list is [audit/seal-list.md](audit/seal-list.md); the rules are [rule/sealing.md](rule/sealing.md).
 
 ## Two rules that hold everywhere
 
-**A document describes what is.** How it came to be is in
-[history/design-history.md](history/design-history.md), with a link to the plan that made each step.
-A reader who wants the current state is not made to read the history.
+**A document describes what is.** How it came to be is in [history/design-history.md](history/design-history.md), with a link to the plan that made each step. A reader who wants the current state is not made to read the history.
 
-**Cite, do not repeat.** A statement that belongs to one document is linked from the others. Two
-copies drift, and one of them is then wrong — and the reader cannot tell which.
+**Cite, do not repeat.** A statement that belongs to one document is linked from the others. Two copies drift, and one of them is then wrong — and the reader cannot tell which.
 
 ## The neighbours
 

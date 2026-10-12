@@ -2,15 +2,11 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc8200/catalog.md](../../standard/rfc8200/catalog.md), [rfc4443/catalog.md](../../standard/rfc4443/catalog.md), [rfc8504/catalog.md](../../standard/rfc8504/catalog.md), [features.md](../../protocol/ipv6/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the IPv6 workflow. Every other artifact
-of this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the IPv6 workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
-The ledger spans the documents of the in-scope set, so one table mixes RFC 8200, RFC 4443
-and RFC 8504 identifiers: a check may establish statements of two documents at once, and a
-later document may govern an earlier statement.
+The ledger spans the documents of the in-scope set, so one table mixes RFC 8200, RFC 4443 and RFC 8504 identifiers: a check may establish statements of two documents at once, and a later document may govern an earlier statement.
 
 State of the ledger, from this run:
 
@@ -26,13 +22,7 @@ State of the ledger, from this run:
 
 ## Statement coverage
 
-`Status` is the state of the workflow, not of the standard: `selected` (a check targets it),
-`covered` (a selected check establishes it as a side effect, or, for an `implementation`
-statement, the rows of the document it names), `candidate` (practical, not yet chosen),
-`later` (needs a toolset or a category beyond this pass), `constraint` (a rule the
-scenarios obey), `superseded by X` (a later in-scope document governs; the check targets X,
-and the row keeps the verdict of that check). A verdict of `declined` marks a `should` the
-model does not follow, which is not a failure.
+`Status` is the state of the workflow, not of the standard: `selected` (a check targets it), `covered` (a selected check establishes it as a side effect, or, for an `implementation` statement, the rows of the document it names), `candidate` (practical, not yet chosen), `later` (needs a toolset or a category beyond this pass), `constraint` (a rule the scenarios obey), `superseded by X` (a later in-scope document governs; the check targets X, and the row keeps the verdict of that check). A verdict of `declined` marks a `should` the model does not follow, which is not a failure.
 
 | Catalog ID | Status | Check section | Test file | Verdict |
 | --- | --- | --- | --- | --- |
@@ -104,26 +94,11 @@ model does not follow, which is not a failure.
 | [RFC8504-NR-11](../../standard/rfc8504/catalog.md#rfc8504-nr-11) | covered | [packet-too-big](../../protocol/ipv6/checks/packet-too-big.md#packet-too-big) | Rfc4443PacketTooBig.test | PASS (the report reached the source) |
 | [RFC8504-NR-12](../../standard/rfc8504/catalog.md#rfc8504-nr-12) | covered (implementation: the RFC 4443 rows) | — | — | as the RFC 4443 rows |
 
-67 entries: 32 of RFC 8200, 23 of RFC 4443, 12 of RFC 8504. 50 have a verdict from a check
-that ran: 46 PASS, 1 declined should, and 3 `implementation` statements whose verdict is the
-verdict of the rows they point to. The 7 rows that failed as a model gap, and both halves of
-the 5 mixed rows (a sender half and a receiver half, or a whole-packet case and a fragment
-case), are PASS now: RFC8200-HDR-2, FRAG-4, FRAG-5 (`84bc80aa8b`); RFC8200-REASM-5 /
-RFC8504-NR-3 receiver half and RFC8200-REASM-6 / RFC8504-NR-4 receiver half (`ab3b1f1ea0`);
-RFC4443-PTB-2 (`84bc80aa8b`); RFC4443-MPR-2 (`40c9f04e21`); RFC4443-MPR-3 (`cbe91d57c5`);
-RFC4443-MPR-7, MPR-8 (`37ddbfa7a8`). 17 have none: 4 need a module test (the handoffs of a
-received report), 5
-wait for level 4 (the reassembly timer, path MTU discovery, the rate limit, congestion), 2
-for level 5 (the other extension headers), 3 for a scenario the mockup lacks (a redirect, a
-point-to-point link, a crafted first fragment), 1 for a unit test, 1 is a scenario
-constraint, and 1 is a should that no check selected.
+67 entries: 32 of RFC 8200, 23 of RFC 4443, 12 of RFC 8504. 50 have a verdict from a check that ran: 46 PASS, 1 declined should, and 3 `implementation` statements whose verdict is the verdict of the rows they point to. The 7 rows that failed as a model gap, and both halves of the 5 mixed rows (a sender half and a receiver half, or a whole-packet case and a fragment case), are PASS now: RFC8200-HDR-2, FRAG-4, FRAG-5 (`84bc80aa8b`); RFC8200-REASM-5 / RFC8504-NR-3 receiver half and RFC8200-REASM-6 / RFC8504-NR-4 receiver half (`ab3b1f1ea0`); RFC4443-PTB-2 (`84bc80aa8b`); RFC4443-MPR-2 (`40c9f04e21`); RFC4443-MPR-3 (`cbe91d57c5`); RFC4443-MPR-7, MPR-8 (`37ddbfa7a8`). 17 have none: 4 need a module test (the handoffs of a received report), 5 wait for level 4 (the reassembly timer, path MTU discovery, the rate limit, congestion), 2 for level 5 (the other extension headers), 3 for a scenario the mockup lacks (a redirect, a point-to-point link, a crafted first fragment), 1 for a unit test, 1 is a scenario constraint, and 1 is a should that no check selected.
 
 ## Feature support
 
-The rule of step 7: `supported` when every core check ran and passed, `partial` when a core
-check passed and another core check failed as a model gap or did not run, `not supported`
-when every core check that ran failed as a model gap, `untested` when no core check ran. A
-statement with two halves counts by its halves.
+The rule of step 7: `supported` when every core check ran and passed, `partial` when a core check passed and another core check failed as a model gap or did not run, `not supported` when every core check that ran failed as a model gap, `untested` when no core check ran. A statement with two halves counts by its halves.
 
 | Feature | Core checks and their state | Support |
 | --- | --- | --- |
@@ -140,29 +115,17 @@ statement with two halves counts by its halves.
 | [IPV6-F-ERROR-SUPPRESSION](../../protocol/ipv6/features.md#ipv6-f-error-suppression) | RFC4443-MPR-4, MPR-6, MPR-9 PASS; MPR-7, MPR-8 PASS since 2026-09-14 (`37ddbfa7a8`) | **supported** |
 | [IPV6-F-ERROR-DELIVERY](../../protocol/ipv6/features.md#ipv6-f-error-delivery) | RFC4443-MPR-1, UL-1, UL-2, UL-3: none ran (internal; module tests). The supporting MPR-3 PASSES since 2026-09-14 (`cbe91d57c5`): a report about an unknown protocol no longer stops the node | **untested** |
 
-Eleven features supported, one untested. All eight defects that the level 3 toolset found
-are repaired, on 2026-09-14: the fragment payload length and the whole-packet payload length
-of HDR-2 (`84bc80aa8b`), the receiver's handling of overlapping fragments and of atomic
-fragments (`ab3b1f1ea0`), the unknown informational ICMPv6 type (`40c9f04e21`), the report
-about an unknown protocol at its source (`cbe91d57c5`), the two link-layer suppression cases
-(`37ddbfa7a8`), and the Packet Too Big MTU field (`84bc80aa8b`). IPV6-F-ERROR-DELIVERY stays
-`untested`: its four core checks are internal and need a module test; its supporting check,
-RFC4443-MPR-3, now passes.
+Eleven features supported, one untested. All eight defects that the level 3 toolset found are repaired, on 2026-09-14: the fragment payload length and the whole-packet payload length of HDR-2 (`84bc80aa8b`), the receiver's handling of overlapping fragments and of atomic fragments (`ab3b1f1ea0`), the unknown informational ICMPv6 type (`40c9f04e21`), the report about an unknown protocol at its source (`cbe91d57c5`), the two link-layer suppression cases (`37ddbfa7a8`), and the Packet Too Big MTU field (`84bc80aa8b`). IPV6-F-ERROR-DELIVERY stays `untested`: its four core checks are internal and need a module test; its supporting check, RFC4443-MPR-3, now passes.
 
 ## Achieved level
 
-**Level 3, partial.** Target: level 3, from
-[`standards.md`](../../protocol/ipv6/standards.md#target-level).
+**Level 3, partial.** Target: level 3, from [`standards.md`](../../protocol/ipv6/standards.md#target-level).
 
 The exit criterion of level 3 has two halves. The first holds; the second does not.
 
-**Hold** — the catalogs hold every mandatory statement of the in-scope documents, including
-each `MUST NOT`: RFC 8200 §3, §4 (the processing rules and the fragment header), §4.5, §5
-and §8.1; RFC 4443 §2 and §3 in full; RFC 8504 §5.1, §5.2, §5.7 and §5.8. The parts left out
-are named at the end of each catalog and in the standards map, with the reason.
+**Hold** — the catalogs hold every mandatory statement of the in-scope documents, including each `MUST NOT`: RFC 8200 §3, §4 (the processing rules and the fragment header), §4.5, §5 and §8.1; RFC 4443 §2 and §3 in full; RFC 8504 §5.1, §5.2, §5.7 and §5.8. The parts left out are named at the end of each catalog and in the standards map, with the reason.
 
-**Run** — each mandatory statement has a check that ran: **not yet.** 50 of 67 statements
-have a verdict. 10 mandatory statements have none, and they fall into four kinds:
+**Run** — each mandatory statement has a check that ran: **not yet.** 50 of 67 statements have a verdict. 10 mandatory statements have none, and they fall into four kinds:
 
 | Kind | Statements | What unlocks them |
 | --- | --- | --- |
@@ -179,8 +142,7 @@ have a verdict. 10 mandatory statements have none, and they fall into four kinds
 | 4, Dynamics | not started | the reassembly timer, the rate limit, congestion, path MTU discovery (the MTU field gap that would have blocked it is repaired, `84bc80aa8b`; the mechanism itself is still level 4) |
 | 5, Complete | not started | the other extension headers and their order, the flow label, the traffic class, jumbograms, the ICMPv6 query messages |
 
-Per feature, level 3 is reached when every mandatory statement mapped to the feature, core
-or supporting, has a verdict:
+Per feature, level 3 is reached when every mandatory statement mapped to the feature, core or supporting, has a verdict:
 
 | Feature | Level 3 | What blocks it |
 | --- | --- | --- |
@@ -197,11 +159,7 @@ or supporting, has a verdict:
 | IPV6-F-ERROR-SUPPRESSION | partial | RFC4443-MPR-5 (a redirect) |
 | IPV6-F-ERROR-DELIVERY | not reached | all four core statements are internal |
 
-Seven of twelve features reach level 3. The level and the support value are different
-axes: IPV6-F-REASSEMBLY has a `supported` support value, because every core check that ran
-passed, while it reaches level 3 only `partial`, because RFC8200-REASM-3 (the reassembly
-timer) has no check yet. A `supported` feature is not the same claim as a feature whose
-level 3 is reached.
+Seven of twelve features reach level 3. The level and the support value are different axes: IPV6-F-REASSEMBLY has a `supported` support value, because every core check that ran passed, while it reaches level 3 only `partial`, because RFC8200-REASM-3 (the reassembly timer) has no check yet. A `supported` feature is not the same claim as a feature whose level 3 is reached.
 
 ## Pass log
 
@@ -213,8 +171,4 @@ level 3 is reached.
 
 ## Out of scope
 
-The catalogs record what this pass left out of the standards: the extension headers other
-than the fragment header and their options, the flow label, the traffic class, jumbograms,
-the routing header responses, the ICMPv6 query messages, and the neighbor discovery,
-addressing and configuration sections of RFC 8504. Each becomes level 4 or level 5 work,
-or the work of another protocol folder.
+The catalogs record what this pass left out of the standards: the extension headers other than the fragment header and their options, the flow label, the traffic class, jumbograms, the routing header responses, the ICMPv6 query messages, and the neighbor discovery, addressing and configuration sections of RFC 8504. Each becomes level 4 or level 5 work, or the work of another protocol folder.

@@ -2,45 +2,19 @@
 
 > **Kind:** design · **Status:** snapshot 2026-09-21 · **Seal:** none · **Owns:** — · **Stands on:** [node-anatomy.md](node-anatomy.md), [protocol-anatomy.md](protocol-anatomy.md), [../domain/ieee80211.md](../domain/ieee80211.md)
 
-The parts of the IEEE 802.11 model, the responsibility of each part, and the means by which the
-parts communicate: at run time, during initialization, and during the start, stop and crash
-operations of a node. It is a survey: a map of the code at commit `4548adeb04` (2026-09-21) that a
-reader can check against that code. It is not a specification of what the model must do. The
-developer's guide chapter `doc/src/developers-guide/ch-80211.rst` states the design of the model,
-and it replaces this document when that chapter is complete; until then the two are read together,
-this one for the exact calls and stages, the chapter for the intended shape.
+The parts of the IEEE 802.11 model, the responsibility of each part, and the means by which the parts communicate: at run time, during initialization, and during the start, stop and crash operations of a node. It is a survey: a map of the code at commit `4548adeb04` (2026-09-21) that a reader can check against that code. It is not a specification of what the model must do. The developer's guide chapter `doc/src/developers-guide/ch-80211.rst` states the design of the model, and it replaces this document when that chapter is complete; until then the two are read together, this one for the exact calls and stages, the chapter for the intended shape.
 
 The transmission contract and local NAV descriptions follow the current [ITx contract](../../../src/inet/linklayer/ieee80211/mac/contract/ITx.h) and [Tx implementation](../../../src/inet/linklayer/ieee80211/mac/Tx.cc).
 
-The scope is the two subtrees `src/inet/linklayer/ieee80211/` and
-`src/inet/physicallayer/wireless/ieee80211/`, plus the generic wireless parts that the 802.11 radio
-stands on. Two guide chapters exist for the model. The user's guide chapter
-`doc/src/users-guide/ch-80211.rst` names the submodules of the interface, the parts of the MAC, the
-radio variants, the management variants and the agent, and says what each one is for. The
-developer's guide chapter `doc/src/developers-guide/ch-80211.rst` is a placeholder. The chapter
-`doc/src/developers-guide/ch-physicallayer.rst` describes the generic wireless framework. This
-document does not repeat those chapters. It adds what they do not say: the responsibility of each
-part in terms of the code, the means by which the parts communicate, the services each part offers
-and uses, the initialization stages, and the lifecycle operations.
+The scope is the two subtrees `src/inet/linklayer/ieee80211/` and `src/inet/physicallayer/wireless/ieee80211/`, plus the generic wireless parts that the 802.11 radio stands on. Two guide chapters exist for the model. The user's guide chapter `doc/src/users-guide/ch-80211.rst` names the submodules of the interface, the parts of the MAC, the radio variants, the management variants and the agent, and says what each one is for. The developer's guide chapter `doc/src/developers-guide/ch-80211.rst` is a placeholder. The chapter `doc/src/developers-guide/ch-physicallayer.rst` describes the generic wireless framework. This document does not repeat those chapters. It adds what they do not say: the responsibility of each part in terms of the code, the means by which the parts communicate, the services each part offers and uses, the initialization stages, and the lifecycle operations.
 
-**Path conventions.** `mac/` means `src/inet/linklayer/ieee80211/mac/`. `mgmt/`, `llc/`, `mib/` and
-`portal/` are its sibling folders. `phy/` means
-`src/inet/physicallayer/wireless/ieee80211/packetlevel/`, `mode/` means
-`src/inet/physicallayer/wireless/ieee80211/mode/`, and `wireless/` means
-`src/inet/physicallayer/wireless/common/`. A *module* is a NED module with a C++ class. An *object*
-is a plain C++ object that a module creates with `new` and owns. Interface names start with `I`.
+**Path conventions.** `mac/` means `src/inet/linklayer/ieee80211/mac/`. `mgmt/`, `llc/`, `mib/` and `portal/` are its sibling folders. `phy/` means `src/inet/physicallayer/wireless/ieee80211/packetlevel/`, `mode/` means `src/inet/physicallayer/wireless/ieee80211/mode/`, and `wireless/` means `src/inet/physicallayer/wireless/common/`. A *module* is a NED module with a C++ class. An *object* is a plain C++ object that a module creates with `new` and owns. Interface names start with `I`.
 
-**2026-09-23 composition update:** this snapshot retains its historical shared
-management-recovery description. The current implementation places that procedure
-inside each EDCAF and binds it to the same EDCAF's CW. See the current
-[developer guide](../../src/developers-guide/ch-80211.rst) for composition, dispatch
-and configuration/signal migration.
+**2026-09-23 composition update:** this snapshot retains its historical shared management-recovery description. The current implementation places that procedure inside each EDCAF and binds it to the same EDCAF's CW. See the current [developer guide](../../src/developers-guide/ch-80211.rst) for composition, dispatch and configuration/signal migration.
 
 ## 1. The interface at a glance
 
-`Ieee80211Interface` (`src/inet/linklayer/ieee80211/Ieee80211Interface.ned`) is a compound module
-that extends `NetworkInterface`. It holds seven submodules and wires them. The figure shows the
-submodules, the gates, and the kind of traffic on each connection.
+`Ieee80211Interface` (`src/inet/linklayer/ieee80211/Ieee80211Interface.ned`) is a compound module that extends `NetworkInterface`. It holds seven submodules and wires them. The figure shows the submodules, the gates, and the kind of traffic on each connection.
 
 ```
                  upperLayerIn                      upperLayerOut
@@ -84,25 +58,18 @@ submodules, the gates, and the kind of traffic on each connection.
 
 The connections are:
 
-- `upperLayerIn → classifier → llc → mac` and `mac → llc → upperLayerOut`. The classifier is on the
-  egress path only.
-- `mgmt.macOut → mac.mgmtIn` and `mac.mgmtOut → mgmt.macIn`. Management traffic has its own gate pair
-  on the MAC (`IIeee80211Mac.ned`).
+- `upperLayerIn → classifier → llc → mac` and `mac → llc → upperLayerOut`. The classifier is on the egress path only.
+- `mgmt.macOut → mac.mgmtIn` and `mac.mgmtOut → mgmt.macIn`. Management traffic has its own gate pair on the MAC (`IIeee80211Mac.ned`).
 - `agent.mgmtOut → mgmt.agentIn` and `mgmt.agentOut → agent.mgmtIn`, only when the agent exists.
 - `mac.lowerLayerOut → radio.upperLayerIn` and `radio.upperLayerOut → mac.lowerLayerIn`.
 - `radioIn → radio.radioIn`. The medium delivers signals to this gate with `sendDirect`.
-- The MIB has no gates. Every module that needs it holds a pointer that it resolves from the
-  `mibModule` parameter.
+- The MIB has no gates. Every module that needs it holds a pointer that it resolves from the `mibModule` parameter.
 
-Three parameters of the interface fan out: `opMode` sets `**.opMode` (the radio's mode set) and
-`mac.modeSet`; `bitrate` sets `**.bitrate` and the data bitrate of the rate selection; `address`
-becomes the MAC address. The parameters `*.macModule`, `*.mibModule`, `*.interfaceTableModule` and
-`*.energySourceModule` give the submodules the paths for their direct calls.
+Three parameters of the interface fan out: `opMode` sets `**.opMode` (the radio's mode set) and `mac.modeSet`; `bitrate` sets `**.bitrate` and the data bitrate of the rate selection; `address` becomes the MAC address. The parameters `*.macModule`, `*.mibModule`, `*.interfaceTableModule` and `*.energySourceModule` give the submodules the paths for their direct calls.
 
 ## 2. The nine means of communication
 
-The model uses nine distinct mechanisms. The table names each one, shows what it looks like in the
-code, and says where the 802.11 model uses it. The sections below refer to them by name.
+The model uses nine distinct mechanisms. The table names each one, shows what it looks like in the code, and says where the 802.11 model uses it. The sections below refer to them by name.
 
 | Means | In the code | Used for |
 | --- | --- | --- |
@@ -116,13 +83,7 @@ code, and says where the 802.11 model uses it. The sections below refer to them 
 | **Self-message timer** | `scheduleAt` on a `cMessage` owned by the module | every wait: backoff, IFS, ACK timeout, NAV, beacon, scan, block ack inactivity |
 | **NED parameter assignment** | a compound module sets a parameter of its submodules, for example `*.rxModule = "^.rx"` | module paths and shared values, set once at build time |
 
-Two conventions matter for the reader. First, **a direct call crosses module boundaries freely**,
-and the caller finds the callee in one of four ways: `getSubmodule("rx")`,
-`getModuleByPath(par("rxModule"))` with a default that the parent NED sets,
-`gate("lowerLayerOut")->getNextGate()->getOwnerModule()`, or
-`getContainingNicModule(this)->getSubmodule("mac")`. Second, **a callback is a direct call in the
-other direction**: the module that offers a service also declares a nested `ICallback` interface,
-and the client implements it. `Dcf` and `Hcf` each implement five such callback interfaces.
+Two conventions matter for the reader. First, **a direct call crosses module boundaries freely**, and the caller finds the callee in one of four ways: `getSubmodule("rx")`, `getModuleByPath(par("rxModule"))` with a default that the parent NED sets, `gate("lowerLayerOut")->getNextGate()->getOwnerModule()`, or `getContainingNicModule(this)->getSubmodule("mac")`. Second, **a callback is a direct call in the other direction**: the module that offers a service also declares a nested `ICallback` interface, and the client implements it. `Dcf` and `Hcf` each implement five such callback interfaces.
 
 ## 3. The parts and their responsibilities
 
@@ -136,10 +97,7 @@ and the client implements it. `Dcf` and `Hcf` each implement five such callback 
 | `Ieee80211LlcEpd` | `llc/Ieee80211LlcEpd.*` | EtherType encapsulation (`Ieee802EpdHeader`). Chosen for `opMode == "p"`. |
 | `Ieee80211Portal` | `portal/Ieee80211Portal.*` | Converts Ethernet frames to LLC/SNAP frames and back. Replaces the LLC in `AccessPoint.ned`. |
 
-The LLC variants share the NED interface `IIeee80211Llc` and the C++ interface of the same name,
-which has one method, `getProtocol()`. The MAC calls it to tag the payload protocol of a received
-frame. The tag `LlcProtocolTag` records which LLC produced a frame, because nothing on the wire
-says so.
+The LLC variants share the NED interface `IIeee80211Llc` and the C++ interface of the same name, which has one method, `getProtocol()`. The MAC calls it to tag the payload protocol of a received frame. The tag `LlcProtocolTag` records which LLC produced a frame, because nothing on the wire says so.
 
 ### 3.2 The management plane: management modules, agent, MIB
 
@@ -168,9 +126,7 @@ The MIB fields and their owners:
 
 ### 3.3 The MAC: `Ieee80211Mac` and its five submodules
 
-`Ieee80211Mac` (`mac/Ieee80211Mac.{ned,cc}`) extends `MacProtocolBase`, which extends
-`LayeredProtocolBase` and `OperationalBase`. It is a compound module with a simple-module class:
-the C++ class dispatches, and the submodules do the work.
+`Ieee80211Mac` (`mac/Ieee80211Mac.{ned,cc}`) extends `MacProtocolBase`, which extends `LayeredProtocolBase` and `OperationalBase`. It is a compound module with a simple-module class: the C++ class dispatches, and the submodules do the work.
 
 | Part | Files | Responsibility |
 | --- | --- | --- |
@@ -182,28 +138,21 @@ the C++ class dispatches, and the submodules do the work.
 | `Hcf` | `mac/coordinationfunction/Hcf.*` | The hybrid coordination function, for a QoS station. Only EDCA exists in the code. See §3.5. |
 | `Pcf`, `Mcf` | `mac/coordinationfunction/{Pcf,Mcf}.*` | Placeholders. Every entry point throws. The MAC declares members for them but never creates them. |
 
-The five submodules exist as `dcf`, `hcf` (only when `qosStation`), `ds`, `rx` and `tx`. The MAC
-sets `*.rxModule = "^.rx"` and `*.txModule = "^.tx"` so that every part below can find `Rx` and
-`Tx` by path.
+The five submodules exist as `dcf`, `hcf` (only when `qosStation`), `ds`, `rx` and `tx`. The MAC sets `*.rxModule = "^.rx"` and `*.txModule = "^.tx"` so that every part below can find `Rx` and `Tx` by path.
 
 `Dcf` and `Hcf` pass `true` for holder frames and `false` for recipient CTS and ACK responses. `Hcf` also passes `false` for recipient Basic Block Ack responses. `Tx` saves the completed frame's choice before the completion callback. For example, a recipient CTS retains `false` if the callback accepts a holder frame with `true`. The CTS retains its Duration/ID field but does not extend the recipient's local NAV. Received reservations still affect channel access through `Rx`.
 
 Both coordination functions share one skeleton. Each one:
 
-- offers `ICoordinationFunction` to the MAC: `processUpperFrame`, `processLowerFrame`,
-  `corruptedFrameReceived`;
+- offers `ICoordinationFunction` to the MAC: `processUpperFrame`, `processLowerFrame`, `corruptedFrameReceived`;
 - owns one `FrameSequenceHandler` object, which runs one frame exchange at a time;
 - owns the RTS, CTS and recipient ACK procedure objects, which build control frames;
-- implements the callbacks `IChannelAccess::ICallback` (channel granted), `ITx::ICallback`
-  (transmission complete), `IFrameSequenceHandler::ICallback` (transmit this, a step succeeded or
-  failed, the sequence finished) and `IProcedureCallback` (send this control response, process
-  this management frame);
+- implements the callbacks `IChannelAccess::ICallback` (channel granted), `ITx::ICallback` (transmission complete), `IFrameSequenceHandler::ICallback` (transmit this, a step succeeded or failed, the sequence finished) and `IProcedureCallback` (send this control response, process this management frame);
 - holds one timer, `startRxTimer`, for the response timeout of a receive step.
 
 ### 3.4 Inside `Dcf`
 
-`Dcf` has one channel access, one queue pair, one frame exchange at a time, and one set of
-policies. Every part below is a submodule of `Dcf` unless marked *object*.
+`Dcf` has one channel access, one queue pair, one frame exchange at a time, and one set of policies. Every part below is a submodule of `Dcf` unless marked *object*.
 
 | Part | Type | Responsibility |
 | --- | --- | --- |
@@ -226,16 +175,11 @@ policies. Every part below is a submodule of `Dcf` unless marked *object*.
 | `RtsProcedure`, `CtsProcedure`, `RecipientAckProcedure` | *objects* | Build an RTS, a CTS in reply to an RTS, an ACK in reply to a frame. The reply procedures ask their policy and call back `Dcf`. |
 | `StationRetryCounters` | *object* | The station-wide short and long retry counters. |
 
-Data flow inside `Dcf`: the pending queue holds packets. `InProgressFrames` pulls one packet
-through the data service when it has no eligible frame. The frame sequence asks `InProgressFrames`
-for the frame to transmit. `Dcf` drops a frame from `InProgressFrames` when it is acknowledged or
-when the retry limit is reached.
+Data flow inside `Dcf`: the pending queue holds packets. `InProgressFrames` pulls one packet through the data service when it has no eligible frame. The frame sequence asks `InProgressFrames` for the frame to transmit. `Dcf` drops a frame from `InProgressFrames` when it is acknowledged or when the retry limit is reached.
 
 ### 3.5 Inside `Hcf`
 
-`Hcf` repeats the `Dcf` skeleton, but with one channel access per access category, and with
-aggregation and block acknowledgement added. The four access categories are `AC_BK`, `AC_BE`,
-`AC_VI` and `AC_VO`, in this order of index and priority.
+`Hcf` repeats the `Dcf` skeleton, but with one channel access per access category, and with aggregation and block acknowledgement added. The four access categories are `AC_BK`, `AC_BE`, `AC_VI` and `AC_VO`, in this order of index and priority.
 
 | Part | Type | Responsibility |
 | --- | --- | --- |
@@ -255,9 +199,7 @@ aggregation and block acknowledgement added. The four access categories are `AC_
 | `HcfFs`, `TxOpFs` | *objects*, one per exchange | The grammar of an EDCA exchange: a group-addressed burst, or a repeat of TXOP rounds. Each round is one of `[RTS CTS] data ACK`, `[RTS CTS] data` under block ack, `BlockAckReq BlockAck`, or `[RTS CTS] management ACK`. `HtTxOpFs`, `McfFs` and `PcfFs` exist but are empty and unused. |
 | `inactivityTimer` | timer | The shared block ack inactivity timer; the handlers ask `Hcf` to schedule it through `IBlockAckAgreementHandlerCallback`. |
 
-The context of an exchange carries a `QoSContext` with the in-progress frames and the TXOP
-procedure of the access category that won the channel. One `FrameSequenceHandler` serves all four
-access categories, so a second grant during a sequence is an error.
+The context of an exchange carries a `QoSContext` with the in-progress frames and the TXOP procedure of the access category that won the channel. One `FrameSequenceHandler` serves all four access categories, so a second grant during a sequence is an error.
 
 ### 3.6 The physical layer
 
@@ -278,97 +220,43 @@ access categories, so a second grant during a sequence is an error.
 
 ### 4.1 Upper layer, LLC, MAC
 
-**Egress.** A packet enters on `upperLayerIn` with a `MacAddressReq` (set by the network layer)
-and a `PacketProtocolTag`. The classifier may add a `UserPriorityReq`. The LLC inserts its header
-and sets `PacketProtocolTag` to `ieee8022llc` or `ieee802epd`. The MAC then:
+**Egress.** A packet enters on `upperLayerIn` with a `MacAddressReq` (set by the network layer) and a `PacketProtocolTag`. The classifier may add a `UserPriorityReq`. The LLC inserts its header and sets `PacketProtocolTag` to `ieee8022llc` or `ieee802epd`. The MAC then:
 
-1. drops the packet when the station is not associated, or when the AP has no association for the
-   destination (`Ieee80211Mac::handleUpperPacket`);
-2. records the payload protocol in an `LlcProtocolTag`, builds an `Ieee80211DataHeader` with the
-   addresses that the MIB mode and station type dictate, sets the QoS subtype and the TID when a
-   `UserPriorityReq` is present, and appends the `Ieee80211MacTrailer` (`encapsulate`);
+1. drops the packet when the station is not associated, or when the AP has no association for the destination (`Ieee80211Mac::handleUpperPacket`);
+2. records the payload protocol in an `LlcProtocolTag`, builds an `Ieee80211DataHeader` with the addresses that the MIB mode and station type dictate, sets the QoS subtype and the TID when a `UserPriorityReq` is present, and appends the `Ieee80211MacTrailer` (`encapsulate`);
 3. hands the frame to `dcf` or `hcf` (`processUpperFrame`).
 
-**Ingress.** The MAC pops the header and the trailer, and sets `PacketProtocolTag` (from
-`llc->getProtocol()`), `MacAddressInd`, `InterfaceInd`, and `UserPriorityInd` for a QoS frame
-(`decapsulate`). A management frame goes out on `mgmtOut`. A data frame goes to `Ds`, which calls
-`mac->sendUp` and the packet leaves on `upperLayerOut` towards the LLC, which pops its header and
-sets the protocol tags for the network layer.
+**Ingress.** The MAC pops the header and the trailer, and sets `PacketProtocolTag` (from `llc->getProtocol()`), `MacAddressInd`, `InterfaceInd`, and `UserPriorityInd` for a QoS frame (`decapsulate`). A management frame goes out on `mgmtOut`. A data frame goes to `Ds`, which calls `mac->sendUp` and the packet leaves on `upperLayerOut` towards the LLC, which pops its header and sets the protocol tags for the network layer.
 
-No module under `src/inet/linklayer/ieee80211/` calls `registerService` or `registerProtocol`. The
-inherited registration in `Ieee8022Llc` is behind a parameter that defaults to false. The LLC
-delivers upward by the protocol registrations that come down from the network layer.
+No module under `src/inet/linklayer/ieee80211/` calls `registerService` or `registerProtocol`. The inherited registration in `Ieee8022Llc` is behind a parameter that defaults to false. The LLC delivers upward by the protocol registrations that come down from the network layer.
 
 ### 4.2 Agent, management, MAC, MIB, radio
 
-**Agent to management.** Six request primitives: scan, authenticate, deauthenticate, associate,
-reassociate, disassociate. Four confirm primitives with a result code: scan, authenticate,
-associate, reassociate. Each travels as a `cMessage` with the primitive as control info, on the
-`agent`/`mgmt` gate pair.
+**Agent to management.** Six request primitives: scan, authenticate, deauthenticate, associate, reassociate, disassociate. Four confirm primitives with a result code: scan, authenticate, associate, reassociate. Each travels as a `cMessage` with the primitive as control info, on the `agent`/`mgmt` gate pair.
 
-**Management to MAC.** The management module builds the **body** of a management frame and sends
-it on `macOut` with three tags: `MacAddressReq` (the receiver), `Ieee80211SubtypeReq` (the frame
-subtype) and `PacketProtocolTag = ieee80211Mgmt`. The MAC builds the `Ieee80211MgmtHeader`
-(subtype, receiver, address 3 = BSSID on an AP) and the trailer, and `Tx` fills the transmitter
-address last. Received management frames come back on `macIn` with the header already popped. The
-management module reads the header back by a peek of 24 bytes behind the front offset.
+**Management to MAC.** The management module builds the **body** of a management frame and sends it on `macOut` with three tags: `MacAddressReq` (the receiver), `Ieee80211SubtypeReq` (the frame subtype) and `PacketProtocolTag = ieee80211Mgmt`. The MAC builds the `Ieee80211MgmtHeader` (subtype, receiver, address 3 = BSSID on an AP) and the trailer, and `Tx` fills the transmitter address last. Received management frames come back on `macIn` with the header already popped. The management module reads the header back by a peek of 24 bytes behind the front offset.
 
-**Management to radio, through the MAC.** A station changes channel with an
-`Ieee80211ConfigureRadioCommand` that carries only the channel number. It goes out on `macOut`.
-The MAC forwards it to the radio at once when `rx->isMediumFree()`, otherwise it stores the message
-as `pendingRadioConfigMsg` and merges a later command into it. The stored command leaves when the
-current frame sequence finishes, or when the contention enters `IDLE` or `DEFER`.
+**Management to radio, through the MAC.** A station changes channel with an `Ieee80211ConfigureRadioCommand` that carries only the channel number. It goes out on `macOut`. The MAC forwards it to the radio at once when `rx->isMediumFree()`, otherwise it stores the message as `pendingRadioConfigMsg` and merges a later command into it. The stored command leaves when the current frame sequence finishes, or when the contention enters `IDLE` or `DEFER`.
 
-**Radio to management.** `Ieee80211Radio` emits `radioChannelChanged` with the band in the details
-object. `Ieee80211MgmtApBase` subscribes to it on the radio and writes the primary channel into the
-MIB. `Ieee80211MgmtSta` subscribes to `receptionStateChanged` on the host during an active scan,
-to detect a busy channel.
+**Radio to management.** `Ieee80211Radio` emits `radioChannelChanged` with the band in the details object. `Ieee80211MgmtApBase` subscribes to it on the radio and writes the primary channel into the MIB. `Ieee80211MgmtSta` subscribes to `receptionStateChanged` on the host during an active scan, to detect a busy channel.
 
-**MAC to management.** `Ieee80211MgmtAp` subscribes to `frameTransmissionOutcome` on the MAC. An
-association response is marked with an `Ieee80211MgmtTransactionTag`; the AP reserves the AID when
-it builds the response and commits it only when the outcome says *acknowledged*.
+**MAC to management.** `Ieee80211MgmtAp` subscribes to `frameTransmissionOutcome` on the MAC. An association response is marked with an `Ieee80211MgmtTransactionTag`; the AP reserves the AID when it builds the response and commits it only when the outcome says *acknowledged*.
 
-**Management to MIB.** The management module is the writer of the mode, the station type, the BSS
-data, the association flag, the station table and the peer HT state (§3.2). The MAC and `Ds` read
-them on every frame.
+**Management to MIB.** The management module is the writer of the mode, the station type, the BSS data, the association flag, the station table and the peer HT state (§3.2). The MAC and `Ds` read them on every frame.
 
-**Management to the node.** `Ieee80211MgmtSta` emits `l2Associated` and `l2BeaconLost`.
-`Ieee80211AgentSta` emits `l2Disassociated`, `l2AssociatedNewAp`, `l2AssociatedOldAp`.
-`Ieee80211MgmtAp` emits `l2ApAssociated`, `l2ApDisassociated`. The listeners outside the interface
-are `Ieee80211VisualizerBase`, `DhcpClient` and `Ipv6NeighbourDiscovery` (on `l2Associated`), and
-`Pmipv6` (on the AP signals). No module writes to the `NetworkInterface` from the management plane.
+**Management to the node.** `Ieee80211MgmtSta` emits `l2Associated` and `l2BeaconLost`. `Ieee80211AgentSta` emits `l2Disassociated`, `l2AssociatedNewAp`, `l2AssociatedOldAp`. `Ieee80211MgmtAp` emits `l2ApAssociated`, `l2ApDisassociated`. The listeners outside the interface are `Ieee80211VisualizerBase`, `DhcpClient` and `Ipv6NeighbourDiscovery` (on `l2Associated`), and `Pmipv6` (on the AP signals). No module writes to the `NetworkInterface` from the management plane.
 
 ### 4.3 MAC and radio
 
-**Down.** `Tx` calls `mac->sendDownFrame`. The MAC switches the radio to transmitter mode with a
-`ConfigureRadioCommand` on the same gate, sets `PacketProtocolTag = ieee80211Mac`, and sends the
-frame. The coordination function has already set `Ieee80211ModeReq` (from the rate selection). The
-radio's `encapsulate` prepends the PHY header and the transmitter creates the transmission.
+**Down.** `Tx` calls `mac->sendDownFrame`. The MAC switches the radio to transmitter mode with a `ConfigureRadioCommand` on the same gate, sets `PacketProtocolTag = ieee80211Mac`, and sends the frame. The coordination function has already set `Ieee80211ModeReq` (from the rate selection). The radio's `encapsulate` prepends the PHY header and the transmitter creates the transmission.
 
-**Up.** The radio decapsulates the PHY header, sets `PacketProtocolTag = ieee80211Mac`, and
-delivers the packet with the indications `Ieee80211ModeInd`, `Ieee80211ChannelInd`,
-`SignalPowerInd`, `SnirInd`, `SignalTimeInd` and `ErrorRateInd`. A packet that failed the SNIR
-threshold or the error model arrives with the bit-error flag set. `Rx` treats a bit error, an
-incorrect chunk and a bad FCS in the same way: it emits `packetDropped` with reason
-`INCORRECTLY_RECEIVED`, tells the contentions (they switch to EIFS), and the MAC tells the
-coordination function (`corruptedFrameReceived`).
+**Up.** The radio decapsulates the PHY header, sets `PacketProtocolTag = ieee80211Mac`, and delivers the packet with the indications `Ieee80211ModeInd`, `Ieee80211ChannelInd`, `SignalPowerInd`, `SnirInd`, `SignalTimeInd` and `ErrorRateInd`. A packet that failed the SNIR threshold or the error model arrives with the bit-error flag set. `Rx` treats a bit error, an incorrect chunk and a bad FCS in the same way: it emits `packetDropped` with reason `INCORRECTLY_RECEIVED`, tells the contentions (they switch to EIFS), and the MAC tells the coordination function (`corruptedFrameReceived`).
 
-**Radio state to the MAC.** The MAC subscribes on the radio to `receptionStateChanged`,
-`transmissionStateChanged` and `receivedSignalPartChanged`, and relays them to `Rx`, which
-recomputes *medium free*. On the transition `TRANSMITTING → IDLE` the MAC calls
-`tx->radioTransmissionFinished()` and switches the radio back to receiver mode. The subscription to
-`radioModeChanged` has no handler.
+**Radio state to the MAC.** The MAC subscribes on the radio to `receptionStateChanged`, `transmissionStateChanged` and `receivedSignalPartChanged`, and relays them to `Rx`, which recomputes *medium free*. On the transition `TRANSMITTING → IDLE` the MAC calls `tx->radioTransmissionFinished()` and switches the radio back to receiver mode. The subscription to `radioModeChanged` has no handler.
 
-**Direct calls to the radio.** At link-layer initialization the MAC calls `radio->setRadioMode`
-for the initial mode, and reads the antenna, transmitter and receiver to compute the HT
-capabilities. The MAC finds the radio as the neighbour of its `lowerLayerOut` gate.
+**Direct calls to the radio.** At link-layer initialization the MAC calls `radio->setRadioMode` for the initial mode, and reads the antenna, transmitter and receiver to compute the HT capabilities. The MAC finds the radio as the neighbour of its `lowerLayerOut` gate.
 
-**The mode set.** The MAC reads `modeSet` and calls `Ieee80211ModeSet::getModeSet`. It publishes
-the pointer with `modesetChanged` on the interface module. Every part that needs timing or modes
-subscribes to that signal at `INITSTAGE_LOCAL`: all `ModeSetListener` subclasses (`Dcf`, `Hcf`, the
-policies, the protection mechanisms, the rate controls), `Dcaf`, `Edcaf`, the rate selections and
-`Ieee80211MgmtBase`. The radio's transmitter and receiver build their own mode set from `opMode`.
-The interface wires both from one parameter.
+**The mode set.** The MAC reads `modeSet` and calls `Ieee80211ModeSet::getModeSet`. It publishes the pointer with `modesetChanged` on the interface module. Every part that needs timing or modes subscribes to that signal at `INITSTAGE_LOCAL`: all `ModeSetListener` subclasses (`Dcf`, `Hcf`, the policies, the protection mechanisms, the rate controls), `Dcaf`, `Edcaf`, the rate selections and `Ieee80211MgmtBase`. The radio's transmitter and receiver build their own mode set from `opMode`. The interface wires both from one parameter.
 
 ### 4.4 Inside the MAC
 
@@ -402,17 +290,9 @@ The call chains, in the order of a transmission:
 
 ### 4.5 Radio, medium, energy consumer
 
-The radio registers itself with the medium at `INITSTAGE_PHYSICAL_LAYER` with `medium->addRadio`.
-It finds the medium through the `radioMediumModule` parameter. To transmit, the radio calls
-`medium->transmitPacket`, and the medium sends a `WirelessSignal` by `sendDirect` to the `radioIn`
-gate of every potential receiver. During a reception the radio asks the medium
-`isReceptionAttempted`, `isReceptionSuccessful`, `getReceptionDecision` and `receivePacket`, and the
-medium asks the receiver's `computeIsReception...` methods. The medium subscribes to the radio's
-signals only when its filter parameters are on; by default a channel change does not reach the
-medium's cached listening objects.
+The radio registers itself with the medium at `INITSTAGE_PHYSICAL_LAYER` with `medium->addRadio`. It finds the medium through the `radioMediumModule` parameter. To transmit, the radio calls `medium->transmitPacket`, and the medium sends a `WirelessSignal` by `sendDirect` to the `radioIn` gate of every potential receiver. During a reception the radio asks the medium `isReceptionAttempted`, `isReceptionSuccessful`, `getReceptionDecision` and `receivePacket`, and the medium asks the receiver's `computeIsReception...` methods. The medium subscribes to the radio's signals only when its filter parameters are on; by default a channel change does not reach the medium's cached listening objects.
 
-The energy consumer is a submodule of the radio. It subscribes to the five radio state signals on
-its parent and registers with the energy source at `INITSTAGE_POWER`.
+The energy consumer is a submodule of the radio. It subscribes to the five radio state signals on its parent and registers with the energy source at `INITSTAGE_POWER`.
 
 ### 4.6 Signals that carry control, and signals that only feed statistics
 
@@ -429,17 +309,11 @@ Some signals change the behaviour of a listener. The reader must know these:
 | `l2Associated`, `l2ApAssociated`, `l2ApDisassociated` | management | `DhcpClient`, `Ipv6NeighbourDiscovery`, `Pmipv6`, visualizers | node-level reactions |
 | the five radio state signals | radio | energy consumers | power state |
 
-All other signals of the model feed `@statistic` declarations only: `packetSentToPeer`,
-`packetReceivedFromPeer`, `linkBroken`, `frameSequenceStarted/Finished`, `datarateSelected`,
-`channelOwnershipChanged`, `backoffStarted/Stopped`, `contentionWindowChanged`, `navChanged`,
-`txopStarted/Ended`, `edcaCollisionDetected`, `blockAckAgreementAdded/Deleted`,
-`packetFragmented/Defragmented/Aggregated/Deaggregated`, and the generic `packetSentToUpper` and
-`packetReceivedFromLower` family.
+All other signals of the model feed `@statistic` declarations only: `packetSentToPeer`, `packetReceivedFromPeer`, `linkBroken`, `frameSequenceStarted/Finished`, `datarateSelected`, `channelOwnershipChanged`, `backoffStarted/Stopped`, `contentionWindowChanged`, `navChanged`, `txopStarted/Ended`, `edcaCollisionDetected`, `blockAckAgreementAdded/Deleted`, `packetFragmented/Defragmented/Aggregated/Deaggregated`, and the generic `packetSentToUpper` and `packetReceivedFromLower` family.
 
 ## 5. Services offered and used
 
-*Offers* lists the C++ interfaces a part implements, or the NED interface when the part has no C++
-contract. *Uses* lists the interfaces of other parts that it calls.
+*Offers* lists the C++ interfaces a part implements, or the NED interface when the part has no C++ contract. *Uses* lists the interfaces of other parts that it calls.
 
 | Part | Offers | Uses |
 | --- | --- | --- |
@@ -471,11 +345,7 @@ contract. *Uses* lists the interfaces of other parts that it calls.
 
 ## 6. Initialization
 
-INET numbers its initialization stages at run time from the dependencies in
-`src/inet/common/InitStages.cc`. The order that matters here is `LOCAL` (0), `POWER` (7),
-`PHYSICAL_LAYER` (8), `NETWORK_INTERFACE_CONFIGURATION` (10), `LINK_LAYER` (13), `LAST` (23). A
-compound module runs its own `initialize(stage)` before its submodules run theirs. A module that
-does not override `numInitStages()` runs only stage 0.
+INET numbers its initialization stages at run time from the dependencies in `src/inet/common/InitStages.cc`. The order that matters here is `LOCAL` (0), `POWER` (7), `PHYSICAL_LAYER` (8), `NETWORK_INTERFACE_CONFIGURATION` (10), `LINK_LAYER` (13), `LAST` (23). A compound module runs its own `initialize(stage)` before its submodules run theirs. A module that does not override `numInitStages()` runs only stage 0.
 
 | Stage | What happens in the 802.11 interface |
 | --- | --- |
@@ -488,33 +358,16 @@ does not override `numInitStages()` runs only stage 0.
 
 The order that a reader should keep in mind:
 
-1. **The address flows in one stage.** The interface generates it, the MAC copies it into the MIB,
-   and `Rx` caches it, all at `NETWORK_INTERFACE_CONFIGURATION`, in parent-before-child order.
-2. **The radio publishes its channel before the MAC publishes the mode set.** The AP management
-   needs both, and completes the HT operation at `LAST`.
-3. **The management modules start before the MAC is wired.** Their `start()` runs at stage 10,
-   the MAC finds its peers at stage 13. This works because the beacon timer fires at a later
-   simulation time.
-4. **The agent schedules its first action at `LOCAL`.** Its `startUp` timer fires at
-   `startingTime`, or at a random time within `maxChannelTime` when `startingTime` is negative.
-5. **`Dcf` and `Hcf` resolve their parts at different stages** (`LINK_LAYER` and `LOCAL`). Both
-   work, because submodules exist from construction. Both defer the queue subscription to `LAST`.
-6. **The first start is part of initialization.** `OperationalMixin::initialize` calls
-   `handleStartOperation(nullptr)` at the module's `isInitializeStage` when the node has no
-   `status` submodule or its state is `UP`. See §7.
+1. **The address flows in one stage.** The interface generates it, the MAC copies it into the MIB, and `Rx` caches it, all at `NETWORK_INTERFACE_CONFIGURATION`, in parent-before-child order.
+2. **The radio publishes its channel before the MAC publishes the mode set.** The AP management needs both, and completes the HT operation at `LAST`.
+3. **The management modules start before the MAC is wired.** Their `start()` runs at stage 10, the MAC finds its peers at stage 13. This works because the beacon timer fires at a later simulation time.
+4. **The agent schedules its first action at `LOCAL`.** Its `startUp` timer fires at `startingTime`, or at a random time within `maxChannelTime` when `startingTime` is negative.
+5. **`Dcf` and `Hcf` resolve their parts at different stages** (`LINK_LAYER` and `LOCAL`). Both work, because submodules exist from construction. Both defer the queue subscription to `LAST`.
+6. **The first start is part of initialization.** `OperationalMixin::initialize` calls `handleStartOperation(nullptr)` at the module's `isInitializeStage` when the node has no `status` submodule or its state is `UP`. See §7.
 
 ## 7. Lifecycle operations
 
-**The mechanism.** `LifecycleController` runs a `ModuleStartOperation`, `ModuleStopOperation` or
-`ModuleCrashOperation` on a node. For each stage of the operation it walks the module tree and calls
-`handleOperationStage` on every module that implements `ILifecycle`. A module that extends
-`OperationalMixin` (`OperationalBase`, and so `LayeredProtocolBase`, `MacProtocolBase`,
-`PhysicalLayerBase`, `Ieee80211MgmtBase`) answers only at its own stage and calls its
-`handleStartOperation`, `handleStopOperation` or `handleCrashOperation`. The start stages run
-bottom-up (`PHYSICAL_LAYER` before `LINK_LAYER`), the stop stages top-down (`LINK_LAYER` before
-`PHYSICAL_LAYER`), and a crash has one stage. While a module is `NOT_OPERATING`, a packet from the
-radio is deleted, a self-message throws, and any other message throws unless it arrives in the
-same instant as the state change.
+**The mechanism.** `LifecycleController` runs a `ModuleStartOperation`, `ModuleStopOperation` or `ModuleCrashOperation` on a node. For each stage of the operation it walks the module tree and calls `handleOperationStage` on every module that implements `ILifecycle`. A module that extends `OperationalMixin` (`OperationalBase`, and so `LayeredProtocolBase`, `MacProtocolBase`, `PhysicalLayerBase`, `Ieee80211MgmtBase`) answers only at its own stage and calls its `handleStartOperation`, `handleStopOperation` or `handleCrashOperation`. The start stages run bottom-up (`PHYSICAL_LAYER` before `LINK_LAYER`), the stop stages top-down (`LINK_LAYER` before `PHYSICAL_LAYER`), and a crash has one stage. While a module is `NOT_OPERATING`, a packet from the radio is deleted, a self-message throws, and any other message throws unless it arrives in the same instant as the state change.
 
 | Part | Stage | Start | Stop | Crash |
 | --- | --- | --- | --- | --- |
@@ -528,183 +381,78 @@ same instant as the state change.
 | radio | `PHYSICAL_LAYER` | re-applies the initial radio mode | cancels the switch timer, "aborts" the transmission (the signal already in flight continues to propagate), sets mode `OFF` | same as stop |
 | radio medium | — | none | none | none |
 
-**What the MAC sees when the radio stops.** The radio emits `radioModeChanged` (`OFF`), then
-`receptionStateChanged` and `transmissionStateChanged` with the `UNDEFINED` values, then the part
-signals with `NONE`. `Rx` recomputes *medium free*. The transition `TRANSMITTING → IDLE` does not
-happen, so `Tx` gets no `radioTransmissionFinished` for a transmission that a crash cut short.
+**What the MAC sees when the radio stops.** The radio emits `radioModeChanged` (`OFF`), then `receptionStateChanged` and `transmissionStateChanged` with the `UNDEFINED` values, then the part signals with `NONE`. `Rx` recomputes *medium free*. The transition `TRANSMITTING → IDLE` does not happen, so `Tx` gets no `radioTransmissionFinished` for a transmission that a crash cut short.
 
-**What does not happen on a MAC stop.** Nothing inside the MAC resets. The pending queues and the
-in-progress frames keep their packets. The acknowledgement states, the retry counters, the
-contention window, the block ack agreements and the reorder buffers keep their values. A frame sequence
-in progress keeps its context. The timers `startRxTimer`, `inactivityTimer`, the NAV timer, the
-IFS timer and the contention timers stay scheduled, and they fire as usual, because the submodules
-do not know the MAC's state. The interface's own state goes `DOWN` through `NetworkInterface`, not
-through the MAC.
+**What does not happen on a MAC stop.** Nothing inside the MAC resets. The pending queues and the in-progress frames keep their packets. The acknowledgement states, the retry counters, the contention window, the block ack agreements and the reorder buffers keep their values. A frame sequence in progress keeps its context. The timers `startRxTimer`, `inactivityTimer`, the NAV timer, the IFS timer and the contention timers stay scheduled, and they fire as usual, because the submodules do not know the MAC's state. The interface's own state goes `DOWN` through `NetworkInterface`, not through the MAC.
 
-**What restarts a station after a start operation.** Only the management module and the
-interface act. The agent has no lifecycle hooks. Its only trigger for a new scan is `l2BeaconLost`,
-which the station management emits when 3.5 beacon intervals pass without a beacon. After a stop
-that cleared the association, no beacon timeout is armed, so nothing restarts the association
-sequence.
+**What restarts a station after a start operation.** Only the management module and the interface act. The agent has no lifecycle hooks. Its only trigger for a new scan is `l2BeaconLost`, which the station management emits when 3.5 beacon intervals pass without a beacon. After a stop that cleared the association, no beacon timeout is armed, so nothing restarts the association sequence.
 
-The operations `InterfaceUpOperation` and `InterfaceDownOperation` exist in
-`src/inet/common/lifecycle/InterfaceOperations.h`. No module handles them.
+The operations `InterfaceUpOperation` and `InterfaceDownOperation` exist in `src/inet/common/lifecycle/InterfaceOperations.h`. No module handles them.
 
 ## 8. Four flows in words
 
 ### 8.1 A unicast data frame under DCF
 
-1. The network layer sends a packet to `upperLayerIn`. The classifier passes it. The LLC inserts
-   its header and sends it to `mac.upperLayerIn`.
-2. `Ieee80211Mac::handleUpperPacket` drops it when the station is not associated. `encapsulate`
-   builds the data header with the receiver address from the MIB (the BSSID on a station) and
-   appends the trailer. `processUpperFrame` calls `dcf->processUpperFrame`.
+1. The network layer sends a packet to `upperLayerIn`. The classifier passes it. The LLC inserts its header and sends it to `mac.upperLayerIn`.
+2. `Ieee80211Mac::handleUpperPacket` drops it when the station is not associated. `encapsulate` builds the data header with the receiver address from the MIB (the BSSID on a station) and appends the trailer. `processUpperFrame` calls `dcf->processUpperFrame`.
 3. `Dcf` enqueues the frame in the pending queue and calls `channelAccess->requestChannel(this)`.
-4. `Dcaf` starts the contention with the current CW, DIFS, EIFS and slot time. `Contention` waits
-   until `Rx` reports a free medium, then waits DIFS (or EIFS after a corrupt frame) plus the
-   backoff slots on a timer. At expiry it calls back `Dcaf`, which calls back `Dcf::channelGranted`.
+4. `Dcaf` starts the contention with the current CW, DIFS, EIFS and slot time. `Contention` waits until `Rx` reports a free medium, then waits DIFS (or EIFS after a corrupt frame) plus the backoff slots on a timer. At expiry it calls back `Dcaf`, which calls back `Dcf::channelGranted`.
 5. `Dcf` builds a `FrameSequenceContext` and starts a `DcfFs` in the `FrameSequenceHandler`.
-6. The first transmit step asks `InProgressFrames` for a frame. `InProgressFrames` pulls a packet
-   from the pending queue through `OriginatorMacDataService`, which assigns the sequence number
-   and fragments the packet when needed, and registers the frame with `AckHandler`.
-7. The handler calls `Dcf::transmitFrame`. `RateSelection` picks the mode and sets
-   `Ieee80211ModeReq`. `OriginatorProtectionMechanism` computes the duration field. `Dcf` calls
-   `tx->transmitFrame(packet, header, ifs, true, this)`. The holder frame requires a local NAV update.
-8. `Tx` fills the transmitter address and the FCS, waits the IFS, and calls `mac->sendDownFrame`.
-   The MAC switches the radio to transmitter mode with a command and sends the frame down.
-9. The radio prepends the PHY header and hands the packet to the medium. At the end of the
-   transmission the radio emits `transmissionStateChanged`; the MAC calls
-   `tx->radioTransmissionFinished`, which calls back `Dcf::transmissionComplete`; the MAC switches
-   the radio back to receiver mode. The handler moves to the receive step, and `Dcf` schedules
-   `startRxTimer` with the ACK timeout.
-10. The ACK arrives on `mac.lowerLayerIn`. `Rx` checks the FCS. `dcf->processLowerFrame` cancels
-    the timer and gives the frame to the handler. The step is accepted, and
-    `Dcf::originatorProcessReceivedFrame` marks the frame acknowledged, resets the retry counters
-    and the CW, reports success to the rate control, and drops the frame from `InProgressFrames`.
-    The sequence finishes: `Dcf` releases the channel, requests it again when the queue is not
-    empty, and flushes a held radio command.
+6. The first transmit step asks `InProgressFrames` for a frame. `InProgressFrames` pulls a packet from the pending queue through `OriginatorMacDataService`, which assigns the sequence number and fragments the packet when needed, and registers the frame with `AckHandler`.
+7. The handler calls `Dcf::transmitFrame`. `RateSelection` picks the mode and sets `Ieee80211ModeReq`. `OriginatorProtectionMechanism` computes the duration field. `Dcf` calls `tx->transmitFrame(packet, header, ifs, true, this)`. The holder frame requires a local NAV update.
+8. `Tx` fills the transmitter address and the FCS, waits the IFS, and calls `mac->sendDownFrame`. The MAC switches the radio to transmitter mode with a command and sends the frame down.
+9. The radio prepends the PHY header and hands the packet to the medium. At the end of the transmission the radio emits `transmissionStateChanged`; the MAC calls `tx->radioTransmissionFinished`, which calls back `Dcf::transmissionComplete`; the MAC switches the radio back to receiver mode. The handler moves to the receive step, and `Dcf` schedules `startRxTimer` with the ACK timeout.
+10. The ACK arrives on `mac.lowerLayerIn`. `Rx` checks the FCS. `dcf->processLowerFrame` cancels the timer and gives the frame to the handler. The step is accepted, and `Dcf::originatorProcessReceivedFrame` marks the frame acknowledged, resets the retry counters and the CW, reports success to the rate control, and drops the frame from `InProgressFrames`. The sequence finishes: `Dcf` releases the channel, requests it again when the queue is not empty, and flushes a held radio command.
 
-On a timeout the handler aborts the sequence and calls `originatorProcessFailedFrame`. The
-recovery procedure counts the retry and doubles the CW. Below the limit `Dcf` sets the retry bit
-and the frame stays in `InProgressFrames`; at the limit `Dcf` drops it and emits `packetDropped`
-and `linkBroken`. Either way the sequence finishes and a new contention starts.
+On a timeout the handler aborts the sequence and calls `originatorProcessFailedFrame`. The recovery procedure counts the retry and doubles the CW. Below the limit `Dcf` sets the retry bit and the frame stays in `InProgressFrames`; at the limit `Dcf` drops it and emits `packetDropped` and `linkBroken`. Either way the sequence finishes and a new contention starts.
 
 ### 8.2 A received frame
 
-1. The medium delivers a `WirelessSignal` to `radio.radioIn`. The radio starts a reception timer.
-   At the end, the medium's decision (SNIR threshold, then the error model) says whether the
-   packet is correct. The radio pops the PHY header, sets the indication tags and the bit-error
-   flag when needed, and sends the packet to `mac.lowerLayerIn`.
-2. `Ieee80211Mac::handleLowerPacket` calls `rx->lowerFrameReceived`. A corrupt frame is dropped
-   here; the contentions switch to EIFS and the coordination function learns of it. A correct frame
-   that is not for this station sets or extends the NAV.
-3. `dcf->processLowerFrame` gives the frame to the sequence in progress when one exists and the frame is
-   for this station. Otherwise `recipientProcessReceivedFrame` runs: `RecipientAckProcedure`
-   builds an ACK (or `CtsProcedure` a CTS in reply to an RTS), which `Dcf` sends through `Tx`
-   after SIFS; `RecipientMacDataService` removes duplicates and reassembles fragments and returns
-   the complete frames.
-   `Dcf` passes `false` for `updateLocalNav` when it sends the response. The response retains its Duration/ID field without a local NAV update.
-4. `Dcf::sendUp` calls `mac->sendUpFrame`. The MAC decapsulates the frame. A management frame goes
-   out on `mgmtOut`. A data frame goes to `Ds`, which passes it up (or, on an AP, forwards it into
-   the BSS through `mac->processUpperFrame`). The LLC pops its header and the packet leaves on
-   `upperLayerOut`.
+1. The medium delivers a `WirelessSignal` to `radio.radioIn`. The radio starts a reception timer. At the end, the medium's decision (SNIR threshold, then the error model) says whether the packet is correct. The radio pops the PHY header, sets the indication tags and the bit-error flag when needed, and sends the packet to `mac.lowerLayerIn`.
+2. `Ieee80211Mac::handleLowerPacket` calls `rx->lowerFrameReceived`. A corrupt frame is dropped here; the contentions switch to EIFS and the coordination function learns of it. A correct frame that is not for this station sets or extends the NAV.
+3. `dcf->processLowerFrame` gives the frame to the sequence in progress when one exists and the frame is for this station. Otherwise `recipientProcessReceivedFrame` runs: `RecipientAckProcedure` builds an ACK (or `CtsProcedure` a CTS in reply to an RTS), which `Dcf` sends through `Tx` after SIFS; `RecipientMacDataService` removes duplicates and reassembles fragments and returns the complete frames. `Dcf` passes `false` for `updateLocalNav` when it sends the response. The response retains its Duration/ID field without a local NAV update.
+4. `Dcf::sendUp` calls `mac->sendUpFrame`. The MAC decapsulates the frame. A management frame goes out on `mgmtOut`. A data frame goes to `Ds`, which passes it up (or, on an AP, forwards it into the BSS through `mac->processUpperFrame`). The LLC pops its header and the packet leaves on `upperLayerOut`.
 
 ### 8.3 A station joins a BSS
 
-1. The agent's `startUp` timer fires. The agent sends a scan request primitive to the management
-   module.
-2. `Ieee80211MgmtSta` disassociates if needed, then visits each channel: it sends an
-   `Ieee80211ConfigureRadioCommand` through the MAC to the radio, sends a probe request (active
-   scan) or waits (passive scan), and records every beacon and probe response.
-3. After the last channel the management module sends a scan confirm with the list of BSSs. The
-   agent picks the BSS with the highest received power whose SSID matches, and sends an
-   authenticate request.
-4. The management module changes channel, sends the authentication frames with a timeout per
-   step, and confirms. The agent then sends an associate request.
-5. The management module sends the association request. On the response it writes the SSID, the
-   BSSID, `isAssociated = true` and the peer HT state into the MIB, emits `l2Associated`, and arms
-   the beacon timeout.
-6. On the AP, `Ieee80211MgmtAp` answers the probe, the authentication and the association. It
-   reserves an AID when it builds the response and commits it, marks the station `ASSOCIATED` and
-   emits `l2ApAssociated` when `frameTransmissionOutcome` reports the acknowledged response. From
-   then on `Ds` forwards frames to and from that station.
-7. When 3.5 beacon intervals pass without a beacon, the station management emits `l2BeaconLost`.
-   The agent emits `l2Disassociated` and sends a new scan request. The association flag in the MIB
-   stays true until that scan request arrives.
+1. The agent's `startUp` timer fires. The agent sends a scan request primitive to the management module.
+2. `Ieee80211MgmtSta` disassociates if needed, then visits each channel: it sends an `Ieee80211ConfigureRadioCommand` through the MAC to the radio, sends a probe request (active scan) or waits (passive scan), and records every beacon and probe response.
+3. After the last channel the management module sends a scan confirm with the list of BSSs. The agent picks the BSS with the highest received power whose SSID matches, and sends an authenticate request.
+4. The management module changes channel, sends the authentication frames with a timeout per step, and confirms. The agent then sends an associate request.
+5. The management module sends the association request. On the response it writes the SSID, the BSSID, `isAssociated = true` and the peer HT state into the MIB, emits `l2Associated`, and arms the beacon timeout.
+6. On the AP, `Ieee80211MgmtAp` answers the probe, the authentication and the association. It reserves an AID when it builds the response and commits it, marks the station `ASSOCIATED` and emits `l2ApAssociated` when `frameTransmissionOutcome` reports the acknowledged response. From then on `Ds` forwards frames to and from that station.
+7. When 3.5 beacon intervals pass without a beacon, the station management emits `l2BeaconLost`. The agent emits `l2Disassociated` and sends a new scan request. The association flag in the MIB stays true until that scan request arrives.
 
 ### 8.4 A QoS station: EDCA and block acknowledgement
 
-1. The classifier sets `UserPriorityReq`. The MAC sets the QoS subtype and the TID. `Hcf` maps
-   the TID to an access category and enqueues the frame in that EDCAF's pending queue. A
-   management frame always goes to `AC_VO`.
-2. Each EDCAF contends on its own, with AIFS and a CW per access category. When two EDCAFs would
-   transmit at the same instant, the collision controller lets the higher category win; `Hcf`
-   treats the loss as a transmission failure of the loser and re-requests the channel.
-3. On a grant `Hcf` starts the TXOP of the winner and an `HcfFs`. Each round is one of: data with
-   ACK, data under block ack policy without a response, a BlockAckReq with its BlockAck, or a
-   management frame with ACK. The TXOP limit bounds the rounds; it is 0 for `AC_BK` and `AC_BE`.
-4. After the first eligible QoS data frame, the originator agreement handler builds an ADDBA
-   request, which `Hcf` sends as a management frame. The peer's recipient handler answers with an
-   ADDBA response. From then on the ack policy may be `BLOCK_ACK`. After `blockAckReqThreshold`
-   outstanding frames the originator sends a BlockAckReq, and the recipient answers with a bitmap
-   from its `BlockAckRecord`. The recipient data service reorders frames per agreement before it
-   passes them up.
+1. The classifier sets `UserPriorityReq`. The MAC sets the QoS subtype and the TID. `Hcf` maps the TID to an access category and enqueues the frame in that EDCAF's pending queue. A management frame always goes to `AC_VO`.
+2. Each EDCAF contends on its own, with AIFS and a CW per access category. When two EDCAFs would transmit at the same instant, the collision controller lets the higher category win; `Hcf` treats the loss as a transmission failure of the loser and re-requests the channel.
+3. On a grant `Hcf` starts the TXOP of the winner and an `HcfFs`. Each round is one of: data with ACK, data under block ack policy without a response, a BlockAckReq with its BlockAck, or a management frame with ACK. The TXOP limit bounds the rounds; it is 0 for `AC_BK` and `AC_BE`.
+4. After the first eligible QoS data frame, the originator agreement handler builds an ADDBA request, which `Hcf` sends as a management frame. The peer's recipient handler answers with an ADDBA response. From then on the ack policy may be `BLOCK_ACK`. After `blockAckReqThreshold` outstanding frames the originator sends a BlockAckReq, and the recipient answers with a bitmap from its `BlockAckRecord`. The recipient data service reorders frames per agreement before it passes them up.
 
 ## 9. Points to check
 
-The study found the items below in the code as it is. They are facts to check, not judgments.
-Each one changes what a reader may assume from the tables above.
+The study found the items below in the code as it is. They are facts to check, not judgments. Each one changes what a reader may assume from the tables above.
 
-1. **The MAC's stop and crash hooks are empty**, marked `FIXME`, and skip `MacProtocolBase`. No
-   part inside the MAC resets on a stop (§7).
+1. **The MAC's stop and crash hooks are empty**, marked `FIXME`, and skip `MacProtocolBase`. No part inside the MAC resets on a stop (§7).
 2. **The agent has no lifecycle support** (`TODO add ILifecycle` in `mgmt/Ieee80211AgentSta.h`).
-3. **The radio returns to receiver mode from `Ieee80211Mac::receiveSignal`**, marked `FIXME this
-   is in a very wrong place`. The coordination function does not control the radio mode.
-4. **A channel change from management can wait without bound** while the medium is busy
-   (`Ieee80211Mac::handleUpperCommand`, `TODO waiting potentially indefinitely`).
-5. **Placeholders and dead code:** `Pcf` and `Mcf` throw; `Hcca` is a stub; `HtTxOpFs`, `McfFs`
-   and `PcfFs` are empty and unused; the two block ack handler `.ned` files declare modules that
-   cannot be instantiated.
-6. **Features that the NED comments advertise but the code does not run:** A-MPDU aggregation
-   (the call is commented out), MSDU lifetime (the handlers are never created), self-CTS (the
-   predicate returns false).
-7. **Block ack timers:** the handlers pass an absolute expiration time, `Hcf` treats it as a
-   delay; the recipient DELBA lookup uses the receiver address where the table is keyed by the
-   originator; the default timeout `0s` disables the timer, so both defects are latent.
-8. **Two mode sets:** the MAC builds one from `mac.modeSet`, the transmitter and receiver build
-   one from `opMode`. The interface wires both from `opMode`; a direct override of `mac.modeSet`
-   desynchronizes them.
-9. **Timing comes from the reference mode of the set.** For `g(mixed)` the reference is the
-   1 Mbps DSSS mode, so slot time and SIFS are 20 µs and 10 µs whatever mode a frame uses.
-10. **`Ieee80211RadioMedium` sets the limit cache center frequency to 2.4 GHz.** A 5 GHz network
-    that uses it without an override gets range limits for 2.4 GHz.
-11. **A corrupt packet reaches the MAC.** The error model delivers it with the bit-error flag,
-    `Rx` drops it, and both `Rx` and the MAC report the corruption, on two separate paths.
-12. **The management module recovers the popped MAC header by a peek of 24 bytes**, a constant
-    that must match the header the MAC popped.
-13. **The simplified AP management never fills the station table.** The MAC and `Ds` then drop
-    downlink frames and pass uplink frames up; the simplified station compensates by a direct
-    write into the AP's MIB.
-14. **Beacon loss does not clear the association.** `l2BeaconLost` leaves `isAssociated` true; the
-    agent's new scan request clears it. No disassociation frame is sent.
-15. **TXOP predicates are stubs.** `isFinalFragment`, `isTxopInitiator` and `isTxopTerminator`
-    return false, which changes the duration fields and the control-frame rate rule.
-16. **Placement questions that the code raises itself:** `Dcf.ned` proposes to merge `Dcaf` into
-    `Dcf`; `Edcaf.ned` and `QosAckHandler.h` propose to move the ack handler and the recovery
-    procedure up to `Hcf`.
-17. **Inert subscriptions and unused declarations:** the MAC subscribes to `radioModeChanged` but
-    has no handler; `frameSequenceAborted` is declared and never emitted; `Ieee80211SubtypeInd`,
-    `IRateControl::frameReceived`, `RateSelection::frameTransmitted` and
-    `Contention::revokeBackoffOptimization` have no user.
-18. **No protocol registration.** Nothing in the 802.11 tree registers a protocol or a service; the
-    LLC's inherited registration is off by default.
+3. **The radio returns to receiver mode from `Ieee80211Mac::receiveSignal`**, marked `FIXME this is in a very wrong place`. The coordination function does not control the radio mode.
+4. **A channel change from management can wait without bound** while the medium is busy (`Ieee80211Mac::handleUpperCommand`, `TODO waiting potentially indefinitely`).
+5. **Placeholders and dead code:** `Pcf` and `Mcf` throw; `Hcca` is a stub; `HtTxOpFs`, `McfFs` and `PcfFs` are empty and unused; the two block ack handler `.ned` files declare modules that cannot be instantiated.
+6. **Features that the NED comments advertise but the code does not run:** A-MPDU aggregation (the call is commented out), MSDU lifetime (the handlers are never created), self-CTS (the predicate returns false).
+7. **Block ack timers:** the handlers pass an absolute expiration time, `Hcf` treats it as a delay; the recipient DELBA lookup uses the receiver address where the table is keyed by the originator; the default timeout `0s` disables the timer, so both defects are latent.
+8. **Two mode sets:** the MAC builds one from `mac.modeSet`, the transmitter and receiver build one from `opMode`. The interface wires both from `opMode`; a direct override of `mac.modeSet` desynchronizes them.
+9. **Timing comes from the reference mode of the set.** For `g(mixed)` the reference is the 1 Mbps DSSS mode, so slot time and SIFS are 20 µs and 10 µs whatever mode a frame uses.
+10. **`Ieee80211RadioMedium` sets the limit cache center frequency to 2.4 GHz.** A 5 GHz network that uses it without an override gets range limits for 2.4 GHz.
+11. **A corrupt packet reaches the MAC.** The error model delivers it with the bit-error flag, `Rx` drops it, and both `Rx` and the MAC report the corruption, on two separate paths.
+12. **The management module recovers the popped MAC header by a peek of 24 bytes**, a constant that must match the header the MAC popped.
+13. **The simplified AP management never fills the station table.** The MAC and `Ds` then drop downlink frames and pass uplink frames up; the simplified station compensates by a direct write into the AP's MIB.
+14. **Beacon loss does not clear the association.** `l2BeaconLost` leaves `isAssociated` true; the agent's new scan request clears it. No disassociation frame is sent.
+15. **TXOP predicates are stubs.** `isFinalFragment`, `isTxopInitiator` and `isTxopTerminator` return false, which changes the duration fields and the control-frame rate rule.
+16. **Placement questions that the code raises itself:** `Dcf.ned` proposes to merge `Dcaf` into `Dcf`; `Edcaf.ned` and `QosAckHandler.h` propose to move the ack handler and the recovery procedure up to `Hcf`.
+17. **Inert subscriptions and unused declarations:** the MAC subscribes to `radioModeChanged` but has no handler; `frameSequenceAborted` is declared and never emitted; `Ieee80211SubtypeInd`, `IRateControl::frameReceived`, `RateSelection::frameTransmitted` and `Contention::revokeBackoffOptimization` have no user.
+18. **No protocol registration.** Nothing in the 802.11 tree registers a protocol or a service; the LLC's inherited registration is off by default.
 
 ## 10. How this document was made
 
-Five code studies, one per area (the MAC skeleton, the inside of `Dcf`, the inside of `Hcf`, the
-management plane with the LLC and the MIB, and the physical layer), each read the files of its area
-and reported the parts, the calls, the signals, the initialization stages and the lifecycle hooks
-with file and line citations. This document condenses those reports. The line numbers were dropped
-on purpose; the file names and the method names stay, so that a reader can open the file and check
-the statement. Where the code carries a `TODO`, `FIXME` or `KLUDGE` that changes the picture, §9
-says so.
+Five code studies, one per area (the MAC skeleton, the inside of `Dcf`, the inside of `Hcf`, the management plane with the LLC and the MIB, and the physical layer), each read the files of its area and reported the parts, the calls, the signals, the initialization stages and the lifecycle hooks with file and line citations. This document condenses those reports. The line numbers were dropped on purpose; the file names and the method names stay, so that a reader can open the file and check the statement. Where the code carries a `TODO`, `FIXME` or `KLUDGE` that changes the picture, §9 says so.

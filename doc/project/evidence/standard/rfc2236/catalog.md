@@ -2,49 +2,28 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC2236-*` · **Stands on:** [standards.md](../../protocol/igmp/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow for RFC 2236, Internet Group Management Protocol, Version 2, of
-November 1997, a document of the in-scope set of IGMP. The catalog comes from the RFC text
-only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow for RFC 2236, Internet Group Management Protocol, Version 2, of November 1997, a document of the in-scope set of IGMP. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc2236.txt`](../../../../../../standards/RFC/rfc2236.txt) —
-  Internet Group Management Protocol, Version 2, November 1997. Downloaded 2026-09-23 from
-  <https://www.rfc-editor.org/rfc/rfc2236.txt>.
+- [`standards/RFC/rfc2236.txt`](../../../../../../standards/RFC/rfc2236.txt) — Internet Group Management Protocol, Version 2, November 1997. Downloaded 2026-09-23 from <https://www.rfc-editor.org/rfc/rfc2236.txt>.
 
-IGMPv3 itself is in [`rfc9776/catalog.md`](../rfc9776/catalog.md); this document gives the
-version 2 behavior that the compatibility rules of RFC 9776 §7 fall back to. The in-scope
-sections are §6 and §7.
+IGMPv3 itself is in [`rfc9776/catalog.md`](../rfc9776/catalog.md); this document gives the version 2 behavior that the compatibility rules of RFC 9776 §7 fall back to. The in-scope sections are §6 and §7.
 
-The family of documents and the in-scope set are in
-[`standards.md`](../../protocol/igmp/standards.md). The features these statements build are in
-[`features.md`](../../protocol/igmp/features.md).
+The family of documents and the in-scope set are in [`standards.md`](../../protocol/igmp/standards.md). The features these statements build are in [`features.md`](../../protocol/igmp/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`igmp/coverage.md`](../../model/igmp/coverage.md). Keeping it out is deliberate: this catalog
-states what the standard says, so a new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`igmp/coverage.md`](../../model/igmp/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc2236.txt:1203-1205` points to lines of that
-file. Where a quote crosses a page break of the RFC, the reference names both line groups.
+Quotes are verbatim. A reference such as `rfc2236.txt:1203-1205` points to lines of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
-The entries were drafted section by section and merged; the sections are the areas below, in
-the order of the document.
+The entries were drafted section by section and merged; the sections are the areas below, in the order of the document.
 
 ## How to read an entry
 
 - **ID** — `RFC2236-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into the text.
-- **Strength** — the word the document uses. RFC 2236 uses the keywords of RFC 2119 in capitals;
-  the entry records `must`, `must not`, `should`, `should not` or `may` for them, and
-  `description` for a normative sentence with no keyword. Where the text writes a keyword in
-  lower case, the entry records the word and says so, for example `must (lower case)`; a
-  "might" stays `description`. An entry with two keywords names what each one covers. A row of
-  a state table that states an action is an entry of its own.
-- **Class** — how a test can observe the statement: `wire` (fields of messages on a link, or
-  the presence or absence of a message), `end-to-end` (what a node accepts and acts on, seen
-  in what it sends or forwards afterwards), `error-signal` (an error report),
-  `internal` (state inside a node), `encoding` (the exact bit layout).
+- **Strength** — the word the document uses. RFC 2236 uses the keywords of RFC 2119 in capitals; the entry records `must`, `must not`, `should`, `should not` or `may` for them, and `description` for a normative sentence with no keyword. Where the text writes a keyword in lower case, the entry records the word and says so, for example `must (lower case)`; a "might" stays `description`. An entry with two keywords names what each one covers. A row of a state table that states an action is an entry of its own.
+- **Class** — how a test can observe the statement: `wire` (fields of messages on a link, or the presence or absence of a message), `end-to-end` (what a node accepts and acts on, seen in what it sends or forwards afterwards), `error-signal` (an error report), `internal` (state inside a node), `encoding` (the exact bit layout).
 - **Check idea** — one or two sentences, still without implementation names.
 
 ## Index
@@ -1092,12 +1071,9 @@ the order of the document.
 
 ## Out of scope in this catalog
 
-The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of
-§6 and §7. What the catalog leaves out:
+The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of §6 and §7. What the catalog leaves out:
 
-- **The sections outside the in-scope set**: §1 to §5 (definitions, message format, protocol
-  description, compatibility with IGMPv1) and §8 to §15 (timers, message destinations,
-  security, references, the changes from IGMPv1).
+- **The sections outside the in-scope set**: §1 to §5 (definitions, message format, protocol description, compatibility with IGMPv1) and §8 to §15 (timers, message destinations, security, references, the changes from IGMPv1).
 
 Within the in-scope sections, these parts have no entry, with the reason:
 

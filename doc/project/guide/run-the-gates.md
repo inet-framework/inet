@@ -2,16 +2,11 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [enforcement/README.md](../enforcement/README.md), [testing.md](../rule/testing.md)
 
-What to run during focused development and before a push, in order, and what each result must say.
-The full inventory and the tier ladder are
-[enforcement/README.md](../enforcement/README.md). Run everything from the repository root unless a
-test command explicitly changes directory.
+What to run during focused development and before a push, in order, and what each result must say. The full inventory and the tier ladder are [enforcement/README.md](../enforcement/README.md). Run everything from the repository root unless a test command explicitly changes directory.
 
 ## Keep the tested library current
 
-After compiled INET source or generated-code inputs change, build the INET library in the mode the
-test will load before running the test. This prevents a green result from describing an older
-`libINET_dbg` or `libINET` than the changed source tree:
+After compiled INET source or generated-code inputs change, build the INET library in the mode the test will load before running the test. This prevents a green result from describing an older `libINET_dbg` or `libINET` than the changed source tree:
 
 ```bash
 make -j$(nproc) MODE=debug
@@ -19,18 +14,11 @@ make -j$(nproc) MODE=debug
 make -j$(nproc) MODE=release
 ```
 
-Debug mode is the primary mode for local behavioral validation because it retains runtime
-assertions. Release mode remains a required compilation check before a contributor pushes; run
-behavioral tests in release mode as well when the changed contract or defect is mode-sensitive.
-A test-definition, script, configuration or documentation-only change does not require rebuilding
-the INET library unless it also changes compiled support inputs. Always record the mode and any
-required build status with the test result.
+Debug mode is the primary mode for local behavioral validation because it retains runtime assertions. Release mode remains a required compilation check before a contributor pushes; run behavioral tests in release mode as well when the changed contract or defect is mode-sensitive. A test-definition, script, configuration or documentation-only change does not require rebuilding the INET library unless it also changes compiled support inputs. Always record the mode and any required build status with the test result.
 
 ## During focused development
 
-Map each changed path, symbol or behavioral contract to the directly related cases in the category
-required by [TR-CAT-MATCH](../rule/testing.md#tr-cat-match). Run those cases through an explicit
-case, tag or filter; for example:
+Map each changed path, symbol or behavioral contract to the directly related cases in the category required by [TR-CAT-MATCH](../rule/testing.md#tr-cat-match). Run those cases through an explicit case, tag or filter; for example:
 
 ```bash
 doc/project/enforcement/check-architecture.sh src/inet/<affected-subtree>
@@ -38,34 +26,17 @@ doc/project/enforcement/check-architecture.sh src/inet/<affected-subtree>
 # Use the category runner's explicit selector for unit, module, protocol and other tests.
 ```
 
-For protocol cases, follow the suite and test-file selection and build instructions in
-[AUTHORING.md](../../../tests/protocol/lib/AUTHORING.md#10-running-tests).
-For recorded statistical results, select
-the related simulation directories/configurations with
-`inet_run_statistical_tests -m debug -w '<simulation-directory-regex>' -c '<config-regex>'`.
-Use release mode when reproducing the statistical CI workflow, and report that mode explicitly.
+For protocol cases, follow the suite and test-file selection and build instructions in [AUTHORING.md](../../../tests/protocol/lib/AUTHORING.md#10-running-tests). For recorded statistical results, select the related simulation directories/configurations with `inet_run_statistical_tests -m debug -w '<simulation-directory-regex>' -c '<config-regex>'`. Use release mode when reproducing the statistical CI workflow, and report that mode explicitly.
 
-Keep the working directory, exact build and test commands, configuration, run and seed where
-applicable, filter, exit status and artifact paths. An unfiltered category or repository-wide suite
-may add integration coverage, but it cannot replace a directly related case. If no such case exists,
-report the coverage gap instead of broadening the command until something green appears
-([TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence)).
+Keep the working directory, exact build and test commands, configuration, run and seed where applicable, filter, exit status and artifact paths. An unfiltered category or repository-wide suite may add integration coverage, but it cannot replace a directly related case. If no such case exists, report the coverage gap instead of broadening the command until something green appears ([TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence)).
 
-A dry run previews selection; it supplies no executed-test evidence. Report a zero-case selection
-as not run. Distinguish observed passes, declared expected failures, unexpected outcomes and setup
-errors even when the runner exits successfully. For protocol expectations, use the failure classes
-in [derive-tests-from-a-standard.md](derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected).
+A dry run previews selection; it supplies no executed-test evidence. Report a zero-case selection as not run. Distinguish observed passes, declared expected failures, unexpected outcomes and setup errors even when the runner exits successfully. For protocol expectations, use the failure classes in [derive-tests-from-a-standard.md](derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected).
 
-Statistical comparisons also record the baseline repository revision and local changes. For a
-base-versus-feature comparison, use the same baseline revision and environment on both sides;
-advancing the baseline during the comparison changes the experiment. Diagnose missing baselines
-separately from changed simulation results. Changes to recorded expectations follow
-[change-a-baseline.md](change-a-baseline.md).
+Statistical comparisons also record the baseline repository revision and local changes. For a base-versus-feature comparison, use the same baseline revision and environment on both sides; advancing the baseline during the comparison changes the experiment. Diagnose missing baselines separately from changed simulation results. Changes to recorded expectations follow [change-a-baseline.md](change-a-baseline.md).
 
 ## Before every push
 
-The final pass keeps the focused evidence and adds the project-wide compilation and mechanical
-gates. It does not turn every local validation into an unfiltered test campaign.
+The final pass keeps the focused evidence and adds the project-wide compilation and mechanical gates. It does not turn every local validation into an unfiltered test campaign.
 
 ```bash
 # 1. compile the source in both supported modes
@@ -82,8 +53,7 @@ doc/project/enforcement/check-source-seals.sh --base origin/master
 # 3. rerun each recorded, explicitly filtered test command against a fresh matching library
 ```
 
-CI, integration and release campaigns may run broader suites and build matrices. Their result is
-additional evidence; it does not erase the focused change-to-test mapping.
+CI, integration and release campaigns may run broader suites and build matrices. Their result is additional evidence; it does not erase the focused change-to-test mapping.
 
 ## When the change touches this document set
 
@@ -109,19 +79,10 @@ doc/project/enforcement/check-architecture.sh src/inet/linklayer/ethernet
 doc/project/enforcement/check-naming.sh src/inet/linklayer/ethernet
 ```
 
-The naming command scans declaration names in every NED and MSG file under the subtree. The scoped
-run is not the final project-wide architecture and naming pass before a push.
+The naming command scans declaration names in every NED and MSG file under the subtree. The scoped run is not the final project-wide architecture and naming pass before a push.
 
 ## What none of them cover
 
-The gates cover dependency direction, C++ identifiers, file names and the commit series. They do not
-cover the **semantic** project rules: substitutable operation outcomes, object ownership,
-externally exposed enum values or named numeric codes, visualization logic inside a protocol, a zero-time message
-standing in for a call, or a test whose category does not match its claim. Those are tier 4, and
-they need the [agent-review checklist](../enforcement/checklist/general.md).
+The gates cover dependency direction, C++ identifiers, file names and the commit series. They do not cover the **semantic** project rules: substitutable operation outcomes, object ownership, externally exposed enum values or named numeric codes, visualization logic inside a protocol, a zero-time message standing in for a call, or a test whose category does not match its claim. Those are tier 4, and they need the [agent-review checklist](../enforcement/checklist/general.md).
 
-The pull-request `enforcement-tests.yml` workflow runs the enforcement checker tests.
-`check-sealing.yml` evaluates paths sealed at the branch merge base and, when necessary, waits for
-the protected approval required by [SR-PR-APPROVAL](../rule/sealing.md#sr-pr-approval). The remaining
-rule gates above still depend on contributors running them by hand, and are the next CI coverage gap
-to close.
+The pull-request `enforcement-tests.yml` workflow runs the enforcement checker tests. `check-sealing.yml` evaluates paths sealed at the branch merge base and, when necessary, waits for the protected approval required by [SR-PR-APPROVAL](../rule/sealing.md#sr-pr-approval). The remaining rule gates above still depend on contributors running them by hand, and are the next CI coverage gap to close.

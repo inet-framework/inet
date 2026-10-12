@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc9776/catalog.md](../../standard/rfc9776/catalog.md), [rfc2236/catalog.md](../../standard/rfc2236/catalog.md), [features.md](../../protocol/igmp/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the IGMP workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the IGMP workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -35,9 +33,7 @@ The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
 | `later` | it needs a toolset of a higher level — a crafted message at level 3, the state of a node at level 4, a version 1 or an SSM-aware system at level 5 |
 | `no check` | a permission that no observation can fail, so [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) asks for no test |
 
-A verdict belongs to the test. Where a test fails at a later observation and the observation
-of a statement held, the row says PASS and names the observation in the note; where a failure
-kept a test from the observation a statement needs, the row says FAIL and says so.
+A verdict belongs to the test. Where a test fails at a later observation and the observation of a statement held, the row says PASS and names the observation in the note; where a failure kept a test from the observation a statement needs, the row says FAIL and says so.
 
 | Status | RFC 9776 | RFC 2236 | Together |
 | --- | --- | --- | --- |
@@ -447,11 +443,7 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 
 ## The coverage debt: the checks this pass owes
 
-Forty-nine statements that the model claims have no check yet. Each needs a normal exchange
-only, in a larger mockup or with a second path of messages, so each is level 2 work for a later
-pass. The closing list of
-[`checks.md`](../../protocol/igmp/checks.md#statements-this-pass-wrote-no-check-for) holds the
-same needs in the words of the standard.
+Forty-nine statements that the model claims have no check yet. Each needs a normal exchange only, in a larger mockup or with a second path of messages, so each is level 2 work for a later pass. The closing list of [`checks.md`](../../protocol/igmp/checks.md#statements-this-pass-wrote-no-check-for) holds the same needs in the words of the standard.
 
 | What the check needs | Statements |
 | --- | --- |
@@ -467,17 +459,11 @@ same needs in the words of the standard.
 | the end of the IGMPv2 mode of a group after the Older Host Present Interval | RFC9776-COMPR-20, COMPR-21, TIMER-25 |
 | an IGMPv2 group that times out, and two IGMPv2 routers, for the non-querier state machine | RFC2236-ROUTER-29, ROUTER-37, ROUTER-48, ROUTER-49, ROUTER-50, ROUTER-51, ROUTER-52, ROUTER-53, ROUTER-54 |
 
-Two groups of them will fail when their checks exist, from what the code shows: the forwarding
-in EXCLUDE mode with blocked sources, RFC9776-FWD-6 and FWD-7, because the forwarding asks for
-the group only ([gap 12](results.md#gap-12-defect--the-forwarding-asks-for-a-listener-of-the-group-not-of-the-source)),
-and a non-querier that adopts the QRV and the QQIC, RFC9776-QRY-14, QRY-18 and TIMER-1, because
-the Queries carry zero in both fields ([gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic)).
+Two groups of them will fail when their checks exist, from what the code shows: the forwarding in EXCLUDE mode with blocked sources, RFC9776-FWD-6 and FWD-7, because the forwarding asks for the group only ([gap 12](results.md#gap-12-defect--the-forwarding-asks-for-a-listener-of-the-group-not-of-the-source)), and a non-querier that adopts the QRV and the QQIC, RFC9776-QRY-14, QRY-18 and TIMER-1, because the Queries carry zero in both fields ([gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic)).
 
 ## Feature support
 
-The rule of the guide, per feature: `supported` when every core check ran and passed,
-`partial` when at least one passed and at least one failed or has no check, `not supported`
-when every core check that ran failed, `untested` when no core check exists.
+The rule of the guide, per feature: `supported` when every core check ran and passed, `partial` when at least one passed and at least one failed or has no check, `not supported` when every core check that ran failed, `untested` when no core check exists.
 
 | Feature | Level | Support | Core statements that fail or have no check |
 | --- | --- | --- | --- |
@@ -502,15 +488,11 @@ when every core check that ran failed, `untested` when no core check exists.
 | [IGMP-F-SSM-AWARE](../../protocol/igmp/features.md#igmp-f-ssm-aware) | optional | untested | RFC9776-REP-21, REP-25, RREP-1, RREP-2, COMPH-27 are `later` |
 | [IGMP-F-TIMER-CONFIGURATION](../../protocol/igmp/features.md#igmp-f-timer-configuration) | mandatory | partial | RFC9776-TIMER-3 fails ([gap 1](results.md#gap-1-defect--the-queries-carry-no-qrv-and-no-qqic)); RFC9776-TIMER-1 is `owed` |
 
-Five features are supported, thirteen partial, none not supported, and two untested. Each of
-the thirteen partial features has at least one core check that passes; eleven of them also have
-a core check that fails. The two untested features are IGMP-F-MESSAGE-VALIDATION, whose checks
-all need a crafted message, and the optional IGMP-F-SSM-AWARE, which is level 5.
+Five features are supported, thirteen partial, none not supported, and two untested. Each of the thirteen partial features has at least one core check that passes; eleven of them also have a core check that fails. The two untested features are IGMP-F-MESSAGE-VALIDATION, whose checks all need a crafted message, and the optional IGMP-F-SSM-AWARE, which is level 5.
 
 ## Achieved level
 
-**Level 2, reached.** Target: level 2, from
-[`standards.md`](../../protocol/igmp/standards.md#target-level).
+**Level 2, reached.** Target: level 2, from [`standards.md`](../../protocol/igmp/standards.md#target-level).
 
 The exit criterion of level 2 has two halves, and both hold:
 
@@ -519,14 +501,9 @@ The exit criterion of level 2 has two halves, and both hold:
 | Every normal-path mandatory mechanism of the base documents appears as a feature | holds | the catalogs hold every normative statement of RFC 9776 §4 to §8 and of the host and router state diagrams of RFC 2236 §6 and §7, 387 entries; the feature map has 20 features and places every entry |
 | Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 18 of the 19 mandatory features have core checks that ran: 42 tests, 24 PASS, 18 FAIL |
 
-The one mandatory feature without a core check has no normal path, so the criterion does not
-reach it at this level, and the ledger says so rather than count it: IGMP-F-MESSAGE-VALIDATION
-is the silent discard of a message that fails a validity check, and every such message is a
-crafted one, which is level 3.
+The one mandatory feature without a core check has no normal path, so the criterion does not reach it at this level, and the ledger says so rather than count it: IGMP-F-MESSAGE-VALIDATION is the silent discard of a message that fails a validity check, and every such message is a crafted one, which is level 3.
 
-A level is a measure of how deeply the pass looked, not of how well the model did. Eighteen
-tests fail, and thirteen gaps of the model stand behind them; the level holds because each of
-those checks ran.
+A level is a measure of how deeply the pass looked, not of how well the model did. Eighteen tests fail, and thirteen gaps of the model stand behind them; the level holds because each of those checks ran.
 
 | Level | State | What it needs |
 | --- | --- | --- |
@@ -536,9 +513,7 @@ those checks ran.
 | 4, Dynamics | partial | the delays and intervals with a bound have a check with a stated window, but the random halves and the state inside a node (RFC9776-HOST-2, RQ-3, RQ-4) have no test |
 | 5, Complete | not started | RFC 1112, which no module implements, and RFC 4604, the SSM-aware behavior |
 
-Per feature, the level reached is level 2 for the eighteen features with a core check that ran,
-level 1 for IGMP-F-MESSAGE-VALIDATION, whose checks are level 3, and level 1 for
-IGMP-F-SSM-AWARE, whose checks are level 5.
+Per feature, the level reached is level 2 for the eighteen features with a core check that ran, level 1 for IGMP-F-MESSAGE-VALIDATION, whose checks are level 3, and level 1 for IGMP-F-SSM-AWARE, whose checks are level 5.
 
 ## Pass log
 
@@ -547,12 +522,8 @@ IGMP-F-SSM-AWARE, whose checks are level 5.
 | 1 | 2026-09-23 | **1, reached** | RFC 9776 and RFC 2236 downloaded; the standards map; the claims of the model | no run; one obsolete claim (RFC 3376, claimed at `Igmpv3.ned:13`); two RFC 9776 formula changes found relative to the model's defaults (Group Membership Interval, Older Version Querier Present Interval); the unrecognized-message-type rule went from a lower-case "should" to a formal MUST between RFC 2236 and RFC 9776, against code that already crashes on the case |
 | 2 | 2026-09-24 | **2, reached** | catalogs of RFC 9776 (293) and RFC 2236 (94); 20 features; 32 checks; 42 tests; the conformance matrix | 24 PASS, 18 FAIL, one of them declared expected; thirteen gaps of the model, twelve defects and one missing feature; 49 statements owed |
 
-The read record of pass 1 named commit `e360ca980e` of the wave 0 branch; its trees, src
-`16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
+The read record of pass 1 named commit `e360ca980e` of the wave 0 branch; its trees, src `16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
 
 ## Out of scope
 
-The areas that the catalogs leave out, and why, are at the end of each catalog:
-[RFC 9776](../../standard/rfc9776/catalog.md#out-of-scope-in-this-catalog),
-[RFC 2236](../../standard/rfc2236/catalog.md#out-of-scope-in-this-catalog). The documents
-outside the in-scope set are in [`standards.md`](../../protocol/igmp/standards.md#in-scope-set).
+The areas that the catalogs leave out, and why, are at the end of each catalog: [RFC 9776](../../standard/rfc9776/catalog.md#out-of-scope-in-this-catalog), [RFC 2236](../../standard/rfc2236/catalog.md#out-of-scope-in-this-catalog). The documents outside the in-scope set are in [`standards.md`](../../protocol/igmp/standards.md#in-scope-set).

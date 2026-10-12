@@ -2,15 +2,11 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc791/catalog.md](../../standard/rfc791/catalog.md), [rfc792/catalog.md](../../standard/rfc792/catalog.md), [rfc1122/catalog.md](../../standard/rfc1122/catalog.md), [rfc6864/catalog.md](../../standard/rfc6864/catalog.md), [features.md](../../protocol/ipv4/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the IPv4 workflow. Every other artifact
-of this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the IPv4 workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
-The ledger spans the documents of the in-scope set, so one table mixes RFC 791, RFC 792,
-RFC 1122 and RFC 6864 identifiers: a check may establish statements of two documents at
-once, and a later document may govern an earlier statement.
+The ledger spans the documents of the in-scope set, so one table mixes RFC 791, RFC 792, RFC 1122 and RFC 6864 identifiers: a check may establish statements of two documents at once, and a later document may govern an earlier statement.
 
 State of the ledger, from this run:
 
@@ -26,12 +22,7 @@ State of the ledger, from this run:
 
 ## Statement coverage
 
-`Status` is the state of the workflow, not of the standard: `selected` (a check targets it),
-`covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet
-chosen), `later` (needs a toolset or a category beyond this pass), `superseded by X` (a later
-in-scope document governs; the check targets X, and the row keeps the verdict of that
-check). A verdict of `declined` marks a `should` or `may` that the model does not follow,
-which is not a failure.
+`Status` is the state of the workflow, not of the standard: `selected` (a check targets it), `covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet chosen), `later` (needs a toolset or a category beyond this pass), `superseded by X` (a later in-scope document governs; the check targets X, and the row keeps the verdict of that check). A verdict of `declined` marks a `should` or `may` that the model does not follow, which is not a failure.
 
 | Catalog ID | Status | Check section | Test file | Verdict |
 | --- | --- | --- | --- | --- |
@@ -103,24 +94,11 @@ which is not a failure.
 | [RFC6864-ID-6](../../standard/rfc6864/catalog.md#rfc6864-id-6) | covered | [dont-fragment](../../protocol/ipv4/checks/fragmentation.md#dont-fragment) | Rfc791DontFragment.test | PASS |
 | [RFC6864-ID-7](../../standard/rfc6864/catalog.md#rfc6864-id-7) | selected | [atomic-identification](../../protocol/ipv4/checks/identification.md#atomic-identification) | Rfc6864AtomicIdentification.test | PASS |
 
-67 entries: 23 of RFC 791 and RFC 792, 37 of RFC 1122, 7 of RFC 6864. 50 have a verdict
-from a check that ran: 47 PASS, 2 FAIL -- both an unimplemented behavior -- 1 declined
-should. Three commits repaired the four defects that the pass 3 run found: `f77a73d5a1`
-(the header checksum guard and the four-field reassembly key), `37ddbfa7a8` (the
-link-layer broadcast suppression), and `40c9f04e21` (the unknown ICMP type). 17 have none:
-7 need a module test (an interface or a handoff inside the host), 2 wait for level 4 (the
-reassembly timer), 1 needs a TCP retransmission, 1 needs a standing negative rule in the
-framework, 1 is refused by the model with an assertion, 2 are superseded or internal, and
-3 are candidates that no check selected yet (a `may`, a `should`, and a conditional
-`must`).
+67 entries: 23 of RFC 791 and RFC 792, 37 of RFC 1122, 7 of RFC 6864. 50 have a verdict from a check that ran: 47 PASS, 2 FAIL -- both an unimplemented behavior -- 1 declined should. Three commits repaired the four defects that the pass 3 run found: `f77a73d5a1` (the header checksum guard and the four-field reassembly key), `37ddbfa7a8` (the link-layer broadcast suppression), and `40c9f04e21` (the unknown ICMP type). 17 have none: 7 need a module test (an interface or a handoff inside the host), 2 wait for level 4 (the reassembly timer), 1 needs a TCP retransmission, 1 needs a standing negative rule in the framework, 1 is refused by the model with an assertion, 2 are superseded or internal, and 3 are candidates that no check selected yet (a `may`, a `should`, and a conditional `must`).
 
 ## Feature support
 
-The rule of step 7: `supported` when every core check ran and passed, `partial` when a core
-check passed and another core check failed as a model gap or did not run, `not supported`
-when every core check that ran failed as a model gap, `untested` when no core check ran. A
-feature spans documents, so its core checks may be RFC 1122 or RFC 6864 statements that
-govern an RFC 791 one; the governing statement counts.
+The rule of step 7: `supported` when every core check ran and passed, `partial` when a core check passed and another core check failed as a model gap or did not run, `not supported` when every core check that ran failed as a model gap, `untested` when no core check ran. A feature spans documents, so its core checks may be RFC 1122 or RFC 6864 statements that govern an RFC 791 one; the governing statement counts.
 
 | Feature | Core checks and their state | Support |
 | --- | --- | --- |
@@ -138,36 +116,19 @@ govern an RFC 791 one; the governing statement counts.
 | [IPV4-F-ERROR-SUPPRESSION](../../protocol/ipv4/features.md#ipv4-f-error-suppression) | RFC1122-ICMP-5, ICMP-6, ICMP-8, ICMP-9 PASS; RFC1122-ICMP-7 PASS since `37ddbfa7a8` | **supported** |
 | [IPV4-F-ERROR-DELIVERY](../../protocol/ipv4/features.md#ipv4-f-error-delivery) | RFC1122-ICMP-3, DU-2, TE-1, PP-2: none ran (internal; module tests) | **untested** |
 
-Eleven features supported, one partial, one untested. Three commits (`f77a73d5a1`,
-`37ddbfa7a8`, `40c9f04e21`) repaired four defects since the pass that first found them, and
-moved IPV4-F-REASSEMBLY, IPV4-F-HEADER-CHECKSUM and IPV4-F-ERROR-SUPPRESSION from partial to
-supported. The one partial feature left is where the level 3 toolset still finds the model
-wanting: two of the five silent-discard rules of input validation, the wrong version and the
-unvalidated source address. The untested one is the handoff of a received ICMP error to the
-transport protocol, which happens inside the host and needs a module test.
+Eleven features supported, one partial, one untested. Three commits (`f77a73d5a1`, `37ddbfa7a8`, `40c9f04e21`) repaired four defects since the pass that first found them, and moved IPV4-F-REASSEMBLY, IPV4-F-HEADER-CHECKSUM and IPV4-F-ERROR-SUPPRESSION from partial to supported. The one partial feature left is where the level 3 toolset still finds the model wanting: two of the five silent-discard rules of input validation, the wrong version and the unvalidated source address. The untested one is the handoff of a received ICMP error to the transport protocol, which happens inside the host and needs a module test.
 
-Two bounds on these values, as before. A `supported` feature is supported as far as its
-checks reach: one datagram size, one MTU, one topology per check. And the checksum
-statements passed only with the model's computed mode enabled; in its default mode the
-field is a placeholder, which [`results.md`](results.md) records.
+Two bounds on these values, as before. A `supported` feature is supported as far as its checks reach: one datagram size, one MTU, one topology per check. And the checksum statements passed only with the model's computed mode enabled; in its default mode the field is a placeholder, which [`results.md`](results.md) records.
 
 ## Achieved level
 
-**Level 3, partial.** Target: level 3, from
-[`standards.md`](../../protocol/ipv4/standards.md#target-level).
+**Level 3, partial.** Target: level 3, from [`standards.md`](../../protocol/ipv4/standards.md#target-level).
 
 The exit criterion of level 3 has two halves. The first holds; the second does not.
 
-**Hold** — the catalogs hold every mandatory statement of the in-scope documents, including
-each `MUST NOT`. The RFC 1122 catalog was checked against the requirements summary of RFC
-1122 §3.5 for every in-scope section: every `MUST` and `MUST NOT` row of §3.2.1.1, §3.2.1.2,
-the validation rules of §3.2.1.3, §3.2.1.4, §3.2.1.7, §3.2.2 with §3.2.2.1, §3.2.2.4 and
-§3.2.2.5, §3.3.2, §3.3.3 and §3.3.8 has an entry. The three deliberate omissions (a `may`
-about several subnets, and two sentences addressed to the transport layer) are named at the
-end of the catalog. The RFC 6864 catalog holds all seven `>>` requirements of its §4.
+**Hold** — the catalogs hold every mandatory statement of the in-scope documents, including each `MUST NOT`. The RFC 1122 catalog was checked against the requirements summary of RFC 1122 §3.5 for every in-scope section: every `MUST` and `MUST NOT` row of §3.2.1.1, §3.2.1.2, the validation rules of §3.2.1.3, §3.2.1.4, §3.2.1.7, §3.2.2 with §3.2.2.1, §3.2.2.4 and §3.2.2.5, §3.3.2, §3.3.3 and §3.3.8 has an entry. The three deliberate omissions (a `may` about several subnets, and two sentences addressed to the transport layer) are named at the end of the catalog. The RFC 6864 catalog holds all seven `>>` requirements of its §4.
 
-**Run** — each mandatory statement has a check that ran: **not yet.** 50 of 67 statements
-have a verdict. 14 mandatory statements have none, and they fall into four kinds:
+**Run** — each mandatory statement has a check that ran: **not yet.** 50 of 67 statements have a verdict. 14 mandatory statements have none, and they fall into four kinds:
 
 | Kind | Statements | What unlocks them |
 | --- | --- | --- |
@@ -184,8 +145,7 @@ have a verdict. 14 mandatory statements have none, and they fall into four kinds
 | 4, Dynamics | not started | the reassembly timer: RFC1122-REASM-4, REASM-5, with the `fragmentTimeout` parameter and a withheld fragment |
 | 5, Complete | not started | options, type of service, the ICMP query messages, RFC 1812 for the gateway side |
 
-Per feature, level 3 is reached when every mandatory statement mapped to the feature, core
-or supporting, has a verdict:
+Per feature, level 3 is reached when every mandatory statement mapped to the feature, core or supporting, has a verdict:
 
 | Feature | Level 3 | What blocks it |
 | --- | --- | --- |
@@ -203,13 +163,7 @@ or supporting, has a verdict:
 | IPV4-F-ERROR-SUPPRESSION | reached | — |
 | IPV4-F-ERROR-DELIVERY | not reached | all four core statements are internal |
 
-Seven of thirteen features reach level 3. The level and the support value are different
-axes, in principle: reaching level 3 needs every mandatory statement to have a check that
-ran, not that it passed. On this run every feature that reaches level 3 also holds a
-`supported` value, because the repairs of `f77a73d5a1` and `37ddbfa7a8` cleared the one
-case that used to show the difference: IPV4-F-HEADER-CHECKSUM reached level 3 with a
-`partial` support value, before `f77a73d5a1`, because its verification check ran and
-failed.
+Seven of thirteen features reach level 3. The level and the support value are different axes, in principle: reaching level 3 needs every mandatory statement to have a check that ran, not that it passed. On this run every feature that reaches level 3 also holds a `supported` value, because the repairs of `f77a73d5a1` and `37ddbfa7a8` cleared the one case that used to show the difference: IPV4-F-HEADER-CHECKSUM reached level 3 with a `partial` support value, before `f77a73d5a1`, because its verification check ran and failed.
 
 ## Pass log
 
@@ -222,8 +176,4 @@ failed.
 
 ## Out of scope
 
-The catalogs record what this pass left out of the standards: options and source routing,
-type of service, the security annex, the subnet and broadcast address forms as
-destinations, host routing and redirects, source quench, the ICMP query messages, IGMP and
-multicasting, and the layer interface of RFC 1122 §3.4. Each becomes level 4 or level 5
-work, or the work of another protocol folder.
+The catalogs record what this pass left out of the standards: options and source routing, type of service, the security annex, the subnet and broadcast address forms as destinations, host routing and redirects, source quench, the ICMP query messages, IGMP and multicasting, and the layer interface of RFC 1122 §3.4. Each becomes level 4 or level 5 work, or the work of another protocol folder.

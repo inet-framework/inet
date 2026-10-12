@@ -1,249 +1,99 @@
 # Agent-Review Checklist (T4 enforcement)
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rule/architecture.md](../../rule/architecture.md), [rule/quality.md](../../rule/quality.md), [rule/release.md](../../rule/release.md), [rule/pull-request.md](../../rule/pull-request.md), [review-a-code-change.md](../../guide/review-a-code-change.md), [README.md](../README.md)
-The tier-4 gate from [enforcement/README.md](../README.md). It enforces the **semantic project
-rules** that no compiler or linter can express by having an LLM reviewer judge a diff against each
-item. Run it as a CI step on every change (and locally before pushing). For diffs touching
-`src/inet/linklayer/ieee80211/` or `src/inet/physicallayer/wireless/ieee80211/`, additionally run
-the [IEEE 802.11 checklist](ieee80211.md).
 
-For a proposed implementation plan, use the draft
-[plan review checklist](../../guide/write-an-implementation-plan.md#review-checklist).
-Its [plan rules](../../rule/planning.md) state when that procedure applies.
+The tier-4 gate from [enforcement/README.md](../README.md). It enforces the **semantic project rules** that no compiler or linter can express by having an LLM reviewer judge a diff against each item. Run it as a CI step on every change (and locally before pushing). For diffs touching `src/inet/linklayer/ieee80211/` or `src/inet/physicallayer/wireless/ieee80211/`, additionally run the [IEEE 802.11 checklist](ieee80211.md).
+
+For a proposed implementation plan, use the draft [plan review checklist](../../guide/write-an-implementation-plan.md#review-checklist). Its [plan rules](../../rule/planning.md) state when that procedure applies.
 
 ## How to run
 
-Input: the change under review (a diff, commit, range, branch, pull request, staged diff, or working
-tree). For **each** checklist item that can be evaluated, output one of:
+Input: the change under review (a diff, commit, range, branch, pull request, staged diff, or working tree). For **each** checklist item that can be evaluated, output one of:
 
 - `PASS` — the reviewed change plainly complies with the cited canonical rule.
 - `N/A — <reason>` — the cited canonical rule does not apply to the reviewed change.
-- `FLAG — <file>:<line> — <one-line reason>` — the reviewed change clearly violates the cited
-  canonical rule.
-- `QUESTION — <file>:<line> — <decision needed>` — the reviewed change plausibly conflicts with the
-  cited canonical rule, but deciding it requires genuine human/T5 judgment. It carries no defect
-  severity.
+- `FLAG — <file>:<line> — <one-line reason>` — the reviewed change clearly violates the cited canonical rule.
+- `QUESTION — <file>:<line> — <decision needed>` — the reviewed change plausibly conflicts with the cited canonical rule, but deciding it requires genuine human/T5 judgment. It carries no defect severity.
 
 Ground rules:
 
-1. **Precision over recall.** Use `FLAG` only for a clear violation of the rule cited by that item.
-   Use `QUESTION` only for a plausible conflict that needs genuine T5 judgment, not as a substitute
-   for investigation. A noisy gate gets ignored.
-2. **Judge only what static checks miss.** The compiler, `clang-tidy`, and `check-architecture.sh`
-   already cover the mechanical rules; you cover *semantics* (intent, logic, duplication).
-3. **Respect the ledgers.** Couplings already recorded in
-   [architecture-exceptions.md](../../audit/architecture-exceptions.md) or names in
-   [naming-exceptions.md](../../audit/naming-exceptions.md) are known — don't re-flag them; flag only *new*
-   deviations. State the ledger disposition for each new deviation, and propose a row only when it
-   will remain unresolved beyond the reviewed change.
+1. **Precision over recall.** Use `FLAG` only for a clear violation of the rule cited by that item. Use `QUESTION` only for a plausible conflict that needs genuine T5 judgment, not as a substitute for investigation. A noisy gate gets ignored.
+2. **Judge only what static checks miss.** The compiler, `clang-tidy`, and `check-architecture.sh` already cover the mechanical rules; you cover *semantics* (intent, logic, duplication).
+3. **Respect the ledgers.** Couplings already recorded in [architecture-exceptions.md](../../audit/architecture-exceptions.md) or names in [naming-exceptions.md](../../audit/naming-exceptions.md) are known — don't re-flag them; flag only *new* deviations. State the ledger disposition for each new deviation, and propose a row only when it will remain unresolved beyond the reviewed change.
 4. **Scope to the diff.** Review what the change adds or moves, not the whole pre-existing tree.
-5. **Expose evidence gaps.** Missing investigation, an unrun validation command, or unavailable
-   runtime evidence is normally `not verified` or a residual risk under
-   [review-a-code-change.md](../../guide/review-a-code-change.md), not automatically a checklist
-   `QUESTION`.
-6. **Do not duplicate findings.** When a rule violation is already explained by a correctness
-   finding, make the checklist `FLAG` reference that finding instead of repeating its proof and
-   correction direction.
+5. **Expose evidence gaps.** Missing investigation, an unrun validation command, or unavailable runtime evidence is normally `not verified` or a residual risk under [review-a-code-change.md](../../guide/review-a-code-change.md), not automatically a checklist `QUESTION`.
+6. **Do not duplicate findings.** When a rule violation is already explained by a correctness finding, make the checklist `FLAG` reference that finding instead of repeating its proof and correction direction.
 
 ## Checklist
 
-**[QR-DESIGN-MINIMAL] Does the change preserve required behavior with the least complex sufficient mechanism?**
-Apply [QR-DESIGN-MINIMAL](../../rule/quality.md#qr-design-minimal) to proposed safeguards and invariant changes. Trace the failure through actual calls, permitted extension behavior, event boundaries, and supported lifecycle operations. FLAG a safeguard whose only justification contradicts those contracts or assumes behavior outside their scope. State the simpler sufficient correction and why it preserves required behavior. Missing investigation is not proof that a safeguard is unnecessary.
+**[QR-DESIGN-MINIMAL] Does the change preserve required behavior with the least complex sufficient mechanism?** Apply [QR-DESIGN-MINIMAL](../../rule/quality.md#qr-design-minimal) to proposed safeguards and invariant changes. Trace the failure through actual calls, permitted extension behavior, event boundaries, and supported lifecycle operations. FLAG a safeguard whose only justification contradicts those contracts or assumes behavior outside their scope. State the simpler sufficient correction and why it preserves required behavior. Missing investigation is not proof that a safeguard is unnecessary.
 
-**[AR-ORG-CONTRACTS] Does a new interface define a concrete replacement role?**
-Check the stated alternative implementation or documented external extension point.
-FLAG an interface whose only justification is speculative flexibility.
-One current implementation is sufficient when the replacement role is clear.
+**[AR-ORG-CONTRACTS] Does a new interface define a concrete replacement role?** Check the stated alternative implementation or documented external extension point. FLAG an interface whose only justification is speculative flexibility. One current implementation is sufficient when the replacement role is clear.
 
-**[AR-ORG-CONTRACTS] Do substitutable implementations preserve the contract's declared outcomes?**
-FLAG a changed implementation, adapter, caller, or default that deviates from or collapses an
-outcome distinction declared by its contract, including a default argument whose meaning varies
-with the caller's static type. *Not a violation:* a contract that deliberately combines outcome
-categories and whose implementations and callers preserve that declared meaning.
+**[AR-ORG-CONTRACTS] Do substitutable implementations preserve the contract's declared outcomes?** FLAG a changed implementation, adapter, caller, or default that deviates from or collapses an outcome distinction declared by its contract, including a default argument whose meaning varies with the caller's static type. *Not a violation:* a contract that deliberately combines outcome categories and whose implementations and callers preserve that declared meaning.
 
-**[PR-SPLIT-ONE-CHANGE / PR-SPLIT-SIZE] Does a commit hold a part that can stand alone?**
-FLAG a commit with a part that builds, passes its tests and has a reason of its own, and name the
-part. Use the signs that the rule lists: baseline rows with more than one explanation, a test for a
-separate symptom, a new mechanism together with its first production user. FLAG a commit above the
-size limit whose body does not say why it does not divide. *Not a violation:* a contract and the
-update of every implementation of it, or another change whose body says why it does not divide.
+**[PR-SPLIT-ONE-CHANGE / PR-SPLIT-SIZE] Does a commit hold a part that can stand alone?** FLAG a commit with a part that builds, passes its tests and has a reason of its own, and name the part. Use the signs that the rule lists: baseline rows with more than one explanation, a test for a separate symptom, a new mechanism together with its first production user. FLAG a commit above the size limit whose body does not say why it does not divide. *Not a violation:* a contract and the update of every implementation of it, or another change whose body says why it does not divide.
 
-**[PR-SPLIT-PREPARE] Does preparation come before the change that needs it?**
-FLAG a commit called a refactor that changes behavior, a feature commit that holds the fix of a
-separate symptom, and a commit that adds a mechanism and also turns on its first production user.
-*Not a violation:* a mechanism that lands before its user in the same pull request, with tests that
-reach it directly.
+**[PR-SPLIT-PREPARE] Does preparation come before the change that needs it?** FLAG a commit called a refactor that changes behavior, a feature commit that holds the fix of a separate symptom, and a commit that adds a mechanism and also turns on its first production user. *Not a violation:* a mechanism that lands before its user in the same pull request, with tests that reach it directly.
 
-**[PR-MSG-BODY / PR-MSG-WHY] Does a substantial commit explain itself?**
-FLAG a commit that repairs a defect, changes behavior, or implements a standard and carries no body —
-the gate catches the empty ones above 50 lines, you catch the small ones. FLAG a body that restates
-the subject in longer words, or that lists the files and methods the diff already shows. Ask of each
-body: does it give the symptom, the cause, and why this solution rather than the obvious one?
-*Not a violation:* a bare subject on a rename, an include ordering, a whitespace commit, a plan or
-documentation commit, a regenerated file, or a `WHATSNEW` entry.
+**[PR-MSG-BODY / PR-MSG-WHY] Does a substantial commit explain itself?** FLAG a commit that repairs a defect, changes behavior, or implements a standard and carries no body — the gate catches the empty ones above 50 lines, you catch the small ones. FLAG a body that restates the subject in longer words, or that lists the files and methods the diff already shows. Ask of each body: does it give the symptom, the cause, and why this solution rather than the obvious one? *Not a violation:* a bare subject on a rename, an include ordering, a whitespace commit, a plan or documentation commit, a regenerated file, or a `WHATSNEW` entry.
 
-**[PR-MSG-SUMMARY] Does a commit body start with a summary?**
-FLAG a body from whose summary a reviewer cannot restate the answers to the
-[reviewer's questions](../../rule/pull-request.md#the-reviewers-questions): the problem, how we know
-that it is real and worth solving, what changes, and how. FLAG a summary that is a list of actions
-that the diff already shows. *Not a violation:* a commit without a body under PR-MSG-BODY, or a short
-body that answers the questions in proportion to a small change.
+**[PR-MSG-SUMMARY] Does a commit body start with a summary?** FLAG a body from whose summary a reviewer cannot restate the answers to the [reviewer's questions](../../rule/pull-request.md#the-reviewers-questions): the problem, how we know that it is real and worth solving, what changes, and how. FLAG a summary that is a list of actions that the diff already shows. *Not a violation:* a commit without a body under PR-MSG-BODY, or a short body that answers the questions in proportion to a small change.
 
-**[PR-MSG-FACTS] Does a commit message describe only the final change?**
-FLAG a message with a section on the history of the pull request — an audit correction, a review
-round, an earlier revision — and a message that carries a test log that belongs in the pull request
-description. *Not a violation:* the regression test of a fix, or the case that shows that a moved
-baseline is right.
+**[PR-MSG-FACTS] Does a commit message describe only the final change?** FLAG a message with a section on the history of the pull request — an audit correction, a review round, an earlier revision — and a message that carries a test log that belongs in the pull request description. *Not a violation:* the regression test of a fix, or the case that shows that a moved baseline is right.
 
-**[PR-REQ-STORY] Does a pull request description answer the reviewer's questions up front?**
-For a pull request, restate from the summary of the description alone: the problem, how we know that
-it is real and worth solving, what changes, how, and the risk. FLAG a description whose summary
-leaves one of them open, and list each open question for the author. *Not a violation:* a pull
-request of one small commit whose message answers the questions, or a short description in
-proportion to a small change.
+**[PR-REQ-STORY] Does a pull request description answer the reviewer's questions up front?** For a pull request, restate from the summary of the description alone: the problem, how we know that it is real and worth solving, what changes, how, and the risk. FLAG a description whose summary leaves one of them open, and list each open question for the author. *Not a violation:* a pull request of one small commit whose message answers the questions, or a short description in proportion to a small change.
 
-**[AR-ORG-CONTRACT-PURITY] Does a contract header declare anything that is not part of the role?**
-FLAG a `static` helper, a utility function, a non-trivial inline body, or a policy decision added to a
-C++ interface or a NED `moduleinterface`. Ask where it goes instead: the `*Base` class if it serves
-implementors, the caller's side if it serves callers, the owning module if it encodes a modeling
-decision. *Not a violation:* a pure virtual, a nested type the role needs, a `static simsignal_t`
-signal identity, or a trivial virtual destructor.
+**[AR-ORG-CONTRACT-PURITY] Does a contract header declare anything that is not part of the role?** FLAG a `static` helper, a utility function, a non-trivial inline body, or a policy decision added to a C++ interface or a NED `moduleinterface`. Ask where it goes instead: the `*Base` class if it serves implementors, the caller's side if it serves callers, the owning module if it encodes a modeling decision. *Not a violation:* a pure virtual, a nested type the role needs, a `static simsignal_t` signal identity, or a trivial virtual destructor.
 
-**[AR-ORG-VIS-SPLIT] Does protocol/model code contain visualization or instrumentation logic?**
-FLAG if a protocol/mobility/physical module draws on a canvas, builds a figure, or references a
-visualizer beyond emitting a signal. *Not a violation:* emitting a `@signal` that a visualizer
-consumes from outside.
+**[AR-ORG-VIS-SPLIT] Does protocol/model code contain visualization or instrumentation logic?** FLAG if a protocol/mobility/physical module draws on a canvas, builds a figure, or references a visualizer beyond emitting a signal. *Not a violation:* emitting a `@signal` that a visualizer consumes from outside.
 
-**[AR-ORG-KERNEL] Does the change reimplement or patch an OMNeT++ kernel facility inside INET?**
-FLAG a private reimplementation of event scheduling, RNG, suspend/resume, breakpoints, or a hand-patch
-of kernel internals. *Not a violation:* consuming a kernel API, or a documented shim with a linked
-upstream issue.
+**[AR-ORG-KERNEL] Does the change reimplement or patch an OMNeT++ kernel facility inside INET?** FLAG a private reimplementation of event scheduling, RNG, suspend/resume, breakpoints, or a hand-patch of kernel internals. *Not a violation:* consuming a kernel API, or a documented shim with a linked upstream issue.
 
-**[AR-MOD-COMPOSITION] Is new behavior added by composition, or by inheritance / a growing god-module?**
-FLAG a new deep inheritance chain, or a simple module/class that accretes several unrelated
-responsibilities. *Not a violation:* extending a `*Base` for genuine shared machinery.
+**[AR-MOD-COMPOSITION] Is new behavior added by composition, or by inheritance / a growing god-module?** FLAG a new deep inheritance chain, or a simple module/class that accretes several unrelated responsibilities. *Not a violation:* extending a `*Base` for genuine shared machinery.
 
-**[AR-COM-SOCKETS] Does a new application talk to a transport protocol via raw messages?**
-FLAG an app that hand-rolls command/indication messages instead of using `UdpSocket`/`TcpSocket`/peer.
-*Not a violation:* a new protocol implementing the socket-facing side.
+**[AR-COM-SOCKETS] Does a new application talk to a transport protocol via raw messages?** FLAG an app that hand-rolls command/indication messages instead of using `UdpSocket`/`TcpSocket`/peer. *Not a violation:* a new protocol implementing the socket-facing side.
 
-**[AR-COM-DIRECT] Is a zero-time message standing in for a required direct call?**
-FLAG `scheduleAt(simTime(), …)` or a zero-delay `send()` used for a same-instant command, query,
-return value or required handshake between sibling submodules. *Not a violation:* a message that
-represents a modeled delivery or explicit event boundary, including at the same simulation time; a
-message that crosses the medium; or a fire-and-forget signal that satisfies AR-COM-NOTIFY.
+**[AR-COM-DIRECT] Is a zero-time message standing in for a required direct call?** FLAG `scheduleAt(simTime(), …)` or a zero-delay `send()` used for a same-instant command, query, return value or required handshake between sibling submodules. *Not a violation:* a message that represents a modeled delivery or explicit event boundary, including at the same simulation time; a message that crosses the medium; or a fire-and-forget signal that satisfies AR-COM-NOTIFY.
 
-**[AR-COM-NOTIFY] Is a behavior-driving signal really an independent notification?**
-FLAG a publisher that depends on a particular listener, reply or relative invocation order among
-listeners; a signal used for ownership transfer, buffering, modeled delay or listener-ordered
-coordination; emission before the publisher restores its invariants; a behavioral module listener
-that omits `Enter_Method`/`Enter_Method_Silent`, retains a pointer beyond its declared lifetime,
-mutates a borrowed payload, or modifies the currently firing subscription list; or a broad ancestor
-subscription that fails to filter unrelated sources. *Not a violation:* an independent consumer
-reacting synchronously to completed facts in emission order without participating in the
-publisher's operation.
+**[AR-COM-NOTIFY] Is a behavior-driving signal really an independent notification?** FLAG a publisher that depends on a particular listener, reply or relative invocation order among listeners; a signal used for ownership transfer, buffering, modeled delay or listener-ordered coordination; emission before the publisher restores its invariants; a behavioral module listener that omits `Enter_Method`/`Enter_Method_Silent`, retains a pointer beyond its declared lifetime, mutates a borrowed payload, or modifies the currently firing subscription list; or a broad ancestor subscription that fails to filter unrelated sources. *Not a violation:* an independent consumer reacting synchronously to completed facts in emission order without participating in the publisher's operation.
 
-**[AR-OBS-SIGNALS] Can attaching an observer change modeled behavior?**
-FLAG a recorder, visualizer or analyzer that mutates modeled state, schedules a modeled action, or
-calls back into the producer. *Not a violation:* a separate behavioral listener that satisfies
-AR-COM-NOTIFY, even when it consumes a signal that is also recorded or visualized.
+**[AR-OBS-SIGNALS] Can attaching an observer change modeled behavior?** FLAG a recorder, visualizer or analyzer that mutates modeled state, schedules a modeled action, or calls back into the producer. *Not a violation:* a separate behavioral listener that satisfies AR-COM-NOTIFY, even when it consumes a signal that is also recorded or visualized.
 
-**[AR-OBS-NED-TRUTH] Does prose/code duplicate what a NED declaration owns?**
-FLAG doc text that restates parameters/gates/signals/statistics already in NED, or C++ that hardcodes a
-value that should be a NED parameter. *Not a violation:* referencing the NED declaration.
+**[AR-OBS-NED-TRUTH] Does prose/code duplicate what a NED declaration owns?** FLAG doc text that restates parameters/gates/signals/statistics already in NED, or C++ that hardcodes a value that should be a NED parameter. *Not a violation:* referencing the NED declaration.
 
-**[AR-OBS-INTROSPECTION] Does a new protocol ship its introspection support?**
-FLAG a new protocol header/chunk added without a registered serializer, dissector, and printer.
-(Partly covered by a completeness test; you catch the "registered but empty/incorrect" case.)
+**[AR-OBS-INTROSPECTION] Does a new protocol ship its introspection support?** FLAG a new protocol header/chunk added without a registered serializer, dissector, and printer. (Partly covered by a completeness test; you catch the "registered but empty/incorrect" case.)
 
-**[AR-CFG-INFER / QR-DUP] Is a derivable fact restated instead of inferred?**
-FLAG a manually configured value that the model could infer (e.g. interface counts), or the same
-constant/parameter duplicated across sites instead of set once and propagated.
+**[AR-CFG-INFER / QR-DUP] Is a derivable fact restated instead of inferred?** FLAG a manually configured value that the model could infer (e.g. interface counts), or the same constant/parameter duplicated across sites instead of set once and propagated.
 
-**[QR-OBJECT-OWNERSHIP] Does each object follow its declared ownership model on every supported path?**
-FLAG a violation of the declared exclusive, shared/reference-counted, or borrowed model: a lost or
-duplicated owning obligation, a double release or destruction, or borrowed access that outlives its
-declared lifetime. *Not a violation:* canonical `Ptr<Chunk>` or other valid reference-counted
-sharing, or retention by a defined owner or holder with a defined cleanup path.
+**[QR-OBJECT-OWNERSHIP] Does each object follow its declared ownership model on every supported path?** FLAG a violation of the declared exclusive, shared/reference-counted, or borrowed model: a lost or duplicated owning obligation, a double release or destruction, or borrowed access that outlives its declared lifetime. *Not a violation:* canonical `Ptr<Chunk>` or other valid reference-counted sharing, or retention by a defined owner or holder with a defined cleanup path.
 
-**[AR-CFG-PARAMS] Are new parameters/fields well-formed?**
-FLAG a physical-quantity parameter without `@unit`, a parameter without a `default()`, or one field
-that means both "user override" and "computed value." *Not a violation:* a dimensionless count.
+**[AR-CFG-PARAMS] Are new parameters/fields well-formed?** FLAG a physical-quantity parameter without `@unit`, a parameter without a `default()`, or one field that means both "user override" and "computed value." *Not a violation:* a dimensionless count.
 
-**[AR-EXT-REUSE] Does each new mechanism need to exist?**
-Check its responsibility, required consumer, and reason to reject the relevant reuse option.
-FLAG an addition with no required responsibility or consumer.
-FLAG a duplicate mechanism when an existing contract meets the same need without a change in meaning.
-Similar code alone does not establish equivalent responsibilities or contracts.
+**[AR-EXT-REUSE] Does each new mechanism need to exist?** Check its responsibility, required consumer, and reason to reject the relevant reuse option. FLAG an addition with no required responsibility or consumer. FLAG a duplicate mechanism when an existing contract meets the same need without a change in meaning. Similar code alone does not establish equivalent responsibilities or contracts.
 
-**[AR-EXT-NOCORE] Does adding a protocol require editing core code?**
-FLAG a change that adds a protocol by modifying `common/` or a dispatcher/registry switch, rather than
-registering through existing contract/registration points.
+**[AR-EXT-NOCORE] Does adding a protocol require editing core code?** FLAG a change that adds a protocol by modifying `common/` or a dispatcher/registry switch, rather than registering through existing contract/registration points.
 
-**[AR-EXT-MINIMAL-SURFACE] Is a new member more visible than its callers need?**
-Start from the *Questions for the review* section of the change summary. QUESTION each new public
-function marked *uncalled* — who is it for? — and each marked *tests only* — is the test testing
-behavior or reaching in? A public setter on a value built once is a value type asking to be immutable.
-*Not a violation:* an override, whose visibility the base fixes; a documented API for out-of-tree
-users, when the comment says so.
+**[AR-EXT-MINIMAL-SURFACE] Is a new member more visible than its callers need?** Start from the *Questions for the review* section of the change summary. QUESTION each new public function marked *uncalled* — who is it for? — and each marked *tests only* — is the test testing behavior or reaching in? A public setter on a value built once is a value type asking to be immutable. *Not a violation:* an override, whose visibility the base fixes; a documented API for out-of-tree users, when the comment says so.
 
-**[AR-EXT-VIRTUAL-IS-A-PROMISE] Is a new virtual a stated extension point?**
-For each new virtual marked *overridden nowhere* in the summary, ask: if a user overrode this, what
-would they be trying to do? FLAG a virtual private-looking helper with no comment saying what an
-override is for. *Not a violation:* fulfilling a framework hook (`initialize`, `handleMessage`,
-`receiveSignal`, `stop`); a virtual whose comment names what an override would do; a template-method
-step in a class designed for subclassing.
+**[AR-EXT-VIRTUAL-IS-A-PROMISE] Is a new virtual a stated extension point?** For each new virtual marked *overridden nowhere* in the summary, ask: if a user overrode this, what would they be trying to do? FLAG a virtual private-looking helper with no comment saying what an override is for. *Not a violation:* fulfilling a framework hook (`initialize`, `handleMessage`, `receiveSignal`, `stop`); a virtual whose comment names what an override would do; a template-method step in a class designed for subclassing.
 
-**[AR-BUILD-DECLARATIVE] Are build values hardcoded?**
-FLAG absolute machine paths, `-march=native`, or per-machine flags baked into build scripts instead of
-declared in the build descriptors.
+**[AR-BUILD-DECLARATIVE] Are build values hardcoded?** FLAG absolute machine paths, `-march=native`, or per-machine flags baked into build scripts instead of declared in the build descriptors.
 
-**[RR-NUMERIC-STABLE] Is an externally exposed enum value or named numeric code explicitly assigned?**
-FLAG an implicit enum value or named numeric code exposed through serialization, registered
-reflection, NED/configuration, signals/statistics/results, persistence, or external tooling, or a
-change to an established value or meaning without the migration required by `RR-BREAK-MIGRATE`.
-*Not a violation:* an internal-only categorical value, a dynamic identifier, or a numeric
-measurement.
+**[RR-NUMERIC-STABLE] Is an externally exposed enum value or named numeric code explicitly assigned?** FLAG an implicit enum value or named numeric code exposed through serialization, registered reflection, NED/configuration, signals/statistics/results, persistence, or external tooling, or a change to an established value or meaning without the migration required by `RR-BREAK-MIGRATE`. *Not a violation:* an internal-only categorical value, a dynamic identifier, or a numeric measurement.
 
-**[AR-QUAL-NAMING] Do new NED/`.msg`/semantic names follow the conventions?**
-FLAG names that break [naming-conventions.md](../../rule/naming.md) on the NED/message side that
-`clang-tidy` can't see (wrong role suffix, `Msg`/`Message` packet, abbreviated field). Apply the
-ledger-disposition ground rule: propose a `naming-exceptions.md` row only if the deviation will
-remain unresolved beyond the reviewed change.
+**[AR-QUAL-NAMING] Do new NED/`.msg`/semantic names follow the conventions?** FLAG names that break [naming-conventions.md](../../rule/naming.md) on the NED/message side that `clang-tidy` can't see (wrong role suffix, `Msg`/`Message` packet, abbreviated field). Apply the ledger-disposition ground rule: propose a `naming-exceptions.md` row only if the deviation will remain unresolved beyond the reviewed change.
 
-**[AR-QUAL-LOGGING] Is a programming error logged instead of thrown?**
-FLAG a violated invariant / impossible state that is written to the log and execution continues, where
-it should `throw`/`ASSERT`/`check_and_cast`. *Not a violation:* informational logging.
+**[AR-QUAL-LOGGING] Is a programming error logged instead of thrown?** FLAG a violated invariant / impossible state that is written to the log and execution continues, where it should `throw`/`ASSERT`/`check_and_cast`. *Not a violation:* informational logging.
 
-**[AR-QUAL-DETERMINISM] Does simulation logic depend on non-deterministic sources or pointer ordering?**
-FLAG behavioral dependence on unordered-container iteration order, ordering or tie-breaking by raw
-pointer address (including ordered pointer-keyed containers), raw `rand()`, `std::random_device`, or
-host-clock reads (`std::chrono` clock `now()`, `time()`) in simulation execution paths. *Not a
-violation:* iteration whose order cannot affect the trajectory, explicit sorting by stable semantic
-keys, OMNeT++ `cRNG` streams, or non-simulation diagnostic benchmarking.
+**[AR-QUAL-DETERMINISM] Does simulation logic depend on non-deterministic sources or pointer ordering?** FLAG behavioral dependence on unordered-container iteration order, ordering or tie-breaking by raw pointer address (including ordered pointer-keyed containers), raw `rand()`, `std::random_device`, or host-clock reads (`std::chrono` clock `now()`, `time()`) in simulation execution paths. *Not a violation:* iteration whose order cannot affect the trajectory, explicit sorting by stable semantic keys, OMNeT++ `cRNG` streams, or non-simulation diagnostic benchmarking.
 
-**[AR-QUAL-TESTS] Does the change ship with tests matching its nature?**
-FLAG new behavior with no accompanying unit/module/statistical/validation test (fingerprints alone
-detect *that* behavior changed, not *whether it is correct*).
+**[AR-QUAL-TESTS] Does the change ship with tests matching its nature?** FLAG new behavior with no accompanying unit/module/statistical/validation test (fingerprints alone detect *that* behavior changed, not *whether it is correct*).
 
-**[AR-QUAL-TRACEABILITY] Does a commit that moves a recorded expectation explain the movement?**
-FLAG a commit that changes a fingerprint `.csv`, a statistical baseline or an expected output and
-whose message does not say which behavior moved and why the new values are right. FLAG a
-baseline-only commit that stands directly after the source commit that moves the values, and ask for
-a squash: that is one change in two commits
-([PR-SPLIT-BASELINE](../../rule/pull-request.md#pr-split-baseline)). *Not a violation:* a first
-recording for new content, or a re-record that names a cause outside the branch, such as a compiler
-or solver version change.
+**[AR-QUAL-TRACEABILITY] Does a commit that moves a recorded expectation explain the movement?** FLAG a commit that changes a fingerprint `.csv`, a statistical baseline or an expected output and whose message does not say which behavior moved and why the new values are right. FLAG a baseline-only commit that stands directly after the source commit that moves the values, and ask for a squash: that is one change in two commits ([PR-SPLIT-BASELINE](../../rule/pull-request.md#pr-split-baseline)). *Not a violation:* a first recording for new content, or a re-record that names a cause outside the branch, such as a compiler or solver version change.
 
-**[AR-QUAL-DISPLAY] Does a new module have a distinguishing icon?**
-FLAG a new module type with no `@display("i=…")`, or one reusing a generic catch-all icon for a
-semantically distinct role.
+**[AR-QUAL-DISPLAY] Does a new module have a distinguishing icon?** FLAG a new module type with no `@display("i=…")`, or one reusing a generic catch-all icon for a semantically distinct role.
 
 ## Output footer
 
-End with a one-line verdict: `REVIEW: n PASS, n N/A, n FLAG, n QUESTION`. List any `not verified`
-checks and residual risks separately. For every `FLAG`, state its ledger disposition. Propose an
-`AV-*` or `NV-*` violation row only when the violation will remain unresolved beyond the reviewed
-change, and propose a sanctioned exception only when the deviation is deliberate and cannot
-reasonably be corrected. Do not propose a ledger entry for a finding expected to be fixed in the
-reviewed change.
+End with a one-line verdict: `REVIEW: n PASS, n N/A, n FLAG, n QUESTION`. List any `not verified` checks and residual risks separately. For every `FLAG`, state its ledger disposition. Propose an `AV-*` or `NV-*` violation row only when the violation will remain unresolved beyond the reviewed change, and propose a sanctioned exception only when the deviation is deliberate and cannot reasonably be corrected. Do not propose a ledger entry for a finding expected to be fixed in the reviewed change.

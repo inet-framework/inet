@@ -2,32 +2,15 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around Multiprotocol Label Switching, records which document governs each contested clause,
-and pins the set that the next pass tests against. MPLS forwarding rests on two base
-documents: RFC 3031 defines the architecture (the label, the LSR, label swapping, the label
-stack), and RFC 3032 defines the wire encoding of the label stack entry. The two signaling
-protocols that install label bindings, LDP and RSVP-TE, and the traffic-engineering database
-that feeds them, are separate protocols. They get their own protocol folder when they get a
-pass; this document does not map their families.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around Multiprotocol Label Switching, records which document governs each contested clause, and pins the set that the next pass tests against. MPLS forwarding rests on two base documents: RFC 3031 defines the architecture (the label, the LSR, label swapping, the label stack), and RFC 3032 defines the wire encoding of the label stack entry. The two signaling protocols that install label bindings, LDP and RSVP-TE, and the traffic-engineering database that feeds them, are separate protocols. They get their own protocol folder when they get a pass; this document does not map their families.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
-claims of the model. The level 2 pass of 2026-09-24 writes the catalogs of the four documents,
-the feature map, the checks and the tests of the normal path.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the claims of the model. The level 2 pass of 2026-09-24 writes the catalogs of the four documents, the feature map, the checks and the tests of the normal path.
 
-The level 2 pass added four parts to the sections that the level 1 pass listed, because the
-normal path needs them: the labeled packet, the LSP with its ingress and egress, and the
-Implicit NULL label (RFC 3031 §3.3, §3.15, §4.1.5), which penultimate hop popping (§3.16) builds
-on; the fragmentation of a labeled datagram that is too big (RFC 3032 §3), nine MUST lines of
-the base document; the encapsulation on PPP links and on LAN media (RFC 3032 §4 and §5), because
-a labeled packet crosses a link in every test; and the whole of RFC 3443 §2 and §3, and RFC 5462
-§3, the use of the renamed field.
+The level 2 pass added four parts to the sections that the level 1 pass listed, because the normal path needs them: the labeled packet, the LSP with its ingress and egress, and the Implicit NULL label (RFC 3031 §3.3, §3.15, §4.1.5), which penultimate hop popping (§3.16) builds on; the fragmentation of a labeled datagram that is too big (RFC 3032 §3), nine MUST lines of the base document; the encapsulation on PPP links and on LAN media (RFC 3032 §4 and §5), because a labeled packet crosses a link in every test; and the whole of RFC 3443 §2 and §3, and RFC 5462 §3, the use of the renamed field.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -36,8 +19,7 @@ a labeled packet crosses a link in every test; and the whole of RFC 3443 §2 and
 | level 4, Dynamics | nothing new | RFC 3031 states no timer or control loop of its own; the label-distribution protocols that do (LDP, RSVP-TE) are out of scope of this protocol |
 | level 5, Complete | RFC 3031 §3.20, §3.26, §3.27 (aggregation, label merging, tunnels and hierarchy); RFC 3270, RFC 5129, RFC 5332, RFC 5586, RFC 6790, RFC 7274, RFC 9017 | optional and compound mechanisms: DiffServ-over-MPLS, ECN marking, multicast encapsulation, the generic associated channel, entropy labels, and the special-purpose label registry |
 
-What a pass actually reached is not recorded here. It is in
-[`model/mpls/coverage.md`](../../model/mpls/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/mpls/coverage.md`](../../model/mpls/coverage.md#achieved-level).
 
 ## Document list
 
@@ -62,22 +44,12 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc3031.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3031.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3031.txt>, downloaded 2026-09-23.
-- `rfc3032.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3032.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3032.txt>, downloaded 2026-09-23.
-- `rfc3443.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3443.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3443.txt>, downloaded 2026-09-23.
-- `rfc5462.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5462.txt) —
-  <https://www.rfc-editor.org/rfc/rfc5462.txt>, downloaded 2026-09-23.
+- `rfc3031.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3031.txt) — <https://www.rfc-editor.org/rfc/rfc3031.txt>, downloaded 2026-09-23.
+- `rfc3032.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3032.txt) — <https://www.rfc-editor.org/rfc/rfc3032.txt>, downloaded 2026-09-23.
+- `rfc3443.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3443.txt) — <https://www.rfc-editor.org/rfc/rfc3443.txt>, downloaded 2026-09-23.
+- `rfc5462.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5462.txt) — <https://www.rfc-editor.org/rfc/rfc5462.txt>, downloaded 2026-09-23.
 
-Neither base document uses the keywords of RFC 2119 heavily. RFC 3031 has "MUST" on 10
-lines, "SHOULD" on 6 and "MAY" on 2 (`grep -c`); RFC 3032 has "MUST" on 16 lines, "SHOULD"
-on 3 and "MAY" on 5. Most of RFC 3031 is a definition of terms (`rfc3031.txt:37-90` lists
-28 subsections of §3, one term each), so the level of a feature will mostly come from the
-"only path" rule of the guide and not from a keyword. RFC 3443 and RFC 5462 each use each
-keyword once, in the boilerplate RFC 2119 reference of their introduction, and are
-themselves short amendments (10 and 9 pages).
+Neither base document uses the keywords of RFC 2119 heavily. RFC 3031 has "MUST" on 10 lines, "SHOULD" on 6 and "MAY" on 2 (`grep -c`); RFC 3032 has "MUST" on 16 lines, "SHOULD" on 3 and "MAY" on 5. Most of RFC 3031 is a definition of terms (`rfc3031.txt:37-90` lists 28 subsections of §3, one term each), so the level of a feature will mostly come from the "only path" rule of the guide and not from a keyword. RFC 3443 and RFC 5462 each use each keyword once, in the boilerplate RFC 2119 reference of their introduction, and are themselves short amendments (10 and 9 pages).
 
 ## Override table
 
@@ -118,7 +90,4 @@ Out of scope, with the reason:
 | RFC 2205, RFC 3209 (RSVP, RSVP-TE) | A separate protocol: the other label-distribution signaling family. It gets its own protocol folder. |
 | RFC 3630, RFC 5305 (OSPF-TE, ISIS-TE) | The traffic-engineering topology distribution that feeds RSVP-TE; out of scope with RSVP-TE. |
 
-RFC 3031 and RFC 3032 are companions, not a base-and-successor pair: neither obsoletes the
-other, both are dated January 2001, and each is `updated_by` its own separate family (RFC
-3031 by RFC 6178 and RFC 6790, the architecture-level updates; RFC 3032 by nine documents,
-the encoding-level updates). No override exists between the two base documents themselves.
+RFC 3031 and RFC 3032 are companions, not a base-and-successor pair: neither obsoletes the other, both are dated January 2001, and each is `updated_by` its own separate family (RFC 3031 by RFC 6178 and RFC 6790, the architecture-level updates; RFC 3032 by nine documents, the encoding-level updates). No override exists between the two base documents themselves.

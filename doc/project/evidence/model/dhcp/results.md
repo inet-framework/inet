@@ -2,10 +2,7 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [checks.md](../../protocol/dhcp/checks.md), [features.md](../../protocol/dhcp/features.md), [coverage.md](coverage.md)
 
-Step 7 artifact of the standards test workflow. This is the first document of the DHCP pass
-that may name the simulation model and reference code, and it does both. The verdicts of
-the run, the class of every failure, and where the model implements or fails to implement
-each checked behavior.
+Step 7 artifact of the standards test workflow. This is the first document of the DHCP pass that may name the simulation model and reference code, and it does both. The verdicts of the run, the class of every failure, and where the model implements or fails to implement each checked behavior.
 
 ## Run record
 
@@ -19,30 +16,17 @@ each checked behavior.
 - Command: `inet_run_protocol_tests -p inet -w dhcp`
 - Target level: 3
 
-The build is newer than every source file under `src`, so the library the run linked was
-built from this commit. The worktree holds no uncommitted change.
+The build is newer than every source file under `src`, so the library the run linked was built from this commit. The worktree holds no uncommitted change.
 
-[`coverage.md`](coverage.md) of this same pass names a different commit, `4acb050ab1`. The
-landing rebase later removed both commits from `master`. Both hold the src tree `182ba10a23`,
-the same tree every commit from `512d6c1b15` to `cae555ebc8` on `master` holds, so the two
-documents record one run of one model, under two names a rebase has since erased.
+[`coverage.md`](coverage.md) of this same pass names a different commit, `4acb050ab1`. The landing rebase later removed both commits from `master`. Both hold the src tree `182ba10a23`, the same tree every commit from `512d6c1b15` to `cae555ebc8` on `master` holds, so the two documents record one run of one model, under two names a rebase has since erased.
 
 ## Verdicts
 
-26 tests: **13 PASS, 5 FAIL (expected), 8 FAIL (unexpected)**, on this run of 2026-09-11. The
-suite as a whole reported **FAIL**, and that was the intended signal: eight of the thirteen
-failures were in behavior the model claims, and a failure in a claimed behavior must keep the
-suite red until somebody fixes it.
+26 tests: **13 PASS, 5 FAIL (expected), 8 FAIL (unexpected)**, on this run of 2026-09-11. The suite as a whole reported **FAIL**, and that was the intended signal: eight of the thirteen failures were in behavior the model claims, and a failure in a claimed behavior must keep the suite red until somebody fixes it.
 
-Two commits after this run, `b72abc4696` and `bdde132792`, both 2026-09-15, closed eight of the
-fourteen gaps below (see [the model gaps](#the-model-gaps)); the table that follows already
-carries each test's repaired verdict, and
-[`coverage.md`](coverage.md) carries the verdict of every later run, including the fresh one of
-2026-09-23.
+Two commits after this run, `b72abc4696` and `bdde132792`, both 2026-09-15, closed eight of the fourteen gaps below (see [the model gaps](#the-model-gaps)); the table that follows already carries each test's repaired verdict, and [`coverage.md`](coverage.md) carries the verdict of every later run, including the fresh one of 2026-09-23.
 
-The `FAIL (expected)` and `FAIL (unexpected)` split is the subject of the next section. It is not
-a statement about how serious a failure is; it is a statement about whether the model claims the
-behavior.
+The `FAIL (expected)` and `FAIL (unexpected)` split is the subject of the next section. It is not a statement about how serious a failure is; it is a statement about whether the model claims the behavior.
 
 | Test | Verdict | Check |
 | --- | --- | --- |
@@ -75,18 +59,13 @@ behavior.
 
 ## The class of every failure
 
-None of the thirteen failures is a **test error** and none is a **specification misread**. Every
-failing test keeps the assertion the standard states; no assertion is inverted and no expectation
-is weakened.
+None of the thirteen failures is a **test error** and none is a **specification misread**. Every failing test keeps the assertion the standard states; no assertion is inverted and no expectation is weakened.
 
-All thirteen are differences between the standard and the model, and they divide into two classes
-that must be declared differently.
+All thirteen are differences between the standard and the model, and they divide into two classes that must be declared differently.
 
 ### The rule that decides the declaration
 
-An expected-result declaration means one thing: *this feature is known to be unimplemented, so
-the failure is not a regression*. The rule that decides when that is true is
-[the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test):
+An expected-result declaration means one thing: *this feature is known to be unimplemented, so the failure is not a regression*. The rule that decides when that is true is [the third principle of the guide](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test):
 
 > **If the model claims a behavior, the behavior gets a test, and the test fails without a
 > declaration.** A claim is explicit — the documentation, a comment, the release notes — or
@@ -96,14 +75,9 @@ the failure is not a regression*. The rule that decides when that is true is
 
 Two consequences decide most of the fourteen findings of this pass.
 
-**A half-written mechanism is a claim.** A complete function that nothing calls, a timer that
-fires and does the wrong thing, a branch that exists and is never reached — each one is an effort.
-"Not finished" is not "not claimed", and only the second may be declared.
+**A half-written mechanism is a claim.** A complete function that nothing calls, a timer that fires and does the wrong thing, a branch that exists and is never reached — each one is an effort. "Not finished" is not "not claimed", and only the second may be declared.
 
-**A claim the check cannot reach still fails.** When the model claims a behavior and no scenario
-and no crafted message can provoke it, the test fails unconditionally and names the missing part
-in its own description. The guide calls that an **untestable claim**. A note in a document is not
-a finding: nothing fails when it goes stale.
+**A claim the check cannot reach still fails.** When the model claims a behavior and no scenario and no crafted message can provoke it, the test fails unconditionally and names the missing part in its own description. The guide calls that an **untestable claim**. A note in a document is not a finding: nothing fails when it goes stale.
 
 ### The two classes, per finding
 
@@ -124,46 +98,27 @@ a finding: nothing fails when it goes stale.
 | [Gap 9](#gap-9-unimplemented--the-server-handles-two-message-types-and-drops-the-other-three) | unimplemented | no code path for DHCPINFORM at all; the one mention is a name in a printer | FAIL (expected) |
 | [Gap 12](#gap-12-unimplemented--the-client-sends-no-dhcprelease) | unimplemented | no builder and no send path; an explicit TODO says it is left out on purpose, and the statement is a `MAY` | FAIL (expected) |
 
-**Eight in claimed behavior and five outside it.** The five declared failures are the ones where
-the model made no effort or said it would not: two halves of a document it never names, a TODO
-that states an impossibility, DHCPINFORM, and DHCPRELEASE. Everything else fails the run.
+**Eight in claimed behavior and five outside it.** The five declared failures are the ones where the model made no effort or said it would not: two halves of a document it never names, a TODO that states an impossibility, DHCPINFORM, and DHCPRELEASE. Everything else fails the run.
 
-Three findings moved into the undeclared group when this rule was applied — gaps 11, 13 and 14 —
-and all three for the same reason: each has code, and a first reading mistook "the mechanism is
-incomplete" for "the mechanism is absent". Gap 11 is the sharpest case. `DhcpClient::sendDecline`
-builds a correct DHCPDECLINE and nothing calls it, so the model claims a message it can never
-send.
+Three findings moved into the undeclared group when this rule was applied — gaps 11, 13 and 14 — and all three for the same reason: each has code, and a first reading mistook "the mechanism is incomplete" for "the mechanism is absent". Gap 11 is the sharpest case. `DhcpClient::sendDecline` builds a correct DHCPDECLINE and nothing calls it, so the model claims a message it can never send.
 
 ### What the rule changed about this pass, twice
 
-The declarations of this pass were corrected twice, and both corrections are worth recording
-because both were caused by the guide and not by carelessness.
+The declarations of this pass were corrected twice, and both corrections are worth recording because both were caused by the guide and not by carelessness.
 
-The first version declared **all thirteen** failures expected, because the guide's step 7 named
-one class, "model gap", where several were needed. The suite reported PASS while six defects sat
-in the model. Five tests lost their declaration.
+The first version declared **all thirteen** failures expected, because the guide's step 7 named one class, "model gap", where several were needed. The suite reported PASS while six defects sat in the model. Five tests lost their declaration.
 
-The second version still declared three failures expected — gaps 11, 13 and 14 — because it drew
-the line at "is the behavior absent" and read a half-written mechanism as absent. The guide now
-names the line as "does the model claim it", with code as a claim, and adds the **untestable
-claim** class for a claim no check can reach. Three more tests lost their declaration.
+The second version still declared three failures expected — gaps 11, 13 and 14 — because it drew the line at "is the behavior absent" and read a half-written mechanism as absent. The guide now names the line as "does the model claim it", with code as a claim, and adds the **untestable claim** class for a claim no check can reach. Three more tests lost their declaration.
 
 The current split is the one the rule produces: five declared, eight not.
 
 ## The model gaps
 
-**Eight of the fourteen are closed, on 2026-09-15: gaps 1, 2, 3, 4, 8, 10, 11, 13 and 14,
-and part of gap 9 with them.** The suite is 26 tests, **21 PASS and 5 FAIL (expected)**, from
-13 / 5 / 8: **nothing fails unexpectedly any more.** The gaps that remain are all recorded as
-unimplemented and carry their declaration.
+**Eight of the fourteen are closed, on 2026-09-15: gaps 1, 2, 3, 4, 8, 10, 11, 13 and 14, and part of gap 9 with them.** The suite is 26 tests, **21 PASS and 5 FAIL (expected)**, from 13 / 5 / 8: **nothing fails unexpectedly any more.** The gaps that remain are all recorded as unimplemented and carry their declaration.
 
-Repairing gap 14 also corrected a step of its test. The absence of observations 3 and 5 was
-an ordered `never` over 90 seconds, and an ordered step consumes its whole window before the
-step after it begins, so the repeated DHCPREQUEST the test is about would have been looked
-for only after those 90 seconds, by which time the client has given up. It is a guard now.
+Repairing gap 14 also corrected a step of its test. The absence of observations 3 and 5 was an ordered `never` over 90 seconds, and an ordered step consumes its whole window before the step after it begins, so the repeated DHCPREQUEST the test is about would have been looked for only after those 90 seconds, by which time the client has given up. It is a guard now.
 
-Fourteen gaps in thirteen tests; `Rfc2131ReplyAddressFields.test` carries two. Each heading names
-the class the section above assigned to it.
+Fourteen gaps in thirteen tests; `Rfc2131ReplyAddressFields.test` carries two. Each heading names the class the section above assigned to it.
 
 ### Gap 1 (defect) — the client changes the transaction identifier between the offer and the request
 
@@ -178,19 +133,11 @@ the class the section above assigned to it.
 
 — `src/inet/applications/dhcp/DhcpClient.cc:514-515`
 
-RFC 2131 §4.4.1 says "The DHCPREQUEST message contains the same 'xid' as the DHCPOFFER
-message", `rfc2131.txt:2116-2117`, which is
-[RFC2131-XID-3](../../standard/rfc2131/catalog.md#rfc2131-xid-3). The comment states the
-intent plainly, so this is a decision and not an oversight.
+RFC 2131 §4.4.1 says "The DHCPREQUEST message contains the same 'xid' as the DHCPOFFER message", `rfc2131.txt:2116-2117`, which is [RFC2131-XID-3](../../standard/rfc2131/catalog.md#rfc2131-xid-3). The comment states the intent plainly, so this is a decision and not an oversight.
 
-The server side is right: it copies the value of the message it answers, so the DHCPOFFER
-carries the identifier of the DHCPDISCOVER and the DHCPACK that of the DHCPREQUEST. The run
-shows exactly that: the test matched its first two steps and missed the third.
+The server side is right: it copies the value of the message it answers, so the DHCPOFFER carries the identifier of the DHCPDISCOVER and the DHCPACK that of the DHCPREQUEST. The run shows exactly that: the test matched its first two steps and missed the third.
 
-An exchange on a quiet subnet still completes, because the server answers whatever it
-receives. What breaks is the purpose of the field: the servers that were not chosen cannot
-connect the DHCPREQUEST to the offer they made, and a client with two transactions open
-cannot tell two answers apart.
+An exchange on a quiet subnet still completes, because the server answers whatever it receives. What breaks is the purpose of the field: the servers that were not chosen cannot connect the DHCPREQUEST to the offer they made, and a client with two transactions open cannot tell two answers apart.
 
 ### Gap 2 (defect) — the server writes the gateway address into `giaddr` of a DHCPOFFER
 
@@ -202,26 +149,13 @@ cannot tell two answers apart.
 
 — `src/inet/applications/dhcp/DhcpServer.cc:422`
 
-RFC 2131 table 1 defines `giaddr` as "Relay agent IP address, used in booting via a relay
-agent", `rfc2131.txt:543-544`, and table 3 says the `giaddr` of a DHCPOFFER is the `giaddr`
-of the client DHCPDISCOVER, `rfc2131.txt:1556-1558` —
-[RFC2131-OFF-6](../../standard/rfc2131/catalog.md#rfc2131-off-6). On a subnet with no relay
-agent that value is 0.0.0.0.
+RFC 2131 table 1 defines `giaddr` as "Relay agent IP address, used in booting via a relay agent", `rfc2131.txt:543-544`, and table 3 says the `giaddr` of a DHCPOFFER is the `giaddr` of the client DHCPDISCOVER, `rfc2131.txt:1556-1558` — [RFC2131-OFF-6](../../standard/rfc2131/catalog.md#rfc2131-off-6). On a subnet with no relay agent that value is 0.0.0.0.
 
-There are two errors in the one line, and the comment shows the first: "next server ip" is
-the meaning of `siaddr`, not of `giaddr`. The router address a client needs travels in option
-3, which the same function also sets correctly at `DhcpServer.cc:439-440`.
+There are two errors in the one line, and the comment shows the first: "next server ip" is the meaning of `siaddr`, not of `giaddr`. The router address a client needs travels in option 3, which the same function also sets correctly at `DhcpServer.cc:439-440`.
 
-The consequence is not cosmetic. `giaddr` is the first value §4.1 tests when it decides where
-a reply goes, and
-[RFC2131-NAK-3](../../standard/rfc2131/catalog.md#rfc2131-nak-3),
-[RFC2131-NAK-4](../../standard/rfc2131/catalog.md#rfc2131-nak-4) and
-[RFC2131-BCAST-2](../../standard/rfc2131/catalog.md#rfc2131-bcast-2) all branch on it. A
-client or a relay agent that read the field would conclude that the exchange passed through
-a relay agent at the server's own address.
+The consequence is not cosmetic. `giaddr` is the first value §4.1 tests when it decides where a reply goes, and [RFC2131-NAK-3](../../standard/rfc2131/catalog.md#rfc2131-nak-3), [RFC2131-NAK-4](../../standard/rfc2131/catalog.md#rfc2131-nak-4) and [RFC2131-BCAST-2](../../standard/rfc2131/catalog.md#rfc2131-bcast-2) all branch on it. A client or a relay agent that read the field would conclude that the exchange passed through a relay agent at the server's own address.
 
-`DhcpServer::sendAck` does not set the field at all, so the DHCPACK carries 0.0.0.0 and the
-two replies of one exchange disagree with each other.
+`DhcpServer::sendAck` does not set the field at all, so the DHCPACK carries 0.0.0.0 and the two replies of one exchange disagree with each other.
 
 ### Gap 3 (defect) — the server writes the leased address into `ciaddr` of a DHCPACK
 
@@ -233,17 +167,9 @@ two replies of one exchange disagree with each other.
 
 — `src/inet/applications/dhcp/DhcpServer.cc:339`
 
-RFC 2131 table 3 gives two permitted values for that field: "'ciaddr' from DHCPREQUEST or 0",
-`rfc2131.txt:1547-1548` — [RFC2131-ACK-8](../../standard/rfc2131/catalog.md#rfc2131-ack-8).
-The `ciaddr` of a DHCPREQUEST from SELECTING is 0.0.0.0 by
-[RFC2131-REQ-3](../../standard/rfc2131/catalog.md#rfc2131-req-3), so the leased address is a
-third value that the table does not allow.
+RFC 2131 table 3 gives two permitted values for that field: "'ciaddr' from DHCPREQUEST or 0", `rfc2131.txt:1547-1548` — [RFC2131-ACK-8](../../standard/rfc2131/catalog.md#rfc2131-ack-8). The `ciaddr` of a DHCPREQUEST from SELECTING is 0.0.0.0 by [RFC2131-REQ-3](../../standard/rfc2131/catalog.md#rfc2131-req-3), so the leased address is a third value that the table does not allow.
 
-This is the mildest of the fourteen. A conforming client reads its address from `yiaddr` and
-never looks at `ciaddr` in a reply, so nothing observable follows. What the rule guards is
-the meaning of the field: `ciaddr` in a message from a client says "I hold this address and I
-answer for it", and a reply that echoes an address the client does not hold yet states
-something that is not true.
+This is the mildest of the fourteen. A conforming client reads its address from `yiaddr` and never looks at `ciaddr` in a reply, so nothing observable follows. What the rule guards is the meaning of the field: `ciaddr` in a message from a client says "I hold this address and I answer for it", and a reply that echoes an address the client does not hold yet states something that is not true.
 
 ### Gap 4 (defect) — the server returns a domain name server option it has no value for
 
@@ -254,53 +180,27 @@ something that is not true.
     ack->getOptionsForUpdate().setDns(0, lease->dns);
 ```
 
-— `src/inet/applications/dhcp/DhcpServer.cc:360-361`, and the same pair in `sendOffer` at
-`:442-443`
+— `src/inet/applications/dhcp/DhcpServer.cc:360-361`, and the same pair in `sendOffer` at `:442-443`
 
-Nothing in the model ever assigns `DhcpLease::dns` (`src/inet/applications/dhcp/DhcpLease.h:28`);
-a search of both source files finds only the two reads above. The field therefore keeps its
-default, an unspecified address. `DhcpMessageSerializer` writes the option because the array
-is not empty and not because the address is a real one
-(`src/inet/applications/dhcp/DhcpMessageSerializer.cc:158-167`), so the octets on the wire
-carry code 6 with the value 0.0.0.0.
+Nothing in the model ever assigns `DhcpLease::dns` (`src/inet/applications/dhcp/DhcpLease.h:28`); a search of both source files finds only the two reads above. The field therefore keeps its default, an unspecified address. `DhcpMessageSerializer` writes the option because the array is not empty and not because the address is a real one (`src/inet/applications/dhcp/DhcpMessageSerializer.cc:158-167`), so the octets on the wire carry code 6 with the value 0.0.0.0.
 
-RFC 2131 §4.3.1 reaches its last branch for a parameter the server has no value for and no
-Host Requirements default for: "The server MUST NOT return a value for that parameter", and
-"MUST omit any parameters it cannot provide", `rfc2131.txt:1622-1632` —
-[RFC2131-SEL-5](../../standard/rfc2131/catalog.md#rfc2131-sel-5).
+RFC 2131 §4.3.1 reaches its last branch for a parameter the server has no value for and no Host Requirements default for: "The server MUST NOT return a value for that parameter", and "MUST omit any parameters it cannot provide", `rfc2131.txt:1622-1632` — [RFC2131-SEL-5](../../standard/rfc2131/catalog.md#rfc2131-sel-5).
 
-The run separates the two halves of the check neatly. The server returns **no** option 42, so
-observation 2 passes; it returns option 6, so observation 3 fails. The server also has no
-parameter for a name server in its NED file, so there is no configuration that could fix
-this: the option is unconditional.
+The run separates the two halves of the check neatly. The server returns **no** option 42, so observation 2 passes; it returns option 6, so observation 3 fails. The server also has no parameter for a name server in its NED file, so there is no configuration that could fix this: the option is unconditional.
 
 ### Gap 5 (unimplemented) — the server never returns the client identifier option
 
-`DhcpServer::sendOffer` and `DhcpServer::sendAck` write six options — subnet mask, the two
-lease timers, the lease time, the router, the domain name server — and the server identifier
-(`DhcpServer.cc:431-447` and `:349-365`). `DhcpServer::sendNak` writes one, the server
-identifier (`:303`). None of the three writes option 61.
+`DhcpServer::sendOffer` and `DhcpServer::sendAck` write six options — subnet mask, the two lease timers, the lease time, the router, the domain name server — and the server identifier (`DhcpServer.cc:431-447` and `:349-365`). `DhcpServer::sendNak` writes one, the server identifier (`:303`). None of the three writes option 61.
 
-RFC 6842 §3: "If the 'client identifier' option is present in a message received from a
-client, the server MUST return the 'client identifier' option, unaltered, in its response
-message", `rfc6842.txt:158-160` —
-[RFC6842-CLID-1](../../standard/rfc6842/catalog.md#rfc6842-clid-1).
+RFC 6842 §3: "If the 'client identifier' option is present in a message received from a client, the server MUST return the 'client identifier' option, unaltered, in its response message", `rfc6842.txt:158-160` — [RFC6842-CLID-1](../../standard/rfc6842/catalog.md#rfc6842-clid-1).
 
-**This behavior follows RFC 2131 and contradicts RFC 6842, and the two cannot both be
-satisfied.** RFC 2131 table 3 makes the option a `MUST NOT` in a DHCPOFFER and a DHCPACK,
-`rfc2131.txt:1584`, and the model does what that table says. So "wrong" is the wrong word:
-the behavior is sixteen years out of date. RFC 6842 §2 explains what it costs — a client
-whose `chaddr` is all zeroes, and two clients that share one hardware address, cannot tell
-whether a reply is theirs, because the transaction identifier is not unique across clients
-either, `rfc6842.txt:128-139`.
+**This behavior follows RFC 2131 and contradicts RFC 6842, and the two cannot both be satisfied.** RFC 2131 table 3 makes the option a `MUST NOT` in a DHCPOFFER and a DHCPACK, `rfc2131.txt:1584`, and the model does what that table says. So "wrong" is the wrong word: the behavior is sixteen years out of date. RFC 6842 §2 explains what it costs — a client whose `chaddr` is all zeroes, and two clients that share one hardware address, cannot tell whether a reply is theirs, because the transaction identifier is not unique across clients either, `rfc6842.txt:128-139`.
 
-The model's client always sends option 61 (`DhcpClient.cc:534` and `:608`), so the condition
-of the `MUST` holds in every exchange of every test.
+The model's client always sends option 61 (`DhcpClient.cc:534` and `:608`), so the condition of the `MUST` holds in every exchange of every test.
 
 ### Gap 6 (unimplemented) — the client never compares the client identifier of a reply
 
-`DhcpClient::handleDhcpMessage` tests two things about an arriving reply, the opcode and the
-transaction identifier:
+`DhcpClient::handleDhcpMessage` tests two things about an arriving reply, the opcode and the transaction identifier:
 
 ```cpp
     if (msg->getXid() != xid) {
@@ -309,20 +209,11 @@ transaction identifier:
 
 — `src/inet/applications/dhcp/DhcpClient.cc:394-395`
 
-and then dispatches on the client state. Nothing reads
-`msg->getOptions().getClientIdentifier()` anywhere in the file.
+and then dispatches on the client state. Nothing reads `msg->getOptions().getClientIdentifier()` anywhere in the file.
 
-RFC 6842 §3: "When a client receives a DHCP message containing a 'client identifier' option,
-the client MUST compare that client identifier to the one it is configured to send. If the
-two client identifiers do not match, the client MUST silently discard the message",
-`rfc6842.txt:183-186` —
-[RFC6842-CLID-3](../../standard/rfc6842/catalog.md#rfc6842-clid-3).
+RFC 6842 §3: "When a client receives a DHCP message containing a 'client identifier' option, the client MUST compare that client identifier to the one it is configured to send. If the two client identifiers do not match, the client MUST silently discard the message", `rfc6842.txt:183-186` — [RFC6842-CLID-3](../../standard/rfc6842/catalog.md#rfc6842-clid-3).
 
-The run shows the consequence and not only the absence. The crafted DHCPOFFER was correct in
-every respect but its identifier, and the client accepted it: the forbidden event of the
-test fired 0.05 seconds after the injection, a DHCPREQUEST naming a server at 192.168.1.9 and
-an address of 192.168.1.250, neither of which belongs to any node of the mockup. A client on a
-subnet where two clients share a hardware address would take another client's lease this way.
+The run shows the consequence and not only the absence. The crafted DHCPOFFER was correct in every respect but its identifier, and the client accepted it: the forbidden event of the test fired 0.05 seconds after the injection, a DHCPREQUEST naming a server at 192.168.1.9 and an address of 192.168.1.250, neither of which belongs to any node of the mockup. A client on a subnet where two clients share a hardware address would take another client's lease this way.
 
 This gap and gap 5 are the two halves of RFC 6842, and neither one is implemented.
 
@@ -340,23 +231,13 @@ The fourth branch of the delivery rule in both `sendOffer` and `sendAck`:
 
 — `src/inet/applications/dhcp/DhcpServer.cc:478-482`
 
-The three branches above it are right, and the quotation of §4.1 that precedes them is
-complete and correct (`:459-470`). So the model knows the rule, states it, and then does not
-follow its last case, for a stated reason: the application cannot set a destination hardware
-address.
+The three branches above it are right, and the quotation of §4.1 that precedes them is complete and correct (`:459-470`). So the model knows the rule, states it, and then does not follow its last case, for a stated reason: the application cannot set a destination hardware address.
 
-RFC 2131 §4.1: "If the broadcast bit is not set and 'giaddr' is zero and 'ciaddr' is zero,
-then the server unicasts DHCPOFFER and DHCPACK messages to the client's hardware address and
-'yiaddr' address", `rfc2131.txt:1278-1280` —
-[RFC2131-BCAST-5](../../standard/rfc2131/catalog.md#rfc2131-bcast-5).
+RFC 2131 §4.1: "If the broadcast bit is not set and 'giaddr' is zero and 'ciaddr' is zero, then the server unicasts DHCPOFFER and DHCPACK messages to the client's hardware address and 'yiaddr' address", `rfc2131.txt:1278-1280` — [RFC2131-BCAST-5](../../standard/rfc2131/catalog.md#rfc2131-bcast-5).
 
-The pair of checks is what makes this legible. `Rfc2131BroadcastBitSet.test` passes and
-`Rfc2131BroadcastBitClear.test` fails, and together they say that the server is not reading
-the bit at all: it broadcasts whichever value the bit carries. One check for the pair would
-have reported one verdict and hidden that.
+The pair of checks is what makes this legible. `Rfc2131BroadcastBitSet.test` passes and `Rfc2131BroadcastBitClear.test` fails, and together they say that the server is not reading the bit at all: it broadcasts whichever value the bit carries. One check for the pair would have reported one verdict and hidden that.
 
-The reply still reaches the client, so nothing stops working. What the rule buys, and what is
-lost, is that a message addressed to one client does not reach every host of the subnet.
+The reply still reaches the client, so nothing stops working. What the rule buys, and what is lost, is that a message addressed to one client does not reach every host of the subnet.
 
 ### Gap 8 (defect) — the server writes a constant into the `flags` field of a reply
 
@@ -368,10 +249,7 @@ lost, is that a message addressed to one client does not reach every host of the
 
 — `src/inet/applications/dhcp/DhcpServer.cc:419`, and `ack->setBroadcast(false);` at `:338`
 
-RFC 2131 table 3 says the `flags` of a DHCPOFFER are the `flags` of the client DHCPDISCOVER
-and the `flags` of a DHCPACK those of the client DHCPREQUEST, `rfc2131.txt:1553-1555` — the
-`flags` half of [RFC2131-OFF-6](../../standard/rfc2131/catalog.md#rfc2131-off-6) and of
-[RFC2131-ACK-8](../../standard/rfc2131/catalog.md#rfc2131-ack-8).
+RFC 2131 table 3 says the `flags` of a DHCPOFFER are the `flags` of the client DHCPDISCOVER and the `flags` of a DHCPACK those of the client DHCPREQUEST, `rfc2131.txt:1553-1555` — the `flags` half of [RFC2131-OFF-6](../../standard/rfc2131/catalog.md#rfc2131-off-6) and of [RFC2131-ACK-8](../../standard/rfc2131/catalog.md#rfc2131-ack-8).
 
 `DhcpServer::sendNak` is the one reply that copies the value:
 
@@ -381,24 +259,15 @@ and the `flags` of a DHCPACK those of the client DHCPREQUEST, `rfc2131.txt:1553-
 
 — `DhcpServer.cc:300`
 
-so the three replies of one server do not agree with each other, and the DHCPNAK is the one
-that is right.
+so the three replies of one server do not agree with each other, and the DHCPNAK is the one that is right.
 
-The gap is invisible while every client clears the bit, which is why
-`Rfc2131OfferContents.test` can cover the field only for the value zero and passes. The
-crafted request with the bit set is what exposes it, and that is the whole reason
-`Rfc2131ReplyFlagsField.test` exists.
+The gap is invisible while every client clears the bit, which is why `Rfc2131OfferContents.test` can cover the field only for the value zero and passes. The crafted request with the bit set is what exposes it, and that is the whole reason `Rfc2131ReplyFlagsField.test` exists.
 
-The field matters to a relay agent and not to the client: §4.1 says a relay agent that
-forwards a reply to a client should examine the bit of the message it forwards,
-`rfc2131.txt:1373-1379`, so a reply that lost the bit tells the relay agent to unicast to a
-client that asked for a broadcast. With no relay agent in the mockup there is no observable
-consequence.
+The field matters to a relay agent and not to the client: §4.1 says a relay agent that forwards a reply to a client should examine the bit of the message it forwards, `rfc2131.txt:1373-1379`, so a reply that lost the bit tells the relay agent to unicast to a client that asked for a broadcast. With no relay agent in the mockup there is no observable consequence.
 
 ### Gap 9 (unimplemented) — the server handles two message types and drops the other three
 
-`DhcpServer::processDhcpMessage` (`DhcpServer.cc:157`) branches on the message type, handles
-DHCPDISCOVER and DHCPREQUEST, and ends with:
+`DhcpServer::processDhcpMessage` (`DhcpServer.cc:157`) branches on the message type, handles DHCPDISCOVER and DHCPREQUEST, and ends with:
 
 ```cpp
             EV_WARN << "BOOTREQUEST arrived, but DHCP message type is unknown. Dropping it." << endl;
@@ -406,25 +275,11 @@ DHCPDISCOVER and DHCPREQUEST, and ends with:
 
 — `src/inet/applications/dhcp/DhcpServer.cc:276`
 
-DHCPINFORM, DHCPDECLINE and DHCPRELEASE all fall into that branch. So three of the five
-messages a server can receive — RFC 2131 §4.3 lists all five, `rfc2131.txt:1445-1453` — are
-dropped with a warning.
+DHCPINFORM, DHCPDECLINE and DHCPRELEASE all fall into that branch. So three of the five messages a server can receive — RFC 2131 §4.3 lists all five, `rfc2131.txt:1445-1453` — are dropped with a warning.
 
-The run reaches the DHCPINFORM case: the crafted message arrived at the server's application
-and the server answered nothing, so `Rfc2131InformWithoutLease.test` missed the deadline of
-its first step. The statements that fail are
-[RFC2131-INF-2](../../standard/rfc2131/catalog.md#rfc2131-inf-2) and, by consequence,
-[RFC2131-INF-3](../../standard/rfc2131/catalog.md#rfc2131-inf-3) and
-[RFC2131-INF-5](../../standard/rfc2131/catalog.md#rfc2131-inf-5), which have nothing to be
-read on.
+The run reaches the DHCPINFORM case: the crafted message arrived at the server's application and the server answered nothing, so `Rfc2131InformWithoutLease.test` missed the deadline of its first step. The statements that fail are [RFC2131-INF-2](../../standard/rfc2131/catalog.md#rfc2131-inf-2) and, by consequence, [RFC2131-INF-3](../../standard/rfc2131/catalog.md#rfc2131-inf-3) and [RFC2131-INF-5](../../standard/rfc2131/catalog.md#rfc2131-inf-5), which have nothing to be read on.
 
-The other two dropped types close two more statements that no check of this pass could reach
-anyway: [RFC2131-DECL-4](../../standard/rfc2131/catalog.md#rfc2131-decl-4), the server marks a
-declined address as unavailable, and
-[RFC2131-REL-4](../../standard/rfc2131/catalog.md#rfc2131-rel-4), the server frees a released
-one. Both are `internal` statements whose consequence needs a second exchange to observe, and
-the ledger records them as `no check`. This analysis is what tells a reader that neither one
-is implemented, which the ledger could not say from a run.
+The other two dropped types close two more statements that no check of this pass could reach anyway: [RFC2131-DECL-4](../../standard/rfc2131/catalog.md#rfc2131-decl-4), the server marks a declined address as unavailable, and [RFC2131-REL-4](../../standard/rfc2131/catalog.md#rfc2131-rel-4), the server frees a released one. Both are `internal` statements whose consequence needs a second exchange to observe, and the ledger records them as `no check`. This analysis is what tells a reader that neither one is implemented, which the ledger could not say from a run.
 
 ### Gap 10 (defect) — the server is silent where it should answer with a DHCPNAK
 
@@ -440,60 +295,29 @@ The INIT-REBOOT branch asks its two questions in the wrong order:
 
 — `src/inet/applications/dhcp/DhcpServer.cc:235-237`
 
-and only for an address it finds does it then test the subnet, at `:241`, with the wrong-net
-DHCPNAK at `:252`. An address of a foreign subnet is in no table of leases, so it takes the
-first path and the server stays silent. The run logged exactly that: "DHCP server has no
-record of IP 10.0.0.7."
+and only for an address it finds does it then test the subnet, at `:241`, with the wrong-net DHCPNAK at `:252`. An address of a foreign subnet is in no table of leases, so it takes the first path and the server stays silent. The run logged exactly that: "DHCP server has no record of IP 10.0.0.7."
 
-RFC 2131 §4.3.2 orders the two the other way: "Determining whether a client in the INIT-REBOOT
-state is on the correct network is done by examining the contents of 'giaddr', the 'requested
-IP address' option, and a database lookup. If the DHCP server detects that the client is on
-the wrong net ... then the server SHOULD send a DHCPNAK message to the client",
-`rfc2131.txt:1723-1730` —
-[RFC2131-NAK-2](../../standard/rfc2131/catalog.md#rfc2131-nak-2). The silence rule of
-[RFC2131-NAK-7](../../standard/rfc2131/catalog.md#rfc2131-nak-7) applies to a client the
-server has no record of **on the correct network**, `rfc2131.txt:1743-1749`.
+RFC 2131 §4.3.2 orders the two the other way: "Determining whether a client in the INIT-REBOOT state is on the correct network is done by examining the contents of 'giaddr', the 'requested IP address' option, and a database lookup. If the DHCP server detects that the client is on the wrong net ... then the server SHOULD send a DHCPNAK message to the client", `rfc2131.txt:1723-1730` — [RFC2131-NAK-2](../../standard/rfc2131/catalog.md#rfc2131-nak-2). The silence rule of [RFC2131-NAK-7](../../standard/rfc2131/catalog.md#rfc2131-nak-7) applies to a client the server has no record of **on the correct network**, `rfc2131.txt:1743-1749`.
 
-The statement is a `SHOULD`, so the matrix of step 8 reads this as a declined behavior and
-not as a defect. What makes it worth recording is the pair of checks:
-`Rfc2131SilentUnknownClient.test` passes and `Rfc2131NakWrongSubnet.test` fails, and together
-they say the model is silent in both cases where the standard asks for silence in one of them
-only. Neither check alone could establish that.
+The statement is a `SHOULD`, so the matrix of step 8 reads this as a declined behavior and not as a defect. What makes it worth recording is the pair of checks: `Rfc2131SilentUnknownClient.test` passes and `Rfc2131NakWrongSubnet.test` fails, and together they say the model is silent in both cases where the standard asks for silence in one of them only. Neither check alone could establish that.
 
 ### Gap 11 (untestable claim) — the client never probes the address it was given
 
-**Closed 2026-09-15.** The client probes the granted address before it takes it, and refuses
-it when somebody answers. Four pieces were needed, and three of them were already written and
-unreachable:
+**Closed 2026-09-15.** The client probes the granted address before it takes it, and refuses it when somebody answers. Four pieces were needed, and three of them were already written and unreachable:
 
 - `Arp::sendArpProbe` built the RFC 5227 probe and nothing called it.
-- `DhcpClient::sendDecline` built the DHCPDECLINE and nothing called it. It also lacked the
-  server identifier that RFC 2131 table 5 requires, which no run had ever shown.
-- `Arp::processArpPacket` threw `wrong ARP packet: source IPv4 address is empty` on the very
-  packet the probe is, so a neighbour's lawful probe stopped the run. An all-zero sender
-  protocol address marks a probe: it claims nothing, so the table steps are skipped for it
-  and the target question still gets its answer.
-- A reply to a probe is addressed to that all-zero address, so the target question cannot
-  recognize it. `Arp` remembers what it is probing and matches the reply by its sender
-  protocol address, as RFC 5227 section 2.1.1 states, then reports
-  `arpAddressConflictDetected`.
+- `DhcpClient::sendDecline` built the DHCPDECLINE and nothing called it. It also lacked the server identifier that RFC 2131 table 5 requires, which no run had ever shown.
+- `Arp::processArpPacket` threw `wrong ARP packet: source IPv4 address is empty` on the very packet the probe is, so a neighbour's lawful probe stopped the run. An all-zero sender protocol address marks a probe: it claims nothing, so the table steps are skipped for it and the target question still gets its answer.
+- A reply to a probe is addressed to that all-zero address, so the target question cannot recognize it. `Arp` remembers what it is probing and matches the reply by its sender protocol address, as RFC 5227 section 2.1.1 states, then reports `arpAddressConflictDetected`.
 
-The client waits `probeWait` (1 s by default, 0 s turns the check off) and binds if nobody
-answers. The lease timers are armed when the acknowledgement arrives, not when the address is
-taken, so the probe does not move T1 or T2.
+The client waits `probeWait` (1 s by default, 0 s turns the check off) and binds if nobody answers. The lease timers are armed when the acknowledgement arrives, not when the address is taken, so the probe does not move T1 or T2.
 
-Closing it also exposed **gap 9** from a new side: the server ignored the DHCPDECLINE, so it
-offered the same address again and the client declined again, for the whole run. RFC 2131
-section 4.3.3 makes marking the address unavailable a MUST, and the server does it now.
+Closing it also exposed **gap 9** from a new side: the server ignored the DHCPDECLINE, so it offered the same address again and the client declined again, for the whole run. RFC 2131 section 4.3.3 makes marking the address unavailable a MUST, and the server does it now.
 
-The four statements the check also carried — DECL-2, DECL-5, DECL-6 and DECL-7 — are tested
-now rather than untested, which is what made this an untestable claim.
+The four statements the check also carried — DECL-2, DECL-5, DECL-6 and DECL-7 — are tested now rather than untested, which is what made this an untestable claim.
 
 
-`DhcpClient::handleDhcpAck` (`DhcpClient.cc:665`) records the lease and calls `bindLease`
-(`:306`), which configures the interface. Neither one sends an address resolution request for
-the new address and neither waits for an answer to one. What `bindLease` has instead is the
-whole procedure, written out as a comment:
+`DhcpClient::handleDhcpAck` (`DhcpClient.cc:665`) records the lease and calls `bindLease` (`:306`), which configures the interface. Neither one sends an address resolution request for the new address and neither waits for an answer to one. What `bindLease` has instead is the whole procedure, written out as a comment:
 
 ```cpp
     /*
@@ -507,27 +331,11 @@ whole procedure, written out as a comment:
 
 — `src/inet/applications/dhcp/DhcpClient.cc:315-320`
 
-RFC 2131 §4.4.1: "The client SHOULD perform a check on the suggested address to ensure that
-the address is not already in use. For example, if the client is on a network that supports
-ARP, the client may issue an ARP request for the suggested request",
-`rfc2131.txt:2119-2123` —
-[RFC2131-DECL-1](../../standard/rfc2131/catalog.md#rfc2131-decl-1).
+RFC 2131 §4.4.1: "The client SHOULD perform a check on the suggested address to ensure that the address is not already in use. For example, if the client is on a network that supports ARP, the client may issue an ARP request for the suggested request", `rfc2131.txt:2119-2123` — [RFC2131-DECL-1](../../standard/rfc2131/catalog.md#rfc2131-decl-1).
 
-The run confirms it: in a mockup where another host already held 192.168.1.100, the client
-took the DHCPACK for that address and sent no probe, so the test missed the deadline of its
-second step.
+The run confirms it: in a mockup where another host already held 192.168.1.100, the client took the DHCPACK for that address and sent no probe, so the test missed the deadline of its second step.
 
-**The failure does not say whether the client would obey
-[RFC2131-DECL-2](../../standard/rfc2131/catalog.md#rfc2131-decl-2) if it ever found a
-conflict.** It says that it cannot find one. The distinction matters, and the code makes it
-sharply: `DhcpClient::sendDecline` exists and is complete
-(`DhcpClient.cc:632-662`), it builds a broadcast DHCPDECLINE with the refused address in
-option 50 and the server in option 54, and its **only** call site is the one inside the
-comment above. A search for `sendDecline` over the two source files finds the declaration at
-`DhcpClient.h:115`, the definition at `DhcpClient.cc:632`, and that commented line at `:319`.
-So the message is written and unreachable, the probe that would trigger it is a comment, and
-the four statements the check also carried — DECL-2, DECL-5, DECL-6 and DECL-7 — are untested
-rather than failed. The ledger records that difference.
+**The failure does not say whether the client would obey [RFC2131-DECL-2](../../standard/rfc2131/catalog.md#rfc2131-decl-2) if it ever found a conflict.** It says that it cannot find one. The distinction matters, and the code makes it sharply: `DhcpClient::sendDecline` exists and is complete (`DhcpClient.cc:632-662`), it builds a broadcast DHCPDECLINE with the refused address in option 50 and the server in option 54, and its **only** call site is the one inside the comment above. A search for `sendDecline` over the two source files finds the declaration at `DhcpClient.h:115`, the definition at `DhcpClient.cc:632`, and that commented line at `:319`. So the message is written and unreachable, the probe that would trigger it is a comment, and the four statements the check also carried — DECL-2, DECL-5, DECL-6 and DECL-7 — are untested rather than failed. The ledger records that difference.
 
 ### Gap 12 (unimplemented) — the client sends no DHCPRELEASE
 
@@ -538,18 +346,11 @@ rather than failed. The ledger records that difference.
 
 — `src/inet/applications/dhcp/DhcpClient.cc:724-725`
 
-The comment quotes RFC 2131 §4.4.6 correctly, `rfc2131.txt:2284-2285`, and the statement the
-check targets, [RFC2131-REL-1](../../standard/rfc2131/catalog.md#rfc2131-rel-1), is a `MAY`.
-So the matrix reads this as a declined behavior and not as a defect, and the comment is a
-fair statement of why.
+The comment quotes RFC 2131 §4.4.6 correctly, `rfc2131.txt:2284-2285`, and the statement the check targets, [RFC2131-REL-1](../../standard/rfc2131/catalog.md#rfc2131-rel-1), is a `MAY`. So the matrix reads this as a declined behavior and not as a defect, and the comment is a fair statement of why.
 
-The run shut the client's application down at 60 seconds, inside a lease of 300 seconds and
-before T1 at 150. The scenario manager logged the shutdown and no DHCPRELEASE left the
-client.
+The run shut the client's application down at 60 seconds, inside a lease of 300 seconds and before T1 at 150. The scenario manager logged the shutdown and no DHCPRELEASE left the client.
 
-What the model loses is the server's chance to free the address early; the lease runs out
-instead. The four field rules of the message — REL-2, REL-3 and REL-5 — have nothing to be
-read on and are untested rather than failed.
+What the model loses is the server's chance to free the address early; the lease runs out instead. The four field rules of the message — REL-2, REL-3 and REL-5 — have nothing to be read on and are untested rather than failed.
 
 ### Gap 13 (defect) — the client's retransmission delay is a constant
 
@@ -569,30 +370,13 @@ and `scheduleTimerTO` reschedules that same value every time it is called:
 
 — `src/inet/applications/dhcp/DhcpClient.cc:678`
 
-RFC 2131 §4.1: "The client MUST adopt a retransmission strategy that incorporates a
-randomized exponential backoff algorithm to determine the delay between retransmissions",
-`rfc2131.txt:1317-1319` —
-[RFC2131-RETX-1](../../standard/rfc2131/catalog.md#rfc2131-retx-1). Neither half is there:
-the delay does not grow and it carries no random part.
+RFC 2131 §4.1: "The client MUST adopt a retransmission strategy that incorporates a randomized exponential backoff algorithm to determine the delay between retransmissions", `rfc2131.txt:1317-1319` — [RFC2131-RETX-1](../../standard/rfc2131/catalog.md#rfc2131-retx-1). Neither half is there: the delay does not grow and it carries no random part.
 
-The run on a subnet with no server produced DHCPDISCOVER messages at 0, 60, 120, 180 and so
-on, so the interval is exactly 60 seconds each time. The repetition itself works —
-[RFC2131-RETX-3](../../standard/rfc2131/catalog.md#rfc2131-retx-3) holds — and only the
-timing rule fails.
+The run on a subnet with no server produced DHCPDISCOVER messages at 0, 60, 120, 180 and so on, so the interval is exactly 60 seconds each time. The repetition itself works — [RFC2131-RETX-3](../../standard/rfc2131/catalog.md#rfc2131-retx-3) holds — and only the timing rule fails.
 
-The figure the model uses is the right number for a different quantity. §4.4.3 names "60
-seconds or 4 tries" as the total a client should wait before it tells the user,
-`rfc2131.txt:2179-2181`; the comment on the line cites that section. §4.1 is about the delay
-between two retransmissions, and it suggests 4 seconds, then 8, doubling to at most 64,
-`rfc2131.txt:1322-1330`. The two were conflated.
+The figure the model uses is the right number for a different quantity. §4.4.3 names "60 seconds or 4 tries" as the total a client should wait before it tells the user, `rfc2131.txt:2179-2181`; the comment on the line cites that section. §4.1 is about the delay between two retransmissions, and it suggests 4 seconds, then 8, doubling to at most 64, `rfc2131.txt:1322-1330`. The two were conflated.
 
-A note on how this gap was found, because it bears on the reliability of the other twelve.
-The first version of the growth test compared the newest interval against the interval it had
-last **recorded**, and a record that advances only on a match compares against a stale value:
-with a constant stream of 60-second repetitions the test passed, at t=0, 60 and 180. The
-predicate now advances its record on every DHCPDISCOVER it sees, and the test fails as it
-should. A check whose own bookkeeping is wrong reports a pass that means nothing, and this one
-did until it was corrected.
+A note on how this gap was found, because it bears on the reliability of the other twelve. The first version of the growth test compared the newest interval against the interval it had last **recorded**, and a record that advances only on a match compares against a stale value: with a constant stream of 60-second repetitions the test passed, at t=0, 60 and 180. The predicate now advances its record on every DHCPDISCOVER it sees, and the test fails as it should. A check whose own bookkeeping is wrong reports a pass that means nothing, and this one did until it was corrected.
 
 ### Gap 14 (defect) — the client does not retransmit a DHCPREQUEST at all
 
@@ -607,99 +391,32 @@ did until it was corrected.
 
 — `src/inet/applications/dhcp/DhcpClient.cc:226-228`
 
-`initClient` (`:363`) returns the client to INIT and sends a fresh DHCPDISCOVER. So the
-unanswered DHCPREQUEST is never repeated; the client abandons the transaction at the first
-timeout.
+`initClient` (`:363`) returns the client to INIT and sends a fresh DHCPDISCOVER. So the unanswered DHCPREQUEST is never repeated; the client abandons the transaction at the first timeout.
 
-RFC 2131 §3.1 asks for the repetition first and the restart only after it: "The client times
-out and retransmits the DHCPREQUEST message if the client receives neither a DHCPACK or a
-DHCPNAK message. ... If the client receives neither a DHCPACK or a DHCPNAK message after
-employing the retransmission algorithm, the client reverts to INIT state and restarts the
-initialization process", `rfc2131.txt:913-925` —
-[RFC2131-RETX-4](../../standard/rfc2131/catalog.md#rfc2131-retx-4).
+RFC 2131 §3.1 asks for the repetition first and the restart only after it: "The client times out and retransmits the DHCPREQUEST message if the client receives neither a DHCPACK or a DHCPNAK message. ... If the client receives neither a DHCPACK or a DHCPNAK message after employing the retransmission algorithm, the client reverts to INIT state and restarts the initialization process", `rfc2131.txt:913-925` — [RFC2131-RETX-4](../../standard/rfc2131/catalog.md#rfc2131-retx-4).
 
-The run dropped every DHCPACK on the path and the forbidden event fired at 60.0001 seconds: a
-DHCPDISCOVER where a repeated DHCPREQUEST should have been. The absence of a DHCPDISCOVER
-between the two DHCPREQUEST messages is the observation that separates a retransmission from a
-restart, and it is the one that caught this. Without it the test would have passed on the
-second DHCPREQUEST of the restarted exchange, which asks for the same address because the
-server offers the same address again.
+The run dropped every DHCPACK on the path and the forbidden event fired at 60.0001 seconds: a DHCPDISCOVER where a repeated DHCPREQUEST should have been. The absence of a DHCPDISCOVER between the two DHCPREQUEST messages is the observation that separates a retransmission from a restart, and it is the one that caught this. Without it the test would have passed on the second DHCPREQUEST of the restarted exchange, which asks for the same address because the server offers the same address again.
 
-This gap and gap 13 are one shape of problem: the client has no retransmission strategy at
-all, only a single timeout that restarts everything.
+This gap and gap 13 are one shape of problem: the client has no retransmission strategy at all, only a single timeout that restarts everything.
 
 ## What the model does well
 
-Thirteen checks pass, and five of them are worth naming, because they are the ones a weaker
-test would have missed.
+Thirteen checks pass, and five of them are worth naming, because they are the ones a weaker test would have missed.
 
-- **The lease and both timers.** `Rfc2131RenewAtT1.test`, `Rfc2131RebindAtT2.test` and
-  `Rfc2131LeaseExpiry.test` all pass. T1 falls at exactly half the lease and T2 at 0.875 of
-  it (`DhcpServer.cc:351-353` computes both and `DhcpClient::scheduleTimerT1` and
-  `scheduleTimerT2` at `:681` and `:687` read them back), the renewal is a unicast to the
-  `server identifier` address with `ciaddr` set and neither option 50 nor option 54, the
-  rebinding is a broadcast with the same fields, and at the expiry the client gives the
-  address up and asks again as an uninitialized client with IP source 0.0.0.0. The last two
-  of those three needed a relay on the path to reach at all.
-- **The transaction identifier at the receiving end.** `Rfc2131ForeignTransactionId.test`
-  passes on both halves of
-  [RFC2131-XID-4](../../standard/rfc2131/catalog.md#rfc2131-xid-4): a crafted DHCPOFFER with
-  a foreign identifier is discarded, and a crafted DHCPACK with the **right** identifier is
-  discarded too, because a client in SELECTING has asked for nothing. `DhcpClient.cc:394` does
-  the first and the SELECTING branch at `:405-414` the second. The client then gave up waiting
-  and asked again at t=60, which shows it never left the state.
-- **Silence for a client the server does not know.** `Rfc2131SilentUnknownClient.test` passes.
-  The server sent nothing at all for a crafted INIT-REBOOT request naming an address inside
-  its subnet that it had never leased, which is what
-  [RFC2131-NAK-7](../../standard/rfc2131/catalog.md#rfc2131-nak-7) demands and what lets two
-  non-communicating servers share one wire.
-- **The framing of the octets.** `Rfc2131MessageFraming.test` passes for all four messages of
-  the exchange: the magic cookie, an option area that parses by "tag, length, value" from its
-  first octet to an `end` option with nothing left over, no code twice, and a lease time of
-  300 written as the four octets `00 00 01 2C`. The serializer and the length arithmetic of
-  the two applications agree; they have to, because `DhcpMessageSerializer` asserts it
-  (`DhcpMessageSerializer.cc:216`).
-- **The mandatory and prohibited options of each message.** `Rfc2131OfferContents.test`,
-  `Rfc2131RequestContents.test` and `Rfc2131AckContents.test` pass. Every option RFC 2131
-  table 3 and table 5 mark `MUST` is present and every one they mark `MUST NOT` is absent,
-  with the two exceptions this document records as gaps 4 and 5.
+- **The lease and both timers.** `Rfc2131RenewAtT1.test`, `Rfc2131RebindAtT2.test` and `Rfc2131LeaseExpiry.test` all pass. T1 falls at exactly half the lease and T2 at 0.875 of it (`DhcpServer.cc:351-353` computes both and `DhcpClient::scheduleTimerT1` and `scheduleTimerT2` at `:681` and `:687` read them back), the renewal is a unicast to the `server identifier` address with `ciaddr` set and neither option 50 nor option 54, the rebinding is a broadcast with the same fields, and at the expiry the client gives the address up and asks again as an uninitialized client with IP source 0.0.0.0. The last two of those three needed a relay on the path to reach at all.
+- **The transaction identifier at the receiving end.** `Rfc2131ForeignTransactionId.test` passes on both halves of [RFC2131-XID-4](../../standard/rfc2131/catalog.md#rfc2131-xid-4): a crafted DHCPOFFER with a foreign identifier is discarded, and a crafted DHCPACK with the **right** identifier is discarded too, because a client in SELECTING has asked for nothing. `DhcpClient.cc:394` does the first and the SELECTING branch at `:405-414` the second. The client then gave up waiting and asked again at t=60, which shows it never left the state.
+- **Silence for a client the server does not know.** `Rfc2131SilentUnknownClient.test` passes. The server sent nothing at all for a crafted INIT-REBOOT request naming an address inside its subnet that it had never leased, which is what [RFC2131-NAK-7](../../standard/rfc2131/catalog.md#rfc2131-nak-7) demands and what lets two non-communicating servers share one wire.
+- **The framing of the octets.** `Rfc2131MessageFraming.test` passes for all four messages of the exchange: the magic cookie, an option area that parses by "tag, length, value" from its first octet to an `end` option with nothing left over, no code twice, and a lease time of 300 written as the four octets `00 00 01 2C`. The serializer and the length arithmetic of the two applications agree; they have to, because `DhcpMessageSerializer` asserts it (`DhcpMessageSerializer.cc:216`).
+- **The mandatory and prohibited options of each message.** `Rfc2131OfferContents.test`, `Rfc2131RequestContents.test` and `Rfc2131AckContents.test` pass. Every option RFC 2131 table 3 and table 5 mark `MUST` is present and every one they mark `MUST NOT` is absent, with the two exceptions this document records as gaps 4 and 5.
 
 ## What the next pass owes, in the order I would do it
 
-The first item is a debt of this pass and not a property of the protocol. The rest are the
-ordinary sharpening candidates.
+The first item is a debt of this pass and not a property of the protocol. The rest are the ordinary sharpening candidates.
 
-1. **Write the thirteen checks this pass owes.**
-   [The debt table](coverage.md#the-coverage-debt-the-checks-this-pass-owes) lists them with
-   what each needs. Thirteen statements of the catalogs are behavior the model claims — there is
-   code for each — and no check reaches them, which is what
-   [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test)
-   forbids and what blocks level 3. Four mockups clear eleven of them: **two clients** (XID-2,
-   ID-1, SEL-2, NAK-1), **a second exchange after a release** (ID-2, SEL-1), **two renewals**
-   (LEASE-11), and **four single crafted injections** (XID-5, NAK-8, MSG-6, BCAST-1). The last two
-   need a server with two addresses (SRVID-1) and a client with two interfaces (MISC-1). Two
-   features leave `unverified` when this is done.
-2. **A statistical check with a stated tolerance**, which is level 4 and which the five
-   distribution statements need:
-   [RETX-2](../../standard/rfc2131/catalog.md#rfc2131-retx-2),
-   [DISC-4](../../standard/rfc2131/catalog.md#rfc2131-disc-4),
-   [LEASE-7](../../standard/rfc2131/catalog.md#rfc2131-lease-7),
-   [LEASE-10](../../standard/rfc2131/catalog.md#rfc2131-lease-10) and
-   [DECL-3](../../standard/rfc2131/catalog.md#rfc2131-decl-3). Gap 13 already tells what the answer
-   will be for the first two.
-3. **A relay agent**, which brings RFC 1542 into the in-scope set and reaches
-   [NAK-4](../../standard/rfc2131/catalog.md#rfc2131-nak-4) and
-   [BCAST-2](../../standard/rfc2131/catalog.md#rfc2131-bcast-2), and which would make gaps 2 and 8
-   observable rather than merely wrong.
-4. **A client that can be told to send no `client identifier` option**, which is the one thing
-   [RFC6842-CLID-2](../../standard/rfc6842/catalog.md#rfc6842-clid-2) needs. The model's client
-   always sends one, so the `MUST NOT` half of RFC 6842 cannot be arranged.
-5. **A slower link or a slower server**, which would separate the two anchors of
-   [LEASE-2](../../standard/rfc2131/catalog.md#rfc2131-lease-2): the expiry is the send instant of
-   the DHCPREQUEST plus the lease, and on a 100 Mbit link that differs from the arrival instant of
-   the DHCPACK by tens of microseconds, which the one-second tolerance cannot see.
-6. **A DHCPINFORM for an address bound to another client**, which is what
-   [INF-4](../../standard/rfc2131/catalog.md#rfc2131-inf-4) needs. Gap 9 makes it moot until the
-   server handles the message at all.
-7. **A serializer unit test suite**, the home of the seven `encoding` statements the ledger files
-   as `later`.
+1. **Write the thirteen checks this pass owes.** [The debt table](coverage.md#the-coverage-debt-the-checks-this-pass-owes) lists them with what each needs. Thirteen statements of the catalogs are behavior the model claims — there is code for each — and no check reaches them, which is what [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) forbids and what blocks level 3. Four mockups clear eleven of them: **two clients** (XID-2, ID-1, SEL-2, NAK-1), **a second exchange after a release** (ID-2, SEL-1), **two renewals** (LEASE-11), and **four single crafted injections** (XID-5, NAK-8, MSG-6, BCAST-1). The last two need a server with two addresses (SRVID-1) and a client with two interfaces (MISC-1). Two features leave `unverified` when this is done.
+2. **A statistical check with a stated tolerance**, which is level 4 and which the five distribution statements need: [RETX-2](../../standard/rfc2131/catalog.md#rfc2131-retx-2), [DISC-4](../../standard/rfc2131/catalog.md#rfc2131-disc-4), [LEASE-7](../../standard/rfc2131/catalog.md#rfc2131-lease-7), [LEASE-10](../../standard/rfc2131/catalog.md#rfc2131-lease-10) and [DECL-3](../../standard/rfc2131/catalog.md#rfc2131-decl-3). Gap 13 already tells what the answer will be for the first two.
+3. **A relay agent**, which brings RFC 1542 into the in-scope set and reaches [NAK-4](../../standard/rfc2131/catalog.md#rfc2131-nak-4) and [BCAST-2](../../standard/rfc2131/catalog.md#rfc2131-bcast-2), and which would make gaps 2 and 8 observable rather than merely wrong.
+4. **A client that can be told to send no `client identifier` option**, which is the one thing [RFC6842-CLID-2](../../standard/rfc6842/catalog.md#rfc6842-clid-2) needs. The model's client always sends one, so the `MUST NOT` half of RFC 6842 cannot be arranged.
+5. **A slower link or a slower server**, which would separate the two anchors of [LEASE-2](../../standard/rfc2131/catalog.md#rfc2131-lease-2): the expiry is the send instant of the DHCPREQUEST plus the lease, and on a 100 Mbit link that differs from the arrival instant of the DHCPACK by tens of microseconds, which the one-second tolerance cannot see.
+6. **A DHCPINFORM for an address bound to another client**, which is what [INF-4](../../standard/rfc2131/catalog.md#rfc2131-inf-4) needs. Gap 9 makes it moot until the server handles the message at all.
+7. **A serializer unit test suite**, the home of the seven `encoding` statements the ledger files as `later`.

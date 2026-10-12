@@ -2,9 +2,7 @@
 
 > **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [decisions.md](decisions.md), [rule/architecture.md](../rule/architecture.md)
 
-Where everything lives, and what keeps it there. [decisions.md](decisions.md) holds the choices this
-layout carries out, and [rule/architecture.md](../rule/architecture.md) holds the rules that a change
-to it must respect. This document is the inventory.
+Where everything lives, and what keeps it there. [decisions.md](decisions.md) holds the choices this layout carries out, and [rule/architecture.md](../rule/architecture.md) holds the rules that a change to it must respect. This document is the inventory.
 
 ## The top level
 
@@ -28,9 +26,7 @@ to it must respect. This document is the inventory.
 
 ## The source tree
 
-`src/inet/` is partitioned by protocol layer and by orthogonal domain, and the dependencies point one
-way: **from a protocol toward the infrastructure, never back**
-([AR-ORG-DOMAINS](../rule/architecture.md#ar-org-domains)).
+`src/inet/` is partitioned by protocol layer and by orthogonal domain, and the dependencies point one way: **from a protocol toward the infrastructure, never back** ([AR-ORG-DOMAINS](../rule/architecture.md#ar-org-domains)).
 
 **The layers**, in the order a packet crosses them:
 
@@ -64,18 +60,13 @@ way: **from a protocol toward the infrastructure, never back**
 | `networks/` | pre-assembled networks |
 | `visualizer/` | every renderer, 2D and 3D — and nothing else depends on it |
 
-`common/` is where the direction is under pressure, and where it is measured:
-[audit/architecture-exceptions.md](../audit/architecture-exceptions.md) holds the couplings that
-point the wrong way today, and [check-architecture.sh](../enforcement/check-architecture.sh) finds
-them.
+`common/` is where the direction is under pressure, and where it is measured: [audit/architecture-exceptions.md](../audit/architecture-exceptions.md) holds the couplings that point the wrong way today, and [check-architecture.sh](../enforcement/check-architecture.sh) finds them.
 
-**A package is a directory is a NED package is a C++ namespace.** The four are one name
-([NR-PKG](../rule/naming.md#nr-pkg)), which is what makes a component findable from its name alone.
+**A package is a directory is a NED package is a C++ namespace.** The four are one name ([NR-PKG](../rule/naming.md#nr-pkg)), which is what makes a component findable from its name alone.
 
 ## The four artifact kinds, side by side
 
-A protocol is written in four languages, and each file kind sits beside the others in the same
-directory:
+A protocol is written in four languages, and each file kind sits beside the others in the same directory:
 
 | Kind | Declares | Named by |
 | --- | --- | --- |
@@ -88,8 +79,7 @@ directory:
 
 ## The three example trees
 
-They are not three names for one thing. Each answers a different question, and a contribution
-belongs in exactly one:
+They are not three names for one thing. Each answers a different question, and a contribution belongs in exactly one:
 
 | Tree | Answers | Shape |
 | --- | --- | --- |
@@ -97,14 +87,11 @@ belongs in exactly one:
 | `showcases/` | *What effect does this produce, and what does the result look like?* | one scenario, measured, with a written page and charts |
 | `tutorials/` | *How do I learn this, step by step?* | a numbered sequence, each step adding one idea |
 
-An `examples/` directory that grows a written argument wants to be a showcase. A showcase that grows
-a second and third step wants to be a tutorial.
+An `examples/` directory that grows a written argument wants to be a showcase. A showcase that grows a second and third step wants to be a tutorial.
 
 ## The test tree
 
-Twelve categories under `tests/`. What each one is for, and which claim it can establish, is
-[test-anatomy.md](test-anatomy.md); which one a change owes is
-[rule/testing.md](../rule/testing.md).
+Twelve categories under `tests/`. What each one is for, and which claim it can establish, is [test-anatomy.md](test-anatomy.md); which one a change owes is [rule/testing.md](../rule/testing.md).
 
 ```
 unit  module  protocol  queueing  packet  networks
@@ -122,9 +109,7 @@ statistical  validation  fingerprint  speed  features  misc
 | `doc/project/enforcement/` | the rule gates, and only the rule gates |
 | `_scripts/` | maintenance sweeps, release steps, IDE helpers |
 
-The boundary is stated in [enforcement/README.md](../enforcement/README.md): the enforcement folder
-holds the direct transcription of a numbered rule, and heavy tooling stays in `python/` and
-`_scripts/`.
+The boundary is stated in [enforcement/README.md](../enforcement/README.md): the enforcement folder holds the direct transcription of a numbered rule, and heavy tooling stays in `python/` and `_scripts/`.
 
 ## The build
 
@@ -136,6 +121,4 @@ holds the direct transcription of a numbered rule, and heavy tooling stays in `p
 | `.nedfolders`, `.nedexclusions` | which directories the NED compiler reads |
 | `/.clang-tidy` | the C++ gate for the naming and quality rules |
 
-A feature descriptor is the single source of truth for the partition
-([AR-BUILD-DECLARATIVE](../rule/architecture.md#ar-build-declarative)), and a feature identifier is
-part of the published interface ([RR-FEATURE-STABLE](../rule/release.md#rr-feature-stable)).
+A feature descriptor is the single source of truth for the partition ([AR-BUILD-DECLARATIVE](../rule/architecture.md#ar-build-declarative)), and a feature identifier is part of the published interface ([RR-FEATURE-STABLE](../rule/release.md#rr-feature-stable)).

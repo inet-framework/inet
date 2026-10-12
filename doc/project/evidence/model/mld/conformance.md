@@ -2,10 +2,7 @@
 
 > **Kind:** report · **Status:** snapshot 2026-09-24 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/mld/standards.md), [features.md](../../protocol/mld/features.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow. Part 1 records what the model intends: which
-standards it claims to implement, mapped onto the standards map. Part 2 crosses the claims
-with the feature support of the ledger, feature by feature.
-[`igmp/conformance.md`](../igmp/conformance.md) records the parallel claims for the IPv4 side.
+Step 8 artifact of the standards test workflow. Part 1 records what the model intends: which standards it claims to implement, mapped onto the standards map. Part 2 crosses the claims with the feature support of the ledger, feature by feature. [`igmp/conformance.md`](../igmp/conformance.md) records the parallel claims for the IPv4 side.
 
 Run record of the ledger state that part 2 comes from:
 
@@ -18,17 +15,11 @@ Run record of the ledger state that part 2 comes from:
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/mld$'`
 
-Part 1 was first read by the level 1 pass, at src `16dc528e10`, commit `e360ca980e` of the wave 0
-branch. The MLD code is the same in `5c4f41c600`: the two trees differ only in seven files of
-IEEE 802.11, and the tree of the run, `8b4f86968e`, differs from it in one line of
-`src/inet/common/InitStages.cc`. The line numbers of part 1 therefore hold for all three.
+Part 1 was first read by the level 1 pass, at src `16dc528e10`, commit `e360ca980e` of the wave 0 branch. The MLD code is the same in `5c4f41c600`: the two trees differ only in seven files of IEEE 802.11, and the tree of the run, `8b4f86968e`, differs from it in one line of `src/inet/common/InitStages.cc`. The line numbers of part 1 therefore hold for all three.
 
 ## Part 1 — the claims
 
-Every place in the model that names a document of the MLD family. Source:
-`src/inet/networklayer/icmpv6/{Mldv1,Mldv2,IMld,MldMessage,Mldv2Message}.{cc,h,ned,msg}`,
-`doc/src/users-guide/ch-ipv6.rst`, `WHATSNEW`. `Mldv1.ned` and `Mldv2.ned` both carry a 2026
-copyright header — this family is much newer code than ND or IGMP.
+Every place in the model that names a document of the MLD family. Source: `src/inet/networklayer/icmpv6/{Mldv1,Mldv2,IMld,MldMessage,Mldv2Message}.{cc,h,ned,msg}`, `doc/src/users-guide/ch-ipv6.rst`, `WHATSNEW`. `Mldv1.ned` and `Mldv2.ned` both carry a 2026 copyright header — this family is much newer code than ND or IGMP.
 
 | Claim | Where | What it says |
 | --- | --- | --- |
@@ -46,8 +37,7 @@ copyright header — this family is much newer code than ND or IGMP.
 | none | [`ch-ipv6.rst`](../../../../../doc/src/users-guide/ch-ipv6.rst) | The IPv6 user's guide never mentions MLD, Multicast Listener Discovery, `Mldv1` or `Mldv2` at all (`grep -ci 'mld\|listener discovery' ch-ipv6.rst` returns 0). Unlike IGMP, which at least gets an undocumented-RFC-number section, MLD gets no user-facing prose at all. |
 | RFC 3810 | [`WHATSNEW:486`](../../../../../WHATSNEW) | "a new Mldv2 module implementing MLDv2 (RFC 3810) was added." |
 
-No line anywhere in the tree names RFC 4604 or RFC 3590
-(`grep -rn 'RFC ?4604\|RFC ?3590' src/inet/networklayer/icmpv6/` finds nothing).
+No line anywhere in the tree names RFC 4604 or RFC 3590 (`grep -rn 'RFC ?4604\|RFC ?3590' src/inet/networklayer/icmpv6/` finds nothing).
 
 Mapped onto the standards map, [`standards.md`](../../protocol/mld/standards.md#document-list):
 
@@ -59,74 +49,20 @@ Mapped onto the standards map, [`standards.md`](../../protocol/mld/standards.md#
 | RFC 4604 | no, level 5 | no | Not named anywhere in `src/inet/networklayer/icmpv6/`. No SSM-address-range check exists in either module. |
 | RFC 3590 | no, level 5 / edge | no | Not named anywhere. No MLD source-address-selection logic exists to check it against. |
 
-**The finding of the survey.** MLDv1 is claimed correctly and consistently, the same way
-IGMPv2 is: RFC 2710 is not obsoleted, and every citation across five files names it. MLDv2 is
-claimed only as RFC 3810, which RFC 9777 obsoleted on 2025-03-11; the claim appears in the
-module reference (`Mldv2.ned:12`) and in 32 inline section citations, and it is never
-corrected anywhere in the tree — not the NED file, not `WHATSNEW`, and the user's guide does
-not mention MLD at all, which is a larger documentation gap than IGMPv3's (IGMPv3 at least
-gets an unlabeled user-guide section; MLD gets none).
+**The finding of the survey.** MLDv1 is claimed correctly and consistently, the same way IGMPv2 is: RFC 2710 is not obsoleted, and every citation across five files names it. MLDv2 is claimed only as RFC 3810, which RFC 9777 obsoleted on 2025-03-11; the claim appears in the module reference (`Mldv2.ned:12`) and in 32 inline section citations, and it is never corrected anywhere in the tree — not the NED file, not `WHATSNEW`, and the user's guide does not mention MLD at all, which is a larger documentation gap than IGMPv3's (IGMPv3 at least gets an unlabeled user-guide section; MLD gets none).
 
-For the level 2 pass, four facts from the code (the guide permits this look to decide the
-claim question, and the pass must check each one), kept parallel to the four facts in
-[`igmp/conformance.md`](../igmp/conformance.md):
+For the level 2 pass, four facts from the code (the guide permits this look to decide the claim question, and the pass must check each one), kept parallel to the four facts in [`igmp/conformance.md`](../igmp/conformance.md):
 
-1. **`Mldv1` crashes on an unrecognized message type; `Mldv2` does not.** `Mldv1.cc:342`
-   `throw cRuntimeError("Mldv1: Unknown MLD message type %d", ...)`, against RFC 9777's MUST
-   (`rfc9777.txt:765`). `Mldv2.cc:703` instead logs a warning and drops the packet
-   (`EV_WARN << "Mldv2: unexpected MLD message type "...; delete packet`) — already conformant.
-   This is the opposite pattern from IGMP, where **both** `Igmpv2` and `Igmpv3` crash on the
-   same case (see [`igmp/conformance.md`](../igmp/conformance.md)); the newer MLDv2 module was
-   apparently written past this defect while the older MLDv1 module was not, and neither IGMP
-   module was.
-2. **No MLD message ever carries a Router Alert option, and no comment names the gap.**
-   `grep -in 'router alert' Mldv1.cc Mldv2.cc` finds nothing at all — not even a TODO — against
-   a requirement RFC 9777 states as a formal MUST (`rfc9777.txt:738-741`) and RFC 2710 already
-   stated descriptively (`rfc2710.txt:83-85`). Both modules do set the Hop Limit to 1 correctly
-   (`Mldv1.cc:495`, `Mldv2.cc:1429`). Unlike IGMP's three `// TODO fill Router Alert option`
-   comments (see [`igmp/conformance.md`](../igmp/conformance.md)), this is a silent gap — the
-   model does not admit it anywhere, which the guide's TODO table treats no differently from a
-   named one: the code exists (option-free packet construction), so this is still a claim, and
-   still a defect if a level 2 check reaches it.
-3. **The `Mldv2.ned` "Parity gaps" comment (`Mldv2.ned:56-61`) is stale on all three of its own
-   points, not just the one the survey lead flagged.** It reads: "state-change Reports are sent
-   once, not retransmitted [Robustness Variable]-1 more times; Multicast-Address-Specific
-   Queries after a leave are not retransmitted `lastMemberQueryCount` times; and MLDv1<->MLDv2
-   interoperation... is not implemented." `git blame` dates this comment to the first commit of
-   the file, `c4b596331a7` (2026-06-17 10:44), when all three gaps were true. Two later commits
-   the same family closed all three: `c325ab8338f` (2026-06-17 21:42) added both retransmission
-   loops (`Mldv2.cc:270`: `groupData->retransmitCount = robustnessVariable - 1`; `Mldv2.cc:1337,
-   1397`: `groupData->rexmtCount = lastMemberQueryCount - 1`, each guarded by `if (...count > 0)
-   startTimer(...)`), and `16c75c1a3c` (2026-06-18, "MLDv1 <-> MLDv2 interop") wired
-   `processOlderVersionQuery`/`processOlderVersionReport`/`processOlderVersionDone` into the
-   live dispatch (`Mldv2.cc:683,695,699`, inside `processMldMessage`) — confirmed reachable, not
-   dead code. Both commits are
-   ancestors of the commit this pass reads (`git merge-base --is-ancestor` confirms it). The NED
-   comment was never updated after either fix. This is the mirror image of the level 2 pass's
-   usual finding: here the code is more capable than the documentation admits, on all three
-   named points at once.
-4. **The Multicast Address Listening Interval default in the NED file has not been checked
-   against RFC 9777's changed text** (see the override table of
-   [`standards.md`](../../protocol/mld/standards.md#override-table)). `Mldv1.ned:71` and
-   `Mldv2.ned:76` both default `multicastListenerInterval`/`groupMembershipInterval` to
-   `(robustnessVariable * queryInterval) + queryResponseInterval` — one Query Response Interval,
-   matching RFC 2710/RFC 3810's superseded formula, not RFC 9777's "plus 2 times" text. The same
-   fact holds for IGMP's `groupMembershipInterval` default, confirming the two protocols share
-   this gap as well as the formula it is measured against.
+1. **`Mldv1` crashes on an unrecognized message type; `Mldv2` does not.** `Mldv1.cc:342` `throw cRuntimeError("Mldv1: Unknown MLD message type %d", ...)`, against RFC 9777's MUST (`rfc9777.txt:765`). `Mldv2.cc:703` instead logs a warning and drops the packet (`EV_WARN << "Mldv2: unexpected MLD message type "...; delete packet`) — already conformant. This is the opposite pattern from IGMP, where **both** `Igmpv2` and `Igmpv3` crash on the same case (see [`igmp/conformance.md`](../igmp/conformance.md)); the newer MLDv2 module was apparently written past this defect while the older MLDv1 module was not, and neither IGMP module was.
+2. **No MLD message ever carries a Router Alert option, and no comment names the gap.** `grep -in 'router alert' Mldv1.cc Mldv2.cc` finds nothing at all — not even a TODO — against a requirement RFC 9777 states as a formal MUST (`rfc9777.txt:738-741`) and RFC 2710 already stated descriptively (`rfc2710.txt:83-85`). Both modules do set the Hop Limit to 1 correctly (`Mldv1.cc:495`, `Mldv2.cc:1429`). Unlike IGMP's three `// TODO fill Router Alert option` comments (see [`igmp/conformance.md`](../igmp/conformance.md)), this is a silent gap — the model does not admit it anywhere, which the guide's TODO table treats no differently from a named one: the code exists (option-free packet construction), so this is still a claim, and still a defect if a level 2 check reaches it.
+3. **The `Mldv2.ned` "Parity gaps" comment (`Mldv2.ned:56-61`) is stale on all three of its own points, not just the one the survey lead flagged.** It reads: "state-change Reports are sent once, not retransmitted [Robustness Variable]-1 more times; Multicast-Address-Specific Queries after a leave are not retransmitted `lastMemberQueryCount` times; and MLDv1<->MLDv2 interoperation... is not implemented." `git blame` dates this comment to the first commit of the file, `c4b596331a7` (2026-06-17 10:44), when all three gaps were true. Two later commits the same family closed all three: `c325ab8338f` (2026-06-17 21:42) added both retransmission loops (`Mldv2.cc:270`: `groupData->retransmitCount = robustnessVariable - 1`; `Mldv2.cc:1337, 1397`: `groupData->rexmtCount = lastMemberQueryCount - 1`, each guarded by `if (...count > 0) startTimer(...)`), and `16c75c1a3c` (2026-06-18, "MLDv1 <-> MLDv2 interop") wired `processOlderVersionQuery`/`processOlderVersionReport`/`processOlderVersionDone` into the live dispatch (`Mldv2.cc:683,695,699`, inside `processMldMessage`) — confirmed reachable, not dead code. Both commits are ancestors of the commit this pass reads (`git merge-base --is-ancestor` confirms it). The NED comment was never updated after either fix. This is the mirror image of the level 2 pass's usual finding: here the code is more capable than the documentation admits, on all three named points at once.
+4. **The Multicast Address Listening Interval default in the NED file has not been checked against RFC 9777's changed text** (see the override table of [`standards.md`](../../protocol/mld/standards.md#override-table)). `Mldv1.ned:71` and `Mldv2.ned:76` both default `multicastListenerInterval`/`groupMembershipInterval` to `(robustnessVariable * queryInterval) + queryResponseInterval` — one Query Response Interval, matching RFC 2710/RFC 3810's superseded formula, not RFC 9777's "plus 2 times" text. The same fact holds for IGMP's `groupMembershipInterval` default, confirming the two protocols share this gap as well as the formula it is measured against.
 
-The level 2 pass checked the four facts; [`results.md`](results.md#the-four-facts-of-the-level-1-look)
-has the outcome of each.
+The level 2 pass checked the four facts; [`results.md`](results.md#the-four-facts-of-the-level-1-look) has the outcome of each.
 
 ## Part 2 — the conformance matrix
 
-A feature is `claimed` when the claims of part 1 cover its governing source document. The
-model claims RFC 3810 for MLDv2, and RFC 9777 is the same protocol raised to Internet Standard,
-with the changes of the [override table](../../protocol/mld/standards.md#override-table); the
-claim of RFC 3810 therefore covers every feature that RFC 3810 already had, and the changed
-interval is a gap of its own, [gap 6](results.md#gap-6-defect--two-default-intervals-have-the-values-of-older-documents). The model claims RFC 2710 as a whole, so the two version 1
-features are claimed. One feature is not claimed: MLD-F-SSM-AWARE comes from the SSM text of RFC
-4604, and the model names RFC 4604 nowhere. The support comes from
-[`coverage.md`](coverage.md#feature-support).
+A feature is `claimed` when the claims of part 1 cover its governing source document. The model claims RFC 3810 for MLDv2, and RFC 9777 is the same protocol raised to Internet Standard, with the changes of the [override table](../../protocol/mld/standards.md#override-table); the claim of RFC 3810 therefore covers every feature that RFC 3810 already had, and the changed interval is a gap of its own, [gap 6](results.md#gap-6-defect--two-default-intervals-have-the-values-of-older-documents). The model claims RFC 2710 as a whole, so the two version 1 features are claimed. One feature is not claimed: MLD-F-SSM-AWARE comes from the SSM text of RFC 4604, and the model names RFC 4604 nowhere. The support comes from [`coverage.md`](coverage.md#feature-support).
 
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
@@ -155,29 +91,12 @@ Two features are `confirmed`, fifteen `partial`, two `defect` and one `out of cl
 
 ### How to read the matrix
 
-- **The two `defect` verdicts are of different kinds.** MLD-F-MESSAGE-VALIDATION is a defect on
-  the normal path: its one core statement that level 2 reaches, RFC2710-NODE-2, fails because
-  the MLDv1 node cannot read an MLDv2 Query. MLD-F-ROUTER-COMPATIBILITY is `defect` by the table
-  only: its querier half is a missing feature, declared expected ([gap 17](results.md#gap-17-missing-feature--no-mldv1-mode-in-an-mldv2-router)), and its other half, the
-  router state for MLDv1 listeners, has code that no run reached, because [gap 16](results.md#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query) stops every run
-  with an MLDv1 host at the start. Read it as one missing feature and one statement set without
-  a verdict.
-- **The fifteen `partial` verdicts** fall into two groups. Thirteen hold a failing core check;
-  the IPv6-specific gaps 2 to 5 reach every MLD message, and MLD-F-MESSAGE-FORMAT is partial
-  through them alone. The other two, the state-change processing of the router and the
-  MLDv1 router, fail no core check and are partial only because some core statement is owed or
-  later.
-- **The twins of IGMP**: every IGMP gap except gap 2, the precedence, for which MLD has no rule,
-  has a twin here, with the same code shape in `Mldv2`; the MLD module is a port of `Igmpv3`,
-  and the port carried the defects with it.
+- **The two `defect` verdicts are of different kinds.** MLD-F-MESSAGE-VALIDATION is a defect on the normal path: its one core statement that level 2 reaches, RFC2710-NODE-2, fails because the MLDv1 node cannot read an MLDv2 Query. MLD-F-ROUTER-COMPATIBILITY is `defect` by the table only: its querier half is a missing feature, declared expected ([gap 17](results.md#gap-17-missing-feature--no-mldv1-mode-in-an-mldv2-router)), and its other half, the router state for MLDv1 listeners, has code that no run reached, because [gap 16](results.md#gap-16-defect--the-mldv1-node-stops-the-simulation-on-an-mldv2-query) stops every run with an MLDv1 host at the start. Read it as one missing feature and one statement set without a verdict.
+- **The fifteen `partial` verdicts** fall into two groups. Thirteen hold a failing core check; the IPv6-specific gaps 2 to 5 reach every MLD message, and MLD-F-MESSAGE-FORMAT is partial through them alone. The other two, the state-change processing of the router and the MLDv1 router, fail no core check and are partial only because some core statement is owed or later.
+- **The twins of IGMP**: every IGMP gap except gap 2, the precedence, for which MLD has no rule, has a twin here, with the same code shape in `Mldv2`; the MLD module is a port of `Igmpv3`, and the port carried the defects with it.
 
 ## Headlines for the next pass
 
-1. **Gap 16 blocks the MLDv1 interoperation of the router.** A repair of `Mldv1::processQuery`
-   gives the older-host checks their verdicts, and makes MLD-F-ROUTER-COMPATIBILITY readable.
-2. **The IPv6-specific gaps 2 to 5 reach every MLD message**: a global source, no Router Alert,
-   a checksum without pseudo-header, and no Report for the solicited-node addresses. Between
-   nodes of the model they cancel out; a real node, or a level 3 check of the receiver rules,
-   drops every message.
-3. **The obsolete claim of level 1 stands**: `Mldv2.ned:12` names RFC 3810, and the stale
-   "parity gaps" comment of the same file still says that three working mechanisms are missing.
+1. **Gap 16 blocks the MLDv1 interoperation of the router.** A repair of `Mldv1::processQuery` gives the older-host checks their verdicts, and makes MLD-F-ROUTER-COMPATIBILITY readable.
+2. **The IPv6-specific gaps 2 to 5 reach every MLD message**: a global source, no Router Alert, a checksum without pseudo-header, and no Report for the solicited-node addresses. Between nodes of the model they cancel out; a real node, or a level 3 check of the receiver rules, drops every message.
+3. **The obsolete claim of level 1 stands**: `Mldv2.ned:12` names RFC 3810, and the stale "parity gaps" comment of the same file still says that three working mechanisms are missing.

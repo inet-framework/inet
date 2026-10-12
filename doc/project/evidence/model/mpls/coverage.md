@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc3031/catalog.md](../../standard/rfc3031/catalog.md), [rfc3032/catalog.md](../../standard/rfc3032/catalog.md), [rfc3443/catalog.md](../../standard/rfc3443/catalog.md), [rfc5462/catalog.md](../../standard/rfc5462/catalog.md), [features.md](../../protocol/mpls/features.md)
 
-The single place that holds the changing state of the MPLS workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the MPLS workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -32,11 +30,7 @@ The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
 | `later` | it needs a toolset of a higher level — a label that no binding covers or a wrong control packet at level 3, a timer at level 4, a tunnel at level 5 |
 | `no check` | the model does not claim the behavior, or a permission that no observation can fail, so [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) asks for no test |
 
-A verdict belongs to the test. Where a test fails at a later observation and the observation
-of a statement held, the row says PASS and names the observation in the note; where a failure
-kept a test from the observation a statement needs, the row says FAIL and says so. A PASS
-"with no weight" is a pass that the model cannot fail, because it does not do the thing that
-the statement limits.
+A verdict belongs to the test. Where a test fails at a later observation and the observation of a statement held, the row says PASS and names the observation in the note; where a failure kept a test from the observation a statement needs, the row says FAIL and says so. A PASS "with no weight" is a pass that the model cannot fail, because it does not do the thing that the statement limits.
 
 | Status | RFC 3031 | RFC 3032 | RFC 3443 | RFC 5462 | Together |
 | --- | --- | --- | --- | --- | --- |
@@ -226,30 +220,18 @@ the statement limits.
 
 ## The coverage debt: the checks this pass owes
 
-Two statements are `owed`: the model claims the behavior, and no check of this pass reaches it.
-The field comment of `MplsHeader` says that the label 1 "represents the router alert label"
-(`MplsPacket.msg:16`), and RFC 3032 §2.1 gives that label its meaning: the packet goes to local
-software in the LSR, and the label comes back on top when the packet goes on. RFC 3032 names no
-such software and no rule for what it does, so a check needs both from the document of a
-protocol that uses the label.
+Two statements are `owed`: the model claims the behavior, and no check of this pass reaches it. The field comment of `MplsHeader` says that the label 1 "represents the router alert label" (`MplsPacket.msg:16`), and RFC 3032 §2.1 gives that label its meaning: the packet goes to local software in the LSR, and the label comes back on top when the packet goes on. RFC 3032 names no such software and no rule for what it does, so a check needs both from the document of a protocol that uses the label.
 
 | Statement | Strength | What a check needs |
 | --- | --- | --- |
 | [RFC3032-ENC-12](../../standard/rfc3032/catalog.md#rfc3032-enc-12) | description | local software in the LSR that takes a packet with the label 1 at the top, and a rule for what it does |
 | [RFC3032-ENC-13](../../standard/rfc3032/catalog.md#rfc3032-enc-13) | should (lower case) | local software in the LSR that takes a packet with the label 1 at the top, and a rule for what it does |
 
-The `later` statements are not debt of this level: 23 need a label that no binding covers,
-an ICMP message about a labeled packet, a second path, a wrong control packet, a timer or a
-tunnel. The 33 `no check` statements are behaviors that the model does not claim — label
-distribution, a link without a TTL field, a labeled IPv6 datagram, the Maximum Initially Labeled
-IP Datagram Size, multicast, and the Pipe and Short Pipe Models — and permissions that no
-observation can fail.
+The `later` statements are not debt of this level: 23 need a label that no binding covers, an ICMP message about a labeled packet, a second path, a wrong control packet, a timer or a tunnel. The 33 `no check` statements are behaviors that the model does not claim — label distribution, a link without a TTL field, a labeled IPv6 datagram, the Maximum Initially Labeled IP Datagram Size, multicast, and the Pipe and Short Pipe Models — and permissions that no observation can fail.
 
 ## Feature support
 
-The rule of the guide: `supported` when every core statement passed, `partial` when some passed
-and some failed or have no check, `not supported` when every core statement that ran failed,
-`untested` when no core statement has a check.
+The rule of the guide: `supported` when every core statement passed, `partial` when some passed and some failed or have no check, `not supported` when every core statement that ran failed, `untested` when no core statement has a check.
 
 | Feature | Level | Support | Why |
 | --- | --- | --- | --- |
@@ -268,19 +250,13 @@ and some failed or have no check, `not supported` when every core statement that
 | [MPLS-F-PPP](../../protocol/mpls/features.md#mpls-f-ppp) | mandatory | partial | 3 core statements passed, 2 failed |
 | [MPLS-F-LAN](../../protocol/mpls/features.md#mpls-f-lan) | mandatory | not supported | every core statement that ran failed (3) |
 
-- **MPLS-F-TTL is partial with one pass**: the entry has a TTL field (RFC3031-TTL-3), and every
-  rule about the value of that field failed ([gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0),
-  [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl),
-  [gap 3](results.md#gap-3-defect--a-labeled-packet-whose-ttl-reaches-zero-goes-on)).
-- **MPLS-F-LAN is not supported**: the run stops before a labeled packet reaches the Ethernet link
-  ([gap 4](results.md#gap-4-defect--an-mpls-router-on-an-ethernet-link-stops-the-run)).
-- **MPLS-F-INVALID-LABEL is untested at this level**: its two core statements are level 3 by the
-  standards map, as [`checks.md`](../../protocol/mpls/checks.md#statements-this-pass-wrote-no-check-for) says.
+- **MPLS-F-TTL is partial with one pass**: the entry has a TTL field (RFC3031-TTL-3), and every rule about the value of that field failed ([gap 1](results.md#gap-1-defect--the-ttl-field-of-every-label-stack-entry-is-0), [gap 2](results.md#gap-2-defect--the-lsp-does-not-count-its-hops-in-the-ipv4-ttl), [gap 3](results.md#gap-3-defect--a-labeled-packet-whose-ttl-reaches-zero-goes-on)).
+- **MPLS-F-LAN is not supported**: the run stops before a labeled packet reaches the Ethernet link ([gap 4](results.md#gap-4-defect--an-mpls-router-on-an-ethernet-link-stops-the-run)).
+- **MPLS-F-INVALID-LABEL is untested at this level**: its two core statements are level 3 by the standards map, as [`checks.md`](../../protocol/mpls/checks.md#statements-this-pass-wrote-no-check-for) says.
 
 ## Achieved level
 
-**Level 2, reached, for the normal path.** Target: level 2, from
-[`standards.md`](../../protocol/mpls/standards.md#target-level).
+**Level 2, reached, for the normal path.** Target: level 2, from [`standards.md`](../../protocol/mpls/standards.md#target-level).
 
 | Half of the criterion | State | Evidence |
 | --- | --- | --- |
@@ -304,8 +280,4 @@ and some failed or have no check, `not supported` when every core statement that
 
 ## Out of scope
 
-The sections of the four documents outside the in-scope set are listed at the end of each
-catalog: [RFC 3031](../../standard/rfc3031/catalog.md#out-of-scope-in-this-catalog),
-[RFC 3032](../../standard/rfc3032/catalog.md#out-of-scope-in-this-catalog),
-[RFC 3443](../../standard/rfc3443/catalog.md#out-of-scope-in-this-catalog) and
-[RFC 5462](../../standard/rfc5462/catalog.md#out-of-scope-in-this-catalog).
+The sections of the four documents outside the in-scope set are listed at the end of each catalog: [RFC 3031](../../standard/rfc3031/catalog.md#out-of-scope-in-this-catalog), [RFC 3032](../../standard/rfc3032/catalog.md#out-of-scope-in-this-catalog), [RFC 3443](../../standard/rfc3443/catalog.md#out-of-scope-in-this-catalog) and [RFC 5462](../../standard/rfc5462/catalog.md#out-of-scope-in-this-catalog).

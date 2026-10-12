@@ -2,25 +2,15 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around DHCP for IPv4, records which document governs each contested clause, and pins the
-exact set that the current pass tests against.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around DHCP for IPv4, records which document governs each contested clause, and pins the exact set that the current pass tests against.
 
-The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`),
-retrieved 2026-09-11.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNN.json`), retrieved 2026-09-11.
 
 ## Target level
 
-**Level 3 — Edge** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-The in-scope set below holds the base document, the companion that defines the options
-without which no DHCP message is legal, and the one later document that corrects an edge
-rule of the base text.
+**Level 3 — Edge** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). The in-scope set below holds the base document, the companion that defines the options without which no DHCP message is legal, and the one later document that corrects an edge rule of the base text.
 
-DHCP has no host-requirements document of its own. RFC 1122 predates it and states nothing
-about DHCP. RFC 2131 is itself the host specification: it states the client behavior and
-the server behavior in two long sections, with the keywords of section 1.4. The document
-that plays the part RFC 1122 plays for UDP is RFC 6842, which changes a `MUST NOT` of
-RFC 2131 into a `MUST` after ten years of operational experience.
+DHCP has no host-requirements document of its own. RFC 1122 predates it and states nothing about DHCP. RFC 2131 is itself the host specification: it states the client behavior and the server behavior in two long sections, with the keywords of section 1.4. The document that plays the part RFC 1122 plays for UDP is RFC 6842, which changes a `MUST NOT` of RFC 2131 into a `MUST` after ten years of operational experience.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -29,8 +19,7 @@ RFC 2131 into a `MUST` after ten years of operational experience.
 | level 4, Dynamics | nothing new | in scope already. The timers of DHCP — T1, T2, the lease, and the randomized exponential backoff — are all in RFC 2131 §4.1 and §4.4.5. Level 4 for DHCP is a matter of tolerances, not of documents |
 | level 5, Complete | RFC 951, RFC 1542, RFC 3396, RFC 4361 | the BOOTP base, the relay agent, long options, and the DUID form of the client identifier |
 
-What the pass actually reached is not recorded here. It is in
-[`model/dhcp/coverage.md`](../../model/dhcp/coverage.md#achieved-level).
+What the pass actually reached is not recorded here. It is in [`model/dhcp/coverage.md`](../../model/dhcp/coverage.md#achieved-level).
 
 ## Document list
 
@@ -48,16 +37,11 @@ What the pass actually reached is not recorded here. It is in
 
 Source of the text:
 
-- `rfc2131.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2131.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2131.txt>, downloaded 2026-09-11.
-- `rfc2132.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2132.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2132.txt>, downloaded 2026-09-11.
-- `rfc6842.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6842.txt) —
-  <https://www.rfc-editor.org/rfc/rfc6842.txt>, downloaded 2026-09-11.
+- `rfc2131.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2131.txt) — <https://www.rfc-editor.org/rfc/rfc2131.txt>, downloaded 2026-09-11.
+- `rfc2132.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2132.txt) — <https://www.rfc-editor.org/rfc/rfc2132.txt>, downloaded 2026-09-11.
+- `rfc6842.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc6842.txt) — <https://www.rfc-editor.org/rfc/rfc6842.txt>, downloaded 2026-09-11.
 
-Each of the three documents gets its own catalog file. No other protocol in this tree uses
-them, so no catalog here is shared, unlike the RFC 792 and RFC 1122 catalogs that IPv4,
-UDP and TCP share.
+Each of the three documents gets its own catalog file. No other protocol in this tree uses them, so no catalog here is shared, unlike the RFC 792 and RFC 1122 catalogs that IPv4, UDP and TCP share.
 
 ## Override table
 
@@ -69,12 +53,7 @@ UDP and TCP share.
 | Options longer than 255 octets | RFC 2131 §4.1, `rfc2131.txt:1309-1314`: the client concatenates the values of several instances of one option | RFC 3396 defines the splitting and the reassembly exactly | RFC 3396 | no; level 5 |
 | The form of the `client identifier` | RFC 2132 §9.14, `rfc2132.txt:1650-1656`: a hardware type and a hardware address, or type 0 | RFC 4361 replaces this with a DUID plus an IAID | RFC 4361 | no; level 5 |
 
-The first two rows are the reason RFC 6842 is in the in-scope set at level 3. The first one
-is a true reversal: a statement that RFC 2131 writes as a prohibition became a requirement.
-The catalog keeps the RFC 2131 entry and its ID, and the entry carries `Overridden by`;
-see [RFC2131-OFF-5](../../standard/rfc2131/catalog.md#rfc2131-off-5) and
-[RFC2131-ACK-5](../../standard/rfc2131/catalog.md#rfc2131-ack-5), which point at
-[RFC6842-CLID-1](../../standard/rfc6842/catalog.md#rfc6842-clid-1).
+The first two rows are the reason RFC 6842 is in the in-scope set at level 3. The first one is a true reversal: a statement that RFC 2131 writes as a prohibition became a requirement. The catalog keeps the RFC 2131 entry and its ID, and the entry carries `Overridden by`; see [RFC2131-OFF-5](../../standard/rfc2131/catalog.md#rfc2131-off-5) and [RFC2131-ACK-5](../../standard/rfc2131/catalog.md#rfc2131-ack-5), which point at [RFC6842-CLID-1](../../standard/rfc6842/catalog.md#rfc6842-clid-1).
 
 ## In-scope set
 
@@ -95,6 +74,4 @@ Out of scope, with the reason:
 | RFC 5494 | It changes an IANA registry (the `htype` values), not a behavior. |
 | RFC 3442, RFC 3942, RFC 4833 | Level 5. Each one defines or reclassifies one configuration option. The options that carry a parameter are the level 5 area of the RFC 2132 catalog. |
 
-The two most important exclusions are RFC 1542 and the per-parameter half of RFC 2132.
-Both are named again in the closing section of the catalogs, so that a later pass finds
-them without reading this document.
+The two most important exclusions are RFC 1542 and the per-parameter half of RFC 2132. Both are named again in the closing section of the catalogs, so that a later pass finds them without reading this document.

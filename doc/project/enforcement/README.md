@@ -2,17 +2,13 @@
 
 > **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [architecture.md](../rule/architecture.md), [naming.md](../rule/naming.md), [quality.md](../rule/quality.md), [planning.md](../rule/planning.md), [pull-request.md](../rule/pull-request.md), [release.md](../rule/release.md), [sealing.md](../rule/sealing.md)
 
-The machinery that checks the rules. This document holds two things: the **tier ladder**, which every
-rule document cites, and the **gate inventory**, which lists the checks that really exist.
+The machinery that checks the rules. This document holds two things: the **tier ladder**, which every rule document cites, and the **gate inventory**, which lists the checks that really exist.
 
-A rule that nothing checks is a hope. The goal of
-[AR-QUAL-ENFORCED](../rule/architecture.md#ar-qual-enforced) is to move every rule as far up the
-ladder as it can go.
+A rule that nothing checks is a hope. The goal of [AR-QUAL-ENFORCED](../rule/architecture.md#ar-qual-enforced) is to move every rule as far up the ladder as it can go.
 
 ## The tier ladder
 
-Each rule is enforced at the strongest tier available to it. A rule states its own tier, on the last
-line of its section. This document does not repeat those tiers, because two copies drift.
+Each rule is enforced at the strongest tier available to it. A rule states its own tier, on the last line of its section. This document does not repeat those tiers, because two copies drift.
 
 | Tier | What happens |
 | --- | --- |
@@ -22,27 +18,17 @@ line of its section. This document does not repeat those tiers, because two copi
 | **T4** | **An agent reviewer flags it.** An LLM reviewer, run as a CI gate, judges the diff against the rule. This tier catches the *semantic* violations that no static rule can express: visualization logic in a protocol, a zero-time message used as a procedure call, prose that duplicates a NED declaration. It is what makes the judgment rules enforceable instead of merely hoped for, and it scales in a way human review does not. |
 | **T5** | **A human decides.** Genuine design judgment and final sign-off. Is a fidelity level worth adding? Does this read as one system? |
 
-T4 needs its own discipline, and [checklist/general.md](checklist/general.md) states it: **precision
-over recall**. The reviewer flags only a clear violation, asks a question only for a plausible rule
-conflict requiring human judgment, and never re-flags a deviation that a ledger already records. A
-noisy gate gets ignored, and an ignored gate enforces nothing.
+T4 needs its own discipline, and [checklist/general.md](checklist/general.md) states it: **precision over recall**. The reviewer flags only a clear violation, asks a question only for a plausible rule conflict requiring human judgment, and never re-flags a deviation that a ledger already records. A noisy gate gets ignored, and an ignored gate enforces nothing.
 
 ## Implementation plan review
 
-The draft [plan procedure](../guide/write-an-implementation-plan.md) includes a
-[review checklist](../guide/write-an-implementation-plan.md#review-checklist) for agent assessment
-at T4. Human approval belongs to T5 under
-[PLR-APPROVAL](../rule/planning.md#plr-approval). The draft
-[plan rules](../rule/planning.md) state when this process applies.
+The draft [plan procedure](../guide/write-an-implementation-plan.md) includes a [review checklist](../guide/write-an-implementation-plan.md#review-checklist) for agent assessment at T4. Human approval belongs to T5 under [PLR-APPROVAL](../rule/planning.md#plr-approval). The draft [plan rules](../rule/planning.md) state when this process applies.
 
-This is a manual review procedure. No automated gate checks plan approval. A successful document
-check establishes neither design quality nor human approval.
+This is a manual review procedure. No automated gate checks plan approval. A successful document check establishes neither design quality nor human approval.
 
 ## The gate inventory
 
-One row per check that exists. The table lists **machinery, not intent**, so it cannot drift from the
-rules: a row disappears when its check is deleted, and coverage is read from the side that can be
-measured.
+One row per check that exists. The table lists **machinery, not intent**, so it cannot drift from the rules: a row disappears when its check is deleted, and coverage is read from the side that can be measured.
 
 | Gate | Tier | Runs | Covers |
 | --- | --- | --- | --- |
@@ -65,12 +51,7 @@ measured.
 | [check-ned-params.sh](check-ned-params.sh) | T3 | by hand; not yet in CI | that every `par("x")` a commit reads is declared by a NED in the tree at that commit — a read ahead of its declaration compiles and cannot run |
 | [check-classification.sh](check-classification.sh) | T3 | by hand; not yet in CI | `CR-TAG-TRAILER`, `CR-TAG-FORM`, `CR-TAG-SUBJECT`, `CR-SCOPE-AREA`, `CR-DEPTH-ONE`, `CR-OBL-INERT`, and a note for each mixed direction under `CR-DEPTH-DIRECTION`; it also prints the commit breakdown through [commit_breakdown.py](commit_breakdown.py) |
 
-The pull-request [enforcement-tests workflow](../../../.github/workflows/enforcement-tests.yml) runs
-the checker regressions without privileged credentials. The trusted
-[sealing workflow](../../../.github/workflows/check-sealing.yml) runs base-branch checker code over
-the exact pull-request head and routes sealed hits through protected approval. The other `T3` gates
-above are still by hand; a person must remember to run them, which is the weakest form of every rule
-they cover.
+The pull-request [enforcement-tests workflow](../../../.github/workflows/enforcement-tests.yml) runs the checker regressions without privileged credentials. The trusted [sealing workflow](../../../.github/workflows/check-sealing.yml) runs base-branch checker code over the exact pull-request head and routes sealed hits through protected approval. The other `T3` gates above are still by hand; a person must remember to run them, which is the weakest form of every rule they cover.
 
 ## How to run them
 
@@ -96,49 +77,21 @@ doc/project/enforcement/check-seals.sh --write            # check and rewrite th
 python3 -m unittest discover -s doc/project/enforcement -p 'test_*.py'
 ```
 
-The NED/MSG checker is diff-focused by default: it checks added, copied, renamed, and untracked
-files completely, and checks only added lines in modified files. `--staged` reads the index.
-`--base <ref>` compares the merge base of `<ref>` and `HEAD` with the committed `HEAD` tree; use it
-for the final branch check. Explicit `.ned`/`.msg` files and directories are scanned completely, and
-`--scope src/inet/<path>` restricts a diff mode without including sibling subtrees. The naming
-wrapper selects branch mode for `--base` and a complete recursive declaration scan for an explicit
-subtree. The source-seal gate defaults to the working-tree diff when no option is supplied; use
-`--staged` or explicit source paths as needed. Its `--base <ref>` mode checks the committed branch
-from `merge-base(<ref>, HEAD)` and reads the seal registry from that merge base, so removing a seal
-inside the branch cannot hide a source change. `--head <ref>` lets trusted base-branch workflow code
-inspect another exact commit without checking it out. The protected workflow alone adds
-`--ci-approved` after its required reviewer approves that base/head range; pull-request content must
-never supply the option. `check-seals.sh` checks document flags, while
-`check-source-seals.sh` checks paths under `src/inet/`. These gates return `2` for invalid usage or a
-missing canonical input; do not substitute a skill-package copy when a canonical gate is unavailable.
+The NED/MSG checker is diff-focused by default: it checks added, copied, renamed, and untracked files completely, and checks only added lines in modified files. `--staged` reads the index. `--base <ref>` compares the merge base of `<ref>` and `HEAD` with the committed `HEAD` tree; use it for the final branch check. Explicit `.ned`/`.msg` files and directories are scanned completely, and `--scope src/inet/<path>` restricts a diff mode without including sibling subtrees. The naming wrapper selects branch mode for `--base` and a complete recursive declaration scan for an explicit subtree. The source-seal gate defaults to the working-tree diff when no option is supplied; use `--staged` or explicit source paths as needed. Its `--base <ref>` mode checks the committed branch from `merge-base(<ref>, HEAD)` and reads the seal registry from that merge base, so removing a seal inside the branch cannot hide a source change. `--head <ref>` lets trusted base-branch workflow code inspect another exact commit without checking it out. The protected workflow alone adds `--ci-approved` after its required reviewer approves that base/head range; pull-request content must never supply the option. `check-seals.sh` checks document flags, while `check-source-seals.sh` checks paths under `src/inet/`. These gates return `2` for invalid usage or a missing canonical input; do not substitute a skill-package copy when a canonical gate is unavailable.
 
-The repository environment named `sealed-source-change` is part of that fail-closed path. Configure
-required reviewers, prevent self-review and administrator bypass, and set its environment variable
-`SEALED_SOURCE_APPROVAL` to `granted`. Without that exact variable the approval job fails even if an
-unprotected environment was created accidentally. Require `check-sealing.yml` itself through an
-organization ruleset's **Require workflows to pass before merging** rule, pinned to the trusted base
-branch. A name-only required status is not the authority, because another pull-request workflow can
-emit the same job name.
+The repository environment named `sealed-source-change` is part of that fail-closed path. Configure required reviewers, prevent self-review and administrator bypass, and set its environment variable `SEALED_SOURCE_APPROVAL` to `granted`. Without that exact variable the approval job fails even if an unprotected environment was created accidentally. Require `check-sealing.yml` itself through an organization ruleset's **Require workflows to pass before merging** rule, pinned to the trusted base branch. A name-only required status is not the authority, because another pull-request workflow can emit the same job name.
 
-[guide/run-the-gates.md](../guide/run-the-gates.md) says which of them to run before a push, and in
-which order.
+[guide/run-the-gates.md](../guide/run-the-gates.md) says which of them to run before a push, and in which order.
 
 ## What belongs in this folder
 
-**Only what a gate runs.** Heavy tooling stays in `python/inet/` and `_scripts/`; this folder holds
-the direct transcription of a numbered rule, plus the small script that reads it.
+**Only what a gate runs.** Heavy tooling stays in `python/inet/` and `_scripts/`; this folder holds the direct transcription of a numbered rule, plus the small script that reads it.
 
-**No copies.** A tool file that must sit at the repository root sits at the root, and this folder
-cites it. The clang-tidy configuration is the case that taught the rule: clang-tidy finds its
-configuration by a walk up from the source file, so a copy staged under `doc/` was never read by
-anything. It now lives at [`/.clang-tidy`](../../../.clang-tidy) and covers two rule families at
-once — the C++ names of [naming.md](../rule/naming.md) and the bug and modernization checks of
-[quality.md](../rule/quality.md).
+**No copies.** A tool file that must sit at the repository root sits at the root, and this folder cites it. The clang-tidy configuration is the case that taught the rule: clang-tidy finds its configuration by a walk up from the source file, so a copy staged under `doc/` was never read by anything. It now lives at [`/.clang-tidy`](../../../.clang-tidy) and covers two rule families at once — the C++ names of [naming.md](../rule/naming.md) and the bug and modernization checks of [quality.md](../rule/quality.md).
 
 ## Quality-attribute coverage
 
-Which quality attributes each rule group serves, in the ISO/IEC 25010 vocabulary. The table is a
-review aid: a change that weakens a rule attacks the attributes on its row.
+Which quality attributes each rule group serves, in the ISO/IEC 25010 vocabulary. The table is a review aid: a change that weakens a rule attacks the attributes on its row.
 
 | Rule group | Quality attributes served |
 |---|---|

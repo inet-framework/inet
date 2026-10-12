@@ -2,27 +2,17 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC6298-*` · **Stands on:** [standards.md](../../protocol/tcp/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 3 artifact of the standards test workflow, for one document of the in-scope set:
-RFC 6298, the June 2011 text that obsoletes RFC 2988 and updates RFC 1122. It lists
-statements that a test can check. The catalog comes from the RFC text only. It contains no
-simulation model names and no code references.
+Step 3 artifact of the standards test workflow, for one document of the in-scope set: RFC 6298, the June 2011 text that obsoletes RFC 2988 and updates RFC 1122. It lists statements that a test can check. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc6298.txt`](../../../../../../standards/RFC/rfc6298.txt) —
-  Computing TCP's Retransmission Timer, June 2011. Downloaded 2026-09-11
-  from <https://www.rfc-editor.org/rfc/rfc6298.txt>.
+- [`standards/RFC/rfc6298.txt`](../../../../../../standards/RFC/rfc6298.txt) — Computing TCP's Retransmission Timer, June 2011. Downloaded 2026-09-11 from <https://www.rfc-editor.org/rfc/rfc6298.txt>.
 
-Quotes are verbatim. A reference such as `rfc6298.txt:122` points to a line of that
-file. The document numbers its own rules, so §2.1 below is rule (2.1) of the
-text.
+Quotes are verbatim. A reference such as `rfc6298.txt:122` points to a line of that file. The document numbers its own rules, so §2.1 below is rule (2.1) of the text.
 
-This document is small and almost entirely normative: it is one control loop, written as
-seven numbered rules for the estimator and seven for the timer.
+This document is small and almost entirely normative: it is one control loop, written as seven numbered rules for the estimator and seven for the timer.
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — lives in the coverage ledger,
-[`tcp/coverage.md`](../../model/tcp/coverage.md).
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — lives in the coverage ledger, [`tcp/coverage.md`](../../model/tcp/coverage.md).
 
 ## Index
 
@@ -59,11 +49,8 @@ what the run said — lives in the coverage ledger,
 > — §2.1, `rfc6298.txt:122-125`
 
 - Strength: should. Class: internal state with a scalar signal.
-- Note: the text allows any value above 1 second, because the earlier document used 3
-  seconds: "A TCP implementation MAY still use this value (or any other value > 1 second)"
-  — `rfc6298.txt:128-129`. A check must accept a value of at least 1 second, not exactly 1.
-- Check idea: open a connection and read the retransmission timeout before the first
-  acknowledgment returns.
+- Note: the text allows any value above 1 second, because the earlier document used 3 seconds: "A TCP implementation MAY still use this value (or any other value > 1 second)" — `rfc6298.txt:128-129`. A check must accept a value of at least 1 second, not exactly 1.
+- Check idea: open a connection and read the retransmission timeout before the first acknowledgment returns.
 
 ### RFC6298-FIRST-1
 
@@ -78,8 +65,7 @@ what the run said — lives in the coverage ledger,
 >         where K = 4." — §2.2, `rfc6298.txt:133-139`
 
 - Strength: must. Class: internal state with a scalar signal.
-- Check idea: run one connection over a link of known delay, so R is known, then read the
-  smoothed round-trip time and the variance after the first acknowledgment.
+- Check idea: run one connection over a link of known delay, so R is known, then read the smoothed round-trip time and the variance after the first acknowledgment.
 
 ### RFC6298-UPD-1
 
@@ -94,10 +80,8 @@ what the run said — lives in the coverage ledger,
 >         itself using the second assignment.  That is, updating RTTVAR and SRTT MUST be
 >         computed in the above order." — §2.3, `rfc6298.txt:141-149`
 
-- Strength: must, for both the formulas and their order. Class: internal state with a
-  scalar signal.
-- Note: the order is observable only when SRTT and R' differ. On a constant-delay link the
-  two orders give the same answer, so a check of the order needs a delay that changes.
+- Strength: must, for both the formulas and their order. Class: internal state with a scalar signal.
+- Note: the order is observable only when SRTT and R' differ. On a constant-delay link the two orders give the same answer, so a check of the order needs a delay that changes.
 
 ### RFC6298-UPD-2
 
@@ -107,8 +91,7 @@ what the run said — lives in the coverage ledger,
 > — §2.3, `rfc6298.txt:151-152`
 
 - Strength: should. Class: internal state with a scalar signal.
-- Check idea: change the link delay once, then compare the new smoothed value against the
-  value the two gains predict from the old one.
+- Check idea: change the link delay once, then compare the new smoothed value against the value the two gains predict from the old one.
 
 ### RFC6298-RTO-1
 
@@ -118,8 +101,7 @@ what the run said — lives in the coverage ledger,
 >            RTO <- SRTT + max (G, K*RTTVAR)" — §2.3, `rfc6298.txt:154-155`
 
 - Strength: must. Class: internal state with a scalar signal.
-- Check idea: read the three variables at the same instant and compare them against the
-  formula. K is 4, from RFC6298-FIRST-1.
+- Check idea: read the three variables at the same instant and compare them against the formula. K is 4, from RFC6298-FIRST-1.
 
 ### RFC6298-MIN-1
 
@@ -129,10 +111,8 @@ what the run said — lives in the coverage ledger,
 > rounded up to 1 second." — §2.4, `rfc6298.txt:157-158`
 
 - Strength: should. Class: internal state with a scalar signal.
-- Check idea: use a link fast enough that SRTT plus four times RTTVAR stays far below one
-  second, then read the timeout.
-- Note: this rule hides RFC6298-RTO-1 on a fast link. A check of the formula needs a delay
-  large enough to lift the result above the floor.
+- Check idea: use a link fast enough that SRTT plus four times RTTVAR stays far below one second, then read the timeout.
+- Note: this rule hides RFC6298-RTO-1 on a fast link. A check of the formula needs a delay large enough to lift the result above the floor.
 
 ### RFC6298-MAX-1
 
@@ -142,8 +122,7 @@ what the run said — lives in the coverage ledger,
 > — §2.5, `rfc6298.txt:179-180`
 
 - Strength: may. Class: internal state with a scalar signal.
-- Note: a model without an upper bound satisfies this statement. A check can only fail a
-  model that bounds the RTO below 60 seconds.
+- Note: a model without an upper bound satisfies this statement. A check can only fail a model that bounds the RTO below 60 seconds.
 
 ### RFC6298-KARN-1
 
@@ -155,11 +134,8 @@ what the run said — lives in the coverage ledger,
 > — §3, `rfc6298.txt:184-188`
 
 - Strength: must, and a must not. Class: internal state with a scalar signal.
-- Check idea: drop one data segment so it is retransmitted, then require the smoothed
-  round-trip time to stay unchanged when the acknowledgment of the retransmission arrives.
-- Note: the text gives one exception: a sample from a retransmitted segment is safe with
-  the timestamp option — `rfc6298.txt:188-191`. A check must disable that option or account
-  for it.
+- Check idea: drop one data segment so it is retransmitted, then require the smoothed round-trip time to stay unchanged when the acknowledgment of the retransmission arrives.
+- Note: the text gives one exception: a sample from a retransmitted segment is safe with the timestamp option — `rfc6298.txt:188-191`. A check must disable that option or account for it.
 
 ### RFC6298-SAMP-1
 
@@ -169,8 +145,7 @@ what the run said — lives in the coverage ledger,
 > possible per Karn's algorithm)." — §3, `rfc6298.txt:198-200`
 
 - Strength: must. Class: internal state with a scalar signal.
-- Check idea: send several windows of data and count how often the smoothed round-trip time
-  changes.
+- Check idea: send several windows of data and count how often the smoothed round-trip time changes.
 
 ### RFC6298-GRAN-1
 
@@ -181,8 +156,7 @@ what the run said — lives in the coverage ledger,
 > — §4, `rfc6298.txt:213-215`
 
 - Strength: must. Class: internal state with a scalar signal.
-- Note: a constant-delay link drives RTTVAR to zero, so this rule and RFC6298-MIN-1 are the
-  two that decide the timeout in a simple scenario.
+- Note: a constant-delay link drives RTTVAR to zero, so this rule and RFC6298-MIN-1 are the two that decide the timeout in a simple scenario.
 
 ## The timer
 
@@ -195,8 +169,7 @@ what the run said — lives in the coverage ledger,
 > that segment." — §5, `rfc6298.txt:237-239`
 
 - Strength: must. Class: wire, with a scalar signal for the bound.
-- Check idea: drop one data segment, then measure the interval between the original and the
-  retransmission and compare it against the timeout in force.
+- Check idea: drop one data segment, then measure the interval between the original and the retransmission and compare it against the timeout in force.
 
 ### RFC6298-TMR-1
 
@@ -206,8 +179,7 @@ what the run said — lives in the coverage ledger,
 > timer is not running, start it running so that it will expire after RTO seconds (for the
 > current value of RTO)." — §5.1, `rfc6298.txt:244-247`
 
-- Strength: recommended. The whole of §5.1 to §5.7 is "the RECOMMENDED algorithm"
-  — `rfc6298.txt:241-242`.
+- Strength: recommended. The whole of §5.1 to §5.7 is "the RECOMMENDED algorithm" — `rfc6298.txt:241-242`.
 - Class: internal. The timer itself is not on the wire.
 
 ### RFC6298-TMR-2
@@ -218,8 +190,7 @@ what the run said — lives in the coverage ledger,
 > timer." — §5.2, `rfc6298.txt:249-250`
 
 - Strength: recommended. Class: internal.
-- Check idea: after the last acknowledgment, require that no retransmission follows for
-  several times the timeout.
+- Check idea: after the last acknowledgment, require that no retransmission follows for several times the timeout.
 
 ### RFC6298-TMR-3
 
@@ -239,8 +210,7 @@ what the run said — lives in the coverage ledger,
 > receiver." — §5.4, `rfc6298.txt:258-259`
 
 - Strength: recommended. Class: wire.
-- Check idea: drop one segment out of several in flight and require the retransmission to
-  carry the sequence number of the earliest unacknowledged one.
+- Check idea: drop one segment out of several in flight and require the retransmission to carry the sequence number of the earliest unacknowledged one.
 
 ### RFC6298-BACK-1
 
@@ -251,8 +221,7 @@ what the run said — lives in the coverage ledger,
 > operation." — §5.5, `rfc6298.txt:261-263`
 
 - Strength: must. Class: internal state with a scalar signal, and the wire for the interval.
-- Check idea: black-hole one segment so the timer expires more than once, then require each
-  interval to be twice the one before it.
+- Check idea: black-hole one segment so the timer expires more than once, then require each interval to be twice the one before it.
 
 ### RFC6298-SYN-1
 
@@ -264,10 +233,8 @@ what the run said — lives in the coverage ledger,
 > — §5.7, `rfc6298.txt:269-272`
 
 - Strength: must. Class: internal state with a scalar signal.
-- Check idea: drop the first SYN so the handshake retries, let the connection open, then
-  read the timeout at the first data send.
-- Note: this is the one rule of the document that a change from RFC 2988 introduced, so a
-  model written against the older text is likely to miss it.
+- Check idea: drop the first SYN so the handshake retries, let the connection open, then read the timeout at the first data send.
+- Note: this is the one rule of the document that a change from RFC 2988 introduced, so a model written against the older text is likely to miss it.
 
 ### RFC6298-COLL-1
 
@@ -279,7 +246,5 @@ what the run said — lives in the coverage ledger,
 > "collapsing" RTO back down after it has been subject to exponential back off (rule 5.5)."
 > — §5, `rfc6298.txt:287-292`
 
-- Strength: description of a consequence, not a separate requirement. Class: internal state
-  with a scalar signal.
-- Check idea: after a backoff, let one clean exchange complete and require the timeout to
-  fall back towards the estimator value.
+- Strength: description of a consequence, not a separate requirement. Class: internal state with a scalar signal.
+- Check idea: after a backoff, let one clean exchange complete and require the timeout to fall back towards the estimator value.

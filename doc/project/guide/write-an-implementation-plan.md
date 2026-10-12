@@ -2,29 +2,21 @@
 
 > **Kind:** procedure · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [planning.md](../rule/planning.md), [contribute-a-change.md](contribute-a-change.md), [documentation.md](../rule/documentation.md)
 
-Use this procedure for a task that calls for an implementation plan. Its proposed requirements are
-in [planning.md](../rule/planning.md). That document states when the draft approval process applies.
+Use this procedure for a task that calls for an implementation plan. Its proposed requirements are in [planning.md](../rule/planning.md). That document states when the draft approval process applies.
 
 ## 1. Establish the current behavior
 
-Follow the discovery route in [contribute-a-change.md](contribute-a-change.md).
-Record the checkout revision and relevant local changes. Trace the behavior through its actual
-caller and effective configuration. Separate observed facts from assumptions under
-[PLR-GROUNDED](../rule/planning.md#plr-grounded).
+Follow the discovery route in [contribute-a-change.md](contribute-a-change.md). Record the checkout revision and relevant local changes. Trace the behavior through its actual caller and effective configuration. Separate observed facts from assumptions under [PLR-GROUNDED](../rule/planning.md#plr-grounded).
 
 ## 2. Define the change
 
-State the intended behavior and acceptance criteria under
-[PLR-SCOPE](../rule/planning.md#plr-scope). Mark optional work as a separate follow-up.
-Explain compatibility effects through the design review map below.
+State the intended behavior and acceptance criteria under [PLR-SCOPE](../rule/planning.md#plr-scope). Mark optional work as a separate follow-up. Explain compatibility effects through the design review map below.
 
 Establish the required model detail before you select an implementation. Identify the applicable standard conditions, the selected model's supported detail, and the required observable result. Preserve mandatory behavior within that scope. Use [AR-MOD-FIDELITY](../rule/architecture.md#ar-mod-fidelity) to assess changes to the model's level of detail. A hypothetical correction to frame handling in a packet-level radio model does not itself require new hardware processing delays. An existing model limitation does not excuse a new violation of the supported contract.
 
 ## 3. Choose the design
 
-Use [PLR-DESIGN](../rule/planning.md#plr-design) to describe component responsibilities.
-Compare relevant reuse options before you propose an addition. A useful comparison records these
-fields:
+Use [PLR-DESIGN](../rule/planning.md#plr-design) to describe component responsibilities. Compare relevant reuse options before you propose an addition. A useful comparison records these fields:
 
 | Field | Content |
 | --- | --- |
@@ -73,16 +65,11 @@ Order the steps by their dependencies. Map each step to one commit or a short se
 | --- | --- | --- | --- | --- |
 | `<why this step is necessary>` | `<paths and owner>` | `<specific change>` | `<observable result>` | `<case and check>` |
 
-Apply [PLR-VERIFICATION](../rule/planning.md#plr-verification) to the verification column.
-Identify the relevant boundaries and failure paths. For a defect, explain how the proposed check
-exposes the original failure. Use [run-the-gates.md](run-the-gates.md) for the applicable build and
-check procedure.
+Apply [PLR-VERIFICATION](../rule/planning.md#plr-verification) to the verification column. Identify the relevant boundaries and failure paths. For a defect, explain how the proposed check exposes the original failure. Use [run-the-gates.md](run-the-gates.md) for the applicable build and check procedure.
 
 ## 5. Review the plan
 
-Use the checklist below before you request approval. Resolve assumptions that affect the design under
-[PLR-GROUNDED](../rule/planning.md#plr-grounded).
-Scale the detail under [PLR-PROPORTION](../rule/planning.md#plr-proportion).
+Use the checklist below before you request approval. Resolve assumptions that affect the design under [PLR-GROUNDED](../rule/planning.md#plr-grounded). Scale the detail under [PLR-PROPORTION](../rule/planning.md#plr-proportion).
 
 Investigation is sufficient when these facts support a concrete decision:
 
@@ -110,13 +97,9 @@ Use the plan's existing explanation as the answer to each applicable row. Add ev
 
 ## 6. Record approval and maintain the plan
 
-Present the concrete plan to the maintainer under
-[PLR-APPROVAL](../rule/planning.md#plr-approval). Record the actual approval source and scope.
-Keep material revisions subject to [PLR-REVISION](../rule/planning.md#plr-revision).
+Present the concrete plan to the maintainer under [PLR-APPROVAL](../rule/planning.md#plr-approval). Record the actual approval source and scope. Keep material revisions subject to [PLR-REVISION](../rule/planning.md#plr-revision).
 
-Store the plan under `plan/pending/` according to
-[DR-NAME](../rule/documentation.md#dr-name). Move it to `plan/done/` when the change lands.
-Use [PR-MSG-PLAN](../rule/pull-request.md#pr-msg-plan) for commit references.
+Store the plan under `plan/pending/` according to [DR-NAME](../rule/documentation.md#dr-name). Move it to `plan/done/` when the change lands. Use [PR-MSG-PLAN](../rule/pull-request.md#pr-msg-plan) for commit references.
 
 ## Plan template
 

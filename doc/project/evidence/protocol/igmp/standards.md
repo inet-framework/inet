@@ -2,24 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around the Internet Group Management Protocol, records which document governs each contested
-clause, and pins the set that the next pass tests against. IGMP has three versions in one
-line of descent — each document restates and extends its predecessor rather than describing
-a separate protocol — so this map has one base document, not several.
-[`mld/standards.md`](../mld/standards.md) maps the parallel line of descent for IPv6; the two
-address families reached Internet Standard on the same day in 2025, and the notes below say
-which sections of each correspond.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around the Internet Group Management Protocol, records which document governs each contested clause, and pins the set that the next pass tests against. IGMP has three versions in one line of descent — each document restates and extends its predecessor rather than describing a separate protocol — so this map has one base document, not several. [`mld/standards.md`](../mld/standards.md) maps the parallel line of descent for IPv6; the two address families reached Internet Standard on the same day in 2025, and the notes below say which sections of each correspond.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
-claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the
-feature map, the checks and the tests of the normal path.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the feature map, the checks and the tests of the normal path.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -28,8 +17,7 @@ feature map, the checks and the tests of the normal path.
 | level 4, Dynamics | RFC 9776 §8 in full: the Group Membership Interval, the Other Querier Present Interval, the Older Version Querier/Host Present Interval, the startup and last-member query counts and intervals — several of which changed formula from RFC 2236/RFC 3376 to RFC 9776 (see the override table) | the timers and the retransmission counts that decide how fast the router notices a departed member |
 | level 5, Complete | RFC 1112 (version 1 hosts and routers); RFC 4604 (SSM-aware behavior; RFC 9776 §6.4 and §8.1.2 already carry its rules) | a version 1 host or router, and a router or host that restricts itself to the SSM address range |
 
-What a pass actually reached is not recorded here. It is in
-[`model/igmp/coverage.md`](../../model/igmp/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/igmp/coverage.md`](../../model/igmp/coverage.md#achieved-level).
 
 ## Document list
 
@@ -43,41 +31,17 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc9776.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9776.txt) —
-  <https://www.rfc-editor.org/rfc/rfc9776.txt>, downloaded 2026-09-23.
-- `rfc2236.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2236.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2236.txt>, downloaded 2026-09-23.
+- `rfc9776.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9776.txt) — <https://www.rfc-editor.org/rfc/rfc9776.txt>, downloaded 2026-09-23.
+- `rfc2236.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2236.txt) — <https://www.rfc-editor.org/rfc/rfc2236.txt>, downloaded 2026-09-23.
 
-`grep -c '\bMUST\b' rfc9776.txt` counts 48 lines, `\bSHOULD\b` counts 20, `\bMAY\b` counts 4.
-`rfc2236.txt` counts 25 `MUST` lines, 10 `SHOULD` and 6 `MAY`; both documents formally adopt
-the RFC 2119 keywords (`rfc2236.txt:44-46`). RFC 1112 predates RFC 2119 by eight years and is
-not downloaded; the survey lead that called it "obsoleted by RFC 2236" is not what the register
-says — see the note below.
+`grep -c '\bMUST\b' rfc9776.txt` counts 48 lines, `\bSHOULD\b` counts 20, `\bMAY\b` counts 4. `rfc2236.txt` counts 25 `MUST` lines, 10 `SHOULD` and 6 `MAY`; both documents formally adopt the RFC 2119 keywords (`rfc2236.txt:44-46`). RFC 1112 predates RFC 2119 by eight years and is not downloaded; the survey lead that called it "obsoleted by RFC 2236" is not what the register says — see the note below.
 
 Four relationship notes the register alone does not give:
 
-- **RFC 1112 is not marked obsoleted.** Its own record shows `obsoleted_by: []` and
-  `updated_by: [RFC2236]` only. IGMPv1 was superseded in practice, not withdrawn on paper;
-  RFC 2236 restates and extends it rather than replacing a text the register still treats as
-  live. This corrects a lead in the survey family, which called RFC 1112 "obsoleted by
-  RFC 2236... from knowledge, not checked."
-- **RFC 2236 is not obsoleted either**, by RFC 3376 or by RFC 9776. Both later documents
-  `update` it, and RFC 9776 keeps citing it by number for the version 2 compatibility path
-  (`rfc9776.txt:445-451` and the compatibility sections). RFC 2236 is a live document a router
-  running IGMPv3 still has to read.
-- **RFC 9776 is a 2025 errata revision of RFC 3376, not a new design.** Its own
-  Appendix C (`rfc9776.txt:2523-2545`) lists six changes: two are formula corrections to timer
-  definitions (Group Membership Interval, Older Version Querier Present Interval — both in the
-  override table below), one is a Router Filter Mode clarification, one is a Querier-election
-  clarification, and two are metadata-only fixes to the Obsoletes/Updates relationship with
-  RFC 2236. It is "backward compatible with [RFC 3376]" by the abstract's own words, and it
-  absorbs RFC 4604's SSM-aware behavior into its own text (`rfc9776.txt:205-209,834-837,
-  1497-1501`), citing RFC 4604 by name at each point rather than silently rewriting it.
-- **RFC 4604 keeps citing the obsoleted RFC 3376 and RFC 3810 in its own header, not their
-  successors.** The register shows no `updated_by` for RFC 4604 and no `updates` relation from
-  RFC 4604 to RFC 9776 or RFC 9777. RFC 9776 resolves this by absorption (the previous note);
-  a reader who follows the register alone, without reading RFC 9776's text, would not learn
-  that RFC 4604 is now folded in.
+- **RFC 1112 is not marked obsoleted.** Its own record shows `obsoleted_by: []` and `updated_by: [RFC2236]` only. IGMPv1 was superseded in practice, not withdrawn on paper; RFC 2236 restates and extends it rather than replacing a text the register still treats as live. This corrects a lead in the survey family, which called RFC 1112 "obsoleted by RFC 2236... from knowledge, not checked."
+- **RFC 2236 is not obsoleted either**, by RFC 3376 or by RFC 9776. Both later documents `update` it, and RFC 9776 keeps citing it by number for the version 2 compatibility path (`rfc9776.txt:445-451` and the compatibility sections). RFC 2236 is a live document a router running IGMPv3 still has to read.
+- **RFC 9776 is a 2025 errata revision of RFC 3376, not a new design.** Its own Appendix C (`rfc9776.txt:2523-2545`) lists six changes: two are formula corrections to timer definitions (Group Membership Interval, Older Version Querier Present Interval — both in the override table below), one is a Router Filter Mode clarification, one is a Querier-election clarification, and two are metadata-only fixes to the Obsoletes/Updates relationship with RFC 2236. It is "backward compatible with [RFC 3376]" by the abstract's own words, and it absorbs RFC 4604's SSM-aware behavior into its own text (`rfc9776.txt:205-209,834-837, 1497-1501`), citing RFC 4604 by name at each point rather than silently rewriting it.
+- **RFC 4604 keeps citing the obsoleted RFC 3376 and RFC 3810 in its own header, not their successors.** The register shows no `updated_by` for RFC 4604 and no `updates` relation from RFC 4604 to RFC 9776 or RFC 9777. RFC 9776 resolves this by absorption (the previous note); a reader who follows the register alone, without reading RFC 9776's text, would not learn that RFC 4604 is now folded in.
 
 ## Override table
 

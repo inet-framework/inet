@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/rtp/standards.md), [conformance.md](conformance.md)
 
-The single place that holds the changing state of the RTP workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard changes.
-This one changes on every pass.
+The single place that holds the changing state of the RTP workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 State of the ledger, from a level 1 pass — no build, no run:
 
@@ -13,13 +11,11 @@ State of the ledger, from a level 1 pass — no build, no run:
 - Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
 - Target level: 1
 
-No catalog, no feature map and no test exist yet, so the ledger has no statement table and no
-feature table.
+No catalog, no feature map and no test exist yet, so the ledger has no statement table and no feature table.
 
 ## Achieved level
 
-**Level 1, reached.** Target: level 1, from
-[`standards.md`](../../protocol/rtp/standards.md#target-level).
+**Level 1, reached.** Target: level 1, from [`standards.md`](../../protocol/rtp/standards.md#target-level).
 
 The exit criterion of level 1 has three parts, and all three hold:
 

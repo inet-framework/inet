@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc9293/catalog.md](../../standard/rfc9293/catalog.md), [rfc6298/catalog.md](../../standard/rfc6298/catalog.md), [rfc5681/catalog.md](../../standard/rfc5681/catalog.md), [features.md](../../protocol/tcp/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the TCP workflow. Every other artifact
-of this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the TCP workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -24,10 +22,7 @@ The run: 27 tests, 25 PASS, 2 FAIL (expected), 0 FAIL (unexpected).
 
 ## Statement coverage
 
-`Status` is the state of the workflow, not of the standard: `selected` (a check targets it),
-`covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet
-chosen), `owed` (the model claims it and no check reaches it yet: the coverage debt), `later`
-(needs a toolset beyond the current level, or another test category).
+`Status` is the state of the workflow, not of the standard: `selected` (a check targets it), `covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet chosen), `owed` (the model claims it and no check reaches it yet: the coverage debt), `later` (needs a toolset beyond the current level, or another test category).
 
 | Catalog ID | Status | Check section | Test file | Verdict |
 | --- | --- | --- | --- | --- |
@@ -108,27 +103,15 @@ chosen), `owed` (the model claims it and no check reaches it yet: the coverage d
 
 74 entries in three catalogs.
 
-- **RFC 9293, 35 entries.** 31 reached a test: 29 with a PASS, RFC9293-PSH-1 with a declared
-  FAIL for an unimplemented feature, and RFC9293-CKSUM-1 with a PASS for the field and a
-  declared FAIL for its value. 4 wait: RFC9293-ISS-2 and RFC9293-SEQ-2 for a unit or module
-  test, RFC9293-ZWP-1 for a timer with a tolerance, and RFC9293-ICMP-4 for a decision about
-  which behaviour the model intends.
+- **RFC 9293, 35 entries.** 31 reached a test: 29 with a PASS, RFC9293-PSH-1 with a declared FAIL for an unimplemented feature, and RFC9293-CKSUM-1 with a PASS for the field and a declared FAIL for its value. 4 wait: RFC9293-ISS-2 and RFC9293-SEQ-2 for a unit or module test, RFC9293-ZWP-1 for a timer with a tolerance, and RFC9293-ICMP-4 for a decision about which behaviour the model intends.
 - **RFC 6298, 18 entries.** 9 reached a test, all with a PASS. 9 are `owed`.
-- **RFC 5681, 21 entries.** 11 reached a test, all with a PASS. 9 are `owed`, and two of the
-  nine are named by a test that does not assert them (RFC5681-SSTH-1, RFC5681-FR-5). 1 waits
-  for the statistical suite (RFC5681-ACK-1).
+- **RFC 5681, 21 entries.** 11 reached a test, all with a PASS. 9 are `owed`, and two of the nine are named by a test that does not assert them (RFC5681-SSTH-1, RFC5681-FR-5). 1 waits for the statistical suite (RFC5681-ACK-1).
 
-**The 18 `owed` rows are the debt of pass 4.** Pass 4 wrote one check for each of its ten
-features, and a feature with several core statements got a check for some of them. Each
-`owed` row says what its check needs. Eight of them are mandatory, see
-[the achieved level](#achieved-level).
+**The 18 `owed` rows are the debt of pass 4.** Pass 4 wrote one check for each of its ten features, and a feature with several core statements got a check for some of them. Each `owed` row says what its check needs. Eight of them are mandatory, see [the achieved level](#achieved-level).
 
 ## Feature support
 
-The rule of step 7: `supported` when every core check ran and passed, `partial` when a core
-check passed and another core check failed as a model gap or did not run, `not supported`
-when every core check that ran failed as a model gap, `untested` when no core check ran. A
-failure of a `supporting` check does not lower the value; it is noted beside the feature.
+The rule of step 7: `supported` when every core check ran and passed, `partial` when a core check passed and another core check failed as a model gap or did not run, `not supported` when every core check that ran failed as a model gap, `untested` when no core check ran. A failure of a `supporting` check does not lower the value; it is noted beside the feature.
 
 | Feature | Core checks and their state | Support |
 | --- | --- | --- |
@@ -158,35 +141,20 @@ failure of a `supporting` check does not lower the value; it is noted beside the
 
 Twenty-three features: sixteen supported, six partial, one untested.
 
-- `TCP-F-CHECKSUM` is partial because the send half fails in the default state: gap 2, a
-  defect whose repair is blocked, declared by `4548adeb04`. The receive half passes.
-- `TCP-F-WINDOW-ROBUSTNESS` and `TCP-F-ICMP-HANDLING` were a supported feature with a noted
-  gap and a partial feature after pass 3. Both are supported now: gap 3 was a test error, and
-  the ICMP repair `40c9f04e21` closed gap 4.
-- The five partial features of level 4 are partial for one reason: a core statement has no
-  check yet. No core check of level 4 fails. Gap 5, the only defect of pass 4, was repaired by
-  `f3064a83d0`.
-- `TCP-F-RESTART-IDLE` is untested, and the model claims it: its congestion control restarts
-  an idle connection. The check is owed.
+- `TCP-F-CHECKSUM` is partial because the send half fails in the default state: gap 2, a defect whose repair is blocked, declared by `4548adeb04`. The receive half passes.
+- `TCP-F-WINDOW-ROBUSTNESS` and `TCP-F-ICMP-HANDLING` were a supported feature with a noted gap and a partial feature after pass 3. Both are supported now: gap 3 was a test error, and the ICMP repair `40c9f04e21` closed gap 4.
+- The five partial features of level 4 are partial for one reason: a core statement has no check yet. No core check of level 4 fails. Gap 5, the only defect of pass 4, was repaired by `f3064a83d0`.
+- `TCP-F-RESTART-IDLE` is untested, and the model claims it: its congestion control restarts an idle connection. The check is owed.
 
-Bounds: every feature rests on one connection, one link, one data size per check, and one
-loss at a time; the flow-control feature rests on a fixed small window, not on a closing one,
-because the model's default mode never closes it (see the results). The four features of
-pass 3 rest on a single crafted event each, which is what an edge is. The features of level
-4 rest on the values that the model publishes; where it publishes none, the check measures
-the interval on the wire (see the results).
+Bounds: every feature rests on one connection, one link, one data size per check, and one loss at a time; the flow-control feature rests on a fixed small window, not on a closing one, because the model's default mode never closes it (see the results). The four features of pass 3 rest on a single crafted event each, which is what an edge is. The features of level 4 rest on the values that the model publishes; where it publishes none, the check measures the interval on the wire (see the results).
 
 ## Achieved level
 
-**Level 2 reached. Level 3 partial. Level 4 partial.** Target: level 4, from
-[`standards.md`](../../protocol/tcp/standards.md#target-level).
+**Level 2 reached. Level 3 partial. Level 4 partial.** Target: level 4, from [`standards.md`](../../protocol/tcp/standards.md#target-level).
 
-Pass 4 recorded "4, reached". That record read the tables of RFC 9293 only, which this
-ledger did not update until 2026-09-23. With RFC 6298 and RFC 5681 in the in-scope set, the
-criteria of level 3 and level 4 cover their statements too, and neither criterion holds yet.
+Pass 4 recorded "4, reached". That record read the tables of RFC 9293 only, which this ledger did not update until 2026-09-23. With RFC 6298 and RFC 5681 in the in-scope set, the criteria of level 3 and level 4 cover their statements too, and neither criterion holds yet.
 
-**Level 2.** Every normal-path mandatory mechanism of RFC 9293 appears as a feature, and every
-mandatory feature has a core check that ran. The inventory:
+**Level 2.** Every normal-path mandatory mechanism of RFC 9293 appears as a feature, and every mandatory feature has a core check that ran. The inventory:
 
 | RFC 9293 mechanism | Where | Feature, or the reason it is not one |
 | --- | --- | --- |
@@ -204,11 +172,7 @@ mandatory feature has a core check that ran. The inventory:
 | urgent data | §3.8.5 | **judgment:** mandatory to implement (MUST-30 to MUST-32) and discouraged in use by the same document; no ordinary transfer exercises it, so it is not a normal-path mechanism for level 2; level 5. The model does not support it, see the results |
 | keep-alives, path MTU discovery, the other options, precedence and security | §3.8.4, §3.7.2, §3.2, §3.9 | `may`, `should`, or extensions; level 5 |
 
-**Level 3, partial.** The criterion: the catalogs hold every mandatory statement of the
-in-scope documents, and each one has a check. The first half holds for all three documents.
-The second half holds for RFC 9293: pass 3 gave every `must` and `must not` of its edges a
-check, and only RFC9293-ICMP-4, a `should`, has none. It does not hold for the two documents
-of pass 4. Nine mandatory statements have no check:
+**Level 3, partial.** The criterion: the catalogs hold every mandatory statement of the in-scope documents, and each one has a check. The first half holds for all three documents. The second half holds for RFC 9293: pass 3 gave every `must` and `must not` of its edges a check, and only RFC9293-ICMP-4, a `should`, has none. It does not hold for the two documents of pass 4. Nine mandatory statements have no check:
 
 | Document | Statements | What blocks them |
 | --- | --- | --- |
@@ -218,14 +182,9 @@ of pass 4. Nine mandatory statements have no check:
 | RFC 5681 | FR-4 | a fourth and a fifth duplicate acknowledgment |
 | RFC 5681 | ACK-1 (the 500 ms bound) | a statistical check |
 
-None of them needs a new tool: each needs a longer or a second scenario in a mockup that
-exists, except ACK-1.
+None of them needs a new tool: each needs a longer or a second scenario in a mockup that exists, except ACK-1.
 
-**Level 4, partial.** The criterion: the catalogs hold every timer and every control loop of
-the in-scope set, and each one has a check with a stated tolerance. The first half does not
-hold: the TIME-WAIT timer of RFC 9293 §3.6 has no catalog entry. The second half does not
-hold either: RFC9293-ZWP-1, RFC9293-ACKD-1 as a bound and RFC5681-ACK-1 wait for statistical
-checks, and the owed rows above include timer rules (RFC6298-TMR-1 to TMR-3, RFC5681-IDLE-1).
+**Level 4, partial.** The criterion: the catalogs hold every timer and every control loop of the in-scope set, and each one has a check with a stated tolerance. The first half does not hold: the TIME-WAIT timer of RFC 9293 §3.6 has no catalog entry. The second half does not hold either: RFC9293-ZWP-1, RFC9293-ACKD-1 as a bound and RFC5681-ACK-1 wait for statistical checks, and the owed rows above include timer rules (RFC6298-TMR-1 to TMR-3, RFC5681-IDLE-1).
 
 | Level | State | Evidence |
 | --- | --- | --- |
@@ -247,7 +206,4 @@ checks, and the owed rows above include timer rules (RFC6298-TMR-1 to TMR-3, RFC
 
 ## Out of scope
 
-The catalogs record what the passes left out: a shrunk or zero window beyond the probe
-statement, the options other than MSS, urgent data, keep-alives, the simultaneous cases, and
-the TIME-WAIT duration of RFC 9293; the options and extensions that RFC 6298 and RFC 5681
-name as other documents. Each is level 3 to level 5 work, and the inventory above says which.
+The catalogs record what the passes left out: a shrunk or zero window beyond the probe statement, the options other than MSS, urgent data, keep-alives, the simultaneous cases, and the TIME-WAIT duration of RFC 9293; the options and extensions that RFC 6298 and RFC 5681 name as other documents. Each is level 3 to level 5 work, and the inventory above says which.

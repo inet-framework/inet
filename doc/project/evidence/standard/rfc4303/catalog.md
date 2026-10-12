@@ -2,50 +2,28 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC4303-*` · **Stands on:** [standards.md](../../protocol/ipsec/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow for RFC 4303, IP Encapsulating Security Payload (ESP), of
-December 2005, a document of the in-scope set of IPsec. The catalog comes from the RFC text
-only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow for RFC 4303, IP Encapsulating Security Payload (ESP), of December 2005, a document of the in-scope set of IPsec. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc4303.txt`](../../../../../../standards/RFC/rfc4303.txt) —
-  IP Encapsulating Security Payload (ESP), December 2005. Downloaded 2026-09-23 from
-  <https://www.rfc-editor.org/rfc/rfc4303.txt>.
+- [`standards/RFC/rfc4303.txt`](../../../../../../standards/RFC/rfc4303.txt) — IP Encapsulating Security Payload (ESP), December 2005. Downloaded 2026-09-23 from <https://www.rfc-editor.org/rfc/rfc4303.txt>.
 
-The architecture is in [`rfc4301/catalog.md`](../rfc4301/catalog.md), and AH, the other
-traffic protocol, in [`rfc4302/catalog.md`](../rfc4302/catalog.md). The in-scope sections are
-§2 to §3.4 and §5.
+The architecture is in [`rfc4301/catalog.md`](../rfc4301/catalog.md), and AH, the other traffic protocol, in [`rfc4302/catalog.md`](../rfc4302/catalog.md). The in-scope sections are §2 to §3.4 and §5.
 
-The family of documents and the in-scope set are in
-[`standards.md`](../../protocol/ipsec/standards.md). The features these statements build are in
-[`features.md`](../../protocol/ipsec/features.md).
+The family of documents and the in-scope set are in [`standards.md`](../../protocol/ipsec/standards.md). The features these statements build are in [`features.md`](../../protocol/ipsec/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`ipsec/coverage.md`](../../model/ipsec/coverage.md). Keeping it out is deliberate: this catalog
-states what the standard says, so a new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`ipsec/coverage.md`](../../model/ipsec/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc4303.txt:1203-1205` points to lines of that
-file. Where a quote crosses a page break of the RFC, the reference names both line groups.
+Quotes are verbatim. A reference such as `rfc4303.txt:1203-1205` points to lines of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
-The entries were drafted section by section and merged; the sections are the areas below, in
-the order of the document.
+The entries were drafted section by section and merged; the sections are the areas below, in the order of the document.
 
 ## How to read an entry
 
 - **ID** — `RFC4303-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into the text.
-- **Strength** — the word the document uses. RFC 4303 uses the keywords of RFC 2119 in capitals;
-  the entry records `must`, `must not`, `should`, `should not` or `may` for them (`must` for
-  REQUIRED), and `description` for a normative sentence with no keyword. Where the text writes a
-  keyword in lower case, the entry records the word and says so, for example `must (lower
-  case)`. An entry with two keywords names what each one covers. A step of a numbered procedure
-  that states an action is an entry of its own.
-- **Class** — how a test can observe the statement: `wire` (fields of a header on a link, or
-  the presence or absence of a packet), `end-to-end` (what an implementation accepts, delivers
-  or discards, seen in what it sends or delivers afterwards), `error-signal` (an ICMP error
-  report), `internal` (state or a database inside an implementation, an audit log), `encoding`
-  (the exact bit layout, sizes and alignment).
+- **Strength** — the word the document uses. RFC 4303 uses the keywords of RFC 2119 in capitals; the entry records `must`, `must not`, `should`, `should not` or `may` for them (`must` for REQUIRED), and `description` for a normative sentence with no keyword. Where the text writes a keyword in lower case, the entry records the word and says so, for example `must (lower case)`. An entry with two keywords names what each one covers. A step of a numbered procedure that states an action is an entry of its own.
+- **Class** — how a test can observe the statement: `wire` (fields of a header on a link, or the presence or absence of a packet), `end-to-end` (what an implementation accepts, delivers or discards, seen in what it sends or delivers afterwards), `error-signal` (an ICMP error report), `internal` (state or a database inside an implementation, an audit log), `encoding` (the exact bit layout, sizes and alignment).
 - **Check idea** — one or two sentences, still without implementation names.
 
 ## Index
@@ -301,9 +279,7 @@ the order of the document.
 > field" — §2, `rfc4303.txt:236-238`
 
 - Strength: must. Class: wire.
-- Check idea: capture a packet carrying ESP and read the Protocol field (IPv4) or Next Header
-  field (IPv6, or an extension header) of the header immediately before the ESP header; confirm
-  it equals 50.
+- Check idea: capture a packet carrying ESP and read the Protocol field (IPv4) or Next Header field (IPv6, or an extension header) of the header immediately before the ESP header; confirm it equals 50.
 
 ### RFC4303-FMT-2
 
@@ -315,9 +291,7 @@ the order of the document.
 > Check Value (ICV) field completes the packet." — §2, `rfc4303.txt:240-242`, `rfc4303.txt:245-247`
 
 - Strength: description. Class: encoding.
-- Check idea: capture an ESP packet and read the fields in order from the start of the packet;
-  confirm the sequence SPI, Sequence Number, Payload Data, Padding, Pad Length, Next Header,
-  and, when the SA uses an ICV, the ICV.
+- Check idea: capture an ESP packet and read the fields in order from the start of the packet; confirm the sequence SPI, Sequence Number, Payload Data, Padding, Pad Length, Next Header, and, when the SA uses an ICV, the ICV.
 
 ### RFC4303-FMT-3
 
@@ -327,8 +301,7 @@ the order of the document.
 > — §2, `rfc4303.txt:287-288`
 
 - Strength: description. Class: encoding.
-- Check idea: capture an ESP packet and confirm the three fields following the Payload Data,
-  and preceding the ICV if present, are Padding, Pad Length, and Next Header.
+- Check idea: capture an ESP packet and confirm the three fields following the Payload Data, and preceding the ICV if present, are Padding, Pad Length, and Next Header.
 
 ### RFC4303-FMT-4
 
@@ -338,9 +311,7 @@ the order of the document.
 > integrity computation, as described below." — §2, `rfc4303.txt:288-290`
 
 - Strength: description. Class: internal.
-- Check idea: under an SA using extended sequence numbers or integrity-algorithm padding,
-  vary the high-order sequence bits or padding bits that are not sent on the wire and confirm
-  the receiver's integrity check result changes accordingly.
+- Check idea: under an SA using extended sequence numbers or integrity-algorithm padding, vary the high-order sequence bits or padding bits that are not sent on the wire and confirm the receiver's integrity check result changes accordingly.
 
 ### RFC4303-FMT-5
 
@@ -351,9 +322,7 @@ the order of the document.
 > `rfc4303.txt:292-294`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA with integrity selected, corrupt one byte of the SPI, the Sequence
-  Number, the Payload Data, or the ESP trailer in turn and confirm the receiver's integrity
-  check fails each time.
+- Check idea: under an SA with integrity selected, corrupt one byte of the SPI, the Sequence Number, the Payload Data, or the ESP trailer in turn and confirm the receiver's integrity check fails each time.
 
 ### RFC4303-FMT-6
 
@@ -364,9 +333,7 @@ the order of the document.
 > ESP trailer." — §2, `rfc4303.txt:296-298`
 
 - Strength: may (lower case). Class: encoding.
-- Check idea: under an SA with confidentiality selected, confirm that only the Payload Data
-  (excluding any synchronization data) and the explicit ESP trailer decrypt to meaningful
-  content, while the SPI and Sequence Number stay in the clear.
+- Check idea: under an SA with confidentiality selected, confirm that only the Payload Data (excluding any synchronization data) and the explicit ESP trailer decrypt to meaningful content, while the SPI and Sequence Number stay in the clear.
 
 ### RFC4303-FMT-7
 
@@ -378,9 +345,7 @@ the order of the document.
 > mode employed." — §2, `rfc4303.txt:312-316`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA with integrity selected, including one using a combined mode
-  algorithm, confirm the SPI and Sequence Number fields remain in the clear on the wire and
-  that corrupting either one makes the receiver's integrity check fail.
+- Check idea: under an SA with integrity selected, including one using a combined mode algorithm, confirm the SPI and Sequence Number fields remain in the clear on the wire and that corrupting either one makes the receiver's integrity check fail.
 
 ### RFC4303-FMT-8
 
@@ -392,8 +357,7 @@ the order of the document.
 > `rfc4303.txt:378-379`
 
 - Strength: may (lower case). Class: wire.
-- Check idea: under an SA using a combined mode algorithm, capture a packet and confirm no
-  explicit ICV field is present at the end of the packet.
+- Check idea: under an SA using a combined mode algorithm, capture a packet and confirm no explicit ICV field is present at the end of the packet.
 
 ### RFC4303-FMT-9
 
@@ -404,8 +368,7 @@ the order of the document.
 > integrity of the packet." — §2, `rfc4303.txt:322-325`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA using a combined mode algorithm with no explicit ICV field, confirm
-  the Payload Data itself carries the data the receiver needs to verify integrity.
+- Check idea: under an SA using a combined mode algorithm with no explicit ICV field, confirm the Payload Data itself carries the data the receiver needs to verify integrity.
 
 ### RFC4303-FMT-10
 
@@ -416,8 +379,7 @@ the order of the document.
 > `rfc4303.txt:327-329`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA using such a combined mode algorithm, decrypt a captured packet's
-  Payload Data and confirm it contains a copy of the SPI and Sequence Number.
+- Check idea: under an SA using such a combined mode algorithm, decrypt a captured packet's Payload Data and confirm it contains a copy of the SPI and Sequence Number.
 
 ### RFC4303-FMT-11
 
@@ -427,8 +389,7 @@ the order of the document.
 > the Payload Data and before the ESP trailer." — §2, `rfc4303.txt:331-332`
 
 - Strength: description. Class: encoding.
-- Check idea: capture a packet from an SA using TFC padding and confirm the padding bytes lie
-  between the end of the Payload Data and the start of the ESP trailer fields.
+- Check idea: capture a packet from an SA using TFC padding and confirm the padding bytes lie between the end of the Payload Data and the start of the ESP trailer fields.
 
 ### RFC4303-FMT-12
 
@@ -439,8 +400,7 @@ the order of the document.
 > Padding (0-255 bytes) field." — Figure 2 note, `rfc4303.txt:373-376`
 
 - Strength: description. Class: encoding.
-- Check idea: capture a tunnel-mode packet from an SA using TFC padding and confirm the TFC
-  padding bytes lie between the Payload Data and the Padding field.
+- Check idea: capture a tunnel-mode packet from an SA using TFC padding and confirm the TFC padding bytes lie between the Payload Data and the Padding field.
 
 ### RFC4303-FMT-13
 
@@ -451,8 +411,7 @@ the order of the document.
 > traffic on the SA." — §2, `rfc4303.txt:379-382`
 
 - Strength: description. Class: wire.
-- Check idea: capture several packets sent on the same SA and confirm they all share the same
-  field layout and Payload Data substructure.
+- Check idea: capture several packets sent on the same SA and confirm they all share the same field layout and Payload Data substructure.
 
 ### RFC4303-FMT-14
 
@@ -463,9 +422,7 @@ the order of the document.
 > — §2, `rfc4303.txt:487-489`
 
 - Strength: description. Class: encoding.
-- Check idea: for an SA that does not select a given optional field, capture a packet and
-  confirm the field is entirely absent, not merely zeroed, and is also absent from the data
-  the ICV is computed over.
+- Check idea: for an SA that does not select a given optional field, capture a packet and confirm the field is entirely absent, not merely zeroed, and is also absent from the data the ICV is computed over.
 
 ### RFC4303-FMT-15
 
@@ -476,8 +433,7 @@ the order of the document.
 > the SA." — §2, `rfc4303.txt:490-492`
 
 - Strength: description. Class: wire.
-- Check idea: capture packets from the same SA at different times and confirm the set of
-  fields present does not change over the SA's lifetime.
+- Check idea: capture packets from the same SA at different times and confirm the set of fields present does not change over the SA's lifetime.
 
 ### RFC4303-FMT-16
 
@@ -487,8 +443,7 @@ the order of the document.
 > — §2, `rfc4303.txt:492-494`
 
 - Strength: description. Class: wire.
-- Check idea: capture packets from different SAs with different option choices and confirm
-  the mandatory fields are present in every one of them.
+- Check idea: capture packets from different SAs with different option choices and confirm the mandatory fields are present in every one of them.
 
 ### RFC4303-FMT-17
 
@@ -499,8 +454,7 @@ the order of the document.
 > byte order. IP packets are also transmitted in network byte order." — §2, `rfc4303.txt:496-499`
 
 - Strength: description. Class: encoding.
-- Check idea: confirm that multi-byte fields covered by a cryptographic computation appear on
-  the wire in network (big-endian) byte order.
+- Check idea: confirm that multi-byte fields covered by a cryptographic computation appear on the wire in network (big-endian) byte order.
 
 ### RFC4303-FMT-18
 
@@ -512,9 +466,7 @@ the order of the document.
 > an out-of-band configuration mechanism." — §2, `rfc4303.txt:511-515`
 
 - Strength: must. Class: internal.
-- Check idea: inspect the SA management configuration or negotiation between two peers and
-  confirm a signaling or out-of-band mechanism establishes a compatible ESP version, since no
-  version field exists on the wire to do so.
+- Check idea: inspect the SA management configuration or negotiation between two peers and confirm a signaling or out-of-band mechanism establishes a compatible ESP version, since no version field exists on the wire to do so.
 
 ## Security Parameters Index (SPI)
 
@@ -526,8 +478,7 @@ the order of the document.
 > an incoming packet is bound." — §2.1, `rfc4303.txt:519-521`
 
 - Strength: description. Class: encoding.
-- Check idea: capture an inbound ESP packet and confirm the receiver selects its SA using the
-  32-bit SPI value carried in the packet.
+- Check idea: capture an inbound ESP packet and confirm the receiver selects its SA using the 32-bit SPI value carried in the packet.
 
 ### RFC4303-SPI-2
 
@@ -546,8 +497,7 @@ the order of the document.
 > `rfc4303.txt:525-526`
 
 - Strength: description. Class: internal.
-- Check idea: observe SA establishment for a unicast SA and confirm the SPI value assigned to
-  it originates from the receiving peer.
+- Check idea: observe SA establishment for a unicast SA and confirm the SPI value assigned to it originates from the receiving peer.
 
 ### RFC4303-SPI-4
 
@@ -557,8 +507,7 @@ the order of the document.
 > implementations." — §2.1, `rfc4303.txt:528-529`
 
 - Strength: must. Class: internal.
-- Check idea: send an inbound unicast ESP packet and confirm the receiver maps it to the
-  correct SA using the SPI, by itself or together with the ESP protocol value.
+- Check idea: send an inbound unicast ESP packet and confirm the receiver maps it to the correct SA using the SPI, by itself or together with the ESP protocol value.
 
 ### RFC4303-SPI-5
 
@@ -568,8 +517,7 @@ the order of the document.
 > algorithm below for mapping inbound IPsec datagrams to SAs." — §2.1, `rfc4303.txt:531-533`
 
 - Strength: must. Class: internal.
-- Check idea: on an implementation that supports multicast, send an inbound multicast ESP
-  packet and confirm the receiver maps it to the correct SA by the SPI-based lookup steps.
+- Check idea: on an implementation that supports multicast, send an inbound multicast ESP packet and confirm the receiver maps it to the correct SA by the SPI-based lookup steps.
 
 ### RFC4303-SPI-6
 
@@ -579,8 +527,7 @@ the order of the document.
 > algorithm." — §2.1, `rfc4303.txt:533-534`
 
 - Strength: description. Class: internal.
-- Check idea: on a unicast-only implementation, confirm the absence of the multicast SAD
-  search algorithm does not affect correct handling of unicast SPI lookups.
+- Check idea: on a unicast-only implementation, confirm the absence of the multicast SAD search algorithm does not affect correct handling of unicast SPI lookups.
 
 ### RFC4303-SPI-7
 
@@ -590,8 +537,7 @@ the order of the document.
 > in the context of SPI collisions." — §2.1, `rfc4303.txt:542-544`
 
 - Strength: must. Class: end-to-end.
-- Check idea: configure a group SA and a unicast SA that share one SPI value, send a packet
-  matching each, and confirm the receiver processes each packet with its correct SA.
+- Check idea: configure a group SA and a unicast SA that share one SPI value, send a packet matching each, and confirm the receiver processes each packet with its correct SA.
 
 ### RFC4303-SPI-8
 
@@ -602,8 +548,7 @@ the order of the document.
 > to the SPI." — §2.1, `rfc4303.txt:546-548`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: inspect an SAD entry and confirm it records whether its lookup key is
-  {SPI, destination} or {SPI, destination, source}.
+- Check idea: inspect an SAD entry and confirm it records whether its lookup key is {SPI, destination} or {SPI, destination, source}.
 
 ### RFC4303-SPI-9
 
@@ -613,8 +558,7 @@ the order of the document.
 > `rfc4303.txt:548-549`
 
 - Strength: description. Class: internal.
-- Check idea: for a multicast SA, confirm the receiver's SAD lookup ignores the protocol field
-  and matches on the SPI and address fields alone.
+- Check idea: for a multicast SA, confirm the receiver's SAD lookup ignores the protocol field and matches on the SPI and address fields alone.
 
 ### RFC4303-SPI-10
 
@@ -627,9 +571,7 @@ the order of the document.
 > is the "longest" match." — §2.1, `rfc4303.txt:550-552`, `rfc4303.txt:552-555`
 
 - Strength: must (lower case). Class: internal.
-- Check idea: install two SAD entries that match the same SPI but differ in whether they also
-  require an address match, send a matching packet, and confirm the receiver picks the entry
-  with the longer identifier.
+- Check idea: install two SAD entries that match the same SPI but differ in whether they also require an address match, send a matching packet, and confirm the receiver picks the entry with the longer identifier.
 
 ### RFC4303-SPI-11
 
@@ -640,8 +582,7 @@ the order of the document.
 > proceed to step 2." — §2.1, `rfc4303.txt:567-570`
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a packet matching an SAD entry keyed on {SPI, destination, source} and
-  confirm the receiver processes it with that entry without going on to the next search step.
+- Check idea: send a packet matching an SAD entry keyed on {SPI, destination, source} and confirm the receiver processes it with that entry without going on to the next search step.
 
 ### RFC4303-SPI-12
 
@@ -652,8 +593,7 @@ the order of the document.
 > — §2.1, `rfc4303.txt:572-575`
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a packet that matches an SAD entry only on {SPI, destination} and confirm
-  the receiver processes it with that entry after the first search step fails.
+- Check idea: send a packet that matches an SAD entry only on {SPI, destination} and confirm the receiver processes it with that entry after the first search step fails.
 
 ### RFC4303-SPI-13
 
@@ -665,9 +605,7 @@ the order of the document.
 > and log an auditable event." — §2.1, `rfc4303.txt:577-581`
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a packet that matches an SAD entry only on {SPI} or {SPI, protocol} and
-  confirm the receiver processes it with that entry; send one matching no entry at all and
-  confirm the receiver discards it and records an audit event.
+- Check idea: send a packet that matches an SAD entry only on {SPI} or {SPI, protocol} and confirm the receiver processes it with that entry; send one matching no entry at all and confirm the receiver discards it and records an audit event.
 
 ### RFC4303-SPI-14
 
@@ -678,9 +616,7 @@ the order of the document.
 > in the above order." — §2.1, `rfc4303.txt:583-586`
 
 - Strength: may; must. Class: end-to-end.
-- Check idea: install SAD entries whose identifiers would produce different search outcomes
-  under a naive ordering, send packets that exercise the collisions, and confirm the receiver
-  always resolves each packet to the entry the longest-match order specifies.
+- Check idea: install SAD entries whose identifiers would produce different search outcomes under a naive ordering, send packets that exercise the collisions, and confirm the receiver always resolves each packet to the entry the longest-match order specifies.
 
 ### RFC4303-SPI-15
 
@@ -692,9 +628,7 @@ the order of the document.
 > Interpretation (GDOI) [RFC3547]." — §2.1, `rfc4303.txt:596-600`
 
 - Strength: must. Class: internal.
-- Check idea: inspect an SA and confirm the indication of whether address matching is required
-  for its inbound lookup was set either by manual configuration or by SA-management-protocol
-  negotiation.
+- Check idea: inspect an SA and confirm the indication of whether address matching is required for its inbound lookup was set either by manual configuration or by SA-management-protocol negotiation.
 
 ### RFC4303-SPI-16
 
@@ -705,8 +639,7 @@ the order of the document.
 > `rfc4303.txt:600-602`
 
 - Strength: description. Class: internal.
-- Check idea: inspect the SA identifier of an SSM group SA and confirm it is the 3-tuple SPI,
-  destination multicast address, source address.
+- Check idea: inspect the SA identifier of an SSM group SA and confirm it is the 3-tuple SPI, destination multicast address, source address.
 
 ### RFC4303-SPI-17
 
@@ -716,8 +649,7 @@ the order of the document.
 > as an identifier." — §2.1, `rfc4303.txt:602-604`
 
 - Strength: description. Class: internal.
-- Check idea: inspect the SA identifier of an Any-Source Multicast group SA and confirm it is
-  the pair SPI, destination multicast address, with no source address.
+- Check idea: inspect the SA identifier of an Any-Source Multicast group SA and confirm it is the pair SPI, destination multicast address, with no source address.
 
 ### RFC4303-SPI-18
 
@@ -727,8 +659,7 @@ the order of the document.
 > be sent on the wire." — §2.1, `rfc4303.txt:609-611`
 
 - Strength: must not. Class: wire.
-- Check idea: capture ESP packets leaving an implementation and confirm none carries an SPI
-  field of value zero.
+- Check idea: capture ESP packets leaving an implementation and confirm none carries an SPI field of value zero.
 
 ## Sequence Number
 
@@ -740,8 +671,7 @@ the order of the document.
 > sent, i.e., a per-SA packet sequence number." — §2.2, `rfc4303.txt:629-630`
 
 - Strength: description. Class: encoding.
-- Check idea: capture successive packets sent on one SA and confirm the Sequence Number field
-  increases by exactly one from each packet to the next.
+- Check idea: capture successive packets sent on one SA and confirm the Sequence Number field increases by exactly one from each packet to the next.
 
 ### RFC4303-SEQ-2
 
@@ -751,8 +681,7 @@ the order of the document.
 > every transmitted packet." — §2.2, `rfc4303.txt:630-632`
 
 - Strength: must. Class: wire.
-- Check idea: capture successive packets sent on a unicast or single-sender multicast SA and
-  confirm the sender increments the Sequence Number field on every one.
+- Check idea: capture successive packets sent on a unicast or single-sender multicast SA and confirm the sender increments the Sequence Number field on every one.
 
 ### RFC4303-SEQ-3
 
@@ -762,8 +691,7 @@ the order of the document.
 > `rfc4303.txt:632-634`
 
 - Strength: description. Class: internal.
-- Check idea: configure an SA with more than one sender and confirm the implementation allows
-  it to be established.
+- Check idea: configure an SA with more than one sender and confirm the implementation allows it to be established.
 
 ### RFC4303-SEQ-4
 
@@ -775,8 +703,7 @@ the order of the document.
 > — §2.2, `rfc4303.txt:634-637`
 
 - Strength: description. Class: internal.
-- Check idea: configure a multi-sender SA and confirm the receiver does not apply an
-  anti-replay window to it.
+- Check idea: configure a multi-sender SA and confirm the receiver does not apply an anti-replay window to it.
 
 ### RFC4303-SEQ-5
 
@@ -787,8 +714,7 @@ the order of the document.
 > field" — §2.2, `rfc4303.txt:640-642`, `rfc4303.txt:645`
 
 - Strength: must. Class: wire.
-- Check idea: capture packets from an SA with anti-replay disabled and confirm the Sequence
-  Number field is still present and populated.
+- Check idea: capture packets from an SA with anti-replay disabled and confirm the Sequence Number field is still present and populated.
 
 ### RFC4303-SEQ-6
 
@@ -800,9 +726,7 @@ the order of the document.
 > `rfc4303.txt:646`
 
 - Strength: must (generation and verification capability); description (the receiver's discretion not to act on it). Class: internal.
-- Check idea: confirm an implementation can generate and verify sequence numbers as described,
-  then configure a receiver to disable anti-replay and confirm it still accepts packets without
-  acting on the counter.
+- Check idea: confirm an implementation can generate and verify sequence numbers as described, then configure a receiver to disable anti-replay and confirm it still accepts packets without acting on the counter.
 
 ### RFC4303-SEQ-7
 
@@ -813,8 +737,7 @@ the order of the document.
 > — §2.2, `rfc4303.txt:650-651`, `rfc4303.txt:651-652`
 
 - Strength: description. Class: wire.
-- Check idea: establish a new SA, capture the first packet sent on it, and confirm its
-  Sequence Number field is 1.
+- Check idea: establish a new SA, capture the first packet sent on it, and confirm its Sequence Number field is 1.
 
 ### RFC4303-SEQ-8
 
@@ -824,8 +747,7 @@ the order of the document.
 > (the default)" — §2.2, `rfc4303.txt:653-654`
 
 - Strength: description. Class: internal.
-- Check idea: establish an SA without explicitly negotiating anti-replay and confirm the
-  receiver enables it.
+- Check idea: establish an SA without explicitly negotiating anti-replay and confirm the receiver enables it.
 
 ### RFC4303-SEQ-9
 
@@ -836,8 +758,7 @@ the order of the document.
 > to the transmission of the 2^32nd packet on an SA." — §2.2, `rfc4303.txt:654-657`
 
 - Strength: must. Class: internal.
-- Check idea: run an SA with anti-replay enabled to near its 2^32nd packet and confirm the
-  implementation establishes a new SA and key before the counter would cycle.
+- Check idea: run an SA with anti-replay enabled to near its 2^32nd packet and confirm the implementation establishes a new SA and key before the counter would cycle.
 
 ### RFC4303-SEQ-10
 
@@ -848,8 +769,7 @@ the order of the document.
 > `rfc4303.txt:661-663`
 
 - Strength: should. Class: internal.
-- Check idea: inspect an implementation's capabilities and confirm it offers an Extended
-  Sequence Number option alongside the 32-bit sequence number.
+- Check idea: inspect an implementation's capabilities and confirm it offers an Extended Sequence Number option alongside the 32-bit sequence number.
 
 ### RFC4303-SEQ-11
 
@@ -858,8 +778,7 @@ the order of the document.
 > "Use of an ESN MUST be negotiated by an SA management protocol." — §2.2.1, `rfc4303.txt:663-664`
 
 - Strength: must. Class: internal.
-- Check idea: establish an SA and confirm whether it uses extended sequence numbers is a
-  negotiated outcome of SA management, not a silent local choice.
+- Check idea: establish an SA and confirm whether it uses extended sequence numbers is a negotiated outcome of SA management, not a silent local choice.
 
 ### RFC4303-SEQ-12
 
@@ -869,8 +788,7 @@ the order of the document.
 > `rfc4303.txt:666-667`
 
 - Strength: description. Class: internal.
-- Check idea: establish a multicast SA with Extended Sequence Numbers negotiated and confirm
-  the feature operates as it does for a unicast SA.
+- Check idea: establish a multicast SA with Extended Sequence Numbers negotiated and confirm the feature operates as it does for a unicast SA.
 
 ### RFC4303-SEQ-13
 
@@ -880,8 +798,7 @@ the order of the document.
 > header of each packet, thus minimizing packet overhead." — §2.2.1, `rfc4303.txt:681-683`
 
 - Strength: description. Class: wire.
-- Check idea: capture a packet from an SA using Extended Sequence Numbers and confirm the
-  Sequence Number field on the wire is 32 bits and unencrypted.
+- Check idea: capture a packet from an SA using Extended Sequence Numbers and confirm the Sequence Number field on the wire is 32 bits and unencrypted.
 
 ### RFC4303-SEQ-14
 
@@ -892,9 +809,7 @@ the order of the document.
 > service is selected)." — §2.2.1, `rfc4303.txt:683-686`
 
 - Strength: description. Class: internal.
-- Check idea: under an SA using Extended Sequence Numbers with integrity selected, vary the
-  high-order bits the sender holds and confirm the receiver's ICV verification depends on
-  them matching.
+- Check idea: under an SA using Extended Sequence Numbers with integrity selected, vary the high-order bits the sender holds and confirm the receiver's ICV verification depends on them matching.
 
 ### RFC4303-SEQ-15
 
@@ -905,8 +820,7 @@ the order of the document.
 > bits." — §2.2.1, `rfc4303.txt:686-688`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA using a separate integrity algorithm and Extended Sequence Numbers,
-  capture a packet and confirm no high-order sequence bits appear on the wire.
+- Check idea: under an SA using a separate integrity algorithm and Extended Sequence Numbers, capture a packet and confirm no high-order sequence bits appear on the wire.
 
 ### RFC4303-SEQ-16
 
@@ -917,9 +831,7 @@ the order of the document.
 > `rfc4303.txt:688-691`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA using a combined mode algorithm with Extended Sequence Numbers,
-  capture a packet and confirm the presence or absence of the high-order bits on the wire
-  matches what the algorithm specifies.
+- Check idea: under an SA using a combined mode algorithm with Extended Sequence Numbers, capture a packet and confirm the presence or absence of the high-order bits on the wire matches what the algorithm specifies.
 
 ## Payload Data
 
@@ -931,8 +843,7 @@ the order of the document.
 > described by the Next Header field." — §2.3, `rfc4303.txt:696-697`
 
 - Strength: description. Class: encoding.
-- Check idea: capture an ESP packet, decrypt or read the Payload Data, and confirm its content
-  matches the type named by the Next Header field.
+- Check idea: capture an ESP packet, decrypt or read the Payload Data, and confirm its content matches the type named by the Next Header field.
 
 ### RFC4303-PAY-2
 
@@ -942,8 +853,7 @@ the order of the document.
 > `rfc4303.txt:697-698`
 
 - Strength: description. Class: wire.
-- Check idea: capture ESP packets from any SA and confirm the Payload Data field is present
-  and its length in bytes is a whole number.
+- Check idea: capture ESP packets from any SA and confirm the Payload Data field is present and its length in bytes is a whole number.
 
 ### RFC4303-PAY-3
 
@@ -956,9 +866,7 @@ the order of the document.
 > ciphertext." — §2.3, `rfc4303.txt:699-703`, `rfc4303.txt:707`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA whose encryption algorithm needs an explicit IV, capture a packet
-  and confirm the IV appears within the Payload Data field, immediately before the ciphertext,
-  with no separate ESP field for it.
+- Check idea: under an SA whose encryption algorithm needs an explicit IV, capture a packet and confirm the IV appears within the Payload Data field, immediately before the ciphertext, with no separate ESP field for it.
 
 ### RFC4303-PAY-4
 
@@ -969,8 +877,7 @@ the order of the document.
 > bytes." — §2.3, `rfc4303.txt:715-717`
 
 - Strength: must. Class: encoding.
-- Check idea: capture an IPv4 ESP packet, decrypt it, and confirm the next layer protocol
-  header starts at an offset from the ESP header that is a multiple of 4 bytes.
+- Check idea: capture an IPv4 ESP packet, decrypt it, and confirm the next layer protocol header starts at an offset from the ESP header that is a multiple of 4 bytes.
 
 ### RFC4303-PAY-5
 
@@ -981,8 +888,7 @@ the order of the document.
 > bytes." — §2.3, `rfc4303.txt:715-716`, `rfc4303.txt:717-718`
 
 - Strength: must. Class: encoding.
-- Check idea: capture an IPv6 ESP packet, decrypt it, and confirm the next layer protocol
-  header starts at an offset from the ESP header that is a multiple of 8 bytes.
+- Check idea: capture an IPv6 ESP packet, decrypt it, and confirm the next layer protocol header starts at an offset from the ESP header that is a multiple of 8 bytes.
 
 ## Padding
 
@@ -996,9 +902,7 @@ the order of the document.
 > to the size required by the algorithm." — §2.4, `rfc4303.txt:744-749`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA using a block-size-constrained encryption algorithm, capture a
-  packet and confirm the total plaintext length, including Padding, Pad Length, and Next
-  Header, is a multiple of the algorithm's block size.
+- Check idea: under an SA using a block-size-constrained encryption algorithm, capture a packet and confirm the total plaintext length, including Padding, Pad Length, and Next Header, is a multiple of the algorithm's block size.
 
 ### RFC4303-PAD-2
 
@@ -1009,8 +913,7 @@ the order of the document.
 > present) is aligned on a 4-byte boundary." — §2.4, `rfc4303.txt:753-757`
 
 - Strength: must (lower case). Class: encoding.
-- Check idea: capture an ESP packet and confirm the Pad Length and Next Header fields end on a
-  4-byte boundary, so any following ICV field starts on a 4-byte boundary.
+- Check idea: capture an ESP packet and confirm the Pad Length and Next Header fields end on a 4-byte boundary, so any following ICV field starts on a 4-byte boundary.
 
 ### RFC4303-PAD-3
 
@@ -1021,9 +924,7 @@ the order of the document.
 > should be used when TFC is required." — §2.4, `rfc4303.txt:761-764`
 
 - Strength: should not, should (lower case). Class: internal.
-- Check idea: when an implementation needs traffic flow confidentiality, confirm it uses the
-  TFC padding mechanism rather than enlarging the Padding field beyond what encryption or
-  alignment requires.
+- Check idea: when an implementation needs traffic flow confidentiality, confirm it uses the TFC padding mechanism rather than enlarging the Padding field beyond what encryption or alignment requires.
 
 ### RFC4303-PAD-4
 
@@ -1032,8 +933,7 @@ the order of the document.
 > "The sender MAY add 0 to 255 bytes of padding." — §2.4, `rfc4303.txt:766`
 
 - Strength: may. Class: wire.
-- Check idea: capture packets from a sender and confirm the Padding field length observed
-  falls within 0 to 255 bytes.
+- Check idea: capture packets from a sender and confirm the Padding field length observed falls within 0 to 255 bytes.
 
 ### RFC4303-PAD-5
 
@@ -1045,8 +945,7 @@ the order of the document.
 > — §2.4, `rfc4303.txt:766-769`
 
 - Strength: must. Class: end-to-end.
-- Check idea: configure a sender to add Padding and confirm the receiver correctly strips it;
-  confirm the same implementation, acting as sender, can produce padded packets.
+- Check idea: configure a sender to add Padding and confirm the receiver correctly strips it; confirm the same implementation, acting as sender, can produce padded packets.
 
 ### RFC4303-PAD-6
 
@@ -1058,8 +957,7 @@ the order of the document.
 > fields." — §2.4, `rfc4303.txt:771-775`
 
 - Strength: description. Class: encoding.
-- Check idea: under a block-size-constrained algorithm, confirm the amount of Padding added
-  accounts for the Payload Data excluding the IV plus the ESP trailer fields.
+- Check idea: under a block-size-constrained algorithm, confirm the amount of Padding added accounts for the Payload Data excluding the IV plus the ESP trailer fields.
 
 ### RFC4303-PAD-7
 
@@ -1074,8 +972,7 @@ the order of the document.
 > `rfc4303.txt:790-793`
 
 - Strength: description. Class: encoding.
-- Check idea: under a combined mode algorithm that replicates the SPI and Sequence Number
-  within the Payload Data, confirm the Pad Length reflects those replicated bytes.
+- Check idea: under a combined mode algorithm that replicates the SPI and Sequence Number within the Payload Data, confirm the Pad Length reflects those replicated bytes.
 
 ### RFC4303-PAD-8
 
@@ -1088,8 +985,7 @@ the order of the document.
 > computation." — §2.4, `rfc4303.txt:795-801`
 
 - Strength: description. Class: encoding.
-- Check idea: confirm the amount of Padding added for 4-byte ICV alignment is computed over
-  the Payload Data including the IV, Pad Length, and Next Header fields.
+- Check idea: confirm the amount of Padding added for 4-byte ICV alignment is computed over the Payload Data including the IV, Pad Length, and Next Header fields.
 
 ### RFC4303-PAD-9
 
@@ -1102,8 +998,7 @@ the order of the document.
 > monotonically increasing sequence: 1, 2, 3, ...." — §2.4, `rfc4303.txt:803-808`
 
 - Strength: must. Class: wire.
-- Check idea: under an algorithm that does not define its own padding contents, capture a
-  padded packet and confirm the Padding bytes, once decrypted, form the sequence 1, 2, 3, ...
+- Check idea: under an algorithm that does not define its own padding contents, capture a padded packet and confirm the Padding bytes, once decrypted, form the sequence 1, 2, 3, ...
 
 ### RFC4303-PAD-10
 
@@ -1113,8 +1008,7 @@ the order of the document.
 > — §2.4, `rfc4303.txt:808-810`
 
 - Strength: should. Class: end-to-end.
-- Check idea: send a packet with the default padding scheme but corrupted Padding bytes and
-  confirm the receiver detects the mismatch when it decrypts the packet.
+- Check idea: send a packet with the default padding scheme but corrupted Padding bytes and confirm the receiver detects the mismatch when it decrypts the packet.
 
 ## Pad Length
 
@@ -1128,8 +1022,7 @@ the order of the document.
 > present." — §2.5, `rfc4303.txt:824-827`
 
 - Strength: description. Class: encoding.
-- Check idea: capture an ESP packet, decrypt it, and confirm the number of Padding bytes
-  immediately before the Pad Length field equals the value the Pad Length field carries.
+- Check idea: capture an ESP packet, decrypt it, and confirm the number of Padding bytes immediately before the Pad Length field equals the value the Pad Length field carries.
 
 ### RFC4303-PADL-2
 
@@ -1139,8 +1032,7 @@ the order of the document.
 > bytes." — §2.5, `rfc4303.txt:827-828`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA using TFC padding as well as ordinary Padding, confirm the Pad
-  Length field counts only the Padding field's bytes, not the separate TFC padding.
+- Check idea: under an SA using TFC padding as well as ordinary Padding, confirm the Pad Length field counts only the Padding field's bytes, not the separate TFC padding.
 
 ### RFC4303-PADL-3
 
@@ -1149,8 +1041,7 @@ the order of the document.
 > "The Pad Length field is mandatory." — §2.5, `rfc4303.txt:828`
 
 - Strength: description. Class: wire.
-- Check idea: capture ESP packets from any SA and confirm the Pad Length field is always
-  present.
+- Check idea: capture ESP packets from any SA and confirm the Pad Length field is always present.
 
 ## Next Header
 
@@ -1164,8 +1055,7 @@ the order of the document.
 > the IANA" — §2.6, `rfc4303.txt:849-853`
 
 - Strength: description. Class: encoding.
-- Check idea: capture an ESP packet, decrypt it, and confirm the Next Header field carries an
-  IANA IP Protocol Number matching the type of data the Payload Data actually holds.
+- Check idea: capture an ESP packet, decrypt it, and confirm the Next Header field carries an IANA IP Protocol Number matching the type of data the Payload Data actually holds.
 
 ### RFC4303-NH-2
 
@@ -1175,8 +1065,7 @@ the order of the document.
 > packet." — §2.6, `rfc4303.txt:858-859`
 
 - Strength: must. Class: wire.
-- Check idea: capture a dummy packet generated for traffic flow confidentiality and confirm
-  its Next Header field carries value 59.
+- Check idea: capture a dummy packet generated for traffic flow confidentiality and confirm its Next Header field carries value 59.
 
 ### RFC4303-NH-3
 
@@ -1187,8 +1076,7 @@ the order of the document.
 > field" — §2.6, `rfc4303.txt:859-861`
 
 - Strength: must. Class: end-to-end.
-- Check idea: request generation of TFC dummy traffic from a sender and confirm it can produce
-  packets whose Next Header field is 59.
+- Check idea: request generation of TFC dummy traffic from a sender and confirm it can produce packets whose Next Header field is 59.
 
 ### RFC4303-NH-4
 
@@ -1198,8 +1086,7 @@ the order of the document.
 > `rfc4303.txt:861-862`
 
 - Strength: must. Class: end-to-end.
-- Check idea: send a dummy packet, Next Header value 59, to a receiver and confirm it discards
-  the packet and raises no error indication.
+- Check idea: send a dummy packet, Next Header value 59, to a receiver and confirm it discards the packet and raises no error indication.
 
 ### RFC4303-NH-5
 
@@ -1211,9 +1098,7 @@ the order of the document.
 > Data may consist of only random bytes." — §2.6, `rfc4303.txt:862-866`
 
 - Strength: must. Class: wire.
-- Check idea: capture a dummy packet and confirm the SPI, Sequence Number, Padding, Pad
-  Length, Next Header, and ICV fields are all present, regardless of whether the rest of the
-  Payload Data is well-formed.
+- Check idea: capture a dummy packet and confirm the SPI, Sequence Number, Padding, Pad Length, Next Header, and ICV fields are all present, regardless of whether the rest of the Payload Data is well-formed.
 
 ### RFC4303-NH-6
 
@@ -1225,8 +1110,7 @@ the order of the document.
 > `rfc4303.txt:869-870`, `rfc4303.txt:889-891`
 
 - Strength: should. Class: internal.
-- Check idea: inspect an implementation's management interface and confirm it offers a per-SA
-  control to enable or disable, and parametrize, dummy-packet generation.
+- Check idea: inspect an implementation's management interface and confirm it offers a per-SA control to enable or disable, and parametrize, dummy-packet generation.
 
 ## Traffic Flow Confidentiality (TFC) padding
 
@@ -1240,9 +1124,7 @@ the order of the document.
 > address the TFC requirement." — §2.7, `rfc4303.txt:905-909`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA that needs to hide traffic characteristics beyond what 255 bytes of
-  Padding can conceal, confirm the implementation offers a separate, larger padding field
-  within the Payload Data for that purpose.
+- Check idea: under an SA that needs to hide traffic characteristics beyond what 255 bytes of Padding can conceal, confirm the implementation offers a separate, larger padding field within the Payload Data for that purpose.
 
 ### RFC4303-TFC-2
 
@@ -1253,8 +1135,7 @@ the order of the document.
 > `rfc4303.txt:911-913`
 
 - Strength: should. Class: wire.
-- Check idea: configure TFC padding on an SA and capture a packet; confirm the added padding
-  bytes lie between the end of the true Payload Data and the start of the Padding field.
+- Check idea: configure TFC padding on an SA and capture a packet; confirm the added padding bytes lie between the end of the true Payload Data and the start of the Padding field.
 
 ### RFC4303-TFC-3
 
@@ -1266,8 +1147,7 @@ the order of the document.
 > (e.g., IP, UDP, ICMP) contains explicit length information." — §2.7, `rfc4303.txt:913-918`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: in transport mode with a next layer protocol that carries no explicit length
-  field, confirm the implementation does not add TFC padding; in tunnel mode, confirm it can.
+- Check idea: in transport mode with a next layer protocol that carries no explicit length field, confirm the implementation does not add TFC padding; in tunnel mode, confirm it can.
 
 ### RFC4303-TFC-4
 
@@ -1278,9 +1158,7 @@ the order of the document.
 > back from the end of the ESP packet.)" — §2.7, `rfc4303.txt:918-921`
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a packet with TFC padding whose IP datagram carries an explicit length
-  field, and confirm the receiver strips exactly the padding bytes and recovers the true
-  payload.
+- Check idea: send a packet with TFC padding whose IP datagram carries an explicit length field, and confirm the receiver strips exactly the padding bytes and recovers the true payload.
 
 ### RFC4303-TFC-5
 
@@ -1291,8 +1169,7 @@ the order of the document.
 > `rfc4303.txt:922-924`
 
 - Strength: must not. Class: wire.
-- Check idea: capture a packet with TFC padding added and confirm the IP datagram's own length
-  field still states the true, unpadded length.
+- Check idea: capture a packet with TFC padding added and confirm the IP datagram's own length field still states the true, unpadded length.
 
 ### RFC4303-TFC-6
 
@@ -1302,8 +1179,7 @@ the order of the document.
 > `rfc4303.txt:924-925`
 
 - Strength: description. Class: wire.
-- Check idea: capture TFC padding bytes from an implementation and confirm the standard places
-  no constraint on their content, so any byte values are acceptable.
+- Check idea: capture TFC padding bytes from an implementation and confirm the standard places no constraint on their content, so any byte values are acceptable.
 
 ### RFC4303-TFC-7
 
@@ -1313,8 +1189,7 @@ the order of the document.
 > to ensure backward compatibility." — §2.7, `rfc4303.txt:930-931`
 
 - Strength: must. Class: internal.
-- Check idea: observe SA establishment and confirm TFC padding use is a negotiated outcome,
-  not silently begun by the transmitter without agreement from the receiver.
+- Check idea: observe SA establishment and confirm TFC padding use is a negotiated outcome, not silently begun by the transmitter without agreement from the receiver.
 
 ### RFC4303-TFC-8
 
@@ -1326,8 +1201,7 @@ the order of the document.
 > `rfc4303.txt:937-940`
 
 - Strength: should. Class: internal.
-- Check idea: inspect an implementation's management interface and confirm it offers a per-SA
-  control to enable or disable, and parametrize, TFC padding.
+- Check idea: inspect an implementation's management interface and confirm it offers a per-SA control to enable or disable, and parametrize, TFC padding.
 
 ## Integrity Check Value (ICV)
 
@@ -1339,8 +1213,7 @@ the order of the document.
 > and ESP trailer fields." — §2.8, `rfc4303.txt:944-945`
 
 - Strength: description. Class: encoding.
-- Check idea: under an SA with integrity selected, corrupt a byte in the ESP header, the
-  Payload, or the ESP trailer in turn and confirm the ICV verification fails each time.
+- Check idea: under an SA with integrity selected, corrupt a byte in the ESP header, the Payload, or the ESP trailer in turn and confirm the ICV verification fails each time.
 
 ### RFC4303-ICV-2
 
@@ -1350,9 +1223,7 @@ the order of the document.
 > included in the ICV computation." — §2.8, `rfc4303.txt:945-947`
 
 - Strength: description. Class: internal.
-- Check idea: under an SA using Extended Sequence Numbers, vary the high-order sequence bits
-  without changing anything transmitted and confirm the ICV verification result depends on
-  them.
+- Check idea: under an SA using Extended Sequence Numbers, vary the high-order sequence bits without changing anything transmitted and confirm the ICV verification result depends on them.
 
 ### RFC4303-ICV-3
 
@@ -1363,8 +1234,7 @@ the order of the document.
 > ICV." — §2.8, `rfc4303.txt:947-950`
 
 - Strength: description. Class: wire.
-- Check idea: capture packets from an SA with no integrity service selected and confirm no ICV
-  field is present; capture packets from an SA with integrity selected and confirm it is.
+- Check idea: capture packets from an SA with no integrity service selected and confirm no ICV field is present; capture packets from an SA with integrity selected and confirm it is.
 
 ### RFC4303-ICV-4
 
@@ -1375,8 +1245,7 @@ the order of the document.
 > SA." — §2.8, `rfc4303.txt:950`, `rfc4303.txt:959-960`
 
 - Strength: description. Class: encoding.
-- Check idea: capture ICV fields from SAs using different integrity algorithms and confirm
-  each field's length matches the length its algorithm specifies.
+- Check idea: capture ICV fields from SAs using different integrity algorithms and confirm each field's length matches the length its algorithm specifies.
 
 ## The location of ESP
 
@@ -1387,8 +1256,7 @@ the order of the document.
 > "ESP may be employed in two ways: transport mode or tunnel mode." — §3.1, `rfc4303.txt:967`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: configure an SA and confirm it operates in exactly one of transport mode or
-  tunnel mode.
+- Check idea: configure an SA and confirm it operates in exactly one of transport mode or tunnel mode.
 
 ### RFC4303-LOC-2
 
@@ -1398,8 +1266,7 @@ the order of the document.
 > e.g., TCP, UDP, ICMP, etc." — §3.1.1, `rfc4303.txt:971-972`
 
 - Strength: description. Class: wire.
-- Check idea: capture a transport-mode ESP packet and confirm the ESP header sits between the
-  IP header and the next layer protocol header.
+- Check idea: capture a transport-mode ESP packet and confirm the ESP header sits between the IP header and the next layer protocol header.
 
 ### RFC4303-LOC-3
 
@@ -1409,8 +1276,7 @@ the order of the document.
 > that it contains), but before the next layer protocol." — §3.1.1, `rfc4303.txt:972-974`
 
 - Strength: description. Class: wire.
-- Check idea: capture an IPv4 transport-mode ESP packet whose IP header carries options and
-  confirm the ESP header follows those options and precedes the next layer protocol.
+- Check idea: capture an IPv4 transport-mode ESP packet whose IP header carries options and confirm the ESP header follows those options and precedes the next layer protocol.
 
 ### RFC4303-LOC-4
 
@@ -1420,8 +1286,7 @@ the order of the document.
 > and ICV, if present." — §3.1.1, `rfc4303.txt:974-976`
 
 - Strength: description. Class: wire.
-- Check idea: capture a packet combining AH and ESP and confirm AH's coverage spans the ESP
-  header, Payload, ESP trailer, and ICV when the ICV is present.
+- Check idea: capture a packet combining AH and ESP and confirm AH's coverage spans the ESP header, Payload, ESP trailer, and ICV when the ICV is present.
 
 ### RFC4303-LOC-5
 
@@ -1431,9 +1296,7 @@ the order of the document.
 > `rfc4303.txt:995-996`
 
 - Strength: description. Class: encoding.
-- Check idea: under transport mode, confirm that decrypting a captured packet recovers the
-  next layer protocol header, data, and ESP trailer, and that the ICV verification covers the
-  ESP header through the ESP trailer but excludes the ICV field itself.
+- Check idea: under transport mode, confirm that decrypting a captured packet recovers the next layer protocol header, data, and ESP trailer, and that the ICV verification covers the ESP header through the ESP trailer but excludes the ICV field itself.
 
 ### RFC4303-LOC-6
 
@@ -1443,8 +1306,7 @@ the order of the document.
 > hop-by-hop, routing, and fragmentation extension headers." — §3.1.1, `rfc4303.txt:998-1000`
 
 - Strength: should (lower case). Class: wire.
-- Check idea: capture an IPv6 transport-mode ESP packet carrying hop-by-hop, routing, and
-  fragmentation extension headers and confirm the ESP header follows all of them.
+- Check idea: capture an IPv6 transport-mode ESP packet carrying hop-by-hop, routing, and fragmentation extension headers and confirm the ESP header follows all of them.
 
 ### RFC4303-LOC-7
 
@@ -1456,8 +1318,7 @@ the order of the document.
 > header(s) after the ESP header." — §3.1.1, `rfc4303.txt:1000-1004`
 
 - Strength: description. Class: wire.
-- Check idea: capture IPv6 transport-mode ESP packets with a destination options header placed
-  after the ESP header and confirm ESP's protection covers it.
+- Check idea: capture IPv6 transport-mode ESP packets with a destination options header placed after the ESP header and confirm ESP's protection covers it.
 
 ### RFC4303-LOC-8
 
@@ -1471,9 +1332,7 @@ the order of the document.
 > `rfc4303.txt:1031-1036`
 
 - Strength: may (lower case). Class: internal.
-- Check idea: send fragmented IP traffic through a bump-in-the-stack or bump-in-the-wire
-  implementation and confirm it reassembles inbound fragments and re-fragments outbound
-  traffic as needed around ESP processing.
+- Check idea: send fragmented IP traffic through a bump-in-the-stack or bump-in-the-wire implementation and confirm it reassembles inbound fragments and re-fragments outbound traffic as needed around ESP processing.
 
 ### RFC4303-LOC-9
 
@@ -1485,9 +1344,7 @@ the order of the document.
 > gateways." — §3.1.2, `rfc4303.txt:1041-1044`
 
 - Strength: description. Class: wire.
-- Check idea: capture a tunnel-mode ESP packet and confirm the outer IP header carries the
-  IPsec peer addresses while the inner IP header, once decrypted, carries the ultimate source
-  and destination addresses.
+- Check idea: capture a tunnel-mode ESP packet and confirm the outer IP header carries the IPsec peer addresses while the inner IP header, once decrypted, carries the ultimate source and destination addresses.
 
 ### RFC4303-LOC-10
 
@@ -1497,8 +1354,7 @@ the order of the document.
 > — §3.1.2, `rfc4303.txt:1044-1045`
 
 - Strength: description. Class: wire.
-- Check idea: establish a tunnel-mode SA with an inner IP version different from the outer,
-  send traffic, and confirm the packet is accepted and processed correctly.
+- Check idea: establish a tunnel-mode SA with an inner IP version different from the outer, send traffic, and confirm the packet is accepted and processed correctly.
 
 ### RFC4303-LOC-11
 
@@ -1508,8 +1364,7 @@ the order of the document.
 > header." — §3.1.2, `rfc4303.txt:1045-1046`
 
 - Strength: description. Class: encoding.
-- Check idea: capture a tunnel-mode ESP packet and confirm the encryption or integrity
-  coverage spans the whole inner IP packet, header included.
+- Check idea: capture a tunnel-mode ESP packet and confirm the encryption or integrity coverage spans the whole inner IP packet, header included.
 
 ### RFC4303-LOC-12
 
@@ -1519,8 +1374,7 @@ the order of the document.
 > in transport mode." — §3.1.2, `rfc4303.txt:1046-1048`
 
 - Strength: description. Class: wire.
-- Check idea: capture tunnel-mode and transport-mode ESP packets and confirm ESP sits in the
-  same position relative to the (outer) IP header in both.
+- Check idea: capture tunnel-mode and transport-mode ESP packets and confirm ESP sits in the same position relative to the (outer) IP header in both.
 
 ### RFC4303-LOC-13
 
@@ -1530,9 +1384,7 @@ the order of the document.
 > — §3.1.2, `rfc4303.txt:1083-1084`
 
 - Strength: description. Class: encoding.
-- Check idea: under tunnel mode, confirm that decrypting a captured packet recovers the entire
-  inner IP packet and the ESP trailer, and that ICV verification covers the ESP header through
-  the ESP trailer but excludes the ICV field itself.
+- Check idea: under tunnel mode, confirm that decrypting a captured packet recovers the entire inner IP packet and the ESP trailer, and that ICV verification covers the ESP header through the ESP trailer but excludes the ICV field itself.
 
 ## Algorithms
 
@@ -3076,109 +2928,39 @@ the order of the document.
 
 ## Out of scope in this catalog
 
-The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of
-§2 to §3.4 and §5, and every field of every header. What the catalog leaves out:
+The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of §2 to §3.4 and §5, and every field of every header. What the catalog leaves out:
 
-- **The sections outside the in-scope set**: §1 (introduction), §4 (auditing), §6 to §10
-  (security, the changes from RFC 2406, backward compatibility, references) and the
-  appendices.
+- **The sections outside the in-scope set**: §1 (introduction), §4 (auditing), §6 to §10 (security, the changes from RFC 2406, backward compatibility, references) and the appendices.
 
 Within the in-scope sections, these parts have no entry, with the reason:
 
 In §2 to §3.1:
 
-- `rfc4303.txt:271-274` and `rfc4303.txt:710-713`: the Figure 1 and Payload Data footnotes on
-  whether an explicit IV "usually is not encrypted per se" and is "sometimes" called part of
-  the ciphertext are hedged, informative remarks about typical algorithm behavior, not a
-  requirement or field value; the operative facts about IV placement and ciphertext scope are
-  cataloged in RFC4303-FMT-6, RFC4303-FMT-7, and RFC4303-PAY-3.
-- `rfc4303.txt:300-309`: the definition of "combined mode algorithms" and the note that
-  "accommodation of combined mode algorithms requires that the algorithm explicitly describe
-  the payload substructure" is a requirement on the algorithm-defining RFC, not on an IPsec
-  implementation; it only sets terminology used elsewhere.
-- `rfc4303.txt:318-320`: "the algorithm itself is expected to return both decrypted plaintext
-  and a pass/fail indication" describes internal algorithm behavior assumed by the
-  specification, not a separately checkable requirement on the ESP implementation beyond what
-  RFC4303-FMT-8/9 already state.
-- `rfc4303.txt:384-425` and `rfc4303.txt:455-485` (Tables 1 and 2): the per-field
-  mandatory/optional/dummy column and the byte-count column restate facts already stated in
-  prose and cataloged under their own fields (SPI/SEQ mandatory-ness in §2.1/§2.2, Payload Data
-  in §2.3, Padding/Pad Length/Next Header/ICV in §2.4-2.8); the novel facts the tables add
-  (SPI/Sequence Number never encrypted, always integrity-protected; ICV optional under combined
-  mode) are cataloged in RFC4303-FMT-7 and RFC4303-FMT-8. The bracketed footnotes ([1]-[6] under
-  each table) are explanatory keys to the table, not separate statements.
-- `rfc4303.txt:483-484` (Table 2 note [6], "The algorithm spec determines whether this field is
-  present") and `rfc4303.txt:480-482` (note [5], "the result is invisible to ESP"): restate, as
-  table footnotes, facts already cataloged from the prose (RFC4303-SEQ-16, RFC4303-FMT-8).
-- `rfc4303.txt:536-540`: the description of a Group Controller/Key Server unilaterally
-  assigning a multicast SPI, and that this is not coordinated with IKE, describes the key
-  management protocol's own operation, not a requirement on the IPsec implementation beyond
-  the collision-handling MUST already cataloged as RFC4303-SPI-7.
-- `rfc4303.txt:586-594`: the software hash-table and hardware TCAM examples of how an
-  implementation might accelerate the SAD search are illustrative examples, not requirements.
-- `rfc4303.txt:606-609`: the statement that SPI values 1-255 are reserved by IANA, and "will
-  not normally be assigned" outside an RFC, is IANA registry policy, not a requirement on an
-  IPsec implementation.
-- `rfc4303.txt:611-613`, `rfc4303.txt:623-625`: the parenthetical example of a key management
-  implementation using SPI zero locally to mean "No Security Association Exists" is an
-  illustrative example of the already-cataloged RFC4303-SPI-18, not a separate statement.
-- `rfc4303.txt:664-666`: "in IKEv2, this negotiation is implicit; the default is ESN unless
-  32-bit sequence numbers are explicitly negotiated" describes IKEv2's own negotiation
-  behavior, a key management protocol, not a requirement on the ESP data-plane implementation
-  beyond RFC4303-SEQ-11.
-- `rfc4303.txt:704-709`: "any encryption algorithm that requires such explicit, per-packet
-  synchronization data MUST indicate the length... as part of an RFC" and "the algorithm for
-  deriving the data MUST be part of the algorithm definition RFC" are requirements on the
-  RFC defining the encryption algorithm, not on an IPsec implementation.
-- `rfc4303.txt:723-727`: the description of some IV-based modes where "alignment of the start
-  of the (real) ciphertext is not an issue at the receiver" is informative background
-  contrasting with the next case, with no independent requirement of its own.
-- `rfc4303.txt:735-738`: "the algorithm specification MUST address how alignment of the (real)
-  ciphertext is to be achieved" is a requirement on the algorithm specification document, not
-  on an IPsec implementation.
-- `rfc4303.txt:759-761`: "Padding beyond that required for the algorithm or alignment reasons
-  cited above could be used to conceal the actual length of the payload, in support of TFC" is
-  an informative lead-in to RFC4303-PAD-3's recommendation, adding no separate checkable claim.
-- `rfc4303.txt:786-793` (parenthetical on ESN in the padding computation) is folded into
-  RFC4303-PAD-7's quote rather than left out, but the surrounding rationale text has no
-  separate claim.
-- `rfc4303.txt:810-814`: the parenthetical rationale for why the default padding scheme "was
-  selected" (simplicity, hardware ease, cut-and-paste resistance) is design rationale, not a
-  checkable requirement.
-- `rfc4303.txt:816-820`: "If an encryption or combined mode algorithm imposes constraints on
-  the values of the bytes used for padding, they MUST be specified by the RFC defining how the
-  algorithm is employed with ESP. If the algorithm requires checking of the values of the
-  bytes used for padding, this too MUST be specified in that RFC" are requirements on the
-  algorithm-defining RFC, not on an IPsec implementation.
-- `rfc4303.txt:876-888`: the "DISCUSSION" paragraph on strategies for masking traffic with
-  dummy packets (constant bit rate shaping, bandwidth trade-offs across multiple SAs) is
-  explicitly informative discussion, not a requirement; its closing SHOULD is folded into
-  RFC4303-NH-6.
-- `rfc4303.txt:927-929`: "In principle, existing IPsec implementations could have made use of
-  this capability previously, in a transparent fashion" is historical/informative framing for
-  the negotiation requirement already cataloged as RFC4303-TFC-7.
-- `rfc4303.txt:932-935`: the summary sentence that combining protocol ID 59 dummy packets with
-  TFC padding lets an implementation generate traffic with "much greater length variability"
-  restates, informally, facts already cataloged as RFC4303-NH-2 and RFC4303-TFC-1/2, with no
-  new claim.
-- `rfc4303.txt:960-962`: "The integrity algorithm specification MUST specify the length of the
-  ICV and the comparison rules and processing steps for validation" is a requirement on the
-  integrity algorithm's specification document, not on an IPsec implementation.
-- `rfc4303.txt:977-978`, `rfc4303.txt:1029`, `rfc4303.txt:1037`: parenthetical asides ("Note
-  that the term 'transport' mode should not be misconstrued...", the "* = if present..."
-  diagram footnotes, "Special care is required... when multiple interfaces are in use") are
-  editorial or cross-reference notes, not independently checkable statements.
-- `rfc4303.txt:980-982`: "This and subsequent diagrams in this section show the ICV field, the
-  presence of which is a function of the security services and the algorithm/mode selected"
-  restates the already-cataloged optionality of the ICV (RFC4303-ICV-3).
-- `rfc4303.txt:984-994`, `rfc4303.txt:1015-1029`, `rfc4303.txt:1071-1101`: the before/after
-  packet-layout diagrams for IPv4 and IPv6, transport and tunnel mode, illustrate the field
-  order and mode positioning already cataloged in RFC4303-FMT-2, RFC4303-LOC-2/3/5/6/9/12/13;
-  the diagrams are quoted directly only where they add a fact the prose does not state (the
-  encryption/integrity coverage spans, RFC4303-LOC-5 and RFC4303-LOC-13).
-- `rfc4303.txt:1102-1105`: the diagram footnote pointing to the Security Architecture document
-  for how outer/inner IP header construction and modification works is a cross-reference, not
-  a checkable statement of this document.
+- `rfc4303.txt:271-274` and `rfc4303.txt:710-713`: the Figure 1 and Payload Data footnotes on whether an explicit IV "usually is not encrypted per se" and is "sometimes" called part of the ciphertext are hedged, informative remarks about typical algorithm behavior, not a requirement or field value; the operative facts about IV placement and ciphertext scope are cataloged in RFC4303-FMT-6, RFC4303-FMT-7, and RFC4303-PAY-3.
+- `rfc4303.txt:300-309`: the definition of "combined mode algorithms" and the note that "accommodation of combined mode algorithms requires that the algorithm explicitly describe the payload substructure" is a requirement on the algorithm-defining RFC, not on an IPsec implementation; it only sets terminology used elsewhere.
+- `rfc4303.txt:318-320`: "the algorithm itself is expected to return both decrypted plaintext and a pass/fail indication" describes internal algorithm behavior assumed by the specification, not a separately checkable requirement on the ESP implementation beyond what RFC4303-FMT-8/9 already state.
+- `rfc4303.txt:384-425` and `rfc4303.txt:455-485` (Tables 1 and 2): the per-field mandatory/optional/dummy column and the byte-count column restate facts already stated in prose and cataloged under their own fields (SPI/SEQ mandatory-ness in §2.1/§2.2, Payload Data in §2.3, Padding/Pad Length/Next Header/ICV in §2.4-2.8); the novel facts the tables add (SPI/Sequence Number never encrypted, always integrity-protected; ICV optional under combined mode) are cataloged in RFC4303-FMT-7 and RFC4303-FMT-8. The bracketed footnotes ([1]-[6] under each table) are explanatory keys to the table, not separate statements.
+- `rfc4303.txt:483-484` (Table 2 note [6], "The algorithm spec determines whether this field is present") and `rfc4303.txt:480-482` (note [5], "the result is invisible to ESP"): restate, as table footnotes, facts already cataloged from the prose (RFC4303-SEQ-16, RFC4303-FMT-8).
+- `rfc4303.txt:536-540`: the description of a Group Controller/Key Server unilaterally assigning a multicast SPI, and that this is not coordinated with IKE, describes the key management protocol's own operation, not a requirement on the IPsec implementation beyond the collision-handling MUST already cataloged as RFC4303-SPI-7.
+- `rfc4303.txt:586-594`: the software hash-table and hardware TCAM examples of how an implementation might accelerate the SAD search are illustrative examples, not requirements.
+- `rfc4303.txt:606-609`: the statement that SPI values 1-255 are reserved by IANA, and "will not normally be assigned" outside an RFC, is IANA registry policy, not a requirement on an IPsec implementation.
+- `rfc4303.txt:611-613`, `rfc4303.txt:623-625`: the parenthetical example of a key management implementation using SPI zero locally to mean "No Security Association Exists" is an illustrative example of the already-cataloged RFC4303-SPI-18, not a separate statement.
+- `rfc4303.txt:664-666`: "in IKEv2, this negotiation is implicit; the default is ESN unless 32-bit sequence numbers are explicitly negotiated" describes IKEv2's own negotiation behavior, a key management protocol, not a requirement on the ESP data-plane implementation beyond RFC4303-SEQ-11.
+- `rfc4303.txt:704-709`: "any encryption algorithm that requires such explicit, per-packet synchronization data MUST indicate the length... as part of an RFC" and "the algorithm for deriving the data MUST be part of the algorithm definition RFC" are requirements on the RFC defining the encryption algorithm, not on an IPsec implementation.
+- `rfc4303.txt:723-727`: the description of some IV-based modes where "alignment of the start of the (real) ciphertext is not an issue at the receiver" is informative background contrasting with the next case, with no independent requirement of its own.
+- `rfc4303.txt:735-738`: "the algorithm specification MUST address how alignment of the (real) ciphertext is to be achieved" is a requirement on the algorithm specification document, not on an IPsec implementation.
+- `rfc4303.txt:759-761`: "Padding beyond that required for the algorithm or alignment reasons cited above could be used to conceal the actual length of the payload, in support of TFC" is an informative lead-in to RFC4303-PAD-3's recommendation, adding no separate checkable claim.
+- `rfc4303.txt:786-793` (parenthetical on ESN in the padding computation) is folded into RFC4303-PAD-7's quote rather than left out, but the surrounding rationale text has no separate claim.
+- `rfc4303.txt:810-814`: the parenthetical rationale for why the default padding scheme "was selected" (simplicity, hardware ease, cut-and-paste resistance) is design rationale, not a checkable requirement.
+- `rfc4303.txt:816-820`: "If an encryption or combined mode algorithm imposes constraints on the values of the bytes used for padding, they MUST be specified by the RFC defining how the algorithm is employed with ESP. If the algorithm requires checking of the values of the bytes used for padding, this too MUST be specified in that RFC" are requirements on the algorithm-defining RFC, not on an IPsec implementation.
+- `rfc4303.txt:876-888`: the "DISCUSSION" paragraph on strategies for masking traffic with dummy packets (constant bit rate shaping, bandwidth trade-offs across multiple SAs) is explicitly informative discussion, not a requirement; its closing SHOULD is folded into RFC4303-NH-6.
+- `rfc4303.txt:927-929`: "In principle, existing IPsec implementations could have made use of this capability previously, in a transparent fashion" is historical/informative framing for the negotiation requirement already cataloged as RFC4303-TFC-7.
+- `rfc4303.txt:932-935`: the summary sentence that combining protocol ID 59 dummy packets with TFC padding lets an implementation generate traffic with "much greater length variability" restates, informally, facts already cataloged as RFC4303-NH-2 and RFC4303-TFC-1/2, with no new claim.
+- `rfc4303.txt:960-962`: "The integrity algorithm specification MUST specify the length of the ICV and the comparison rules and processing steps for validation" is a requirement on the integrity algorithm's specification document, not on an IPsec implementation.
+- `rfc4303.txt:977-978`, `rfc4303.txt:1029`, `rfc4303.txt:1037`: parenthetical asides ("Note that the term 'transport' mode should not be misconstrued...", the "* = if present..." diagram footnotes, "Special care is required... when multiple interfaces are in use") are editorial or cross-reference notes, not independently checkable statements.
+- `rfc4303.txt:980-982`: "This and subsequent diagrams in this section show the ICV field, the presence of which is a function of the security services and the algorithm/mode selected" restates the already-cataloged optionality of the ICV (RFC4303-ICV-3).
+- `rfc4303.txt:984-994`, `rfc4303.txt:1015-1029`, `rfc4303.txt:1071-1101`: the before/after packet-layout diagrams for IPv4 and IPv6, transport and tunnel mode, illustrate the field order and mode positioning already cataloged in RFC4303-FMT-2, RFC4303-LOC-2/3/5/6/9/12/13; the diagrams are quoted directly only where they add a fact the prose does not state (the encryption/integrity coverage spans, RFC4303-LOC-5 and RFC4303-LOC-13).
+- `rfc4303.txt:1102-1105`: the diagram footnote pointing to the Security Architecture document for how outer/inner IP header construction and modification works is a cross-reference, not a checkable statement of this document.
 
 In §3.2 to §3.4, and §5:
 

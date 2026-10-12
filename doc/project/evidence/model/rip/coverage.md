@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc2453/catalog.md](../../standard/rfc2453/catalog.md), [rfc2080/catalog.md](../../standard/rfc2080/catalog.md), [features.md](../../protocol/rip/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the RIP workflow. Every other artifact of
-this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the RIP workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -35,9 +33,7 @@ The analysis of every failure is in [`results.md`](results.md#the-model-gaps).
 | `later` | it needs a toolset of a higher level — a crafted message at level 3 — or its category is another suite: a serializer test, the forwarding of IPv4 |
 | `no check` | the model does not claim the behavior, so [the third principle](../../../guide/derive-tests-from-a-standard.md#principle-a-claimed-feature-gets-a-test) asks for no test |
 
-A verdict belongs to the test. Where a test fails at a later observation and the observation
-of a statement held, the row says PASS and names the observation in the note; where a failure
-kept a test from the observation a statement needs, the row says FAIL and says so.
+A verdict belongs to the test. Where a test fails at a later observation and the observation of a statement held, the row says PASS and names the observation in the note; where a failure kept a test from the observation a statement needs, the row says FAIL and says so.
 
 | Status | RFC 2453 | RFC 2080 | Together |
 | --- | --- | --- | --- |
@@ -227,8 +223,7 @@ kept a test from the observation a statement needs, the row says FAIL and says s
 | [RFC2080-GEN-7](../../standard/rfc2080/catalog.md#rfc2080-gen-7) | selected | [Triggered update for a lost network (RIPng)](../../protocol/rip/checks/triggered-update.md#triggered-update-for-a-lost-network-ripng); [Split horizon on the link of a learned route (RIPng)](../../protocol/rip/checks/split-horizon.md#split-horizon-on-the-link-of-a-learned-route-ripng) | `Rfc2080LostNetwork`, `Rfc2080SplitHorizon` | PASS | — |
 ## The coverage debt: the checks this pass owes
 
-Twenty-one statements that the model claims have no check yet. Each needs a normal exchange
-only, so each is level 2 work for a later pass:
+Twenty-one statements that the model claims have no check yet. Each needs a normal exchange only, so each is level 2 work for a later pass:
 
 | What the check needs | Statements |
 | --- | --- |
@@ -244,15 +239,11 @@ only, so each is level 2 work for a later pass:
 | a second network behind the receiver of a multicast | RFC2453-MCAST-2 |
 | an interface with two link-local addresses | RFC2080-GEN-2 |
 
-Two of them will fail when their check exists, from what the code shows: RFC2453-RESP-11 and
-RFC2080-RESP-13 are a bare TODO (`Rip.cc:712`), and the route tag and the metric of an import
-are parameters that every caller leaves at the default (`Rip.cc:266`).
+Two of them will fail when their check exists, from what the code shows: RFC2453-RESP-11 and RFC2080-RESP-13 are a bare TODO (`Rip.cc:712`), and the route tag and the metric of an import are parameters that every caller leaves at the default (`Rip.cc:266`).
 
 ## Feature support
 
-The rule of the guide, per feature: `supported` when every core check ran and passed,
-`partial` when at least one passed and at least one failed or has no check, `not supported`
-when every core check that ran failed, `untested` when no core check exists.
+The rule of the guide, per feature: `supported` when every core check ran and passed, `partial` when at least one passed and at least one failed or has no check, `not supported` when every core check that ran failed, `untested` when no core check exists.
 
 | Feature | Level | Support | Core statements that fail or have no check |
 | --- | --- | --- | --- |
@@ -280,8 +271,7 @@ Seven features are supported, six partial, six untested, and none is not support
 
 ## Achieved level
 
-**Level 2, reached.** Target: level 2, from
-[`standards.md`](../../protocol/rip/standards.md#target-level).
+**Level 2, reached.** Target: level 2, from [`standards.md`](../../protocol/rip/standards.md#target-level).
 
 The exit criterion of level 2 has two halves, and both hold:
 
@@ -290,16 +280,9 @@ The exit criterion of level 2 has two halves, and both hold:
 | Every normal-path mandatory mechanism of the base documents appears as a feature | holds | the catalogs hold every normative statement of RFC 2453 §3 and §4.2 to §4.6 and of RFC 2080 §2, 168 entries; the feature map has 19 features and places every entry but the forwarding rule RFC2453-ADDR-8 |
 | Every mandatory feature has a core check that ran and has a verdict | holds for the normal path | 11 of the 14 mandatory features have core checks that ran: 30 tests, 20 PASS, 10 FAIL |
 
-The three mandatory features without a core check have no normal path, so the criterion does
-not reach them at this level, and the ledger says so rather than count them:
-RIP-F-RESPONSE-VALIDATION and RIP-F-ROUTE-TAG need a crafted response (a tag other than zero
-reaches a router only in a crafted response, because no import in the model sets one), which
-is level 3; RIP-F-VERSION-1-INTERWORKING needs a version 1 router, which the standards map
-puts at level 5.
+The three mandatory features without a core check have no normal path, so the criterion does not reach them at this level, and the ledger says so rather than count them: RIP-F-RESPONSE-VALIDATION and RIP-F-ROUTE-TAG need a crafted response (a tag other than zero reaches a router only in a crafted response, because no import in the model sets one), which is level 3; RIP-F-VERSION-1-INTERWORKING needs a version 1 router, which the standards map puts at level 5.
 
-A level is a measure of how deeply the pass looked, not of how well the model did. Ten tests
-fail, and six gaps of the model stand behind them; the level holds because each of those
-checks ran.
+A level is a measure of how deeply the pass looked, not of how well the model did. Ten tests fail, and six gaps of the model stand behind them; the level holds because each of those checks ran.
 
 | Level | State | What it needs |
 | --- | --- | --- |
@@ -309,11 +292,7 @@ checks ran.
 | 4, Dynamics | partial | every timer of the in-scope set has a check with a stated window — 30 s, 180 s, 120 s, 1 to 5 s — but the random offset of the periodic update and the random timer of the triggered update have no statistical test |
 | 5, Complete | not started | authentication, the interworking with version 1, demand circuits |
 
-Per feature, the level reached is the level of the rows above: level 2 for the eleven
-mandatory features with a normal path and for RIP-F-TABLE-REQUEST and RIP-F-NEXT-HOP; level 1
-for RIP-F-RESPONSE-VALIDATION, RIP-F-SPECIFIC-QUERY and RIP-F-ROUTE-TAG, whose checks are
-level 3; level 1 for RIP-F-DEFAULT-ROUTE and RIP-F-HOST-ROUTES, whose checks are owed; and
-level 1 for RIP-F-VERSION-1-INTERWORKING.
+Per feature, the level reached is the level of the rows above: level 2 for the eleven mandatory features with a normal path and for RIP-F-TABLE-REQUEST and RIP-F-NEXT-HOP; level 1 for RIP-F-RESPONSE-VALIDATION, RIP-F-SPECIFIC-QUERY and RIP-F-ROUTE-TAG, whose checks are level 3; level 1 for RIP-F-DEFAULT-ROUTE and RIP-F-HOST-ROUTES, whose checks are owed; and level 1 for RIP-F-VERSION-1-INTERWORKING.
 
 ## Pass log
 
@@ -322,12 +301,8 @@ level 1 for RIP-F-VERSION-1-INTERWORKING.
 | 1 | 2026-09-23 | **1, reached** | RFC 2453 and RFC 2080 downloaded; the standards map; the claims of the model | no run; one obsolete claim (RFC 1058), one declined area (authentication) |
 | 2 | 2026-09-24 | **2, reached** | catalogs of RFC 2453 (88) and RFC 2080 (80); 19 features; 30 checks; 30 tests; the conformance matrix | 20 PASS, 10 FAIL, none declared; six gaps of the model, three of them in RIPng alone; 21 statements owed |
 
-The read record of pass 1 named commit `97f4559eee` of the wave 0 branch; its trees, src
-`16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
+The read record of pass 1 named commit `97f4559eee` of the wave 0 branch; its trees, src `16dc528e10` and tests/protocol `6f0a6bdb05`, identify the code it read.
 
 ## Out of scope
 
-The areas that the catalogs leave out, and why, are at the end of each catalog:
-[RFC 2453](../../standard/rfc2453/catalog.md#out-of-scope-in-this-catalog),
-[RFC 2080](../../standard/rfc2080/catalog.md#out-of-scope-in-this-catalog). The documents
-outside the in-scope set are in [`standards.md`](../../protocol/rip/standards.md#in-scope-set).
+The areas that the catalogs leave out, and why, are at the end of each catalog: [RFC 2453](../../standard/rfc2453/catalog.md#out-of-scope-in-this-catalog), [RFC 2080](../../standard/rfc2080/catalog.md#out-of-scope-in-this-catalog). The documents outside the in-scope set are in [`standards.md`](../../protocol/rip/standards.md#in-scope-set).

@@ -2,10 +2,7 @@
 
 > **Kind:** what · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/dhcp/standards.md), [features.md](../../protocol/dhcp/features.md), [coverage.md](coverage.md), [results.md](results.md)
 
-Step 8 artifact of the standards test workflow. The tests say what the model does; this
-document adds what the model **intends**, and compares the two. Part 1 collects the standards
-the model claims to implement, from the model itself. Part 2 cross-checks those claims against
-the measured feature support, feature by feature and not test by test.
+Step 8 artifact of the standards test workflow. The tests say what the model does; this document adds what the model **intends**, and compares the two. Part 1 collects the standards the model claims to implement, from the model itself. Part 2 cross-checks those claims against the measured feature support, feature by feature and not test by test.
 
 The ledger state this matrix comes from:
 
@@ -17,11 +14,8 @@ The ledger state this matrix comes from:
 - Compiler: Ubuntu clang version 23.0.0
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/dhcp$'`
-- Ledger: [`coverage.md`](coverage.md), achieved level 3 partial, 14 features supported, 6
-  partial, 2 not supported, 2 untested, and 14 claimed statements owed a check.
-- Suite: 26 tests, 21 PASS, 5 FAIL (expected), 0 FAIL (unexpected). None are undeclared now; the
-  five declared ones are behavior the model does not claim. See
-  [`results.md`](results.md#the-rule-that-decides-the-declaration).
+- Ledger: [`coverage.md`](coverage.md), achieved level 3 partial, 14 features supported, 6 partial, 2 not supported, 2 untested, and 14 claimed statements owed a check.
+- Suite: 26 tests, 21 PASS, 5 FAIL (expected), 0 FAIL (unexpected). None are undeclared now; the five declared ones are behavior the model does not claim. See [`results.md`](results.md#the-rule-that-decides-the-declaration).
 
 ## Part 1 — what the model claims
 
@@ -42,11 +36,7 @@ Part 1 was read on 2026-09-11 and this refresh did not read the claims again.
 
 ### What the claims come to
 
-The claim is **RFC 2131 and RFC 2132**, and it is stated at four levels: in the NED
-documentation of both applications, in the message definition, and in the release notes. The
-section citations are dense and accurate — every one of the eight sections named above is the
-right section for the code it sits on — which makes this a model that was written against the
-text and not against a summary of it.
+The claim is **RFC 2131 and RFC 2132**, and it is stated at four levels: in the NED documentation of both applications, in the message definition, and in the release notes. The section citations are dense and accurate — every one of the eight sections named above is the right section for the code it sits on — which makes this a model that was written against the text and not against a summary of it.
 
 Mapped onto the in-scope set of [`standards.md`](../../protocol/dhcp/standards.md#in-scope-set):
 
@@ -58,26 +48,13 @@ Mapped onto the in-scope set of [`standards.md`](../../protocol/dhcp/standards.m
 
 ### The gap between the claim and the register
 
-This is the finding of the level 1 survey, and it is the reason the guide says to choose the
-in-scope set from the standards register and never from what the model claims.
+This is the finding of the level 1 survey, and it is the reason the guide says to choose the in-scope set from the standards register and never from what the model claims.
 
-**The model claims RFC 2131 and never names RFC 6842.** The RFC-editor metadata for RFC 2131
-lists four documents that update it — RFC 3396, RFC 4361, RFC 5494 and RFC 6842 — and one of
-them, RFC 6842, reverses a `MUST NOT` of the base text into a `MUST`. A model that implements
-RFC 2131 exactly, as this one intends to, is therefore **guaranteed** to fail RFC 6842, and
-the run confirms it: gaps 5 and 6 of [`results.md`](results.md#the-model-gaps) are both halves
-of RFC 6842 and neither is implemented.
+**The model claims RFC 2131 and never names RFC 6842.** The RFC-editor metadata for RFC 2131 lists four documents that update it — RFC 3396, RFC 4361, RFC 5494 and RFC 6842 — and one of them, RFC 6842, reverses a `MUST NOT` of the base text into a `MUST`. A model that implements RFC 2131 exactly, as this one intends to, is therefore **guaranteed** to fail RFC 6842, and the run confirms it: gaps 5 and 6 of [`results.md`](results.md#the-model-gaps) are both halves of RFC 6842 and neither is implemented.
 
-So the two RFC 6842 failures are not defects in the ordinary sense. They are the cost of a
-claim that was accurate in 2014 and is thirteen years out of date now. The verdict column below
-records them as `out of claim` and not as `defect`, and the recommendation that follows is a
-documentation change first: either name RFC 6842 and implement it, or state in the NED
-documentation that the model implements RFC 2131 without its updates.
+So the two RFC 6842 failures are not defects in the ordinary sense. They are the cost of a claim that was accurate in 2014 and is thirteen years out of date now. The verdict column below records them as `out of claim` and not as `defect`, and the recommendation that follows is a documentation change first: either name RFC 6842 and implement it, or state in the NED documentation that the model implements RFC 2131 without its updates.
 
-**The three other updating documents are out of the in-scope set** of this pass, with reasons in
-the standards map. They are a scope gap for a later pass and not a verdict: RFC 3396 (long
-options), RFC 4361 (the DUID form of the client identifier) and RFC 5494 (an IANA registry
-change).
+**The three other updating documents are out of the in-scope set** of this pass, with reasons in the standards map. They are a scope gap for a later pass and not a verdict: RFC 3396 (long options), RFC 4361 (the DUID form of the client identifier) and RFC 5494 (an IANA registry change).
 
 ### One claim the model makes about its own limits
 
@@ -86,16 +63,9 @@ change).
 > "Limitation: The client module currently does not support multiple DHCP servers and BOOTP
 > relay agents."
 
-This is worth recording beside the claims, because it is a **correct and useful** statement of
-scope, and because it agrees exactly with what this pass found. The relay agent half explains
-why [RFC2131-NAK-4](../../standard/rfc2131/catalog.md#rfc2131-nak-4) and
-[RFC2131-BCAST-2](../../standard/rfc2131/catalog.md#rfc2131-bcast-2) carry `no check`: the
-statements need a node type the model does not have. The multiple-server half is the reason
-several statements of the ledger need a richer mockup, and it also explains gap 1 in part: a
-client that never sees two servers has no visible reason to keep one transaction identifier.
+This is worth recording beside the claims, because it is a **correct and useful** statement of scope, and because it agrees exactly with what this pass found. The relay agent half explains why [RFC2131-NAK-4](../../standard/rfc2131/catalog.md#rfc2131-nak-4) and [RFC2131-BCAST-2](../../standard/rfc2131/catalog.md#rfc2131-bcast-2) carry `no check`: the statements need a node type the model does not have. The multiple-server half is the reason several statements of the ledger need a richer mockup, and it also explains gap 1 in part: a client that never sees two servers has no visible reason to keep one transaction identifier.
 
-A limitation stated in the release notes is not a claim to conform, so the matrix treats the
-features these limits cover as `out of claim` rather than as defects.
+A limitation stated in the release notes is not a claim to conform, so the matrix treats the features these limits cover as `out of claim` rather than as defects.
 
 ## Part 2 — the conformance matrix
 
@@ -111,10 +81,7 @@ The rule of step 8, from the guide:
 | any | no | supported | `undocumented` |
 | any | no | partial, not supported, or untested | `out of claim` |
 
-A feature is `claimed` when the claims of part 1 cover its **governing** source document. Every
-feature of this protocol is governed by RFC 2131 or RFC 2132 except
-[DHCP-F-CLIENT-IDENTITY](../../protocol/dhcp/features.md#dhcp-f-client-identity), whose
-governing document is RFC 6842 for the two statements RFC 6842 overrides.
+A feature is `claimed` when the claims of part 1 cover its **governing** source document. Every feature of this protocol is governed by RFC 2131 or RFC 2132 except [DHCP-F-CLIENT-IDENTITY](../../protocol/dhcp/features.md#dhcp-f-client-identity), whose governing document is RFC 6842 for the two statements RFC 6842 overrides.
 
 | Feature | Level | Claimed | Support | Verdict |
 | --- | --- | --- | --- | --- |
@@ -147,95 +114,29 @@ Twenty-four features: **14 confirmed, 5 partial, 0 defect, 2 declined, 2 unverif
 
 ### How to read the four groups
 
-**Zero `defect` verdicts. Both are repaired.** The word means one thing here and a different
-thing in [`results.md`](results.md#the-rule-that-decides-the-declaration): in this matrix a
-`defect` is a **whole mandatory feature** that the model claims and does not support, while there
-a defect is one statement. The first pass found two feature-level defects, `DHCP-F-NAK` and
-`DHCP-F-DECLINE`, and both had the same shape: **the mechanism was written and the trigger never
-fired.** `DhcpServer::sendNak` built a correct DHCPNAK and the branch that would send it for a
-foreign subnet was unreachable, because the INIT-REBOOT code tested its two conditions in the
-wrong order. `DhcpClient::sendDecline` built a correct DHCPDECLINE and nothing called it, because
-the address probe that would find a conflict was a commented-out block.
+**Zero `defect` verdicts. Both are repaired.** The word means one thing here and a different thing in [`results.md`](results.md#the-rule-that-decides-the-declaration): in this matrix a `defect` is a **whole mandatory feature** that the model claims and does not support, while there a defect is one statement. The first pass found two feature-level defects, `DHCP-F-NAK` and `DHCP-F-DECLINE`, and both had the same shape: **the mechanism was written and the trigger never fired.** `DhcpServer::sendNak` built a correct DHCPNAK and the branch that would send it for a foreign subnet was unreachable, because the INIT-REBOOT code tested its two conditions in the wrong order. `DhcpClient::sendDecline` built a correct DHCPDECLINE and nothing called it, because the address probe that would find a conflict was a commented-out block.
 
-**Both are repaired now.** `b72abc4696` (2026-09-15) reorders the INIT-REBOOT checks, so
-the DHCPNAK for a foreign subnet fires; `bdde132792` (2026-09-15) gives the client the ARP probe
-RFC 2131 §4.4.1 asks for, so `sendDecline` gets a caller. `DHCP-F-DECLINE` reads `partial` now: every
-check passes, and DECL-4 is `owed`, because the same commit gave the server its half.
-`DHCP-F-NAK` reads `partial`, not `confirmed`, because one of its four core checks, `NAK-8`, is
-still `owed`: nobody has written the check yet, the mechanism is not at fault.
+**Both are repaired now.** `b72abc4696` (2026-09-15) reorders the INIT-REBOOT checks, so the DHCPNAK for a foreign subnet fires; `bdde132792` (2026-09-15) gives the client the ARP probe RFC 2131 §4.4.1 asks for, so `sendDecline` gets a caller. `DHCP-F-DECLINE` reads `partial` now: every check passes, and DECL-4 is `owed`, because the same commit gave the server its half. `DHCP-F-NAK` reads `partial`, not `confirmed`, because one of its four core checks, `NAK-8`, is still `owed`: nobody has written the check yet, the mechanism is not at fault.
 
-An earlier version of this matrix read both as `unverified`, on the ground that a gap elsewhere had
-removed the stimulus their checks needed. That was wrong twice over: the checks did run and did
-fail, so the run answered the question; and `unverified` reads as "nobody looked", which is the
-opposite of what happened. The rest of the matrix stands: every mandatory feature is now confirmed
-or partial, except the one whose governing document the model does not claim. The model does what
-it says it does, and after 2026-09-15 it does more of it.
+An earlier version of this matrix read both as `unverified`, on the ground that a gap elsewhere had removed the stimulus their checks needed. That was wrong twice over: the checks did run and did fail, so the run answered the question; and `unverified` reads as "nobody looked", which is the opposite of what happened. The rest of the matrix stands: every mandatory feature is now confirmed or partial, except the one whose governing document the model does not claim. The model does what it says it does, and after 2026-09-15 it does more of it.
 
-**The five `partial` verdicts have three shapes now, not one.** `DHCP-F-ACKNOWLEDGEMENT`
-fails its `must not` half alone, gap 9, unrepaired: the server still drops DHCPINFORM outright, so
-the reply that half would read never exists. `DHCP-F-REPLY-DELIVERY` fails the broadcast-bit-clear
-case alone, gap 7, a TODO
-that names its own limit: the application cannot address a reply to a client's hardware address.
-`DHCP-F-NAK` fails no check at all; it is held at `partial` solely by `NAK-8`, a check this pass
-still owes, and `DHCP-F-DECLINE` has the same shape with `DECL-4`. `DHCP-F-DUPLICATE-DETECTION`
-has the third: its client half passes and its server half has no code. The first pass's six `partial` verdicts were each a single field or option in an
-otherwise correct mechanism — a transaction identifier redrawn, a `giaddr` holding a gateway, a
-`ciaddr` holding a lease, a `flags` field written as a constant, an option returned with no value,
-a reply broadcast where a unicast belonged. The list left out the sixth, `DHCP-F-RETRANSMISSION`,
-whose fault was a timing law rather than a field. All four of the field faults and the timing law
-are repaired now, so four of the six read `confirmed`: `b72abc4696` fixed all of them on
-2026-09-15.
+**The five `partial` verdicts have three shapes now, not one.** `DHCP-F-ACKNOWLEDGEMENT` fails its `must not` half alone, gap 9, unrepaired: the server still drops DHCPINFORM outright, so the reply that half would read never exists. `DHCP-F-REPLY-DELIVERY` fails the broadcast-bit-clear case alone, gap 7, a TODO that names its own limit: the application cannot address a reply to a client's hardware address. `DHCP-F-NAK` fails no check at all; it is held at `partial` solely by `NAK-8`, a check this pass still owes, and `DHCP-F-DECLINE` has the same shape with `DECL-4`. `DHCP-F-DUPLICATE-DETECTION` has the third: its client half passes and its server half has no code. The first pass's six `partial` verdicts were each a single field or option in an otherwise correct mechanism — a transaction identifier redrawn, a `giaddr` holding a gateway, a `ciaddr` holding a lease, a `flags` field written as a constant, an option returned with no value, a reply broadcast where a unicast belonged. The list left out the sixth, `DHCP-F-RETRANSMISSION`, whose fault was a timing law rather than a field. All four of the field faults and the timing law are repaired now, so four of the six read `confirmed`: `b72abc4696` fixed all of them on 2026-09-15.
 
-**The two `declined` verdicts are honest and both are documented.** DHCPINFORM and DHCPRELEASE are
-absent by decision. `DhcpClient.cc:724-725` says why the release is absent and quotes RFC 2131
-§4.4.6 correctly. Both statements are a `MAY`, so no rule is broken. Duplicate detection left this
-group on 2026-09-15: `DHCP-F-DUPLICATE-DETECTION` is `partial` now, because the client's half,
-`DECL-1`, is implemented and its check passes, while the server's own pre-offer probe, `OFF-7`,
-has no code.
+**The two `declined` verdicts are honest and both are documented.** DHCPINFORM and DHCPRELEASE are absent by decision. `DhcpClient.cc:724-725` says why the release is absent and quotes RFC 2131 §4.4.6 correctly. Both statements are a `MAY`, so no rule is broken. Duplicate detection left this group on 2026-09-15: `DHCP-F-DUPLICATE-DETECTION` is `partial` now, because the client's half, `DECL-1`, is implemented and its check passes, while the server's own pre-offer probe, `OFF-7`, has no code.
 
-**The two `unverified` verdicts are the coverage debt of the pass, and neither is the model's
-doing.** `DHCP-F-INIT-REBOOT` has a state machine in the model and this pass wrote no check of it;
-address selection has the preference code and no check of it. Both are owed a check, both are
-reachable with a richer mockup and no new tool, and
-[the debt table of the ledger](coverage.md#the-coverage-debt-the-checks-this-pass-owes) says
-what each needs. An `unverified` verdict is a statement about the pass and never about the model.
+**The two `unverified` verdicts are the coverage debt of the pass, and neither is the model's doing.** `DHCP-F-INIT-REBOOT` has a state machine in the model and this pass wrote no check of it; address selection has the preference code and no check of it. Both are owed a check, both are reachable with a richer mockup and no new tool, and [the debt table of the ledger](coverage.md#the-coverage-debt-the-checks-this-pass-owes) says what each needs. An `unverified` verdict is a statement about the pass and never about the model.
 
-**The one `out of claim`** is [DHCP-F-CLIENT-IDENTITY](../../protocol/dhcp/features.md#dhcp-f-client-identity),
-and it is a documentation task before it is a code task; see below.
+**The one `out of claim`** is [DHCP-F-CLIENT-IDENTITY](../../protocol/dhcp/features.md#dhcp-f-client-identity), and it is a documentation task before it is a code task; see below.
 
 ## Headlines for the next pass
 
-The guide says a `defect`, and an `unverified` feature with level `mandatory`, are the headlines.
-There is no defect any more and no mandatory unverified feature. Items 1 and 2 below no longer
-hold; they stay in the list, each marked with the commit that repaired it, because a headline that
-stopped holding is kept, not deleted. Item 3 leads what remains.
+The guide says a `defect`, and an `unverified` feature with level `mandatory`, are the headlines. There is no defect any more and no mandatory unverified feature. Items 1 and 2 below no longer hold; they stay in the list, each marked with the commit that repaired it, because a headline that stopped holding is kept, not deleted. Item 3 leads what remains.
 
-1. **Close gap 10, and DHCP-F-NAK leaves `defect`.** The fix is the order of two tests in the
-   INIT-REBOOT branch of `DhcpServer::processDhcpMessage`: test the subnet before the table of
-   leases, as RFC 2131 §4.3.2 states it. Four ledger rows change from FAIL to a real verdict and a
-   mandatory feature stops being a defect, with no change to any test. — **repaired by
-   `b72abc4696`**, 2026-09-15; `DHCP-F-NAK` reads `partial` now, held there only by `NAK-8`, still
-   `owed`.
-2. **Close gap 11, and DHCP-F-DECLINE leaves `defect`.** The code is written; the probe that
-   triggers it is a comment. Four more ledger rows change, and a second mandatory feature stops
-   being a defect. — **repaired by `bdde132792`**, 2026-09-15; `DHCP-F-DECLINE` reads `partial`
-   now.
-3. **Decide what the model claims about RFC 6842.** Two options, and the matrix does not choose
-   between them. Either implement it — the server returns the option it received and the client
-   compares it, which is a small change on both sides — or state in the NED documentation of both
-   applications that the model implements RFC 2131 without the documents that update it. The
-   second option costs nothing and makes the `out of claim` verdict correct rather than merely
-   true; the first closes gaps 5 and 6.
-4. **A documentation task with no code behind it.** RFC 2132 is claimed in a release note from
-   2014 and in neither NED file, although the model implements thirteen of its options and cannot
-   work without §9.6. Naming it beside RFC 2131 in both NED files would make the claim match the
-   code.
+1. **Close gap 10, and DHCP-F-NAK leaves `defect`.** The fix is the order of two tests in the INIT-REBOOT branch of `DhcpServer::processDhcpMessage`: test the subnet before the table of leases, as RFC 2131 §4.3.2 states it. Four ledger rows change from FAIL to a real verdict and a mandatory feature stops being a defect, with no change to any test. — **repaired by `b72abc4696`**, 2026-09-15; `DHCP-F-NAK` reads `partial` now, held there only by `NAK-8`, still `owed`.
+2. **Close gap 11, and DHCP-F-DECLINE leaves `defect`.** The code is written; the probe that triggers it is a comment. Four more ledger rows change, and a second mandatory feature stops being a defect. — **repaired by `bdde132792`**, 2026-09-15; `DHCP-F-DECLINE` reads `partial` now.
+3. **Decide what the model claims about RFC 6842.** Two options, and the matrix does not choose between them. Either implement it — the server returns the option it received and the client compares it, which is a small change on both sides — or state in the NED documentation of both applications that the model implements RFC 2131 without the documents that update it. The second option costs nothing and makes the `out of claim` verdict correct rather than merely true; the first closes gaps 5 and 6.
+4. **A documentation task with no code behind it.** RFC 2132 is claimed in a release note from 2014 and in neither NED file, although the model implements thirteen of its options and cannot work without §9.6. Naming it beside RFC 2131 in both NED files would make the claim match the code.
 
-Item 4 is the `undocumented` direction of the matrix in a mild form: the model does more than it
-claims, and the table above has no row for it because the missing claim is a document and not a
-feature.
+Item 4 is the `undocumented` direction of the matrix in a mild form: the model does more than it claims, and the table above has no row for it because the missing claim is a document and not a feature.
 
-5. **Write the thirteen checks the pass owes**, from
-   [the debt table](coverage.md#the-coverage-debt-the-checks-this-pass-owes). Four mockups
-   clear eleven of them, and two features leave `unverified`. This is the largest of the five items
-   and the only one that is test work rather than model work.
+5. **Write the thirteen checks the pass owes**, from [the debt table](coverage.md#the-coverage-debt-the-checks-this-pass-owes). Four mockups clear eleven of them, and two features leave `unverified`. This is the largest of the five items and the only one that is test work rather than model work.

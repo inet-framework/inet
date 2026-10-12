@@ -2,20 +2,11 @@
 
 > **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [results.md](results.md), [test-anatomy.md](../../../design/test-anatomy.md)
 
-Step 9 artifact of the standards test workflow. For each check, this document records the
-category the check belongs to, confirmed after the run, and the reason. The categories and
-what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories);
-the rule that the category must match the claim is
-[TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
+Step 9 artifact of the standards test workflow. For each check, this document records the category the check belongs to, confirmed after the run, and the reason. The categories and what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories); the rule that the category must match the claim is [TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
 
 ## The decision, per check
 
-All 32 checks of this pass are **protocol tests**, and their 47 tests are all in
-`tests/protocol/mld/`. The decision is the one of the IGMP twin,
-[`igmp/categories.md`](../igmp/categories.md): for the classes `wire` and `end-to-end`, the
-prediction of step 3 held; for the class `internal`, which 24 checks hold, it did not,
-because MLD state shows on the link — in the Reports, the Queries and the forwarded datagrams —
-and a check reads it there.
+All 32 checks of this pass are **protocol tests**, and their 47 tests are all in `tests/protocol/mld/`. The decision is the one of the IGMP twin, [`igmp/categories.md`](../igmp/categories.md): for the classes `wire` and `end-to-end`, the prediction of step 3 held; for the class `internal`, which 24 checks hold, it did not, because MLD state shows on the link — in the Reports, the Queries and the forwarded datagrams — and a check reads it there.
 
 | Check | Observation class of its statements | Category | Reason |
 | --- | --- | --- | --- |
@@ -54,30 +45,15 @@ and a check reads it there.
 
 ### The checks with a time window, and why they are not statistical tests
 
-Most checks compare instants against bounds that the standard gives as figures: a Report within
-10 ms of its request, a repetition within 1 s, an answer within the Maximum Response Delay and
-not within 1 ms of the Query, Queries 31.25 s and 125 s apart, a querier that takes over 255 s
-after the last Query of the other router, a forwarding that stops within the Last Listener Query
-Time or the Multicast Address Listening Interval, and a host that leaves MLDv1 mode between 290
-and 293 seconds. One run can break each bound; none of them tests the shape of a distribution.
+Most checks compare instants against bounds that the standard gives as figures: a Report within 10 ms of its request, a repetition within 1 s, an answer within the Maximum Response Delay and not within 1 ms of the Query, Queries 31.25 s and 125 s apart, a querier that takes over 255 s after the last Query of the other router, a forwarding that stops within the Last Listener Query Time or the Multicast Address Listening Interval, and a host that leaves MLDv1 mode between 290 and 293 seconds. One run can break each bound; none of them tests the shape of a distribution.
 
 ### The checks that read the octets
 
-The checksum of a Report and of a Query is the one field that the checks read from the octets:
-`mldChecksumOk` of [`MldChecks.h`](../../../../../tests/protocol/mld/MldChecks.h) serializes the
-MLD message and sums it with the pseudo-header of RFC 8200 §8.1. The Hop-by-Hop Options header
-and its Router Alert option are read from the chunk of the extension header. Every other field
-is read from the message as it holds its fields. The whole bit layout, the floating-point codes
-and the deserializer are a serializer test (below).
+The checksum of a Report and of a Query is the one field that the checks read from the octets: `mldChecksumOk` of [`MldChecks.h`](../../../../../tests/protocol/mld/MldChecks.h) serializes the MLD message and sums it with the pseudo-header of RFC 8200 §8.1. The Hop-by-Hop Options header and its Router Alert option are read from the chunk of the extension header. Every other field is read from the message as it holds its fields. The whole bit layout, the floating-point codes and the deserializer are a serializer test (below).
 
 ### The test modules of the mockups
 
-Two modules of [`MldChecks.h`](../../../../../tests/protocol/mld/MldChecks.h) stand in for parts
-that are outside MLD. `MldRequests` plays the sockets of a host: it makes the calls of the
-service interface of RFC 9777 §3 at fixed instants. `MulticastLeafRoute6` plays the multicast
-routing protocol of the router: one route from L2 to L1, with L1 as a leaf. Neither module
-changes a behavior of MLD, and the tests stay protocol tests. The `ScenarioManager` of the tests
-breaks and restores a link, which plays a node that leaves or joins L1.
+Two modules of [`MldChecks.h`](../../../../../tests/protocol/mld/MldChecks.h) stand in for parts that are outside MLD. `MldRequests` plays the sockets of a host: it makes the calls of the service interface of RFC 9777 §3 at fixed instants. `MulticastLeafRoute6` plays the multicast routing protocol of the router: one route from L2 to L1, with L1 as a leaf. Neither module changes a behavior of MLD, and the tests stay protocol tests. The `ScenarioManager` of the tests breaks and restores a link, which plays a node that leaves or joins L1.
 
 ## The statements that belong in another suite
 
@@ -91,6 +67,4 @@ breaks and restores a link, which plays a node that leaves or joins L1.
 
 ## A category this pass did not need
 
-No check needs a module test: every checked behavior shows in a message on a link or in a
-forwarded datagram, also the state of the class `internal`. No check needs a fingerprint test:
-the pass locks behaviors to the standard, not trajectories to a reference run.
+No check needs a module test: every checked behavior shows in a message on a link or in a forwarded datagram, also the state of the class `internal`. No check needs a fingerprint test: the pass locks behaviors to the standard, not trajectories to a reference run.

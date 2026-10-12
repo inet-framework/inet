@@ -2,22 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around OSPF for IPv6 (OSPFv3), records which document governs each contested clause, and
-pins the set that a level 2 pass tests against. RFC 5340 states its own relationship to OSPF
-version 2 in its own words, `rfc5340.txt:698-699`: "the basic OSPF mechanisms remain
-unchanged from those documented in [OSPFV2]. These mechanisms are briefly outlined in
-Section 4 of [OSPFV2]." A large share of the in-scope set is therefore RFC 2328 clauses that
-RFC 5340 points at, read from the same text as [`ospfv2/standards.md`](../ospfv2/standards.md).
+Step 2 artifact of the standards test workflow. This document maps the family of standards around OSPF for IPv6 (OSPFv3), records which document governs each contested clause, and pins the set that a level 2 pass tests against. RFC 5340 states its own relationship to OSPF version 2 in its own words, `rfc5340.txt:698-699`: "the basic OSPF mechanisms remain unchanged from those documented in [OSPFV2]. These mechanisms are briefly outlined in Section 4 of [OSPFV2]." A large share of the in-scope set is therefore RFC 2328 clauses that RFC 5340 points at, read from the same text as [`ospfv2/standards.md`](../ospfv2/standards.md).
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -26,8 +17,7 @@ claims of the model. It writes no catalog, no feature map and no test.
 | level 4, Dynamics | RFC 5340 §4.2.1.1 (sending Hello packets) and the timers RFC 2328 §9.5, §13.3, §13.6, §14 and §14.1 govern unchanged (see the mapping table) | the periodic Hello, the retransmission of an unacknowledged LSA, and the aging of the database are timers |
 | level 5, Complete | RFC 5340 §4.4.3.4 to §4.4.3.7 (Inter-Area-Prefix-LSAs, Inter-Area-Router-LSAs, AS-External-LSAs, NSSA-LSAs), §4.7 (virtual links), §4.8.3 to §4.8.5 (inter-area, transit-area and AS external/NSSA route calculation), §4.9 and §4.9.1 (multiple interfaces to one link, the Standby interface state); RFC 6845 (the hybrid broadcast and point-to-multipoint interface type); RFC 6860 (hiding transit-only networks); RFC 7503 (OSPFv3 autoconfiguration); RFC 8362 (the Extended LSA TLV encoding); RFC 5838 (address families); RFC 9454 (terminology) | more than one area, external and NSSA route redistribution, a second interface to the same link, and the optional extensions |
 
-What a pass actually reached is not recorded here. It is in
-[`model/ospfv3/coverage.md`](../../model/ospfv3/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/ospfv3/coverage.md`](../../model/ospfv3/coverage.md#achieved-level).
 
 ## Document list
 
@@ -45,30 +35,16 @@ What a pass actually reached is not recorded here. It is in
 
 Sources of the texts:
 
-- `rfc5340.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5340.txt) —
-  <https://www.rfc-editor.org/rfc/rfc5340.txt>, downloaded 2026-09-23. 94 pages, 5267 lines.
-- `rfc2328.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2328.txt), downloaded
-  2026-09-23 for [`ospfv2/standards.md`](../ospfv2/standards.md); reused here, not
-  re-downloaded, per the guide's rule that one document serves every protocol that uses it.
+- `rfc5340.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc5340.txt) — <https://www.rfc-editor.org/rfc/rfc5340.txt>, downloaded 2026-09-23. 94 pages, 5267 lines.
+- `rfc2328.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2328.txt), downloaded 2026-09-23 for [`ospfv2/standards.md`](../ospfv2/standards.md); reused here, not re-downloaded, per the guide's rule that one document serves every protocol that uses it.
 
-RFC 5340 uses the RFC 2119 convention (§1.1, "Requirements Notation"): upper-case "MUST" on
-29 lines, "SHOULD" on 14, "MAY" on 13, "SHALL" and "REQUIRED" once each, "RECOMMENDED" once.
-It also carries lower-case "must" (36 lines), "should" (69) and "may" (53) in descriptive
-prose, mostly where it paraphrases RFC 2328, which itself has no upper-case keyword at all
-(see [`ospfv2/standards.md`](../ospfv2/standards.md#document-list)).
+RFC 5340 uses the RFC 2119 convention (§1.1, "Requirements Notation"): upper-case "MUST" on 29 lines, "SHOULD" on 14, "MAY" on 13, "SHALL" and "REQUIRED" once each, "RECOMMENDED" once. It also carries lower-case "must" (36 lines), "should" (69) and "may" (53) in descriptive prose, mostly where it paraphrases RFC 2328, which itself has no upper-case keyword at all (see [`ospfv2/standards.md`](../ospfv2/standards.md#document-list)).
 
-RFC 5340 §2.6, `rfc5340.txt:379-388`, removes authentication from the protocol itself: "the
-'AuType' and 'Authentication' fields have been removed from the OSPF packet header... OSPF
-relies on the IP Authentication Header... and the IP Encapsulating Security Payload." OSPFv3
-has no authentication mechanism of its own to bring into scope at any level; the mechanism
-that protects an OSPFv3 exchange belongs to IPv6's own evidence tree, not this one.
+RFC 5340 §2.6, `rfc5340.txt:379-388`, removes authentication from the protocol itself: "the 'AuType' and 'Authentication' fields have been removed from the OSPF packet header... OSPF relies on the IP Authentication Header... and the IP Encapsulating Security Payload." OSPFv3 has no authentication mechanism of its own to bring into scope at any level; the mechanism that protects an OSPFv3 exchange belongs to IPv6's own evidence tree, not this one.
 
 ### Which RFC 2328 clauses this pass inherits
 
-RFC 5340 §4, `rfc5340.txt:715-762`, names a list of RFC 2328 clauses that it states are
-"completely unchanged" or "remain unchanged" for IPv6. §4.5, `rfc5340.txt:2214-2223`, adds
-five more that are "exactly the same." §4.8.1, `rfc5340.txt:2505-2506`, states its
-shortest-path calculation is "identical" to RFC 2328's, with named exceptions.
+RFC 5340 §4, `rfc5340.txt:715-762`, names a list of RFC 2328 clauses that it states are "completely unchanged" or "remain unchanged" for IPv6. §4.5, `rfc5340.txt:2214-2223`, adds five more that are "exactly the same." §4.8.1, `rfc5340.txt:2505-2506`, states its shortest-path calculation is "identical" to RFC 2328's, with named exceptions.
 
 | Mechanism | RFC 5340 | Inherits from RFC 2328 |
 | --- | --- | --- |
@@ -80,10 +56,7 @@ shortest-path calculation is "identical" to RFC 2328's, with named exceptions.
 | Flooding: receiving and sending Link State Updates, installing LSAs in the database | modified for flooding scope and the IPv6 LSA reorganization, `rfc5340.txt:2224-2231` | §13 and §13.3 (governing text is now RFC 5340 §4.5.1 and §4.5.2); §13.2 (governing text is now RFC 5340 §4.5.3) |
 | Shortest-path tree for one area | "identical...with the following exceptions," `rfc5340.txt:2505-2506` | §16.1 (governing text is now RFC 5340 §4.8.1, which states the exceptions) |
 
-RFC 9454 renames the same "master/slave" and "MS bit" terms this table's Database
-Description row inherits to "Leader/Follower" and the "L bit," inside RFC 5340 as well as
-RFC 2328 ([`ospfv2/standards.md`](../ospfv2/standards.md#document-list)). The update states
-the operation is not modified.
+RFC 9454 renames the same "master/slave" and "MS bit" terms this table's Database Description row inherits to "Leader/Follower" and the "L bit," inside RFC 5340 as well as RFC 2328 ([`ospfv2/standards.md`](../ospfv2/standards.md#document-list)). The update states the operation is not modified.
 
 ## Override table
 

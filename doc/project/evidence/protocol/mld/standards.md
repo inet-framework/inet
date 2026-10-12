@@ -2,23 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around Multicast Listener Discovery, records which document governs each contested clause,
-and pins the set that the next pass tests against. MLD is the IPv6 line of descent that
-parallels IGMP's IPv4 line: version 1 and version 2 describe the same state machines RFC 9776
-and RFC 9777 describe for IGMP, over the two address families. Both pairs reached Internet
-Standard on the same day, March 2025. [`igmp/standards.md`](../igmp/standards.md) is the
-parallel map; the correspondence table below lines up the two families section by section.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around Multicast Listener Discovery, records which document governs each contested clause, and pins the set that the next pass tests against. MLD is the IPv6 line of descent that parallels IGMP's IPv4 line: version 1 and version 2 describe the same state machines RFC 9776 and RFC 9777 describe for IGMP, over the two address families. Both pairs reached Internet Standard on the same day, March 2025. [`igmp/standards.md`](../igmp/standards.md) is the parallel map; the correspondence table below lines up the two families section by section.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the
-claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the
-feature map, the checks and the tests of the normal path.
+**Level 2 — Core** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). The level 1 pass of 2026-09-23 mapped the family, pinned the in-scope set and recorded the claims of the model. The level 2 pass of 2026-09-24 wrote the catalogs of the in-scope set, the feature map, the checks and the tests of the normal path.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -27,8 +17,7 @@ feature map, the checks and the tests of the normal path.
 | level 4, Dynamics | RFC 9777 §9 in full: the Multicast Address Listening Interval, the Other Querier Present Interval, the Older Version Querier/Host Present Interval, the startup and last-listener query counts and intervals — one of which changed formula from RFC 2710/RFC 3810 to RFC 9777 (see the override table) | the timers and the retransmission counts that decide how fast the router notices a departed listener |
 | level 5, Complete | RFC 4604 (SSM-aware behavior for MLDv2); querier election and MLD snooping | a router or host that restricts itself to the SSM address range; a link with more than one querier |
 
-What a pass actually reached is not recorded here. It is in
-[`model/mld/coverage.md`](../../model/mld/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/mld/coverage.md`](../../model/mld/coverage.md#achieved-level).
 
 ## Document list
 
@@ -42,24 +31,15 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc9777.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9777.txt) —
-  <https://www.rfc-editor.org/rfc/rfc9777.txt>, downloaded 2026-09-23.
-- `rfc2710.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2710.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2710.txt>, downloaded 2026-09-23.
-- RFC 4443 (ICMPv6) is not downloaded again for this protocol either; every MLD message is an
-  ICMPv6 message (types 130/131/132/143), and it belongs to the ipv6 pass, already downloaded as
-  [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt) — see
-  [`ipv6/standards.md`](../ipv6/standards.md#document-list).
+- `rfc9777.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc9777.txt) — <https://www.rfc-editor.org/rfc/rfc9777.txt>, downloaded 2026-09-23.
+- `rfc2710.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2710.txt) — <https://www.rfc-editor.org/rfc/rfc2710.txt>, downloaded 2026-09-23.
+- RFC 4443 (ICMPv6) is not downloaded again for this protocol either; every MLD message is an ICMPv6 message (types 130/131/132/143), and it belongs to the ipv6 pass, already downloaded as [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt) — see [`ipv6/standards.md`](../ipv6/standards.md#document-list).
 
-`grep -c '\bMUST\b' rfc9777.txt` counts 44 lines, `\bSHOULD\b` counts 15, `\bMAY\b` counts 4.
-`rfc2710.txt` counts 17 `MUST` lines, 5 `SHOULD` and 3 `MAY`; both documents formally adopt
-the RFC 2119 keywords.
+`grep -c '\bMUST\b' rfc9777.txt` counts 44 lines, `\bSHOULD\b` counts 15, `\bMAY\b` counts 4. `rfc2710.txt` counts 17 `MUST` lines, 5 `SHOULD` and 3 `MAY`; both documents formally adopt the RFC 2119 keywords.
 
 ### Where IGMP and MLD correspond
 
-The two documents share one editor and one structure. Section numbers differ by exactly one,
-starting at §2, because MLD carries an extra "Protocol Overview" section IGMP folds into its
-introduction:
+The two documents share one editor and one structure. Section numbers differ by exactly one, starting at §2, because MLD carries an extra "Protocol Overview" section IGMP folds into its introduction:
 
 | Subject | RFC 9776 (IGMP) | RFC 9777 (MLD) |
 | --- | --- | --- |
@@ -71,8 +51,7 @@ introduction:
 | Interoperation with the older version | §7 | §8 |
 | Timers and defaults | §8 | §9 |
 
-RFC 2236 and RFC 2710 correspond less exactly, because RFC 2710 was written after RFC 2236
-and restructures around a message-format section RFC 2236 does not have:
+RFC 2236 and RFC 2710 correspond less exactly, because RFC 2710 was written after RFC 2236 and restructures around a message-format section RFC 2236 does not have:
 
 | Subject | RFC 2236 (IGMPv2) | RFC 2710 (MLDv1) |
 | --- | --- | --- |
@@ -82,26 +61,10 @@ and restructures around a message-format section RFC 2236 does not have:
 
 Four relationship notes the register alone does not give, in the same shape as the IGMP ones:
 
-- **RFC 2710 is not marked obsoleted**, by RFC 3810 or by RFC 9777. Both later documents
-  `update` it, and MLDv1 report/query/done procedures stay governed by RFC 2710's own text
-  where RFC 9777 does not restate them.
-- **RFC 9777 is the 2025 Internet Standard revision of RFC 3810**, published the same month as
-  RFC 9776. Its "Summary of Changes" appendix has two parts: §B.1 against MLDv1
-  (`rfc9777.txt:2966-3030`) and §B.2 against RFC 3810 (`rfc9777.txt:3031-3046`). §B.2 names
-  "Erratum 6725" for the Group Membership Interval Timer change — the same erratum number
-  RFC 9776's Appendix C names for IGMP's identical formula fix (`rfc9776.txt:2523-2545`),
-  confirming the two changes are one correction applied to both documents, not independent
-  drift. §B.2's other three items (Erratum 4773, a Resv-field definition; Erratum 5977, which
-  addresses require an MLD message; a Reserved-to-Flags field rename for a future IANA
-  registry) touch no clause this pass brought into scope.
-- **RFC 9777 did not carry every RFC 9776-style fix over.** RFC 9776 changed IGMP's Older
-  Version Querier Present Interval formula and downgraded it to a `SHOULD`
-  (`rfc9776.txt:2110-2122`); RFC 9777's equivalent clause, §9.12, is unchanged from RFC 3810
-  and stays a `MUST` (`rfc9777.txt:2622-2631`). The two documents are siblings, not mirrors —
-  the pass that keeps their maps parallel still has to check each clause on its own.
-- **RFC 3590 is a narrow, orphaned companion.** It fixes the source address a node chooses for
-  an MLD message it sends while its own address is still tentative (during SLAAC). Neither
-  RFC 3810 nor RFC 9777 names it, so the later text does not carry it forward.
+- **RFC 2710 is not marked obsoleted**, by RFC 3810 or by RFC 9777. Both later documents `update` it, and MLDv1 report/query/done procedures stay governed by RFC 2710's own text where RFC 9777 does not restate them.
+- **RFC 9777 is the 2025 Internet Standard revision of RFC 3810**, published the same month as RFC 9776. Its "Summary of Changes" appendix has two parts: §B.1 against MLDv1 (`rfc9777.txt:2966-3030`) and §B.2 against RFC 3810 (`rfc9777.txt:3031-3046`). §B.2 names "Erratum 6725" for the Group Membership Interval Timer change — the same erratum number RFC 9776's Appendix C names for IGMP's identical formula fix (`rfc9776.txt:2523-2545`), confirming the two changes are one correction applied to both documents, not independent drift. §B.2's other three items (Erratum 4773, a Resv-field definition; Erratum 5977, which addresses require an MLD message; a Reserved-to-Flags field rename for a future IANA registry) touch no clause this pass brought into scope.
+- **RFC 9777 did not carry every RFC 9776-style fix over.** RFC 9776 changed IGMP's Older Version Querier Present Interval formula and downgraded it to a `SHOULD` (`rfc9776.txt:2110-2122`); RFC 9777's equivalent clause, §9.12, is unchanged from RFC 3810 and stays a `MUST` (`rfc9777.txt:2622-2631`). The two documents are siblings, not mirrors — the pass that keeps their maps parallel still has to check each clause on its own.
+- **RFC 3590 is a narrow, orphaned companion.** It fixes the source address a node chooses for an MLD message it sends while its own address is still tentative (during SLAAC). Neither RFC 3810 nor RFC 9777 names it, so the later text does not carry it forward.
 
 ## Override table
 
@@ -122,8 +85,7 @@ The set that a level 2 pass tests against:
 | RFC 9777 | March 2025, Internet Standard (STD 101); §5 to §9 | [`standard/rfc9777/catalog.md`](../../standard/rfc9777/catalog.md) |
 | RFC 2710 | October 1999, Proposed Standard; §5 to §7 | [`standard/rfc2710/catalog.md`](../../standard/rfc2710/catalog.md) |
 
-RFC 4443 stays a background companion, exactly as in the ipv6 pass: every MLD message is an
-ICMPv6 message, and the checks tolerate its general rules without re-deriving them.
+RFC 4443 stays a background companion, exactly as in the ipv6 pass: every MLD message is an ICMPv6 message, and the checks tolerate its general rules without re-deriving them.
 
 Out of scope, with the reason:
 

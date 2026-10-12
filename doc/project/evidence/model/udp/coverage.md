@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [rfc768/catalog.md](../../standard/rfc768/catalog.md), [rfc792/catalog.md](../../standard/rfc792/catalog.md), [rfc1122/catalog.md](../../standard/rfc1122/catalog.md), [features.md](../../protocol/udp/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the UDP workflow. Every other artifact
-of this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the UDP workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -22,11 +20,7 @@ State of the ledger, from this run:
 
 ## Statement coverage
 
-`Status` is the state of the workflow, not of the standard: `selected` (a check targets it),
-`covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet
-chosen), `later` (needs a toolset beyond the current level, or another test category),
-`no check` (no check of two nodes on a link can observe it; the reason is in
-[`checks.md`](../../protocol/udp/checks.md#statements-that-no-check-carries)).
+`Status` is the state of the workflow, not of the standard: `selected` (a check targets it), `covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet chosen), `later` (needs a toolset beyond the current level, or another test category), `no check` (no check of two nodes on a link can observe it; the reason is in [`checks.md`](../../protocol/udp/checks.md#statements-that-no-check-carries)).
 
 | Catalog ID | Status | Check section | Test file | Verdict |
 | --- | --- | --- | --- | --- |
@@ -58,17 +52,11 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC1122-UAPI-2](../../standard/rfc1122/catalog.md#rfc1122-uapi-2) | no check | — | — | at the program interface; and a may |
 | [RFC1122-UAPI-3](../../standard/rfc1122/catalog.md#rfc1122-uapi-3) | no check | — | — | §3.4 is an interface catalog, not a behaviour on a link |
 
-27 entries. 17 reached a test: 15 with a PASS and 2 with a FAIL -- 1 of them a defect with a
-blocked repair and 1 an unimplemented behavior -- that names a model gap. 9 carry `no check`,
-each with its reason, and 1 waits for a unit-test suite. The nine
-without a check are all statements about the interface between UDP and a program; the list
-is in [`checks.md`](../../protocol/udp/checks.md#statements-that-no-check-carries).
+27 entries. 17 reached a test: 15 with a PASS and 2 with a FAIL -- 1 of them a defect with a blocked repair and 1 an unimplemented behavior -- that names a model gap. 9 carry `no check`, each with its reason, and 1 waits for a unit-test suite. The nine without a check are all statements about the interface between UDP and a program; the list is in [`checks.md`](../../protocol/udp/checks.md#statements-that-no-check-carries).
 
 ## Feature support
 
-The rule of step 7: `supported` when every core check ran and passed, `partial` when a core
-check passed and another core check failed as a model gap or did not run, `not supported`
-when every core check that ran failed as a model gap, `untested` when no core check ran.
+The rule of step 7: `supported` when every core check ran and passed, `partial` when a core check passed and another core check failed as a model gap or did not run, `not supported` when every core check that ran failed as a model gap, `untested` when no core check ran.
 
 | Feature | Core checks and their state | Support |
 | --- | --- | --- |
@@ -80,54 +68,28 @@ when every core check that ran failed as a model gap, `untested` when no core ch
 | [UDP-F-ERROR-DELIVERY](../../protocol/udp/features.md#udp-f-error-delivery) | RFC1122-UERR-1 has no check | **untested** |
 | [UDP-F-APP-INTERFACE](../../protocol/udp/features.md#udp-f-app-interface) | RFC1122-UAPI-1 and UMH-2 PASS; UOPT-1, UOPT-2 and UMH-1 have no check | **partial** |
 
-Seven features: three supported, three partial, one untested. Pass 1 called all four features
-of level 2 supported. `UDP-F-CHECKSUM` is partial now: RFC 1122 entered the in-scope set, and
-it demands of a host what RFC 768 only describes. `UDP-F-HEADER` also went partial, for a
-different reason: a defect in a result filter, not in UDP, stopped the run at the minimum
-length. `d63f1fdef5` repaired it on 2026-09-15, and the feature is supported again.
+Seven features: three supported, three partial, one untested. Pass 1 called all four features of level 2 supported. `UDP-F-CHECKSUM` is partial now: RFC 1122 entered the in-scope set, and it demands of a host what RFC 768 only describes. `UDP-F-HEADER` also went partial, for a different reason: a defect in a result filter, not in UDP, stopped the run at the minimum length. `d63f1fdef5` repaired it on 2026-09-15, and the feature is supported again.
 
-1. `UDP-F-CHECKSUM` was supported when the question was "is a checksum present or absent".
-   RFC 1122 asks whether a host generates one by default and whether it is the right value.
-   The answer is no by default and yes in the computed mode; see gap 1.
-2. `UDP-F-HEADER` was supported for datagrams that carry data, and not yet for the minimum
-   of eight; gap 3. Commit `d63f1fdef5` fixed the result filter that stopped the run on an
-   empty payload, on 2026-09-15, and the feature is supported again.
-3. `UDP-F-INPUT-VALIDATION` is new. Half of it works well: a wrong checksum is discarded in
-   silence, confirmed from three sides. The other half, the invalid source address, is not
-   implemented at either layer; see gap 2.
-4. `UDP-F-ERROR-DELIVERY` is `untested`, not `not supported`. The model does implement the
-   path — `Udp::processIcmpv4Error` hands the report to the socket — but it hands it up as an
-   `Indication`, and the tester turns only packet signals into events. No verdict is claimed
-   where no check ran.
+1. `UDP-F-CHECKSUM` was supported when the question was "is a checksum present or absent". RFC 1122 asks whether a host generates one by default and whether it is the right value. The answer is no by default and yes in the computed mode; see gap 1.
+2. `UDP-F-HEADER` was supported for datagrams that carry data, and not yet for the minimum of eight; gap 3. Commit `d63f1fdef5` fixed the result filter that stopped the run on an empty payload, on 2026-09-15, and the feature is supported again.
+3. `UDP-F-INPUT-VALIDATION` is new. Half of it works well: a wrong checksum is discarded in silence, confirmed from three sides. The other half, the invalid source address, is not implemented at either layer; see gap 2.
+4. `UDP-F-ERROR-DELIVERY` is `untested`, not `not supported`. The model does implement the path — `Udp::processIcmpv4Error` hands the report to the socket — but it hands it up as an `Indication`, and the tester turns only packet signals into events. No verdict is claimed where no check ran.
 
 Three bounds that pass 1 recorded, and where they stand now:
 
-1. The minimum length of eight: **reached** at level 3. It was gap 3 until `d63f1fdef5`
-   repaired it on 2026-09-15; the minimum passes now.
-2. The checksum arithmetic: **reached** at level 3. Two tests establish the coverage from the
-   wire, and a third computes the value the standard defines and compares it with the field.
-   The bound is gone, and gap 1 is what it uncovered.
-3. `UDP-F-DELIVERY` still confirms the source port and address on the wire and not at the
-   program interface. This bound stands.
+1. The minimum length of eight: **reached** at level 3. It was gap 3 until `d63f1fdef5` repaired it on 2026-09-15; the minimum passes now.
+2. The checksum arithmetic: **reached** at level 3. Two tests establish the coverage from the wire, and a third computes the value the standard defines and compares it with the field. The bound is gone, and gap 1 is what it uncovered.
+3. `UDP-F-DELIVERY` still confirms the source port and address on the wire and not at the program interface. This bound stands.
 
 ## Achieved level
 
-**Level 3 partial.** Target: level 3, from
-[`standards.md`](../../protocol/udp/standards.md#target-level).
+**Level 3 partial.** Target: level 3, from [`standards.md`](../../protocol/udp/standards.md#target-level).
 
-The exit criterion of level 3 is that the catalogs hold every mandatory statement of the
-in-scope documents, including each MUST NOT, and that each one has a check.
+The exit criterion of level 3 is that the catalogs hold every mandatory statement of the in-scope documents, including each MUST NOT, and that each one has a check.
 
-**Hold** — the catalogs hold every statement of RFC 768, the port unreachable entry of
-RFC 792, and all 18 statements of RFC 1122 §4.1. Nothing of §4.1 was left out: the two other
-parts of that section hold no checkable statement.
+**Hold** — the catalogs hold every statement of RFC 768, the port unreachable entry of RFC 792, and all 18 statements of RFC 1122 §4.1. Nothing of §4.1 was left out: the two other parts of that section hold no checkable statement.
 
-**Does not hold** — of the 18 statements of §4.1, nine have a check that ran and nine have
-none. The nine without a check share one reason: they describe the interface between UDP and
-a program, and a check that watches two nodes on a link cannot see it. Five of the nine are a
-`must`. Until a module test can watch the gate between UDP and the program above it, level 3
-stays partial for this protocol. This is a limit of the toolset and not a verdict on the
-model.
+**Does not hold** — of the 18 statements of §4.1, nine have a check that ran and nine have none. The nine without a check share one reason: they describe the interface between UDP and a program, and a check that watches two nodes on a link cannot see it. Five of the nine are a `must`. Until a module test can watch the gate between UDP and the program above it, level 3 stays partial for this protocol. This is a limit of the toolset and not a verdict on the model.
 
 | Level | State | Evidence |
 | --- | --- | --- |
@@ -147,8 +109,4 @@ model.
 
 ## Out of scope
 
-What the two passes left out: the IP interface rule RFC768-IP-1, which is unit-test material;
-the options of RFC 9868, which are level 5; and the nine statements of RFC 1122 §4.1 that
-live at the interface between UDP and a program, which need a test category that watches a
-module gate and not a link. The checksum arithmetic and the RFC 1122 host requirements were
-out of scope after pass 1 and are in scope now.
+What the two passes left out: the IP interface rule RFC768-IP-1, which is unit-test material; the options of RFC 9868, which are level 5; and the nine statements of RFC 1122 §4.1 that live at the interface between UDP and a program, which need a test category that watches a module gate and not a link. The checksum arithmetic and the RFC 1122 host requirements were out of scope after pass 1 and are in scope now.

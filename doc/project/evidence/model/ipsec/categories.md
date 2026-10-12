@@ -2,22 +2,11 @@
 
 > **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [results.md](results.md), [test-anatomy.md](../../../design/test-anatomy.md)
 
-Step 9 artifact of the standards test workflow. For each check, this document records the
-category the check belongs to, confirmed after the run, and the reason. The categories and
-what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories);
-the rule that the category must match the claim is
-[TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
+Step 9 artifact of the standards test workflow. For each check, this document records the category the check belongs to, confirmed after the run, and the reason. The categories and what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories); the rule that the category must match the claim is [TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
 
 ## The decision, per check
 
-All 23 checks of this pass are **protocol tests**, and their 31 tests are all in
-`tests/protocol/ipsec/`. For the classes `wire` and `end-to-end`, the prediction that step 3
-made from the observation class held. For the class `internal`, it held too, for a reason of its
-own: the SPD and the SAD are databases inside a host, but IPsec exists to decide what crosses the
-boundary, so each entry shows in what leaves a host and in what its applications receive. A check
-reads the database through that effect. The class `encoding` is read from the chunks of a frame,
-because the model has no serializer for AH and ESP; the order and the lengths of the chunks are
-the layout on the wire.
+All 23 checks of this pass are **protocol tests**, and their 31 tests are all in `tests/protocol/ipsec/`. For the classes `wire` and `end-to-end`, the prediction that step 3 made from the observation class held. For the class `internal`, it held too, for a reason of its own: the SPD and the SAD are databases inside a host, but IPsec exists to decide what crosses the boundary, so each entry shows in what leaves a host and in what its applications receive. A check reads the database through that effect. The class `encoding` is read from the chunks of a frame, because the model has no serializer for AH and ESP; the order and the lengths of the chunks are the layout on the wire.
 
 | Check | Observation class of its statements | Category | Reason |
 | --- | --- | --- | --- |
@@ -56,7 +45,4 @@ the layout on the wire.
 
 ## A category this pass did not need
 
-No check needs a module test: every checked behavior shows in a packet on a link or in a
-datagram that a host delivers, also the SPD and SAD entries of the class `internal`. No check
-needs a fingerprint test: the pass locks behaviors to the standard, not trajectories to a
-reference run.
+No check needs a module test: every checked behavior shows in a packet on a link or in a datagram that a host delivers, also the SPD and SAD entries of the class `internal`. No check needs a fingerprint test: the pass locks behaviors to the standard, not trajectories to a reference run.

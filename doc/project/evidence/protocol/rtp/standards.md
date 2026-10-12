@@ -2,21 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around the Real-time Transport Protocol and its companion control protocol, RTCP, records
-which document governs each contested clause, and pins the set that the next pass tests
-against. RTP has one base document and one profile document that together define the normal
-exchange; the base document also has ten later documents that update it, and the profile
-document has three.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around the Real-time Transport Protocol and its companion control protocol, RTCP, records which document governs each contested clause, and pins the set that the next pass tests against. RTP has one base document and one profile document that together define the normal exchange; the base document also has ten later documents that update it, and the profile document has three.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -25,8 +17,7 @@ claims of the model. It writes no catalog, no feature map and no test.
 | level 4, Dynamics | nothing new | §6.2 and §6.3 hold the RTCP transmission-interval algorithm, the SSRC timeout, and the reduced-interval rules — a control loop with several time constants |
 | level 5, Complete | RFC 3550 §6.7 (APP), §7 (translators and mixers); every document that updates RFC 3550 or RFC 3551; RFC 2250 (a second payload format) | an application-defined packet, a topology with more than two endpoints, each later extension, and a payload format the normal path does not need |
 
-What a pass actually reached is not recorded here. It is in
-[`model/rtp/coverage.md`](../../model/rtp/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/rtp/coverage.md`](../../model/rtp/coverage.md#achieved-level).
 
 ## Document list
 
@@ -51,23 +42,12 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc3550.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3550.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3550.txt>, downloaded 2026-09-23.
-- `rfc3551.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3551.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3551.txt>, downloaded 2026-09-23.
+- `rfc3550.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3550.txt) — <https://www.rfc-editor.org/rfc/rfc3550.txt>, downloaded 2026-09-23.
+- `rfc3551.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3551.txt) — <https://www.rfc-editor.org/rfc/rfc3551.txt>, downloaded 2026-09-23.
 
-Both base documents were published as Draft Standard, one step short of full Internet
-Standard under the process in force in 2003; the register's current `status` field
-(distinct from the `pub_status` field this pass fetched) shows both have since reached
-Internet Standard, without a text change. RFC 1889 and
-RFC 1890 — the documents this protocol's own model names, see
-[`conformance.md`](../../model/rtp/conformance.md#part-1--the-claims) — were both obsoleted in
-2003 by RFC 3550 and RFC 3551, over twenty years before this pass.
+Both base documents were published as Draft Standard, one step short of full Internet Standard under the process in force in 2003; the register's current `status` field (distinct from the `pub_status` field this pass fetched) shows both have since reached Internet Standard, without a text change. RFC 1889 and RFC 1890 — the documents this protocol's own model names, see [`conformance.md`](../../model/rtp/conformance.md#part-1--the-claims) — were both obsoleted in 2003 by RFC 3550 and RFC 3551, over twenty years before this pass.
 
-RFC 3550 uses the keywords of RFC 2119, with the boilerplate at `rfc3550.txt:267`. `MUST` is on
-82 lines, `SHOULD` on 87, `MAY` on 85, `SHALL` on 1. RFC 3551 also uses them, with the
-boilerplate at `rfc3551.txt:156`. `MUST` is on 21 lines, `SHOULD` on 30, `MAY` on 31, `SHALL`
-on 12.
+RFC 3550 uses the keywords of RFC 2119, with the boilerplate at `rfc3550.txt:267`. `MUST` is on 82 lines, `SHOULD` on 87, `MAY` on 85, `SHALL` on 1. RFC 3551 also uses them, with the boilerplate at `rfc3551.txt:156`. `MUST` is on 21 lines, `SHOULD` on 30, `MAY` on 31, `SHALL` on 12.
 
 ## Override table
 
@@ -77,8 +57,7 @@ on 12.
 | The audio/video profile and its payload type table | RFC 1890 (1996) defined it first | RFC 3551 §6, `rfc3551.txt:1756-1830`, restates and obsoletes RFC 1890 in full | RFC 3551 | yes, level 2, for payload type 10 |
 | The RTCP CNAME construction rule | Neither base document mandates a specific algorithm to derive the CNAME SDES item; RFC 3550 §6.5.1 gives examples only | RFC 6222 (2011), then RFC 7022 (2013) after RFC 6222 was itself obsoleted, gives a normative algorithm | RFC 7022, when this area enters scope | no; level 5 |
 
-No clause of any later document contradicts a clause of RFC 3550 or RFC 3551 within the level-2
-slice above; every one of the ten later documents adds an optional mechanism instead.
+No clause of any later document contradicts a clause of RFC 3550 or RFC 3551 within the level-2 slice above; every one of the ten later documents adds an optional mechanism instead.
 
 ## In-scope set
 

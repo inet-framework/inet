@@ -2,51 +2,28 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC3032-*` · **Stands on:** [standards.md](../../protocol/mpls/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow for RFC 3032, MPLS Label Stack Encoding, of
-January 2001, a document of the in-scope set of MPLS. The catalog comes from the RFC text
-only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow for RFC 3032, MPLS Label Stack Encoding, of January 2001, a document of the in-scope set of MPLS. The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc3032.txt`](../../../../../../standards/RFC/rfc3032.txt) —
-  MPLS Label Stack Encoding, January 2001. Downloaded 2026-09-23 from
-  <https://www.rfc-editor.org/rfc/rfc3032.txt>.
+- [`standards/RFC/rfc3032.txt`](../../../../../../standards/RFC/rfc3032.txt) — MPLS Label Stack Encoding, January 2001. Downloaded 2026-09-23 from <https://www.rfc-editor.org/rfc/rfc3032.txt>.
 
-The architecture is in [`rfc3031/catalog.md`](../rfc3031/catalog.md); RFC 3443 and RFC 5462
-update this document, and have catalogs of their own:
-[`rfc3443/catalog.md`](../rfc3443/catalog.md) and [`rfc5462/catalog.md`](../rfc5462/catalog.md).
-The in-scope sections are §2 to §5.
+The architecture is in [`rfc3031/catalog.md`](../rfc3031/catalog.md); RFC 3443 and RFC 5462 update this document, and have catalogs of their own: [`rfc3443/catalog.md`](../rfc3443/catalog.md) and [`rfc5462/catalog.md`](../rfc5462/catalog.md). The in-scope sections are §2 to §5.
 
-The family of documents and the in-scope set are in
-[`standards.md`](../../protocol/mpls/standards.md). The features these statements build are in
-[`features.md`](../../protocol/mpls/features.md).
+The family of documents and the in-scope set are in [`standards.md`](../../protocol/mpls/standards.md). The features these statements build are in [`features.md`](../../protocol/mpls/features.md).
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`mpls/coverage.md`](../../model/mpls/coverage.md). Keeping it out is deliberate: this catalog
-states what the standard says, so a new test or a new run must never force an edit here.
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`mpls/coverage.md`](../../model/mpls/coverage.md). Keeping it out is deliberate: this catalog states what the standard says, so a new test or a new run must never force an edit here.
 
-Quotes are verbatim. A reference such as `rfc3032.txt:1203-1205` points to lines of that
-file. Where a quote crosses a page break of the RFC, the reference names both line groups.
+Quotes are verbatim. A reference such as `rfc3032.txt:1203-1205` points to lines of that file. Where a quote crosses a page break of the RFC, the reference names both line groups.
 
-The entries were drafted section by section and merged; the sections are the areas below, in
-the order of the document.
+The entries were drafted section by section and merged; the sections are the areas below, in the order of the document.
 
 ## How to read an entry
 
 - **ID** — `RFC3032-AREA-n`. The ID is stable forever. New entries go at the end of an area.
 - **Quote** — the verbatim sentence, with a line reference into the text.
-- **Strength** — the word the document uses. RFC 3032 uses the keywords of RFC 2119 in capitals;
-  the entry records `must`, `must not`, `should`, `should not` or `may` for them (`must` for
-  REQUIRED), and `description` for a normative sentence with no keyword. Where the text writes a
-  keyword in lower case, the entry records the word and says so, for example `must (lower
-  case)`. An entry with two keywords names what each one covers. A step of a numbered procedure
-  that states an action is an entry of its own.
-- **Class** — how a test can observe the statement: `wire` (fields of a header on a link, or
-  the presence or absence of a packet), `end-to-end` (what an implementation accepts, delivers
-  or discards, seen in what it sends or delivers afterwards), `error-signal` (an ICMP error
-  report), `internal` (state or a database inside an implementation, an audit log), `encoding`
-  (the exact bit layout, sizes and alignment).
+- **Strength** — the word the document uses. RFC 3032 uses the keywords of RFC 2119 in capitals; the entry records `must`, `must not`, `should`, `should not` or `may` for them (`must` for REQUIRED), and `description` for a normative sentence with no keyword. Where the text writes a keyword in lower case, the entry records the word and says so, for example `must (lower case)`. An entry with two keywords names what each one covers. A step of a numbered procedure that states an action is an entry of its own.
+- **Class** — how a test can observe the statement: `wire` (fields of a header on a link, or the presence or absence of a packet), `end-to-end` (what an implementation accepts, delivers or discards, seen in what it sends or delivers afterwards), `error-signal` (an ICMP error report), `internal` (state or a database inside an implementation, an audit log), `encoding` (the exact bit layout, sizes and alignment).
 - **Check idea** — one or two sentences, still without implementation names.
 
 ## Index
@@ -144,8 +121,7 @@ the order of the document.
 > "Each label stack entry is represented by 4 octets." — §2.1, `rfc3032.txt:149`.
 
 - Strength: description. Class: encoding.
-- Check idea: capture a label stack entry on a link and check that it occupies exactly 4
-  octets.
+- Check idea: capture a label stack entry on a link and check that it occupies exactly 4 octets.
 
 ### RFC3032-ENC-2
 
@@ -154,8 +130,7 @@ the order of the document.
 > "|                Label                  | Exp |S|       TTL     |" — Figure 1, `rfc3032.txt:155`.
 
 - Strength: description. Class: encoding.
-- Check idea: capture a label stack entry on a link and check that its bits appear in this
-  order: Label, Exp, S, TTL.
+- Check idea: capture a label stack entry on a link and check that its bits appear in this order: Label, Exp, S, TTL.
 
 ### RFC3032-ENC-3
 
@@ -165,8 +140,7 @@ the order of the document.
 > Label." — Figure 1, `rfc3032.txt:158`, `rfc3032.txt:200`.
 
 - Strength: description. Class: encoding.
-- Check idea: capture a label stack entry and check that its Label field occupies 20 bits and
-  carries the label value.
+- Check idea: capture a label stack entry and check that its Label field occupies 20 bits and carries the label value.
 
 ### RFC3032-ENC-4
 
@@ -205,8 +179,7 @@ the order of the document.
 >    BEFORE any network layer headers." — §2.1, `rfc3032.txt:175-176`.
 
 - Strength: description. Class: wire.
-- Check idea: capture a labeled frame on a link and check that the label stack entries sit
-  after the data link layer headers and before the network layer header.
+- Check idea: capture a labeled frame on a link and check that the label stack entries sit after the data link layer headers and before the network layer header.
 
 ### RFC3032-ENC-8
 
@@ -216,8 +189,7 @@ the order of the document.
 >    earliest in the packet, and the bottom appears latest." — §2.1, `rfc3032.txt:176-177`.
 
 - Strength: description. Class: wire.
-- Check idea: capture a labeled packet with two or more label stack entries and check that the
-  top entry appears before the bottom entry in the packet.
+- Check idea: capture a labeled packet with two or more label stack entries and check that the top entry appears before the bottom entry in the packet.
 
 ### RFC3032-ENC-9
 
@@ -228,8 +200,7 @@ the order of the document.
 >    S bit set." — §2.1, `rfc3032.txt:177-179`.
 
 - Strength: description. Class: wire.
-- Check idea: capture a labeled packet and check that the network layer header starts
-  immediately after the label stack entry whose S bit is set.
+- Check idea: capture a labeled packet and check that the network layer header starts immediately after the label stack entry whose S bit is set.
 
 ### RFC3032-ENC-10
 
@@ -240,8 +211,7 @@ the order of the document.
 >          label stack entries." — §2.1, `rfc3032.txt:185-187`.
 
 - Strength: description. Class: wire.
-- Check idea: capture a labeled packet with several label stack entries and check that the S
-  bit is one only in the bottom entry and zero in every entry above it.
+- Check idea: capture a labeled packet with several label stack entries and check that the S bit is one only in the bottom entry and zero in every entry above it.
 
 ### RFC3032-ENC-11
 
@@ -254,8 +224,7 @@ the order of the document.
 >              IPv4 header." — §2.1, `rfc3032.txt:233-237`.
 
 - Strength: must (lower case). Class: wire.
-- Check idea: send a packet with label value 0 at the bottom of the stack and check that the
-  receiving LSR pops the label and forwards the packet on its IPv4 header.
+- Check idea: send a packet with label value 0 at the bottom of the stack and check that the receiving LSR pops the label and forwards the packet on its IPv4 header.
 
 ### RFC3032-ENC-12
 
@@ -270,9 +239,7 @@ the order of the document.
 >              beneath it in the stack." — §2.1, `rfc3032.txt:239-245`.
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a packet with label value 1 at the top of the stack, not at the bottom, and
-  check that the LSR delivers it to a local module while forwarding is decided by the label
-  beneath it.
+- Check idea: send a packet with label value 1 at the top of the stack, not at the bottom, and check that the LSR delivers it to a local module while forwarding is decided by the label beneath it.
 
 ### RFC3032-ENC-13
 
@@ -283,9 +250,7 @@ the order of the document.
 >              back onto the label stack before forwarding." — §2.1, `rfc3032.txt:245-247`.
 
 - Strength: should (lower case). Class: wire.
-- Check idea: send a packet with the Router Alert Label at the top, have the LSR forward it
-  further after local processing, and check that the outgoing packet still carries the Router
-  Alert Label on the stack.
+- Check idea: send a packet with the Router Alert Label at the top, have the LSR forward it further after local processing, and check that the outgoing packet still carries the Router Alert Label on the stack.
 
 ### RFC3032-ENC-14
 
@@ -298,8 +263,7 @@ the order of the document.
 >              IPv6 header." — §2.1, `rfc3032.txt:253-257`.
 
 - Strength: must (lower case). Class: wire.
-- Check idea: send a packet with label value 2 at the bottom of the stack and check that the
-  receiving LSR pops the label and forwards the packet on its IPv6 header.
+- Check idea: send a packet with label value 2 at the bottom of the stack and check that the receiving LSR pops the label and forwards the packet on its IPv6 header.
 
 ### RFC3032-ENC-15
 
@@ -314,8 +278,7 @@ the order of the document.
 >              replacement." — §2.1, `rfc3032.txt:259-265`.
 
 - Strength: may (lower case). Class: internal.
-- Check idea: assign the Implicit NULL Label as the next label for a packet and check that the
-  LSR pops the top label stack entry instead of replacing it.
+- Check idea: assign the Implicit NULL Label as the next label for a packet and check that the LSR pops the top label stack entry instead of replacing it.
 
 ### RFC3032-ENC-16
 
@@ -324,8 +287,7 @@ the order of the document.
 > "Values 4-15 are reserved." — §2.1, `rfc3032.txt:269`.
 
 - Strength: description. Class: wire.
-- Check idea: capture label stack entries on a link and check that none of them carries a
-  label value from 4 through 15, other than as later assigned.
+- Check idea: capture label stack entries on a link and check that none of them carries a label value from 4 through 15, other than as later assigned.
 
 ## Determining the network layer protocol
 
@@ -338,8 +300,7 @@ the order of the document.
 >    based on the packet's network layer header." — §2.2, `rfc3032.txt:273-275`.
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a packet whose last label is popped at an LSR and check that the LSR then
-  processes the packet using its network layer header.
+- Check idea: send a packet whose last label is popped at an LSR and check that the LSR then processes the packet using its network layer header.
 
 ### RFC3032-NLP-2
 
@@ -350,8 +311,7 @@ the order of the document.
 >    packet's network layer protocol." — §2.2, `rfc3032.txt:275-277`.
 
 - Strength: must (lower case). Class: internal.
-- Check idea: send a labeled packet whose last label is popped at an LSR and check that the LSR
-  determines the packet's network layer protocol.
+- Check idea: send a labeled packet whose last label is popped at an LSR and check that the LSR determines the packet's network layer protocol.
 
 ### RFC3032-NLP-3
 
@@ -365,9 +325,7 @@ the order of the document.
 >    network layer header itself." — §2.2, `rfc3032.txt:277-278`, `rfc3032.txt:287-290`.
 
 - Strength: must (lower case). Class: internal.
-- Check idea: pop the bottom label of a packet at an LSR and check that the LSR determines the
-  network layer protocol from the label value alone, or from the label value together with the
-  network layer header.
+- Check idea: pop the bottom label of a packet at an LSR and check that the LSR determines the network layer protocol from the label value alone, or from the label value together with the network layer header.
 
 ### RFC3032-NLP-4
 
@@ -381,9 +339,7 @@ the order of the document.
 >    the network layer header." — §2.2, `rfc3032.txt:292-297`.
 
 - Strength: must (lower case). Class: internal.
-- Check idea: have an LSR push the first label onto an unlabeled network layer packet and check
-  that the assigned label value is dedicated to one network layer, or to a set of network
-  layers whose packets can be told apart by their header.
+- Check idea: have an LSR push the first label onto an unlabeled network layer packet and check that the assigned label value is dedicated to one network layer, or to a set of network layers whose packets can be told apart by their header.
 
 ### RFC3032-NLP-5
 
@@ -394,8 +350,7 @@ the order of the document.
 >    value must also be one which meets the same criteria." — §2.2, `rfc3032.txt:297-299`.
 
 - Strength: must (lower case). Class: internal.
-- Check idea: have an LSR replace a label during a packet's transit and check that the new
-  label value still meets the network-layer-identifiability criterion the original label met.
+- Check idea: have an LSR replace a label during a packet's transit and check that the new label value still meets the network-layer-identifiability criterion the original label met.
 
 ### RFC3032-NLP-6
 
@@ -409,9 +364,7 @@ the order of the document.
 >    specified above for labels which appear at the bottom of the stack." — §2.2, `rfc3032.txt:310-315`.
 
 - Strength: must (lower case). Class: internal.
-- Check idea: configure a network where intermediate LSRs generate protocol-specific error
-  messages for labeled packets and check that every label in the stack, not only the bottom
-  one, meets the network-layer-identifiability criterion.
+- Check idea: configure a network where intermediate LSRs generate protocol-specific error messages for labeled packets and check that every label in the stack, not only the bottom one, meets the network-layer-identifiability criterion.
 
 ### RFC3032-NLP-7
 
@@ -424,9 +377,7 @@ the order of the document.
 >    discarded." — §2.2, `rfc3032.txt:317-321`.
 
 - Strength: must. Class: end-to-end.
-- Check idea: send an undeliverable labeled packet whose network layer protocol cannot be
-  identified, or for which no protocol-dependent error rule exists, and check that the LSR
-  discards it and sends no error message.
+- Check idea: send an undeliverable labeled packet whose network layer protocol cannot be identified, or for which no protocol-dependent error rule exists, and check that the LSR discards it and sends no error message.
 
 ## ICMP messages for labeled IP packets
 
@@ -438,8 +389,7 @@ the order of the document.
 >         labeled packet is an IP packet" — §2.3, `rfc3032.txt:330-331`.
 
 - Strength: must (lower case). Class: error-signal.
-- Check idea: present an undeliverable labeled IP packet to an LSR and check that it generates
-  an ICMP message only when it can first determine that the packet is an IP packet.
+- Check idea: present an undeliverable labeled IP packet to an LSR and check that it generates an ICMP message only when it can first determine that the packet is an IP packet.
 
 ### RFC3032-ICMP-2
 
@@ -449,9 +399,7 @@ the order of the document.
 >         source address." — §2.3, `rfc3032.txt:333-334`.
 
 - Strength: must (lower case). Class: error-signal.
-- Check idea: present an undeliverable labeled IP packet to an LSR whose source address it can,
-  and separately cannot, route to, and check that it generates the ICMP message only in the
-  first case.
+- Check idea: present an undeliverable labeled IP packet to an LSR whose source address it can, and separately cannot, route to, and check that it generates the ICMP message only in the first case.
 
 ### RFC3032-ICMP-3
 
@@ -461,9 +409,7 @@ the order of the document.
 >    the ICMP message, and then label switch the ICMP message." — §2.3.2, `rfc3032.txt:389-390`.
 
 - Strength: may (lower case). Class: error-signal.
-- Check idea: have an LSR generate an ICMP message for a packet whose source address it cannot
-  route to directly, and check that the LSR copies the original packet's label stack onto the
-  ICMP message and label switches it.
+- Check idea: have an LSR generate an ICMP message for a packet whose source address it cannot route to directly, and check that the LSR copies the original packet's label stack onto the ICMP message and label switches it.
 
 ### RFC3032-ICMP-4
 
@@ -472,8 +418,7 @@ the order of the document.
 > "the label values must be copied exactly" — §2.3.2, `rfc3032.txt:411`.
 
 - Strength: must (lower case). Class: error-signal.
-- Check idea: have an LSR build an ICMP message by copying the original packet's label stack
-  and check that every copied label value matches the original packet's label value exactly.
+- Check idea: have an LSR build an ICMP message by copying the original packet's label stack and check that every copied label value matches the original packet's label value exactly.
 
 ### RFC3032-ICMP-5
 
@@ -484,9 +429,7 @@ the order of the document.
 >    the IP header of the ICMP message." — §2.3.2, `rfc3032.txt:411-413`.
 
 - Strength: should (lower case). Class: error-signal.
-- Check idea: have an LSR build an ICMP message by copying the original packet's label stack
-  and check that each copied entry's TTL field equals the TTL value in the ICMP message's own
-  IP header.
+- Check idea: have an LSR build an ICMP message by copying the original packet's label stack and check that each copied entry's TTL field equals the TTL value in the ICMP message's own IP header.
 
 ### RFC3032-ICMP-6
 
@@ -497,8 +440,7 @@ the order of the document.
 >    to follow." — §2.3.2, `rfc3032.txt:413-415`.
 
 - Strength: should (lower case). Class: wire.
-- Check idea: label switch an ICMP message over a circuitous route to the source and check that
-  its TTL value is large enough for the message to reach the source.
+- Check idea: label switch an ICMP message over a circuitous route to the source and check that its TTL value is large enough for the message to reach the source.
 
 ## Processing the Time to Live field
 
@@ -511,8 +453,7 @@ the order of the document.
 >    received." — §2.4.1, `rfc3032.txt:428-430`.
 
 - Strength: description. Class: encoding.
-- Check idea: capture a labeled packet as it arrives at an LSR and check that its incoming TTL
-  equals the TTL field of its top label stack entry.
+- Check idea: capture a labeled packet as it arrives at an LSR and check that its incoming TTL equals the TTL field of its top label stack entry.
 
 ### RFC3032-TTL-2
 
@@ -525,8 +466,7 @@ the order of the document.
 >       b) zero." — §2.4.1, `rfc3032.txt:432-436`.
 
 - Strength: description. Class: encoding.
-- Check idea: present an LSR with a labeled packet of a known incoming TTL and check that the
-  outgoing TTL equals the incoming TTL minus one, or zero if that would be negative.
+- Check idea: present an LSR with a labeled packet of a known incoming TTL and check that the outgoing TTL equals the incoming TTL minus one, or zero if that would be negative.
 
 ### RFC3032-TTL-3
 
@@ -537,8 +477,7 @@ the order of the document.
 >    off and the packet forwarded as an unlabeled packet." — §2.4.2, `rfc3032.txt:440-442`.
 
 - Strength: must not. Class: end-to-end.
-- Check idea: send a labeled packet whose outgoing TTL computes to zero and check that the LSR
-  neither forwards it as a labeled packet nor strips the label stack and forwards it unlabeled.
+- Check idea: send a labeled packet whose outgoing TTL computes to zero and check that the LSR neither forwards it as a labeled packet nor strips the label stack and forwards it unlabeled.
 
 ### RFC3032-TTL-4
 
@@ -550,8 +489,7 @@ the order of the document.
 >    generation of an ICMP error message, see section 2.3)." — §2.4.2, `rfc3032.txt:455-458`.
 
 - Strength: may. Class: end-to-end.
-- Check idea: send a labeled packet whose outgoing TTL computes to zero and check that the LSR
-  either discards it silently or passes it to the network layer for error processing.
+- Check idea: send a labeled packet whose outgoing TTL computes to zero and check that the LSR either discards it silently or passes it to the network layer for error processing.
 
 ### RFC3032-TTL-5
 
@@ -562,8 +500,7 @@ the order of the document.
 >    value." — §2.4.2, `rfc3032.txt:460-462`.
 
 - Strength: must. Class: wire.
-- Check idea: capture a labeled packet as an LSR forwards it and check that the top label stack
-  entry's TTL field equals the outgoing TTL computed from the incoming TTL.
+- Check idea: capture a labeled packet as an LSR forwards it and check that the top label stack entry's TTL field equals the outgoing TTL computed from the incoming TTL.
 
 ### RFC3032-TTL-6
 
@@ -574,8 +511,7 @@ the order of the document.
 >    popped before forwarding." — §2.4.2, `rfc3032.txt:464-466`.
 
 - Strength: description. Class: wire.
-- Check idea: forward the same packet through two paths that push or pop a different number of
-  labels and check that the outgoing top TTL value is the same in both cases.
+- Check idea: forward the same packet through two paths that push or pop a different number of labels and check that the outgoing top TTL value is the same in both cases.
 
 ### RFC3032-TTL-7
 
@@ -586,8 +522,7 @@ the order of the document.
 >    stack." — §2.4.2, `rfc3032.txt:466-468`.
 
 - Strength: description. Class: wire.
-- Check idea: capture a labeled packet with more than one label stack entry and check that a
-  receiver's processing does not depend on the TTL field of any entry other than the top one.
+- Check idea: capture a labeled packet with more than one label stack entry and check that a receiver's processing does not depend on the TTL field of any entry other than the top one.
 
 ### RFC3032-TTL-8
 
@@ -597,8 +532,7 @@ the order of the document.
 >    or the value of the IPv6 Hop Limit field, whichever is applicable." — §2.4.3, `rfc3032.txt:472-473`.
 
 - Strength: description. Class: encoding.
-- Check idea: capture an IPv4 packet and an IPv6 packet at an LSR and check that the IP TTL
-  field is read from the IPv4 TTL field or the IPv6 Hop Limit field respectively.
+- Check idea: capture an IPv4 packet and an IPv6 packet at an LSR and check that the IP TTL field is read from the IPv4 TTL field or the IPv6 Hop Limit field respectively.
 
 ### RFC3032-TTL-9
 
@@ -608,8 +542,7 @@ the order of the document.
 >    entry MUST BE set to the value of the IP TTL field." — §2.4.3, `rfc3032.txt:475-476`.
 
 - Strength: must. Class: wire.
-- Check idea: label an unlabeled IP packet at an LSR and check that the new label stack entry's
-  TTL field equals the packet's IP TTL field.
+- Check idea: label an unlabeled IP packet at an LSR and check that the new label stack entry's TTL field equals the packet's IP TTL field.
 
 ### RFC3032-TTL-10
 
@@ -621,8 +554,7 @@ the order of the document.
 >    of the IP header checksum." — §2.4.3, `rfc3032.txt:480-483`.
 
 - Strength: should. Class: wire.
-- Check idea: pop the last label of a packet at an LSR and check that the IP TTL field becomes
-  the outgoing TTL value, and, for IPv4, that the header checksum matches the new TTL value.
+- Check idea: pop the last label of a packet at an LSR and check that the IP TTL field becomes the outgoing TTL value, and, for IPv4, that the header checksum matches the new TTL value.
 
 ## Fragmentation and path MTU discovery
 
@@ -637,8 +569,7 @@ the order of the document.
 >    payload." — §3, `rfc3032.txt:530-534`.
 
 - Strength: may (lower case). Class: wire.
-- Check idea: push one additional label onto a labeled packet at an LSR and check that the
-  outgoing frame payload is 4 octets larger than the incoming frame payload.
+- Check idea: push one additional label onto a labeled packet at an LSR and check that the outgoing frame payload is 4 octets larger than the incoming frame payload.
 
 ### RFC3032-FRAG-2
 
@@ -655,9 +586,7 @@ the order of the document.
 >    negative value." — §3.2, `rfc3032.txt:647-655`.
 
 - Strength: should. Class: internal.
-- Check idea: check that an LSR which receives unlabeled IP datagrams and labels them before
-  forwarding offers a configuration parameter for the Maximum Initially Labeled IP Datagram
-  Size, settable to a non-negative value.
+- Check idea: check that an LSR which receives unlabeled IP datagrams and labels them before forwarding offers a configuration parameter for the Maximum Initially Labeled IP Datagram Size, settable to a non-negative value.
 
 ### RFC3032-FRAG-3
 
@@ -666,8 +595,7 @@ the order of the document.
 > "If this configuration parameter is set to zero, it has no effect." — §3.2, `rfc3032.txt:657`.
 
 - Strength: description. Class: internal.
-- Check idea: set the Maximum Initially Labeled IP Datagram Size parameter to zero at an LSR
-  and check that it does not change how the LSR labels and forwards datagrams.
+- Check idea: set the Maximum Initially Labeled IP Datagram Size parameter to zero at an LSR and check that it does not change how the LSR labels and forwards datagrams.
 
 ### RFC3032-FRAG-4
 
@@ -689,10 +617,7 @@ the order of the document.
 >       b) each fragment must be labeled and then forwarded." — §3.2, `rfc3032.txt:659-671`, `rfc3032.txt:679`.
 
 - Strength: must (lower case). Class: wire.
-- Check idea: set the Maximum Initially Labeled IP Datagram Size parameter to a positive value
-  at an LSR, send it an unlabeled datagram without the DF bit set that needs labeling and
-  exceeds the parameter, and check that every resulting fragment is no larger than the
-  parameter, is labeled, and is forwarded.
+- Check idea: set the Maximum Initially Labeled IP Datagram Size parameter to a positive value at an LSR, send it an unlabeled datagram without the DF bit set that needs labeling and exceeds the parameter, and check that every resulting fragment is no larger than the parameter, is labeled, and is forwarded.
 
 ### RFC3032-FRAG-5
 
@@ -704,9 +629,7 @@ the order of the document.
 >    IP Datagrams." — §3.2, `rfc3032.txt:688-691`.
 
 - Strength: may (lower case). Class: wire.
-- Check idea: configure the Maximum Initially Labeled IP Datagram Size parameter to a non-zero
-  value network-wide and check that no previously labeled datagram is fragmented further,
-  while an initially labeled datagram may be fragmented that would not otherwise need it.
+- Check idea: configure the Maximum Initially Labeled IP Datagram Size parameter to a non-zero value network-wide and check that no previously labeled datagram is fragmented further, while an initially labeled datagram may be fragmented that would not otherwise need it.
 
 ### RFC3032-FRAG-6
 
@@ -717,9 +640,7 @@ the order of the document.
 >    of Path MTU discovery is unaffected by the setting of this parameter." — §3.2, `rfc3032.txt:693-695`.
 
 - Strength: description. Class: end-to-end.
-- Check idea: run Path MTU Discovery through an LSR under two different settings of the Maximum
-  Initially Labeled IP Datagram Size parameter and check that the discovered MTU is the same
-  in both cases.
+- Check idea: run Path MTU Discovery through an LSR under two different settings of the Maximum Initially Labeled IP Datagram Size parameter and check that the discovered MTU is the same in both cases.
 
 ### RFC3032-FRAG-7
 
@@ -730,8 +651,7 @@ the order of the document.
 >    MAY be considered to be "too big"." — §3.3, `rfc3032.txt:699-701`.
 
 - Strength: may. Class: internal.
-- Check idea: forward a labeled IP datagram larger than the outgoing link's Conventional Maximum
-  Frame Payload Size and check that the LSR is permitted to treat it as too big.
+- Check idea: forward a labeled IP datagram larger than the outgoing link's Conventional Maximum Frame Payload Size and check that the LSR is permitted to treat it as too big.
 
 ### RFC3032-FRAG-8
 
@@ -742,8 +662,7 @@ the order of the document.
 >    be considered to be "too big"." — §3.3, `rfc3032.txt:703-705`.
 
 - Strength: must. Class: internal.
-- Check idea: forward a labeled IP datagram larger than the outgoing link's True Maximum Frame
-  Payload Size and check that the LSR always treats it as too big.
+- Check idea: forward a labeled IP datagram larger than the outgoing link's True Maximum Frame Payload Size and check that the LSR always treats it as too big.
 
 ### RFC3032-FRAG-9
 
@@ -753,8 +672,7 @@ the order of the document.
 >    without fragmentation." — §3.3, `rfc3032.txt:707-708`.
 
 - Strength: must. Class: wire.
-- Check idea: forward a labeled IP datagram that is not too big for the outgoing link and check
-  that it is transmitted in one piece.
+- Check idea: forward a labeled IP datagram that is not too big for the outgoing link and check that it is transmitted in one piece.
 
 ### RFC3032-FRAG-10
 
@@ -764,8 +682,7 @@ the order of the document.
 >    its IP header, then the LSR MAY silently discard the datagram." — §3.4, `rfc3032.txt:712-713`.
 
 - Strength: may. Class: end-to-end.
-- Check idea: send a too-big labeled IPv4 datagram without the DF bit set and check that the LSR
-  is permitted to discard it silently.
+- Check idea: send a too-big labeled IPv4 datagram without the DF bit set and check that the LSR is permitted to discard it silently.
 
 ### RFC3032-FRAG-11
 
@@ -776,9 +693,7 @@ the order of the document.
 >          bytes less than the Effective Maximum Frame Payload Size." — §3.4, `rfc3032.txt:721-722`, `rfc3032.txt:741-742`.
 
 - Strength: must. Class: wire.
-- Check idea: send a too-big labeled IPv4 datagram without the DF bit set to an LSR that does
-  not discard it, and check that every resulting fragment is at least N bytes below the
-  Effective Maximum Frame Payload Size of the outgoing link.
+- Check idea: send a too-big labeled IPv4 datagram without the DF bit set to an LSR that does not discard it, and check that every resulting fragment is at least N bytes below the Effective Maximum Frame Payload Size of the outgoing link.
 
 ### RFC3032-FRAG-12
 
@@ -789,9 +704,7 @@ the order of the document.
 >          been necessary." and "Forward the fragments" — §3.4, `rfc3032.txt:744-746`, `rfc3032.txt:748`.
 
 - Strength: description. Class: wire.
-- Check idea: fragment a too-big labeled IPv4 datagram without the DF bit set and check that
-  each fragment carries the same label header the original datagram would have carried, and
-  that the LSR forwards every fragment.
+- Check idea: fragment a too-big labeled IPv4 datagram without the DF bit set and check that each fragment carries the same label header the original datagram would have carried, and that the LSR forwards every fragment.
 
 ### RFC3032-FRAG-13
 
@@ -800,8 +713,7 @@ the order of the document.
 > "the datagram MUST NOT be forwarded" — §3.4, `rfc3032.txt:753`.
 
 - Strength: must not. Class: end-to-end.
-- Check idea: send a too-big labeled IPv4 datagram with the DF bit set to an LSR and check that
-  it never forwards the datagram.
+- Check idea: send a too-big labeled IPv4 datagram with the DF bit set to an LSR and check that it never forwards the datagram.
 
 ### RFC3032-FRAG-14
 
@@ -817,9 +729,7 @@ the order of the document.
 >                 of N" — §3.4, `rfc3032.txt:755-762`.
 
 - Strength: description. Class: error-signal.
-- Check idea: send a too-big labeled IPv4 datagram with the DF bit set and check that the LSR's
-  ICMP Destination Unreachable message carries code Fragmentation Required and DF Set and a
-  Next-Hop MTU field equal to the Effective Maximum Frame Payload Size minus N.
+- Check idea: send a too-big labeled IPv4 datagram with the DF bit set and check that the LSR's ICMP Destination Unreachable message carries code Fragmentation Required and DF Set and a Next-Hop MTU field equal to the Effective Maximum Frame Payload Size minus N.
 
 ### RFC3032-FRAG-15
 
@@ -829,9 +739,7 @@ the order of the document.
 >             Message to the source of the of the discarded datagram." — §3.4, `rfc3032.txt:764-765`.
 
 - Strength: description. Class: error-signal.
-- Check idea: send a too-big labeled IPv4 datagram with the DF bit set over a path where the
-  LSR can route to its source, and check that the LSR transmits the ICMP Destination
-  Unreachable message there.
+- Check idea: send a too-big labeled IPv4 datagram with the DF bit set over a path where the LSR can route to its source, and check that the LSR transmits the ICMP Destination Unreachable message there.
 
 ### RFC3032-FRAG-16
 
@@ -843,9 +751,7 @@ the order of the document.
 >          Frame Payload Size and the value of N" — §3.5, `rfc3032.txt:769-770`, `rfc3032.txt:791-793`.
 
 - Strength: must. Class: error-signal.
-- Check idea: send a too-big labeled IPv6 datagram that is larger than 1280 bytes, or that has
-  no fragment header, and check that the LSR's ICMP Packet Too Big message carries a Next-Hop
-  MTU field equal to the Effective Maximum Frame Payload Size minus N.
+- Check idea: send a too-big labeled IPv6 datagram that is larger than 1280 bytes, or that has no fragment header, and check that the LSR's ICMP Packet Too Big message carries a Next-Hop MTU field equal to the Effective Maximum Frame Payload Size minus N.
 
 ### RFC3032-FRAG-17
 
@@ -855,9 +761,7 @@ the order of the document.
 >          source of the datagram." and "discard the labeled IPv6 datagram." — §3.5, `rfc3032.txt:795-796`, `rfc3032.txt:798`.
 
 - Strength: description. Class: end-to-end.
-- Check idea: send a too-big labeled IPv6 datagram that is larger than 1280 bytes, or that has
-  no fragment header, over a path where the LSR can route to its source, and check that the
-  LSR sends the ICMP Packet Too Big message there and discards the datagram.
+- Check idea: send a too-big labeled IPv6 datagram that is larger than 1280 bytes, or that has no fragment header, over a path where the LSR can route to its source, and check that the LSR sends the ICMP Packet Too Big message there and discards the datagram.
 
 ### RFC3032-FRAG-18
 
@@ -867,9 +771,7 @@ the order of the document.
 >          bytes less than the Effective Maximum Frame Payload Size." — §3.5, `rfc3032.txt:803-804`.
 
 - Strength: must. Class: wire.
-- Check idea: send a too-big labeled IPv6 datagram that is not larger than 1280 octets and
-  carries a fragment header, and check that every resulting fragment is at least N bytes below
-  the Effective Maximum Frame Payload Size of the outgoing link.
+- Check idea: send a too-big labeled IPv6 datagram that is not larger than 1280 octets and carries a fragment header, and check that every resulting fragment is at least N bytes below the Effective Maximum Frame Payload Size of the outgoing link.
 
 ### RFC3032-FRAG-19
 
@@ -881,9 +783,7 @@ the order of the document.
 >          host." — §3.5, `rfc3032.txt:806-808`, `rfc3032.txt:810`, `rfc3032.txt:812-813`.
 
 - Strength: description. Class: wire.
-- Check idea: fragment a too-big labeled IPv6 datagram that carries a fragment header and check
-  that each fragment carries the same label header the original datagram would have carried,
-  that the LSR forwards every fragment, and that no LSR along the path reassembles them.
+- Check idea: fragment a too-big labeled IPv6 datagram that carries a fragment header and check that each fragment carries the same label header the original datagram would have carried, that the LSR forwards every fragment, and that no LSR along the path reassembles them.
 
 ### RFC3032-FRAG-20
 
@@ -895,9 +795,7 @@ the order of the document.
 >       endpoint, and performing Path MTU Discovery with those packets." — §3.6, `rfc3032.txt:853-856`.
 
 - Strength: must (determining the tunnel MTU); may (the method used). Class: internal.
-- Check idea: set up a tunnel whose transmitting-end LSR cannot forward ICMP messages to a
-  packet's source from inside the tunnel, and check that the LSR still determines the tunnel's
-  MTU as a whole, for instance by running Path MTU Discovery through the tunnel.
+- Check idea: set up a tunnel whose transmitting-end LSR cannot forward ICMP messages to a packet's source from inside the tunnel, and check that the LSR still determines the tunnel's MTU as a whole, for instance by running Path MTU Discovery through the tunnel.
 
 ### RFC3032-FRAG-21
 
@@ -911,9 +809,7 @@ the order of the document.
 >       the Next-Hop MTU Field set as described above." — §3.6, `rfc3032.txt:858-863`.
 
 - Strength: must. Class: error-signal.
-- Check idea: send a packet with the DF bit set into a tunnel whose MTU it exceeds, and check
-  that the transmitting-end LSR sends an ICMP Destination Unreachable message to the source,
-  coded Fragmentation Required and DF Set, with the Next-Hop MTU field set accordingly.
+- Check idea: send a packet with the DF bit set into a tunnel whose MTU it exceeds, and check that the transmitting-end LSR sends an ICMP Destination Unreachable message to the source, coded Fragmentation Required and DF Set, with the Next-Hop MTU field set accordingly.
 
 ## Labeled packets over PPP
 
@@ -1096,8 +992,7 @@ the order of the document.
 > "Exactly one labeled packet is carried in each frame." — §5, `rfc3032.txt:989`.
 
 - Strength: description. Class: wire.
-- Check idea: capture a frame carrying labeled packets on a LAN link and check that it carries
-  exactly one labeled packet.
+- Check idea: capture a frame carrying labeled packets on a LAN link and check that it carries exactly one labeled packet.
 
 ### RFC3032-LAN-2
 
@@ -1108,9 +1003,7 @@ the order of the document.
 >    headers that may exist." — §5, `rfc3032.txt:991-993`.
 
 - Strength: may (lower case). Class: wire.
-- Check idea: capture a labeled frame on a LAN link, including one with an 802.1Q header, and
-  check that the label stack entries sit immediately before the network layer header and after
-  every data link layer header.
+- Check idea: capture a labeled frame on a LAN link, including one with an 802.1Q header, and check that the label stack entries sit immediately before the network layer header and after every data link layer header.
 
 ### RFC3032-LAN-3
 
@@ -1120,8 +1013,7 @@ the order of the document.
 >    carrying an MPLS unicast packet." — §5, `rfc3032.txt:995-996`.
 
 - Strength: description. Class: wire.
-- Check idea: capture a frame carrying an MPLS unicast packet on a LAN link and check that its
-  ethertype field carries the value 8847 hex.
+- Check idea: capture a frame carrying an MPLS unicast packet on a LAN link and check that its ethertype field carries the value 8847 hex.
 
 ### RFC3032-LAN-4
 
@@ -1131,8 +1023,7 @@ the order of the document.
 >    carrying an MPLS multicast packet." — §5, `rfc3032.txt:998-999`.
 
 - Strength: description. Class: wire.
-- Check idea: capture a frame carrying an MPLS multicast packet on a LAN link and check that
-  its ethertype field carries the value 8848 hex.
+- Check idea: capture a frame carrying an MPLS multicast packet on a LAN link and check that its ethertype field carries the value 8848 hex.
 
 ### RFC3032-LAN-5
 
@@ -1143,72 +1034,37 @@ the order of the document.
 >    packets." — §5, `rfc3032.txt:1001-1003`.
 
 - Strength: description. Class: wire.
-- Check idea: capture labeled frames on a LAN link using the ethernet encapsulation and,
-  separately, the 802.3 LLC/SNAP encapsulation, and check that both carry the MPLS ethertype
-  values correctly.
+- Check idea: capture labeled frames on a LAN link using the ethernet encapsulation and, separately, the 802.3 LLC/SNAP encapsulation, and check that both carry the MPLS ethertype values correctly.
 
 
 ## Out of scope in this catalog
 
-The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of
-§2 to §5, and every field of every header. What the catalog leaves out:
+The entries above hold every `MUST`, `MUST NOT`, `SHOULD`, `SHOULD NOT` and `MAY` of §2 to §5, and every field of every header. What the catalog leaves out:
 
-- **The sections outside the in-scope set**: §1 (introduction) and §6 to §11 (IANA,
-  security, intellectual property, addresses, references).
+- **The sections outside the in-scope set**: §1 (introduction) and §6 to §11 (IANA, security, intellectual property, addresses, references).
 
 Within the in-scope sections, these parts have no entry, with the reason:
 
 In §2, §3 and §5:
 
-- `rfc3032.txt:202-217`: the description of what a successful label lookup yields (next hop,
-  stack operation, outgoing encapsulation) restates the generic NHLFE-style lookup outcome that
-  belongs to RFC 3031's NHLFE definition, out of this draft's assigned areas.
-- `rfc3032.txt:248-251`, `rfc3032.txt:265-267`: informative asides (the analogy with the IP
-  Router Alert Option; the reason the Implicit NULL Label needs a reserved value in the Label
-  Distribution Protocol) state no forwarding behavior of their own.
-- `rfc3032.txt:299-302`: restates, as a negative consequence, the requirement RFC3032-NLP-2,
-  RFC3032-NLP-4 and RFC3032-NLP-5 already state; no independent checkable fact.
-- `rfc3032.txt:304-309`: informative rationale and example for why intermediate LSRs generally
-  do not need to identify a packet's network layer protocol.
-- `rfc3032.txt:343-346`: cross-reference back to §2.2 and a restatement that ICMP generation is
-  not always possible; no new rule.
-- `rfc3032.txt:348-376` (§2.3.1): a routing-engineering example (default-route injection into an
-  IGP, ASBRs, BGP) for making ICMP messages routable through a transit domain; states nothing
-  about the forwarding of a labeled packet, and is scoped to routing/label-distribution
-  protocols outside this catalog.
-- `rfc3032.txt:380-387`, `rfc3032.txt:392-409`, `rfc3032.txt:417-422`: scene-setting for the
-  private-address tunneling case, the elaboration of how a label-switched ICMP message
-  eventually reaches an unlabeled hop that can route to the source, a usefulness example (Time
-  Exceeded / Destination Unreachable messages), and a closing note on routing-loop risk and
-  implementation throttling of ICMP generation; all informative, no independent LSR requirement.
-- `rfc3032.txt:443`: "The packet's lifetime in the network is considered to have expired" is
-  explanatory of RFC3032-TTL-3, not a separate checkable fact.
-- `rfc3032.txt:477-478`: a parenthetical assumption that any IPv4/IPv6 TTL decrement needed as
-  part of ordinary IP processing has already happened before labeling; not an independent
-  requirement.
-- `rfc3032.txt:485-488`: an administrative note that a network may prefer to decrement the IPv4
-  TTL by one per MPLS domain rather than by the number of LSP hops; states no requirement,
-  either scheme is left to local policy.
-- `rfc3032.txt:490-518` (§2.4.4): TTL handling when translating to or from an encapsulation other
-  than the PPP/LAN encoding this document specifies (e.g., LC-ATM) defers entirely to the
-  procedures of that other encapsulation's own specification; no rule of this document to
-  catalog.
-- `rfc3032.txt:522-529`: scene-setting restating, in general terms, the possibility that a
-  labeled or unlabeled packet is too large for its output link; superseded by RFC3032-FRAG-1
-  and the §3.3 rules.
-- `rfc3032.txt:536-576`: informative background on typical (non-Path-MTU-Discovery) host
-  behavior and datagram sizes; motivates the section but imposes no LSR requirement.
-- `rfc3032.txt:578-644` (§3.1 Terminology): pure definitions of Frame Payload, Conventional/True/
-  Effective Maximum Frame Payload Size, and Initially/Previously Labeled IP Datagram; the terms
-  are used as defined in the entries above, no independent behavior follows from the
-  definitions themselves.
+- `rfc3032.txt:202-217`: the description of what a successful label lookup yields (next hop, stack operation, outgoing encapsulation) restates the generic NHLFE-style lookup outcome that belongs to RFC 3031's NHLFE definition, out of this draft's assigned areas.
+- `rfc3032.txt:248-251`, `rfc3032.txt:265-267`: informative asides (the analogy with the IP Router Alert Option; the reason the Implicit NULL Label needs a reserved value in the Label Distribution Protocol) state no forwarding behavior of their own.
+- `rfc3032.txt:299-302`: restates, as a negative consequence, the requirement RFC3032-NLP-2, RFC3032-NLP-4 and RFC3032-NLP-5 already state; no independent checkable fact.
+- `rfc3032.txt:304-309`: informative rationale and example for why intermediate LSRs generally do not need to identify a packet's network layer protocol.
+- `rfc3032.txt:343-346`: cross-reference back to §2.2 and a restatement that ICMP generation is not always possible; no new rule.
+- `rfc3032.txt:348-376` (§2.3.1): a routing-engineering example (default-route injection into an IGP, ASBRs, BGP) for making ICMP messages routable through a transit domain; states nothing about the forwarding of a labeled packet, and is scoped to routing/label-distribution protocols outside this catalog.
+- `rfc3032.txt:380-387`, `rfc3032.txt:392-409`, `rfc3032.txt:417-422`: scene-setting for the private-address tunneling case, the elaboration of how a label-switched ICMP message eventually reaches an unlabeled hop that can route to the source, a usefulness example (Time Exceeded / Destination Unreachable messages), and a closing note on routing-loop risk and implementation throttling of ICMP generation; all informative, no independent LSR requirement.
+- `rfc3032.txt:443`: "The packet's lifetime in the network is considered to have expired" is explanatory of RFC3032-TTL-3, not a separate checkable fact.
+- `rfc3032.txt:477-478`: a parenthetical assumption that any IPv4/IPv6 TTL decrement needed as part of ordinary IP processing has already happened before labeling; not an independent requirement.
+- `rfc3032.txt:485-488`: an administrative note that a network may prefer to decrement the IPv4 TTL by one per MPLS domain rather than by the number of LSP hops; states no requirement, either scheme is left to local policy.
+- `rfc3032.txt:490-518` (§2.4.4): TTL handling when translating to or from an encapsulation other than the PPP/LAN encoding this document specifies (e.g., LC-ATM) defers entirely to the procedures of that other encapsulation's own specification; no rule of this document to catalog.
+- `rfc3032.txt:522-529`: scene-setting restating, in general terms, the possibility that a labeled or unlabeled packet is too large for its output link; superseded by RFC3032-FRAG-1 and the §3.3 rules.
+- `rfc3032.txt:536-576`: informative background on typical (non-Path-MTU-Discovery) host behavior and datagram sizes; motivates the section but imposes no LSR requirement.
+- `rfc3032.txt:578-644` (§3.1 Terminology): pure definitions of Frame Payload, Conventional/True/ Effective Maximum Frame Payload Size, and Initially/Previously Labeled IP Datagram; the terms are used as defined in the entries above, no independent behavior follows from the definitions themselves.
 - `rfc3032.txt:681-686`: a worked numeric example illustrating RFC3032-FRAG-4; no new rule.
 - `rfc3032.txt:715-718`: a rationale note on when discarding is "sensible"; not a requirement.
-- `rfc3032.txt:817-834` (part of §3.6): informative discussion of how Path MTU Discovery's
-  outcome relates to the rules above, and a cross-reference to §2.3; restates consequences of
-  entries already cataloged, states no new requirement.
-- `rfc3032.txt:1004`: "The procedure for choosing which of these two encapsulations to use is
-  beyond the scope of this document" explicitly disclaims scope; not a requirement.
+- `rfc3032.txt:817-834` (part of §3.6): informative discussion of how Path MTU Discovery's outcome relates to the rules above, and a cross-reference to §2.3; restates consequences of entries already cataloged, states no new requirement.
+- `rfc3032.txt:1004`: "The procedure for choosing which of these two encapsulations to use is beyond the scope of this document" explicitly disclaims scope; not a requirement.
 
 In §4:
 

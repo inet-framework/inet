@@ -2,22 +2,11 @@
 
 > **Kind:** decision · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [results.md](results.md), [test-anatomy.md](../../../design/test-anatomy.md)
 
-Step 9 artifact of the standards test workflow. For each check, this document records the
-category the check belongs to, confirmed after the run, and the reason. The categories and
-what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories);
-the rule that the category must match the claim is
-[TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
+Step 9 artifact of the standards test workflow. For each check, this document records the category the check belongs to, confirmed after the run, and the reason. The categories and what each can establish are in [test-anatomy.md](../../../design/test-anatomy.md#the-categories); the rule that the category must match the claim is [TR-CAT-MATCH](../../../rule/testing.md#tr-cat-match).
 
 ## The decision, per check
 
-All 15 checks of this pass are **protocol tests**, and their 21 tests are all in
-`tests/protocol/mpls/`. For the classes `wire`, `encoding`, `end-to-end` and `error-signal`, the
-prediction that step 3 made from the observation class held. For the class `internal`, it held
-too, for a reason of its own: the ILM, the FTN and the NHLFE are tables inside an LSR, but each
-entry decides which label a packet carries on the next link, or whether it carries one. A check
-reads the table through that effect. The class `encoding` is read from the octets of each label
-stack entry, which the helper of the tests serializes, so a field in the wrong bits fails a
-check.
+All 15 checks of this pass are **protocol tests**, and their 21 tests are all in `tests/protocol/mpls/`. For the classes `wire`, `encoding`, `end-to-end` and `error-signal`, the prediction that step 3 made from the observation class held. For the class `internal`, it held too, for a reason of its own: the ILM, the FTN and the NHLFE are tables inside an LSR, but each entry decides which label a packet carries on the next link, or whether it carries one. A check reads the table through that effect. The class `encoding` is read from the octets of each label stack entry, which the helper of the tests serializes, so a field in the wrong bits fails a check.
 
 | Check | Observation class of its statements | Category | Reason |
 | --- | --- | --- | --- |
@@ -46,6 +35,4 @@ check.
 
 ## A category this pass did not need
 
-No check needs a module test: every checked behavior shows in a frame on a link or in a
-datagram that B delivers, also the tables of the class `internal`. No check needs a fingerprint
-test: the pass locks behaviors to the standard, not trajectories to a reference run.
+No check needs a module test: every checked behavior shows in a frame on a link or in a datagram that B delivers, also the tables of the class `internal`. No check needs a fingerprint test: the pass locks behaviors to the standard, not trajectories to a reference run.

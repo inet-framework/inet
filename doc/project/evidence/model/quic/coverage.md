@@ -2,9 +2,7 @@
 
 > **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [catalog.md](../../standard/rfc9000/catalog.md), [features.md](../../protocol/quic/features.md), [results.md](results.md)
 
-The single place that holds the changing state of the QUIC workflow. Every other artifact
-of this protocol states what a standard says and never changes again unless the standard
-changes. This one changes on every pass.
+The single place that holds the changing state of the QUIC workflow. Every other artifact of this protocol states what a standard says and never changes again unless the standard changes. This one changes on every pass.
 
 **No step edits an artifact of an earlier step. Steps 5, 6 and 7 record their outcome here.**
 
@@ -22,9 +20,7 @@ State of the ledger, from this run:
 
 ## Statement coverage
 
-`Status` is the state of the workflow, not of the standard: `selected` (a check targets it),
-`covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet
-chosen), `later` (needs a toolset beyond the current level, or another test category).
+`Status` is the state of the workflow, not of the standard: `selected` (a check targets it), `covered` (a selected check establishes it as a side effect), `candidate` (practical, not yet chosen), `later` (needs a toolset beyond the current level, or another test category).
 
 | Catalog ID | Status | Check section | Test file | Verdict |
 | --- | --- | --- | --- | --- |
@@ -44,17 +40,11 @@ chosen), `later` (needs a toolset beyond the current level, or another test cate
 | [RFC9000-AMP-1](../../standard/rfc9000/catalog.md#rfc9000-amp-1) | selected | [anti-amplification-limit](../../protocol/quic/checks/address-validation.md#anti-amplification-limit) | Rfc9000AntiAmplification.test | PASS |
 | [RFC9000-ERR-1](../../standard/rfc9000/catalog.md#rfc9000-err-1) | selected | [unknown-frame-type](../../protocol/quic/checks/frame-validation.md#unknown-frame-type) | Rfc9000UnknownFrameType.test | PASS since `948c8b5cb4` closed gap 3 |
 
-14 entries. 11 reached a test: 10 with a PASS and 1 with a FAIL, an unimplemented behavior, that
-names a model gap. Two former defects closed: commit `948c8b5cb4` repaired the server's Initial
-padding (gap 1) and the unknown frame type (gap 3). RFC9000-STR-1 carries `no check`, with a
-proof rather than a suspicion behind it; and RFC9000-VER-2 is a candidate the relay could now
-reach.
+14 entries. 11 reached a test: 10 with a PASS and 1 with a FAIL, an unimplemented behavior, that names a model gap. Two former defects closed: commit `948c8b5cb4` repaired the server's Initial padding (gap 1) and the unknown frame type (gap 3). RFC9000-STR-1 carries `no check`, with a proof rather than a suspicion behind it; and RFC9000-VER-2 is a candidate the relay could now reach.
 
 ## Feature support
 
-The rule of step 7: `supported` when every core check ran and passed, `partial` when a core
-check passed and another core check failed as a model gap or did not run, `not supported`
-when every core check that ran failed as a model gap, `untested` when no core check ran.
+The rule of step 7: `supported` when every core check ran and passed, `partial` when a core check passed and another core check failed as a model gap or did not run, `not supported` when every core check that ran failed as a model gap, `untested` when no core check ran.
 
 | Feature | Core checks and their state | Support |
 | --- | --- | --- |
@@ -70,37 +60,22 @@ when every core check that ran failed as a model gap, `untested` when no core ch
 
 Seven supported, one partial, one not supported.
 
-Commit `948c8b5cb4` (2026-09-15) closed two of the four gaps this ledger held, and moved two
-features from their earlier value:
+Commit `948c8b5cb4` (2026-09-15) closed two of the four gaps this ledger held, and moved two features from their earlier value:
 
-1. **QUIC-F-INITIAL-SIZE** was partial because the server half had no check, and then because
-   the check it got failed, gap 1. The commit adds the missing padding to
-   `buildServerInitialPacket`; both halves pass now, and the feature is **supported**.
-2. **QUIC-F-FRAME-VALIDATION** was not supported because RFC9000-ERR-1 failed: an unknown
-   frame type stopped the run, gap 3. The commit makes the connection close with
-   FRAME_ENCODING_ERROR instead, as RFC 9000 §12.4 requires; the check passes and the feature
-   is **supported**.
+1. **QUIC-F-INITIAL-SIZE** was partial because the server half had no check, and then because the check it got failed, gap 1. The commit adds the missing padding to `buildServerInitialPacket`; both halves pass now, and the feature is **supported**.
+2. **QUIC-F-FRAME-VALIDATION** was not supported because RFC9000-ERR-1 failed: an unknown frame type stopped the run, gap 3. The commit makes the connection close with FRAME_ENCODING_ERROR instead, as RFC 9000 §12.4 requires; the check passes and the feature is **supported**.
 
-One `partial` value remains, the same one the level 2 pass recorded, and it is firmer now. It
-does not rest on a suspicion:
+One `partial` value remains, the same one the level 2 pass recorded, and it is firmer now. It does not rest on a suspicion:
 
-3. **QUIC-F-STREAMS** is partial because RFC9000-STR-1 passed vacuously. A probe showed why it
-   cannot do otherwise, so the statement carries `no check` and the feature stays partial for a
-   proven cause. Its other half is solid: RFC9000-STR-2 runs with data arriving out of order,
-   which is the harder half of what it demands, and the model keeps what arrives early.
+3. **QUIC-F-STREAMS** is partial because RFC9000-STR-1 passed vacuously. A probe showed why it cannot do otherwise, so the statement carries `no check` and the feature stays partial for a proven cause. Its other half is solid: RFC9000-STR-2 runs with data arriving out of order, which is the harder half of what it demands, and the model keeps what arrives early.
 
-One `not supported` value remains, unchanged by `948c8b5cb4`: **QUIC-F-VERSION-NEGOTIATION**.
-The model still does not read the version field of a received packet, RFC9000-VER-1 still fails
-as an unimplemented behavior (gap 2), and RFC9000-VER-2 still has no check.
+One `not supported` value remains, unchanged by `948c8b5cb4`: **QUIC-F-VERSION-NEGOTIATION**. The model still does not read the version field of a received packet, RFC9000-VER-1 still fails as an unimplemented behavior (gap 2), and RFC9000-VER-2 still has no check.
 
-Bounds, unchanged from pass 1 and worth repeating: every feature rests on one connection over
-one link, with one stream identifier, one connection identifier, and no packet protection.
+Bounds, unchanged from pass 1 and worth repeating: every feature rests on one connection over one link, with one stream identifier, one connection identifier, and no packet protection.
 
 ## Achieved level
 
-**Level 2 reached, level 3 partial.** Target: level 2, from
-[`standards.md`](../../protocol/quic/standards.md#target-level). The pass went on into
-level 3; the level table below gives the state of each level.
+**Level 2 reached, level 3 partial.** Target: level 2, from [`standards.md`](../../protocol/quic/standards.md#target-level). The pass went on into level 3; the level table below gives the state of each level.
 
 The exit criterion of level 2 has two halves, and both hold.
 
@@ -119,21 +94,12 @@ The exit criterion of level 2 has two halves, and both hold.
 | loss detection, congestion control, the idle timeout | §13, RFC 9002 | level 4 |
 | errors, stateless reset, version negotiation, address validation, migration, stream reset | §10, §11, §6, §8, §9, §3 | level 3: each needs a fault or a crafted packet |
 
-**Run** — every mandatory feature now has a core check that ran and has a verdict: 9 of 9.
-The two blockers the level 2 pass recorded are closed. One closed the way a reader would have
-hoped; one did not:
+**Run** — every mandatory feature now has a core check that ran and has a verdict: 9 of 9. The two blockers the level 2 pass recorded are closed. One closed the way a reader would have hoped; one did not:
 
-1. `QUIC-F-STREAMS`: RFC9000-STR-1 had no check that could fail. A probe settled why. The
-   model has one stream identifier, 0, whatever the application asks, so no check on the wire
-   can fail. The statement carries `no check` with that proof, and the feature keeps
-   `partial` for a stated cause rather than a missing test.
-2. `QUIC-F-INITIAL-SIZE`: the server half now has a check. It failed at first, gap 1; commit
-   `948c8b5cb4` (2026-09-15) added the missing padding, and the check passes now.
+1. `QUIC-F-STREAMS`: RFC9000-STR-1 had no check that could fail. A probe settled why. The model has one stream identifier, 0, whatever the application asks, so no check on the wire can fail. The statement carries `no check` with that proof, and the feature keeps `partial` for a stated cause rather than a missing test.
+2. `QUIC-F-INITIAL-SIZE`: the server half now has a check. It failed at first, gap 1; commit `948c8b5cb4` (2026-09-15) added the missing padding, and the check passes now.
 
-**Level 3, partial.** Level 2's exit criterion is met: every normal-path
-mandatory mechanism is a feature, and every mandatory feature has a core check with a verdict.
-Level 3 is partial: four of the subjects the catalog files at level 3 are done, and five are
-not.
+**Level 3, partial.** Level 2's exit criterion is met: every normal-path mandatory mechanism is a feature, and every mandatory feature has a core check with a verdict. Level 3 is partial: four of the subjects the catalog files at level 3 are done, and five are not.
 
 | Level | State | Evidence |
 | --- | --- | --- |
@@ -143,10 +109,7 @@ not.
 | 4, Dynamics | not started | RFC 9002 is not in the in-scope set. |
 | 5, Complete | not started | RFC 9001, the remaining frame types, migration, 0-RTT, key updates. |
 
-The tooling no longer gates level 3. Pass 1 recorded that a QUIC dissector was needed before
-the edges could be reached; pass 2 reached four of them by selecting datagrams on their UDP
-fields and their size, and changing the QUIC chunks directly. A dissector would still make
-every check of this suite shorter and plainer.
+The tooling no longer gates level 3. Pass 1 recorded that a QUIC dissector was needed before the edges could be reached; pass 2 reached four of them by selecting datagrams on their UDP fields and their size, and changing the QUIC chunks directly. A dissector would still make every check of this suite shorter and plainer.
 
 ## Pass log
 
@@ -158,7 +121,4 @@ every check of this suite shorter and plainer.
 
 ## Out of scope
 
-The catalog records what this pass left out: the error and reset mechanisms, version
-negotiation, address validation and migration, loss detection and congestion control, the
-cryptographic handshake, and the frame types beyond STREAM, ACK, PADDING and
-CONNECTION_CLOSE. The catalog's closing section names the level that reaches each one.
+The catalog records what this pass left out: the error and reset mechanisms, version negotiation, address validation and migration, loss detection and congestion control, the cryptographic handshake, and the frame types beyond STREAM, ACK, PADDING and CONNECTION_CLOSE. The catalog's closing section names the level that reaches each one.

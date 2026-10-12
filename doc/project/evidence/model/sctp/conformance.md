@@ -2,9 +2,7 @@
 
 > **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/sctp/standards.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the
-model intends: which standards it claims to implement, mapped onto the standards map. Part 2,
-the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
+Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the model intends: which standards it claims to implement, mapped onto the standards map. Part 2, the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
 
 Read record — no build, no run:
 
@@ -35,9 +33,7 @@ Every place in the model that names a standard of the SCTP family:
 | RFC 4960 §3.3.3 | [`SctpHeaderSerializer.cc:1586-1587`](../../../../../src/inet/transportlayer/sctp/SctpHeaderSerializer.cc) | "RFC 4960 3.3.3: the INIT-ACK reports the parameters the peer's INIT carried and this end did not recognize". |
 | RFC 6525, RFC 4895, RFC 5061, RFC 3758 | [`WHATSNEW:5205-5214`](../../../../../WHATSNEW) | The changelog entry "5. STCP received several new features" (sic, a misspelling of SCTP) lists, one item per line: "SCTP Stream Reset (RFC 6525)", "SCTP Authentication (RFC 4895)", "Add-IP feature for SCTP (RFC 5061)", "NR\_SACK feature to SCTP" (no document), "Partial Reliability SCTP (RFC 3758)", "SCTP packet drop feature (draft-stewart-sctp-pktdrprep-15.txt)", and "SCTP \"sack immediately\" feature (draft-ietf-tsvwg-sctp-sack-immediately)". |
 
-No `.msg` file, and none of `SctpAssociationStreamReset.cc`, `SctpAssociationAddIp.cc`, or
-`sctpapp/`, names a document. The four level-5 extensions the changelog names are claimed only
-there, not at the place a reader of the module reference would look.
+No `.msg` file, and none of `SctpAssociationStreamReset.cc`, `SctpAssociationAddIp.cc`, or `sctpapp/`, names a document. The four level-5 extensions the changelog names are claimed only there, not at the place a reader of the module reference would look.
 
 Mapped onto the standards map, [`standards.md`](../../protocol/sctp/standards.md#document-list):
 
@@ -56,44 +52,12 @@ Mapped onto the standards map, [`standards.md`](../../protocol/sctp/standards.md
 | RFC 1982 | out of scope always | yes, in a comment | Used correctly for a generic wraparound comparison, not a protocol-behavior claim. |
 | NR-SACK, CMT | no, level 5, unstable | code exists, named informally | The changelog names "NR\_SACK feature to SCTP" with no document; CMT is named only through the model's own parameter and variant names (`CUCVariant`, `BufferSplitVariant`), never through a draft string in the source. |
 
-**The finding of the survey.** The model's most repeated citation is the most obsolete one in
-active use. `RFC4960` is not only quoted in comments; it is an **identifier**,
-`enum SctpCcModules { RFC4960 = 0 }`, so the name of a document RFC 9260 obsoleted in 2022
-is load-bearing in the parameter surface a user sets (`ccModule`,
-[`Sctp.ned:61`](../../../../../src/inet/transportlayer/sctp/Sctp.ned)) and in the switch
-statement the congestion-control code branches on
-([`SctpAssociationBase.cc:1675`](../../../../../src/inet/transportlayer/sctp/SctpAssociationBase.cc)).
-One citation reaches back a further generation, to RFC 2960 (obsoleted twice over,
-`SctpAssociationUtil.cc:2851`). RFC 9260, the document that has governed since 2022, is named
-nowhere: not in the module documentation, not in the user's guide, not in one comment among the
-sixteen this survey found. A reader of the model has no way to learn that SCTP's actual base
-document today is RFC 9260, and the checksum comments name an appendix letter, "appendix B",
-that RFC 9260 renumbered to Appendix A when it folded the errata documents in
-([`standards.md`](../../protocol/sctp/standards.md#override-table)).
+**The finding of the survey.** The model's most repeated citation is the most obsolete one in active use. `RFC4960` is not only quoted in comments; it is an **identifier**, `enum SctpCcModules { RFC4960 = 0 }`, so the name of a document RFC 9260 obsoleted in 2022 is load-bearing in the parameter surface a user sets (`ccModule`, [`Sctp.ned:61`](../../../../../src/inet/transportlayer/sctp/Sctp.ned)) and in the switch statement the congestion-control code branches on ([`SctpAssociationBase.cc:1675`](../../../../../src/inet/transportlayer/sctp/SctpAssociationBase.cc)). One citation reaches back a further generation, to RFC 2960 (obsoleted twice over, `SctpAssociationUtil.cc:2851`). RFC 9260, the document that has governed since 2022, is named nowhere: not in the module documentation, not in the user's guide, not in one comment among the sixteen this survey found. A reader of the model has no way to learn that SCTP's actual base document today is RFC 9260, and the checksum comments name an appendix letter, "appendix B", that RFC 9260 renumbered to Appendix A when it folded the errata documents in ([`standards.md`](../../protocol/sctp/standards.md#override-table)).
 
-The second half of the finding concerns the four extensions. RFC 3758, RFC 5061, RFC 4895 and
-RFC 6525 are all implemented in depth — dedicated files, dedicated enums, and a matching
-`.test` file each in `tests/module/` for three of the four — yet the only place any of the four
-numbers appears is one changelog entry from when the feature first landed
-([`WHATSNEW:5205-5214`](../../../../../WHATSNEW)). The changelog entry for "sack immediately"
-names a pre-standardization draft; that feature is now part of the base document itself, as the
-override table of `standards.md` records, so even the changelog's own citation is out of date
-by two steps: draft, then RFC 7053, then folded into RFC 9260.
+The second half of the finding concerns the four extensions. RFC 3758, RFC 5061, RFC 4895 and RFC 6525 are all implemented in depth — dedicated files, dedicated enums, and a matching `.test` file each in `tests/module/` for three of the four — yet the only place any of the four numbers appears is one changelog entry from when the feature first landed ([`WHATSNEW:5205-5214`](../../../../../WHATSNEW)). The changelog entry for "sack immediately" names a pre-standardization draft; that feature is now part of the base document itself, as the override table of `standards.md` records, so even the changelog's own citation is out of date by two steps: draft, then RFC 7053, then folded into RFC 9260.
 
-For the level 2 pass, three facts from the code (the guide permits this look to decide the
-claim question, and the pass must check each one):
+For the level 2 pass, three facts from the code (the guide permits this look to decide the claim question, and the pass must check each one):
 
-1. **`RFC4960` is an enum identifier, not only a comment.** A level 2 catalog that quotes
-   "RFC 4960" from the code quotes a name chosen for a constant, and the constant's value
-   (`New Reno`, the base congestion-control algorithm) is what RFC 9260 §7 also specifies.
-   The naming is stale; nothing suggests the algorithm itself has drifted from the current
-   text, and a later pass should check that directly against RFC 9260 §7, not assume it from
-   the name.
-2. **The I bit and the chunk-flags registry are base-document material now, not extensions.**
-   A check of `RFC9260-CHUNK-*` for a DATA chunk's `I` bit belongs in the level 2 catalog
-   under §3/§6.10, not in a level 5 extension catalog, even though the model's own changelog
-   still calls "sack immediately" a feature added on top of the base.
-3. **NR-SACK and CMT have no citable stable document.** Any later pass that reaches level 5
-   for either one must cite an exact Internet-Draft revision and quote by its own clause
-   numbers, per the guide's rule for a text without stable line numbers
-   ([`standards.md`](../../protocol/sctp/standards.md#in-scope-set)).
+1. **`RFC4960` is an enum identifier, not only a comment.** A level 2 catalog that quotes "RFC 4960" from the code quotes a name chosen for a constant, and the constant's value (`New Reno`, the base congestion-control algorithm) is what RFC 9260 §7 also specifies. The naming is stale; nothing suggests the algorithm itself has drifted from the current text, and a later pass should check that directly against RFC 9260 §7, not assume it from the name.
+2. **The I bit and the chunk-flags registry are base-document material now, not extensions.** A check of `RFC9260-CHUNK-*` for a DATA chunk's `I` bit belongs in the level 2 catalog under §3/§6.10, not in a level 5 extension catalog, even though the model's own changelog still calls "sack immediately" a feature added on top of the base.
+3. **NR-SACK and CMT have no citable stable document.** Any later pass that reaches level 5 for either one must cite an exact Internet-Draft revision and quote by its own clause numbers, per the guide's rule for a text without stable line numbers ([`standards.md`](../../protocol/sctp/standards.md#in-scope-set)).

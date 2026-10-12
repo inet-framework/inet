@@ -2,19 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around Open Shortest Path First version 2, records which document governs each contested
-clause, and pins the set that a level 2 pass tests against. RFC 2328 is a large document
-(244 pages); this pass pins a clause slice of it for level 2 and defers the rest.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around Open Shortest Path First version 2, records which document governs each contested clause, and pins the set that a level 2 pass tests against. RFC 2328 is a large document (244 pages); this pass pins a clause slice of it for level 2 and defers the rest.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -23,8 +17,7 @@ claims of the model. It writes no catalog, no feature map and no test.
 | level 4, Dynamics | RFC 2328 §9.5 and §9.5.1 (sending Hello packets), §13.3 and §13.6 (retransmission), §14 and §14.1 (aging and premature aging), and the timers of Appendix C.3 (HelloInterval, RouterDeadInterval, RxmtInterval) | the periodic Hello, the retransmission of an unacknowledged LSA, and the aging of the database are timers |
 | level 5, Complete | RFC 2328 §3 (splitting the AS into areas), §4.1, §4.2, §12.4.3 (Summary-LSAs), §12.4.4 (AS-external-LSAs), §15 (virtual links), §16.2 to §16.4 (inter-area and AS external routes), Appendix D (authentication: Null, Simple, Cryptographic); RFC 3101 (the NSSA option); RFC 5709 and RFC 7474 (cryptographic and manual-key authentication); RFC 6549 (multiple instances on one interface); RFC 6845 (the hybrid broadcast and point-to-multipoint interface type); RFC 6860 (hiding transit-only networks); RFC 8042 (the two-part metric); RFC 9355 (BFD strict-mode) | more than one area, the backbone-through-a-transit-area topology of a virtual link, external route redistribution, the authentication types, and the optional extensions |
 
-What a pass actually reached is not recorded here. It is in
-[`model/ospfv2/coverage.md`](../../model/ospfv2/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/ospfv2/coverage.md`](../../model/ospfv2/coverage.md#achieved-level).
 
 ## Document list
 
@@ -45,29 +38,13 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the text:
 
-- `rfc2328.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2328.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2328.txt>, downloaded 2026-09-23. 244 pages, 12201 lines.
+- `rfc2328.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2328.txt) — <https://www.rfc-editor.org/rfc/rfc2328.txt>, downloaded 2026-09-23. 244 pages, 12201 lines.
 
-RFC 2328 predates the common use of the RFC 2119 convention: it carries no upper-case
-keyword. It uses "must" on 163 lines, "should" on 197, "may" on 135, "required" on 21 and
-"recommended" on 2, all lower case. The catalog of a later pass records the words as
-written; most statements have the strength `description` or a lower-case keyword, not the
-formal RFC 2119 word.
+RFC 2328 predates the common use of the RFC 2119 convention: it carries no upper-case keyword. It uses "must" on 163 lines, "should" on 197, "may" on 135, "required" on 21 and "recommended" on 2, all lower case. The catalog of a later pass records the words as written; most statements have the strength `description` or a lower-case keyword, not the formal RFC 2119 word.
 
-RFC 2328 Appendix C.1 defines a configurable parameter, `RFC1583Compatibility`
-(`rfc2328.txt:10941-10964`), that selects between two rules for choosing among multiple
-AS-external-LSAs that advertise the same destination: the rule of RFC 1583, or the
-loop-preventing rule of RFC 2328 §16.4.1. Appendix G, "Differences from RFC 2178"
-(`rfc2328.txt:11955-11957`), documents this and the other differences from the document RFC
-2328 obsoletes directly. The parameter is about AS-external route preference, §16.4; it has
-no connection to RFC 3101, the NSSA option, which is a companion document about a different
-area type.
+RFC 2328 Appendix C.1 defines a configurable parameter, `RFC1583Compatibility` (`rfc2328.txt:10941-10964`), that selects between two rules for choosing among multiple AS-external-LSAs that advertise the same destination: the rule of RFC 1583, or the loop-preventing rule of RFC 2328 §16.4.1. Appendix G, "Differences from RFC 2178" (`rfc2328.txt:11955-11957`), documents this and the other differences from the document RFC 2328 obsoletes directly. The parameter is about AS-external route preference, §16.4; it has no connection to RFC 3101, the NSSA option, which is a companion document about a different area type.
 
-RFC 9454 renames the Database Description exchange's "master/slave" relationship and the
-"master (MS) bit" to "Leader/Follower" and the "Leader (L) bit" inside RFC 2328 §7.2, §10,
-§10.1 to §10.3, §10.6, §10.8, §10.10 and Appendix A.3.3 — clauses of the level-2 slice above.
-The document states this in its own words: "The operation of OSPFv2 is not modified." It is
-a naming change for a later catalog to use, not an override of any clause's substance.
+RFC 9454 renames the Database Description exchange's "master/slave" relationship and the "master (MS) bit" to "Leader/Follower" and the "Leader (L) bit" inside RFC 2328 §7.2, §10, §10.1 to §10.3, §10.6, §10.8, §10.10 and Appendix A.3.3 — clauses of the level-2 slice above. The document states this in its own words: "The operation of OSPFv2 is not modified." It is a naming change for a later catalog to use, not an override of any clause's substance.
 
 ## Override table
 

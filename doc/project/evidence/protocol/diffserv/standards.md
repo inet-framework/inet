@@ -2,23 +2,13 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-Step 2 artifact of the standards test workflow. This document maps the family of standards
-around Differentiated Services, records which document governs each contested clause, and
-pins the set that the next pass tests against. DiffServ has no protocol data unit of its own.
-Its mechanisms — classification, metering, marking, queueing — act inside one node on the
-Differentiated Services (DS) field of the IP header that RFC 2474 defines; nothing is
-exchanged between DiffServ peers. Because of this, most statements of the family are
-algorithm descriptions rather than wire rules, and the "only path to an outcome" rule of the
-guide, not an RFC 2119 keyword, will decide most feature levels once a catalog exists.
+Step 2 artifact of the standards test workflow. This document maps the family of standards around Differentiated Services, records which document governs each contested clause, and pins the set that the next pass tests against. DiffServ has no protocol data unit of its own. Its mechanisms — classification, metering, marking, queueing — act inside one node on the Differentiated Services (DS) field of the IP header that RFC 2474 defines; nothing is exchanged between DiffServ peers. Because of this, most statements of the family are algorithm descriptions rather than wire rules, and the "only path to an outcome" rule of the guide, not an RFC 2119 keyword, will decide most feature levels once a catalog exists.
 
-The relationships come from the RFC-editor metadata
-(`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
+The relationships come from the RFC-editor metadata (`https://www.rfc-editor.org/rfc/rfcNNNN.json`), retrieved 2026-09-23.
 
 ## Target level
 
-**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)).
-This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the
-claims of the model. It writes no catalog, no feature map and no test.
+**Level 1 — Survey** (see [the levels of the guide](../../../guide/derive-tests-from-a-standard.md#levels-of-depth)). This pass maps the family, pins the in-scope set that a level 2 pass needs, and records the claims of the model. It writes no catalog, no feature map and no test.
 
 | To reach | Add to the in-scope set | Why |
 | --- | --- | --- |
@@ -27,8 +17,7 @@ claims of the model. It writes no catalog, no feature map and no test.
 | level 4, Dynamics | nothing new | the srTCM and trTCM token buckets of RFC 2697 §3 and RFC 2698 §3 are distributions over time, already inside the base documents above; a level 4 pass adds the tolerance, not a new document |
 | level 5, Complete | RFC 3290, RFC 4115 | the informal management model that the classifiers reference for configuration, and a second, alternative two-rate marker the model does not implement |
 
-What a pass actually reached is not recorded here. It is in
-[`model/diffserv/coverage.md`](../../model/diffserv/coverage.md#achieved-level).
+What a pass actually reached is not recorded here. It is in [`model/diffserv/coverage.md`](../../model/diffserv/coverage.md#achieved-level).
 
 ## Document list
 
@@ -50,32 +39,17 @@ What a pass actually reached is not recorded here. It is in
 
 Source of the texts:
 
-- `rfc2474.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2474.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2474.txt>, downloaded 2026-09-23.
-- `rfc2475.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2475.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2475.txt>, downloaded 2026-09-23.
-- `rfc2597.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2597.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2597.txt>, downloaded 2026-09-23.
-- `rfc3246.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3246.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3246.txt>, downloaded 2026-09-23.
-- `rfc2697.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2697.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2697.txt>, downloaded 2026-09-23.
-- `rfc2698.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2698.txt) —
-  <https://www.rfc-editor.org/rfc/rfc2698.txt>, downloaded 2026-09-23.
-- `rfc3260.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3260.txt) —
-  <https://www.rfc-editor.org/rfc/rfc3260.txt>, downloaded 2026-09-23.
+- `rfc2474.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2474.txt) — <https://www.rfc-editor.org/rfc/rfc2474.txt>, downloaded 2026-09-23.
+- `rfc2475.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2475.txt) — <https://www.rfc-editor.org/rfc/rfc2475.txt>, downloaded 2026-09-23.
+- `rfc2597.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2597.txt) — <https://www.rfc-editor.org/rfc/rfc2597.txt>, downloaded 2026-09-23.
+- `rfc3246.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3246.txt) — <https://www.rfc-editor.org/rfc/rfc3246.txt>, downloaded 2026-09-23.
+- `rfc2697.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2697.txt) — <https://www.rfc-editor.org/rfc/rfc2697.txt>, downloaded 2026-09-23.
+- `rfc2698.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc2698.txt) — <https://www.rfc-editor.org/rfc/rfc2698.txt>, downloaded 2026-09-23.
+- `rfc3260.txt` in [`standards/RFC/`](../../../../../../standards/RFC/rfc3260.txt) — <https://www.rfc-editor.org/rfc/rfc3260.txt>, downloaded 2026-09-23.
 
-RFC 2474 obsoletes RFC 1349 (and RFC 1455) as a whole; no predecessor text is downloaded. RFC
-3246 obsoletes RFC 2598 as a whole; RFC 3260 itself records the reason
-(`rfc3260.txt:43-45`): "RFC 2598 has been obsoleted by RFC 3246, and clarifications agreed
-by the group were incorporated in that revision." Neither obsoleted document is downloaded.
+RFC 2474 obsoletes RFC 1349 (and RFC 1455) as a whole; no predecessor text is downloaded. RFC 3246 obsoletes RFC 2598 as a whole; RFC 3260 itself records the reason (`rfc3260.txt:43-45`): "RFC 2598 has been obsoleted by RFC 3246, and clarifications agreed by the group were incorporated in that revision." Neither obsoleted document is downloaded.
 
-Keyword use is mixed across the family. RFC 2474 has "MUST" on 21 lines, "SHOULD" on 11 and
-"MAY" on 15; RFC 2597 has 20, 6 and 7; RFC 3246 has 11, 8 and 10; RFC 3260 has 4, 3 and 0
-(`grep -c '\bMUST\b'` and so on). RFC 2475, RFC 2697 and RFC 2698 use none of the three
-words at all: the architecture document and the two meter algorithms are pure description.
-This matches the note above — DiffServ statements lean on the "only path" rule more than on
-RFC 2119 keywords, and the three zero-keyword documents will lean on it entirely.
+Keyword use is mixed across the family. RFC 2474 has "MUST" on 21 lines, "SHOULD" on 11 and "MAY" on 15; RFC 2597 has 20, 6 and 7; RFC 3246 has 11, 8 and 10; RFC 3260 has 4, 3 and 0 (`grep -c '\bMUST\b'` and so on). RFC 2475, RFC 2697 and RFC 2698 use none of the three words at all: the architecture document and the two meter algorithms are pure description. This matches the note above — DiffServ statements lean on the "only path" rule more than on RFC 2119 keywords, and the three zero-keyword documents will lean on it entirely.
 
 ## Override table
 

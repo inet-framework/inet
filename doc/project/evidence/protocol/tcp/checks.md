@@ -2,15 +2,9 @@
 
 > **Kind:** procedure · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [catalog.md](../../standard/rfc9293/catalog.md), [features.md](features.md)
 
-Step 5 artifact of the standards test workflow. This file holds the common mockups, the
-scenario constants, the rules every check obeys, and the index. The checks themselves live
-in one file per feature under [`checks/`](checks); the section names are the anchors that
-the coverage ledger links to. The procedures come from the specification only.
-They name no simulation model and no code. The catalog entries are in
-[`rfc9293/catalog.md`](../../standard/rfc9293/catalog.md).
+Step 5 artifact of the standards test workflow. This file holds the common mockups, the scenario constants, the rules every check obeys, and the index. The checks themselves live in one file per feature under [`checks/`](checks); the section names are the anchors that the coverage ledger links to. The procedures come from the specification only. They name no simulation model and no code. The catalog entries are in [`rfc9293/catalog.md`](../../standard/rfc9293/catalog.md).
 
-The governing document is RFC 9293, not RFC 793. The reason is in
-[`standards.md`](standards.md#override-table).
+The governing document is RFC 9293, not RFC 793. The reason is in [`standards.md`](standards.md#override-table).
 
 ## Index
 
@@ -44,10 +38,7 @@ The governing document is RFC 9293, not RFC 793. The reason is in
 | [Fast retransmit and fast recovery](checks/congestion-control.md#fast-retransmit-and-fast-recovery) | `checks/congestion-control.md` | RFC5681-FR-1, FR-2, FR-3, FR-5; covers ACK-2 |
 | [Window after a lost SYN](checks/congestion-control.md#window-after-a-lost-syn) | `checks/congestion-control.md` | RFC5681-IW-3 |
 
-Twenty-seven checks: six from the level 2 pass, eleven added at level 3, ten added at
-level 4. The ten of level 4 differ in kind from the seventeen before them: eight of them
-read a control variable of the sender rather than a field of a segment, because the
-retransmission timeout and the congestion window never travel on the link.
+Twenty-seven checks: six from the level 2 pass, eleven added at level 3, ten added at level 4. The ten of level 4 differ in kind from the seventeen before them: eight of them read a control variable of the sender rather than a field of a segment, because the retransmission timeout and the congestion window never travel on the link.
 
 ## Statements that no check carries
 
@@ -60,13 +51,9 @@ Two statements of the in-scope set have no check of their own.
 
 ## Common mockups
 
-Three mockups serve the seventeen checks. The first is the one the level 2 pass used. The
-other two are what the level 3 checks need, because a segment can only be changed while it
-travels, and a report from a gateway needs a gateway.
+Three mockups serve the seventeen checks. The first is the one the level 2 pass used. The other two are what the level 3 checks need, because a segment can only be changed while it travels, and a report from a gateway needs a gateway.
 
-**The plain mockup.** Two hosts on one link. Host A opens a connection to host B, sends a
-block of data, and closes. Host B accepts, receives what arrives, and closes when host A
-closes.
+**The plain mockup.** Two hosts on one link. Host A opens a connection to host B, sends a block of data, and closes. Host B accepts, receives what arrives, and closes when host A closes.
 
 ```
    host A  ------------  host B
@@ -81,25 +68,18 @@ closes.
     (client)                        (server)
 ```
 
-- The relay changes one segment and passes every other frame on without a change. It is not
-  a node of the protocol: it has no address, it answers nothing, and neither host can see
-  it.
-- A relay holds one rule at a time. A check that needs two changes uses two relays in
-  series, and both see both directions.
-- What the relay does is what a fault or a third party on the path would do. No program can
-  produce it, and that is why these checks are level 3.
+- The relay changes one segment and passes every other frame on without a change. It is not a node of the protocol: it has no address, it answers nothing, and neither host can see it.
+- A relay holds one rule at a time. A check that needs two changes uses two relays in series, and both see both directions.
+- What the relay does is what a fault or a third party on the path would do. No program can produce it, and that is why these checks are level 3.
 
-**The mockup with a relay and a gateway.** A gateway R stands behind the relay, so that a
-real node produces the ICMP report the check needs.
+**The mockup with a relay and a gateway.** A gateway R stands behind the relay, so that a real node produces the ICMP report the check needs.
 
 ```
    host A  ------  relay T  ------  gateway R  ------  host B
 ```
 
-- The relay sits before the gateway, so that it can change a segment on its way out and see
-  the report the gateway sends back.
-- No report in these checks is forged. The relay makes a condition the gateway must report,
-  and the gateway writes the message.
+- The relay sits before the gateway, so that it can change a segment on its way out and see the report the gateway sends back.
+- No report in these checks is forged. The relay makes a condition the gateway must report, and the gateway writes the message.
 
 Scenario constants, shared unless a check says otherwise:
 
@@ -113,10 +93,6 @@ Scenario constants, shared unless a check says otherwise:
 | Observation limit | 2 s at level 2, 10 s where a loss must be recovered | a check that takes a segment away waits for the retransmission timeout, which starts at three seconds |
 | The receiving program | echoes nothing at level 3 | the reverse direction then carries acknowledgments only, so an observation about a segment from host B cannot be confused with an echo |
 
-No check assumes a value for any sequence number. Each side picks its own initial sequence
-number (RFC9293-ISS-1), so every expectation is **relative**: a captured value plus a
-computed offset.
+No check assumes a value for any sequence number. Each side picks its own initial sequence number (RFC9293-ISS-1), so every expectation is **relative**: a captured value plus a computed offset.
 
-A check that changes a segment must leave the checksum right for what it wrote. A relay that
-changes a header computes the checksum again, as a deliberate rewriter on the path would;
-otherwise the receiver would object to the checksum and never reach the rule under test.
+A check that changes a segment must leave the checksum right for what it wrote. A relay that changes a header computes the checksum again, as a deliberate rewriter on the path would; otherwise the receiver would object to the checksum and never reach the rule under test.

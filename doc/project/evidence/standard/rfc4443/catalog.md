@@ -2,28 +2,17 @@
 
 > **Kind:** what · **Status:** current · **Seal:** none · **Owns:** `RFC4443-*` · **Stands on:** [standards.md](../../protocol/ipv6/standards.md), [derive-tests-from-a-standard.md](../../../guide/derive-tests-from-a-standard.md)
 
-This document is the step 3 artifact of the standards test workflow, for one document of
-the in-scope set: RFC 4443. RFC 8200 delegates its error reports to ICMPv6, so every entry
-here pairs with an entry of [`rfc8200/catalog.md`](../rfc8200/catalog.md). The catalog
-comes from the RFC text only. It contains no simulation model names and no code references.
+This document is the step 3 artifact of the standards test workflow, for one document of the in-scope set: RFC 4443. RFC 8200 delegates its error reports to ICMPv6, so every entry here pairs with an entry of [`rfc8200/catalog.md`](../rfc8200/catalog.md). The catalog comes from the RFC text only. It contains no simulation model names and no code references.
 
 Source, in the `standards` project beside the INET tree:
 
-- [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt) —
-  Internet Control Message Protocol (ICMPv6) for the Internet Protocol
-  Version 6 (IPv6) Specification, March 2006. Downloaded 2026-09-09 from
-  <https://www.rfc-editor.org/rfc/rfc4443.txt>.
+- [`standards/RFC/rfc4443.txt`](../../../../../../standards/RFC/rfc4443.txt) — Internet Control Message Protocol (ICMPv6) for the Internet Protocol Version 6 (IPv6) Specification, March 2006. Downloaded 2026-09-09 from <https://www.rfc-editor.org/rfc/rfc4443.txt>.
 
-The scope of this catalog: the general rules of §2 (the source address of a message and the
-processing rules of §2.4) and the error messages of §3. The informational messages of §4
-(echo request and reply) belong to an ICMPv6 protocol folder and stay out.
+The scope of this catalog: the general rules of §2 (the source address of a message and the processing rules of §2.4) and the error messages of §3. The informational messages of §4 (echo request and reply) belong to an ICMPv6 protocol folder and stay out.
 
-Quotes are verbatim. A reference such as `rfc4443.txt:548` points to a line of that
-file.
+Quotes are verbatim. A reference such as `rfc4443.txt:548` points to a line of that file.
 
-The state of the workflow — which statement a check targets, which test carries it, and
-what the run said — is **not** in this document. It lives in the coverage ledger,
-[`ipv6/coverage.md`](../../model/ipv6/coverage.md).
+The state of the workflow — which statement a check targets, which test carries it, and what the run said — is **not** in this document. It lives in the coverage ledger, [`ipv6/coverage.md`](../../model/ipv6/coverage.md).
 
 ## Index
 
@@ -53,16 +42,13 @@ what the run said — is **not** in this document. It lives in the coverage ledg
 | [RFC4443-UL-2](#rfc4443-ul-2) | A received Packet Too Big is passed to the upper-layer process. |
 | [RFC4443-UL-3](#rfc4443-ul-3) | A received Time Exceeded is passed to the upper-layer process. |
 
-The conventions of an entry — strength, class, and the `Overridden by` field — are the ones
-of [`rfc8200/catalog.md`](../rfc8200/catalog.md#how-to-read-an-entry). RFC 4443 uses the
-RFC 2119 keywords; a MUST is a `must` and a SHOULD a `should`.
+The conventions of an entry — strength, class, and the `Overridden by` field — are the ones of [`rfc8200/catalog.md`](../rfc8200/catalog.md#how-to-read-an-entry). RFC 4443 uses the RFC 2119 keywords; a MUST is a `must` and a SHOULD a `should`.
 
 ## Error signals for the RFC 8200 checks
 
 ### RFC4443-PTB-1
 
-**A router sends Packet Too Big when it cannot forward a packet because the packet is larger
-than the MTU of the outgoing link.**
+**A router sends Packet Too Big when it cannot forward a packet because the packet is larger than the MTU of the outgoing link.**
 
 > "A Packet Too Big MUST be sent by a router in response to a packet that it cannot
 > forward because the packet is larger than the MTU of the outgoing link.  The information
@@ -70,30 +56,24 @@ than the MTU of the outgoing link.**
 > `rfc4443.txt:548-551`
 
 - Strength: must. Class: error-signal.
-- Pairs with [RFC8200-FRAG-1](../rfc8200/catalog.md#rfc8200-frag-1): the router does not
-  fragment, so the report is the only thing it can do.
-- Check idea: send a packet larger than the MTU of the link after the gateway. The source
-  receives a message of type 2.
+- Pairs with [RFC8200-FRAG-1](../rfc8200/catalog.md#rfc8200-frag-1): the router does not fragment, so the report is the only thing it can do.
+- Check idea: send a packet larger than the MTU of the link after the gateway. The source receives a message of type 2.
 
 ### RFC4443-PTB-2
 
-**The MTU field of a Packet Too Big message carries the MTU of the next-hop link, and the
-code is 0.**
+**The MTU field of a Packet Too Big message carries the MTU of the next-hop link, and the code is 0.**
 
 > "Code           Set to 0 (zero) by the originator and ignored by the receiver." — §3.2,
 > `rfc4443.txt:541-542`
 > "MTU            The Maximum Transmission Unit of the next-hop link." — §3.2,
 > `rfc4443.txt:544`
 
-- Strength: description (the field definitions of a mandatory message). Class:
-  error-signal (the content of the message).
-- Check idea: with a known MTU on the link after the gateway, the MTU field of the
-  message equals that value. Path MTU discovery (RFC 8201) rests on this field.
+- Strength: description (the field definitions of a mandatory message). Class: error-signal (the content of the message).
+- Check idea: with a known MTU on the link after the gateway, the MTU field of the message equals that value. Path MTU discovery (RFC 8201) rests on this field.
 
 ### RFC4443-TE-1
 
-**A router that receives a packet with hop limit zero, or decrements it to zero, discards
-the packet and sends Time Exceeded code 0 to the source.**
+**A router that receives a packet with hop limit zero, or decrements it to zero, discards the packet and sends Time Exceeded code 0 to the source.**
 
 > "If a router receives a packet with a Hop Limit of zero, or if a router decrements a
 > packet's Hop Limit to zero, it MUST discard the packet and originate an ICMPv6 Time
@@ -101,13 +81,11 @@ the packet and sends Time Exceeded code 0 to the source.**
 > routing loop or too small an initial Hop Limit value." — §3.3, `rfc4443.txt:605-609`
 
 - Strength: must. Class: error-signal.
-- Pairs with [RFC8200-HL-2](../rfc8200/catalog.md#rfc8200-hl-2). Unlike the IPv4 report,
-  the message is not optional.
+- Pairs with [RFC8200-HL-2](../rfc8200/catalog.md#rfc8200-hl-2). Unlike the IPv4 report, the message is not optional.
 
 ### RFC4443-DU-4
 
-**A destination should send Destination Unreachable code 4 when the transport protocol has
-no listener for the packet and no way of its own to tell the sender.**
+**A destination should send Destination Unreachable code 4 when the transport protocol has no listener for the packet and no way of its own to tell the sender.**
 
 > "A destination node SHOULD originate a Destination Unreachable message with Code 4 in
 > response to a packet for which the transport protocol (e.g., UDP) has no listener, if
@@ -115,21 +93,18 @@ no listener for the packet and no way of its own to tell the sender.**
 > `rfc4443.txt:481-484`
 
 - Strength: should. Class: error-signal.
-- Note: the transport side of this rule belongs to the UDP catalogs; here it is the host's
-  error report of the IPv6 layer.
+- Note: the transport side of this rule belongs to the UDP catalogs; here it is the host's error report of the IPv6 layer.
 
 ### RFC4443-ERR-1
 
-**An error message includes as much of the invoking packet as fits without exceeding the
-minimum IPv6 MTU.**
+**An error message includes as much of the invoking packet as fits without exceeding the minimum IPv6 MTU.**
 
 > "(c) Every ICMPv6 error message (type < 128) MUST include as much of the IPv6 offending
 > (invoking) packet (the packet that caused the error) as possible without making the
 > error message packet exceed the minimum IPv6 MTU [IPv6]." — §2.4, `rfc4443.txt:295-298`
 
 - Strength: must. Class: error-signal (the content of the message).
-- Check idea: a report of a small invoking packet quotes the whole packet; a report of a
-  large one is at most 1280 octets long. The content of a report is level 3 work.
+- Check idea: a report of a small invoking packet quotes the whole packet; a report of a large one is at most 1280 octets long. The content of a report is level 3 work.
 
 ### RFC4443-ERR-2
 
@@ -146,8 +121,7 @@ minimum IPv6 MTU.**
 
 ### RFC4443-SRC-1
 
-**A message that responds to a message sent to one of the node's unicast addresses carries
-that address as its source.**
+**A message that responds to a message sent to one of the node's unicast addresses carries that address as its source.**
 
 > "If the node has more than one unicast address, it MUST choose the Source Address of the
 > message as follows: (a) If the message is a response to a message sent to one of the
@@ -155,13 +129,11 @@ that address as its source.**
 > §2.2, `rfc4443.txt:240-245`
 
 - Strength: must. Class: error-signal (a field of the message).
-- Check idea: a host's report about a datagram sent to its address carries that address as
-  source.
+- Check idea: a host's report about a datagram sent to its address carries that address as source.
 
 ### RFC4443-SRC-2
 
-**A message that responds to a message sent to any other address carries a unicast address
-of the node, chosen as the source of any other packet would be.**
+**A message that responds to a message sent to any other address carries a unicast address of the node, chosen as the source of any other packet would be.**
 
 > "(b) If the message is a response to a message sent to any other address, such as a
 > multicast group address, an anycast address implemented by the node, or a unicast
@@ -170,30 +142,23 @@ of the node, chosen as the source of any other packet would be.**
 > rules that would be used to select the source address for any other packet originated by
 > the node, given the destination address of the packet." — §2.2, `rfc4443.txt:247-258`
 
-- Strength: must (a unicast address of the node); should (the usual selection). Class:
-  error-signal (a field of the message).
-- Check idea: a router's report about a packet it forwarded carries one of the router's own
-  unicast addresses, the one of the interface toward the source.
+- Strength: must (a unicast address of the node); should (the usual selection). Class: error-signal (a field of the message).
+- Check idea: a router's report about a packet it forwarded carries one of the router's own unicast addresses, the one of the interface toward the source.
 
 ## Message processing rules
 
-The rules of §2.4 (a) to (f). The note that closes them: "THE RESTRICTIONS UNDER (e) AND (f)
-ABOVE TAKE PRECEDENCE OVER ANY REQUIREMENT ELSEWHERE IN THIS DOCUMENT FOR ORIGINATING ICMP
-ERROR MESSAGES." — `rfc4443.txt:379-381`
+The rules of §2.4 (a) to (f). The note that closes them: "THE RESTRICTIONS UNDER (e) AND (f) ABOVE TAKE PRECEDENCE OVER ANY REQUIREMENT ELSEWHERE IN THIS DOCUMENT FOR ORIGINATING ICMP ERROR MESSAGES." — `rfc4443.txt:379-381`
 
 ### RFC4443-MPR-1
 
-**An error message of unknown type is passed to the upper-layer process that sent the
-invoking packet, where that process can be identified.**
+**An error message of unknown type is passed to the upper-layer process that sent the invoking packet, where that process can be identified.**
 
 > "(a) If an ICMPv6 error message of unknown type is received at its destination, it MUST
 > be passed to the upper-layer process that originated the packet that caused the error,
 > where this can be identified (see Section 2.4, (d))." — §2.4, `rfc4443.txt:287-290`
 
-- Strength: must. Class: internal (a handoff), with a wire half: the node stays silent about
-  it, by [RFC4443-MPR-4](#rfc4443-mpr-4).
-- Check idea: deliver an error message of an unassigned type below 128. The node sends
-  nothing back and keeps running; the handoff itself needs a module test.
+- Strength: must. Class: internal (a handoff), with a wire half: the node stays silent about it, by [RFC4443-MPR-4](#rfc4443-mpr-4).
+- Check idea: deliver an error message of an unassigned type below 128. The node sends nothing back and keeps running; the handoff itself needs a module test.
 
 ### RFC4443-MPR-2
 
@@ -203,8 +168,7 @@ invoking packet, where that process can be identified.**
 > discarded." — §2.4, `rfc4443.txt:292-293`
 
 - Strength: must. Class: end-to-end (absence) plus error-signal (absence).
-- Check idea: deliver a message of an unassigned type of 128 or above. The node sends
-  nothing back, neither a reply nor an error, and keeps running.
+- Check idea: deliver a message of an unassigned type of 128 or above. The node sends nothing back, neither a reply nor an error, and keeps running.
 
 ### RFC4443-MPR-3
 
@@ -225,8 +189,7 @@ invoking packet, where that process can be identified.**
 > following: (e.1) An ICMPv6 error message." — §2.4, `rfc4443.txt:317-320`
 
 - Strength: must not. Class: error-signal (absence).
-- Check idea: let an error message run into an error of its own, for example a hop limit
-  that expires at a router. The router sends no Time Exceeded.
+- Check idea: let an error message run into an error of its own, for example a hop limit that expires at a router. The router sends no Time Exceeded.
 
 ### RFC4443-MPR-5
 
@@ -235,13 +198,11 @@ invoking packet, where that process can be identified.**
 > "(e.2) An ICMPv6 redirect message [IPv6-DISC]." — §2.4, `rfc4443.txt:322`
 
 - Strength: must not. Class: error-signal (absence).
-- Note: needs a redirect in flight; neighbor discovery is out of scope, so this entry waits
-  for a scenario that produces one.
+- Note: needs a redirect in flight; neighbor discovery is out of scope, so this entry waits for a scenario that produces one.
 
 ### RFC4443-MPR-6
 
-**No error message is originated about a packet destined to a multicast address, except
-Packet Too Big and Parameter Problem code 2.**
+**No error message is originated about a packet destined to a multicast address, except Packet Too Big and Parameter Problem code 2.**
 
 > "(e.3) A packet destined to an IPv6 multicast address.  (There are two exceptions to this
 > rule: (1) the Packet Too Big Message (Section 3.2) to allow Path MTU discovery to work for
@@ -250,25 +211,21 @@ Packet Too Big and Parameter Problem code 2.**
 > order two bits set to 10)." — §2.4, `rfc4443.txt:324-330`
 
 - Strength: must not, with two exceptions. Class: error-signal (absence).
-- Check idea: send a datagram to the all-nodes multicast address and to a port that no
-  program opened. No node answers with Destination Unreachable.
+- Check idea: send a datagram to the all-nodes multicast address and to a port that no program opened. No node answers with Destination Unreachable.
 
 ### RFC4443-MPR-7
 
-**No error message is originated about a packet sent as a link-layer multicast, with the
-same exceptions.**
+**No error message is originated about a packet sent as a link-layer multicast, with the same exceptions.**
 
 > "(e.4) A packet sent as a link-layer multicast (the exceptions from e.3 apply to this
 > case, too)." — §2.4, `rfc4443.txt:332-333`
 
 - Strength: must not. Class: error-signal (absence).
-- Check idea: deliver a unicast datagram to a closed port inside a frame whose link-layer
-  destination is a multicast address. The host sends no Destination Unreachable.
+- Check idea: deliver a unicast datagram to a closed port inside a frame whose link-layer destination is a multicast address. The host sends no Destination Unreachable.
 
 ### RFC4443-MPR-8
 
-**No error message is originated about a packet sent as a link-layer broadcast, with the
-same exceptions.**
+**No error message is originated about a packet sent as a link-layer broadcast, with the same exceptions.**
 
 > "(e.5) A packet sent as a link-layer broadcast (the exceptions from e.3 apply to this
 > case, too)." — §2.4, `rfc4443.txt:343-344`
@@ -278,16 +235,14 @@ same exceptions.**
 
 ### RFC4443-MPR-9
 
-**No error message is originated about a packet whose source address does not identify a
-single node.**
+**No error message is originated about a packet whose source address does not identify a single node.**
 
 > "(e.6) A packet whose source address does not uniquely identify a single node -- e.g.,
 > the IPv6 Unspecified Address, an IPv6 multicast address, or an address known by the ICMP
 > message originator to be an IPv6 anycast address." — §2.4, `rfc4443.txt:346-349`
 
 - Strength: must not. Class: error-signal (absence).
-- Check idea: deliver a datagram with the unspecified address as source to a closed port.
-  The host sends no Destination Unreachable.
+- Check idea: deliver a datagram with the unspecified address as source to a closed port. The host sends no Destination Unreachable.
 
 ### RFC4443-MPR-10
 
@@ -315,8 +270,7 @@ single node.**
 
 ### RFC4443-DU-P
 
-**A router does not forward, back onto a point-to-point arrival link, a packet destined to
-an address within a subnet assigned to that link.**
+**A router does not forward, back onto a point-to-point arrival link, a packet destined to an address within a subnet assigned to that link.**
 
 > "One specific case in which a Destination Unreachable message is sent with a code 3 is in
 > response to a packet received by a router from a point-to-point link, destined to an
@@ -361,10 +315,4 @@ an address within a subnet assigned to that link.**
 
 ## Out of scope in this catalog
 
-The checksum of §2.3 (an encoding statement; see
-[RFC8200-CKSUM-2](../rfc8200/catalog.md#rfc8200-cksum-2)), the Destination Unreachable codes
-other than 4 (routing and policy reasons that the mockup cannot produce), Time Exceeded
-code 1 (the reassembly timer, level 4), the Parameter Problem message as a message of its
-own (its codes appear as the reports of the RFC 8200 statements), and the informational
-messages of §4 (echo request and reply, including the echo responder that every node must
-implement), which belong to an ICMPv6 protocol folder.
+The checksum of §2.3 (an encoding statement; see [RFC8200-CKSUM-2](../rfc8200/catalog.md#rfc8200-cksum-2)), the Destination Unreachable codes other than 4 (routing and policy reasons that the mockup cannot produce), Time Exceeded code 1 (the reassembly timer, level 4), the Parameter Problem message as a message of its own (its codes appear as the reports of the RFC 8200 statements), and the informational messages of §4 (echo request and reply, including the echo responder that every node must implement), which belong to an ICMPv6 protocol folder.
