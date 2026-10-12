@@ -180,6 +180,11 @@ struct TcpStateVariables
     bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled
 
     uint32_t full_sized_segment_counter = 0;    // this counter is needed for delayed ACK
+    bool adaptiveDelayedAcks = false;           // the delayed ACK of Linux (adaptiveDelayedAcks parameter)
+    uint32_t quickAckCounter = 0;               // the ACKs that still go at once (Linux icsk_ack.quick)
+    uint32_t pingpongCount = 0;                 // the replies within one ATO after an arrival (Linux icsk_ack.pingpong); at the threshold, the connection is interactive
+    simtime_t ackAto = 0;                       // the adaptive delayed ACK timeout (Linux icsk_ack.ato); 0: no data arrived yet
+    simtime_t lastDataRecvTime = 0;             // the arrival of the last in-order data (Linux icsk_ack.lrcvtime)
     uint32_t delayedAckFrameCount = 2;          // the full-sized segments after which a delayed ACK goes at once (delayedAckFrameCount parameter)
     bool ack_now = false;                       // send ACK immediately, needed if delayed_acks_enabled is set
                                                 // Based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, page 861].

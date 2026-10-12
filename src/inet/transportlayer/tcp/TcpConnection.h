@@ -184,6 +184,9 @@ class INET_API TcpConnection : public SimpleModule
     // the application owns the connection (Linux sk->sk_socket): false for a connection
     // that the application did not accept yet, as TcpSetOwnedCommand tells
     bool appOwned = true;
+    // an accepted segment ends beyond the right edge of the last offered window
+    // (acceptBeyondBufferAtEmptyQueue); adaptiveDelayedAcks then sends no ACK at once
+    bool overWindowAcceptPending = false;
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
@@ -283,6 +286,13 @@ class INET_API TcpConnection : public SimpleModule
      * child socket at snd_una = ISS+1).
      */
     virtual uint32_t getDataSndUna() const;
+
+    /**
+     * Returns whether the last accepted segment ended beyond the right edge of the
+     * last offered window, and clears that mark. Linux sends no immediate ACK for
+     * such a segment (rcv_neg_window).
+     */
+    bool takeOverWindowAccept() { bool b = overWindowAcceptPending; overWindowAcceptPending = false; return b; }
 
   protected:
 

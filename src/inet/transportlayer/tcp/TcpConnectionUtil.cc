@@ -925,6 +925,7 @@ void TcpConnection::configureStateVariables()
         state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
+    state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks");
     state->synRetries = socketSynRetries >= 0 ? socketSynRetries : (int)tcpMain->par("synRetries");
     state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled

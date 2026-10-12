@@ -140,6 +140,20 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void receivedOutOfOrderSegment() override;
 
+    /** @name The delayed ACK of Linux (adaptiveDelayedAcks) */
+    //@{
+    /** Raises the quickack budget to enough ACKs for half the window, at most maxQuickacks (tcp_incr_quickack()). */
+    virtual void incrQuickack(uint32_t maxQuickacks);
+    /** Raises the quickack budget, leaves the pingpong mode and resets the ATO (tcp_enter_quickack_mode()). */
+    virtual void enterQuickackMode(uint32_t maxQuickacks);
+    /** Whether the next ACK goes at once (tcp_in_quickack_mode()). */
+    virtual bool inQuickackMode() const;
+    /** Updates the ATO from the gap since the last arrival (tcp_event_data_recv()). */
+    virtual void dataArrivedAtoUpdate();
+    /** Arms the delayed ACK timer with the ATO, limited by the SRTT and 200 ms (tcp_send_delayed_ack()). */
+    virtual void scheduleDelayedAck();
+    //@}
+
     virtual void receiveSeqChanged() override;
 
     virtual void receivedAckForAlreadyAckedData(const TcpHeader *tcpHeader, uint32_t payloadLength) override;

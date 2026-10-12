@@ -1,0 +1,49 @@
+%description:
+Tests adaptiveDelayedAcks=true, the quickack mode of Linux. The first data
+segment gives the server a quickack budget (tcp_incr_quickack(): half the
+window in full-sized segments, here 8), so it acknowledges the 100 bytes of
+t=1.0 and of t=1.6 at once. Without the parameter, each ACK waits for the
+delayed ACK timer (200 ms).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 100; 1.6 100"
+*.srv_tcp.adaptiveDelayedAcks = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:101(100) ack 501 win 16384 
+[1.003 B002] A.1000 < B.2000: A ack 101 win 16384 
+[1.601 A004] A.1000 > B.2000: A 101:201(100) ack 501 win 16384 
+[1.603 B003] A.1000 < B.2000: A ack 201 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+sending ACK now (quickack mode, quickack budget 7)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -649,6 +649,10 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 }
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
                 if (payloadLength > 0) {
+                    // rcv_adv is still the edge before this arrival: a segment beyond it
+                    // came in by acceptBeyondBufferAtEmptyQueue
+                    if (seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_adv))
+                        overWindowAcceptPending = true;
                     chargeRcvBuffer(payloadLength);
                     // windowAutoTuning, as Linux (tcp_clamp_window()): when the charged
                     // segments outgrow the receive buffer of a connection that the
