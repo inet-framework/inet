@@ -96,6 +96,11 @@ void TcpAlgorithmBase::initialize()
     tlpTimer->setContextPointer(conn);
 
     state->rexmit_timeout = initialRto;
+
+    state->keepalive_enabled = conn->getTcpMain()->par("keepAliveEnabled");
+    state->keepalive_idle_time = conn->getTcpMain()->par("keepAliveIdleTime");
+    state->keepalive_interval = conn->getTcpMain()->par("keepAliveInterval");
+    state->keepalive_max_probes = conn->getTcpMain()->par("keepAliveProbeCount");
 }
 
 void TcpAlgorithmBase::established(bool active)
@@ -176,6 +181,12 @@ void TcpAlgorithmBase::established(bool active)
             conn->sendAck();
             sendData(false);
         }
+    }
+
+    if (state->keepalive_enabled) {
+        state->time_last_segment_received = simTime();
+        state->keepalive_probes_sent = 0;
+        conn->scheduleAfter(state->keepalive_idle_time, keepAliveTimer);
     }
 }
 
@@ -429,18 +440,42 @@ void TcpAlgorithmBase::processDelayedAckTimer(TcpEventCode& event)
 
 void TcpAlgorithmBase::processKeepAliveTimer(TcpEventCode& event)
 {
-    // TODO
-    // RFC 1122, page 102:
-    // "A "keep-alive" mechanism periodically probes the other
-    // end of a connection when the connection is otherwise
-    // idle, even when there is no data to be sent.  The TCP
-    // specification does not include a keep-alive mechanism
-    // because it could:  (1) cause perfectly good connections
-    // to break during transient Internet failures; (2)
-    // consume unnecessary bandwidth ("if no one is using the
-    // connection, who cares if it is still good?"); and (3)
-    // cost money for an Internet path that charges for
-    // packets."
+    // RFC 9293 section 3.8.4, as Linux tcp_keepalive_timer(). TIME_WAIT has no
+    // keepalive (Linux keeps only a time-wait socket there).
+    if (conn->getFsmState() == TCP_S_TIME_WAIT)
+        return;
+
+    // MUST-26: "Keep-alive packets MUST only be sent when no sent data is outstanding";
+    // data that waits also keeps the connection from being idle. Try again after the
+    // idle time.
+    if (state->snd_max != state->snd_una || !conn->isSendQueueEmpty()) {
+        state->keepalive_probes_sent = 0;
+        conn->scheduleAfter(state->keepalive_idle_time, keepAliveTimer);
+        return;
+    }
+
+    // MUST-26: "and no data or acknowledgment packets have been received for the
+    // connection within an interval". A segment since the last probe also answers it.
+    simtime_t idle = simTime() - state->time_last_segment_received;
+    if (idle < state->keepalive_idle_time) {
+        state->keepalive_probes_sent = 0;
+        conn->scheduleAfter(state->keepalive_idle_time - idle, keepAliveTimer);
+        return;
+    }
+
+    // MUST-29: one probe without an answer is not a dead connection; after
+    // keepAliveProbeCount of them, abort, and tell the application (TCP_I_TIMED_OUT)
+    if (state->keepalive_probes_sent >= state->keepalive_max_probes) {
+        EV_INFO << "Keepalive: no answer to " << state->keepalive_max_probes << " probes, aborting connection\n";
+        conn->signalConnectionTimeout();
+        event = TCP_E_ABORT;
+        return;
+    }
+
+    EV_INFO << "Keepalive: the connection is idle, sending probe #" << (state->keepalive_probes_sent + 1) << "\n";
+    conn->sendKeepAliveProbe();
+    state->keepalive_probes_sent++;
+    conn->scheduleAfter(state->keepalive_interval, keepAliveTimer);
 }
 
 void TcpAlgorithmBase::startRexmitTimer()

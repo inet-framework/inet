@@ -213,6 +213,7 @@ struct TcpStateVariables
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received
     uint32_t ts_recent = 0;         // RFC 7323: TS.Recent, the latest received timestamp
     uint32_t last_ack_sent = 0;     // RFC 7323: Last.ACK.sent, the last ACK field sent
+    simtime_t time_last_segment_received; // the arrival of the last segment of this connection, where the idle time of keepalive starts (RFC 9293 MUST-26)
     simtime_t time_last_data_sent;  // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
 
     // SACK related variables

@@ -86,6 +86,8 @@ TcpEventCode TcpConnection::process_RCV_SEGMENT(Packet *tcpSegment, const Ptr<co
     emit(rcvSeqSignal, tcpHeader->getSequenceNo());
     emit(rcvAckSignal, tcpHeader->getAckNo());
 
+    state->time_last_segment_received = simTime(); // the idle time of keepalive starts here
+
     emit(tcpRcvPayloadBytesSignal, int(tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>()));
 
     // snapshot delivered-bytes so consumers can read this segment's newly

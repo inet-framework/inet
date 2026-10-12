@@ -267,6 +267,10 @@ simple Tcp extends SimpleModule like ITcp
         int fastopenMaxPendingRequests = default(16); // TCP Fast Open, server: the largest number of Fast Open connections of a local port in SYN_RCVD (PendingFastOpenRequests, RFC 7413 section 4.2; Linux takes it from the TCP_FASTOPEN socket option of the listener); above it, a SYN gets no Fast Open: no cookie, and its data is not acknowledged
         bool fastopenServerEnabled @mutable = default(false); // TCP Fast Open (RFC 7413), server: give cookies, and deliver the data of a SYN with a valid cookie to the application before the handshake completes (~ Linux tcp_fastopen bit 0x2)
         double initialRto @unit(s) = default(3s); // the retransmission timeout before the first RTT measurement, also the first timeout of a SYN and of a SYN-ACK (RFC 6298 section 2.1: 1 s; 3 s is the value of RFC 1122)
+        bool keepAliveEnabled = default(false); // keepalive (RFC 9293 section 3.8.4): after keepAliveIdleTime without a received segment and without data in flight, send a probe without data (SEG.SEQ = SND.UNA - 1), again each keepAliveInterval, and abort the connection after keepAliveProbeCount probes without an answer; off by default (MUST-25)
+        double keepAliveIdleTime @unit(s) = default(7200s); // the idle time before the first keepalive probe (RFC 9293 MUST-28: at least two hours; Linux tcp_keepalive_time)
+        double keepAliveInterval @unit(s) = default(75s); // the time between two keepalive probes (Linux tcp_keepalive_intvl)
+        int keepAliveProbeCount = default(9); // the keepalive probes without an answer, after which the connection aborts (Linux tcp_keepalive_probes; RFC 9293 MUST-29: one probe without an answer is not a dead connection)
         int maxRexmitCount = default(12); // the retransmissions of one segment, after which the connection aborts
         double maxRexmitTimeout @unit(s) = default(240s); // the upper limit of the retransmission timeout (RFC 6298 section 2.5: at least 60 s)
         double minRexmitTimeout @unit(s) = default(1s); // the lower limit of the retransmission timeout (RFC 6298 section 2.4: 1 s; Linux: 200 ms)

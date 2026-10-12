@@ -32,6 +32,15 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     simtime_t persist_timeout = 5.0; ///< current persist timeout
     //@}
 
+    /// keepalive (RFC 9293 section 3.8.4)
+    //@{
+    bool keepalive_enabled = false; ///< keepalive probes on this connection
+    simtime_t keepalive_idle_time = 7200; ///< the idle time before the first probe
+    simtime_t keepalive_interval = 75; ///< the time between two probes
+    int keepalive_max_probes = 9; ///< the probes without an answer, after which the connection aborts
+    int keepalive_probes_sent = 0; ///< the probes of this idle time
+    //@}
+
     /// congestion window
     //@{
     uint32_t snd_cwnd = 0; ///< congestion window

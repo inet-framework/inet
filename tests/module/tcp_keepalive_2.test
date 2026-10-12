@@ -1,0 +1,56 @@
+%description:
+Tests that keepalive aborts a connection to a peer that does not answer. The
+tester removes the probes of the client, so the server never answers. The
+client sends a probe after the idle time of 30 s, and two more at the interval
+of 5 s; at the next expiry it aborts the connection and tells the application
+(TCP_I_TIMED_OUT). RFC 9293 MUST-29: one probe without an answer is not a dead
+connection.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 60s
+*.cli_tcp.keepAliveEnabled = true
+*.cli_tcp.keepAliveIdleTime = 30s
+*.cli_tcp.keepAliveInterval = 5s
+*.cli_tcp.keepAliveProbeCount = 3
+*.tcptester.script="a3 delete; a4 delete; a5 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[30.005 A003] A.1000 > B.2000: A ack 501 win 16384 # deleting
+[35.005 A004] A.1000 > B.2000: A ack 501 win 16384 # deleting
+[40.005 A005] A.1000 > B.2000: A ack 501 win 16384 # deleting
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Keepalive: no answer to 3 probes, aborting connection
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Notifying app: TIMED_OUT
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

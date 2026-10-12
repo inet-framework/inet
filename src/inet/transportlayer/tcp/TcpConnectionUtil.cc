@@ -1715,6 +1715,23 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     return true;
 }
 
+void TcpConnection::sendKeepAliveProbe()
+{
+    // RFC 9293 section 3.8.4: "Such a segment generally contains SEG.SEQ = SND.NXT-1";
+    // the connection is idle, so SND.NXT = SND.UNA. The sequence number is below the
+    // window of the peer, so the peer answers with an ACK and accepts nothing. No data
+    // (SHLD-12), and so no ECT; snd_nxt and snd_max stay. As Linux tcp_xmit_probe_skb().
+    const auto& tcpHeader = makeShared<TcpHeader>();
+    tcpHeader->setAckBit(true);
+    tcpHeader->setSequenceNo(state->snd_una - 1);
+    tcpHeader->setAckNo(state->rcv_nxt);
+    tcpHeader->setWindow(updateRcvWnd());
+    writeHeaderOptions(tcpHeader);
+    Packet *fp = new Packet("TcpKeepAlive");
+    EV_INFO << "Sending keepalive probe, seq=" << (state->snd_una - 1) << "\n";
+    sendToIP(fp, tcpHeader);
+}
+
 bool TcpConnection::sendProbe()
 {
     // we'll start sending from snd_max
