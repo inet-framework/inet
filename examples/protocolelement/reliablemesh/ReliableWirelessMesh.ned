@@ -94,7 +94,7 @@ module SinkApp like IApp
 // A module that handles protocol/service registrations (queue, multiplexer, dispatcher) is declared
 // before every module that registers into it: it reads its gates and parameters in initialization
 // stage 0, and the protocol elements register in that same stage. Mostly this means downstream-first.
-module WirelessInterface extends NetworkInterface
+module LocalReliableWirelessInterface extends NetworkInterface
 {
     parameters:
         string interfaceTableModule;
@@ -200,7 +200,7 @@ module WirelessNode
         // downstream-first, like the submodules of the layers: the app registers into
         // forwardingLayer.inputMux and forwardingLayer.outputDispatcher, and forwardingLayer
         // registers into the interface
-        interface: WirelessInterface {
+        interface: LocalReliableWirelessInterface {
             interfaceTableModule = "^.interfaceTable";
             @display("p=300,350");
         }
