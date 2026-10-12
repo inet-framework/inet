@@ -1,15 +1,16 @@
 %description:
 
-Tests the packetPendingDelay statistic of EthernetCsmaMac.
+Tests the packetPendingDelay and packetDropRetryLimitReached statistics of
+EthernetCsmaMac.
 
 Two pairs of nodes on EthernetCsmaMac send one frame each at t = 1 ms, so
 the first attempts of a pair collide. The nodes of pair "same" draw from two
 random number generators with the same seed, so they choose the same backoff,
-collide on every attempt and drop the frame: no delay is recorded. The nodes
-of pair "diff" draw different backoffs, so both frames get through after the
-collision, and each node records one delay greater than zero. The two delays
-differ by 153.6 us, three slot times of 51.2 us, the difference between the
-backoffs the two nodes drew.
+collide on every attempt and drop the frame: each records one retry-limit
+drop and no delay. The nodes of pair "diff" draw different backoffs, so both
+frames get through after the collision, and each node records one delay
+greater than zero. The two delays differ by 153.6 us, three slot times of
+51.2 us, the difference between the backoffs the two nodes drew.
 
 %file: test.ned
 
@@ -70,3 +71,11 @@ field mean 0.000460825
 statistic Test.diff[1].eth[0].mac packetPendingDelay:histogram
 field count 1
 field mean 0.000614425
+%contains: results/General-#0.sca
+scalar Test.same[0].eth[0].mac packetDropRetryLimitReached:count 1
+%contains: results/General-#0.sca
+scalar Test.same[1].eth[0].mac packetDropRetryLimitReached:count 1
+%contains: results/General-#0.sca
+scalar Test.diff[0].eth[0].mac packetDropRetryLimitReached:count 0
+%contains: results/General-#0.sca
+scalar Test.diff[1].eth[0].mac packetDropRetryLimitReached:count 0
