@@ -40,34 +40,10 @@ simple RtpPayloadReceiver extends SimpleModule like IRTPPayloadReceiver
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfilePayload10Receiver extends SimpleModule like IRTPPayloadReceiver
-{
-    parameters:
-        @class(RTPAVProfilePayload10Receiver);
-        string outputFileName;
-        string outputLogFileName = default("outputLogLoss%d.log");
-
-    gates:
-        input profileIn @labels(RtpInnerPacket);
-        output profileOut @labels(RtpInnerPacket);
-}
-
 simple RtpAvProfilePayload32Receiver extends SimpleModule like IRTPPayloadReceiver
 {
     parameters:
         @class(RtpAvProfilePayload32Receiver);
-        string outputFileName;
-        string outputLogFileName = default("outputLogLoss%d.log");
-
-    gates:
-        input profileIn @labels(RtpInnerPacket);
-        output profileOut @labels(RtpInnerPacket);
-}
-
-simple RTPAVProfileSampleBasedAudioReceiver extends SimpleModule like IRTPPayloadReceiver
-{
-    parameters:
-        @class(RTPAVProfileSampleBasedAudioReceiver);
         string outputFileName;
         string outputLogFileName = default("outputLogLoss%d.log");
 

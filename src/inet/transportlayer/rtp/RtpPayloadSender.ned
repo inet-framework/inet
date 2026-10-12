@@ -32,16 +32,6 @@ simple RtpPayloadSender extends SimpleModule like IRtpPayloadSender
         output profileOut @labels(RtpInnerPacket);
 }
 
-simple RTPAVProfilePayload10Sender extends SimpleModule like IRtpPayloadSender
-{
-    parameters:
-        @class(RTPAVProfilePayload10Sender);
-        
-    gates:
-        input profileIn @labels(RtpInnerPacket);
-        output profileOut @labels(RtpInnerPacket);
-}
-
 simple RtpAvProfilePayload32Sender extends SimpleModule like IRtpPayloadSender
 {
     parameters:
@@ -51,14 +41,3 @@ simple RtpAvProfilePayload32Sender extends SimpleModule like IRtpPayloadSender
         input profileIn @labels(RtpInnerPacket);
         output profileOut @labels(RtpInnerPacket);
 }
-
-simple RTPAVProfileSampleBasedAudioSender extends SimpleModule like IRtpPayloadSender
-{
-    parameters:
-        @class(RTPAVProfileSampleBasedAudioSender);
-        
-    gates:
-        input profileIn @labels(RtpInnerPacket);
-        output profileOut @labels(RtpInnerPacket);
-}
-
