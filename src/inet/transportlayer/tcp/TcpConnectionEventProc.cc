@@ -9,6 +9,7 @@
 
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -236,6 +237,8 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
             endSeqNo = requestedEndPos;
         if (Packet *dataMsg = receiveQueue->extractBytesUpTo(endSeqNo)) {
             releaseRcvBuffer(dataMsg->getByteLength());
+            if (rxTimestampingEnabled)
+                dataMsg->addTag<TcpRxTimestampInd>(); // the time of the delivery
             dataMsg->setKind(TCP_I_DATA);
             dataMsg->addTag<SocketInd>()->setSocketId(socketId);
             sendToApp(dataMsg);
@@ -260,6 +263,9 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     }
     else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
+    }
+    else if (auto cmd = dynamic_cast<TcpSetTimestampingCommand *>(tcpCommand)) {
+        rxTimestampingEnabled = cmd->getEnabled();
     }
     else if (auto cmd = dynamic_cast<TcpSetWriterBlockedCommand *>(tcpCommand)) {
         writerBlocked = cmd->getBlocked();

@@ -29,6 +29,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -821,6 +822,8 @@ void TcpConnection::sendAvailableDataToApp()
             }
             while (auto msg = receiveQueue->extractBytesUpTo(endSeqNo)) {
                 releaseRcvBuffer(msg->getByteLength());
+                if (rxTimestampingEnabled)
+                    msg->addTag<TcpRxTimestampInd>(); // SO_TIMESTAMPING: the time of the delivery
                 msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
                 msg->addTag<SocketInd>()->setSocketId(socketId);
                 sendToApp(msg);

@@ -173,6 +173,10 @@ class INET_API TcpConnection : public SimpleModule
     // ids of Linux SO_ZEROCOPY)
     std::map<uint32_t, uint32_t> zerocopySeqNums;
     uint32_t nextZerocopyId = 0;
+    // SO_TIMESTAMPING: the delivered data carries the time of its delivery
+    // (TcpRxTimestampInd), as TcpSetTimestampingCommand asks; a member, because the
+    // command can come before the open
+    bool rxTimestampingEnabled = false;
     // the application writer waits for space in the send buffer (Linux SOCK_NOSPACE), as
     // TcpSetWriterBlockedCommand tells; it drives the send buffer limited time
     bool writerBlocked = false;

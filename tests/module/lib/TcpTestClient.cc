@@ -14,6 +14,7 @@
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
+#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 
 namespace inet {
 
@@ -212,6 +213,9 @@ void TcpTestClient::handleMessage(cMessage *msg)
         EV_INFO_C("testing") << getFullName() << ": " << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind());
         if (auto packet = dynamic_cast<Packet *>(msg))
             EV_INFO_C("testing") << ", " << packet->getByteLength() << " bytes";
+        if (auto packet = dynamic_cast<Packet *>(msg))
+            if (auto timestamp = packet->findTag<TcpRxTimestampInd>())
+                EV_INFO_C("testing") << ", delivered at " << timestamp->getTimestamp();
         if (auto completionInfo = dynamic_cast<TcpZerocopyCompletionInfo *>(msg->getControlInfo()))
             EV_INFO_C("testing") << ", id " << completionInfo->getZerocopyId();
         EV_INFO_C("testing") << "\n";
@@ -253,6 +257,8 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
                 socket.listenOnce();
             if (!par("owned").boolValue())
                 socket.setOwned(false);
+            if (par("timestamping").boolValue())
+                socket.setTimestamping(true);
             scheduleNextSend();
             delete msg;
             break;
