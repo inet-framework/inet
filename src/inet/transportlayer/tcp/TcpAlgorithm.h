@@ -34,6 +34,7 @@ class INET_API TcpAlgorithm : public cObject
     bool rtoVarianceFloor = false; // the RTO of Linux: the minimum limits the variance term
     int maxRexmitCount = 0; // the retransmissions of one segment, after which the connection aborts
     simtime_t delayedAckTimeout; // the longest delay of an ACK
+    bool sendDataWithFirstAck = true; // the data that waits at the end of an active open goes with the ACK of the SYN-ACK
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected
@@ -86,6 +87,7 @@ class INET_API TcpAlgorithm : public cObject
         rtoVarianceFloor = tcpMain->par("rtoVarianceFloor");
         maxRexmitCount = tcpMain->par("maxRexmitCount");
         delayedAckTimeout = tcpMain->par("delayedAckTimeout");
+        sendDataWithFirstAck = tcpMain->par("sendDataWithFirstAck");
     }
 
     /**
