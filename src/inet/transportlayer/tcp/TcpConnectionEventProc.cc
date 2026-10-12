@@ -235,6 +235,7 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
         if (seqLess(requestedEndPos, endSeqNo))
             endSeqNo = requestedEndPos;
         if (Packet *dataMsg = receiveQueue->extractBytesUpTo(endSeqNo)) {
+            releaseRcvBuffer(dataMsg->getByteLength());
             dataMsg->setKind(TCP_I_DATA);
             dataMsg->addTag<SocketInd>()->setSocketId(socketId);
             sendToApp(dataMsg);

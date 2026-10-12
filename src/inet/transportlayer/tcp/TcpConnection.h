@@ -9,6 +9,8 @@
 #ifndef __INET_TCPCONNECTION_H
 #define __INET_TCPCONNECTION_H
 
+#include <deque>
+
 #include "inet/common/SimpleModule.h"
 #include "inet/networklayer/common/IcmpType_m.h"
 #include "inet/networklayer/common/Icmpv6Type_m.h"
@@ -150,6 +152,15 @@ class INET_API TcpConnection : public SimpleModule
     long sentSegments = 0;
     uint32_t lastRcvdSeqNo = 0;
     uint32_t lastSentAck = 0;
+
+    // The receive buffer in the accounting of Linux, for windowShrinkAllowed: each
+    // received data segment costs the truesize of its skb (sk_rmem_alloc), until the
+    // application reads all of it, and the window counts the free buffer at the ratio
+    // of payload to truesize (scaling_ratio of tcp_measure_rcv_mss())
+    std::deque<std::pair<uint32_t, uint32_t>> rcvSkbChain; // the unread received segments: payload bytes and truesize
+    uint64_t rcvBufOccupancy = 0; // the sum of the truesizes in rcvSkbChain
+    uint8_t rcvScalingRatio = 128; // payload / truesize, in units of 1/256 (Linux TCP_DEFAULT_SCALING_RATIO)
+    uint32_t rcvMssEstimate = 536; // the estimate of the received MSS that gates the ratio (Linux icsk_ack.rcv_mss)
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
@@ -416,6 +427,17 @@ class INET_API TcpConnection : public SimpleModule
     static const char *optionName(int option);
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
+
+    /**
+     * The truesize of the skb of a received TCP segment in Linux, from a tun device as
+     * packetdrill uses: the payload, the IP and TCP headers and skb_shared_info (320
+     * bytes) in a page-sized or power-of-two allocation, and struct sk_buff (232 bytes).
+     */
+    static uint32_t linuxSkbTruesize(uint32_t payloadBytes);
+    /** Charges the receive buffer with a received data segment (rcvSkbChain). */
+    virtual void chargeRcvBuffer(uint32_t payloadBytes);
+    /** Releases the receive buffer for the data that the application read. */
+    virtual void releaseRcvBuffer(uint64_t readBytes);
 
     /** Utility: returns true when receive queue has enough space for store the tcpHeader */
     virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);

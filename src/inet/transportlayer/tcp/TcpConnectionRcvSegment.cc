@@ -648,6 +648,8 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                                 tcpHeader->getSequenceNo() + payloadLength, dupStart, dupEnd);
                 }
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
+                if (payloadLength > 0)
+                    chargeRcvBuffer(payloadLength);
 
                 // windowAutoTuning, as Linux (tcp_grow_window(), also for out-of-order
                 // data): each data segment grows the offer by max(2 * MSS, 2 * its
