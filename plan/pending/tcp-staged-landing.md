@@ -63,7 +63,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S12 ✅ | `topic/tcp-fast-open` | 15 (part), 16 (part), 23 (part), 26 (part), 27 (part), 39 (part), 43, 44, new | +868 −72 | TCP Fast Open (RFC 7413), and the option writing and the MSS rules that it needs (D-42 to D-50) |
 | S13 ✅ | `topic/tcp-accecn` | 13 (part), 23 (part), 27, 48 (part), 64 (part), 65 (part), new | +877 −122 | Accurate ECN (RFC 9768), the ECN repairs that it needs, `ecnMarkAll`; DCTCP counts its bytes also in a fast recovery (D-51 to D-60) |
 | S14 ✅ | `topic/tcp-receive-buffer` | 28, 29, 35, new | +353 −9 | the receive buffer apart from the advertised window, the Linux receive memory behind parameters, the window and the buffer of one socket (D-4), MSG_ZEROCOPY, the send buffer chrono, SO_TIMESTAMPING, `TCP_NOTSENT_LOWAT` (D-61 to D-64) |
-| S15 | `topic/tcp-timers` | 18 (part), 26 (part), 28 (part), 31, 32 (part), 33, 68 (part), 77, new | +450 −40 (about) | the timer parameters, the RTO of Linux, the SYN retries, a FIN that keeps a running retransmission timer, adaptive delayed ACK, keepalive, no new fast recovery before the recovery point of a timeout (D-34) |
+| S15 ✅ | `topic/tcp-timers` | 18 (part), 26 (part), 28 (part), 31, 32 (part), 33, 68 (part), 77, new | +483 −64 | the timer parameters, the RTO of Linux, the SYN retries, a FIN that keeps a running retransmission timer, adaptive delayed ACK, keepalive, no new fast recovery before the recovery point of a timeout (D-34) |
 | S15b | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +150 −40 (about) | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
 | S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
@@ -413,7 +413,9 @@ plan gives a reason for.
   new value of RecoveryPoint". Master and the source start a new fast recovery at the next
   duplicate ACK, because the duplicate-ACK count or `IsLost()` is still above the limit;
   `tcp_frto_4` shows it at t=4.002. The repair changes master's behavior with SACK, so it is not
-  part of S10. The proposal is S15, which changes the loss marking at a timeout.
+  part of S10. The proposal is S15, which changes the loss marking at a timeout. S15 repairs it
+  for an RTO during a loss recovery, the scope of section 5.1, at a duplicate ACK and at the RACK
+  timer; Linux blocks a new recovery after each RTO (its Loss state), which S15 does not model.
 - **D-35 — The tail loss probe follows RFC 8985 sections 7.2 and 7.4.2.** Four deviations from
   source commits 25, 76 and 85. (1) An ACK of new data also arms the probe timeout (section 7.2,
   Linux `tcp_set_xmit_timer()`). In the source only a send armed it, and the RTO restart at each
@@ -627,6 +629,39 @@ plan gives a reason for.
   its queues are empty (`tcp_chrono_stop()`); the source stopped it only at a send or a command, so the time ran on. The
   mark of `TCP_NOTSENT_LOWAT` comes from the socket option, else from the parameter
   `notsentLowat`, as in the source.
+- **D-65 — The timer parameters keep the values of master.** Commit 32 turned the timer constants
+  into parameters and changed three defaults to those of Linux: a minimum RTO of 200 ms, a maximum
+  of 120 s, and the RTO formula of Linux; commit 68 put the formula of RFC 6298 back, behind
+  `rtoVarianceFloor`, and the minimum of 1 s. S15 keeps the values of master (`initialRto` 3 s,
+  `minRexmitTimeout` 1 s, `maxRexmitTimeout` 240 s), and S19 changes the defaults: the initial RTO
+  of 1 s of RFC 6298 section 2.1 (the source: 1 s) and the maximum (the source: 120 s, which RFC
+  6298 section 2.5 allows). `synLinearTimeouts` is 0 by default, as RFC 6298 section 5.5 doubles
+  the timer at each expiry (the source: 4, as Linux). `synRetries` has the plain default 12 and is
+  not `@mutable` (the source: -1 for 12, and `@mutable` for TCP_SYNCNT). `maxRexmitTimeout` also
+  limits the SYN timeout. The rule of RFC 6298 section 5.7 (commit 77) acts only below an initial
+  RTO of 3 s.
+- **D-66 — TCP_SYNCNT and SO_KEEPALIVE are socket calls (D-4).** inet-gpl changed the parameter
+  `synRetries` at run time for TCP_SYNCNT. `TcpSocket::setSynRetries()` puts the value in the open
+  command, as `setReceiveBufferSize()` does (D-63). RFC 9293 MUST-24 asks for keepalive on or off
+  for each connection, which the source did not have: `TcpSocket::setKeepAlive()` sends a command
+  that acts before and after the open, as SO_KEEPALIVE. A listening socket gives both values to
+  the connections that it forks, as in Linux.
+- **D-67 — Keepalive as RFC 9293 section 3.8.4 and Linux `tcp_keepalive_timer()`.** The defaults are
+  those of Linux (7200 s, 75 s, 9 probes; MUST-28: at least two hours). TIME_WAIT sends no probe,
+  as Linux keeps only a time-wait socket there; the source could send one. At the end of the
+  probes the connection aborts as after too many retransmissions, without a RST, as the source
+  does; Linux sends a RST.
+- **D-68 — The delayed ACK of Linux is the model of the source.** The source tuned
+  `adaptiveDelayedAcks` against the packetdrill scripts of inet-gpl. It simplifies Linux in five
+  places: each ACK uses one ACK of the quickack budget, where `tcp_dec_quickack_mode()` counts only
+  an ACK of new data and resets the ATO at the end of the budget; `__tcp_ack_snd_check()` also asks
+  that the right edge of the window advances; the send MSS stands for the received MSS; a FIN
+  without data updates the ATO; a retransmission is not a reply. S15 changes only that a FIN
+  without data is not a reply, as in Linux (`tcp_event_data_sent()`); the other places can change
+  when a run of the scripts against master shows a reason, after S18.
+- **D-69 — STATUS reports the last in-order data.** `lastDataRecvTime` is the arrival of the last
+  in-order data, and before any data the end of the handshake, as Linux `icsk_ack.lrcvtime`, which
+  `tcpi_last_data_recv` reports. The source reported the last segment of any kind.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -1695,25 +1730,78 @@ the lwIP rows need a build with lwIP). The six gates pass.
 | --- | --- | --- | --- |
 | 1 | add: the timer constants as parameters, with the values of master | — | 31 (part), 32 (part) |
 | 2 | add: `rtoVarianceFloor`, the RTO of Linux | — | 68 (part) |
-| 3 | add: `synRetries` and `synLinearTimeouts`, and the SYN timer under `maxRexmitTimeout` | — | 32 (part) |
-| 4 | add: the SYN retries of one socket (TCP_SYNCNT, D-4) | — | new |
+| 3 | add: `synRetries` and `synLinearTimeouts`, and the SYN timer limit | — | 32 (part) |
+| 4 | add: the SYN retries of one socket (TCP_SYNCNT) | — | new (D-66) |
 | 5 | add: an RTO of 3 s after a SYN timeout (RFC 6298 section 5.7) | — | 77 |
 | 6 | add: `sendDataWithFirstAck` | — | 32 (part) |
 | 7 | change: a FIN starts the retransmission timer only when it does not run | — | 26 (part) |
 | 8 | add: adaptive delayed ACKs, selected by `adaptiveDelayedAcks` | — | 28 (part), 31 (part) |
 | 9 | add: the time of the last received data in STATUS | — | 18 (part) |
 | 10 | add: keepalive (RFC 9293 section 3.8.4) | — | 33 |
-| 11 | add: keepalive for each connection (MUST-24) | — | new |
-| 12 | fix: no new fast recovery before the recovery point of a timeout (D-34) | — | new |
+| 11 | add: keepalive for each connection (MUST-24) | — | new (D-66) |
+| 12 | fix: no new fast recovery before the recovery point of a timeout | — | new (D-34) |
 
 S15 had commits 31 to 34 and 77. The loss marking of commit 34 landed with S5e, and its zero-window
 probe goes to S15b with the persist timing of commit 32 and the window update of commit 84 (B14,
-B15). The timing parameters keep the values of master: S19 changes the defaults (the initial RTO
-of 1 s of RFC 6298 section 2.1, which the source pins back to 3 s in its tests). Commit 32 changed
-the RTO to the formula of Linux, and commit 68 put the formula of RFC 6298 back as the default with
-`rtoVarianceFloor`; S15 brings only the parameter. `synLinearTimeouts` is 0 by default, as RFC 6298
-section 5.5 doubles the timer at each expiry (the source: 4, as Linux). The source changes the
-module parameter `synRetries` at run time for the socket option TCP_SYNCNT, and it has no switch of
+B15). The timing parameters keep the values of master, and S19 changes the defaults (D-65). Commit
+32 changed the RTO to the formula of Linux, and commit 68 put the formula of RFC 6298 back as the
+default with `rtoVarianceFloor`; S15 brings only the parameter. The source changes the module
+parameter `synRetries` at run time for the socket option TCP_SYNCNT, and it has no switch of
 keepalive for one connection, which RFC 9293 MUST-24 requires; steps 4 and 11 add them as socket
-calls. Step 7 follows RFC 6298 section 5.1: master restarts the timer at each FIN, also with data
-in flight. Step 12 is D-34.
+calls (D-66). Step 7 follows RFC 6298 section 5.1: master restarted the timer at each FIN, also with
+data in flight. Step 12 repairs D-34.
+
+Items for later stages: (S15b) the zero window: the persist timing, the probe, and the window update
+that reopens the window. (S19) the defaults of D-65. (inet-gpl) Its configuration sets the values of
+Linux that the source has as defaults: `initialRto = 1s`, `maxRexmitTimeout = 120s` and
+`synLinearTimeouts = 4`. `PacketDrillApp` changes the parameter `synRetries` for TCP_SYNCNT; when it
+builds against master after S18, it uses `setSynRetries()`, because the parameter is not `@mutable`
+on master. A run can check both only after S18.
+
+### S15 — `topic/tcp-timers` — landed 2026-10-12
+
+The owner reviewed and approved S15 on 2026-10-12.
+
+S15 brings the timer parameters, the RTO of Linux, the SYN retries, an RTO of 3 s after a SYN
+timeout, a FIN that keeps a running retransmission timer, the delayed ACK of Linux, keepalive, the
+time of the last received data in STATUS, and the repair of D-34. Each addition is off by default or
+keeps the value of master. Where the source is wrong or incomplete, S15 deviates from it (D-65 to
+D-69).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: the timer constants as parameters, with the values of master` | — | 31 (part), 32 (part) | — |
+| `tcp: add: rtoVarianceFloor, the RTO of Linux` | — | 68 (part) | — |
+| `tcp: add: synRetries and synLinearTimeouts, and the SYN timer limit` | — | 32 (part) | — |
+| `tcp: add: the SYN retries of one socket (TCP_SYNCNT)` | — | new (D-66) | — |
+| `tcp: add: an RTO of 3 s after a SYN timeout (RFC 6298 section 5.7)` | — | 77 | — |
+| `tcp: add: sendDataWithFirstAck` | — | 32 (part) | — |
+| `tcp: change: a FIN starts the retransmission timer only when it does not run` | — | 26 (part) | — |
+| `tcp: add: adaptive delayed ACKs, selected by adaptiveDelayedAcks` | — | 28 (part), 31 (part) | — |
+| `tcp: add: the time of the last received data in STATUS` | — | 18 (part) | — |
+| `tcp: add: keepalive (RFC 9293 section 3.8.4)` | — | 33 | — |
+| `tcp: add: keepalive for each connection (MUST-24)` | — | new (D-66) | — |
+| `tcp: fix: no new fast recovery before the recovery point of a timeout` | — | new (D-34) | `bulktransfer` inet_inet_2b (tplx, ~tNl, ~tND) |
+
+One commit moves a CI row. In the bulk transfer example, a server connection gets an RTO during a
+SACK recovery at t=2.987, and a duplicate ACK at t=3.122 started a new recovery there; with the
+repair of D-34 it does not. Each connection still sends up to the end of the run, with two
+retransmissions fewer.
+
+New tests: `tcp_rto_params_1` to `_3`, `tcp_delack_params_1`, `tcp_rto_variance_floor_1`,
+`tcp_syn_retries_1`, `tcp_syn_linear_1`, `tcp_socket_synretries_1`, `tcp_rto_syn_fallback_1`,
+`tcp_first_ack_1`, `tcp_fin_rexmit_timer_1`, `tcp_adaptive_delack_1` to `_3`,
+`tcp_info_last_data_recv_1`, `tcp_keepalive_1` to `_4`, and `tcp_sack_rto_recovery_1`;
+`tcp_frto_4` checks the repair of D-34. The test client gets the parameters `socketSynRetries` and
+`keepAliveScript`, and a third status line with `lastDataRecvTime`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (510 at the first code commit, 526 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 122 and serializer 4 pass at the head. The new and
+changed tests of each code commit fail with the source of the commit before; there, the test
+library of `tcp_socket_synretries_1` and of `tcp_keepalive_3` and `_4` does not compile, because it
+calls the new socket functions. The CI fingerprint job runs at each code commit, and only the row
+above moves. The TCP fingerprint rows run in debug at the head with no runtime error (the `tyf`
+ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six gates
+pass.
