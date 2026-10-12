@@ -471,6 +471,13 @@ Notable backward compatible changes are the following:
    the results of every simulation that uses EthernetCsmaMac, including those
    with EthernetPlcaInterface.
 
+10. CSMA/CD retry-limit drop statistic
+
+   EthernetCsmaMac records packetDropRetryLimitReached, the frames it drops
+   after 16 colliding transmission attempts, as the IEEE 802.11 and
+   IEEE 802.15.4 MACs and the Carrier Sense Multiple Access with Collision
+   Avoidance (CSMA/CA) MAC, CsmaCaMac, do.
+
 INET-4.7 (July 2026) — feature release
 --------------------------------------
 
