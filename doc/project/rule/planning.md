@@ -25,7 +25,7 @@ These rules govern the plan. The linked technical rules govern the implementatio
 
 **A maintainer can assess the plan without the conversation history.**
 
-Write for the INET maintainer who must approve the work. Explain the problem before the proposed edits. Define unfamiliar terms at first use. State the reason for each significant choice. Link to evidence that the maintainer needs to check the proposal.
+Use the audience and explanatory style in [DR-EXPLAIN](documentation.md#dr-explain). Explain the problem before the proposed edits. State the reason for each significant choice. Link to evidence that the maintainer needs to check the proposal. Put the explanation in the plan itself, even when a separate summary accompanies it.
 
 A file list alone does not explain the design. A useful step connects its purpose to the affected component, the proposed change, and the expected result.
 
@@ -47,7 +47,7 @@ An unresolved fact that can change the design or acceptance criteria blocks impl
 
 **The plan defines the intended behavior, acceptance criteria, and scope boundaries.**
 
-Describe the current behavior and the required behavior. Give a concrete example when useful. State observable acceptance criteria. Identify the conditions that must remain true.
+Describe the current behavior and required behavior through a concrete scenario under [DR-EXPLAIN](documentation.md#dr-explain). State observable acceptance criteria. Identify the conditions that must remain true.
 
 Separate work necessary for those criteria from optional follow-up work. Explain why each implementation step belongs in the requested change. Apply [PR-SPLIT-DRIVEBY](pull-request.md#pr-split-driveby) to unrelated fixes.
 

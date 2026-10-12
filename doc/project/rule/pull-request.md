@@ -1,6 +1,6 @@
 # Pull Requests and Commits
 
-> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `PR-*` · **Stands on:** [architecture.md](architecture.md), [testing.md](testing.md)
+> **Kind:** rule · **Status:** current · **Seal:** by rule · **Owns:** `PR-*` · **Stands on:** [architecture.md](architecture.md), [testing.md](testing.md), [documentation.md](documentation.md)
 
 How to divide a change into commits, how to write the commit messages, and what a pull request must contain. The rules exist for the *reader* of the change: the reviewer who must judge it now, the developer who bisects a regression two years later, and the developer who reads `git log` to learn why the code looks as it does. A change that is correct but badly divided costs all three of them time, and it hides real defects.
 
@@ -10,12 +10,14 @@ Each rule has a stable identifier of the form `PR-<AREA>-<NAME>`, a one-line sta
 
 ## The reviewer's questions
 
+Write commit bodies and PR descriptions for the audience defined by [DR-EXPLAIN](documentation.md#dr-explain). Apply its explanatory style within the formats below. The questions check whether the explanation is complete; they do not require a separate heading for every answer.
+
 A reviewer meets every change with the same four questions. The opening of each commit body and of each pull request description answers them, before any detail:
 
 1. **Which problem does the change solve?** What is wrong or missing today, and for whom.
 2. **Is it a real problem, and do we want to solve it?** How we know: a symptom with a way to reproduce it, a failing test, a standard clause, a requirement, a user report, a measurement. What it costs to leave the problem, and why the change is worth its own cost. For a commit that prepares a later one: which later commit needs it, and for what.
 3. **What changes?** What a user or a developer sees after the change: behavior, contracts, configuration, recorded results.
-4. **How does the change reach its goal?** The approach in a sentence or two, and why this approach and not the obvious alternative.
+4. **How does the change reach its goal?** Explain the mechanism and why it meets the need. Compare alternatives when a real design choice needs explanation.
 
 **The answers scale with the change.** A typo fix answers all four in its subject. A small fix answers them in a few sentences. A feature answers them in the first paragraphs of each commit and of the pull request. Headings such as "Why", "What" and "How" can help a long text; a short text does not need them. What counts is that the answers are there, that they come first, and that a reviewer without the author's context understands them.
 
@@ -54,7 +56,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | [PR-MSG-SUBJECT](#pr-msg-subject) | `area: what the commit does` |
 | [PR-MSG-BODY](#pr-msg-body) | A commit whose subject cannot carry its reason has a body |
 | [PR-MSG-SUMMARY](#pr-msg-summary) | The body starts with a summary that a reviewer understands in two minutes |
-| [PR-MSG-WHY](#pr-msg-why) | The body gives the reason, not the content |
+| [PR-MSG-WHY](#pr-msg-why) | The body explains the behavior change and why it is necessary |
 | [PR-MSG-REPRODUCE](#pr-msg-reproduce) | A fix says how to reproduce the defect |
 | [PR-MSG-PLAN](#pr-msg-plan) | A commit that implements a plan names it |
 | [PR-MSG-GENERIC](#pr-msg-generic) | A shared-component commit explains itself in generic terms |
@@ -229,6 +231,8 @@ A merge commit inside the series mixes other developers' changes into the diff o
 
 One line: the component or tree area, a colon, then what the commit does, in the present tense. End it without a full stop. Then one empty line, then the body.
 
+For a behavior change, name the resulting behavior or correction in the subject. The body explains the problem that the correction addresses. A subject such as `UdpBasicApp: prevent send timeouts after shutdown` states the result; its body explains the old failure.
+
 **Aim for 72 characters. A gate fails above 80.** The 72 is where `git log --oneline` still fits an 80-column terminal, once the abbreviated hash and its space are counted. The 80 is where the subject stops fitting on its own. Between the two is a matter of taste and nothing is gained by arguing it: the length limit is a proxy for [PR-SPLIT-ONE-CHANGE](#pr-split-one-change) — a subject that will not fit usually describes two changes — and at 73 characters that proxy tells you nothing. A gate that reports a one-character overrun beside a real defect teaches the reader to skim both.
 
 The area is the NED or C++ component (`ExternalProcess:`, `Ipv4:`, `visualizer:`) or the part of the tree (`tests:`, `doc:`, `build:`, `examples/mpls/net37:`). An optional kind word may follow the area (`ospfv3: fix:`, `python: refactor:`). Name the *behavior*, never the mechanics: write `ExternalProcess: don't kill the process group when a spawned command fails`, not "update ExternalProcess.cc" and not a list of file names or links.
@@ -251,9 +255,9 @@ A subject says what the commit does. Where that is the whole story, the commit i
 
 | | Where it belongs |
 | --- | --- |
-| **why** it was done | the summary gives the problem, and how we know that it is real and worth solving ([PR-MSG-SUMMARY](#pr-msg-summary)). The rest of the body adds the cause, the alternative rejected, and what the change deliberately leaves unrepaired. Nothing else carries the reason. |
+| **why** it was done | The summary gives the problem and its evidence under [PR-MSG-SUMMARY](#pr-msg-summary). The body explains the cause and relevant limits. It compares alternatives when a real design choice needs explanation. |
 | **what** it changes | the subject names it, and the summary says what a user or a developer sees after the change, at the level of components and contracts. The diff shows the lines; the body does not restate them. |
-| **how** it reaches the goal | the summary gives the approach in a sentence or two. The body says *which* mechanism, and *why that one and not the obvious alternative*. The diff shows the code. |
+| **how** it reaches the goal | The summary gives the approach. The body connects the trigger, responsible component, action, and result. The diff supplies the implementation detail. |
 
 A body that restates the subject in longer words is worse than no body, because it costs a reader the time to discover that it says nothing.
 
@@ -269,7 +273,19 @@ Details come after the summary: the mechanism and why it was chosen, edge cases,
 
 The summary is not a list of actions. "Add X. Change Y. Remove Z." repeats the diff and leaves the reader to find the reason. Write the problem first, then the idea of the solution.
 
-**Keep the body short.** The first paragraph aims for about 100 words, and the whole body for about 300. Both numbers are measured: across master's last 1000 commits, 99 % of first paragraphs have at most 121 words, and 95 % of bodies have at most 291. A body that needs much more usually describes more than one change ([PR-SPLIT-ONE-CHANGE](#pr-split-one-change)), or carries evidence that belongs in the pull request ([PR-MSG-FACTS](#pr-msg-facts)).
+**Separate the behavior before the commit from the behavior after it.** Compare the commit with its parent. In a series, the parent includes earlier commits, so each message describes only its own change. Use separate paragraphs with explicit transitions such as "Before this commit" and "After this commit". Headings are optional. A short body may combine these statements if the boundary remains explicit.
+
+For the same concrete scenario, explain:
+
+1. **Before the commit:** State the trigger, the old behavior, and its consequence. Explain the confirmed cause, or state what remains unknown.
+2. **After the commit:** State the changed action and the new observable result under the same conditions.
+3. **The connection:** Explain why that action removes the failure or supplies the missing capability. Preserve the conditions and limits that control the result.
+
+The [worked message](#worked-messages) shows this distinction for a timeout after shutdown. A reproduction can supply the common scenario; it needs no duplicate example. For a feature, identify the missing capability before the commit. For a change that preserves behavior, explain the structural need and state which behavior remains unchanged. Do not invent a defect or behavior change to fill either paragraph.
+
+**Keep the body proportionate to the change.** Preserve the conditions and causal explanation that the reader needs. The first paragraph aims for about 100 words, and the whole body for about 300. Both numbers are measured: across master's last 1000 commits, 99 % of first paragraphs have at most 121 words, and 95 % of bodies have at most 291. A body that needs much more usually describes more than one change ([PR-SPLIT-ONE-CHANGE](#pr-split-one-change)), or carries evidence that belongs in the pull request ([PR-MSG-FACTS](#pr-msg-facts)).
+
+These word counts guide review; they are not limits that justify an incomplete explanation.
 
 A commit whose subject is the whole story needs no body ([PR-MSG-BODY](#pr-msg-body)). In a body of one short paragraph, that paragraph is the summary.
 
@@ -277,9 +293,11 @@ A commit whose subject is the whole story needs no body ([PR-MSG-BODY](#pr-msg-b
 
 ### PR-MSG-WHY
 
-**The body gives the reason, not the content**
+**The body explains the behavior change and why it is necessary**
 
-The diff already shows what changed, line by line. The body says why: the symptom, the cause, why this solution and not an obvious alternative, and what the change deliberately does not repair.
+Explain the behavior change and why it is necessary. Connect the symptom or need to the cause, the mechanism, and the result. Omit a line-by-line account of the diff. State uncertainty when the cause remains unknown. Include scope limits that affect the reader's assessment. Compare alternatives only when a real design choice needs explanation.
+
+For example, the [shutdown-timer message](#worked-messages) connects a pending event to a runtime error after shutdown. It explains how cancellation prevents that error while the timer object remains available for restart. The scenario supplies both the mechanism and its reason.
 
 For a bug fix, write the symptom in the words a future reader will search for — the error message, the wrong packet, the failed assertion. For a behavior change, name the standard clause or the reference that makes the new behavior the correct one. For a new feature, say who needs it and how we know: a requirement, a standard clause, a user report, or the later commit that uses it. A commit that prepares a later one names that commit and what it needs from this one; "needed later" alone is not a reason.
 
@@ -341,6 +359,8 @@ No attribution trailers for tools or assistants, no progress notes, no apologies
 
 **The message describes the final change, not the way to it.** A pull request goes through revisions, and the commits that land show only the result ([PR-SERIES-ORDER](#pr-series-order)). A section such as "audit correction", "after review" or "the earlier revision" records the history of the pull request, and it means nothing to a reader of `git log`. Write the message for the final change.
 
+A comparison of behavior before and after the commit explains that final change. It is distinct from the development history excluded here. Preserve that comparison under [PR-MSG-SUMMARY](#pr-msg-summary).
+
 **Test logs belong in the pull request.** The commands that ran, their results, the run counts and the seeds go in the description ([PR-REQ-STORY](#pr-req-story)). They describe one run on one machine, and they are often the same for every commit of a series. A message names a test only when the test is part of the reason: the regression test of a fix ([PR-MSG-REPRODUCE](#pr-msg-reproduce)), or the case that shows that a moved baseline is right.
 
 *Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) fails an attribution trailer and gives a note for words of revision history and for a `Validation:` paragraph; T4 — agent review for other progress notes.*
@@ -388,6 +408,65 @@ Name the contracts, the packet content, the configuration surface, and the featu
 **No leftovers**
 
 The branch contains no debug output, no commented-out code, no `#if 0` block, no build output or IDE files, and no TODO without an issue number. A change that is not ready for this stays a draft.
+
+## Worked messages
+
+These examples use the hypothetical repair in the [compact plan](../guide/write-an-implementation-plan.md#compact-worked-example). They assume that an edit removed timer cancellation from `UdpBasicApp::handleStopOperation()`. The current source already contains that cancellation. These examples report no current defect, implemented repair, or executed tests.
+
+### Commit message
+
+The message explains one change and its reproduction. The `Plan:` path is illustrative; a real message names its actual plan. The `?` trailer keeps unresolved obligations explicit under [CR-TAG-FORM](classification.md#cr-tag-form).
+
+```text
+UdpBasicApp: prevent send timeouts after shutdown
+
+Before this commit, the stop handler leaves the send timer scheduled. If its timeout occurs after shutdown completes, the lifecycle handler rejects the self-message because UdpBasicApp is down. The simulation stops with a runtime error.
+
+After this commit, the stop handler cancels the pending event. Under the same conditions, the old timeout does not invoke the stopped application, so that runtime error does not occur. The handler retains the timer object so the application can send again after restart.
+
+To compare both versions:
+
+1. Choose a send interval that places the next timeout after shutdown completes.
+2. Stop the client before that timeout, away from its exact timestamp.
+3. Advance beyond the timeout while the client remains down.
+
+The parent version reaches the runtime error; the changed version cancels that timeout.
+
+Plan: plan/pending/udpapp-stop-timer.md
+Change: src.applications.udpapp.UdpBasicApp | behavior.change.fix | ?
+```
+
+### Pull request description
+
+The description adds the review scope and evidence status to the explanation. This draft example keeps the proposed test separate from executed evidence. Its command remains proposed until the new test exists and the selector is verified.
+
+````markdown
+Before this change, the stop handler leaves the send timer scheduled. If its timeout occurs after shutdown completes, the lifecycle handler rejects the self-message because UdpBasicApp is down. The simulation stops with a runtime error.
+
+After this change, the stop handler cancels the pending event and retains the timer object for restart. Under the same conditions, the old timeout does not invoke the stopped application, so that runtime error does not occur. A later start can schedule sends again.
+
+The main risk is loss of restart behavior if the repair deletes the timer object. The proposed module test covers the interval after shutdown and a later restart.
+
+## Commit
+
+1. `UdpBasicApp: prevent send timeouts after shutdown` restores cancellation and adds the proposed regression test. This commit changes behavior.
+
+The change affects the application stop handler and its module test. It preserves socket closure, delayed stop completion, configuration, and cumulative counters. It introduces no public interface or protocol-format change.
+
+## Evidence
+
+No simulation ran for this example. The proposed command selects the existing lifecycle case and the new restart variant:
+
+```sh
+inet_run_module_tests -m debug -f 'udpapp_lifecycle_(6|timer_restart)\.test'
+```
+
+The new test must show no send callback after shutdown and a successful send after restart. The existing case alone does not establish restart behavior. Runtime results and baseline effects remain unverified.
+````
+
+### Implementation plan
+
+The [compact plan](../guide/write-an-implementation-plan.md#compact-worked-example) uses the same scenario. It adds the responsible component, proposed edits, preserved behavior, verification procedure, and approval scope. It distinguishes proposed checks from observed evidence. A commit message describes its final change; a plan explains work that the maintainer must assess before implementation.
 
 ## Quick reference
 

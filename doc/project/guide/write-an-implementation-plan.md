@@ -85,7 +85,7 @@ Use the plan's existing explanation as the answer to each applicable row. Add ev
 
 | Review question | Rule |
 | --- | --- |
-| Can a maintainer assess the proposal without the conversation? | [PLR-READABLE](../rule/planning.md#plr-readable) |
+| Can a maintainer explain the behavior, its reason, and its result from the plan alone? | [PLR-READABLE](../rule/planning.md#plr-readable) |
 | Which facts support the chosen owner and production path? | [PLR-GROUNDED](../rule/planning.md#plr-grounded) |
 | What observable result establishes completion? | [PLR-SCOPE](../rule/planning.md#plr-scope) |
 | Why does each significant addition need to exist? | [PLR-DESIGN](../rule/planning.md#plr-design) |
@@ -104,6 +104,8 @@ Store the plan under `plan/pending/` according to [DR-NAME](../rule/documentatio
 ## Plan template
 
 Choose the compact form below when one explanation covers the owner, path, change, and verification. Use the expanded form when interactions need separate explanation. Both forms follow the same plan rules. The placeholders describe content; they are not evidence or approval.
+
+Write the explanation within the selected structure under [DR-EXPLAIN](../rule/documentation.md#dr-explain). Each section must connect its facts so the reader can assess the proposal. A completed template must make sense without a separate chat explanation. The [worked messages](../rule/pull-request.md#worked-messages) show the compact example as a commit message and PR description.
 
 ### Compact worked example
 
@@ -137,16 +139,16 @@ Plan revision: <revision or date that identifies the reviewed text>
 Approval: <pending, or actual approval source and scope>
 
 ## 1. Problem and intended behavior
-<Current behavior, required behavior, and a concrete example.>
+<Explain the current behavior and intended result through a concrete scenario. An existing failure scenario or reproduction can supply that example.>
 
 ## 2. Current implementation and evidence
-<Actual caller, responsible component, consumers, source links, and observed evidence.>
+<Explain how the actual caller, responsible component, and consumers produce the current behavior. Support that explanation with source links and observed evidence.>
 
 ## 3. Scope and acceptance criteria
 <Required work, optional follow-up work, observable criteria, and preserved conditions.>
 
 ## 4. Proposed design and reasons
-<Responsibilities, interactions, reuse options, justified additions, and rule references.>
+<Explain how the proposed component actions produce the intended result. Discuss reuse, justified additions, and relevant design choices with rule references.>
 
 ## 5. Affected components and compatibility
 <Affected artifact types, existing configurations, external consumers, and migration needs.>
@@ -155,10 +157,8 @@ Approval: <pending, or actual approval source and scope>
 <Purpose, owner and files, proposed change, expected behavior, and verification for each step.>
 
 ## 7. Verification methods and expected results
-<Existing or proposed tests, exact commands, build mode, selectors, expected observations, and gaps.>
-<Keep planned checks separate from observed results and their evidence.>
+<Existing or proposed tests, exact commands, build mode, selectors, expected observations, and gaps.> <Keep planned checks separate from observed results and their evidence.>
 
 ## 8. Risks, unresolved decisions, and approval scope
-<Design-critical assumptions, required decisions, and any separate permissions.>
-<For a revision, identify the changed decision and whether renewed approval is necessary.>
+<Design-critical assumptions, required decisions, and any separate permissions.> <For a revision, identify the changed decision and whether renewed approval is necessary.>
 ```
