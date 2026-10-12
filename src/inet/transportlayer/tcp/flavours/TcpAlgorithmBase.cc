@@ -26,8 +26,6 @@ namespace tcp {
 #define TCP_MAX_QUICKACKS      16
 #define TCP_PINGPONG_THRESH    1
 
-#define MIN_PERSIST_TIMEOUT    5   // 5s
-#define MAX_PERSIST_TIMEOUT    60   // 60s
 #define TLP_MAX_ACK_DELAY      0.2   // 200ms: RFC 8985 TLP.max_ack_delay, as Linux (TCP_RTO_MIN)
 #define TLP_MIN_TIMEOUT        0.002 // 2ms: Linux TCP_TIMEOUT_MIN, the PTO margin when more than one segment is in flight
 
@@ -223,8 +221,9 @@ void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
         // RFC 3168, section 6.1.2: after an ECN-Echo at a congestion window of one
         // segment, "The sending TCP MUST reset the retransmit timer", also with
         // nothing in flight, and when it expires, the sender "will then be able to
-        // send a new packet". So there is nothing to retransmit then.
-        if (state->snd_una == state->snd_max) {
+        // send a new packet". So there is nothing to retransmit then. In the persist
+        // state only the probe octet is in flight, and the persist timer repeats it.
+        if (state->snd_una == state->snd_max || persistTimer->isScheduled()) {
             EV_INFO << "REXMIT timer expired with nothing in flight: no retransmission, sending new data\n";
             sendData(false);
         }
@@ -410,25 +409,15 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
 
 void TcpAlgorithmBase::processPersistTimer(TcpEventCode& event)
 {
-    // setup and restart the PERSIST timer
-    // FIXME Calculation of PERSIST timer is not as simple as done here!
-    // It depends on RTT calculations and is bounded to 5-60 seconds.
-    // This simplified PERSIST timer calculation generates values
-    // as presented in [Stevens, W.R.: TCP/IP Illustrated, Volume 1, chapter 22.2]
-    // (5, 5, 6, 12, 24, 48, 60, 60, 60...)
-    if (state->persist_factor == 0)
-        state->persist_factor++;
-    else if (state->persist_factor < 64)
-        state->persist_factor = state->persist_factor * 2;
-
-    state->persist_timeout = state->persist_factor * 1.5; // 1.5 is a factor for typical LAN connection [Stevens, W.R.: TCP/IP Ill. Vol. 1, chapter 22.2]
-
-    // PERSIST timer is bounded to 5-60 seconds
-    if (state->persist_timeout < MIN_PERSIST_TIMEOUT)
-        state->persist_timeout = MIN_PERSIST_TIMEOUT;
-
-    if (state->persist_timeout > MAX_PERSIST_TIMEOUT)
-        state->persist_timeout = MAX_PERSIST_TIMEOUT;
+    // RFC 9293 section 3.8.6.1: "The transmitting host SHOULD send the first
+    // zero-window probe when a zero window has existed for the retransmission timeout
+    // period (SHLD-29), and SHOULD increase exponentially the interval between
+    // successive probes (SHLD-30)." The first interval is the RTO (see
+    // receivedAckForUnackedData()), and each probe doubles it, up to
+    // maxPersistTimeout; as Linux tcp_probe_timer().
+    state->persist_timeout = state->persist_timeout * 2;
+    if (state->persist_timeout > maxPersistTimeout)
+        state->persist_timeout = maxPersistTimeout;
 
     conn->scheduleAfter(state->persist_timeout, persistTimer);
 
@@ -834,7 +823,6 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
             if (persistTimer->isScheduled()) {
                 EV_INFO << "Received zero-sized window and REXMIT timer is running therefore PERSIST timer is canceled.\n";
                 cancelEvent(persistTimer);
-                state->persist_factor = 0;
             }
             else
                 EV_INFO << "Received zero-sized window and REXMIT timer is running therefore PERSIST timer is not started.\n";
@@ -842,6 +830,7 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
         else {
             if (!persistTimer->isScheduled()) {
                 EV_INFO << "Received zero-sized window therefore PERSIST timer is started.\n";
+                state->persist_timeout = state->rexmit_timeout; // the first probe after one RTO (SHLD-29)
                 conn->scheduleAfter(state->persist_timeout, persistTimer);
             }
             else
@@ -852,7 +841,6 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
         if (persistTimer->isScheduled()) {
             EV_INFO << "Received non zero-sized window therefore PERSIST timer is canceled.\n";
             cancelEvent(persistTimer);
-            state->persist_factor = 0;
         }
     }
 

@@ -48,7 +48,7 @@ while($sor = <FILE>)
 [1.003 B002] A.1000 < B.2000: A E ack 1001 win 0 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: postrun-command(1).out
-[8.000] tcpdump finished, A:4 B:3 segments
+[8.000] tcpdump finished, A:5 B:4 segments
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 REXMIT timer expired with nothing in flight: no retransmission, sending new data

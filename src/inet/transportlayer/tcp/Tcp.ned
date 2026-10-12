@@ -271,6 +271,7 @@ simple Tcp extends SimpleModule like ITcp
         double keepAliveIdleTime @unit(s) = default(7200s); // the idle time before the first keepalive probe (RFC 9293 MUST-28: at least two hours; Linux tcp_keepalive_time)
         double keepAliveInterval @unit(s) = default(75s); // the time between two keepalive probes (Linux tcp_keepalive_intvl)
         int keepAliveProbeCount = default(9); // the keepalive probes without an answer, after which the connection aborts (Linux tcp_keepalive_probes; RFC 9293 MUST-29: one probe without an answer is not a dead connection)
+        double maxPersistTimeout @unit(s) = default(60s); // the upper limit of the interval of the zero-window probes, which starts at the RTO and doubles at each probe (RFC 9293 SHLD-29, SHLD-30)
         int maxRexmitCount = default(12); // the retransmissions of one segment, after which the connection aborts
         double maxRexmitTimeout @unit(s) = default(240s); // the upper limit of the retransmission timeout (RFC 6298 section 2.5: at least 60 s)
         double minRexmitTimeout @unit(s) = default(1s); // the lower limit of the retransmission timeout (RFC 6298 section 2.4: 1 s; Linux: 200 ms)

@@ -3,7 +3,7 @@ Tests a window probe of an ECN connection: RFC 3168 section 6.1.6, "the TCP
 data sender MUST NOT set either an ECT codepoint or the CWR bit on window
 probe packets." The tester marks the first data segment CE, and the ACK with
 ECE closes the window. The sender reduces cwnd, but its next segment is the
-window probe at t=6 s, without ECT and without CWR. Before, the probe carried
+window probe at t=2 s, without ECT and without CWR. Before, the probe carried
 both.
 
 %inifile: omnetpp.ini
@@ -44,7 +44,7 @@ while($sor = <FILE>)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: postrun-command(1).out
 [1.003 B002] A.1000 < B.2000: A E ack 1001 win 0 
-[6.005 A004] A.1000 > B.2000: A 1001:1002(1) ack 501 win 16384 
+[2.005 A004] A.1000 > B.2000: A 1001:1002(1) ack 501 win 16384 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

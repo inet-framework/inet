@@ -3,8 +3,9 @@ Tests the zero-window probe of RFC 9293 section 3.8.6.1. The server offers 2000
 bytes and reads nothing until t=20, so its window is zero after two segments.
 Each probe of the client is the first unacknowledged octet, 2001: new data the
 first time, and the same octet again later. The probes start no retransmission
-timer, and their ACKs are no duplicate ACKs. The persist intervals follow their
-table (5, 5, 6, 12 s).
+timer, and their ACKs are no duplicate ACKs. The first probe comes one RTO
+(1 s) after the window closed, and each probe doubles the interval (RFC 9293
+SHLD-29, SHLD-30): 1, 2, 4, 8, 16 s.
 
 %inifile: omnetpp.ini
 [General]
@@ -40,16 +41,16 @@ while($sor = <FILE>)
 %postrun-command:  perl ./postrun.pl
 %#--------------------------------------------------------------------------------------------------------------
 %contains: postrun-command(1).out
-[6.409 A005] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
-[6.411 B004] A.1000 < B.2000: A ack 2001 win 0 
-[11.409 A006] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
-[11.411 B005] A.1000 < B.2000: A ack 2001 win 0 
-[16.409 A007] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
-[16.411 B006] A.1000 < B.2000: A ack 2001 win 0 
-[22.409 A008] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
-[22.411 B007] A.1000 < B.2000: A ack 2001 win 2000 
-[34.409 A009] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
-[34.411 B008] A.1000 < B.2000: A ack 2002 win 1999 
+[2.409 A005] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[2.411 B004] A.1000 < B.2000: A ack 2001 win 0 
+[4.409 A006] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[4.411 B005] A.1000 < B.2000: A ack 2001 win 0 
+[8.409 A007] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[8.411 B006] A.1000 < B.2000: A ack 2001 win 0 
+[16.409 A008] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[16.411 B007] A.1000 < B.2000: A ack 2001 win 0 
+[32.409 A009] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[32.411 B008] A.1000 < B.2000: A ack 2001 win 2000 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 Performing retransmission

@@ -3,10 +3,10 @@ STATUS field `probes` (cumulative zero-window persist probes).
 tcp_info_fields_1.test's RTO scenario never exercises this counter (it stays
 0 there). The client sends more than the receiver's advertised window, and
 the server never reads, so the window closes and the persist timer sends
-probes, at t=6.013 and 11.013 here. The application asks for STATUS after
-each of them, at t=6.5 and t=12, so the counter must read 1 and then 2: it
-counts the probes of the persist timer, not the retransmissions of a probe
-octet.
+probes, at t=2.013 and 4.013 here (one RTO after the window closed, then
+doubled). The application asks for STATUS after each of them, at t=3 and t=5,
+so the counter must read 1 and then 2: it counts the probes of the persist
+timer.
 
 %inifile: omnetpp.ini
 [General]
@@ -36,7 +36,7 @@ cmdenv-log-prefix="[%c]: "
 *.cli_app.sendScript=""
 *.cli_app.tClose=-1s
 # just after the first and the second persist probe
-*.cli_app.statusRequestScript="6.5,12"
+*.cli_app.statusRequestScript="3,5"
 
 *.srv_app.active=false
 *.srv_app.localAddress="10.0.0.2"

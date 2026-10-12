@@ -26,10 +26,9 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     simtime_t rexmit_timeout = 3.0; ///< current retransmission timeout (aka RTO)
     //@}
 
-    /// persist factor
+    /// persist timer
     //@{
-    unsigned int persist_factor = 0; ///< factor needed for simplified PERSIST timer calculation
-    simtime_t persist_timeout = 5.0; ///< current persist timeout
+    simtime_t persist_timeout = 5.0; ///< the interval of the next zero-window probe
     //@}
 
     /// keepalive (RFC 9293 section 3.8.4)
