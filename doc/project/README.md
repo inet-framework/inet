@@ -11,7 +11,7 @@ It is one of two documentation roots, and the boundary matters ([DR-TWO-ROOTS](r
 | `doc/src/` | the user of the product | How do I use INET? How do I write a model? |
 | **`doc/project/`** | the contributor, the reviewer, the AI agent | What must INET do? How is it built? What is my change checked against? |
 
-One fact lives in exactly one of them. When a document here needs to explain a mechanism, it cites the guide chapter rather than restating it.
+Each fact has one authoritative home. A document may include brief local context under [DR-CITE-DONT-REPEAT](rule/documentation.md#dr-cite-dont-repeat), with a link to that home.
 
 ## The chain
 
@@ -128,7 +128,7 @@ A seal covers a path, a whole document, or one unit inside a document ([SR-SCOPE
 
 **A document describes what is.** How it came to be is in [history/design-history.md](history/design-history.md), with a link to the plan that made each step. A reader who wants the current state is not made to read the history.
 
-**Cite, do not repeat.** A statement that belongs to one document is linked from the others. Two copies drift, and one of them is then wrong — and the reader cannot tell which.
+**Keep one authoritative definition.** [DR-CITE-DONT-REPEAT](rule/documentation.md#dr-cite-dont-repeat) permits brief local context with a citation. Full definitions remain in their authoritative documents.
 
 ## The neighbours
 

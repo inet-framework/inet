@@ -2,7 +2,7 @@
 
 > **Kind:** rule · **Status:** current · **Seal:** whole · **Owns:** `DR-*` · **Stands on:** [sealing.md](sealing.md), [naming.md](naming.md)
 
-Where a fact lives, how a document is shaped, and how an identifier is formed. These rules govern `doc/project/` itself, and the boundary between it and the published guides under `doc/src/`.
+These rules define document ownership, structure, identifiers, and clear explanations. They govern `doc/project/` and its boundary with `doc/src/`. [DR-EXPLAIN](#dr-explain) also applies to contributor prose, including PR descriptions, commit messages, plans, and reports.
 
 A rule has a stable identifier `DR-<AREA>`, and the identifier is the heading: [DR-HEADER](documentation.md#dr-header).
 
@@ -13,7 +13,7 @@ A rule has a stable identifier `DR-<AREA>`, and the identifier is the heading: [
 | Rule | Statement |
 | --- | --- |
 | [DR-TWO-ROOTS](#dr-two-roots) | Two documentation roots, one fact in one of them |
-| [DR-CITE-DONT-REPEAT](#dr-cite-dont-repeat) | Cite, do not repeat |
+| [DR-CITE-DONT-REPEAT](#dr-cite-dont-repeat) | Each fact has one authoritative definition. |
 | [DR-WHAT-IS](#dr-what-is) | A document describes what is; the history lives apart |
 | [DR-NO-SECOND-COPY](#dr-no-second-copy) | An agent instruction file points here; it holds no rules of its own |
 
@@ -21,6 +21,7 @@ A rule has a stable identifier `DR-<AREA>`, and the identifier is the heading: [
 
 | Rule | Statement |
 | --- | --- |
+| [DR-EXPLAIN](#dr-explain) | Contributor prose explains the change to a human reader. |
 | [DR-HEADER](#dr-header) | Every document carries the header block |
 | [DR-KIND](#dr-kind) | The kind is one of eleven, and it decides how the document may change |
 | [DR-OWNS](#dr-owns) | Exactly one document owns an identifier prefix |
@@ -53,15 +54,19 @@ A rule has a stable identifier `DR-<AREA>`, and the identifier is the heading: [
 | `doc/src/` | the user of the product | How do I use INET? How do I write a model? | `.rst`, published |
 | `doc/project/` | the contributor, the reviewer, the AI agent | What must INET do? How is it built? What is my change checked against? | `.md`, not published |
 
-The product documents describe the models and the API as they are today. The project documents describe the requirements, the decisions, the rules and their enforcement. When a project document needs to explain a mechanism, it cites the chapter of the product document rather than restating it — `doc/src/developers-guide/ch-packets.rst` explains how to use the chunk API, and [packet-anatomy.md](../design/packet-anatomy.md) says what the representation is and why.
+The product documents describe the current models and APIs. The project documents describe requirements, decisions, rules, and enforcement. Cite the product documentation for the full explanation of a mechanism. Include the brief local context permitted by [DR-CITE-DONT-REPEAT](#dr-cite-dont-repeat) when the argument needs it. For example, `doc/src/developers-guide/ch-packets.rst` explains use of the chunk API. [packet-anatomy.md](../design/packet-anatomy.md) defines the representation and its reasons.
 
 *Enforced at T4 — agent review: does this text belong in the other root?*
 
 ### DR-CITE-DONT-REPEAT
 
-**A statement that belongs to one document is linked from the others, never copied into them.**
+**Each fact has one authoritative definition.**
 
-Two copies drift, and one of them is then wrong — and the reader has no way to tell which. A bare `§N` means a section of the file you are reading; cite any other file by name and link.
+Link to that definition from other documents. Independent copies can diverge, so the reader cannot tell which one to trust. A brief local explanation may repeat the context needed to understand an argument under [DR-EXPLAIN](#dr-explain). Cite the authoritative source beside that explanation. Preserve its conditions and limits. Keep full API descriptions and policy definitions in their authoritative documents.
+
+For example, a plan may state that a component retains its timer object across stop/start. That fact explains why the proposed stop handler cancels the event and keeps the object. The plan links to the source for the complete lifecycle behavior.
+
+A bare `§N` means a section of the current document. Cite another document by name and link.
 
 *Enforced at T4 — agent review.*
 
@@ -86,6 +91,28 @@ Agent skills may supply tool invocation recipes, implementation discovery, filte
 *Enforced at T3 — a size and content check on the pointer files.*
 
 ## The shape of a document
+
+### DR-EXPLAIN
+
+**Contributor prose explains the change to a human reader.**
+
+Use the same explanatory style as a direct answer to a developer who asks how the change works. Assume general knowledge of software engineering and communication protocols, including IEEE 802.11. Assume no knowledge of the specific implementation, change, or conversation. Explain specialized protocol conditions and local terms when the reader needs them.
+
+State the problem or intended result first. Explain the cause when evidence establishes it. State uncertainty when the cause remains unknown. Connect the trigger, responsible component, action, and observable result. Introduce an API name through its role in that mechanism.
+
+Use a concrete scenario to explain behavior, a cause, or a design choice. A failure scenario or reproduction already serves as that example when it states the initial condition, action, and result. Use one scenario for closely related points. Add another only when a distinct condition needs explanation. Label hypothetical examples. A simple fact or status needs no example.
+
+Use a diagram when it clarifies an interaction or sequence.
+
+For example, a hypothetical TXOP admission rule requires the complete exchange to fit within the remaining TXOP. Only 200 μs remain, but the exchange needs 240 μs. The MAC refuses the exchange before it transmits RTS. This preserves the proposed duration bound. The example describes a proposed model rule; it makes no claim about an IEEE requirement or current INET behavior.
+
+Keep related sentences in connected paragraphs. Use lists for steps or parallel items. Use tables for comparisons. Preserve required document structures, trailers, and evidence fields. Fill templates with explanations that connect the facts. A list of files, API names, or checklist verdicts alone does not explain a change.
+
+Write each prose paragraph on one line. Separate paragraphs with a blank line. Preserve line breaks required by lists, tables, code blocks, and other structured content.
+
+Keep relevant conditions, scope limits, and distinctions between requirements, model choices, proposals, and observed results explicit. Links support the explanation; the reader must understand the main argument without them. Check whether the document alone explains what happens, why it happens, and what the result means.
+
+*Enforced at T4 — prose review of the document and its technical evidence.*
 
 ### DR-HEADER
 
