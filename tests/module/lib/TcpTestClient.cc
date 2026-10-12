@@ -33,10 +33,11 @@ class INET_API TcpTestClient : public cSimpleModule
     Commands commands;
     Commands readCommands; // with autoRead=false: when to READ, and how many bytes
     Commands writerBlockedCommands; // when to tell TCP that the writer is blocked (1) or not (0)
+    std::list<std::pair<std::string, std::string>> tcpParCommands; // tcpParScript: the parameters to set, in time order
     static const int NUM_EXTRA = 2; // the optional second and third connection (tOpen2, tOpen3)
     Commands extraCommands[NUM_EXTRA]; // the SEND of each extra connection
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
 
     int ctr;
 
@@ -172,6 +173,15 @@ void TcpTestClient::initialize()
     parseScript(par("readScript"), readCommands);
     for (const auto& read : readCommands)
         scheduleAt(read.tSend, new cMessage("Read", TEST_READ));
+    // tcpParScript: "time name value; ...", as a harness that changes a sysctl
+    cStringTokenizer tcpParTokenizer(par("tcpParScript"), ";");
+    while (tcpParTokenizer.hasMoreTokens()) {
+        std::vector<std::string> fields = cStringTokenizer(tcpParTokenizer.nextToken()).asVector();
+        if (fields.size() != 3)
+            throw cRuntimeError("tcpParScript: \"time name value\" expected");
+        tcpParCommands.push_back(std::make_pair(fields[1], fields[2]));
+        scheduleAt(SimTime::parse(fields[0].c_str()), new cMessage("TcpPar", TEST_TCP_PAR));
+    }
     parseScript(par("writerBlockedScript"), writerBlockedCommands);
     for (const auto& command : writerBlockedCommands)
         scheduleAt(command.tSend, new cMessage("WriterBlocked", TEST_WRITER_BLOCKED));
@@ -280,6 +290,16 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.requestStatus();
             delete msg;
             break;
+        case TEST_TCP_PAR: {
+            // the Tcp module at the end of the socket output gate
+            cModule *tcp = gate("socketOut")->getPathEndGate()->getOwnerModule();
+            auto& command = tcpParCommands.front();
+            tcp->par(command.first.c_str()).parse(command.second.c_str());
+            EV_INFO << "Parameter " << command.first << " of " << tcp->getFullPath() << " set to " << command.second << "\n";
+            tcpParCommands.pop_front();
+            delete msg;
+            break;
+        }
         case TEST_WRITER_BLOCKED:
             socket.setWriterBlocked(writerBlockedCommands.front().numBytes != 0);
             writerBlockedCommands.pop_front();
