@@ -933,6 +933,7 @@ void TcpConnection::configureStateVariables()
     state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks");
     state->synRetries = socketSynRetries >= 0 ? socketSynRetries : (int)tcpMain->par("synRetries");
     state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
+    state->linuxZeroWindowProbe = !strcmp(tcpMain->par("zeroWindowProbe").stringValue(), "linux");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
@@ -1723,18 +1724,26 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
 void TcpConnection::sendKeepAliveProbe()
 {
     // RFC 9293 section 3.8.4: "Such a segment generally contains SEG.SEQ = SND.NXT-1";
-    // the connection is idle, so SND.NXT = SND.UNA. The sequence number is below the
-    // window of the peer, so the peer answers with an ACK and accepts nothing. No data
-    // (SHLD-12), and so no ECT; snd_nxt and snd_max stay. As Linux tcp_xmit_probe_skb().
+    // the connection is idle, so SND.NXT = SND.UNA. No data (SHLD-12).
+    EV_INFO << "Sending keepalive probe, seq=" << (state->snd_una - 1) << "\n";
+    sendSegmentBelowWindow("TcpKeepAlive");
+}
+
+void TcpConnection::sendSegmentBelowWindow(const char *name)
+{
+    // As Linux tcp_xmit_probe_skb(): a segment without data with SEG.SEQ = SND.UNA - 1.
+    // The sequence number is below the window of the peer, so the peer answers with an
+    // ACK and accepts nothing. No data, and so no ECT; snd_nxt and snd_max stay. The
+    // segment carries the current ACK (Linux tcp_event_ack_sent()).
     const auto& tcpHeader = makeShared<TcpHeader>();
     tcpHeader->setAckBit(true);
     tcpHeader->setSequenceNo(state->snd_una - 1);
     tcpHeader->setAckNo(state->rcv_nxt);
     tcpHeader->setWindow(updateRcvWnd());
     writeHeaderOptions(tcpHeader);
-    Packet *fp = new Packet("TcpKeepAlive");
-    EV_INFO << "Sending keepalive probe, seq=" << (state->snd_una - 1) << "\n";
+    Packet *fp = new Packet(name);
     sendToIP(fp, tcpHeader);
+    tcpAlgorithm->ackSent();
 }
 
 bool TcpConnection::sendProbe()
@@ -1750,6 +1759,13 @@ bool TcpConnection::sendProbe()
     if (sendQueue->getBytesAvailable(state->snd_una) == 0) {
         EV_WARN << "Cannot send probe because send buffer is empty\n";
         return false;
+    }
+
+    // zeroWindowProbe="linux": the probe of Linux without data (tcp_xmit_probe_skb())
+    if (state->linuxZeroWindowProbe) {
+        EV_INFO << "Sending zero-window probe without data, seq=" << (state->snd_una - 1) << "\n";
+        sendSegmentBelowWindow("ZeroWindowProbe");
+        return true;
     }
 
     EV_INFO << "Sending 1 byte as probe, with seq=" << state->snd_una << "\n";

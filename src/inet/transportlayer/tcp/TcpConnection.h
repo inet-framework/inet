@@ -363,6 +363,9 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: sends a keepalive probe, a segment without data with SEG.SEQ = SND.UNA - 1, which the peer answers with an ACK (RFC 9293 section 3.8.4) */
     virtual void sendKeepAliveProbe();
 
+    /** Utility: sends a segment without data with SEG.SEQ = SND.UNA - 1, which the peer answers with an ACK (Linux tcp_xmit_probe_skb()): the keepalive probe, and the zero-window probe of Linux */
+    virtual void sendSegmentBelowWindow(const char *name);
+
     /** Utility: retransmit one segment from snd_una */
     virtual void retransmitOneSegment(bool called_at_rto);
 

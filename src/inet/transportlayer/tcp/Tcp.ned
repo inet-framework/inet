@@ -284,6 +284,7 @@ simple Tcp extends SimpleModule like ITcp
         bool syncookiesAlways = default(false); // model Linux tcp_syncookies=2 (a SYN cookie on every passive open): the cookie quantizes the MSS of the peer down to the IPv4 msstab {536, 1300, 1440, 1460} of net/ipv4/syncookies.c; the other options stay exact
         bool tlpEnabled = default(false); // Tail Loss Probe (RFC 8985 section 7): about two SRTTs after the last transmission or ACK of new data, send one probe, so that its ACK starts the repair of a lost tail before the RTO. Requires sackSupport.
         double rackReoTimerGranularity @unit(s) = default(0s); // model the kernel's jiffy-quantized REO timeout arming (Linux usecs_to_jiffies(timeout)+1: delay rounded UP to this granularity plus one extra tick, e.g. 4ms for an HZ=250 kernel); a sub-tick RACK deadline then fires whole ticks later, letting a dupthresh-timed SACK enter recovery first, as real kernels do. 0 = exact (default INET behavior)
+        string zeroWindowProbe @enum("rfc","linux") = default("rfc"); // the probe of a zero window. "rfc": the first unacknowledged octet, as RFC 9293 section 3.8.6.1 says ("at least one octet of new data (if available), or retransmit"); "linux": a segment without data with SEG.SEQ = SND.UNA - 1, which the receiver answers with an ACK, as Linux (tcp_xmit_probe_skb())
         @display("i=block/wheelbarrow");
         @signal[tcpConnectionAdded];
         @signal[tcpConnectionRemoved];

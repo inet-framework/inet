@@ -160,6 +160,7 @@ struct TcpStateVariables
     int syn_rexmit_count = 0;       // number of SYN/SYN+ACK retransmissions (=1 after first rexmit)
     simtime_t syn_rexmit_timeout;   // current SYN/SYN+ACK retransmission timeout
     int synRetries = 12;            // the retransmissions of a SYN or a SYN-ACK, after which the open fails (synRetries parameter)
+    bool linuxZeroWindowProbe = false; // the zero-window probe of Linux, without data (zeroWindowProbe parameter)
     int synLinearTimeouts = 0;      // the retransmissions of a SYN after which its timeout does not double yet (synLinearTimeouts parameter)
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
