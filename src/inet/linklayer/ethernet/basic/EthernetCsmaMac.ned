@@ -55,5 +55,7 @@ simple EthernetCsmaMac extends MacProtocolBase
         // frame's first transmission attempt to the start of the transmission attempt that completed
         // successfully; comparable to the packetPendingDelay statistic of ~EthernetPlca
         @statistic[packetPendingDelay](title="packet pending delay"; unit=s; record=count,histogram,vector; interpolationmode=none);
+        // the frames dropped because they suffered a collision on each of the allowed 16 transmission attempts
+        @statistic[packetDropRetryLimitReached](title="packet drop: retry limit reached"; source=packetDropReasonIsRetryLimitReached(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
 }
 
