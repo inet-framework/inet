@@ -165,6 +165,7 @@ class INET_API TcpConnection : public SimpleModule
     // not a module parameter)
     int socketAdvertisedWindow = -1;
     int socketReceiveBufferSize = -1;
+    int socketSynRetries = -1; // the SYN retries of this connection (TcpSocket::setSynRetries()); -1: the parameter
     // MSG_ZEROCOPY: the pending completions, by the sequence number that ends the data
     // of each zero-copy SEND, and the id of the next one (per connection from 0, as the
     // ids of Linux SO_ZEROCOPY)

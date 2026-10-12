@@ -258,6 +258,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.setAutoRead(par("autoRead"));
             socket.setAdvertisedWindow(par("socketAdvertisedWindow"));
             socket.setReceiveBufferSize(par("socketReceiveBufferSize"));
+            socket.setSynRetries(par("socketSynRetries"));
 
             if (par("active"))
                 socket.connect(L3Address(connectAddress), connectPort, par("fastOpen"));

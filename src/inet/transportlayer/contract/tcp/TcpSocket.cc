@@ -111,6 +111,7 @@ void TcpSocket::listen(bool fork)
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
     openCmd->setAdvertisedWindow(advertisedWindow);
     openCmd->setReceiveBufferSize(receiveBufferSize);
+    openCmd->setSynRetries(synRetries);
 
     request->setControlInfo(openCmd);
     sendToTcp(request);
@@ -153,6 +154,7 @@ void TcpSocket::connect(L3Address remoteAddress, int remotePort, bool fastOpen)
     openCmd->setFastOpen(fastOpen);
     openCmd->setAdvertisedWindow(advertisedWindow);
     openCmd->setReceiveBufferSize(receiveBufferSize);
+    openCmd->setSynRetries(synRetries);
 
     request->setControlInfo(openCmd);
     sendToTcp(request);

@@ -219,6 +219,7 @@ class INET_API TcpSocket : public ISocket
     std::string tcpAlgorithmClass;
     int advertisedWindow = -1;
     int receiveBufferSize = -1;
+    int synRetries = -1;
 
     ChunkQueue *receiveQueue = nullptr;
 
@@ -359,6 +360,14 @@ class INET_API TcpSocket : public ISocket
      * or listen()). -1: the parameter of the Tcp module.
      */
     void setReceiveBufferSize(int receiveBufferSize) { this->receiveBufferSize = receiveBufferSize; }
+
+    /**
+     * Sets the retransmissions of the SYN of the next connect(), or of the SYN-ACKs of
+     * the connections of the next listen(), after which the open fails, in place of the
+     * synRetries parameter of the Tcp module (as the Linux socket option TCP_SYNCNT).
+     * -1: the parameter of the Tcp module.
+     */
+    void setSynRetries(int synRetries) { this->synRetries = synRetries; }
 
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen

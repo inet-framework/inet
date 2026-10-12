@@ -244,6 +244,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
 
     socketAdvertisedWindow = listenerConn->socketAdvertisedWindow;
     socketReceiveBufferSize = listenerConn->socketReceiveBufferSize;
+    socketSynRetries = listenerConn->socketSynRetries;
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
@@ -852,6 +853,7 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
 
     socketAdvertisedWindow = openCmd->getAdvertisedWindow();
     socketReceiveBufferSize = openCmd->getReceiveBufferSize();
+    socketSynRetries = openCmd->getSynRetries();
 
     // create algorithm
     const char *tcpAlgorithmClass = openCmd->getTcpAlgorithmClass();
@@ -923,7 +925,7 @@ void TcpConnection::configureStateVariables()
         state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
-    state->synRetries = tcpMain->par("synRetries");
+    state->synRetries = socketSynRetries >= 0 ? socketSynRetries : (int)tcpMain->par("synRetries");
     state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
