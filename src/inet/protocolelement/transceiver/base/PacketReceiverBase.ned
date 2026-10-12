@@ -12,6 +12,7 @@ import inet.queueing.base.PacketProcessorBase;
 simple PacketReceiverBase extends PacketProcessorBase
 {
     parameters:
+        @class(-);
         double datarate @unit(bps);
         @display("i=block/wrx");
         @signal[receptionStarted](type=inet::physicallayer::Signal);

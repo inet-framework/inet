@@ -23,6 +23,6 @@ simple ChecksumCheckerBase extends PacketFilterBase
 {
     parameters:
         string checksumType @enum("internet","ethernet-fcs","crc32c","crc32-iso-hdlc","crc32-mpeg2","crc16-ibm","crc16-ccitt") = default("ethernet-fcs");
-        @class(ChecksumCheckerBase);
+        @class(-);
         @display("i=block/checker");
 }

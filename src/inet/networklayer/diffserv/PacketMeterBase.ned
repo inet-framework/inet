@@ -13,6 +13,7 @@ import inet.queueing.base.PacketProcessorBase;
 simple PacketMeterBase extends PacketProcessorBase
 {
     parameters:
+        @class(-);
         @display("i=block/classifier");
         @signal[packetPushed](type=inet::Packet);
         @signal[packetPulled](type=inet::Packet);

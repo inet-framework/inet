@@ -13,7 +13,7 @@ package inet.queueing.base;
 simple PacketPusherBase extends PacketProcessorBase
 {
     parameters:
-        @class(PacketPusherBase);
+        @class(-);
     gates:
         input in;
         output out;

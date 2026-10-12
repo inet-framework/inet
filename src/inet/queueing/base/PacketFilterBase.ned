@@ -19,7 +19,7 @@ simple PacketFilterBase extends PacketProcessorBase
     parameters:
         bool backpressure = default(false);
         displayStringTextFormat = default("dropped {numDroppedPackets}/{numProcessedPackets} pk ({droppedTotalLength}/{processedTotalLength})"); // Determines the text that is written on top of the submodule
-        @class(PacketFilterBase);
+        @class(-);
         @display("i=block/downarrow");
         @signal[packetPushedIn](type=inet::Packet);
         @signal[packetPushedOut](type=inet::Packet);

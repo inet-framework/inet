@@ -15,6 +15,7 @@ import inet.common.LayeredProtocolBase;
 simple NetworkProtocolBase extends LayeredProtocolBase
 {
     parameters:
+        @class(-);
         string interfaceTableModule;
         @display("i=block/fork");
     gates:

@@ -19,7 +19,7 @@ simple PacketSchedulerBase extends PacketProcessorBase
     parameters:
         bool reverseOrder = default(false);
         displayStringTextFormat = default("scheduled %p pk (%l)");
-        @class(PacketSchedulerBase);
+        @class(-);
         @display("i=block/join");
         @signal[packetPulled](type=inet::Packet);
         // the statistical value is the scheduled packet

@@ -14,6 +14,8 @@ import inet.common.LayeredProtocolBase;
 //
 simple TransportProtocolBase extends LayeredProtocolBase
 {
+    parameters:
+        @class(-);
     gates:
         input upperLayerIn[];
         output upperLayerOut[];

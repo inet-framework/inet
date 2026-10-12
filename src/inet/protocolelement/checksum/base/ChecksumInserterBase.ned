@@ -24,6 +24,6 @@ simple ChecksumInserterBase extends PacketFlowBase
     parameters:
         string checksumType @enum("internet","ethernet-fcs","crc32c","crc32-iso-hdlc","crc32-mpeg2","crc16-ibm","crc16-ccitt") = default("ethernet-fcs");
         string checksumMode @enum("disabled","declared","computed") = default("declared");
-        @class(ChecksumInserterBase);
+        @class(-);
         @display("i=block/inserter");
 }

@@ -15,6 +15,7 @@ import inet.common.LayeredProtocolBase;
 simple PhysicalLayerBase extends LayeredProtocolBase
 {
     parameters:
+        @class(-);
         @display("i=block/wrxtx");
     gates:
         input upperLayerIn @labels(ILinkLayerFrame/down);

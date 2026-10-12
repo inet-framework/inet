@@ -23,5 +23,5 @@ simple DeaggregatorBase extends PacketPusherBase
     parameters:
         bool deleteSelf = default(false);
         @display("i=block/fork");
-        @class(DeaggregatorBase);
+        @class(-);
 }

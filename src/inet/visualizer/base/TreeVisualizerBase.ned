@@ -29,6 +29,6 @@ simple TreeVisualizerBase extends VisualizerBase
         double lineContactSpacing = default(3); // Spacing between arrow end and submodule icon
         string lineContactMode @enum("circular", "rectangular") = default("rectangular"); // Determines how arrows are clipped at the submodules
 
-        @class(TreeVisualizerBase);
+        @class(-);
 }
 

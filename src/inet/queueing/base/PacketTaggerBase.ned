@@ -24,6 +24,6 @@ simple PacketTaggerBase extends PacketMarkerBase
         double transmissionPower @unit(W) = default(nan W); // Specifies signal transmission power, unused by default
         object encapsulationProtocols = default([]);
         displayStringTextFormat = default("tagged %p pk (%l)");
-        @class(PacketTaggerBase);
+        @class(-);
         @display("i=block/star");
 }

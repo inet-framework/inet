@@ -19,7 +19,7 @@ import inet.common.SimpleModule;
 simple RecipientBlockAckAgreementHandler extends SimpleModule
 {
     parameters:
-        @class(RecipientBlockAckAgreementHandler);
+        @class(-);
         string rateSelectionModule;
 
         @display("i=block/cogwheel");

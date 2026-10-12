@@ -10,5 +10,5 @@ package inet.protocolelement.transceiver.base;
 simple StreamingTransmitterBase extends PacketTransmitterBase
 {
     parameters:
-        @class(StreamingTransmitterBase);
+        @class(-);
 }

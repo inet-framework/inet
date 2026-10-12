@@ -22,6 +22,6 @@ simple PhysicalEnvironmentVisualizerBase extends VisualizerBase
 
         bool displayObjects = default(true);
 
-        @class(PhysicalEnvironmentVisualizerBase);
+        @class(-);
 }
 

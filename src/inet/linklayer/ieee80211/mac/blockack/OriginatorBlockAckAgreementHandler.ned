@@ -20,7 +20,7 @@ import inet.common.SimpleModule;
 simple OriginatorBlockAckAgreementHandler extends SimpleModule
 {
     parameters:
-        @class(OriginatorBlockAckAgreementHandler);
+        @class(-);
         string rateSelectionModule;
 
         @display("i=block/cogwheel");

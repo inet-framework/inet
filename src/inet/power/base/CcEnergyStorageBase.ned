@@ -19,7 +19,7 @@ import inet.power.contract.ICcEnergyStorage;
 simple CcEnergyStorageBase extends SimpleModule like ICcEnergyStorage
 {
     parameters:
-        @class(CcEnergyStorageBase);
+        @class(-);
         @display("i=block/plug");
         @signal[currentConsumptionChanged];
         @signal[currentGenerationChanged];

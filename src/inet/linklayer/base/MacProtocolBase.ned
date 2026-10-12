@@ -15,6 +15,7 @@ import inet.common.LayeredProtocolBase;
 simple MacProtocolBase extends LayeredProtocolBase
 {
     parameters:
+        @class(-);
         string interfaceTableModule;
         @display("i=block/rxtx");
     gates:
