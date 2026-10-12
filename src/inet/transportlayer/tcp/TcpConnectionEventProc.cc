@@ -261,6 +261,11 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     else if (auto cmd = dynamic_cast<TcpSetDscpCommand *>(tcpCommand)) {
         dscp = cmd->getDscp();
     }
+    else if (auto cmd = dynamic_cast<TcpSetWriterBlockedCommand *>(tcpCommand)) {
+        writerBlocked = cmd->getBlocked();
+        EV_DETAIL << "The application writer is " << (writerBlocked ? "blocked on the send buffer" : "not blocked") << "\n";
+        updateSndbufLimitedChrono();
+    }
     else if (auto cmd = dynamic_cast<TcpSetOwnedCommand *>(tcpCommand)) {
         appOwned = cmd->getOwned();
         EV_DETAIL << "The application " << (appOwned ? "owns" : "does not own") << " the connection\n";
@@ -490,6 +495,8 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
         + (state->busyStartTime >= SIMTIME_ZERO ? simTime() - state->busyStartTime : SIMTIME_ZERO)).dbl());
     statusInfo->setRwndLimited((state->rwndLimitedAccumulated
         + (state->rwndLimitedStartTime >= SIMTIME_ZERO ? simTime() - state->rwndLimitedStartTime : SIMTIME_ZERO)).dbl());
+    statusInfo->setSndbufLimited((state->sndbufLimitedAccumulated
+        + (state->sndbufLimitedStartTime >= SIMTIME_ZERO ? simTime() - state->sndbufLimitedStartTime : SIMTIME_ZERO)).dbl());
 
     // Segment counts are approximated from byte totals by rounding UP: Linux
     // counts skbs, and a single retransmitted/lost sub-MSS segment must report 1,

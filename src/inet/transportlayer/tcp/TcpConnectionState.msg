@@ -349,6 +349,8 @@ struct TcpStateVariables
     simtime_t busyTimeAccumulated = 0;
     simtime_t rwndLimitedStartTime;   // set to -1 in configureStateVariables()
     simtime_t rwndLimitedAccumulated = 0;
+    simtime_t sndbufLimitedStartTime; // set to -1 in configureStateVariables()
+    simtime_t sndbufLimitedAccumulated = 0; // the time that the send buffer limited the sender (Linux TCP_CHRONO_SNDBUF_LIMITED)
 
     bool seedRttFromHandshake = false; // seed srtt/rttvar/RTO from the SYN<->SYN-ACK exchange, as Linux does
     simtime_t handshakeSentTime = -1; // when our SYN (active) / SYN-ACK (passive) was last sent; seeds the RTT estimator from the handshake RTT on reaching ESTABLISHED (skipped per Karn if the handshake segment was retransmitted)

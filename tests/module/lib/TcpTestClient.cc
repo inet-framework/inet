@@ -31,10 +31,11 @@ class INET_API TcpTestClient : public cSimpleModule
     typedef std::list<Command> Commands;
     Commands commands;
     Commands readCommands; // with autoRead=false: when to READ, and how many bytes
+    Commands writerBlockedCommands; // when to tell TCP that the writer is blocked (1) or not (0)
     static const int NUM_EXTRA = 2; // the optional second and third connection (tOpen2, tOpen3)
     Commands extraCommands[NUM_EXTRA]; // the SEND of each extra connection
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
 
     int ctr;
 
@@ -136,7 +137,7 @@ void TcpTestClient::printStatus(TcpStatusInfo *status)
             << " rwndLimited=" << status->getRwndLimited()
             << " deliveredBytes=" << status->getDeliveredBytes()
             << "\n";
-    EV_INFO << "STATUS: skRcvbuf=" << status->getSkRcvbuf() << "\n";
+    EV_INFO << "STATUS: skRcvbuf=" << status->getSkRcvbuf() << " sndbufLimited=" << status->getSndbufLimited() << "\n";
 }
 
 void TcpTestClient::initialize()
@@ -170,6 +171,9 @@ void TcpTestClient::initialize()
     parseScript(par("readScript"), readCommands);
     for (const auto& read : readCommands)
         scheduleAt(read.tSend, new cMessage("Read", TEST_READ));
+    parseScript(par("writerBlockedScript"), writerBlockedCommands);
+    for (const auto& command : writerBlockedCommands)
+        scheduleAt(command.tSend, new cMessage("WriterBlocked", TEST_WRITER_BLOCKED));
     if (tClose > 0)
         scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
 
@@ -266,6 +270,11 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             break;
         case TEST_STATUS:
             socket.requestStatus();
+            delete msg;
+            break;
+        case TEST_WRITER_BLOCKED:
+            socket.setWriterBlocked(writerBlockedCommands.front().numBytes != 0);
+            writerBlockedCommands.pop_front();
             delete msg;
             break;
         case TEST_READ:

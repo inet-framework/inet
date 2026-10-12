@@ -991,6 +991,7 @@ void TcpConnection::configureStateVariables()
     // sendData() call says otherwise (enqueueSendCommandData(), sendData()).
     state->busyStartTime = -1;
     state->rwndLimitedStartTime = -1;
+    state->sndbufLimitedStartTime = -1;
 
     WATCH_EXPR("snd_nxt", state->snd_nxt);
     WATCH_EXPR("rcv_nxt", state->rcv_nxt);
@@ -1472,6 +1473,8 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         sendToApp(indication);
     }
 
+    updateSndbufLimitedChrono(); // this segment can have sent the last unsent data
+
     // copy the region of tcpHeader to rexmitQueue; without SACK, the queue
     // still records what is in flight
     rexmitQueue->enqueueSentData(old_snd_nxt, state->snd_nxt);
@@ -1550,6 +1553,8 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
         EV_DETAIL << "MSG_ZEROCOPY: completion " << nextZerocopyId << " at sequence number " << endSeq << "\n";
         nextZerocopyId++;
     }
+
+    updateSndbufLimitedChrono(); // new unsent data ends a limited interval
 }
 
 int TcpConnection::deriveLinuxCaState() const
@@ -2530,6 +2535,21 @@ uint32_t TcpConnection::getTSecr(const Ptr<const TcpHeader>& tcpHeader) const
     }
 
     return 0;
+}
+
+void TcpConnection::updateSndbufLimitedChrono()
+{
+    // as Linux at the end of tcp_write_xmit(): the send buffer limits the sender when
+    // the write queue has no unsent data, but the blocked writer waits for space
+    if (state == nullptr || sendQueue == nullptr)
+        return;
+    bool limited = writerBlocked && sendQueue->getBytesAvailable(state->snd_nxt) == 0 && state->snd_una != state->snd_max;
+    if (limited && state->sndbufLimitedStartTime < SIMTIME_ZERO)
+        state->sndbufLimitedStartTime = simTime();
+    else if (!limited && state->sndbufLimitedStartTime >= SIMTIME_ZERO) {
+        state->sndbufLimitedAccumulated += simTime() - state->sndbufLimitedStartTime;
+        state->sndbufLimitedStartTime = -1;
+    }
 }
 
 uint32_t TcpConnection::linuxSkbTruesize(uint32_t payloadBytes)

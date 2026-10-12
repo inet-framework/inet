@@ -31,6 +31,7 @@ simple TcpTestClient like IApp
         bool owned = default(true); // false: tell TCP that the application does not own the connection, as a Linux connection that waits for accept() (TcpSocket::setOwned())
         int socketAdvertisedWindow = default(-1); // the advertised window of the first connection, in bytes (TcpSocket::setAdvertisedWindow()); -1: the parameters of the Tcp module
         int socketReceiveBufferSize = default(-1); // the receive buffer of the first connection, in bytes (TcpSocket::setReceiveBufferSize()); -1: the parameter of the Tcp module
+        string writerBlockedScript = default(""); // "time 1; time 0; ..." -- at each time, tell TCP that the application writer is blocked on the send buffer (1) or not (0) (TcpSocket::setWriterBlocked())
         bool zerocopy = default(false); // the SENDs of the first connection ask for a completion (MSG_ZEROCOPY, TcpSocket::sendZerocopy()), which logIndications logs
         string readScript = default(""); // with autoRead=false: "time bytes; time bytes; ..." -- at each time, issue a READ of at most that many bytes
         string statusRequestScript = default(""); // comma-separated list of times ("1.5,3.0") at which to issue a TCP_C_STATUS query on the socket; the reply is logged as a "STATUS:" line

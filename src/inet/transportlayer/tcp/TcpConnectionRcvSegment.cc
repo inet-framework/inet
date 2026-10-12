@@ -1670,6 +1670,7 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
             state->busyTimeAccumulated += simTime() - state->busyStartTime;
             state->busyStartTime = -1;
         }
+        updateSndbufLimitedChrono(); // an ACK of all data ends a limited interval
 
         // acked data no longer needed in rexmit queue
         uint32_t sackedBeforeDiscard = state->sack_enabled ? rexmitQueue->getTotalAmountOfSackedBytes() : 0;

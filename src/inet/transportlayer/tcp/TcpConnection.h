@@ -173,6 +173,9 @@ class INET_API TcpConnection : public SimpleModule
     // ids of Linux SO_ZEROCOPY)
     std::map<uint32_t, uint32_t> zerocopySeqNums;
     uint32_t nextZerocopyId = 0;
+    // the application writer waits for space in the send buffer (Linux SOCK_NOSPACE), as
+    // TcpSetWriterBlockedCommand tells; it drives the send buffer limited time
+    bool writerBlocked = false;
     // the application owns the connection (Linux sk->sk_socket): false for a connection
     // that the application did not accept yet, as TcpSetOwnedCommand tells
     bool appOwned = true;
@@ -449,6 +452,12 @@ class INET_API TcpConnection : public SimpleModule
      * bytes) in a page-sized or power-of-two allocation, and struct sk_buff (232 bytes).
      */
     static uint32_t linuxSkbTruesize(uint32_t payloadBytes);
+    /**
+     * The time that the send buffer limits the sender (Linux TCP_CHRONO_SNDBUF_LIMITED):
+     * it runs while the application writer is blocked, no unsent data waits, and data
+     * is in flight. Called at each event that can change this condition.
+     */
+    virtual void updateSndbufLimitedChrono();
     /** Charges the receive buffer with a received data segment (rcvSkbChain). */
     virtual void chargeRcvBuffer(uint32_t payloadBytes);
     /** Releases the receive buffer for the data that the application read. */
