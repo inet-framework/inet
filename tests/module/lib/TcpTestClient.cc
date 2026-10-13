@@ -45,7 +45,7 @@ class INET_API TcpTestClient : public cSimpleModule
     static const int NUM_EXTRA = 2; // the optional second and third connection (tOpen2, tOpen3)
     Commands extraCommands[NUM_EXTRA]; // the SEND of each extra connection
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_NODELAY, TEST_MAXSEG, TEST_CORK, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_ABORT, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_NODELAY, TEST_MAXSEG, TEST_CORK, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
 
     int ctr;
 
@@ -222,6 +222,9 @@ void TcpTestClient::initialize()
         scheduleAt(command.tSend, new cMessage("Cork", TEST_CORK));
     if (tClose > 0)
         scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
+    simtime_t tAbort = par("tAbort");
+    if (tAbort > 0)
+        scheduleAt(tAbort, new cMessage("Abort", TEST_ABORT));
 
     for (int i = 0; i < NUM_EXTRA; i++) {
         simtime_t tOpenExtra = extraPar("tOpen", i);
@@ -320,6 +323,10 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             break;
         case TEST_CLOSE:
             socket.close();
+            delete msg;
+            break;
+        case TEST_ABORT:
+            socket.abort();
             delete msg;
             break;
         case TEST_STATUS:

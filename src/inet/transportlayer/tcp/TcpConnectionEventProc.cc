@@ -429,7 +429,7 @@ void TcpConnection::process_ABORT(TcpEventCode& event, TcpCommand *tcpCommand, c
             //
             //   <SEQ=SND.NXT><CTL=RST>
             //"
-            sendRst(state->snd_nxt);
+            sendAbortRst();
             break;
     }
 }

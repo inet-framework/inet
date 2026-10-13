@@ -27,6 +27,7 @@ simple TcpTestClient like IApp
         int sendBytes @unit(B);
         string sendScript; // "time bytes [flag]; ..." -- the SENDs of the first connection; the flag "more" gives the SEND MSG_MORE (TcpSendMoreReq), the flag "eor" gives it MSG_EOR (TcpSendEorReq)
         double tClose @unit(s);
+        double tAbort @unit(s) = default(-1s); // when the first connection aborts (TcpSocket::abort()); a negative value: never
         bool autoRead = default(true); // when false, the app reads received data only by the READ commands of readScript (fills the receive buffer -> zero window)
         bool owned = default(true); // false: tell TCP that the application does not own the connection, as a Linux connection that waits for accept() (TcpSocket::setOwned())
         int socketAdvertisedWindow = default(-1); // the advertised window of the first connection, in bytes (TcpSocket::setAdvertisedWindow()); -1: the parameters of the Tcp module

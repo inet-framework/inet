@@ -1299,7 +1299,15 @@ void TcpConnection::sendRst(uint32_t seqNo)
     sendRst(seqNo, localAddr, remoteAddr, localPort, remotePort);
 }
 
-void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int srcPort, int destPort)
+void TcpConnection::sendAbortRst()
+{
+    // RFC 7323 section 5.2: "If an <RST> is being generated because of a user abort, and
+    // Snd.TS.OK is set, then a Timestamps option SHOULD be included in the <RST>"; the
+    // RST has no ACK bit, so its TSecr is 0 (section 3.2)
+    sendRst(state->snd_nxt, localAddr, remoteAddr, localPort, remotePort, state->ts_enabled);
+}
+
+void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int srcPort, int destPort, bool withTimestamp)
 {
     const auto& tcpHeader = makeShared<TcpHeader>();
 
@@ -1310,6 +1318,17 @@ void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int src
     tcpHeader->setSequenceNo(seq);
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
     tcpHeader->setChecksum(0);
+
+    if (withTimestamp) {
+        tcpHeader->appendHeaderOption(new TcpOptionNop());
+        tcpHeader->appendHeaderOption(new TcpOptionNop());
+        auto option = new TcpOptionTimestamp();
+        option->setSenderTimestamp(convertSimtimeToTS(simTime()));
+        option->setEchoedTimestamp(0);
+        tcpHeader->appendHeaderOption(option);
+        tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpHeader->getHeaderOptionArrayLength());
+        tcpHeader->setChunkLength(B(tcpHeader->getHeaderLength()));
+    }
 
     Packet *fp = new Packet("RST");
 
@@ -1397,6 +1416,8 @@ void TcpConnection::sendFin()
     tcpHeader->setAckNo(state->rcv_nxt);
     tcpHeader->setSequenceNo(state->snd_nxt);
     tcpHeader->setWindow(updateRcvWnd());
+    // the options of each segment, the TS option among them (RFC 7323 section 3.2)
+    writeHeaderOptions(tcpHeader);
     Packet *fp = new Packet("FIN");
 
     // send it
@@ -2428,7 +2449,8 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
 
     if ((!state->ts_enabled && fsm.getState() != TCP_S_LISTEN && fsm.getState() != TCP_S_SYN_SENT) ||
         (state->ts_enabled && fsm.getState() != TCP_S_SYN_RCVD && fsm.getState() != TCP_S_ESTABLISHED &&
-         fsm.getState() != TCP_S_FIN_WAIT_1 && fsm.getState() != TCP_S_FIN_WAIT_2))
+         fsm.getState() != TCP_S_FIN_WAIT_1 && fsm.getState() != TCP_S_FIN_WAIT_2 && fsm.getState() != TCP_S_CLOSE_WAIT &&
+         fsm.getState() != TCP_S_CLOSING && fsm.getState() != TCP_S_LAST_ACK && fsm.getState() != TCP_S_TIME_WAIT))
     {
         EV_ERROR << "ERROR: Tcp Header Option TS received, but in unexpected state\n";
         return false;
@@ -2753,8 +2775,12 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
     }
     else if (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD
              || fsm.getState() == TCP_S_ESTABLISHED || fsm.getState() == TCP_S_FIN_WAIT_1
-             || fsm.getState() == TCP_S_FIN_WAIT_2 || fsm.getState() == TCP_S_CLOSE_WAIT) // connetion is not in INIT or LISTEN state
+             || fsm.getState() == TCP_S_FIN_WAIT_2 || fsm.getState() == TCP_S_CLOSE_WAIT
+             || fsm.getState() == TCP_S_CLOSING || fsm.getState() == TCP_S_LAST_ACK
+             || fsm.getState() == TCP_S_TIME_WAIT) // connection is not in INIT or LISTEN state
     {
+        // RFC 7323 section 3.2: "the TSopt MUST be sent in every non-<RST> segment for
+        // the duration of the connection", also in CLOSING, LAST_ACK and TIME_WAIT
         // TS header option
         if (state->ts_enabled) { // Is TS enabled?
             if (tcpMain->alignOptions && !(state->sack_enabled && (state->snd_sack || state->snd_dsack))) { // if SACK is enabled and SACKs need to be added, do not add NOPs to this segment
