@@ -231,6 +231,7 @@ struct TcpStateVariables
     bool softIcmpErrorsAbortSetup = false; // a soft ICMP error aborts a connection setup, as Linux (softIcmpErrorsAbortSetup parameter)
     bool abortRstWithAck = false;   // the RST of an abort carries ACK, as Linux (abortRstWithAck parameter)
     bool dropBeyondWindowEdge = false; // the window-edge check of Linux (dropBeyondWindowEdge parameter)
+    bool windowUpdateAfterRead = false; // a READ that opens the window enough sends a window update, as Linux (windowUpdateAfterRead parameter)
     bool rfc5961AckCheck = false;   // the ACK check of RFC 5961 section 5.2 (rfc5961AckCheck parameter)
     bool tsRecentAfterAckCheck = false; // TS.Recent not from a segment that acknowledges unsent data, as Linux (tsRecentAfterAckCheck parameter)
     simtime_t ts_recent_stamp = SIMTIME_ZERO; // when TS.Recent was last set: after 24 days, TS.Recent is invalid for PAWS (RFC 7323 section 5.5; Linux rx_opt.ts_recent_stamp)

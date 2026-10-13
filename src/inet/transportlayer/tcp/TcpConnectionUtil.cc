@@ -1033,6 +1033,7 @@ void TcpConnection::configureStateVariables()
     state->tsRecentAfterAckCheck = tcpMain->par("tsRecentAfterAckCheck");
     state->rfc5961AckCheck = tcpMain->par("rfc5961AckCheck");
     state->dropBeyondWindowEdge = tcpMain->par("dropBeyondWindowEdge");
+    state->windowUpdateAfterRead = tcpMain->par("windowUpdateAfterRead");
     state->abortRstWithAck = tcpMain->par("abortRstWithAck");
     state->softIcmpErrorsAbortSetup = tcpMain->par("softIcmpErrorsAbortSetup");
     state->icmpSequenceCheck = tcpMain->par("icmpSequenceCheck");

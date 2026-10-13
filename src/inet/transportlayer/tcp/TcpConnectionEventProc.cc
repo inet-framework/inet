@@ -248,6 +248,23 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
             dataMsg->addTag<SocketInd>()->setSocketId(socketId);
             sendToApp(dataMsg);
             maxByteCountRequested = 0;
+            // windowUpdateAfterRead, as Linux __tcp_cleanup_rbuf(): when the receiver can
+            // now offer at least twice the window that is still open, an ACK tells the peer
+            // at once; not after the FIN of the peer, because no more data comes
+            const auto fsmState = fsm.getState();
+            if (state->windowUpdateAfterRead && !state->fin_rcvd
+                && (fsmState == TCP_S_ESTABLISHED || fsmState == TCP_S_FIN_WAIT_1 || fsmState == TCP_S_FIN_WAIT_2))
+            {
+                uint32_t stillOpen = seqGreater(state->rcv_adv, state->rcv_nxt) ? state->rcv_adv - state->rcv_nxt : 0;
+                uint32_t clamp = state->window_clamp > 0 ? state->window_clamp : state->maxRcvBuffer;
+                if (2ULL * stillOpen <= clamp) {
+                    uint32_t win = selectRcvWnd();
+                    if (win > 0 && win >= 2ULL * stillOpen) {
+                        EV_INFO << "The read lets the receiver offer " << win << " bytes, where " << stillOpen << " bytes are open: sending a window update\n";
+                        sendAck();
+                    }
+                }
+            }
         }
     }
     if (!peerClosedSentUp && fsm.getState() == TCP_S_CLOSE_WAIT && this->receiveQueue->getQueueLength() == 0) {
