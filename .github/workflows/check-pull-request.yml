@@ -1,0 +1,188 @@
+name: "Check: pull request"
+
+# The mechanical half of the pull-request audit (doc/project/guide/review-a-pull-request.md, steps 2
+# and 3): the series gates of doc/project/enforcement over merge-base..head, through
+# check-pull-request.sh.
+#
+# The workflow runs the gates of the base branch over the pull-request head as data, as
+# check-sealing.yml does. It never checks out or runs pull-request content, so a pull request cannot
+# change the gate that judges it. Commit messages and descriptions are untrusted text: they reach
+# a shell only through an environment variable or a file, and workflow commands are stopped while
+# a gate prints them.
+#
+# A pull request without activity gets no event. To audit the pull requests that exist, start the
+# workflow by hand with the numbers, or with 'open' for every open pull request to master. That run
+# posts a commit status on each head, with a link to the run.
+
+on:
+  pull_request_target:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+  workflow_dispatch:
+    inputs:
+      pull-requests:
+        description: "Pull request numbers, separated by spaces, or 'open' for every open pull request to master"
+        required: true
+        default: open
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pull-request-audit-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Mechanical audit
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch pull-request head as data
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          git fetch --no-tags origin "+refs/pull/${PR_NUMBER}/head:refs/remotes/pull/${PR_NUMBER}/head"
+          actual_head_sha="$(git rev-parse "refs/remotes/pull/${PR_NUMBER}/head^{commit}")"
+          if [ "$actual_head_sha" != "$EXPECTED_HEAD_SHA" ]; then
+            echo "error: fetched pull-request head $actual_head_sha, expected $EXPECTED_HEAD_SHA" >&2
+            exit 2
+          fi
+      - name: Run the series gates
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          DESCRIPTION: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$DESCRIPTION" > "$RUNNER_TEMP/description.md"
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          set +e
+          doc/project/enforcement/check-pull-request.sh --base "$BASE_SHA" --head "$HEAD_SHA" \
+            --description-file "$RUNNER_TEMP/description.md" --markdown "$RUNNER_TEMP/report.md"
+          status=$?
+          set -e
+          echo "::$token::"
+          if [ -f "$RUNNER_TEMP/report.md" ]; then
+            cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$status"
+
+  sweep:
+    name: Mechanical audit of existing pull requests
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      statuses: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select the pull requests
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SELECTION: ${{ inputs.pull-requests }}
+        run: |
+          gh pr list --repo "$GITHUB_REPOSITORY" --base master --state open --limit 1000 \
+            --json number,headRefOid,body > "$RUNNER_TEMP/open.json"
+          if [ "$SELECTION" = open ]; then
+            cp "$RUNNER_TEMP/open.json" "$RUNNER_TEMP/selected.json"
+          else
+            for n in $SELECTION; do
+              if ! [[ "$n" =~ ^[0-9]+$ ]]; then
+                echo "error: '$n' is not a pull request number" >&2
+                exit 2
+              fi
+              if ! jq -e --argjson n "$n" 'any(.[]; .number == $n)' "$RUNNER_TEMP/open.json" >/dev/null; then
+                echo "error: #$n is not an open pull request to master" >&2
+                exit 2
+              fi
+            done
+            jq --arg s "$SELECTION" '($s | split(" ") | map(select(length > 0) | tonumber)) as $want
+              | map(select(.number as $n | $want | index($n)))' "$RUNNER_TEMP/open.json" > "$RUNNER_TEMP/selected.json"
+          fi
+          echo "$(jq length "$RUNNER_TEMP/selected.json") pull request(s) selected"
+      - name: Fetch the pull-request heads as data
+        run: |
+          refspecs=$(jq -r '.[] | "+refs/pull/\(.number)/head:refs/remotes/pull/\(.number)/head"' "$RUNNER_TEMP/selected.json")
+          if [ -n "$refspecs" ]; then
+            # shellcheck disable=SC2086
+            git fetch --no-tags origin $refspecs
+          fi
+      - name: Run the series gates on each pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          base_sha="$(git rev-parse origin/master)"
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          context="Check: pull request / Mechanical audit (sweep)"
+          reports="$RUNNER_TEMP/reports"
+          mkdir -p "$reports"
+          printf '| Pull request | Head | Result |\n| --- | --- | --- |\n' > "$RUNNER_TEMP/table.md"
+          errors=0
+          for n in $(jq -r '.[].number' "$RUNNER_TEMP/selected.json"); do
+            head_sha="$(jq -r --argjson n "$n" '.[] | select(.number == $n) | .headRefOid' "$RUNNER_TEMP/selected.json")"
+            jq -r --argjson n "$n" '.[] | select(.number == $n) | .body // ""' "$RUNNER_TEMP/selected.json" \
+              > "$RUNNER_TEMP/description.md"
+            actual_head_sha="$(git rev-parse "refs/remotes/pull/$n/head^{commit}")"
+            if [ "$actual_head_sha" != "$head_sha" ]; then
+              echo "#$n: the head moved from $head_sha to $actual_head_sha during the sweep; skipped"
+              # shellcheck disable=SC2016 # the backticks are Markdown, not a command
+              printf '| #%s | `%s` | skipped: the head moved |\n' "$n" "${head_sha:0:10}" >> "$RUNNER_TEMP/table.md"
+              continue
+            fi
+            # the gate output goes to a file, never to the log, so it cannot hold a workflow command
+            set +e
+            env -u GH_TOKEN doc/project/enforcement/check-pull-request.sh --base "$base_sha" --head "$head_sha" \
+              --description-file "$RUNNER_TEMP/description.md" --markdown "$reports/pr-$n.md" > "$reports/pr-$n.txt" 2>&1
+            status=$?
+            set -e
+            violations="$(grep -c 'VIOLATION:' "$reports/pr-$n.txt" || true)"
+            case "$status" in
+              0) state=success; result="no violation" ;;
+              1) state=failure; result="$violations violation(s)" ;;
+              *) state=error; result="a gate could not run"; errors=1 ;;
+            esac
+            echo "#$n ${head_sha:0:10}: $result"
+            # shellcheck disable=SC2016 # the backticks are Markdown, not a command
+            printf '| #%s | `%s` | %s |\n' "$n" "${head_sha:0:10}" "$result" >> "$RUNNER_TEMP/table.md"
+            gh api --silent "repos/$GITHUB_REPOSITORY/statuses/$head_sha" -f state="$state" \
+              -f context="$context" -f description="$result" -f target_url="$run_url"
+          done
+          {
+            echo "## Pull-request audit of existing pull requests"
+            echo
+            cat "$RUNNER_TEMP/table.md"
+            echo
+          } >> "$GITHUB_STEP_SUMMARY"
+          # A step summary holds at most 1 MiB; the artifact holds every report.
+          for report in "$reports"/pr-*.md; do
+            [ -f "$report" ] || continue
+            if [ $(( $(stat -c %s "$GITHUB_STEP_SUMMARY") + $(stat -c %s "$report") )) -gt 900000 ]; then
+              echo "The other reports are in the artifact pull-request-audit." >> "$GITHUB_STEP_SUMMARY"
+              break
+            fi
+            { echo "### #$(basename "$report" .md | cut -d- -f2)"; tail -n +2 "$report"; echo; } >> "$GITHUB_STEP_SUMMARY"
+          done
+          # a violation is the result of one pull request, in its status; the run fails only on an error
+          exit "$errors"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: pull-request-audit
+          path: ${{ runner.temp }}/reports
+          if-no-files-found: ignore
