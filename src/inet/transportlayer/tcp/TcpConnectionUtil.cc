@@ -50,7 +50,7 @@ namespace tcp {
 // helper functions
 //
 
-// A queue of sequence numbers (the record boundaries of MSG_EOR) is in sequence order.
+// A queue of sequence numbers (the record boundaries of MSG_EOR, the PSH marks) is in sequence order.
 // It is a queue, not a std::set, because the sequence numbers wrap around.
 static void removeSeqNumsUpTo(std::deque<uint32_t>& seqNums, uint32_t seq)
 {
@@ -62,6 +62,19 @@ static void removeSeqNumsUpTo(std::deque<uint32_t>& seqNums, uint32_t seq)
 static std::deque<uint32_t>::const_iterator findSeqNumAfter(const std::deque<uint32_t>& seqNums, uint32_t seq)
 {
     return std::partition_point(seqNums.begin(), seqNums.end(), [&] (uint32_t s) { return seqLE(s, seq); });
+}
+
+static void insertSeqNum(std::deque<uint32_t>& seqNums, uint32_t seq)
+{
+    auto it = findSeqNumAfter(seqNums, seq - 1); // the first at seq or after it
+    if (it == seqNums.end() || *it != seq)
+        seqNums.insert(it, seq);
+}
+
+static bool containsSeqNum(const std::deque<uint32_t>& seqNums, uint32_t seq)
+{
+    auto it = findSeqNumAfter(seqNums, seq - 1);
+    return it != seqNums.end() && *it == seq;
 }
 
 const char *TcpConnection::stateName(int state)
@@ -959,6 +972,7 @@ void TcpConnection::configureStateVariables()
     if (noDelaySockopt >= 0)
         state->nagle_enabled = noDelaySockopt == 0; // TCP_NODELAY of this connection
     state->minshallNagle = tcpMain->par("minshallNagle");
+    state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
@@ -1051,6 +1065,7 @@ void TcpConnection::selectInitialSeqNum()
     state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
 
     state->snd_una = state->snd_nxt = state->snd_max = state->iss;
+    state->pushed_seq = state->iss + 1; // Linux tcp_connect_init(): no PSH mark yet
 
     sendQueue->init(state->iss + 1); // + 1 is for SYN
     rexmitQueue->init(state->iss + 1); // + 1 is for SYN
@@ -1132,8 +1147,14 @@ void TcpConnection::sendSyn()
     // The rexmit queue records the data of the SYN once, at the first SYN. A
     // retransmitted SYN leaves the data out (RFC 7413 section 4.2.2), and the
     // data stays in flight until the SYN-ACK shows what the server acknowledged.
-    if (synDataLen > 0 && rexmitQueue->getBufferEndSeq() == state->iss + 1)
+    if (synDataLen > 0 && rexmitQueue->getBufferEndSeq() == state->iss + 1) {
         rexmitQueue->enqueueSentData(state->iss + 1, state->iss + 1 + synDataLen);
+        // pushSegmentsOnWriteBoundary: Linux tcp_send_syn_data() gives the skb of the
+        // SYN data PSH, so its retransmission after the handshake has PSH, also in a
+        // longer write
+        if (state->pushOnWriteBoundary)
+            insertSeqNum(pushSeqNums, state->iss + 1 + synDataLen);
+    }
 
     // ECN: the "accecn" mode requests Accurate ECN with (AE,CWR,ECE) = (1,1,1) (RFC 9768
     // section 3.1.1), and the "rfc3168" mode requests ECN (RFC 3168)
@@ -1444,6 +1465,8 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     // MSG_EOR: a segment ends at the next record boundary, also in a retransmission.
     // The boundaries that are acknowledged are removed first.
     removeSeqNumsUpTo(eorSeqNums, state->snd_una);
+    removeSeqNumsUpTo(pushSeqNums, state->snd_una);
+    removeSeqNumsUpTo(forcedPushSeqNums, state->snd_una);
     auto nextBoundary = findSeqNumAfter(eorSeqNums, state->snd_nxt);
     if (nextBoundary != eorSeqNums.end() && bytes > *nextBoundary - state->snd_nxt)
         bytes = *nextBoundary - state->snd_nxt;
@@ -1502,6 +1525,13 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     ASSERT(bytes == tcpSegment->getByteLength());
 
     state->snd_nxt += bytes;
+
+    // pushSegmentsOnWriteBoundary: PSH on the segment that ends a write or a mark of
+    // forced_push(). Linux marks the skb at the time of the write, so a retransmission
+    // keeps PSH. A held partial that goes now has the PSH rule of the cork above.
+    if (state->pushOnWriteBoundary && !state->corkFlush && !state->corkedDataPending
+            && (containsSeqNum(pushSeqNums, state->snd_nxt) || containsSeqNum(forcedPushSeqNums, state->snd_nxt)))
+        tcpHeader->setPshBit(true);
 
     // check if afterRto bit can be reset
     if (state->afterRto && seqGE(state->snd_nxt, state->snd_max))
@@ -1621,12 +1651,38 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
     state->msgMoreThisSend = msgMore;
     if (!msgMore && (state->tcp_cork || state->corkedDataPending))
         state->pushHeldPartial = true;
+    uint32_t writeStartSeq = sendQueue->getBufferEndSeq(); // Linux tp->write_seq before this write
     sendQueue->enqueueAppData(packet);
 
     // MSG_EOR: the end of this SEND is a record boundary
     if (eor) {
         eorSeqNums.push_back(sendQueue->getBufferEndSeq());
         EV_DETAIL << "MSG_EOR: record boundary at sequence number " << eorSeqNums.back() << "\n";
+    }
+
+    // pushSegmentsOnWriteBoundary, as Linux tcp_sendmsg(): forced_push() marks the skb that
+    // a write fills more than max_window/2 after the last mark. The skbs of a write are
+    // size_goal long (tcp_xmit_size_goal(), half the largest window in whole MSS), and
+    // the PSH of a mark is on the second MSS of the skb.
+    if (state->pushOnWriteBoundary && !msgMore && state->max_window > 0) {
+        uint32_t halfWnd = state->max_window >> 1;
+        const uint32_t mssCache = 1460; // Linux tp->mss_cache (IPv4 PMTU 1500 - 40)
+        uint32_t alignQ = (halfWnd + mssCache - 1) & ~(mssCache - 1); // the ALIGN() of Linux, which is for a power of 2
+        uint32_t sizeGoal = std::max((alignQ / state->snd_mss) * state->snd_mss, state->snd_mss);
+        uint32_t writeEndSeq = sendQueue->getBufferEndSeq();
+        for (uint32_t f = writeStartSeq + sizeGoal; seqLE(f, writeEndSeq); f += sizeGoal) {
+            if (seqGreater(f, state->pushed_seq + halfWnd)) {
+                insertSeqNum(forcedPushSeqNums, f - sizeGoal + 2 * state->snd_mss);
+                state->pushed_seq = f;
+                EV_DETAIL << "forced_push: PSH at sequence number " << f - sizeGoal + 2 * state->snd_mss << "\n";
+            }
+        }
+    }
+    // pushSegmentsOnWriteBoundary: PSH on the segment that ends this write (Linux
+    // tcp_push() and tcp_mark_push() on the last skb of a write without MSG_MORE)
+    if (state->pushOnWriteBoundary && !msgMore) {
+        insertSeqNum(pushSeqNums, sendQueue->getBufferEndSeq());
+        state->pushed_seq = sendQueue->getBufferEndSeq();
     }
 
     // MSG_ZEROCOPY: the completion of this SEND waits until its last byte goes out
@@ -1746,9 +1802,20 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
     // start sending 'bytesToSend' bytes
     EV_INFO << "May send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin << ", in buffer " << buffered << " bytes)\n";
 
-    // send whole segments
+    // send whole segments. pushSegmentsOnWriteBoundary: PSH on the last segment of each
+    // GSO burst of more than one segment of new data, as Linux tcp_transmit_skb()
+    // (tcp_skb_pcount() > 1). A retransmission is its own skb in Linux, so it has no
+    // place in a burst.
+    uint32_t burstSegs = state->pushOnWriteBoundary ? getGsoBurstSegments(congestionWindow, bytesInFlight, effectiveMss) : 1;
+    uint32_t newSegIdx = 0;
+    uint32_t oldSndMax = state->snd_max;
     while (bytesToSend >= effectiveMss) {
+        bool newData = seqGE(state->snd_nxt, oldSndMax);
+        state->pushThisSegment = newData && burstSegs > 1 && newSegIdx % burstSegs == burstSegs - 1;
         uint32_t sentBytes = sendSegment(effectiveMss);
+        state->pushThisSegment = false;
+        if (newData)
+            newSegIdx++;
         if (sentBytes == 0) { // no data left after the forward of snd_nxt
             bytesToSend = 0;
             break;
@@ -1862,6 +1929,28 @@ void TcpConnection::sendSegmentBelowWindow(const char *name)
     Packet *fp = new Packet(name);
     sendToIP(fp, tcpHeader);
     tcpAlgorithm->ackSent();
+}
+
+uint32_t TcpConnection::getGsoBurstSegments(uint32_t congestionWindow, uint32_t bytesInFlight, uint32_t effectiveMss) const
+{
+    if (effectiveMss == 0)
+        return 1;
+    // tcp_cwnd_test(): at most half of the congestion window, and at most the free part
+    uint32_t cwndSegs = congestionWindow / effectiveMss;
+    uint32_t inFlightSegs = bytesInFlight / effectiveMss;
+    if (cwndSegs == 0 || inFlightSegs >= cwndSegs)
+        return 1;
+    uint32_t cwndQuota = std::min(std::max(cwndSegs / 2, 1u), cwndSegs - inFlightSegs);
+    // tcp_tso_autosize(): the bytes that the pacing rate gives in about 1 ms (rate >>
+    // sk_pacing_shift), at least two segments. Without an RTT sample, Linux does not
+    // divide the rate, so the congestion window alone sets the burst.
+    simtime_t srtt = tcpAlgorithm->getSrtt();
+    if (srtt <= SIMTIME_ZERO)
+        return std::max(1u, cwndQuota);
+    // the pacing rate of slow start (tcp_pacing_ss_ratio = 200%)
+    double bytesPerBurst = (2.0 * congestionWindow / srtt.dbl()) / 1024.0;
+    uint32_t tsoSegs = std::max<uint32_t>(2, (uint32_t)(bytesPerBurst / effectiveMss));
+    return std::max(1u, std::min(cwndQuota, tsoSegs));
 }
 
 uint32_t TcpConnection::getLastRecordBoundaryBefore(uint32_t seq) const

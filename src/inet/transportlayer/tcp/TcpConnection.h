@@ -174,6 +174,11 @@ class INET_API TcpConnection : public SimpleModule
     // MSG_EOR: the record boundaries, that is the sequence numbers that end the data of
     // each SEND with TcpSendEorReq, in sequence order. No segment spans a boundary.
     std::deque<uint32_t> eorSeqNums;
+    // pushSegmentsOnWriteBoundary: the sequence numbers that end a segment with PSH, in
+    // sequence order: the end of each write without MSG_MORE and of the data of a Fast
+    // Open SYN (pushSeqNums), and the marks of forced_push() (forcedPushSeqNums)
+    std::deque<uint32_t> pushSeqNums;
+    std::deque<uint32_t> forcedPushSeqNums;
     // SO_TIMESTAMPING: the delivered data carries the time of its delivery
     // (TcpRxTimestampInd), as TcpSetTimestampingCommand asks; a member, because the
     // command can come before the open
@@ -319,6 +324,13 @@ class INET_API TcpConnection : public SimpleModule
      * number, or snd_nxt if there is none.
      */
     virtual uint32_t getLastRecordBoundaryBefore(uint32_t seq) const;
+
+    /**
+     * pushSegmentsOnWriteBoundary: the number of segments that Linux gives the NIC as
+     * one GSO burst (tcp_write_xmit(), tcp_tso_autosize()), at the given congestion
+     * window and bytes in flight.
+     */
+    virtual uint32_t getGsoBurstSegments(uint32_t congestionWindow, uint32_t bytesInFlight, uint32_t effectiveMss) const;
 
   protected:
 

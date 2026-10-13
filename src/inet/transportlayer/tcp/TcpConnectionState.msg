@@ -153,6 +153,8 @@ struct TcpStateVariables
     bool corkFlush = false;         // an uncork, TCP_NODELAY or the cork timer sends the held partial now
     bool forcePushHeld = false;     // the cork timer sends the held partial, with PSH (Linux tcp_write_wakeup())
     bool pushThisSegment = false;   // sendData() asks sendSegment() for PSH on the next segment
+    bool pushOnWriteBoundary = false; // set PSH as Linux (pushSegmentsOnWriteBoundary parameter)
+    uint32_t pushed_seq = 0;        // the end of the data with the last PSH mark of a write (Linux tp->pushed_seq), for forced_push()
     bool swsOverride = false;       // the override timeout of the sender SWS avoidance is sending (rule (4) of RFC 9293 section 3.8.6.2.1)
     uint32_t snd_up = 0;            // send urgent pointer
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update

@@ -201,6 +201,7 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void processEcnInEstablished() override;
     virtual uint32_t getBytesInFlight() const override;
+    virtual simtime_t getSrtt() const override { return state->srtt; }
     virtual uint32_t calculateSsthresh(uint32_t bytesInFlight) override;
 
     virtual uint32_t calculateSsthreshForFastRecovery() override;
