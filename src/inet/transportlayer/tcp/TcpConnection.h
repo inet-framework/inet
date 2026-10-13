@@ -546,6 +546,12 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: returns true when receive queue has enough space for store the tcpHeader */
     virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
 
+    /** Utility: the window that the receiver can offer now, from its free receive buffer,
+     *  before the rule that the window does not shrink (Linux __tcp_select_window()).
+     *  It changes no state.
+     */
+    virtual uint32_t selectRcvWnd();
+
     /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
      *  Returns the (scaled) receive window size.
      */

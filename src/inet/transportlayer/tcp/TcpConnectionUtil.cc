@@ -3085,31 +3085,12 @@ void TcpConnection::updateRcvQueueVars()
 //    tcpEV << "receiveQ: receiveQLength=" << receiveQueue->getQueueLength() << " maxRcvBuffer=" << state->maxRcvBuffer << " usedRcvBuffer=" << state->usedRcvBuffer << " freeRcvBuffer=" << state->freeRcvBuffer << "\n";
 }
 
-uint16_t TcpConnection::updateRcvWnd()
+uint32_t TcpConnection::selectRcvWnd()
 {
-    uint32_t win = 0;
-
-    // update receive queue related state variables and statistics
-    updateRcvQueueVars();
-
-    // A locked buffer dropped the last arrival: this ACK offers a zero window, as Linux
-    // tcp_select_window() with ICSK_ACK_NOMEM, and the edge in force moves back to
-    // RCV.NXT; the highest edge offered stays. The window shrinks (RFC 9293 SHLD-14),
-    // which only a buffer that the application locked does.
-    if (state->ackNomem) {
-        state->ackNomem = false;
-        state->rcv_wnd = 0;
-        state->rcv_adv = state->rcv_nxt;
-        emit(rcvAdvSignal, state->rcv_adv);
-        emit(rcvWndSignal, state->rcv_wnd);
-        return 0;
-    }
-
     // windowShrinkAllowed, as Linux with tcp_shrink_window=1 (__tcp_select_window()): the
     // offer is the free buffer at the payload ratio, rounded down to the window scale;
     // zero when it falls under 1/16 of the buffer (or under one MSS or one scale unit)
-    // while less than half the buffer is free; and at most rcv_ssthresh, aligned up. The
-    // right edge may move back; rcv_mwnd_seq keeps the largest edge that the receiver offered.
+    // while less than half the buffer is free; and at most rcv_ssthresh, aligned up.
     if (state->windowShrinkAllowed) {
         uint32_t rcvbuf = state->rcvBufferSize > 0 ? state->rcvBufferSize : state->maxRcvBuffer;
         uint64_t freeSpace = rcvBufOccupancy < rcvbuf ? (((uint64_t)rcvbuf - rcvBufOccupancy) * rcvScalingRatio) >> 8 : 0;
@@ -3121,17 +3102,12 @@ uint16_t TcpConnection::updateRcvWnd()
         if (state->rcv_ssthresh > 0 && freeSpace > state->rcv_ssthresh)
             freeSpace = ((uint64_t)(state->rcv_ssthresh + scaleUnit - 1) / scaleUnit) * scaleUnit;
         const uint32_t maxWin = (state->ws_enabled && state->rcv_wnd_scale) ? (TCP_MAX_WIN << state->rcv_wnd_scale) : TCP_MAX_WIN;
-        win = (uint32_t)std::min<uint64_t>(freeSpace, maxWin);
-        state->rcv_adv = state->rcv_nxt + win;
-        emit(rcvAdvSignal, state->rcv_adv);
-        if (seqGreater(state->rcv_adv, state->rcv_mwnd_seq))
-            state->rcv_mwnd_seq = state->rcv_adv;
-        state->rcv_wnd = win;
-        emit(rcvWndSignal, state->rcv_wnd);
-        return (uint16_t)(state->ws_enabled ? state->rcv_wnd >> state->rcv_wnd_scale : state->rcv_wnd);
+        return (uint32_t)std::min<uint64_t>(freeSpace, maxWin);
     }
 
-    win = state->freeRcvBuffer;
+    // the free receive buffer, as updateRcvQueueVars() keeps it in freeRcvBuffer
+    uint32_t bufferSize = state->rcvBufferSize > 0 ? state->rcvBufferSize : state->maxRcvBuffer;
+    uint32_t win = receiveQueue->getAmountOfFreeBytes(bufferSize);
 
     // With a receive buffer apart from the advertised window, the window also limits
     // the offer: the advertised window less the in-order data that the application did
@@ -3159,6 +3135,41 @@ uint16_t TcpConnection::updateRcvWnd()
     // smaller than one MSS, the empty buffer must still open the window)
     if (win < (fullSpace / 4) && win < state->snd_mss)
         win = 0;
+
+    return win;
+}
+
+uint16_t TcpConnection::updateRcvWnd()
+{
+    // update receive queue related state variables and statistics
+    updateRcvQueueVars();
+
+    // A locked buffer dropped the last arrival: this ACK offers a zero window, as Linux
+    // tcp_select_window() with ICSK_ACK_NOMEM, and the edge in force moves back to
+    // RCV.NXT; the highest edge offered stays. The window shrinks (RFC 9293 SHLD-14),
+    // which only a buffer that the application locked does.
+    if (state->ackNomem) {
+        state->ackNomem = false;
+        state->rcv_wnd = 0;
+        state->rcv_adv = state->rcv_nxt;
+        emit(rcvAdvSignal, state->rcv_adv);
+        emit(rcvWndSignal, state->rcv_wnd);
+        return 0;
+    }
+
+    uint32_t win = selectRcvWnd();
+
+    // windowShrinkAllowed: the right edge may move back; rcv_mwnd_seq keeps the largest
+    // edge that the receiver offered
+    if (state->windowShrinkAllowed) {
+        state->rcv_adv = state->rcv_nxt + win;
+        emit(rcvAdvSignal, state->rcv_adv);
+        if (seqGreater(state->rcv_adv, state->rcv_mwnd_seq))
+            state->rcv_mwnd_seq = state->rcv_adv;
+        state->rcv_wnd = win;
+        emit(rcvWndSignal, state->rcv_wnd);
+        return (uint16_t)(state->ws_enabled ? state->rcv_wnd >> state->rcv_wnd_scale : state->rcv_wnd);
+    }
 
     // Do not shrink window
     // (rcv_adv minus rcv_nxt) is the amount of space still available to the sender that was previously advertised
