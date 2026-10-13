@@ -1976,3 +1976,17 @@ against the defect that source commit 69 repairs. The CI fingerprint job runs at
 and only the rows above move. The TCP fingerprint rows run in debug at the head with no runtime
 error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build with
 lwIP). The six gates pass.
+
+### S16b — `topic/tcp-write-boundaries`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: `TCP_CORK` and `MSG_MORE`, with the cork timer | — | 36 (part) |
+| 2 | add: `MSG_EOR`, record boundaries that no segment spans | — | 36 (part) |
+| 3 | add: the PSH of Linux at write boundaries, selected by `pushSegmentsOnWriteBoundary` | — | 36 (part), new |
+
+S16b takes the write boundaries of commit 36: the socket options `TCP_CORK` and `MSG_MORE`, which
+hold the partial segment at the end of a write, the record boundary of `MSG_EOR`, and the PSH that
+Linux sets at the end of a write, in a large write (`forced_push`) and on each burst of segments
+(GSO). No RFC has these; each acts only when an application asks for it or the Linux parameter is
+on. The PSH in the last buffered segment of RFC 9293 (MUST-61) comes with S19 (D-74).
