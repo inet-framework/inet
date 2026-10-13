@@ -68,7 +68,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S16 ✅ | `topic/tcp-send-rules` | 15 (part), 16 (part), 36 (part), 69, new | +90 −4 | the sender SWS avoidance of RFC 9293 with its override timeout, `TCP_NODELAY`, the Nagle of Minshall, `TCP_MAXSEG` (D-73 to D-75) |
 | S16b ✅ | `topic/tcp-write-boundaries` | 36 (part), 46 (part), new | +297 −8 | `TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of Linux at write boundaries behind a parameter (D-76 to D-78) |
 | S17 ✅ | `topic/tcp-connection-leftovers` | 39 (part), 61 | +82 −754 | the copies of the SACK recovery that nothing calls, the SACK scoreboard scan (D-79, D-80) |
-| S17b | `topic/tcp-timestamps` | 26 (part), 39 (part), new | +120 −40 (about) | the timestamps of RFC 7323: `TS.Recent` from the handshake, PAWS, the update after the window test, the TS option on each segment; the update rule of Linux behind a parameter |
+| S17b ✅ | `topic/tcp-timestamps` | 26 (part), 39 (part), new | +113 −37 | the timestamps of RFC 7323: `TS.Recent` from the handshake, PAWS, the update after the window test, the TS option on each segment; the update rule of Linux behind a parameter (D-81 to D-83) |
 | S17c | `topic/tcp-segment-checks` | 39 (part), new | +150 −30 (about) | the sequence number of a pure ACK and the window update (D-72), the acceptability test, the Linux checks of RFC 5961 and of the window edge, the RST of Linux at an abort |
 | S17d | `topic/tcp-connection-setup` | 26 (part), 39 (part), new | +150 −30 (about) | the text of a SYN, the data queued in SYN_RCVD, the timers at a return to LISTEN, the ICMP checks of RFC 5927 and in SYN_RCVD |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
@@ -754,6 +754,27 @@ plan gives a reason for.
   name, which the lwIP TCP shares; the source renames it to `sndSeq`. The range that
   `retransmitOneSegment()` reports differs from the source's only in SYN_RCVD, where the list of
   send times ignores it.
+- **D-81 — The handshake sets `TS.Recent` only in LISTEN and SYN_SENT.** RFC 7323 appendix D saves
+  the TSval of a SYN in LISTEN, and of a SYN or a SYN-ACK in SYN_SENT; master took `TS.Recent`
+  only from a later segment, so its SYN-ACK and its handshake ACK echoed TSecr 0. The source sets
+  `TS.Recent` from each segment with SYN, also in a synchronized state, where PAWS protects it
+  (section 5.2).
+- **D-82 — PAWS and the update of `TS.Recent` follow RFC 7323 section 5.3.** Master and the source
+  dropped a segment with an older TSval only after 24 days of idle time, the opposite of R1, so
+  PAWS never dropped a segment; S17b drops it while `TS.Recent` is valid, measured from the last
+  update of `TS.Recent` (section 5.5, as Linux `ts_recent_stamp`), and exempts a RST, which
+  changes no timestamp state (section 5.2). `TS.Recent` changes only after the window test (R2
+  before R3), where master and the source follow the order of appendix D. RFC 7323 keeps R1 for
+  each non-RST segment; Linux also accepts an older TSval within one tick and on a reordered pure
+  ACK (`tcp_disordered_ack()`), which S17b does not model. The update of Linux after the ACK check
+  is the parameter `tsRecentAfterAckCheck`, whose default follows the RFC.
+- **D-83 — The TS option on each segment after the handshake.** RFC 7323 section 3.2 asks for the
+  option in each non-RST segment, and the RST of a user abort SHOULD carry it; master's FIN and its
+  segments in CLOSING, LAST_ACK and TIME_WAIT had none, and its receiver refused the option in
+  those states and in CLOSE_WAIT. The abort RST carries TSecr 0, because it has no ACK bit. A RST
+  that answers a segment stays without the option: section 5.2 asks for TSval 0 there "to enable
+  research", which Linux does not do. The source puts the option on each RST with ACK, with the
+  TSecr of `TS.Recent`.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -2147,11 +2168,11 @@ with lwIP). S17 changes no behavior, so inet-gpl needs no change. The six gates 
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | fix: the SYN-ACK and the handshake ACK echo the timestamp of the peer | — | 39 (part) |
-| 2 | fix: PAWS drops a segment with an old timestamp (RFC 7323 section 5.3) | — | new |
-| 3 | fix: `TS.Recent` only from a segment that passes the window test | — | new |
-| 4 | fix: the TS option on each segment after the handshake | — | 39 (part), new |
-| 5 | add: the `TS.Recent` rule of Linux, selected by a parameter | — | 26 (part) |
+| 1 | fix: the SYN-ACK and the handshake ACK echo the timestamp of the peer | — | 39 (part), new (D-81) |
+| 2 | fix: PAWS drops a segment with an old timestamp (RFC 7323 section 5.3) | — | new (D-82) |
+| 3 | fix: `TS.Recent` only from a segment that passes the window test | — | new (D-82) |
+| 4 | fix: the TS option on each segment after the handshake | — | 39 (part), new (D-83) |
+| 5 | add: the `TS.Recent` rule of Linux, selected by `tsRecentAfterAckCheck` | — | 26 (part) |
 
 S17b takes the timestamp rules of RFC 7323. RFC 7323 appendix D saves the TSval of a SYN in LISTEN,
 and of a SYN-ACK in SYN_SENT, in `TS.Recent`; master takes `TS.Recent` only from a later segment, so
@@ -2175,3 +2196,45 @@ Linux updates `TS.Recent` only after the ACK of the segment passes its check
 (`tcp_replace_ts_recent()` in `tcp_ack()`), so a segment that acknowledges unsent data does not set
 it; section 5.3 updates it before the ACK is processed. Commit 26 takes the Linux rule; step 5
 selects it with a parameter, whose default follows the RFC.
+
+Items for later stages: (inet-gpl) its configuration sets `tsRecentAfterAckCheck = true`; a run
+can check it only after S18. (any stage) A RST that answers a segment carries no TS option (D-83).
+(any stage) PAWS of Linux accepts an older TSval within one tick and on a reordered pure ACK
+(`tcp_disordered_ack()`); INET follows R1 and answers such an ACK (D-82).
+
+### S17b — `topic/tcp-timestamps` — landed 2026-10-13
+
+The owner reviewed and approved S17b on 2026-10-13.
+
+S17b brings the timestamp rules of RFC 7323: `TS.Recent` from the handshake, PAWS, the update after
+the window test, and the TS option on each segment after the handshake, with the update rule of
+Linux behind a parameter. Where master and the source are wrong, S17b deviates from them (D-81 to
+D-83).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: the SYN-ACK and the handshake ACK echo the timestamp of the peer` | — | 39 (part), new | `netperfmeter` TraceFile-Tcp (`~tND` only) |
+| `tcp: fix: PAWS drops a segment with an old timestamp (RFC 7323 section 5.3)` | — | new | — |
+| `tcp: fix: TS.Recent only from a segment that passes the window test` | — | new | — |
+| `tcp: fix: the TS option on each segment after the handshake` | — | 39 (part), new | — |
+| `tcp: add: the TS.Recent rule of Linux, selected by tsRecentAfterAckCheck` | — | 26 (part) | — |
+
+One commit moves a CI row: in the netperfmeter row, the ACKs after the handshake echo the TSval of
+the SYN-ACK in place of 0, so only the packet data (`~tND`) changes, not the times or the lengths.
+
+New tests: `tcp_timestamp_3`, `tcp_paws_1`, `tcp_ts_recent_1`, `tcp_ts_recent_2` (a control of the
+default), `tcp_ts_recent_linux_1`, `tcp_timestamp_close_1` and `tcp_timestamp_abort_1`.
+`tcp_timestamp_1`, `tcp_timestamp_2`, `tcp_timestamp_sysctl_1` and `tcp_options_align_1` echo the
+TSval of the SYN-ACK after the handshake. The test client gets the parameter `tAbort`, and the
+scripted tester the command `ackadd`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each code commit (556 at the first code commit, 562 at
+the head); at the plan commit one module test failed once in the series and passed in a run again
+(555), and the series did not record its name. The TCP standards tests pass at each code commit (25
+pass, 2 expected failures, the packetdrill tests skip without inet-gpl); unit 122 and serializer 4
+pass at the head. The new and changed tests of each code commit fail with the source of the commit
+before, except `tcp_ts_recent_2`, a control of the default of `tsRecentAfterAckCheck`, which master
+passes too. The CI fingerprint job runs at each code commit, and only the row above moves. The TCP
+fingerprint rows run in debug at the head with no runtime error (the `tyf` ingredient differs in 52
+rows, as on master; the lwIP rows need a build with lwIP). The six gates pass.
