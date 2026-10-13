@@ -13,6 +13,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendMoreTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
@@ -30,6 +31,7 @@ class INET_API TcpTestClient : public cSimpleModule
         simtime_t tSend;
         int numBytes;
         bool more = false; // the SEND carries MSG_MORE (TcpSendMoreReq)
+        bool eor = false; // the SEND carries MSG_EOR (TcpSendEorReq)
     };
     typedef std::list<Command> Commands;
     Commands commands;
@@ -103,6 +105,8 @@ void TcpTestClient::parseScript(const char *script, Commands& commands)
             std::string flag(w, s - w);
             if (flag == "more")
                 cmd.more = true;
+            else if (flag == "eor")
+                cmd.eor = true;
             else
                 throw cRuntimeError("syntax error in script: unknown flag '%s'", flag.c_str());
         }
@@ -398,6 +402,8 @@ void TcpTestClient::scheduleNextSend()
         msg->insertAtBack(makeShared<ByteCountChunk>(B(cmd.numBytes)));
     if (cmd.more)
         msg->addTag<TcpSendMoreReq>();
+    if (cmd.eor)
+        msg->addTag<TcpSendEorReq>();
     scheduleAt(cmd.tSend, msg);
 }
 

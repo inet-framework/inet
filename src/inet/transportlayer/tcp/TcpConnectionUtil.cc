@@ -29,6 +29,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendMoreTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
@@ -48,6 +49,20 @@ namespace tcp {
 //
 // helper functions
 //
+
+// A queue of sequence numbers (the record boundaries of MSG_EOR) is in sequence order.
+// It is a queue, not a std::set, because the sequence numbers wrap around.
+static void removeSeqNumsUpTo(std::deque<uint32_t>& seqNums, uint32_t seq)
+{
+    while (!seqNums.empty() && seqLE(seqNums.front(), seq))
+        seqNums.pop_front();
+}
+
+// the first sequence number of the queue after seq, or the end of the queue
+static std::deque<uint32_t>::const_iterator findSeqNumAfter(const std::deque<uint32_t>& seqNums, uint32_t seq)
+{
+    return std::partition_point(seqNums.begin(), seqNums.end(), [&] (uint32_t s) { return seqLE(s, seq); });
+}
 
 const char *TcpConnection::stateName(int state)
 {
@@ -1426,6 +1441,13 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (bytes + options_len > state->snd_mss)
         bytes = state->snd_mss - options_len;
 
+    // MSG_EOR: a segment ends at the next record boundary, also in a retransmission.
+    // The boundaries that are acknowledged are removed first.
+    removeSeqNumsUpTo(eorSeqNums, state->snd_una);
+    auto nextBoundary = findSeqNumAfter(eorSeqNums, state->snd_nxt);
+    if (nextBoundary != eorSeqNums.end() && bytes > *nextBoundary - state->snd_nxt)
+        bytes = *nextBoundary - state->snd_nxt;
+
     // A retransmission never extends past the previously sent high-water mark
     // in the same segment: Linux retransmits skbs from the rtx queue (possibly
     // collapsed together, but only from already-SENT data); unsent data goes
@@ -1591,6 +1613,7 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
     }
 
     bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
+    bool eor = packet->findTag<TcpSendEorReq>() != nullptr;
     // MSG_MORE holds the partial segment at the end of this SEND (sendData() takes the
     // flag). A SEND without MSG_MORE while a partial is held gives that partial PSH
     // when it goes, as Linux tcp_mark_push() on the last write.
@@ -1599,6 +1622,12 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
     if (!msgMore && (state->tcp_cork || state->corkedDataPending))
         state->pushHeldPartial = true;
     sendQueue->enqueueAppData(packet);
+
+    // MSG_EOR: the end of this SEND is a record boundary
+    if (eor) {
+        eorSeqNums.push_back(sendQueue->getBufferEndSeq());
+        EV_DETAIL << "MSG_EOR: record boundary at sequence number " << eorSeqNums.back() << "\n";
+    }
 
     // MSG_ZEROCOPY: the completion of this SEND waits until its last byte goes out
     if (zerocopy) {
@@ -1730,6 +1759,20 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         buffered -= sentBytes;
     }
 
+    // MSG_EOR: a record that ends in the partial segment at the end cannot become
+    // larger, so Nagle and the cork do not hold it, as Linux tcp_write_xmit(), which
+    // applies them only to the last skb of the queue. They hold only the data after the
+    // last record boundary.
+    uint32_t recordEnd = bytesToSend > 0 && !swsHold(effectiveWin, buffered) ? getLastRecordBoundaryBefore(state->snd_nxt + bytesToSend) : state->snd_nxt;
+    while (seqLess(state->snd_nxt, recordEnd)) {
+        uint32_t sentBytes = sendSegment(recordEnd - state->snd_nxt);
+        if (sentBytes == 0)
+            break;
+        bytesToSend -= sentBytes;
+        effectiveWin -= sentBytes;
+        buffered -= sentBytes;
+    }
+
     if (bytesToSend > 0) {
         // Nagle's algorithm: when a TCP connection has outstanding data that has not
         // yet been acknowledged, small segments cannot be sent until the outstanding
@@ -1819,6 +1862,14 @@ void TcpConnection::sendSegmentBelowWindow(const char *name)
     Packet *fp = new Packet(name);
     sendToIP(fp, tcpHeader);
     tcpAlgorithm->ackSent();
+}
+
+uint32_t TcpConnection::getLastRecordBoundaryBefore(uint32_t seq) const
+{
+    auto it = findSeqNumAfter(eorSeqNums, seq - 1); // the first boundary at seq or after it
+    if (it != eorSeqNums.begin() && seqGreater(*std::prev(it), state->snd_nxt))
+        return *std::prev(it);
+    return state->snd_nxt;
 }
 
 void TcpConnection::flushCorkedData(bool forcePush)

@@ -171,6 +171,9 @@ class INET_API TcpConnection : public SimpleModule
     // ids of Linux SO_ZEROCOPY)
     std::map<uint32_t, uint32_t> zerocopySeqNums;
     uint32_t nextZerocopyId = 0;
+    // MSG_EOR: the record boundaries, that is the sequence numbers that end the data of
+    // each SEND with TcpSendEorReq, in sequence order. No segment spans a boundary.
+    std::deque<uint32_t> eorSeqNums;
     // SO_TIMESTAMPING: the delivered data carries the time of its delivery
     // (TcpRxTimestampInd), as TcpSetTimestampingCommand asks; a member, because the
     // command can come before the open
@@ -310,6 +313,12 @@ class INET_API TcpConnection : public SimpleModule
      * TCP_NODELAY, and at the cork timer, which also asks for PSH (forcePush).
      */
     virtual void flushCorkedData(bool forcePush);
+
+    /**
+     * MSG_EOR: the last record boundary after snd_nxt and before the given sequence
+     * number, or snd_nxt if there is none.
+     */
+    virtual uint32_t getLastRecordBoundaryBefore(uint32_t seq) const;
 
   protected:
 
