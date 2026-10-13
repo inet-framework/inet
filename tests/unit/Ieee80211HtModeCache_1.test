@@ -1,0 +1,55 @@
+%description:
+Verify that the HT factory preserves band and preamble format in cached modes.
+Both request orders produce distinct modes for different parameters.
+Identical requests reuse the same mode object.
+
+%includes:
+#include <algorithm>
+#include <vector>
+
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%activity:
+
+const Ieee80211Htmcs *mcsModes[] = {
+    &Ieee80211HtmcsTable::htMcs0BW20MHz,
+    &Ieee80211HtmcsTable::htMcs0BW40MHz,
+};
+for (int testCase = 0; testCase < 2; testCase++) {
+    const auto *mcsMode = mcsModes[testCase];
+    std::vector<const Ieee80211HtMode *> modes;
+    for (int bandIndex = 0; bandIndex < 2; bandIndex++) {
+        bool use5Ghz = bandIndex == testCase;
+        auto band = use5Ghz ? Ieee80211HtMode::BAND_5GHZ : Ieee80211HtMode::BAND_2_4GHZ;
+        for (int preambleIndex = 0; preambleIndex < 2; preambleIndex++) {
+            bool useGreenfield = preambleIndex == testCase;
+            auto preambleFormat = useGreenfield ? Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD :
+                    Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED;
+            const auto *mode = Ieee80211HtCompliantModes::getCompliantMode(mcsMode, band,
+                    preambleFormat, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
+            ASSERT(mode->getCenterFrequencyMode() == band);
+            ASSERT(mode->getPreambleMode()->getPreambleFormat() == preambleFormat);
+            ASSERT((mode->getLegacySignalMode() == nullptr) == useGreenfield);
+            ASSERT(mode->getHtMcsIndex() == 0);
+            ASSERT(mode->getDataMode()->getBandwidth() == mcsMode->getBandwidth());
+            ASSERT(!mode->isHtShortGuardInterval());
+            // IEEE Std 802.11-2024, Table 19-25: band-specific HT PHY timing.
+            ASSERT(mode->getSifsTime() == SimTime(use5Ghz ? 16 : 10, SIMTIME_US));
+            ASSERT(mode->getSlotTime() == SimTime(use5Ghz ? 9 : 20, SIMTIME_US));
+            ASSERT(std::find(modes.begin(), modes.end(), mode) == modes.end());
+            modes.push_back(mode);
+            ASSERT(Ieee80211HtCompliantModes::getCompliantMode(mcsMode, band,
+                    preambleFormat, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) == mode);
+        }
+    }
+    ASSERT(modes.size() == 4);
+}
+
+EV << "HT mode cache preserves band, preamble format, and object reuse.\n";
+
+%contains: stdout
+HT mode cache preserves band, preamble format, and object reuse.
