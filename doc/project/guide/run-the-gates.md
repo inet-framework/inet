@@ -45,8 +45,7 @@ make -j$(nproc) MODE=debug && make -j$(nproc) MODE=release
 # 2. run the rules a script can check
 doc/project/enforcement/check-architecture.sh
 doc/project/enforcement/check-naming.sh --base origin/master
-doc/project/enforcement/check-commits.sh origin/master..HEAD
-doc/project/enforcement/check-classification.sh origin/master..HEAD   # the Change: trailers
+doc/project/enforcement/check-pull-request.sh --base origin/master  # the series gates, as CI runs them
 doc/project/enforcement/check-interfaces.sh                # every I<Stem> class holds no body
 doc/project/enforcement/check-source-seals.sh --base origin/master
 
@@ -85,4 +84,4 @@ The naming command scans declaration names in every NED and MSG file under the s
 
 The gates cover dependency direction, C++ identifiers, file names and the commit series. They do not cover the **semantic** project rules: substitutable operation outcomes, object ownership, externally exposed enum values or named numeric codes, visualization logic inside a protocol, a zero-time message standing in for a call, or a test whose category does not match its claim. Those are tier 4, and they need the [agent-review checklist](../enforcement/checklist/general.md).
 
-The pull-request `enforcement-tests.yml` workflow runs the enforcement checker tests. `check-sealing.yml` evaluates paths sealed at the branch merge base and, when necessary, waits for the protected approval required by [SR-PR-APPROVAL](../rule/sealing.md#sr-pr-approval). The remaining rule gates above still depend on contributors running them by hand, and are the next CI coverage gap to close.
+The pull-request `enforcement-tests.yml` workflow runs the enforcement checker tests. `check-sealing.yml` evaluates paths sealed at the branch merge base and, when necessary, waits for the protected approval required by [SR-PR-APPROVAL](../rule/sealing.md#sr-pr-approval). `check-pull-request.yml` runs the series gates of `check-pull-request.sh` over every pull request to `master`: the commits, the `Change:` trailers, the includes and parameters of each commit, and the description. The tree gates above still depend on contributors running them by hand. They are the next CI coverage gap to close, and they need a comparison with the merge base first, because `master` has old violations.

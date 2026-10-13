@@ -20,11 +20,12 @@ Record the head commit and the merge base in the report. A review of "the branch
 ## 2. Run the mechanical checks
 
 ```bash
-doc/project/enforcement/check-commits.sh $MB..refs/pr/<n>
-doc/project/enforcement/check-pr-description.sh --pr <n> --range $MB..refs/pr/<n>
+doc/project/enforcement/check-pull-request.sh --base origin/master --head refs/pr/<n> --pr <n>
 ```
 
-What it covers, and what to run by hand when you want the detail:
+It computes the merge base and runs the five series gates over `$MB..refs/pr/<n>`: `check-commits.sh`, `check-classification.sh`, `check-includes.sh`, `check-ned-params.sh` and `check-pr-description.sh`. CI runs the same command on every pull request to `master`, through `check-pull-request.yml`, and the run page of that check holds the same report. **A CI report is evidence only for the head commit that it names.** Use it when that head is the one you review, and run the command yourself when it is not.
+
+What `check-commits.sh` covers, and what to run by hand when you want the detail:
 
 ```bash
 # PR-SPLIT-WHITESPACE — a file whose diff is empty when whitespace and blank lines are ignored
@@ -46,6 +47,8 @@ git log --format=%s $MB..refs/pr/<n>
 **The whitespace check needs `--ignore-blank-lines` as well as `-w`.** With `-w` alone a branch that removes blank lines instead of changing indentation reports nothing. That is a real finding from `audit/pull-request/pr-1144.md`, and it is the reason the flag is written here.
 
 ## 3. Audit the commit messages
+
+The command of step 2 runs the classification gate. To run it alone:
 
 ```bash
 doc/project/enforcement/check-classification.sh $MB..refs/pr/<n>
@@ -70,7 +73,7 @@ It checks the mechanical half of [rule/classification.md](../rule/classification
 - **Is the obligation discharged, and where?** The two obligations have **different units**, and reading them the same way produces a false finding. [TR-SHIP-WITH](../rule/testing.md#tr-ship-with) asks for the test in the same *pull request*, so a batch of tests at the end of a series satisfies the letter of it. [PR-SPLIT-BASELINE](../rule/pull-request.md#pr-split-baseline) asks for the baseline in the same *commit*, so a batch at the end is a violation. A long gap between behavior and test is still worth a **note**: the rule's own reason is that a test written later is written against the code as it turned out.
 - **Is a `?` still a `?`** A commit that says `?` for its baselines is honest and unfinished. It is a `PARTIAL`, not a `PASS`, and the report says what run would settle it.
 
-**Do not report a missing trailer on a commit that predates the rule.** Check the date of the branch against the date `classification.md` entered the tree.
+**Do not report a missing trailer on a commit that predates the rule.** The gate gives a note, not a violation, for a missing `Change:` line on a commit authored before 2026-09-11, the day `classification.md` entered the tree. A rebase keeps the author date, so an old commit on a new branch still gets the note.
 
 ## 4. Read the breakdown
 
