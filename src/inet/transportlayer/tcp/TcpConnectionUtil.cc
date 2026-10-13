@@ -1103,9 +1103,14 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
     else { // len > 0
         if (state->rcv_wnd == 0)
             ret = false;
-        else // rcv_wnd > 0
+        else { // rcv_wnd > 0
+            // RFC 9293: SEG.LEN counts the SYN and the FIN, so a segment of old data with a
+            // FIN at RCV.NXT, as a peer retransmits its last data together with its FIN,
+            // is acceptable, and its FIN is processed
+            uint32_t endSeq = seqNo + len + tcpHeader->getSynFinLen();
             ret = (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd))
-                || (seqLess(state->rcv_nxt, seqNo + len) && seqLE(seqNo + len, rcvWndEnd)); // Accept an ACK on end of window
+                || (seqLess(state->rcv_nxt, endSeq) && seqLE(endSeq, rcvWndEnd)); // Accept an ACK on end of window
+        }
     }
 
     // RFC 793, page 25:

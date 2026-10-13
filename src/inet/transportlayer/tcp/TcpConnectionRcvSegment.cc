@@ -617,7 +617,9 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // transmitted if possible without incurring undue delay.
         //"
 
-        if (payloadLength > 0) {
+        // only data beyond RCV.NXT: a segment of old data comes here only for its FIN,
+        // which the eighth step processes
+        if (payloadLength > 0 && seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_nxt)) {
             // check for full sized segment
             if ((uint32_t)payloadLength == state->snd_mss || (uint32_t)payloadLength + (tcpHeader->getHeaderLength() - TCP_MIN_HEADER_LENGTH).get<B>() == state->snd_mss)
                 state->full_sized_segment_counter++;
