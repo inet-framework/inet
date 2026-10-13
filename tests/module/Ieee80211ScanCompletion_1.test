@@ -1,0 +1,239 @@
+%description:
+Verify that active scan minimum dwell begins after the Probe Request has completed
+transmission, and that passive scan dwell confirmation is preceded by application
+of the requested radio channel when the scan starts while the radio is busy.
+
+%file: Ieee80211ScanCompletion.cc
+
+#include <omnetpp.h>
+
+#include "inet/common/InitStages.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211Primitives_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class ScanCompletionObserver : public cSimpleModule, public cListener
+{
+  protected:
+    cMessage *trigger = nullptr;
+    cModule *radio = nullptr;
+    bool activeScan = true;
+    bool waitForBusyReception = false;
+    int targetChannel = 1;
+    bool scanRequested = false;
+    int scanConfirms = 0;
+    bool probeTransmissionCompleted = false;
+    simtime_t probeTransmissionCompletionTime = SIMTIME_ZERO;
+    bool requestedChannelApplied = false;
+    simtime_t requestedChannelApplicationTime = SIMTIME_ZERO;
+    simtime_t scanConfirmTime = SIMTIME_ZERO;
+
+  public:
+    int getScanConfirms() const { return scanConfirms; }
+    bool hasProbeTransmissionCompleted() const { return probeTransmissionCompleted; }
+    simtime_t getProbeTransmissionCompletionTime() const { return probeTransmissionCompletionTime; }
+    bool hasRequestedChannelApplied() const { return requestedChannelApplied; }
+    simtime_t getRequestedChannelApplicationTime() const { return requestedChannelApplicationTime; }
+    simtime_t getScanConfirmTime() const { return scanConfirmTime; }
+
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            activeScan = par("active");
+            waitForBusyReception = par("waitBusy");
+            targetChannel = par("targetChannel");
+            trigger = new cMessage("scanTrigger");
+            radio = getParentModule()->getSubmodule("radio");
+            radio->subscribe(physicallayer::IRadio::receptionStateChangedSignal, this);
+            radio->subscribe(physicallayer::Ieee80211Radio::radioChannelChangedSignal, this);
+            getParentModule()->subscribe(packetSentToPeerSignal, this);
+        }
+        if (stage == INITSTAGE_APPLICATION_LAYER && !waitForBusyReception)
+            scheduleAfter(SimTime(1, SIMTIME_MS), trigger);
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (message == trigger) {
+            ASSERT(!scanRequested);
+            scanRequested = true;
+            auto request = new Ieee80211Prim_ScanRequest();
+            request->setBSSType(BSSTYPE_INFRASTRUCTURE);
+            request->setActiveScan(activeScan);
+            request->setProbeDelay(SIMTIME_ZERO);
+            request->setMinChannelTime(SimTime(1, SIMTIME_US));
+            request->setMaxChannelTime(SimTime(2, SIMTIME_MS));
+            request->setChannelListArraySize(1);
+            request->setChannelList(0, targetChannel);
+            auto command = new cMessage("scanRequest");
+            command->setControlInfo(request);
+            send(command, "mgmtOut");
+        }
+        else {
+            auto confirm = dynamic_cast<Ieee80211Prim_ScanConfirm *>(message->getControlInfo());
+            ASSERT(confirm != nullptr);
+            ASSERT(confirm->getResultCode() == PRC_SUCCESS);
+            scanConfirms++;
+            scanConfirmTime = simTime();
+            delete message;
+        }
+    }
+
+    virtual void receiveSignal(cComponent *, simsignal_t signalID, intval_t value, cObject *) override
+    {
+        if (signalID == physicallayer::IRadio::receptionStateChangedSignal && waitForBusyReception && !scanRequested &&
+                !trigger->isScheduled() && value == physicallayer::IRadio::RECEPTION_STATE_RECEIVING)
+            scheduleAfter(SIMTIME_ZERO, trigger);
+        else if (signalID == physicallayer::Ieee80211Radio::radioChannelChangedSignal && scanRequested && value == targetChannel) {
+            requestedChannelApplied = true;
+            requestedChannelApplicationTime = simTime();
+        }
+    }
+
+    virtual void receiveSignal(cComponent *, simsignal_t signalID, cObject *object, cObject *) override
+    {
+        if (signalID != packetSentToPeerSignal || !scanRequested || object == nullptr)
+            return;
+        auto packet = dynamic_cast<Packet *>(object);
+        if (packet == nullptr)
+            return;
+        const auto& header = packet->peekAtFront<ieee80211::Ieee80211MacHeader>();
+        if (header->getType() == ST_PROBEREQUEST) {
+            ASSERT(!probeTransmissionCompleted);
+            ASSERT(requestedChannelApplied && requestedChannelApplicationTime <= simTime());
+            probeTransmissionCompleted = true;
+            probeTransmissionCompletionTime = simTime();
+        }
+    }
+
+    using cListener::finish;
+
+    virtual void finish() override
+    {
+        if (radio != nullptr) {
+            radio->unsubscribe(physicallayer::IRadio::receptionStateChangedSignal, this);
+            radio->unsubscribe(physicallayer::Ieee80211Radio::radioChannelChangedSignal, this);
+        }
+        if (getParentModule() != nullptr)
+            getParentModule()->unsubscribe(packetSentToPeerSignal, this);
+    }
+
+  public:
+    virtual ~ScanCompletionObserver()
+    {
+        cancelAndDelete(trigger);
+    }
+};
+
+Define_Module(ScanCompletionObserver);
+
+class Ieee80211ScanCompletionTest : public cSimpleModule
+{
+  protected:
+    virtual void finish() override
+    {
+        auto active = check_and_cast<ScanCompletionObserver *>(getModuleByPath("^.activeSta.wlan[0].agent"));
+        auto passive = check_and_cast<ScanCompletionObserver *>(getModuleByPath("^.passiveSta.wlan[0].agent"));
+
+        ASSERT(active->getScanConfirms() == 1);
+        ASSERT(active->hasProbeTransmissionCompleted());
+        ASSERT(active->getScanConfirmTime() >= active->getProbeTransmissionCompletionTime() + SimTime(1, SIMTIME_US));
+
+        ASSERT(passive->getScanConfirms() == 1);
+        ASSERT(passive->hasRequestedChannelApplied());
+        ASSERT(passive->getRequestedChannelApplicationTime() + SimTime(2, SIMTIME_MS) == passive->getScanConfirmTime());
+
+        std::cout << "IEEE 802.11 scan dwell and retune completion ordering verified.\n";
+    }
+};
+
+Define_Module(Ieee80211ScanCompletionTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mgmt.IIeee80211Agent;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple ScanCompletionObserver like IIeee80211Agent
+{
+    parameters:
+        bool active = default(true);
+        bool waitBusy = default(false);
+        int targetChannel = default(1);
+        @class(::inet::ieee80211::ScanCompletionObserver);
+    gates:
+        input mgmtIn;
+        output mgmtOut;
+}
+
+simple Ieee80211ScanCompletionTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::Ieee80211ScanCompletionTest);
+}
+
+network Ieee80211ScanCompletionTestNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        activeSta: WirelessHost {
+            parameters:
+                wlan[*].agent.typename = "ScanCompletionObserver";
+                wlan[*].agent.active = true;
+                wlan[*].agent.waitBusy = false;
+        }
+        passiveSta: WirelessHost {
+            parameters:
+                wlan[*].agent.typename = "ScanCompletionObserver";
+                wlan[*].agent.active = false;
+                wlan[*].agent.waitBusy = true;
+        }
+        test: Ieee80211ScanCompletionTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Ieee80211ScanCompletionTestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+sim-time-limit = 5ms
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+**.analogModel.ignorePartialInterference = true
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.wlan[*].opMode = "g(mixed)"
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].radio.transmitter.power = 100mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
+*.ap.wlan[*].mgmt.beaconInterval = 1024us
+*.activeSta.wlan[*].mgmt.numChannels = 2
+*.passiveSta.wlan[*].mgmt.numChannels = 2
+*.activeSta.wlan[*].mac.dcf.channelAccess.cwMin = 0
+*.passiveSta.wlan[*].mac.dcf.channelAccess.cwMin = 0
+
+%contains: stdout
+IEEE 802.11 scan dwell and retune completion ordering verified.

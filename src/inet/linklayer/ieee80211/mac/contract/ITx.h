@@ -58,6 +58,9 @@ class INET_API ITx
      */
     [[nodiscard]] virtual bool hasTransmission() const = 0;
     virtual void radioTransmissionFinished() = 0;
+
+    // Includes a frame waiting for its inter-frame space, as well as on-air transmission.
+    virtual bool isTransmissionPending() const = 0;
 };
 
 } // namespace ieee80211
