@@ -1,6 +1,6 @@
 # IPsec level 2 — repair the model gaps
 
-**Status:** in progress. Started 2026-09-25 on `topic/standards-tests-ipsec-level2-fixes`, on top of `topic/standards-tests-ipsec-level2` at `6d57390964`. Worktree: `/home/levy/workspace/inet-standards-tests-ipsec-level2-fixes`.
+**Status:** done on 2026-09-25: ten gaps repaired, gaps 8 and 12 have a plan each. Landed on `master` on 2026-10-13. Started 2026-09-25 on `topic/standards-tests-ipsec-level2-fixes`, on top of `topic/standards-tests-ipsec-level2` at `6d57390964`. Worktree: `/home/levy/workspace/inet-standards-tests-ipsec-level2-fixes`.
 
 The level 2 pass of 2026-09-24 measured the model and repaired nothing. This branch repairs the gaps of [`results.md`](../../doc/project/evidence/model/ipsec/results.md#the-model-gaps), one gap for each commit, as the user asked on 2026-09-25: the defects, the untestable claim, and the small or medium missing features. Tunnel mode (gap 8) and the path MTU (gap 12) are large, and get a plan each and no code.
 
@@ -25,7 +25,7 @@ The same as in `plan/pending/mpls-level2-fixes.md` of the MPLS repair branch: th
 11. [x] **Gap 11** — dummy packets. Test: `Rfc4303DummyPackets`.
 12. [x] **Gaps 8 and 12, a plan each** — `plan/pending/ipsec-tunnel-mode.md` and `plan/pending/ipv6-path-mtu.md`.
 13. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and `notes.md` ("Fixed on" entries) follow it. No statistics branch: nothing moves.
-14. [ ] Gates, then move this plan to `plan/done/`.
+14. [x] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 
@@ -38,3 +38,15 @@ The same as in `plan/pending/mpls-level2-fixes.md` of the MPLS repair branch: th
 - **Found on the way, not repaired**: the inbound ESP path schedules its delay on `lastProtectedOut`, the variable of the outbound queue, where the AH path uses `lastProtectedIn`. No test sees it, because the delays are 0 by default.
 - **The whole branch moves no statistical result.** The full suite at `f6e23fceb3` gives 890 PASS and the same 27 unexpected failures as the baseline, all of 802.11 EDCA.
 - **The documents follow a fresh run** at `f6e23fceb3`: 28 PASS, 3 FAIL declared expected (tunnel mode twice, the path MTU). The ledger and the matrix come from `audit/ipsec-level2-fixes/` of `inet-master`. The matrix script of the level 2 pass gave `out of claim` to every feature of a stated refusal; the guide gives `undocumented` to a supported one, and the creation of an SA is such a feature now, so the script follows the guide.
+
+## Landing on master
+
+The branch landed on 2026-10-13 by a rebase onto `master` at `a61363aba5`, 297 commits after its earlier base. No source file conflicted. `WHATSNEW` conflicted because master added items to the same list: the IPsec item is now item 29 of the backward incompatible changes of INET 4.7.x. `doc/src/migration-guide/index.rst` conflicted because master added sections at the top; the IPsec section stays first. The four documents of `doc/project/evidence/model/ipsec/` conflicted because master put every prose paragraph of `doc/project/` on one line; the documents and the plans of this branch now follow that rule. The commit messages follow the current rules of `doc/project/rule/pull-request.md`.
+
+The checks on the new base, at the rebased commits:
+
+- The IPsec protocol suite (debug): 31 tests, 28 PASS, 3 FAIL declared expected, with the same failure reasons as before. The documents carry the record of this run.
+- The module tests (debug): 584 PASS.
+- The CI fingerprint set (release, 1752 rows, `tplx`, `~tNl` and `~tND`) at the tip: no row moves, and the only error is the expected one of `ethernet.csv`. The six rows of `examples/inet/ipsec`, run again at each of the nine repair commits: no row moves.
+- The statistical tests of `examples/inet/ipsec` (release, native build, clang 23) against the statistics repository at `9ab4c26`: 4 PASS, and `TCPTraffic` and `TCPTraffic6` fail. Master at `a61363aba5` gives the same values in every statistic, so the failures come from master, not from this branch: the TCP vectors moved with the TCP changes on master, and the other differences are in the last digits of floating-point values.
+
