@@ -1,6 +1,6 @@
 # Run the mechanical pull-request audit in CI
 
-> **Status:** in progress · **Branch:** `topic/pull-request-audit-ci` · **Base:** `origin/master` `f26dcbc424` (2026-10-13)
+> **Status:** done, not yet run on GitHub · **Branch:** `topic/pull-request-audit-ci` · **Base:** `origin/master` `7610dddc1e` (2026-10-13); section 2 was measured on `f26dcbc424`, and the six commits between them touch no file of this plan
 
 ## 1. Problem and intended behavior
 
@@ -104,13 +104,15 @@ The risk of `pull_request_target` is a token of the base repository in a job tha
 
 Each step is one commit, with a `Change:` trailer.
 
-- [ ] **S1.** Commit this plan.
-- [ ] **S2.** `check-ned-params.sh` reads `par()` only in `src/` C++ files (D5), with a new regression test.
-- [ ] **S3.** `check-classification.sh` gives a note for a missing trailer on a commit that predates the rule (D4), with tests.
-- [ ] **S4.** The entry command `check-pull-request.sh` (D1), with tests.
-- [ ] **S5.** The workflow `check-pull-request.yml` (D2, D3, D6).
-- [ ] **S6.** The documents: the gate inventory, the gates guide, and the review guide.
-- [ ] **S7.** Run the sample again, record the results here, and move the plan to `plan/done/`.
+- [x] **S1.** Commit this plan. — `5d1c78a2f2`
+- [x] **S2.** `check-ned-params.sh` reads `par()` only in `src/` C++ files (D5), with a new regression test. — `38c7e492da`
+- [x] **S3a.** `CR-OBL-INERT` skips a commit with no trailer (D7, found in S3). — `16fd7b87ba`
+- [x] **S3.** `check-classification.sh` gives a note for a missing trailer on a commit that predates the rule (D4), with tests. — `6245adc925`
+- [x] **S4.** The entry command `check-pull-request.sh` (D1), with tests. — `db2c457dc2`
+- [x] **S5.** The workflow `check-pull-request.yml` (D2, D3, D6). — `6124431ce6`
+- [x] **S6.** The documents: the gate inventory, the gates guide, and the review guide. — `cc577fdee7`
+- [x] **S7.** Run the sample again, record the results here, and move the plan to `plan/done/`.
+- [x] **S8.** `check-commits.sh` flags a move that changes the moved file (D13, asked for after S7). — `1bc315432f`
 
 S4 needs S2 and S3 only for the sample results. S5 needs S4.
 
@@ -131,6 +133,36 @@ S4 needs S2 and S3 only for the sample results. S5 needs S4.
 - **Seals and baselines:** no sealed path changes, and no baseline changes.
 - **Approval:** the request of 2026-10-13 asks for this function. The draft [PLR-APPROVAL](../../doc/project/rule/planning.md#plr-approval) is not in effect for this task. Nothing is pushed; the maintainer reviews the branch before a push.
 
+## Results
+
+**The sample of section 2, again,** with `check-pull-request.sh --base origin/master --head refs/pr/<n> --description-file /dev/null` at `db2c457dc2`:
+
+| PR | Before (section 2) | After | Time |
+| --- | --- | --- | ---: |
+| 1312, 1311, 1306, 1297 | pass | pass | 0–1 s |
+| 1309 | 4 false `check-ned-params.sh` violations | pass | 4 s |
+| 1308 | 4 missing trailers | 4 missing trailers, real: the commits are from 2026-10-13 | 3 s |
+| 1155 | 15 + 63 + 4 + 8 | commits 15, classification 0 (61 notes), includes 4, parameters 8 | 31 s |
+
+The 27 remaining violations of PR 1155 are real. The parameter violations are reads ahead of the declaration: for example, the `TcpCubic` commit reads `cubicBeta`, and the later commit `e24da2c9d4` declares it. The commit violations are bodies that are missing, two baseline commits that follow their source commit, and a rename with edits. They agree with `plan/pending/pr-1155-resolve-audit-findings.md`.
+
+**Acceptance criteria.** 1: yes. 2: 151 checker tests pass, 14 of them new. 3: yes. 4: yes, see D2 and the simulation below. 5: `actionlint` 1.7.12 with `shellcheck` 0.11.0 gives no finding.
+
+**A local simulation of both jobs.** The `run:` scripts came from the YAML file, and ran under `bash -e` with a bare "origin" in `/var/tmp`, a stub `gh`, and the GitHub environment variables:
+
+- The event job for PR 1308 returned 1 and wrote a 4 KB summary. A description that held `$(touch …)`, a backtick command and a `::error::` line reached the file as literal text, and the `touch` did not run. A wrong expected head stopped the fetch step with 2.
+- The sweep over the 7 sample pull requests posted 7 statuses (5 `success`, 2 `failure`), wrote a 46 KB summary and 14 report files, and returned 0. A selection of `1308 1155` audited two. A selection of `12x` or `9999` stopped with 2 and posted nothing.
+
+**The branch itself** passes `check-pull-request.sh --base origin/master` with no note, and `check-seals.sh`. `check-naming.sh --base origin/master` shows 23 old path violations (NR-DIR, NR-ASSET, NR-PKG) and none from this branch; NR-CI accepts the workflow name. `check-links.sh` shows one old broken link, in `doc/project/evidence/model/mpls/conformance.md` to a generated `_m.h` file; master has the same link.
+
+**Not verified:** a run on GitHub. See section 7.
+
 ## Decision log
 
-(Filled in during implementation.)
+- **D7. `CR-OBL-INERT` skips a commit with no trailer.** Found in S3: after the date exception, PR 1155 still had 2 classification violations, "claims '' and moves 2 recorded expectation(s)". The check read the missing claim as a depth below behavior, so a commit with no trailer got a second violation for one defect. It is a separate defect that can land alone, so it is its own commit, before S3.
+- **D8. The sweep run fails only when a gate cannot run.** A violation is the result of one pull request, and its status already shows it. A red sweep run for a violation on an old pull request tells the maintainer nothing new.
+- **D9. The sweep does not stop workflow commands.** It sends the output of each gate to a report file, never to the log, so no commit text reaches the log. The event job prints the gate output to the log, so it keeps the stop.
+- **D10. One `shellcheck` directive for each `printf`.** `actionlint` puts text before a `run:` script, so a directive on the first line of the script covers only the next command, not the whole script.
+- **D11. The sweep audits against `origin/master`,** with the gates of the commit that the run starts from. The rules apply to pull requests to `master`, and only a person with write access can start the run from another branch.
+- **D12. `persist-credentials: false` in both jobs.** The jobs fetch only public refs, so they need no credential in `.git/config`. `check-sealing.yml` keeps the default; this plan does not change it.
+- **D13. `PR-SPLIT-MOVE` flags a rename below 100 % similarity.** The rule says that a move does not change the content of the file. The gate flagged a rename only together with an edit of another file, so a commit that moved one file and edited it passed; the last plan commit of this branch did that before it was split in two. The gate now names each moved file that changed, with its similarity. On master since 2026-08-31, the check finds 30 more commits, most of them a plan moved to `plan/done/` and edited in one commit. The sample of section 2 gets no new violation, except 3 more on PR 1155. A maintainer who wants to permit a plan move with an edit must change the rule first; this plan follows the rule as it is.
