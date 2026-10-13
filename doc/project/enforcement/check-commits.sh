@@ -64,7 +64,7 @@ while read -r sha; do
   elif [ ${#subj} -gt 72 ]; then
     note "$short subject is ${#subj} characters, over the 72 aimed for: $subj"
   fi
-  echo "$subj" | grep -qE "^[a-z0-9_./-]+(\([a-z0-9_/-]+\))?: " || { flag "$short subject is not 'area: what it does': $subj"; ok=0; }
+  echo "$subj" | grep -qE "^[A-Za-z0-9_./-]+(\([a-z0-9_/-]+\))?: " || { flag "$short subject is not 'area: what it does': $subj"; ok=0; }
   echo "$subj" | grep -qE "\.(cc|h|ned|msg|ini|py|sh|md)\b|https?://" && { flag "$short subject names a file or a link: $subj"; ok=0; }
   git log -1 --format=%B "$sha" | grep -qiE "^(Co-Authored-By|Generated-By|Signed-off-by: .*\[bot\]):" && { flag "$short carries an attribution trailer"; ok=0; }
 done <<< "$COMMITS"
