@@ -1658,6 +1658,21 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         return false;
     }
 
+    // RFC 9293 section 3.8.6.2.1, the sender SWS avoidance (MUST-38): a segment of new
+    // data smaller than the effective MSS goes out only if it carries all queued data
+    // (rule (2)) or at least Fs = 1/2 of the largest window that the peer offered (rule
+    // (3)); else it waits for a larger window, or for the override timeout (rule (4), the
+    // persist timer, see TcpAlgorithmBase::sendData()). As BSD, the usable window is also
+    // limited by the congestion window, and a retransmission is never held.
+    auto swsHold = [&] (int64_t usable, uint32_t queued) {
+        return !state->swsOverride && seqGE(state->snd_nxt, state->snd_max) && usable < state->snd_effmss
+               && queued > usable && usable < state->max_window / 2;
+    };
+    if (swsHold(effectiveWin, buffered)) {
+        EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
+        return false;
+    }
+
     uint32_t bytesToSend = std::min(buffered, (uint32_t)effectiveWin);
 
     // make a temporary tcp header for detecting tcp options length (copied from 'TcpConnection::sendSegment(uint32_t bytes)' )
@@ -1682,6 +1697,8 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         }
         ASSERT(bytesToSend >= sentBytes);
         bytesToSend -= sentBytes;
+        effectiveWin -= sentBytes;
+        buffered -= sentBytes;
     }
 
     if (bytesToSend > 0) {
@@ -1696,7 +1713,9 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // data is available"), without Nagle.
         bool unacknowledgedData = (getDataSndUna() != state->snd_max) && fsm.getState() != TCP_S_SYN_SENT;
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
-        if (state->nagle_enabled && unacknowledgedData && !containsFin)
+        if (swsHold(effectiveWin, buffered))
+            EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
+        else if (state->nagle_enabled && unacknowledgedData && !containsFin)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
         else
             sendSegment(bytesToSend);
@@ -2801,6 +2820,8 @@ void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool do
     {
         // send window should be updated
         state->snd_wnd = true_window;
+        if (state->snd_wnd > state->max_window)
+            state->max_window = state->snd_wnd;
         EV_INFO << "Updating send window from segment: new wnd=" << state->snd_wnd << "\n";
         state->snd_wl1 = tcpHeader->getSequenceNo();
         state->snd_wl2 = tcpHeader->getAckNo();

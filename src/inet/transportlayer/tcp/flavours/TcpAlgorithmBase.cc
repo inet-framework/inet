@@ -422,6 +422,18 @@ void TcpAlgorithmBase::processPersistTimer(TcpEventCode& event)
         return;
     }
 
+    // RFC 9293 section 3.8.6.2.1, rule (4): with an open window that the sender SWS
+    // avoidance does not use, "it is necessary to have a timeout to force transmission
+    // of data, overriding the SWS avoidance algorithm", and the RFC suggests this timer.
+    // Linux sends such a segment from its probe timer too (tcp_write_wakeup()).
+    if (state->snd_wnd > 0 && state->snd_una == state->snd_max) {
+        EV_INFO << "PERSIST timer expired with an open window: overriding the SWS avoidance\n";
+        state->swsOverride = true;
+        sendData(false);
+        state->swsOverride = false;
+        return;
+    }
+
     state->persist_timeout = state->persist_timeout * 2;
     if (state->persist_timeout > maxPersistTimeout)
         state->persist_timeout = maxPersistTimeout;
@@ -621,9 +633,13 @@ bool TcpAlgorithmBase::sendData(bool sendCommandInvoked)
 
     // Data that a zero window stops, with nothing in flight, starts the persist timer,
     // as Linux tcp_check_probe_timer(): also after a zero window of the SYN-ACK, or when
-    // the application sends after the window closed
-    if (state->snd_wnd == 0 && !rexmitTimer->isScheduled() && !persistTimer->isScheduled() && isDataWaiting()) {
-        EV_INFO << "Data waits for a zero window, therefore PERSIST timer is started.\n";
+    // the application sends after the window closed. Data that the sender SWS avoidance
+    // holds with nothing in flight starts it too: its expiry is the override timeout
+    // (RFC 9293 section 3.8.6.2.1, rule (4)).
+    if ((state->snd_wnd == 0 || state->snd_una == state->snd_max) && !rexmitTimer->isScheduled()
+        && !persistTimer->isScheduled() && isDataWaiting())
+    {
+        EV_INFO << "Data waits for the window, therefore PERSIST timer is started.\n";
         startPersistTimer();
     }
     return sent;

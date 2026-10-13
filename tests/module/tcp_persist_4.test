@@ -57,7 +57,7 @@ while($sor = <FILE>)
 Received zero-sized window, but no data waits, therefore PERSIST timer is not started.
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-Data waits for a zero window, therefore PERSIST timer is started.
+Data waits for the window, therefore PERSIST timer is started.
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
