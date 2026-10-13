@@ -49,7 +49,9 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         managementFramesSent++;
     }
 
-    void storeSerializedDiscovery(const MacAddress& address, int primaryChannel, bool probeResponse)
+    void storeSerializedDiscovery(const MacAddress& address, int primaryChannel, bool probeResponse,
+            const physicallayer::IIeee80211Band *band = &physicallayer::Ieee80211CompliantBands::band2_4GHz,
+            int secondaryChannelOffset = 0)
     {
         Enter_Method("storeSerializedDiscovery");
         Ptr<Ieee80211BeaconFrame> original;
@@ -70,8 +72,9 @@ class TestIeee80211MgmtStaDiscovery : public Ieee80211MgmtSta
         setHtCapabilities(original, capabilities);
         Ieee80211HtOperation operation;
         operation.primaryChannel = primaryChannel;
+        operation.secondaryChannelOffset = secondaryChannelOffset;
+        operation.operatingChannelWidth = secondaryChannelOffset == 0 ? MHz(20) : MHz(40);
         operation.basicMcsSupported[0] = true;
-        const auto *band = &physicallayer::Ieee80211CompliantBands::band2_4GHz;
         setHtOperation(original, band, operation);
         original->setChunkLength(B(8 + 2 + 2 + (2 + 10)) + B(3) + getHtMgmtElementsLength(original));
 
@@ -369,6 +372,29 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
     {
         auto mgmt = check_and_cast<TestIeee80211MgmtStaDiscovery *>(getModuleByPath("^.sta.wlan[0].mgmt"));
         const MacAddress address("02:00:00:00:00:01");
+
+        // Serialized HT Operation enters the production discovery validator.
+        // The mapped band permits 36/40 and 44/48, but rejects 40/44.
+        auto mappedMgmt = check_and_cast<TestIeee80211MgmtStaDiscovery *>(getModuleByPath("^.mappedSta.wlan[0].mgmt"));
+        auto mappedMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.mappedSta.wlan[0].mib"));
+        ASSERT(mappedMib->localHtCapabilities.supportedChannelWidths.count(MHz(20)) == 1);
+        ASSERT(mappedMib->localHtCapabilities.supportedChannelWidths.count(MHz(40)) == 0);
+        const auto *mappedBand = &physicallayer::Ieee80211CompliantBands::band5GHzMapped20MHz;
+        for (int primary = 0; primary < 4; primary++) {
+            MacAddress validAddress("02:00:00:00:01:01");
+            validAddress.setAddressByte(5, primary + 1);
+            int offset = primary % 2 == 0 ? 1 : 3;
+            mappedMgmt->storeSerializedDiscovery(validAddress, primary, primary % 2 != 0, mappedBand, offset);
+            ASSERT(mappedMgmt->getCachedAp(validAddress) != nullptr);
+            ASSERT(mappedMgmt->getCachedAp(validAddress)->channel == primary);
+        }
+        const MacAddress invalidLower("02:00:00:00:01:05");
+        const MacAddress invalidUpper("02:00:00:00:01:06");
+        mappedMgmt->storeSerializedDiscovery(invalidLower, 1, false, mappedBand, 1);
+        mappedMgmt->storeSerializedDiscovery(invalidUpper, 2, true, mappedBand, 3);
+        ASSERT(mappedMgmt->getCachedAp(invalidLower) == nullptr);
+        ASSERT(mappedMgmt->getCachedAp(invalidUpper) == nullptr);
+        std::cout << "Mapped HT discovery accepts 36/40 and 44/48; both directions of 40/44 fail.\n";
 
         mgmt->setPrimaryChannelForTest(6);
         mgmt->storeSerializedDiscovery(address, 6, false);
@@ -773,6 +799,11 @@ network Ieee80211MgmtStaDiscoveryTestNetwork
                 wlan[*].mgmt.typename = "TestIeee80211MgmtStaDiscovery";
                 wlan[*].agent.typename = "Ieee80211AgentSta";
         }
+        mappedSta: WirelessHost {
+            parameters:
+                wlan[*].mgmt.typename = "TestIeee80211MgmtStaDiscovery";
+                wlan[*].agent.typename = "Ieee80211AgentSta";
+        }
         test: Ieee80211MgmtStaDiscoveryTest;
 }
 
@@ -789,6 +820,10 @@ record-scalar-results = false
 
 *.sta.wlan[0].address = "02:00:00:00:00:09"
 *.sta.wlan[0].agent.startingTime = 100s
+*.mappedSta.wlan[0].address = "02:00:00:00:00:0a"
+*.mappedSta.wlan[0].agent.startingTime = 100s
+*.mappedSta.wlan[0].radio.bandName = "5 GHz (mapped 20 MHz)"
+*.mappedSta.wlan[0].radio.channelNumber = 0
 **.wlan[*].opMode = "n(mixed-2.4Ghz)"
 **.wlan[*].bitrate = 65Mbps
 *.sta.wlan[0].mac.qosStation = true
@@ -810,3 +845,6 @@ Serialized Beacon and Probe Response HT discovery drive production tuning to adv
 
 %contains: stdout
 Association and reassociation HT response semantics preserve success and diagnose invalid negotiation.
+
+%contains: stdout
+Mapped HT discovery accepts 36/40 and 44/48; both directions of 40/44 fail.

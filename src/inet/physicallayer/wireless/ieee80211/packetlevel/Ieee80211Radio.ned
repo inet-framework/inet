@@ -26,7 +26,8 @@ module Ieee80211Radio extends FlatRadioBase
 {
     parameters:
         string opMode @enum("a", "b", "g(erp)", "g(mixed)", "n(mixed-2.4Ghz)", "p", "ac") = default("g(mixed)"); // Operation mode
-        string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz") = default("2.4 GHz"); // Band name
+        // The mapped subset has channel centers 36, 40, 44, and 48; it permits HT40 pairs 36/40 and 44/48.
+        string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (mapped 20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz") = default("2.4 GHz"); // Band name
         int channelNumber = default(0);                                 // Initial channel number within the band (TODO this is offset by 1)
         string fcsMode @enum("declared","computed") = default("declared");
         transmitter.typename = default("Ieee80211Transmitter");
