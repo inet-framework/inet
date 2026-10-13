@@ -67,7 +67,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S15b ✅ | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +186 −56 | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
 | S16 ✅ | `topic/tcp-send-rules` | 15 (part), 16 (part), 36 (part), 69, new | +90 −4 | the sender SWS avoidance of RFC 9293 with its override timeout, `TCP_NODELAY`, the Nagle of Minshall, `TCP_MAXSEG` (D-73 to D-75) |
 | S16b ✅ | `topic/tcp-write-boundaries` | 36 (part), 46 (part), new | +297 −8 | `TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of Linux at write boundaries behind a parameter (D-76 to D-78) |
-| S17 | `topic/tcp-connection-leftovers` | 39 (part), 61 | +100 −450 (about) | the copies of the SACK recovery that nothing calls, the SACK scoreboard scan |
+| S17 ✅ | `topic/tcp-connection-leftovers` | 39 (part), 61 | +82 −754 | the copies of the SACK recovery that nothing calls, the SACK scoreboard scan (D-79, D-80) |
 | S17b | `topic/tcp-timestamps` | 26 (part), 39 (part) | +80 −20 (about) | `TS.Recent` from the handshake and its update rule, the TS option on each segment (RFC 7323) |
 | S17c | `topic/tcp-segment-checks` | 39 (part), new | +150 −30 (about) | the sequence number of a pure ACK and the window update (D-72), the acceptability test, the Linux checks of RFC 5961 and of the window edge, the RST of Linux at an abort |
 | S17d | `topic/tcp-connection-setup` | 26 (part), 39 (part), new | +150 −30 (about) | the text of a SYN, the data queued in SYN_RCVD, the timers at a return to LISTEN, the ICMP checks of RFC 5927 and in SYN_RCVD |
@@ -738,6 +738,22 @@ plan gives a reason for.
   at the ISS, as Linux `tcp_connect_init()`, where the source set it at the first write, which
   compares wrongly when the ISS is more than 2^31 from zero. The PSH in the last buffered segment
   of RFC 9293 (MUST-61) stays with S19 (D-74).
+- **D-79 — The SACK option stays with the connection.** The SACK option reports what the data
+  receiver holds (RFC 2018), so `TcpConnection::addSacks()` writes it from the receive queue,
+  whatever loss recovery the sender uses; S17 removes the copy in `Rfc6675Recovery`, which had no
+  caller. This reverses the move of the option that D-5 and the items of S11 and S13 planned. The
+  source writes the option through a `dynamic_cast` to `Rfc6675Recovery` and guards it (commit
+  51), so a connection in SYN_RCVD, whose recovery does not exist yet, or with another recovery,
+  sends no SACK option; and its copy lacks the first-block rule of RFC 2018 section 4 (S8) and the
+  room for the AccECN option (S13). `TcpConnectionSackUtil.cc` stays, with this one function.
+- **D-80 — Four parts of commit 39 stay out.** The connection keeps the reset of the duplicate-ACK
+  counter after the ACK handlers of the algorithm (B1 of D-6): the source resets it at the end of
+  `TcpAlgorithmBase::receivedAckForUnackedData()`, before the code of the flavour, so the
+  `dupacks = dupthresh` that `TcpVegas` sets after its fine-grained retransmission stays, which
+  changes Vegas. `validationInfo()` has no caller in the source. The statistic `sndNxt` keeps its
+  name, which the lwIP TCP shares; the source renames it to `sndSeq`. The range that
+  `retransmitOneSegment()` reports differs from the source's only in SYN_RCVD, where the list of
+  send times ignores it.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -2058,7 +2074,7 @@ verdict. The six gates pass.
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | refactor: remove the copies of the SACK recovery that nothing calls | — | 39 (part) |
+| 1 | refactor: remove the copies of the SACK recovery that nothing calls | — | 39 (part), new (D-79) |
 | 2 | refactor: walk the SACK scoreboard once, and cache its totals | — | 61 |
 
 S17 had commits 39 and 61. Commit 39 is the remainder of the source branch's cut into features:
@@ -2104,3 +2120,25 @@ RFC 1323; `sndSeqSignal` is registered and never emitted; the `sndMax` signal mi
 `snd_max` at a FIN, at a window probe and in `sendOneNewSegment()`, but no statistic records it.
 (any stage) `TcpVegas` sets `dupacks = dupthresh` after its fine-grained retransmission at a new
 ACK, and the connection resets the counter right after it, so the assignment has no effect.
+
+### S17 — `topic/tcp-connection-leftovers` — landed 2026-10-13
+
+The owner reviewed and approved S17 on 2026-10-13.
+
+S17 removes the copies of the SACK recovery that nothing calls, keeps the SACK option with the
+connection (D-79), and walks the SACK scoreboard once with cached totals. It leaves four parts of
+commit 39 out (D-80). Both commits keep master's behavior.
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: refactor: remove the copies of the SACK recovery that nothing calls` | — | 39 (part), new | — |
+| `tcp: refactor: walk the SACK scoreboard once, and cache its totals` | — | 61 | — |
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (555); the TCP standards tests pass at each
+code commit (25 pass, 2 expected failures, the packetdrill tests skip without inet-gpl); unit 122
+and serializer 4 pass at the head. The debug build checks the cache of the scoreboard totals at
+each read. The CI fingerprint job runs at each code commit, and no row moves; its release build
+reads the cache without the check. The TCP fingerprint rows run in debug at the head with no
+runtime error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build
+with lwIP). S17 changes no behavior, so inet-gpl needs no change. The six gates pass.
