@@ -2238,3 +2238,32 @@ before, except `tcp_ts_recent_2`, a control of the default of `tsRecentAfterAckC
 passes too. The CI fingerprint job runs at each code commit, and only the row above moves. The TCP
 fingerprint rows run in debug at the head with no runtime error (the `tyf` ingredient differs in 52
 rows, as on master; the lwIP rows need a build with lwIP). The six gates pass.
+
+### S17c — `topic/tcp-segment-checks`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: a pure ACK carries the highest sequence number sent | — | new (D-72) |
+| 2 | fix: a data segment of the peer updates the send window | — | new (D-72) |
+| 3 | fix: the FIN of a segment of old data passes the window test | — | 39 (part) |
+| 4 | add: the ACK check of RFC 5961 section 5.2, selected by a parameter | — | 39 (part) |
+| 5 | add: the window-edge check of Linux, selected by a parameter | — | 39 (part) |
+| 6 | add: the RST with ACK of Linux at an abort, selected by a parameter | — | 39 (part) |
+
+S17c takes the checks of a received segment from commit 39 and the two repairs that S15b deferred
+(D-72). A pure ACK of master carries `snd_nxt`, which goes back to `snd_una` during a
+retransmission; the SND.NXT of RFC 9293 never goes back, and BSD and Linux put the highest sequence
+number sent (`snd_max`) on a pure ACK (step 1). With that, the window update of RFC 9293 section
+3.10.7.4 can also take a data segment of the peer, as S15b found (step 2).
+
+RFC 9293 counts the SYN and the FIN in SEG.LEN. Master's window test measures only the data, so a
+segment that carries old data and a FIN at RCV.NXT, as a peer sends when it retransmits its last
+data together with its FIN, fails the test, and the FIN is lost (step 3). A segment without data
+keeps master's test.
+
+Three rules of commit 39 are Linux behavior that the RFCs do not require, so each comes with a
+parameter whose default keeps master's behavior: the ACK check of RFC 5961 section 5.2, which
+RFC 9293 allows (MAY-12) and Linux uses (step 4); the drop of a segment whose end lies beyond the
+highest window edge advertised (`rcv_adv`), unless the in-order receive queue is empty (Linux
+`tcp_sequence()`, step 5); and the RST with ACK and `rcv_nxt` at an abort (Linux
+`tcp_send_active_reset()`), where RFC 9293 sends `<SEQ=SND.NXT><CTL=RST>` (step 6).
