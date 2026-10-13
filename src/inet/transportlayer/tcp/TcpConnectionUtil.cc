@@ -280,6 +280,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     noDelaySockopt = listenerConn->noDelaySockopt;
     maxSegSockopt = listenerConn->maxSegSockopt;
     corkSockopt = listenerConn->corkSockopt;
+    rcvBufSockopt = listenerConn->rcvBufSockopt;
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
@@ -986,6 +987,13 @@ void TcpConnection::configureStateVariables()
     state->maxRcvBuffer = advertisedWindow;
     double receiveBufferSize = socketReceiveBufferSize >= 0 ? (double)socketReceiveBufferSize : tcpMain->par("receiveBufferSize").doubleValue();
     state->rcvBufferSize = receiveBufferSize > 0 ? (uint32_t)receiveBufferSize : 0;
+    // SO_RCVBUF locks the buffer (Linux SOCK_RCVBUF_LOCK), before and after the open; a
+    // listening socket passes its buffer to the connections that it forks
+    state->rcvbufLocked = socketReceiveBufferSize >= 0;
+    if (rcvBufSockopt >= 0) {
+        state->rcvBufferSize = (uint32_t)rcvBufSockopt;
+        state->rcvbufLocked = true;
+    }
     state->acceptBeyondBufferAtEmptyQueue = tcpMain->par("acceptBeyondBufferAtEmptyQueue");
     // window auto-tuning (Linux tcp_grow_window()): the offer starts at the advertised
     // window and grows toward half the receive buffer (tcp_win_from_space() at the

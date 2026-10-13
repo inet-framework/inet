@@ -269,6 +269,7 @@ struct TcpStateVariables
 
     // receiver buffer / receiver queue related variables
     uint32_t maxRcvBuffer = 0;    // maximal amount of bytes in tcp receive queue
+    bool rcvbufLocked = false;     // SO_RCVBUF locked the receive buffer (Linux SOCK_RCVBUF_LOCK): it does not grow under pressure
     uint32_t rcvBufferSize = 0;   // the receive buffer apart from the advertised window (receiveBufferSize); 0: the buffer is maxRcvBuffer
     bool acceptBeyondBufferAtEmptyQueue = false; // from the acceptBeyondBufferAtEmptyQueue parameter
     uint32_t rcv_ssthresh = 0;    // windowAutoTuning: the window that the receiver offers at most now, which grows toward window_clamp (Linux rcv_ssthresh); 0: no auto-tuning

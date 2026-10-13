@@ -206,6 +206,7 @@ class INET_API TcpConnection : public SimpleModule
     int maxSegSockopt = -1;
     // TCP_CORK of this connection (TcpSocket::setCork()), also from before the open; -1: off
     int corkSockopt = -1;
+    int rcvBufSockopt = -1; // SO_RCVBUF of the open connection (TcpSetRcvBufCommand); -1: none
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */

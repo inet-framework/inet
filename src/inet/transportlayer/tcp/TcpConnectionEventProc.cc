@@ -307,6 +307,17 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
                 flushCorkedData(false);
         }
     }
+    else if (auto cmd = dynamic_cast<TcpSetRcvBufCommand *>(tcpCommand)) {
+        // SO_RCVBUF on an open connection, as Linux: the buffer changes and is locked; a
+        // buffer smaller than the queued data discards nothing, but the next arrival may
+        // not fit
+        rcvBufSockopt = cmd->getValue();
+        if (state != nullptr && rcvBufSockopt >= 0) {
+            state->rcvBufferSize = (uint32_t)rcvBufSockopt;
+            state->rcvbufLocked = true;
+            EV_DETAIL << "SO_RCVBUF: the receive buffer is " << state->rcvBufferSize << " bytes, locked\n";
+        }
+    }
     else if (auto cmd = dynamic_cast<TcpSetCorkCommand *>(tcpCommand)) {
         // TCP_CORK, as Linux: hold the partial segment at the end of the data, also
         // with nothing in flight; full-sized segments go. An uncork sends the held

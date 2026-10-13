@@ -1,0 +1,69 @@
+%description:
+Tests SO_RCVBUF on an open connection (TcpSocket::setReceiveBufferSize()), which
+locks the receive buffer, as Linux SOCK_RCVBUF_LOCK. The scenario is that of
+tcp_rcvbuf_grow_1, but the server application sets the buffer to 8000 bytes on
+its open socket at t=0.8 s. The out-of-order segments outgrow the buffer, and
+windowAutoTuning does not grow a locked buffer: STATUS reports skRcvbuf=8000 at
+t=3 s, where tcp_rcvbuf_grow_1 grows it to 18240.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.cli_app.sendScript="1.0 20000"
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.*_tcp.sackSupport = true
+*.srv_tcp.advertisedWindow = 8000
+*.srv_tcp.receiveBufferSize = 8000B
+*.srv_tcp.windowAutoTuning = true
+*.srv_app.rcvBufScript="0.8 8000"
+*.srv_app.statusRequestScript="0.5,3"
+*.tcptester.script="a12 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.013 A012] A.1000 > B.2000: A 9001:10001(1000) ack 501 win 16384 # deleting
+[1.013 A013] A.1000 > B.2000: A 10001:11001(1000) ack 501 win 16384 
+[1.013 A014] A.1000 > B.2000: A 11001:12001(1000) ack 501 win 16384 
+[1.013 A015] A.1000 > B.2000: A 12001:13001(1000) ack 501 win 16384 
+[1.013 A016] A.1000 > B.2000: A 13001:14001(1000) ack 501 win 16384 
+[1.013 A017] A.1000 > B.2000: A 14001:15001(1000) ack 501 win 16384 
+[1.015 B009] A.1000 < B.2000: A ack 8001 win 8000 
+[1.015 B010] A.1000 < B.2000: A ack 9001 win 8000 
+[1.015 B011] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,11001)
+[1.015 B012] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,12001)
+[1.015 B013] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,13001)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+SO_RCVBUF: the receive buffer is 8000 bytes, locked
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+STATUS: skRcvbuf=18240
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

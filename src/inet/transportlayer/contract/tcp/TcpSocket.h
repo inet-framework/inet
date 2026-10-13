@@ -355,11 +355,13 @@ class INET_API TcpSocket : public ISocket
     void setAdvertisedWindow(int advertisedWindow) { this->advertisedWindow = advertisedWindow; }
 
     /**
-     * Sets the receive buffer of the next connect() or listen() call, in bytes, in place
-     * of the receiveBufferSize parameter of the Tcp module (as SO_RCVBUF before connect()
-     * or listen()). -1: the parameter of the Tcp module.
+     * Sets the receive buffer, in bytes, in place of the receiveBufferSize parameter of the
+     * Tcp module, as SO_RCVBUF: of the next connect() or listen() call, and of the open
+     * connection at once. The buffer is then locked, as Linux SOCK_RCVBUF_LOCK: it does not
+     * grow under pressure (windowAutoTuning). -1, before the open: the parameter of the Tcp
+     * module.
      */
-    void setReceiveBufferSize(int receiveBufferSize) { this->receiveBufferSize = receiveBufferSize; }
+    void setReceiveBufferSize(int receiveBufferSize);
 
     /**
      * Sets the retransmissions of the SYN of the next connect(), or of the SYN-ACKs of

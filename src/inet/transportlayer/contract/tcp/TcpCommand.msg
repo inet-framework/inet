@@ -167,6 +167,18 @@ class TcpSetOptionCommand extends TcpCommand
 {
 }
 
+//
+// SO_RCVBUF on an open connection: the receive buffer of the connection, in bytes, which the
+// option also locks, so the buffer no longer grows (Linux SOCK_RCVBUF_LOCK). A buffer
+// smaller than the queued data discards nothing.
+//
+// @see ~TcpSocket::setReceiveBufferSize
+//
+class TcpSetRcvBufCommand extends TcpSetOptionCommand
+{
+    int value = -1;
+}
+
 class TcpSetTimeToLiveCommand extends TcpSetOptionCommand
 {
     int ttl;

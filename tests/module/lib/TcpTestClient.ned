@@ -34,6 +34,7 @@ simple TcpTestClient like IApp
         int socketReceiveBufferSize = default(-1); // the receive buffer of the first connection, in bytes (TcpSocket::setReceiveBufferSize()); -1: the parameter of the Tcp module
         int socketSynRetries = default(-1); // the SYN retries of the first connection (TcpSocket::setSynRetries()); -1: the parameter of the Tcp module
         string tcpParScript = default(""); // "time name value; ..." -- at each time, set a parameter of the Tcp module of this application, as a harness that changes a sysctl; the parameter must be @mutable
+        string rcvBufScript = default(""); // "time bytes; ..." -- at each time, set the receive buffer of the first connection (TcpSocket::setReceiveBufferSize(), SO_RCVBUF on an open connection)
         string corkScript = default(""); // "time 1; time 0; ..." -- at each time, turn TCP_CORK on (1) or off (0) for the first connection (TcpSocket::setCork()), also before its open
         string maxSegScript = default(""); // "time value; ..." -- at each time, set TCP_MAXSEG of the first connection (TcpSocket::setMaxSeg()), also before its open
         string noDelayScript = default(""); // "time 1; time 0; ..." -- at each time, turn TCP_NODELAY on (1) or off (0) for the first connection (TcpSocket::setNoDelay()), also before its open

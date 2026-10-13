@@ -341,6 +341,18 @@ void TcpSocket::setWriterBlocked(bool blocked)
     sendToTcp(request);
 }
 
+void TcpSocket::setReceiveBufferSize(int receiveBufferSize)
+{
+    this->receiveBufferSize = receiveBufferSize;
+    if (receiveBufferSize >= 0 && (sockstate == LISTENING || sockstate == CONNECTING || sockstate == CONNECTED || sockstate == PEER_CLOSED)) {
+        auto request = new Request("setReceiveBufferSize", TCP_C_SETOPTION);
+        auto *cmd = new TcpSetRcvBufCommand();
+        cmd->setValue(receiveBufferSize);
+        request->setControlInfo(cmd);
+        sendToTcp(request);
+    }
+}
+
 void TcpSocket::setCork(bool cork)
 {
     auto request = new Request("setCork", TCP_C_SETOPTION);
