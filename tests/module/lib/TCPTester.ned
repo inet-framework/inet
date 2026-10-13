@@ -47,11 +47,16 @@ package inet.test.moduletest.lib;
 //    - <tt>zeroaccecn</tt>: forwards the segment with the fields of its AccECN option
 //      set to 0; it makes a path that zeroes them
 //
+// The parameter pathMtu makes a path that drops each packet larger than this
+// MTU without an ICMP error, a black hole for RFC 4821: the length of a packet
+// is the TCP segment and 20 bytes of IPv4 header.
+//
 simple TCPScriptableTester
 {
     parameters:
         @class(::inet::tcp::TCPScriptableTester);
         string script;
+        int pathMtu = default(-1); // drop each packet larger than this MTU, without an ICMP error; -1: no limit
         @display("i=device/router");
     gates:
         input in1;

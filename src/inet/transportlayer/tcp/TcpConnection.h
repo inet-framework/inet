@@ -573,6 +573,21 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual uint32_t calculateEffectiveMss();
 
+    /** The path MTU search of RFC 4821 (mtuProbing): the MSS of the peer, limited by TCP_MAXSEG (Linux mss_clamp) */
+    virtual uint32_t getMssClamp() const;
+    /** The payload of a segment of this MTU, without the options of each segment, at most getMssClamp() (Linux tcp_mtu_to_mss()) */
+    virtual uint32_t mtuToMss(uint32_t mtu) const;
+    /** The MTU of a segment with this payload (Linux tcp_mss_to_mtu()) */
+    virtual uint32_t mssToMtu(uint32_t mss) const;
+    /** Arms the path MTU search when the MSS is settled (Linux tcp_mtup_init()) */
+    virtual void initMtuProbing();
+    /** The payload of the probe to send now; 0: wait for room for a probe; -1: no probe (Linux tcp_mtu_probe()) */
+    virtual int64_t getMtuProbeBytes(uint32_t buffered, uint32_t congestionWindow, uint32_t bytesInFlight) const;
+    /** The peer acknowledged the probe (Linux tcp_mtup_probe_success()) */
+    virtual void mtuProbeSucceeded();
+    /** The probe is lost (Linux tcp_mtup_probe_failed()) */
+    virtual void mtuProbeFailed();
+
   public:
     TcpConnection() {}
     TcpConnection(const TcpConnection& other) {} // FIXME kludge

@@ -1,0 +1,61 @@
+%description:
+Tests a lost probe of the path MTU search (mtuProbing = 2). The scenario is that
+of tcp_mtu_probe_1, but the path drops each packet larger than 1100 bytes
+without an ICMP error (the pathMtu of the tester). The probe of MTU 1026 gets
+through and raises the MSS to 986; the probe of 1223 bytes (MTU 1263) is
+dropped (B040). The fast retransmit of its range shows the loss, so the search
+continues below it (1026 to 1262), and the MSS stays 986.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.srv_app.sendScript="1.0 60000"
+*.srv_tcp.mss = 600
+*.cli_tcp.mss = 1460
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.mtuProbing = 2
+*.srv_tcp.baseMss = 512
+*.srv_tcp.pathMtu = 1500
+*.tcptester.pathMtu = 1100
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.021 B040] A.1000 < B.2000: A 23687:24910(1223) ack 1 win 16384 # dropping, larger than the path MTU
+[1.021 B041] A.1000 < B.2000: A 24910:25896(986) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1026 is acknowledged, snd_mss is 986
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1263 is lost, the search runs from 1026 to 1262
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+snd_mss is 1223
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

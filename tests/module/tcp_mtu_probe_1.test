@@ -1,0 +1,63 @@
+%description:
+Tests the path MTU search of RFC 4821 as Linux runs it (mtuProbing = 2), in the
+scenario of the Linux script mtu_probe/basic-v4. The server has an MSS of 600, a
+base MSS of 512 and a route MTU of 1500, and the client announces an MSS of
+1460. The search runs from 552 (512 and 40 bytes of headers) to 1500. When the
+congestion window reaches 11 segments, the server sends one probe of 986 bytes
+(MTU 1026, the middle of the search), as Linux does in the script, and the
+segments after it keep the MSS of 600. The ACK of the probe raises the MSS to
+986, and the next probe (1223 bytes, MTU 1263) raises it to 1223.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.srv_app.sendScript="1.0 40000"
+*.srv_tcp.mss = 600
+*.cli_tcp.mss = 1460
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.mtuProbing = 2
+*.srv_tcp.baseMss = 512
+*.srv_tcp.pathMtu = 1500
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.017 B020] A.1000 < B.2000: A 11301:11901(600) ack 1 win 16384 
+[1.017 B021] A.1000 < B.2000: A 11901:12887(986) ack 1 win 16384 
+[1.017 B022] A.1000 < B.2000: A 12887:13487(600) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: sent an MTU probe of 986 bytes (MTU 1026)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1026 is acknowledged, snd_mss is 986, the search runs from 1026 to 1500
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1263 is acknowledged, snd_mss is 1223, the search runs from 1263 to 1500
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

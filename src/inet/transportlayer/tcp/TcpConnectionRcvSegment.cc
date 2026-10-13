@@ -412,6 +412,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
         // notify tcpAlgorithm and app layer; a TCP Fast Open connection did so at its SYN
         if (!state->fastopenAccelerated) {
+            initMtuProbing(); // before the initial window (Linux tcp_init_transfer())
             tcpAlgorithm->established(false);
 
             if (isToBeAccepted())
@@ -1140,6 +1141,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
         // the ACK of the SYN-ACK (as Linux starts the transfer of the child socket,
         // tcp_init_transfer()), so that the application can send in SYN_RCVD.
         state->snd_effmss = calculateEffectiveMss();
+        initMtuProbing(); // before the initial window (Linux tcp_init_transfer())
         tcpAlgorithm->established(false);
         B payloadLength = B(tcpSegment->getByteLength()) - tcpHeader->getHeaderLength();
         updateRcvQueueVars();
@@ -1492,6 +1494,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
                 state->rcv_nxt = state->rcv_fin_seq + 1;
             }
 
+            initMtuProbing(); // before the initial window (Linux tcp_init_transfer())
             tcpAlgorithm->established(true);
             tcpMain->emit(Tcp::tcpConnectionAddedSignal, this);
             sendEstabIndicationToApp();
@@ -1691,6 +1694,10 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // after retransmitting a lost segment, we may get an ack well ahead of snd_nxt
         if (seqLess(state->snd_nxt, state->snd_una))
             state->snd_nxt = state->snd_una;
+
+        // mtuProbing: the peer acknowledged the whole probe (Linux tcp_clean_rtx_queue())
+        if (state->mtupProbeSize != 0 && seqGE(state->snd_una, state->mtupProbeSeqEnd))
+            mtuProbeSucceeded();
 
         // RFC 1323, page 36:
         // "If SND.UNA < SEG.ACK =< SND.NXT then, set SND.UNA <- SEG.ACK.

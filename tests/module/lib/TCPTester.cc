@@ -262,6 +262,15 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     pk->removeTag<L3AddressReq>();
     segmentEcn = deliverEcn(pk);
 
+    // pathMtu: a black hole for each packet larger than the path MTU
+    int pathMtu = par("pathMtu");
+    if (pathMtu > 0 && pk->getByteLength() + 20 > pathMtu) {
+        bubble("dropping a packet larger than the path MTU");
+        dump(seg, pk->getByteLength(), fromA, "dropping, larger than the path MTU");
+        delete pk;
+        return;
+    }
+
     // find entry in script
     Command *cmd = NULL;
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)

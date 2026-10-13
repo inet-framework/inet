@@ -1103,6 +1103,10 @@ void TcpConnection::configureStateVariables()
         state->lossDetectionMode = 0;
     }
     state->pmtudEnabled = tcpMain->par("pmtudEnabled"); // Path MTU Discovery (RFC 1191, RFC 1981)
+    int mtuProbing = tcpMain->par("mtuProbing");
+    if (mtuProbing < 0 || mtuProbing > 2)
+        throw cRuntimeError("mtuProbing must be 0, 1 or 2, but it is %d", mtuProbing);
+    state->mtupEnabled = mtuProbing == 2;
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
 
@@ -1561,6 +1565,12 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         }
     }
 
+    // mtuProbing: a retransmission into the probe shows that the probe is lost; Linux
+    // decides at the fast retransmit (tcp_fastretrans_alert())
+    if (state->mtupProbeSize != 0 && seqLess(state->snd_nxt, state->snd_max)
+        && seqGE(state->snd_nxt, state->mtupProbeSeqStart) && seqLess(state->snd_nxt, state->mtupProbeSeqEnd))
+        mtuProbeFailed();
+
     uint32_t buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 
     if (bytes > buffered) // last segment?
@@ -1587,7 +1597,8 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
 
     ASSERT(options_len < state->snd_mss);
 
-    if (bytes + options_len > state->snd_mss)
+    // an RFC 4821 probe (mtuProbing) is larger than the MSS on purpose
+    if (state->mtupProbeBytes == 0 && bytes + options_len > state->snd_mss)
         bytes = state->snd_mss - options_len;
 
     // MSG_EOR: a segment ends at the next record boundary, also in a retransmission.
@@ -1916,6 +1927,27 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
 
     // start sending 'bytesToSend' bytes
     EV_INFO << "May send " << bytesToSend << " bytes (effectiveWindow " << effectiveWin << ", in buffer " << buffered << " bytes)\n";
+
+    // mtuProbing, as Linux tcp_write_xmit(): the RFC 4821 probe goes first, one segment
+    // larger than the MSS, from data that goes out anyway; when only the window edge or
+    // the pipe has no room for it, the sender waits for the ACKs that make room
+    int64_t probeBytes = state->mtupEnabled ? getMtuProbeBytes(buffered, congestionWindow, bytesInFlight) : -1;
+    if (probeBytes == 0) {
+        EV_INFO << "RFC 4821: waiting for room for an MTU probe\n";
+        return false;
+    }
+    if (probeBytes > 0 && probeBytes <= bytesToSend) {
+        state->mtupProbeSeqStart = state->snd_nxt;
+        state->mtupProbeBytes = probeBytes;
+        uint32_t sentBytes = sendSegment(probeBytes);
+        state->mtupProbeBytes = 0;
+        state->mtupProbeSeqEnd = state->mtupProbeSeqStart + sentBytes;
+        state->mtupProbeSize = mssToMtu(sentBytes);
+        EV_INFO << "RFC 4821: sent an MTU probe of " << sentBytes << " bytes (MTU " << state->mtupProbeSize << ")\n";
+        bytesToSend -= sentBytes;
+        effectiveWin -= sentBytes;
+        buffered -= sentBytes;
+    }
 
     // send whole segments. pushSegmentsOnWriteBoundary: PSH on the last segment of each
     // GSO burst of more than one segment of new data, as Linux tcp_transmit_skb()
@@ -2647,6 +2679,110 @@ uint32_t TcpConnection::calculateEffectiveMss()
     // 10 bytes and 2 bytes of padding. The SACK option is not counted: its length
     // varies, and it is on few segments of a data sender.
     return state->snd_mss - (state->ts_enabled ? 10 + 2 : 0);
+}
+
+uint32_t TcpConnection::getMssClamp() const
+{
+    // Linux mss_clamp: the MSS option of the peer, else the default of RFC 9293 (MUST-15),
+    // limited by TCP_MAXSEG
+    uint32_t clamp = state->peerAdvertisedMss > 0 ? state->peerAdvertisedMss : (remoteAddr.getType() == L3Address::IPv6 ? 1220 : 536);
+    if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < clamp)
+        clamp = maxSegSockopt;
+    return clamp;
+}
+
+uint32_t TcpConnection::mtuToMss(uint32_t mtu) const
+{
+    // Linux tcp_mtu_to_mss(): the MTU less the IP header and the TCP header, at most
+    // mss_clamp, less the options of each segment (the timestamps); snd_mss of INET
+    // counts these options, as mss_clamp does
+    uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
+    uint32_t mss = std::min(mtu > headers ? mtu - headers : 0, getMssClamp());
+    uint32_t options = state->ts_enabled ? 12 : 0;
+    return mss > options ? mss - options : 0;
+}
+
+uint32_t TcpConnection::mssToMtu(uint32_t mss) const
+{
+    return mss + (state->ts_enabled ? 12 : 0) + B(TCP_MIN_HEADER_LENGTH).get() + (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20);
+}
+
+void TcpConnection::initMtuProbing()
+{
+    // mtuProbing, as Linux tcp_mtup_init(): the search runs between the MTU of the base MSS
+    // and the MTU of the MSS of the peer; the route MTU (pathMtu, else the MTU of the
+    // negotiated MSS) limits the MSS that a success gives
+    if (!state->mtupEnabled)
+        return;
+    uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
+    state->mtupSearchHigh = getMssClamp() + headers;
+    state->mtupSearchLow = mssToMtu((int)tcpMain->par("baseMss"));
+    state->mtupProbeSize = 0;
+    int pathMtu = tcpMain->par("pathMtu");
+    state->pathMtu = pathMtu > 0 ? pathMtu : state->snd_mss + headers;
+    EV_INFO << "RFC 4821: the path MTU search runs from " << state->mtupSearchLow << " to " << state->mtupSearchHigh
+            << ", the route MTU is " << state->pathMtu << "\n";
+}
+
+int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWindow, uint32_t bytesInFlight) const
+{
+    // mtuProbing, as Linux tcp_mtu_probe(): one probe at a time, from new data, in the
+    // congestion state Open (no duplicate ACK either), with a congestion window of 11
+    // segments, and not while this side sends SACK blocks, whose length changes the size
+    // of the probe
+    uint32_t mss = state->snd_effmss;
+    bool sackBlocksToSend = state->sack_enabled
+        && (state->snd_dsack || receiveQueue->getAmountOfBufferedBytes() > receiveQueue->getAcknowledgedDataLength());
+    if (state->mtupProbeSize != 0 || seqLess(state->snd_nxt, state->snd_max) || deriveLinuxCaState() != 0
+        || state->dupacks > 0 || congestionWindow < 11 * mss || sackBlocksToSend)
+        return -1;
+    // the middle of the search; none when the search is narrower than 8 bytes (Linux
+    // tcp_probe_threshold), and none at or below the MSS in use
+    uint32_t probe = mtuToMss((state->mtupSearchHigh + state->mtupSearchLow) / 2);
+    if (probe > mtuToMss(state->mtupSearchHigh) || state->mtupSearchHigh - state->mtupSearchLow < 8 || probe <= mss)
+        return -1;
+    // the probe and reordering + 1 segments after it, so that duplicate ACKs find a lost
+    // probe (RFC 4821 section 7.4)
+    uint32_t sizeNeeded = probe + (state->reordering + 1) * mss;
+    if (buffered < sizeNeeded || state->snd_wnd < sizeNeeded)
+        return -1;
+    // a probe does not span a record boundary (MSG_EOR; Linux tcp_can_coalesce_send_queue_head())
+    auto boundary = findSeqNumAfter(eorSeqNums, state->snd_nxt);
+    if (boundary != eorSeqNums.end() && seqLess(*boundary, state->snd_nxt + probe))
+        return -1;
+    // the sender waits for room at the window edge, and for two free segments in the
+    // pipe, unless nothing is in flight
+    if (seqGreater(state->snd_nxt + sizeNeeded, getDataSndUna() + state->snd_wnd))
+        return 0;
+    if (bytesInFlight + 2 * mss > congestionWindow)
+        return bytesInFlight == 0 ? -1 : 0;
+    return probe;
+}
+
+void TcpConnection::mtuProbeSucceeded()
+{
+    // Linux tcp_mtup_probe_success(): the path carries the probe, so the lower bound rises
+    // to it, and the MSS follows, up to the route MTU (tcp_sync_mss())
+    uint32_t probeMtu = state->mtupProbeSize;
+    state->mtupSearchLow = probeMtu;
+    state->mtupProbeSize = 0;
+    uint32_t mss = std::min(mtuToMss(state->pathMtu), mtuToMss(state->mtupSearchLow)) + (state->ts_enabled ? 12 : 0);
+    if (mss > state->snd_mss) {
+        state->snd_mss = mss;
+        state->snd_effmss = calculateEffectiveMss();
+    }
+    EV_INFO << "RFC 4821: the MTU probe of " << probeMtu << " is acknowledged, snd_mss is " << state->snd_mss
+            << ", the search runs from " << state->mtupSearchLow << " to " << state->mtupSearchHigh << "\n";
+}
+
+void TcpConnection::mtuProbeFailed()
+{
+    // Linux tcp_mtup_probe_failed(): the path does not carry the probe, so the search
+    // continues below it
+    EV_INFO << "RFC 4821: the MTU probe of " << state->mtupProbeSize << " is lost, the search runs from "
+            << state->mtupSearchLow << " to " << state->mtupProbeSize - 1 << "\n";
+    state->mtupSearchHigh = state->mtupProbeSize - 1;
+    state->mtupProbeSize = 0;
 }
 
 bool TcpConnection::processFastOpenOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTcpFastOpen& option)
