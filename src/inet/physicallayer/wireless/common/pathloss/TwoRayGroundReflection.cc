@@ -15,7 +15,6 @@
 #include "inet/physicallayer/wireless/common/pathloss/TwoRayGroundReflection.h"
 
 #include "inet/common/ModuleAccess.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
@@ -42,18 +41,29 @@ std::ostream& TwoRayGroundReflection::printToStream(std::ostream& stream, int le
     return stream;
 }
 
-double TwoRayGroundReflection::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
+std::ostream& TwoRayGroundReflection::ReceptionPathLoss::printToStream(std::ostream& stream, int level, int evFlags) const
+{
+    stream << "TwoRayGroundReflection::ReceptionPathLoss";
+    if (level <= PRINT_LEVEL_DEBUG)
+        stream << EV_FIELD(distance) << EV_FIELD(transmitterAltitude) << EV_FIELD(receiverAltitude);
+    return stream;
+}
+
+Ptr<const IReceptionPathLoss> TwoRayGroundReflection::computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
 {
     auto radioMedium = transmission->getMedium();
-    auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
     auto transmitterPosition = transmission->getStartPosition();
     auto recepiverPosition = arrival->getStartPosition();
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz centerFrequency = narrowbandSignalAnalogModel->getCenterFrequency();
     m distance = m(recepiverPosition.distance(transmitterPosition));
     m transmitterAltitude = m(transmitterPosition.distance(physicalEnvironment->getGround()->computeGroundProjection(transmitterPosition)));
     m receiverAltitude = m(recepiverPosition.distance(physicalEnvironment->getGround()->computeGroundProjection(recepiverPosition)));
-    m waveLength = propagationSpeed / centerFrequency;
+    return makeShared<ReceptionPathLoss>(this, propagationSpeed, distance, transmitterAltitude, receiverAltitude);
+}
+
+double TwoRayGroundReflection::computeTwoRayGroundReflection(mps propagationSpeed, Hz frequency, m distance, m transmitterAltitude, m receiverAltitude) const
+{
+    m waveLength = propagationSpeed / frequency;
     /**
      * At the cross over distance two ray model and free space model predict the same power
      *

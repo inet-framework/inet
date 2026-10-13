@@ -414,6 +414,35 @@ Notable backward incompatible changes are the following:
    computePathLoss(propagationSpeed, frequency, distance): every path loss
    model derived from PathLossBase overrides it.
 
+24. The path loss of a reception knows its receiver
+
+   IPathLoss::computePathLoss(transmission, arrival) was replaced by
+   computeReceptionPathLoss(receiverRadio, transmission, arrival). It returns
+   an IReceptionPathLoss, the path loss of that one reception, whose
+   computePathLoss(frequency) gives the loss factor at any frequency, the way
+   IAntenna::getGain() returns an IAntennaGain. Together with the
+   transmission's transmitter radio, the receiver radio identifies the link,
+   so a path loss can now keep per-link state (for example a shadowing that
+   is correlated over distance). Both medium analog models call it once per
+   reception: ScalarMediumAnalogModel evaluates the result at the center
+   frequency, DimensionalMediumAnalogModel across the band, in place of the
+   computeDistancePathLoss() it called before. A path loss with per-link
+   state resolves that state in the call, and the returned object holds
+   values only, so the value of a reception does not depend on when or how
+   often the dimensional model evaluates it. The PathLossBase default
+   evaluates computeDistancePathLoss() for the link's distance, so the
+   results of models that only implement that form are unchanged. The
+   FrequencyDependentAttenuationFunction constructor takes the reception's
+   path loss as its second argument.
+
+   TwoRayGroundReflection and TwoRayInterference now take the geometry of the
+   link into account under DimensionalMediumAnalogModel too: before, the
+   former acted as FreeSpacePathLoss there, and the latter returned NaN.
+
+   This change requires the modification of C++ code that implements or calls
+   computePathLoss(transmission, arrival), or constructs
+   FrequencyDependentAttenuationFunction objects.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
