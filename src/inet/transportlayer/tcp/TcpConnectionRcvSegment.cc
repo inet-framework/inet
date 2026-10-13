@@ -156,16 +156,18 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     bool acceptable = true;
 
     if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) { // Header options present? TCP_HEADER_OCTETS = 20
-        // PAWS
-        if (state->ts_enabled) {
-            uint32_t tsval = getTSval(tcpHeader);
-            if (tsval != 0 && seqLess(tsval, state->ts_recent) &&
-                (simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) // PAWS_IDLE_TIME_THRESH = 24 days
-            {
-                EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << tsval << " in "
-                          << stateName(fsm.getState()) << " state received: dropping segment\n";
-                acceptable = false;
-            }
+        // PAWS, RFC 7323 section 5.3: "R1) If there is a Timestamps option in the arriving
+        // segment, SEG.TSval < TS.Recent, TS.Recent is valid (see later discussion), and if
+        // the RST bit is not set, then treat the arriving segment as not acceptable".
+        // TS.Recent is valid unless the connection was idle for more than 24 days (section
+        // 5.5).
+        const TcpOptionTimestamp *tsOption = state->ts_enabled && !tcpHeader->getRstBit() ? findTSOption(tcpHeader) : nullptr;
+        if (tsOption != nullptr && seqLess(tsOption->getSenderTimestamp(), state->ts_recent)
+            && (simTime() - state->ts_recent_stamp) <= PAWS_IDLE_TIME_THRESH)
+        {
+            EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << tsOption->getSenderTimestamp() << " < TS.Recent=" << state->ts_recent
+                      << " in " << stateName(fsm.getState()) << " state received: dropping segment\n";
+            acceptable = false;
         }
 
         readHeaderOptions(tcpHeader);

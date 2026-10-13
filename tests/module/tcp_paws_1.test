@@ -1,0 +1,53 @@
+%description:
+Tests PAWS (RFC 7323 section 5.3, R1). The tester delays the first ACK of the
+server by 1 s, so that the ACK of the second data segment (TSval 1702) arrives
+first and sets TS.Recent. The delayed ACK (TSval 1202 < TS.Recent) is not
+acceptable: the client drops it and sends an ACK in reply. Master dropped a
+segment only after 24 days of idle time.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 100; 1.5 100"
+*.*_tcp.timestampSupport = true
+*.cli_tcp.nagleEnabled = false
+*.tcptester.script="B2 delay 1"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:101(100) ack 501 win 16384   Option(s): NOP NOP TS(1000,2)
+[1.203 B002] A.1000 < B.2000: A ack 101 win 16384   Option(s): NOP NOP TS(1202,1000)# removing original
+[1.501 A004] A.1000 > B.2000: A 101:201(100) ack 501 win 16384   Option(s): NOP NOP TS(1500,2)
+[1.703 B003] A.1000 < B.2000: A ack 201 win 16384   Option(s): NOP NOP TS(1702,1500)
+[2.203 B003] A.1000 < B.2000: A ack 101 win 16384   Option(s): NOP NOP TS(1202,1000)# introducing copy
+[2.205 A005] A.1000 > B.2000: A ack 501 win 16384   Option(s): NOP NOP TS(2204,1702)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PAWS: Segment is not acceptable, TSval=1202 < TS.Recent=1702 in ESTABLISHED state received: dropping segment
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

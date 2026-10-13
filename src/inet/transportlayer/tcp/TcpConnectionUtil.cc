@@ -2411,6 +2411,11 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const
 
 bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionTimestamp& option)
 {
+    // RFC 7323 section 5.2: "information from the Timestamps option MUST NOT be used to
+    // update connection state information" of a RST
+    if (tcpHeader->getRstBit())
+        return true;
+
     // Eifel input (RFC 3522 / Linux rx_opt.rcv_tsecr): remember the echo so the
     // undo logic can compare it against the first retransmission's timestamp.
     if (tcpHeader->getAckBit() && option.getEchoedTimestamp() != 0)
@@ -2453,21 +2458,23 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
     if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_LISTEN || fsm.getState() == TCP_S_SYN_SENT)) {
         if (state->ts_support) {
             state->ts_recent = option.getSenderTimestamp();
+            state->ts_recent_stamp = simTime();
             EV_DETAIL << "Setting ts_recent from the handshake segment: ts_recent=" << state->ts_recent << "\n";
         }
     }
     else if (state->ts_enabled) {
-        if (seqLess(option.getSenderTimestamp(), state->ts_recent)) {
-            if ((simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) { // PAWS_IDLE_TIME_THRESH = 24 days
-                EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << option.getSenderTimestamp() << " in " << stateName(fsm.getState()) << " state received: dropping segment\n";
-                return false;
-            }
-        }
-        else if (seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) { // Note: test is modified according to the latest proposal of the tcplw@cray.com list (Braden 1993/04/26)
+        // RFC 7323 section 4.3, rule (2): "If SEG.TSval >= TS.Recent and SEG.SEQ <=
+        // Last.ACK.sent then SEG.TSval is copied to TS.Recent". An older TSval updates
+        // TS.Recent only when TS.Recent is invalid after 24 days of idle time (section
+        // 5.5); else PAWS has dropped the segment (processSegment1stThru8th()).
+        bool tsRecentValid = (simTime() - state->ts_recent_stamp) <= PAWS_IDLE_TIME_THRESH;
+        bool olderTsval = seqLess(option.getSenderTimestamp(), state->ts_recent);
+        if ((!olderTsval || !tsRecentValid) && seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) { // Note: test is modified according to the latest proposal of the tcplw@cray.com list (Braden 1993/04/26)
             // a newer timestamp lets the AccECN decode read this ACK (Linux FLAG_TS_PROGRESS)
             if (seqGreater(option.getSenderTimestamp(), state->ts_recent))
                 state->accEcnTsProgress = true;
             state->ts_recent = option.getSenderTimestamp();
+            state->ts_recent_stamp = simTime();
             EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
         }
     }
@@ -2835,6 +2842,16 @@ uint32_t TcpConnection::getTSval(const Ptr<const TcpHeader>& tcpHeader) const
     }
 
     return 0;
+}
+
+const TcpOptionTimestamp *TcpConnection::findTSOption(const Ptr<const TcpHeader>& tcpHeader) const
+{
+    for (uint i = 0; i < tcpHeader->getHeaderOptionArraySize(); i++) {
+        const TcpOption *option = tcpHeader->getHeaderOption(i);
+        if (option->getKind() == TCPOPTION_TIMESTAMP)
+            return check_and_cast<const TcpOptionTimestamp *>(option);
+    }
+    return nullptr;
 }
 
 uint32_t TcpConnection::getTSecr(const Ptr<const TcpHeader>& tcpHeader) const

@@ -369,6 +369,9 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: get TSval from segments TS header option */
     virtual uint32_t getTSval(const Ptr<const TcpHeader>& tcpHeader) const;
 
+    /** Utility: the TS option of the segment, or nullptr */
+    virtual const TcpOptionTimestamp *findTSOption(const Ptr<const TcpHeader>& tcpHeader) const;
+
     /** Utility: get TSecr from segments TS header option */
     virtual uint32_t getTSecr(const Ptr<const TcpHeader>& tcpHeader) const;
 

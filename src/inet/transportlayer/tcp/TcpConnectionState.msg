@@ -226,9 +226,10 @@ struct TcpStateVariables
     bool snd_initial_ts = false;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received
     uint32_t ts_recent = 0;         // RFC 7323: TS.Recent, the latest received timestamp
+    simtime_t ts_recent_stamp = SIMTIME_ZERO; // when TS.Recent was last set: after 24 days, TS.Recent is invalid for PAWS (RFC 7323 section 5.5; Linux rx_opt.ts_recent_stamp)
     uint32_t last_ack_sent = 0;     // RFC 7323: Last.ACK.sent, the last ACK field sent
     simtime_t time_last_segment_received; // the arrival of the last segment of this connection, where the idle time of keepalive starts (RFC 9293 MUST-26)
-    simtime_t time_last_data_sent;  // time at which the last data segment was sent (needed to compute the IDLE time for PAWS)
+    simtime_t time_last_data_sent;  // time at which the last data segment was sent (the restart after an idle period)
 
     // SACK related variables
     bool sack_support = false;      // set if the host supports selective acknowledgment (header option) (RFC 2018, 2883, 6675)
