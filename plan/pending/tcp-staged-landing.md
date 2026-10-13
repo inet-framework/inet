@@ -67,7 +67,10 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S15b ✅ | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +186 −56 | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
 | S16 ✅ | `topic/tcp-send-rules` | 15 (part), 16 (part), 36 (part), 69, new | +90 −4 | the sender SWS avoidance of RFC 9293 with its override timeout, `TCP_NODELAY`, the Nagle of Minshall, `TCP_MAXSEG` (D-73 to D-75) |
 | S16b ✅ | `topic/tcp-write-boundaries` | 36 (part), 46 (part), new | +297 −8 | `TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of Linux at write boundaries behind a parameter (D-76 to D-78) |
-| S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
+| S17 | `topic/tcp-connection-leftovers` | 39 (part), 61 | +100 −450 (about) | the copies of the SACK recovery that nothing calls, the SACK scoreboard scan |
+| S17b | `topic/tcp-timestamps` | 26 (part), 39 (part) | +80 −20 (about) | `TS.Recent` from the handshake and its update rule, the TS option on each segment (RFC 7323) |
+| S17c | `topic/tcp-segment-checks` | 39 (part), new | +150 −30 (about) | the sequence number of a pure ACK and the window update (D-72), the acceptability test, the Linux checks of RFC 5961 and of the window edge, the RST of Linux at an abort |
+| S17d | `topic/tcp-connection-setup` | 26 (part), 39 (part), new | +150 −30 (about) | the text of a SYN, the data queued in SYN_RCVD, the timers at a return to LISTEN, the ICMP checks of RFC 5927 and in SYN_RCVD |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
@@ -2050,3 +2053,54 @@ error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need
 lwIP). The packetdrill suite of inet-gpl, with the comments of its follow-up and against the source
 branch, gives 303 MATCH, 12 KERNEL_DRIFT and 3 UNSUPPORTED_FEATURE, and no script changes its
 verdict. The six gates pass.
+
+### S17 — `topic/tcp-connection-leftovers`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | refactor: remove the copies of the SACK recovery that nothing calls | — | 39 (part) |
+| 2 | refactor: walk the SACK scoreboard once, and cache its totals | — | 61 |
+
+S17 had commits 39 and 61. Commit 39 is the remainder of the source branch's cut into features:
+it holds fourteen changes that belong to no one feature. Earlier stages took six of them (the
+retransmission queue without SACK and the inferred SACKs in S5c, the delivered bytes in S9, the
+receive shutdown at a full close and the forked connection in S11, the data of a Fast Open SYN in
+S12). The rest, with the items that earlier stages gave to S17, go to four stages by topic, so that
+each stays small enough to review: S17 removes dead code and makes the scoreboard scan cheaper,
+S17b brings the timestamp rules, S17c the checks of a received segment and the sequence number of a
+pure ACK, and S17d the connection setup and the ICMP errors. The comments that cite RFC 793 and
+RFC 1323 go with the RFC list of S20.
+
+Master has two copies of the SACK recovery. The connection's copy (`isLost()`, `setPipe()`,
+`nextSeg()`, `sendDataDuringLossRecoveryPhase()`, `sendSegmentDuringLossRecoveryPhase()`) has no
+caller since S5d; `Rfc6675Recovery` runs. The recovery's `addSacks()`,
+`sendDataDuringLossRecoveryPhase()` and `sendSegmentDuringLossRecoveryPhase()` have no caller
+either. The SACK option comes from the connection's `addSacks()`, which has the repairs of S8 (the
+first block of RFC 2018 section 4) and S13 (the room for the AccECN option); the recovery's copy
+has neither. The source moves the option to the recovery's copy and reaches it with a
+`dynamic_cast` to `Rfc6675Recovery` (commit 51 guards that cast), so a connection whose recovery is
+another one, or one in SYN_RCVD before its recovery exists, sends no SACK option. The SACK option
+reports what the receiver holds (RFC 2018); it does not belong to the sender's loss recovery. Step
+1 keeps the connection's `addSacks()` in `TcpConnectionSackUtil.cc` and removes the other copies
+(D-79).
+
+Commit 61 walks the scoreboard once to get the lost, SACKed and retransmitted bytes, caches the
+totals until the queue changes, and walks `setPipe()` with one iterator. Master's queue has more
+methods that change it than the source had when commit 61 was written (`discardFrom()` of S15b);
+each one clears the cache. A debug build walks the queue at each read and checks the cache, so a
+method that forgets to clear it fails a test.
+
+S17 leaves four parts of commit 39 out (D-80). The connection keeps the reset of the duplicate-ACK
+counter after the ACK handlers of the algorithm (B1 of D-6): the source resets the counter at the
+end of `TcpAlgorithmBase::receivedAckForUnackedData()`, before the code of the flavour, so the
+`dupacks = dupthresh` that `TcpVegas` sets after its fine-grained retransmission stays, where
+master resets it. `validationInfo()` has no caller in the source. The rename of the statistic
+`sndNxt` to `sndSeq` would make INET's TCP differ from the lwIP TCP, which records `sndNxt` too.
+The range that `retransmitOneSegment()` reports differs from the source's only in SYN_RCVD, where
+the list of send times ignores it.
+
+Items for later stages: (S17b to S17d) as the table says. (S20) the comments that cite RFC 793 and
+RFC 1323; `sndSeqSignal` is registered and never emitted; the `sndMax` signal misses the changes of
+`snd_max` at a FIN, at a window probe and in `sendOneNewSegment()`, but no statistic records it.
+(any stage) `TcpVegas` sets `dupacks = dupthresh` after its fine-grained retransmission at a new
+ACK, and the connection resets the counter right after it, so the assignment has no effect.
