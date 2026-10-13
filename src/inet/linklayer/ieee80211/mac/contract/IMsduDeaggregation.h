@@ -19,6 +19,11 @@ class INET_API IMsduDeaggregation
   public:
     virtual ~IMsduDeaggregation() {}
 
+    // Inspect lengths without consuming the packet; callers may use this before success signals.
+    virtual bool isValidAggregate(const Packet *frame) const = 0;
+
+    // Success consumes frame and transfers ownership of the returned vector and packets.
+    // Malformed lengths return nullptr; frame remains unchanged and caller-owned.
     virtual std::vector<Packet *> *deaggregateFrame(Packet *frame) = 0;
 };
 

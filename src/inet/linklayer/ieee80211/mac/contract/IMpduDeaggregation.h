@@ -19,6 +19,8 @@ class INET_API IMpduDeaggregation
   public:
     virtual ~IMpduDeaggregation() {}
 
+    // Success consumes frame and transfers ownership of the returned vector and packets.
+    // Malformed lengths return nullptr; frame remains unchanged and caller-owned.
     virtual std::vector<Packet *> *deaggregateFrame(Packet *frame) = 0;
 };
 

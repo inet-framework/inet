@@ -41,9 +41,38 @@ void MsduDeaggregation::setExplodedFrameAddress(const Ptr<Ieee80211DataHeader>& 
     ASSERT(!header->getTransmitterAddress().isUnspecified());
 }
 
+bool MsduDeaggregation::isValidAggregate(const Packet *aggregatedFrame) const
+{
+    // IEEE Std 802.11-2024, 9.3.2.2: validate the complete aggregate before
+    // consuming it, so a malformed later subframe cannot deliver a partial MSDU set.
+    const auto& outerHeader = aggregatedFrame->peekAtFront<Ieee80211DataHeader>();
+    auto offset = outerHeader->getChunkLength();
+    auto end = aggregatedFrame->getDataLength() - B(4);
+    if (offset >= end)
+        return false;
+    while (offset < end) {
+        if (end - offset < LENGTH_A_MSDU_SUBFRAME_HEADER)
+            return false;
+        const auto& subframe = aggregatedFrame->peekDataAt<Ieee80211MsduSubframeHeader>(offset, LENGTH_A_MSDU_SUBFRAME_HEADER);
+        int length = subframe->getLength();
+        if (length <= 0 || B(length) > end - offset - LENGTH_A_MSDU_SUBFRAME_HEADER)
+            return false;
+        offset += LENGTH_A_MSDU_SUBFRAME_HEADER + B(length);
+        if (offset == end)
+            break;
+        auto padding = B((4 - (LENGTH_A_MSDU_SUBFRAME_HEADER.get<B>() + length) % 4) % 4);
+        if (end - offset < padding + LENGTH_A_MSDU_SUBFRAME_HEADER)
+            return false;
+        offset += padding;
+    }
+    return true;
+}
+
 std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)
 {
     EV_DEBUG << "Deaggregating A-MSDU " << *aggregatedFrame << " into multiple packets.\n";
+    if (!isValidAggregate(aggregatedFrame))
+        return nullptr;
     std::vector<Packet *> *frames = new std::vector<Packet *>();
     const auto& amsduHeader = aggregatedFrame->popAtFront<Ieee80211DataHeader>();
     aggregatedFrame->popAtBack<Ieee80211MacTrailer>(B(4));
@@ -69,6 +98,7 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
         if (header->getToDS() && header->getFromDS())
             header->addChunkLength(B(6));
         header->setTid(tid);
+        header->setDurationField(amsduHeader->getDurationField());
         header->setSequenceNumber(SequenceNumberCyclic(0));
         setExplodedFrameAddress(header, msduSubframeHeader, amsduHeader);
         frame->insertAtFront(header);
