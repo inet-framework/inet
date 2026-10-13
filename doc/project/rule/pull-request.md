@@ -54,6 +54,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | Rule | Statement |
 | --- | --- |
 | [PR-MSG-SUBJECT](#pr-msg-subject) | `area: what the commit does` |
+| [PR-MSG-WRAP](#pr-msg-wrap) | The body is plain text, wrapped at 72 columns |
 | [PR-MSG-BODY](#pr-msg-body) | A commit whose subject cannot carry its reason has a body |
 | [PR-MSG-SUMMARY](#pr-msg-summary) | The body starts with a summary that a reviewer understands in two minutes |
 | [PR-MSG-WHY](#pr-msg-why) | The body explains the behavior change and why it is necessary |
@@ -229,7 +230,7 @@ A merge commit inside the series mixes other developers' changes into the diff o
 
 **`area: what the commit does`**
 
-One line: the component or tree area, a colon, then what the commit does, in the present tense. End it without a full stop. Then one empty line, then the body.
+One line: the component or tree area, a colon, then what the commit does, in the present tense. End it without a full stop. Then one empty line, then the body ([PR-MSG-WRAP](#pr-msg-wrap)).
 
 For a behavior change, name the resulting behavior or correction in the subject. The body explains the problem that the correction addresses. A subject such as `UdpBasicApp: prevent send timeouts after shutdown` states the result; its body explains the old failure.
 
@@ -238,6 +239,16 @@ For a behavior change, name the resulting behavior or correction in the subject.
 The area is the NED or C++ component (`ExternalProcess:`, `Ipv4:`, `visualizer:`) or the part of the tree (`tests:`, `doc:`, `build:`, `examples/mpls/net37:`). An optional kind word may follow the area (`ospfv3: fix:`, `python: refactor:`). Name the *behavior*, never the mechanics: write `ExternalProcess: don't kill the process group when a spawned command fails`, not "update ExternalProcess.cc" and not a list of file names or links.
 
 **Both the area and the kind word are optional, and both are free within a bound.** [CR-TAG-SUBJECT](classification.md#cr-tag-subject) gives the grammar: the author may write any consecutive segments of the trailer's scope and any consecutive segments of its depth, direction and intent, so `EthernetMac: fix:`, `linklayer: refactor:` and `showcases.tsn: format:` are all correct. The one thing a subject must not do is disagree with the trailer. The obligations never appear in a subject.
+
+### PR-MSG-WRAP
+
+**The body is plain text, wrapped at 72 columns**
+
+Git keeps a commit message as written. `git log`, `git show`, `git format-patch` and most terminal tools show it as written: they do not wrap a long line, or the terminal breaks it at its edge, in the middle of a word and without the indent that `git log` adds. Wrap each prose paragraph of the body at 72 columns, so that it fits an 80-column terminal after that indent of 4 columns. The same number is the aim for the subject ([PR-MSG-SUBJECT](#pr-msg-subject)).
+
+A line may be longer where a break would damage it: a trailer (`Change:`, `Plan:`), a URL, a command, a quoted log line or another indented line. Wrap a list item with a hanging indent.
+
+Markdown follows the opposite rule. A document or a pull request description keeps each paragraph on one line ([DR-EXPLAIN](documentation.md#dr-explain)), because the editor and the GitHub renderer wrap it, and GitHub shows a line break inside a paragraph of a description as a break. A paragraph that moves between a commit body and a description changes its layout too.
 
 ### PR-MSG-BODY
 
@@ -420,17 +431,25 @@ The message explains one change and its reproduction. The `Plan:` path is illust
 ```text
 UdpBasicApp: prevent send timeouts after shutdown
 
-Before this commit, the stop handler leaves the send timer scheduled. If its timeout occurs after shutdown completes, the lifecycle handler rejects the self-message because UdpBasicApp is down. The simulation stops with a runtime error.
+Before this commit, the stop handler leaves the send timer scheduled. If
+its timeout occurs after shutdown completes, the lifecycle handler
+rejects the self-message because UdpBasicApp is down. The simulation
+stops with a runtime error.
 
-After this commit, the stop handler cancels the pending event. Under the same conditions, the old timeout does not invoke the stopped application, so that runtime error does not occur. The handler retains the timer object so the application can send again after restart.
+After this commit, the stop handler cancels the pending event. Under the
+same conditions, the old timeout does not invoke the stopped
+application, so that runtime error does not occur. The handler retains
+the timer object so the application can send again after restart.
 
 To compare both versions:
 
-1. Choose a send interval that places the next timeout after shutdown completes.
+1. Choose a send interval that places the next timeout after shutdown
+   completes.
 2. Stop the client before that timeout, away from its exact timestamp.
 3. Advance beyond the timeout while the client remains down.
 
-The parent version reaches the runtime error; the changed version cancels that timeout.
+The parent version reaches the runtime error; the changed version
+cancels that timeout.
 
 Plan: plan/pending/udpapp-stop-timer.md
 Change: src.applications.udpapp.UdpBasicApp | behavior.change.fix | ?
@@ -503,6 +522,7 @@ The tiers are the ones defined in [architectural-requirements.md](architecture.m
 | PR-SERIES-ORDER | T3 | subject-line check for `fixup!`, `squash!`, "typo", "address review" |
 | PR-SERIES-LINEAR | T3 | branch check: no merge commit between the merge base and the head |
 | PR-MSG-SUBJECT | T3 | commit-message lint: `area: summary`, no file paths, no links; length fails above 80 and is a note above 72 |
+| PR-MSG-WRAP | T3 | note: a body line above 72 characters, other than a trailer, a URL or an indented line |
 | PR-MSG-FACTS | T3+T4 | commit-message lint: no attribution trailers; note for words of revision history and for a `Validation:` paragraph (T3) + agent review for other progress notes (T4) |
 | PR-SPLIT-ONE-CHANGE | T3+T4 | note: the fingerprint rows of one commit move in more than one way (T3) + agent review: can a part of the commit stand alone? The rule lists the signs (T4) |
 | PR-SPLIT-UPSTREAM | T4 | agent review: does the commit change a shared component to serve one protocol? |

@@ -111,6 +111,28 @@ class CheckCommitsTest(unittest.TestCase):
     def words(self, count):
         return " ".join("word" for _ in range(count))
 
+    def test_a_paragraph_on_one_line_gives_a_wrap_note(self):
+        self.commit("a: change: explain on one line\n\n" + "The body says why. " * 6 + "\n\nChange: src | behavior.change | - | x", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("has 1 body line(s) above 72 characters", result.stdout)
+
+    def test_a_wrapped_body_with_long_trailers_and_quotes_is_quiet(self):
+        self.commit("a: change: explain in wrapped lines\n\n"
+                    "The body says why, and it wraps its paragraph at 72 columns, so\n"
+                    "that git log shows it in an 80-column terminal.\n\n"
+                    "    <!> Error: a quoted log line keeps its length, however long it is here\n"
+                    "See https://example.invalid/a/very/long/path/that/no/reader/would/break/up\n\n"
+                    "Plan: plan/pending/a-plan-with-a-name-that-makes-this-trailer-long.md\n"
+                    "Change: src.applications.udpapp.UdpBasicApp | behavior.change.fix | test | x", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertNotIn("above 72 characters", result.stdout)
+
     def test_a_long_first_paragraph_gives_a_summary_note(self):
         self.commit(f"a: change: one value\n\n{self.words(121)}\n\nChange: src | behavior.change | -", {
             "src/inet/a/A.cc": "int a = 1;\n",

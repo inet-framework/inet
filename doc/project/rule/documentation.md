@@ -108,7 +108,7 @@ For example, a hypothetical TXOP admission rule requires the complete exchange t
 
 Keep related sentences in connected paragraphs. Use lists for steps or parallel items. Use tables for comparisons. Preserve required document structures, trailers, and evidence fields. Fill templates with explanations that connect the facts. A list of files, API names, or checklist verdicts alone does not explain a change.
 
-Write each prose paragraph on one line. Separate paragraphs with a blank line. Preserve line breaks required by lists, tables, code blocks, and other structured content.
+In a Markdown document, write each prose paragraph on one line. Editors and renderers wrap a Markdown paragraph to the window, and a changed sentence then changes one line of the diff. Separate paragraphs with a blank line. Preserve line breaks required by lists, tables, code blocks, and other structured content. A pull request description is Markdown too, and GitHub shows a line break inside one of its paragraphs as a break. A commit message is plain text, which git shows as written: wrap its body at 72 columns ([PR-MSG-WRAP](pull-request.md#pr-msg-wrap)).
 
 Keep relevant conditions, scope limits, and distinctions between requirements, model choices, proposals, and observed results explicit. Links support the explanation; the reader must understand the main argument without them. Check whether the document alone explains what happens, why it happens, and what the result means.
 

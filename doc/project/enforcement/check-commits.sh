@@ -14,6 +14,8 @@
 #   PR-MSG-BODY          — an empty body above 50 changed lines, outside the exempt kinds
 #   PR-MSG-SUBJECT       — "area: what it does", no file path, no link; length fails above 80,
 #                          and is reported as a note between 73 and 80
+#   PR-MSG-WRAP          — note: a body line above 72 characters, other than a trailer, a URL or
+#                          an indented line
 #   PR-MSG-FACTS         — no attribution trailer; note: words of revision history, a test log
 #   PR-SPLIT-ONE-CHANGE  — note: the fingerprint rows of one commit move in more than one way
 #   PR-SPLIT-SIZE        — note: more than 400 changed source lines in one commit
@@ -69,6 +71,25 @@ while read -r sha; do
   git log -1 --format=%B "$sha" | grep -qiE "^(Co-Authored-By|Generated-By|Signed-off-by: .*\[bot\]):" && { flag "$short carries an attribution trailer"; ok=0; }
 done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
+
+echo
+echo "== PR-MSG-WRAP: the body is plain text, wrapped at 72 columns (notes only) =="
+# git shows a message as written.  A trailer, a URL and an indented line (a quoted log, a command,
+# the continuation of a list item) may be longer; a longer prose line is usually a paragraph that
+# was left on one line, as Markdown keeps it.
+quiet=1
+while read -r sha; do
+  [ -z "$sha" ] && continue
+  long=$(git log -1 --format=%b "$sha" \
+         | grep -vE '^(Change|Plan|Fixes|Closes|Refs|Co-Authored-By|Signed-off-by|Reviewed-by):' \
+         | grep -vE '^[[:space:]]|https?://' \
+         | python3 -c 'import sys; print(sum(len(l) > 72 for l in sys.stdin.read().splitlines()))')
+  if [ "$long" -gt 0 ]; then
+    note "${sha:0:9} has $long body line(s) above 72 characters: is a paragraph left on one line?"
+    quiet=0
+  fi
+done <<< "$COMMITS"
+[ "$quiet" -eq 1 ] && echo "  ok"
 
 echo
 echo "== PR-MSG-BODY: a substantial commit explains itself =="
