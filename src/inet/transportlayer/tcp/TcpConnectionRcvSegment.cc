@@ -669,9 +669,9 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 }
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
                 if (payloadLength > 0) {
-                    // rcv_adv is still the edge before this arrival: a segment beyond it
-                    // came in by acceptBeyondBufferAtEmptyQueue
-                    if (seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_adv))
+                    // rcv_mwnd_seq is still the highest edge before this arrival: a
+                    // segment beyond it came in by acceptBeyondBufferAtEmptyQueue
+                    if (seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_mwnd_seq))
                         overWindowAcceptPending = true;
                     chargeRcvBuffer(payloadLength);
                     // windowAutoTuning, as Linux (tcp_clamp_window()): when the charged
@@ -1041,6 +1041,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     //"
     state->rcv_nxt = tcpHeader->getSequenceNo() + 1;
     state->rcv_adv = state->rcv_nxt + state->rcv_wnd;
+    state->rcv_mwnd_seq = state->rcv_adv;
 
     emit(rcvAdvSignal, state->rcv_adv);
 
@@ -1294,6 +1295,7 @@ TcpEventCode TcpConnection::processSegmentInSynSent(Packet *tcpSegment, const Pt
         //
         state->rcv_nxt = tcpHeader->getSequenceNo() + 1;
         state->rcv_adv = state->rcv_nxt + state->rcv_wnd;
+        state->rcv_mwnd_seq = state->rcv_adv;
 
         emit(rcvAdvSignal, state->rcv_adv);
 

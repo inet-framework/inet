@@ -1154,11 +1154,14 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
     bool ret;
 
     if (len == 0) {
-        if (state->rcv_wnd == 0)
+        // After the window shrank, a peer may still send from the highest edge ever
+        // offered, as Linux tcp_sequence() accepts. Without a shrink that edge is not
+        // beyond the window, and the test is the one of RFC 9293.
+        uint32_t promiseEnd = seqGreater(state->rcv_mwnd_seq, rcvWndEnd) ? state->rcv_mwnd_seq : rcvWndEnd;
+        if (state->rcv_wnd == 0 && promiseEnd == rcvWndEnd)
             ret = (seqNo == state->rcv_nxt);
-        else // rcv_wnd > 0
-//            ret = seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd);
-            ret = seqLE(state->rcv_nxt, seqNo) && seqLE(seqNo, rcvWndEnd); // Accept an ACK on end of window
+        else
+            ret = seqLE(state->rcv_nxt, seqNo) && seqLE(seqNo, promiseEnd); // Accept an ACK on end of window
     }
     else { // len > 0
         if (state->rcv_wnd == 0)
@@ -1171,12 +1174,12 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
             ret = (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd))
                 || (seqLess(state->rcv_nxt, endSeq) && seqLE(endSeq, rcvWndEnd)); // Accept an ACK on end of window
             // dropBeyondWindowEdge, as Linux tcp_sequence(): a segment whose data ends
-            // beyond the highest window edge offered (rcv_adv) is dropped whole, unless it
+            // beyond the highest window edge offered (rcv_mwnd_seq) is dropped whole, unless it
             // starts within it and the in-order receive queue is empty
-            if (ret && state->dropBeyondWindowEdge && seqGreater(seqNo + len, state->rcv_adv)
-                && (seqGreater(seqNo, state->rcv_adv) || receiveQueue->getAcknowledgedDataLength() != 0))
+            if (ret && state->dropBeyondWindowEdge && seqGreater(seqNo + len, state->rcv_mwnd_seq)
+                && (seqGreater(seqNo, state->rcv_mwnd_seq) || receiveQueue->getAcknowledgedDataLength() != 0))
             {
-                EV_WARN << "The segment ends beyond the highest window edge offered (" << state->rcv_adv << "): dropping it\n";
+                EV_WARN << "The segment ends beyond the highest window edge offered (" << state->rcv_mwnd_seq << "): dropping it\n";
                 ret = false;
             }
         }
@@ -3093,7 +3096,7 @@ uint16_t TcpConnection::updateRcvWnd()
     // offer is the free buffer at the payload ratio, rounded down to the window scale;
     // zero when it falls under 1/16 of the buffer (or under one MSS or one scale unit)
     // while less than half the buffer is free; and at most rcv_ssthresh, aligned up. The
-    // right edge may move back; rcv_adv keeps the largest edge that the receiver offered.
+    // right edge may move back; rcv_mwnd_seq keeps the largest edge that the receiver offered.
     if (state->windowShrinkAllowed) {
         uint32_t rcvbuf = state->rcvBufferSize > 0 ? state->rcvBufferSize : state->maxRcvBuffer;
         uint64_t freeSpace = rcvBufOccupancy < rcvbuf ? (((uint64_t)rcvbuf - rcvBufOccupancy) * rcvScalingRatio) >> 8 : 0;
@@ -3106,10 +3109,10 @@ uint16_t TcpConnection::updateRcvWnd()
             freeSpace = ((uint64_t)(state->rcv_ssthresh + scaleUnit - 1) / scaleUnit) * scaleUnit;
         const uint32_t maxWin = (state->ws_enabled && state->rcv_wnd_scale) ? (TCP_MAX_WIN << state->rcv_wnd_scale) : TCP_MAX_WIN;
         win = (uint32_t)std::min<uint64_t>(freeSpace, maxWin);
-        if (win > 0 && seqGE(state->rcv_nxt + win, state->rcv_adv)) {
-            state->rcv_adv = state->rcv_nxt + win;
-            emit(rcvAdvSignal, state->rcv_adv);
-        }
+        state->rcv_adv = state->rcv_nxt + win;
+        emit(rcvAdvSignal, state->rcv_adv);
+        if (seqGreater(state->rcv_adv, state->rcv_mwnd_seq))
+            state->rcv_mwnd_seq = state->rcv_adv;
         state->rcv_wnd = win;
         emit(rcvWndSignal, state->rcv_wnd);
         return (uint16_t)(state->ws_enabled ? state->rcv_wnd >> state->rcv_wnd_scale : state->rcv_wnd);
@@ -3152,6 +3155,8 @@ uint16_t TcpConnection::updateRcvWnd()
 
         emit(rcvAdvSignal, state->rcv_adv);
     }
+    if (seqGreater(state->rcv_adv, state->rcv_mwnd_seq))
+        state->rcv_mwnd_seq = state->rcv_adv;
 
     state->rcv_wnd = win;
 

@@ -166,7 +166,8 @@ struct TcpStateVariables
     uint32_t rcv_wnd = 0;           // receive window
     uint32_t rcv_up = 0;            // receive urgent pointer;
     uint32_t irs = 0;               // initial receive sequence number
-    uint32_t rcv_adv = 0;           // advertised window
+    uint32_t rcv_adv = 0;           // the right edge of the window in force (Linux rcv_wup + rcv_wnd)
+    uint32_t rcv_mwnd_seq = 0;      // the highest right edge ever offered (Linux rcv_mwnd_seq): a peer may still send up to it after the window shrank
 
     // SYN, SYN+ACK retransmission variables (handled separately
     // because normal rexmit belongs to TcpAlgorithm)
