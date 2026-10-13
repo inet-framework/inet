@@ -26,10 +26,11 @@ namespace physicallayer {
 /**
  * This class implements the log normal shadowing model.
  *
- * By default every path loss computation draws a new shadowing value. With a
- * correlation distance, the value is kept per pair of radios, the same in
- * both directions, and drawn again only when either radio has moved farther
- * than that distance from where it was when the value was drawn. The values
+ * By default every reception draws a new shadowing value, which holds for
+ * its whole band. With a correlation distance, the value is kept per pair of
+ * radios, the same in both directions, and drawn again only when either radio
+ * has moved farther than that distance from where it was when the value was
+ * drawn. The values
  * of a radio's links are dropped when the radio is removed from its medium.
  */
 class INET_API LogNormalShadowing : public FreeSpacePathLoss, public cListener
