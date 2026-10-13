@@ -182,6 +182,28 @@ class CheckCommitsTest(unittest.TestCase):
                     "Change: src | name | -", {"src/inet/a/A.cc": "int a = 1;\n"})
         self.assertNotIn("opens with an action", self.check().stdout)
 
+    def move(self, message, content):
+        self.write("src/inet/a/Long.cc", "".join(f"int v{i} = {i};\n" for i in range(40)))
+        self.git("add", ".")
+        self.git("commit", "-qm", "fixture: a file to move")
+        self.base = self.git("rev-parse", "HEAD").stdout.strip()
+        (self.root / "src/inet/b").mkdir(parents=True)
+        self.git("mv", "src/inet/a/Long.cc", "src/inet/b/Long.cc")
+        self.commit(message, {"src/inet/b/Long.cc": content})
+
+    def test_a_move_that_changes_the_moved_file_fails(self):
+        content = "".join(f"int v{i} = {i};\n" for i in range(40)).replace("v7 = 7", "v7 = 70")
+        self.move("a: location: move a file\n\nThe file moves.\n\nChange: src | location | -", content)
+        result = self.check()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("moves src/inet/a/Long.cc to src/inet/b/Long.cc and changes it (similarity 9", result.stdout)
+
+    def test_a_pure_move_passes(self):
+        content = "".join(f"int v{i} = {i};\n" for i in range(40))
+        self.move("a: location: move a file\n\nThe file moves.\n\nChange: src | location | -", content)
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

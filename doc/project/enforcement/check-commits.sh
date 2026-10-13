@@ -7,7 +7,7 @@
 # note: a note asks the reviewer a question and never changes the exit status.
 #
 #   PR-SPLIT-WHITESPACE  — a file whose diff is empty ignoring whitespace, in a commit with real changes
-#   PR-SPLIT-MOVE        — a rename together with a content change
+#   PR-SPLIT-MOVE        — a rename together with a content change, in the moved file or in another
 #   PR-SPLIT-BASELINE    — a baseline-only commit that repeats the commit before it, or gives no reason
 #   PR-SERIES-ORDER      — a fixup, squash or "address review" subject
 #   PR-SERIES-LINEAR     — a merge commit inside the series
@@ -232,9 +232,14 @@ echo
 echo "== PR-SPLIT-MOVE: a rename together with a content change =="
 ok=1
 while read -r sha; do
-  renames=$(git show --name-status -M -C --pretty="" "$sha" | grep -cE "^R[0-9]" || true)
-  edits=$(git show --name-status -M -C --pretty="" "$sha" | grep -cE "^M" || true)
+  changes=$(git show --name-status -M -C --pretty="" "$sha")
+  renames=$(grep -cE "^R[0-9]" <<< "$changes" || true)
+  edits=$(grep -cE "^M" <<< "$changes" || true)
   [ "$renames" -gt 0 ] && [ "$edits" -gt 0 ] && { flag "${sha:0:9} has $renames rename(s) and $edits edit(s)"; ok=0; }
+  # A similarity below 100 % is an edit of the moved file itself, which no M line shows.
+  while IFS=$'\t' read -r score from to; do
+    flag "${sha:0:9} moves $from to $to and changes it (similarity $((10#${score#R}))%)"; ok=0
+  done < <(grep -E "^R0[0-9]{2}"$'\t' <<< "$changes")
 done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
 
