@@ -53,6 +53,16 @@ class CheckClassificationTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertNotIn("can a part stand alone?", result.stdout)
 
+    def test_a_commit_without_a_trailer_is_reported_once(self):
+        self.write("src/inet/a/A.cc", "int a = 1;\n")
+        self.write("tests/fingerprint/a.csv", "row\n")
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "a: fix: one value\n\nThe value changes.")
+        result = self.check()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertEqual(result.stdout.count("VIOLATION:"), 1, result.stdout)
+        self.assertIn("has no Change: line", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

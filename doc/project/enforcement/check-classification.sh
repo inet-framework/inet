@@ -150,6 +150,8 @@ ok=1
 while read -r sha; do
   [ -z "$sha" ] && continue
   kind=$(git log -1 --format='%(trailers:key=Change,valueonly)' "$sha" | awk -F'|' '{gsub(/ /,"");print $2}')
+  # no claim, nothing to compare: CR-TAG-TRAILER reports the missing line
+  [ -z "$kind" ] && continue
   case "$kind" in *behavior*) continue ;; esac
   n=$(git show --name-only --format='' "$sha" | grep -cE 'tests/(fingerprint|statistical)/.*\.(csv|json|sca)$')
   [ "$n" -gt 0 ] && { flag "${sha:0:9} claims '$kind' and moves $n recorded expectation(s)"; ok=0; }
