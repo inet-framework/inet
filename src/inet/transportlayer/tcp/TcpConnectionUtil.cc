@@ -708,7 +708,10 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
                 state->snd_mss = newMss;
                 state->snd_effmss = calculateEffectiveMss();
                 state->pmtudLastMssReduction = simTime();
-                retransmitOneSegment(true);
+                if (fsm.getState() == TCP_S_SYN_SENT)
+                    retransmitSynAfterMtuReduction(newMss);
+                else
+                    retransmitOneSegment(true);
             }
         }
     }
@@ -793,7 +796,10 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
                 state->snd_mss = newMss;
                 state->snd_effmss = calculateEffectiveMss();
                 state->pmtudLastMssReduction = simTime();
-                retransmitOneSegment(true);
+                if (fsm.getState() == TCP_S_SYN_SENT)
+                    retransmitSynAfterMtuReduction(newMss);
+                else
+                    retransmitOneSegment(true);
             }
         }
     }
@@ -2716,6 +2722,23 @@ uint32_t TcpConnection::mtuToMss(uint32_t mtu) const
 uint32_t TcpConnection::mssToMtu(uint32_t mss) const
 {
     return mss + (state->ts_enabled ? 12 : 0) + B(TCP_MIN_HEADER_LENGTH).get() + (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20);
+}
+
+void TcpConnection::retransmitSynAfterMtuReduction(uint32_t newMss)
+{
+    // in SYN_SENT, as Linux tcp_v4_mtu_reduced() and tcp_v6_mtu_reduced(): the MSS option
+    // of the next SYN falls too (advmss of the route). The error shows that a router
+    // dropped the SYN, but only a SYN with data goes again at once, as a bare SYN
+    // (tcp_simple_retransmit(), kernel commit c31b70c9968f); a SYN without data is not
+    // larger than the new MSS, and it waits for its timer
+    if (newMss < state->advertisedMss)
+        state->advertisedMss = newMss;
+    if (seqGreater(state->snd_max, state->iss + 1)) {
+        EV_DETAIL << "The SYN carried data: retransmitting a bare SYN at once\n";
+        state->syn_rexmit_count++;
+        sendSyn();
+        rescheduleAfter(state->syn_rexmit_timeout, synRexmitTimer);
+    }
 }
 
 void TcpConnection::limitMtuSearch(uint32_t mtu)

@@ -582,6 +582,8 @@ class INET_API TcpConnection : public SimpleModule
     virtual uint32_t mtuToMss(uint32_t mtu) const;
     /** The MTU of a segment with this payload (Linux tcp_mss_to_mtu()) */
     virtual uint32_t mssToMtu(uint32_t mss) const;
+    /** An ICMP error lowered the MSS in SYN_SENT: the next SYN announces it, and a SYN with data goes again at once (Linux tcp_v4_mtu_reduced()) */
+    virtual void retransmitSynAfterMtuReduction(uint32_t newMss);
     /** A new route MTU bounds the path MTU search (Linux tcp_sync_mss()) */
     virtual void limitMtuSearch(uint32_t mtu);
     /** Arms the path MTU search when the MSS is settled (Linux tcp_mtup_init()) */
