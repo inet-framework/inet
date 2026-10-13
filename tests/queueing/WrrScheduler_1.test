@@ -1,0 +1,121 @@
+%description:
+
+In this test, packets are produced by two active packet sources
+(ActivePacketSources): 100-byte packets by one and 1000-byte packets by the
+other. The sources are connected to FIFO queues (PacketQueue) where packets
+are stored temporarily. The queues are connected to a server (TokenBasedServer)
+using a scheduler (WrrScheduler) that serves the two queues alternately.
+
+The server reads the length of the packet that the scheduler offers, and it
+pulls the packet only if it has one token for each bit. The server receives
+9600 tokens at 1s, when both queues contain packets. That is enough for a
+100-byte packet (800 tokens), a 1000-byte packet (8000 tokens) and a second
+100-byte packet (800 tokens), in the order of the scheduler. The test checks
+that the server processes these three packets and no more, i.e. the packet
+that the scheduler offers is the packet that the scheduler provides when
+the server pulls. The fourth packet in the order of the scheduler is a
+1000-byte packet (producer2-1), for which the server has no tokens left.
+
+%file: test.ned
+
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.WrrScheduler;
+import inet.queueing.server.TokenBasedServer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.tokengenerator.TimeBasedTokenGenerator;
+
+network TestWrrScheduler
+{
+    submodules:
+        producer1: ActivePacketSource {
+            @display("p=100,100");
+        }
+        producer2: ActivePacketSource {
+            @display("p=100,200");
+        }
+        queue1: PacketQueue {
+            @display("p=200,100");
+        }
+        queue2: PacketQueue {
+            @display("p=200,200");
+        }
+        scheduler: WrrScheduler {
+            @display("p=300,100");
+        }
+        server: TokenBasedServer {
+            @display("p=400,100");
+        }
+        tokenGenerator: TimeBasedTokenGenerator {
+            @display("p=400,200");
+        }
+        consumer: PassivePacketSink {
+            @display("p=500,100");
+        }
+    connections allowunconnected:
+        producer1.out --> queue1.in;
+        producer2.out --> queue2.in;
+        queue1.out --> scheduler.in++;
+        queue2.out --> scheduler.in++;
+        scheduler.out --> server.in;
+        server.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestWrrScheduler
+sim-time-limit = 1.5s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.producer1.packetLength = 100B
+*.producer2.packetLength = 1000B
+*.producer*.productionInterval = 0.4s
+*.scheduler.weights = "1 1"
+*.server.tokenConsumptionPerPacket = 0
+*.server.tokenConsumptionPerBit = 1
+*.tokenGenerator.storageModule = "server"
+*.tokenGenerator.generationInterval = 1s
+*.tokenGenerator.numTokens = 9600
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+At 0s producer1: Producing packet, .*?producer1-0.*?
+At 0s queue1: Pushing packet, .*?producer1-0.*?
+At 0s producer2: Producing packet, .*?producer2-0.*?
+At 0s queue2: Pushing packet, .*?producer2-0.*?
+At 0.4s producer1: Producing packet, .*?producer1-1.*?
+At 0.4s queue1: Pushing packet, .*?producer1-1.*?
+At 0.4s producer2: Producing packet, .*?producer2-1.*?
+At 0.4s queue2: Pushing packet, .*?producer2-1.*?
+At 0.8s producer1: Producing packet, .*?producer1-2.*?
+At 0.8s queue1: Pushing packet, .*?producer1-2.*?
+At 0.8s producer2: Producing packet, .*?producer2-2.*?
+At 0.8s queue2: Pushing packet, .*?producer2-2.*?
+At 1s queue1: Pulling packet, .*?producer1-0.*?
+At 1s scheduler: Scheduling packet, .*?producer1-0.*?
+At 1s server: Processing packet, .*?producer1-0.*?
+At 1s consumer: Consuming packet, .*?producer1-0.*?
+At 1s queue2: Pulling packet, .*?producer2-0.*?
+At 1s scheduler: Scheduling packet, .*?producer2-0.*?
+At 1s server: Processing packet, .*?producer2-0.*?
+At 1s consumer: Consuming packet, .*?producer2-0.*?
+At 1s queue1: Pulling packet, .*?producer1-1.*?
+At 1s scheduler: Scheduling packet, .*?producer1-1.*?
+At 1s server: Processing packet, .*?producer1-1.*?
+At 1s consumer: Consuming packet, .*?producer1-1.*?
+At 1.2s producer1: Producing packet, .*?producer1-3.*?
+At 1.2s queue1: Pushing packet, .*?producer1-3.*?
+At 1.2s producer2: Producing packet, .*?producer2-3.*?
+At 1.2s queue2: Pushing packet, .*?producer2-3.*?
+
+<!> Simulation time limit reached -- at t=1.5s
+
+%not-contains-regex: stdout
+server: Processing packet, [^\n]*?producer2-1

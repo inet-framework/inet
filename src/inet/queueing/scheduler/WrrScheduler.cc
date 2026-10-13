@@ -65,34 +65,40 @@ void WrrScheduler::removeAllPackets()
         collection->removeAllPackets();
 }
 
-int WrrScheduler::schedulePacket()
+int WrrScheduler::selectInput() const
 {
     int firstWeighted = -1;
     int firstNonWeighted = -1;
     for (size_t i = 0; i < providers.size(); ++i) {
         if (providers[i].canPullSomePacket()) {
-            if (buckets[i] > 0) {
-                buckets[i]--;
+            if (buckets[i] > 0)
                 return (int)i;
-            }
             else if (firstWeighted == -1 && weights[i] > 0)
                 firstWeighted = (int)i;
             else if (firstNonWeighted == -1 && weights[i] == 0)
                 firstNonWeighted = (int)i;
         }
     }
+    return firstWeighted != -1 ? firstWeighted : firstNonWeighted;
+}
 
-    if (firstWeighted != -1) {
-        for (size_t i = 0; i < providers.size(); ++i)
-            buckets[i] = weights[i];
-        buckets[firstWeighted]--;
-        return firstWeighted;
+int WrrScheduler::schedulePacket()
+{
+    int index = selectInput();
+    if (index != -1 && weights[index] > 0) {
+        // no input that has a packet has a token left, so a new round starts
+        if (buckets[index] == 0)
+            for (size_t i = 0; i < providers.size(); ++i)
+                buckets[i] = weights[i];
+        buckets[index]--;
     }
+    return index;
+}
 
-    if (firstNonWeighted != -1)
-        return firstNonWeighted;
-
-    return -1;
+Packet *WrrScheduler::canPullPacket(const cGate *gate) const
+{
+    int index = selectInput();
+    return index != -1 ? providers[index].canPullPacket() : nullptr;
 }
 
 } // namespace queueing

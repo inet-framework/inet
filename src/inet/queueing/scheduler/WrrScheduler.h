@@ -27,10 +27,19 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
 
   protected:
     virtual void initialize(int stage) override;
+
+    /**
+     * Returns the index of the input that the next pull is served from, or -1
+     * if no input has a packet. Changes no state, so that the offer and the
+     * pull select the same input.
+     */
+    virtual int selectInput() const;
     virtual int schedulePacket() override;
 
   public:
     virtual ~WrrScheduler();
+
+    virtual Packet *canPullPacket(const cGate *gate) const override;
 
     virtual int getMaxNumPackets() const override { return -1; }
     virtual int getNumPackets() const override;

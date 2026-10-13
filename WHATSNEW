@@ -589,6 +589,22 @@ Notable backward incompatible changes are the following:
    this, the IPsec module has the new gates ipIn and ipOut, which the IPv4 and
    IPv6 network layers connect to their dispatcher.
 
+30. WrrScheduler offers the packet that it then provides
+
+   The canPullPacket() method of WrrScheduler returned the first packet of the
+   first input that has a packet, and pullPacket() returned the packet of the
+   input whose turn it was. A module that reads the offered packet before it
+   pulls, for example a TokenBasedServer that takes its tokens by the length of
+   the packet, therefore decided on one packet and received another. With
+   100-byte and 1000-byte packets in two queues, such a server took the tokens
+   of a 100-byte packet for each 1000-byte packet as well. WrrScheduler now
+   offers the packet that the next pull provides.
+
+   This changes the results of simulations in which a module that reads the
+   offered packet pulls from a WrrScheduler whose inputs hold packets of
+   different lengths. The order in which WrrScheduler serves its inputs does
+   not change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
