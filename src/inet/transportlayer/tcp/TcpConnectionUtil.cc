@@ -663,7 +663,12 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
     // RFC 9293 section 3.9.2.2: a hard error SHOULD abort the connection (SHLD-26), also
     // in SYN_RCVD; a connection that is neither active nor forked nor Fast Open returns to
     // LISTEN, and its application, which has no socket for it yet, is not informed
-    if (isHardIcmpv4Error(errorInd->getType(), errorInd->getCode())
+    // softIcmpErrorsAbortSetup: as Linux tcp_v4_err(), also a soft Destination Unreachable
+    // (codes 0, 1 and 5) aborts a connection setup (RFC 5461 section 4)
+    bool softAborts = state->softIcmpErrorsAbortSetup && errorInd->getType() == ICMP_DESTINATION_UNREACHABLE
+        && (errorInd->getCode() == ICMP_DU_NETWORK_UNREACHABLE || errorInd->getCode() == ICMP_DU_HOST_UNREACHABLE
+            || errorInd->getCode() == ICMP_DU_SOURCE_ROUTE_FAILED);
+    if ((isHardIcmpv4Error(errorInd->getType(), errorInd->getCode()) || softAborts)
         && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
     {
         EV_DETAIL << "Hard ICMPv4 error during connection setup -- connection refused\n";
@@ -734,7 +739,11 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
     // RFC 9293 section 3.9.2.2: a hard error SHOULD abort the connection (SHLD-26), also
     // in SYN_RCVD; a connection that is neither active nor forked nor Fast Open returns to
     // LISTEN, and its application, which has no socket for it yet, is not informed
-    if (isHardIcmpv6Error(errorInd->getType(), errorInd->getCode())
+    // softIcmpErrorsAbortSetup: as Linux tcp_v6_err(), also a soft Destination Unreachable
+    // (codes 0 and 3) aborts a connection setup (RFC 5461 section 4)
+    bool softAborts = state->softIcmpErrorsAbortSetup && errorInd->getType() == ICMPv6_DESTINATION_UNREACHABLE
+        && (errorInd->getCode() == NO_ROUTE_TO_DEST || errorInd->getCode() == ADDRESS_UNREACHABLE);
+    if ((isHardIcmpv6Error(errorInd->getType(), errorInd->getCode()) || softAborts)
         && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
     {
         EV_DETAIL << "Hard ICMPv6 error during connection setup -- connection refused\n";
@@ -991,6 +1000,7 @@ void TcpConnection::configureStateVariables()
     state->rfc5961AckCheck = tcpMain->par("rfc5961AckCheck");
     state->dropBeyondWindowEdge = tcpMain->par("dropBeyondWindowEdge");
     state->abortRstWithAck = tcpMain->par("abortRstWithAck");
+    state->softIcmpErrorsAbortSetup = tcpMain->par("softIcmpErrorsAbortSetup");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)

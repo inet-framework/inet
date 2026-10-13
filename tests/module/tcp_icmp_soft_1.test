@@ -1,0 +1,46 @@
+%description:
+Tests softIcmpErrorsAbortSetup, the rule of Linux (tcp_v4_err()) that RFC 5461
+section 4 describes: the tester answers the SYN of the client with Destination
+Unreachable, Host Unreachable (3/1), a soft error, and the client aborts the
+connection in SYN_SENT.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.cli_tcp.softIcmpErrorsAbortSetup = true
+*.tcptester.script="A1 icmp 3 1"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# answering with an ICMP error
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Hard ICMPv4 error during connection setup -- connection refused
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
