@@ -1,7 +1,6 @@
 
 #include "inet/physicallayer/wireless/common/pathloss/TwoRayInterference.h"
 
-#include "inet/physicallayer/wireless/common/contract/packetlevel/INarrowbandSignalAnalogModel.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
 
 namespace inet {
@@ -48,15 +47,18 @@ std::ostream& TwoRayInterference::printToStream(std::ostream& os, int level, int
     return os;
 }
 
-double TwoRayInterference::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
+std::ostream& TwoRayInterference::ReceptionPathLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    auto radioMedium = transmission->getMedium();
-    auto narrowbandSignalAnalogModel = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
-    mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz centerFrequency = Hz(narrowbandSignalAnalogModel->getCenterFrequency());
-    const m waveLength = propagationSpeed / centerFrequency;
+    stream << "TwoRayInterference::ReceptionPathLoss";
+    if (level <= PRINT_LEVEL_DEBUG)
+        stream << EV_FIELD(transmitterPosition) << EV_FIELD(receiverPosition);
+    return stream;
+}
 
-    return computeTwoRayInterference(transmission->getStartPosition(), arrival->getStartPosition(), waveLength);
+Ptr<const IReceptionPathLoss> TwoRayInterference::computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
+{
+    mps propagationSpeed = transmission->getMedium()->getPropagation()->getPropagationSpeed();
+    return makeShared<ReceptionPathLoss>(this, propagationSpeed, transmission->getStartPosition(), arrival->getStartPosition());
 }
 
 double TwoRayInterference::computeTwoRayInterference(const Coord& pos_t, const Coord& pos_r, m lambda) const

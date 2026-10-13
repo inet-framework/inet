@@ -8,22 +8,26 @@
 #include "inet/physicallayer/wireless/common/base/packetlevel/PathLossBase.h"
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
-#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioSignal.h"
-
-#include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-double PathLossBase::computePathLoss(const ITransmission *transmission, const IArrival *arrival) const
+std::ostream& PathLossBase::DistanceReceptionPathLoss::printToStream(std::ostream& stream, int level, int evFlags) const
 {
-    auto radioMedium = transmission->getMedium();
-    auto analogModel = check_and_cast<const INarrowbandSignalAnalogModel *>(transmission->getAnalogModel());
-    mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-    Hz centerFrequency = Hz(analogModel->getCenterFrequency());
+    stream << "DistanceReceptionPathLoss";
+    if (level <= PRINT_LEVEL_DEBUG)
+        stream << EV_FIELD(distance);
+    if (level <= PRINT_LEVEL_TRACE)
+        stream << EV_FIELD(propagationSpeed) << EV_FIELD(pathLoss, printFieldToString(pathLoss, level + 1, evFlags));
+    return stream;
+}
+
+Ptr<const IReceptionPathLoss> PathLossBase::computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const
+{
+    mps propagationSpeed = transmission->getMedium()->getPropagation()->getPropagationSpeed();
     m distance = m(arrival->getStartPosition().distance(transmission->getStartPosition()));
-    return computeDistancePathLoss(propagationSpeed, centerFrequency, distance);
+    return makeShared<DistanceReceptionPathLoss>(this, propagationSpeed, distance);
 }
 
 } // namespace physicallayer

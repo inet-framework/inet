@@ -9,11 +9,14 @@
 #define __INET_IPATHLOSS_H
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IArrival.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionPathLoss.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 
 namespace physicallayer {
+
+class IRadio;
 
 /**
  * This interface models path loss (or path attenuation) that is the reduction
@@ -23,11 +26,16 @@ class INET_API IPathLoss : public virtual IPrintableObject
 {
   public:
     /**
-     * Returns the loss factor for the provided transmission and arrival.
-     * The value is in the range [0, 1] where 1 means no loss at all and 0
-     * means all power is lost.
+     * Returns the path loss of the reception of the provided transmission by
+     * the provided receiver radio, for the provided arrival. The medium
+     * analog model calls this once per reception, when it computes the
+     * reception, and evaluates the result at one or more frequencies, at that
+     * time or later. A model that keeps per-link state resolves it in this
+     * call. The returned object may refer to the path loss model, but not to
+     * the transmission, the arrival or the radios: the medium may delete them
+     * while the reception's power is still evaluated.
      */
-    virtual double computePathLoss(const ITransmission *transmission, const IArrival *arrival) const = 0;
+    virtual Ptr<const IReceptionPathLoss> computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const = 0;
 
     /**
      * Returns the loss factor as a function of propagation speed, carrier

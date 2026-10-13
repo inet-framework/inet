@@ -24,10 +24,29 @@ class INET_API TwoRayInterference : public Module, public IPathLoss
   public:
     TwoRayInterference();
     void initialize(int stage) override;
-    double computePathLoss(const ITransmission *, const IArrival *) const override;
+    Ptr<const IReceptionPathLoss> computeReceptionPathLoss(const IRadio *receiverRadio, const ITransmission *transmission, const IArrival *arrival) const override;
     double computeDistancePathLoss(mps propagation, Hz frequency, m distance) const override;
     m computeRange(mps propagation, Hz frequency, double loss) const override;
     std::ostream& printToStream(std::ostream&, int level, int evFlags = 0) const override;
+
+  protected:
+    /**
+     * The path loss of one reception: the positions of the two ends are
+     * taken when the reception is computed.
+     */
+    class INET_API ReceptionPathLoss : public IReceptionPathLoss {
+      protected:
+        const TwoRayInterference *pathLoss;
+        mps propagationSpeed;
+        Coord transmitterPosition;
+        Coord receiverPosition;
+
+      public:
+        ReceptionPathLoss(const TwoRayInterference *pathLoss, mps propagationSpeed, const Coord& transmitterPosition, const Coord& receiverPosition) :
+            pathLoss(pathLoss), propagationSpeed(propagationSpeed), transmitterPosition(transmitterPosition), receiverPosition(receiverPosition) {}
+        virtual double computePathLoss(Hz frequency) const override { return pathLoss->computeTwoRayInterference(transmitterPosition, receiverPosition, propagationSpeed / frequency); }
+        virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
+    };
 
   protected:
     double epsilon_r;
