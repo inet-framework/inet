@@ -55,4 +55,8 @@ The first row is in scope from level 3 on, and the catalog entry it names carrie
 
 Out of scope, with the reason:
 
-| Document | Reason | | RFC 9868 | Level 5. Options are optional per datagram and a new mechanism; the level table of the guide files them at level 5. | | RFC 8085 | A best current practice for applications; it states no behavior of the UDP module that a protocol test can observe. | | RFC 6935, RFC 6936 | IPv6 only. |
+| Document | Reason |
+| --- | --- |
+| RFC 9868 | Level 5. Options are optional per datagram and a new mechanism; the level table of the guide files them at level 5. |
+| RFC 8085 | A best current practice for applications; it states no behavior of the UDP module that a protocol test can observe. |
+| RFC 6935, RFC 6936 | IPv6 only. |
