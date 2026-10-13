@@ -143,7 +143,9 @@ struct TcpStateVariables
     uint32_t snd_nxt = 0;           // send next (drops back on retransmission)
     uint32_t snd_max = 0;           // max seq number sent (needed because snd_nxt is re-set on retransmission)
     uint32_t snd_wnd = 0;           // send window
+    uint32_t snd_sml = 0;           // the end of the last small segment of new data (Linux tp->snd_sml), for minshallNagle
     uint32_t max_window = 0;        // the largest send window so far, Max(SND.WND) of the sender SWS avoidance (RFC 9293 section 3.8.6.2.1; Linux tp->max_window)
+    bool minshallNagle = false;     // the Nagle of Minshall (minshallNagle parameter)
     bool swsOverride = false;       // the override timeout of the sender SWS avoidance is sending (rule (4) of RFC 9293 section 3.8.6.2.1)
     uint32_t snd_up = 0;            // send urgent pointer
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update

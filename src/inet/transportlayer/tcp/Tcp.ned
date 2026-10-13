@@ -275,6 +275,7 @@ simple Tcp extends SimpleModule like ITcp
         int maxRexmitCount = default(12); // the retransmissions of one segment, after which the connection aborts
         double maxRexmitTimeout @unit(s) = default(240s); // the upper limit of the retransmission timeout (RFC 6298 section 2.5: at least 60 s)
         double minRexmitTimeout @unit(s) = default(1s); // the lower limit of the retransmission timeout (RFC 6298 section 2.4: 1 s; Linux: 200 ms)
+        bool minshallNagle = default(false); // with nagleEnabled, the variant of Minshall, as Linux (tcp_minshall_check()): a small segment waits only while an earlier small segment is not acknowledged, so a flight of full-sized segments does not hold the end of a write; false: the Nagle algorithm of RFC 9293 section 3.7.4, where a small segment waits while any data is not acknowledged
         bool rtoVarianceFloor = default(false); // false: RTO = SRTT + 4*RTTVAR, rounded up to minRexmitTimeout (RFC 6298 sections 2.3 and 2.4); true: RTO = SRTT + max(4*RTTVAR, minRexmitTimeout), as Linux (tcp_set_rto()), whose minimum limits the variance term
         bool seedRttFromHandshake = default(false); // Seed the RTT estimator (srtt/rttvar/RTO) from the SYN<->SYN-ACK exchange, as Linux does. The first-flight RTO becomes RTT-scaled instead of the initial RTO.
         bool sendDataWithFirstAck = default(true); // an active open sends data that waits at the end of the handshake with the ACK of the SYN-ACK; false: a bare ACK first, and then the data

@@ -938,6 +938,7 @@ void TcpConnection::configureStateVariables()
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     if (noDelaySockopt >= 0)
         state->nagle_enabled = noDelaySockopt == 0; // TCP_NODELAY of this connection
+    state->minshallNagle = tcpMain->par("minshallNagle");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
@@ -1531,6 +1532,11 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         }
     }
 
+    // minshallNagle: the end of the last small segment of new data, as Linux
+    // tcp_minshall_update(); small is less than this segment could carry
+    if (bytes > 0 && bytes + options_len < state->snd_mss && seqGreater(state->snd_nxt, state->snd_max))
+        state->snd_sml = state->snd_nxt;
+
     // remember highest seq sent (snd_nxt may be set back on retransmission,
     // but we'll need snd_max to check validity of ACKs -- they must ack
     // something we really sent)
@@ -1715,6 +1721,10 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // acknowledge (RFC 7413 section 4.2.2: "include the data after SND.UNA if
         // data is available"), without Nagle.
         bool unacknowledgedData = (getDataSndUna() != state->snd_max) && fsm.getState() != TCP_S_SYN_SENT;
+        // minshallNagle, as Linux (tcp_minshall_check()): only an unacknowledged small
+        // segment holds, not a flight of full-sized segments
+        if (state->minshallNagle)
+            unacknowledgedData = unacknowledgedData && seqGreater(state->snd_sml, state->snd_una) && seqLE(state->snd_sml, state->snd_nxt);
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
         if (swsHold(effectiveWin, buffered))
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
