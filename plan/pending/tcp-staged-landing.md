@@ -70,9 +70,9 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S17 ✅ | `topic/tcp-connection-leftovers` | 39 (part), 61 | +82 −754 | the copies of the SACK recovery that nothing calls, the SACK scoreboard scan (D-79, D-80) |
 | S17b ✅ | `topic/tcp-timestamps` | 26 (part), 39 (part), new | +113 −37 | the timestamps of RFC 7323: `TS.Recent` from the handshake, PAWS, the update after the window test, the TS option on each segment; the update rule of Linux behind a parameter (D-81 to D-83) |
 | S17c ✅ | `topic/tcp-segment-checks` | 39 (part), new | +72 −12 | the sequence number of a pure ACK and of the RST of an abort, the window update from data (D-72), the FIN in the window test, the Linux checks of RFC 5961 and of the window edge and the RST with ACK of Linux behind parameters (D-84 to D-86) |
-| S17d | `topic/tcp-connection-setup` | 26 (part), 39 (part), new | +150 −30 (about) | the text of a SYN, the data queued in SYN_RCVD, the timers at a return to LISTEN, the ICMP checks of RFC 5927 and in SYN_RCVD |
+| S17d ✅ | `topic/tcp-connection-setup` | 26 (part), 39 (part), 79, new | +111 −20 | the text of a SYN without Fast Open, the hard ICMP error in SYN_RCVD, the soft ICMP errors and the ICMP sequence check of Linux behind parameters, the zero-copy completion of SYN data (D-87 to D-89) |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
-| S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
+| S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
 The big test commit (41, `tests: add+change: cover the new behavior, and pin the old defaults`,
@@ -796,6 +796,23 @@ plan gives a reason for.
   them, with defaults that keep master's behavior. The source makes the three rules
   unconditional. Like the source, S17c models neither the blind RST and SYN mitigations of RFC
   5961 (sections 3 and 4) nor the rate limit of challenge ACKs.
+- **D-87 — The text of a SYN without Fast Open is processed after the handshake.** RFC 9293
+  queues it in LISTEN "for processing later"; master and the source inserted it one octet too
+  early and never moved RCV.NXT over it. S17d queues it at SEG.SEQ+1 and, at ESTABLISHED, moves
+  RCV.NXT over the in-order data of the receive queue, delivers it, and acknowledges it. Linux and
+  the BSDs drop such text, and the peer sends it again; S17d follows the RFC.
+- **D-88 — A hard ICMP error aborts a connection in SYN_RCVD.** RFC 9293 section 3.9.2.2 says that
+  a hard error SHOULD abort the connection (SHLD-26); master acted on it only in SYN_SENT. A
+  connection that is neither active nor forked nor Fast Open returns to LISTEN, and its
+  application, which has no socket for it, is not informed. A synchronized connection keeps
+  master's rule and does not abort, as Linux and the note of the RFC.
+- **D-89 — Two ICMP rules of Linux are options.** `softIcmpErrorsAbortSetup` lets a soft error
+  abort a connection setup (Linux `tcp_v4_err()`, `tcp_v6_err()`; RFC 5461 section 4), which RFC
+  9293 forbids (MUST-56); commit 39 made this unconditional for IPv4, and commit 79 repaired it
+  with the parameter, which S17d takes from S19 and extends to IPv6. `icmpSequenceCheck` ignores an
+  error whose quoted sequence number lies outside SND.UNA to SND.MAX (Linux, the BSDs; RFC 5927
+  section 4.1), which no RFC requires; the source makes it unconditional. Both defaults keep
+  master's behavior.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -2346,10 +2363,10 @@ head, and the combined pull-request gate passes.
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | fix: the text of a SYN without Fast Open goes to the application after the handshake | — | new |
-| 2 | fix: a hard ICMP error aborts a connection in SYN_RCVD too | — | 26 (part) |
-| 3 | add: the soft ICMP errors of Linux abort a connection setup, by a parameter | — | 26 (part), 39 (part) |
-| 4 | add: the sequence check of an ICMP error of Linux, by a parameter | — | 26 (part) |
+| 1 | fix: the text of a SYN without Fast Open reaches the application | — | new (D-87) |
+| 2 | fix: a hard ICMP error aborts a connection in SYN_RCVD too | — | 26 (part), D-88 |
+| 3 | add: the soft ICMP errors of Linux abort a setup, by a parameter | — | 39 (part), 79, D-89 |
+| 4 | add: the sequence check of an ICMP error of Linux, by a parameter | — | 26 (part), D-89 |
 | 5 | fix: the data of a Fast Open SYN completes its zero-copy write | — | 39 (part) |
 
 S17d takes the connection setup and the ICMP errors from commits 26 and 39. RFC 9293 queues the
@@ -2372,3 +2389,47 @@ SYN_RCVD to LISTEN has no timer: since S11, only a connection that is neither fo
 returns there, and its algorithm starts at ESTABLISHED. A passive connection never gets data that a
 SEND queued in SYN_RCVD: INET's socket refuses a SEND before the connection is established, and an
 application that sends raw commands is the only way there.
+
+During the work, the first test of step 1 let the tester add text to a SYN that the client never
+sent: the server then acknowledged data that the client did not know, and the two ends sent ACKs
+to each other without end. The test uses a client that really sends the text (Fast Open without a
+cookie, to a server without Fast Open). The scripted tester gets the commands `icmp` and `icmp6`,
+which answer a segment with an ICMP error that quotes it, because no test network of the module
+tests has IP.
+
+Items for later stages: (inet-gpl) its configuration sets `softIcmpErrorsAbortSetup` already and
+gets `icmpSequenceCheck = true`; a run can check them only after S18; if a script sends text on a
+SYN to a server without Fast Open, Linux drops the text where INET processes it (D-87).
+
+### S17d — `topic/tcp-connection-setup` — landed 2026-10-13
+
+The owner reviewed and approved S17d on 2026-10-13.
+
+S17d processes the text of a SYN without Fast Open after the handshake, aborts a connection in
+SYN_RCVD on a hard ICMP error, completes a zero-copy write on a Fast Open SYN, and brings two ICMP
+rules of Linux behind parameters. Where master and the source are wrong, S17d deviates from them
+(D-87 to D-89).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: the text of a SYN without Fast Open reaches the application` | — | new | — |
+| `tcp: fix: a hard ICMP error aborts a connection in SYN_RCVD too` | — | 26 (part) | — |
+| `tcp: add: the soft ICMP errors of Linux abort a setup, by a parameter` | — | 39 (part), 79 | — |
+| `tcp: add: the sequence check of an ICMP error of Linux, by a parameter` | — | 26 (part) | — |
+| `tcp: fix: the data of a Fast Open SYN completes its zero-copy write` | — | 39 (part) | — |
+
+New tests: `tcp_syn_text_1`, `tcp_icmp_synrcvd_1`, `tcp_icmp6_synrcvd_1`, `tcp_icmp_soft_1`,
+`tcp_icmp6_soft_1`, `tcp_icmp_soft_2` (a control of the default), `tcp_icmp_seq_1`,
+`tcp_icmp6_seq_1`, `tcp_icmp_seq_2` (a control of the default) and `tcp_fastopen_zerocopy_1`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the module tests pass at each commit (584 at the plan commit, 594 at the head). The TCP
+standards tests pass at each code commit (25 pass, 2 expected failures, the packetdrill tests skip
+without inet-gpl); unit 123 and serializer 4 pass at the head. The new tests of each code commit
+fail with the source of the commit before, except `tcp_icmp_soft_2` and `tcp_icmp_seq_2`, the
+controls of the defaults, which master passes too. The CI fingerprint job runs at each code commit,
+and no row moves. The TCP fingerprint rows run in debug at the head with no runtime error (the
+`tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six
+gates and the combined pull-request gate pass. After a rebase onto 14 new commits of master (IPsec),
+each commit builds alone, the module tests pass at the head (594), the CI fingerprint job passes
+at the head, and the combined pull-request gate passes.
