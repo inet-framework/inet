@@ -69,7 +69,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S16b ✅ | `topic/tcp-write-boundaries` | 36 (part), 46 (part), new | +297 −8 | `TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of Linux at write boundaries behind a parameter (D-76 to D-78) |
 | S17 ✅ | `topic/tcp-connection-leftovers` | 39 (part), 61 | +82 −754 | the copies of the SACK recovery that nothing calls, the SACK scoreboard scan (D-79, D-80) |
 | S17b ✅ | `topic/tcp-timestamps` | 26 (part), 39 (part), new | +113 −37 | the timestamps of RFC 7323: `TS.Recent` from the handshake, PAWS, the update after the window test, the TS option on each segment; the update rule of Linux behind a parameter (D-81 to D-83) |
-| S17c | `topic/tcp-segment-checks` | 39 (part), new | +150 −30 (about) | the sequence number of a pure ACK and the window update (D-72), the acceptability test, the Linux checks of RFC 5961 and of the window edge, the RST of Linux at an abort |
+| S17c ✅ | `topic/tcp-segment-checks` | 39 (part), new | +72 −12 | the sequence number of a pure ACK and of the RST of an abort, the window update from data (D-72), the FIN in the window test, the Linux checks of RFC 5961 and of the window edge and the RST with ACK of Linux behind parameters (D-84 to D-86) |
 | S17d | `topic/tcp-connection-setup` | 26 (part), 39 (part), new | +150 −30 (about) | the text of a SYN, the data queued in SYN_RCVD, the timers at a return to LISTEN, the ICMP checks of RFC 5927 and in SYN_RCVD |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
@@ -775,6 +775,27 @@ plan gives a reason for.
   that answers a segment stays without the option: section 5.2 asks for TSval 0 there "to enable
   research", which Linux does not do. The source puts the option on each RST with ACK, with the
   TSecr of `TS.Recent`.
+- **D-84 — A pure ACK and the RST of an abort carry SND.NXT of RFC 9293.** RFC 9293 sends
+  `<SEQ=SND.NXT><ACK=RCV.NXT><CTL=ACK>` and, at an ABORT, `<SEQ=SND.NXT><CTL=RST>`; its SND.NXT is
+  the next new sequence number, `snd_max` in INET, because INET's `snd_nxt` goes back to `snd_una`
+  during a retransmission. BSD and Linux put the highest sequence number sent on a pure ACK. With
+  `snd_nxt`, the peer refused the window of a pure ACK sent during a retransmission (SND.WL1), so
+  its duplicate ACKs failed condition (e) of RFC 5681, and it dropped a RST below its RCV.NXT.
+  With the repair, a data segment of the peer updates the send window too (RFC 9293 section
+  3.10.7.4), which closes D-72. The source has neither repair. The segment log shows the sequence
+  number of a segment without data, so that a test can read it.
+- **D-85 — The FIN counts in the window test of a segment with data.** RFC 9293 counts the SYN and
+  the FIN in SEG.LEN, so a segment of old data with a FIN at RCV.NXT is acceptable, and its FIN is
+  processed; only its data beyond RCV.NXT goes to the receive queue. A segment without data keeps
+  master's test, as the source does, so a bare FIN at a zero window stays acceptable, which the
+  RFC would refuse.
+- **D-86 — Three rules of Linux are options.** The ACK check of RFC 5961 section 5.2, which RFC 9293
+  allows (MAY-12), the drop of a segment beyond the highest window edge offered (Linux
+  `tcp_sequence()`), and the RST with ACK at an abort (Linux `tcp_send_active_reset()`) are not
+  required by the RFCs, so `rfc5961AckCheck`, `dropBeyondWindowEdge` and `abortRstWithAck` select
+  them, with defaults that keep master's behavior. The source makes the three rules
+  unconditional. Like the source, S17c models neither the blind RST and SYN mitigations of RFC
+  5961 (sections 3 and 4) nor the rate limit of challenge ACKs.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -2243,12 +2264,14 @@ rows, as on master; the lwIP rows need a build with lwIP). The six gates pass.
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | fix: a pure ACK carries the highest sequence number sent | — | new (D-72) |
-| 2 | fix: a data segment of the peer updates the send window | — | new (D-72) |
-| 3 | fix: the FIN of a segment of old data passes the window test | — | 39 (part) |
-| 4 | add: the ACK check of RFC 5961 section 5.2, selected by a parameter | — | 39 (part) |
-| 5 | add: the window-edge check of Linux, selected by a parameter | — | 39 (part) |
-| 6 | add: the RST with ACK of Linux at an abort, selected by a parameter | — | 39 (part) |
+| 1 | change: the log of an empty segment shows its sequence number | — | new |
+| 2 | fix: a pure ACK carries the highest sequence number sent | — | new (D-72, D-84) |
+| 3 | fix: a data segment of the peer updates the send window | — | new (D-72, D-84) |
+| 4 | fix: the FIN of a segment of old data passes the window test | — | 39 (part), D-85 |
+| 5 | add: the ACK check of RFC 5961 section 5.2, by a parameter | — | 39 (part), D-86 |
+| 6 | add: the window-edge check of Linux, by a parameter | — | 39 (part), D-86 |
+| 7 | fix: the RST of an abort carries the highest sequence number sent | — | new (D-84) |
+| 8 | add: the RST with ACK of Linux at an abort, by a parameter | — | 39 (part), D-86 |
 
 S17c takes the checks of a received segment from commit 39 and the two repairs that S15b deferred
 (D-72). A pure ACK of master carries `snd_nxt`, which goes back to `snd_una` during a
@@ -2267,3 +2290,54 @@ RFC 9293 allows (MAY-12) and Linux uses (step 4); the drop of a segment whose en
 highest window edge advertised (`rcv_adv`), unless the in-order receive queue is empty (Linux
 `tcp_sequence()`, step 5); and the RST with ACK and `rcv_nxt` at an abort (Linux
 `tcp_send_active_reset()`), where RFC 9293 sends `<SEQ=SND.NXT><CTL=RST>` (step 6).
+
+During the work, step 1 came first, so that the tests of steps 2 and 7 can read the sequence number
+of a pure ACK and of a RST, and step 7 came up as a new defect: the RST of an abort carried
+`snd_nxt` too.
+
+Items for later stages: (inet-gpl) its configuration sets `rfc5961AckCheck`,
+`dropBeyondWindowEdge` and `abortRstWithAck` to true; a run can check them only after S18. (S20)
+the RFC list says that RFC 5961 is modeled only in section 5.2 (D-86). (any stage) The ACK
+processing of a segment sends data before the text of the same segment is processed, so that data
+acknowledges the text later, as `tcp_wnd_update_data_1` shows.
+
+### S17c — `topic/tcp-segment-checks` — landed 2026-10-13
+
+The owner reviewed and approved S17c on 2026-10-13.
+
+S17c repairs the sequence number of a pure ACK and of the RST of an abort, takes the window from a
+data segment of the peer, counts the FIN in the window test, and brings three rules of Linux behind
+parameters. Where master and the source are wrong, S17c deviates from them (D-84 to D-86).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: change: the log of an empty segment shows its sequence number` | — | new | — |
+| `tcp: fix: a pure ACK carries the highest sequence number sent` | — | new | `arptest` ARPTest, `arptest2` ARPTest, `bulktransfer` inet__inet, inet_inet_2a, inet_inet_2b, `pcaprecorder` General, `tcp_ppp_reconnect` General, `tcpclientserver` default_tcp, inet__inet, inet__inet_msg, inet__inet_stream; `tcp_eth_reconnect` (six rows, `~tND` only) |
+| `tcp: fix: a data segment of the peer updates the send window` | — | new | `bulktransfer` inet_inet_2b; `tcp_eth_reconnect` (four rows, `tplx` only) |
+| `tcp: fix: the FIN of a segment of old data passes the window test` | — | 39 (part) | — |
+| `tcp: add: the ACK check of RFC 5961 section 5.2, by a parameter` | — | 39 (part) | — |
+| `tcp: add: the window-edge check of Linux, by a parameter` | — | 39 (part) | — |
+| `tcp: fix: the RST of an abort carries the highest sequence number sent` | — | new | — |
+| `tcp: add: the RST with ACK of Linux at an abort, by a parameter` | — | 39 (part) | — |
+
+Two commits move CI rows. With the sequence number of a pure ACK, the peer takes the window of an
+ACK that it gets during a retransmission of the other end: the client takes the window 7504 of the
+server's ACK, counts the next ACKs as duplicates, and retransmits earlier; in the ARP rows, the
+client no longer answers such an ACK as unacceptable. In the tcp_eth_reconnect rows, only the
+sequence numbers in the packet data change. With the window update from data, a sender whose peer
+sends data too sends one ACK earlier.
+
+New tests: `tcp_ack_seq_1`, `tcp_wnd_update_data_1`, `tcp_fin_old_data_1`, `tcp_rfc5961_ack_1`,
+`tcp_window_edge_1`, `tcp_abort_rst_seq_1` and `tcp_abort_rst_ack_1`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the module tests pass at each commit (565 at the plan commit, 572 at the head); in the
+run of the stage tests at the head, `ExternalProcess_4`, which runs an outside process, failed once
+and passed in a run again. The TCP standards tests pass at each code commit (25 pass, 2 expected
+failures, the packetdrill tests skip without inet-gpl); unit 122 and serializer 4 pass at the head.
+The new tests of each code commit fail with the source of the commit before. The CI fingerprint job
+runs at each code commit, and only the rows above move. The TCP fingerprint rows run in debug at the
+head with no runtime error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows
+need a build with lwIP). The six gates pass. After a rebase onto 17 new commits of master, each
+commit builds alone, the module tests pass at the head (579), the CI fingerprint job passes at the
+head, and the combined pull-request gate passes.
