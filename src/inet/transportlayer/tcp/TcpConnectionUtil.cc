@@ -1323,7 +1323,10 @@ void TcpConnection::sendAbortRst()
     // RFC 7323 section 5.2: "If an <RST> is being generated because of a user abort, and
     // Snd.TS.OK is set, then a Timestamps option SHOULD be included in the <RST>"; the
     // RST has no ACK bit, so its TSecr is 0 (section 3.2)
-    sendRst(state->snd_nxt, localAddr, remoteAddr, localPort, remotePort, state->ts_enabled);
+    // RFC 9293 ABORT: "<SEQ=SND.NXT><CTL=RST>"; SND.NXT is the next new sequence number,
+    // snd_max here, because snd_nxt goes back during a retransmission, and a RST below
+    // RCV.NXT of the peer lies outside its window and is dropped
+    sendRst(state->snd_max, localAddr, remoteAddr, localPort, remotePort, state->ts_enabled);
 }
 
 void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int srcPort, int destPort, bool withTimestamp)
