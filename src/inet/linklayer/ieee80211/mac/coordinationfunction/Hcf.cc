@@ -781,15 +781,15 @@ simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee802
         auto mode = rateSelection->computeMode(predicted.get(), protectedHeader, txop);
         setFrameMode(predicted.get(), protectedHeader, mode);
         auto protectedDuration = mode->getDuration(predicted->getDataLength());
-        auto ctsDuration = rateSelection->computeResponseCtsFrameMode(packet, rts)->getDuration(LENGTH_CTS);
+        auto ctsDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
         return ppduDuration + sifs + ctsDuration + sifs +
             estimateZeroLimitExchange(predicted.get(), protectedHeader, txop, protectedDuration);
     }
     if (auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header))
-        return ppduDuration + sifs + rateSelection->computeResponseBlockAckFrameMode(packet, bar)->getDuration(LENGTH_BASIC_BLOCKACK);
+        return ppduDuration + sifs + rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT)->getDuration(LENGTH_BASIC_BLOCKACK);
     if (auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
         if (recipientAckPolicy->isAckNeeded(dataOrMgmt))
-            return ppduDuration + sifs + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmt)->getDuration(LENGTH_ACK);
+            return ppduDuration + sifs + rateSelection->computeResponseAckFrameMode(packet, dataOrMgmt, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
         return ppduDuration;
     }
     throw cRuntimeError("Unsupported zero-limit multiple protection frame");
@@ -798,7 +798,7 @@ simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee802
 simtime_t Hcf::computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     return recipientAckPolicy->isAckNeeded(header) ?
-        rateSelection->computeResponseAckFrameMode(packet, header)->getDuration(LENGTH_ACK) : SIMTIME_ZERO;
+        rateSelection->computeResponseAckFrameMode(packet, header, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK) : SIMTIME_ZERO;
 }
 
 simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header,
@@ -833,7 +833,7 @@ simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const
         auto rtsHeader = rts.peekAtFront<Ieee80211RtsFrame>();
         auto rtsMode = rateSelection->computeMode(&rts, rtsHeader, txop);
         setFrameMode(&rts, rtsHeader, rtsMode);
-        auto ctsDuration = rateSelection->computeResponseCtsFrameMode(&rts, rtsHeader)->getDuration(LENGTH_CTS);
+        auto ctsDuration = rateSelection->computeResponseCtsFrameMode(&rts, rtsHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
         // The field estimates the next holder frame and its response, not its whole protected exchange.
         protectionCost = rtsMode->getDuration(rts.getDataLength()) + sifs + ctsDuration;
         completeCost += protectionCost + sifs;
@@ -879,7 +879,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 auto protectedHeader = protectedPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
                 auto dataMode = rateSelection->computeMode(protectedPacket, protectedHeader, txop);
                 setFrameMode(protectedPacket, protectedHeader, dataMode);
-                responseDuration = rateSelection->computeResponseCtsFrameMode(packet, rts)->getDuration(LENGTH_CTS);
+                responseDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
                 nextFrameDuration = dataMode->getDuration(protectedPacket->getDataLength());
                 auto ackDuration = computeImmediateResponseDuration(protectedPacket, protectedHeader);
                 if (recipientAckPolicy->isAckNeeded(protectedHeader))
@@ -955,11 +955,11 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     responsePacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
     const IIeee80211Mode *responseMode = nullptr;
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(receivedHeader))
-        responseMode = rateSelection->computeResponseCtsFrameMode(receivedPacket, rtsFrame);
+        responseMode = rateSelection->computeResponseCtsFrameMode(receivedPacket, rtsFrame, ResponseQueryRole::RESPOND);
     else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(receivedHeader))
-        responseMode = rateSelection->computeResponseBlockAckFrameMode(receivedPacket, blockAckReq);
+        responseMode = rateSelection->computeResponseBlockAckFrameMode(receivedPacket, blockAckReq, ResponseQueryRole::RESPOND);
     else if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(receivedHeader))
-        responseMode = rateSelection->computeResponseAckFrameMode(receivedPacket, dataOrMgmtHeader);
+        responseMode = rateSelection->computeResponseAckFrameMode(receivedPacket, dataOrMgmtHeader, ResponseQueryRole::RESPOND);
     else
         throw cRuntimeError("Unknown received frame type");
     setFrameMode(responsePacket, responseHeader, responseMode);

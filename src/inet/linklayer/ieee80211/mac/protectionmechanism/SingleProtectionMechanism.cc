@@ -33,12 +33,12 @@ simtime_t SingleProtectionMechanism::computeRtsDurationField(Packet *rtsPacket, 
     // TODO We assume that the RTS frame is not part of a dual clear-to-send
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader, txop);
     simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
-    simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
+    simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
     simtime_t durationId = ctsFrameDuration + modeSet->getSifsTime() + pendingFrameDuration + modeSet->getSifsTime();
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(pendingHeader)) {
         if (ackPolicy->isAckNeeded(dataOrMgmtHeader)) {
             RateSelection::setFrameMode(pendingPacket, dataOrMgmtHeader, pendingFrameMode); // KLUDGE
-            simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
+            simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, dataOrMgmtHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
             durationId += ackFrameDuration + modeSet->getSifsTime();
         }
     }
@@ -68,7 +68,7 @@ simtime_t SingleProtectionMechanism::computeBlockAckReqDurationField(Packet *pac
 {
     // TODO ACK or BlockAck frame, as applicable
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        simtime_t blockAckFrameDuration = rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getDuration(LENGTH_BASIC_BLOCKACK);
+        simtime_t blockAckFrameDuration = rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq, ResponseQueryRole::PREDICT)->getDuration(LENGTH_BASIC_BLOCKACK);
         simtime_t blockAckReqDurationPerId = blockAckFrameDuration + modeSet->getSifsTime();
         return blockAckReqDurationPerId;
     }
@@ -122,12 +122,12 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
         individuallyAddressedDataWithNoAckOrBlockAck = !groupAddressed && (dataHeader->getAckPolicy() == AckPolicy::NO_ACK || dataHeader->getAckPolicy() == AckPolicy::BLOCK_ACK);
     }
     if (!groupAddressed && (mgmtFrame || nonQoSData || individuallyAddressedDataWithNormalAck)) {
-        simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
+        simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
         if (txop->isFinalFragment(dataOrMgmtHeader)) {
             return ackFrameDuration + modeSet->getSifsTime();
         }
         else {
-            simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
+            simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
             simtime_t duration = ackFrameDuration + modeSet->getSifsTime();
             if (pendingHeader) {
                 auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader, txop);
@@ -135,7 +135,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
                 duration += pendingFrameDuration + modeSet->getSifsTime();
                 if (ackPolicy->isAckNeeded(pendingHeader)) {
                     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE
-                    simtime_t ackToPendingFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
+                    simtime_t ackToPendingFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
                     duration += ackToPendingFrameDuration + modeSet->getSifsTime();
                 }
             }
@@ -153,7 +153,7 @@ simtime_t SingleProtectionMechanism::computeDataOrMgmtFrameDurationField(Packet 
                 duration = pendingFrameDuration + modeSet->getSifsTime();
                 if (ackPolicy->isAckNeeded(pendingHeader)) {
                     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE
-                    simtime_t ackToPendingFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
+                    simtime_t ackToPendingFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
                     duration += ackToPendingFrameDuration + modeSet->getSifsTime();
                 }
             }

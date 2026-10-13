@@ -24,7 +24,7 @@ void RecipientAckPolicy::initialize(int stage)
 
 simtime_t RecipientAckPolicy::computeAckDuration(Packet *dataOrMgmtPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
 {
-    return rateSelection->computeResponseAckFrameMode(dataOrMgmtPacket, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
+    return rateSelection->computeResponseAckFrameMode(dataOrMgmtPacket, dataOrMgmtHeader, ResponseQueryRole::RESPOND)->getDuration(LENGTH_ACK);
 }
 
 //

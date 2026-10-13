@@ -1,0 +1,278 @@
+%description:
+Verify directional HT response selection through both production selectors.
+Compatible n peers agree for ACK, CTS, and QoS Basic Block Ack queries.
+Receiver GI capability controls each response direction. Unknown advertised Tx
+support retains valid peer state but limits prediction to legacy fallback.
+These queries do not establish complete exchanges or control-format compliance.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+namespace Ieee80211ResponseModeSelection_1 {
+
+class TestRateSelection : public RateSelection
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL)
+            mib.reference(this, "mibModule", true);
+    }
+  public:
+    void configure(const Ieee80211ModeSet *catalog, const IIeee80211Mode *responseOverride)
+    {
+        modeSet = catalog;
+        responseAckFrameMode = responseCtsFrameMode = responseOverride;
+    }
+};
+Define_Module(TestRateSelection);
+
+class TestQosRateSelection : public QosRateSelection
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL)
+            mib.reference(this, "mibModule", true);
+    }
+  public:
+    void configure(const Ieee80211ModeSet *catalog, const IIeee80211Mode *responseOverride)
+    {
+        modeSet = catalog;
+        responseAckFrameMode = responseCtsFrameMode = responseBlockAckFrameMode = responseOverride;
+    }
+};
+Define_Module(TestQosRateSelection);
+
+static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *catalog, int mcs, bool shortGi)
+{
+    for (int i = 0; i < catalog->getNumModes(); i++) {
+        const auto *mode = catalog->getMode(i);
+        if (mode->getHtMcsIndex() == mcs && mode->getDataMode()->getBandwidth() == MHz(20) &&
+                mode->isHtShortGuardInterval() == shortGi)
+            return mode;
+    }
+    throw cRuntimeError("Required HT mode absent");
+}
+
+static void assertDirectionUnchanged(const Ieee80211HtDirectionalCapabilities& before,
+        const Ieee80211HtDirectionalCapabilities& after)
+{
+    ASSERT(before.valid == after.valid);
+    ASSERT(before.supportedChannelWidths == after.supportedChannelWidths);
+    ASSERT(before.mcsNss.maxMcsPerNss == after.mcsNss.maxMcsPerNss);
+    ASSERT(before.supportedMcs == after.supportedMcs);
+    ASSERT(before.receiverLdpc == after.receiverLdpc);
+    ASSERT(before.receiverShortGi20 == after.receiverShortGi20);
+    ASSERT(before.receiverShortGi40 == after.receiverShortGi40);
+    ASSERT(before.receiverMaxAmpduLengthExponent == after.receiverMaxAmpduLengthExponent);
+}
+
+static void assertPeerUnchanged(const Ieee80211Mib::PeerHtState& before,
+        const Ieee80211Mib::PeerHtState& after)
+{
+    ASSERT(before.valid == after.valid);
+    ASSERT(before.generation == after.generation);
+    ASSERT(before.advertisedCapabilities == after.advertisedCapabilities);
+    ASSERT(before.negotiatedCapabilities.localAdvertisement == after.negotiatedCapabilities.localAdvertisement);
+    ASSERT(before.negotiatedCapabilities.peerAdvertisement == after.negotiatedCapabilities.peerAdvertisement);
+    ASSERT(before.negotiatedCapabilities.operation == after.negotiatedCapabilities.operation);
+    assertDirectionUnchanged(before.negotiatedCapabilities.localTxPeerRx, after.negotiatedCapabilities.localTxPeerRx);
+    assertDirectionUnchanged(before.negotiatedCapabilities.localRxPeerTx, after.negotiatedCapabilities.localRxPeerTx);
+}
+
+} // namespace Ieee80211ResponseModeSelection_1
+
+%file: TestNetwork.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+
+simple TestRateSelection extends SimpleModule
+{
+    parameters:
+        @class(TestRateSelection);
+        string mibModule;
+}
+simple TestQosRateSelection extends SimpleModule
+{
+    parameters:
+        @class(TestQosRateSelection);
+        string mibModule;
+}
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        aMib: Ieee80211Mib;
+        bMib: Ieee80211Mib;
+        aDcf: TestRateSelection { parameters: mibModule = "^.aMib"; }
+        bDcf: TestRateSelection { parameters: mibModule = "^.bMib"; }
+        aQos: TestQosRateSelection { parameters: mibModule = "^.aMib"; }
+        bQos: TestQosRateSelection { parameters: mibModule = "^.bMib"; }
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+
+%activity:
+using namespace Ieee80211ResponseModeSelection_1;
+
+auto aMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("aMib"));
+auto bMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("bMib"));
+auto aDcf = check_and_cast<TestRateSelection *>(getModuleByPath("aDcf"));
+auto bDcf = check_and_cast<TestRateSelection *>(getModuleByPath("bDcf"));
+auto aQos = check_and_cast<TestQosRateSelection *>(getModuleByPath("aQos"));
+auto bQos = check_and_cast<TestQosRateSelection *>(getModuleByPath("bQos"));
+const MacAddress a("02:00:00:00:00:01");
+const MacAddress b("02:00:00:00:00:02");
+aMib->address = a;
+bMib->address = b;
+const auto *catalog = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+const auto *mcs1Long = findHtMode(catalog, 1, false);
+const auto *mcs0Long = findHtMode(catalog, 0, false);
+const auto *mcs0Short = findHtMode(catalog, 0, true);
+const auto *legacy6 = catalog->getMode(Mbps(6));
+const auto *legacy12 = catalog->getMode(Mbps(12));
+ASSERT(mcs1Long->getDataMode()->getNetBitrate() == Mbps(13));
+
+Ieee80211HtCapabilities aCapabilities;
+aCapabilities.supportedChannelWidths = {MHz(20)};
+for (int mcs = 0; mcs < 8; mcs++)
+    aCapabilities.rxMcsSupported[mcs] = true;
+aCapabilities.txMaxNss = 1;
+aCapabilities.txMcsNss.maxMcsPerNss[0] = 7;
+Ieee80211HtCapabilities bCapabilities = aCapabilities;
+Ieee80211HtOperation operation;
+operation.primaryChannel = 1;
+operation.operatingChannelWidth = MHz(20);
+
+auto install = [&]() {
+    aMib->localHtCapabilitiesValid = bMib->localHtCapabilitiesValid = true;
+    aMib->localHtCapabilities = aCapabilities;
+    bMib->localHtCapabilities = bCapabilities;
+    aMib->bssStationData.isAssociated = bMib->bssStationData.isAssociated = true;
+    aMib->setPeerHtCapabilities(b, bCapabilities, operation);
+    bMib->setPeerHtCapabilities(a, aCapabilities, operation);
+    ASSERT(aMib->findPeerHtState(b)->valid);
+    ASSERT(bMib->findPeerHtState(a)->valid);
+};
+auto configure = [&](const IIeee80211Mode *responseOverride) {
+    aDcf->configure(catalog, responseOverride);
+    bDcf->configure(catalog, responseOverride);
+    aQos->configure(catalog, responseOverride);
+    bQos->configure(catalog, responseOverride);
+};
+
+// Each packet pair represents one frame at its originator and recipient.
+auto checkExchange = [&](bool reverse, const IIeee80211Mode *input,
+        const IIeee80211Mode *predicted, const IIeee80211Mode *actual) {
+    auto senderMib = reverse ? bMib : aMib;
+    auto recipientMib = reverse ? aMib : bMib;
+    auto senderDcf = reverse ? bDcf : aDcf;
+    auto recipientDcf = reverse ? aDcf : bDcf;
+    auto senderQos = reverse ? bQos : aQos;
+    auto recipientQos = reverse ? aQos : bQos;
+    const auto senderAddress = senderMib->address;
+    const auto recipientAddress = recipientMib->address;
+    const auto *senderPeer = senderMib->findPeerHtState(recipientAddress);
+    const auto *recipientPeer = recipientMib->findPeerHtState(senderAddress);
+    Ieee80211Mib::PeerHtState senderBefore, recipientBefore;
+    if (senderPeer)
+        senderBefore = *senderPeer;
+    if (recipientPeer)
+        recipientBefore = *recipientPeer;
+    Packet outgoing("outgoing"), received("received");
+    outgoing.addTag<Ieee80211ModeReq>()->setMode(input);
+    received.addTag<Ieee80211ModeInd>()->setMode(input);
+    auto data = makeShared<Ieee80211DataHeader>();
+    auto rts = makeShared<Ieee80211RtsFrame>();
+    auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+    auto receivedRts = makeShared<Ieee80211RtsFrame>();
+    auto receivedBar = makeShared<Ieee80211BasicBlockAckReq>();
+    for (auto header : {Ptr<Ieee80211TwoAddressHeader>(data), Ptr<Ieee80211TwoAddressHeader>(receivedRts), Ptr<Ieee80211TwoAddressHeader>(receivedBar)}) {
+        header->setTransmitterAddress(senderAddress);
+        header->setReceiverAddress(recipientAddress);
+    }
+    // Prediction precedes Tx's transmitter-address assignment for control frames.
+    rts->setReceiverAddress(recipientAddress);
+    bar->setReceiverAddress(recipientAddress);
+    ASSERT(rts->getTransmitterAddress().isUnspecified());
+    ASSERT(bar->getTransmitterAddress().isUnspecified());
+    auto checkPair = [&](const IIeee80211Mode *forecast, const IIeee80211Mode *response, units::values::b length) {
+        ASSERT(forecast == predicted);
+        ASSERT(response == actual);
+        if (predicted == actual)
+            ASSERT(forecast->getDuration(length) == response->getDuration(length));
+    };
+    checkPair(senderDcf->computeResponseAckFrameMode(&outgoing, data, ResponseQueryRole::PREDICT),
+            recipientDcf->computeResponseAckFrameMode(&received, data, ResponseQueryRole::RESPOND), B(14));
+    checkPair(senderDcf->computeResponseCtsFrameMode(&outgoing, rts, ResponseQueryRole::PREDICT),
+            recipientDcf->computeResponseCtsFrameMode(&received, receivedRts, ResponseQueryRole::RESPOND), B(14));
+    checkPair(senderQos->computeResponseAckFrameMode(&outgoing, data, ResponseQueryRole::PREDICT),
+            recipientQos->computeResponseAckFrameMode(&received, data, ResponseQueryRole::RESPOND), B(14));
+    checkPair(senderQos->computeResponseCtsFrameMode(&outgoing, rts, ResponseQueryRole::PREDICT),
+            recipientQos->computeResponseCtsFrameMode(&received, receivedRts, ResponseQueryRole::RESPOND), B(14));
+    checkPair(senderQos->computeResponseBlockAckFrameMode(&outgoing, bar, ResponseQueryRole::PREDICT),
+            recipientQos->computeResponseBlockAckFrameMode(&received, receivedBar, ResponseQueryRole::RESPOND), B(152));
+    if (senderPeer)
+        assertPeerUnchanged(senderBefore, *senderMib->findPeerHtState(recipientAddress));
+    if (recipientPeer)
+        assertPeerUnchanged(recipientBefore, *recipientMib->findPeerHtState(senderAddress));
+    ASSERT(senderMib->bssStationData.isAssociated);
+    ASSERT(recipientMib->bssStationData.isAssociated);
+};
+
+install();
+configure(nullptr);
+checkExchange(false, mcs1Long, mcs1Long, mcs1Long);
+checkExchange(true, mcs1Long, mcs1Long, mcs1Long);
+
+// A can receive short GI; B cannot. The response goes to the frame sender.
+aCapabilities.shortGi20 = true;
+bCapabilities.shortGi20 = false;
+install();
+configure(mcs0Short);
+checkExchange(false, mcs0Long, mcs0Short, mcs0Short);
+checkExchange(true, mcs0Long, mcs0Long, mcs0Long);
+
+// Both unknown advertisements preserve association and the responder's private Tx map.
+for (bool undefined : {true, false}) {
+    bCapabilities.txMcsSetDefined = !undefined;
+    bCapabilities.txRxMcsSetNotEqual = !undefined;
+    install();
+    ASSERT(aMib->findPeerHtState(b)->negotiatedCapabilities.localRxPeerTx.valid);
+    ASSERT(!aMib->findPeerHtState(b)->negotiatedCapabilities.localRxPeerTx.supportedMcs[0]);
+    ASSERT(bMib->findPeerHtState(a)->negotiatedCapabilities.localTxPeerRx.supportedMcs[0]);
+    checkExchange(false, mcs0Long, legacy6, mcs0Short);
+}
+bCapabilities.txMcsSetDefined = true;
+bCapabilities.txRxMcsSetNotEqual = false;
+install();
+configure(nullptr);
+aMib->removePeerHtCapabilities(b);
+checkExchange(false, mcs1Long, legacy12, mcs1Long);
+install();
+bMib->removePeerHtCapabilities(a);
+checkExchange(false, mcs1Long, mcs1Long, legacy12);
+aMib->removePeerHtCapabilities(b);
+checkExchange(false, mcs1Long, legacy12, legacy12);
+checkExchange(false, legacy6, legacy6, legacy6);
+install();
+checkExchange(false, legacy6, legacy6, legacy6);
+
+EV << "Directional production response selection checks passed.\n";
+
+%contains: stdout
+Directional production response selection checks passed.

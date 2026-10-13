@@ -913,6 +913,19 @@ streams is bounded by the antenna count of the radio.
    **.wlan[*].radio.channelNumber = 8
    **.wlan[*].bitrate = 24Mbps
 
+.. _ug:sec:80211:response-prediction:
+
+Response prediction
+~~~~~~~~~~~~~~~~~~~
+
+For compatible associated ``n(mixed-2.4Ghz)`` peers, 13 Mbps HT input retains a 13 Mbps HT response. Absent HT state selects 12 Mbps legacy ERP-OFDM. Prediction checks peer transmission against local reception; actual response selection checks local transmission against peer reception. Exact agreement requires:
+
+- Both stations use identical mode catalogs and response configuration.
+- Peer advertisements, HT Operation state, and selected capabilities are consistent and stable across the exchange.
+- The responder advertises a defined transmit MCS set equal to its receive MCS set.
+
+Unknown responder transmission support can produce a legacy prediction while the actual response uses HT. That prediction is not a proven upper bound on response duration. Unknown support alone does not invalidate association or force a legacy response. See :doc:`../migration-guide/index` for external response signatures and channel migration.
+
 Radio parameters
 ~~~~~~~~~~~~~~~~
 

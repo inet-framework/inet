@@ -38,7 +38,7 @@ bool OriginatorAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>
 //
 simtime_t OriginatorAckPolicy::getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(packet, header)->getPhyRxStartDelay() : ackTimeout;
+    return ackTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseAckFrameMode(packet, header, ResponseQueryRole::PREDICT)->getPhyRxStartDelay() : ackTimeout;
 }
 
 } /* namespace ieee80211 */

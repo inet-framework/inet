@@ -17,6 +17,10 @@ typedef int8_t FragmentNumber;
 typedef int8_t Tid;
 typedef int16_t SequenceNumber;
 
+// PREDICT selects the peer's response to an outgoing frame.
+// RESPOND selects the local response to a received frame.
+enum class ResponseQueryRole { PREDICT, RESPOND };
+
 struct SequenceNumberCyclic
 {
   private:

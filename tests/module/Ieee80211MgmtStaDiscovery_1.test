@@ -554,12 +554,12 @@ class Ieee80211MgmtStaDiscoveryTest : public cSimpleModule, public cListener
         responsePacket.addTag<physicallayer::Ieee80211ModeInd>()->setMode(mcs0Long);
         auto responseDataHeader = makeShared<Ieee80211DataHeader>();
         responseDataHeader->setTransmitterAddress(address);
-        ASSERT(dcfRateSelection->computeResponseAckFrameMode(&responsePacket, responseDataHeader) == legacy6Mbps);
-        ASSERT(qosRateSelection->computeResponseAckFrameMode(&responsePacket, responseDataHeader) == legacy6Mbps);
+        ASSERT(dcfRateSelection->computeResponseAckFrameMode(&responsePacket, responseDataHeader, ResponseQueryRole::RESPOND) == legacy6Mbps);
+        ASSERT(qosRateSelection->computeResponseAckFrameMode(&responsePacket, responseDataHeader, ResponseQueryRole::RESPOND) == legacy6Mbps);
         auto rtsHeader = makeShared<Ieee80211RtsFrame>();
         rtsHeader->setTransmitterAddress(address);
-        ASSERT(dcfRateSelection->computeResponseCtsFrameMode(&responsePacket, rtsHeader) == legacy6Mbps);
-        ASSERT(qosRateSelection->computeResponseCtsFrameMode(&responsePacket, rtsHeader) == legacy6Mbps);
+        ASSERT(dcfRateSelection->computeResponseCtsFrameMode(&responsePacket, rtsHeader, ResponseQueryRole::RESPOND) == legacy6Mbps);
+        ASSERT(qosRateSelection->computeResponseCtsFrameMode(&responsePacket, rtsHeader, ResponseQueryRole::RESPOND) == legacy6Mbps);
 
         auto multicastHeader = makeShared<Ieee80211DataHeader>();
         multicastHeader->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);

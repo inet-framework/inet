@@ -25,7 +25,7 @@ void QosCtsPolicy::initialize(int stage)
 
 simtime_t QosCtsPolicy::computeCtsDuration(Packet *rtsPacket, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
-    return rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
+    return rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame, ResponseQueryRole::RESPOND)->getDuration(LENGTH_CTS);
 }
 
 //

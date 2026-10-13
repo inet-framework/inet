@@ -34,8 +34,8 @@ simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPack
     auto pendingFrameMode = rateSelection->computeMode(pendingPacket, pendingHeader);
     RateSelection::setFrameMode(pendingPacket, pendingHeader, pendingFrameMode); // KLUDGE
     simtime_t pendingFrameDuration = pendingFrameMode->getDuration(pendingPacket->getDataLength());
-    simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame)->getDuration(LENGTH_CTS);
-    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader)->getDuration(LENGTH_ACK);
+    simtime_t ctsFrameDuration = rateSelection->computeResponseCtsFrameMode(rtsPacket, rtsFrame, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
+    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(pendingPacket, pendingHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
     simtime_t durationId = ctsFrameDuration + pendingFrameDuration + ackFrameDuration;
     return durationId + 3 * modeSet->getSifsTime();
 }
@@ -52,7 +52,7 @@ simtime_t OriginatorProtectionMechanism::computeRtsDurationField(Packet *rtsPack
 //
 simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    simtime_t ackToDataFrameDuration = rateSelection->computeResponseAckFrameMode(dataPacket, dataHeader)->getDuration(LENGTH_ACK);
+    simtime_t ackToDataFrameDuration = rateSelection->computeResponseAckFrameMode(dataPacket, dataHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
     if (dataHeader->getReceiverAddress().isMulticast())
         return 0;
     if (!dataHeader->getMoreFragments())
@@ -78,7 +78,7 @@ simtime_t OriginatorProtectionMechanism::computeDataFrameDurationField(Packet *d
 //
 simtime_t OriginatorProtectionMechanism::computeMgmtFrameDurationField(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader, Packet *pendingPacket, const Ptr<const Ieee80211DataOrMgmtHeader>& pendingHeader)
 {
-    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtPacket, mgmtHeader)->getDuration(LENGTH_ACK);
+    simtime_t ackFrameDuration = rateSelection->computeResponseAckFrameMode(mgmtPacket, mgmtHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK);
     if (mgmtHeader->getReceiverAddress().isMulticast())
         return 0;
     if (!mgmtHeader->getMoreFragments()) {
