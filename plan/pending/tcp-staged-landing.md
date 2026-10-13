@@ -66,7 +66,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S15 ✅ | `topic/tcp-timers` | 18 (part), 26 (part), 28 (part), 31, 32 (part), 33, 68 (part), 77, new | +483 −64 | the timer parameters, the RTO of Linux, the SYN retries, a FIN that keeps a running retransmission timer, adaptive delayed ACK, keepalive, no new fast recovery before the recovery point of a timeout (D-34) |
 | S15b ✅ | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +186 −56 | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
 | S16 ✅ | `topic/tcp-send-rules` | 15 (part), 16 (part), 36 (part), 69, new | +90 −4 | the sender SWS avoidance of RFC 9293 with its override timeout, `TCP_NODELAY`, the Nagle of Minshall, `TCP_MAXSEG` (D-73 to D-75) |
-| S16b | `topic/tcp-write-boundaries` | 36 (part), new | +250 −10 (about) | `TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of Linux at write boundaries |
+| S16b ✅ | `topic/tcp-write-boundaries` | 36 (part), 46 (part), new | +297 −8 | `TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of Linux at write boundaries behind a parameter (D-76 to D-78) |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
@@ -708,6 +708,33 @@ plan gives a reason for.
   the source announced the value of the option also when it was larger. `minshallNagle` selects the
   Nagle of Minshall that Linux uses; the default is the Nagle of RFC 9293 section 3.7.4, where the
   source made the variant of Minshall the only Nagle.
+- **D-76 — `TCP_CORK` and `MSG_MORE` as Linux.** Master ignored both; S3 landed only the contract.
+  A partial segment waits while `TCP_CORK` is set or while the last write has `MSG_MORE`; a
+  full-sized segment and a FIN go. An uncork sends the held data, but Nagle applies again, as Linux
+  `__tcp_sock_set_cork()`. With nothing in flight, the cork timer sends the held data with PSH one
+  RTO after the start of the hold, and a later hold does not start it again, as Linux
+  `tcp_check_probe_timer()` and `tcp_write_wakeup()`: the hold has a ceiling. `TCP_NODELAY` sends
+  the held data once and keeps the cork (Linux `TCP_NAGLE_PUSH`). The persist timer does not start
+  while the cork timer runs, but a zero window starts it. The source starts the cork timer again at
+  each hold, so a train of small writes can hold the data for longer than one RTO, and it sends the
+  held data at an uncork also when Nagle holds it.
+- **D-77 — `MSG_EOR` sets no PSH, and Nagle holds only the last record.** No segment spans a record
+  boundary, also not a retransmission. Linux sets PSH at the end of a write without `MSG_MORE`
+  (`tcp_mark_push()`), not at a record boundary, so S16b gives a boundary no PSH of its own; with
+  the Linux parameter of D-78, the end of the write sets it. A record that ends inside the partial
+  segment at the end cannot become larger, so Nagle and the cork hold only the data after the last
+  boundary, as Linux `tcp_write_xmit()`, which tests them only on the last skb of the queue. The
+  source sets PSH at each boundary and holds a whole record. The boundaries are in a queue in
+  sequence order, where the source has a `std::set`, whose order is wrong after a wrap-around of
+  the sequence numbers.
+- **D-78 — The PSH of Linux is an option.** No RFC asks for PSH at the end of a write, at the end of
+  a GSO burst, in a long write (`forced_push()`) or on the data of a Fast Open SYN, so
+  `pushSegmentsOnWriteBoundary` selects these rules and its default is false; inet-gpl sets it. The
+  rules and their geometry come from the source, which fitted them to the packetdrill scripts;
+  only the Linux headers are on hand, so the scripts of inet-gpl measure them. `pushed_seq` starts
+  at the ISS, as Linux `tcp_connect_init()`, where the source set it at the first write, which
+  compares wrongly when the ISS is more than 2^31 from zero. The PSH in the last buffered segment
+  of RFC 9293 (MUST-61) stays with S19 (D-74).
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -1981,12 +2008,45 @@ lwIP). The six gates pass.
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | add: `TCP_CORK` and `MSG_MORE`, with the cork timer | — | 36 (part) |
-| 2 | add: `MSG_EOR`, record boundaries that no segment spans | — | 36 (part) |
-| 3 | add: the PSH of Linux at write boundaries, selected by `pushSegmentsOnWriteBoundary` | — | 36 (part), new |
+| 1 | add: `TCP_CORK` and `MSG_MORE`, with the cork timer | — | 36 (part), new (D-76) |
+| 2 | add: `MSG_EOR`, record boundaries that no segment spans | — | 36 (part), new (D-77) |
+| 3 | add: the PSH of Linux at write boundaries, by a parameter | — | 36 (part), 46 (part), new (D-78) |
 
 S16b takes the write boundaries of commit 36: the socket options `TCP_CORK` and `MSG_MORE`, which
 hold the partial segment at the end of a write, the record boundary of `MSG_EOR`, and the PSH that
 Linux sets at the end of a write, in a large write (`forced_push`) and on each burst of segments
 (GSO). No RFC has these; each acts only when an application asks for it or the Linux parameter is
-on. The PSH in the last buffered segment of RFC 9293 (MUST-61) comes with S19 (D-74).
+on. The PSH in the last buffered segment of RFC 9293 (MUST-61) comes with S19 (D-74). S16b takes
+the size of a GSO burst and `TcpAlgorithm::getSrtt()` from commit 46; S18 takes the rest of that
+commit. Where Linux and the source differ, S16b follows Linux: the cork timer, Nagle after an
+uncork (D-76), and the PSH and Nagle of a record (D-77).
+
+Items for later stages: (inet-gpl) its configuration sets `pushSegmentsOnWriteBoundary = true`
+already; a run can check the cork, `MSG_MORE` and `MSG_EOR` scripts only after S18.
+
+### S16b — `topic/tcp-write-boundaries` — landed 2026-10-13
+
+The owner reviewed and approved S16b on 2026-10-13.
+
+S16b brings `TCP_CORK`, `MSG_MORE` and `MSG_EOR`, and the PSH of Linux at write boundaries behind
+a parameter. Where the source is wrong or differs from Linux, S16b deviates from it (D-76 to D-78).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: TCP_CORK and MSG_MORE, with the cork timer` | — | 36 (part), new | — |
+| `tcp: add: MSG_EOR, record boundaries that no segment spans` | — | 36 (part), new | — |
+| `tcp: add: the PSH of Linux at write boundaries, by a parameter` | — | 36 (part), 46 (part), new | — |
+
+New tests: `tcp_cork_1` to `_4`, `tcp_msg_more_1`, `tcp_eor_1` to `_3` and `tcp_push_write_1` to
+`_3`. The test client gets the parameter `corkScript` and the `sendScript` flags `more` and `eor`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (541 at the first code commit, 547 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 122 and serializer 4 pass at the head. The new tests
+of each code commit fail with the source of the commit before. The CI fingerprint job runs at each
+code commit, and no row moves. The TCP fingerprint rows run in debug at the head with no runtime
+error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build with
+lwIP). The packetdrill suite of inet-gpl, with the comments of its follow-up and against the source
+branch, gives 303 MATCH, 12 KERNEL_DRIFT and 3 UNSUPPORTED_FEATURE, and no script changes its
+verdict. The six gates pass.
