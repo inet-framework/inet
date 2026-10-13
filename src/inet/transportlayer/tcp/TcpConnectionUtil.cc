@@ -1277,6 +1277,11 @@ void TcpConnection::sendSyn()
 
     // send it
     sendToIP(fp, tcpHeader);
+
+    // the data of a Fast Open SYN goes out here, not by sendSegment(), so its zero-copy
+    // SENDs complete here (snd_nxt is past the SYN data)
+    if (attachSynData)
+        notifyZerocopyCompletions();
 }
 
 void TcpConnection::sendSynAck()
@@ -1654,20 +1659,7 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         state->snd_nxt = state->snd_fin_seq + 1;
     }
 
-    // MSG_ZEROCOPY: a completion for each zero-copy SEND whose data went out now; one
-    // segment can complete several small SENDs. As Linux on a device that copies the
-    // data (a tun device), TCP is then done with the buffer of the application.
-    while (!zerocopySeqNums.empty() && !seqGreater(zerocopySeqNums.begin()->first, state->snd_nxt)) {
-        uint32_t zerocopyId = zerocopySeqNums.begin()->second;
-        zerocopySeqNums.erase(zerocopySeqNums.begin());
-        EV_INFO << "Notifying app: ZEROCOPY_COMPLETION id=" << zerocopyId << "\n";
-        auto *indication = new Indication("ZerocopyCompletion", TCP_I_ZEROCOPY_COMPLETION);
-        auto *completionInfo = new TcpZerocopyCompletionInfo();
-        completionInfo->setZerocopyId(zerocopyId);
-        indication->addTag<SocketInd>()->setSocketId(socketId);
-        indication->setControlInfo(completionInfo);
-        sendToApp(indication);
-    }
+    notifyZerocopyCompletions();
 
     updateSndbufLimitedChrono(); // this segment can have sent the last unsent data
 
@@ -2062,6 +2054,24 @@ uint32_t TcpConnection::getGsoBurstSegments(uint32_t congestionWindow, uint32_t 
     double bytesPerBurst = (2.0 * congestionWindow / srtt.dbl()) / 1024.0;
     uint32_t tsoSegs = std::max<uint32_t>(2, (uint32_t)(bytesPerBurst / effectiveMss));
     return std::max(1u, std::min(cwndQuota, tsoSegs));
+}
+
+void TcpConnection::notifyZerocopyCompletions()
+{
+    // MSG_ZEROCOPY: a completion for each zero-copy SEND whose data went out now; one
+    // segment can complete several small SENDs. As Linux on a device that copies the
+    // data (a tun device), TCP is then done with the buffer of the application.
+    while (!zerocopySeqNums.empty() && !seqGreater(zerocopySeqNums.begin()->first, state->snd_nxt)) {
+        uint32_t zerocopyId = zerocopySeqNums.begin()->second;
+        zerocopySeqNums.erase(zerocopySeqNums.begin());
+        EV_INFO << "Notifying app: ZEROCOPY_COMPLETION id=" << zerocopyId << "\n";
+        auto *indication = new Indication("ZerocopyCompletion", TCP_I_ZEROCOPY_COMPLETION);
+        auto *completionInfo = new TcpZerocopyCompletionInfo();
+        completionInfo->setZerocopyId(zerocopyId);
+        indication->addTag<SocketInd>()->setSocketId(socketId);
+        indication->setControlInfo(completionInfo);
+        sendToApp(indication);
+    }
 }
 
 uint32_t TcpConnection::getLastRecordBoundaryBefore(uint32_t seq) const

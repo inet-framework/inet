@@ -325,6 +325,9 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual uint32_t getLastRecordBoundaryBefore(uint32_t seq) const;
 
+    /** MSG_ZEROCOPY: notifies the application of each zero-copy SEND whose data went out */
+    virtual void notifyZerocopyCompletions();
+
     /**
      * pushSegmentsOnWriteBoundary: the number of segments that Linux gives the NIC as
      * one GSO burst (tcp_write_xmit(), tcp_tso_autosize()), at the given congestion
