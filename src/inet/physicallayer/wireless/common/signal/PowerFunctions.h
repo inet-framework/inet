@@ -58,6 +58,16 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
         return gain;
     }
 
+    virtual void partition(const Interval<simsec, Hz>& i, const std::function<void(const Interval<simsec, Hz>&, const IFunction<double, Domain<simsec, Hz>> *)> f) const override {
+        // the value does not depend on time: with a fixed frequency it is constant over the interval
+        if ((i.getFixed() & 0b01) == 0b01) {
+            ConstantFunction<double, Domain<simsec, Hz>> g(getValue(i.getLower()));
+            f(i, &g);
+        }
+        else
+            FunctionBase::partition(i, f);
+    }
+
     virtual bool isFinite(const Interval<simsec, Hz>& i) const override { return true; }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override {
