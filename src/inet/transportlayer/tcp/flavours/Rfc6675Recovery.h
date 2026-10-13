@@ -124,20 +124,6 @@ class INET_API Rfc6675Recovery : public ITcpRecovery
      * returns false if no segment should be send.
      */
     virtual bool nextSeg(uint32_t& seqNum);
-
-    /**
-     * Utility: send data during Loss Recovery phase (if SACK is enabled).
-     */
-    virtual void sendDataDuringLossRecoveryPhase(uint32_t congestionWindow);
-
-    /**
-     * Utility: send segment during Loss Recovery phase (if SACK is enabled).
-     * Returns the number of bytes sent.
-     */
-    virtual uint32_t sendSegmentDuringLossRecoveryPhase(uint32_t seqNum);
-
-    /** Utility: adds SACKs to segments header options field */
-    virtual TcpHeader addSacks(const Ptr<TcpHeader>& tcpHeader);
 };
 
 } // namespace tcp
