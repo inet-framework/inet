@@ -24,6 +24,9 @@ shas = git("log", "--reverse", "--format=%H", rng).split()
 print(f"== every #include resolves at the commit that writes it: {rng} ==")
 print(f"  {len(shas)} commit(s)")
 INC = re.compile(r'^\s*#\s*include\s+"(inet/[^"]+)"')
+# The build writes these two headers, so they are never in git: the root Makefile writes
+# features.h (FEATURES_H), and src/makefrag writes opp_defines.h (DEFINES_FILE).
+BUILD_GENERATED = {"inet/features.h", "inet/opp_defines.h"}
 bad = 0
 for sha in shas:
     touched = [f for f in git("show", "--name-only", "--format=", sha).split()
@@ -40,9 +43,9 @@ for sha in shas:
             if not m:
                 continue
             inc = m.group(1)
-            # a generated header comes from the .msg beside it
+            # a generated header comes from the .msg beside it, or from the build
             src = "src/" + inc
-            if src in tree or src.replace("_m.h", ".msg") in tree:
+            if src in tree or src.replace("_m.h", ".msg") in tree or inc in BUILD_GENERATED:
                 continue
             missing.setdefault(f, []).append(inc)
     if missing:
