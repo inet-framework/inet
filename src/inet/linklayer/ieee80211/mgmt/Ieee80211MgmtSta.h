@@ -85,7 +85,7 @@ class INET_API Ieee80211MgmtSta : public Ieee80211MgmtBase
         double rxPower;
 
         bool isAuthenticated;
-        int authSeqExpected; // valid while authenticating; values: 1,3,5...
+        int authSeqExpected; // Open System response transaction: 2
         cMessage *authTimeoutMsg; // if non-nullptr: authentication is in progress
 
         ApInfo()

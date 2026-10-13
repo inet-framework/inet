@@ -43,7 +43,7 @@ num-rngs = 3
 *.radioMedium.mediumLimitCache.minInterferencePower = -82dBm
 
 # access point
-**.wlan*.mgmt.numAuthSteps = 4
+**.wlan*.mgmt.numAuthSteps = 2
 
 # ALL APs common parameters
 **.AP*.wlan*.mgmt.beaconInterval = 0.1s

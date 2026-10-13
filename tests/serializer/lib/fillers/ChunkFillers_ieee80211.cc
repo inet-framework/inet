@@ -520,6 +520,7 @@ void addFillers_ieee80211(std::vector<ChunkFiller>& fillers)
     fillers.push_back({"inet::ieee80211::Ieee80211AuthenticationFrame", "", [](Chunk *c) {
         auto p = check_and_cast<Ieee80211AuthenticationFrame *>(c);
         FillValues v;
+        p->setAlgorithmNumber(v.u16());
         p->setSequenceNumber(v.u16());
         p->setStatusCode(SC_AUTH_ALG0_UNSUP);
         // isLast is explicitly not part of the standard (see the .msg comment) and is
