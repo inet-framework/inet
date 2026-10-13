@@ -176,6 +176,9 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
     if (acceptable)
         acceptable = isSegmentAcceptable(tcpSegment, tcpHeader);
 
+    if (acceptable)
+        updateTsRecent(tcpHeader);
+
     int payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
 
     if (!acceptable) {

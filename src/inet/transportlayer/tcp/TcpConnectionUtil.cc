@@ -2442,15 +2442,6 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
     else
         EV_INFO << "Tcp Header Option TS(TSval=" << option.getSenderTimestamp() << ", TSecr=" << option.getEchoedTimestamp() << ") received\n";
 
-    // RFC 1323, page 35:
-    // "Check whether the segment contains a Timestamps option and bit
-    // Snd.TS.OK is on.  If so:
-    //   If SEG.TSval < TS.Recent, then test whether connection has
-    //   been idle less than 24 days; if both are true, then the
-    //   segment is not acceptable; follow steps below for an
-    //   unacceptable segment.
-    //   If SEG.SEQ is equal to Last.ACK.sent, then save SEG.[TSval] in
-    //   variable TS.Recent."
     // RFC 7323 appendix D: the TSval of a SYN in LISTEN, and of a SYN or a SYN-ACK in
     // SYN_SENT, goes to TS.Recent, so that the SYN-ACK and the ACK that completes the
     // handshake echo it. No ACK has gone out yet, so the rule of Last.ACK.sent below
@@ -2462,24 +2453,32 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
             EV_DETAIL << "Setting ts_recent from the handshake segment: ts_recent=" << state->ts_recent << "\n";
         }
     }
-    else if (state->ts_enabled) {
-        // RFC 7323 section 4.3, rule (2): "If SEG.TSval >= TS.Recent and SEG.SEQ <=
-        // Last.ACK.sent then SEG.TSval is copied to TS.Recent". An older TSval updates
-        // TS.Recent only when TS.Recent is invalid after 24 days of idle time (section
-        // 5.5); else PAWS has dropped the segment (processSegment1stThru8th()).
-        bool tsRecentValid = (simTime() - state->ts_recent_stamp) <= PAWS_IDLE_TIME_THRESH;
-        bool olderTsval = seqLess(option.getSenderTimestamp(), state->ts_recent);
-        if ((!olderTsval || !tsRecentValid) && seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) { // Note: test is modified according to the latest proposal of the tcplw@cray.com list (Braden 1993/04/26)
-            // a newer timestamp lets the AccECN decode read this ACK (Linux FLAG_TS_PROGRESS)
-            if (seqGreater(option.getSenderTimestamp(), state->ts_recent))
-                state->accEcnTsProgress = true;
-            state->ts_recent = option.getSenderTimestamp();
-            state->ts_recent_stamp = simTime();
-            EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
-        }
-    }
+    // a synchronized connection updates TS.Recent after the window test, see updateTsRecent()
 
     return true;
+}
+
+void TcpConnection::updateTsRecent(const Ptr<const TcpHeader>& tcpHeader)
+{
+    // RFC 7323 section 5.3: "R3) If an arriving segment satisfies SEG.TSval >= TS.Recent
+    // and SEG.SEQ <= Last.ACK.sent (see Section 4.3), then record its timestamp in
+    // TS.Recent", after the window test (R2), so a segment outside the window does not
+    // set it. A RST changes no timestamp state (section 5.2). An older TSval sets
+    // TS.Recent only when TS.Recent is invalid after 24 days of idle time (section 5.5);
+    // else PAWS has dropped the segment.
+    const TcpOptionTimestamp *option = state->ts_enabled && !tcpHeader->getRstBit() ? findTSOption(tcpHeader) : nullptr;
+    if (option == nullptr)
+        return;
+    bool tsRecentValid = (simTime() - state->ts_recent_stamp) <= PAWS_IDLE_TIME_THRESH;
+    bool olderTsval = seqLess(option->getSenderTimestamp(), state->ts_recent);
+    if ((!olderTsval || !tsRecentValid) && seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) {
+        // a newer timestamp lets the AccECN decode read this ACK (Linux FLAG_TS_PROGRESS)
+        if (seqGreater(option->getSenderTimestamp(), state->ts_recent))
+            state->accEcnTsProgress = true;
+        state->ts_recent = option->getSenderTimestamp();
+        state->ts_recent_stamp = simTime();
+        EV_DETAIL << "Updating ts_recent from segment: new ts_recent=" << state->ts_recent << "\n";
+    }
 }
 
 bool TcpConnection::processSACKPermittedOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionSackPermitted& option)
