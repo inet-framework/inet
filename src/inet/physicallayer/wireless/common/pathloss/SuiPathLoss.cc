@@ -81,7 +81,7 @@ std::ostream& SuiPathLoss::printToStream(std::ostream& stream, int level, int ev
     return stream;
 }
 
-double SuiPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double SuiPathLoss::computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     m R = distance;
     m R0 = m(100.0);

@@ -43,7 +43,7 @@ std::ostream& RicianFading::printToStream(std::ostream& stream, int level, int e
     return stream;
 }
 
-double RicianFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double RicianFading::computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     m waveLength = propagationSpeed / frequency;
     double c = 1.0 / (2.0 * (k + 1));

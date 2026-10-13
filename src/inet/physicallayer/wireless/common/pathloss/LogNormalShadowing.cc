@@ -43,7 +43,7 @@ std::ostream& LogNormalShadowing::printToStream(std::ostream& stream, int level,
     return stream;
 }
 
-double LogNormalShadowing::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double LogNormalShadowing::computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     m d0 = m(1.0);
     // reference path loss

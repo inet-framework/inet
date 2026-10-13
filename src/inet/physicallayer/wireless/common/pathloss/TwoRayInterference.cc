@@ -100,7 +100,7 @@ double TwoRayInterference::computeTwoRayInterference(const Coord& pos_t, const C
     return friis_term * interference_term;
 }
 
-double TwoRayInterference::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double TwoRayInterference::computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     return NaN;
 }

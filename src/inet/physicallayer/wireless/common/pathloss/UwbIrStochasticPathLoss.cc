@@ -91,7 +91,7 @@ double UwbIrStochasticPathLoss::getGhassemzadehPathLoss(double gamma, double S, 
     return math::dB2fraction(attenuation);
 }
 
-double UwbIrStochasticPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double UwbIrStochasticPathLoss::computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     double n1 = simtruncnormal(0, 1, n1_limit, 1);
     double n2 = simtruncnormal(0, 1, n2_limit, 2);
