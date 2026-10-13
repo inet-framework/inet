@@ -2745,6 +2745,15 @@ void TcpConnection::initMtuProbing()
     state->pathMtu = pathMtu > 0 ? pathMtu : state->snd_mss + headers;
     EV_INFO << "RFC 4821: the path MTU search runs from " << state->mtupSearchLow << " to " << state->mtupSearchHigh
             << ", the route MTU is " << state->pathMtu << "\n";
+    // an active opener starts at the base MSS, because Linux tcp_connect_init() arms the
+    // search before tcp_sync_mss() ("use initial MSS of tcp_base_mss"); a passive
+    // connection keeps its MSS, as the Linux script mtu_probe/basic-v4 shows
+    uint32_t baseMss = mtuToMss(state->mtupSearchLow) + (state->ts_enabled ? 12 : 0);
+    if (state->active && baseMss < state->snd_mss) {
+        state->snd_mss = baseMss;
+        state->snd_effmss = calculateEffectiveMss();
+        EV_INFO << "RFC 4821: an active opener starts at the base MSS, SMSS is " << state->snd_mss << "\n";
+    }
 }
 
 int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWindow, uint32_t bytesInFlight) const
