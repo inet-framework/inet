@@ -65,7 +65,8 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S14 ✅ | `topic/tcp-receive-buffer` | 28, 29, 35, new | +353 −9 | the receive buffer apart from the advertised window, the Linux receive memory behind parameters, the window and the buffer of one socket (D-4), MSG_ZEROCOPY, the send buffer chrono, SO_TIMESTAMPING, `TCP_NOTSENT_LOWAT` (D-61 to D-64) |
 | S15 ✅ | `topic/tcp-timers` | 18 (part), 26 (part), 28 (part), 31, 32 (part), 33, 68 (part), 77, new | +483 −64 | the timer parameters, the RTO of Linux, the SYN retries, a FIN that keeps a running retransmission timer, adaptive delayed ACK, keepalive, no new fast recovery before the recovery point of a timeout (D-34) |
 | S15b ✅ | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +186 −56 | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
-| S16 | `topic/tcp-write-boundaries` | 15 (part), 16 (part), 36, 69 | +355 −9 | PSH at write boundaries, `TCP_CORK`, a window smaller than one MSS |
+| S16 | `topic/tcp-send-rules` | 15 (part), 16 (part), 36 (part), 69, new | +250 −20 (about) | the send rules of RFC 9293: sender SWS avoidance with its override timeout, PSH in the last buffered segment, `TCP_NODELAY`, the Nagle of Minshall, `TCP_MAXSEG` |
+| S16b | `topic/tcp-write-boundaries` | 36 (part), new | +250 −10 (about) | `TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of Linux at write boundaries |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 79, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
@@ -1893,3 +1894,31 @@ changed tests of each code commit fail with the source of the commit before. The
 runs at each code commit, and no row moves. The TCP fingerprint rows run in debug at the head with
 no runtime error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build
 with lwIP). The six gates pass.
+
+### S16 — `topic/tcp-send-rules`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: the sender avoids the silly window syndrome (RFC 9293 MUST-38) | — | 15 (part), 16 (part), 69, new |
+| 2 | change: PSH in the last buffered segment (RFC 9293 MUST-61) | — | new |
+| 3 | add: `TCP_NODELAY` for one socket | — | 36 (part) |
+| 4 | add: the Nagle of Minshall, selected by a parameter | — | 36 (part) |
+| 5 | add: `TCP_MAXSEG` for one socket | — | 15 (part) |
+
+S16 had commits 15 and 16 (parts), 36 and 69. Commit 36 brings two kinds of work: the send rules
+(Nagle, `TCP_NODELAY`) and the write boundaries (`TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of
+Linux). S16 takes the send rules, and a new stage S16b takes the write boundaries, so that each
+stage stays small enough to review.
+
+Master has no sender SWS avoidance, which RFC 9293 section 3.8.6.2.1 requires (MUST-38). The source
+adds rules (1) to (3) of that section with commits 15, 16 and 69, but not rule (4), the override
+timeout: "To avoid a resulting deadlock, it is necessary to have a timeout to force transmission of
+data, overriding the SWS avoidance algorithm." The RFC suggests the timer of the zero-window probes
+for it, and Linux uses its probe timer the same way (`tcp_write_wakeup()`); step 1 uses the persist
+timer of S15b. Master sets PSH on no segment. INET has no PUSH flag on SEND, so RFC 9293 section
+3.9.1.2 asks for PSH "in the last buffered segment (i.e., when there is no more queued data to be
+sent) (MUST-61)"; the source sets PSH only with the Linux option of S16b. The Nagle of master is
+that of RFC 9293 section 3.7.4; the source changed it to the variant of Minshall, which Linux uses;
+step 4 keeps the RFC as the default. The counts of `sendData()` of commit 27 (`allowedToSend`)
+need no change: master computes the effective window with signed arithmetic, so it does not
+underflow.
