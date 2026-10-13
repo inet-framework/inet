@@ -95,6 +95,19 @@ class CheckCommitsTest(unittest.TestCase):
         result = self.check()
         self.assertNotIn("source lines, above 400", result.stdout)
 
+    def test_a_component_area_is_a_subject(self):
+        self.commit("Ipv4: fix: one value\n\nThe value was wrong.", {"src/inet/a/A.cc": "int a = 1;\n"})
+        self.commit("ExternalProcess: change: one value\n\nThe value was wrong.", {"src/inet/a/A.cc": "int a = 2;\n"})
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertNotIn("is not 'area: what it does'", result.stdout)
+
+    def test_a_subject_without_an_area_is_a_violation(self):
+        self.commit("Fix one value\n\nThe value was wrong.", {"src/inet/a/A.cc": "int a = 1;\n"})
+        result = self.check()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("is not 'area: what it does': Fix one value", result.stdout)
+
     def words(self, count):
         return " ".join("word" for _ in range(count))
 
