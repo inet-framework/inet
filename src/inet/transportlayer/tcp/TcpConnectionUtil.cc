@@ -247,6 +247,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     socketSynRetries = listenerConn->socketSynRetries;
     keepAliveSockopt = listenerConn->keepAliveSockopt;
     noDelaySockopt = listenerConn->noDelaySockopt;
+    maxSegSockopt = listenerConn->maxSegSockopt;
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
@@ -942,6 +943,8 @@ void TcpConnection::configureStateVariables()
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
+    if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss)
+        state->snd_mss = maxSegSockopt; // TCP_MAXSEG of this connection, as Linux user_mss
     state->advertisedMss = state->snd_mss; // our own receive limit; stays when snd_mss falls to the MSS of the peer
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     const char *tcpEcnMode = tcpMain->par("tcpEcnMode");

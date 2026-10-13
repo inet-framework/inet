@@ -193,6 +193,9 @@ class INET_API TcpConnection : public SimpleModule
     // TCP_NODELAY of this connection (TcpSocket::setNoDelay()), also from before the
     // open; -1: the nagleEnabled parameter
     int noDelaySockopt = -1;
+    // TCP_MAXSEG of this connection (TcpSocket::setMaxSeg()), also from before the open;
+    // -1: the mss parameter alone
+    int maxSegSockopt = -1;
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */

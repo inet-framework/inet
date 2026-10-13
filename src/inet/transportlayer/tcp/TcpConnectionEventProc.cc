@@ -283,6 +283,16 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
         EV_DETAIL << "The application writer is " << (writerBlocked ? "blocked on the send buffer" : "not blocked") << "\n";
         updateSndbufLimitedChrono();
     }
+    else if (auto cmd = dynamic_cast<TcpSetMaxSegCommand *>(tcpCommand)) {
+        // TCP_MAXSEG, as Linux: the largest segment that this connection sends; before
+        // the open it also limits the MSS option (configureStateVariables() takes it then)
+        maxSegSockopt = cmd->getValue();
+        if (state != nullptr && maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss) {
+            state->snd_mss = maxSegSockopt;
+            state->snd_effmss = calculateEffectiveMss();
+            EV_DETAIL << "TCP_MAXSEG: SMSS is set to " << state->snd_mss << "\n";
+        }
+    }
     else if (auto cmd = dynamic_cast<TcpSetNoDelayCommand *>(tcpCommand)) {
         // TCP_NODELAY turns Nagle off (RFC 9293 section 3.7.4: "the user can disable
         // the Nagle algorithm"); the command can come before the open, and then

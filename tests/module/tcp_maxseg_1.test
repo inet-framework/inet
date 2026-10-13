@@ -1,0 +1,64 @@
+%description:
+Tests TcpSocket::setMaxSeg(), the socket option TCP_MAXSEG. The mss parameter
+is 1000. The client application sets TCP_MAXSEG to 600 before its open (t=0.2),
+so the SYN announces an MSS of 600 and the data segments carry 600 bytes. At
+t=2 it sets 400 on the open connection, and the later segments carry 400 bytes.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.tOpen=0.5s
+*.cli_app.maxSegScript="0.2 600; 2 400"
+*.cli_app.sendScript="1.0 1200; 3.0 1200"
+*.*_tcp.mss = 1000
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.501 A001] A.1000 > B.2000: S 125000:125000(0) win 16384   Option(s): MaxSegSize
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.503 B001] A.1000 < B.2000: A S 125500:125500(0) ack 125001 win 16384   Option(s): MaxSegSize
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.505 A002] A.1000 > B.2000: A ack 125501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[1.001 A003] A.1000 > B.2000: A 125001:125601(600) ack 125501 win 16384 
+[1.203 B002] A.1000 < B.2000: A ack 125601 win 16384 
+[1.205 A004] A.1000 > B.2000: A 125601:126201(600) ack 125501 win 16384 
+[1.407 B003] A.1000 < B.2000: A ack 126201 win 16384 
+[3.001 A005] A.1000 > B.2000: A 126201:126601(400) ack 125501 win 16384 
+[3.203 B004] A.1000 < B.2000: A ack 126601 win 16384 
+[3.205 A006] A.1000 > B.2000: A 126601:127001(400) ack 125501 win 16384 
+[3.205 A007] A.1000 > B.2000: A 127001:127401(400) ack 125501 win 16384 
+[3.407 B005] A.1000 < B.2000: A ack 127401 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Tcp Header Option MSS(=600) sent
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+TCP_MAXSEG: SMSS is set to 400
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
