@@ -3092,6 +3092,19 @@ uint16_t TcpConnection::updateRcvWnd()
     // update receive queue related state variables and statistics
     updateRcvQueueVars();
 
+    // A locked buffer dropped the last arrival: this ACK offers a zero window, as Linux
+    // tcp_select_window() with ICSK_ACK_NOMEM, and the edge in force moves back to
+    // RCV.NXT; the highest edge offered stays. The window shrinks (RFC 9293 SHLD-14),
+    // which only a buffer that the application locked does.
+    if (state->ackNomem) {
+        state->ackNomem = false;
+        state->rcv_wnd = 0;
+        state->rcv_adv = state->rcv_nxt;
+        emit(rcvAdvSignal, state->rcv_adv);
+        emit(rcvWndSignal, state->rcv_wnd);
+        return 0;
+    }
+
     // windowShrinkAllowed, as Linux with tcp_shrink_window=1 (__tcp_select_window()): the
     // offer is the free buffer at the payload ratio, rounded down to the window scale;
     // zero when it falls under 1/16 of the buffer (or under one MSS or one scale unit)

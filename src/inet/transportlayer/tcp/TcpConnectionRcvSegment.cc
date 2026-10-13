@@ -128,6 +128,11 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
     long int payloadLength = tcpSegment->getByteLength() - tcpHeader->getHeaderLength().get<B>();
     uint32_t payloadSeq = tcpHeader->getSequenceNo();
     uint32_t firstSeq = receiveQueue->getFirstSeqNo();
+    // a buffer that SO_RCVBUF locked cannot grow, so a socket already over its budget
+    // takes nothing more until the application reads (Linux tcp_try_rmem_schedule());
+    // the segment that first crosses the budget still gets in
+    if (payloadLength > 0 && state->rcvbufLocked && state->rcvBufferSize > 0 && rcvBufOccupancy > state->rcvBufferSize)
+        return false;
     if (seqLess(payloadSeq, firstSeq)) {
         long delta = firstSeq - payloadSeq;
         payloadSeq += delta;
@@ -810,6 +815,12 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
                 // if the ACK bit is off drop the segment and return
                 EV_WARN << "RcvQueueBuffer has run out, dropping segment\n";
+                // a locked buffer answers at once with a zero window, as Linux
+                // (ICSK_ACK_NOMEM, ICSK_ACK_NOW), so the peer waits until the application reads
+                if (state->rcvbufLocked) {
+                    state->ackNomem = true;
+                    sendAck();
+                }
                 return TCP_E_IGNORE;
             }
         }
