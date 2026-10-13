@@ -2341,3 +2341,34 @@ head with no runtime error (the `tyf` ingredient differs in 52 rows, as on maste
 need a build with lwIP). The six gates pass. After a rebase onto 17 new commits of master, each
 commit builds alone, the module tests pass at the head (579), the CI fingerprint job passes at the
 head, and the combined pull-request gate passes.
+
+### S17d — `topic/tcp-connection-setup`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | fix: the text of a SYN without Fast Open goes to the application after the handshake | — | new |
+| 2 | fix: a hard ICMP error aborts a connection in SYN_RCVD too | — | 26 (part) |
+| 3 | add: the soft ICMP errors of Linux abort a connection setup, by a parameter | — | 26 (part), 39 (part) |
+| 4 | add: the sequence check of an ICMP error of Linux, by a parameter | — | 26 (part) |
+| 5 | fix: the data of a Fast Open SYN completes its zero-copy write | — | 39 (part) |
+
+S17d takes the connection setup and the ICMP errors from commits 26 and 39. RFC 9293 queues the
+text of a SYN in LISTEN "for processing later"; master inserts it into the receive queue at
+SEG.SEQ, one octet too early, because the SYN takes SEG.SEQ, and never moves RCV.NXT over it; the
+source does the same (step 1). RFC 9293 section 3.9.2.2 says that a hard ICMP error SHOULD abort the
+connection (SHLD-26); master aborts only in SYN_SENT, also for a connection in SYN_RCVD, which has
+no synchronized state yet (step 2).
+
+Two rules of the source are Linux behavior, so parameters select them, with defaults that keep
+master's behavior: a soft ICMP error (IPv4 net or host unreachable) aborts a connection setup, as
+Linux `tcp_v4_err()` does, where RFC 9293 forbids it (MUST-56) and RFC 5461 section 4 describes the
+practice (step 3); and an ICMP error whose quoted sequence number lies outside SND.UNA to SND.MAX is
+ignored, which RFC 5927 section 4.1 describes and Linux and the BSDs do, but no RFC requires (step
+4). The data of a Fast Open SYN goes out without `sendSegment()`, so its zero-copy completion never
+came (step 5).
+
+Two items of earlier stages need no change. The algorithm of a connection that returns from
+SYN_RCVD to LISTEN has no timer: since S11, only a connection that is neither forked nor Fast Open
+returns there, and its algorithm starts at ESTABLISHED. A passive connection never gets data that a
+SEND queued in SYN_RCVD: INET's socket refuses a SEND before the connection is established, and an
+application that sends raw commands is the only way there.
