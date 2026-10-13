@@ -2680,3 +2680,21 @@ test client calls the new `TcpSocket::setPathMtu()`. The CI fingerprint job runs
 commit, and no row moves. The TCP fingerprint rows run in debug at the head with no runtime error
 (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The
 six gates and the combined pull-request gate pass.
+
+### S18c — `topic/tcp-applications`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: MSG_EOR in the send script of TcpSessionApp | — | 42 (part) |
+| 2 | add: a fill byte for the data of TcpSessionApp | — | 42 (part) |
+
+Commit 42 says that `TcpSessionApp` drives per-write options, end-of-record and zero-copy
+semantics, and the Fast Open path; its diff carries only two of them. Step 1 takes the keyword
+`eor` of the send script, which marks the end of a SEND as a record boundary through the
+`TcpSocket::send()` of S16b, and `TcpAppBase::sendPacket()` gets the flag. Step 2 takes the
+parameter `packetData`, the byte that fills the data in the modes `bytecount` and `bytestream`,
+as the parameter of the same name of the queueing sources. Commit 42 also lets
+`TcpServerSocketIo` close a connection when the peer closes, and commit 58 takes that back,
+because it breaks the half-close that the module serves; by D-1, neither part lands. The module
+tests get a `cli_app` of any `IApp`, so that a test can run `TcpSessionApp` against the scripted
+tester, and the test client gets a log of the bytes that it receives.
