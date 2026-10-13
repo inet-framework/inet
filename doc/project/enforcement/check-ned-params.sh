@@ -6,6 +6,9 @@
 # reads ahead of its declaration compiles and cannot run. `git bisect` over any test is then
 # useless across the run of such commits, which is what PR-SERIES-BUILDS exists to prevent.
 #
+# Only the C++ files under src/ count. A test declares the parameters it reads in its own NED,
+# often inside the .test file, and this gate does not read that NED.
+#
 # Usage (from the INET repository root):
 #   doc/project/enforcement/check-ned-params.sh origin/master..HEAD
 #
@@ -28,11 +31,11 @@ DECL = re.compile(r'^\s*(?:volatile\s+)?(?:bool|int|double|string|xml|object)\s+
 bad = 0
 for sha in shas:
     files = git("show", "--name-only", "--format=", sha).split()
-    cc = [f for f in files if f.endswith((".cc", ".h"))]
+    cc = [f for f in files if f.startswith("src/") and f.endswith((".cc", ".h"))]
     if not cc:
         continue
-    # what this commit newly reads
-    plus = "\n".join(l for l in git("show", sha).splitlines() if l.startswith("+"))
+    # what this commit newly reads in the library source
+    plus = "\n".join(l for l in git("show", "--format=", sha, "--", *cc).splitlines() if l.startswith("+"))
     reads = set(re.findall(r'par\("([A-Za-z_]\w*)"\)', plus))
     if not reads:
         continue
