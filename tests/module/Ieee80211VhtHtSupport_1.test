@@ -1,0 +1,547 @@
+%description:
+Run 0 checks full management and HT delivery.
+Run 1 checks simplified management and teardown.
+Run 2 checks the asymmetric HT stream limit.
+Run 3 checks VHT delivery.
+Run 4 checks the default ACK prediction, reservation, and acknowledgment.
+Run 5 checks the default CTS prediction, RTS reservation, and acknowledgment.
+Run 6 checks the TXOP boundary with two queued frames and default HT ACKs.
+All runs use seed 0. Management frames use 6 Mbps legacy OFDM.
+Run 6 supplies extra TXNAV only during production admission queries.
+These checks retain the model's short-GI duration and control-format limits.
+
+%extraargs: -r 0..6
+
+%file: VhtHtSupport.cc
+#include "inet/applications/udpapp/UdpSink.h"
+#include <algorithm>
+#include <cmath>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtStaSimplified.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+
+namespace inet::ieee80211 {
+using physicallayer::IIeee80211Mode;
+struct ResponseObservation {
+    long tree;
+    int type;
+    ResponseQueryRole role;
+    simtime_t time;
+    const IIeee80211Mode *mode;
+};
+class VhtHtSelection : public IQosRateSelection {
+  public:
+    QosRateSelection *delegate = nullptr;
+    std::vector<ResponseObservation> responses;
+    const IIeee80211Mode *configuredDataMode() const {
+        return physicallayer::Ieee80211ModeSet::getModeSet("ac")->getMode(
+            bps(delegate->par("dataFrameBitrate").doubleValue()),
+            Hz(delegate->par("dataFrameBandwidth").doubleValue()),
+            delegate->par("dataFrameNumSpatialStreams").intValue());
+    }
+    const IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            TxopProcedure *txop) override { return delegate->computeMode(packet, header, txop); }
+    const IIeee80211Mode *computeResponseAckFrameMode(Packet *packet,
+            const Ptr<const Ieee80211DataOrMgmtHeader>& header, ResponseQueryRole role) override {
+        auto mode = delegate->computeResponseAckFrameMode(packet, header, role);
+        if (dynamicPtrCast<const Ieee80211DataHeader>(header))
+            responses.push_back({packet->getTreeId(), ST_ACK, role, simTime(), mode});
+        return mode;
+    }
+    const IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet,
+            const Ptr<const Ieee80211RtsFrame>& header, ResponseQueryRole role) override {
+        auto mode = delegate->computeResponseCtsFrameMode(packet, header, role);
+        responses.push_back({packet->getTreeId(), ST_CTS, role, simTime(), mode});
+        return mode;
+    }
+    const IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet,
+            const Ptr<const Ieee80211BlockAckReq>& header, ResponseQueryRole role) override {
+        return delegate->computeResponseBlockAckFrameMode(packet, header, role);
+    }
+};
+class VhtHtRx : public Rx {
+  public:
+    bool admissionQuery = false;
+    simtime_t getTxnavRemaining() const override {
+        return admissionQuery ? SimTime(10, SIMTIME_MS) : Rx::getTxnavRemaining();
+    }
+};
+Define_Module(VhtHtRx);
+class VhtHtMac : public Ieee80211Mac {
+  public:
+    struct Received { int type; long tree; const IIeee80211Mode *mode; simtime_t time; };
+    std::vector<Received> received;
+    void handleLowerPacket(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto tag = packet->findTag<physicallayer::Ieee80211ModeInd>();
+        if (tag)
+            received.push_back({header->getType(), packet->getTreeId(), tag->getMode(), simTime()});
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+};
+Define_Module(VhtHtMac);
+class VhtHtHcf : public Hcf {
+  public:
+    VhtHtSelection selection;
+    int grants = 0;
+    int refusals = 0;
+    int failures = 0;
+    std::vector<simtime_t> acknowledgments;
+    std::vector<simtime_t> admissionRemaining;
+    std::vector<simtime_t> admissionTimes;
+    std::vector<bool> admissionAccepted;
+    std::vector<int> admissionGrant;
+    bool boundary() const { return par("boundary").boolValue(); }
+    void channelGranted(IChannelAccess *access) override {
+        grants++;
+        Hcf::channelGranted(access);
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        auto controlledRx = check_and_cast<VhtHtRx *>(rx);
+        if (boundary() && data) {
+            auto context = frameSequenceHandler->getContext();
+            admissionRemaining.push_back(context->getQoSContext()->txopProcedure->getRemaining());
+            admissionTimes.push_back(simTime());
+            admissionGrant.push_back(grants);
+            controlledRx->admissionQuery = true;
+        }
+        bool accepted = Hcf::transmitFrame(packet, ifs);
+        controlledRx->admissionQuery = false;
+        if (boundary() && data) {
+            admissionAccepted.push_back(accepted);
+            if (!accepted) refusals++;
+        }
+        return accepted;
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *request) override {
+        if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK &&
+                dynamicPtrCast<const Ieee80211DataHeader>(request->peekAtFront<Ieee80211MacHeader>()))
+            acknowledgments.push_back(simTime());
+        Hcf::originatorProcessReceivedFrame(packet, request);
+    }
+    void originatorProcessFailedFrame(Packet *packet) override {
+        failures++;
+        Hcf::originatorProcessFailedFrame(packet);
+    }
+    void originatorProcessRtsProtectionFailed(Packet *packet) override {
+        failures++;
+        Hcf::originatorProcessRtsProtectionFailed(packet);
+    }
+    void inject() {
+        Enter_Method("inject");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(5);
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(mac->getAddress());
+        auto packet = new Packet("boundary-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(26)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+  protected:
+    void initialize(int stage) override {
+        Hcf::initialize(stage);
+        if (stage == INITSTAGE_LOCAL) {
+            selection.delegate = check_and_cast<QosRateSelection *>(rateSelection);
+            rateSelection = &selection;
+        }
+    }
+    void sendUp(const std::vector<Packet *>& packets) override {
+        if (boundary()) {
+            std::vector<Packet *> management;
+            for (auto packet : packets) {
+                if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>())) {
+                    take(packet);
+                    delete packet;
+                }
+                else management.push_back(packet);
+            }
+            Hcf::sendUp(management);
+        }
+        else Hcf::sendUp(packets);
+    }
+};
+Define_Module(VhtHtHcf);
+class VhtHtSimplified : public Ieee80211MgmtStaSimplified {
+  public:
+    void stopForTest() { Enter_Method("stopForTest"); stop(); }
+};
+Define_Module(VhtHtSimplified);
+class VhtHtSink : public UdpSink {
+  public:
+    int receivedCount() const { return numReceived; }
+};
+Define_Module(VhtHtSink);
+struct PhyObservation {
+    bool station;
+    int type;
+    bool retry;
+    long tree;
+    simtime_t start;
+    simtime_t duration;
+    simtime_t airtime;
+    b length;
+    const IIeee80211Mode *mode;
+};
+class VhtHtTest : public cSimpleModule, public cListener {
+  public:
+    VhtHtTest() : cSimpleModule(65536) {}
+  protected:
+    std::vector<PhyObservation> phy;
+    bool associationRequestHt = false;
+    bool associationResponseHt = false;
+    cModule *staRadio = nullptr;
+    int scenario() const { return par("scenario").intValue(); }
+    void receiveSignal(cComponent *source, simsignal_t, cObject *object, cObject *) override {
+        auto tx = check_and_cast<const physicallayer::Ieee80211Transmission *>(object);
+        auto packet = tx->getPacket()->dup();
+        physicallayer::Ieee80211Radio::popIeee80211PhyHeaderAtFront(packet);
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType() == ST_ASSOCIATIONREQUEST) {
+            auto body = packet->peekAt<Ieee80211AssociationRequestFrame>(packet->getFrontOffset() + header->getChunkLength());
+            ASSERT(body->getHtCapabilitiesPresent());
+            ASSERT(!body->getHtOperationPresent());
+            associationRequestHt = true;
+        }
+        if (header->getType() == ST_ASSOCIATIONRESPONSE) {
+            auto body = packet->peekAt<Ieee80211AssociationResponseFrame>(packet->getFrontOffset() + header->getChunkLength());
+            ASSERT(body->getHtCapabilitiesPresent());
+            ASSERT(body->getHtOperationPresent());
+            associationResponseHt = true;
+        }
+        phy.push_back({source == staRadio, header->getType(), header->getRetry(), packet->getTreeId(),
+            tx->getStartTime(), header->getDurationField(), tx->getEndTime() - tx->getStartTime(),
+            packet->getDataLength(), tx->getMode()});
+        delete packet;
+    }
+    static void checkLocal(Ieee80211Mib *mib, int antennas) {
+        ASSERT(mib->localHtCapabilitiesValid);
+        const auto& caps = mib->localHtCapabilities;
+        ASSERT(caps.supportedChannelWidths.count(MHz(20)) == 1);
+        ASSERT(caps.supportedChannelWidths.count(MHz(40)) == 0);
+        ASSERT(caps.shortGi20 && !caps.shortGi40);
+        for (int mcs = 0; mcs < 32; mcs++)
+            ASSERT(caps.rxMcsSupported[mcs] == (mcs < 8 * antennas));
+    }
+    void checkResponse(const PhyObservation& input, int type, VhtHtSelection *selection,
+            VhtHtMac *staMac, const std::vector<PhyObservation>& peerFrames) {
+        const ResponseObservation *prediction = nullptr;
+        for (const auto& observation : selection->responses)
+            if (observation.tree == input.tree && observation.type == type &&
+                    observation.role == ResponseQueryRole::PREDICT && observation.time <= input.start)
+                prediction = &observation;
+        ASSERT(prediction != nullptr);
+        const PhyObservation *actual = nullptr;
+        for (const auto& response : peerFrames)
+            if (response.type == type && response.start > input.start) { actual = &response; break; }
+        ASSERT(actual != nullptr);
+        ASSERT(prediction->mode == actual->mode);
+        auto peerSelection = &check_and_cast<VhtHtHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf"))->selection;
+        bool responderSelected = false;
+        for (const auto& observation : peerSelection->responses)
+            if (observation.tree == input.tree && observation.type == type &&
+                    observation.role == ResponseQueryRole::RESPOND && observation.mode == actual->mode)
+                responderSelected = true;
+        ASSERT(responderSelected);
+        ASSERT(prediction->mode->getDuration(type == ST_ACK ? LENGTH_ACK : LENGTH_CTS) == actual->airtime);
+        bool received = false;
+        for (const auto& frame : staMac->received)
+            if (frame.type == type && frame.tree == actual->tree && frame.mode == actual->mode)
+                received = true;
+        ASSERT(received);
+        if (scenario() == 4 || scenario() == 6 || type == ST_CTS) {
+            ASSERT(actual->mode->getHtMcsIndex() == 1);
+            ASSERT(actual->mode->getDataMode()->getNetBitrate() == Mbps(13));
+        }
+        std::cout << "Response " << type << " predicted and actual rate="
+                  << actual->mode->getDataMode()->getNetBitrate() << " duration=" << actual->airtime << "\n";
+    }
+    void activity() override {
+        staRadio = getModuleByPath("^.sta.wlan[0].radio");
+        staRadio->subscribe(transmissionStartedSignal, this);
+        getModuleByPath("^.ap.wlan[0].radio")->subscribe(transmissionStartedSignal, this);
+        wait(SimTime(40, SIMTIME_MS));
+        auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == Ieee80211Mib::ASSOCIATED);
+        checkLocal(staMib, scenario() >= 2 ? 2 : 1);
+        checkLocal(apMib, scenario() >= 3 ? 2 : 1);
+        ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
+        ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
+        if (scenario() != 1) ASSERT(associationRequestHt && associationResponseHt);
+        auto selection = &check_and_cast<VhtHtHcf *>(getModuleByPath("^.sta.wlan[0].mac.hcf"))->selection;
+        auto candidate = selection->configuredDataMode();
+        ASSERT(candidate != nullptr);
+        if (scenario() == 2) {
+            ASSERT(candidate->getHtMcsIndex() == 8);
+            ASSERT(candidate->getDataMode()->getNumberOfSpatialStreams() == 2);
+        }
+        auto hcf = check_and_cast<VhtHtHcf *>(getModuleByPath("^.sta.wlan[0].mac.hcf"));
+        if (scenario() == 6) { hcf->inject(); hcf->inject(); }
+        wait(SimTime(45, SIMTIME_MS));
+        std::vector<PhyObservation> data, peerFrames, rts;
+        for (const auto& frame : phy) {
+            if (!frame.station) peerFrames.push_back(frame);
+            if (frame.station && (frame.type == ST_DATA || frame.type == ST_DATA_WITH_QOS)) data.push_back(frame);
+            if (frame.station && frame.type == ST_RTS && frame.start >= SimTime(40, SIMTIME_MS)) rts.push_back(frame);
+        }
+        ASSERT(!data.empty());
+        auto apMac = check_and_cast<VhtHtMac *>(getModuleByPath("^.ap.wlan[0].mac"));
+        auto staMac = check_and_cast<VhtHtMac *>(getModuleByPath("^.sta.wlan[0].mac"));
+        for (const auto& frame : data) {
+            ASSERT(!frame.retry);
+            bool received = false;
+            for (const auto& reception : apMac->received)
+                if (reception.tree == frame.tree && reception.mode == frame.mode) received = true;
+            ASSERT(received);
+            if (scenario() <= 2) {
+                ASSERT(frame.mode->getHtMcsIndex() == (scenario() == 2 ? 1 : 0));
+                ASSERT(frame.mode->getDataMode()->getBandwidth() == MHz(20));
+                ASSERT(frame.mode->getDataMode()->getNumberOfSpatialStreams() == 1);
+                ASSERT(frame.mode->isHtShortGuardInterval() == (scenario() <= 1));
+                if (scenario() == 2)
+                    ASSERT(frame.mode->getDataMode()->getNetBitrate() == Mbps(13));
+            }
+            else {
+                auto vht = dynamic_cast<const physicallayer::Ieee80211VhtMode *>(frame.mode);
+                ASSERT(vht != nullptr);
+                if (scenario() == 3 || scenario() == 5) {
+                    ASSERT(vht->getDataMode()->getMcsIndex() == 1);
+                    ASSERT(vht->getDataMode()->getBandwidth() == MHz(20));
+                    ASSERT(vht->getDataMode()->getNumberOfSpatialStreams() == 1);
+                    ASSERT(vht->getDataMode()->getGuardIntervalType() == physicallayer::Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+                    ASSERT(vht->getDataMode()->getNetBitrate() == Mbps(13));
+                }
+            }
+        }
+        ASSERT(hcf->failures == 0);
+        ASSERT(hcf->acknowledgments.size() == data.size());
+        if (scenario() < 6) {
+            auto sink = check_and_cast<VhtHtSink *>(getModuleByPath("^.server.app[0]"));
+            ASSERT(sink->receivedCount() > 0);
+        }
+        if (scenario() >= 4) checkResponse(data.front(), ST_ACK, selection, staMac, peerFrames);
+        if (scenario() == 4) {
+            auto ack = std::find_if(peerFrames.begin(), peerFrames.end(), [&](const auto& f) {
+                return f.type == ST_ACK && f.start > data.front().start;
+            });
+            ASSERT(ack != peerFrames.end());
+            ASSERT(data.front().duration == data.front().mode->getSifsTime() + ack->airtime);
+        }
+        if (scenario() == 5) {
+            ASSERT(!rts.empty());
+            ASSERT(rts.size() == data.size());
+            for (const auto& frame : rts) ASSERT(!frame.retry);
+            ASSERT(rts.front().mode->getHtMcsIndex() < 0);
+            ASSERT(rts.front().mode->getDataMode()->getBandwidth() == MHz(20));
+            ASSERT(rts.front().mode->getDataMode()->getNumberOfSpatialStreams() == 2);
+            auto vhtRts = dynamic_cast<const physicallayer::Ieee80211VhtMode *>(rts.front().mode);
+            ASSERT(vhtRts != nullptr);
+            ASSERT(vhtRts->getDataMode()->getMcsIndex() == 0);
+            ASSERT(vhtRts->getDataMode()->getGuardIntervalType() == physicallayer::Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT);
+            ASSERT(std::abs(vhtRts->getDataMode()->getNetBitrate().get() - 14444444.444444) < 0.001);
+            checkResponse(rts.front(), ST_CTS, selection, staMac, peerFrames);
+            auto cts = std::find_if(peerFrames.begin(), peerFrames.end(), [&](const auto& f) {
+                return f.type == ST_CTS && f.start > rts.front().start;
+            });
+            ASSERT(cts != peerFrames.end());
+            ASSERT(rts.front().duration == 2 * rts.front().mode->getSifsTime() + cts->airtime +
+                data.front().airtime + data.front().duration);
+        }
+        if (scenario() == 6) {
+            ASSERT(data.size() == 2);
+            checkResponse(data[1], ST_ACK, selection, staMac, peerFrames);
+            ASSERT(hcf->refusals == 1);
+            ASSERT(hcf->admissionAccepted.size() == 3);
+            ASSERT(hcf->admissionAccepted[0] && !hcf->admissionAccepted[1] && hcf->admissionAccepted[2]);
+            ASSERT(hcf->admissionGrant[0] == hcf->admissionGrant[1]);
+            ASSERT(hcf->admissionGrant[2] > hcf->admissionGrant[1]);
+            ASSERT(data[1].start > hcf->acknowledgments[0]);
+            const IIeee80211Mode *ht = nullptr;
+            auto catalog = physicallayer::Ieee80211ModeSet::getModeSet("ac");
+            for (int index = 0; index < catalog->getNumModes(); index++) {
+                auto mode = catalog->getMode(index);
+                if (mode->getHtMcsIndex() == 1 && mode->getDataMode()->getBandwidth() == MHz(20) &&
+                        mode->getDataMode()->getNetBitrate() == Mbps(13)) ht = mode;
+            }
+            ASSERT(ht != nullptr);
+            ASSERT(ht->getHtMcsIndex() == 1);
+            auto legacy = physicallayer::Ieee80211ModeSet::getModeSet("ac")->getMode(Mbps(12));
+            auto sifs = data[1].mode->getSifsTime();
+            auto htCost = data[1].airtime + sifs + ht->getDuration(LENGTH_ACK);
+            auto legacyCost = data[1].airtime + sifs + legacy->getDuration(LENGTH_ACK);
+            auto remaining = hcf->admissionRemaining[1];
+            ASSERT(sifs + legacyCost < remaining && remaining < sifs + htCost);
+            ASSERT(data[0].duration == sifs + ht->getDuration(LENGTH_ACK));
+            bool successorForecast = false;
+            for (const auto& observation : selection->responses)
+                if (observation.tree == data[1].tree && observation.type == ST_ACK &&
+                        observation.role == ResponseQueryRole::PREDICT && observation.time <= data[0].start) {
+                    ASSERT(observation.mode == ht);
+                    successorForecast = true;
+                }
+            ASSERT(successorForecast);
+            ASSERT(hcf->admissionTimes[1] == hcf->acknowledgments[0]);
+            std::cout << "TXOP remaining=" << remaining << " HT cost=" << htCost
+                      << " legacy cost=" << legacyCost << " reservation=" << data[0].duration << "\n";
+            for (size_t index = 0; index < hcf->admissionAccepted.size(); index++)
+                std::cout << "Admission time=" << hcf->admissionTimes[index] << " remaining="
+                          << hcf->admissionRemaining[index] << " grant=" << hcf->admissionGrant[index]
+                          << " accepted=" << hcf->admissionAccepted[index] << "\n";
+        }
+        if (scenario() == 1) {
+            auto mgmt = check_and_cast<VhtHtSimplified *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+            mgmt->stopForTest();
+            ASSERT(!staMib->bssStationData.isAssociated);
+            ASSERT(staMib->findPeerHtState(apMib->address) == nullptr);
+            ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
+            ASSERT(apMib->bssAccessPointData.stations.count(staMib->address) == 0);
+        }
+        std::cout << "VHT HT scenario " << scenario() << " passed.\n";
+    }
+};
+Define_Module(VhtHtTest);
+}
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.applications.udpapp.UdpSink;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtStaSimplified;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module VhtHtMac extends Ieee80211Mac { parameters: @class(::inet::ieee80211::VhtHtMac); }
+module VhtHtHcf extends Hcf { parameters: bool boundary; @class(::inet::ieee80211::VhtHtHcf); }
+simple VhtHtRx extends Rx { parameters: @class(::inet::ieee80211::VhtHtRx); }
+simple VhtHtSimplified extends Ieee80211MgmtStaSimplified { parameters: @class(::inet::ieee80211::VhtHtSimplified); }
+simple VhtHtSink extends UdpSink { parameters: @class(::inet::ieee80211::VhtHtSink); }
+simple VhtHtTest extends SimpleModule { parameters: int scenario; @class(::inet::ieee80211::VhtHtTest); }
+network VhtHtNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        sta: WirelessHost;
+        ap: AccessPoint;
+        server: StandardHost;
+        test: VhtHtTest;
+    connections:
+        ap.ethg++ <--> Eth100M <--> server.ethg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = VhtHtNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 90ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.scenario = ${scenario=0..6}
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.configurator.addStaticRoutes = true
+*.configurator.assignDisjunctSubnetAddresses = false
+**.arp.typename = "GlobalArp"
+**.mobility.initFromDisplayString = false
+*.sta.mobility.initialX = 10m
+*.sta.mobility.initialY = 10m
+*.ap.mobility.initialX = 20m
+*.ap.mobility.initialY = 10m
+**.wlan[*].opMode = "ac"
+**.wlan[*].bitrate = -1bps
+**.wlan[*].radio.bandName = "5 GHz (mapped 20 MHz)"
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].radio.centerFrequency = 5.18GHz
+*.sta.wlan[0].radio.antenna.numAntennas = ${scenario} >= 2 ? 2 : 1
+*.ap.wlan[0].radio.antenna.numAntennas = ${scenario} >= 3 ? 2 : 1
+**.radio.transmitter.power = 100mW
+**.radio.receiver.sensitivity = -85dBm
+**.radio.receiver.snirThreshold = 4dB
+**.radio.receiver.errorModel.typename = ""
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].mgmt.typename = ${staMgmt="Ieee80211MgmtSta","VhtHtSimplified","Ieee80211MgmtSta","Ieee80211MgmtSta","Ieee80211MgmtSta","Ieee80211MgmtSta","Ieee80211MgmtSta" ! scenario}
+*.ap.wlan[0].mgmt.typename = ${apMgmt="Ieee80211MgmtAp","Ieee80211MgmtApSimplified","Ieee80211MgmtAp","Ieee80211MgmtAp","Ieee80211MgmtAp","Ieee80211MgmtAp","Ieee80211MgmtAp" ! scenario}
+*.sta.wlan[0].agent.typename = ${agent="Ieee80211AgentSta","","Ieee80211AgentSta","Ieee80211AgentSta","Ieee80211AgentSta","Ieee80211AgentSta","Ieee80211AgentSta" ! scenario}
+*.sta.wlan[0].mgmt.accessPointAddress = "ap"
+*.ap.wlan[0].mgmt.ssid = "vht-ht"
+*.ap.wlan[0].mgmt.beaconInterval = 5ms
+*.sta.wlan[0].mgmt.numChannels = 1
+*.sta.wlan[0].agent.startingTime = 0s
+*.sta.wlan[0].agent.defaultSsid = "vht-ht"
+*.sta.wlan[0].agent.channelsToScan = "0"
+*.sta.wlan[0].agent.probeDelay = 1ms
+*.sta.wlan[0].agent.minChannelTime = 5ms
+*.sta.wlan[0].agent.maxChannelTime = 5ms
+*.sta.wlan[0].agent.authenticationTimeout = 20ms
+*.sta.wlan[0].agent.associationTimeout = 20ms
+**.wlan[*].mac.typename = "VhtHtMac"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.rx.typename = "VhtHtRx"
+**.wlan[*].mac.hcf.typename = "VhtHtHcf"
+**.wlan[*].mac.hcf.boundary = ${scenario} == 6
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.rateSelection.mgmtFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = ${scenario} == 5 ? 14.444444444444Mbps : 6Mbps
+**.wlan[*].mac.hcf.rateSelection.responseAckFrameBitrate = -1bps
+**.wlan[*].mac.hcf.rateSelection.responseCtsFrameBitrate = -1bps
+*.sta.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = ${scenario} <= 1 ? 7.222222222222Mbps : (${scenario} == 2 || ${scenario} == 3 || ${scenario} == 5 ? 13Mbps : 14.444444444444Mbps)
+*.sta.wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = 20MHz
+*.sta.wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = ${scenario} == 3 || ${scenario} == 5 ? 1 : (${scenario} >= 2 ? 2 : 1)
+*.sta.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == 5 ? 0B : 4096B
+*.ap.wlan[0].mac.hcf.rtsPolicy.rtsThreshold = 4096B
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMin = ${scenario} == 6 ? 0 : 7
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMax = ${scenario} == 6 ? 0 : 15
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = "single"
+*.sta.wlan[0].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = ${scenario} == 6 ? 304us : 0s
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = 0s
+*.sta.numApps = ${scenario} == 6 ? 0 : 1
+*.sta.app[0].typename = "UdpBasicApp"
+*.sta.app[0].destAddresses = "server"
+*.sta.app[0].destPort = 5000
+*.sta.app[0].messageLength = 100B
+*.sta.app[0].sendInterval = 5ms
+*.sta.app[0].startTime = 45ms
+*.sta.app[0].stopTime = 70ms
+*.server.numApps = 1
+*.server.app[0].typename = "VhtHtSink"
+*.server.app[0].localPort = 5000
+
+%contains: stdout
+VHT HT scenario 0 passed.
+%contains: stdout
+VHT HT scenario 1 passed.
+%contains: stdout
+VHT HT scenario 2 passed.
+%contains: stdout
+VHT HT scenario 3 passed.
+%contains: stdout
+VHT HT scenario 4 passed.
+%contains: stdout
+VHT HT scenario 5 passed.
+%contains: stdout
+VHT HT scenario 6 passed.

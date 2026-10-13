@@ -15,6 +15,8 @@ within that capability after a full infrastructure association.
 #include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -23,12 +25,15 @@ class RecordingAarfRateControl : public AarfRateControl
 {
   public:
     std::vector<int> rawHtMcs;
+    int rawWideHtCandidates = 0;
 
     virtual const physicallayer::IIeee80211Mode *getRate(const MacAddress& receiverAddress) override
     {
         auto mode = AarfRateControl::getRate(receiverAddress);
         if (mode->getHtMcsIndex() >= 0)
             rawHtMcs.push_back(mode->getHtMcsIndex());
+        if (mode->getHtMcsIndex() >= 0 && mode->getDataMode()->getBandwidth() == MHz(40))
+            rawWideHtCandidates++;
         return mode;
     }
 };
@@ -66,9 +71,27 @@ class CheckingUdpSink : public UdpSink
 
 Define_Module(CheckingUdpSink);
 
-class Ieee80211HtAntennaRateControlTest : public cSimpleModule
+class Ieee80211HtAntennaRateControlTest : public cSimpleModule, public cListener
 {
   protected:
+    int actualHtDataTransmissions = 0;
+    virtual void initialize() override
+    {
+        getModuleByPath("^.sta.wlan[0].radio")->subscribe(transmissionStartedSignal, this);
+    }
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override
+    {
+        auto transmission = check_and_cast<const physicallayer::Ieee80211Transmission *>(object);
+        auto packet = transmission->getPacket()->dup();
+        physicallayer::Ieee80211Radio::popIeee80211PhyHeaderAtFront(packet);
+        if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>())) {
+            auto mode = transmission->getMode();
+            ASSERT(mode->getHtMcsIndex() >= 0);
+            ASSERT(mode->getDataMode()->getBandwidth() == MHz(20));
+            actualHtDataTransmissions++;
+        }
+        delete packet;
+    }
     static void checkCapabilities(const Ieee80211HtCapabilities& capabilities)
     {
         ASSERT(capabilities.txMcsSetDefined);
@@ -137,6 +160,8 @@ class Ieee80211HtAntennaRateControlTest : public cSimpleModule
         }
         ASSERT(sawLowMcs);
         ASSERT(advancedBeyondLowMcs);
+        ASSERT(rateControl->rawWideHtCandidates > 0);
+        ASSERT(actualHtDataTransmissions > 0);
         auto mac = check_and_cast<RecordingIeee80211Mac *>(staInterface->getSubmodule("mac"));
         ASSERT(!mac->transmittedDataModes.empty());
         for (const auto& mode : mac->transmittedDataModes) {
@@ -219,6 +244,7 @@ network Ieee80211HtAntennaRateControlTestNetwork
 network = Ieee80211HtAntennaRateControlTestNetwork
 ned-path = .;../../../../src;../../lib
 sim-time-limit = 100ms
+seed-set = 0
 cmdenv-express-mode = false
 record-vector-results = false
 record-scalar-results = false

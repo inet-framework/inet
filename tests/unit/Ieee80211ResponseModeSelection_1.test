@@ -1,6 +1,6 @@
 %description:
 Verify directional HT response selection through both production selectors.
-Compatible n peers agree for ACK, CTS, and QoS Basic Block Ack queries.
+Compatible n and ac peers agree for ACK, CTS, and QoS Basic Block Ack queries.
 Receiver GI capability controls each response direction. Unknown advertised Tx
 support retains valid peer state but limits prediction to legacy fallback.
 These queries do not establish complete exchanges or control-format compliance.
@@ -9,6 +9,7 @@ These queries do not establish complete exchanges or control-format compliance.
 #include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
 #include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 
 using namespace inet;
 using namespace inet::ieee80211;
@@ -139,7 +140,8 @@ const MacAddress a("02:00:00:00:00:01");
 const MacAddress b("02:00:00:00:00:02");
 aMib->address = a;
 bMib->address = b;
-const auto *catalog = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+for (const char *catalogName : {"n(mixed-2.4Ghz)", "ac"}) {
+const auto *catalog = Ieee80211ModeSet::getModeSet(catalogName);
 const auto *mcs1Long = findHtMode(catalog, 1, false);
 const auto *mcs0Long = findHtMode(catalog, 0, false);
 const auto *mcs0Short = findHtMode(catalog, 0, true);
@@ -177,7 +179,7 @@ auto configure = [&](const IIeee80211Mode *responseOverride) {
 
 // Each packet pair represents one frame at its originator and recipient.
 auto checkExchange = [&](bool reverse, const IIeee80211Mode *input,
-        const IIeee80211Mode *predicted, const IIeee80211Mode *actual) {
+        const IIeee80211Mode *predicted, const IIeee80211Mode *actual, bool checkBlockAck = true) {
     auto senderMib = reverse ? bMib : aMib;
     auto recipientMib = reverse ? aMib : bMib;
     auto senderDcf = reverse ? bDcf : aDcf;
@@ -224,8 +226,9 @@ auto checkExchange = [&](bool reverse, const IIeee80211Mode *input,
             recipientQos->computeResponseAckFrameMode(&received, data, ResponseQueryRole::RESPOND), B(14));
     checkPair(senderQos->computeResponseCtsFrameMode(&outgoing, rts, ResponseQueryRole::PREDICT),
             recipientQos->computeResponseCtsFrameMode(&received, receivedRts, ResponseQueryRole::RESPOND), B(14));
-    checkPair(senderQos->computeResponseBlockAckFrameMode(&outgoing, bar, ResponseQueryRole::PREDICT),
-            recipientQos->computeResponseBlockAckFrameMode(&received, receivedBar, ResponseQueryRole::RESPOND), B(152));
+    if (checkBlockAck)
+        checkPair(senderQos->computeResponseBlockAckFrameMode(&outgoing, bar, ResponseQueryRole::PREDICT),
+                recipientQos->computeResponseBlockAckFrameMode(&received, receivedBar, ResponseQueryRole::RESPOND), B(152));
     if (senderPeer)
         assertPeerUnchanged(senderBefore, *senderMib->findPeerHtState(recipientAddress));
     if (recipientPeer)
@@ -238,6 +241,23 @@ install();
 configure(nullptr);
 checkExchange(false, mcs1Long, mcs1Long, mcs1Long);
 checkExchange(true, mcs1Long, mcs1Long, mcs1Long);
+if (catalogName[0] == 'a') {
+    const IIeee80211Mode *vhtInput = nullptr;
+    for (int index = 0; index < catalog->getNumModes(); index++) {
+        const auto *mode = catalog->getMode(index);
+        const auto *vhtData = dynamic_cast<const Ieee80211VhtDataMode *>(mode->getDataMode());
+        if (vhtData && vhtData->getMcsIndex() == 0 && vhtData->getNumberOfSpatialStreams() == 2 &&
+                vhtData->getBandwidth() == MHz(20) &&
+                vhtData->getGuardIntervalType() == Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT)
+            vhtInput = mode;
+    }
+    ASSERT(vhtInput != nullptr);
+    checkExchange(false, vhtInput, mcs1Long, mcs1Long, false);
+    checkExchange(true, vhtInput, mcs1Long, mcs1Long, false);
+    bMib->removePeerHtCapabilities(a);
+    checkExchange(false, vhtInput, mcs1Long, legacy12, false);
+    install();
+}
 
 // A can receive short GI; B cannot. The response goes to the frame sender.
 aCapabilities.shortGi20 = true;
@@ -271,6 +291,26 @@ checkExchange(false, mcs1Long, legacy12, legacy12);
 checkExchange(false, legacy6, legacy6, legacy6);
 install();
 checkExchange(false, legacy6, legacy6, legacy6);
+
+// Basic Block Ack retains the compatible HT BAR candidate without an override.
+aCapabilities.shortGi20 = bCapabilities.shortGi20 = true;
+install();
+configure(nullptr);
+Packet outgoingBar("outgoingBar"), receivedBarPacket("receivedBar");
+outgoingBar.addTag<Ieee80211ModeReq>()->setMode(mcs0Short);
+receivedBarPacket.addTag<Ieee80211ModeInd>()->setMode(mcs0Short);
+auto outgoingHeader = makeShared<Ieee80211BasicBlockAckReq>();
+outgoingHeader->setReceiverAddress(b);
+auto receivedHeader = makeShared<Ieee80211BasicBlockAckReq>();
+receivedHeader->setTransmitterAddress(a);
+receivedHeader->setReceiverAddress(b);
+const auto aBefore = *aMib->findPeerHtState(b);
+const auto bBefore = *bMib->findPeerHtState(a);
+ASSERT(aQos->computeResponseBlockAckFrameMode(&outgoingBar, outgoingHeader, ResponseQueryRole::PREDICT) == mcs0Short);
+ASSERT(bQos->computeResponseBlockAckFrameMode(&receivedBarPacket, receivedHeader, ResponseQueryRole::RESPOND) == mcs0Short);
+assertPeerUnchanged(aBefore, *aMib->findPeerHtState(b));
+assertPeerUnchanged(bBefore, *bMib->findPeerHtState(a));
+}
 
 EV << "Directional production response selection checks passed.\n";
 

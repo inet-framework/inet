@@ -28,9 +28,6 @@ Define_ProtocolTest(wifi_11ac_160mhz)
 [General]
 *.tester.testName = "wifi_11ac_160mhz"
 # VHT 160 MHz 1SS MCS7 (64-QAM 5/6 SHORT GI) = 650 Mbps.
-# bandName must be set BEFORE including _ac.ini: identical "**" patterns use
-# first-occurrence-wins, so the 160 MHz band must appear before _ac.ini's 80 MHz.
-**.bandName = "5 GHz (160 MHz)"
 # Pin the data-frame mode to exactly 160 MHz 1SS so findMode() does not pick the
 # first 650 Mbps match (80 MHz 2SS MCS7 SHORT GI, which appears earlier in the table).
 *.sta*.wlan[*].mac.*.rateSelection.dataFrameBitrate = 650Mbps

@@ -877,9 +877,9 @@ mode; the interface does not set it. Set :par:`bandName` on the radio for
      - ``"2.4 GHz"``
      - MCS 0 to 31 at 20 MHz, with long and short guard interval
    * - ``"ac"``
-     - VHT
-     - ``"5 GHz (20 MHz)"``
-     - VHT MCS at 20 MHz
+     - VHT, HT, and legacy OFDM
+     - ``"5 GHz (mapped 20 MHz)"``
+     - Existing VHT modes plus HT MCS 0 through 31; advertised HT operation remains 20 MHz
    * - ``"p"``
      - OFDM with 10 MHz channels
      - ``"5.9 GHz"``
@@ -893,18 +893,7 @@ channel spacing. Radios on different channels do not hear each other in the
 scalar model. Only the dimensional model computes the partial overlap of
 adjacent channels.
 
-.. _ug:sec:80211:mapped-band:
-
-Mapped 5 GHz channels
-^^^^^^^^^^^^^^^^^^^^^
-
-Mapped index 0 selects standard channel 36 at 5180 MHz. Indices 1, 2, and 3 select standard channels 40, 44, and 48 at 5200, 5220, and 5240 MHz. HT40 pair validation permits 36/40 and 44/48 in either direction; it rejects 40/44. The subset follows IEEE Std 802.11-2024, Table E-4 and Equation (17-27); it supplies no complete regulatory-domain model. HT management requires explicit standard channel conversion; arithmetic 5 GHz bands lack this conversion.
-
-HT40 pair validation does not enable 40 MHz HT operation.
-
-Channel widths above 20 MHz are not modeled at packet level: 802.11n and
-802.11ac stations always use 20 MHz channels, and the number of spatial
-streams is bounded by the antenna count of the radio.
+The radio advertises and negotiates only 20 MHz HT operation, despite the 40 MHz catalog entries. Wider VHT mode requests use one channel center; MAC mode requests do not prove wider PHY reception. See :ref:`ug:sec:80211:limitations` for the model limits.
 
 .. code-block:: ini
 
@@ -913,12 +902,38 @@ streams is bounded by the antenna count of the radio.
    **.wlan[*].radio.channelNumber = 8
    **.wlan[*].bitrate = 24Mbps
 
+.. _ug:sec:80211:ac-ht:
+
+HT operation with ac interfaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``opMode = "ac"`` exposes existing HT behavior alongside VHT and legacy OFDM. The MIB derives HT capability from the mode catalog, antenna count, and PHY limits, with at most four spatial streams. One antenna permits MCS 0 through 7.
+
+Full management installs negotiated peer HT state after successful association; simplified management installs that state without an on-air exchange. Teardown removes peer HT state. VHT candidates bypass HT negotiation.
+
+Use :ned:`Ieee80211Radio` with a compatible scalar, dimensional, or unit-disk radio medium. The bit-level :ned:`Ieee80211OfdmRadio` lacks the required HT capability queries.
+
+For example, this configuration selects mapped index 0, standard channel 36, at 5180 MHz:
+
+.. code-block:: ini
+
+   **.wlan[*].opMode = "ac"
+   **.wlan[*].radio.bandName = "5 GHz (mapped 20 MHz)"
+   **.wlan[*].radio.channelNumber = 0
+   **.wlan[*].radio.centerFrequency = 5.18GHz
+
+Indices 1, 2, and 3 select standard channels 40, 44, and 48 at 5200, 5220, and 5240 MHz. HT40 pair validation permits 36/40 and 44/48 in either direction; it rejects 40/44. The subset follows IEEE Std 802.11-2024, Table E-4 and Equation (17-27); it supplies no complete regulatory-domain model. HT management requires explicit standard channel conversion, including simplified AP management; arithmetic 5 GHz bands lack this conversion.
+
+Normal HT unicast selection checks negotiated MCS, 20 MHz width, and receiver guard interval capabilities. Absent or invalid peer HT state selects a legacy fallback. Direct PHY requests bypass this check. The radio advertises short guard interval support only at 20 MHz.
+
+Fixed-rate selection prefers VHT when equivalent entries satisfy the same constraints; a unique supported HT rate can select HT. AARF and Onoe can take steps between equal-rate formats. For one stream at 20 MHz with a long guard interval, VHT MCS 0 and HT MCS 0 both supply 6.5 Mbps. The effect on throughput and convergence remains unmeasured. Rate-control notifications report candidates before the peer check; use actual transmitted modes for performance comparisons.
+
 .. _ug:sec:80211:response-prediction:
 
 Response prediction
-~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^
 
-For compatible associated ``n(mixed-2.4Ghz)`` peers, 13 Mbps HT input retains a 13 Mbps HT response. Absent HT state selects 12 Mbps legacy ERP-OFDM. Prediction checks peer transmission against local reception; actual response selection checks local transmission against peer reception. Exact agreement requires:
+For approximately 14.444 Mbps VHT input, compatible peers retain a 13 Mbps HT ACK/CTS candidate; absent HT state selects 12 Mbps legacy OFDM. Prediction checks peer transmission against local reception; actual response selection checks local transmission against peer reception. Exact agreement requires:
 
 - Both stations use identical mode catalogs and response configuration.
 - Peer advertisements, HT Operation state, and selected capabilities are consistent and stable across the exchange.
@@ -1007,7 +1022,9 @@ The model does not contain:
 
 -  Compressed and multi-TID block acknowledgement.
 
--  Channel widths above 20 MHz for 802.11n and 802.11ac.
+-  Operational HT widths above 20 MHz, and a primary/secondary channel relationship for wider VHT modes.
+
+-  VHT capability negotiation, VHT management elements, and automatic VHT-to-HT fallback.
 
 -  Security: authentication frames are exchanged, but no keys or
    encryption are modeled.
@@ -1015,6 +1032,10 @@ The model does not contain:
 -  Power save mode, mesh networks, and 802.11ax and later amendments.
 
 -  Beacons in ad hoc mode.
+
+Control responses retain format violations under IEEE Std 802.11-2024, Clause 10.6.6.1. Ordinary HT ACK and HT Basic Block Ack responses lack the required exceptions. HT RTS requires HT CTS; VHT RTS without an HT Control field does not require a VHT response. An HT BAR alone does not permit HT Block Ack.
+
+HT short guard interval modes use the correct bitrate but retain the long symbol interval for duration. These limits prevent full VHT conformance under IEEE Std 802.11-2024, Clauses 11.38.1 and 21.1.1.
 
 Two behaviours differ from a real device. Management frames of a QoS
 station always use the voice access category. And when a node is shut down

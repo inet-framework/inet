@@ -1,6 +1,7 @@
 %description:
-Verify that HT operation is enabled only for a mode set with selectable HT
-modes. The current VHT-only ac profile intentionally does not advertise HT.
+Verify that n and ac expose the same 128 HT combinations.
+Verify distinct band-specific objects and timing for each HT combination.
+The ac catalog retains VHT fixed-rate ties and equal-rate traversal order.
 Also verify exact sparse HT MCS and width derivation from typed mode entries.
 
 %includes:
@@ -8,6 +9,7 @@ Also verify exact sparse HT MCS and width derivation from typed mode entries.
 #include <vector>
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 
 using namespace inet;
@@ -44,7 +46,7 @@ const auto *htModeSet = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
 const auto *vhtOnlyModeSet = Ieee80211ModeSet::getModeSet("ac");
 
 ASSERT(htModeSet->isHtOperationSupported());
-ASSERT(!vhtOnlyModeSet->isHtOperationSupported());
+ASSERT(vhtOnlyModeSet->isHtOperationSupported());
 
 // The built-in HT catalog is complete for the advertised MCS, widths, and
 // guard intervals. Only long-GI 20 MHz MCS 0-7 are mandatory.
@@ -132,7 +134,7 @@ SparseModeSet longOnly({
         { true, htModeSet->getMode(Mbps(1)), true },
     }, findHtMode(htModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG), false);
 ASSERT(!longOnly.isHtShortGuardIntervalSupported(MHz(20)));
-ASSERT(vhtOnlyModeSet->getHtShortGuardIntervalChannelWidths().empty());
+ASSERT(vhtOnlyModeSet->getHtShortGuardIntervalChannelWidths() == htModeSet->getHtShortGuardIntervalChannelWidths());
 
 // All mandatory HT MCSs without an eligible legacy operational mode are
 // rejected at the mode-set boundary before management serialization.
@@ -197,6 +199,73 @@ catch (const cRuntimeError&) {
     notContainedReferenceRejected = true;
 }
 ASSERT(notContainedReferenceRejected);
+
+int acHtCount = 0;
+int acVhtCount = 0;
+for (int i = 0; i < vhtOnlyModeSet->getNumModes(); i++) {
+    const auto *mode = vhtOnlyModeSet->getMode(i);
+    acHtCount += mode->getHtMcsIndex() >= 0;
+    if (dynamic_cast<const Ieee80211VhtMode *>(mode)) {
+        acVhtCount++;
+        const auto *fixed = vhtOnlyModeSet->getMode(mode->getDataMode()->getNetBitrate(),
+                mode->getDataMode()->getBandwidth(), mode->getDataMode()->getNumberOfSpatialStreams());
+        ASSERT(dynamic_cast<const Ieee80211VhtMode *>(fixed) != nullptr);
+    }
+}
+ASSERT(acHtCount == 128);
+ASSERT(acVhtCount == 310);
+ASSERT(vhtOnlyModeSet->getHtMcsSupported() == htModeSet->getHtMcsSupported());
+ASSERT(vhtOnlyModeSet->getHtMcsMandatory() == htModeSet->getHtMcsMandatory());
+ASSERT(vhtOnlyModeSet->getHtSupportedChannelWidths() == htModeSet->getHtSupportedChannelWidths());
+for (int mcs = 0; mcs < 32; mcs++) {
+    for (auto width : {MHz(20), MHz(40)}) {
+        for (auto gi : {Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT}) {
+            const auto *ht = findHtMode(htModeSet, mcs, width, gi);
+            const auto *acHt = findHtMode(vhtOnlyModeSet, mcs, width, gi);
+            ASSERT(acHt != nullptr);
+            const auto *typedHt = dynamic_cast<const Ieee80211HtMode *>(ht);
+            const auto *typedAcHt = dynamic_cast<const Ieee80211HtMode *>(acHt);
+            ASSERT(typedHt != nullptr);
+            ASSERT(typedAcHt != nullptr);
+            ASSERT(typedAcHt != typedHt);
+            ASSERT(typedHt->getCenterFrequencyMode() == Ieee80211HtMode::BAND_2_4GHZ);
+            ASSERT(typedAcHt->getCenterFrequencyMode() == Ieee80211HtMode::BAND_5GHZ);
+            // IEEE Std 802.11-2024, Table 19-25: band-specific HT PHY timing.
+            ASSERT(typedHt->getSifsTime() == SimTime(10, SIMTIME_US));
+            ASSERT(typedHt->getSlotTime() == SimTime(20, SIMTIME_US));
+            ASSERT(typedAcHt->getSifsTime() == SimTime(16, SIMTIME_US));
+            ASSERT(typedAcHt->getSlotTime() == SimTime(9, SIMTIME_US));
+            ASSERT(acHt->getDataMode()->getNetBitrate() == ht->getDataMode()->getNetBitrate());
+            ASSERT(acHt->getDataMode()->getNumberOfSpatialStreams() == ht->getDataMode()->getNumberOfSpatialStreams());
+            ASSERT(vhtOnlyModeSet->getIsMandatory(acHt) == htModeSet->getIsMandatory(ht));
+        }
+    }
+}
+const auto *vht6_5 = vhtOnlyModeSet->getMode(Mbps(6.5), MHz(20), 1);
+const auto *vht13 = vhtOnlyModeSet->getMode(Mbps(13), MHz(20), 1);
+ASSERT(dynamic_cast<const Ieee80211VhtMode *>(vht6_5) != nullptr);
+ASSERT(dynamic_cast<const Ieee80211VhtMode *>(vht13) != nullptr);
+const auto *ht6_5 = findHtMode(vhtOnlyModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
+ASSERT(vhtOnlyModeSet->getFasterMode(vht6_5) == ht6_5);
+ASSERT(vhtOnlyModeSet->getSlowerMode(ht6_5) == vht6_5);
+ASSERT(vhtOnlyModeSet->getMode(ht6_5->getDataMode()->getNetBitrate()) == vht6_5);
+const auto *htUnique = findHtMode(vhtOnlyModeSet, 0, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+ASSERT(vhtOnlyModeSet->getMode(htUnique->getDataMode()->getNetBitrate(), MHz(20), 1) == htUnique);
+const auto *ht8 = findHtMode(vhtOnlyModeSet, 8, MHz(20), Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
+ASSERT(vhtOnlyModeSet->getMode(Mbps(13), MHz(20), 2) == ht8);
+const auto *fastestMandatory = vhtOnlyModeSet->getFastestMandatoryMode();
+ASSERT(dynamic_cast<const Ieee80211VhtMode *>(fastestMandatory) != nullptr);
+ASSERT(fastestMandatory->getDataMode()->getNetBitrate() == Mbps(78));
+ASSERT(vhtOnlyModeSet->getReferenceMode() == vht6_5);
+ASSERT(vhtOnlyModeSet->getSifsTime() == SimTime(16, SIMTIME_US));
+ASSERT(vhtOnlyModeSet->getSlotTime() == SimTime(9, SIMTIME_US));
+ASSERT(vhtOnlyModeSet->getLegacyOperationalModes().size() == 3);
+for (int legacyRate : {6, 12, 24}) {
+    bool foundLegacy = false;
+    for (const auto *legacy : vhtOnlyModeSet->getLegacyOperationalModes())
+        foundLegacy |= legacy->getDataMode()->getNetBitrate() == Mbps(legacyRate);
+    ASSERT(foundLegacy);
+}
 
 EV << "HT mode-set capability and sparse-MCS checks verified.\n";
 

@@ -6,11 +6,11 @@ Plan revision: 10, 2026-10-13.
 
 Scope authority: the user requests the current VHT implementation to match the current INET HT implementation's capabilities.
 
-Status: implementation authorized. The user's “Execute plan ieee80211-vht-ht-support.md” authorizes this work on 13 October 2026. The sections below specify the intended changes and required verification.
+Status: local implementation, verification, and planned commits complete. The user's “Execute plan ieee80211-vht-ht-support.md” authorizes this work on 13 October 2026. The user's “Try now the planned commits” authorizes their creation after Git access changes. The [execution record](ieee80211-vht-ht-support-execution.md) contains the results and commit boundaries. The plan remains under `pending` until the change lands.
 
 Evidence at review: current source inspection, configuration and test inspection, and retrieval of IEEE clauses from the local corpus. No build or simulation ran. The plan and its companion summary were untracked at review.
 
-The design and review sections below preserve revision 10 at its review commit. Their proposed behavior remains separate from later execution evidence.
+The design and review sections below preserve revision 10 at its review commit. Their proposed behavior and verification requirements now have separate execution evidence.
 
 Current HCF consumes response estimates for single-protection forecasts and continuation decisions. The source review confirms that the prediction defect also affects the existing `n(mixed-2.4Ghz)` catalog. The response repair therefore precedes HT activation in a separate commit. The plan also specifies an explicit role enum, rate-control width checks, and documentation of equal-rate adaptation steps.
 
@@ -482,7 +482,7 @@ Select affected fingerprint configurations for each behavior commit from its cha
 
 ## 7. Review status before implementation and retained limits
 
-This revision follows the user's explicit implementation-parity scope. It separates the existing HT response defect into a prerequisite commit with an explicit role enum and an `n` reproduction. The HCF consumers and affected test selectors remain in the implementation inventory. The continuation scenario checks the TXOP consumer after HT activation. At review, no source change or runtime result established the repair. Later implementation requires separate execution evidence.
+This revision follows the user's explicit implementation-parity scope. It separates the existing HT response defect into a prerequisite commit with an explicit role enum and an `n` reproduction. The HCF consumers and affected test selectors remain in the implementation inventory. The continuation scenario checks the TXOP consumer after HT activation. At review, no source change or runtime result established the repair. The execution record now supplies that evidence.
 
 The mapped band now has explicit HT40 pair validation and a receive-path test. The plan corrects Table 21-22's 160 MHz example and distinguishes mode requests from actual PHY transmission. It retains all eleven affected expected-PASS protocol controls, plus evidence requirements for the known expected failure. The response design uses existing MIB state and selection code; the band design uses existing catalog and validation interfaces.
 
@@ -500,4 +500,4 @@ This work remains outside scope:
 
 The added channel mapping is necessary for the existing HT management path to operate in the VHT band. The response-prediction mismatch requires the preceding HT repair, as Section 4 explains. Other repairs require a demonstrated failure caused by HT activation. They do not authorize unrelated conformance work. Refresh the source comparison if the implementation base changes.
 
-Follow the [plan procedure](../../doc/project/guide/write-an-implementation-plan.md), [state ownership design](../../doc/project/design/ieee80211-model-architecture.md), and [minimal-design rule](../../doc/project/rule/quality.md#qr-design-minimal). The plan procedure remains a draft. Revision 10 changed the proposal at review. Later implementation requires its own verification and commits. Publication requires separate authority.
+Follow the [plan procedure](../../doc/project/guide/write-an-implementation-plan.md), [state ownership design](../../doc/project/design/ieee80211-model-architecture.md), and [minimal-design rule](../../doc/project/rule/quality.md#qr-design-minimal). The plan procedure remains a draft. Revision 10 changed the proposal at review. The separate execution record describes the later implementation, checks, and commits. No baseline update or publication occurs during execution.

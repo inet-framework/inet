@@ -595,6 +595,12 @@ Notable backward incompatible changes are the following:
 
    External IRateSelection and IQosRateSelection implementations and callers must add ResponseQueryRole to their response queries. Use PREDICT for sender estimates. Use RESPOND for recipient responses. The migration guide supplies the signatures and links to the prediction limits.
 
+31. IEEE 802.11 ac interfaces also expose current HT support
+
+   ac interfaces now use existing HT capability and management support alongside VHT and legacy OFDM. Advertised and negotiated HT operation remains limited to 20 MHz and four spatial streams. Added HT modes can change ACK/CTS candidates and adaptive rate steps, including steps between equal nominal rates.
+
+   ac APs require a band with standard channel conversion, including simplified management. The supplied ac configurations now use "5 GHz (mapped 20 MHz)" at 5180 MHz. This frequency change can affect propagation results and fingerprints. See the migration guide for configuration changes and the IEEE 802.11 user guide for radio requirements and model limits.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

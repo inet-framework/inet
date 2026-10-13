@@ -1,0 +1,62 @@
+%description:
+Verify production MIB assembly for inherited HT modes in the ac catalog.
+Operational width 20 MHz excludes HT40 and its short GI capability.
+Stream limits 1, 2, 3, 4, and 8 expose exact MCS sets through MCS 31.
+This fixture does not establish antenna propagation through the radio.
+
+%includes:
+#include <algorithm>
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%file: TestNetwork.ned
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        mib: Ieee80211Mib;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+
+%activity:
+auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
+const auto *catalog = Ieee80211ModeSet::getModeSet("ac");
+mib->setPrimaryChannel(36);
+for (int streamLimit : {1, 2, 3, 4, 8}) {
+    mib->updateLocalHtCapabilities(catalog, {MHz(20)}, streamLimit);
+    ASSERT(mib->isHtOperationSupported());
+    const auto& capabilities = mib->localHtCapabilities;
+    int supportedStreams = std::min(streamLimit, 4);
+    ASSERT(capabilities.supportedChannelWidths.size() == 1);
+    ASSERT(capabilities.supportedChannelWidths.count(MHz(20)) == 1);
+    ASSERT(capabilities.supportedChannelWidths.count(MHz(40)) == 0);
+    ASSERT(capabilities.shortGi20);
+    ASSERT(!capabilities.shortGi40);
+    ASSERT(capabilities.txMcsSetDefined);
+    ASSERT(!capabilities.txRxMcsSetNotEqual);
+    for (int mcs = 0; mcs < 77; mcs++) {
+        ASSERT(capabilities.rxMcsSupported[mcs] == (mcs < 8 * supportedStreams));
+        ASSERT(mib->getHtOperation().basicMcsSupported[mcs] == (mcs < 8));
+    }
+    for (int stream = 0; stream < 4; stream++)
+        ASSERT(capabilities.txMcsNss.maxMcsPerNss[stream] == (stream < supportedStreams ? 7 : -1));
+    ASSERT(mib->getHtOperation().operatingChannelWidth == MHz(20));
+    ASSERT(mib->getHtOperation().secondaryChannelOffset == 0);
+}
+EV << "VHT catalog HT capability assembly checks passed.\n";
+
+%contains: stdout
+VHT catalog HT capability assembly checks passed.

@@ -1,11 +1,15 @@
 %description:
 Verify that peer HT mode selection honors negotiated MCS, channel width,
 operation width, and receiver short-guard-interval capabilities.
+Both production data selectors check every n and ac catalog candidate.
+Valid 20 MHz peer state restricts HT output; absent state selects legacy.
 
 %includes:
 #include <initializer_list>
 
 #include "inet/linklayer/ieee80211/mac/rateselection/Ieee80211PeerModeSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/RateSelection.h"
+#include "inet/linklayer/ieee80211/mac/rateselection/QosRateSelection.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 
 using namespace inet;
@@ -14,6 +18,62 @@ using namespace inet::physicallayer;
 using namespace inet::units::values;
 
 %global:
+
+class CandidateRateControl : public IRateControl
+{
+  public:
+    const IIeee80211Mode *candidate = nullptr;
+    MacAddress expectedReceiver;
+    int requests = 0;
+    virtual const IIeee80211Mode *getRate(const MacAddress& receiver) override
+    {
+        ASSERT(receiver == expectedReceiver);
+        requests++;
+        return candidate;
+    }
+    virtual void frameTransmitted(Packet *, int, bool, bool) override {}
+    virtual void frameReceived(Packet *) override {}
+};
+
+class SweepRateSelection : public RateSelection
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL)
+            mib.reference(this, "mibModule", true);
+    }
+  public:
+    void configure(const Ieee80211ModeSet *catalog, IRateControl *controller)
+    {
+        modeSet = catalog;
+        dataOrMgmtRateControl = controller;
+        dataFrameMode = nullptr;
+        perReceiverDataFrameMode.clear();
+        perReceiverResolved = true;
+    }
+};
+Define_Module(SweepRateSelection);
+
+class SweepQosRateSelection : public QosRateSelection
+{
+  protected:
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL)
+            mib.reference(this, "mibModule", true);
+    }
+  public:
+    void configure(const Ieee80211ModeSet *catalog, IRateControl *controller)
+    {
+        modeSet = catalog;
+        dataOrMgmtRateControl = controller;
+        dataFrameMode = nullptr;
+        perReceiverDataFrameMode.clear();
+        perReceiverResolved = true;
+    }
+};
+Define_Module(SweepQosRateSelection);
 
 static const IIeee80211Mode *findHtMode(const Ieee80211ModeSet *modeSet, int mcsIndex, Hz bandwidth,
         Ieee80211HtModeBase::GuardIntervalType guardIntervalType)
@@ -43,6 +103,38 @@ static Ieee80211Mib::PeerHtState makePeerState(std::initializer_list<int> mcsInd
     state.negotiatedCapabilities.operation.operatingChannelWidth = operatingChannelWidth;
     return state;
 }
+
+%file: TestNetwork.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+simple SweepRateSelection extends SimpleModule
+{
+    parameters:
+        @class(SweepRateSelection);
+        string mibModule;
+}
+simple SweepQosRateSelection extends SimpleModule
+{
+    parameters:
+        @class(SweepQosRateSelection);
+        string mibModule;
+}
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        mib: Ieee80211Mib;
+        dcf: SweepRateSelection { parameters: mibModule = "^.mib"; }
+        qos: SweepQosRateSelection { parameters: mibModule = "^.mib"; }
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
 
 %activity:
 
@@ -167,6 +259,60 @@ const auto *secondSelection = selectPeerCompatibleMode(modeSet, &deterministicPe
 ASSERT(firstSelection == secondSelection);
 ASSERT(firstSelection->getHtMcsIndex() == 8);
 ASSERT(!firstSelection->isHtShortGuardInterval());
+
+auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
+auto dcf = check_and_cast<SweepRateSelection *>(getModuleByPath("dcf"));
+auto qos = check_and_cast<SweepQosRateSelection *>(getModuleByPath("qos"));
+CandidateRateControl controller;
+controller.expectedReceiver = peer;
+for (const char *catalogName : {"n(mixed-2.4Ghz)", "ac"}) {
+    const auto *catalog = Ieee80211ModeSet::getModeSet(catalogName);
+    mib->clearPeerHtCapabilities();
+    mib->setPrimaryChannel(catalogName[0] == 'a' ? 36 : 1);
+    mib->updateLocalHtCapabilities(catalog, {MHz(20)}, 1);
+    dcf->configure(catalog, &controller);
+    qos->configure(catalog, &controller);
+    for (bool hasPeer : {true, false}) {
+        if (hasPeer)
+            mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+        else
+            mib->removePeerHtCapabilities(peer);
+        for (bool useQos : {false, true}) {
+            int htCandidates = 0;
+            int fortyMhzCandidates = 0;
+            for (int index = 0; index < catalog->getNumModes(); index++) {
+                controller.candidate = catalog->getMode(index);
+                auto header = makeShared<Ieee80211DataHeader>();
+                header->setReceiverAddress(peer);
+                Packet packet("candidate");
+                int requestsBefore = controller.requests;
+                const auto *selected = useQos ? qos->computeMode(&packet, header, nullptr) : dcf->computeMode(&packet, header);
+                ASSERT(controller.requests == requestsBefore + 1);
+                ASSERT(selected != nullptr);
+                ASSERT(catalog->containsMode(selected));
+                if (controller.candidate->getHtMcsIndex() >= 0) {
+                    htCandidates++;
+                    fortyMhzCandidates += controller.candidate->getDataMode()->getBandwidth() == MHz(40);
+                    if (hasPeer) {
+                        ASSERT(selected->getHtMcsIndex() >= 0);
+                        ASSERT(selected->getHtMcsIndex() < 8);
+                        ASSERT(selected->getDataMode()->getBandwidth() == MHz(20));
+                        ASSERT(selected->getDataMode()->getNumberOfSpatialStreams() == 1);
+                    }
+                    else
+                        ASSERT(selected->getHtMcsIndex() < 0);
+                }
+                else
+                    ASSERT(selected == controller.candidate);
+            }
+            ASSERT(htCandidates == 128);
+            ASSERT(fortyMhzCandidates == 64);
+        }
+    }
+}
+// The selectors do not own the test controller.
+dcf->configure(modeSet, nullptr);
+qos->configure(modeSet, nullptr);
 
 EV << "Peer-compatible HT mode selection checks verified.\n";
 
