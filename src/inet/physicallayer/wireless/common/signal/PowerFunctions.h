@@ -74,8 +74,11 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
         os << "(FrequencyDependentAttenuation" << EV_FIELD(distance) << EV_FIELD(transmitterAntennaGain) << EV_FIELD(receiverAntennaGain);
         os << "\n" << std::string(level + 2, ' ');
         os << "(" << *receptionPathLoss << ")";
-        os << "\n" << std::string(level + 2, ' ');
-        os << "(" << *radioMedium->getObstacleLoss() << "))";
+        if (auto obstacleLoss = radioMedium->getObstacleLoss()) {
+            os << "\n" << std::string(level + 2, ' ');
+            os << "(" << *obstacleLoss << ")";
+        }
+        os << ")";
     }
 };
 
