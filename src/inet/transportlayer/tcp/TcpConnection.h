@@ -190,6 +190,9 @@ class INET_API TcpConnection : public SimpleModule
     // SO_KEEPALIVE of this connection (TcpSocket::setKeepAlive()), also from before the
     // open; -1: the keepAliveEnabled parameter
     int keepAliveSockopt = -1;
+    // TCP_NODELAY of this connection (TcpSocket::setNoDelay()), also from before the
+    // open; -1: the nagleEnabled parameter
+    int noDelaySockopt = -1;
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */

@@ -283,6 +283,18 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
         EV_DETAIL << "The application writer is " << (writerBlocked ? "blocked on the send buffer" : "not blocked") << "\n";
         updateSndbufLimitedChrono();
     }
+    else if (auto cmd = dynamic_cast<TcpSetNoDelayCommand *>(tcpCommand)) {
+        // TCP_NODELAY turns Nagle off (RFC 9293 section 3.7.4: "the user can disable
+        // the Nagle algorithm"); the command can come before the open, and then
+        // configureStateVariables() takes it. As Linux, the option sends the data that
+        // Nagle holds at once (tcp_push_pending_frames()).
+        noDelaySockopt = cmd->getNodelay() ? 1 : 0;
+        if (state != nullptr) {
+            state->nagle_enabled = !cmd->getNodelay();
+            if (cmd->getNodelay() && (fsm.getState() == TCP_S_ESTABLISHED || fsm.getState() == TCP_S_CLOSE_WAIT))
+                tcpAlgorithm->sendCommandInvoked();
+        }
+    }
     else if (auto cmd = dynamic_cast<TcpSetKeepAliveCommand *>(tcpCommand)) {
         // the command can come before the open: initConnection() takes it then
         keepAliveSockopt = cmd->getEnabled() ? 1 : 0;

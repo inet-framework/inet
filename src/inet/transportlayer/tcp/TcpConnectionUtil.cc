@@ -246,6 +246,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     socketReceiveBufferSize = listenerConn->socketReceiveBufferSize;
     socketSynRetries = listenerConn->socketSynRetries;
     keepAliveSockopt = listenerConn->keepAliveSockopt;
+    noDelaySockopt = listenerConn->noDelaySockopt;
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
@@ -935,6 +936,8 @@ void TcpConnection::configureStateVariables()
     state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
     state->linuxZeroWindowProbe = !strcmp(tcpMain->par("zeroWindowProbe").stringValue(), "linux");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
+    if (noDelaySockopt >= 0)
+        state->nagle_enabled = noDelaySockopt == 0; // TCP_NODELAY of this connection
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
