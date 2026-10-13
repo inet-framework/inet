@@ -40,6 +40,10 @@ class INET_API Ieee80211ModeSet : public IPrintableObject, public cObject
         bool operator()(const Entry& left, const Entry& right) { return left.mode->getDataMode()->getNetBitrate() < right.mode->getDataMode()->getNetBitrate(); }
     };
 
+  private:
+    static std::vector<Entry> getHtModeEntries(bool use5Ghz);
+    static std::vector<Entry> appendHtModeEntries(std::vector<Entry> entries, bool use5Ghz);
+
   protected:
     std::string name;
     const std::vector<Entry> entries;
