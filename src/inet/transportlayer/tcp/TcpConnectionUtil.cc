@@ -973,6 +973,7 @@ void TcpConnection::configureStateVariables()
         state->nagle_enabled = noDelaySockopt == 0; // TCP_NODELAY of this connection
     state->minshallNagle = tcpMain->par("minshallNagle");
     state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary");
+    state->tsRecentAfterAckCheck = tcpMain->par("tsRecentAfterAckCheck");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
@@ -2491,6 +2492,12 @@ void TcpConnection::updateTsRecent(const Ptr<const TcpHeader>& tcpHeader)
     const TcpOptionTimestamp *option = state->ts_enabled && !tcpHeader->getRstBit() ? findTSOption(tcpHeader) : nullptr;
     if (option == nullptr)
         return;
+    // tsRecentAfterAckCheck: as Linux, not from a segment whose ACK the connection drops
+    // later, because it acknowledges data that was not sent
+    if (state->tsRecentAfterAckCheck && tcpHeader->getAckBit() && seqGreater(tcpHeader->getAckNo(), state->snd_max)) {
+        EV_DETAIL << "Not updating ts_recent: the segment acknowledges unsent data\n";
+        return;
+    }
     bool tsRecentValid = (simTime() - state->ts_recent_stamp) <= PAWS_IDLE_TIME_THRESH;
     bool olderTsval = seqLess(option->getSenderTimestamp(), state->ts_recent);
     if ((!olderTsval || !tsRecentValid) && seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) {

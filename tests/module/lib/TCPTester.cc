@@ -124,6 +124,13 @@ void TCPScriptableTester::parseScript(const char *script)
             if (!isdigit(*s))
                 throw cRuntimeError("syntax error in script: TSecr value expected");
             cmd.tsecr = strtoul(s, &const_cast<char *&>(s), 10);
+        } else if (!strncmp(s,"ackadd",6)) {
+            // "ackadd <n>": add n to the ACK field
+            cmd.command = CMD_ACKADD; s+=6;
+            while (isspace(*s)) s++;
+            if (!isdigit(*s))
+                throw cRuntimeError("syntax error in script: number expected");
+            cmd.ackadd = strtoul(s, &const_cast<char *&>(s), 10);
         } else if (!strncmp(s,"data",4)) {
             // "data <bytes> [fin]": add the bytes after the payload, and set the FIN bit with "fin"
             cmd.command = CMD_DATA; s+=4;
@@ -292,6 +299,15 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
                 ts->setEchoedTimestamp(cmd->tsecr);
         pk->insertAtFront(header);
         dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "changing TSecr");
+        send(pk, fromA ? "out2" : "out1");
+    }
+    else if (cmd->command==CMD_ACKADD)
+    {
+        bubble("changing the ACK field");
+        auto header = pk->removeAtFront<TcpHeader>();
+        header->setAckNo(header->getAckNo() + cmd->ackadd);
+        pk->insertAtFront(header);
+        dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "changing the ACK field");
         send(pk, fromA ? "out2" : "out1");
     }
     else if (cmd->command==CMD_DATA)

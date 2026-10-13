@@ -53,7 +53,7 @@ class INET_API TCPTesterBase : public cSimpleModule
 class INET_API TCPScriptableTester : public TCPTesterBase
 {
   protected:
-    enum {CMD_DELETE,CMD_COPY,CMD_CE,CMD_TSECR,CMD_DATA,CMD_STRIP,CMD_ACE,CMD_ZEROACCECN}; // CMD_TSECR sets the TSecr of the timestamp option, for tests of the TSecr checks; CMD_DATA adds bytes and the FIN bit to a segment, for tests of a peer that sends them where INET does not (on a SYN-ACK); CMD_STRIP removes the options of a kind, for a peer that does not answer an option; CMD_ACE sets the AE, CWR and ECE bits, for a peer or a path that changes them; CMD_ZEROACCECN sets the fields of the AccECN option to 0, for a path that zeroes them; // "delay" is same as "copy"; CMD_CE marks the segment CE, ECT(1) or ECT(0) instead of forwarding it unmarked -- for AccECN/ECN module tests that need a CE-marked inbound segment
+    enum {CMD_DELETE,CMD_COPY,CMD_CE,CMD_TSECR,CMD_DATA,CMD_STRIP,CMD_ACE,CMD_ZEROACCECN,CMD_ACKADD}; // CMD_TSECR sets the TSecr of the timestamp option, for tests of the TSecr checks; CMD_DATA adds bytes and the FIN bit to a segment, for tests of a peer that sends them where INET does not (on a SYN-ACK); CMD_STRIP removes the options of a kind, for a peer that does not answer an option; CMD_ACE sets the AE, CWR and ECE bits, for a peer or a path that changes them; CMD_ZEROACCECN sets the fields of the AccECN option to 0, for a path that zeroes them; // "delay" is same as "copy"; CMD_CE marks the segment CE, ECT(1) or ECT(0) instead of forwarding it unmarked -- for AccECN/ECN module tests that need a CE-marked inbound segment
     typedef std::vector<simtime_t> DelayVector;
     struct Command
     {
@@ -62,6 +62,7 @@ class INET_API TCPScriptableTester : public TCPTesterBase
         int command; // CMD_DELETE, CMD_COPY
         DelayVector delays;  // arg list
         uint32_t tsecr = 0;  // CMD_TSECR: the new TSecr
+        uint32_t ackadd = 0; // CMD_ACKADD: the number to add to the ACK field, for an ACK of data that was not sent
         int bytes = 0;       // CMD_DATA: the number of bytes to add after the payload
         bool fin = false;    // CMD_DATA: set the FIN bit
         int kind = -1;       // CMD_STRIP: the kind of the options to remove
