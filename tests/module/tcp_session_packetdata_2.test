@@ -1,0 +1,56 @@
+%description:
+Tests the fill byte of TcpSessionApp (packetData) in the mode "bytestream". The
+client is a TcpSessionApp that sends 1500 bytes with packetData = 66, and the
+server application logs the first bytes of each data packet that it receives:
+each byte is 66, where the bytes counted 0, 1, 2 and so on before.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.cli_app.typename = "TcpSessionApp"
+*.cli_app.sendScript="1.0 1500"
+*.cli_app.dataTransferMode = "bytestream"
+*.cli_app.packetData = 66
+*.srv_app.logData = true
+*.*_tcp.mss = 1000
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 
+[1.203 B002] A.1000 < B.2000: A ack 1001 win 16384 
+cli_tcp: ESTABLISHED --> FIN_WAIT_1  (on CLOSE)
+[1.205 A004] A.1000 > B.2000: A F 1001:1501(500) ack 501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+received data: 66 66 66 66 66 66 66 66
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+received data: 0 1 2
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

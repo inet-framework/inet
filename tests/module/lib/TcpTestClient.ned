@@ -47,6 +47,7 @@ simple TcpTestClient like IApp
         string readScript = default(""); // with autoRead=false: "time bytes; time bytes; ..." -- at each time, issue a READ of at most that many bytes
         string statusRequestScript = default(""); // comma-separated list of times ("1.5,3.0") at which to issue a TCP_C_STATUS query on the socket; the reply is logged as a "STATUS:" line
         bool logIndications = default(false); // log each indication of TCP (with the number of bytes of its data) in the "testing" category
+        bool logData = default(false); // log the first bytes (at most 8) of each data packet that arrives, as "received data: ..."
         bool fastOpen = default(false); // active open: request TCP Fast Open (RFC 7413) for the connection
         double tOpen2 @unit(s) = default(-1s); // the open of a second connection of this application (and Tcp module), for example to use the Fast Open cookie that the first connection got; -1s: no second connection
         bool active2 = default(false); // the second connection: active open (to connectAddress:connectPort), or passive open (listenOnce())

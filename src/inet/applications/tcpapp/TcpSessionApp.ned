@@ -88,6 +88,7 @@ simple TcpSessionApp extends SimpleModule like IApp
         string connectAddress;
         int connectPort = default(1000);
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        int packetData = default(-1); // the byte that fills the data in the modes "bytecount" and "bytestream", as the parameter of the queueing sources; -1: no fill byte ("bytestream" then counts the bytes)
         bool autoRead = default(true); // Whether to use "autoread" or "explicit-read" mode for TCP connection
         volatile int readSize @unit(B) = default(-1B);    // Used only with autoRead==false
         volatile double readDelay @unit(s) = default(-1s);    // Used only with autoRead==false; delay for issuing a READ command after previous READ was satisfied; -1 means immediately, 0 means zero delay

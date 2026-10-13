@@ -260,6 +260,13 @@ void TcpTestClient::handleMessage(cMessage *msg)
     {
         rcvdPackets++;
         rcvdBytes += PK(msg)->getByteLength();
+        if (par("logData")) {
+            const auto& bytes = check_and_cast<Packet *>(msg)->peekDataAsBytes();
+            EV_INFO << "received data:";
+            for (size_t i = 0; i < std::min<size_t>(8, bytes->getBytes().size()); i++)
+                EV_INFO << " " << (int)bytes->getByte(i);
+            EV_INFO << "\n";
+        }
     }
     else if (msg->getKind()==TCP_I_STATUS)
     {
