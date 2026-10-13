@@ -1,6 +1,6 @@
 # MPLS level 2 — repair the model gaps
 
-**Status:** in progress. Started 2026-09-25 on `topic/standards-tests-mpls-level2-fixes`, on top of `topic/standards-tests-mpls-level2` at `24675c3a37`. Worktree: `/home/levy/workspace/inet-standards-tests-mpls-level2-fixes`.
+**Status:** done on 2026-09-25: six gaps repaired, gap 7 has its plan. Landed on `master` on 2026-10-13. Started 2026-09-25 on `topic/standards-tests-mpls-level2-fixes`, on top of `topic/standards-tests-mpls-level2` at `24675c3a37`. Worktree: `/home/levy/workspace/inet-standards-tests-mpls-level2-fixes`.
 
 The level 2 pass of 2026-09-24 measured the model and repaired nothing. This branch repairs the gaps of [`results.md`](../../doc/project/evidence/model/mpls/results.md#the-model-gaps), one gap for each commit, as the user asked on 2026-09-25: the defects and the small or medium missing features. A large missing feature gets a plan of its own and no code.
 
@@ -25,7 +25,7 @@ Commit group: `mpls-model-repairs`. Each repair commit carries the source change
 7. [x] **Gap 6** — the MTU check and the fragmentation of a labeled datagram, and the ICMP message for one with the DF bit. Tests: the three `Rfc3032TooBig*`; their declarations go.
 8. [x] **Gap 7, a plan only** — PPP LCP and the MPLS Control Protocol: `plan/pending/ppp-lcp-and-mplscp.md`.
 9. [x] **The documents** — a fresh run; `results.md`, `coverage.md`, `conformance.md` part 2 and `notes.md` ("Fixed on" entries) follow it. No statistics branch: nothing moves.
-10. [ ] Gates, then move this plan to `plan/done/`.
+10. [x] Gates, then move this plan to `plan/done/`.
 
 ## Decisions and facts found on the way
 
@@ -38,3 +38,14 @@ Commit group: `mpls-model-repairs`. Each repair commit carries the source change
 - **The whole branch moves no statistical result.** The full suite at `6f07e3e3a9` (930 tasks, release, GitHub-job copy) gives 890 PASS and the same 27 unexpected failures as the baseline, all of 802.11 EDCA. So the branch needs no commit in the statistics repository.
 - **The documents follow a fresh run** at `6f07e3e3a9`: 20 PASS, 1 FAIL declared expected. The ledger and the matrix come from `audit/mpls-level2-fixes/` of `inet-master` (outside git), the scripts of the level 2 pass with the verdicts of this run: 7 features supported, 3 partial, 4 untested; the matrix has 7 `confirmed`, 3 `partial`, 3 `unverified`, 1 `out of claim`, and no `defect`.
 - **Large run copies go to disk.** The fingerprint runs write a 2.8 GB copy of `tests/fingerprint`; they now live in `/var/tmp/claude-standards-fixes/` and each copy is deleted when its summary is read, because `/tmp` is a RAM file system.
+
+## Landing on master
+
+The branch landed on 2026-10-13 by a rebase onto `master` at `764bc6a3fe`, 249 commits after its earlier base. No source file conflicted. `WHATSNEW` conflicted because master added items to the same list: the four MPLS items are now items 25 to 28 of the backward incompatible changes of INET 4.7.x. The four documents of `doc/project/evidence/model/mpls/` conflicted because master put every prose paragraph of `doc/project/` on one line; the documents and the two plans of this branch now follow that rule. The commit messages follow the current rules of `doc/project/rule/pull-request.md`: a summary with the behavior before and after each commit, the reproduction of each fix, and a `Plan:` line.
+
+The checks on the new base, at the rebased commits:
+
+- The MPLS protocol suite (debug): 21 tests, 20 PASS, 1 FAIL declared expected, `Rfc3032PppMplscp`, with the same failure reason as before. The documents carry the record of this run.
+- The module tests (debug): 579 PASS.
+- The CI fingerprint set (release, 1752 rows, `tplx`, `~tNl` and `~tND`) at the tip: no row moves, and the only error is the expected one of `ethernet.csv`. The seven rows of `examples/mpls`, run again at each of the six repair commits: no row moves.
+- The statistical tests of `examples/mpls` (release, native build, clang 23) at the tip, against the statistics repository at `9ab4c26`: 7 PASS. The GitHub-job copy was in use by another session, so this run used the native build; the earlier run of the whole set in that copy found no move either.
