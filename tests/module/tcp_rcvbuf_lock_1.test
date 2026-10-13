@@ -2,9 +2,12 @@
 Tests SO_RCVBUF on an open connection (TcpSocket::setReceiveBufferSize()), which
 locks the receive buffer, as Linux SOCK_RCVBUF_LOCK. The scenario is that of
 tcp_rcvbuf_grow_1, but the server application sets the buffer to 8000 bytes on
-its open socket at t=0.8 s. The out-of-order segments outgrow the buffer, and
-windowAutoTuning does not grow a locked buffer: STATUS reports skRcvbuf=8000 at
-t=3 s, where tcp_rcvbuf_grow_1 grows it to 18240.
+its open socket at t=0.8 s. A locked buffer offers only its free space at the
+truesize ratio of the received segments (112/256): 8000 bytes give 3500. The
+right edge of the handshake offer (8001) does not move back, so the offers go
+down from 7000 to 3500 as RCV.NXT moves toward that edge. windowAutoTuning does
+not grow a locked buffer: STATUS reports skRcvbuf=8000 at t=3 s, where
+tcp_rcvbuf_grow_1 grows it to 18240.
 
 %inifile: omnetpp.ini
 [General]
@@ -45,17 +48,19 @@ while($sor = <FILE>)
 %postrun-command:  perl ./postrun.pl
 %#--------------------------------------------------------------------------------------------------------------
 %contains: postrun-command(1).out
-[1.013 A012] A.1000 > B.2000: A 9001:10001(1000) ack 501 win 16384 # deleting
-[1.013 A013] A.1000 > B.2000: A 10001:11001(1000) ack 501 win 16384 
-[1.013 A014] A.1000 > B.2000: A 11001:12001(1000) ack 501 win 16384 
-[1.013 A015] A.1000 > B.2000: A 12001:13001(1000) ack 501 win 16384 
-[1.013 A016] A.1000 > B.2000: A 13001:14001(1000) ack 501 win 16384 
-[1.013 A017] A.1000 > B.2000: A 14001:15001(1000) ack 501 win 16384 
-[1.015 B009] A.1000 < B.2000: A ack 8001 win 8000 
-[1.015 B010] A.1000 < B.2000: A ack 9001 win 8000 
-[1.015 B011] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,11001)
-[1.015 B012] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,12001)
-[1.015 B013] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,13001)
+[1.003 B002] A.1000 < B.2000: A ack 1001 win 7000 
+[1.005 A004] A.1000 > B.2000: A 1001:2001(1000) ack 501 win 16384 
+[1.005 A005] A.1000 > B.2000: A 2001:3001(1000) ack 501 win 16384 
+[1.007 B003] A.1000 < B.2000: A ack 2001 win 6000 
+[1.007 B004] A.1000 < B.2000: A ack 3001 win 5000 
+[1.009 A006] A.1000 > B.2000: A 3001:4001(1000) ack 501 win 16384 
+[1.009 A007] A.1000 > B.2000: A 4001:5001(1000) ack 501 win 16384 
+[1.009 A008] A.1000 > B.2000: A 5001:6001(1000) ack 501 win 16384 
+[1.009 A009] A.1000 > B.2000: A 6001:7001(1000) ack 501 win 16384 
+[1.011 B005] A.1000 < B.2000: A ack 4001 win 4000 
+[1.011 B006] A.1000 < B.2000: A ack 5001 win 3500 
+[1.011 B007] A.1000 < B.2000: A ack 6001 win 3500 
+[1.011 B008] A.1000 < B.2000: A ack 7001 win 3500 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 SO_RCVBUF: the receive buffer is 8000 bytes, locked

@@ -3131,9 +3131,20 @@ uint16_t TcpConnection::updateRcvWnd()
         win = std::min(win, window > unread ? window - unread : 0);
     }
 
+    // a buffer that SO_RCVBUF locked does not grow, so the offer may promise only its
+    // free space, charged at the truesize of the Linux skbs (tcp_space())
+    uint32_t fullSpace = state->maxRcvBuffer;
+    if (state->rcvbufLocked && state->rcvBufferSize > 0) {
+        uint64_t freeSpace = rcvBufOccupancy < state->rcvBufferSize ? (((uint64_t)state->rcvBufferSize - rcvBufOccupancy) * rcvScalingRatio) >> 8 : 0;
+        win = (uint32_t)std::min<uint64_t>(win, freeSpace);
+        fullSpace = (uint32_t)std::min<uint64_t>(fullSpace, ((uint64_t)state->rcvBufferSize * rcvScalingRatio) >> 8);
+    }
+
     // Following lines are based on [Stevens, W.R.: TCP/IP Illustrated, Volume 2, chapter 26.7, pages 878-879]:
     // Don't advertise less than one full-sized segment to avoid SWS
-    if (win < (state->maxRcvBuffer / 4) && win < state->snd_mss)
+    // (the buffer is the whole space that the receiver can offer: with a locked buffer
+    // smaller than one MSS, the empty buffer must still open the window)
+    if (win < (fullSpace / 4) && win < state->snd_mss)
         win = 0;
 
     // Do not shrink window
