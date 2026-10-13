@@ -1,5 +1,6 @@
 package inet.test.moduletest.lib;
 
+import inet.applications.contract.IApp;
 import inet.transportlayer.contract.ITcp;
 
 network TcpTestNet1
@@ -7,7 +8,7 @@ network TcpTestNet1
     parameters:
         bool testing;
     submodules:
-        cli_app: TcpTestClient {
+        cli_app: <default("TcpTestClient")> like IApp {
             @display("p=95,95");
         }
         cli_tcp: <default("Tcp")> like ITcp {

@@ -45,7 +45,7 @@ class INET_API TcpAppBase : public ApplicationBase, public TcpSocket::ICallback
     /* Utility functions */
     virtual void connect();
     virtual void close();
-    virtual void sendPacket(Packet *pkt);
+    virtual void sendPacket(Packet *pkt, bool eor = false);
 
     virtual void handleTimer(cMessage *msg) = 0;
 
