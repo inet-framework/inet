@@ -25,7 +25,7 @@ simple TcpTestClient like IApp
         double tOpen @unit(s);
         double tSend @unit(s);
         int sendBytes @unit(B);
-        string sendScript;
+        string sendScript; // "time bytes [flag]; ..." -- the SENDs of the first connection; the flag "more" gives the SEND MSG_MORE (TcpSendMoreReq)
         double tClose @unit(s);
         bool autoRead = default(true); // when false, the app reads received data only by the READ commands of readScript (fills the receive buffer -> zero window)
         bool owned = default(true); // false: tell TCP that the application does not own the connection, as a Linux connection that waits for accept() (TcpSocket::setOwned())
@@ -33,6 +33,7 @@ simple TcpTestClient like IApp
         int socketReceiveBufferSize = default(-1); // the receive buffer of the first connection, in bytes (TcpSocket::setReceiveBufferSize()); -1: the parameter of the Tcp module
         int socketSynRetries = default(-1); // the SYN retries of the first connection (TcpSocket::setSynRetries()); -1: the parameter of the Tcp module
         string tcpParScript = default(""); // "time name value; ..." -- at each time, set a parameter of the Tcp module of this application, as a harness that changes a sysctl; the parameter must be @mutable
+        string corkScript = default(""); // "time 1; time 0; ..." -- at each time, turn TCP_CORK on (1) or off (0) for the first connection (TcpSocket::setCork()), also before its open
         string maxSegScript = default(""); // "time value; ..." -- at each time, set TCP_MAXSEG of the first connection (TcpSocket::setMaxSeg()), also before its open
         string noDelayScript = default(""); // "time 1; time 0; ..." -- at each time, turn TCP_NODELAY on (1) or off (0) for the first connection (TcpSocket::setNoDelay()), also before its open
         string keepAliveScript = default(""); // "time 1; time 0; ..." -- at each time, turn keepalive on (1) or off (0) for the first connection (TcpSocket::setKeepAlive()), also before its open

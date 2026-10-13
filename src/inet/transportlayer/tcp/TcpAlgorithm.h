@@ -113,6 +113,14 @@ class INET_API TcpAlgorithm : public cObject
     virtual void setKeepAlive(bool enabled) {}
 
     /**
+     * Starts the cork timer if it does not run, or cancels it. The timer sends a partial
+     * segment that TCP_CORK or MSG_MORE holds after one RTO (Linux ICSK_TIME_PROBE0). A
+     * flavour without it does nothing.
+     */
+    virtual void scheduleCorkTimer() {}
+    virtual void cancelCorkTimer() {}
+
+    /**
      * Place to process timers specific to this TcpAlgorithm class.
      * TcpConnection will invoke this method on any timer (self-message)
      * it doesn't recognize (that is, any timer other than the 2MSL,

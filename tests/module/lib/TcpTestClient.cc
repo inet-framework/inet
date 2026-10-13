@@ -13,6 +13,7 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpSendMoreTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSocket.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 
@@ -28,6 +29,7 @@ class INET_API TcpTestClient : public cSimpleModule
     {
         simtime_t tSend;
         int numBytes;
+        bool more = false; // the SEND carries MSG_MORE (TcpSendMoreReq)
     };
     typedef std::list<Command> Commands;
     Commands commands;
@@ -36,11 +38,12 @@ class INET_API TcpTestClient : public cSimpleModule
     Commands keepAliveCommands; // when to turn keepalive on (1) or off (0)
     Commands noDelayCommands; // when to turn TCP_NODELAY on (1) or off (0)
     Commands maxSegCommands; // when to set TCP_MAXSEG, and its value
+    Commands corkCommands; // when to turn TCP_CORK on (1) or off (0)
     std::list<std::pair<std::string, std::string>> tcpParCommands; // tcpParScript: the parameters to set, in time order
     static const int NUM_EXTRA = 2; // the optional second and third connection (tOpen2, tOpen3)
     Commands extraCommands[NUM_EXTRA]; // the SEND of each extra connection
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_NODELAY, TEST_MAXSEG, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_NODELAY, TEST_MAXSEG, TEST_CORK, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
 
     int ctr;
 
@@ -91,6 +94,18 @@ void TcpTestClient::parseScript(const char *script, Commands& commands)
             throw cRuntimeError("syntax error in script: number of bytes expected");
         cmd.numBytes = atoi(s);
         while (isdigit(*s)) s++;
+
+        // parse an optional flag of the SEND
+        while (isspace(*s)) s++;
+        if (isalpha(*s)) {
+            const char *w = s;
+            while (isalpha(*s)) s++;
+            std::string flag(w, s - w);
+            if (flag == "more")
+                cmd.more = true;
+            else
+                throw cRuntimeError("syntax error in script: unknown flag '%s'", flag.c_str());
+        }
 
         // add command
         commands.push_back(cmd);
@@ -198,6 +213,9 @@ void TcpTestClient::initialize()
     parseScript(par("maxSegScript"), maxSegCommands);
     for (const auto& command : maxSegCommands)
         scheduleAt(command.tSend, new cMessage("MaxSeg", TEST_MAXSEG));
+    parseScript(par("corkScript"), corkCommands);
+    for (const auto& command : corkCommands)
+        scheduleAt(command.tSend, new cMessage("Cork", TEST_CORK));
     if (tClose > 0)
         scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
 
@@ -314,6 +332,11 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             delete msg;
             break;
         }
+        case TEST_CORK:
+            socket.setCork(corkCommands.front().numBytes != 0);
+            corkCommands.pop_front();
+            delete msg;
+            break;
         case TEST_MAXSEG:
             socket.setMaxSeg(maxSegCommands.front().numBytes);
             maxSegCommands.pop_front();
@@ -373,6 +396,8 @@ void TcpTestClient::scheduleNextSend()
     Packet *msg = new Packet(makeMsgName().c_str(), TEST_SEND);
     if (cmd.numBytes > 0) // a SEND of 0 bytes is a packet without content
         msg->insertAtBack(makeShared<ByteCountChunk>(B(cmd.numBytes)));
+    if (cmd.more)
+        msg->addTag<TcpSendMoreReq>();
     scheduleAt(cmd.tSend, msg);
 }
 

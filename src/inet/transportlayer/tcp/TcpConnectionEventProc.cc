@@ -298,11 +298,26 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
         // the Nagle algorithm"); the command can come before the open, and then
         // configureStateVariables() takes it. As Linux, the option sends the data that
         // Nagle holds at once (tcp_push_pending_frames()).
+        // TCP_NODELAY also sends a partial that TCP_CORK holds, once (Linux
+        // TCP_NAGLE_PUSH), but the cork stays for later writes.
         noDelaySockopt = cmd->getNodelay() ? 1 : 0;
         if (state != nullptr) {
             state->nagle_enabled = !cmd->getNodelay();
-            if (cmd->getNodelay() && (fsm.getState() == TCP_S_ESTABLISHED || fsm.getState() == TCP_S_CLOSE_WAIT))
-                tcpAlgorithm->sendCommandInvoked();
+            if (cmd->getNodelay())
+                flushCorkedData(false);
+        }
+    }
+    else if (auto cmd = dynamic_cast<TcpSetCorkCommand *>(tcpCommand)) {
+        // TCP_CORK, as Linux: hold the partial segment at the end of the data, also
+        // with nothing in flight; full-sized segments go. An uncork sends the held
+        // partial (tcp_push_pending_frames()). The command can come before the open,
+        // and then configureStateVariables() takes it.
+        corkSockopt = cmd->getCork() ? 1 : 0;
+        if (state != nullptr) {
+            bool wasCorked = state->tcp_cork;
+            state->tcp_cork = cmd->getCork();
+            if (wasCorked && !state->tcp_cork)
+                flushCorkedData(false);
         }
     }
     else if (auto cmd = dynamic_cast<TcpSetKeepAliveCommand *>(tcpCommand)) {

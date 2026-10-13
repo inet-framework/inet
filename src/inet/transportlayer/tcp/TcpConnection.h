@@ -196,6 +196,8 @@ class INET_API TcpConnection : public SimpleModule
     // TCP_MAXSEG of this connection (TcpSocket::setMaxSeg()), also from before the open;
     // -1: the mss parameter alone
     int maxSegSockopt = -1;
+    // TCP_CORK of this connection (TcpSocket::setCork()), also from before the open; -1: off
+    int corkSockopt = -1;
 
   protected:
     /** @name FSM transitions: analysing events and executing state transitions */
@@ -302,6 +304,12 @@ class INET_API TcpConnection : public SimpleModule
      * such a segment (rcv_neg_window).
      */
     bool takeOverWindowAccept() { bool b = overWindowAcceptPending; overWindowAcceptPending = false; return b; }
+
+    /**
+     * Sends the partial segment that TCP_CORK or MSG_MORE holds: at an uncork, at
+     * TCP_NODELAY, and at the cork timer, which also asks for PSH (forcePush).
+     */
+    virtual void flushCorkedData(bool forcePush);
 
   protected:
 

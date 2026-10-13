@@ -52,7 +52,7 @@ std::string TcpAlgorithmBaseStateVariables::detailedInfo() const
 TcpAlgorithmBase::TcpAlgorithmBase() : TcpAlgorithm(),
     state((TcpAlgorithmBaseStateVariables *&)TcpAlgorithm::state)
 {
-    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = tlpTimer = nullptr;
+    rexmitTimer = persistTimer = delayedAckTimer = keepAliveTimer = tlpTimer = corkTimer = nullptr;
 }
 
 TcpAlgorithmBase::~TcpAlgorithmBase()
@@ -70,6 +70,8 @@ TcpAlgorithmBase::~TcpAlgorithmBase()
         delete cancelEvent(keepAliveTimer);
     if (tlpTimer)
         delete cancelEvent(tlpTimer);
+    if (corkTimer)
+        delete cancelEvent(corkTimer);
 }
 
 void TcpAlgorithmBase::initialize()
@@ -86,12 +88,14 @@ void TcpAlgorithmBase::initialize()
     // timer, where the probe takes the place of the RTO: the probe goes first,
     // and processPtoTimer() then restarts the RTO.
     tlpTimer->setSchedulingPriority(-1);
+    corkTimer = new cMessage("CORK");
 
     rexmitTimer->setContextPointer(conn);
     persistTimer->setContextPointer(conn);
     delayedAckTimer->setContextPointer(conn);
     keepAliveTimer->setContextPointer(conn);
     tlpTimer->setContextPointer(conn);
+    corkTimer->setContextPointer(conn);
 
     state->rexmit_timeout = initialRto;
 
@@ -213,6 +217,7 @@ void TcpAlgorithmBase::connectionClosed()
     cancelEvent(delayedAckTimer);
     cancelEvent(keepAliveTimer);
     cancelEvent(tlpTimer);
+    cancelEvent(corkTimer);
 }
 
 void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
@@ -238,6 +243,11 @@ void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
         processKeepAliveTimer(event);
     else if (timer == tlpTimer)
         processPtoTimer(event);
+    else if (timer == corkTimer) {
+        // a partial that TCP_CORK or MSG_MORE held goes now, with PSH (Linux
+        // tcp_write_wakeup())
+        conn->flushCorkedData(true);
+    }
     else
         throw cRuntimeError(timer, "unrecognized timer");
 }
@@ -636,13 +646,27 @@ bool TcpAlgorithmBase::sendData(bool sendCommandInvoked)
     // the application sends after the window closed. Data that the sender SWS avoidance
     // holds with nothing in flight starts it too: its expiry is the override timeout
     // (RFC 9293 section 3.8.6.2.1, rule (4)).
-    if ((state->snd_wnd == 0 || state->snd_una == state->snd_max) && !rexmitTimer->isScheduled()
+    // A partial that TCP_CORK or MSG_MORE holds with nothing in flight has the cork timer.
+    if ((state->snd_wnd == 0 || (state->snd_una == state->snd_max && !corkTimer->isScheduled())) && !rexmitTimer->isScheduled()
         && !persistTimer->isScheduled() && isDataWaiting())
     {
         EV_INFO << "Data waits for the window, therefore PERSIST timer is started.\n";
         startPersistTimer();
     }
     return sent;
+}
+
+void TcpAlgorithmBase::scheduleCorkTimer()
+{
+    // a running timer stays, as Linux tcp_check_probe_timer(): the hold has a ceiling
+    // of one RTO from its start, also if more small writes come
+    if (!corkTimer->isScheduled())
+        conn->scheduleAfter(state->rexmit_timeout, corkTimer);
+}
+
+void TcpAlgorithmBase::cancelCorkTimer()
+{
+    cancelEvent(corkTimer);
 }
 
 bool TcpAlgorithmBase::isDataWaiting() const

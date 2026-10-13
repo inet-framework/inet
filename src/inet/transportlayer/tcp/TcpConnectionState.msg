@@ -146,6 +146,13 @@ struct TcpStateVariables
     uint32_t snd_sml = 0;           // the end of the last small segment of new data (Linux tp->snd_sml), for minshallNagle
     uint32_t max_window = 0;        // the largest send window so far, Max(SND.WND) of the sender SWS avoidance (RFC 9293 section 3.8.6.2.1; Linux tp->max_window)
     bool minshallNagle = false;     // the Nagle of Minshall (minshallNagle parameter)
+    bool tcp_cork = false;          // TCP_CORK: hold the partial segment at the end of the data, also with nothing in flight
+    bool msgMoreThisSend = false;   // MSG_MORE on the SEND that sendData() serves now: hold its partial segment
+    bool corkedDataPending = false; // TCP_CORK or MSG_MORE holds a partial segment now
+    bool pushHeldPartial = false;   // the held partial carries PSH when it goes: a later SEND came without MSG_MORE (Linux tcp_mark_push())
+    bool corkFlush = false;         // an uncork, TCP_NODELAY or the cork timer sends the held partial now
+    bool forcePushHeld = false;     // the cork timer sends the held partial, with PSH (Linux tcp_write_wakeup())
+    bool pushThisSegment = false;   // sendData() asks sendSegment() for PSH on the next segment
     bool swsOverride = false;       // the override timeout of the sender SWS avoidance is sending (rule (4) of RFC 9293 section 3.8.6.2.1)
     uint32_t snd_up = 0;            // send urgent pointer
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update

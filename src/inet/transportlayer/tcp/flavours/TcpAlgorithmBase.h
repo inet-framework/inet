@@ -48,6 +48,7 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     cMessage *persistTimer;
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
+    cMessage *corkTimer; // sends a partial that TCP_CORK or MSG_MORE holds, after one RTO
     cMessage *tlpTimer; // probe timeout of the Tail Loss Probe (RFC 8985 section 7.2)
 
   protected:
@@ -132,6 +133,9 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void connectionClosed() override;
 
     virtual void setKeepAlive(bool enabled) override;
+
+    virtual void scheduleCorkTimer() override;
+    virtual void cancelCorkTimer() override;
 
     /**
      * Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers.

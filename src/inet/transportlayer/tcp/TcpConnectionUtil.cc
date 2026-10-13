@@ -29,6 +29,7 @@
 #include "inet/networklayer/contract/IL3AddressType.h"
 #include "inet/transportlayer/common/L4Tools.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
+#include "inet/transportlayer/contract/tcp/TcpSendMoreTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
@@ -248,6 +249,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     keepAliveSockopt = listenerConn->keepAliveSockopt;
     noDelaySockopt = listenerConn->noDelaySockopt;
     maxSegSockopt = listenerConn->maxSegSockopt;
+    corkSockopt = listenerConn->corkSockopt;
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
     tcpAlgorithm->initialize();
@@ -937,6 +939,8 @@ void TcpConnection::configureStateVariables()
     state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
     state->linuxZeroWindowProbe = !strcmp(tcpMain->par("zeroWindowProbe").stringValue(), "linux");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
+    if (corkSockopt >= 0)
+        state->tcp_cork = corkSockopt != 0; // TCP_CORK of this connection
     if (noDelaySockopt >= 0)
         state->nagle_enabled = noDelaySockopt == 0; // TCP_NODELAY of this connection
     state->minshallNagle = tcpMain->par("minshallNagle");
@@ -1469,7 +1473,9 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         state->sndCwr = false;
     }
 
-    // TODO when to set PSH bit?
+    // a partial that TCP_CORK or MSG_MORE held, see sendData()
+    if (state->pushThisSegment)
+        tcpHeader->setPshBit(true);
     // TODO set URG bit if needed
     ASSERT(bytes == tcpSegment->getByteLength());
 
@@ -1585,6 +1591,13 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
     }
 
     bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
+    // MSG_MORE holds the partial segment at the end of this SEND (sendData() takes the
+    // flag). A SEND without MSG_MORE while a partial is held gives that partial PSH
+    // when it goes, as Linux tcp_mark_push() on the last write.
+    bool msgMore = packet->findTag<TcpSendMoreReq>() != nullptr;
+    state->msgMoreThisSend = msgMore;
+    if (!msgMore && (state->tcp_cork || state->corkedDataPending))
+        state->pushHeldPartial = true;
     sendQueue->enqueueAppData(packet);
 
     // MSG_ZEROCOPY: the completion of this SEND waits until its last byte goes out
@@ -1626,6 +1639,10 @@ uint32_t TcpConnection::getDataSndUna() const
 
 bool TcpConnection::sendData(uint32_t congestionWindow)
 {
+    // MSG_MORE holds only for the SEND that brought it, not for a later send of an ACK
+    bool msgMoreHold = state->msgMoreThisSend;
+    state->msgMoreThisSend = false;
+
     // we'll start sending from snd_max, if not after RTO
     if (!state->afterRto)
         state->snd_nxt = state->snd_max;
@@ -1729,13 +1746,36 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         if (state->minshallNagle)
             unacknowledgedData = unacknowledgedData && seqGreater(state->snd_sml, state->snd_una) && seqLE(state->snd_sml, state->snd_nxt);
         bool containsFin = state->send_fin && (state->snd_nxt + bytesToSend) == state->snd_fin_seq;
+        // TCP_CORK and MSG_MORE hold the partial segment at the end of the data, also with
+        // nothing in flight; an uncork, TCP_NODELAY or the cork timer (corkFlush) sends it.
+        // Nagle stays after an uncork, as Linux __tcp_sock_set_cork().
+        bool corkHold = (state->tcp_cork || msgMoreHold) && !state->corkFlush && !containsFin && buffered < state->snd_effmss;
         if (swsHold(effectiveWin, buffered))
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
+        else if (corkHold) {
+            state->corkedDataPending = true;
+            EV_WARN << "Holding the partial segment (TCP_CORK or MSG_MORE)\n";
+        }
         else if (state->nagle_enabled && unacknowledgedData && !containsFin)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
-        else
+        else {
+            // a held partial carries PSH when a later SEND came without MSG_MORE, or when
+            // the cork timer sends it (Linux tcp_mark_push(), tcp_write_wakeup())
+            bool flushingCorked = state->corkedDataPending || state->corkFlush;
+            state->pushThisSegment = flushingCorked && (state->pushHeldPartial || state->forcePushHeld);
             sendSegment(bytesToSend);
+            state->pushThisSegment = false;
+            state->corkedDataPending = false;
+            state->pushHeldPartial = false;
+        }
     }
+
+    // The cork timer (Linux ICSK_TIME_PROBE0) runs while a held partial waits and
+    // nothing is in flight; else an ACK brings the next try.
+    if (state->corkedDataPending && state->snd_una == state->snd_max)
+        tcpAlgorithm->scheduleCorkTimer();
+    else
+        tcpAlgorithm->cancelCorkTimer();
 
     if (old_snd_nxt == state->snd_nxt)
         return false; // no data sent
@@ -1779,6 +1819,18 @@ void TcpConnection::sendSegmentBelowWindow(const char *name)
     Packet *fp = new Packet(name);
     sendToIP(fp, tcpHeader);
     tcpAlgorithm->ackSent();
+}
+
+void TcpConnection::flushCorkedData(bool forcePush)
+{
+    // only in the states that send data
+    if (fsm.getState() != TCP_S_ESTABLISHED && fsm.getState() != TCP_S_CLOSE_WAIT)
+        return;
+    state->corkFlush = true;
+    state->forcePushHeld = forcePush;
+    tcpAlgorithm->sendCommandInvoked();
+    state->corkFlush = false;
+    state->forcePushHeld = false;
 }
 
 bool TcpConnection::sendProbe()
