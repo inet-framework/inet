@@ -660,14 +660,20 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
     // Hard errors abort the connection during setup (RFC 5461).
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
-    if (isHardIcmpv4Error(errorInd->getType(), errorInd->getCode()) && fsm.getState() == TCP_S_SYN_SENT) {
+    // RFC 9293 section 3.9.2.2: a hard error SHOULD abort the connection (SHLD-26), also
+    // in SYN_RCVD; a connection that is neither active nor forked nor Fast Open returns to
+    // LISTEN, and its application, which has no socket for it yet, is not informed
+    if (isHardIcmpv4Error(errorInd->getType(), errorInd->getCode())
+        && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
+    {
         EV_DETAIL << "Hard ICMPv4 error during connection setup -- connection refused\n";
 
         sendQueue->discardUpTo(sendQueue->getBufferEndSeq());
         if (state->sack_enabled)
             rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
 
-        sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
+        if (state->active || state->forked || state->fastopenAccelerated)
+            sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
         delete indication;
 
         return performStateTransition(TCP_E_RCV_RST);
@@ -725,14 +731,20 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
     // Hard errors abort the connection during setup (RFC 5461).
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
-    if (isHardIcmpv6Error(errorInd->getType(), errorInd->getCode()) && fsm.getState() == TCP_S_SYN_SENT) {
+    // RFC 9293 section 3.9.2.2: a hard error SHOULD abort the connection (SHLD-26), also
+    // in SYN_RCVD; a connection that is neither active nor forked nor Fast Open returns to
+    // LISTEN, and its application, which has no socket for it yet, is not informed
+    if (isHardIcmpv6Error(errorInd->getType(), errorInd->getCode())
+        && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
+    {
         EV_DETAIL << "Hard ICMPv6 error during connection setup -- connection refused\n";
 
         sendQueue->discardUpTo(sendQueue->getBufferEndSeq());
         if (state->sack_enabled)
             rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
 
-        sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
+        if (state->active || state->forked || state->fastopenAccelerated)
+            sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
         delete indication;
 
         return performStateTransition(TCP_E_RCV_RST);

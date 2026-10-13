@@ -10,6 +10,9 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/networklayer/common/EcnTag_m.h"
+#include "inet/common/packet/Message.h"
+#include "inet/networklayer/common/Icmpv4ErrorTag_m.h"
+#include "inet/networklayer/common/Icmpv6ErrorTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
 
 namespace inet {
@@ -124,6 +127,25 @@ void TCPScriptableTester::parseScript(const char *script)
             if (!isdigit(*s))
                 throw cRuntimeError("syntax error in script: TSecr value expected");
             cmd.tsecr = strtoul(s, &const_cast<char *&>(s), 10);
+        } else if (!strncmp(s,"icmp",4)) {
+            // "icmp <type> <code> [seqadd]" and "icmp6 <type> <code> [seqadd]": the segment does
+            // not reach the peer; its sender gets an ICMPv4 or ICMPv6 error that quotes it,
+            // with seqadd added to the quoted sequence number
+            cmd.command = CMD_ICMP; s+=4;
+            if (*s == '6') {
+                cmd.command = CMD_ICMP6; s++;
+            }
+            while (isspace(*s)) s++;
+            if (!isdigit(*s))
+                throw cRuntimeError("syntax error in script: ICMP type expected");
+            cmd.icmpType = strtol(s, &const_cast<char *&>(s), 10);
+            while (isspace(*s)) s++;
+            if (!isdigit(*s))
+                throw cRuntimeError("syntax error in script: ICMP code expected");
+            cmd.icmpCode = strtol(s, &const_cast<char *&>(s), 10);
+            while (isspace(*s)) s++;
+            if (isdigit(*s))
+                cmd.icmpSeqAdd = strtoul(s, &const_cast<char *&>(s), 10);
         } else if (!strncmp(s,"ackadd",6)) {
             // "ackadd <n>": add n to the ACK field
             cmd.command = CMD_ACKADD; s+=6;
@@ -300,6 +322,31 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
         pk->insertAtFront(header);
         dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "changing TSecr");
         send(pk, fromA ? "out2" : "out1");
+    }
+    else if (cmd->command==CMD_ICMP || cmd->command==CMD_ICMP6)
+    {
+        bubble("answering with an ICMP error");
+        dump(seg, pk->getByteLength(), fromA, "answering with an ICMP error");
+        if (cmd->icmpSeqAdd != 0) {
+            auto header = pk->removeAtFront<TcpHeader>();
+            header->setSequenceNo(header->getSequenceNo() + cmd->icmpSeqAdd);
+            pk->insertAtFront(header);
+        }
+        // the quoted segment keeps its L3AddressInd: the source is the sender of the segment
+        auto indication = new Indication("ICMP-error");
+        if (cmd->command == CMD_ICMP) {
+            auto& errorInd = indication->addTag<Icmpv4ErrorInd>();
+            errorInd->setType((IcmpType)cmd->icmpType);
+            errorInd->setCode(cmd->icmpCode);
+            errorInd->setOriginalPacket(pk);
+        }
+        else {
+            auto& errorInd = indication->addTag<Icmpv6ErrorInd>();
+            errorInd->setType((Icmpv6Type)cmd->icmpType);
+            errorInd->setCode(cmd->icmpCode);
+            errorInd->setOriginalPacket(pk);
+        }
+        send(indication, fromA ? "out1" : "out2");
     }
     else if (cmd->command==CMD_ACKADD)
     {
