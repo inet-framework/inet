@@ -65,7 +65,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S14 ✅ | `topic/tcp-receive-buffer` | 28, 29, 35, new | +353 −9 | the receive buffer apart from the advertised window, the Linux receive memory behind parameters, the window and the buffer of one socket (D-4), MSG_ZEROCOPY, the send buffer chrono, SO_TIMESTAMPING, `TCP_NOTSENT_LOWAT` (D-61 to D-64) |
 | S15 ✅ | `topic/tcp-timers` | 18 (part), 26 (part), 28 (part), 31, 32 (part), 33, 68 (part), 77, new | +483 −64 | the timer parameters, the RTO of Linux, the SYN retries, a FIN that keeps a running retransmission timer, adaptive delayed ACK, keepalive, no new fast recovery before the recovery point of a timeout (D-34) |
 | S15b ✅ | `topic/tcp-zero-window` | 13 (part), 32 (part), 34 (part), 84, new | +186 −56 | the zero window: the persist timing (B15), the probe, the window update that reopens the window (B14) |
-| S16 | `topic/tcp-send-rules` | 15 (part), 16 (part), 36 (part), 69, new | +250 −20 (about) | the send rules of RFC 9293: sender SWS avoidance with its override timeout, PSH in the last buffered segment, `TCP_NODELAY`, the Nagle of Minshall, `TCP_MAXSEG` |
+| S16 ✅ | `topic/tcp-send-rules` | 15 (part), 16 (part), 36 (part), 69, new | +90 −4 | the sender SWS avoidance of RFC 9293 with its override timeout, `TCP_NODELAY`, the Nagle of Minshall, `TCP_MAXSEG` (D-73 to D-75) |
 | S16b | `topic/tcp-write-boundaries` | 36 (part), new | +250 −10 (about) | `TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of Linux at write boundaries |
 | S17 | `topic/tcp-connection-leftovers` | 39, 61 | +445 −185 | the remaining connection work, the SACK scoreboard scan, two repairs |
 | S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
@@ -685,6 +685,29 @@ plan gives a reason for.
   retransmission (BSD and Linux put the highest sequence number sent), so after a data segment of
   the peer the window of its later pure ACKs looked old (SND.WL1), condition (e) failed, and a fast
   retransmit did not come. Both repairs go together to a later stage.
+- **D-73 — The sender SWS avoidance of RFC 9293, with its override timeout.** Master had none
+  (MUST-38). S16 follows section 3.8.6.2.1: a segment of new data smaller than the effective MSS
+  goes out only if it carries all queued data (rule (2)) or at least Fs = 1/2 of Max(SND.WND)
+  (rule (3)); else it waits, and the persist timer of S15b times the override (rule (4)), as the
+  RFC suggests and as Linux sends from its probe timer (`tcp_write_wakeup()`). As BSD, the usable
+  window is also limited by the congestion window, and a retransmission is never held. The source
+  has rules (1) to (3), with the Fs condition of commit 69, but no override, so a window that
+  stayed below both limits blocked the data for ever.
+- **D-74 — PSH in the last buffered segment goes to S19.** INET has no PUSH flag on SEND, so RFC
+  9293 section 3.9.1.2 asks for PSH "in the last buffered segment (i.e., when there is no more
+  queued data to be sent) (MUST-61)"; master and the source set it on no segment by default (the
+  source only with the Linux option of S16b). The rule changes the end of each train of data
+  segments: the packet dump of 164 module tests and the packet data of each TCP fingerprint row.
+  S19 moves the tests to the new defaults and pins the old ones, so the rule lands there, with a
+  parameter whose default follows the RFC, and each test changes once.
+- **D-75 — The socket options of the send rules.** `TCP_NODELAY` and `TCP_MAXSEG` act through the
+  socket calls of the contract (D-4), before and after the open, and a forked connection takes the
+  values of its listener. `TCP_NODELAY` sends the data that Nagle holds at once, as Linux
+  `tcp_push_pending_frames()`. `TCP_MAXSEG` limits the send MSS, and before the open also the MSS
+  option, together with the `mss` parameter, as Linux limits `user_mss` by the MSS of the device;
+  the source announced the value of the option also when it was larger. `minshallNagle` selects the
+  Nagle of Minshall that Linux uses; the default is the Nagle of RFC 9293 section 3.7.4, where the
+  source made the variant of Minshall the only Nagle.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -1899,26 +1922,57 @@ with lwIP). The six gates pass.
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | fix: the sender avoids the silly window syndrome (RFC 9293 MUST-38) | — | 15 (part), 16 (part), 69, new |
-| 2 | change: PSH in the last buffered segment (RFC 9293 MUST-61) | — | new |
-| 3 | add: `TCP_NODELAY` for one socket | — | 36 (part) |
-| 4 | add: the Nagle of Minshall, selected by a parameter | — | 36 (part) |
-| 5 | add: `TCP_MAXSEG` for one socket | — | 15 (part) |
+| 1 | fix: the sender avoids the silly window syndrome (RFC 9293 MUST-38) | — | 15 (part), 16 (part), 69, new (D-73) |
+| 2 | add: `TCP_NODELAY` for one socket | — | 36 (part) |
+| 3 | add: the Nagle of Minshall, selected by `minshallNagle` | — | 36 (part) |
+| 4 | add: `TCP_MAXSEG` for one socket | — | 15 (part) |
 
 S16 had commits 15 and 16 (parts), 36 and 69. Commit 36 brings two kinds of work: the send rules
 (Nagle, `TCP_NODELAY`) and the write boundaries (`TCP_CORK`, `MSG_MORE`, `MSG_EOR`, the PSH of
 Linux). S16 takes the send rules, and a new stage S16b takes the write boundaries, so that each
-stage stays small enough to review.
+stage stays small enough to review. Master has no sender SWS avoidance, which RFC 9293 section
+3.8.6.2.1 requires (MUST-38); the source has no override timeout for it (D-73). The plan had a
+step for PSH in the last buffered segment (MUST-61); it goes to S19, because it changes the
+packet dump of most module tests (D-74). The Nagle of master is that of RFC 9293 section 3.7.4;
+step 3 adds the variant of Minshall behind a parameter (D-75). The counts of `sendData()` of
+commit 27 (`allowedToSend`) need no change: master computes the effective window with signed
+arithmetic, so it does not underflow.
 
-Master has no sender SWS avoidance, which RFC 9293 section 3.8.6.2.1 requires (MUST-38). The source
-adds rules (1) to (3) of that section with commits 15, 16 and 69, but not rule (4), the override
-timeout: "To avoid a resulting deadlock, it is necessary to have a timeout to force transmission of
-data, overriding the SWS avoidance algorithm." The RFC suggests the timer of the zero-window probes
-for it, and Linux uses its probe timer the same way (`tcp_write_wakeup()`); step 1 uses the persist
-timer of S15b. Master sets PSH on no segment. INET has no PUSH flag on SEND, so RFC 9293 section
-3.9.1.2 asks for PSH "in the last buffered segment (i.e., when there is no more queued data to be
-sent) (MUST-61)"; the source sets PSH only with the Linux option of S16b. The Nagle of master is
-that of RFC 9293 section 3.7.4; the source changed it to the variant of Minshall, which Linux uses;
-step 4 keeps the RFC as the default. The counts of `sendData()` of commit 27 (`allowedToSend`)
-need no change: master computes the effective window with signed arithmetic, so it does not
-underflow.
+Items for later stages: (S16b) `TCP_CORK`, `MSG_MORE`, `MSG_EOR` and the PSH of Linux at write
+boundaries. (S19) PSH in the last buffered segment, with a parameter (D-74). (inet-gpl) Its
+configuration sets `minshallNagle = true`; a run can check it only after S18.
+
+### S16 — `topic/tcp-send-rules` — landed 2026-10-13
+
+The owner reviewed and approved S16 on 2026-10-13.
+
+S16 brings the sender SWS avoidance of RFC 9293 with its override timeout, the socket options
+`TCP_NODELAY` and `TCP_MAXSEG`, and the Nagle of Minshall behind a parameter. Where the source is
+wrong or incomplete, S16 deviates from it (D-73 to D-75).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: fix: the sender avoids the silly window syndrome (RFC 9293 MUST-38)` | — | 15 (part), 16 (part), 69, new | `dctcp` DcTcpIncast, TcpRenoIncast; `redmarker` TcpSender1; `bulktransfer` inet_inet_2b |
+| `tcp: add: TCP_NODELAY for one socket` | — | 36 (part) | — |
+| `tcp: add: the Nagle of Minshall, selected by minshallNagle` | — | 36 (part) | — |
+| `tcp: add: TCP_MAXSEG for one socket` | — | 15 (part) | — |
+
+One commit moves CI rows. In the two DCTCP incast rows and the RED marker row, a segment smaller
+than the MSS that the congestion window limits now waits for the next ACK, as BSD holds it; in the
+bulk transfer row, a peer window of 195 bytes no longer gets a segment of 175 bytes (rule (3)).
+
+New tests: `tcp_sws_1` and `_2`, `tcp_nodelay_1`, `tcp_nagle_minshall_1` and `tcp_maxseg_1`.
+`tcp_timestamp_2` and `tcp_zerocopy_1` send full segments in place of small ones, and
+`tcp_persist_4` follows a new log text. The test client gets the parameters `noDelayScript` and
+`maxSegScript`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the TCP module tests pass at each commit (533 at the first code commit, 536 at the
+head); the TCP standards tests pass at each code commit (25 pass, 2 expected failures, the
+packetdrill tests skip without inet-gpl); unit 122 and serializer 4 pass at the head. The new and
+changed tests of each code commit fail with the source of the commit before, except `tcp_sws_1`,
+a control of rule (3): master sends each segment that the window allows, and the test guards
+against the defect that source commit 69 repairs. The CI fingerprint job runs at each code commit,
+and only the rows above move. The TCP fingerprint rows run in debug at the head with no runtime
+error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build with
+lwIP). The six gates pass.
