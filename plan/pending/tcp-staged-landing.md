@@ -71,7 +71,9 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S17b ✅ | `topic/tcp-timestamps` | 26 (part), 39 (part), new | +113 −37 | the timestamps of RFC 7323: `TS.Recent` from the handshake, PAWS, the update after the window test, the TS option on each segment; the update rule of Linux behind a parameter (D-81 to D-83) |
 | S17c ✅ | `topic/tcp-segment-checks` | 39 (part), new | +72 −12 | the sequence number of a pure ACK and of the RST of an abort, the window update from data (D-72), the FIN in the window test, the Linux checks of RFC 5961 and of the window edge and the RST with ACK of Linux behind parameters (D-84 to D-86) |
 | S17d ✅ | `topic/tcp-connection-setup` | 26 (part), 39 (part), 79, new | +111 −20 | the text of a SYN without Fast Open, the hard ICMP error in SYN_RCVD, the soft ICMP errors and the ICMP sequence check of Linux behind parameters, the zero-copy completion of SYN data (D-87 to D-89) |
-| S18 | `topic/tcp-pmtud-rcvbuf` | 46, 47, 42, 58 | +556 −65 | RFC 4821 path MTU discovery, receive buffer memory, the applications |
+| S18 | `topic/tcp-receive-memory` | 47 | +150 −40 (about) | the receive buffer memory of Linux: SO_RCVBUF on an open connection and its lock, the zero window of a buffer that runs out of room, the window update after a read |
+| S18b | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part) | +300 −10 (about) | the RFC 4821 path MTU search of Linux, the SYN after an ICMP fragmentation-needed error |
+| S18c | `topic/tcp-applications` | 42, 58 | +30 −12 (about) | the applications use the new socket behavior |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
@@ -2433,3 +2435,37 @@ and no row moves. The TCP fingerprint rows run in debug at the head with no runt
 gates and the combined pull-request gate pass. After a rebase onto 14 new commits of master (IPsec),
 each commit builds alone, the module tests pass at the head (594), the CI fingerprint job passes
 at the head, and the combined pull-request gate passes.
+
+### S18 — `topic/tcp-receive-memory`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: SO_RCVBUF on an open connection, and the lock of the buffer | — | 47 (part) |
+| 2 | fix: accept a pure ACK up to the highest window edge offered | — | 47 (part) |
+| 3 | add: a locked receive buffer offers only its free space | — | 47 (part) |
+| 4 | add: a locked buffer that runs out of room offers a zero window | — | 47 (part) |
+| 5 | refactor: compute the receive window apart from its update | — | — |
+| 6 | add: the window update of Linux after a read, by a parameter | — | 47 (part) |
+
+S18 had commits 42, 46, 47 and 58, which cover three topics: the receive buffer memory (47), the
+RFC 4821 path MTU search (46), and the applications (42, and 58, which repairs 42). They go to three
+stages, so that each stays small enough to review: S18 the receive buffer, S18b the path MTU search
+with the SYN that commit 26 sends at once after an ICMP fragmentation-needed error in SYN_SENT, and
+S18c the applications.
+
+Linux SO_RCVBUF sets the receive buffer before and after the open, and it locks the buffer, so the
+buffer no longer grows under pressure (SOCK_RCVBUF_LOCK). S14 brought `TcpSocket::setReceiveBufferSize()`
+for the next open; step 1 makes it act on an open connection too, and both forms lock the buffer,
+which matters only with `windowAutoTuning`, the growth of Linux. The window in force and the
+highest edge ever offered become two variables, as Linux `rcv_wup + rcv_wnd` and `rcv_mwnd_seq`; a
+pure ACK up to the highest edge then stays acceptable after the window shrank, which corrects
+`windowShrinkAllowed` (step 2). A locked buffer offers only its free space at the truesize ratio
+(step 3), and a locked buffer that runs out of room drops the next segment and answers at once with
+a zero window (Linux ICSK_ACK_NOMEM, step 4). RFC 9293 says that a receiver SHOULD NOT shrink the
+window (SHLD-14), so only a buffer that the application locked, as the socket call of Linux does,
+gets this rule. Linux sends a window update when a read frees enough of the buffer
+(`tcp_cleanup_rbuf()`), which RFC 9293 does not require: the receiver SWS avoidance only says when
+the right edge may move, and the delayed ACK says when the ACK goes; a parameter selects it (step
+6), which needs the window that the receiver can offer without an update of the state (step 5).
+The explicit READ of master already gives back the buffer charge of the data it reads (S14).
+Neither master nor the source limits the growth of the buffer (Linux `tcp_rmem[2]`).
