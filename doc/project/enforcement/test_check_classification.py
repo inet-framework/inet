@@ -63,6 +63,24 @@ class CheckClassificationTest(unittest.TestCase):
         self.assertEqual(result.stdout.count("VIOLATION:"), 1, result.stdout)
         self.assertIn("has no Change: line", result.stdout)
 
+    def commit_without_trailer(self, author_date):
+        self.write("src/inet/a/A.cc", "int a = 1;\n")
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "a: fix: one value\n\nThe value changes.", f"--date={author_date}T12:00:00")
+
+    def test_a_missing_trailer_before_the_rule_gives_a_note(self):
+        self.commit_without_trailer("2026-09-10")
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("has no Change: line, and it predates the rule (authored 2026-09-10)", result.stdout)
+
+    def test_a_missing_trailer_after_the_rule_fails(self):
+        self.commit_without_trailer("2026-09-11")
+        result = self.check()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("has no Change: line", result.stdout)
+        self.assertNotIn("predates the rule", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
