@@ -37,11 +37,14 @@ class TestRateSelection : public SimpleModule, public IRateSelection, public IQo
 
   public:
     virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet,
-            const Ptr<const Ieee80211RtsFrame>& rtsFrame) override { return responseMode; }
+            const Ptr<const Ieee80211RtsFrame>& rtsFrame, ResponseQueryRole role) override
+    { ASSERT(role == ResponseQueryRole::PREDICT); return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet,
-            const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override { return responseMode; }
+            const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, ResponseQueryRole role) override
+    { ASSERT(role == ResponseQueryRole::PREDICT); return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet,
-            const Ptr<const Ieee80211BlockAckReq>& blockAckReq) override { return responseMode; }
+            const Ptr<const Ieee80211BlockAckReq>& blockAckReq, ResponseQueryRole role) override
+    { ASSERT(role == ResponseQueryRole::PREDICT); return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
             const Ptr<const Ieee80211MacHeader>& header) override { return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet,

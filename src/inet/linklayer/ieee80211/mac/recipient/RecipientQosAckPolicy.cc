@@ -24,12 +24,12 @@ void RecipientQosAckPolicy::initialize(int stage)
 
 simtime_t RecipientQosAckPolicy::computeBasicBlockAckDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const
 {
-    return rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq)->getDuration(LENGTH_BASIC_BLOCKACK);
+    return rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq, ResponseQueryRole::RESPOND)->getDuration(LENGTH_BASIC_BLOCKACK);
 }
 
 simtime_t RecipientQosAckPolicy::computeAckDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const
 {
-    return rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader)->getDuration(LENGTH_ACK);
+    return rateSelection->computeResponseAckFrameMode(packet, dataOrMgmtHeader, ResponseQueryRole::RESPOND)->getDuration(LENGTH_ACK);
 }
 
 //

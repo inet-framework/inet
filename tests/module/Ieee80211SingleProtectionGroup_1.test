@@ -19,15 +19,15 @@ class GroupRateSelection : public IQosRateSelection {
     int ackQueries = 0;
     int currentAckQueries = 0;
     int successorAckQueries = 0;
-    const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override {
+    const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header, ResponseQueryRole role) override {
         ackQueries++;
         if (header->getReceiverAddress().isMulticast()) currentAckQueries++;
         else successorAckQueries++;
-        return delegate->computeResponseAckFrameMode(packet, header);
+        return delegate->computeResponseAckFrameMode(packet, header, role);
     }
     const physicallayer::IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txop) override { return delegate->computeMode(packet, header, txop); }
-    const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& header) override { return delegate->computeResponseCtsFrameMode(packet, header); }
-    const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header) override { return delegate->computeResponseBlockAckFrameMode(packet, header); }
+    const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& header, ResponseQueryRole role) override { return delegate->computeResponseCtsFrameMode(packet, header, role); }
+    const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header, ResponseQueryRole role) override { return delegate->computeResponseBlockAckFrameMode(packet, header, role); }
 };
 class GroupMechanism : public SingleProtectionMechanism {
   public:

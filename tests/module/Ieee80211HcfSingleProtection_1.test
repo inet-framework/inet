@@ -73,23 +73,23 @@ class SingleRateSelection : public IQosRateSelection {
         return delegate->computeMode(packet, header, txop);
     }
     const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet,
-            const Ptr<const Ieee80211RtsFrame>& header) override {
-        return delegate->computeResponseCtsFrameMode(packet, header);
+            const Ptr<const Ieee80211RtsFrame>& header, ResponseQueryRole role) override {
+        return delegate->computeResponseCtsFrameMode(packet, header, role);
     }
     const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet,
-            const Ptr<const Ieee80211DataOrMgmtHeader>& header) override {
+            const Ptr<const Ieee80211DataOrMgmtHeader>& header, ResponseQueryRole role) override {
         auto requestMode = packet->findTag<physicallayer::Ieee80211ModeReq>();
         ackInputs.push_back(requestMode ? requestMode->getMode() :
             packet->getTag<physicallayer::Ieee80211ModeInd>()->getMode());
         ackTreeIds.push_back(packet->getTreeId());
         ackTimes.push_back(simTime());
-        auto responseMode = delegate->computeResponseAckFrameMode(packet, header);
+        auto responseMode = delegate->computeResponseAckFrameMode(packet, header, role);
         ackDurations.push_back(responseMode->getDuration(LENGTH_ACK));
         return responseMode;
     }
     const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet,
-            const Ptr<const Ieee80211BlockAckReq>& header) override {
-        return delegate->computeResponseBlockAckFrameMode(packet, header);
+            const Ptr<const Ieee80211BlockAckReq>& header, ResponseQueryRole role) override {
+        return delegate->computeResponseBlockAckFrameMode(packet, header, role);
     }
 };
 class SingleRateControl : public IRateControl {

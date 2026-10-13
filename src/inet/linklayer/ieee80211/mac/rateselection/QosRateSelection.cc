@@ -94,7 +94,7 @@ bool QosRateSelection::isControlResponseFrame(const Ptr<const Ieee80211MacHeader
 // non-HT PPDU CTS or ACK control response frame at either the primary rate or the alternate rate, if
 // one exists.
 //
-const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
+const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, ResponseQueryRole role)
 {
     // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, dataOrMgmtHeader);
@@ -110,10 +110,10 @@ const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *pack
     }
     else
         responseMode = responseAckFrameMode;
-    return getPeerCompatibleMode(dataOrMgmtHeader->getTransmitterAddress(), responseMode);
+    return getPeerCompatibleResponseMode(dataOrMgmtHeader, responseMode, role);
 }
 
-const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame)
+const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ResponseQueryRole role)
 {
     // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, rtsFrame);
@@ -129,7 +129,7 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
     }
     else
         responseMode = responseCtsFrameMode;
-    return getPeerCompatibleMode(rtsFrame->getTransmitterAddress(), responseMode);
+    return getPeerCompatibleResponseMode(rtsFrame, responseMode, role);
 }
 
 //
@@ -138,11 +138,11 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 // rate is defined to be the same rate and modulation class as the BlockAckReq frame, and the STA
 // shall transmit the Basic BlockAck frame at the primary rate.
 //
-const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
+const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, ResponseQueryRole role)
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         auto mode = responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
-        return getPeerCompatibleMode(blockAckReq->getTransmitterAddress(), mode);
+        return getPeerCompatibleResponseMode(blockAckReq, mode, role);
     }
     else
         throw cRuntimeError("Unknown BlockAckReq frame type");
@@ -284,6 +284,15 @@ void QosRateSelection::frameTransmitted(Packet *packet, const Ptr<const Ieee8021
 {
     auto receiverAddr = header->getReceiverAddress();
     lastTransmittedFrameMode[receiverAddr] = getMode(packet, header);
+}
+
+const IIeee80211Mode *QosRateSelection::getPeerCompatibleResponseMode(const Ptr<const Ieee80211TwoAddressHeader>& header,
+        const IIeee80211Mode *mode, ResponseQueryRole role) const
+{
+    const auto& peerAddress = role == ResponseQueryRole::PREDICT ? header->getReceiverAddress() : header->getTransmitterAddress();
+    if (mode == nullptr || peerAddress.isMulticast() || mib == nullptr || mode->getHtMcsIndex() < 0)
+        return mode;
+    return selectPeerCompatibleResponseMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress, role);
 }
 
 const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& peerAddress, const IIeee80211Mode *mode) const

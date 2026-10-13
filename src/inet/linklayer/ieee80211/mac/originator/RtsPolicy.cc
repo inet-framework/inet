@@ -50,7 +50,7 @@ bool RtsPolicy::isRtsNeeded(Packet *packet, const Ptr<const Ieee80211MacHeader>&
 //
 simtime_t RtsPolicy::getCtsTimeout(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) const
 {
-    return ctsTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseCtsFrameMode(packet, rtsFrame)->getPhyRxStartDelay() : ctsTimeout;
+    return ctsTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseCtsFrameMode(packet, rtsFrame, ResponseQueryRole::PREDICT)->getPhyRxStartDelay() : ctsTimeout;
 }
 
 } /* namespace ieee80211 */

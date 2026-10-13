@@ -70,6 +70,8 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     virtual const physicallayer::IIeee80211Mode *computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
     virtual const physicallayer::IIeee80211Mode *getPeerCompatibleMode(const MacAddress& peerAddress,
             const physicallayer::IIeee80211Mode *mode) const;
+    const physicallayer::IIeee80211Mode *getPeerCompatibleResponseMode(const Ptr<const Ieee80211TwoAddressHeader>& header,
+            const physicallayer::IIeee80211Mode *mode, ResponseQueryRole role) const;
 
     virtual bool isControlResponseFrame(const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure);
 
@@ -79,9 +81,9 @@ class INET_API QosRateSelection : public IQosRateSelection, public ModeSetListen
     // reception, an ACK in response to a DATA reception, a BlockAck in response to a BlockAckReq reception. In
     // some situations, the transmission of a control frame is not a control response transmission, such as when a CTS
     // is used to initiate a TXOP.
-    virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame) override;
-    virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
-    virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) override;
+    virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ResponseQueryRole role) override;
+    virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, ResponseQueryRole role) override;
+    virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, ResponseQueryRole role) override;
 
     virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure) override;
 
