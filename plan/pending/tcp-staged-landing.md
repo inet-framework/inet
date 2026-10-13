@@ -74,7 +74,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S18 ✅ | `topic/tcp-receive-memory` | 47 | +165 −36 | SO_RCVBUF on an open connection and its lock, the highest window edge apart from the edge in force, the free space and the zero window of a locked buffer, the window update of Linux after a read behind a parameter (D-90 to D-93) |
 | S18b | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part) | +300 −10 (about) | the RFC 4821 path MTU search of Linux, the SYN after an ICMP fragmentation-needed error |
 | S18c | `topic/tcp-applications` | 42, 58 | +30 −12 (about) | the applications use the new socket behavior |
-| S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
+| S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 46 (part), 53, 63, 68, 70, 71, 72, 78, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
 The big test commit (41, `tests: add+change: cover the new behavior, and pin the old defaults`,
@@ -2546,3 +2546,61 @@ fail with the source of the commit before. The CI fingerprint job runs at each c
 row moves. The TCP fingerprint rows run in debug at the head with no runtime error (the `tyf`
 ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six gates
 and the combined pull-request gate pass.
+
+### S18b — `topic/tcp-path-mtu-probing`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: the RFC 4821 path MTU search of Linux, by a parameter | — | 46 (part) |
+| 2 | add: TcpSocket::setPathMtu(), and the route MTU bounds the search | — | 46 (part) |
+| 3 | add: an active opener with mtuProbing starts at the base MSS | — | new |
+| 4 | fix: a SYN that meets an ICMP fragmentation-needed error | — | 26 (part) |
+
+S16b took the size of a GSO burst and `TcpAlgorithm::getSrtt()` from commit 46. S18b takes the RFC
+4821 search: with Linux `tcp_mtu_probing = 2`, the sender sends one segment larger than its MSS,
+from data that goes out anyway, and raises the MSS when the peer acknowledges that segment. The
+parameters `mtuProbing`, `baseMss` and `pathMtu` select it, and the default keeps master. The route
+parameter `initialCwnd` of commit 46 needs the initial window modes of commit 15, so it goes to
+S19.
+
+Step 1 arms the search where the flavour learns the established state, before it computes its
+initial window, as Linux `tcp_init_transfer()` calls `tcp_mtup_init()`; the source arms it after
+the transition. It counts as INET does: `snd_mss` is the MSS without options, as Linux
+`mss_clamp`, and the payload of a probe is that of Linux `tcp_mtu_to_mss()`. The source counts the
+timestamp option in the upper bound and sets `snd_mss` from a payload, so with timestamps its
+probes can exceed the MSS of the peer by 12 bytes, and its new MSS loses 12 bytes. The
+preconditions are those of Linux `tcp_mtu_probe()`: the congestion state Open, a window of 11
+segments, no SACK block to send, and enough data and window for the probe and `reordering + 1`
+more segments; when only the window edge or the pipe has no room, the sender waits, as Linux. The
+source tests the cumulative SACK counters, so one SACK stops the search for ever, and it never
+waits. As in the source, no probe goes at or below the current MSS; Linux can lower the MSS of a
+passive connection whose MSS is above `baseMss`. A retransmission into the range of the probe
+ends the probe as lost, and the upper bound falls below it, as in the source; without that, a
+lost probe would count as a success when its retransmission is acknowledged. Linux decides at the
+fast retransmit and repairs the probe without a congestion response (`tcp_simple_retransmit()`),
+as RFC 4821 section 7.6.2 says (the loss of a probe alone SHOULD NOT count as congestion); S18b
+keeps the congestion response of the flavour, an open item. A probe gap larger than the MSS then
+needs more than one retransmission, and with `TcpReno` the rest waits for the retransmission
+timeout. The search does not run again after `tcp_probe_interval` (600 s), and no black-hole
+detection (`tcp_mtu_probing = 1`) exists.
+
+Step 2: Linux learns a new route MTU at the next send (`tcp_sync_mss()`), and `setPathMtu()`
+models `ip route change`. A smaller MTU lowers the MSS at once; a larger one raises the MSS only
+through the search, because the parameter `mss` limits it otherwise. The route MTU, from the call
+or from an ICMP error of RFC 1191, bounds the search: no probe goes above it, and a lost probe does
+not raise the upper bound again. The source raises the upper bound to a new MTU, which can exceed
+the MSS of the peer, never lowers the MSS, and lets a lost probe raise the upper bound.
+
+Step 3: with `tcp_mtu_probing = 2`, Linux starts an active opener at `tcp_base_mss`, because
+`tcp_connect_init()` arms the search before `tcp_sync_mss()`; its documentation says so. A passive
+connection keeps its MSS, as the script `mtu_probe/basic-v4` shows. The source keeps the MSS on
+both sides.
+
+Step 4: master, with `pmtudEnabled`, answers an ICMP fragmentation-needed error (or an ICMPv6
+Packet Too Big) in SYN_SENT with a lower `snd_mss` and `retransmitOneSegment()`, which builds a
+segment from the ISS and stops the simulation with an ASSERT. Linux lowers the MSS and the MSS
+option of the next SYN (`tcp_v4_mtu_reduced()`), and retransmits at once only a SYN with data, as
+a bare SYN (kernel commit c31b70c9968f; the Fast Open client scripts
+`syn-data-icmp-unreach-frag-needed*`). A SYN without data waits for its timer. The source
+retransmits each SYN at once, also without `pmtudEnabled`. S18b keeps the gate of master: without
+`pmtudEnabled`, an IPv4 segment has no DF bit, so no router answers it with this error.
