@@ -43,7 +43,7 @@ std::ostream& NakagamiFading::printToStream(std::ostream& stream, int level, int
     return stream;
 }
 
-double NakagamiFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double NakagamiFading::computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     m waveLength = propagationSpeed / frequency;
     double freeSpacePathLoss = computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);

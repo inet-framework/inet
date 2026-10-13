@@ -42,7 +42,7 @@ std::ostream& BreakpointPathLoss::printToStream(std::ostream& stream, int level,
     return stream;
 }
 
-double BreakpointPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
+double BreakpointPathLoss::computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     // PL(d) = PL0 + 10 alpha log10 (d/d0)
     // 10 ^ { PL(d)/10 } = 10 ^{PL0 + 10 alpha log10 (d/d0)}/10

@@ -31,10 +31,12 @@ class INET_API IPathLoss : public virtual IPrintableObject
 
     /**
      * Returns the loss factor as a function of propagation speed, carrier
-     * frequency and distance. The value is in the range [0, 1] where 1 means
-     * no loss at all and 0 means all power is lost.
+     * frequency and distance, independently of the transmitter and the
+     * receiver. The value is in the range [0, 1] where 1 means no loss at all
+     * and 0 means all power is lost, or NaN if the model cannot tell the loss
+     * from the distance alone.
      */
-    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const = 0;
+    virtual double computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const = 0;
 
     /**
      * Returns the range for the given loss factor. The value is in the range

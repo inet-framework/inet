@@ -46,7 +46,7 @@ class INET_API FrequencyDependentAttenuationFunction : public FunctionBase<doubl
     virtual double getValue(const Point<simsec, Hz>& p) const override {
         Hz frequency = std::get<1>(p);
         auto propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
-        auto pathLoss = radioMedium->getPathLoss()->computePathLoss(propagationSpeed, frequency, distance);
+        auto pathLoss = radioMedium->getPathLoss()->computeDistancePathLoss(propagationSpeed, frequency, distance);
         auto obstacleLoss = radioMedium->getObstacleLoss() ? radioMedium->getObstacleLoss()->computeObstacleLoss(frequency, transmissionPosition, receptionPosition) : 1;
         double gain = transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss;
         ASSERT(!std::isnan(gain));
@@ -383,7 +383,7 @@ class INET_API PathLossFunction : public FunctionBase<double, Domain<mps, m, Hz>
         mps propagationSpeed = std::get<0>(p);
         Hz frequency = std::get<2>(p);
         m distance = std::get<1>(p);
-        return pathLoss->computePathLoss(propagationSpeed, frequency, distance);
+        return pathLoss->computeDistancePathLoss(propagationSpeed, frequency, distance);
     }
 
     virtual void printStructure(std::ostream& os, int level = 0) const override { os << "(" << *pathLoss << ")"; }

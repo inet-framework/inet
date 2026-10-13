@@ -18,7 +18,7 @@ namespace physicallayer {
 class INET_API PathLossBase : public Module, public IPathLoss
 {
   public:
-    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const override = 0;
+    virtual double computeDistancePathLoss(mps propagationSpeed, Hz frequency, m distance) const override = 0;
     virtual double computePathLoss(const ITransmission *transmission, const IArrival *arrival) const override;
 };
 

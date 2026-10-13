@@ -23,7 +23,7 @@ double PathLossBase::computePathLoss(const ITransmission *transmission, const IA
     mps propagationSpeed = radioMedium->getPropagation()->getPropagationSpeed();
     Hz centerFrequency = Hz(analogModel->getCenterFrequency());
     m distance = m(arrival->getStartPosition().distance(transmission->getStartPosition()));
-    return computePathLoss(propagationSpeed, centerFrequency, distance);
+    return computeDistancePathLoss(propagationSpeed, centerFrequency, distance);
 }
 
 } // namespace physicallayer
