@@ -1,0 +1,56 @@
+%description:
+Tests rfc5961AckCheck, the ACK check of RFC 5961 section 5.2. The tester
+subtracts 20000 from the ACK field of a data segment of the server, so the ACK
+lies below SND.UNA - MAX.SND.WND (1001 - 16384). The client drops the segment
+with its data and sends an ACK in reply, and the server sends the data again
+after its RTO. Without the parameter, the client takes such an ACK as an old
+duplicate ACK and accepts the data.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 1000"
+*.*_tcp.mss = 1000
+*.cli_tcp.rfc5961AckCheck = true
+*.srv_app.tSend = 2s
+*.srv_app.sendBytes = 100B
+*.tcptester.script="B3 ackadd 4294947296"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 
+[1.203 B002] A.1000 < B.2000: A ack 1001 win 16384 
+[2.001 B003] A.1000 < B.2000: A 501:601(100) ack 4294948297 win 16384 # changing the ACK field
+[2.003 A004] A.1000 > B.2000: A ack 501 win 16384 
+[5.001 B004] A.1000 < B.2000: A 501:601(100) ack 1001 win 16384 
+[5.203 A005] A.1000 > B.2000: A ack 601 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+ACK below SND.UNA - MAX.SND.WND (RFC 5961 section 5.2): dropping the segment and sending an ACK
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

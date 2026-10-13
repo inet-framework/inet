@@ -1614,6 +1614,19 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
     if (seqLE(tcpHeader->getAckNo(), state->snd_max))
         tcpAlgorithm->processTlpAck(tcpHeader.get(), payloadLength);
 
+    // rfc5961AckCheck: RFC 5961 section 5.2, which RFC 9293 allows (MAY-12): "the ACK value
+    // is acceptable only if it is in the range of ((SND.UNA - MAX.SND.WND) =< SEG.ACK =<
+    // SND.NXT). All incoming segments whose ACK value doesn't satisfy the above condition
+    // MUST be discarded and an ACK sent back." MAX.SND.WND is max_window; an ACK above
+    // SND.NXT takes the path of an ACK of unsent data below.
+    if (state->rfc5961AckCheck && state->max_window > 0
+        && seqLess(tcpHeader->getAckNo(), state->snd_una - state->max_window))
+    {
+        EV_INFO << "ACK below SND.UNA - MAX.SND.WND (RFC 5961 section 5.2): dropping the segment and sending an ACK\n";
+        sendAck();
+        return false; // means "drop"
+    }
+
     if (seqGE(state->snd_una, tcpHeader->getAckNo())) {
         //
         // duplicate ACK? A received TCP segment is a duplicate ACK if all of

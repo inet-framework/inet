@@ -976,6 +976,7 @@ void TcpConnection::configureStateVariables()
     state->minshallNagle = tcpMain->par("minshallNagle");
     state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary");
     state->tsRecentAfterAckCheck = tcpMain->par("tsRecentAfterAckCheck");
+    state->rfc5961AckCheck = tcpMain->par("rfc5961AckCheck");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
