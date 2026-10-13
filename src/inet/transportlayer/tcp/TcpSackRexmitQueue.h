@@ -42,6 +42,22 @@ class INET_API TcpSackRexmitQueue
     uint32_t begin; // 1st sequence number stored
     uint32_t end; // last sequence number stored + 1
 
+  protected:
+    // getLost(), getSacked() and getRetrans() are read several times for each ACK, so
+    // one walk of the queue gives the three totals, which stay valid until a method
+    // changes the queue. Linux keeps lost_out, sacked_out and retrans_out up to date
+    // at each change instead.
+    mutable bool countersValid = false;
+    mutable uint32_t lostBytes = 0;
+    mutable uint32_t sackedBytes = 0;
+    mutable uint32_t retransBytes = 0;
+
+    /** Walks the queue once to update the three totals. */
+    virtual void updateCounters() const;
+
+    /** Each method that adds, removes or changes a region calls this first. */
+    void invalidateCounters() { countersValid = false; }
+
   public:
     /**
      * Ctor

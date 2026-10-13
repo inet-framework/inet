@@ -1080,9 +1080,7 @@ void Rfc6675Recovery::setPipe()
 
     state->highRxt = conn->getRexmitQueue()->getHighestRexmittedSeqNum();
     state->pipe = 0;
-    uint32_t length = 0; // required for rexmitQueue->checkSackBlock()
-    bool sacked; // required for rexmitQueue->checkSackBlock()
-    bool rexmitted; // required for rexmitQueue->checkSackBlock()
+    uint32_t length = 0;
 
     // RFC 6675, page 5:
     //"
@@ -1096,13 +1094,25 @@ void Rfc6675Recovery::setPipe()
     // HighData (snd_max) can sit one sequence number past the last DATA octet
     // when a FIN is outstanding: the FIN consumes a sequence number but is not
     // stored in the (data-only) rexmit queue. Scan only the sequence space the
-    // scoreboard actually covers, or checkSackBlock() walks off its end and
-    // aborts (seen on a TFO fallback that closes with data still in flight).
-    uint32_t scanEnd = conn->getRexmitQueue()->getBufferEndSeq();
+    // scoreboard actually covers, or the walk runs off its end and aborts
+    // (seen on a TFO fallback that closes with data still in flight).
+    //
+    // One iterator walks the scoreboard: a search from the front for each run of
+    // octets, in checkSackBlock() and in isLost() of RACK mode, made the walk
+    // quadratic in the number of regions. Each step still covers the rest of one
+    // region, so the sums and their order stay the same.
+    auto rexmitQueue = conn->getRexmitQueue();
+    uint32_t scanEnd = rexmitQueue->getBufferEndSeq();
     if (seqLess(state->snd_max, scanEnd))
         scanEnd = state->snd_max;
+    ASSERT(seqLE(rexmitQueue->getBufferStartSeq(), state->snd_una) || !seqLess(state->snd_una, scanEnd));
+    auto region = rexmitQueue->rexmitQueue.begin();
     for (uint32_t s1 = state->snd_una; seqLess(s1, scanEnd); s1 += length) {
-        conn->getRexmitQueue()->checkSackBlock(s1, length, sacked, rexmitted);
+        while (region != rexmitQueue->rexmitQueue.end() && seqLE(region->endSeqNum, s1))
+            region++;
+        ASSERT(region != rexmitQueue->rexmitQueue.end() && seqLE(region->beginSeqNum, s1));
+        length = region->endSeqNum - s1;
+        bool sacked = region->sacked;
 
         if (!sacked) {
             // RFC 6675, page 5:
@@ -1116,7 +1126,9 @@ void Rfc6675Recovery::setPipe()
             //     to have been lost (i.e., those segments that are still assumed
             //     to be in the network).
             //"
-            if (isLost(s1) == false)
+            // in RACK mode, isLost() is the lost flag of the region of S1
+            bool lost = state->lossDetectionMode == 1 ? region->lost : isLost(s1);
+            if (lost == false)
                 state->pipe += length;
 
             // RFC 6675, pages 5:
