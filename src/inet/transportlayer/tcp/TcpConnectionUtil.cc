@@ -1372,7 +1372,10 @@ void TcpConnection::sendAck()
     const auto& tcpHeader = makeShared<TcpHeader>();
 
     tcpHeader->setAckBit(true);
-    tcpHeader->setSequenceNo(state->snd_nxt);
+    // SND.NXT of RFC 9293, "<SEQ=SND.NXT><ACK=RCV.NXT><CTL=ACK>", is the next new sequence
+    // number, which a retransmission does not move back; that is snd_max here, because
+    // snd_nxt goes back to snd_una during a retransmission (also BSD and Linux)
+    tcpHeader->setSequenceNo(state->snd_max);
     tcpHeader->setAckNo(state->rcv_nxt);
     tcpHeader->setWindow(updateRcvWnd());
 
