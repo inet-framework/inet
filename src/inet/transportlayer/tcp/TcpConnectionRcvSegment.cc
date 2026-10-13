@@ -415,6 +415,17 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 sendEstabIndicationToApp();
         }
 
+        // The text of a SYN without Fast Open waits in the receive queue since LISTEN
+        // (RFC 9293: "queued for processing later"); it is processed now, as the data of
+        // a segment: RCV.NXT moves over it, it goes to the application, and an ACK follows.
+        if (seqGreater(receiveQueue->getRcvNxt(), state->rcv_nxt)) {
+            EV_INFO << "Processing the text of the SYN: " << receiveQueue->getRcvNxt() - state->rcv_nxt << " bytes\n";
+            state->rcv_nxt = receiveQueue->getRcvNxt();
+            if (!isToBeAccepted())
+                sendAvailableDataToApp();
+            tcpAlgorithm->receiveSeqChanged();
+        }
+
         // A SYN-ACK that completes a simultaneous open repeats the SYN that this
         // side already received: report its one sequence number by a D-SACK, with
         // an immediate ACK, as Linux tcp_data_queue() does for a segment below
@@ -1158,8 +1169,13 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     if (!fastOpenOption && !state->fastopenAccelerated && synData) {
         updateRcvQueueVars();
 
-        if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
-            receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
+        // RFC 9293: "any other control or text should be queued for processing later".
+        // The SYN takes SEG.SEQ, so the text starts at SEG.SEQ+1; RCV.NXT moves over it
+        // when the connection reaches ESTABLISHED.
+        auto textHeader = staticPtrCast<TcpHeader>(tcpHeader->dupShared());
+        textHeader->setSequenceNo(tcpHeader->getSequenceNo() + 1);
+        if (hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, textHeader)) { // enough freeRcvBuffer in rcvQueue for new segment?
+            receiveQueue->insertBytesFromSegment(tcpSegment, textHeader);
         }
         else { // not enough freeRcvBuffer in rcvQueue for new segment
             state->tcpRcvQueueDrops++; // update current number of tcp receive queue drops
