@@ -201,7 +201,7 @@
 /examples/inet/nclients/,            -f video.ini -c Video -r 0,                    50s,             1283-585d/tplx;54ff-5a96/~tNl;5a36-258b/~tND;dc65-79d5/tyf, PASS, Ipv4
 
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Udp -r 0,          100s,            2949-e8ce/tplx;b44e-17d8/~tNl;c2a6-b2ba/~tND;be43-9ccd/tyf, PASS, Ipv4
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Tcp -r 0,          100s,            5a1d-d203/tplx;0309-b513/~tNl;5b37-e188/~tND;a1a5-7087/tyf, PASS, Ipv4
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Tcp -r 0,          100s,            5a1d-d203/tplx;0309-b513/~tNl;45c4-6630/~tND;a1a5-7087/tyf, PASS, Ipv4
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Sctp -r 0,              100s,            489a-aa35/tplx;5720-aff9/~tNl;378d-e4f4/~tND;1753-2e23/tyf, PASS, Ipv4
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             eb3f-fff6/tplx;4921-f3c9/~tNl;5bf3-b6dc/~tND;0968-339c/tyf, PASS, Ipv4
 

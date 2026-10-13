@@ -2446,7 +2446,17 @@ bool TcpConnection::processTSOption(const Ptr<const TcpHeader>& tcpHeader, const
     //   unacceptable segment.
     //   If SEG.SEQ is equal to Last.ACK.sent, then save SEG.[TSval] in
     //   variable TS.Recent."
-    if (state->ts_enabled) {
+    // RFC 7323 appendix D: the TSval of a SYN in LISTEN, and of a SYN or a SYN-ACK in
+    // SYN_SENT, goes to TS.Recent, so that the SYN-ACK and the ACK that completes the
+    // handshake echo it. No ACK has gone out yet, so the rule of Last.ACK.sent below
+    // cannot take it.
+    if (tcpHeader->getSynBit() && (fsm.getState() == TCP_S_LISTEN || fsm.getState() == TCP_S_SYN_SENT)) {
+        if (state->ts_support) {
+            state->ts_recent = option.getSenderTimestamp();
+            EV_DETAIL << "Setting ts_recent from the handshake segment: ts_recent=" << state->ts_recent << "\n";
+        }
+    }
+    else if (state->ts_enabled) {
         if (seqLess(option.getSenderTimestamp(), state->ts_recent)) {
             if ((simTime() - state->time_last_data_sent) > PAWS_IDLE_TIME_THRESH) { // PAWS_IDLE_TIME_THRESH = 24 days
                 EV_DETAIL << "PAWS: Segment is not acceptable, TSval=" << option.getSenderTimestamp() << " in " << stateName(fsm.getState()) << " state received: dropping segment\n";

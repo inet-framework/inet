@@ -29,7 +29,7 @@ include ../../lib/defaults.ini
 %contains: stdout
 [0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize WinScale SackPermitted TS(0,0)
 [0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize WinScale SackPermitted TS(2,0)
-[0.005 A002] A.1000 > B.2000: A ack 501 win 16384   Option(s): TS(4,0)
+[0.005 A002] A.1000 > B.2000: A ack 501 win 16384   Option(s): TS(4,2)
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
