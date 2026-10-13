@@ -72,7 +72,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S17c ✅ | `topic/tcp-segment-checks` | 39 (part), new | +72 −12 | the sequence number of a pure ACK and of the RST of an abort, the window update from data (D-72), the FIN in the window test, the Linux checks of RFC 5961 and of the window edge and the RST with ACK of Linux behind parameters (D-84 to D-86) |
 | S17d ✅ | `topic/tcp-connection-setup` | 26 (part), 39 (part), 79, new | +111 −20 | the text of a SYN without Fast Open, the hard ICMP error in SYN_RCVD, the soft ICMP errors and the ICMP sequence check of Linux behind parameters, the zero-copy completion of SYN data (D-87 to D-89) |
 | S18 ✅ | `topic/tcp-receive-memory` | 47 | +165 −36 | SO_RCVBUF on an open connection and its lock, the highest window edge apart from the edge in force, the free space and the zero window of a locked buffer, the window update of Linux after a read behind a parameter (D-90 to D-93) |
-| S18b | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part) | +300 −10 (about) | the RFC 4821 path MTU search of Linux, the SYN after an ICMP fragmentation-needed error |
+| S18b ✅ | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part), new | +285 −3 | the RFC 4821 path MTU search of Linux behind a parameter, the route MTU of a connection and `TcpSocket::setPathMtu()`, the start MSS of an active opener, the SYN after an ICMP fragmentation-needed error (D-94 to D-97) |
 | S18c | `topic/tcp-applications` | 42, 58 | +30 −12 (about) | the applications use the new socket behavior |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 46 (part), 53, 63, 68, 70, 71, 72, 78, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
@@ -846,6 +846,37 @@ plan gives a reason for.
   the receiver can offer (`selectRcvWnd()`) with the window still open, as Linux
   `tcp_receive_window()`, for each buffer model; the source compares the free buffer with the last
   offer (`rcv_wnd`), only for a buffer apart from the advertised window, and always.
+- **D-94 — The path MTU search counts as INET and as Linux `tcp_mtu_probe()`.** `snd_mss` is the
+  MSS without options, as Linux `mss_clamp`, and a probe carries the payload of Linux
+  `tcp_mtu_to_mss()`; the source counts the timestamp option in the upper bound and sets `snd_mss`
+  from a payload, so with timestamps its probes can exceed the MSS of the peer by 12 bytes, and
+  its new MSS loses 12 bytes. The preconditions are those of Linux: the congestion state Open
+  without duplicate ACKs, a window of 11 segments, no SACK block to send, room for the probe and
+  `reordering + 1` more segments, and a wait when only the window edge or the pipe has no room.
+  The source tests the cumulative SACK counters, so one SACK stops its search for ever, and it
+  never waits. The search starts before the flavour computes its initial window. As in the
+  source, no probe goes at or below the MSS in use, where Linux can lower the MSS of a passive
+  connection to `baseMss`.
+- **D-95 — A lost probe keeps the congestion response.** A retransmission into the range of the
+  probe ends it as lost, as in the source; Linux decides at the fast retransmit and repairs the
+  probe with `tcp_simple_retransmit()`, without a congestion response, as RFC 4821 section 7.6.2
+  says (SHOULD NOT). S18b keeps the response of the flavour, an open item: a model of it needs a
+  hook in the recovery of each flavour. The search does not run again after
+  `tcp_probe_interval`, and no black-hole detection (`tcp_mtu_probing = 1`) exists.
+- **D-96 — The route MTU bounds the search, and an active opener starts at the base MSS.** The
+  route MTU comes from `pathMtu`, from `TcpSocket::setPathMtu()` or from an ICMP error of RFC 1191.
+  A smaller one lowers the MSS at once (Linux `tcp_sync_mss()`); a larger one raises the MSS only
+  through the search, because the parameter `mss` limits it otherwise. No probe goes above it,
+  and a lost probe does not raise the upper bound again; the source raises the upper bound to a
+  new MTU, which can exceed the MSS of the peer, and never lowers the MSS. With `mtuProbing`, an
+  active opener starts at `baseMss`, as Linux `tcp_connect_init()` and its documentation; the
+  source keeps the MSS on both sides.
+- **D-97 — The SYN after an ICMP fragmentation-needed error.** Master stopped the simulation with
+  an ASSERT, because `retransmitOneSegment()` cannot send a SYN. In SYN_SENT, the error now lowers
+  the MSS and the MSS option of the next SYN, and only a SYN with data goes again at once, as a
+  bare SYN that counts as a retransmission (Linux, kernel commit c31b70c9968f); the source
+  retransmits each SYN at once. The gate `pmtudEnabled` of master stays, where Linux and the
+  source react always: without it, an IPv4 segment has no DF bit.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -2551,10 +2582,10 @@ and the combined pull-request gate pass.
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | add: the RFC 4821 path MTU search of Linux, by a parameter | — | 46 (part) |
-| 2 | add: TcpSocket::setPathMtu(), and the route MTU bounds the search | — | 46 (part) |
-| 3 | add: an active opener with mtuProbing starts at the base MSS | — | new |
-| 4 | fix: a SYN that meets an ICMP fragmentation-needed error | — | 26 (part) |
+| 1 | add: the RFC 4821 path MTU search of Linux, by a parameter | — | 46 (part), D-94, D-95 |
+| 2 | add: TcpSocket::setPathMtu(), and the route MTU bounds the search | — | 46 (part), D-96 |
+| 3 | add: an active opener with mtuProbing starts at the base MSS | — | new, D-96 |
+| 4 | fix: a SYN that meets an ICMP fragmentation-needed error | — | 26 (part), D-97 |
 
 S16b took the size of a GSO burst and `TcpAlgorithm::getSrtt()` from commit 46. S18b takes the RFC
 4821 search: with Linux `tcp_mtu_probing = 2`, the sender sends one segment larger than its MSS,
@@ -2604,3 +2635,48 @@ a bare SYN (kernel commit c31b70c9968f; the Fast Open client scripts
 `syn-data-icmp-unreach-frag-needed*`). A SYN without data waits for its timer. The source
 retransmits each SYN at once, also without `pmtudEnabled`. S18b keeps the gate of master: without
 `pmtudEnabled`, an IPv4 segment has no DF bit, so no router answers it with this error.
+
+During the work, the lost probe joined step 1: without it, a lost probe counts as a success when
+its retransmission is acknowledged, and no commit may hold that defect. The test of
+`setPathMtu()` found that a cap of the upper bound at the start stopped the search when the route
+MTU rose later, as in the Linux script; the upper bound now starts at the MSS of the peer, as
+Linux, and no probe goes above the route MTU instead. The scripted tester gets the parameter
+`pathMtu`, a path that drops each larger packet without an ICMP error (a script command for a
+packet wins over it), and the command `icmp` gets the option `mtu`.
+
+Items for later stages: (S19) The parameter `initialCwnd` of commit 46, with the initial window
+modes. (later) After a SYN-ACK that acknowledges only the SYN, INET retransmits one segment of the
+data of a Fast Open SYN, and the rest waits for the retransmission timeout; Linux retransmits all
+of it (`tcp_rcv_fastopen_synack()`). (later) The congestion response to a lost probe (D-95).
+(inet-gpl) Its configuration gets `pmtudEnabled = true`, because Linux reacts to each
+fragmentation-needed error and sets DF; its harness no longer compares the DF bit, as upstream
+packetdrill `verify_ipv4()`. Its harness already gives the route MTU (`pathMtu`, `setPathMtu()`).
+
+### S18b — `topic/tcp-path-mtu-probing` — landed 2026-10-13
+
+The owner reviewed and approved S18b on 2026-10-13.
+
+S18b brings the RFC 4821 path MTU search of Linux behind a parameter, the route MTU of a
+connection with `TcpSocket::setPathMtu()`, the start MSS of an active opener, and the SYN after
+an ICMP fragmentation-needed error. Where master and the source are wrong, S18b deviates from them
+(D-94 to D-97).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: the RFC 4821 path MTU search of Linux, by a parameter` | — | 46 (part) | — |
+| `tcp: add: TcpSocket::setPathMtu(), and the route MTU bounds the search` | — | 46 (part) | — |
+| `tcp: add: an active opener with mtuProbing starts at the base MSS` | — | new | — |
+| `tcp: fix: a SYN that meets an ICMP fragmentation-needed error` | — | 26 (part) | — |
+
+New tests: `tcp_mtu_probe_1` to `tcp_mtu_probe_6`, `tcp_path_mtu_1`, `tcp_icmp_frag_syn_1`,
+`tcp_icmp_frag_syn_2` and `tcp_icmp6_frag_syn_1`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the module tests pass at each commit (599 at the plan commit, 609 at the head). The TCP
+standards tests pass at each code commit (25 pass, 2 expected failures, the packetdrill tests skip
+without inet-gpl); unit 123 and serializer 4 pass at the head. The new tests of steps 1, 3 and 4
+fail with the source of the commit before; the tests of step 2 do not build with it, because the
+test client calls the new `TcpSocket::setPathMtu()`. The CI fingerprint job runs at each code
+commit, and no row moves. The TCP fingerprint rows run in debug at the head with no runtime error
+(the `tyf` ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The
+six gates and the combined pull-request gate pass.
