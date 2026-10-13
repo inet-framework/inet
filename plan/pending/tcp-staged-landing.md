@@ -71,7 +71,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S17b ✅ | `topic/tcp-timestamps` | 26 (part), 39 (part), new | +113 −37 | the timestamps of RFC 7323: `TS.Recent` from the handshake, PAWS, the update after the window test, the TS option on each segment; the update rule of Linux behind a parameter (D-81 to D-83) |
 | S17c ✅ | `topic/tcp-segment-checks` | 39 (part), new | +72 −12 | the sequence number of a pure ACK and of the RST of an abort, the window update from data (D-72), the FIN in the window test, the Linux checks of RFC 5961 and of the window edge and the RST with ACK of Linux behind parameters (D-84 to D-86) |
 | S17d ✅ | `topic/tcp-connection-setup` | 26 (part), 39 (part), 79, new | +111 −20 | the text of a SYN without Fast Open, the hard ICMP error in SYN_RCVD, the soft ICMP errors and the ICMP sequence check of Linux behind parameters, the zero-copy completion of SYN data (D-87 to D-89) |
-| S18 | `topic/tcp-receive-memory` | 47 | +150 −40 (about) | the receive buffer memory of Linux: SO_RCVBUF on an open connection and its lock, the zero window of a buffer that runs out of room, the window update after a read |
+| S18 ✅ | `topic/tcp-receive-memory` | 47 | +165 −36 | SO_RCVBUF on an open connection and its lock, the highest window edge apart from the edge in force, the free space and the zero window of a locked buffer, the window update of Linux after a read behind a parameter (D-90 to D-93) |
 | S18b | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part) | +300 −10 (about) | the RFC 4821 path MTU search of Linux, the SYN after an ICMP fragmentation-needed error |
 | S18c | `topic/tcp-applications` | 42, 58 | +30 −12 (about) | the applications use the new socket behavior |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 53, 63, 68, 70, 71, 72, 78, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
@@ -815,6 +815,37 @@ plan gives a reason for.
   error whose quoted sequence number lies outside SND.UNA to SND.MAX (Linux, the BSDs; RFC 5927
   section 4.1), which no RFC requires; the source makes it unconditional. Both defaults keep
   master's behavior.
+- **D-90 — SO_RCVBUF locks the buffer, by the socket call only.** Linux locks the buffer when the
+  application sets SO_RCVBUF, before or after the open (SOCK_RCVBUF_LOCK). Both forms of
+  `TcpSocket::setReceiveBufferSize()` lock it; the module parameter `receiveBufferSize` keeps the
+  byte model of S14 and does not lock. The source adds the `@mutable` parameter
+  `receiveBufferLocked`, which `PacketDrillApp` sets; S18 has no such parameter, because the lock
+  belongs to one socket, not to the module. Only a locked buffer follows the memory model of Linux
+  (D-92).
+- **D-91 — The window in force and the highest edge offered are two variables.** `rcv_adv` is the
+  right edge in force (Linux `rcv_wup + rcv_wnd`), and the new `rcv_mwnd_seq` is the highest edge
+  ever offered. A segment without data is acceptable from RCV.NXT up to `rcv_mwnd_seq`, as Linux
+  `tcp_sequence()` accepts it; without a shrink, that is the test of RFC 9293. With
+  `windowShrinkAllowed`, master refused a pure ACK from beyond the shrunk window, so S18 corrects
+  that in a commit of its own. The source moves `rcv_adv` to RCV.NXT plus the offer at each offer;
+  S18 does that only where the window may move back (`windowShrinkAllowed`, the zero window of
+  D-92), and the windows are the same.
+- **D-92 — A locked buffer follows the memory model of Linux.** It offers at most its free space at
+  the truesize ratio (`tcp_space()`), and the limits of S14 stay; the source drops the limit of
+  the advertised window for a locked buffer. The receiver SWS rule compares the offer with a
+  quarter of the whole space, which for a locked buffer is the buffer at the truesize ratio, as
+  Linux `__tcp_select_window()` limits the MSS to the full space; with the rule of the source, an
+  empty locked buffer smaller than one MSS offers zero for ever. A locked buffer over its size
+  drops the next segment and answers at once with a zero window (ICSK_ACK_NOMEM). RFC 9293 says
+  that a receiver SHOULD NOT shrink the window (SHLD-14); only a locked buffer does it, as in the
+  source, because an unlocked buffer grows under pressure.
+- **D-93 — The window update after a read is an option.** Linux sends a window update when a read
+  lets the receiver offer at least twice the window still open (`__tcp_cleanup_rbuf()`); RFC 9293
+  lets the receiver SWS avoidance and the delayed ACK decide (section 3.8.6.2.2).
+  `windowUpdateAfterRead` selects Linux, and the default keeps master. It compares the window that
+  the receiver can offer (`selectRcvWnd()`) with the window still open, as Linux
+  `tcp_receive_window()`, for each buffer model; the source compares the free buffer with the last
+  offer (`rcv_wnd`), only for a buffer apart from the advertised window, and always.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -2440,12 +2471,12 @@ at the head, and the combined pull-request gate passes.
 
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
-| 1 | add: SO_RCVBUF on an open connection, and the lock of the buffer | — | 47 (part) |
-| 2 | fix: accept a pure ACK up to the highest window edge offered | — | 47 (part) |
-| 3 | add: a locked receive buffer offers only its free space | — | 47 (part) |
-| 4 | add: a locked buffer that runs out of room offers a zero window | — | 47 (part) |
-| 5 | refactor: compute the receive window apart from its update | — | — |
-| 6 | add: the window update of Linux after a read, by a parameter | — | 47 (part) |
+| 1 | add: SO_RCVBUF on an open connection, and the lock of the buffer | — | 47 (part), D-90 |
+| 2 | fix: accept a pure ACK up to the highest window edge offered | — | 47 (part), D-91 |
+| 3 | add: a locked receive buffer offers only its free space | — | 47 (part), D-92 |
+| 4 | add: a locked buffer that runs out of room offers a zero window | — | 47 (part), D-92 |
+| 5 | refactor: compute the receive window apart from its update | — | new |
+| 6 | add: the window update of Linux after a read, by a parameter | — | 47 (part), D-93 |
 
 S18 had commits 42, 46, 47 and 58, which cover three topics: the receive buffer memory (47), the
 RFC 4821 path MTU search (46), and the applications (42, and 58, which repairs 42). They go to three
@@ -2469,3 +2500,49 @@ the right edge may move, and the delayed ACK says when the ACK goes; a parameter
 6), which needs the window that the receiver can offer without an update of the state (step 5).
 The explicit READ of master already gives back the buffer charge of the data it reads (S14).
 Neither master nor the source limits the growth of the buffer (Linux `tcp_rmem[2]`).
+
+During the work, the plan had three steps. The second step held three changes, and each became a
+commit of its own: the split of the two edges changes `windowShrinkAllowed`, so it is a fix with
+its own test (step 2); the free space of a locked buffer moves a test of step 1 and one of S14
+(step 3); the zero window comes after it (step 4). The test of the zero window found that an empty
+locked buffer of 1000 bytes offered zero for ever, because the receiver SWS rule compared its offer
+of 437 bytes with one MSS; step 3 corrects the rule (D-92). The window update after a read needs
+the window that the receiver can offer without an update of the state, so a refactor comes before
+it (step 5).
+
+Items for later stages: (inet-gpl) It builds against master after S18. `PacketDrillApp` can then
+use `setReceiveBufferSize()` of its socket for SO_RCVBUF, before and after the open, in place of the
+module parameters and of `receiveBufferLocked` of the source (D-90); Linux doubles the value of
+SO_RCVBUF, and the application does that, as in the source. Its configuration gets
+`windowUpdateAfterRead = true` (D-93). The runs that the items above can check only after S18 are
+possible now. (S18c) The applications use the new socket calls.
+
+### S18 — `topic/tcp-receive-memory` — landed 2026-10-13
+
+The owner reviewed and approved S18 on 2026-10-13.
+
+S18 lets SO_RCVBUF change the buffer of an open connection and lock it, splits the window in force
+from the highest edge offered, gives a locked buffer the memory model of Linux, and brings the
+window update of Linux after a read behind a parameter. Where master and the source are wrong, S18
+deviates from them (D-90 to D-93).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: SO_RCVBUF on an open connection, and the lock of the buffer` | — | 47 (part) | — |
+| `tcp: fix: accept a pure ACK up to the highest window edge offered` | — | 47 (part) | — |
+| `tcp: add: a locked receive buffer offers only its free space` | — | 47 (part) | — |
+| `tcp: add: a locked buffer that runs out of room offers a zero window` | — | 47 (part) | — |
+| `tcp: refactor: compute the receive window apart from its update` | — | new | — |
+| `tcp: add: the window update of Linux after a read, by a parameter` | — | 47 (part) | — |
+
+New tests: `tcp_rcvbuf_lock_1`, `tcp_rcvbuf_shrink_2`, `tcp_rcvbuf_lock_2`, `tcp_rcvbuf_nomem_1` and
+`tcp_window_update_read_1`. Moved tests: `tcp_rcvbuf_lock_1` and `tcp_socket_rcvbuf_1` (step 3).
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the module tests pass at each commit (594 at the plan commit, 599 at the head). The TCP
+standards tests pass at each code commit (25 pass, 2 expected failures, the packetdrill tests skip
+without inet-gpl); unit 123 and serializer 4 pass at the head. The new tests of each code commit
+fail with the source of the commit before. The CI fingerprint job runs at each code commit, and no
+row moves. The TCP fingerprint rows run in debug at the head with no runtime error (the `tyf`
+ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six gates
+and the combined pull-request gate pass.
