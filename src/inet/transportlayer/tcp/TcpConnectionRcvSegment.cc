@@ -1625,11 +1625,10 @@ bool TcpConnection::processAckInEstabEtc(Packet *tcpSegment, const Ptr<const Tcp
         // are ignored anyway if neither seqNo nor ackNo has changed.
         //
         // RFC 9293 section 3.10.7.4: "If SND.UNA =< SEG.ACK =< SND.NXT, the send window
-        // should be updated", also by a duplicate ACK and by a window update when nothing
-        // is in flight; updateWndInfo() keeps old segments out (SND.WL1, SND.WL2). Not yet
-        // by a data segment: a pure ACK of INET carries snd_nxt, which goes back during a
-        // retransmission, so after a data segment its window would look old.
-        if (state->snd_una == tcpHeader->getAckNo() && payloadLength == 0)
+        // should be updated", also by a duplicate ACK, by a window update when nothing is
+        // in flight, and by a data segment of the peer; updateWndInfo() keeps old segments
+        // out (SND.WL1, SND.WL2)
+        if (state->snd_una == tcpHeader->getAckNo())
             updateWndInfo(tcpHeader);
 
         if (state->accEcnNegotiated)
