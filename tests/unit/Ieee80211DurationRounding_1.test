@@ -1,0 +1,86 @@
+%description:
+Ordinary Duration/ID fields round fractional microseconds upward in every
+supported MAC header family (IEEE 802.11-2024, 9.2.5.1).
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+class TestRx : public Rx {
+  public:
+    int updates = 0;
+    virtual bool isFcsOk(Packet *) const override { return true; }
+  protected:
+    virtual void setOrExtendNav(simtime_t) override { updates++; }
+};
+static Ptr<Ieee80211MacHeader> frame(int family)
+{
+    switch (family) {
+        case 0: return makeShared<Ieee80211DataHeader>();
+        case 1: {
+            auto header = makeShared<Ieee80211MgmtHeader>();
+            header->setType(ST_AUTHENTICATION);
+            return header;
+        }
+        case 2: return makeShared<Ieee80211RtsFrame>();
+        case 3: return makeShared<Ieee80211CtsFrame>();
+        case 4: return makeShared<Ieee80211AckFrame>();
+        case 5: return makeShared<Ieee80211BasicBlockAckReq>();
+        default: {
+            auto header = makeShared<Ieee80211BasicBlockAck>();
+            for (int i = 0; i < 64; i++)
+                for (int bit = 0; bit < 16; bit++)
+                    header->getBlockAckBitmapForUpdate(i).setBit(bit, false);
+            return header;
+        }
+    }
+}
+
+%activity:
+ASSERT(normalizeIeee80211Duration(SimTime(-1, SIMTIME_US)) == SIMTIME_ZERO);
+ASSERT(normalizeIeee80211Duration(SimTime(44800, SIMTIME_NS)) == SimTime(45, SIMTIME_US));
+ASSERT(normalizeIeee80211Duration(SimTime(32766800, SIMTIME_NS)) == SimTime(32767, SIMTIME_US));
+for (auto invalid : {SimTime(-1, SIMTIME_US), SimTime(32767100, SIMTIME_NS)}) {
+    bool rejected = false;
+    try { encodeIeee80211Duration(invalid); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+for (int family = 0; family < 7; family++) {
+    for (int nanoseconds : {0, 1, 44000, 44800, 32766800}) {
+        auto header = frame(family);
+        if (auto data = dynamicPtrCast<Ieee80211DataOrMgmtHeader>(header))
+            data->setSequenceNumber(SequenceNumberCyclic(0));
+        if (auto bar = dynamicPtrCast<Ieee80211BasicBlockAckReq>(header))
+            bar->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        if (auto ba = dynamicPtrCast<Ieee80211BasicBlockAck>(header))
+            ba->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        header->setDurationField(SimTime(nanoseconds, SIMTIME_NS));
+        Packet packet("duration", header);
+        const auto bytes = packet.peekAllAsBytes()->getBytes();
+        ASSERT(bytes.size() >= 4);
+        int encoded = bytes[2] | (bytes[3] << 8);
+        ASSERT(encoded == (nanoseconds + 999) / 1000);
+    }
+}
+TestRx rx;
+for (int duration : {-1, 0, 32767, 32768, 65535}) {
+    auto header = makeShared<Ieee80211DataHeader>();
+    header->setReceiverAddress(MacAddress("02:00:00:00:00:12"));
+    header->setDurationField(SimTime(duration, SIMTIME_US));
+    auto packet = new Packet("nav", header);
+    int before = rx.updates;
+    ASSERT(rx.lowerFrameReceived(packet));
+    ASSERT(rx.updates - before == (duration >= 0 && duration <= 32767 ? 1 : 0));
+    delete packet;
+}
+EV << "All seven ordinary MAC Duration fields round upward.\n";
+
+%contains: stdout
+All seven ordinary MAC Duration fields round upward.
