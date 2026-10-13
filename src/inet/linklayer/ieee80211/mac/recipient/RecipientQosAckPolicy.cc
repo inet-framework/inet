@@ -39,11 +39,11 @@ simtime_t RecipientQosAckPolicy::computeAckDuration(Packet *packet, const Ptr<co
 //
 bool RecipientQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeader>& header) const
 {
-    // TODO add mgmt frame NoAck check
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header))
         if (dataHeader->getAckPolicy() != NORMAL_ACK)
             return false;
-    return !header->getReceiverAddress().isMulticast();
+    // IEEE Std 802.11-2024, 10.3.2.11: Action No Ack elicits no ACK.
+    return header->getType() != ST_NOACKACTION && !header->getReceiverAddress().isMulticast();
 }
 
 //
