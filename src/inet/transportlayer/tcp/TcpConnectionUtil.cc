@@ -228,6 +228,8 @@ void TcpConnection::printSegmentBrief(Packet *tcpSegment, const Ptr<const TcpHea
         EV_INFO << "[" << tcpHeader->getSequenceNo() << ".." << (tcpHeader->getSequenceNo() + payloadLength) << ") ";
         EV_INFO << "(l=" << payloadLength << ") ";
     }
+    else
+        EV_INFO << "seq " << tcpHeader->getSequenceNo() << " ";
 
     if (tcpHeader->getAckBit())
         EV_INFO << "ack " << tcpHeader->getAckNo() << " ";
