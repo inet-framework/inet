@@ -226,6 +226,7 @@ struct TcpStateVariables
     bool snd_initial_ts = false;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received
     uint32_t ts_recent = 0;         // RFC 7323: TS.Recent, the latest received timestamp
+    bool abortRstWithAck = false;   // the RST of an abort carries ACK, as Linux (abortRstWithAck parameter)
     bool dropBeyondWindowEdge = false; // the window-edge check of Linux (dropBeyondWindowEdge parameter)
     bool rfc5961AckCheck = false;   // the ACK check of RFC 5961 section 5.2 (rfc5961AckCheck parameter)
     bool tsRecentAfterAckCheck = false; // TS.Recent not from a segment that acknowledges unsent data, as Linux (tsRecentAfterAckCheck parameter)

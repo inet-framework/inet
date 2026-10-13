@@ -978,6 +978,7 @@ void TcpConnection::configureStateVariables()
     state->tsRecentAfterAckCheck = tcpMain->par("tsRecentAfterAckCheck");
     state->rfc5961AckCheck = tcpMain->par("rfc5961AckCheck");
     state->dropBeyondWindowEdge = tcpMain->par("dropBeyondWindowEdge");
+    state->abortRstWithAck = tcpMain->par("abortRstWithAck");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
@@ -1326,7 +1327,11 @@ void TcpConnection::sendAbortRst()
     // RFC 9293 ABORT: "<SEQ=SND.NXT><CTL=RST>"; SND.NXT is the next new sequence number,
     // snd_max here, because snd_nxt goes back during a retransmission, and a RST below
     // RCV.NXT of the peer lies outside its window and is dropped
-    sendRst(state->snd_max, localAddr, remoteAddr, localPort, remotePort, state->ts_enabled);
+    // abortRstWithAck: the RST with ACK and RCV.NXT of Linux (tcp_send_active_reset())
+    if (state->abortRstWithAck)
+        sendRstAck(state->snd_max, state->rcv_nxt, localAddr, remoteAddr, localPort, remotePort, state->ts_enabled);
+    else
+        sendRst(state->snd_max, localAddr, remoteAddr, localPort, remotePort, state->ts_enabled);
 }
 
 void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int srcPort, int destPort, bool withTimestamp)
@@ -1362,7 +1367,7 @@ void TcpConnection::sendRst(uint32_t seq, L3Address src, L3Address dest, int src
     sendToIP(fp, tcpHeader, src, dest);
 }
 
-void TcpConnection::sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Address dest, int srcPort, int destPort)
+void TcpConnection::sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Address dest, int srcPort, int destPort, bool withTimestamp)
 {
     const auto& tcpHeader = makeShared<TcpHeader>();
 
@@ -1375,6 +1380,17 @@ void TcpConnection::sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Addr
     tcpHeader->setAckNo(ack);
     tcpHeader->setChecksumMode(tcpMain->checksumMode);
     tcpHeader->setChecksum(0);
+
+    if (withTimestamp) {
+        tcpHeader->appendHeaderOption(new TcpOptionNop());
+        tcpHeader->appendHeaderOption(new TcpOptionNop());
+        auto option = new TcpOptionTimestamp();
+        option->setSenderTimestamp(convertSimtimeToTS(simTime()));
+        option->setEchoedTimestamp(state->ts_recent); // the ACK bit is set (RFC 7323 section 3.2)
+        tcpHeader->appendHeaderOption(option);
+        tcpHeader->setHeaderLength(TCP_MIN_HEADER_LENGTH + tcpHeader->getHeaderOptionArrayLength());
+        tcpHeader->setChunkLength(B(tcpHeader->getHeaderLength()));
+    }
 
     Packet *fp = new Packet("RST+ACK");
 

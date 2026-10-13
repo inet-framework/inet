@@ -435,7 +435,7 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: sends the RST of a user abort, with the TS option if it is enabled (RFC 7323 section 5.2) */
     virtual void sendAbortRst();
     /** Utility: sends RST+ACK; does not use connection state */
-    virtual void sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Address dest, int srcPort, int destPort);
+    virtual void sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Address dest, int srcPort, int destPort, bool withTimestamp = false);
 
     /** Utility: sends FIN */
     virtual void sendFin();
