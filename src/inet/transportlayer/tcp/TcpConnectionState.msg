@@ -226,6 +226,7 @@ struct TcpStateVariables
     bool snd_initial_ts = false;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received
     uint32_t ts_recent = 0;         // RFC 7323: TS.Recent, the latest received timestamp
+    bool icmpSequenceCheck = false; // ignore an ICMP error that quotes a sequence number outside SND.UNA to SND.MAX, as Linux (icmpSequenceCheck parameter)
     bool softIcmpErrorsAbortSetup = false; // a soft ICMP error aborts a connection setup, as Linux (softIcmpErrorsAbortSetup parameter)
     bool abortRstWithAck = false;   // the RST of an abort carries ACK, as Linux (abortRstWithAck parameter)
     bool dropBeyondWindowEdge = false; // the window-edge check of Linux (dropBeyondWindowEdge parameter)

@@ -657,6 +657,11 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
             << " > " << remoteAddr << ":" << remotePort
             << " type=" << errorInd->getType() << " code=" << errorInd->getCode() << "\n";
 
+    if (!isIcmpErrorInWindow(errorInd->getOriginalPacket())) {
+        delete indication;
+        return true;
+    }
+
     // Hard errors abort the connection during setup (RFC 5461).
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
@@ -733,6 +738,11 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
             << " > " << remoteAddr << ":" << remotePort
             << " type=" << errorInd->getType() << " code=" << errorInd->getCode() << "\n";
 
+    if (!isIcmpErrorInWindow(errorInd->getOriginalPacket())) {
+        delete indication;
+        return true;
+    }
+
     // Hard errors abort the connection during setup (RFC 5461).
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
@@ -795,6 +805,22 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
     indication->addTag<SocketInd>()->setSocketId(socketId);
     sendToApp(indication);
     return true;
+}
+
+bool TcpConnection::isIcmpErrorInWindow(const Packet *originalPacket) const
+{
+    // icmpSequenceCheck: as Linux tcp_v4_err() and tcp_v6_err() (RFC 5927 section 4.1), an
+    // error that quotes a sequence number outside SND.UNA to SND.MAX is stale or forged,
+    // and the connection ignores it
+    if (!state->icmpSequenceCheck || originalPacket == nullptr)
+        return true;
+    const auto& quotedHeader = originalPacket->peekAtFront<TcpHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE);
+    uint32_t quotedSeq = quotedHeader->getSequenceNo();
+    if (seqLE(state->snd_una, quotedSeq) && seqLE(quotedSeq, state->snd_max))
+        return true;
+    EV_DETAIL << "Ignoring the ICMP error: it quotes sequence number " << quotedSeq << ", outside SND.UNA=" << state->snd_una
+              << " to SND.MAX=" << state->snd_max << "\n";
+    return false;
 }
 
 bool TcpConnection::isHardIcmpv4Error(int type, int code)
@@ -1001,6 +1027,7 @@ void TcpConnection::configureStateVariables()
     state->dropBeyondWindowEdge = tcpMain->par("dropBeyondWindowEdge");
     state->abortRstWithAck = tcpMain->par("abortRstWithAck");
     state->softIcmpErrorsAbortSetup = tcpMain->par("softIcmpErrorsAbortSetup");
+    state->icmpSequenceCheck = tcpMain->par("icmpSequenceCheck");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)

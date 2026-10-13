@@ -666,6 +666,12 @@ class INET_API TcpConnection : public SimpleModule
     static bool isHardIcmpv6Error(int type, int code);
 
     /**
+     * Returns false if icmpSequenceCheck is on and the segment that the ICMP error quotes
+     * has a sequence number outside SND.UNA to SND.MAX (RFC 5927 section 4.1).
+     */
+    virtual bool isIcmpErrorInWindow(const Packet *originalPacket) const;
+
+    /**
      * Returns true if the ICMPv4 error is "Fragmentation Needed and DF Set"
      * (type=3, code=4), used for Path MTU Discovery (RFC 1191).
      */
