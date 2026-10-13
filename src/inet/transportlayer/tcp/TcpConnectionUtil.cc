@@ -977,6 +977,7 @@ void TcpConnection::configureStateVariables()
     state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary");
     state->tsRecentAfterAckCheck = tcpMain->par("tsRecentAfterAckCheck");
     state->rfc5961AckCheck = tcpMain->par("rfc5961AckCheck");
+    state->dropBeyondWindowEdge = tcpMain->par("dropBeyondWindowEdge");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
@@ -1111,6 +1112,15 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
             uint32_t endSeq = seqNo + len + tcpHeader->getSynFinLen();
             ret = (seqLE(state->rcv_nxt, seqNo) && seqLess(seqNo, rcvWndEnd))
                 || (seqLess(state->rcv_nxt, endSeq) && seqLE(endSeq, rcvWndEnd)); // Accept an ACK on end of window
+            // dropBeyondWindowEdge, as Linux tcp_sequence(): a segment whose data ends
+            // beyond the highest window edge offered (rcv_adv) is dropped whole, unless it
+            // starts within it and the in-order receive queue is empty
+            if (ret && state->dropBeyondWindowEdge && seqGreater(seqNo + len, state->rcv_adv)
+                && (seqGreater(seqNo, state->rcv_adv) || receiveQueue->getAcknowledgedDataLength() != 0))
+            {
+                EV_WARN << "The segment ends beyond the highest window edge offered (" << state->rcv_adv << "): dropping it\n";
+                ret = false;
+            }
         }
     }
 

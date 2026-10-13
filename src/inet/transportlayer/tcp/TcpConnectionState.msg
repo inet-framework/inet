@@ -226,6 +226,7 @@ struct TcpStateVariables
     bool snd_initial_ts = false;    // set if initial TIMESTAMP has been sent
     bool rcv_initial_ts = false;    // set if initial TIMESTAMP has been received
     uint32_t ts_recent = 0;         // RFC 7323: TS.Recent, the latest received timestamp
+    bool dropBeyondWindowEdge = false; // the window-edge check of Linux (dropBeyondWindowEdge parameter)
     bool rfc5961AckCheck = false;   // the ACK check of RFC 5961 section 5.2 (rfc5961AckCheck parameter)
     bool tsRecentAfterAckCheck = false; // TS.Recent not from a segment that acknowledges unsent data, as Linux (tsRecentAfterAckCheck parameter)
     simtime_t ts_recent_stamp = SIMTIME_ZERO; // when TS.Recent was last set: after 24 days, TS.Recent is invalid for PAWS (RFC 7323 section 5.5; Linux rx_opt.ts_recent_stamp)
