@@ -310,6 +310,23 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
             EV_DETAIL << "TCP_MAXSEG: SMSS is set to " << state->snd_mss << "\n";
         }
     }
+    else if (auto cmd = dynamic_cast<TcpSetPathMtuCommand *>(tcpCommand)) {
+        // the route MTU changed (Linux: ip route change, which tcp_sync_mss() takes at the
+        // next send): the MSS falls at once to a smaller MTU, and the path MTU search
+        // (mtuProbing) gives at most the new MTU; a larger MTU raises the MSS only through
+        // the search, because the mss parameter limits it otherwise
+        pathMtuSockopt = cmd->getValue();
+        if (state != nullptr && pathMtuSockopt > 0) {
+            uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
+            state->pathMtu = pathMtuSockopt;
+            limitMtuSearch(state->pathMtu);
+            if ((uint32_t)pathMtuSockopt > headers && (uint32_t)pathMtuSockopt - headers < state->snd_mss) {
+                state->snd_mss = pathMtuSockopt - headers;
+                state->snd_effmss = calculateEffectiveMss();
+            }
+            EV_DETAIL << "The route MTU is " << state->pathMtu << ", SMSS is " << state->snd_mss << "\n";
+        }
+    }
     else if (auto cmd = dynamic_cast<TcpSetNoDelayCommand *>(tcpCommand)) {
         // TCP_NODELAY turns Nagle off (RFC 9293 section 3.7.4: "the user can disable
         // the Nagle algorithm"); the command can come before the open, and then

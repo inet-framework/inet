@@ -279,6 +279,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     keepAliveSockopt = listenerConn->keepAliveSockopt;
     noDelaySockopt = listenerConn->noDelaySockopt;
     maxSegSockopt = listenerConn->maxSegSockopt;
+    pathMtuSockopt = listenerConn->pathMtuSockopt;
     corkSockopt = listenerConn->corkSockopt;
     rcvBufSockopt = listenerConn->rcvBufSockopt;
     state = tcpAlgorithm->getStateVariables();
@@ -696,6 +697,11 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
         if (mtu > 0) {
             // 20 bytes IPv4 header + 20 bytes TCP minimum header
             uint32_t newMss = mtu - 40;
+            // mtuProbing: the reported MTU is the route MTU now, which bounds the search
+            if (state->mtupEnabled && (uint32_t)mtu < state->pathMtu) {
+                state->pathMtu = mtu;
+                limitMtuSearch(mtu);
+            }
             if (newMss < state->snd_mss) {
                 EV_DETAIL << "PMTUD: reducing snd_mss from " << state->snd_mss
                           << " to " << newMss << " (reported MTU=" << mtu << ")\n";
@@ -776,6 +782,11 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
         if (mtu > 0) {
             // 40 bytes IPv6 header + 20 bytes TCP minimum header
             uint32_t newMss = mtu - 60;
+            // mtuProbing: the reported MTU is the route MTU now, which bounds the search
+            if (state->mtupEnabled && (uint32_t)mtu < state->pathMtu) {
+                state->pathMtu = mtu;
+                limitMtuSearch(mtu);
+            }
             if (newMss < state->snd_mss) {
                 EV_DETAIL << "PMTUD: reducing snd_mss from " << state->snd_mss
                           << " to " << newMss << " (reported MTU=" << mtu << ")\n";
@@ -2707,6 +2718,18 @@ uint32_t TcpConnection::mssToMtu(uint32_t mss) const
     return mss + (state->ts_enabled ? 12 : 0) + B(TCP_MIN_HEADER_LENGTH).get() + (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20);
 }
 
+void TcpConnection::limitMtuSearch(uint32_t mtu)
+{
+    // Linux tcp_sync_mss(): the upper bound of the search does not exceed the route MTU
+    if (!state->mtupEnabled || state->mtupSearchHigh <= mtu)
+        return;
+    state->mtupSearchHigh = mtu;
+    if (state->mtupSearchLow > mtu)
+        state->mtupSearchLow = mtu;
+    EV_INFO << "RFC 4821: the route MTU " << mtu << " limits the path MTU search, which runs from "
+            << state->mtupSearchLow << " to " << state->mtupSearchHigh << "\n";
+}
+
 void TcpConnection::initMtuProbing()
 {
     // mtuProbing, as Linux tcp_mtup_init(): the search runs between the MTU of the base MSS
@@ -2718,7 +2741,7 @@ void TcpConnection::initMtuProbing()
     state->mtupSearchHigh = getMssClamp() + headers;
     state->mtupSearchLow = mssToMtu((int)tcpMain->par("baseMss"));
     state->mtupProbeSize = 0;
-    int pathMtu = tcpMain->par("pathMtu");
+    int pathMtu = pathMtuSockopt > 0 ? pathMtuSockopt : (int)tcpMain->par("pathMtu");
     state->pathMtu = pathMtu > 0 ? pathMtu : state->snd_mss + headers;
     EV_INFO << "RFC 4821: the path MTU search runs from " << state->mtupSearchLow << " to " << state->mtupSearchHigh
             << ", the route MTU is " << state->pathMtu << "\n";
@@ -2740,6 +2763,9 @@ int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWi
     // tcp_probe_threshold), and none at or below the MSS in use
     uint32_t probe = mtuToMss((state->mtupSearchHigh + state->mtupSearchLow) / 2);
     if (probe > mtuToMss(state->mtupSearchHigh) || state->mtupSearchHigh - state->mtupSearchLow < 8 || probe <= mss)
+        return -1;
+    // and none larger than the route MTU, which the packet could not leave
+    if (mssToMtu(probe) > state->pathMtu)
         return -1;
     // the probe and reordering + 1 segments after it, so that duplicate ACKs find a lost
     // probe (RFC 4821 section 7.4)
@@ -2778,10 +2804,10 @@ void TcpConnection::mtuProbeSucceeded()
 void TcpConnection::mtuProbeFailed()
 {
     // Linux tcp_mtup_probe_failed(): the path does not carry the probe, so the search
-    // continues below it
+    // continues below it, and below a route MTU that an ICMP error reported
+    state->mtupSearchHigh = std::min(state->mtupSearchHigh, state->mtupProbeSize - 1);
     EV_INFO << "RFC 4821: the MTU probe of " << state->mtupProbeSize << " is lost, the search runs from "
-            << state->mtupSearchLow << " to " << state->mtupProbeSize - 1 << "\n";
-    state->mtupSearchHigh = state->mtupProbeSize - 1;
+            << state->mtupSearchLow << " to " << state->mtupSearchHigh << "\n";
     state->mtupProbeSize = 0;
 }
 

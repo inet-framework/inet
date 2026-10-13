@@ -66,6 +66,7 @@ class INET_API TCPScriptableTester : public TCPTesterBase
         int icmpType = 0;    // CMD_ICMP, CMD_ICMP6: the type and the code of the ICMP error that answers the segment in place of the peer
         int icmpCode = 0;
         uint32_t icmpSeqAdd = 0; // CMD_ICMP, CMD_ICMP6: the number to add to the quoted sequence number, for a stale error
+        int icmpMtu = 0; // CMD_ICMP, CMD_ICMP6: the MTU of a fragmentation-needed error or a Packet Too Big
         int bytes = 0;       // CMD_DATA: the number of bytes to add after the payload
         bool fin = false;    // CMD_DATA: set the FIN bit
         int kind = -1;       // CMD_STRIP: the kind of the options to remove

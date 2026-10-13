@@ -37,6 +37,7 @@ simple TcpTestClient like IApp
         string rcvBufScript = default(""); // "time bytes; ..." -- at each time, set the receive buffer of the first connection (TcpSocket::setReceiveBufferSize(), SO_RCVBUF on an open connection)
         string corkScript = default(""); // "time 1; time 0; ..." -- at each time, turn TCP_CORK on (1) or off (0) for the first connection (TcpSocket::setCork()), also before its open
         string maxSegScript = default(""); // "time value; ..." -- at each time, set TCP_MAXSEG of the first connection (TcpSocket::setMaxSeg()), also before its open
+        string pathMtuScript = default(""); // "time value; ..." -- at each time, set the route MTU of the first connection (TcpSocket::setPathMtu(), as ip route change), also before its open
         string noDelayScript = default(""); // "time 1; time 0; ..." -- at each time, turn TCP_NODELAY on (1) or off (0) for the first connection (TcpSocket::setNoDelay()), also before its open
         string keepAliveScript = default(""); // "time 1; time 0; ..." -- at each time, turn keepalive on (1) or off (0) for the first connection (TcpSocket::setKeepAlive()), also before its open
         string writerBlockedScript = default(""); // "time 1; time 0; ..." -- at each time, tell TCP that the application writer is blocked on the send buffer (1) or not (0) (TcpSocket::setWriterBlocked())

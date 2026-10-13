@@ -1,0 +1,54 @@
+%description:
+Tests TcpSocket::setPathMtu() without the path MTU search. Both ends have an MSS
+of 1000. At t=1.009 s, the server application sets the route MTU to 560, as ip
+route change does. The MSS falls at once to 520 (560 less 40 bytes of headers),
+as Linux tcp_sync_mss(), and the segments from B009 on carry 520 bytes.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.srv_app.sendScript="1.0 20000"
+*.srv_app.pathMtuScript="1.009 560"
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.009 B008] A.1000 < B.2000: A 6501:7501(1000) ack 1 win 16384 
+[1.011 A006] A.1000 > B.2000: A ack 4501 win 16384 
+[1.011 A007] A.1000 > B.2000: A ack 5501 win 16384 
+[1.011 A008] A.1000 > B.2000: A ack 6501 win 16384 
+[1.011 A009] A.1000 > B.2000: A ack 7501 win 16384 
+[1.013 B009] A.1000 < B.2000: A 7501:8021(520) ack 1 win 16384 
+[1.013 B010] A.1000 < B.2000: A 8021:8541(520) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+The route MTU is 560, SMSS is 520
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

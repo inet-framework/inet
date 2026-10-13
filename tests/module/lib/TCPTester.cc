@@ -128,9 +128,10 @@ void TCPScriptableTester::parseScript(const char *script)
                 throw cRuntimeError("syntax error in script: TSecr value expected");
             cmd.tsecr = strtoul(s, &const_cast<char *&>(s), 10);
         } else if (!strncmp(s,"icmp",4)) {
-            // "icmp <type> <code> [seqadd]" and "icmp6 <type> <code> [seqadd]": the segment does
-            // not reach the peer; its sender gets an ICMPv4 or ICMPv6 error that quotes it,
-            // with seqadd added to the quoted sequence number
+            // "icmp <type> <code> [seqadd] [mtu <n>]" and "icmp6 <type> <code> [seqadd] [mtu <n>]":
+            // the segment does not reach the peer; its sender gets an ICMPv4 or ICMPv6 error
+            // that quotes it, with seqadd added to the quoted sequence number, and with this
+            // MTU (fragmentation needed, Packet Too Big)
             cmd.command = CMD_ICMP; s+=4;
             if (*s == '6') {
                 cmd.command = CMD_ICMP6; s++;
@@ -146,6 +147,14 @@ void TCPScriptableTester::parseScript(const char *script)
             while (isspace(*s)) s++;
             if (isdigit(*s))
                 cmd.icmpSeqAdd = strtoul(s, &const_cast<char *&>(s), 10);
+            while (isspace(*s)) s++;
+            if (!strncmp(s, "mtu", 3)) {
+                s += 3;
+                while (isspace(*s)) s++;
+                if (!isdigit(*s))
+                    throw cRuntimeError("syntax error in script: MTU expected");
+                cmd.icmpMtu = strtol(s, &const_cast<char *&>(s), 10);
+            }
         } else if (!strncmp(s,"ackadd",6)) {
             // "ackadd <n>": add n to the ACK field
             cmd.command = CMD_ACKADD; s+=6;
@@ -262,20 +271,21 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
     pk->removeTag<L3AddressReq>();
     segmentEcn = deliverEcn(pk);
 
-    // pathMtu: a black hole for each packet larger than the path MTU
-    int pathMtu = par("pathMtu");
-    if (pathMtu > 0 && pk->getByteLength() + 20 > pathMtu) {
-        bubble("dropping a packet larger than the path MTU");
-        dump(seg, pk->getByteLength(), fromA, "dropping, larger than the path MTU");
-        delete pk;
-        return;
-    }
-
     // find entry in script
     Command *cmd = NULL;
     for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
         if (i->fromA==fromA && i->segno==segno)
             cmd = &(*i);
+
+    // pathMtu: a black hole for each packet larger than the path MTU, unless the script
+    // handles the packet (for example, with an ICMP error)
+    int pathMtu = par("pathMtu");
+    if (!cmd && pathMtu > 0 && pk->getByteLength() + 20 > pathMtu) {
+        bubble("dropping a packet larger than the path MTU");
+        dump(seg, pk->getByteLength(), fromA, "dropping, larger than the path MTU");
+        delete pk;
+        return;
+    }
 
     if (!cmd)
     {
@@ -347,12 +357,14 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
             auto& errorInd = indication->addTag<Icmpv4ErrorInd>();
             errorInd->setType((IcmpType)cmd->icmpType);
             errorInd->setCode(cmd->icmpCode);
+            errorInd->setMtu(cmd->icmpMtu);
             errorInd->setOriginalPacket(pk);
         }
         else {
             auto& errorInd = indication->addTag<Icmpv6ErrorInd>();
             errorInd->setType((Icmpv6Type)cmd->icmpType);
             errorInd->setCode(cmd->icmpCode);
+            errorInd->setMtu(cmd->icmpMtu);
             errorInd->setOriginalPacket(pk);
         }
         send(indication, fromA ? "out1" : "out2");

@@ -1,0 +1,63 @@
+%description:
+Tests TcpSocket::setPathMtu() with the path MTU search (mtuProbing = 2), in the
+scenario of the Linux script mtu_probe/basic-v4. At the start, the route MTU is
+that of the MSS of 600 (640). At t=0.9 s, the server application raises it to
+1500, as the script does with ip route change. No probe goes above the route
+MTU, so the search needs the larger MTU. Then the server sends the probe of 986
+bytes (MTU 1026), as in tcp_mtu_probe_1, and its ACK raises the MSS to 986. The
+larger route MTU does not raise the MSS by itself: the segments before the ACK
+of the probe stay at 600.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.srv_app.sendScript="1.0 40000"
+*.srv_app.pathMtuScript="0.9 1500"
+*.srv_tcp.mss = 600
+*.cli_tcp.mss = 1460
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.mtuProbing = 2
+*.srv_tcp.baseMss = 512
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.017 B020] A.1000 < B.2000: A 11301:11901(600) ack 1 win 16384 
+[1.017 B021] A.1000 < B.2000: A 11901:12887(986) ack 1 win 16384 
+[1.017 B022] A.1000 < B.2000: A 12887:13487(600) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+The route MTU is 1500, SMSS is 600
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: sent an MTU probe of 986 bytes (MTU 1026)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1026 is acknowledged, snd_mss is 986
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -49,7 +49,8 @@ package inet.test.moduletest.lib;
 //
 // The parameter pathMtu makes a path that drops each packet larger than this
 // MTU without an ICMP error, a black hole for RFC 4821: the length of a packet
-// is the TCP segment and 20 bytes of IPv4 header.
+// is the TCP segment and 20 bytes of IPv4 header. A packet that the script
+// handles is not dropped.
 //
 simple TCPScriptableTester
 {

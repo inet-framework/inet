@@ -204,6 +204,9 @@ class INET_API TcpConnection : public SimpleModule
     // TCP_MAXSEG of this connection (TcpSocket::setMaxSeg()), also from before the open;
     // -1: the mss parameter alone
     int maxSegSockopt = -1;
+    // the route MTU of this connection (TcpSocket::setPathMtu()), also from before the
+    // open; 0: the pathMtu parameter
+    int pathMtuSockopt = 0;
     // TCP_CORK of this connection (TcpSocket::setCork()), also from before the open; -1: off
     int corkSockopt = -1;
     int rcvBufSockopt = -1; // SO_RCVBUF of the open connection (TcpSetRcvBufCommand); -1: none
@@ -579,6 +582,8 @@ class INET_API TcpConnection : public SimpleModule
     virtual uint32_t mtuToMss(uint32_t mtu) const;
     /** The MTU of a segment with this payload (Linux tcp_mss_to_mtu()) */
     virtual uint32_t mssToMtu(uint32_t mss) const;
+    /** A new route MTU bounds the path MTU search (Linux tcp_sync_mss()) */
+    virtual void limitMtuSearch(uint32_t mtu);
     /** Arms the path MTU search when the MSS is settled (Linux tcp_mtup_init()) */
     virtual void initMtuProbing();
     /** The payload of the probe to send now; 0: wait for room for a probe; -1: no probe (Linux tcp_mtu_probe()) */

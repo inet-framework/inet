@@ -40,13 +40,14 @@ class INET_API TcpTestClient : public cSimpleModule
     Commands keepAliveCommands; // when to turn keepalive on (1) or off (0)
     Commands noDelayCommands; // when to turn TCP_NODELAY on (1) or off (0)
     Commands maxSegCommands; // when to set TCP_MAXSEG, and its value
+    Commands pathMtuCommands; // when to set the route MTU, and its value
     Commands corkCommands; // when to turn TCP_CORK on (1) or off (0)
     Commands rcvBufCommands; // when to set SO_RCVBUF, and its value
     std::list<std::pair<std::string, std::string>> tcpParCommands; // tcpParScript: the parameters to set, in time order
     static const int NUM_EXTRA = 2; // the optional second and third connection (tOpen2, tOpen3)
     Commands extraCommands[NUM_EXTRA]; // the SEND of each extra connection
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_ABORT, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_NODELAY, TEST_MAXSEG, TEST_CORK, TEST_RCVBUF, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_ABORT, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_NODELAY, TEST_MAXSEG, TEST_PATHMTU, TEST_CORK, TEST_RCVBUF, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
 
     int ctr;
 
@@ -218,6 +219,9 @@ void TcpTestClient::initialize()
     parseScript(par("maxSegScript"), maxSegCommands);
     for (const auto& command : maxSegCommands)
         scheduleAt(command.tSend, new cMessage("MaxSeg", TEST_MAXSEG));
+    parseScript(par("pathMtuScript"), pathMtuCommands);
+    for (const auto& command : pathMtuCommands)
+        scheduleAt(command.tSend, new cMessage("PathMtu", TEST_PATHMTU));
     parseScript(par("corkScript"), corkCommands);
     for (const auto& command : corkCommands)
         scheduleAt(command.tSend, new cMessage("Cork", TEST_CORK));
@@ -360,6 +364,11 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
         case TEST_MAXSEG:
             socket.setMaxSeg(maxSegCommands.front().numBytes);
             maxSegCommands.pop_front();
+            delete msg;
+            break;
+        case TEST_PATHMTU:
+            socket.setPathMtu(pathMtuCommands.front().numBytes);
+            pathMtuCommands.pop_front();
             delete msg;
             break;
         case TEST_NODELAY:

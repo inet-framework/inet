@@ -231,6 +231,18 @@ class TcpSetMaxSegCommand extends TcpSetOptionCommand
 }
 
 //
+// The MTU of the route of this connection changed (Linux: ip route change, a new
+// dst_mtu()). The MSS never exceeds it; with mtuProbing, it is also the largest MTU
+// that the path MTU search of RFC 4821 can give. May be sent before connect()/listen().
+//
+// @see ~TcpSocket::setPathMtu
+//
+class TcpSetPathMtuCommand extends TcpSetOptionCommand
+{
+    int value = 0;
+}
+
+//
 // TCP_NODELAY (setsockopt SOL_TCP): enable/disable Nagle's algorithm at runtime.
 // nodelay==true disables Nagle and force-pushes any held partial segment (but does
 // NOT clear TCP_CORK, which outranks TCP_NODELAY in Linux).
