@@ -5,6 +5,8 @@
 //
 
 
+#include <algorithm>
+
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 
 namespace inet {
@@ -42,10 +44,12 @@ bool Ieee80211BandBase::isHt40OperationSupported(int primaryChannelIndex, int se
     }
 }
 
-Ieee80211EnumeratedBand::Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers, const std::vector<int> standardChannelNumbers) :
+Ieee80211EnumeratedBand::Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers, const std::vector<int> standardChannelNumbers,
+        const std::vector<std::pair<int, int>> ht40ChannelPairs) :
     Ieee80211BandBase(name),
     centers(centers),
-    standardChannelNumbers(standardChannelNumbers)
+    standardChannelNumbers(standardChannelNumbers),
+    ht40ChannelPairs(ht40ChannelPairs)
 {
     if (!this->standardChannelNumbers.empty() && this->standardChannelNumbers.size() != this->centers.size())
         throw cRuntimeError("Band '%s' has %zu centers but %zu standards channel numbers", name, this->centers.size(), this->standardChannelNumbers.size());
@@ -75,6 +79,18 @@ int Ieee80211EnumeratedBand::getChannelIndex(int standardChannelNumber) const
         if (standardChannelNumbers[channelIndex] == standardChannelNumber)
             return channelIndex;
     throw cRuntimeError("Band '%s' has no internal channel index for standards channel number %d", getName(), standardChannelNumber);
+}
+
+bool Ieee80211EnumeratedBand::isHt40OperationSupported(int primaryChannelIndex, int secondaryChannelOffset) const
+{
+    if (!Ieee80211BandBase::isHt40OperationSupported(primaryChannelIndex, secondaryChannelOffset))
+        return false;
+    if (ht40ChannelPairs.empty())
+        return true;
+    int primary = getStandardChannelNumber(primaryChannelIndex);
+    int secondary = primary + (secondaryChannelOffset == 1 ? 4 : -4);
+    auto pair = std::make_pair(std::min(primary, secondary), std::max(primary, secondary));
+    return std::find(ht40ChannelPairs.begin(), ht40ChannelPairs.end(), pair) != ht40ChannelPairs.end();
 }
 
 Ieee80211ArithmeticalBand::Ieee80211ArithmeticalBand(const char *name, Hz start, Hz spacing, int numChannels) :
@@ -117,6 +133,11 @@ const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz("5 GHz", GHz(5
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz20MHz("5 GHz (20 MHz)", GHz(5), MHz(20), 25);
 
+// Model subset: Table E-4 classes 115, 116, and 117; centers follow Equation (17-27).
+// Permitted HT40 pairs restrict validation; they do not enable 40 MHz PHY operation.
+const Ieee80211EnumeratedBand Ieee80211CompliantBands::band5GHzMapped20MHz("5 GHz (mapped 20 MHz)",
+        { MHz(5180), MHz(5200), MHz(5220), MHz(5240) }, { 36, 40, 44, 48 }, { { 36, 40 }, { 44, 48 } });
+
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz40MHz("5 GHz (40 MHz)", GHz(5), MHz(40), 12);
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz80MHz("5 GHz (80 MHz)", GHz(5), MHz(80), 5);
@@ -125,7 +146,7 @@ const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5GHz160MHz("5 GHz (
 
 const Ieee80211ArithmeticalBand Ieee80211CompliantBands::band5_9GHz("5.9 GHz", GHz(5.855), MHz(10), 7);
 
-const std::vector<const IIeee80211Band *> Ieee80211CompliantBands::bands = { &band2_4GHz, &band5GHz, &band5GHz20MHz, &band5GHz40MHz, &band5GHz80MHz, &band5GHz160MHz, &band5_9GHz };
+const std::vector<const IIeee80211Band *> Ieee80211CompliantBands::bands = { &band2_4GHz, &band5GHz, &band5GHz20MHz, &band5GHzMapped20MHz, &band5GHz40MHz, &band5GHz80MHz, &band5GHz160MHz, &band5_9GHz };
 
 const IIeee80211Band *Ieee80211CompliantBands::findBand(const char *name)
 {

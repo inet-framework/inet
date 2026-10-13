@@ -13,6 +13,11 @@ first, so that the first packet carries 1. The method is now
 ``SecurityAssociation::incrementAndGetSeqNum()``, and returns the incremented value. C++ code that
 called the old method must use the new name, and expects one more than before.
 
+IEEE 802.11 Mapped 5 GHz Band
+-----------------------------
+
+Use ``bandName = "5 GHz (mapped 20 MHz)"`` when HT management requires standard channel numbers. ``channelNumber`` remains an internal index. See :ref:`ug:sec:80211:mapped-band` for the supported subset.
+
 IEEE 802.11 TXNAV and Sequence Callbacks
 --------------------------------------
 

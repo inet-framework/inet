@@ -893,6 +893,15 @@ channel spacing. Radios on different channels do not hear each other in the
 scalar model. Only the dimensional model computes the partial overlap of
 adjacent channels.
 
+.. _ug:sec:80211:mapped-band:
+
+Mapped 5 GHz channels
+^^^^^^^^^^^^^^^^^^^^^
+
+Mapped index 0 selects standard channel 36 at 5180 MHz. Indices 1, 2, and 3 select standard channels 40, 44, and 48 at 5200, 5220, and 5240 MHz. HT40 pair validation permits 36/40 and 44/48 in either direction; it rejects 40/44. The subset follows IEEE Std 802.11-2024, Table E-4 and Equation (17-27); it supplies no complete regulatory-domain model. HT management requires explicit standard channel conversion; arithmetic 5 GHz bands lack this conversion.
+
+HT40 pair validation does not enable 40 MHz HT operation.
+
 Channel widths above 20 MHz are not modeled at packet level: 802.11n and
 802.11ac stations always use 20 MHz channels, and the number of spatial
 streams is bounded by the antenna count of the radio.

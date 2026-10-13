@@ -8,6 +8,8 @@
 #ifndef __INET_IEEE80211BAND_H
 #define __INET_IEEE80211BAND_H
 
+#include <utility>
+
 #include "inet/common/IPrintableObject.h"
 #include "inet/common/Units.h"
 
@@ -50,15 +52,18 @@ class INET_API Ieee80211EnumeratedBand : public Ieee80211BandBase
   protected:
     std::vector<Hz> centers;
     std::vector<int> standardChannelNumbers;
+    std::vector<std::pair<int, int>> ht40ChannelPairs;
 
   public:
-    Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers, const std::vector<int> standardChannelNumbers = {});
+    Ieee80211EnumeratedBand(const char *name, const std::vector<Hz> centers, const std::vector<int> standardChannelNumbers = {},
+            const std::vector<std::pair<int, int>> ht40ChannelPairs = {});
 
     virtual int getNumChannels() const override { return centers.size(); }
     virtual Hz getCenterFrequency(int channelNumber) const override;
     virtual Hz getSpacing() const override { return Hz(NaN); }
     virtual int getStandardChannelNumber(int channelIndex) const override;
     virtual int getChannelIndex(int standardChannelNumber) const override;
+    virtual bool isHt40OperationSupported(int primaryChannelIndex, int secondaryChannelOffset) const override;
 };
 
 class INET_API Ieee80211ArithmeticalBand : public Ieee80211BandBase
@@ -85,6 +90,8 @@ class INET_API Ieee80211CompliantBands
     static const Ieee80211EnumeratedBand band2_4GHz;
     static const Ieee80211ArithmeticalBand band5GHz;
     static const Ieee80211ArithmeticalBand band5GHz20MHz;
+    // Model subset of IEEE Std 802.11-2024, Table E-4, operating class 115.
+    static const Ieee80211EnumeratedBand band5GHzMapped20MHz;
     static const Ieee80211ArithmeticalBand band5GHz40MHz;
     static const Ieee80211ArithmeticalBand band5GHz80MHz;
     static const Ieee80211ArithmeticalBand band5GHz160MHz;

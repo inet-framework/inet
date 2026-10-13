@@ -81,6 +81,47 @@ catch (const cRuntimeError&) {
 }
 ASSERT(rejected);
 
+const auto *mappedBand = Ieee80211CompliantBands::getBand("5 GHz (mapped 20 MHz)");
+ASSERT(mappedBand->getNumChannels() == 4);
+for (int index = 0; index < 4; index++) {
+    int standardChannel = 36 + 4 * index;
+    ASSERT(mappedBand->getStandardChannelNumber(index) == standardChannel);
+    ASSERT(mappedBand->getChannelIndex(standardChannel) == index);
+    ASSERT(mappedBand->getCenterFrequency(index) == MHz(5180 + 20 * index));
+}
+for (int index : {-1, 4}) {
+    rejected = false;
+    try {
+        mappedBand->getStandardChannelNumber(index);
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+    rejected = false;
+    try {
+        mappedBand->getCenterFrequency(index);
+    }
+    catch (const cRuntimeError&) {
+        rejected = true;
+    }
+    ASSERT(rejected);
+}
+rejected = false;
+try {
+    mappedBand->getChannelIndex(52);
+}
+catch (const cRuntimeError&) {
+    rejected = true;
+}
+ASSERT(rejected);
+ASSERT(mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(36), 1));
+ASSERT(mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(40), 3));
+ASSERT(mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(44), 1));
+ASSERT(mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(48), 3));
+ASSERT(!mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(40), 1));
+ASSERT(!mappedBand->isHt40OperationSupported(mappedBand->getChannelIndex(44), 3));
+
 EV << "IEEE 802.11 band channel mapping checks passed.\n";
 
 %contains: stdout
