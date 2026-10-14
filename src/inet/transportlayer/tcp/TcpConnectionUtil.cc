@@ -1047,6 +1047,7 @@ void TcpConnection::configureStateVariables()
         state->nagle_enabled = noDelaySockopt == 0; // TCP_NODELAY of this connection
     state->minshallNagle = tcpMain->par("minshallNagle");
     state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary");
+    state->pushLastBuffered = tcpMain->par("pushLastBufferedSegment");
     state->tsRecentAfterAckCheck = tcpMain->par("tsRecentAfterAckCheck");
     state->rfc5961AckCheck = tcpMain->par("rfc5961AckCheck");
     state->dropBeyondWindowEdge = tcpMain->par("dropBeyondWindowEdge");
@@ -1715,6 +1716,13 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     // keeps PSH. A held partial that goes now has the PSH rule of the cork above.
     if (state->pushOnWriteBoundary && !state->corkFlush && !state->corkedDataPending
             && (containsSeqNum(pushSeqNums, state->snd_nxt) || containsSeqNum(forcedPushSeqNums, state->snd_nxt)))
+        tcpHeader->setPshBit(true);
+
+    // pushLastBufferedSegment, RFC 9293 section 3.9.1.2: the SEND of INET has no PUSH
+    // flag, so the TCP "MUST set the PSH bit in the last buffered segment (i.e., when
+    // there is no more queued data to be sent)" (MUST-61); the rule of Linux above
+    // replaces it
+    if (state->pushLastBuffered && !state->pushOnWriteBoundary && state->snd_nxt == sendQueue->getBufferEndSeq())
         tcpHeader->setPshBit(true);
 
     // check if afterRto bit can be reset

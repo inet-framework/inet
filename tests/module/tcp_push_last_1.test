@@ -1,0 +1,52 @@
+%description:
+Tests pushLastBufferedSegment, the PSH of RFC 9293 section 3.9.1.2 (MUST-61):
+the SEND of INET has no PUSH flag, so the last buffered segment carries PSH. The
+client sends 2500 bytes and, at t=3 s, 1000 bytes more, with an MSS of 1000.
+Only the segments that empty the send queue carry PSH: A005, the last 500 bytes
+of the first SEND, and A006, the second SEND.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.cli_app.sendScript="1.0 2500; 3.0 1000"
+*.*_tcp.mss = 1000
+*.cli_tcp.pushLastBufferedSegment = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 
+[1.203 B002] A.1000 < B.2000: A ack 1001 win 16384 
+[1.205 A004] A.1000 > B.2000: A 1001:2001(1000) ack 501 win 16384 
+[1.407 B003] A.1000 < B.2000: A ack 2001 win 16384 
+[1.409 A005] A.1000 > B.2000: A P 2001:2501(500) ack 501 win 16384 
+[1.611 B004] A.1000 < B.2000: A ack 2501 win 16384 
+[3.001 A006] A.1000 > B.2000: A P 2501:3501(1000) ack 501 win 16384 
+[3.203 B005] A.1000 < B.2000: A ack 3501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
