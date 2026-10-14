@@ -73,7 +73,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S17d ✅ | `topic/tcp-connection-setup` | 26 (part), 39 (part), 79, new | +111 −20 | the text of a SYN without Fast Open, the hard ICMP error in SYN_RCVD, the soft ICMP errors and the ICMP sequence check of Linux behind parameters, the zero-copy completion of SYN data (D-87 to D-89) |
 | S18 ✅ | `topic/tcp-receive-memory` | 47 | +165 −36 | SO_RCVBUF on an open connection and its lock, the highest window edge apart from the edge in force, the free space and the zero window of a locked buffer, the window update of Linux after a read behind a parameter (D-90 to D-93) |
 | S18b ✅ | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part), new | +285 −3 | the RFC 4821 path MTU search of Linux behind a parameter, the route MTU of a connection and `TcpSocket::setPathMtu()`, the start MSS of an active opener, the SYN after an ICMP fragmentation-needed error (D-94 to D-97) |
-| S18c | `topic/tcp-applications` | 42, 58 | +30 −12 (about) | the applications use the new socket behavior |
+| S18c ✅ | `topic/tcp-applications` | 42, 58 | +27 −11 | MSG_EOR in the send script of `TcpSessionApp`, and a fill byte for its data; commit 58 takes back the close of `TcpServerSocketIo` of commit 42 (D-1) |
 | S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 46 (part), 53, 63, 68, 70, 71, 72, 78, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
@@ -2698,3 +2698,30 @@ as the parameter of the same name of the queueing sources. Commit 42 also lets
 because it breaks the half-close that the module serves; by D-1, neither part lands. The module
 tests get a `cli_app` of any `IApp`, so that a test can run `TcpSessionApp` against the scripted
 tester, and the test client gets a log of the bytes that it receives.
+
+During the work, the test of the fill byte needed a view of the bytes that arrive, so the test
+client gets the parameter `logData`; the network `TcpTestNet1` of the module tests gets a
+`cli_app` of any `IApp`.
+
+### S18c — `topic/tcp-applications` — landed 2026-10-14
+
+The owner reviewed and approved S18c on 2026-10-14.
+
+S18c lets `TcpSessionApp` end a record with a SEND (MSG_EOR) and fill its data with one byte.
+Commit 58 takes back the third part of commit 42, so neither part lands.
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcpapp: add: MSG_EOR in the send script of TcpSessionApp` | — | 42 (part) | — |
+| `tcpapp: add: a fill byte for the data of TcpSessionApp` | — | 42 (part) | — |
+
+New tests: `tcp_session_eor_1`, `tcp_session_packetdata_1` and `tcp_session_packetdata_2`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the module tests pass at each commit (609 at the plan commit, 612 at the head). The TCP
+standards tests pass at each code commit (25 pass, 2 expected failures, the packetdrill tests skip
+without inet-gpl); unit 123 and serializer 4 pass at the head. The new tests of each code commit
+fail with the source of the commit before. The CI fingerprint job runs at each code commit, and no
+row moves. The TCP fingerprint rows run in debug at the head with no runtime error (the `tyf`
+ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six gates
+and the combined pull-request gate pass.
