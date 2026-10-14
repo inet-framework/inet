@@ -234,7 +234,7 @@ simple Tcp extends SimpleModule like ITcp
         bool ecnWillingness = default(false); // deprecated: true is tcpEcnMode="rfc3168", in place of "off" or "passive"
         bool ecnMarkAll = default(false); // ECN: ECT also on the pure ACKs, FINs, retransmissions and window probes of an AccECN connection (RFC 9768) and of a DCTCP connection, as Linux does (tcp_ecn_send()); RFC 8257 section 4.1 recommends such a knob for DCTCP. false: ECT only on new data, as RFC 3168 sections 6.1.4 to 6.1.6 ask, which RFC 9768 section 4 keeps
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
-        bool pmtudEnabled = default(false); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
+        bool pmtudEnabled = default(true); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
         double pmtudTimeout @unit(s) = default(600s); // Time after which the original MSS is restored to probe for increased path MTU (RFC 1191, Section 6.3)
         double cubicBeta = default(0.7); // multiplicative-decrease factor applied to cwnd on loss. Note that the TCP-friendliness estimator keeps the kernel's fixed scale (derived from beta=717/1024), so changing this only alters the decrease itself
         double cubicC = default(0.4); // scaling constant C of the cubic window-growth curve

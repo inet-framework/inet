@@ -40,4 +40,5 @@ simple LegacyTcp extends Tcp
         tlpEnabled = default(false);
         pushLastBufferedSegment = default(false);
         tcpEcnMode = default("off");
+        pmtudEnabled = default(false);
 }
