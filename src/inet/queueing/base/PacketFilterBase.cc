@@ -50,6 +50,8 @@ void PacketFilterBase::checkPacketStreaming(Packet *packet)
 void PacketFilterBase::startPacketStreaming(Packet *packet)
 {
     inProgressStreamId = packet->getTreeId();
+    inProgressMatches = matchesPacket(packet);
+    handlePacketFiltered(packet, inProgressMatches);
 }
 
 void PacketFilterBase::endPacketStreaming(Packet *packet)
@@ -78,7 +80,9 @@ void PacketFilterBase::pushPacket(Packet *packet, const cGate *gate)
     take(packet);
     checkPacketStreaming(nullptr);
     emit(packetPushedInSignal, packet);
-    if (matchesPacket(packet)) {
+    bool matches = matchesPacket(packet);
+    handlePacketFiltered(packet, matches);
+    if (matches) {
         processPacket(packet);
         handlePacketProcessed(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
@@ -98,7 +102,7 @@ void PacketFilterBase::pushPacketStart(Packet *packet, const cGate *gate, bps da
     take(packet);
     checkPacketStreaming(packet);
     startPacketStreaming(packet);
-    if (matchesPacket(packet)) {
+    if (inProgressMatches) {
         processPacket(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         pushOrSendPacketStart(packet, outputGate, consumer, datarate, packet->getTransmissionId());
@@ -117,7 +121,7 @@ void PacketFilterBase::pushPacketEnd(Packet *packet, const cGate *gate)
         startPacketStreaming(packet);
     else
         checkPacketStreaming(packet);
-    if (matchesPacket(packet)) {
+    if (inProgressMatches) {
         processPacket(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         endPacketStreaming(packet);
@@ -139,7 +143,7 @@ void PacketFilterBase::pushPacketProgress(Packet *packet, const cGate *gate, bps
         startPacketStreaming(packet);
     else
         checkPacketStreaming(packet);
-    if (matchesPacket(packet)) {
+    if (inProgressMatches) {
         processPacket(packet);
         EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;
         if (packet->getTotalLength() == position + extraProcessableLength)
@@ -187,6 +191,7 @@ Packet *PacketFilterBase::canPullPacket(const cGate *gate) const
             packet = nonConstThisPtr->provider.pullPacket();
             nonConstThisPtr->take(packet);
             nonConstThisPtr->emit(packetPulledInSignal, packet);
+            nonConstThisPtr->handlePacketFiltered(packet, false);
             EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
             // KLUDGE
             nonConstThisPtr->handlePacketProcessed(packet);
@@ -202,7 +207,9 @@ Packet *PacketFilterBase::pullPacket(const cGate *gate)
         auto packet = provider.pullPacket();
         take(packet);
         emit(packetPulledInSignal, packet);
-        if (matchesPacket(packet)) {
+        bool matches = matchesPacket(packet);
+        handlePacketFiltered(packet, matches);
+        if (matches) {
             processPacket(packet);
             handlePacketProcessed(packet);
             EV_INFO << "Passing through packet" << EV_FIELD(packet) << EV_ENDL;

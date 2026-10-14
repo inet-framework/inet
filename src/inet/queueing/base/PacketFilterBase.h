@@ -37,6 +37,7 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     ActivePacketSinkRef collector;
 
     int inProgressStreamId = -1;
+    bool inProgressMatches = false;
 
     int numDroppedPackets = 0;
     b droppedTotalLength = b(-1);
@@ -46,6 +47,15 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
     virtual void handleMessage(cMessage *message) override;
 
     virtual void processPacket(Packet *packet) {}
+
+    /**
+     * Updates the state of the module for a packet that goes through the
+     * module or that the module drops. The matches argument is the result of
+     * matchesPacket() for the packet. The base class calls this function one
+     * time for each packet, and one time for each packet stream, when the
+     * module holds the packet and before the packet leaves the module.
+     */
+    virtual void handlePacketFiltered(Packet *packet, bool matches) {}
 
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming(Packet *packet);
