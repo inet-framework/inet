@@ -86,8 +86,8 @@
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0, 100s,    0, ERROR,    # pcap devices not supported
 # /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0, ERROR,    # pcap devices not supported
 
-/examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            3b50-9295/tplx;ce47-dbcf/~tNl;46b5-9e61/~tND;26ac-bc27/tyf, PASS, EthernetMac Ipv4
-/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            0ae0-5026/tplx;66ad-7c53/~tNl;c8c5-3524/~tND;0d87-579d/tyf, PASS, EthernetMac EthernetCsmaMac Ipv4
+/examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            6365-4815/tplx;95b4-da09/~tNl;147c-70cd/~tND;26ac-bc27/tyf, PASS, EthernetMac Ipv4
+/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            e076-c9c1/tplx;8f67-017e/~tNl;9578-bc8e/~tND;0d87-579d/tyf, PASS, EthernetMac EthernetCsmaMac Ipv4
 
 # /examples/ethernet/lans/,            -f .qtenv.ini -c General -r 0
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            1b3d-7b41/tplx;46eb-2c9e/~tNl;59e8-47d5/tyf, PASS, EthernetCsmaMac
@@ -142,8 +142,8 @@
 /examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             d8cb-f43f/tplx;ddee-635f/~tNl;9893-9bd8/~tND;d892-7043/tyf, PASS, EthernetMac Ipv4
 
 # /examples/inet/bulktransfer/,        -f .qtenv.ini -c General -r 0
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             92de-438a/tplx;c33d-80c5/~tNl;45ba-70a0/~tND;1df2-ba17/tyf, PASS, Ipv4
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             2a99-5837/tplx;0e34-1674/~tNl;3a0c-995e/~tND;41ae-4548/tyf, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             cfca-a35a/tplx;9359-cd14/~tNl;cd44-c25c/~tND;1df2-ba17/tyf, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             461a-d1db/tplx;95b3-78c0/~tNl;cde8-0148/~tND;41ae-4548/tyf, PASS, Ipv4
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             461a-d1db/tplx;95b3-78c0/~tNl;cde8-0148/~tND;2798-249c/tyf, PASS, Ipv4
 
 /examples/inet/configurator/,        -f omnetpp.ini -c Default -r 0,                        10s,     145e-a1db/tplx;5ea9-e407/~tNl;57e3-efce/~tND;4161-eaff/tyf, PASS, EthernetMac Ipv4
@@ -192,8 +192,8 @@
 /examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           8fdb-eda6/tplx;3ac0-3950/~tNl;b4b8-940d/~tND;0318-5176/tyf, PASS, igmp Ipv4
 
 /examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              1d,              00ef-f3ea/tplx;1434-6ecd/~tNl;fc8f-d880/tyf, PASS, Ipv4
-/examples/inet/nclients/,            -f filetransfer.ini -c Filetransfer -r 0,      50s,             b03e-95d2/tplx;4b5b-a713/~tNl;338a-ff42/~tND;f5e8-0fd1/tyf, PASS, Ipv4
-/examples/inet/nclients/,            -f nclients2.ini -c General -r 0,              50s,             9b4a-c61b/tplx;4b64-9f2b/~tNl;1296-a1c2/tyf, PASS, Ipv4
+/examples/inet/nclients/,            -f filetransfer.ini -c Filetransfer -r 0,      50s,             c4a8-4c4b/tplx;e895-66db/~tNl;6817-a801/~tND;f5e8-0fd1/tyf, PASS, Ipv4
+/examples/inet/nclients/,            -f nclients2.ini -c General -r 0,              50s,             d97b-dab7/tplx;4931-0deb/~tNl;1296-a1c2/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 1,              50s,             a7fb-53dd/tplx;55e2-8f25/~tNl;b7bd-11cd/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f omnetpp-ping.ini -c Ping -r 0,              10s,             ab1a-b6af/tplx;3873-7716/~tNl;a523-1870/tyf, PASS, Ipv4
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0,             200s,            541c-e50f/tplx;3ef7-8493/~tNl;4588-727b/tyf, PASS, Ipv4
@@ -205,7 +205,7 @@
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Sctp -r 0,              100s,            489a-aa35/tplx;5720-aff9/~tNl;378d-e4f4/~tND;1753-2e23/tyf, PASS, Ipv4
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             eb3f-fff6/tplx;4921-f3c9/~tNl;5bf3-b6dc/~tND;0968-339c/tyf, PASS, Ipv4
 
-/examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           f68e-4945/tplx;baa2-142e/~tNl;45ad-dd66/~tND;1bb9-1773/tyf, PASS, EthernetMac Ipv4
+/examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           90fe-7df3/tplx;264f-93c4/~tNl;67c6-63ef/~tND;1bb9-1773/tyf, PASS, EthernetMac Ipv4
 
 /examples/inet/redmarker/,           -f omnetpp.ini -c TcpSender1 -r 0,             100s,         b5e4-ac3e/tplx;e6db-3b7f/~tNl;32d1-1828/~tND;5d29-588d/tyf, PASS, EthernetMac Ipv4
 
@@ -236,53 +236,53 @@
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_halfduplex -r 1, 10s,        c6e8-0089/tplx;59dd-e12a/~tNl;5a87-8bbd/~tND;8ed6-a146/tyf, PASS, EthernetCsmaMac Ipv4
 
 /examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudDisabled -r 0,           300s,        4bb0-fa64/tplx;3d52-17e3/~tNl;731c-4378/~tND;0819-dcab/tyf, PASS, Ipv4
-/examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudEnabled -r 0,            300s,        1a1e-8280/tplx;761c-9207/~tNl;f9c6-ab5e/~tND;3aaf-a690/tyf, PASS, Ipv4
-/examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudProbe -r 0,              300s,        b963-5d84/tplx;4481-26c8/~tNl;22e7-7e08/~tND;6c75-00c7/tyf, PASS, Ipv4
+/examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudEnabled -r 0,            300s,        163b-aa28/tplx;a281-81ba/~tNl;f277-34b6/~tND;3aaf-a690/tyf, PASS, Ipv4
+/examples/inet/tcp_pmtud/,           -f omnetpp.ini -c PmtudProbe -r 0,              300s,        f647-f4f8/tplx;776a-7f4d/~tNl;3fa0-d8c5/~tND;6c75-00c7/tyf, PASS, Ipv4
 
-/examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,                  10s,        0bb7-fdd9/tplx;9601-f317/~tNl;f0f2-6cb7/~tND;32ba-9e70/tyf, PASS, Ipv4
+/examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c General -r 0,                  10s,        ba4e-7205/tplx;7e56-90c5/~tNl;bff1-8786/~tND;32ba-9e70/tyf, PASS, Ipv4
 
 /examples/inet/tcpapp/,              -f omnetpp.ini -c BurstyTraffic -r 0,          100s,         f9bd-1243/tplx;3e50-ff27/~tNl;2dd1-7e68/~tND;c076-5b46/tyf, PASS, Ipv4
 /examples/inet/tcpapp/,              -f omnetpp.ini -c RequestResponseTraffic -r 0, 100s,         2a94-09ba/tplx;5320-bfd2/~tNl;6fd2-6ea4/~tND;93af-dacb/tyf, PASS, Ipv4
 
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c default_tcp -r 0,            100s,            ee54-2328/tplx;40a1-12cc/~tNl;8390-9c5b/~tND;429b-4e89/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet -r 0,             100s,            ee54-2328/tplx;40a1-12cc/~tNl;8390-9c5b/~tND;429b-4e89/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_msg -r 0,         100s,            ee54-2328/tplx;40a1-12cc/~tNl;e9c5-785b/~tND;429b-4e89/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_stream -r 0,      100s,            ee54-2328/tplx;40a1-12cc/~tNl;7a92-cf9f/~tND;429b-4e89/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c default_tcp -r 0,            100s,            5c6d-fe9e/tplx;33c3-59eb/~tNl;b67f-c25c/~tND;429b-4e89/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet -r 0,             100s,            5c6d-fe9e/tplx;33c3-59eb/~tNl;b67f-c25c/~tND;429b-4e89/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_msg -r 0,         100s,            5c6d-fe9e/tplx;33c3-59eb/~tNl;527f-a809/~tND;429b-4e89/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_stream -r 0,      100s,            5c6d-fe9e/tplx;33c3-59eb/~tNl;879a-7fbc/~tND;429b-4e89/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 0,              500s,            5a8a-5601/tplx;e833-9530/~tNl;2140-c62a/~tND;bca9-2421/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 1,              500s,            0b09-b9bc/tplx;3fae-9383/~tNl;536c-d860/~tND;f1d9-65ea/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 2,              500s,            5a3e-5ed6/tplx;0050-c910/~tNl;8bfb-bab1/~tND;e767-29d7/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 3,              500s,            4552-a221/tplx;5361-c8df/~tNl;000a-a9a9/~tND;281b-993f/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 4,              500s,            101e-4053/tplx;6370-3697/~tNl;c7ac-2b1f/~tND;044f-b462/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 5,              500s,            88d4-46ba/tplx;7ca7-20dc/~tNl;f688-416c/~tND;bc52-fb70/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 6,              500s,            34e6-9641/tplx;031a-fa9c/~tNl;cbdc-6292/~tND;f389-299d/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 1,              500s,            d711-b1bf/tplx;18dc-2c77/~tNl;11ce-714f/~tND;f1d9-65ea/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 2,              500s,            94f3-ee95/tplx;3008-dd2d/~tNl;2162-fbb3/~tND;e767-29d7/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 3,              500s,            fcba-3330/tplx;989a-a5a2/~tNl;9f2a-1570/~tND;281b-993f/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 4,              500s,            7bc2-069c/tplx;30f3-dc70/~tNl;5a8b-d118/~tND;044f-b462/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 5,              500s,            fa7b-ee9b/tplx;027b-717b/~tNl;0329-aeca/~tND;bc52-fb70/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 6,              500s,            228e-52b7/tplx;8fd2-ab14/~tNl;747f-1c96/~tND;f389-299d/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 0,           500s,            5a8a-5601/tplx;e833-9530/~tNl;2140-c62a/~tND;a0ba-91b2/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 1,           500s,            0b09-b9bc/tplx;3fae-9383/~tNl;536c-d860/~tND;9e27-47a7/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 2,           500s,            5a3e-5ed6/tplx;0050-c910/~tNl;8bfb-bab1/~tND;b636-f04b/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 3,           500s,            4552-a221/tplx;5361-c8df/~tNl;000a-a9a9/~tND;7c99-a024/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 4,           500s,            101e-4053/tplx;6370-3697/~tNl;c7ac-2b1f/~tND;e255-301a/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 5,           500s,            88d4-46ba/tplx;7ca7-20dc/~tNl;f688-416c/~tND;43fc-ad90/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 6,           500s,            34e6-9641/tplx;031a-fa9c/~tNl;cbdc-6292/~tND;6a29-8f90/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 0,             500s,            fbf8-000c/tplx;669a-20e4/~tNl;de79-8a17/~tND;bca9-2421/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 1,             500s,            62ef-8828/tplx;8989-db76/~tNl;8863-8703/~tND;f1d9-65ea/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 2,             500s,            a285-0264/tplx;f9c0-4909/~tNl;f16a-37b9/~tND;e767-29d7/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 3,             500s,            be22-a276/tplx;a162-d9ca/~tNl;5d8a-e315/~tND;281b-993f/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 4,             500s,            ac7a-2566/tplx;3d28-4cfb/~tNl;0332-be58/~tND;044f-b462/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 5,             500s,            c2c5-ab32/tplx;530c-1022/~tNl;e627-c746/~tND;bc52-fb70/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 6,             500s,            c03f-e119/tplx;3e24-2f7e/~tNl;3beb-c216/~tND;f389-299d/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 1,           500s,            d711-b1bf/tplx;18dc-2c77/~tNl;11ce-714f/~tND;9e27-47a7/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 2,           500s,            94f3-ee95/tplx;3008-dd2d/~tNl;2162-fbb3/~tND;b636-f04b/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 3,           500s,            fcba-3330/tplx;989a-a5a2/~tNl;9f2a-1570/~tND;7c99-a024/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 4,           500s,            7bc2-069c/tplx;30f3-dc70/~tNl;5a8b-d118/~tND;e255-301a/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 5,           500s,            fa7b-ee9b/tplx;027b-717b/~tNl;0329-aeca/~tND;43fc-ad90/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 6,           500s,            228e-52b7/tplx;8fd2-ab14/~tNl;747f-1c96/~tND;6a29-8f90/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 0,             500s,            83d9-6135/tplx;290a-45db/~tNl;8658-883b/~tND;bca9-2421/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 1,             500s,            1e49-69f0/tplx;c5fb-10ee/~tNl;3305-2114/~tND;f1d9-65ea/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 2,             500s,            8d34-8a66/tplx;03ca-96ed/~tNl;d4f6-96c8/~tND;e767-29d7/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 3,             500s,            4efd-d609/tplx;fe21-5792/~tNl;0222-9f27/~tND;281b-993f/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 4,             500s,            c4a6-93c0/tplx;17bf-3060/~tNl;2be9-09c6/~tND;044f-b462/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 5,             500s,            5a26-9f17/tplx;7613-6797/~tNl;bb0b-892a/~tND;bc52-fb70/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 6,             500s,            f161-d233/tplx;43ce-29bb/~tNl;8f19-fef5/~tND;f389-299d/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 0,             500s,            8160-d692/tplx;308d-2563/~tNl;7cb7-49e6/~tND;f900-287a/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 1,             500s,            1913-f214/tplx;6499-bbbc/~tNl;3545-6218/~tND;a0b5-4d19/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 2,             500s,            c96e-8b75/tplx;055d-39ca/~tNl;e619-096c/~tND;2714-f154/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 3,             500s,            efc9-66c9/tplx;99f3-ee96/~tNl;21ed-1344/~tND;b9e0-c4a9/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 4,             500s,            dc37-b0fa/tplx;c13e-86b9/~tNl;7b26-c5f8/~tND;8cb1-a6ce/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 5,             500s,            c638-dbeb/tplx;cd3c-d4f7/~tNl;cb63-7115/~tND;cbf9-9cb9/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 6,             500s,            38b2-68f7/tplx;ef2c-adff/~tNl;26fd-d0b0/~tND;663b-4d80/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 0,          500s,            c458-02ba/tplx;7a32-331f/~tNl;47ae-9e02/~tND;8965-b3bb/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 1,          500s,            22b4-382d/tplx;41c8-adba/~tNl;ac44-cdbb/~tND;7660-1000/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 2,          500s,            d215-9f6e/tplx;c14e-08d2/~tNl;747e-e311/~tND;361f-2896/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 3,          500s,            acaa-82b8/tplx;502b-5f19/~tNl;4595-76c4/~tND;d653-8261/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 4,          500s,            f82d-307c/tplx;c2ea-7f29/~tNl;1ccf-3db2/~tND;2f82-0f44/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 5,          500s,            bf4f-669a/tplx;5331-6ffb/~tNl;2726-af71/~tND;686a-75b3/tyf, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 6,          500s,            c7c6-0872/tplx;da27-c94f/~tNl;8143-dcf5/~tND;7e76-7472/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 1,             500s,            07e0-9d64/tplx;0032-32c6/~tNl;438d-e73b/~tND;a0b5-4d19/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 2,             500s,            477f-4267/tplx;c00d-bfb9/~tNl;ef5c-3709/~tND;2714-f154/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 3,             500s,            9915-e2ee/tplx;fbf4-f2ca/~tNl;7c05-4ef3/~tND;b9e0-c4a9/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 4,             500s,            501c-884d/tplx;00d7-6fdc/~tNl;57bb-af08/~tND;8cb1-a6ce/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 5,             500s,            35ce-888d/tplx;9e1f-b8ad/~tNl;93ea-675f/~tND;cbf9-9cb9/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 6,             500s,            b1c4-fd75/tplx;7db6-a041/~tNl;6c04-9f0e/~tND;663b-4d80/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 0,          500s,            26c7-50cc/tplx;7a32-331f/~tNl;8aae-503f/~tND;8965-b3bb/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 1,          500s,            aeaf-a218/tplx;31ca-2549/~tNl;6ecc-0c7a/~tND;7660-1000/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 2,          500s,            eca9-4788/tplx;cf33-0e97/~tNl;4d72-4188/~tND;361f-2896/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 3,          500s,            b054-eb55/tplx;03fc-a4a2/~tNl;279d-fa7e/~tND;d653-8261/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 4,          500s,            4eca-c575/tplx;7d17-7014/~tNl;03f6-cc9f/~tND;2f82-0f44/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 5,          500s,            c210-164c/tplx;1ec9-abdd/~tNl;dfdb-2ca0/~tND;686a-75b3/tyf, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 6,          500s,            ae29-46c2/tplx;7203-71f7/~tNl;126c-f072/~tND;7e76-7472/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 0,              500s,            596d-cd8d/tplx;21e9-0987/~tNl;052f-eb3f/~tND;f6d4-59c8/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 1,              500s,            58d3-c723/tplx;7c45-8827/~tNl;37b0-84d5/~tND;7b34-2e4d/tyf, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 2,              500s,            aa23-f4b6/tplx;ca76-2252/~tNl;de1f-863f/~tND;f798-3084/tyf, PASS, Ipv4
@@ -589,7 +589,7 @@
 /examples/wireless/ieee80211levelofdetail, -f omnetpp.ini -c Layered -r '$distance=1000 && $bitrate=54 && $repetition=0',               1s,           140d-f0e8/tplx;8a78-c0c1/~tNl;b4c0-6737/~tND;7809-dd01/tyf, PASS, wireless Ipv4
 
 # /examples/wireless/lan80211/,        -f .qtenv.ini -c General -r 0
-/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,         7204-ecd2/tplx;e375-9830/~tNl;ed13-9291/~tND, PASS, wireless Ipv4
+/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,         d7f9-da4e/tplx;d505-71d1/~tNl;db69-3efc/~tND, PASS, wireless Ipv4
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,          7517-ff4b/tplx;3da1-c87f/~tNl;6a02-78a7/~tND, PASS, wireless Ipv4
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, ERROR, wireless # interactive config, needed a *.numHosts parameter
