@@ -216,6 +216,7 @@ simple Tcp extends SimpleModule like ITcp
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // deprecated: the same as initialWindow = "rfc3390" (RFC 3390); an error with initialWindow = "rfc6928"
+        volatile int initialSendSequenceNumber = default(-1); // the initial send sequence number (ISS) of each connection; volatile, so a distribution gives each connection its own value; -1: from the clock, one tick in 4 microseconds (RFC 9293 section 3.4.1)
         string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc2001"); // the initial congestion window: "rfc2001" = 1 SMSS; "rfc3390" = min(4*SMSS, max(2*SMSS, 4380 bytes)), the upper bound of RFC 5681 section 3.1; "rfc6928" = min(10*SMSS, max(2*SMSS, 14600 bytes)), as Linux
         int initialCwnd = default(0); // the initial congestion window in segments, in place of initialWindow, as the initcwnd of a Linux route (dst_metric(RTAX_INITCWND)); 0: initialWindow
         bool sackSupport = default(false); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)

@@ -1164,8 +1164,12 @@ void TcpConnection::configureStateVariables()
 
 void TcpConnection::selectInitialSeqNum()
 {
-    // set the initial send sequence number
-    state->iss = (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
+    // set the initial send sequence number: initialSendSequenceNumber, else the clock of
+    // RFC 9293 section 3.4.1 (one tick in 4 microseconds)
+    int64_t iss = tcpMain->par("initialSendSequenceNumber");
+    if (iss < -1 || iss > 0xffffffffLL)
+        throw cRuntimeError("initialSendSequenceNumber must be -1 or 0 to 4294967295, but it is %" PRId64, iss);
+    state->iss = iss != -1 ? (uint32_t)iss : (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
 
     state->snd_una = state->snd_nxt = state->snd_max = state->iss;
     state->pushed_seq = state->iss + 1; // Linux tcp_connect_init(): no PSH mark yet
