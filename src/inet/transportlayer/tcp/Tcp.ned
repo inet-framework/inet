@@ -254,7 +254,7 @@ simple Tcp extends SimpleModule like ITcp
         bool frtoEnabled = default(false); // F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux tcp_frto=2). Requires sackSupport.
         bool lossUndoEnabled = default(false); // Undo a spurious cwnd/ssthresh reduction when D-SACK (RFC 2883) or timestamps (RFC 3522 Eifel) reveal the retransmission was unnecessary.
         int maxReordering = default(300); // Upper bound on the learned reordering degree in segments (Linux tcp_max_reordering).
-        bool prrEnabled = default(false); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport.
+        bool prrEnabled = default(true); // Proportional Rate Reduction (RFC 6937) during fast recovery instead of classic cwnd inflation/halving. Requires sackSupport.
         bool abortOnDataAfterClose = default(false); // model the full close of Linux close(): a CLOSE without halfClose also shuts the receive side down, and new data after it resets the connection (RFC 1122 section 4.2.2.13); false: RFC 9293 CLOSE, after which the application may still receive
         bool accEcnBareTimeWaitAck = default(false); // AccECN: the ACKs of TIME_WAIT carry no ACE field, as in Linux, whose time-wait socket sends them (tcp_v4_send_ack()); false: they carry it, as each ACK after the handshake (RFC 9768 section 3.2.2.2: MUST)
         bool accEcnOptionEnabled @mutable = default(true); // AccECN: send the AccECN option, which gives the byte counts of each ECN codepoint (RFC 9768 section 3.2.3: RECOMMENDED); false: only the ACE field (Linux tcp_ecn_option=0). Each connection reads it at its open

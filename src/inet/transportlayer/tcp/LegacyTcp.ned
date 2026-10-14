@@ -36,4 +36,5 @@ simple LegacyTcp extends Tcp
         hystartEnabled = default(true);
         initialRto = default(3s);
         lossDetectionMode = default("dupthresh");
+        prrEnabled = default(false);
 }
