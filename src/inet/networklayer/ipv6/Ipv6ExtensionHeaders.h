@@ -61,6 +61,28 @@ inline Ptr<const Ipv6ExtensionHeader> peekIpv6ExtensionHeaderAt(const Packet *pa
     }
 }
 
+/**
+ * Walks the extension headers that follow an IPv6 header whose Next Header field is
+ * nextHeader, starting at the given offset of the packet, and returns the protocol of
+ * the upper-layer header (RFC 8200 Section 4). The offset is advanced past the
+ * extension headers. Returns IP_PROT_NONE when the upper-layer header is not in the
+ * packet: the packet is a fragment other than the first (RFC 8200 Section 4.5), or it
+ * ends inside the extension header chain, as the quoted packet of an ICMPv6 error may.
+ */
+inline IpProtocolId skipIpv6ExtensionHeaders(const Packet *packet, b& offset, IpProtocolId nextHeader)
+{
+    while (isIpv6ExtensionHeader(nextHeader)) {
+        if (offset >= packet->getDataLength())
+            return IP_PROT_NONE;
+        auto extensionHeader = peekIpv6ExtensionHeaderAt(packet, offset, nextHeader);
+        if (nextHeader == IP_PROT_IPv6EXT_FRAGMENT && staticPtrCast<const Ipv6FragmentHeader>(extensionHeader)->getFragmentOffset() != 0)
+            return IP_PROT_NONE;
+        offset += extensionHeader->getChunkLength();
+        nextHeader = extensionHeader->getNextHeaderProtocol();
+    }
+    return nextHeader;
+}
+
 } // namespace inet
 
 #endif
