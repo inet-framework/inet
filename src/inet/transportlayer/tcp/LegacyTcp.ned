@@ -33,4 +33,5 @@ simple LegacyTcp extends Tcp
         mss = default(536);
         initialWindow = default("rfc2001");
         tcpAlgorithmClass = default("TcpReno");
+        hystartEnabled = default(true);
 }
