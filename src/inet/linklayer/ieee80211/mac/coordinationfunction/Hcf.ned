@@ -29,6 +29,7 @@ module Hcf extends Module like IHcf
 {
     parameters:
         bool isBlockAckSupported = default(false);
+        string blockAckVariant = default("basic"); // "basic" selects historical compatibility. "compressed" is reserved until its exchange path exists.
 
         string rxModule;
         string txModule;

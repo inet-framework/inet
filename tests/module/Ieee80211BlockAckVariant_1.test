@@ -1,0 +1,45 @@
+%description:
+Check profile validation through production HCF initialization.
+Retain the default and explicit Basic profile.
+Reject unknown values with support enabled or disabled.
+Reject Compressed until its runtime exchange path exists.
+
+%testprog: python3 check-profile.py
+
+%file: profile.ini
+[General]
+network = inet.showcases.wireless.blockack.BlockAckShowcase
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+
+%file: check-profile.py
+from pathlib import Path
+import subprocess
+
+root = Path.cwd().parents[3]
+cases = [
+    (None, True, None),
+    ("basic", True, None),
+    ("invalid", True, 'Unknown blockAckVariant "invalid": expected "basic" or "compressed"'),
+    ("invalid", False, 'Unknown blockAckVariant "invalid": expected "basic" or "compressed"'),
+    ("compressed", True, 'Compressed Block Ack exchanges are not implemented'),
+    ("compressed", False, 'Compressed Block Ack exchanges are not implemented'),
+]
+for variant, supported, diagnostic in cases:
+    command = [str(root / "bin/inet"), "--debug", "-u", "Cmdenv", "-f", str(Path.cwd() / "profile.ini"), "-c", "General", "-r", "0",
+               "--sim-time-limit=0s", "--record-vector-results=false", "--record-scalar-results=false",
+               f"--result-dir={Path.cwd() / 'results'}",
+               f"--**.wlan[*].mac.hcf.isBlockAckSupported={'true' if supported else 'false'}"]
+    if variant is not None:
+        command.append(f'--**.wlan[*].mac.hcf.blockAckVariant="{variant}"')
+    result = subprocess.run(command, cwd=root / "showcases/wireless/blockack", text=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print(result.stdout)
+    if diagnostic is None:
+        assert result.returncode == 0, (variant, supported, result.stdout)
+    else:
+        assert result.returncode != 0 and diagnostic in result.stdout, (variant, supported, result.stdout)
+print("Block Ack profile initialization checks passed.")
+
+%contains: stdout
+Block Ack profile initialization checks passed.

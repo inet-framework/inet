@@ -963,6 +963,10 @@ Notable backward compatible changes are the following:
    attenuating with the center frequency (the default), nothing changes.
 
 
+12. Explicit historical Basic Block Ack selection
+
+   HCF adds blockAckVariant = "basic" for historical compatibility. Basic remains the default. HCF rejects unknown values and the reserved "compressed" value during initialization until Compressed exchanges exist. These checks also apply when Block Ack support is disabled. Basic originated in IEEE Std 802.11e-2005; IEEE Std 802.11-2024 reserves its type value.
+
 Notable bug fixes are the following:
 
 1. IEEE 802.11 HT modes preserve the requested band and preamble

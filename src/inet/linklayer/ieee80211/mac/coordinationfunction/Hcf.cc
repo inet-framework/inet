@@ -36,6 +36,15 @@ void Hcf::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        const char *configuredVariant = par("blockAckVariant").stringValue();
+        if (!strcmp(configuredVariant, "basic"))
+            blockAckVariant = BlockAckVariant::BASIC;
+        else if (!strcmp(configuredVariant, "compressed"))
+            blockAckVariant = BlockAckVariant::COMPRESSED;
+        else
+            throw cRuntimeError("Unknown blockAckVariant \"%s\": expected \"basic\" or \"compressed\"", configuredVariant);
+        if (blockAckVariant == BlockAckVariant::COMPRESSED)
+            throw cRuntimeError("Compressed Block Ack exchanges are not implemented");
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         startRxTimer = new cMessage("startRxTimeout");
         inactivityTimer = new cMessage("blockAckInactivityTimer");
