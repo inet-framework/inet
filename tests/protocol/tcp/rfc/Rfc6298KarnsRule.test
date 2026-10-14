@@ -22,18 +22,20 @@ blocking guard would hold the cursor for its whole window, so the acknowledgment
 the exchange completed could not be observed inside it.
 
 **The model conforms.** The run takes exactly one round-trip sample, from the first
-segment, and cancels the measurement when the timer expires:
+segment; host B delays its acknowledgment, so the sample is about 200 ms. The Nagle
+algorithm holds the second segment until that acknowledgment arrives, and the relay discards
+it. The tail loss probe sends the FIN again at t=1; the timer then expires for the second
+segment, and the measurement is cancelled:
 
-    Measured RTT=0.10804ms, updated SRTT=0.013505ms, new RTO=2625.067525ms
-    Performing retransmission #1; increasing RTO from 2.625067525s to 5.25013505s,
-        and cancelling RTT measurement
+    Measured RTT=200.25588ms, updated SRTT=200.25588ms, new RTO=1000ms
+    TLP: probing by resending the FIN
+    Performing retransmission #1; increasing RTO from 1s  to 2s, and cancelling RTT measurement
+
+No sample of host A follows the acknowledgment of the retransmission; the next sample in the
+log is the one of host B for its FIN.
 
 The guard was verified to detect a sample: opened before the permitted one instead of after
-it, it fires with "forbidden event occurred at t=0.20010804".
-
-That first line also shows the defect `Rfc6298FirstMeasurement.test` records, on a different
-link: the measured trip is 0.108 ms and the smoothed value becomes 0.0135 ms, one eighth of
-it, where RFC 6298 section 2.2 requires the two to be equal.
+it, it fires with "forbidden event occurred at t=0.40025588".
 
 **Why the check is not vacuous.** A forbidden publication is only meaningful if a permitted
 one is possible in the same window, so the last step observes the acknowledgment of the
