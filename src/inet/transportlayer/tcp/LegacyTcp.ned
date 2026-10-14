@@ -27,4 +27,5 @@ simple LegacyTcp extends Tcp
         sackSupport = default(false);
         timestampSupport = default(false);
         windowScalingSupport = default(false);
+        delayedAcksEnabled = default(false);
 }

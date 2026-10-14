@@ -212,7 +212,7 @@ simple Tcp extends SimpleModule like ITcp
         bool windowShrinkAllowed = default(false); // the offered window follows the free receive buffer and may move its right edge back, as Linux with tcp_shrink_window=1: the buffer is charged with the truesize of the skb of each segment, and the free buffer counts at the measured ratio of payload to truesize; the first offer is half the buffer. RFC 9293 says that a receiver SHOULD NOT shrink the window (SHLD-14)
         bool windowUpdateAfterRead = default(false); // true: as Linux (__tcp_cleanup_rbuf()), a READ after which the receiver can offer at least twice the window that is still open sends that window at once in an ACK; false: the new window goes with the next ACK, as the receiver SWS avoidance and the delayed ACK of RFC 9293 (section 3.8.6.2.2) decide
         int notsentLowat @unit(B) = default(-1B); // TCP_NOTSENT_LOWAT (a Linux socket option, no RFC): a low-water mark on the unsent bytes: when they exceed it, TCP sends no TCP_I_SEND_MSG until they are at or below it again, and then it sends one; TcpSocket::setNotsentLowat() sets it for one connection; -1B: off
-        bool delayedAcksEnabled = default(false); // Delayed ACK algorithm (RFC 1122) enabled/disabled
+        bool delayedAcksEnabled = default(true); // Delayed ACK algorithm (RFC 1122) enabled/disabled
         bool nagleEnabled = default(true); // Nagle's algorithm (RFC 896) enabled/disabled
         bool limitedTransmitEnabled = default(false); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
         bool increasedIWEnabled = default(false); // deprecated: the same as initialWindow = "rfc3390" (RFC 3390); an error with initialWindow = "rfc6928"
