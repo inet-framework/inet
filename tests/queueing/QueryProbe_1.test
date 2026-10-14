@@ -1,0 +1,151 @@
+%description:
+
+This test checks the query probe (QueryProbe of tests/queueing/lib) on modules
+whose queries have no side effects. The probe repeats each query three times,
+and it checks that a pulled packet is the packet that its provider offered.
+The network has three chains:
+
+- push: an active packet source pushes packets through the probe into a
+  classifier (PacketClassifier), which sends them to two passive packet sinks.
+- push: an active packet source pushes packets through the probe into a filter
+  (PacketFilter), which drops every second packet.
+- pull: two queues hold the packets of two active packet sources. An active
+  packet sink pulls them through the probe from a priority scheduler
+  (PriorityScheduler).
+
+The test passes if no query gives another answer when it is repeated, and if
+each pulled packet is the offered packet.
+
+%file: test.ned
+
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.filter.PacketFilter;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.test.queueingtest.lib.QueryProbe;
+
+network TestQueryProbe
+{
+    submodules:
+        classifierProducer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        classifierProbe: QueryProbe {
+            @display("p=200,100");
+        }
+        classifier: PacketClassifier {
+            @display("p=300,100");
+        }
+        classifierConsumer1: PassivePacketSink {
+            @display("p=400,50");
+        }
+        classifierConsumer2: PassivePacketSink {
+            @display("p=400,150");
+        }
+        filterProducer: ActivePacketSource {
+            @display("p=100,250");
+        }
+        filterProbe: QueryProbe {
+            @display("p=200,250");
+        }
+        filter: PacketFilter {
+            @display("p=300,250");
+        }
+        filterConsumer: PassivePacketSink {
+            @display("p=400,250");
+        }
+        producer1: ActivePacketSource {
+            @display("p=100,350");
+        }
+        producer2: ActivePacketSource {
+            @display("p=100,450");
+        }
+        queue1: PacketQueue {
+            @display("p=200,350");
+        }
+        queue2: PacketQueue {
+            @display("p=200,450");
+        }
+        scheduler: PriorityScheduler {
+            @display("p=300,400");
+        }
+        schedulerProbe: QueryProbe {
+            @display("p=400,400");
+        }
+        collector: ActivePacketSink {
+            @display("p=500,400");
+        }
+    connections allowunconnected:
+        classifierProducer.out --> classifierProbe.in;
+        classifierProbe.out --> classifier.in;
+        classifier.out++ --> classifierConsumer1.in;
+        classifier.out++ --> classifierConsumer2.in;
+        filterProducer.out --> filterProbe.in;
+        filterProbe.out --> filter.in;
+        filter.out --> filterConsumer.in;
+        producer1.out --> queue1.in;
+        producer2.out --> queue2.in;
+        queue1.out --> scheduler.in++;
+        queue2.out --> scheduler.in++;
+        scheduler.out --> schedulerProbe.in;
+        schedulerProbe.out --> collector.in;
+}
+
+%file: Test.cc
+#include "inet/queueing/function/PacketClassifierFunction.h"
+#include "inet/queueing/function/PacketFilterFunction.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace inet;
+
+static int testClassify(Packet *packet)
+{
+    return packet->getId() % 2;
+}
+
+Register_Packet_Classifier_Function(TestClassifier, testClassify);
+
+static bool testFilter(const Packet *packet)
+{
+    return packet->getId() % 2 == 0;
+}
+
+Register_Packet_Filter_Function(TestFilter, testFilter);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestQueryProbe
+sim-time-limit = 10s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.*roducer*.packetLength = 1B
+*.classifierProducer.productionInterval = 1s
+*.filterProducer.productionInterval = 1s
+*.producer1.productionInterval = 0.5s
+*.producer2.productionInterval = 0.7s
+*.collector.collectionInterval = 1s
+*.classifier.classifierClass = "TestClassifier"
+*.filter.filterClass = "TestFilter"
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+At 9s classifierConsumer[12]: Consuming packet, .*?classifierProducer-9
+
+%contains-regex: stdout
+At 9s collector: Collecting packet, .*?producer1-\d+
+
+%contains-regex: stdout
+At \d+s filterConsumer: Consuming packet, .*?filterProducer-\d+
+
+%not-contains: stdout
+undisposed object
