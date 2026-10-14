@@ -66,8 +66,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         delete dataPacket;
         return std::vector<Packet *>();
     }
-    BlockAckReordering::ReorderBuffer frames;
-    frames[dataHeader->getSequenceNumber().get()].push_back(dataPacket);
+    BlockAckReordering::ReleasedFrames frames = {{dataHeader->getSequenceNumber().get(), {dataPacket}}};
     if (blockAckReordering && blockAckAgreementHandler) {
         Tid tid = dataHeader->getTid();
         MacAddress originatorAddr = dataHeader->getTransmitterAddress();
@@ -137,7 +136,7 @@ std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *c
 {
     Enter_Method("controlFrameReceived");
     if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(controlHeader)) {
-        BlockAckReordering::ReorderBuffer frames;
+        BlockAckReordering::ReleasedFrames frames;
         if (blockAckReordering) {
             Tid tid = blockAckReq->getTidInfo();
             MacAddress originatorAddr = blockAckReq->getTransmitterAddress();

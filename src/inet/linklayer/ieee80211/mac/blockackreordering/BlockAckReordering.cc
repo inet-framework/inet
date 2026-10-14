@@ -12,12 +12,20 @@
 namespace inet {
 namespace ieee80211 {
 
-//
-// The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
-//
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
+BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
 {
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
+    auto sequenceNumber = dataHeader->getSequenceNumber();
+    auto windowStart = receiveBuffer->getNextExpectedSequenceNumber();
+    ReleasedFrames releasedFrames;
+    // IEEE Std 802.11-2024, 10.25.6.6.2.1(b,c): advance for newer DATA beyond the window; discard older DATA.
+    // The shared reorder service also retains Basic fragment reassembly as an INET compatibility choice.
+    if (!(windowStart <= sequenceNumber)) {
+        delete dataPacket;
+        return releasedFrames;
+    }
+    if (!(sequenceNumber < windowStart + receiveBuffer->getBufferSize()))
+        releasedFrames = advanceReceiveBuffer(agreement, receiveBuffer, sequenceNumber - receiveBuffer->getBufferSize() + 1);
     // The reception of QoS data frames using Normal Ack policy shall not be used by the
     // recipient to reset the timer to detect Block Ack timeout (see 10.5.4).
     // This allows the recipient to delete the Block Ack if the originator does not switch
@@ -25,36 +33,18 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedQoSFrame(Re
     if (receiveBuffer->insertFrame(dataPacket, dataHeader)) {
         if (dataHeader->getAckPolicy() == BLOCK_ACK)
             agreement->blockAckPolicyFrameReceived(dataHeader);
-        auto earliestCompleteMsduOrAMsdu = getEarliestCompleteMsduOrAMsduIfExists(receiveBuffer);
-        if (earliestCompleteMsduOrAMsdu.size() > 0) {
-            auto earliestSequenceNumber = earliestCompleteMsduOrAMsdu.at(0)->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
-            // If, after an MPDU is received, the receive buffer is full, the complete MSDU or A-MSDU with the earliest
-            // sequence number shall be passed up to the next MAC process.
-            if (receiveBuffer->isFull()) {
-                passedUp(agreement, receiveBuffer, earliestSequenceNumber);
-                return ReorderBuffer({ std::make_pair(earliestSequenceNumber.get(), Fragments(earliestCompleteMsduOrAMsdu)) });
-            }
-            // If, after an MPDU is received, the receive buffer is not full, but the sequence number of the complete MSDU or
-            // A-MSDU in the buffer with the lowest sequence number is equal to the NextExpectedSequenceNumber for
-            // that Block Ack agreement, then the MPDU shall be passed up to the next MAC process.
-            else if (earliestSequenceNumber == receiveBuffer->getNextExpectedSequenceNumber()) {
-                passedUp(agreement, receiveBuffer, earliestSequenceNumber);
-                return ReorderBuffer({ std::make_pair(earliestSequenceNumber.get(), Fragments(earliestCompleteMsduOrAMsdu)) });
-            }
-        }
+        // IEEE Std 802.11-2024, 10.25.6.6.2.1(a)(2): release every consecutive complete unit at the window start.
+        auto consecutiveFrames = collectConsecutiveCompleteFollowingMpdus(receiveBuffer, receiveBuffer->getNextExpectedSequenceNumber());
+        releaseReceiveBuffer(agreement, receiveBuffer, consecutiveFrames);
+        releasedFrames.insert(releasedFrames.end(), consecutiveFrames.begin(), consecutiveFrames.end());
     }
     else
         delete dataPacket;
-    return ReorderBuffer({});
+    return releasedFrames;
 }
 
-//
-// The recipient flushes received MSDUs from its receive buffer as described in this subclause. [...]
-//
-BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
+BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
-    // The originator shall use the Block Ack starting sequence control to signal the first MPDU in the block for
-    // which an acknowledgment is expected.
     SequenceNumberCyclic startingSequenceNumber;
     Tid tid = -1;
     if (auto basicReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
@@ -70,62 +60,41 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::processReceivedBlockAckReq
     }
     auto id = std::make_pair(tid, blockAckReq->getTransmitterAddress());
     auto it = receiveBuffers.find(id);
-    if (it != receiveBuffers.end()) {
-        ReceiveBuffer *receiveBuffer = it->second;
-        // MPDUs in the recipient’s buffer with a sequence control value that
-        // precedes the starting sequence control value are called preceding MPDUs.
-        // The recipient shall reassemble any complete MSDUs from buffered preceding
-        // MPDUs and indicate these to its higher layer.
-        auto completePrecedingMpdus = collectCompletePrecedingMpdus(receiveBuffer, startingSequenceNumber);
-        // Upon arrival of a BlockAckReq frame, the recipient shall pass up the MSDUs and A-MSDUs starting with
-        // the starting sequence number sequentially until there is an incomplete or missing MSDU
-        // or A-MSDU in the buffer.
-        auto consecutiveCompleteFollowingMpdus = collectConsecutiveCompleteFollowingMpdus(receiveBuffer, startingSequenceNumber);
-        // If no MSDUs or A-MSDUs are passed up to the next MAC process after the receipt
-        // of the BlockAckReq frame and the starting sequence number of the BlockAckReq frame is newer than the
-        // NextExpectedSequenceNumber for that Block Ack agreement, then the NextExpectedSequenceNumber for
-        // that Block Ack agreement is set to the sequence number of the BlockAckReq frame.
-        int numOfMsdusToPassUp = completePrecedingMpdus.size() + consecutiveCompleteFollowingMpdus.size();
-        if (numOfMsdusToPassUp == 0 && receiveBuffer->getNextExpectedSequenceNumber() < startingSequenceNumber)
-            receiveBuffer->setNextExpectedSequenceNumber(startingSequenceNumber);
-        // The recipient shall then release any buffers held by preceding MPDUs.
-        releaseReceiveBuffer(agreement, receiveBuffer, completePrecedingMpdus);
-        releaseReceiveBuffer(agreement, receiveBuffer, consecutiveCompleteFollowingMpdus);
-        // The recipient shall pass MSDUs and A-MSDUs up to the next MAC process in order of increasing sequence
-        // number.
-        completePrecedingMpdus.insert(consecutiveCompleteFollowingMpdus.begin(), consecutiveCompleteFollowingMpdus.end());
-        return completePrecedingMpdus;
-    }
-    return ReorderBuffer();
+    if (it == receiveBuffers.end())
+        return ReleasedFrames();
+    ReceiveBuffer *receiveBuffer = it->second;
+    // IEEE Std 802.11-2024, 10.25.6.6.3.1: only a newer BAR advances the window, including an empty window.
+    if (!(receiveBuffer->getNextExpectedSequenceNumber() < startingSequenceNumber))
+        return ReleasedFrames();
+    auto releasedFrames = advanceReceiveBuffer(agreement, receiveBuffer, startingSequenceNumber);
+    auto consecutiveFrames = collectConsecutiveCompleteFollowingMpdus(receiveBuffer, startingSequenceNumber);
+    releaseReceiveBuffer(agreement, receiveBuffer, consecutiveFrames);
+    releasedFrames.insert(releasedFrames.end(), consecutiveFrames.begin(), consecutiveFrames.end());
+    return releasedFrames;
 }
 
-//
-// If a BlockAckReq frame is received, all complete MSDUs and A-MSDUs with lower sequence numbers than
-// the starting sequence number contained in the BlockAckReq frame shall be passed up to the next MAC process
-// as shown in Figure 5-1.
-//
-BlockAckReordering::ReorderBuffer BlockAckReordering::collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber)
+BlockAckReordering::ReleasedFrames BlockAckReordering::advanceReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber)
 {
-    ReorderBuffer completePrecedingMpdus;
-    const auto& buffer = receiveBuffer->getBuffer();
-    for (auto it : buffer) { // collects complete preceding MPDUs
-        auto sequenceNumber = it.first;
-        auto fragments = it.second;
-        if (SequenceNumberCyclic(sequenceNumber) < startingSequenceNumber)
-            if (isComplete(fragments))
-                completePrecedingMpdus[sequenceNumber] = fragments;
-    }
+    auto releasedFrames = collectCompletePrecedingMpdus(receiveBuffer, startingSequenceNumber);
+    releaseReceiveBuffer(agreement, receiveBuffer, releasedFrames);
+    receiveBuffer->dropFramesUntil(startingSequenceNumber);
+    receiveBuffer->setNextExpectedSequenceNumber(startingSequenceNumber);
+    return releasedFrames;
+}
+
+BlockAckReordering::ReleasedFrames BlockAckReordering::collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber)
+{
+    ReleasedFrames completePrecedingMpdus;
+    auto windowStart = receiveBuffer->getNextExpectedSequenceNumber();
+    // Numeric map order cannot preserve delivery order across 4095 -> 0.
+    for (int i = 0; i < receiveBuffer->getBufferSize() && windowStart + i < startingSequenceNumber; i++)
+        addMsduIfComplete(receiveBuffer, completePrecedingMpdus, windowStart + i);
     return completePrecedingMpdus;
 }
 
-//
-// Upon arrival of a BlockAckReq frame, the recipient shall pass up the MSDUs and A-MSDUs starting with
-// the starting sequence number sequentially until there is an incomplete or missing MSDU
-// or A-MSDU in the buffer.
-//
-BlockAckReordering::ReorderBuffer BlockAckReordering::collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber)
+BlockAckReordering::ReleasedFrames BlockAckReordering::collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber)
 {
-    ReorderBuffer framesToPassUp;
+    ReleasedFrames framesToPassUp;
     for (int i = 0; i < receiveBuffer->getBufferSize(); i++) {
         if (!addMsduIfComplete(receiveBuffer, framesToPassUp, startingSequenceNumber + i))
             return framesToPassUp;
@@ -133,23 +102,23 @@ BlockAckReordering::ReorderBuffer BlockAckReordering::collectConsecutiveComplete
     return framesToPassUp;
 }
 
-bool BlockAckReordering::addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumberCyclic seqNum)
+bool BlockAckReordering::addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReleasedFrames& releasedFrames, SequenceNumberCyclic seqNum)
 {
     const auto& buffer = receiveBuffer->getBuffer();
     auto it = buffer.find(seqNum.get());
     if (it != buffer.end()) {
         auto fragments = it->second;
         if (isComplete(fragments)) {
-            reorderBuffer[seqNum.get()] = fragments;
+            releasedFrames.push_back({seqNum.get(), fragments});
             return true;
         }
     }
     return false;
 }
 
-void BlockAckReordering::releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer)
+void BlockAckReordering::releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReleasedFrames& releasedFrames)
 {
-    for (auto it : reorderBuffer) {
+    for (const auto& it : releasedFrames) {
         auto sequenceNumber = it.first;
         passedUp(agreement, receiveBuffer, SequenceNumberCyclic(sequenceNumber));
     }

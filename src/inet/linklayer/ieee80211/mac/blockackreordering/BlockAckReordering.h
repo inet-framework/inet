@@ -25,27 +25,35 @@ class INET_API BlockAckReordering
   public:
     typedef std::vector<Packet *> Fragments;
     typedef std::map<SequenceNumber, Fragments> ReorderBuffer;
+    // The caller owns these complete units. Their order follows the previous window across sequence wrap.
+    typedef std::vector<std::pair<SequenceNumber, Fragments>> ReleasedFrames;
 
   protected:
     std::map<std::pair<Tid, MacAddress>, ReceiveBuffer *> receiveBuffers;
 
   protected:
-    ReorderBuffer collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
-    ReorderBuffer collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
+    ReleasedFrames collectCompletePrecedingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
+    ReleasedFrames collectConsecutiveCompleteFollowingMpdus(ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
 
+    // Compatibility lookup for external subclasses. The returned fragments remain owned by the buffer.
+    // Production delivery uses ReleasedFrames. This helper remains available for one release of deprecation.
+    [[deprecated("Use the ordered ReleasedFrames result from the public DATA or BAR method.")]]
     std::vector<Packet *> getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer);
     bool isComplete(const Fragments& fragments);
     void passedUp(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic sequenceNumber);
-    void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReorderBuffer& reorderBuffer);
+    void releaseReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, const ReleasedFrames& releasedFrames);
     ReceiveBuffer *createReceiveBufferIfNecessary(RecipientBlockAckAgreement *agreement);
-    bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReorderBuffer& reorderBuffer, SequenceNumberCyclic seqNum);
+    bool addMsduIfComplete(ReceiveBuffer *receiveBuffer, ReleasedFrames& releasedFrames, SequenceNumberCyclic seqNum);
+
+  private:
+    ReleasedFrames advanceReceiveBuffer(RecipientBlockAckAgreement *agreement, ReceiveBuffer *receiveBuffer, SequenceNumberCyclic startingSequenceNumber);
 
   public:
     virtual ~BlockAckReordering();
 
     void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
-    ReorderBuffer processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
-    ReorderBuffer processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
+    ReleasedFrames processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
+    ReleasedFrames processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
 
 } /* namespace ieee80211 */
