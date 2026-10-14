@@ -23,7 +23,14 @@ Rfc6582Recovery::Rfc6582Recovery(TcpStateVariables *state, TcpConnection *conn) 
     //      set to the initial send sequence number."
     // The connection creates the recovery when it is established, after it
     // has chosen the initial send sequence number.
-    this->state->recover = this->state->iss;
+    // Step 2 asks for an ACK that covers more than recover, and an ACK of the
+    // SYN alone covers the ISS and no more: with recover at the ISS, a loss of
+    // the first data segment would wait for the RTO. recover starts one below
+    // the ISS, where nothing was sent, as FreeBSD, which keeps it as the next
+    // sequence number (snd_recover) and starts it at the ISS; Linux has no such
+    // check outside a recovery. ackProcessed() of TcpNewReno gives the same
+    // value, snd_una - 2, after each ACK.
+    this->state->recover = this->state->iss - 1;
 }
 
 bool Rfc6582Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloadLength)

@@ -1,0 +1,57 @@
+%description:
+Tests the fast retransmit of NewReno without SACK (RFC 6582) when the first
+data segment is lost. RFC 6582 starts "recover" at the initial send sequence
+number, and step 2 enters fast retransmit only when the ACK covers more than
+"recover". The duplicate ACKs of the first segment acknowledge only the SYN,
+so "recover" starts one below the ISS. A sends 4 segments at t=1, and the
+tester drops the first. At the third duplicate ACK, A retransmits it at once,
+as Linux and FreeBSD do (the packetdrill script fr-4pkt). Before the repair,
+"recover" started at the ISS, and A retransmitted the segment at the RTO, at
+t=2.001.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A3 delete"  # the first data segment
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 4000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.mss = 1000
+*.*_tcp.sackSupport = false
+*.*_tcp.timestampSupport = false
+
+%# the fast retransmit of the first segment, at the third duplicate ACK
+%contains: stdout
+[1.005 A007] A.1000 > B.2000: A 1:1001(1000) ack 501 win 65535
+%contains: stdout
+[1.008] tcpdump finished, A:7 B:5 segments
