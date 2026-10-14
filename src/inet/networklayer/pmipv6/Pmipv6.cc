@@ -371,7 +371,10 @@ void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime)
     pbu->setMobileNodeIdentifier(binding.mnIdentifier.c_str());
     pbu->setHomeNetworkPrefix(binding.homeNetworkPrefix);
     pbu->setHomeNetworkPrefixLength(binding.homeNetworkPrefixLength);
-    pbu->setHandoffIndicator(1);       // attachment over a new interface
+    // handoff state unknown: the MAG learns of an attachment from the access link alone, so it
+    // cannot tell a new interface from a handoff (RFC 5213 Section 6.9.1.1 step 4); a
+    // deregistration carries the same value (Section 6.9.1.4 step 3)
+    pbu->setHandoffIndicator(4);
     pbu->setAccessTechnologyType(4);   // IEEE 802.11 (RFC 5213 access technology type)
     pbu->setTimestampValue(0);         // ordered by sequence number in this model
     pbu->setChunkLength(MobilityHeaderSerializer::getProxyBindingUpdateLength(binding.mnIdentifier.size()));
