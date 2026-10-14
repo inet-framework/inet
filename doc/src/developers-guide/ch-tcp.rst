@@ -151,6 +151,12 @@ The :ned:`Tcp` module has the following parameters:
 - :par:`recordStats` if set to false it disables writing an excessive
   amount of output vectors
 
+The defaults of these parameters follow the RFCs. :ned:`LinuxTcp` and
+:ned:`LegacyTcp` extend :ned:`Tcp` and change only defaults:
+:ned:`LinuxTcp` sets the defaults of Linux, and :ned:`LegacyTcp` the
+defaults of :ned:`Tcp` before it took those of the RFCs. A change of a
+default of :ned:`Tcp` adds the old value to :ned:`LegacyTcp`.
+
 TCP connections
 ---------------
 

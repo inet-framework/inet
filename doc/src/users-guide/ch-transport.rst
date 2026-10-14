@@ -144,6 +144,18 @@ Values like ``"TcpVegas"`` name C++ classes. Indeed, :ned:`Tcp` can
 be extended with new congestion control schemes by implementing and
 registering them in C++.
 
+The defaults of :ned:`Tcp` follow the RFCs. Two modules extend it and
+change only defaults: :ned:`LinuxTcp` has the defaults of Linux, and
+:ned:`LegacyTcp` has the defaults that :ned:`Tcp` had before it took
+those of the RFCs. Select one as any other TCP implementation:
+
+.. code-block:: ini
+
+   **.tcp.typename = "LinuxTcp"
+
+A parameter that the ini file sets takes precedence over the defaults
+of the selected module.
+
 .. _ug:sec:transport:tcplwip:
 
 TcpLwip
