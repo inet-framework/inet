@@ -105,6 +105,22 @@ void TcpAlgorithmBase::initialize()
     state->keepalive_max_probes = conn->getTcpMain()->par("keepAliveProbeCount");
 }
 
+uint32_t TcpAlgorithmBase::getInitialWindow() const
+{
+    // initialCwnd, as the initcwnd of a Linux route, which wins over the default
+    // (tcp_init_cwnd()); else initialWindow
+    if (state->initialCwndSegments > 0)
+        return state->initialCwndSegments * state->snd_effmss;
+    switch (state->init_cwnd_mode) {
+        case 1: // RFC 3390, the upper bound of RFC 5681 section 3.1
+            return std::min(4 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)4380));
+        case 2: // RFC 6928 (IW10)
+            return std::min(10 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)14600));
+        default: // RFC 2001: one segment
+            return state->snd_effmss;
+    }
+}
+
 void TcpAlgorithmBase::established(bool active)
 {
     // RFC 6298 section 5.7: "If the timer expires awaiting the ACK of a SYN segment and
@@ -162,9 +178,9 @@ void TcpAlgorithmBase::established(bool active)
     // If the SYN or SYN/ACK is
     // lost, the initial window used by a sender after a correctly
     // transmitted SYN MUST be one segment consisting of MSS bytes."
-    if (state->increased_IW_enabled && state->syn_rexmit_count == 0) {
-        state->snd_cwnd = std::min(4 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)4380));
-        EV_DETAIL << "Enabled Increased Initial Window, CWND is set to " << state->snd_cwnd << "\n";
+    if (state->syn_rexmit_count == 0 && (state->init_cwnd_mode != 0 || state->initialCwndSegments != 0)) {
+        state->snd_cwnd = getInitialWindow();
+        EV_DETAIL << "Increased Initial Window, CWND is set to " << state->snd_cwnd << "\n";
     }
     // RFC 2001, page 3:
     // " 1.  Initialization for a given connection sets cwnd to one segment
@@ -631,8 +647,8 @@ bool TcpAlgorithmBase::sendData(bool sendCommandInvoked)
     if (!conn->isSendQueueEmpty()) { // do we have any data to send?
         if ((simTime() - state->time_last_data_sent) > state->rexmit_timeout) {
             // RFC 5681, page 11: "For the purposes of this standard, we define RW = min(IW,cwnd)."
-            if (state->increased_IW_enabled)
-                state->snd_cwnd = std::min(std::min(4 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)4380)), state->snd_cwnd);
+            if (state->init_cwnd_mode != 0 || state->initialCwndSegments != 0)
+                state->snd_cwnd = std::min(getInitialWindow(), state->snd_cwnd);
             else
                 state->snd_cwnd = state->snd_effmss;
 

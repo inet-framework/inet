@@ -193,6 +193,8 @@ struct TcpStateVariables
     bool delayed_acks_enabled = false;          // set if delayed ACK algorithm (RFC 1122) is enabled
     bool limited_transmit_enabled = false;      // set if Limited Transmit algorithm (RFC 3042) is enabled
     bool increased_IW_enabled = false;          // set if Increased Initial Window (RFC 3390) is enabled
+    int init_cwnd_mode = 0;                     // initialWindow: 0 = RFC 2001 (one segment), 1 = RFC 3390 (the bound of RFC 5681), 2 = RFC 6928 (IW10)
+    uint32_t initialCwndSegments = 0;           // initialCwnd: the initial window in segments, as a Linux route; 0: init_cwnd_mode
 
     uint32_t full_sized_segment_counter = 0;    // this counter is needed for delayed ACK
     bool adaptiveDelayedAcks = false;           // the delayed ACK of Linux (adaptiveDelayedAcks parameter)

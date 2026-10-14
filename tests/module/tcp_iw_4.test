@@ -1,0 +1,41 @@
+%description:
+Tests the conflict of the deprecated increasedIWEnabled with initialWindow =
+"rfc6928": the two ask for two different increased windows, so the simulation
+stops with an error. increasedIWEnabled with the default initialWindow selects
+"rfc3390" (tcp_iw_2).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.cli_app.sendScript="1.0 20000"
+*.cli_tcp.increasedIWEnabled = true
+*.cli_tcp.initialWindow = "rfc6928"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+Tcp: set either the deprecated increasedIWEnabled or initialWindow = "rfc6928", not both
+%#--------------------------------------------------------------------------------------------------------------

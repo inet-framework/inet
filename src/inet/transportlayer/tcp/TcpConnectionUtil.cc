@@ -1056,6 +1056,24 @@ void TcpConnection::configureStateVariables()
     state->icmpSequenceCheck = tcpMain->par("icmpSequenceCheck");
     state->limited_transmit_enabled = tcpMain->par("limitedTransmitEnabled"); // Limited Transmit algorithm (RFC 3042) enabled/disabled
     state->increased_IW_enabled = tcpMain->par("increasedIWEnabled"); // Increased Initial Window (RFC 3390) enabled/disabled
+    // initialWindow; the deprecated increasedIWEnabled selects RFC 3390, and only the
+    // other increased window, RFC 6928, conflicts with it
+    const char *initialWindow = tcpMain->par("initialWindow");
+    if (!strcmp(initialWindow, "rfc6928"))
+        state->init_cwnd_mode = 2;
+    else if (!strcmp(initialWindow, "rfc3390"))
+        state->init_cwnd_mode = 1;
+    else
+        state->init_cwnd_mode = 0;
+    if (state->increased_IW_enabled) {
+        if (state->init_cwnd_mode == 2)
+            throw cRuntimeError("Tcp: set either the deprecated increasedIWEnabled or initialWindow = \"rfc6928\", not both");
+        state->init_cwnd_mode = 1;
+    }
+    int initialCwnd = tcpMain->par("initialCwnd");
+    if (initialCwnd < 0)
+        throw cRuntimeError("initialCwnd must be 0 or more, but it is %d", initialCwnd);
+    state->initialCwndSegments = initialCwnd;
     state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
     if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss)
         state->snd_mss = maxSegSockopt; // TCP_MAXSEG of this connection, as Linux user_mss

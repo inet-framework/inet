@@ -130,6 +130,9 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     virtual void established(bool active) override;
 
+    /** The initial window (initialWindow, initialCwnd), in bytes; the restart window is at most this too (RFC 5681 section 4.1) */
+    virtual uint32_t getInitialWindow() const;
+
     virtual void connectionClosed() override;
 
     virtual void setKeepAlive(bool enabled) override;
