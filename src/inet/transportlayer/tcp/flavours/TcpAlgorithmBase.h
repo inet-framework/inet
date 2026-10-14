@@ -211,7 +211,7 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 };
 
 
-// Deprecated: TcpBaseAlg was renamed to TcpAlgorithmBase in INET 4.6, because the old name said
+// Deprecated: TcpBaseAlg was renamed to TcpAlgorithmBase after INET 4.7, because the old name said
 // what the class inherits rather than what it is -- it is the base of every TCP algorithm.
 // The alias keeps code outside this repository compiling for one release; it goes
 // away in the release after that.

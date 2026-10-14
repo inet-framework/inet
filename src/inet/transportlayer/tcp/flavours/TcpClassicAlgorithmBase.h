@@ -115,7 +115,7 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 };
 
 
-// Deprecated: TcpTahoeRenoFamily was renamed to TcpClassicAlgorithmBase in INET 4.6, because the old name said
+// Deprecated: TcpTahoeRenoFamily was renamed to TcpClassicAlgorithmBase after INET 4.7, because the old name said
 // what the class inherits rather than what it is -- it is the base of the classic loss-based algorithms.
 // The alias keeps code outside this repository compiling for one release; it goes
 // away in the release after that.
