@@ -422,4 +422,26 @@ The implementation records each step here when its commit exists: the commit, wh
 
 | Step | State | Commit | Notes and evidence |
 | --- | --- | --- | --- |
-| 1–20 | not started | — | — |
+| 1 | done | `94374d58e3` | `QueryProbe` and `QueryProbe_1.test`. The lib needs `package.ned` with `@namespace(inet)`, because the `package.ned` of an opp_test test gives the default package the namespace of the test. With a `WrrScheduler` in place of the priority scheduler, the probe stops the run at 1 s: it offers `producer1-1` and serves `producer2-0`. |
+| 2 | done | `bb4ea7600c` | `MultiFieldClassifier::classifyPacket()` uses a copy of each filter, because `matches()` keeps intermediate results in the filter. The diffserv classifiers and `MarkovClassifier` call the commit hook in their own `pushPacket()` and `pullPacket()`. Evidence: 58 queueing tests pass; 612 debug module tests pass; the fingerprint subsets equal the base (section 9.1). |
+| 3 | done | `0c6e691756` | Before the fix, `TokenBucketClassifier_2` sent all eight packets to the red consumer. |
+| 4 | done | `38349125c9` | Before the fix, `MultiTokenBucketClassifier_2` sent all eight packets to the red consumer (checked with the parent version of the two files). |
+| 5 | done | `6228f5f6b6` | The weights of the test are 1 and 3. With the weights 1 and 2, a round has 3 packets, and 4 classifications for each push (3 queries and the push) move the round as far as 1, so the test could not fail. Before the fix, all seven packets went to the second consumer. |
+| 6 | done | `3048f2e591` | An active source cannot feed a `DynamicClassifier` that has no branch, because the classifier answers `canPushSomePacket()` with no (the back-pressure defect that D-6 leaves in #1122). The tests feed it through a queue and a `PacketServer`, whose `canPushPacket()` query creates the branch (E1). Before the fix, `reverseOrder = true` made four branches for two classes, and `producer-0` and `producer-1` of different classes went through `branch[1]`. |
+| 1–6 | evidence | — | After step 6: 65 queueing tests pass; 612 debug module tests pass; the fingerprint subsets equal the base (section 9.1). |
+| 7–20 | not started | — | — |
+
+**Test lessons.** `opp_test` checks `%contains-regex` with `MULTILINE` and `DOTALL`. A `.*?` can therefore cross lines, and a long multi-line expectation that does not match backtracks for many minutes. The probe tests use one check for each consumed packet, anchored with `^`, with `[^\n]*` inside the line.
+
+### 9.1 Fingerprint evidence
+
+The subsets of section 7.2 run in debug mode with `-F tyf`. The base is commit `94374d58e3` (no source change).
+
+| Subset | Rows | Base | After step 2 | After step 6 |
+| --- | --- | --- | --- | --- |
+| `tutorials.csv` `tutorials/queueing` | 47 | 47 pass | 47 pass | 47 pass |
+| `examples.csv` (diffserv, redmarker, dctcp, netperfmeter, tcpapp, udpapp, ethernet/vlan) | 36 | 33 pass, 3 errors | the same | the same |
+| `showcases.csv` (tsn, general/diffserv) | 47 | 43 pass, 4 errors | the same | the same |
+| `ethernet.csv` | 160 | as expected | as expected | as expected |
+
+The errors are not results: the three `diffserv/simple_` VoIP rows of each csv need the `VoipStream` feature, and `tsn/gatescheduling/sat` needs `Z3GateScheduleConfigurator`. Neither is built here. So the rows that run a `WrrScheduler` behind a VoIP source are not covered locally.
