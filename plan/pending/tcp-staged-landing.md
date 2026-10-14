@@ -3084,3 +3084,26 @@ timer; the default `maxTransmissionDuration` of the radio medium is shorter than
 of 1500 bytes at 1 Mbit/s; INET has no HyStart++ (RFC 9406); RFC 9293 section 3.8.3 asks for at
 least 3 minutes of SYN retransmissions, and an active open fails after 75 s. (S20) the RFC list of
 `Tcp.ned` and the release note, which names the three modules.
+
+### S20 — `topic/tcp-modernization-docs`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | comment: the RFCs that Tcp follows, and where it departs from them | — | 48 (the rest) |
+| 2 | comment: the comments of TCP cite RFC 9293 and RFC 7323 | — | new |
+| 3 | fix: sndMax at each change of snd_max | — | new |
+| 4 | remove: the sndSeq signal, which nothing emits | — | new |
+| 5 | doc: the release note of the TCP modernization | — | 66 |
+| 6 | plan: the plan of the TCP branch, done | — | 67, 75, 83, 88, 89, 90 |
+
+Commit 48 rewrote the standards section of `Tcp.ned` for the source branch, whose defaults are
+those of Linux; on master `Tcp` has the defaults of the RFCs, and `LinuxTcp` and `LegacyTcp` the
+others (D-104), so step 1 ports each entry to the behavior and the defaults of master, with the
+scope of RFC 5961 (D-86) and the three modules. Steps 2 to 4 are the items that S17 gave S20: the
+comments that still cite RFC 793 and RFC 1323, the `sndMax` signal that misses the changes of
+`snd_max` at a FIN, at a window probe and in `sendOneNewSegment()`, and the `sndSeq` signal that is
+registered and never emitted. Commit 66 wrote the release note for the source branch; step 5 ports
+it to what master gives a user: the RFC defaults, `LegacyTcp` for the old ones, `LinuxTcp`, the
+deprecated names (commit 12 of S4), and the signals. Step 6 brings the plan of the source branch,
+which the plan commits 67 to 90 wrote, to `plan/done/`. After S20 lands, this plan moves to
+`plan/done/` too.
