@@ -1074,7 +1074,13 @@ void TcpConnection::configureStateVariables()
     if (initialCwnd < 0)
         throw cRuntimeError("initialCwnd must be 0 or more, but it is %d", initialCwnd);
     state->initialCwndSegments = initialCwnd;
-    state->snd_mss = tcpMain->par("mss"); // Maximum Segment Size (RFC 793)
+    // Maximum Segment Size (RFC 793); mss = -1 waits for the address of the peer, and
+    // until then the connection has the 536 bytes of RFC 9293 (MUST-15)
+    int mss = tcpMain->par("mss");
+    if (mss < -1)
+        throw cRuntimeError("mss must be -1 or more, but it is %d", mss);
+    mssFromAddressFamily = mss == -1;
+    state->snd_mss = mssFromAddressFamily ? 536 : mss;
     if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss)
         state->snd_mss = maxSegSockopt; // TCP_MAXSEG of this connection, as Linux user_mss
     state->advertisedMss = state->snd_mss; // our own receive limit; stays when snd_mss falls to the MSS of the peer
@@ -2718,6 +2724,23 @@ uint32_t TcpConnection::calculateEffectiveMss()
     // 10 bytes and 2 bytes of padding. The SACK option is not counted: its length
     // varies, and it is on few segments of a data sender.
     return state->snd_mss - (state->ts_enabled ? 10 + 2 : 0);
+}
+
+void TcpConnection::resolveAddressFamilyMss()
+{
+    // mss = -1, as Linux derives the MSS from the MTU of the route (tcp_mss_clamp()):
+    // the MTU of 1500 bytes less the IP header and the TCP header, before the options of
+    // the SYN are read, so that the MSS of the peer limits this value and not the other
+    // way round; TCP_MAXSEG limits it too
+    if (!mssFromAddressFamily)
+        return;
+    mssFromAddressFamily = false;
+    state->snd_mss = remoteAddr.getType() == L3Address::IPv6 ? 1440 : 1460;
+    if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss)
+        state->snd_mss = maxSegSockopt;
+    state->advertisedMss = state->snd_mss;
+    state->snd_effmss = calculateEffectiveMss();
+    EV_DETAIL << "The MSS of the address family is " << state->snd_mss << "\n";
 }
 
 uint32_t TcpConnection::getMssClamp() const

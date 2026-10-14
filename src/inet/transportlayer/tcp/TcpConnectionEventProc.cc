@@ -57,6 +57,7 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
             EV_DETAIL << "OPEN: " << localAddr << ":" << localPort << " --> " << remoteAddr << ":" << remotePort << "\n";
 
             tcpMain->addSockPair(this, localAddr, remoteAddr, localPort, remotePort);
+            resolveAddressFamilyMss();
 
             // TCP Fast Open (RFC 7413 section 4.2): with a cached cookie for the
             // server, the SYN waits for the first SEND, and carries its data

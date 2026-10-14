@@ -223,7 +223,7 @@ simple Tcp extends SimpleModule like ITcp
         bool windowScalingSupport = default(false); // Window Scale (RFC 1323) support (header option) (WS will be enabled for a connection if both endpoints support it)
         int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
         bool timestampSupport @mutable = default(false); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it). Each connection reads it at its open, so a run can change it as the host-wide sysctl net.ipv4.tcp_timestamps
-        int mss = default(536); // Maximum Segment Size (header option). Default 536 per RFC 1122.
+        int mss = default(536); // Maximum Segment Size (header option): the largest segment text that this host sends and announces. Default 536 per RFC 1122. -1: the MSS of the address family for an MTU of 1500 bytes, 1460 for IPv4 and 1440 for IPv6, when the peer is known
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
         string tcpAlgorithmClass @examples("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing

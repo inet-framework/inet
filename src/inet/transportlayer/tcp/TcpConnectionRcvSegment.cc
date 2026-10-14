@@ -1060,6 +1060,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     state->irs = tcpHeader->getSequenceNo();
     receiveQueue->init(state->rcv_nxt); // FIXME may init twice...
     selectInitialSeqNum();
+    resolveAddressFamilyMss(); // before the MSS option of the peer limits it
 
     // although not mentioned in RFC 793, seems like we have to pick up
     // initial snd_wnd from the segment here.

@@ -204,6 +204,9 @@ class INET_API TcpConnection : public SimpleModule
     // TCP_MAXSEG of this connection (TcpSocket::setMaxSeg()), also from before the open;
     // -1: the mss parameter alone
     int maxSegSockopt = -1;
+    // mss = -1: snd_mss takes the MSS of the address family when the peer is known
+    // (resolveAddressFamilyMss())
+    bool mssFromAddressFamily = false;
     // the route MTU of this connection (TcpSocket::setPathMtu()), also from before the
     // open; 0: the pathMtu parameter
     int pathMtuSockopt = 0;
@@ -575,6 +578,9 @@ class INET_API TcpConnection : public SimpleModule
      * TCP options that every segment of the established connection carries.
      */
     virtual uint32_t calculateEffectiveMss();
+
+    /** mss = -1: snd_mss and the announced MSS take the MSS of the address family of the peer, 1460 for IPv4 and 1440 for IPv6 */
+    virtual void resolveAddressFamilyMss();
 
     /** The path MTU search of RFC 4821 (mtuProbing): the MSS of the peer, limited by TCP_MAXSEG (Linux mss_clamp) */
     virtual uint32_t getMssClamp() const;
