@@ -21,6 +21,10 @@ class INET_API IPacketFilter : public virtual IPacketFlow
   public:
     /**
      * Returns true if the filter matches the given packet.
+     *
+     * This function is a query: it must not change the state of the module,
+     * and it must not draw a random number. The operations of the filter call
+     * it, and so do the queries of the filter.
      */
     virtual bool matchesPacket(const Packet *packet) const = 0;
 };

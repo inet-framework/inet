@@ -26,6 +26,9 @@ class INET_API IPassivePacketSink
      * Returns true if packets can be pushed at the given gate into the packet
      * sink.
      *
+     * This function is a query: it must not change the state of the
+     * simulation, so any number of calls in any order gives the same results.
+     *
      * The gate must be a valid gate of this module and it must support pushing
      * packets.
      */
@@ -34,6 +37,12 @@ class INET_API IPassivePacketSink
     /**
      * Returns true if the given packet can be pushed at the given gate into
      * the packet sink.
+     *
+     * This function is a query: it must not change the state of the
+     * simulation. If it returns true, then pushPacket() with the same packet
+     * at the same gate, in the same event and with no other operation between
+     * the two calls, accepts the packet on the path that this function
+     * examined.
      *
      * The packet must not be nullptr. The gate must be a valid gate of this
      * module and it must support pushing packets.

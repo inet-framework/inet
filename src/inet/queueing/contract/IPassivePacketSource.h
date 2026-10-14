@@ -26,6 +26,9 @@ class INET_API IPassivePacketSource
      * Returns true if packets can be pulled at the given gate from the packet
      * source.
      *
+     * This function is a query: it must not change the state of the
+     * simulation, so any number of calls in any order gives the same results.
+     *
      * The gate must be a valid gate of this module and it must support pulling
      * packets.
      */
@@ -35,7 +38,12 @@ class INET_API IPassivePacketSource
      * Returns the packet that can be pulled at the given gate. The returned
      * value is nullptr if there is no such packet.
      *
-     * The gate must be a valid gate of this module and it must support pushing
+     * This function is a query: it must not change the state of the
+     * simulation. If it returns a packet, then pullPacket() at the same gate,
+     * in the same event and with no other operation between the two calls,
+     * returns that packet.
+     *
+     * The gate must be a valid gate of this module and it must support pulling
      * packets.
      */
     virtual Packet *canPullPacket(const cGate *gate) const = 0;
