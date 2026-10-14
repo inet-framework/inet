@@ -48,6 +48,7 @@ void Hcf::initialize(int stage)
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         startRxTimer = new cMessage("startRxTimeout");
         inactivityTimer = new cMessage("blockAckInactivityTimer");
+        dataLifetimeTimer = new cMessage("dataLifetimeTimer");
         edca = check_and_cast<Edca *>(getSubmodule("edca"));
         hcca = check_and_cast<Hcca *>(getSubmodule("hcca"));
         tx = check_and_cast<ITx *>(getModuleByPath(par("txModule")));
@@ -78,8 +79,16 @@ void Hcf::initialize(int stage)
     else if (stage == INITSTAGE_LAST) {
         // Edca resolves its Edcaf array at the link-layer stage. Install the
         // queue signal listeners after all child initialization has completed.
-        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+        auto lifetimeHandler = edca->getLifetimeHandler();
+        lifetimeHandler->setDeadlineChangedCallback([this]() { scheduleDataLifetimeTimer(); });
+        check_and_cast<OriginatorQosMacDataService *>(originatorDataService)->setLifetimeHandler(
+            lifetimeHandler, [this]() { expireDataFrames(); });
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
             check_and_cast<cModule *>(edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue())->subscribe(packetDroppedSignal, this);
+            auto frames = edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
+            frames->setLifetimeHandler(lifetimeHandler);
+            frames->subscribe(InProgressFrames::packetDequeuedSignal, this);
+        }
     }
 }
 
@@ -95,6 +104,93 @@ std::string Hcf::getFrameSequenceInfo() const
     return "Fs: " + history;
 }
 
+void Hcf::scheduleDataLifetimeTimer()
+{
+    Enter_Method("scheduleDataLifetimeTimer");
+    std::set<int64_t> referenced;
+    for (auto packet : getReferencedDataFrames())
+        referenced.insert(packet->getId());
+    auto deadline = edca->getLifetimeHandler()->getEarliestDeadline(referenced);
+    if (deadline != SIMTIME_MAX)
+        deadline = std::max(simTime(), deadline);
+    if (dataLifetimeTimer->isScheduled() && dataLifetimeTimer->getArrivalTime() == deadline)
+        return;
+    cancelEvent(dataLifetimeTimer);
+    if (deadline != SIMTIME_MAX)
+        scheduleAt(deadline, dataLifetimeTimer);
+}
+
+std::set<const Packet *> Hcf::getReferencedDataFrames() const
+{
+    std::set<const Packet *> frames;
+    if (frameSequenceHandler->isSequenceRunning()) {
+        auto context = frameSequenceHandler->getContext();
+        for (int i = 0; i < context->getNumSteps(); i++) {
+            auto step = context->getStep(i);
+            if (auto transmit = dynamic_cast<ITransmitStep *>(step))
+                frames.insert(transmit->getFrameToTransmit());
+            if (auto rts = dynamic_cast<RtsTransmitStep *>(step))
+                frames.insert(rts->getProtectedFrame());
+        }
+    }
+    return frames;
+}
+
+void Hcf::expireDataFrames(bool preserveSequence)
+{
+    Enter_Method("expireDataFrames");
+    auto handler = edca->getLifetimeHandler();
+    if (handler->getNumFrames() == 0)
+        return;
+    if (dataLifetimeTimer->isScheduled() && dataLifetimeTimer->getArrivalTime() > simTime()) {
+        if (preserveSequence)
+            return;
+        bool expiredReference = false;
+        for (auto packet : getReferencedDataFrames())
+            expiredReference |= handler->isExpired(packet);
+        // A safe boundary needs a queue scan only if it resolves expired referenced DATA.
+        if (!expiredReference)
+            return;
+    }
+    std::set<int64_t> referenced;
+    if (preserveSequence) {
+        for (auto packet : getReferencedDataFrames())
+            referenced.insert(packet->getId());
+    }
+    for (auto id : handler->getExpiredFrameIds(referenced)) {
+        auto packet = handler->findFrame(id);
+        // A drop notification can retire another due frame through its queue owner.
+        if (packet == nullptr)
+            continue;
+        auto header = packet->peekAtFront<Ieee80211DataHeader>();
+        auto edcaf = edca->getEdcaf(edca->classifyFrame(header));
+        auto frames = edcaf->getInProgressFrames();
+        bool inProgress = frames->containsFrame(packet);
+        if (inProgress) {
+            edcaf->getAckHandler()->dropFrame(header);
+            edcaf->getRecoveryProcedure()->dropFrame(header);
+            frames->dropFrame(packet);
+        }
+        else {
+            edcaf->getPendingQueue()->removePacket(packet);
+            take(packet);
+            handler->forgetFrame(packet->getId());
+        }
+        PacketDropDetails details;
+        details.setReason(LIFETIME_EXPIRED);
+        emit(packetDroppedSignal, packet, &details);
+        if (!inProgress)
+            delete packet;
+    }
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        auto frames = edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
+        if (!frameSequenceHandler->isSequenceRunning() ||
+            frameSequenceHandler->getContext()->getInProgressFrames() != frames)
+            frames->clearDroppedFrames();
+    }
+    scheduleDataLifetimeTimer();
+}
+
 void Hcf::forEachChild(cVisitor *v)
 {
     SimpleModule::forEachChild(v);
@@ -104,7 +200,9 @@ void Hcf::forEachChild(cVisitor *v)
 
 void Hcf::handleMessage(cMessage *msg)
 {
-    if (msg == startRxTimer) {
+    if (msg == dataLifetimeTimer)
+        expireDataFrames();
+    else if (msg == startRxTimer) {
         if (!isReceptionInProgress()) {
             frameSequenceHandler->handleStartRxTimeout();
         }
@@ -154,6 +252,8 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         throw cRuntimeError("Unknown message type");
     EV_INFO << "The upper frame has been classified as a " << printAccessCategory(ac) << " frame." << endl;
     auto pendingQueue = edca->getEdcaf(ac)->getPendingQueue();
+    if (header->getType() == ST_DATA_WITH_QOS)
+        edca->getLifetimeHandler()->registerFrame(packet, ac);
     pendingQueue->enqueuePacket(packet);
     if (!pendingQueue->isEmpty()) {
         auto edcaf = edca->getChannelOwner();
@@ -166,9 +266,14 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
 
 void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
-    if (signalID == packetDroppedSignal) {
+    if (signalID == InProgressFrames::packetDequeuedSignal) {
+        Enter_Method("packetDequeued");
+        edca->getLifetimeHandler()->forgetFrame(check_and_cast<Packet *>(obj)->getId());
+    }
+    else if (signalID == packetDroppedSignal) {
         Enter_Method("%s", cComponent::getSignalName(signalID));
         auto packet = check_and_cast<Packet *>(obj);
+        edca->getLifetimeHandler()->forgetFrame(packet->getId());
         if (packet->findTag<Ieee80211MgmtTransactionTag>() != nullptr) {
             FrameTransmissionDetails transmissionDetails;
             transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_DROPPED_BEFORE_TRANSMISSION);
@@ -242,6 +347,13 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
             handleInternalCollision(internallyCollidedEdcafs);
             emit(edcaCollisionDetectedSignal, (unsigned long)internallyCollidedEdcafs.size());
         }
+        // DATA can expire while the EDCAF waits for its previously requested grant.
+        if (!hasFrameToTransmit(ac)) {
+            edcaf->releaseChannel(this);
+            edcaf->getTxopProcedure()->endTxop();
+            mac->sendDownPendingRadioConfigMsg();
+            return;
+        }
         // Preserve same-time collision accounting before the shared contention gate changes.
         rx->setContentionBlocked(true);
         startFrameSequence(ac);
@@ -274,6 +386,8 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
         AccessCategory ac = edcaf->getAccessCategory();
         auto dataRecoveryProcedure = edcaf->getRecoveryProcedure();
         Packet *internallyCollidedFrame = edcaf->getInProgressFrames()->getFrameToTransmit();
+        if (internallyCollidedFrame == nullptr)
+            continue;
         auto internallyCollidedHeader = internallyCollidedFrame->peekAtFront<Ieee80211DataOrMgmtHeader>();
         EV_INFO << printAccessCategory(ac) << " (" << internallyCollidedFrame->getName() << ")" << endl;
         bool retryLimitReached = false;
@@ -326,6 +440,8 @@ void Hcf::frameSequenceFinished()
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
+        // The context still owns references. dropFrame defers deletion until context disposal.
+        expireDataFrames(false);
         bool startContention = hasFrameToTransmit(); // TODO outstanding frame
         edcaf->releaseChannel(this);
         mac->sendDownPendingRadioConfigMsg(); // TODO review
@@ -716,6 +832,7 @@ void Hcf::originatorProcessReceivedDataFrame(const Ptr<const Ieee80211DataHeader
 
 bool Hcf::hasFrameToTransmit(AccessCategory ac)
 {
+    expireDataFrames();
     auto edcaf = edca->getEdcaf(ac);
     if (edcaf)
         return !edcaf->getPendingQueue()->isEmpty() || edcaf->getInProgressFrames()->hasInProgressFrames();
@@ -725,6 +842,7 @@ bool Hcf::hasFrameToTransmit(AccessCategory ac)
 
 bool Hcf::hasFrameToTransmit()
 {
+    expireDataFrames();
     auto edcaf = edca->getChannelOwner();
     if (edcaf)
         return !edcaf->getPendingQueue()->isEmpty() || edcaf->getInProgressFrames()->hasInProgressFrames();
@@ -856,6 +974,13 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
     Enter_Method("transmitFrame");
     auto channelOwner = edca->getChannelOwner();
     if (channelOwner) {
+        auto lifetimeHandler = edca->getLifetimeHandler();
+        auto step = frameSequenceHandler->getContext()->getLastStep();
+        auto protectedPacket = dynamic_cast<RtsTransmitStep *>(step);
+        auto data = protectedPacket ? protectedPacket->getProtectedFrame() : packet;
+        // IEEE Std 802.11-2024, 10.23.2.12.1: a delayed start cannot exceed DATA lifetime.
+        if (lifetimeHandler->isExpired(data, simTime() + ifs))
+            return false;
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         auto txop = channelOwner->getTxopProcedure();
         auto context = frameSequenceHandler->getContext();
@@ -1042,6 +1167,7 @@ void Hcf::corruptedFrameReceived()
 
 Hcf::~Hcf()
 {
+    cancelAndDelete(dataLifetimeTimer);
     cancelAndDelete(startRxTimer);
     cancelAndDelete(inactivityTimer);
     delete recipientAckProcedure;

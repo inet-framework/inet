@@ -111,7 +111,15 @@ IFrameSequenceStep *DataFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            Packet *packet = nullptr;
+            if (context->getQoSContext() && dynamic_cast<IReceiveStep *>(context->getLastStep())) {
+                if (auto rts = dynamic_cast<RtsTransmitStep *>(context->getStepBeforeLast()))
+                    packet = const_cast<Packet *>(rts->getProtectedFrame());
+            }
+            // RTS/CTS retains its selected DATA even if its lifetime expires during protection.
+            // HCF rejects the next submission before Tx accepts that expired DATA.
+            if (packet == nullptr)
+                packet = context->getInProgressFrames()->getFrameToTransmit();
             return new TransmitStep(packet, context->getIfs());
         }
         case 1:

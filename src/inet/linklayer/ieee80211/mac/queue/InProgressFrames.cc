@@ -49,19 +49,25 @@ void InProgressFrames::forEachChild(cVisitor *v)
 bool InProgressFrames::hasEligibleFrameToTransmit()
 {
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if (isEligibleToTransmit(frame))
             return true;
     }
     return false;
 }
 
+bool InProgressFrames::containsFrame(const Packet *packet) const
+{
+    return std::find(inProgressFrames.begin(), inProgressFrames.end(), packet) != inProgressFrames.end();
+}
+
+bool InProgressFrames::isEligibleToTransmit(Packet *packet)
+{
+    return (!lifetimeHandler || !lifetimeHandler->isExpired(packet)) &&
+        ackHandler->isEligibleToTransmit(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
+}
+
 void InProgressFrames::ensureHasFrameToTransmit()
 {
-//    TODO delete old frames from inProgressFrames
-//    if (auto dataFrame = dynamic_cast<Ieee80211DataHeader*>(frame)) {
-//        if (transmitLifetimeHandler->isLifetimeExpired(dataFrame))
-//            return frame;
-//    }
     if (!hasEligibleFrameToTransmit()) {
         auto frames = dataService->extractFramesToTransmit(pendingQueue);
         if (frames) {
@@ -82,7 +88,7 @@ Packet *InProgressFrames::getFrameToTransmit()
 {
     ensureHasFrameToTransmit();
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if (isEligibleToTransmit(frame))
             return frame;
     }
     return nullptr;
@@ -95,7 +101,7 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
         return frameToTransmit;
     else {
         for (auto frame : inProgressFrames) {
-            if (ackHandler->isEligibleToTransmit(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()) && frameToTransmit != frame)
+            if (isEligibleToTransmit(frame) && frameToTransmit != frame)
                 return frame;
         }
         auto frames = dataService->extractFramesToTransmit(pendingQueue);

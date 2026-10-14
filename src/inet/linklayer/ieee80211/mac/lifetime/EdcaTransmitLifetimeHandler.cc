@@ -12,44 +12,104 @@ namespace ieee80211 {
 
 EdcaTransmitLifetimeHandler::EdcaTransmitLifetimeHandler(simtime_t bkLifetime, simtime_t beLifetime, simtime_t viLifetime, simtime_t voLifetime)
 {
-    msduLifetime[0] = bkLifetime;
-    msduLifetime[1] = beLifetime;
-    msduLifetime[2] = viLifetime;
-    msduLifetime[3] = voLifetime;
+    msduLifetime[AC_BK] = bkLifetime;
+    msduLifetime[AC_BE] = beLifetime;
+    msduLifetime[AC_VI] = viLifetime;
+    msduLifetime[AC_VO] = voLifetime;
 }
 
-void EdcaTransmitLifetimeHandler::frameGotInProgess(const Ptr<const Ieee80211DataHeader>& header)
+void EdcaTransmitLifetimeHandler::setDeadlineChangedCallback(std::function<void()> callback)
 {
-    if (header->getFragmentNumber() == 0)
-        lifetimes[header->getSequenceNumber().get()] = simTime();
+    deadlineChanged = callback;
 }
 
-void EdcaTransmitLifetimeHandler::frameTransmitted(const Ptr<const Ieee80211DataHeader>& header)
+void EdcaTransmitLifetimeHandler::addDeadline(Packet *packet, simtime_t deadline)
 {
-    // don't care
+    auto packetId = packet->getId();
+    auto inserted = deadlines.emplace(deadline, packetId);
+    if (!inserted.second || !frames.emplace(packetId, FrameLifetime{inserted.first, packet}).second)
+        throw cRuntimeError("Duplicate DATA lifetime identity");
 }
 
-bool EdcaTransmitLifetimeHandler::isLifetimeExpired(const Ptr<const Ieee80211DataHeader>& header)
+bool EdcaTransmitLifetimeHandler::eraseDeadline(int64_t packetId)
 {
-    ASSERT(header->getType() == ST_DATA_WITH_QOS);
-    AccessCategory ac = mapTidToAc(header->getTid());
-    auto it = lifetimes.find(header->getSequenceNumber().get());
-    if (it == lifetimes.end())
-        throw cRuntimeError("There is no lifetime entry for frame = %s", header->getName());
-    return (simTime() - it->second) >= msduLifetime[ac];
+    auto it = frames.find(packetId);
+    if (it == frames.end())
+        return false;
+    deadlines.erase(it->second.deadline);
+    frames.erase(it);
+    return true;
 }
 
-// TODO Copy!!!!!!
-AccessCategory EdcaTransmitLifetimeHandler::mapTidToAc(int tid)
+void EdcaTransmitLifetimeHandler::registerFrame(Packet *packet, AccessCategory ac)
 {
-    // standard static mapping (see "UP-to-AC mappings" table in the 802.11 spec.)
-    switch (tid) {
-        case 1: case 2: return AC_BK;
-        case 0: case 3: return AC_BE;
-        case 4: case 5: return AC_VI;
-        case 6: case 7: return AC_VO;
-        default: throw cRuntimeError("No mapping from TID=%d to AccessCategory (must be in the range 0..7)", tid);
+    // IEEE Std 802.11-2024, 10.23.2.12.1: start at MAC acceptance or the latest A-MSDU addition.
+    addDeadline(packet, simTime() + msduLifetime[ac]);
+    if (deadlineChanged)
+        deadlineChanged();
+}
+
+void EdcaTransmitLifetimeHandler::forgetFrame(int64_t packetId)
+{
+    if (eraseDeadline(packetId) && deadlineChanged)
+        deadlineChanged();
+}
+
+void EdcaTransmitLifetimeHandler::prepareFrameReplacement(const std::vector<int64_t>& sourceIds)
+{
+    for (auto id : sourceIds) {
+        if (!eraseDeadline(id))
+            throw cRuntimeError("Frame replacement source has no DATA lifetime entry");
     }
+    // Retain timer order until the synchronous builder registers its replacement.
+}
+
+void EdcaTransmitLifetimeHandler::registerFragments(const std::vector<Packet *>& fragments, simtime_t deadline)
+{
+    // IEEE Std 802.11-2024, 10.23.2.12.1: undelivered fragments retain the MSDU timer.
+    for (auto fragment : fragments)
+        addDeadline(fragment, deadline);
+    if (deadlineChanged)
+        deadlineChanged();
+}
+
+simtime_t EdcaTransmitLifetimeHandler::getDeadline(const Packet *packet) const
+{
+    auto it = frames.find(packet->getId());
+    return it == frames.end() ? SIMTIME_MAX : it->second.deadline->first;
+}
+
+bool EdcaTransmitLifetimeHandler::isExpired(const Packet *packet, simtime_t time) const
+{
+    return getDeadline(packet) <= time;
+}
+
+simtime_t EdcaTransmitLifetimeHandler::getEarliestDeadline(const std::set<int64_t>& referencedFrames) const
+{
+    for (const auto& entry : deadlines) {
+        // An accepted exchange can retain expired DATA until its safe boundary.
+        if (entry.first > simTime() || referencedFrames.count(entry.second) == 0)
+            return entry.first;
+    }
+    return SIMTIME_MAX;
+}
+
+std::vector<int64_t> EdcaTransmitLifetimeHandler::getExpiredFrameIds(const std::set<int64_t>& referencedFrames) const
+{
+    std::vector<int64_t> expired;
+    for (const auto& entry : deadlines) {
+        if (entry.first > simTime())
+            break;
+        if (referencedFrames.count(entry.second) == 0)
+            expired.push_back(entry.second);
+    }
+    return expired;
+}
+
+Packet *EdcaTransmitLifetimeHandler::findFrame(int64_t packetId) const
+{
+    auto it = frames.find(packetId);
+    return it == frames.end() ? nullptr : it->second.packet;
 }
 
 } /* namespace ieee80211 */

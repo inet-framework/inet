@@ -1,0 +1,376 @@
+%description:
+Check QoS DATA lifetime through production HCF with either Block Ack switch value.
+Hold channel access beyond the default deadline.
+
+%extraargs: -r 0..18
+
+%file: EdcaDataLifetime.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+
+namespace inet::ieee80211 {
+class LifetimeHcf : public Hcf {
+  protected:
+    void sendUp(const std::vector<Packet *>& frames) override {
+        delivered += frames.size();
+        for (auto packet : frames)
+            delete packet;
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        bool data = packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_DATA_WITH_QOS;
+        if (data)
+            ifs += SimTime(par("testIfs").doubleValue());
+        auto accepted = Hcf::transmitFrame(packet, ifs);
+        if (accepted && data)
+            acceptedData++;
+        if (accepted && data && packet->peekAtFront<Ieee80211DataHeader>()->getRetry())
+            retriedData++;
+        return accepted;
+    }
+    void originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *last, const Ptr<const Ieee80211MacHeader>& lastHeader, AccessCategory ac) override {
+        if (header->getType() == ST_ACK)
+            acknowledged++;
+        Hcf::originatorProcessReceivedControlFrame(packet, header, last, lastHeader, ac);
+    }
+  public:
+    int acceptedData = 0;
+    int acknowledged = 0;
+    int delivered = 0;
+    int retriedData = 0;
+};
+Define_Module(LifetimeHcf);
+
+class EdcaDataLifetimeTest : public cSimpleModule, public cListener {
+    LifetimeHcf *hcf = nullptr;
+    Edca *edca = nullptr;
+    std::map<int64_t, simtime_t> acceptedAt;
+    int lifetimeDrops = 0;
+    int otherDrops = 0;
+
+  public:
+    Packet *accept(const char *name, const char *peer = "02:00:00:00:00:02", int bytes = 100) {
+        Enter_Method("accept");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(0);
+        header->setSequenceNumber(SequenceNumberCyclic(0));
+        header->setReceiverAddress(MacAddress(peer));
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+        header->setAddress3(header->getReceiverAddress());
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(bytes)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        acceptedAt[packet->getId()] = simTime();
+        hcf->processUpperFrame(packet, header);
+        return packet;
+    }
+  protected:
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *details) override {
+        auto packet = check_and_cast<Packet *>(object);
+        auto drop = check_and_cast<PacketDropDetails *>(details);
+        if (drop->getReason() == LIFETIME_EXPIRED) {
+            lifetimeDrops++;
+            auto it = acceptedAt.find(packet->getId());
+            if (it != acceptedAt.end()) {
+                auto age = simTime() - it->second;
+                ASSERT(age >= SimTime(edca->getEdcaf(AC_BE)->par("msduLifetime").doubleValue()));
+                std::cout << "Lifetime disposal: acceptance=" << it->second << " disposal=" << simTime()
+                    << " age=" << age << " cause=LIFETIME_EXPIRED\n";
+            }
+        }
+        else
+            otherDrops++;
+    }
+  protected:
+    void activity() override {
+        auto mac = getParentModule()->getSubmodule("host")->getSubmodule("wlan", 0)->getSubmodule("mac");
+        hcf = check_and_cast<LifetimeHcf *>(mac->getSubmodule("hcf"));
+        auto rx = check_and_cast<Rx *>(mac->getSubmodule("rx"));
+        edca = check_and_cast<Edca *>(hcf->getSubmodule("edca"));
+        auto handler = edca->getLifetimeHandler();
+        auto edcaf = edca->getEdcaf(AC_BE);
+        auto pending = edcaf->getPendingQueue();
+        auto frames = edcaf->getInProgressFrames();
+        hcf->subscribe(packetDroppedSignal, this);
+        int scenario = par("scenario");
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+            auto configured = edca->getEdcaf(static_cast<AccessCategory>(ac))->par("msduLifetime").doubleValue();
+            auto expected = scenario == 2 ? SimTime(1) : scenario == 3 ? SimTime(100) :
+                scenario == 15 ? SimTime(2, SIMTIME_MS) :
+                (scenario >= 8 && scenario <= 10) || scenario == 14 ? SimTime(100, SIMTIME_US) :
+                SimTime(512, SIMTIME_MS);
+            ASSERT(SimTime(configured) == expected);
+        }
+        auto receiverMac = getParentModule()->getSubmodule("receiver")->getSubmodule("wlan", 0)->getSubmodule("mac");
+        auto receiverEdca = check_and_cast<Edca *>(receiverMac->getSubmodule("hcf")->getSubmodule("edca"));
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
+            ASSERT(SimTime(receiverEdca->getEdcaf(static_cast<AccessCategory>(ac))->par("msduLifetime").doubleValue()) ==
+                SimTime(512, SIMTIME_MS));
+        rx->setContentionBlocked(true);
+        if (scenario <= 3 || scenario == 12) {
+            for (int i = 0; i < 20; i++)
+                accept("queued-data");
+            wait(SimTime(511, SIMTIME_MS));
+            ASSERT(pending->getNumPackets() == (scenario == 12 ? 1 : 20));
+            wait(SimTime(2, SIMTIME_MS));
+            ASSERT(pending->getNumPackets() == (scenario == 2 || scenario == 3 ? 20 : 0));
+            wait(SimTime(187, SIMTIME_MS));
+            ASSERT(pending->getNumPackets() == (scenario == 2 || scenario == 3 ? 20 : 0));
+            ASSERT(hcf->acceptedData == 0);
+            if (scenario == 2) {
+                wait(SimTime(301, SIMTIME_MS));
+                ASSERT(pending->getNumPackets() == 0);
+            }
+            if (scenario == 3) {
+                wait(SimTime(9300, SIMTIME_MS));
+                ASSERT(pending->getNumPackets() == 20);
+                ASSERT(lifetimeDrops == 0);
+            }
+            else {
+                ASSERT(lifetimeDrops == (scenario == 12 ? 1 : 20));
+                ASSERT(handler->getNumFrames() == 0);
+            }
+            ASSERT(otherDrops == (scenario == 12 ? 19 : 0));
+            // The old contention request must accept an empty queue without a null-frame failure.
+            rx->setContentionBlocked(false);
+            wait(SimTime(5, SIMTIME_MS));
+        }
+        else if (scenario == 4 || scenario == 5 || scenario == 6 || scenario == 13 || scenario == 16) {
+            auto first = accept("first", "02:00:00:00:00:02", scenario == 6 ? 300 : 100);
+            ASSERT(handler->getDeadline(first) == SimTime(512, SIMTIME_MS));
+            wait(SimTime(400, SIMTIME_MS));
+            auto second = accept("second", scenario == 4 || scenario == 13 || scenario == 16 ?
+                "02:00:00:00:00:03" : "02:00:00:00:00:02");
+            auto secondId = second->getId();
+            ASSERT(first->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() ==
+                second->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber());
+            if (scenario == 5 || scenario == 6 || scenario == 13 || scenario == 16) {
+                auto selected = frames->getFrameToTransmit();
+                if (scenario == 16) {
+                    auto next = frames->getPendingFrameFor(selected);
+                    auto nextHeader = next->peekAtFront<Ieee80211DataHeader>();
+                    ASSERT(selected->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() ==
+                        nextHeader->getSequenceNumber());
+                    edcaf->getRecoveryProcedure()->dataFrameTransmissionFailed(next, nextHeader);
+                    ASSERT(edcaf->getRecoveryProcedure()->getRetryCount(next, nextHeader) == 1);
+                }
+                if (scenario == 5) {
+                    ASSERT(selected->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent());
+                    ASSERT(handler->getDeadline(selected) == SimTime(912, SIMTIME_MS));
+                    ASSERT(handler->getNumFrames() == 1);
+                }
+                if (scenario == 6) {
+                    ASSERT(frames->getLength() > 1);
+                    for (int i = 0; i < frames->getLength(); i++)
+                        ASSERT(handler->getDeadline(frames->getFrames(i)) == SimTime(512, SIMTIME_MS));
+                }
+                if (scenario == 13) {
+                    auto header = selected->peekAtFront<Ieee80211DataHeader>();
+                    edcaf->getAckHandler()->dropFrame(header);
+                    frames->dropFrame(selected);
+                    frames->clearDroppedFrames();
+                    ASSERT(handler->getNumFrames() == 1);
+                    ASSERT(handler->getDeadline(second) == SimTime(912, SIMTIME_MS));
+                }
+            }
+            wait(SimTime(113, SIMTIME_MS));
+            if (scenario == 16) {
+                ASSERT(pending->isEmpty());
+                ASSERT(frames->getLength() == 1);
+                auto remaining = frames->getFrames(0);
+                ASSERT(remaining->getId() == secondId);
+                ASSERT(handler->getNumFrames() == 1);
+                ASSERT(edcaf->getRecoveryProcedure()->getRetryCount(remaining,
+                    remaining->peekAtFront<Ieee80211DataHeader>()) == 1);
+            }
+            else if (scenario == 4 || scenario == 6 || scenario == 13) {
+                ASSERT(pending->getNumPackets() == 1);
+                ASSERT(pending->getPacket(0)->getId() == secondId);
+                ASSERT(handler->getNumFrames() == 1);
+                if (scenario != 13)
+                    ASSERT(lifetimeDrops > 0);
+            }
+            else {
+                ASSERT(frames->getLength() == 1);
+                ASSERT(lifetimeDrops == 0);
+            }
+            wait(SimTime(400, SIMTIME_MS));
+            ASSERT(handler->getNumFrames() == 0);
+            ASSERT(pending->isEmpty());
+            ASSERT(frames->getLength() == 0);
+        }
+        else if (scenario == 18) {
+            accept("large-data", "02:00:00:00:00:02", 300);
+            auto selected = frames->getFrameToTransmit();
+            auto header = selected->peekAtFront<Ieee80211DataHeader>();
+            auto recovery = edcaf->getRecoveryProcedure();
+            recovery->rtsFrameTransmissionFailed(header);
+            recovery->dataFrameTransmissionFailed(selected, header);
+            ASSERT(recovery->getRetryCount(selected, header) == 1);
+            wait(SimTime(513, SIMTIME_MS));
+            ASSERT(handler->getNumFrames() == 0);
+            ASSERT(frames->getLength() == 0);
+            for (int length : {10, 300}) {
+                Packet probe("resolved-retry-state", header);
+                probe.insertAtBack(makeShared<ByteCountChunk>(B(length)));
+                bool absent = false;
+                try {
+                    recovery->getRetryCount(&probe, header);
+                }
+                catch (const cRuntimeError& error) {
+                    absent = std::string(error.what()).find("retry counter entry doesn't exist") != std::string::npos;
+                }
+                ASSERT(absent);
+            }
+        }
+        else if (scenario == 17) {
+            accept("due-before-arrival");
+            wait(SimTime(513, SIMTIME_MS));
+            ASSERT(lifetimeDrops == 1);
+            ASSERT(pending->getNumPackets() == 1);
+            ASSERT(std::string(pending->getPacket(0)->getName()) == "same-time-arrival");
+            ASSERT(handler->getDeadline(pending->getPacket(0)) == SimTime(1024, SIMTIME_MS));
+            wait(SimTime(512, SIMTIME_MS));
+            ASSERT(lifetimeDrops == 2);
+            ASSERT(handler->getNumFrames() == 0);
+        }
+        else if (scenario == 7) {
+            accept("expired-input");
+            wait(SimTime(600, SIMTIME_MS));
+            ASSERT(pending->isEmpty());
+            accept("new-first");
+            accept("new-second");
+            auto aggregate = frames->getFrameToTransmit();
+            ASSERT(std::string(aggregate->getName()) == "new-first+new-second");
+            ASSERT(handler->getDeadline(aggregate) == SimTime(1112, SIMTIME_MS));
+            wait(SimTime(513, SIMTIME_MS));
+            ASSERT(handler->getNumFrames() == 0);
+        }
+        else {
+            accept("exchange", scenario == 9 || scenario == 15 ? "02:00:00:00:00:03" : "02:00:00:00:00:02");
+            rx->setContentionBlocked(false);
+            if (scenario == 8 || scenario == 9) {
+                wait(SimTime(101, SIMTIME_US));
+                ASSERT(hcf->acceptedData == 1);
+                ASSERT(frames->getLength() == 1);
+                ASSERT(handler->getNumFrames() == 1);
+                ASSERT(lifetimeDrops == 0);
+            }
+            wait(SimTime(5, SIMTIME_MS));
+            ASSERT(handler->getNumFrames() == 0);
+            ASSERT(frames->getLength() == 0);
+            if (scenario == 15) {
+                ASSERT(hcf->acceptedData > 1);
+                ASSERT(hcf->retriedData > 0);
+                ASSERT(hcf->acknowledged == 0);
+                ASSERT(lifetimeDrops == 1);
+                ASSERT(otherDrops == 0);
+            }
+            else {
+                ASSERT(hcf->acceptedData == (scenario == 10 || scenario == 14 ? 0 : 1));
+                ASSERT(hcf->acknowledged == (scenario == 9 || scenario == 10 || scenario == 14 ? 0 : 1));
+                ASSERT(lifetimeDrops == (scenario == 9 || scenario == 10 || scenario == 14 ? 1 : 0));
+            }
+        }
+        hcf->unsubscribe(packetDroppedSignal, this);
+        std::cout << "QoS DATA lifetime scenario " << scenario << " passed.\n";
+    }
+  public:
+    EdcaDataLifetimeTest() : cSimpleModule(65536) {}
+};
+Define_Module(EdcaDataLifetimeTest);
+
+class LifetimeArrival : public cSimpleModule {
+  protected:
+    void initialize() override {
+        if (par("scenario").intValue() == 17)
+            scheduleAt(SimTime(512, SIMTIME_MS), new cMessage("arrivalAtDeadline"));
+    }
+    void handleMessage(cMessage *message) override {
+        auto test = check_and_cast<EdcaDataLifetimeTest *>(getParentModule()->getSubmodule("test"));
+        test->accept("same-time-arrival");
+        delete message;
+    }
+};
+Define_Module(LifetimeArrival);
+}
+
+%file: EdcaDataLifetimeNetwork.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple EdcaDataLifetimeTest extends SimpleModule {
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::EdcaDataLifetimeTest);
+}
+simple LifetimeArrival extends SimpleModule {
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::LifetimeArrival);
+}
+module LifetimeHcf extends Hcf {
+    parameters:
+        double testIfs @unit(s) = default(0s);
+        @class(::inet::ieee80211::LifetimeHcf);
+}
+network EdcaDataLifetimeNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        receiver: WirelessHost;
+        test: EdcaDataLifetimeTest;
+        arrival: LifetimeArrival;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = EdcaDataLifetimeNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10.1s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.qosStation = true
+*.test.scenario = ${scenario=0..18}
+*.arrival.scenario = ${scenario}
+**.wlan[*].mac.hcf.typename = "LifetimeHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} == 1
+*.host.wlan[*].mac.hcf.edca.edcaf[*].msduLifetime = (${scenario} == 2 ? 1s : ${scenario} == 3 ? 100s : ${scenario} == 15 ? 2ms : (${scenario} >= 8 && ${scenario} <= 10) || ${scenario} == 14 ? 100us : 0.512s)
+*.host.wlan[*].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = ${scenario} == 15 ? 100 : 7
+*.host.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} == 14 ? 0B : ${scenario} == 18 ? 150B : 2346B
+*.host.wlan[*].mac.hcf.testIfs = ${scenario} == 10 ? 200us : 0s
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "BasicMsduAggregationPolicy"
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = ${scenario} == 5 || ${scenario} == 7 ? 2 : 1000
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = ${scenario} == 6 ? 130B : 1500B
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
+*.host.wlan[*].mac.hcf.edca.edcaf[*].pendingQueue.packetCapacity = ${scenario} == 12 ? 1 : 100
+*.host.wlan[0].address = "02:00:00:00:00:01"
+*.receiver.wlan[0].address = "02:00:00:00:00:02"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.host.mobility.initialX = 0m
+*.host.mobility.initialY = 0m
+*.receiver.mobility.initialX = 1m
+*.receiver.mobility.initialY = 0m
+
+%contains: stdout
+QoS DATA lifetime scenario 18 passed.

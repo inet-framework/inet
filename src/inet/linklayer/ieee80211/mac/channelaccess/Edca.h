@@ -37,6 +37,7 @@ class INET_API Edca : public SimpleModule
 
     virtual AccessCategory classifyFrame(const Ptr<const Ieee80211DataHeader>& header);
     virtual Edcaf *getEdcaf(AccessCategory ac) const { return edcafs[ac]; }
+    EdcaTransmitLifetimeHandler *getLifetimeHandler() const { return lifetimeHandler; }
     virtual Edcaf *getChannelOwner();
     virtual std::vector<Edcaf *> getInternallyCollidedEdcafs();
 

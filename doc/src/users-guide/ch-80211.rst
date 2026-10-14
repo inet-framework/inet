@@ -455,6 +455,14 @@ own, with its own queue, inter-frame space and contention window:
      - ``edcaf[3]``
      - 2, (aCWmin+1)/4-1, (aCWmin+1)/2-1
 
+Each access category has a positive, finite QoS DATA lifetime. The parameter ``mac.hcf.edca.edcaf[*].msduLifetime`` defaults to 0.512 seconds for AP and non-AP stations. HCF starts the timer at MAC acceptance, so queue residence counts toward the lifetime. This rule applies with Block Ack support enabled or disabled. For example, DATA that waits for channel access beyond 0.512 seconds expires under the default.
+
+HCF records lifetime disposal in ``packetDropLifetimeExpired``. These results separate lifetime disposal from queue overflow and retry-limit disposal. Each discarded MAC frame contributes to the results, including individual fragments and aggregate MPDUs. The results do not count the original source MSDUs separately. The :ned:`inet.linklayer.ieee80211.mac.coordinationfunction.Hcf` reference supplies the recorder declaration.
+
+Set ``**.mac.hcf.edca.edcaf[*].msduLifetime = 1s`` to permit a one-second lifetime. A long finite value, such as 100 seconds for a ten-second run, prevents lifetime expiration during that run. Queue loss, acknowledgment, and retry limits can still resolve DATA earlier. A large lifetime also postpones recovery paths that depend on expiration. HCF rejects zero, negative, and nonfinite values. HCF also rejects a value that rounds to zero at the simulation time resolution.
+
+A-MSDU construction restarts the aggregate timer at each MSDU addition. Fragments retain the source MSDU deadline. Retransmission and ACK-policy changes do not restart the timer. HCF checks the proposed transmission start, including its interframe space, before Tx submission. An accepted exchange can complete after expiration, but expired DATA cannot cause another attempt.
+
 The classifier submodule assigns the user priority. The default classifier
 is omitted, so every packet has priority 0 and goes to ``AC_BE``. Replace it
 to get differentiated traffic:

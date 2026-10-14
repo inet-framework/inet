@@ -1,0 +1,65 @@
+%description:
+Check the default QoS DATA lifetime at AP and non-AP stations.
+
+%file: LifetimeDefaults.cc
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
+
+namespace inet::ieee80211 {
+class LifetimeDefaultsTest : public cSimpleModule {
+  protected:
+    int numInitStages() const override { return NUM_INIT_STAGES; }
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LAST) {
+            for (int station = 0; station < 2; station++) {
+                auto host = getParentModule()->getSubmodule("host", station);
+                auto edca = check_and_cast<Edca *>(host->getSubmodule("wlan", 0)->getSubmodule("mac")
+                    ->getSubmodule("hcf")->getSubmodule("edca"));
+                for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+                    auto value = edca->getEdcaf(static_cast<AccessCategory>(ac))->par("msduLifetime").doubleValue();
+                    ASSERT(SimTime(value) == SimTime(512, SIMTIME_MS));
+                }
+            }
+            std::cout << "AP and non-AP DATA lifetime defaults are 0.512 seconds.\n";
+        }
+    }
+};
+Define_Module(LifetimeDefaultsTest);
+}
+
+%file: LifetimeDefaults.ned
+import inet.common.SimpleModule;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple LifetimeDefaultsTest extends SimpleModule {
+    parameters:
+        @class(::inet::ieee80211::LifetimeDefaultsTest);
+}
+network LifetimeDefaultsNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host[2]: WirelessHost;
+        test: LifetimeDefaultsTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = LifetimeDefaultsNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 0s
+**.wlan[*].mac.qosStation = true
+**.wlan[*].agent.typename = ""
+*.host[0].wlan[*].mgmt.typename = "Ieee80211MgmtAp"
+*.host[1].wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1m
+**.mobility.constraintAreaMaxY = 1m
+**.mobility.constraintAreaMaxZ = 1m
+
+%contains: stdout
+AP and non-AP DATA lifetime defaults are 0.512 seconds.

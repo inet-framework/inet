@@ -30,6 +30,9 @@ module Edcaf extends Module
         int aifsn = default(-1);
         int cwMin = default(-1);
         int cwMax = default(-1);
+        // IEEE Std 802.11-2024, Annex C.3: AP and non-AP defaults are 500 TU (0.512 seconds).
+        // Queue residence counts toward this positive, finite lifetime for QoS DATA.
+        double msduLifetime @unit(s) = default(0.512s);
         @class(Edcaf);
         displayStringTextFormat = default("{accessCategory}\n{contentionState}");
         @display("i=block/queue");

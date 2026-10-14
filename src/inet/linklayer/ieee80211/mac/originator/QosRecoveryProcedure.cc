@@ -148,18 +148,16 @@ void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee
 void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
-    auto id = getRetryKey(header);
-    if (packet->getByteLength() >= rtsThreshold) {
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
-        auto it = shortRetryCounter.find(id);
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
+    dropFrame(header);
     emit(retryLimitReachedSignal, packet);
+}
+
+void QosRecoveryProcedure::dropFrame(const Ptr<const Ieee80211DataHeader>& header)
+{
+    auto id = getRetryKey(header);
+    // RTS failure can leave an SRC entry even when the protected DATA uses an LRC entry.
+    shortRetryCounter.erase(id);
+    longRetryCounter.erase(id);
 }
 
 //
