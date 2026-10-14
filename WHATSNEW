@@ -741,6 +741,17 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. An ICMPv6 error about a first fragment reaches the transport protocol
+
+   ICMPv6 took the protocol of the packet that caused an error from the first
+   Next Header field of the quoted IPv6 header, so it dropped every error about
+   a fragment, and about any packet with a Hop-by-Hop Options, Routing or
+   Destination Options header. It now skips the quoted extension headers, as
+   RFC 4443 Section 2.4 requires: an error about a first fragment reaches the
+   transport protocol and the socket that sent the datagram, and one about a
+   later fragment, which quotes no transport header, is dropped. Errors about a
+   fragmented tunnel packet stay dropped.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

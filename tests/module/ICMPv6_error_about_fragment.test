@@ -1,0 +1,95 @@
+%description:
+An ICMPv6 error about the first fragment of a datagram reaches the transport protocol
+that sent the datagram; one about a later fragment is dropped (RFC 4443 Section 2.4 (d),
+RFC 8200 Section 4.5).
+
+Topology: hostA -- router -- hostB
+
+hostA sends a 2008-byte UDP datagram to 2001:db8:2::99, an address on the router --
+hostB link that no node has, so hostA fragments it into two fragments. The router's
+address resolution for the destination fails, and it sends Destination Unreachable,
+code 3 (address unreachable), about each fragment. The error about the first fragment
+quotes the IPv6 header, the Fragment header and the UDP header, so it must reach hostA's
+UDP and the socket that sent the datagram. The error about the second fragment
+quotes no UDP header, so it is dropped.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Icmpv6ErrorAboutFragmentTest
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        hostA: StandardHost6;
+        router: Router6;
+        hostB: StandardHost6;
+    connections:
+        hostA.ethg++ <--> ethline <--> router.ethg++;
+        router.ethg++ <--> ethline <--> hostB.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Icmpv6ErrorAboutFragmentTest
+ned-path = .;../../../../src
+sim-time-limit = 6s
+record-vector-results = false
+cmdenv-express-mode = false
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.addStaticRoutes = false
+**.configurator.config = xml("<config> \
+    <interface hosts='hostA' names='eth0' address='2001:db8:1::a'/> \
+    <interface hosts='router' names='eth0' address='2001:db8:1::1'/> \
+    <interface hosts='router' names='eth1' address='2001:db8:2::1'/> \
+    <interface hosts='hostB' names='eth0' address='2001:db8:2::b'/> \
+    <route hosts='hostA' destination='::' prefixLength='0' gateway='2001:db8:1::1' interface='eth0'/> \
+    <route hosts='hostB' destination='::' prefixLength='0' gateway='2001:db8:2::1' interface='eth0'/> \
+    <route hosts='router' destination='2001:db8:1::' prefixLength='64' interface='eth0'/> \
+    <route hosts='router' destination='2001:db8:2::' prefixLength='64' interface='eth1'/> \
+  </config>")
+
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+**.neighbourDiscovery.hostBootupTime = 0s
+**.neighbourDiscovery.routerBootupTime = 0s
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "2001:db8:2::99"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 2000B
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].sendInterval = 10s
+
+*.hostA.udp.cmdenv-log-level = detail
+*.hostA.ipv6.icmpv6.cmdenv-log-level = warn
+**.cmdenv-log-level = off
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+ICMPv6 error received: type=1 code=3 about packet 2001:db8:1::a:
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Source socket is sockId=0, notifying.
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+The quoted packet does not contain its upper-layer header, packet dropped
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+not registered, packet dropped
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+<!> Error
+%#--------------------------------------------------------------------------------------------------------------
