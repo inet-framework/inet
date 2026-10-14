@@ -35,4 +35,5 @@ simple LegacyTcp extends Tcp
         tcpAlgorithmClass = default("TcpReno");
         hystartEnabled = default(true);
         initialRto = default(3s);
+        lossDetectionMode = default("dupthresh");
 }
