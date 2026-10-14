@@ -24,4 +24,5 @@ simple LegacyTcp extends Tcp
 {
     parameters:
         @class(Tcp);
+        sackSupport = default(false);
 }
