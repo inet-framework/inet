@@ -34,6 +34,7 @@ network TestScheduler
 }
 
 %file: Test.cc
+#include <cstring>
 #include <vector>
 #include "inet/queueing/function/PacketSchedulerFunction.h"
 #include "inet/common/packet/Packet.h"
@@ -41,10 +42,23 @@ network TestScheduler
 
 using namespace inet; 
 
+// the number of the packet that the provider offers, or -1 if it offers none
+static int getOfferedPacketNumber(queueing::IPassivePacketSource *provider)
+{
+    auto packet = provider->canPullPacket(nullptr);
+    return packet == nullptr ? -1 : atoi(strrchr(packet->getName(), '-') + 1);
+}
+
+// a query without a change of state: the provider whose packet has the lower
+// number, the first provider if the numbers are equal
 static int testSchedule(const std::vector<queueing::IPassivePacketSource *>& providers)
 {
-    static int i = 0;
-    return i++ % 2;
+    int number1 = getOfferedPacketNumber(providers[0]);
+    int number2 = getOfferedPacketNumber(providers[1]);
+    if (number1 == -1)
+        return number2 == -1 ? -1 : 1;
+    else
+        return number2 != -1 && number2 < number1 ? 1 : 0;
 }
 
 Register_Packet_Scheduler_Function(TestScheduler, testSchedule);

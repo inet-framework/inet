@@ -1,0 +1,102 @@
+%description:
+
+In this test, two queues (PacketQueues) hold packets of 100 bytes and of
+1000 bytes. A token based server (TokenBasedServer) pulls them through a
+weighted round-robin scheduler (WrrScheduler) with the weights 1 and 1. The
+server reads the length of the offered packet, waits for that number of
+tokens, and then pulls. It gets 16000 tokens of one bit each at 1 s, so it
+must pass a small packet, a large packet and a small packet (9600 bits), and
+then wait for 8000 tokens for the next large packet. This requires that the
+scheduler offers the packet that it serves (issue 1317). The query probe
+between the scheduler and the server asks no query (numRepeats = 0).
+
+%file: test.ned
+
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.WrrScheduler;
+import inet.queueing.server.TokenBasedServer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.queueing.tokengenerator.TimeBasedTokenGenerator;
+import inet.test.queueingtest.lib.QueryProbe;
+
+network TestWrrScheduler
+{
+    submodules:
+        smallSource: ActivePacketSource {
+            @display("p=100,100");
+        }
+        largeSource: ActivePacketSource {
+            @display("p=100,200");
+        }
+        smallQueue: PacketQueue {
+            @display("p=200,100");
+        }
+        largeQueue: PacketQueue {
+            @display("p=200,200");
+        }
+        scheduler: WrrScheduler {
+            @display("p=300,150");
+        }
+        probe: QueryProbe {
+            @display("p=400,150");
+        }
+        server: TokenBasedServer {
+            @display("p=500,150");
+        }
+        tokenGenerator: TimeBasedTokenGenerator {
+            @display("p=500,50");
+        }
+        sink: PassivePacketSink {
+            @display("p=600,150");
+        }
+    connections:
+        smallSource.out --> smallQueue.in;
+        largeSource.out --> largeQueue.in;
+        smallQueue.out --> scheduler.in++;
+        largeQueue.out --> scheduler.in++;
+        scheduler.out --> probe.in;
+        probe.out --> server.in;
+        server.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestWrrScheduler
+sim-time-limit = 1.5s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+# 100-byte packets in one queue and 1000-byte packets in the other; the server
+# has no token until 1 s, so both queues hold 100 packets by then
+*.smallSource.packetLength = 100B
+*.largeSource.packetLength = 1000B
+*.*Source.productionInterval = 10ms
+# one token for each bit, and 16000 tokens at 1 s: with the weights 1 and 1
+# that is a small packet (800), a large packet (8000) and a small packet (800)
+*.server.tokenConsumptionPerPacket = 0
+*.server.tokenConsumptionPerBit = 1
+*.tokenGenerator.storageModule = "^.server"
+*.tokenGenerator.generationInterval = 1s
+*.tokenGenerator.numTokens = 16000
+*.scheduler.weights = "1 1"
+*.probe.numRepeats = 0
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 1s sink: Consuming packet, [^\n]*smallSource-0 \(
+
+%contains-regex: stdout
+^At 1s sink: Consuming packet, [^\n]*largeSource-0 \(
+
+%contains-regex: stdout
+^At 1s sink: Consuming packet, [^\n]*smallSource-1 \(
+
+%not-contains-regex: stdout
+^At \S+ sink: Consuming packet, [^\n]*(largeSource-1|smallSource-2) \(

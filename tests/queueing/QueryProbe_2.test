@@ -1,0 +1,102 @@
+%description:
+
+This test checks the query probe (QueryProbe of tests/queueing/lib) on two
+schedulers that do not serve the first input that has a packet: a priority
+scheduler (PriorityScheduler) with reverseOrder = true, and a content based
+scheduler (ContentBasedScheduler) that prefers the packets of the second source.
+In each chain, two queues hold the packets of two active packet sources, and an
+active packet sink pulls them through the probe. The probe repeats each query
+three times, and it checks that each pulled packet is the offered packet. The
+second queue has packets when the sinks start at 1 s, so both schedulers must
+offer and serve its packets.
+
+%file: test.ned
+
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.ContentBasedScheduler;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.test.queueingtest.lib.QueryProbe;
+
+module SchedulerChain
+{
+    parameters:
+        string schedulerType;
+    submodules:
+        producer1: ActivePacketSource {
+            @display("p=100,100");
+        }
+        producer2: ActivePacketSource {
+            @display("p=100,200");
+        }
+        queue1: PacketQueue {
+            @display("p=200,100");
+        }
+        queue2: PacketQueue {
+            @display("p=200,200");
+        }
+        scheduler: <schedulerType> like inet.queueing.contract.IPacketScheduler {
+            @display("p=300,150");
+        }
+        probe: QueryProbe {
+            @display("p=400,150");
+        }
+        collector: ActivePacketSink {
+            @display("p=500,150");
+        }
+    connections:
+        producer1.out --> queue1.in;
+        producer2.out --> queue2.in;
+        queue1.out --> scheduler.in++;
+        queue2.out --> scheduler.in++;
+        scheduler.out --> probe.in;
+        probe.out --> collector.in;
+}
+
+network TestQueryProbe
+{
+    submodules:
+        priority: SchedulerChain {
+            schedulerType = "PriorityScheduler";
+            @display("p=100,100");
+        }
+        contentBased: SchedulerChain {
+            schedulerType = "ContentBasedScheduler";
+            @display("p=100,200");
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestQueryProbe
+sim-time-limit = 2.5s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %m: "
+*.*.producer*.packetLength = 1B
+*.*.producer*.productionInterval = 0.5s
+*.*.producer2.initialProductionOffset = 0.25s
+*.*.collector.collectionInterval = 1s
+*.*.collector.initialCollectionOffset = 1s
+*.priority.scheduler.reverseOrder = true
+*.contentBased.scheduler.packetFilters = ["producer2*"]
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 1s TestQueryProbe\.priority\.collector: Collecting packet, [^\n]*producer2-0 \(
+
+%contains-regex: stdout
+^At 1s TestQueryProbe\.contentBased\.collector: Collecting packet, [^\n]*producer2-0 \(
+
+%contains-regex: stdout
+^At 2s TestQueryProbe\.priority\.collector: Collecting packet, [^\n]*producer2-1 \(
+
+%contains-regex: stdout
+^At 2s TestQueryProbe\.contentBased\.collector: Collecting packet, [^\n]*producer2-1 \(

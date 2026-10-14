@@ -738,6 +738,22 @@ Notable backward incompatible changes are the following:
    LabelScheduler read the labels of the packet that each input offered, and
    it crashed when an input had no packet. It now skips an empty input.
 
+40. A packet scheduler offers the packet that it serves
+
+   canPullPacket() of PacketSchedulerBase returned the packet of the first
+   input that had a packet, and pullPacket() served the input that
+   schedulePacket() selected. The two agreed only for a PriorityScheduler
+   without reverseOrder. A module that reads the offered packet before it
+   pulls, such as TokenBasedServer, then acted on another packet than the one
+   it pulled. Now canPullPacket() returns the packet of the input that
+   schedulePacket() selects, and canPullSomePacket() asks whether that input
+   has a packet. This affects WrrScheduler, ContentBasedScheduler,
+   LabelScheduler, PacketScheduler, MarkovScheduler and PriorityScheduler
+   with reverseOrder. The scheduler function of a PacketScheduler must not
+   change any state, because the base class now calls it from queries too.
+   This can change the results of simulations in which a module reads the
+   packet that such a scheduler offers.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset
