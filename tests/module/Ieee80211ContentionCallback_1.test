@@ -1,0 +1,70 @@
+%description:
+The grant callback installs another request before it returns.
+The production grant handler must retain that request for the next grant.
+This fixture injects callback installation at the reentry boundary.
+It does not test channel arbitration.
+
+%file: ContentionCallbackTest.cc
+
+#include "inet/linklayer/ieee80211/mac/contention/Contention.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class ContentionCallbackTest : public Contention, public IContention::ICallback
+{
+  protected:
+    int grants = 0;
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LOCAL) {
+            channelGrantedEvent = new cMessage("channelGranted");
+            callback = this;
+            scheduleAfter(SIMTIME_ZERO, channelGrantedEvent);
+        }
+    }
+
+    virtual void expectedChannelAccess(simtime_t time) override {}
+
+    virtual void channelAccessGranted() override
+    {
+        grants++;
+        if (grants == 1) {
+            callback = this;
+            scheduleAfter(SIMTIME_ZERO, channelGrantedEvent);
+        }
+        else {
+            ASSERT(grants == 2);
+            std::cout << "Both grant callbacks completed.\n";
+            endSimulation();
+        }
+    }
+};
+
+Define_Module(ContentionCallbackTest);
+
+%file: ContentionCallbackNetwork.ned
+
+import inet.linklayer.ieee80211.mac.contention.Contention;
+
+simple ContentionCallbackTest extends Contention
+{
+    parameters:
+        @class(::ContentionCallbackTest);
+}
+
+network ContentionCallbackNetwork
+{
+    submodules:
+        contention: ContentionCallbackTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ContentionCallbackNetwork
+sim-time-limit = 1s
+cmdenv-express-mode = false
+
+%contains: stdout
+Both grant callbacks completed.
