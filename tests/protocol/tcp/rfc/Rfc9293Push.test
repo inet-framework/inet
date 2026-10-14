@@ -9,19 +9,12 @@ are in doc/project/evidence/protocol/tcp/checks/data-transfer.md#push-on-the-las
 steps below map one to one onto its expected observations. Mapping of the mockup: host A =
 host1, host B = host2, link L = host1-host2.
 
-Expected result: FAIL. The class is an **unimplemented feature**, so the declaration below
-stands: the model does not claim this behaviour. No call to `setPshBit` exists anywhere in
-the TCP sender, and the two comments quoted below say the absence is on purpose.
-
-The model's send interface offers no PUSH flag, so MUST-61 applies,
-and the model never sets the PSH bit on a data segment: the sender carries the comment
-"TODO when to set PSH bit?" where the bit would be set (src/inet/transportlayer/tcp/
-TcpConnectionUtil.cc, sendSegment), and the SEND processing carries "FIXME how to support
-PUSH?" (TcpConnectionEventProc.cc, process_SEND). The step stays as the standard demands;
-the gap is recorded in doc/project/evidence/model/tcp/results.md. When the gap closes, this
-test reports PASS (unexpected), and the declaration below is removed.
-
-%# expected-result: FAIL
+The model's send interface offers no PUSH flag, so MUST-61 applies. The model conforms by
+default: `pushLastBufferedSegment` sets PSH on the segment after which no queued data waits
+(sendSegment in src/inet/transportlayer/tcp/TcpConnectionUtil.cc). With that parameter false
+and `pushSegmentsOnWriteBoundary` false, the model sets no PSH on this stream, and the test
+fails. Until the default changed, the test declared that failure as an unimplemented feature
+(gap 1 of doc/project/evidence/model/tcp/results.md).
 
 %includes:
 #include "ProtocolTest.h"

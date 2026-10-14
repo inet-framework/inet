@@ -38,4 +38,5 @@ simple LegacyTcp extends Tcp
         lossDetectionMode = default("dupthresh");
         prrEnabled = default(false);
         tlpEnabled = default(false);
+        pushLastBufferedSegment = default(false);
 }
