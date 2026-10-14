@@ -536,8 +536,9 @@ class INET_API TcpConnection : public SimpleModule
 
     /**
      * The truesize of the skb of a received TCP segment in Linux, from a tun device as
-     * packetdrill uses: the payload, the IP and TCP headers and skb_shared_info (320
-     * bytes) in a page-sized or power-of-two allocation, and struct sk_buff (232 bytes).
+     * packetdrill uses, and struct sk_buff (232 bytes): a small packet with
+     * skb_shared_info (320 bytes) in a power-of-two allocation, a larger one in a page
+     * and pages of the largest order up to 3 that the rest fills.
      */
     static uint32_t linuxSkbTruesize(uint32_t payloadBytes);
     /**

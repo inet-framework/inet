@@ -3284,14 +3284,27 @@ void TcpConnection::updateSndbufLimitedChrono()
 
 uint32_t TcpConnection::linuxSkbTruesize(uint32_t payloadBytes)
 {
-    uint32_t base = payloadBytes + 40 + 320;
+    // Linux tun_get_user() and tun_alloc_skb(): a packet that does not fit one page with
+    // the NET_SKB_PAD of 64 bytes gets a linear part of one page (SKB_MAX_HEAD: the page
+    // less the pad and skb_shared_info), and the rest in pages of the largest order up
+    // to 3 (PAGE_ALLOC_COSTLY_ORDER) that it fills (alloc_skb_with_frags())
+    uint32_t packetBytes = payloadBytes + 40;
     uint32_t alloc;
-    if (base > 16384)
-        alloc = ((base + 32767) / 32768) * 32768; // pages of order 3 (PAGE_ALLOC_COSTLY_ORDER)
-    else if (base > 4096)
-        alloc = ((base + 4095) / 4096) * 4096; // the paged skb of tun_alloc_skb()
+    if (64 + packetBytes >= 4096) {
+        uint32_t rest = packetBytes - (4096 - 64 - 320);
+        uint32_t order = 3;
+        alloc = 4096;
+        while (rest > 0) {
+            uint32_t aligned = (rest + 4095) / 4096 * 4096;
+            while (order > 0 && aligned < (4096u << order))
+                order--;
+            alloc += 4096u << order;
+            rest -= std::min(rest, 4096u << order);
+        }
+    }
     else {
-        alloc = 1024; // a power-of-two page fragment (tun_build_skb())
+        uint32_t base = packetBytes + 320;
+        alloc = 1024; // a power-of-two allocation of the linear packet
         while (alloc < base)
             alloc <<= 1;
     }
