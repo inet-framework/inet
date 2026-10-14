@@ -623,6 +623,8 @@ Notable backward compatible changes are the following:
 
    Full AP departure completes the station downgrade before peer cleanup notification. Full AP stop clears station and association-ID tables, peer state, and BSS rates before one notification. Rate publication excludes BSS membership selectors from legacy rate records. Selector-based join checks remain outside this change.
 
+   Management rejects nonfinite numeric rates in abstract frames before ordered-set insertion. Previously, a NaN after a valid rate could escape validation and replace committed records. Malformed rate elements now preserve committed records and emit no rate notification. Wire-decoded rate octets cannot produce these nonfinite values.
+
 12. IEEE 802.11 MIB state commit operations
 
    The MIB now supplies combined operations for peer HT state, BSS rates, and peer rates. Each operation completes its mutations before notification. AP cleanup can also clear station and association-ID tables in the same transition. Standalone setters retain their existing behavior. Local records remain available after cleanup.
