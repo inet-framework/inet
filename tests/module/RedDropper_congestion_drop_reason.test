@@ -1,0 +1,67 @@
+%description:
+A Random Early Detection (RED) early drop is reported with reason CONGESTION, so the
+packetDropCongestion statistic of RedDropper counts it.
+
+Topology: client --100Mbps-- router --10Mbps-- server
+
+client sends 20 Mb/s of UDP into the router's 10 Mb/s link. The router's queue on that
+link is a RedDropperQueue with maxth = 4 and a packet capacity of 24, so RED drops
+packets once its average queue length reaches 4, long before the queue is full. Such
+drops must be emitted with reason CONGESTION, so packetDropCongestion must count at
+least one.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
+
+network RedDropperCongestionTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        client: StandardHost;
+        router: Router;
+        server: StandardHost;
+    connections:
+        client.ethg++ <--> DatarateChannel { datarate = 100Mbps; delay = 1us; } <--> router.ethg++;
+        router.ethg++ <--> DatarateChannel { datarate = 10Mbps; delay = 1us; } <--> server.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = RedDropperCongestionTest
+ned-path = .;../../../../src
+sim-time-limit = 1.5s
+record-vector-results = false
+cmdenv-express-mode = true
+
+**.router.eth[1].queue.typename = "RedDropperQueue"
+**.router.eth[1].queue.red.minth = 3
+**.router.eth[1].queue.red.maxth = 4
+**.router.eth[1].queue.red.maxp = 1
+**.router.eth[1].queue.red.wq = 1
+**.router.eth[1].queue.red.packetCapacity = 24
+
+**.client.numApps = 1
+**.client.app[0].typename = "UdpBasicApp"
+**.client.app[0].destAddresses = "server"
+**.client.app[0].destPort = 1000
+**.client.app[0].messageLength = 1000B
+**.client.app[0].sendInterval = 0.4ms
+**.client.app[0].startTime = 1s
+**.server.numApps = 1
+**.server.app[0].typename = "UdpSink"
+**.server.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-#0.sca
+scalar RedDropperCongestionTest\.router\.eth\[1\]\.queue\.red packetDropCongestion:count [1-9][0-9]*
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+<!> Error
+%#--------------------------------------------------------------------------------------------------------------

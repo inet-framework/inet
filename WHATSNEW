@@ -471,6 +471,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. Random Early Detection (RED) reports its early drops as congestion
+
+   RedDropper emitted every drop with reason OTHER_PACKET_DROP, so its packetDropCongestion statistic always read 0. An early drop is now reported with reason CONGESTION and a drop at the packet capacity with QUEUE_OVERFLOW. Which packets are dropped does not change; the packetDropCongestion scalars and vectors of RED queues that make early drops, including those in EthernetQosRedQueue and AFxyQueue, become non-zero.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
