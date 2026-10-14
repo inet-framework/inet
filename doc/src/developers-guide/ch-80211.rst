@@ -846,6 +846,8 @@ Full AP departure completes the station downgrade and pending-transaction cleanu
 
 BSS membership selectors describe required features, not legacy data rates. The rate writer excludes the six selectors from IEEE Std 802.11-2024, Table 9-131, from supported, basic, and operational legacy rate sets. This applies to both Supported Rates and Extended Supported Rates. For example, the HT selector ``0xFF`` does not create a 63.5 Mbps rate record. Management retains its existing HT capability checks; selector-based join checks remain unmodeled.
 
+Bit 7 marks both basic rates and basic selectors in BSS advertisements. Clause 9.4.2.3 states that selector values cannot match valid supported rates. For example, ``0xFA`` encodes the HE selector, but ``0x7A`` does not establish a valid 61 Mbps legacy rate. The serializer can represent both octets; field representability does not establish a valid PHY rate. Receivers ignore bit 7 in other management frame types, including association requests.
+
 .. _dg:sec:80211:views:
 
 The views
