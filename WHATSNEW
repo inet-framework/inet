@@ -700,6 +700,15 @@ Notable backward incompatible changes are the following:
    goes through. This can change the results of simulations in which a module
    asks a token bucket classifier about a packet before it pushes the packet.
 
+36. A weighted round-robin classifier moves its round only for a packet
+
+   WrrClassifier moved its round forward in each query about a packet, for
+   example when a module asked canPushPacket() before it pushed the packet.
+   The packets then went to other consumers than the weights state. The
+   classifier now moves its round only when a packet goes through. This can
+   change the results of simulations in which a module asks a WrrClassifier
+   about a packet before it pushes the packet.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

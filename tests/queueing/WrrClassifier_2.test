@@ -1,0 +1,78 @@
+%description:
+
+This test is WrrClassifier_1 with a query probe (QueryProbe) that asks the
+classifier three times before each push if it can take the packet. A query
+must not change the round of the classifier, so the sinks get the packets in
+the same order as in WrrClassifier_1.
+
+%file: test.ned
+
+import inet.queueing.classifier.WrrClassifier;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.test.queueingtest.lib.QueryProbe;
+
+network TestWrrClassifier
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        probe: QueryProbe {
+            @display("p=200,100");
+        }
+        classifier: WrrClassifier {
+            @display("p=300,100");
+        }
+        consumer1: PassivePacketSink {
+            @display("p=400,50");
+        }
+        consumer2: PassivePacketSink {
+            @display("p=400,150");
+        }
+    connections allowunconnected:
+        producer.out --> probe.in;
+        probe.out --> classifier.in;
+        classifier.out++ --> consumer1.in;
+        classifier.out++ --> consumer2.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestWrrClassifier
+sim-time-limit = 6.5s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.classifier.weights = "1 3"
+*.probe.numRepeats = 3
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 0s consumer1: Consuming packet, [^\n]*producer-0
+
+%contains-regex: stdout
+^At 1s consumer2: Consuming packet, [^\n]*producer-1
+
+%contains-regex: stdout
+^At 2s consumer2: Consuming packet, [^\n]*producer-2
+
+%contains-regex: stdout
+^At 3s consumer2: Consuming packet, [^\n]*producer-3
+
+%contains-regex: stdout
+^At 4s consumer1: Consuming packet, [^\n]*producer-4
+
+%contains-regex: stdout
+^At 5s consumer2: Consuming packet, [^\n]*producer-5
+
+%contains-regex: stdout
+^At 6s consumer2: Consuming packet, [^\n]*producer-6

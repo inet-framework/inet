@@ -28,7 +28,7 @@ class INET_API WrrClassifier : public PacketClassifierBase
   protected:
     virtual void initialize(int stage) override;
     virtual int classifyPacket(Packet *packet) const override;
-    virtual int classifyPacketAndUpdateState(Packet *packet);
+    virtual void handlePacketClassified(Packet *packet, int index) override;
 
   public:
     virtual ~WrrClassifier();
