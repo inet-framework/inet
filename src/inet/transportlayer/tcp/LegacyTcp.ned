@@ -31,4 +31,5 @@ simple LegacyTcp extends Tcp
         limitedTransmitEnabled = default(false);
         advertisedWindow = default(14 * this.mss);
         mss = default(536);
+        initialWindow = default("rfc2001");
 }

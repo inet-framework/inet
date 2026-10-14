@@ -438,10 +438,11 @@ the window becomes positive.
 Initial Congestion Window
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Congestion window is set to 1 SMSS when the connection is established.
-If the :par:`increasedIWEnabled` parameter is true, then the initial
-window is increased to 4380 bytes, but at least 2 SMSS and at most 4
-SMSS. The congestion window is not updated afterwards; subclasses can
+When the connection is established, the :par:`initialWindow` parameter
+sets the congestion window. The default, ``rfc3390``, sets it to 4380
+bytes, but at least 2 SMSS and at most 4 SMSS (RFC 5681 section 3.1);
+``rfc2001`` sets it to 1 SMSS, and ``rfc6928`` to the ten segments of
+RFC 6928. The congestion window is not updated afterwards; subclasses can
 add congestion control by redefining virtual methods of the
 :cpp:`TcpAlgorithmBase` class in their own class implementation.
 
@@ -477,9 +478,9 @@ is detected.
 Slow Start
 ^^^^^^^^^^
 
-The congestion window is initially set to 1 SMSS or in case of
-:par:`increasedIWEnabled` to 4380 bytes (but no less than 2 SMSS and
-no more than 4 SMSS). The window is increased with each incoming ACK by 1
+The congestion window is initially set to the initial window
+(:par:`initialWindow`): by default 4380 bytes, but no less than 2 SMSS
+and no more than 4 SMSS. The window is increased with each incoming ACK by 1
 SMSS, so it is approximately doubled in each RTT.
 
 Congestion Avoidance
