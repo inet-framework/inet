@@ -1,0 +1,136 @@
+%description:
+A Mobile Access Gateway that learns of an attachment from the access link alone
+sends Handoff Indicator 4, handoff state unknown, in its Proxy Binding Update
+(RFC 5213 Section 6.9.1.1 step 4).
+
+Topology: anchor -- mag, and mn associated with mag over IEEE 802.11
+
+mn associates with mag's access point at the start of the run. mag cannot tell
+whether mn has just left another gateway or is attaching for the first time, so
+the Proxy Binding Update it sends to anchor must carry Handoff Indicator 4, not 1
+(attachment over a new interface). A probe prints the Handoff Indicator of every
+Proxy Binding Update that a node hands to its IPv6 layer.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.mipv6.WirelessHost6;
+import inet.node.pmipv6.LocalMobilityAnchor;
+import inet.node.pmipv6.MobileAccessGateway;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import ned.DatarateChannel;
+
+simple ProxyBindingUpdateProbe
+{
+}
+
+network HandoffIndicatorTest
+{
+    parameters:
+        **.ipv6.configurator.networkConfiguratorModule = "configurator";
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        probe: ProxyBindingUpdateProbe;
+        anchor: LocalMobilityAnchor;
+        mag: MobileAccessGateway;
+        mn: WirelessHost6;
+    connections allowunconnected:
+        mag.ethg++ <--> ethline <--> anchor.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: ProxyBindingUpdateProbe.cc
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
+
+namespace PMIPv6_handoff_indicator {
+
+using namespace inet;
+
+class ProxyBindingUpdateProbe : public cSimpleModule, public cListener
+{
+  protected:
+    virtual void initialize() override
+    {
+        getSystemModule()->subscribe(packetReceivedFromUpperSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override
+    {
+        auto packet = dynamic_cast<Packet *>(obj);
+        if (packet == nullptr)
+            return;
+        auto protocolTag = packet->findTag<PacketProtocolTag>();
+        if (protocolTag == nullptr || protocolTag->getProtocol() != &Protocol::mobileipv6)
+            return;
+        auto bindingUpdate = dynamicPtrCast<const BindingUpdate>(packet->peekAtFront<MobilityHeader>());
+        if (bindingUpdate == nullptr || !bindingUpdate->getProxyRegistrationFlag())
+            return;
+        EV_INFO << "Proxy Binding Update, lifetime " << bindingUpdate->getLifetime()
+                << " s, Handoff Indicator " << (int)bindingUpdate->getHandoffIndicator() << endl;
+    }
+};
+
+Define_Module(ProxyBindingUpdateProbe);
+
+} // namespace PMIPv6_handoff_indicator
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: config.xml
+
+<config>
+    <interface hosts="anchor" towards="mag" address="2001:db8:0:1::1"/>
+    <interface hosts="mag" towards="anchor" address="2001:db8:0:1::2"/>
+</config>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = HandoffIndicatorTest
+ned-path = .;../../../../src
+sim-time-limit = 3s
+record-vector-results = false
+cmdenv-express-mode = false
+
+*.configurator.config = xmldoc("config.xml")
+*.configurator.assignAddressesToHosts = false
+
+*.mag.ipv6.pmipv6.localMobilityAnchorAddress = "2001:db8:0:1::1"
+*.mag.ipv6.pmipv6.mobileNodeProfiles = xml("<mobileNodes><mobileNode id='mn1@example.com' homeNetworkPrefix='2001:db8:1::' prefixLength='64'/></mobileNodes>")
+
+*.mag.numWlanInterfaces = 1
+*.mag.wlan[*].mgmt.ssid = "MAG"
+*.mn.numWlanInterfaces = 1
+**.mgmt.numChannels = 1
+**.wlan*.bitrate = 2Mbps
+
+*.mag.mobility.typename = "StationaryMobility"
+*.mag.mobility.initialX = 100m
+*.mag.mobility.initialY = 100m
+*.mn.mobility.typename = "StationaryMobility"
+*.mn.mobility.initialX = 120m
+*.mn.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.initFromDisplayString = false
+
+*.probe.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Proxy Binding Update, lifetime 3600 s, Handoff Indicator 4
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Handoff Indicator 1
+%#--------------------------------------------------------------------------------------------------------------
