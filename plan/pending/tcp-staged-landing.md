@@ -74,7 +74,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S18 ✅ | `topic/tcp-receive-memory` | 47 | +165 −36 | SO_RCVBUF on an open connection and its lock, the highest window edge apart from the edge in force, the free space and the zero window of a locked buffer, the window update of Linux after a read behind a parameter (D-90 to D-93) |
 | S18b ✅ | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part), new | +285 −3 | the RFC 4821 path MTU search of Linux behind a parameter, the route MTU of a connection and `TcpSocket::setPathMtu()`, the start MSS of an active opener, the SYN after an ICMP fragmentation-needed error (D-94 to D-97) |
 | S18c ✅ | `topic/tcp-applications` | 42, 58 | +27 −11 | MSG_EOR in the send script of `TcpSessionApp`, and a fill byte for its data; commit 58 takes back the close of `TcpServerSocketIo` of commit 42 (D-1) |
-| S19 | `topic/tcp-new-parameters` | 15 (part), 46 (part), 53, 87, new | +250 −30 (about) | the new parameters with the defaults of master: `retainSackAfterRto`, `initialWindow` and `initialCwnd`, `initialSendSequenceNumber`, `mss = -1`, the PSH of RFC 9293 MUST-61 |
+| S19 ✅ | `topic/tcp-new-parameters` | 15 (part), 46 (part), 53, 87, new | +115 −16 | the new parameters with the defaults of master: `retainSackAfterRto`, `initialWindow` and `initialCwnd`, `initialSendSequenceNumber`, `mss = -1`, the PSH of RFC 9293 MUST-61; the initial window in SMSS (D-98 to D-100) |
 | S19b | `topic/tcp-modern-defaults` | 16 (part), 40, 68 (part), 70, 71, 72 (the rest), 78, 80 (part), 81 | +600 −450 (about) | the pins of the old defaults in the tests, the modern defaults one commit for each with their moved rows, the TCP standards tests and the evidence under the new defaults, the statistical baselines |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
@@ -878,6 +878,23 @@ plan gives a reason for.
   bare SYN that counts as a retransmission (Linux, kernel commit c31b70c9968f); the source
   retransmits each SYN at once. The gate `pmtudEnabled` of master stays, where Linux and the
   source react always: without it, an IPv4 segment has no DF bit.
+- **D-98 — The initial window counts the SMSS, and the old parameter conflicts only with IW10.**
+  RFC 5681 counts the initial window and the restart window in SMSS, without the TCP options;
+  master counted `snd_mss`, with the space of the timestamp option, so S19 corrects that first.
+  The modes of `initialWindow` are those of the source, with the default `rfc2001` of master
+  until S19b. The deprecated `increasedIWEnabled` selects `rfc3390`, and only `rfc6928` conflicts
+  with it; commit 53 compared with the default of the parameter, which S19b changes, so the
+  combination that it wanted to accept would fail after the change.
+- **D-99 — `mss = -1` takes the MSS of the address family before the MSS option of the peer.**
+  The source resolves the value only when it writes the options, so a passive side first took
+  the MSS option of the peer as its own MSS (D-19). S19 resolves it at an active open when the
+  address is known and at a SYN in LISTEN before the options are read, and `TCP_MAXSEG` limits
+  it. The values are those of an MTU of 1500 bytes: 1460 for IPv4 and 1440 for IPv6.
+- **D-100 — PSH in the last buffered segment, and the Linux rule replaces it.** RFC 9293 MUST-61
+  asks for PSH on the segment after which no queued data waits, because the SEND of INET has no
+  PUSH flag; neither master nor the source has the rule. `pushLastBufferedSegment` selects it,
+  also for a retransmission of that segment, and `pushSegmentsOnWriteBoundary` replaces it with
+  the PSH of Linux. S19 lands it off; S19b turns it on (D-74).
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -2732,11 +2749,11 @@ and the combined pull-request gate pass.
 | Step | Commit | B of D-6 | Source |
 | --- | --- | --- | --- |
 | 1 | add: retainSackAfterRto, the SACK marks of Linux after a timeout | — | 87 |
-| 2 | fix: the initial window counts the MSS without options | — | 15 (part) |
-| 3 | add: initialWindow and initialCwnd, the initial windows of RFCs | — | 15 (part), 46 (part), 53 |
+| 2 | fix: the initial window counts the MSS without options | — | 15 (part), D-98 |
+| 3 | add: initialWindow and initialCwnd, the initial windows of RFCs | — | 15 (part), 46 (part), 53, D-98 |
 | 4 | add: initialSendSequenceNumber, a fixed initial sequence number | — | 15 (part) |
-| 5 | add: mss = -1, the MSS of the address family | — | 15 (part) |
-| 6 | add: PSH in the last buffered segment of RFC 9293, by a parameter | — | new (D-74) |
+| 5 | add: mss = -1, the MSS of the address family | — | 15 (part), D-99 |
+| 6 | add: PSH in the last buffered segment of RFC 9293, by a parameter | — | new (D-74, D-100) |
 
 S19 had 14 source commits and the default changes of D-24, D-65 and D-74: too much for one review,
 and most of it moves CI rows. S19 now takes the new parameters, each with a default that keeps the
@@ -2757,3 +2774,48 @@ IPv4 and 1440 for IPv6, with the default 536 of master; the source resolves the 
 it writes the options, so a passive side takes the MSS of the peer as its own (D-19), and S19
 resolves it before the options of the SYN are read. Step 6 is the PSH of RFC 9293 section 3.9.1.2
 (MUST-61) behind a parameter, off in S19; S19b turns it on with the pins of the tests (D-74).
+
+During the work, the first names of the tests of `mss = -1` were those of two tests of master
+(`tcp_mss_default_1` and `_2`), and the drafts replaced them; the commit was undone, the tests of
+master were restored, and the new tests are `tcp_mss_family_1` to `_3`. A test that expects an
+error of the configuration (`tcp_iw_4`) has no check of undisposed objects, because the aborted
+open leaves its request. The tester removes the SACK option of one ACK (`strip 5`) to show the
+SACK marks after a timeout, because a receiver reports its blocks again in the next ACK.
+
+Items for later stages: (S19b) The defaults of the new parameters: `initialWindow = "rfc3390"`,
+`mss = -1` and `pushLastBufferedSegment = true`. (inet-gpl) Its configuration already sets
+`initialWindow = "rfc6928"`, `retainSackAfterRto = true`, `mss = 1460` and
+`pushSegmentsOnWriteBoundary`, which replaces the PSH of MUST-61, and its harness gives
+`initialCwnd` from a route; S19 needs no change there.
+
+### S19 — `topic/tcp-new-parameters` — landed 2026-10-14
+
+The owner reviewed and approved S19 on 2026-10-14.
+
+S19 brings the new parameters of the TCP branch, each with the default of master: the SACK marks
+after a timeout, the initial windows of the RFCs and of a route, a fixed initial sequence number,
+the MSS of the address family, and the PSH of RFC 9293 MUST-61; it also counts the initial window
+in SMSS. Where master and the source are wrong, S19 deviates from them (D-98 to D-100).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: add: retainSackAfterRto, the SACK marks of Linux after a timeout` | — | 87 | — |
+| `tcp: fix: the initial window counts the MSS without options` | — | 15 (part) | — |
+| `tcp: add: initialWindow and initialCwnd, the initial windows of RFCs` | — | 15 (part), 46 (part), 53 | — |
+| `tcp: add: initialSendSequenceNumber, a fixed initial sequence number` | — | 15 (part) | — |
+| `tcp: add: mss = -1, the MSS of the address family` | — | 15 (part) | — |
+| `tcp: add: PSH in the last buffered segment of RFC 9293, by a parameter` | — | new | — |
+
+New tests: `tcp_sack_rto_1`, `tcp_sack_rto_2` (a control of the default), `tcp_iw_1` to
+`tcp_iw_4`, `tcp_iss_1`, `tcp_mss_family_1` to `tcp_mss_family_3` and `tcp_push_last_1`. Moved
+tests: `tcp_effective_mss_1` and `tcp_accecn_option_6` (step 2).
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the module tests pass at each commit (612 at the plan commit, 623 at the head). The TCP
+standards tests pass at each code commit (25 pass, 2 expected failures, the packetdrill tests skip
+without inet-gpl); unit 123 and serializer 4 pass at the head. The new and the moved tests of each
+code commit fail with the source of the commit before, except `tcp_sack_rto_2` and `tcp_iw_2`, the
+controls of the default and of the deprecated `increasedIWEnabled`, which pass there too. The CI
+fingerprint job runs at each code commit, and no row moves. The TCP fingerprint rows run in debug
+at the head with no runtime error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP
+rows need a build with lwIP). The six gates and the combined pull-request gate pass.
