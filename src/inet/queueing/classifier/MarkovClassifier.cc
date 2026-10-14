@@ -78,7 +78,7 @@ void MarkovClassifier::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-int MarkovClassifier::classifyPacket(Packet *packet)
+int MarkovClassifier::classifyPacket(Packet *packet) const
 {
     return state;
 }
@@ -105,6 +105,7 @@ Packet *MarkovClassifier::pullPacket(const cGate *gate)
         throw cRuntimeError("Cannot pull from gate");
     auto packet = provider.pullPacket();
     take(packet);
+    handlePacketClassified(packet, state);
     animatePullPacket(packet, outputGates[gate->getIndex()], findConnectedGate<IActivePacketSink>(gate));
     numProcessedPackets++;
     processedTotalLength += packet->getDataLength();

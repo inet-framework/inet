@@ -32,7 +32,7 @@ void ContentBasedClassifier::initialize(int stage)
     }
 }
 
-int ContentBasedClassifier::classifyPacket(Packet *packet)
+int ContentBasedClassifier::classifyPacket(Packet *packet) const
 {
     for (size_t i = 0; i < filters.size(); i++) {
         auto filter = filters[i];

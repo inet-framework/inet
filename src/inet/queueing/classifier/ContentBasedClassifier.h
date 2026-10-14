@@ -22,7 +22,7 @@ class INET_API ContentBasedClassifier : public PacketClassifierBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual int classifyPacket(Packet *packet) override;
+    virtual int classifyPacket(Packet *packet) const override;
 
   public:
     virtual ~ContentBasedClassifier();

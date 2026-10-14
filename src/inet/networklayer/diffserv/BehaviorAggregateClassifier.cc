@@ -99,6 +99,7 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, const cGate *inputG
     EV_INFO << "Classifying packet " << packet->getName() << ".\n";
     numRcvd++;
     int index = classifyPacket(packet);
+    handlePacketClassified(packet, index);
     emit(pkClassSignal, index);
     if (index >= 0)
         pushOrSendPacket(packet, outputGates[index], consumers[index]);
@@ -110,7 +111,7 @@ void BehaviorAggregateClassifier::pushPacket(Packet *packet, const cGate *inputG
     }
 }
 
-int BehaviorAggregateClassifier::classifyPacket(Packet *packet)
+int BehaviorAggregateClassifier::classifyPacket(Packet *packet) const
 {
     PacketDissectorCallback callback;
 

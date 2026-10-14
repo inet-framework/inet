@@ -23,7 +23,8 @@ class INET_API MultiTokenBucketClassifier : public TokenBucketClassifierMixin<Mu
   protected:
     virtual void initialize(int stage) override;
 
-    virtual int classifyPacket(Packet *packet) override;
+    virtual int classifyPacket(Packet *packet) const override;
+    virtual int classifyPacketAndUpdateState(Packet *packet);
 };
 
 } // namespace queueing

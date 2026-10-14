@@ -22,7 +22,7 @@ class INET_API PacketClassifier : public PacketClassifierBase
   protected:
     virtual void initialize(int stage) override;
     virtual IPacketClassifierFunction *createClassifierFunction(const char *classifierClass) const;
-    virtual int classifyPacket(Packet *packet) override;
+    virtual int classifyPacket(Packet *packet) const override;
 
   public:
     virtual ~PacketClassifier() { delete packetClassifierFunction; }

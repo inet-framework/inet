@@ -76,7 +76,7 @@ class INET_API MultiFieldClassifier : public queueing::PacketClassifierBase
     virtual void initialize(int stage) override;
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 
-    virtual int classifyPacket(Packet *packet) override;
+    virtual int classifyPacket(Packet *packet) const override;
 
     virtual void mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f) override;
 

@@ -23,7 +23,7 @@ void PcpTrafficClassClassifier::initialize(int stage)
     }
 }
 
-int PcpTrafficClassClassifier::classifyPacket(Packet *packet)
+int PcpTrafficClassClassifier::classifyPacket(Packet *packet) const
 {
     int pcp = -1;
     switch (*mode) {

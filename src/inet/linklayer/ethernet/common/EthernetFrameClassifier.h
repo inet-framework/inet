@@ -25,7 +25,7 @@ class INET_API EthernetFrameClassifier : public queueing::PacketClassifierBase
     /**
      * Sends the incoming packet to either the first or the second gate.
      */
-    virtual int classifyPacket(Packet *packet) override;
+    virtual int classifyPacket(Packet *packet) const override;
 };
 
 } // namespace inet

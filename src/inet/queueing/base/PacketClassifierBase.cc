@@ -58,10 +58,18 @@ void PacketClassifierBase::mapRegistrationForwardingGates(cGate *gate, std::func
 
 int PacketClassifierBase::callClassifyPacket(Packet *packet) const
 {
-    // KLUDGE
-    int index = const_cast<PacketClassifierBase *>(this)->classifyPacket(packet);
+    int index = classifyPacket(packet);
     if (index < 0 || static_cast<unsigned int>(index) >= outputGates.size())
         throw cRuntimeError("Packet is classified to invalid output gate: %d", index);
+    return index;
+}
+
+int PacketClassifierBase::classifyPulledPacket(Packet *packet, const cGate *gate)
+{
+    int index = callClassifyPacket(packet);
+    if (index != gate->getIndex())
+        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
+    handlePacketClassified(packet, index);
     return index;
 }
 
@@ -76,6 +84,7 @@ void PacketClassifierBase::startPacketStreaming(Packet *packet)
     EV_INFO << "Classifying packet" << EV_FIELD(packet) << EV_ENDL;
     inProgressStreamId = packet->getTreeId();
     inProgressGateIndex = callClassifyPacket(packet);
+    handlePacketClassified(packet, inProgressGateIndex);
 }
 
 void PacketClassifierBase::endPacketStreaming(Packet *packet)
@@ -107,6 +116,7 @@ void PacketClassifierBase::pushPacket(Packet *packet, const cGate *gate)
     checkPacketStreaming(nullptr);
     EV_INFO << "Classifying packet" << EV_FIELD(packet) << EV_ENDL;
     int index = callClassifyPacket(packet);
+    handlePacketClassified(packet, index);
     handlePacketProcessed(packet);
     emit(packetPushedSignal, packet);
     pushOrSendPacket(packet, outputGates[index], consumers[index]);
@@ -181,36 +191,50 @@ Packet *PacketClassifierBase::canPullPacket(const cGate *gate) const
 Packet *PacketClassifierBase::pullPacket(const cGate *gate)
 {
     auto packet = provider.pullPacket();
-    int index = callClassifyPacket(packet);
-    if (index != gate->getIndex())
-        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
+    classifyPulledPacket(packet, gate);
     return packet;
 }
 
 Packet *PacketClassifierBase::pullPacketStart(const cGate *gate, bps datarate)
 {
+    checkPacketStreaming(nullptr);
     auto packet = provider.pullPacketStart(datarate);
-    int index = callClassifyPacket(packet);
-    if (index != gate->getIndex())
-        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
+    inProgressStreamId = packet->getTreeId();
+    inProgressGateIndex = classifyPulledPacket(packet, gate);
     return packet;
 }
 
 Packet *PacketClassifierBase::pullPacketEnd(const cGate *gate)
 {
     auto packet = provider.pullPacketEnd();
-    int index = callClassifyPacket(packet);
-    if (index != gate->getIndex())
-        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
+    if (!isStreamingPacket())
+        classifyPulledPacket(packet, gate);
+    else {
+        checkPacketStreaming(packet);
+        if (inProgressGateIndex != gate->getIndex())
+            throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", inProgressGateIndex, gate->getIndex());
+    }
+    inProgressStreamId = -1;
+    inProgressGateIndex = -1;
     return packet;
 }
 
 Packet *PacketClassifierBase::pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     auto packet = provider.pullPacketProgress(datarate, position, extraProcessableLength);
-    int index = callClassifyPacket(packet);
-    if (index != gate->getIndex())
-        throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", index, gate->getIndex());
+    if (!isStreamingPacket()) {
+        inProgressStreamId = packet->getTreeId();
+        inProgressGateIndex = classifyPulledPacket(packet, gate);
+    }
+    else {
+        checkPacketStreaming(packet);
+        if (inProgressGateIndex != gate->getIndex())
+            throw cRuntimeError("Packet is classified to the wrong output gate (%d) when pulled from gate (%d)", inProgressGateIndex, gate->getIndex());
+    }
+    if (packet->getDataLength() == position + extraProcessableLength) {
+        inProgressStreamId = -1;
+        inProgressGateIndex = -1;
+    }
     return packet;
 }
 

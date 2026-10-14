@@ -28,7 +28,7 @@ void LabelClassifier::initialize(int stage)
     }
 }
 
-int LabelClassifier::classifyPacket(Packet *packet)
+int LabelClassifier::classifyPacket(Packet *packet) const
 {
     auto labelsTag = packet->getTag<LabelsTag>();
     for (size_t i = 0; i < labelsTag->getLabelsArraySize(); i++) {

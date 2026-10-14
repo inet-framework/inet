@@ -24,7 +24,7 @@ void StreamClassifier::initialize(int stage)
     }
 }
 
-int StreamClassifier::classifyPacket(Packet *packet)
+int StreamClassifier::classifyPacket(Packet *packet) const
 {
     const char *streamName = nullptr;
     switch (*mode) {

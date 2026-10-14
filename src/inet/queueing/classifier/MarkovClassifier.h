@@ -36,7 +36,7 @@ class INET_API MarkovClassifier : public ClockUserModuleMixin<PacketClassifierBa
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual int classifyPacket(Packet *packet) override;
+    virtual int classifyPacket(Packet *packet) const override;
     virtual void scheduleWaitTimer();
 
   public:

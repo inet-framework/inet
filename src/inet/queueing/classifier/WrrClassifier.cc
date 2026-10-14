@@ -39,7 +39,13 @@ void WrrClassifier::initialize(int stage)
     }
 }
 
-int WrrClassifier::classifyPacket(Packet *packet)
+int WrrClassifier::classifyPacket(Packet *packet) const
+{
+    // KLUDGE: this query changes the state of the module
+    return const_cast<WrrClassifier *>(this)->classifyPacketAndUpdateState(packet);
+}
+
+int WrrClassifier::classifyPacketAndUpdateState(Packet *packet)
 {
     bool isEmpty = true;
     for (size_t i = 0; i < consumers.size(); ++i) {

@@ -23,7 +23,13 @@ void TokenBucketClassifier::initialize(int stage)
     }
 }
 
-int TokenBucketClassifier::classifyPacket(Packet *packet)
+int TokenBucketClassifier::classifyPacket(Packet *packet) const
+{
+    // KLUDGE: this query changes the state of the module
+    return const_cast<TokenBucketClassifier *>(this)->classifyPacketAndUpdateState(packet);
+}
+
+int TokenBucketClassifier::classifyPacketAndUpdateState(Packet *packet)
 {
     emit(tokensChangedSignal, getNumTokens());
     auto numTokens = getNumPacketTokens(packet);

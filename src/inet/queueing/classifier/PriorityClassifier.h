@@ -17,7 +17,7 @@ namespace queueing {
 class INET_API PriorityClassifier : public PacketClassifierBase
 {
   protected:
-    virtual int classifyPacket(Packet *packet) override;
+    virtual int classifyPacket(Packet *packet) const override;
 
   public:
     virtual bool canPushSomePacket(const cGate *gate) const override;

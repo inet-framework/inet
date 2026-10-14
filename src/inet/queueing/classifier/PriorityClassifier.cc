@@ -12,7 +12,7 @@ namespace queueing {
 
 Define_Module(PriorityClassifier);
 
-int PriorityClassifier::classifyPacket(Packet *packet)
+int PriorityClassifier::classifyPacket(Packet *packet) const
 {
     for (size_t i = 0; i < consumers.size(); i++) {
         size_t outputGateIndex = getOutputGateIndex(i);

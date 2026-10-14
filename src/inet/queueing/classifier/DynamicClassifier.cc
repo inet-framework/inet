@@ -26,7 +26,13 @@ void DynamicClassifier::initialize(int stage)
      }
 }
 
-int DynamicClassifier::classifyPacket(Packet *packet)
+int DynamicClassifier::classifyPacket(Packet *packet) const
+{
+    // KLUDGE: this query changes the state of the module
+    return const_cast<DynamicClassifier *>(this)->classifyPacketAndUpdateState(packet);
+}
+
+int DynamicClassifier::classifyPacketAndUpdateState(Packet *packet)
 {
     int index = PacketClassifier::classifyPacket(packet);
     auto it = classIndexToGateItMap.find(index);

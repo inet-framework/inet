@@ -23,7 +23,13 @@ void MultiTokenBucketClassifier::initialize(int stage)
     }
 }
 
-int MultiTokenBucketClassifier::classifyPacket(Packet *packet)
+int MultiTokenBucketClassifier::classifyPacket(Packet *packet) const
+{
+    // KLUDGE: this query changes the state of the module
+    return const_cast<MultiTokenBucketClassifier *>(this)->classifyPacketAndUpdateState(packet);
+}
+
+int MultiTokenBucketClassifier::classifyPacketAndUpdateState(Packet *packet)
 {
     emitTokensChangedSignals();
     auto numTokens = getNumPacketTokens(packet);

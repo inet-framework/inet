@@ -151,6 +151,7 @@ void MultiFieldClassifier::pushPacket(Packet *packet, const cGate *inputGate)
 {
     numRcvd++;
     int gateIndex = classifyPacket(packet);
+    handlePacketClassified(packet, gateIndex);
     emit(pkClassSignal, gateIndex);
 
     cGate *outputGate = nullptr;
@@ -163,11 +164,12 @@ void MultiFieldClassifier::pushPacket(Packet *packet, const cGate *inputGate)
     pushOrSendPacket(packet, outputGate, consumer);
 }
 
-int MultiFieldClassifier::classifyPacket(Packet *packet)
+int MultiFieldClassifier::classifyPacket(Packet *packet) const
 {
-    for (auto& elem : filters)
-        if (elem.matches(packet))
-            return elem.gateIndex;
+    // a copy, because matches() keeps its intermediate results in the filter
+    for (auto filter : filters)
+        if (filter.matches(packet))
+            return filter.gateIndex;
     return -1;
 }
 

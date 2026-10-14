@@ -24,7 +24,7 @@ IPacketClassifierFunction *PacketClassifier::createClassifierFunction(const char
     return check_and_cast<IPacketClassifierFunction *>(createOne(classifierClass));
 }
 
-int PacketClassifier::classifyPacket(Packet *packet)
+int PacketClassifier::classifyPacket(Packet *packet) const
 {
     int index = packetClassifierFunction->classifyPacket(packet);
     return index == -1 ? index : getOutputGateIndex(index);

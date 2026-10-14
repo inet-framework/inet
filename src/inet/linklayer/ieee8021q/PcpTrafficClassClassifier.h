@@ -21,7 +21,7 @@ class INET_API PcpTrafficClassClassifier : public queueing::PacketClassifierBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual int classifyPacket(Packet *packet) override;
+    virtual int classifyPacket(Packet *packet) const override;
 };
 
 } // namespace inet
