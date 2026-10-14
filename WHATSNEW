@@ -803,6 +803,16 @@ Notable backward incompatible changes are the following:
    initialization. Simulations with a RedDropper therefore give other
    results, with the same statistical behavior.
 
+46. A statistical rate limiter draws its random number in advance
+
+   StatisticalRateLimiter drew a random number in matchesPacket(), so in pull
+   mode each query, such as canPullPacket(), drew a number and could give
+   another answer. It now decides with a stored random number, and it draws
+   the next one in handlePacketFiltered() after a decision that used the
+   stored one. The limiter draws one more random number at initialization.
+   Simulations with a StatisticalRateLimiter therefore give other results,
+   with the same statistical behavior.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

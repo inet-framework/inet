@@ -82,7 +82,7 @@
 #/showcases/tsn/gatescheduling/tsnsched/, -f omnetpp.ini -c General -r 0,            0.2s,         0000-0000/tplx;c268-fae7/~tNl;0d5b-c7a9/~tND;e74e-6ba9/tyf, PASS, # TSNsched externel tool required
 
 /showcases/tsn/streamfiltering/statistical/, -f omnetpp.ini -c NoStreamFiltering -r 0,        1s,         acd0-8c41/tplx;56f6-90ae/~tNl;b708-1087/~tND;ca7b-72f2/tyf, PASS,
-/showcases/tsn/streamfiltering/statistical/, -f omnetpp.ini -c StreamFiltering -r 0,        1s,         ab3f-ce09/tplx;0691-6665/~tNl;824b-bd80/~tND;a3b1-89c9/tyf, PASS,
+/showcases/tsn/streamfiltering/statistical/, -f omnetpp.ini -c StreamFiltering -r 0,        1s,         0f3b-129b/tplx;0e6b-64f9/~tNl;cab0-cf9d/~tND;a3b1-89c9/tyf, PASS,
 /showcases/tsn/streamfiltering/tokenbucket/, -f omnetpp.ini -c NoStreamFiltering -r 0,        1s,         7f25-0e2b/tplx;b959-85bf/~tNl;5d79-c71d/~tND;0e8a-20eb/tyf, PASS,
 /showcases/tsn/streamfiltering/tokenbucket/, -f omnetpp.ini -c StreamFiltering -r 0,        1s,         6b1d-e40e/tplx;1655-5bb5/~tNl;d3d6-51c1/~tND;3d06-01f0/tyf, PASS,
 /showcases/tsn/streamfiltering/underthehood/, -f omnetpp.ini -c General -r 0,       1s,         8225-8839/tplx;0000-0000/~tNl;0000-0000/~tND;4a42-5200/tyf, PASS,

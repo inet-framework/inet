@@ -19,16 +19,20 @@ class INET_API StatisticalRateLimiter : public PacketFilterBase, public Transpar
   protected:
     bps maxDatarate = bps(NaN);
     double maxPacketrate = NaN;
+    double randomValue = NaN; // drawn before the decision that uses it, so that a query draws nothing
 
   protected:
     virtual void initialize(int stage) override;
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
-    // NOTE: cannot answer because matchesPacket draws random numbers
+    // the answer of the consumer, so that a source waits while the consumer
+    // is full, also with a packet that the limiter would drop
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
 
+    virtual double getDropProbability(const Packet *packet) const;
     virtual bool matchesPacket(const Packet *packet) const override;
+    virtual void handlePacketFiltered(Packet *packet, bool matches) override;
 };
 
 } // namespace queueing

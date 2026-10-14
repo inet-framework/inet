@@ -20,6 +20,7 @@ void StatisticalRateLimiter::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         maxDatarate = bps(par("maxDatarate"));
         maxPacketrate = par("maxPacketrate");
+        randomValue = dblrand();
     }
 }
 
@@ -38,7 +39,7 @@ bool StatisticalRateLimiter::canPushPacket(Packet *packet, const cGate *gate) co
     return consumer == nullptr || consumer.canPushPacket(packet);
 }
 
-bool StatisticalRateLimiter::matchesPacket(const Packet *packet) const
+double StatisticalRateLimiter::getDropProbability(const Packet *packet) const
 {
     auto rateTag = packet->getTag<RateTag>();
     double p = 0;
@@ -46,7 +47,20 @@ bool StatisticalRateLimiter::matchesPacket(const Packet *packet) const
         p = std::max(p, ((rateTag->getDatarate() - maxDatarate) / rateTag->getDatarate()).get<unit>());
     else if (!std::isnan(maxPacketrate) && rateTag->getPacketrate() > maxPacketrate)
         p = std::max(p, (rateTag->getPacketrate() - maxPacketrate) / rateTag->getPacketrate());
-    return p == 0 || dblrand() >= p;
+    return p;
+}
+
+bool StatisticalRateLimiter::matchesPacket(const Packet *packet) const
+{
+    double p = getDropProbability(packet);
+    return p == 0 || randomValue >= p;
+}
+
+void StatisticalRateLimiter::handlePacketFiltered(Packet *packet, bool matches)
+{
+    // the decision used the random value, so the next decision needs a new one
+    if (getDropProbability(packet) != 0)
+        randomValue = dblrand();
 }
 
 } // namespace queueing

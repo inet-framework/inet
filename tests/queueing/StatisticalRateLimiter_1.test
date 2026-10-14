@@ -1,0 +1,198 @@
+%description:
+
+In this test, an active packet sink (ActivePacketSink) pulls packets from a
+passive packet source through a statistical rate limiter
+(StatisticalRateLimiter). The source tags each packet with a data rate of
+100 bps, and the limit is 50 bps, so the limiter drops about half of the
+packets at random. In pull mode the limiter drops a packet when the source
+offers it. The query probe between the limiter and the sink asks no query
+(numRepeats = 0).
+
+%file: test.ned
+
+import inet.queueing.filter.StatisticalRateLimiter;
+import inet.queueing.sink.ActivePacketSink;
+import inet.test.queueingtest.lib.QueryProbe;
+
+network TestStatisticalRateLimiter
+{
+    submodules:
+        provider: TaggingSource {
+            @display("p=100,100");
+        }
+        limiter: StatisticalRateLimiter {
+            @display("p=200,100");
+        }
+        probe: QueryProbe {
+            @display("p=300,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=400,100");
+        }
+    connections:
+        provider.out --> limiter.in;
+        limiter.out --> probe.in;
+        probe.out --> collector.in;
+}
+
+%file: TaggingSource.ned
+
+import inet.queueing.source.PassivePacketSource;
+
+simple TaggingSource extends PassivePacketSource
+{
+    parameters:
+        double taggedDatarate @unit(bps);
+        @class(TaggingSource);
+}
+
+%file: TaggingSource.cc
+#include "inet/queueing/common/RateTag_m.h"
+#include "inet/queueing/source/PassivePacketSource.h"
+
+using namespace inet;
+namespace StatisticalRateLimiter_1 {
+
+// a passive packet source that tags each packet with a data rate
+class TaggingSource : public queueing::PassivePacketSource
+{
+  protected:
+    virtual Packet *createPacket() override
+    {
+        auto packet = PassivePacketSource::createPacket();
+        packet->addTag<RateTag>()->setDatarate(bps(par("taggedDatarate").doubleValue()));
+        return packet;
+    }
+};
+
+Define_Module(TaggingSource);
+
+} // namespace StatisticalRateLimiter_1
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestStatisticalRateLimiter
+sim-time-limit = 20s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.provider.packetLength = 1B
+*.provider.taggedDatarate = 100bps
+*.limiter.maxDatarate = 50bps
+*.collector.collectionInterval = 1s
+*.probe.numRepeats = 0
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 0s collector: Collecting packet, [^\n]*provider-0 \(
+
+%contains-regex: stdout
+^At 1s collector: Collecting packet, [^\n]*provider-1 \(
+
+%contains-regex: stdout
+^At 2s collector: Collecting packet, [^\n]*provider-2 \(
+
+%contains-regex: stdout
+^At 3s collector: Collecting packet, [^\n]*provider-3 \(
+
+%contains-regex: stdout
+^At 4s collector: Collecting packet, [^\n]*provider-4 \(
+
+%contains-regex: stdout
+^At 5s collector: Collecting packet, [^\n]*provider-5 \(
+
+%contains-regex: stdout
+^At 6s collector: Collecting packet, [^\n]*provider-6 \(
+
+%contains-regex: stdout
+^At 7s limiter: Filtering out packet, [^\n]*provider-8 \(
+
+%contains-regex: stdout
+^At 7s collector: Collecting packet, [^\n]*provider-7 \(
+
+%contains-regex: stdout
+^At 8s collector: Collecting packet, [^\n]*provider-9 \(
+
+%contains-regex: stdout
+^At 9s limiter: Filtering out packet, [^\n]*provider-11 \(
+
+%contains-regex: stdout
+^At 9s limiter: Filtering out packet, [^\n]*provider-12 \(
+
+%contains-regex: stdout
+^At 9s limiter: Filtering out packet, [^\n]*provider-13 \(
+
+%contains-regex: stdout
+^At 9s collector: Collecting packet, [^\n]*provider-10 \(
+
+%contains-regex: stdout
+^At 10s limiter: Filtering out packet, [^\n]*provider-15 \(
+
+%contains-regex: stdout
+^At 10s collector: Collecting packet, [^\n]*provider-14 \(
+
+%contains-regex: stdout
+^At 11s limiter: Filtering out packet, [^\n]*provider-17 \(
+
+%contains-regex: stdout
+^At 11s limiter: Filtering out packet, [^\n]*provider-18 \(
+
+%contains-regex: stdout
+^At 11s limiter: Filtering out packet, [^\n]*provider-19 \(
+
+%contains-regex: stdout
+^At 11s collector: Collecting packet, [^\n]*provider-16 \(
+
+%contains-regex: stdout
+^At 12s collector: Collecting packet, [^\n]*provider-20 \(
+
+%contains-regex: stdout
+^At 13s collector: Collecting packet, [^\n]*provider-21 \(
+
+%contains-regex: stdout
+^At 14s limiter: Filtering out packet, [^\n]*provider-23 \(
+
+%contains-regex: stdout
+^At 14s collector: Collecting packet, [^\n]*provider-22 \(
+
+%contains-regex: stdout
+^At 15s limiter: Filtering out packet, [^\n]*provider-25 \(
+
+%contains-regex: stdout
+^At 15s collector: Collecting packet, [^\n]*provider-24 \(
+
+%contains-regex: stdout
+^At 16s collector: Collecting packet, [^\n]*provider-26 \(
+
+%contains-regex: stdout
+^At 17s limiter: Filtering out packet, [^\n]*provider-28 \(
+
+%contains-regex: stdout
+^At 17s limiter: Filtering out packet, [^\n]*provider-29 \(
+
+%contains-regex: stdout
+^At 17s limiter: Filtering out packet, [^\n]*provider-30 \(
+
+%contains-regex: stdout
+^At 17s collector: Collecting packet, [^\n]*provider-27 \(
+
+%contains-regex: stdout
+^At 18s limiter: Filtering out packet, [^\n]*provider-32 \(
+
+%contains-regex: stdout
+^At 18s limiter: Filtering out packet, [^\n]*provider-33 \(
+
+%contains-regex: stdout
+^At 18s collector: Collecting packet, [^\n]*provider-31 \(
+
+%contains-regex: stdout
+^At 19s collector: Collecting packet, [^\n]*provider-34 \(
+
+%contains-regex: stdout
+^At 20s collector: Collecting packet, [^\n]*provider-35 \(
