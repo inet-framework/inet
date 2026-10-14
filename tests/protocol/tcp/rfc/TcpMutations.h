@@ -213,6 +213,40 @@ inline double tcpSegmentDataLength(const Packet *packet)
          - evalPacketField(packet, "tcp.headerLength").doubleValueInUnit("B");
 }
 
+// The TCP header of a frame or of a segment, whatever chunks come in front of it.
+inline Ptr<const TcpHeader> tcpHeaderOf(const Packet *packet)
+{
+    std::unique_ptr<Packet> copy(packet->dup());
+    while (true) {
+        const auto& front = copy->peekAtFront<Chunk>();
+        if (dynamicPtrCast<const TcpHeader>(front) != nullptr)
+            return copy->peekAtFront<TcpHeader>();
+        copy->removeAtFront<Chunk>(front->getChunkLength());
+    }
+}
+
+// The value of the MSS option of a segment (RFC 9293 section 3.2), or 0 when it has none.
+inline uint32_t tcpMssOptionOf(const Packet *packet)
+{
+    const auto& header = tcpHeaderOf(packet);
+    for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++)
+        if (auto mss = dynamic_cast<const inet::tcp::TcpOptionMaxSegmentSize *>(header->getHeaderOption(i)))
+            return mss->getMaxSegmentSize();
+    return 0;
+}
+
+// The octets that the options of a segment occupy, counted from the options themselves and
+// padded to a whole number of 32-bit words (RFC 9293 section 3.1). The header length field of
+// a correct segment is 20 octets more than this.
+inline double tcpOptionsLength(const Packet *packet)
+{
+    const auto& header = tcpHeaderOf(packet);
+    unsigned int length = 0;
+    for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++)
+        length += header->getHeaderOption(i)->getLength();
+    return (length + 3) / 4 * 4;
+}
+
 // True when the packet matches a PacketFilter expression; an expression that does not apply
 // to the packet is a non-match, never an error.
 inline bool matchesExpression(const Packet *packet, const char *expression)

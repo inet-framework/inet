@@ -29,8 +29,10 @@ rule where it acts: a guard forbids any segment of new data that host A sends in
 that takes FlightSize past the threshold plus 3 + k segments, with k the further duplicates.
 Two observers keep FlightSize and k from the segments and the acknowledgments.
 
-**The scenario runs the RFC 5681 algorithm.** With SACK, the recovery of RFC 6675 replaces
-steps 3 to 5. The ini selects Reno without SACK, and says why.
+**The scenario runs the RFC 5681 algorithm.** The defaults replace it: SACK brings RFC 6675,
+RACK-TLP and PRR replace the threshold of duplicates and the window of steps 3 to 5, and
+CUBIC has its own threshold. The ini selects Reno without SACK, with the threshold of three
+duplicates and without PRR, and says why.
 
 **The model conforms.** The relay removes exactly one frame, host B repeats its
 acknowledgment, and host A repairs the loss on the third duplicate. The threshold falls, the
@@ -45,8 +47,8 @@ new data as an anchor, and that anchor is the next check's subject. It is record
 sharpening candidate rather than claimed.
 
 **The retransmission carries a second bound.** It must arrive well before the retransmission
-timer would have fired, or a slow timer and fast retransmit look the same. The timer is three
-seconds here, and the step allows one.
+timer would have fired, or a slow timer and fast retransmit look the same. The timer is at
+least one second here, and the step allows one.
 
 %includes:
 #include <algorithm>
@@ -249,11 +251,16 @@ sim-time-limit = 30s
 seed-set = 0
 
 **.ipv4.arp.typename = "GlobalArp"
-# RFC 5681's fast retransmit and fast recovery are the algorithm of a TCP without SACK. With
-# SACK, the recovery of RFC 6675 replaces steps 3 to 5. The check reads RFC 5681, so it runs
-# Reno without SACK.
+# RFC 5681's fast retransmit and fast recovery are the algorithm of a TCP without SACK. The
+# defaults replace every part of it: SACK brings the recovery of RFC 6675, RACK-TLP
+# (RFC 8985) replaces the duplicate-acknowledgment threshold, Proportional Rate Reduction
+# (RFC 6937) replaces the window of steps 3 to 5, and CUBIC sets its own threshold
+# (RFC 9438 section 4.6). The check reads RFC 5681, so it runs Reno without SACK, with the
+# threshold of three duplicates and without PRR.
 **.tcp.tcpAlgorithmClass = "TcpReno"
 **.tcp.sackSupport = false
+**.tcp.lossDetectionMode = "dupthresh"
+**.tcp.prrEnabled = false
 **.tcp.advertisedWindow = 65535
 
 *.host1.numApps = 1

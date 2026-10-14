@@ -146,6 +146,12 @@ seed-set = 0
 # static ARP: the only frames on the wire are the TCP/IP ones.
 **.ipv4.arp.typename = "GlobalArp"
 
+# The tail loss probe (RFC 8985 section 7.3) sends the last segment again before the
+# retransmission timer expires and then re-arms that timer for a full period, so the
+# retransmission of the data would come one probe timeout late. This check reads the
+# retransmission timer of RFC 6298 alone, so the probe is off.
+**.tcp.tlpEnabled = false
+
 *.host1.numApps = 1
 *.host1.app[0].typename = "TcpSessionApp"
 *.host1.app[0].connectAddress = "host2"

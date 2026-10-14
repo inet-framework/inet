@@ -57,10 +57,12 @@ Define_ProtocolTestProgram()
                   .describe("host B's empty acknowledgment, still expecting ISS_A + 1")
                   .within(0.5))
         // Observation 4: host B never answers with a reset (RFC9293-RST-2).
-        .never(on("host2.tcp").signal("packetSentToLower")
-                  .filterPacket("tcp.rstBit == true")
-                  .describe("a reset from host B")
-                  .within(0.5))
+        // The guard runs beside the next step: the modern loss recovery (SACK, RACK) can
+        // complete the stream inside its window, and a blocking step would miss that.
+        .meanwhile(never(on("host2.tcp").signal("packetSentToLower")
+                             .filterPacket("tcp.rstBit == true")
+                             .describe("a reset from host B")
+                             .within(0.5)))
         // Observation 5: the connection stays in the same state and finishes. Host A receives
         // an acknowledgment of the whole stream after it retransmits the segment that host B
         // could not use.

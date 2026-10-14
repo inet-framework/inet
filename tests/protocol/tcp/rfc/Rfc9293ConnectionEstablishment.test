@@ -29,14 +29,27 @@ at host1.tcp. The captured header length is reported in the run: 24 octets means
 SYN carries the MSS option (RFC9293-OPT-1, a "should"); this test does not assert either
 value, since the option's absence would be a note, not a failure.
 
+Observation 3 reads the header length against the options the ACK carries. Both SYNs carry
+the timestamp option by default, and RFC 7323 section 3.2 then puts it on every segment that
+is not a reset, so the ACK has a 32-octet header. The header length must be 20 octets plus
+its options, padded to whole words (RFC9293-HDR-1), and without options it is 20.
+
 %includes:
 #include "ProtocolTest.h"
 #include "PacketField.h"
+#include "TcpMutations.h"
 
 %global:
 
 using namespace inet;
 using namespace inet::protocoltest;
+
+// RFC9293-HDR-1: the data offset counts the fixed 20 octets and the options, and nothing else.
+static bool headerLengthMatchesOptions(const MatchContext& context)
+{
+    double headerLength = evalPacketField(context.event.packet, "tcp.headerLength").doubleValueInUnit("B");
+    return headerLength == 20 + tcpOptionsLength(context.event.packet);
+}
 
 Define_ProtocolTestProgram()
 {
@@ -71,8 +84,9 @@ Define_ProtocolTestProgram()
         // Observation 3: host A's final ACK acknowledges ISS_B + 1, with a 20-octet header:
         // no option, five words.
         .once(on("host1.tcp").signal("packetSentToLower")
-                  .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {issB} + 1 && tcp.headerLength == 20B")
-                  .describe("host A's final ACK acknowledging ISS_B + 1, with a 20-octet header").within(0.5));
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {issB} + 1")
+                  .assertEvent(headerLengthMatchesOptions)
+                  .describe("host A's final ACK acknowledging ISS_B + 1, whose header is 20 octets and its options").within(0.5));
 }
 
 %activity:
