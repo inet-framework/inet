@@ -27,7 +27,6 @@ class INET_API ReceiveBuffer
     // NextExpectedSequenceNumber is initialized to to the value of the Starting Block Ack Starting Sequence
     // Control field of the ADDBA Request frame of the accepted Block Ack agreement. (IEEE 802.11­-11/0381r0)
     int bufferSize = -1;
-    int length = 0;
     SequenceNumberCyclic nextExpectedSequenceNumber;
 
   public:
@@ -39,11 +38,11 @@ class INET_API ReceiveBuffer
     void removeFrame(SequenceNumberCyclic sequenceNumber);
 
     const ReorderBuffer& getBuffer() { return buffer; }
-    int getLength() { return length; }
+    int getLength() { return buffer.size(); }
     int getBufferSize() { return bufferSize; }
     SequenceNumberCyclic getNextExpectedSequenceNumber() { return nextExpectedSequenceNumber; }
     void setNextExpectedSequenceNumber(SequenceNumberCyclic nextExpectedSequenceNumber) { this->nextExpectedSequenceNumber = nextExpectedSequenceNumber; }
-    bool isFull() { ASSERT(length <= bufferSize); return length == bufferSize; }
+    bool isFull() { ASSERT(getLength() <= bufferSize); return getLength() == bufferSize; }
 };
 
 } /* namespace ieee80211 */
