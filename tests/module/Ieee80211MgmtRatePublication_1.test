@@ -8,6 +8,8 @@ full STA stop, simplified STA stop, and the AP's static peer departure.
 
 %file: TestRatePublication.cc
 
+#include <limits>
+
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
@@ -431,6 +433,37 @@ class RatePublicationTest : public cSimpleModule, public cListener
         invalid->setSupportedRates(rates);
         sta->advertisement(apMib->address, invalid);
         ASSERT(staMib->getBssRateSet() == original);
+
+        int beforeInvalid = rateNotifications;
+        for (bool extendedElement : {false, true}) {
+            for (double invalidRate : {std::numeric_limits<double>::quiet_NaN(),
+                    std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()}) {
+                for (int invalidIndex : {0, 1}) {
+                    auto malformed = makeShared<Ieee80211BeaconFrame>(*changed);
+                    Ieee80211SupportedRatesElement primary;
+                    primary.numRates = extendedElement ? 1 : 2;
+                    primary.rate[0] = 6;
+                    Ieee80211ExtendedSupportedRatesElement extra;
+                    if (extendedElement) {
+                        extra.numRates = 2;
+                        extra.rate[1 - invalidIndex] = 24;
+                        extra.rate[invalidIndex] = invalidRate;
+                    }
+                    else {
+                        primary.rate[1 - invalidIndex] = 6;
+                        primary.rate[invalidIndex] = invalidRate;
+                    }
+                    malformed->setSupportedRates(primary);
+                    malformed->setExtendedSupportedRatesPresent(extendedElement);
+                    malformed->setExtendedSupportedRates(extra);
+                    sta->advertisement(apMib->address, malformed);
+                    ASSERT(staMib->getBssRateSet() == original);
+                    ASSERT(*staMib->findPeerRateSet(apMib->address) == original);
+                    ASSERT(staMib->bssStationData.isAssociated);
+                    ASSERT(rateNotifications == beforeInvalid);
+                }
+            }
+        }
 
         auto rateControl = check_and_cast<AarfRateControl *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateControl"));
         auto selectedMode = rateControl->getRate(apMib->address);

@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 
+#include <cmath>
+
 #include "inet/common/INETUtils.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -90,6 +92,9 @@ Ieee80211RateSetState Ieee80211MgmtBase::makeRateSet(const Ieee80211SupportedRat
     state.basic.known = basicKnown;
     auto addRates = [&state, basicKnown](const auto& element) {
         for (int i = 0; i < element.numRates; i++) {
+            // Reject nonfinite values before ordered-set comparison can discard them.
+            if (!std::isfinite(element.rate[i]))
+                throw cRuntimeError("Invalid nonfinite management rate");
             auto rate = Mbps(element.rate[i]);
             state.supported.legacyRates.insert(rate);
             state.operational.legacyRates.insert(rate);

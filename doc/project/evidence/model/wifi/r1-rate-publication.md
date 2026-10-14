@@ -241,6 +241,29 @@ The corrected diagnostic logs use the `repro-corrected-` prefix under `audit/pul
 
 The scoped architecture check, source protection, document seals, and whitespace checks pass. Full architecture, naming, and interface findings match the pinned parent. The naming comparison omits the different base-ref label and ignores output order. The correction adds no exception or recorded expectation. The final source and fixture hashes appear in `corrections/source-digests.json`.
 
+## Nonfinite management rate validation
+
+The management converter rejects each nonfinite numeric value before it inserts that value into an ordered rate set. Previously, an abstract Beacon with rates `[6, NaN]` could replace committed rates with a set containing only 6 Mbps. Set comparison discarded the NaN before the existing record validator could inspect it. The converter now throws before insertion, so the management handler discards the malformed frame without a rate commit or notification. The shared converter serves both rate elements in requests, responses, and discovery frames.
+
+The publication fixture supplies NaN, positive infinity, and negative infinity before and after a valid rate in each element. These twelve abstract Beacons use the production associated-AP Beacon handler. Each case must preserve BSS rates, peer rates, association state, and the rate notification count. The wire decoder cannot produce these nonfinite values from rate octets. The check covers abstract management input and adds no wire-format rule.
+
+The expanded fixture fails against the unchanged production source at head `b6693f2362db28311974ddd780903affcc39e62a`. Its BSS preservation assertion fails at 0.5 seconds, event 394. Raw failure output resides in `audit/ieee80211-compressed-blockack-r1/nonfinite-rate/before.out` and `before.err`. The fixture retains its existing PASS expectation; this failure establishes the regression before the correction.
+
+After the correction, fresh debug and release builds pass. Two module files and four unit files pass across seven runs. The publication fixture checks all twelve malformed inputs; the HT fixture retains its selector and callback checks. Both module fixtures use `General` and seed set 0 with their existing time limits. The focused architecture, document seal, and whitespace checks pass. The original audit remains a snapshot of the comparison head; these results describe the corrected source.
+
+The following commands run from the checkout root. The debug build completes before either test runner starts.
+
+```sh
+make MODE=debug -j12
+make MODE=release -j12
+inet_run_module_tests -m debug -f 'Ieee80211Mgmt(RatePublication|StateCommit)_1.test' --no-concurrent
+inet_run_unit_tests -m debug -f 'Ieee80211(Mib(BssTeardown|PeerTeardown|StateCommit)|SupportedRates)_1.test' --no-concurrent
+```
+
+Each command exits with status 0. Build logs, runner logs, verification records, and source digests reside under `audit/ieee80211-compressed-blockack-r1/nonfinite-rate/`. Direct malformed-input execution covers Beacons; the same pre-insertion check serves association requests and responses. This pass does not repeat the full regression selection or the fingerprint controls. No recorded expectation changes.
+
+Before publication, the final pass repeats all 28 selected test files across 46 runs against the corrected source. All 19 module, seven unit, and two protocol files pass. Both Basic Block Ack fingerprint controls retain all three selected ingredients. Repository-wide architecture, naming, and interface findings match the pinned parent. Final runner and gate logs reside under `audit/ieee80211-compressed-blockack-r1/final-publication/`. The selector coverage forms a separate test commit; the numeric correction includes its regression and release note.
+
 ## Limits and next integration check
 
 The self-audit checks ownership, packet lifetime, callback boundaries, terminal paths, and source protection against the implementation contract. The retained response chunk remains valid after packet deletion. The source adds no event, frame format, or rate-selector change. The controls establish their existing assertions; they do not establish every simulation trajectory or arbitrary external listener behavior.
