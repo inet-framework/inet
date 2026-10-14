@@ -73,23 +73,29 @@ void Ieee80211MgmtStaSimplified::configureAssociation()
     apMib->bssAccessPointData.stations[mib->address] = Ieee80211Mib::ASSOCIATED;
     mib->bssData.ssid = apMib->bssData.ssid;
     mib->bssStationData.isAssociated = true;
+    auto peerRates = mib->getLocalRateSet();
+    // IEEE Std 802.11-2024, 9.4.2.3: request basic-rate bits have no BSS meaning.
+    peerRates.basic = Ieee80211RateSet();
     // Simplified management is an explicit no-air abstraction: install the state that the
     // Association Request/Response exchange would have committed in detailed management.
-    if (mib->isHtOperationSupported() && apMib->isHtOperationSupported()) {
-        mib->setPeerHtCapabilities(apMib->address, apMib->localHtCapabilities, apMib->getHtOperation());
-        apMib->setPeerHtCapabilities(mib->address, mib->localHtCapabilities, apMib->getHtOperation());
-    }
+    bool validHt = mib->isHtOperationSupported() && apMib->isHtOperationSupported();
+    auto operation = validHt ? apMib->getHtOperation() : Ieee80211HtOperation();
+    mib->installBssAndPeerState(apMib->getBssRateSet(), apMib->address, apMib->getLocalRateSet(),
+            validHt ? &apMib->localHtCapabilities : nullptr, operation);
+    apMib->installBssAndPeerState(apMib->getBssRateSet(), mib->address, peerRates,
+            validHt ? &mib->localHtCapabilities : nullptr, operation);
 }
 
 void Ieee80211MgmtStaSimplified::stop()
 {
+    auto accessPointAddress = mib->bssData.bssid;
     mib->bssStationData.isAssociated = false;
-    auto apMib = findAccessPointMib(mib->bssData.bssid, false);
+    Ieee80211MgmtBase::stop();
+    auto apMib = findAccessPointMib(accessPointAddress, false);
     if (apMib != nullptr) {
         apMib->bssAccessPointData.stations.erase(mib->address);
-        apMib->removePeerHtCapabilities(mib->address);
+        apMib->releaseAssociationId(mib->address);
     }
-    Ieee80211MgmtBase::stop();
 }
 
 void Ieee80211MgmtStaSimplified::handleTimer(cMessage *msg)

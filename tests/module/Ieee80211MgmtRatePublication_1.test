@@ -1,0 +1,645 @@
+%description:
+Verify rate publication through a real AP/STA exchange and static simplified
+association. Check both rate elements, commit boundaries, Beacon refresh,
+refusal, unknown and known empty state, notifications, departure, and shutdown.
+The fixture does not write MIB rate records.
+Check completed state inside callbacks for disassociation, replacement,
+full STA stop, simplified STA stop, and the AP's static peer departure.
+
+%file: TestRatePublication.cc
+
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/ratecontrol/AarfRateControl.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet {
+namespace ieee80211 {
+
+class RatePublicationAp : public Ieee80211MgmtAp
+{
+  public:
+    Ptr<const Ieee80211BeaconFrame> beacon;
+    Ptr<const Ieee80211AssociationResponseFrame> response;
+    bool captureOnly = false;
+    uint64_t pendingTransaction(const MacAddress& address) const { return staList.at(address).pendingAssociationTransactionId; }
+
+  protected:
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& address, uint64_t transactionId = 0) override
+    {
+        if (subtype == ST_BEACON)
+            beacon = dynamicPtrCast<const Ieee80211BeaconFrame>(body);
+        if (subtype == ST_ASSOCIATIONRESPONSE || subtype == ST_REASSOCIATIONRESPONSE)
+            response = dynamicPtrCast<const Ieee80211AssociationResponseFrame>(body);
+        if (!captureOnly)
+            Ieee80211MgmtAp::sendManagementFrame(name, body, subtype, address, transactionId);
+    }
+
+  public:
+    void request(const MacAddress& address, const Ptr<const Ieee80211AssociationRequestFrame>& body)
+    {
+        Enter_Method("request");
+        captureOnly = true;
+        auto packet = new Packet("AssociationRequest");
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        if (dynamicPtrCast<const Ieee80211ReassociationRequestFrame>(body) != nullptr) {
+            header->setType(ST_REASSOCIATIONREQUEST);
+            handleReassociationRequestFrame(packet, header);
+        }
+        else {
+            header->setType(ST_ASSOCIATIONREQUEST);
+            handleAssociationRequestFrame(packet, header);
+        }
+    }
+
+    void complete(const MacAddress& address, FrameTransmissionStatus status, bool moreFragments = false, bool stale = false)
+    {
+        Enter_Method("complete");
+        Packet packet("AssociationResponse");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setType(dynamicPtrCast<const Ieee80211ReassociationResponseFrame>(response) != nullptr ?
+                ST_REASSOCIATIONRESPONSE : ST_ASSOCIATIONRESPONSE);
+        header->setReceiverAddress(address);
+        header->setMoreFragments(moreFragments);
+        packet.insertAtBack(header);
+        auto id = staList.at(address).pendingAssociationTransactionId;
+        packet.addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(stale ? id + 1 : id);
+        frameTransmissionFinished(&packet, status);
+    }
+
+    void depart(const MacAddress& address)
+    {
+        Enter_Method("depart");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDisassociationFrame(new Packet("Disassociation"), header);
+    }
+
+    void authenticate(const MacAddress& address)
+    {
+        Enter_Method("authenticate");
+        for (int sequence = 1; sequence < numAuthSteps; sequence += 2) {
+            auto body = makeShared<Ieee80211AuthenticationFrame>();
+            body->setSequenceNumber(sequence);
+            auto packet = new Packet("Authentication", body);
+            auto header = makeShared<Ieee80211MgmtHeader>();
+            header->setTransmitterAddress(address);
+            handleAuthenticationFrame(packet, header);
+        }
+    }
+
+    void deauthenticate(const MacAddress& address)
+    {
+        Enter_Method("deauthenticate");
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        handleDeauthenticationFrame(new Packet("Deauthentication"), header);
+    }
+};
+
+Define_Module(RatePublicationAp);
+
+class RatePublicationSta : public Ieee80211MgmtSta
+{
+  public:
+    Ptr<const Ieee80211AssociationRequestFrame> request;
+    bool captureOnly = false;
+
+  protected:
+    virtual void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body,
+            int subtype, const MacAddress& address) override
+    {
+        if (subtype == ST_ASSOCIATIONREQUEST)
+            request = dynamicPtrCast<const Ieee80211AssociationRequestFrame>(body);
+        if (!captureOnly)
+            Ieee80211MgmtSta::sendManagementFrame(name, body, subtype, address);
+    }
+
+    virtual void sendConfirm(Ieee80211PrimConfirm *confirm, Ieee80211PrimResultCode resultCode) override
+    {
+        if (captureOnly)
+            delete confirm;
+        else
+            Ieee80211MgmtSta::sendConfirm(confirm, resultCode);
+    }
+
+  public:
+    void advertisement(const MacAddress& address, const Ptr<const Ieee80211BeaconFrame>& body, bool probe = false)
+    {
+        Enter_Method("advertisement");
+        auto packet = new Packet("Advertisement");
+        if (probe) {
+            auto probeBody = makeShared<Ieee80211ProbeResponseFrame>();
+            probeBody->setSSID(body->getSSID());
+            probeBody->setChannelNumber(body->getChannelNumber());
+            probeBody->setBeaconInterval(body->getBeaconInterval());
+            probeBody->setSupportedRates(body->getSupportedRates());
+            probeBody->setExtendedSupportedRatesPresent(body->getExtendedSupportedRatesPresent());
+            probeBody->setExtendedSupportedRates(body->getExtendedSupportedRates());
+            probeBody->setChunkLength(body->getChunkLength());
+            packet->insertAtBack(probeBody);
+        }
+        else
+            packet->insertAtBack(body);
+        packet->addTag<SignalPowerInd>()->setPower(mW(1));
+        physicallayer::Ieee80211Channel channel(&physicallayer::Ieee80211CompliantBands::band2_4GHz, 0);
+        packet->addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        header->setType(probe ? ST_PROBERESPONSE : ST_BEACON);
+        if (probe)
+            handleProbeResponseFrame(packet, header);
+        else
+            handleBeaconFrame(packet, header);
+    }
+
+    void refuse(const MacAddress& address)
+    {
+        Enter_Method("refuse");
+        captureOnly = true;
+        auto ap = lookupAP(address);
+        ASSERT(ap != nullptr);
+        ap->isAuthenticated = true;
+        startReassociation(ap, SimTime(1));
+        auto body = makeShared<Ieee80211ReassociationResponseFrame>();
+        body->setStatusCode(SC_DATARATE_UNSUP);
+        body->setChunkLength(B(6));
+        auto packet = new Packet("RefusedResponse");
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        processAssociationResponse(packet, header, true);
+    }
+
+    void loseAssociation()
+    {
+        Enter_Method("loseAssociation");
+        disassociate();
+    }
+
+    bool hasBeaconTimeout() const { return assocAP.beaconTimeoutMsg != nullptr; }
+
+    void replaceAssociation(const MacAddress& address, const Ptr<const Ieee80211AssociationResponseFrame>& advertisement)
+    {
+        Enter_Method("replaceAssociation");
+        auto ap = lookupAP(address);
+        ASSERT(ap != nullptr && ap->isAuthenticated);
+        startReassociation(ap, SimTime(1));
+        auto body = makeShared<Ieee80211ReassociationResponseFrame>();
+        body->setStatusCode(SC_SUCCESSFUL);
+        body->setAid(1);
+        body->setSupportedRates(advertisement->getSupportedRates());
+        body->setExtendedSupportedRatesPresent(advertisement->getExtendedSupportedRatesPresent());
+        body->setExtendedSupportedRates(advertisement->getExtendedSupportedRates());
+        body->setChunkLength(advertisement->getChunkLength());
+        auto packet = new Packet("ReplacementResponse");
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        processAssociationResponse(packet, header, true);
+    }
+
+    void associateAgain(const MacAddress& address, const Ptr<const Ieee80211AssociationResponseFrame>& body)
+    {
+        Enter_Method("associateAgain");
+        auto ap = lookupAP(address);
+        ASSERT(ap != nullptr && ap->isAuthenticated);
+        startAssociation(ap, SimTime(1));
+        auto packet = new Packet("AcceptedResponse");
+        packet->insertAtBack(body);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(address);
+        processAssociationResponse(packet, header, false);
+    }
+};
+
+Define_Module(RatePublicationSta);
+
+class RatePublicationTest : public cSimpleModule, public cListener
+{
+  protected:
+    Ieee80211Mib *staMib = nullptr;
+    Ieee80211Mib *apMib = nullptr;
+    int rateNotifications = 0;
+    int datarateNotifications = 0;
+    bool checkAtomicRates = false;
+    bool checkTeardown = false;
+    int teardownNotifications = 0;
+    int simpleTeardownNotifications = 0;
+    int simpleDepartureNotifications = 0;
+    int apCleanupNotifications = 0;
+    bool checkApCleanup = false;
+    bool checkApStop = false;
+    Ieee80211Mib::BssMemberStatus expectedApState = Ieee80211Mib::AUTHENTICATED;
+
+    void checkClearedRates(Ieee80211Mib *mib, const MacAddress& peer)
+    {
+        ASSERT(!mib->bssStationData.isAssociated);
+        ASSERT(mib->findPeerHtState(peer) == nullptr);
+        ASSERT(mib->findPeerRateSet(peer) == nullptr);
+        const auto& bss = mib->getBssRateSet();
+        ASSERT(!bss.supported.known && !bss.basic.known && !bss.operational.known);
+        ASSERT(mib->getLocalRateSet().operational.known);
+    }
+
+    Ieee80211Mib *getMib(const char *node)
+    {
+        return check_and_cast<Ieee80211Mib *>(getModuleByPath((std::string("^.") + node + ".wlan[0].mib").c_str()));
+    }
+
+    template<typename Frame>
+    void checkRates(const Ieee80211RateSetState& state, const Ptr<const Frame>& frame, bool basicKnown = true)
+    {
+        ASSERT(state.supported.known && state.operational.known);
+        ASSERT(state.basic.known == basicKnown);
+        std::set<bps> operational;
+        std::set<bps> basic;
+        auto checkElement = [&](const auto& element) {
+            for (int i = 0; i < element.numRates; i++) {
+                operational.insert(Mbps(element.rate[i]));
+                if (basicKnown && element.basicRate[i])
+                    basic.insert(Mbps(element.rate[i]));
+            }
+        };
+        checkElement(frame->getSupportedRates());
+        if (frame->getExtendedSupportedRatesPresent())
+            checkElement(frame->getExtendedSupportedRates());
+        ASSERT(state.supported.legacyRates == operational);
+        ASSERT(state.operational.legacyRates == operational);
+        ASSERT(state.basic.legacyRates == basic);
+        ASSERT(state.supported.htMcs.empty() && state.operational.htMcs.empty() && state.basic.htMcs.empty());
+    }
+
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_LAST) {
+            staMib = getMib("sta");
+            apMib = getMib("ap");
+            ASSERT(staMib->getLocalRateSet().operational.known);
+            ASSERT(apMib->getLocalRateSet().operational.known);
+            ASSERT(!staMib->getBssRateSet().basic.known);
+            ASSERT(staMib->findPeerRateSet(apMib->address) == nullptr);
+            ASSERT(apMib->getBssRateSet() == apMib->getLocalRateSet());
+            auto simpleAp = getMib("simpleAp");
+            auto simpleSta = getMib("simpleSta");
+            ASSERT(simpleAp->getLocalRateSet().operational.known);
+            ASSERT(simpleSta->getLocalRateSet().operational.known);
+            ASSERT(simpleSta->findPeerHtState(simpleAp->address) != nullptr);
+            ASSERT(simpleSta->getBssRateSet() == simpleAp->getBssRateSet());
+            ASSERT(*simpleSta->findPeerRateSet(simpleAp->address) == simpleAp->getLocalRateSet());
+            auto peer = simpleSta->getLocalRateSet();
+            peer.basic = Ieee80211RateSet();
+            ASSERT(*simpleAp->findPeerRateSet(simpleSta->address) == peer);
+            staMib->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+            apMib->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+            simpleSta->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+            simpleAp->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+            getModuleByPath("^.sta")->subscribe(cComponent::registerSignal("datarateChanged"), this);
+            scheduleAt(SimTime(500, SIMTIME_MS), new cMessage("checkAssociation"));
+            scheduleAt(SimTime(630, SIMTIME_MS), new cMessage("checkStops"));
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t id, bool value, cObject *details) override
+    {
+        Enter_Method("rateStateChanged");
+        if (source == apMib) {
+            if (checkApCleanup) {
+                ASSERT(apMib->findPeerRateSet(staMib->address) == nullptr);
+                ASSERT(apMib->findPeerHtState(staMib->address) == nullptr);
+                ASSERT(apMib->bssAccessPointData.associationIds.empty());
+                if (checkApStop) {
+                    ASSERT(apMib->bssAccessPointData.stations.empty());
+                    ASSERT(!apMib->getBssRateSet().operational.known);
+                }
+                else {
+                    ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == expectedApState);
+                    ASSERT(apMib->getBssRateSet().operational.known);
+                    auto ap = check_and_cast<RatePublicationAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+                    ASSERT(ap->pendingTransaction(staMib->address) == 0);
+                }
+                apCleanupNotifications++;
+            }
+            return;
+        }
+        auto simpleSta = getMib("simpleSta");
+        auto simpleAp = getMib("simpleAp");
+        if (source == simpleSta) {
+            checkClearedRates(simpleSta, simpleAp->address);
+            simpleTeardownNotifications++;
+            return;
+        }
+        if (source == simpleAp) {
+            if (simpleDepartureNotifications == 0) {
+                ASSERT(simpleAp->findPeerHtState(simpleSta->address) == nullptr);
+                ASSERT(simpleAp->findPeerRateSet(simpleSta->address) == nullptr);
+                ASSERT(simpleAp->bssAccessPointData.stations.count(simpleSta->address) == 0);
+                ASSERT(simpleAp->getBssRateSet().operational.known);
+                checkClearedRates(simpleSta, simpleAp->address);
+            }
+            simpleDepartureNotifications++;
+            return;
+        }
+        rateNotifications++;
+        if (checkTeardown && !staMib->bssStationData.isAssociated) {
+            checkClearedRates(staMib, apMib->address);
+            auto sta = check_and_cast<RatePublicationSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+            ASSERT(sta->getAssociatedAp()->address.isUnspecified());
+            ASSERT(!sta->hasBeaconTimeout());
+            teardownNotifications++;
+        }
+        if (checkAtomicRates) {
+            ASSERT(staMib->bssStationData.isAssociated);
+            ASSERT(staMib->findPeerRateSet(apMib->address) != nullptr);
+            ASSERT(staMib->getBssRateSet() == *staMib->findPeerRateSet(apMib->address));
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t id, double value, cObject *details) override
+    {
+        datarateNotifications++;
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        if (!strcmp(message->getName(), "checkStops")) {
+            ASSERT(apCleanupNotifications == 4);
+            ASSERT(simpleTeardownNotifications == 1);
+            ASSERT(simpleDepartureNotifications == 2); // Peer departure and later AP stop.
+            ASSERT(teardownNotifications == 3); // Disassociation, replacement, and stop.
+            for (auto node : {"ap", "sta", "simpleAp", "simpleSta"}) {
+                auto mib = getMib(node);
+                ASSERT(!mib->getBssRateSet().basic.known);
+                ASSERT(mib->getLocalRateSet().operational.known);
+                ASSERT(mib->findPeerRateSet(apMib->address) == nullptr);
+                ASSERT(mib->findPeerRateSet(staMib->address) == nullptr);
+                ASSERT(mib->findPeerRateSet(getMib("simpleAp")->address) == nullptr);
+                ASSERT(mib->findPeerRateSet(getMib("simpleSta")->address) == nullptr);
+            }
+            std::cout << "Management stop clears BSS and peer rates.\n";
+            delete message;
+            return;
+        }
+        auto ap = check_and_cast<RatePublicationAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto sta = check_and_cast<RatePublicationSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == Ieee80211Mib::ASSOCIATED);
+        ASSERT(ap->beacon != nullptr && ap->response != nullptr && sta->request != nullptr);
+        ASSERT(ap->beacon->getExtendedSupportedRatesPresent());
+        checkRates(apMib->getLocalRateSet(), ap->beacon);
+        checkRates(staMib->getLocalRateSet(), sta->request);
+        checkRates(apMib->getBssRateSet(), ap->beacon);
+        checkRates(staMib->getBssRateSet(), ap->response);
+        checkRates(*staMib->findPeerRateSet(apMib->address), ap->response);
+        checkRates(*apMib->findPeerRateSet(staMib->address), sta->request, false);
+        std::cout << "Full and simplified management publish local, BSS, and peer rates.\n";
+
+        auto original = staMib->getBssRateSet();
+        auto changed = makeShared<Ieee80211BeaconFrame>(*ap->beacon);
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        changed->setSupportedRates(rates);
+        Ieee80211ExtendedSupportedRatesElement extended;
+        extended.numRates = 2;
+        extended.rate[0] = 24;
+        extended.rate[1] = 54;
+        changed->setExtendedSupportedRates(extended);
+        changed->setExtendedSupportedRatesPresent(true);
+        changed->setChunkLength(B(30));
+        const MacAddress other("02:00:00:00:00:ff");
+        sta->advertisement(other, changed);
+        ASSERT(staMib->getBssRateSet() == original);
+        ASSERT(staMib->findPeerRateSet(other) == nullptr);
+        sta->advertisement(apMib->address, changed, true);
+        ASSERT(staMib->getBssRateSet() == original);
+        sta->refuse(other);
+        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(staMib->getBssRateSet() == original);
+        ASSERT(*staMib->findPeerRateSet(apMib->address) == original);
+        auto invalid = makeShared<Ieee80211BeaconFrame>(*changed);
+        rates.rate[0] = 6.1;
+        invalid->setSupportedRates(rates);
+        sta->advertisement(apMib->address, invalid);
+        ASSERT(staMib->getBssRateSet() == original);
+
+        auto rateControl = check_and_cast<AarfRateControl *>(getModuleByPath("^.sta.wlan[0].mac.dcf.rateControl"));
+        auto selectedMode = rateControl->getRate(apMib->address);
+        int notifications = rateNotifications;
+        int datarates = datarateNotifications;
+        checkAtomicRates = true;
+        sta->advertisement(apMib->address, changed);
+        ASSERT(rateNotifications == notifications + 1);
+        checkRates(staMib->getBssRateSet(), Ptr<const Ieee80211BeaconFrame>(changed));
+        ASSERT(staMib->getBssRateSet().basic.known && staMib->getBssRateSet().basic.legacyRates.empty());
+        sta->advertisement(apMib->address, changed);
+        ASSERT(rateNotifications == notifications + 1);
+        ASSERT(rateControl->getRate(apMib->address) == selectedMode);
+        ASSERT(datarateNotifications == datarates);
+        checkAtomicRates = false;
+        std::cout << "Beacon refresh is atomic; scan, probe, refusal, and invalid rates preserve active records.\n";
+        std::cout << "Known empty basic rates differ from unknown rates; duplicate updates emit no notification.\n";
+
+        auto oldPeer = *apMib->findPeerRateSet(staMib->address);
+        auto request = makeShared<Ieee80211AssociationRequestFrame>(*sta->request);
+        rates.rate[0] = 6;
+        rates.basicRate[0] = true;
+        request->setSupportedRates(rates);
+        request->setExtendedSupportedRatesPresent(false);
+        request->setExtendedSupportedRates(Ieee80211ExtendedSupportedRatesElement());
+        ap->request(staMib->address, request);
+        ASSERT(*apMib->findPeerRateSet(staMib->address) == oldPeer);
+        ap->complete(staMib->address, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, false, true);
+        ASSERT(*apMib->findPeerRateSet(staMib->address) == oldPeer);
+        ap->complete(staMib->address, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED, true);
+        ASSERT(*apMib->findPeerRateSet(staMib->address) == oldPeer);
+        ap->complete(staMib->address, FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+        ASSERT(*apMib->findPeerRateSet(staMib->address) == oldPeer);
+        ap->request(staMib->address, request);
+        ap->complete(staMib->address, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        checkRates(*apMib->findPeerRateSet(staMib->address), Ptr<const Ieee80211AssociationRequestFrame>(request), false);
+        auto reassociation = makeShared<Ieee80211ReassociationRequestFrame>();
+        rates.rate[0] = 12;
+        reassociation->setSupportedRates(rates);
+        reassociation->setCurrentAP(apMib->address);
+        reassociation->setChunkLength(B(12));
+        ap->request(staMib->address, reassociation);
+        ASSERT(apMib->findPeerRateSet(staMib->address)->operational.legacyRates == std::set<bps>({Mbps(6)}));
+        ap->complete(staMib->address, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        checkRates(*apMib->findPeerRateSet(staMib->address), Ptr<const Ieee80211ReassociationRequestFrame>(reassociation), false);
+        auto bss = apMib->getBssRateSet();
+        checkApCleanup = true;
+        ap->depart(staMib->address);
+        ASSERT(apCleanupNotifications == 1);
+        checkApCleanup = false;
+        ASSERT(apMib->findPeerRateSet(staMib->address) == nullptr);
+        ASSERT(apMib->getBssRateSet() == bss);
+        expectedApState = Ieee80211Mib::NOT_AUTHENTICATED;
+        for (bool deauth : {true, false}) {
+            ap->request(staMib->address, request);
+            ap->complete(staMib->address, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+            ap->request(staMib->address, request); // Keep a pending response during cleanup.
+            checkApCleanup = true;
+            int before = apCleanupNotifications;
+            if (deauth)
+                ap->deauthenticate(staMib->address);
+            else
+                ap->authenticate(staMib->address);
+            ASSERT(apCleanupNotifications == before + 1);
+            checkApCleanup = false;
+            if (deauth)
+                ap->authenticate(staMib->address);
+        }
+        checkTeardown = true;
+        sta->loseAssociation();
+        ASSERT(teardownNotifications == 1);
+        checkTeardown = false;
+        ASSERT(!staMib->getBssRateSet().basic.known);
+        ASSERT(staMib->findPeerRateSet(apMib->address) == nullptr);
+        std::cout << "AP peer rates commit after the final ACK; departure and association loss clear the correct records.\n";
+        ap->request(staMib->address, request);
+        ap->complete(staMib->address, FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
+        sta->associateAgain(apMib->address, ap->response);
+        ASSERT(staMib->getBssRateSet().operational.known);
+        ASSERT(staMib->findPeerRateSet(apMib->address) != nullptr);
+        ASSERT(apMib->findPeerRateSet(staMib->address) != nullptr);
+        checkTeardown = true;
+        sta->replaceAssociation(apMib->address, ap->response);
+        ASSERT(teardownNotifications == 2);
+        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(staMib->getBssRateSet() == *staMib->findPeerRateSet(apMib->address));
+        checkApCleanup = checkApStop = true;
+        delete message;
+    }
+};
+
+Define_Module(RatePublicationTest);
+
+} // namespace ieee80211
+} // namespace inet
+
+%file: test.ned
+
+import inet.common.SimpleModule;
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple RatePublicationAp extends Ieee80211MgmtAp
+{
+    parameters:
+        @class(::inet::ieee80211::RatePublicationAp);
+}
+
+simple RatePublicationSta extends Ieee80211MgmtSta
+{
+    parameters:
+        @class(::inet::ieee80211::RatePublicationSta);
+}
+
+simple RatePublicationTest extends SimpleModule
+{
+    parameters:
+        @class(::inet::ieee80211::RatePublicationTest);
+}
+
+network RatePublicationNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        scenarioManager: ScenarioManager;
+        ap: AccessPoint;
+        sta: WirelessHost;
+        simpleAp: AccessPoint;
+        simpleSta: WirelessHost;
+        test: RatePublicationTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = RatePublicationNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 640ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap.wlan[0].mgmt.typename = "RatePublicationAp"
+*.sta.wlan[0].mgmt.typename = "RatePublicationSta"
+*.sta.wlan[0].agent.typename = "Ieee80211AgentSta"
+*.sta.wlan[0].agent.startingTime = 0s
+*.sta.wlan[0].agent.channelsToScan = "0"
+*.sta.wlan[0].agent.probeDelay = 1ms
+*.sta.wlan[0].agent.minChannelTime = 10ms
+*.sta.wlan[0].agent.maxChannelTime = 20ms
+*.sta.wlan[0].mac.dcf.rateControl.typename = "AarfRateControl"
+*.simpleAp.wlan[0].mgmt.typename = "Ieee80211MgmtApSimplified"
+*.simpleSta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.simpleSta.wlan[0].agent.typename = ""
+*.simpleSta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:03"
+*.simpleAp.wlan[0].opMode = "n(mixed-2.4Ghz)"
+*.simpleSta.wlan[0].opMode = "n(mixed-2.4Ghz)"
+*.simpleAp.wlan[0].bitrate = 65Mbps
+*.simpleSta.wlan[0].bitrate = 65Mbps
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.simpleAp.wlan[0].address = "02:00:00:00:00:03"
+*.simpleSta.wlan[0].address = "02:00:00:00:00:04"
+**.hasStatus = true
+**.wlan[0].opMode = "g(mixed)"
+**.wlan[0].bitrate = 54Mbps
+**.wlan[0].radio.bandName = "2.4 GHz"
+**.wlan[0].radio.channelNumber = 0
+**.wlan[0].radio.transmitter.power = 100mW
+**.wlan[0].radio.receiver.sensitivity = -85dBm
+**.wlan[0].radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 10m
+**.mobility.constraintAreaMaxY = 10m
+**.mobility.constraintAreaMaxZ = 0m
+*.scenarioManager.script = xmldoc("scenario.xml")
+
+%file: scenario.xml
+
+<scenario>
+    <at t="600ms">
+        <shutdown module="sta"/>
+        <shutdown module="simpleSta"/>
+    </at>
+    <!-- Keep the APs available until the asynchronous STA stop operations complete. -->
+    <at t="620ms">
+        <shutdown module="ap"/>
+        <shutdown module="simpleAp"/>
+    </at>
+</scenario>
+
+%contains: stdout
+Full and simplified management publish local, BSS, and peer rates.
+
+%contains: stdout
+Beacon refresh is atomic; scan, probe, refusal, and invalid rates preserve active records.
+
+%contains: stdout
+Known empty basic rates differ from unknown rates; duplicate updates emit no notification.
+
+%contains: stdout
+AP peer rates commit after the final ACK; departure and association loss clear the correct records.
+
+%contains: stdout
+Management stop clears BSS and peer rates.

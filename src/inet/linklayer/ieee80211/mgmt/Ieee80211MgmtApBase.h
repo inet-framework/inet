@@ -39,6 +39,7 @@ class INET_API Ieee80211MgmtApBase : public Ieee80211MgmtBase
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int) override;
     using Ieee80211MgmtBase::receiveSignal;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 };
 
