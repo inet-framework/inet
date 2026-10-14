@@ -310,6 +310,12 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
             state->snd_effmss = calculateEffectiveMss();
             EV_DETAIL << "TCP_MAXSEG: SMSS is set to " << state->snd_mss << "\n";
         }
+        // on a listening socket, also the MSS option of the connections to come, as Linux
+        // limits the MSS option of each request by user_mss (tcp_openreq_init())
+        if (state != nullptr && fsm.getState() == TCP_S_LISTEN && maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->advertisedMss) {
+            state->advertisedMss = maxSegSockopt;
+            EV_DETAIL << "TCP_MAXSEG: the MSS option is " << state->advertisedMss << "\n";
+        }
     }
     else if (auto cmd = dynamic_cast<TcpSetPathMtuCommand *>(tcpCommand)) {
         // the route MTU changed (Linux: ip route change, which tcp_sync_mss() takes at the
