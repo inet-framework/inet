@@ -421,6 +421,7 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
                 state->snd_nxt = state->snd_max;
                 sendFin();
                 state->snd_max = ++state->snd_nxt;
+                emit(sndMaxSignal, state->snd_max);
                 // the FIN is new data on the wire: RFC 6298 section 5.1 starts the
                 // retransmission timer only when it does not run, and RFC 8985 section
                 // 7.2 arms the loss probe for the new tail (Linux

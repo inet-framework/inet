@@ -1364,8 +1364,10 @@ void TcpConnection::sendSynAck()
     // does not move them back over the data.
     if (seqLess(state->snd_nxt, state->iss + 1))
         state->snd_nxt = state->iss + 1;
-    if (seqLess(state->snd_max, state->iss + 1))
+    if (seqLess(state->snd_max, state->iss + 1)) {
         state->snd_max = state->iss + 1;
+        emit(sndMaxSignal, state->snd_max);
+    }
 
     // ECN. RFC 3168, section 6.1.1: "If a host has received an ECN-setup SYN packet,
     // then it MAY send an ECN-setup SYN-ACK packet.  Otherwise, it MUST NOT send an
@@ -2241,6 +2243,7 @@ void TcpConnection::unsendWindowProbe()
         ASSERT(state->snd_max - state->snd_una == 1);
         rexmitQueue->discardFrom(state->snd_una);
         state->snd_max = state->snd_una;
+        emit(sndMaxSignal, state->snd_max);
     }
     state->snd_nxt = state->snd_una;
 }
@@ -2295,12 +2298,15 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
 
     // FIN (without user data) needs to be resent
     if (bytes == 0 && state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq()) {
+        uint32_t oldSndMax = state->snd_max;
         state->snd_max = sendQueue->getBufferEndSeq();
         EV_DETAIL << "No outstanding DATA, resending FIN, advancing snd_nxt over the FIN\n";
         state->snd_nxt = state->snd_max;
         sendFin();
         tcpAlgorithm->segmentRetransmitted(state->snd_nxt, state->snd_nxt + 1);
         state->snd_max = ++state->snd_nxt;
+        if (state->snd_max != oldSndMax)
+            emit(sndMaxSignal, state->snd_max);
 
         emit(unackedSignal, state->snd_max - state->snd_una);
     }
@@ -2417,11 +2423,14 @@ void TcpConnection::retransmitData()
     // retransmitOneSegment(): sendSegment() makes no segment without data.
     if ((bytesToSend == 0 || sendQueue->getBytesAvailable(state->snd_nxt) == 0)
             && state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq()) {
+        uint32_t oldSndMax = state->snd_max;
         state->snd_max = sendQueue->getBufferEndSeq();
         EV_DETAIL << "No outstanding DATA, resending FIN, advancing snd_nxt over the FIN\n";
         state->snd_nxt = state->snd_max;
         sendFin();
         state->snd_max = ++state->snd_nxt;
+        if (state->snd_max != oldSndMax)
+            emit(sndMaxSignal, state->snd_max);
 
         emit(unackedSignal, state->snd_max - state->snd_una);
         return;
