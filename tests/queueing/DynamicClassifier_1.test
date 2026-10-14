@@ -1,0 +1,119 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource), and a server (PacketServer) takes them from a queue
+(PacketQueue). A dynamic classifier (DynamicClassifier) sends the packets
+of two classes to two branches, which it creates when the first packet of a
+class arrives. Each branch is a delayer (PacketDelayer), and a multiplexer
+(PacketMultiplexer) joins the branches before a passive packet sink
+(PassivePacketSink). The server asks canPushPacket() about each packet, and
+for the first packet of a class this query creates the branch. An active
+source cannot feed the classifier directly, because it asks
+canPushSomePacket(), which a classifier without branches answers with no.
+The query probe between the server and the classifier asks no query
+(numRepeats = 0).
+
+%file: test.ned
+
+import inet.queueing.classifier.DynamicClassifier;
+import inet.queueing.common.PacketDelayer;
+import inet.queueing.common.PacketMultiplexer;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.server.PacketServer;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.test.queueingtest.lib.QueryProbe;
+
+network TestDynamicClassifier
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        queue: PacketQueue {
+            @display("p=200,100");
+        }
+        server: PacketServer {
+            @display("p=300,100");
+        }
+        probe: QueryProbe {
+            @display("p=400,100");
+        }
+        classifier: DynamicClassifier {
+            @display("p=500,100");
+        }
+        branch[0]: PacketDelayer {
+            @display("p=600,100,column,100");
+        }
+        multiplexer: PacketMultiplexer {
+            @display("p=700,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=800,100");
+        }
+    connections allowunconnected:
+        producer.out --> queue.in;
+        queue.out --> server.in;
+        server.out --> probe.in;
+        probe.out --> classifier.in;
+        multiplexer.out --> consumer.in;
+}
+
+%file: Test.cc
+#include <cstring>
+#include "inet/queueing/function/PacketClassifierFunction.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace inet;
+
+// the class of producer-N is N modulo 2
+static int testClassify(Packet *packet)
+{
+    return atoi(strrchr(packet->getName(), '-') + 1) % 2;
+}
+
+Register_Packet_Classifier_Function(TestClassifier, testClassify);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestDynamicClassifier
+sim-time-limit = 3s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.server.processingTime = 0s
+*.classifier.classifierClass = "TestClassifier"
+*.classifier.submoduleName = "branch"
+*.classifier.moduleType = "inet.queueing.common.PacketDelayer"
+*.branch[*].delay = 0.5s
+*.probe.numRepeats = 0
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 0s branch\[0\]: Delaying packet, [^\n]*producer-0
+
+%contains-regex: stdout
+^At 0.5s consumer: Consuming packet, [^\n]*producer-0
+
+%contains-regex: stdout
+^At 1s branch\[1\]: Delaying packet, [^\n]*producer-1
+
+%contains-regex: stdout
+^At 1.5s consumer: Consuming packet, [^\n]*producer-1
+
+%contains-regex: stdout
+^At 2s branch\[0\]: Delaying packet, [^\n]*producer-2
+
+%contains-regex: stdout
+^At 2.5s consumer: Consuming packet, [^\n]*producer-2
+
+%not-contains: stdout
+branch[2]
