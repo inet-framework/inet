@@ -1,0 +1,172 @@
+%description:
+Verify that combined BSS and peer cleanup completes before notification.
+Check individual and bulk cleanup, empty state, local-state retention,
+unrelated peers, and replacement state installed by a callback.
+
+%includes:
+#include <functional>
+
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+namespace Ieee80211MibBssTeardown_1 {
+
+class Observer : public cListener
+{
+  public:
+    int notifications = 0;
+    std::function<void()> check;
+
+    virtual void receiveSignal(cComponent *, simsignal_t id, bool value, cObject *details) override
+    {
+        ASSERT(id == Ieee80211Mib::rateStateChangedSignal && value && details == nullptr);
+        notifications++;
+        if (check)
+            check();
+    }
+};
+
+} // namespace Ieee80211MibBssTeardown_1
+
+%file: TestNetwork.ned
+import inet.linklayer.ieee80211.mib.Ieee80211Mib;
+
+network TestNetwork
+{
+    submodules:
+        mib: Ieee80211Mib;
+        test: Test;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = TestNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+
+%activity:
+using namespace Ieee80211MibBssTeardown_1;
+
+auto mib = check_and_cast<Ieee80211Mib *>(getModuleByPath("mib"));
+mib->setPrimaryChannel(1);
+mib->updateLocalHtCapabilities(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)"), {MHz(20)}, 1);
+const auto capabilities = mib->localHtCapabilities;
+const auto operation = mib->getHtOperation();
+const MacAddress first("02:00:00:00:00:01");
+const MacAddress other("02:00:00:00:00:02");
+Ieee80211RateSetState rates;
+rates.supported.known = true;
+rates.supported.legacyRates.insert(Mbps(6));
+rates.basic = rates.operational = rates.supported;
+mib->setLocalRateSet(rates);
+
+Observer observer;
+mib->subscribe(Ieee80211Mib::rateStateChangedSignal, &observer);
+auto clear = [&](bool bulk) {
+    if (bulk)
+        mib->clearBssAndAllPeerStates();
+    else
+        mib->clearBssAndPeerState(first);
+};
+auto checkLocal = [&]() {
+    ASSERT(mib->getLocalRateSet() == rates);
+    ASSERT(mib->localHtCapabilities == capabilities);
+    ASSERT(mib->getHtOperation() == operation);
+};
+
+for (bool bulk : {false, true}) {
+    for (bool hasBss : {false, true}) {
+        for (bool hasHt : {false, true}) {
+            for (bool hasRates : {false, true}) {
+                observer.check = nullptr;
+                mib->clearBssAndAllPeerStates();
+                mib->setBssRateSet(hasBss ? rates : Ieee80211RateSetState());
+                if (hasHt)
+                    mib->setPeerHtCapabilities(first, capabilities, operation);
+                if (hasRates)
+                    mib->installBssAndPeerRateSets(mib->getBssRateSet(), first, rates);
+                mib->setPeerHtCapabilities(other, capabilities, operation);
+                mib->installBssAndPeerRateSets(mib->getBssRateSet(), other, rates);
+                observer.check = [&]() {
+                    ASSERT(mib->findPeerHtState(first) == nullptr);
+                    ASSERT(mib->findPeerRateSet(first) == nullptr);
+                    ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());
+                    if (bulk) {
+                        ASSERT(mib->findPeerHtState(other) == nullptr);
+                        ASSERT(mib->findPeerRateSet(other) == nullptr);
+                    }
+                    else {
+                        ASSERT(mib->findPeerHtState(other) != nullptr);
+                        ASSERT(*mib->findPeerRateSet(other) == rates);
+                    }
+                    checkLocal();
+                };
+                int before = observer.notifications;
+                clear(bulk);
+                ASSERT(observer.notifications == before + (bulk || hasBss || hasHt || hasRates ? 1 : 0));
+                int after = observer.notifications;
+                clear(bulk);
+                ASSERT(observer.notifications == after);
+                observer.check = nullptr;
+            }
+        }
+    }
+}
+
+for (bool bulk : {false, true}) {
+    mib->clearBssAndAllPeerStates();
+    mib->setPeerHtCapabilities(first, capabilities, operation);
+    mib->installBssAndPeerRateSets(rates, first, rates);
+    bool replaced = false;
+    observer.check = [&]() {
+        if (replaced)
+            return;
+        ASSERT(mib->findPeerHtState(first) == nullptr);
+        ASSERT(mib->findPeerRateSet(first) == nullptr);
+        ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());
+        checkLocal();
+        replaced = true;
+        mib->setPeerHtCapabilities(first, capabilities, operation);
+        mib->installBssAndPeerRateSets(rates, first, rates);
+    };
+    clear(bulk);
+    ASSERT(replaced);
+    ASSERT(mib->findPeerHtState(first) != nullptr);
+    ASSERT(*mib->findPeerRateSet(first) == rates);
+    ASSERT(mib->getBssRateSet() == rates);
+    observer.check = nullptr;
+}
+
+observer.check = nullptr;
+mib->bssAccessPointData.stations[first] = Ieee80211Mib::ASSOCIATED;
+mib->allocateAssociationId(first);
+mib->reserveAssociationId(other);
+mib->installBssAndPeerState(rates, first, rates, &capabilities, operation);
+observer.check = [&]() {
+    ASSERT(mib->bssAccessPointData.stations.empty());
+    ASSERT(mib->bssAccessPointData.associationIds.empty());
+    ASSERT(mib->findPeerHtState(first) == nullptr);
+    ASSERT(mib->findPeerRateSet(first) == nullptr);
+    ASSERT(mib->getBssRateSet() == Ieee80211RateSetState());
+    checkLocal();
+};
+int before = observer.notifications;
+mib->clearAccessPointState();
+ASSERT(observer.notifications == before + 1);
+mib->clearAccessPointState();
+ASSERT(observer.notifications == before + 1);
+ASSERT(mib->reserveAssociationId(first) == 1); // Reservations also clear.
+observer.check = nullptr;
+
+mib->unsubscribe(Ieee80211Mib::rateStateChangedSignal, &observer);
+EV << "Combined BSS and peer cleanup notification checks passed.\n";
+
+%contains: stdout
+Combined BSS and peer cleanup notification checks passed.
