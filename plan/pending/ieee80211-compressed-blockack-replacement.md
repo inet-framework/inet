@@ -1,12 +1,19 @@
 # Implementation plan: add Compressed Block Ack and retain Basic Block Ack
 
-Checkout and source revision: `/home/user/omnetpp_ws/inet`, branch `master`, at `1cdb362a2a4b97f564566487079d9d156a5d213d`.
-Plan revision: 2026-10-14, revision 25.
-Source basis: the merged S1 source above and IEEE Std 802.11-2024. Direct PDF inspection supplies the historical IEEE Std 802.11e-2005 evidence. This plan uses no implementation from another feature checkout.
+Integration source: local `master` at `633b071e213b825ce6019ff3e344ae49f52791ff`, with S1, R1, and S3a merged.
+Plan revision: 2026-10-15, revision 31.
+Review checkout: `/home/user/omnetpp_ws/inet-compressed-blockack-s2`, branch `work/compressed-blockack-s2`, at `d2fcb528b67f9be376caa06d68ea0c1c028ab145`.
+Source basis: the pinned integration source and IEEE Std 802.11-2024. Earlier direct PDF inspection supplies the historical IEEE Std 802.11e-2005 evidence. Local S2 source, test, and plan edits are separate from merged master. This review preserves those edits. Remote verification failed because GitHub access was unavailable; the integration pin describes local master.
 
-Approval: the maintainer's 14 October 2026 instruction, "proceed", after the revision-24 review authorizes these corrections to four plan documents. The [S1 source record](ieee80211-compressed-blockack-s1.md) owns its separate implementation, baseline, and publication authorization. This document approval authorizes no later implementation, recorded expectation change, or publication. The [decision table](#maintainer-decisions) identifies unresolved choices for dependent stages.
+Approval: the maintainer's 14 October 2026 instruction, "proceed", after the revision-24 review authorizes these corrections to four plan documents. The [S1 source record](ieee80211-compressed-blockack-s1.md) owns its separate implementation, baseline, and publication authorization. This document approval authorizes no later implementation, recorded expectation change, or publication. The [decision table](#maintainer-decisions) records accepted choices and remaining stage requirements.
 
-S1 is merged through [PR #1320](https://github.com/inet-framework/inet/pull/1320) at the source revision above. Its original verified head is `fcc06450355a52b9c8b0f8f2647e0654711bfaca`. [Appendix A](#completed-s1-and-recorded-verification) preserves that head's scope and recorded evidence. This revision adds no runtime verification of the merged source. The later stages remain proposed.
+Decision approval: on 14 October 2026, the maintainer accepted the 0.512-second DATA lifetime default, transfer-completion predicate, and individual-DATA scope. The maintainer subsequently selected a 100 ms ADDBA response timeout and a fatal configuration error for active profile conflict. The [decision table](#maintainer-decisions) records all five accepted choices. These instructions authorize their record in the plans, not implementation, baseline changes, or publication. The maintainer's subsequent instructions authorize the review corrections and strict application of the individual-MPDU release clause in revision 30. Its timestamp mapping, event observation, and state ownership are implementation design work, not additional policy decisions.
+
+The earlier "proceed" for revision 30 authorizes its text corrections and explicit escalation and publication rules. The current "proceed" authorizes the remaining document corrections for merged R1 and S3a. Strict compliance remains required; no model approximation is approved.
+
+S1 merged through [PR #1320](https://github.com/inet-framework/inet/pull/1320) at `1cdb362a2a4b97f564566487079d9d156a5d213d`. Its original verified head is `fcc06450355a52b9c8b0f8f2647e0654711bfaca`. [Appendix A](#completed-s1-and-recorded-verification) preserves that head's scope and recorded evidence. R1 and S3a are also merged, as the [completed prerequisite record](#completed-r1-and-s3a) explains. This revision adds no runtime verification of the combined source. The remaining stages retain their separate review and verification requirements.
+
+Revision 31 follows the maintainer's request to account for merged R1 and S3a. It corrects stage status, source assumptions, and dependent verification. It grants no new implementation, baseline, or publication authority.
 
 This plan defines Compressed support beside retained Basic support and orders its prerequisite changes. The [EDCA lifetime plan](ieee80211-edca-data-lifetime.md) owns DATA expiration. The [agreement lifecycle plan](ieee80211-blockack-agreement-lifecycle.md) owns setup, recovery, and teardown. Section 5 defines separate review and regression boundaries. The complete design is not one implementation change.
 
@@ -48,11 +55,11 @@ This change covers immediate, one-TID Compressed BAR and Compressed Block Ack in
 
 ### Purpose of the individual-DATA profile
 
-The proposed user need is controlled study of Compressed bitmap, response, and recovery behavior in INET's current individual-frame MAC. C2 will supply a directly observed Compressed BAR and Block Ack exchange for that purpose. The frame and scoreboard contracts can also support a later A-MPDU design. That later design remains separate.
+The accepted user need is controlled study of Compressed bitmap, response, and recovery behavior in INET's current individual-frame MAC. C2 will supply a directly observed Compressed BAR and Block Ack exchange for that purpose. The frame and scoreboard contracts can also support a later A-MPDU design. That later design remains separate.
 
 The response MPDU decreases from 152 bytes for Basic to 32 bytes for Compressed. This frame-length result does not establish lower exchange airtime or higher application goodput. Control rates, explicit BAR, contention, and repeated setup also affect those results. Section 6 requires direct exchange and airtime evidence without an assumed performance gain.
 
-Before C2 implementation, the maintainer must accept this intermediate scope for the stated user need. A requirement for complete HT-immediate transfer coverage needs an A-MPDU design before dependent implementation. Wire definitions and independent prerequisite repairs do not establish that coverage.
+On 14 October 2026, the maintainer accepted this intermediate scope for the stated user need. The scope decision before C2 is satisfied. Complete HT-immediate transfer coverage requires a separate A-MPDU design. Wire definitions and independent prerequisite repairs do not establish that complete coverage.
 
 ### Excluded features and fragmentation
 
@@ -68,7 +75,11 @@ A positive bitmap bit in this profile will acknowledge a complete MSDU or A-MSDU
 
 ## 3. Current source path and evidence limits
 
-These observations describe the source after S1. The [S1 record](#completed-s1-and-recorded-verification) reports completed recipient verification. The [earlier branch record](#branch-verification-record) reports capability and Basic exchange checks before S1. Neither record verifies the proposed Compressed behavior or every unresolved defect. Each later prerequisite must reproduce its old failure through production code before its implementation changes that path.
+These observations use the pinned integration source, which contains S1, R1, and S3a. The [completed prerequisite record](#completed-r1-and-s3a) separates their evidence from proposed Compressed behavior. The [earlier branch record](#branch-verification-record) reports capability and Basic exchange checks before S1. Historical source observations in the lifetime and lifecycle plans still require review against each selected parent. Each remaining behavior repair must reproduce its old failure through production code before its implementation changes that path.
+
+[HCF](../../src/inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.cc) already resolves `blockAckVariant` once into private typed state. Basic remains the default. Unknown values and explicit Compressed selection stop initialization, also when Block Ack support is disabled. S3b/A2 must replace the temporary Compressed rejection before its admission checks can run. C2 supplies the complete exchange path; C4 changes the default.
+
+Management already publishes local, BSS, and peer rates through R1. Its combined MIB operations commit related HT and rate state before notification. C2 must consume these records; A3b must preserve their callback contract. Identical AP reassociation state can produce no rate notification, so association reset requires a separate handoff for both profiles.
 
 `Hcf` creates the Block Ack procedures when `isBlockAckSupported` is true. [TxOpFs](../../src/inet/linklayer/ieee80211/mac/framesequence/TxOpFs.cc) chooses the BAR sequence. [BlockAckReqBlockAckFs](../../src/inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.cc) builds Basic BAR. The Compressed builder in [OriginatorBlockAckProcedure](../../src/inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.cc) throws `Unsupported feature`.
 
@@ -106,9 +117,9 @@ The [IEEE 802.11 fillers](../../tests/serializer/lib/fillers/ChunkFillers_ieee80
 
 ### 4.1 Select the current or historical profile
 
-HCF will resolve `blockAckVariant` once into a typed profile value during initialization. The values remain `"compressed"` and `"basic"`; Compressed is the final default. Reject unknown values at initialization. The resolved value remains immutable throughout each agreement's lifetime. This plan supports no runtime profile change. Both endpoints must select the same profile.
+HCF already resolves `blockAckVariant` once into a private typed profile value during initialization. The values remain `"compressed"` and `"basic"`; Basic is the current default and Compressed is the final default. Preserve rejection of unknown values. A2 replaces the temporary Compressed rejection; C4 changes the default after runtime verification. The resolved value remains immutable throughout each agreement's lifetime. Both endpoints must select the same profile; this plan supports no runtime profile change.
 
-HCF owns local profile selection. Agreement setup and frame exchanges receive that resolved value through HCF's existing agreement context or profile query. Policies, builders, records, protection, and timeouts must not independently read the parameter or infer the profile from PHY mode. The frame context supplies the expected BAR and response variant. This adds no variant registry or second agreement store.
+HCF owns local profile selection. Merged S3a keeps its typed profile private and exposes no profile query. A2 must pass that value to agreement setup through the smallest interface its actual consumers require. C2 must pass it to frame exchanges and their dependent procedures. Policies, builders, records, protection, and timeouts must not independently read the parameter or infer the profile from PHY mode. The frame context supplies the expected BAR and response variant without a variant registry or second agreement store.
 
 The serializer independently decodes the actual wire type. It must not consult HCF configuration. Format-specific bitmap and length operations remain necessary, but they consume the decoded frame or resolved exchange context. `isBlockAckSupported` still controls procedure construction. ADDBA gains no variant negotiation field.
 
@@ -121,7 +132,7 @@ Type 0 will produce Basic typed frames for historical compatibility. Type 2 will
 - For Compressed, ignore received reserved-bit values.
 - Preserve the common C++ fields and Basic values that encode Type 0.
 
-The current nine-bit `reserved` field maps to B3–B11. Its two low bits therefore overlap the expanded Type field at B3 and B4. For Basic serialization, those two bits must be zero. Preserve the other Basic field values and existing round trips within that Type 0 contract. Reject a Basic object that would encode another Type before serialization. Do not guess a historical layout from frame length or local profile configuration.
+The current nine-bit `reserved` field maps to B3–B11. Its two low bits therefore overlap the expanded Type field at B3 and B4. For Basic serialization, those two bits must be zero. Preserve the other Basic field values and existing round trips within that Type 0 contract. Reject a Basic object that would encode another Type before serialization. The [BAR writer](../../src/inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.cc) and Block Ack writer both encode `(getReserved() & 0x1FF) << 3`. C1 must verify this layout with direct octet assertions for both frame types. Do not guess a historical layout from frame length or local profile configuration.
 
 Hypothetical example: a Basic object has `reserved = 1`. The old writer places that value in B3, which a complete four-bit decoder reads as Type 4. C1 rejects that inconsistent Basic object before serialization.
 
@@ -135,7 +146,7 @@ Set the Compressed Block Ack chunk length to 28 bytes. Its fields contain 16 MAC
 
 The Basic response remains 152 bytes with FCS; Compressed remains 32 bytes with FCS. Protection and timeouts must use the request's actual response variant. The Compressed rate rules below must not replace the retained Basic response contract. A received response must match the pending BAR variant before it can report success.
 
-A profile mismatch cannot silently select Basic or acknowledge DATA through the other variant. ADDBA cannot detect this configuration mismatch. The [lifecycle mismatch contract](ieee80211-blockack-agreement-lifecycle.md#profile-conflict-recovery) owns valid conflicting BAR recovery and the unresolved persistent-conflict decision. Finite DATA disposal alone does not establish recovery.
+A profile mismatch cannot silently select Basic or acknowledge DATA through the other variant. ADDBA cannot detect this configuration mismatch. The [lifecycle mismatch contract](ieee80211-blockack-agreement-lifecycle.md#profile-conflict-detection-and-termination) requires HCF to stop the simulation on a valid conflicting BAR for an active agreement. Corrected endpoint profiles require a new run.
 
 The prerequisite plans own eligibility queries, sequence preview, Action outcomes, lifetime operations, and duplicate-state cleanup. The recipient stage below owns ordered delivery. These changes extend beyond the Basic-specific contracts; each stage requires its own caller and compatibility checks.
 
@@ -157,7 +168,7 @@ Hypothetical example: the lifecycle owner retires the agreement before DATA 101 
 
 The Compressed addition retains the prerequisite's DATA eligibility, Action ownership, and recovery results. It does not add a second agreement store or reproduce the lifecycle state machine.
 
-HCF will validate a Compressed BAR before it calls `RecipientQosMacDataService::controlFrameReceived`. This profile requires Fragment Number zero and the supported frame length. An invalid BAR will reach neither the reorder service nor the response procedure. Unknown variants and malformed frames follow the invalid-frame path without protocol recovery actions. A well-formed retained BAR for the other profile is a separate conflict case. Its matching active peer/TID reaches the lifecycle mismatch owner before scoreboard, reorder, response, or inactivity updates.
+HCF will validate a Compressed BAR before it calls `RecipientQosMacDataService::controlFrameReceived`. This profile requires Fragment Number zero and the supported frame length. An invalid BAR will reach neither the reorder service nor the response procedure. Unknown variants and malformed frames follow the invalid-frame path without protocol recovery actions. A well-formed retained BAR for the other profile is a separate conflict case. For a matching active peer/TID, HCF raises the configuration error before scoreboard, reorder, response, or inactivity updates.
 
 After format validation, HCF will use the absent-agreement path from lifecycle stage A3c. C2 will verify that valid Compressed BAR reaches that path and malformed BAR does not. The lifecycle plan owns DATA disposal, Action ownership, and the resulting teardown state.
 
@@ -223,15 +234,49 @@ The response will use the adjusted `WinStartR` as its starting sequence number. 
 
 S1 releases every consecutive complete unit from `WinStartB` when DATA fills a gap. It stops at the next absent or incomplete unit. The reorder owner advances the window after the last released unit without a later DATA reception or BAR. Its selected rule follows Clause 10.25.6.6.2.1(a)(2), with Basic retention as an INET compatibility choice. The S1 fixture buffers complete DATA 101 and 102 behind absent DATA 100. Receipt of DATA 100 releases 100, 101, and 102 in that order in the same operation.
 
-C2 also implements Clause 10.25.6.6.2.1(a)(2)(v) for supported individual MPDUs. The received MPDU must lie inside the reorder window with `SN > WinStartB`. The bit at `WinStartR - 1` must be positive. The MPDU must arrive SIFS or RIFS after the previous MPDU, or SIFS after ACK transmission. RIFS means reduced interframe space. These conditions can require delivery despite a gap.
+C2 must implement Clause 10.25.6.6.2.1(a)(2)(v) with its surrounding conditions for the supported individual-MPDU path. The received DATA must belong to an HT-immediate agreement without segmentation and reassembly. The station must be non-EDMG.
+
+RIFS means reduced interframe space. The sequence number must lie inside the reorder window and exceed `WinStartB`. The receipt bit at `WinStartR - 1` must be positive. The MPDU must follow the preceding MPDU by SIFS or RIFS, or follow ACK transmission by SIFS.
+
+When these conditions hold, the recipient must apply the clause's sequential delivery and window-update rules despite the gap. If either receipt evidence or the interframe relation is absent, this condition does not permit release. Another applicable release rule can still permit delivery. C2 must not omit this behavior or make it optional merely to avoid event history.
 
 The reorder owner releases eligible units in cyclic order under that clause. It continues sequentially until the next sequence position has no buffered unit. It advances `WinStartB` after the last released unit. The A-MPDU exclusion does not exclude this individual-MPDU condition. The originator retains its current SIFS frame sequences.
 
 HCF supplies the actual interframe relation to the reorder operation. The [receiver](../../src/inet/physicallayer/wireless/common/base/packetlevel/ReceiverBase.cc) supplies reception start and end times through `SignalTimeInd`. HCF receives ACK completion through its current transmission callback. The [mode interface](../../src/inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h) supplies the applicable SIFS and RIFS intervals. Those receive and completion paths retain no previous-MPDU or ACK history for this decision. C2 retains only that required event history in HCF.
 
+### Interframe history and timing design
+
+The individual-MPDU release rule adds behavior to Compressed reception. It can change delivery times and fingerprints when its conditions hold. Basic retains S1's delivery rules. A changed Basic fingerprint requires its own causal evidence; the Compressed release rule does not justify that change.
+
+As part of C2, its owner must derive the history and timing contract against the selected source parent. The existing callbacks identify possible inputs, but they do not establish a complete contract. Record the implementation design and its source and standards evidence:
+
+- Derive the qualifying previous reception or ACK transmission from the complete standard procedure. Do not impose extra same-peer, address, or TID restrictions without a standards basis.
+- Specify the minimal stored timestamps and validity fields. Retain values rather than frame pointers beyond their ownership lifetime.
+- Define which intervening receptions and transmissions replace or invalidate history, including unrelated traffic and failed reception.
+- Clear relevant validity on agreement retirement, peer cleanup, and replacement setup. Establish invalid history at initialization; add no stop/start support claim.
+- Define when HCF evaluates the current frame against previous history and when it replaces that history. Preserve the evidence needed by reorder processing.
+
+A per-peer last-frame timestamp alone cannot establish the immediately preceding event. An intervening frame from another peer can break the relation. The production trace must establish how HCF observes such events before the owner selects its storage layout. Do not add a history registry or new timer without a demonstrated need.
+
+Define the receive-side interval from previous reception end to current reception start. Define the ACK-side interval from local ACK transmission end to current reception start. `SignalTimeInd` supplies receive endpoints; the transmission callback supplies local completion. Current-frame delivery time is not its reception start.
+
+For a stationary sender, equal propagation delays can cancel between successive receptions. After local ACK transmission, the next DATA reception can include outward and return propagation delay. Therefore, raw equality to SIFS is not a complete rule for both paths. Map the applicable PHY timing definitions to INET timestamps, including signal extension and propagation effects. Record time resolution, supported coverage assumptions, and the applicable RIFS operation conditions.
+
+An available RIFS duration alone does not establish permission to transmit RIFS-separated frames.
+
+Clauses 10.3.2.3.2 and 10.3.2.3.3 define RIFS and SIFS timing; Clause 10.22.5 defines coverage-class behavior. These clauses constrain the implementation; they do not make timing tolerance a maintainer preference. A proposed receiver-side recognition interval must have a documented derivation from those rules and the model. No inferred interval or arbitrary epsilon is accepted by this plan update.
+
+The exact timestamp mapping, event observation coverage, and stored fields still need source analysis and design. The C2 owner must resolve and review them before the affected implementation is complete. These are engineering obligations within the required behavior, not new policy decisions or grounds to omit the clause. Independent R1 work remains unaffected. Tests must cover nonzero propagation delay, intervals outside the permitted relation, and intervening unrelated frames.
+
+If existing PHY observations cannot establish the required timing relation, the C2 owner must record the specific gap and a concrete example. The owner must propose the smallest correction to the observations or their interpretation. The code reviewer must check that proposal against the standard and the supported PHY model. Missing callback data alone does not establish that the required behavior cannot be modeled.
+
+If the correction requires a model approximation or reduced scope, the maintainer must approve an explicit plan revision before its implementation. The revision must state the changed behavior, evidence, and compliance limits. Approval does not make an approximation equivalent to strict compliance. Until resolution, the affected C2 path remains incomplete and cannot be published. Independent work that neither exposes nor depends on that path may continue.
+
+Local experimental code may support the design investigation. The affected Compressed release path must not enter a published implementation until its design review and direct verification pass. This publication boundary requires no runtime switch to disable an unfinished rule. These provisions add no implementation or publication authorization to this document-only update.
+
 HCF passes the interframe result with the frame. It adds no timer, scheduler, or simulation event for this relation. The agreement-owned scoreboard supplies the bit at `WinStartR - 1` before window cleanup can erase it. The reorder owner consumes that bit with the interframe result. A false receipt bit or absent interframe relation leaves an in-window gap buffered under the ordinary rule. The two conditions remain independent.
 
-Hypothetical example: an accepted agreement starts at 100 with buffer size four. The recipient receives and delivers Normal Ack DATA 100, then sends ACK. Its reorder start becomes 101. DATA 104 arrives one SIFS after ACK, and the scoreboard start becomes 101. Receipt evidence for 100 satisfies condition (v), so the recipient delivers 104 despite absent positions 101–103. Without that evidence or SIFS relation, it retains 104 until another applicable release condition occurs.
+Hypothetical example: an accepted agreement starts at 100 with buffer size four. The recipient receives and delivers Normal Ack DATA 100, then sends ACK. Its reorder start becomes 101. In this zero-propagation example, DATA 104 reception starts one SIFS after local ACK transmission ends. The scoreboard start becomes 101. Receipt evidence for 100 satisfies condition (v), so the recipient delivers 104 despite absent positions 101–103. Without that evidence or SIFS relation, it retains 104 until another applicable release condition occurs.
 
 S1 returns released units as an ordered sequence of fragment groups through `ReleasedFrames`. Its traversal uses modulo-4096 order relative to the old reorder window. `RecipientQosMacDataService` preserves that order through defragmentation, A-MSDU deaggregation, and delivery. The receive buffer retains its indexed storage. External callers must consume the supplied order, as the [migration guide](../../doc/src/migration-guide/index.rst) requires. C2 will preserve this contract for Compressed reception, with constituent MSDUs in order within each A-MSDU.
 
@@ -271,15 +316,15 @@ For BAR, HCF will bypass `getPendingFrameFor` and use the BAR duration operation
 
 ### Maintainer decisions
 
-These decisions remain open. Document approval does not select their outcomes. Each decision affects only its dependent implementation. S1 recipient repair and R1 rate publication retain independent review and publication boundaries.
+The maintainer accepted all five decisions on 14 October 2026. Their decision conditions are satisfied; source reviews, stage prerequisites, and verification remain required. S1 recipient repair and R1 rate publication retain independent review and publication boundaries.
 
-| Decision | Owner and required result | Dependent boundary |
+| Decision | Status and recorded result | Dependent boundary |
 | --- | --- | --- |
-| Lifetime compatibility | The [lifetime reviewer](ieee80211-edca-data-lifetime.md#lifetime-compatibility-decision) records acceptance of the proposed 0.512-second default or another justified positive, finite default. The review covers new disposal with Block Ack disabled. | Before S2's L1 implementation. |
-| Response timeout | The [lifecycle reviewer](ieee80211-blockack-agreement-lifecycle.md#response-timeout-and-data-lifetime) accepts the proposed one-second default and its disposal consequence or selects a justified shorter value. | Before A4 implementation. |
-| Transfer completion | The [lifecycle reviewer](ieee80211-blockack-agreement-lifecycle.md#transfer-completion-decision) accepts the exact queue predicate or defines another supported boundary that preserves conditional DELBA. Exchange counts alone do not approve the predicate. | Before A5 implementation in S4. |
-| Individual-DATA purpose | The maintainer accepts the [intermediate profile](#purpose-of-the-individual-data-profile) for bitmap, response, and recovery studies. Complete HT-immediate transfer remains outside that claim. | Before C2 implementation. |
-| Persistent profile conflict | The [lifecycle owner](ieee80211-blockack-agreement-lifecycle.md#profile-conflict-recovery) defines what bounds repeat setup and what permits another attempt. Finite disposal alone does not meet this condition. | Before C2 mismatch implementation. |
+| Lifetime compatibility | The maintainer accepted the 0.512-second default on 14 October 2026. It applies to QoS DATA with Block Ack enabled or disabled. The [lifetime record](ieee80211-edca-data-lifetime.md#lifetime-compatibility-decision) states the compatibility effect and required measurements. | The decision condition for S2/L1 is satisfied. |
+| Response timeout | The maintainer accepted a positive, finite 100 ms default on 14 October 2026. The [lifecycle contract](ieee80211-blockack-agreement-lifecycle.md#response-timeout-and-data-lifetime) defines its start, recovery, and DATA-lifetime interaction. | The decision condition for A4 is satisfied. |
+| Transfer completion | The maintainer accepted the [queue predicate](ieee80211-blockack-agreement-lifecycle.md#transfer-completion-decision) on 14 October 2026. At an exchange boundary, the agreement has no queued DATA, in-progress DATA, or pending BAR exchange. Conditional DELBA remains required. | The decision condition for A5 in S4 is satisfied. |
+| Individual-DATA purpose | The maintainer accepted the [intermediate profile](#purpose-of-the-individual-data-profile) on 14 October 2026. Its purpose is bitmap, response, and recovery studies with individual DATA before explicit BAR. Complete HT-immediate transfer remains outside that scope. | The scope decision before C2 is satisfied. |
+| Persistent profile conflict | The maintainer accepted a fatal configuration error on 14 October 2026. The [conflict contract](ieee80211-blockack-agreement-lifecycle.md#profile-conflict-detection-and-termination) requires termination before state updates and a new run with corrected profiles. | The decision condition for C2 mismatch implementation is satisfied. |
 
 ### Stage conditions
 
@@ -288,19 +333,20 @@ The table separates conditions for stage start, continuation, completion, and pu
 | Boundary | Responsible owner and required condition |
 | --- | --- |
 | Before each stage starts. | The stage owner pins the source parent and comparison base under the source-base rules below. |
-| Before S2 implementation. | The lifetime reviewer completes the separate [lifetime review](ieee80211-edca-data-lifetime.md). The maintainer resolves compatibility before L1. Before the production change, the implementation owner reproduces absent queue expiration through HCF. |
+| Before S2 implementation. | The lifetime reviewer completes the separate [lifetime review](ieee80211-edca-data-lifetime.md). The accepted default is 0.512 seconds; its compatibility decision is satisfied. Before the production change, the implementation owner reproduces absent queue expiration through HCF. |
 | Before S2 completes. | The lifetime owner supplies [measured expiry under controlled congestion](ieee80211-edca-data-lifetime.md#5-verification-and-evidence), including a Block Ack-disabled case. A selected regression row without expiry cannot satisfy this condition. |
-| Before S3a implementation. | The configuration migration owner pins its parent under the common source-base condition. The pending A4 timeout decision does not block S3a. |
-| Before S3b implementation, including A1. | The lifecycle reviewer completes the separate [lifecycle review](ieee80211-blockack-agreement-lifecycle.md). The S3a owners complete the required preparation and evidence. The lifecycle owner uses that completed revision as its parent. |
+| S3a preparation. | S3a is merged. Preserve its recorded parent comparison and explicit Basic consumers. Repeat affected checks after shared changes. |
+| Before S3b implementation, including A1. | The lifecycle reviewer completes the separate [lifecycle review](ieee80211-blockack-agreement-lifecycle.md). Select a parent that contains merged S3a and R1. Refresh selector, MIB commit, reset, and callback paths against that parent. |
 | Before A3b implementation. | Refresh the [consumer assessment](ieee80211-blockack-agreement-lifecycle.md#reassociation-consumers-and-callback-order). Trace Compressed HT removal and replacement. Trace Basic association-reset notifications with the actual peer key. |
-| Before A4 implementation. | The lifecycle review resolves the [response-timeout and DATA-lifetime choice](ieee80211-blockack-agreement-lifecycle.md#response-timeout-and-data-lifetime). The implementation owner completes S2, A1, A2, and A3a through A3c. |
-| Before S4 starts. | The S4 owner confirms that S3b supplies the required teardown behavior and S1 supplies recipient progress. The lifecycle reviewer resolves transfer completion before A5 implementation. |
+| Before A4 implementation. | The lifecycle review checks the [accepted 100 ms timeout](ieee80211-blockack-agreement-lifecycle.md#response-timeout-and-data-lifetime) against the selected source parent. The implementation owner completes S2, A1, A2, and A3a through A3c. |
+| Before S4 starts. | The S4 owner confirms that S3b supplies the required teardown behavior and S1 supplies recipient progress. A5 uses the accepted transfer-completion predicate; its decision condition is satisfied. |
 | Before S4 completes or its affected Basic path is published. | The S4 owner compares changed BAR timing with S4's pinned parent. Resolve any new unlawful overrun under [Section 6](#airtime-acceptance-and-admission-dependencies) before that publication. This condition requires no future C2 or C3 result. |
 | Before S5 starts. | The implementation owners complete the prerequisite contracts from S1 through S4. C2 evidence is produced within S5, so it is not a start condition. |
-| Before R1 starts. | The rate-publication owner pins its parent and maps advertised and accepted rate elements to existing MIB records. |
-| Before R1 completes. | Production tests establish publication, refresh, cleanup, unknown versus empty state, and Basic controls against R1's pinned parent. |
-| Before C2 implementation. | The maintainer accepts the individual-DATA purpose and scope in the decision table. Complete HT-immediate transfer requires a separate A-MPDU design. |
-| Before C2 mismatch recovery implementation. | Resolve the [persistent-conflict disposition](ieee80211-blockack-agreement-lifecycle.md#profile-conflict-recovery). An unresolved setup/teardown loop blocks that path. |
+| R1 publication prerequisite. | R1 is merged. Its [evidence record](../../doc/project/evidence/model/wifi/r1-rate-publication.md) owns the parent comparisons. C2 must repeat notification checks with S3b's subscriber. |
+| Before C2 implementation. | C2 uses the accepted individual-DATA purpose and scope. Complete HT-immediate transfer requires a separate A-MPDU design. Other C2 prerequisites retain their stated boundaries. The accepted fatal profile-conflict policy applies. |
+| Before C2 individual-MPDU release is complete. | Implement the required clause. Resolve and review its [history and timing design](#interframe-history-and-timing-design) against the actual parent. Verify each condition through production reception without extra unsupported restrictions. |
+| Before the C2 individual-MPDU release path is published. | The code reviewer accepts the history and timing design, and direct verification passes. Resolve any observation gap through the [escalation rule](#interframe-history-and-timing-design). A model approximation or reduced scope requires an explicit maintainer-approved plan revision. |
+| Before C2 mismatch validation implementation. | Apply the accepted [fatal conflict policy](ieee80211-blockack-agreement-lifecycle.md#profile-conflict-detection-and-termination). Trace production BAR validation before state updates. Require exact diagnostic and compatible-run controls before publication. |
 | Before C2's first production exchange or timing assessment. | R1 supplies committed local, BSS, and peer rates. Repeat publication callbacks with S3b's subscriber. HCF supplies actual BAR position. C2 supplies legal modes, timeouts, durations, and protection airtime. |
 | Before C4 completes. | The migration fixture proves the default, warning limits, capability-gap fallback, and explicit Basic recovery for external-style configurations. |
 | Before C3 or C4 proceeds. | The C2 owner records the first airtime result with its selected response mode and resulting admission decision under [Section 6](#6-verification-and-scope-limits). |
@@ -310,15 +356,17 @@ C2 belongs to S5. A new overrun outside Clause 10.23.2.9's permitted cases can r
 
 ### Source base and publication boundaries
 
-The main checkout contains merged S1 at `1cdb362a2a4b97f564566487079d9d156a5d213d` and the merged VHT/HT prerequisite from [PR #1318](https://github.com/inet-framework/inet/pull/1318). PR #1320 merged on 14 October 2026. Its original feature-series publication base is `ac6344cc5bcac972012759281a11b3f8255b5d46`. The original head and that base remain historical verification boundaries. Each later stage must pin its actual source parent and comparison base from the merged integration source.
+Local master at `633b071e213b825ce6019ff3e344ae49f52791ff` contains S1, R1, S3a, and the VHT/HT prerequisite from PR #1318. S1 merged through PR #1320 on 14 October 2026. Its original feature-series publication base is `ac6344cc5bcac972012759281a11b3f8255b5d46`. Original feature heads and comparison bases remain historical verification boundaries. Each remaining stage must pin its actual source parent and comparison base from the merged integration source.
 
-The lifetime and lifecycle plans retain their separately pinned `b06e8768` source observations. Before each prerequisite starts, its owner must refresh its source observations and caller assessment against the selected stage parent. This umbrella review does not replace either prerequisite's review. The decision table defines their unresolved implementation boundaries.
+The lifetime and lifecycle plans retain their separately pinned `b06e8768` source observations. Before each prerequisite starts, its owner must refresh its source observations and caller assessment against the selected stage parent. This umbrella review does not replace either prerequisite's review. The decision table records accepted policy choices; stage reviews and verification remain required.
+
+S2 and S3b must refresh their prerequisite source observations against their actual selected parents. Those parents must include merged R1 and S3a; the refresh must not remain fixed to `1cdb362a`. Existing local S2 implementation does not establish merged S2 status or authorize a history change.
 
 A move to another base requires a fresh caller and test assessment. Shared paths identify overlap; they do not by themselves prove a merge conflict. This plan does not authorize branch mutation or publication.
 
 Each stage below has its own direct tests and regression evidence. Basic support remains available in every stage and in the final implementation. No prerequisite change claims completed Compressed support.
 
-The [stage conditions](#stage-conditions) define which work each unresolved decision blocks.
+The [stage conditions](#stage-conditions) define the remaining design, implementation, and verification obligations.
 
 ### Implementation stages
 
@@ -326,39 +374,47 @@ The [stage conditions](#stage-conditions) define which work each unresolved deci
 | --- | --- | --- |
 | S1. Merged in PR #1320. | `ReceiveBuffer`, `BlockAckReordering`, and `RecipientQosMacDataService` count sequence positions and release complete groups in cyclic order. Valid Basic BAR creates a record before DATA. | Original-head verification passes eight recipient scenarios, three NAV runs, and 12 selected fingerprints. The [S1 record](#completed-s1-and-recorded-verification) states the supplied-agreement scope and approved baseline changes. |
 | S2. Establish DATA lifetime. | Implement the [separate EDCA lifetime plan](ieee80211-edca-data-lifetime.md). Its owner supplies deadlines independently of Block Ack support. | Normal Ack DATA expires under either switch value. Identity transfer and accepted-exchange completion preserve ownership. |
-| S3a. Preserve legacy demonstrations and record fixture evidence. | HCF exposes the variant selector with Basic as the temporary default before Compressed exists. The configuration owner adds explicit Basic settings to legacy consumers. The fixture owner records profile, assertions, and HT/VHT state. | Topologies, modes, fragmentation studies, and Basic exchanges remain available. Record explicit settings and parent comparisons before S3b. No working Compressed exchange is claimed. |
+| S3a. Merged. | HCF validates the selector with Basic as the temporary default. Legacy demonstrations and twelve existing fixtures select Basic explicitly. | The [S3a record](ieee80211-compressed-blockack-s3a.md) reports direct Basic exchange and capability comparisons. Compressed selection still stops initialization. |
 | S3b. Repair agreement lifecycle. | Implement A1, A2, A3a through A3c, and A4 of the [separate lifecycle plan](ieee80211-blockack-agreement-lifecycle.md#5-reviewable-stages-and-dependencies). A2 distinguishes Basic compatibility from the Compressed HT requirement. Retain Basic fixtures and add focused Compressed admission checks. | Legacy ad hoc and non-HT consumers retain Basic. Compressed admission requires valid HT state; its capability-gap cases use Normal Ack. Shared lifecycle tests cover both profiles. |
 | S4. Complete BAR work independently of DATA selection. | The originator policy, ACK handler, agreement window, HCF, and frame sequences isolate peer/TID state. They permit BAR-only contention without DATA extraction. Connect lifecycle stage A5. | One or four outstanding frames cause BAR below the default threshold of five. Another peer cannot suppress this work. Final completion causes DELBA. Compare changed Basic BAR timing with S4's parent before publication. |
-| R1. Publish production rate state. | Management commits existing local, BSS, and peer records from its real rate elements. Pin an independent parent. Supply the [R1 contract](#r1-publish-production-rate-state) and production fixture. | Publication, refresh, cleanup, and unknown/empty state pass through full and simplified management. Basic controls retain their mode contract. C2 later consumes the committed state. |
+| R1. Merged. | Full and simplified management commit local, BSS, and peer rates through the MIB. Combined operations commit related state before notification. | The [R1 record](../../doc/project/evidence/model/wifi/r1-rate-publication.md) reports publication, refresh, cleanup, and malformed-input checks. C2 later consumes these records and repeats subscriber checks. |
 | S5. Add Compressed and activate its default. | Frame definitions, serializer, procedures, recipient scoreboard, response matching, rate selection, and protection support both profiles. C4 changes the default only after C2 and C3 pass. | Compressed exchanges pass direct bitmap, rate, and timing checks. Explicit Basic still supports type 0, fragment bitmaps, existing consumers, and its response contract. |
 
-After completed S1, the proposed order remains S2, S3a, S3b, S4, R1, and S5. S1 retains its separate PR and recorded parent comparison. It supplies no lifetime, lifecycle, rate publication, or default activation. R1 remains a separate change with its own parent comparison. R1 need not wait for S2, S3b, or S4, but it must complete before C2 consumes rates.
+S1, R1, and S3a are complete in the integration source. The remaining stages are S2, S3b, S4, and S5. A1, A2, and A3a through A3c can proceed without S2; A4 requires S2. Completed stages retain their separate parent comparisons. R1 satisfies the rate-publication prerequisite, but C2 still requires subscriber integration and legal rate consumption.
 
 S1's direct tests supply an agreement with a known buffer size through the existing Basic path. S3b later verifies that negotiation supplies the correct size to that repaired recipient. Lifecycle stage A4 depends on S2; A1, A2, and A3a through A3c need not wait for S2. S4 depends on S3b teardown and S1 recipient progress.
 
 The lifecycle plan owns the [A3 review split and publication conditions](ieee80211-blockack-agreement-lifecycle.md#5-reviewable-stages-and-dependencies). A3a covers directional teardown and inactivity; A3b covers association reset; A3c completes Action disposal and absent-agreement recovery. Required Action invalidation and safe completion accompany the first retirement or reset path that uses them. The split does not authorize an unsafe intermediate publication.
 
-S3a precedes S3b as a separate commit or short series. Pin S3a's parent before the selector and explicit Basic settings. Record Basic exchange evidence and any changed result before S3b starts. Pin the completed S3a revision as S3b's parent. Attribute later lifecycle effects to S3b. The final Compressed default takes effect at C4, after the runtime path and timing checks exist.
+S3a already precedes S3b in the integration source. S3b must use a parent that contains both S3a and R1. Preserve S3a's original parent comparison. Attribute later lifecycle effects to S3b. The final Compressed default takes effect at C4, after the runtime path and timing checks exist.
 
-S5 depends on the completed prerequisite contracts. C1 can precede R1 completion because wire definitions need no committed rate state. C2 requires completed R1. S1's recorded parent comparison remains separate from the future R1 and S4 comparisons. Unresolved C2 or C4 decisions do not reopen S1.
+S5 depends on the completed prerequisite contracts. C1 changes wire definitions without a new rate-publication stage. C2 consumes merged R1 and repeats its interaction with S3b. S1's and R1's recorded parent comparisons remain separate from S4's future comparison. Unresolved C2 or C4 work does not reopen completed stages.
+
+### Completed R1 and S3a
+
+R1 spans commits `c1973f443e` through `b385562353`. It adds combined MIB commits, production publication, membership-selector checks, and nonfinite-rate rejection. The [R1 evidence record](../../doc/project/evidence/model/wifi/r1-rate-publication.md) preserves its original source boundaries, commands, failures, and corrected results. Its final broad verification reports 46 runs; a later focused correction adds nonfinite-input checks. These recorded results do not establish a new combined-master pass.
+
+S3a spans `4e6aa75c99` and `633b071e21`. Its [execution record](ieee80211-compressed-blockack-s3a.md) reports thirteen demonstration comparisons, eight capability probes, and nineteen fingerprint rows. Every calculated fingerprint ingredient equals its parent. Fifteen rows retain graphical `tyf` baseline mismatches, so the fingerprint runner exits 1. Four protocol fixtures retain expected FAIL results with unchanged causes. S3a changes no recorded baseline and proves no Compressed exchange.
+
+The inventories below remain preservation requirements for later stages. They describe the original S3a consumer set, not every fixture now present. Preserve the new selector, Basic observation, and R1 fixtures as additional controls. The original evidence belongs to its recorded feature source; this plan review runs no simulations.
 
 S1 changes recipient delivery, not the Compressed bitmap representation. S4 preserves Basic fragment rules; S5 retains those rules beside the Compressed restriction. Neither stage may claim a Compressed exchange solely because a helper handles a Compressed class.
 
 ### S3a: demonstration migration and fallback inventory
 
-S3a will preserve the existing Basic demonstrations through explicit profile selection. The [Block Ack network](../../showcases/wireless/blockack/BlockAckShowcase.ned) and [TXOP network](../../showcases/wireless/txop/TxopShowcase.ned) will retain their two ad hoc hosts. The plan requires no AP, Ethernet link, channel migration, or new association interval in either showcase.
+Merged S3a preserves the existing Basic demonstrations through explicit profile selection. The [Block Ack network](../../showcases/wireless/blockack/BlockAckShowcase.ned) and [TXOP network](../../showcases/wireless/txop/TxopShowcase.ned) retain their two ad hoc hosts. Later stages must retain this configuration scope. The plan requires no AP, Ethernet link, channel migration, or new association interval in either showcase.
 
 The current ad hoc management does not install peer HT records. That limitation prevents the Compressed HT profile, but it will not disable explicit Basic compatibility. The Basic profile preserves INET's existing capability assumptions. Its use with later PHY modes does not establish complete IEEE Std 802.11e-2005 conformance.
 
-Add this assignment to each legacy configuration's existing scope:
+Preserve S3a's explicit Basic assignment in each legacy configuration's existing scope:
 
 ```ini
 *.host*.wlan[*].mac.hcf.blockAckVariant = "basic"
 ```
 
-Use the actual node patterns below for networks without `host*` names. HCF will validate the selector in S3a. Its temporary default remains Basic until C4 activates the completed Compressed implementation. This order avoids an unsupported intermediate default.
+Use the actual node patterns below for networks without `host*` names. HCF already validates the selector. Its temporary default remains Basic until C4 activates the completed Compressed implementation. A2 must revise the temporary rejection of Compressed, including the selector fixture's expected diagnostic. A2 must prevent an admitted setup from reaching the unsupported builder before C2 supplies that path.
 
-| Configuration and source | Retained behavior | Minimal proposed change |
+| Configuration and source | Retained behavior | Basic selection to preserve |
 | --- | --- | --- |
 | Block Ack [General](../../showcases/wireless/blockack/omnetpp.ini), `NoFragmentation`, `MixedTraffic`, and `Fragmentation` | Existing ad hoc topology, modes, radio settings, traffic, and fragment demonstration. | Select Basic on both hosts in General. All named configurations inherit it. |
 | TXOP [General](../../showcases/wireless/txop/omnetpp.ini) | Existing ad hoc topology and `n(mixed-2.4Ghz)`; mixed Block Ack, Normal Ack, A-MSDU, and RTS/CTS exchanges. | Select Basic on both hosts. Retain thresholds and application settings. |
@@ -369,13 +425,13 @@ Use the actual node patterns below for networks without `host*` names. HCF will 
 
 Retain `PacketSizeHCFfragblockack`, `TxPowerHCFfragblockack`, `ThresholdHCFfragblockack`, and `OnlyPacketSizeHCFfragblockack`. Retain their names, result filters, analysis inputs, plot series, fingerprint rows, and speed records.
 
-The configuration owner will check effective INI inheritance before each assignment. The tracked inventory includes six INI files and the ad hoc `${false, true}` parameter loop. Search tracked `tests/**/*.test` sources and shared includes separately. Generated files under `work/` do not replace those sources.
+S3a's completed migration covers six INI files and the ad hoc `${false, true}` parameter loop. Check effective INI inheritance before a later change to these assignments. Search tracked `tests/**/*.test` sources and shared includes separately. Generated files under `work/` do not replace those sources.
 
 For each legacy demonstration, require accepted ADDBA, Block Ack-policy DATA, Basic BAR, and a Basic response with positive receipt status. Check fragment status in the fragmentation cases. Record peer addresses and TIDs for every measured wireless hop. No peer HT record is required for Basic eligibility.
 
 Repeat those assertions after A2 and at final S5. A fingerprint match without a Basic exchange cannot establish preservation. Check the support-disabled ad hoc run separately. Add a focused Compressed ad hoc case with absent peer HT state. That case requires Normal Ack without ADDBA, BAR, or Block Ack.
 
-Update the [Block Ack page](../../showcases/wireless/blockack/doc/index.rst), [TXOP page](../../showcases/wireless/txop/doc/index.rst), and [fragmentation page](../../showcases/wireless/fragmentation/doc/index.rst) at the relevant descriptions. State that Basic originated in IEEE Std 802.11e-2005 and is unsupported by IEEE Std 802.11-2024. Link to Section 2's historical and current-standard sources. Apply the same note to the affected QoS example descriptions and parameter-study explanation.
+Preserve S3a's historical Basic explanation in the [Block Ack page](../../showcases/wireless/blockack/doc/index.rst), [TXOP page](../../showcases/wireless/txop/doc/index.rst), and [fragmentation page](../../showcases/wireless/fragmentation/doc/index.rst). State that Basic originated in IEEE Std 802.11e-2005 and is unsupported by IEEE Std 802.11-2024. Link to Section 2's historical and current-standard sources. Retain this distinction in affected QoS example descriptions and the parameter-study explanation.
 
 Preserve existing images and plots when the evidence still supports them. Shared recipient, lifetime, and lifecycle repairs can change results despite unchanged topology and traffic. Regenerate only affected evidence after a measured change. Keep prior measurements as historical evidence; do not claim unchanged fingerprints or current performance without verification.
 
@@ -383,13 +439,13 @@ Existing infrastructure protocol fixtures will supply Compressed coverage throug
 
 ### S3a: tracked fixture inventory and VHT scope
 
-S3a's fixture owner will search tracked INI files and `tests/**/*.test` with their conditional assignments and included configuration files. The owner will also search for Basic frame classes, Basic duration methods, and expected serializer fields. The current source has 12 fixtures that can enable Block Ack: eight protocol fixtures and four module fixtures. Five further module fixtures explicitly disable support. The separate S1 recipient fixture supplies accepted Basic agreements without an HCF enablement assignment. The response-mode unit fixture and serializer fixture also consume Basic types without that assignment.
+S3a's recorded inventory covers tracked INI files, conditional assignments, included configuration files, and direct Basic consumers. Its original migration set contains twelve fixtures: eight protocol fixtures and four module fixtures. Five further module fixtures explicitly disable support. The separate S1 recipient fixture supplies accepted Basic agreements without an HCF enablement assignment. The response-mode unit fixture and serializer fixture also consume Basic types without that assignment. Later verification must include S3a's new selector and Basic observation fixtures in addition to this original set.
 
 The existing protocol fixtures include [_n.ini](../../tests/protocol/wifi/ini/_n.ini) or [_ac.ini](../../tests/protocol/wifi/ini/_ac.ini), followed by shared [_base.ini](../../tests/protocol/wifi/ini/_base.ini). Their [infrastructure network](../../tests/protocol/wifi/ned/WifiInfraNetwork.ned) uses full AP/STA management. The HT configuration selects `n(mixed-2.4Ghz)`; the VHT configuration selects `ac`. Association alone therefore does not prove that either endpoint has usable HT state.
 
 The [mode catalog](../../src/inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.cc) appends 128 existing HT combinations to `ac` and enables its HT-support flag. These HT modes use 5 GHz timing. [Ieee80211Mib](../../src/inet/linklayer/ieee80211/mib/Ieee80211Mib.cc) derives local capabilities from that catalog and operational limits. The [HT mode-set fixture](../../tests/unit/Ieee80211HtModeSet_1.test) requires `ac` to report HT operation. The [VHT/HT production fixture](../../tests/module/Ieee80211VhtHtSupport_1.test) checks peer HT state after association. Clause 4.3.15 defines a VHT STA as an HT STA with additional VHT features.
 
-S3a will record the actual mode, local HT flag, peer HT state, and pre-A2 exchange outcome for HT and VHT fixtures. S3b/A2 must retain Basic compatibility and check Compressed admission with real HT state. Before C2, admission fixtures do not claim a production Compressed exchange. C2 and C4 must retain the original `Ac_BlockAck` requirement with matched Compressed exchanges and positive receipt bits. The [branch verification record](#branch-verification-record) reports its current generic frame-type pass. That pass establishes neither negotiated-parameter correctness nor final Compressed support.
+The [S3a record](ieee80211-compressed-blockack-s3a.md) records actual modes, local HT flags, peer HT state, and pre-A2 outcomes. S3b/A2 must retain Basic compatibility and check Compressed admission with real HT state. Before C2, admission fixtures do not claim a production Compressed exchange. C2 and C4 must retain the original `Ac_BlockAck` requirement with matched Compressed exchanges and positive receipt bits. Earlier generic frame-type passes establish neither negotiated-parameter correctness nor final Compressed support.
 
 This revision removes the proposed `Ac_BlockAck` deferral and its approval gate because their missing-HT premise no longer applies. The implementation must preserve `_ac.ini` and real capability exchange rather than replace VHT fixtures with HT-only configurations. If a later result exposes a different missing prerequisite, record its actual cause before any expectation proposal. The [recorded-expectation rule](../../doc/project/rule/testing.md#tr-baseline-deliberate) still governs such a proposal.
 
@@ -412,7 +468,7 @@ The fallback assertions require delivered Normal Ack QoS DATA, absent peer HT st
 
 Hypothetical example: full `ac` management installs valid peer HT state and A2 permits agreement setup. The fallback fixture first establishes static association through simplified management. It removes peer HT state after initialization, before DATA. No Beacon refresh restores that state, so A2 uses Normal Ack throughout the measured traffic. The positive and fallback fixtures must preserve those distinct initial conditions and results.
 
-The table assigns fixture changes to the stage that changes their contract. S3a records the original outcomes; it does not claim that future assertions already pass. S3b's lifecycle owner owns capability and agreement adaptation. C2's production owner owns Compressed exchange assertions. C4's consumer owner owns default activation, profile-specific configuration validation, and coverage of both serializers.
+The table assigns fixture changes to the stage that changes their contract. S3a recorded the original outcomes; those results do not establish future assertions. S3b's lifecycle owner owns capability and agreement adaptation. C2's production owner owns Compressed exchange assertions. C4's consumer owner owns default activation, profile-specific configuration validation, and coverage of both serializers.
 
 | Tracked fixture | Current assertion or dependency | Decision and stage |
 | --- | --- | --- |
@@ -440,9 +496,7 @@ Five module fixtures explicitly disable support: `Ieee80211HcfMultipleProtection
 
 ### R1: publish production rate state
 
-R1 repairs the gap between management rate elements and MIB rate records. The records and setters already exist, but current production management does not populate them. Compressed BAR and response selection need committed operational and basic rates. This stage owns publication; C2 owns the later rate consumer.
-
-The owner will pin R1's source parent and comparison base. Review and publish R1 separately from lifetime, recipient delivery, BAR access, and Compressed frame integration. No complete Compressed exchange is required to verify publication.
+R1 is merged and supplies production publication of local, BSS, and peer rates. The [R1 evidence record](../../doc/project/evidence/model/wifi/r1-rate-publication.md) owns its implementation contract and parent comparisons. C2 owns Compressed rate consumption. The requirements below remain regression obligations when later stages change these paths.
 
 Use the existing [MIB](../../src/inet/linklayer/ieee80211/mib/Ieee80211Mib.h) stores and validation. The responsible management paths are:
 
@@ -453,11 +507,11 @@ Use the existing [MIB](../../src/inet/linklayer/ieee80211/mib/Ieee80211Mib.h) st
 - Full STA management refreshes those records from valid associated-AP Beacons.
 - Simplified AP and STA management publish equivalent rates during their existing static association operation.
 
-Use `installBssAndPeerRateSets` when BSS and peer records commit together. Preserve unknown state and a known empty basic-rate set as distinct values. Scan candidates and unsuccessful association attempts must not replace active rate state.
+Use the merged combined MIB operations when related state commits together. `installBssAndPeerRateSets` commits rate records; `installBssAndPeerState` also commits peer HT state before notification. Preserve unknown state and a known empty basic-rate set as distinct values. Scan candidates and unsuccessful association attempts must not replace active rate state.
 
 AP departure removes that peer's rates without loss of BSS rates. STA association loss clears its old BSS and peer records. Existing management stop paths clear their corresponding records. R1 adds no stop/start recovery guarantee.
 
-Add a proposed `tests/module/Ieee80211MgmtRatePublication_1.test`. The fixture must drive real management and observe committed MIB state without direct rate injection. Check the published rates and basic flags against actual Supported Rates and Extended Supported Rates elements.
+Retain [Ieee80211MgmtRatePublication_1.test](../../tests/module/Ieee80211MgmtRatePublication_1.test) and [Ieee80211MgmtStateCommit_1.test](../../tests/module/Ieee80211MgmtStateCommit_1.test). These existing fixtures drive real management without direct rate injection. Compare published rates and basic flags with actual Supported Rates and Extended Supported Rates elements after affected changes.
 
 The fixture must cover these conditions:
 
@@ -468,18 +522,18 @@ The fixture must cover these conditions:
 - Peer departure, association loss, and existing management stop paths.
 - Unknown state and known empty basic-rate state.
 
-Retain focused Basic DATA, BAR, response-mode, and support-disabled controls. Current rate selectors do not consume these records; publication must not silently change their existing selection contract. Compare each changed result with R1's parent and record its cause.
+Retain focused Basic DATA, BAR, response-mode, and support-disabled controls. Current rate selectors do not consume these records; later rate consumers must preserve the retained Basic selection contract. Compare each later changed result with the responsible stage's pinned parent. Preserve R1's original comparison separately and record each new result's cause.
 
-R1 tests the MIB's existing notification contract. If the selected parent already contains S3b's subscriber, include its synchronous callback trace in R1 evidence. Otherwise, C2 repeats that integration after both changes exist. A rate-only update must preserve unchanged Basic and Compressed agreements. The built-in rate-control path must produce no additional reset or rate statistic solely from these notifications. External listeners retain their documented notification contract.
+R1 tests the MIB's notification contract without S3b's future subscriber. C2 must repeat that integration after both changes exist. A3b must use the merged combined-commit behavior instead of an assumed AP remove/reinstall notification pair. A rate-only update must preserve unchanged Basic and Compressed agreements. The built-in rate-control path must produce no additional reset or rate statistic solely from these notifications. External listeners retain their documented notification contract.
 
-C2 cannot replace R1 evidence with helper injection or a successful Compressed exchange. Record R1's commands, mode, fixture selectors, seed, parent, and outcomes in its own evidence record. The actual selector must follow the fixture's supported runner interface after it exists.
+C2 cannot replace R1 evidence with helper injection or a successful Compressed exchange. Preserve R1's recorded commands, mode, fixture selectors, seed, parent, and outcomes. Record later subscriber integration against its actual combined source.
 
 ### Compressed replacement steps
 
 | Step and purpose | Owner and proposed change | Expected result and verification |
 | --- | --- | --- |
 | C1. Define valid type 2 frames beside Basic. | Add the Compressed builder and fixed 28-byte header chunk. Decode the complete Type field. Retain Basic classes, fields, builders, and producers within the Type 0 contract. Adapt existing Compressed round-trip producers and expected fields in this step. | Golden octets and round trips verify Type 0 and Type 2. Reject Basic values that encode another Type. Compressed reserved bits write zero and received values are ignored. Basic remains 152 bytes with FCS; Compressed remains 32 bytes. |
-| C2. Connect complete Compressed exchanges. | Consume R1's committed rates. HCF derives BAR position and the recipient's actual interframe relation. Procedures and ACK handling select the configured profile and match the response variant. The record retains Compressed receipt truth after delivery and supplies the bit at `WinStartR - 1`. Add the individual-MPDU release condition without loss of Basic fragment behavior. Supply fragmentation suppression, Compressed rates, timeouts, durations, and protection airtime. | Real association supplies rate state. Production checks cover receipt retention, zero holes, interframe release, and ordinary gap retention. Empty records yield zero bits. Wrong-profile and malformed input cannot report success. Explicit Basic retains fragments and its response contract. Resolve persistent conflict before implementation; record the first Compressed timing result before C3 or C4. |
+| C2. Connect complete Compressed exchanges. | Consume R1's committed rates. HCF derives BAR position and the recipient's actual interframe relation. Procedures and ACK handling select the configured profile and match the response variant. The record retains Compressed receipt truth after delivery and supplies the bit at `WinStartR - 1`. Add the individual-MPDU release condition without loss of Basic fragment behavior. Supply fragmentation suppression, Compressed rates, timeouts, durations, and protection airtime. | Real association supplies rate state. Production checks cover receipt retention, zero holes, interframe release, and ordinary gap retention. Empty records yield zero bits. Wrong-profile and malformed input cannot report success. Explicit Basic retains fragments and its response contract. Verify the accepted fatal conflict diagnostic; record the first Compressed timing result before C3 or C4. |
 | C3. Verify both profiles and Compressed timing. | Add focused Compressed rate and timing cases. Retain the Basic response-mode fixture and its 152-byte assertions. Add 32-byte Compressed cases with directional queries, peer isolation, and ACK/CTS controls. | Primary and legal alternate Compressed rates produce correct duration. Initial and later BAR use legal rates. Profile-specific lengths remain distinct. Timing checks distinguish permitted overruns from unlawful continuation. |
 | C4. Activate the default and complete compatibility guidance. | Set Compressed as the final default. Add the migration diagnostics and external-style fixture. Keep explicit Basic settings and complete both serializer inventories. Add Compressed delayed-policy rejection. | Default eligible HT links use Compressed. Default links without usable HT state use Normal Ack. Explicit Basic remains usable without HT peer records. No Basic class, showcase configuration, parameter-study variant, or result row is removed. |
 
@@ -519,7 +573,7 @@ The choices have explicit owners:
 - This plan owns `blockAckVariant`, its final Compressed default, and explicit Basic compatibility.
 - This plan owns the fallback when the basic-rate set is unknown.
 
-The [decision table](#maintainer-decisions) defines the unresolved lifetime and transfer-completion choices. Basic retention does not eliminate their compatibility effects. Required measurements remain unexecuted.
+The [decision table](#maintainer-decisions) records the accepted lifetime default and transfer-completion predicate. Basic retention does not remove their compatibility effects. Required measurements remain unexecuted. The 100 ms response timeout and fatal profile-conflict policy are also accepted.
 
 ## 6. Verification and scope limits
 
@@ -557,17 +611,17 @@ Retain these direct checks for recipient delivery, BAR channel access, and final
 
 - Final response timing: At C3, repeat affected airtime checks across primary and legal alternate response modes implemented by C2. Include the lowest supported rates and late continuation near the TXOP limit. Test a permitted initial unaggregated MSDU under Block Ack, an initial A-MSDU, and a later exchange that cannot finish within the required bound. Require containment for the A-MSDU and applicable later exchange. A permitted initial overrun must not create a false admission prerequisite. A C2 result covers only its recorded modes and exchange boundaries; a fingerprint match does not prove timing compliance.
 
-- Demonstration coverage: At S3a, check explicit Basic selection and the direct assertions in Section 5. Repeat after A2 and at C2/S5. Every legacy Block Ack demonstration must retain actual Basic exchanges, including ad hoc QoS run 1. Retain run 0 as the support-disabled control. Check Compressed capability-gap fallback separately; it must not replace legacy coverage.
+- Demonstration coverage: Preserve S3a's explicit Basic selection and recorded direct assertions from Section 5. Repeat the assertions after A2 and at C2/S5. Every legacy Block Ack demonstration must retain actual Basic exchanges, including ad hoc QoS run 1. Retain run 0 as the support-disabled control. Check Compressed capability-gap fallback separately; it must not replace legacy coverage.
 
 - Fixture coverage: S3a records the [tracked fixture inventory](#s3a-tracked-fixture-inventory-and-vht-scope), including HT/VHT state and actual failure causes. S3b runs the capability, agreement, A-MSDU permission, and fallback checks before final conversion. C2 requires Compressed responses in retained positive Block Ack cases. C4 runs the final inventory, serializer expectations, and delayed-policy rejection fixture. Report deferred protocol obligations separately from successful exchanges and successful fallback checks.
 
 - Recipient gap release, completed S1: Retain scenarios 1 and 2 of the recipient fixture. Scenario 1 buffers complete DATA 101 and 102 behind absent DATA 100. Receipt of DATA 100 must release all three units in order in that operation. Scenario 2 repeats this condition across sequence wrap. Retain their assertions for delivery order and the resulting reorder window without a later DATA reception or BAR.
 
-- Recipient interframe release, C2: Supply an agreement with start 100 and size four through HCF. Receive Normal Ack DATA 100 and observe its ACK completion. Receive DATA 104 one SIFS after ACK. Require adjusted scoreboard start 101, receipt evidence for 100, immediate delivery of 104, and reorder start 105.
+- Recipient interframe release, C2: Supply an agreement with start 100 and size four through HCF. Receive Normal Ack DATA 100 and observe its ACK completion. In a zero-propagation control, start DATA 104 reception one SIFS after local ACK transmission ends. Require adjusted scoreboard start 101, receipt evidence for 100, immediate delivery of 104, and reorder start 105.
 
   Use actual receive times and the transmission callback. A directly supplied relation flag cannot replace this production check. Repeat with applicable SIFS and RIFS relations after a previous MPDU. Repeat the positive case across sequence wrap.
 
-- Recipient interframe controls, C2: Repeat with a false bit at `WinStartR - 1` and with an interval outside the applicable SIFS/RIFS conditions. Each control must retain 104 behind the gap.
+- Recipient interframe controls, C2: Repeat with a false bit at `WinStartR - 1` and an interval outside the accepted timing relation. Each control must retain 104 behind the gap. Add nonzero propagation delay and intervening unrelated reception or transmission. Test history invalidation after agreement retirement, peer cleanup, and replacement setup. Check that stale history cannot release DATA. Record exact receive and transmit endpoints and the applied timing allowance. Retain Basic controls and explain each changed Compressed fingerprint through observed delivery events.
 
 - Recipient BAR before DATA, completed S1: Retain scenario 3 with supplied agreement start 100 and buffer size eight. Before DATA, valid Basic BAR at 104 must create the record and set reorder start 104. Subsequent DATA 104 must reach immediate delivery. Invalid BAR and BAR without an agreement must create no reorder record.
 
@@ -593,7 +647,7 @@ Repeat both recipient cases with Compressed frames at C2 and C4. Each result mus
 
 - Migration diagnostics, C4: Use the [external-style migration fixture](#migration-diagnostics), outside the explicit legacy override inventory. Check local non-HT warnings, HT ad hoc fallback reasons, and explicit Basic exchanges. Disabled support must produce no irrelevant warning. Keep Compressed as the selected default.
 
-- Profile conflict, C2: Send a valid retained BAR of the other variant to an active peer/TID. Require one recipient-role DELBA and no scoreboard, reorder, response, or inactivity success update. Preserve another peer and the opposite role. Repeat conflicting BAR during pending teardown. Record delivered DATA separately from originator disposal. The persistent-conflict disposition must supply bounded repeated-setup assertions before implementation.
+- Profile conflict, C2: Send a valid addressed BAR of the other variant to an active peer/TID. Require the fatal configuration diagnostic before agreement, scoreboard, reorder, response, or inactivity updates. Check both mismatch directions and no conflict-triggered DELBA. Require termination at the first qualifying BAR. Verify diagnostic fields and cause, not merely an expected failure status. In separate compatible runs, verify Basic and Compressed exchanges plus unaffected Normal Ack traffic. Keep malformed, unknown-variant, unaddressed, and absent-agreement cases separate.
 
 - Compatibility and activation: Default eligible HT links must use Compressed. Explicit Basic must preserve legacy classes, bitmap fragments, response lengths, and existing NAV and protection assertions. Change `N_CompressedBa.test` to require Compressed and retain positive `Ac_BlockAck` coverage through real HT state. Keep Basic NAV and multiple-protection scenarios; add Compressed scenarios rather than removal of Basic coverage. Extend response-mode tests with 32-byte Compressed cases beside 152-byte Basic cases. Retain directional queries, peer isolation, asymmetric state, and ACK/CTS controls.
 
@@ -608,7 +662,7 @@ Use the HCF module fixture for identity, small-window, shifted-response, respons
 - Test the default Compressed setting and explicit Basic at both endpoints.
 - Test unknown selector values at initialization.
 - Give two HT peers different profiles.
-- Require no cross-variant acknowledgment, classified DELBA recovery, and finite disposal without a repeated setup loop.
+- Require no cross-variant acknowledgment. A valid addressed BAR that conflicts with an active agreement must cause the exact fatal configuration diagnostic before state updates. Require no conflict-triggered DELBA or repeated setup. Verify compatible traffic in separate runs; absent-agreement recovery retains its separate DELBA checks.
 
 Retain [Ieee80211BlockAckReordering_1.test](../../tests/module/Ieee80211BlockAckReordering_1.test) through the later stages. Its current scenarios 0 through 7 assert delivery and state through `RecipientQosMacDataService`. Scenario 0 covers fragment capacity; scenarios 1 and 2 cover gap release and wrap; scenario 3 covers BAR before DATA. Scenarios 4 through 7 cover BAR order, window movement, peer/TID isolation, and A-MSDU order. The fixture supplies accepted Basic agreements. A2 must add negotiation checks through HCF, while C2 and C4 must verify Compressed integration.
 
@@ -675,7 +729,7 @@ The table gives normative IEEE Std 802.11-2024 evidence for Compressed and share
 
 Table 9-62 requires HT Capabilities when `dot11HighThroughputOptionImplemented` is true and the station is not a 6 GHz station. The condition does not exclude IBSS. The choice to defer IBSS capability support remains an INET scope decision.
 
-The prerequisite plans own [lifetime evidence](ieee80211-edca-data-lifetime.md#2-current-source-and-standard-support) and [lifecycle evidence](ieee80211-blockack-agreement-lifecycle.md#8-standards-evidence-and-scope-limits). Profile-conflict DELBA is a model choice under the [lifecycle contract](ieee80211-blockack-agreement-lifecycle.md#profile-conflict-recovery), not a new requirement inferred from Clause 11.5.4.
+The prerequisite plans own [lifetime evidence](ieee80211-edca-data-lifetime.md#2-current-source-and-standard-support) and [lifecycle evidence](ieee80211-blockack-agreement-lifecycle.md#8-standards-evidence-and-scope-limits). Fatal profile-conflict termination is a model choice under the [lifecycle contract](ieee80211-blockack-agreement-lifecycle.md#profile-conflict-detection-and-termination), not a new requirement inferred from Clause 11.5.4.
 
 ### Airtime acceptance and admission dependencies
 

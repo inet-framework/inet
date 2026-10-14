@@ -1,0 +1,167 @@
+%description:
+Check lifetime replacement through production HCF and the QoS data service.
+With qOsCheck false, aggregation accepts non-QoS and mixed sources.
+The resulting QoS aggregate starts a new lifetime at construction.
+With qOsCheck true, non-QoS sources retain ordinary extraction behavior.
+
+%extraargs: -r 0..4
+
+%file: LifetimeAggregationTest.cc
+
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+
+namespace inet::ieee80211 {
+
+class LifetimeAggregationTest : public cSimpleModule, public cListener
+{
+    int lifetimeDrops = 0;
+
+  public:
+    LifetimeAggregationTest() : cSimpleModule(65536) {}
+
+  protected:
+    virtual void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *details) override
+    {
+        auto drop = check_and_cast<PacketDropDetails *>(details);
+        ASSERT(drop->getReason() == LIFETIME_EXPIRED);
+        lifetimeDrops++;
+    }
+
+    virtual void activity() override
+    {
+        auto mac = getModuleByPath("^.host.wlan[0].mac");
+        auto hcf = check_and_cast<Hcf *>(mac->getSubmodule("hcf"));
+        auto rx = check_and_cast<Rx *>(mac->getSubmodule("rx"));
+        auto edca = check_and_cast<Edca *>(hcf->getSubmodule("edca"));
+        auto handler = edca->getLifetimeHandler();
+        auto edcaf = edca->getEdcaf(AC_BE);
+        auto pending = edcaf->getPendingQueue();
+        auto frames = edcaf->getInProgressFrames();
+        int scenario = par("scenario");
+        int64_t sourceIds[2];
+        int qosSources = 0;
+        hcf->subscribe(packetDroppedSignal, this);
+        rx->setContentionBlocked(true);
+        for (int i = 0; i < 2; i++) {
+            bool qos = scenario == 3 || (scenario == 1 && i == 1) || (scenario == 2 && i == 0);
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(qos ? ST_DATA_WITH_QOS : ST_DATA);
+            if (qos)
+                header->addChunkLength(QOSCONTROL_PART_LENGTH);
+            header->setTid(0);
+            header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+            header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+            header->setAddress3(header->getReceiverAddress());
+            auto frame = new Packet(qos ? "qos-source" : "non-qos-source", header);
+            frame->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+            frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            sourceIds[i] = frame->getId();
+            hcf->processUpperFrame(frame, header);
+            qosSources += qos;
+            ASSERT(handler->getDeadline(frame) == (qos ? SimTime(512, SIMTIME_MS) : SIMTIME_MAX));
+        }
+        ASSERT(handler->getNumFrames() == qosSources);
+        ASSERT(pending->getNumPackets() == 2);
+        wait(SimTime(100, SIMTIME_MS));
+        auto selected = frames->getFrameToTransmit();
+        ASSERT(selected != nullptr);
+        auto header = selected->peekAtFront<Ieee80211DataHeader>();
+        if (scenario == 4) {
+            ASSERT(header->getType() == ST_DATA && !header->getAMsduPresent());
+            ASSERT(pending->getNumPackets() == 1 && frames->getLength() == 1);
+            ASSERT(handler->getNumFrames() == 0);
+        }
+        else {
+            ASSERT(header->getType() == ST_DATA_WITH_QOS && header->getAMsduPresent());
+            ASSERT(pending->isEmpty() && frames->getLength() == 1);
+            ASSERT(handler->getNumFrames() == 1);
+            ASSERT(handler->getDeadline(selected) == SimTime(612, SIMTIME_MS));
+            for (auto id : sourceIds)
+                ASSERT(handler->findFrame(id) == nullptr);
+        }
+        wait(SimTime(413, SIMTIME_MS));
+        ASSERT(lifetimeDrops == 0);
+        ASSERT(frames->getLength() == 1);
+        wait(SimTime(100, SIMTIME_MS));
+        ASSERT(lifetimeDrops == (scenario == 4 ? 0 : 1));
+        ASSERT(handler->getNumFrames() == 0);
+        ASSERT(frames->getLength() == (scenario == 4 ? 1 : 0));
+        hcf->unsubscribe(packetDroppedSignal, this);
+        std::cout << "Lifetime aggregation scenario " << scenario << " passed.\n";
+        endSimulation();
+    }
+};
+
+Define_Module(LifetimeAggregationTest);
+
+} // namespace inet::ieee80211
+
+%file: LifetimeAggregationNetwork.ned
+
+import inet.common.SimpleModule;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple LifetimeAggregationTest extends SimpleModule
+{
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::LifetimeAggregationTest);
+}
+
+network LifetimeAggregationNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: LifetimeAggregationTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = LifetimeAggregationNetwork
+sim-time-limit = 1s
+seed-set = 0
+cmdenv-express-mode = true
+result-dir = results
+**.scalar-recording = true
+**.vector-recording = false
+*.test.scenario = ${scenario=0..4}
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "BasicMsduAggregationPolicy"
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.qOsCheck = ${scenario} == 4
+**.wlan[*].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+*.host.wlan[0].address = "02:00:00:00:00:01"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Lifetime aggregation scenario 4 passed.
+
+%contains: results/General-scenario=0-#0.sca
+scalar LifetimeAggregationNetwork.host.wlan[0].mac.hcf packetDropLifetimeExpired:count 1
+
+%contains: results/General-scenario=0-#0.sca
+scalar LifetimeAggregationNetwork.host.wlan[0].mac.hcf packetDropLifetimeExpired:sum(packetBytes) 260
+
+%contains: results/General-scenario=4-#0.sca
+scalar LifetimeAggregationNetwork.host.wlan[0].mac.hcf packetDropLifetimeExpired:count 0
+
+%contains: results/General-scenario=4-#0.sca
+scalar LifetimeAggregationNetwork.host.wlan[0].mac.hcf packetDropLifetimeExpired:sum(packetBytes) 0

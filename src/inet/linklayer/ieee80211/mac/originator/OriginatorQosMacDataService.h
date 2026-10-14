@@ -18,6 +18,7 @@
 #include "inet/linklayer/ieee80211/mac/contract/IMsduAggregationPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/contract/ISequenceNumberAssignment.h"
+#include "inet/linklayer/ieee80211/mac/lifetime/EdcaTransmitLifetimeHandler.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -38,6 +39,8 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
 //    PsDeferQueueing *psDeferQueueing = nullptr;
     IMpduAggregationPolicy *aMpduAggregationPolicy = nullptr;
     IMpduAggregation *aMpduAggregation = nullptr;
+    EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr; // Borrowed from EDCA.
+    std::function<void()> expireFrames;
 
   protected:
     virtual void initialize() override;
@@ -49,6 +52,10 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
 
   public:
     virtual ~OriginatorQosMacDataService();
+    void setLifetimeHandler(EdcaTransmitLifetimeHandler *handler, std::function<void()> expiration) {
+        lifetimeHandler = handler;
+        expireFrames = expiration;
+    }
 
     virtual std::vector<Packet *> *extractFramesToTransmit(queueing::IPacketQueue *pendingQueue) override;
 };

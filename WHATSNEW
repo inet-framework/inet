@@ -375,6 +375,14 @@ Notable backward incompatible changes are the following:
 
    StatisticalRateLimiter drew a random number in matchesPacket(), so in pull mode each query, such as canPullPacket(), drew a number and could give another answer. It now decides with a stored random number, and it draws the next one in handlePacketFiltered() after a decision that used the stored one. The limiter draws one more random number at initialization. Simulations with a StatisticalRateLimiter therefore give other results, with the same statistical behavior.
 
+47. IEEE 802.11 QoS DATA lifetime
+
+   HCF now discards QoS DATA when its finite lifetime expires, with Block Ack support enabled or disabled. Each access category uses mac.hcf.edca.edcaf[*].msduLifetime, with a default of 0.512 seconds. The timer starts at MAC acceptance, so DATA can expire in the queue before transmission. Users can select another positive, finite lifetime for congestion and compatibility studies. A-MSDU construction restarts the aggregate timer; fragmentation, retransmission, and ACK-policy changes preserve the applicable deadline. Accepted exchanges retain their DATA until safe completion and permit no later attempt after expiration.
+
+   Congested QoS simulations can transmit newer DATA because older queued or in-progress DATA expires. Recorded trajectories change in the Block Ack fragmentation showcase, the QoS showcase, and the wireless and ad hoc MacQos examples. The approved fingerprint baselines reflect these lifetime changes.
+
+   HCF records lifetime drops separately in packetDropLifetimeExpired. Its count and byte sum separate lifetime disposal from queue overflow and retry-limit disposal. Aggregation with qOsCheck=false still accepts non-QoS or mixed sources. The resulting QoS aggregate starts its own lifetime at construction, even when its sources have no lifetime entries.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

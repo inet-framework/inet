@@ -13,6 +13,7 @@
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/lifetime/EdcaTransmitLifetimeHandler.h"
 #include "inet/queueing/contract/IPacketQueue.h"
 
 namespace inet {
@@ -28,6 +29,7 @@ class INET_API InProgressFrames : public SimpleModule
     queueing::IPacketQueue *pendingQueue = nullptr;
     IOriginatorMacDataService *dataService = nullptr;
     IAckHandler *ackHandler = nullptr;
+    EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr; // Borrowed from EDCA; null for DCF.
     std::vector<Packet *> inProgressFrames;
     std::vector<Packet *> droppedFrames;
 
@@ -36,14 +38,17 @@ class INET_API InProgressFrames : public SimpleModule
 
     void ensureHasFrameToTransmit();
     bool hasEligibleFrameToTransmit();
+    bool isEligibleToTransmit(Packet *packet);
 
   public:
     virtual ~InProgressFrames();
+    void setLifetimeHandler(EdcaTransmitLifetimeHandler *handler) { lifetimeHandler = handler; }
 
     virtual std::string str() const override;
     virtual void forEachChild(cVisitor *v) override;
     virtual int getLength() const { return inProgressFrames.size(); }
     virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
+    bool containsFrame(const Packet *packet) const;
     virtual Packet *getFrameToTransmit();
     virtual Packet *getPendingFrameFor(Packet *frame);
     virtual void dropFrame(Packet *packet);

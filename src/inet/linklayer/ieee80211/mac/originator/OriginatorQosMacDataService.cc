@@ -11,6 +11,7 @@
 
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
 
@@ -36,11 +37,27 @@ Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQue
 {
     auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
     if (subframes) {
+        std::vector<int64_t> sourceIds;
+        AccessCategory ac = AC_BE;
+        if (lifetimeHandler) {
+            auto header = subframes->front()->peekAtFront<Ieee80211DataHeader>();
+            ac = check_and_cast<Edca *>(getParentModule()->getSubmodule("edca"))->classifyFrame(header);
+        }
         for (auto subframe : *subframes) {
             pendingQueue->removePacket(subframe);
             take(subframe);
+            // qOsCheck can permit non-QoS sources that have no lifetime entry.
+            if (lifetimeHandler && lifetimeHandler->getDeadline(subframe) != SIMTIME_MAX)
+                sourceIds.push_back(subframe->getId());
         }
+        if (lifetimeHandler)
+            lifetimeHandler->prepareFrameReplacement(sourceIds);
         auto aggregatedFrame = aMsduAggregation->aggregateFrames(subframes);
+        if (lifetimeHandler) {
+            // IEEE Std 802.11-2024, 10.23.2.12.1: each addition restarts the A-MSDU timer.
+            // This builder adds all constituents at the current simulation time.
+            lifetimeHandler->registerFrame(aggregatedFrame, ac);
+        }
         emit(packetAggregatedSignal, aggregatedFrame);
         delete subframes;
         return aggregatedFrame;
@@ -71,8 +88,13 @@ std::vector<Packet *> *OriginatorQosMacDataService::fragmentIfNeeded(Packet *fra
 {
     auto fragmentSizes = fragmentationPolicy->computeFragmentSizes(frame);
     if (fragmentSizes.size() != 0) {
+        auto deadline = lifetimeHandler ? lifetimeHandler->getDeadline(frame) : SIMTIME_MAX;
+        if (deadline != SIMTIME_MAX)
+            lifetimeHandler->prepareFrameReplacement({frame->getId()});
         emit(packetFragmentedSignal, frame);
         auto fragmentFrames = fragmentation->fragmentFrame(frame, fragmentSizes);
+        if (deadline != SIMTIME_MAX)
+            lifetimeHandler->registerFragments(*fragmentFrames, deadline);
         return fragmentFrames;
     }
     return nullptr;
@@ -81,6 +103,8 @@ std::vector<Packet *> *OriginatorQosMacDataService::fragmentIfNeeded(Packet *fra
 std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queueing::IPacketQueue *pendingQueue)
 {
     Enter_Method("extractFramesToTransmit");
+    if (expireFrames)
+        expireFrames();
     if (pendingQueue->isEmpty())
         return nullptr;
     else {

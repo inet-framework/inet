@@ -1,13 +1,15 @@
 # Implementation plan: enforce EDCA DATA lifetime
 
 Original source observation revision: `feat/ieee80211-txop-single-protection` at `b06e8768b0e9c78b7a3665b9c69b0e0da9f30e41`.
-Current integration source: `master` at `1cdb362a2a4b97f564566487079d9d156a5d213d` in `/home/user/omnetpp_ws/inet`.
-Plan revision: 2026-10-14, revision 9.
+Current integration source: local `master` at `633b071e213b825ce6019ff3e344ae49f52791ff`, with S1, R1, and S3a merged.
+Plan revision: 2026-10-15, revision 11.
 Source basis: IEEE Std 802.11-2024 and the revisions above. Source observations do not establish runtime results.
 
-Approval: the maintainer's 14 October 2026 instruction, "proceed", after the revision-24 review authorizes these document corrections. This approval authorizes no later implementation, recorded expectation change, or publication. The lifetime compatibility decision below remains open.
+Approval: the maintainer's 14 October 2026 instruction, "proceed", after the revision-24 review authorizes the earlier document corrections. The maintainer's later explicit decision accepts the proposed 0.512-second DATA lifetime default. This decision selects the default and authorizes its record in the plan. These instructions authorize no implementation, recorded expectation change, or publication.
 
 The [completed S1 record](ieee80211-compressed-blockack-replacement.md#completed-s1-and-recorded-verification) supplies Basic recipient capacity and ordered delivery. PR #1320 is merged in the integration source. Its original feature-head evidence establishes no fresh runtime result for main or S2 expiration. Lifetime observations retain `b06e8768` until the separate S2 review refreshes them against its selected parent.
+
+Revision 11 updates the integration pin for merged R1 and S3a. Their completion does not establish S2 completion. The [umbrella source record](ieee80211-compressed-blockack-replacement.md#source-base-and-publication-boundaries) distinguishes the integration source from this checkout's separate S2 implementation and local edits. This review adds no runtime result or implementation authority.
 
 ## 1. Core intended behavior
 
@@ -35,7 +37,7 @@ The implementation must reproduce missing queue expiration through production HC
 
 ## 3. Proposed ownership and behavior
 
-The current `EdcaTransmitLifetimeHandler` will own deadlines for QoS DATA regardless of HCF Block Ack support. EDCA will construct this owner from a positive, finite `msduLifetime` parameter on each EDCAF. The proposed default is 0.512 seconds, which matches the standard's 500-TU defaults for AP and non-AP stations. The compatibility decision below must resolve that proposal before L1 implementation. HCF will register DATA when `processUpperFrame` accepts it, before queue insertion or sequence assignment. The deadline therefore includes queue residence and setup deferral.
+The current `EdcaTransmitLifetimeHandler` will own deadlines for QoS DATA regardless of HCF Block Ack support. EDCA will construct this owner from a positive, finite `msduLifetime` parameter on each EDCAF. The accepted default is 0.512 seconds, which matches the standard's 500-TU defaults for AP and non-AP stations. The compatibility record below identifies its acceptance and effect. HCF will register DATA when `processUpperFrame` accepts it, before queue insertion or sequence assignment. The deadline therefore includes queue residence and setup deferral.
 
 Management exchanges retain their existing retry procedure. This change does not claim complete management-lifetime support.
 
@@ -47,7 +49,7 @@ For compatibility studies, users can select a finite lifetime longer than their 
 
 The standards basis establishes the timer's scope and the 500-TU default. It does not measure the effect on current INET simulations. New disposal can occur with Block Ack disabled when retained DATA reaches its deadline. Congestion alone does not prove that a retained frame reaches that age.
 
-Before L1 implementation, the maintainer must accept the proposed default or select another justified positive, finite default. Record the value, compatibility consequence, and reason in this plan. Revise the affected acceptance criteria if the selected value differs from 0.512 seconds. Document approval does not resolve this decision.
+On 14 October 2026, the maintainer explicitly accepted the proposed 0.512-second default. The value matches the 500-TU standards basis and supplies a finite disposal deadline. This acceptance includes the proposed scope with Block Ack disabled. It permits new disposal when retained QoS DATA reaches its deadline. The compatibility decision before L1 is satisfied. Source review, production reproduction, and measured expiry remain required by S2.
 
 An opt-in or unlimited compatibility mode would require a separate design. That design must state its standards limits and supply another finite disposal bound wherever Block Ack recovery requires progress. This plan retains a finite lifetime and the long-finite compatibility setting above.
 
@@ -75,7 +77,7 @@ Hypothetical example: every response reports DATA 100 as absent but acknowledges
 
 L1 and L2 form the publishable lifetime change in umbrella stage S2. Their commits must build and expose no unused public contract. L3 integration tests accompany the consumers that introduce those paths; they do not block standalone Normal Ack verification.
 
-L1 requires the recorded lifetime compatibility decision. Before S2 starts, refresh the older source observations and caller assessment against its pinned parent. The [umbrella decision table](ieee80211-compressed-blockack-replacement.md#maintainer-decisions) defines the independent stage boundaries.
+The lifetime compatibility decision for L1 is accepted at 0.512 seconds. Before S2 starts, refresh the older source observations and caller assessment against its pinned parent. The [umbrella decision table](ieee80211-compressed-blockack-replacement.md#maintainer-decisions) records that acceptance and the independent stage boundaries.
 
 Finite lifetime changes Block Ack-disabled EDCA simulations as well as Block Ack-enabled simulations. Affected callers include the single-protection path, the QoS and aggregation showcases, and the `MacQos` examples. Queue residence can now cause disposal before any transmission. User documentation must state the default, parameter location, and the compatibility setting and limits above. It must distinguish aggregation's timer restart from retransmission and ACK-policy changes, which do not restart the deadline. No number of changed fingerprints is assumed before measurement.
 

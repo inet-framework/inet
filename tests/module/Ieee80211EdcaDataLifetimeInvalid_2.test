@@ -1,0 +1,33 @@
+%description:
+Reject msduLifetime = -1s before channel access.
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+network LifetimeInvalidNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = LifetimeInvalidNetwork
+ned-path = .;../../../../src;../../lib
+**.wlan[*].mac.qosStation = true
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1m
+**.mobility.constraintAreaMaxY = 1m
+**.mobility.constraintAreaMaxZ = 1m
+**.wlan[*].mac.hcf.edca.edcaf[*].msduLifetime = -1s
+
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > lifetime-error.out || true
+%contains: lifetime-error.out
+msduLifetime must be positive and finite

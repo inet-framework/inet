@@ -62,6 +62,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     cMessage *startRxTimer = nullptr;
     cMessage *inactivityTimer = nullptr;
+    cMessage *dataLifetimeTimer = nullptr;
 
     // Transmission and Reception
     IRx *rx = nullptr;
@@ -131,6 +132,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);
     virtual bool isReceptionInProgress();
+    void scheduleDataLifetimeTimer();
+    void expireDataFrames(bool preserveSequence = true);
+    std::set<const Packet *> getReferencedDataFrames() const;
 
     // Recipient
     virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);

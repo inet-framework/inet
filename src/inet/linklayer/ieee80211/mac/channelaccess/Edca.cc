@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 
+#include <cmath>
+
 namespace inet {
 namespace ieee80211 {
 
@@ -20,6 +22,17 @@ void Edca::initialize(int stage)
         for (int ac = 0; ac < numEdcafs; ac++) {
             edcafs[ac] = check_and_cast<Edcaf *>(getSubmodule("edcaf", ac));
         }
+        simtime_t lifetimes[AC_NUMCATEGORIES];
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+            auto value = edcafs[ac]->par("msduLifetime").doubleValue();
+            if (!std::isfinite(value) || value <= 0)
+                throw cRuntimeError("msduLifetime must be positive and finite");
+            lifetimes[ac] = value;
+            if (lifetimes[ac] <= SIMTIME_ZERO)
+                throw cRuntimeError("msduLifetime must be positive at the simulation time resolution");
+        }
+        lifetimeHandler = new EdcaTransmitLifetimeHandler(lifetimes[AC_BK], lifetimes[AC_BE],
+            lifetimes[AC_VI], lifetimes[AC_VO]);
     }
 }
 
@@ -69,6 +82,7 @@ void Edca::releaseChannelAccess(AccessCategory ac, IChannelAccess::ICallback *ca
 
 Edca::~Edca()
 {
+    delete lifetimeHandler;
     delete[] edcafs;
 }
 
