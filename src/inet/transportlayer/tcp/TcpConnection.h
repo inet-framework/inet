@@ -159,6 +159,8 @@ class INET_API TcpConnection : public SimpleModule
     uint64_t rcvBufOccupancy = 0; // the sum of the truesizes in rcvSkbChain
     uint8_t rcvScalingRatio = 128; // payload / truesize, in units of 1/256 (Linux TCP_DEFAULT_SCALING_RATIO)
     uint32_t rcvMssEstimate = 536; // the estimate of the received MSS that gates the ratio (Linux icsk_ack.rcv_mss)
+    uint32_t rcvqSpace = 0; // windowAutoTuning: the first offer, which bounds the receive space of Linux (rcvq_space.space of tcp_init_buffer_space(), at most 10 MSS); INET has no DRS that grows it
+    uint32_t oooHighestEnd = 0; // the end of the highest out-of-order data (Linux ooo_last_skb)
     // the advertised window and the receive buffer of this connection from its open
     // command (TcpSocket::setAdvertisedWindow(), setReceiveBufferSize()); -1: the
     // parameters of the Tcp module (D-4 of the staged landing: a socket option is
@@ -548,6 +550,8 @@ class INET_API TcpConnection : public SimpleModule
     virtual void chargeRcvBuffer(uint32_t payloadBytes);
     /** Releases the receive buffer for the data that the application read. */
     virtual void releaseRcvBuffer(uint64_t readBytes);
+    /** windowAutoTuning: the growth of the receive buffer with out-of-order data that end at endSeq */
+    virtual void growRcvBufferForOutOfOrderData(uint32_t endSeq);
 
     /** Utility: returns true when receive queue has enough space for store the tcpHeader */
     virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);

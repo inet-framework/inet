@@ -673,6 +673,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                         dupRangeFound = receiveQueue->findFirstDuplicateRange(tcpHeader->getSequenceNo(),
                                 tcpHeader->getSequenceNo() + payloadLength, dupStart, dupEnd);
                 }
+                uint32_t oldRcvNxt = state->rcv_nxt;
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
                 if (payloadLength > 0) {
                     // rcv_mwnd_seq is still the highest edge before this arrival: a
@@ -691,6 +692,8 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                             state->maxRcvBuffer = state->rcvBufferSize;
                         EV_DETAIL << "Window auto-tuning: the receive buffer grows to " << state->rcvBufferSize << "\n";
                     }
+                    if (seqGreater(tcpHeader->getSequenceNo(), oldRcvNxt))
+                        growRcvBufferForOutOfOrderData(tcpHeader->getSequenceNo() + payloadLength);
                 }
 
                 // windowAutoTuning, as Linux (tcp_grow_window(), also for out-of-order

@@ -1034,6 +1034,8 @@ void TcpConnection::configureStateVariables()
     // a receive buffer smaller than the advertised window limits the first offer too
     if (state->rcvBufferSize > 0 && state->rcv_wnd > state->rcvBufferSize)
         state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
+    if (state->rcv_ssthresh > 0)
+        rcvqSpace = std::min(state->rcv_ssthresh, state->rcv_wnd);
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
     state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks");
@@ -3309,6 +3311,30 @@ void TcpConnection::chargeRcvBuffer(uint32_t payloadBytes)
             rcvScalingRatio = (uint8_t)std::min<uint64_t>(ratio ? ratio : 1, 255);
         }
         rcvMssEstimate = std::min<uint32_t>(payloadBytes, state->advertisedMss > 0 ? (uint32_t)state->advertisedMss : payloadBytes);
+    }
+}
+
+void TcpConnection::growRcvBufferForOutOfOrderData(uint32_t endSeq)
+{
+    if (seqLE(oooHighestEnd, state->rcv_nxt) || seqGreater(endSeq, oooHighestEnd))
+        oooHighestEnd = endSeq;
+    // windowAutoTuning, as Linux (tcp_rcvbuf_grow() at the end of tcp_data_queue_ofo()):
+    // out-of-order data grow the buffer of a connection that the application accepted
+    // to the window of twice the receive space and the out-of-order span, at the payload
+    // ratio, and the clamp of the offer follows; a buffer that SO_RCVBUF locked does not
+    // grow. The receive space is the first offer, at most 10 MSS: INET has no DRS that
+    // grows it, and Linux does not either before it measures the receive RTT.
+    if (state->rcv_ssthresh == 0 || state->rcvbufLocked || !appOwned || isToBeAccepted())
+        return;
+    uint32_t space = std::min<uint32_t>(rcvqSpace, 10 * state->advertisedMss);
+    uint64_t rcvwin = 2 * (uint64_t)space + (seqGreater(oooHighestEnd, state->rcv_nxt) ? oooHighestEnd - state->rcv_nxt : 0);
+    uint64_t rcvbuf = (rcvwin << 8) / rcvScalingRatio;
+    if (rcvbuf > state->rcvBufferSize) {
+        state->rcvBufferSize = (uint32_t)std::min<uint64_t>(rcvbuf, UINT32_MAX);
+        if (state->maxRcvBuffer < state->rcvBufferSize)
+            state->maxRcvBuffer = state->rcvBufferSize;
+        state->window_clamp = (uint32_t)(((uint64_t)state->rcvBufferSize * rcvScalingRatio) >> 8);
+        EV_DETAIL << "Window auto-tuning: out-of-order data grow the receive buffer to " << state->rcvBufferSize << "\n";
     }
 }
 

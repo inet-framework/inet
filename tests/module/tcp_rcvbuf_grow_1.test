@@ -1,11 +1,17 @@
 %description:
-Tests the growth of the receive buffer with windowAutoTuning, as Linux
-(tcp_clamp_window()). The server has a receive buffer of 8000 bytes, and the
-tester removes A012, so A013 to A017 wait as out-of-order data. Each 1000-byte
-segment costs the truesize of its Linux skb (2280 bytes); when the charged
-segments outgrow the buffer of a connection that the application owns, the
-buffer grows to their size. STATUS reports it (skRcvbuf): 8000 before, 18240
-after.
+Tests the growth of the receive buffer with windowAutoTuning by out-of-order
+data, as Linux (tcp_rcvbuf_grow() at the end of tcp_data_queue_ofo()). The
+server has a receive buffer of 8000 bytes and offers 8000 bytes first. The
+tester removes A012, so A013 to A019 wait as out-of-order data. Each
+out-of-order segment grows the buffer of the connection, which the
+application owns, to the window of twice the receive space and the
+out-of-order span, at the payload ratio of the segments: a 1000-byte segment
+costs 2280 bytes, so the ratio is 112/256. The receive space is the first
+offer, 8000 bytes, so the first segment gives (16000 + 2000) * 256/112 = 41142
+bytes. The clamp of the offer follows the buffer, so the SACKs offer more.
+STATUS reports the buffer (skRcvbuf): 8000 before, 54857 after. Before the
+repair, the buffer grew only when its memory outgrew it (tcp_clamp_window()),
+to 18240 bytes.
 
 %inifile: omnetpp.ini
 [General]
@@ -52,15 +58,17 @@ while($sor = <FILE>)
 [1.013 A017] A.1000 > B.2000: A 14001:15001(1000) ack 501 win 16384 
 [1.015 B009] A.1000 < B.2000: A ack 8001 win 8000 
 [1.015 B010] A.1000 < B.2000: A ack 9001 win 8000 
-[1.015 B011] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,11001)
-[1.015 B012] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,12001)
-[1.015 B013] A.1000 < B.2000: A ack 9001 win 8000   Option(s): NOP NOP SACK[10001,13001)
+[1.015 B011] A.1000 < B.2000: A ack 9001 win 10000   Option(s): NOP NOP SACK[10001,11001)
+[1.015 B012] A.1000 < B.2000: A ack 9001 win 12000   Option(s): NOP NOP SACK[10001,12001)
+[1.015 B013] A.1000 < B.2000: A ack 9001 win 14000   Option(s): NOP NOP SACK[10001,13001)
+[1.015 B014] A.1000 < B.2000: A ack 9001 win 16000   Option(s): NOP NOP SACK[10001,14001)
+[1.015 B015] A.1000 < B.2000: A ack 9001 win 18000   Option(s): NOP NOP SACK[10001,15001)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 STATUS: skRcvbuf=8000
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-STATUS: skRcvbuf=18240
+STATUS: skRcvbuf=54857
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
