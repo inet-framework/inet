@@ -1,0 +1,164 @@
+%description:
+Check Basic fragment capacity through RecipientQosMacDataService.
+Supply an accepted agreement with one sequence position.
+Require both fragments and reject a duplicate fragment without extra capacity.
+The fixture does not test ADDBA negotiation.
+
+%extraargs: -r 0
+
+%file: RecipientReordering.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+
+namespace inet::ieee80211 {
+
+class ReorderingProbe : public BlockAckReordering {
+  public:
+    ReceiveBuffer *findBuffer(Tid tid, MacAddress peer) const {
+        auto it = receiveBuffers.find({tid, peer});
+        return it == receiveBuffers.end() ? nullptr : it->second;
+    }
+};
+
+class ReorderingRecipient : public RecipientQosMacDataService {
+  protected:
+    void initialize() override {
+        RecipientQosMacDataService::initialize();
+        delete blockAckReordering;
+        blockAckReordering = new ReorderingProbe();
+    }
+  public:
+    const ReorderingProbe *getReordering() const {
+        return static_cast<const ReorderingProbe *>(blockAckReordering);
+    }
+};
+Define_Module(ReorderingRecipient);
+
+class ReorderingAgreements : public RecipientBlockAckAgreementHandler {
+  public:
+    void accept(MacAddress peer, Tid tid, int start, int size) {
+        auto agreement = new RecipientBlockAckAgreement(peer, tid, SequenceNumberCyclic(start), size, SIMTIME_ZERO);
+        agreement->addbaResposneSent();
+        blockAckAgreements[{peer, tid}] = agreement;
+    }
+};
+
+class RecipientReorderingTest : public cSimpleModule {
+  protected:
+    ReorderingRecipient *recipient = nullptr;
+    ReorderingAgreements agreements;
+    const MacAddress peer = MacAddress("02:00:00:00:00:02");
+    const MacAddress receiver = MacAddress("02:00:00:00:00:01");
+
+    Packet *makeData(int sequence, const char *name, int fragment = 0, bool more = false,
+            MacAddress transmitter = MacAddress("02:00:00:00:00:02"), Tid tid = 5) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTransmitterAddress(transmitter);
+        header->setReceiverAddress(receiver);
+        header->setAddress3(transmitter);
+        header->setTid(tid);
+        header->setAckPolicy(BLOCK_ACK);
+        header->setSequenceNumber(SequenceNumberCyclic(sequence));
+        header->setFragmentNumber(fragment);
+        header->setMoreFragments(more);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        return packet;
+    }
+
+    std::vector<Packet *> receive(Packet *packet) {
+        auto header = packet->peekAtFront<Ieee80211DataHeader>();
+        return recipient->dataFrameReceived(packet, header, &agreements);
+    }
+
+    void checkDelivery(std::vector<Packet *> frames, std::initializer_list<const char *> names) {
+        std::vector<std::string> actualNames;
+        for (auto frame : frames) {
+            actualNames.push_back(frame->getName());
+            take(frame);
+            delete frame;
+        }
+        std::vector<std::string> expectedNames(names.begin(), names.end());
+        std::cout << "Delivered:";
+        for (const auto& name : actualNames)
+            std::cout << " " << name;
+        std::cout << "\n";
+        ASSERT(actualNames == expectedNames);
+    }
+
+    void checkWindow(int start, int length, MacAddress transmitter, Tid tid = 5) {
+        auto buffer = recipient->getReordering()->findBuffer(tid, transmitter);
+        ASSERT(buffer != nullptr);
+        std::cout << "Window start=" << buffer->getNextExpectedSequenceNumber()
+                  << " positions=" << buffer->getLength() << "\n";
+        ASSERT(buffer->getNextExpectedSequenceNumber() == SequenceNumberCyclic(start));
+        ASSERT(buffer->getLength() == length);
+    }
+
+    void handleMessage(cMessage *message) override {
+        delete message;
+        recipient = check_and_cast<ReorderingRecipient *>(getModuleByPath("^.recipient"));
+        int scenario = par("scenario");
+        std::cout << "Recipient scenario " << scenario << "\n";
+        switch (scenario) {
+            case 0: // Two Basic fragments occupy one sequence position.
+                agreements.accept(peer, 5, 100, 1);
+                checkDelivery(receive(makeData(100, "fragmented-frag0", 0, true)), {});
+                checkWindow(100, 1, peer);
+                checkDelivery(receive(makeData(100, "duplicate-frag0", 0, true)), {});
+                checkWindow(100, 1, peer);
+                checkDelivery(receive(makeData(100, "fragmented-frag1", 1)), {"fragmented"});
+                checkWindow(101, 0, peer);
+                break;
+            default:
+                throw cRuntimeError("Unknown recipient scenario");
+        }
+        std::cout << "Recipient reordering checks passed.\n";
+    }
+
+    void initialize() override { scheduleAt(SIMTIME_ZERO, new cMessage("checkRecipient")); }
+};
+Define_Module(RecipientReorderingTest);
+}
+
+%file: RecipientReorderingNetwork.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
+
+module ReorderingRecipient extends RecipientQosMacDataService
+{
+    parameters:
+        @class(::inet::ieee80211::ReorderingRecipient);
+}
+
+simple RecipientReorderingTest extends SimpleModule
+{
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::RecipientReorderingTest);
+}
+
+network RecipientReorderingNetwork
+{
+    submodules:
+        recipient: ReorderingRecipient;
+        test: RecipientReorderingTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RecipientReorderingNetwork
+sim-time-limit = 1ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.scenario = ${scenario=0}
+
+%contains: stdout
+Recipient reordering checks passed.

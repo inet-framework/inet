@@ -13,6 +13,13 @@ first, so that the first packet carries 1. The method is now
 ``SecurityAssociation::incrementAndGetSeqNum()``, and returns the incremented value. C++ code that
 called the old method must use the new name, and expects one more than before.
 
+IEEE 802.11 Block Ack Recipient Capacity
+----------------------------------------
+
+``ReceiveBuffer::getLength()`` counts occupied sequence positions. All Basic fragments of one MSDU count once. ``isFull()`` uses that same count. Custom diagnostics that require a fragment count must count the fragments in each stored position separately.
+
+No configuration change is necessary. This repair lets Basic fragments of one MSDU share a sequence position. It does not enable Compressed Block Ack.
+
 IEEE 802.11 Response Query Roles
 --------------------------------
 

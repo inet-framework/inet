@@ -26,9 +26,8 @@ bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211Dat
 {
     auto sequenceNumber = dataHeader->getSequenceNumber();
     auto fragmentNumber = dataHeader->getFragmentNumber();
-    // The total number of MPDUs in these MSDUs may not
-    // exceed the reorder buffer size in the receiver.
-    if (length < bufferSize && nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize) {
+    // Each sequence position counts once, including all Basic fragments of that MSDU.
+    if (nextExpectedSequenceNumber <= sequenceNumber && sequenceNumber < nextExpectedSequenceNumber + bufferSize) {
         auto it = buffer.find(sequenceNumber.get());
         if (it != buffer.end()) {
             auto& fragments = it->second;
@@ -41,11 +40,10 @@ bool ReceiveBuffer::insertFrame(Packet *dataPacket, const Ptr<const Ieee80211Dat
             fragments.push_back(dataPacket);
         }
         else {
+            if (isFull())
+                return false;
             buffer[sequenceNumber.get()].push_back(dataPacket);
         }
-        // The total number of frames that can be sent depends on the total
-        // number of MPDUs in all the outstanding MSDUs.
-        length++;
         return true;
     }
     return false;
@@ -56,7 +54,6 @@ void ReceiveBuffer::dropFramesUntil(SequenceNumberCyclic sequenceNumber)
     auto it = buffer.begin();
     while (it != buffer.end()) {
         if (SequenceNumberCyclic(it->first) < sequenceNumber) {
-            length -= it->second.size();
             for (auto fragment : it->second)
                 delete fragment;
             it = buffer.erase(it);
@@ -70,7 +67,6 @@ void ReceiveBuffer::removeFrame(SequenceNumberCyclic sequenceNumber)
 {
     auto it = buffer.find(sequenceNumber.get());
     if (it != buffer.end()) {
-        length -= it->second.size();
         buffer.erase(sequenceNumber.get());
     }
     else
