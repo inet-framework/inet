@@ -1,0 +1,60 @@
+%description:
+Tests retainSackAfterRto, the SACK marks of Linux after a retransmission
+timeout. The client sends four segments with SACK, and the path drops the first
+and the third (A003, A005); dupthresh = 10 stops a fast retransmit, so the
+retransmission timeout repairs the loss. The path removes the SACK option from
+the ACK of the retransmission (B004). The client keeps the SACKed mark of
+3001:4001 across the timeout, as Linux does and RFC 6675 section 5.1 allows, so
+after 2001:3001 it sends new data (A009, 4001:5001), not the data that the
+server holds. tcp_sack_rto_2 shows the default.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.cli_app.sendScript="1.0 6000"
+*.*_tcp.mss = 1000
+*.*_tcp.sackSupport = true
+*.*_tcp.delayedAcksEnabled = false
+*.cli_tcp.increasedIWEnabled = true
+*.cli_tcp.dupthresh = 10
+*.cli_tcp.retainSackAfterRto = true
+*.tcptester.script="a3 delete; a5 delete; b4 strip 5"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[4.001 A007] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 
+[4.003 B004] A.1000 < B.2000: A ack 2001 win 15384   Option(s): NOP NOP# removing options
+[4.005 A008] A.1000 > B.2000: A 2001:3001(1000) ack 501 win 16384 
+[4.005 A009] A.1000 > B.2000: A 4001:5001(1000) ack 501 win 16384 
+[4.007 B005] A.1000 < B.2000: A ack 4001 win 16384 
+[4.007 B006] A.1000 < B.2000: A ack 5001 win 16384 
+[4.009 A010] A.1000 > B.2000: A 5001:6001(1000) ack 501 win 16384 
+[4.011 B007] A.1000 < B.2000: A ack 6001 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

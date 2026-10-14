@@ -32,6 +32,7 @@ class INET_API TcpAlgorithm : public cObject
     simtime_t minRexmitTimeout; // the lower limit of the RTO
     simtime_t maxRexmitTimeout; // the upper limit of the RTO
     bool rtoVarianceFloor = false; // the RTO of Linux: the minimum limits the variance term
+    bool retainSackAfterRto = false; // a retransmission timeout keeps the SACKed marks, as Linux
     int maxRexmitCount = 0; // the retransmissions of one segment, after which the connection aborts
     simtime_t maxPersistTimeout; // the upper limit of the interval of the zero-window probes
     simtime_t delayedAckTimeout; // the longest delay of an ACK
@@ -86,6 +87,7 @@ class INET_API TcpAlgorithm : public cObject
         minRexmitTimeout = tcpMain->par("minRexmitTimeout");
         maxRexmitTimeout = tcpMain->par("maxRexmitTimeout");
         rtoVarianceFloor = tcpMain->par("rtoVarianceFloor");
+        retainSackAfterRto = tcpMain->par("retainSackAfterRto");
         maxRexmitCount = tcpMain->par("maxRexmitCount");
         maxPersistTimeout = tcpMain->par("maxPersistTimeout");
         delayedAckTimeout = tcpMain->par("delayedAckTimeout");
