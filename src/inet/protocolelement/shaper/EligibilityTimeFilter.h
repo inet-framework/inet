@@ -29,6 +29,11 @@ class INET_API EligibilityTimeFilter : public ClockUserModuleMixin<PacketFilterB
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
     virtual bool matchesPacket(const Packet *packet) const override;
+
+  public:
+    // the verdict changes with time without an event, so a packet that the
+    // provider offers in pull mode could expire without a drop
+    virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 };
 
 } // namespace inet

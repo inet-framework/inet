@@ -766,6 +766,17 @@ Notable backward incompatible changes are the following:
    such as a dropper that counts packets, changes that state there, not in
    matchesPacket(), processPacket() or dropPacket(). See the migration guide.
 
+42. A filter in pull mode drops a packet in its own operations
+
+   In pull mode, PacketFilterBase::canPullPacket(), a query, pulled and
+   dropped each packet of its provider that did not match. The filter now
+   drops such packets when they become available: when its provider reports
+   a packet, and after each pull. canPullPacket() returns the packet of the
+   provider if it matches. This can change the time of a drop in simulations
+   that pull packets through a filter. ReceiveWithLifetime and
+   EligibilityTimeFilter no longer support pull mode, because their verdict
+   about a packet changes with time without an event of the module.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

@@ -14,6 +14,10 @@ import inet.queueing.base.PacketFilterBase;
 // ~maxLifetime; otherwise pops the lifetime header and forwards. The time-based analogue of
 // ~ReceiveWithHopLimit.
 //
+// The module works in push mode only. In pull mode, a packet that the provider
+// offers could become too old without an event of the module, so the module
+// could not drop it.
+//
 simple ReceiveWithLifetime extends PacketFilterBase
 {
     parameters:

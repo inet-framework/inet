@@ -17,7 +17,9 @@ import inet.queueing.contract.IPacketFilter;
 // the packets for which the eligibility time in the attached ~EligibilityTimeTag
 // is greater than the current simulation time plus the maximum residence time.
 //
-// This module is part of the asynchronous shaper architecture.
+// This module is part of the asynchronous shaper architecture. It works in push
+// mode only, because its verdict about a packet changes with time without an
+// event of the module.
 //
 // @see ~EligibilityTimeGate, ~EligibilityTimeQueue, ~EligibilityTimeMeter, ~EligibilityTimeTag
 //

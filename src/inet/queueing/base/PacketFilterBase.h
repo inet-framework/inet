@@ -57,6 +57,14 @@ class INET_API PacketFilterBase : public PacketProcessorBase, public virtual IPa
      */
     virtual void handlePacketFiltered(Packet *packet, bool matches) {}
 
+    /**
+     * In pull mode without back pressure, pulls and drops the packets of the
+     * provider that do not match, until the provider offers a packet that
+     * matches or no packet. The filter calls this function in its own
+     * operations, so that a query can answer without a drop.
+     */
+    virtual void dropNonMatchingPackets();
+
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming(Packet *packet);
     virtual void endPacketStreaming(Packet *packet);

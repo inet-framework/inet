@@ -178,25 +178,25 @@ bool PacketFilterBase::canPullSomePacket(const cGate *gate) const
 Packet *PacketFilterBase::canPullPacket(const cGate *gate) const
 {
     Enter_Method("canPullPacket");
+    auto packet = provider.canPullPacket();
+    return packet != nullptr && matchesPacket(packet) ? packet : nullptr;
+}
+
+void PacketFilterBase::dropNonMatchingPackets()
+{
+    if (backpressure || provider == nullptr)
+        return;
     while (true) {
         auto packet = provider.canPullPacket();
-        if (packet == nullptr)
-            return nullptr;
-        else if (matchesPacket(packet))
-            return packet;
-        else if (backpressure)
-            return nullptr;
-        else {
-            auto nonConstThisPtr = const_cast<PacketFilterBase *>(this);
-            packet = nonConstThisPtr->provider.pullPacket();
-            nonConstThisPtr->take(packet);
-            nonConstThisPtr->emit(packetPulledInSignal, packet);
-            nonConstThisPtr->handlePacketFiltered(packet, false);
-            EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
-            // KLUDGE
-            nonConstThisPtr->handlePacketProcessed(packet);
-            nonConstThisPtr->dropPacket(packet);
-        }
+        if (packet == nullptr || matchesPacket(packet))
+            return;
+        packet = provider.pullPacket();
+        take(packet);
+        emit(packetPulledInSignal, packet);
+        handlePacketFiltered(packet, false);
+        EV_INFO << "Filtering out packet" << EV_FIELD(packet) << EV_ENDL;
+        handlePacketProcessed(packet);
+        dropPacket(packet);
     }
 }
 
@@ -216,6 +216,8 @@ Packet *PacketFilterBase::pullPacket(const cGate *gate)
             if (collector != nullptr)
                 animatePullPacket(packet, outputGate, collector.getReferencedGate());
             emit(packetPulledOutSignal, packet);
+            // the next packet of the provider must match when a collector asks
+            dropNonMatchingPackets();
             return packet;
         }
         else {
@@ -254,6 +256,7 @@ void PacketFilterBase::handlePullPacketProcessed(Packet *packet, const cGate *ga
 void PacketFilterBase::handleCanPullPacketChanged(const cGate *gate)
 {
     Enter_Method("handleCanPullPacketChanged");
+    dropNonMatchingPackets();
     if (collector != nullptr)
         collector.handleCanPullPacketChanged();
 }
