@@ -4,7 +4,8 @@ bytes of the timestamp option, which every segment carries (RFC 5681
 defines SMSS without the TCP options). With an MSS of 1024 and
 timestamps, a segment carries 1012 bytes. The receiver acknowledges every
 second segment, so the second ACK covers 2024 bytes, and slow start grows cwnd by
-min(2024, SMSS) = 1012 bytes, not by 1024 (RFC 5681 equation (2)).
+min(2024, SMSS) = 1012 bytes, not by 1024 (RFC 5681 equation (2)). The initial
+window is one SMSS too, 1012 bytes, so cwnd grows to 2024 and then to 3036.
 
 %inifile: omnetpp.ini
 [General]
@@ -28,7 +29,7 @@ cmdenv-express-mode=false
 include ../../lib/defaults.ini
 
 %contains: stdout
-Slow Start: increasing cwnd by 1012 bytes to cwnd=3048
+Slow Start: increasing cwnd by 1012 bytes to cwnd=3036
 
 %not-contains: stdout
 Slow Start: increasing cwnd by 1024 bytes
