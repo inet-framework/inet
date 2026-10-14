@@ -1,0 +1,68 @@
+%description:
+Tests that an ACK below SND.UNA takes part in the SACK recovery when its SACK
+blocks report new data. RFC 6675 section 2 counts such an ACK as a duplicate
+ACK, and Linux processes it (the old_ack path of tcp_ack()). A sends 10
+segments at t=1, and the tester drops segments 1 and 5. The five ACKs of B
+that SACK 5001:10001 arrive 5 ms late, after the ACK of the retransmission of
+segment 1 (ack 4001), whose SACK option the tester removes. Only the late ACKs
+report the SACKed data. At these ACKs, RACK marks 4001:5001 lost, and A
+retransmits it at once and sends new data, as PRR allows. Before the repair,
+A ignored the late ACKs and retransmitted 4001:5001 at the RTO, at t=2.009.
+Timestamps are off, as in the packetdrill script
+prr-ss-ack-below-snd_una-cubic: with timestamps, PAWS drops the late ACKs
+(RFC 7323 section 5.3). TLP is off, so that without the repair only the RTO
+sends the retransmission.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A3 delete; A7 delete; B5 delay 0.005; B6 delay 0.005; B7 delay 0.005; B8 delay 0.005; B9 delay 0.005; B10 strip 5; B11 strip 5; B12 strip 5"  # drop segments 1 and 5; the SACK of 5001:10001 comes late, and the ACKs after it lose their SACK option
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 10000; 1.006 10000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.mss = 1000
+*.*_tcp.initialCwnd = 10
+*.*_tcp.tlpEnabled = false
+*.*_tcp.timestampSupport = false
+
+%# the late ACKs: below SND.UNA (4001), with the first report of 5001:10001...
+%contains: stdout
+[1.007 B010] A.1000 < B.2000: A ack 4001 win 61535   Option(s): NOP NOP# removing options
+%contains: stdout
+[1.008 B010] A.1000 < B.2000: A ack 1 win 65535   Option(s): NOP NOP SACK[5001,10001)[1001,4001)# introducing copy
+
+%# ...start the retransmission of 4001:5001 and new data at once
+%contains: stdout
+[1.010 A014] A.1000 > B.2000: A 4001:5001(1000) ack 501 win 65535
+%contains: stdout
+[1.010 A015] A.1000 > B.2000: A 10001:11001(1000) ack 501 win 65535

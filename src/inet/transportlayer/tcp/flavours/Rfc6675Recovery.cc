@@ -30,6 +30,13 @@ bool Rfc6675Recovery::isDuplicateAck(const TcpHeader *tcpHeader, uint32_t payloa
     // TODO unfortunately these values are wrong, see other comment where they are set
     // could be something like return state->addedSackedBytes > 0;
 //    return state->sackedBytes != state->sackedBytes_old;
+
+    // An ACK below SND.UNA (a late ACK) counts when its SACK blocks report new data,
+    // so that the recovery uses that data, as Linux does on the old_ack path of
+    // tcp_ack(); prrNewlyDelivered() gives the bytes that this segment SACKed first.
+    if (seqLess(tcpHeader->getAckNo(), state->snd_una))
+        return prrNewlyDelivered() > 0 && state->snd_una != state->snd_max;
+
     return state->snd_una == tcpHeader->getAckNo() && payloadLength == 0 && state->snd_una != state->snd_max;
 
 }
