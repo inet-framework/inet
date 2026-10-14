@@ -1,0 +1,103 @@
+%description:
+
+In this test, packets are produced periodically by two active packet sources
+(ActivePacketSources). Two labelers (PacketLabelers) give the packets of the
+first source the label "a", and the packets of the second source the label "b".
+Two queues (PacketQueues) hold the packets. An active packet sink
+(ActivePacketSink) pulls them through a label scheduler (LabelScheduler), which
+prefers the label "b". The second source starts 0.5 s later, so its queue is
+empty when the sink pulls the first packet. The scheduler must skip the empty
+queue.
+
+%file: test.ned
+
+import inet.queueing.marker.PacketLabeler;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.LabelScheduler;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestLabelScheduler
+{
+    submodules:
+        producer1: ActivePacketSource {
+            @display("p=100,100");
+        }
+        producer2: ActivePacketSource {
+            @display("p=100,200");
+        }
+        labeler1: PacketLabeler {
+            @display("p=200,100");
+        }
+        labeler2: PacketLabeler {
+            @display("p=200,200");
+        }
+        queue1: PacketQueue {
+            @display("p=300,100");
+        }
+        queue2: PacketQueue {
+            @display("p=300,200");
+        }
+        scheduler: LabelScheduler {
+            @display("p=400,150");
+        }
+        collector: ActivePacketSink {
+            @display("p=500,150");
+        }
+    connections allowunconnected:
+        producer1.out --> labeler1.in;
+        producer2.out --> labeler2.in;
+        labeler1.out --> queue1.in;
+        labeler2.out --> queue2.in;
+        queue1.out --> scheduler.in++;
+        queue2.out --> scheduler.in++;
+        scheduler.out --> collector.in;
+}
+
+%file: Test.cc
+#include "inet/queueing/function/PacketFilterFunction.h"
+#include "inet/common/packet/Packet.h"
+
+using namespace inet;
+
+static bool testAll(const Packet *packet)
+{
+    return true;
+}
+
+Register_Packet_Filter_Function(TestAll, testAll);
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestLabelScheduler
+sim-time-limit = 3.2s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.producer*.packetLength = 1B
+*.producer*.productionInterval = 1s
+*.producer2.initialProductionOffset = 0.5s
+*.labeler*.filterClasses = "TestAll"
+*.labeler1.labels = "a"
+*.labeler2.labels = "b"
+*.scheduler.labels = "b a"
+*.collector.collectionInterval = 1s
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 0s collector: Collecting packet, [^\n]*producer1-0 \(
+
+%contains-regex: stdout
+^At 1s collector: Collecting packet, [^\n]*producer2-0 \(
+
+%contains-regex: stdout
+^At 2s collector: Collecting packet, [^\n]*producer2-1 \(
+
+%contains-regex: stdout
+^At 3s collector: Collecting packet, [^\n]*producer2-2 \(

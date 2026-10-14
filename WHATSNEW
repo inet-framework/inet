@@ -733,6 +733,11 @@ Notable backward incompatible changes are the following:
    INET, which no longer compile until their schedulePacket() is const. See
    the migration guide.
 
+39. A label scheduler skips an empty input
+
+   LabelScheduler read the labels of the packet that each input offered, and
+   it crashed when an input had no packet. It now skips an empty input.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

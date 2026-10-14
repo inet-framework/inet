@@ -63,6 +63,8 @@ int LabelScheduler::schedulePacket() const
     for (auto label : labels) {
         for (size_t i = 0; i < providers.size(); i++) {
             auto packet = providers[i].canPullPacket();
+            if (packet == nullptr)
+                continue;
             const auto& labelsTag = packet->findTag<LabelsTag>();
             if (labelsTag != nullptr) {
                 for (size_t j = 0; j < labelsTag->getLabelsArraySize(); j++)
