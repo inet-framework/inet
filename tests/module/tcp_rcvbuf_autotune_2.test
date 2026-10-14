@@ -1,0 +1,61 @@
+%description:
+Tests windowAutoTuning with a receive buffer that SO_RCVBUF locked
+(TcpSocket::setReceiveBufferSize()), and an application that does not read.
+A locked buffer offers its free space at the truesize ratio of the received
+segments: a 9000-byte segment costs 12520 bytes, so the ratio is 184/256. The
+offer is also at most the window that auto-tuning reached, up to the clamp of
+half the buffer, 100000 bytes. As in Linux (__tcp_select_window()), the unread
+data count through the buffer, and not a second time against the auto-tuned
+window: the server takes 143768 bytes, the free space of 200000 bytes at the
+ratio, before it offers a zero window. Before the repair, the unread data also
+counted against the clamp, and the server took 100000 bytes. Without
+window scaling, the offer is at most 65535 bytes.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 300000"
+*.srv_app.autoRead=false
+*.srv_app.rcvBufScript="0.5 200000"  # SO_RCVBUF: lock the buffer
+sim-time-limit = 3s
+*.*_tcp.mss = 9000
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.advertisedWindow = 20000
+*.srv_tcp.receiveBufferSize = 200000B
+*.srv_tcp.windowAutoTuning = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# at 99000 unread bytes, the offer is the free buffer at the ratio...
+%contains: postrun-command(1).out
+[1.015 B012] A.1000 < B.2000: A ack 99001 win 44763 
+%# ...and the window closes at 143768 bytes
+%contains: postrun-command(1).out
+[2.023 B017] A.1000 < B.2000: A ack 143769 win 0 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
+

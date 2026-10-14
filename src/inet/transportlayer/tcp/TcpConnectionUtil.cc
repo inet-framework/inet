@@ -3371,10 +3371,12 @@ uint32_t TcpConnection::selectRcvWnd()
     // the offer: the advertised window less the in-order data that the application did
     // not read. The out-of-order data uses only the buffer.
     // With windowAutoTuning, the window that auto-tuning reached takes the place of the
-    // advertised window.
+    // advertised window. A locked buffer counts the unread data below, at their
+    // truesize; there, as Linux (__tcp_select_window()), they do not count against the
+    // auto-tuned window too.
     if (state->rcvBufferSize > 0) {
         uint32_t window = state->rcv_ssthresh > 0 ? std::min(state->rcv_ssthresh, state->window_clamp) : state->maxRcvBuffer;
-        uint32_t unread = receiveQueue->getAcknowledgedDataLength();
+        uint32_t unread = state->rcv_ssthresh > 0 && state->rcvbufLocked ? 0 : receiveQueue->getAcknowledgedDataLength();
         win = std::min(win, window > unread ? window - unread : 0);
     }
 
