@@ -67,20 +67,12 @@ void WrrScheduler::removeAllPackets()
 
 int WrrScheduler::schedulePacket() const
 {
-    // KLUDGE: this query changes the state of the module
-    return const_cast<WrrScheduler *>(this)->schedulePacketAndUpdateState();
-}
-
-int WrrScheduler::schedulePacketAndUpdateState()
-{
     int firstWeighted = -1;
     int firstNonWeighted = -1;
     for (size_t i = 0; i < providers.size(); ++i) {
         if (providers[i].canPullSomePacket()) {
-            if (buckets[i] > 0) {
-                buckets[i]--;
+            if (buckets[i] > 0)
                 return (int)i;
-            }
             else if (firstWeighted == -1 && weights[i] > 0)
                 firstWeighted = (int)i;
             else if (firstNonWeighted == -1 && weights[i] == 0)
@@ -88,17 +80,25 @@ int WrrScheduler::schedulePacketAndUpdateState()
         }
     }
 
-    if (firstWeighted != -1) {
-        for (size_t i = 0; i < providers.size(); ++i)
-            buckets[i] = weights[i];
-        buckets[firstWeighted]--;
+    if (firstWeighted != -1)
         return firstWeighted;
-    }
 
     if (firstNonWeighted != -1)
         return firstNonWeighted;
 
     return -1;
+}
+
+void WrrScheduler::handlePacketScheduled(Packet *packet, int index)
+{
+    if (buckets[index] > 0)
+        buckets[index]--;
+    // an empty bucket of an input with a weight means that a new round starts
+    else if (weights[index] > 0) {
+        for (size_t i = 0; i < providers.size(); ++i)
+            buckets[i] = weights[i];
+        buckets[index]--;
+    }
 }
 
 } // namespace queueing
