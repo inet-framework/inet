@@ -26,4 +26,5 @@ simple LegacyTcp extends Tcp
         @class(Tcp);
         sackSupport = default(false);
         timestampSupport = default(false);
+        windowScalingSupport = default(false);
 }
