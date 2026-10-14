@@ -133,8 +133,9 @@ The :ned:`Tcp` module has the following parameters:
 - :par:`timestampSupport` Timestamps (RFC 7323) support (header option)
   (TS will be enabled for a connection if both endpoints support it)
 
-- :par:`mss` Maximum Segment Size (RFC 9293) (header option, default is
-  536)
+- :par:`mss` Maximum Segment Size (RFC 9293) (header option); the
+  default, -1, takes the MSS of the address family: 1460 bytes for IPv4
+  and 1440 bytes for IPv6
 
 - :par:`tcpAlgorithmClass` the name of the TCP flavour
 

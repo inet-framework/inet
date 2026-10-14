@@ -6,7 +6,7 @@
 
 # /showcases/general/dynamic/,         -f omnetpp.ini -c General -r 0,                100s,         aa91-2c95/tplx;0000-0000/~tNl;0000-0000/~tND, PASS,
 
-/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         9418-4c45/tplx;502c-4ed3/~tNl;f536-9854/~tND;588a-7dd9/tyf, PASS,    wireless EthernetMac Ipv4
+/showcases/general/pcaprecording/,   -f omnetpp.ini -c PcapRecording -r 0,          10s,         19f6-9879/tplx;167d-c32a/~tNl;a2ee-c23e/~tND;588a-7dd9/tyf, PASS,    wireless EthernetMac Ipv4
 
 /showcases/measurement/datarate/,         -f omnetpp.ini -c General -r 0,           1s,           7af9-93b4/tplx;2d48-cf54/~tNl;ce00-3055/~tND;c848-3d2a/tyf, PASS, Ipv4
 /showcases/measurement/endtoenddelay/,    -f omnetpp.ini -c General -r 0,           1s,           a6ec-9c0d/tplx;5632-17e6/~tNl;3b24-2f2d/~tND;1479-9b89/tyf, PASS, Ipv4
@@ -130,7 +130,7 @@
 /showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c PacketCounts -r 0,                    5s,            271c-6821/tplx;3c0c-db82/~tNl;8315-9723/~tND;b145-6576/tyf, PASS,   wireless Ipv4 # VisualizingSubmoduleInformation extended
 /showcases/visualizer/canvas/submoduleinfo/,         -f omnetpp.ini -c MACStates -r 0,                                    5s,            271c-6821/tplx;3c0c-db82/~tNl;8315-9723/~tND;4677-fc97/tyf, PASS,    wireless Ipv4
 
-/showcases/visualizer/canvas/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              9774-7583/tplx;1c01-d19c/~tNl;d944-bd28/~tND;4266-0d42/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/instrumentfigures/,    -f omnetpp.ini -c General -r 0,                                            3s,              6622-adb9/tplx;28ca-9f8c/~tNl;85f0-a9c3/~tND;4266-0d42/tyf, PASS,    wireless Ipv4
 
 /showcases/visualizer/canvas/interfacetable/, -f omnetpp.ini -c EnablingVisualization -r 0,                  5s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS,
 /showcases/visualizer/canvas/interfacetable/, -f omnetpp.ini -c AdvancedFeatures -r 0,                       5s,            61ec-13d6/tplx;518c-d31e/~tNl;03fe-e203/~tND;b2d8-b329/tyf, PASS,    wireless EthernetMac Ipv4
@@ -181,11 +181,11 @@
 
 /showcases/visualizer/canvas/styling/,      -f omnetpp.ini -c Line -r 0,                   25s,         cb1d-a154/tplx;a565-1a98/~tNl;ee1b-5f7a/~tND;7b44-2fb8/tyf, PASS,    wireless Ipv4
 /showcases/visualizer/canvas/styling/,      -f omnetpp.ini -c Font -r 0,                   25s,         cb1d-a154/tplx;a565-1a98/~tNl;ee1b-5f7a/~tND;5e90-6a92/tyf, PASS,    wireless Ipv4
-/showcases/visualizer/canvas/styling/,      -f omnetpp.ini -c Icon -r 0,                   25s,         7f95-b93b/tplx;9e36-cdaa/~tNl;9931-65ad/~tND;62e8-28b7/tyf, PASS,    wireless Ipv4
-/showcases/visualizer/canvas/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         a153-ae66/tplx;078f-2259/~tNl;38fc-44ec/~tND;342b-0033/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/styling/,      -f omnetpp.ini -c Icon -r 0,                   25s,         b0d0-cb75/tplx;49bd-049e/~tNl;86a6-e349/~tND;62e8-28b7/tyf, PASS,    wireless Ipv4
+/showcases/visualizer/canvas/styling/,      -f omnetpp.ini -c Annotation -r 0,             25s,         c9bc-dfd5/tplx;ca52-b765/~tNl;34ae-ebd9/~tND;342b-0033/tyf, PASS,    wireless Ipv4
 
-/showcases/visualizer/canvas/transportconnection/, -f omnetpp.ini -c EnablingVisualization -r 0,                       2s,            006d-094b/tplx;c876-1220/~tNl;f219-4b33/~tND;d5f4-f615/tyf, PASS, EthernetMac Ipv4
-/showcases/visualizer/canvas/transportconnection/, -f omnetpp.ini -c MultipleConnections -r 0,                         2s,            155e-cb96/tplx;547e-3836/~tNl;da2e-ac19/~tND;1584-363d/tyf, PASS, EthernetMac Ipv4
+/showcases/visualizer/canvas/transportconnection/, -f omnetpp.ini -c EnablingVisualization -r 0,                       2s,            a5be-b17c/tplx;62cb-f71d/~tNl;e5a5-96cd/~tND;d5f4-f615/tyf, PASS, EthernetMac Ipv4
+/showcases/visualizer/canvas/transportconnection/, -f omnetpp.ini -c MultipleConnections -r 0,                         2s,            3b9a-ec2f/tplx;3ed2-2f56/~tNl;aeb3-d5ae/~tND;1584-363d/tyf, PASS, EthernetMac Ipv4
 
 /showcases/visualizer/canvas/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWired -r 0,            500s,            1939-d7f9/tplx;56a5-52e3/~tNl;f34f-f329/~tND;6b93-2fc6/tyf, PASS, EthernetMac Ipv4
 /showcases/visualizer/canvas/transportpathactivity/, -f omnetpp.ini -c EnablingPathVisualizationWireless -r 0,         500s,            691e-0e35/tplx;5dfc-9178/~tNl;0fa0-c15f/~tND;9224-5dd7/tyf, PASS,    wireless Ipv4
