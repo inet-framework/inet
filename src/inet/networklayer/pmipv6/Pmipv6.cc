@@ -56,6 +56,8 @@ void Pmipv6::initialize(int stage)
 
         cModule *host = getContainingNode(this);
         rt6 = L3AddressResolver().getIpv6RoutingTableOf(host);
+        // the routing table may delete a route this module added, e.g. when the node is shut down
+        host->subscribe(routeDeletedSignal, this);
 
         if (isMag) {
             parseMobileNodeProfiles();
@@ -303,6 +305,17 @@ void Pmipv6::receiveSignal(cComponent *source, simsignal_t signalID, cObject *ob
         else
             handleMobileNodeDetached(accessInterface);
     }
+    else if (signalID == routeDeletedSignal) {
+        // forget the route, so that it is neither used nor added again as already present
+        for (auto& element : bindingCache)
+            if (element.second.downlinkRoute == obj)
+                element.second.downlinkRoute = nullptr;
+        for (auto& element : magBindings)
+            if (element.second.downlinkRoute == obj)
+                element.second.downlinkRoute = nullptr;
+        if (magUplinkRoute == obj)
+            magUplinkRoute = nullptr;
+    }
 }
 
 void Pmipv6::handleMobileNodeAttached(NetworkInterface *accessInterface)
@@ -381,19 +394,23 @@ void Pmipv6::sendProxyBindingUpdate(MagBinding& binding, simtime_t lifetime)
 
 void Pmipv6::ensureMagTunnel()
 {
-    if (magTunnelId != -1)
-        return;
-    Ipv6Address magAddress = getEgressAddressFor(localMobilityAnchorAddress);
-    NetworkInterface *tunnel = rt6->createTunnelNetworkInterface(magAddress, localMobilityAnchorAddress);
-    magTunnelId = tunnel->getInterfaceId();
-    // route mobile-node uplink traffic (everything not on-link) into the tunnel to the LMA
-    magUplinkRoute = new Ipv6Route(Ipv6Address::UNSPECIFIED_ADDRESS, 0, IRoute::MANUAL);
-    magUplinkRoute->setInterface(tunnel);
-    magUplinkRoute->setNextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
-    magUplinkRoute->setMetric(256);
-    rt6->addRoute(magUplinkRoute);
-    EV_INFO << "MAG: created tunnel " << magAddress << " -> " << localMobilityAnchorAddress
-            << " and default route into it (interface id " << magTunnelId << ")" << endl;
+    if (magTunnelId == -1) {
+        Ipv6Address magAddress = getEgressAddressFor(localMobilityAnchorAddress);
+        NetworkInterface *tunnel = rt6->createTunnelNetworkInterface(magAddress, localMobilityAnchorAddress);
+        magTunnelId = tunnel->getInterfaceId();
+        EV_INFO << "MAG: created tunnel " << magAddress << " -> " << localMobilityAnchorAddress
+                << " (interface id " << magTunnelId << ")" << endl;
+    }
+    // the tunnel outlives a shutdown of the node, the route into it does not
+    if (magUplinkRoute == nullptr) {
+        // route mobile-node uplink traffic (everything not on-link) into the tunnel to the LMA
+        magUplinkRoute = new Ipv6Route(Ipv6Address::UNSPECIFIED_ADDRESS, 0, IRoute::MANUAL);
+        magUplinkRoute->setInterface(ift->getInterfaceById(magTunnelId));
+        magUplinkRoute->setNextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
+        magUplinkRoute->setMetric(256);
+        rt6->addRoute(magUplinkRoute);
+        EV_INFO << "MAG: added default route into the tunnel to the LMA" << endl;
+    }
 }
 
 void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAcknowledgement *pba)
@@ -469,12 +486,39 @@ void Pmipv6::processProxyBindingAcknowledgement(Packet *packet, const BindingAck
 // Lifecycle
 //
 
+//
+// A shutdown or a crash ends every mobility session the node held. When the whole
+// node goes down, the routing table has already deleted the routes (receiveSignal()
+// forgot them) and the interface table drops the advertised prefixes, so what is
+// left here is the module's own record of the sessions. A session is set up again
+// when the mobile node attaches. The tunnel interfaces are kept and reused: they
+// are submodules of the node, which the lifecycle operation is walking.
+//
+void Pmipv6::releaseMobilitySessions()
+{
+    for (auto& element : bindingCache)
+        if (element.second.downlinkRoute)
+            rt6->deleteRoute(element.second.downlinkRoute);
+    bindingCache.clear();
+
+    for (auto& element : magBindings)
+        if (element.second.downlinkRoute)
+            rt6->deleteRoute(element.second.downlinkRoute);
+    magBindings.clear();
+    if (magUplinkRoute) {
+        rt6->deleteRoute(magUplinkRoute);
+        magUplinkRoute = nullptr;
+    }
+}
+
 void Pmipv6::handleStopOperation(LifecycleOperation *operation)
 {
+    releaseMobilitySessions();
 }
 
 void Pmipv6::handleCrashOperation(LifecycleOperation *operation)
 {
+    releaseMobilitySessions();
 }
 
 } // namespace inet
