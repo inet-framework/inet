@@ -171,8 +171,10 @@ void Contention::handleMessage(cMessage *msg)
     else if (msg == channelGrantedEvent) {
         EV_INFO << "Channel granted: startTime = " << startTime << std::endl;
         emit(channelAccessGrantedSignal, this);
-        callback->channelAccessGranted();
+        auto grantedCallback = callback;
+        // A refused first submission can request new contention inside this callback.
         callback = nullptr;
+        grantedCallback->channelAccessGranted();
     }
     else
         throw cRuntimeError("Unknown msg");
