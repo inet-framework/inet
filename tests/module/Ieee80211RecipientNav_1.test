@@ -257,6 +257,7 @@ record-scalar-results = false
 **.wlan[*].mac.qosStation = ${scenario="hcf","dcf","blockAck"} != "dcf"
 **.wlan[*].mac.rx.typename = "RecipientNavRx"
 **.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} == "blockAck"
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
 *.test.basicBlockAckOnly = ${scenario} == "blockAck"
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""

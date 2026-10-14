@@ -154,6 +154,7 @@ record-scalar-results = false
 **.wlan[*].mac.qosStation = true
 **.wlan[*].mac.hcf.typename = "GroupHcf"
 **.wlan[*].mac.hcf.isBlockAckSupported = ${blockAck=false,true}
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 4096B

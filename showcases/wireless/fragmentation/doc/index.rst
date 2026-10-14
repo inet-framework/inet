@@ -181,6 +181,8 @@ individually.
 In the final configuration, ``HCFfragblockack``, we extend the previous configuration
 and turn on block acks, so a group of packets can be ACKed.
 
+This configuration selects ``mac.hcf.blockAckVariant = "basic"`` on both hosts. The Basic bitmap reports receipt status for individual fragments. `IEEE Std 802.11e-2005 <https://standards.ieee.org/ieee/802.11e/3131/>`__ introduced the format in Clauses 7.2.1.7 and 7.2.1.8. `IEEE Std 802.11-2024 <https://standards.ieee.org/ieee/802.11/10548/>`__ reserves type 0 in Tables 9-36 and 9-37. Thus, IEEE Std 802.11-2024 does not support Basic. INET retains this historical profile for fragment studies, without a claim of complete historical conformance.
+
 When block acks are enabled, the sender node sends a block ack request after
 transmitting a certain number of frames (by default, five). The receiver node
 then sends a block ack, which contains information about which packets were
@@ -191,7 +193,7 @@ Here is the configuration:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: HCFfragblockack
-   :end-at: isBlockAckSupported
+   :end-at: blockAckVariant
    :language: ini
 
 This configuration just enables block acks. The default block ack threshold is used,
@@ -243,6 +245,8 @@ and ``HCFfragblockack`` is due to the improvements of each configuration: the us
 of TXOP increases throughput, and the use of TXOP + block acks increases it further.
 
 Secondly, the fragmentation threshold was iterated, using a 1000-byte packet size:
+
+The Block Ack variants in ``parameterstudy.ini`` also select Basic explicitly. Their packet-size, transmit-power, and threshold sweeps retain the historical fragment bitmap. The existing plot series remain measurements of those configurations; they do not demonstrate Compressed support.
 
 .. figure:: media/threshold.png
    :width: 90%

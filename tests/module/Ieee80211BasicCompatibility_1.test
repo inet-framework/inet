@@ -1,0 +1,153 @@
+%description:
+Check Basic exchanges through production HCF with the Block Ack showcase traffic.
+Observe accepted ADDBA, Block Ack-policy DATA, Basic BAR, and positive fragment receipt bits.
+Record each peer and TID without a change to protocol decisions.
+
+%extraargs: -c Compatibility
+
+%file: BasicCompatibility.cc
+#include <iostream>
+
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+
+namespace inet::ieee80211 {
+
+class BasicCompatibilityMac : public Ieee80211Mac {
+    struct Exchange {
+        int acceptedAddba = 0;
+        int data = 0;
+        int fragments = 0;
+        int bar = 0;
+        int positiveResponses = 0;
+        int fragmentResponses = 0;
+        bool peerHt = false;
+        int pendingStart = -1;
+        std::set<std::pair<int, int>> transmitted;
+    };
+    std::map<std::pair<MacAddress, int>, Exchange> exchanges;
+    std::map<MacAddress, bool> peerStates;
+    int normalAckData = 0;
+    int addbaRequests = 0;
+    int blockAckResponses = 0;
+
+    void sendDownFrame(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        addbaRequests += dynamicPtrCast<const Ieee80211AddbaRequest>(header) != nullptr;
+        blockAckResponses += dynamicPtrCast<const Ieee80211BlockAck>(header) != nullptr;
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            peerStates[data->getReceiverAddress()] = mib->findPeerHtState(data->getReceiverAddress()) != nullptr;
+            if (data->getType() == ST_DATA_WITH_QOS && data->getAckPolicy() == BLOCK_ACK) {
+                auto& exchange = exchanges[{data->getReceiverAddress(), data->getTid()}];
+                exchange.data++;
+                exchange.fragments += data->getFragmentNumber() != 0;
+                exchange.peerHt = mib->findPeerHtState(data->getReceiverAddress()) != nullptr;
+                exchange.transmitted.insert({data->getSequenceNumber().get(), data->getFragmentNumber()});
+            }
+            else if (data->getType() == ST_DATA_WITH_QOS && data->getAckPolicy() == NORMAL_ACK)
+                normalAckData++;
+        }
+        if (auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
+            auto& exchange = exchanges[{bar->getReceiverAddress(), bar->getTidInfo()}];
+            exchange.bar++;
+            exchange.pendingStart = bar->getStartingSequenceNumber().get();
+        }
+        Ieee80211Mac::sendDownFrame(packet);
+    }
+
+    void handleLowerPacket(Packet *packet) override {
+        auto header = packet->peekAtFront<Ieee80211OneAddressHeader>();
+        if (header->getReceiverAddress() == getAddress() && !packet->hasBitError()) {
+            if (auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
+                if (response->getStatusCode() == 0)
+                    exchanges[{response->getTransmitterAddress(), response->getTid()}].acceptedAddba++;
+            }
+            if (auto response = dynamicPtrCast<const Ieee80211BasicBlockAck>(header)) {
+                auto& exchange = exchanges[{response->getTransmitterAddress(), response->getTidInfo()}];
+                bool positive = false;
+                bool fragment = false;
+                if (exchange.pendingStart == response->getStartingSequenceNumber().get()) {
+                    for (const auto& [sequence, bit] : exchange.transmitted) {
+                        int offset = (sequence - exchange.pendingStart + 4096) % 4096;
+                        if (offset < 64 && response->getBlockAckBitmap(offset).getBit(bit)) {
+                            positive = true;
+                            fragment |= bit != 0;
+                        }
+                    }
+                }
+                exchange.positiveResponses += positive;
+                exchange.fragmentResponses += fragment;
+            }
+        }
+        Ieee80211Mac::handleLowerPacket(packet);
+    }
+
+    void finish() override {
+        bool complete = false;
+        bool fragment = false;
+        for (const auto& [peer, ht] : peerStates)
+            std::cout << "BASIC-PEER " << getFullPath() << " local=" << getAddress()
+                    << " peer=" << peer << " localHt=" << mib->isHtOperationSupported() << " peerHt=" << ht << "\n";
+        for (const auto& [key, exchange] : exchanges) {
+            std::cout << "BASIC-HOP " << getFullPath() << " local=" << getAddress()
+                    << " peer=" << key.first << " tid=" << key.second
+                    << " localHt=" << mib->isHtOperationSupported() << " peerHt=" << exchange.peerHt
+                    << " addba=" << exchange.acceptedAddba << " data=" << exchange.data
+                    << " fragments=" << exchange.fragments << " bar=" << exchange.bar
+                    << " positive=" << exchange.positiveResponses << " fragmentBits=" << exchange.fragmentResponses << "\n";
+            bool valid = exchange.acceptedAddba > 0 && exchange.data > 0 && exchange.bar > 0 && exchange.positiveResponses > 0;
+            complete |= valid;
+            fragment |= valid && exchange.fragments > 0 && exchange.fragmentResponses > 0;
+        }
+        std::cout << "BASIC-CONTROL " << getFullPath() << " normalAckData=" << normalAckData
+                << " addbaRequests=" << addbaRequests << " blockAckResponses=" << blockAckResponses << "\n";
+        if (par("requireBasicExchange").boolValue())
+            ASSERT(complete);
+        if (par("requireBasicFragments").boolValue())
+            ASSERT(fragment);
+        cSimpleModule::finish();
+    }
+};
+Define_Module(BasicCompatibilityMac);
+}
+
+%file: BasicCompatibility.ned
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
+
+module BasicCompatibilityMac extends Ieee80211Mac {
+    parameters:
+        bool requireBasicExchange = default(false);
+        bool requireBasicFragments = default(false);
+        @class(::inet::ieee80211::BasicCompatibilityMac);
+}
+network BasicCompatibilityNetwork {
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211RadioMedium;
+        host1: AdhocHost;
+        host2: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+include ../../../../showcases/wireless/blockack/omnetpp.ini
+
+[Config Compatibility]
+extends = Fragmentation
+network = BasicCompatibilityNetwork
+sim-time-limit = 30ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].mac.typename = "BasicCompatibilityMac"
+*.host1.wlan[*].mac.requireBasicExchange = true
+*.host1.wlan[*].mac.requireBasicFragments = true
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+BASIC-HOP

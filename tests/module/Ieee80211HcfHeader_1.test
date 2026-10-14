@@ -157,6 +157,7 @@ record-scalar-results = false
 **.wlan[*].mac.qosStation = true
 **.wlan[*].mac.hcf.typename = "HeaderHcf"
 **.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
 *.sender.wlan[0].mac.hcf.originatorAckPolicy.typename = ${policy}
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""

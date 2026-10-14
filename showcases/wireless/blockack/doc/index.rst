@@ -40,17 +40,17 @@ acked if *delayed block ack* is used, and not acked if *immediate block ack* is 
 The frames or fragments of frames from the previous block that were not acked are
 retransmitted in the next block by the originator.
 
-There are several kinds of block acks, such as `normal`, `compressed`, and `multi-tid`.
-INET currently only supports `normal block ack`. Normal block acks contain a bitmap,
-which contains up to 64 entries, each entry being a 16-bit array. The bitmap can acknowledge
-up to 64 MSDUs. Each MSDU can be fragmented to at most 16 fragments. The 16 bits in a bitmap
-entry are used to acknowledge the individual fragments of the MSDU.
+This showcase selects the historical Basic Block Ack profile with ``mac.hcf.blockAckVariant = "basic"``. Basic uses 64 bitmap entries, each with 16 bits for individual fragments. The recipient can acknowledge up to 64 MSDUs, each with up to 16 fragments.
+
+`IEEE Std 802.11e-2005 <https://standards.ieee.org/ieee/802.11e/3131/>`__ introduced this format in Clauses 7.2.1.7 and 7.2.1.8. `IEEE Std 802.11-2024 <https://standards.ieee.org/ieee/802.11/10548/>`__ reserves type 0 in Tables 9-36 and 9-37. Thus, IEEE Std 802.11-2024 does not support Basic. INET retains Basic for historical compatibility with existing studies. The showcase's PHY modes and INET response rules do not establish complete conformance to IEEE Std 802.11e-2005.
 
 Block Acknowledgment in INET
 ----------------------------
 
 In INET, the block ack mechanism can be enabled by setting the :par:`isBlockAckSupported`
 parameter of the MAC's :ned:`Hcf` submodule to ``true`` (it is disabled by default).
+
+Select ``blockAckVariant = "basic"`` on both endpoints to retain the historical profile. Basic remains the default during preparation for Compressed support. This stage rejects ``"compressed"`` because its runtime exchange path does not yet exist. HCF rejects unknown selector values during initialization, also when Block Ack support is disabled.
 
 Several submodules of :ned:`Hcf` are involved in the block ack mechanism.
 These modules have parameters controlling the block ack behavior. The following paragraphs
@@ -122,7 +122,7 @@ Block ack support is enabled in both hosts:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: isBlockAckSupported
-   :end-at: isBlockAckSupported
+   :end-at: blockAckVariant
    :language: ini
 
 The maximum block ack frame length is left as default, 1000B.
