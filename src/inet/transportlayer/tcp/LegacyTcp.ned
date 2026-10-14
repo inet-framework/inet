@@ -32,4 +32,5 @@ simple LegacyTcp extends Tcp
         advertisedWindow = default(14 * this.mss);
         mss = default(536);
         initialWindow = default("rfc2001");
+        tcpAlgorithmClass = default("TcpReno");
 }

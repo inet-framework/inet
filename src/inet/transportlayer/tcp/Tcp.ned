@@ -225,7 +225,7 @@ simple Tcp extends SimpleModule like ITcp
         bool timestampSupport @mutable = default(true); // Timestamps (RFC 1323) support (header option) (TS will be enabled for a connection if both endpoints support it). Each connection reads it at its open, so a run can change it as the host-wide sysctl net.ipv4.tcp_timestamps
         int mss = default(-1); // Maximum Segment Size (header option): the largest segment text that this host sends and announces. -1: the MSS of the address family for an MTU of 1500 bytes, 1460 for IPv4 and 1440 for IPv6, when the peer is known
         int msl @unit(s) = default(120s);   // Maximum Segment Lifetime
-        string tcpAlgorithmClass @examples("TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpReno");
+        string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpNewReno");
         int dupthresh = default(3); // Used for TcpTahoe, TcpReno, and SACK (RFC 3517) DO NOT change unless you really know what you are doing
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished

@@ -139,11 +139,11 @@ The :ned:`Tcp` module has the following parameters:
 
 - :par:`tcpAlgorithmClass` the name of the TCP flavour
 
-  Possible values are “TCPReno” (default), “TCPNewReno”, “TCPTahoe”,
-  “TCPNoCongestionControl” and “DumpTCP”. In the future, other classes
-  can be written which implement Vegas, LinuxTCP or other variants. See
-  section `1.3 <#sec:tcp_algorithms>`__ for detailed description of
-  implemented flavours.
+  Possible values are “TcpNewReno” (default), “TcpReno”, “TcpTahoe”,
+  “TcpCubic”, “TcpVegas”, “TcpWestwood”, “DcTcp”,
+  “TcpNoCongestionControl” and “DumbTcp”. See section
+  `1.3 <#sec:tcp_algorithms>`__ for detailed description of implemented
+  flavours.
 
   Note that TCPOpenCommand allows tcpAlgorithmClass to be chosen
   per-connection.
