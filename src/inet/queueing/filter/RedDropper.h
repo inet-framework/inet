@@ -24,6 +24,15 @@ class INET_API RedDropper : public PacketFilterBase, public cListener
   protected:
     enum RedResult { QUEUE_FULL, RANDOMLY_ABOVE_LIMIT, RANDOMLY_BELOW_LIMIT, ABOVE_MAX_LIMIT, BELOW_MIN_LIMIT };
 
+    // the result of the RED algorithm for a packet, and the state after it
+    struct RedDecision {
+        RedResult result = BELOW_MIN_LIMIT;
+        double avg = 0.0;
+        double count = NaN;
+        simtime_t q_time;
+        bool usesRandomValue = false;
+    };
+
   protected:
     double wq = 0.0;
     double minth = NaN;
@@ -38,16 +47,17 @@ class INET_API RedDropper : public PacketFilterBase, public cListener
     int packetCapacity = -1;
     bool useEcn = false;
     bool markNext = false;
-    mutable RedResult lastResult;
+    double randomValue = NaN; // drawn before the decision that uses it, so that a query draws nothing
 
     ModuleRef<IPacketCollection> collection;
 
   protected:
     virtual void initialize(int stage) override;
 
-    virtual RedResult doRandomEarlyDetection(const Packet *packet);
+    virtual RedDecision doRandomEarlyDetection(const Packet *packet) const;
+    virtual bool matchesResult(RedResult result, const Packet *packet) const;
 
-    virtual void processPacket(Packet *packet) override;
+    virtual void handlePacketFiltered(Packet *packet, bool matches) override;
 
     // cListener:
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;

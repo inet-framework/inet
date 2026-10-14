@@ -792,6 +792,17 @@ Notable backward incompatible changes are the following:
    instance of a packet stream. It now records the number one time, in
    handlePacketFiltered().
 
+45. A random early detection dropper draws its random number in advance
+
+   RedDropper updated its average queue length and drew a random number in
+   matchesPacket(), so each query about a packet, such as canPushPacket(),
+   changed the state of the dropper. It now decides with a stored random
+   number, and it updates its state in handlePacketFiltered() when a packet
+   goes through or is dropped; after a decision that used the stored number,
+   it draws the next one. The dropper draws one more random number at
+   initialization. Simulations with a RedDropper therefore give other
+   results, with the same statistical behavior.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

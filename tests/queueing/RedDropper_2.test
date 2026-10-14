@@ -1,0 +1,235 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource) twice as fast as an active packet sink (ActivePacketSink)
+collects them from a queue (PacketQueue). A random early detection dropper
+(RedDropper) in front of the queue drops packets at random when the average
+queue length is between minth and maxth. The query probe between the source and
+the dropper asks no query (numRepeats = 0).
+
+%file: test.ned
+
+import inet.queueing.filter.RedDropper;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.sink.ActivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.test.queueingtest.lib.QueryProbe;
+
+network TestRedDropper
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        probe: QueryProbe {
+            @display("p=200,100");
+        }
+        dropper: RedDropper {
+            @display("p=300,100");
+        }
+        queue: PacketQueue {
+            @display("p=400,100");
+        }
+        collector: ActivePacketSink {
+            @display("p=500,100");
+        }
+    connections:
+        producer.out --> probe.in;
+        probe.out --> dropper.in;
+        dropper.out --> queue.in;
+        queue.out --> collector.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestRedDropper
+sim-time-limit = 30s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.producer.packetLength = 1B
+*.producer.productionInterval = 0.5s
+*.dropper.minth = 1
+*.dropper.maxth = 5
+*.dropper.maxp = 0.5
+*.dropper.wq = 0.5
+*.collector.collectionInterval = 1s
+*.probe.numRepeats = 0
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 0s collector: Collecting packet, [^\n]*producer-0 \(
+
+%contains-regex: stdout
+^At 1s collector: Collecting packet, [^\n]*producer-1 \(
+
+%contains-regex: stdout
+^At 2s collector: Collecting packet, [^\n]*producer-2 \(
+
+%contains-regex: stdout
+^At 3s collector: Collecting packet, [^\n]*producer-3 \(
+
+%contains-regex: stdout
+^At 4s collector: Collecting packet, [^\n]*producer-4 \(
+
+%contains-regex: stdout
+^At 5s collector: Collecting packet, [^\n]*producer-5 \(
+
+%contains-regex: stdout
+^At 5\.5s dropper: Filtering out packet, [^\n]*producer-11 \(
+
+%contains-regex: stdout
+^At 6s collector: Collecting packet, [^\n]*producer-6 \(
+
+%contains-regex: stdout
+^At 6s dropper: Filtering out packet, [^\n]*producer-12 \(
+
+%contains-regex: stdout
+^At 7s collector: Collecting packet, [^\n]*producer-7 \(
+
+%contains-regex: stdout
+^At 7s dropper: Filtering out packet, [^\n]*producer-14 \(
+
+%contains-regex: stdout
+^At 8s collector: Collecting packet, [^\n]*producer-8 \(
+
+%contains-regex: stdout
+^At 8s dropper: Filtering out packet, [^\n]*producer-16 \(
+
+%contains-regex: stdout
+^At 8\.5s dropper: Filtering out packet, [^\n]*producer-17 \(
+
+%contains-regex: stdout
+^At 9s collector: Collecting packet, [^\n]*producer-9 \(
+
+%contains-regex: stdout
+^At 9s dropper: Filtering out packet, [^\n]*producer-18 \(
+
+%contains-regex: stdout
+^At 9\.5s dropper: Filtering out packet, [^\n]*producer-19 \(
+
+%contains-regex: stdout
+^At 10s collector: Collecting packet, [^\n]*producer-10 \(
+
+%contains-regex: stdout
+^At 10\.5s dropper: Filtering out packet, [^\n]*producer-21 \(
+
+%contains-regex: stdout
+^At 11s collector: Collecting packet, [^\n]*producer-13 \(
+
+%contains-regex: stdout
+^At 11\.5s dropper: Filtering out packet, [^\n]*producer-23 \(
+
+%contains-regex: stdout
+^At 12s collector: Collecting packet, [^\n]*producer-15 \(
+
+%contains-regex: stdout
+^At 13s collector: Collecting packet, [^\n]*producer-20 \(
+
+%contains-regex: stdout
+^At 14s collector: Collecting packet, [^\n]*producer-22 \(
+
+%contains-regex: stdout
+^At 14\.5s dropper: Filtering out packet, [^\n]*producer-29 \(
+
+%contains-regex: stdout
+^At 15s collector: Collecting packet, [^\n]*producer-24 \(
+
+%contains-regex: stdout
+^At 15s dropper: Filtering out packet, [^\n]*producer-30 \(
+
+%contains-regex: stdout
+^At 15\.5s dropper: Filtering out packet, [^\n]*producer-31 \(
+
+%contains-regex: stdout
+^At 16s collector: Collecting packet, [^\n]*producer-25 \(
+
+%contains-regex: stdout
+^At 16s dropper: Filtering out packet, [^\n]*producer-32 \(
+
+%contains-regex: stdout
+^At 17s collector: Collecting packet, [^\n]*producer-26 \(
+
+%contains-regex: stdout
+^At 17\.5s dropper: Filtering out packet, [^\n]*producer-35 \(
+
+%contains-regex: stdout
+^At 18s collector: Collecting packet, [^\n]*producer-27 \(
+
+%contains-regex: stdout
+^At 18s dropper: Filtering out packet, [^\n]*producer-36 \(
+
+%contains-regex: stdout
+^At 18\.5s dropper: Filtering out packet, [^\n]*producer-37 \(
+
+%contains-regex: stdout
+^At 19s collector: Collecting packet, [^\n]*producer-28 \(
+
+%contains-regex: stdout
+^At 19\.5s dropper: Filtering out packet, [^\n]*producer-39 \(
+
+%contains-regex: stdout
+^At 20s collector: Collecting packet, [^\n]*producer-33 \(
+
+%contains-regex: stdout
+^At 21s collector: Collecting packet, [^\n]*producer-34 \(
+
+%contains-regex: stdout
+^At 22s collector: Collecting packet, [^\n]*producer-38 \(
+
+%contains-regex: stdout
+^At 22\.5s dropper: Filtering out packet, [^\n]*producer-45 \(
+
+%contains-regex: stdout
+^At 23s collector: Collecting packet, [^\n]*producer-40 \(
+
+%contains-regex: stdout
+^At 23\.5s dropper: Filtering out packet, [^\n]*producer-47 \(
+
+%contains-regex: stdout
+^At 24s collector: Collecting packet, [^\n]*producer-41 \(
+
+%contains-regex: stdout
+^At 24\.5s dropper: Filtering out packet, [^\n]*producer-49 \(
+
+%contains-regex: stdout
+^At 25s collector: Collecting packet, [^\n]*producer-42 \(
+
+%contains-regex: stdout
+^At 25\.5s dropper: Filtering out packet, [^\n]*producer-51 \(
+
+%contains-regex: stdout
+^At 26s collector: Collecting packet, [^\n]*producer-43 \(
+
+%contains-regex: stdout
+^At 26s dropper: Filtering out packet, [^\n]*producer-52 \(
+
+%contains-regex: stdout
+^At 27s collector: Collecting packet, [^\n]*producer-44 \(
+
+%contains-regex: stdout
+^At 27s dropper: Filtering out packet, [^\n]*producer-54 \(
+
+%contains-regex: stdout
+^At 27\.5s dropper: Filtering out packet, [^\n]*producer-55 \(
+
+%contains-regex: stdout
+^At 28s collector: Collecting packet, [^\n]*producer-46 \(
+
+%contains-regex: stdout
+^At 28\.5s dropper: Filtering out packet, [^\n]*producer-57 \(
+
+%contains-regex: stdout
+^At 29s collector: Collecting packet, [^\n]*producer-48 \(
+
+%contains-regex: stdout
+^At 29\.5s dropper: Filtering out packet, [^\n]*producer-59 \(
+
+%contains-regex: stdout
+^At 30s collector: Collecting packet, [^\n]*producer-50 \(

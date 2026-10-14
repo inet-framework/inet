@@ -175,7 +175,7 @@
 /tutorials/queueing/,                -f omnetpp.ini -c Filter1 -r 0,                            10s,           b037-1970/tplx;0000-0000/~tNl;0000-0000/~tND;1295-3d2c/tyf, PASS, queueing
 /tutorials/queueing/,                -f omnetpp.ini -c Filter2 -r 0,                            10s,           f05f-77fe/tplx;0000-0000/~tNl;0000-0000/~tND;1295-3d2c/tyf, PASS, queueing
 /tutorials/queueing/,                -f omnetpp.ini -c OrdinalBasedDropper -r 0,                10s,           be66-a8df/tplx;0000-0000/~tNl;0000-0000/~tND;1c0f-a98e/tyf, PASS, queueing
-/tutorials/queueing/,                -f omnetpp.ini -c RedDropper -r 0,                         100s,           c3f0-02e1/tplx;0000-0000/~tNl;0000-0000/~tND;c1a8-9f05/tyf, PASS, queueing
+/tutorials/queueing/,                -f omnetpp.ini -c RedDropper -r 0,                         100s,           6c21-be05/tplx;0000-0000/~tNl;0000-0000/~tND;c1a8-9f05/tyf, PASS, queueing
 /tutorials/queueing/,                -f omnetpp.ini -c Server -r 0,                             10s,           87e9-9232/tplx;0000-0000/~tNl;0000-0000/~tND;2965-5d8a/tyf, PASS, queueing
 /tutorials/queueing/,                -f omnetpp.ini -c TokenBasedServer -r 0,                   10s,           41ff-9436/tplx;0000-0000/~tNl;0000-0000/~tND;0000-0000/tyf, PASS, queueing
 /tutorials/queueing/,                -f omnetpp.ini -c TimeBasedTokenGenerator -r 0,            10s,           012b-3ee2/tplx;0000-0000/~tNl;0000-0000/~tND;c737-9ada/tyf, PASS, queueing

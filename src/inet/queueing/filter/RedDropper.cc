@@ -28,6 +28,7 @@ void RedDropper::initialize(int stage)
         maxp = par("maxp");
         pkrate = par("pkrate");
         count = -1;
+        randomValue = dblrand();
         WATCH(avg);
         WATCH(count);
         WATCH(markNext);
@@ -58,54 +59,55 @@ void RedDropper::initialize(int stage)
     }
 }
 
-RedDropper::RedResult RedDropper::doRandomEarlyDetection(const Packet *packet)
+RedDropper::RedDecision RedDropper::doRandomEarlyDetection(const Packet *packet) const
 {
+    RedDecision decision;
+    decision.avg = avg;
+    decision.count = count;
+    decision.q_time = q_time;
     int queueLength = collection->getNumPackets();
 
     if (queueLength > 0) {
         // TD: This following calculation is only useful when the queue is not empty!
-        avg = (1 - wq) * avg + wq * queueLength;
+        decision.avg = (1 - wq) * avg + wq * queueLength;
     }
     else {
         // TD: Added behaviour for empty queue.
         const double m = SIMTIME_DBL(simTime() - q_time) * pkrate;
-        avg = pow(1 - wq, m) * avg;
-        q_time = simTime();
+        decision.avg = pow(1 - wq, m) * avg;
+        decision.q_time = simTime();
     }
 
     if (queueLength >= packetCapacity) { // maxth is also the "hard" limit
-        EV_DEBUG << "Queue length >= capacity" << EV_FIELD(queueLength) << EV_FIELD(packetCapacity) << EV_ENDL;
-        count = 0;
-        return QUEUE_FULL;
+        decision.count = 0;
+        decision.result = QUEUE_FULL;
     }
-    else if (minth <= avg && avg < maxth) {
-        count++;
-        const double pb = maxp * (avg - minth) / (maxth - minth);
-        const double pa = pb / (1 - count * pb); // TD: Adapted to work as in [Floyd93].
-        if (dblrand() < pa) {
-            EV_DEBUG << "Random early packet detected" << EV_FIELD(averageQueueLength, avg) << EV_FIELD(probability, pa) << EV_ENDL;
-            count = 0;
-            return RANDOMLY_ABOVE_LIMIT;
+    else if (minth <= decision.avg && decision.avg < maxth) {
+        decision.count = count + 1;
+        const double pb = maxp * (decision.avg - minth) / (maxth - minth);
+        const double pa = pb / (1 - decision.count * pb); // TD: Adapted to work as in [Floyd93].
+        decision.usesRandomValue = true;
+        if (randomValue < pa) {
+            decision.count = 0;
+            decision.result = RANDOMLY_ABOVE_LIMIT;
         }
         else
-            return RANDOMLY_BELOW_LIMIT;
+            decision.result = RANDOMLY_BELOW_LIMIT;
     }
-    else if (avg >= maxth) {
-        EV_DEBUG << "Average queue length >= maxth" << EV_FIELD(averageQueueLength, avg) << EV_FIELD(maxth) << EV_ENDL;
-        count = 0;
-        return ABOVE_MAX_LIMIT;
+    else if (decision.avg >= maxth) {
+        decision.count = 0;
+        decision.result = ABOVE_MAX_LIMIT;
     }
     else {
-        count = -1;
+        decision.count = -1;
+        decision.result = BELOW_MIN_LIMIT;
     }
-
-    return BELOW_MIN_LIMIT;
+    return decision;
 }
 
-bool RedDropper::matchesPacket(const Packet *packet) const
+bool RedDropper::matchesResult(RedResult result, const Packet *packet) const
 {
-    lastResult = const_cast<RedDropper *>(this)->doRandomEarlyDetection(packet);
-    switch (lastResult) {
+    switch (result) {
         case RANDOMLY_ABOVE_LIMIT:
         case ABOVE_MAX_LIMIT:
             return useEcn && EcnMarker::getEcn(packet) != IP_ECN_NOT_ECT;
@@ -119,34 +121,49 @@ bool RedDropper::matchesPacket(const Packet *packet) const
     }
 }
 
-void RedDropper::processPacket(Packet *packet)
+bool RedDropper::matchesPacket(const Packet *packet) const
 {
-    switch (lastResult) {
-        case RANDOMLY_ABOVE_LIMIT:
-        case ABOVE_MAX_LIMIT: {
-            if (useEcn) {
-                IpEcnCode ecn = EcnMarker::getEcn(packet);
-                if (ecn != IP_ECN_NOT_ECT) {
-                    // if next packet should be marked and it is not
-                    if (markNext && ecn != IP_ECN_CE) {
-                        EcnMarker::setEcn(packet, IP_ECN_CE);
-                        markNext = false;
-                    }
-                    else {
-                        if (ecn == IP_ECN_CE)
-                            markNext = true;
-                        else
-                            EcnMarker::setEcn(packet, IP_ECN_CE);
-                    }
-                }
-            }
-        }
-        case RANDOMLY_BELOW_LIMIT:
-        case BELOW_MIN_LIMIT:
+    return matchesResult(doRandomEarlyDetection(packet).result, packet);
+}
+
+void RedDropper::handlePacketFiltered(Packet *packet, bool matches)
+{
+    // the same state as the query, so the same decision
+    auto decision = doRandomEarlyDetection(packet);
+    avg = decision.avg;
+    count = decision.count;
+    q_time = decision.q_time;
+    switch (decision.result) {
         case QUEUE_FULL:
+            EV_DEBUG << "Queue length >= capacity" << EV_FIELD(packetCapacity) << EV_ENDL;
+            break;
+        case RANDOMLY_ABOVE_LIMIT:
+            EV_DEBUG << "Random early packet detected" << EV_FIELD(averageQueueLength, avg) << EV_ENDL;
+            break;
+        case ABOVE_MAX_LIMIT:
+            EV_DEBUG << "Average queue length >= maxth" << EV_FIELD(averageQueueLength, avg) << EV_FIELD(maxth) << EV_ENDL;
             break;
         default:
-            throw cRuntimeError("Unknown RED result");
+            break;
+    }
+    if (decision.usesRandomValue)
+        randomValue = dblrand();
+    // a packet above the limit passes only to be marked
+    if (matches && (decision.result == RANDOMLY_ABOVE_LIMIT || decision.result == ABOVE_MAX_LIMIT) && useEcn) {
+        IpEcnCode ecn = EcnMarker::getEcn(packet);
+        if (ecn != IP_ECN_NOT_ECT) {
+            // if next packet should be marked and it is not
+            if (markNext && ecn != IP_ECN_CE) {
+                EcnMarker::setEcn(packet, IP_ECN_CE);
+                markNext = false;
+            }
+            else {
+                if (ecn == IP_ECN_CE)
+                    markNext = true;
+                else
+                    EcnMarker::setEcn(packet, IP_ECN_CE);
+            }
+        }
     }
 }
 
