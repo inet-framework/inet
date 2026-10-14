@@ -25,26 +25,29 @@ void MultiTokenBucketClassifier::initialize(int stage)
 
 int MultiTokenBucketClassifier::classifyPacket(Packet *packet) const
 {
-    // KLUDGE: this query changes the state of the module
-    return const_cast<MultiTokenBucketClassifier *>(this)->classifyPacketAndUpdateState(packet);
+    auto numTokens = getNumPacketTokens(packet);
+    for (size_t i = 0; i < tokenBuckets.size(); i++)
+        if (tokenBuckets[i].getNumTokens() > numTokens)
+            return i;
+    return outputGates.size() - 1;
 }
 
-int MultiTokenBucketClassifier::classifyPacketAndUpdateState(Packet *packet)
+void MultiTokenBucketClassifier::handlePacketClassified(Packet *packet, int index)
 {
     emitTokensChangedSignals();
     auto numTokens = getNumPacketTokens(packet);
     for (size_t i = 0; i < tokenBuckets.size(); i++) {
         auto& tokenBucket = tokenBuckets[i];
         EV_DEBUG << "Checking tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
-        if (tokenBucket.getNumTokens() > numTokens) {
+        // the index of the last output gate also means that no bucket has enough tokens
+        if ((int)i == index && tokenBucket.getNumTokens() > numTokens) {
             tokenBucket.removeTokens(numTokens);
             EV_INFO << "Removed tokens from ith bucket for packet" << EV_FIELD(numTokens) << EV_FIELD(i) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
             emitTokensChangedSignals();
-            return i;
+            return;
         }
     }
     EV_INFO << "Insufficient number of tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(packet) << EV_ENDL;
-    return outputGates.size() - 1;
 }
 
 } // namespace queueing

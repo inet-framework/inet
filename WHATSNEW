@@ -690,8 +690,10 @@ Notable backward incompatible changes are the following:
 
 35. A token bucket classifier takes the tokens of a packet one time
 
-   TokenBucketClassifier, and SingleRateTwoColorClassifier which extends it,
-   removed the tokens of a packet in each query about the packet, and again
+   TokenBucketClassifier and MultiTokenBucketClassifier, and the classifiers
+   that extend them in NED (SingleRateTwoColorClassifier,
+   SingleRateThreeColorClassifier and DualRateThreeColorClassifier), removed
+   the tokens of a packet in each query about the packet, and again
    when the packet went through. For example, a PacketServer asks
    canPushPacket() before it pushes a packet. In pull mode, each peek removed
    tokens. The classifier now removes the tokens one time, when the packet
