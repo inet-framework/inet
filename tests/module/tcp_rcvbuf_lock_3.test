@@ -1,0 +1,57 @@
+%description:
+Tests a receive buffer that SO_RCVBUF locked: it counts its memory, not the
+bytes of its data, as Linux (tcp_can_ingest()). The server offers 65535 bytes,
+and at t=1.001 s, while two 20000-byte segments are on their way, it locks a
+buffer of 32000 bytes and does not read. The first segment costs 20712 bytes
+of memory, within the buffer, so the second one gets in whole, although its
+data end 8000 bytes beyond the buffer; the memory is then over the buffer, and
+the next segment would be dropped. The offer keeps the right edge of the
+earlier offer, as the window does not move back. Before the repair, the server
+also counted the bytes and dropped the second segment.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 40000"
+*.srv_app.autoRead=false
+*.srv_app.rcvBufScript="1.001 32000"  # SO_RCVBUF: lock a buffer of 32000 bytes before the data arrive
+sim-time-limit = 3s
+*.*_tcp.mss = 20000
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.advertisedWindow = 65535
+*.cli_tcp.initialCwnd = 2
+*.srv_tcp.receiveBufferSize = 100000B
+*.srv_tcp.windowAutoTuning = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%# the second segment gets in
+%contains: postrun-command(1).out
+[1.003 B003] A.1000 < B.2000: A ack 40001 win 25535 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
+

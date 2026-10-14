@@ -144,6 +144,11 @@ bool TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, c
     if (state->acceptBeyondBufferAtEmptyQueue && payloadLength > 0 && payloadSeq == state->rcv_nxt
         && receiveQueue->getAmountOfBufferedBytes() == 0)
         return true;
+    // a locked buffer counts its memory, not the bytes of its data (Linux
+    // tcp_can_ingest()): within the buffer, a segment gets in whole, also when it ends
+    // beyond the buffer
+    if (payloadLength > 0 && state->rcvbufLocked && state->rcvBufferSize > 0)
+        return seqLE(firstSeq, payloadSeq);
     uint32_t bufferSize = state->rcvBufferSize > 0 ? state->rcvBufferSize : state->maxRcvBuffer;
     return seqLE(firstSeq, payloadSeq) && seqLE(payloadSeq + payloadLength, firstSeq + bufferSize);
 }
