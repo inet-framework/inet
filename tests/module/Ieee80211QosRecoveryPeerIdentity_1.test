@@ -1,0 +1,121 @@
+%description:
+Equal TID, sequence, and fragment values at two receivers require separate retry counters.
+Check failed attempts, acknowledgment, and retry-limit disposal before any DATA lifetime expiry.
+Use the production recovery procedure with both short and long retry counters.
+
+%file: QosRecoveryPeerIdentityTest.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class QosRecoveryPeerIdentityTest : public cSimpleModule
+{
+  protected:
+    void verifyCounters(QosRecoveryProcedure *recovery, int payloadBytes)
+    {
+        auto firstHeader = makeShared<Ieee80211DataHeader>();
+        firstHeader->setType(ST_DATA_WITH_QOS);
+        firstHeader->addChunkLength(QOSCONTROL_PART_LENGTH);
+        firstHeader->setTid(0);
+        firstHeader->setSequenceNumber(SequenceNumberCyclic(37));
+        firstHeader->setFragmentNumber(0);
+        firstHeader->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        auto secondHeader = makeShared<Ieee80211DataHeader>(*firstHeader);
+        secondHeader->setReceiverAddress(MacAddress("02:00:00:00:00:03"));
+        Packet first("first-peer", firstHeader);
+        Packet second("second-peer", secondHeader);
+        for (auto packet : {&first, &second}) {
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(payloadBytes)));
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        }
+
+        recovery->dataFrameTransmissionFailed(&first, firstHeader);
+        recovery->dataFrameTransmissionFailed(&second, secondHeader);
+        ASSERT(recovery->getRetryCount(&first, firstHeader) == 1);
+        ASSERT(recovery->getRetryCount(&second, secondHeader) == 1);
+        recovery->dataFrameTransmissionFailed(&first, firstHeader);
+        ASSERT(recovery->getRetryCount(&first, firstHeader) == 2);
+        ASSERT(recovery->getRetryCount(&second, secondHeader) == 1);
+
+        recovery->ackFrameReceived(&first, firstHeader);
+        ASSERT(recovery->getRetryCount(&second, secondHeader) == 1);
+        recovery->dataFrameTransmissionFailed(&first, firstHeader);
+        ASSERT(recovery->getRetryCount(&first, firstHeader) == 1);
+        ASSERT(recovery->getRetryCount(&second, secondHeader) == 1);
+        recovery->dataFrameTransmissionFailed(&first, firstHeader);
+        recovery->dataFrameTransmissionFailed(&first, firstHeader);
+        ASSERT(recovery->isRetryLimitReached(&first, firstHeader));
+        ASSERT(!recovery->isRetryLimitReached(&second, secondHeader));
+        recovery->retryLimitReached(&first, firstHeader);
+        ASSERT(recovery->getRetryCount(&second, secondHeader) == 1);
+        recovery->ackFrameReceived(&second, secondHeader);
+    }
+
+    void activity() override
+    {
+        auto mac = getParentModule()->getSubmodule("host")->getSubmodule("wlan", 0)->getSubmodule("mac");
+        auto hcf = check_and_cast<Hcf *>(mac->getSubmodule("hcf"));
+        auto recovery = hcf->getSubmodule("edca")->getSubmodule("edcaf", AC_BE)->getSubmodule("recoveryProcedure");
+        auto procedure = check_and_cast<QosRecoveryProcedure *>(recovery);
+        verifyCounters(procedure, 100);
+        verifyCounters(procedure, 300);
+        std::cout << "Peer retry identity: short and long counters remain independent.\n";
+        endSimulation();
+    }
+
+  public:
+    QosRecoveryPeerIdentityTest() : cSimpleModule(65536) {}
+};
+
+Define_Module(QosRecoveryPeerIdentityTest);
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple QosRecoveryPeerIdentityTest
+{
+    parameters:
+        @class(::QosRecoveryPeerIdentityTest);
+}
+
+network QosRecoveryPeerIdentityNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: QosRecoveryPeerIdentityTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = QosRecoveryPeerIdentityNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+seed-set = 0
+cmdenv-express-mode = true
+record-scalar-results = false
+record-vector-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 150B
+**.wlan[*].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = 3
+**.wlan[*].mac.hcf.edca.edcaf[*].recoveryProcedure.longRetryLimit = 3
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1m
+**.mobility.constraintAreaMaxY = 1m
+**.mobility.constraintAreaMaxZ = 1m
+
+%contains: stdout
+Peer retry identity: short and long counters remain independent.
