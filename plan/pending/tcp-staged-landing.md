@@ -74,7 +74,8 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S18 ✅ | `topic/tcp-receive-memory` | 47 | +165 −36 | SO_RCVBUF on an open connection and its lock, the highest window edge apart from the edge in force, the free space and the zero window of a locked buffer, the window update of Linux after a read behind a parameter (D-90 to D-93) |
 | S18b ✅ | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part), new | +285 −3 | the RFC 4821 path MTU search of Linux behind a parameter, the route MTU of a connection and `TcpSocket::setPathMtu()`, the start MSS of an active opener, the SYN after an ICMP fragmentation-needed error (D-94 to D-97) |
 | S18c ✅ | `topic/tcp-applications` | 42, 58 | +27 −11 | MSG_EOR in the send script of `TcpSessionApp`, and a fill byte for its data; commit 58 takes back the close of `TcpServerSocketIo` of commit 42 (D-1) |
-| S19 | `topic/tcp-modern-defaults` | 15 (part), 16 (part), 40, 46 (part), 53, 63, 68, 70, 71, 72, 78, 80 (part), 81, 82, 87 | +863 −488 | the modern defaults, the RFC 6298 and RFC 5681 corrections, the tests under the new defaults |
+| S19 | `topic/tcp-new-parameters` | 15 (part), 46 (part), 53, 87, new | +250 −30 (about) | the new parameters with the defaults of master: `retainSackAfterRto`, `initialWindow` and `initialCwnd`, `initialSendSequenceNumber`, `mss = -1`, the PSH of RFC 9293 MUST-61 |
+| S19b | `topic/tcp-modern-defaults` | 16 (part), 40, 68 (part), 70, 71, 72 (the rest), 78, 80 (part), 81 | +600 −450 (about) | the pins of the old defaults in the tests, the modern defaults one commit for each with their moved rows, the TCP standards tests and the evidence under the new defaults, the statistical baselines |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
 The big test commit (41, `tests: add+change: cover the new behavior, and pin the old defaults`,
@@ -2725,3 +2726,34 @@ fail with the source of the commit before. The CI fingerprint job runs at each c
 row moves. The TCP fingerprint rows run in debug at the head with no runtime error (the `tyf`
 ingredient differs in 52 rows, as on master; the lwIP rows need a build with lwIP). The six gates
 and the combined pull-request gate pass.
+
+### S19 — `topic/tcp-new-parameters`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | add: retainSackAfterRto, the SACK marks of Linux after a timeout | — | 87 |
+| 2 | fix: the initial window counts the MSS without options | — | 15 (part) |
+| 3 | add: initialWindow and initialCwnd, the initial windows of RFCs | — | 15 (part), 46 (part), 53 |
+| 4 | add: initialSendSequenceNumber, a fixed initial sequence number | — | 15 (part) |
+| 5 | add: mss = -1, the MSS of the address family | — | 15 (part) |
+| 6 | add: PSH in the last buffered segment of RFC 9293, by a parameter | — | new (D-74) |
+
+S19 had 14 source commits and the default changes of D-24, D-65 and D-74: too much for one review,
+and most of it moves CI rows. S19 now takes the new parameters, each with a default that keeps the
+behavior of master, so no row moves; S19b takes the pins of the old defaults in the tests, then
+one commit for each modern default with its moved rows, the TCP standards tests and the evidence
+under the new defaults (commits 80 and 81), and the statistical baselines, which no stage has
+updated since S5b. Commits 70, 71 and 72 landed in S5c and S5e; their test changes under the new
+defaults go to S19b. Commit 63 renames the statistic `sndNxt` of `tcp_lwip`, which master keeps
+(D-80), and commit 82 corrects a comment that master does not have, so neither lands.
+
+Step 2: RFC 5681 counts the initial window in SMSS, the segment size without the TCP options;
+master counts it with `snd_mss`, so with timestamps the first window carries 12 bytes more per
+segment. Step 3 takes the modes of the source (`rfc2001`, one segment; `rfc3390`, the bound of RFC
+5681 section 3.1; `rfc6928`, IW10) with the default `rfc2001` of master, the deprecated
+`increasedIWEnabled` as `rfc3390` (commit 53), and `initialCwnd` of a route (commit 46). Step 4
+takes `initialSendSequenceNumber`, -1 for the clock of master. Step 5 takes `mss = -1`, 1460 for
+IPv4 and 1440 for IPv6, with the default 536 of master; the source resolves the value only when
+it writes the options, so a passive side takes the MSS of the peer as its own (D-19), and S19
+resolves it before the options of the SYN are read. Step 6 is the PSH of RFC 9293 section 3.9.1.2
+(MUST-61) behind a parameter, off in S19; S19b turns it on with the pins of the tests (D-74).
