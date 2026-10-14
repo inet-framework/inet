@@ -68,6 +68,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | --- | --- |
 | [AR-QUEUE-ROLES](#ar-queue-roles) | Standard push/pull source/sink contracts let processing elements chain arbitrarily |
 | [AR-QUEUE-STREAMING](#ar-queue-streaming) | Processing contracts support progressive transfer (preemption, cut-through) |
+| [AR-QUEUE-QUERIES](#ar-queue-queries) | A query changes nothing, and the operation after it does what the query said |
 
 **Observability (AR-OBS)**
 
@@ -373,6 +374,16 @@ The `queueing` package defines a small set of interfaces (packet source, packet 
 The processing contracts support progressive packet transfer, so preemption and cut-through behavior are expressible.
 
 Modern link layers do not always treat a frame as an indivisible unit: frame preemption interrupts a low-priority frame mid-transmission, and cut-through forwarding begins sending a frame before it has been fully received. The queueing/streaming contracts model a packet being handed over progressively rather than atomically, so these behaviors fall out of the same composable framework instead of requiring special-case code. Supporting partial/streamed transfer at the contract level is what lets INET model TSN and cut-through switches within the ordinary datapath abstraction.
+
+### AR-QUEUE-QUERIES
+
+**A query changes nothing, and the operation after it does what the query said**
+
+The queries of the push and pull contracts (`canPushSomePacket()`, `canPushPacket()`, `canPullSomePacket()`, `canPullPacket()`) and the decision functions behind them (`classifyPacket()`, `schedulePacket()`, `matchesPacket()`) change no state, emit no signal, draw no random number and schedule no event.
+
+A caller asks a query to decide, and then it pushes or pulls. This is safe only under two conditions: the query changes nothing, and the operation does what the query said. If `canPullPacket()` returns a packet, the next `pullPacket()` at the same gate returns that packet, in the same event and with no other operation between the two calls. If `canPushPacket()` returns true, the next `pushPacket()` of that packet accepts it on the path that the query examined. A module that keeps decision state, such as a round-robin counter, a token bucket or the average queue length of RED, changes that state in a commit hook that its base class calls one time for each packet: `handlePacketClassified()`, `handlePacketScheduled()` or `handlePacketFiltered()`. A random decision uses a number that the module draws in advance. Then any number of queries, in any order, gives the same simulation results. The one exception is `DynamicClassifier::canPushPacket()`, which creates the branch of a new class, because its answer depends on that branch.
+
+*Enforced at T1/T2 — `const` query and decision functions (compiler) + the query probe tests of `tests/queueing`.*
 
 ## Observability (AR-OBS)
 

@@ -59,7 +59,7 @@ A whole-document seal is declared in the document's own header, as `**Seal:** wh
 | `design/test-anatomy.md` | by section | 0 | 0 | 6 |
 | `domain/ieee80211.md` | by rule | 0 | 0 | 14 |
 | `requirement/accepted-requirements.md` | by requirement, complete | 0 | 27 | 0 |
-| `rule/architecture.md` | by rule | 0 | 0 | 45 |
+| `rule/architecture.md` | by rule | 0 | 0 | 46 |
 | `rule/classification.md` | by rule | 0 | 0 | 18 |
 | `rule/documentation.md` | whole | 0 | 0 | 1 |
 | `rule/naming.md` | by rule | 0 | 0 | 23 |
