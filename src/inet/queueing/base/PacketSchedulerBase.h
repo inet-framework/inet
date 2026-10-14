@@ -42,8 +42,22 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public Transpar
     virtual void mapRegistrationForwardingGates(cGate *gate, std::function<void(cGate *)> f) override;
 
     virtual size_t getInputGateIndex(size_t i) const { return reverseOrder ? inputGates.size() - i - 1 : i; }
-    virtual int schedulePacket() = 0;
+    /**
+     * Returns the index of the input gate whose packet the module passes on
+     * next. This function is a query, so it must not change the state of the
+     * module. The base class calls it from queries and from operations that
+     * move the packet.
+     */
+    virtual int schedulePacket() const = 0;
     virtual int callSchedulePacket() const;
+    /**
+     * Updates the state of the module for a packet that goes through the input
+     * gate with the given index. The base class calls this function one time
+     * for each packet, and one time for each packet stream, when the module
+     * holds the packet and before the packet leaves the module.
+     */
+    virtual void handlePacketScheduled(Packet *packet, int index) {}
+    virtual int schedulePushedPacket(Packet *packet, const cGate *gate);
 
     virtual bool isStreamingPacket() const { return inProgressStreamId != -1; }
     virtual void startPacketStreaming();

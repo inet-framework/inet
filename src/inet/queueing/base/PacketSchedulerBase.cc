@@ -53,10 +53,18 @@ void PacketSchedulerBase::mapRegistrationForwardingGates(cGate *gate, std::funct
 
 int PacketSchedulerBase::callSchedulePacket() const
 {
-    // KLUDGE const_cast
-    int index = const_cast<PacketSchedulerBase *>(this)->schedulePacket();
+    int index = schedulePacket();
     if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
         throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
+    return index;
+}
+
+int PacketSchedulerBase::schedulePushedPacket(Packet *packet, const cGate *gate)
+{
+    int index = callSchedulePacket();
+    if (index != gate->getIndex())
+        throw cRuntimeError("Scheduled packet from wrong input gate");
+    handlePacketScheduled(packet, index);
     return index;
 }
 
@@ -93,9 +101,7 @@ bool PacketSchedulerBase::canPushPacket(Packet *packet, const cGate *gate) const
 void PacketSchedulerBase::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
-    int index = callSchedulePacket();
-    if (index != gate->getIndex())
-        throw cRuntimeError("Scheduled packet from wrong input gate");
+    schedulePushedPacket(packet, gate);
     consumer.pushPacket(packet);
 }
 
@@ -103,9 +109,7 @@ void PacketSchedulerBase::pushPacketStart(Packet *packet, const cGate *gate, bps
 {
     Enter_Method("pushPacketStart");
     ASSERT(!isStreamingPacket());
-    int index = callSchedulePacket();
-    if (index != gate->getIndex())
-        throw cRuntimeError("Scheduled packet from wrong input gate");
+    schedulePushedPacket(packet, gate);
     consumer.pushPacketStart(packet, datarate);
 }
 
@@ -168,6 +172,7 @@ Packet *PacketSchedulerBase::pullPacket(const cGate *gate)
     int index = callSchedulePacket();
     auto packet = providers[index].pullPacket();
     take(packet);
+    handlePacketScheduled(packet, index);
     EV_INFO << "Scheduling packet" << EV_FIELD(packet) << EV_ENDL;
     handlePacketProcessed(packet);
     emit(packetPulledSignal, packet);
@@ -184,6 +189,7 @@ Packet *PacketSchedulerBase::pullPacketStart(const cGate *gate, bps datarate)
     auto packet = providers[inProgressGateIndex].pullPacketStart(datarate);
     EV_INFO << "Starting packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
+    handlePacketScheduled(packet, inProgressGateIndex);
     inProgressStreamId = packet->getTreeId();
     if (collector != nullptr)
         animatePullPacketStart(packet, outputGate, collector.getReferencedGate(), datarate, packet->getTransmissionId());
@@ -193,12 +199,15 @@ Packet *PacketSchedulerBase::pullPacketStart(const cGate *gate, bps datarate)
 Packet *PacketSchedulerBase::pullPacketEnd(const cGate *gate)
 {
     Enter_Method("pullPacketEnd");
-    if (!isStreamingPacket())
+    bool isStarting = !isStreamingPacket();
+    if (isStarting)
         startPacketStreaming();
     auto packet = providers[inProgressGateIndex].pullPacketEnd();
     EV_INFO << "Ending packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     checkPacketStreaming(packet);
+    if (isStarting)
+        handlePacketScheduled(packet, inProgressGateIndex);
     inProgressStreamId = packet->getTreeId();
     endPacketStreaming(packet);
     if (collector != nullptr)
@@ -209,12 +218,15 @@ Packet *PacketSchedulerBase::pullPacketEnd(const cGate *gate)
 Packet *PacketSchedulerBase::pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)
 {
     Enter_Method("pullPacketProgress");
-    if (!isStreamingPacket())
+    bool isStarting = !isStreamingPacket();
+    if (isStarting)
         startPacketStreaming();
     auto packet = providers[inProgressGateIndex].pullPacketProgress(datarate, position, extraProcessableLength);
     EV_INFO << "Progressing packet streaming" << EV_FIELD(packet) << EV_ENDL;
     take(packet);
     checkPacketStreaming(packet);
+    if (isStarting)
+        handlePacketScheduled(packet, inProgressGateIndex);
     inProgressStreamId = packet->getTreeId();
     if (packet->getDataLength() == position + extraProcessableLength)
         endPacketStreaming(packet);

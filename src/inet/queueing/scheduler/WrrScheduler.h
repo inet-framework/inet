@@ -27,7 +27,8 @@ class INET_API WrrScheduler : public PacketSchedulerBase, public virtual IPacket
 
   protected:
     virtual void initialize(int stage) override;
-    virtual int schedulePacket() override;
+    virtual int schedulePacket() const override;
+    virtual int schedulePacketAndUpdateState();
 
   public:
     virtual ~WrrScheduler();

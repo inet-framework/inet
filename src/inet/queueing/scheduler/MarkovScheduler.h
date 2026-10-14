@@ -35,7 +35,7 @@ class INET_API MarkovScheduler : public ClockUserModuleMixin<PacketSchedulerBase
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *message) override;
 
-    virtual int schedulePacket() override;
+    virtual int schedulePacket() const override;
     virtual void scheduleWaitTimer();
 
   public:

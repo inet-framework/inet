@@ -24,7 +24,7 @@ IPacketSchedulerFunction *PacketScheduler::createSchedulerFunction(const char *s
     return check_and_cast<IPacketSchedulerFunction *>(createOne(schedulerClass));
 }
 
-int PacketScheduler::schedulePacket()
+int PacketScheduler::schedulePacket() const
 {
     // TODO: should we change the interface method instead?
     std::vector<IPassivePacketSource *> rawProviders;

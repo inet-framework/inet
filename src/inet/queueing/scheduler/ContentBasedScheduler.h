@@ -22,7 +22,7 @@ class INET_API ContentBasedScheduler : public PacketSchedulerBase
 
   protected:
     virtual void initialize(int stage) override;
-    virtual int schedulePacket() override;
+    virtual int schedulePacket() const override;
 
   public:
     virtual ~ContentBasedScheduler();

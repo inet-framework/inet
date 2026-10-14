@@ -719,6 +719,20 @@ Notable backward incompatible changes are the following:
    classes appear. With reverseOrder = true, it created more branches than
    classes, and it sent packets of different classes into one branch.
 
+38. Packet schedulers answer a query without a change of state
+
+   PacketSchedulerBase::schedulePacket() is now a const function. The base
+   class calls it from queries, such as canPushSomePacket(), and again from
+   the operation that moves the packet, so it must not change the state of
+   the module. The base class calls the new function handlePacketScheduled()
+   one time for each packet that goes through the module, and one time for
+   each packet stream, when the module holds the packet and before the
+   packet leaves the module. A scheduler that keeps state changes it there.
+
+   This change requires the modification of schedulers implemented outside
+   INET, which no longer compile until their schedulePacket() is const. See
+   the migration guide.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

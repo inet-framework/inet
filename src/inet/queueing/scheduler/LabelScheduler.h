@@ -23,7 +23,7 @@ class INET_API LabelScheduler : public PacketSchedulerBase, public virtual IPack
 
   protected:
     virtual void initialize(int stage) override;
-    virtual int schedulePacket() override;
+    virtual int schedulePacket() const override;
 
   public:
     virtual int getMaxNumPackets() const override { return -1; }

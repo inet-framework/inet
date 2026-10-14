@@ -78,7 +78,7 @@ void MarkovScheduler::handleMessage(cMessage *message)
         throw cRuntimeError("Unknown message");
 }
 
-int MarkovScheduler::schedulePacket()
+int MarkovScheduler::schedulePacket() const
 {
     return state;
 }
@@ -104,6 +104,7 @@ void MarkovScheduler::pushPacket(Packet *packet, const cGate *gate)
     take(packet);
     if (gate->getIndex() != state)
         throw cRuntimeError("Cannot push to gate");
+    handlePacketScheduled(packet, state);
     processedTotalLength += packet->getDataLength();
     pushOrSendPacket(packet, outputGate, consumer);
     numProcessedPackets++;

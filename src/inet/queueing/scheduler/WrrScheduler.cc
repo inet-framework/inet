@@ -65,7 +65,13 @@ void WrrScheduler::removeAllPackets()
         collection->removeAllPackets();
 }
 
-int WrrScheduler::schedulePacket()
+int WrrScheduler::schedulePacket() const
+{
+    // KLUDGE: this query changes the state of the module
+    return const_cast<WrrScheduler *>(this)->schedulePacketAndUpdateState();
+}
+
+int WrrScheduler::schedulePacketAndUpdateState()
 {
     int firstWeighted = -1;
     int firstNonWeighted = -1;

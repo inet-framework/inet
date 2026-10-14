@@ -58,7 +58,7 @@ void LabelScheduler::removeAllPackets()
         collection->removeAllPackets();
 }
 
-int LabelScheduler::schedulePacket()
+int LabelScheduler::schedulePacket() const
 {
     for (auto label : labels) {
         for (size_t i = 0; i < providers.size(); i++) {

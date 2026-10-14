@@ -78,7 +78,7 @@ void PriorityScheduler::removeAllPackets()
         collection->removeAllPackets();
 }
 
-int PriorityScheduler::schedulePacket()
+int PriorityScheduler::schedulePacket() const
 {
     for (size_t i = 0; i < providers.size(); i++) {
         int inputIndex = getInputGateIndex(i);

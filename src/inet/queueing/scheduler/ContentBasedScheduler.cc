@@ -32,7 +32,7 @@ void ContentBasedScheduler::initialize(int stage)
     }
 }
 
-int ContentBasedScheduler::schedulePacket()
+int ContentBasedScheduler::schedulePacket() const
 {
     for (auto filter : filters) {
         for (size_t i = 0; i < inputGates.size(); i++) {
