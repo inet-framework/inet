@@ -205,7 +205,7 @@ simple Tcp extends SimpleModule like ITcp
     parameters:
         @class(Tcp);
         string checksumMode @enum("declared", "computed") = default("declared");
-        int advertisedWindow = default(14 * this.mss); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
+        int advertisedWindow = default(65535); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)
         double receiveBufferSize @unit(B) = default(-1B); // the receive buffer, apart from the advertised window (Linux sk_rcvbuf): the unread data and the out-of-order data use it, and the offered window is the smaller of its free space and the advertised window less the unread data; -1B: the buffer is the advertised window, as before
         bool acceptBeyondBufferAtEmptyQueue = default(false); // accept a whole in-order segment that reaches beyond the receive buffer when the receive queue is empty, as Linux does (tcp_data_queue()); the window is then zero until the application reads. false: drop such a segment
         bool windowAutoTuning = default(false); // receive window auto-tuning, as Linux (tcp_grow_window()): the offered window starts at advertisedWindow and grows with each received data segment toward a clamp of half the receive buffer; needs receiveBufferSize

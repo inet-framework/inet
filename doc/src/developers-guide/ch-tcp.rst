@@ -109,7 +109,7 @@ The :ned:`Tcp` module has the following parameters:
 
 - :par:`advertisedWindow` in bytes, corresponds with the maximal
   receiver buffer capacity (Note: normally, NIC queues should be at
-  least this size, default is 14*mss)
+  least this size, default is 65535 bytes)
 
 - :par:`delayedAcksEnabled` delayed ACK algorithm (RFC 1122) enabled/disabled
 

@@ -2,8 +2,8 @@
 
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            27f5-c858/tplx, PASS, Ipv4
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            6ad2-ff04/tplx, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            30e2-b752/tplx, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            ed80-1586/tplx, PASS, Ipv4
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            f1ba-019b/tplx, PASS, Ipv4
 
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TcpLwip -r 0,                     100s,           8ae1-b60d/tplx, PASS, Ipv4

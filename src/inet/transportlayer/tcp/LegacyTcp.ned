@@ -29,4 +29,5 @@ simple LegacyTcp extends Tcp
         windowScalingSupport = default(false);
         delayedAcksEnabled = default(false);
         limitedTransmitEnabled = default(false);
+        advertisedWindow = default(14 * this.mss);
 }
