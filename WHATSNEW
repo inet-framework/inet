@@ -785,6 +785,13 @@ Notable backward incompatible changes are the following:
    other packets than its dropsVector names. It now counts each packet one
    time, in handlePacketFiltered().
 
+44. A stream merger records a streamed packet one time
+
+   StreamMerger recorded the sequence number of a passing packet in
+   processPacket(), which the filter base class calls for each packet
+   instance of a packet stream. It now records the number one time, in
+   handlePacketFiltered().
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

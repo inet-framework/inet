@@ -26,6 +26,7 @@ class INET_API StreamMerger : public PacketFilterBase, public TransparentProtoco
   protected:
     virtual void initialize(int stage) override;
     virtual void handleParameterChange(const char *name) override;
+    virtual void handlePacketFiltered(Packet *packet, bool matches) override;
     virtual void processPacket(Packet *packet) override;
     virtual bool matchesPacket(const Packet *packet) const override;
 

@@ -40,10 +40,11 @@ cGate *StreamMerger::getRegistrationForwardingGate(cGate *gate)
         throw cRuntimeError("Unknown gate");
 }
 
-void StreamMerger::processPacket(Packet *packet)
+void StreamMerger::handlePacketFiltered(Packet *packet, bool matches)
 {
+    // remember the sequence number of a packet that passes, so that its copies do not pass
     const auto& streamInd = packet->findTag<StreamInd>();
-    if (streamInd != nullptr) {
+    if (matches && streamInd != nullptr) {
         auto inputStreamName = streamInd->getStreamName();
         if (mapping->containsKey(inputStreamName)) {
             auto outputStreamName = mapping->get(inputStreamName).stringValue();
@@ -51,6 +52,17 @@ void StreamMerger::processPacket(Packet *packet)
             it.push_back(packet->getTag<SequenceNumberInd>()->getSequenceNumber());
             if ((int)it.size() > bufferSize)
                 it.erase(it.begin(), it.begin() + it.size() - bufferSize);
+        }
+    }
+}
+
+void StreamMerger::processPacket(Packet *packet)
+{
+    const auto& streamInd = packet->findTag<StreamInd>();
+    if (streamInd != nullptr) {
+        auto inputStreamName = streamInd->getStreamName();
+        if (mapping->containsKey(inputStreamName)) {
+            auto outputStreamName = mapping->get(inputStreamName).stringValue();
             if (*outputStreamName != '\0')
                 packet->getTagForUpdate<StreamInd>()->setStreamName(outputStreamName);
             else {
