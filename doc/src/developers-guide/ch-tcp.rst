@@ -225,8 +225,8 @@ The application opens a connection to a remote server by sending the TCP
 a TCP_C_OPEN_ACTIVE command. The TCP creates a :cpp:`TcpConnection`
 object and sends a SYN segment. The initial sequence number is selected
 according to the simulation time: 0 at time 0, and increased by 1 each
-4 µs. If there is no response to the SYN segment, it retries after 3s,
-9s, 21s, and 45s. After 75s, a connection establishment
+4 µs. If there is no response to the SYN segment, it retries after 1s,
+3s, 7s, 15s, 31s, and 63s. After 75s, a connection establishment
 timeout (TCP_I_TIMEOUT) is reported to the application and the connection
 is closed.
 
@@ -458,7 +458,7 @@ RTO calculation
 
 Retransmission timeout (:math:`RTO`) is calculated according to Jacobson's
 algorithm (with :math:`\alpha=7/8`), and Karn’s modification is also
-applied. The initial value of the :math:`RTO` is 3s, its minimum is 1s,
+applied. The initial value of the :math:`RTO` is 1s, its minimum is 1s,
 maximum is 240s (2 MSL).
 
 TCPNoCongestion
