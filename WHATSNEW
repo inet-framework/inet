@@ -605,7 +605,7 @@ Notable backward incompatible changes are the following:
 
    Basic Block Ack recipients now count sequence positions as buffer capacity. All fragments of one MSDU occupy one position. A one-position buffer can therefore accept both fragments and deliver the complete MSDU.
 
-   DATA that fills a gap releases all consecutive complete units in the same operation. DATA beyond the window moves the window and releases older complete units. Delivery follows cyclic sequence order, including 4095 before 0. These repairs can change delivery times, simulation results, and fingerprints in affected Block Ack scenarios.
+   DATA that fills a gap releases all consecutive complete units in the same operation. DATA beyond the window moves the window and releases older complete units. A valid BAR for an accepted agreement also creates and advances an empty reorder record before DATA arrives. Delivery follows cyclic sequence order, including 4095 before 0. These repairs can change delivery times, simulation results, and fingerprints in affected Block Ack scenarios.
 
    Custom C++ consumers must use the ordered ReleasedFrames return type from BlockAckReordering. Preserve its order through reassembly and deaggregation. The migration guide gives the required change. Basic frame formats and fragment bitmaps remain available.
 

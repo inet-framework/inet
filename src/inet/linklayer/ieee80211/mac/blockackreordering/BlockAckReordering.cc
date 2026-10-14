@@ -46,23 +46,18 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(R
 BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     SequenceNumberCyclic startingSequenceNumber;
-    Tid tid = -1;
     if (auto basicReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        tid = basicReq->getTidInfo();
+        // IEEE Std 802.11e-2005, 7.2.1.7: Basic BAR uses a zero Fragment Number.
+        // Reject inconsistent model fields before record creation.
+        if (basicReq->getFragmentNumber() != 0 || basicReq->getMultiTid() || basicReq->getCompressedBitmap() ||
+            basicReq->getTidInfo() < 0 || basicReq->getTidInfo() > 15 || !basicReq->getStartingSequenceNumber().isSpecified())
+            return ReleasedFrames();
         startingSequenceNumber = basicReq->getStartingSequenceNumber();
-    }
-    else if (auto compressedReq = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAckReq)) {
-        tid = compressedReq->getTidInfo();
-        startingSequenceNumber = compressedReq->getStartingSequenceNumber();
     }
     else {
         throw cRuntimeError("Multi-Tid BlockAckReq is currently an unimplemented feature");
     }
-    auto id = std::make_pair(tid, blockAckReq->getTransmitterAddress());
-    auto it = receiveBuffers.find(id);
-    if (it == receiveBuffers.end())
-        return ReleasedFrames();
-    ReceiveBuffer *receiveBuffer = it->second;
+    ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
     // IEEE Std 802.11-2024, 10.25.6.6.3.1: only a newer BAR advances the window, including an empty window.
     if (!(receiveBuffer->getNextExpectedSequenceNumber() < startingSequenceNumber))
         return ReleasedFrames();

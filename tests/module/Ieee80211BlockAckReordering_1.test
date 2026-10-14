@@ -1,11 +1,11 @@
 %description:
 Check S1 recipient delivery through RecipientQosMacDataService.
 Supply accepted Basic agreements with known buffer sizes.
-Check fragment capacity, complete gap release, cyclic delivery, and BAR window movement.
+Check fragment capacity, complete gap release, cyclic delivery, and BAR before DATA.
 Check window movement, incomplete-unit disposal, peer/TID isolation, and A-MSDU order.
 The fixture supplies agreements; it does not test ADDBA negotiation or Compressed exchanges.
 
-%extraargs: -r 0..6
+%extraargs: -r 0..7
 
 %file: RecipientReordering.cc
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -21,6 +21,7 @@ class ReorderingProbe : public BlockAckReordering {
         auto it = receiveBuffers.find({tid, peer});
         return it == receiveBuffers.end() ? nullptr : it->second;
     }
+    size_t getBufferCount() const { return receiveBuffers.size(); }
 };
 
 class ReorderingRecipient : public RecipientQosMacDataService {
@@ -152,6 +153,26 @@ class RecipientReorderingTest : public cSimpleModule {
                 checkDelivery(receive(makeData(start, "old")), {});
                 break;
             }
+            case 3: // BAR establishes state before the first DATA.
+                agreements.accept(peer, 5, 100, 8);
+                ASSERT(recipient->getReordering()->getBufferCount() == 0);
+                {
+                    auto unsupported = makeShared<Ieee80211MultiTidBlockAckReq>();
+                    unsupported->setTransmitterAddress(peer);
+                    unsupported->setReceiverAddress(receiver);
+                    auto packet = new Packet("unsupported-bar", unsupported);
+                    checkDelivery(recipient->controlFrameReceived(packet, unsupported, &agreements), {});
+                    delete packet;
+                }
+                checkDelivery(receiveBar(104, otherPeer), {});
+                checkDelivery(receiveBar(104, peer, 6), {});
+                checkDelivery(receiveBar(104, peer, 5, 1), {});
+                ASSERT(recipient->getReordering()->getBufferCount() == 0);
+                checkDelivery(receiveBar(104, peer), {});
+                checkWindow(104, 0, peer);
+                checkDelivery(receive(makeData(104, "first")), {"first"});
+                checkWindow(105, 0, peer);
+                break;
             case 4: // BAR releases preceding and consecutive units in cyclic order.
                 agreements.accept(peer, 5, 4093, 8);
                 checkDelivery(receive(makeData(4094, "incomplete-frag0", 0, true)), {});
@@ -246,7 +267,7 @@ seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
-*.test.scenario = ${scenario=0,1,2,4,5,6,7}
+*.test.scenario = ${scenario=0..7}
 
 %contains: stdout
 Recipient reordering checks passed.
