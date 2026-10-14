@@ -75,7 +75,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S18b ✅ | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part), new | +285 −3 | the RFC 4821 path MTU search of Linux behind a parameter, the route MTU of a connection and `TcpSocket::setPathMtu()`, the start MSS of an active opener, the SYN after an ICMP fragmentation-needed error (D-94 to D-97) |
 | S18c ✅ | `topic/tcp-applications` | 42, 58 | +27 −11 | MSG_EOR in the send script of `TcpSessionApp`, and a fill byte for its data; commit 58 takes back the close of `TcpServerSocketIo` of commit 42 (D-1) |
 | S19 ✅ | `topic/tcp-new-parameters` | 15 (part), 46 (part), 53, 87, new | +115 −16 | the new parameters with the defaults of master: `retainSackAfterRto`, `initialWindow` and `initialCwnd`, `initialSendSequenceNumber`, `mss = -1`, the PSH of RFC 9293 MUST-61; the initial window in SMSS (D-98 to D-100) |
-| S19b | `topic/tcp-modern-defaults` | 16 (part), 40, 68 (part), 70, 71, 72 (the rest), 78, 80 (part), 81 | +600 −450 (about) | `LegacyTcp` for the module tests, the RFC defaults one commit for each with their moved rows, `LinuxTcp`, the TCP standards tests and the evidence under the new defaults, the statistical baselines |
+| S19b ✅ | `topic/tcp-modern-defaults` | 16 (part), 40, 68 (part), 70, 71, 72 (the rest), 78, 80 (part), 81, new | +653 −187 | `LegacyTcp` for the module tests, the RFC defaults one commit for each with their moved rows, `LinuxTcp`, the TCP standards tests and the evidence under the new defaults, the statistical baselines |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
 The big test commit (41, `tests: add+change: cover the new behavior, and pin the old defaults`,
@@ -895,6 +895,42 @@ plan gives a reason for.
   PUSH flag; neither master nor the source has the rule. `pushLastBufferedSegment` selects it,
   also for a retransmission of that segment, and `pushSegmentsOnWriteBoundary` replaces it with
   the PSH of Linux. S19 lands it off; S19b turns it on (D-74).
+- **D-101 — retransmitData() sends a lost FIN without data again, before the defaults.**
+  Only DumbTcp calls `retransmitData()`. It counts the FIN in `snd_max - snd_nxt`, so its branch
+  for a FIN without data never ran, and since commit 475c7a8535 (S10, D-33) `sendSegment()` makes
+  no segment of zero bytes: a lost FIN without data before it was never sent again. The window of
+  65535 bytes shows it in `tcp_algorithm_dumb` (536-byte segments, 2 % packet errors): the
+  simulation ran until the simulation time overflowed. The repair also takes the branch when the
+  queue holds no data at `snd_nxt`, as `retransmitOneSegment()` does, and lands before the
+  defaults. DumbTcp still sends an acknowledged FIN again at each expiry of its timer until the
+  connection closes; that is older behavior, and S19b leaves it.
+- **D-102 — A standards test changes with the default that needs the change.**
+  `Rfc6298KarnsRule` sends 2000 bytes from the MSS step, so that two segments of the new MSS
+  remain; from the tail loss probe its description names the probe of the FIN. The source version
+  of commit 80 needs the Nagle of Minshall and the RTT sample of the handshake, which `Tcp` does
+  not take, so it stays out. `Rfc6298FirstMeasurement` takes its first sample from the timestamp
+  clock, which counts milliseconds, because `Tcp` takes no sample from the handshake; its bands are
+  1 ms wider from the timestamp step on. `Rfc9293Push` passes from the PSH step, and its
+  declaration of an expected failure goes; the evidence marks gap 1 closed.
+- **D-103 — The developers guide and Tcp.ned follow each default.** The source left `ch-tcp.rst`
+  with "TCPReno (default)", an MSS of 536, a window of 14 segments and an initial RTO of 3 s, and
+  `Tcp.ned` with "Default 536 per RFC 1122". Each step that changes one of these defaults corrects
+  its text, and the step of `LinuxTcp` describes the three modules in both guides.
+- **D-104 — Tcp has the defaults of the RFCs; LinuxTcp and LegacyTcp change only defaults.** The
+  owner decided on 2026-10-14 that the RFCs decide each default of `Tcp` by the rule of the S19b
+  steps, and that two public modules extend `Tcp` and change only defaults: `LinuxTcp` (Linux 7.1
+  with its stock sysctls) and `LegacyTcp` (master before S19b; each change of a default of `Tcp`
+  adds the old value). A simulation selects one with `**.tcp.typename`. The owner decided the five
+  rows that no RFC decides: NewReno, CUBIC without the hybrid slow start, a window of 65535 bytes,
+  the passive ECN and path MTU discovery. The deprecated `ecnWillingness = true` replaces the
+  default "passive" as it replaced "off", so the old configurations keep working. The source
+  defaults that are Linux behavior went to `LinuxTcp`: the maximum RTO of 120 s, the learned
+  reordering degree, the RTT sample of the handshake, the undo and F-RTO.
+- **D-105 — One CI error at an intermediate step stays.** At the MSS step, the showcase
+  `visualizer/canvas/instrumentfigures` stops: AARF lowers the rate to DSSS 1 Mbit/s, and a
+  segment of 1448 bytes then needs more than the 10 ms of `maxTransmissionDuration` of the radio
+  medium. The next step changes the path, and the row passes. The owner decided on 2026-10-14 to
+  keep the error, rather than to change the showcase or the medium in a TCP stage.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -2980,3 +3016,71 @@ MTU discovery, which sets DF in each IPv4 segment.
 
 Compared with the first steps of S19b, five defaults moved from `Tcp` to `LinuxTcp`: the maximum
 RTO of 120 s, the learned reordering degree, the RTT sample of the handshake, the undo and F-RTO.
+
+### S19b — `topic/tcp-modern-defaults` — landed 2026-10-14
+
+The owner reviewed and approved S19b on 2026-10-14.
+
+S19b gives `Tcp` the defaults of the RFCs, one commit for each default with the CI rows that it
+moves, and adds `LegacyTcp`, which keeps the defaults of master for the module tests, and
+`LinuxTcp`, which has the defaults of Linux (D-104). It repairs a defect of DumbTcp that the new
+window shows (D-101), and the TCP standards tests and their evidence follow the new defaults
+(D-102, D-103).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tests: change: the TCP standards tests hold under the RFC defaults` | — | 80 (part) | — |
+| `tcp: add: LegacyTcp, the defaults of master, for the module tests` | — | 41 (part) | — |
+| `tcp: fix: retransmitData() sends a lost FIN again without data` | — | new | — |
+| `tcp: change: SACK by default` | — | 40 (part) | 100 |
+| `tcp: change: timestamps by default` | — | 40 (part) | 136 |
+| `tcp: change: window scaling by default` | — | 40 (part) | 136 |
+| `tcp: change: delayed ACKs by default` | — | 40 (part) | 131 |
+| `tcp: change: Limited Transmit by default` | — | 40 (part) | 47 |
+| `tcp: change: an advertised window of 65535 bytes by default` | — | 40 (part) | 93 |
+| `tcp: change: the MSS of the address family by default` | — | 40 (part) | 91, and 1 error (D-105) |
+| `tcp: change: the initial window of RFC 5681 by default` | — | 78 | 90 |
+| `tcp: change: NewReno by default` | — | new | — |
+| `tcp: change: CUBIC without the hybrid slow start by default` | — | new | — |
+| `tcp: change: the initial RTO of RFC 6298 by default` | — | 40 (part), 68 (part) | 18 |
+| `tcp: change: RACK loss detection by default` | — | 40 (part) | 38 |
+| `tcp: change: PRR by default` | — | 40 (part) | 38 |
+| `tcp: change: the tail loss probe by default` | — | 40 (part) | 32 |
+| `tcp: change: PSH in the last buffered segment by default` | — | new | 117 |
+| `tcp: change: an answer to an ECN request by default` | — | new | — |
+| `tcp: change: path MTU discovery by default` | — | new | 118 |
+| `tcp: add: LinuxTcp, the defaults of Linux` | — | 16 (part), 40 (part), new | — |
+| `doc: change: the TCP evidence follows the tests to the RFC defaults` | — | 81 | — |
+
+New tests: `tcp_dumb_fin_rexmit_1` (step 3) and `tcp_linux_defaults_1` (step 21). Changed tests:
+`Rfc6298FirstMeasurement`, `Rfc6298KarnsRule` and `Rfc9293Push` (D-102). The module tests select
+`LegacyTcp` through `defaults.ini` and `tcp-legacy.ini`.
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the module tests pass at each commit (624 at the plan commit, 625 from the FIN repair,
+626 at the head). The TCP standards tests pass at each commit (25 pass and 2 expected failures, 26
+and 1 from the PSH step; the packetdrill tests skip without inet-gpl); unit 126 and serializer 4
+pass at the head. The two new tests fail at the commit before their own. The CI fingerprint job
+runs at each code commit; the table gives the moved rows, and at the head the job passes with the
+old error of `ethernet.csv` only. At the MSS step one showcase stops (D-105). The TCP fingerprint
+rows run in debug at the head with no runtime error outside the five lwIP rows, which need a build
+with lwIP; the `tyf` ingredient, which the CI does not check, differs in 69 rows (52 on master).
+The packetdrill suite of inet-gpl against the source branch gives 303 MATCH, 12 KERNEL_DRIFT and 3
+UNSUPPORTED, with and without the values of `LinuxTcp` that its configuration does not set
+(`msl`, `maxRexmitCount`, `maxPersistTimeout`); against master it waits for the port of
+`PacketDrillApp`. The statistical job of the CI copy at the head fails in 155 configurations
+before the update; the 95 with TCP statistics are updated in the commit `tcp: update statistics
+after the staged landing of the TCP branch` of the branch `topic/tcp-modern-defaults` of the
+`statistics` repository; with that commit the job fails only in the 60 configurations without TCP
+statistics, whose causes are outside TCP, and which the owner decided on 2026-10-14 to leave. The six gates and the combined pull-request gate pass.
+
+Items for later stages: (inet-gpl) `PacketDrillApp` sets five parameters at run time that master
+does not mark mutable (`advertisedWindow`, `windowScalingFactor`, `receiveBufferSize`,
+`receiveBufferLocked`, which master replaced by a socket call (D-90), and `synRetries`); after it
+uses the socket calls of S18, inet-gpl builds against master, selects `LinuxTcp` with a short
+`tcp.ini`, and confirms the rows of `LinuxTcp` that only master has, such as
+`abortOnDataAfterClose`. (Later) DumbTcp sends an acknowledged FIN again at each expiry of its
+timer; the default `maxTransmissionDuration` of the radio medium is shorter than an 802.11b frame
+of 1500 bytes at 1 Mbit/s; INET has no HyStart++ (RFC 9406); RFC 9293 section 3.8.3 asks for at
+least 3 minutes of SYN retransmissions, and an active open fails after 75 s. (S20) the RFC list of
+`Tcp.ned` and the release note, which names the three modules.
