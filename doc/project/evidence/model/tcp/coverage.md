@@ -8,17 +8,17 @@ The single place that holds the changing state of the TCP workflow. Every other 
 
 State of the ledger, from this run:
 
-- Date: 2026-09-23 18:26 +0200
-- INET: branch `topic/standards-tests-wave0`, commit `28536bd0a5` (on `master`), tree clean
-- Trees: src `16dc528e10`, tests/protocol `6f0a6bdb05`
+- Date: 2026-10-14 17:36 +0200
+- INET: branch `topic/tcp-modern-defaults`, the commit `tcp: add: LinuxTcp, the defaults of Linux`, tree clean
+- Trees: src `d5bd1c1f6f`, tests/protocol `61bfc48f7f`
 - OMNeT++: 6.4.0, commit `cf58891643`
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0
-- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-34-generic x86_64
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-38-generic x86_64
 - Command: `inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/tcp$'`
 - Target level: 4
 
-The run: 27 tests, 25 PASS, 2 FAIL (expected), 0 FAIL (unexpected).
+The run: 27 tests, 26 PASS, 1 FAIL (expected), 0 FAIL (unexpected).
 
 ## Statement coverage
 
@@ -39,7 +39,7 @@ The run: 27 tests, 25 PASS, 2 FAIL (expected), 0 FAIL (unexpected).
 | [RFC9293-DATA-1](../../standard/rfc9293/catalog.md#rfc9293-data-1) | selected | [data-transfer](../../protocol/tcp/checks/data-transfer.md#data-transfer) | Rfc9293DataTransfer.test | PASS |
 | [RFC9293-SEG-1](../../standard/rfc9293/catalog.md#rfc9293-seg-1) | selected | [data-transfer](../../protocol/tcp/checks/data-transfer.md#data-transfer) | Rfc9293DataTransfer.test | PASS |
 | [RFC9293-OPT-1](../../standard/rfc9293/catalog.md#rfc9293-opt-1) | covered | [connection-establishment](../../protocol/tcp/checks/establishment.md#connection-establishment) | Rfc9293ConnectionEstablishment.test | PASS; the SYN header is 24 octets, the option is present |
-| [RFC9293-PSH-1](../../standard/rfc9293/catalog.md#rfc9293-psh-1) | selected | [push-on-the-last-segment](../../protocol/tcp/checks/data-transfer.md#push-on-the-last-segment) | Rfc9293Push.test | **FAIL (expected)** — unimplemented feature, gap 1: the model never sets PSH |
+| [RFC9293-PSH-1](../../standard/rfc9293/catalog.md#rfc9293-psh-1) | selected | [push-on-the-last-segment](../../protocol/tcp/checks/data-transfer.md#push-on-the-last-segment) | Rfc9293Push.test | PASS — gap 1 closed on 2026-10-14 |
 | [RFC9293-WND-1](../../standard/rfc9293/catalog.md#rfc9293-wnd-1) | selected | [flow-control](../../protocol/tcp/checks/flow-control.md#flow-control) | Rfc9293FlowControl.test | PASS |
 | [RFC9293-WND-2](../../standard/rfc9293/catalog.md#rfc9293-wnd-2) | selected | [flow-control](../../protocol/tcp/checks/flow-control.md#flow-control) | Rfc9293FlowControl.test | PASS |
 | [RFC9293-ZWP-1](../../standard/rfc9293/catalog.md#rfc9293-zwp-1) | later (level 4: a timer with a tolerance) | — | — | — |
@@ -103,7 +103,7 @@ The run: 27 tests, 25 PASS, 2 FAIL (expected), 0 FAIL (unexpected).
 
 74 entries in three catalogs.
 
-- **RFC 9293, 35 entries.** 31 reached a test: 29 with a PASS, RFC9293-PSH-1 with a declared FAIL for an unimplemented feature, and RFC9293-CKSUM-1 with a PASS for the field and a declared FAIL for its value. 4 wait: RFC9293-ISS-2 and RFC9293-SEQ-2 for a unit or module test, RFC9293-ZWP-1 for a timer with a tolerance, and RFC9293-ICMP-4 for a decision about which behaviour the model intends.
+- **RFC 9293, 35 entries.** 31 reached a test: 30 with a PASS, and RFC9293-CKSUM-1 with a PASS for the field and a declared FAIL for its value. 4 wait: RFC9293-ISS-2 and RFC9293-SEQ-2 for a unit or module test, RFC9293-ZWP-1 for a timer with a tolerance, and RFC9293-ICMP-4 for a decision about which behaviour the model intends.
 - **RFC 6298, 18 entries.** 9 reached a test, all with a PASS. 9 are `owed`.
 - **RFC 5681, 21 entries.** 11 reached a test, all with a PASS. 9 are `owed`, and two of the nine are named by a test that does not assert them (RFC5681-SSTH-1, RFC5681-FR-5). 1 waits for the statistical suite (RFC5681-ACK-1).
 
@@ -119,7 +119,7 @@ The rule of step 7: `supported` when every core check ran and passed, `partial` 
 | [TCP-F-SEQUENCE](../../protocol/tcp/features.md#tcp-f-sequence) | RFC9293-SEQ-1 PASS, FIN-1 PASS | **supported** |
 | [TCP-F-ACKNOWLEDGE](../../protocol/tcp/features.md#tcp-f-acknowledge) | RFC9293-ACK-1 PASS | **supported** |
 | [TCP-F-TERMINATE](../../protocol/tcp/features.md#tcp-f-terminate) | RFC9293-FIN-2 PASS | **supported** |
-| [TCP-F-DATA-TRANSFER](../../protocol/tcp/features.md#tcp-f-data-transfer) | RFC9293-DATA-1 PASS, SEG-1 PASS; supporting RFC9293-PSH-1 **FAIL (expected)**, unimplemented | **supported**, with the PSH gap noted |
+| [TCP-F-DATA-TRANSFER](../../protocol/tcp/features.md#tcp-f-data-transfer) | RFC9293-DATA-1 PASS, SEG-1 PASS; supporting RFC9293-PSH-1 PASS | **supported** |
 | [TCP-F-FLOW-CONTROL](../../protocol/tcp/features.md#tcp-f-flow-control) | RFC9293-WND-1 PASS, WND-2 PASS | **supported** |
 | [TCP-F-CHECKSUM](../../protocol/tcp/features.md#tcp-f-checksum) | RFC9293-CKSUM-2 PASS; CKSUM-1 PASS for the field, **FAIL (expected)** for its value by default | **partial** |
 | [TCP-F-HEADER](../../protocol/tcp/features.md#tcp-f-header) | RFC9293-HDR-1 PASS | **supported** |
@@ -203,6 +203,7 @@ None of them needs a new tool: each needs a longer or a second scenario in a moc
 | 3 | 2026-09-09 | **3, reached** | RFC 9293's edges added to the same catalog: 13 entries, 4 features, 11 checks, 11 tests. No new document | 19 tests: 15 PASS, 4 declared FAIL naming four model gaps; 11 features supported, 2 partial; see [`results.md`](results.md) |
 | 4 | 2026-09-14 | recorded as 4, reached; corrected on 2026-09-23 to 3 partial and 4 partial | RFC 6298 and RFC 5681 enter the in-scope set: 39 catalog entries, 10 features, 10 checks, 10 tests, all new. The obsolete-citation sweep of the pass counted the old citations of the model; it changed no source file. | 27 tests: 22 PASS, 2 FAIL (expected), 3 FAIL (unexpected). One new finding, gap 5, a defect in the first round-trip measurement. Two of the level 3 declarations were withdrawn earlier in the pass, because they covered defects. See [`results.md`](results.md) |
 | — | 2026-09-23 | 2 reached, 3 partial, 4 partial | Re-run only, no new check. The run record of pass 4 named `e0ac3b7307`, a commit that the landing rebase removed from master. This row gives the ledger a run on master, adds the 39 statement rows and the 10 feature rows of pass 4, and corrects the level. | 27 tests: 25 PASS, 2 FAIL (expected), 0 FAIL (unexpected). Changed since pass 4: RFC6298-FIRST-1 PASS (gap 5, `f3064a83d0`); RFC9293-WND-5 PASS (gap 3, a test error); RFC9293-ICMP-2 PASS (gap 4, `40c9f04e21`); RFC9293-CKSUM-1 declared (gap 2, `4548adeb04`) |
+| — | 2026-10-14 | 2 reached, 3 partial, 4 partial | Re-run under the RFC defaults of `Tcp`; no new check. 15 TCP tests and one self test changed their scenario or their observable, and none its check; the procedures changed with them. See [`results.md`](results.md#the-rfc-defaults-2026-10-14) | 27 tests: 26 PASS, 1 FAIL (expected), 0 FAIL (unexpected). RFC9293-PSH-1 PASS (gap 1, closed by the default `pushLastBufferedSegment`). The four model findings of the first run under these defaults, on the branch `topic/tcp-new-audit-fixes`, did not reach master; RFC9293-WND-5 had passed without looking at anything under the new defaults, and its scenario is repaired |
 
 ## Out of scope
 

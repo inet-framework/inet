@@ -22,9 +22,9 @@ The tooling quirks that apply to every protocol are in [`ipv4/notes.md`](../ipv4
 
 For the nine features of this pass it costs nothing: RFC 9293 collects RFC 793 and its updates, and the two agree. It costs something where they do not, and those places are exactly the next levels — the congestion rules, the retransmission timer, the timestamp and window scale rules all changed.
 
-### The PSH bit is never set
+### PSH follows a parameter, not the SEND call
 
-RFC 9293 MUST-61 binds a sender whose SEND call offers no PUSH flag to set PSH on the last buffered segment. This model's interface offers no such flag, and the bit is never set. The code marks both halves itself: [TcpConnectionUtil.cc:1008](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1008) `// TODO when to set PSH bit?` and [TcpConnectionEventProc.cc:116-117](../../../../../src/inet/transportlayer/tcp/TcpConnectionEventProc.cc#L116-L117) `// FIXME how to support PUSH?`. The receiver ignores it too. `Rfc9293Push.test` keeps the faithful assertion and declares `expected-result: FAIL`. Urgent data is unsupported by the same comments, and is a level 5 candidate for the same treatment.
+RFC 9293 MUST-61 binds a sender whose SEND call offers no PUSH flag to set PSH on the last buffered segment. The SEND call of this model offers no such flag. The parameter `pushLastBufferedSegment` sets PSH on the segment after which no queued data waits ([TcpConnectionUtil.cc:1721-1726](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1721-L1726)), and it is on by default. `pushSegmentsOnWriteBoundary` replaces that rule with the rule of Linux, and with both parameters off the model sets PSH on no segment of a plain stream. The receiver ignores the bit: [TcpConnectionRcvSegment.cc:759](../../../../../src/inet/transportlayer/tcp/TcpConnectionRcvSegment.cc#L759) `// FIXME observe PSH bit`. Urgent data is unsupported, and is a level 5 candidate.
 
 ### The checksum is inserted one layer down
 
@@ -34,11 +34,23 @@ With `checksumMode = "computed"`, the TCP checksum is written by a hook that the
 
 [Tcp.ned:53-58](../../../../../src/inet/transportlayer/tcp/Tcp.ned#L53-L58): in the default "autoread" mode "the advertised window never decreases so there is effectively no flow control". The flow-control check works because it tests the sender's respect for a **fixed small window**, which does not need the window to close. A closing window needs the "explicit-read" mode that the same note names, and which the applications expose as `autoRead = false`.
 
-### The initial congestion window is one segment
+### The initial congestion window is the bound of RFC 5681
 
-[TcpAlgorithmBase.cc:149](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L149). This is what lets a 300-octet receiver window be the binding limit in the flow-control check: it is smaller than a segment and smaller than the congestion window, so neither of the other two limits can be mistaken for it.
+[TcpAlgorithmBase.cc:108-121](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L108-L121): by default min(4·SMSS, max(2·SMSS, 4380 octets)), which is 4380 octets for a 1460-octet SMSS. This is what lets a 300-octet receiver window be the binding limit in the flow-control check: it is smaller than a segment and smaller than the congestion window, so neither of the other two limits can be mistaken for it.
 
 ## Scenario and tooling quirks
+
+### A loss is repaired within a millisecond
+
+With SACK and RACK, which are on by default, a sender repairs a lost segment about half a millisecond after the loss, and it sends its next segments in the same flight. A blocking `never` step holds the cursor for its whole window, so the event that the next step waits for happens inside that window and the next step misses it. Five checks failed in this way when the defaults changed. The guard belongs beside the steps (`meanwhile`). A guard that forbids an acknowledgment "before the retransmission" needs a flag that a later step sets, because a fixed window then also catches the correct acknowledgment after the repair.
+
+### A scenario constant can stop making its condition
+
+The shrunk-window checks rewrote host B's fourth acknowledgment. With the old defaults, that acknowledgment came while data was in flight. With the new ones, host A sends the whole stream in its first flight, and the fourth acknowledgment was host B's FIN. The no-new-data check then passed without looking at anything. A change of defaults needs a look at every constant that picks a segment by its position.
+
+### The published window is Linux's, not RFC 5681's
+
+Without SACK the model takes each duplicate acknowledgment out of the data it counts in flight, as Linux does, and does not inflate the window. The published `cwnd` stays at the threshold in fast recovery, while RFC 5681 says threshold plus three segments. Both allow the same segments. A check of the window reads what the window limits: the new data that the sender puts in flight.
 
 ### An echo application defeats a delayed-acknowledgment scenario
 

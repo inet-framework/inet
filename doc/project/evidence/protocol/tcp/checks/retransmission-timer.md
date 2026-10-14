@@ -74,6 +74,7 @@ RFC 6298 §5.5: each expiry doubles the timeout. §5: no segment is retransmitte
 
 - The plain mockup with a relay on the path. The relay discards every copy of the first data segment, so the segment never arrives and the timer expires again and again.
 - Everything else passes, so the connection opens normally.
+- The sender sends no tail loss probe (RFC 8985). A probe sends the segment again before the timer expires and re-arms the timer (RFC 8985 §7.3), so the times on the link would no longer show the retransmission timeout alone.
 
 ### Procedure
 
@@ -133,6 +134,7 @@ RFC 6298 §5.7: when the timer expires while the sender waits for the acknowledg
 
 - The plain mockup with a relay. The relay discards the first SYN and lets the retry through.
 - The data transfer starts after the handshake completes.
+- The sender sends no tail loss probe (RFC 8985). A probe sends the segment again before the timer expires and re-arms the timer (RFC 8985 §7.3), so the times on the link would no longer show the retransmission timeout alone.
 
 ### Procedure
 

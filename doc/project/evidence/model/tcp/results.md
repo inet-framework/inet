@@ -25,7 +25,7 @@ Step 7 artifact of the standards test workflow. This is the first document of th
 | --- | --- | --- |
 | Rfc9293ConnectionEstablishment.test | RFC9293-EST-1, EST-2, SEQ-1, HDR-1, CKSUM-1; ISS-1, OPT-1 | PASS |
 | Rfc9293DataTransfer.test | RFC9293-DATA-1, SEG-1, ACK-1; ACK-2 | PASS |
-| Rfc9293Push.test | RFC9293-PSH-1 | **FAIL (expected)** — unimplemented feature, gap 1 |
+| Rfc9293Push.test | RFC9293-PSH-1 | **PASS** since 2026-10-14 — gap 1 closed by `tcp: change: PSH in the last buffered segment by default` |
 | Rfc9293ConnectionTermination.test | RFC9293-FIN-1, FIN-2 | PASS |
 | Rfc9293FlowControl.test | RFC9293-WND-1, WND-2; ACKD-1 | PASS |
 | Rfc9293Reset.test | RFC9293-RST-1 | PASS |
@@ -75,9 +75,52 @@ A fresh run on master, commit `28536bd0a5`, gives **25 PASS, 2 FAIL (expected), 
 
 Nine of the ten pass. Both control loops are written, and the one difference the checks find is a defect rather than an absence.
 
+## The RFC defaults (2026-10-14)
+
+This is not a new pass. It is a run of the same checks after the defaults of `Tcp` changed to those of the RFCs. The new defaults are SACK, timestamps and window scaling; delayed ACKs and Limited Transmit; an advertised window of 65535 octets; the MSS of the address family; the initial window of RFC 5681; NewReno; an initial RTO of 1 s; RACK-TLP and PRR; PSH on the last buffered segment; the passive ECN; and path MTU discovery. `LinuxTcp` has the defaults of Linux, and `LegacyTcp` those of master before the change. The owner decided on 2026-09-29 that the tests run the defaults of `Tcp` and override a parameter only where a check needs it, with the reason in the ini.
+
+- Date: 2026-10-14 17:36 +0200
+- INET: branch `topic/tcp-modern-defaults`, the commit `tcp: add: LinuxTcp, the defaults of Linux`, tree clean
+- Trees: src `d5bd1c1f6f`, tests/protocol `61bfc48f7f`
+- OMNeT++: 6.4.0, commit `cf58891643`
+- Build: debug, built from this commit
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-38-generic x86_64
+- Command, after the `setenv` scripts of OMNeT++ and INET: `inet_run_protocol_tests -p inet --filter '(tcp|self)/'`
+- Result: TCP 27 tests, **26 PASS, 1 FAIL (expected), 0 FAIL (unexpected)**; the 21 protocol self tests pass. The declared failure is gap 2 (the checksum default). Gap 1 (PSH) is closed: the default `pushLastBufferedSegment` sets the bit, and `Rfc9293Push.test` passes and declares nothing.
+
+The tests were first made to hold under new defaults on the branch `topic/tcp-new-audit-fixes`, on 2026-09-29. There, 15 of the 27 tests and two self tests failed. The analysis found four defects of the model and some test errors. The staged landing of that branch brought the repair of each defect together with the feature, so no defect reached master:
+
+| Finding on the branch | Seen in | On master |
+| --- | --- | --- |
+| The tail loss probe stayed armed after the acknowledgment of all data; in TIME_WAIT it sent the FIN again, and the peer answered with a reset | Rfc9293OutOfWindowSegment (a forbidden reset at t=0.6) | part of `tcp: add: Tail Loss Probe (RFC 8985 section 7), selected by tlpEnabled` |
+| RFC 6298 §5.7 was missing: after a SYN timeout the RTO stayed at the 1 s default and did not go to 3 s | Rfc6298TimeoutAfterLostSyn | `tcp: add: an RTO of 3 s after a SYN timeout (RFC 6298 section 5.7)` |
+| The default initial window was IW10 (RFC 6928), above the bound of RFC 5681 §3.1 | Rfc5681InitialWindow | the default is the bound of RFC 5681 (`tcp: change: the initial window of RFC 5681 by default`); IW10 is the option `initialWindow = "rfc6928"` |
+| An ICMP net unreachable aborted a connection in SYN_SENT, against RFC 9293 MUST-56 | the self test ReactiveInject | the abort is the option `softIcmpErrorsAbortSetup`, off by default (`tcp: add: the soft ICMP errors of Linux abort a setup, by a parameter`) |
+
+The last two are Linux behavior. The model keeps them as options, and `LinuxTcp` selects them.
+
+**Test errors and their repair.** The commit `tests: change: the TCP standards tests hold under the RFC defaults` repairs the tests that hold under the old defaults too. A test that needs a new default changes in the commit of that default.
+
+| Class | Tests | Repair |
+| --- | --- | --- |
+| A blocking `never` step hid the next event: SACK and RACK repair a loss within a millisecond, and host A sends its next segments in the same flight | SoftIcmpError, SourceQuench, ValidReset, OutOfWindowSegment, ChecksumDiscard | the guard runs beside the next steps (`meanwhile`); ChecksumDiscard forbids an acknowledgment of the discarded data only until the retransmission |
+| A constant of the old defaults: 536-octet segments, a 20-octet ACK header | DataTransfer, ConnectionEstablishment | the effective send MSS is read from the run (RFC 9293 §3.7.1); the header length must be 20 octets plus the options |
+| The scenario no longer made the condition: host B's fourth acknowledgment was its FIN, after the whole stream | ShrunkWindow, and **ShrunkWindowNoNewData, which passed without looking at anything** | a 30000-octet stream, and the shrink on host B's first acknowledgment of data |
+| One segment where the check needs two | KarnsRule | 2000 octets, and the guard starts at the retransmission |
+| The check reads the rule of one algorithm, the Reno of RFC 5681, which CUBIC (RFC 9438) changes on purpose | SlowStartGrowth, TimeoutResponse, FastRetransmit | the ini selects Reno; FastRetransmit also turns off SACK, RACK and PRR |
+| The tail loss probe re-arms the retransmission timer (RFC 8985 §7.3) | BackoffDoubling, TimeoutAfterLostSyn | the probe is off |
+| A framework test needed a SYN four octets longer than the ACK | the self test CaptureWithUnit | three options are off |
+
+Master needed two more repairs. `Tcp` takes no RTT sample from the handshake (that is `LinuxTcp`), so with timestamps the first sample comes from the timestamp clock, which counts milliseconds (RFC 7323 §4.1). The sample is then up to 1 ms below the time on the link, and `Rfc6298FirstMeasurement.test` widens its bands by 1 ms. And the Nagle algorithm of RFC 9293 holds the second, partial segment of `Rfc6298KarnsRule.test` until the first one is acknowledged, where the source branch sends both at once; the test keeps its steps, and its description says so.
+
+FastRetransmit also changed its observable. The model keeps the window of Linux: without SACK, each duplicate acknowledgment takes one segment out of the data counted in flight, and the published `cwnd` stays at the threshold. So the check no longer reads the published value; a guard forbids new data in recovery that takes FlightSize past the threshold plus 3 + k segments. On the branch, a comparison with master's module test `tcp_fastrexmit_1` found three defects of that recovery; the stages that brought the recovery to master include the repairs, for example `tcp: change: set ssthresh from FlightSize, as RFC 5681 equation (4) says`.
+
+On the branch, each new guard and assertion was checked to fail on a copy with one changed detail, and each copy failed at the intended place.
+
 ## Gap 5 (pass 4): the first round-trip measurement is smoothed — defect
 
-RFC 6298 section 2.2 gives the first measurement a case of its own: the smoothed value becomes R and the variance becomes R/2. The model has no such case. `TcpBaseAlg::receivedDataAck` applies the smoothing formula of section 2.3 to every measurement, the first one included ([TcpAlgorithmBase.cc:327-341](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L327-L341)). The run states it in one line:
+RFC 6298 section 2.2 gives the first measurement a case of its own: the smoothed value becomes R and the variance becomes R/2. The model has no such case. `TcpBaseAlg::receivedDataAck` applies the smoothing formula of section 2.3 to every measurement, the first one included ([TcpAlgorithmBase.cc:576-591](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L576-L591), the code after the repair). The run states it in one line:
 
     Measured RTT=400.05104ms, updated SRTT=50.00638ms, new RTO=2875.0319ms
 
@@ -128,7 +171,7 @@ All four failures of this suite were reviewed against that line, each against th
 
 | Test | Does code exist for the behaviour? | Class | Declared? |
 | --- | --- | --- | --- |
-| Rfc9293Push | no call to `setPshBit` exists anywhere in the sender; two comments say so | unimplemented feature | yes |
+| Rfc9293Push | no call to `setPshBit` exists anywhere in the sender; two comments say so | unimplemented feature; closed 2026-10-14 | yes; removed 2026-10-14 |
 | Rfc9293SourceQuench | `Icmp::processIcmpMessage` still has no branch for type 4, but its default discards instead of throwing, which meets the rule | closed 2026-09-14 | no, removed |
 | Rfc9293ChecksumDefault | **Defect, and the repair is blocked.** `TcpChecksumInsertionHook::computeChecksum` computes the value and the `computed` mode runs it; what is wrong is the default, which `Tcp.ned` sets to `declared`. Changing it to `computed` was tried on 2026-09-15 and reverted. Computing a checksum serializes the segment, and the copy that comes back has lost the region tags its payload carried: `examples/inet/nclients -c lwip__inet` then stops with "Received 1 B of TCP data without a GenericAppMsgReq region tag at its front". The protocol suite cannot see this, because none of its scenarios uses a region-tagged payload; the fingerprint run found it. **TCP cannot default to a computed checksum until a serialized payload keeps its region tags.** This is the same blocker that stops the UDP default, where QUIC has no serializer at all | **defect with a blocked repair** | **yes, since 2026-09-17** |
 | Rfc9293ShrunkWindowNoNewData | **Reclassified 2026-09-15: a test error, and the model obeys the rule.** `sendData` refuses the send and says so: `Effective window is zero (advertised window 100, congestion window 2144), cannot send.` Host A had 2320 octets buffered, so it wanted to send and did not. 59 microseconds later host B advertises 7504 again, because only the relay shrank anything, and host A then sends lawfully. The old watch ran for 0.3 seconds and caught that lawful send. It runs for 50 microseconds now, inside the interval the shrunk edge stands | **test error** | **no, removed** |
@@ -137,9 +180,13 @@ Two declarations were removed. The suite result moves from 18 TOTAL, 14 PASS, 4 
 
 Since 2026-09-17 the checksum default is declared again, as a **defect with a blocked repair**. The guide now allows a declaration when a named limitation keeps the repair away for a long time, and the description of the test names it: a serialized TCP payload loses its region tags. The suite is 27 tests: 25 PASS and 2 FAIL (expected), and it reports PASS.
 
+Since 2026-10-14 gap 1 is closed, and its declaration is removed. The suite is 27 tests: 26 PASS and 1 FAIL (expected).
+
 Neither defect is a large repair. One is a NED default; the other is one comparison in the send decision.
 
 ## Gap 1 (pass 2): the PSH bit is never set — unimplemented feature
+
+**Closed on 2026-10-14.** The parameter `pushLastBufferedSegment` sets PSH on the segment after which no queued data waits, and it is on by default (`tcp: change: PSH in the last buffered segment by default`). `Rfc9293Push.test` passes and declares nothing. The text below is the finding of pass 2.
 
 `Rfc9293Push.test` keeps the faithful assertion — the last segment of a 5000-octet send carries PSH — and declares `%# expected-result: FAIL`. The class is **unimplemented feature**: the model does not claim this behaviour, on three pieces of evidence:
 
@@ -200,7 +247,7 @@ Error: Unknown ICMP type 4 -- in module (inet::Icmp) Rfc9293IcmpNet.host1.ipv4.i
 ## Scenario settings beyond the templates
 
 - `**.checksumMode = "computed"` in every test. The default, [Tcp.ned:189](../../../../../src/inet/transportlayer/tcp/Tcp.ned#L189), is `"declared"`, a placeholder; the TCP checksum is never optional (MUST-2), so the computed mode is the conformant configuration.
-- `*.host2.tcp.advertisedWindow = 300` and `*.host2.tcp.delayedAcksEnabled = true` in the flow-control test. The delay is the fixed constant [TcpAlgorithmBase.cc:32](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L32), 0.2 s, which is what the check document assumes and within MUST-40.
+- `*.host2.tcp.advertisedWindow = 300` and `*.host2.tcp.delayedAcksEnabled = true` in the flow-control test. The delay is the parameter `delayedAckTimeout`, [Tcp.ned:267](../../../../../src/inet/transportlayer/tcp/Tcp.ned#L267), 0.2 s by default, which is what the check document assumes and within MUST-40.
 - `sendBytes = 5000B` (data transfer, push) and `3000B` (flow control); `connectPort = 7000` with `*.host2.numApps = 0` (reset).
 
 Pass 3 adds:
@@ -230,7 +277,7 @@ The last error is worth naming twice. Before it was found, the check failed for 
 - **MSS option, header length (OPT-1, HDR-1):** written into the SYN in `writeHeaderOptions`, [TcpConnectionUtil.cc:1454-1465](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1454-L1465); 20 octets plus the 4-octet option, 24 observed.
 - **Segmentation (SEG-1):** `sendSegment` caps a segment at `snd_mss` less the option length, [TcpConnectionUtil.cc:983-984](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L983-L984); `sendData` sends whole segments of the effective MSS, [:1094-1106](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1094-L1106). Observed: 536 octets in the first segment.
 - **Cumulative acknowledgment, delivery (ACK-1, DATA-1):** `rcv_nxt` advances over in-order data at [TcpConnectionRcvSegment.cc:500](../../../../../src/inet/transportlayer/tcp/TcpConnectionRcvSegment.cc#L500); delivery in `sendAvailableDataToApp`, [TcpConnectionUtil.cc:566-577](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L566-L577). Observed: the acknowledgment of `ISS_A + 5001`.
-- **Send window (WND-2):** `sendData` bounds new data by `min(snd_wnd, cwnd) - (snd_nxt - snd_una)`, [TcpConnectionUtil.cc:1075-1078](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1075-L1078). The initial congestion window is one segment, [TcpAlgorithmBase.cc:149](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L149), so a 300-octet receiver window is the binding limit. Observed: a 300-octet first segment, silence for 0.15 s, the delayed acknowledgment at 0.2 s, and the resume at the edge.
+- **Send window (WND-2):** `sendData` bounds new data by `min(snd_wnd, cwnd) - (snd_nxt - snd_una)`, [TcpConnectionUtil.cc:1075-1078](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1075-L1078). The initial congestion window is one segment, [TcpAlgorithmBase.cc:119-120](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L119-L120), so a 300-octet receiver window is the binding limit. Observed: a 300-octet first segment, silence for 0.15 s, the delayed acknowledgment at 0.2 s, and the resume at the edge.
 - **Advertised window (WND-1):** `updateRcvWnd`, [TcpConnectionUtil.cc:1650-1670](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1650-L1670), with the receiver's silly-window floor at [:1660-1661](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L1660-L1661). Observed: 300 in the SYN-ACK and in the acknowledgments.
 - **Checksum (CKSUM-1):** inserted by the hook, [Tcp.cc:43-77](../../../../../src/inet/transportlayer/tcp/Tcp.cc#L43-L77); verified in `checkChecksum`, [Tcp.cc:496-535](../../../../../src/inet/transportlayer/tcp/Tcp.cc#L496-L535), and a failing segment is dropped with reason `INCORRECTLY_RECEIVED`, [Tcp.cc:149-156](../../../../../src/inet/transportlayer/tcp/Tcp.cc#L149-L156). That drop is RFC9293-CKSUM-2, level 3.
 - **Close (FIN-1, FIN-2):** `sendFin` [TcpConnectionUtil.cc:922](../../../../../src/inet/transportlayer/tcp/TcpConnectionUtil.cc#L922); `rcv_nxt` over the FIN, [TcpConnectionRcvSegment.cc:627-630](../../../../../src/inet/transportlayer/tcp/TcpConnectionRcvSegment.cc#L627-L630).

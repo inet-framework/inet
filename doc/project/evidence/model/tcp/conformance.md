@@ -87,7 +87,7 @@ The verdict combines the claim on the governing source document, the support val
 | TCP-F-SEQUENCE | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-ACKNOWLEDGE | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-TERMINATE | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-DATA-TRANSFER | mandatory | yes, through RFC 793 | supported; supporting PSH-1 failed | **confirmed**, with finding 3 |
+| TCP-F-DATA-TRANSFER | mandatory | yes, through RFC 793 | supported | **confirmed**; finding 3 closed on 2026-10-14 |
 | TCP-F-FLOW-CONTROL | mandatory | yes, through RFC 793 | supported | **confirmed** |
 | TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — the receive half passes; the value the sender writes by default does not, finding 4, a statement-level defect whose repair is blocked |
 | TCP-F-HEADER | mandatory | yes, through RFC 793 | supported | **confirmed** |
@@ -122,6 +122,8 @@ Every feature of this pass is confirmed or partial, and the confirmation means s
 The model claims RFC 793, which RFC 9293 replaced in August 2022, and cites the obsolete congestion, timer and extension documents throughout. For the nine features of this pass that costs nothing, because the texts agree. It costs something where they do not, and those places are exactly the next levels: RFC 5681 changed the congestion rules, RFC 6298 changed the retransmission timer, RFC 7323 changed the timestamp and window scale rules. A reader cannot tell which text the model follows. The repair is a documentation change.
 
 ### 3. The PSH bit is never set — a MUST the model does not meet
+
+**Closed on 2026-10-14.** The default `pushLastBufferedSegment` sets PSH on the last buffered segment, and `Rfc9293Push.test` passes. The text below is the finding of pass 2.
 
 RFC 9293 §3.9.1.2 binds a sender whose SEND call offers no PUSH flag: it MUST set PSH on the last buffered segment (MUST-61). The model's send interface offers no PUSH flag, and the model never sets the bit; its own code marks the place `TODO when to set PSH bit?` and the SEND processing `FIXME how to support PUSH?` (the exact references are in [`results.md`](results.md#gap-1-pass-2-the-psh-bit-is-never-set--unimplemented-feature)). `Rfc9293Push.test` keeps the faithful assertion and declares its failure.
 
@@ -158,6 +160,20 @@ The rule exists because the message still arrives at hosts even though RFC 6633 
 Within nine features and seventeen passing statements, on one topology and without loss, the model does what RFC 9293 describes on the normal path. Pass 1 stopped at level 2 partial with flow control undeclared; pass 2 declares it and passes it.
 
 Pass 3 took the same model off the normal path, with a corrupt segment, a segment outside the window, two crafted resets, a window that moved backward and two ICMP reports. Twenty-seven statements now carry a PASS and four a declared FAIL. Of the three gaps this pass found, one is a choice of default, one is a `should not` beside a `must` that holds, and one is a missing case in a module of another layer. None of them is a failure of the connection logic itself, which is what these eleven checks were built to attack.
+
+### 9. Where Linux departs from an RFC, the default follows the RFC
+
+The TCP model has many options that model Linux in detail, and the packetdrill corpus of inet-gpl checks them against real kernels. In five places Linux departs from an RFC that this pass checks. The owner decided on 2026-09-29 that the default follows the RFC and that Linux is an option, and on 2026-10-14 that `LinuxTcp` selects all the options of Linux.
+
+| Behavior | Default (RFC) | Linux, selectable |
+| --- | --- | --- |
+| Retransmission timeout | RFC 6298 §2.3 and §2.4: SRTT + 4·RTTVAR, rounded up to 1 s | `rtoVarianceFloor`: SRTT + max(4·RTTVAR, minimum), with a 200 ms minimum |
+| Initial window | RFC 5681 §3.1: min(4·SMSS, max(2·SMSS, 4380 octets)) | `initialWindow = "rfc6928"`: IW10 (RFC 6928, experimental) |
+| ICMP net or host unreachable during setup | RFC 9293 MUST-56: a soft error, never an abort | `softIcmpErrorsAbortSetup`: the connection aborts (RFC 5461 §4) |
+| RTO after a lost SYN | RFC 6298 §5.7: 3 s | no option: Linux does the same (`TCP_TIMEOUT_FALLBACK`) |
+| PSH | RFC 9293 MUST-61: on the last buffered segment | `pushSegmentsOnWriteBoundary`: on the segment that ends a write |
+
+One departure is not an option but a newer standard: CUBIC, the algorithm of `LinuxTcp`, follows RFC 9438, which departs from RFC 5681 on purpose in slow start and in the threshold. The checks of RFC 5681 select Reno, and say why in their ini. See [`results.md`](results.md#the-rfc-defaults-2026-10-14).
 
 ## What this document does not establish
 

@@ -31,7 +31,7 @@ The plus-one in row 2 and row 3 is the whole of RFC9293-SEQ-1: the SYN occupied 
 
 1. Host A sends a segment with SYN set and ACK clear, a header length of at least 20 octets, and a nonzero checksum. Record its sequence number as `ISS_A` and its header length. *(This observation confirms the stimulus, and covers HDR-1 and CKSUM-1. A header length of 24 octets means the SYN carries the MSS option, RFC9293-OPT-1; the option is a `should`, so its absence is a note and not a failure.)*
 2. Host A receives a segment with SYN set and ACK set, whose acknowledgment field equals `ISS_A + 1`. Record its sequence number as `ISS_B`.
-3. Host A sends a segment with ACK set and SYN clear, whose acknowledgment field equals `ISS_B + 1`, with a header length of 20 octets: no option, five words.
+3. Host A sends a segment with ACK set and SYN clear, whose acknowledgment field equals `ISS_B + 1`, with a header length of 20 octets plus the options it carries, padded to whole 32-bit words: five words without options. When both SYNs carried the timestamp option, RFC 7323 §3.2 puts it on this segment too.
 
 ### Notes
 
