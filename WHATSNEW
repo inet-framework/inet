@@ -532,19 +532,23 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
-2. TCP Limited Transmit sends only new data
+2. Random Early Detection (RED) reports its early drops as congestion
+
+   RedDropper emitted every drop with reason OTHER_PACKET_DROP, so its packetDropCongestion statistic always read 0. An early drop is now reported with reason CONGESTION and a drop at the packet capacity with QUEUE_OVERFLOW. Which packets are dropped does not change; the packetDropCongestion scalars and vectors of RED queues that make early drops, including those in EthernetQosRedQueue and AFxyQueue, become non-zero.
+
+3. TCP Limited Transmit sends only new data
 
    With SACK and lossDetectionMode = "dupthresh", the first duplicate ACK of a flight with no more new data retransmitted the first hole: Limited Transmit took its segment from NextSeg(), whose rule 3 returns an old segment. The fast retransmit then sent the hole again, and the receiver reported a D-SACK. Limited Transmit now sends only previously unsent data, as RFC 3042 and step (3.3) of RFC 6675 say, in both loss detection modes. No fingerprint or statistical baseline of INET moves; simulations that select the dupthresh mode with SACK can change.
 
-3. DumbTcp no longer sends an acknowledged FIN again
+4. DumbTcp no longer sends an acknowledged FIN again
 
    The retransmission timer of DumbTcp restarted at each expiry, also when nothing was outstanding, so DumbTcp sent an acknowledged FIN again every 2 seconds until the connection closed; with a peer that does not close, it went on to the end of the simulation. The timer now stops when all data, the FIN included, is acknowledged, as RFC 6298 section 5.2 says. Simulations that select DumbTcp can change.
 
-4. Nagle no longer holds a TCP retransmission
+5. Nagle no longer holds a TCP retransmission
 
    Nagle's algorithm counted data as unacknowledged up to the highest sequence number sent. After a go-back, after a retransmission timeout or after a SYN-ACK that did not acknowledge the data of a Fast Open SYN, the partial segment at the end is a retransmission, and Nagle held it until the next retransmission timeout. Nagle now holds only new data, as RFC 9293 section 3.7.4 says and as Linux does. Simulations with losses and Nagle on (the default of Tcp and LegacyTcp) can change; 27 fingerprints and 11 statistical results of the INET examples moved. LinuxTcp, with the Nagle variant of Minshall, was not affected in the packetdrill suite.
 
-5. TCP repairs that reach the algorithms of INET 4.7
+6. TCP repairs that reach the algorithms of INET 4.7
 
    A review of all TCP parameters found defects. Most of their repairs concern features that are new in this release (entry 34), but the repairs below also reach the algorithms and the parameters of INET 4.7. Simulations that use them can change; 30 fingerprints and 20 statistical results of the INET examples moved.
 

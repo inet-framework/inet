@@ -48,6 +48,7 @@ class INET_API RedDropper : public PacketFilterBase, public cListener
     bool useEcn = false;
     bool markNext = false;
     double randomValue = NaN; // drawn before the decision that uses it, so that a query draws nothing
+    RedResult lastResult = BELOW_MIN_LIMIT; // of the last decision, for the reason of a drop
 
     ModuleRef<IPacketCollection> collection;
 
@@ -58,6 +59,7 @@ class INET_API RedDropper : public PacketFilterBase, public cListener
     virtual bool matchesResult(RedResult result, const Packet *packet) const;
 
     virtual void handlePacketFiltered(Packet *packet, bool matches) override;
+    virtual void dropPacket(Packet *packet) override;
 
     // cListener:
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
