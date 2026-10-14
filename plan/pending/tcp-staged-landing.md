@@ -1,10 +1,11 @@
 # Land the TCP modernization on master in small stages
 
-Status: **in progress** — S1 and S2 landed on master on 2026-10-02, S3, S4 and S5 on 2026-10-05, S5b and S5c on 2026-10-06. S5d is next.
+Status: **done** — the stages S1 to S20 landed on master between 2026-10-02 and 2026-10-14. The
+items that stay open are at the end of the record of S20.
 
 Source: the branch `topic/tcp-new-audit-fixes`, local head `1826c3f4be` on master `86cede7986`.
-Its own plan is `plan/pending/pr-1155-resolve-audit-findings.md` on that branch. An older copy of
-that plan is on master.
+Its own plan is `plan/done/pr-1155-resolve-audit-findings.md`; S20 brought its final text to
+master.
 
 ## 1. Why
 
@@ -76,7 +77,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S18c ✅ | `topic/tcp-applications` | 42, 58 | +27 −11 | MSG_EOR in the send script of `TcpSessionApp`, and a fill byte for its data; commit 58 takes back the close of `TcpServerSocketIo` of commit 42 (D-1) |
 | S19 ✅ | `topic/tcp-new-parameters` | 15 (part), 46 (part), 53, 87, new | +115 −16 | the new parameters with the defaults of master: `retainSackAfterRto`, `initialWindow` and `initialCwnd`, `initialSendSequenceNumber`, `mss = -1`, the PSH of RFC 9293 MUST-61; the initial window in SMSS (D-98 to D-100) |
 | S19b ✅ | `topic/tcp-modern-defaults` | 16 (part), 40, 68 (part), 70, 71, 72 (the rest), 78, 80 (part), 81, new | +653 −187 | `LegacyTcp` for the module tests, the RFC defaults one commit for each with their moved rows, `LinuxTcp`, the TCP standards tests and the evidence under the new defaults, the statistical baselines |
-| S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
+| S20 ✅ | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +589 −169 | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
 The big test commit (41, `tests: add+change: cover the new behavior, and pin the old defaults`,
 74 files, +4529 −250) splits into the stages. Each stage takes the test files of its own
@@ -931,6 +932,20 @@ plan gives a reason for.
   segment of 1448 bytes then needs more than the 10 ms of `maxTransmissionDuration` of the radio
   medium. The next step changes the path, and the row passes. The owner decided on 2026-10-14 to
   keep the error, rather than to change the showcase or the medium in a TCP stage.
+- **D-106 — The release note compares with INET 4.7, the last release.** The source note of
+  commit 66 compared with the defaults of its time and said that the signal `sndNxt` is gone;
+  master keeps `sndNxt`, and its defaults are those of the RFCs (D-104). The note lists the
+  changes since INET 4.7.0: the defaults, the new mechanisms, the three modules, the deprecated
+  parameters and class names, and the new signals. INET 4.7.0 still has `TcpBaseAlg` and
+  `TcpTahoeRenoFamily`, so the comments of their aliases say that the rename came after INET 4.7,
+  not in INET 4.6.
+- **D-107 — sndMax changes where snd_max changes, and sndSeq goes.** S17 named three places where
+  `sndMax` missed a change: the FIN, the window probe and `sendOneNewSegment()`. The FIN of a
+  CLOSE and the SYN-ACK missed it; at a window probe, the miss is the removal of the old probe
+  octet in `unsendWindowProbe()`, which moves `snd_max` back; `sendOneNewSegment()` raises
+  `snd_max` through `sendSegment()`, which already emits it. The two retransmissions of a FIN emit
+  only when the value changes. `sndSeq`, which the source branch used in place of `sndNxt`, was
+  registered and never emitted, so it goes; `sndNxt` stays.
 - **D-3 — The socket contract lands alone (S3).** Commit 2 is contract surface only, and the
   features of S7 to S18 use it. A split of commit 2 into one part for each feature is possible,
   but it costs more than it gives.
@@ -3093,8 +3108,10 @@ least 3 minutes of SYN retransmissions, and an active open fails after 75 s. (S2
 | 2 | comment: the comments of TCP cite RFC 9293 and RFC 7323 | — | new |
 | 3 | fix: sndMax at each change of snd_max | — | new |
 | 4 | remove: the sndSeq signal, which nothing emits | — | new |
-| 5 | doc: the release note of the TCP modernization | — | 66 |
-| 6 | plan: the plan of the TCP branch, done | — | 67, 75, 83, 88, 89, 90 |
+| 5 | comment: the base classes were renamed after INET 4.7 | — | new (D-106) |
+| 6 | doc: the release note of the TCP modernization | — | 66, D-106 |
+| 7 | plan: the plan of the TCP branch takes its final text | — | 67, 75, 83, 88, 89, 90 |
+| 8 | plan: the plan of the TCP branch, done (a move only) | — | — |
 
 Commit 48 rewrote the standards section of `Tcp.ned` for the source branch, whose defaults are
 those of Linux; on master `Tcp` has the defaults of the RFCs, and `LinuxTcp` and `LegacyTcp` the
@@ -3107,3 +3124,42 @@ it to what master gives a user: the RFC defaults, `LegacyTcp` for the old ones, 
 deprecated names (commit 12 of S4), and the signals. Step 6 brings the plan of the source branch,
 which the plan commits 67 to 90 wrote, to `plan/done/`. After S20 lands, this plan moves to
 `plan/done/` too.
+
+### S20 — `topic/tcp-modernization-docs` — landed 2026-10-14
+
+The owner reviewed and approved S20 on 2026-10-14.
+
+S20 documents the TCP modernization: the RFCs that `Tcp` follows and where it departs from them,
+the comments that still cited RFC 793 and RFC 1323, and the release note; it repairs the two
+signals that S17 found wrong (D-107), and it brings the plan of the source branch to
+`plan/done/`. The release note compares with INET 4.7, and the base classes were renamed after
+that release (D-106).
+
+| Commit | B of D-6 | Source | Moved CI rows |
+| --- | --- | --- | --- |
+| `tcp: comment: the RFCs that Tcp follows, and where it departs from them` | — | 48 (the rest) | — |
+| `tcp: comment: the comments of TCP cite RFC 9293 and RFC 7323` | — | new | — |
+| `tcp: fix: sndMax at each change of snd_max` | — | new | — |
+| `tcp: remove: the sndSeq signal, which nothing emits` | — | new | — |
+| `tcp: comment: the base classes were renamed after INET 4.7` | — | new | — |
+| `doc: add: the release note of the TCP modernization` | — | 66 | — |
+| `plan: change: the plan of the TCP branch takes its final text` | — | 67, 75, 83, 88, 89, 90 | — |
+| `plan: location: the plan of the TCP branch, done` | — | — | — |
+
+New tests: `tcp_snd_max_1` and `tcp_snd_max_2` (step 3).
+
+Evidence, debug build against `omnetpp-6.x`: each commit builds alone with no undefined `inet::`
+symbol, and the module tests pass at each commit (626, and 628 from the `sndMax` repair). The TCP
+standards tests pass at each commit (26 pass and 1 expected failure, the packetdrill tests skip
+without inet-gpl); unit 126 and serializer 4 pass at the head. The two new tests fail at the
+commit before their own. The CI fingerprint job runs at each code commit, no row moves, and the
+old error of `ethernet.csv` stays. The TCP fingerprint rows run in debug at the head with no
+runtime error outside the five lwIP rows, and the `tyf` ingredient differs in the same 69 rows as
+after S19b. The link check passes after the new standards section and the plan move. The six
+gates and the combined pull-request gate pass.
+
+With S20, the staged landing has brought each commit of the source branch to master, or recorded
+why not, and this plan moves to `plan/done/`. Items that stay open: (inet-gpl) `PacketDrillApp`
+must use the socket calls of master, and then the suite selects `LinuxTcp` (S19b); (later) the
+items that the records of S17 to S19b list, among them the urgent data, HyStart++, the 75 s limit
+of an active open, and the acknowledged FIN that DumbTcp sends again.
