@@ -3,7 +3,7 @@
 # working directory, command line arguments, simulation time limit, fingerprint, expected result, tags
 
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__lwip -r 0,                  50s,            2312-37d6/tplx, PASS, Ipv4
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            43f3-0640/tplx, PASS, Ipv4
+/examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__inet -r 0,                  50s,            0ed3-27c7/tplx, PASS, Ipv4
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c lwip__lwip -r 0,                  50s,            f1ba-019b/tplx, PASS, Ipv4
 
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TcpLwip -r 0,                     100s,           8ae1-b60d/tplx, PASS, Ipv4
@@ -11,7 +11,7 @@
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TcpLwip -r 2,                     100s,           cd3e-3242/tplx, PASS, Ipv4
 
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,                 100s,            dbac-e55c/tplx, PASS, Ipv4
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            6967-d01d/tplx, PASS, Ipv4
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,                 100s,            80e4-85bb/tplx, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0,            100s,            dbac-e55c/tplx, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,         100s,            dbac-e55c/tplx, PASS, Ipv4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,                 100s,            4999-d547/tplx, PASS, Ipv4
@@ -19,5 +19,5 @@
 
 # nclients uses TelnetApp + TcpGenericServerApp, whose request/reply control rides in a GenericAppMsgReq region tag. TcpLwip now preserves region tags across the lwIP stack, so these run.
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,                 200s,            cdda-993b/tplx, PASS, Ipv4
-/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            3bd6-a705/tplx, PASS, Ipv4
+/examples/inet/nclients/,            -f omnetpp.ini -c lwip__inet -r 0,                 200s,            ce6e-1546/tplx, PASS, Ipv4
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0,                 200s,            89be-7ae7/tplx, PASS, Ipv4

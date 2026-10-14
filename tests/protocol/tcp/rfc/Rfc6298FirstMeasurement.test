@@ -53,19 +53,21 @@ using namespace inet;
 using namespace inet::protocoltest;
 
 // One way is 200 ms, so a round trip is 400 ms plus the transmission of one segment and one
-// acknowledgment, which is a few tens of microseconds on a 100 Mbit link. The bands below
-// are wide enough for that and far too narrow to admit a different formula.
+// acknowledgment, which is a few tens of microseconds on a 100 Mbit link. With timestamps,
+// which are on by default, the sample comes from the timestamp clock (RFC 7323 section 4.1),
+// which counts milliseconds, so it can be up to 1 ms below the time on the link. The bands
+// below are wide enough for both and far too narrow to admit a different formula.
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("rfc6298_first_measurement")
         // RFC 6298 section 2.2: the first measurement sets the smoothed value to R.
         .once(on("host1.tcp").signal("srtt").first()
-                  .assertValueBetween(0.400, 0.401)
+                  .assertValueBetween(0.399, 0.401)
                   .describe("the smoothed round-trip time after the first measurement")
                   .within(2.0))
         // RFC 6298 section 2.2: and the variance to half of R.
         .once(on("host1.tcp").signal("rttvar").first()
-                  .assertValueBetween(0.200, 0.2005)
+                  .assertValueBetween(0.1995, 0.2005)
                   .describe("the round-trip variance after the first measurement")
                   .within(0.001))
         // RFC 6298 sections 2.3 and 2.4: the timeout is the smoothed value plus four times
