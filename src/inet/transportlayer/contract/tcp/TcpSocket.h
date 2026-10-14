@@ -367,9 +367,10 @@ class INET_API TcpSocket : public ISocket
      * Sets the retransmissions of the SYN of the next connect(), or of the SYN-ACKs of
      * the connections of the next listen(), after which the open fails, in place of the
      * synRetries parameter of the Tcp module (as the Linux socket option TCP_SYNCNT).
-     * -1: the parameter of the Tcp module.
+     * On an open socket, the value acts from the next timeout on, as Linux reads
+     * TCP_SYNCNT at each timeout. -1: the parameter of the Tcp module.
      */
-    void setSynRetries(int synRetries) { this->synRetries = synRetries; }
+    void setSynRetries(int synRetries);
 
     /**
      * Initiates passive OPEN, creating a "forking" connection that will listen

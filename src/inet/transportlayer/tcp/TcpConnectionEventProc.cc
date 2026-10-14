@@ -372,6 +372,14 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
         if (tcpAlgorithm != nullptr)
             tcpAlgorithm->setKeepAlive(cmd->getEnabled());
     }
+    else if (auto cmd = dynamic_cast<TcpSetSynRetriesCommand *>(tcpCommand)) {
+        // TCP_SYNCNT on an open socket, as Linux, which reads it at each timeout: the
+        // next retransmission of the SYN or of the SYN-ACK counts against the new value,
+        // and a listener passes it to the connections that it forks
+        socketSynRetries = cmd->getValue();
+        if (state != nullptr)
+            state->synRetries = socketSynRetries >= 0 ? socketSynRetries : (int)tcpMain->par("synRetries");
+    }
     else if (auto cmd = dynamic_cast<TcpSetOwnedCommand *>(tcpCommand)) {
         appOwned = cmd->getOwned();
         EV_DETAIL << "The application " << (appOwned ? "owns" : "does not own") << " the connection\n";

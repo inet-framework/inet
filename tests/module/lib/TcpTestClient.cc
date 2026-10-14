@@ -43,11 +43,12 @@ class INET_API TcpTestClient : public cSimpleModule
     Commands pathMtuCommands; // when to set the route MTU, and its value
     Commands corkCommands; // when to turn TCP_CORK on (1) or off (0)
     Commands rcvBufCommands; // when to set SO_RCVBUF, and its value
+    Commands synRetriesCommands; // when to set TCP_SYNCNT, and its value
     std::list<std::pair<std::string, std::string>> tcpParCommands; // tcpParScript: the parameters to set, in time order
     static const int NUM_EXTRA = 2; // the optional second and third connection (tOpen2, tOpen3)
     Commands extraCommands[NUM_EXTRA]; // the SEND of each extra connection
 
-    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_ABORT, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_NODELAY, TEST_MAXSEG, TEST_PATHMTU, TEST_CORK, TEST_RCVBUF, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE, TEST_ABORT, TEST_STATUS, TEST_READ, TEST_WRITER_BLOCKED, TEST_KEEPALIVE, TEST_NODELAY, TEST_MAXSEG, TEST_PATHMTU, TEST_CORK, TEST_RCVBUF, TEST_SYN_RETRIES, TEST_TCP_PAR, TEST_OPEN_EXTRA, TEST_SEND_EXTRA = TEST_OPEN_EXTRA + NUM_EXTRA };
 
     int ctr;
 
@@ -228,6 +229,9 @@ void TcpTestClient::initialize()
     parseScript(par("rcvBufScript"), rcvBufCommands);
     for (const auto& command : rcvBufCommands)
         scheduleAt(command.tSend, new cMessage("RcvBuf", TEST_RCVBUF));
+    parseScript(par("synRetriesScript"), synRetriesCommands);
+    for (const auto& command : synRetriesCommands)
+        scheduleAt(command.tSend, new cMessage("SynRetries", TEST_SYN_RETRIES));
     if (tClose > 0)
         scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
     simtime_t tAbort = par("tAbort");
@@ -361,6 +365,11 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
         case TEST_RCVBUF:
             socket.setReceiveBufferSize(rcvBufCommands.front().numBytes);
             rcvBufCommands.pop_front();
+            delete msg;
+            break;
+        case TEST_SYN_RETRIES:
+            socket.setSynRetries(synRetriesCommands.front().numBytes);
+            synRetriesCommands.pop_front();
             delete msg;
             break;
         case TEST_CORK:

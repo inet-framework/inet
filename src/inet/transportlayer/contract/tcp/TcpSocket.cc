@@ -362,6 +362,18 @@ void TcpSocket::setReceiveBufferSize(int receiveBufferSize)
     }
 }
 
+void TcpSocket::setSynRetries(int synRetries)
+{
+    this->synRetries = synRetries;
+    if (sockstate == LISTENING || sockstate == CONNECTING || sockstate == CONNECTED || sockstate == PEER_CLOSED) {
+        auto request = new Request("setSynRetries", TCP_C_SETOPTION);
+        auto *cmd = new TcpSetSynRetriesCommand();
+        cmd->setValue(synRetries);
+        request->setControlInfo(cmd);
+        sendToTcp(request);
+    }
+}
+
 void TcpSocket::setCork(bool cork)
 {
     auto request = new Request("setCork", TCP_C_SETOPTION);

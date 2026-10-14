@@ -266,6 +266,14 @@ class TcpSetKeepAliveCommand extends TcpSetOptionCommand
     bool enabled = true;
 }
 
+// TCP_SYNCNT on an open socket: the retransmissions of the SYN, or of the SYN-ACKs,
+// of this connection, from the next timeout on (TcpSocket::setSynRetries()); -1: the
+// synRetries parameter of the Tcp module
+class TcpSetSynRetriesCommand extends TcpSetOptionCommand
+{
+    int value = -1;
+}
+
 // The application writer's blocked-on-send-buffer state (Linux SOCK_NOSPACE
 // while a blocking write waits in sk_stream_wait_memory): while set AND the
 // send queue has run dry, the connection accumulates SNDBUF_LIMITED chrono
