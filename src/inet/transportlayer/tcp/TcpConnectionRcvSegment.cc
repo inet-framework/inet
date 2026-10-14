@@ -1137,14 +1137,6 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
         if (!state->fastopenCookieValid)
             state->fastopenSendCookieOption = false;
         state->fastopenAccelerated = true;
-        // RFC 7413 section 4.2.2, step 6: "If the FastOpened flag is set, the server
-        // MUST follow [RFC5681] (based on [RFC3390]) to set the initial congestion
-        // window for sending more data packets". The algorithm starts now, not at
-        // the ACK of the SYN-ACK (as Linux starts the transfer of the child socket,
-        // tcp_init_transfer()), so that the application can send in SYN_RCVD.
-        state->snd_effmss = calculateEffectiveMss();
-        initMtuProbing(); // before the initial window (Linux tcp_init_transfer())
-        tcpAlgorithm->established(false);
         B payloadLength = B(tcpSegment->getByteLength()) - tcpHeader->getHeaderLength();
         updateRcvQueueVars();
         if (payloadLength > B(0) && hasEnoughSpaceForSegmentInReceiveQueue(tcpSegment, tcpHeader)) {
@@ -1166,6 +1158,20 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     }
 
     sendSynAck();
+
+    if (state->fastopenAccelerated) {
+        // RFC 7413 section 4.2.2, step 6: "If the FastOpened flag is set, the server
+        // MUST follow [RFC5681] (based on [RFC3390]) to set the initial congestion
+        // window for sending more data packets". The algorithm starts now, not at
+        // the ACK of the SYN-ACK (as Linux starts the transfer of the child socket,
+        // tcp_init_transfer()), so that the application can send in SYN_RCVD. It
+        // starts after the SYN-ACK, whose options settle SACK and the timestamps:
+        // the recovery that the algorithm chooses depends on SACK.
+        state->snd_effmss = calculateEffectiveMss();
+        initMtuProbing(); // before the initial window (Linux tcp_init_transfer())
+        tcpAlgorithm->established(false);
+    }
+
     startSynRexmitTimer();
 
     if (!connEstabTimer->isScheduled())

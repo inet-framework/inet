@@ -1,0 +1,55 @@
+%description:
+Tests the SACK recovery of a TCP Fast Open server that sends in SYN_RCVD (RFC
+7413 section 4.2.2). The algorithm of the server starts in SYN_RCVD, so that
+the application can send at once, and the recovery that the algorithm chooses
+depends on SACK, which the options of the SYN-ACK settle. The server of
+connection 2 sends 6000 bytes at t=0.5025 s, and the tester drops the first
+and the fifth segment. The client SACKs the segments between them, and the
+server repairs both holes in its SACK recovery: RACK marks the first one lost
+at once, and the second one goes at t=0.511 s. Before the repair, the
+algorithm started before the SYN-ACK, chose the recovery without SACK and
+dropped the SACK options: the server retransmitted the first hole at the third
+duplicate ACK, and the second one at the RTO, at t=1.512 s.
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=0.5s
+*.cli_app.sendBytes2=200B
+*.cli_app.fastOpen2=true
+*.srv_app.tOpen2=0.5s
+*.srv_app.localPort2=2000
+
+*.srv_app.tSend2=0.5025s
+*.srv_app.sendBytes2=6000B
+*.tcptester.script="b3 delete; b7 delete"  # the first and the fifth data segment of connection 2
+*.cli_tcp.fastopenClientEnabled = true
+*.srv_tcp.fastopenServerEnabled = true
+*.srv_tcp.initialCwnd = 10
+*.*_tcp.typename = "Tcp"  # the RFC defaults, with SACK (before the include, which selects LegacyTcp)
+
+include ../../lib/defaults.ini
+
+%# the server keeps the SACK blocks...
+%postrun-command: grep "SACK-capable" test.out > test_sack.out || true
+%not-contains: test_sack.out
+no SACK-capable recovery in use
+
+%# ...and retransmits both holes at once
+%contains: stdout
+[0.507 B009] A.1001 < B.2000: A 125501:126513(1012) ack 125201 win 16384   Option(s): NOP NOP TS(506,504)
+%contains: stdout
+[0.511 B010] A.1001 < B.2000: A 129549:130561(1012) ack 125201 win 16384   Option(s): NOP NOP TS(510,508)
+%contains: stdout
+[0.514] tcpdump finished, A:10 B:10 segments
