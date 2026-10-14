@@ -133,6 +133,7 @@ void RedDropper::handlePacketFiltered(Packet *packet, bool matches)
     avg = decision.avg;
     count = decision.count;
     q_time = decision.q_time;
+    lastResult = decision.result;
     switch (decision.result) {
         case QUEUE_FULL:
             EV_DEBUG << "Queue length >= capacity" << EV_FIELD(packetCapacity) << EV_ENDL;
@@ -165,6 +166,18 @@ void RedDropper::handlePacketFiltered(Packet *packet, bool matches)
             }
         }
     }
+}
+
+void RedDropper::dropPacket(Packet *packet)
+{
+    // an early drop is the congestion signal RED exists to give, a drop at the packet
+    // capacity is a buffer overflow, as in PacketQueue
+    if (lastResult == QUEUE_FULL)
+        PacketFilterBase::dropPacket(packet, QUEUE_OVERFLOW);
+    else if (lastResult == RANDOMLY_ABOVE_LIMIT || lastResult == ABOVE_MAX_LIMIT)
+        PacketFilterBase::dropPacket(packet, CONGESTION);
+    else
+        PacketFilterBase::dropPacket(packet, OTHER_PACKET_DROP);
 }
 
 void RedDropper::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
