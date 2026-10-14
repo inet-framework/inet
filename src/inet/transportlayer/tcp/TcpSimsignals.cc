@@ -30,7 +30,6 @@ simsignal_t deliveredSignal = cComponent::registerSignal("delivered"); // cumula
 simsignal_t sndAckSignal = cComponent::registerSignal("sndAck"); // sent ackNo
 simsignal_t sndMaxSignal = cComponent::registerSignal("sndMax"); // snd_max
 simsignal_t sndSacksSignal = cComponent::registerSignal("sndSacks"); // number of sent Sacks
-simsignal_t sndSeqSignal = cComponent::registerSignal("sndSeq"); // sent seqNo
 simsignal_t sndWndSignal = cComponent::registerSignal("sndWnd"); // snd_wnd
 simsignal_t srttSignal = cComponent::registerSignal("srtt"); // will record smoothed RTT
 simsignal_t ssthreshSignal = cComponent::registerSignal("ssthresh"); // will record changes to ssthresh

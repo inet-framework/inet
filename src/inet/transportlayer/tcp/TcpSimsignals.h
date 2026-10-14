@@ -39,7 +39,6 @@ extern INET_API simsignal_t deliveredSignal; // cumulative newly-delivered (acke
 extern INET_API simsignal_t sndAckSignal; // sent ackNo
 extern INET_API simsignal_t sndMaxSignal; // snd_max
 extern INET_API simsignal_t sndSacksSignal; // number of sent Sacks
-extern INET_API simsignal_t sndSeqSignal; // sent seqNo
 extern INET_API simsignal_t sndWndSignal; // snd_wnd
 extern INET_API simsignal_t srttSignal; // will record smoothed RTT
 extern INET_API simsignal_t srttSignal; // will record smoothed RTT
