@@ -1088,7 +1088,9 @@ void TcpConnection::configureStateVariables()
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
     const char *tcpEcnMode = tcpMain->par("tcpEcnMode");
     if (tcpMain->par("ecnWillingness").boolValue()) {
-        if (strcmp(tcpEcnMode, "off") != 0)
+        // the deprecated parameter replaces a mode that requests no ECN: "off" and the
+        // default, "passive"
+        if (strcmp(tcpEcnMode, "off") != 0 && strcmp(tcpEcnMode, "passive") != 0)
             throw cRuntimeError("Set the deprecated ecnWillingness or tcpEcnMode, not both");
         state->ecnMode = TCP_ECN_MODE_RFC3168;
     }
