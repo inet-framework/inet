@@ -1,0 +1,84 @@
+%description:
+
+This test is TokenBucketClassifier_1 with a query probe (QueryProbe) between the
+source and the classifier. The probe asks the classifier three times before each
+push if it can take the packet. A query must not remove tokens, so the
+classifier sends the packets to the same sinks as in TokenBucketClassifier_1.
+
+%file: test.ned
+
+import inet.queueing.classifier.TokenBucketClassifier;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+import inet.test.queueingtest.lib.QueryProbe;
+
+network TestTokenBucket
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        probe: QueryProbe {
+            @display("p=150,200");
+        }
+        classifier: TokenBucketClassifier {
+            @display("p=200,100");
+        }
+        greenConsumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+        redConsumer: PassivePacketSink {
+            @display("p=300,200");
+        }
+        consumer: PassivePacketSink {
+            @display("p=300,100");
+        }
+    connections allowunconnected:
+        producer.out --> probe.in;
+        probe.out --> classifier.in;
+        classifier.out++ --> greenConsumer.in;
+        classifier.out++ --> redConsumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestTokenBucket
+sim-time-limit = 10s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.producer.packetLength = 1B
+*.producer.productionInterval = exponential(1s)
+*.classifier.tokenProductionRate = 4
+*.classifier.label = "green"
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 0s redConsumer: Consuming packet, [^\n]*producer-0 \(
+
+%contains-regex: stdout
+^At 0\.795874504566s redConsumer: Consuming packet, [^\n]*producer-1 \(
+
+%contains-regex: stdout
+^At 1\.69443489305s redConsumer: Consuming packet, [^\n]*producer-2 \(
+
+%contains-regex: stdout
+^At 2\.950365651097s greenConsumer: Consuming packet, [^\n]*producer-3 \(
+
+%contains-regex: stdout
+^At 4\.809969863172s greenConsumer: Consuming packet, [^\n]*producer-4 \(
+
+%contains-regex: stdout
+^At 5\.733192994643s redConsumer: Consuming packet, [^\n]*producer-5 \(
+
+%contains-regex: stdout
+^At 7\.684738330527s greenConsumer: Consuming packet, [^\n]*producer-6 \(
+
+%contains-regex: stdout
+^At 8\.471939470509s greenConsumer: Consuming packet, [^\n]*producer-7 \(

@@ -25,25 +25,21 @@ void TokenBucketClassifier::initialize(int stage)
 
 int TokenBucketClassifier::classifyPacket(Packet *packet) const
 {
-    // KLUDGE: this query changes the state of the module
-    return const_cast<TokenBucketClassifier *>(this)->classifyPacketAndUpdateState(packet);
+    return tokenBucket.getNumTokens() > getNumPacketTokens(packet) ? 0 : 1;
 }
 
-int TokenBucketClassifier::classifyPacketAndUpdateState(Packet *packet)
+void TokenBucketClassifier::handlePacketClassified(Packet *packet, int index)
 {
     emit(tokensChangedSignal, getNumTokens());
     auto numTokens = getNumPacketTokens(packet);
     EV_DEBUG << "Checking tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
-    if (tokenBucket.getNumTokens() > numTokens) {
+    if (index == 0) {
         tokenBucket.removeTokens(numTokens);
         EV_INFO << "Removed tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
         emit(tokensChangedSignal, tokenBucket.getNumTokens());
-        return 0;
     }
-    else {
+    else
         EV_INFO << "Insufficient number of tokens for packet" << EV_FIELD(numTokens) << EV_FIELD(tokenBucket) << EV_FIELD(packet) << EV_ENDL;
-        return 1;
-    }
 }
 
 } // namespace queueing

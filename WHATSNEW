@@ -688,6 +688,16 @@ Notable backward incompatible changes are the following:
    A pull stream through a classifier now classifies its packet one time, at
    the start of the stream. Before, each call of the stream classified it.
 
+35. A token bucket classifier takes the tokens of a packet one time
+
+   TokenBucketClassifier, and SingleRateTwoColorClassifier which extends it,
+   removed the tokens of a packet in each query about the packet, and again
+   when the packet went through. For example, a PacketServer asks
+   canPushPacket() before it pushes a packet. In pull mode, each peek removed
+   tokens. The classifier now removes the tokens one time, when the packet
+   goes through. This can change the results of simulations in which a module
+   asks a token bucket classifier about a packet before it pushes the packet.
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset
