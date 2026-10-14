@@ -1,0 +1,74 @@
+%description:
+A solicited Neighbor Advertisement that sets a STALE Neighbour Cache entry REACHABLE also
+starts its ReachableTime window, so the next datagram to that neighbour does not start
+Neighbour Unreachability Detection (RFC 4861 Section 7.3.3).
+
+Topology: a -- b
+
+a and b start sending UDP to each other at the same moment, so each resolves the other's
+address while being resolved. Each host's entry for the other is INCOMPLETE when the
+other's multicast Neighbor Solicitation arrives; the solicitation carries a link-layer
+address, so the entry becomes STALE. Then the solicited Neighbor Advertisement arrives
+and sets it REACHABLE. Neither host may start Neighbour Unreachability Detection on a
+neighbour it has just confirmed reachable.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network NudRefreshTest
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        a: StandardHost6;
+        b: StandardHost6;
+    connections:
+        a.ethg++ <--> ethline <--> b.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = NudRefreshTest
+ned-path = .;../../../../src
+sim-time-limit = 10s
+record-vector-results = false
+cmdenv-express-mode = false
+
+**.numApps = 1
+**.app[0].typename = "UdpBasicApp"
+**.app[0].localPort = 1000
+**.app[0].destPort = 1000
+**.app[0].messageLength = 64B
+**.app[0].sendInterval = 1s
+**.app[0].startTime = 6s
+**.a.app[0].destAddresses = "b"
+**.b.app[0].destAddresses = "a"
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+**.neighbourDiscovery.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Solicited Flag is TRUE. Set NCE state to REACHABLE.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Initiating Neighbour Unreachability Detection
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+<!> Error
+%#--------------------------------------------------------------------------------------------------------------

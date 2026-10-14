@@ -1,0 +1,3 @@
+A solicited Neighbor Advertisement restarts ReachableTime
+
+A solicited Neighbor Advertisement that found a Neighbour Cache entry STALE or REACHABLE set it REACHABLE without restarting its ReachableTime window, so the next datagram could start Neighbour Unreachability Detection on a neighbour just confirmed reachable, for example when two hosts resolve each other at the same moment. The window now restarts whenever a solicited advertisement sets the entry REACHABLE, as RFC 4861 Section 7.3.3 requires; such runs send fewer Neighbor Solicitation probes.
