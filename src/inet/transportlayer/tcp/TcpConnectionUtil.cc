@@ -2410,8 +2410,11 @@ void TcpConnection::retransmitData()
 
     uint32_t bytesToSend = state->snd_max - state->snd_nxt;
 
-    // FIN (without user data) needs to be resent
-    if (bytesToSend == 0 && state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq()) {
+    // FIN (without user data) needs to be resent. bytesToSend counts an unacknowledged
+    // FIN, so a FIN without data before it is found by the data in the queue, as in
+    // retransmitOneSegment(): sendSegment() makes no segment without data.
+    if ((bytesToSend == 0 || sendQueue->getBytesAvailable(state->snd_nxt) == 0)
+            && state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq()) {
         state->snd_max = sendQueue->getBufferEndSeq();
         EV_DETAIL << "No outstanding DATA, resending FIN, advancing snd_nxt over the FIN\n";
         state->snd_nxt = state->snd_max;
