@@ -65,9 +65,16 @@ void QosRecoveryProcedure::incrementStationLrc()
         incrementContentionWindow();
 }
 
-void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
+QosRecoveryProcedure::RetryKey QosRecoveryProcedure::getRetryKey(const Ptr<const Ieee80211DataHeader>& header) const
 {
-    auto id = std::make_pair((Tid)header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+    // IEEE Std 802.11-2024, 10.23.2.12.1: disposal resolves only this DATA's retry state.
+    return {header->getReceiverAddress(), {header->getTid(),
+        SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())}};
+}
+
+void QosRecoveryProcedure::incrementCounter(const Ptr<const Ieee80211DataHeader>& header, std::map<RetryKey, int>& retryCounter)
+{
+    auto id = getRetryKey(header);
     if (containsKey(retryCounter, id))
         retryCounter[id]++;
     else
@@ -114,7 +121,7 @@ void QosRecoveryProcedure::blockAckFrameReceived()
 //
 void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader)
 {
-    auto id = std::make_pair(ackedHeader->getTid(), SequenceControlField(ackedHeader->getSequenceNumber().get(), ackedHeader->getFragmentNumber()));
+    auto id = getRetryKey(ackedHeader);
     if (packet->getByteLength() >= rtsThreshold) {
         resetStationLrc();
         auto it = longRetryCounter.find(id);
@@ -141,7 +148,7 @@ void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee
 void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
-    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+    auto id = getRetryKey(header);
     if (packet->getByteLength() >= rtsThreshold) {
         auto it = longRetryCounter.find(id);
         if (it != longRetryCounter.end())
@@ -230,9 +237,9 @@ bool QosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr
     return getRc(packet, protectedHeader, shortRetryCounter) >= shortRetryLimit;
 }
 
-int QosRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, std::map<std::pair<Tid, SequenceControlField>, int>& retryCounter)
+int QosRecoveryProcedure::getRc(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, std::map<RetryKey, int>& retryCounter)
 {
-    auto id = std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()));
+    auto id = getRetryKey(header);
     auto it = retryCounter.find(id);
     if (it != retryCounter.end())
         return it->second;

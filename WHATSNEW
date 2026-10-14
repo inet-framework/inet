@@ -453,6 +453,10 @@ Notable backward compatible changes are the following:
 
    HCF adds blockAckVariant = "basic" for historical compatibility. Existing Block Ack, TXOP, QoS, and fragmentation demonstrations select it explicitly. Basic remains the default. HCF rejects unknown values and the reserved "compressed" value during initialization until Compressed exchanges exist. These checks also apply when Block Ack support is disabled. Basic originated in IEEE Std 802.11e-2005; IEEE Std 802.11-2024 reserves its type value.
 
+15. IEEE 802.11 retry counters for each receiver
+
+   QoS recovery now keeps separate retry counters for each receiver. Frames with equal TID, sequence number, and fragment number no longer share a counter across receivers. An acknowledgment or retry-limit disposal for one receiver preserves the other receiver's counter. This repair applies before DATA lifetime expiration.
+
 Notable bug fixes are the following:
 
 1. IEEE 802.11 HT modes preserve the requested band and preamble
