@@ -1,0 +1,79 @@
+%description:
+
+In this test, packets are produced periodically by an active packet source
+(ActivePacketSource). A streamer (PacketStreamer) pushes each packet as a packet
+stream through an ordinal based dropper (OrdinalBasedDropper), which drops the
+packets 0, 2, 4, 6, 8 and 10, and a destreamer (PacketDestreamer) joins the
+stream again before a passive packet sink (PassivePacketSink). The dropper must
+count each streamed packet one time, so the sink gets the same packets as in
+OrdinalBasedDropper_1, 0.1 s later.
+
+%file: test.ned
+
+import inet.protocolelement.common.PacketDestreamer;
+import inet.protocolelement.common.PacketStreamer;
+import inet.queueing.filter.OrdinalBasedDropper;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+network TestOrdinalBasedDropper
+{
+    submodules:
+        producer: ActivePacketSource {
+            @display("p=100,100");
+        }
+        streamer: PacketStreamer {
+            @display("p=200,100");
+        }
+        dropper: OrdinalBasedDropper {
+            @display("p=300,100");
+        }
+        destreamer: PacketDestreamer {
+            @display("p=400,100");
+        }
+        consumer: PassivePacketSink {
+            @display("p=500,100");
+        }
+    connections:
+        producer.out --> streamer.in;
+        streamer.out --> dropper.in;
+        dropper.out --> destreamer.in;
+        destreamer.out --> consumer.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestOrdinalBasedDropper
+sim-time-limit = 10s
+cmdenv-event-banners = false
+cmdenv-log-prefix = "At %ts %N: "
+*.producer.packetLength = 1B
+*.producer.productionInterval = 1s
+*.streamer.datarate = 80bps
+*.dropper.dropsVector = "0; 2; 4; 6; 8; 10"
+
+%# remove formatting
+%subst: /\x1B\[[0-9;]*m//
+
+%subst: /\nRunning simulation\.\.\.\n//
+%# remove method call lines added in OMNeT++ 6.4
+%subst: /^At \S+ \S+: Method call [^\n]*\n//m
+
+%contains-regex: stdout
+^At 1\.1s consumer: Consuming packet, [^\n]*producer-1 \(
+
+%contains-regex: stdout
+^At 3\.1s consumer: Consuming packet, [^\n]*producer-3 \(
+
+%contains-regex: stdout
+^At 5\.1s consumer: Consuming packet, [^\n]*producer-5 \(
+
+%contains-regex: stdout
+^At 7\.1s consumer: Consuming packet, [^\n]*producer-7 \(
+
+%contains-regex: stdout
+^At 9\.1s consumer: Consuming packet, [^\n]*producer-9 \(
+
+%not-contains-regex: stdout
+^At \S+ consumer: Consuming packet, [^\n]*producer-(0|2|4|6|8) \(

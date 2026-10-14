@@ -777,6 +777,14 @@ Notable backward incompatible changes are the following:
    EligibilityTimeFilter no longer support pull mode, because their verdict
    about a packet changes with time without an event of the module.
 
+43. An ordinal based dropper counts a streamed packet one time
+
+   OrdinalBasedDropper counted a packet in processPacket() and dropPacket(),
+   which the filter base class calls for each packet instance of a packet
+   stream. So it counted a streamed packet more than one time, and it dropped
+   other packets than its dropsVector names. It now counts each packet one
+   time, in handlePacketFiltered().
+
 Notable backward compatible changes are the following:
 
 11. IEEE 802.11 mapped 5 GHz channel subset

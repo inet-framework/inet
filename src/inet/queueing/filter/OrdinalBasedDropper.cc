@@ -43,21 +43,23 @@ bool OrdinalBasedDropper::matchesPacket(const Packet *packet) const
     return !generateFurtherDrops || numPackets != dropsVector[0];
 }
 
-void OrdinalBasedDropper::processPacket(Packet *packet)
+void OrdinalBasedDropper::handlePacketFiltered(Packet *packet, bool matches)
 {
+    if (!matches) {
+        numDropped++;
+        dropsVector.erase(dropsVector.begin());
+        if (dropsVector.size() == 0)
+            generateFurtherDrops = false;
+    }
     numPackets++;
 }
 
 void OrdinalBasedDropper::dropPacket(Packet *packet)
 {
-    EV_DEBUG << "Dropping packet" << EV_FIELD(ordinalNumber, numPackets) << EV_FIELD(packet) << EV_ENDL;
-    numPackets++;
-    numDropped++;
-    dropsVector.erase(dropsVector.begin());
-    if (dropsVector.size() == 0) {
+    // handlePacketFiltered() counted the packet already
+    EV_DEBUG << "Dropping packet" << EV_FIELD(ordinalNumber, numPackets - 1) << EV_FIELD(packet) << EV_ENDL;
+    if (dropsVector.size() == 0)
         EV_DEBUG << "End of dropsVector reached" << EV_ENDL;
-        generateFurtherDrops = false;
-    }
     PacketFilterBase::dropPacket(packet);
 }
 
