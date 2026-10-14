@@ -47,7 +47,7 @@ class TcpAlgorithm;
 #define TCP_MAX_WIN                   65535lu  // 65535 bytes, largest value (16 bit) for (unscaled) window size
 #define TCP_MAX_WIN_SCALED            0x3fffffffL // 2^30-1 bytes, largest value for scaled window size
 #define MAX_SACK_BLOCKS               60  // will only be used with SACK
-#define PAWS_IDLE_TIME_THRESH         (24 * 24 * 3600)  // 24 days in seconds (RFC 1323)
+#define PAWS_IDLE_TIME_THRESH         (24 * 24 * 3600)  // 24 days in seconds (RFC 7323 section 5.5)
 
 /**
  * Manages a TCP connection. This class itself implements the TCP state
@@ -56,7 +56,7 @@ class TcpAlgorithm;
  * associated with TCP state changes.
  *
  * The implementation largely follows the functional specification at the end
- * of RFC 793. Code comments extensively quote RFC 793 to make it easier
+ * of RFC 9293. Code comments extensively quote RFC 9293 to make it easier
  * to understand.
  *
  * TcpConnection objects are not used alone -- they are instantiated and managed

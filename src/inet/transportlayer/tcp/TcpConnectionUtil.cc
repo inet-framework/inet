@@ -1075,7 +1075,7 @@ void TcpConnection::configureStateVariables()
     if (initialCwnd < 0)
         throw cRuntimeError("initialCwnd must be 0 or more, but it is %d", initialCwnd);
     state->initialCwndSegments = initialCwnd;
-    // Maximum Segment Size (RFC 793); mss = -1 waits for the address of the peer, and
+    // Maximum Segment Size (RFC 9293 section 3.7.1); mss = -1 waits for the address of the peer, and
     // until then the connection has the 536 bytes of RFC 9293 (MUST-15)
     int mss = tcpMain->par("mss");
     if (mss < -1)
@@ -1085,7 +1085,7 @@ void TcpConnection::configureStateVariables()
     if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss)
         state->snd_mss = maxSegSockopt; // TCP_MAXSEG of this connection, as Linux user_mss
     state->advertisedMss = state->snd_mss; // our own receive limit; stays when snd_mss falls to the MSS of the peer
-    state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 1323)
+    state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 7323 section 3)
     const char *tcpEcnMode = tcpMain->par("tcpEcnMode");
     if (tcpMain->par("ecnWillingness").boolValue()) {
         // the deprecated parameter replaces a mode that requests no ECN: "off" and the
@@ -1190,7 +1190,7 @@ void TcpConnection::selectInitialSeqNum()
 bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader) const
 {
     // check that segment entirely falls in receive window
-    // RFC 793, page 69:
+    // RFC 9293 section 3.10.7.4 (First, check sequence number):
     // "There are four cases for the acceptability test for an incoming segment:
     //    Segment Receive  Test
     //    Length  Window
@@ -1238,8 +1238,8 @@ bool TcpConnection::isSegmentAcceptable(Packet *tcpSegment, const Ptr<const TcpH
         }
     }
 
-    // RFC 793, page 25:
-    // "A new acknowledgment (called an "acceptable ack"), is one for which
+    // RFC 9293 section 3.4:
+    // "A new acknowledgment (called an "acceptable ack") is one for which
     // the inequality below holds:
     //    SND.UNA < SEG.ACK =< SND.NXT"
     if (!ret && len == 0) {
@@ -2624,7 +2624,7 @@ bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const
     state->snd_wnd_scale = option.getWindowScale();
     EV_INFO << "Tcp Header Option WS(=" << state->snd_wnd_scale << ") received, WS (ws_enabled) is set to " << state->ws_enabled << "\n";
 
-    if (state->snd_wnd_scale > 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
+    if (state->snd_wnd_scale > 14) { // RFC 7323 section 2.3: "the shift count MUST be limited to 14"
         EV_ERROR << "ERROR: Tcp Header Option WS received but shift count value is exceeding 14\n";
         state->snd_wnd_scale = 14;
     }
@@ -3045,7 +3045,7 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + std::max(state->maxRcvBuffer, state->window_clamp) - state->rcv_nxt;
                 state->rcv_wnd_scale = 0;
 
-                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 1323, page 11: "the shift count must be limited to 14"
+                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 7323 section 2.3: "the shift count MUST be limited to 14"
                     scaled_rcv_wnd = scaled_rcv_wnd >> 1;
                     state->rcv_wnd_scale++;
                 }
@@ -3090,16 +3090,14 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
+            // RFC 7323 section 3.2: "The TSval field contains the current value of the timestamp clock of the TCP sending the option."
             option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
-            // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
-            // RFC 1323, page 13:
-            // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the Tcp header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote Tcp in the TSval field
-            // of a Timestamps option.  When TSecr is not valid, its value
-            // must be zero."
+            // RFC 7323 section 4.3: "(3)  When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
+            // RFC 7323 section 3.2:
+            // "The TSecr field is valid if the ACK bit is set in the TCP header.  If
+            // the ACK bit is not set in the outgoing TCP header, the sender of that
+            // segment SHOULD set the TSecr field to zero."
             option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
 
             state->snd_initial_ts = true;
@@ -3162,16 +3160,14 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
             TcpOptionTimestamp *option = new TcpOptionTimestamp();
 
             // Update TS variables
-            // RFC 1323, page 13: "The Timestamp Value field (TSval) contains the current value of the timestamp clock of the Tcp sending the option."
+            // RFC 7323 section 3.2: "The TSval field contains the current value of the timestamp clock of the TCP sending the option."
             option->setSenderTimestamp(convertSimtimeToTS(simTime()));
 
-            // RFC 1323, page 16: "(3) When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
-            // RFC 1323, page 13:
-            // "The Timestamp Echo Reply field (TSecr) is only valid if the ACK
-            // bit is set in the Tcp header; if it is valid, it echos a times-
-            // tamp value that was sent by the remote Tcp in the TSval field
-            // of a Timestamps option.  When TSecr is not valid, its value
-            // must be zero."
+            // RFC 7323 section 4.3: "(3)  When a TSopt is sent, its TSecr field is set to the current TS.Recent value."
+            // RFC 7323 section 3.2:
+            // "The TSecr field is valid if the ACK bit is set in the TCP header.  If
+            // the ACK bit is not set in the outgoing TCP header, the sender of that
+            // segment SHOULD set the TSecr field to zero."
             option->setEchoedTimestamp(tcpHeader->getAckBit() ? state->ts_recent : 0);
 
             EV_INFO << "Tcp Header Option TS(TSval=" << option->getSenderTimestamp() << ", TSecr=" << option->getEchoedTimestamp() << ") sent\n";
@@ -3433,7 +3429,7 @@ uint16_t TcpConnection::updateRcvWnd()
     // Observe upper limit for advertised window on this connection
     const uint32_t maxWin = (state->ws_enabled && state->rcv_wnd_scale) ? (TCP_MAX_WIN << state->rcv_wnd_scale) : TCP_MAX_WIN; // TCP_MAX_WIN = 65535 (16 bit)
     if (win > maxWin)
-        win = maxWin; // Note: The window size is limited to a 16 bit value in the TCP header if WINDOW SCALE option (RFC 1323) is not used
+        win = maxWin; // Note: The window size is limited to a 16 bit value in the TCP header if WINDOW SCALE option (RFC 7323 section 2) is not used
 
     // Note: The order of the "Do not shrink window" and "Observe upper limit" parts has been changed to the order used in FreeBSD Release 7.1
 
@@ -3453,7 +3449,7 @@ uint16_t TcpConnection::updateRcvWnd()
     // scale rcv_wnd:
     uint32_t scaled_rcv_wnd = state->rcv_wnd;
     if (state->ws_enabled && state->rcv_wnd_scale) {
-        ASSERT(state->rcv_wnd_scale <= 14); // RFC 1323, page 11: "the shift count must be limited to 14"
+        ASSERT(state->rcv_wnd_scale <= 14); // RFC 7323 section 2.3: "the shift count MUST be limited to 14"
         scaled_rcv_wnd = scaled_rcv_wnd >> state->rcv_wnd_scale;
     }
 
@@ -3471,11 +3467,11 @@ uint32_t TcpConnection::getFlightSize() const
 void TcpConnection::updateWndInfo(const Ptr<const TcpHeader>& tcpHeader, bool doAlways)
 {
     uint32_t true_window = tcpHeader->getWindow();
-    // RFC 1323, page 10:
+    // RFC 7323 section 2.3:
     // "The window field (SEG.WND) in the header of every incoming
-    // segment, with the exception of SYN segments, is left-shifted
-    // by Snd.Wind.Scale bits before updating SND.WND:
-    //    SND.WND = SEG.WND << Snd.Wind.Scale"
+    // segment, with the exception of <SYN> segments, MUST be left-
+    // shifted by Snd.Wind.Shift bits before updating SND.WND:
+    //    SND.WND = SEG.WND << Snd.Wind.Shift"
     if (state->ws_enabled && !tcpHeader->getSynBit())
         true_window = tcpHeader->getWindow() << state->snd_wnd_scale;
 

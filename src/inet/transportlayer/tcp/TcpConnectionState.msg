@@ -102,7 +102,7 @@ enum TcpEventCode {
     TCP_E_RCV_UNEXP_SYN = 19; // unexpected SYN
 
     // timers
-    TCP_E_TIMEOUT_2MSL = 20; // RFC 793, a.k.a. TIME-WAIT timer
+    TCP_E_TIMEOUT_2MSL = 20; // RFC 9293 section 3.10.8, a.k.a. TIME-WAIT timer
     TCP_E_TIMEOUT_CONN_ESTAB = 21;
     TCP_E_TIMEOUT_FIN_WAIT_2 = 22;
 
@@ -119,7 +119,7 @@ enum TcpEventCode {
 // it in Tkenv.)
 //
 // TcpStateVariables only contains variables needed to implement
-// the "base" (RFC 793) TCP. More advanced TCP variants are encapsulated
+// the "base" (RFC 9293) TCP. More advanced TCP variants are encapsulated
 // into TcpAlgorithm subclasses which can have their own state blocks,
 // subclassed from TcpStateVariables. See TcpAlgorithm::createStateVariables().
 //
@@ -138,7 +138,7 @@ struct TcpStateVariables
     uint32_t advertisedMss = 0;     // the MSS that this side announces in its SYN or SYN-ACK: its own receive limit
                                     // (RFC 9293 section 3.7.1), not clamped to the MSS of the peer as snd_mss is
 
-    // send sequence number variables (see RFC 793, "3.2. Terminology")
+    // send sequence number variables (see RFC 9293 section 3.3.1, "Key Connection State Variables")
     uint32_t snd_una = 0;           // send unacknowledged
     uint32_t snd_nxt = 0;           // send next (drops back on retransmission)
     uint32_t snd_max = 0;           // max seq number sent (needed because snd_nxt is re-set on retransmission)

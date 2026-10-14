@@ -2,14 +2,14 @@ TCP
 ===
 
 This folder contains the "base part" of TCP, basically the operation
-described in RFC 793. This base algorithm can be extended and customized via
+described in RFC 9293. This base algorithm can be extended and customized via
 "flavour" and "queue" classes that implement the TCPAlgorith, TCPSendQueue
 and TCPReceiveQueue classes, and are selected via TCP's NED parameters.
 This implementation supports:
-  - RFC  793 - Transmission Control Protocol
+  - RFC 9293 - Transmission Control Protocol
   - RFC  896 - Congestion Control in IP/TCP Internetworks
   - RFC 1122 - Requirements for Internet Hosts -- Communication Layers
-  - RFC 1323 - TCP Extensions for High Performance
+  - RFC 7323 - TCP Extensions for High Performance
   - RFC 2018 - TCP Selective Acknowledgment Options
   - RFC 2581 - TCP Congestion Control
   - RFC 2883 - An Extension to the Selective Acknowledgement (SACK) Option for TCP

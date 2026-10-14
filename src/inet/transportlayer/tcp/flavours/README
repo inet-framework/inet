@@ -18,7 +18,7 @@ What is inside these "flavour" classes?
 
 TCP implementations may differ significantly in the presence and flavour of
 congestion control, fast retransmit/recovery, selective acknowledgement and
-other schemes -- while the "base part", defined in RFC 793 is always the
+other schemes -- while the "base part", defined in RFC 9293 is always the
 same. In this TCP model, this "base" part is implemented in the
 TCPConnection class, while the rest is outsourced to "flavour" classes that
 are used via the TCPAlgorithm interface (an abstract base class).

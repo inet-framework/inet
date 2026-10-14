@@ -360,7 +360,7 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     // Also: abort connection after max 12 retries.
     //
     // However, retransmission is actually more complicated than that
-    // in RFC 793 above, we'll leave it to subclasses (e.g. TcpTahoe, TcpReno).
+    // in RFC 9293 section 3.10.8 above, we'll leave it to subclasses (e.g. TcpTahoe, TcpReno).
     //
     if (++state->rexmit_count > maxRexmitCount) {
         EV_DETAIL << "Retransmission count exceeds " << maxRexmitCount << ", aborting connection\n";

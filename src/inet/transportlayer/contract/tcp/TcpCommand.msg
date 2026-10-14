@@ -374,7 +374,7 @@ class TcpStatusInfo extends TcpCommand
     bool fin_ack_rcvd;
 
     // Additional fields below bridge a Linux struct tcp_info-style status query
-    // (e.g. for packetdrill's %{ }% assertion blocks) -- not part of RFC 793,
+    // (e.g. for packetdrill's %{ }% assertion blocks) -- not part of RFC 9293,
     // sourced from the congestion-control/loss-recovery state variables where
     // available. Fields with no equivalent for the connection's flavour (e.g.
     // DumbTcp has no congestion window) are set to UINT_MAX/-1 as a sentinel;
