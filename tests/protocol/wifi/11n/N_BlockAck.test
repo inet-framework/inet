@@ -33,6 +33,7 @@ Define_ProtocolTest(wifi_11n_block_ack)
 [General]
 *.tester.testName = "wifi_11n_block_ack"
 *.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
 *.ap.wlan[*].mac.hcf.isBlockAckSupported = true
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
 *.sta1.app[0].sendInterval = 0.1ms

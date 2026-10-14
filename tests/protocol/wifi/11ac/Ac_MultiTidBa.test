@@ -55,6 +55,7 @@ Define_ProtocolTest(wifi_11ac_multi_tid_ba)
 *.sta2.app[1].typename = "UdpSink"
 *.sta2.app[1].localPort = 5001
 *.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
 *.ap.wlan[*].mac.hcf.isBlockAckSupported = true
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
 *.sta1.app[0].sendInterval = 2ms

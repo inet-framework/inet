@@ -26,6 +26,7 @@ Define_ProtocolTest(wifi_11n_amsdu)
 [General]
 *.tester.testName = "wifi_11n_amsdu"
 *.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
 *.ap.wlan[*].mac.hcf.isBlockAckSupported = true
 *.sta1.app[0].sendInterval = 0.1ms
 include ../../ini/_n.ini

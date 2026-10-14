@@ -8,6 +8,8 @@ Transmit opportunity (TXOP) is a MAC feature in 802.11, which increases throughp
 for high priority data by providing contention-free channel access for a period of time.
 This showcase demonstrates frame exchanges during a TXOP.
 
+The Block Ack exchanges select the historical Basic profile with ``mac.hcf.blockAckVariant = "basic"`` on both ad hoc hosts. `IEEE Std 802.11e-2005 <https://standards.ieee.org/ieee/802.11e/3131/>`__ introduced the format in Clauses 7.2.1.7 and 7.2.1.8. `IEEE Std 802.11-2024 <https://standards.ieee.org/ieee/802.11/10548/>`__ reserves type 0 in Tables 9-36 and 9-37. Thus, IEEE Std 802.11-2024 does not support Basic. This profile preserves the existing TXOP study; its HT PHY modes and INET response rules do not establish complete historical conformance.
+
 | Verified with INET version: ``4.6``
 | Source files location: `inet/showcases/wireless/txop <https://github.com/inet-framework/inet/tree/master/showcases/wireless/txop>`__
 
@@ -137,7 +139,7 @@ Block acks are enabled:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: isBlockAckSupported
-   :end-at: isBlockAckSupported
+   :end-at: blockAckVariant
    :language: ini
 
 The aggregation, RTS, and block ack thresholds are also set appropriately to produce the desired frame sequences:

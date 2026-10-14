@@ -342,6 +342,7 @@ record-scalar-results = false
 **.wlan[*].mac.rx.typename = "RateProtectionRx"
 **.wlan[*].mac.hcf.typename = "RateProtectionHcf"
 **.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} == 0 || ${scenario} == 1 || ${scenario} == 5
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 1
