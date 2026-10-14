@@ -49,7 +49,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.tlpEnabled = true
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %contains: stdout
 Loss at cwnd=8 segments, in flight=8 segments

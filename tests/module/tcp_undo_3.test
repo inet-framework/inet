@@ -54,7 +54,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.lossUndoEnabled = true
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %# the D-SACK of the second timeout's retransmission...
 %contains: stdout

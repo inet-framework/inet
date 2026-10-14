@@ -51,7 +51,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.frtoEnabled = true
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %contains: stdout
 [4.003 B004] A.1000 < B.2000: A ack 1501 win 5000

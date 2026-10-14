@@ -75,6 +75,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.mss = 500
 *.*_tcp.tcpAlgorithmClass = "TcpReno"
 
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %#--------------------------------------------------------------------------------------------------------------
 %# t=0.5: idle baseline, before tSend -- both counters still exactly 0.

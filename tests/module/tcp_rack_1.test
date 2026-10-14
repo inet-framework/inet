@@ -50,7 +50,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.lossDetectionMode = "rack"
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %# RACK marks the earlier-sent segment lost by time...
 %contains: stdout

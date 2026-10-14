@@ -53,7 +53,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.frtoEnabled = true
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %contains: stdout
 F-RTO: no detection, the timeout comes during a loss recovery

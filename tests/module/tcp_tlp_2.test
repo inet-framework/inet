@@ -51,7 +51,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.tlpEnabled = true
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %# the ACK of the original comes first, without a D-SACK...
 %contains: stdout

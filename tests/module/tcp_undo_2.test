@@ -50,7 +50,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.lossUndoEnabled = true
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %# the needless retransmission is reported by a D-SACK...
 %contains: stdout

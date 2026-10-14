@@ -67,6 +67,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.mss = 1000
 *.*_tcp.advertisedWindow = 20000
 
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout

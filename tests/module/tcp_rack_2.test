@@ -54,7 +54,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.lossDetectionMode = "rack"
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %# the reordering timer fires and RACK marks the dropped segment lost by time...
 %contains: stdout

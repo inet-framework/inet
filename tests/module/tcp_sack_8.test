@@ -51,7 +51,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.tcpAlgorithmClass = "TcpReno"
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %# after the timeout, the sender sends the one segment that is not SACKed...
 %contains: stdout

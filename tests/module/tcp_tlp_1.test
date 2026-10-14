@@ -52,7 +52,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.tlpEnabled = true
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %# the probe retransmits the lost tail...
 %contains: stdout

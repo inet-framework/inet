@@ -50,7 +50,8 @@ cmdenv-log-prefix="[%c]: "
 *.*_tcp.frtoEnabled = true
 *.*_tcp.increasedIWEnabled = true
 
-
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
 
 %# the first ACK after the timeout covers data that was sent once...
 %contains: stdout

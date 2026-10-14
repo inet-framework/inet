@@ -44,6 +44,9 @@ sim-time-limit = 3s
 
 **.app[0].dataTransferMode = "bytecount"
 
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
+
 %file: test.ned
 
 import inet.test.moduletest.lib.*;
