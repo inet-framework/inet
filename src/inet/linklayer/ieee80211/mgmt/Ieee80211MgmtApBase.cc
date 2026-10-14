@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 
@@ -28,6 +29,14 @@ const simsignal_t ieee80211RadioChannelChangedSignal = cComponent::registerSigna
 }
 
 namespace ieee80211 {
+
+void Ieee80211MgmtApBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+    Ieee80211MgmtBase::receiveSignal(source, signalID, obj, details);
+    if (signalID == modesetChangedSignal)
+        mib->setBssRateSet(makeRateSet(supportedRates, extendedSupportedRates.numRates > 0, extendedSupportedRates));
+}
 
 void Ieee80211MgmtApBase::initialize(int stage)
 {

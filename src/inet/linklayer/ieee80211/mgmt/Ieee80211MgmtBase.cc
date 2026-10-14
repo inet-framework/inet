@@ -71,7 +71,47 @@ void Ieee80211MgmtBase::receiveSignal(cComponent *source, simsignal_t signalID, 
         }
         supportedRates.numRates = rateIndex;
         extendedSupportedRates.numRates = extendedRateIndex;
+        mib->setLocalRateSet(makeRateSet(supportedRates, extendedRateIndex > 0, extendedSupportedRates));
     }
+}
+
+Ieee80211RateSetState Ieee80211MgmtBase::makeRateSet(const Ieee80211SupportedRatesElement& rates,
+        bool extendedPresent, const Ieee80211ExtendedSupportedRatesElement& extendedRates, bool basicKnown)
+{
+    Ieee80211RateSetState state;
+    if (rates.numRates < 0 || rates.numRates > 8 ||
+            (extendedPresent && (extendedRates.numRates < 1 || extendedRates.numRates > 255)))
+        throw cRuntimeError("Invalid management rate element count");
+    // Zero rates preserve absent information in abstract management inputs.
+    // The serializer requires a nonempty Supported Rates element on the wire.
+    if (rates.numRates == 0)
+        return state;
+    state.supported.known = state.operational.known = true;
+    state.basic.known = basicKnown;
+    auto addRates = [&state, basicKnown](const auto& element) {
+        for (int i = 0; i < element.numRates; i++) {
+            auto rate = Mbps(element.rate[i]);
+            state.supported.legacyRates.insert(rate);
+            state.operational.legacyRates.insert(rate);
+            if (basicKnown && element.basicRate[i])
+                state.basic.legacyRates.insert(rate);
+        }
+    };
+    // IEEE Std 802.11-2024, 9.4.2.3 and 9.4.2.11: both elements
+    // describe operational rates. Request frames do not supply BSS basic rates.
+    addRates(rates);
+    if (extendedPresent)
+        addRates(extendedRates);
+    validateIeee80211RateSetState(state, "management rate state");
+    // IEEE Std 802.11-2024, Table 9-131: values 122..127 are BSS membership
+    // selectors, not legacy rates. Selector-based join checks remain unmodeled.
+    for (int selector = 122; selector <= 127; selector++) {
+        auto rate = Mbps(selector * 0.5);
+        state.supported.legacyRates.erase(rate);
+        state.operational.legacyRates.erase(rate);
+        state.basic.legacyRates.erase(rate);
+    }
+    return state;
 }
 
 void Ieee80211MgmtBase::addHtCapabilities(const Ptr<Ieee80211MgmtFrame>& frame) const
@@ -191,7 +231,7 @@ void Ieee80211MgmtBase::start()
 
 void Ieee80211MgmtBase::stop()
 {
-    mib->clearPeerHtCapabilities();
+    mib->clearBssAndAllPeerStates();
 }
 
 } // namespace ieee80211

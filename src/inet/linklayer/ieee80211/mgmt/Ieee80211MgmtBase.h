@@ -63,6 +63,10 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Packet *frame);
 
+    // Convert the modeled legacy rate elements to the existing MIB representation.
+    static Ieee80211RateSetState makeRateSet(const Ieee80211SupportedRatesElement& rates,
+            bool extendedPresent, const Ieee80211ExtendedSupportedRatesElement& extendedRates, bool basicKnown = true);
+
     /** Populates the primary and (when needed) Extended Supported Rates elements. */
     template<typename Frame>
     void setSupportedRateElements(const Ptr<Frame>& frame) const

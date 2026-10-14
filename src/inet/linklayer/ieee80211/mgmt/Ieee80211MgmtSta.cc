@@ -621,11 +621,12 @@ void Ieee80211MgmtSta::disassociate()
 void Ieee80211MgmtSta::clearCurrentAssociation()
 {
     ASSERT(mib->bssStationData.isAssociated);
+    auto address = assocAP.address;
     mib->bssStationData.isAssociated = false;
-    mib->removePeerHtCapabilities(assocAP.address);
     cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
     assocAP = AssociatedApInfo(); // clear it
+    mib->clearBssAndPeerState(address);
 }
 
 bool Ieee80211MgmtSta::terminateCurrentAssociationFromPeer(const MacAddress& address)
@@ -665,14 +666,10 @@ void Ieee80211MgmtSta::stop()
 
     clearAPList();
 
-    if (mib->bssStationData.isAssociated)
-        clearCurrentAssociation();
-    else {
-        cancelAndDelete(assocAP.beaconTimeoutMsg);
-        assocAP.beaconTimeoutMsg = nullptr;
-        assocAP = AssociatedApInfo();
-    }
-
+    mib->bssStationData.isAssociated = false;
+    cancelAndDelete(assocAP.beaconTimeoutMsg);
+    assocAP.beaconTimeoutMsg = nullptr;
+    assocAP = AssociatedApInfo();
     Ieee80211MgmtBase::stop();
 }
 
@@ -893,8 +890,20 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
     }
 
     // extract frame contents
-    const auto& responseBody = packet->peekData<Ieee80211AssociationResponseFrame>();
+    const auto responseBody = packet->peekData<Ieee80211AssociationResponseFrame>();
     int statusCode = responseBody->getStatusCode();
+    Ieee80211RateSetState responseRates;
+    if (statusCode == SC_SUCCESSFUL) {
+        try {
+            responseRates = makeRateSet(responseBody->getSupportedRates(), responseBody->getExtendedSupportedRatesPresent(),
+                    responseBody->getExtendedSupportedRates());
+        }
+        catch (const cRuntimeError& error) {
+            EV_WARN << "Ignoring association response with invalid rates: " << error.what() << "\n";
+            delete packet;
+            return;
+        }
+    }
 
     HtAssociationResponseStatus responseHtStatus = HtAssociationResponseStatus::LEGACY;
     Ieee80211HtCapabilities responseHtCapabilities;
@@ -930,11 +939,7 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
 
         if (mib->bssStationData.isAssociated) {
             EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
-            mib->bssStationData.isAssociated = false;
-            mib->removePeerHtCapabilities(assocAP.address);
-            cancelAndDelete(assocAP.beaconTimeoutMsg);
-            assocAP.beaconTimeoutMsg = nullptr;
-            assocAP = AssociatedApInfo();
+            clearCurrentAssociation();
         }
 
         // change our state to "associated"
@@ -942,26 +947,24 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
         mib->bssData.bssid = ap->address;
         mib->bssStationData.isAssociated = true;
         (ApInfo&)assocAP = (*ap);
-        if (responseHtStatus == HtAssociationResponseStatus::VALID_HT)
-            mib->setPeerHtCapabilities(ap->address, responseHtCapabilities, responseHtOperation);
-        else {
-            mib->removePeerHtCapabilities(ap->address);
-            if (responseHtStatus == HtAssociationResponseStatus::INVALID_HT) {
-                EV_WARN << "Association succeeded without usable HT negotiation with AP address=" << ap->address
-                        << ": " << responseHtReason << "\n";
-                HtNegotiationFailure notification;
-                notification.setPeerAddress(ap->address);
-                notification.setReassociation(reassociation);
-                notification.setStatus(responseHtStatus);
-                notification.setReason(responseHtReason);
-                emit(htNegotiationFailedSignal, &notification);
-            }
-        }
-
-        emit(l2AssociatedSignal, myIface, ap);
-
+        assocAP.supportedRates = responseBody->getSupportedRates();
+        assocAP.extendedSupportedRatesPresent = responseBody->getExtendedSupportedRatesPresent();
+        assocAP.extendedSupportedRates = responseBody->getExtendedSupportedRates();
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
         scheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
+        mib->installBssAndPeerState(responseRates, ap->address, responseRates,
+                responseHtStatus == HtAssociationResponseStatus::VALID_HT ? &responseHtCapabilities : nullptr, responseHtOperation);
+        if (responseHtStatus == HtAssociationResponseStatus::INVALID_HT) {
+            EV_WARN << "Association succeeded without usable HT negotiation with AP address=" << ap->address
+                    << ": " << responseHtReason << "\n";
+            HtNegotiationFailure notification;
+            notification.setPeerAddress(ap->address);
+            notification.setReassociation(reassociation);
+            notification.setStatus(responseHtStatus);
+            notification.setReason(responseHtReason);
+            emit(htNegotiationFailedSignal, &notification);
+        }
+        emit(l2AssociatedSignal, myIface, ap);
     }
 
     // report back to agent
@@ -1104,18 +1107,7 @@ void Ieee80211MgmtSta::handleBeaconFrame(Packet *packet, const Ptr<const Ieee802
 {
     EV << "Received Beacon frame\n";
     const auto& beaconBody = packet->peekData<Ieee80211BeaconFrame>();
-    bool accepted = storeAPInfo(packet, header, beaconBody);
-
-    // if it is out associate AP, restart beacon timeout
-    if (accepted && mib->bssStationData.isAssociated && header->getTransmitterAddress() == assocAP.address) {
-        EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
-        ASSERT(assocAP.beaconTimeoutMsg != nullptr);
-        rescheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
-
-//        ApInfo *ap = lookupAP(frame->getTransmitterAddress());
-//        ASSERT(ap!=nullptr);
-    }
-
+    storeAPInfo(packet, header, beaconBody);
     delete packet;
 }
 
@@ -1152,6 +1144,14 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     candidate.supportedRates = body->getSupportedRates();
     candidate.extendedSupportedRatesPresent = body->getExtendedSupportedRatesPresent();
     candidate.extendedSupportedRates = body->getExtendedSupportedRates();
+    Ieee80211RateSetState advertisedRates;
+    try {
+        advertisedRates = makeRateSet(candidate.supportedRates, candidate.extendedSupportedRatesPresent, candidate.extendedSupportedRates);
+    }
+    catch (const cRuntimeError& error) {
+        EV_WARN << "Ignoring discovery with invalid rates: " << error.what() << "\n";
+        return false;
+    }
     bool htCapabilitiesPresent = body->getHtCapabilitiesPresent();
     bool htOperationPresent = body->getHtOperationPresent();
     bool ignoreHt = mib != nullptr && !mib->isHtOperationSupported();
@@ -1255,22 +1255,26 @@ bool Ieee80211MgmtSta::storeAPInfo(Packet *packet, const Ptr<const Ieee80211Mgmt
     if (currentAssociatedAp && isBeacon) {
         (ApInfo&)assocAP = *ap;
         mib->bssData.ssid = ap->ssid;
+        EV << "Beacon is from associated AP, restarting beacon timeout timer\n";
+        ASSERT(assocAP.beaconTimeoutMsg != nullptr);
+        rescheduleAfter(MAX_BEACONS_MISSED * assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
+        bool validHt = false;
         if (mib->isHtOperationSupported() && candidate.htCapabilitiesPresent && candidate.htOperationPresent) {
             auto negotiated = negotiateHtCapabilities(mib->localHtCapabilities, candidate.htCapabilities, candidate.htOperation);
             if (supportsBasicHtMcsSet(mib->localHtCapabilities, candidate.htOperation) &&
                     negotiated.localTxPeerRx.valid && negotiated.localRxPeerTx.valid) {
                 EV_INFO << "Refreshing authoritative HT state for associated AP address=" << address << "\n";
-                mib->setPeerHtCapabilities(address, candidate.htCapabilities, candidate.htOperation);
+                validHt = true;
             }
             else {
                 EV_WARN << "Beacon from associated AP has unusable HT advertisement: removing peer HT state for AP address=" << address << "\n";
-                mib->removePeerHtCapabilities(address);
             }
         }
         else {
             EV_INFO << "Beacon from associated AP has no usable HT advertisement or STA is legacy: removing peer HT state for AP address=" << address << "\n";
-            mib->removePeerHtCapabilities(address);
         }
+        mib->installBssAndPeerState(advertisedRates, address, advertisedRates,
+                validHt ? &candidate.htCapabilities : nullptr, candidate.htOperation);
     }
     else if (signalPowerInd != nullptr && currentAp)
         assocAP.rxPower = candidate.rxPower;

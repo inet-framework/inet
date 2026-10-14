@@ -832,6 +832,20 @@ association identifiers and the peer HT states. Everyone else reads. The
 state view in the next part gives every field with its owner, its writers,
 its readers and its lifetime.
 
+Management publishes supported, basic, and operational legacy rates through the MIB's rate-set operations. The local record follows the configured mode set. The AP's BSS record contains its advertised rates and basic flags. The AP commits a peer's operational rates after the final association or reassociation response receives an ACK. Request frames do not define BSS basic rates, so the AP's peer record keeps its basic set unknown.
+
+The STA commits BSS and AP rates from the successful response. A valid associated-AP Beacon refreshes both records before one ``rateStateChanged`` notification. Scan candidates, Probe Responses, and refused attempts for another AP preserve the active records. A known basic set with no rates differs from an unknown basic set. Simplified management installs equivalent records from local advertisements during static association.
+
+Association and valid associated-AP Beacons use ``installBssAndPeerState()`` to commit peer HT state, BSS rates, and peer rates before one notification. A null capabilities argument removes peer HT state in the same transition. AP management clears its pending transaction before this call. STA management completes its association snapshot and Beacon timer before this call. Identical HT and rate state emits no notification. Standalone HT and rate setters retain their separate notification behavior.
+
+For example, ``g(mixed)`` advertises twelve legacy rates across Supported Rates and Extended Supported Rates. Management publishes all twelve rates in the operational record. After association loss, the STA clears its BSS and peer records. At the AP, peer departure removes that peer's record and preserves the BSS record. Management stop clears its BSS and peer records; the local catalog record remains available. Current built-in rate selectors do not consume these legacy rate records.
+
+On STA association loss, management clears its association snapshot and Beacon timer before the MIB emits the cleanup notification. The MIB operation ``clearBssAndPeerState()`` removes BSS rates and one peer's HT and rate state before one notification. It preserves local state and unrelated peers. Stop uses ``clearBssAndAllPeerStates()`` to remove all peer HT and rate state and BSS rates before one notification. Empty cleanup emits no notification. The standalone removal methods continue to notify independently.
+
+Full AP departure completes the station downgrade and pending-transaction cleanup before peer release notification. Full AP stop uses ``clearAccessPointState()`` to clear station and association-ID tables, BSS rates, and peer state before one notification. Local rate records remain available. The standalone ``clearAssociationIds()`` operation continues to preserve BSS rates.
+
+BSS membership selectors describe required features, not legacy data rates. The rate writer excludes the six selectors from IEEE Std 802.11-2024, Table 9-131, from supported, basic, and operational legacy rate sets. This applies to both Supported Rates and Extended Supported Rates. For example, the HT selector ``0xFF`` does not create a 63.5 Mbps rate record. Management retains its existing HT capability checks; selector-based join checks remain unmodeled.
+
 .. _dg:sec:80211:views:
 
 The views
