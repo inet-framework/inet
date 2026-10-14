@@ -75,7 +75,7 @@ neighbour or split, when its cherry-picks or its builds show a reason.
 | S18b ✅ | `topic/tcp-path-mtu-probing` | 26 (part), 46 (part), new | +285 −3 | the RFC 4821 path MTU search of Linux behind a parameter, the route MTU of a connection and `TcpSocket::setPathMtu()`, the start MSS of an active opener, the SYN after an ICMP fragmentation-needed error (D-94 to D-97) |
 | S18c ✅ | `topic/tcp-applications` | 42, 58 | +27 −11 | MSG_EOR in the send script of `TcpSessionApp`, and a fill byte for its data; commit 58 takes back the close of `TcpServerSocketIo` of commit 42 (D-1) |
 | S19 ✅ | `topic/tcp-new-parameters` | 15 (part), 46 (part), 53, 87, new | +115 −16 | the new parameters with the defaults of master: `retainSackAfterRto`, `initialWindow` and `initialCwnd`, `initialSendSequenceNumber`, `mss = -1`, the PSH of RFC 9293 MUST-61; the initial window in SMSS (D-98 to D-100) |
-| S19b | `topic/tcp-modern-defaults` | 16 (part), 40, 68 (part), 70, 71, 72 (the rest), 78, 80 (part), 81 | +600 −450 (about) | the pins of the old defaults in the tests, the modern defaults one commit for each with their moved rows, the TCP standards tests and the evidence under the new defaults, the statistical baselines |
+| S19b | `topic/tcp-modern-defaults` | 16 (part), 40, 68 (part), 70, 71, 72 (the rest), 78, 80 (part), 81 | +600 −450 (about) | `LegacyTcp` for the module tests, the RFC defaults one commit for each with their moved rows, `LinuxTcp`, the TCP standards tests and the evidence under the new defaults, the statistical baselines |
 | S20 | `topic/tcp-modernization-docs` | 48, 66, and the source plan | +700 −200 (about) | the RFC list of the module, the release note, the source plan to `plan/done/` |
 
 The big test commit (41, `tests: add+change: cover the new behavior, and pin the old defaults`,
@@ -2819,3 +2819,164 @@ controls of the default and of the deprecated `increasedIWEnabled`, which pass t
 fingerprint job runs at each code commit, and no row moves. The TCP fingerprint rows run in debug
 at the head with no runtime error (the `tyf` ingredient differs in 52 rows, as on master; the lwIP
 rows need a build with lwIP). The six gates and the combined pull-request gate pass.
+
+### S19b — `topic/tcp-modern-defaults`: the steps
+
+| Step | Commit | B of D-6 | Source |
+| --- | --- | --- | --- |
+| 1 | tests: the TCP standards tests hold under the RFC defaults | — | 80 (part) |
+| 2 | add: LegacyTcp, the defaults of master, for the module tests | — | 41 (part), D-104 |
+| 3 | fix: retransmitData() sends a lost FIN again without data | — | new (D-101) |
+| 4 | change: SACK by default | — | 40 (part) |
+| 5 | change: timestamps by default | — | 40 (part) |
+| 6 | change: window scaling by default | — | 40 (part) |
+| 7 | change: delayed ACKs by default | — | 40 (part) |
+| 8 | change: Limited Transmit by default | — | 40 (part) |
+| 9 | change: an advertised window of 65535 bytes by default | — | 40 (part) |
+| 10 | change: the MSS of the address family by default | — | 40 (part) |
+| 11 | change: the initial window of RFC 5681 by default | — | 78 |
+| 12 | change: NewReno by default | — | new (D-104) |
+| 13 | change: CUBIC without the hybrid slow start by default | — | new (D-104) |
+| 14 | change: the initial RTO of RFC 6298 by default | — | 40 (part), 68 (part) |
+| 15 | change: RACK loss detection by default | — | 40 (part) |
+| 16 | change: PRR by default | — | 40 (part) |
+| 17 | change: the tail loss probe by default | — | 40 (part) |
+| 18 | change: PSH in the last buffered segment by default | — | new (D-74) |
+| 19 | change: an answer to an ECN request by default | — | new (D-104) |
+| 20 | change: path MTU discovery by default | — | new (D-104) |
+| 21 | add: LinuxTcp, the defaults of Linux | — | 16 (part), 40 (part), new (D-104) |
+| 22 | doc: the TCP evidence follows the tests to the RFC defaults | — | 81 |
+
+The owner decided on 2026-09-29 that the TCP standards tests run the defaults of the series and
+override a parameter only where a check needs it, with the reason in the ini. Commit 80 makes
+them do that; except for `Rfc6298KarnsRule`, its changes hold under the old defaults too, so they
+land first, and the change of `Rfc6298KarnsRule` comes with the default that needs it. The module
+tests keep their dumps: step 2 adds `LegacyTcp`, which they select, and each change of a default
+adds the old value there, so the module tests see no change; a test that checks a default says
+so. Then each default changes in a commit of its own, with the CI rows that it moves (D-24), in an
+order where each feature has what it needs: SACK before RACK, the advertised window before the MSS
+of the address family, whose window of 14 segments would follow it. Step 3 repairs a defect that
+the new window shows in `tcp_algorithm_dumb`: DumbTcp did not send a lost FIN again when no data
+was before it, and the connection never ended (D-101). Step 21 adds `LinuxTcp`, and inet-gpl then
+selects it; its packetdrill suite confirms the values of Linux. The statistical baselines of the
+`statistics` repository have not followed the stages since S5b (the job fails on 147 tests); after
+the last change of a default, they are regenerated in the CI copy, in a commit of that repository.
+
+#### The defaults of `Tcp`, `LinuxTcp` and `LegacyTcp`
+
+The owner decided on 2026-10-14 that the defaults of `Tcp` follow the RFCs, and that other sets of
+defaults are modules that extend `Tcp` and change only defaults: `LinuxTcp` (the defaults of
+Linux) and `LegacyTcp` (the defaults of master before S19b), both public (D-104). A user selects one
+with `**.tcp.typename`, and sets single parameters on top as before.
+
+The rule for `Tcp`:
+
+1. An RFC sets a value (MUST, SHOULD, RECOMMENDED, or a value that the RFC defines): `Tcp` takes it.
+2. An RFC recommends a mechanism (SHOULD, RECOMMENDED, "strongly recommended", "recommended to
+   implement"), and INET has it: on.
+3. An RFC only allows a mechanism (MAY), or only an Experimental RFC or Linux defines it: off, and
+   `LinuxTcp` sets the value of Linux.
+4. No RFC says anything (a size, a model choice): the value of master stays, unless the row is
+   open.
+
+`LinuxTcp` has the defaults of Linux 7.1 (the kernel of the packetdrill results of inet-gpl,
+7.1.3), with the stock sysctls, not the preamble of the scripts. `LegacyTcp` sets the value of
+master for each parameter whose default `Tcp` changes; a later change of a default of `Tcp` adds
+the old value there. It does not restore the behavior that earlier stages repaired.
+
+In the table, "=" is the value of `Tcp`. "verify" marks a value of Linux that the packetdrill
+suite must confirm before S19b lands. The class is RFC, Linux, model (no protocol meaning), or owner
+(no RFC decides the row, and the owner decided it on 2026-10-14).
+
+| Parameter | `Tcp` | `LinuxTcp` | `LegacyTcp` | Basis | Class |
+| --- | --- | --- | --- | --- | --- |
+| `sackSupport` | true | = | false | RFC 9293 3.2.1: recommended to implement; RFC 8985 needs it | RFC |
+| `dsackEnabled` | `this.sackSupport` | = | = | RFC 2883; Linux `tcp_dsack=1` | RFC |
+| `timestampSupport` | true | = | false | RFC 9293 3.2.1, RFC 7323 | RFC |
+| `windowScalingSupport` | true | = | false | RFC 9293 3.2.1, RFC 7323 | RFC |
+| `windowScalingFactor` | -1 | = | = | computed from the buffer | model |
+| `delayedAcksEnabled` | true | = | false | RFC 9293 SHLD-18 | RFC |
+| `delayedAckTimeout` | 200ms | = | = | RFC 9293 MUST-40: below 0.5 s | RFC |
+| `delayedAckFrameCount` | 2 | = | = | RFC 9293 SHLD-19 | RFC |
+| `adaptiveDelayedAcks` | false | true | = | the quickack and ATO of Linux | Linux |
+| `limitedTransmitEnabled` | true | = | false | RFC 5681 section 7: now recommended; RFC 3042 | RFC |
+| `nagleEnabled` | true | = | = | RFC 9293 SHLD-7 | RFC |
+| `minshallNagle` | false | true | = | Linux `tcp_minshall_check()` | Linux |
+| `mss` | -1 | = | 536 | RFC 9293 3.7.1: the MSS from the MTU (D-99) | RFC |
+| `sendMssOption` | true | = | = | RFC 9293 SHLD-5 | RFC |
+| `initialWindow` | `"rfc3390"` | `"rfc6928"` | `"rfc2001"` | RFC 5681 3.1; IW10 is RFC 6928, Experimental | RFC |
+| `initialCwnd`, `increasedIWEnabled` | 0, false | = | = | a route value; deprecated | model |
+| `initialSsthresh` | 0xFFFFFFFF | = | = | RFC 5681 3.1: arbitrarily high | RFC |
+| `dupthresh` | 3 | = | = | RFC 5681, RFC 6675; Linux `tcp_reordering=3` | RFC |
+| `tcpAlgorithmClass` | `"TcpNewReno"` | `"TcpCubic"` | `"TcpReno"` | RFC 5681 section 4.3 recommends a recovery for many losses, as NewReno; RFC 9438 (CUBIC) only allows CUBIC | owner |
+| `hystartEnabled` | false | true | true | RFC 9438 4.10: HyStart++ (RFC 9406) SHOULD, the hybrid slow start of Linux is experimental, Reno slow start MAY; INET has no HyStart++ | owner |
+| `hystartAckDelta`, `hystartDelayMax`, `hystartDelayMin`, `hystartDetect`, `hystartLowWindow` | 2ms, 16ms, 4ms, 3, 16 | = | = | the values of Linux; only with `hystartEnabled` | Linux |
+| `cubicBeta`, `cubicC`, `cubicFastConvergence`, `cubicTcpFriendliness` | 0.7, 0.4, true, true | = | = | RFC 9438 | RFC |
+| `cubicCntClamp`, `cubicDelta` | 20, 10ms | = | = | the values of Linux | Linux |
+| `dctcpGamma` | 0.0625 | = | = | RFC 8257 | RFC |
+| `lossDetectionMode` | `"rack"` | = | `"dupthresh"` | RFC 8985: RACK-TLP RECOMMENDED | RFC |
+| `tlpEnabled` | true | = | false | RFC 8985 | RFC |
+| `prrEnabled` | true | = | false | RFC 8985: PRR RECOMMENDED with RACK-TLP | RFC |
+| `rackReoTimerGranularity` | 0s | 4ms | = | the ticks of HZ=250 of the pinned kernel | Linux |
+| `adaptiveReorderingEnabled` | false | true | = | the reordering degree of Linux; RFC 4653 is Experimental | Linux |
+| `maxReordering` | 300 | = | = | Linux `tcp_max_reordering` | model |
+| `frtoEnabled` | false | true | = | RFC 5682; RFC 9438 4.9.1: MAY | Linux |
+| `lossUndoEnabled` | false | true | = | Eifel (RFC 3522) and D-SACK detection (RFC 3708) are Experimental; RFC 4015: MAY | Linux |
+| `retainSackAfterRto` | false | true | = | RFC 2018 section 8, RFC 5682 | Linux |
+| `seedRttFromHandshake` | false | true | = | no RFC asks for it; Linux | Linux |
+| `initialRto` | 1s | = | 3s | RFC 6298 2.1 | RFC |
+| `minRexmitTimeout` | 1s | 200ms | = | RFC 6298 2.4; Linux `TCP_RTO_MIN` | RFC |
+| `rtoVarianceFloor` | false | true | = | RFC 6298 2.3; Linux `tcp_set_rto()` | Linux |
+| `maxRexmitTimeout` | 240s | 120s | = | RFC 6298 2.5: at least 60 s, no value; Linux `TCP_RTO_MAX` | Linux |
+| `maxRexmitCount` | 12 | 15 | = | RFC 9293 SHLD-11: R2 at least 100 s; Linux `tcp_retries2` | Linux |
+| `synRetries` | 12 | 6 | = | RFC 9293 3.8.3: R2 of a SYN at least 3 minutes; Linux `tcp_syn_retries` | Linux |
+| `synLinearTimeouts` | 0 | 4 | = | RFC 6298 5.5; Linux `tcp_syn_linear_timeouts` | Linux |
+| `msl` | 120s | 30s | = | RFC 9293 3.4.2: 2 minutes; Linux TIME_WAIT is 60 s | Linux |
+| `maxPersistTimeout` | 60s | 120s | = | RFC 9293 SHLD-29, SHLD-30 set no limit (D-65); Linux `TCP_RTO_MAX`, verify | Linux |
+| `zeroWindowProbe` | `"rfc"` | `"linux"` | = | RFC 9293 3.8.6.1; Linux `tcp_xmit_probe_skb()` | Linux |
+| `keepAliveEnabled`, `keepAliveIdleTime`, `keepAliveInterval`, `keepAliveProbeCount` | false, 7200s, 75s, 9 | = | = | RFC 9293 MUST-24, MUST-25; Linux the same | RFC |
+| `pushLastBufferedSegment` | true | = | false | RFC 9293 MUST-61 | RFC |
+| `pushSegmentsOnWriteBoundary` | false | true | = | Linux `tcp_mark_push()`; it replaces the rule of MUST-61 | Linux |
+| `sendDataWithFirstAck` | true | = | = | RFC 9293 allows it; Linux the same | model |
+| `advertisedWindow` | 65535 | = | `14 * this.mss` | no RFC value; 14 segments were sized for 536 bytes, 20440 bytes with the MSS of the address family; Linux offers about 64 KB, verify | owner |
+| `receiveBufferSize` | -1B | = | = | Linux `tcp_rmem`, verify | model |
+| `windowAutoTuning` | false | true | = | Linux `tcp_moderate_rcvbuf=1` | Linux |
+| `windowShrinkAllowed` | false | = | = | RFC 9293 SHLD-14; Linux `tcp_shrink_window=0` | RFC |
+| `windowUpdateAfterRead` | false | true | = | Linux `__tcp_cleanup_rbuf()` | Linux |
+| `acceptBeyondBufferAtEmptyQueue` | false | true | = | Linux `tcp_data_queue()` | Linux |
+| `dropBeyondWindowEdge` | false | true | = | Linux `tcp_sequence()` | Linux |
+| `notsentLowat` | -1B | = | = | Linux `tcp_notsent_lowat` is off | model |
+| `tcpEcnMode` | `"passive"` | = | `"off"` | RFC 9293 SHLD-8: implement ECN (RFC 3168); no RFC asks to request it; Linux `tcp_ecn=2` | owner |
+| `ecnWillingness` | false | = | = | deprecated | model |
+| `accEcnOptionEnabled` | true | = | = | RFC 9768 3.2.3: RECOMMENDED; Linux `tcp_ecn_option`, verify | RFC |
+| `accEcnOptionPolicy` | `"rfc"` | `"linux"` | = | RFC 9768 3.2.3.3 | Linux |
+| `accEcnBareTimeWaitAck` | false | true | = | Linux | Linux |
+| `ecnMarkAll` | false | true | = | Linux, for AccECN and DCTCP | Linux |
+| `pmtudEnabled` | true | = | false | RFC 9293 3.7.2: strongly recommended; Linux on | owner |
+| `pmtudTimeout` | 600s | = | = | RFC 1191: 10 minutes | RFC |
+| `mtuProbing`, `baseMss`, `pathMtu` | 0, 1024, 0 | = | = | RFC 4821 search off, as Linux `tcp_mtu_probing=0` | model |
+| `softIcmpErrorsAbortSetup` | false | true | = | RFC 9293 MUST-56; Linux `tcp_v4_err()` | Linux |
+| `icmpSequenceCheck` | false | true | = | RFC 9293 3.9.2.2; Linux, RFC 5927 4.1 | Linux |
+| `tsRecentAfterAckCheck` | false | true | = | RFC 7323 5.3; Linux `tcp_replace_ts_recent()` | Linux |
+| `rfc5961AckCheck` | false | true | = | RFC 9293 MAY-12 | Linux |
+| `abortRstWithAck` | false | true | = | RFC 9293; Linux `tcp_send_active_reset()` | Linux |
+| `abortOnDataAfterClose` | false | true | = | RFC 9293 CLOSE; Linux `close()`, verify | Linux |
+| `fastopenClientEnabled` | false | true | = | RFC 7413 is Experimental; Linux `tcp_fastopen=1` | Linux |
+| `fastopenBlackholeTimeout` | 3600s | 0s | = | RFC 7413; Linux 5.14 and later | Linux |
+| `fastopenExpOptionEnabled` | false | true | = | RFC 7413 section 9; Linux | Linux |
+| `fastopenServerEnabled`, `fastopenAcceptWithoutCookie`, `fastopenClientNoCookieRequired`, `fastopenLenientCookieValidation` | false | = | = | RFC 7413; Linux the same | RFC |
+| `fastopenCookieBytes`, `fastopenCookieCacheSize`, `fastopenKey`, `fastopenMaxPendingRequests` | 8, 1024, `""`, 16 | = | = | Linux the same | model |
+| `syncookiesAlways` | false | = | = | Linux `tcp_syncookies=1` sends cookies only under a SYN flood | model |
+| `alignOptions` | true | = | = | the NOP alignment of RFC 7323 appendix A, as Linux | model |
+| `initialSendSequenceNumber` | -1 | = | = | RFC 9293 3.4.1 | model |
+| `checksumMode` | `"declared"` | = | = | RFC 9293 MUST-2 asks for `"computed"`; blocked, gap 2 | model |
+| `stopOperationExtraTime`, `stopOperationTimeout` | 0s, 2s | = | = | the lifecycle of INET | model |
+
+The owner decided the five rows of class owner on 2026-10-14, as the table shows: NewReno, which
+the rule gives, in place of CUBIC, which RFC 9438 only allows; no hybrid slow start, because INET
+has no HyStart++; a window of 65535 bytes, because the 14 segments of master were sized for 536
+bytes; the passive ECN, which answers a request and changes nothing when no peer asks; and path
+MTU discovery, which sets DF in each IPv4 segment.
+
+Compared with the first steps of S19b, five defaults moved from `Tcp` to `LinuxTcp`: the maximum
+RTO of 120 s, the learned reordering degree, the RTT sample of the handshake, the undo and F-RTO.
