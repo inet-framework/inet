@@ -61,12 +61,12 @@
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp16 -r 0,                  10s,             8451-5676/tplx;3813-bed6/~tNl;e7b8-9204/~tND;df08-d482/tyf, PASS, EthernetMac Ipv4
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp17 -r 0,                  10s,             67c9-084a/tplx;a480-20bf/~tNl;640b-c2e9/~tND;358d-162d/tyf, PASS, EthernetMac Ipv4
 # /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp2 -r 0,                  10s,             0, PASS, # abstract-config
-/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             d96c-2f0b/tplx;a43e-c684/~tNl;27dd-5870/~tND;3a6e-1801/tyf, PASS, EthernetMac Ipv4
-/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp22 -r 0,                  10s,             d96c-2f0b/tplx;a43e-c684/~tNl;a8dd-1314/~tND;c512-346f/tyf, PASS, EthernetMac Ipv4
-/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp23 -r 0,                  10s,             d96c-2f0b/tplx;a43e-c684/~tNl;0673-b7fe/~tND;cff7-d159/tyf, PASS, EthernetMac Ipv4
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             077e-63c7/tplx;b1a5-ca74/~tNl;50ba-c087/~tND;3a6e-1801/tyf, PASS, EthernetMac Ipv4
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp22 -r 0,                  10s,             077e-63c7/tplx;b1a5-ca74/~tNl;b0b1-fc69/~tND;c512-346f/tyf, PASS, EthernetMac Ipv4
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp23 -r 0,                  10s,             077e-63c7/tplx;b1a5-ca74/~tNl;361a-ea02/~tND;cff7-d159/tyf, PASS, EthernetMac Ipv4
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp24 -r 0,                  10s,             4e97-3b9f/tplx;a43e-c684/~tNl;e6dd-d3c6/~tND;640b-0006/tyf, PASS, EthernetMac Ipv4
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp3 -r 0   # abstract-config
-/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             f250-73f5/tplx;2942-66fc/~tNl;9d8a-4515/~tND;fbb9-0545/tyf, PASS, EthernetMac Ipv4
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             01bd-b21b/tplx;5e67-15d9/~tNl;df82-5bce/~tND;fbb9-0545/tyf, PASS, EthernetMac Ipv4
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp32 -r 0,                  10s,             a1c3-dc6b/tplx;ef6d-0c79/~tNl;7b1e-652b/~tND;ff5d-7f10/tyf, PASS, EthernetMac Ipv4
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp33 -r 0,                  10s,             4996-3fc6/tplx;ef6d-0c79/~tNl;7b1e-652b/~tND;31e7-cb21/tyf, PASS, EthernetMac Ipv4
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp5 -r 0   # abstract-config
@@ -152,8 +152,8 @@
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableSourceHost -r 0,              10s,     ee2c-67dc/tplx;283e-764a/~tNl;98c5-772c/~tND;e43d-2303/tyf, PASS, EthernetMac Ipv4
 /examples/inet/configurator/,        -f omnetpp.ini -c DisableDestinationInterfaces -r 0,   10s,     4fea-ce55/tplx;ba3e-99de/~tNl;21bc-bc31/~tND;37ed-6720/tyf, PASS, EthernetMac Ipv4
 
-/examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         cc2f-286d/tplx;9141-92f9/~tNl;41ea-71ae/~tND;0ad1-d012/tyf, PASS, EthernetMac Ipv4
-/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         417d-d488/tplx;6eef-636f/~tNl;0674-dbd3/~tND;651a-d4cf/tyf, PASS, EthernetMac Ipv4
+/examples/inet/dctcp/,               -f omnetpp.ini -c DcTcpIncast -r 0,            100s,         fbd5-a49b/tplx;d1c3-3cd6/~tNl;4f3f-8df1/~tND;0ad1-d012/tyf, PASS, EthernetMac Ipv4
+/examples/inet/dctcp/,               -f omnetpp.ini -c TcpRenoIncast -r 0,          100s,         3c90-c807/tplx;6def-df14/~tNl;e2bf-bdfc/~tND;651a-d4cf/tyf, PASS, EthernetMac Ipv4
 
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            71ec-9523/tplx;31bc-5c4b/~tNl;4f14-30a7/~tND;2b32-31ec/tyf, PASS, Ipv4
 
@@ -202,8 +202,8 @@
 
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Udp -r 0,          100s,            2949-e8ce/tplx;b44e-17d8/~tNl;c2a6-b2ba/~tND;be43-9ccd/tyf, PASS, Ipv4
 /examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Tcp -r 0,          100s,            8bfd-2014/tplx;a7f2-ebef/~tNl;6a85-0895/~tND;a1a5-7087/tyf, PASS, Ipv4
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Sctp -r 0,              100s,            489a-aa35/tplx;5720-aff9/~tNl;378d-e4f4/~tND;1753-2e23/tyf, PASS, Ipv4
-/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             eb3f-fff6/tplx;4921-f3c9/~tNl;5bf3-b6dc/~tND;0968-339c/tyf, PASS, Ipv4
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c TraceFile-Sctp -r 0,              100s,            489a-aa35/tplx;5720-aff9/~tNl;4817-7205/~tND;1753-2e23/tyf, PASS, Ipv4
+/examples/inet/netperfmeter/,        -f omnetpp.ini -c SCTP-with-OLIA -r 0,         30s,             e560-cb2d/tplx;1f02-956e/~tNl;53f6-41cc/~tND;0968-339c/tyf, PASS, Ipv4
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           9a45-bf68/tplx;0ed6-89f6/~tNl;3234-28af/~tND;1bb9-1773/tyf, PASS, EthernetMac Ipv4
 
