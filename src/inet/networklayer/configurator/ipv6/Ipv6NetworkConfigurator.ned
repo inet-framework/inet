@@ -27,10 +27,16 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    interfaces then obtain their global addresses through dynamic
 //    configuration -- Stateless Address Autoconfiguration (SLAAC) today, or
 //    potentially DHCPv6 via the Managed/Other-config RA flags. The dynamic
-//    method is selected by the usual mechanisms, not by this parameter. Static
-//    routes are still added, including on-link routes for the router links that
-//    such hosts attach to. This mode is required for mobile nodes (MIPv6),
-//    whose home/care-of addresses must be autoconfigured.
+//    method is selected by the usual mechanisms, not by this parameter. Routes
+//    are generated as in the other mode, so hosts still get static routes: an
+//    on-link route for their link prefix, and either a default route via their
+//    router or routes to the remote prefixes. To let hosts learn their default
+//    route from Router Advertisements instead, restrict route generation to the
+//    routers with `<autoroute sourceHosts="...">`. Setting `addDefaultRoutes`
+//    and `addRemoteRoutes` to false also removes the hosts' default and remote
+//    routes, but it removes the routers' remote routes too. This mode is
+//    required for mobile nodes (MIPv6), whose home/care-of addresses must be
+//    autoconfigured.
 //
 // Independently, `assignAddresses = false` disables address assignment
 // entirely, and `addStaticRoutes = false` disables static route generation.
@@ -103,7 +109,7 @@ simple Ipv6NetworkConfigurator extends L3NetworkConfiguratorBase
     parameters:
         xml config = default(xml("<config><interface hosts='**' prefix='2001:db8:x:x::/64'/></config>")); // XML configuration parameters for IPv6 prefix assignment and manual routes
         bool assignAddresses = default(true); // Assign IPv6 global addresses to interfaces
-        bool assignAddressesToHosts = default(true); // If true, statically assign global addresses to host (non-router) interfaces too. If false, configure only router interfaces and their advertised prefixes, leaving hosts to obtain addresses through DYNAMIC configuration; which dynamic method is used is selected by the usual mechanisms (router AdvAutonomousFlag for SLAAC; the Managed/Other-config RA flags plus a DHCPv6 server for DHCPv6), not by this parameter. Set to false for mobile nodes (MIPv6), whose home/care-of addresses must be autoconfigured. Routers always get static addresses regardless of this setting.
+        bool assignAddressesToHosts = default(true); // If true, statically assign global addresses to host (non-router) interfaces too. If false, configure only router interfaces and their advertised prefixes, leaving hosts to obtain addresses through DYNAMIC configuration; which dynamic method is used is selected by the usual mechanisms (router AdvAutonomousFlag for SLAAC; the Managed/Other-config RA flags plus a DHCPv6 server for DHCPv6), not by this parameter. Set to false for mobile nodes (MIPv6), whose home/care-of addresses must be autoconfigured. Routers always get static addresses regardless of this setting. Hosts get static routes in both modes; see the module documentation.
         bool addStaticRoutes = default(true); // Add static routes to all routing tables
         bool addDefaultRoutes = default(true); // Add default routes if all routes from a source go through the same gateway
         bool addDirectRoutes = default(true); // Add direct routes (on-link prefix routes) for local network members (used only if addStaticRoutes is true)
