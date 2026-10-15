@@ -3370,6 +3370,59 @@ void TcpConnection::growRcvBufferForOutOfOrderData(uint32_t endSeq)
     }
 }
 
+void TcpConnection::updateRcvRtt(uint32_t sampleUs, bool winDep)
+{
+    // Linux tcp_rcv_rtt_update(): the estimate is in microseconds times 8. A smaller
+    // sample replaces it; without timestamps (winDep) the estimate is a minimum; with
+    // them, a sample when the application read all data moves it by 1/8
+    uint32_t oldSample = state->rcvRttUs;
+    uint64_t m = (uint64_t)sampleUs << 3;
+    uint32_t newSample;
+    if (oldSample == 0 || m < oldSample)
+        newSample = (uint32_t)std::min<uint64_t>(m, UINT32_MAX);
+    else {
+        if (winDep)
+            return;
+        if (state->rcv_nxt != receiveQueue->getFirstSeqNo()) // unread data
+            return;
+        newSample = oldSample - (oldSample >> 3) + sampleUs;
+    }
+    state->rcvRttUs = newSample;
+}
+
+void TcpConnection::measureRcvRtt()
+{
+    // Linux tcp_rcv_rtt_measure(), at each segment of in-order data: one sample for each
+    // window, the time until rcv_nxt passes the right edge of the window at its start
+    if (state->rcvRttTime != SIMTIME_ZERO) {
+        if (seqLess(state->rcv_nxt, state->rcvRttSeq))
+            return;
+        int64_t deltaUs = (simTime() - state->rcvRttTime).inUnit(SIMTIME_US);
+        updateRcvRtt(deltaUs > 0 ? (uint32_t)std::min<int64_t>(deltaUs, UINT32_MAX) : 1, true);
+    }
+    state->rcvRttSeq = state->rcv_nxt + state->rcv_wnd;
+    state->rcvRttTime = simTime();
+}
+
+void TcpConnection::measureRcvRttTs(const Ptr<const TcpHeader>& tcpHeader, uint32_t payloadLength)
+{
+    // Linux tcp_rcv_rtt_measure_ts(), at each segment in ESTABLISHED: a new TSecr on a
+    // segment of at least the received MSS gives a sample, now minus TSecr, in the
+    // milliseconds of the timestamp clock; a delta of 0 gives none
+    const TcpOptionTimestamp *tsOption = state->ts_enabled ? findTSOption(tcpHeader) : nullptr;
+    if (tsOption == nullptr)
+        return;
+    uint32_t tsecr = tsOption->getEchoedTimestamp();
+    if (tsecr == state->rcvRttLastTsecr)
+        return;
+    state->rcvRttLastTsecr = tsecr;
+    if (payloadLength >= rcvMssEstimate) {
+        uint32_t delta = convertSimtimeToTS(simTime()) - tsecr;
+        if (delta > 0 && delta < INT32_MAX / 1000)
+            updateRcvRtt(delta * 1000, false);
+    }
+}
+
 void TcpConnection::releaseRcvBuffer(uint64_t readBytes)
 {
     // Linux frees an skb, with all its truesize, only when the application read all of it

@@ -1,0 +1,54 @@
+%description:
+Tests the receive RTT of Linux with timestamps (tcp_rcv_rtt_measure_ts()).
+The client of LinuxTcp sends 30000 bytes at t=1; the server reports its
+receive RTT at t=1.5 through the status query. Each data segment of at least
+one MSS with a new TSecr gives a sample, now minus TSecr: the first one
+echoes the SYN-ACK and includes the idle time, the next ones the ACKs of the
+server, so the estimate falls to the RTT of the path, 4 ms (1 ms each way
+between each host and the tester).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 30000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.typename = "LinuxTcp"
+*.srv_app.statusRequestScript="1.5"
+sim-time-limit = 3s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+STATUS: rcvRtt=0\.004 rcvSpace=
+%#--------------------------------------------------------------------------------------------------------------

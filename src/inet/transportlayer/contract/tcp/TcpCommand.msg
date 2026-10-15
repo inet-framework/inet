@@ -392,6 +392,8 @@ class TcpStatusInfo extends TcpCommand
     unsigned int reordering;
     double srtt;
     double minRtt;
+    double rcvRtt;          // the receive RTT of Linux, in seconds (tcpi_rcv_rtt); 0: no sample yet
+    unsigned int rcvSpace;  // the receive space of Linux, in bytes (tcpi_rcv_space)
     unsigned int flightSize;
     unsigned int sackedBytes;
     unsigned int deliveredBytes;

@@ -557,6 +557,13 @@ class INET_API TcpConnection : public SimpleModule
     /** windowAutoTuning: the growth of the receive buffer with out-of-order data that end at endSeq */
     virtual void growRcvBufferForOutOfOrderData(uint32_t endSeq);
 
+    /** The receive RTT of Linux: a sample without timestamps, once per window (tcp_rcv_rtt_measure()) */
+    virtual void measureRcvRtt();
+    /** The receive RTT of Linux: a sample from the TSecr of a segment of at least one MSS (tcp_rcv_rtt_measure_ts()) */
+    virtual void measureRcvRttTs(const Ptr<const TcpHeader>& tcpHeader, uint32_t payloadLength);
+    /** The receive RTT of Linux: the update of the estimate by a sample (tcp_rcv_rtt_update()) */
+    virtual void updateRcvRtt(uint32_t sampleUs, bool winDep);
+
     /** Utility: returns true when receive queue has enough space for store the tcpHeader */
     virtual bool hasEnoughSpaceForSegmentInReceiveQueue(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
 

@@ -639,6 +639,10 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // transmitted if possible without incurring undue delay.
         //"
 
+        // the receive RTT of Linux, after the ACK and before the data (tcp_rcv_established())
+        if (fsm.getState() == TCP_S_ESTABLISHED)
+            measureRcvRttTs(tcpHeader, payloadLength);
+
         // only data beyond RCV.NXT: a segment of old data comes here only for its FIN,
         // which the eighth step processes
         if (payloadLength > 0 && seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_nxt)) {
@@ -680,6 +684,9 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                 }
                 uint32_t oldRcvNxt = state->rcv_nxt;
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
+                // in-order data (Linux tcp_event_data_recv() in tcp_data_queue())
+                if (!seqGreater(tcpHeader->getSequenceNo(), oldRcvNxt) && seqGreater(state->rcv_nxt, oldRcvNxt))
+                    measureRcvRtt();
                 if (payloadLength > 0) {
                     // rcv_mwnd_seq is still the highest edge before this arrival: a
                     // segment beyond it came in by acceptBeyondBufferAtEmptyQueue

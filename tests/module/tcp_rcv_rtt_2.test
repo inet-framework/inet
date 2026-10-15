@@ -1,0 +1,54 @@
+%description:
+Tests the receive RTT of Linux without timestamps (tcp_rcv_rtt_measure()).
+The client of LinuxTcp sends 200000 bytes at t=1, without timestamps; the
+server reports its receive RTT at t=1.5. Each measurement lasts until rcv_nxt
+passes the right edge of the window at its start: the first one, in slow
+start, takes 8 ms (1.002 to 1.010), and a later one, with a full window in
+flight, one RTT of the path; the estimate keeps the minimum, 4 ms.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 200000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.typename = "LinuxTcp"
+*.srv_app.statusRequestScript="1.5"
+*.*_tcp.timestampSupport = false
+sim-time-limit = 3s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+STATUS: rcvRtt=0\.004 rcvSpace=
+%#--------------------------------------------------------------------------------------------------------------

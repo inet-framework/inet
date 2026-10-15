@@ -178,6 +178,10 @@ struct TcpStateVariables
     bool linuxZeroWindowProbe = false; // the zero-window probe of Linux, without data (zeroWindowProbe parameter)
     int synLinearTimeouts = 0;      // the retransmissions of a SYN after which its timeout does not double yet (synLinearTimeouts parameter)
     bool dropSynData = false;       // the data of a SYN that Fast Open does not accept is dropped (dropSynData parameter)
+    uint32_t rcvRttUs = 0;          // the receive RTT of Linux, in microseconds times 8 (rcv_rtt_est.rtt_us of tcp_rcv_rtt_update()); 0: no sample yet
+    uint32_t rcvRttSeq = 0;         // the sequence number that ends the current measurement without timestamps (rcv_rtt_est.seq)
+    simtime_t rcvRttTime = SIMTIME_ZERO; // the start of that measurement (rcv_rtt_est.time); 0: none started
+    uint32_t rcvRttLastTsecr = 0;   // the TSecr of the last segment with timestamps (rcv_rtt_last_tsecr)
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code

@@ -567,6 +567,8 @@ void TcpConnection::process_STATUS(TcpEventCode& event, TcpCommand *tcpCommand, 
     // tp->reordering). Report the live degree, not the static dupthresh.
     statusInfo->setReordering(state->reordering);
     statusInfo->setMinRtt(state->minRtt.dbl());
+    statusInfo->setRcvRtt((state->rcvRttUs >> 3) / 1e6);
+    statusInfo->setRcvSpace(rcvqSpace);
     statusInfo->setFlightSize(tcpAlgorithm->getBytesInFlight());
     statusInfo->setSackedBytes(state->sackedBytes);
     statusInfo->setDeliveredBytes(state->deliveredBytes);
