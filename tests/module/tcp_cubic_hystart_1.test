@@ -20,7 +20,7 @@ cmdenv-express-mode=false
 *.client*.tcpType = "Tcp"
 **.tcp.tcpAlgorithmClass = "TcpCubic"
 **.tcp.sackSupport = true
-**.tcp.hystartEnabled = true
+**.tcp.conn-*.algorithm.hystartEnabled = true
 
 **.client.numApps = 1
 **.client.app[0].typename = "TcpSessionApp"

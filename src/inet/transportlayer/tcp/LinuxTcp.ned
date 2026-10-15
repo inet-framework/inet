@@ -25,7 +25,7 @@ simple LinuxTcp extends Tcp
         @class(Tcp);
         // congestion control: tcp_congestion_control=cubic, TCP_INIT_CWND
         tcpAlgorithmClass = default("TcpCubic");
-        hystartEnabled = default(true);
+        conn*.algorithm.hystartEnabled = default(true);
         initialWindow = default("rfc6928");
         // loss recovery: tcp_recovery=1, tcp_frto=2, tcp_reordering=3
         adaptiveReorderingEnabled = default(true);

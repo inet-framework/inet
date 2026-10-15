@@ -33,7 +33,7 @@ simple LegacyTcp extends Tcp
         mss = default(536);
         initialWindow = default("rfc2001");
         tcpAlgorithmClass = default("TcpReno");
-        hystartEnabled = default(true);
+        conn*.algorithm.hystartEnabled = default(true);
         initialRto = default(3s);
         lossDetectionMode = default("dupthresh");
         prrEnabled = default(false);

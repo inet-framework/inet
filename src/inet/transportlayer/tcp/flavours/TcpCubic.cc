@@ -43,18 +43,18 @@ void TcpCubic::initializeAlgorithm()
 {
     TcpClassicAlgorithmBase::initializeAlgorithm();
 
-    state->cubic_beta = conn->getTcpMain()->par("cubicBeta");
-    state->cubic_c = conn->getTcpMain()->par("cubicC");
-    state->cubic_fast_convergence = conn->getTcpMain()->par("cubicFastConvergence");
-    state->cubic_tcp_friendliness = conn->getTcpMain()->par("cubicTcpFriendliness");
-    state->cubic_delta = conn->getTcpMain()->par("cubicDelta");
-    state->cubic_cnt_clamp = conn->getTcpMain()->par("cubicCntClamp");
-    state->hystart_enabled = conn->getTcpMain()->par("hystartEnabled");
-    state->hystart_detect = conn->getTcpMain()->par("hystartDetect");
-    state->hystart_low_window = conn->getTcpMain()->par("hystartLowWindow");
-    state->hystart_ack_delta = conn->getTcpMain()->par("hystartAckDelta");
-    state->hystart_delay_min = conn->getTcpMain()->par("hystartDelayMin");
-    state->hystart_delay_max = conn->getTcpMain()->par("hystartDelayMax");
+    state->cubic_beta = par("beta");
+    state->cubic_c = par("c");
+    state->cubic_fast_convergence = par("fastConvergence");
+    state->cubic_tcp_friendliness = par("tcpFriendliness");
+    state->cubic_delta = par("delta");
+    state->cubic_cnt_clamp = par("cntClamp");
+    state->hystart_enabled = par("hystartEnabled");
+    state->hystart_detect = par("hystartDetect");
+    state->hystart_low_window = par("hystartLowWindow");
+    state->hystart_ack_delta = par("hystartAckDelta");
+    state->hystart_delay_min = par("hystartDelayMin");
+    state->hystart_delay_max = par("hystartDelayMax");
 
     cubicReset();
 }

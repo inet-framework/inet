@@ -43,8 +43,8 @@ import inet.transportlayer.contract.ITcp;
 //
 //   -# The parameters come in groups, one for each part of the protocol: the
 //      module, connection setup and header options, the receive window and
-//      buffer, acknowledgments, sending data, congestion control (with CUBIC
-//      and DCTCP), loss detection and recovery, the retransmission timeout,
+//      buffer, acknowledgments, sending data, congestion control (with
+//      DCTCP), loss detection and recovery, the retransmission timeout,
 //      ECN, the path MTU, keepalive, TCP Fast Open, and the connection close
 //      with the checks of arriving segments. In a group, the parameters of
 //      the RFCs come first; the behaviors of Linux that no RFC defines follow
@@ -55,7 +55,11 @@ import inet.transportlayer.contract.ITcp;
 //      can be programmatically overridden on a per-connection basis. Also note
 //      that the `TcpNoCongestionControl` and `DumbTcp` flavors are intentionally
 //      simplified code that are only provided for testing/educational purposes,
-//      and do not support many TCP features the more advanced ones do.
+//      and do not support many TCP features the more advanced ones do. Each
+//      connection creates its algorithm as its submodule `algorithm`, of the
+//      NED type of that name (see ~TcpAlgorithm). The parameters of an
+//      algorithm, for example those of CUBIC in ~TcpCubic, are parameters of
+//      its type: set them with a key such as `**.tcp.conn-*.algorithm.beta`.
 //
 //   -# The `limitedTransmitEnabled` parameter can be used to enable/disable the
 //      Limited Transmit algorithm (RFC 3042).
@@ -253,11 +257,11 @@ import inet.transportlayer.contract.ITcp;
 //  - RFC 9438 - CUBIC for Fast and Long-Distance Networks (obsoletes RFC 8312)
 //    `TcpCubic`, the algorithm of Linux. It grows by the number of segments that an
 //    ACK acknowledges in slow start (RFC 3465, experimental). The hybrid slow start
-//    of Linux (`hystartEnabled`) is off by default: RFC 9438 section 4.10 asks for
+//    of Linux (`hystartEnabled` of ~TcpCubic) is off by default: RFC 9438 section 4.10 asks for
 //    HyStart++ (RFC 9406), which is not implemented, and calls the hybrid slow
 //    start experimental.
 //    Deviation: the TCP-friendliness estimator keeps the fixed scale of Linux,
-//    from beta = 717/1024, so a change of `cubicBeta` does not rescale it.
+//    from beta = 717/1024, so a change of `beta` of ~TcpCubic does not rescale it.
 //
 //  - RFC 8257 - Data Center TCP (DCTCP): TCP Congestion Control for Data Centers
 //    ECN-driven congestion control, in the `DcTcp` algorithm class.
@@ -461,21 +465,6 @@ simple Tcp extends SimpleModule like ITcp
         bool increasedIWEnabled = default(false); // deprecated: the same as initialWindow = "rfc3390" (RFC 3390); an error with initialWindow = "rfc6928"
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         bool limitedTransmitEnabled = default(true); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
-
-        // CUBIC (tcpAlgorithmClass = "TcpCubic")
-        double cubicBeta = default(0.7); // multiplicative-decrease factor applied to cwnd on loss. Note that the TCP-friendliness estimator keeps the kernel's fixed scale (derived from beta=717/1024), so changing this only alters the decrease itself
-        double cubicC = default(0.4); // scaling constant C of the cubic window-growth curve
-        bool cubicFastConvergence = default(true); // on a loss below the previous W_max, release extra window so a newly arrived competing flow can grow (RFC 9438 section 4.7)
-        bool cubicTcpFriendliness = default(true); // never grow slower than an AIMD(1, beta) Reno flow would (RFC 9438 section 4.3)
-        // Linux behaviors (no RFC)
-        int cubicCntClamp = default(20); // cap on the per-increment ACK count while no W_max is known yet (before the first loss)
-        double cubicDelta @unit(s) = default(10ms); // settling time after a window reduction, during which RTT samples are ignored
-        bool hystartEnabled = default(false); // HyStart: leave slow start when the path appears full, instead of overshooting into loss
-        double hystartAckDelta @unit(s) = default(2ms); // largest ACK spacing still counted as part of an ACK train
-        double hystartDelayMax @unit(s) = default(16ms); // upper clamp on the same threshold (Linux HYSTART_DELAY_MAX)
-        double hystartDelayMin @unit(s) = default(4ms); // lower clamp on the HyStart delay-increase threshold (an eighth of the minimum RTT)
-        int hystartDetect = default(3); // HyStart detectors, as a bitmask: 1 = ACK train, 2 = delay increase, 3 = both
-        int hystartLowWindow = default(16); // smallest cwnd (in segments) at which HyStart starts looking for the exit point
 
         // DCTCP (tcpAlgorithmClass = "DcTcp")
         double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
