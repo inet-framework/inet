@@ -111,7 +111,7 @@ simple Ipv6NetworkConfigurator extends L3NetworkConfiguratorBase
         bool addManualRoutes = default(true); // Add manual routes from the XML configuration; independent of addStaticRoutes
         bool dumpTopology = default(false); // Print extracted network topology
         bool dumpLinks = default(false); // Print recognized network links
-        bool dumpAddresses = default(false); // Print assigned IPv6 addresses for all interfaces
+        bool dumpAddresses = default(false); // Print assigned IPv6 addresses for all interfaces. With assignAddressesToHosts = false, host interfaces get no address from the configurator and are printed as "addr=dynamic"
         bool dumpRoutes = default(false); // Print configured routing tables
         @class(Ipv6NetworkConfigurator);
         @display("i=block/cogwheel");
