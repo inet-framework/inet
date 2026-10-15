@@ -490,6 +490,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. The packet drop animation uses the dy parameter
+
+   PacketDropCanvasVisualizer read its dx parameter into dy as well, so dy had no effect and the dropped packet's icon turned over at the height dx, 32 pixels with the defaults instead of the documented 64. The visualizer now reads dy, so the canvas packet drop animation, for example in showcases/visualizer/canvas/packetdrop, rises twice as high with the defaults. Simulation results do not change.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
