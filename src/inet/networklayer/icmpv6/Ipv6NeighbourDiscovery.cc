@@ -1957,11 +1957,20 @@ void Ipv6NeighbourDiscovery::processNsWithSpecifiedSrcAddr(Packet *packet, const
         else {
             /*If an entry already exists, and the cached link-layer address differs from
                the one in the received Source Link-Layer option,*/
-            if (!(entry->macAddress.equals(nsMacAddr))) {
+            // (an INCOMPLETE entry may already hold the address from a Router Advertisement)
+            bool wasIncomplete = entry->reachabilityState == Ipv6NeighbourCache::INCOMPLETE;
+            if (!(entry->macAddress.equals(nsMacAddr)) || wasIncomplete) {
                 // the cached address should be replaced by the received address
                 entry->macAddress = nsMacAddr;
                 // and the entry's reachability state MUST be set to STALE.
                 entry->reachabilityState = Ipv6NeighbourCache::STALE;
+                // RFC 4861 Appendix C: an NS ends address resolution for an INCOMPLETE
+                // entry, which sends the packets queued for it
+                if (wasIncomplete) {
+                    cancelAndDelete(entry->arTimer);
+                    entry->arTimer = nullptr;
+                    sendQueuedPacketsToIpv6Module(entry);
+                }
             }
         }
     }
