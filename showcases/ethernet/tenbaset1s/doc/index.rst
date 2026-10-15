@@ -28,9 +28,9 @@ configuration line.
 | Verified with INET version: ``4.7``
 | Source files location: `inet/showcases/ethernet/tenbaset1s <https://github.com/inet-framework/inet/tree/master/showcases/ethernet/tenbaset1s>`__
 
-.. TODO: confirm the release version number that contains commits e342d04b0e,
-   1bc2af2784, 5e0d2fce22 before publishing; also applies to the opp_env
-   version below.
+.. TODO: confirm the release version number that contains PR #1311 (the
+   16-attempt fix, with the PR #1312 statistics merged into it) before
+   publishing; also applies to the opp_env version below.
 
 How PLCA Hands Out the Channel
 ------------------------------
