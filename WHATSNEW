@@ -506,6 +506,10 @@ Notable bug fixes are the following:
 
    The retransmission timer of DumbTcp restarted at each expiry, also when nothing was outstanding, so DumbTcp sent an acknowledged FIN again every 2 seconds until the connection closed; with a peer that does not close, it went on to the end of the simulation. The timer now stops when all data, the FIN included, is acknowledged, as RFC 6298 section 5.2 says. Simulations that select DumbTcp can change.
 
+4. Nagle no longer holds a TCP retransmission
+
+   Nagle's algorithm counted data as unacknowledged up to the highest sequence number sent. After a go-back, after a retransmission timeout or after a SYN-ACK that did not acknowledge the data of a Fast Open SYN, the partial segment at the end is a retransmission, and Nagle held it until the next retransmission timeout. Nagle now holds only new data, as RFC 9293 section 3.7.4 says and as Linux does. Simulations with losses and Nagle on (the default of Tcp and LegacyTcp) can change; 27 fingerprints and 11 statistical results of the INET examples moved. LinuxTcp, with the Nagle variant of Minshall, was not affected in the packetdrill suite.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
