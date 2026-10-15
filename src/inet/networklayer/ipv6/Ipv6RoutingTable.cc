@@ -227,7 +227,7 @@ void Ipv6RoutingTable::configureInterfaceForIpv6(NetworkInterface *ie)
         simtime_t advDefaultLifetime = par("advDefaultLifetime");
         if (advDefaultLifetime >= SIMTIME_ZERO)
             ipv6IfData->setAdvDefaultLifetime(advDefaultLifetime);
-        // else: leave at default (3*maxRtrAdvInterval), already set by Ipv6InterfaceData constructor
+        // else: keep the default, 3 * MaxRtrAdvInterval, see Ipv6InterfaceData::getAdvDefaultLifetime()
     }
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...

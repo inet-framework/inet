@@ -1,0 +1,90 @@
+%description:
+Tests the default Router Lifetime of Router Advertisements.
+
+RFC 4861 section 6.2.1 gives AdvDefaultLifetime the default 3 * MaxRtrAdvInterval. Each router
+below advertises on its own link to one host, and the host logs the Router Lifetime of the first
+Router Advertisement that it accepts:
+
+- r1 sets MaxRtrAdvInterval with the maxIntervalBetweenRAs parameter of Ipv6NeighbourDiscovery
+  (30 s, so 90 s);
+- r2 sets it with the maxRtrAdvInterval attribute of Ipv6NetworkConfigurator (20 s, so 60 s);
+- r3 uses the Mobile IPv6 minimum 0.07 s (RFC 6275 section 7.5); 3 * 0.07 s is below one second,
+  the unit of the Router Lifetime field, and rounds up to 1 s, not down to 0 s, which would mean
+  "not a default router";
+- r4 sets MaxRtrAdvInterval to 30 s and an explicit advDefaultLifetime of 50 s, which wins.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network RouterLifetimeNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        r1: Router6;
+        h1: StandardHost6;
+        r2: Router6;
+        h2: StandardHost6;
+        r3: Router6;
+        h3: StandardHost6;
+        r4: Router6;
+        h4: StandardHost6;
+    connections:
+        h1.ethg++ <--> ethline <--> r1.ethg++;
+        h2.ethg++ <--> ethline <--> r2.ethg++;
+        h3.ethg++ <--> ethline <--> r3.ethg++;
+        h4.ethg++ <--> ethline <--> r4.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = RouterLifetimeNetwork
+sim-time-limit = 60s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.configurator.assignAddressesToHosts = false
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config> \
+    <interface hosts='r1' names='eth0' address='2001:db8:1::1'/> \
+    <interface hosts='r2' names='eth0' address='2001:db8:2::1' maxRtrAdvInterval='20' minRtrAdvInterval='5'/> \
+    <interface hosts='r3' names='eth0' address='2001:db8:3::1'/> \
+    <interface hosts='r4' names='eth0' address='2001:db8:4::1'/> \
+</config>")
+
+*.r1.ipv6.neighbourDiscovery.maxIntervalBetweenRAs = 30s
+*.r1.ipv6.neighbourDiscovery.minIntervalBetweenRAs = 10s
+*.r3.ipv6.neighbourDiscovery.maxIntervalBetweenRAs = 0.07s
+*.r3.ipv6.neighbourDiscovery.minIntervalBetweenRAs = 0.03s
+*.r4.ipv6.neighbourDiscovery.maxIntervalBetweenRAs = 30s
+*.r4.ipv6.neighbourDiscovery.minIntervalBetweenRAs = 10s
+*.r4.ipv6.routingTable.advDefaultLifetime = 50s
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+RouterLifetimeNetwork\.h1\.ipv6\.neighbourDiscovery: RA's router lifetime is non-zero, creating an entry in the Host's default router list with lifetime=90\n
+%contains-regex: stdout
+RouterLifetimeNetwork\.h2\.ipv6\.neighbourDiscovery: RA's router lifetime is non-zero, creating an entry in the Host's default router list with lifetime=60\n
+%contains-regex: stdout
+RouterLifetimeNetwork\.h3\.ipv6\.neighbourDiscovery: RA's router lifetime is non-zero, creating an entry in the Host's default router list with lifetime=1\n
+%contains-regex: stdout
+RouterLifetimeNetwork\.h4\.ipv6\.neighbourDiscovery: RA's router lifetime is non-zero, creating an entry in the Host's default router list with lifetime=50\n
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
