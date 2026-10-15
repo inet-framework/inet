@@ -556,6 +556,8 @@ class INET_API TcpConnection : public SimpleModule
     virtual void releaseRcvBuffer(uint64_t readBytes);
     /** windowAutoTuning: the growth of the receive buffer with out-of-order data that end at endSeq */
     virtual void growRcvBufferForOutOfOrderData(uint32_t endSeq);
+    /** windowAutoTuning: the receive space becomes newSpace, and the buffer grows to its window (Linux tcp_rcvbuf_grow()) */
+    virtual void growRcvBuffer(uint32_t newSpace);
 
     /** The receive RTT of Linux: a sample without timestamps, once per window (tcp_rcv_rtt_measure()) */
     virtual void measureRcvRtt();
