@@ -456,6 +456,25 @@ Confirm, after the run, the category that the observation class predicted at ste
 
 Record the decision and the reason per check. When a check does not fit the protocol suite, keep its catalog entry and note the target category; write the test in the other suite in a later pass.
 
+## Evidence from an implementation oracle
+
+The test suite of another implementation can also judge the model. For TCP, the packetdrill scripts of Linux run in the `PacketDrillApp` of inet-gpl, and each script states what Linux does on the wire. A pass shows that INET behaves as Linux. This evidence does not come from the standard, so it stays outside the steps of this guide and outside their levels. It answers another question: not "does the model do what the standard says?", but "does the model do what this implementation does?".
+
+### Where it goes
+
+- **The scripts stay in the project of the oracle.** The packetdrill scripts are GPL-2.0 and stay in inet-gpl. INET gets one generated wrapper for each script, at the path of the script below `tests/protocol/<proto>/` (for TCP, `linux/` and `packetdrill/`). A wrapper names its script and the verdict line, and holds no line of the script. A `README.md` in each folder lists the scripts that have no wrapper, and why.
+- **Each wrapper names what its script exercises:** ids of the feature map (`Features:`), a document outside the catalogs, or an interface of the oracle that no standard defines. The map from scripts to features lives with the generator, not in the feature map, because a step of this guide never takes information from a test.
+- **`model/<proto>/results.md` gets a section on the oracle** with its run record: the commits of INET, of the project of the oracle and of the scripts, the version of the oracle (for example the Linux kernel), the configuration of the model that the scripts select, and the count of each verdict.
+- **`conformance.md` gets a column beside the verdict of the matrix:** for each feature, the scripts that exercise it and their verdicts, or "no script".
+
+### What it may not claim
+
+- **A script never enters a catalog or the feature map.** The information still flows only from the standard.
+- **A pass of a script is never a pass of a catalog statement.** It does not change the support of a feature in the ledger, and it does not change the verdict of the matrix.
+- **A pass speaks for the configuration that the scripts select, not for the defaults.** For TCP, the scripts select `LinuxTcp`; a pass shows nothing about the defaults of `Tcp`, which follow the RFCs.
+- **Where the oracle departs from a standard, a pass shows that the model departs too.** A pass that contradicts a catalog statement is a finding: record it in `results.md`, and never count it as a pass of that statement.
+- **A script that the oracle itself does not pass gets no wrapper.** Such a script tells nothing about the model. A script that the model cannot run, because it needs a part outside the model, is an expected `FAIL` of the class `unimplemented feature`.
+
 ## What a pass delivers
 
 A pass is complete when every output in the table exists and agrees with the last run. A later pass updates the outputs of the earlier passes; it does not start new files. A level 1 pass delivers the rows with level 1 only.
@@ -555,6 +574,8 @@ tests/protocol/<proto>/                  the tests
 
 tests/protocol/tcp/rfc/                  the tests of a protocol that has other kinds of test
   Rfc9293DataTransfer.test               step 6
+
+tests/protocol/tcp/linux/, tcp/packetdrill/   the wrappers of an implementation oracle, generated in inet-gpl
 
 plan/pending/, plan/done/                the plan of the pass, with its decision log
 audit/<proto>-level<N>/                  the working scripts, not in git
