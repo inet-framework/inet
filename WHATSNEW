@@ -498,6 +498,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. TCP Limited Transmit sends only new data
+
+   With SACK and lossDetectionMode = "dupthresh", the first duplicate ACK of a flight with no more new data retransmitted the first hole: Limited Transmit took its segment from NextSeg(), whose rule 3 returns an old segment. The fast retransmit then sent the hole again, and the receiver reported a D-SACK. Limited Transmit now sends only previously unsent data, as RFC 3042 and step (3.3) of RFC 6675 say, in both loss detection modes. No fingerprint or statistical baseline of INET moves; simulations that select the dupthresh mode with SACK can change.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
