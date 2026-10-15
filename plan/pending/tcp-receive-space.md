@@ -1,6 +1,6 @@
 # The receive space of the Linux mode (T6)
 
-Status: **in progress** — item T6 of `plan/pending/tcp-open-items.md`, decision D-134; the owner answered the questions of section 5 on 2026-10-15.
+Status: **ready for review** — item T6 of `plan/pending/tcp-open-items.md`, decision D-134; the owner answered the questions of section 5 on 2026-10-15.
 
 - Branch `topic/tcp-receive-space`, on master `380a55880c`.
 - The decision numbers continue those of `plan/done/tcp-syn-data-drop.md` (D-146 onward).
@@ -23,13 +23,14 @@ With `windowAutoTuning` (on in `LinuxTcp`), INET grows the receive buffer in two
 
 | Step | Commit | Test |
 | --- | --- | --- |
-| 1 | `plan: add: the receive space of the Linux mode` | — |
-| 2 | `tcp: add: the receive RTT of Linux` | a module test of the estimate, with and without timestamps (through the status query) |
-| 3 | `tcp: refactor: one growth of the receive buffer, as tcp_rcvbuf_grow()` | the out-of-order growth stays as it is (the tests of D-114) |
-| 4 | `tcp: add: Dynamic Right-Sizing in the Linux mode` | a long transfer with a `LinuxTcp` receiver: the offered window per RTT, computed by hand from the code of Linux |
-| 5 | `tcp: add: the bound of the receive buffer` | a growth that stops at the bound |
-| 6 | `doc: change: the release note of the receive space` | — |
-| 7 | `plan: change: record the receive space of the Linux mode` | — |
+| 1 ✅ | `plan: add: the receive space of the Linux mode` | — |
+| 2 ✅ | `tcp: add: the receive RTT of Linux` | `tcp_rcv_rtt_1` (timestamps), `tcp_rcv_rtt_2` (without) |
+| 3 ✅ | `tcp: refactor: one growth of the receive buffer, as tcp_rcvbuf_grow()` | the out-of-order growth stays as it is (the tests of D-114) |
+| 4 ✅ | `tcp: add: Dynamic Right-Sizing in the Linux mode` | `tcp_rcv_space_1` (new); `tcp_rcvbuf_grow_1` sees DRS before its out-of-order data |
+| 5 ✅ | `tcp: add: the bound of the receive buffer` | `tcp_rcv_space_2` (new) |
+| 6 ✅ | `doc: change: the release note of the receive space` | WHATSNEW entry 52 |
+| 7 ✅ | `plan: change: record the receive space of the Linux mode` | — |
+| 8 | (inet-gpl) `TCP_INFO` reports `tcpi_rcv_rtt` and `tcpi_rcv_space` | after the landing, because inet-gpl builds against INET master (D-150) |
 
 The collapse of `tcp_prune_queue()`, and the pad and the slab classes of a small packet, become items of their own (section 5, Q4).
 
@@ -46,3 +47,21 @@ The owner approved the plan and the recommended answers on 2026-10-15.
 - **D-148 — `receiveBufferMax` (Q3).** A parameter holds the bound of `tcp_rmem[2]`, 32 MiB in `Tcp` and `LinuxTcp`: no RFC gives a value, and in `Tcp` it matters only when a user turns auto-tuning on.
 - **D-149 — The collapse and the slab classes are items of their own (Q4),** after T5, with a low priority: they act only under memory pressure and for small packets, and no script reaches them.
 - **D-150 — `TCP_INFO` reports the receive RTT and space (Q5).** `PacketDrillApp` of inet-gpl reports `tcpi_rcv_rtt` and `tcpi_rcv_space`, so that later scripts can check DRS against Linux.
+
+## 6. The record
+
+Commits on master `380a55880c`: `e5d4218bb9` and `a9b4476883` (plan), `45a93a0e27` (T13 and T14 in the open items), `18cd1d7de7` (the receive RTT), `9c8c09bf6d` (the refactor), `fd7dc01f9f` (DRS), `f3a4f93279` (the bound), `233103f123` (the release note), and this record.
+
+The values of `tcp_rcv_space_1` are those of the formula of Linux 7.1, computed by hand with its integer arithmetic: with a payload ratio of 162/256 for 1460-byte segments and a receive RTT of 4 ms, reads of 28960, 57920 and 115840 bytes in one RTT give windows of 152698, 347520 and 695040 bytes and buffers of 241300, 549167 and 1098334 bytes; reads of 15928 and 130320 bytes give buffers below the one of the moment, which stays.
+
+| Evidence | Result |
+| --- | --- |
+| Each commit builds alone; module tests at each commit | 664, 664, 664, 666, 666, 667, 668 PASS; no undefined `inet::` symbol |
+| The new tests fail before their commits | yes: `tcp_rcv_rtt_1` and `_2` before the receive RTT, `tcp_rcv_space_1` before DRS, `tcp_rcv_space_2` before the bound |
+| CI fingerprint job (podman, clang-16) at the four code commits | OK at each; the one ERROR row of `ethernet.csv` is the expected one of master |
+| Statistics of the 38 TCP working directories, against statistics `ebda488` | 122 KEEP, 4 SKIP (expected), no file changes: no example turns auto-tuning on with a receive buffer |
+| Packetdrill suite of inet-gpl `4a3894d` | 303 MATCH, 12 KERNEL_DRIFT, 3 UNSUPPORTED_FEATURE; each of the 318 verdicts as before |
+| INET's TCP protocol suite with inet-gpl | 333 tests: 329 PASS, 4 FAIL (expected) |
+
+A finding for the owner: `LinuxTcp` turns `windowAutoTuning` on, but sets no receive buffer, and auto-tuning acts only with one; so with the defaults of `LinuxTcp`, neither the growth of D-114 nor DRS acts. Linux gives each socket the buffer `tcp_rmem[1]`, 128 KiB. A trial with `receiveBufferSize = 131072B` in `LinuxTcp` changed no verdict of the packetdrill suite, and no example or baseline uses `LinuxTcp`.
+
