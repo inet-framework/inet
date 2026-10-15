@@ -933,6 +933,8 @@ void TcpConnection::sendAvailableDataToApp()
                     break;
                 }
             }
+            // a delivery is a read of the application (D-146)
+            adjustRcvSpace();
         }
     }
 }
@@ -1046,8 +1048,7 @@ void TcpConnection::configureStateVariables()
     // a receive buffer smaller than the advertised window limits the first offer too
     if (state->rcvBufferSize > 0 && state->rcv_wnd > state->rcvBufferSize)
         state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
-    if (state->rcv_ssthresh > 0)
-        rcvqSpace = std::min(state->rcv_ssthresh, state->rcv_wnd);
+    state->rcvBufferLowRttUs = (uint32_t)tcpMain->par("receiveBufferLowRtt").doubleValueInUnit("us");
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
     state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks");
@@ -3351,10 +3352,37 @@ void TcpConnection::growRcvBufferForOutOfOrderData(uint32_t endSeq)
     if (seqLE(oooHighestEnd, state->rcv_nxt) || seqGreater(endSeq, oooHighestEnd))
         oooHighestEnd = endSeq;
     // windowAutoTuning, as Linux (tcp_rcvbuf_grow() at the end of tcp_data_queue_ofo()):
-    // out-of-order data grow the buffer with the receive space as it is. The receive
-    // space is the first offer, at most 10 MSS: INET has no DRS that grows it, and Linux
-    // does not either before it measures the receive RTT.
-    growRcvBuffer(std::min<uint32_t>(rcvqSpace, 10 * state->advertisedMss));
+    // out-of-order data grow the buffer with the receive space as it is
+    growRcvBuffer(rcvqSpace);
+}
+
+void TcpConnection::initRcvSpace()
+{
+    // Linux tcp_init_buffer_space(): the receive space starts at the smallest of the
+    // offer, the window and the initial window of 10 MSS, and the measurement of DRS
+    // starts now, at the first unread byte
+    rcvqSpace = std::min<uint32_t>({state->rcv_ssthresh > 0 ? state->rcv_ssthresh : state->rcv_wnd, state->rcv_wnd, 10 * (uint32_t)state->advertisedMss});
+    state->rcvqSpaceTime = simTime();
+    state->rcvqSpaceSeq = receiveQueue->getFirstSeqNo();
+}
+
+void TcpConnection::adjustRcvSpace()
+{
+    // Linux tcp_rcv_space_adjust(), at each read: after one receive RTT, the bytes that
+    // the application read in it, less the unread bytes, grow the receive space and the
+    // buffer when they are more than the space; the measurement starts again
+    if (state->rcvRttUs == 0)
+        return;
+    if ((simTime() - state->rcvqSpaceTime).inUnit(SIMTIME_US) < (int64_t)(state->rcvRttUs >> 3))
+        return;
+    uint32_t copiedSeq = receiveQueue->getFirstSeqNo();
+    int64_t copied = (int64_t)(uint32_t)(copiedSeq - state->rcvqSpaceSeq) - (int64_t)(uint32_t)(state->rcv_nxt - copiedSeq);
+    if (copied > (int64_t)rcvqSpace) {
+        EV_DETAIL << "Dynamic Right-Sizing: " << copied << " bytes read in one receive RTT\n";
+        growRcvBuffer((uint32_t)copied);
+    }
+    state->rcvqSpaceSeq = copiedSeq;
+    state->rcvqSpaceTime = simTime();
 }
 
 void TcpConnection::growRcvBuffer(uint32_t newSpace)
@@ -3363,10 +3391,21 @@ void TcpConnection::growRcvBuffer(uint32_t newSpace)
     // connection that the application accepted grows to the window of twice the space
     // and the out-of-order span, at the payload ratio (tcp_space_from_win()), and the
     // clamp of the offer follows; a buffer that SO_RCVBUF locked does not grow
+    uint32_t oldSpace = rcvqSpace;
     rcvqSpace = newSpace;
     if (state->rcv_ssthresh == 0 || state->rcvbufLocked || !appOwned || isToBeAccepted())
         return;
-    uint64_t rcvwin = 2 * (uint64_t)newSpace + (seqGreater(oooHighestEnd, state->rcv_nxt) ? oooHighestEnd - state->rcv_nxt : 0);
+    // DRS is one RTT late: the window is twice the space, and it grows by the window times
+    // the receive RTT over receiveBufferLowRtt below that RTT, else by twice the window
+    // times the relative growth of the space, so that the sender can double its rate
+    uint64_t rcvwin = 2 * (uint64_t)newSpace;
+    uint64_t rttUs = state->rcvRttUs >> 3;
+    uint64_t grow;
+    if (rttUs < state->rcvBufferLowRttUs)
+        grow = rcvwin * rttUs / state->rcvBufferLowRttUs;
+    else
+        grow = oldSpace > 0 && newSpace > oldSpace ? ((rcvwin << 1) * (newSpace - oldSpace)) / oldSpace : 0;
+    rcvwin += grow + (seqGreater(oooHighestEnd, state->rcv_nxt) ? oooHighestEnd - state->rcv_nxt : 0);
     uint64_t rcvbuf = (rcvwin << 8) / rcvScalingRatio;
     if (rcvbuf > state->rcvBufferSize) {
         state->rcvBufferSize = (uint32_t)std::min<uint64_t>(rcvbuf, UINT32_MAX);

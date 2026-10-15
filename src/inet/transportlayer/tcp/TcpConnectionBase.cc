@@ -691,6 +691,7 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             delete cancelEvent(deferredSynTimer);
             delete cancelEvent(synRexmitTimer);
             deferredSynTimer = synRexmitTimer = nullptr;
+            initRcvSpace(); // Linux tcp_init_buffer_space() in tcp_init_transfer()
             // TCP_I_ESTAB notification moved inside event processing
             break;
 

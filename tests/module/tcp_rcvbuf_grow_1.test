@@ -7,11 +7,16 @@ out-of-order segment grows the buffer of the connection, which the
 application owns, to the window of twice the receive space and the
 out-of-order span, at the payload ratio of the segments: a 1000-byte segment
 costs 2280 bytes, so the ratio is 112/256. The receive space is the first
-offer, 8000 bytes, so the first segment gives (16000 + 2000) * 256/112 = 41142
-bytes. The clamp of the offer follows the buffer, so the SACKs offer more.
-STATUS reports the buffer (skRcvbuf): 8000 before, 54857 after. Before the
-repair, the buffer grew only when its memory outgrew it (tcp_clamp_window()),
-to 18240 bytes.
+offer, 8000 bytes. Before the loss, Dynamic Right-Sizing grows it: in the
+first receive RTT that the receiver measured (4 ms), the application read
+9000 bytes, more than the space, so the space becomes 9000 and the buffer the
+window 2 * 9000 + 2 * 18000 * 1000/8000 = 22500, 51428 bytes (the slow-start
+rule of tcp_rcvbuf_grow() above 1 ms). The out-of-order segments then grow the
+buffer to the window 18000 + their span: 52571, 54857, 57142 and 59428 bytes
+for spans of 5000 to 8000. The clamp of the offer follows the buffer, so the
+SACKs offer more. STATUS reports the buffer (skRcvbuf): 8000 before, 59428
+after. Before the repair of out-of-order growth, the buffer grew only when its
+memory outgrew it (tcp_clamp_window()), to 18240 bytes.
 
 %inifile: omnetpp.ini
 [General]
@@ -68,7 +73,7 @@ while($sor = <FILE>)
 STATUS: skRcvbuf=8000
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-STATUS: skRcvbuf=54857
+STATUS: skRcvbuf=59428
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out

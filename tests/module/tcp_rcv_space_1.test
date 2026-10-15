@@ -1,0 +1,76 @@
+%description:
+Tests Dynamic Right-Sizing (DRS) of Linux (tcp_rcv_space_adjust() and
+tcp_rcvbuf_grow()). A client of LinuxTcp sends 2000000 bytes at t=1 to a
+server of LinuxTcp with a receive buffer of 131072 bytes (tcp_rmem[1] of
+Linux). The receive RTT is 4 ms. At the first read after each RTT, the bytes
+that the application read in it grow the receive space; with an RTT above
+1 ms the window is twice the space plus twice that times the relative growth
+of the space (slow start), and the buffer is that window at the payload ratio
+162/256 of a 1460-byte segment. The space starts at 10 MSS, 14600 bytes.
+15928 bytes give a window of 37651 and a buffer of 59497, below 131072: no
+growth. Then 28960 bytes give 57920 + 94778 = 152698 and 241300 bytes;
+57920 bytes give 347520 and 549167; 115840 bytes give 695040 and 1098334; and
+130320 bytes give 325800 and a smaller buffer, which stays. The values double
+with the window of the sender in slow start.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 2000000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.typename = "LinuxTcp"
+*.srv_app.statusRequestScript="1.5"
+*.srv_tcp.receiveBufferSize = 131072B
+sim-time-limit = 3s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[]: Dynamic Right-Sizing: 15928 bytes read in one receive RTT
+%contains: stdout
+[]: Dynamic Right-Sizing: 28960 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 241300
+%contains: stdout
+[]: Dynamic Right-Sizing: 57920 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 549167
+%contains: stdout
+[]: Dynamic Right-Sizing: 115840 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 1098334
+%contains: stdout
+[]: Dynamic Right-Sizing: 130320 bytes read in one receive RTT
+%contains: stdout
+[]: STATUS: skRcvbuf=1098334 sndbufLimited=0
+%contains: stdout
+[]: STATUS: rcvRtt=0.004 rcvSpace=130320
+%#--------------------------------------------------------------------------------------------------------------

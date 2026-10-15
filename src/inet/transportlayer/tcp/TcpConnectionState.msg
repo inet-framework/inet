@@ -182,6 +182,9 @@ struct TcpStateVariables
     uint32_t rcvRttSeq = 0;         // the sequence number that ends the current measurement without timestamps (rcv_rtt_est.seq)
     simtime_t rcvRttTime = SIMTIME_ZERO; // the start of that measurement (rcv_rtt_est.time); 0: none started
     uint32_t rcvRttLastTsecr = 0;   // the TSecr of the last segment with timestamps (rcv_rtt_last_tsecr)
+    uint32_t rcvqSpaceSeq = 0;      // DRS: the first unread byte at the start of the measurement (rcvq_space.seq)
+    simtime_t rcvqSpaceTime = SIMTIME_ZERO; // DRS: the start of the measurement (rcvq_space.time)
+    uint32_t rcvBufferLowRttUs = 1000; // DRS: the receive RTT below which the growth is proportional to the RTT (receiveBufferLowRtt parameter)
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code

@@ -247,6 +247,7 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
             dataMsg->addTag<SocketInd>()->setSocketId(socketId);
             sendToApp(dataMsg);
             maxByteCountRequested = 0;
+            adjustRcvSpace(); // Linux tcp_rcv_space_adjust(), before the window update of the read
             // windowUpdateAfterRead, as Linux __tcp_cleanup_rbuf(): when the receiver can
             // now offer at least twice the window that is still open, an ACK tells the peer
             // at once; not after the FIN of the peer, because no more data comes

@@ -558,6 +558,10 @@ class INET_API TcpConnection : public SimpleModule
     virtual void growRcvBufferForOutOfOrderData(uint32_t endSeq);
     /** windowAutoTuning: the receive space becomes newSpace, and the buffer grows to its window (Linux tcp_rcvbuf_grow()) */
     virtual void growRcvBuffer(uint32_t newSpace);
+    /** windowAutoTuning: the receive space at the end of the handshake (Linux tcp_init_buffer_space()) */
+    virtual void initRcvSpace();
+    /** windowAutoTuning: Dynamic Right-Sizing at each read of the application (Linux tcp_rcv_space_adjust()) */
+    virtual void adjustRcvSpace();
 
     /** The receive RTT of Linux: a sample without timestamps, once per window (tcp_rcv_rtt_measure()) */
     virtual void measureRcvRtt();
