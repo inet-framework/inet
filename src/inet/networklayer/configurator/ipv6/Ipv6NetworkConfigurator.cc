@@ -935,7 +935,7 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 Ipv6Route *route = new Ipv6Route(sourceInterfaceInfo->prefix, sourceInterfaceInfo->prefixLength, IRoute::MANUAL);
                 route->setNextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
                 route->setInterface(sourceNetworkInterface);
-                route->setMetric(0);
+                route->setMetric(getDirectRouteMetric(sourceInterfaceInfo));
                 EV_DEBUG << "Adding direct route " << sourceInterfaceInfo->prefix << "/" << sourceInterfaceInfo->prefixLength
                          << " to " << sourceNode->module->getFullPath() << endl;
                 sourceNode->staticRoutes.push_back(route);
@@ -1016,19 +1016,19 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                         // added first, so traffic to the other hosts would be misdelivered
                         // to it. A direct route is also correct and de-duplicates: all hosts
                         // on one link collapse to a single on-link prefix route.
-                        NetworkInterface *directOutInterface = nullptr;
+                        InterfaceInfo *directOutInterfaceInfo = nullptr;
                         for (auto& ifInfoBase : destinationInterfaceInfo->linkInfo->interfaceInfos) {
                             InterfaceInfo *onLinkIf = static_cast<InterfaceInfo *>(ifInfoBase);
                             if (static_cast<Node *>(onLinkIf->node) == sourceNode) {
-                                directOutInterface = onLinkIf->networkInterface;
+                                directOutInterfaceInfo = onLinkIf;
                                 break;
                             }
                         }
 
                         Ipv6Address nextHop;
                         NetworkInterface *outInterface;
-                        if (directOutInterface != nullptr)
-                            outInterface = directOutInterface; // on-link: resolve the destination directly
+                        if (directOutInterfaceInfo != nullptr)
+                            outInterface = directOutInterfaceInfo->networkInterface; // on-link: resolve the destination directly
                         else {
                             outInterface = sourceNetworkInterface;
                             auto nhIpv6Data = nextHopInterfaceInfo->networkInterface->findProtocolData<Ipv6InterfaceData>();
@@ -1062,7 +1062,7 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                         Ipv6Route *route = new Ipv6Route(destPrefix, destPrefixLength, IRoute::MANUAL);
                         route->setNextHop(nextHop);
                         route->setInterface(outInterface);
-                        route->setMetric(0);
+                        route->setMetric(directOutInterfaceInfo != nullptr ? getDirectRouteMetric(directOutInterfaceInfo) : 0);
                         sourceNode->staticRoutes.push_back(route);
                         sourceNode->routingTableNetworkInterfaces.push_back(route->getInterface());
                         EV_DETAIL << "Adding route " << outInterface->getInterfaceFullPath() << " -> "
@@ -1104,7 +1104,7 @@ void Ipv6NetworkConfigurator::addStaticRoutes(Topology& topology, cXMLElement *a
                 Ipv6Route *route = new Ipv6Route(interfaceInfo->prefix, interfaceInfo->prefixLength, IRoute::MANUAL);
                 route->setNextHop(Ipv6Address::UNSPECIFIED_ADDRESS);
                 route->setInterface(networkInterface);
-                route->setMetric(0);
+                route->setMetric(getDirectRouteMetric(interfaceInfo));
                 EV_DEBUG << "Adding on-link route " << interfaceInfo->prefix << "/" << interfaceInfo->prefixLength
                          << " dev " << networkInterface->getInterfaceName() << " to " << sourceNode->module->getFullPath()
                          << " (directly-connected prefix with no other configured member)" << endl;

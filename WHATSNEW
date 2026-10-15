@@ -490,6 +490,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. The interface metric of Ipv6NetworkConfigurator sets the metric of its on-link routes
+
+   The metric attribute of an <interface> element in the Ipv6NetworkConfigurator configuration was read and then ignored, although the documentation lists it. It now sets the metric of the on-link (direct) routes that the configurator adds through that interface, as the interface metric of Ipv4NetworkConfigurator sets the metric of the directly connected route. Routes via a next hop, the link-local fe80::/10 route of each interface, and on-link routes learned from Router Advertisements are not affected. A configuration that sets the attribute on an Internet Protocol version 6 (IPv6) interface now gets the metric it sets on those routes, and the metric chooses between two routes of the same prefix length and administrative distance.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
