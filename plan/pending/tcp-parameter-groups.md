@@ -1,9 +1,10 @@
-# Group the parameters of Tcp, and decide which parts become submodules
+# Group the parameters of Tcp, and make the algorithm of a connection its submodule
 
-Status: **in progress** — the grouping (step 2) landed on master on 2026-10-15; the submodules
-are in design (option A).
+Status: **in progress** — the grouping (step 2) landed on master on 2026-10-15; the algorithm as
+a submodule of its connection (steps 3 to 7) is planned.
 
-- Branch `topic/tcp-parameter-groups`, on master `00e916e3ed`.
+- Branch `topic/tcp-parameter-groups`, on master `633b071e21`.
+- The decision numbers continue those of `plan/done/tcp-receive-memory-repairs.md` (D-117 onward).
 
 ## 1. The problem
 
@@ -51,53 +52,190 @@ the undo, the checks of RFC 5961) stays with the RFC parameters.
 The step moves lines and adds headings only: the 102 parameters keep their names, types,
 defaults and properties (checked by `opp_nedtool c -x` of the old and the new file).
 
-## 4. Submodules
+## 4. The algorithm as a submodule of its connection
 
-### The constraints
+### Today
 
-1. `Tcp` can have submodules and stay a simple module in C++: `Ieee80211Mac` is declared as
-   `module Ieee80211Mac extends MacProtocolBase`, a module type on a simple base, and its C++
-   class is a `SimpleModule`. The connections stay `tcp.conn-N`, and the modules talk through
-   the same C++ calls; only parameters move. (The first version of this plan said that a
-   simple module cannot have submodules; the owner corrected it.)
-2. A flavour (`tcpAlgorithmClass`) is one object per connection, and a socket can choose its own
-   flavour (the open command carries `tcpAlgorithmClass`). So the parameters of an algorithm must
-   exist for each flavour that a socket can choose, not only for the default of the module.
-3. `LinuxTcp` and `LegacyTcp` set defaults in NED. With NED submodules, they set the
-   defaults of a submodule by a deep assignment (`cubic.hystartEnabled = default(true)`).
-   Between `Tcp` and `LinuxTcp`, one algorithm parameter differs: `hystartEnabled`.
+- Each connection is a submodule of `Tcp`: `Tcp::createConnection()` creates `tcp.conn-N` at run
+  time from the NED type `TcpConnection`, and a listener forks a new one for each accepted
+  connection. `TcpConnection.ned` has no parameters, only signals and statistics.
+- The algorithm (`tcpAlgorithmClass`, the default of `Tcp` or the choice of the socket) is a
+  `cObject` that the connection creates by its class name. It has no parameters of its own: the
+  connection and the algorithm read all 102 parameters from `Tcp` (94 calls of
+  `tcpMain->par()`).
+- The algorithm creates the state of the connection as its own subclass
+  (`createStateVariables()`): `TcpCubicStateVariables` extends
+  `TcpClassicAlgorithmBaseStateVariables`, which extends the TCB (`TcpStateVariables`). These
+  `.msg` structs have descriptors; Qtenv shows them under `tcp.conn-N`, `state`.
+- OMNeT++ applies the pattern assignments of the NED types of all ancestors to a module that C++
+  creates (`cNedNetworkBuilder::assignParametersFromPatterns()`). A `simple` type may hold a
+  pattern assignment; a hyphen is not allowed in the pattern (`conn*`, not `conn-*`).
 
-### The candidates
+### The options
 
-| Part | Parameters | Separate? | Verdict |
-| --- | --- | --- | --- |
-| CUBIC and HyStart | 12 | read only by `TcpCubic`; set at most once in INET | the strong candidate |
-| DCTCP | 1 | read only by `DcTcp` | with CUBIC, if the algorithms move |
-| Vegas | 0 (alpha 2, beta 4, gamma 1 segments are constants in the code) | would become parameters | with CUBIC, if the algorithms move |
-| loss detection and recovery | 10 | no: the connection reads them into its state; the RACK and TLP timers are in `TcpConnection`, PRR in `Rfc6675Recovery`, F-RTO and the undo in the algorithm base; SACK negotiation, not the user, chooses the recovery | a group, not a submodule |
-| TCP Fast Open | 11 | partly: a separate feature with host-wide state in `Tcp` (the server key, the cookie cache, the blackhole timer) | a submodule would fit if `Tcp` were compound; as a C++-created one, a moderate refactor |
-| keepalive, path MTU, ECN | 4, 5, 6 | small, read into the connection state | groups |
+The first version of this plan compared parameter submodules of `Tcp` (`tcp.cubic`, option A),
+the algorithm as a submodule of each connection (option B), a compound `Tcp` (rejected: it moves
+the connections) and no submodules. The owner chose B: Qtenv then shows the algorithm that a
+running connection uses, with its parameters and its state.
 
-### The options for the algorithms
+### The shape
 
-- **A — Parameter submodules of the algorithm types.** `Tcp` creates `tcp.cubic`, `tcp.dctcp`
-  (and `tcp.vegas`) at initialization; the per-connection objects stay as they are and read the
-  parameters of their type's submodule. Small C++ change; 13 ini keys move (`**.tcp.cubicBeta`
-  becomes `**.tcp.cubic.beta`). Constraint 3: `LinuxTcp` needs another way to turn HyStart on,
-  for example a parameter of `Tcp` that names the NED type of the CUBIC submodule.
-- **B — The algorithm as a submodule of each connection.** The flavour becomes a module,
-  `tcp.conn-N.algorithm`, of the NED type that `tcpAlgorithmClass` names. This is the cleanest
-  OMNeT++ model (the algorithm with its own parameters and signals, visible in Qtenv), but the
-  largest change: the `TcpAlgorithm` hierarchy becomes `cSimpleModule`, the connection creates
-  and forks it, the ini keys become `**.algorithm.beta`, and Linux defaults need NED types such
-  as `LinuxTcpCubic`.
-- **C — `Tcp` as a compound module.** Rejected by constraint 1.
-- **D — No submodules.** The groups of step 2, with the prefixes `cubic*`, `hystart*` and
-  `dctcp*` that the parameters already have.
+- `tcp.conn-N.algorithm`: each connection creates its algorithm as a submodule, of the NED type
+  that `tcpAlgorithmClass` names, at its open or fork.
+- Each algorithm has a NED type with the name of its C++ class, in
+  `inet.transportlayer.tcp.flavours`; the parameters of that algorithm move there.
+- `Tcp`, `LinuxTcp` and `LegacyTcp` stay `simple`; `LinuxTcp` and `LegacyTcp` set the one
+  algorithm default that differs by a pattern assignment.
+- The connection keeps its timers, its events and its signals, and calls the algorithm through
+  the same C++ calls. Connection paths, statistics and fingerprints stay.
 
-Recommendation: D now (step 2); then A for the algorithms if the owner wants submodules, because
-it separates the 13 algorithm parameters at a small cost and keeps the connection code as it is.
-B only if the algorithms should become visible modules in their own right.
+`flavours/TcpAlgorithm.ned`:
+
+```ned
+package inet.transportlayer.tcp.flavours;
+
+import inet.common.SimpleModule;
+
+//
+// The congestion control and loss recovery algorithm of one TCP connection.
+// Each connection of ~Tcp creates one as its submodule `algorithm`, of the
+// NED type that the `tcpAlgorithmClass` parameter of ~Tcp names, or that the
+// socket chose. The connection calls it from C++; its state is the state of
+// the connection, extended by the algorithm, and Qtenv shows it with the
+// parameters of the algorithm.
+//
+simple TcpAlgorithm extends SimpleModule
+{
+    parameters:
+        @class(-);
+        @display("i=block/control");
+}
+```
+
+`flavours/TcpNewReno.ned` (and `TcpReno`, `TcpTahoe`, `TcpWestwood`, `TcpNoCongestionControl`,
+`DumbTcp` alike, without parameters):
+
+```ned
+package inet.transportlayer.tcp.flavours;
+
+//
+// NewReno (RFC 6582), with the SACK recovery of RFC 6675 when SACK is on.
+//
+simple TcpNewReno extends TcpAlgorithm
+{
+    parameters:
+        @class(TcpNewReno);
+}
+```
+
+`flavours/TcpCubic.ned`:
+
+```ned
+package inet.transportlayer.tcp.flavours;
+
+//
+// CUBIC (RFC 9438), with the slow start of Linux (HyStart).
+//
+simple TcpCubic extends TcpAlgorithm
+{
+    parameters:
+        @class(TcpCubic);
+        double beta = default(0.7); // multiplicative-decrease factor ... (RFC 9438)
+        double c = default(0.4); // scaling constant C of the cubic window-growth curve
+        bool fastConvergence = default(true); // ... (RFC 9438 section 4.7)
+        bool tcpFriendliness = default(true); // ... (RFC 9438 section 4.3)
+        // Linux behaviors (no RFC)
+        int cntClamp = default(20); // ...
+        double delta @unit(s) = default(10ms); // ...
+        bool hystartEnabled = default(false); // HyStart: leave slow start when the path appears full
+        double hystartAckDelta @unit(s) = default(2ms);
+        double hystartDelayMax @unit(s) = default(16ms);
+        double hystartDelayMin @unit(s) = default(4ms);
+        int hystartDetect = default(3);
+        int hystartLowWindow = default(16);
+}
+```
+
+`flavours/DcTcp.ned`:
+
+```ned
+simple DcTcp extends TcpAlgorithm
+{
+    parameters:
+        @class(DcTcp);
+        double g = default(0.0625); // the estimation gain g of RFC 8257 section 4.2
+}
+```
+
+`flavours/TcpVegas.ned` (the values of the code today, in segments):
+
+```ned
+simple TcpVegas extends TcpAlgorithm
+{
+    parameters:
+        @class(TcpVegas);
+        int alpha = default(2); // below this many extra segments in the network, cwnd grows
+        int beta = default(4); // above this many, cwnd shrinks
+        int gamma = default(1); // in slow start, above this many, Vegas leaves slow start
+}
+```
+
+`Tcp.ned`: the groups CUBIC and DCTCP go; the group "congestion control" keeps
+`tcpAlgorithmClass` and its documentation names the algorithm types. `dctcpGamma` goes (D-120).
+
+`LinuxTcp.ned` (and `LegacyTcp.ned` alike):
+
+```ned
+simple LinuxTcp extends Tcp
+{
+    parameters:
+        @class(Tcp);
+        tcpAlgorithmClass = default("TcpCubic");
+        conn*.algorithm.hystartEnabled = default(true);   // was: hystartEnabled = default(true)
+        ...
+}
+```
+
+ini: `**.tcp.cubicBeta` becomes `**.tcp.conn-*.algorithm.beta` (or `**.algorithm.beta`).
+
+### The C++ shape
+
+- `TcpAlgorithm` derives from `SimpleModule` instead of `cObject`. It keeps `conn`, `state` and
+  its interface; the connection creates it with `cModuleType::create("algorithm", this)` (NED type
+  from `tcpAlgorithmClass`: a qualified NED name, or a name in `inet.transportlayer.tcp.flavours`),
+  and the fork takes the NED type of the listener's algorithm. The module goes with its
+  connection; nothing deletes it by hand.
+- The method that the connection calls to start the algorithm, `TcpAlgorithm::initialize()`, has
+  the name of the module initialization of OMNeT++, which runs in the context of the algorithm
+  module: the timers that it creates would belong to the algorithm, and the connection could not
+  schedule them. It gets another name, and the connection calls it as today, in its own context.
+  The module initialization only reads the parameters of the algorithm.
+- The names that `SimpleModule` brings (`cancelEvent()`, `scheduleAfter()`, `scheduleAt()`,
+  `getState()`) must not take over calls that go to the connection today; the step checks each
+  use.
+- The algorithm module watches the state (`WATCH_PTR`), so Qtenv shows its parameters and the
+  state together; the connection keeps its watches.
+
+### The decisions
+
+- **D-117 — The algorithm of a connection is its submodule `algorithm`.** The owner chose this
+  shape (option B) so that Qtenv shows the algorithm of a running connection with its parameters
+  and its state. The NED types have the names of the C++ classes.
+- **D-118 — Only the parameters of one algorithm move now.** CUBIC and HyStart (12), DCTCP (1)
+  and the thresholds of Vegas (3, constants until now) move to their algorithm. The algorithm base
+  also reads the parameters of the RTO, the persist timer, the delayed-ACK timer and keepalive;
+  they stay in `Tcp`, because many configurations set them, and a later step can move them to a
+  common base type.
+- **D-119 — The names lose their prefixes.** CUBIC as RFC 9438 (`beta`, `c`); the gain of DCTCP
+  `g`, as RFC 8257; Vegas `alpha`, `beta`, `gamma`, as Brakmo and Peterson. The CUBIC and HyStart
+  parameters were never in a release, so they move without a deprecation.
+- **D-120 — `dctcpGamma` goes.** It was in INET 4.7, but the owner keeps no parameters for
+  backward compatibility: the release note names the new key `algorithm.g`.
+- **D-121 — The connection keeps its events.** The timers stay messages of the connection, and
+  the signals stay on the connection, so the module paths of the results stay; a log line of the
+  initialization of the new module is the only new output.
+- **D-122 — An algorithm needs a NED type.** A C++ algorithm class without one (from another
+  project) stops with an error that tells to add a NED type; the release note says so.
 
 ## 5. The steps
 
@@ -105,5 +243,20 @@ B only if the algorithms should become visible modules in their own right.
 | --- | --- | --- |
 | 1 ✅ | `plan: add: group the parameters of Tcp` | this plan |
 | 2 ✅ | `tcp: format: group the parameters of Tcp by the part of the protocol` | section 3; landed on master on 2026-10-15, the owner approved it |
-| 3 | (after the decision) the submodules of section 4 | — |
-| 4 | the record | — |
+| 3 | `plan: change: the algorithm of a connection becomes its submodule` | section 4 |
+| 4 | `tcp: refactor: the algorithm of a connection is its submodule` | `TcpAlgorithm` a module, the NED types without parameters, the creation, the fork, the watches; no change of behavior |
+| 5 | `tcp: change: the parameters of CUBIC and HyStart belong to TcpCubic` | 12 parameters; `LinuxTcp`, `LegacyTcp`; `tcp_cubic_hystart_1` |
+| 6 | `tcp: change: the gain of DCTCP belongs to DcTcp` | `g`; `dctcpGamma` goes (D-120) |
+| 7 | `tcp: add: the thresholds of Vegas as parameters` | `alpha`, `beta`, `gamma` with the values of today, and a test |
+| 8 | `doc: change: the release note of the algorithm submodule` | WHATSNEW entry 33 |
+| 9 | the record | — |
+
+## 6. The evidence
+
+Each commit builds alone; the module tests and the TCP protocol tests pass at each commit; unit
+and serializer at the head. Step 4 changes no behavior: the CI fingerprint job moves no row, the
+statistical results of the 95 TCP configurations stay (the chain helper of the statistics, at the
+head), and the packetdrill suite of inet-gpl keeps 303 MATCH. Steps 5 to 7 move no CI row either,
+because the defaults keep their values. A module test checks that Qtenv's model is there: the
+connection has the submodule `algorithm` of the right type, and `LinuxTcp` turns HyStart on
+through the pattern. The six gates and the combined pull-request gate.
