@@ -1,0 +1,58 @@
+%description:
+Tests that Ipv6NetworkConfigurator rejects a configuration that gives two links
+the same prefix.
+
+    h1 -- r -- h2
+
+One <interface> element with a prefix template that has no 'x' group matches
+both links. A template without 'x' is used as is, so both links would get
+2001:db8:1:1::/64.
+
+Expected: network initialization stops with an error that names an interface on
+each link.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network DuplicatePrefixTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        h1: StandardHost6;
+        r: Router6;
+        h2: StandardHost6;
+        configurator: Ipv6NetworkConfigurator;
+    connections:
+        h1.ethg++ <--> ethernetline <--> r.ethg++;
+        r.ethg++ <--> ethernetline <--> h2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = DuplicatePrefixTest6
+sim-time-limit = 1s
+cmdenv-express-mode = false
+ned-path = .;../../../../src
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.configurator.config = xml("<config><interface hosts='**' prefix='2001:db8:1:1::/64'/></config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > duplicate-prefix-error.out || true
+%contains-regex: duplicate-prefix-error.out
+The link of DuplicatePrefixTest6\.h1\.eth0 and the link of DuplicatePrefixTest6\.r\.eth1 both get the prefix 2001:db8:1:1::/64, but each link needs a unique prefix
+%#--------------------------------------------------------------------------------------------------------------
