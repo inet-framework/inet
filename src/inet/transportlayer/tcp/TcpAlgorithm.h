@@ -8,6 +8,7 @@
 #ifndef __INET_TCPALGORITHM_H
 #define __INET_TCPALGORITHM_H
 
+#include "inet/common/SimpleModule.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
 #include "inet/transportlayer/tcp_common/TcpHeader.h"
@@ -22,8 +23,13 @@ namespace tcp {
  * during data transfer state: flavour of congestion control, fast
  * retransmit/recovery, selective acknowledgement etc. Subclasses
  * may implement various sets and flavours of the above algorithms.
+ *
+ * The algorithm is the submodule `algorithm` of its connection. It holds the
+ * parameters of the algorithm, and Qtenv shows them with its state variables.
+ * The connection calls it from C++, and the connection schedules its timers
+ * and emits its signals.
  */
-class INET_API TcpAlgorithm : public cObject
+class INET_API TcpAlgorithm : public SimpleModule
 {
   protected:
     TcpConnection *conn; // we belong to this connection
@@ -45,6 +51,13 @@ class INET_API TcpAlgorithm : public cObject
      * create and return a "blank" state block of the appropriate type.
      */
     virtual TcpStateVariables *createStateVariables() = 0;
+
+    // the module has one stage of initialization, as its connection
+    virtual void initialize() override
+    {
+        SimpleModule::initialize();
+        WATCH_PTR(state);
+    }
 
   public:
     /**
@@ -75,10 +88,10 @@ class INET_API TcpAlgorithm : public cObject
     }
 
     /**
-     * Should be redefined to initialize the object: create timers, etc.
-     * This method is necessary because the TcpConnection ptr is not
-     * available in the constructor yet. Subclasses call it first: it reads the
-     * timer parameters of the Tcp module.
+     * Should be redefined to initialize the algorithm: create timers, etc.
+     * The connection calls it after it configured the state variables, in
+     * its own context, so that the connection owns the timers. Subclasses
+     * call it first: it reads the timer parameters of the Tcp module.
      */
     virtual void initializeAlgorithm()
     {

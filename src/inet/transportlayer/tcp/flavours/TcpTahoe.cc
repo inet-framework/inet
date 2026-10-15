@@ -14,7 +14,7 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(TcpTahoe);
+Define_Module(TcpTahoe);
 
 TcpTahoe::TcpTahoe() : TcpAlgorithmBase(),
     state((TcpTahoeStateVariables *&)TcpAlgorithm::state)

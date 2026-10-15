@@ -269,9 +269,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     rexmitQueue = new TcpSackRexmitQueue();
     rexmitQueue->setConnection(this);
 
-    const char *tcpAlgorithmClass = listenerConn->tcpAlgorithm->getClassName();
-    tcpAlgorithm = check_and_cast<TcpAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
-    tcpAlgorithm->setConnection(this);
+    tcpAlgorithm = createTcpAlgorithm(listenerConn->tcpAlgorithm->getNedTypeName());
 
     socketAdvertisedWindow = listenerConn->socketAdvertisedWindow;
     socketReceiveBufferSize = listenerConn->socketReceiveBufferSize;
@@ -963,8 +961,7 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
     if (opp_isempty(tcpAlgorithmClass))
         tcpAlgorithmClass = tcpMain->par("tcpAlgorithmClass");
 
-    tcpAlgorithm = check_and_cast<TcpAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
-    tcpAlgorithm->setConnection(this);
+    tcpAlgorithm = createTcpAlgorithm(tcpAlgorithmClass);
 
     // create state block
     state = tcpAlgorithm->getStateVariables();
@@ -972,6 +969,21 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
     tcpAlgorithm->initializeAlgorithm();
     if (keepAliveSockopt >= 0)
         tcpAlgorithm->setKeepAlive(keepAliveSockopt != 0);
+}
+
+TcpAlgorithm *TcpConnection::createTcpAlgorithm(const char *tcpAlgorithmClass)
+{
+    // the NED type has the name of the C++ class: a qualified NED name, or a name in the
+    // package of the flavours (D-122)
+    std::string nedTypeName = strchr(tcpAlgorithmClass, '.') != nullptr ? tcpAlgorithmClass
+            : std::string("inet.transportlayer.tcp.flavours.") + tcpAlgorithmClass;
+    cModuleType *moduleType = cModuleType::find(nedTypeName.c_str());
+    if (moduleType == nullptr)
+        throw cRuntimeError("The TCP algorithm \"%s\" has no NED type %s: add a simple module type "
+                "that extends inet.transportlayer.tcp.flavours.TcpAlgorithm", tcpAlgorithmClass, nedTypeName.c_str());
+    auto algorithm = check_and_cast<TcpAlgorithm *>(moduleType->createScheduleInit("algorithm", this));
+    algorithm->setConnection(this);
+    return algorithm;
 }
 
 void TcpConnection::configureStateVariables()

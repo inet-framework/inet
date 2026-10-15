@@ -19,7 +19,7 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(TcpReno);
+Define_Module(TcpReno);
 
 TcpReno::TcpReno() : TcpClassicAlgorithmBase(),
     state((TcpRenoStateVariables *&)TcpAlgorithm::state)

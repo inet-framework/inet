@@ -12,7 +12,7 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(DumbTcp);
+Define_Module(DumbTcp);
 
 // just a dummy value
 #define REXMIT_TIMEOUT    2
@@ -27,7 +27,7 @@ DumbTcp::~DumbTcp()
 {
     // cancel and delete timers
     if (rexmitTimer)
-        delete conn->cancelEvent(rexmitTimer);
+        conn->deleteTimer(rexmitTimer);
 }
 
 void DumbTcp::initializeAlgorithm()

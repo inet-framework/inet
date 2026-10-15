@@ -140,9 +140,14 @@ fragment selects TCP Vegas:
 
    **.tcp.tcpAlgorithmClass = "TcpVegas"
 
-Values like ``"TcpVegas"`` name C++ classes. Indeed, :ned:`Tcp` can
-be extended with new congestion control schemes by implementing and
-registering them in C++.
+Values like ``"TcpVegas"`` name NED types of the
+``inet.transportlayer.tcp.flavours`` package, which have the names of
+their C++ classes. Each connection creates its algorithm as its
+submodule ``algorithm``, so Qtenv shows the parameters and the state of
+the algorithm of a running connection. To add a new congestion control
+scheme, write a C++ class and a simple module type that extends
+:ned:`TcpAlgorithm`; a qualified NED type name selects a type of another
+package.
 
 The defaults of :ned:`Tcp` follow the RFCs. Two modules extend it and
 change only defaults: :ned:`LinuxTcp` has the defaults of Linux, and

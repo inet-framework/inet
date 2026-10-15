@@ -61,17 +61,17 @@ TcpAlgorithmBase::~TcpAlgorithmBase()
 
     // cancel and delete timers
     if (rexmitTimer)
-        delete cancelTimer(rexmitTimer);
+        conn->deleteTimer(rexmitTimer);
     if (persistTimer)
-        delete cancelTimer(persistTimer);
+        conn->deleteTimer(persistTimer);
     if (delayedAckTimer)
-        delete cancelTimer(delayedAckTimer);
+        conn->deleteTimer(delayedAckTimer);
     if (keepAliveTimer)
-        delete cancelTimer(keepAliveTimer);
+        conn->deleteTimer(keepAliveTimer);
     if (tlpTimer)
-        delete cancelTimer(tlpTimer);
+        conn->deleteTimer(tlpTimer);
     if (corkTimer)
-        delete cancelTimer(corkTimer);
+        conn->deleteTimer(corkTimer);
 }
 
 void TcpAlgorithmBase::initializeAlgorithm()

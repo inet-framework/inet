@@ -1,0 +1,52 @@
+%description:
+Tests that an algorithm without a NED type stops the simulation with an
+error. The algorithm of a connection is a module, so the value of
+tcpAlgorithmClass must name a NED type: here no type
+inet.transportlayer.tcp.flavours.TcpNoSuchAlgorithm exists.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 30000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.cli_tcp.tcpAlgorithmClass = "TcpNoSuchAlgorithm"
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+The TCP algorithm "TcpNoSuchAlgorithm" has no NED type inet.transportlayer.tcp.flavours.TcpNoSuchAlgorithm: add a simple module type that extends inet.transportlayer.tcp.flavours.TcpAlgorithm
+%#--------------------------------------------------------------------------------------------------------------

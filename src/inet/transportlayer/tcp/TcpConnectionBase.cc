@@ -145,7 +145,7 @@ TcpConnection::~TcpConnection()
     delete sendQueue;
     delete rexmitQueue;
     delete receiveQueue;
-    delete tcpAlgorithm;
+    // the algorithm is a submodule: deleteModule() deleted it before this destructor
     delete state;
 
     if (the2MSLTimer)

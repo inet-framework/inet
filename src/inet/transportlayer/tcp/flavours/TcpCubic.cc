@@ -17,7 +17,7 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(TcpCubic);
+Define_Module(TcpCubic);
 
 // RTT samples needed before the delay-increase detector may fire.
 static const uint32_t HYSTART_MIN_SAMPLES = 8;

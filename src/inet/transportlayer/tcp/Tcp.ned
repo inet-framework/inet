@@ -455,7 +455,7 @@ simple Tcp extends SimpleModule like ITcp
         int notsentLowat @unit(B) = default(-1B); // TCP_NOTSENT_LOWAT (a Linux socket option, no RFC): a low-water mark on the unsent bytes: when they exceed it, TCP sends no TCP_I_SEND_MSG until they are at or below it again, and then it sends one; TcpSocket::setNotsentLowat() sets it for one connection; -1B: off
 
         // congestion control
-        string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpNewReno");
+        string tcpAlgorithmClass @examples("TcpCubic", "TcpVegas", "TcpWestwood", "DcTcp", "TcpNewReno", "TcpReno", "TcpTahoe", "TcpNoCongestionControl") = default("TcpNewReno"); // the NED type of the algorithm of each connection, its submodule algorithm: a type of the package inet.transportlayer.tcp.flavours, or a qualified NED type name; the open command of a socket can choose another one
         string initialWindow @enum("rfc2001","rfc3390","rfc6928") = default("rfc3390"); // the initial congestion window: "rfc2001" = 1 SMSS; "rfc3390" = min(4*SMSS, max(2*SMSS, 4380 bytes)), the upper bound of RFC 5681 section 3.1; "rfc6928" = min(10*SMSS, max(2*SMSS, 14600 bytes)), as Linux
         int initialCwnd = default(0); // the initial congestion window in segments, in place of initialWindow, as the initcwnd of a Linux route (dst_metric(RTAX_INITCWND)); 0: initialWindow
         bool increasedIWEnabled = default(false); // deprecated: the same as initialWindow = "rfc3390" (RFC 3390); an error with initialWindow = "rfc6928"

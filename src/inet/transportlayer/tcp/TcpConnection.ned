@@ -17,6 +17,10 @@ import inet.common.SimpleModule;
 // Provides extensive statistics collection for various TCP metrics including
 // window sizes, sequence numbers, RTT measurements, and congestion parameters.
 //
+// The connection creates its congestion control and loss recovery algorithm
+// as its submodule `algorithm`, a ~TcpAlgorithm, when it opens. The signals
+// of the algorithm stay signals of the connection.
+//
 simple TcpConnection extends SimpleModule {
     parameters:
         @class(TcpConnection);

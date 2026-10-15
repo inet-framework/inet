@@ -24,7 +24,7 @@ cplusplus {{
 namespace inet::tcp;
 
 class TcpSackRexmitQueue { @existingClass; }
-class TcpAlgorithm extends cObject { @existingClass; }
+class TcpAlgorithm extends cSimpleModule { @existingClass; }
 
 class TcpSendQueue extends cObject
 {

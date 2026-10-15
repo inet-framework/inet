@@ -12,7 +12,7 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(TcpNoCongestionControl);
+Define_Module(TcpNoCongestionControl);
 
 TcpNoCongestionControl::TcpNoCongestionControl() : TcpAlgorithmBase(),
     state((TcpNoCongestionControlStateVariables *&)TcpAlgorithm::state)

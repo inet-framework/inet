@@ -137,7 +137,8 @@ The :ned:`Tcp` module has the following parameters:
   default, -1, takes the MSS of the address family: 1460 bytes for IPv4
   and 1440 bytes for IPv6
 
-- :par:`tcpAlgorithmClass` the name of the TCP flavour
+- :par:`tcpAlgorithmClass` the name of the TCP flavour, which is the NED
+  type of the submodule ``algorithm`` of each connection
 
   Possible values are “TcpNewReno” (default), “TcpReno”, “TcpTahoe”,
   “TcpCubic”, “TcpVegas”, “TcpWestwood”, “DcTcp”,
@@ -381,8 +382,12 @@ numbers, windows of the receiver and sender, etc.
 TCP algorithms
 --------------
 
-The :cpp:`TcpAlgorithm` object controls retransmissions, congestion
+The :cpp:`TcpAlgorithm` module controls retransmissions, congestion
 control, and ACK sending: delayed ACKs, slow start, fast retransmit, etc.
+Each connection creates one as its submodule ``algorithm``. The module
+holds the parameters of the algorithm, and Qtenv shows them with its
+state variables. The connection calls the algorithm from C++, schedules
+its timers and emits its signals.
 They all extend the :cpp:`TcpAlgorithm` class. This simplifies the
 design of :cpp:`TcpConnection` and makes it a lot easier to implement
 TCP variations such as Tahoe, NewReno, Vegas, or LinuxTCP.
@@ -390,7 +395,10 @@ TCP variations such as Tahoe, NewReno, Vegas, or LinuxTCP.
 Currently implemented algorithm classes are :cpp:`TcpReno`,
 :cpp:`TcpTahoe`, :cpp:`TcpNewReno`, :cpp:`TcpNoCongestionControl`, and
 :cpp:`DumbTcp`. It is also possible to add new TCP variations by
-implementing :cpp:`TcpAlgorithm`.
+implementing :cpp:`TcpAlgorithm`. A new variation also needs a simple
+module type that extends :ned:`TcpAlgorithm`, with the C++ class in its
+``@class`` property: the connection creates the algorithm from its NED
+type, and stops with an error if there is none.
 
 .. graphviz:: figures/tcp_algorithms.dot
    :align: center

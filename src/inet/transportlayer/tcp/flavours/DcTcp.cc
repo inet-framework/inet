@@ -14,7 +14,7 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(DcTcp);
+Define_Module(DcTcp);
 
 simsignal_t DcTcp::loadSignal = cComponent::registerSignal("load"); // will record load
 simsignal_t DcTcp::calcLoadSignal = cComponent::registerSignal("calcLoad"); // will record total number of RTOs

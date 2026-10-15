@@ -14,7 +14,7 @@ namespace inet {
 
 namespace tcp {
 
-Register_Class(TcpVegas);
+Define_Module(TcpVegas);
 
 std::string TcpVegasStateVariables::str() const
 {

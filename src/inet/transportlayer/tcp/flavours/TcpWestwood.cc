@@ -14,7 +14,7 @@
 namespace inet {
 namespace tcp {
 
-Register_Class(TcpWestwood);
+Define_Module(TcpWestwood);
 
 std::string TcpWestwoodStateVariables::str() const
 {

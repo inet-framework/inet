@@ -354,6 +354,9 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: creates send/receive queues and tcpAlgorithm */
     virtual void initConnection(TcpOpenCommand *openCmd);
 
+    /** Utility: creates the submodule `algorithm` of the NED type that tcpAlgorithmClass names */
+    virtual TcpAlgorithm *createTcpAlgorithm(const char *tcpAlgorithmClass);
+
     /** Utility: set snd_mss, rcv_wnd and sack in newly created state variables block */
     virtual void configureStateVariables();
 
@@ -653,6 +656,12 @@ class INET_API TcpConnection : public SimpleModule
     TcpReceiveQueue *getReceiveQueueForUpdate() { return receiveQueue; }
     const TcpAlgorithm *getTcpAlgorithm() const { return tcpAlgorithm; }
     TcpAlgorithm *getTcpAlgorithmForUpdate() { return tcpAlgorithm; }
+
+    /**
+     * Cancels and deletes a timer of the algorithm. The connection owns the timers, so it
+     * deletes them in its own context: the algorithm module deletes itself in its context.
+     */
+    void deleteTimer(cMessage *timer) { Enter_Method_Silent(); delete cancelEvent(timer); }
 
     Tcp *getTcpMain() { return tcpMain; }
     //@}
