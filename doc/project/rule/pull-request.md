@@ -54,7 +54,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | Rule | Statement |
 | --- | --- |
 | [PR-MSG-SUBJECT](#pr-msg-subject) | `area: what the commit does` |
-| [PR-MSG-WRAP](#pr-msg-wrap) | The body is plain text, wrapped at 72 columns |
+| [PR-MSG-WRAP](#pr-msg-wrap) | Each prose paragraph occupies one line, with exactly one blank line between paragraphs |
 | [PR-MSG-BODY](#pr-msg-body) | A commit whose subject cannot carry its reason has a body |
 | [PR-MSG-SUMMARY](#pr-msg-summary) | The body starts with a summary that a reviewer understands in two minutes |
 | [PR-MSG-WHY](#pr-msg-why) | The body explains the behavior change and why it is necessary |
@@ -242,13 +242,15 @@ The area is the NED or C++ component (`ExternalProcess:`, `Ipv4:`, `visualizer:`
 
 ### PR-MSG-WRAP
 
-**The body is plain text, wrapped at 72 columns**
+**Each prose paragraph occupies one line, with exactly one blank line between paragraphs**
 
-Git keeps a commit message as written. `git log`, `git show`, `git format-patch` and most terminal tools show it as written: they do not wrap a long line, or the terminal breaks it at its edge, in the middle of a word and without the indent that `git log` adds. Wrap each prose paragraph of the body at 72 columns, so that it fits an 80-column terminal after that indent of 4 columns. The same number is the aim for the subject ([PR-MSG-SUBJECT](#pr-msg-subject)).
+Git stores the line breaks in a commit message. Keep related prose sentences on one source line. Put exactly one blank line between paragraphs. Use viewer display options to wrap long lines. The subject length guidance remains separate ([PR-MSG-SUBJECT](#pr-msg-subject)).
 
-A line may be longer where a break would damage it: a trailer (`Change:`, `Plan:`), a URL, a command, a quoted log line or another indented line. Wrap a list item with a hanging indent.
+Preserve line breaks required by lists, tables, commands, code blocks, quoted output, and trailers such as `Change:` and `Plan:`. These structures do not require blank lines between each pair of lines.
 
-Markdown follows the opposite rule. A document or a pull request description keeps each paragraph on one line ([DR-EXPLAIN](documentation.md#dr-explain)), because the editor and the GitHub renderer wrap it, and GitHub shows a line break inside a paragraph of a description as a break. A paragraph that moves between a commit body and a description changes its layout too.
+For example, a body contains two paragraphs that explain the old failure and the new behavior. Each paragraph occupies one line, with one blank line between them. A paragraph retains this layout when copied to a document or pull request description ([DR-EXPLAIN](documentation.md#dr-explain)).
+
+*Enforced at T3 — [check-commits.sh](../enforcement/check-commits.sh) gives notes for adjacent prose lines and extra blank lines; T4 checks paragraph boundaries.*
 
 ### PR-MSG-BODY
 
@@ -431,25 +433,17 @@ The message explains one change and its reproduction. The `Plan:` path is illust
 ```text
 UdpBasicApp: prevent send timeouts after shutdown
 
-Before this commit, the stop handler leaves the send timer scheduled. If
-its timeout occurs after shutdown completes, the lifecycle handler
-rejects the self-message because UdpBasicApp is down. The simulation
-stops with a runtime error.
+Before this commit, the stop handler leaves the send timer scheduled. If its timeout occurs after shutdown completes, the lifecycle handler rejects the self-message because UdpBasicApp is down. The simulation stops with a runtime error.
 
-After this commit, the stop handler cancels the pending event. Under the
-same conditions, the old timeout does not invoke the stopped
-application, so that runtime error does not occur. The handler retains
-the timer object so the application can send again after restart.
+After this commit, the stop handler cancels the pending event. Under the same conditions, the old timeout does not invoke the stopped application, so that runtime error does not occur. The handler retains the timer object so the application can send again after restart.
 
 To compare both versions:
 
-1. Choose a send interval that places the next timeout after shutdown
-   completes.
+1. Choose a send interval that places the next timeout after shutdown completes.
 2. Stop the client before that timeout, away from its exact timestamp.
 3. Advance beyond the timeout while the client remains down.
 
-The parent version reaches the runtime error; the changed version
-cancels that timeout.
+The parent version reaches the runtime error; the changed version cancels that timeout.
 
 Plan: plan/pending/udpapp-stop-timer.md
 Change: src.applications.udpapp.UdpBasicApp | behavior.change.fix | ?
@@ -522,7 +516,7 @@ The tiers are the ones defined in [architectural-requirements.md](architecture.m
 | PR-SERIES-ORDER | T3 | subject-line check for `fixup!`, `squash!`, "typo", "address review" |
 | PR-SERIES-LINEAR | T3 | branch check: no merge commit between the merge base and the head |
 | PR-MSG-SUBJECT | T3 | commit-message lint: `area: summary`, no file paths, no links; length fails above 80 and is a note above 72 |
-| PR-MSG-WRAP | T3 | note: a body line above 72 characters, other than a trailer, a URL or an indented line |
+| PR-MSG-WRAP | T3+T4 | notes for adjacent prose lines and extra blank lines (T3); review paragraph boundaries (T4) |
 | PR-MSG-FACTS | T3+T4 | commit-message lint: no attribution trailers; note for words of revision history and for a `Validation:` paragraph (T3) + agent review for other progress notes (T4) |
 | PR-SPLIT-ONE-CHANGE | T3+T4 | note: the fingerprint rows of one commit move in more than one way (T3) + agent review: can a part of the commit stand alone? The rule lists the signs (T4) |
 | PR-SPLIT-UPSTREAM | T4 | agent review: does the commit change a shared component to serve one protocol? |
