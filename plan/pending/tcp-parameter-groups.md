@@ -1,9 +1,9 @@
 # Group the parameters of Tcp, and make the algorithm of a connection its submodule
 
-Status: **in progress** — the grouping (step 2) landed on master on 2026-10-15; the algorithm as
-a submodule of its connection (steps 3 to 7) is planned.
+Status: **done** — the grouping (step 2) and the algorithm as a submodule of its connection
+(steps 3 to 9) landed on master on 2026-10-15; the owner approved both.
 
-- Branch `topic/tcp-parameter-groups`, on master `633b071e21`.
+- Branch `topic/tcp-parameter-groups`, rebased on master `9b4b22258f` for the landing.
 - The decision numbers continue those of `plan/done/tcp-receive-memory-repairs.md` (D-117 onward).
 
 ## 1. The problem
@@ -237,19 +237,52 @@ ini: `**.tcp.cubicBeta` becomes `**.tcp.conn-*.algorithm.beta` (or `**.algorithm
 - **D-122 — An algorithm needs a NED type.** A C++ algorithm class without one (from another
   project) stops with an error that tells to add a NED type; the release note says so.
 
+Decisions of the implementation:
+
+- **D-123 — Step 4 is two commits.** The rename of `initialize()` to `initializeAlgorithm()` and of
+  the helper `cancelEvent()` to `cancelTimer()` has the depth `name`, and the module has the depth
+  `refactor`; the rule of one depth for each commit separates them. The rename comes first and
+  stands alone.
+- **D-124 — The connection deletes the timers of the algorithm.** OMNeT++ deletes a module in the
+  context of that module, so the destructor of the algorithm deleted the timers of the connection
+  in a foreign context: 306 module tests printed "is deleting an object ... it doesn't own" at the
+  end of the run, and 10 of them failed. `TcpConnection::deleteTimer()` cancels and deletes a timer
+  with `Enter_Method_Silent()`, and the destructors of `TcpAlgorithmBase` and `DumbTcp` call it.
+- **D-125 — The algorithm module has one stage of initialization**, as its connection. It only
+  watches the state; with the stages of INET, Cmdenv would print one line for each stage at each
+  open when the event banners are on.
+- **D-126 — The log lines of the algorithm come from its module.** In a cComponent, `EV` takes the
+  component as the source of the line, so the prefixes that show the source component (`%x`, `%y`,
+  `%z`) and the log level of the module apply to the lines of the algorithm. The module tests do
+  not show these prefixes, and the statistical test records no parameters
+  (`**.param-recording=false`), so neither moves; D-121 named only the initialization line. The
+  scalar file of an ordinary run records the parameters of the algorithm modules that exist at the
+  end of the run.
+- **D-127 — The moves of steps 5 and 6 have the depth `name`, not `change`.** Each value stays, and
+  only the keys move, so the subjects say `name:`. HyStart does not leave slow start in the scenario
+  of `tcp_cubic_hystart_1` with the defaults of `LinuxTcp`, also with a larger queue, so
+  `tcp_cubic_hystart_2` reads the recorded parameter instead: the `Tcp` client keeps `false`, and
+  the connection that the `LinuxTcp` listener forks has `true`.
+- **D-128 — The thresholds of Vegas are state variables.** `TcpVegas` copies `alpha`, `beta` and
+  `gamma` into its state, where Qtenv shows them, and stops with an error unless
+  0 <= alpha <= beta and 0 <= gamma. The state variable of the gain of DCTCP keeps its name,
+  `dctcp_gamma`: a rename would change the TCB lines of the log, and the parameter `g` documents
+  it.
+
 ## 5. The steps
 
 | Step | Commit | What |
 | --- | --- | --- |
 | 1 ✅ | `plan: add: group the parameters of Tcp` | this plan |
 | 2 ✅ | `tcp: format: group the parameters of Tcp by the part of the protocol` | section 3; landed on master on 2026-10-15, the owner approved it |
-| 3 | `plan: change: the algorithm of a connection becomes its submodule` | section 4 |
-| 4 | `tcp: refactor: the algorithm of a connection is its submodule` | `TcpAlgorithm` a module, the NED types without parameters, the creation, the fork, the watches; no change of behavior |
-| 5 | `tcp: change: the parameters of CUBIC and HyStart belong to TcpCubic` | 12 parameters; `LinuxTcp`, `LegacyTcp`; `tcp_cubic_hystart_1` |
-| 6 | `tcp: change: the gain of DCTCP belongs to DcTcp` | `g`; `dctcpGamma` goes (D-120) |
-| 7 | `tcp: add: the thresholds of Vegas as parameters` | `alpha`, `beta`, `gamma` with the values of today, and a test |
-| 8 | `doc: change: the release note of the algorithm submodule` | WHATSNEW entry 33 |
-| 9 | the record | — |
+| 3 ✅ | `plan: change: the algorithm of a connection becomes its submodule` | section 4 |
+| 4a ✅ | `tcp: name: the connection starts its algorithm in initializeAlgorithm()` | the two names that clash with a module (D-123) |
+| 4b ✅ | `tcp: refactor: the algorithm of a connection is its submodule` | `TcpAlgorithm` a module, the NED types without parameters, the creation, the fork, the watches, `deleteTimer()` (D-124); `tcp_algorithm_submodule_1`, `_2` |
+| 5 ✅ | `tcp: name: the parameters of CUBIC and HyStart belong to TcpCubic` | 12 parameters; `LinuxTcp`, `LegacyTcp`; `tcp_cubic_hystart_1`, `tcp_cubic_hystart_2` (D-127) |
+| 6 ✅ | `tcp: name: the gain of DCTCP belongs to DcTcp` | `g`; `dctcpGamma` goes (D-120); `tcp_dctcp_gain_1` |
+| 7 ✅ | `tcp: add: the thresholds of Vegas as parameters` | `alpha`, `beta`, `gamma` with the values of today (D-128); `tcp_vegas_thresholds_1` |
+| 8 ✅ | `doc: change: the release note of the algorithm submodule` | WHATSNEW entry 49, the migration guide |
+| 9 ✅ | `plan: change: record the algorithm submodule` | sections 5 to 7 |
 
 ## 6. The evidence
 
@@ -260,3 +293,36 @@ head), and the packetdrill suite of inet-gpl keeps 303 MATCH. Steps 5 to 7 move 
 because the defaults keep their values. A module test checks that Qtenv's model is there: the
 connection has the submodule `algorithm` of the right type, and `LinuxTcp` turns HyStart on
 through the pattern. The six gates and the combined pull-request gate.
+
+## 7. The record
+
+The evidence below was taken on master `2d16cb1614` (the grouping of step 2 is on origin with
+it), at the commits `3416078f69` (plan), `89dde4d55b` (4a), `63533d9db0` (4b), `91b55a848e` (5),
+`87a8241db9` (6), `1cbfbdb2b8` (7) and `751cca9985` (8).
+
+For the landing, the branch was rebased on origin master `9b4b22258f`, whose 7 new commits change
+IEEE 802.11 files, WHATSNEW and the migration guide. That master had two WHATSNEW entries with the
+number 47, so the commit `333ea6383f` numbers the entry of the QoS DATA lifetime 48, and the
+release note of this plan is entry 49. The rebased commits are `5abb63861b` (plan), `eacc040ed9`
+(4a), `ee23386728` (4b), `308cfa76d2` (5), `4ad6c6a90f` (6), `346ade23b5` (7) and `c376be4e85`
+(8). The owner asked to land first; the tests were not run again after the rebase.
+
+| Evidence | Result |
+| --- | --- |
+| Each commit builds alone (debug, omnetpp-6.x) | yes; no undefined `inet::` symbol |
+| Module tests at each commit | 641, 641, 643, 644, 645, 646, 646 PASS |
+| Unit, serializer, protocol (`tcp`, `self`) at the head | 128, 4, 2 PASS |
+| CI fingerprint job (podman, clang-16): master, 4a, 4b, 5, 6, 7 | OK at each; the one ERROR row is the expected 5 Gbps half-duplex row of `ethernet.csv`, the same as on master |
+| Statistics of the 38 TCP working directories at the head, against statistics `8fdf7f5` | 122 KEEP, 4 SKIP (expected), 0 files change |
+| inet-gpl packetdrill suite (inet-gpl `4a3894d`) at the head | 303 MATCH, 12 KERNEL_DRIFT, 3 UNSUPPORTED_FEATURE; each of the 318 verdicts as before the branch |
+| Gates on `master..HEAD` | check-commits, check-classification, check-seals, check-source-seals, check-includes, check-ned-params, check-links and check-pull-request pass |
+
+The new tests: `tcp_algorithm_submodule_1` (the client of `Tcp` has a `TcpNewReno` submodule
+`algorithm`, and the connection that the `LinuxTcp` listener forks has `TcpCubic`),
+`tcp_algorithm_submodule_2` (the error of D-122), `tcp_cubic_hystart_2` (D-127),
+`tcp_dctcp_gain_1` (with g = 1, alpha is 1024 / 21504 = 0.047619 where the default gives
+0.00297619) and `tcp_vegas_thresholds_1` (thresholds of 1000 segments let the queue drop packets,
+the defaults drop none). Each fails before its commit.
+
+Open, outside this plan: the parameters of the RTO, the persist timer, the delayed ACK and
+keepalive, which `TcpAlgorithmBase` reads from `Tcp` (D-118), can move to a common base type later.
