@@ -502,6 +502,10 @@ Notable bug fixes are the following:
 
    With SACK and lossDetectionMode = "dupthresh", the first duplicate ACK of a flight with no more new data retransmitted the first hole: Limited Transmit took its segment from NextSeg(), whose rule 3 returns an old segment. The fast retransmit then sent the hole again, and the receiver reported a D-SACK. Limited Transmit now sends only previously unsent data, as RFC 3042 and step (3.3) of RFC 6675 say, in both loss detection modes. No fingerprint or statistical baseline of INET moves; simulations that select the dupthresh mode with SACK can change.
 
+3. DumbTcp no longer sends an acknowledged FIN again
+
+   The retransmission timer of DumbTcp restarted at each expiry, also when nothing was outstanding, so DumbTcp sent an acknowledged FIN again every 2 seconds until the connection closed; with a peer that does not close, it went on to the end of the simulation. The timer now stops when all data, the FIN included, is acknowledged, as RFC 6298 section 5.2 says. Simulations that select DumbTcp can change.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
