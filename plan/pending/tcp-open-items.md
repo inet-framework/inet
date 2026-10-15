@@ -25,7 +25,7 @@ This plan collects the open TCP items in one list. For each item it gives the ev
 | T8 | Urgent data | missing MUSTs of RFC 9293 | `Tcp.ned` ("Remaining gaps", the deviations of RFC 9293) |
 | T9 | The default checksum mode (gap 2) | defect with a blocked repair: RFC 9293 MUST-2 | `doc/project/evidence/model/tcp/results.md` |
 | T10 | The timer parameters in a common base type of the algorithms | structure | D-118 of `plan/done/tcp-parameter-groups.md` |
-| T11 | The packetdrill wrappers: steps 7 and 8, and the new scripts | open plan | `plan/pending/packetdrill-tcp-protocol-tests.md` |
+| T11 | The packetdrill wrappers: steps 7 and 8, and the new scripts | open plan | `plan/done/packetdrill-tcp-protocol-tests.md` |
 
 ### T1 — An active open fails after 75 s
 
@@ -86,7 +86,7 @@ RFC 9293 section 3.8.5 asks for urgent data: support (MUST-30), a sequence of ur
 
 ### T11 — The packetdrill wrappers: steps 7 and 8, and the new scripts
 
-`plan/pending/packetdrill-tcp-protocol-tests.md` waited for the TCP branch, which is on master now. Its CI job runs the wrappers: on master `bba1db4c81`, the TCP suite of the protocol job has 333 tests, 329 PASS and 4 FAIL (expected); the job fails only in the IGMP, MLD, ND and RIP suites. Open: steps 7 and 8 of that plan (the evidence and the guide), and wrappers for the scripts that inet-gpl added since (INET has 306 wrappers, inet-gpl has 321 scripts in `tests/protocol/tcp`). Then that plan moves to `plan/done`. Size: small.
+`plan/done/packetdrill-tcp-protocol-tests.md` waited for the TCP branch, which is on master now. Its CI job runs the wrappers: on master `bba1db4c81`, the TCP suite of the protocol job has 333 tests, 329 PASS and 4 FAIL (expected); the job fails only in the IGMP, MLD, ND and RIP suites. Open: steps 7 and 8 of that plan (the evidence and the guide), and wrappers for the scripts that inet-gpl added since (INET has 306 wrappers, inet-gpl has 321 scripts in `tests/protocol/tcp`). Then that plan moves to `plan/done`. Size: small.
 
 ## 3. Out of scope
 
@@ -131,3 +131,10 @@ The owner approved the plan and these answers on 2026-10-15, with one rule for a
 | 1 ✅ | `plan: add: the open TCP items` | this plan |
 | 2 | `plan: change: the decisions of the owner on the open TCP items` | section 6 |
 | 3 | — | each item on its own branch, in the order of section 5; this plan records the branches and their results |
+
+## 8. The record
+
+| Item | Branch | Result |
+| --- | --- | --- |
+| T11 | `topic/tcp-packetdrill-wrappers` | done 2026-10-15: step 8 (the guide, `2dfb5bba68`) and step 7 (the evidence, `c5d99b242e`) of `packetdrill-tcp-protocol-tests.md`, which moves to `plan/done`. No wrapper was missing: `suite.py gen-wrappers --check` finds the 306 wrappers up to date, and the 15 scripts without one are 12 of kernel drift and 3 that need IPv6, by design. Section 2 counted them wrong. |
+
