@@ -1,0 +1,50 @@
+%description:
+Tests that LinuxTcp drops the data of a SYN without Fast Open (dropSynData),
+as Linux tcp_conn_request() does, and that Tcp keeps it (RFC 9293 section
+3.10.7.2). The client has Tcp and the server LinuxTcp; the scalar file records
+the parameter of both modules.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 30000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.srv_tcp.typename = "LinuxTcp"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-#0.sca
+par TcpTestNet1.cli_tcp dropSynData false
+%contains: results/General-#0.sca
+par TcpTestNet1.srv_tcp dropSynData true
+%#--------------------------------------------------------------------------------------------------------------

@@ -68,4 +68,6 @@ simple LinuxTcp extends Tcp
         fastopenClientEnabled = default(true);
         fastopenBlackholeTimeout = default(0s);
         fastopenExpOptionEnabled = default(true);
+        // connection setup: tcp_conn_request() keeps no data of a SYN without Fast Open
+        dropSynData = default(true);
 }
