@@ -490,6 +490,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. Address resolution sends no Neighbor Solicitation from a tentative address
+
+   Address resolution sent its Neighbor Solicitation from a tentative address, for example under Optimistic Duplicate Address Detection, although RFC 4861 Section 7.2.2 takes the source from the assigned addresses, RFC 4862 does not count a tentative address as assigned, and RFC 4429 forbids an Optimistic address as the source of a Neighbor Solicitation. The solicitation now uses an address that is not tentative, keeping the previous choice when that address is assigned; if the interface has none yet, address resolution starts when Duplicate Address Detection of an address completes. If Duplicate Address Detection finds the link-local address duplicate before any other address is assigned, datagrams to unresolved neighbours now stay queued instead of being returned with an ICMPv6 error. Simulations in which a node sends IPv6 traffic to an unresolved neighbour while every address of the interface is tentative produce different results, for example examples/ipv6/mipv6, examples/ipv6/mipv6roaming and examples/inet/hierarchical99.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
