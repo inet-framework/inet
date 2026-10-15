@@ -406,6 +406,10 @@ Notable backward incompatible changes are the following:
 
    A link that takes its prefix from an explicit address could share it with an earlier link that had generated the same prefix from a template, and traffic between the two links was lost. A prefix generated from a template with an 'x' group now avoids every prefix that an explicit address fixes, so the template link that collided, and every link after it that uses the same template, get other prefixes and other global addresses. See the migration guide.
 
+51. Ipv6NetworkConfigurator rejects a prefix on two links
+
+   A prefix template without an 'x' group that matched interfaces on more than one link gave all those links the same prefix without an error, and so did two explicit addresses in one /64 on different links. Traffic between those links was lost. A configuration that gives two links the same prefix now stops initialization with an error that names an interface on each link. See the migration guide.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
