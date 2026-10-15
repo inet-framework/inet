@@ -3,7 +3,7 @@
 Status: **done** — item T4 of `plan/pending/tcp-open-items.md` (the S18 record of `plan/done/tcp-staged-landing.md`); landed on master on 2026-10-15 with T2 and T3, the owner approved it; the statistics repository records the 11 files of D-144.
 
 - Branch `topic/tcp-fastopen-syn-data`, on `topic/tcp-dumb-fin` (T3), because all three items add entries to the bug fixes of WHATSNEW.
-- The decision numbers continue those of `plan/pending/tcp-dumb-fin.md` (D-142 onward).
+- The decision numbers continue those of `plan/done/tcp-dumb-fin.md` (D-142 onward).
 
 ## 1. The problem
 

@@ -3,7 +3,7 @@
 Status: **done** — item T3 of `plan/pending/tcp-open-items.md` (D-101 of `plan/done/tcp-staged-landing.md`); landed on master on 2026-10-15 with T2 and T4, the owner approved it; the statistics repository records the DumbTcp file of D-141.
 
 - Branch `topic/tcp-dumb-fin`, on `topic/tcp-limited-transmit` (T2), because both add an entry to the bug fixes of WHATSNEW.
-- The decision numbers continue those of `plan/pending/tcp-limited-transmit.md` (D-140 onward).
+- The decision numbers continue those of `plan/done/tcp-limited-transmit.md` (D-140 onward).
 
 ## 1. The problem
 

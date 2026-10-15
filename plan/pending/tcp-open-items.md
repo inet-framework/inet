@@ -26,7 +26,7 @@ This plan collects the open TCP items in one list. For each item it gives the ev
 | T9 | The default checksum mode (gap 2) | defect with a blocked repair: RFC 9293 MUST-2 | `doc/project/evidence/model/tcp/results.md` |
 | T10 | The timer parameters in a common base type of the algorithms | structure | D-118 of `plan/done/tcp-parameter-groups.md` |
 | T11 | The packetdrill wrappers: steps 7 and 8, and the new scripts | open plan | `plan/done/packetdrill-tcp-protocol-tests.md` |
-| T12 | The data of a SYN without a Fast Open option | difference from Linux | found in T4 (`plan/pending/tcp-fastopen-syn-data.md`, D-143) |
+| T12 | The data of a SYN without a Fast Open option | difference from Linux | found in T4 (`plan/done/tcp-fastopen-syn-data.md`, D-143) |
 
 ### T1 — An active open fails after 75 s
 
