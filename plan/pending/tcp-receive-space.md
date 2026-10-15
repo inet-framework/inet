@@ -1,9 +1,9 @@
 # The receive space of the Linux mode (T6)
 
-Status: **planned** — item T6 of `plan/pending/tcp-open-items.md`, decision D-134; the owner decides the questions of section 5 before the code.
+Status: **in progress** — item T6 of `plan/pending/tcp-open-items.md`, decision D-134; the owner answered the questions of section 5 on 2026-10-15.
 
-- Branch `topic/tcp-receive-space`, on `topic/tcp-syn-data-drop` (T12).
-- The decision numbers continue those of `plan/pending/tcp-syn-data-drop.md` (D-146 onward).
+- Branch `topic/tcp-receive-space`, on master `380a55880c`.
+- The decision numbers continue those of `plan/done/tcp-syn-data-drop.md` (D-146 onward).
 
 ## 1. The problem
 
@@ -37,10 +37,12 @@ The collapse of `tcp_prune_queue()`, and the pad and the slab classes of a small
 
 Each step as before: each commit builds and passes the module tests, a new test fails before its commit, the CI fingerprint job and the TCP statistics with the attribution of each moved row, the packetdrill suite of inet-gpl (its `tcp_rcvbuf_*` scripts must keep their verdicts), and the gates.
 
-## 5. Questions for the owner
+## 5. The decisions
 
-- **Q1 — The read of the application.** With `autoRead`, INET gives the data to the application when it arrives, so each arrival is a read for DRS; in the explicit-read mode, each READ is one. Is that the model you want?
-- **Q2 — `tcp_rcvbuf_low_rtt`.** A parameter (`receiveBufferLowRtt`, 1 ms as Linux), or the fixed value of Linux?
-- **Q3 — The bound.** A parameter `receiveBufferMax` (the bound of `tcp_rmem[2]`): 32 MiB in `LinuxTcp`; and in `Tcp`, where auto-tuning is off by default, the same value or no bound?
-- **Q4 — The other two parts.** The collapse of `tcp_prune_queue()` and the slab classes of the truesize: separate items after T6, or leave them out?
-- **Q5 — The receive RTT in `TCP_INFO`.** Should inet-gpl's `PacketDrillApp` also report `tcpi_rcv_rtt` and `tcpi_rcv_space`, so that scripts can check them later?
+The owner approved the plan and the recommended answers on 2026-10-15.
+
+- **D-146 — A delivery is a read (Q1).** With `autoRead`, each delivery of data to the application is a read for DRS, because such an application reads at once; in the explicit-read mode, each READ is one.
+- **D-147 — `receiveBufferLowRtt` (Q2).** A parameter holds `tcp_rcvbuf_low_rtt`, 1 ms, as Linux.
+- **D-148 — `receiveBufferMax` (Q3).** A parameter holds the bound of `tcp_rmem[2]`, 32 MiB in `Tcp` and `LinuxTcp`: no RFC gives a value, and in `Tcp` it matters only when a user turns auto-tuning on.
+- **D-149 — The collapse and the slab classes are items of their own (Q4),** after T5, with a low priority: they act only under memory pressure and for small packets, and no script reaches them.
+- **D-150 — `TCP_INFO` reports the receive RTT and space (Q5).** `PacketDrillApp` of inet-gpl reports `tcpi_rcv_rtt` and `tcpi_rcv_space`, so that later scripts can check DRS against Linux.
