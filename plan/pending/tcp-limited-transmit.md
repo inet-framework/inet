@@ -1,6 +1,6 @@
 # Limited Transmit in the dupthresh mode (T2)
 
-Status: **ready for review** — item T2 of `plan/pending/tcp-open-items.md` (finding G of `plan/done/tcp-packetdrill-repairs.md`), decision D-134; all steps done on 2026-10-15; T3 is stacked on this branch.
+Status: **done** — item T2 of `plan/pending/tcp-open-items.md` (finding G of `plan/done/tcp-packetdrill-repairs.md`), decision D-134; landed on master on 2026-10-15 with T3 and T4, which are stacked on it; the owner approved it.
 
 - Branch `topic/tcp-limited-transmit`, on master `d020d88ba8`.
 - The decision numbers continue those of `plan/done/tcp-active-open-limit.md` (D-139 onward).
