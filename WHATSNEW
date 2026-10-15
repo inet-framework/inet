@@ -8,586 +8,253 @@ Notable backward incompatible changes are the following:
 
 1. IEEE 802.11 rate control per receiver
 
-   IEEE 802.11 rate control now selects and adapts the transmission rate
-   separately for each peer a station transmits to. The rate controls previously
-   kept a single set of adaptive state per module, so the feedback of all peers
-   was blended into one rate.
+   IEEE 802.11 rate control now selects and adapts the transmission rate separately for each peer a station transmits to. The rate controls previously kept a single set of adaptive state per module, so the feedback of all peers was blended into one rate.
 
-   To make this possible, the getRate() method of the IRateControl C++ interface,
-   implemented by AarfRateControl and OnoeRateControl, now takes the MAC address
-   of the receiver. This change requires the modification of rate control models
-   implemented outside INET, which no longer compile until their getRate() is
-   given the new argument. Simulation models that only configure a rate control
-   are unaffected.
+   To make this possible, the getRate() method of the IRateControl C++ interface, implemented by AarfRateControl and OnoeRateControl, now takes the MAC address of the receiver. This change requires the modification of rate control models implemented outside INET, which no longer compile until their getRate() is given the new argument. Simulation models that only configure a rate control are unaffected.
 
-   Rate selection no longer consults the rate control for group-addressed frames,
-   which are never acknowledged and so could never have their rate corrected by
-   feedback. They now take a mandatory rate, as they already did when no rate
-   control was configured.
+   Rate selection no longer consults the rate control for group-addressed frames, which are never acknowledged and so could never have their rate corrected by feedback. They now take a mandatory rate, as they already did when no rate control was configured.
 
-   These changes may change the statistical results of simulations that use an
-   adaptive rate control, either where a station transmits to several peers or
-   where it sends group-addressed traffic.
+   These changes may change the statistical results of simulations that use an adaptive rate control, either where a station transmits to several peers or where it sends group-addressed traffic.
 
 2. IEEE 802.11 wire and reception corrections
 
-   QoS Control fields now use the standard bit positions. Non-QoS Data no
-   longer aliases the QoS TID-0 duplicate cache. OFDM radios generate and check
-   SIGNAL parity and reject undefined RATE codes; HR/DSSS and ERP transmissions
-   carry their specific PHY protocol identities.
+   QoS Control fields now use the standard bit positions. Non-QoS Data no longer aliases the QoS TID-0 duplicate cache. OFDM radios generate and check SIGNAL parity and reject undefined RATE codes; HR/DSSS and ERP transmissions carry their specific PHY protocol identities.
 
-   AP beacon intervals are rounded down to whole 1024-us TUs for both target
-   scheduling and advertisement (100ms becomes 99.328ms). Configured intervals
-   must be between 1 and 65535 TUs. Beacon and Probe Response frames now encode
-   the DSSS Current Channel for 2.4 GHz operation. Their channelNumber field is
-   a standard channel number, with -1 for an absent element, rather than an
-   internal channel index. Radio channel parameters and scan results remain
-   internal indices. Custom frame producers should follow the migration guide.
+   AP beacon intervals are rounded down to whole 1024-us TUs for both target scheduling and advertisement (100ms becomes 99.328ms). Configured intervals must be between 1 and 65535 TUs. Beacon and Probe Response frames now encode the DSSS Current Channel for 2.4 GHz operation. Their channelNumber field is a standard channel number, with -1 for an absent element, rather than an internal channel index. Radio channel parameters and scan results remain internal indices. Custom frame producers should follow the migration guide.
 
-   The mesh no-forwarding-information reason code is corrected from 60 to 62.
-   These corrections change affected packet bytes and may change Wi-Fi
-   simulation trajectories and fingerprints.
+   The mesh no-forwarding-information reason code is corrected from 60 to 62. These corrections change affected packet bytes and may change Wi-Fi simulation trajectories and fingerprints.
 
-   Noncompliant layered OFDM retains its configured mode and RATE-0 placeholder;
-   SIGNAL parity is checked in both compliant and noncompliant operation.
+   Noncompliant layered OFDM retains its configured mode and RATE-0 placeholder; SIGNAL parity is checked in both compliant and noncompliant operation.
 
 3. UDP no longer reports a received datagram twice
 
-   The Udp module emitted packetReceivedFromLower a second time for every datagram
-   it received from the network layer. Its base class, LayeredProtocolBase, already
-   emits the signal before it calls handleLowerPacket, and Udp emitted it again in
-   processUDPPacket. Every other protocol module emits it once.
+   The Udp module emitted packetReceivedFromLower a second time for every datagram it received from the network layer. Its base class, LayeredProtocolBase, already emits the signal before it calls handleLowerPacket, and Udp emitted it again in processUDPPacket. Every other protocol module emits it once.
 
-   No statistic changes, because Udp.ned declares the signal and sources no
-   statistic from it. Code that subscribes to the signal on a UDP module is
-   affected: it now runs once per datagram instead of twice, so a listener that
-   counted arrivals or summed bytes reported twice the true value and now reports
-   the true one.
+   No statistic changes, because Udp.ned declares the signal and sources no statistic from it. Code that subscribes to the signal on a UDP module is affected: it now runs once per datagram instead of twice, so a listener that counted arrivals or summed bytes reported twice the true value and now reports the true one.
 
 4. Resending accepts the packets that a producer offers
 
-   The canPushPacket() method of the Resending protocol element tested its packet
-   argument instead of the packet that the module holds, so it refused every
-   packet that a producer asked about. An active producer that asks before it
-   pushes, for example a PacketServer after a queue, therefore never passed a
-   packet to Resending. Resending now accepts a packet whenever it holds none, as
-   its canPushSomePacket() method already did.
+   The canPushPacket() method of the Resending protocol element tested its packet argument instead of the packet that the module holds, so it refused every packet that a producer asked about. An active producer that asks before it pushes, for example a PacketServer after a queue, therefore never passed a packet to Resending. Resending now accepts a packet whenever it holds none, as its canPushSomePacket() method already did.
 
-   This changes the results of simulations that feed Resending from such a
-   producer. Inside INET, the client in the Network6 and Network7 steps of
-   tutorials/protocol now sends its packet; before, it sent none.
+   This changes the results of simulations that feed Resending from such a producer. Inside INET, the client in the Network6 and Network7 steps of tutorials/protocol now sends its packet; before, it sent none.
 
 5. An unrecognized ICMP or ICMPv6 type is discarded, not thrown
 
-   Icmp::processIcmpMessage and the ICMPv6 type switch each had a default branch
-   for a message type they do not know, and each branch threw a cRuntimeError.
-   Any peer could therefore end a simulation with one packet.
+   Icmp::processIcmpMessage and the ICMPv6 type switch each had a default branch for a message type they do not know, and each branch threw a cRuntimeError. Any peer could therefore end a simulation with one packet.
 
-   RFC 1122 section 3.2.2 and RFC 4443 section 2.4(b) both require a silent
-   discard. Both branches now emit packetDropped and delete the packet. A
-   simulation that used to stop with "Unknown ICMP type" carries on.
+   RFC 1122 section 3.2.2 and RFC 4443 section 2.4(b) both require a silent discard. Both branches now emit packetDropped and delete the packet. A simulation that used to stop with "Unknown ICMP type" carries on.
 
-   No baseline moves. A scenario that reached either branch aborted, so it cannot
-   be in a passing fingerprint or statistical baseline.
+   No baseline moves. A scenario that reached either branch aborted, so it cannot be in a passing fingerprint or statistical baseline.
 
 6. IPv6 reassembly writes the payload length of the reassembled datagram
 
-   Ipv6FragBuf::addFragment rebuilt the datagram from the base header of the
-   first fragment and left its Payload Length field untouched, so the field
-   described that fragment and not the datagram.
+   Ipv6FragBuf::addFragment rebuilt the datagram from the base header of the first fragment and left its Payload Length field untouched, so the field described that fragment and not the datagram.
 
-   Where the field exceeded the reassembled data, Ipv6::decapsulate asserted and
-   the run stopped. Where it fell short, which is the ordinary two-fragment case,
-   the same function truncated the datagram silently to the first fragment's
-   length. Every IPv6 reassembly was affected. The field now counts every octet
-   after the base header, extension headers included, as RFC 8200 section 3
-   requires.
+   Where the field exceeded the reassembled data, Ipv6::decapsulate asserted and the run stopped. Where it fell short, which is the ordinary two-fragment case, the same function truncated the datagram silently to the first fragment's length. Every IPv6 reassembly was affected. The field now counts every octet after the base header, extension headers included, as RFC 8200 section 3 requires.
 
-   The same function also erased a stale end() iterator when one fragment
-   completed a datagram, which aborted the run on an atomic fragment.
+   The same function also erased a stale end() iterator when one fragment completed a datagram, which aborted the run on an atomic fragment.
 
-   Simulations that reassemble IPv6 fragments deliver whole datagrams now, so
-   their trajectories and fingerprints may change.
+   Simulations that reassemble IPv6 fragments deliver whole datagrams now, so their trajectories and fingerprints may change.
 
 7. ICMPv6 drops an error report for a protocol nothing registered
 
-   Icmpv6 handed the error indication up to the protocol the quoted datagram
-   names without asking whether anything on the node had registered it. The
-   MessageDispatcher then knew no route and stopped the run, so any node could be
-   halted by an ICMPv6 error about a protocol it does not run.
+   Icmpv6 handed the error indication up to the protocol the quoted datagram names without asking whether anything on the node had registered it. The MessageDispatcher then knew no route and stopped the run, so any node could be halted by an ICMPv6 error about a protocol it does not run.
 
-   Icmpv6 already kept the set of registered transport protocols and never read
-   it. It reads it now and drops the report, as Icmp has always done for IPv4.
+   Icmpv6 already kept the set of registered transport protocols and never read it. It reads it now and drops the report, as Icmp has always done for IPv4.
 
 8. No ICMP or ICMPv6 error about a link-layer broadcast or multicast
 
-   Icmp::maySendErrorMessage and Icmpv6::validateDatagramPromptingError each
-   suppressed an error report for four conditions, and every condition read an IP
-   address. RFC 1122 section 3.2.2 and RFC 4443 section 2.4(e) also forbid a
-   report about a datagram that arrived in a link-layer broadcast or multicast
-   frame, which no IP address records.
+   Icmp::maySendErrorMessage and Icmpv6::validateDatagramPromptingError each suppressed an error report for four conditions, and every condition read an IP address. RFC 1122 section 3.2.2 and RFC 4443 section 2.4(e) also forbid a report about a datagram that arrived in a link-layer broadcast or multicast frame, which no IP address records.
 
-   Both functions read the MacAddressInd tag of the arriving frame now. A node
-   that receives a unicast-addressed datagram inside a broadcast frame, for a
-   closed port or an unknown protocol, stays silent instead of answering the
-   address in the source field.
+   Both functions read the MacAddressInd tag of the arriving frame now. A node that receives a unicast-addressed datagram inside a broadcast frame, for a closed port or an unknown protocol, stays silent instead of answering the address in the source field.
 
-   Simulations where that happens send fewer ICMP messages, so their
-   trajectories and fingerprints may change.
+   Simulations where that happens send fewer ICMP messages, so their trajectories and fingerprints may change.
 
 9. IPv6 fills in two length fields it used to leave wrong
 
-   A Packet Too Big report carried an MTU of zero. Icmpv6::sendErrorMessage took
-   no MTU and handed createPacketTooBigMsg a literal 0, under a bare "TODO
-   implement MTU support". It takes one now, and Ipv6 passes the MTU it has
-   already read from the outgoing interface two lines above the call, as RFC 4443
-   section 3.2 requires. A source that receives the report can act on it.
+   A Packet Too Big report carried an MTU of zero. Icmpv6::sendErrorMessage took no MTU and handed createPacketTooBigMsg a literal 0, under a bare "TODO implement MTU support". It takes one now, and Ipv6 passes the MTU it has already read from the outgoing interface two lines above the call, as RFC 4443 section 3.2 requires. A source that receives the report can act on it.
 
-   Every fragment of a fragmented datagram carried the Payload Length of the
-   whole datagram, because Ipv6::fragmentAndSend builds each fragment from a copy
-   of the base header. Each fragment now carries its own: the fragment header
-   plus that fragment's share.
+   Every fragment of a fragmented datagram carried the Payload Length of the whole datagram, because Ipv6::fragmentAndSend builds each fragment from a copy of the base header. Each fragment now carries its own: the fragment header plus that fragment's share.
 
-   Simulations that fragment IPv6 datagrams or report a too-big packet put
-   different bytes on the wire, so their fingerprints may change.
+   Simulations that fragment IPv6 datagrams or report a too-big packet put different bytes on the wire, so their fingerprints may change.
 
 10. IPv4 verifies the header checksum, and reassembly reads the protocol
 
-   Ipv4 dropped a datagram whose header checksum failed only when the header was
-   also structurally incorrect: the guard read "!isCorrect() && !verifyChecksum()"
-   and an AND short-circuits, so a well-formed header never reached the checksum
-   test and a wrong checksum was accepted. The guard is an OR now, which is what
-   RFC 1122 section 3.2.1.2 requires.
+   Ipv4 dropped a datagram whose header checksum failed only when the header was also structurally incorrect: the guard read "!isCorrect() && !verifyChecksum()" and an AND short-circuits, so a well-formed header never reached the checksum test and a wrong checksum was accepted. The guard is an OR now, which is what RFC 1122 section 3.2.1.2 requires.
 
-   Ipv4FragBuf::Key, the reassembly key, carried three of the four fields RFC 791
-   names: source, destination and identification, but not the protocol. Fragments
-   of two datagrams that shared an identification but used different protocols
-   reassembled into each other. The key carries the protocol now.
+   Ipv4FragBuf::Key, the reassembly key, carried three of the four fields RFC 791 names: source, destination and identification, but not the protocol. Fragments of two datagrams that shared an identification but used different protocols reassembled into each other. The key carries the protocol now.
 
-   Simulations with header bit errors drop more datagrams than before, and
-   simulations that fragment two protocols at once reassemble them apart, so
-   fingerprints for those scenarios may change.
+   Simulations with header bit errors drop more datagrams than before, and simulations that fragment two protocols at once reassemble them apart, so fingerprints for those scenarios may change.
 
 11. An ARP packet a host cannot process is discarded, not thrown
 
-    Arp::processArpPacket stopped the run in two places a neighbour controls. Its
-    opcode switch threw on any operation the model does not implement, and RFC
-    5494 section 3 makes 24 and 25 legal values a neighbour may put on a link. And
-    it peeked the packet with the default flags, which turns an incorrect chunk
-    into an error; the serializer marks a packet incorrect when its hardware space
-    is not Ethernet or its protocol space is not IPv4, so nothing ever read that
-    mark.
+    Arp::processArpPacket stopped the run in two places a neighbour controls. Its opcode switch threw on any operation the model does not implement, and RFC 5494 section 3 makes 24 and 25 legal values a neighbour may put on a link. And it peeked the packet with the default flags, which turns an incorrect chunk into an error; the serializer marks a packet incorrect when its hardware space is not Ethernet or its protocol space is not IPv4, so nothing ever read that mark.
 
-    Both now end processing, as RFC 826 states: the unknown opcode breaks out of
-    the switch after the table step, and the unsupported space is dropped with a
-    packetDropped signal. The two RARP branches still throw, which the model means
-    as a statement that it does not implement RARP.
+    Both now end processing, as RFC 826 states: the unknown opcode breaks out of the switch after the table step, and the unsupported space is dropped with a packetDropped signal. The two RARP branches still throw, which the model means as a statement that it does not implement RARP.
 
 12. TCP takes its first round-trip measurement as RFC 6298 states
 
-    rttMeasurementComplete folded the first measurement into the recurrence of
-    RFC 6298 section 2.3, starting from srtt = 0 and rttvar = 3/4. The first
-    smoothed value was therefore one eighth of the measurement and the first
-    timeout described the initial guess rather than the path.
+    rttMeasurementComplete folded the first measurement into the recurrence of RFC 6298 section 2.3, starting from srtt = 0 and rttvar = 3/4. The first smoothed value was therefore one eighth of the measurement and the first timeout described the initial guess rather than the path.
 
-    Section 2.2 gives the first measurement a case of its own: SRTT = R and
-    RTTVAR = R/2. The estimator now does that, and a new rttMeasured flag in the
-    algorithm state tells the two cases apart.
+    Section 2.2 gives the first measurement a case of its own: SRTT = R and RTTVAR = R/2. The estimator now does that, and a new rttMeasured flag in the algorithm state tells the two cases apart.
 
-    Every TCP connection's early retransmission timeout changes, so trajectories
-    and fingerprints of TCP simulations move with it.
+    Every TCP connection's early retransmission timeout changes, so trajectories and fingerprints of TCP simulations move with it.
 
-13. QUIC closes the connection on an unknown frame type, and a server pads its
-    Initial datagram
+13. QUIC closes the connection on an unknown frame type, and a server pads its Initial datagram
 
-    A frame of a type the model does not know threw a cRuntimeError, so any peer
-    could stop a run with one frame. RFC 9000 section 12.4 makes it a connection
-    error of type FRAME_ENCODING_ERROR, and the model now sends CONNECTION_CLOSE
-    with that code. Two further stops sat behind it: the frame loop read on past
-    the error into bytes that are no frame header, and the datagram loop then
-    read those bytes as a packet header. Both stop when a connection error is
-    raised.
+    A frame of a type the model does not know threw a cRuntimeError, so any peer could stop a run with one frame. RFC 9000 section 12.4 makes it a connection error of type FRAME_ENCODING_ERROR, and the model now sends CONNECTION_CLOSE with that code. Two further stops sat behind it: the frame loop read on past the error into bytes that are no frame header, and the datagram loop then read those bytes as a packet header. Both stop when a connection error is raised.
 
-    PacketBuilder::buildServerInitialPacket did not pad. RFC 9000 section 14.1
-    requires a server to expand a datagram carrying an ack-eliciting Initial
-    packet to at least 1200 octets, which the client's builder has always done.
+    PacketBuilder::buildServerInitialPacket did not pad. RFC 9000 section 14.1 requires a server to expand a datagram carrying an ack-eliciting Initial packet to at least 1200 octets, which the client's builder has always done.
 
 14. DHCP corrects seven defects in its client and server
 
-    The client drew a new transaction identifier for every DHCPREQUEST, so a
-    request never carried the identifier of the offer it answered, against RFC
-    2131 section 4.4.1. It keeps the identifier of the exchange now, and a new
-    transaction draws its own.
+    The client drew a new transaction identifier for every DHCPREQUEST, so a request never carried the identifier of the offer it answered, against RFC 2131 section 4.4.1. It keeps the identifier of the exchange now, and a new transaction draws its own.
 
-    The server wrote three field values it had no right to write. It put the
-    gateway address into the giaddr of a DHCPOFFER, where RFC 2131 table 3 wants
-    the giaddr of the client's DHCPDISCOVER; it put the leased address into the
-    ciaddr of a DHCPACK, where the table allows only the client's ciaddr or zero;
-    and it wrote a constant false into the flags of every reply, where the table
-    wants the flags of the message it answers. It also returned a domain name
-    server option holding 0.0.0.0, because nothing in the model ever assigns that
-    field.
+    The server wrote three field values it had no right to write. It put the gateway address into the giaddr of a DHCPOFFER, where RFC 2131 table 3 wants the giaddr of the client's DHCPDISCOVER; it put the leased address into the ciaddr of a DHCPACK, where the table allows only the client's ciaddr or zero; and it wrote a constant false into the flags of every reply, where the table wants the flags of the message it answers. It also returned a domain name server option holding 0.0.0.0, because nothing in the model ever assigns that field.
 
-    The server stayed silent for a DHCPREQUEST naming an address of a foreign
-    subnet, because it asked its lease table before it asked about the subnet and
-    a foreign address is in no table. RFC 2131 section 4.3.2 wants a DHCPNAK.
+    The server stayed silent for a DHCPREQUEST naming an address of a foreign subnet, because it asked its lease table before it asked about the subnet and a foreign address is in no table. RFC 2131 section 4.3.2 wants a DHCPNAK.
 
-    The client's retransmission delay was a constant 60 seconds, and it never
-    repeated a DHCPREQUEST at all: it abandoned the transaction at the first
-    timeout. RFC 2131 section 4.1 asks for a randomized exponential backoff, 4
-    seconds doubling to 64, and section 3.1 asks for the request to be repeated.
-    Both are there now, for the initial exchange only: RENEWING and REBINDING keep
-    the schedule of section 4.4.5.
+    The client's retransmission delay was a constant 60 seconds, and it never repeated a DHCPREQUEST at all: it abandoned the transaction at the first timeout. RFC 2131 section 4.1 asks for a randomized exponential backoff, 4 seconds doubling to 64, and section 3.1 asks for the request to be repeated. Both are there now, for the initial exchange only: RENEWING and REBINDING keep the schedule of section 4.4.5.
 
-    DHCP exchanges now take different times and put different bytes on the wire,
-    so trajectories and fingerprints of simulations that use DHCP move.
+    DHCP exchanges now take different times and put different bytes on the wire, so trajectories and fingerprints of simulations that use DHCP move.
 
 15. A DHCP client checks the granted address before it takes it
 
-    RFC 2131 section 4.4.1 asks a client to check that the address it was granted
-    is not already in use, and RFC 5227 section 2.1.1 makes that check an ARP
-    Probe. The client now sends one, waits probeWait (1s by default; 0s turns the
-    check off), and takes the address only if nobody answers. If somebody does, it
-    sends a DHCPDECLINE and starts again. It probes only an address it is about to
-    start using, after REQUESTING or REBOOTING, and only on a link that uses ARP.
+    RFC 2131 section 4.4.1 asks a client to check that the address it was granted is not already in use, and RFC 5227 section 2.1.1 makes that check an ARP Probe. The client now sends one, waits probeWait (1s by default; 0s turns the check off), and takes the address only if nobody answers. If somebody does, it sends a DHCPDECLINE and starts again. It probes only an address it is about to start using, after REQUESTING or REBOOTING, and only on a link that uses ARP.
 
-    Three of the four pieces this needed were already written and unreachable.
-    Arp::sendArpProbe had no caller, DhcpClient::sendDecline had no caller, and
-    Arp::processArpPacket threw "wrong ARP packet: source IPv4 address is empty"
-    on the very packet a probe is, so a neighbour's lawful probe stopped the run.
-    An all-zero sender protocol address marks a probe: it claims nothing, so the
-    table steps are skipped for it and the target question still gets its answer.
+    Three of the four pieces this needed were already written and unreachable. Arp::sendArpProbe had no caller, DhcpClient::sendDecline had no caller, and Arp::processArpPacket threw "wrong ARP packet: source IPv4 address is empty" on the very packet a probe is, so a neighbour's lawful probe stopped the run. An all-zero sender protocol address marks a probe: it claims nothing, so the table steps are skipped for it and the target question still gets its answer.
 
-    Arp gained an arpAddressConflictDetected signal. A reply to a probe is
-    addressed to the all-zero sender address, so the target question cannot
-    recognize it; Arp remembers what it is probing and matches the reply by its
-    sender protocol address instead.
+    Arp gained an arpAddressConflictDetected signal. A reply to a probe is addressed to the all-zero sender address, so the target question cannot recognize it; Arp remembers what it is probing and matches the reply by its sender protocol address instead.
 
-    IArp gained a pure virtual sendArpProbe, which DhcpClient calls. An IArp
-    implementation outside INET must override it; the migration guide says how.
-    GlobalArp overrides it with an empty body, because it has nobody to ask.
+    IArp gained a pure virtual sendArpProbe, which DhcpClient calls. An IArp implementation outside INET must override it; the migration guide says how. GlobalArp overrides it with an empty body, because it has nobody to ask.
 
-    DhcpClient gained an arpModule parameter and a probeWait parameter.
-    DHCPDECLINE now carries the server identifier, which RFC 2131 table 5
-    requires.
+    DhcpClient gained an arpModule parameter and a probeWait parameter. DHCPDECLINE now carries the server identifier, which RFC 2131 table 5 requires.
 
-    DhcpServer marks a declined address unavailable, which RFC 2131 section 4.3.3
-    makes a MUST. Without it the server offered the same address again and the
-    client declined again for the whole run.
+    DhcpServer marks a declined address unavailable, which RFC 2131 section 4.3.3 makes a MUST. Without it the server offered the same address again and the client declined again for the whole run.
 
-    Every DHCP client now spends probeWait between the acknowledgement and taking
-    the address. The lease timers T1 and T2 are armed when the acknowledgement
-    arrives, so renewal timing does not move; traffic from the client starts one
-    probeWait later.
+    Every DHCP client now spends probeWait between the acknowledgement and taking the address. The lease timers T1 and T2 are armed when the acknowledgement arrives, so renewal timing does not move; traffic from the client starts one probeWait later.
 
 16. IEEE 802.11 management recovery belongs to each EDCAF
 
-   Management failures and completion now update the contention window and
-   retry state of the affected access category. Previously the shared recovery
-   procedure changed the best-effort window even for voice management frames.
+   Management failures and completion now update the contention window and retry state of the affected access category. Previously the shared recovery procedure changed the best-effort window even for voice management frames.
 
-   The hcf.edca.mgmtAndNonQoSRecoveryProcedure module moves beneath each
-   edcaf[i], and its C++ getter moves from Edca to Edcaf. Update configuration,
-   signal subscriptions and result paths as described in the migration guide.
-   Management-recovery trajectories may change, including Block Ack agreement
-   negotiation. The MacQosWithBlockAck example fingerprints are updated; the
-   QoS and NonQos showcase fingerprint controls remain unchanged.
+   The hcf.edca.mgmtAndNonQoSRecoveryProcedure module moves beneath each edcaf[i], and its C++ getter moves from Edca to Edcaf. Update configuration, signal subscriptions and result paths as described in the migration guide. Management-recovery trajectories may change, including Block Ack agreement negotiation. The MacQosWithBlockAck example fingerprints are updated; the QoS and NonQos showcase fingerprint controls remain unchanged.
 
 17. IEEE 802.11 PHY mode properties for response-rate selection
 
-   The physical layer (PHY) mode interface now exposes the mode family,
-   legacy preamble type, and non-HT reference rate. Custom rate selectors can
-   query these properties without a dependency on a concrete mode class.
-   HT means High Throughput; VHT means Very High Throughput. The reference rate
-   for HT and VHT modes depends on the modulation and code rate of stream 1.
-   An unsupported reference-rate mapping returns bps(NaN), where NaN means
-   not a number.
+   The physical layer (PHY) mode interface now exposes the mode family, legacy preamble type, and non-HT reference rate. Custom rate selectors can query these properties without a dependency on a concrete mode class. HT means High Throughput; VHT means Very High Throughput. The reference rate for HT and VHT modes depends on the modulation and code rate of stream 1. An unsupported reference-rate mapping returns bps(NaN), where NaN means not a number.
 
-   IIeee80211Mode gains three pure virtual methods: getModulationClass(),
-   getLegacyPreambleType(), and getNonHtReferenceRate(). Direct implementations
-   outside INET must implement these methods before they compile again.
-   Ieee80211ModeBase supplies default unknown values for custom subclasses.
-   The migration guide explains the return values and required overrides.
+   IIeee80211Mode gains three pure virtual methods: getModulationClass(), getLegacyPreambleType(), and getNonHtReferenceRate(). Direct implementations outside INET must implement these methods before they compile again. Ieee80211ModeBase supplies default unknown values for custom subclasses. The migration guide explains the return values and required overrides.
 
 18. IEEE 802.11 radio commands wait for an accepted frame
 
-   Tx is the component that transmits frames for medium access control (MAC).
-   Radio reconfiguration now waits until Tx completes an accepted transmission.
-   This includes the short interframe space (SIFS) before a response.
-   The MAC previously used only the medium state, which cannot identify that wait.
+   Tx is the component that transmits frames for medium access control (MAC). Radio reconfiguration now waits until Tx completes an accepted transmission. This includes the short interframe space (SIFS) before a response. The MAC previously used only the medium state, which cannot identify that wait.
 
-   For example, a radio command arrives while Tx waits to transmit an
-   acknowledgment (ACK) frame. The MAC keeps the command until the ACK completes.
-   This prevents radio reconfiguration before the accepted response completes.
-   The change affects event order and the event fingerprints of IEEE 802.11 simulations.
+   For example, a radio command arrives while Tx waits to transmit an acknowledgment (ACK) frame. The MAC keeps the command until the ACK completes. This prevents radio reconfiguration before the accepted response completes. The change affects event order and the event fingerprints of IEEE 802.11 simulations.
 
-   Custom implementations of ITx must implement hasTransmission() before they compile again.
-   The method identifies both the wait before transmission and the transmission itself.
-   The migration guide explains the return values and the order of the completion callback.
+   Custom implementations of ITx must implement hasTransmission() before they compile again. The method identifies both the wait before transmission and the transmission itself. The migration guide explains the return values and the order of the completion callback.
 
 19. IEEE 802.11 recipient responses do not extend their local NAV
 
-   Tx requires an explicit local NAV choice in both transmitFrame() overloads.
-   The NAV records a reservation of the medium. Custom C++ implementations and
-   callers must add updateLocalNav. DCF holder frames use true. HCF holder frames
-   and recipient responses use false. The migration guide supplies the signatures and completion rules.
+   Tx requires an explicit local NAV choice in both transmitFrame() overloads. The NAV records a reservation of the medium. Custom C++ implementations and callers must add updateLocalNav. DCF holder frames use true. HCF holder frames and recipient responses use false. The migration guide supplies the signatures and completion rules.
 
-   CTS, ACK, and Basic Block Ack responses retain their duration fields without
-   extending the recipient's local NAV. Received reservations still control
-   channel access. For example, a recipient can answer another RTS from the same
-   holder when its own previous CTS would otherwise leave the medium busy.
+   CTS, ACK, and Basic Block Ack responses retain their duration fields without extending the recipient's local NAV. Received reservations still control channel access. For example, a recipient can answer another RTS from the same holder when its own previous CTS would otherwise leave the medium busy.
 
-   HCF clamps response durations to zero and applies ceiling to whole microseconds
-   before transmission. These shared changes can change Wi-Fi simulation results.
+   HCF clamps response durations to zero and applies ceiling to whole microseconds before transmission. These shared changes can change Wi-Fi simulation results.
 
 20. Every transmission and reception in progress of a radio
 
-   IRadio gained getTransmissionsInProgress() and getReceptionsInProgress(),
-   which return every transmission the radio is transmitting and every
-   reception it is attempting, in no particular order. ReceiverBase and the
-   canvas visualizers use them instead of getTransmissionInProgress() and
-   getReceptionInProgress(), so that they also work for a radio that has
-   several signals in progress at once (see the next item). For Radio,
-   NoiseSource and ShortcutRadio, which have at most one in each direction,
-   the vectors hold at most one element, and nothing else changes.
+   IRadio gained getTransmissionsInProgress() and getReceptionsInProgress(), which return every transmission the radio is transmitting and every reception it is attempting, in no particular order. ReceiverBase and the canvas visualizers use them instead of getTransmissionInProgress() and getReceptionInProgress(), so that they also work for a radio that has several signals in progress at once (see the next item). For Radio, NoiseSource and ShortcutRadio, which have at most one in each direction, the vectors hold at most one element, and nothing else changes.
 
-   This change requires the modification of C++ code that implements IRadio
-   without deriving from Radio: the two methods are pure virtual.
+   This change requires the modification of C++ code that implements IRadio without deriving from Radio: the two methods are pure virtual.
 
 21. Radio: concurrent transmissions and receptions
 
-   Radio can now transmit any number of signals at the same time, and attempt
-   any number of receptions at the same time, as a technology with
-   concurrent per-user transmissions (e.g. a cellular base station) needs.
-   Both are allowed by new Radio parameters, allowConcurrentTransmissions
-   and allowConcurrentReceptions, which default to false. With
-   allowConcurrentReceptions set, every reception the receiver's
-   computeIsReceptionAttempted() accepts is attempted alongside the ones in
-   progress; the receivers shipped with INET attempt one reception at a time
-   either way, so the switch only matters with a receiver that attempts more.
+   Radio can now transmit any number of signals at the same time, and attempt any number of receptions at the same time, as a technology with concurrent per-user transmissions (e.g. a cellular base station) needs. Both are allowed by new Radio parameters, allowConcurrentTransmissions and allowConcurrentReceptions, which default to false. With allowConcurrentReceptions set, every reception the receiver's computeIsReceptionAttempted() accepts is attempted alongside the ones in progress; the receivers shipped with INET attempt one reception at a time either way, so the switch only matters with a receiver that attempts more.
 
-   The behavior with the defaults is unchanged, but the C++ API of Radio
-   subclasses changed: the protected receptionTimer and transmissionTimer
-   members were replaced by the attemptedReceptionTimers and
-   transmissionTimers vectors, and continueTransmission(), endTransmission()
-   and abortTransmission() take the transmission timer as an argument. A
-   subclass that dropped the attempted reception on a reconfiguration by
-   resetting receptionTimer calls abandonAttemptedReceptions() instead.
-   getTransmissionInProgress(), getReceptionInProgress(),
-   getTransmittedSignalPart() and getReceivedSignalPart() answer as before
-   while at most one signal is in progress in their direction, and throw an
-   error while several are. A model that relies on them, such as the
-   StateBasedEpEnergyConsumer and StateBasedCcEnergyConsumer energy
-   consumers, therefore cannot be used with a radio that has several signals
-   in progress at once.
+   The behavior with the defaults is unchanged, but the C++ API of Radio subclasses changed: the protected receptionTimer and transmissionTimer members were replaced by the attemptedReceptionTimers and transmissionTimers vectors, and continueTransmission(), endTransmission() and abortTransmission() take the transmission timer as an argument. A subclass that dropped the attempted reception on a reconfiguration by resetting receptionTimer calls abandonAttemptedReceptions() instead. getTransmissionInProgress(), getReceptionInProgress(), getTransmittedSignalPart() and getReceivedSignalPart() answer as before while at most one signal is in progress in their direction, and throw an error while several are. A model that relies on them, such as the StateBasedEpEnergyConsumer and StateBasedCcEnergyConsumer energy consumers, therefore cannot be used with a radio that has several signals in progress at once.
 
-   This change requires the modification of C++ code that derives from Radio
-   and accesses these members or overrides these methods.
+   This change requires the modification of C++ code that derives from Radio and accesses these members or overrides these methods.
 
 22. Interference for a listening of the caller's making
 
-   IRadioMedium gained computeInterference(receiver, listening), formerly a
-   protected member of RadioMedium: the background noise plus the
-   receptions, at the receiver, of the transmissions on the medium that
-   overlap the listening, for a listening that need not belong to any
-   transmission. The result is not cached, but the receptions in it come
-   from the medium's reception cache: the ones not computed yet are computed
-   at the call, and draw their random numbers, if any, then. Together with
-   the propagation, the receiver's createListening() and the analog model,
-   it lets a radio compute a hypothetical SNIR (e.g. for link-quality
-   estimation) from public API.
+   IRadioMedium gained computeInterference(receiver, listening), formerly a protected member of RadioMedium: the background noise plus the receptions, at the receiver, of the transmissions on the medium that overlap the listening, for a listening that need not belong to any transmission. The result is not cached, but the receptions in it come from the medium's reception cache: the ones not computed yet are computed at the call, and draw their random numbers, if any, then. Together with the propagation, the receiver's createListening() and the analog model, it lets a radio compute a hypothetical SNIR (e.g. for link-quality estimation) from public API.
 
-   This change requires the modification of C++ code that implements
-   IRadioMedium without deriving from RadioMedium.
+   This change requires the modification of C++ code that implements IRadioMedium without deriving from RadioMedium.
+
 23. IEEE 802.11 single protection and shared TXNAV
 
-   HCF now checks complete continuation costs under single protection with
-   Block Ack support disabled. Before the next SIFS, the exchange cost must
-   be strictly less than remaining TXNAV. The initial SIFS plus exchange
-   cost must fit the positive TXOP limit. This separation permits bursts
-   whose preceding ACK's propagation delay consumes part of the initial SIFS
-   budget. For example, a 238 us exchange proceeds with 246.67 us TXNAV and
-   sufficient TXOP time, after 10 us SIFS.
+   HCF now checks complete continuation costs under single protection with Block Ack support disabled. Before the next SIFS, the exchange cost must be strictly less than remaining TXNAV. The initial SIFS plus exchange cost must fit the positive TXOP limit. This separation permits bursts whose preceding ACK's propagation delay consumes part of the initial SIFS budget. For example, a 238 us exchange proceeds with 246.67 us TXNAV and sufficient TXOP time, after 10 us SIFS.
 
-   A refused frame remains available for a fresh grant without a retry
-   increment or failed-rate feedback. HCF retains the admitted DATA mode
-   through RTS/CTS. Forecasts preserve the retained successor's mode and ACK policy.
+   A refused frame remains available for a fresh grant without a retry increment or failed-rate feedback. HCF retains the admitted DATA mode through RTS/CTS. Forecasts preserve the retained successor's mode and ACK policy.
 
-   When the next exchange needs RTS/CTS, the preceding field's successor term
-   contains RTS airtime, one SIFS, and CTS airtime. It excludes the protected
-   DATA and its response. The complete RTS/CTS/DATA/response cost exceeds the
-   remaining TXNAV with unchanged estimates. Single protection therefore
-   refuses that continuation before RTS.
+   When the next exchange needs RTS/CTS, the preceding field's successor term contains RTS airtime, one SIFS, and CTS airtime. It excludes the protected DATA and its response. The complete RTS/CTS/DATA/response cost exceeds the remaining TXNAV with unchanged estimates. Single protection therefore refuses that continuation before RTS.
 
-   For example, after DATA A and its ACK, queued DATA B needs RTS/CTS.
-   B waits for a fresh grant after TXNAV expires. An initial exchange can
-   still use RTS/CTS.
+   For example, after DATA A and its ACK, queued DATA B needs RTS/CTS. B waits for a fresh grant after TXNAV expires. An initial exchange can still use RTS/CTS.
 
-   The first exchange retains a compatibility fallback, including under an
-   insufficient positive limit. TXOP-based fragmentation remains unsupported.
-   A zero limit permits no additional exchange. Block Ack support disables
-   the new admission check even without an agreement. Multiple protection
-   retains its separate admission policy.
+   The first exchange retains a compatibility fallback, including under an insufficient positive limit. TXOP-based fragmentation remains unsupported. A zero limit permits no additional exchange. Block Ack support disables the new admission check even without an agreement. Multiple protection retains its separate admission policy.
 
-   Rx now owns shared TXNAV separately from received NAV. Successful holder
-   frames replace TXNAV from their PPDU end and encoded Duration/ID. TXNAV
-   persists after TXOP end and blocks contention, but it does not itself
-   prevent an eligible CTS response. DCF retains its local NAV behavior.
+   Rx now owns shared TXNAV separately from received NAV. Successful holder frames replace TXNAV from their PPDU end and encoded Duration/ID. TXNAV persists after TXOP end and blocks contention, but it does not itself prevent an eligible CTS response. DCF retains its local NAV behavior.
 
-   HCF also blocks local contention through its active sequence. This prevents
-   a second grant during an initial ACK wait before successful TXNAV exists.
-   Normal AIFS and backoff follow channel release.
+   HCF also blocks local contention through its active sequence. This prevents a second grant during an initial ACK wait before successful TXNAV exists. Normal AIFS and backoff follow channel release.
 
-   Single protection now excludes the current ACK estimate for group management
-   and non-QoS DATA, with Block Ack support enabled or disabled. With support
-   enabled, the legacy forecast can still reserve an ineligible group successor.
+   Single protection now excludes the current ACK estimate for group management and non-QoS DATA, with Block Ack support enabled or disabled. With support enabled, the legacy forecast can still reserve an ineligible group successor.
 
-   TxOpFs publishes the ACK policy before RTS. If Block Ack replaces a stale
-   Normal Ack policy, the single protection RTS field omits the unnecessary
-   ACK and its SIFS. These field and contention changes can change Wi-Fi
-   simulation results and fingerprints. The separate expiry event and corrected
-   sequence observations can also change fingerprints.
+   TxOpFs publishes the ACK policy before RTS. If Block Ack replaces a stale Normal Ack policy, the single protection RTS field omits the unnecessary ACK and its SIFS. These field and contention changes can change Wi-Fi simulation results and fingerprints. The separate expiry event and corrected sequence observations can also change fingerprints.
 
-   Custom IRx implementations need the TXNAV operations. Sequence callbacks
-   need the start notification and Boolean submission result. Custom ACK policies
-   must not depend on HCF's removed second policy query. See the migration guide.
+   Custom IRx implementations need the TXNAV operations. Sequence callbacks need the start notification and Boolean submission result. Custom ACK policies must not depend on HCF's removed second policy query. See the migration guide.
 
 23. The distance form of the path loss is computeDistancePathLoss()
 
-   IPathLoss::computePathLoss(propagationSpeed, frequency, distance) was
-   renamed to computeDistancePathLoss(), so that it is no longer an overload
-   of the method that computes the path loss of a reception (see the next
-   item): a model that overrode one of the overloads hid the other. Its
-   documentation now states that the value is independent of the transmitter
-   and the receiver, and may be NaN when the model cannot tell the loss from
-   the distance alone (TwoRayInterference).
+   IPathLoss::computePathLoss(propagationSpeed, frequency, distance) was renamed to computeDistancePathLoss(), so that it is no longer an overload of the method that computes the path loss of a reception (see the next item): a model that overrode one of the overloads hid the other. Its documentation now states that the value is independent of the transmitter and the receiver, and may be NaN when the model cannot tell the loss from the distance alone (TwoRayInterference).
 
-   This change requires the modification of C++ code that implements or calls
-   computePathLoss(propagationSpeed, frequency, distance): every path loss
-   model derived from PathLossBase overrides it.
+   This change requires the modification of C++ code that implements or calls computePathLoss(propagationSpeed, frequency, distance): every path loss model derived from PathLossBase overrides it.
 
 24. The path loss of a reception knows its receiver
 
-   IPathLoss::computePathLoss(transmission, arrival) was replaced by
-   computeReceptionPathLoss(receiverRadio, transmission, arrival). It returns
-   an IReceptionPathLoss, the path loss of that one reception, whose
-   computePathLoss(frequency) gives the loss factor at any frequency, the way
-   IAntenna::getGain() returns an IAntennaGain. Together with the
-   transmission's transmitter radio, the receiver radio identifies the link,
-   so a path loss can now keep per-link state (for example a shadowing that
-   is correlated over distance). Both medium analog models call it once per
-   reception: ScalarMediumAnalogModel evaluates the result at the center
-   frequency, DimensionalMediumAnalogModel across the band, in place of the
-   computeDistancePathLoss() it called before. A path loss with per-link
-   state resolves that state in the call, and the returned object holds
-   values only, so the value of a reception does not depend on when or how
-   often the dimensional model evaluates it. The PathLossBase default
-   evaluates computeDistancePathLoss() for the link's distance, so the
-   results of models that only implement that form are unchanged. The
-   FrequencyDependentAttenuationFunction constructor takes the reception's
-   path loss as its second argument.
+   IPathLoss::computePathLoss(transmission, arrival) was replaced by computeReceptionPathLoss(receiverRadio, transmission, arrival). It returns an IReceptionPathLoss, the path loss of that one reception, whose computePathLoss(frequency) gives the loss factor at any frequency, the way IAntenna::getGain() returns an IAntennaGain. Together with the transmission's transmitter radio, the receiver radio identifies the link, so a path loss can now keep per-link state (for example a shadowing that is correlated over distance). Both medium analog models call it once per reception: ScalarMediumAnalogModel evaluates the result at the center frequency, DimensionalMediumAnalogModel across the band, in place of the computeDistancePathLoss() it called before. A path loss with per-link state resolves that state in the call, and the returned object holds values only, so the value of a reception does not depend on when or how often the dimensional model evaluates it. The PathLossBase default evaluates computeDistancePathLoss() for the link's distance, so the results of models that only implement that form are unchanged. The FrequencyDependentAttenuationFunction constructor takes the reception's path loss as its second argument.
 
-   TwoRayGroundReflection and TwoRayInterference now take the geometry of the
-   link into account under DimensionalMediumAnalogModel too: before, the
-   former acted as FreeSpacePathLoss there, and the latter returned NaN.
+   TwoRayGroundReflection and TwoRayInterference now take the geometry of the link into account under DimensionalMediumAnalogModel too: before, the former acted as FreeSpacePathLoss there, and the latter returned NaN.
 
-   This change requires the modification of C++ code that implements or calls
-   computePathLoss(transmission, arrival), or constructs
-   FrequencyDependentAttenuationFunction objects.
+   This change requires the modification of C++ code that implements or calls computePathLoss(transmission, arrival), or constructs FrequencyDependentAttenuationFunction objects.
 
 25. MPLS follows the TTL rules of RFC 3032
 
-   The TTL field of every label stack entry was 0. A pushed entry now copies
-   the TTL of the entry below it, or of the IPv4 header when it is the first
-   label, and each LSR forwards a labeled packet with the incoming TTL minus
-   one, as RFC 3032 section 2.4 and the Uniform Model of RFC 3443 state.
+   The TTL field of every label stack entry was 0. A pushed entry now copies the TTL of the entry below it, or of the IPv4 header when it is the first label, and each LSR forwards a labeled packet with the incoming TTL minus one, as RFC 3032 section 2.4 and the Uniform Model of RFC 3443 state.
 
-   The IPv4 TTL also counts the LSRs now. The ingress decrements it before it
-   labels a datagram, and leaves a datagram with TTL 1 to IPv4, which reports
-   it; a pop that empties the label stack writes the outgoing TTL into the IPv4
-   header. Before, a datagram left an LSP with the TTL it had at the ingress.
-   An LSR now discards a labeled packet whose outgoing TTL is zero, with a
-   packetDropped signal; before, no LSR looked at the TTL.
+   The IPv4 TTL also counts the LSRs now. The ingress decrements it before it labels a datagram, and leaves a datagram with TTL 1 to IPv4, which reports it; a pop that empties the label stack writes the outgoing TTL into the IPv4 header. Before, a datagram left an LSP with the TTL it had at the ingress. An LSR now discards a labeled packet whose outgoing TTL is zero, with a packetDropped signal; before, no LSR looked at the TTL.
 
 26. MPLS works on Ethernet links
 
-   An MPLS router with an Ethernet interface stopped the simulation at the
-   first ARP packet, because the MPLS module threw on every protocol other
-   than MPLS and IPv4. Such a packet now goes to the network layer. A labeled
-   packet now also goes through the Ethernet encapsulation, with the ethertype
-   8847 hex. A LIB entry holds no next hop, so the frame goes to the broadcast
-   address of the link; on a point-to-point link that is the one neighbor.
+   An MPLS router with an Ethernet interface stopped the simulation at the first ARP packet, because the MPLS module threw on every protocol other than MPLS and IPv4. Such a packet now goes to the network layer. A labeled packet now also goes through the Ethernet encapsulation, with the ethertype 8847 hex. A LIB entry holds no next hop, so the frame goes to the broadcast address of the link; on a point-to-point link that is the one neighbor.
 
 27. MPLS knows the IPv4 Explicit NULL and the Implicit NULL labels
 
-   An LSR now pops the label 0 at the bottom of the stack with no binding and
-   forwards the datagram by its IPv4 header, and pops the stack where a swap
-   would give the label 3, as RFC 3032 section 2.1 states. The LIB accepts
-   these values as outgoing labels; before, a debug build refused the label 0,
-   and the label 3 went onto the wire. The LIB now allocates labels from 16,
-   after the reserved values; before, RSVP-TE and LDP got labels from 1.
+   An LSR now pops the label 0 at the bottom of the stack with no binding and forwards the datagram by its IPv4 header, and pops the stack where a swap would give the label 3, as RFC 3032 section 2.1 states. The LIB accepts these values as outgoing labels; before, a debug build refused the label 0, and the label 3 went onto the wire. The LIB now allocates labels from 16, after the reserved values; before, RSVP-TE and LDP got labels from 1.
 
 28. MPLS fragments a labeled datagram that is too big for the next link
 
-   An LSR sent a labeled packet of any length, also onto a link with a smaller
-   MTU. It now compares the length with the MTU of the outgoing interface, as
-   RFC 3032 section 3 states. It fragments an IPv4 datagram with the DF bit
-   clear, and each fragment carries the label stack; for a datagram with the DF
-   bit set, it sends an ICMP Destination Unreachable message whose Next-Hop MTU
-   is the MTU minus the label stack. The new parameter icmpModule of Mpls names
-   the ICMP module, by default the one of the node's IPv4 layer.
+   An LSR sent a labeled packet of any length, also onto a link with a smaller MTU. It now compares the length with the MTU of the outgoing interface, as RFC 3032 section 3 states. It fragments an IPv4 datagram with the DF bit clear, and each fragment carries the label stack; for a datagram with the DF bit set, it sends an ICMP Destination Unreachable message whose Next-Hop MTU is the MTU minus the label stack. The new parameter icmpModule of Mpls names the ICMP module, by default the one of the node's IPv4 layer.
 
 29. IPsec corrections to the AH and ESP packets
 
-   The first packet of an SA now carries the Sequence Number 1, as RFC 4302
-   and RFC 4303 state; before, it carried 0. The C++ method
-   SecurityAssociation::getAndIncSeqNum() is now incrementAndGetSeqNum(), and
-   returns the incremented value.
+   The first packet of an SA now carries the Sequence Number 1, as RFC 4302 and RFC 4303 state; before, it carried 0. The C++ method SecurityAssociation::getAndIncSeqNum() is now incrementAndGetSeqNum(), and returns the incremented value.
 
-   The AH header now has the layout of RFC 4302: its Payload Length holds the
-   length of the header in 32-bit words minus 2 (before, 0), and the ICV field
-   ends the header, before the payload (before, the ICV followed the payload).
-   In IPv6 the ICV field has the padding that makes the header a multiple of
-   8 octets, so an AH packet over IPv6 is 4 octets longer with a 16-octet ICV.
-   The payload of AH is no longer an EncryptedChunk, because AH does not
-   encrypt, and the AH dissector reads the new layout.
+   The AH header now has the layout of RFC 4302: its Payload Length holds the length of the header in 32-bit words minus 2 (before, 0), and the ICV field ends the header, before the payload (before, the ICV followed the payload). In IPv6 the ICV field has the padding that makes the header a multiple of 8 octets, so an AH packet over IPv6 is 4 octets longer with a 16-octet ICV. The payload of AH is no longer an EncryptedChunk, because AH does not encrypt, and the AH dissector reads the new layout.
 
-   The padding of an ESP packet now holds the octets 1, 2, 3 and so on, as
-   RFC 4303 section 2.4 states; before, every octet held the default 63 of a
-   ByteCountChunk.
+   The padding of an ESP packet now holds the octets 1, 2, 3 and so on, as RFC 4303 section 2.4 states; before, every octet held the default 63 of a ByteCountChunk.
 
-   After AH or ESP processing, the receiver now checks that the packet matches
-   the selectors of the SA that protected it, and discards it if not (RFC 4301
-   section 5.2). Before, an SA accepted every packet with its SPI, so a
-   sender could reach any port of the receiver through one SA.
+   After AH or ESP processing, the receiver now checks that the packet matches the selectors of the SA that protected it, and discards it if not (RFC 4301 section 5.2). Before, an SA accepted every packet with its SPI, so a sender could reach any port of the receiver through one SA.
 
-   A packet that matches a PROTECT entry, and no SA of it, is now discarded
-   (RFC 4301 section 5.1); before, it left the host in clear.
+   A packet that matches a PROTECT entry, and no SA of it, is now discarded (RFC 4301 section 5.1); before, it left the host in clear.
 
-   One policy can now protect a packet with ESP and AH together. The new
-   Protection element of a SecurityAssociation overrides the Protection of
-   its SecurityPolicy, so an ESP policy can hold an AH SA as well. The sender
-   applies ESP first and AH around it, whatever the order of the SAs, and the
-   receiver processes the ESP header that follows an AH header. Before, the
-   documentation named a Protection AH_ESP that the configuration refused.
+   One policy can now protect a packet with ESP and AH together. The new Protection element of a SecurityAssociation overrides the Protection of its SecurityPolicy, so an ESP policy can hold an AH SA as well. The sender applies ESP first and AH around it, whatever the order of the SAs, and the receiver processes the ESP header that follows an AH header. Before, the documentation named a Protection AH_ESP that the configuration refused.
 
-   An SA can now have a hard lifetime (RFC 4301 section 4.4.2.1): the new
-   elements HardLifetimeSeconds and HardLifetimeBytes of a SecurityAssociation
-   or of its SecurityPolicy. With no key management to replace it, an SA whose
-   lifetime has ended is not used any more, and its packets are discarded.
+   An SA can now have a hard lifetime (RFC 4301 section 4.4.2.1): the new elements HardLifetimeSeconds and HardLifetimeBytes of a SecurityAssociation or of its SecurityPolicy. With no key management to replace it, an SA whose lifetime has ended is not used any more, and its packets are discarded.
 
-   An SA can now have a set of DSCP values, the new DSCP element of a
-   SecurityAssociation (RFC 4301 section 4.4.2.1). Of the SAs of one policy,
-   the sender uses the first whose set holds the DSCP of the packet, so that
-   classes of traffic can have SAs of their own. Before, the first matching SA
-   carried every packet.
+   An SA can now have a set of DSCP values, the new DSCP element of a SecurityAssociation (RFC 4301 section 4.4.2.1). Of the SAs of one policy, the sender uses the first whose set holds the DSCP of the packet, so that classes of traffic can have SAs of their own. Before, the first matching SA carried every packet.
 
-   An outbound ESP SA can now send dummy packets (RFC 4303 section 2.6), with
-   the new DummyPacketInterval element of a SecurityAssociation: ESP packets
-   with Next Header 59 and an empty payload, to the peer of the last packet
-   that the SA protected. The receiver discards them without an error. For
-   this, the IPsec module has the new gates ipIn and ipOut, which the IPv4 and
-   IPv6 network layers connect to their dispatcher.
+   An outbound ESP SA can now send dummy packets (RFC 4303 section 2.6), with the new DummyPacketInterval element of a SecurityAssociation: ESP packets with Next Header 59 and an empty payload, to the peer of the last packet that the SA protected. The receiver discards them without an error. For this, the IPsec module has the new gates ipIn and ipOut, which the IPv4 and IPv6 network layers connect to their dispatcher.
 
 30. IEEE 802.11 response queries require an explicit caller role
 
@@ -613,16 +280,9 @@ Notable backward incompatible changes are the following:
 
 33. TCP takes the defaults of the RFCs, and gains LinuxTcp and LegacyTcp
 
-   The TCP model was reworked. A flavour is now a choice of congestion control
-   (ITcpCongestionControl) and of loss recovery (ITcpRecovery). The model
-   gained CUBIC (TcpCubic), RACK-TLP loss detection, Proportional Rate
-   Reduction, F-RTO, the undo of a spurious loss, Accurate ECN, TCP Fast Open,
-   keepalive probes, the path MTU search of RFC 4821, and many parameters that
-   select a behavior of Linux. The documentation of the Tcp module lists each
-   RFC, what the model implements, and where it departs from the RFC.
+   The TCP model was reworked. A flavour is now a choice of congestion control (ITcpCongestionControl) and of loss recovery (ITcpRecovery). The model gained CUBIC (TcpCubic), RACK-TLP loss detection, Proportional Rate Reduction, F-RTO, the undo of a spurious loss, Accurate ECN, TCP Fast Open, keepalive probes, the path MTU search of RFC 4821, and many parameters that select a behavior of Linux. The documentation of the Tcp module lists each RFC, what the model implements, and where it departs from the RFC.
 
-   The defaults of Tcp now follow the RFCs. This changes each simulation that
-   uses TCP without setting these parameters (INET 4.7 -> now):
+   The defaults of Tcp now follow the RFCs. This changes each simulation that uses TCP without setting these parameters (INET 4.7 -> now):
 
      sackSupport              false             -> true
      timestampSupport         false             -> true
@@ -645,173 +305,75 @@ Notable backward incompatible changes are the following:
                                                    (tcpEcnMode = "passive")
      pmtudEnabled             false             -> true (DF on IPv4 segments)
 
-   The results of TCP simulations differ from INET 4.7 in any case, also
-   because many defects were repaired. To keep the old defaults, select
-   LegacyTcp, which extends Tcp and changes only defaults:
+   The results of TCP simulations differ from INET 4.7 in any case, also because many defects were repaired. To keep the old defaults, select LegacyTcp, which extends Tcp and changes only defaults:
 
      **.tcp.typename = "LegacyTcp"
 
-   LinuxTcp extends Tcp in the same way, with the defaults of Linux 7.1: CUBIC
-   with the hybrid slow start, an initial window of ten segments, the timers
-   and the delayed ACK of Linux, and the other behaviors of Linux that
-   parameters select. A parameter that the ini file sets takes precedence over
-   the defaults of the selected module.
+   LinuxTcp extends Tcp in the same way, with the defaults of Linux 7.1: CUBIC with the hybrid slow start, an initial window of ten segments, the timers and the delayed ACK of Linux, and the other behaviors of Linux that parameters select. A parameter that the ini file sets takes precedence over the defaults of the selected module.
 
-   Two parameters are deprecated: increasedIWEnabled (use initialWindow =
-   "rfc3390") and ecnWillingness (use tcpEcnMode = "rfc3168"). They still
-   work in this release.
+   Two parameters are deprecated: increasedIWEnabled (use initialWindow = "rfc3390") and ecnWillingness (use tcpEcnMode = "rfc3168"). They still work in this release.
 
-   Two C++ base classes were renamed: TcpBaseAlg is now TcpAlgorithmBase, and
-   TcpTahoeRenoFamily is now TcpClassicAlgorithmBase. The old names remain as
-   deprecated aliases in this release. A TCP algorithm implemented outside
-   INET needs more than the rename, however: the split into congestion control
-   and recovery moved much of the protected interface that a flavour
-   overrides, so such an algorithm must be written against
-   ITcpCongestionControl and ITcpRecovery.
+   Two C++ base classes were renamed: TcpBaseAlg is now TcpAlgorithmBase, and TcpTahoeRenoFamily is now TcpClassicAlgorithmBase. The old names remain as deprecated aliases in this release. A TCP algorithm implemented outside INET needs more than the rename, however: the split into congestion control and recovery moved much of the protected interface that a flavour overrides, so such an algorithm must be written against ITcpCongestionControl and ITcpRecovery.
 
    The connection has the new signals sndMax, delivered and deliveredCe.
 
 34. Packet classifiers answer a query without a change of state
 
-   PacketClassifierBase::classifyPacket() is now a const function. The base
-   class calls it from queries, such as canPushPacket() and canPullPacket(),
-   and again from the operation that moves the packet, so it must not change
-   the state of the module. The base class calls the new function
-   handlePacketClassified() one time for each packet that goes through the
-   module, and one time for each packet stream, before the packet leaves the
-   module. A classifier that keeps state changes it there.
+   PacketClassifierBase::classifyPacket() is now a const function. The base class calls it from queries, such as canPushPacket() and canPullPacket(), and again from the operation that moves the packet, so it must not change the state of the module. The base class calls the new function handlePacketClassified() one time for each packet that goes through the module, and one time for each packet stream, before the packet leaves the module. A classifier that keeps state changes it there.
 
-   This change requires the modification of classifiers implemented outside
-   INET, which no longer compile until their classifyPacket() is const. See
-   the migration guide.
+   This change requires the modification of classifiers implemented outside INET, which no longer compile until their classifyPacket() is const. See the migration guide.
 
-   A pull stream through a classifier now classifies its packet one time, at
-   the start of the stream. Before, each call of the stream classified it.
+   A pull stream through a classifier now classifies its packet one time, at the start of the stream. Before, each call of the stream classified it.
 
 35. A token bucket classifier takes the tokens of a packet one time
 
-   TokenBucketClassifier and MultiTokenBucketClassifier, and the classifiers
-   that extend them in NED (SingleRateTwoColorClassifier,
-   SingleRateThreeColorClassifier and DualRateThreeColorClassifier), removed
-   the tokens of a packet in each query about the packet, and again
-   when the packet went through. For example, a PacketServer asks
-   canPushPacket() before it pushes a packet. In pull mode, each peek removed
-   tokens. The classifier now removes the tokens one time, when the packet
-   goes through. This can change the results of simulations in which a module
-   asks a token bucket classifier about a packet before it pushes the packet.
+   TokenBucketClassifier and MultiTokenBucketClassifier, and the classifiers that extend them in NED (SingleRateTwoColorClassifier, SingleRateThreeColorClassifier and DualRateThreeColorClassifier), removed the tokens of a packet in each query about the packet, and again when the packet went through. For example, a PacketServer asks canPushPacket() before it pushes a packet. In pull mode, each peek removed tokens. The classifier now removes the tokens one time, when the packet goes through. This can change the results of simulations in which a module asks a token bucket classifier about a packet before it pushes the packet.
 
 36. A weighted round-robin classifier moves its round only for a packet
 
-   WrrClassifier moved its round forward in each query about a packet, for
-   example when a module asked canPushPacket() before it pushed the packet.
-   The packets then went to other consumers than the weights state. The
-   classifier now moves its round only when a packet goes through. This can
-   change the results of simulations in which a module asks a WrrClassifier
-   about a packet before it pushes the packet.
+   WrrClassifier moved its round forward in each query about a packet, for example when a module asked canPushPacket() before it pushed the packet. The packets then went to other consumers than the weights state. The classifier now moves its round only when a packet goes through. This can change the results of simulations in which a module asks a WrrClassifier about a packet before it pushes the packet.
 
 37. A dynamic classifier creates a branch only for a packet
 
-   DynamicClassifier creates the branch of a class when the first packet of
-   the class goes through, or when a module asks canPushPacket() about such a
-   packet, because the answer depends on the branch. Before, its other
-   queries created branches too. The classifier now refuses the reverseOrder
-   parameter, because it creates its output gates in the order in which the
-   classes appear. With reverseOrder = true, it created more branches than
-   classes, and it sent packets of different classes into one branch.
+   DynamicClassifier creates the branch of a class when the first packet of the class goes through, or when a module asks canPushPacket() about such a packet, because the answer depends on the branch. Before, its other queries created branches too. The classifier now refuses the reverseOrder parameter, because it creates its output gates in the order in which the classes appear. With reverseOrder = true, it created more branches than classes, and it sent packets of different classes into one branch.
 
 38. Packet schedulers answer a query without a change of state
 
-   PacketSchedulerBase::schedulePacket() is now a const function. The base
-   class calls it from queries, such as canPushSomePacket(), and again from
-   the operation that moves the packet, so it must not change the state of
-   the module. The base class calls the new function handlePacketScheduled()
-   one time for each packet that goes through the module, and one time for
-   each packet stream, when the module holds the packet and before the
-   packet leaves the module. A scheduler that keeps state changes it there.
+   PacketSchedulerBase::schedulePacket() is now a const function. The base class calls it from queries, such as canPushSomePacket(), and again from the operation that moves the packet, so it must not change the state of the module. The base class calls the new function handlePacketScheduled() one time for each packet that goes through the module, and one time for each packet stream, when the module holds the packet and before the packet leaves the module. A scheduler that keeps state changes it there.
 
-   This change requires the modification of schedulers implemented outside
-   INET, which no longer compile until their schedulePacket() is const. See
-   the migration guide.
+   This change requires the modification of schedulers implemented outside INET, which no longer compile until their schedulePacket() is const. See the migration guide.
 
 39. A label scheduler skips an empty input
 
-   LabelScheduler read the labels of the packet that each input offered, and
-   it crashed when an input had no packet. It now skips an empty input.
+   LabelScheduler read the labels of the packet that each input offered, and it crashed when an input had no packet. It now skips an empty input.
 
 40. A packet scheduler offers the packet that it serves
 
-   canPullPacket() of PacketSchedulerBase returned the packet of the first
-   input that had a packet, and pullPacket() served the input that
-   schedulePacket() selected. The two agreed only for a PriorityScheduler
-   without reverseOrder. A module that reads the offered packet before it
-   pulls, such as TokenBasedServer, then acted on another packet than the one
-   it pulled. Now canPullPacket() returns the packet of the input that
-   schedulePacket() selects, and canPullSomePacket() asks whether that input
-   has a packet. This affects WrrScheduler, ContentBasedScheduler,
-   LabelScheduler, PacketScheduler, MarkovScheduler and PriorityScheduler
-   with reverseOrder. The scheduler function of a PacketScheduler must not
-   change any state, because the base class now calls it from queries too.
-   This can change the results of simulations in which a module reads the
-   packet that such a scheduler offers.
+   canPullPacket() of PacketSchedulerBase returned the packet of the first input that had a packet, and pullPacket() served the input that schedulePacket() selected. The two agreed only for a PriorityScheduler without reverseOrder. A module that reads the offered packet before it pulls, such as TokenBasedServer, then acted on another packet than the one it pulled. Now canPullPacket() returns the packet of the input that schedulePacket() selects, and canPullSomePacket() asks whether that input has a packet. This affects WrrScheduler, ContentBasedScheduler, LabelScheduler, PacketScheduler, MarkovScheduler and PriorityScheduler with reverseOrder. The scheduler function of a PacketScheduler must not change any state, because the base class now calls it from queries too. This can change the results of simulations in which a module reads the packet that such a scheduler offers.
 
 41. Packet filters decide one time for each packet
 
-   PacketFilterBase called matchesPacket() and processPacket() again on each
-   call of a push stream, so its verdict could change in the middle of a
-   stream. It now decides at the start of the stream and keeps the verdict
-   for the stream; processPacket() still runs for each packet instance of the
-   stream. The base class calls the new function handlePacketFiltered() one
-   time for each packet that goes through the filter or that the filter
-   drops, and one time for each packet stream. A filter that keeps state,
-   such as a dropper that counts packets, changes that state there, not in
-   matchesPacket(), processPacket() or dropPacket(). See the migration guide.
+   PacketFilterBase called matchesPacket() and processPacket() again on each call of a push stream, so its verdict could change in the middle of a stream. It now decides at the start of the stream and keeps the verdict for the stream; processPacket() still runs for each packet instance of the stream. The base class calls the new function handlePacketFiltered() one time for each packet that goes through the filter or that the filter drops, and one time for each packet stream. A filter that keeps state, such as a dropper that counts packets, changes that state there, not in matchesPacket(), processPacket() or dropPacket(). See the migration guide.
 
 42. A filter in pull mode drops a packet in its own operations
 
-   In pull mode, PacketFilterBase::canPullPacket(), a query, pulled and
-   dropped each packet of its provider that did not match. The filter now
-   drops such packets when they become available: when its provider reports
-   a packet, and after each pull. canPullPacket() returns the packet of the
-   provider if it matches. This can change the time of a drop in simulations
-   that pull packets through a filter. ReceiveWithLifetime and
-   EligibilityTimeFilter no longer support pull mode, because their verdict
-   about a packet changes with time without an event of the module.
+   In pull mode, PacketFilterBase::canPullPacket(), a query, pulled and dropped each packet of its provider that did not match. The filter now drops such packets when they become available: when its provider reports a packet, and after each pull. canPullPacket() returns the packet of the provider if it matches. This can change the time of a drop in simulations that pull packets through a filter. ReceiveWithLifetime and EligibilityTimeFilter no longer support pull mode, because their verdict about a packet changes with time without an event of the module.
 
 43. An ordinal based dropper counts a streamed packet one time
 
-   OrdinalBasedDropper counted a packet in processPacket() and dropPacket(),
-   which the filter base class calls for each packet instance of a packet
-   stream. So it counted a streamed packet more than one time, and it dropped
-   other packets than its dropsVector names. It now counts each packet one
-   time, in handlePacketFiltered().
+   OrdinalBasedDropper counted a packet in processPacket() and dropPacket(), which the filter base class calls for each packet instance of a packet stream. So it counted a streamed packet more than one time, and it dropped other packets than its dropsVector names. It now counts each packet one time, in handlePacketFiltered().
 
 44. A stream merger records a streamed packet one time
 
-   StreamMerger recorded the sequence number of a passing packet in
-   processPacket(), which the filter base class calls for each packet
-   instance of a packet stream. It now records the number one time, in
-   handlePacketFiltered().
+   StreamMerger recorded the sequence number of a passing packet in processPacket(), which the filter base class calls for each packet instance of a packet stream. It now records the number one time, in handlePacketFiltered().
 
 45. A random early detection dropper draws its random number in advance
 
-   RedDropper updated its average queue length and drew a random number in
-   matchesPacket(), so each query about a packet, such as canPushPacket(),
-   changed the state of the dropper. It now decides with a stored random
-   number, and it updates its state in handlePacketFiltered() when a packet
-   goes through or is dropped; after a decision that used the stored number,
-   it draws the next one. The dropper draws one more random number at
-   initialization. Simulations with a RedDropper therefore give other
-   results, with the same statistical behavior.
+   RedDropper updated its average queue length and drew a random number in matchesPacket(), so each query about a packet, such as canPushPacket(), changed the state of the dropper. It now decides with a stored random number, and it updates its state in handlePacketFiltered() when a packet goes through or is dropped; after a decision that used the stored number, it draws the next one. The dropper draws one more random number at initialization. Simulations with a RedDropper therefore give other results, with the same statistical behavior.
 
 46. A statistical rate limiter draws its random number in advance
 
-   StatisticalRateLimiter drew a random number in matchesPacket(), so in pull
-   mode each query, such as canPullPacket(), drew a number and could give
-   another answer. It now decides with a stored random number, and it draws
-   the next one in handlePacketFiltered() after a decision that used the
-   stored one. The limiter draws one more random number at initialization.
-   Simulations with a StatisticalRateLimiter therefore give other results,
-   with the same statistical behavior.
+   StatisticalRateLimiter drew a random number in matchesPacket(), so in pull mode each query, such as canPullPacket(), drew a number and could give another answer. It now decides with a stored random number, and it draws the next one in handlePacketFiltered() after a decision that used the stored one. The limiter draws one more random number at initialization. Simulations with a StatisticalRateLimiter therefore give other results, with the same statistical behavior.
 
 Notable backward compatible changes are the following:
 
@@ -837,131 +399,55 @@ Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
 
-   The datarateChanged signal of the rate controls is now emitted with the name of
-   the receiving station as a named details object, and a new dataratePerStation
-   statistic demultiplexes it into one data rate vector per peer. The
-   datarateSelected signal of Dcf and Hcf is tagged the same way, which also covers
-   fixed and configured rates. The declaration of the aggregate datarateChanged
-   statistic is unchanged and it still ignores the details, but the values it
-   records move: the rate control no longer reports a rate when the mode set
-   changes, and reports one per station when that station is first seen instead.
+   The datarateChanged signal of the rate controls is now emitted with the name of the receiving station as a named details object, and a new dataratePerStation statistic demultiplexes it into one data rate vector per peer. The datarateSelected signal of Dcf and Hcf is tagged the same way, which also covers fixed and configured rates. The declaration of the aggregate datarateChanged statistic is unchanged and it still ignores the details, but the values it records move: the rate control no longer reports a rate when the mode set changes, and reports one per station when that station is first seen instead.
 
 2. IEEE 802.11 per-receiver configured data frame rates
 
-   RateSelection and QosRateSelection gained a dataFrameBitratePerReceiver
-   parameter, a map from peer interface module path to bitrate, which fixes the
-   rate of originated unicast data frames separately for each peer. It is empty by
-   default, so it changes nothing unless it is configured. The dataFrameBitrate
-   parameter, which fixes one rate for the whole interface, is unchanged.
+   RateSelection and QosRateSelection gained a dataFrameBitratePerReceiver parameter, a map from peer interface module path to bitrate, which fixes the rate of originated unicast data frames separately for each peer. It is empty by default, so it changes nothing unless it is configured. The dataFrameBitrate parameter, which fixes one rate for the whole interface, is unchanged.
 
 3. Naming the host owning a MAC address
 
-   A new L3AddressResolver::getHostNameWithMacAddress() method names the host that
-   owns a MAC address, by the host's path relative to the network, and falls back
-   to the MAC address string when no host owns the address.
+   A new L3AddressResolver::getHostNameWithMacAddress() method names the host that owns a MAC address, by the host's path relative to the network, and falls back to the MAC address string when no host owns the address.
 
 4. Type-aware field chunk serializers
 
-   FieldsChunkSerializer gained two protected hooks, serializeFields() and
-   deserializeFields(). The deserializeFields() hook receives the concrete chunk
-   type that was requested from ChunkSerializerRegistry, so a serializer that is
-   registered for several chunk types can build the exact requested type. The old
-   hooks, serialize(stream, chunk) and deserialize(stream), are deprecated but
-   still work: they are no longer pure virtual, and the new hooks call them by
-   default. Serializers written against an earlier INET version need no source
-   change. See the migration guide for the new signatures.
+   FieldsChunkSerializer gained two protected hooks, serializeFields() and deserializeFields(). The deserializeFields() hook receives the concrete chunk type that was requested from ChunkSerializerRegistry, so a serializer that is registered for several chunk types can build the exact requested type. The old hooks, serialize(stream, chunk) and deserialize(stream), are deprecated but still work: they are no longer pure virtual, and the new hooks call them by default. Serializers written against an earlier INET version need no source change. See the migration guide for the new signatures.
 
 5. Region tag removal by type
 
-   The removeTagsWherePresent() method of SharingRegionTagSet removed the region
-   tags of every type in the given range, and not only the tags of the requested
-   type. It now removes only the requested type, as its documentation always
-   stated. The same correction reaches Chunk::removeTagsWherePresent() and
-   Packet::removeRegionTagsWherePresent(), which forward to it. The clearTags()
-   method gained an optional predicate that selects the tags to clear, and clears
-   all of them by default, so its own behavior is unchanged.
+   The removeTagsWherePresent() method of SharingRegionTagSet removed the region tags of every type in the given range, and not only the tags of the requested type. It now removes only the requested type, as its documentation always stated. The same correction reaches Chunk::removeTagsWherePresent() and Packet::removeRegionTagsWherePresent(), which forward to it. The clearTags() method gained an optional predicate that selects the tags to clear, and clears all of them by default, so its own behavior is unchanged.
 
-   This may change the results of a simulation that removes the region tags of one
-   type while the region tags of another type cover the same range. Inside INET
-   this happens when ResidenceTimeMeasurer ends a measurement: it removed the
-   ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet.
-   Those two tags now survive the measurement.
+   This may change the results of a simulation that removes the region tags of one type while the region tags of another type cover the same range. Inside INET this happens when ResidenceTimeMeasurer ends a measurement: it removed the ResidenceTimeTag and, with it, the FlowTag and the PacketEventTag of the packet. Those two tags now survive the measurement.
 
 6. IEEE 802.11 MIB rate state and notifications
 
-   The Management Information Base (MIB) now stores supported, basic, and
-   operational rate sets for the local station, Basic Service Set (BSS), and
-   individual peers. A rate set distinguishes unknown information from a
-   known empty set. Rate-set setters validate the input before they commit it.
-   A combined BSS and peer update installs both records before one notification.
+   The Management Information Base (MIB) now stores supported, basic, and operational rate sets for the local station, Basic Service Set (BSS), and individual peers. A rate set distinguishes unknown information from a known empty set. Rate-set setters validate the input before they commit it. A combined BSS and peer update installs both records before one notification.
 
-   The rateStateChanged signal reports a committed rate, High Throughput (HT)
-   capability, or channel-operation change. Its value is true, with no details
-   object. Listeners query the MIB for current state. Equal rate-set updates
-   emit no signal. The migration guide explains state access and listener use.
+   The rateStateChanged signal reports a committed rate, High Throughput (HT) capability, or channel-operation change. Its value is true, with no details object. Listeners query the MIB for current state. Equal rate-set updates emit no signal. The migration guide explains state access and listener use.
 
-   Association release and bulk teardown remove both peer HT capabilities and
-   rate sets before one notification. A listener can install replacement peer
-   state from the callback; teardown does not remove that replacement.
-   Direct HT or rate removal still emits its own notification if state changes.
-   Empty teardown emits no signal. Existing configuration parameters stay unchanged.
+   Association release and bulk teardown remove both peer HT capabilities and rate sets before one notification. A listener can install replacement peer state from the callback; teardown does not remove that replacement. Direct HT or rate removal still emits its own notification if state changes. Empty teardown emits no signal. Existing configuration parameters stay unchanged.
 
 8. Radio medium purge without a timer
 
-   RadioMedium has a new transmissionPurgeMode parameter. The default,
-   "timer", removes transmissions that can no longer interfere with a
-   self-message scheduled at the interference end time of the oldest
-   transmission that can still interfere, as before.
-   "onTransmission" removes them whenever a new transmission is added
-   instead, so the medium schedules no events of its own; this keeps the
-   medium out of the event sequence entirely, which matters for a model
-   whose fingerprints must not depend on the medium's bookkeeping.
-   Interference is computed identically in both modes.
+   RadioMedium has a new transmissionPurgeMode parameter. The default, "timer", removes transmissions that can no longer interfere with a self-message scheduled at the interference end time of the oldest transmission that can still interfere, as before. "onTransmission" removes them whenever a new transmission is added instead, so the medium schedules no events of its own; this keeps the medium out of the event sequence entirely, which matters for a model whose fingerprints must not depend on the medium's bookkeeping. Interference is computed identically in both modes.
 
-   The protected removeNonInterferingTransmissions() of RadioMedium now only
-   removes; it no longer reschedules the timer, which the timer handler does
-   by calling the new scheduleRemoveNonInterferingTransmissionsTimer() after
-   it. A subclass that calls or overrides removeNonInterferingTransmissions()
-   and relied on the rescheduling must call that method itself.
-
+   The protected removeNonInterferingTransmissions() of RadioMedium now only removes; it no longer reschedules the timer, which the timer handler does by calling the new scheduleRemoveNonInterferingTransmissionsTimer() after it. A subclass that calls or overrides removeNonInterferingTransmissions() and relied on the rescheduling must call that method itself.
 
 7. IEEE 802.11 selectable multiple protection in EDCA TXOPs
 
-   EDCA TXOPs support selectable multiple protection. Single protection remains
-   the default. Nominal timing uses the mode set's short interframe space (SIFS)
-   unchanged after the first transmission step. The first step adds no
-   interframe space. Multiple protection stops normally when another exchange
-   cannot use a legal duration field.
+   EDCA TXOPs support selectable multiple protection. Single protection remains the default. Nominal timing uses the mode set's short interframe space (SIFS) unchanged after the first transmission step. The first step adds no interframe space. Multiple protection stops normally when another exchange cannot use a legal duration field.
 
-   For example, a 200 us PPDU within a 1024 us TXOP advertises 824 us
-   of reservation.
-   A TXOP is a transmission opportunity; a PPDU is one PHY transmission.
+   For example, a 200 us PPDU within a 1024 us TXOP advertises 824 us of reservation. A TXOP is a transmission opportunity; a PPDU is one PHY transmission.
 
-   The user guide explains nominal timing, zero-limit estimates, unused
-   reservation time, and support limits. Multiple protection uses shared TXNAV.
-   It does not check a complete exchange against the remaining budget.
+   The user guide explains nominal timing, zero-limit estimates, unused reservation time, and support limits. Multiple protection uses shared TXNAV. It does not check a complete exchange against the remaining budget.
 
 9. Correlated log-normal shadowing
 
-   LogNormalShadowing has a new correlationDistance parameter. By default
-   (NaN) every path loss computation draws a new shadowing value, as before.
-   With a distance, the value is kept per pair of radios, the same in both
-   directions, and drawn again only when either radio has moved farther than
-   that distance from where it was when the value was drawn, which is how
-   shadowing behaves physically. The value is resolved once per reception,
-   so with DimensionalMediumAnalogModel the whole band of a reception has
-   the same shadowing. The values of a radio's links are dropped when the
-   radio is removed from the medium.
+   LogNormalShadowing has a new correlationDistance parameter. By default (NaN) every path loss computation draws a new shadowing value, as before. With a distance, the value is kept per pair of radios, the same in both directions, and drawn again only when either radio has moved farther than that distance from where it was when the value was drawn, which is how shadowing behaves physically. The value is resolved once per reception, so with DimensionalMediumAnalogModel the whole band of a reception has the same shadowing. The values of a radio's links are dropped when the radio is removed from the medium.
 
 10. Log-normal shadowing once per reception
 
-   Without a correlation distance, LogNormalShadowing draws one shadowing
-   value per reception. With DimensionalMediumAnalogModel it drew one per
-   evaluation of the attenuation, so the frequencies of one reception had
-   independent values, and an evaluation repeated later gave a different
-   one. With ScalarMediumAnalogModel, or with the dimensional model
-   attenuating with the center frequency (the default), nothing changes.
-
+   Without a correlation distance, LogNormalShadowing draws one shadowing value per reception. With DimensionalMediumAnalogModel it drew one per evaluation of the attenuation, so the frequencies of one reception had independent values, and an evaluation repeated later gave a different one. With ScalarMediumAnalogModel, or with the dimensional model attenuating with the center frequency (the default), nothing changes.
 
 12. Explicit historical Basic Block Ack selection
 
