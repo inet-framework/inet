@@ -101,13 +101,13 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
     // queues and algorithm will be created on active or passive open
 
     the2MSLTimer = new cMessage("2MSL");
-    connEstabTimer = new cMessage("CONN-ESTAB");
+    deferredSynTimer = new cMessage("DEFERRED-SYN");
     finWait2Timer = new cMessage("FIN-WAIT-2");
     synRexmitTimer = new cMessage("SYN-REXMIT");
     rackReoTimer = new cMessage("RACK-REO");
 
     the2MSLTimer->setContextPointer(this);
-    connEstabTimer->setContextPointer(this);
+    deferredSynTimer->setContextPointer(this);
     finWait2Timer->setContextPointer(this);
     synRexmitTimer->setContextPointer(this);
     rackReoTimer->setContextPointer(this);
@@ -131,7 +131,7 @@ void TcpConnection::initConnection(Tcp *_mod, int _socketId)
     WATCH(rexmitQueue);
     WATCH(tcpAlgorithm);
     WATCH(the2MSLTimer);
-    WATCH(connEstabTimer);
+    WATCH(deferredSynTimer);
     WATCH(finWait2Timer);
     WATCH(synRexmitTimer);
     WATCH(rcvdSegments);
@@ -150,8 +150,8 @@ TcpConnection::~TcpConnection()
 
     if (the2MSLTimer)
         delete cancelEvent(the2MSLTimer);
-    if (connEstabTimer)
-        delete cancelEvent(connEstabTimer);
+    if (deferredSynTimer)
+        delete cancelEvent(deferredSynTimer);
     if (finWait2Timer)
         delete cancelEvent(finWait2Timer);
     if (synRexmitTimer)
@@ -182,7 +182,7 @@ bool TcpConnection::processTimer(cMessage *msg)
         event = TCP_E_TIMEOUT_2MSL;
         process_TIMEOUT_2MSL();
     }
-    else if (msg == connEstabTimer) {
+    else if (msg == deferredSynTimer) {
         // TCP Fast Open: no SEND came for the SYN that waits for one. The SYN goes
         // out now without data (with the cookie, which RFC 7413 allows), and its
         // retransmissions limit the handshake. Only a deferred SYN uses this timer.
@@ -677,8 +677,8 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
 
         case TCP_S_LISTEN:
             // we may get back to LISTEN from SYN_RCVD
-            ASSERT(connEstabTimer && synRexmitTimer);
-            cancelEvent(connEstabTimer);
+            ASSERT(deferredSynTimer && synRexmitTimer);
+            cancelEvent(deferredSynTimer);
             cancelEvent(synRexmitTimer);
             break;
 
@@ -688,9 +688,9 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
 
         case TCP_S_ESTABLISHED:
             // we're in ESTABLISHED, these timers are no longer needed
-            delete cancelEvent(connEstabTimer);
+            delete cancelEvent(deferredSynTimer);
             delete cancelEvent(synRexmitTimer);
-            connEstabTimer = synRexmitTimer = nullptr;
+            deferredSynTimer = synRexmitTimer = nullptr;
             // TCP_I_ESTAB notification moved inside event processing
             break;
 
@@ -705,8 +705,8 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             }
             // whether connection setup succeeded (ESTABLISHED) or not (others),
             // cancel these timers
-            if (connEstabTimer)
-                cancelEvent(connEstabTimer);
+            if (deferredSynTimer)
+                cancelEvent(deferredSynTimer);
             if (synRexmitTimer)
                 cancelEvent(synRexmitTimer);
             break;
@@ -724,8 +724,8 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
             // all timers need to be cancelled
             if (the2MSLTimer)
                 cancelEvent(the2MSLTimer);
-            if (connEstabTimer)
-                cancelEvent(connEstabTimer);
+            if (deferredSynTimer)
+                cancelEvent(deferredSynTimer);
             if (finWait2Timer)
                 cancelEvent(finWait2Timer);
             if (synRexmitTimer)

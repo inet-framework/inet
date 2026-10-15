@@ -139,7 +139,7 @@ class INET_API TcpAlgorithm : public SimpleModule
      * Place to process timers specific to this TcpAlgorithm class.
      * TcpConnection will invoke this method on any timer (self-message)
      * it doesn't recognize (that is, any timer other than the 2MSL,
-     * CONN-ESTAB and FIN-WAIT-2 timers).
+     * SYN-REXMIT, DEFERRED-SYN and FIN-WAIT-2 timers).
      *
      * Method may also change the event code (by default set to TCP_E_IGNORE)
      * to cause the state transition of TCP FSM.

@@ -133,7 +133,7 @@ import inet.transportlayer.contract.ITcp;
 //
 //  - RFC 9293 - Transmission Control Protocol (TCP)
 //    The base specification: every state and transition, connection setup and
-//    teardown, segment acceptability, sequence-number arithmetic, the CONN-ESTAB,
+//    teardown, segment acceptability, sequence-number arithmetic, the
 //    SYN-REXMIT, 2MSL and FIN-WAIT-2 timers, keepalive (`keepAliveEnabled`, off by
 //    default, as MUST-25 asks), the delayed ACK (`delayedAckTimeout`,
 //    `delayedAckFrameCount`), the Nagle algorithm, silly-window-syndrome avoidance

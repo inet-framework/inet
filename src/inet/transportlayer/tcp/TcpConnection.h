@@ -33,7 +33,7 @@ class TcpAlgorithm;
 
 /** @name Timeout values */
 //@{
-#define TCP_TIMEOUT_CONN_ESTAB        75  // 75 seconds: a deferred SYN of Fast Open waits so long for a SEND
+#define TCP_TIMEOUT_DEFERRED_SYN        75  // 75 seconds: a deferred SYN of Fast Open waits so long for a SEND
 #define TCP_TIMEOUT_FIN_WAIT_2        600  // 10 minutes
 //@}
 
@@ -52,7 +52,7 @@ class TcpAlgorithm;
 /**
  * Manages a TCP connection. This class itself implements the TCP state
  * machine as well as handling control PDUs (SYN, SYN+ACK, RST, FIN, etc.),
- * timers (2MSL, CONN-ESTAB, FIN-WAIT-2) and events (OPEN, SEND, etc)
+ * timers (2MSL, SYN-REXMIT, FIN-WAIT-2) and events (OPEN, SEND, etc)
  * associated with TCP state changes.
  *
  * The implementation largely follows the functional specification at the end
@@ -92,7 +92,7 @@ class TcpAlgorithm;
  *     in this step.
  *  -# if there was a state change (for example, we entered the
  *     TCP_S_ESTABLISHED state), performStateTransition() invokes stateEntered(),
- *     which performs some necessary housekeeping (cancel the CONN-ESTAB timer).
+ *     which performs some necessary housekeeping (cancel the SYN-REXMIT timer).
  *
  * When the CLOSED state is reached, TCP will delete the TcpConnection object.
  *
@@ -138,7 +138,7 @@ class INET_API TcpConnection : public SimpleModule
 
     // timers
     cMessage *the2MSLTimer = nullptr;
-    cMessage *connEstabTimer = nullptr;
+    cMessage *deferredSynTimer = nullptr;
     cMessage *finWait2Timer = nullptr;
     cMessage *synRexmitTimer = nullptr; // for retransmitting SYN and SYN+ACK
     cMessage *rackReoTimer = nullptr; // RACK reordering timer (Linux ICSK_TIME_REO_TIMEOUT): fires when a not-yet-lost segment's RACK.rtt+reo_wnd deadline matures between ACKs

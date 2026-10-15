@@ -74,7 +74,7 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
                 if (tcpMain->getFastOpenCookie(remoteAddr, cookie) || state->fastopenClientNoCookieRequired) {
                     selectInitialSeqNum();
                     state->fastopenSynDeferred = true;
-                    scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
+                    scheduleAfter(TCP_TIMEOUT_DEFERRED_SYN, deferredSynTimer);
                     EV_DETAIL << "Fast Open: the SYN waits for the first SEND\n";
                     break;
                 }
