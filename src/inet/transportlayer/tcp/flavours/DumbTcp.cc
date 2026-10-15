@@ -59,6 +59,10 @@ void DumbTcp::processTimer(cMessage *timer, TcpEventCode& event)
     if (timer != rexmitTimer)
         throw cRuntimeError(timer, "unrecognized timer");
 
+    // nothing is outstanding: the timer stops (RFC 6298 section 5.2)
+    if (state->snd_una == state->snd_max)
+        return;
+
     conn->retransmitData();
     conn->scheduleAfter(REXMIT_TIMEOUT, rexmitTimer);
 }
@@ -85,6 +89,11 @@ void DumbTcp::receiveSeqChanged()
 
 void DumbTcp::receivedAckForUnackedData(uint32_t)
 {
+    // RFC 6298 section 5.2: when all outstanding data, a FIN included, is acknowledged,
+    // the retransmission timer stops; sending new data starts it again (dataSent())
+    if (state->snd_una == state->snd_max)
+        conn->cancelEvent(rexmitTimer);
+
     // ack may have freed up some room in the window, try sending.
     conn->sendData(65535);
 }
