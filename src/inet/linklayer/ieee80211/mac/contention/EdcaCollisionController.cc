@@ -28,15 +28,21 @@ void EdcaCollisionController::expectedChannelAccess(Edcaf *edcaf, simtime_t time
     auto ac = edcaf->getAccessCategory();
     EV_INFO << "The expected channel access of the " << printAccessCategory(ac) << " queue is: " << time << std::endl;
     txStartTimes[ac] = time;
+    edcafs[ac] = edcaf;
 }
 
 bool EdcaCollisionController::isInternalCollision(Edcaf *edcaf)
 {
     simtime_t now = simTime();
     AccessCategory accessCategory = edcaf->getAccessCategory();
-    if (txStartTimes[accessCategory] == now) {
+    auto hasFrames = [](const Edcaf *candidate) {
+        return !candidate->getPendingQueue()->isEmpty() || candidate->getInProgressFrames()->getLength() != 0;
+    };
+    // An expired empty queue cannot initiate a TXOP or cause an internal collision.
+    // Keep the winner's in-progress frame visible until its transmission completes.
+    if (txStartTimes[accessCategory] == now && hasFrames(edcaf)) {
         for (int ac = accessCategory + 1; ac < 4; ac++) {
-            if (txStartTimes[ac] == now) {
+            if (txStartTimes[ac] == now && hasFrames(edcafs[ac])) {
                 EV_WARN << "Internal collision detected between multiple access categories for the current simulation time.\n";
                 return true;
             }

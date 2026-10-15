@@ -18,6 +18,7 @@ class INET_API EdcaCollisionController : public IEdcaCollisionController, public
 {
   protected:
     simtime_t txStartTimes[4];
+    Edcaf *edcafs[4] = {}; // Borrowed; the EDCA module owns these instances.
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
