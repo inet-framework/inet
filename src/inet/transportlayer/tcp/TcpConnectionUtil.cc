@@ -2068,7 +2068,13 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // handshake carries the data of a Fast Open SYN that the SYN-ACK did not
         // acknowledge (RFC 7413 section 4.2.2: "include the data after SND.UNA if
         // data is available"), without Nagle.
-        bool unacknowledgedData = (getDataSndUna() != state->snd_max) && fsm.getState() != TCP_S_SYN_SENT;
+        // Nagle holds only new data. After a go-back (a retransmission timeout, or a
+        // SYN-ACK that did not acknowledge the data of a Fast Open SYN), snd_nxt is below
+        // snd_max, and the partial segment at snd_nxt is a retransmission: RFC 9293
+        // section 3.7.4 tests SND.NXT > SND.UNA, and Linux never sends a retransmission
+        // through Nagle.
+        bool unacknowledgedData = seqGE(state->snd_nxt, state->snd_max) && (getDataSndUna() != state->snd_max)
+                && fsm.getState() != TCP_S_SYN_SENT;
         // minshallNagle, as Linux (tcp_minshall_check()): only an unacknowledged small
         // segment holds, not a flight of full-sized segments
         if (state->minshallNagle)
