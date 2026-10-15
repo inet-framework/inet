@@ -1,0 +1,3 @@
+The packet drop animation uses the dy parameter
+
+PacketDropCanvasVisualizer read its dx parameter into dy as well, so dy had no effect and the dropped packet's icon turned over at the height dx, 32 pixels with the defaults instead of the documented 64. The visualizer now reads dy, so the canvas packet drop animation, for example in showcases/visualizer/canvas/packetdrop, rises twice as high with the defaults. Simulation results do not change.
