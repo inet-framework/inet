@@ -1,6 +1,6 @@
 # The open TCP items
 
-Status: **planned** — the owner chooses the items and their order (section 6).
+Status: **in progress** — the owner approved the plan and decided the questions on 2026-10-15 (section 6); T10 is closed.
 
 - Branch `topic/tcp-open-items`, on master `bba1db4c81`. This branch holds only the plan; each item gets a branch of its own (section 4).
 - The decision numbers continue those of `plan/done/tcp-parameter-groups.md` (D-129 onward).
@@ -78,7 +78,7 @@ RFC 9293 section 3.8.5 asks for urgent data: support (MUST-30), a sequence of ur
 
 ### T9 — The default checksum mode (gap 2)
 
-`checksumMode` defaults to `"declared"`: the segment carries no checksum, against RFC 9293 MUST-2. The computed mode works, but a computed checksum serializes the segment, and the payload that comes back has lost its region tags: `examples/inet/nclients -c lwip__inet` then stops. The TCP evidence records the repair as blocked since 2026-09-17, with UDP gap 1 for the same cause. The cause is in `src/inet/common/packet/`, which is sealed. Proposal: first check whether the repair of `SharingRegionTagSet` (`83396aa655`) changed the facts; then the owner decides (question Q4). Effect of a new default: every TCP and UDP fingerprint moves.
+`checksumMode` defaults to `"declared"`: the segment carries no checksum, against RFC 9293 MUST-2. The computed mode works, but a computed checksum serializes the segment, and the payload that comes back has lost its region tags: `examples/inet/nclients -c lwip__inet` then stops. The TCP evidence records the repair as blocked since 2026-09-17, with UDP gap 1 for the same cause. The cause is in `src/inet/common/packet/`, which is sealed. Proposal: first check whether the repair of `SharingRegionTagSet` (`83396aa655`) changed the facts; then the owner decides (question Q4). Effect of a new default: the CI fingerprint job decides which rows move; the checksum value is not an ingredient of `tplx`, but the serialization can change more than the value.
 
 ### T10 — The timer parameters in a common base type of the algorithms
 
@@ -99,27 +99,35 @@ RFC 9293 section 3.8.5 asks for urgent data: support (MUST-30), a sequence of ur
 
 Each item is a branch of its own, `topic/tcp-<item>`, in a worktree of the same name, as the repairs before. An item with more than one step gets its own plan in `plan/pending`. A test comes first and fails before the repair; each commit builds alone and passes the module tests; the CI fingerprint job runs at each code commit; a moved statistic gets its attribution; an item of the Linux mode runs the packetdrill suite of inet-gpl, and inet-gpl follows a change of semantics. Commit messages follow the Before/After rules, with one source line for each paragraph (PR-MSG-WRAP). A moved or renamed parameter loses its old name, and WHATSNEW names the new key.
 
-## 5. The proposed order
+## 5. The order
 
-| Wave | Items | Why |
+| Order | Item | Note |
 | --- | --- | --- |
-| 1 | T11, T1, T2, T3, T4 | small; T1 and T2 break a MUST or a step of an RFC; T11 closes an open plan |
-| 2 | T5 (a, then b and c), T6 (DRS first) | the Linux mode, with Linux as the oracle |
-| 3 | T7, T8 | new features with an API and a design |
-| — | T9, T10 | the owner decides first |
+| 1 | T11 | small; it gives the later items the packetdrill wrappers in CI |
+| 2 | T9, step 1 | the check of the blocker decides the size of T9 |
+| 3 | T1, T2, T3, T4 | small defects; T4 starts with a test |
+| 4 | T6 | DRS first: it changes long transfers of `LinuxTcp` |
+| 5 | T5 | (a), then (b) and (c); the search is off by default |
+| 6 | T7 | it changes a default of `Tcp`, so the CUBIC baselines move |
+| 7 | T8 | large, with few users |
+| 8 | T9, steps 2 and 3 | the repair of the packet API, then the default |
+| — | T10 | closed (D-133) |
 
-## 6. Questions for the owner
+## 6. The decisions
 
-- **Q1 (T1):** Do the SYN retransmissions alone end an active open in `Tcp` and `LinuxTcp`, with 75 s kept only in `LegacyTcp` through a new parameter?
-- **Q2 (T7):** Does HyStart++ go into the slow start of all the flavours, or only into `TcpCubic`? And does `Tcp` turn it on by default, as RFC 9438 asks?
-- **Q3 (T8):** Urgent data on both sides with the socket API, or the receive side only? And the out-of-band byte of Linux by a parameter of `LinuxTcp`?
-- **Q4 (T9):** Who repairs the region tags of a serialized payload in the sealed `src/inet/common/packet/`, and may the default of `checksumMode` move after that?
-- **Q5 (T10):** Do the timer parameters move now, or later?
-- **Q6:** Is the order of section 5 right?
+The owner approved the plan and these answers on 2026-10-15, with one rule for all of them: `Tcp` has the behavior of the RFCs by default, `LinuxTcp` sets the behavior of Linux by parameters, and backward compatibility counts little; `LegacyTcp` gets no new parameters to keep old behavior.
+
+- **D-129 — Only the SYN retransmissions end an active open (T1).** The constant of 75 s goes, without a new parameter. RFC 9293 section 3.8.3 allows R2 as a count, and `TcpSocket::setSynRetries()` sets it for one connection (MUST-21, as `TCP_SYNCNT`). `Tcp` keeps `synRetries = 12`, which the staged landing chose for MUST-23 (about 24 minutes); `LinuxTcp` keeps 6 retries with 4 linear timeouts (11 s, as Linux); `LegacyTcp` loses the 75 s.
+- **D-130 — HyStart++ is a choice of the slow start of each algorithm (T7).** One parameter of the algorithm types, `slowStartExit = "none" | "hystart" | "hystartpp"`, replaces `hystartEnabled`, which was never in a release; `"hystart"` exists only in `TcpCubic`, as in Linux. `TcpCubic` defaults to `"hystartpp"` (RFC 9438 section 4.10, SHOULD); the classic algorithms default to `"none"` (RFC 5681); `LinuxTcp` and `LegacyTcp` set `"hystart"` by their pattern, because Linux has no HyStart++. HyStart++ runs only in the first slow start (RFC 9406).
+- **D-131 — Urgent data on both sides, with the socket API (T8).** A packet tag of the send sets URG and the urgent pointer at the octet after the urgent data (MUST-62). `Tcp` keeps the urgent bytes in the stream (RFC 6093) and tells the application the position of the urgent mark (MUST-32, MUST-33). The parameter `urgentOutOfBand` of `LinuxTcp` takes the last urgent byte out of the stream, as `MSG_OOB` of Linux, and a socket option puts it back in the stream for one connection (`SO_OOBINLINE`). `PacketDrillApp` of inet-gpl gets `MSG_OOB`, `SO_OOBINLINE` and `SIOCATMARK`.
+- **D-132 — The default checksum mode becomes `"computed"` (T9).** Step 1 checks the blocker on master. If it stays, step 2 repairs the region tags of a serialized payload on a branch of its own to master: the owner permitted the change of the sealed `src/inet/common/packet/` for this repair on 2026-10-15. Step 3 sets `checksumMode = "computed"` in `Tcp` (MUST-2) and keeps `"declared"` as an option for speed; the run time of the serialization is measured and recorded. The default of UDP stays for its owner.
+- **D-133 — The timer parameters stay in `Tcp`; T10 closes.** The RTO, the persist timer, the delayed ACK and keepalive belong to the connection, not to a congestion control algorithm; Linux keeps them out of `tcp_congestion_ops`, and all algorithms but DumbTcp share them. A later refactor can move the RTO estimator from `TcpAlgorithmBase` into the connection, without a change of an ini key.
+- **D-134 — The items without a question follow the RFC where Linux agrees.** T2: only new data in step (3.3), in both modes, without a parameter. T5: (a) a lost probe gets no congestion response, as RFC 4821 and Linux; (b) the new parameter `mtuProbeInterval`, 600 s as Linux; (c) black-hole detection makes `mtuProbing = 1` work as in Linux. T6: the parts of Linux under `windowAutoTuning`, with a new parameter for the bound of `tcp_rmem[2]`.
 
 ## 7. The steps of this plan
 
 | Step | Commit | What |
 | --- | --- | --- |
-| 1 | `plan: add: the open TCP items` | this plan |
-| 2 | — | the owner answers section 6; then each item starts on its own branch, and this plan records the branches and their results |
+| 1 ✅ | `plan: add: the open TCP items` | this plan |
+| 2 | `plan: change: the decisions of the owner on the open TCP items` | section 6 |
+| 3 | — | each item on its own branch, in the order of section 5; this plan records the branches and their results |
