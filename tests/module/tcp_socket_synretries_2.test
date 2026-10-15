@@ -43,7 +43,7 @@ while($sor = <FILE>)
 %contains: postrun-command(1).out
 [0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
 [1.001 A002] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
-cli_tcp: SYN_SENT --> CLOSED  (on ABORT)
+cli_tcp: SYN_SENT --> CLOSED  (on TIMEOUT_CONN_ESTAB)
 [10.000] tcpdump finished, A:2 B:0 segments
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true

@@ -2035,8 +2035,11 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
     // value for both); an active open also ends at the CONN-ESTAB timeout
     if (++state->syn_rexmit_count > state->synRetries) {
         EV_INFO << "Retransmission count during connection setup exceeds " << state->synRetries << ", giving up\n";
-        // Note ABORT will take the connection to closed, and cancel CONN-ESTAB timer as well
-        event = TCP_E_ABORT;
+        // the setup times out: an active open tells the application (TCP_I_TIMED_OUT, as
+        // ETIMEDOUT of Linux), and a passive open returns to LISTEN, or closes if it was
+        // forked (RFC 9293 section 3.10.7.3)
+        event = TCP_E_TIMEOUT_CONN_ESTAB;
+        process_TIMEOUT_CONN_ESTAB();
         return;
     }
 

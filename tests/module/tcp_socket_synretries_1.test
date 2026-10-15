@@ -44,7 +44,7 @@ cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
 [0.501 A002] A.1001 > B.2000: S 125000:125000(0) win 16384   Option(s): MaxSegSize# deleting
 [1.001 A003] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
 [1.501 A004] A.1001 > B.2000: S 125000:125000(0) win 16384   Option(s): MaxSegSize# deleting
-cli_tcp: SYN_SENT --> CLOSED  (on ABORT)
+cli_tcp: SYN_SENT --> CLOSED  (on TIMEOUT_CONN_ESTAB)
 [3.501 A005] A.1001 > B.2000: S 125000:125000(0) win 16384   Option(s): MaxSegSize
 srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
 [3.503 B001] A.1001 < B.2000: A S 875500:875500(0) ack 125001 win 16384   Option(s): MaxSegSize

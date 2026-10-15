@@ -1,7 +1,9 @@
 %description:
 Tests synRetries. The client sends its SYN again at most twice (12 times by
 default), with an initial RTO of 1 s. The tester removes each SYN, so the SYNs
-go at 0, 1 and 3 s, and at the third timeout (t=7) the open fails.
+go at 0, 1 and 3 s, and at the third timeout (t=7) the open times out: the
+connection closes and tells the application (TCP_I_TIMED_OUT), as connect()
+of Linux fails with ETIMEDOUT.
 
 %inifile: omnetpp.ini
 [General]
@@ -40,6 +42,10 @@ while($sor = <FILE>)
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Retransmission count during connection setup exceeds 2, giving up
+%contains: stdout
+Notifying app: TIMED_OUT
+%contains: postrun-command(1).out
+cli_tcp: SYN_SENT --> CLOSED  (on TIMEOUT_CONN_ESTAB)
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
