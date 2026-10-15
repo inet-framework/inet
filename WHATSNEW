@@ -471,6 +471,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. A Neighbor Solicitation ends address resolution for an INCOMPLETE entry
+
+   A Neighbor Solicitation that set an INCOMPLETE Neighbour Cache entry STALE left the address-resolution timer running and the queued packets waiting. The timer then sent further multicast Neighbor Solicitations for a neighbour whose link-layer address was known and finally deleted the entry as a failed resolution, for example when two hosts resolve each other at the same moment. The solicitation now cancels the timer and sends the queued packets, as the state machine in RFC 4861 Appendix C gives it. Simulations in which neighbours resolve each other at the same moment produce different results, for example fewer failed address resolutions in examples/manetrouting/gpsr.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

@@ -1,0 +1,79 @@
+%description:
+A Neighbor Solicitation that carries a Source Link-Layer Address option and finds an
+INCOMPLETE Neighbour Cache entry ends address resolution for that entry: the entry becomes
+STALE (RFC 4861 Section 7.2.3), its queued packets are sent, and no further multicast
+Neighbor Solicitation is sent for it (Section 7.2.2 and Appendix C). The test checks the
+last: the other two are masked by the Neighbor Advertisement that follows.
+
+Topology: a -- b
+
+a and b start sending User Datagram Protocol (UDP) traffic to each other at the same moment,
+so each resolves the other's address while being resolved. Each host's entry for the other
+is INCOMPLETE when the other's multicast Neighbor Solicitation arrives. Neither host may
+retransmit a Neighbor Solicitation for address resolution, and neither may declare address
+resolution failed and delete the entry. The test also checks that address resolution starts,
+so that it cannot pass without the case.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network AddressResolutionTest
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        a: StandardHost6;
+        b: StandardHost6;
+    connections:
+        a.ethg++ <--> ethline <--> b.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = AddressResolutionTest
+ned-path = .;../../../../src
+sim-time-limit = 10s
+record-vector-results = false
+cmdenv-express-mode = false
+
+**.numApps = 1
+**.app[0].typename = "UdpBasicApp"
+**.app[0].localPort = 1000
+**.app[0].destPort = 1000
+**.app[0].messageLength = 64B
+**.app[0].sendInterval = 1s
+**.app[0].startTime = 6s
+**.a.app[0].destAddresses = "b"
+**.b.app[0].destAddresses = "a"
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+**.neighbourDiscovery.cmdenv-log-level = detail
+**.cmdenv-log-level = off
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Initiating Address Resolution for:
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Sending another Address Resolution NS message
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Address Resolution has failed.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+<!> Error
+%#--------------------------------------------------------------------------------------------------------------
