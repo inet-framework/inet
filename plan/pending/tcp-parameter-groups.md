@@ -1,6 +1,7 @@
 # Group the parameters of Tcp, and decide which parts become submodules
 
-Status: **in progress** — the grouping is done; the submodules wait for the decision of the owner.
+Status: **in progress** — the grouping (step 2) landed on master on 2026-10-15; the submodules
+are in design (option A).
 
 - Branch `topic/tcp-parameter-groups`, on master `00e916e3ed`.
 
@@ -54,16 +55,16 @@ defaults and properties (checked by `opp_nedtool c -x` of the old and the new fi
 
 ### The constraints
 
-1. `Tcp` is a simple module, and NED gives a simple module no submodules. A submodule must
-   either be created in C++ at initialization, as the `conn-N` modules are, or `Tcp` must become
-   a compound module. The second moves the protocol and every connection one level down
-   (`tcp.<core>.conn-N`): each result name, chart filter, statistical baseline and fingerprint
-   that names a connection changes, and so do the ini keys of the 102 parameters.
+1. `Tcp` can have submodules and stay a simple module in C++: `Ieee80211Mac` is declared as
+   `module Ieee80211Mac extends MacProtocolBase`, a module type on a simple base, and its C++
+   class is a `SimpleModule`. The connections stay `tcp.conn-N`, and the modules talk through
+   the same C++ calls; only parameters move. (The first version of this plan said that a
+   simple module cannot have submodules; the owner corrected it.)
 2. A flavour (`tcpAlgorithmClass`) is one object per connection, and a socket can choose its own
    flavour (the open command carries `tcpAlgorithmClass`). So the parameters of an algorithm must
    exist for each flavour that a socket can choose, not only for the default of the module.
-3. `LinuxTcp` and `LegacyTcp` set defaults in NED. NED cannot set the defaults of a submodule
-   that C++ creates: such a submodule takes its defaults from its own NED type and from ini.
+3. `LinuxTcp` and `LegacyTcp` set defaults in NED. With NED submodules, they set the
+   defaults of a submodule by a deep assignment (`cubic.hystartEnabled = default(true)`).
    Between `Tcp` and `LinuxTcp`, one algorithm parameter differs: `hystartEnabled`.
 
 ### The candidates
@@ -102,7 +103,7 @@ B only if the algorithms should become visible modules in their own right.
 
 | Step | Commit | What |
 | --- | --- | --- |
-| 1 | `plan: add: group the parameters of Tcp` | this plan |
-| 2 | `tcp: format: group the parameters of Tcp by the part of the protocol` | section 3 |
+| 1 ✅ | `plan: add: group the parameters of Tcp` | this plan |
+| 2 ✅ | `tcp: format: group the parameters of Tcp by the part of the protocol` | section 3; landed on master on 2026-10-15, the owner approved it |
 | 3 | (after the decision) the submodules of section 4 | — |
 | 4 | the record | — |
