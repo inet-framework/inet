@@ -1,9 +1,6 @@
 # Run the packetdrill TCP corpus as INET protocol tests — the INET half
 
-Status: **in progress.** Branch `topic/tcp-packetdrill-tests`, worktree
-`/home/levy/workspace/inet-tcp-packetdrill-tests`, based on `master` since 2026-09-29: the owner
-wants these tests in `master` before the TCP repairs of #1155, so the order is reversed and #1155
-follows this branch.
+Status: **done** on 2026-10-15. Steps 2 to 6 landed from the branch `topic/tcp-packetdrill-tests` before the TCP repairs of #1155, as the owner wanted; steps 7 and 8 landed from `topic/tcp-packetdrill-wrappers` (item T11 of `plan/pending/tcp-open-items.md`), after #1155 landed in stages.
 
 **What that means on `master`.** Without `inet-gpl` the 306 wrappers skip; the RFC tests keep
 their verdicts from `tcp/rfc/` (25 PASS, 2 FAIL (expected)); every other protocol suite gives the
@@ -158,5 +155,6 @@ from before the RTO). After the third rebase onto `topic/tcp-new-audit-fixes` (`
 `derive-tests-from-a-standard.md` did not exist at this branch's first base. Since the rebase of
 #1155 onto master (2026-09-29) they do, so the two steps can land on this branch.
 
-**Steps 7 and 8 are open.** Step 6 is on master; the protocol job runs the wrappers once #1155
-merges.
+**Steps 7 and 8 — done 2026-10-15.** Step 8: the guide `derive-tests-from-a-standard.md` has the section "Evidence from an implementation oracle": where the evidence goes, and what it may not claim (`2dfb5bba68`). Step 7: `model/tcp/results.md` has the section "Linux equivalence: the packetdrill suite" with its run record, and `conformance.md` has the column "Linux equivalence (`LinuxTcp`)" (`c5d99b242e`). Eleven of the 23 features have scripts, and each script matches.
+
+**The run at the end (2026-10-15).** INET master `3d3b535fc8`, inet-gpl `4a3894d`, Linux 7.1.3: the suite gives 303 MATCH, 12 KERNEL_DRIFT and 3 UNSUPPORTED_FEATURE; INET's runner, with `INETGPL_ROOT` set, gives the TCP suite 333 tests, 329 PASS and 4 FAIL (expected). `suite.py gen-wrappers --check` finds the 306 wrappers up to date; the 15 scripts without a wrapper are 12 of kernel drift and 3 that need IPv6. In the CI protocol job on master `bba1db4c81`, the TCP suite gives the same counts; the job fails only in the IGMP, MLD, ND and RIP suites, which other work owns.
