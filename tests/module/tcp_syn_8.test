@@ -1,13 +1,14 @@
 %description:
-Test connection setup: A performs active open, and its ACK of SYN always gets
-lost.
+Test connection setup: A performs active open, and its first five ACKs of
+the SYN+ACK get lost.
 
 Test that:
 - initial RTO is 3s
 - it doubles with each retransmission
-- B it retries SYN+ACK a number of times, then CONN-ESTAB timer goes off
-- for A, connection setup seems successful at first, but will fail when it
-  starts to send data
+- B retries the SYN+ACK also after 75 s (RFC 9293 MUST-23): A acknowledges
+  its sixth SYN+ACK, at t=93 s, and B's side of the connection opens
+- for A, connection setup seems successful at first, and its data at t=100 s
+  arrives
 
 %inifile: omnetpp.ini
 [General]
@@ -60,18 +61,20 @@ cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
 [21.005 A005] A.1000 > B.2000: A ack 501 win 16384 # deleting
 [45.003 B005] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
 [45.005 A006] A.1000 > B.2000: A ack 501 win 16384 # deleting
-srv_tcp: SYN_RCVD --> LISTEN  (on TIMEOUT_CONN_ESTAB)
-[100.001 A007] A.1000 > B.2000: A 1:101(100) ack 501 win 16384
-[100.003 B006] A.1000 < B.2000: R win 0
-cli_tcp: ESTABLISHED --> CLOSED  (on RCV_RST)
+[93.003 B006] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
+[93.005 A007] A.1000 > B.2000: A ack 501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[100.001 A008] A.1000 > B.2000: A 1:101(100) ack 501 win 16384 
+[100.203 B007] A.1000 < B.2000: A ack 101 win 16384 
+[100.204] tcpdump finished, A:8 B:7 segments
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Calling finish() at end of Run #0...
 []: TcpTestNet1.cli_app: received 0 bytes in 0 packets
-[]: TcpTestNet1.cli_tcp: finishing with 0 connections open.
+[]: TcpTestNet1.cli_tcp: finishing with 1 connections open.
 []: TcpTestNet1.srv_tcp: finishing with 1 connections open.
-[]: TcpTestNet1.srv_app: received 0 bytes in 0 packets
-[testing]: [100.004] tcpdump finished, A:7 B:6 segments
+[]: TcpTestNet1.srv_app: received 100 bytes in 1 packets
+[testing]: [100.204] tcpdump finished, A:8 B:7 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------

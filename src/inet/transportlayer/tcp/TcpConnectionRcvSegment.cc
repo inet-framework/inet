@@ -1182,9 +1182,6 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
 
     startSynRexmitTimer();
 
-    if (!connEstabTimer->isScheduled())
-        scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
-
     //"
     // Note that any other incoming control or data (combined with SYN)
     // will be processed in the SYN-RECEIVED state, but processing of SYN
@@ -2032,7 +2029,7 @@ void TcpConnection::startSynRexmitTimer()
 void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
 {
     // synRetries: Linux net.ipv4.tcp_syn_retries, also for the SYN-ACK (INET has one
-    // value for both); an active open also ends at the CONN-ESTAB timeout
+    // value for both); the retransmissions alone limit the setup (RFC 9293 MUST-23)
     if (++state->syn_rexmit_count > state->synRetries) {
         EV_INFO << "Retransmission count during connection setup exceeds " << state->synRetries << ", giving up\n";
         // the setup times out: an active open tells the application (TCP_I_TIMED_OUT, as

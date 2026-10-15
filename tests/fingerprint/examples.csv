@@ -26,7 +26,7 @@
 /examples/bgpv4/Bgp2RoutersInAS/,    -f omnetpp.ini -c General -r 0,                1000s,           e90f-7e72/tplx;0d9f-f11e/~tNl;dd86-0e7e/~tND;2ec9-a2e6/tyf, PASS, ospf EthernetMac Ipv4
 /examples/bgpv4/Bgp3Routers/,        -f omnetpp.ini -c General -r 0,                1000s,           b7fe-84d4/tplx;af39-c1f4/~tNl;08fe-c245/~tND;6015-a84e/tyf, PASS, ospf EthernetMac Ipv4
 /examples/bgpv4/BgpCompleteTest/,    -f omnetpp.ini -c General -r 0,                1000s,           8758-6451/tplx;a1a2-c613/~tNl;c7d7-944d/~tND;1157-257f/tyf, PASS, ospf EthernetMac Ipv4
-/examples/bgpv4/BgpLifecycle/,       -f omnetpp.ini -c General -r 0,                900s,            4003-3ecc/tplx;7cce-47ec/~tNl;e665-eb5a/~tND;18b7-cb3c/tyf, PASS, ospf EthernetMac Ipv4 lifecycle
+/examples/bgpv4/BgpLifecycle/,       -f omnetpp.ini -c General -r 0,                900s,            61e8-da0e/tplx;c5b2-710c/~tNl;5f4b-4518/~tND;18b7-cb3c/tyf, PASS, ospf EthernetMac Ipv4 lifecycle
 /examples/bgpv4/BgpOpen/,            -f omnetpp.ini -c General -r 0,                62s,             e6cb-b728/tplx;f2e4-6b75/~tNl;16e5-c13e/~tND;083d-c5af/tyf, PASS, ospf Ipv4
 /examples/bgpv4/BgpUpdate/,          -f omnetpp.ini -c General -r 0,                30s,             a728-2369/tplx;e63e-fcf2/~tNl;df66-43af/~tND;0573-e0b4/tyf, PASS, ospf EthernetMac Ipv4
 /examples/bgpv4/BgpAndOspf/,         -f omnetpp.ini -c General -r 0,                1000s,           a271-49ba/tplx;2739-eefe/~tNl;39f1-bbc7/~tND;de89-afd7/tyf, PASS, ospf EthernetMac Ipv4
@@ -176,11 +176,11 @@
 /examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            b955-c7a2/tplx;a117-03d4/~tNl;1227-636c/~tND;0ae1-5b86/tyf, PASS, EthernetMac Ipv4
 /examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            10f0-b187/tplx;eaf6-aa8e/~tNl;3f5c-3a92/~tND;c3be-02b3/tyf, PASS, EthernetMac Ipv4
 
-/examples/inet/ipsec/,               -f omnetpp.ini -c TCPTraffic -r 0,             200s,            d6ea-a4ee/tplx;d4a9-d34f/~tNl, PASS, IPSec
+/examples/inet/ipsec/,               -f omnetpp.ini -c TCPTraffic -r 0,             200s,            cb56-1aa8/tplx;d4a9-d34f/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f omnetpp.ini -c UDPTraffic -r 0,             200s,            bfe2-5b42/tplx;3d88-94d1/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f omnetpp.ini -c Multicast -r 0,              200s,            e53d-f92e/tplx;6ac3-ef6b/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f ipv6.ini -c UDPTraffic6 -r 0,              200s,            bac2-fae6/tplx;d5ee-ccc0/~tNl, PASS, IPSec
-/examples/inet/ipsec/,               -f ipv6.ini -c TCPTraffic6 -r 0,              200s,            a3e1-d7ed/tplx;3e44-7623/~tNl, PASS, IPSec
+/examples/inet/ipsec/,               -f ipv6.ini -c TCPTraffic6 -r 0,              200s,            f27b-429d/tplx;3e44-7623/~tNl, PASS, IPSec
 /examples/inet/ipsec/,               -f ipv6.ini -c Multicast6 -r 0,               200s,            e6f7-0820/tplx;1222-ffd8/~tNl, PASS, IPSec
 
 /examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            1afb-5eeb/tplx;3df8-bb36/~tNl;2891-5a4e/~tND;48e1-2966/tyf, PASS, EthernetMac Ipv4

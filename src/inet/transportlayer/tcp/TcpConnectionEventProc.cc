@@ -81,11 +81,10 @@ void TcpConnection::process_OPEN_ACTIVE(TcpEventCode& event, TcpCommand *tcpComm
                 state->fastopenCookieRequestPending = true;
             }
 
-            // send initial SYN
+            // send initial SYN; the SYN retransmissions limit the open (synRetries)
             selectInitialSeqNum();
             sendSyn();
             startSynRexmitTimer();
-            scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
             break;
 
         default:
@@ -154,7 +153,6 @@ void TcpConnection::process_SEND(TcpEventCode& event, TcpCommand *tcpCommand, cM
             selectInitialSeqNum();
             sendSyn();
             startSynRexmitTimer();
-            scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
             enqueueSendCommandData(packet); // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;

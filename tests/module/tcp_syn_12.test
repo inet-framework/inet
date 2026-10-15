@@ -1,9 +1,10 @@
 %description:
 Test connection setup with a forking listener (B): the timeout of the
 connection setup in SYN_RCVD closes the forked connection. The tester
-deletes all of B's SYN-ACKs. At t=75 s both connections time out; the forked
-connection closes, and B keeps one connection, its listener. Before, the
-forked connection returned to LISTEN, and B had two listeners.
+deletes all of B's SYN-ACKs, and both sides give up after two retransmissions
+(synRetries = 2): both setups time out; the forked connection closes, and B
+keeps one connection, its listener. Before, the forked connection
+returned to LISTEN, and B had two listeners.
 
 %inifile: omnetpp.ini
 [General]
@@ -16,6 +17,8 @@ cmdenv-express-mode=false
 cmdenv-log-prefix="[%c]: "
 
 *.srv_app.fork=true
+*.cli_tcp.synRetries = 2
+*.srv_tcp.synRetries = 2
 *.tcptester.script="b1 delete;b2 delete;b3 delete;b4 delete;b5 delete;b6 delete;b7 delete;b8 delete;b9 delete;b10 delete"
 
 include ../../lib/defaults.ini

@@ -1,5 +1,6 @@
 %description:
-Test connection setup: A performs active open, and B's SYN+ACK always gets lost.
+Test connection setup: A performs active open, and B's first ten SYN+ACKs
+get lost.
 (Linux parity: B answers each retransmitted SYN in SYN_RCVD by RE-SENDING the
 SYN-ACK -- tcp_check_req -- not with a plain ACK; the resends are deleted by
 the tester like the originals.)
@@ -7,7 +8,8 @@ the tester like the originals.)
 Test that:
 - initial RTO is 3s
 - it doubles with each retransmission
-- after some time, CONN-ESTAB timer goes off, and game over
+- the setup goes on after 75 s (RFC 9293 MUST-23): the SYN+ACK that answers
+  A's sixth SYN, at t=93 s, is not lost, and the connection opens
 
 Note: results are a bit weird, because both sides try very hard...
 
@@ -61,16 +63,21 @@ srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
 [45.001 A005] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize
 [45.003 B008] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# deleting
 [45.003 B009] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# deleting
-cli_tcp: SYN_SENT --> CLOSED  (on TIMEOUT_CONN_ESTAB)
-srv_tcp: SYN_RCVD --> LISTEN  (on TIMEOUT_CONN_ESTAB)
+[93.001 A006] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize
+[93.003 B010] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize# deleting
+[93.003 B011] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384   Option(s): MaxSegSize
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[93.005 A007] A.1000 > B.2000: A ack 501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[93.006] tcpdump finished, A:7 B:11 segments
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 Calling finish() at end of Run #0...
 []: TcpTestNet1.cli_app: received 0 bytes in 0 packets
-[]: TcpTestNet1.cli_tcp: finishing with 0 connections open.
+[]: TcpTestNet1.cli_tcp: finishing with 1 connections open.
 []: TcpTestNet1.srv_tcp: finishing with 1 connections open.
 []: TcpTestNet1.srv_app: received 0 bytes in 0 packets
-[testing]: [75.002] tcpdump finished, A:5 B:9 segments
+[testing]: [93.006] tcpdump finished, A:7 B:11 segments
 
 End.
 %#--------------------------------------------------------------------------------------------------------------

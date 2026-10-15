@@ -33,7 +33,7 @@ class TcpAlgorithm;
 
 /** @name Timeout values */
 //@{
-#define TCP_TIMEOUT_CONN_ESTAB        75  // 75 seconds
+#define TCP_TIMEOUT_CONN_ESTAB        75  // 75 seconds: a deferred SYN of Fast Open waits so long for a SEND
 #define TCP_TIMEOUT_FIN_WAIT_2        600  // 10 minutes
 //@}
 

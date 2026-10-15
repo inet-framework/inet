@@ -183,21 +183,15 @@ bool TcpConnection::processTimer(cMessage *msg)
         process_TIMEOUT_2MSL();
     }
     else if (msg == connEstabTimer) {
-        if (state->fastopenSynDeferred) {
-            // TCP Fast Open: no SEND came for the SYN that waits for one. The SYN
-            // goes out now without data (with the cookie, which RFC 7413 allows),
-            // and the handshake gets its full time.
-            EV_DETAIL << "Fast Open: no SEND, sending the SYN without data\n";
-            sendSyn();
-            state->fastopenSynDeferred = false;
-            startSynRexmitTimer();
-            scheduleAfter(TCP_TIMEOUT_CONN_ESTAB, connEstabTimer);
-            event = TCP_E_IGNORE;
-        }
-        else {
-            event = TCP_E_TIMEOUT_CONN_ESTAB;
-            process_TIMEOUT_CONN_ESTAB();
-        }
+        // TCP Fast Open: no SEND came for the SYN that waits for one. The SYN goes
+        // out now without data (with the cookie, which RFC 7413 allows), and its
+        // retransmissions limit the handshake. Only a deferred SYN uses this timer.
+        ASSERT(state->fastopenSynDeferred);
+        EV_DETAIL << "Fast Open: no SEND, sending the SYN without data\n";
+        sendSyn();
+        state->fastopenSynDeferred = false;
+        startSynRexmitTimer();
+        event = TCP_E_IGNORE;
     }
     else if (msg == finWait2Timer) {
         event = TCP_E_TIMEOUT_FIN_WAIT_2;

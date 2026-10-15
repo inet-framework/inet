@@ -152,8 +152,6 @@ import inet.transportlayer.contract.ITcp;
 //     - Initial sequence numbers come from the simulation clock, or from
 //       `initialSendSequenceNumber`. The hashed generator of RFC 6528 is not
 //       implemented.
-//     - An active open fails after 75 s, where section 3.8.3 asks for at least
-//       three minutes of SYN retransmissions.
 //    Linux, by parameter: the PSH of Linux (`pushSegmentsOnWriteBoundary`), the
 //    adaptive delayed ACK with its quickack mode (`adaptiveDelayedAcks`), the Nagle
 //    algorithm of Minshall (`minshallNagle`), the zero-window probe of Linux
@@ -424,7 +422,7 @@ simple Tcp extends SimpleModule like ITcp
         int windowScalingFactor = default(-1); // Window Scaling Factor given as a shift count. Valid values are 0..14, and -1 for automatic selection (it chooses the smallest shift count that makes advertisedWindow representable in 16 bits)
         bool timestampSupport @mutable = default(true); // Timestamps (RFC 7323) support (header option) (TS will be enabled for a connection if both endpoints support it). Each connection reads it at its open, so a run can change it as the host-wide sysctl net.ipv4.tcp_timestamps
         bool sackSupport = default(true); // Selective Acknowledgment (RFC 2018, 2883, 3517) support (header option) (SACK will be enabled for a connection if both endpoints support it)
-        int synRetries = default(12); // the retransmissions of a SYN or of a SYN-ACK, after which the open fails (Linux net.ipv4.tcp_syn_retries, its default: 6; Linux has tcp_synack_retries for the SYN-ACK); an active open also fails after 75 s
+        int synRetries = default(12); // the retransmissions of a SYN or of a SYN-ACK, after which the open fails (Linux net.ipv4.tcp_syn_retries, its default: 6; Linux has tcp_synack_retries for the SYN-ACK); they alone limit the setup: with the defaults, an open fails after about 24 minutes, and RFC 9293 section 3.8.3 asks for at least 3 minutes (MUST-23)
         bool sendDataWithFirstAck = default(true); // an active open sends data that waits at the end of the handshake with the ACK of the SYN-ACK; false: a bare ACK first, and then the data
         // Linux behaviors (no RFC)
         int synLinearTimeouts = default(0); // the first retransmissions of a SYN that keep the initial timeout before it doubles, as Linux net.ipv4.tcp_syn_linear_timeouts (its default: 4): with 4 and an initial RTO of 1 s, the SYN timeouts are 1, 1, 1, 1, 1, 2, 4 s; 0: the timeout doubles at each expiry (RFC 6298 section 5.5)

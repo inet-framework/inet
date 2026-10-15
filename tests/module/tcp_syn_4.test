@@ -1,9 +1,12 @@
 %description:
-Test connection setup: A performs active open and SYN always gets lost.
+Test connection setup: A performs active open, and its first five SYNs get
+lost.
 Test that:
 - initial RTO is 3s
 - it doubles with each retransmission
-- after some time, CONN-ESTAB timer goes off, and game over
+- the open goes on after 75 s, as RFC 9293 section 3.8.3 asks for at least
+  3 minutes of SYN retransmissions (MUST-23): the sixth SYN, at t=93 s, gets
+  through, and the connection opens
 
 %inifile: omnetpp.ini
 [General]
@@ -45,10 +48,16 @@ srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
 [9.001 A003] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
 [21.001 A004] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
 [45.001 A005] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize# deleting
-cli_tcp: SYN_SENT --> CLOSED  (on TIMEOUT_CONN_ESTAB)
+[93.001 A006] A.1000 > B.2000: S 0:0(0) win 16384   Option(s): MaxSegSize
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[93.003 B001] A.1000 < B.2000: A S 23250500:23250500(0) ack 1 win 16384   Option(s): MaxSegSize
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[93.005 A007] A.1000 > B.2000: A ack 23250501 win 16384 
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[93.006] tcpdump finished, A:7 B:1 segments
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-[75.000] tcpdump finished, A:5 B:0 segments
+[93.006] tcpdump finished, A:7 B:1 segments
 
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
