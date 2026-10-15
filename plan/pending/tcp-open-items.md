@@ -27,6 +27,8 @@ This plan collects the open TCP items in one list. For each item it gives the ev
 | T10 | The timer parameters in a common base type of the algorithms | structure | D-118 of `plan/done/tcp-parameter-groups.md` |
 | T11 | The packetdrill wrappers: steps 7 and 8, and the new scripts | open plan | `plan/done/packetdrill-tcp-protocol-tests.md` |
 | T12 | The data of a SYN without a Fast Open option | difference from Linux | found in T4 (`plan/done/tcp-fastopen-syn-data.md`, D-143) |
+| T13 | The collapse of the receive queue (`tcp_prune_queue()`) | difference from Linux | D-149 of `plan/pending/tcp-receive-space.md` |
+| T14 | The pad and the slab classes of the truesize of a small packet | difference from Linux | D-149 of `plan/pending/tcp-receive-space.md` |
 
 ### T1 — An active open fails after 75 s
 
@@ -95,6 +97,10 @@ The INET server keeps the data of a SYN that carries no Fast Open option, and de
 
 Proposal, by the rule of section 6: `Tcp` keeps the data, as RFC 9293 allows; a new parameter makes `LinuxTcp` drop it, as Linux; the data of a SYN with an invalid cookie is dropped in each mode if INET keeps it now. Effect: only `LinuxTcp` and clients that send data on a SYN. Size: small.
 
+### T13 and T14 — The rest of the receive memory of Linux
+
+From the open findings of `plan/done/tcp-receive-memory-repairs.md`, split from T6 by D-149. T13: when the memory of the receive queue overflows, Linux merges the queued segments into fewer, fuller buffers (`tcp_collapse()` in `tcp_prune_queue()`) before it drops out-of-order data; INET drops at once. T14: the truesize of a small packet in Linux has a pad and the classes of the slab allocator; INET keeps the power-of-two charge of master for packets that fit one page (D-115). Both act only under memory pressure or for small packets, and no script of the packetdrill suite reaches them. Size: medium (T13), small (T14).
+
 ## 3. Out of scope
 
 - The KERNEL_DRIFT rows of the packetdrill suite (12): Linux 7.1.3 itself does not pass these scripts.
@@ -119,6 +125,7 @@ Each item is a branch of its own, `topic/tcp-<item>`, in a worktree of the same 
 | 7 | T7 | it changes a default of `Tcp`, so the CUBIC baselines move |
 | 8 | T8 | large, with few users |
 | 9 | T9, steps 2 and 3 | the repair of the packet API, then the default |
+| 10 | T13, T14 | low priority (D-149) |
 | — | T10 | closed (D-133) |
 
 ## 6. The decisions
