@@ -305,7 +305,9 @@ IEEE 802.11 files, WHATSNEW and the migration guide. That master had two WHATSNE
 number 47, so the commit `333ea6383f` numbers the entry of the QoS DATA lifetime 48, and the
 release note of this plan is entry 49. The rebased commits are `5abb63861b` (plan), `eacc040ed9`
 (4a), `ee23386728` (4b), `308cfa76d2` (5), `4ad6c6a90f` (6), `346ade23b5` (7) and `c376be4e85`
-(8). The owner asked to land first; the tests were not run again after the rebase.
+(8). The owner asked to land first, and to test again after the landing.
+
+The retest at master `bba1db4c81` (debug build, 2026-10-15): unit 128 PASS, serializer 4 PASS, module 657 PASS (the 802.11 commits added tests), protocol (`tcp`, `self`) 2 PASS; the CI fingerprint job OK with the same expected ERROR row of `ethernet.csv`; the statistics of the 38 TCP working directories against statistics `8fdf7f5`: 122 KEEP, 4 SKIP (expected), no file changes; the packetdrill suite of inet-gpl `4a3894d`: 303 MATCH, each of the 318 verdicts as before.
 
 | Evidence | Result |
 | --- | --- |
