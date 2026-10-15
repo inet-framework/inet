@@ -144,7 +144,7 @@ Details: [excluded procedures](ieee80211-txop-multiple-protection.md#1-intended-
 
 ## Implementation order and required evidence
 
-The independent [recipient NAV fix](ieee80211-recipient-nav.md) supplies the Tx contract and HCF/DCF caller choices before this feature. Its tests check repeated RTS, received NAV refusal, holder updates, and callback choice replacement. Its commit also owns the migration instructions and all 24 causal fingerprint rows.
+The independent [recipient NAV fix](../pending/ieee80211-recipient-nav.md) supplies the Tx contract and HCF/DCF caller choices before this feature. Its tests check repeated RTS, received NAV refusal, holder updates, and callback choice replacement. Its commit also owns the migration instructions and all 24 causal fingerprint rows.
 
 1. HCF converts response fields before transmission. Tests cover negative and fractional response values under single protection.
 2. HCF supplies isolated duration arithmetic before its production caller. Direct tests check the equations, conversion, range errors, and field bytes.
