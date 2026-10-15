@@ -355,18 +355,12 @@ void Rfc6675Recovery::receivedDuplicateAck()
                 //"
                 while (state->limited_transmit_enabled
                        && (int32_t)state->snd_cwnd - (int32_t)state->pipe >= (int32_t)state->snd_mss) {
-                    uint32_t seqNum;
-                    if (!nextSeg(seqNum))
-                        break;
-                    // Limited Transmit (RFC 3042 / RFC 6675 step 3.3) transmits only
-                    // PREVIOUSLY UNSENT data (HighData+1), never a retransmission. In RACK
-                    // mode (lossDetectionMode==1) nextSeg()'s rule-3 "last resort" clause
-                    // would otherwise return an old unSACKed segment (== snd_una on the first
-                    // SACK) and retransmit the first hole a dupack early -- Linux only
-                    // retransmits once RACK's reordering timer enters recovery. Restrict this
-                    // pre-recovery path to new data there; classic recovery keeps its behavior.
-                    if (state->lossDetectionMode == 1 && seqLess(seqNum, state->snd_max))
-                        break;
+                    // Limited Transmit (RFC 3042, RFC 6675 step 3.3) sends only previously
+                    // unsent data, from HighData+1, in both loss detection modes. NextSeg() is
+                    // not part of this step: its rule 3 returns an old unSACKed segment when
+                    // no new data waits, which would retransmit the first hole before the
+                    // recovery starts. Linux sends only new data before a recovery too.
+                    uint32_t seqNum = state->snd_max;
                     if (seqLE(seqNum + state->snd_mss, state->snd_una + state->snd_wnd)) {
                         state->snd_nxt = seqNum;
                         uint32_t oldSndMax = state->snd_max;

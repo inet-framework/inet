@@ -1,0 +1,61 @@
+%description:
+Tests Limited Transmit with SACK in the dupthresh mode (finding G of
+plan/done/tcp-packetdrill-repairs.md). The client sends four segments, and the
+path drops the first one (A003). The three duplicate ACKs (B002 to B004) carry
+SACK blocks. No new data waits, so Limited Transmit (RFC 3042, step (3.3) of
+RFC 6675) sends nothing; at the third duplicate ACK, the fast retransmit sends
+the hole once (A007). Before, the first duplicate ACK retransmitted the hole
+through rule 3 of NextSeg(), and the recovery sent it a second time.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.cli_app.sendScript="1.0 4000"
+*.*_tcp.mss = 1000
+*.*_tcp.sackSupport = true
+*.*_tcp.delayedAcksEnabled = false
+*.cli_tcp.increasedIWEnabled = true
+*.cli_tcp.lossDetectionMode = "dupthresh"
+*.cli_tcp.limitedTransmitEnabled = true
+*.tcptester.script="a3 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 # deleting
+[1.001 A004] A.1000 > B.2000: A 1001:2001(1000) ack 501 win 16384 
+[1.001 A005] A.1000 > B.2000: A 2001:3001(1000) ack 501 win 16384 
+[1.001 A006] A.1000 > B.2000: A 3001:4001(1000) ack 501 win 16384 
+[1.003 B002] A.1000 < B.2000: A ack 1 win 16384   Option(s): NOP NOP SACK[1001,2001)
+[1.003 B003] A.1000 < B.2000: A ack 1 win 16384   Option(s): NOP NOP SACK[1001,3001)
+[1.003 B004] A.1000 < B.2000: A ack 1 win 16384   Option(s): NOP NOP SACK[1001,4001)
+[1.005 A007] A.1000 > B.2000: A 1:1001(1000) ack 501 win 16384 
+[1.007 B005] A.1000 < B.2000: A ack 4001 win 16384 
+[10.000] tcpdump finished, A:7 B:5 segments
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
