@@ -2323,13 +2323,15 @@ void Ipv6NeighbourDiscovery::processNaForOtherNceStates(const Ipv6NeighbourAdver
             EV_INFO << "Solicited Flag is TRUE. Set NCE state to REACHABLE.\n";
             // the state of the entry MUST be set to REACHABLE.
             nce->reachabilityState = Ipv6NeighbourCache::REACHABLE;
+            // a solicited NA is a reachability confirmation in every state, so ReachableTime
+            // runs from now (RFC 4861 Section 7.3.3), not only after a NUD probe
+            nce->reachabilityExpires = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
             // We have to cancel the NUD self timer message if there is one.
 
             cMessage *msg = nce->nudTimeoutEvent;
             if (msg != nullptr) {
                 EV_INFO << "NUD in progress. Cancelling NUD Timer\n";
                 bubble("Reachability Confirmed via NUD.");
-                nce->reachabilityExpires = simTime() + ie->getProtocolData<Ipv6InterfaceData>()->_getReachableTime();
                 cancelAndDelete(msg);
                 nce->nudTimeoutEvent = nullptr;
             }
