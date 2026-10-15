@@ -111,18 +111,49 @@ class CheckCommitsTest(unittest.TestCase):
     def words(self, count):
         return " ".join("word" for _ in range(count))
 
-    def test_a_paragraph_on_one_line_gives_a_wrap_note(self):
+    def test_a_long_paragraph_on_one_line_is_quiet(self):
         self.commit("a: change: explain on one line\n\n" + "The body says why. " * 6 + "\n\nChange: src | behavior.change | - | x", {
             "src/inet/a/A.cc": "int a = 1;\n",
         })
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout)
-        self.assertIn("has 1 body line(s) above 72 characters", result.stdout)
+        self.assertNotIn("adjacent prose lines", result.stdout)
+        self.assertNotIn("above 72 characters", result.stdout)
 
-    def test_a_wrapped_body_with_long_trailers_and_quotes_is_quiet(self):
+    def test_a_wrapped_paragraph_gives_a_layout_note(self):
         self.commit("a: change: explain in wrapped lines\n\n"
-                    "The body says why, and it wraps its paragraph at 72 columns, so\n"
-                    "that git log shows it in an 80-column terminal.\n\n"
+                    "The value was wrong because the old code\n"
+                    "used a different unit.\n\n"
+                    "Change: src | behavior.change | -", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("adjacent prose lines at body line 2", result.stdout)
+
+    def test_extra_blank_lines_give_a_layout_note(self):
+        # Git normally removes extra blank lines when it stores a message.
+        self.commit("a: change: explain the cause\n\nThe value was wrong.", {
+            "src/inet/a/A.cc": "int a = 1;\n",
+        })
+        self.git("-c", "commit.cleanup=verbatim", "commit", "--amend", "-q", "-m",
+                 "a: change: explain the cause\n\nThe value was wrong.\n\n\n"
+                 "The new value uses the correct unit.\n\nChange: src | behavior.change | -")
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("extra blank line at body line 3", result.stdout)
+
+    def test_structured_content_and_separate_paragraphs_are_quiet(self):
+        self.commit("a: change: explain the cause\n\n"
+                    "The value was wrong.\n\n"
+                    "The new value uses the correct unit.\n\n"
+                    "1. Read the value.\n"
+                    "   Keep this list continuation.\n"
+                    "2. Compare the unit.\n\n"
+                    "```text\nfirst literal line\nsecond literal line\n\n\nfourth literal line\n```\n\n"
+                    "~~~text\nfirst literal line\nsecond literal line\n~~~\n\n"
+                    "> First quoted line.\n> Second quoted line.\n\n"
+                    "| Unit | Value |\n| --- | --- |\n| s | 1 |\n\n"
                     "    <!> Error: a quoted log line keeps its length, however long it is here\n"
                     "See https://example.invalid/a/very/long/path/that/no/reader/would/break/up\n\n"
                     "Plan: plan/pending/a-plan-with-a-name-that-makes-this-trailer-long.md\n"
@@ -131,6 +162,8 @@ class CheckCommitsTest(unittest.TestCase):
         })
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertNotIn("adjacent prose lines", result.stdout)
+        self.assertNotIn("extra blank line", result.stdout)
         self.assertNotIn("above 72 characters", result.stdout)
 
     def test_a_long_first_paragraph_gives_a_summary_note(self):

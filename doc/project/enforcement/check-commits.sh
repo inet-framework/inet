@@ -14,8 +14,7 @@
 #   PR-MSG-BODY          — an empty body above 50 changed lines, outside the exempt kinds
 #   PR-MSG-SUBJECT       — "area: what it does", no file path, no link; length fails above 80,
 #                          and is reported as a note between 73 and 80
-#   PR-MSG-WRAP          — note: a body line above 72 characters, other than a trailer, a URL or
-#                          an indented line
+#   PR-MSG-WRAP          — notes for adjacent prose lines and extra blank lines
 #   PR-MSG-FACTS         — no attribution trailer; note: words of revision history, a test log
 #   PR-SPLIT-ONE-CHANGE  — note: the fingerprint rows of one commit move in more than one way
 #   PR-SPLIT-SIZE        — note: more than 400 changed source lines in one commit
@@ -73,19 +72,42 @@ done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
 
 echo
-echo "== PR-MSG-WRAP: the body is plain text, wrapped at 72 columns (notes only) =="
-# git shows a message as written.  A trailer, a URL and an indented line (a quoted log, a command,
-# the continuation of a list item) may be longer; a longer prose line is usually a paragraph that
-# was left on one line, as Markdown keeps it.
+echo "== PR-MSG-WRAP: one source line per paragraph, one blank line between paragraphs (notes only) =="
+# Keep layout notes advisory. Structured text can require adjacent lines.
 quiet=1
 while read -r sha; do
   [ -z "$sha" ] && continue
-  long=$(git log -1 --format=%b "$sha" \
-         | grep -vE '^(Change|Plan|Fixes|Closes|Refs|Co-Authored-By|Signed-off-by|Reviewed-by):' \
-         | grep -vE '^[[:space:]]|https?://' \
-         | python3 -c 'import sys; print(sum(len(l) > 72 for l in sys.stdin.read().splitlines()))')
-  if [ "$long" -gt 0 ]; then
-    note "${sha:0:9} has $long body line(s) above 72 characters: is a paragraph left on one line?"
+  layout=$(git log -1 --format=%b "$sha" | python3 -c '
+import re
+import sys
+
+structured = re.compile(r"^(?:\s|>|\||#|[-*+]\s|\d+[.)]\s|[A-Za-z][A-Za-z-]*:)")
+previous_prose = previous_blank = False
+fence = None
+for number, line in enumerate(sys.stdin.read().strip("\n").splitlines(), 1):
+    stripped = line.strip()
+    marker = re.match(r"^(`{3,}|~{3,})", stripped)
+    if fence:
+        if marker and marker[1][0] == fence[0] and len(marker[1]) >= len(fence):
+            fence = None
+        previous_prose = previous_blank = False
+        continue
+    if marker:
+        fence = marker[1]
+        previous_prose = previous_blank = False
+        continue
+    blank = not stripped
+    prose = not blank and not structured.match(line)
+    if prose and previous_prose:
+        print(f"adjacent prose lines at body line {number}: keep each paragraph on one source line")
+    if blank and previous_blank:
+        print(f"extra blank line at body line {number}: use exactly one blank line between paragraphs")
+    previous_prose, previous_blank = prose, blank
+')
+  if [ -n "$layout" ]; then
+    while IFS= read -r finding; do
+      note "${sha:0:9} $finding"
+    done <<< "$layout"
     quiet=0
   fi
 done <<< "$COMMITS"
