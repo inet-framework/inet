@@ -1258,9 +1258,15 @@ bool Ipv6NeighbourDiscovery::validateRsPacket(Packet *packet, const Ipv6RouterSo
 
 void Ipv6NeighbourDiscovery::createAndSendRaPacket(const Ipv6Address& destAddr, NetworkInterface *ie)
 {
-    EV_INFO << "Create and send RA invoked!\n";
     // Must use link-local addr. See: RFC2461 Section 6.1.2
     Ipv6Address sourceAddr = ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress();
+    // RFC 4861 Section 4.2: the source is the link-local address assigned to the interface,
+    // and a tentative address is not assigned (RFC 4862 Section 5.4)
+    if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(sourceAddr)) {
+        EV_INFO << "Link-local address " << sourceAddr << " is tentative, RA not sent\n";
+        return;
+    }
+    EV_INFO << "Create and send RA invoked!\n";
 
     // This operation includes all options, regardless whether it is solicited or unsolicited.
     if (ie->getProtocolData<Ipv6InterfaceData>()->getAdvSendAdvertisements()) { // if this is an advertising interface
@@ -1682,8 +1688,14 @@ void Ipv6NeighbourDiscovery::sendPeriodicRa(cMessage *msg)
     NetworkInterface *ie = (NetworkInterface *)msg->getContextPointer();
     AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie);
     Ipv6Address destAddr = Ipv6Address("FF02::1");
-    createAndSendRaPacket(destAddr, ie);
-    advIfEntry->numRASent++;
+    // an RA that is not sent while the link-local address is tentative does not count
+    // as one of the initial advertisements
+    if (!ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress())) {
+        createAndSendRaPacket(destAddr, ie);
+        advIfEntry->numRASent++;
+    }
+    else
+        EV_INFO << "Link-local address is tentative, periodic RA not sent\n";
 
     // RFC 2461, Section 6.2.4
     /*Whenever a multicast advertisement is sent from an interface, the timer is
@@ -1726,6 +1738,12 @@ void Ipv6NeighbourDiscovery::sendSolicitedRa(cMessage *msg)
     NetworkInterface *ie = (NetworkInterface *)msg->getContextPointer();
     Ipv6Address destAddr = Ipv6Address("FF02::1");
     EV_DETAIL << "Testing condition!\n";
+    if (ie->getProtocolData<Ipv6InterfaceData>()->isTentativeAddress(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress())) {
+        // createAndSendRaPacket() sends nothing; processRsPacket() took this RA as the next
+        // scheduled one, so point back at the periodic RA, or later RSs would be ignored
+        if (AdvIfEntry *advIfEntry = fetchAdvIfEntry(ie))
+            advIfEntry->nextScheduledRATime = advIfEntry->raTimeoutMsg->getArrivalTime();
+    }
     createAndSendRaPacket(destAddr, ie);
     delete msg;
 }

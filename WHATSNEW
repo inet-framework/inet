@@ -471,6 +471,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. A router sends no Router Advertisement while its link-local address is tentative
+
+   A router sent Router Advertisements from its link-local address while Duplicate Address Detection for that address was running, and before it started, although RFC 4861 Section 4.2 requires the source to be the assigned link-local address, Section 6.2.2 allows them only on an interface with an assigned unicast address, and RFC 4862 does not count a tentative address as assigned. Periodic, solicited and Proxy Mobile IPv6 advertisements are now not sent while the link-local address is tentative; a solicited advertisement that is due after the address is verified is sent as before. Simulations with short advertisement intervals, or with advertisements solicited or sent by Proxy Mobile IPv6 while a router is still verifying its address, produce different results, for example in examples/manetrouting/dymo, examples/ipv6/pmipv6 and examples/inet/hierarchical99.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
