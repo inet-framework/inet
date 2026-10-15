@@ -28,7 +28,7 @@ DcTcp::DcTcp() : TcpReno(),
 void DcTcp::initializeAlgorithm()
 {
     TcpReno::initializeAlgorithm();
-    state->dctcp_gamma = conn->getTcpMain()->par("dctcpGamma");
+    state->dctcp_gamma = par("g");
 }
 
 bool DcTcp::processEce(uint32_t numBytesAcked)

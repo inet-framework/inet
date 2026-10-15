@@ -1,0 +1,36 @@
+%description:
+Tests that the gain g of DcTcp sets the weight of the last window of data
+in alpha (RFC 8257 section 3.3.6). The scenario is the one of
+tcp_dctcp_recovery_count_1, where the window has 1024 of 21504 bytes
+marked and alpha becomes 0.00297619 with the default gain of 1/16. With
+g = 1, alpha is the fraction of marked bytes of the last window,
+1024 / 21504.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 40000"
+*.*_tcp.tcpEcnMode = "accecn"
+*.*_tcp.tcpAlgorithmClass = "DcTcp"
+*.*_tcp.conn-*.algorithm.g = 1
+*.*_tcp.sackSupport = true
+*.tcptester.script="a28 delete; a30 ce"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[]: DCTCP: end of a window of data: 1024 of 21504 bytes marked, alpha=0.047619
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

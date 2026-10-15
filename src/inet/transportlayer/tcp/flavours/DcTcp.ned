@@ -13,4 +13,5 @@ simple DcTcp extends TcpAlgorithm
 {
     parameters:
         @class(DcTcp);
+        double g = default(0.0625); // the estimation gain g of the fraction of marked bytes, alpha (RFC 8257 section 4.2)
 }

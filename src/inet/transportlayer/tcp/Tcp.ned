@@ -43,8 +43,8 @@ import inet.transportlayer.contract.ITcp;
 //
 //   -# The parameters come in groups, one for each part of the protocol: the
 //      module, connection setup and header options, the receive window and
-//      buffer, acknowledgments, sending data, congestion control (with
-//      DCTCP), loss detection and recovery, the retransmission timeout,
+//      buffer, acknowledgments, sending data, congestion control, loss
+//      detection and recovery, the retransmission timeout,
 //      ECN, the path MTU, keepalive, TCP Fast Open, and the connection close
 //      with the checks of arriving segments. In a group, the parameters of
 //      the RFCs come first; the behaviors of Linux that no RFC defines follow
@@ -99,8 +99,8 @@ import inet.transportlayer.contract.ITcp;
 //      number of CE marks instead of one bit for each round trip. The AccECN
 //      option (`accEcnOptionEnabled`, `accEcnOptionPolicy`) gives the bytes of
 //      each ECN codepoint. `ecnMarkAll` sets ECT also on the control segments
-//      of an AccECN or DCTCP connection, as Linux does. When using the `DcTcp`
-//      algorithm, the `dctcpGamma` parameter controls the EWMA gain for
+//      of an AccECN or DCTCP connection, as Linux does. With the `DcTcp`
+//      algorithm, the `g` parameter of ~DcTcp controls the EWMA gain for
 //      estimating the congestion level (RFC 8257).
 //
 //   -# The `pmtudEnabled` parameter enables Path MTU Discovery (RFC 1191,
@@ -465,9 +465,6 @@ simple Tcp extends SimpleModule like ITcp
         bool increasedIWEnabled = default(false); // deprecated: the same as initialWindow = "rfc3390" (RFC 3390); an error with initialWindow = "rfc6928"
         int initialSsthresh = default(0xFFFFFFFF); // Initial value for Slow Start threshold used in TahoeRenoFamily. The initial value of ssthresh SHOULD be set arbitrarily high (e.g., to the size of the largest possible advertised window) Without user interaction there is no limit...
         bool limitedTransmitEnabled = default(true); // Limited Transmit algorithm (RFC 3042) enabled/disabled (can be used for TcpReno/TcpTahoe/TcpNewReno/TcpNoCongestionControl)
-
-        // DCTCP (tcpAlgorithmClass = "DcTcp")
-        double dctcpGamma = default(0.0625); // A fixed estimation gain for calculating dctcp_alpha (RFC 8257 4.2)
 
         // loss detection and recovery
         string lossDetectionMode @enum("dupthresh","rack") = default("rack"); // SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC 8985). RACK requires sackSupport.
