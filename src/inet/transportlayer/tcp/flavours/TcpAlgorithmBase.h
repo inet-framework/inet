@@ -104,7 +104,7 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     virtual void receivedDuplicateAck();
 
     /** Utility function */
-    cMessage *cancelEvent(cMessage *msg) { return conn->cancelEvent(msg); }
+    cMessage *cancelTimer(cMessage *msg) { return conn->cancelEvent(msg); }
 
   public:
     /**
@@ -126,7 +126,7 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     /**
      * Create timers, etc.
      */
-    virtual void initialize() override;
+    virtual void initializeAlgorithm() override;
 
     virtual void established(bool active) override;
 

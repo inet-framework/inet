@@ -41,7 +41,7 @@ class INET_API DumbTcp : public TcpAlgorithm
 
     virtual ~DumbTcp();
 
-    virtual void initialize() override;
+    virtual void initializeAlgorithm() override;
 
     virtual void established(bool active) override;
 

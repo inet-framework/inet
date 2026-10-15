@@ -19,9 +19,9 @@ TcpNoCongestionControl::TcpNoCongestionControl() : TcpAlgorithmBase(),
 {
 }
 
-void TcpNoCongestionControl::initialize()
+void TcpNoCongestionControl::initializeAlgorithm()
 {
-    TcpAlgorithmBase::initialize();
+    TcpAlgorithmBase::initializeAlgorithm();
 
     // set congestion window to a practically infinite value
     state->snd_cwnd = 0x7fffffff;

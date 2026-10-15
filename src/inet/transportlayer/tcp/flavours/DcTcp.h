@@ -36,7 +36,7 @@ class INET_API DcTcp : public TcpReno
         return new DcTcpStateVariables();
     }
 
-    virtual void initialize() override;
+    virtual void initializeAlgorithm() override;
 
   public:
     /** Constructor */

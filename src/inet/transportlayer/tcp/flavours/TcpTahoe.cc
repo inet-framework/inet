@@ -21,9 +21,9 @@ TcpTahoe::TcpTahoe() : TcpAlgorithmBase(),
 {
 }
 
-void TcpTahoe::initialize()
+void TcpTahoe::initializeAlgorithm()
 {
-    TcpAlgorithmBase::initialize();
+    TcpAlgorithmBase::initializeAlgorithm();
 
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
 }

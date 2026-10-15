@@ -80,7 +80,7 @@ class INET_API TcpAlgorithm : public cObject
      * available in the constructor yet. Subclasses call it first: it reads the
      * timer parameters of the Tcp module.
      */
-    virtual void initialize()
+    virtual void initializeAlgorithm()
     {
         cModule *tcpMain = conn->getTcpMain();
         initialRto = tcpMain->par("initialRto");

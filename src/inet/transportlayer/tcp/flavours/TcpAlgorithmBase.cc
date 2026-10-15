@@ -16,7 +16,7 @@ namespace inet {
 namespace tcp {
 
 // The retransmission and delayed ACK timers take their values from the
-// parameters of the Tcp module (TcpAlgorithm::initialize()).
+// parameters of the Tcp module (TcpAlgorithm::initializeAlgorithm()).
 
 // the delayed ACK of Linux (adaptiveDelayedAcks): TCP_ATO_MIN, TCP_DELACK_MIN,
 // TCP_DELACK_MAX, TCP_MAX_QUICKACKS, and the default of net.ipv4.tcp_pingpong_thresh
@@ -61,22 +61,22 @@ TcpAlgorithmBase::~TcpAlgorithmBase()
 
     // cancel and delete timers
     if (rexmitTimer)
-        delete cancelEvent(rexmitTimer);
+        delete cancelTimer(rexmitTimer);
     if (persistTimer)
-        delete cancelEvent(persistTimer);
+        delete cancelTimer(persistTimer);
     if (delayedAckTimer)
-        delete cancelEvent(delayedAckTimer);
+        delete cancelTimer(delayedAckTimer);
     if (keepAliveTimer)
-        delete cancelEvent(keepAliveTimer);
+        delete cancelTimer(keepAliveTimer);
     if (tlpTimer)
-        delete cancelEvent(tlpTimer);
+        delete cancelTimer(tlpTimer);
     if (corkTimer)
-        delete cancelEvent(corkTimer);
+        delete cancelTimer(corkTimer);
 }
 
-void TcpAlgorithmBase::initialize()
+void TcpAlgorithmBase::initializeAlgorithm()
 {
-    TcpAlgorithm::initialize();
+    TcpAlgorithm::initializeAlgorithm();
 
     rexmitTimer = new cMessage("REXMIT");
     persistTimer = new cMessage("PERSIST");
@@ -214,7 +214,7 @@ void TcpAlgorithmBase::setKeepAlive(bool enabled)
     // starts the idle time now; before that, established() starts it
     state->keepalive_enabled = enabled;
     if (!enabled)
-        cancelEvent(keepAliveTimer);
+        cancelTimer(keepAliveTimer);
     else if (!keepAliveTimer->isScheduled()) {
         int fsmState = conn->getFsmState();
         if (fsmState == TCP_S_ESTABLISHED || fsmState == TCP_S_CLOSE_WAIT || fsmState == TCP_S_FIN_WAIT_1
@@ -228,12 +228,12 @@ void TcpAlgorithmBase::setKeepAlive(bool enabled)
 
 void TcpAlgorithmBase::connectionClosed()
 {
-    cancelEvent(rexmitTimer);
-    cancelEvent(persistTimer);
-    cancelEvent(delayedAckTimer);
-    cancelEvent(keepAliveTimer);
-    cancelEvent(tlpTimer);
-    cancelEvent(corkTimer);
+    cancelTimer(rexmitTimer);
+    cancelTimer(persistTimer);
+    cancelTimer(delayedAckTimer);
+    cancelTimer(keepAliveTimer);
+    cancelTimer(tlpTimer);
+    cancelTimer(corkTimer);
 }
 
 void TcpAlgorithmBase::processTimer(cMessage *timer, TcpEventCode& event)
@@ -298,7 +298,7 @@ void TcpAlgorithmBase::schedulePto()
     if (pto <= SIMTIME_ZERO)
         return;
 
-    cancelEvent(tlpTimer);
+    cancelTimer(tlpTimer);
     conn->scheduleAfter(pto, tlpTimer);
     EV_DETAIL << "TLP: probe timeout armed for " << pto << "s\n";
 }
@@ -315,7 +315,7 @@ void TcpAlgorithmBase::processPtoTimer(TcpEventCode& event)
     if (conn->sendTlpProbe()) {
         state->tlpHighSeq = state->snd_max;
         // the probe takes the place of the RTO: restart the RTO from now
-        cancelEvent(rexmitTimer);
+        cancelTimer(rexmitTimer);
         conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
     }
 }
@@ -388,7 +388,7 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     // RFC 8985 section 8: the RTO and the probe timeout are one timer. Section 7.1:
     // "Reset TLP.is_retrans and TLP.end_seq when initiating a connection, fast
     // recovery, or RTO recovery": an earlier probe is not the repair of this loss.
-    cancelEvent(tlpTimer);
+    cancelTimer(tlpTimer);
     state->tlpHighSeq = 0;
     state->tlpRetrans = false;
 
@@ -543,7 +543,7 @@ void TcpAlgorithmBase::startRexmitTimer()
     state->rexmit_count = 0;
 
     // the RTO and the probe timeout are one timer (RFC 8985 section 8)
-    cancelEvent(tlpTimer);
+    cancelTimer(tlpTimer);
 
     // schedule timer
     conn->scheduleAfter(state->rexmit_timeout, rexmitTimer);
@@ -687,7 +687,7 @@ void TcpAlgorithmBase::scheduleCorkTimer()
 
 void TcpAlgorithmBase::cancelCorkTimer()
 {
-    cancelEvent(corkTimer);
+    cancelTimer(corkTimer);
 }
 
 bool TcpAlgorithmBase::isDataWaiting() const
@@ -780,14 +780,14 @@ void TcpAlgorithmBase::scheduleDelayedAck()
     simtime_t timeout = simTime() + ato;
     if (delayedAckTimer->isScheduled()) {
         if (delayedAckTimer->getArrivalTime() <= simTime() + ato / 4) {
-            cancelEvent(delayedAckTimer);
+            cancelTimer(delayedAckTimer);
             state->ack_now = true;
             conn->sendAck();
             return;
         }
         if (delayedAckTimer->getArrivalTime() < timeout)
             return;
-        cancelEvent(delayedAckTimer);
+        cancelTimer(delayedAckTimer);
     }
     conn->scheduleAt(timeout, delayedAckTimer);
 }
@@ -880,18 +880,18 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     if (state->snd_una == state->snd_max) {
         if (rexmitTimer->isScheduled()) {
             EV_INFO << "ACK acks all outstanding segments, cancel REXMIT timer\n";
-            cancelEvent(rexmitTimer);
+            cancelTimer(rexmitTimer);
         }
         else
             EV_INFO << "There were no outstanding segments, nothing new in this ACK.\n";
         // no data is outstanding, so there is nothing to probe (RFC 8985 section 8)
-        cancelEvent(tlpTimer);
+        cancelTimer(tlpTimer);
     }
     else {
         EV_INFO << "ACK acks some but not all outstanding segments ("
                 << (state->snd_max - state->snd_una) << " bytes outstanding), "
                 << "restarting REXMIT timer\n";
-        cancelEvent(rexmitTimer);
+        cancelTimer(rexmitTimer);
         startRexmitTimer();
         // RFC 8985 section 7.2: an ACK of new data also arms the probe timeout
         schedulePto();
@@ -910,7 +910,7 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
         if (rexmitTimer->isScheduled()) {
             if (persistTimer->isScheduled()) {
                 EV_INFO << "Received zero-sized window and REXMIT timer is running therefore PERSIST timer is canceled.\n";
-                cancelEvent(persistTimer);
+                cancelTimer(persistTimer);
             }
             else
                 EV_INFO << "Received zero-sized window and REXMIT timer is running therefore PERSIST timer is not started.\n";
@@ -929,7 +929,7 @@ void TcpAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
     else { // received non zero-sized window?
         if (persistTimer->isScheduled()) {
             EV_INFO << "Received non zero-sized window therefore PERSIST timer is canceled.\n";
-            cancelEvent(persistTimer);
+            cancelTimer(persistTimer);
         }
     }
 
@@ -953,7 +953,7 @@ bool TcpAlgorithmBase::processWindowUpdate()
     if (state->snd_wnd > 0 && (state->snd_una == state->snd_max || persistTimer->isScheduled())) {
         if (persistTimer->isScheduled()) {
             EV_INFO << "The window update opens the window: cancelling the PERSIST timer\n";
-            cancelEvent(persistTimer);
+            cancelTimer(persistTimer);
             // The ACK is below the probe octet, so the receiver did not accept it: the
             // octet goes again as the first octet of the data.
             conn->unsendWindowProbe();
@@ -1049,7 +1049,7 @@ void TcpAlgorithmBase::ackSent()
     state->last_ack_sent = state->rcv_nxt; // update last_ack_sent, needed for TS option
     // if delayed ACK timer is running, cancel it
     if (delayedAckTimer->isScheduled())
-        cancelEvent(delayedAckTimer);
+        cancelTimer(delayedAckTimer);
 }
 
 void TcpAlgorithmBase::dataSent(uint32_t fromseq)
@@ -1101,7 +1101,7 @@ void TcpAlgorithmBase::segmentRetransmitted(uint32_t fromseq, uint32_t toseq)
 void TcpAlgorithmBase::restartRexmitTimer()
 {
     if (rexmitTimer->isScheduled())
-        cancelEvent(rexmitTimer);
+        cancelTimer(rexmitTimer);
 
     startRexmitTimer();
 }

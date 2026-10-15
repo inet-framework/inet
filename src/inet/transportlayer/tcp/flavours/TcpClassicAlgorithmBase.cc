@@ -44,9 +44,9 @@ TcpClassicAlgorithmBase::TcpClassicAlgorithmBase() : TcpAlgorithmBase(),
 {
 }
 
-void TcpClassicAlgorithmBase::initialize()
+void TcpClassicAlgorithmBase::initializeAlgorithm()
 {
-    TcpAlgorithmBase::initialize();
+    TcpAlgorithmBase::initializeAlgorithm();
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
 }
 

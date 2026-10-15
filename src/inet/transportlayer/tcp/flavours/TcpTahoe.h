@@ -34,7 +34,7 @@ class INET_API TcpTahoe : public TcpAlgorithmBase
         return new TcpTahoeStateVariables();
     }
 
-    virtual void initialize() override;
+    virtual void initializeAlgorithm() override;
 
     /** Halves ssthresh from cwnd and restarts slow start from the first unacknowledged segment */
     virtual void resetToSlowStart();

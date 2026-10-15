@@ -39,9 +39,9 @@ TcpCubic::TcpCubic() : TcpClassicAlgorithmBase(),
 {
 }
 
-void TcpCubic::initialize()
+void TcpCubic::initializeAlgorithm()
 {
-    TcpClassicAlgorithmBase::initialize();
+    TcpClassicAlgorithmBase::initializeAlgorithm();
 
     state->cubic_beta = conn->getTcpMain()->par("cubicBeta");
     state->cubic_c = conn->getTcpMain()->par("cubicC");

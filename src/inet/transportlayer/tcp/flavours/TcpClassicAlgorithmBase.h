@@ -86,7 +86,7 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 
     virtual ~TcpClassicAlgorithmBase();
 
-    virtual void initialize() override;
+    virtual void initializeAlgorithm() override;
 
     virtual void established(bool active) override;
 

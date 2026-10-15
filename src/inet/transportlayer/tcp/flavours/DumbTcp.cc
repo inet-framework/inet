@@ -30,9 +30,9 @@ DumbTcp::~DumbTcp()
         delete conn->cancelEvent(rexmitTimer);
 }
 
-void DumbTcp::initialize()
+void DumbTcp::initializeAlgorithm()
 {
-    TcpAlgorithm::initialize();
+    TcpAlgorithm::initializeAlgorithm();
 
     rexmitTimer = new cMessage("REXMIT");
     rexmitTimer->setContextPointer(conn);

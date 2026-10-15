@@ -25,9 +25,9 @@ DcTcp::DcTcp() : TcpReno(),
 {
 }
 
-void DcTcp::initialize()
+void DcTcp::initializeAlgorithm()
 {
-    TcpReno::initialize();
+    TcpReno::initializeAlgorithm();
     state->dctcp_gamma = conn->getTcpMain()->par("dctcpGamma");
 }
 

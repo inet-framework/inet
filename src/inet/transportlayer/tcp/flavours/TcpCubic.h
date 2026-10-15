@@ -92,7 +92,7 @@ class INET_API TcpCubic : public TcpClassicAlgorithmBase
   public:
     TcpCubic();
 
-    virtual void initialize() override;
+    virtual void initializeAlgorithm() override;
 
     virtual void processRexmitTimer(TcpEventCode& event) override;
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;

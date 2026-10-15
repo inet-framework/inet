@@ -284,7 +284,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     rcvBufSockopt = listenerConn->rcvBufSockopt;
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
-    tcpAlgorithm->initialize();
+    tcpAlgorithm->initializeAlgorithm();
     if (keepAliveSockopt >= 0)
         tcpAlgorithm->setKeepAlive(keepAliveSockopt != 0);
 
@@ -969,7 +969,7 @@ void TcpConnection::initConnection(TcpOpenCommand *openCmd)
     // create state block
     state = tcpAlgorithm->getStateVariables();
     configureStateVariables();
-    tcpAlgorithm->initialize();
+    tcpAlgorithm->initializeAlgorithm();
     if (keepAliveSockopt >= 0)
         tcpAlgorithm->setKeepAlive(keepAliveSockopt != 0);
 }
