@@ -118,6 +118,46 @@ FastRetransmit also changed its observable. The model keeps the window of Linux:
 
 On the branch, each new guard and assertion was checked to fail on a copy with one changed detail, and each copy failed at the intended place.
 
+## Linux equivalence: the packetdrill suite
+
+This is not a pass of the workflow. It is the run of the implementation oracle of TCP ([Evidence from an implementation oracle](../../../guide/derive-tests-from-a-standard.md#evidence-from-an-implementation-oracle)): the packetdrill scripts of Linux run in the `PacketDrillApp` of inet-gpl, each one through its wrapper in [`tests/protocol/tcp/linux/`](../../../../../tests/protocol/tcp/linux/README.md) or [`tests/protocol/tcp/packetdrill/`](../../../../../tests/protocol/tcp/packetdrill/README.md). The `tcp.ini` of the suite selects `LinuxTcp`, so each result speaks for `LinuxTcp`, not for the RFC defaults of `Tcp`.
+
+- Date: 2026-10-15 18:01 +0200
+- INET: master `3d3b535fc8`, the code of this run; the commit of this section changes only documents
+- inet-gpl: master `4a3894d`
+- Scripts: 321 in `tests/protocol/tcp` of inet-gpl: 159 Linux selftests in `linux/`, and 162 scripts of upstream packetdrill `2c4001c4d6fc` in `packetdrill/`
+- Oracle: Linux 7.1.3, with the result of each script in `tests/packetdrill/tcp/linux-results.csv` of inet-gpl
+- OMNeT++: 6.4.0, commit `cf58891643`
+- Build: debug, INET and inet-gpl built from these commits
+- Compiler: Ubuntu clang version 23.0.0
+- Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-38-generic x86_64
+- Commands: `make test` and `make summary` in `tests/packetdrill` of inet-gpl; then, with `INETGPL_ROOT` set, `inet_run_protocol_tests -p inet --filter 'tcp/'`
+- Result of the suite: 318 scripts run, **303 MATCH**, 12 KERNEL_DRIFT, 3 UNSUPPORTED_FEATURE; 3 scripts are skipped, because they need IPv6
+- Result of INET's runner: TCP 333 tests, **329 PASS, 4 FAIL (expected), 0 FAIL (unexpected)**. The 306 wrappers give 303 PASS and 3 FAIL (expected); the 27 RFC tests give 26 PASS and 1 FAIL (expected), gap 2
+
+The 15 scripts without a wrapper are the 12 that Linux 7.1.3 itself does not pass (kernel drift) and the 3 that need IPv6; the READMEs of the two folders list them with the reason. The 3 wrappers that expect `FAIL` change a `tc qdisc` in the middle of the script, and INET does not model the drops of the local queue: an unimplemented feature.
+
+**What the run shows.** Each of the 303 wrappers that expect `PASS` passes: on every script that Linux passes and INET can run, `LinuxTcp` sends and accepts the same segments as Linux 7.1.3. Eleven features of the feature map have scripts, and the column "Linux equivalence" of [conformance.md](conformance.md#part-2--conformance-matrix) gives their counts. Most scripts exercise documents that the TCP catalogs do not have, and so show where the catalogs stop:
+
+| Document outside the TCP catalogs | Scripts |
+| --- | --- |
+| RFC 7413, TCP Fast Open | 80 |
+| RFC 9768, Accurate ECN | 58 |
+| RFC 2018 and RFC 6675, SACK and its loss recovery | 8 |
+| RFC 6937, Proportional Rate Reduction | 8 |
+| RFC 9293 section 3.7.4, the Nagle algorithm | 6 |
+| RFC 7323, timestamps | 5 |
+| RFC 3042, Limited Transmit | 4 |
+| RFC 5482, the user timeout | 4 (2 of them expect `FAIL`) |
+| RFC 9438, CUBIC | 4 (1 of them expects `FAIL`) |
+| RFC 3168, ECN | 2 |
+| RFC 2385, the MD5 signature option | 2 |
+| RFC 2883, D-SACK; RFC 4821, the path MTU search; RFC 4987, SYN cookies; RFC 5961, the checks of a segment | 1 each |
+
+Other scripts exercise interfaces of Linux that no standard defines: `MSG_ZEROCOPY` (21), `MSG_EOR` (8), blocking socket calls (8), `SO_TIMESTAMPING` (7), `TCP_INFO` (6), the checks of system call arguments (6), `TCP_INQ` (4), `TCP_USER_TIMEOUT` (4), `TCP_MAXSEG` (3), `TCP_NOTSENT_LOWAT`, `sendfile` and `splice` (2 each), `epoll`, `ioctl` and the cwnd moderation of Linux (1 each).
+
+**What the run does not show.** A match is not a pass of a catalog statement, and the ledger and the verdicts of the matrix do not change. Where the defaults of `LinuxTcp` depart from the RFCs by design ([conformance.md finding 9](conformance.md#9-where-linux-departs-from-an-rfc-the-default-follows-the-rfc)), for example the initial window of ten segments in the scripts of slow start, a match shows the behavior of Linux, not that of the RFC; such a departure is known, and it is not a new finding. This record did not compare each script with the statements of the catalogs, so it reports no other finding.
+
 ## Gap 5 (pass 4): the first round-trip measurement is smoothed — defect
 
 RFC 6298 section 2.2 gives the first measurement a case of its own: the smoothed value becomes R and the variance becomes R/2. The model has no such case. `TcpBaseAlg::receivedDataAck` applies the smoothing formula of section 2.3 to every measurement, the first one included ([TcpAlgorithmBase.cc:576-591](../../../../../src/inet/transportlayer/tcp/flavours/TcpAlgorithmBase.cc#L576-L591), the code after the repair). The run states it in one line:

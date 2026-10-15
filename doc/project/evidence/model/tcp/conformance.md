@@ -81,31 +81,33 @@ RFC 9293 collects RFC 793 and its updates into one text; for the nine features o
 
 The verdict combines the claim on the governing source document, the support value of the ledger, and the level of the feature, by the table of step 8.
 
-| Feature | Level | Claimed | Support | Verdict |
-| --- | --- | --- | --- | --- |
-| TCP-F-ESTABLISH | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-SEQUENCE | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-ACKNOWLEDGE | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-TERMINATE | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-DATA-TRANSFER | mandatory | yes, through RFC 793 | supported | **confirmed**; finding 3 closed on 2026-10-14 |
-| TCP-F-FLOW-CONTROL | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — the receive half passes; the value the sender writes by default does not, finding 4, a statement-level defect whose repair is blocked |
-| TCP-F-HEADER | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-RESET | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-SEGMENT-ACCEPTANCE | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-RESET-VALIDATION | mandatory | yes, through RFC 793 | supported | **confirmed** |
-| TCP-F-WINDOW-ROBUSTNESS | mandatory | yes, through RFC 793 | supported | **confirmed**; finding 5 was withdrawn, gap 3 was a test error |
-| TCP-F-ICMP-HANDLING | mandatory | yes, through RFC 793 | supported | **confirmed** — finding 6 was repaired by `40c9f04e21` |
-| TCP-F-RTO-ESTIMATOR | mandatory | yes, through RFC 2988, and RFC 6298 in two comments | partial | **partial** — the first measurement passes since `f3064a83d0` repaired gap 5; the update of a later measurement, RFC6298-UPD-1, has no check yet |
-| TCP-F-RTO-BOUNDS | optional | yes, through RFC 2988 | supported | **confirmed** — one second before any measurement, and a ceiling of 240 seconds |
-| TCP-F-RTO-BACKOFF | mandatory | yes, through RFC 2988 | partial | **partial** — the timeout doubles at every expiry on the wire; RFC6298-EXP-1 has no check yet |
-| TCP-F-RTT-SAMPLING | mandatory | yes, through RFC 2988 | supported | **confirmed** — no sample is taken from a retransmitted segment |
-| TCP-F-CONGESTION-WINDOW | mandatory | yes, through RFC 2581 | partial | **partial** — slow start stays inside one segment per acknowledgment; congestion avoidance, RFC5681-USE-1 and CA-2, has no check yet |
-| TCP-F-INITIAL-WINDOW | mandatory | yes, through RFC 2581, and RFC 5681 in one quote | supported | **confirmed** — inside the table, and one segment after a lost SYN |
-| TCP-F-LOSS-RESPONSE | mandatory | yes, through RFC 2581 | supported | **confirmed** — the window falls to one segment and the threshold to half the flight |
-| TCP-F-FAST-RETRANSMIT | mandatory | yes, through RFC 2581 and RFC 3782 | partial | **partial** — three duplicates repair the loss without the timer; the deflation, RFC5681-FR-5, is not asserted |
-| TCP-F-RESTART-IDLE | optional | yes, RFC 5681 in one comment | untested | **unverified** — the check is owed |
-| TCP-F-DELAYED-ACK | mandatory | yes, through RFC 1122 and RFC 2581 | partial | **partial** — an out-of-order segment is acknowledged at once; the 500 ms bound waits for a statistical check |
+| Feature | Level | Claimed | Support | Verdict | Linux equivalence (`LinuxTcp`) |
+| --- | --- | --- | --- | --- | --- |
+| TCP-F-ESTABLISH | mandatory | yes, through RFC 793 | supported | **confirmed** | 2 scripts, all match Linux |
+| TCP-F-SEQUENCE | mandatory | yes, through RFC 793 | supported | **confirmed** | no script |
+| TCP-F-ACKNOWLEDGE | mandatory | yes, through RFC 793 | supported | **confirmed** | 3 scripts, all match Linux |
+| TCP-F-TERMINATE | mandatory | yes, through RFC 793 | supported | **confirmed** | 15 scripts, all match Linux |
+| TCP-F-DATA-TRANSFER | mandatory | yes, through RFC 793 | supported | **confirmed**; finding 3 closed on 2026-10-14 | 7 scripts, all match Linux |
+| TCP-F-FLOW-CONTROL | mandatory | yes, through RFC 793 | supported | **confirmed** | 5 scripts, all match Linux |
+| TCP-F-CHECKSUM | mandatory | yes, through RFC 793 | partial | **partial** — the receive half passes; the value the sender writes by default does not, finding 4, a statement-level defect whose repair is blocked | no script |
+| TCP-F-HEADER | mandatory | yes, through RFC 793 | supported | **confirmed** | no script |
+| TCP-F-RESET | mandatory | yes, through RFC 793 | supported | **confirmed** | no script |
+| TCP-F-SEGMENT-ACCEPTANCE | mandatory | yes, through RFC 793 | supported | **confirmed** | 7 scripts, all match Linux |
+| TCP-F-RESET-VALIDATION | mandatory | yes, through RFC 793 | supported | **confirmed** | no script |
+| TCP-F-WINDOW-ROBUSTNESS | mandatory | yes, through RFC 793 | supported | **confirmed**; finding 5 was withdrawn, gap 3 was a test error | no script |
+| TCP-F-ICMP-HANDLING | mandatory | yes, through RFC 793 | supported | **confirmed** — finding 6 was repaired by `40c9f04e21` | no script |
+| TCP-F-RTO-ESTIMATOR | mandatory | yes, through RFC 2988, and RFC 6298 in two comments | partial | **partial** — the first measurement passes since `f3064a83d0` repaired gap 5; the update of a later measurement, RFC6298-UPD-1, has no check yet | no script |
+| TCP-F-RTO-BOUNDS | optional | yes, through RFC 2988 | supported | **confirmed** — one second before any measurement, and a ceiling of 240 seconds | 1 script, matches Linux |
+| TCP-F-RTO-BACKOFF | mandatory | yes, through RFC 2988 | partial | **partial** — the timeout doubles at every expiry on the wire; RFC6298-EXP-1 has no check yet | 1 script, matches Linux |
+| TCP-F-RTT-SAMPLING | mandatory | yes, through RFC 2988 | supported | **confirmed** — no sample is taken from a retransmitted segment | no script |
+| TCP-F-CONGESTION-WINDOW | mandatory | yes, through RFC 2581 | partial | **partial** — slow start stays inside one segment per acknowledgment; congestion avoidance, RFC5681-USE-1 and CA-2, has no check yet | 21 scripts, all match Linux |
+| TCP-F-INITIAL-WINDOW | mandatory | yes, through RFC 2581, and RFC 5681 in one quote | supported | **confirmed** — inside the table, and one segment after a lost SYN | no script |
+| TCP-F-LOSS-RESPONSE | mandatory | yes, through RFC 2581 | supported | **confirmed** — the window falls to one segment and the threshold to half the flight | no script |
+| TCP-F-FAST-RETRANSMIT | mandatory | yes, through RFC 2581 and RFC 3782 | partial | **partial** — three duplicates repair the loss without the timer; the deflation, RFC5681-FR-5, is not asserted | 12 scripts, all match Linux |
+| TCP-F-RESTART-IDLE | optional | yes, RFC 5681 in one comment | untested | **unverified** — the check is owed | 2 scripts, all match Linux |
+| TCP-F-DELAYED-ACK | mandatory | yes, through RFC 1122 and RFC 2581 | partial | **partial** — an out-of-order segment is acknowledged at once; the 500 ms bound waits for a statistical check | no script |
+
+The last column, added on 2026-10-15, is the evidence of an implementation oracle ([Evidence from an implementation oracle](../../../guide/derive-tests-from-a-standard.md#evidence-from-an-implementation-oracle)): the packetdrill scripts whose wrappers name the feature, run with `LinuxTcp`, and how many of them match Linux. The run record is in [results.md](results.md#linux-equivalence-the-packetdrill-suite). The column does not change a verdict: a match shows that `LinuxTcp` behaves as Linux, not that the model meets the statements of the feature. Eleven of the 23 features have scripts, and each script matches; `TCP-F-RESTART-IDLE` has two matching scripts, and its check is still owed.
 
 Twenty-three features: sixteen `confirmed`, six `partial`, one `unverified`. No feature reaches `defect` by the rules of the matrix. The level 4 column is corrected on 2026-09-23 to the level that [`features.md`](../../protocol/tcp/features.md) gives: TCP-F-RESTART-IDLE is optional and TCP-F-DELAYED-ACK mandatory, where the earlier matrix had them the other way. Two MUST-level statements are violated all the same, on supporting statements; findings 3 and 4 say so rather than let the matrix's shape hide it. Five of the six `partial` verdicts come from core statements without a check, not from a failure; see the owed rows of [`coverage.md`](coverage.md#statement-coverage).
 
