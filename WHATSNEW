@@ -410,6 +410,10 @@ Notable backward incompatible changes are the following:
 
    The timer that waits for the SEND of a deferred Fast Open SYN is now TcpConnection::deferredSynTimer, with the constant TCP_TIMEOUT_DEFERRED_SYN. See the migration guide.
 
+51. LinuxTcp drops the data of a SYN without Fast Open
+
+   A TCP listener keeps the data of a SYN that carries no Fast Open option and delivers it after the handshake, as RFC 9293 section 3.10.7.2 allows. A Linux listener drops such data, and the client sends it again after the SYN-ACK. The new parameter dropSynData selects the behavior of Linux; LinuxTcp sets it, and Tcp keeps the data. Simulations with LinuxTcp in which a client sends data on a SYN without Fast Open change. The data of a SYN with an invalid Fast Open cookie is dropped in each mode, as RFC 7413 section 4.2.2 asks, as before.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
