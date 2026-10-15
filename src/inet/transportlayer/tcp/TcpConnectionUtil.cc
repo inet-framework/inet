@@ -1053,6 +1053,7 @@ void TcpConnection::configureStateVariables()
     state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks");
     state->synRetries = socketSynRetries >= 0 ? socketSynRetries : (int)tcpMain->par("synRetries");
     state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
+    state->dropSynData = tcpMain->par("dropSynData");
     state->linuxZeroWindowProbe = !strcmp(tcpMain->par("zeroWindowProbe").stringValue(), "linux");
     state->nagle_enabled = tcpMain->par("nagleEnabled"); // Nagle's algorithm (RFC 896) enabled/disabled
     if (corkSockopt >= 0)

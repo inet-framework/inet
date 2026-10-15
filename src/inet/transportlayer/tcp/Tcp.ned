@@ -427,6 +427,7 @@ simple Tcp extends SimpleModule like ITcp
         // Linux behaviors (no RFC)
         int synLinearTimeouts = default(0); // the first retransmissions of a SYN that keep the initial timeout before it doubles, as Linux net.ipv4.tcp_syn_linear_timeouts (its default: 4): with 4 and an initial RTO of 1 s, the SYN timeouts are 1, 1, 1, 1, 1, 2, 4 s; 0: the timeout doubles at each expiry (RFC 6298 section 5.5)
         bool syncookiesAlways = default(false); // model Linux tcp_syncookies=2 (a SYN cookie on every passive open): the cookie quantizes the MSS of the peer down to the IPv4 msstab {536, 1300, 1440, 1460} of net/ipv4/syncookies.c; the other options stay exact
+        bool dropSynData = default(false); // the data of a SYN that Fast Open does not accept is dropped, so the SYN-ACK acknowledges only the SYN and the client sends the data again, as Linux (tcp_conn_request() keeps no data of such a SYN); false: the data waits in the receive queue until the handshake ends (RFC 9293 section 3.10.7.2)
 
         // receive window and buffer
         int advertisedWindow = default(65535); // In bytes, corresponds with the maximal receiver buffer capacity (Note: normally, NIC queues should be at least this size)

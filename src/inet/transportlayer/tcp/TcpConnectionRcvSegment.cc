@@ -1194,7 +1194,11 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // The text of a SYN with a Fast Open option was accepted above, or it is
     // not acknowledged.
     //
-    if (!fastOpenOption && !state->fastopenAccelerated && synData) {
+    // dropSynData, as Linux tcp_conn_request(): the data of such a SYN is dropped, and
+    // the client sends it again after the SYN-ACK, which acknowledges only the SYN
+    if (!fastOpenOption && !state->fastopenAccelerated && synData && state->dropSynData)
+        EV_INFO << "Dropping the text of the SYN (dropSynData)\n";
+    else if (!fastOpenOption && !state->fastopenAccelerated && synData) {
         updateRcvQueueVars();
 
         // RFC 9293: "any other control or text should be queued for processing later".

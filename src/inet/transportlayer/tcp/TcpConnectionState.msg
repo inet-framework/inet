@@ -177,6 +177,7 @@ struct TcpStateVariables
     int synRetries = 12;            // the retransmissions of a SYN or a SYN-ACK, after which the open fails (synRetries parameter)
     bool linuxZeroWindowProbe = false; // the zero-window probe of Linux, without data (zeroWindowProbe parameter)
     int synLinearTimeouts = 0;      // the retransmissions of a SYN after which its timeout does not double yet (synLinearTimeouts parameter)
+    bool dropSynData = false;       // the data of a SYN that Fast Open does not accept is dropped (dropSynData parameter)
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code
