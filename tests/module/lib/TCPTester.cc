@@ -173,6 +173,9 @@ void TCPScriptableTester::parseScript(const char *script)
             if (!strncmp(s,"fin",3)) {
                 cmd.fin = true; s+=3;
             }
+        } else if (!strncmp(s,"nodata",6)) {
+            // "nodata": remove the payload of the segment
+            cmd.command = CMD_NODATA; s+=6;
         } else if (!strncmp(s,"fin",3)) {
             cmd.command = CMD_DATA; s+=3;
             cmd.fin = true;
@@ -389,6 +392,16 @@ void TCPScriptableTester::processIncomingSegment(Packet *pk, bool fromA)
         if (cmd->bytes > 0)
             pk->insertAtBack(makeShared<ByteCountChunk>(B(cmd->bytes)));
         dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "adding data");
+        send(pk, fromA ? "out2" : "out1");
+    }
+    else if (cmd->command==CMD_NODATA)
+    {
+        bubble("removing the payload");
+        auto header = pk->removeAtFront<TcpHeader>();
+        if (pk->getDataLength() > b(0))
+            pk->removeAtBack(pk->getDataLength());
+        pk->insertAtFront(header);
+        dump(pk->peekAtFront<TcpHeader>(), pk->getByteLength(), fromA, "removing the payload");
         send(pk, fromA ? "out2" : "out1");
     }
     else if (cmd->command==CMD_ACE)
