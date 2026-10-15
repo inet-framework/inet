@@ -9,7 +9,7 @@ with #1155: `inet-gpl` master builds only against it (F1 and F10 of the cleanup 
 the 306 wrappers give 303 PASS and 3 FAIL (expected).
 
 **The design and every decision are in the `inet-gpl` plan**, now on `inet-gpl` master,
-`plan/pending/packetdrill-tcp-protocol-tests.md`. This file tracks the steps that land in INET, so
+`plan/done/packetdrill-tcp-protocol-tests.md`. This file tracks the steps that land in INET, so
 that the INET commits name a plan inside this repository.
 
 ## What INET receives
