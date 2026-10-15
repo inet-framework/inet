@@ -204,13 +204,13 @@ Notable backward incompatible changes are the following:
 
    Custom IRx implementations need the TXNAV operations. Sequence callbacks need the start notification and Boolean submission result. Custom ACK policies must not depend on HCF's removed second policy query. See the migration guide.
 
-23. The distance form of the path loss is computeDistancePathLoss()
+24. The distance form of the path loss is computeDistancePathLoss()
 
    IPathLoss::computePathLoss(propagationSpeed, frequency, distance) was renamed to computeDistancePathLoss(), so that it is no longer an overload of the method that computes the path loss of a reception (see the next item): a model that overrode one of the overloads hid the other. Its documentation now states that the value is independent of the transmitter and the receiver, and may be NaN when the model cannot tell the loss from the distance alone (TwoRayInterference).
 
    This change requires the modification of C++ code that implements or calls computePathLoss(propagationSpeed, frequency, distance): every path loss model derived from PathLossBase overrides it.
 
-24. The path loss of a reception knows its receiver
+25. The path loss of a reception knows its receiver
 
    IPathLoss::computePathLoss(transmission, arrival) was replaced by computeReceptionPathLoss(receiverRadio, transmission, arrival). It returns an IReceptionPathLoss, the path loss of that one reception, whose computePathLoss(frequency) gives the loss factor at any frequency, the way IAntenna::getGain() returns an IAntennaGain. Together with the transmission's transmitter radio, the receiver radio identifies the link, so a path loss can now keep per-link state (for example a shadowing that is correlated over distance). Both medium analog models call it once per reception: ScalarMediumAnalogModel evaluates the result at the center frequency, DimensionalMediumAnalogModel across the band, in place of the computeDistancePathLoss() it called before. A path loss with per-link state resolves that state in the call, and the returned object holds values only, so the value of a reception does not depend on when or how often the dimensional model evaluates it. The PathLossBase default evaluates computeDistancePathLoss() for the link's distance, so the results of models that only implement that form are unchanged. The FrequencyDependentAttenuationFunction constructor takes the reception's path loss as its second argument.
 
@@ -218,25 +218,25 @@ Notable backward incompatible changes are the following:
 
    This change requires the modification of C++ code that implements or calls computePathLoss(transmission, arrival), or constructs FrequencyDependentAttenuationFunction objects.
 
-25. MPLS follows the TTL rules of RFC 3032
+26. MPLS follows the TTL rules of RFC 3032
 
    The TTL field of every label stack entry was 0. A pushed entry now copies the TTL of the entry below it, or of the IPv4 header when it is the first label, and each LSR forwards a labeled packet with the incoming TTL minus one, as RFC 3032 section 2.4 and the Uniform Model of RFC 3443 state.
 
    The IPv4 TTL also counts the LSRs now. The ingress decrements it before it labels a datagram, and leaves a datagram with TTL 1 to IPv4, which reports it; a pop that empties the label stack writes the outgoing TTL into the IPv4 header. Before, a datagram left an LSP with the TTL it had at the ingress. An LSR now discards a labeled packet whose outgoing TTL is zero, with a packetDropped signal; before, no LSR looked at the TTL.
 
-26. MPLS works on Ethernet links
+27. MPLS works on Ethernet links
 
    An MPLS router with an Ethernet interface stopped the simulation at the first ARP packet, because the MPLS module threw on every protocol other than MPLS and IPv4. Such a packet now goes to the network layer. A labeled packet now also goes through the Ethernet encapsulation, with the ethertype 8847 hex. A LIB entry holds no next hop, so the frame goes to the broadcast address of the link; on a point-to-point link that is the one neighbor.
 
-27. MPLS knows the IPv4 Explicit NULL and the Implicit NULL labels
+28. MPLS knows the IPv4 Explicit NULL and the Implicit NULL labels
 
    An LSR now pops the label 0 at the bottom of the stack with no binding and forwards the datagram by its IPv4 header, and pops the stack where a swap would give the label 3, as RFC 3032 section 2.1 states. The LIB accepts these values as outgoing labels; before, a debug build refused the label 0, and the label 3 went onto the wire. The LIB now allocates labels from 16, after the reserved values; before, RSVP-TE and LDP got labels from 1.
 
-28. MPLS fragments a labeled datagram that is too big for the next link
+29. MPLS fragments a labeled datagram that is too big for the next link
 
    An LSR sent a labeled packet of any length, also onto a link with a smaller MTU. It now compares the length with the MTU of the outgoing interface, as RFC 3032 section 3 states. It fragments an IPv4 datagram with the DF bit clear, and each fragment carries the label stack; for a datagram with the DF bit set, it sends an ICMP Destination Unreachable message whose Next-Hop MTU is the MTU minus the label stack. The new parameter icmpModule of Mpls names the ICMP module, by default the one of the node's IPv4 layer.
 
-29. IPsec corrections to the AH and ESP packets
+30. IPsec corrections to the AH and ESP packets
 
    The first packet of an SA now carries the Sequence Number 1, as RFC 4302 and RFC 4303 state; before, it carried 0. The C++ method SecurityAssociation::getAndIncSeqNum() is now incrementAndGetSeqNum(), and returns the incremented value.
 
@@ -256,19 +256,19 @@ Notable backward incompatible changes are the following:
 
    An outbound ESP SA can now send dummy packets (RFC 4303 section 2.6), with the new DummyPacketInterval element of a SecurityAssociation: ESP packets with Next Header 59 and an empty payload, to the peer of the last packet that the SA protected. The receiver discards them without an error. For this, the IPsec module has the new gates ipIn and ipOut, which the IPv4 and IPv6 network layers connect to their dispatcher.
 
-30. IEEE 802.11 response queries require an explicit caller role
+31. IEEE 802.11 response queries require an explicit caller role
 
    Sender estimates now query the recipient's HT capabilities instead of the sender's own peer address. This correction can change response reservations, timeout estimates, and TXOP admission in existing HT simulations.
 
    External IRateSelection and IQosRateSelection implementations and callers must add ResponseQueryRole to their response queries. Use PREDICT for sender estimates. Use RESPOND for recipient responses. The migration guide supplies the signatures and links to the prediction limits.
 
-31. IEEE 802.11 ac interfaces also expose current HT support
+32. IEEE 802.11 ac interfaces also expose current HT support
 
    ac interfaces now use existing HT capability and management support alongside VHT and legacy OFDM. Advertised and negotiated HT operation remains limited to 20 MHz and four spatial streams. Added HT modes can change ACK/CTS candidates and adaptive rate steps, including steps between equal nominal rates.
 
    ac APs require a band with standard channel conversion, including simplified management. The supplied ac configurations now use "5 GHz (mapped 20 MHz)" at 5180 MHz. This frequency change can affect propagation results and fingerprints. See the migration guide for configuration changes and the IEEE 802.11 user guide for radio requirements and model limits.
 
-32. IEEE 802.11 Block Ack recipients preserve delivery order
+33. IEEE 802.11 Block Ack recipients preserve delivery order
 
    Basic Block Ack recipients now count sequence positions as buffer capacity. All fragments of one MSDU occupy one position. A one-position buffer can therefore accept both fragments and deliver the complete MSDU.
 
@@ -278,7 +278,7 @@ Notable backward incompatible changes are the following:
 
    The protected getEarliestCompleteMsduOrAMsduIfExists() helper remains available for one release but is deprecated. External subclasses retain its lookup behavior during that period. Delivery code must use the ordered release results instead. The migration guide explains the different ownership contracts.
 
-33. TCP takes the defaults of the RFCs, and gains LinuxTcp and LegacyTcp
+34. TCP takes the defaults of the RFCs, and gains LinuxTcp and LegacyTcp
 
    The TCP model was reworked. A flavour is now a choice of congestion control (ITcpCongestionControl) and of loss recovery (ITcpRecovery). The model gained CUBIC (TcpCubic), RACK-TLP loss detection, Proportional Rate Reduction, F-RTO, the undo of a spurious loss, Accurate ECN, TCP Fast Open, keepalive probes, the path MTU search of RFC 4821, and many parameters that select a behavior of Linux. The documentation of the Tcp module lists each RFC, what the model implements, and where it departs from the RFC.
 
@@ -317,7 +317,7 @@ Notable backward incompatible changes are the following:
 
    The connection has the new signals sndMax, delivered and deliveredCe.
 
-34. Packet classifiers answer a query without a change of state
+35. Packet classifiers answer a query without a change of state
 
    PacketClassifierBase::classifyPacket() is now a const function. The base class calls it from queries, such as canPushPacket() and canPullPacket(), and again from the operation that moves the packet, so it must not change the state of the module. The base class calls the new function handlePacketClassified() one time for each packet that goes through the module, and one time for each packet stream, before the packet leaves the module. A classifier that keeps state changes it there.
 
@@ -325,77 +325,57 @@ Notable backward incompatible changes are the following:
 
    A pull stream through a classifier now classifies its packet one time, at the start of the stream. Before, each call of the stream classified it.
 
-35. A token bucket classifier takes the tokens of a packet one time
+36. A token bucket classifier takes the tokens of a packet one time
 
    TokenBucketClassifier and MultiTokenBucketClassifier, and the classifiers that extend them in NED (SingleRateTwoColorClassifier, SingleRateThreeColorClassifier and DualRateThreeColorClassifier), removed the tokens of a packet in each query about the packet, and again when the packet went through. For example, a PacketServer asks canPushPacket() before it pushes a packet. In pull mode, each peek removed tokens. The classifier now removes the tokens one time, when the packet goes through. This can change the results of simulations in which a module asks a token bucket classifier about a packet before it pushes the packet.
 
-36. A weighted round-robin classifier moves its round only for a packet
+37. A weighted round-robin classifier moves its round only for a packet
 
    WrrClassifier moved its round forward in each query about a packet, for example when a module asked canPushPacket() before it pushed the packet. The packets then went to other consumers than the weights state. The classifier now moves its round only when a packet goes through. This can change the results of simulations in which a module asks a WrrClassifier about a packet before it pushes the packet.
 
-37. A dynamic classifier creates a branch only for a packet
+38. A dynamic classifier creates a branch only for a packet
 
    DynamicClassifier creates the branch of a class when the first packet of the class goes through, or when a module asks canPushPacket() about such a packet, because the answer depends on the branch. Before, its other queries created branches too. The classifier now refuses the reverseOrder parameter, because it creates its output gates in the order in which the classes appear. With reverseOrder = true, it created more branches than classes, and it sent packets of different classes into one branch.
 
-38. Packet schedulers answer a query without a change of state
+39. Packet schedulers answer a query without a change of state
 
    PacketSchedulerBase::schedulePacket() is now a const function. The base class calls it from queries, such as canPushSomePacket(), and again from the operation that moves the packet, so it must not change the state of the module. The base class calls the new function handlePacketScheduled() one time for each packet that goes through the module, and one time for each packet stream, when the module holds the packet and before the packet leaves the module. A scheduler that keeps state changes it there.
 
    This change requires the modification of schedulers implemented outside INET, which no longer compile until their schedulePacket() is const. See the migration guide.
 
-39. A label scheduler skips an empty input
+40. A label scheduler skips an empty input
 
    LabelScheduler read the labels of the packet that each input offered, and it crashed when an input had no packet. It now skips an empty input.
 
-40. A packet scheduler offers the packet that it serves
+41. A packet scheduler offers the packet that it serves
 
    canPullPacket() of PacketSchedulerBase returned the packet of the first input that had a packet, and pullPacket() served the input that schedulePacket() selected. The two agreed only for a PriorityScheduler without reverseOrder. A module that reads the offered packet before it pulls, such as TokenBasedServer, then acted on another packet than the one it pulled. Now canPullPacket() returns the packet of the input that schedulePacket() selects, and canPullSomePacket() asks whether that input has a packet. This affects WrrScheduler, ContentBasedScheduler, LabelScheduler, PacketScheduler, MarkovScheduler and PriorityScheduler with reverseOrder. The scheduler function of a PacketScheduler must not change any state, because the base class now calls it from queries too. This can change the results of simulations in which a module reads the packet that such a scheduler offers.
 
-41. Packet filters decide one time for each packet
+42. Packet filters decide one time for each packet
 
    PacketFilterBase called matchesPacket() and processPacket() again on each call of a push stream, so its verdict could change in the middle of a stream. It now decides at the start of the stream and keeps the verdict for the stream; processPacket() still runs for each packet instance of the stream. The base class calls the new function handlePacketFiltered() one time for each packet that goes through the filter or that the filter drops, and one time for each packet stream. A filter that keeps state, such as a dropper that counts packets, changes that state there, not in matchesPacket(), processPacket() or dropPacket(). See the migration guide.
 
-42. A filter in pull mode drops a packet in its own operations
+43. A filter in pull mode drops a packet in its own operations
 
    In pull mode, PacketFilterBase::canPullPacket(), a query, pulled and dropped each packet of its provider that did not match. The filter now drops such packets when they become available: when its provider reports a packet, and after each pull. canPullPacket() returns the packet of the provider if it matches. This can change the time of a drop in simulations that pull packets through a filter. ReceiveWithLifetime and EligibilityTimeFilter no longer support pull mode, because their verdict about a packet changes with time without an event of the module.
 
-43. An ordinal based dropper counts a streamed packet one time
+44. An ordinal based dropper counts a streamed packet one time
 
    OrdinalBasedDropper counted a packet in processPacket() and dropPacket(), which the filter base class calls for each packet instance of a packet stream. So it counted a streamed packet more than one time, and it dropped other packets than its dropsVector names. It now counts each packet one time, in handlePacketFiltered().
 
-44. A stream merger records a streamed packet one time
+45. A stream merger records a streamed packet one time
 
    StreamMerger recorded the sequence number of a passing packet in processPacket(), which the filter base class calls for each packet instance of a packet stream. It now records the number one time, in handlePacketFiltered().
 
-45. A random early detection dropper draws its random number in advance
+46. A random early detection dropper draws its random number in advance
 
    RedDropper updated its average queue length and drew a random number in matchesPacket(), so each query about a packet, such as canPushPacket(), changed the state of the dropper. It now decides with a stored random number, and it updates its state in handlePacketFiltered() when a packet goes through or is dropped; after a decision that used the stored number, it draws the next one. The dropper draws one more random number at initialization. Simulations with a RedDropper therefore give other results, with the same statistical behavior.
 
-46. A statistical rate limiter draws its random number in advance
+47. A statistical rate limiter draws its random number in advance
 
    StatisticalRateLimiter drew a random number in matchesPacket(), so in pull mode each query, such as canPullPacket(), drew a number and could give another answer. It now decides with a stored random number, and it draws the next one in handlePacketFiltered() after a decision that used the stored one. The limiter draws one more random number at initialization. Simulations with a StatisticalRateLimiter therefore give other results, with the same statistical behavior.
 
 Notable backward compatible changes are the following:
-
-13. IEEE 802.11 management publishes legacy rate state
-
-   Full and simplified management now populate the existing MIB rate records from local advertisements and accepted associations. Associated-AP Beacons refresh the STA's BSS and peer rates. Peer departure, association loss, and management stop clear the corresponding records. External models can query these records after rateStateChanged notifications. Current built-in rate selectors retain their existing behavior.
-
-   STA teardown clears BSS rates and peer HT and rate state before one notification. Management clears its association snapshot and Beacon timer first. Listeners see complete cleanup, and the local rate record remains available.
-
-   Association and valid associated-AP Beacons commit HT state and rate records before one notification. AP management clears its pending transaction first. STA management sets its Beacon timer first. Listeners can query the complete state from the callback.
-
-   Full AP departure completes the station downgrade before peer cleanup notification. Full AP stop clears station and association-ID tables, peer state, and BSS rates before one notification. Rate publication excludes BSS membership selectors from legacy rate records. Selector-based join checks remain outside this change.
-
-   Management rejects nonfinite numeric rates in abstract frames before ordered-set insertion. Previously, a NaN after a valid rate could escape validation and replace committed records. Malformed rate elements now preserve committed records and emit no rate notification. Wire-decoded rate octets cannot produce these nonfinite values.
-
-12. IEEE 802.11 MIB state commit operations
-
-   The MIB now supplies combined operations for peer HT state, BSS rates, and peer rates. Each operation completes its mutations before notification. AP cleanup can also clear station and association-ID tables in the same transition. Standalone setters retain their existing behavior. Local records remain available after cleanup.
-
-11. IEEE 802.11 mapped 5 GHz channel subset
-
-   The new "5 GHz (mapped 20 MHz)" band supplies standard channels 36, 40, 44, and 48 for HT management. The IEEE 802.11 user guide describes its indices, frequencies, and HT40 pair validation. The subset does not enable 40 MHz HT operation or provide a complete regulatory-domain model.
 
 1. IEEE 802.11 per-station rate statistics
 
@@ -427,12 +407,6 @@ Notable backward compatible changes are the following:
 
    Association release and bulk teardown remove both peer HT capabilities and rate sets before one notification. A listener can install replacement peer state from the callback; teardown does not remove that replacement. Direct HT or rate removal still emits its own notification if state changes. Empty teardown emits no signal. Existing configuration parameters stay unchanged.
 
-8. Radio medium purge without a timer
-
-   RadioMedium has a new transmissionPurgeMode parameter. The default, "timer", removes transmissions that can no longer interfere with a self-message scheduled at the interference end time of the oldest transmission that can still interfere, as before. "onTransmission" removes them whenever a new transmission is added instead, so the medium schedules no events of its own; this keeps the medium out of the event sequence entirely, which matters for a model whose fingerprints must not depend on the medium's bookkeeping. Interference is computed identically in both modes.
-
-   The protected removeNonInterferingTransmissions() of RadioMedium now only removes; it no longer reschedules the timer, which the timer handler does by calling the new scheduleRemoveNonInterferingTransmissionsTimer() after it. A subclass that calls or overrides removeNonInterferingTransmissions() and relied on the rescheduling must call that method itself.
-
 7. IEEE 802.11 selectable multiple protection in EDCA TXOPs
 
    EDCA TXOPs support selectable multiple protection. Single protection remains the default. Nominal timing uses the mode set's short interframe space (SIFS) unchanged after the first transmission step. The first step adds no interframe space. Multiple protection stops normally when another exchange cannot use a legal duration field.
@@ -440,6 +414,12 @@ Notable backward compatible changes are the following:
    For example, a 200 us PPDU within a 1024 us TXOP advertises 824 us of reservation. A TXOP is a transmission opportunity; a PPDU is one PHY transmission.
 
    The user guide explains nominal timing, zero-limit estimates, unused reservation time, and support limits. Multiple protection uses shared TXNAV. It does not check a complete exchange against the remaining budget.
+
+8. Radio medium purge without a timer
+
+   RadioMedium has a new transmissionPurgeMode parameter. The default, "timer", removes transmissions that can no longer interfere with a self-message scheduled at the interference end time of the oldest transmission that can still interfere, as before. "onTransmission" removes them whenever a new transmission is added instead, so the medium schedules no events of its own; this keeps the medium out of the event sequence entirely, which matters for a model whose fingerprints must not depend on the medium's bookkeeping. Interference is computed identically in both modes.
+
+   The protected removeNonInterferingTransmissions() of RadioMedium now only removes; it no longer reschedules the timer, which the timer handler does by calling the new scheduleRemoveNonInterferingTransmissionsTimer() after it. A subclass that calls or overrides removeNonInterferingTransmissions() and relied on the rescheduling must call that method itself.
 
 9. Correlated log-normal shadowing
 
@@ -449,7 +429,27 @@ Notable backward compatible changes are the following:
 
    Without a correlation distance, LogNormalShadowing draws one shadowing value per reception. With DimensionalMediumAnalogModel it drew one per evaluation of the attenuation, so the frequencies of one reception had independent values, and an evaluation repeated later gave a different one. With ScalarMediumAnalogModel, or with the dimensional model attenuating with the center frequency (the default), nothing changes.
 
-12. Explicit historical Basic Block Ack selection
+11. IEEE 802.11 mapped 5 GHz channel subset
+
+   The new "5 GHz (mapped 20 MHz)" band supplies standard channels 36, 40, 44, and 48 for HT management. The IEEE 802.11 user guide describes its indices, frequencies, and HT40 pair validation. The subset does not enable 40 MHz HT operation or provide a complete regulatory-domain model.
+
+12. IEEE 802.11 MIB state commit operations
+
+   The MIB now supplies combined operations for peer HT state, BSS rates, and peer rates. Each operation completes its mutations before notification. AP cleanup can also clear station and association-ID tables in the same transition. Standalone setters retain their existing behavior. Local records remain available after cleanup.
+
+13. IEEE 802.11 management publishes legacy rate state
+
+   Full and simplified management now populate the existing MIB rate records from local advertisements and accepted associations. Associated-AP Beacons refresh the STA's BSS and peer rates. Peer departure, association loss, and management stop clear the corresponding records. External models can query these records after rateStateChanged notifications. Current built-in rate selectors retain their existing behavior.
+
+   STA teardown clears BSS rates and peer HT and rate state before one notification. Management clears its association snapshot and Beacon timer first. Listeners see complete cleanup, and the local rate record remains available.
+
+   Association and valid associated-AP Beacons commit HT state and rate records before one notification. AP management clears its pending transaction first. STA management sets its Beacon timer first. Listeners can query the complete state from the callback.
+
+   Full AP departure completes the station downgrade before peer cleanup notification. Full AP stop clears station and association-ID tables, peer state, and BSS rates before one notification. Rate publication excludes BSS membership selectors from legacy rate records. Selector-based join checks remain outside this change.
+
+   Management rejects nonfinite numeric rates in abstract frames before ordered-set insertion. Previously, a NaN after a valid rate could escape validation and replace committed records. Malformed rate elements now preserve committed records and emit no rate notification. Wire-decoded rate octets cannot produce these nonfinite values.
+
+14. Explicit historical Basic Block Ack selection
 
    HCF adds blockAckVariant = "basic" for historical compatibility. Existing Block Ack, TXOP, QoS, and fragmentation demonstrations select it explicitly. Basic remains the default. HCF rejects unknown values and the reserved "compressed" value during initialization until Compressed exchanges exist. These checks also apply when Block Ack support is disabled. Basic originated in IEEE Std 802.11e-2005; IEEE Std 802.11-2024 reserves its type value.
 
