@@ -1,6 +1,6 @@
 # The data of a SYN without Fast Open (T12)
 
-Status: **ready for review** — item T12 of `plan/pending/tcp-open-items.md`, added by the owner on 2026-10-15.
+Status: **done** — item T12 of `plan/pending/tcp-open-items.md`, added by the owner on 2026-10-15; landed on master on 2026-10-15, the owner approved it.
 
 - Branch `topic/tcp-syn-data-drop`, on master `b389fdfd50`.
 - The decision numbers continue those of `plan/done/tcp-fastopen-syn-data.md` (D-145 onward).
