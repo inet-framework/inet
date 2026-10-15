@@ -1,0 +1,84 @@
+%description:
+Tests that a prefix Ipv6NetworkConfigurator generates from a template avoids the
+prefix that an explicit @address fixes on another link, even when the
+configurator processes the template link first.
+
+    h1 -- r -- h2
+
+r and h2 get the explicit addresses 2001:db8:0:1::1 and 2001:db8:0:1::2 on their
+common link, which fixes its prefix to 2001:db8:0:1::/64. Every other interface
+gets the template 2001:db8:0:x::/64. The configurator processes the h1--r link
+first; its generated prefix must not be 2001:db8:0:1::/64. h1 then pings h2.
+
+Expected: the two links get different prefixes and the ping reply comes back.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network ExplicitAddressPrefixTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        h1: StandardHost6;
+        r: Router6;
+        h2: StandardHost6;
+        configurator: Ipv6NetworkConfigurator;
+    connections:
+        h1.ethg++ <--> ethernetline <--> r.ethg++;
+        r.ethg++ <--> ethernetline <--> h2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = ExplicitAddressPrefixTest6
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+ned-path = .;../../../../src
+
+*.configurator.dumpLinks = true
+*.configurator.config = xml("<config>\
+    <interface hosts='r' towards='h2' address='2001:db8:0:1::1'/>\
+    <interface hosts='h2' address='2001:db8:0:1::2'/>\
+    <interface hosts='**' prefix='2001:db8:0:x::/64'/>\
+    </config>")
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+
+*.h1.numApps = 1
+*.h1.app[0].typename = "PingApp"
+*.h1.app[0].destAddr = "2001:db8:0:1::2"
+*.h1.app[0].startTime = 1s
+*.h1.app[0].count = 1
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%# the h1--r link avoids the prefix that the explicit addresses fix
+%contains: stdout
+ExplicitAddressPrefixTest6.h1.eth0 prefix=2001:db8:0:2::/64
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+ExplicitAddressPrefixTest6.h2.eth0 prefix=2001:db8:0:1::/64
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ping reply #0 arrived
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

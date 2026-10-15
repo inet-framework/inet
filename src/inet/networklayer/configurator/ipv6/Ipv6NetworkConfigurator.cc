@@ -762,21 +762,28 @@ void Ipv6NetworkConfigurator::assignAddresses(Topology& topology)
 
     std::vector<Ipv6Address> assignedPrefixes;
 
-    // Assign a unique prefix to each link, then derive global addresses for each interface on that link
-    for (auto& linkInfo : topology.linkInfos) {
-        if (linkInfo->interfaceInfos.empty())
-            continue;
-
-        // Find a prefix source for this link: the first configured interface that carries either a
-        // prefix template or an explicit @address (an explicit address seeds the link prefix too).
-        InterfaceInfo *templateInterface = nullptr;
+    // Find a prefix source for a link: the first configured interface that carries either a
+    // prefix template or an explicit @address (an explicit address seeds the link prefix too).
+    auto findPrefixSource = [] (LinkInfo *linkInfo) -> InterfaceInfo * {
         for (auto& ifInfo : linkInfo->interfaceInfos) {
             InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(ifInfo);
-            if (interfaceInfo->configure && (!interfaceInfo->prefix.isUnspecified() || !interfaceInfo->explicitAddress.isUnspecified())) {
-                templateInterface = interfaceInfo;
-                break;
-            }
+            if (interfaceInfo->configure && (!interfaceInfo->prefix.isUnspecified() || !interfaceInfo->explicitAddress.isUnspecified()))
+                return interfaceInfo;
         }
+        return nullptr;
+    };
+
+    // Reserve the prefixes that an explicit @address fixes before generating any from a template,
+    // so that a generated prefix avoids them whatever the order of the links.
+    for (auto& linkInfo : topology.linkInfos) {
+        InterfaceInfo *templateInterface = findPrefixSource(linkInfo);
+        if (templateInterface && templateInterface->prefix.isUnspecified())
+            assignedPrefixes.push_back(templateInterface->explicitAddress.getPrefix(templateInterface->prefixLength));
+    }
+
+    // Assign a unique prefix to each link, then derive global addresses for each interface on that link
+    for (auto& linkInfo : topology.linkInfos) {
+        InterfaceInfo *templateInterface = findPrefixSource(linkInfo);
         if (!templateInterface)
             continue;
 
@@ -784,11 +791,12 @@ void Ipv6NetworkConfigurator::assignAddresses(Topology& topology)
 
         // Derive the link prefix from the prefix template if present, otherwise from the explicit address.
         Ipv6Address linkPrefix;
-        if (!templateInterface->prefix.isUnspecified())
+        if (!templateInterface->prefix.isUnspecified()) {
             linkPrefix = generateUniquePrefix(templateInterface->prefix, prefixLength, templateInterface->specifiedGroups, assignedPrefixes);
+            assignedPrefixes.push_back(linkPrefix);
+        }
         else
             linkPrefix = templateInterface->explicitAddress.getPrefix(prefixLength);
-        assignedPrefixes.push_back(linkPrefix);
 
         EV_DEBUG << "Link gets prefix " << linkPrefix << "/" << prefixLength << endl;
 
