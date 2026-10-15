@@ -26,6 +26,7 @@ This plan collects the open TCP items in one list. For each item it gives the ev
 | T9 | The default checksum mode (gap 2) | defect with a blocked repair: RFC 9293 MUST-2 | `doc/project/evidence/model/tcp/results.md` |
 | T10 | The timer parameters in a common base type of the algorithms | structure | D-118 of `plan/done/tcp-parameter-groups.md` |
 | T11 | The packetdrill wrappers: steps 7 and 8, and the new scripts | open plan | `plan/done/packetdrill-tcp-protocol-tests.md` |
+| T12 | The data of a SYN without a Fast Open option | difference from Linux | found in T4 (`plan/pending/tcp-fastopen-syn-data.md`, D-143) |
 
 ### T1 — An active open fails after 75 s
 
@@ -88,6 +89,12 @@ RFC 9293 section 3.8.5 asks for urgent data: support (MUST-30), a sequence of ur
 
 `plan/done/packetdrill-tcp-protocol-tests.md` waited for the TCP branch, which is on master now. Its CI job runs the wrappers: on master `bba1db4c81`, the TCP suite of the protocol job has 333 tests, 329 PASS and 4 FAIL (expected); the job fails only in the IGMP, MLD, ND and RIP suites. Open: steps 7 and 8 of that plan (the evidence and the guide), and wrappers for the scripts that inet-gpl added since (INET has 306 wrappers, inet-gpl has 321 scripts in `tests/protocol/tcp`). Then that plan moves to `plan/done`. Size: small.
 
+### T12 — The data of a SYN without a Fast Open option
+
+The INET server keeps the data of a SYN that carries no Fast Open option, and delivers it after the handshake: RFC 9293 section 3.10.7.2 allows this ("any other control or text should be queued for processing later"). A Linux server drops such data (`tcp_conn_request()` keeps no data without an accepted Fast Open cookie), and the SYN-ACK acknowledges only the SYN, so the client sends the data again. T4 found it, because its module test needed a tester command that removes the data of a SYN to play a Linux server. RFC 7413 section 4.2.2 also asks a Fast Open server to drop the data of a SYN whose cookie is not valid; the step first checks what INET does then.
+
+Proposal, by the rule of section 6: `Tcp` keeps the data, as RFC 9293 allows; a new parameter makes `LinuxTcp` drop it, as Linux; the data of a SYN with an invalid cookie is dropped in each mode if INET keeps it now. Effect: only `LinuxTcp` and clients that send data on a SYN. Size: small.
+
 ## 3. Out of scope
 
 - The KERNEL_DRIFT rows of the packetdrill suite (12): Linux 7.1.3 itself does not pass these scripts.
@@ -106,11 +113,12 @@ Each item is a branch of its own, `topic/tcp-<item>`, in a worktree of the same 
 | 1 | T11 | small; it gives the later items the packetdrill wrappers in CI |
 | 2 | T9, step 1 | the check of the blocker decides the size of T9 |
 | 3 | T1, T2, T3, T4 | small defects; T4 starts with a test |
-| 4 | T6 | DRS first: it changes long transfers of `LinuxTcp` |
-| 5 | T5 | (a), then (b) and (c); the search is off by default |
-| 6 | T7 | it changes a default of `Tcp`, so the CUBIC baselines move |
-| 7 | T8 | large, with few users |
-| 8 | T9, steps 2 and 3 | the repair of the packet API, then the default |
+| 4 | T12 | small; found in T4, added by the owner on 2026-10-15 |
+| 5 | T6 | DRS first: it changes long transfers of `LinuxTcp` |
+| 6 | T5 | (a), then (b) and (c); the search is off by default |
+| 7 | T7 | it changes a default of `Tcp`, so the CUBIC baselines move |
+| 8 | T8 | large, with few users |
+| 9 | T9, steps 2 and 3 | the repair of the packet API, then the default |
 | — | T10 | closed (D-133) |
 
 ## 6. The decisions
