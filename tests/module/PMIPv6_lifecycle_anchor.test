@@ -1,0 +1,123 @@
+%description:
+A Local Mobility Anchor that is shut down and started again routes to a mobile
+node that is registered with it afterwards.
+
+Topology: cn -- anchor -- mag, and mn associated with mag over IEEE 802.11
+
+mn associates with mag at the start of the run, mag registers it with anchor,
+and anchor installs its route to mn's home network prefix. anchor is shut down
+at t=1 s and started at t=2 s. To make mag register mn again, mag is shut down
+at t=2.5 s and started at t=3 s, and mn associates with it again. cn pings mn's
+home address from t=5 s. The replies reach cn only if anchor installed its route
+for mn again when it accepted the second registration.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.StandardHost6;
+import inet.node.mipv6.WirelessHost6;
+import inet.node.pmipv6.LocalMobilityAnchor;
+import inet.node.pmipv6.MobileAccessGateway;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import ned.DatarateChannel;
+
+network Pmipv6LifecycleAnchorTest
+{
+    parameters:
+        **.ipv6.configurator.networkConfiguratorModule = "configurator";
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        scenarioManager: ScenarioManager;
+        configurator: Ipv6NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        cn: StandardHost6;
+        anchor: LocalMobilityAnchor;
+        mag: MobileAccessGateway;
+        mn: WirelessHost6;
+    connections allowunconnected:
+        cn.ethg++ <--> ethline <--> anchor.ethg++;
+        mag.ethg++ <--> ethline <--> anchor.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: config.xml
+
+<config>
+    <interface hosts="anchor" towards="cn" address="2001:db8:ff::1"/>
+    <interface hosts="anchor" towards="mag" address="2001:db8:0:1::1"/>
+    <interface hosts="mag" towards="anchor" address="2001:db8:0:1::2"/>
+</config>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: anchor.xml
+
+<scenario>
+    <at t="1"><shutdown module="anchor"/></at>
+    <at t="2"><startup module="anchor"/></at>
+    <at t="2.5"><shutdown module="mag"/></at>
+    <at t="3"><startup module="mag"/></at>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Pmipv6LifecycleAnchorTest
+ned-path = .;../../../../src
+sim-time-limit = 7s
+record-vector-results = false
+cmdenv-express-mode = false
+
+**.hasStatus = true
+*.scenarioManager.script = xmldoc("anchor.xml")
+
+*.configurator.config = xmldoc("config.xml")
+*.configurator.assignAddressesToHosts = false
+
+*.mag.ipv6.pmipv6.localMobilityAnchorAddress = "2001:db8:0:1::1"
+*.mag.ipv6.pmipv6.mobileNodeProfiles = xml("<mobileNodes><mobileNode id='mn1@example.com' homeNetworkPrefix='2001:db8:1::' prefixLength='64'/></mobileNodes>")
+
+*.mag.numWlanInterfaces = 1
+*.mag.wlan[*].mgmt.ssid = "MAG"
+*.mn.numWlanInterfaces = 1
+*.mn.wlan[*].address = "0A:AA:00:00:00:0B"
+**.mgmt.numChannels = 1
+**.wlan*.bitrate = 2Mbps
+
+*.mag.mobility.typename = "StationaryMobility"
+*.mag.mobility.initialX = 100m
+*.mag.mobility.initialY = 100m
+*.mn.mobility.typename = "StationaryMobility"
+*.mn.mobility.initialX = 120m
+*.mn.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.initFromDisplayString = false
+
+# mn's home address: the home network prefix and the EUI-64 of its MAC address
+*.cn.numApps = 1
+*.cn.app[0].typename = "PingApp"
+*.cn.app[0].destAddr = "2001:db8:1:0:8aa:ff:fe00:b"
+*.cn.app[0].startTime = 5s
+*.cn.app[0].sendInterval = 0.5s
+*.cn.forwarding = false
+*.mn.forwarding = false
+
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+
+*.cn.app[0].cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ping reply #0 arrived
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+<!> Error
+%#--------------------------------------------------------------------------------------------------------------

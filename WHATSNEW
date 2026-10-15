@@ -490,6 +490,16 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. Proxy Mobile IPv6 routes a mobile node again after a gateway or anchor restart
+
+   When a Mobile Access Gateway or a Local Mobility Anchor was shut down or
+   crashed and then started again, it accepted the mobile node's next
+   registration but installed no route for it, and the node stayed unreachable.
+   Both now forget their routes when the routing table deletes them and clear
+   their bindings on a shutdown or a crash, so the next attachment of the mobile
+   node sets up the session from scratch. Simulations in which no route of a
+   gateway or an anchor is deleted behave as before.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
