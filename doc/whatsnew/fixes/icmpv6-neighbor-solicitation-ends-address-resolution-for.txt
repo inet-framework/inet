@@ -1,0 +1,3 @@
+A Neighbor Solicitation ends address resolution for an INCOMPLETE entry
+
+A Neighbor Solicitation that set an INCOMPLETE Neighbour Cache entry STALE left the address-resolution timer running and the queued packets waiting. The timer then sent further multicast Neighbor Solicitations for a neighbour whose link-layer address was known and finally deleted the entry as a failed resolution, for example when two hosts resolve each other at the same moment. The solicitation now cancels the timer and sends the queued packets, as the state machine in RFC 4861 Appendix C gives it. Simulations in which neighbours resolve each other at the same moment produce different results, for example fewer failed address resolutions in examples/manetrouting/gpsr.
