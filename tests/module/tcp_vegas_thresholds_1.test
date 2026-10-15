@@ -1,0 +1,66 @@
+%description:
+Tests that the thresholds of TcpVegas take effect. With the defaults
+(alpha = 2, beta = 4, gamma = 1 segments), Vegas leaves slow start and
+keeps only a few extra segments in the network, so the bottleneck queue
+of 10 packets drops nothing. With thresholds of 1000 segments, Vegas
+never sees enough extra segments to stop the growth of cwnd, so the
+queue overflows. Both runs deliver all the data.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+output-scalar-file = "${resultdir}/${configname}-#${runnumber}.sca"
+cmdenv-event-banners=false
+cmdenv-express-mode=true
+
+*.testing=true
+
+network = inet.test.moduletest.lib.ClientServer
+total-stack = 7MiB
+
+*.server*.tcpType = "Tcp"
+*.client*.tcpType = "Tcp"
+**.tcp.tcpAlgorithmClass = "TcpVegas"
+**.tcp.conn-*.algorithm.alpha = ${alpha=2, 1000}
+**.tcp.conn-*.algorithm.beta = ${beta=4, 1000 ! alpha}
+**.tcp.conn-*.algorithm.gamma = ${gamma=1, 1000 ! alpha}
+
+## tcp apps
+**.client.numApps = 1
+**.client.app[0].typename = "TcpSessionApp"
+**.client.app[0].active = true
+**.client.app[0].localPort = -1
+**.client.app[0].connectAddress = "server"
+**.client.app[0].connectPort = 1000
+**.client.app[0].tOpen = 0.2s
+**.client.app[0].tSend = 0.4s
+**.client.app[0].sendBytes = 1000000B
+**.client.app[0].sendScript = ""
+**.client.app[0].tClose = 25s
+
+**.server.numApps = 1
+**.server.app[0].typename="TcpSinkApp"
+**.server.app[0].localPort = 1000
+
+# NIC configuration
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.configurator.config=xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-#0.sca
+scalar ClientServer.client.ppp[0].queue droppedPacketsQueueOverflow:count 0
+%contains: results/General-#0.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+%contains-regex: results/General-#1.sca
+scalar ClientServer\.client\.ppp\[0\]\.queue droppedPacketsQueueOverflow:count [1-9][0-9]*
+%contains: results/General-#1.sca
+scalar ClientServer.server.app[0] packetReceived:sum(packetBytes) 1e+06
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

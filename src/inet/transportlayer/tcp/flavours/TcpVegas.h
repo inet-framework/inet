@@ -34,6 +34,9 @@ class INET_API TcpVegas : public TcpAlgorithmBase
     /** Ctor */
     TcpVegas();
 
+    /** Reads the thresholds of Vegas */
+    virtual void initializeAlgorithm() override;
+
     /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 

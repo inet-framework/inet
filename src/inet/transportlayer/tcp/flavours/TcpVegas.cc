@@ -30,12 +30,26 @@ std::string TcpVegasStateVariables::detailedInfo() const
     out << TcpAlgorithmBaseStateVariables::detailedInfo();
     out << "ssthresh = " << ssthresh << "\n";
     out << "baseRTT = " << v_baseRTT << "\n";
+    out << "alpha = " << v_alpha << ", beta = " << v_beta << ", gamma = " << v_gamma << "\n";
     return out.str();
 }
 
 TcpVegas::TcpVegas()
     : TcpAlgorithmBase(), state((TcpVegasStateVariables *&)TcpAlgorithm::state)
 {
+}
+
+void TcpVegas::initializeAlgorithm()
+{
+    TcpAlgorithmBase::initializeAlgorithm();
+    int alpha = par("alpha");
+    int beta = par("beta");
+    int gamma = par("gamma");
+    if (alpha < 0 || gamma < 0 || beta < alpha)
+        throw cRuntimeError("TcpVegas: the thresholds must be 0 <= alpha <= beta and 0 <= gamma, but alpha=%d, beta=%d, gamma=%d", alpha, beta, gamma);
+    state->v_alpha = alpha;
+    state->v_beta = beta;
+    state->v_gamma = gamma;
 }
 
 // Same as TcpReno
@@ -151,7 +165,7 @@ void TcpVegas::receivedAckForUnackedData(uint32_t firstSeqAcked)
                         state->v_incr = 0;
                     }
                     else {
-                        if (diff > 1 * state->snd_mss) { // gamma
+                        if (diff > state->v_gamma * state->snd_mss) { // gamma
                             /* When actual rate falls below expected rate a certain value (gamma threshold)
                                Vegas changes from slow start to linear incr/decr */
 
@@ -175,10 +189,10 @@ void TcpVegas::receivedAckForUnackedData(uint32_t firstSeqAcked)
                     // Cong. avoidance
                     EV_DETAIL << "Vegas: Congestion avoidance: " << "\n";
 
-                    if (diff > 4 * state->snd_mss) { // beta
+                    if (diff > state->v_beta * state->snd_mss) { // beta
                         state->v_incr = -state->snd_mss;
                     }
-                    else if (diff < 2 * state->snd_mss) { // alpha
+                    else if (diff < state->v_alpha * state->snd_mss) { // alpha
                         state->v_incr = state->snd_mss;
                     }
                     else

@@ -36,6 +36,10 @@ struct TcpVegasStateVariables extends TcpAlgorithmBaseStateVariables
     bool v_incr_ss = false; // to control no incr. cwnd if during slowstart ssthresh has been exceeded before the rtt is over
     int32_t v_incr = 0; // incr/decr
     uint32_t v_worried = 0; // pkts a to retransmit due to vegas fine-grained timeout
+
+    uint32_t v_alpha = 2; // the lower threshold of the extra segments in congestion avoidance (the alpha parameter)
+    uint32_t v_beta = 4; // the upper threshold of the extra segments in congestion avoidance (the beta parameter)
+    uint32_t v_gamma = 1; // the threshold of the extra segments that ends slow start (the gamma parameter)
 };
 
 cplusplus(TcpVegasStateVariables) {{
