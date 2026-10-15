@@ -414,6 +414,10 @@ Notable backward incompatible changes are the following:
 
    A TCP listener keeps the data of a SYN that carries no Fast Open option and delivers it after the handshake, as RFC 9293 section 3.10.7.2 allows. A Linux listener drops such data, and the client sends it again after the SYN-ACK. The new parameter dropSynData selects the behavior of Linux; LinuxTcp sets it, and Tcp keeps the data. Simulations with LinuxTcp in which a client sends data on a SYN without Fast Open change. The data of a SYN with an invalid Fast Open cookie is dropped in each mode, as RFC 7413 section 4.2.2 asks, as before.
 
+52. Dynamic Right-Sizing of the TCP receive buffer, as Linux
+
+   With windowAutoTuning and a receive buffer (receiveBufferSize), a TCP receiver now grows its buffer in a long transfer as Linux does (Dynamic Right-Sizing). At each read of the application after one receive RTT, the bytes read in that RTT become the receive space when they are more, and the buffer grows to twice the space, more during slow start, up to the new parameter receiveBufferMax (32 MiB, as tcp_rmem[2] of Linux). In the autoRead mode, each delivery to the application is a read. The new parameter receiveBufferLowRtt (1 ms, as tcp_rcvbuf_low_rtt) selects a smaller growth for small RTTs. The receiver estimates the receive RTT as Linux, with and without timestamps, and the status of a connection reports it with the receive space (rcvRtt, rcvSpace of TcpStatusInfo). Simulations that turn windowAutoTuning on with a receive buffer change. LinuxTcp sets no receive buffer by default, so it changes only where a configuration sets one.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
