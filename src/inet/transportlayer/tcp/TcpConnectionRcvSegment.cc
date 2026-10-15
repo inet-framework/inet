@@ -698,8 +698,10 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                     // application owns, the buffer grows; a connection that the
                     // application did not accept yet keeps its buffer, and so does a
                     // buffer that SO_RCVBUF locked
-                    if (state->rcv_ssthresh > 0 && !state->rcvbufLocked && appOwned && !isToBeAccepted() && rcvBufOccupancy > state->rcvBufferSize) {
-                        state->rcvBufferSize = (uint32_t)std::min<uint64_t>(rcvBufOccupancy, UINT32_MAX);
+                    if (state->rcv_ssthresh > 0 && !state->rcvbufLocked && appOwned && !isToBeAccepted() && rcvBufOccupancy > state->rcvBufferSize
+                        && state->rcvBufferSize < state->rcvBufferMax)
+                    {
+                        state->rcvBufferSize = (uint32_t)std::min<uint64_t>(rcvBufOccupancy, state->rcvBufferMax);
                         if (state->maxRcvBuffer < state->rcvBufferSize)
                             state->maxRcvBuffer = state->rcvBufferSize;
                         EV_DETAIL << "Window auto-tuning: the receive buffer grows to " << state->rcvBufferSize << "\n";

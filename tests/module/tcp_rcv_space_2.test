@@ -1,0 +1,62 @@
+%description:
+Tests receiveBufferMax, the bound of the receive buffer (tcp_rmem[2] of
+Linux). The transfer is the one of tcp_rcv_space_1, but the bound is 500000
+bytes: Dynamic Right-Sizing grows the buffer to 241300 bytes as there, and
+then to the bound, where the window of 347520 bytes gives 549167; the next
+growths stop at the bound.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 2000000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.typename = "LinuxTcp"
+*.srv_app.statusRequestScript="1.5"
+*.srv_tcp.receiveBufferSize = 131072B
+*.srv_tcp.receiveBufferMax = 500000B
+sim-time-limit = 3s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[]: Dynamic Right-Sizing: 28960 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 241300
+%contains: stdout
+[]: Dynamic Right-Sizing: 57920 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 500000
+%contains: stdout
+[]: STATUS: skRcvbuf=500000 sndbufLimited=0
+%not-contains: stdout
+Window auto-tuning: the receive buffer grows to 1098334
+%#--------------------------------------------------------------------------------------------------------------

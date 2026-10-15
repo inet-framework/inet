@@ -185,6 +185,7 @@ struct TcpStateVariables
     uint32_t rcvqSpaceSeq = 0;      // DRS: the first unread byte at the start of the measurement (rcvq_space.seq)
     simtime_t rcvqSpaceTime = SIMTIME_ZERO; // DRS: the start of the measurement (rcvq_space.time)
     uint32_t rcvBufferLowRttUs = 1000; // DRS: the receive RTT below which the growth is proportional to the RTT (receiveBufferLowRtt parameter)
+    uint32_t rcvBufferMax = 33554432; // windowAutoTuning: the largest buffer that auto-tuning reaches (receiveBufferMax parameter, tcp_rmem[2])
 
     // whether ACK of our FIN has been received. Needed in FIN bit processing
     // to decide between transition to TIME-WAIT and CLOSING (set event code

@@ -1049,6 +1049,7 @@ void TcpConnection::configureStateVariables()
     if (state->rcvBufferSize > 0 && state->rcv_wnd > state->rcvBufferSize)
         state->rcv_wnd = state->rcv_adv = state->rcvBufferSize;
     state->rcvBufferLowRttUs = (uint32_t)tcpMain->par("receiveBufferLowRtt").doubleValueInUnit("us");
+    state->rcvBufferMax = (uint32_t)std::min<double>(tcpMain->par("receiveBufferMax").doubleValueInUnit("B"), UINT32_MAX);
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
     state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
     state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks");
@@ -3406,7 +3407,8 @@ void TcpConnection::growRcvBuffer(uint32_t newSpace)
     else
         grow = oldSpace > 0 && newSpace > oldSpace ? ((rcvwin << 1) * (newSpace - oldSpace)) / oldSpace : 0;
     rcvwin += grow + (seqGreater(oooHighestEnd, state->rcv_nxt) ? oooHighestEnd - state->rcv_nxt : 0);
-    uint64_t rcvbuf = (rcvwin << 8) / rcvScalingRatio;
+    // the buffer of that window, at most tcp_rmem[2] (receiveBufferMax)
+    uint64_t rcvbuf = std::min<uint64_t>((rcvwin << 8) / rcvScalingRatio, state->rcvBufferMax);
     if (rcvbuf > state->rcvBufferSize) {
         state->rcvBufferSize = (uint32_t)std::min<uint64_t>(rcvbuf, UINT32_MAX);
         if (state->maxRcvBuffer < state->rcvBufferSize)
