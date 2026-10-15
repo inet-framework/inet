@@ -44,6 +44,27 @@ simsignal_t Ipv6NeighbourDiscovery::startDadSignal = registerSignal("startDad");
 simsignal_t Ipv6NeighbourDiscovery::dadCompletedSignal = registerSignal("dadCompleted");
 simsignal_t Ipv6NeighbourDiscovery::dadFailedSignal = registerSignal("dadFailed");
 
+// RFC 4861 Section 7.2.2: the source of an address-resolution NS is the source of the
+// prompting packet if it is assigned to the interface, otherwise any assigned address.
+// A tentative address is not assigned (RFC 4862 Section 5.4), and an Optimistic address
+// MUST NOT be the source of an NS (RFC 4429 Section 3.2). Returns the unspecified
+// address if the interface has no assigned address.
+static Ipv6Address chooseNsSourceAddress(const Ipv6InterfaceData *ipv6Data, const Ipv6Address& dgSrcAddr)
+{
+    if (ipv6Data->hasAddress(dgSrcAddr) && !ipv6Data->isTentativeAddress(dgSrcAddr))
+        return dgSrcAddr;
+    const Ipv6Address& preferredAddr = ipv6Data->getPreferredAddress();
+    if (!preferredAddr.isUnspecified() && !ipv6Data->isTentativeAddress(preferredAddr))
+        return preferredAddr;
+    const Ipv6Address& linkLocalAddr = ipv6Data->getLinkLocalAddress();
+    if (!linkLocalAddr.isUnspecified() && !ipv6Data->isTentativeAddress(linkLocalAddr))
+        return linkLocalAddr;
+    for (int i = 0; i < ipv6Data->getNumAddresses(); i++)
+        if (!ipv6Data->isTentativeAddress(i) && ipv6Data->getAddress(i).isUnicast())
+            return ipv6Data->getAddress(i);
+    return Ipv6Address::UNSPECIFIED_ADDRESS;
+}
+
 Ipv6NeighbourDiscovery::Ipv6NeighbourDiscovery()
     : neighbourCache(*this)
 {
@@ -670,15 +691,16 @@ void Ipv6NeighbourDiscovery::initiateAddressResolution(const Ipv6Address& dgSrcA
     Ipv6Address nsSrcAddr;
 
     /*If the source address of the packet prompting the solicitation is the
-       same as one of the addresses assigned to the outgoing interface,*/
-    if (ie->getProtocolData<Ipv6InterfaceData>()->hasAddress(dgSrcAddr))
-        /*that address SHOULD be placed in the IP Source Address of the outgoing
-           solicitation.*/
-        nsSrcAddr = dgSrcAddr;
-    else
-        /*Otherwise, any one of the addresses assigned to the interface
-           should be used.*/
-        nsSrcAddr = ie->getProtocolData<Ipv6InterfaceData>()->getPreferredAddress();
+       same as one of the addresses assigned to the outgoing interface, that
+       address SHOULD be placed in the IP Source Address of the outgoing
+       solicitation. Otherwise, any one of the addresses assigned to the
+       interface should be used.*/
+    nsSrcAddr = chooseNsSourceAddress(ie->getProtocolData<Ipv6InterfaceData>(), dgSrcAddr);
+    if (nsSrcAddr.isUnspecified()) {
+        // makeTentativeAddressPermanent() starts address resolution when an address is assigned
+        EV_INFO << "No address assigned to the interface yet, address resolution waits for DAD\n";
+        return;
+    }
     ASSERT(ifID != -1);
     // Sending NS on specified interface.
     createAndSendNsPacket(nsTargetAddr, nsDestAddr, nsSrcAddr, ie);
@@ -706,6 +728,19 @@ void Ipv6NeighbourDiscovery::processArTimeout(cMessage *arTimeoutMsg)
     EV_INFO << "Max Multicast Solicitation:" << ie->getProtocolData<Ipv6InterfaceData>()->_getMaxMulticastSolicit() << endl;
 
     if (nce->numOfARNSSent < ie->getProtocolData<Ipv6InterfaceData>()->_getMaxMulticastSolicit()) {
+        // the source chosen for the first NS may have become tentative or been removed since
+        const auto *ipv6Data = ie->getProtocolData<Ipv6InterfaceData>();
+        if (!ipv6Data->hasAddress(nce->nsSrcAddr) || ipv6Data->isTentativeAddress(nce->nsSrcAddr)) {
+            Ipv6Address dgSrcAddr = nce->pendingPackets.empty() ? Ipv6Address::UNSPECIFIED_ADDRESS : nce->pendingPackets.front()->peekAtFront<Ipv6Header>()->getSrcAddress();
+            nce->nsSrcAddr = chooseNsSourceAddress(ipv6Data, dgSrcAddr);
+            if (nce->nsSrcAddr.isUnspecified()) {
+                // makeTentativeAddressPermanent() restarts address resolution
+                EV_INFO << "No address assigned to the interface any more, address resolution waits for DAD\n";
+                nce->arTimer = nullptr;
+                delete arTimeoutMsg;
+                return;
+            }
+        }
         EV_INFO << "Sending another Address Resolution NS message" << endl;
         Ipv6Address nsDestAddr = nsTargetAddr.formSolicitedNodeMulticastAddress();
         createAndSendNsPacket(nsTargetAddr, nsDestAddr, nce->nsSrcAddr, ie);
@@ -895,6 +930,14 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
         sendUnsolicitedNa(ie, tentativeAddr);
 
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
+
+    // start the address resolution that waited for an assigned address (see initiateAddressResolution())
+    for (auto& elem : neighbourCache) {
+        Neighbour& nce = elem.second;
+        if (elem.first.interfaceID == ie->getInterfaceId() && nce.reachabilityState == Ipv6NeighbourCache::INCOMPLETE
+                && nce.arTimer == nullptr && !nce.pendingPackets.empty())
+            initiateAddressResolution(nce.pendingPackets.front()->peekAtFront<Ipv6Header>()->getSrcAddress(), &nce);
+    }
 
     if (!tentativeAddr.isLinkLocal()) {
         // DAD completed for a global address -- nothing else to do
