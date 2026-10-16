@@ -1,6 +1,6 @@
 # HyStart++ (T7)
 
-Status: **done** — item T7 of `plan/pending/tcp-open-items.md`, decision D-130; landed on master on 2026-10-16, the owner approved it.
+Status: **reverted** — item T7 of `plan/pending/tcp-open-items.md`, decision D-130; landed on master on 2026-10-16, the owner approved it; reverted on 2026-10-16 by decision D-167 of the same plan (`1d57475d67`).
 
 - Branch `topic/tcp-hystartpp`, on master `5f909b20f1`.
 - The decision numbers continue those of `plan/done/tcp-path-mtu-search.md` (D-157 onward).

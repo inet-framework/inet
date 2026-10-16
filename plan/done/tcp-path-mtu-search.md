@@ -1,6 +1,6 @@
 # The path MTU search of RFC 4821 (T5)
 
-Status: **done** — item T5 of `plan/pending/tcp-open-items.md`, decision D-134; landed on master on 2026-10-16, the owner approved it.
+Status: **reverted** — item T5 of `plan/pending/tcp-open-items.md`, decision D-134; landed on master on 2026-10-16, the owner approved it; reverted on 2026-10-16 by decision D-167 of the same plan (`4f0b96c9a7`).
 
 - Branch `topic/tcp-path-mtu-search`, on master `36952dc48a`.
 - The decision numbers continue those of `plan/done/tcp-linux-receive-buffer.md` (D-153 onward).

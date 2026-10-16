@@ -1,6 +1,6 @@
 # Urgent data (T8)
 
-Status: **done** — item T8 of `plan/pending/tcp-open-items.md`, decision D-131; landed on master on 2026-10-16, the owner approved it.
+Status: **cut** — item T8 of `plan/pending/tcp-open-items.md`, decision D-131; landed on master on 2026-10-16, the owner approved it; on 2026-10-16 only `urgentOutOfBand` remained, by decision D-169 of the same plan (`95b8fe0489`, inet-gpl `fba4616`).
 
 - Branch `topic/tcp-urgent-data`, on master `bbad103b0f`.
 - The decision numbers continue those of `plan/done/tcp-hystartpp.md` (D-161 onward).
