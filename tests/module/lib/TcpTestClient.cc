@@ -421,7 +421,7 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             if (msg->getKind() >= TEST_OPEN_EXTRA && msg->getKind() < TEST_OPEN_EXTRA + NUM_EXTRA) {
                 int i = msg->getKind() - TEST_OPEN_EXTRA;
                 const char *localAddress = par("localAddress");
-                const char *connectAddress = par("connectAddress");
+                const char *connectAddress = *extraPar("connectAddress", i).stringValue() ? extraPar("connectAddress", i).stringValue() : par("connectAddress").stringValue();
                 extraSockets[i].bind(*localAddress ? L3Address(localAddress) : L3Address(), extraPar("localPort", i));
                 extraSockets[i].setAutoRead(par("autoRead"));
                 if (extraPar("active", i))
