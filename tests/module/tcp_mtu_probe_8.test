@@ -1,0 +1,73 @@
+%description:
+Tests a lost probe of the path MTU search (mtuProbing = 2) with TcpReno without
+SACK, which starts the fast retransmit of RFC 5681 recovery. The scenario is that of
+tcp_mtu_probe_2: the probe of MTU 1263 is dropped (B040), and at the third
+duplicate ACK only the probe is lost. The search continues below it, and the
+probe goes again as segments of the MSS (B056, B057), without a congestion
+response, so the next probe (MTU 1144) follows, as in tcp_mtu_probe_2.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.srv_app.sendScript="1.0 60000"
+*.srv_tcp.mss = 600
+*.cli_tcp.mss = 1460
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.mtuProbing = 2
+*.srv_tcp.baseMss = 512
+*.srv_tcp.pathMtu = 1500
+*.tcptester.pathMtu = 1100
+*.*_tcp.sackSupport = false
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.021 B040] A.1000 < B.2000: A 23687:24910(1223) ack 1 win 16384 # dropping, larger than the path MTU
+[1.021 B041] A.1000 < B.2000: A 24910:25896(986) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1026 is acknowledged, snd_mss is 986
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1263 is lost, the search runs from 1026 to 1262
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the lost MTU probe goes again as segments of the MSS, without a congestion response
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.025 B056] A.1000 < B.2000: A 23687:24673(986) ack 1 win 16384 
+[1.025 B057] A.1000 < B.2000: A 24673:24910(237) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1144 is lost, the search runs from 1026 to 1143
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+snd_mss is 1223
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

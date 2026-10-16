@@ -3,8 +3,13 @@ Tests a lost probe of the path MTU search (mtuProbing = 2). The scenario is that
 of tcp_mtu_probe_1, but the path drops each packet larger than 1100 bytes
 without an ICMP error (the pathMtu of the tester). The probe of MTU 1026 gets
 through and raises the MSS to 986; the probe of 1223 bytes (MTU 1263) is
-dropped (B040). The fast retransmit of its range shows the loss, so the search
-continues below it (1026 to 1262), and the MSS stays 986.
+dropped (B040). The third duplicate ACK, with the probe as the first
+unacknowledged segment, shows that only the probe is lost (RFC 4821 section
+7.6.2, Linux tcp_fastretrans_alert()): the search continues below it (1026 to
+1262), and the probe goes again as segments of the MSS (B056, B057), without a
+congestion response (tcp_simple_retransmit()). The window stays, so the search
+goes on: the probe of MTU 1144 is dropped too (1026 to 1143). The MSS stays
+986. The algorithm is TcpNewReno with SACK (RFC 6675).
 
 %inifile: omnetpp.ini
 [General]
@@ -51,6 +56,16 @@ RFC 4821: the MTU probe of 1026 is acknowledged, snd_mss is 986
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 RFC 4821: the MTU probe of 1263 is lost, the search runs from 1026 to 1262
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the lost MTU probe goes again as segments of the MSS, without a congestion response
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.025 B056] A.1000 < B.2000: A 23687:24673(986) ack 1 win 16384 
+[1.025 B057] A.1000 < B.2000: A 24673:24910(237) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: the MTU probe of 1144 is lost, the search runs from 1026 to 1143
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 snd_mss is 1223

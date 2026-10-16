@@ -426,6 +426,19 @@ class INET_API TcpConnection : public SimpleModule
     virtual void retransmitOneSegment(bool called_at_rto);
 
     /**
+     * Where a loss recovery would start: true when only the MTU probe is lost, that is, when
+     * it is the first unacknowledged segment, outside a reduction of the window (RFC 4821
+     * section 7.6.2, Linux tcp_fastretrans_alert())
+     */
+    virtual bool isMtuProbeLost() const;
+
+    /**
+     * The search continues below the lost MTU probe, and the probe goes again at once, as
+     * segments of the MSS (Linux tcp_mtup_probe_failed() and tcp_simple_retransmit())
+     */
+    virtual void retransmitLostMtuProbe();
+
+    /**
      * RFC 8985 section 7.3 loss probe: send one segment of new data if the data
      * and the receive window allow it, else the FIN again, else the last segment
      * again. Returns true if a segment was sent.

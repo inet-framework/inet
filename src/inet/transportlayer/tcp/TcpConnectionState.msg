@@ -324,6 +324,8 @@ struct TcpStateVariables
     uint32_t mtupProbeSeqStart = 0;         // the first sequence number of that probe
     uint32_t mtupProbeSeqEnd = 0;           // the sequence number after that probe
     uint32_t mtupProbeBytes = 0;            // the payload of the probe that sendSegment() makes now, beyond snd_mss
+    bool mtupRepair = false;                // a lost probe went again without a congestion response: no loss recovery starts until snd_una reaches mtupRepairEnd
+    uint32_t mtupRepairEnd = 0;             // the sequence number after that probe
     uint32_t pathMtu = 0;                   // the MTU of the route, the ceiling of a success of the search (Linux icsk_pmtu_cookie)
     // declared here for the code above that already uses it:
     uint32_t maxPacketsOut = 0;    // peak segments in flight in the current window of data (Linux max_packets_out); drives the cwnd-limited slow-start gate

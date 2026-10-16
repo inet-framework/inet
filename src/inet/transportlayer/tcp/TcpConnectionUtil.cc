@@ -2360,6 +2360,39 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
         state->rexmit = false;
 }
 
+bool TcpConnection::isMtuProbeLost() const
+{
+    return state->mtupProbeSize != 0 && state->snd_una == state->mtupProbeSeqStart && deriveLinuxCaState() < 2;
+}
+
+void TcpConnection::retransmitLostMtuProbe()
+{
+    uint32_t probeEnd = state->mtupProbeSeqEnd;
+    mtuProbeFailed();
+
+    // the probe took its bytes of the window, so its retransmission adds none: the lost
+    // mark takes it out of the bytes in flight, as tcp_mark_skb_lost() does
+    rexmitQueue->markLost(state->snd_una, probeEnd);
+    if (state->ect)
+        state->rexmit = true;
+    uint32_t oldSndNxt = state->snd_nxt;
+    state->snd_nxt = state->snd_una;
+    while (seqLess(state->snd_nxt, probeEnd)) {
+        uint32_t fromSeq = state->snd_nxt;
+        if (sendSegment(std::min(state->snd_effmss, probeEnd - fromSeq)) == 0)
+            break;
+        tcpAlgorithm->segmentRetransmitted(fromSeq, state->snd_nxt);
+    }
+    EV_INFO << "RFC 4821: the lost MTU probe goes again as segments of the MSS, without a congestion response\n";
+    if (seqGreater(oldSndNxt, state->snd_nxt))
+        state->snd_nxt = oldSndNxt;
+    tcpAlgorithm->ackSent();
+    if (state->sack_enabled)
+        state->highRxt = rexmitQueue->getHighestRexmittedSeqNum();
+    if (state->ect)
+        state->rexmit = false;
+}
+
 bool TcpConnection::sendTlpProbe()
 {
     // RFC 8985 section 7.3, Linux tcp_send_loss_probe(): send new data if a segment

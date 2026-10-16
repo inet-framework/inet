@@ -72,11 +72,20 @@ void Rfc5681Recovery::receivedDuplicateAck()
     // inflated: cwnd minus the bytes in flight gives the same room to send as the
     // RFC's inflated cwnd minus FlightSize.
 
+    // a lost MTU probe went again: no loss recovery until the ACK passes it, and the
+    // duplicate ACKs make room for new data, as in the state Loss of Linux
+    if (algorithm->isMtuProbeRepairPending()) {
+        algorithm->sendData(false);
+        return;
+    }
+
     //"
     // 2. When the third duplicate ACK is received, a TCP MUST set ssthresh
     //    to no more than the value given in equation (4).
     //"
     if (state->dupacks == state->dupthresh && !state->lossRecovery) {
+        if (algorithm->repairLostMtuProbe())
+            return;
         EV_INFO << "Reno on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Fast Recovery:";
 
         //"
