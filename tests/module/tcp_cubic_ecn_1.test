@@ -1,0 +1,40 @@
+%description:
+TcpCubic reacts to an ECN-Echo with its own decrease (RFC 9438 section 4.6,
+as Linux tcp_enter_cwr()): the tester CE-marks segment a12, and at the ACK
+with ECE, cwnd is 10 segments; CUBIC sets ssthresh and cwnd to beta * cwnd,
+7 segments (7168 bytes), where the halving of RFC 3168 gives 5.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.cli_tcp.**.cmdenv-log-level=DETAIL
+**.cmdenv-log-level=OFF
+
+*.*_tcp.tcpAlgorithmClass = "TcpCubic"
+*.*_tcp.ecnWillingness = true
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=32768B # 32 1024-byte segments
+
+*.tcptester.script="a12 ce"  # CE-mark a segment
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+Loss at cwnd=10 segments, in flight=10 segments
+cwnd = cwnd / 2: received ECN-Echo ACK... new cwnd = 7168
+ssthresh = cwnd: received ECN-Echo ACK... new ssthresh = 7168
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

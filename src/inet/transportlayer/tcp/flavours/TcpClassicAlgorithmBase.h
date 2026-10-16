@@ -68,6 +68,9 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     /** The loss window that an expired retransmission timer restarts slow start from. */
     virtual uint32_t calculateCwndForRto() { return state->snd_mss; }
 
+    /** The cwnd and ssthresh of the reaction to an ECN-Echo (RFC 3168 section 6.1.2: cwnd halves, at least 1 MSS). */
+    virtual uint32_t calculateSsthreshForEce() { return std::max(state->snd_cwnd / 2, state->snd_mss); }
+
     /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TcpEventCode& event) override;
 

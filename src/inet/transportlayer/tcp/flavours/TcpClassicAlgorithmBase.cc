@@ -196,7 +196,7 @@ bool TcpClassicAlgorithmBase::processEce(uint32_t numBytesAcked)
         // the slow-start threshold, ssthresh, if it has been decreased
         // within the last round trip time."
         if (simTime() - state->eceReactionTime > state->srtt) {
-            state->snd_cwnd = std::max(state->snd_cwnd / 2, state->snd_mss);
+            state->snd_cwnd = calculateSsthreshForEce();
             conn->emit(cwndSignal, state->snd_cwnd);
             EV_INFO << "cwnd = cwnd / 2: received ECN-Echo ACK... new cwnd = " << state->snd_cwnd << "\n";
 
