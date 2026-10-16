@@ -1,6 +1,6 @@
 # The receive space of the Linux mode (T6)
 
-Status: **ready for review** — item T6 of `plan/pending/tcp-open-items.md`, decision D-134; the owner answered the questions of section 5 on 2026-10-15.
+Status: **done** — item T6 of `plan/pending/tcp-open-items.md`, decision D-134; the owner answered the questions of section 5 on 2026-10-15; landed on master on 2026-10-16, the owner approved it.
 
 - Branch `topic/tcp-receive-space`, on master `380a55880c`.
 - The decision numbers continue those of `plan/done/tcp-syn-data-drop.md` (D-146 onward).
@@ -30,7 +30,7 @@ With `windowAutoTuning` (on in `LinuxTcp`), INET grows the receive buffer in two
 | 5 ✅ | `tcp: add: the bound of the receive buffer` | `tcp_rcv_space_2` (new) |
 | 6 ✅ | `doc: change: the release note of the receive space` | WHATSNEW entry 52 |
 | 7 ✅ | `plan: change: record the receive space of the Linux mode` | — |
-| 8 | (inet-gpl) `TCP_INFO` reports `tcpi_rcv_rtt` and `tcpi_rcv_space` | after the landing, because inet-gpl builds against INET master (D-150) |
+| 8 ✅ | (inet-gpl) `PacketDrillApp: TCP_INFO reports the receive RTT and space` | after the landing, because inet-gpl builds against INET master (D-150) |
 
 The collapse of `tcp_prune_queue()`, and the pad and the slab classes of a small packet, become items of their own (section 5, Q4).
 
@@ -62,6 +62,8 @@ The values of `tcp_rcv_space_1` are those of the formula of Linux 7.1, computed 
 | Statistics of the 38 TCP working directories, against statistics `ebda488` | 122 KEEP, 4 SKIP (expected), no file changes: no example turns auto-tuning on with a receive buffer |
 | Packetdrill suite of inet-gpl `4a3894d` | 303 MATCH, 12 KERNEL_DRIFT, 3 UNSUPPORTED_FEATURE; each of the 318 verdicts as before |
 | INET's TCP protocol suite with inet-gpl | 333 tests: 329 PASS, 4 FAIL (expected) |
+
+The landing on 2026-10-16: master moved to `6307e1d820` by a fast-forward. Step 8 is inet-gpl `0dfbcae` (`PacketDrillApp: TCP_INFO reports the receive RTT and space`), on inet-gpl master `5056974`. With it, built against the landed INET, the packetdrill suite gives 303 MATCH, 12 KERNEL_DRIFT and 3 UNSUPPORTED_FEATURE, with each of the 318 verdicts as before, and INET's TCP protocol suite gives 329 PASS and 4 FAIL (expected). No script uses the two new fields yet.
 
 A finding for the owner: `LinuxTcp` turns `windowAutoTuning` on, but sets no receive buffer, and auto-tuning acts only with one; so with the defaults of `LinuxTcp`, neither the growth of D-114 nor DRS acts. Linux gives each socket the buffer `tcp_rmem[1]`, 128 KiB. A trial with `receiveBufferSize = 131072B` in `LinuxTcp` changed no verdict of the packetdrill suite, and no example or baseline uses `LinuxTcp`.
 

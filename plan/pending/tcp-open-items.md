@@ -27,8 +27,8 @@ This plan collects the open TCP items in one list. For each item it gives the ev
 | T10 | The timer parameters in a common base type of the algorithms | structure | D-118 of `plan/done/tcp-parameter-groups.md` |
 | T11 | The packetdrill wrappers: steps 7 and 8, and the new scripts | open plan | `plan/done/packetdrill-tcp-protocol-tests.md` |
 | T12 | The data of a SYN without a Fast Open option | difference from Linux | found in T4 (`plan/done/tcp-fastopen-syn-data.md`, D-143) |
-| T13 | The collapse of the receive queue (`tcp_prune_queue()`) | difference from Linux | D-149 of `plan/pending/tcp-receive-space.md` |
-| T14 | The pad and the slab classes of the truesize of a small packet | difference from Linux | D-149 of `plan/pending/tcp-receive-space.md` |
+| T13 | The collapse of the receive queue (`tcp_prune_queue()`) | difference from Linux | D-149 of `plan/done/tcp-receive-space.md` |
+| T14 | The pad and the slab classes of the truesize of a small packet | difference from Linux | D-149 of `plan/done/tcp-receive-space.md` |
 
 ### T1 — An active open fails after 75 s
 
@@ -158,4 +158,4 @@ The owner approved the plan and these answers on 2026-10-15, with one rule for a
 | T3 | `topic/tcp-dumb-fin` | done, landed 2026-10-15 (plan `plan/done/tcp-dumb-fin.md`): the timer of DumbTcp stops when all is acknowledged (RFC 6298 section 5.2); six fingerprints and one statistics file move by the FIN resend that is gone. |
 | T4 | `topic/tcp-fastopen-syn-data` | done, landed 2026-10-15 (plan `plan/done/tcp-fastopen-syn-data.md`): `LinuxTcp` already sends all the SYN data at once, as Linux; the real defect was Nagle, which held a retransmitted partial segment after a go-back until the next timeout. 27 fingerprints and 11 statistics files move. |
 | T12 | `topic/tcp-syn-data-drop` | done, landed 2026-10-15 (plan `plan/done/tcp-syn-data-drop.md`): the parameter `dropSynData` drops the data of a SYN without Fast Open, as Linux; `LinuxTcp` sets it, `Tcp` keeps the data (RFC 9293); the case of an invalid cookie was already right. No baseline moves. |
-| T6 | `topic/tcp-receive-space` | ready for review 2026-10-15 (plan `plan/pending/tcp-receive-space.md`): the receive RTT, Dynamic Right-Sizing and the bound of the receive buffer of Linux; no baseline moves; T13 and T14 split off. |
+| T6 | `topic/tcp-receive-space` | done, landed 2026-10-16 (plan `plan/done/tcp-receive-space.md`): the receive RTT, Dynamic Right-Sizing and the bound of the receive buffer of Linux; no baseline moves; T13 and T14 split off. |
