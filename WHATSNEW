@@ -402,6 +402,12 @@ Notable backward incompatible changes are the following:
 
    A TCP algorithm implemented outside INET needs a simple module type that extends TcpAlgorithm, and Define_Module() in place of Register_Class(); without the type, the connection stops with an error. Its initialize() is now initializeAlgorithm(), and the cancelEvent() helper of TcpAlgorithmBase is now cancelTimer(). See the migration guide.
 
+50. A packet drop reason for datagrams that are too big
+
+   PacketDropReason gains PACKET_TOO_BIG, for a datagram that is larger than the MTU of the next link and may not be fragmented, with the result filter packetDropReasonIsPacketTooBig. Ipv4 reports it for a datagram with the Don't Fragment flag set, and Mpls for a labeled datagram with that flag; both reported OTHER_PACKET_DROP before. Ipv4 records the new statistic packetDropPacketTooBig.
+
+   Ipv4's packetDropUndefined no longer counts these drops, so its results change in simulations where routers drop such datagrams, for example examples/inet/tcp_pmtud and examples/quic/dplpmtud. A PacketDropVisualizer label that shows the reason now shows 16 or PACKET_TOO_BIG instead of -1 or OTHER_PACKET_DROP.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
