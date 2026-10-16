@@ -95,8 +95,14 @@ void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     //
     // where, as discussed above, FlightSize is the amount of outstanding
     // data in the network."
-    state->ssthresh = calculateSsthreshForRto();
-    conn->emit(ssthreshSignal, state->ssthresh);
+    //
+    // A later timeout of the same segment keeps ssthresh: "the given segment has
+    // not yet been resent" is false, and the window is then 1 segment (Linux
+    // tcp_enter_loss() also sets ssthresh only at the first timeout).
+    if (state->rexmit_count == 1) {
+        state->ssthresh = calculateSsthreshForRto();
+        conn->emit(ssthreshSignal, state->ssthresh);
+    }
 
     state->snd_cwnd = calculateCwndForRto();
     conn->emit(cwndSignal, state->snd_cwnd);

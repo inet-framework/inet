@@ -1,0 +1,52 @@
+%description:
+TcpCubic keeps ssthresh at a second retransmission timeout of the same
+segment (RFC 5681 section 3.1: equation (4) applies only when "the given
+segment has not yet been resent by way of the retransmission timer"). The
+tester drops the flight of 8 segments at t=1.213 and the first
+retransmission of its first segment. At the first timeout, CUBIC sets
+ssthresh to beta * cwnd (5 segments); at the second timeout, cwnd is 1
+segment, and ssthresh stays 5 segments.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+*.cli_tcp.**.cmdenv-log-level=DETAIL
+**.cmdenv-log-level=OFF
+
+*.*_tcp.tcpAlgorithmClass = "TcpCubic"
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=16384B # 16 1024-byte segments
+
+*.tcptester.script="a10 delete; a11 delete; a12 delete; a13 delete; a14 delete; a15 delete; a16 delete; a17 delete; a18 delete"  # the flight of 8 segments at t=1.213, and its first retransmission
+
+include ../../lib/defaults.ini
+
+%# the first timeout: ssthresh = beta * cwnd
+%contains: stdout
+Loss at cwnd=8 segments, in flight=8 segments
+Begin Slow Start: resetting cwnd to 1024, ssthresh=5120
+
+%# the second timeout of the same segment: ssthresh stays
+%contains: stdout
+Performing retransmission #2; increasing RTO from 2s  to 4s, and cancelling RTT measurement
+recover=15360
+Loss Recovery terminated.
+Begin Slow Start: resetting cwnd to 1024, ssthresh=5120
+
+%contains: stdout
+[4.427 B010] A.1000 < B.2000: A ack 16385 win 16384
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
