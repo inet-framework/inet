@@ -1,0 +1,69 @@
+%description:
+Tests a probe of the path MTU search (mtuProbing = 2) that another
+retransmission ends without a result. The scenario is that of tcp_mtu_probe_1,
+but the tester deletes B020, the segment before the probe B021 (MTU 1026). The
+probe arrives, and the third duplicate ACK starts a fast retransmit of B020
+(B038). As Linux __tcp_retransmit_skb() ("Inconclusive MTU probe"), this
+retransmission ends the probe: the ACK of the probe later raises no MSS, and the
+bounds of the search stay. Only a probe that is the first unacknowledged segment
+where a loss recovery starts is lost (tcp_mtu_probe_2).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.srv_app.sendScript="1.0 40000"
+*.srv_tcp.mss = 600
+*.cli_tcp.mss = 1460
+*.*_tcp.delayedAcksEnabled = false
+*.srv_tcp.mtuProbing = 2
+*.srv_tcp.baseMss = 512
+*.srv_tcp.pathMtu = 1500
+*.tcptester.script="b20 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.017 B020] A.1000 < B.2000: A 11301:11901(600) ack 1 win 16384 # deleting
+[1.017 B021] A.1000 < B.2000: A 11901:12887(986) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.021 B038] A.1000 < B.2000: A 11301:11901(600) ack 1 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: sent an MTU probe of 986 bytes (MTU 1026)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RFC 4821: a retransmission ends the MTU probe of 1026 without a result
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+RFC 4821: the MTU probe of 1026 is acknowledged
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+RFC 4821: the MTU probe of 1026 is lost
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

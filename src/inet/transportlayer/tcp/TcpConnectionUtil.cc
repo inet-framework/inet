@@ -1632,11 +1632,13 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
         }
     }
 
-    // mtuProbing: a retransmission into the probe shows that the probe is lost; Linux
-    // decides at the fast retransmit (tcp_fastretrans_alert())
-    if (state->mtupProbeSize != 0 && seqLess(state->snd_nxt, state->snd_max)
-        && seqGE(state->snd_nxt, state->mtupProbeSeqStart) && seqLess(state->snd_nxt, state->mtupProbeSeqEnd))
-        mtuProbeFailed();
+    // mtuProbing: a retransmission during a probe ends the probe without a result, and
+    // the bounds of the search stay (Linux __tcp_retransmit_skb(): "Inconclusive MTU
+    // probe"); only the start of a loss recovery shows a lost probe (isMtuProbeLost())
+    if (state->mtupProbeSize != 0 && seqLess(state->snd_nxt, state->snd_max)) {
+        EV_INFO << "RFC 4821: a retransmission ends the MTU probe of " << state->mtupProbeSize << " without a result\n";
+        state->mtupProbeSize = 0;
+    }
 
     uint32_t buffered = sendQueue->getBytesAvailable(state->snd_nxt);
 

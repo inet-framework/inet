@@ -816,6 +816,11 @@ void Rfc6675Recovery::onRexmitTimeout()
         state->frtoActive = state->frtoActive || !recoveryOpen;
         if (!state->frtoActive)
             EV_DETAIL << "F-RTO: no detection, the timeout comes during a loss recovery\n";
+        // and none with an MTU probe in flight, as Linux tcp_enter_loss()
+        if (state->frtoActive && state->mtupProbeSize != 0) {
+            state->frtoActive = false;
+            EV_DETAIL << "F-RTO: no detection, an MTU probe is in flight\n";
+        }
         state->frtoOrigAcked = false;
     }
 

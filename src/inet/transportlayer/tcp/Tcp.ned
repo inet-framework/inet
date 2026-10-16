@@ -347,14 +347,14 @@ import inet.transportlayer.contract.ITcp;
 //    search (`pathMtu`, `TcpSocket::setPathMtu()`). A lost probe, the first
 //    unacknowledged segment where a loss recovery would start, gets no congestion
 //    response (section 7.6.2): the search continues below it, and the probe goes
-//    again as segments of the MSS, as Linux `tcp_simple_retransmit()`.
+//    again as segments of the MSS, as Linux `tcp_simple_retransmit()`. Any other
+//    retransmission ends a probe without a result, and F-RTO does not start at a
+//    timeout with a probe in flight, as Linux.
 //    Deviations:
 //     - The search goes upward only. No black-hole detector exists, so
 //       `mtuProbing = 1` is the same as off.
 //     - ~TcpVegas and ~TcpWestwood, with their own recoveries, treat a lost probe
 //       as congestion.
-//     - Another retransmission into the range of a probe, such as at a timeout,
-//       ends the probe as lost.
 //     - The search does not run again after a probe interval.
 //
 // <b>7. Connection setup acceleration</b>
