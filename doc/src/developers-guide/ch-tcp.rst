@@ -420,7 +420,7 @@ out-of-order segments, it does not work well together with other
 algorithms.
 
 TcpAlgorithmBase
-~~~~~~~~~~
+~~~~~~~~~~~~~~~~
 
 The :cpp:`TcpAlgorithmBase` is the base class of the INET implementation of
 Tahoe, Reno, and NewReno. It implements basic TCP algorithms for

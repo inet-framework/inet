@@ -346,17 +346,13 @@ class SimulationTask(Task):
         """
         Runs a simulation task by running the simulation as a child process or in the same process where Python is running.
 
-        Parameters:
-            append_args (list):
-                Additional command line arguments for the simulation executable.
+        The keyword arguments are passed on to the task. Those specific to running a simulation are:
 
-            simulation_runner (string):
-                Determines if the simulation is run as a separate process or in the same process where Python is running.
-                Valid values are "subprocess" and "inprocess".
-
-            simulation_runner_class (type):
-                The simulation runner class that is used to run the simulation. If not specified, then this is determined
-                by the simulation_runner parameter.
+        - ``append_args`` (list): Additional command line arguments for the simulation executable.
+        - ``simulation_runner`` (string): Determines if the simulation is run as a separate process or in the same
+          process where Python is running. Valid values are "subprocess" and "inprocess".
+        - ``simulation_runner_class`` (type): The simulation runner class that is used to run the simulation. If not
+          specified, then this is determined by the simulation_runner argument.
 
         Returns (SimulationTaskResult):
             a simulation task result that contains the several simulation specific information and also the subprocess

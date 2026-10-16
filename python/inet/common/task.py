@@ -279,7 +279,7 @@ class MultipleTaskResults:
             results (List of :py:class:`TaskResult`):
                 The list of individual task results corresponding to the individual tasks.
 
-            expected_result="DONE" (string):
+            expected_result (string):
                 The expected result of the multiple task execution. The value must be one of the values in the possible_results attribute.
 
             elapsed_wall_time (number):

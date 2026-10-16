@@ -1,7 +1,7 @@
 digraph g {
   newrank=true; rankdir="TB"; nodesep=0.3; ranksep=0.25
-  node [shape=box, fontsize=10, fontname="Helvetica"]
-  edge [fontsize=9, fontname="Helvetica"]
+  node [shape=box, fontsize=10]
+  edge [fontsize=9]
 
   cf [label="coordination function (Dcf, Hcf)", style=bold]
 
@@ -11,27 +11,27 @@ digraph g {
   node [style=solid, label="\N", width=0.75, height=0.5]
 
   subgraph cluster_access {
-    label="access"; fontsize=10; fontname="Helvetica"; style=dashed
+    label="access"; fontsize=10; style=dashed
     ca [label="channel access\n(Dcaf, Edcaf)"]; contention [label="contention"]
     txop [label="TXOP procedure"]; p1
   }
   subgraph cluster_exchange {
-    label="exchange"; fontsize=10; fontname="Helvetica"; style=dashed
+    label="exchange"; fontsize=10; style=dashed
     handler [label="frame sequence\nhandler"]; sequence [label="frame sequence\n(DcfFs, HcfFs)"]
     procedures [label="control frame\nprocedures"]; p2
   }
   subgraph cluster_transform {
-    label="transformation"; fontsize=10; fontname="Helvetica"; style=dashed
+    label="transformation"; fontsize=10; style=dashed
     inprogress [label="in-progress\nframes"]; dataservice [label="originator\ndata service"]
     recipient [label="recipient\ndata service"]; queue [label="pending queue"]
   }
   subgraph cluster_reliability {
-    label="reliability"; fontsize=10; fontname="Helvetica"; style=dashed
+    label="reliability"; fontsize=10; style=dashed
     ackhandler [label="ack handler"]; policies [label="policies"]
     recovery [label="recovery\nprocedure"]; agreements [label="block ack\nagreements"]
   }
   subgraph cluster_rate {
-    label="rate and protection"; fontsize=10; fontname="Helvetica"; style=dashed
+    label="rate and protection"; fontsize=10; style=dashed
     rate [label="rate selection,\nrate control"]; protection [label="protection\nmechanism"]
   }
 

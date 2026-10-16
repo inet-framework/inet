@@ -1,7 +1,7 @@
 digraph g {
   fontsize=10; rankdir="TB"
-  node [shape=box, fontsize=10, fontname="Helvetica"]
-  edge [fontsize=9, fontname="Helvetica"]
+  node [shape=box, fontsize=10]
+  edge [fontsize=9]
 
   upper [label="network layer", shape=plaintext]
   classifier [label="classifier\n(egress only)"]

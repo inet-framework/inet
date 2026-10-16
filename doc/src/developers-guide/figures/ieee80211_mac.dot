@@ -1,12 +1,12 @@
 digraph g {
   newrank=true; rankdir="TB"; nodesep=0.25; ranksep=0.5
-  node [shape=box, fontsize=10, fontname="Helvetica"]
-  edge [fontsize=9, fontname="Helvetica"]
+  node [shape=box, fontsize=10]
+  edge [fontsize=9]
 
   llc [label="llc", shape=plaintext]
   mgmt [label="mgmt", shape=plaintext]
   subgraph cluster_mac {
-    label="mac (Ieee80211Mac)"; fontsize=10; fontname="Helvetica"
+    label="mac (Ieee80211Mac)"; fontsize=10
     macmod [label="frame codec and dispatcher", style=bold]
     cf [label="coordination function\n(dcf or hcf)"]
     ds [label="ds"]

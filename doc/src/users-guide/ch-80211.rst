@@ -538,7 +538,7 @@ A zero limit permits the initial exchange and its existing RTS/CTS and immediate
 All single protection paths classify group frames before the current-frame ACK equation. With Block Ack support disabled, the current one-frame group sequence advertises zero. With support enabled, its legacy forecast can reserve a queued successor that the sequence cannot transmit. This limit applies to group management and non-QoS DATA too.
 
 Multiple protection in an EDCA TXOP
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A transmission opportunity (TXOP) lets one access category send frame exchanges after one channel
 access. To reserve time for several frames, select multiple
@@ -913,7 +913,7 @@ The radio advertises and negotiates only 20 MHz HT operation, despite the 40 MHz
 .. _ug:sec:80211:ac-ht:
 
 HT operation with ac interfaces
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``opMode = "ac"`` exposes existing HT behavior alongside VHT and legacy OFDM. The MIB derives HT capability from the mode catalog, antenna count, and PHY limits, with at most four spatial streams. One antenna permits MCS 0 through 7.
 

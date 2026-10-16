@@ -1,6 +1,6 @@
 digraph g {
   rankdir="TB"
-  node [shape=plaintext, fontsize=10, fontname="Helvetica"]
+  node [shape=plaintext, fontsize=10]
   grid [label=<
     <table border="0" cellborder="1" cellspacing="0" cellpadding="6">
       <tr><td border="0"></td><td><b>Data plane</b><br/>MSDUs, frame by frame<br/>microseconds to milliseconds</td><td><b>Management plane</b><br/>the relation to a BSS<br/>seconds</td></tr>
