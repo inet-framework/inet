@@ -13,11 +13,15 @@
 #include "inet/common/TimeTag.h"
 #include "inet/queueing/function/PacketComparatorFunction.h"
 #include "inet/queueing/function/PacketDropperFunction.h"
+#include "inet/queueing/function/PacketFilterFunction.h"
 
 namespace inet {
 namespace queueing {
 
 Define_Module(PacketQueue);
+
+// the first packet that this filter matches is the front of the queue
+static const CPacketFilterFunction anyPacket([] (const Packet *packet) { return true; });
 
 void PacketQueue::initialize(int stage)
 {
@@ -117,15 +121,30 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
 
 Packet *PacketQueue::pullPacket(const cGate *gate)
 {
-    Enter_Method("pullPacket");
-    auto packet = check_and_cast<Packet *>(queue.front());
-    EV_INFO << "Pulling packet" << EV_FIELD(packet) << EV_ENDL;
-    if (buffer != nullptr) {
-        queue.remove(packet);
-        buffer->removePacket(packet);
+    return pullPacket(gate, &anyPacket);
+}
+
+Packet *PacketQueue::canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const
+{
+    // the queue order is the pull order
+    for (cQueue::Iterator it(queue); !it.end(); it++) {
+        auto packet = check_and_cast<Packet *>(*it);
+        if (filter->matchesPacket(packet))
+            return packet;
     }
-    else
-        queue.pop();
+    return nullptr;
+}
+
+Packet *PacketQueue::pullPacket(const cGate *gate, const IPacketFilterFunction *filter)
+{
+    Enter_Method("pullPacket");
+    auto packet = canPullPacket(gate, filter);
+    if (packet == nullptr)
+        throw cRuntimeError("Cannot pull packet, the filter matches no packet");
+    EV_INFO << "Pulling packet" << EV_FIELD(packet) << EV_ENDL;
+    queue.remove(packet);
+    if (buffer != nullptr)
+        buffer->removePacket(packet);
     auto queueingTime = simTime() - packet->getArrivalTime();
     auto packetEvent = new PacketEvent();
     insertPacketEvent(this, packet, PEK_QUEUED, 0, queueingTime, packetEvent);
