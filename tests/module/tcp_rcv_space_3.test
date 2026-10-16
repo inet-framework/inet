@@ -1,0 +1,59 @@
+%description:
+Tests the receive buffer of LinuxTcp, the tcp_rmem[1] of Linux, 131072 bytes.
+The transfer is the one of tcp_rcv_space_1, but no parameter sets a receive
+buffer: with the defaults of LinuxTcp, auto-tuning acts, both hosts announce
+the window scale of receiveBufferMax, 10, and Dynamic Right-Sizing grows the
+buffer of the server from 131072 to 8786678 bytes, as in tcp_rcv_space_1.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 2000000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.typename = "LinuxTcp"
+*.srv_app.statusRequestScript="1.5"
+sim-time-limit = 3s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[]: Tcp Header Option WS(=10) sent, WS (ws_enabled) is set to 0
+%contains: stdout
+[]: Tcp Header Option WS(=10) sent, WS (ws_enabled) is set to 1
+%contains: stdout
+[]: Dynamic Right-Sizing: 28960 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 241300
+%contains: stdout
+[]: STATUS: skRcvbuf=8786678 sndbufLimited=0
+%#--------------------------------------------------------------------------------------------------------------

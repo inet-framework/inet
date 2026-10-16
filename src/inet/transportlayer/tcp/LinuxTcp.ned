@@ -45,10 +45,12 @@ simple LinuxTcp extends Tcp
         maxPersistTimeout = default(120s);
         zeroWindowProbe = default("linux");
         msl = default(30s);
-        // sending and receiving: the delayed ACK, Nagle, PSH and the receive window of Linux
+        // sending and receiving: the delayed ACK, Nagle, PSH, and the receive window and
+        // buffer of Linux (tcp_rmem[1] = 131072)
         adaptiveDelayedAcks = default(true);
         minshallNagle = default(true);
         pushSegmentsOnWriteBoundary = default(true);
+        receiveBufferSize = default(131072B);
         windowAutoTuning = default(true);
         windowUpdateAfterRead = default(true);
         acceptBeyondBufferAtEmptyQueue = default(true);

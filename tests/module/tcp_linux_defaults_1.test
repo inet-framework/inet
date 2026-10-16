@@ -2,7 +2,9 @@
 Tests that LinuxTcp selects the defaults of Linux. The client sends 30000
 bytes at t=1. Its SYN carries the options of Linux (MSS, SACK permitted,
 timestamps and window scale), and its first flight is the initial window
-of Linux (TCP_INIT_CWND), ten segments, where Tcp sends three.
+of Linux (TCP_INIT_CWND), ten segments, where Tcp sends three. With the
+receive buffer of Linux (tcp_rmem[1]), the window scale is 10, so the windows
+after the handshake are in units of 1024 bytes.
 
 %inifile: omnetpp.ini
 [General]
@@ -61,8 +63,8 @@ while($sor = <FILE>)
 [0.001 A001] A.1000 > B.2000: S 0:0(0) win 65535   Option(s): MaxSegSize NOP WinScale SackPermitted TS(0,0)
 %# the tenth data segment leaves before the first ACK arrives
 %contains: postrun-command(1).out
-[1.001 A012] A.1000 > B.2000: A 13033:14481(1448) ack 501 win 65535   Option(s): NOP NOP TS(1000,2)
-[1.003 B002] A.1000 < B.2000: A ack 1449 win 65535   Option(s): NOP NOP TS(1002,1000)
+[1.001 A012] A.1000 > B.2000: A 13033:14481(1448) ack 501 win 63   Option(s): NOP NOP TS(1000,2)
+[1.003 B002] A.1000 < B.2000: A ack 1449 win 64   Option(s): NOP NOP TS(1002,1000)
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
