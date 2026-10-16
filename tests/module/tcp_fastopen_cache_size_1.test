@@ -1,0 +1,38 @@
+%description:
+Tests that fastopenCookieCacheSize below 1 stops the simulation with an
+error at the start, where a value of 0 removed an entry from the empty cache
+at the first cookie.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=0.5s
+*.cli_app.sendBytes2=200B
+*.cli_app.fastOpen2=true
+*.srv_app.tOpen2=0.5s
+*.srv_app.localPort2=2000
+
+*.cli_tcp.fastopenClientEnabled = true
+*.cli_tcp.fastopenCookieCacheSize = 0
+*.srv_tcp.fastopenServerEnabled = true
+
+include ../../lib/defaults.ini
+
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+fastopenCookieCacheSize must be 1 or more, but it is 0
+%#--------------------------------------------------------------------------------------------------------------

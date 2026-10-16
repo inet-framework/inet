@@ -57,6 +57,8 @@ void Tcp::initialize(int stage)
         sendMssOption = par("sendMssOption");
         ecnMarkAll = par("ecnMarkAll");
         fastOpenCookieCacheSize = par("fastopenCookieCacheSize");
+        if (fastOpenCookieCacheSize < 1)
+            throw cRuntimeError("fastopenCookieCacheSize must be 1 or more, but it is %d", fastOpenCookieCacheSize);
 
         WATCH(checksumMode);
         WATCH(lastEphemeralPort);
