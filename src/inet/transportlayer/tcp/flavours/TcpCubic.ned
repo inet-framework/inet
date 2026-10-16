@@ -17,7 +17,7 @@ simple TcpCubic extends TcpAlgorithm
         double c = default(0.4); // scaling constant C of the cubic window-growth curve (RFC 9438 section 4.2)
         bool fastConvergence = default(true); // on a loss below the previous W_max, release extra window so a newly arrived competing flow can grow (RFC 9438 section 4.7)
         bool tcpFriendliness = default(true); // never grow slower than an AIMD(1, beta) Reno flow would (RFC 9438 section 4.3)
-        string slowStartExit @enum("none", "hystart", "hystartpp") = default("none"); // the end of the first slow start: "none" = at ssthresh or at a congestion signal (RFC 5681); "hystart" = the hybrid slow start of Linux, with the hystart parameters below, which RFC 9438 section 4.10 calls experimental; ~LinuxTcp and ~LegacyTcp set it; "hystartpp" = HyStart++ (RFC 9406), which RFC 9438 section 4.10 recommends
+        string slowStartExit @enum("none", "hystart", "hystartpp") = default("hystartpp"); // the end of the first slow start: "none" = at ssthresh or at a congestion signal (RFC 5681); "hystart" = the hybrid slow start of Linux, with the hystart parameters below, which RFC 9438 section 4.10 calls experimental; ~LinuxTcp and ~LegacyTcp set it; "hystartpp" = HyStart++ (RFC 9406), which RFC 9438 section 4.10 recommends
         // Linux behaviors (no RFC)
         int cntClamp = default(20); // cap on the per-increment ACK count while no W_max is known yet (before the first loss)
         double delta @unit(s) = default(10ms); // settling time after a window reduction, during which RTT samples are ignored

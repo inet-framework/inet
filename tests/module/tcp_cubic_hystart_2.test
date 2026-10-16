@@ -1,7 +1,7 @@
 %description:
 Tests that LinuxTcp turns HyStart on in the algorithm of its connections.
-TcpCubic has slowStartExit = "none", and LinuxTcp sets the default of its
-connections to "hystart" with a pattern assignment. The client has Tcp and the
+TcpCubic has slowStartExit = "hystartpp" (RFC 9438 section 4.10), and LinuxTcp
+sets the default of its connections to "hystart" with a pattern assignment. The client has Tcp and the
 server LinuxTcp, both with TcpCubic, and nothing else sets the parameter.
 The connections stay open, so the scalar file records the parameters of
 both algorithms at the end of the run.
@@ -48,7 +48,7 @@ cmdenv-express-mode=false
 %#--------------------------------------------------------------------------------------------------------------
 %# Tcp keeps the default of TcpCubic
 %contains: results/General-#0.sca
-par TcpTestNet1.cli_tcp.conn-0.algorithm slowStartExit "\"none\""
+par TcpTestNet1.cli_tcp.conn-0.algorithm slowStartExit "\"hystartpp\""
 %# the pattern of LinuxTcp sets it in the connection that the listener forks
 %contains: results/General-#0.sca
 par TcpTestNet1.srv_tcp.conn-3.algorithm slowStartExit "\"hystart\""
