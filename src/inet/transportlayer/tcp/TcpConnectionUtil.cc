@@ -524,6 +524,27 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
         tcpHeader->setEceBit((ace & 1) != 0);
     }
 
+    // Classic ECN, rfc-3168, pages 19-20:
+    // When TCP receives a CE data packet at the destination end-system, the
+    // TCP data receiver sets the ECN-Echo flag in the TCP header of the
+    // subsequent ACK packet.
+    // ...
+    // After a TCP receiver sends an ACK packet with the ECN-Echo bit set,
+    // that TCP receiver continues to set the ECN-Echo flag in all the ACK
+    // packets it sends (whether they acknowledge CE data packets or non-CE
+    // data packets) until it receives a CWR packet (a packet with the CWR
+    // flag set).  After the receipt of the CWR packet, acknowledgments for
+    // subsequent non-CE data packets do not have the ECN-Echo flag set.
+    //
+    // "All the ACK packets" are also the data and FIN segments, as in Linux
+    // (tcp_ecn_send()).
+    if (state->ect && !state->accEcnNegotiated && tcpHeader->getAckBit() && !tcpHeader->getSynBit()
+        && !tcpHeader->getRstBit() && tcpAlgorithm != nullptr && tcpAlgorithm->shouldMarkAck())
+    {
+        tcpHeader->setEceBit(true);
+        EV_INFO << "In ecnEcho state... send ACK with ECE bit set\n";
+    }
+
     // AccECN option (RFC 9768 section 3.2.3.3): remember the counts that it reported,
     // so that the next option knows the counters that changed since. A data segment
     // with the option ends the extra options of the client (section 3.2.3.2.1). As
@@ -1593,26 +1614,7 @@ void TcpConnection::sendAck()
     tcpHeader->setAckNo(state->rcv_nxt);
     tcpHeader->setWindow(updateRcvWnd());
 
-    // rfc-3168, pages 19-20:
-    // When TCP receives a CE data packet at the destination end-system, the
-    // TCP data receiver sets the ECN-Echo flag in the TCP header of the
-    // subsequent ACK packet.
-    // ...
-    // After a TCP receiver sends an ACK packet with the ECN-Echo bit set,
-    // that TCP receiver continues to set the ECN-Echo flag in all the ACK
-    // packets it sends (whether they acknowledge CE data packets or non-CE
-    // data packets) until it receives a CWR packet (a packet with the CWR
-    // flag set).  After the receipt of the CWR packet, acknowledgments for
-    // subsequent non-CE data packets do not have the ECN-Echo flag set.
-
-    // (an AccECN connection uses the ECE bit for the ACE field, see sendToIP())
-    TcpStateVariables *state = getStateForUpdate();
-    if (state && state->ect && !state->accEcnNegotiated) {
-        if (tcpAlgorithm->shouldMarkAck()) {
-            tcpHeader->setEceBit(true);
-            EV_INFO << "In ecnEcho state... send ACK with ECE bit set\n";
-        }
-    }
+    // (sendToIP() sets the ECE bit)
 
     // write header options
     writeHeaderOptions(tcpHeader);

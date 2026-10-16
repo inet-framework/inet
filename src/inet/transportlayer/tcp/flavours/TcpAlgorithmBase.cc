@@ -1120,20 +1120,10 @@ bool TcpAlgorithmBase::shouldMarkAck()
     // flag set).  After the receipt of the CWR packet, acknowledgments for
     // subsequent non-CE data packets do not have the ECN-Echo flag set.
 
-    if (state && state->ect) {
-        if (state->gotCeIndication) {
-            EV_INFO << "Received CE... ";
-            if (state->ecnEchoState)
-                EV_INFO << "Already in ecnEcho state\n";
-            else {
-                state->ecnEchoState = true;
-                EV << "Entering ecnEcho state\n";
-            }
-            state->gotCeIndication = false;
-        }
-        return state->ecnEchoState;
-    }
-    return false;
+    //
+    // The connection enters the echo state when the CE packet arrives (see
+    // TcpConnection::processSegment1stThru8th()).
+    return state && state->ect && state->ecnEchoState;
 }
 
 void TcpAlgorithmBase::processEcnInEstablished()

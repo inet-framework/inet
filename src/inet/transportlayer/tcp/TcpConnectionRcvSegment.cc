@@ -298,6 +298,14 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         state->ecnEchoState = false;
     }
 
+    // RFC 3168 section 6.1.3: a CE packet starts the echo state when it arrives, so
+    // that a delayed ACK echoes it also after a later packet without CE. A CWR of the
+    // same packet comes first (Linux tcp_ecn_accept_cwr(), then tcp_ecn_check_ce()).
+    if (state->ect && state->gotCeIndication && !state->accEcnNegotiated && !state->ecnEchoState) {
+        EV_INFO << "Received CE... Entering ecnEcho state\n";
+        state->ecnEchoState = true;
+    }
+
     //
     // RFC 9293 section 3.10.7.4: Second, check the RST bit:
     //
