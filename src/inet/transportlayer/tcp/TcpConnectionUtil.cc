@@ -32,6 +32,7 @@
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendMoreTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpUrgentTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -463,6 +464,22 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
         emit(sndNxtSignal, tcpHeader->getSequenceNo());
 
     emit(sndAckSignal, tcpHeader->getAckNo());
+
+    // RFC 9293 section 3.8.5, as Linux tcp_transmit_skb(): while urgent data is
+    // outstanding, each segment that starts before SND.UP carries URG and the urgent
+    // pointer, the offset of SND.UP from its sequence number (MUST-62). An offset that
+    // does not fit in 16 bits is 65535 when that lies beyond SND.NXT.
+    if (isUrgentSendPending() && !tcpHeader->getSynBit() && seqLess(tcpHeader->getSequenceNo(), state->snd_up)) {
+        uint32_t offset = state->snd_up - tcpHeader->getSequenceNo();
+        if (offset <= 0xFFFF) {
+            tcpHeader->setUrgBit(true);
+            tcpHeader->setUrgentPointer(offset);
+        }
+        else if (seqGreater(tcpHeader->getSequenceNo() + 0xFFFF, state->snd_nxt)) {
+            tcpHeader->setUrgBit(true);
+            tcpHeader->setUrgentPointer(0xFFFF);
+        }
+    }
 
     // final touches on the segment before sending
     tcpHeader->setSrcPort(localPort);
@@ -1848,6 +1865,7 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
 
     bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
     bool eor = packet->findTag<TcpSendEorReq>() != nullptr;
+    bool urgent = packet->findTag<TcpSendUrgentReq>() != nullptr;
     // MSG_MORE holds the partial segment at the end of this SEND (sendData() takes the
     // flag). A SEND without MSG_MORE while a partial is held gives that partial PSH
     // when it goes, as Linux tcp_mark_push() on the last write.
@@ -1857,6 +1875,15 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
         state->pushHeldPartial = true;
     uint32_t writeStartSeq = sendQueue->getBufferEndSeq(); // Linux tp->write_seq before this write
     sendQueue->enqueueAppData(packet);
+
+    // urgent data (RFC 9293 section 3.8.5, the SEND call: "If the URGENT flag is set, then
+    // SND.UP <- SND.NXT"): the urgent pointer points to the octet after this data
+    // (MUST-62), as Linux tcp_mark_urg() sets snd_up = write_seq
+    if (urgent) {
+        state->snd_up = sendQueue->getBufferEndSeq();
+        state->urgentSendPending = true;
+        EV_DETAIL << "Urgent data: the urgent pointer is " << state->snd_up << "\n";
+    }
 
     // MSG_EOR: the end of this SEND is a record boundary
     if (eor) {
@@ -2090,14 +2117,16 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // TCP_CORK and MSG_MORE hold the partial segment at the end of the data, also with
         // nothing in flight; an uncork, TCP_NODELAY or the cork timer (corkFlush) sends it.
         // Nagle stays after an uncork, as Linux __tcp_sock_set_cork().
-        bool corkHold = (state->tcp_cork || msgMoreHold) && !state->corkFlush && !containsFin && buffered < state->snd_effmss;
+        // urgent data goes at once: neither the cork nor Nagle holds it (Linux tcp_nagle_test())
+        bool urgentMode = isUrgentSendPending();
+        bool corkHold = (state->tcp_cork || msgMoreHold) && !state->corkFlush && !containsFin && !urgentMode && buffered < state->snd_effmss;
         if (swsHold(effectiveWin, buffered))
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
         else if (corkHold) {
             state->corkedDataPending = true;
             EV_WARN << "Holding the partial segment (TCP_CORK or MSG_MORE)\n";
         }
-        else if (state->nagle_enabled && unacknowledgedData && !containsFin)
+        else if (state->nagle_enabled && unacknowledgedData && !containsFin && !urgentMode)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
         else {
             // a held partial carries PSH when a later SEND came without MSG_MORE, or when
@@ -2362,6 +2391,14 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
 
     if (state && state->ect)
         state->rexmit = false;
+}
+
+bool TcpConnection::isUrgentSendPending()
+{
+    // urgent data is outstanding until SND.UNA reaches SND.UP (Linux tcp_urg_mode())
+    if (state->urgentSendPending && seqGE(state->snd_una, state->snd_up))
+        state->urgentSendPending = false;
+    return state->urgentSendPending;
 }
 
 bool TcpConnection::isMtuProbeLost() const

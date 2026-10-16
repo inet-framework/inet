@@ -140,8 +140,8 @@ import inet.transportlayer.contract.ITcp;
 //    on both sides, and the socket command set. A SEND has no PUSH flag, so PSH is
 //    set on the last buffered segment (MUST-61, `pushLastBufferedSegment`).
 //    Deviations:
-//     - The urgent pointer is carried in the connection state, but urgent data is
-//       not supported: a receiver treats URG-marked bytes as ordinary data.
+//     - Urgent data is sent (`TcpSocket::sendUrgent()`, MUST-62), but a receiver
+//       treats URG-marked bytes as ordinary data.
 //     - PSH is ignored on arrival: the receiver delivers data as early as it can,
 //       as if PSH were set on each segment.
 //     - Checksums are declared correct rather than computed, unless `checksumMode`

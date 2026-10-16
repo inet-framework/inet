@@ -18,6 +18,7 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
+#include "inet/transportlayer/contract/tcp/TcpUrgentTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 
 namespace inet {
@@ -436,6 +437,13 @@ class INET_API TcpSocket : public ISocket
      * with a later SEND's data into the same outgoing segment.
      */
     void send(Packet *msg, bool eor);
+
+    /**
+     * Sends data as urgent data (RFC 9293 section 3.8.5, Linux MSG_OOB): the urgent
+     * pointer points to the octet after this data. New applications should not use
+     * urgent data (RFC 9293 SHLD-13).
+     */
+    void sendUrgent(Packet *msg);
 
     /**
      * Sends data packet, requesting a zerocopy-style completion notification

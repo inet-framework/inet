@@ -432,6 +432,9 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual bool isMtuProbeLost() const;
 
+    /** True while urgent data is outstanding: SND.UNA is before SND.UP (Linux tcp_urg_mode()) */
+    virtual bool isUrgentSendPending();
+
     /**
      * The search continues below the lost MTU probe, and the probe goes again at once, as
      * segments of the MSS (Linux tcp_mtup_probe_failed() and tcp_simple_retransmit())

@@ -157,7 +157,8 @@ struct TcpStateVariables
     bool pushLastBuffered = false;    // set PSH on the last buffered segment, RFC 9293 MUST-61 (pushLastBufferedSegment parameter)
     uint32_t pushed_seq = 0;        // the end of the data with the last PSH mark of a write (Linux tp->pushed_seq), for forced_push()
     bool swsOverride = false;       // the override timeout of the sender SWS avoidance is sending (rule (4) of RFC 9293 section 3.8.6.2.1)
-    uint32_t snd_up = 0;            // send urgent pointer
+    uint32_t snd_up = 0;            // send urgent pointer: the octet after the urgent data (RFC 9293 MUST-62)
+    bool urgentSendPending = false; // urgent data is outstanding: SND.UNA is before SND.UP (Linux tcp_urg_mode())
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update
     uint32_t snd_wl2 = 0;           // segment ack. number used for last window update
     uint32_t iss = 0;               // initial sequence number (ISS)

@@ -32,6 +32,7 @@ class INET_API TcpTestClient : public cSimpleModule
         int numBytes;
         bool more = false; // the SEND carries MSG_MORE (TcpSendMoreReq)
         bool eor = false; // the SEND carries MSG_EOR (TcpSendEorReq)
+        bool urgent = false; // the SEND carries urgent data (TcpSendUrgentReq, MSG_OOB)
     };
     typedef std::list<Command> Commands;
     Commands commands;
@@ -110,6 +111,8 @@ void TcpTestClient::parseScript(const char *script, Commands& commands)
                 cmd.more = true;
             else if (flag == "eor")
                 cmd.eor = true;
+            else if (flag == "urgent")
+                cmd.urgent = true;
             else
                 throw cRuntimeError("syntax error in script: unknown flag '%s'", flag.c_str());
         }
@@ -446,6 +449,8 @@ void TcpTestClient::scheduleNextSend()
         msg->addTag<TcpSendMoreReq>();
     if (cmd.eor)
         msg->addTag<TcpSendEorReq>();
+    if (cmd.urgent)
+        msg->addTag<TcpSendUrgentReq>();
     scheduleAt(cmd.tSend, msg);
 }
 

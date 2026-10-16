@@ -194,6 +194,12 @@ void TcpSocket::send(Packet *msg, bool eor)
     send(msg);
 }
 
+void TcpSocket::sendUrgent(Packet *msg)
+{
+    msg->addTagIfAbsent<TcpSendUrgentReq>();
+    send(msg);
+}
+
 void TcpSocket::sendZerocopy(Packet *msg)
 {
     msg->addTagIfAbsent<TcpSendZerocopyReq>();
