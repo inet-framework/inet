@@ -65,7 +65,8 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      address also seeds the link's /64 prefix. Use this when an interface
 //      needs a specific address (e.g. an RFC 3956 embedded-RP "prefix::RIID").
 //    - `@mtu` - optional MTU override
-//    - `@metric` - optional metric override
+//    - `@metric` - metric of the on-link (direct) routes the configurator adds
+//      through this interface. Routes via a next hop are not affected.
 //    - `@add-static-route` - optional bool (default true)
 //    - `@add-default-route` - optional bool (default true)
 //    - `@advValidLifetime` - AdvPrefix valid lifetime in seconds (default: 2592000 = 30 days)
