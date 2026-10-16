@@ -490,6 +490,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. IPv6 routers keep link-local sources on their link
+
+   An IPv6 router forwarded a unicast datagram whose source address is link-local onto another link; it checked only the destination address. It now drops such a datagram and, unless the datagram is a Redirect, answers with ICMPv6 Destination Unreachable, code 2, "beyond scope of source address" (RFC 4291 Section 2.5.6, RFC 4007 Section 9). Sending the datagram back out of the interface it arrived on is still allowed. The Icmpv6DestUnav enum gains the value BEYOND_SCOPE_OF_SOURCE = 2. This changes the results of simulations in which a node sends from a link-local address to an off-link destination, for example before its global address is configured, or in which a router sends a Redirect to a node that is not its neighbour.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
