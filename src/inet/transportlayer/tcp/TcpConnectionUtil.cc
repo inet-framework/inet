@@ -503,10 +503,10 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
     // back the IP ECN codepoint of the SYN-ACK instead (section 3.2.2.1, Table 3):
     // "If the TCP Client (A) in AccECN mode uses a pure ACK with no SACK blocks to
     // acknowledge the SYN/ACK, it MUST use the binary encoding in Table 3". The
-    // ACKs that TIME_WAIT sends carry no ACE field in Linux (tcp_v4_send_ack()),
+    // ACKs of a time-wait socket carry no ACE field in Linux (tcp_v4_send_ack()),
     // selected by accEcnBareTimeWaitAck.
     if (state->accEcnNegotiated && tcpHeader->getAckBit() && !tcpHeader->getSynBit()
-        && !(tcpMain->accEcnBareTimeWaitAck && the2MSLTimer != nullptr && the2MSLTimer->isScheduled()))
+        && !(tcpMain->accEcnBareTimeWaitAck && timeWaitSocket))
     {
         bool pureAck = tcpSegment->getByteLength() == 0;
         bool sackBlocks = false;
@@ -3323,8 +3323,10 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
 
         // AccECN option (RFC 9768 section 3.2.3), after the SACK option, which leaves
         // room for the fields that changed (see addSacks())
+        // (a time-wait socket of Linux writes no AccECN option, see sendToIP())
         int accEcnOrder, accEcnWanted, accEcnRequired;
-        if (tcpHeader->getAckBit() && getAccEcnOptionFields(accEcnOrder, accEcnWanted, accEcnRequired))
+        if (tcpHeader->getAckBit() && !(tcpMain->accEcnBareTimeWaitAck && timeWaitSocket)
+            && getAccEcnOptionFields(accEcnOrder, accEcnWanted, accEcnRequired))
             appendAccEcnOption(tcpHeader, accEcnOrder, accEcnWanted, accEcnRequired);
 
         // TODO add new TCPOptions here once they are implemented

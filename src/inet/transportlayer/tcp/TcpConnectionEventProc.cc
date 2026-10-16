@@ -404,8 +404,8 @@ void TcpConnection::process_CLOSE(TcpEventCode& event, TcpCommand *tcpCommand, c
     // of Linux close(), which also shuts the receive side down (RFC 1122 section
     // 4.2.2.13 lets a host implement such a "half-duplex" close). state is still null
     // for a CLOSE that reaches a new connection in INIT.
-    if (state != nullptr && tcpMain->par("abortOnDataAfterClose").boolValue()
-            && (tcpCommand == nullptr || !tcpCommand->getHalfClose()))
+    fullClose = tcpCommand == nullptr || !tcpCommand->getHalfClose();
+    if (state != nullptr && tcpMain->par("abortOnDataAfterClose").boolValue() && fullClose)
         state->rcvShutdown = true;
     delete tcpCommand;
     delete msg;

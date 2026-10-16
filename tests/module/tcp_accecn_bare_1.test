@@ -1,0 +1,50 @@
+%description:
+Tests accEcnBareTimeWaitAck=true when the FIN of the peer also acknowledges
+the FIN of the client in FIN_WAIT_1: the tester drops the pure ACK of the FIN
+of the client, so the FIN of the server at t=2.5 acknowledges it. Linux
+answers that FIN from its full socket (tcp_fin()) before it becomes a
+time-wait socket, so the ACK of the client carries the ACE field.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 1000"
+*.*_tcp.accEcnOptionEnabled = false # the ACE field alone (tcp_accecn_option_* test the option)
+*.*_tcp.tcpEcnMode = "accecn"
+*.cli_app.tClose=2s
+*.srv_app.tClose=2.5s
+*.tcptester.script="b3 delete"  # the pure ACK of the FIN of the client
+*.*_tcp.accEcnBareTimeWaitAck = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[2.501 B004] A.1000 < B.2000: A F E N ack 1002 win 16384 
+cli_tcp: FIN_WAIT_1 --> TIME_WAIT  (on RCV_FIN_ACK)
+[2.503 A005] A.1000 > B.2000: A E N ack 502 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

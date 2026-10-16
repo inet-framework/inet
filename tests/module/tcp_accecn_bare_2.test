@@ -1,0 +1,50 @@
+%description:
+Tests that the ACK of a time-wait socket carries no AccECN option either, as
+the ACK of Linux tcp_v4_send_ack(), which writes only the timestamp option.
+The scenario is that of tcp_accecn_10 with the AccECN option of Linux: the other
+segments carry the option, and the ACK in TIME_WAIT carries none.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 1000"
+*.*_tcp.accEcnOptionEnabled = true
+*.*_tcp.accEcnOptionPolicy = "linux"
+*.*_tcp.tcpEcnMode = "accecn"
+*.cli_app.tClose=2s
+*.srv_app.tClose=3s
+*.*_tcp.accEcnBareTimeWaitAck = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[3.001 B004] A.1000 < B.2000: A F E N ack 1002 win 16384   Option(s): NOP AccECN1(e1b=1,ceb=0,e0b=1001)
+cli_tcp: FIN_WAIT_2 --> TIME_WAIT  (on RCV_FIN)
+[3.003 A005] A.1000 > B.2000: A ack 502 win 16384 
+srv_tcp: LAST_ACK --> CLOSED  (on RCV_ACK)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

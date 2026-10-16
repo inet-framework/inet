@@ -118,6 +118,8 @@ class INET_API TcpConnection : public SimpleModule
     short tos = -1;
     bool autoRead = true;
     bool peerClosedSentUp = false;
+    bool fullClose = false; // the application closed without halfClose: it will not read again (Linux close(), an orphaned socket)
+    bool timeWaitSocket = false; // the connection is where Linux keeps only a time-wait socket: TIME_WAIT, and FIN_WAIT_2 after a full close
     long maxByteCountRequested = 0;  // from READ requests
 
     Tcp *tcpMain = nullptr; // Tcp module

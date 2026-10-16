@@ -700,6 +700,10 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
         case TCP_S_FIN_WAIT_1:
         case TCP_S_FIN_WAIT_2:
         case TCP_S_CLOSING:
+            // Linux tcp_rcv_state_process(): the ACK of our FIN, without a FIN, turns an
+            // orphaned socket in FIN_WAIT_2 into a time-wait socket (tcp_time_wait())
+            if (state == TCP_S_FIN_WAIT_2 && oldState == TCP_S_FIN_WAIT_1 && fullClose)
+                timeWaitSocket = true;
             if (!peerClosedSentUp && state == TCP_S_CLOSE_WAIT && this->receiveQueue->getQueueLength() == 0) {
                 sendIndicationToApp(TCP_I_PEER_CLOSED);
                 peerClosedSentUp = true;
@@ -714,6 +718,7 @@ void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
 
         case TCP_S_TIME_WAIT:
             sendIndicationToApp(TCP_I_CLOSED);
+            timeWaitSocket = true;
             break;
 
         case TCP_S_CLOSED:
