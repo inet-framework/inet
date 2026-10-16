@@ -1,6 +1,6 @@
 # Urgent data (T8)
 
-Status: **in progress** — item T8 of `plan/pending/tcp-open-items.md`, decision D-131.
+Status: **ready for review** — item T8 of `plan/pending/tcp-open-items.md`, decision D-131.
 
 - Branch `topic/tcp-urgent-data`, on master `bbad103b0f`.
 - The decision numbers continue those of `plan/done/tcp-hystartpp.md` (D-161 onward).
@@ -16,12 +16,12 @@ Linux reads the urgent pointer as RFC 9293 does (`tcp_stdurg = 0`), but it takes
 
 | Step | Commit | Test |
 | --- | --- | --- |
-| 1 | `plan: add: urgent data` | — |
-| 2 | `tcp: add: the urgent send` | `tcp_urgent_1` (new): URG and the urgent pointer in each segment before the end of urgent data of three segments, none after its ACK |
-| 3 | `tcp: add: the urgent receive of RFC 9293` | `tcp_urgent_2` (new): the notice, the deliveries that end at the mark, the urgent bytes that remain, a second notice when the pointer advances |
-| 4 | `tcp: add: urgentOutOfBand, the out-of-band byte of Linux` | `tcp_urgent_3` (new): the byte leaves the stream in `LinuxTcp`; `tcp_urgent_4` (new): `setOobInline()` keeps it |
-| 5 | `doc: change: the release note of urgent data` | WHATSNEW entry 56 |
-| 6 | `plan: change: record urgent data` | — |
+| 1 ✅ | `plan: add: urgent data` | — |
+| 2 ✅ | `tcp: add: the urgent send` | `tcp_urgent_1` (new): URG and the urgent pointer in each segment before the end of urgent data of three segments, none after its ACK |
+| 3 ✅ | `tcp: add: the urgent receive of RFC 9293` | `tcp_urgent_2` (new): the notice, the deliveries that end at the mark, the urgent bytes that remain, a second notice when the pointer advances |
+| 4 ✅ | `tcp: add: urgentOutOfBand, the out-of-band byte of Linux` | `tcp_urgent_3` (new): the byte leaves the stream in `LinuxTcp`; `tcp_urgent_4` (new): `setOobInline()` keeps it |
+| 5 ✅ | `doc: change: the release note of urgent data` | WHATSNEW entry 56 |
+| 6 ✅ | `plan: change: record urgent data` | — |
 | 7 | (inet-gpl) `PacketDrillApp: urgent data of the socket API` | after the landing, because inet-gpl builds against INET master (D-164) |
 
 The test client of the module tests gets an urgent send in its send script and prints the notices and the urgent deliveries.
@@ -39,4 +39,21 @@ As for T7: each commit builds and passes the module tests, a new test fails befo
 
 ## 5. The record
 
-(after the steps)
+Commits on master `bbad103b0f`: `34ae30d28c` (plan), `c6707b8d95` (the urgent send), `0f539ef4c8` (the urgent receive of RFC 9293), `dc3df5e1b6` (the out-of-band byte of Linux), `5c3f1a2504` (the release note), and this record. Step 7 waits for the landing.
+
+Facts found during the work:
+
+- `TcpConnection::sendToIP()` is the one path of each segment of a connection, so URG and the urgent pointer go there, for data, ACKs, FINs and retransmissions alike, as in `tcp_transmit_skb()`.
+- The explicit READ had its own copy of the delivery; both delivery paths now take their data through `extractDataForApp()`, which ends a delivery at the urgent mark and sets the kind and the tags.
+- The out-of-band byte comes from the segment that holds it, in the sixth step, before the data of that segment reaches the application, as `tcp_urg()` sets `urg_data` before `sk_data_ready`. With `ByteCountChunk` data, the byte has no value; with `BytesChunk` data, it has the value of the stream.
+- PacketDrillApp does not run `splice()`, `ioctl()` or recv flags yet (step 7), so the out-of-band byte changes no verdict of the suite: `splice/tcp_splice_loop_test` passes without a check.
+- A receiver of `LinuxTcp` that gets urgent data from an application of INET now gets the out-of-band byte; no example or baseline sends urgent data.
+
+| Evidence | Result |
+| --- | --- |
+| Each commit builds alone; module tests at each commit | 683, 684, 685, 687, 687 PASS; no undefined `inet::` symbol |
+| The new tests fail before their commits | yes, each of `tcp_urgent_1` to `_4` |
+| CI fingerprint job (podman, clang-16) at the three code commits | OK at each; the one ERROR row of `ethernet.csv` is the expected one of master |
+| Statistics of the 38 TCP working directories, against statistics `ebda488` | 122 KEEP, 4 SKIP (expected), no file changes: no example sends urgent data |
+| Packetdrill suite of inet-gpl `0dfbcae` | 303 MATCH, 12 KERNEL_DRIFT, 3 UNSUPPORTED_FEATURE; each of the 318 verdicts as before |
+| INET's TCP protocol suite with inet-gpl | 333 tests: 329 PASS, 4 FAIL (expected) |
