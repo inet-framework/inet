@@ -535,6 +535,11 @@ void TcpAlgorithmBase::processKeepAliveTimer(TcpEventCode& event)
         return;
     }
 
+    // a segment after the last probe answers the probes, also when the interval is
+    // longer than the idle time (Linux tcp_ack() clears icsk_probes_out)
+    if (state->keepalive_probes_sent > 0 && state->time_last_segment_received > state->keepalive_last_probe_time)
+        state->keepalive_probes_sent = 0;
+
     // MUST-29: one probe without an answer is not a dead connection; after
     // keepAliveProbeCount of them, abort, and tell the application (TCP_I_TIMED_OUT)
     if (state->keepalive_probes_sent >= state->keepalive_max_probes) {
@@ -547,6 +552,7 @@ void TcpAlgorithmBase::processKeepAliveTimer(TcpEventCode& event)
     EV_INFO << "Keepalive: the connection is idle, sending probe #" << (state->keepalive_probes_sent + 1) << "\n";
     conn->sendKeepAliveProbe();
     state->keepalive_probes_sent++;
+    state->keepalive_last_probe_time = simTime();
     conn->scheduleAfter(state->keepalive_interval, keepAliveTimer);
 }
 

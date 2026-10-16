@@ -38,6 +38,7 @@ struct TcpAlgorithmBaseStateVariables extends TcpStateVariables
     simtime_t keepalive_interval = 75; ///< the time between two probes
     int keepalive_max_probes = 9; ///< the probes without an answer, after which the connection aborts
     int keepalive_probes_sent = 0; ///< the probes of this idle time
+    simtime_t keepalive_last_probe_time = 0; ///< the time of the last keepalive probe
     //@}
 
     /// congestion window
