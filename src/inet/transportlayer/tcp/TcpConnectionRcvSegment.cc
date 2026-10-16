@@ -574,10 +574,10 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // signal the user again.
         //"
 
-        processUrgentPointer(tcpHeader->getSequenceNo() + tcpHeader->getUrgentPointer());
+        // urgent data is not supported, except the out-of-band byte of Linux
+        if (state->urgentOutOfBand)
+            processUrgentPointer(tcpHeader->getSequenceNo() + tcpHeader->getUrgentPointer());
     }
-    if (fsm.getState() == TCP_S_ESTABLISHED || fsm.getState() == TCP_S_FIN_WAIT_1 || fsm.getState() == TCP_S_FIN_WAIT_2)
-        sendOutOfBandByte(tcpSegment, tcpHeader);
 
     //
     // RFC 9293: Seventh, process the segment text

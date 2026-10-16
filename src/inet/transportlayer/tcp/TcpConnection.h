@@ -203,9 +203,6 @@ class INET_API TcpConnection : public SimpleModule
     // TCP_NODELAY of this connection (TcpSocket::setNoDelay()), also from before the
     // open; -1: the nagleEnabled parameter
     int noDelaySockopt = -1;
-    // SO_OOBINLINE of this connection (TcpSocket::setOobInline()), also from before the
-    // open; -1: off
-    int oobInlineSockopt = -1;
     // TCP_MAXSEG of this connection (TcpSocket::setMaxSeg()), also from before the open;
     // -1: the mss parameter alone
     int maxSegSockopt = -1;
@@ -428,15 +425,6 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: retransmit one segment from snd_una */
     virtual void retransmitOneSegment(bool called_at_rto);
 
-    /** True while urgent data is outstanding: SND.UNA is before SND.UP (Linux tcp_urg_mode()) */
-    virtual bool isUrgentSendPending();
-
-    /** A received urgent pointer, the octet after the urgent data: RCV.UP and the notice to the application (RFC 9293 MUST-32) */
-    virtual void processUrgentPointer(uint32_t urgentPointer);
-
-    /** urgentOutOfBand: a segment that holds the last urgent byte gives it to the application alone (Linux tcp_urg()) */
-    virtual void sendOutOfBandByte(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
-
     /**
      * RFC 8985 section 7.3 loss probe: send one segment of new data if the data
      * and the receive window allow it, else the FIN again, else the last segment
@@ -533,8 +521,11 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: sends data or data notification to application */
     virtual void sendAvailableDataToApp();
 
-    /** Utility: takes the next delivery to the application from the receive queue, at most up to endSeqNo and never across the urgent mark; nullptr: no data */
+    /** Utility: takes the next delivery to the application from the receive queue, at most up to endSeqNo; with urgentOutOfBand, never across the urgent mark; nullptr: no data */
     virtual Packet *extractDataForApp(uint32_t endSeqNo);
+
+    /** urgentOutOfBand: a received urgent pointer, the octet after the urgent data (Linux tcp_check_urg()) */
+    virtual void processUrgentPointer(uint32_t urgentPointer);
 
   public:
     /** Utility: prints local/remote addr/port and app gate index/socketId */

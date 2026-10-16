@@ -18,7 +18,6 @@
 #include "inet/networklayer/common/L3Address.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
-#include "inet/transportlayer/contract/tcp/TcpUrgentTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 
 namespace inet {
@@ -184,14 +183,6 @@ class INET_API TcpSocket : public ISocket
          * Default implementation does nothing (backward compatible).
          */
         virtual void socketZerocopyCompletion(TcpSocket *socket, unsigned int zerocopyId) {}
-
-        /**
-         * Notifies that an urgent pointer arrived or advanced (RFC 9293 MUST-32): the
-         * application should read the urgent data, which comes with the kind
-         * TCP_I_URGENT_DATA (socketDataArrived() with urgent = true).
-         * Default implementation does nothing.
-         */
-        virtual void socketUrgentArrived(TcpSocket *socket, TcpUrgentInfo *urgentInfo) {}
     };
 
     /**
@@ -447,13 +438,6 @@ class INET_API TcpSocket : public ISocket
     void send(Packet *msg, bool eor);
 
     /**
-     * Sends data as urgent data (RFC 9293 section 3.8.5, Linux MSG_OOB): the urgent
-     * pointer points to the octet after this data. New applications should not use
-     * urgent data (RFC 9293 SHLD-13).
-     */
-    void sendUrgent(Packet *msg);
-
-    /**
      * Sends data packet, requesting a zerocopy-style completion notification
      * (MSG_ZEROCOPY) once this SEND's data has been
      * transmitted: the callback's socketZerocopyCompletion() (see ICallback)
@@ -577,12 +561,6 @@ class INET_API TcpSocket : public ISocket
      * (full segments still flow). Clearing the cork flushes any held partial.
      */
     void setCork(bool cork);
-
-    /**
-     * SO_OOBINLINE of this connection: with the urgentOutOfBand parameter of Tcp, the
-     * last urgent byte stays in the stream instead of coming alone.
-     */
-    void setOobInline(bool oobInline);
 
     /**
      * Required to re-connect with a "used" TcpSocket object.

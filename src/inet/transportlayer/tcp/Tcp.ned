@@ -139,12 +139,9 @@ import inet.transportlayer.contract.ITcp;
 //    `delayedAckFrameCount`), the Nagle algorithm, silly-window-syndrome avoidance
 //    on both sides, and the socket command set. A SEND has no PUSH flag, so PSH is
 //    set on the last buffered segment (MUST-61, `pushLastBufferedSegment`).
-//    Urgent data (section 3.8.5): `TcpSocket::sendUrgent()` sets the urgent pointer
-//    at the octet after the data (MUST-62); a receiver tells the application of a
-//    new or advanced pointer (`TCP_I_URGENT`, MUST-32) and delivers the data
-//    before the mark as `TCP_I_URGENT_DATA` with the urgent bytes that remain
-//    (`TcpUrgentInd`, MUST-33).
 //    Deviations:
+//     - Urgent data is not supported: a sender sets no URG, and a receiver treats
+//       URG-marked bytes as ordinary data, unless `urgentOutOfBand` is set.
 //     - PSH is ignored on arrival: the receiver delivers data as early as it can,
 //       as if PSH were set on each segment.
 //     - Checksums are declared correct rather than computed, unless `checksumMode`
@@ -162,7 +159,7 @@ import inet.transportlayer.contract.ITcp;
 //    close() of Linux (`abortOnDataAfterClose`), the checks of a received segment
 //    of Linux (`dropBeyondWindowEdge`, `acceptBeyondBufferAtEmptyQueue`), the
 //    receive window of Linux (`windowAutoTuning`, `windowUpdateAfterRead`), and the
-//    out-of-band byte of urgent data (`urgentOutOfBand`, `TcpSocket::setOobInline()`).
+//    out-of-band byte of received urgent data (`urgentOutOfBand`).
 //    The MSS that this host announces is that of the address family for an MTU of
 //    1500 bytes, 1460 for IPv4 and 1440 for IPv6 (`mss = -1`); 536 and 1220 are
 //    what a missing MSS option of the peer implies (MUST-15).
@@ -394,6 +391,7 @@ import inet.transportlayer.contract.ITcp;
 //
 // <b>Remaining gaps</b>
 //
+//  - Urgent data, as described under RFC 9293 above.
 //  - Flow control between TCP and the application is opt-in: a connection opened
 //    in "autoread" mode delivers the received data to the application at once, so
 //    its advertised window never closes. A connection opened in explicit-read mode
@@ -442,8 +440,8 @@ simple Tcp extends SimpleModule like ITcp
         double receiveBufferMax @unit(B) = default(32MiB); // windowAutoTuning: the largest receive buffer that auto-tuning reaches, by Dynamic Right-Sizing, out-of-order data or the overflow of its memory (Linux net.ipv4.tcp_rmem[2], 32 MiB on a usual host)
         bool windowUpdateAfterRead = default(false); // true: as Linux (__tcp_cleanup_rbuf()), a READ after which the receiver can offer at least twice the window that is still open sends that window at once in an ACK; false: the new window goes with the next ACK, as the receiver SWS avoidance and the delayed ACK of RFC 9293 (section 3.8.6.2.2) decide
         bool acceptBeyondBufferAtEmptyQueue = default(false); // accept a whole in-order segment that reaches beyond the receive buffer when the receive queue is empty, as Linux does (tcp_data_queue()); the window is then zero until the application reads. false: drop such a segment
+        bool urgentOutOfBand = default(false); // true: as Linux without SO_OOBINLINE, the last byte of received urgent data leaves the stream, and a read stops before it (tcp_check_urg(), tcp_recvmsg()); INET does not deliver that byte, which Linux gives to recv(MSG_OOB)
         bool dropBeyondWindowEdge = default(false); // true: as Linux (tcp_sequence()), a segment whose data ends beyond the highest window edge offered is dropped whole, unless it starts within that edge and the in-order receive queue is empty; false: the window test of RFC 9293 section 3.10.7.4, after which only the receive buffer limits the data
-        bool urgentOutOfBand = default(false); // true: as Linux without SO_OOBINLINE, the last urgent byte leaves the stream and comes to the application alone, as a packet of one byte with TCP_I_URGENT_DATA and TcpOutOfBandInd (MSG_OOB); the data before it comes as TCP_I_DATA, and a delivery ends before it; TcpSocket::setOobInline() keeps the byte in the stream for one connection. false: the urgent receive of RFC 9293, in which the data before the mark comes as TCP_I_URGENT_DATA
 
         // acknowledgments
         bool delayedAcksEnabled = default(true); // Delayed ACK algorithm (RFC 1122) enabled/disabled

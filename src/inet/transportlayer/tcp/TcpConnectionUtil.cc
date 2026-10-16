@@ -32,7 +32,6 @@
 #include "inet/transportlayer/contract/tcp/TcpSendEorTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpSendMoreTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
-#include "inet/transportlayer/contract/tcp/TcpUrgentTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpZerocopyTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
@@ -143,7 +142,6 @@ const char *TcpConnection::indicationName(int code)
     switch (code) {
         CASE(TCP_I_DATA);
         CASE(TCP_I_URGENT_DATA);
-        CASE(TCP_I_URGENT);
         CASE(TCP_I_AVAILABLE);
         CASE(TCP_I_ESTABLISHED);
         CASE(TCP_I_PEER_CLOSED);
@@ -278,7 +276,6 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     socketSynRetries = listenerConn->socketSynRetries;
     keepAliveSockopt = listenerConn->keepAliveSockopt;
     noDelaySockopt = listenerConn->noDelaySockopt;
-    oobInlineSockopt = listenerConn->oobInlineSockopt;
     maxSegSockopt = listenerConn->maxSegSockopt;
     pathMtuSockopt = listenerConn->pathMtuSockopt;
     corkSockopt = listenerConn->corkSockopt;
@@ -466,22 +463,6 @@ void TcpConnection::sendToIP(Packet *tcpSegment, const Ptr<TcpHeader>& tcpHeader
         emit(sndNxtSignal, tcpHeader->getSequenceNo());
 
     emit(sndAckSignal, tcpHeader->getAckNo());
-
-    // RFC 9293 section 3.8.5, as Linux tcp_transmit_skb(): while urgent data is
-    // outstanding, each segment that starts before SND.UP carries URG and the urgent
-    // pointer, the offset of SND.UP from its sequence number (MUST-62). An offset that
-    // does not fit in 16 bits is 65535 when that lies beyond SND.NXT.
-    if (isUrgentSendPending() && !tcpHeader->getSynBit() && seqLess(tcpHeader->getSequenceNo(), state->snd_up)) {
-        uint32_t offset = state->snd_up - tcpHeader->getSequenceNo();
-        if (offset <= 0xFFFF) {
-            tcpHeader->setUrgBit(true);
-            tcpHeader->setUrgentPointer(offset);
-        }
-        else if (seqGreater(tcpHeader->getSequenceNo() + 0xFFFF, state->snd_nxt)) {
-            tcpHeader->setUrgBit(true);
-            tcpHeader->setUrgentPointer(0xFFFF);
-        }
-    }
 
     // final touches on the segment before sending
     tcpHeader->setSrcPort(localPort);
@@ -955,63 +936,48 @@ void TcpConnection::sendAvailableDataToApp()
 
 Packet *TcpConnection::extractDataForApp(uint32_t endSeqNo)
 {
-    if (state->urgentOutOfBand) {
-        // as Linux tcp_recvmsg(): the mark is the last urgent byte (urg_seq), a read
-        // stops before it, and without SO_OOBINLINE the byte leaves the stream; the data
-        // is ordinary data
-        if (state->rcvUrgentPending) {
-            uint32_t markSeqNo = state->rcv_up - 1;
-            uint32_t firstSeqNo = receiveQueue->getFirstSeqNo();
-            if (firstSeqNo == markSeqNo && receiveQueue->getAcknowledgedDataLength() > 0) {
-                state->rcvUrgentPending = false;
-                if (!state->oobInline) {
-                    Packet *oobByte = receiveQueue->extractBytesUpTo(markSeqNo + 1);
-                    releaseRcvBuffer(oobByte->getByteLength());
-                    delete oobByte;
-                    EV_INFO << "Urgent data: the out-of-band byte at " << markSeqNo << " leaves the stream\n";
-                    // the byte does not count toward the bytes of a read
-                    uint32_t dataEndSeqNo = receiveQueue->getFirstSeqNo() + receiveQueue->getAcknowledgedDataLength();
-                    endSeqNo = seqLess(endSeqNo + 1, dataEndSeqNo) ? endSeqNo + 1 : dataEndSeqNo;
-                }
-            }
-            else if (seqLess(firstSeqNo, markSeqNo) && seqLess(markSeqNo, endSeqNo))
-                endSeqNo = markSeqNo;
+    // urgentOutOfBand, as Linux tcp_recvmsg() without SO_OOBINLINE: the mark is the last
+    // urgent byte (urg_seq); a read stops before it, and at the mark the byte leaves the
+    // stream and does not count toward the bytes of the read
+    if (state->urgentOutOfBand && state->rcvUrgentPending) {
+        uint32_t markSeqNo = state->rcv_up - 1;
+        uint32_t firstSeqNo = receiveQueue->getFirstSeqNo();
+        if (firstSeqNo == markSeqNo && receiveQueue->getAcknowledgedDataLength() > 0) {
+            state->rcvUrgentPending = false;
+            Packet *oobByte = receiveQueue->extractBytesUpTo(markSeqNo + 1);
+            releaseRcvBuffer(oobByte->getByteLength());
+            delete oobByte;
+            EV_INFO << "Urgent data: the out-of-band byte at " << markSeqNo << " leaves the stream\n";
+            uint32_t dataEndSeqNo = receiveQueue->getFirstSeqNo() + receiveQueue->getAcknowledgedDataLength();
+            endSeqNo = seqLess(endSeqNo + 1, dataEndSeqNo) ? endSeqNo + 1 : dataEndSeqNo;
         }
-        Packet *msg = receiveQueue->extractBytesUpTo(endSeqNo);
-        if (msg == nullptr)
-            return nullptr;
-        releaseRcvBuffer(msg->getByteLength());
-        if (rxTimestampingEnabled)
-            msg->addTag<TcpRxTimestampInd>(); // SO_TIMESTAMPING: the time of the delivery
-        msg->setKind(TCP_I_DATA);
-        msg->addTag<SocketInd>()->setSocketId(socketId);
-        return msg;
+        else if (seqLess(firstSeqNo, markSeqNo) && seqLess(markSeqNo, endSeqNo))
+            endSeqNo = markSeqNo;
     }
-
-    // RFC 9293 section 3.10.2, RECEIVE: "data following the urgent pointer (non-urgent
-    // data) cannot be delivered to the user in the same buffer with preceding urgent
-    // data": a delivery ends at the urgent mark
-    bool urgent = state->rcvUrgentPending && seqLess(receiveQueue->getFirstSeqNo(), state->rcv_up);
-    if (urgent && seqLess(state->rcv_up, endSeqNo))
-        endSeqNo = state->rcv_up;
     Packet *msg = receiveQueue->extractBytesUpTo(endSeqNo);
     if (msg == nullptr)
         return nullptr;
     releaseRcvBuffer(msg->getByteLength());
     if (rxTimestampingEnabled)
         msg->addTag<TcpRxTimestampInd>(); // SO_TIMESTAMPING: the time of the delivery
-    if (urgent) {
-        // the URGENT flag of RECEIVE: the urgent bytes that remain (MUST-33)
-        uint32_t remaining = state->rcv_up - receiveQueue->getFirstSeqNo();
-        msg->setKind(TCP_I_URGENT_DATA);
-        msg->addTag<TcpUrgentInd>()->setRemaining(remaining);
-        if (remaining == 0)
-            state->rcvUrgentPending = false;
-    }
-    else
-        msg->setKind(TCP_I_DATA);
+    msg->setKind(TCP_I_DATA);
     msg->addTag<SocketInd>()->setSocketId(socketId);
     return msg;
+}
+
+void TcpConnection::processUrgentPointer(uint32_t urgentPointer)
+{
+    // urgentOutOfBand, as Linux tcp_check_urg(): RCV.UP from a URG segment, but no pointer
+    // whose urgent data the application received, none whose last urgent byte is before
+    // RCV.NXT ("Do not replay urg ptr"), and none that does not advance
+    uint32_t consumed = receiveQueue->getFirstSeqNo();
+    if (seqGE(consumed, urgentPointer) || seqLE(urgentPointer, state->rcv_nxt))
+        return;
+    if (state->rcvUrgentPending && seqLE(urgentPointer, state->rcv_up))
+        return;
+    state->rcv_up = urgentPointer;
+    state->rcvUrgentPending = true;
+    EV_INFO << "Urgent data: the urgent pointer is " << state->rcv_up << "\n";
 }
 
 void TcpConnection::initConnection(TcpOpenCommand *openCmd)
@@ -1137,14 +1103,13 @@ void TcpConnection::configureStateVariables()
         state->tcp_cork = corkSockopt != 0; // TCP_CORK of this connection
     if (noDelaySockopt >= 0)
         state->nagle_enabled = noDelaySockopt == 0; // TCP_NODELAY of this connection
-    state->urgentOutOfBand = tcpMain->par("urgentOutOfBand");
-    state->oobInline = oobInlineSockopt > 0; // SO_OOBINLINE of this connection
     state->minshallNagle = tcpMain->par("minshallNagle");
     state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary");
     state->pushLastBuffered = tcpMain->par("pushLastBufferedSegment");
     state->tsRecentAfterAckCheck = tcpMain->par("tsRecentAfterAckCheck");
     state->rfc5961AckCheck = tcpMain->par("rfc5961AckCheck");
     state->dropBeyondWindowEdge = tcpMain->par("dropBeyondWindowEdge");
+    state->urgentOutOfBand = tcpMain->par("urgentOutOfBand");
     state->windowUpdateAfterRead = tcpMain->par("windowUpdateAfterRead");
     state->abortRstWithAck = tcpMain->par("abortRstWithAck");
     state->softIcmpErrorsAbortSetup = tcpMain->par("softIcmpErrorsAbortSetup");
@@ -1921,7 +1886,6 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
 
     bool zerocopy = packet->findTag<TcpSendZerocopyReq>() != nullptr;
     bool eor = packet->findTag<TcpSendEorReq>() != nullptr;
-    bool urgent = packet->findTag<TcpSendUrgentReq>() != nullptr;
     // MSG_MORE holds the partial segment at the end of this SEND (sendData() takes the
     // flag). A SEND without MSG_MORE while a partial is held gives that partial PSH
     // when it goes, as Linux tcp_mark_push() on the last write.
@@ -1931,15 +1895,6 @@ void TcpConnection::enqueueSendCommandData(Packet *packet)
         state->pushHeldPartial = true;
     uint32_t writeStartSeq = sendQueue->getBufferEndSeq(); // Linux tp->write_seq before this write
     sendQueue->enqueueAppData(packet);
-
-    // urgent data (RFC 9293 section 3.8.5, the SEND call: "If the URGENT flag is set, then
-    // SND.UP <- SND.NXT"): the urgent pointer points to the octet after this data
-    // (MUST-62), as Linux tcp_mark_urg() sets snd_up = write_seq
-    if (urgent) {
-        state->snd_up = sendQueue->getBufferEndSeq();
-        state->urgentSendPending = true;
-        EV_DETAIL << "Urgent data: the urgent pointer is " << state->snd_up << "\n";
-    }
 
     // MSG_EOR: the end of this SEND is a record boundary
     if (eor) {
@@ -2173,16 +2128,14 @@ bool TcpConnection::sendData(uint32_t congestionWindow)
         // TCP_CORK and MSG_MORE hold the partial segment at the end of the data, also with
         // nothing in flight; an uncork, TCP_NODELAY or the cork timer (corkFlush) sends it.
         // Nagle stays after an uncork, as Linux __tcp_sock_set_cork().
-        // urgent data goes at once: neither the cork nor Nagle holds it (Linux tcp_nagle_test())
-        bool urgentMode = isUrgentSendPending();
-        bool corkHold = (state->tcp_cork || msgMoreHold) && !state->corkFlush && !containsFin && !urgentMode && buffered < state->snd_effmss;
+        bool corkHold = (state->tcp_cork || msgMoreHold) && !state->corkFlush && !containsFin && buffered < state->snd_effmss;
         if (swsHold(effectiveWin, buffered))
             EV_WARN << "Not sending to prevent Silly Window Syndrome.\n";
         else if (corkHold) {
             state->corkedDataPending = true;
             EV_WARN << "Holding the partial segment (TCP_CORK or MSG_MORE)\n";
         }
-        else if (state->nagle_enabled && unacknowledgedData && !containsFin && !urgentMode)
+        else if (state->nagle_enabled && unacknowledgedData && !containsFin)
             EV_WARN << "Cannot send (last) segment due to Nagle, not enough data for a full segment\n";
         else {
             // a held partial carries PSH when a later SEND came without MSG_MORE, or when
@@ -2447,72 +2400,6 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
 
     if (state && state->ect)
         state->rexmit = false;
-}
-
-void TcpConnection::processUrgentPointer(uint32_t urgentPointer)
-{
-    // RFC 9293 section 3.10.7.4, sixth: "RCV.UP <- max(RCV.UP,SEG.UP), and signal the
-    // user that the remote side has urgent data if the urgent pointer (RCV.UP) is in
-    // advance of the data consumed", with the checks of Linux tcp_check_urg(): no
-    // pointer whose urgent data the application received, none whose last urgent
-    // byte is before RCV.NXT ("Do not replay urg ptr"), and none that does not advance
-    uint32_t consumed = receiveQueue->getFirstSeqNo();
-    if (seqGE(consumed, urgentPointer) || seqLE(urgentPointer, state->rcv_nxt))
-        return;
-    if (state->rcvUrgentPending && seqLE(urgentPointer, state->rcv_up))
-        return;
-    // urgentOutOfBand, as tcp_check_urg(): an unread out-of-band byte of the old
-    // pointer at the read position leaves the stream; other older bytes stay in it
-    if (state->urgentOutOfBand && !state->oobInline && state->rcvUrgentPending
-            && state->rcv_up - 1 == consumed && receiveQueue->getAcknowledgedDataLength() > 0)
-    {
-        Packet *oobByte = receiveQueue->extractBytesUpTo(consumed + 1);
-        releaseRcvBuffer(oobByte->getByteLength());
-        delete oobByte;
-        consumed = receiveQueue->getFirstSeqNo();
-    }
-    state->rcv_up = urgentPointer;
-    state->rcvUrgentPending = true;
-    state->oobByteSent = false;
-    // MUST-32: "inform the application layer asynchronously whenever it receives an
-    // urgent pointer and there was previously no pending urgent data, or whenever the
-    // urgent pointer advances in the data stream"
-    // with urgentOutOfBand, the bytes before the out-of-band byte (Linux urg_seq)
-    uint32_t urgentBytes = state->rcv_up - consumed - (state->urgentOutOfBand ? 1 : 0);
-    EV_INFO << "Urgent data: the urgent pointer is " << state->rcv_up << ", " << urgentBytes << " urgent bytes to read\n";
-    auto *indication = new Indication(indicationName(TCP_I_URGENT), TCP_I_URGENT);
-    auto *urgentInfo = new TcpUrgentInfo();
-    urgentInfo->setUrgentBytes(urgentBytes);
-    indication->addTag<SocketInd>()->setSocketId(socketId);
-    indication->setControlInfo(urgentInfo);
-    sendToApp(indication);
-}
-
-void TcpConnection::sendOutOfBandByte(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader)
-{
-    // urgentOutOfBand, as Linux tcp_urg(): the segment that holds the last urgent byte
-    // gives it to the application, which reads it with MSG_OOB
-    if (!state->urgentOutOfBand || state->oobInline || !state->rcvUrgentPending || state->oobByteSent)
-        return;
-    uint32_t markSeqNo = state->rcv_up - 1;
-    uint32_t offset = markSeqNo - tcpHeader->getSequenceNo();
-    if (seqLess(markSeqNo, tcpHeader->getSequenceNo()) || offset >= tcpSegment->getByteLength())
-        return;
-    state->oobByteSent = true;
-    auto oobByte = new Packet("OutOfBand", tcpSegment->peekDataAt(B(offset), B(1)));
-    oobByte->setKind(TCP_I_URGENT_DATA);
-    oobByte->addTag<TcpOutOfBandInd>();
-    oobByte->addTag<SocketInd>()->setSocketId(socketId);
-    EV_INFO << "Urgent data: the out-of-band byte at " << markSeqNo << " goes to the application\n";
-    sendToApp(oobByte);
-}
-
-bool TcpConnection::isUrgentSendPending()
-{
-    // urgent data is outstanding until SND.UNA reaches SND.UP (Linux tcp_urg_mode())
-    if (state->urgentSendPending && seqGE(state->snd_una, state->snd_up))
-        state->urgentSendPending = false;
-    return state->urgentSendPending;
 }
 
 bool TcpConnection::sendTlpProbe()

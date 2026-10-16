@@ -194,12 +194,6 @@ void TcpSocket::send(Packet *msg, bool eor)
     send(msg);
 }
 
-void TcpSocket::sendUrgent(Packet *msg)
-{
-    msg->addTagIfAbsent<TcpSendUrgentReq>();
-    send(msg);
-}
-
 void TcpSocket::sendZerocopy(Packet *msg)
 {
     msg->addTagIfAbsent<TcpSendZerocopyReq>();
@@ -389,15 +383,6 @@ void TcpSocket::setCork(bool cork)
     sendToTcp(request);
 }
 
-void TcpSocket::setOobInline(bool oobInline)
-{
-    auto request = new Request("setOobInline", TCP_C_SETOPTION);
-    auto *cmd = new TcpSetOobInlineCommand();
-    cmd->setOobInline(oobInline);
-    request->setControlInfo(cmd);
-    sendToTcp(request);
-}
-
 // ######################
 // TCP Socket Options End
 // ######################
@@ -545,14 +530,6 @@ void TcpSocket::processMessage(cMessage *msg)
             auto *tcpCommand = check_and_cast<TcpCommand *>(msg->getControlInfo());
             if (cb)
                 cb->socketSendMsgArrived(this, tcpCommand);
-            delete msg;
-            break;
-        }
-
-        case TCP_I_URGENT: {
-            auto *urgentInfo = check_and_cast<TcpUrgentInfo *>(msg->getControlInfo());
-            if (cb)
-                cb->socketUrgentArrived(this, urgentInfo);
             delete msg;
             break;
         }

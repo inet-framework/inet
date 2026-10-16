@@ -53,7 +53,6 @@ enum TcpStatusInd
     TCP_I_ICMPv4_ERROR = 12;       // ICMPv4 error received (carries ~Icmpv4ErrorInd tag)
     TCP_I_ICMPv6_ERROR = 13;     // ICMPv6 error received (carries ~Icmpv6ErrorInd tag)
     TCP_I_ZEROCOPY_COMPLETION = 14; // a zerocopy-marked SEND's data has been transmitted (MSG_ZEROCOPY; carries ~TcpZerocopyCompletionInfo)
-    TCP_I_URGENT = 15;           // an urgent pointer arrived or advanced (RFC 9293 MUST-32; carries ~TcpUrgentInfo)
 }
 
 //
@@ -301,15 +300,6 @@ class TcpSetCorkCommand extends TcpSetOptionCommand
 }
 
 //
-// SO_OOBINLINE of one connection (TcpSocket::setOobInline()): with the
-// urgentOutOfBand parameter of Tcp, the last urgent byte stays in the stream.
-//
-class TcpSetOobInlineCommand extends TcpSetOptionCommand
-{
-    bool oobInline = true;
-}
-
-//
 // Sent with message kind TCP_I_ZEROCOPY_COMPLETION, in response to a
 // zerocopy-marked SEND (MSG_ZEROCOPY -- see
 // ~TcpSendZerocopyReq/~TcpSocket::sendZerocopy) once that SEND's data has
@@ -320,19 +310,6 @@ class TcpSetOobInlineCommand extends TcpSetOptionCommand
 class TcpZerocopyCompletionInfo extends TcpCommand
 {
     unsigned int zerocopyId;
-}
-
-//
-// Sent with message kind TCP_I_URGENT when an urgent pointer arrives and no urgent
-// data was pending, or when the urgent pointer advances (RFC 9293 section 3.8.5,
-// MUST-32). The data before the urgent mark then comes with the kind
-// TCP_I_URGENT_DATA and the tag ~TcpUrgentInd.
-//
-// @see ~TcpStatusInd, ~TcpSocket
-//
-class TcpUrgentInfo extends TcpCommand
-{
-    unsigned int urgentBytes; // the bytes before the urgent mark that the application has not received yet (MUST-33)
 }
 
 //

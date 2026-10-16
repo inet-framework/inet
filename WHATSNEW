@@ -424,9 +424,9 @@ Notable backward incompatible changes are the following:
 
    With windowScalingFactor = -1, windowAutoTuning and a receive buffer that SO_RCVBUF does not lock, the window scale now also represents receiveBufferMax, as Linux tcp_select_initial_window() represents tcp_rmem[2]: with the default of 32 MiB, the shift is 10. Before, the shift represented only the window at the time of the SYN: a buffer of 131072 bytes got a shift of 1, and the offered window could not grow above 131070 bytes, although the buffer grew. A buffer that SO_RCVBUF locks keeps the shift of its own window. Simulations with LinuxTcp, and simulations that turn windowAutoTuning on with a receive buffer, change.
 
-54. TCP urgent data
+54. The out-of-band byte of received TCP urgent data, as Linux
 
-   Tcp now supports urgent data, as RFC 9293 section 3.8.5 requires. TcpSocket::sendUrgent() sends data as urgent data (the tag TcpSendUrgentReq): the urgent pointer points to the octet after it, and the segments before it carry URG until the peer acknowledges them; neither the cork nor Nagle holds urgent data. A receiver tells the application of a new or advanced urgent pointer with the new indication TCP_I_URGENT (TcpUrgentInfo, the bytes before the mark; TcpSocket calls socketUrgentArrived()), and delivers the data before the mark as TCP_I_URGENT_DATA with the urgent bytes that remain (the tag TcpUrgentInd); a delivery ends at the mark. The new parameter urgentOutOfBand, which LinuxTcp sets, gives the behavior of Linux: the last urgent byte leaves the stream and comes alone (TCP_I_URGENT_DATA of one byte with the tag TcpOutOfBandInd), and the data before it is ordinary data; TcpSocket::setOobInline() keeps the byte in the stream (SO_OOBINLINE). Before, a receiver ignored URG. Simulations change only where an application sends urgent data.
+   The new parameter urgentOutOfBand, which LinuxTcp sets, gives the receive side of urgent data of Linux without SO_OOBINLINE: the last byte of urgent data leaves the stream, and a read stops before it. INET does not deliver that byte, which Linux gives to recv(MSG_OOB), and it sends no urgent data. Tcp keeps treating URG-marked bytes as ordinary data. Simulations change only where a peer sends urgent data to LinuxTcp.
 
 Notable backward compatible changes are the following:
 

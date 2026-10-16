@@ -157,8 +157,7 @@ struct TcpStateVariables
     bool pushLastBuffered = false;    // set PSH on the last buffered segment, RFC 9293 MUST-61 (pushLastBufferedSegment parameter)
     uint32_t pushed_seq = 0;        // the end of the data with the last PSH mark of a write (Linux tp->pushed_seq), for forced_push()
     bool swsOverride = false;       // the override timeout of the sender SWS avoidance is sending (rule (4) of RFC 9293 section 3.8.6.2.1)
-    uint32_t snd_up = 0;            // send urgent pointer: the octet after the urgent data (RFC 9293 MUST-62)
-    bool urgentSendPending = false; // urgent data is outstanding: SND.UNA is before SND.UP (Linux tcp_urg_mode())
+    uint32_t snd_up = 0;            // send urgent pointer
     uint32_t snd_wl1 = 0;           // segment sequence number used for last window update
     uint32_t snd_wl2 = 0;           // segment ack. number used for last window update
     uint32_t iss = 0;               // initial sequence number (ISS)
@@ -166,11 +165,9 @@ struct TcpStateVariables
     // receive sequence number variables
     uint32_t rcv_nxt = 0;           // receive next
     uint32_t rcv_wnd = 0;           // receive window
-    uint32_t rcv_up = 0;            // receive urgent pointer: the octet after the urgent data (RFC 9293 MUST-62)
-    bool rcvUrgentPending = false;  // RCV.UP is valid, and the application has not received all urgent data
+    uint32_t rcv_up = 0;            // receive urgent pointer: the octet after the urgent data
+    bool rcvUrgentPending = false;  // urgentOutOfBand: RCV.UP is valid, and its out-of-band byte is still in the stream
     bool urgentOutOfBand = false;   // urgentOutOfBand: the last urgent byte leaves the stream, as Linux
-    bool oobInline = false;         // SO_OOBINLINE: with urgentOutOfBand, the last urgent byte stays in the stream
-    bool oobByteSent = false;       // urgentOutOfBand: the application got the byte of the current urgent pointer
     uint32_t irs = 0;               // initial receive sequence number
     uint32_t rcv_adv = 0;           // the right edge of the window in force (Linux rcv_wup + rcv_wnd)
     uint32_t rcv_mwnd_seq = 0;      // the highest right edge ever offered (Linux rcv_mwnd_seq): a peer may still send up to it after the window shrank

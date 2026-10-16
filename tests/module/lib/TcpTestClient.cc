@@ -32,7 +32,6 @@ class INET_API TcpTestClient : public cSimpleModule
         int numBytes;
         bool more = false; // the SEND carries MSG_MORE (TcpSendMoreReq)
         bool eor = false; // the SEND carries MSG_EOR (TcpSendEorReq)
-        bool urgent = false; // the SEND carries urgent data (TcpSendUrgentReq, MSG_OOB)
     };
     typedef std::list<Command> Commands;
     Commands commands;
@@ -111,8 +110,6 @@ void TcpTestClient::parseScript(const char *script, Commands& commands)
                 cmd.more = true;
             else if (flag == "eor")
                 cmd.eor = true;
-            else if (flag == "urgent")
-                cmd.urgent = true;
             else
                 throw cRuntimeError("syntax error in script: unknown flag '%s'", flag.c_str());
         }
@@ -289,14 +286,6 @@ void TcpTestClient::handleMessage(cMessage *msg)
                 EV_INFO_C("testing") << ", delivered at " << timestamp->getTimestamp();
         if (auto completionInfo = dynamic_cast<TcpZerocopyCompletionInfo *>(msg->getControlInfo()))
             EV_INFO_C("testing") << ", id " << completionInfo->getZerocopyId();
-        if (auto urgentInfo = dynamic_cast<TcpUrgentInfo *>(msg->getControlInfo()))
-            EV_INFO_C("testing") << ", " << urgentInfo->getUrgentBytes() << " urgent bytes to read";
-        if (auto packet = dynamic_cast<Packet *>(msg))
-            if (auto urgentInd = packet->findTag<TcpUrgentInd>())
-                EV_INFO_C("testing") << ", " << urgentInd->getRemaining() << " urgent bytes remain";
-        if (auto packet = dynamic_cast<Packet *>(msg))
-            if (packet->findTag<TcpOutOfBandInd>())
-                EV_INFO_C("testing") << ", out-of-band";
         EV_INFO_C("testing") << "\n";
     }
     for (auto& extraSocket : extraSockets) {
@@ -328,8 +317,6 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.setAdvertisedWindow(par("socketAdvertisedWindow"));
             socket.setReceiveBufferSize(par("socketReceiveBufferSize"));
             socket.setSynRetries(par("socketSynRetries"));
-            if (par("oobInline"))
-                socket.setOobInline(true);
 
             if (par("active"))
                 socket.connect(L3Address(connectAddress), connectPort, par("fastOpen"));
@@ -459,8 +446,6 @@ void TcpTestClient::scheduleNextSend()
         msg->addTag<TcpSendMoreReq>();
     if (cmd.eor)
         msg->addTag<TcpSendEorReq>();
-    if (cmd.urgent)
-        msg->addTag<TcpSendUrgentReq>();
     scheduleAt(cmd.tSend, msg);
 }
 
