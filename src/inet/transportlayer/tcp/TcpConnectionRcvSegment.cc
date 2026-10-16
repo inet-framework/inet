@@ -2074,8 +2074,8 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
     }
 
     // TCP Fast Open: the third transmission of a SYN with a Fast Open option or
-    // data suggests a path that drops them (RFC 7413 section 4.1.3.1; Linux
-    // tcp_fastopen_active_detect_blackhole())
+    // data suggests a path that drops them (RFC 7413 section 4.1.3.1); Linux
+    // tcp_fastopen_active_detect_blackhole() detects it one timeout later
     if (fsm.getState() == TCP_S_SYN_SENT && (state->fastopenSynCarriedOption || state->fastopenSynDataLen > 0)
         && state->syn_rexmit_count == TFO_BLACKHOLE_REXMIT_COUNT)
         tcpMain->recordFastOpenBlackhole();
