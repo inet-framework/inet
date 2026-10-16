@@ -3,8 +3,8 @@ Tests the blackhole detection of TCP Fast Open (RFC 7413 section 4.1.3.1:
 the client caches negative responses). Connection 1 caches the cookie.
 The tester deletes the SYN of connection 2, which carries the cookie and 200
 bytes, and its first retransmission. The third transmission of the SYN
-suggests a path that drops Fast Open SYNs (as in Linux), so Fast Open stops
-for fastopenBlackholeTimeout (3600 s). The SYN-ACK acknowledges only the SYN,
+suggests a path that drops Fast Open SYNs (Linux waits for the fourth), so
+Fast Open stops for fastopenBlackholeTimeout (3600 s). The SYN-ACK acknowledges only the SYN,
 and the first ACK carries the 200 bytes. Connection 3 asks for Fast Open at
 t=20 s, but its SYN carries no Fast Open option and no data, as in Linux.
 
