@@ -1,0 +1,161 @@
+%description:
+Check the pull with an acceptance filter through a compound queue.
+The test uses CompoundPendingQueue of the IEEE 802.11 MAC: a classifier, three
+packet queues and a priority scheduler. The filter refuses the multicast frame
+and the head of the unicast queue. Each layer applies the effects of a pull one time.
+
+%file: FilteredPullCompound.cc
+#include <set>
+#include "inet/common/PacketEventTag.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/queueing/contract/IPacketFilterFunction.h"
+#include "inet/queueing/contract/IPacketQueue.h"
+
+namespace inet::queueing {
+
+class NameFilter : public IPacketFilterFunction
+{
+  protected:
+    std::set<std::string> names;
+
+  public:
+    NameFilter(std::set<std::string> names) : names(names) {}
+    virtual bool matchesPacket(const Packet *packet) const override { return names.count(packet->getName()) != 0; }
+};
+
+class FilteredPullCompoundTest : public cSimpleModule, public cListener
+{
+  protected:
+    std::map<std::string, int> pulls;
+    cModule *compound = nullptr;
+
+    static void check(bool condition, const char *what)
+    {
+        if (!condition)
+            throw cRuntimeError("Check failed: %s", what);
+    }
+
+    template<typename F>
+    static bool throws(F f)
+    {
+        try {
+            f();
+        }
+        catch (const cRuntimeError&) {
+            return true;
+        }
+        return false;
+    }
+
+    Packet *makeFrame(const char *name, bool multicast)
+    {
+        auto header = makeShared<ieee80211::Ieee80211DataHeader>();
+        header->setType(ieee80211::ST_DATA_WITH_QOS);
+        header->addChunkLength(ieee80211::QOSCONTROL_PART_LENGTH);
+        header->setTid(5);
+        header->setReceiverAddress(MacAddress(multicast ? "01:00:00:00:00:01" : "02:00:00:00:00:02"));
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(20)));
+        packet->setArrivalTime(simTime());
+        auto timeTag = packet->addRegionTag<QueueingTimeTag>();
+        timeTag->setPacketTotalTimesArraySize(1);
+        timeTag->setPacketTotalTimes(0, SIMTIME_ZERO);
+        packet->addRegionTag<PacketEventTag>();
+        return packet;
+    }
+
+    virtual void initialize() override
+    {
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("enqueue"));
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        bool enqueue = !strcmp(message->getName(), "enqueue");
+        delete message;
+        if (enqueue) {
+            compound = getModuleByPath("^.compound");
+            compound->subscribe(packetPulledSignal, this);
+            auto queue = check_and_cast<IPacketQueue *>(compound);
+            queue->enqueuePacket(makeFrame("m0", true));
+            queue->enqueuePacket(makeFrame("u0", false));
+            queue->enqueuePacket(makeFrame("u1", false));
+            // the pull checks the time in the queue
+            scheduleAt(SimTime(11, SIMTIME_MS), new cMessage("pull"));
+        }
+        else {
+            checkCompoundPull();
+            compound->unsubscribe(packetPulledSignal, this);
+            std::cout << "Filtered pull compound checks passed.\n";
+        }
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        pulls[source->getFullName()]++;
+    }
+
+    void checkCompoundPull()
+    {
+        auto queue = check_and_cast<IPacketQueue *>(compound);
+        auto source = check_and_cast<IPassivePacketSource *>(compound);
+        auto gate = compound->gate("out");
+        auto multicastQueue = check_and_cast<IPacketQueue *>(compound->getSubmodule("multicastQueue"));
+        auto unicastQueue = check_and_cast<IPacketQueue *>(compound->getSubmodule("unicastQueue"));
+        check(multicastQueue->getNumPackets() == 1 && unicastQueue->getNumPackets() == 2, "the classifier sorts the frames");
+        auto u0 = unicastQueue->getPacket(0);
+        auto u1 = unicastQueue->getPacket(1);
+        NameFilter filter({"u1"}), none({"x"});
+        check(source->canPullPacket(gate) != u1, "without the filter, the compound queue offers another frame");
+        check(source->canPullPacket(gate, &filter) == u1, "the compound queue offers the frame that the filter matches");
+        check(source->canPullPacket(gate, &none) == nullptr, "the compound queue offers nothing if the filter matches no frame");
+        check(throws([&] { source->pullPacket(gate, &none); }), "a pull that the filter refuses throws");
+        check(queue->getNumPackets() == 3 && pulls.empty(), "the queries and the refused pull change nothing");
+        auto packet = source->pullPacket(gate, &filter);
+        check(packet == u1, "the pull returns the frame of the query");
+        take(packet);
+        check(queue->getNumPackets() == 2 && unicastQueue->getPacket(0) == u0, "the other frames stay in their queues");
+        check(pulls.size() == 3 && pulls["compound"] == 1 && pulls["prioritizer"] == 1 && pulls["unicastQueue"] == 1, "the compound queue, the scheduler and the unicast queue each emit packetPulled one time");
+        auto timeTag = packet->findRegionTag<QueueingTimeTag>();
+        check(timeTag->getPacketTotalTimes(0) == SimTime(10, SIMTIME_MS), "the unicast queue adds the time in the queue one time");
+        auto eventTag = packet->findRegionTag<PacketEventTag>();
+        check(eventTag->getPacketEventsArraySize() == 1 && eventTag->getPacketEvents(0)->getKind() == PEK_QUEUED, "the unicast queue adds one PEK_QUEUED event");
+        delete packet;
+    }
+};
+
+Define_Module(FilteredPullCompoundTest);
+
+} // namespace inet::queueing
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue;
+
+simple FilteredPullCompoundTest
+{
+    parameters:
+        @class(::inet::queueing::FilteredPullCompoundTest);
+}
+
+network FilteredPullCompoundNetwork
+{
+    submodules:
+        compound: CompoundPendingQueue;
+        test: FilteredPullCompoundTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = FilteredPullCompoundNetwork
+ned-path = .;../../../../src
+sim-time-limit = 20ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.compound.classifier.classifierClass = "inet::ieee80211::MgmtOverMulticastOverUnicastClassifier"
+
+%contains: stdout
+Filtered pull compound checks passed.

@@ -59,6 +59,8 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual bool canPullSomePacket(const cGate *gate) const override { return provider.canPullSomePacket(); }
     virtual Packet *canPullPacket(const cGate *gate) const override { return provider.canPullPacket(); }
     virtual Packet *pullPacket(const cGate *gate) override;
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override { return provider.canPullPacket(filter); }
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override;
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
 };
