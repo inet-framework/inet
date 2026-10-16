@@ -1,0 +1,217 @@
+%description:
+Check the pull with an acceptance filter at packet schedulers.
+A scheduler decides as if each input held only the packets that the filter matches.
+The pull has the effects of a normal pull, and WrrScheduler spends its credit for it.
+A scheduler without support throws an error before any change.
+
+%file: FilteredPullScheduler.cc
+#include <set>
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/queueing/contract/IPacketFilterFunction.h"
+#include "inet/queueing/contract/IPacketQueue.h"
+
+namespace inet::queueing {
+
+class NameFilter : public IPacketFilterFunction
+{
+  protected:
+    std::set<std::string> names;
+
+  public:
+    NameFilter(std::set<std::string> names) : names(names) {}
+    virtual bool matchesPacket(const Packet *packet) const override { return names.count(packet->getName()) != 0; }
+};
+
+class FilteredPullSchedulerTest : public cSimpleModule, public cListener
+{
+  protected:
+    std::map<std::string, int> pulls;
+    std::vector<cModule *> observed;
+
+    static void check(bool condition, const char *what)
+    {
+        if (!condition)
+            throw cRuntimeError("Check failed: %s", what);
+    }
+
+    template<typename F>
+    static bool throws(F f)
+    {
+        try {
+            f();
+        }
+        catch (const cRuntimeError&) {
+            return true;
+        }
+        return false;
+    }
+
+    cModule *observe(const char *path)
+    {
+        auto module = getModuleByPath(path);
+        module->subscribe(packetPulledSignal, this);
+        observed.push_back(module);
+        return module;
+    }
+
+    void enqueue(const char *path, std::vector<const char *> names)
+    {
+        auto queue = check_and_cast<IPacketQueue *>(observe(path));
+        for (auto name : names)
+            queue->enqueuePacket(new Packet(name, makeShared<ByteCountChunk>(B(20))));
+    }
+
+    // pulls with or without a filter, and returns the name of the packet
+    std::string pull(const char *path, const IPacketFilterFunction *filter)
+    {
+        auto module = getModuleByPath(path);
+        auto source = check_and_cast<IPassivePacketSource *>(module);
+        auto gate = module->gate("out");
+        auto expected = filter != nullptr ? source->canPullPacket(gate, filter) : source->canPullPacket(gate);
+        auto packet = filter != nullptr ? source->pullPacket(gate, filter) : source->pullPacket(gate);
+        check(packet == expected, "the pull returns the packet of the query");
+        take(packet);
+        std::string name = packet->getName();
+        delete packet;
+        return name;
+    }
+
+    virtual void initialize() override
+    {
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("start"));
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        checkPriorityScheduler("^.priority", "^.p", "y1");
+        checkPriorityScheduler("^.reversePriority", "^.r", "z0");
+        checkWrrScheduler();
+        checkUnsupportedScheduler();
+        for (auto module : observed)
+            module->unsubscribe(packetPulledSignal, this);
+        std::cout << "Filtered pull scheduler checks passed.\n";
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        pulls[source->getFullName()]++;
+    }
+
+    void checkPriorityScheduler(const char *schedulerPath, const char *queuePrefix, const char *expected)
+    {
+        std::string prefix = queuePrefix;
+        enqueue((prefix + "0").c_str(), {"x0"});
+        enqueue((prefix + "1").c_str(), {"y0", "y1"});
+        enqueue((prefix + "2").c_str(), {"z0"});
+        auto scheduler = observe(schedulerPath);
+        pulls.clear();
+        // the filter refuses the packet of the first input and the head of the second input
+        NameFilter filter({"y1", "z0"}), none({"w"});
+        auto source = check_and_cast<IPassivePacketSource *>(scheduler);
+        check(source->canPullPacket(scheduler->gate("out"), &none) == nullptr, "the scheduler offers nothing if the filter matches no packet");
+        check(throws([&] { source->pullPacket(scheduler->gate("out"), &none); }), "a pull that the filter refuses throws");
+        check(pulls.empty(), "the query and the refused pull emit no packetPulled");
+        check(pull(schedulerPath, &filter) == expected, "the scheduler serves the first input in priority order that holds an accepted packet");
+        check(pulls[scheduler->getFullName()] == 1, "the scheduler emits packetPulled one time");
+        int queuePulls = 0;
+        for (auto entry : pulls)
+            if (entry.first != scheduler->getFullName()) {
+                check(entry.second == 1, "the queue of the packet emits packetPulled one time");
+                queuePulls++;
+            }
+        check(queuePulls == 1, "only the queue of the packet emits packetPulled");
+    }
+
+    void checkWrrScheduler()
+    {
+        enqueue("^.w0", {"a0", "a1", "a2"});
+        enqueue("^.w1", {"b0", "b1", "b2"});
+        // the weights are 2 and 1; the filtered pull spends the token of the second input
+        NameFilter onlyB({"b0", "b1", "b2"});
+        check(pull("^.wrr", &onlyB) == "b0", "the scheduler serves the only input that holds an accepted packet");
+        check(pull("^.wrr", nullptr) == "a0", "the round continues with the first input");
+        check(pull("^.wrr", nullptr) == "a1", "the first input has a second token");
+        check(pull("^.wrr", nullptr) == "a2", "the filtered pull spent the token of the second input, so a new round starts");
+        check(pull("^.wrr", nullptr) == "b1", "the new round gives the second input its token");
+    }
+
+    void checkUnsupportedScheduler()
+    {
+        enqueue("^.l0", {"c0"});
+        auto scheduler = observe("^.label");
+        auto source = check_and_cast<IPassivePacketSource *>(scheduler);
+        NameFilter filter({"c0"});
+        pulls.clear();
+        check(throws([&] { source->canPullPacket(scheduler->gate("out"), &filter); }), "a scheduler without support refuses the query with a filter");
+        check(throws([&] { source->pullPacket(scheduler->gate("out"), &filter); }), "a scheduler without support refuses the pull with a filter");
+        check(check_and_cast<IPacketQueue *>(getModuleByPath("^.l0"))->getNumPackets() == 1 && pulls.empty(), "the refused calls change nothing");
+    }
+};
+
+Define_Module(FilteredPullSchedulerTest);
+
+} // namespace inet::queueing
+
+%file: test.ned
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.LabelScheduler;
+import inet.queueing.scheduler.PriorityScheduler;
+import inet.queueing.scheduler.WrrScheduler;
+
+simple FilteredPullSchedulerTest
+{
+    parameters:
+        @class(::inet::queueing::FilteredPullSchedulerTest);
+}
+
+network FilteredPullSchedulerNetwork
+{
+    submodules:
+        p0: PacketQueue;
+        p1: PacketQueue;
+        p2: PacketQueue;
+        priority: PriorityScheduler;
+        r0: PacketQueue;
+        r1: PacketQueue;
+        r2: PacketQueue;
+        reversePriority: PriorityScheduler {
+            parameters:
+                reverseOrder = true;
+        }
+        w0: PacketQueue;
+        w1: PacketQueue;
+        wrr: WrrScheduler {
+            parameters:
+                weights = "2 1";
+        }
+        l0: PacketQueue;
+        label: LabelScheduler {
+            parameters:
+                labels = "";
+        }
+        test: FilteredPullSchedulerTest;
+    connections allowunconnected:
+        p0.out --> priority.in++;
+        p1.out --> priority.in++;
+        p2.out --> priority.in++;
+        r0.out --> reversePriority.in++;
+        r1.out --> reversePriority.in++;
+        r2.out --> reversePriority.in++;
+        w0.out --> wrr.in++;
+        w1.out --> wrr.in++;
+        l0.out --> label.in++;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = FilteredPullSchedulerNetwork
+ned-path = .;../../../../src
+sim-time-limit = 20ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+%contains: stdout
+Filtered pull scheduler checks passed.

@@ -51,9 +51,22 @@ void PacketSchedulerBase::mapRegistrationForwardingGates(cGate *gate, std::funct
         throw cRuntimeError("Unknown gate");
 }
 
+int PacketSchedulerBase::schedulePacket(const IPacketFilterFunction *filter) const
+{
+    throw cRuntimeError("Invalid operation");
+}
+
 int PacketSchedulerBase::callSchedulePacket() const
 {
     int index = schedulePacket();
+    if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
+        throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
+    return index;
+}
+
+int PacketSchedulerBase::callSchedulePacket(const IPacketFilterFunction *filter) const
+{
+    int index = schedulePacket(filter);
     if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
         throw cRuntimeError("Scheduled packet from invalid input gate: %d", index);
     return index;
@@ -165,6 +178,34 @@ Packet *PacketSchedulerBase::pullPacket(const cGate *gate)
     checkPacketStreaming(nullptr);
     int index = callSchedulePacket();
     auto packet = providers[index].pullPacket();
+    take(packet);
+    handlePacketScheduled(packet, index);
+    EV_INFO << "Scheduling packet" << EV_FIELD(packet) << EV_ENDL;
+    handlePacketProcessed(packet);
+    emit(packetPulledSignal, packet);
+    if (collector != nullptr)
+        animatePullPacket(packet, outputGate, collector.getReferencedGate());
+    return packet;
+}
+
+Packet *PacketSchedulerBase::canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const
+{
+    // the acceptance filter applies to whole packets only
+    if (isStreamingPacket())
+        throw cRuntimeError("Another packet streaming operation is already in progress");
+    int index = schedulePacket(filter);
+    if (index < 0 || static_cast<unsigned int>(index) >= inputGates.size())
+        return nullptr;
+    else
+        return providers[index].canPullPacket(filter);
+}
+
+Packet *PacketSchedulerBase::pullPacket(const cGate *gate, const IPacketFilterFunction *filter)
+{
+    Enter_Method("pullPacket");
+    checkPacketStreaming(nullptr);
+    int index = callSchedulePacket(filter);
+    auto packet = providers[index].pullPacket(filter);
     take(packet);
     handlePacketScheduled(packet, index);
     EV_INFO << "Scheduling packet" << EV_FIELD(packet) << EV_ENDL;
