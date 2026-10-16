@@ -2822,6 +2822,14 @@ void TcpConnection::updateTsRecent(const Ptr<const TcpHeader>& tcpHeader)
         EV_DETAIL << "Not updating ts_recent: the segment acknowledges unsent data\n";
         return;
     }
+    // ... and not from a segment that rfc5961AckCheck drops (Linux tcp_ack() returns
+    // before tcp_replace_ts_recent())
+    if (state->tsRecentAfterAckCheck && tcpHeader->getAckBit() && state->rfc5961AckCheck && state->max_window > 0
+        && seqLess(tcpHeader->getAckNo(), state->snd_una - state->max_window))
+    {
+        EV_DETAIL << "Not updating ts_recent: the ACK of the segment is below SND.UNA - MAX.SND.WND\n";
+        return;
+    }
     bool tsRecentValid = (simTime() - state->ts_recent_stamp) <= PAWS_IDLE_TIME_THRESH;
     bool olderTsval = seqLess(option->getSenderTimestamp(), state->ts_recent);
     if ((!olderTsval || !tsRecentValid) && seqLE(tcpHeader->getSequenceNo(), state->last_ack_sent)) {
