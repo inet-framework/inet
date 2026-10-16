@@ -3091,7 +3091,9 @@ bool TcpConnection::processFastOpenCookieBytes(const std::vector<uint8_t>& cooki
             state->fastopenSendCookieOption = true;
             EV_INFO << "Fast Open: cookie requested\n";
         }
-        else if (state->fastopenLenientCookieValidation || cookie == tcpMain->generateFastOpenCookie(localAddr, remoteAddr, cookieLength)) {
+        else if (state->fastopenLenientCookieValidation
+                 || (cookieLength == (size_t)state->fastopenCookieBytes && cookie == tcpMain->generateFastOpenCookie(localAddr, remoteAddr, cookieLength)))
+        {
             state->fastopenCookieValid = true;
             EV_INFO << "Fast Open: valid cookie\n";
         }

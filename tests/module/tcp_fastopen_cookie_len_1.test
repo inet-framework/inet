@@ -1,0 +1,58 @@
+%description:
+Tests that the strict cookie check of a Fast Open server takes only a cookie
+of fastopenCookieBytes (8). The scenario is that of tcp_fastopen_1, and the
+tester cuts the cookie of the SYN of connection 2 to its first 4 bytes. The
+server does not accept the cookie: its SYN-ACK acknowledges only the SYN and
+gives the cookie of 8 bytes again, and the data goes after the handshake.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=0.5s
+*.cli_app.sendBytes2=200B
+*.cli_app.fastOpen2=true
+*.srv_app.tOpen2=0.5s
+*.srv_app.localPort2=2000
+
+*.cli_tcp.fastopenClientEnabled = true
+*.srv_tcp.fastopenServerEnabled = true
+*.tcptester.script="a3 cookie 4"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[0.501 A003] A.1001 > B.2000: S 125000:125200(200) win 16384   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=4)# cutting the Fast Open cookie
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.503 B002] A.1001 < B.2000: A S 125500:125500(0) ack 125001 win 16384   Option(s): MaxSegSize NOP NOP FastOpen(cookieLen=8)
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.505 A004] A.1001 > B.2000: A 125001:125201(200) ack 125501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
