@@ -490,6 +490,16 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. A Proxy Mobile IPv6 gateway reports the handoff state as unknown
+
+   A Mobile Access Gateway sent Handoff Indicator 1, attachment over a new
+   interface, in every Proxy Binding Update, including the one it sends after a
+   handover from another gateway. It learns of an attachment from the access
+   link alone, so it now sends 4, handoff state unknown, as RFC 5213 Section
+   6.9.1.1 requires in that case. The Local Mobility Anchor does not read the
+   indicator, so simulations behave as before; one octet of each Proxy Binding
+   Update changes on the wire.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
