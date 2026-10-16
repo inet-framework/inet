@@ -38,14 +38,16 @@ the guide classifies as a defect. See
 doc/project/guide/derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected
 and doc/project/evidence/model/tcp/results.md.
 
-The limitation. Changing the default to `computed` was tried on 2026-09-15 and withdrawn.
-Computing the checksum serializes the segment, and the payload that the receiver gets back has
-lost its region tags: `examples/inet/nclients -c lwip__inet` then stops with "Received 1 B of
-TCP data without a GenericAppMsgReq region tag at its front". The default can change only when a
-serialized TCP payload keeps its region tags, and the repair waits for that, maybe for a long
-time. The UDP default waits for the same kind of limitation (udp/Rfc1122ChecksumDefault). When
-the default is computed, this test reports PASS (unexpected), and the declaration below is
-removed.
+The limitation. Changing the default to `computed` was tried on 2026-09-15 and withdrawn,
+because `examples/inet/nclients -c lwip__inet` then stops with "Received 1 B of TCP data without
+a GenericAppMsgReq region tag at its front". On 2026-10-16 the cause was found in TcpLwip, not
+in the serialization: its receive cache reads the payload at an offset from the start of the
+packet, and with a computed checksum the headers below TCP are still in the packet. The checksum
+hook also fails when Mobile IPv6 adds extension headers (MIPv6_tcp_handover with a computed
+checksum). The owner decided on 2026-10-16 to keep the declared default, and the two defects
+stay (D-165, commit 742884a572). The repair waits for that decision, maybe for a long time. The
+UDP default waits for a limitation of its own (udp/Rfc1122ChecksumDefault). When the default is
+computed, this test reports PASS (unexpected), and the declaration below is removed.
 
 %# expected-result: FAIL
 
