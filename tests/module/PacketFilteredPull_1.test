@@ -84,13 +84,24 @@ class FilteredPullTest : public cSimpleModule, public cListener
 
     virtual void handleMessage(cMessage *message) override
     {
+        bool start = !strcmp(message->getName(), "start");
         delete message;
-        checkPassivePacketSource();
-        checkEmptyPacketSource();
-        checkUnsupportedSource();
-        for (auto module : observed)
-            module->unsubscribe(packetPulledSignal, this);
-        std::cout << "Filtered pull checks passed.\n";
+        if (start) {
+            checkPassivePacketSource();
+            checkEmptyPacketSource();
+            checkUnsupportedSource();
+            auto queue = check_and_cast<IPacketQueue *>(observe("^.queue"));
+            for (auto name : {"a", "b", "c"})
+                queue->enqueuePacket(makePacket(name));
+            // the pull checks the time in the queue
+            scheduleAt(SimTime(11, SIMTIME_MS), new cMessage("pull"));
+        }
+        else {
+            checkPacketQueue();
+            for (auto module : observed)
+                module->unsubscribe(packetPulledSignal, this);
+            std::cout << "Filtered pull checks passed.\n";
+        }
     }
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
@@ -141,6 +152,33 @@ class FilteredPullTest : public cSimpleModule, public cListener
         check(queue->getNumPackets() == 1, "the refused calls leave the packet in the queue");
         check(pulls["gate"] == 0 && pulls["gatedQueue"] == 0, "the refused calls emit no packetPulled");
     }
+
+    void checkPacketQueue()
+    {
+        auto module = getModuleByPath("^.queue");
+        auto queue = check_and_cast<IPacketQueue *>(module);
+        auto gate = module->gate("out");
+        auto a = queue->getPacket(0);
+        auto b = queue->getPacket(1);
+        auto c = queue->getPacket(2);
+        NameFilter notA({"b", "c"}), none({"x"});
+        check(queue->canPullPacket(gate, &notA) == b, "the queue offers the first packet that the filter matches");
+        check(queue->canPullPacket(gate, &none) == nullptr, "the queue offers nothing if the filter matches no packet");
+        check(throws([&] { queue->pullPacket(gate, &none); }), "a pull that the filter refuses throws");
+        check(queue->getNumPackets() == 3 && pulls["queue"] == 0, "the queries and the refused pull change nothing");
+        auto packet = queue->pullPacket(gate, &notA);
+        check(packet == b, "the pull returns the packet of the query");
+        take(packet);
+        check(queue->getNumPackets() == 2 && queue->getPacket(0) == a && queue->getPacket(1) == c, "the other packets keep their order");
+        check(pulls["queue"] == 1, "the queue emits packetPulled one time");
+        auto timeTag = packet->findRegionTag<QueueingTimeTag>();
+        check(timeTag->getPacketTotalTimes(0) == SimTime(10, SIMTIME_MS), "the pull adds the time in the queue");
+        auto eventTag = packet->findRegionTag<PacketEventTag>();
+        check(eventTag->getPacketEventsArraySize() == 1 && eventTag->getPacketEvents(0)->getKind() == PEK_QUEUED, "the pull adds one PEK_QUEUED event");
+        check(eventTag->getPacketEvents(0)->getPacketDuration() == SimTime(10, SIMTIME_MS), "the event holds the time in the queue");
+        check(a->findRegionTag<PacketEventTag>()->getPacketEventsArraySize() == 0, "the packets that stay get no event");
+        delete packet;
+    }
 };
 
 Define_Module(FilteredPullTest);
@@ -169,6 +207,7 @@ network FilteredPullNetwork
         empty: EmptyPacketSource;
         gatedQueue: PacketQueue;
         gate: InteractiveGate;
+        queue: PacketQueue;
         test: FilteredPullTest;
     connections allowunconnected:
         gatedQueue.out --> gate.in;

@@ -69,6 +69,8 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual bool canPullSomePacket(const cGate *gate) const override { return !isEmpty(); }
     virtual Packet *canPullPacket(const cGate *gate) const override { return !isEmpty() ? getPacket(0) : nullptr; }
     virtual Packet *pullPacket(const cGate *gate) override;
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override;
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override;
 
     virtual void handlePacketRemoved(Packet *packet) override;
 };
