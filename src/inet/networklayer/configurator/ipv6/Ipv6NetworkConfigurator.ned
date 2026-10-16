@@ -59,6 +59,8 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    - `@among` - shorthand for hosts+towards
 //    - `@prefix` - prefix template, e.g. "2001:db8:1:x::/64". Use 'x' for
 //      unspecified 16-bit groups that will be filled by the configurator.
+//      A template without 'x' is used as is, so it must match interfaces on one link only:
+//      two links that get the same prefix are an error.
 //    - `@address` - explicit full IPv6 address for the interface, e.g.
 //      "2001:db8:1:1::1". Overrides the EUI-64-derived interface id; must lie
 //      within the interface's link prefix. With no `@prefix` on the link, the
