@@ -30,6 +30,8 @@ This plan collects the open TCP items in one list. For each item it gives the ev
 | T13 | The collapse of the receive queue (`tcp_prune_queue()`) | difference from Linux | D-149 of `plan/done/tcp-receive-space.md` |
 | T14 | The pad and the slab classes of the truesize of a small packet | difference from Linux | D-149 of `plan/done/tcp-receive-space.md` |
 | T15 | The receive buffer and the window scale of the Linux mode | difference from Linux | found in T6 (`plan/done/tcp-receive-space.md`, section 6) |
+| T16 | The first receive window of the Linux mode | difference from Linux | found in T15 (`plan/done/tcp-linux-receive-buffer.md`) |
+| T17 | The cause of gap 2 in the TCP evidence | wrong text | found in T9 (D-165, section 8) |
 
 ### T1 — An active open fails after 75 s
 
@@ -108,6 +110,14 @@ From the open findings of `plan/done/tcp-receive-memory-repairs.md`, split from 
 
 `LinuxTcp` turns `windowAutoTuning` on, but sets no receive buffer, so auto-tuning and Dynamic Right-Sizing never act with its defaults; Linux gives each socket `tcp_rmem[1]`, 131072 bytes. Also, the automatic window scale represents only the window at the time of the SYN, a shift of 1 for a buffer of 131072 bytes, so the offered window stops at 131070 bytes when DRS grows the buffer; Linux represents `tcp_rmem[2]`, a shift of 10. Plan: `plan/done/tcp-linux-receive-buffer.md`. Effect: only `LinuxTcp` and connections with `windowAutoTuning`. Size: small.
 
+### T16 — The first receive window of the Linux mode
+
+`LinuxTcp` offers 65535 bytes in its SYN and SYN-ACK, and its `rcv_ssthresh` starts at `advertisedWindow`. Linux starts both at the result of `tcp_select_initial_window()`: the full space of the receive buffer (half of `tcp_rmem[1]`, 65536 bytes) rounded down to a multiple of the MSS. That is 64240 bytes with an MSS of 1460, and 65160 bytes in a SYN-ACK with timestamps, where the MSS of the rounding is 12 bytes smaller. Proposal: with `windowAutoTuning`, the first offer and `rcv_ssthresh` come from the receive buffer, as in Linux; without it, `advertisedWindow` keeps its role. The packetdrill harness of inet-gpl sets `advertisedWindow = 29200`, which then has no effect on `LinuxTcp`; the packetdrill suite decides whether that line goes. Size: small.
+
+### T17 — The cause of gap 2 in the TCP evidence
+
+The evidence of gap 2 (`doc/project/evidence/model/tcp/results.md`, `coverage.md`, and the description of `tests/protocol/tcp/rfc/Rfc9293ChecksumDefault.test`) says that a serialized TCP payload loses its region tags. T9 found other causes: the offset of the receive cache of `TcpLwip`, and the checksum hook with the extension headers of Mobile IPv6 (the record of T9 in section 8). The default stays by the decision of the owner (D-165). Proposal: correct the text. The test stays FAIL (expected), and its limitation becomes the decision of the owner and the two defects. Size: small.
+
 ## 3. Out of scope
 
 - The KERNEL_DRIFT rows of the packetdrill suite (12): Linux 7.1.3 itself does not pass these scripts.
@@ -134,7 +144,9 @@ Each item is a branch of its own, `topic/tcp-<item>`, in a worktree of the same 
 | 8 | T7 | it changes a default of `Tcp`, so the CUBIC baselines move |
 | 9 | T8 | large, with few users |
 | 10 | T9, steps 2 and 3 | dropped (D-165) |
-| 11 | T13, T14 | low priority (D-149) |
+| 11 | T17 | small; found in T9, added by the owner on 2026-10-16 |
+| 12 | T16 | small; found in T15, added by the owner on 2026-10-16 |
+| 13 | T14, then T13 | low priority (D-149); the collapse of T13 charges the truesize of T14 |
 | — | T10 | closed (D-133) |
 
 ## 6. The decisions
