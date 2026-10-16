@@ -40,6 +40,7 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
 
     virtual void enqueuePacket(Packet *packet) override;
     virtual Packet *dequeuePacket() override;
+    virtual Packet *dequeuePacket(const IPacketFilterFunction *filter) override;
 
   public:
     virtual void pushPacketStart(Packet *packet, const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }

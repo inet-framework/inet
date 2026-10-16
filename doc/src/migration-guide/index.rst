@@ -146,6 +146,14 @@ with the filter, and it calls ``handlePacketScheduled()`` as for a normal pull:
 
    int schedulePacket(const IPacketFilterFunction *filter) const override;
 
+``IPacketQueue`` has the new method ``dequeuePacket(filter)``. ``PacketQueueBase`` implements it as
+``pullPacket(outputGate, filter)`` and ``drop()``, as it implements ``dequeuePacket()``. A class that
+implements ``IPacketQueue`` directly must declare it:
+
+.. code-block:: c++
+
+   Packet *dequeuePacket(const IPacketFilterFunction *filter) override;
+
 A class that declares only one of the overloads hides the other one in its own scope. Add
 ``using IPassivePacketSource::pullPacket;`` (and the same for ``canPullPacket``) if the class calls
 the other overload without a qualifier.

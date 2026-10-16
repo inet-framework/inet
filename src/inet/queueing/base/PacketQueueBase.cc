@@ -53,6 +53,13 @@ Packet *PacketQueueBase::dequeuePacket()
     return packet;
 }
 
+Packet *PacketQueueBase::dequeuePacket(const IPacketFilterFunction *filter)
+{
+    auto packet = pullPacket(outputGate, filter);
+    drop(packet);
+    return packet;
+}
+
 void PacketQueueBase::emit(simsignal_t signal, cObject *object, cObject *details)
 {
     if (signal == packetPushedSignal || signal == packetPushStartedSignal)
