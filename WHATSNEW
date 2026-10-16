@@ -436,6 +436,10 @@ Notable backward incompatible changes are the following:
 
    Tcp now supports urgent data, as RFC 9293 section 3.8.5 requires. TcpSocket::sendUrgent() sends data as urgent data (the tag TcpSendUrgentReq): the urgent pointer points to the octet after it, and the segments before it carry URG until the peer acknowledges them; neither the cork nor Nagle holds urgent data. A receiver tells the application of a new or advanced urgent pointer with the new indication TCP_I_URGENT (TcpUrgentInfo, the bytes before the mark; TcpSocket calls socketUrgentArrived()), and delivers the data before the mark as TCP_I_URGENT_DATA with the urgent bytes that remain (the tag TcpUrgentInd); a delivery ends at the mark. The new parameter urgentOutOfBand, which LinuxTcp sets, gives the behavior of Linux: the last urgent byte leaves the stream and comes alone (TCP_I_URGENT_DATA of one byte with the tag TcpOutOfBandInd), and the data before it is ordinary data; TcpSocket::setOobInline() keeps the byte in the stream (SO_OOBINLINE). Before, a receiver ignored URG. Simulations change only where an application sends urgent data.
 
+57. A sink can pull a packet that it accepts
+
+   IPassivePacketSource has two new methods, canPullPacket(gate, filter) and pullPacket(gate, filter). The filter, an IPacketFilterFunction, is the acceptance condition of the sink. The source answers and pulls as if it held only the packets that the filter matches, and the pull has the effects of a normal pull of that packet. This is the pull counterpart of canPushPacket(packet, gate): a sink can now take a packet behind a packet that it cannot accept at the moment. PassivePacketSource and EmptyPacketSource support the filter. The base classes of the queueing model throw an error for it, so a module that cannot choose among its packets refuses the filtered call. A class outside INET that implements IPassivePacketSource directly no longer compiles until it declares the two methods. See the migration guide. Simulation results do not change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

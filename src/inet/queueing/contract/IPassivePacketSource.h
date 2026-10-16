@@ -9,6 +9,7 @@
 #define __INET_IPASSIVEPACKETSOURCE_H
 
 #include "inet/common/packet/Packet.h"
+#include "inet/queueing/contract/IPacketFilterFunction.h"
 
 namespace inet {
 namespace queueing {
@@ -58,6 +59,38 @@ class INET_API IPassivePacketSource
      * support pulling and passing packets.
      */
     virtual Packet *pullPacket(const cGate *gate) = 0;
+
+    /**
+     * Returns the packet that can be pulled at the given gate when the sink
+     * accepts only the packets that the filter matches. The returned value is
+     * nullptr if there is no such packet. The filter is the acceptance
+     * condition of the sink, and the result is the packet that canPullPacket()
+     * would return if the source held only the packets that the filter matches.
+     *
+     * This function is a query: it must not change the state of the
+     * simulation. If it returns a packet, then pullPacket() with the same gate
+     * and filter, in the same event and with no other operation between the
+     * two calls, returns that packet.
+     *
+     * A source that cannot choose among the packets that the filter matches
+     * throws an error. The gate must be a valid gate of this module and it must
+     * support pulling packets. The filter must not be nullptr, and it must not
+     * change the state of the simulation.
+     */
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const = 0;
+
+    /**
+     * Pulls the packet that canPullPacket() returns for the same gate and
+     * filter. This operation pulls the packet as a whole, with the effects of
+     * pullPacket() for that packet. The ownership of the packet is transferred
+     * to the sink.
+     *
+     * The source must hold a packet that the filter matches. The returned
+     * packet must not be nullptr. The other conditions are the same as for
+     * canPullPacket() with a filter, and the gate must also support passing
+     * packets.
+     */
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) = 0;
 
     /**
      * Starts pulling the packet from the packet source at the given gate. This

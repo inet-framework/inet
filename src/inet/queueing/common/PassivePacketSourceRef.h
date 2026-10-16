@@ -31,6 +31,14 @@ class INET_API PassivePacketSourceRef : public ModuleRefByGate<IPassivePacketSou
         return referencedModule->pullPacket(referencedGate);
     }
 
+    virtual Packet *canPullPacket(const IPacketFilterFunction *filter) const {
+        return referencedModule->canPullPacket(referencedGate, filter);
+    }
+
+    virtual Packet *pullPacket(const IPacketFilterFunction *filter) {
+        return referencedModule->pullPacket(referencedGate, filter);
+    }
+
     virtual Packet *pullPacketStart(bps datarate) {
         return referencedModule->pullPacketStart(referencedGate, datarate);
     }

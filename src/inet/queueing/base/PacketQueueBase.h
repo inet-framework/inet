@@ -46,6 +46,12 @@ class INET_API PacketQueueBase : public PacketProcessorBase, public virtual IPac
     virtual void pushPacketEnd(Packet *packet, const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
     virtual void pushPacketProgress(Packet *packet, const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
 
+    // the overloads with a filter must not hide the ones without a filter
+    using IPassivePacketSource::canPullPacket;
+    using IPassivePacketSource::pullPacket;
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override { throw cRuntimeError("Invalid operation"); }
+
     virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *pullPacketEnd(const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }

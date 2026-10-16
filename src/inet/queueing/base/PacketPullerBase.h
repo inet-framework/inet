@@ -40,6 +40,8 @@ class INET_API PacketPullerBase : public PacketProcessorBase, public virtual IPa
     virtual Packet *canPullPacket(const cGate *gate) const override;
 
     virtual Packet *pullPacket(const cGate *gate) override;
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override;
     virtual Packet *pullPacketEnd(const cGate *gate) override;
     virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override;

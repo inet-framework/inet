@@ -44,6 +44,8 @@ class INET_API PassivePacketSource : public ClockUserModuleMixin<PassivePacketSo
     virtual Packet *canPullPacket(const cGate *gate) const override;
 
     virtual Packet *pullPacket(const cGate *gate) override;
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override;
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override;
     virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *pullPacketEnd(const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) override { throw cRuntimeError("Invalid operation"); }

@@ -67,6 +67,13 @@ via separate methods to tell if they can be pushed or pulled on a specific gate
 in their current state, either with respect to a specific packet or any packet
 thereof.
 
+In the pull direction, the sink can also give the passive source its acceptance
+condition, an :cpp:`IPacketFilterFunction`. The source then answers and pulls as
+if it held only the packets that the filter matches. This is the counterpart of
+asking a passive sink about a specific packet in the push direction. With it, a
+sink can take a packet behind a packet that it cannot accept at the moment. A
+source that cannot choose among its packets throws an error for such a call.
+
 Queueing model elements can be divided into two categories with respect to the
 operation on a given gate: *passive* and *active*. The passive model elements
 are pushed into and pulled from by other connected modules. In contrast, the

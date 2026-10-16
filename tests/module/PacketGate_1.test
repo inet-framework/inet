@@ -24,6 +24,8 @@ class TestSource : public cSimpleModule, public IPacketSource
         virtual bool canPullSomePacket(const cGate *gate) const override { return true; }
         virtual Packet *canPullPacket(const cGate *gate) const override { return nullptr; }
         virtual Packet *pullPacket(const cGate *gate) override { return nullptr; }
+        virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override { throw cRuntimeError("Invalid operation"); }
+        virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override { throw cRuntimeError("Invalid operation"); }
         virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override { return nullptr; }
 
         virtual Packet *pullPacketEnd(const cGate *gate) override {

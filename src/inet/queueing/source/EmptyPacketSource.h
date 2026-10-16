@@ -36,6 +36,8 @@ class INET_API EmptyPacketSource : public PacketProcessorBase, public virtual IP
     virtual Packet *canPullPacket(const cGate *gate) const override { return nullptr; }
 
     virtual Packet *pullPacket(const cGate *gate) override { throw cRuntimeError("Illegal operation: packet source is empty"); }
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override { return nullptr; }
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override { throw cRuntimeError("Illegal operation: packet source is empty"); }
     virtual Packet *pullPacketStart(const cGate *gate, bps datarate)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
     virtual Packet *pullPacketEnd(const cGate *gate)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
     virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength)  override { throw cRuntimeError("Illegal operation: packet source is empty"); }
