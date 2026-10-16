@@ -1349,7 +1349,7 @@ void TcpConnection::sendSyn()
     tcpHeader->setSequenceNo(state->iss);
     tcpHeader->setSynBit(true);
     updateRcvWnd();
-    tcpHeader->setWindow(state->rcv_wnd);
+    tcpHeader->setWindow(synWindow());
 
     // TCP Fast Open (RFC 7413 section 4.2.2): the data that process_SEND() gave
     // the SYN takes the sequence numbers after the SYN
@@ -1437,7 +1437,7 @@ void TcpConnection::sendSynAck()
     tcpHeader->setSynBit(true);
     tcpHeader->setAckBit(true);
     updateRcvWnd();
-    tcpHeader->setWindow(state->rcv_wnd);
+    tcpHeader->setWindow(synWindow());
 
     // The SYN-ACK takes the ISS: snd_nxt and snd_max are at least ISS+1. A
     // retransmitted SYN-ACK of a TCP Fast Open server that sent data in SYN_RCVD
@@ -3604,6 +3604,19 @@ uint32_t TcpConnection::selectRcvWnd()
         win = 0;
 
     return win;
+}
+
+uint16_t TcpConnection::synWindow()
+{
+    // RFC 7323 section 2.2: "The window field in a segment where the SYN bit is set
+    // (i.e., a <SYN> or <SYN,ACK>) MUST NOT be scaled", so the window of a SYN or a
+    // SYN-ACK is at most 65535, also after the SYN of the peer turned window scaling
+    // on; the right edge offered moves back with it
+    if (state->rcv_wnd <= TCP_MAX_WIN)
+        return state->rcv_wnd;
+    state->rcv_adv = state->rcv_nxt + TCP_MAX_WIN;
+    emit(rcvAdvSignal, state->rcv_adv);
+    return TCP_MAX_WIN;
 }
 
 uint16_t TcpConnection::updateRcvWnd()

@@ -590,6 +590,9 @@ class INET_API TcpConnection : public SimpleModule
      */
     virtual uint16_t updateRcvWnd();
 
+    /** Utility: the window field of a SYN or a SYN-ACK, which is not scaled; call after updateRcvWnd(). */
+    virtual uint16_t synWindow();
+
     /** Utility: update window information (snd_wnd, snd_wl1, snd_wl2) */
     /**
      * FlightSize for the ssthresh of fast retransmit (RFC 5681 equation (4)): the data
