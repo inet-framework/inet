@@ -1,0 +1,53 @@
+%description:
+Tests that the path MTU discovery restores the MSS of the handshake after
+pmtudTimeout, also after an ICMP error in SYN_SENT. The scenario is that of
+tcp_icmp_frag_syn_2: the error for an MTU of 800 lowers the MSS of the client
+from 1460 to 760 before the handshake. With pmtudTimeout = 2s, the first
+send at t=4 restores the MSS from before the error: after the first segment
+(760 bytes), the data goes in segments of 1460 bytes.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.cli_app.sendScript="4.0 3000"
+*.*_tcp.mss = 1460
+*.cli_tcp.pmtudEnabled = true
+*.cli_tcp.pmtudTimeout = 2s
+*.tcptester.script="a1 icmp 3 4 mtu 800"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[4.001 A004] A.1000 > B.2000: A 1:761(760) ack 750501 win 16384 
+[4.203 B002] A.1000 < B.2000: A ack 761 win 16384 
+[4.205 A005] A.1000 > B.2000: A 761:2221(1460) ack 750501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PMTUD: probe timeout elapsed, restoring snd_mss from 760 to original 1460
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

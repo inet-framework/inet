@@ -724,6 +724,10 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
             if (newMss < state->snd_mss) {
                 EV_DETAIL << "PMTUD: reducing snd_mss from " << state->snd_mss
                           << " to " << newMss << " (reported MTU=" << mtu << ")\n";
+                // in SYN_SENT, the MSS of the handshake comes later: keep the MSS from
+                // before the error for the restore (pmtudTimeout)
+                if (state->pmtudOriginalMss == 0)
+                    state->pmtudOriginalMss = state->snd_mss;
                 state->snd_mss = newMss;
                 state->snd_effmss = calculateEffectiveMss();
                 state->pmtudLastMssReduction = simTime();
@@ -812,6 +816,10 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
             if (newMss < state->snd_mss) {
                 EV_DETAIL << "PMTUD: reducing snd_mss from " << state->snd_mss
                           << " to " << newMss << " (reported MTU=" << mtu << ")\n";
+                // in SYN_SENT, the MSS of the handshake comes later: keep the MSS from
+                // before the error for the restore (pmtudTimeout)
+                if (state->pmtudOriginalMss == 0)
+                    state->pmtudOriginalMss = state->snd_mss;
                 state->snd_mss = newMss;
                 state->snd_effmss = calculateEffectiveMss();
                 state->pmtudLastMssReduction = simTime();
@@ -1656,10 +1664,20 @@ uint32_t TcpConnection::sendSegment(uint32_t bytes)
     if (state->pmtudEnabled && state->pmtudLastMssReduction >= SIMTIME_ZERO
         && simTime() - state->pmtudLastMssReduction >= state->pmtudTimeout)
     {
-        EV_INFO << "PMTUD: probe timeout elapsed, restoring snd_mss from " << state->snd_mss
-                << " to original " << state->pmtudOriginalMss << "\n";
-        state->snd_mss = state->pmtudOriginalMss;
-        state->snd_effmss = calculateEffectiveMss();
+        // the MSS of the handshake, at most TCP_MAXSEG and the route MTU of now
+        uint32_t mss = state->pmtudOriginalMss;
+        if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < mss)
+            mss = maxSegSockopt;
+        int pathMtu = pathMtuSockopt > 0 ? pathMtuSockopt : (int)tcpMain->par("pathMtu");
+        uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
+        if (pathMtu > 0 && (uint32_t)pathMtu > headers && (uint32_t)pathMtu - headers < mss)
+            mss = pathMtu - headers;
+        if (mss > state->snd_mss) {
+            EV_INFO << "PMTUD: probe timeout elapsed, restoring snd_mss from " << state->snd_mss
+                    << " to original " << mss << "\n";
+            state->snd_mss = mss;
+            state->snd_effmss = calculateEffectiveMss();
+        }
         state->pmtudLastMssReduction = -1;
     }
 
@@ -2657,8 +2675,10 @@ bool TcpConnection::processMSSOption(const Ptr<const TcpHeader>& tcpHeader, cons
     if (state->snd_mss == 0)
         state->snd_mss = 536;
 
-    // Store negotiated MSS for PMTUD: this is the value we restore after the probe timeout
-    state->pmtudOriginalMss = state->snd_mss;
+    // the MSS that the path MTU discovery restores after pmtudTimeout: that of the
+    // handshake, without the reduction of an ICMP error in SYN_SENT
+    uint32_t peerMss = option.getMaxSegmentSize() > 0 ? option.getMaxSegmentSize() : 536;
+    state->pmtudOriginalMss = std::min(state->pmtudOriginalMss > 0 ? state->pmtudOriginalMss : state->snd_mss, peerMss);
 
     EV_INFO << "Tcp Header Option MSS(=" << option.getMaxSegmentSize() << ") received, SMSS is set to " << state->snd_mss << "\n";
     return true;
@@ -2679,8 +2699,9 @@ void TcpConnection::applyDefaultSendMss(const Ptr<const TcpHeader>& tcpHeader, c
     if (state->snd_mss > defaultMss) {
         EV_INFO << "No MSS option received, SMSS is set to the default " << defaultMss << " (RFC 9293 MUST-15)\n";
         state->snd_mss = defaultMss;
-        state->pmtudOriginalMss = state->snd_mss;
     }
+    // the MSS that the path MTU discovery restores, as in processMSSOption()
+    state->pmtudOriginalMss = std::min(state->pmtudOriginalMss > 0 ? state->pmtudOriginalMss : state->snd_mss, defaultMss);
 }
 
 bool TcpConnection::processWSOption(const Ptr<const TcpHeader>& tcpHeader, const TcpOptionWindowScale& option)
