@@ -1032,6 +1032,13 @@ void Rfc6675Recovery::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
         // needless, so restore cwnd/ssthresh (and leave recovery if still in it).
         undoCwndReduction();
         state->lossRecovery = false;
+        // the undo of a timeout also ends its go-back-N, as the F-RTO undo does
+        // (Linux tcp_try_undo_loss() clears the loss marks)
+        if (state->afterRto) {
+            conn->getRexmitQueueForUpdate()->resetLostBit();
+            state->afterRto = false;
+            state->rexmit_count = 0;
+        }
     }
 }
 

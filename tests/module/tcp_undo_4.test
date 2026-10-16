@@ -1,0 +1,63 @@
+%description:
+Tests that the undo of a spurious retransmission timeout also ends its
+go-back-N (Linux tcp_try_undo_loss(), lossUndoEnabled=true). At t=10 the
+sender sends four segments, and the tester delays their ACKs by 1.5 s. The
+timeout at t=11 retransmits 501:1001, and the tester drops the
+retransmission. At t=11.504 the first delayed ACK echoes the timestamp of
+the original segment (Eifel), so the sender restores cwnd 2000. The other
+three segments arrived, so the sender does not retransmit them, and the
+next three ACKs acknowledge them.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="b3 delay 1.5; b4 delay 1.5; b5 delay 1.5; b6 delay 1.5; a8 delete"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 500;10 2000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 512 # 500 bytes of data with the TS option
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.lossUndoEnabled = true
+*.*_tcp.timestampSupport = true
+*.*_tcp.increasedIWEnabled = true
+
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
+
+%# the D-SACK of the second timeout's retransmission...
+%contains: stdout
+Undoing spurious cwnd reduction (D-SACK): cwnd=2000
+%contains: stdout
+[11.504] tcpdump finished, A:8 B:6 segments
