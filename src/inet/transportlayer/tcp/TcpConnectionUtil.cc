@@ -1624,6 +1624,10 @@ void TcpConnection::sendRstAck(uint32_t seq, uint32_t ack, L3Address src, L3Addr
 
     Packet *fp = new Packet("RST+ACK");
 
+    // RFC 8257 section 3.6: the RST of a DCTCP connection carries ECT, as in sendRst()
+    if (state != nullptr && state->ect && tcpAlgorithm != nullptr && tcpAlgorithm->needsEcn())
+        fp->addTag<EcnReq>()->setExplicitCongestionNotification(IP_ECN_ECT_0);
+
     // send it
     sendToIP(fp, tcpHeader, src, dest);
 
