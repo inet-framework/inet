@@ -1,6 +1,6 @@
 # The repairs of the TCP parameters
 
-Status: **proposed** — written on 2026-10-16 from the review of all TCP parameters; waits for the owner.
+Status: **in progress** — written on 2026-10-16 from the review of all TCP parameters; the owner decided the questions on 2026-10-16 (section 6).
 
 - Branch `topic/tcp-parameter-repairs`, on master `675655fc35`. This branch holds only the plan; each item gets a branch of its own (section 4).
 - The decision numbers continue those of `plan/done/tcp-open-items.md` (D-170 onward).
@@ -23,10 +23,10 @@ The goal follows the rule of the owner: INET gets close to Linux and follows the
 | P1 | `lossDetectionMode` = "rack" | `Tcp` | RACK detects reordering only with `adaptiveReorderingEnabled`, which `Tcp` turns off, so RACK retransmits reordered data and halves cwnd (RFC 8985 section 6.2 step 3 is mandatory) | run the reordering detection always; keep only the growth of `reordering` behind `adaptiveReorderingEnabled` |
 | P2 | `hystartEnabled` (TcpCubic) | `LinuxTcp` | the first HyStart round never starts when `snd_una` is 2^31 or more, that is, for half of the random ISS values | reset the HyStart round at the start of the connection, as Linux `cubictcp_init()` |
 | P3 | `beta` (TcpCubic) | `LinuxTcp` | at a second RTO in a row, ssthresh falls to 2 MSS, because TcpCubic takes the bytes in flight | compute ssthresh only at the first RTO of an episode, as RFC 5681 and Linux `tcp_enter_loss()` |
-| P4 | `synLinearTimeouts` | `LinuxTcp` | an active open gives up after 11 s; Linux gives up after about 131 s, because it limits by time ((2^(n+1) − 1) × RTO), not by count | see Q1 |
+| P4 | `synLinearTimeouts` | `LinuxTcp` | an active open gives up after 11 s; Linux gives up after about 131 s, because it limits by time ((2^(n+1) − 1) × RTO), not by count | document the count limit (D-170); a doc fix in P24 |
 | P5 | `initialWindow` = "rfc6928", `initialCwnd` | `LinuxTcp` | after one lost SYN, cwnd falls to 1 segment; RFC 6928 section 2 and Linux keep the initial window unless the SYN or SYN-ACK went more than once | for "rfc6928" and `initialCwnd`, reduce only after more than one retransmission |
 | P6 | `lossUndoEnabled` | `LinuxTcp` | the undo of a spurious RTO restores cwnd, but go-back-N goes on and sends data that arrived | at an RTO undo, also clear the lost marks and `afterRto`, as Linux `tcp_try_undo_loss()` and RFC 4015 |
-| P7 | `frtoEnabled` | `LinuxTcp` | F-RTO decides at the first ACK; RFC 5682 steps 2.b and 3 (send new data, decide at the second ACK) are missing | see Q2 |
+| P7 | `frtoEnabled` | `LinuxTcp` | F-RTO decides at the first ACK; RFC 5682 steps 2.b and 3 (send new data, decide at the second ACK) are missing | document the limit (D-171); a doc fix in P24 |
 | P8 | `adaptiveReorderingEnabled` | `LinuxTcp` | the learned reordering degree does not delay the start of recovery, which still comes at the third duplicate ACK | use the learned degree in step (1) and in `updateLost()`, as Linux `tcp_time_to_recover()` |
 | P9 | `tcpEcnMode` (classic ECN) | `Tcp`, `LinuxTcp` with ECN | a delayed ACK loses the echo of a CE mark when an unmarked segment comes first; ACKs on data and FIN segments carry no ECE | enter the echo state when the CE segment arrives, and set ECE on each segment that acknowledges, as RFC 3168 section 6.1.3 |
 | P10 | `beta` (TcpCubic) with ECN | `LinuxTcp` with ECN | at an ECN echo, CUBIC halves cwnd with the generic code; beta, W_max and the epoch stay | TcpCubic reacts to ECE with its own decrease, as RFC 9438 section 4.6 |
@@ -42,7 +42,7 @@ The goal follows the rule of the owner: INET gets close to Linux and follows the
 | P15 | `keepAliveProbeCount` | answered probes count when the interval is at least the idle time plus the RTT, so a live connection aborts | reset the probe count when a segment arrives after the last probe |
 | P16 | `pmtudTimeout` | the MSS goes back to a stored value that can be 0 (ASSERT) or already reduced | record the MSS when it is settled, and bound the restore by `TCP_MAXSEG` and the route MTU |
 | P17 | `pathMtu` | the path MTU search does not use it as its upper end and stalls below it; `setPathMtu()` before the open does nothing without `mtuProbing = 2` | bound the midpoint by `pathMtu`; apply the socket option at the open |
-| P18 | `abortOnDataAfterClose` | the RST rule works only in FIN_WAIT_1/2: a CLOSE behind unsent data accepts new data, and a CLOSE with unread data sends FIN | see Q3 |
+| P18 | `abortOnDataAfterClose` | the RST rule works only in FIN_WAIT_1/2: a CLOSE behind unsent data accepts new data, and a CLOSE with unread data sends FIN | document that only FIN_WAIT_1/2 is covered (D-172); a doc fix in P24 |
 | P19 | `fastopenServerEnabled` | after a lost SYN-ACK, the server keeps its full initial window | at the SYN-ACK timeout, set cwnd to 1 SMSS (RFC 7413 section 4.2.2 with RFC 5681) |
 | P20 | `fastopenCookieCacheSize` | 0 makes the first cookie erase from an empty map (crash) | reject values below 1 |
 
@@ -53,7 +53,7 @@ The goal follows the rule of the owner: INET gets close to Linux and follows the
 | P21 | Range checks with a clear error: `mss` ≥ 1 (and not tiny), `baseMss` ≥ 1, `dupthresh` ≥ 1, `maxReordering` ≥ `dupthresh`, `delayedAckFrameCount` ≥ 1, `maxPersistTimeout` > 0, DcTcp `g` in (0, 1], the 12 TcpCubic parameters (`beta` in (0, 1), `c` > 0, times ≥ 0, `hystartDelayMin` ≤ `hystartDelayMax`, `hystartDetect` in 0..3), `initialSsthresh` > 0. |
 | P22 | Small behavior repairs: `maxPersistTimeout` caps the first probe interval; `minshallNagle` starts `snd_sml` at the ISS; `notsentLowat` set on a listener reaches its connections and a change is checked at once; the SWS rule uses the receive buffer, so a buffer below one MSS opens; `windowAutoTuning` without `receiveBufferSize` gives an error; `alignOptions = false` pads SACK without NOPs; `syncookiesAlways` quantizes the MSS of the peer; TcpVegas and TcpWestwood read `initialSsthresh`; `keepAliveEnabled` starts with TcpNoCongestionControl; the RTO loss window uses `snd_effmss`. |
 | P23 | Small ECN, close and Fast Open repairs: the bare TIME_WAIT ACK of AccECN; soft ICMP errors of the types Time Exceeded and Parameter Problem; ECT on the RST+ACK of DCTCP; TS.Recent only after the RFC 5961 ACK check; the strict cookie check takes only the configured length; the pending Fast Open limit counts per listener. |
-| P24 | Doc fixes: `pushSegmentsOnWriteBoundary`, `sackSupport` (and `tcpAlgorithmClass`, see Q4), `limitedTransmitEnabled`, `tcpFriendliness`, `cntClamp`, `delta`, `mtuProbing` (needs `pmtudEnabled` on IPv4), `baseMss`, `accEcnOptionPolicy`, `advertisedWindow`, `dupthresh`, `lossUndoEnabled` (needs SACK), `fastopenBlackholeTimeout` (see Q5), and the stale comments in inet-gpl (`parser.y`, `sysctls.yaml`). |
+| P24 | Doc fixes: `synLinearTimeouts` and `synRetries` (P4: the count limit, not the time limit of Linux), `frtoEnabled` (P7: the decision at the first ACK), `abortOnDataAfterClose` (P18: FIN_WAIT_1/2 only), `pushSegmentsOnWriteBoundary`, `sackSupport` (and `tcpAlgorithmClass`: SACK off in both directions, D-173), `limitedTransmitEnabled`, `tcpFriendliness`, `cntClamp`, `delta`, `mtuProbing` (needs `pmtudEnabled` on IPv4), `baseMss`, `accEcnOptionPolicy`, `advertisedWindow`, `dupthresh`, `lossUndoEnabled` (needs SACK), `fastopenBlackholeTimeout` (the second SYN timeout, without the "as Linux" claims, D-174), and the stale comments in inet-gpl (`parser.y`, `sysctls.yaml`). |
 
 Two items of the review stay out of this plan, because they are not defects of a parameter: the idle restart of `LinuxTcp` follows RFC 5681 and not Linux `tcp_cwnd_restart()`, and `PacketDrillApp` does not map `TCP_CONGESTION`.
 
@@ -77,9 +77,8 @@ Wave 1 changes the behavior of the defaults, so baselines can move: P1 for `Tcp`
 | 2 | P2, P3 | `LinuxTcp` default (CUBIC); small; one branch |
 | 3 | P9, P10 | ECN; P10 after P9, as both touch the ECE path |
 | 4 | P5, P6, P8 | `LinuxTcp` recovery; small to medium |
-| 5 | P4, P7 | by the answers to Q1 and Q2 |
-| 6 | P11 to P20 | options; P11 first (high) |
-| 7 | P21 to P24 | one or two branches |
+| 5 | P11 to P20, but P18 | options; P11 first (high) |
+| 6 | P21 to P24 | one or two branches; P24 has the docs of P4, P7 and P18 |
 
 ## 6. Questions for the owner, with recommendations
 
@@ -90,12 +89,23 @@ Wave 1 changes the behavior of the defaults, so baselines can move: P1 for `Tcp`
 - **Q5 — `fastopenBlackholeTimeout`.** (a) Detect the black hole at the third SYN timeout and at the give-up, as Linux. (b) Remove the "as Linux" claims and keep the second timeout. **Recommendation: (a)**; it is a one-line change of the count, with the test.
 - **Q6 — The order and the scope.** Do wave 1 first, then wave 2, then wave 3, each item on its own branch as in section 4. **Recommendation: yes.**
 
+### The decisions
+
+The owner decided on 2026-10-16: "chose the smaller changes that keep the tests pass, order agreed".
+
+- **D-170 — P4: the count limit stays.** `synLinearTimeouts` keeps the count of `synRetries` as the limit of the setup; the docs of both say that Linux limits by time, so with linear timeouts `LinuxTcp` gives up earlier than Linux (11 s against about 131 s with the defaults).
+- **D-171 — P7: F-RTO decides at the first ACK.** The doc of `frtoEnabled` says that steps 2.b and 3 of RFC 5682 are not modeled, so a delay spike with one ACK per segment is not detected.
+- **D-172 — P18: only FIN_WAIT_1/2.** The doc of `abortOnDataAfterClose` says that the RST covers new data in FIN_WAIT_1/2 only; a CLOSE with unread data sends FIN.
+- **D-173 — SACK with an algorithm without SACK recovery stays off in both directions,** and the docs of `sackSupport` and `tcpAlgorithmClass` say so.
+- **D-174 — The Fast Open black hole stays at the second SYN timeout;** the "as Linux" claims go from the code comment, the test description and the doc.
+- **D-175 — Each repair is the smaller change that keeps the tests passing,** in the order of section 5. A test changes only where its old expectation was the defect itself, and the commit says so.
+
 ## 7. The steps of this plan
 
 | Step | Commit | What |
 | --- | --- | --- |
 | 1 ✅ | `plan: add: the repairs of the TCP parameters` | this plan |
-| 2 | `plan: change: the decisions of the owner on the TCP parameter repairs` | section 6 |
+| 2 ✅ | `plan: change: the decisions of the owner on the TCP parameter repairs` | section 6 |
 | 3 | — | each item on its own branch, in the order of section 5; this plan records the branches and their results |
 
 ## 8. The record
