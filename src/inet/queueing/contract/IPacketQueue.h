@@ -16,7 +16,11 @@ namespace inet {
 namespace queueing {
 
 /**
- * This class defines the interface for packet queues.
+ * This class defines the interface for packet queues. A packet queue is a
+ * passive packet sink and a passive packet source. enqueuePacket() is the
+ * form of pushPacket() at the input gate without the gate argument, and
+ * dequeuePacket(), with or without a filter, is the same form of pullPacket()
+ * at the output gate.
  */
 class INET_API IPacketQueue : public virtual IPacketCollection, public virtual IPassivePacketSink, public virtual IPassivePacketSource
 {

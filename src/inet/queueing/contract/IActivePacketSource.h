@@ -16,6 +16,11 @@ namespace queueing {
 /**
  * This class defines the interface for active packet sources.
  * See the corresponding NED file for more details.
+ *
+ * An active packet source holds the packets and pushes them into a passive
+ * packet sink, which decides which packets it accepts. IPassivePacketSink
+ * describes the push handshake, and IActivePacketSink is the mirror image of
+ * this interface.
  */
 class INET_API IActivePacketSource
 {
