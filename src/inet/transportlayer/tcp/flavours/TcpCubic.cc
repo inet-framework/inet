@@ -92,6 +92,15 @@ void TcpCubic::hystartReset()
     state->hystart_sample_cnt = 0;
 }
 
+void TcpCubic::established(bool active)
+{
+    // Linux cubictcp_init(): the first HyStart round starts with the connection.
+    // Before it, hystart_end_seq is no sequence number of the connection, and the
+    // round does not end when the ISS is 2^31 or more.
+    hystartReset();
+    TcpClassicAlgorithmBase::established(active);
+}
+
 void TcpCubic::processRexmitTimer(TcpEventCode& event)
 {
     TcpClassicAlgorithmBase::processRexmitTimer(event);

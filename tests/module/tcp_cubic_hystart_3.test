@@ -1,0 +1,56 @@
+%description:
+Tests that TcpCubic HyStart works when the initial send sequence number is
+2^31 or more. The scenario is that of tcp_cubic_hystart_1, with an ISS of
+3000000000 at the client. The first HyStart round starts at the end of the
+handshake (Linux cubictcp_init()), so its end is a sequence number of the
+connection, and HyStart exits slow start before the first loss, as in
+tcp_cubic_hystart_1.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.ClientServer
+total-stack = 7MiB
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.server*.tcpType = "Tcp"
+*.client*.tcpType = "Tcp"
+**.tcp.tcpAlgorithmClass = "TcpCubic"
+**.tcp.sackSupport = true
+**.tcp.conn-*.algorithm.hystartEnabled = true
+**.client.tcp.initialSendSequenceNumber = 3000000000 # 2^31 or more
+
+**.client.numApps = 1
+**.client.app[0].typename = "TcpSessionApp"
+**.client.app[0].active = true
+**.client.app[0].localPort = -1
+**.client.app[0].connectAddress = "server"
+**.client.app[0].connectPort = 1000
+**.client.app[0].tOpen = 0.2s
+**.client.app[0].tSend = 0.4s
+**.client.app[0].sendBytes = 500000B
+**.client.app[0].sendScript = ""
+**.client.app[0].tClose = 25s
+
+**.server.numApps = 1
+**.server.app[0].typename = "TcpSinkApp"
+**.server.app[0].localPort = 1000
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 10
+
+*.configurator.config = xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
+
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
+
+%# HyStart must find the slow-start exit point and set ssthresh before the first
+%# loss-driven congestion event.
+%contains: stdout
+HyStart: exiting slow start, ssthresh=9648
