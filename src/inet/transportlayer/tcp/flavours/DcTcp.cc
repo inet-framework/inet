@@ -28,7 +28,10 @@ DcTcp::DcTcp() : TcpReno(),
 void DcTcp::initializeAlgorithm()
 {
     TcpReno::initializeAlgorithm();
-    state->dctcp_gamma = par("g");
+    double g = par("g");
+    if (!(g > 0 && g <= 1))
+        throw cRuntimeError("g must be more than 0 and at most 1, but it is %g", g);
+    state->dctcp_gamma = g;
 }
 
 bool DcTcp::processEce(uint32_t numBytesAcked)

@@ -1,0 +1,30 @@
+%description:
+Tests the range check of DcTcp: g = 0 stops the simulation with an error when
+the algorithm of the connection starts, because the gain must be more than 0
+and at most 1 (RFC 8257 section 4.2).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.cli_app.sendScript="1.0 20000"
+*.cli_tcp.tcpAlgorithmClass = "DcTcp"
+*.cli_tcp.conn-*.algorithm.g = 0
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+g must be more than 0 and at most 1, but it is 0
+%#--------------------------------------------------------------------------------------------------------------
