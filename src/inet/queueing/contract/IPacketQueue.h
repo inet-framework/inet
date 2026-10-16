@@ -36,6 +36,18 @@ class INET_API IPacketQueue : public virtual IPacketCollection, public virtual I
      * The queue must not be empty. The returned packet must not be nullptr.
      */
     virtual Packet *dequeuePacket() = 0;
+
+    /**
+     * Dequeues the packet that dequeuePacket() would dequeue if the queue held
+     * only the packets that the filter matches. The effects are the effects of
+     * dequeuePacket() for that packet. The ownership of the packet is
+     * transferred from the queue to the caller.
+     *
+     * The queue must hold a packet that the filter matches. The returned packet
+     * must not be nullptr. The filter must not be nullptr, and it must not
+     * change the state of the simulation.
+     */
+    virtual Packet *dequeuePacket(const IPacketFilterFunction *filter) = 0;
 };
 
 } // namespace queueing

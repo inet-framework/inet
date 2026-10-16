@@ -1,8 +1,9 @@
 %description:
-Check the pull with an acceptance filter through a compound queue.
+Check the pull and the dequeue with an acceptance filter through a compound queue.
 The test uses CompoundPendingQueue of the IEEE 802.11 MAC: a classifier, three
 packet queues and a priority scheduler. The filter refuses the multicast frame
 and the head of the unicast queue. Each layer applies the effects of a pull one time.
+The dequeue with a filter equals the filtered pull at the output gate, also for a plain queue.
 
 %file: FilteredPullCompound.cc
 #include <set>
@@ -83,13 +84,18 @@ class FilteredPullCompoundTest : public cSimpleModule, public cListener
             queue->enqueuePacket(makeFrame("m0", true));
             queue->enqueuePacket(makeFrame("u0", false));
             queue->enqueuePacket(makeFrame("u1", false));
+            auto plainQueue = check_and_cast<IPacketQueue *>(getModuleByPath("^.plainQueue"));
+            plainQueue->enqueuePacket(makeFrame("a", false));
+            plainQueue->enqueuePacket(makeFrame("b", false));
             // the pull checks the time in the queue
             scheduleAt(SimTime(11, SIMTIME_MS), new cMessage("pull"));
         }
         else {
             checkCompoundPull();
+            checkCompoundDequeue();
+            checkPlainDequeue();
             compound->unsubscribe(packetPulledSignal, this);
-            std::cout << "Filtered pull compound checks passed.\n";
+            std::cout << "Filtered pull and dequeue checks passed.\n";
         }
     }
 
@@ -125,6 +131,38 @@ class FilteredPullCompoundTest : public cSimpleModule, public cListener
         check(eventTag->getPacketEventsArraySize() == 1 && eventTag->getPacketEvents(0)->getKind() == PEK_QUEUED, "the unicast queue adds one PEK_QUEUED event");
         delete packet;
     }
+
+    void checkCompoundDequeue()
+    {
+        auto queue = check_and_cast<IPacketQueue *>(compound);
+        auto unicastQueue = check_and_cast<IPacketQueue *>(compound->getSubmodule("unicastQueue"));
+        auto u0 = unicastQueue->getPacket(0);
+        NameFilter filter({"u0"}), none({"x"});
+        pulls.clear();
+        check(throws([&] { queue->dequeuePacket(&none); }), "a dequeue that the filter refuses throws");
+        check(queue->getNumPackets() == 2 && pulls.empty(), "the refused dequeue changes nothing");
+        auto packet = queue->dequeuePacket(&filter);
+        check(packet == u0, "the dequeue takes the frame that the filtered pull would take");
+        take(packet);
+        check(queue->getNumPackets() == 1 && unicastQueue->getNumPackets() == 0, "only the multicast frame stays");
+        check(pulls.size() == 3 && pulls["compound"] == 1 && pulls["prioritizer"] == 1 && pulls["unicastQueue"] == 1, "the dequeue has the effects of a pull on each layer");
+        delete packet;
+    }
+
+    void checkPlainDequeue()
+    {
+        auto queue = check_and_cast<IPacketQueue *>(getModuleByPath("^.plainQueue"));
+        auto a = queue->getPacket(0);
+        auto b = queue->getPacket(1);
+        NameFilter filter({"b"});
+        auto packet = queue->dequeuePacket(&filter);
+        check(packet == b, "the plain queue dequeues the first packet that the filter matches");
+        take(packet);
+        check(queue->getNumPackets() == 1 && queue->getPacket(0) == a, "the head stays in the plain queue");
+        auto timeTag = packet->findRegionTag<QueueingTimeTag>();
+        check(timeTag->getPacketTotalTimes(0) == SimTime(10, SIMTIME_MS), "the dequeue adds the time in the queue");
+        delete packet;
+    }
 };
 
 Define_Module(FilteredPullCompoundTest);
@@ -133,6 +171,7 @@ Define_Module(FilteredPullCompoundTest);
 
 %file: test.ned
 import inet.linklayer.ieee80211.mac.queue.CompoundPendingQueue;
+import inet.queueing.queue.PacketQueue;
 
 simple FilteredPullCompoundTest
 {
@@ -144,6 +183,7 @@ network FilteredPullCompoundNetwork
 {
     submodules:
         compound: CompoundPendingQueue;
+        plainQueue: PacketQueue;
         test: FilteredPullCompoundTest;
 }
 
@@ -158,4 +198,4 @@ record-scalar-results = false
 *.compound.classifier.classifierClass = "inet::ieee80211::MgmtOverMulticastOverUnicastClassifier"
 
 %contains: stdout
-Filtered pull compound checks passed.
+Filtered pull and dequeue checks passed.
