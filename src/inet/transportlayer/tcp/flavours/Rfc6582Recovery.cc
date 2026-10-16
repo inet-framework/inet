@@ -110,17 +110,8 @@ void Rfc6582Recovery::receivedDuplicateAck()
     //      number transmitted by the TCP so far.  The TCP then enters fast
     //      retransmit (step 2 of Section 3.2 of [RFC5681]).  If not, the TCP
     //      does not enter fast retransmit and does not reset ssthresh."
-    // A lost MTU probe goes again without a fast retransmit, and recover stays
-    // (TcpAlgorithmBase::repairLostMtuProbe()).
-    TcpAlgorithmBase *algorithm = check_and_cast<TcpAlgorithmBase *>(conn->getTcpAlgorithmForUpdate());
-    if (algorithm->isMtuProbeRepairPending()) {
-        algorithm->sendData(false);
-        return;
-    }
     if (state->dupacks == state->dupthresh && !state->lossRecovery) {
         if (seqGreater(state->snd_una - 1, state->recover)) {
-            if (algorithm->repairLostMtuProbe())
-                return;
             state->recover = (state->snd_max - 1);
             state->firstPartialACK = false;
             EV_INFO << "NewReno: set recover=" << state->recover << "\n";

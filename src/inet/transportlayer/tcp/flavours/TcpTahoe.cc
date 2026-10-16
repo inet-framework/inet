@@ -95,9 +95,8 @@ void TcpTahoe::receivedDuplicateAck()
     TcpAlgorithmBase::receivedDuplicateAck();
 
     // Tahoe has no fast recovery: the third duplicate ACK starts the same
-    // slow start from the first unacknowledged segment as a timeout does; a lost MTU
-    // probe goes again without it (RFC 4821 section 7.6.2)
-    if (state->dupacks == state->dupthresh && !isMtuProbeRepairPending() && !repairLostMtuProbe()) {
+    // slow start from the first unacknowledged segment as a timeout does
+    if (state->dupacks == state->dupthresh) {
         EV_DETAIL << "Tahoe on dupAcks == DUPTHRESH(=" << state->dupthresh << ": perform Fast Retransmit, and enter Slow Start:\n";
         resetToSlowStart();
     }

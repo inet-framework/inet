@@ -322,18 +322,13 @@ struct TcpStateVariables
 
     // the path MTU search of RFC 4821, as Linux icsk_mtup (mtuProbing); the bounds and the
     // probe size are MTUs, with the IP and TCP headers and the options of each segment
-    int mtuProbing = 0;                     // mtuProbing (Linux tcp_mtu_probing): 1 or 2, a black hole at a timeout starts the search or halves its lower bound
-    bool mtupEnabled = false;               // the search runs: mtuProbing = 2, or 1 after a black hole (Linux icsk_mtup.enabled)
+    bool mtupEnabled = false;               // mtuProbing (Linux tcp_mtu_probing = 2)
     uint32_t mtupSearchHigh = 0;            // the largest MTU that the search can still try (Linux search_high)
     uint32_t mtupSearchLow = 0;             // the largest MTU that the path surely carries (Linux search_low)
     uint32_t mtupProbeSize = 0;             // the MTU of the probe in flight; 0: no probe in flight
     uint32_t mtupProbeSeqStart = 0;         // the first sequence number of that probe
     uint32_t mtupProbeSeqEnd = 0;           // the sequence number after that probe
     uint32_t mtupProbeBytes = 0;            // the payload of the probe that sendSegment() makes now, beyond snd_mss
-    bool mtupRepair = false;                // a lost probe went again without a congestion response: no loss recovery starts until snd_una reaches mtupRepairEnd
-    uint32_t mtupRepairEnd = 0;             // the sequence number after that probe
-    simtime_t mtupProbeTimestamp;           // when the search started (Linux probe_timestamp)
-    simtime_t mtupProbeInterval;            // mtuProbeInterval (Linux tcp_probe_interval)
     uint32_t pathMtu = 0;                   // the MTU of the route, the ceiling of a success of the search (Linux icsk_pmtu_cookie)
     // declared here for the code above that already uses it:
     uint32_t maxPacketsOut = 0;    // peak segments in flight in the current window of data (Linux max_packets_out); drives the cwnd-limited slow-start gate

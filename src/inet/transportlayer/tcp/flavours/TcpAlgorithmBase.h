@@ -103,18 +103,6 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
      */
     virtual void receivedDuplicateAck();
 
-  public:
-    /**
-     * Called where a loss recovery would start. When only the MTU probe is lost, it goes
-     * again without a congestion response (RFC 4821 section 7.6.2), and the method returns
-     * true: the caller starts no loss recovery
-     */
-    virtual bool repairLostMtuProbe();
-
-    /** True until the ACK passes a lost MTU probe that went again; no loss recovery starts until then */
-    virtual bool isMtuProbeRepairPending();
-
-  protected:
     /** Utility function */
     cMessage *cancelTimer(cMessage *msg) { return conn->cancelEvent(msg); }
 

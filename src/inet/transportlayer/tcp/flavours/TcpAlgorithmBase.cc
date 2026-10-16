@@ -11,7 +11,6 @@
 #include "inet/transportlayer/tcp/TcpSackRexmitQueue.h"
 #include "inet/transportlayer/tcp/TcpSendQueue.h"
 #include "inet/transportlayer/tcp/TcpSimsignals.h"
-#include "inet/transportlayer/tcp/flavours/TcpClassicAlgorithmBaseState_m.h"
 
 namespace inet {
 namespace tcp {
@@ -370,18 +369,6 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
         return;
     }
 
-    // RFC 4821 section 7.7, as Linux tcp_write_timeout(): after an earlier retransmission
-    // at a timeout, the R1 threshold of RFC 1122 shows a black hole. Linux measures R1 as
-    // the time of tcp_retries1 = 3 retransmissions at the minimum RTO (tcp_model_timeout())
-    if (state->mtuProbing != 0 && state->rexmit_count > 1 && minRexmitTimeout > 0) {
-        const int retries1 = 3;
-        int linearBackoffThreshold = (int)std::floor(std::log2(maxRexmitTimeout / minRexmitTimeout));
-        simtime_t r1 = retries1 <= linearBackoffThreshold
-                ? ((2 << retries1) - 1) * minRexmitTimeout
-                : ((2 << linearBackoffThreshold) - 1) * minRexmitTimeout + (retries1 - linearBackoffThreshold) * maxRexmitTimeout;
-        conn->detectMtuBlackhole(r1);
-    }
-
     EV_INFO << "Performing retransmission #" << state->rexmit_count
             << "; increasing RTO from " << state->rexmit_timeout << "s ";
 
@@ -404,9 +391,6 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
     cancelTimer(tlpTimer);
     state->tlpHighSeq = 0;
     state->tlpRetrans = false;
-
-    // the timeout ends the repair of a lost MTU probe: the recovery of the timeout follows
-    state->mtupRepair = false;
 
     EV_INFO << " to " << state->rexmit_timeout << "s, and cancelling RTT measurement\n";
 
@@ -1042,38 +1026,6 @@ void TcpAlgorithmBase::receivedDuplicateAck()
     // That is, subclasses will redefine this method, call us, then perform
     // whatever action they want to do on dupAcks (e.g. retransmitting one segment).
     //
-}
-
-bool TcpAlgorithmBase::repairLostMtuProbe()
-{
-    // RFC 4821 section 7.6.2: "When only the probe is lost, it is treated as an indication
-    // that the Path MTU is smaller than the probe size. In this case alone, the loss SHOULD
-    // NOT be interpreted as congestion signal." Linux tcp_fastretrans_alert() decides it
-    // where a loss recovery would start
-    if (!conn->isMtuProbeLost())
-        return false;
-    // cwnd stays; ssthresh rises to at least 3/4 of cwnd, as Linux
-    // tcp_non_congestion_loss_retransmit() sets it (tcp_current_ssthresh()), which
-    // reduces nothing
-    auto classicState = check_and_cast<TcpClassicAlgorithmBaseStateVariables *>(state);
-    uint32_t ssthresh = state->snd_cwnd / 2 + state->snd_cwnd / 4;
-    if (classicState->ssthresh < ssthresh) {
-        classicState->ssthresh = ssthresh;
-        conn->emit(ssthreshSignal, classicState->ssthresh);
-    }
-    state->mtupRepair = true;
-    state->mtupRepairEnd = state->mtupProbeSeqEnd;
-    conn->retransmitLostMtuProbe();
-    return true;
-}
-
-bool TcpAlgorithmBase::isMtuProbeRepairPending()
-{
-    // Linux stays in its state Loss until the ACK passes all data sent before the repair;
-    // here only the probe must arrive, and a later loss is a congestion signal again
-    if (state->mtupRepair && seqGE(state->snd_una, state->mtupRepairEnd))
-        state->mtupRepair = false;
-    return state->mtupRepair;
 }
 
 void TcpAlgorithmBase::receivedAckForUnsentData(uint32_t seq)

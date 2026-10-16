@@ -197,10 +197,6 @@ void Rfc6675Recovery::receivedAckForUnackedData(uint32_t numBytesAcked)
 
 void Rfc6675Recovery::step4()
 {
-    // a lost MTU probe goes again without a loss recovery (RFC 4821 section 7.6.2)
-    if (check_and_cast<TcpAlgorithmBase *>(conn->getTcpAlgorithmForUpdate())->repairLostMtuProbe())
-        return;
-
     //"
     // (4) Invoke fast retransmit and enter loss recovery as follows:
     //"
@@ -307,14 +303,6 @@ void Rfc6675Recovery::receivedDuplicateAck()
         // greater than or equal to the new value of RecoveryPoint"
         if (isRecoveryBlockedAfterRto()) {
             EV_INFO << "No new loss recovery before the RecoveryPoint of the RTO (RFC 6675 section 5.1)\n";
-            return;
-        }
-
-        // a lost MTU probe went again: no loss recovery until the ACK passes it, and the
-        // duplicate ACKs make room for new data, as in the state Loss of Linux
-        TcpAlgorithmBase *algorithm = check_and_cast<TcpAlgorithmBase *>(conn->getTcpAlgorithmForUpdate());
-        if (algorithm->isMtuProbeRepairPending()) {
-            algorithm->sendData(false);
             return;
         }
 
@@ -816,11 +804,6 @@ void Rfc6675Recovery::onRexmitTimeout()
         state->frtoActive = state->frtoActive || !recoveryOpen;
         if (!state->frtoActive)
             EV_DETAIL << "F-RTO: no detection, the timeout comes during a loss recovery\n";
-        // and none with an MTU probe in flight, as Linux tcp_enter_loss()
-        if (state->frtoActive && state->mtupProbeSize != 0) {
-            state->frtoActive = false;
-            EV_DETAIL << "F-RTO: no detection, an MTU probe is in flight\n";
-        }
         state->frtoOrigAcked = false;
     }
 
@@ -979,8 +962,7 @@ void Rfc6675Recovery::reoTimeout()
     // recovering, this is the fast-retransmit trigger RACK exists to provide;
     // otherwise just push out whatever the scoreboard now says is missing.
     if (!state->lossRecovery) {
-        // RFC 6675 section 5.1, and a lost MTU probe that went again, as in receivedDuplicateAck()
-        if (!isRecoveryBlockedAfterRto() && !check_and_cast<TcpAlgorithmBase *>(conn->getTcpAlgorithmForUpdate())->isMtuProbeRepairPending())
+        if (!isRecoveryBlockedAfterRto()) // RFC 6675 section 5.1, as in receivedDuplicateAck()
             step4();
     }
     else

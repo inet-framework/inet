@@ -428,13 +428,6 @@ class INET_API TcpConnection : public SimpleModule
     /** Utility: retransmit one segment from snd_una */
     virtual void retransmitOneSegment(bool called_at_rto);
 
-    /**
-     * Where a loss recovery would start: true when only the MTU probe is lost, that is, when
-     * it is the first unacknowledged segment, outside a reduction of the window (RFC 4821
-     * section 7.6.2, Linux tcp_fastretrans_alert())
-     */
-    virtual bool isMtuProbeLost() const;
-
     /** True while urgent data is outstanding: SND.UNA is before SND.UP (Linux tcp_urg_mode()) */
     virtual bool isUrgentSendPending();
 
@@ -443,19 +436,6 @@ class INET_API TcpConnection : public SimpleModule
 
     /** urgentOutOfBand: a segment that holds the last urgent byte gives it to the application alone (Linux tcp_urg()) */
     virtual void sendOutOfBandByte(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
-
-    /**
-     * The search continues below the lost MTU probe, and the probe goes again at once, as
-     * segments of the MSS (Linux tcp_mtup_probe_failed() and tcp_simple_retransmit())
-     */
-    virtual void retransmitLostMtuProbe();
-
-    /**
-     * At a timeout: retransmissions that last longer than r1 show a black hole, which
-     * starts the path MTU search or halves its lower bound, and the MSS falls to it (RFC
-     * 4821 section 7.7, Linux tcp_mtu_probing())
-     */
-    virtual void detectMtuBlackhole(simtime_t r1);
 
     /**
      * RFC 8985 section 7.3 loss probe: send one segment of new data if the data
@@ -651,9 +631,7 @@ class INET_API TcpConnection : public SimpleModule
     /** Arms the path MTU search when the MSS is settled (Linux tcp_mtup_init()) */
     virtual void initMtuProbing();
     /** The payload of the probe to send now; 0: wait for room for a probe; -1: no probe (Linux tcp_mtu_probe()) */
-    virtual int64_t getMtuProbeBytes(uint32_t buffered, uint32_t congestionWindow, uint32_t bytesInFlight);
-    /** A search that converged starts again after mtuProbeInterval (Linux tcp_mtu_check_reprobe()) */
-    virtual void checkMtuReprobe();
+    virtual int64_t getMtuProbeBytes(uint32_t buffered, uint32_t congestionWindow, uint32_t bytesInFlight) const;
     /** The peer acknowledged the probe (Linux tcp_mtup_probe_success()) */
     virtual void mtuProbeSucceeded();
     /** The probe is lost (Linux tcp_mtup_probe_failed()) */

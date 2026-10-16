@@ -3,10 +3,9 @@ Tests a route MTU that an ICMP error reports during the path MTU search
 (mtuProbing = 2, pmtudEnabled). The scenario is that of tcp_mtu_probe_1, but the
 path answers the first probe (B021, MTU 1026) with an ICMP fragmentation-needed
 error for an MTU of 1000, and it drops each larger packet. The reported MTU
-bounds the search at 1000, as Linux tcp_sync_mss(). The third duplicate ACK,
-with the probe as the first unacknowledged segment, then shows the loss: the
-search continues from 552 to 1000, and the probe goes again as segments of the
-MSS of 600 (B040, B041), without a congestion response. The next probe (736 bytes, MTU 776) stays below the reported MTU, and its ACK raises
+bounds the search at 1000, as Linux tcp_sync_mss(). The fast retransmit of the
+probe range then shows the loss, and the search continues from 552 to 1000. The
+next probe (736 bytes, MTU 776) stays below the reported MTU, and its ACK raises
 the MSS to 736.
 
 %inifile: omnetpp.ini
@@ -57,13 +56,6 @@ RFC 4821: the route MTU 1000 limits the path MTU search, which runs from 552 to 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 RFC 4821: the MTU probe of 1026 is lost, the search runs from 552 to 1000
-%#--------------------------------------------------------------------------------------------------------------
-%contains: stdout
-RFC 4821: the lost MTU probe goes again as segments of the MSS, without a congestion response
-%#--------------------------------------------------------------------------------------------------------------
-%contains: postrun-command(1).out
-[1.021 B040] A.1000 < B.2000: A 11901:12501(600) ack 1 win 16384 
-[1.021 B041] A.1000 < B.2000: A 12501:12887(386) ack 1 win 16384 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
 RFC 4821: the MTU probe of 776 is acknowledged, snd_mss is 736
