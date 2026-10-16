@@ -213,3 +213,61 @@ video {
   stroke: var(--md-default-fg-color--light);
   fill: var(--md-default-bg-color);
 }
+
+/* The colours of the former inet.omnetpp.org (Bootswatch Cerulean, with an orange strip under the navigation bar). It
+   had no dark scheme: that keeps the header, and lightens the links and the headings, and mutes the hover, which would
+   glare on the dark background. */
+[data-md-color-primary="custom"] {
+  --md-primary-fg-color: #2fa4e7;
+  --md-primary-fg-color--light: #54b4eb;
+  --md-primary-fg-color--dark: #178acc;
+  --md-primary-bg-color: #fff;
+  --md-primary-bg-color--light: #ffffffb3;
+  --inet-heading-color: #317eac;
+  --inet-strip-color: #ff8800;
+}
+
+[data-md-color-accent="custom"] {
+  --md-accent-fg-color: #157ab5;
+  --md-accent-fg-color--transparent: #157ab51a;
+  --md-accent-bg-color: #fff;
+  --md-accent-bg-color--light: #ffffffb3;
+}
+
+[data-md-color-scheme="slate"][data-md-color-primary="custom"] {
+  --md-typeset-a-color: #6cc0f0;
+  --inet-heading-color: #7ab8de;
+}
+
+[data-md-color-scheme="slate"][data-md-color-accent="custom"] {
+  --md-accent-fg-color: #7ea6d8;
+  --md-accent-fg-color--transparent: #7ea6d81a;
+}
+
+.md-typeset :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--inet-heading-color);
+}
+
+/* The strip is under the tabs while they are shown, and under the header otherwise. */
+.md-tabs {
+  border-bottom: 0.2rem solid var(--inet-strip-color);
+}
+
+.md-header::after {
+  content: "";
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 0.2rem;
+  background-color: var(--inet-strip-color);
+  opacity: 0;
+}
+
+.md-header--shadow::after {
+  opacity: 1;
+}
+
+@media screen and (max-width: 76.2344em) {
+  .md-header::after {
+    opacity: 1;
+  }
+}

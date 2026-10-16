@@ -47,12 +47,14 @@ exclude_patterns = ['_build', '_extra', 'Thumbs.db', '.DS_Store', '**/_docs', '*
 # The section files of the migration guide are parts of migration-guide/index.rst (tools/includefiles.py).
 exclude_patterns.append('migration-guide/*/*.rst')
 if cfg.mode == 'site':
-    html_extra_path = [os.path.join(HERE, 'site', '_extra')]
+    # Browsers also ask for /favicon.ico by default, e.g. for files that are not pages.
+    html_extra_path = [os.path.join(HERE, 'site', '_extra'), os.path.join(HERE, '_static', 'favicon.ico')]
     templates_path = [os.path.join(HERE, 'site', '_templates')]
     html_context = {'inet_site_path': urllib.parse.urlsplit(cfg.baseurl).path + '/'}
 html_static_path = [os.path.join(HERE, '_static')]
 html_css_files = ['inet.css']
 html_favicon = os.path.join(HERE, '_static', 'favicon.ico')
+html_logo = os.path.join(HERE, '_static', 'inet-logo.png')
 html_title = 'INET Framework'
 html_baseurl = cfg.page_root_url
 html_copy_source = False
@@ -99,19 +101,20 @@ html_theme_options = {
         'toc.follow',
         'toc.sticky',
     ],
+    # The colors of the former inet.omnetpp.org, defined in inet.css.
     'palette': [
         {
             'media': '(prefers-color-scheme: light)',
             'scheme': 'default',
-            'primary': 'light-blue',
-            'accent': 'blue',
+            'primary': 'custom',
+            'accent': 'custom',
             'toggle': {'icon': 'material/lightbulb-outline', 'name': 'Switch to dark mode'},
         },
         {
             'media': '(prefers-color-scheme: dark)',
             'scheme': 'slate',
-            'primary': 'light-blue',
-            'accent': 'lime',
+            'primary': 'custom',
+            'accent': 'custom',
             'toggle': {'icon': 'material/lightbulb', 'name': 'Switch to light mode'},
         },
     ],
