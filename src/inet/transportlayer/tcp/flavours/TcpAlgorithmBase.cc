@@ -178,7 +178,13 @@ void TcpAlgorithmBase::established(bool active)
     // If the SYN or SYN/ACK is
     // lost, the initial window used by a sender after a correctly
     // transmitted SYN MUST be one segment consisting of MSS bytes."
-    if (state->syn_rexmit_count == 0 && (state->init_cwnd_mode != 0 || state->initialCwndSegments != 0)) {
+    //
+    // RFC 6928 section 2 relaxes this for IW10: "it is RECOMMENDED that
+    // implementations refrain from resetting the initial window to 1 segment, unless
+    // there have been more than one SYN or SYN/ACK retransmissions". Linux does the
+    // same for its initial window and for initcwnd (tcp_init_transfer()).
+    uint32_t synRexmitsKeepingIw = (state->init_cwnd_mode == 2 || state->initialCwndSegments != 0) ? 1 : 0;
+    if (state->syn_rexmit_count <= synRexmitsKeepingIw && (state->init_cwnd_mode != 0 || state->initialCwndSegments != 0)) {
         state->snd_cwnd = getInitialWindow();
         EV_DETAIL << "Increased Initial Window, CWND is set to " << state->snd_cwnd << "\n";
     }

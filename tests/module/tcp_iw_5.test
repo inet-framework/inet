@@ -1,0 +1,55 @@
+%description:
+Tests that initialWindow = "rfc6928" keeps the initial window after one lost
+SYN (RFC 6928 section 2: no reset to one segment "unless there have been
+more than one SYN or SYN/ACK retransmissions", as Linux). The tester drops
+the first SYN, and after the handshake the client sends ten segments before
+the first ACK arrives.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.cli_app.sendScript="4.0 20000"
+*.cli_tcp.initialWindow = "rfc6928"
+*.tcptester.script="a1 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[4.001 A004] A.1000 > B.2000: A 1:1025(1024) ack 750501 win 16384 
+[4.001 A005] A.1000 > B.2000: A 1025:2049(1024) ack 750501 win 16384 
+[4.001 A006] A.1000 > B.2000: A 2049:3073(1024) ack 750501 win 16384 
+[4.001 A007] A.1000 > B.2000: A 3073:4097(1024) ack 750501 win 16384 
+[4.001 A008] A.1000 > B.2000: A 4097:5121(1024) ack 750501 win 16384 
+[4.001 A009] A.1000 > B.2000: A 5121:6145(1024) ack 750501 win 16384 
+[4.001 A010] A.1000 > B.2000: A 6145:7169(1024) ack 750501 win 16384 
+[4.001 A011] A.1000 > B.2000: A 7169:8193(1024) ack 750501 win 16384 
+[4.001 A012] A.1000 > B.2000: A 8193:9217(1024) ack 750501 win 16384 
+[4.001 A013] A.1000 > B.2000: A 9217:10241(1024) ack 750501 win 16384 
+[4.003 B002] A.1000 < B.2000: A ack 2049 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
