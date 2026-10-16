@@ -1,0 +1,187 @@
+%description:
+Check the pull with an acceptance filter at packet sources and at a packet queue.
+A source answers and pulls as if it held only the packets that the filter matches.
+A source that cannot choose among its packets throws an error before any change.
+
+%file: FilteredPull.cc
+#include <set>
+#include "inet/common/PacketEventTag.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/queueing/contract/IPacketFilterFunction.h"
+#include "inet/queueing/contract/IPacketQueue.h"
+
+namespace inet::queueing {
+
+class NameFilter : public IPacketFilterFunction
+{
+  protected:
+    std::set<std::string> names;
+
+  public:
+    NameFilter(std::set<std::string> names) : names(names) {}
+    virtual bool matchesPacket(const Packet *packet) const override { return names.count(packet->getName()) != 0; }
+};
+
+class ConstantFilter : public IPacketFilterFunction
+{
+  protected:
+    bool result;
+
+  public:
+    ConstantFilter(bool result) : result(result) {}
+    virtual bool matchesPacket(const Packet *packet) const override { return result; }
+};
+
+class FilteredPullTest : public cSimpleModule, public cListener
+{
+  protected:
+    std::map<std::string, int> pulls;
+    std::vector<cModule *> observed;
+
+    static void check(bool condition, const char *what)
+    {
+        if (!condition)
+            throw cRuntimeError("Check failed: %s", what);
+    }
+
+    template<typename F>
+    static bool throws(F f)
+    {
+        try {
+            f();
+        }
+        catch (const cRuntimeError&) {
+            return true;
+        }
+        return false;
+    }
+
+    Packet *makePacket(const char *name)
+    {
+        auto packet = new Packet(name, makeShared<ByteCountChunk>(B(20)));
+        packet->setArrivalTime(simTime());
+        auto timeTag = packet->addRegionTag<QueueingTimeTag>();
+        timeTag->setPacketTotalTimesArraySize(1);
+        timeTag->setPacketTotalTimes(0, SIMTIME_ZERO);
+        packet->addRegionTag<PacketEventTag>();
+        return packet;
+    }
+
+    cModule *observe(const char *path)
+    {
+        auto module = getModuleByPath(path);
+        module->subscribe(packetPulledSignal, this);
+        observed.push_back(module);
+        return module;
+    }
+
+    virtual void initialize() override
+    {
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("start"));
+    }
+
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        checkPassivePacketSource();
+        checkEmptyPacketSource();
+        checkUnsupportedSource();
+        for (auto module : observed)
+            module->unsubscribe(packetPulledSignal, this);
+        std::cout << "Filtered pull checks passed.\n";
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        pulls[source->getFullName()]++;
+    }
+
+    void checkPassivePacketSource()
+    {
+        auto module = observe("^.source");
+        auto source = check_and_cast<IPassivePacketSource *>(module);
+        auto gate = module->gate("out");
+        ConstantFilter all(true), none(false);
+        auto next = source->canPullPacket(gate);
+        check(next != nullptr, "the source offers its next packet");
+        check(source->canPullPacket(gate, &all) == next, "the source offers its next packet if the filter matches it");
+        check(source->canPullPacket(gate, &none) == nullptr, "the source offers nothing if the filter matches no packet");
+        check(throws([&] { source->pullPacket(gate, &none); }), "a pull that the filter refuses throws");
+        check(source->canPullPacket(gate) == next && pulls.empty(), "the refused pull changes nothing");
+        auto packet = source->pullPacket(gate, &all);
+        check(packet == next, "the pull returns the packet of the query");
+        check(pulls["source"] == 1, "the source emits packetPulled one time");
+        take(packet);
+        delete packet;
+    }
+
+    void checkEmptyPacketSource()
+    {
+        auto module = getModuleByPath("^.empty");
+        auto source = check_and_cast<IPassivePacketSource *>(module);
+        auto gate = module->gate("out");
+        ConstantFilter all(true);
+        check(source->canPullPacket(gate, &all) == nullptr, "the empty source offers nothing");
+        check(throws([&] { source->pullPacket(gate, &all); }), "a pull from the empty source throws");
+    }
+
+    void checkUnsupportedSource()
+    {
+        auto queue = check_and_cast<IPacketQueue *>(observe("^.gatedQueue"));
+        auto module = observe("^.gate");
+        auto source = check_and_cast<IPassivePacketSource *>(module);
+        auto gate = module->gate("out");
+        ConstantFilter all(true);
+        queue->enqueuePacket(makePacket("gated"));
+        check(source->canPullPacket(gate) != nullptr, "the open gate offers the packet of its queue");
+        check(throws([&] { source->canPullPacket(gate, &all); }), "a gate refuses the query with a filter");
+        check(throws([&] { source->pullPacket(gate, &all); }), "a gate refuses the pull with a filter");
+        check(queue->getNumPackets() == 1, "the refused calls leave the packet in the queue");
+        check(pulls["gate"] == 0 && pulls["gatedQueue"] == 0, "the refused calls emit no packetPulled");
+    }
+};
+
+Define_Module(FilteredPullTest);
+
+} // namespace inet::queueing
+
+%file: test.ned
+import inet.queueing.gate.InteractiveGate;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.source.EmptyPacketSource;
+import inet.queueing.source.PassivePacketSource;
+
+simple FilteredPullTest
+{
+    parameters:
+        @class(::inet::queueing::FilteredPullTest);
+}
+
+network FilteredPullNetwork
+{
+    submodules:
+        source: PassivePacketSource {
+            parameters:
+                packetLength = 20B;
+        }
+        empty: EmptyPacketSource;
+        gatedQueue: PacketQueue;
+        gate: InteractiveGate;
+        test: FilteredPullTest;
+    connections allowunconnected:
+        gatedQueue.out --> gate.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = FilteredPullNetwork
+ned-path = .;../../../../src
+sim-time-limit = 20ms
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+%contains: stdout
+Filtered pull checks passed.

@@ -119,6 +119,28 @@ calls them for each instance, so neither may change the state of the module. A f
 with a random number draws the number in advance, and draws the next one in
 ``handlePacketFiltered()`` after a decision used it.
 
+Queueing Acceptance Filter
+--------------------------
+
+``IPassivePacketSource`` has two new methods. The filter is the acceptance condition of the sink.
+The source answers and pulls as if it held only the packets that the filter matches:
+
+.. code-block:: c++
+
+   Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override;
+   Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override;
+
+A class that extends a base class of the queueing model, such as ``PacketFlowBase`` or
+``PacketQueueBase``, gets both methods, and they throw an error. A class that implements
+``IPassivePacketSource`` directly must declare them. A class that holds one packet at most returns
+that packet if the filter matches it, and ``nullptr`` otherwise. A class that cannot choose among
+the packets that the filter matches throws an error. If a class supports the filter and adds an
+effect in ``pullPacket()``, the filtered ``pullPacket()`` must add the same effect.
+
+A class that declares only one of the overloads hides the other one in its own scope. Add
+``using IPassivePacketSource::pullPacket;`` (and the same for ``canPullPacket``) if the class calls
+the other overload without a qualifier.
+
 IPsec Sequence Numbers
 ----------------------
 

@@ -428,6 +428,10 @@ Notable backward incompatible changes are the following:
 
    The new parameter urgentOutOfBand, which LinuxTcp sets, gives the receive side of urgent data of Linux without SO_OOBINLINE: the last byte of urgent data leaves the stream, and a read stops before it. INET does not deliver that byte, which Linux gives to recv(MSG_OOB), and it sends no urgent data. Tcp keeps treating URG-marked bytes as ordinary data. Simulations change only where a peer sends urgent data to LinuxTcp.
 
+55. A sink can pull a packet that it accepts
+
+   IPassivePacketSource has two new methods, canPullPacket(gate, filter) and pullPacket(gate, filter). The filter, an IPacketFilterFunction, is the acceptance condition of the sink. The source answers and pulls as if it held only the packets that the filter matches, and the pull has the effects of a normal pull of that packet. This is the pull counterpart of canPushPacket(packet, gate): a sink can now take a packet behind a packet that it cannot accept at the moment. PassivePacketSource and EmptyPacketSource support the filter. The base classes of the queueing model throw an error for it, so a module that cannot choose among its packets refuses the filtered call. A class outside INET that implements IPassivePacketSource directly no longer compiles until it declares the two methods. See the migration guide. Simulation results do not change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

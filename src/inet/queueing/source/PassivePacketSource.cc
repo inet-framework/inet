@@ -84,6 +84,21 @@ Packet *PassivePacketSource::pullPacket(const cGate *gate)
     }
 }
 
+Packet *PassivePacketSource::canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const
+{
+    // the source holds only its next packet
+    auto packet = canPullPacket(gate);
+    return packet != nullptr && filter->matchesPacket(packet) ? packet : nullptr;
+}
+
+Packet *PassivePacketSource::pullPacket(const cGate *gate, const IPacketFilterFunction *filter)
+{
+    Enter_Method("pullPacket");
+    if (canPullPacket(gate, filter) == nullptr)
+        throw cRuntimeError("Cannot pull packet, the filter matches no packet");
+    return pullPacket(gate);
+}
+
 Packet *PassivePacketSource::providePacket(const cGate *gate)
 {
     Packet *packet;

@@ -31,6 +31,9 @@ class INET_API PassivePacketSourceBase : public PacketSourceBase, public virtual
 
     virtual bool canPullSomePacket(const cGate *gate) const override { return true; }
 
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override { throw cRuntimeError("Invalid operation"); }
+
     virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *pullPacketEnd(const cGate *gate) override { throw cRuntimeError("Invalid operation"); }
     virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength = b(0)) override { throw cRuntimeError("Invalid operation"); }
