@@ -240,6 +240,12 @@ void TcpAlgorithmBase::established(bool active)
         }
     }
 
+    startKeepAlive();
+}
+
+void TcpAlgorithmBase::startKeepAlive()
+{
+    // with keepalive, the idle time starts at the end of the handshake
     if (state->keepalive_enabled) {
         state->time_last_segment_received = simTime();
         state->keepalive_probes_sent = 0;

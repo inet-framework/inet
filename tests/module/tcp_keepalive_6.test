@@ -1,0 +1,57 @@
+%description:
+Tests keepalive with TcpNoCongestionControl, whose established() is its own.
+The scenario is that of tcp_keepalive_1: the client has keepalive with an idle
+time of 30 s, and its algorithm is TcpNoCongestionControl. After 30 s the
+client sends a probe, and the server answers it.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 80s
+*.cli_app.tClose=70s
+*.cli_tcp.keepAliveEnabled = true
+*.cli_tcp.tcpAlgorithmClass = "TcpNoCongestionControl"
+*.cli_tcp.keepAliveIdleTime = 30s
+*.cli_tcp.keepAliveInterval = 5s
+*.cli_tcp.keepAliveProbeCount = 3
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[30.005 A003] A.1000 > B.2000: A ack 501 win 16384 
+[30.007 B002] A.1000 < B.2000: A ack 1 win 16384 
+[60.009 A004] A.1000 > B.2000: A ack 501 win 16384 
+[60.011 B003] A.1000 < B.2000: A ack 1 win 16384 
+cli_tcp: ESTABLISHED --> FIN_WAIT_1  (on CLOSE)
+[70.001 A005] A.1000 > B.2000: A F ack 501 win 16384 
+srv_tcp: ESTABLISHED --> CLOSE_WAIT  (on RCV_FIN)
+[70.003 B004] A.1000 < B.2000: A ack 2 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Sending keepalive probe, seq=0
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

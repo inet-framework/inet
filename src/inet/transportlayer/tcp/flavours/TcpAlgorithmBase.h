@@ -135,6 +135,9 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     /** The initial window (initialWindow, initialCwnd), in bytes; the restart window is at most this too (RFC 5681 section 4.1) */
     virtual uint32_t getInitialWindow() const;
 
+    /** Starts the idle time of keepalive at the end of the handshake, when keepalive is on. */
+    virtual void startKeepAlive();
+
     /** RMSS of RFC 9293: the MSS that this side announced, or the default when it announced none. */
     virtual uint32_t getReceiveMss() const;
 

@@ -35,6 +35,7 @@ void TcpNoCongestionControl::established(bool active)
         if (!sendData(false)) // FIXME - This condition is never true because the buffer is empty (at this time) therefore the first ACK is never piggyback on data
             conn->sendAck();
     }
+    startKeepAlive();
 }
 
 bool TcpNoCongestionControl::sendData(bool sendCommandInvoked)
