@@ -80,6 +80,15 @@ Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate)
     return packet;
 }
 
+Packet *CompoundPacketQueueBase::pullPacket(const cGate *gate, const IPacketFilterFunction *filter)
+{
+    Enter_Method("pullPacket");
+    auto packet = provider.pullPacket(filter);
+    take(packet);
+    emit(packetPulledSignal, packet);
+    return packet;
+}
+
 void CompoundPacketQueueBase::removePacket(Packet *packet)
 {
     Enter_Method("removePacket");
