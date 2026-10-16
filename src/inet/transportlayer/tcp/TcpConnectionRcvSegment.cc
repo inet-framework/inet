@@ -696,7 +696,11 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                                 tcpHeader->getSequenceNo() + payloadLength, dupStart, dupEnd);
                 }
                 uint32_t oldRcvNxt = state->rcv_nxt;
+                uint32_t oldBufferedBytes = receiveQueue->getAmountOfBufferedBytes();
                 state->rcv_nxt = receiveQueue->insertBytesFromSegment(tcpSegment, tcpHeader);
+                // the bytes that this arrival added: a duplicate adds none, as Linux
+                // drops it, and a partial duplicate adds its new part
+                uint32_t addedBytes = receiveQueue->getAmountOfBufferedBytes() - oldBufferedBytes;
                 // in-order data (Linux tcp_event_data_recv() in tcp_data_queue())
                 if (!seqGreater(tcpHeader->getSequenceNo(), oldRcvNxt) && seqGreater(state->rcv_nxt, oldRcvNxt))
                     measureRcvRtt();
@@ -705,7 +709,8 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
                     // segment beyond it came in by acceptBeyondBufferAtEmptyQueue
                     if (seqGreater(tcpHeader->getSequenceNo() + payloadLength, state->rcv_mwnd_seq))
                         overWindowAcceptPending = true;
-                    chargeRcvBuffer(payloadLength);
+                    if (addedBytes > 0)
+                        chargeRcvBuffer(addedBytes);
                     // windowAutoTuning, as Linux (tcp_clamp_window()): when the charged
                     // segments outgrow the receive buffer of a connection that the
                     // application owns, the buffer grows; a connection that the
