@@ -255,7 +255,7 @@ import inet.transportlayer.contract.ITcp;
 //  - RFC 9438 - CUBIC for Fast and Long-Distance Networks (obsoletes RFC 8312)
 //    `TcpCubic`, the algorithm of Linux. It grows by the number of segments that an
 //    ACK acknowledges in slow start (RFC 3465, experimental). The hybrid slow start
-//    of Linux (`hystartEnabled` of ~TcpCubic) is off by default: RFC 9438 section 4.10 asks for
+//    of Linux (`slowStartExit = "hystart"` of ~TcpCubic) is off by default: RFC 9438 section 4.10 asks for
 //    HyStart++ (RFC 9406), which is not implemented, and calls the hybrid slow
 //    start experimental.
 //    Deviation: the TCP-friendliness estimator keeps the fixed scale of Linux,

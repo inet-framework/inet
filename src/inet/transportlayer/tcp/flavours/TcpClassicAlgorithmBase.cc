@@ -48,6 +48,8 @@ void TcpClassicAlgorithmBase::initializeAlgorithm()
 {
     TcpAlgorithmBase::initializeAlgorithm();
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
+    const char *slowStartExit = par("slowStartExit");
+    state->slowStartExit = !strcmp(slowStartExit, "hystart") ? SLOW_START_EXIT_HYSTART : SLOW_START_EXIT_NONE;
 }
 
 TcpClassicAlgorithmBase::~TcpClassicAlgorithmBase()

@@ -49,7 +49,7 @@ void TcpCubic::initializeAlgorithm()
     state->cubic_tcp_friendliness = par("tcpFriendliness");
     state->cubic_delta = par("delta");
     state->cubic_cnt_clamp = par("cntClamp");
-    state->hystart_enabled = par("hystartEnabled");
+    state->hystart_enabled = state->slowStartExit == SLOW_START_EXIT_HYSTART;
     state->hystart_detect = par("hystartDetect");
     state->hystart_low_window = par("hystartLowWindow");
     state->hystart_ack_delta = par("hystartAckDelta");

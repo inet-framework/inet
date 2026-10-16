@@ -18,6 +18,7 @@ struct TcpClassicAlgorithmBaseStateVariables extends TcpAlgorithmBaseStateVariab
     @descriptor(readonly);
 
     uint32_t ssthresh; ///< slow start threshold
+    int slowStartExit = 0; ///< slowStartExit: 0 = none, 1 = hystart (the hybrid slow start of Linux, TcpCubic only)
 };
 
 cplusplus(TcpClassicAlgorithmBaseStateVariables) {{

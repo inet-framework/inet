@@ -23,6 +23,10 @@ namespace tcp {
  */
 class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 {
+  public:
+    /** The values of the slowStartExit parameter */
+    enum SlowStartExit { SLOW_START_EXIT_NONE, SLOW_START_EXIT_HYSTART };
+
   protected:
     TcpClassicAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
 
