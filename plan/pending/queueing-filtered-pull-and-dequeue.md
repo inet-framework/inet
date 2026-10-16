@@ -1,8 +1,8 @@
 # Implementation plan: the acceptance filter in the pull handshake, and the selective dequeue
 
 Checkout and revision: `inet-master`, branch `master` at `1b5dba65d3`. Two untracked files at the repository root (`ieee80211-edca-management-recovery.md`, `ieee80211-txop-boundaries-and-rate-selection.md`) are not related to this plan.
-Plan revision: draft 1, 2026-10-16.
-Approval: pending.
+Plan revision: draft 2, 2026-10-16. Draft 2 records the decisions of the owner (section 8).
+Approval: pending for the implementation. The owner decided D-4, D-5, the test category and the recommendation for the MAC on 2026-10-16.
 Consumer: pull request inet-framework/inet#1343, branch `work/compressed-blockack-s3b`. Its first commit `45f4da2e28` ("queueing: add: preserve pull effects for selected packet extraction", parent `bba1db4c81`) solves the same problem in a different way. This plan replaces that commit.
 
 ## 1. Problem and intended behavior
@@ -152,7 +152,7 @@ A concrete class that knows its packets opts in:
 
 **D-4. The method names are overloads.** `canPullPacket(gate, filter)`, `pullPacket(gate, filter)` and `dequeuePacket(filter)` use the names of the unfiltered operations, because they are the same operations with a condition. INET builds with `-Wno-overloaded-virtual` ([src/makefrag](../../src/makefrag#L103)). C++ name hiding affects only a call through a subclass type that overrides one overload. The callers use the interfaces and `PassivePacketSourceRef`.
 
-**D-5. `IPacketQueue` gets no new query.** A caller uses `canPullPacket(gate, filter)` at the output gate of the queue. The 802.11 MAC already looks up that gate in pull request #1343. This keeps the contract minimal ([AR-EXT-MINIMAL-SURFACE](../../doc/project/rule/architecture.md#ar-ext-minimal-surface)). This is an owner decision (section 8).
+**D-5. `IPacketQueue` gets no new query.** A caller uses `canPullPacket(gate, filter)` at the output gate of the queue. The 802.11 MAC already looks up that gate in pull request #1343. This keeps the contract minimal ([AR-EXT-MINIMAL-SURFACE](../../doc/project/rule/architecture.md#ar-ext-minimal-surface)). The owner accepted this (section 8).
 
 **D-6. The scheduler decision gets one extension point.** `PacketSchedulerBase` implements the filtered query and pull once, on top of a new protected query:
 
@@ -258,18 +258,21 @@ doc/project/enforcement/check-pull-request.sh --base origin/master
 
 ## 8. Risks, unresolved decisions, and approval scope
 
-**Decisions for the owner:**
+**Decisions of the owner (2026-10-16, in the design conversation):**
 
-- **D-4.** Overloads, or separate names such as `canPullAcceptedPacket()`. The recommendation is overloads.
-- **D-5.** No gate-less query on `IPacketQueue`. The recommendation is no new query.
-- **The test category for the new tests.** The recommendation is module tests, because the consumer is C++ code and not a NED module.
+- **D-4.** Overloads. Separate names such as `canPullAcceptedPacket()` are not used.
+- **D-5.** No gate-less query on `IPacketQueue`.
+- **The test category for the new tests.** Module tests, because the consumer is C++ code and not a NED module.
+- **The recommendation for the MAC.** The second approach in the risk below: filtered only to skip a blocked head.
 
 **Risks:**
 
 - **An external subclass of `PacketQueue` or `PacketSchedulerBase` that overrides `pullPacket(gate)`.** It keeps its extra effect on the unfiltered path only. Its filtered pull uses the base implementation. The migration guide must say that such a class also overrides the filtered method.
-- **A custom 802.11 pending queue with a part that does not support the filter.** For example, a gate, or a `PacketScheduler` with a scheduler function. That queue throws "Invalid operation" when the MAC makes a filtered call. Pull request #1343 decides which approach to take:
+- **A custom 802.11 pending queue with a part that does not support the filter.** For example, a gate, or a `PacketScheduler` with a scheduler function. That queue throws "Invalid operation" when the MAC makes a filtered call. There are two approaches for the MAC:
   - The MAC always uses the filtered dequeue. This is simple, and the error is loud.
   - The MAC uses `dequeuePacket()` when the head is accepted, and the filtered dequeue only to skip a blocked head. Then such queues fail only when a skip is necessary.
+
+  The owner recommends the second approach to the author of pull request #1343. A configuration that never blocks the head then keeps its current behavior with every pending queue.
 
 **Follow-ups, not in this plan:**
 
