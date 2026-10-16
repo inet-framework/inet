@@ -48,9 +48,6 @@ void TcpClassicAlgorithmBase::initializeAlgorithm()
 {
     TcpAlgorithmBase::initializeAlgorithm();
     state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
-    const char *slowStartExit = par("slowStartExit");
-    state->slowStartExit = !strcmp(slowStartExit, "hystart") ? SLOW_START_EXIT_HYSTART
-            : !strcmp(slowStartExit, "hystartpp") ? SLOW_START_EXIT_HYSTARTPP : SLOW_START_EXIT_NONE;
 }
 
 TcpClassicAlgorithmBase::~TcpClassicAlgorithmBase()
@@ -65,10 +62,6 @@ void TcpClassicAlgorithmBase::established(bool active)
 
     recovery = createRecovery();
     congestionControl = createCongestionControl();
-
-    // RFC 9406 section 4.2: "Define windowEnd as a sequence number initialized to SND.NXT"
-    state->hystartppSsthresh = state->ssthresh;
-    state->hystartppWindowEnd = state->snd_nxt;
 }
 
 void TcpClassicAlgorithmBase::processRexmitTimer(TcpEventCode& event)
@@ -139,10 +132,8 @@ void TcpClassicAlgorithmBase::receivedAckForUnackedData(uint32_t firstSeqAcked)
         recovery->receivedAckForUnackedData(numBytesAcked);
         ackedInFastRecovery(numBytesAcked);
     }
-    else if (!processEce(numBytesAcked)) {
-        if (!isHystartppActive() || !hystartppAck(firstSeqAcked, numBytesAcked))
-            congestionControl->receivedAckForUnackedData(numBytesAcked);
-    }
+    else if (!processEce(numBytesAcked))
+        congestionControl->receivedAckForUnackedData(numBytesAcked);
 
     ackProcessed(inFastRecovery);
 
@@ -257,106 +248,6 @@ void TcpClassicAlgorithmBase::receivedDuplicateAck()
     }
 
     recovery->receivedDuplicateAck();
-}
-
-simtime_t TcpClassicAlgorithmBase::getAckRttSample(uint32_t firstSeqAcked) const
-{
-    const TcpSegmentTransmitInfoList::Item *sent = state->sentInfo.get(firstSeqAcked);
-    if (sent == nullptr || sent->getTransmitCount() != 1)
-        return -1;
-    return simTime() - sent->getFirstSentTime();
-}
-
-// the constants of RFC 9406 section 4.3; L = 8, because INET does not pace
-static const double HYSTARTPP_MIN_RTT_THRESH = 0.004; // s
-static const double HYSTARTPP_MAX_RTT_THRESH = 0.016; // s
-static const int HYSTARTPP_MIN_RTT_DIVISOR = 8;
-static const uint32_t HYSTARTPP_N_RTT_SAMPLE = 8;
-static const uint32_t HYSTARTPP_CSS_GROWTH_DIVISOR = 4;
-static const uint32_t HYSTARTPP_CSS_ROUNDS = 5;
-static const uint32_t HYSTARTPP_L = 8;
-
-bool TcpClassicAlgorithmBase::isHystartppActive()
-{
-    if (state->slowStartExit != SLOW_START_EXIT_HYSTARTPP || state->hystartppPhase == HYSTARTPP_ENDED)
-        return false;
-    // section 4.3: "An implementation SHOULD use HyStart++ only for the initial slow
-    // start (when the ssthresh is at its initial value of arbitrarily high per
-    // [RFC5681])": a congestion response, which changes ssthresh, ends it, and so does
-    // the end of the slow start at ssthresh
-    if (state->ssthresh != state->hystartppSsthresh || state->snd_cwnd >= state->ssthresh) {
-        state->hystartppPhase = HYSTARTPP_ENDED;
-        EV_INFO << "HyStart++: the first slow start is over\n";
-        return false;
-    }
-    return true;
-}
-
-bool TcpClassicAlgorithmBase::hystartppAck(uint32_t firstSeqAcked, uint32_t numBytesAcked)
-{
-    // "When windowEnd is ACKed, the current round ends and windowEnd is set to SND.NXT."
-    if (seqGE(state->snd_una, state->hystartppWindowEnd)) {
-        state->hystartppLastRoundMinRtt = state->hystartppCurrentRoundMinRtt;
-        state->hystartppCurrentRoundMinRtt = -1;
-        state->hystartppRttSampleCount = 0;
-        state->hystartppWindowEnd = state->snd_nxt;
-        // "CSS lasts at most CSS_ROUNDS rounds. If the transition into CSS happens in
-        // the middle of a round, that partial round counts towards the limit."
-        if (state->hystartppPhase == HYSTARTPP_CSS && ++state->hystartppCssRounds >= HYSTARTPP_CSS_ROUNDS) {
-            // "If CSS_ROUNDS rounds are complete, enter congestion avoidance by
-            // setting the ssthresh to the current cwnd."
-            state->ssthresh = state->snd_cwnd;
-            conn->emit(ssthreshSignal, state->ssthresh);
-            state->hystartppPhase = HYSTARTPP_ENDED;
-            EV_INFO << "HyStart++: " << HYSTARTPP_CSS_ROUNDS << " rounds of CSS, congestion avoidance, ssthresh=" << state->ssthresh << "\n";
-            hystartppEnded();
-            return false;
-        }
-    }
-
-    // "cwnd = cwnd + min(N, L * SMSS)", divided by CSS_GROWTH_DIVISOR in CSS; as in the
-    // slow start of RFC 5681, only while the sender fills cwnd (Linux tcp_is_cwnd_limited())
-    if (state->snd_effmss == 0 || state->snd_cwnd / state->snd_effmss < 2 * state->maxPacketsOut) {
-        uint32_t increment = std::min(numBytesAcked, HYSTARTPP_L * state->snd_effmss);
-        if (state->hystartppPhase == HYSTARTPP_CSS)
-            increment /= HYSTARTPP_CSS_GROWTH_DIVISOR;
-        state->snd_cwnd += increment;
-        conn->emit(cwndSignal, state->snd_cwnd);
-    }
-    EV_INFO << "HyStart++: " << (state->hystartppPhase == HYSTARTPP_CSS ? "CSS" : "slow start") << ", cwnd=" << state->snd_cwnd << "\n";
-
-    // "Keep track of the minimum observed RTT"
-    simtime_t rtt = getAckRttSample(firstSeqAcked);
-    if (rtt >= SIMTIME_ZERO) {
-        if (state->hystartppCurrentRoundMinRtt < SIMTIME_ZERO || rtt < state->hystartppCurrentRoundMinRtt)
-            state->hystartppCurrentRoundMinRtt = rtt;
-        state->hystartppRttSampleCount++;
-    }
-    if (state->hystartppRttSampleCount < HYSTARTPP_N_RTT_SAMPLE || state->hystartppCurrentRoundMinRtt < SIMTIME_ZERO)
-        return true;
-
-    if (state->hystartppPhase == HYSTARTPP_SLOW_START) {
-        if (state->hystartppLastRoundMinRtt < SIMTIME_ZERO)
-            return true;
-        // "RttThresh = max(MIN_RTT_THRESH, min(lastRoundMinRTT / MIN_RTT_DIVISOR, MAX_RTT_THRESH))"
-        simtime_t rttThresh = std::max(SimTime(HYSTARTPP_MIN_RTT_THRESH), std::min(state->hystartppLastRoundMinRtt / HYSTARTPP_MIN_RTT_DIVISOR, SimTime(HYSTARTPP_MAX_RTT_THRESH)));
-        if (state->hystartppCurrentRoundMinRtt >= state->hystartppLastRoundMinRtt + rttThresh) {
-            state->hystartppCssBaselineMinRtt = state->hystartppCurrentRoundMinRtt;
-            state->hystartppPhase = HYSTARTPP_CSS;
-            state->hystartppCssRounds = 0;
-            EV_INFO << "HyStart++: the minimum RTT of the round grew from " << state->hystartppLastRoundMinRtt << " to "
-                    << state->hystartppCurrentRoundMinRtt << ", conservative slow start (CSS)\n";
-        }
-    }
-    else if (state->hystartppCurrentRoundMinRtt < state->hystartppCssBaselineMinRtt) {
-        // "the current round's minRTT drops below baseline (cssBaselineMinRtt) indicating
-        // that slow start exit was spurious": "resume slow start including HyStart++"
-        EV_INFO << "HyStart++: the minimum RTT of the round fell to " << state->hystartppCurrentRoundMinRtt << ", below "
-                << state->hystartppCssBaselineMinRtt << ": the exit was spurious, slow start again\n";
-        state->hystartppCssBaselineMinRtt = -1;
-        state->hystartppPhase = HYSTARTPP_SLOW_START;
-    }
-    return true;
 }
 
 uint32_t TcpClassicAlgorithmBase::getBytesInFlight() const
