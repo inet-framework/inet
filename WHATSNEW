@@ -442,6 +442,16 @@ Notable backward compatible changes are the following:
 
    The user guide explains nominal timing, zero-limit estimates, unused reservation time, and support limits. Multiple protection uses shared TXNAV. It does not check a complete exchange against the remaining budget.
 
+7. A Mobile IPv6 mobile node can send its own traffic through the reverse tunnel
+
+   A mobile node that sent a datagram with an unspecified source address after
+   registering with its home agent aborted the simulation ("Tag
+   'inet::Ipv6InterfaceData' is absent"): the datagram is routed through the
+   reverse tunnel, a tunnel interface created at run time without IPv6 data,
+   and IPv6 took the source address from that interface. IPv6 now takes the
+   home address of the mobile node as the source, as RFC 6275 Section 11.3.1
+   expects of a reverse-tunneled datagram.
+
 8. Radio medium purge without a timer
 
    RadioMedium has a new transmissionPurgeMode parameter. The default, "timer", removes transmissions that can no longer interfere with a self-message scheduled at the interference end time of the oldest transmission that can still interfere, as before. "onTransmission" removes them whenever a new transmission is added instead, so the medium schedules no events of its own; this keeps the medium out of the event sequence entirely, which matters for a model whose fingerprints must not depend on the medium's bookkeeping. Interference is computed identically in both modes.
