@@ -292,6 +292,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     state->fork = true;
     state->forked = true;
     localAddr = listenerConn->localAddr;
+    listenAddr = listenerConn->localAddr;
     localPort = listenerConn->localPort;
     autoRead = listenerConn->autoRead;
 

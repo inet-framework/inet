@@ -1162,7 +1162,7 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
     // server MUST disable TFO for all new connection requests": no cookie, and the
     // data of the SYN is not acknowledged (section 5.1)
     if (state->fastopenServerEnabled && (fastOpenOption || synData)
-        && tcpMain->getNumPendingFastOpenRequests(localAddr, localPort) >= (int)tcpMain->par("fastopenMaxPendingRequests"))
+        && tcpMain->getNumPendingFastOpenRequests(listenAddr, localPort) >= (int)tcpMain->par("fastopenMaxPendingRequests"))
     {
         EV_INFO << "Fast Open: the limit of pending Fast Open connections is reached, no Fast Open for this SYN\n";
         state->fastopenCookieValid = false;

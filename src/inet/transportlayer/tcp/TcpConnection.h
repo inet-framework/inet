@@ -120,6 +120,7 @@ class INET_API TcpConnection : public SimpleModule
     bool peerClosedSentUp = false;
     bool fullClose = false; // the application closed without halfClose: it will not read again (Linux close(), an orphaned socket)
     bool timeWaitSocket = false; // the connection is where Linux keeps only a time-wait socket: TIME_WAIT, and FIN_WAIT_2 after a full close
+    L3Address listenAddr; // the local address of the listening socket of this connection (unspecified: each address), for the pending Fast Open limit of the listener
     long maxByteCountRequested = 0;  // from READ requests
 
     Tcp *tcpMain = nullptr; // Tcp module

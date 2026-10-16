@@ -117,6 +117,7 @@ void TcpConnection::process_OPEN_PASSIVE(TcpEventCode& event, TcpCommand *tcpCom
             EV_DETAIL << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
 
             tcpMain->addSockPair(this, localAddr, L3Address(), localPort, -1);
+            this->listenAddr = localAddr;
             break;
 
         default:
