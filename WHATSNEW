@@ -432,6 +432,10 @@ Notable backward incompatible changes are the following:
 
    The new parameter slowStartExit of TcpReno, TcpNewReno, DcTcp and TcpCubic selects how the first slow start ends: "none" (at ssthresh or at a congestion signal, RFC 5681), "hystart" (the hybrid slow start of Linux, which only TcpCubic runs) or "hystartpp" (HyStart++, RFC 9406). It replaces the bool hystartEnabled of TcpCubic: set slowStartExit = "hystart" where hystartEnabled was true. HyStart++ leaves slow start when the minimum RTT of a round grows, continues with a conservative slow start for at most 5 rounds, returns to slow start when the RTT growth was spurious, and runs only until the first congestion signal. TcpCubic now uses HyStart++ by default, as RFC 9438 section 4.10 recommends, and after an exit without a loss it sets W_max to cwnd and K to 0. LinuxTcp and LegacyTcp keep the hybrid slow start of Linux. Simulations that use TcpCubic in Tcp change.
 
+56. TCP urgent data
+
+   Tcp now supports urgent data, as RFC 9293 section 3.8.5 requires. TcpSocket::sendUrgent() sends data as urgent data (the tag TcpSendUrgentReq): the urgent pointer points to the octet after it, and the segments before it carry URG until the peer acknowledges them; neither the cork nor Nagle holds urgent data. A receiver tells the application of a new or advanced urgent pointer with the new indication TCP_I_URGENT (TcpUrgentInfo, the bytes before the mark; TcpSocket calls socketUrgentArrived()), and delivers the data before the mark as TCP_I_URGENT_DATA with the urgent bytes that remain (the tag TcpUrgentInd); a delivery ends at the mark. The new parameter urgentOutOfBand, which LinuxTcp sets, gives the behavior of Linux: the last urgent byte leaves the stream and comes alone (TCP_I_URGENT_DATA of one byte with the tag TcpOutOfBandInd), and the data before it is ordinary data; TcpSocket::setOobInline() keeps the byte in the stream (SO_OOBINLINE). Before, a receiver ignored URG. Simulations change only where an application sends urgent data.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
