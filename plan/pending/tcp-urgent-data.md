@@ -1,6 +1,6 @@
 # Urgent data (T8)
 
-Status: **ready for review** — item T8 of `plan/pending/tcp-open-items.md`, decision D-131.
+Status: **done** — item T8 of `plan/pending/tcp-open-items.md`, decision D-131; landed on master on 2026-10-16, the owner approved it.
 
 - Branch `topic/tcp-urgent-data`, on master `bbad103b0f`.
 - The decision numbers continue those of `plan/done/tcp-hystartpp.md` (D-161 onward).
@@ -22,7 +22,7 @@ Linux reads the urgent pointer as RFC 9293 does (`tcp_stdurg = 0`), but it takes
 | 4 ✅ | `tcp: add: urgentOutOfBand, the out-of-band byte of Linux` | `tcp_urgent_3` (new): the byte leaves the stream in `LinuxTcp`; `tcp_urgent_4` (new): `setOobInline()` keeps it |
 | 5 ✅ | `doc: change: the release note of urgent data` | WHATSNEW entry 56 |
 | 6 ✅ | `plan: change: record urgent data` | — |
-| 7 | (inet-gpl) `PacketDrillApp: urgent data of the socket API` | after the landing, because inet-gpl builds against INET master (D-164) |
+| 7 ✅ | (inet-gpl) `PacketDrillApp: urgent data of the socket API` | after the landing, because inet-gpl builds against INET master (D-164) |
 
 The test client of the module tests gets an urgent send in its send script and prints the notices and the urgent deliveries.
 
@@ -39,7 +39,7 @@ As for T7: each commit builds and passes the module tests, a new test fails befo
 
 ## 5. The record
 
-Commits on master `bbad103b0f`: `34ae30d28c` (plan), `c6707b8d95` (the urgent send), `0f539ef4c8` (the urgent receive of RFC 9293), `dc3df5e1b6` (the out-of-band byte of Linux), `5c3f1a2504` (the release note), and this record. Step 7 waits for the landing.
+Commits on master `bbad103b0f`: `34ae30d28c` (plan), `c6707b8d95` (the urgent send), `0f539ef4c8` (the urgent receive of RFC 9293), `dc3df5e1b6` (the out-of-band byte of Linux), `5c3f1a2504` (the release note), and this record. The landing on 2026-10-16: master moved to `484d3c0258` by a fast-forward. Step 7 is inet-gpl `0bea63d`, on inet-gpl master `0dfbcae`: `send(MSG_OOB)`, `recv(MSG_OOB)` with the results of `tcp_recv_urg()`, `SO_OOBINLINE`, `ioctl(SIOCATMARK)`, a read that stops at the mark, and `splice()`. PacketDrillApp did not know the symbol `NULL`, so it skipped each call with a `NULL` argument without a word; it is 0 now. With it, `tcp_splice_loop_test` checks the out-of-band byte: it passes with `LinuxTcp`, and it fails with `urgentOutOfBand = false` ("splice() reads 1 bytes, the script expects 0"). The packetdrill suite keeps each of its 318 verdicts, the scripts with a `NULL` buffer included, and INET's TCP protocol suite gives 329 PASS and 4 FAIL (expected).
 
 Facts found during the work:
 
