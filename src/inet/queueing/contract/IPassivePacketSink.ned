@@ -13,6 +13,13 @@ package inet.queueing.contract;
 // connected to an active packet source module. The connected active packet
 // source is expected to push packets into the passive packet sink over time.
 //
+// In the push handshake, the producer holds the packets and decides when a
+// packet moves, and the consumer decides which packets it accepts. The
+// producer can ask whether the consumer accepts some packet or a specific
+// packet, and it can try another packet that it holds. The consumer notifies
+// the producer when its answer can change. The pull handshake of
+// ~IPassivePacketSource is the mirror image.
+//
 // @see ~PassivePacketSink, ~PacketQueue, ~PacketClassifier, ~IActivePacketSource
 //
 moduleinterface IPassivePacketSink

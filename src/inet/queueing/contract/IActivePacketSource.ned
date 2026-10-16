@@ -12,6 +12,8 @@ package inet.queueing.contract;
 // An active packet source, also called a producer, has one output that must
 // be connected to a passive packet sink module. The active packet source is
 // expected to push packets into the connected passive packet sink over time.
+// The producer holds the packets and decides when a packet moves, and the
+// consumer decides which packets it accepts; see ~IPassivePacketSink.
 //
 // @see ~PassivePacketSink, ~PacketServer, ~PacketClassifier, ~IPassivePacketSink
 //

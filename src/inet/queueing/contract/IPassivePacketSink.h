@@ -16,6 +16,15 @@ namespace queueing {
 /**
  * This class defines the interface for passive packet sinks.
  * See the corresponding NED file for more details.
+ *
+ * The push handshake is the mirror image of the pull handshake of
+ * IPassivePacketSource. The caller is the active packet source, which holds
+ * the packets and decides when a packet moves. The acceptance condition
+ * belongs to this passive sink, and the sink offers it as methods:
+ * canPushSomePacket() for any packet, and canPushPacket() for a specific
+ * packet. Because the caller holds the packets, it can try another packet
+ * when this sink refuses one. When the answer can change, this sink calls
+ * IActivePacketSource::handleCanPushPacketChanged().
  */
 class INET_API IPassivePacketSink
 {

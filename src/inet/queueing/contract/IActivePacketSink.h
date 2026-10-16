@@ -16,6 +16,12 @@ namespace queueing {
 /**
  * This class defines the interface for active packet sinks.
  * See the corresponding NED file for more details.
+ *
+ * An active packet sink pulls packets from a passive packet source, which
+ * holds the packets and chooses among them. The sink can limit that choice to
+ * the packets that it accepts with a filter. IPassivePacketSource describes
+ * the pull handshake, and IActivePacketSource is the mirror image of this
+ * interface.
  */
 class INET_API IActivePacketSink
 {

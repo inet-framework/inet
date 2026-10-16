@@ -12,6 +12,9 @@ package inet.queueing.contract;
 // An active packet sink, also called a collector, has one input that must be
 // connected to a passive packet source module. The active packet sink is
 // expected to pull packets from the connected passive packet source over time.
+// The collector decides when a packet moves and which packets it accepts, and
+// the provider holds the packets and chooses among the accepted ones; see
+// ~IPassivePacketSource.
 //
 // @see ~ActivePacketSink, ~PacketServer, ~PacketScheduler, ~IPassivePacketSource
 //
