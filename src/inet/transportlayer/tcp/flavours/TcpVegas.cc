@@ -226,6 +226,12 @@ void TcpVegas::receivedAckForUnackedData(uint32_t firstSeqAcked)
             EV_DETAIL << "Vegas: decr cwnd linearly, to " << state->snd_cwnd << "\n";
         }
 
+        // in congestion avoidance, the step of one segment applies once per RTT, as
+        // the decision does (Linux tcp_vegas_cong_avoid()); in slow start, each ACK
+        // of the growing RTT grows cwnd
+        if (!state->v_incr_ss)
+            state->v_incr = 0;
+
         // update vegas fine-grained timeout value (retransmitted packets do not count)
         if (tSent != 0 && num_transmits == 1) {
             simtime_t newRTT = currentTime - tSent;
