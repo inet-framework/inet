@@ -23,6 +23,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/SimpleModule.h"
+#include "inet/common/Simsignals.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Protocol.h"
@@ -112,6 +113,7 @@ class INET_API IPsec : public SimpleModule, NetfilterBase::HookBase
     virtual INetfilter::IHook::Result protectDatagram(Packet *ipv4datagram, const PacketInfo& packetInfo, SecurityPolicy *spdEntry);
     virtual bool matchesSelectorsOfSa(Packet *packet, SecurityAssociation *sadEntry);
     virtual void sendDummyPacket(SecurityAssociation *sadEntry);
+    virtual void emitPacketDropped(Packet *packet, PacketDropReason reason);
 
     virtual int getIntegrityCheckValueBitLength(EncryptionAlg alg);
     virtual int getInitializationVectorBitLength(EncryptionAlg alg);

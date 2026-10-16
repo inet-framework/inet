@@ -486,6 +486,14 @@ void IPsec::sendDummyPacket(SecurityAssociation *sadEntry)
     send(packet, "ipOut");
 }
 
+void IPsec::emitPacketDropped(Packet *packet, PacketDropReason reason)
+{
+    // the hook returns DROP after this, and the network layer deletes the packet
+    PacketDropDetails details;
+    details.setReason(reason);
+    emit(packetDroppedSignal, packet, &details);
+}
+
 INetfilter::IHook::Result IPsec::datagramPostRoutingHook(Packet *packet)
 {
     // a dummy packet is already protected
@@ -525,12 +533,14 @@ INetfilter::IHook::Result IPsec::processEgressPacket(Packet *packet, const L3Add
         }
         else if (spdEntry->getAction() == Action::DISCARD) {
             EV_INFO << "IPsec OUT DROP rule, packet: " << egressPacketInfo.str() << std::endl;
+            emitPacketDropped(packet, OTHER_PACKET_DROP);
             emit(outDropSignal, 1L);
             outDrop++;
             return INetfilter::IHook::DROP;
         }
     }
     EV_INFO << "IPsec OUT BYPASS, no matching rule, packet: " << egressPacketInfo.str() << std::endl;
+    emitPacketDropped(packet, OTHER_PACKET_DROP);
     emit(outDropSignal, 1L);
     outDrop++;
     return INetfilter::IHook::DROP;
@@ -882,6 +892,7 @@ INetfilter::IHook::Result IPsec::protectDatagram(Packet *packet, const PacketInf
         // RFC 4301 section 5.1: the entry wants protection, and no SA of it covers the packet;
         // with no key management to create one, the packet is discarded, not sent in clear
         EV_INFO << "IPsec OUT DROP, no SA of the PROTECT entry matches, packet: " << packetInfo.str() << std::endl;
+        emitPacketDropped(packet, OTHER_PACKET_DROP);
         emit(outDropSignal, 1L);
         outDrop++;
         return INetfilter::IHook::DROP;
@@ -939,6 +950,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
         if (sadEntry != nullptr) {
             if (sadEntry->getProtection() != Protection::AH) {
                 EV_INFO << "IPsec IN DROP AH, SA does not prescribe AH, packet: " << ingressPacketInfo.str() << std::endl;
+                // report the datagram as received
+                packet->insertAtFront(ah);
+                packet->insertAtFront(netHeader);
+                emitPacketDropped(packet, OTHER_PACKET_DROP);
                 emit(inProtectedDropSignal, 1L);
                 inDrop++;
                 return INetfilter::IHook::DROP;
@@ -956,6 +971,11 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             // RFC 4301 section 4.4.2.1: an SA whose hard lifetime has ended accepts nothing
             if (!sadEntry->isUsable(simTime(), packet->getByteLength())) {
                 EV_INFO << "IPsec IN DROP AH, the hard lifetime of the SA has ended, packet: " << ingressPacketInfo.str() << std::endl;
+                // report the datagram as AH processing would give it back
+                setNetworkHeaderProtocol(netHeader, (IpProtocolId)ah->getNextHeader());
+                updateNetworkHeaderLength(netHeader, packet);
+                packet->insertAtFront(netHeader);
+                emitPacketDropped(packet, LIFETIME_EXPIRED);
                 emit(inProtectedDropSignal, 1L);
                 inDrop++;
                 return INetfilter::IHook::DROP;
@@ -972,6 +992,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             if (ah->getNextHeader() != IP_PROT_ESP) {
                 if (!matchesSelectorsOfSa(packet, sadEntry)) {
                     EV_INFO << "IPsec IN DROP AH, the packet does not match the selectors of its SA, packet: " << ingressPacketInfo.str() << std::endl;
+                    emitPacketDropped(packet, OTHER_PACKET_DROP);
                     emit(inProtectedDropSignal, 1L);
                     inDrop++;
                     return INetfilter::IHook::DROP;
@@ -1004,6 +1025,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
 
         if (sadEntry == nullptr) {
             EV_INFO << "IPsec IN DROP AH, no matching rule, packet: " << ingressPacketInfo.str() << std::endl;
+            // report the datagram as received
+            packet->insertAtFront(ah);
+            packet->insertAtFront(netHeader);
+            emitPacketDropped(packet, OTHER_PACKET_DROP);
             emit(inProtectedDropSignal, 1L);
             inDrop++;
             return INetfilter::IHook::DROP;
@@ -1019,6 +1044,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
         if (sadEntry != nullptr) {
             if (sadEntry->getProtection() != Protection::ESP) {
                 EV_INFO << "IPsec IN DROP ESP, SA does not prescribe ESP, packet: " << ingressPacketInfo.str() << std::endl;
+                // report the datagram as ESP processing received it
+                packet->insertAtFront(espHeader);
+                packet->insertAtFront(netHeader);
+                emitPacketDropped(packet, OTHER_PACKET_DROP);
                 emit(inProtectedDropSignal, 1L);
                 inDrop++;
                 return INetfilter::IHook::DROP;
@@ -1044,6 +1073,11 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
             // RFC 4301 section 4.4.2.1: an SA whose hard lifetime has ended accepts nothing
             if (!sadEntry->isUsable(simTime(), packet->getByteLength())) {
                 EV_INFO << "IPsec IN DROP ESP, the hard lifetime of the SA has ended, packet: " << ingressPacketInfo.str() << std::endl;
+                // report the datagram as ESP processing would give it back
+                setNetworkHeaderProtocol(netHeader, (IpProtocolId)espTrailer->getNextHeader());
+                updateNetworkHeaderLength(netHeader, packet);
+                packet->insertAtFront(netHeader);
+                emitPacketDropped(packet, LIFETIME_EXPIRED);
                 emit(inProtectedDropSignal, 1L);
                 inDrop++;
                 return INetfilter::IHook::DROP;
@@ -1055,6 +1089,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
 
             if (!matchesSelectorsOfSa(packet, sadEntry) || (ahSadEntry != nullptr && !matchesSelectorsOfSa(packet, ahSadEntry))) {
                 EV_INFO << "IPsec IN DROP ESP, the packet does not match the selectors of its SA, packet: " << ingressPacketInfo.str() << std::endl;
+                emitPacketDropped(packet, OTHER_PACKET_DROP);
                 emit(inProtectedDropSignal, 1L);
                 inDrop++;
                 return INetfilter::IHook::DROP;
@@ -1086,6 +1121,10 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
 
         if (sadEntry == nullptr) {
             EV_INFO << "IPsec IN DROP ESP, no matching rule, packet: " << ingressPacketInfo.str() << std::endl;
+            // report the datagram as ESP processing received it
+            packet->insertAtFront(espHeader);
+            packet->insertAtFront(netHeader);
+            emitPacketDropped(packet, OTHER_PACKET_DROP);
             emit(inProtectedDropSignal, 1L);
             inDrop++;
             return INetfilter::IHook::DROP;
@@ -1102,12 +1141,14 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
         }
         else if (spdEntry->getAction() == Action::DISCARD) {
             EV_INFO << "IPsec DROP rule, packet: " << ingressPacketInfo.str() << std::endl;
+            emitPacketDropped(packet, OTHER_PACKET_DROP);
             emit(inUnprotectedDropSignal, 1L);
             inDrop++;
             return INetfilter::IHook::DROP;
         }
         else {
             EV_INFO << "IPsec IN DROP due to wrong rule, packet: " << ingressPacketInfo.str() << std::endl;
+            emitPacketDropped(packet, OTHER_PACKET_DROP);
             emit(inUnprotectedDropSignal, 1L);
             inDrop++;
             return INetfilter::IHook::DROP;
@@ -1116,6 +1157,7 @@ INetfilter::IHook::Result IPsec::processIngressPacket(Packet *packet)
     }
 
     EV_INFO << "IPsec IN DROP, no matching rule, packet: " << ingressPacketInfo.str() << std::endl;
+    emitPacketDropped(packet, OTHER_PACKET_DROP);
     emit(inUnprotectedDropSignal, 1L);
     inDrop++;
     return INetfilter::IHook::DROP;

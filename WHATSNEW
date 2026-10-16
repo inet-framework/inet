@@ -490,6 +490,10 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+2. IPsec reports the datagrams it discards
+
+   IPsec discarded datagrams, for example by a Security Policy Database entry with the action DISCARD, without emitting packetDropped, so PacketDropVisualizer and the statistics built on that signal did not see these drops. IPsec now emits packetDropped at each discard it counts, with the reason LIFETIME_EXPIRED when an inbound packet arrives on a Security Association whose hard lifetime has ended or whose byte limit it would exceed, and OTHER_PACKET_DROP otherwise, and records the statistics packetDropLifetimeExpired and packetDropUndefined. A discarded Encapsulating Security Payload (ESP) dummy packet is still not reported. The event trajectory does not change.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
