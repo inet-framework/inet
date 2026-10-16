@@ -1,14 +1,5 @@
 #!/usr/bin/env bash
 
-# before running this script:
-# 1. build the INET documentation from the IDE:
-#    * be sure to switch off auto linking (i.e. enable tilde linking)
-#    * enable ALL features in the project properties dialog
-#    * be sure to have a 72DPI screen when generating the sources
-#    * after building the documentation grep for 'class="error"' in the neddoc 
-#      folder to be sure that there are no broken tilde links
-# 2. build the inet manual and copy the generated PDF file to the doc directory.
-
 INET_ROOT=$(inet_root)
 
 VERSION=$(inet_version) || exit 1
@@ -33,18 +24,15 @@ git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error c
 
 echo "inet-$BUILDID" > $INET_ROOT/out/$DIRNAME/Version
 
-# copying documentation
-#cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-#cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-#cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
-(cd doc/src && DOC_BUILD_TARGET="users-guide,developers-guide" ./doc-build pdf)
-cp -r doc/src/_build/latex/*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+# PDF manuals (see doc/src/README.md)
+rm -rf $INET_ROOT/out/doc
+doc/src/build --pdf --only users-guide,developers-guide --out $INET_ROOT/out/doc --quiet || { echo --- error building the documentation ---; exit 1;}
+cp $INET_ROOT/out/doc/docs/*/inet-*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 
 # switch to the destination dir
 cd $INET_ROOT/out/$DIRNAME
 
 # patching files
-perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g doc/neddoc/overview.html
 perl -i -pe $REGEXPREPLACE s/##BUILDID##/$BUILDID/g src/inet-index.ned
 
 # cleanup

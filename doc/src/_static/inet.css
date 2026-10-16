@@ -1,0 +1,116 @@
+.lead {
+  font-size: 1.15em;
+  font-weight: 300;
+}
+
+.post-date {
+  color: var(--md-default-fg-color--light);
+  font-size: 0.85em;
+}
+
+.post-list {
+  list-style: none;
+}
+
+.post-entry {
+  margin-bottom: 1.5em;
+}
+
+.post-related {
+  margin-top: 2em;
+}
+
+.home-hero {
+  margin-bottom: 1.5em;
+  font-size: 1.1em;
+}
+
+.home-hero .home-highlight {
+  background-color: var(--md-accent-fg-color);
+  border-color: var(--md-accent-fg-color);
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0 2rem;
+}
+
+.home-grid ul {
+  margin-left: 0.5em;
+}
+
+.md-typeset .rubric.home-heading {
+  font-size: 1.3em;
+  font-weight: 400;
+  margin-top: 0.5em;
+}
+
+.md-typeset .rubric.home-subheading {
+  font-size: 1em;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.two-columns {
+  column-count: 2;
+}
+
+.md-typeset ul.plain-list {
+  list-style: none;
+  margin-left: 0;
+}
+
+.md-typeset ul.plain-list li {
+  margin-left: 0;
+  margin-bottom: 0;
+}
+
+.small {
+  font-size: 0.85em;
+}
+
+.md-typeset table.model-catalog {
+  display: table;
+  font-size: 0.75rem;
+  border-collapse: collapse;
+}
+
+.md-typeset table.model-catalog td,
+.md-typeset table.model-catalog th {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  padding: 0.4em 0.6em;
+  vertical-align: top;
+}
+
+.md-typeset table.model-catalog td.section {
+  background-color: var(--md-accent-fg-color--transparent);
+  font-weight: 700;
+}
+
+video {
+  max-width: 100%;
+}
+
+.align-left {
+  text-align: left;
+}
+
+.align-center {
+  text-align: center;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-right {
+  text-align: right;
+  display: block;
+  margin-left: auto;
+}
+
+@media screen and (max-width: 44.9375em) {
+  .two-columns {
+    column-count: 1;
+  }
+}

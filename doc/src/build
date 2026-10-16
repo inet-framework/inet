@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#
+# Builds inet.omnetpp.org (or parts of it) in the doc-builder container; see README.md and `./build --help`.
+#
+# Env:  ENGINE   podman (default), docker, or none to run tools/build.py directly
+#                (inside a container, or with Sphinx, opp_docgen and graphviz installed)
+#       IMAGE    the doc-builder image (default: the one named in .doc-builder-image)
+#       PDF_IMAGE  the image used with --pdf (default: $IMAGE-pdf, its variant with TeX Live)
+#
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$HERE/../.." && pwd)"
+IMAGE="${IMAGE:-$(tr -d '[:space:]' < "$HERE/.doc-builder-image")}"
+ENGINE="${ENGINE:-podman}"
+for arg in "$@"; do
+    if [ "$arg" = --pdf ]; then IMAGE="${PDF_IMAGE:-$IMAGE-pdf}"; fi
+done
+
+if [ "$ENGINE" = none ] || [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
+    export INETSITE_IMAGE="${INETSITE_IMAGE:-$IMAGE}"
+    exec python3 "$HERE/tools/build.py" "$@"
+fi
+
+# Paths are mounted at the same location, so they mean the same inside.
+mounts=(-v "$ROOT:$ROOT")
+if [ -L "$ROOT/media" ] && [ -e "$ROOT/media" ]; then
+    media="$(realpath "$ROOT/media")"
+    case "$media" in "$ROOT"/*) ;; *) mounts+=(-v "$media:$media") ;; esac
+fi
+if [ -f "$ROOT/.git" ] && common="$(git -C "$ROOT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
+    case "$common" in "$ROOT"/*) ;; *) mounts+=(-v "$common:$common") ;; esac
+fi
+serve=0
+port=8000
+args=("$@")
+for ((i = 0; i < ${#args[@]}; i++)); do
+    case "${args[i]}" in
+        --inet|--media|--out|--cache|--legacy-api-redirects)
+            path="$(realpath "${args[i+1]}")"
+            args[i+1]="$path"
+            [ -d "$path" ] || mkdir -p "$path"
+            mounts+=(-v "$path:$path") ;;
+        --inet=*|--media=*|--out=*|--cache=*|--legacy-api-redirects=*)
+            path="$(realpath "${args[i]#*=}")"
+            args[i]="${args[i]%%=*}=$path"
+            [ -d "$path" ] || mkdir -p "$path"
+            mounts+=(-v "$path:$path") ;;
+        --serve) serve=1 ;;
+        --port) port="${args[i+1]}" ;;
+        --port=*) port="${args[i]#*=}" ;;
+    esac
+done
+ports=()
+[ "$serve" = 1 ] && ports=(-p "$port:$port")
+
+# Rootless podman maps the container's root to the calling user, so the output belongs to them either way.
+user=()
+case "$ENGINE" in
+    podman) user=(--security-opt label=disable) ;;
+    docker) user=(--user "$(id -u):$(id -g)") ;;
+esac
+
+tty=()
+[ -t 0 ] && tty=(-it)
+
+# The cached builds are keyed to the content of the image, which a tag such as latest does not identify.
+if ! image_id="$("$ENGINE" image inspect --format '{{.Id}}' "$IMAGE" 2>/dev/null)"; then
+    "$ENGINE" pull --quiet "$IMAGE" >/dev/null
+    image_id="$("$ENGINE" image inspect --format '{{.Id}}' "$IMAGE")"
+fi
+
+# --init: the build would be PID 1 otherwise, and the kernel would discard the signals it does not handle.
+exec "$ENGINE" run --rm --init "${tty[@]}" "${user[@]}" "${mounts[@]}" "${ports[@]}" \
+    -e HOME=/tmp -e INETSITE_IMAGE="$IMAGE $image_id" -w "$HERE" \
+    "$IMAGE" python3 "$HERE/tools/build.py" "${args[@]}"

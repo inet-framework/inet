@@ -1,0 +1,60 @@
+name: Build and deploy inet.omnetpp.org
+
+# The site pages exist only on the website branch, so this runs (and deploys) from there; see doc/src/README.md.
+on:
+  push:
+    branches: [website]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Versions to rebuild even if their cached build is current (comma-separated labels, or "all")'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore the build cache
+        uses: actions/cache@v4
+        with:
+          path: doc/src/_build/out
+          key: site-versions-${{ github.run_id }}
+          restore-keys: site-versions-
+
+      - name: Build
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          args=(--versions all --pdf --quiet)
+          [ -n "$FORCE" ] && args+=(--force="$FORCE")
+          podman pull --quiet "$(tr -d '[:space:]' < doc/src/.doc-builder-image)-pdf"
+          doc/src/build "${args[@]}"
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc/site
+
+  deploy:
+    if: github.ref == 'refs/heads/website'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

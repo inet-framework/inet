@@ -1,6 +1,4 @@
 # local and generated files not to be committed
-doc/src/showcases
-doc/src/tutorials
 src/Makefile
 debug/makefile
 *_m.h
@@ -35,6 +33,7 @@ CLAUDE.md
 .ccls-cache/
 /doc/doxy/
 /doc/neddoc/
+/doc/site/
 /doc/src/manual/figures/*.pdf
 /doc/src/manual/inet-manual.pdf
 /doc/src/python-api/_autosummary
