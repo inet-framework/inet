@@ -65,8 +65,8 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
     /** The ssthresh that an expired retransmission timer sets: RFC 5681 equation (4), with the outstanding data as FlightSize. */
     virtual uint32_t calculateSsthreshForRto() { return std::max((state->snd_max - state->snd_una) / 2, 2 * state->snd_mss); }
 
-    /** The loss window that an expired retransmission timer restarts slow start from. */
-    virtual uint32_t calculateCwndForRto() { return state->snd_mss; }
+    /** The loss window that an expired retransmission timer restarts slow start from: one full-sized segment (RFC 5681 section 3.1), whose data the options of each segment reduce. */
+    virtual uint32_t calculateCwndForRto() { return state->snd_effmss; }
 
     /** The cwnd and ssthresh of the reaction to an ECN-Echo (RFC 3168 section 6.1.2: cwnd halves, at least 1 MSS). */
     virtual uint32_t calculateSsthreshForEce() { return std::max(state->snd_cwnd / 2, state->snd_mss); }

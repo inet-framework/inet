@@ -1,0 +1,53 @@
+%description:
+Tests that the loss window after a retransmission timeout is one full-sized
+segment of data (RFC 5681 section 3.1), also with the timestamp option, which
+takes 12 bytes of each segment. The client (TcpReno, MSS 500, timestamps)
+loses its first flight of four segments. After the timeout, the window
+holds whole segments of 488 bytes: the ACK of the retransmission lets two
+segments go, and no segment of the remaining 12 bytes of an MSS follows
+them.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 10s
+*.cli_app.sendScript="1.0 2000"
+*.*_tcp.mss = 500
+*.*_tcp.timestampSupport = true
+*.cli_tcp.initialWindow = "rfc3390"
+*.tcptester.script="a3 delete; a4 delete; a5 delete; a6 delete"
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[4.001 A007] A.1000 > B.2000: A 1:489(488) ack 501 win 16384   Option(s): NOP NOP TS(4000,2)
+[4.203 B002] A.1000 < B.2000: A ack 489 win 16384   Option(s): NOP NOP TS(4202,4000)
+[4.205 A008] A.1000 > B.2000: A 489:977(488) ack 501 win 16384   Option(s): NOP NOP TS(4204,4202)
+[4.205 A009] A.1000 > B.2000: A 977:1465(488) ack 501 win 16384   Option(s): NOP NOP TS(4204,4202)
+[4.207 B003] A.1000 < B.2000: A ack 1465 win 16384   Option(s): NOP NOP TS(4206,4204)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
