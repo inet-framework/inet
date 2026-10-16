@@ -1,0 +1,59 @@
+%description:
+Tests the automatic window scale with auto-tuning and a locked receive buffer.
+Both hosts are LinuxTcp with a receive buffer of 131072 bytes, but the server
+application locks its buffer at 131072 bytes before the open
+(socketReceiveBufferSize, the sk_rcvbuf of Linux after SO_RCVBUF), so
+auto-tuning cannot grow it. As Linux, where
+tcp_openreq_init_rwin() clamps the window of a locked listener to the space of
+its buffer, the SYN-ACK announces the shift of that window, 1 for 65536 bytes.
+The client does not lock its buffer, so its SYN announces the shift of
+receiveBufferMax, 10.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 2000000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.typename = "LinuxTcp"
+*.*_tcp.receiveBufferSize = 131072B
+*.srv_app.socketReceiveBufferSize = 131072
+sim-time-limit = 3s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[]: Tcp Header Option WS(=10) sent, WS (ws_enabled) is set to 0
+%contains: stdout
+[]: Tcp Header Option WS(=1) sent, WS (ws_enabled) is set to 1
+%#--------------------------------------------------------------------------------------------------------------

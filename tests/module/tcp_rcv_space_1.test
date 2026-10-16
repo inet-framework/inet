@@ -9,9 +9,11 @@ of the space (slow start), and the buffer is that window at the payload ratio
 162/256 of a 1460-byte segment. The space starts at 10 MSS, 14600 bytes.
 15928 bytes give a window of 37651 and a buffer of 59497, below 131072: no
 growth. Then 28960 bytes give 57920 + 94778 = 152698 and 241300 bytes;
-57920 bytes give 347520 and 549167; 115840 bytes give 695040 and 1098334; and
-130320 bytes give 325800 and a smaller buffer, which stays. The values double
-with the window of the sender in slow start.
+57920 bytes give 347520 and 549167; 115840 bytes give 695040 and 1098334;
+231680 bytes give 1390080 and 2196669; 463360 bytes give 2780160 and 4393339;
+and 926720 bytes give 5560320 and 8786678. The values double with the window
+of the sender in slow start; the window scale of 10 lets the offered window
+follow the buffer.
 
 %inifile: omnetpp.ini
 [General]
@@ -68,9 +70,16 @@ sim-time-limit = 3s
 []: Dynamic Right-Sizing: 115840 bytes read in one receive RTT
 []: Window auto-tuning: the receive buffer grows to 1098334
 %contains: stdout
-[]: Dynamic Right-Sizing: 130320 bytes read in one receive RTT
+[]: Dynamic Right-Sizing: 231680 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 2196669
 %contains: stdout
-[]: STATUS: skRcvbuf=1098334 sndbufLimited=0
+[]: Dynamic Right-Sizing: 463360 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 4393339
 %contains: stdout
-[]: STATUS: rcvRtt=0.004 rcvSpace=130320
+[]: Dynamic Right-Sizing: 926720 bytes read in one receive RTT
+[]: Window auto-tuning: the receive buffer grows to 8786678
+%contains: stdout
+[]: STATUS: skRcvbuf=8786678 sndbufLimited=0
+%contains: stdout
+[]: STATUS: rcvRtt=0.004 rcvSpace=926720
 %#--------------------------------------------------------------------------------------------------------------

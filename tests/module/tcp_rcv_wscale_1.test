@@ -1,0 +1,59 @@
+%description:
+Tests the automatic window scale with auto-tuning (windowScalingFactor = -1).
+Both hosts are LinuxTcp with a receive buffer of 131072 bytes, which auto-tuning
+may grow up to receiveBufferMax, 32 MiB. As Linux tcp_select_initial_window(),
+the SYN and the SYN-ACK announce the shift that represents 32 MiB, 10, and not
+the shift of the first window, 1. The client sends 2000000 bytes at t=1, and
+Dynamic Right-Sizing grows the buffer of the server; with the shift of 10, the
+window that the server offers grows above 131070 bytes, the largest window of a
+shift of 1.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 2000000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.typename = "LinuxTcp"
+*.*_tcp.receiveBufferSize = 131072B
+sim-time-limit = 3s
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[]: Tcp Header Option WS(=10) sent, WS (ws_enabled) is set to 0
+%contains: stdout
+[]: Tcp Header Option WS(=10) sent, WS (ws_enabled) is set to 1
+%contains-regex: stdout
+new wnd=([2-9][0-9]{5}|[1-9][0-9]{6,})\n
+%#--------------------------------------------------------------------------------------------------------------
