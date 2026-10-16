@@ -1,0 +1,47 @@
+%description:
+Tests that the delayed ACK counts the bytes against RMSS, the MSS of the
+receiver (RFC 9293 SHLD-19: "at least every second full-sized segment or
+2*RMSS bytes of new data"). The server sends no MSS option, so its RMSS is
+the default 536, and the client sends segments of 536 bytes, shorter than
+the send MSS of the server (1024). The server acknowledges the two segments
+of 1072 bytes at once, not at the delayed ACK timeout.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 1072"
+*.cli_tcp.increasedIWEnabled = true # two segments at once
+*.srv_tcp.sendMssOption = false
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 1:537(536) ack 501 win 16384 
+[1.001 A004] A.1000 > B.2000: A 537:1073(536) ack 501 win 16384 
+[1.003 B002] A.1000 < B.2000: A ack 1073 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

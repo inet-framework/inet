@@ -133,6 +133,9 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
     /** The initial window (initialWindow, initialCwnd), in bytes; the restart window is at most this too (RFC 5681 section 4.1) */
     virtual uint32_t getInitialWindow() const;
 
+    /** RMSS of RFC 9293: the MSS that this side announced, or the default when it announced none. */
+    virtual uint32_t getReceiveMss() const;
+
     virtual void connectionClosed() override;
 
     virtual void setKeepAlive(bool enabled) override;

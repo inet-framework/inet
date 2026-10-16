@@ -105,6 +105,14 @@ void TcpAlgorithmBase::initializeAlgorithm()
     state->keepalive_max_probes = conn->getTcpMain()->par("keepAliveProbeCount");
 }
 
+uint32_t TcpAlgorithmBase::getReceiveMss() const
+{
+    // RMSS of RFC 9293: the MSS that this side announced, else the default (MUST-15)
+    if (conn->getTcpMain()->sendMssOption && state->advertisedMss > 0)
+        return state->advertisedMss;
+    return conn->getRemoteAddress().getType() == L3Address::IPv6 ? 1220 : 536;
+}
+
 uint32_t TcpAlgorithmBase::getInitialWindow() const
 {
     // initialCwnd, as the initcwnd of a Linux route, which wins over the default
@@ -847,9 +855,15 @@ void TcpAlgorithmBase::receiveSeqChanged()
                 conn->sendAck();
             }
             // RFC 9293 section 3.8.6.3: "the delay MUST be less than 0.5 seconds (MUST-40).
-            // An ACK SHOULD be generated for at least every second full-sized segment"
-            // (SHLD-19); delayedAckTimeout and delayedAckFrameCount set both.
-            else if (state->full_sized_segment_counter >= state->delayedAckFrameCount) {
+            // An ACK SHOULD be generated for at least every second full-sized segment or
+            // 2*RMSS bytes of new data (where RMSS is the MSS specified by the TCP endpoint
+            // receiving the segments to be acknowledged, or the default value if not
+            // specified)" (SHLD-19); delayedAckTimeout and delayedAckFrameCount set both.
+            // The bytes count also when the segments of the peer are shorter than the
+            // send MSS of this side.
+            else if (state->full_sized_segment_counter >= state->delayedAckFrameCount
+                     || state->rcv_nxt - state->last_ack_sent >= state->delayedAckFrameCount * getReceiveMss())
+            {
                 EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", (delayed ACK enabled, but full_sized_segment_counter=" << state->full_sized_segment_counter << ") sending ACK now\n";
                 conn->sendAck();
             }
