@@ -318,7 +318,9 @@ void Rfc6675Recovery::receivedDuplicateAck()
         // was seen, and not at all by DupThresh once reordering was seen (Linux
         // tcp_time_to_recover() skips the duplicate-ACK heuristic with RACK).
         // The RACK marks reach this function through IsLost() in step (2).
-        if (state->lossDetectionMode != 1 && state->dupacks >= state->dupthresh)
+        // DupThresh is the reordering degree, which adaptiveReorderingEnabled can
+        // grow, as IsLost() uses it (Linux tcp_time_to_recover()).
+        if (state->lossDetectionMode != 1 && state->dupacks >= state->reordering)
             step4();
         else {
             //"

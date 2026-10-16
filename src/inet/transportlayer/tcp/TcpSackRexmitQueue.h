@@ -218,7 +218,9 @@ class INET_API TcpSackRexmitQueue
 
     /**
      * Marks lost each region that is not SACKed and has at least DupThresh SACKed
-     * regions above it (the loss rule of RFC 6675, by segments).
+     * regions above it (the loss rule of RFC 6675, by segments). DupThresh is the
+     * reordering degree, which adaptiveReorderingEnabled can grow (Linux
+     * tp->reordering).
      */
     virtual void updateLost();
 

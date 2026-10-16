@@ -537,7 +537,7 @@ void TcpSackRexmitQueue::updateLost()
     for (auto it = rexmitQueue.rbegin(); it != rexmitQueue.rend(); it++) {
         if (it->sacked)
             numSacked++;
-        if (numSacked >= conn->getState()->dupthresh && !it->sacked)
+        if (numSacked >= conn->getState()->reordering && !it->sacked)
             it->lost = true;
     }
 }

@@ -1,0 +1,75 @@
+%description:
+Tests that the learned reordering degree delays the start of a recovery with
+lossDetectionMode = "dupthresh" (adaptiveReorderingEnabled = true, as Linux
+tcp_time_to_recover()). The tester delays the first segment of two bursts of
+six segments by 0.3 ms. In the burst at t=2, the third duplicate ACK starts
+a fast retransmission; its D-SACK raises the reordering degree to 6, and
+the ACK of the segment at t=2.5 undoes the reduction. In the burst at t=3,
+five duplicate ACKs arrive, fewer than the reordering degree, so nothing is
+retransmitted.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A4 delay 0.0003; A12 delay 0.0003"  # the first segment of each burst of six arrives 0.3 ms late
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 500;2 3000;2.5 500;3 3000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.lossDetectionMode = "dupthresh"
+*.*_tcp.adaptiveReorderingEnabled = true
+*.*_tcp.initialCwnd = 10
+*.*_tcp.lossUndoEnabled = true
+
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
+
+%# four later segments are SACKed, then the delayed one arrives...
+%contains: stdout
+reordering degree updated to 6
+
+%# five duplicate ACKs in the burst at t=3...
+%contains: stdout
+[testing]: [3.003 B011] A.1000 < B.2000: A ack 4001 win 5000   Option(s): NOP NOP SACK[4501,5001)
+[testing]: [3.003 B012] A.1000 < B.2000: A ack 4001 win 5000   Option(s): NOP NOP SACK[4501,5501)
+[testing]: [3.003 B013] A.1000 < B.2000: A ack 4001 win 5000   Option(s): NOP NOP SACK[4501,6001)
+[testing]: [3.003 B014] A.1000 < B.2000: A ack 4001 win 5000   Option(s): NOP NOP SACK[4501,6501)
+[testing]: [3.003 B015] A.1000 < B.2000: A ack 4001 win 5000   Option(s): NOP NOP SACK[4501,7001)
+[testing]: [3.003 B016] A.1000 < B.2000: A ack 7001 win 5000 
+
+%# ...and no retransmission
+%contains: stdout
+[3.004] tcpdump finished, A:17 B:16 segments
