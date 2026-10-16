@@ -8,6 +8,7 @@
 
 import os
 import sys
+import urllib.parse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '_ext'))
@@ -44,6 +45,8 @@ exclude_patterns = ['_build', '_extra', 'Thumbs.db', '.DS_Store', '**/_docs', '*
 exclude_patterns.append('migration-guide/*/*.rst')
 if cfg.mode == 'site':
     html_extra_path = [os.path.join(HERE, 'site', '_extra')]
+    templates_path = [os.path.join(HERE, 'site', '_templates')]
+    html_context = {'inet_site_path': urllib.parse.urlsplit(cfg.baseurl).path + '/'}
 html_static_path = [os.path.join(HERE, '_static')]
 html_css_files = ['inet.css']
 html_favicon = os.path.join(HERE, '_static', 'favicon.ico')

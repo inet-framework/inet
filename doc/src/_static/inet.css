@@ -20,14 +20,68 @@
   margin-top: 2em;
 }
 
-.home-hero {
-  margin-bottom: 1.5em;
-  font-size: 1.1em;
+/* The hero of the former Jekyll site; the slate scheme dims its light background image. */
+.inet-hero {
+  position: relative;
+  background-repeat: repeat;
+  color: #014872;
 }
 
-.home-hero .home-highlight {
-  background-color: var(--md-accent-fg-color);
-  border-color: var(--md-accent-fg-color);
+[data-md-color-scheme=slate] .inet-hero {
+  color: var(--md-default-fg-color);
+}
+
+[data-md-color-scheme=slate] .inet-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--md-default-bg-color);
+  opacity: 0.8;
+}
+
+.inet-hero__inner {
+  position: relative;
+  padding: 2rem 0.8rem 1.6rem;
+  font-size: 1rem;
+}
+
+.md-typeset .inet-hero__inner h1 {
+  margin: 0 0 0.6rem;
+  color: inherit;
+  font-size: 2.4rem;
+  font-weight: 400;
+}
+
+.inet-hero__inner p {
+  margin: 0 0 0.8rem;
+}
+
+.md-typeset .inet-hero__highlight,
+.md-typeset .inet-hero__highlight:focus,
+.md-typeset .inet-hero__highlight:hover {
+  background-color: #c71c22;
+  border-color: #c71c22;
+  color: #fff;
+}
+
+/* The hero shows the title of the home page. */
+.inet-hero ~ .md-main .md-content__inner > h1:first-child {
+  display: none;
+}
+
+/* The theme shows the title of the page in the header, instead of the name of the site, once the title is out of
+   view, which the hidden one always is. */
+body:has(.inet-hero) .md-header__title--active .md-header__topic {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  z-index: 0;
+}
+
+body:has(.inet-hero) .md-header__title--active .md-header__topic + .md-header__topic {
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .home-grid {
@@ -112,5 +166,9 @@ video {
 @media screen and (max-width: 44.9375em) {
   .two-columns {
     column-count: 1;
+  }
+
+  .md-typeset .inet-hero__inner h1 {
+    font-size: 1.8rem;
   }
 }

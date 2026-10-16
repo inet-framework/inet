@@ -6,18 +6,6 @@ INET Framework
 
 .. inet-nav::
 
-.. raw:: html
-
-   <div class="home-hero">
-     <p>An open-source OMNeT++ model suite for wired, wireless and mobile networks.<br>
-     INET evolves via feedback and contributions from the user community.</p>
-     <p>
-       <a class="md-button md-button--primary" href="Introduction.html">What is INET?</a>
-       <a class="md-button md-button--primary home-highlight" href="docs/users-guide/index.html">User's Guide</a>
-       <a class="md-button md-button--primary" href="docs/showcases/index.html">Example simulations</a>
-     </p>
-   </div>
-
 .. container:: home-grid
 
    .. container:: home-column

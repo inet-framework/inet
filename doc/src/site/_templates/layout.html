@@ -1,0 +1,24 @@
+{% extends "!layout.html" %}
+{# GitHub Pages serves the 404 page for a missing page at any depth, where its relative URLs would not resolve. #}
+{% block site_meta %}
+  {% if pagename == "404" %}<base href="{{ inet_site_path }}">{% endif %}
+  {{ super() }}
+{% endblock %}
+{# The hero spans the whole width under the tabs, which the page content cannot. #}
+{% block tabs %}
+  {{ super() }}
+  {% if pagename == "index" %}
+    <div class="inet-hero" style="background-image: url('{{ pathto('images/bg.svg', 1) }}')">
+      <div class="inet-hero__inner md-grid md-typeset">
+        <h1>INET Framework</h1>
+        <p>An open-source OMNeT++ model suite for wired, wireless and mobile networks.<br>
+        INET evolves via feedback and contributions from the user community.</p>
+        <p>
+          <a class="md-button md-button--primary" href="Introduction.html">What is INET?</a>
+          <a class="md-button md-button--primary inet-hero__highlight" href="docs/users-guide/index.html">User's Guide</a>
+          <a class="md-button md-button--primary" href="docs/showcases/index.html">Example simulations</a>
+        </p>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
