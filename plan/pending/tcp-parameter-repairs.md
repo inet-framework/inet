@@ -100,15 +100,20 @@ The owner decided on 2026-10-16: "chose the smaller changes that keep the tests 
 - **D-174 — The Fast Open black hole stays at the second SYN timeout;** the "as Linux" claims go from the code comment, the test description and the doc.
 - **D-175 — Each repair is the smaller change that keeps the tests passing,** in the order of section 5. A test changes only where its old expectation was the defect itself, and the commit says so.
 
+### The decisions of the work
+
+- **D-176 — P1: the reordering detection compares with the SACK state before the ACK.** The first run of P1 moved 33 fingerprints of examples on paths that do not reorder. Two ACKs looked like reordering: a delayed ACK that acknowledges in-order data and SACKs later data, and an ACK that newly SACKs two blocks, the higher block first. RFC 8985 step 3 takes the newly acknowledged segments in ascending order, and Linux compares with `prior_fack`, so both checks now compare with the highest SACKed sequence number before the segment (`priorFack`). This repair is a commit of its own before P1, because the defect also reaches `LinuxTcp` through `adaptiveReorderingEnabled`. A D-SACK sets no reordering in RFC 8985, so its two checks keep the condition `adaptiveReorderingEnabled`.
+
 ## 7. The steps of this plan
 
 | Step | Commit | What |
 | --- | --- | --- |
 | 1 ✅ | `plan: add: the repairs of the TCP parameters` | this plan |
 | 2 ✅ | `plan: change: the decisions of the owner on the TCP parameter repairs` | section 6 |
-| 3 | — | each item on its own branch, in the order of section 5; this plan records the branches and their results |
+| 3 | — | each item on its own branch, in the order of section 5; this plan records the branches and their results (section 8) |
 
 ## 8. The record
 
 | Item | Branch | Result |
 | --- | --- | --- |
+| P1 | `topic/tcp-rack-reordering` | landed: 4e696c711b (the SACK state before the ACK, D-176, `tcp_reordering_2`), 455ce93c55 (RACK detects reordering, `tcp_reordering_3`); each new test fails before its commit; the module tests pass at each commit (672, 673); no fingerprint and no statistics file moves; each of the 318 packetdrill verdicts stays; the TCP protocol suite gives 329 PASS and 4 expected FAIL; the gates are clean |
