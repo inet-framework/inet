@@ -409,7 +409,7 @@ void Mpls::processTooBigDatagram(Packet *packet, const NetworkInterface *network
         // Destination Unreachable message whose Next-Hop MTU leaves room for the label stack
         EV_WARN << "discarding a too-big datagram with the DF bit, sending ICMP_DESTINATION_UNREACHABLE" << endl;
         PacketDropDetails details;
-        details.setReason(OTHER_PACKET_DROP);
+        details.setReason(PACKET_TOO_BIG);
         emit(packetDroppedSignal, packet, &details);
         if (icmp != nullptr)
             icmp->sendPtbMessage(packet, maxDatagramLength);
