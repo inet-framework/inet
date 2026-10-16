@@ -189,21 +189,25 @@ TcpHeader TcpConnection::addSacks(const Ptr<TcpHeader>& tcpHeader)
         return *tcpHeader;
     }
 
-    uint optArrSize = tcpHeader->getHeaderOptionArraySize();
+    // alignOptions: NOPs in front of the SACK option align its blocks to 32 bits;
+    // without it, the EOL padding at the end of the options fills the area
+    if (tcpMain->alignOptions) {
+        uint optArrSize = tcpHeader->getHeaderOptionArraySize();
 
-    uint optArrSizeAligned = optArrSize;
+        uint optArrSizeAligned = optArrSize;
 
-    while (used_options_len.get<B>() % 4 != 2) {
-        used_options_len++;
-        optArrSizeAligned++;
+        while (used_options_len.get<B>() % 4 != 2) {
+            used_options_len++;
+            optArrSizeAligned++;
+        }
+
+        while (optArrSize < optArrSizeAligned) {
+            tcpHeader->appendHeaderOption(new TcpOptionNop());
+            optArrSize++;
+        }
+
+        ASSERT(used_options_len.get<B>() % 4 == 2);
     }
-
-    while (optArrSize < optArrSizeAligned) {
-        tcpHeader->appendHeaderOption(new TcpOptionNop());
-        optArrSize++;
-    }
-
-    ASSERT(used_options_len.get<B>() % 4 == 2);
 
     TcpOptionSack *option = new TcpOptionSack();
     option->setLength(8 * n + 2);
