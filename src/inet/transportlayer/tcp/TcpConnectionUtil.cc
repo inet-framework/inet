@@ -1280,6 +1280,7 @@ void TcpConnection::selectInitialSeqNum()
 
     state->snd_una = state->snd_nxt = state->snd_max = state->iss;
     state->pushed_seq = state->iss + 1; // Linux tcp_connect_init(): no PSH mark yet
+    state->snd_sml = state->iss; // Linux tcp_connect_init(): no small segment yet (minshallNagle)
 
     sendQueue->init(state->iss + 1); // + 1 is for SYN
     rexmitQueue->init(state->iss + 1); // + 1 is for SYN

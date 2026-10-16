@@ -1,0 +1,47 @@
+%description:
+Tests minshallNagle=true when the sequence numbers wrap: the client has an
+ISS of 4294965795, so its data crosses sequence number 0. The client writes
+2500 bytes. After the ACK of t=1.203, the tail of 500 bytes goes at once after
+the second full segment, as in tcp_nagle_minshall_1: no small segment was
+sent, so none holds (Linux tcp_connect_init() sets snd_sml to the ISS).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 2500"
+*.*_tcp.mss = 1000
+*.cli_tcp.minshallNagle = true
+*.cli_tcp.initialSendSequenceNumber = 4294965795
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.203 B002] A.1000 < B.2000: A ack 4294966796 win 16384 
+[1.205 A004] A.1000 > B.2000: A 4294966796:500(1000) ack 501 win 16384 
+[1.205 A005] A.1000 > B.2000: A 500:1000(500) ack 501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
