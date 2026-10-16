@@ -1,0 +1,95 @@
+%description:
+Tests HyStart++ (RFC 9406, slowStartExit = "hystartpp") over a bottleneck. The
+client (TcpNewReno with SACK) sends 1000000 bytes over a 10 Mbps link with a
+delay of 10 ms and a queue of 100 packets. In slow start, the queue grows, and
+when the minimum RTT of a round (at least 8 samples) is 4 ms (MIN_RTT_THRESH)
+above that of the round before (0.0237 to 0.0410 s), the client leaves slow
+start for the conservative slow start (CSS), which grows cwnd by a quarter of
+the bytes acknowledged (CSS_GROWTH_DIVISOR): 724 bytes per ACK of two segments
+instead of 2896. After 5 rounds of CSS (CSS_ROUNDS), congestion avoidance
+starts with ssthresh = cwnd. No packet is lost: the queue never overflows.
+
+%file: test.ned
+import ned.DatarateChannel;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network HystartppNet
+{
+    types:
+        channel C extends DatarateChannel
+        {
+            datarate = 10Mbps;
+            delay = 10ms;
+        }
+    submodules:
+        client: StandardHost;
+        server: StandardHost;
+        configurator: Ipv4NetworkConfigurator;
+    connections:
+        client.pppg++ <--> C <--> server.pppg++;
+}
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = HystartppNet
+total-stack = 7MiB
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.server*.tcpType = "Tcp"
+*.client*.tcpType = "Tcp"
+**.tcp.tcpAlgorithmClass = "TcpNewReno"
+**.tcp.sackSupport = true
+**.client.tcp.conn-*.algorithm.slowStartExit = "hystartpp"
+
+**.client.numApps = 1
+**.client.app[0].typename = "TcpSessionApp"
+**.client.app[0].active = true
+**.client.app[0].localPort = -1
+**.client.app[0].connectAddress = "server"
+**.client.app[0].connectPort = 1000
+**.client.app[0].tOpen = 0.2s
+**.client.app[0].tSend = 0.4s
+**.client.app[0].sendBytes = 1000000B
+**.client.app[0].sendScript = ""
+**.client.app[0].tClose = 25s
+
+**.server.numApps = 1
+**.server.app[0].typename = "TcpSinkApp"
+**.server.app[0].localPort = 1000
+
+**.ppp[*].queue.typename = "DropTailQueue"
+**.ppp[*].queue.packetCapacity = 100
+
+*.configurator.config = xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
+
+
+%contains: stdout
+HyStart++: slow start, cwnd=117324
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+HyStart++: the minimum RTT of the round grew from 0.023664 to 0.0409904, conservative slow start (CSS)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+HyStart++: CSS, cwnd=118048
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+HyStart++: 5 rounds of CSS, congestion avoidance, ssthresh=130356
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+the exit was spurious
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Performing retransmission
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

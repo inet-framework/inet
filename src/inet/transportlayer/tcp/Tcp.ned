@@ -255,11 +255,16 @@ import inet.transportlayer.contract.ITcp;
 //  - RFC 9438 - CUBIC for Fast and Long-Distance Networks (obsoletes RFC 8312)
 //    `TcpCubic`, the algorithm of Linux. It grows by the number of segments that an
 //    ACK acknowledges in slow start (RFC 3465, experimental). The hybrid slow start
-//    of Linux (`slowStartExit = "hystart"` of ~TcpCubic) is off by default: RFC 9438 section 4.10 asks for
-//    HyStart++ (RFC 9406), which is not implemented, and calls the hybrid slow
-//    start experimental.
+//    of Linux (`slowStartExit = "hystart"` of ~TcpCubic) is off by default: RFC
+//    9438 section 4.10 calls it experimental and asks for HyStart++.
 //    Deviation: the TCP-friendliness estimator keeps the fixed scale of Linux,
 //    from beta = 717/1024, so a change of `beta` of ~TcpCubic does not rescale it.
+//
+//  - RFC 9406 - HyStart++: Modified Slow Start for TCP
+//    By parameter (`slowStartExit = "hystartpp"` of ~TcpReno, ~TcpNewReno, ~DcTcp
+//    and ~TcpCubic), in the first slow start only, with the recommended constants
+//    of section 4.3 and L = 8, because INET does not pace. ~TcpCubic sets W_max
+//    to cwnd and K to 0 after an exit without a loss (RFC 9438 section 4.10).
 //
 //  - RFC 8257 - Data Center TCP (DCTCP): TCP Congestion Control for Data Centers
 //    ECN-driven congestion control, in the `DcTcp` algorithm class.

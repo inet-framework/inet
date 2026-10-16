@@ -83,6 +83,9 @@ class INET_API TcpCubic : public TcpClassicAlgorithmBase
     /** Feeds an RTT sample to the min-RTT tracker and to HyStart. */
     virtual void processRttSample(const simtime_t& rtt);
 
+    /** RFC 9438 section 4.10: W_max is cwnd and K is 0 after a HyStart++ exit without a loss */
+    virtual void hystartppEnded() override;
+
     /** Looks for the slow-start exit point (Linux hystart_update). */
     virtual void hystartUpdate(const simtime_t& delay);
 

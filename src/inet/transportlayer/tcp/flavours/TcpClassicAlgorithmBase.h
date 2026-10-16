@@ -25,7 +25,10 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
 {
   public:
     /** The values of the slowStartExit parameter */
-    enum SlowStartExit { SLOW_START_EXIT_NONE, SLOW_START_EXIT_HYSTART };
+    enum SlowStartExit { SLOW_START_EXIT_NONE, SLOW_START_EXIT_HYSTART, SLOW_START_EXIT_HYSTARTPP };
+
+    /** The phases of HyStart++ (RFC 9406) */
+    enum HystartppPhase { HYSTARTPP_SLOW_START, HYSTARTPP_CSS, HYSTARTPP_ENDED };
 
   protected:
     TcpClassicAlgorithmBaseStateVariables *& state; // alias to TcpAlgorithm's 'state'
@@ -36,6 +39,27 @@ class INET_API TcpClassicAlgorithmBase : public TcpAlgorithmBase
   protected:
     virtual ITcpCongestionControl *createCongestionControl() { return nullptr; } // a flavour with its own window growth (TcpCubic) has none
     virtual ITcpRecovery *createRecovery() = 0;
+
+    /**
+     * The RTT sample of an ACK of new data: the time since the first send of the first
+     * newly acknowledged segment, as Linux tcp_clean_rtx_queue() measures it; -1 when
+     * that segment was retransmitted (Karn) or is unknown
+     */
+    virtual simtime_t getAckRttSample(uint32_t firstSeqAcked) const;
+
+    /** True while HyStart++ (slowStartExit = "hystartpp") runs the first slow start */
+    virtual bool isHystartppActive();
+
+    /**
+     * HyStart++ (RFC 9406 section 4.2) for an ACK of new data in the first slow start:
+     * the rounds, the RTT samples, the exit to CSS and back, and the growth of cwnd.
+     * Returns false when HyStart++ has just ended at the end of CSS: the ACK then gets
+     * the congestion avoidance.
+     */
+    virtual bool hystartppAck(uint32_t firstSeqAcked, uint32_t numBytesAcked);
+
+    /** The first slow start ended through HyStart++, without a congestion signal */
+    virtual void hystartppEnded() {}
 
     /**
      * Whether the ACK of new data ends a fast recovery, so the recovery strategy

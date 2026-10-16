@@ -1,0 +1,62 @@
+%description:
+Tests that a congestion signal ends HyStart++ (RFC 9406 section 4.3: "An
+implementation SHOULD use HyStart++ only for the initial slow start"). The
+client (Tcp, TcpNewReno with SACK, slowStartExit = "hystartpp") sends 2000000
+bytes at t=1, and the tester deletes the data segment A012 in the third round
+of slow start, before HyStart++ finds an exit. The fast recovery changes
+ssthresh, so HyStart++ ends; later growth is that of RFC 5681.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script="a12 delete"
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 2000000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.cli_tcp.conn-*.algorithm.slowStartExit = "hystartpp"
+*.srv_app.statusRequestScript="1.5"
+sim-time-limit = 3s
+
+%contains: stdout
+PRR fast recovery: entering, priorCwnd=17412 ssthresh=9412
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+HyStart++: the first slow start is over
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+conservative slow start (CSS)
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

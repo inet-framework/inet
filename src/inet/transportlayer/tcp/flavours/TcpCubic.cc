@@ -118,6 +118,8 @@ void TcpCubic::receivedAckForUnackedData(uint32_t firstSeqAcked)
         recovery->receivedAckForUnackedData(numBytesAcked);
     else if (processEce(numBytesAcked))
         ; // an ECN-Echo reaction replaces this ACK's window growth (RFC 3168)
+    else if (state->snd_cwnd < state->ssthresh && isHystartppActive() && hystartppAck(firstSeqAcked, numBytesAcked))
+        ; // HyStart++ grew the window (RFC 9406)
     else if (state->snd_cwnd < state->ssthresh)
         slowStart(numSegmentsAcked);
     else if (numSegmentsAcked > 0)
@@ -260,16 +262,28 @@ void TcpCubic::processAckRttSample(uint32_t firstSeqAcked)
     // per-ACK nor rise fast enough to cross a threshold set 12.5% above the
     // connection minimum. Deliberately kept separate from the srtt/RTO estimator,
     // which stays on its own once-per-RTT schedule.
-    const TcpSegmentTransmitInfoList::Item *sent = state->sentInfo.get(firstSeqAcked);
-    if (sent == nullptr)
-        return;
     // Karn's algorithm: a retransmitted segment cannot be timed, because there is
     // no telling which copy this ACK answers. Linux discards the sample for the
     // same reason (tcp_clean_rtx_queue only times !sacked_retrans segments when
     // the timestamp option is not available to disambiguate).
-    if (sent->getTransmitCount() != 1)
-        return;
-    processRttSample(simTime() - sent->getFirstSentTime());
+    simtime_t rtt = getAckRttSample(firstSeqAcked);
+    if (rtt >= SIMTIME_ZERO)
+        processRttSample(rtt);
+}
+
+void TcpCubic::hystartppEnded()
+{
+    // RFC 9438 section 4.10: "When CUBIC uses HyStart++ [RFC9406], it may exit the first
+    // slow start without incurring any packet loss and thus W_max is undefined. In this
+    // special case, CUBIC sets cwnd_prior = cwnd and switches to congestion avoidance.
+    // It then increases its congestion window size using Figure 1, where t is the
+    // elapsed time since the beginning of the current congestion avoidance stage, K is
+    // set to 0, and W_max is set to the congestion window size at the beginning of the
+    // current congestion avoidance stage." W_max is known, so cntClamp does not act.
+    state->cubic_last_max_cwnd = state->snd_cwnd / state->snd_effmss;
+    state->cubic_epoch_start = -1;
+    state->cubic_last_time = -1;
+    EV_INFO << "CUBIC: W_max=" << state->cubic_last_max_cwnd << " segments after HyStart++, K=0\n";
 }
 
 void TcpCubic::processRttSample(const simtime_t& rtt)
