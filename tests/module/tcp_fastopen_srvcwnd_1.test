@@ -1,0 +1,64 @@
+%description:
+Tests that a Fast Open server reduces its initial window when its SYN-ACK
+times out (RFC 7413 section 4.2.2 with RFC 5681 section 3.1). The scenario is
+that of tcp_fastopen_1 with initialWindow = "rfc6928" at the server. The tester
+drops the SYN-ACK of the second connection and its retransmission, so the
+SYN-ACK goes three times. The server set the initial window of 10 segments
+at the SYN, and the second timeout reduces it to one segment, as for a
+server without Fast Open (RFC 6928 section 2: more than one retransmission).
+At t=20, the server sends one segment of its 8000 bytes, not ten.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.fastOpen=true
+*.cli_app.tOpen2=0.5s
+*.cli_app.active2=true
+*.cli_app.localPort2=1001
+*.cli_app.tSend2=0.5s
+*.cli_app.sendBytes2=200B
+*.cli_app.fastOpen2=true
+*.srv_app.tOpen2=0.5s
+*.srv_app.localPort2=2000
+
+*.cli_tcp.fastopenClientEnabled = true
+*.srv_tcp.fastopenServerEnabled = true
+*.srv_tcp.initialWindow = "rfc6928"
+*.srv_app.tSend2=20s
+*.srv_app.sendBytes2=8000B
+*.tcptester.script="b2 delete; b3 delete; a4 delete; a5 delete"
+sim-time-limit = 21s
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[20.001 B005] A.1001 < B.2000: A 125501:126525(1024) ack 125201 win 16384 
+[20.203 A007] A.1001 > B.2000: A ack 126525 win 16384 
+[20.205 B006] A.1001 < B.2000: A 126525:127549(1024) ack 125201 win 16384 
+[20.205 B007] A.1001 < B.2000: A 127549:128573(1024) ack 125201 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

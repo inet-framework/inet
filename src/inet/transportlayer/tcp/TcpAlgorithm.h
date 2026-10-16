@@ -211,6 +211,12 @@ class INET_API TcpAlgorithm : public SimpleModule
     virtual void ackSent() = 0;
 
     /**
+     * Called when a Fast Open server retransmits its SYN-ACK: it set its initial
+     * window at the SYN, before it knew that the SYN-ACK arrived.
+     */
+    virtual void synAckRetransmitted() {}
+
+    /**
      * Called after we sent data. This hook can be used to schedule the
      * retransmission timer, to start round-trip time measurement, etc.
      * The argument is the seqno of the first byte sent.

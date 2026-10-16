@@ -128,6 +128,8 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
      */
     virtual void initializeAlgorithm() override;
 
+    virtual void synAckRetransmitted() override;
+
     virtual void established(bool active) override;
 
     /** The initial window (initialWindow, initialCwnd), in bytes; the restart window is at most this too (RFC 5681 section 4.1) */
@@ -135,6 +137,9 @@ class INET_API TcpAlgorithmBase : public TcpAlgorithm
 
     /** RMSS of RFC 9293: the MSS that this side announced, or the default when it announced none. */
     virtual uint32_t getReceiveMss() const;
+
+    /** Whether the increased initial window stays after the SYN and SYN-ACK retransmissions so far. */
+    virtual bool isInitialWindowKept() const;
 
     virtual void connectionClosed() override;
 

@@ -2088,6 +2088,8 @@ void TcpConnection::process_TIMEOUT_SYN_REXMIT(TcpEventCode& event)
 
         case TCP_S_SYN_RCVD:
             sendSynAck();
+            if (state->fastopenAccelerated)
+                tcpAlgorithm->synAckRetransmitted();
             break;
 
         default:

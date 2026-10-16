@@ -105,6 +105,28 @@ void TcpAlgorithmBase::initializeAlgorithm()
     state->keepalive_max_probes = conn->getTcpMain()->par("keepAliveProbeCount");
 }
 
+bool TcpAlgorithmBase::isInitialWindowKept() const
+{
+    // the increased initial window after the SYN and SYN-ACK retransmissions so far (see
+    // established()): "rfc3390" falls to one segment at the first, "rfc6928" and
+    // initialCwnd at the second
+    uint32_t synRexmitsKeepingIw = (state->init_cwnd_mode == 2 || state->initialCwndSegments != 0) ? 1 : 0;
+    return state->syn_rexmit_count <= synRexmitsKeepingIw && (state->init_cwnd_mode != 0 || state->initialCwndSegments != 0);
+}
+
+void TcpAlgorithmBase::synAckRetransmitted()
+{
+    // a Fast Open server set its initial window at the SYN (established()), before it
+    // knew that the SYN-ACK arrived; a lost SYN-ACK reduces the window as it does for a
+    // server without Fast Open, which sets it at the ACK of the SYN-ACK (RFC 7413
+    // section 4.2.2: the server "MUST follow [RFC5681]")
+    if (!isInitialWindowKept() && state->snd_cwnd > state->snd_effmss) {
+        state->snd_cwnd = state->snd_effmss;
+        conn->emit(cwndSignal, state->snd_cwnd);
+        EV_INFO << "The SYN-ACK of the Fast Open server timed out, CWND is set to " << state->snd_cwnd << "\n";
+    }
+}
+
 uint32_t TcpAlgorithmBase::getReceiveMss() const
 {
     // RMSS of RFC 9293: the MSS that this side announced, else the default (MUST-15)
@@ -191,8 +213,7 @@ void TcpAlgorithmBase::established(bool active)
     // implementations refrain from resetting the initial window to 1 segment, unless
     // there have been more than one SYN or SYN/ACK retransmissions". Linux does the
     // same for its initial window and for initcwnd (tcp_init_transfer()).
-    uint32_t synRexmitsKeepingIw = (state->init_cwnd_mode == 2 || state->initialCwndSegments != 0) ? 1 : 0;
-    if (state->syn_rexmit_count <= synRexmitsKeepingIw && (state->init_cwnd_mode != 0 || state->initialCwndSegments != 0)) {
+    if (isInitialWindowKept()) {
         state->snd_cwnd = getInitialWindow();
         EV_DETAIL << "Increased Initial Window, CWND is set to " << state->snd_cwnd << "\n";
     }
