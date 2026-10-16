@@ -1,6 +1,6 @@
 # The receive buffer of the Linux mode (T15)
 
-Status: **ready for review** — item T15 of `plan/pending/tcp-open-items.md`, added by the owner on 2026-10-16.
+Status: **done** — item T15 of `plan/pending/tcp-open-items.md`, added by the owner on 2026-10-16; landed on master on 2026-10-16, the owner approved it.
 
 - Branch `topic/tcp-linux-receive-buffer`, on master `e35907827b`.
 - The decision numbers continue those of `plan/done/tcp-receive-space.md` (D-151 onward).

@@ -104,7 +104,7 @@ From the open findings of `plan/done/tcp-receive-memory-repairs.md`, split from 
 
 ### T15 — The receive buffer and the window scale of the Linux mode
 
-`LinuxTcp` turns `windowAutoTuning` on, but sets no receive buffer, so auto-tuning and Dynamic Right-Sizing never act with its defaults; Linux gives each socket `tcp_rmem[1]`, 131072 bytes. Also, the automatic window scale represents only the window at the time of the SYN, a shift of 1 for a buffer of 131072 bytes, so the offered window stops at 131070 bytes when DRS grows the buffer; Linux represents `tcp_rmem[2]`, a shift of 10. Plan: `plan/pending/tcp-linux-receive-buffer.md`. Effect: only `LinuxTcp` and connections with `windowAutoTuning`. Size: small.
+`LinuxTcp` turns `windowAutoTuning` on, but sets no receive buffer, so auto-tuning and Dynamic Right-Sizing never act with its defaults; Linux gives each socket `tcp_rmem[1]`, 131072 bytes. Also, the automatic window scale represents only the window at the time of the SYN, a shift of 1 for a buffer of 131072 bytes, so the offered window stops at 131070 bytes when DRS grows the buffer; Linux represents `tcp_rmem[2]`, a shift of 10. Plan: `plan/done/tcp-linux-receive-buffer.md`. Effect: only `LinuxTcp` and connections with `windowAutoTuning`. Size: small.
 
 ## 3. Out of scope
 
@@ -165,4 +165,4 @@ The owner approved the plan and these answers on 2026-10-15, with one rule for a
 | T4 | `topic/tcp-fastopen-syn-data` | done, landed 2026-10-15 (plan `plan/done/tcp-fastopen-syn-data.md`): `LinuxTcp` already sends all the SYN data at once, as Linux; the real defect was Nagle, which held a retransmitted partial segment after a go-back until the next timeout. 27 fingerprints and 11 statistics files move. |
 | T12 | `topic/tcp-syn-data-drop` | done, landed 2026-10-15 (plan `plan/done/tcp-syn-data-drop.md`): the parameter `dropSynData` drops the data of a SYN without Fast Open, as Linux; `LinuxTcp` sets it, `Tcp` keeps the data (RFC 9293); the case of an invalid cookie was already right. No baseline moves. |
 | T6 | `topic/tcp-receive-space` | done, landed 2026-10-16 (plan `plan/done/tcp-receive-space.md`): the receive RTT, Dynamic Right-Sizing and the bound of the receive buffer of Linux; no baseline moves; T13 and T14 split off. |
-| T15 | `topic/tcp-linux-receive-buffer` | ready for review 2026-10-16 (plan `plan/pending/tcp-linux-receive-buffer.md`): `LinuxTcp` has the receive buffer of Linux, 131072 bytes, and with auto-tuning the automatic window scale represents `receiveBufferMax`, a shift of 10 for 32 MiB; no baseline moves, and no packetdrill verdict changes. |
+| T15 | `topic/tcp-linux-receive-buffer` | done, landed 2026-10-16 (plan `plan/done/tcp-linux-receive-buffer.md`): `LinuxTcp` has the receive buffer of Linux, 131072 bytes, and with auto-tuning the automatic window scale represents `receiveBufferMax`, a shift of 10 for 32 MiB; no baseline moves, and no packetdrill verdict changes. |
