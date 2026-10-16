@@ -29,8 +29,8 @@
 /examples/inet/udpclientserver/,     -f omnetpp.ini -c udp_Host_Unav_ipv6 -r 0,     10s,             6360-9ed1/~tNlb, PASS,
 
 # DYMO with IPv6
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             d23a-ce35/~tNlb, PASS,  wireless adhoc
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             d23a-ce35/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             280f-8527/~tNlb, PASS,  wireless adhoc
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             280f-8527/~tNlb, PASS,  wireless adhoc
 
 # EIGRP with IPv6
 /examples/eigrp/testing_scenario6/,    -f omnetpp.ini -c EIGRP-IPv6_exp1_bandwidth-change -r 0,              3min,         c645-565e/~tNlb,  PASS,  eigrp EthernetMac
