@@ -1,0 +1,69 @@
+%description:
+Tests that the reordering detection does not take one ACK of in-order data
+and of later data as reordering. The client sends six segments at once, and the
+tester drops the fourth and the fifth. The server delays its ACKs: it
+acknowledges the first two segments, holds the ACK of the third, and sends
+it at once at the sixth, with a SACK of the sixth. This ACK acknowledges
+the third segment and SACKs the sixth, but no segment arrived out of order,
+so the reordering degree stays 3 (RFC 8985 step 3 takes the newly
+acknowledged segments in ascending order, Linux compares with prior_fack).
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=false
+
+*.tcptester.script="A6 delete; A7 delete"  # the fourth and the fifth segment of the burst
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1 3000"
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+*.*_tcp.advertisedWindow = 5000
+*.*_tcp.sackSupport = true
+*.*_tcp.mss = 500
+*.*_tcp.tcpAlgorithmClass = "TcpReno"
+*.*_tcp.lossDetectionMode = "rack"
+*.*_tcp.adaptiveReorderingEnabled = true
+*.*_tcp.initialCwnd = 10
+*.srv_tcp.delayedAcksEnabled = true
+
+# the TCP defaults that this test was written for
+include ../../lib/tcp-legacy.ini
+
+%# four later segments are SACKed, then the delayed one arrives...
+%# one ACK acknowledges the third segment and SACKs the sixth...
+%contains: stdout
+[1.003 B003] A.1000 < B.2000: A ack 1501 win 4500   Option(s): NOP NOP SACK[2501,3001)
+
+%# ...and the reordering degree does not change
+%not-contains: stdout
+reordering degree updated
+%contains: stdout
+[1.008] tcpdump finished, A:10 B:5 segments

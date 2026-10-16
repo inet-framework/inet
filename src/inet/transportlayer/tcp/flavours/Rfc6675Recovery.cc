@@ -497,21 +497,21 @@ bool Rfc6675Recovery::processSACKOption(const Ptr<const TcpHeader>& tcpHeader, c
             }
 
             if (seqGreater(tmp.getEnd(), tcpHeader->getAckNo()) && seqGreater(tmp.getEnd(), state->snd_una)) {
-                // FACK before this block is applied: needed to recognize that the
-                // block NEWLY sacks data below the highest already-SACKed sequence.
-                uint32_t fackBefore = conn->getRexmitQueue()->getHighestSackedSeqNum();
                 uint32_t newlySackedLow = conn->getRexmitQueueForUpdate()->setSackedBit(tmp.getStart(), tmp.getEnd());
                 // Reordering detection (Linux tcp_sacktag_one/tcp_check_sack_reordering):
-                // a never-retransmitted range newly SACKed BELOW the prior FACK proves
-                // the network delivered it out of order -- data above it arrived first.
-                // A re-reported or merely grown block returns newlySackedLow at/above
-                // fackBefore and is ignored, as are SACKs of retransmissions.
+                // a never-retransmitted range newly SACKed BELOW the FACK of an earlier
+                // ACK proves the network delivered it out of order -- data above it
+                // arrived first. The other blocks of this ACK do not count, because the
+                // blocks come in the order of arrival, and RFC 8985 step 3 takes them in
+                // ascending order. A re-reported or merely grown block returns
+                // newlySackedLow at/above the prior FACK and is ignored, as are SACKs of
+                // retransmissions.
                 // F-RTO (SACK side): newly SACKed data that was never retransmitted
                 // likewise proves the original flight arrived.
                 if (state->frtoActive && newlySackedLow != 0)
                     state->frtoOrigAcked = true;
                 if (state->adaptiveReorderingEnabled && newlySackedLow != 0
-                        && fackBefore != 0 && seqLess(newlySackedLow, fackBefore))
+                        && seqLess(newlySackedLow, state->priorFack))
                     checkSackReordering(newlySackedLow);
             }
             else
@@ -1003,9 +1003,12 @@ void Rfc6675Recovery::segmentsAcked(uint32_t fromSeq, uint32_t toSeq)
     processFrtoEpisode();
 
     // Adaptive reordering: if this cumulatively-acked segment was never retransmitted
-    // yet sits below already-SACKed data, it was merely reordered (not lost) -- grow the
-    // learned reordering degree so it stops causing spurious fast retransmits.
-    if (state->adaptiveReorderingEnabled && state->sack_enabled) {
+    // yet sits below data that an earlier ACK SACKed, it was merely reordered (not lost)
+    // -- grow the learned reordering degree so it stops causing spurious fast
+    // retransmits. The SACK blocks of this ACK do not count: the receiver can SACK
+    // later data and acknowledge this segment in one ACK (RFC 8985 step 3 takes the
+    // newly acknowledged segments in ascending order, Linux compares with prior_fack).
+    if (state->adaptiveReorderingEnabled && state->sack_enabled && seqLess(fromSeq, state->priorFack)) {
         auto rq = conn->getRexmitQueue();
         if (rq != nullptr && rq->getQueueLength() > 0
             && seqLE(rq->getBufferStartSeq(), fromSeq) && seqLess(fromSeq, rq->getBufferEndSeq())

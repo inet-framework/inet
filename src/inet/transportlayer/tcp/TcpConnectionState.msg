@@ -367,6 +367,7 @@ struct TcpStateVariables
     uint32_t rackEndSeq = 0;      // end sequence number of that segment
     simtime_t rackRtt = 0;        // RTT of the ACK that last advanced the RACK point
     bool rackReordSeen = false;   // whether reordering has been observed (widens the reordering window)
+    uint32_t priorFack = 0;       // the highest SACKed sequence number before the options of the current segment (Linux prior_fack)
     bool adaptiveReorderingEnabled = false; // set from the adaptiveReorderingEnabled parameter
     bool dsack_enabled = false;    // report duplicate segments by D-SACK blocks (RFC 2883), set from the dsackEnabled parameter
     uint32_t reordering = 3;       // learned reordering degree in segments; initialized to dupthresh

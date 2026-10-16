@@ -165,6 +165,9 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
 
     bool acceptable = true;
 
+    // the reordering detection compares with the SACK state before this segment
+    state->priorFack = rexmitQueue->getHighestSackedSeqNum();
+
     if (tcpHeader->getHeaderLength() > TCP_MIN_HEADER_LENGTH) { // Header options present? TCP_HEADER_OCTETS = 20
         // PAWS, RFC 7323 section 5.3: "R1) If there is a Timestamps option in the arriving
         // segment, SEG.TSval < TS.Recent, TS.Recent is valid (see later discussion), and if
