@@ -1,0 +1,57 @@
+%description:
+Tests that maxPersistTimeout also caps the first interval of the zero-window
+probes. The scenario is that of tcp_persist_1 with maxPersistTimeout = 500ms:
+the RTO is 1 s, but the first probe comes 0.5 s after the window closed, and
+each later probe 0.5 s after the one before.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 4s
+*.cli_app.sendScript="1.0 5000"
+*.*_tcp.mss = 1000
+*.srv_tcp.advertisedWindow = 2000
+*.srv_app.autoRead=false
+*.srv_app.readScript="20 10000"
+*.cli_tcp.maxPersistTimeout = 500ms
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.407 B003] A.1000 < B.2000: A ack 2001 win 0 
+[1.909 A005] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[1.911 B004] A.1000 < B.2000: A ack 2001 win 0 
+[2.409 A006] A.1000 > B.2000: A 2001:2002(1) ack 501 win 16384 
+[2.411 B005] A.1000 < B.2000: A ack 2001 win 0 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Performing retransmission
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+Duplicate ACK
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

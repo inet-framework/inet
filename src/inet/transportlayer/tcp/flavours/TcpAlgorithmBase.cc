@@ -742,7 +742,9 @@ bool TcpAlgorithmBase::isDataWaiting() const
 
 void TcpAlgorithmBase::startPersistTimer()
 {
-    state->persist_timeout = state->rexmit_timeout; // the first probe after one RTO (SHLD-29)
+    // the first probe after one RTO (SHLD-29), at most maxPersistTimeout, as the later
+    // ones (Linux caps the first interval too)
+    state->persist_timeout = std::min(state->rexmit_timeout, maxPersistTimeout);
     conn->scheduleAfter(state->persist_timeout, persistTimer);
 }
 
