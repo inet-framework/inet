@@ -1,0 +1,34 @@
+%description:
+Tests that syncookiesAlways quantizes the MSS of the peer, not the MSS that
+the local MSS already limits (Linux quantizes mss_clamp). The client announces
+1460, which stays 1460 in the msstab, and the server has an MSS of 1400, so it
+sends segments of 1400 bytes, as Linux does.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+
+*.tcptester.cmdenv-log-level=DEBUG
+**.cmdenv-log-level=OFF
+
+*.srv_tcp.syncookiesAlways = true
+*.srv_app.sendScript="1.0 3000"
+*.srv_tcp.mss = 1400
+*.cli_tcp.mss = 1460
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.001 B002] A.1000 < B.2000: A 501:1901(1400) ack 1 win 16384
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

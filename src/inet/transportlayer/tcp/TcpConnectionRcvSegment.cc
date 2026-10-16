@@ -1108,17 +1108,19 @@ TcpEventCode TcpConnection::processSynInListen(Packet *tcpSegment, const Ptr<con
 
     // Linux tcp_syncookies=2 (syncookiesAlways): the connection is built again from
     // the cookie at the handshake ACK, and the 2-bit MSS field of the cookie
-    // quantizes the MSS of the peer down to the IPv4 msstab of
-    // net/ipv4/syncookies.c: the largest entry not above it. Window scale, SACK and
-    // timestamps come through the timestamp encoding and stay exact.
-    if (tcpMain->par("syncookiesAlways").boolValue() && state->snd_mss > 536) {
+    // quantizes the MSS of the peer (mss_clamp: the MSS option, or the default, at
+    // most TCP_MAXSEG) down to the IPv4 msstab of net/ipv4/syncookies.c: the largest
+    // entry not above it. The local MSS then limits it as before. Window scale, SACK
+    // and timestamps come through the timestamp encoding and stay exact.
+    uint32_t peerMss = getMssClamp();
+    if (tcpMain->par("syncookiesAlways").boolValue() && peerMss > 536) {
         static const uint32_t msstab[] = { 536, 1300, 1440, 1460 };
         uint32_t clamped = msstab[0];
         for (uint32_t entry : msstab)
-            if (entry <= state->snd_mss)
+            if (entry <= peerMss)
                 clamped = entry;
         if (clamped < state->snd_mss) {
-            EV_DETAIL << "syncookiesAlways: peer MSS " << state->snd_mss << " quantized to " << clamped << "\n";
+            EV_DETAIL << "syncookiesAlways: peer MSS " << peerMss << " quantized to " << clamped << "\n";
             state->snd_mss = clamped;
             state->snd_effmss = calculateEffectiveMss();
         }
