@@ -402,6 +402,18 @@ Notable backward incompatible changes are the following:
 
    A TCP algorithm implemented outside INET needs a simple module type that extends TcpAlgorithm, and Define_Module() in place of Register_Class(); without the type, the connection stops with an error. Its initialize() is now initializeAlgorithm(), and the cancelEvent() helper of TcpAlgorithmBase is now cancelTimer(). See the migration guide.
 
+20. Half-duplex Ethernet drops a frame after 16 collisions, not 17
+
+   The two half-duplex Ethernet medium access control (MAC) modules,
+   EthernetCsmaMac and EthernetCsmaMacPhy, made a 17th transmission attempt
+   before they dropped a frame whose attempts all collided. IEEE 802.3 allows
+   16 (attemptLimit, clause 4.2.3.2.5 and Table 4-2), and both modules now
+   stop there. The backoff before each retransmission is unchanged.
+
+   This changes the results of half-duplex simulations in which a frame
+   collides 16 times in a row: the frame is dropped without the 17th attempt
+   and the backoff before it.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -490,6 +502,24 @@ Notable bug fixes are the following:
 
    The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.
 
+
+9. CSMA/CD medium access delay statistic
+
+   EthernetCsmaMac, the Carrier Sense Multiple Access with Collision Detection
+   (CSMA/CD) medium access control (MAC) module, records packetPendingDelay:
+   the time from the start of a frame's first transmission attempt to the
+   start of the attempt that succeeds. EthernetPlca records a statistic of the
+   same name, so the medium access delay of a 10BASE-T1S link can be compared
+   with and without Physical Layer Collision Avoidance (PLCA). It appears in
+   the results of every simulation that uses EthernetCsmaMac, including those
+   with EthernetPlcaInterface.
+
+10. CSMA/CD retry-limit drop statistic
+
+   EthernetCsmaMac records packetDropRetryLimitReached, the frames it drops
+   after 16 colliding transmission attempts, as the IEEE 802.11 and
+   IEEE 802.15.4 MACs and the Carrier Sense Multiple Access with Collision
+   Avoidance (CSMA/CA) MAC, CsmaCaMac, do.
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------

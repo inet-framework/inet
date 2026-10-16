@@ -35,6 +35,7 @@ class INET_API EthernetCsmaMac : public MacProtocolBase, public virtual IEtherne
     static simsignal_t carrierSenseChangedSignal;
     static simsignal_t collisionChangedSignal;
     static simsignal_t stateChangedSignal;
+    static simsignal_t packetPendingDelaySignal;
 
     enum State {
         IDLE,        // neither transmitting nor receiving
@@ -69,9 +70,12 @@ class INET_API EthernetCsmaMac : public MacProtocolBase, public virtual IEtherne
 
     // state
     Fsm fsm;
-    int numRetries = 0; // for exponential back-off algorithm
+    int numRetries = 0; // number of transmission attempts of the current frame that ended in a collision;
+                        // drives the exponential back-off algorithm and the give-up at MAX_ATTEMPTS
     bool carrierSense = false;
     bool collision = false;
+    simtime_t firstTxAttemptTime = -1; // start of the first transmission attempt of the current frame
+    simtime_t currentTxAttemptTime = -1; // start of the most recent transmission attempt of the current frame
 
     // timers
     cMessage *txTimer = nullptr;

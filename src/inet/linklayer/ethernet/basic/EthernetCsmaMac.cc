@@ -21,6 +21,7 @@ Define_Module(EthernetCsmaMac);
 simsignal_t EthernetCsmaMac::carrierSenseChangedSignal = cComponent::registerSignal("carrierSenseChanged");
 simsignal_t EthernetCsmaMac::collisionChangedSignal = cComponent::registerSignal("collisionChanged");
 simsignal_t EthernetCsmaMac::stateChangedSignal = cComponent::registerSignal("stateChanged");
+simsignal_t EthernetCsmaMac::packetPendingDelaySignal = cComponent::registerSignal("packetPendingDelay");
 
 Register_Enum(EthernetCsmaMac::State,
     (EthernetCsmaMac::IDLE,
@@ -319,6 +320,7 @@ void EthernetCsmaMac::setCurrentTransmission(Packet *packet)
 {
     ASSERT(currentTxFrame == nullptr);
     currentTxFrame = packet;
+    firstTxAttemptTime = simTime(); // the first transmission attempt starts immediately
 }
 
 void EthernetCsmaMac::startTransmission()
@@ -336,11 +338,16 @@ void EthernetCsmaMac::startTransmission()
     }
     addPaddingAndSetFcs(currentTxFrame, MIN_ETHERNET_FRAME_BYTES);
     scheduleTxTimer(currentTxFrame);
+    currentTxAttemptTime = simTime();
 }
 
 void EthernetCsmaMac::endTransmission()
 {
     EV_DEBUG << "Ending frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
+    // medium access delay: from the start of the first attempt to the start of this successful one
+    emit(packetPendingDelaySignal, currentTxAttemptTime - firstTxAttemptTime);
+    firstTxAttemptTime = -1;
+    currentTxAttemptTime = -1;
     numFramesSent++;
     delete currentTxFrame;
     currentTxFrame = nullptr;
@@ -351,12 +358,12 @@ void EthernetCsmaMac::abortTransmission()
 {
     EV_DEBUG << "Aborting frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
     cancelEvent(txTimer);
+    numRetries++;
 }
 
 void EthernetCsmaMac::retryTransmission()
 {
     EV_DEBUG << "Retrying frame transmission" << EV_FIELD(currentTxFrame) << EV_ENDL;
-    numRetries++;
 }
 
 void EthernetCsmaMac::giveUpTransmission()
@@ -366,6 +373,8 @@ void EthernetCsmaMac::giveUpTransmission()
     details.setReason(RETRY_LIMIT_REACHED);
     details.setLimit(MAX_ATTEMPTS);
     dropCurrentTxFrame(details);
+    firstTxAttemptTime = -1;
+    currentTxAttemptTime = -1;
     numRetries = 0;
 }
 
