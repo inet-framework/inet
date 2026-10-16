@@ -103,6 +103,8 @@ class INET_API TcpAlgorithm : public SimpleModule
         retainSackAfterRto = tcpMain->par("retainSackAfterRto");
         maxRexmitCount = tcpMain->par("maxRexmitCount");
         maxPersistTimeout = tcpMain->par("maxPersistTimeout");
+        if (maxPersistTimeout <= SIMTIME_ZERO)
+            throw cRuntimeError("maxPersistTimeout must be more than 0, but it is %s", maxPersistTimeout.str().c_str());
         delayedAckTimeout = tcpMain->par("delayedAckTimeout");
         sendDataWithFirstAck = tcpMain->par("sendDataWithFirstAck");
     }

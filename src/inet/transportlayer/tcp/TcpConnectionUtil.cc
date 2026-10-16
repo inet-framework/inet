@@ -1121,7 +1121,10 @@ void TcpConnection::configureStateVariables()
     state->rcvBufferLowRttUs = (uint32_t)tcpMain->par("receiveBufferLowRtt").doubleValueInUnit("us");
     state->rcvBufferMax = (uint32_t)std::min<double>(tcpMain->par("receiveBufferMax").doubleValueInUnit("B"), UINT32_MAX);
     state->delayed_acks_enabled = tcpMain->par("delayedAcksEnabled"); // delayed ACK algorithm (RFC 1122) enabled/disabled
-    state->delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
+    int delayedAckFrameCount = tcpMain->par("delayedAckFrameCount");
+    if (delayedAckFrameCount < 1)
+        throw cRuntimeError("delayedAckFrameCount must be 1 or more, but it is %d", delayedAckFrameCount);
+    state->delayedAckFrameCount = delayedAckFrameCount;
     state->adaptiveDelayedAcks = tcpMain->par("adaptiveDelayedAcks");
     state->synRetries = socketSynRetries >= 0 ? socketSynRetries : (int)tcpMain->par("synRetries");
     state->synLinearTimeouts = tcpMain->par("synLinearTimeouts");
@@ -1166,8 +1169,8 @@ void TcpConnection::configureStateVariables()
     // Maximum Segment Size (RFC 9293 section 3.7.1); mss = -1 waits for the address of the peer, and
     // until then the connection has the 536 bytes of RFC 9293 (MUST-15)
     int mss = tcpMain->par("mss");
-    if (mss < -1)
-        throw cRuntimeError("mss must be -1 or more, but it is %d", mss);
+    if (mss != -1 && mss < 88) // Linux TCP_MIN_MSS: a smaller MSS leaves no room for the options
+        throw cRuntimeError("mss must be -1 or at least 88, but it is %d", mss);
     mssFromAddressFamily = mss == -1;
     state->snd_mss = mssFromAddressFamily ? 536 : mss;
     if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss)
@@ -1195,7 +1198,10 @@ void TcpConnection::configureStateVariables()
         state->ecnMode = TCP_ECN_MODE_OFF;
     state->ecnWillingness = state->ecnMode != TCP_ECN_MODE_OFF;
     state->accEcnOptionEnabled = tcpMain->par("accEcnOptionEnabled");
-    state->dupthresh = tcpMain->par("dupthresh");
+    int dupthresh = tcpMain->par("dupthresh");
+    if (dupthresh < 1)
+        throw cRuntimeError("dupthresh must be 1 or more, but it is %d", dupthresh);
+    state->dupthresh = dupthresh;
     state->sack_support = tcpMain->par("sackSupport"); // if set, this means that current host supports SACK (RFC 2018, 2883, 3517)
     // SACK-based (RFC 6675) loss recovery is provided by flavours whose createRecovery()
     // can return an Rfc6675Recovery (TcpReno, TcpNewReno). Other flavours (TcpTahoe,
@@ -1223,7 +1229,10 @@ void TcpConnection::configureStateVariables()
     state->tlpEnabled = tcpMain->par("tlpEnabled");
     state->adaptiveReorderingEnabled = tcpMain->par("adaptiveReorderingEnabled");
     state->dsack_enabled = tcpMain->par("dsackEnabled");
-    state->maxReordering = tcpMain->par("maxReordering");
+    int maxReordering = tcpMain->par("maxReordering");
+    if (maxReordering < (int)state->dupthresh)
+        throw cRuntimeError("maxReordering must be at least dupthresh (%d), but it is %d", (int)state->dupthresh, maxReordering);
+    state->maxReordering = maxReordering;
     state->reordering = state->dupthresh; // dynamic DupThresh starts at the static value
     state->lossDetectionMode = !strcmp(tcpMain->par("lossDetectionMode"), "rack") ? 1 : 0;
     if (state->lossDetectionMode == 1 && !state->sack_support) {
@@ -2927,7 +2936,10 @@ void TcpConnection::initMtuProbing()
         return;
     uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
     state->mtupSearchHigh = getMssClamp() + headers;
-    state->mtupSearchLow = mssToMtu((int)tcpMain->par("baseMss"));
+    int baseMssPar = tcpMain->par("baseMss");
+    if (baseMssPar < 88) // Linux TCP_MIN_MSS, as mss
+        throw cRuntimeError("baseMss must be at least 88, but it is %d", baseMssPar);
+    state->mtupSearchLow = mssToMtu(baseMssPar);
     state->mtupProbeSize = 0;
     int pathMtu = pathMtuSockopt > 0 ? pathMtuSockopt : (int)tcpMain->par("pathMtu");
     state->pathMtu = pathMtu > 0 ? pathMtu : state->snd_mss + headers;

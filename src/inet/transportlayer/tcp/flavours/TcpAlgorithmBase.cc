@@ -78,6 +78,10 @@ void TcpAlgorithmBase::initializeAlgorithm()
 {
     TcpAlgorithm::initializeAlgorithm();
 
+    intval_t initialSsthresh = conn->getTcpMain()->par("initialSsthresh");
+    if (initialSsthresh < 1 || initialSsthresh > 0xFFFFFFFFLL)
+        throw cRuntimeError("initialSsthresh must be 1 to 4294967295, but it is %" PRId64, (int64_t)initialSsthresh);
+
     rexmitTimer = new cMessage("REXMIT");
     persistTimer = new cMessage("PERSIST");
     delayedAckTimer = new cMessage("DELAYEDACK");
