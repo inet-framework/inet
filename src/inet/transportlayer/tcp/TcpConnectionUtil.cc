@@ -1100,6 +1100,8 @@ void TcpConnection::configureStateVariables()
     // window auto-tuning (Linux tcp_grow_window()): the offer starts at the advertised
     // window and grows toward half the receive buffer (tcp_win_from_space() at the
     // default scaling ratio)
+    if (tcpMain->par("windowAutoTuning").boolValue() && state->rcvBufferSize == 0)
+        throw cRuntimeError("windowAutoTuning needs a receive buffer, but receiveBufferSize is not set");
     if (tcpMain->par("windowAutoTuning").boolValue() && state->rcvBufferSize > 0) {
         state->rcv_ssthresh = advertisedWindow;
         state->window_clamp = std::max(advertisedWindow, state->rcvBufferSize / 2);

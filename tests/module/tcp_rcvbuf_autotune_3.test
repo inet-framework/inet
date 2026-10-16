@@ -1,0 +1,29 @@
+%description:
+Tests that windowAutoTuning without a receive buffer stops the simulation with
+an error at the open: auto-tuning grows the receive buffer, so it needs
+receiveBufferSize.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.cli_app.sendScript="1.0 20000"
+*.cli_tcp.windowAutoTuning = true
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+windowAutoTuning needs a receive buffer, but receiveBufferSize is not set
+%#--------------------------------------------------------------------------------------------------------------
