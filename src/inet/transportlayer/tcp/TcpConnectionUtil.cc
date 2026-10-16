@@ -1168,6 +1168,7 @@ void TcpConnection::configureStateVariables()
     if (mtuProbing < 0 || mtuProbing > 2)
         throw cRuntimeError("mtuProbing must be 0, 1 or 2, but it is %d", mtuProbing);
     state->mtupEnabled = mtuProbing == 2;
+    state->mtupProbeInterval = tcpMain->par("mtuProbeInterval");
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
     state->pmtudLastMssReduction = -1; // never reduced yet
 
@@ -2889,6 +2890,7 @@ void TcpConnection::initMtuProbing()
     state->mtupSearchHigh = getMssClamp() + headers;
     state->mtupSearchLow = mssToMtu((int)tcpMain->par("baseMss"));
     state->mtupProbeSize = 0;
+    state->mtupProbeTimestamp = simTime();
     int pathMtu = pathMtuSockopt > 0 ? pathMtuSockopt : (int)tcpMain->par("pathMtu");
     state->pathMtu = pathMtu > 0 ? pathMtu : state->snd_mss + headers;
     EV_INFO << "RFC 4821: the path MTU search runs from " << state->mtupSearchLow << " to " << state->mtupSearchHigh
@@ -2904,7 +2906,7 @@ void TcpConnection::initMtuProbing()
     }
 }
 
-int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWindow, uint32_t bytesInFlight) const
+int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWindow, uint32_t bytesInFlight)
 {
     // mtuProbing, as Linux tcp_mtu_probe(): one probe at a time, from new data, in the
     // congestion state Open (no duplicate ACK either), with a congestion window of 11
@@ -2917,9 +2919,14 @@ int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWi
         || state->dupacks > 0 || congestionWindow < 11 * mss || sackBlocksToSend)
         return -1;
     // the middle of the search; none when the search is narrower than 8 bytes (Linux
-    // tcp_probe_threshold), and none at or below the MSS in use
+    // tcp_probe_threshold): it converged, and it starts again after mtuProbeInterval
     uint32_t probe = mtuToMss((state->mtupSearchHigh + state->mtupSearchLow) / 2);
-    if (probe > mtuToMss(state->mtupSearchHigh) || state->mtupSearchHigh - state->mtupSearchLow < 8 || probe <= mss)
+    if (probe > mtuToMss(state->mtupSearchHigh) || state->mtupSearchHigh - state->mtupSearchLow < 8) {
+        checkMtuReprobe();
+        return -1;
+    }
+    // and none at or below the MSS in use
+    if (probe <= mss)
         return -1;
     // and none larger than the route MTU, which the packet could not leave
     if (mssToMtu(probe) > state->pathMtu)
@@ -2940,6 +2947,21 @@ int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWi
     if (bytesInFlight + 2 * mss > congestionWindow)
         return bytesInFlight == 0 ? -1 : 0;
     return probe;
+}
+
+void TcpConnection::checkMtuReprobe()
+{
+    // Linux tcp_mtu_check_reprobe(): the search starts again from the MTU of the MSS in
+    // use up to the MSS of the peer, so that a larger path MTU can come into use (RFC 4821
+    // section 7.2)
+    if (simTime() - state->mtupProbeTimestamp < state->mtupProbeInterval)
+        return;
+    uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
+    state->mtupSearchHigh = getMssClamp() + headers;
+    state->mtupSearchLow = mssToMtu(state->snd_effmss);
+    state->mtupProbeTimestamp = simTime();
+    EV_INFO << "RFC 4821: after mtuProbeInterval, the path MTU search runs again from " << state->mtupSearchLow
+            << " to " << state->mtupSearchHigh << "\n";
 }
 
 void TcpConnection::mtuProbeSucceeded()
