@@ -43,6 +43,24 @@ void TcpCubic::initializeAlgorithm()
 {
     TcpClassicAlgorithmBase::initializeAlgorithm();
 
+    double beta = par("beta");
+    if (!(beta > 0 && beta < 1))
+        throw cRuntimeError("beta must be more than 0 and less than 1, but it is %g", beta);
+    double c = par("c");
+    if (!(c > 0))
+        throw cRuntimeError("c must be more than 0, but it is %g", c);
+    for (const char *name : {"cntClamp", "hystartLowWindow"})
+        if (par(name).intValue() < 0)
+            throw cRuntimeError("%s must be 0 or more, but it is %" PRId64, name, (int64_t)par(name).intValue());
+    for (const char *name : {"delta", "hystartAckDelta", "hystartDelayMin", "hystartDelayMax"})
+        if (par(name).doubleValue() < 0)
+            throw cRuntimeError("%s must be 0 or more, but it is %gs", name, par(name).doubleValue());
+    if (par("hystartDelayMax").doubleValue() < par("hystartDelayMin").doubleValue())
+        throw cRuntimeError("hystartDelayMax must be at least hystartDelayMin (%gs), but it is %gs", par("hystartDelayMin").doubleValue(), par("hystartDelayMax").doubleValue());
+    int hystartDetect = par("hystartDetect");
+    if (hystartDetect < 0 || hystartDetect > 3)
+        throw cRuntimeError("hystartDetect must be 0 to 3, but it is %d", hystartDetect);
+
     state->cubic_beta = par("beta");
     state->cubic_c = par("c");
     state->cubic_fast_convergence = par("fastConvergence");
