@@ -3638,7 +3638,9 @@ uint32_t TcpConnection::selectRcvWnd()
 
     // a buffer that SO_RCVBUF locked does not grow, so the offer may promise only its
     // free space, charged at the truesize of the Linux skbs (tcp_space())
-    uint32_t fullSpace = state->maxRcvBuffer;
+    // (the full space of the SWS rule is the receive buffer, RCV.BUFF of RFC 9293
+    // section 3.8.6.2.2, when there is one)
+    uint32_t fullSpace = state->rcvBufferSize > 0 ? std::min(state->maxRcvBuffer, state->rcvBufferSize) : state->maxRcvBuffer;
     if (state->rcvbufLocked && state->rcvBufferSize > 0) {
         uint64_t freeSpace = rcvBufOccupancy < state->rcvBufferSize ? (((uint64_t)state->rcvBufferSize - rcvBufOccupancy) * rcvScalingRatio) >> 8 : 0;
         win = (uint32_t)std::min<uint64_t>(win, freeSpace);
