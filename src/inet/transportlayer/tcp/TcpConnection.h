@@ -439,6 +439,13 @@ class INET_API TcpConnection : public SimpleModule
     virtual void retransmitLostMtuProbe();
 
     /**
+     * At a timeout: retransmissions that last longer than r1 show a black hole, which
+     * starts the path MTU search or halves its lower bound, and the MSS falls to it (RFC
+     * 4821 section 7.7, Linux tcp_mtu_probing())
+     */
+    virtual void detectMtuBlackhole(simtime_t r1);
+
+    /**
      * RFC 8985 section 7.3 loss probe: send one segment of new data if the data
      * and the receive window allow it, else the FIN again, else the last segment
      * again. Returns true if a segment was sent.

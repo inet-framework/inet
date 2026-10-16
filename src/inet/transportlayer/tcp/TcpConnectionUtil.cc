@@ -696,7 +696,7 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
             // 20 bytes IPv4 header + 20 bytes TCP minimum header
             uint32_t newMss = mtu - 40;
             // mtuProbing: the reported MTU is the route MTU now, which bounds the search
-            if (state->mtupEnabled && (uint32_t)mtu < state->pathMtu) {
+            if (state->mtuProbing != 0 && (uint32_t)mtu < state->pathMtu) {
                 state->pathMtu = mtu;
                 limitMtuSearch(mtu);
             }
@@ -784,7 +784,7 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
             // 40 bytes IPv6 header + 20 bytes TCP minimum header
             uint32_t newMss = mtu - 60;
             // mtuProbing: the reported MTU is the route MTU now, which bounds the search
-            if (state->mtupEnabled && (uint32_t)mtu < state->pathMtu) {
+            if (state->mtuProbing != 0 && (uint32_t)mtu < state->pathMtu) {
                 state->pathMtu = mtu;
                 limitMtuSearch(mtu);
             }
@@ -1167,6 +1167,7 @@ void TcpConnection::configureStateVariables()
     int mtuProbing = tcpMain->par("mtuProbing");
     if (mtuProbing < 0 || mtuProbing > 2)
         throw cRuntimeError("mtuProbing must be 0, 1 or 2, but it is %d", mtuProbing);
+    state->mtuProbing = mtuProbing;
     state->mtupEnabled = mtuProbing == 2;
     state->mtupProbeInterval = tcpMain->par("mtuProbeInterval");
     state->pmtudTimeout = tcpMain->par("pmtudTimeout"); // time after which original MSS is restored
@@ -2870,7 +2871,7 @@ void TcpConnection::retransmitSynAfterMtuReduction(uint32_t newMss)
 void TcpConnection::limitMtuSearch(uint32_t mtu)
 {
     // Linux tcp_sync_mss(): the upper bound of the search does not exceed the route MTU
-    if (!state->mtupEnabled || state->mtupSearchHigh <= mtu)
+    if (state->mtuProbing == 0 || state->mtupSearchHigh <= mtu)
         return;
     state->mtupSearchHigh = mtu;
     if (state->mtupSearchLow > mtu)
@@ -2883,8 +2884,9 @@ void TcpConnection::initMtuProbing()
 {
     // mtuProbing, as Linux tcp_mtup_init(): the search runs between the MTU of the base MSS
     // and the MTU of the MSS of the peer; the route MTU (pathMtu, else the MTU of the
-    // negotiated MSS) limits the MSS that a success gives
-    if (!state->mtupEnabled)
+    // negotiated MSS) limits the MSS that a success gives. With mtuProbing = 1, the bounds
+    // wait for a black hole (detectMtuBlackhole())
+    if (state->mtuProbing == 0)
         return;
     uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
     state->mtupSearchHigh = getMssClamp() + headers;
@@ -2893,13 +2895,13 @@ void TcpConnection::initMtuProbing()
     state->mtupProbeTimestamp = simTime();
     int pathMtu = pathMtuSockopt > 0 ? pathMtuSockopt : (int)tcpMain->par("pathMtu");
     state->pathMtu = pathMtu > 0 ? pathMtu : state->snd_mss + headers;
-    EV_INFO << "RFC 4821: the path MTU search runs from " << state->mtupSearchLow << " to " << state->mtupSearchHigh
-            << ", the route MTU is " << state->pathMtu << "\n";
+    EV_INFO << "RFC 4821: the path MTU search " << (state->mtupEnabled ? "runs" : "waits for a black hole to run") << " from "
+            << state->mtupSearchLow << " to " << state->mtupSearchHigh << ", the route MTU is " << state->pathMtu << "\n";
     // an active opener starts at the base MSS, because Linux tcp_connect_init() arms the
     // search before tcp_sync_mss() ("use initial MSS of tcp_base_mss"); a passive
     // connection keeps its MSS, as the Linux script mtu_probe/basic-v4 shows
     uint32_t baseMss = mtuToMss(state->mtupSearchLow) + (state->ts_enabled ? 12 : 0);
-    if (state->active && baseMss < state->snd_mss) {
+    if (state->mtupEnabled && state->active && baseMss < state->snd_mss) {
         state->snd_mss = baseMss;
         state->snd_effmss = calculateEffectiveMss();
         EV_INFO << "RFC 4821: an active opener starts at the base MSS, SMSS is " << state->snd_mss << "\n";
@@ -2947,6 +2949,37 @@ int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWi
     if (bytesInFlight + 2 * mss > congestionWindow)
         return bytesInFlight == 0 ? -1 : 0;
     return probe;
+}
+
+void TcpConnection::detectMtuBlackhole(simtime_t r1)
+{
+    // RFC 4821 section 7.7, as Linux tcp_write_timeout() and tcp_mtu_probing(): at a
+    // timeout, retransmissions that last since the first send of the oldest unacknowledged
+    // segment (Linux retrans_stamp) longer than R1 show a black hole
+    if (!seqLess(state->snd_una, rexmitQueue->getBufferEndSeq()))
+        return;
+    simtime_t duration = simTime() - rexmitQueue->getRegion(state->snd_una).firstSentTime;
+    if (duration < r1)
+        return;
+    if (!state->mtupEnabled) {
+        // mtuProbing = 1: the search starts, from the base MSS
+        state->mtupEnabled = true;
+        state->mtupProbeTimestamp = simTime();
+        EV_INFO << "RFC 4821: a black hole after " << duration << "s of retransmissions, the path MTU search starts\n";
+    }
+    else {
+        // the lower bound falls to the smaller of the base MSS and half of its MSS, at
+        // least 48 bytes (Linux tcp_mtu_probe_floor and tcp_min_snd_mss)
+        uint32_t mss = std::max(std::min((uint32_t)(int)tcpMain->par("baseMss"), mtuToMss(state->mtupSearchLow) / 2), (uint32_t)48);
+        state->mtupSearchLow = mssToMtu(mss);
+        EV_INFO << "RFC 4821: a black hole after " << duration << "s of retransmissions, the lower bound of the path MTU search falls to "
+                << state->mtupSearchLow << "\n";
+    }
+    // the MSS falls to the lower bound (tcp_sync_mss())
+    state->snd_mss = std::min(mtuToMss(state->pathMtu), mtuToMss(state->mtupSearchLow)) + (state->ts_enabled ? 12 : 0);
+    state->snd_effmss = calculateEffectiveMss();
+    EV_INFO << "RFC 4821: snd_mss is " << state->snd_mss << ", the search runs from " << state->mtupSearchLow << " to "
+            << state->mtupSearchHigh << "\n";
 }
 
 void TcpConnection::checkMtuReprobe()

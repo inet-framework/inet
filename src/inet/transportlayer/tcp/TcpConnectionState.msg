@@ -317,7 +317,8 @@ struct TcpStateVariables
 
     // the path MTU search of RFC 4821, as Linux icsk_mtup (mtuProbing); the bounds and the
     // probe size are MTUs, with the IP and TCP headers and the options of each segment
-    bool mtupEnabled = false;               // mtuProbing (Linux tcp_mtu_probing = 2)
+    int mtuProbing = 0;                     // mtuProbing (Linux tcp_mtu_probing): 1 or 2, a black hole at a timeout starts the search or halves its lower bound
+    bool mtupEnabled = false;               // the search runs: mtuProbing = 2, or 1 after a black hole (Linux icsk_mtup.enabled)
     uint32_t mtupSearchHigh = 0;            // the largest MTU that the search can still try (Linux search_high)
     uint32_t mtupSearchLow = 0;             // the largest MTU that the path surely carries (Linux search_low)
     uint32_t mtupProbeSize = 0;             // the MTU of the probe in flight; 0: no probe in flight

@@ -341,7 +341,7 @@ import inet.transportlayer.contract.ITcp;
 //    `pmtudTimeout` the original MSS comes back, to probe for a larger path MTU.
 //
 //  - RFC 4821 - Packetization Layer Path MTU Discovery
-//    By parameter (`mtuProbing = 2`, off by default as in Linux): a search between
+//    By parameter (`mtuProbing`, off by default as in Linux): a search between
 //    `baseMss` and the MSS of the peer, with one probe segment from queued data,
 //    under the preconditions of Linux `tcp_mtu_probe()`. The route MTU bounds the
 //    search (`pathMtu`, `TcpSocket::setPathMtu()`). A lost probe, the first
@@ -350,10 +350,17 @@ import inet.transportlayer.contract.ITcp;
 //    again as segments of the MSS, as Linux `tcp_simple_retransmit()`. Any other
 //    retransmission ends a probe without a result, and F-RTO does not start at a
 //    timeout with a probe in flight, as Linux. A search that converged starts
-//    again after `mtuProbeInterval` (section 7.2), as Linux `tcp_mtu_check_reprobe()`.
+//    again after `mtuProbeInterval` (section 7.2), as Linux
+//    `tcp_mtu_check_reprobe()`.
+//    A black hole (section 7.7), retransmissions at a timeout that last longer
+//    than R1, starts the search (`mtuProbing = 1`) or halves its lower bound, and
+//    the MSS falls to the lower bound, as Linux `tcp_mtu_probing()`.
 //    Deviations:
-//     - The search goes upward only. No black-hole detector exists, so
-//       `mtuProbing = 1` is the same as off.
+//     - R1 is the time of 3 retransmissions at the minimum RTO
+//       (`minRexmitTimeout`), as Linux `tcp_retries1` and `tcp_model_timeout()`;
+//       RFC 1122 counts 3 retransmissions at the current RTO. At the first black
+//       hole of a running search, the lower bound halves at once, as Linux;
+//       section 7.7 first sets the MTU to the lower bound.
 //     - ~TcpVegas and ~TcpWestwood, with their own recoveries, treat a lost probe
 //       as congestion.
 //
@@ -506,7 +513,7 @@ simple Tcp extends SimpleModule like ITcp
         // path MTU
         bool pmtudEnabled = default(true); // Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled
         double pmtudTimeout @unit(s) = default(600s); // Time after which the original MSS is restored to probe for increased path MTU (RFC 1191, Section 6.3)
-        int mtuProbing = default(0); // the path MTU search of RFC 4821, as Linux tcp_mtu_probing: 2 = from the start of each connection, the sender sends single segments larger than its MSS and raises the MSS when the peer acknowledges them; 0 and 1 = no search (1, the search after a black hole, needs a detector that INET does not have)
+        int mtuProbing = default(0); // the path MTU search of RFC 4821, as Linux tcp_mtu_probing: 2 = from the start of each connection, the sender sends single segments larger than its MSS and raises the MSS when the peer acknowledges them; 1 = the search starts after a black hole, that is, retransmissions at a timeout that last longer than R1; 0 = no search
         int baseMss = default(1024); // with mtuProbing: the lower end of the path MTU search, the payload of a segment that the path surely carries (Linux tcp_base_mss)
         int pathMtu = default(0); // with mtuProbing: the MTU of the route, the largest MTU that the search can give the connection (Linux dst_mtu()); 0 = the MTU of the negotiated MSS
         double mtuProbeInterval @unit(s) = default(600s); // with mtuProbing: when the search converged and this time passed since it started, it starts again from the MTU of the MSS in use up to the MSS of the peer, as Linux tcp_probe_interval (RFC 4821 section 7.2: at least 5 minutes, 10 recommended)

@@ -370,6 +370,18 @@ void TcpAlgorithmBase::processRexmitTimer(TcpEventCode& event)
         return;
     }
 
+    // RFC 4821 section 7.7, as Linux tcp_write_timeout(): after an earlier retransmission
+    // at a timeout, the R1 threshold of RFC 1122 shows a black hole. Linux measures R1 as
+    // the time of tcp_retries1 = 3 retransmissions at the minimum RTO (tcp_model_timeout())
+    if (state->mtuProbing != 0 && state->rexmit_count > 1 && minRexmitTimeout > 0) {
+        const int retries1 = 3;
+        int linearBackoffThreshold = (int)std::floor(std::log2(maxRexmitTimeout / minRexmitTimeout));
+        simtime_t r1 = retries1 <= linearBackoffThreshold
+                ? ((2 << retries1) - 1) * minRexmitTimeout
+                : ((2 << linearBackoffThreshold) - 1) * minRexmitTimeout + (retries1 - linearBackoffThreshold) * maxRexmitTimeout;
+        conn->detectMtuBlackhole(r1);
+    }
+
     EV_INFO << "Performing retransmission #" << state->rexmit_count
             << "; increasing RTO from " << state->rexmit_timeout << "s ";
 
