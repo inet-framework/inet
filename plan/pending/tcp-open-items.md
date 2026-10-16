@@ -63,6 +63,8 @@ The S18 record says: after such a SYN-ACK, INET retransmits one segment of the S
 
 Effect: the search is off by default in `Tcp`, `LinuxTcp` and `LegacyTcp`, so no baseline moves; the tests of the search change. Size: medium, in three branches or three steps.
 
+Reverted by the owner on 2026-10-16 (D-167).
+
 ### T6 — The receive memory of the Linux mode
 
 With `windowAutoTuning`, INET follows `tcp_rcvbuf_grow()` and the truesize of Linux, but four parts are missing:
@@ -77,6 +79,8 @@ Effect: only `LinuxTcp` and the configurations that turn `windowAutoTuning` on; 
 ### T7 — HyStart++ (RFC 9406)
 
 RFC 9438 section 4.10 says that CUBIC SHOULD use HyStart++ (RFC 9406). INET has only the hybrid slow start of Linux (`hystartEnabled` of `TcpCubic`), which RFC 9438 calls experimental, and which is off in `Tcp`. HyStart++ applies to any slow start: it leaves slow start for a conservative slow start (CSS) when the RTT of a round grows, and it can go back. Linux has no HyStart++, so there is no packetdrill oracle; the tests are module tests against the text of RFC 9406 (`../standards/RFC/rfc9406.txt`). Proposal: a parameter of the slow start, in `TcpCubic` and in the classic flavours (question Q2). Effect: none while it is off. Size: medium to large.
+
+Reverted by the owner on 2026-10-16 (D-167).
 
 ### T8 — Urgent data
 
@@ -106,6 +110,8 @@ Proposal, by the rule of section 6: `Tcp` keeps the data, as RFC 9293 allows; a 
 
 From the open findings of `plan/done/tcp-receive-memory-repairs.md`, split from T6 by D-149. T13: when the memory of the receive queue overflows, Linux merges the queued segments into fewer, fuller buffers (`tcp_collapse()` in `tcp_prune_queue()`) before it drops out-of-order data; INET drops at once. T14: the truesize of a small packet in Linux has a pad and the classes of the slab allocator; INET keeps the power-of-two charge of master for packets that fit one page (D-115). Both act only under memory pressure or for small packets, and no script of the packetdrill suite reaches them. Size: medium (T13), small (T14).
 
+Dropped by the owner on 2026-10-16 (D-166).
+
 ### T15 — The receive buffer and the window scale of the Linux mode
 
 `LinuxTcp` turns `windowAutoTuning` on, but sets no receive buffer, so auto-tuning and Dynamic Right-Sizing never act with its defaults; Linux gives each socket `tcp_rmem[1]`, 131072 bytes. Also, the automatic window scale represents only the window at the time of the SYN, a shift of 1 for a buffer of 131072 bytes, so the offered window stops at 131070 bytes when DRS grows the buffer; Linux represents `tcp_rmem[2]`, a shift of 10. Plan: `plan/done/tcp-linux-receive-buffer.md`. Effect: only `LinuxTcp` and connections with `windowAutoTuning`. Size: small.
@@ -113,6 +119,8 @@ From the open findings of `plan/done/tcp-receive-memory-repairs.md`, split from 
 ### T16 — The first receive window of the Linux mode
 
 `LinuxTcp` offers 65535 bytes in its SYN and SYN-ACK, and its `rcv_ssthresh` starts at `advertisedWindow`. Linux starts both at the result of `tcp_select_initial_window()`: the full space of the receive buffer (half of `tcp_rmem[1]`, 65536 bytes) rounded down to a multiple of the MSS. That is 64240 bytes with an MSS of 1460, and 65160 bytes in a SYN-ACK with timestamps, where the MSS of the rounding is 12 bytes smaller. Proposal: with `windowAutoTuning`, the first offer and `rcv_ssthresh` come from the receive buffer, as in Linux; without it, `advertisedWindow` keeps its role. The packetdrill harness of inet-gpl sets `advertisedWindow = 29200`, which then has no effect on `LinuxTcp`; the packetdrill suite decides whether that line goes. Size: small.
+
+Dropped by the owner on 2026-10-16 (D-166).
 
 ### T17 — The cause of gap 2 in the TCP evidence
 
@@ -140,13 +148,13 @@ Each item is a branch of its own, `topic/tcp-<item>`, in a worktree of the same 
 | 4 | T12 | small; found in T4, added by the owner on 2026-10-15 |
 | 5 | T6 | DRS first: it changes long transfers of `LinuxTcp` |
 | 6 | T15 | small; found in T6, added by the owner on 2026-10-16 |
-| 7 | T5 | (a), then (b) and (c); the search is off by default |
-| 8 | T7 | it changes a default of `Tcp`, so the CUBIC baselines move |
+| 7 | T5 | (a), then (b) and (c); the search is off by default; reverted (D-167) |
+| 8 | T7 | it changes a default of `Tcp`, so the CUBIC baselines move; reverted (D-167) |
 | 9 | T8 | large, with few users |
 | 10 | T9, steps 2 and 3 | dropped (D-165) |
 | 11 | T17 | small; found in T9, added by the owner on 2026-10-16 |
-| 12 | T16 | small; found in T15, added by the owner on 2026-10-16 |
-| 13 | T14, then T13 | low priority (D-149); the collapse of T13 charges the truesize of T14 |
+| 12 | T16 | small; found in T15, added by the owner on 2026-10-16; dropped (D-166) |
+| 13 | T14, then T13 | dropped (D-166) |
 | — | T10 | closed (D-133) |
 
 ## 6. The decisions
@@ -160,6 +168,9 @@ The owner approved the plan and these answers on 2026-10-15, with one rule for a
 - **D-133 — The timer parameters stay in `Tcp`; T10 closes.** The RTO, the persist timer, the delayed ACK and keepalive belong to the connection, not to a congestion control algorithm; Linux keeps them out of `tcp_congestion_ops`, and all algorithms but DumbTcp share them. A later refactor can move the RTO estimator from `TcpAlgorithmBase` into the connection, without a change of an ini key.
 - **D-134 — The items without a question follow the RFC where Linux agrees.** T2: only new data in step (3.3), in both modes, without a parameter. T5: (a) a lost probe gets no congestion response, as RFC 4821 and Linux; (b) the new parameter `mtuProbeInterval`, 600 s as Linux; (c) black-hole detection makes `mtuProbing = 1` work as in Linux. T6: the parts of Linux under `windowAutoTuning`, with a new parameter for the bound of `tcp_rmem[2]`.
 - **D-165 — T9 leaves this plan.** The owner dropped the change of the checksum on 2026-10-16: this plan is not about all the defects of TCP. The default stays `"declared"`, and the branch `topic/tcp-checksum-computed` was deleted without a merge. The record keeps its findings for a later owner.
+- **D-166 — T16, T14 and T13 leave this plan.** On 2026-10-16 the owner asked for a model close to Linux, not an exact copy: for an exact copy, the kernel sources serve better. The packetdrill suite needs none of the three: with T16, each of its 318 verdicts stayed as before, and no script reaches the receive memory of T14 and T13. T16 (the first window of Linux) was dropped before its push, and the branch of T14 and T13 (the skbs of the receive queues) without a landing.
+- **D-167 — T5 and T7 are reverted.** No verdict of the packetdrill suite changed with them: the two scripts of the path MTU search were MATCH before T5, and the two scripts of the hybrid slow start of Linux use the hystart of Linux, which was there before T7. T5 added code to the recovery of four algorithms, and T7 a second slow start to the classic algorithms. `hystartEnabled` comes back, and `TcpCubic` again starts without HyStart++.
+- **D-168 — T6 and T12 stay.** The owner keeps T6, Dynamic Right-Sizing, which makes long transfers of `LinuxTcp` close to Linux, and T12, which is small.
 
 ## 7. The steps of this plan
 
