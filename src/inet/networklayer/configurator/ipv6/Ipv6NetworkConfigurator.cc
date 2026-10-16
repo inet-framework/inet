@@ -1136,11 +1136,17 @@ void Ipv6NetworkConfigurator::dumpAddresses(Topology& topology)
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         EV_INFO << node->module->getFullPath() << ":" << endl;
+        bool isRouter = node->routingTable && node->routingTable->isForwardingEnabled();
         for (auto *ifInfo : node->interfaceInfos) {
             InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(ifInfo);
             EV_INFO << "  " << interfaceInfo->networkInterface->getInterfaceName();
-            if (!interfaceInfo->globalAddress.isUnspecified())
-                EV_INFO << " addr=" << interfaceInfo->globalAddress << "/" << interfaceInfo->prefixLength;
+            if (!interfaceInfo->globalAddress.isUnspecified()) {
+                // configureInterface() does not assign the address to a host interface in this mode
+                if (!assignAddressesToHostsParameter && !isRouter)
+                    EV_INFO << " addr=dynamic";
+                else
+                    EV_INFO << " addr=" << interfaceInfo->globalAddress << "/" << interfaceInfo->prefixLength;
+            }
             if (!interfaceInfo->prefix.isUnspecified())
                 EV_INFO << " prefix=" << interfaceInfo->prefix << "/" << interfaceInfo->prefixLength;
             EV_INFO << endl;
