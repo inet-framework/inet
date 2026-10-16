@@ -1,6 +1,6 @@
 # The path MTU search of RFC 4821 (T5)
 
-Status: **in progress** — item T5 of `plan/pending/tcp-open-items.md`, decision D-134.
+Status: **ready for review** — item T5 of `plan/pending/tcp-open-items.md`, decision D-134.
 
 - Branch `topic/tcp-path-mtu-search`, on master `36952dc48a`.
 - The decision numbers continue those of `plan/done/tcp-linux-receive-buffer.md` (D-153 onward).
@@ -19,13 +19,13 @@ Status: **in progress** — item T5 of `plan/pending/tcp-open-items.md`, decisio
 
 | Step | Commit | Test |
 | --- | --- | --- |
-| 1 | `plan: add: the path MTU search of RFC 4821` | — |
-| 2 | `tcp: change: a lost MTU probe gets no congestion response` | `tcp_mtu_probe_2` and `tcp_mtu_probe_5` change; `tcp_mtu_probe_7` (new, without SACK) |
-| 3 | `tcp: change: another retransmission ends an MTU probe without a result` | `tcp_mtu_probe_8` (new): a loss before the probe |
-| 4 | `tcp: add: mtuProbeInterval, a new path MTU search after a time` | `tcp_mtu_probe_9` (new) |
-| 5 | `tcp: add: the black-hole detection of the path MTU search` | `tcp_mtu_probe_10` (new, `mtuProbing = 1`), `tcp_mtu_probe_11` (new, `mtuProbing = 2`) |
-| 6 | `doc: change: the release note of the path MTU search` | WHATSNEW entry 54 |
-| 7 | `plan: change: record the path MTU search` | — |
+| 1 ✅ | `plan: add: the path MTU search of RFC 4821` | — |
+| 2 ✅ | `tcp: change: a lost MTU probe gets no congestion response` | `tcp_mtu_probe_2` and `tcp_mtu_probe_5` change; `tcp_mtu_probe_7`, `_8` and `_9` (new): the scenario of `tcp_mtu_probe_2` without SACK, with `TcpNewReno`, `TcpReno` and `TcpTahoe` |
+| 3 ✅ | `tcp: change: another retransmission ends an MTU probe without a result` | `tcp_mtu_probe_10` (new): a loss before the probe; `tcp_mtu_probe_11` (new): a timeout with the probe in flight and F-RTO on |
+| 4 ✅ | `tcp: add: mtuProbeInterval, a new path MTU search after a time` | `tcp_mtu_probe_12` (new) |
+| 5 ✅ | `tcp: add: the black-hole detection of the path MTU search` | `tcp_mtu_probe_13` (new, `mtuProbing = 1`), `tcp_mtu_probe_14` (new, `mtuProbing = 2`) |
+| 6 ✅ | `doc: change: the release note of the path MTU search` | WHATSNEW entry 54 |
+| 7 ✅ | `plan: change: record the path MTU search` | — |
 
 Each code step also updates the deviations of RFC 4821 in the documentation of `Tcp`.
 
@@ -42,4 +42,21 @@ As for T6 and T15: each commit builds and passes the module tests, a new test fa
 
 ## 5. The record
 
-(after the steps)
+Commits on master `36952dc48a`: `f39017be81` (plan), `e0c409260c` (the lost probe), `c7b70e59aa` (the probe without a result), `d1bf93d126` (`mtuProbeInterval`), `c2105b15a5` (the black-hole detection), `0dc9e104dd` (the release note), and this record.
+
+Facts found during the work:
+
+- The repair of a lost probe (`TcpAlgorithmBase::repairLostMtuProbe()`) and the block of a new recovery until the ACK passes the probe (`isMtuProbeRepairPending()`) sit at the start of a loss recovery in the RFC 5681 and RFC 6582 recoveries, at the top of step (4) of the RFC 6675 recovery (so the RACK timer is covered), and in `TcpTahoe`. During the block, each duplicate ACK calls `sendData()`, whose bytes in flight follow Linux `tcp_packets_in_flight()`, so new data goes out as in the state Loss of Linux. A timeout ends the block.
+- With SACK and without it, the duplicate ACKs do not mark the head as SACKed (`addInferredSack()` skips it), so the lost mark of the probe (`markLost()`) takes it out of the bytes in flight, as `tcp_mark_skb_lost()`.
+- Because the window stays after a lost probe, the search goes on at once: in `tcp_mtu_probe_2`, a second probe (MTU 1144) follows and is lost too. Before, the reduction of the window stopped the probes (they need 11 segments of cwnd).
+- Linux measures `mtuProbeInterval` from the start of the search, not from the convergence. When the search converges later than the interval, it starts again at once; `tcp_mtu_probe_12` lets it converge in a first burst so that the interval shows.
+- The black-hole detection uses the first send time of the head region of the retransmission queue as the `retrans_stamp` of Linux. With `LinuxTcp` and a minimum RTO of 200 ms, the timeouts come after 0.204, 0.408, 0.816 and 1.632 s; the fourth one comes 3.07 s after the first send, so the detection acts there, as in Linux.
+
+| Evidence | Result |
+| --- | --- |
+| Each commit builds alone; module tests at each commit | 671, 674, 676, 677, 679, 679 PASS; no undefined `inet::` symbol |
+| The new and changed tests fail before their commits | yes, each of `tcp_mtu_probe_2`, `_5`, `_7` to `_14` |
+| CI fingerprint job (podman, clang-16) at the four code commits | OK at each; the one ERROR row of `ethernet.csv` is the expected one of master |
+| Statistics of the 38 TCP working directories, against statistics `ebda488` | 122 KEEP, 4 SKIP (expected), no file changes: no example sets `mtuProbing` |
+| Packetdrill suite of inet-gpl `0dfbcae` | 303 MATCH, 12 KERNEL_DRIFT, 3 UNSUPPORTED_FEATURE; each of the 318 verdicts as before; `mtu_probe/basic-v4` stays MATCH |
+| INET's TCP protocol suite with inet-gpl | 333 tests: 329 PASS, 4 FAIL (expected) |
