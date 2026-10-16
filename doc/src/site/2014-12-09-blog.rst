@@ -1,0 +1,16 @@
+:orphan:
+:date: 2014-12-09
+:category: progress
+
+===================
+Working Towards 3.0
+===================
+
+We are working in the *integration* branch towards INET-3.0.
+
+What we've been doing since the INET-2.99.0 pre-release:
+
+- Set up a Coverity account for detecting defects via static code analysis
+- Introducing C++11 features in the code (nullptr, auto, in-class member initializers)
+- Working on the manual
+- Merged the PIM/IGMPv3 topic branch into integration

@@ -1,0 +1,9 @@
+:orphan:
+
+==============
+Page Not Found
+==============
+
+The page you requested doesn't exist. Better luck next time!
+
+`Go back to the front page. </index.html>`__

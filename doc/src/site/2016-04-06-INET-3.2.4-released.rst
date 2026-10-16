@@ -1,0 +1,18 @@
+:orphan:
+:date: 2016-04-06
+:category: news
+
+===================================
+INET-3.2.4 Stable Release Available
+===================================
+
+This is a minor maintenance release that requires either OMNeT++ 4.6,
+or 5.0. (Earlier test versions of OMNeT++ will not work.)
+
+- build: updated inet_featuretool (the same like the opp_featuretool in OMNeT++ 5.0)
+- minor fixes to make it build under both OMNeT++ 4.6 and 5.0
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.2.4/WHATSNEW>`__ file for more detail and
+`download INET-3.2.4 <https://github.com/inet-framework/inet/releases/download/v3.2.4/inet-3.2.4-src.tgz>`__
+now.

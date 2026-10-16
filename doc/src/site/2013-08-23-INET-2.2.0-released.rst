@@ -1,0 +1,33 @@
+:orphan:
+:date: 2013-08-23
+:category: news
+
+===================================
+INET-2.2.0 Stable Release Available
+===================================
+
+We are happy to announce the latest stable version of the INET Framework. This version requires OMNeT++ 4.2 or 4.3.
+
+New features:
+
+- Simulating shutdown, crash, reboot and similar events for network nodes. This is made possible by a new mechanism called lifecycle infrastructure. For node shutdown/crash/startup/etc, a LifecycleOperation (e.g. NodeShutdownOperation) is applied to the submodule tree of the network node (host or router) by a LifecycleController module. Each module can decide how to handle the operation and how to store the resulting state (up/down,etc). Operations can be multi-stage, and don't need to complete immediately (i.e. they can take nonzero simulation time and multiple events to complete).
+
+- Static IP4 configuration: A new module, IPv4NodeConfigurator was added to IPv4NetworkLayer. This module is necessary because IPv4NetworkConfigurator cannot configure the node after a restart (see newly introduced node lifecycle operations above), since being a global module, it doesn't know about node lifecycle events. The new module listens to node lifecycle events, and configures the node's routing table and interfaces according to configuration computed by the network's global IPv4NetworkConfigurator module. Initialization-time node configuration is also carried out by the new module.
+
+- New TCP congestion control algorithms: TCP Vegas, TCP Westwood
+
+- Added IdealWirelessNic (IdealRadio + IdealWirelessMac). This is a highly abstracted wireless NIC that consists of a unit disk radio and a trivial MAC protocol. It offers simplicity for scenarios where Layer 1 and Layer 2 effects can be completely ignored, for example testing the basic functionality of a wireless ad-hoc routing protocol.
+
+- SCTP received several new features: new strategies for SCTP stream scheduling; SCTP Stream Reset (RFC 6525); SCTP Authentication (RFC 4895); Add-IP feature for SCTP (RFC 5061); NR_SACK feature to SCTP; Partial Reliability SCTP (RFC 3758); SCTP packet drop feature (draft-stewart-sctp-pktdrprep-15.txt); SCTP "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately); several alternatives to send fast retransmissions on SCTP
+
+- Loopback interface module added. Loopback used to be a special case inside the IPv4/IPv6 modules, now it is handled completely like any other interface, with a separate Loopback module.
+
+- EtherSwitch, AccessPoint: Bare EtherMAC modules have been replaced with EthernetInterface, so that external queues can be used (useful for e.g. QoS).
+
+- InterfaceTable, NIC, NetworkLayer: Revert to earlier behavior of determining networkLayerGateIndex. Now the module connected to a NIC must have gate vectors called ifIn and ifOut. If it doesn't, the code decides that the NIC is not directly connected to a network layer, and leaves networkLayerGateIndex unfilled.
+
+- In addition, there were several bugfixes and smaller improvements
+
+See the WHATSNEW and per-directory ChangeLog files for further details.
+
+You can download INET-2.2.0 `here </Download.html>`__.

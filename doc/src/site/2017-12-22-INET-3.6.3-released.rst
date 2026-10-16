@@ -1,0 +1,40 @@
+:orphan:
+:date: 2017-12-22
+:category: news
+
+===================================
+INET-3.6.3 Stable Release Available
+===================================
+
+This release contains minor bug fixes and compatibility fixes for the
+OMNeT++ 5.3 Preview 1 release. It requires OMNeT++ 5.1 or later.
+
+TCP:
+
+- Fixed TCP/IP Checksum calculation with odd lengths.
+
+SCTP:
+
+- Fixed a retransmission bug where the transmission counter was not
+  advanced when the data was retransmitted due to timeout.
+- Fixed a bug when fast recovery was active and the cumulative TSN
+  advanced, the miss indications were not increased.
+
+Packetdrill:
+
+- The counting of Gap Reports was fixed.
+- Added a new test to test fast Retransmissions.
+
+Ieee802154NarrowbandScalarRadio:
+
+- The bandwidth was not correctly claculated, leading to incorrect channel allocation
+- The PHY header was calculated wrong
+
+APSKScalarReceiver:
+
+- Fixed sensitivity bug in APSKScalarReceiver found by Tobias Thiel
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.6.3/WHATSNEW>`__ file for more detail and
+`download INET-3.6.3 <https://github.com/inet-framework/inet/releases/download/v3.6.3/inet-3.6.3-src.tgz>`__
+now.

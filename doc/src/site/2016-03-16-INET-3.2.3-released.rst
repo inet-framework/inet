@@ -1,0 +1,20 @@
+:orphan:
+:date: 2016-03-16
+:category: news
+
+===================================
+INET-3.2.3 Stable Release Available
+===================================
+
+This is a minor maintenance release that requires either OMNeT++ 4.6,
+or 5.0rc or later. (Earlier test versions of OMNeT++ will not work.)
+
+- build: updated inet_featuretool (the same like the opp_featuretool in OMNeT++ 5.0 rc)
+- several fixes to make it compatible with both OMNeT++ 4.6 and 5.0
+- smoke and fingerprint tests are running on both OMNeT++ 4.6 and 5.0
+- some varaiable renames and fixes in ieee802.11
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.2.3/WHATSNEW>`__ file for more detail and
+`download INET-3.2.3 <https://github.com/inet-framework/inet/releases/download/v3.2.3/inet-3.2.3-src.tgz>`__
+now.

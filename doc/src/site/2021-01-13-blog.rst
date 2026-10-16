@@ -1,0 +1,9 @@
+:orphan:
+:date: 2021-01-13
+:category: progress
+
+==================================
+INET 4.3 with TSN support released
+==================================
+
+We have released INET 4.3 containing Time Sensitive Network and Colck Synchronization support.

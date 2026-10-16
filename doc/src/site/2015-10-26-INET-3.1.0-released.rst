@@ -1,0 +1,21 @@
+:orphan:
+:date: 2015-10-26
+:category: news
+
+===================================
+INET-3.1.1 Stable Release Available
+===================================
+
+INET 3.1.1 is now available for download.
+
+Highlights:
+
+- Added a modular and extensible new 802.11 MAC model.
+- Added packetdrill testing tool for transport layer testing.
+- Manet protocols in inet.routing.extras package are now disabled by default.
+- Changes and bug fixes in the (old) 802.11 MAC:
+
+This version requires OMNeT++ 4.6 or later. Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.1.1/WHATSNEW>`__ file for more detail and
+`download INET-3.1.1 <https://github.com/inet-framework/inet/releases/download/v3.1.1/inet-3.1.1-src.tgz>`__
+now.

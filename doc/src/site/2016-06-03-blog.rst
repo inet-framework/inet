@@ -1,0 +1,18 @@
+:orphan:
+:date: 2016-06-03
+:category: progress
+
+========================
+Heading towards INET 4.0
+========================
+
+With the release of INET 3.3 we are starting to work towards INET 4.0 which will
+contain numerous improvements that will require OMNeT++ 5.0. INET 3.3 is the last
+release that will work with both OMNeT++ 4.6 and 5.0.
+
+Major features to be added in INET 4.0:
+
+- A rewritten wireless tutorial
+- Enhanced visualization (2D/3D)
+- Reorganized StandardHost internals that will enable better configurability
+- Enhanced Ieee 802.11 MAC

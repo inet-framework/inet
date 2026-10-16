@@ -1,0 +1,23 @@
+:orphan:
+:date: 2026-07-07
+:category: news
+
+===================
+INET-4.7.0 Released
+===================
+
+This is a new feature release in the INET 4.x branch. The central theme of this
+release is the maturation of the IPv6 protocol family, bringing it
+substantially closer to feature parity with IPv4. Highlights include a new
+declarative IPv6 network configurator, IPv6 multicast routing (MLD, and
+PIM-DM/PIM-SM over IPv6), node lifecycle support, Duplicate Address Detection,
+a modernized Mobile IPv6 (MIPv6) model with new Proxy Mobile IPv6 (PMIPv6)
+support, and IPv6 support in BGP (MP-BGP) and IPsec. Outside the IPv6 area, the
+release brings satellite and GNSS track mobility models with geographic
+visualization, a substantial overhaul of the STP and RSTP spanning tree models,
+major BGP improvements, TCP Path MTU Discovery, and a configurable RNG grouping
+mechanism. Requires OMNeT++ 6.4 or later.
+
+For general overview see `WHATSNEW <https://github.com/inet-framework/inet/blob/v4.7.0/WHATSNEW>`__
+
+`Download INET-4.7.0 <https://github.com/inet-framework/inet/releases/download/v4.7.0/inet-4.7.0-src.tgz>`__

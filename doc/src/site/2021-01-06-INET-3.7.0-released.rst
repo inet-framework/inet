@@ -1,0 +1,37 @@
+:orphan:
+:date: 2021-01-06
+:category: news
+
+===================================
+INET-3.7.0 Stable Release Available
+===================================
+
+This release adds an IPsec model, improves on UDPBasicApp, and contains small bug fixes. It requires OMNeT++ 5.3 or later, or OMNeT++ 6.0 Preview 9 or 10.
+
+IPsec:
+
+The IPsec model implements basic RFC 4301 functionality: Authentication Header (AH) and Encapsulating Security Payload (ESP). Key exchange protocols are not modeled, but instead, security associations (SAs) are statically configured and remain in effect for the entire duration of the simulation.
+
+The model does not perform actual cryptography. This was an explicit non-goal, as the purpose of the model is to study the effects of the network overhead of IPsec. As a consequence, encryption keys, certificates, and other cryptography-related data do not appear in the model's data structures. However, protocol overhead and a simple performance model to account for the runtime overhead of cryptography are included.
+
+Further limitations:
+- Transport mode only. Tunnel mode is not supported.
+- Multicast traffic is not supported.
+- The anti-replay mechanism is not implemented.
+- DSCP-based SA selection is not implemented.
+
+UDPBasicApp:
+
+- Added sendScript parameter; sendInterval made optional. The change is backward compatible (existing fingerprints unchanged).
+
+VoIPStream:
+
+- Updated for avcodec-7:4.2.4
+
+Other:
+- Fixed a number of (previously hidden) subtle ownership problems.
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.7.0/WHATSNEW>`__ file for more detail and
+`download INET-3.7.0 <https://github.com/inet-framework/inet/releases/download/v3.7.0/inet-3.7.0-src.tgz>`__
+now.

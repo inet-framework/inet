@@ -1,0 +1,12 @@
+:orphan:
+:date: 2010-08-05
+:category: news
+
+===============================
+BGPv4 Model Contributed to INET
+===============================
+
+Helene Lageber has contributed a BGPv4 model to the INET Framework. The
+code is now available in the *topic/bgpv4* branch of the INET repo; it will
+be integrated into the INET *master* branch after some refinements and
+testing.

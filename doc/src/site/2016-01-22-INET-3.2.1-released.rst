@@ -1,0 +1,19 @@
+:orphan:
+:date: 2016-01-22
+:category: news
+
+===================================
+INET-3.2.1 Stable Release Available
+===================================
+
+This minor version fixes several issues reported since the latest release.
+
+- 802.11 MAC model: EDCA, rate control crashes fixed
+- Radio: Fixed handling of abort reception/transmission.
+- Added missing INET_API defines
+- Physical layer: Fixed memory issues detected by valgrind
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.2.1/WHATSNEW>`__ file for more detail and
+`download INET-3.2.1 <https://github.com/inet-framework/inet/releases/download/v3.2.1/inet-3.2.1-src.tgz>`__
+now.

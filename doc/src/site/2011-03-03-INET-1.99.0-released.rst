@@ -1,0 +1,10 @@
+:orphan:
+:date: 2011-03-03
+:category: news
+
+================================
+Development Snapshot INET-1.99.0
+================================
+
+This release is a snapshot of work in progress, please do not use it for
+research. The source is available from the `download page </Download.html>`__.

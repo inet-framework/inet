@@ -1,0 +1,22 @@
+:orphan:
+:date: 2017-10-02
+:category: news
+
+===================================
+INET-3.6.2 Stable Release Available
+===================================
+
+This release contains minor bug fixes and compatibility fixes for the final
+OMNeT++ 5.2 release. It requires OMNeT++ 5.1 or later.
+
+- Tcp: Fixed incorrect connection pointer in rexmitQueue.
+- Edcaf: Fixed aifs calculation for customised aifsn.
+- Visualization: parameter rename
+- inet_featuretool: Removed warning when treating a missing feature in the state files as default.
+- Updated showcases and tutorials.
+- Various fixes to eliminate warnings on clang 4 and gcc 7.x.
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.6.2/WHATSNEW>`__ file for more detail and
+`download INET-3.6.2 <https://github.com/inet-framework/inet/releases/download/v3.6.2/inet-3.6.2-src.tgz>`__
+now.

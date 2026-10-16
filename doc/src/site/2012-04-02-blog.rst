@@ -1,0 +1,16 @@
+:orphan:
+:date: 2012-04-02
+:category: progress
+
+======
+Update
+======
+
+Now that INET-1.99.4 has been released, we are currently concentrating on code and protocol reviews.
+
+Additional short term plans:
+
+- Implement DiffServ.
+- Merge/integrate the MiXiM project with INET.
+- Implement Node failure/recovery support.
+- Implement IPv6NetworkConfigurator (should work like the current IPv4NetworkConfigurator).

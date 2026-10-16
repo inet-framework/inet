@@ -1,0 +1,17 @@
+:orphan:
+:date: 2015-06-25
+:category: progress
+
+======================================
+Git Changes After the INET 3.0 Release
+======================================
+
+Now that INET 3.0 has been released, we made some changes to the git repository:
+
+- The old ``master`` branch has been renamed to ``v2.x``. It will hold maintenance commits
+  for the INET 2.x.
+- The ``master`` branch has been set to the commit containing the 3.0 release.
+- The ``integration`` branch will contain the changes scheduled for INET 4.0.
+
+We hope that you find the changes in INET 3.0 useful and will start using it
+in your own projects.

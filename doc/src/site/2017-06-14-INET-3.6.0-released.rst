@@ -1,0 +1,82 @@
+:orphan:
+:date: 2017-06-14
+:category: news
+
+===================================
+INET-3.6.0 Stable Release Available
+===================================
+
+This release contains some important new features, several bug fixes, and a few
+minor enhancements. It requires OMNeT++ 5.1 or later.
+
+Highlights in this release:
+
+- On Windows, INET is no longer using the auto-import feature of the linker, because
+  it generated more than 65536 symbols. Dependent projects crashed because of this.
+  All INET APIs now should be prefixed with INET_API macro. (fixes #257)
+
+- The makefile now generates separate precompiled header for debug and release mode.
+  This is required to be able to quicly switch between release and debug mode in the IDE.
+
+- The IEEE 802.11 MAC model has been extended with several new components. The
+  implementation is entirely based on the standard IEEE 802.11™-2012 Part 11:
+  Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications.
+
+  The new architecture is designed to be modular to facilitate experimenting
+  with new policies, features and algorithms within the MAC layer. Users can
+  easily replace individual components with their own implementations. Policies,
+  which most likely to be experimented with, are extracted into their own modules.
+
+  The new model has the following replaceable built-in policies:
+
+  - ACK policy
+  - RTS/CTS policy
+  - Originator and recipient block ACK agreement policies
+  - MSDU aggregation policy
+  - Fragmentation policy
+
+  The new model also separates the following components:
+
+  - Coordination functions
+  - Channel access methods
+  - MAC data services
+  - Aggregation and deaggregation
+  - Fragmentation and defragmentation
+  - Block ACK agreements and reordering
+  - Frame exchange sequences
+  - Duplicate removal
+  - Rate selection
+  - Rate control
+  - Protection mechanisms
+  - Recovery procedure
+  - Contention
+  - Frame queues
+  - TX/RX
+
+  There are several enhancements and new features to the previous version, the
+  most notable are frame exchange sequences, block acknowledgement, and MSDU
+  aggregation.
+
+  The new version was thoroughly tested against the old one using fingerprint
+  tests. The tests ensure that the new version doesn't introduce any regression.
+  In fact, the tests brought up a few problems in the old implementation that
+  were fixed in the new one.
+
+- The power model has been extended with support for charge/current based models
+  as opposed to the existing energy/power based ones. A new energy management
+  component has also been added to separate monitoring and controlling of energy
+  consumers and generators from the rest of the model.
+
+- New visualizers has been added to display packet drops and link breaks, data
+  contained in interface tables, routes stored in routing tables, queues filled
+  with packets, residual capacity of energy storages, and transport connections
+  between network nodes. The new visualizers are also added to the already existing
+  integrated ones. Note: many features that work with the 2D visualizers currently
+  don't work with the 3D OSG visualizers.
+
+- Added new features for various tutorials and showcases.
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.6.0/WHATSNEW>`__ file for more detail and
+`download INET-3.6.0 <https://github.com/inet-framework/inet/releases/download/v3.6.0/inet-3.6.0-src.tgz>`__
+now.

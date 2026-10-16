@@ -1,0 +1,32 @@
+:orphan:
+:date: 2022-04-29
+:category: news
+
+=====================================
+INET-4.3.9, 4.2.10 and 3.8.3 Released
+=====================================
+
+These maintenance releases contain compatibility fixes for OMNeT++ 6.0 and OMNeT++ 5.7.
+
+Here is an OMNeT++ compatibility list for various INET versions:
+
+- INET 3.7.x: OMNeT++ 5.3 - 5.6.2
+- INET 3.8.3: OMNeT++ 5.7.0, 6.0
+- INET 4.2.5: OMNeT++ 5.4.1 - 5.6.2
+- INET 4.2.10: OMNeT++ 5.7.0, 6.0
+
+If you have a project that uses OMNeT++ 5.x and INET 3.x we recommend to migrate in several smaller steps (at least internally):
+
+1. Migrate to OMNeT++ 5.7
+2. Migrate to INET 3.8
+3. Migrate to OMNeT++ 6.0
+4. Migrate to INET 4.2.10
+5. Finally migrate to INET 4.3.9 (or the master branch)
+
+(step 3 and 4 can be done in reverse order, too)
+
+`Download INET-4.3.9 <https://github.com/inet-framework/inet/releases/download/v4.3.9/inet-4.3.9-src.tgz>`__
+
+`Download INET-4.2.10 <https://github.com/inet-framework/inet/releases/download/v4.2.10/inet-4.2.10-src.tgz>`__
+
+`Download INET-3.8.3 <https://github.com/inet-framework/inet/releases/download/v3.8.3/inet-3.8.3-src.tgz>`__

@@ -1,0 +1,19 @@
+:orphan:
+:date: 2026-02-20
+:category: news
+
+===================
+INET-4.6.0 Released
+===================
+
+This is a new feature release in the INET 4.x branch. Highlights include new
+protocol implementations for QUIC, Ethernet 10BASE-T1S, IPsec, and MRP; major
+refinements to the clock model; a reimplementation of IEEE 802.1AS (gPTP); and
+an important refactoring of the wireless physical layer's analog domain. The
+release continues to focus on improving correctness, accuracy, modularity, and
+long-term maintainability while addressing several long-standing limitations.
+Requires OMNeT++ 6.2 or later.
+
+For general overview see `WHATSNEW <https://github.com/inet-framework/inet/blob/v4.6.0/WHATSNEW>`__
+
+`Download INET-4.6.0 <https://github.com/inet-framework/inet/releases/download/v4.6.0/inet-4.6.0-src.tgz>`__

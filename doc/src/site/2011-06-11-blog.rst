@@ -1,0 +1,13 @@
+:orphan:
+:date: 2011-06-11
+:category: progress
+
+======
+Update
+======
+
+For the last six months or so, development has taken place in the **master** branch of the repository, with periodic releases of that branch as INET-1.99.x.
+
+To see what's been done, check the WHATSNEW file in the repository, or browse the commits directly.
+
+Short-term plans include the integration of the 802.15.4 model from INETMANET, HttpTools and MiXiM.

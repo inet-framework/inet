@@ -1,0 +1,30 @@
+:orphan:
+:date: 2021-09-01
+:category: news
+
+==================================
+INET-4.3.3 and INET 4.2.6 Released
+==================================
+
+These maintenance releases contain compatibility fixes for OMNeT++ 6.0 Preview 12 and OMNeT++ 5.7 Preview 1 or later.
+
+We are releasing these versions in the hope that they will ease the work of migrating your project to OMNeT++ 6.0. Here is an OMNeT++ compatibility list for various INET versions:
+
+- INET 3.7.x: OMNeT++ 5.3 - 5.6.2
+- INET 3.8.x: OMNeT++ 5.7.x (pre1 or later), 6.x (pre12 or later)
+- INET 4.2.5: OMNeT++ 5.4.1 - 5.6.2
+- INET 4.2.6: OMNeT++ 5.7.x (pre1 or later)
+- INET 4.3.3: OMNeT++ 6.x (pre12 or later)
+
+If you have a project that uses OMNeT++ 5.x and INET 3.x we recommend to migrate in several smaller steps (at least internally):
+
+1. Migrate to OMNeT++ 5.7 and INET 3.8
+2. Migrate to OMNeT++ 6.0 and then to INET 4.3
+
+or alternatively:
+1. Migrate to OMNeT++ 5.7 and INET 3.8
+2. Migrate to INET 4.2.6 and then to OMNeT++ 6.0 and INET 4.3
+
+`Download INET-4.2.6 <https://github.com/inet-framework/inet/releases/download/v4.2.6/inet-4.2.6-src.tgz>`__
+
+`Download INET-4.3.3 <https://github.com/inet-framework/inet/releases/download/v4.3.3/inet-4.3.3-src.tgz>`__

@@ -1,0 +1,13 @@
+:orphan:
+:date: 2023-08-29
+:category: news
+
+===================
+INET-4.5.2 Released
+===================
+
+A minor patch release of INET 4.5 has been released containing several `fixes <https://github.com/inet-framework/inet/compare/v4.5.1...v4.5.2>`__ since the 4.5.1 version.
+
+For general overview see `WHATSNEW <https://github.com/inet-framework/inet/blob/v4.5.2/WHATSNEW>`__
+
+`Download INET-4.5.2 <https://github.com/inet-framework/inet/releases/download/v4.5.2/inet-4.5.2-src.tgz>`__

@@ -1,0 +1,17 @@
+:orphan:
+:date: 2015-01-26
+:category: progress
+
+===================================
+Update on Coverity and PHY Modeling
+===================================
+
+We added a bit/symbol-level physical layer model for the IEEE 802.11 OFDM PHY,
+and a generic APSK model for experimentation. The implementation includes
+forward error correction, scambling, interleaving and modulation.
+We have also started to run simulations to compare the symbol-level models
+with frame-level simulations for model verification.
+
+We have fixed more than 300 defects found by Coverity, decreasing Defect Density to 0.5/kLoC.
+
+We plan to release 2.99.1 in the next few weeks.

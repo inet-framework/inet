@@ -1,0 +1,14 @@
+:orphan:
+:date: 2015-12-17
+:category: news
+
+===================================
+INET-3.2.0 Stable Release Available
+===================================
+
+For this release, we put a lot of work into refining and validating the new, extensible 802.11 MAC model to make it ready for replacing the old codebase. We used the ns-3 Wifi model for validation. This INET version, in addition to other improvements and bug fixes, also compiles with the recently released 3rd beta of OMNeT++ 5.0.
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.2.0/WHATSNEW>`__ file for more detail and
+`download INET-3.2.0 <https://github.com/inet-framework/inet/releases/download/v3.2.0/inet-3.2.0-src.tgz>`__
+now.

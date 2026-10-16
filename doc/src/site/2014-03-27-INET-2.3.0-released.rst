@@ -1,0 +1,70 @@
+:orphan:
+:date: 2014-03-27
+:category: news
+
+===================================
+INET-2.3.0 Stable Release Available
+===================================
+
+We are happy to announce the latest stable version of the INET Framework. This version requires OMNeT++ 4.3 or 4.4.
+
+This release contains several new protocols, and a lot of changes that were backported from the current integration branch (destined to be INET 3.0).
+
+Application startTime/stopTime fixes:
+
+- apps start sending at startTime, and send their last packet before stopTime
+- negative stopTime means sending forever
+- if startTime and stopTime are the same, the app sends a single packet only (except TCP apps)
+
+DHCPServer and Client:
+
+- The whole implementation has been reviewed to bring it closer to the standards defined in RFC 2131 and 2132.
+- Major changes were made both in client's and server's state machines. It is now extended with new states (INIT-REBOOT, REBOOTING) and with new message types (DHCPNAK, DHCPDECLINE). The new states allow the user to model scenarios with lifecycle events.
+- The server's performance model has been removed.
+- The internal representation of the DHCP options were moved to the DHCPOptions INET message definition file.
+- Limitation: The client module currently does not support multiple DHCP servers and BOOTP relay agents.
+
+SCTP improvements submitted by Irene Rungeler and Thomas Dreibholz:
+
+- added CMT support (Concurrent Multipath Transfer)
+- added SCTP NAT support
+- added support for using SCTP over IPv6
+
+STP / RSTP support (802.1d) added to the EthernetSwitch:
+
+- STP: added IEEE 802.1D-1998 implementation of Spanning Tree Protocol. The source code is based on the ANSA (https://github.com/kvetak/ANSA) implementation.
+- RSTP: added IEEE 802.1D-2004 implementation of Spanning Tree Protocol. The source code is based on Juan Luis Garrote Molinero's implementation from INETMANET.
+- Interfaces can be configured using the new L2NetworkConfigurator module. This module allows one to configure network scenarios at Layer 2.
+- Replaced the EtherSwitch relay unit with a new, STP/RSTP capable one. The CPU and memory modelling are no longer supported in this relay unit.
+
+Nodes automatically pick-up the network configuration on restart:
+
+- An IPv4NodeConfigurator module has been added to hosts, which is responsible for configuring the host on restart based on information stored in the IPv4NetworkConfigurator module.
+
+INetFilter::IHook API:
+
+- Modules can now hook into the IP module with the new 'NetFilter' API. Routing protocols can be implemented now without modifying the IP module's code. ManetRoutingBase, InternetCloud and ARP have been updated to use the new 'NetFilter' API.
+
+Added new routing protocols:
+
+- RIP (networklayer/routing/rip)
+- GPSR (networklayer/routing/gpsr)
+- DYMO (networklayer/routing/dymo)
+
+These protocols use INetFilter::IHook, too.
+
+Revised Mobility code: Split the 'models' directory into multiple directories:
+
+- contract - specifies the interface of mobility models
+- common - shared files among mobility models that are not complete mobility models
+- static - mobility models that actually don't move
+- single - mobility models controlling only one moving object
+- group - mobility models controlling multiple interlinked moving objects
+
+Radio:
+
+- Added the Stanford University Interim radio propagation model contributed by Konrad Polys and Krzysztof Grochla.
+
+In addition, there were several bugfixes and smaller improvements See the WHATSNEW and per-directory ChangeLog files for further details.
+
+You can download INET-2.3.0 `here </Download.html>`__.

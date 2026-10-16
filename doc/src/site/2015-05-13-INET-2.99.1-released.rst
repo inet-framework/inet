@@ -1,0 +1,52 @@
+:orphan:
+:date: 2015-05-13
+:category: news
+
+=========================================
+INET-2.99.1 Development Release Available
+=========================================
+
+This release is the second snapshot of the development that has begun in
+early 2013, and will culminate in the release of INET-3.0. The code is
+now fairly stable and we do not expect major changes before 3.0.
+
+The highlights of this release are:
+
+- Includes a new packet/bit/symbol level physical layer model for the 802.11
+  OFDM PHY according to the IEEE 802.11-2012 standard, and a hypothetical
+  generic packet/bit/symbol level APSK physical layer model for further
+  experimentation. The new implementations include forward error correction
+  encoding/decoding, scrambling/descrambling, interleaving/deinterleaving, and
+  modulation/demodulation.
+
+- Contains fixes for more than 300 defects found by Coverity, an online C++
+  static code analysis tool. The reported Defect Density is decreased to
+  0.5/kLoC which is considered a result. You can find the detailed results at
+  https://scan.coverity.com/projects/3472
+
+- Contains several other memory leak and memory management fixes reported by
+  valgrind memcheck.
+
+- Modernizes C++ source code using new C++11 features such as nullptr, auto
+  types, range loop, override, etc.
+
+- A new tool to enable/disable INET features from the command line.
+
+- Rewritten serializer classes
+
+- SCTP improvements
+
+- New IGMPv3, PIM-DM and PIM-SM models.
+
+- Improved IPv4NetworkConfigurator
+
+- TUN/TAP virtual network interfaces
+
+- New wireless tutorial
+
+- Added INET version macros (INET_VERSION, INET_PATCH_LEVEL)
+
+This version requires OMNeT++ 4.6 or later. Read
+`what's new <https://github.com/inet-framework/inet/blob/v2.99.1/WHATSNEW>`__ and
+`download INET-2.99.1 <https://github.com/inet-framework/inet/releases/download/v2.99.1/inet-2.99.1-src.tgz>`__
+now.

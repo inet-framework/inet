@@ -1,0 +1,13 @@
+:orphan:
+:date: 2023-08-25
+:category: news
+
+===================
+INET-4.5.1 Released
+===================
+
+This patch release resolves a Windows-specific linker error (missing symbols) that occurred when trying to build model frameworks based on INET. It was fixed by adding INET_API annotations where they were missing.
+
+For general overview see `WHATSNEW <https://github.com/inet-framework/inet/blob/v4.5.1/WHATSNEW>`__
+
+`Download INET-4.5.1 <https://github.com/inet-framework/inet/releases/download/v4.5.1/inet-4.5.1-src.tgz>`__

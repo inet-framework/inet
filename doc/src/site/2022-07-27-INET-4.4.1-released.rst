@@ -1,0 +1,18 @@
+:orphan:
+:date: 2022-07-27
+:category: news
+
+===================
+INET-4.4.1 Released
+===================
+
+This is a minor bugfix release, mostly fixing linker errors on Windows for projects depending on INET.
+
+- Fixed #758
+- Added several INET_API markers to fix linker errors on Windows
+- Fixed duplicate symbol linker errors on Windows when using template classes as a base class.
+- Fixed some inline method declarations.
+
+For general overview see `WHATSNEW <https://github.com/inet-framework/inet/blob/v4.4.1/WHATSNEW>`__
+
+`Download INET-4.4.1 <https://github.com/inet-framework/inet/releases/download/v4.4.1/inet-4.4.1-src.tgz>`__

@@ -1,0 +1,17 @@
+:orphan:
+:date: 2023-04-04
+:category: news
+
+===================
+INET-4.5.0 Released
+===================
+
+This is a new minor stable release within the INET 4.x branch. The main feature of this release is the ability to concurrently run multiple simulations within the same process (requires OMNeT++ 7.0 preview 2 or later), along with an extended Ethernet cut-through switching functionality.
+
+There are also a number of small improvements, and several bug fixes. Some changes are backward incompatible, so existing models may need to be updated. This version requires OMNeT++ 6.0 or later.
+
+For a complete list of all added, removed, and changed folders, NED modules, packet chunks, packet tags, statistics, C++ classes, and signals please refer to the ChangeLog file in the src folder.
+
+For general overview see `WHATSNEW <https://github.com/inet-framework/inet/blob/v4.5.0/WHATSNEW>`__
+
+`Download INET-4.5.0 <https://github.com/inet-framework/inet/releases/download/v4.5.0/inet-4.5.0-src.tgz>`__

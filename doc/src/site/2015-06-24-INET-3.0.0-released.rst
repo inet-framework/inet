@@ -1,0 +1,72 @@
+:orphan:
+:date: 2015-06-24
+:category: news
+
+===================================
+INET-3.0.0 Stable Release Available
+===================================
+
+INET 3.0.0 is now available for download. This release contains a lot of
+new features and fixes compared to 2.6.
+Please read the `what's new <https://github.com/inet-framework/inet/blob/v3.0.0/WHATSNEW>`__
+file carefully to see all the changes in detail. This release is not source compatible
+with 2.6 so you may need to adjust your models after upgrading.
+
+Highlights:
+
+- A new physical layer model that builds upon the INET and MiXiM physical
+  layers, and brings them to new heights. Design goals were extreme
+  modularity, extensibility, the ability to support (and easily switch
+  between) various levels of detail, and the ability to add support for
+  exploiting various pieces of parallel hardware.
+- Includes a new packet/bit/symbol level physical layer model for the 802.11
+  OFDM PHY according to the IEEE 802.11-2012 standard, and a hypothetical
+  generic packet/bit/symbol level APSK physical layer model for further
+  experimentation. The new implementations include forward error correction
+  encoding/decoding, scrambling/descrambling, interleaving/deinterleaving, and
+  modulation/demodulation.
+- Extensive refactoring aimed at improving code quality. It includes
+  directory restructuring, code formatting, refactoring of init stages and
+  publish-subscribe communication, and more.
+- Modernized C++ source code using new C++11 features such as nullptr, auto
+  types, range loop, override, etc.
+- Network layer refactoring that allows higher layer protocols (including
+  routing protocols) to be written in a network protocol agnostic manner.
+- Numerous SCTP improvements
+- New IGMPv3, PIM-DM and PIM-SM models
+- Improved IPv4NetworkConfigurator to support multi-path routing scenarios.
+- TUN/TAP virtual network interfaces
+- Network Emulation feature no longer depends on OMNeT++ to detect the presence
+  of PCAP. Instead the feature can be turned on/off by the user.
+- Improved response time on external interfaces.
+- Added support for sending NF_LINK_BREAK signal from BMAC and CSMA. This is
+  required for certain routing protocols (i.e. AODV) to function properly.
+- Added a new power model:
+
+  - Removed obsolete classes: IBattery, BasicBattery, InetSimpleBattery and Energy.
+  - Added new interfaces: IEnergyConsumer, IEnergyStorage, and IEnergyGenerator.
+  - Added implementations: IdealEnergyStorage, and SimpleEnergyStorage.
+
+- Added a new physical environment model and removing obsolete classes:
+  Obstacle, ObstacleControl, and AnnotationManager.
+- Added new geometry model:
+
+  - orientation related classes: EulerAngles, Rotation, and Quaternion.
+  - basic 3D geometry classes: LineSegment, Box, Plane, and Polygon.
+  - 3D convex shapes: Cuboid, Sphere, Prism, and Polyhedron.
+  - geometry cache data structures: SpatialGrid, QuadTree, and BVHTree.
+
+- Added support for drawing the physical objects on a compound module canvas
+  (Tkenv) in 2D as seen from a configured view angle.
+- Rewritten packet serializer classes.
+- Added a new StaticConcentricMobility similar to StaticGridMobility that places
+  nodes on concentric circles.
+- Removed TracCI and TraCIScenarioManager because these modules are maintained
+  in the Veins framework.
+- New step by step wireless tutorial
+- A new tool to enable/disable INET features from the command line
+
+This version requires OMNeT++ 4.6 or later. Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.0.0/WHATSNEW>`__ file for more detail and
+`download INET-3.0.0 <https://github.com/inet-framework/inet/releases/download/v3.0.0/inet-3.0.0-src.tgz>`__
+now.

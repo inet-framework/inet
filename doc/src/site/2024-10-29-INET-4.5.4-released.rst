@@ -1,0 +1,21 @@
+:orphan:
+:date: 2024-10-29
+:category: news
+
+===================
+INET-4.5.4 Released
+===================
+
+A minor patch release containing OMNeT++ 6.1 compatibility fixes (enum related issues). It contains also `fixes <https://github.com/inet-framework/inet/compare/v4.5.2...v4.5.4>`__ for #880, #886, #913, #919, #956, #967, #974, #982. Several memory leak errors were fixed. Added logging and testing framework enhancements. Added a python/requirements.txt so Python dependencies can be installed by pip install -r python/requirements.txt. Fixed escaping errors with Python 3.12 in pythons scripts.
+
+Test framework enhancements:
+
+- Added new commands inet_run\_*_tests to allow running various tests.
+- Smoke tests are executed for run #0 only by default.
+- Tests marked intentionally as SKIP are now left out from the test execution.
+- Added inet_run_release_tests for pre-release testing.
+- A lot of miscellaneous fixes.
+
+For general overview see `WHATSNEW <https://github.com/inet-framework/inet/blob/v4.5.4/WHATSNEW>`__
+
+`Download INET-4.5.4 <https://github.com/inet-framework/inet/releases/download/v4.5.4/inet-4.5.4-src.tgz>`__

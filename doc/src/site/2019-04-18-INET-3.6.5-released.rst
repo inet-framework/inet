@@ -1,0 +1,49 @@
+:orphan:
+:date: 2019-04-18
+:category: news
+
+===================================
+INET-3.6.5 Stable Release Available
+===================================
+
+This release contains minor bug fixes and compatibility fixes for the OMNeT++ 5.4.1
+release and for recent Linux distros. It requires OMNeT++ 5.3 or later.
+
+General:
+
+- Added missing measurement units for 0 values in NED and INI files
+- NED files are now using fully qualified type names
+- Added missing doParsimPacking/doParsimUnpacking in L3Address
+
+Ethernet:
+
+- Fixed 'EtherMAC swallows frames when PAUSE is engaged (#391)'
+- Fixed 'Cannot abort PAUSE (LFC) before timeout (#390)'
+  (author: Danushka Menikkumbura)
+
+ieee802.11:
+
+- Fixed ACK frame duration bug where the duration was incorrectly
+  rounded up in seconds instead of microseconds for data fragment ACKs.
+
+TCP:
+
+- Bugfix: static variables were removed, but remained in header
+
+SCTP:
+
+- Set the DupTsn relative to the localDiffTSN
+
+IPv6:
+
+- Added constructors in AdvPrefix.
+
+Visualizers:
+
+- Removed dependence on ObjectLocatorNode as it was removed in recent
+  versions of osgEarth
+
+Read the
+`what's new <https://github.com/inet-framework/inet/blob/v3.6.5/WHATSNEW>`__ file for more detail and
+`download INET-3.6.5 <https://github.com/inet-framework/inet/releases/download/v3.6.5/inet-3.6.5-src.tgz>`__
+now.

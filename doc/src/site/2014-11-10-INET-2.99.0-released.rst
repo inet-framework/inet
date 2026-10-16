@@ -1,0 +1,31 @@
+:orphan:
+:date: 2014-11-10
+:category: news
+
+=========================================
+INET-2.99.0 Development Release Available
+=========================================
+
+This release is a snapshot of the development that has begun in early 2013,
+and will culminate in the release of INET-3.0. The code is work in
+progress, which means all details may still change until 3.0 is reached.
+
+The highlights of this release are:
+
+- Network layer refactoring that allows higher layer protocols (including
+  routing protocols) to be written in a network protocol agnostic manner.
+
+- A new physical layer model that builds upon the INET and MiXiM physical
+  layers, and brings them to new heights. Design goals were extreme
+  modularity, extensibility, the ability to support (and easily switch
+  between) various levels of detail, and the ability to add support for
+  exploiting various pieces of parallel hardware.
+
+- Extensive refactoring aimed at improving code quality. It includes
+  directory restructuring, code formatting, refactoring of init stages and
+  publish-subscribe communication, and more.
+
+This version requires OMNeT++ 4.6 or later. Read
+`what's new <https://github.com/inet-framework/inet/blob/v2.99.0/WHATSNEW>`__ and
+`download INET-2.99.0 <https://github.com/inet-framework/inet/releases/download/v2.99.0/inet-2.99.0-src.tgz>`__
+now.

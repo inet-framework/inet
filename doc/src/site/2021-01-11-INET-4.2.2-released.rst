@@ -1,0 +1,12 @@
+:orphan:
+:date: 2021-01-11
+:category: news
+
+===================================
+INET-4.2.2 Stable Release Available
+===================================
+
+This release contains a compatibility fix to build and run properly on Windows with OMNeT++ 6 Preview 10.
+
+`Download INET-4.2.2 <https://github.com/inet-framework/inet/releases/download/v4.2.2/inet-4.2.2-src.tgz>`__
+now.

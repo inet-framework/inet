@@ -1,0 +1,12 @@
+:orphan:
+:date: 2011-05-27
+:category: news
+
+================================
+Development Snapshot INET-1.99.1
+================================
+
+Work on INET is progressing fast. The 1.99.x snapshots represent the
+consolidation of the INET codebase as well as integrating various external
+INET extensions created by the community, and will eventually result in a
+2.0 stable release. Download the source `here </Download.html>`__.

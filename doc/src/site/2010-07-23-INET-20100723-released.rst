@@ -1,0 +1,11 @@
+:orphan:
+:date: 2010-07-23
+:category: news
+
+======================
+INET-20100723 Released
+======================
+
+A new INET Framework has been released. The most significant change is new
+features for the TCP model by Thomas Reschka. See the
+`release announcement <http://github.com/inet-framework/inet/blob/master/WHATSNEW>`__.

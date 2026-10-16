@@ -1,0 +1,15 @@
+:orphan:
+:date: 2011-02-25
+:category: news
+
+======================
+INET-20110225 Released
+======================
+
+We are happy to announce a new release of the INET Framework,
+INET-20110225. This release contains ``#include`` fixes needed for INET to
+compile with OMNeT++ 4.2b1. (If you have your own copy or fork of INET, apply
+`this <https://github.com/inet-framework/inet/commit/869de7139b3bc5cd43443a3fe978c5fec42fe331>`__ and
+`this <https://github.com/inet-framework/inet/commit/c86b8e5bd6e38eabcb677117e27afb7295db422f>`__ patch.)
+Other changes in this INET release include SCTP fixes and additional SCTP statistics by Alberto Cortes.
+`Download <https://github.com/inet-framework/inet/releases/download/master_20110225/inet-20110225-src.tgz>`__

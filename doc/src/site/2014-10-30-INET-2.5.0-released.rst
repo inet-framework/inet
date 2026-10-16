@@ -1,0 +1,17 @@
+:orphan:
+:date: 2014-10-30
+:category: news
+
+===================================
+INET-2.5.0 Stable Release Available
+===================================
+
+We are happy to announce the latest stable version of the INET Framework.
+This version requires OMNeT++ 4.6.
+
+This release contains some smaller fixes:
+
+- Compiles with OMNeT++ 4.6 with C++11 compatibility turned on.
+- added netperfmeter application by Thomas Dreibholz
+
+You can download INET-2.5.0 `here </Download.html>`__.

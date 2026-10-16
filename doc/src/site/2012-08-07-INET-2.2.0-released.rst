@@ -1,0 +1,59 @@
+:orphan:
+:date: 2012-08-07
+:category: news
+
+===================================
+INET-2.0.0 Stable Release Available
+===================================
+
+We are happy to announce the INET Framework 2.0.0 release. The INET
+Framework is an open-source communication networks simulation package for
+the OMNeT++ simulation environment. It contains models for several wired
+and wireless networking protocols, including UDP, TCP, SCTP, IP, IPv6,
+Ethernet, PPP, 802.11, MPLS, OSPF, and many others. We recommend that you
+port your existing models to the new 2.0 version so you can benefit from
+new features and improvements.
+
+New features:
+
+- INET is now partitioned into several "project features" that can be turned on or off independently. This can greatly reduce the compile time by turning off unused parts of INET.
+- Result recording has been ported to use the new signal-based statistics collection framework; this allows better separation of the model and the statistic collection code.
+- New Differentiated Services framework for QoS simulations.
+- New IPv4NetworkConfigurator for more powerful configuration of IP networks.
+- New protocols: DHCP, BGPv4; interated xMIPv6 (mobile IPv6).
+- New MANET routing protocols (from INETMANET): AODV, DSR, BATMAN, DYMO, OLSR
+- New PcapRecorder module for capturing traffic traces.
+- New VoIP application that allows sending an actual voice stream over the network.
+- Integrated HttpTools for simulating HTTP-based applications.
+- New mobility modules including TraCI (taken over from the Veins project)
+- Added an LwIP-based TCP implementation.
+- Writing a manual for INET has been started and already made a great progress.
+
+Improvements:
+
+- Node models refactored for better extensibility (StandardHost, AdhocHost, WirelessHost, Router).
+
+  - Different types of TCP, UDP and SCTP applications can co-exist in the same host.
+  - Alternate UDP and TCP implementation can be plugged-in. Three independent TCP implementations are available (OMNeT++ native, LwIP, NSC)
+  - Inside a host, submodules are instantiated only if they are actually required.
+  - Configurable hooks have been added in the network layer to allow packet drop/duplication scenarios.
+  - Routers now support an unlimited number of wireless, Ethernet, point-to-point and external interfaces.
+  - Mobility support in Router and StandardHost is now optional.
+  - AccessPoints now have both wireless and Ethernet interfaces (bridged).
+
+- Revised OSPFv2 model.
+- TCP: Transmission mode (byte count, object and byte stream) is now specified by the application.
+- UDP: multicast, broadcast and TTL support. Improved socket API.
+- IPv6: implemented default router selection, tunneling and datagram fragmentation/reassembly for PPP links.
+- IPv4: reimplemented multicast routing
+- Ethernet: EtherMAC refactored for better readability; added reconnect support, better PAUSE support, support for 40 and 100 Gigabit Ethernet.
+- Ethernet datarate is now configured on the channels (not in the MAC). Also added new Ethernet channel types: Eth10M, Eth100M, Eth1G, Eth10G, Eth40G and Eth100G
+- IEEE802.11 a/b/g/s model: Unified several implementations into a single MAC module.
+- Multiple radio support for wireless hosts; radio infrastructure has been refactored.
+- Refactoring: Mobility support is now completely independent of the radio infrastructure and it is compatible with the MiXiM mobility modules.
+- A comprehensive test suite has be devised, and deployed in a continuous testing environment (Jenkins).
+- A large number of bug fixes and other improvements.
+
+You can find the detailed change log `here <https://github.com/inet-framework/inet/blob/v2.0.0/WHATSNEW>`__.
+
+You can download INET-2.0.0 `here </Download.html>`__.

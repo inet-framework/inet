@@ -1,0 +1,21 @@
+:orphan:
+:date: 2010-08-18
+:category: progress
+
+======================
+Current Topic Branches
+======================
+
+The following topic branches are currently open in the INET repository:
+
+- ``topic/bgpv4`` -- recently contributed BGP protocol (mostly done)
+- ``topic/ethernet`` -- changing Ethernet to use channel datarate instead of parameter (mostly done)
+- ``topic/ospfrenaming`` -- OSPF model code style fixes (mostly done)
+- ``topic/signals`` -- signals-based result recording instead of cOutVector/recordScalar (halfway)
+- ``topic/PcapTrace`` -- capturing and recording PCAP traces via GUI
+- ``topic/tcp_lwip`` -- lwIP integration as alternative TCP (mostly done)
+- ``topic/tcp_socket_read`` -- application-level flow control in TCP (in work)
+- ``topic/tcptransfermode`` -- refactoring of TCP send/recvQueueClass to a transferMode parameter (halfway)
+- ``topic/wizards`` -- wizards to generate wireless and other networks (halfway)
+
+The plan is to have these branches finished, reviewed, and merged into master over the next few months.

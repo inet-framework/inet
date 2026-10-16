@@ -1,0 +1,19 @@
+:orphan:
+:date: 2022-05-16
+:category: news
+
+===================
+INET-4.4.0 Released
+===================
+
+This is a new minor stable release of the INET 4.x branch. The highlight of this release is the implementation of several Time-Sensitive Networking (TSN) features. Also, INET is now fully licensed under LGPL.
+
+Experimental Python support has been added for running simulations concurrently and optionally on an SSH cluster. This is mostly useful for running parameter studies, automated testing and optimizing parameters.
+
+There are also a number of small improvements, and several bug fixes. Some changes are backward incompatible, so existing models may need to be updated. This version requires OMNeT++ 6.0 or later.
+
+For a complete list of all added, removed, and changed folders, NED modules, packet chunks, packet tags, statistics, C++ classes, and signals please refer to the ChangeLog file in the src folder.
+
+For general overview see `WHATSNEW <https://github.com/inet-framework/inet/blob/v4.4.0/WHATSNEW>`__
+
+`Download INET-4.4.0 <https://github.com/inet-framework/inet/releases/download/v4.4.0/inet-4.4.0-src.tgz>`__

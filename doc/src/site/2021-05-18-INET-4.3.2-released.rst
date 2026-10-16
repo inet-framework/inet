@@ -1,0 +1,13 @@
+:orphan:
+:date: 2021-05-18
+:category: news
+
+==================================
+INET-4.3.2 and INET 4.2.5 Released
+==================================
+
+These maintenance releases contain compatibility fixes for OMNeT++ 6 Preview 11.
+
+`Download INET-4.2.5 <https://github.com/inet-framework/inet/releases/download/v4.2.5/inet-4.2.5-src.tgz>`__
+
+`Download INET-4.3.2 <https://github.com/inet-framework/inet/releases/download/v4.3.2/inet-4.3.2-src.tgz>`__

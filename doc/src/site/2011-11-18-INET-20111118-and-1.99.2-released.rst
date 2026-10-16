@@ -1,0 +1,13 @@
+:orphan:
+:date: 2011-11-18
+:category: news
+
+====================================================================
+New INET Releases: INET-20111118 (stable), INET-1.99.2 (development)
+====================================================================
+
+INET-20111118 is an update of the previous stable INET version to the
+just-released OMNeT++ 4.2, with a few bug fixes. The other download,
+INET-1.99.2 represents a snapshot of the development effort ongoing since
+the last 1.99.x release in March, which will eventually result in the 2.0
+stable release. Download the source `here </Download.html>`__.

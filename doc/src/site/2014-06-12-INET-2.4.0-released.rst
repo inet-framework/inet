@@ -1,0 +1,23 @@
+:orphan:
+:date: 2014-06-12
+:category: news
+
+===================================
+INET-2.4.0 Stable Release Available
+===================================
+
+We are happy to announce the latest stable version of the INET Framework.
+This version requires OMNeT++ 4.3 or 4.4.
+
+This release contains some smaller fixes:
+
+- Added support for link break detection in IdealWireless. (using the NF_LINK_BREAK signal)
+- VoIPStream updated to match the latest version of ffmpeg library.
+- Added packet printers that can dump packet data in OMNeT++ 4.5/Tkenv in the packet trace window.
+- Fixed non-conformant 802.11 WAITACK timeout computation
+
+and a new routing protocol:
+
+- Brand new AODV implementation in network/routing folder (backported from the integration branch).
+
+You can download INET-2.4.0 `here </Download.html>`__.

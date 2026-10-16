@@ -1,0 +1,12 @@
+:orphan:
+:date: 2012-03-21
+:category: news
+
+=========================================
+New INET Development Release: INET-1.99.4
+=========================================
+
+We have just released a new version from the development branch of INET. It
+contains some features that did not make into the previous version. You can
+download INET-1.99.4 `here </Download.html>`__, or read what's new in this version
+`here <https://github.com/inet-framework/inet/blob/integration_1.99.4/WHATSNEW>`__.
