@@ -120,6 +120,7 @@ simple Ipv4 extends SimpleModule like IIpv4
         @statistic[packetDropLifetimeExpired](title="packet drop: lifetime expired"; source=packetDropReasonIsLifetimeExpired(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNoInterfaceFound](title="packet drop: no interface found"; source=packetDropReasonIsNoInterfaceFound(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropNoRouteFound](title="packet drop: no route found"; source=packetDropReasonIsNoRouteFound(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
+        @statistic[packetDropPacketTooBig](title="packet drop: packet too big"; source=packetDropReasonIsPacketTooBig(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
         @statistic[packetDropUndefined](title="packet drop: undefined"; source=packetDropReasonIsUndefined(packetDropped); record=count,sum(packetBytes),vector(packetBytes); interpolationmode=none);
     gates:
         input transportIn @labels(Ipv4ControlInfo/down,TcpHeader,UdpHeader,SctpHeader);

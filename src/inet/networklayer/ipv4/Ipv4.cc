@@ -980,6 +980,7 @@ void Ipv4::fragmentAndSend(Packet *packet)
     // if "don't fragment" bit is set, throw datagram away and send ICMP error message
     if (ipv4Header->getDontFragment()) {
         PacketDropDetails details;
+        details.setReason(PACKET_TOO_BIG);
         emit(packetDroppedSignal, packet, &details);
         EV_WARN << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
         icmp->sendPtbMessage(packet, mtu);
