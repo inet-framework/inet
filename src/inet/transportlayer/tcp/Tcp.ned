@@ -183,8 +183,9 @@ import inet.transportlayer.contract.ITcp;
 //  - RFC 5461 - TCP's Reaction to Soft Errors
 //    A soft ICMP error never aborts a connection (RFC 9293 MUST-56); a hard error
 //    aborts a connection in setup, also in SYN_RCVD. Linux, by parameter
-//    (`softIcmpErrorsAbortSetup`): an IPv4 net or host unreachable aborts a
-//    connection in setup too, the widespread behavior of section 4.
+//    (`softIcmpErrorsAbortSetup`): a soft error (a net or host unreachable, a time
+//    exceeded, a parameter problem) aborts a connection in setup too, the
+//    widespread behavior of section 4.
 //
 //  - RFC 5927 - ICMP Attacks against TCP
 //    Linux, by parameter (`icmpSequenceCheck`): an ICMP error whose quoted segment
@@ -532,7 +533,7 @@ simple Tcp extends SimpleModule like ITcp
         bool abortOnDataAfterClose = default(false); // model the full close of Linux close(): a CLOSE without halfClose also shuts the receive side down, and new data after it resets the connection (RFC 1122 section 4.2.2.13); false: RFC 9293 CLOSE, after which the application may still receive
         bool rfc5961AckCheck = default(false); // the ACK check of RFC 5961 section 5.2, which RFC 9293 allows (MAY-12) and Linux uses: a segment whose ACK lies below SND.UNA - MAX.SND.WND is dropped, and an ACK goes in reply; false: such an ACK counts as an old duplicate ACK
         bool icmpSequenceCheck = default(false); // true: an ICMP error whose quoted TCP segment has a sequence number outside SND.UNA to SND.MAX is ignored as stale or forged, as Linux (tcp_v4_err(), tcp_v6_err()) and the BSDs do and RFC 5927 section 4.1 describes; false: each ICMP error of the connection counts, as RFC 9293 section 3.9.2.2 says
-        bool softIcmpErrorsAbortSetup = default(false); // true: a soft ICMP Destination Unreachable (IPv4 codes 0, 1 and 5, IPv6 codes 0 and 3) aborts a connection in SYN_SENT or SYN_RCVD, as Linux (tcp_v4_err(), tcp_v6_err()) and RFC 5461 section 4 describe; false: RFC 9293 MUST-56, a soft error never aborts a connection
+        bool softIcmpErrorsAbortSetup = default(false); // true: a soft ICMP error (a Destination Unreachable with the IPv4 codes 0, 1 and 5 or the IPv6 codes 0 and 3, a Time Exceeded, a Parameter Problem) aborts a connection in SYN_SENT or SYN_RCVD, as Linux (tcp_v4_err(), tcp_v6_err()) and RFC 5461 section 4 describe; false: RFC 9293 MUST-56, a soft error never aborts a connection
         // Linux behaviors (no RFC)
         bool abortRstWithAck = default(false); // true: the RST of an abort carries the ACK bit and RCV.NXT, as Linux (tcp_send_active_reset()); false: <SEQ=SND.NXT><CTL=RST> of RFC 9293
         bool tsRecentAfterAckCheck = default(false); // false: TS.Recent takes the TSval of each acceptable segment before its ACK is processed (RFC 7323 section 5.3, R3); true: not from a segment that acknowledges data that was not sent, as Linux, which updates TS.Recent only after the ACK passes its check (tcp_replace_ts_recent() in tcp_ack())

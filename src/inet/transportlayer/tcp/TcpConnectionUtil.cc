@@ -690,11 +690,14 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
     // RFC 9293 section 3.9.2.2: a hard error SHOULD abort the connection (SHLD-26), also
     // in SYN_RCVD; a connection that is neither active nor forked nor Fast Open returns to
     // LISTEN, and its application, which has no socket for it yet, is not informed
-    // softIcmpErrorsAbortSetup: as Linux tcp_v4_err(), also a soft Destination Unreachable
-    // (codes 0, 1 and 5) aborts a connection setup (RFC 5461 section 4)
-    bool softAborts = state->softIcmpErrorsAbortSetup && errorInd->getType() == ICMP_DESTINATION_UNREACHABLE
-        && (errorInd->getCode() == ICMP_DU_NETWORK_UNREACHABLE || errorInd->getCode() == ICMP_DU_HOST_UNREACHABLE
-            || errorInd->getCode() == ICMP_DU_SOURCE_ROUTE_FAILED);
+    // softIcmpErrorsAbortSetup: as Linux tcp_v4_err(), also a soft error aborts a
+    // connection setup (RFC 5461 section 4): a Destination Unreachable with the codes 0,
+    // 1 and 5, a Time Exceeded and a Parameter Problem (RFC 9293 section 3.9.2.2)
+    bool softAborts = state->softIcmpErrorsAbortSetup
+        && ((errorInd->getType() == ICMP_DESTINATION_UNREACHABLE
+             && (errorInd->getCode() == ICMP_DU_NETWORK_UNREACHABLE || errorInd->getCode() == ICMP_DU_HOST_UNREACHABLE
+                 || errorInd->getCode() == ICMP_DU_SOURCE_ROUTE_FAILED))
+            || errorInd->getType() == ICMP_TIME_EXCEEDED || errorInd->getType() == ICMP_PARAMETER_PROBLEM);
     if ((isHardIcmpv4Error(errorInd->getType(), errorInd->getCode()) || softAborts)
         && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
     {
@@ -783,10 +786,13 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
     // RFC 9293 section 3.9.2.2: a hard error SHOULD abort the connection (SHLD-26), also
     // in SYN_RCVD; a connection that is neither active nor forked nor Fast Open returns to
     // LISTEN, and its application, which has no socket for it yet, is not informed
-    // softIcmpErrorsAbortSetup: as Linux tcp_v6_err(), also a soft Destination Unreachable
-    // (codes 0 and 3) aborts a connection setup (RFC 5461 section 4)
-    bool softAborts = state->softIcmpErrorsAbortSetup && errorInd->getType() == ICMPv6_DESTINATION_UNREACHABLE
-        && (errorInd->getCode() == NO_ROUTE_TO_DEST || errorInd->getCode() == ADDRESS_UNREACHABLE);
+    // softIcmpErrorsAbortSetup: as Linux tcp_v6_err(), also a soft error aborts a
+    // connection setup (RFC 5461 section 4): a Destination Unreachable with the codes 0
+    // and 3, a Time Exceeded and a Parameter Problem (RFC 9293 section 3.9.2.2)
+    bool softAborts = state->softIcmpErrorsAbortSetup
+        && ((errorInd->getType() == ICMPv6_DESTINATION_UNREACHABLE
+             && (errorInd->getCode() == NO_ROUTE_TO_DEST || errorInd->getCode() == ADDRESS_UNREACHABLE))
+            || errorInd->getType() == ICMPv6_TIME_EXCEEDED || errorInd->getType() == ICMPv6_PARAMETER_PROBLEM);
     if ((isHardIcmpv6Error(errorInd->getType(), errorInd->getCode()) || softAborts)
         && (fsm.getState() == TCP_S_SYN_SENT || fsm.getState() == TCP_S_SYN_RCVD))
     {
