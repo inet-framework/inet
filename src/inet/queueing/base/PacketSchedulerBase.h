@@ -49,7 +49,19 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public Transpar
      * move the packet.
      */
     virtual int schedulePacket() const = 0;
+    /**
+     * Returns the index of the input gate that schedulePacket() would return
+     * if each input held only the packets that the filter matches, or -1 if no
+     * input holds such a packet. This function is a query, so it must not
+     * change the state of the module. The base class calls it with a filter
+     * from the queries and the operations with an acceptance filter, and it
+     * throws an error; a scheduler that supports the acceptance filter
+     * overrides it. Such a scheduler may call it with nullptr from
+     * schedulePacket(): nullptr means that every packet matches.
+     */
+    virtual int schedulePacket(const IPacketFilterFunction *filter) const;
     virtual int callSchedulePacket() const;
+    virtual int callSchedulePacket(const IPacketFilterFunction *filter) const;
     /**
      * Updates the state of the module for a packet that goes through the input
      * gate with the given index. The base class calls this function one time
@@ -87,8 +99,8 @@ class INET_API PacketSchedulerBase : public PacketProcessorBase, public Transpar
     virtual Packet *canPullPacket(const cGate *gate) const override;
 
     virtual Packet *pullPacket(const cGate *gate) override;
-    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override { throw cRuntimeError("Invalid operation"); }
-    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override { throw cRuntimeError("Invalid operation"); }
+    virtual Packet *canPullPacket(const cGate *gate, const IPacketFilterFunction *filter) const override;
+    virtual Packet *pullPacket(const cGate *gate, const IPacketFilterFunction *filter) override;
     virtual Packet *pullPacketStart(const cGate *gate, bps datarate) override;
     virtual Packet *pullPacketEnd(const cGate *gate) override;
     virtual Packet *pullPacketProgress(const cGate *gate, bps datarate, b position, b extraProcessableLength) override;

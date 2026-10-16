@@ -137,6 +137,15 @@ that packet if the filter matches it, and ``nullptr`` otherwise. A class that ca
 the packets that the filter matches throws an error. If a class supports the filter and adds an
 effect in ``pullPacket()``, the filtered ``pullPacket()`` must add the same effect.
 
+A scheduler that extends ``PacketSchedulerBase`` supports the filter when it overrides this
+overload of ``schedulePacket()``. It returns the input that ``schedulePacket()`` would return if
+each input held only the packets that the filter matches. The base class then pulls from that input
+with the filter, and it calls ``handlePacketScheduled()`` as for a normal pull:
+
+.. code-block:: c++
+
+   int schedulePacket(const IPacketFilterFunction *filter) const override;
+
 A class that declares only one of the overloads hides the other one in its own scope. Add
 ``using IPassivePacketSource::pullPacket;`` (and the same for ``canPullPacket``) if the class calls
 the other overload without a qualifier.

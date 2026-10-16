@@ -80,9 +80,16 @@ void PriorityScheduler::removeAllPackets()
 
 int PriorityScheduler::schedulePacket() const
 {
+    return schedulePacket(nullptr);
+}
+
+int PriorityScheduler::schedulePacket(const IPacketFilterFunction *filter) const
+{
+    // without a filter, every packet matches
     for (size_t i = 0; i < providers.size(); i++) {
         int inputIndex = getInputGateIndex(i);
-        if (inputIndex == inProgressGateIndex || providers[inputIndex].canPullSomePacket())
+        if (filter == nullptr ? inputIndex == inProgressGateIndex || providers[inputIndex].canPullSomePacket()
+                              : providers[inputIndex].canPullPacket(filter) != nullptr)
             return inputIndex;
     }
     return -1;

@@ -67,10 +67,16 @@ void WrrScheduler::removeAllPackets()
 
 int WrrScheduler::schedulePacket() const
 {
+    return schedulePacket(nullptr);
+}
+
+int WrrScheduler::schedulePacket(const IPacketFilterFunction *filter) const
+{
     int firstWeighted = -1;
     int firstNonWeighted = -1;
     for (size_t i = 0; i < providers.size(); ++i) {
-        if (providers[i].canPullSomePacket()) {
+        // without a filter, every packet matches
+        if (filter == nullptr ? providers[i].canPullSomePacket() : providers[i].canPullPacket(filter) != nullptr) {
             if (buckets[i] > 0)
                 return (int)i;
             else if (firstWeighted == -1 && weights[i] > 0)

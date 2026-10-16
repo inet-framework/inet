@@ -22,6 +22,7 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IP
   protected:
     virtual void initialize(int stage) override;
     virtual int schedulePacket() const override;
+    virtual int schedulePacket(const IPacketFilterFunction *filter) const override;
 
   public:
     virtual int getMaxNumPackets() const override { return -1; }
