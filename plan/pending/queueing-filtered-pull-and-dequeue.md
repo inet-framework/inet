@@ -1,9 +1,9 @@
 # Implementation plan: the acceptance filter in the pull handshake, and the selective dequeue
 
 Checkout and revision: `inet-master`, branch `master` at `1b5dba65d3`. Two untracked files at the repository root (`ieee80211-edca-management-recovery.md`, `ieee80211-txop-boundaries-and-rate-selection.md`) are not related to this plan.
-Plan revision: draft 2, 2026-10-16. Draft 2 records the decisions of the owner (section 8).
+Plan revision: draft 3, 2026-10-16. Draft 2 records the decisions of the owner (section 8). Draft 3 records the work (section 9): the fingerprint check compares before with after (section 7), and the internal code follows D-6, which the owner asked for after a review of the first internal names.
 Approval: the owner approved the implementation of steps 1 to 5 of draft 2 on 2026-10-16 ("let's implement it"), on the branch `topic/queueing-filtered-pull` from `master` at `8f45b42ca2`. The owner decided D-4, D-5, the test category and the recommendation for the MAC on the same day.
-Status: in progress. Section 9 records the work.
+Status: implemented, ready for review, rebased onto master `ee4afb459d` on 2026-10-19. Section 9 records the work. The plan stays in `plan/pending/` until the change lands on master.
 Consumer: pull request inet-framework/inet#1343, branch `work/compressed-blockack-s3b`. Its first commit `45f4da2e28` ("queueing: add: preserve pull effects for selected packet extraction", parent `bba1db4c81`) solves the same problem in a different way. This plan replaces that commit.
 
 ## 1. Problem and intended behavior
@@ -155,15 +155,12 @@ A concrete class that knows its packets opts in:
 
 **D-5. `IPacketQueue` gets no new query.** A caller uses `canPullPacket(gate, filter)` at the output gate of the queue. The 802.11 MAC already looks up that gate in pull request #1343. This keeps the contract minimal ([AR-EXT-MINIMAL-SURFACE](../../doc/project/rule/architecture.md#ar-ext-minimal-surface)). The owner accepted this (section 8).
 
-**D-6. The scheduler decision gets one extension point.** `PacketSchedulerBase` implements the filtered query and pull once, on top of a new protected query:
+**D-6. The internal code reuses the current names and structure.** The code adds no internal name of its own. The owner rejected a first set of helper names in review, because they did not fit the symmetric names of the queueing bases:
 
-```cpp
-// Returns the index of the input gate whose accepted packet the module passes
-// on next, or -1. This function is a query. The base class throws an error.
-virtual int scheduleAcceptedPacket(const IPacketFilterFunction *filter) const;
-```
-
-The filtered pull then pulls from that input with the same filter. It applies the same effects as the unfiltered pull, through code that both paths share. `PriorityScheduler` and `WrrScheduler` override `scheduleAcceptedPacket()`. Each one keeps its normal decision and tests an input with `providers[i].canPullPacket(filter) != nullptr` instead of `canPullSomePacket()`. `WrrScheduler` updates its credit in the current `handlePacketScheduled()`, so the round stays correct. Each scheduler owns its decision. That is why the extension point is a protected virtual method ([AR-EXT-VIRTUAL-IS-A-PROMISE](../../doc/project/rule/architecture.md#ar-ext-virtual-is-a-promise)).
+- **The scheduler decision is an overload.** `PacketSchedulerBase` gets the protected overload `schedulePacket(filter)` and its checked call `callSchedulePacket(filter)`. They mirror `schedulePacket()` and `callSchedulePacket()`, as `classifyPacket(packet)` is the decision of a classifier with an argument. The filtered query uses `schedulePacket(filter)`, and the filtered pull uses `callSchedulePacket(filter)`, as the pair without a filter does. The base version of `schedulePacket(filter)` throws an error. Each scheduler owns its decision, so the extension point is a protected virtual method ([AR-EXT-VIRTUAL-IS-A-PROMISE](../../doc/project/rule/architecture.md#ar-ext-virtual-is-a-promise)).
+- **The filtered pull of a scheduler carries its own effects.** Its block of effects repeats the one of `pullPacket()`, as `pullPacket()`, `pullPacketStart()` and `pullPacketEnd()` already each carry their own.
+- **A scheduler decides in one place.** `PriorityScheduler` and `WrrScheduler` decide only in `schedulePacket(filter)`, and their `schedulePacket()` calls it with `nullptr`, which means that every packet matches. Without a filter, an input counts if `canPullSomePacket()` is true, as before. The schedulers cannot use a filter that matches every packet instead, because the decision passes the filter on to the inputs: an input without support for the filter, such as the gate in a `GatingPriorityQueue`, throws an error, and `canPullPacket()` of a `PassivePacketSource` creates the next packet, which would change the fingerprints. Comments at `anyPacket` and at `schedulePacket(filter)` give these reasons. `WrrScheduler` updates its credit in the current `handlePacketScheduled()`, so the round stays correct.
+- **The pull of a queue without a filter is the pull with a filter that matches every packet.** `PacketQueue::pullPacket(gate)` calls `pullPacket(gate, &anyPacket)`, with a file-local `static const CPacketFilterFunction`. The first packet that it matches is the front of the queue, so the behavior does not change, and the effects of a pull stay in one place.
 
 **D-7. No new state, signal or parameter.** The filter lives only for the length of one call, in the caller. Each filtered pull emits the signals of the normal pull ([QR-DESIGN-MINIMAL](../../doc/project/rule/quality.md#qr-design-minimal)).
 
@@ -199,11 +196,11 @@ The work happens in a dedicated worktree on the branch `topic/queueing-filtered-
 | Step | Purpose | Files and responsible component | Proposed change | Expected behavior | Verification |
 | --- | --- | --- | --- | --- | --- |
 | 1 | Add the contract. An interface change and its implementations must build together, so this is one commit. | `IPassivePacketSource.h`, `PassivePacketSourceRef.h`, every Base and direct implementer in section 5, the two module test sources, `PassivePacketSource`, `EmptyPacketSource`, `WHATSNEW`, the migration guide, `ch-queueing.rst` | Two pure virtual declarations (D-2); forwards in the Ref; "Invalid operation" in every Base and direct implementer (D-3); exact behavior in the two sources | AC-1, AC-7 for the parts that throw, AC-9; no unfiltered change | new test `_1` (section 7), all queueing tests, the two changed module tests, fingerprints |
-| 2a | Prepare `PacketQueue`. | `PacketQueue.h/.cc` | Move the pull effects of `pullPacket(gate)` into a non-virtual helper that takes the chosen packet. Behavior stays the same. | unchanged behavior | queueing tests, fingerprints |
-| 2b | `PacketQueue` makes the real choice. | `PacketQueue.h/.cc` | `canPullPacket(gate, filter)`: the first accepted packet in queue order. `pullPacket(gate, filter)`: the helper of step 2a with that packet. | AC-2, AC-6 | new test `_1` |
-| 3 | The priority and WRR schedulers make the real choice. | `PacketSchedulerBase.h/.cc`, `PriorityScheduler.h/.cc`, `WrrScheduler.h/.cc` | D-6. The unfiltered decision code stays as it is. | AC-3, AC-4, AC-6 | new test `_2` |
+| 2 | `PacketQueue` makes the real choice. | `PacketQueue.h/.cc` | `canPullPacket(gate, filter)`: the first accepted packet in queue order. `pullPacket(gate, filter)` takes it out with the effects of a pull, and `pullPacket(gate)` calls it with a filter that matches every packet (D-6). | AC-2, AC-6 | new test `_1` |
+| 3 | The priority and WRR schedulers make the real choice. | `PacketSchedulerBase.h/.cc`, `PriorityScheduler.h/.cc`, `WrrScheduler.h/.cc` | D-6. Without a filter, the decision stays as it is. | AC-3, AC-4, AC-6 | new test `_2` |
 | 4 | Compound queues pass the filter on. | `CompoundPacketQueueBase.h/.cc` | Filtered query and pull through `provider`; then `take()` and `packetPulled`, as in `pullPacket(gate)` | AC-5 | new test `_3` |
 | 5 | Add the selective dequeue (part B). | `IPacketQueue.h`, `PacketQueueBase.h/.cc`, `WHATSNEW`, the migration guide | Pure virtual `dequeuePacket(filter)`; `PacketQueueBase` implements it as `pullPacket(outputGate, filter)` plus `drop()` | AC-8 | new test `_3` |
+| 6 | Document the symmetry of the two handshakes, as the owner asked during the review. | the NED files and C++ class comments of `IPassivePacketSink`, `IPassivePacketSource`, `IActivePacketSource`, `IActivePacketSink`, and the class comment of `IPacketQueue` | Describe which side decides when a packet moves, which side holds and chooses the packets, and that the acceptance condition belongs to the sink: a method of the passive sink in push, a filter from the active sink in pull | no behavior change | the NED files load in the queueing tests; commit gates |
 
 Steps 2 to 5 depend on step 1. Step 4 needs steps 2 and 3 for its tests. Step 5 needs step 1 only, but it comes last so that its test can use a compound queue.
 
@@ -233,14 +230,13 @@ inet_run_module_tests -m debug -f 'PacketFilteredPull_|PacketGate_1|PrioritySche
 
 Check that the selector picks every intended case after the new tests exist. `PacketGate_1` and `PriorityScheduler_1` cover the changed test sources. The two `Ieee80211MgmtAp*QueueDrop_1` tests cover the unfiltered path of both pending queue types.
 
-**Regression of the unfiltered behavior.** Step 1 touches every passive source base, so all 77 queueing tests are directly related:
+**Regression of the unfiltered behavior.** Step 1 touches every passive source base, so all 75 queueing tests are directly related. On this host, the runners need `-p inet`; they take the project root from `INET_ROOT`:
 
 ```bash
-inet_run_queueing_tests -m debug
-inet_run_fingerprint_tests -m debug -f 'tutorials/queueing|showcases/tsn|examples/wireless'
+inet_run_queueing_tests -p inet -m debug
 ```
 
-Before you rely on the fingerprint command, check with a dry run that the selector picks the queueing tutorial (47 cases in `tests/fingerprint/tutorials.csv`), the TSN showcases and the wireless examples. Expected result: every fingerprint is unchanged, because no unfiltered path changes. No recorded expectation changes ([TR-BASELINE-DELIBERATE](../../doc/project/rule/testing.md#tr-baseline-deliberate)).
+**Fingerprints.** This work must not change any fingerprint, because no simulation calls the new methods. So the check compares before with after: each case runs in a worktree at the parent of the first code commit, whose sources equal master (`4e0ae31b4d` after the rebase), and in the worktree of the branch, each with its own library and NED files. The check compares the `tplx` fingerprints and also prints the value of the CSV file. The selection is every case of `tests/fingerprint/{tutorials,showcases,examples}.csv` under `tutorials/queueing`, `showcases/tsn` and `examples/wireless` (175 cases). The script is `/var/tmp/claude-qfp/fpba.sh`. Expected result: before and after are the same in every case. No recorded expectation changes ([TR-BASELINE-DELIBERATE](../../doc/project/rule/testing.md#tr-baseline-deliberate)). The Python runner `inet_run_fingerprint_tests` is not usable for this check: it reads `tests/fingerprint/store.json`, which was last synchronized with the CSV files on 2026-09-09; 71 later commits changed the CSV files only. For example, the store records `02cf-58d1/tplx` for `examples/wireless/mactest` `-c MacDcf`, while `examples.csv` and master both give `031d-548a/tplx`. CI runs `fingerprinttest`, which reads the CSV files.
 
 **Mechanical gates, before every push:**
 
@@ -282,7 +278,7 @@ doc/project/enforcement/check-pull-request.sh --base origin/master
   - `PacketGateBase` applies `isOpen()` and `canPacketFlowThrough()` to the accepted packet.
   - Review `EligibilityTimeGate` and `BackPressureBarrier`, which override the pull methods.
   - Review the classifiers, the demultiplexer, the pullers and the streamers.
-- **F-2.** `ContentBasedScheduler`, `LabelScheduler` and `MarkovScheduler` override `scheduleAcceptedPacket()`. `PacketScheduler` needs a change of `IPacketSchedulerFunction`.
+- **F-2.** `ContentBasedScheduler`, `LabelScheduler` and `MarkovScheduler` override `schedulePacket(filter)`. `PacketScheduler` needs a change of `IPacketSchedulerFunction`.
 - **F-3.** The A-MSDU subframes leave the pending queue through `removePacket()` ([OriginatorQosMacDataService.cc](../../src/inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.cc#L47)). So they are not counted as outgoing packets, and they get no residence metadata. With this plan they can leave through `dequeuePacket()` with a filter that accepts exactly that packet. This changes 802.11 statistics, so it needs its own change.
 - **F-4.** An overflow drop in `CompoundPacketQueueBase` emits `packetRemoved` and `packetDropped`, and the compound `queueLength` subtracts both ([CompoundPacketQueueBase.ned](../../src/inet/queueing/queue/CompoundPacketQueueBase.ned#L33)). This was found by reading the source only, not by a run. It is not related to this plan ([PR-SPLIT-DRIVEBY](../../doc/project/rule/pull-request.md#pr-split-driveby)).
 - **F-5.** `PriorityScheduler::getPacket()` ignores `reverseOrder`. This is not related to this plan.
@@ -296,13 +292,31 @@ The worktree is `../inet-queueing-filtered-pull`. Its debug build started from a
 
 | Step | Status | Commit | Evidence |
 | --- | --- | --- | --- |
-| 1 | open | | |
-| 2a | open | | |
-| 2b | open | | |
-| 3 | open | | |
-| 4 | open | | |
-| 5 | open | | |
+| 1 | done | `d504981c96` | New test `PacketFilteredPull_1` (sources, gate) PASS. `PacketGate_1`, `PriorityScheduler_1` and both `Ieee80211MgmtAp*QueueDrop_1` PASS. 75 queueing tests PASS. Debug build without undefined INET symbols. `check-interfaces.sh` reports 15 classes, the same 15 as on master; no class of this work is among them. |
+| 2 | done | `50dffdd1e7` | `PacketFilteredPull_1` PASS with the queue checks. With a query that ignores the filter, it FAILs at "the queue offers the first packet that the filter matches". Focused module tests and 75 queueing tests PASS. |
+| 3 | done | `6827d19198` | New test `PacketFilteredPull_2` PASS: both priority orders, the WRR round after a filtered pull, and the refusal of `LabelScheduler`. Without `handlePacketScheduled()` in the filtered pull, it FAILs at "the filtered pull spent the token of the second input, so a new round starts". |
+| 4 | done | `c5f385bf28` | New test `PacketFilteredPull_3` PASS through `CompoundPendingQueue`: one `packetPulled` each at the compound queue, the scheduler and the unicast queue. With a compound query that ignores the filter, it FAILs at "the compound queue offers the frame that the filter matches". |
+| 5 | done | `f0c439b64b` | `PacketFilteredPull_3` PASS with `dequeuePacket(filter)` on the compound queue and on a plain queue. With a dequeue that ignores the filter, it FAILs. |
+| 6 | done | `c003b805c9` | Comments only. The 75 queueing tests and the 3 new tests PASS, so the NED files still load. Commit and classification gates PASS; `check-interfaces.sh` reports the same 15 old findings. |
+
+**Final evidence, at `f0c439b64b` after the rebase onto master `ee4afb459d`:**
+
+- Debug and release builds pass without undefined INET symbols and without new warnings.
+- The whole debug module suite: 734 PASS, the 3 new tests among them.
+- The 75 queueing tests PASS.
+- Fingerprints (section 7), before `4e0ae31b4d` against after `f0c439b64b`, measured on `b793b9d41a`, which differs from `f0c439b64b` only in two comments: 174 of 175 cases calculate the same `tplx` fingerprint before and after, and in each of them the value equals the CSV file. All 43 runnable TSN cases are among them. The case `showcases/tsn/gatescheduling/sat` cannot run in either build, because the build excludes the Z3 feature; its two error texts differ only in the path of the tree. The evidence is in `/var/tmp/claude-qfp/fpba-rb.txt`. Before the rebase, the same comparison on the old base gave the same result.
+- `check-commits.sh` and `check-classification.sh` on the series, `check-pull-request.sh --base master`, `check-architecture.sh src/inet/queueing`, `check-links.sh`, `check-seals.sh` and `check-source-seals.sh --base master` PASS. `check-interfaces.sh` and `check-naming.sh` fail with the same 15 and 23 old findings as master; none is in a file of this work.
 
 Facts found during the work:
 
-- None yet.
+- **Name hiding.** `PacketQueueBase` declares only the overloads with a filter, so it hid `pullPacket(gate)`, which its `dequeuePacket()` calls. Two `using` declarations make the other overloads visible again. The migration guide tells other projects to do the same.
+- **The test runners need `-p inet` on this host.** Without it, the search for a project file climbs to `~/.omnetpp`, which is a directory, and the runner stops.
+- **`tests/queueing` holds 75 tests**, not 77 as the first draft said.
+- **The fingerprint baseline.** The "before" library is a debug build of the detached worktree `../inet-4e0ae31b4d`. It started from a copy of the build of the branch, and make compiled 222 source files again: the changed ones and the ones that include a changed header. The library holds none of the new methods.
+- **The internal names changed after review.** The first version of the series had four internal helpers: `scheduleAcceptedPacket()`, `processPulledPacket()`, `pullQueuedPacket()` and `selectInput()`, with three refactor commits for them. The owner rejected these names on 2026-10-16. The branch was rewritten from step 1 on with the structure of D-6: the refactor commits disappeared, steps 2 and 3 changed, and steps 4 and 5 stayed as they were. The checks that fail with broken code ran again for step 3; steps 2, 4 and 5 keep the checked code unchanged.
+- **Step 6 came from the review.** After step 5, the owner asked to describe the symmetry of the push and pull handshakes in the documentation of the core interfaces. The NED files hold the concept, because the C++ class comments point to them; the C++ class comments name the methods.
+- **The rebase onto master.** During the work, master dropped the first two plan commits and gained 66 commits. On 2026-10-19 the branch was rebased onto master `ee4afb459d`; it now starts with the three plan commits. Only `WHATSNEW` changed on both sides: the item of this work is now item 55, after the 54 incompatible changes on master. The worktrees held a stale generated pair `TcpUrgentTag_m.h` and `TcpUrgentTag_m.cc`, whose `.msg` master removed; it was deleted before the checks, so neither library contains it.
+- **The tests use explicit checks, not `ASSERT`.** A failed check throws an error with its text, so a test fails in a release build too.
+- **`PacketFilteredPull_1` uses `InteractiveGate`** for the refusal check, because `PacketGate` needs `openTime` and `closeTime`.
+- **`PacketFilteredPull_3` uses the real `CompoundPendingQueue`** with IEEE 802.11 data frames and `MgmtOverMulticastOverUnicastClassifier`, as the test of pull request #1343 does. No generic classifier function sorts packets by name.
+- **A filtered query of `PacketSchedulerBase` throws during a packet stream**, with the error text of `checkPacketStreaming()`, because the query is `const` and cannot call that function.
