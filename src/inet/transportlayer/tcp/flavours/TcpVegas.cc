@@ -50,6 +50,7 @@ void TcpVegas::initializeAlgorithm()
     state->v_alpha = alpha;
     state->v_beta = beta;
     state->v_gamma = gamma;
+    state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
 }
 
 // Same as TcpReno

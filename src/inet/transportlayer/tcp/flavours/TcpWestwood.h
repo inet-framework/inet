@@ -37,6 +37,8 @@ class INET_API TcpWestwood : public TcpAlgorithmBase
     /** Ctor */
     TcpWestwood();
 
+    virtual void initializeAlgorithm() override;
+
     /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedAckForUnackedData(uint32_t firstSeqAcked) override;
 

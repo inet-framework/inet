@@ -38,6 +38,12 @@ TcpWestwood::TcpWestwood()
 {
 }
 
+void TcpWestwood::initializeAlgorithm()
+{
+    TcpAlgorithmBase::initializeAlgorithm();
+    state->ssthresh = conn->getTcpMain()->par("initialSsthresh");
+}
+
 void TcpWestwood::recalculateSlowStartThreshold()
 {
     double x = (state->w_bwe * SIMTIME_DBL(state->w_RTTmin)) / (state->w_a);
