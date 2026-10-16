@@ -435,6 +435,9 @@ class INET_API TcpConnection : public SimpleModule
     /** True while urgent data is outstanding: SND.UNA is before SND.UP (Linux tcp_urg_mode()) */
     virtual bool isUrgentSendPending();
 
+    /** A received urgent pointer, the octet after the urgent data: RCV.UP and the notice to the application (RFC 9293 MUST-32) */
+    virtual void processUrgentPointer(uint32_t urgentPointer);
+
     /**
      * The search continues below the lost MTU probe, and the probe goes again at once, as
      * segments of the MSS (Linux tcp_mtup_probe_failed() and tcp_simple_retransmit())
@@ -543,6 +546,9 @@ class INET_API TcpConnection : public SimpleModule
 
     /** Utility: sends data or data notification to application */
     virtual void sendAvailableDataToApp();
+
+    /** Utility: takes the next delivery to the application from the receive queue, at most up to endSeqNo and never across the urgent mark; nullptr: no data */
+    virtual Packet *extractDataForApp(uint32_t endSeqNo);
 
   public:
     /** Utility: prints local/remote addr/port and app gate index/socketId */

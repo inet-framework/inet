@@ -19,3 +19,13 @@ namespace inet;
 class TcpSendUrgentReq extends TagBase
 {
 }
+
+//
+// Indication tag on a TCP_I_URGENT_DATA packet, data before the urgent mark: the
+// urgent bytes that remain after this packet (RFC 9293 section 3.8.5, MUST-33, and
+// the URGENT flag of the RECEIVE call). A packet never holds data after the mark.
+//
+class TcpUrgentInd extends TagBase
+{
+    uint32_t remaining; // the urgent bytes after this packet; 0: the urgent data ends here
+}

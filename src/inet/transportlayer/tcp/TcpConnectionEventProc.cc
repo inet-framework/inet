@@ -9,7 +9,6 @@
 
 #include "inet/common/socket/SocketTag_m.h"
 #include "inet/transportlayer/contract/tcp/TcpCommand_m.h"
-#include "inet/transportlayer/contract/tcp/TcpTimestampingTag_m.h"
 #include "inet/transportlayer/tcp/Tcp.h"
 #include "inet/transportlayer/tcp/TcpAlgorithm.h"
 #include "inet/transportlayer/tcp/TcpConnection.h"
@@ -239,12 +238,7 @@ void TcpConnection::process_READ_REQUEST(TcpEventCode& event, TcpCommand *tcpCom
         uint32_t requestedEndPos = receiveQueue->getFirstSeqNo() + maxByteCountRequested;
         if (seqLess(requestedEndPos, endSeqNo))
             endSeqNo = requestedEndPos;
-        if (Packet *dataMsg = receiveQueue->extractBytesUpTo(endSeqNo)) {
-            releaseRcvBuffer(dataMsg->getByteLength());
-            if (rxTimestampingEnabled)
-                dataMsg->addTag<TcpRxTimestampInd>(); // the time of the delivery
-            dataMsg->setKind(TCP_I_DATA);
-            dataMsg->addTag<SocketInd>()->setSocketId(socketId);
+        if (Packet *dataMsg = extractDataForApp(endSeqNo)) {
             sendToApp(dataMsg);
             maxByteCountRequested = 0;
             adjustRcvSpace(); // Linux tcp_rcv_space_adjust(), before the window update of the read

@@ -1,0 +1,85 @@
+%description:
+Tests the urgent receive of RFC 9293 (section 3.8.5, the sixth step of section
+3.10.7.4, the RECEIVE call). The client sends 1000 bytes at t=1, 3000 bytes of
+urgent data at t=1.1 and 500 bytes of urgent data at t=1.2. The server reads only
+by its read script (autoRead = false): 2000 bytes at t=1.15, and at most 10000
+at t=1.3 and t=1.4. The first urgent pointer (4001) gives the notice TCP_I_URGENT
+with the 4000 bytes before the mark (MUST-32, MUST-33); the next two segments
+repeat it and give no notice. The first read delivers 2000 bytes as urgent data,
+with 2000 urgent bytes that remain. The advance of the pointer to 4501 gives a
+second notice, with 2500 bytes. The second read asks for 10000 bytes and gets
+2500, as urgent data: a delivery ends at the mark, and 0 urgent bytes remain.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1.0 1000; 1.1 3000 urgent; 1.2 500 urgent"
+*.srv_app.autoRead = false
+*.srv_app.readScript = "1.15 2000; 1.3 10000; 1.4 10000"
+*.srv_app.logIndications = true
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+sim-time-limit = 3s
+
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[testing]: srv_app: TCP_I_URGENT, 4000 urgent bytes to read
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[testing]: srv_app: TCP_I_URGENT_DATA, 2000 bytes, 2000 urgent bytes remain
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[testing]: srv_app: TCP_I_URGENT, 2500 urgent bytes to read
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[testing]: srv_app: TCP_I_URGENT_DATA, 2500 bytes, 0 urgent bytes remain
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+[testing]: srv_app: TCP_I_DATA
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

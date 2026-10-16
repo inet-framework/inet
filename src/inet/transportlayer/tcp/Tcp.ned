@@ -139,9 +139,12 @@ import inet.transportlayer.contract.ITcp;
 //    `delayedAckFrameCount`), the Nagle algorithm, silly-window-syndrome avoidance
 //    on both sides, and the socket command set. A SEND has no PUSH flag, so PSH is
 //    set on the last buffered segment (MUST-61, `pushLastBufferedSegment`).
+//    Urgent data (section 3.8.5): `TcpSocket::sendUrgent()` sets the urgent pointer
+//    at the octet after the data (MUST-62); a receiver tells the application of a
+//    new or advanced pointer (`TCP_I_URGENT`, MUST-32) and delivers the data
+//    before the mark as `TCP_I_URGENT_DATA` with the urgent bytes that remain
+//    (`TcpUrgentInd`, MUST-33).
 //    Deviations:
-//     - Urgent data is sent (`TcpSocket::sendUrgent()`, MUST-62), but a receiver
-//       treats URG-marked bytes as ordinary data.
 //     - PSH is ignored on arrival: the receiver delivers data as early as it can,
 //       as if PSH were set on each segment.
 //     - Checksums are declared correct rather than computed, unless `checksumMode`
@@ -407,7 +410,6 @@ import inet.transportlayer.contract.ITcp;
 //
 // <b>Remaining gaps</b>
 //
-//  - Urgent data, as described under RFC 9293 above.
 //  - Flow control between TCP and the application is opt-in: a connection opened
 //    in "autoread" mode delivers the received data to the application at once, so
 //    its advertised window never closes. A connection opened in explicit-read mode

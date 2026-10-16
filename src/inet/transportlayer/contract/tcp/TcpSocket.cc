@@ -540,6 +540,14 @@ void TcpSocket::processMessage(cMessage *msg)
             break;
         }
 
+        case TCP_I_URGENT: {
+            auto *urgentInfo = check_and_cast<TcpUrgentInfo *>(msg->getControlInfo());
+            if (cb)
+                cb->socketUrgentArrived(this, urgentInfo);
+            delete msg;
+            break;
+        }
+
         case TCP_I_ZEROCOPY_COMPLETION: {
             auto *completionInfo = check_and_cast<TcpZerocopyCompletionInfo *>(msg->getControlInfo());
             if (cb)

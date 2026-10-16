@@ -184,6 +184,14 @@ class INET_API TcpSocket : public ISocket
          * Default implementation does nothing (backward compatible).
          */
         virtual void socketZerocopyCompletion(TcpSocket *socket, unsigned int zerocopyId) {}
+
+        /**
+         * Notifies that an urgent pointer arrived or advanced (RFC 9293 MUST-32): the
+         * application should read the urgent data, which comes with the kind
+         * TCP_I_URGENT_DATA (socketDataArrived() with urgent = true).
+         * Default implementation does nothing.
+         */
+        virtual void socketUrgentArrived(TcpSocket *socket, TcpUrgentInfo *urgentInfo) {}
     };
 
     /**

@@ -143,6 +143,7 @@ const char *TcpConnection::indicationName(int code)
     switch (code) {
         CASE(TCP_I_DATA);
         CASE(TCP_I_URGENT_DATA);
+        CASE(TCP_I_URGENT);
         CASE(TCP_I_AVAILABLE);
         CASE(TCP_I_ESTABLISHED);
         CASE(TCP_I_PEER_CLOSED);
@@ -938,12 +939,7 @@ void TcpConnection::sendAvailableDataToApp()
                 if (seqLess(requestedEndPos, endSeqNo))
                     endSeqNo = requestedEndPos;
             }
-            while (auto msg = receiveQueue->extractBytesUpTo(endSeqNo)) {
-                releaseRcvBuffer(msg->getByteLength());
-                if (rxTimestampingEnabled)
-                    msg->addTag<TcpRxTimestampInd>(); // SO_TIMESTAMPING: the time of the delivery
-                msg->setKind(TCP_I_DATA);    // TBD currently we never send TCP_I_URGENT_DATA
-                msg->addTag<SocketInd>()->setSocketId(socketId);
+            while (auto msg = extractDataForApp(endSeqNo)) {
                 sendToApp(msg);
                 if (!autoRead) {
                     maxByteCountRequested = 0;
@@ -954,6 +950,34 @@ void TcpConnection::sendAvailableDataToApp()
             adjustRcvSpace();
         }
     }
+}
+
+Packet *TcpConnection::extractDataForApp(uint32_t endSeqNo)
+{
+    // RFC 9293 section 3.10.2, RECEIVE: "data following the urgent pointer (non-urgent
+    // data) cannot be delivered to the user in the same buffer with preceding urgent
+    // data": a delivery ends at the urgent mark
+    bool urgent = state->rcvUrgentPending && seqLess(receiveQueue->getFirstSeqNo(), state->rcv_up);
+    if (urgent && seqLess(state->rcv_up, endSeqNo))
+        endSeqNo = state->rcv_up;
+    Packet *msg = receiveQueue->extractBytesUpTo(endSeqNo);
+    if (msg == nullptr)
+        return nullptr;
+    releaseRcvBuffer(msg->getByteLength());
+    if (rxTimestampingEnabled)
+        msg->addTag<TcpRxTimestampInd>(); // SO_TIMESTAMPING: the time of the delivery
+    if (urgent) {
+        // the URGENT flag of RECEIVE: the urgent bytes that remain (MUST-33)
+        uint32_t remaining = state->rcv_up - receiveQueue->getFirstSeqNo();
+        msg->setKind(TCP_I_URGENT_DATA);
+        msg->addTag<TcpUrgentInd>()->setRemaining(remaining);
+        if (remaining == 0)
+            state->rcvUrgentPending = false;
+    }
+    else
+        msg->setKind(TCP_I_DATA);
+    msg->addTag<SocketInd>()->setSocketId(socketId);
+    return msg;
 }
 
 void TcpConnection::initConnection(TcpOpenCommand *openCmd)
@@ -2391,6 +2415,33 @@ void TcpConnection::retransmitOneSegment(bool called_at_rto)
 
     if (state && state->ect)
         state->rexmit = false;
+}
+
+void TcpConnection::processUrgentPointer(uint32_t urgentPointer)
+{
+    // RFC 9293 section 3.10.7.4, sixth: "RCV.UP <- max(RCV.UP,SEG.UP), and signal the
+    // user that the remote side has urgent data if the urgent pointer (RCV.UP) is in
+    // advance of the data consumed", with the checks of Linux tcp_check_urg(): no
+    // pointer whose urgent data the application received, none whose last urgent
+    // byte is before RCV.NXT ("Do not replay urg ptr"), and none that does not advance
+    uint32_t consumed = receiveQueue->getFirstSeqNo();
+    if (seqGE(consumed, urgentPointer) || seqLE(urgentPointer, state->rcv_nxt))
+        return;
+    if (state->rcvUrgentPending && seqLE(urgentPointer, state->rcv_up))
+        return;
+    state->rcv_up = urgentPointer;
+    state->rcvUrgentPending = true;
+    // MUST-32: "inform the application layer asynchronously whenever it receives an
+    // urgent pointer and there was previously no pending urgent data, or whenever the
+    // urgent pointer advances in the data stream"
+    uint32_t urgentBytes = state->rcv_up - consumed;
+    EV_INFO << "Urgent data: the urgent pointer is " << state->rcv_up << ", " << urgentBytes << " urgent bytes to read\n";
+    auto *indication = new Indication(indicationName(TCP_I_URGENT), TCP_I_URGENT);
+    auto *urgentInfo = new TcpUrgentInfo();
+    urgentInfo->setUrgentBytes(urgentBytes);
+    indication->addTag<SocketInd>()->setSocketId(socketId);
+    indication->setControlInfo(urgentInfo);
+    sendToApp(indication);
 }
 
 bool TcpConnection::isUrgentSendPending()

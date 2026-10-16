@@ -289,6 +289,11 @@ void TcpTestClient::handleMessage(cMessage *msg)
                 EV_INFO_C("testing") << ", delivered at " << timestamp->getTimestamp();
         if (auto completionInfo = dynamic_cast<TcpZerocopyCompletionInfo *>(msg->getControlInfo()))
             EV_INFO_C("testing") << ", id " << completionInfo->getZerocopyId();
+        if (auto urgentInfo = dynamic_cast<TcpUrgentInfo *>(msg->getControlInfo()))
+            EV_INFO_C("testing") << ", " << urgentInfo->getUrgentBytes() << " urgent bytes to read";
+        if (auto packet = dynamic_cast<Packet *>(msg))
+            if (auto urgentInd = packet->findTag<TcpUrgentInd>())
+                EV_INFO_C("testing") << ", " << urgentInd->getRemaining() << " urgent bytes remain";
         EV_INFO_C("testing") << "\n";
     }
     for (auto& extraSocket : extraSockets) {

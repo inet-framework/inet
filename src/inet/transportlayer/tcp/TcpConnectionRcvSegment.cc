@@ -574,7 +574,7 @@ TcpEventCode TcpConnection::processSegment1stThru8th(Packet *tcpSegment, const P
         // signal the user again.
         //"
 
-        // TODO URG currently not supported
+        processUrgentPointer(tcpHeader->getSequenceNo() + tcpHeader->getUrgentPointer());
     }
 
     //
