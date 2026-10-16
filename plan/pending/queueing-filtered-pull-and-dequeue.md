@@ -2,7 +2,8 @@
 
 Checkout and revision: `inet-master`, branch `master` at `1b5dba65d3`. Two untracked files at the repository root (`ieee80211-edca-management-recovery.md`, `ieee80211-txop-boundaries-and-rate-selection.md`) are not related to this plan.
 Plan revision: draft 2, 2026-10-16. Draft 2 records the decisions of the owner (section 8).
-Approval: pending for the implementation. The owner decided D-4, D-5, the test category and the recommendation for the MAC on 2026-10-16.
+Approval: the owner approved the implementation of steps 1 to 5 of draft 2 on 2026-10-16 ("let's implement it"), on the branch `topic/queueing-filtered-pull` from `master` at `8f45b42ca2`. The owner decided D-4, D-5, the test category and the recommendation for the MAC on the same day.
+Status: in progress. Section 9 records the work.
 Consumer: pull request inet-framework/inet#1343, branch `work/compressed-blockack-s3b`. Its first commit `45f4da2e28` ("queueing: add: preserve pull effects for selected packet extraction", parent `bba1db4c81`) solves the same problem in a different way. This plan replaces that commit.
 
 ## 1. Problem and intended behavior
@@ -288,3 +289,20 @@ doc/project/enforcement/check-pull-request.sh --base origin/master
 - **F-6.** `removeAllPackets(filter)` for disposal. No consumer needs it now.
 
 **Approval scope.** No sealed path is affected: the seal list holds only `common/packet/`. No recorded expectation changes. The adaptation of the 802.11 MAC belongs to pull request #1343 and its author. The approval of this plan covers steps 1 to 5 on `topic/queueing-filtered-pull`.
+
+## 9. Implementation record
+
+The worktree is `../inet-queueing-filtered-pull`. Its debug build started from a copy of a matching build, and only the changed files were compiled again.
+
+| Step | Status | Commit | Evidence |
+| --- | --- | --- | --- |
+| 1 | open | | |
+| 2a | open | | |
+| 2b | open | | |
+| 3 | open | | |
+| 4 | open | | |
+| 5 | open | | |
+
+Facts found during the work:
+
+- None yet.
