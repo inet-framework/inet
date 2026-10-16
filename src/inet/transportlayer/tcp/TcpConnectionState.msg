@@ -168,6 +168,9 @@ struct TcpStateVariables
     uint32_t rcv_wnd = 0;           // receive window
     uint32_t rcv_up = 0;            // receive urgent pointer: the octet after the urgent data (RFC 9293 MUST-62)
     bool rcvUrgentPending = false;  // RCV.UP is valid, and the application has not received all urgent data
+    bool urgentOutOfBand = false;   // urgentOutOfBand: the last urgent byte leaves the stream, as Linux
+    bool oobInline = false;         // SO_OOBINLINE: with urgentOutOfBand, the last urgent byte stays in the stream
+    bool oobByteSent = false;       // urgentOutOfBand: the application got the byte of the current urgent pointer
     uint32_t irs = 0;               // initial receive sequence number
     uint32_t rcv_adv = 0;           // the right edge of the window in force (Linux rcv_wup + rcv_wnd)
     uint32_t rcv_mwnd_seq = 0;      // the highest right edge ever offered (Linux rcv_mwnd_seq): a peer may still send up to it after the window shrank

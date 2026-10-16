@@ -301,6 +301,15 @@ class TcpSetCorkCommand extends TcpSetOptionCommand
 }
 
 //
+// SO_OOBINLINE of one connection (TcpSocket::setOobInline()): with the
+// urgentOutOfBand parameter of Tcp, the last urgent byte stays in the stream.
+//
+class TcpSetOobInlineCommand extends TcpSetOptionCommand
+{
+    bool oobInline = true;
+}
+
+//
 // Sent with message kind TCP_I_ZEROCOPY_COMPLETION, in response to a
 // zerocopy-marked SEND (MSG_ZEROCOPY -- see
 // ~TcpSendZerocopyReq/~TcpSocket::sendZerocopy) once that SEND's data has

@@ -341,6 +341,13 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
                 flushCorkedData(false);
         }
     }
+    else if (auto cmd = dynamic_cast<TcpSetOobInlineCommand *>(tcpCommand)) {
+        // SO_OOBINLINE: with urgentOutOfBand, the last urgent byte stays in the stream;
+        // the command can come before the open, and then configureStateVariables() takes it
+        oobInlineSockopt = cmd->getOobInline() ? 1 : 0;
+        if (state != nullptr)
+            state->oobInline = cmd->getOobInline();
+    }
     else if (auto cmd = dynamic_cast<TcpSetRcvBufCommand *>(tcpCommand)) {
         // SO_RCVBUF on an open connection, as Linux: the buffer changes and is locked; a
         // buffer smaller than the queued data discards nothing, but the next arrival may

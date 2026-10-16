@@ -294,6 +294,9 @@ void TcpTestClient::handleMessage(cMessage *msg)
         if (auto packet = dynamic_cast<Packet *>(msg))
             if (auto urgentInd = packet->findTag<TcpUrgentInd>())
                 EV_INFO_C("testing") << ", " << urgentInd->getRemaining() << " urgent bytes remain";
+        if (auto packet = dynamic_cast<Packet *>(msg))
+            if (packet->findTag<TcpOutOfBandInd>())
+                EV_INFO_C("testing") << ", out-of-band";
         EV_INFO_C("testing") << "\n";
     }
     for (auto& extraSocket : extraSockets) {
@@ -325,6 +328,8 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             socket.setAdvertisedWindow(par("socketAdvertisedWindow"));
             socket.setReceiveBufferSize(par("socketReceiveBufferSize"));
             socket.setSynRetries(par("socketSynRetries"));
+            if (par("oobInline"))
+                socket.setOobInline(true);
 
             if (par("active"))
                 socket.connect(L3Address(connectAddress), connectPort, par("fastOpen"));

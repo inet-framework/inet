@@ -31,6 +31,7 @@ simple TcpTestClient like IApp
         bool autoRead = default(true); // when false, the app reads received data only by the READ commands of readScript (fills the receive buffer -> zero window)
         bool owned = default(true); // false: tell TCP that the application does not own the connection, as a Linux connection that waits for accept() (TcpSocket::setOwned())
         int socketAdvertisedWindow = default(-1); // the advertised window of the first connection, in bytes (TcpSocket::setAdvertisedWindow()); -1: the parameters of the Tcp module
+        bool oobInline = default(false); // SO_OOBINLINE of the first connection, before the open (TcpSocket::setOobInline())
         int socketReceiveBufferSize = default(-1); // the receive buffer of the first connection, in bytes (TcpSocket::setReceiveBufferSize()); -1: the parameter of the Tcp module
         int socketSynRetries = default(-1); // the SYN retries of the first connection (TcpSocket::setSynRetries()); -1: the parameter of the Tcp module
         string tcpParScript = default(""); // "time name value; ..." -- at each time, set a parameter of the Tcp module of this application, as a harness that changes a sysctl; the parameter must be @mutable

@@ -55,6 +55,7 @@ simple LinuxTcp extends Tcp
         windowUpdateAfterRead = default(true);
         acceptBeyondBufferAtEmptyQueue = default(true);
         dropBeyondWindowEdge = default(true);
+        urgentOutOfBand = default(true);
         // the checks of a segment and of an ICMP error, and the reset at an abort
         softIcmpErrorsAbortSetup = default(true);
         icmpSequenceCheck = default(true);

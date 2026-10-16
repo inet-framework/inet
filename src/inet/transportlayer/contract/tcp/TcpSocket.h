@@ -579,6 +579,12 @@ class INET_API TcpSocket : public ISocket
     void setCork(bool cork);
 
     /**
+     * SO_OOBINLINE of this connection: with the urgentOutOfBand parameter of Tcp, the
+     * last urgent byte stays in the stream instead of coming alone.
+     */
+    void setOobInline(bool oobInline);
+
+    /**
      * Required to re-connect with a "used" TcpSocket object.
      * By default, a TcpSocket object is tied to a single TCP connection,
      * via the connectionId. When the connection gets closed or aborted,

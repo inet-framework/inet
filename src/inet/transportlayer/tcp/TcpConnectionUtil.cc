@@ -278,6 +278,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     socketSynRetries = listenerConn->socketSynRetries;
     keepAliveSockopt = listenerConn->keepAliveSockopt;
     noDelaySockopt = listenerConn->noDelaySockopt;
+    oobInlineSockopt = listenerConn->oobInlineSockopt;
     maxSegSockopt = listenerConn->maxSegSockopt;
     pathMtuSockopt = listenerConn->pathMtuSockopt;
     corkSockopt = listenerConn->corkSockopt;
@@ -954,6 +955,39 @@ void TcpConnection::sendAvailableDataToApp()
 
 Packet *TcpConnection::extractDataForApp(uint32_t endSeqNo)
 {
+    if (state->urgentOutOfBand) {
+        // as Linux tcp_recvmsg(): the mark is the last urgent byte (urg_seq), a read
+        // stops before it, and without SO_OOBINLINE the byte leaves the stream; the data
+        // is ordinary data
+        if (state->rcvUrgentPending) {
+            uint32_t markSeqNo = state->rcv_up - 1;
+            uint32_t firstSeqNo = receiveQueue->getFirstSeqNo();
+            if (firstSeqNo == markSeqNo && receiveQueue->getAcknowledgedDataLength() > 0) {
+                state->rcvUrgentPending = false;
+                if (!state->oobInline) {
+                    Packet *oobByte = receiveQueue->extractBytesUpTo(markSeqNo + 1);
+                    releaseRcvBuffer(oobByte->getByteLength());
+                    delete oobByte;
+                    EV_INFO << "Urgent data: the out-of-band byte at " << markSeqNo << " leaves the stream\n";
+                    // the byte does not count toward the bytes of a read
+                    uint32_t dataEndSeqNo = receiveQueue->getFirstSeqNo() + receiveQueue->getAcknowledgedDataLength();
+                    endSeqNo = seqLess(endSeqNo + 1, dataEndSeqNo) ? endSeqNo + 1 : dataEndSeqNo;
+                }
+            }
+            else if (seqLess(firstSeqNo, markSeqNo) && seqLess(markSeqNo, endSeqNo))
+                endSeqNo = markSeqNo;
+        }
+        Packet *msg = receiveQueue->extractBytesUpTo(endSeqNo);
+        if (msg == nullptr)
+            return nullptr;
+        releaseRcvBuffer(msg->getByteLength());
+        if (rxTimestampingEnabled)
+            msg->addTag<TcpRxTimestampInd>(); // SO_TIMESTAMPING: the time of the delivery
+        msg->setKind(TCP_I_DATA);
+        msg->addTag<SocketInd>()->setSocketId(socketId);
+        return msg;
+    }
+
     // RFC 9293 section 3.10.2, RECEIVE: "data following the urgent pointer (non-urgent
     // data) cannot be delivered to the user in the same buffer with preceding urgent
     // data": a delivery ends at the urgent mark
@@ -1103,6 +1137,8 @@ void TcpConnection::configureStateVariables()
         state->tcp_cork = corkSockopt != 0; // TCP_CORK of this connection
     if (noDelaySockopt >= 0)
         state->nagle_enabled = noDelaySockopt == 0; // TCP_NODELAY of this connection
+    state->urgentOutOfBand = tcpMain->par("urgentOutOfBand");
+    state->oobInline = oobInlineSockopt > 0; // SO_OOBINLINE of this connection
     state->minshallNagle = tcpMain->par("minshallNagle");
     state->pushOnWriteBoundary = tcpMain->par("pushSegmentsOnWriteBoundary");
     state->pushLastBuffered = tcpMain->par("pushLastBufferedSegment");
@@ -2429,12 +2465,24 @@ void TcpConnection::processUrgentPointer(uint32_t urgentPointer)
         return;
     if (state->rcvUrgentPending && seqLE(urgentPointer, state->rcv_up))
         return;
+    // urgentOutOfBand, as tcp_check_urg(): an unread out-of-band byte of the old
+    // pointer at the read position leaves the stream; other older bytes stay in it
+    if (state->urgentOutOfBand && !state->oobInline && state->rcvUrgentPending
+            && state->rcv_up - 1 == consumed && receiveQueue->getAcknowledgedDataLength() > 0)
+    {
+        Packet *oobByte = receiveQueue->extractBytesUpTo(consumed + 1);
+        releaseRcvBuffer(oobByte->getByteLength());
+        delete oobByte;
+        consumed = receiveQueue->getFirstSeqNo();
+    }
     state->rcv_up = urgentPointer;
     state->rcvUrgentPending = true;
+    state->oobByteSent = false;
     // MUST-32: "inform the application layer asynchronously whenever it receives an
     // urgent pointer and there was previously no pending urgent data, or whenever the
     // urgent pointer advances in the data stream"
-    uint32_t urgentBytes = state->rcv_up - consumed;
+    // with urgentOutOfBand, the bytes before the out-of-band byte (Linux urg_seq)
+    uint32_t urgentBytes = state->rcv_up - consumed - (state->urgentOutOfBand ? 1 : 0);
     EV_INFO << "Urgent data: the urgent pointer is " << state->rcv_up << ", " << urgentBytes << " urgent bytes to read\n";
     auto *indication = new Indication(indicationName(TCP_I_URGENT), TCP_I_URGENT);
     auto *urgentInfo = new TcpUrgentInfo();
@@ -2442,6 +2490,25 @@ void TcpConnection::processUrgentPointer(uint32_t urgentPointer)
     indication->addTag<SocketInd>()->setSocketId(socketId);
     indication->setControlInfo(urgentInfo);
     sendToApp(indication);
+}
+
+void TcpConnection::sendOutOfBandByte(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader)
+{
+    // urgentOutOfBand, as Linux tcp_urg(): the segment that holds the last urgent byte
+    // gives it to the application, which reads it with MSG_OOB
+    if (!state->urgentOutOfBand || state->oobInline || !state->rcvUrgentPending || state->oobByteSent)
+        return;
+    uint32_t markSeqNo = state->rcv_up - 1;
+    uint32_t offset = markSeqNo - tcpHeader->getSequenceNo();
+    if (seqLess(markSeqNo, tcpHeader->getSequenceNo()) || offset >= tcpSegment->getByteLength())
+        return;
+    state->oobByteSent = true;
+    auto oobByte = new Packet("OutOfBand", tcpSegment->peekDataAt(B(offset), B(1)));
+    oobByte->setKind(TCP_I_URGENT_DATA);
+    oobByte->addTag<TcpOutOfBandInd>();
+    oobByte->addTag<SocketInd>()->setSocketId(socketId);
+    EV_INFO << "Urgent data: the out-of-band byte at " << markSeqNo << " goes to the application\n";
+    sendToApp(oobByte);
 }
 
 bool TcpConnection::isUrgentSendPending()

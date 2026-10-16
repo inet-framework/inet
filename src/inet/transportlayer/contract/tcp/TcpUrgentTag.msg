@@ -29,3 +29,12 @@ class TcpUrgentInd extends TagBase
 {
     uint32_t remaining; // the urgent bytes after this packet; 0: the urgent data ends here
 }
+
+//
+// Indication tag on a TCP_I_URGENT_DATA packet of one byte: the last urgent byte,
+// which the urgentOutOfBand parameter of Tcp takes out of the stream, as Linux
+// (MSG_OOB without SO_OOBINLINE). A later urgent pointer gives a new byte.
+//
+class TcpOutOfBandInd extends TagBase
+{
+}

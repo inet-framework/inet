@@ -1,0 +1,78 @@
+%description:
+Tests SO_OOBINLINE (TcpSocket::setOobInline()) with the out-of-band byte of
+Linux. The scenario is that of tcp_urgent_3, but the server sets SO_OOBINLINE
+before its listen, and the connection that the listener forks keeps it. The last
+urgent byte stays in the stream: no out-of-band byte comes, and all 5000 bytes
+come as ordinary data. A delivery still ends before the byte, as a read of Linux
+stops at the mark: 103 bytes, then the byte alone.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+network = inet.test.moduletest.lib.TcpTestNet1
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+cmdenv-log-prefix="[%c]: "
+
+*.testing=true
+
+*.tcptester.script=""
+
+*.cli_app.active=true
+*.cli_app.localAddress="10.0.0.1"
+*.cli_app.localPort=1000
+*.cli_app.connectAddress="10.0.0.2"
+*.cli_app.connectPort=2000
+*.cli_app.tOpen=0s
+*.cli_app.tSend=-1s
+*.cli_app.sendBytes=0B
+*.cli_app.sendScript="1.0 1000; 1.1 3000 urgent; 1.5 1000"
+*.*_tcp.typename = "LinuxTcp"
+*.srv_app.logIndications = true
+*.srv_app.oobInline = true
+*.cli_app.tClose=-1s
+
+*.srv_app.active=false
+*.srv_app.localAddress="10.0.0.2"
+*.srv_app.localPort=2000
+*.srv_app.connectAddress="10.0.0.1"
+*.srv_app.connectPort=1000
+*.srv_app.tOpen=0s
+*.srv_app.tSend=-1s
+*.srv_app.sendBytes=0B
+*.srv_app.sendScript=""
+*.srv_app.tClose=-1s
+
+sim-time-limit = 3s
+
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[testing]: srv_app: TCP_I_URGENT, 2999 urgent bytes to read
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[testing]: srv_app: TCP_I_DATA, 103 bytes
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+[testing]: srv_app: TCP_I_DATA, 1 bytes
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+out-of-band
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

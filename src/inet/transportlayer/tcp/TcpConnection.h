@@ -203,6 +203,9 @@ class INET_API TcpConnection : public SimpleModule
     // TCP_NODELAY of this connection (TcpSocket::setNoDelay()), also from before the
     // open; -1: the nagleEnabled parameter
     int noDelaySockopt = -1;
+    // SO_OOBINLINE of this connection (TcpSocket::setOobInline()), also from before the
+    // open; -1: off
+    int oobInlineSockopt = -1;
     // TCP_MAXSEG of this connection (TcpSocket::setMaxSeg()), also from before the open;
     // -1: the mss parameter alone
     int maxSegSockopt = -1;
@@ -437,6 +440,9 @@ class INET_API TcpConnection : public SimpleModule
 
     /** A received urgent pointer, the octet after the urgent data: RCV.UP and the notice to the application (RFC 9293 MUST-32) */
     virtual void processUrgentPointer(uint32_t urgentPointer);
+
+    /** urgentOutOfBand: a segment that holds the last urgent byte gives it to the application alone (Linux tcp_urg()) */
+    virtual void sendOutOfBandByte(Packet *tcpSegment, const Ptr<const TcpHeader>& tcpHeader);
 
     /**
      * The search continues below the lost MTU probe, and the probe goes again at once, as

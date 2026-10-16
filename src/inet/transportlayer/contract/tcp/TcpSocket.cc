@@ -389,6 +389,15 @@ void TcpSocket::setCork(bool cork)
     sendToTcp(request);
 }
 
+void TcpSocket::setOobInline(bool oobInline)
+{
+    auto request = new Request("setOobInline", TCP_C_SETOPTION);
+    auto *cmd = new TcpSetOobInlineCommand();
+    cmd->setOobInline(oobInline);
+    request->setControlInfo(cmd);
+    sendToTcp(request);
+}
+
 // ######################
 // TCP Socket Options End
 // ######################
