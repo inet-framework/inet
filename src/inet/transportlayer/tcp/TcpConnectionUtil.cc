@@ -1172,6 +1172,7 @@ void TcpConnection::configureStateVariables()
     state->snd_mss = mssFromAddressFamily ? 536 : mss;
     if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss)
         state->snd_mss = maxSegSockopt; // TCP_MAXSEG of this connection, as Linux user_mss
+    limitMssByPathMtuSockopt(); // the route MTU of this connection, also from before the open
     state->advertisedMss = state->snd_mss; // our own receive limit; stays when snd_mss falls to the MSS of the peer
     state->ts_support = tcpMain->par("timestampSupport"); // if set, this means that current host supports TS (RFC 7323 section 3)
     const char *tcpEcnMode = tcpMain->par("tcpEcnMode");
@@ -2848,6 +2849,7 @@ void TcpConnection::resolveAddressFamilyMss()
     state->snd_mss = remoteAddr.getType() == L3Address::IPv6 ? 1440 : 1460;
     if (maxSegSockopt > 0 && (uint32_t)maxSegSockopt < state->snd_mss)
         state->snd_mss = maxSegSockopt;
+    limitMssByPathMtuSockopt();
     state->advertisedMss = state->snd_mss;
     state->snd_effmss = calculateEffectiveMss();
     EV_DETAIL << "The MSS of the address family is " << state->snd_mss << "\n";
@@ -2908,6 +2910,14 @@ void TcpConnection::limitMtuSearch(uint32_t mtu)
             << state->mtupSearchLow << " to " << state->mtupSearchHigh << "\n";
 }
 
+void TcpConnection::limitMssByPathMtuSockopt()
+{
+    // TcpSocket::setPathMtu(): the MSS does not exceed the route MTU of this connection
+    uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
+    if (pathMtuSockopt > 0 && (uint32_t)pathMtuSockopt > headers && (uint32_t)pathMtuSockopt - headers < state->snd_mss)
+        state->snd_mss = pathMtuSockopt - headers;
+}
+
 void TcpConnection::initMtuProbing()
 {
     // mtuProbing, as Linux tcp_mtup_init(): the search runs between the MTU of the base MSS
@@ -2946,10 +2956,12 @@ int64_t TcpConnection::getMtuProbeBytes(uint32_t buffered, uint32_t congestionWi
     if (state->mtupProbeSize != 0 || seqLess(state->snd_nxt, state->snd_max) || deriveLinuxCaState() != 0
         || state->dupacks > 0 || congestionWindow < 11 * mss || sackBlocksToSend)
         return -1;
-    // the middle of the search; none when the search is narrower than 8 bytes (Linux
-    // tcp_probe_threshold), and none at or below the MSS in use
-    uint32_t probe = mtuToMss((state->mtupSearchHigh + state->mtupSearchLow) / 2);
-    if (probe > mtuToMss(state->mtupSearchHigh) || state->mtupSearchHigh - state->mtupSearchLow < 8 || probe <= mss)
+    // the middle of the search, whose upper end is at most the route MTU (pathMtu); none
+    // when the search is narrower than 8 bytes (Linux tcp_probe_threshold), and none at
+    // or below the MSS in use
+    uint32_t searchHigh = std::min(state->mtupSearchHigh, state->pathMtu);
+    uint32_t probe = mtuToMss((searchHigh + state->mtupSearchLow) / 2);
+    if (probe > mtuToMss(searchHigh) || searchHigh < state->mtupSearchLow + 8 || probe <= mss)
         return -1;
     // and none larger than the route MTU, which the packet could not leave
     if (mssToMtu(probe) > state->pathMtu)

@@ -317,13 +317,12 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
         // the search, because the mss parameter limits it otherwise
         pathMtuSockopt = cmd->getValue();
         if (state != nullptr && pathMtuSockopt > 0) {
-            uint32_t headers = (remoteAddr.getType() == L3Address::IPv6 ? 40 : 20) + B(TCP_MIN_HEADER_LENGTH).get();
             state->pathMtu = pathMtuSockopt;
             limitMtuSearch(state->pathMtu);
-            if ((uint32_t)pathMtuSockopt > headers && (uint32_t)pathMtuSockopt - headers < state->snd_mss) {
-                state->snd_mss = pathMtuSockopt - headers;
+            uint32_t oldMss = state->snd_mss;
+            limitMssByPathMtuSockopt();
+            if (state->snd_mss != oldMss)
                 state->snd_effmss = calculateEffectiveMss();
-            }
             EV_DETAIL << "The route MTU is " << state->pathMtu << ", SMSS is " << state->snd_mss << "\n";
         }
     }

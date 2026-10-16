@@ -622,6 +622,8 @@ class INET_API TcpConnection : public SimpleModule
     virtual void retransmitSynAfterMtuReduction(uint32_t newMss);
     /** A new route MTU bounds the path MTU search (Linux tcp_sync_mss()) */
     virtual void limitMtuSearch(uint32_t mtu);
+    /** The route MTU of TcpSocket::setPathMtu() bounds the MSS */
+    virtual void limitMssByPathMtuSockopt();
     /** Arms the path MTU search when the MSS is settled (Linux tcp_mtup_init()) */
     virtual void initMtuProbing();
     /** The payload of the probe to send now; 0: wait for room for a probe; -1: no probe (Linux tcp_mtu_probe()) */

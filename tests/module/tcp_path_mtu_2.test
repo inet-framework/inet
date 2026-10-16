@@ -1,0 +1,50 @@
+%description:
+Tests TcpSocket::setPathMtu() before the open: the route MTU of 900 limits
+the MSS of the connection to 860 (900 less the IP and TCP headers), as it does
+after the open. The client sets it at t=0.2 and opens at t=0.5; its SYN
+announces 860, and its data goes in segments of 860 bytes.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+sim-time-limit = 5s
+*.cli_app.tOpen=0.5s
+*.cli_app.pathMtuScript="0.2 900"
+*.cli_app.sendScript="1.0 2000"
+*.*_tcp.mss = 1460
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /^\[testing\]: (.*)$/)
+    {
+        print "$1\n";
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
+[1.001 A003] A.1000 > B.2000: A 125001:125861(860) ack 125501 win 16384 
+[1.203 B002] A.1000 < B.2000: A ack 125861 win 16384 
+[1.205 A004] A.1000 > B.2000: A 125861:126721(860) ack 125501 win 16384 
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Tcp Header Option MSS(=860) sent
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
