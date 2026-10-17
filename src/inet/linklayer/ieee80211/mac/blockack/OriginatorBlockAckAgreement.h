@@ -8,6 +8,8 @@
 #ifndef __INET_ORIGINATORBLOCKACKAGREEMENT_H
 #define __INET_ORIGINATORBLOCKACKAGREEMENT_H
 
+#include <vector>
+
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 
 namespace inet {
@@ -48,9 +50,27 @@ class INET_API OriginatorBlockAckAgreement : public cObject
 
     virtual int getBufferSize() const { return bufferSize; }
     int getWindowSize() const { return std::min(bufferSize, 64); }
+    static int computeSequenceDistance(SequenceNumberCyclic start, SequenceNumberCyclic sequence)
+    {
+        return (sequence.get() - start.get() + 4096) % 4096;
+    }
     bool containsSequence(SequenceNumberCyclic sequence) const
     {
-        return (sequence.get() - startingSequenceNumber.get() + 4096) % 4096 < getWindowSize();
+        return computeSequenceDistance(startingSequenceNumber, sequence) < getWindowSize();
+    }
+    // The Basic and Compressed bitmaps cover 64 sequence positions, independent of the accepted window size.
+    static bool isInBitmap(SequenceNumberCyclic sequence, SequenceNumberCyclic bitmapStart)
+    {
+        return computeSequenceDistance(bitmapStart, sequence) < 64;
+    }
+    // Preserve the earliest unresolved position, or advance to the next allocation when none remains.
+    void advanceWindow(SequenceNumberCyclic nextSequence, const std::vector<SequenceNumberCyclic>& unresolvedSequences)
+    {
+        auto start = getStartingSequenceNumber();
+        int distance = computeSequenceDistance(start, nextSequence);
+        for (auto sequence : unresolvedSequences)
+            distance = std::min(distance, computeSequenceDistance(start, sequence));
+        setStartingSequenceNumber(start + distance);
     }
     virtual SequenceNumberCyclic getStartingSequenceNumber() { return startingSequenceNumber; }
     virtual void setStartingSequenceNumber(SequenceNumberCyclic sequenceNumber) { startingSequenceNumber = sequenceNumber; }

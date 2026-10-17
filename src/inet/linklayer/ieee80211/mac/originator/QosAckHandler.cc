@@ -216,14 +216,14 @@ void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211Block
         if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
             if (basicBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = basicBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && (sequence.get() - startingSeqNum.get() + 4096) % 4096 < 64)
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && OriginatorBlockAckAgreement::isInBitmap(sequence, startingSeqNum))
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }
         else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
             if (compressedBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = compressedBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && (sequence.get() - startingSeqNum.get() + 4096) % 4096 < 64 && seqCtrlField.getFragmentNumber() == 0)
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && OriginatorBlockAckAgreement::isInBitmap(sequence, startingSeqNum) && seqCtrlField.getFragmentNumber() == 0)
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }
