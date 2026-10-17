@@ -38,6 +38,11 @@ The serializer decodes the complete four-bit Type field. Type 0 retains Basic co
 
 Compressed producers must supply Fragment Number zero and a 64-bit bitmap. A Compressed Block Ack header chunk contains 28 bytes before FCS. Both BAR profiles occupy 24 bytes with FCS. Keep the corresponding header chunk and trailer lengths consistent. The serializer rejects malformed wire fields before runtime processing.
 
+IEEE 802.11 reversible DATA preparation
+-------------------------------------
+
+Custom QoS data services must implement the reversible preparation operations in ``IOriginatorQosMacDataService``. ``prepareFrame()`` creates an owned preview and retains original MSDUs in their queue. ``isPreparationValid()`` checks current source identity, eligibility, lifetime, sequence state, and aggregation permission. ``commitPreparedFrame()`` transfers the same preview pointer only after successful validation. Failure must preserve the preview and all original queue frames.
+
 IEEE 802.11 Basic Block Ack extension points
 ------------------------------------------
 

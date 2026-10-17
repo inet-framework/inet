@@ -470,6 +470,12 @@ Notable backward incompatible changes are the following:
 
    HT Operation now preserves RIFS Mode through management conversion and equality checks. The MIB permits RIFS under unprotected HT operation and clears the permission for VHT. A recipient can therefore check the actual advertised permission before it recognizes a RIFS relation. This change adds no RIFS transmission scheduler.
 
+57. IEEE 802.11 reversible DATA preparation
+
+   QoS data services now supply an owned DATA preview before queue extraction or sequence assignment. A successful commit transfers that same preview to the caller. A refused commit preserves the preview and original queue frames. Custom services must implement the preparation contract in the migration guide. The existing extraction path remains available.
+
+   Commitment of ordinary DATA now preserves normal queue service effects. Queue output statistics count the departure, and the retained preview includes elapsed queueing time and queue events. This also applies when a deferred head causes selection of a later eligible frame.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

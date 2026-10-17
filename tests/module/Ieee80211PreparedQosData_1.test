@@ -1,0 +1,294 @@
+%description:
+Check reversible QoS DATA preparation through the production data service and PacketQueue.
+Ten runs combine ordinary and aggregate previews with cancellation, commitment, stale sources, and stale sequence state.
+Preparation must preserve source identities, ownership, deadlines, and sequence counters.
+Commitment must return the same preview pointer and consume one sequence number and allocation index.
+Ordinary commitment preserves queue service signals, elapsed queueing time, and queue events for head and selected non-head frames.
+Refusal must preserve the preview and the queue state that follows the explicit invalidation.
+The fixture uses no HCF runtime path. Its Edca subclass supplies only the production access-category mapping for aggregate lifetime registration.
+
+%extraargs: -r 0..9
+
+%file: PreparedData.cc
+#include <iostream>
+
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/PacketEventTag.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/queueing/queue/PacketQueue.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+// Aggregate commitment uses classifyFrame(). This fixture does not exercise channel access.
+class PreparedEdca : public Edca {
+  protected:
+    void initialize(int) override {}
+};
+Define_Module(PreparedEdca);
+
+class PreparedService : public OriginatorQosMacDataService {
+    std::unique_ptr<EdcaTransmitLifetimeHandler> ownedLifetime;
+  protected:
+    void initialize() override {
+        OriginatorQosMacDataService::initialize();
+        auto lifetime = SimTime(1, SIMTIME_S);
+        ownedLifetime = std::make_unique<EdcaTransmitLifetimeHandler>(lifetime, lifetime, lifetime, lifetime);
+        setLifetimeHandler(ownedLifetime.get(), {});
+        setEligibility([](Packet *) { return true; }, [](Packet *) { return true; });
+    }
+  public:
+    EdcaTransmitLifetimeHandler *lifetime() const { return ownedLifetime.get(); }
+    int64_t allocations() const { return nextDataAllocationIndex; }
+};
+Define_Module(PreparedService);
+
+class PreparedDataTest : public cSimpleModule, public cListener {
+    const MacAddress peer{"02:00:00:00:00:02"};
+    PreparedService *service = nullptr;
+    queueing::PacketQueue *queue = nullptr;
+    queueing::PacketQueue *otherQueue = nullptr;
+    std::vector<Packet *> sources;
+    std::vector<int64_t> sourceIds;
+    std::vector<cObject *> sourceOwners;
+    std::vector<simtime_t> deadlines;
+    std::unique_ptr<PreparedQosData> preparation;
+    Packet *preview = nullptr;
+    int removals = 0;
+    int pulls = 0;
+    int aggregates = 0;
+
+    bool aggregate() const { return par("aggregate") && operation() != "selectedCommit"; }
+    std::string operation() const { return par("operation").stdstringValue(); }
+
+    Packet *enqueue(queueing::PacketQueue *destination, const char *name) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setReceiverAddress(peer);
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+        header->setAddress3(peer);
+        header->setTid(0);
+        header->setSequenceNumber(SequenceNumberCyclic(77));
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        auto time = packet->addRegionTag<QueueingTimeTag>(header->getChunkLength(), B(100));
+        time->setPacketTotalTimesArraySize(1);
+        time->setPacketTotalTimes(0, SIMTIME_ZERO);
+        packet->addRegionTag<PacketEventTag>(header->getChunkLength(), B(100));
+        packet->setArrivalTime(simTime());
+        destination->enqueuePacket(packet);
+        service->lifetime()->registerFrame(packet, AC_BE);
+        return packet;
+    }
+
+    void assertSources(int first, int expectedSequence = 0, int expectedAllocations = 0) const {
+        ASSERT(queue->getNumPackets() == int(sources.size()) - first);
+        ASSERT(service->getNextSequenceNumber(peer, 0) == SequenceNumberCyclic(expectedSequence));
+        ASSERT(service->allocations() == expectedAllocations);
+        int index = 0;
+        for (int i = 0; i < int(sources.size()); i++) {
+            if (first && (operation() == "selectedCommit" ? i == 1 : i < first))
+                continue;
+            auto packet = queue->getPacket(index++);
+            ASSERT(packet == sources[i] && packet->getId() == sourceIds[i]);
+            ASSERT(packet->getOwner() == sourceOwners[i]);
+            ASSERT(packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(77));
+            ASSERT(!packet->findTag<Ieee80211DataSequenceTag>());
+            ASSERT(service->lifetime()->findFrame(sourceIds[i]) == packet);
+            ASSERT(service->lifetime()->getDeadline(packet) == deadlines[i]);
+            ASSERT(packet->findRegionTag<QueueingTimeTag>(packet->peekAtFront<Ieee80211DataHeader>()->getChunkLength(), B(100))->getPacketTotalTimes(0) == SIMTIME_ZERO);
+        }
+    }
+
+    void deleteCommitted(Packet *packet) {
+        service->lifetime()->forgetFrame(packet->getId());
+        take(packet);
+        delete packet;
+    }
+
+    void cancelPreview() {
+        ASSERT(preparation->packet.get() == preview && preview->getOwner() == preparation.get());
+        auto live = cOwnedObject::getLiveObjectCount();
+        preparation.reset();
+        ASSERT(cOwnedObject::getLiveObjectCount() == live - 1);
+        preview = nullptr;
+    }
+
+    void prepare() {
+        for (const char *name : {"first-msdu", "second-msdu"}) {
+            auto packet = enqueue(queue, name);
+            sources.push_back(packet);
+            sourceIds.push_back(packet->getId());
+            sourceOwners.push_back(packet->getOwner());
+            deadlines.push_back(service->lifetime()->getDeadline(packet));
+        }
+        if (operation() == "selectedCommit")
+            service->setEligibility([](Packet *packet) { return !packet->isName("first-msdu"); }, [](Packet *) { return true; });
+        preparation = service->prepareFrame(queue, aggregate());
+        ASSERT(preparation && preparation->packet);
+        preview = preparation->packet.get();
+        ASSERT(preview != sources[0] && preview != sources[1]);
+        ASSERT(preview->getOwner() == preparation.get());
+        ASSERT(preparation->queue == queue && preparation->aggregate == aggregate());
+        ASSERT(preparation->sourceIds.size() == (aggregate() ? 2 : 1));
+        for (size_t i = 0; i < preparation->sourceIds.size(); i++)
+            ASSERT(preparation->sourceIds[i] == sourceIds[operation() == "selectedCommit" ? 1 : i]);
+        auto header = preview->peekAtFront<Ieee80211DataHeader>();
+        ASSERT(header->getAMsduPresent() == aggregate());
+        ASSERT(header->getSequenceNumber() == SequenceNumberCyclic(0));
+        ASSERT(!preview->findTag<Ieee80211DataSequenceTag>());
+        ASSERT(service->lifetime()->findFrame(preview->getId()) == nullptr);
+        ASSERT(service->isPreparationValid(*preparation, simTime()));
+        ASSERT(removals == 0 && pulls == 0 && aggregates == 0);
+        assertSources(0);
+        scheduleAt(SimTime(3, SIMTIME_MS), new cMessage("check"));
+    }
+
+    void check() {
+        assertSources(0);
+        ASSERT(service->isPreparationValid(*preparation, simTime()));
+        if (operation() == "commit" || operation() == "selectedCommit") {
+            auto committed = service->commitPreparedFrame(*preparation);
+            ASSERT(committed == preview && !preparation->packet);
+            ASSERT(committed->getOwner() == service);
+            ASSERT(committed->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(0));
+            ASSERT(committed->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == 0);
+            ASSERT(!service->isPreparationValid(*preparation, simTime()));
+            int consumed = aggregate() ? 2 : 1;
+            for (int i = 0; i < consumed; i++)
+                ASSERT(service->lifetime()->findFrame(sourceIds[operation() == "selectedCommit" ? 1 : i]) == nullptr);
+            auto expectedDeadline = aggregate() ? simTime() + SimTime(1, SIMTIME_S) : deadlines[operation() == "selectedCommit" ? 1 : 0];
+            ASSERT(service->lifetime()->getDeadline(committed) == expectedDeadline);
+            ASSERT(removals == (aggregate() ? consumed : 0) && pulls == (aggregate() ? 0 : 1) && aggregates == (aggregate() ? 1 : 0));
+            if (!aggregate()) {
+                auto offset = committed->peekAtFront<Ieee80211DataHeader>()->getChunkLength();
+                auto time = committed->findRegionTag<QueueingTimeTag>(offset, B(100));
+                ASSERT(time && time->getPacketTotalTimes(0) == SimTime(2, SIMTIME_MS));
+                auto events = committed->findRegionTag<PacketEventTag>(offset, B(100));
+                ASSERT(events && events->getPacketEventsArraySize() == 1);
+                ASSERT(events->getPacketEvents(0)->getKind() == PEK_QUEUED);
+                ASSERT(events->getPacketEvents(0)->getPacketDuration() == SimTime(2, SIMTIME_MS));
+            }
+            assertSources(consumed, 1, 1);
+            deleteCommitted(committed);
+            preparation.reset();
+            preview = nullptr;
+        }
+        else if (operation() == "staleSource") {
+            auto removed = queue->getPacket(0);
+            queue->removePacket(removed);
+            service->lifetime()->forgetFrame(removed->getId());
+            take(removed);
+            delete removed;
+            ASSERT(!service->isPreparationValid(*preparation, simTime()));
+            ASSERT(service->commitPreparedFrame(*preparation) == nullptr);
+            assertSources(1);
+            ASSERT(removals == 1 && pulls == 0 && aggregates == 0);
+            cancelPreview();
+            assertSources(1);
+        }
+        else if (operation() == "staleSequence") {
+            enqueue(otherQueue, "independent-msdu");
+            auto other = service->prepareFrame(otherQueue, false);
+            ASSERT(other && service->isPreparationValid(*other, simTime()));
+            auto otherPreview = other->packet.get();
+            auto committed = service->commitPreparedFrame(*other);
+            ASSERT(committed == otherPreview && otherQueue->isEmpty());
+            ASSERT(!service->isPreparationValid(*preparation, simTime()));
+            ASSERT(service->commitPreparedFrame(*preparation) == nullptr);
+            assertSources(0, 1, 1);
+            ASSERT(removals == 0 && pulls == 0 && aggregates == 0);
+            deleteCommitted(committed);
+            cancelPreview();
+            assertSources(0, 1, 1);
+        }
+        else {
+            ASSERT(operation() == "cancel");
+            cancelPreview();
+            assertSources(0);
+            ASSERT(removals == 0 && pulls == 0 && aggregates == 0);
+        }
+        while (!queue->isEmpty()) {
+            auto packet = queue->getPacket(0);
+            queue->removePacket(packet);
+            deleteCommitted(packet);
+        }
+        ASSERT(otherQueue->isEmpty() && service->lifetime()->getNumFrames() == 0);
+        std::cout << "Prepared QoS DATA assertions passed: aggregate=" << aggregate()
+            << " operation=" << operation() << ".\n";
+        endSimulation();
+    }
+
+  protected:
+    void initialize() override {
+        service = check_and_cast<PreparedService *>(getModuleByPath("^.service"));
+        queue = check_and_cast<queueing::PacketQueue *>(getModuleByPath("^.queue"));
+        otherQueue = check_and_cast<queueing::PacketQueue *>(getModuleByPath("^.otherQueue"));
+        queue->subscribe(packetRemovedSignal, this);
+        queue->subscribe(packetPulledSignal, this);
+        service->subscribe(IOriginatorMacDataService::packetAggregatedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("prepare"));
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *) override {
+        if (signal == packetRemovedSignal) removals++;
+        if (signal == packetPulledSignal) pulls++;
+        if (signal == IOriginatorMacDataService::packetAggregatedSignal) aggregates++;
+    }
+    void handleMessage(cMessage *message) override {
+        bool first = message->isName("prepare");
+        delete message;
+        if (first)
+            prepare();
+        else
+            check();
+    }
+};
+Define_Module(PreparedDataTest);
+
+%file: test.ned
+import inet.common.SimpleModule;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
+import inet.queueing.queue.PacketQueue;
+
+simple PreparedEdca extends SimpleModule { parameters: @class(::PreparedEdca); }
+module PreparedService extends OriginatorQosMacDataService { parameters: @class(::PreparedService); }
+simple PreparedDataTest {
+    parameters:
+        bool aggregate;
+        string operation;
+        @class(::PreparedDataTest);
+}
+network PreparedDataNetwork {
+    submodules:
+        edca: PreparedEdca;
+        service: PreparedService;
+        queue: PacketQueue;
+        otherQueue: PacketQueue;
+        test: PreparedDataTest;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = PreparedDataNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = true
+record-scalar-results = false
+record-vector-results = false
+*.test.aggregate = ${aggregate=false,true}
+*.test.operation = ${operation="cancel","commit","staleSource","staleSequence","selectedCommit"}
+*.service.msduAggregationPolicy.subframeNumThreshold = 2
+*.service.msduAggregationPolicy.maxAMsduSize = 1000
+*.service.mpduAggregationPolicy.typename = ""
+*.service.fragmentationPolicy.typename = ""
+
+%contains: stdout
+Prepared QoS DATA assertions passed:
