@@ -664,8 +664,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
                     std::vector<uint8_t> bytes;
                     bytes.push_back(stream.readByte());
                     bytes.push_back(stream.readByte());
-                    BitVector *blockAckBitmap = new BitVector(bytes);
-                    basicBlockAck->setBlockAckBitmap(i, *blockAckBitmap);
+                    basicBlockAck->setBlockAckBitmap(i, BitVector(bytes));
                 }
                 return basicBlockAck;
             }
@@ -684,7 +683,7 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
                 for (size_t i = 0; i < 8; ++i) {
                     bytes.push_back(stream.readByte());
                 }
-                compressedBlockAck->setBlockAckBitmap(*(new BitVector(bytes)));
+                compressedBlockAck->setBlockAckBitmap(BitVector(bytes));
                 return compressedBlockAck;
             }
             else {
