@@ -65,6 +65,8 @@ class INET_API ICommunicationCache : public virtual IPrintableObject
     /** @name Reception Cache */
     //@{
     virtual const IArrival *getCachedArrival(const IRadio *receiver, const ITransmission *transmission) = 0;
+    // This lookup returns nullptr for absent state. It allocates no cache entry.
+    virtual const IArrival *findCachedArrival(const IRadio *receiver, const ITransmission *transmission) const = 0;
     virtual void setCachedArrival(const IRadio *receiver, const ITransmission *transmission, const IArrival *arrival) = 0;
     virtual void removeCachedArrival(const IRadio *receiver, const ITransmission *transmission) = 0;
 

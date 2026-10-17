@@ -454,6 +454,10 @@ Notable backward incompatible changes are the following:
 
    Custom QoS ACK policies must accept the agreement-handler argument in isBlockAckReqNeeded() and computeBlockAckReqParameters(). Custom in-progress queues must preserve the extract argument in getPendingFrameFor(). QoS data services must implement IOriginatorQosMacDataService for candidate preview without extraction.
 
+53. Radio medium timing queries
+
+   Radio media now expose copied transmission endpoints and cached arrival endpoints. Consumers can preserve physical timing evidence after cache expiry without retained transmission pointers or new propagation calculations. Receivers attach the transmission identifier to SignalTimeInd so later frame delivery can identify that evidence. Custom radio media and communication caches must implement the new query methods described in the migration guide.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
