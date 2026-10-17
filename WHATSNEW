@@ -500,6 +500,10 @@ Notable backward incompatible changes are the following:
 
    Delimiter recovery now scans across typed MPDU headers. An invalid delimiter no longer causes a chunk conversion error at those headers. Bounded recovery retains later complete MPDU ranges.
 
+59. Pure HT aggregate probabilities
+
+   NIST and Yans now expose pure HT20 range probabilities through an optional WLAN error-model role. Receiver activation remains separate.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
