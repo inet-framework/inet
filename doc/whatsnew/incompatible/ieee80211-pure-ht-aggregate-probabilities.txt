@@ -1,0 +1,3 @@
+Pure HT aggregate probabilities
+
+NIST and Yans now expose pure HT20 range probabilities through an optional WLAN error-model role. Receiver activation remains separate.

@@ -18,6 +18,22 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 {
 }
 
+bool Ieee80211ErrorModelBase::supportsAmpduMode(const IIeee80211Mode *mode) const
+{
+    return mode != nullptr && mode->getModulationClass() == IIeee80211Mode::ModulationClass::HT &&
+            mode->getHtMcsIndex() >= 0 && mode->getHtMcsIndex() <= 31 && mode->getDataMode()->getBandwidth() == MHz(20);
+}
+
+double Ieee80211ErrorModelBase::computeAmpduRangeSuccessRate(const ISnir *snir, const IIeee80211Mode *mode, B length) const
+{
+    Enter_Method("computeAmpduRangeSuccessRate");
+    if (!supportsAmpduMode(mode))
+        throw cRuntimeError("Unsupported HT A-MPDU receive mode");
+    if (snir == nullptr || length <= B(0) || length > B(65535))
+        throw cRuntimeError("Invalid A-MPDU probability range");
+    return getDataSuccessRate(mode, b(length).get<b>(), getScalarSnir(snir));
+}
+
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method("computePacketErrorRate");
