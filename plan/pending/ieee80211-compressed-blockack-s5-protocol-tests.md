@@ -17,6 +17,7 @@ Protocol comparisons use identical fixtures against each applicable commit and i
 | S5-P7 | retain explicit Compressed receipt state. | [Receipt representation; the protocol caller enters in S5-P9.](../../tests/protocol/wifi/s5-receipt-state.md) |
 | S5-P8 | select legal Compressed control rates. | [Rate helpers; the protocol caller enters in S5-P9.](../../tests/protocol/wifi/s5-control-rates.md) |
 | S5-P9 | complete explicit immediate Compressed Block Ack. | [Explicit exchange cannot initialize in the parent; child feedback passes.](../../tests/protocol/wifi/s5-compressed-exchange.md) |
+| S5-P10 | default HCF to immediate Compressed Block Ack. | [Explicit profiles pass in both; the NED default passes only in the child.](../../tests/protocol/wifi/s5-default-profile.md) |
 
 ## Execution and evidence boundaries
 

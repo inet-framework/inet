@@ -4,13 +4,11 @@
 
 HCF enforces a finite deadline for every QoS DATA frame that it accepts. This contract applies with Block Ack enabled or disabled. DCF lifetime, complete management lifetime, and MAC stop/start recovery remain outside the contract.
 
-## Previous PRs and S4 scope
+## Master prerequisites and S5 scope
 
-Merged [PR #1331](https://github.com/inet-framework/inet/pull/1331) supplies the lifetime mechanism described here. It includes identity-based deadlines, the 0.512-second default, expiry, fragment and aggregate rules, and safe completion across expiry. Merged [PR #1343](https://github.com/inet-framework/inet/pull/1343) uses that deadline during agreement setup and teardown recovery. These mechanisms are already present in S4's master base.
+Master supplies the finite DATA lifetime from PR #1331, agreement lifecycle from PR #1343, and merged S4 completion through PR #1344. HCF connects final lifetime disposal to window progress and completion DELBA without a separate agreement lifetime store.
 
-This S4 branch, [PR #1344](https://github.com/inet-framework/inet/pull/1344), connects lifetime disposal to transmit-window advancement and final-transfer completion. HCF removes resolved positions without sequence reuse. If the final unresolved DATA expires and no DATA remains, HCF can start completion DELBA at a safe exchange boundary.
-
-The recipient's complete-unit release on ordinary teardown comes from PR #1343. S4 supplies the final-expiry trigger that reaches that existing path. S4 does not change the lifetime default, restart retry deadlines, or introduce another lifetime store. The [main scope table](ieee80211-compressed-blockack-replacement.md#previous-prs-and-s4-scope) gives the wider implementation boundary.
+S5 retains those deadlines while a Compressed DATA preview awaits commitment. Ordinary commitment transfers the original deadline. Aggregate commitment starts the A-MSDU lifetime. Failed RTS before DATA leaves original MSDUs queued, so their deadlines bound repeated attempts. The [admission contract](ieee80211-compressed-blockack-txop-admission.md) defines these event boundaries.
 
 ## 1. Core behavior
 
@@ -52,6 +50,6 @@ Hypothetical example: repeated Block Ack feedback leaves DATA 100 unresolved. It
 
 ## 5. Verification and limits
 
-The source includes lifetime, identity, aggregation, arbitration, and congestion fixtures under `tests/module`. The [current S4 verification record](ieee80211-compressed-blockack-s4-execution.md) defines the executed selection. It includes lifetime interactions through Block Ack fixtures but does not report a new standalone lifetime campaign.
+The source includes lifetime, identity, aggregation, arbitration, and congestion fixtures under `tests/module`. The [S5 verification record](ieee80211-compressed-blockack-s5-execution.md) defines current final-commit verification. Its fixture inventory establishes no result without an executed command.
 
-The source contract applies independently of Block Ack support. Current S4 results do not establish complete Compressed recovery, general performance, or MAC stop/start behavior. Lifetime disposal, inactivity teardown, queue overflow, and retry-limit disposal remain distinct causes.
+The source contract applies independently of Block Ack support. General performance and MAC stop/start behavior remain outside the claim. Lifetime disposal, inactivity teardown, queue overflow, and retry-limit disposal remain distinct causes.
