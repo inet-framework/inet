@@ -22,7 +22,27 @@ namespace ieee80211 {
 class INET_API IOriginatorBlockAckAgreementHandler
 {
   public:
+    typedef std::pair<MacAddress, Tid> AgreementId;
+    enum class ProcedureState { SETUP_INTENT, REQUEST_PENDING, TEARDOWN_PENDING, RECOVERY_NEEDED, WAITING_FOR_SUCCESSOR };
+    struct Procedure {
+        ProcedureState state = ProcedureState::SETUP_INTENT;
+        bool requestAttempted = false;
+        simtime_t responseDeadline = SIMTIME_MAX;
+    };
     virtual ~IOriginatorBlockAckAgreementHandler() {}
+    virtual const std::map<AgreementId, OriginatorBlockAckAgreement *>& getAgreements() const = 0;
+    virtual const std::map<AgreementId, Procedure>& getProcedures() const = 0;
+    virtual simtime_t computeEarliestExpirationTime() = 0;
+    virtual OriginatorBlockAckAgreement *detachAgreement(MacAddress peer, Tid tid) = 0;
+    virtual std::vector<OriginatorBlockAckAgreement *> detachPeer(MacAddress peer) = 0;
+    virtual void noteEligibleDataTransmission(MacAddress peer, Tid tid) = 0;
+    virtual void beginSetupIntent(MacAddress peer, Tid tid) = 0;
+    virtual void beginTeardown(MacAddress peer, Tid tid) = 0;
+    virtual void failTeardown(MacAddress peer, Tid tid) = 0;
+    virtual void finishProcedure(MacAddress peer, Tid tid) = 0;
+    virtual void markRequestAttempted(MacAddress peer, Tid tid) = 0;
+    virtual void acknowledgeRequest(MacAddress peer, Tid tid, simtime_t timeout) = 0;
+    virtual void startSetup(MacAddress peer, Tid tid, SequenceNumberCyclic sequence, IOriginatorBlockAckAgreementPolicy *policy, IProcedureCallback *callback, bool aMsdu) = 0;
 
     virtual void processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void processTransmittedAddbaReq(const Ptr<const Ieee80211AddbaRequest>& addbaReq) = 0;

@@ -1,0 +1,358 @@
+%description:
+Check Basic teardown through initialized HCF and production receive paths. Each role has agreements for two peers and two TIDs. Deletion callbacks inspect the selected agreement after its removal. Recipient teardown releases complete units behind a gap before the callback. Absent-agreement DATA and BAR cause recipient-role DELBA without agreement allocation. The fixture supplies accepted agreements; it does not test negotiation or wireless transmission.
+
+The inactivity timer uses the earliest absolute deadline from both agreement roles. The fixture checks that derived deadline and the later expiration of the opposite role.
+
+%extraargs: -r 0..9
+
+%file: Lifecycle.cc
+#include <iostream>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class LifecycleOriginator : public OriginatorBlockAckAgreementHandler {
+  public:
+    void accept(MacAddress peer, Tid tid, int start = 100, simtime_t timeout = SIMTIME_ZERO) {
+        auto agreement = new OriginatorBlockAckAgreement(peer, tid, SequenceNumberCyclic(start), 64, false, false);
+        agreement->setIsAddbaRequestSent(true);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(timeout);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, tid}] = agreement;
+    }
+};
+class LifecycleRecipient : public RecipientBlockAckAgreementHandler {
+  public:
+    void accept(MacAddress peer, Tid tid, int start = 100, simtime_t timeout = SIMTIME_ZERO) {
+        auto agreement = new RecipientBlockAckAgreement(peer, tid, SequenceNumberCyclic(start), 64, timeout);
+        agreement->addbaResposneSent();
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, tid}] = agreement;
+    }
+};
+class LifecycleHcf : public Hcf {
+  public:
+    const MacAddress peer = MacAddress("02:00:00:00:00:02");
+    const MacAddress other = MacAddress("02:00:00:00:00:03");
+    std::vector<std::string> delivered;
+    int deletions = 0;
+    int delbas = 0;
+    int controlResponses = 0;
+    bool selectedRecipient = false;
+    bool requireRelease = false;
+    bool strictOpposite = true;
+    bool dynamicRole = false;
+    void prepare(int start = 100, simtime_t originatorTimeout = SIMTIME_ZERO, simtime_t recipientTimeout = SIMTIME_ZERO) {
+        Enter_Method("prepare");
+        delete originatorBlockAckAgreementHandler;
+        delete recipientBlockAckAgreementHandler;
+        auto originator = new LifecycleOriginator();
+        auto recipient = new LifecycleRecipient();
+        originatorBlockAckAgreementHandler = originator;
+        recipientBlockAckAgreementHandler = recipient;
+        for (auto address : {peer, other})
+            for (Tid tid : {5, 6}) {
+                bool selected = address == peer && tid == 5;
+                originator->accept(address, tid, start, selected ? originatorTimeout : SIMTIME_ZERO);
+                recipient->accept(address, tid, start, selected ? recipientTimeout : SIMTIME_ZERO);
+            }
+        subscribe(blockAckAgreementDeletedSignal, this);
+    }
+    void checkInactivityDeadline(simtime_t expectedDeadline) {
+        Enter_Method("checkInactivityDeadline");
+        scheduleInactivityTimer();
+        ASSERT(inactivityTimer->isScheduled());
+        ASSERT(inactivityTimer->getArrivalTime() == expectedDeadline);
+    }
+    bool hasInactivityTimer() const { return inactivityTimer->isScheduled(); }
+    void retireRecipientLocally() {
+        Enter_Method("retireRecipientLocally");
+        selectedRecipient = true;
+        beginTeardown(peer, 5, false, 37);
+    }
+    bool hasOriginator(MacAddress address, Tid tid) {
+        return originatorBlockAckAgreementHandler->getAgreement(address, tid) != nullptr;
+    }
+    bool hasRecipient(MacAddress address, Tid tid) {
+        return recipientBlockAckAgreementHandler->getAgreement(tid, address) != nullptr;
+    }
+    void receiveDelba(bool initiator, int sequence) {
+        Enter_Method("receiveDelba");
+        selectedRecipient = initiator;
+        auto header = makeShared<Ieee80211Delba>();
+        header->setTransmitterAddress(peer);
+        header->setReceiverAddress(mac->getAddress());
+        header->setTid(5);
+        header->setInitiator(initiator);
+        header->setSequenceNumber(SequenceNumberCyclic(sequence));
+        auto packet = new Packet("delba", header);
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(
+                physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processLowerFrame(packet, header);
+    }
+    void receiveData(int sequence, const char *name, MacAddress address, bool incomplete = false) {
+        Enter_Method("receiveData");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTransmitterAddress(address);
+        header->setReceiverAddress(mac->getAddress());
+        header->setAddress3(address);
+        header->setTid(5);
+        header->setAckPolicy(BLOCK_ACK);
+        header->setSequenceNumber(SequenceNumberCyclic(sequence));
+        header->setMoreFragments(incomplete);
+        auto packet = new Packet(name, header);
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processLowerFrame(packet, header);
+    }
+    void receiveBar(MacAddress address, int fragment = 0) {
+        Enter_Method("receiveBar");
+        auto header = makeShared<Ieee80211BasicBlockAckReq>();
+        header->setTransmitterAddress(address);
+        header->setReceiverAddress(mac->getAddress());
+        header->setTidInfo(5);
+        header->setFragmentNumber(fragment);
+        header->setStartingSequenceNumber(SequenceNumberCyclic(100));
+        auto packet = new Packet("bar", header);
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processLowerFrame(packet, header);
+    }
+  protected:
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *payload, cObject *details) override {
+        if (signal != blockAckAgreementDeletedSignal) {
+            Hcf::receiveSignal(source, signal, payload, details);
+            return;
+        }
+        if (requireRelease)
+            ASSERT((delivered == std::vector<std::string>{"second", "third"}));
+        ASSERT(payload != nullptr);
+        if (dynamicRole)
+            selectedRecipient = dynamic_cast<RecipientBlockAckAgreement *>(payload) != nullptr;
+        if (selectedRecipient) {
+            auto agreement = check_and_cast<RecipientBlockAckAgreement *>(payload);
+            ASSERT(agreement->getBlockAckRecord()->getOriginatorAddress() == peer);
+            ASSERT(agreement->getBlockAckRecord()->getTid() == 5);
+            ASSERT(!hasRecipient(peer, 5));
+            if (strictOpposite)
+                ASSERT(hasOriginator(peer, 5));
+            ASSERT(agreement->getBufferSize() == 64);
+        }
+        else {
+            auto agreement = check_and_cast<OriginatorBlockAckAgreement *>(payload);
+            ASSERT(agreement->getReceiverAddr() == peer);
+            ASSERT(agreement->getTid() == 5);
+            ASSERT(!hasOriginator(peer, 5));
+            if (strictOpposite)
+                ASSERT(hasRecipient(peer, 5));
+            ASSERT(agreement->getBufferSize() == 64);
+        }
+        ASSERT(hasOriginator(other, 5));
+        ASSERT(hasRecipient(other, 5));
+        ASSERT(hasOriginator(peer, 6));
+        ASSERT(hasRecipient(peer, 6));
+        deletions++;
+    }
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto packet : frames) {
+            if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>()))
+                delivered.push_back(packet->getName());
+            take(packet);
+            delete packet;
+        }
+    }
+    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&,
+            Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        controlResponses++;
+        delete packet;
+    }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
+            if (!dynamicRole)
+                ASSERT(!delba->getInitiator());
+            delbas++;
+        }
+        delete packet;
+    }
+};
+Define_Module(LifecycleHcf);
+class LifecycleTest : public cSimpleModule {
+  protected:
+    LifecycleHcf *hcf = nullptr;
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("test")); }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("recipientExpiry")) {
+            delete message;
+            ASSERT(hcf->hasOriginator(hcf->peer, 5));
+            ASSERT(!hcf->hasRecipient(hcf->peer, 5));
+            ASSERT(hcf->deletions == 1);
+            ASSERT(hcf->delbas == 1);
+            ASSERT((hcf->delivered == std::vector<std::string>{"second", "third"}));
+            ASSERT(!hcf->hasInactivityTimer());
+            std::cout << "Block Ack lifecycle assertions passed.\n";
+            return;
+        }
+        if (message->isName("firstExpiry")) {
+            delete message;
+            ASSERT(!hcf->hasOriginator(hcf->peer, 5));
+            ASSERT(hcf->hasRecipient(hcf->peer, 5));
+            ASSERT(hcf->deletions == 1);
+            ASSERT(hcf->delbas == 1);
+            scheduleAt(SimTime(5000001, SIMTIME_NS), new cMessage("secondExpiry"));
+            return;
+        }
+        if (message->isName("secondExpiry")) {
+            delete message;
+            ASSERT(!hcf->hasOriginator(hcf->peer, 5));
+            ASSERT(!hcf->hasRecipient(hcf->peer, 5));
+            ASSERT(hcf->deletions == 2);
+            ASSERT(hcf->delbas == 2);
+            ASSERT(!hcf->hasInactivityTimer());
+            std::cout << "Block Ack lifecycle assertions passed.\n";
+            return;
+        }
+        if (message->isName("zeroExpiry")) {
+            delete message;
+            ASSERT(hcf->hasOriginator(hcf->peer, 5));
+            ASSERT(hcf->hasRecipient(hcf->peer, 5));
+            ASSERT(hcf->deletions == 0);
+            ASSERT(hcf->delbas == 0);
+            ASSERT(!hcf->hasInactivityTimer());
+            std::cout << "Block Ack lifecycle assertions passed.\n";
+            return;
+        }
+        delete message;
+        hcf = check_and_cast<LifecycleHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"));
+        int scenario = par("scenario");
+        hcf->prepare(scenario == 5 ? 4094 : 100,
+                scenario == 6 ? SimTime(2, SIMTIME_MS) : SIMTIME_ZERO,
+                scenario == 6 ? SimTime(4, SIMTIME_MS) : scenario == 9 ? SimTime(2, SIMTIME_MS) : SIMTIME_ZERO);
+        if (scenario >= 8) {
+            hcf->requireRelease = true;
+            hcf->selectedRecipient = true;
+            hcf->receiveData(101, "second", hcf->peer);
+            hcf->receiveData(102, "third", hcf->peer);
+            ASSERT(hcf->delivered.empty());
+            if (scenario == 8) {
+                hcf->retireRecipientLocally();
+                ASSERT(hcf->deletions == 1);
+                ASSERT(hcf->delbas == 1);
+                hcf->retireRecipientLocally();
+                ASSERT(hcf->deletions == 1);
+                ASSERT(hcf->delbas == 1);
+                std::cout << "Block Ack lifecycle assertions passed.\n";
+            }
+            else {
+                hcf->checkInactivityDeadline(SimTime(3, SIMTIME_MS));
+                scheduleAt(SimTime(3000001, SIMTIME_NS), new cMessage("recipientExpiry"));
+            }
+            return;
+        }
+        if (scenario >= 6) {
+            if (scenario == 6) {
+                hcf->strictOpposite = false;
+                hcf->dynamicRole = true;
+                hcf->checkInactivityDeadline(SimTime(3, SIMTIME_MS));
+                scheduleAt(SimTime(3000001, SIMTIME_NS), new cMessage("firstExpiry"));
+            }
+            else
+                scheduleAt(SimTime(6, SIMTIME_MS), new cMessage("zeroExpiry"));
+            return;
+        }
+        if (scenario <= 2 || scenario == 5) {
+            if (scenario == 2 || scenario == 5) {
+                hcf->requireRelease = true;
+                if (scenario == 5)
+                    hcf->receiveData(4094, "incomplete-frag0", hcf->peer, true);
+                hcf->receiveData(scenario == 5 ? 4095 : 101, "second", hcf->peer);
+                hcf->receiveData(scenario == 5 ? 0 : 102, "third", hcf->peer);
+                ASSERT(hcf->delivered.empty());
+            }
+            hcf->receiveDelba(scenario != 0, 20);
+            ASSERT(hcf->deletions == 1);
+            hcf->receiveDelba(scenario != 0, 21);
+            ASSERT(hcf->deletions == 1);
+            if (scenario == 2 || scenario == 5)
+                ASSERT((hcf->delivered == std::vector<std::string>{"second", "third"}));
+        }
+        else {
+            const MacAddress absent("02:00:00:00:00:04");
+            if (scenario == 4) {
+                hcf->receiveBar(absent, 1);
+                ASSERT(hcf->delbas == 0);
+                ASSERT(hcf->controlResponses == 0);
+            }
+            if (scenario == 3)
+                hcf->receiveData(100, "absent", absent);
+            else
+                hcf->receiveBar(absent);
+            ASSERT(hcf->delivered.empty());
+            ASSERT(hcf->delbas == 1);
+            ASSERT(hcf->controlResponses == 0);
+            ASSERT(!hcf->hasRecipient(absent, 5));
+            ASSERT(!hcf->hasOriginator(absent, 5));
+            if (scenario == 3)
+                hcf->receiveData(101, "absent-again", absent);
+            else
+                hcf->receiveBar(absent);
+            ASSERT(hcf->delbas == 1);
+            ASSERT(hcf->delivered.empty());
+        }
+        std::cout << "Block Ack lifecycle assertions passed.\n";
+    }
+};
+Define_Module(LifecycleTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module LifecycleHcf extends Hcf { parameters: @class(::inet::ieee80211::LifecycleHcf); }
+simple LifecycleTest { parameters: int scenario; @class(::inet::ieee80211::LifecycleTest); }
+network LifecycleNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: LifecycleTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = LifecycleNetwork
+ned-path = .;../../../../src
+sim-time-limit = 7ms
+seed-set = 0
+*.test.scenario = ${0..9}
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "LifecycleHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+
+%contains: stdout
+Block Ack lifecycle assertions passed.

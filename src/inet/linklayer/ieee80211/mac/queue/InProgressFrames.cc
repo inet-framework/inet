@@ -63,6 +63,7 @@ bool InProgressFrames::containsFrame(const Packet *packet) const
 bool InProgressFrames::isEligibleToTransmit(Packet *packet)
 {
     return (!lifetimeHandler || !lifetimeHandler->isExpired(packet)) &&
+        (!transmissionEligible || transmissionEligible(packet)) &&
         ackHandler->isEligibleToTransmit(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
 }
 
