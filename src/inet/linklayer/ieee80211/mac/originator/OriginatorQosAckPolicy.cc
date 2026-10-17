@@ -61,12 +61,12 @@ std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::comput
             agreement->containsSequence(frames->getCandidateSequenceNumber(candidate)))
             continue;
         auto start = agreement->getStartingSequenceNumber();
-        int oldestOffset = 4096;
+        int oldestOffset = -1;
         simtime_t arrival = SIMTIME_MAX;
         for (auto frame : entry.second) {
             auto sequence = frame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
-            int offset = (sequence.get() - start.get() + 4096) % 4096;
-            if (offset < oldestOffset) {
+            int offset = OriginatorBlockAckAgreement::computeSequenceDistance(start, sequence);
+            if (oldestOffset == -1 || offset < oldestOffset) {
                 oldestOffset = offset;
                 arrival = frame->getArrivalTime();
             }

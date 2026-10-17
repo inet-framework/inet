@@ -537,20 +537,19 @@ void Hcf::advanceOriginatorWindows()
         auto agreement = entry.second;
         if (!agreement->getIsAddbaResponseReceived())
             continue;
-        auto start = agreement->getStartingSequenceNumber();
         auto next = service->getNextSequenceNumber(entry.first.first, entry.first.second);
-        int distance = (next.get() - start.get() + 4096) % 4096;
+        std::vector<SequenceNumberCyclic> unresolvedSequences;
         for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
             auto frames = edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
             for (int i = 0; i < frames->getLength(); i++) {
                 auto data = dynamicPtrCast<const Ieee80211DataHeader>(frames->getFrames(i)->peekAtFront<Ieee80211MacHeader>());
                 if (data && data->getType() == ST_DATA_WITH_QOS &&
                     data->getReceiverAddress() == entry.first.first && data->getTid() == entry.first.second)
-                    distance = std::min(distance, (data->getSequenceNumber().get() - start.get() + 4096) % 4096);
+                    unresolvedSequences.push_back(data->getSequenceNumber());
             }
         }
         // IEEE Std 802.11-2024, 10.25.6.7.1: resolved positions permit transmit-window progress.
-        agreement->setStartingSequenceNumber(start + distance);
+        agreement->advanceWindow(next, unresolvedSequences);
     }
 }
 
