@@ -1,0 +1,3 @@
+PHY DATA chunk errors
+
+PHY error models now support unconditional DATA corruption through `IErrorModel::computeReceivedData()`. The operation returns existing chunk content with local error flags. Direct interface implementations must supply this operation. The common base uses DATA BER. A model can override the probability calculation through its existing PHY functions.
