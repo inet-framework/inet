@@ -9,6 +9,7 @@ using namespace inet;
 using namespace inet::ieee80211;
 namespace Ieee80211TxNavChoice_1 {
 class NavRx : public IRx {
+    void invalidateInterframeHistory() override {}
   public:
     int updates = 0;
     simtime_t lastDuration;

@@ -1,0 +1,170 @@
+%description:
+Check local ACK history through production Tx, Rx, and radio completion.
+Check immediate submission, delayed submission, non-ACK completion, and radio OFF abort.
+The Tx callback releases its frame before the radio emits normal completion.
+
+%extraargs: -r 0..13
+
+%file: Completion.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/Tx.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/common/signal/WirelessSignal.h"
+namespace inet::ieee80211 {
+using namespace physicallayer;
+class CompletionRadio : public Ieee80211Radio {
+  protected:
+    void endTransmission(cMessage *timer) override {
+        if (par("incompletePhy").boolValue()) {
+            // The fault affects only the completion representation, after valid physical submission.
+            auto signal = static_cast<WirelessSignal *>(timer->getContextPointer());
+            auto packet = const_cast<Packet *>(signal->getTransmission()->getPacket());
+            auto header = packet->removeAtFront<Ieee80211PhyHeader>();
+            header->markIncomplete();
+            packet->insertAtFront(header);
+        }
+        if (par("unsupportedPhy").boolValue()) {
+            auto signal = static_cast<WirelessSignal *>(timer->getContextPointer());
+            auto packet = const_cast<Packet *>(signal->getTransmission()->getPacket());
+            packet->getTagForUpdate<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        }
+        Ieee80211Radio::endTransmission(timer);
+    }
+};
+Define_Module(CompletionRadio);
+class CompletionRx : public Rx {
+  public:
+    bool hasAck() const { return precedingFrame && precedingFrame->ack; }
+};
+Define_Module(CompletionRx);
+class CompletionDriver : public cSimpleModule, public cListener, public ITx::ICallback {
+    CompletionRx *rx = nullptr;
+    Tx *tx = nullptr;
+    Ieee80211Radio *radio = nullptr;
+    int scenario = -1;
+    int callbacks = 0;
+    int completions = 0;
+    bool completed = false;
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("start")); }
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        callbacks++;
+        ASSERT(!tx->hasTransmission());
+        ASSERT(!rx->hasAck());
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *) override {
+        Enter_Method_Silent();
+        if (signal == transmissionStartedSignal) {
+            ASSERT(!rx->hasAck());
+            if (scenario == 3)
+                scheduleAfter(SimTime(1, SIMTIME_US), new cMessage("abort"));
+        }
+        else {
+            ASSERT(callbacks == 1);
+            ASSERT(!tx->hasTransmission());
+            completions++;
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        std::string name = message->getName();
+        delete message;
+        if (name == "start") {
+            scenario = par("scenario");
+            rx = check_and_cast<CompletionRx *>(getSimulation()->getModuleByPath("host.wlan[0].mac.rx"));
+            tx = check_and_cast<Tx *>(getSimulation()->getModuleByPath("host.wlan[0].mac.tx"));
+            radio = check_and_cast<Ieee80211Radio *>(getSimulation()->getModuleByPath("host.wlan[0].radio"));
+            radio->subscribe(transmissionStartedSignal, this);
+            radio->subscribe(transmissionEndedSignal, this);
+            Ptr<Ieee80211MacHeader> header;
+            if (scenario == 2)
+                header = makeShared<Ieee80211CtsFrame>();
+            else
+                header = makeShared<Ieee80211AckFrame>();
+            header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+            header->setDurationField(SIMTIME_ZERO);
+            auto packet = new Packet("completion-probe", header);
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+            packet->addTag<Ieee80211ModeReq>()->setMode(Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000)));
+            tx->transmitFrame(packet, header, scenario == 1 ? SimTime(10, SIMTIME_US) : SIMTIME_ZERO, false, this);
+            delete packet;
+            ASSERT(!rx->hasAck());
+            scheduleAfter(SimTime(1, SIMTIME_MS), new cMessage("check"));
+        }
+        else if (name == "abort") {
+            radio->setRadioMode(IRadio::RADIO_MODE_OFF);
+            ASSERT(!rx->hasAck());
+        }
+        else {
+            ASSERT(callbacks == 1);
+            ASSERT(completions == (scenario == 3 ? 0 : 1));
+            auto networkInterface = radio->getParentModule();
+            networkInterface->emit(transmissionStartedSignal, static_cast<cObject *>(nullptr));
+            networkInterface->emit(IRadio::radioModeChangedSignal, static_cast<intval_t>(IRadio::RADIO_MODE_OFF));
+            ASSERT(rx->hasAck() == (scenario == 0 || scenario == 1 || scenario == 4));
+            ASSERT(rx->getTxnavRemaining() == SIMTIME_ZERO);
+            completed = true;
+            std::cout << "Local completion scenario=" << scenario << ": PASS\n";
+            endSimulation();
+        }
+    }
+    void finish() override { ASSERT(completed); }
+};
+Define_Module(CompletionDriver);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.Rx;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+module CompletionRadio extends Ieee80211ScalarRadio {
+    parameters: bool incompletePhy; bool unsupportedPhy; @class(::inet::ieee80211::CompletionRadio);
+}
+simple CompletionRx extends Rx { parameters: @class(::inet::ieee80211::CompletionRx); }
+simple CompletionDriver { parameters: int scenario; @class(::inet::ieee80211::CompletionDriver); }
+network CompletionNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        driver: CompletionDriver;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = CompletionNetwork
+ned-path = .;../../../../src
+sim-time-limit = 3ms
+seed-set = 0
+record-vector-results = false
+record-scalar-results = false
+*.driver.scenario = ${scenario=0..6}
+**.wlan[*].radio.typename = "CompletionRadio"
+**.wlan[*].radio.incompletePhy = ${scenario} == 5
+**.wlan[*].radio.unsupportedPhy = ${scenario} == 6
+**.wlan[*].radio.switchingTimes = "ns 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ${turnaround=0,1000} 0 0 0 0 0 0 0"
+**.wlan[*].radio.sendRawBytes = ${scenario} == 4
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].mac.qosStation = false
+**.wlan[*].mac.fcsMode = ${scenario} == 4 ? "computed" : "declared"
+**.wlan[*].mac.rx.typename = "CompletionRx"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 10m
+**.mobility.constraintAreaMaxY = 10m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+: PASS
+%not-contains: stdout
+: FAIL

@@ -12,6 +12,8 @@ import inet.linklayer.ieee80211.mac.contract.IRx;
 
 //
 // Rx checks received frames for errors and manages received NAV and shared TXNAV.
+// Rx derives interval evidence from local radio notifications and decoded frames.
+// The indication reports interval evidence without a change to FCS acceptance.
 // Successful HCF holder frames replace TXNAV from the PPDU end and encoded Duration/ID.
 // TXNAV blocks contention until expiry, including after TXOP end.
 // HCF also disables local contention through its active sequence and response waits.
