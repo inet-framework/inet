@@ -1,0 +1,5 @@
+IEEE 802.11 RIFS permission
+
+HT Operation now preserves RIFS Mode through management conversion and equality checks. The MIB permits RIFS under unprotected HT operation and clears the permission for VHT. A recipient can therefore check the actual advertised permission before it recognizes a RIFS relation. This change adds no RIFS transmission scheduler.
+
+Rx now detects permitted RIFS from local HT receptions. The frames must have the same transmitter and receiver addresses. The preceding frame must need no SIFS response. Rx also requires actual preceding extension evidence and BSS permission at reception start. Non-QoS configurations require no HCF policy module and supply no RIFS evidence.

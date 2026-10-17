@@ -9,9 +9,12 @@
 #define __INET_RX_H
 
 #include <optional>
+#include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRecipientQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
@@ -47,6 +50,11 @@ class INET_API Rx : public ModeSetListener, public IRx
     struct PrecedingFrame {
         simtime_t end;
         bool ack = false;
+        bool ht = false;
+        MacAddress transmitter;
+        MacAddress receiver;
+        bool noSifsResponse = false;
+        simtime_t extension = -1;
     };
     struct ReceptionEvidence {
         simtime_t start;
@@ -55,12 +63,16 @@ class INET_API Rx : public ModeSetListener, public IRx
         simtime_t sifs;
         simtime_t tolerance;
         bool mayBecomePredecessor = true;
+        bool rifsPermitted = false;
+        simtime_t rifs;
     };
     opp_component_ptr<cModule> networkInterface;
     std::optional<PrecedingFrame> precedingFrame;
     std::optional<ReceptionEvidence> activeReception;
     std::optional<ReceptionEvidence> completedReception;
     simtime_t ambiguityEnd = -1;
+    ModuleRefByPar<Ieee80211Mib> mib;
+    ModuleRefByPar<IRecipientQosAckPolicy> recipientAckPolicy;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }

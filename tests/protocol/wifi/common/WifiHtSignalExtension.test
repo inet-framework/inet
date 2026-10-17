@@ -7,6 +7,7 @@ No changed mode-duration helper supplies the expected value.
 %extraargs: -r 0..4
 
 %file: HtSignalExtension.cc
+#include "../../LocalInterframeTestSupport.h"
 #include "ProtocolTest.h"
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -26,7 +27,9 @@ template<typename T> auto actualExtension(const T *tag, int) -> decltype(tag->ge
 }
 template<typename T> simtime_t actualExtension(const T *, long) { return SimTime(-1); }
 
-class ExtensionTransmitter : public Ieee80211Transmitter {
+class ExtensionTransmitter : public LocalInterframeTransmitterBase {
+  protected:
+    bool omitsSignalExtension(const Packet *) const override { return par("scenario").intValue() == 2; }
   public:
     const IIeee80211Mode *computeTransmissionMode(const Packet *packet) const override {
         auto selected = Ieee80211Transmitter::computeTransmissionMode(packet);
@@ -43,24 +46,6 @@ class ExtensionTransmitter : public Ieee80211Transmitter {
                 return candidate;
         }
         throw cRuntimeError("Missing 5 GHz HT MCS 0 mode");
-    }
-    const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t start) const override {
-        auto selected = computeTransmissionMode(packet);
-        if (par("scenario").intValue() != 2 || selected->getHtMcsIndex() < 0)
-            return Ieee80211Transmitter::createTransmission(radio, packet, start);
-        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
-        auto duration = selected->getDuration(B(phy->getLengthField())) - SimTime(6, SIMTIME_US);
-        auto preamble = selected->getPreambleMode()->getDuration();
-        auto header = selected->getHeaderMode()->getDuration();
-        auto data = duration - preamble - header;
-        auto mobility = radio->getAntenna()->getMobility();
-        auto position = mobility->getCurrentPosition();
-        auto orientation = mobility->getCurrentAngularPosition();
-        auto analog = getAnalogModel()->createAnalogModel(preamble, header, data, centerFrequency,
-                selected->getDataMode()->getBandwidth(), computeTransmissionPower(packet));
-        return new Ieee80211Transmission(radio, packet, start, start + duration, preamble, header, data,
-                position, position, orientation, orientation, nullptr, nullptr, nullptr, nullptr,
-                analog, selected, computeTransmissionChannel(packet));
     }
 };
 Define_Module(ExtensionTransmitter);
