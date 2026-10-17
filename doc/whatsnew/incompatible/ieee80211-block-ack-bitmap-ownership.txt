@@ -1,0 +1,3 @@
+Block Ack bitmap ownership
+
+Block Ack decoders now use bitmap values without unowned temporary allocations. Repeated Basic and Compressed decode no longer loses those temporary objects.
