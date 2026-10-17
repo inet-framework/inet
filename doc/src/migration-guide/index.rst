@@ -46,7 +46,7 @@ Custom QoS data services must implement the reversible preparation operations in
 IEEE 802.11 Compressed Block Ack extension points
 ------------------------------------------------
 
-Select ``mac.hcf.blockAckVariant = "compressed"`` for immediate Compressed Block Ack. Basic remains the default. Both endpoints must select the same profile. ADDBA does not negotiate this selector. A valid addressed BAR with the other profile stops the simulation before agreement updates. The diagnostic identifies the peer, TID, local profile, and received profile. Configure the same selectors before a new run.
+HCF defaults to ``mac.hcf.blockAckVariant = "compressed"``. Both endpoints must select the same profile. ADDBA does not negotiate this selector. A valid addressed BAR with the other profile stops the simulation before agreement updates. The diagnostic identifies the peer, TID, local profile, and received profile. Configure the same selectors before a new run.
 
 Compressed agreements require usable local HT support and directional peer HT state. An HT PHY mode alone does not supply that state. Without it, HCF retains Normal Ack DATA. Explicit ``blockAckVariant = "basic"`` retains historical Basic compatibility without that HT requirement. Compressed agreements suppress fragmentation for their peer and TID. Fragmentation outside those agreements retains its existing threshold.
 

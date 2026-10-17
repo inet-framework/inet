@@ -352,7 +352,6 @@ network ExchangeNetwork {
 
 %inifile: omnetpp.ini
 [General]
-**.hcf.blockAckVariant = "compressed"
 network = ExchangeNetwork
 ned-path = .;../../../../src
 sim-time-limit = 1.3s

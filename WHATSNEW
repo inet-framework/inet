@@ -456,7 +456,7 @@ Notable backward incompatible changes are the following:
 
 52. IEEE 802.11 immediate Compressed Block Ack
 
-   HCF supports explicit immediate Compressed Block Ack. Basic remains the default. Eligible HT infrastructure links and the supported ac path use accepted agreements and 32-byte Compressed responses with FCS. Links without usable local or peer HT state retain Normal Ack. Select blockAckVariant = "basic" at both endpoints for historical Basic compatibility. An HT PHY mode alone does not supply peer capability state.
+   HCF defaults to immediate Compressed Block Ack. Eligible HT infrastructure links and the supported ac path use accepted agreements and 32-byte Compressed responses with FCS. Links without usable local or peer HT state retain Normal Ack. Select blockAckVariant = "basic" at both endpoints for historical Basic compatibility. An HT PHY mode alone does not supply peer capability state.
 
    Both endpoints must select the same blockAckVariant because ADDBA does not negotiate it. A valid addressed BAR with the other profile stops the simulation before agreement updates. The diagnostic identifies the peer, TID, and profiles. Compressed rejects delayedAckPolicySupported = true in either agreement policy at initialization.
 
