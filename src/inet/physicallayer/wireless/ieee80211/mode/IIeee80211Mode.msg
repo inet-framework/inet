@@ -57,6 +57,7 @@ class IIeee80211Mode extends cObject
     simtime_t slotTime;
     simtime_t sifsTime;
     simtime_t rifsTime;
+    simtime_t signalExtensionTime;
     simtime_t ccaTime;
     simtime_t phyRxStartDelay;
     simtime_t rxTxTurnaroundTime;

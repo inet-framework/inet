@@ -1,0 +1,3 @@
+IEEE 802.11 signal extension
+
+HT duration at 2.4 GHz now includes its six-microsecond signal extension. Previously, that waveform ended early, which could change interframe recognition and airtime. Custom IEEE 802.11 modes must supply the new nominal-extension query. A transmission query supplies the actual extension from its waveform so consumers do not count it twice.

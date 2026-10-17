@@ -6,6 +6,7 @@
 
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
 namespace inet {
 
@@ -25,6 +26,17 @@ std::ostream& Ieee80211Transmission::printToStream(std::ostream& stream, int lev
         stream << EV_FIELD(mode, printFieldToString(mode, level + 1, evFlags))
                << EV_FIELD(channel, printFieldToString(channel, level + 1, evFlags));
     return TransmissionBase::printToStream(stream, level);
+}
+
+std::optional<simtime_t> Ieee80211Transmission::getSignalExtensionDuration() const
+{
+    auto header = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(getPacket());
+    auto defaultExtension = mode->getSignalExtensionTime();
+    // The PHY Length field contains MAC octets. The mode duration already includes PHY headers and padding.
+    auto extension = getEndTime() - getStartTime() - mode->getDuration(B(header->getLengthField())) + defaultExtension;
+    if (extension == SIMTIME_ZERO || extension == defaultExtension)
+        return extension;
+    return std::nullopt;
 }
 
 } // namespace physicallayer

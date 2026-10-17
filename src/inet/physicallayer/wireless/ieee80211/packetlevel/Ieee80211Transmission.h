@@ -8,6 +8,8 @@
 #ifndef __INET_IEEE80211TRANSMISSION_H
 #define __INET_IEEE80211TRANSMISSION_H
 
+#include <optional>
+
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
@@ -30,6 +32,9 @@ class INET_API Ieee80211Transmission : public TransmissionBase
 
     virtual const IIeee80211Mode *getMode() const { return mode; }
     virtual const Ieee80211Channel *getChannel() const { return channel; }
+    // The actual waveform can omit the default extension through NO_SIG_EXTN for RIFS.
+    // An unsupported duration returns no value; the method changes no state.
+    std::optional<simtime_t> getSignalExtensionDuration() const;
 };
 
 } // namespace physicallayer

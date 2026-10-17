@@ -235,6 +235,14 @@ for (int mcs = 0; mcs < 32; mcs++) {
             ASSERT(typedHt->getSlotTime() == SimTime(20, SIMTIME_US));
             ASSERT(typedAcHt->getSifsTime() == SimTime(16, SIMTIME_US));
             ASSERT(typedAcHt->getSlotTime() == SimTime(9, SIMTIME_US));
+            ASSERT(typedHt->getSignalExtensionTime() == SimTime(6, SIMTIME_US));
+            ASSERT(typedAcHt->getSignalExtensionTime() == SIMTIME_ZERO);
+            ASSERT(typedHt->getDuration(B(100)) - typedAcHt->getDuration(B(100)) == SimTime(6, SIMTIME_US));
+            if (mcs == 0 && width == MHz(20) && gi == Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG) {
+                // MCS 0: 36 us preamble + ceil((16 + 800 + 6) / 26) * 4 us + band extension.
+                ASSERT(typedHt->getDuration(B(100)) == SimTime(170, SIMTIME_US));
+                ASSERT(typedAcHt->getDuration(B(100)) == SimTime(164, SIMTIME_US));
+            }
             ASSERT(acHt->getDataMode()->getNetBitrate() == ht->getDataMode()->getNetBitrate());
             ASSERT(acHt->getDataMode()->getNumberOfSpatialStreams() == ht->getDataMode()->getNumberOfSpatialStreams());
             ASSERT(vhtOnlyModeSet->getIsMandatory(acHt) == htModeSet->getIsMandatory(ht));
