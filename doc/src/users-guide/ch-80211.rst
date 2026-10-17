@@ -706,7 +706,7 @@ After the final exchange, the originator sends DELBA when its agreement has no q
 
 The agreement policies, ``mac.hcf.originatorBlockAckAgreementPolicy`` and ``mac.hcf.recipientBlockAckAgreementPolicy``, set the buffer size. ``maximumAllowedBufferSize`` defaults to 64. Both negotiated ``aMsduSupported`` flags control A-MSDU use; each defaults to ``true``. ``blockAckTimeoutValue`` defaults to ``0s``, which disables the inactivity timeout. Transfer completion and DATA lifetime expiry retain their separate teardown rules.
 
-Select ``mac.hcf.blockAckVariant = "compressed"`` for immediate Compressed Block Ack. Basic remains the default. Block Ack support itself remains disabled by default. The response contains a 64-bit bitmap and occupies 32 bytes with FCS. Each positive bit acknowledges one unfragmented MPDU. The recipient retains receipt bits after delivery, so a later BAR can still obtain those positive bits. Missing receipt evidence produces zero.
+HCF defaults to ``mac.hcf.blockAckVariant = "compressed"`` for immediate Compressed Block Ack. Block Ack support itself remains disabled by default. The response contains a 64-bit bitmap and occupies 32 bytes with FCS. Each positive bit acknowledges one unfragmented MPDU. The recipient retains receipt bits after delivery, so a later BAR can still obtain those positive bits. Missing receipt evidence produces zero.
 
 Rx detects SIFS and permitted RIFS from observations at its own station. HCF passes that result to the recipient service. The reorder service retains its receipt and receive-window conditions for conditional release across a sequence gap. A rejected interval does not reject a valid frame or erase positive receipt evidence.
 

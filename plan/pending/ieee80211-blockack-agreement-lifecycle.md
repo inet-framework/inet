@@ -1,18 +1,14 @@
-# Basic Block Ack agreement lifecycle
+# Block Ack agreement lifecycle
 
 > **Kind:** reference · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [HCF](../../src/inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.cc), [implementation status](ieee80211-compressed-blockack-replacement.md)
 
-HCF keeps each Basic Block Ack agreement consistent with its role, peer, and traffic identifier (TID). This document describes implemented setup, DATA deferral, Action handling, teardown, and peer reset. Production Compressed selection fails initialization. No Compressed lifecycle behavior is claimed.
+HCF keeps each Basic Block Ack agreement consistent with its role, peer, and traffic identifier (TID). This document describes implemented setup, DATA deferral, Action handling, teardown, and peer reset. Compressed agreements use the same lifecycle owners with the HT eligibility and profile rules in the implementation status.
 
-## Previous PRs and S4 scope
+## Master prerequisites and S5 scope
 
-Most of this lifecycle contract is inherited from master. Merged [PR #1343](https://github.com/inet-framework/inet/pull/1343) supplies setup validation, Action dispatch, response waits, DATA deferral, and directional teardown. It also supplies recipient delivery of complete buffered units at ordinary teardown. Merged [PR #1368](https://github.com/inet-framework/inet/pull/1368) supplies explicit peer cleanup at association replacement. Merged [PR #1331](https://github.com/inet-framework/inet/pull/1331) supplies the finite DATA deadline consumed during setup and recovery.
+Master contains stage S4 through merged [PR #1344](https://github.com/inet-framework/inet/pull/1344). Its lifecycle supplies BAR-only contention, peer/TID-specific feedback, window progress, DATA Retry, and completion DELBA. PR #1343 supplies setup, Action dispatch, and directional teardown. PR #1368 supplies association replacement cleanup. PR #1331 supplies the finite DATA deadline.
 
-This S4 branch, [PR #1344](https://github.com/inet-framework/inet/pull/1344), adds the final-transfer path. HCF can contend for a due BAR without another DATA candidate. Matched feedback or lifetime disposal permits window progress. At a safe exchange boundary, HCF starts completion DELBA when first DATA was transmitted and no queued or numbered DATA remains.
-
-S4 also isolates BAR state by peer and TID, separates control failure from DATA retry feedback, and centralizes agreement-window calculations. It does not add a second lifecycle owner or replace inherited teardown disposition. The [main scope table](ieee80211-compressed-blockack-replacement.md#previous-prs-and-s4-scope) separates the production commits.
-
-For example, ordinary recipient teardown already releases complete DATA behind a gap. S4 supplies the completion trigger after the originator's final unresolved DATA expires. The recipient then uses its inherited delivery and cleanup path. The sections below describe the full contract available to that exchange.
+S5 uses these owners for immediate Compressed agreements. Both endpoints must select the same profile because ADDBA does not negotiate it. Usable local and directional peer HT state controls Compressed eligibility. Active Compressed agreements suppress fragmentation. A conflicting addressed BAR stops the simulation before agreement updates. The [implementation status](ieee80211-compressed-blockack-replacement.md) defines the complete profile and admission boundary.
 
 ## 1. Core behavior
 

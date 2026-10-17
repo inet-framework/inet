@@ -50,7 +50,7 @@ Block Acknowledgment in INET
 In INET, the block ack mechanism can be enabled by setting the :par:`isBlockAckSupported`
 parameter of the MAC's :ned:`Hcf` submodule to ``true`` (it is disabled by default).
 
-This showcase selects ``blockAckVariant = "basic"`` on both endpoints to retain the historical profile. Basic remains the default. Other configurations can select Compressed explicitly. Compressed agreements require usable local and peer HT state. Without that state, DATA uses Normal Ack. HCF rejects unknown selector values during initialization, also when Block Ack support is disabled.
+This showcase selects ``blockAckVariant = "basic"`` on both endpoints to retain the historical profile. HCF defaults to Compressed for other configurations. Compressed agreements require usable local and peer HT state. Without that state, DATA uses Normal Ack. HCF rejects unknown selector values during initialization, also when Block Ack support is disabled.
 
 Several submodules of :ned:`Hcf` are involved in the block ack mechanism.
 These modules have parameters controlling the block ack behavior. The following paragraphs
