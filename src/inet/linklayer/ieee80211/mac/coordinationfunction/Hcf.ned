@@ -29,7 +29,7 @@ module Hcf extends Module like IHcf
 {
     parameters:
         bool isBlockAckSupported = default(false);
-        string blockAckVariant = default("basic"); // Compressed requires usable HT state. Select Basic explicitly for historical compatibility.
+        string blockAckVariant = default("compressed"); // Compressed requires usable HT state. Select Basic explicitly for historical compatibility.
 
         string rxModule;
         string txModule;

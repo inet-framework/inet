@@ -1,8 +1,11 @@
 %description:
 802.11ac Block Ack session: ADDBA action (type 13), BlockAckReq (type 24), BlockAck (type 25). [Required]
-Check explicit Basic and Compressed with concrete BAR/BA types and positive receipt bits.
+Check explicit Basic, explicit Compressed, and the NED default with concrete BAR/BA types and positive receipt bits.
+The third run uses the unquoted INI keyword default. OMNeT++ accepts the parameter's NED default for this keyword.
 
-%extraargs: -r 0..1
+%extraargs: -r 0..2
+
+%postrun-command: python3 check-default.py
 
 %file: Ac_BlockAck.cc
 
@@ -78,9 +81,9 @@ Define_ProtocolTest(wifi_11ac_compressed_exchange)
 %inifile: test.ini
 
 [General]
-*.tester.testName = ${test="wifi_11ac_block_ack","wifi_11ac_compressed_exchange"}
+*.tester.testName = ${test="wifi_11ac_block_ack","wifi_11ac_compressed_exchange","wifi_11ac_compressed_exchange"}
 *.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
-**.wlan[*].mac.hcf.blockAckVariant = ${profile="basic","compressed" ! test}
+**.wlan[*].mac.hcf.blockAckVariant = ${profile="basic","compressed",default ! test}
 *.ap.wlan[*].mac.hcf.isBlockAckSupported = true
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
 *.sta1.app[0].sendInterval = 0.1ms
@@ -95,6 +98,20 @@ include ../../ini/_base.ini
 **.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
 **.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+
+%file: check-default.py
+from pathlib import Path
+import re
+
+runs = re.split(r"Preparing for running configuration General, run #\d+\.\.\.", Path("test.out").read_text())[1:]
+assert len(runs) == 3, len(runs)
+for run, profile in zip(runs, ["basic", "compressed", "default"]):
+    assert f'$profile={profile if profile == "default" else chr(34) + profile + chr(34)}' in run
+    resolved = "basic" if profile == "basic" else "compressed"
+    assert run.count(f"Block Ack profile: {resolved}") == 3
+    test = "wifi_11ac_block_ack" if profile == "basic" else "wifi_11ac_compressed_exchange"
+    assert f"PROTOCOLTEST {test}: PASS" in run
+print("Basic, explicit Compressed, and NED default exchanges passed.")
 
 %contains: stdout
 PROTOCOLTEST wifi_11ac_block_ack: PASS
