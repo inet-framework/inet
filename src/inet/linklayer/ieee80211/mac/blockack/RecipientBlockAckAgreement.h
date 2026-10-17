@@ -23,6 +23,8 @@ class INET_API RecipientBlockAckAgreement : public cObject
     simtime_t blockAckTimeoutValue = 0;
     bool isAddbaResponseSent = false;
     simtime_t expirationTime = -1;
+    SequenceNumberCyclic highestReceivedSequence;
+    int highestReceivedFragment = 0;
 
   public:
     RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue);
@@ -33,6 +35,17 @@ class INET_API RecipientBlockAckAgreement : public cObject
     virtual BlockAckRecord *getBlockAckRecord() const { return blockAckRecord; }
     virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
     virtual int getBufferSize() const { return bufferSize; }
+    void recordReceived(const Ptr<const Ieee80211DataHeader>& header) {
+        auto sequence = header->getSequenceNumber();
+        if (!highestReceivedSequence.isSpecified() || highestReceivedSequence < sequence) {
+            highestReceivedSequence = sequence;
+            highestReceivedFragment = header->getFragmentNumber();
+        }
+        else if (highestReceivedSequence == sequence)
+            highestReceivedFragment = std::max(highestReceivedFragment, int(header->getFragmentNumber()));
+    }
+    const SequenceNumberCyclic& getHighestReceivedSequence() const { return highestReceivedSequence; }
+    int getHighestReceivedFragment() const { return highestReceivedFragment; }
     virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
 
     virtual void addbaResposneSent() { isAddbaResponseSent = true; }

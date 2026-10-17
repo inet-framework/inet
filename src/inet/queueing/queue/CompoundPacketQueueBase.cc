@@ -14,6 +14,26 @@ namespace queueing {
 
 Define_Module(CompoundPacketQueueBase);
 
+Packet *CompoundPacketQueueBase::peekEligiblePacket(const std::function<bool(Packet *)>& predicate) const
+{
+    if (auto selected = dynamic_cast<ISelectivePacketCollection *>(collection))
+        return selected->peekEligiblePacket(predicate);
+    throw UnsupportedPacketSelection("CompoundPacketQueueBase provider does not support ISelectivePacketCollection");
+}
+
+Packet *CompoundPacketQueueBase::extractPacket(Packet *packet)
+{
+    Enter_Method("extractPacket");
+    if (auto selected = dynamic_cast<ISelectivePacketCollection *>(collection))
+        selected->extractPacket(packet);
+    else
+        throw UnsupportedPacketSelection("Provider does not support selected extraction");
+    take(packet);
+    emit(packetPulledSignal, packet);
+    drop(packet);
+    return packet;
+}
+
 void CompoundPacketQueueBase::initialize(int stage)
 {
     PacketQueueBase::initialize(stage);

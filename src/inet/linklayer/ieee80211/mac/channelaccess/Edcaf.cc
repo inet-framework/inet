@@ -165,6 +165,11 @@ bool Edcaf::isInternalCollision()
     return collisionController->isInternalCollision(this);
 }
 
+bool Edcaf::hasEligibleFrames() const
+{
+    return frameEligibility ? frameEligibility() : !pendingQueue->isEmpty() || inProgressFrames->getLength() != 0;
+}
+
 int Edcaf::getCwMax(AccessCategory ac, int aCwMax, int aCwMin)
 {
     switch (ac) {

@@ -1,0 +1,83 @@
+%description:
+Check recipient negotiation through the production agreement handler.
+The recipient response determines buffer size and inactivity timeout.
+The response copies the request dialog token.
+
+%extraargs: -r 0..3
+
+%file: Negotiation.cc
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+
+namespace inet::ieee80211 {
+class NegotiationPolicy : public IRecipientBlockAckAgreementPolicy {
+  public:
+    bool isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const override {
+        return variant == BlockAckVariant::BASIC || (localHt && peerHt);
+    }
+    bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>&) override { return true; }
+    bool isDelbaAccepted(const Ptr<const Ieee80211Delba>&) override { return true; }
+    simtime_t getBlockAckTimeoutValue() const override { return SimTime(20, SIMTIME_MS); }
+    bool aMsduSupported() const override { return false; }
+    bool delayedBlockAckPolicySupported() const override { return false; }
+    int getMaximumAllowedBufferSize() const override { return 64; }
+};
+class NegotiationTest : public cSimpleModule, public IProcedureCallback {
+  protected:
+    RecipientBlockAckAgreementHandler handler;
+    NegotiationPolicy policy;
+    Ptr<const Ieee80211AddbaResponse> response;
+    void initialize() override { scheduleAt(SIMTIME_ZERO, new cMessage("test")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        const MacAddress peer("02:00:00:00:00:02");
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(peer);
+        request->setTid(5);
+        request->setDialogToken(37);
+        request->setBlockAckPolicy(true);
+        request->setBufferSize(par("requestSize"));
+        request->setStartingSequenceNumber(SequenceNumberCyclic(100));
+        request->setBlockAckTimeoutValue(SimTime(40, SIMTIME_MS));
+        handler.processReceivedAddbaRequest(request, &policy, this);
+        ASSERT(response != nullptr);
+        ASSERT(response->getDialogToken() == 37);
+        ASSERT(response->getBufferSize() == 64);
+        ASSERT(response->getBlockAckTimeoutValue() == SimTime(20, SIMTIME_MS));
+        auto agreement = handler.getAgreement(5, peer);
+        ASSERT(agreement != nullptr);
+        ASSERT(agreement->getBufferSize() == response->getBufferSize());
+        ASSERT(agreement->getBlockAckTimeoutValue() == response->getBlockAckTimeoutValue());
+        ASSERT(agreement->getStartingSequenceNumber() == SequenceNumberCyclic(100));
+        std::cout << "Block Ack negotiation assertions passed.\n";
+    }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        response = dynamicPtrCast<const Ieee80211AddbaResponse>(header);
+        delete packet;
+    }
+    void transmitControlResponseFrame(Packet *, const Ptr<const Ieee80211MacHeader>&,
+            Packet *, const Ptr<const Ieee80211MacHeader>&) override { throw cRuntimeError("Unexpected control response"); }
+};
+Define_Module(NegotiationTest);
+}
+
+%file: test.ned
+simple NegotiationTest {
+    parameters:
+        int requestSize;
+        @class(::inet::ieee80211::NegotiationTest);
+}
+network NegotiationNetwork { submodules: test: NegotiationTest; }
+
+%inifile: omnetpp.ini
+[General]
+network = NegotiationNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1ms
+seed-set = 0
+*.test.requestSize = ${0,8,64,128}
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+%contains: stdout
+Block Ack negotiation assertions passed.

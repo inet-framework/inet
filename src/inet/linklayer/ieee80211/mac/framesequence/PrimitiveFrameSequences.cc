@@ -150,7 +150,13 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            Packet *packet = nullptr;
+            if (context->getQoSContext() && dynamic_cast<IReceiveStep *>(context->getLastStep())) {
+                if (auto rts = dynamic_cast<RtsTransmitStep *>(context->getStepBeforeLast()))
+                    packet = const_cast<Packet *>(rts->getProtectedFrame());
+            }
+            if (packet == nullptr)
+                packet = context->getInProgressFrames()->getFrameToTransmit();
             return new TransmitStep(packet, context->getIfs());
         }
         case 1: {
@@ -195,7 +201,13 @@ IFrameSequenceStep *ManagementFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            Packet *packet = nullptr;
+            if (context->getQoSContext() && dynamic_cast<IReceiveStep *>(context->getLastStep())) {
+                if (auto rts = dynamic_cast<RtsTransmitStep *>(context->getStepBeforeLast()))
+                    packet = const_cast<Packet *>(rts->getProtectedFrame());
+            }
+            if (packet == nullptr)
+                packet = context->getInProgressFrames()->getFrameToTransmit();
             return new TransmitStep(packet, context->getIfs());
         }
         case 1:
@@ -400,7 +412,8 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
 {
     switch (step) {
         case 0: {
-            auto blockAckReqParams = context->getQoSContext()->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), context->getQoSContext()->txopProcedure);
+            auto qos = context->getQoSContext();
+            auto blockAckReqParams = qos->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler);
             auto receiverAddr = std::get<0>(blockAckReqParams);
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
@@ -433,7 +446,12 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
             const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
-            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_BLOCKACK;
+            auto response = dynamicPtrCast<const Ieee80211BasicBlockAck>(receivedHeader);
+            auto requestStep = check_and_cast<ITransmitStep *>(context->getStep(firstStep));
+            auto request = requestStep->getFrameToTransmit()->peekAtFront<Ieee80211BasicBlockAckReq>();
+            return context->isForUs(receivedHeader) && response &&
+                response->getTransmitterAddress() == request->getReceiverAddress() &&
+                response->getTidInfo() == request->getTidInfo();
         }
         default:
             throw cRuntimeError("Unknown step");

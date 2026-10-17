@@ -1,0 +1,451 @@
+%description:
+Check Basic agreement cleanup through AP and STA management after a real association. AP reassociation uses identical capability and rate fields. Deletion callbacks require removal of both roles before the first callback. Another peer remains unchanged. Rate callbacks require coherent committed state. The fixture supplies Block Ack agreements and controlled management completion.
+
+The handler's waiting phase records a completed eligible DATA transmission until another DATA packet arrives. Reassociation removes this phase. A lone DATA packet in the new association must not cause ADDBA.
+
+%extraargs: -r 0..15
+
+%file: AssociationReset.cc
+#include <iostream>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtAp.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtSta.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class ResetOriginator : public OriginatorBlockAckAgreementHandler {
+  public:
+    void accept(MacAddress peer) {
+        auto agreement = new OriginatorBlockAckAgreement(peer, 5, SequenceNumberCyclic(100), 64, false, false);
+        agreement->setIsAddbaRequestSent(true);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(SIMTIME_ZERO);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, 5}] = agreement;
+    }
+};
+class ResetRecipient : public RecipientBlockAckAgreementHandler {
+  public:
+    void accept(MacAddress peer) {
+        auto agreement = new RecipientBlockAckAgreement(peer, 5, SequenceNumberCyclic(100), 64, SIMTIME_ZERO);
+        agreement->addbaResposneSent();
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, 5}] = agreement;
+    }
+};
+class AssociationResetHcf : public Hcf {
+  public:
+    MacAddress selected;
+    const MacAddress other = MacAddress("02:00:00:00:00:09");
+    int deletions = 0;
+    int deliveries = 0;
+    bool observeData = false;
+    bool retainRealAcks = false;
+    bool checkOtherProcedure = true;
+    int addbaRequests = 0;
+    int dataAttempts = 0;
+    int dataCompletions = 0;
+    void prepare(MacAddress peer) {
+        Enter_Method("prepare");
+        selected = peer;
+        observeData = true;
+        delete originatorBlockAckAgreementHandler;
+        delete recipientBlockAckAgreementHandler;
+        auto originator = new ResetOriginator();
+        auto recipient = new ResetRecipient();
+        originatorBlockAckAgreementHandler = originator;
+        recipientBlockAckAgreementHandler = recipient;
+        for (auto address : {selected, other}) {
+            originator->accept(address);
+            recipient->accept(address);
+            originator->beginSetupIntent(address, 6);
+        }
+        subscribe(blockAckAgreementDeletedSignal, this);
+    }
+    void receiveNormalAckFragment(int fragment, bool more) {
+        Enter_Method("receiveNormalAckFragment");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTransmitterAddress(selected);
+        header->setReceiverAddress(mib->address);
+        header->setAddress3(selected);
+        header->setTid(7);
+        header->setSequenceNumber(SequenceNumberCyclic(100));
+        header->setFragmentNumber(fragment);
+        header->setMoreFragments(more);
+        header->setAckPolicy(NORMAL_ACK);
+        auto packet = new Packet(fragment == 0 ? "old-unit-frag0" : "new-unit-frag1", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+        processLowerFrame(packet, header);
+    }
+    bool hasBoth(MacAddress peer) const {
+        return originatorBlockAckAgreementHandler->getAgreement(peer, 5) != nullptr &&
+                recipientBlockAckAgreementHandler->getAgreement(5, peer) != nullptr;
+    }
+    bool hasNeither(MacAddress peer) const {
+        return originatorBlockAckAgreementHandler->getAgreement(peer, 5) == nullptr &&
+                recipientBlockAckAgreementHandler->getAgreement(5, peer) == nullptr;
+    }
+    bool waitsForSuccessor() const {
+        const auto& procedures = originatorBlockAckAgreementHandler->getProcedures();
+        auto it = procedures.find({selected, 6});
+        return it != procedures.end() && it->second.state == IOriginatorBlockAckAgreementHandler::ProcedureState::WAITING_FOR_SUCCESSOR;
+    }
+    bool hasSuccessorProcedure() const {
+        return originatorBlockAckAgreementHandler->getProcedures().count({selected, 6}) != 0;
+    }
+    void clearSeededSuccessorIntent() {
+        Enter_Method("clearSeededSuccessorIntent");
+        originatorBlockAckAgreementHandler->finishProcedure(selected, 6);
+    }
+    void sendEligibleData(const char *name) {
+        Enter_Method("sendEligibleData");
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTransmitterAddress(mib->address);
+        header->setReceiverAddress(selected);
+        header->setAddress3(mib->address);
+        header->setTid(6);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+  protected:
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        bool accepted = Hcf::transmitFrame(packet, ifs);
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        if (accepted && data && data->getReceiverAddress() == selected && data->getTid() == 6) {
+            ASSERT(data->getAckPolicy() == NORMAL_ACK);
+            dataAttempts++;
+        }
+        return accepted;
+    }
+    void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        Enter_Method("transmissionComplete");
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        Hcf::transmissionComplete(packet, header);
+        if (data && data->getReceiverAddress() == selected && data->getTid() == 6)
+            dataCompletions++;
+    }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (dynamicPtrCast<const Ieee80211AddbaRequest>(header))
+            addbaRequests++;
+        Hcf::processMgmtFrame(packet, header);
+    }
+    void sendUp(const std::vector<Packet *>& packets) override {
+        for (auto packet : packets) {
+            if (observeData && dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>())) {
+                deliveries++;
+                take(packet);
+                delete packet;
+            }
+            else
+                Hcf::sendUp({packet});
+        }
+    }
+    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *received, const Ptr<const Ieee80211MacHeader>& receivedHeader) override {
+        if (observeData && !retainRealAcks)
+            delete packet;
+        else
+            Hcf::transmitControlResponseFrame(packet, header, received, receivedHeader);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *payload, cObject *details) override {
+        if (signal != blockAckAgreementDeletedSignal) {
+            Hcf::receiveSignal(source, signal, payload, details);
+            return;
+        }
+        ASSERT(payload != nullptr);
+        ASSERT(hasNeither(selected));
+        ASSERT(hasBoth(other));
+        for (const auto& item : originatorBlockAckAgreementHandler->getProcedures())
+            ASSERT(item.first.first != selected);
+        if (checkOtherProcedure)
+            ASSERT(originatorBlockAckAgreementHandler->getProcedures().count({other, 6}) == 1);
+        if (auto originator = dynamic_cast<OriginatorBlockAckAgreement *>(payload)) {
+            ASSERT(originator->getReceiverAddr() == selected);
+            ASSERT(originator->getTid() == 5);
+            ASSERT(originator->getBufferSize() == 64);
+        }
+        else {
+            auto recipient = check_and_cast<RecipientBlockAckAgreement *>(payload);
+            ASSERT(recipient->getBlockAckRecord()->getOriginatorAddress() == selected);
+            ASSERT(recipient->getBlockAckRecord()->getTid() == 5);
+            ASSERT(recipient->getBufferSize() == 64);
+        }
+        ASSERT(hasNeither(selected));
+        deletions++;
+    }
+};
+Define_Module(AssociationResetHcf);
+class AssociationResetAp : public Ieee80211MgmtAp {
+  public:
+    Ptr<const Ieee80211AssociationResponseFrame> response;
+    bool controlled = false;
+    void reassociate(MacAddress peer, const Ptr<const Ieee80211AssociationRequestFrame>& original, bool acknowledged = true) {
+        Enter_Method("reassociate");
+        controlled = true;
+        auto request = makeShared<Ieee80211ReassociationRequestFrame>();
+        request->setCurrentAP(mib->address);
+        request->setSSID(original->getSSID());
+        request->setSupportedRates(original->getSupportedRates());
+        request->setExtendedSupportedRatesPresent(original->getExtendedSupportedRatesPresent());
+        request->setExtendedSupportedRates(original->getExtendedSupportedRates());
+        request->setHtCapabilitiesPresent(original->getHtCapabilitiesPresent());
+        request->setHtCapabilities(original->getHtCapabilities());
+        request->setChunkLength(B(100));
+        auto packet = new Packet("reassociation", request);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(peer);
+        header->setReceiverAddress(mib->address);
+        header->setType(ST_REASSOCIATIONREQUEST);
+        handleReassociationRequestFrame(packet, header);
+        ASSERT(response->getStatusCode() == SC_SUCCESSFUL);
+        Packet acknowledgment("response-ack");
+        auto responseHeader = makeShared<Ieee80211MgmtHeader>();
+        responseHeader->setType(ST_REASSOCIATIONRESPONSE);
+        responseHeader->setReceiverAddress(peer);
+        acknowledgment.insertAtBack(responseHeader);
+        acknowledgment.addTag<Ieee80211MgmtTransactionTag>()->setTransactionId(staList.at(peer).pendingAssociationTransactionId);
+        frameTransmissionFinished(&acknowledgment, acknowledged ? FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED : FRAME_TRANSMISSION_STATUS_RETRY_LIMIT_REACHED);
+    }
+    void disassociatePeer(MacAddress peer) {
+        Enter_Method("disassociatePeer");
+        auto packet = new Packet("disassociation", makeShared<Ieee80211DisassociationFrame>());
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(peer);
+        header->setType(ST_DISASSOCIATION);
+        handleDisassociationFrame(packet, header);
+    }
+  protected:
+    void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype,
+            const MacAddress& peer, uint64_t transactionId = 0) override {
+        if (subtype == ST_ASSOCIATIONRESPONSE || subtype == ST_REASSOCIATIONRESPONSE)
+            response = dynamicPtrCast<const Ieee80211AssociationResponseFrame>(body);
+        if (!controlled)
+            Ieee80211MgmtAp::sendManagementFrame(name, body, subtype, peer, transactionId);
+    }
+};
+Define_Module(AssociationResetAp);
+class AssociationResetSta : public Ieee80211MgmtSta {
+  public:
+    Ptr<const Ieee80211AssociationRequestFrame> request;
+    bool controlled = false;
+    void reassociate(const Ptr<const Ieee80211AssociationResponseFrame>& response, bool accepted = true) {
+        Enter_Method("reassociate");
+        controlled = true;
+        auto peer = assocAP.address;
+        auto ap = lookupAP(peer);
+        ASSERT(ap != nullptr);
+        startReassociation(ap, SimTime(1, SIMTIME_MS));
+        auto body = makeShared<Ieee80211AssociationResponseFrame>(*response);
+        if (!accepted)
+            body->setStatusCode(SC_UNSUP_CAP);
+        auto packet = new Packet("reassociation-response", body);
+        physicallayer::Ieee80211Channel channel(&physicallayer::Ieee80211CompliantBands::band2_4GHz, 0);
+        packet->addTag<physicallayer::Ieee80211ChannelInd>()->setChannel(&channel);
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(peer);
+        header->setType(ST_REASSOCIATIONRESPONSE);
+        handleReassociationResponseFrame(packet, header);
+        ASSERT(mib->bssStationData.isAssociated == accepted);
+    }
+    void disassociatePeer() {
+        Enter_Method("disassociatePeer");
+        auto packet = new Packet("disassociation", makeShared<Ieee80211DisassociationFrame>());
+        auto header = makeShared<Ieee80211MgmtHeader>();
+        header->setTransmitterAddress(assocAP.address);
+        header->setType(ST_DISASSOCIATION);
+        handleDisassociationFrame(packet, header);
+    }
+  protected:
+    void sendManagementFrame(const char *name, const Ptr<Ieee80211MgmtFrame>& body, int subtype,
+            const MacAddress& peer) override {
+        if (subtype == ST_ASSOCIATIONREQUEST)
+            request = dynamicPtrCast<const Ieee80211AssociationRequestFrame>(body);
+        if (!controlled)
+            Ieee80211MgmtSta::sendManagementFrame(name, body, subtype, peer);
+    }
+};
+Define_Module(AssociationResetSta);
+class AssociationResetTest : public cSimpleModule, public cListener {
+    Ieee80211Mib *observed = nullptr;
+    MacAddress observedPeer;
+    bool expectPresent = true;
+    int notifications = 0;
+  protected:
+    void initialize() override { scheduleAt(SimTime(500, SIMTIME_MS), new cMessage("test")); }
+    void receiveSignal(cComponent *, simsignal_t, bool, cObject *) override {
+        const auto *rates = observed->findPeerRateSet(observedPeer);
+        const auto *ht = observed->findPeerHtState(observedPeer);
+        if (rates != nullptr) {
+            ASSERT(rates != nullptr && rates->operational.known);
+            ASSERT((ht != nullptr) == observed->isHtOperationSupported());
+        }
+        else {
+            ASSERT(rates == nullptr);
+            ASSERT(ht == nullptr);
+        }
+        notifications++;
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("checkWaitingPhase")) {
+            delete message;
+            auto hcf = check_and_cast<AssociationResetHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+            auto ap = check_and_cast<AssociationResetAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+            auto sta = check_and_cast<AssociationResetSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+            ASSERT(hcf->dataAttempts == 1);
+            ASSERT(hcf->dataCompletions == 1);
+            ASSERT(hcf->addbaRequests == 0);
+            ASSERT(hcf->waitsForSuccessor());
+            ap->reassociate(observedPeer, sta->request);
+            ASSERT(!hcf->hasSuccessorProcedure());
+            ASSERT(hcf->deletions == 2);
+            hcf->sendEligibleData("new-association-first");
+            scheduleAfter(SimTime(2, SIMTIME_MS), new cMessage("checkNewAssociationData"));
+            return;
+        }
+        if (message->isName("checkNewAssociationData")) {
+            delete message;
+            auto hcf = check_and_cast<AssociationResetHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+            ASSERT(hcf->dataAttempts == 2);
+            ASSERT(hcf->dataCompletions == 2);
+            ASSERT(hcf->addbaRequests == 0);
+            ASSERT(hcf->waitsForSuccessor());
+            ASSERT(hcf->hasNeither(observedPeer));
+            ASSERT(hcf->hasBoth(hcf->other));
+            std::cout << "Block Ack association-reset assertions passed.\n";
+            endSimulation();
+        }
+        delete message;
+        auto ap = check_and_cast<AssociationResetAp *>(getModuleByPath("^.ap.wlan[0].mgmt"));
+        auto sta = check_and_cast<AssociationResetSta *>(getModuleByPath("^.sta.wlan[0].mgmt"));
+        auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(ap->response != nullptr && sta->request != nullptr);
+        int scenario = par("scenario");
+        bool useAp = scenario < 2 || scenario == 4 || scenario == 6 || scenario == 7;
+        auto hcf = check_and_cast<AssociationResetHcf *>(getModuleByPath(useAp ? "^.ap.wlan[0].mac.hcf" : "^.sta.wlan[0].mac.hcf"));
+        observed = useAp ? apMib : staMib;
+        observedPeer = useAp ? staMib->address : apMib->address;
+        observed->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
+        hcf->prepare(observedPeer);
+        if (scenario == 7) {
+            auto peerHcf = check_and_cast<AssociationResetHcf *>(getModuleByPath("^.sta.wlan[0].mac.hcf"));
+            peerHcf->observeData = true;
+            peerHcf->retainRealAcks = true;
+            hcf->retainRealAcks = true;
+            hcf->checkOtherProcedure = false;
+            hcf->clearSeededSuccessorIntent();
+            hcf->sendEligibleData("old-association-first");
+            scheduleAfter(SimTime(2, SIMTIME_MS), new cMessage("checkWaitingPhase"));
+            return;
+        }
+        expectPresent = scenario == 0 || scenario == 2 || scenario == 4 || scenario == 6;
+        if (scenario == 6) {
+            ASSERT(observed->findPeerHtState(observedPeer) != nullptr || !observed->isHtOperationSupported());
+            hcf->receiveNormalAckFragment(0, true);
+            ASSERT(hcf->deliveries == 0);
+            ap->reassociate(staMib->address, sta->request);
+            hcf->receiveNormalAckFragment(1, false);
+            ASSERT(hcf->deliveries == 0);
+        }
+        else if (scenario == 0)
+            ap->reassociate(staMib->address, sta->request);
+        else if (scenario == 1)
+            ap->disassociatePeer(staMib->address);
+        else if (scenario == 2)
+            sta->reassociate(ap->response);
+        else if (scenario == 3)
+            sta->disassociatePeer();
+        else if (scenario == 4)
+            ap->reassociate(staMib->address, sta->request, false);
+        else
+            sta->reassociate(ap->response, false);
+        ASSERT(hcf->deletions == (scenario == 4 ? 0 : 2));
+        if (scenario == 4)
+            ASSERT(hcf->hasBoth(observedPeer));
+        else
+            ASSERT(hcf->hasNeither(observedPeer));
+        ASSERT(hcf->hasBoth(hcf->other));
+        ASSERT((observed->findPeerRateSet(observedPeer) != nullptr) == expectPresent);
+        ASSERT((observed->findPeerHtState(observedPeer) != nullptr) ==
+                (expectPresent && observed->isHtOperationSupported()));
+        if (scenario == 0 || scenario == 4 || scenario == 6)
+            ASSERT(notifications == 0);
+        std::cout << "Block Ack association-reset assertions passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(AssociationResetTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtAp;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtSta;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module AssociationResetHcf extends Hcf { parameters: @class(::inet::ieee80211::AssociationResetHcf); }
+simple AssociationResetAp extends Ieee80211MgmtAp { parameters: @class(::inet::ieee80211::AssociationResetAp); }
+simple AssociationResetSta extends Ieee80211MgmtSta { parameters: @class(::inet::ieee80211::AssociationResetSta); }
+simple AssociationResetTest { parameters: int scenario; @class(::inet::ieee80211::AssociationResetTest); }
+network AssociationResetNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta: WirelessHost;
+        test: AssociationResetTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AssociationResetNetwork
+ned-path = .;../../../../src
+sim-time-limit = 505ms
+seed-set = 0
+*.test.scenario = ${0..7}
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.ap.wlan[0].mgmt.typename = "AssociationResetAp"
+*.sta.wlan[0].mgmt.typename = "AssociationResetSta"
+*.sta.wlan[0].agent.startingTime = 0s
+*.sta.wlan[0].agent.channelsToScan = "0"
+*.sta.wlan[0].agent.probeDelay = 1ms
+*.sta.wlan[0].agent.minChannelTime = 10ms
+*.sta.wlan[0].agent.maxChannelTime = 20ms
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+**.wlan[0].opMode = ${"g(mixed)","n(mixed-2.4Ghz)"}
+**.wlan[0].mac.qosStation = true
+**.wlan[0].mac.hcf.typename = "AssociationResetHcf"
+**.wlan[0].mac.hcf.isBlockAckSupported = true
+**.wlan[0].mac.hcf.blockAckVariant = "basic"
+**.wlan[0].radio.bandName = "2.4 GHz"
+**.wlan[0].radio.channelNumber = 0
+**.wlan[0].radio.transmitter.power = 100mW
+**.wlan[0].radio.receiver.sensitivity = -85dBm
+**.wlan[0].radio.receiver.snirThreshold = 4dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 10m
+**.mobility.constraintAreaMaxY = 10m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+Block Ack association-reset assertions passed.

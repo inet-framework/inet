@@ -1,0 +1,164 @@
+%description:
+Check peer/TID BAR arbitration, window boundaries, cyclic sequence order, and ACK-state isolation.
+The production policy reads the production ACK handler through an in-progress queue.
+These helper checks supplement the HCF module fixture.
+
+%includes:
+#include <type_traits>
+#include <utility>
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+namespace Ieee80211BlockAckScheduling_1 {
+template<typename T, typename = void> struct ImplicitBarQuery : std::false_type {};
+template<typename T> struct ImplicitBarQuery<T, std::void_t<decltype(
+    std::declval<const T&>().isBlockAckReqNeeded(nullptr, nullptr))>> : std::true_type {};
+template<typename T, typename = void> struct ImplicitBarParameters : std::false_type {};
+template<typename T> struct ImplicitBarParameters<T, std::void_t<decltype(
+    std::declval<const T&>().computeBlockAckReqParameters(nullptr, nullptr))>> : std::true_type {};
+template<typename T, typename = void> struct ImplicitBarWindow : std::false_type {};
+template<typename T> struct ImplicitBarWindow<T, std::void_t<decltype(
+    std::declval<T&>().processTransmittedBlockAckReq(std::declval<Ptr<const Ieee80211BlockAckReq>>()))>> : std::true_type {};
+
+static_assert(!ImplicitBarQuery<IOriginatorQoSAckPolicy>::value, "The interface requires an explicit agreement handler");
+static_assert(!ImplicitBarQuery<OriginatorQosAckPolicy>::value, "The concrete policy requires an explicit agreement handler");
+static_assert(!ImplicitBarParameters<IOriginatorQoSAckPolicy>::value, "The interface requires an explicit agreement handler");
+static_assert(!ImplicitBarParameters<OriginatorQosAckPolicy>::value, "The concrete policy requires an explicit agreement handler");
+static_assert(!ImplicitBarWindow<QosAckHandler>::value, "The ACK handler requires an explicit agreement window");
+
+class SchedulingCw : public IRecoveryProcedure::ICwCalculator {
+  public:
+    int cw = 0;
+    void incrementCw() override { cw = std::min(7, 2 * cw + 1); }
+    void resetCw() override { cw = 0; }
+    int getCw() override { return cw; }
+};
+class SchedulingRecovery : public QosRecoveryProcedure {
+  public:
+    void configure(ICwCalculator *calculator) { cwCalculator = calculator; shortRetryLimit = 1; }
+    int getStationSrc() const { return stationShortRetryCounter; }
+    bool hasDataRetry() const { return !shortRetryCounter.empty() || !longRetryCounter.empty(); }
+};
+class SchedulingPolicy : public OriginatorQosAckPolicy {
+  public:
+    SchedulingPolicy() { blockAckReqThreshold = 5; }
+};
+class SchedulingAgreements : public OriginatorBlockAckAgreementHandler {
+  public:
+    OriginatorBlockAckAgreement *accept(MacAddress peer, Tid tid, int start, int size) {
+        auto agreement = new OriginatorBlockAckAgreement(peer, tid, SequenceNumberCyclic(start), size, false, false);
+        agreement->setIsAddbaResponseReceived(true);
+        blockAckAgreements[{peer, tid}] = agreement;
+        return agreement;
+    }
+};
+class SchedulingFrames : public InProgressFrames {
+  public:
+    Packet *candidate = nullptr;
+    void configure(QosAckHandler *handler) { ackHandler = handler; }
+    Packet *peekFrameToTransmit() override { return candidate; }
+    Ptr<const Ieee80211DataHeader> add(MacAddress peer, Tid tid, int sequence, bool sent = true) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setReceiverAddress(peer);
+        header->setTid(tid);
+        header->setSequenceNumber(SequenceNumberCyclic(sequence));
+        header->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet("data", header);
+        take(packet);
+        packet->setArrivalTime(simTime());
+        inProgressFrames.push_back(packet);
+        ackHandler->frameGotInProgress(header);
+        if (sent)
+            check_and_cast<QosAckHandler *>(ackHandler)->processTransmittedDataOrMgmtFrame(header);
+        return header;
+    }
+};
+}
+
+%activity:
+SchedulingCw cw;
+SchedulingRecovery recovery;
+recovery.configure(&cw);
+recovery.controlFrameTransmissionFailed();
+ASSERT(recovery.getStationSrc() == 1 && cw.getCw() == 1);
+recovery.controlFrameTransmissionFailed();
+ASSERT(recovery.getStationSrc() == 0 && cw.getCw() == 0);
+recovery.controlFrameTransmissionFailed();
+recovery.blockAckFrameReceived();
+ASSERT(recovery.getStationSrc() == 0 && cw.getCw() == 0 && !recovery.hasDataRetry());
+const MacAddress peer("02:00:00:00:00:02");
+const MacAddress other("02:00:00:00:00:03");
+OriginatorBlockAckAgreement window(peer, 5, SequenceNumberCyclic(4094), 4, false, false);
+window.advanceWindow(SequenceNumberCyclic(2), {SequenceNumberCyclic(0), SequenceNumberCyclic(4095)});
+ASSERT(window.getStartingSequenceNumber() == SequenceNumberCyclic(4095));
+window.advanceWindow(SequenceNumberCyclic(2), {SequenceNumberCyclic(0)});
+ASSERT(window.getStartingSequenceNumber() == SequenceNumberCyclic(0));
+window.advanceWindow(SequenceNumberCyclic(2), {});
+ASSERT(window.getStartingSequenceNumber() == SequenceNumberCyclic(2));
+ASSERT(OriginatorBlockAckAgreement::isInBitmap(SequenceNumberCyclic(62), SequenceNumberCyclic(4095)));
+ASSERT(!OriginatorBlockAckAgreement::isInBitmap(SequenceNumberCyclic(63), SequenceNumberCyclic(4095)));
+ASSERT(!OriginatorBlockAckAgreement::isInBitmap(SequenceNumberCyclic(4094), SequenceNumberCyclic(4095)));
+ASSERT(!window.containsSequence(SequenceNumberCyclic(62)));
+SchedulingPolicy policy;
+SchedulingAgreements agreements;
+QosAckHandler ack;
+SchedulingFrames frames;
+frames.configure(&ack);
+agreements.accept(peer, 2, 100, 8);
+auto selectedAgreement = agreements.accept(peer, 5, 4094, 4);
+auto otherAgreement = agreements.accept(other, 5, 4094, 4);
+std::vector<Ptr<const Ieee80211DataHeader>> unrelated;
+for (int i = 100; i < 104; i++)
+    unrelated.push_back(frames.add(peer, 2, i));
+auto selected = frames.add(peer, 5, 4095);
+auto wrap = frames.add(peer, 5, 0);
+auto outside = frames.add(peer, 5, 2);
+auto separatePeer = frames.add(other, 5, 4095);
+// A candidate inside TID 2 defers only that group.
+frames.add(peer, 2, 104, false);
+frames.candidate = frames.getFrames(frames.getLength() - 1);
+ASSERT(!policy.isBlockAckReqNeeded(&frames, nullptr, nullptr));
+ASSERT(std::get<2>(policy.computeBlockAckReqParameters(&frames, nullptr, nullptr)) == -1);
+auto choice = policy.computeBlockAckReqParameters(&frames, nullptr, &agreements);
+ASSERT(std::get<0>(choice) == peer && std::get<2>(choice) == 5);
+ASSERT(std::get<1>(choice) == SequenceNumberCyclic(4095));
+ASSERT(selectedAgreement->containsSequence(SequenceNumberCyclic(1)));
+ASSERT(!selectedAgreement->containsSequence(SequenceNumberCyclic(2)));
+auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+bar->setReceiverAddress(peer);
+bar->setTidInfo(5);
+bar->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+ack.processTransmittedBlockAckReq(bar, selectedAgreement);
+ASSERT(ack.getQoSDataAckStatus(selected) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+ASSERT(ack.getQoSDataAckStatus(wrap) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+for (auto header : unrelated)
+    ASSERT(ack.getQoSDataAckStatus(header) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+ASSERT(ack.getQoSDataAckStatus(outside) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+ASSERT(ack.getQoSDataAckStatus(separatePeer) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+ack.processFailedBlockAckReq(bar);
+ASSERT(ack.isEligibleToTransmit(selected));
+ASSERT(ack.isEligibleToTransmit(wrap));
+ASSERT(ack.getQoSDataAckStatus(separatePeer) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+frames.candidate = nullptr;
+choice = policy.computeBlockAckReqParameters(&frames, nullptr, &agreements);
+ASSERT(std::get<0>(choice) == peer && std::get<2>(choice) == 2);
+ASSERT(std::get<1>(choice) == SequenceNumberCyclic(100));
+ASSERT(otherAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(4094));
+auto duration = SimTime(1, SIMTIME_US);
+EdcaTransmitLifetimeHandler lifetime(duration, duration, duration, duration);
+frames.setLifetimeHandler(&lifetime);
+for (int i = 0; i < frames.getLength(); i++)
+    lifetime.registerFrame(frames.getFrames(i), AC_VI);
+ASSERT(policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
+wait(duration);
+ASSERT(!policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
+ASSERT(ack.getQoSDataAckStatus(unrelated.front()) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+std::cout << "Block Ack scheduling isolation assertions passed.\n";
+
+%contains: stdout
+Block Ack scheduling isolation assertions passed.

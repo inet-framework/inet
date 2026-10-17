@@ -133,18 +133,23 @@ void NonQosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const I
 void NonQosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
-    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
-    if (packet->getByteLength() >= rtsThreshold) {
-        auto it = longRetryCounter.find(id);
-        if (it != longRetryCounter.end())
-            longRetryCounter.erase(it);
-    }
-    else {
-        auto it = shortRetryCounter.find(id);
-        if (it != shortRetryCounter.end())
-            shortRetryCounter.erase(it);
-    }
+    dropFrame(packet, header);
     emit(retryLimitReachedSignal, packet);
+}
+
+void NonQosRecoveryProcedure::dropFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
+{
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
+    if (packet->getByteLength() >= rtsThreshold)
+        longRetryCounter.erase(id);
+    else
+        shortRetryCounter.erase(id);
+}
+
+void NonQosRecoveryProcedure::dropRtsProtectedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
+{
+    auto id = SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber());
+    shortRetryCounter.erase(id);
 }
 
 //

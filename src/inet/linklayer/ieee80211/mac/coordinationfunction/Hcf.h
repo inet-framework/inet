@@ -12,6 +12,7 @@
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/contract/BlockAckVariant.h"
 #include "inet/linklayer/ieee80211/mac/contract/IBlockAckAgreementHandlerCallback.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICtsPolicy.h"
@@ -41,6 +42,7 @@ namespace inet {
 namespace ieee80211 {
 
 class Ieee80211Mac;
+class Ieee80211Mib;
 
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
@@ -48,7 +50,6 @@ class Ieee80211Mac;
 class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
 {
   private:
-    enum class BlockAckVariant { BASIC, COMPRESSED };
     BlockAckVariant blockAckVariant = BlockAckVariant::BASIC;
 
   public:
@@ -58,11 +59,26 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   protected:
     Ieee80211Mac *mac = nullptr;
+    Ieee80211Mib *mib = nullptr;
     IRateControl *dataAndMgmtRateControl = nullptr;
 
     cMessage *startRxTimer = nullptr;
     cMessage *inactivityTimer = nullptr;
     cMessage *dataLifetimeTimer = nullptr;
+    cMessage *addbaResponseTimer = nullptr;
+    struct OwnedAction {
+        MacAddress peer;
+        Tid tid = -1;
+        bool originator = false;
+        enum Kind { REQUEST, RESPONSE, DELBA } kind = REQUEST;
+        bool attempted = false;
+        bool rtsRecoveryOwned = false;
+    };
+    std::map<int64_t, OwnedAction> ownedActions;
+    std::set<int64_t> obsoleteActions;
+    bool handlingAgreementAction = false;
+    bool finishingSequence = false;
+    bool updatingProcedures = false;
 
     // Transmission and Reception
     IRx *rx = nullptr;
@@ -113,6 +129,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void forEachChild(cVisitor *v) override;
     virtual void handleMessage(cMessage *msg) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, bool value, cObject *details) override;
     virtual void refreshDisplay() const override;
 
     void startFrameSequence(AccessCategory ac);
@@ -131,10 +148,29 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
             TxopProcedure *txop, simtime_t ppduDuration);
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);
+    bool hasEligibleFrameToTransmit(AccessCategory ac) const;
     virtual bool isReceptionInProgress();
     void scheduleDataLifetimeTimer();
     void expireDataFrames(bool preserveSequence = true);
     std::set<const Packet *> getReferencedDataFrames() const;
+    bool isFrameEligible(Packet *packet, bool numbered) const;
+    bool isAMsduPermitted(Packet *packet) const;
+    bool hasQueuedData(MacAddress peer, Tid tid) const;
+    bool hasNumberedData(MacAddress peer, Tid tid) const;
+    bool hasObsoleteActionInFlight(MacAddress peer, Tid tid, bool originator) const;
+    void updateAgreementProcedures();
+    void advanceOriginatorWindows();
+    void completeTransfers();
+    void updateContention();
+    void scheduleAddbaResponseTimer();
+    void actionTerminated(Packet *packet, bool acknowledged);
+    void invalidateActions(MacAddress peer, Tid tid, bool originator);
+    void retireAgreement(MacAddress peer, Tid tid, bool originator, bool associationReset = false);
+    void beginTeardown(MacAddress peer, Tid tid, bool originator, int reasonCode);
+    void discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highestTransmittedDataIndex = -1);
+    void firstDataDiscarded(const Ptr<const Ieee80211DataHeader>& header);
+    bool dispatchAgreementAction(const Ptr<const Ieee80211MgmtHeader>& header);
+    bool isProfileAllowed(MacAddress peer, bool originator) const;
 
     // Recipient
     virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
@@ -176,12 +212,13 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) override;
 
     // IProcedureCallback
-    virtual void scheduleInactivityTimer(simtime_t timeout) override;
+    virtual void scheduleInactivityTimer() override;
 
     std::string getFrameSequenceInfo() const;
 
   public:
     virtual ~Hcf();
+    void resetPeer(MacAddress peer);
 
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;

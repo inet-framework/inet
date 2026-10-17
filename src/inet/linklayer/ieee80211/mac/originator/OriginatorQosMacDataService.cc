@@ -9,11 +9,13 @@
 
 #include <algorithm>
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
+#include "inet/queueing/contract/ISelectivePacketCollection.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -33,9 +35,29 @@ void OriginatorQosMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue)
+Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected)
 {
     auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
+    if (subframes) {
+        bool valid = !subframes->empty() && subframes->front() == selected;
+        std::set<Packet *> unique;
+        for (auto frame : *subframes) {
+            bool present = false;
+            for (int i = 0; i < pendingQueue->getNumPackets(); i++) {
+                if (pendingQueue->getPacket(i) == frame) {
+                    present = true;
+                    break;
+                }
+            }
+            valid &= present && unique.insert(frame).second &&
+                (!extractionEligible || extractionEligible(frame)) &&
+                (!aMsduPermitted || aMsduPermitted(frame));
+        }
+        if (!valid) {
+            delete subframes;
+            return nullptr;
+        }
+    }
     if (subframes) {
         std::vector<int64_t> sourceIds;
         AccessCategory ac = AC_BE;
@@ -105,16 +127,20 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
     Enter_Method("extractFramesToTransmit");
     if (expireFrames)
         expireFrames();
-    if (pendingQueue->isEmpty())
+    auto selected = peekEligibleFrame(pendingQueue);
+    if (selected == nullptr)
         return nullptr;
     else {
 //        if (msduRateLimiting)
 //            txRateLimitingIfNeeded();
         Packet *packet = nullptr;
-        if (aMsduAggregationPolicy)
-            packet = aMsduAggregateIfNeeded(pendingQueue);
+        auto module = dynamic_cast<cModule *>(pendingQueue);
+        auto next = pendingQueue->canPullPacket(module ? module->gate("out") : nullptr);
+        if (selected == next && aMsduAggregationPolicy && (!aMsduPermitted || aMsduPermitted(selected)))
+            packet = aMsduAggregateIfNeeded(pendingQueue, selected);
         if (!packet) {
-            packet = pendingQueue->dequeuePacket();
+            packet = selected == next ? pendingQueue->dequeuePacket() :
+                check_and_cast<queueing::ISelectivePacketCollection *>(pendingQueue)->extractPacket(selected);
             take(packet);
         }
         // PS Defer Queueing
@@ -123,6 +149,8 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
             assignSequenceNumber(header);
             packet->insertAtFront(header);
         }
+        if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+            packet->addTagIfAbsent<Ieee80211DataSequenceTag>()->setAllocationIndex(nextDataAllocationIndex++);
 //        if (msduIntegrityAndProtection)
 //            frame = protectMsduIfNeeded(frame);
         std::vector<Packet *> *fragments = nullptr;
@@ -141,6 +169,35 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
 //            fragments = new Fragments({aMpdu});
         return fragments;
     }
+}
+
+Packet *OriginatorQosMacDataService::peekEligibleFrame(queueing::IPacketQueue *queue) const
+{
+    if (queue->isEmpty())
+        return nullptr;
+    auto predicate = [this](Packet *packet) { return !extractionEligible || extractionEligible(packet); };
+    auto module = dynamic_cast<cModule *>(queue);
+    auto packet = queue->canPullPacket(module ? module->gate("out") : nullptr);
+    if (packet && predicate(packet))
+        return packet;
+    if (auto selected = dynamic_cast<queueing::ISelectivePacketCollection *>(queue)) {
+        try {
+            return selected->peekEligiblePacket(predicate);
+        }
+        catch (const queueing::UnsupportedPacketSelection&) {
+            // Ordinary service remains valid when this composition cannot bypass a deferred head.
+        }
+    }
+    for (int i = 0; i < queue->getNumPackets(); i++) {
+        if (predicate(queue->getPacket(i)))
+            throw cRuntimeError("Deferred DATA hides an eligible frame: queue requires ISelectivePacketCollection");
+    }
+    return nullptr;
+}
+
+SequenceNumberCyclic OriginatorQosMacDataService::getNextSequenceNumber(MacAddress peer, Tid tid) const
+{
+    return check_and_cast<QoSSequenceNumberAssignment *>(sequenceNumberAssignment)->getNextSequenceNumber(peer, tid);
 }
 
 OriginatorQosMacDataService::~OriginatorQosMacDataService()

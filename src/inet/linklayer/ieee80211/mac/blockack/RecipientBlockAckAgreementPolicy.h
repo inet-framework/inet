@@ -28,6 +28,7 @@ class INET_API RecipientBlockAckAgreementPolicy : public SimpleModule, public IR
     virtual void initialize(int stage) override;
 
   public:
+    virtual bool isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const override;
     virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq) override;
     virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override;
 

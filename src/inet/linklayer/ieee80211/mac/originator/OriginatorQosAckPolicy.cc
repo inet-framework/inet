@@ -31,73 +31,63 @@ bool OriginatorQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& h
     return !header->getReceiverAddress().isMulticast();
 }
 
-std::map<MacAddress, std::vector<Packet *>> OriginatorQosAckPolicy::getOutstandingFramesPerReceiver(InProgressFrames *inProgressFrames) const
+bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames *frames, TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements) const
 {
-    auto outstandingFrames = inProgressFrames->getOutstandingFrames();
-    std::map<MacAddress, std::vector<Packet *>> outstandingFramesPerReceiver;
-    for (auto frame : outstandingFrames)
-        outstandingFramesPerReceiver[frame->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress()].push_back(frame);
-    return outstandingFramesPerReceiver;
+    return std::get<2>(computeBlockAckReqParameters(frames, txop, agreements)) != -1;
 }
 
-SequenceNumberCyclic OriginatorQosAckPolicy::computeStartingSequenceNumber(const std::vector<Packet *>& outstandingFrames) const
+std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *frames, TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements) const
 {
-    ASSERT(outstandingFrames.size() > 0);
-    auto startingSequenceNumber = outstandingFrames[0]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
-    for (size_t i = 1; i < outstandingFrames.size(); i++) {
-        auto seqNum = outstandingFrames[i]->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
-        if (seqNum < startingSequenceNumber)
-            startingSequenceNumber = seqNum;
+    using Id = std::pair<MacAddress, Tid>;
+    std::map<Id, std::vector<Packet *>> groups;
+    for (auto frame : frames->getOutstandingFrames()) {
+        auto header = frame->peekAtFront<Ieee80211DataHeader>();
+        auto agreement = agreements ? agreements->getAgreement(header->getReceiverAddress(), header->getTid()) : nullptr;
+        if (agreement && agreement->getIsAddbaResponseReceived() && agreement->containsSequence(header->getSequenceNumber()))
+            groups[{header->getReceiverAddress(), header->getTid()}].push_back(frame);
     }
-    return startingSequenceNumber;
-}
-
-bool OriginatorQosAckPolicy::isCompressedBlockAckReq(const std::vector<Packet *>& outstandingFrames, int startingSequenceNumber) const
-{
-    // The Compressed Bitmap subfield of the BA Control field or BAR Control field shall be set to 1 in all
-    // BlockAck and BlockAckReq frames sent from one HT STA to another HT STA and shall be set to 0 otherwise.
-    return false; // non-HT STA
-//    for (auto frame : outstandingFrames)
-//        if (frame->getSequenceNumber() >= startingSequenceNumber && frame->getFragmentNumber() > 0)
-//            return false;
-//    return true;
-}
-
-// FIXME
-bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const
-{
-    auto outstandingFramesPerReceiver = getOutstandingFramesPerReceiver(inProgressFrames);
-    for (auto outstandingFrames : outstandingFramesPerReceiver) {
-        if ((int)outstandingFrames.second.size() >= blockAckReqThreshold)
-            return true;
-    }
-    return false;
-}
-
-// FIXME
-std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const
-{
-    auto outstandingFramesPerReceiver = getOutstandingFramesPerReceiver(inProgressFrames);
-    for (auto outstandingFrames : outstandingFramesPerReceiver) {
-        if ((int)outstandingFrames.second.size() >= blockAckReqThreshold) {
-            auto largestOutstandingFrames = outstandingFramesPerReceiver.begin();
-            for (auto it = outstandingFramesPerReceiver.begin(); it != outstandingFramesPerReceiver.end(); it++) {
-                if (it->second.size() > largestOutstandingFrames->second.size())
-                    largestOutstandingFrames = it;
+    if (groups.empty())
+        return std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(0), Tid(-1));
+    auto candidate = frames->peekFrameToTransmit();
+    auto data = candidate ? dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>()) : nullptr;
+    auto result = std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(0), Tid(-1));
+    simtime_t oldestArrival = SIMTIME_MAX;
+    for (const auto& entry : groups) {
+        const auto& id = entry.first;
+        auto agreement = agreements->getAgreement(id.first, id.second);
+        // INET BAR policy defers a short group only for DATA within that group's window.
+        if ((int)entry.second.size() < blockAckReqThreshold && data &&
+            data->getReceiverAddress() == id.first && data->getTid() == id.second &&
+            agreement->containsSequence(frames->getCandidateSequenceNumber(candidate)))
+            continue;
+        auto start = agreement->getStartingSequenceNumber();
+        int oldestOffset = -1;
+        simtime_t arrival = SIMTIME_MAX;
+        for (auto frame : entry.second) {
+            auto sequence = frame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber();
+            int offset = OriginatorBlockAckAgreement::computeSequenceDistance(start, sequence);
+            if (oldestOffset == -1 || offset < oldestOffset) {
+                oldestOffset = offset;
+                arrival = frame->getArrivalTime();
             }
-            MacAddress receiverAddress = largestOutstandingFrames->first;
-            SequenceNumberCyclic startingSequenceNumber = computeStartingSequenceNumber(largestOutstandingFrames->second);
-            Tid tid = largestOutstandingFrames->second.at(0)->peekAtFront<Ieee80211DataHeader>()->getTid();
-            return std::make_tuple(receiverAddress, startingSequenceNumber, tid);
+            else if (offset == oldestOffset)
+                arrival = std::min(arrival, frame->getArrivalTime());
+        }
+        // Map order supplies the peer/TID tie break.
+        if (std::get<2>(result) == -1 || arrival < oldestArrival) {
+            oldestArrival = arrival;
+            result = std::make_tuple(id.first, start + oldestOffset, id.second);
         }
     }
-    return std::make_tuple(MacAddress::UNSPECIFIED_ADDRESS, SequenceNumberCyclic(), -1);
+    return result;
 }
 
 AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const
 {
     if (agreement == nullptr)
         return AckPolicy::NORMAL_ACK;
+    if (agreement->getIsAddbaResponseReceived() && header->getAMsduPresent() && !agreement->isAMsduPermitted())
+        throw cRuntimeError("A-MSDU is not permitted by both ADDBA flags");
     if (agreement->getIsAddbaResponseReceived() && isBlockAckPolicyEligibleFrame(packet, header)) {
         if (checkAgreementPolicy(header, agreement))
             return AckPolicy::BLOCK_ACK;
@@ -115,10 +105,9 @@ bool OriginatorQosAckPolicy::isBlockAckPolicyEligibleFrame(Packet *packet, const
 
 bool OriginatorQosAckPolicy::checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const
 {
-    bool bufferFull = agreement->getBufferSize() == agreement->getNumSentBaPolicyFrames();
-    bool aMsduOk = agreement->getIsAMsduSupported() || !header->getAMsduPresent();
+    bool aMsduOk = agreement->isAMsduPermitted() || !header->getAMsduPresent();
     // TODO bool baPolicy = agreement->getIsDelayedBlockAckPolicySupported() || !frame->getAckPolicy();
-    return !bufferFull && aMsduOk && (header->getSequenceNumber() >= agreement->getStartingSequenceNumber()); // TODO && baPolicy
+    return aMsduOk && agreement->containsSequence(header->getSequenceNumber());
 }
 
 //
