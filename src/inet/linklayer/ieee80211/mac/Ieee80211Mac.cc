@@ -90,6 +90,7 @@ void Ieee80211Mac::initialize(int stage)
                 if (transmitter->isHtChannelWidthSupported(channelWidth) &&
                         receiver->isHtChannelWidthSupported(channelWidth))
                     operationalChannelWidths.insert(channelWidth);
+            receiver->validateHtReceptionCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         }
         mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         emit(modesetChangedSignal, modeSet);

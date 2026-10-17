@@ -37,14 +37,16 @@ double Ieee80211ErrorModelBase::computeAmpduRangeSuccessRate(const ISnir *snir, 
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method("computePacketErrorRate");
+    if (part == IRadioSignal::SIGNAL_PART_PREAMBLE)
+        return 0;
     auto transmission = check_and_cast<const Ieee80211Transmission *>(snir->getReception()->getTransmission());
     auto mode = transmission->getMode();
     auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
     auto headerLength = mode->getHeaderMode()->getLength();
     auto dataLength = b(mode->getDataMode()->getCompleteLength(B(phyHeader->getLengthField())));
     // TODO check header length and data length for OFDM (signal) field
-    double headerSuccessRate = getHeaderSuccessRate(mode, headerLength.get<b>(), getScalarSnir(snir));
-    double dataSuccessRate = getDataSuccessRate(mode, dataLength.get<b>(), getScalarSnir(snir));
+    double headerSuccessRate = part == IRadioSignal::SIGNAL_PART_DATA ? 1 : getHeaderSuccessRate(mode, headerLength.get<b>(), getScalarSnir(snir));
+    double dataSuccessRate = part == IRadioSignal::SIGNAL_PART_HEADER ? 1 : getDataSuccessRate(mode, dataLength.get<b>(), getScalarSnir(snir));
     switch (part) {
         case IRadioSignal::SIGNAL_PART_WHOLE:
             return 1.0 - headerSuccessRate * dataSuccessRate;

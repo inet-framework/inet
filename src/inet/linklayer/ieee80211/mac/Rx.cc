@@ -12,6 +12,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -104,7 +105,10 @@ bool Rx::lowerFrameReceived(Packet *packet)
     Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
-    bool isFrameOk = isFcsOk(packet);
+    // Aggregate containers need member acceptance before standalone FCS or header checks.
+    // Reject them until MAC aggregate reception exists; PHY range outcomes stay separate.
+    auto aggregate = packet->findTag<Ieee80211AmpduInd>();
+    bool isFrameOk = !(aggregate && aggregate->getAggregation()) && isFcsOk(packet);
     if (isFrameOk) {
         EV_INFO << "Received frame from PHY: " << packet << endl;
         const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
