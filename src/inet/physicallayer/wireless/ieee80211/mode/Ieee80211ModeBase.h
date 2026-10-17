@@ -29,6 +29,7 @@ class INET_API Ieee80211ModeBase : public IIeee80211Mode
     virtual PreambleType getLegacyPreambleType() const override { return PreambleType::UNKNOWN; }
     virtual int getHtMcsIndex() const override { return -1; }
     virtual bool isHtShortGuardInterval() const override { return false; }
+    virtual const simtime_t getSignalExtensionTime() const override { return SIMTIME_ZERO; }
     virtual const char *getName() const override { return name.c_str(); }
 };
 

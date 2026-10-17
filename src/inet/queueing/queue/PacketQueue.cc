@@ -118,14 +118,38 @@ void PacketQueue::pushPacket(Packet *packet, const cGate *gate)
 Packet *PacketQueue::pullPacket(const cGate *gate)
 {
     Enter_Method("pullPacket");
-    auto packet = check_and_cast<Packet *>(queue.front());
+    return pullSelectedPacket(check_and_cast<Packet *>(queue.front()));
+}
+
+Packet *PacketQueue::peekEligiblePacket(const std::function<bool(Packet *)>& predicate) const
+{
+    for (cQueue::Iterator it(queue); !it.end(); it++) {
+        auto packet = check_and_cast<Packet *>(*it);
+        if (predicate(packet))
+            return packet;
+    }
+    return nullptr;
+}
+
+Packet *PacketQueue::extractPacket(Packet *packet)
+{
+    Enter_Method("extractPacket");
+    if (!queue.contains(packet))
+        throw cRuntimeError("Selected packet is not in this queue");
+    pullSelectedPacket(packet);
+    drop(packet);
+    return packet;
+}
+
+Packet *PacketQueue::pullSelectedPacket(Packet *packet)
+{
     EV_INFO << "Pulling packet" << EV_FIELD(packet) << EV_ENDL;
     if (buffer != nullptr) {
         queue.remove(packet);
         buffer->removePacket(packet);
     }
     else
-        queue.pop();
+        queue.remove(packet);
     auto queueingTime = simTime() - packet->getArrivalTime();
     auto packetEvent = new PacketEvent();
     insertPacketEvent(this, packet, PEK_QUEUED, 0, queueingTime, packetEvent);

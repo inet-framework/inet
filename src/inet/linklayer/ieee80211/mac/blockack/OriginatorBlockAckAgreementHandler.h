@@ -21,6 +21,8 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
 {
   protected:
     std::map<std::pair<MacAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
+    std::map<AgreementId, Procedure> procedures;
+    std::map<AgreementId, int> dialogTokens;
 
   protected:
     virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy);
@@ -28,10 +30,22 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
     virtual void updateAgreement(OriginatorBlockAckAgreement *agreement, const Ptr<const Ieee80211AddbaResponse>& addbaResp);
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
-    virtual simtime_t computeEarliestExpirationTime();
     virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
   public:
+    virtual simtime_t computeEarliestExpirationTime() override;
+    const std::map<AgreementId, OriginatorBlockAckAgreement *>& getAgreements() const override { return blockAckAgreements; }
+    const std::map<AgreementId, Procedure>& getProcedures() const override { return procedures; }
+    virtual void noteEligibleDataTransmission(MacAddress peer, Tid tid) override;
+    virtual void beginSetupIntent(MacAddress peer, Tid tid) override;
+    virtual void beginTeardown(MacAddress peer, Tid tid) override;
+    virtual void failTeardown(MacAddress peer, Tid tid) override;
+    virtual void finishProcedure(MacAddress peer, Tid tid) override;
+    virtual void markRequestAttempted(MacAddress peer, Tid tid) override;
+    virtual void acknowledgeRequest(MacAddress peer, Tid tid, simtime_t timeout) override;
+    OriginatorBlockAckAgreement *detachAgreement(MacAddress peer, Tid tid) override;
+    std::vector<OriginatorBlockAckAgreement *> detachPeer(MacAddress peer) override;
+    void startSetup(MacAddress peer, Tid tid, SequenceNumberCyclic sequence, IOriginatorBlockAckAgreementPolicy *policy, IProcedureCallback *callback, bool aMsdu) override;
     virtual ~OriginatorBlockAckAgreementHandler();
     virtual void processTransmittedAddbaReq(const Ptr<const Ieee80211AddbaRequest>& addbaReq) override;
     virtual void processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;

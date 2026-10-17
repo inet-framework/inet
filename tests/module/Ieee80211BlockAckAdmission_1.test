@@ -1,0 +1,132 @@
+%description:
+Check isolated profile admission through initialized production policies.
+Basic permits legacy capability state. Compressed requires local and peer HT eligibility.
+The fixture leaves production HCF on Basic and creates no Compressed agreement.
+
+%file: Admission.cc
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementPolicy.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+namespace inet::ieee80211 {
+class AdmissionTest : public cSimpleModule {
+  protected:
+    void checkResponse(IOriginatorBlockAckAgreementPolicy *policy) {
+        const MacAddress peer("02:00:00:00:00:02");
+        OriginatorBlockAckAgreement agreement(peer, 5, SequenceNumberCyclic(100), 64, true, false);
+        agreement.setDialogToken(37);
+        auto response = makeShared<Ieee80211AddbaResponse>();
+        response->setTransmitterAddress(peer);
+        response->setTid(5);
+        response->setDialogToken(37);
+        response->setStatusCode(SC_SUCCESSFUL);
+        response->setBlockAckPolicy(true);
+        response->setBufferSize(8);
+        ASSERT(policy->isAddbaReqAccepted(response, &agreement));
+        ASSERT(!policy->isAddbaReqAccepted(response, nullptr));
+        response->setDialogToken(0);
+        ASSERT(!policy->isAddbaReqAccepted(response, &agreement));
+        response->setDialogToken(38);
+        ASSERT(!policy->isAddbaReqAccepted(response, &agreement));
+        response->setDialogToken(37);
+        response->setTid(4);
+        ASSERT(!policy->isAddbaReqAccepted(response, &agreement));
+        response->setTid(5);
+        response->setTransmitterAddress(MacAddress("02:00:00:00:00:03"));
+        ASSERT(!policy->isAddbaReqAccepted(response, &agreement));
+        response->setTransmitterAddress(peer);
+        response->setStatusCode(SC_UNSPECIFIED);
+        ASSERT(!policy->isAddbaReqAccepted(response, &agreement));
+        response->setStatusCode(SC_SUCCESSFUL);
+        response->setBlockAckPolicy(false);
+        ASSERT(!policy->isAddbaReqAccepted(response, &agreement));
+        response->setBlockAckPolicy(true);
+        response->setBufferSize(0);
+        ASSERT(!policy->isAddbaReqAccepted(response, &agreement));
+        response->setBufferSize(8);
+        agreement.setIsAddbaResponseReceived(true);
+        ASSERT(!policy->isAddbaReqAccepted(response, &agreement));
+    }
+
+    void checkRequest(IRecipientBlockAckAgreementPolicy *policy) {
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+        request->setTid(5);
+        request->setDialogToken(37);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(100));
+        request->setBlockAckPolicy(true);
+        for (int size : {0, 8, 64, 128}) {
+            request->setBufferSize(size);
+            ASSERT(policy->isAddbaReqAccepted(request));
+        }
+        request->setBlockAckPolicy(false);
+        ASSERT(!policy->isAddbaReqAccepted(request));
+        request->setBlockAckPolicy(true);
+        request->setDialogToken(0);
+        ASSERT(!policy->isAddbaReqAccepted(request));
+        request->setDialogToken(37);
+        request->setTransmitterAddress(MacAddress::BROADCAST_ADDRESS);
+        ASSERT(!policy->isAddbaReqAccepted(request));
+    }
+
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("test")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto originator = check_and_cast<IOriginatorBlockAckAgreementPolicy *>(
+                getModuleByPath("^.host.wlan[0].mac.hcf.originatorBlockAckAgreementPolicy"));
+        auto recipient = check_and_cast<IRecipientBlockAckAgreementPolicy *>(
+                getModuleByPath("^.host.wlan[0].mac.hcf.recipientBlockAckAgreementPolicy"));
+        checkResponse(originator);
+        checkRequest(recipient);
+        for (bool localHt : {false, true}) {
+            for (bool peerHt : {false, true}) {
+                ASSERT(originator->isProfileAllowed(BlockAckVariant::BASIC, localHt, peerHt));
+                ASSERT(recipient->isProfileAllowed(BlockAckVariant::BASIC, localHt, peerHt));
+                ASSERT(originator->isProfileAllowed(BlockAckVariant::COMPRESSED, localHt, peerHt) == (localHt && peerHt));
+                ASSERT(recipient->isProfileAllowed(BlockAckVariant::COMPRESSED, localHt, peerHt) == (localHt && peerHt));
+            }
+        }
+        std::cout << "Block Ack admission assertions passed.\n";
+    }
+};
+Define_Module(AdmissionTest);
+}
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple AdmissionTest { parameters: @class(::inet::ieee80211::AdmissionTest); }
+network AdmissionNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: AdmissionTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AdmissionNetwork
+ned-path = .;../../../../src
+sim-time-limit = 2ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+
+%contains: stdout
+Block Ack admission assertions passed.

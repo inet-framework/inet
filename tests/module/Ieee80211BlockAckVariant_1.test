@@ -1,8 +1,8 @@
 %description:
 Check profile validation through production HCF initialization.
-Retain the default and explicit Basic profile.
+Accept the default, explicit Basic, and explicit Compressed profiles.
 Reject unknown values with support enabled or disabled.
-Reject Compressed until its runtime exchange path exists.
+Reject delayed policy for Compressed before any ADDBA transmission.
 
 %testprog: python3 check-profile.py
 
@@ -18,20 +18,26 @@ import subprocess
 
 root = Path.cwd().parents[3]
 cases = [
-    (None, True, None),
-    ("basic", True, None),
-    ("invalid", True, 'Unknown blockAckVariant "invalid": expected "basic" or "compressed"'),
-    ("invalid", False, 'Unknown blockAckVariant "invalid": expected "basic" or "compressed"'),
-    ("compressed", True, 'Compressed Block Ack exchanges are not implemented'),
-    ("compressed", False, 'Compressed Block Ack exchanges are not implemented'),
+    (None, True, (), None),
+    ("basic", True, (), None),
+    ("invalid", True, (), 'Unknown blockAckVariant "invalid": expected "basic" or "compressed"'),
+    ("invalid", False, (), 'Unknown blockAckVariant "invalid": expected "basic" or "compressed"'),
+    ("compressed", True, (), None),
+    ("compressed", False, (), None),
 ]
-for variant, supported, diagnostic in cases:
+for policies in [("originator",), ("recipient",), ("originator", "recipient")]:
+    cases.append(("compressed", True, policies,
+                  "Compressed Block Ack does not support delayedAckPolicySupported"))
+    cases.append(("basic", True, policies, None))
+for variant, supported, policies, diagnostic in cases:
     command = [str(root / "bin/inet"), "--debug", "-u", "Cmdenv", "-f", str(Path.cwd() / "profile.ini"), "-c", "General", "-r", "0",
                "--sim-time-limit=0s", "--record-vector-results=false", "--record-scalar-results=false",
                f"--result-dir={Path.cwd() / 'results'}",
                f"--**.wlan[*].mac.hcf.isBlockAckSupported={'true' if supported else 'false'}"]
     if variant is not None:
         command.append(f'--**.wlan[*].mac.hcf.blockAckVariant="{variant}"')
+    for policy in policies:
+        command.append(f'--**.wlan[*].mac.hcf.{policy}BlockAckAgreementPolicy.delayedAckPolicySupported=true')
     result = subprocess.run(command, cwd=root / "showcases/wireless/blockack", text=True,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     print(result.stdout)
