@@ -50,9 +50,11 @@ class INET_API BlockAckReordering
 
   public:
     virtual ~BlockAckReordering();
+    ReleasedFrames detachAgreement(MacAddress peer, Tid tid, bool deliverComplete, std::vector<Packet *>& discarded);
+    void clearPeer(MacAddress peer);
 
     void processReceivedDelba(const Ptr<const Ieee80211Delba>& delba);
-    ReleasedFrames processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader);
+    ReleasedFrames processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe = false);
     ReleasedFrames processReceivedBlockAckReq(RecipientBlockAckAgreement *agreement, const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 };
 

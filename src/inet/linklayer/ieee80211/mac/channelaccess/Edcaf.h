@@ -49,6 +49,7 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     InProgressFrames *inProgressFrames = nullptr;
 
     bool owning = false;
+    std::function<bool()> frameEligibility;
 
     simtime_t slotTime = -1;
     simtime_t sifs = -1;
@@ -102,6 +103,8 @@ class INET_API Edcaf : public IChannelAccess, public IContention::ICallback, pub
     // Edcaf
     virtual bool isOwning() { return owning; }
     virtual bool isInternalCollision();
+    void setFrameEligibility(std::function<bool()> predicate) { frameEligibility = predicate; }
+    bool hasEligibleFrames() const;
     virtual AccessCategory getAccessCategory() { return ac; }
 };
 

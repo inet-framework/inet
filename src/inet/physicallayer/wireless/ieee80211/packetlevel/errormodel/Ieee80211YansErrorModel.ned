@@ -8,8 +8,9 @@
 package inet.physicallayer.wireless.ieee80211.packetlevel.errormodel;
 
 import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
+import inet.physicallayer.wireless.ieee80211.contract.packetlevel.IIeee80211AmpduErrorModel;
 
-module Ieee80211YansErrorModel extends ErrorModelBase
+module Ieee80211YansErrorModel extends ErrorModelBase like IIeee80211AmpduErrorModel
 {
     parameters:
         @class(Ieee80211YansErrorModel);

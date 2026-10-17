@@ -23,6 +23,13 @@ class INET_API IRecipientBlockAckAgreementHandler
 {
   public:
     virtual ~IRecipientBlockAckAgreementHandler() {}
+    virtual simtime_t computeEarliestExpirationTime() = 0;
+    virtual const std::map<std::pair<MacAddress, Tid>, RecipientBlockAckAgreement *>& getAgreements() const = 0;
+    virtual RecipientBlockAckAgreement *detachAgreement(MacAddress peer, Tid tid) = 0;
+    virtual std::vector<RecipientBlockAckAgreement *> detachPeer(MacAddress peer) = 0;
+    virtual bool isTeardownPending(MacAddress peer, Tid tid) const = 0;
+    virtual void beginTeardown(MacAddress peer, Tid tid) = 0;
+    virtual void finishTeardown(MacAddress peer, Tid tid) = 0;
 
     virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) = 0;
     virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) = 0;

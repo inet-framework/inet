@@ -10,6 +10,7 @@
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
@@ -21,6 +22,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211ControlInfo_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211OfdmSignalField.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211HtSignalField.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Receiver.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -258,6 +260,13 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
             staticPtrCast<Ieee80211PhyHeader>(makeShared<Ieee80211ErpOfdmPhyHeader>()) : mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
     phyHeader->setLengthField(B(packet->getDataLength()));
+    if (auto htHeader = dynamicPtrCast<Ieee80211HtPhyHeader>(phyHeader)) {
+        htHeader->setMcs(mode->getHtMcsIndex());
+        htHeader->setChannelWidth40(mode->getDataMode()->getBandwidth() == MHz(40));
+        htHeader->setShortGi(mode->isHtShortGuardInterval());
+        htHeader->setAggregation(dynamicPtrCast<const ieee80211::Ieee80211MpduSubframeHeader>(packet->peekAtFront<Chunk>()) != nullptr);
+        htHeader->setCrc(computeIeee80211HtSignalCrc(*htHeader));
+    }
     if (auto ofdmHeader = dynamicPtrCast<Ieee80211OfdmPhyHeader>(phyHeader)) {
         auto ofdmMode = check_and_cast<const Ieee80211OfdmMode *>(mode);
         ofdmHeader->setRate(ofdmMode->getSignalMode()->getRate());
@@ -298,6 +307,14 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
     const auto& phyHeader = popIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+    if (auto htHeader = dynamicPtrCast<const Ieee80211HtPhyHeader>(phyHeader)) {
+        bool valid = isIeee80211HtSignalValid(*htHeader, mode);
+        if (!valid || htHeader->getLengthField() > packet->getDataLength()) {
+            packet->setBitError(true);
+            packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+            return;
+        }
+    }
     if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented() || !verifyFcs(phyHeader))
         packet->setBitError(true);
     if (auto ofdmHeader = dynamicPtrCast<const Ieee80211OfdmPhyHeader>(phyHeader)) {

@@ -47,6 +47,7 @@ class INET_API MapCommunicationCache : public CommunicationCacheBase
 
   public:
     virtual ~MapCommunicationCache();
+    virtual const IArrival *findCachedArrival(const IRadio *receiver, const ITransmission *transmission) const override;
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "MapCommunicationCache"; }
 

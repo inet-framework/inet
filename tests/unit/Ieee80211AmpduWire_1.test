@@ -1,0 +1,185 @@
+%description:
+Check HT-SIG golden bytes against IEEE Std 802.11-2024, Figure 19-6 and 19.3.9.4.4.
+Fresh byte-backed packets establish independent decode, including singleton identity.
+Bounded delimiter inspection covers lengths, alignment, truncation, and recovery.
+Recovery preserves matching ranges across typed and byte representations, including a nonzero PSDU offset.
+
+%includes:
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregationUtils.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211HtSignalField.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%global:
+static const IIeee80211Mode *findMode(int mcs, bool shortGi)
+{
+    auto modes = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+    for (int i = 0; i < modes->getNumModes(); i++) {
+        auto mode = modes->getMode(i);
+        if (mode->getHtMcsIndex() == mcs && mode->getDataMode()->getBandwidth() == MHz(20) &&
+                mode->isHtShortGuardInterval() == shortGi)
+            return mode;
+    }
+    throw cRuntimeError("Missing test mode");
+}
+
+static void checkSignal(int length, bool aggregation, int mcs, bool shortGi, const std::vector<uint8_t>& golden)
+{
+    auto header = makeShared<Ieee80211HtPhyHeader>();
+    header->setLengthField(B(length));
+    header->setAggregation(aggregation);
+    header->setMcs(mcs);
+    header->setShortGi(shortGi);
+    header->setCrc(computeIeee80211HtSignalCrc(*header));
+    Packet output("output", header);
+    ASSERT(output.peekAllAsBytes()->getBytes() == golden);
+    Packet input("fresh", makeShared<BytesChunk>(golden));
+    auto decoded = input.popAtFront<Ieee80211HtPhyHeader>(B(6));
+    ASSERT(input.getDataLength() == B(0));
+    ASSERT(decoded->getLengthField() == B(length));
+    ASSERT(decoded->getAggregation() == aggregation);
+    ASSERT(isIeee80211HtSignalValid(*decoded, findMode(mcs, shortGi)));
+    auto bad = golden;
+    bad[0] ^= 1;
+    Packet corrupt("corrupt", makeShared<BytesChunk>(bad));
+    ASSERT(!isIeee80211HtSignalValid(*corrupt.peekAtFront<Ieee80211HtPhyHeader>(B(6)), findMode(mcs, shortGi)));
+    auto unsupported = makeShared<Ieee80211HtPhyHeader>(*decoded);
+    unsupported->setFecCoding(true);
+    unsupported->setCrc(computeIeee80211HtSignalCrc(*unsupported));
+    ASSERT(!isIeee80211HtSignalValid(*unsupported, findMode(mcs, shortGi)));
+    auto incomplete = makeShared<Ieee80211HtPhyHeader>(*decoded);
+    incomplete->markIncomplete();
+    ASSERT(!isIeee80211HtSignalValid(*incomplete, findMode(mcs, shortGi)));
+    auto improper = makeShared<Ieee80211HtPhyHeader>(*decoded);
+    improper->markImproperlyRepresented();
+    ASSERT(!isIeee80211HtSignalValid(*improper, findMode(mcs, shortGi)));
+    ASSERT(decoded->getChunkLength() == b(48));
+}
+
+static void appendMember(Packet& packet, int length)
+{
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(length);
+    packet.insertAtBack(delimiter);
+    if (length)
+        packet.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(length, 0)));
+}
+
+%activity:
+// CRC constants use polynomial long division, independent of the production shift register.
+checkSignal(100, false, 0, false, {0x00, 0x64, 0x00, 0x07, 0xFC, 0x00});
+checkSignal(104, true, 0, false, {0x00, 0x68, 0x00, 0x0F, 0xB4, 0x01});
+checkSignal(218, true, 7, true, {0x07, 0xDA, 0x00, 0x8F, 0x18, 0x02});
+checkSignal(65535, true, 31, false, {0x1F, 0xFF, 0xFF, 0x0F, 0x7C, 0x00});
+for (int length : {0, 1, 2, 3, 4, 4095}) {
+    Packet packet("layout");
+    appendMember(packet, 0);
+    appendMember(packet, length);
+    if (length) {
+        int padding = (4 - length % 4) % 4;
+        if (padding)
+            packet.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(padding, 0)));
+        appendMember(packet, 20);
+    }
+    auto layout = inspectMpduAggregate(&packet, B(0), B(packet.getDataLength()));
+    ASSERT(layout.complete);
+    ASSERT(layout.ranges.size() == (length ? 5 : 2));
+    ASSERT(layout.ranges.front().kind == MpduRangeKind::DELIMITER);
+    for (const auto& range : layout.ranges)
+        ASSERT(range.offset + range.length <= packet.getDataLength());
+    auto bytes = packet.peekAllAsBytes()->getBytes();
+    Packet independent("wire", makeShared<BytesChunk>(bytes));
+    ASSERT(inspectMpduAggregate(&independent, B(0), B(bytes.size())).complete);
+    if (length) {
+        bytes.pop_back();
+        Packet truncated("truncated", makeShared<BytesChunk>(bytes));
+        ASSERT(!inspectMpduAggregate(&truncated, B(0), B(bytes.size())).complete);
+    }
+}
+Packet recovery("recovery", makeShared<BytesChunk>(std::vector<uint8_t>{0, 0, 0, 0}));
+appendMember(recovery, 20);
+auto recovered = inspectMpduAggregate(&recovery, B(0), B(recovery.getDataLength()));
+ASSERT(!recovered.complete && recovered.ranges.size() == 3);
+ASSERT(!recovered.ranges[0].valid && recovered.ranges[1].offset == B(4));
+// An invalid length forces delimiter recovery through a typed MAC header.
+for (int prefixLength : {0, 6}) {
+    Packet typed("typed-recovery");
+    if (prefixLength)
+        typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(prefixLength, 0)));
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(2000);
+    typed.insertAtBack(delimiter);
+    auto member = makeShared<Ieee80211DataHeader>();
+    member->setSequenceNumber(SequenceNumberCyclic(0));
+    typed.insertAtBack(member);
+    typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(100 - member->getChunkLength().get<B>(), 0)));
+    appendMember(typed, 20);
+    auto bytes = typed.peekAllAsBytes()->getBytes();
+    Packet independent("byte-recovery", makeShared<BytesChunk>(bytes));
+    auto typedLayout = inspectMpduAggregate(&typed, B(prefixLength), B(128));
+    auto byteLayout = inspectMpduAggregate(&independent, B(prefixLength), B(128));
+    ASSERT(!typedLayout.complete && !byteLayout.complete);
+    ASSERT(typedLayout.ranges.size() == byteLayout.ranges.size());
+    for (size_t i = 0; i < typedLayout.ranges.size(); i++) {
+        const auto& actual = typedLayout.ranges[i];
+        const auto& expected = byteLayout.ranges[i];
+        ASSERT(actual.kind == expected.kind && actual.offset == expected.offset &&
+                actual.length == expected.length && actual.valid == expected.valid);
+    }
+    const auto& last = typedLayout.ranges.back();
+    ASSERT(last.kind == MpduRangeKind::MPDU && last.valid && last.offset == B(108) && last.length == B(20));
+}
+// Reinterpretation must not hide an existing typed delimiter's error flag.
+auto incorrectDelimiter = makeShared<Ieee80211MpduSubframeHeader>();
+incorrectDelimiter->setLength(0);
+incorrectDelimiter->markIncorrect();
+Packet incorrect("incorrect-delimiter", incorrectDelimiter);
+appendMember(incorrect, 20);
+auto incorrectLayout = inspectMpduAggregate(&incorrect, B(0), B(incorrect.getDataLength()));
+ASSERT(!incorrectLayout.complete && !incorrectLayout.ranges.front().valid);
+ASSERT(incorrectLayout.ranges.back().kind == MpduRangeKind::MPDU && incorrectLayout.ranges.back().valid);
+for (int byte : {2, 3}) {
+    Packet good("good");
+    appendMember(good, 20);
+    auto bytes = good.peekAllAsBytes()->getBytes();
+    bytes[byte] ^= 1;
+    Packet bad("bad", makeShared<BytesChunk>(bytes));
+    auto layout = inspectMpduAggregate(&bad, B(0), B(bytes.size()));
+    ASSERT(!layout.complete && !layout.ranges.front().valid);
+}
+Packet finalPadding("final-padding");
+appendMember(finalPadding, 1);
+finalPadding.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(3, 0)));
+ASSERT(!inspectMpduAggregate(&finalPadding, B(0), B(finalPadding.getDataLength())).complete);
+auto overrun = makeShared<Ieee80211MpduSubframeHeader>();
+overrun->setLength(4095);
+Packet missingMember("missing-member", overrun);
+auto refusedLayout = inspectMpduAggregate(&missingMember, B(0), B(4));
+ASSERT(!refusedLayout.complete && refusedLayout.ranges.size() == 1 && !refusedLayout.ranges[0].valid);
+for (int size : {0, 1, 2, 3}) {
+    Packet shortInput("short", makeShared<BytesChunk>(std::vector<uint8_t>(size, 0)));
+    ASSERT(inspectMpduAggregate(&shortInput, B(0), B(size)).ranges.empty());
+}
+auto tooLong = makeShared<Ieee80211MpduSubframeHeader>();
+tooLong->setLength(4096);
+Packet overflow("overflow", tooLong);
+bool refused = false;
+try { overflow.peekAllAsBytes(); }
+catch (const cRuntimeError&) { refused = true; }
+ASSERT(refused);
+auto invalidLength = makeShared<Ieee80211HtPhyHeader>();
+invalidLength->setLengthField(B(65536));
+Packet excessivePsdu("excessive-psdu", invalidLength);
+refused = false;
+try { excessivePsdu.peekAllAsBytes(); }
+catch (const cRuntimeError&) { refused = true; }
+ASSERT(refused);
+EV << "A-MPDU wire checks passed\n";
+
+%contains: stdout
+A-MPDU wire checks passed

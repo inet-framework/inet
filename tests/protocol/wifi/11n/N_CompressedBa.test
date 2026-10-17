@@ -1,5 +1,5 @@
 %description:
-802.11n Block Ack received at sta1 with non-empty bitmap (acknowledges at least one frame). [Required]
+802.11n Compressed Block Ack received at sta1 with a positive receipt bit. [Required]
 
 %file: N_CompressedBa.cc
 
@@ -11,10 +11,6 @@ namespace protocoltest {
 
 using namespace inet::ieee80211;
 
-// INET sends Ieee80211BasicBlockAck (not CompressedBlockAck) for all block ack sessions.
-// The Basic Block Ack carries a 64x16-bit bitmap acknowledging MPDUs.
-// We assert that a BasicBlockAck is received and its bitmap has at least one bit set,
-// confirming the AP has positively acknowledged at least one received data MPDU.
 Define_ProtocolTest(wifi_11n_compressed_ba)
 {
     return ProtocolTest("wifi_11n_compressed_ba")
@@ -22,18 +18,14 @@ Define_ProtocolTest(wifi_11n_compressed_ba)
                   .filterPacket("ieee80211mac.type == 25")
                   .filterEvent([](const MatchContext& c) {
                       if (!c.event.packet) return false;
-                      auto ba = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+                      auto ba = c.event.packet->peekAtFront<Ieee80211CompressedBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
                       if (!ba) return false;
-                      // At least one bit set means at least one MPDU was acknowledged.
-                      for (int i = 0; i < 64; i++) {
-                          const auto& bv = ba->getBlockAckBitmap(i);
-                          for (unsigned int j = 0; j < bv.getSize(); j++) {
-                              if (bv.getBit(j)) return true;
-                          }
-                      }
+                      const auto& bitmap = ba->getBlockAckBitmap();
+                      for (unsigned int i = 0; i < bitmap.getSize(); i++)
+                          if (bitmap.getBit(i)) return true;
                       return false;
                   })
-                  .describe("a BasicBlockAck with at least one acknowledged MPDU").within(2.5));
+                  .describe("a Compressed Block Ack with a positive receipt bit").within(2.5));
 }
 
 } // namespace protocoltest
@@ -44,7 +36,7 @@ Define_ProtocolTest(wifi_11n_compressed_ba)
 [General]
 *.tester.testName = "wifi_11n_compressed_ba"
 *.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
-**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.blockAckVariant = "compressed"
 *.ap.wlan[*].mac.hcf.isBlockAckSupported = true
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
 *.sta1.app[0].sendInterval = 0.1ms

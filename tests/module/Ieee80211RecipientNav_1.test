@@ -5,8 +5,10 @@ Retain received NAV refusal and DCF local NAV updates for holder frames.
 Require zero HCF local NAV updates for holder frames.
 Check a Basic Block Ack response after an ADDBA exchange through production HCF.
 Require its positive Duration/ID field without a local NAV update.
+Repeat the response checks with Compressed and valid supplied HT peer state.
+The Compressed case uses a 32-byte response MPDU and retains the same NAV invariant.
 
-%extraargs: -r 0..2
+%extraargs: -r 0..3
 
 %file: RecipientNav.cc
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -14,6 +16,8 @@ Require its positive Duration/ID field without a local NAV update.
 #include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
 
 namespace inet::ieee80211 {
 class RecipientNavRx : public Rx {
@@ -32,6 +36,9 @@ class RecipientNavMac : public Ieee80211Mac {
     std::vector<simtime_t> durations;
     simtime_t addbaResponseEnd = -1;
     Ptr<const Ieee80211BasicBlockAck> basicBlockAck;
+    Ptr<const Ieee80211CompressedBlockAck> compressedBlockAck;
+    units::values::b blockAckLength;
+    const physicallayer::IIeee80211Mode *blockAckMode = nullptr;
     void sendDownFrame(Packet *packet) override {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         types.push_back(header->getType());
@@ -43,6 +50,11 @@ class RecipientNavMac : public Ieee80211Mac {
         }
         if (auto response = dynamicPtrCast<const Ieee80211BasicBlockAck>(header))
             basicBlockAck = response;
+        if (auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(header)) {
+            compressedBlockAck = response;
+            blockAckLength = packet->getDataLength();
+            blockAckMode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+        }
         Ieee80211Mac::sendDownFrame(packet);
     }
     void injectBlockAckSetup() {
@@ -58,12 +70,33 @@ class RecipientNavMac : public Ieee80211Mac {
         request->setStartingSequenceNumber(SequenceNumberCyclic(0));
         injectBlockAckFrame(request);
     }
-    void injectBlockAckRequest() {
+    void prepareCompressedPeer() {
+        Enter_Method("prepareCompressedPeer");
+        const MacAddress peer("02:00:00:00:00:02");
+        ASSERT(mib->isHtOperationSupported() && mib->localHtCapabilitiesValid);
+        auto radio = check_and_cast<physicallayer::Ieee80211Radio *>(getParentModule()->getSubmodule("radio"));
+        auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
+        auto channel = transmitter->getChannel();
+        mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
+        mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+        ASSERT(mib->findPeerHtState(peer) && mib->findPeerHtState(peer)->valid);
+    }
+    void injectBlockAckRequest(bool compressed = false) {
         Enter_Method("injectBlockAckRequest");
-        auto request = makeShared<Ieee80211BasicBlockAckReq>();
+        Ptr<Ieee80211BlockAckReq> request;
+        if (compressed) {
+            auto bar = makeShared<Ieee80211CompressedBlockAckReq>();
+            bar->setTidInfo(5);
+            bar->setStartingSequenceNumber(SequenceNumberCyclic(0));
+            request = bar;
+        }
+        else {
+            auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+            bar->setTidInfo(5);
+            bar->setStartingSequenceNumber(SequenceNumberCyclic(0));
+            request = bar;
+        }
         request->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
-        request->setTidInfo(5);
-        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
         request->setDurationField(SimTime(500, SIMTIME_US));
         injectBlockAckFrame(request);
     }
@@ -77,7 +110,7 @@ class RecipientNavMac : public Ieee80211Mac {
         header->setReceiverAddress(getAddress());
         auto packet = new Packet("received-block-ack-exchange", header);
         packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(
-            physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000)));
+            physicallayer::Ieee80211ModeSet::getModeSet(mib->isHtOperationSupported() ? "n(mixed-2.4Ghz)" : "a")->getMode(bps(6000000)));
         auto trailer = makeShared<Ieee80211MacTrailer>();
         trailer->setFcsMode(FCS_DECLARED_CORRECT);
         packet->insertAtBack(trailer);
@@ -140,8 +173,10 @@ class RecipientNavTest : public cSimpleModule {
   public:
     RecipientNavTest() : cSimpleModule(65536) {}
   protected:
-    void checkBasicBlockAck(RecipientNavMac *mac, RecipientNavRx *rx) {
-        auto mode = physicallayer::Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000));
+    void checkBlockAck(RecipientNavMac *mac, RecipientNavRx *rx, bool compressed) {
+        auto mode = physicallayer::Ieee80211ModeSet::getModeSet(compressed ? "n(mixed-2.4Ghz)" : "a")->getMode(bps(6000000));
+        if (compressed)
+            mac->prepareCompressedPeer();
         mac->injectBlockAckSetup();
         for (int i = 0; i < 100 && mac->addbaResponseEnd < SIMTIME_ZERO; i++)
             wait(SimTime(10, SIMTIME_US));
@@ -154,27 +189,40 @@ class RecipientNavTest : public cSimpleModule {
         ASSERT(rx->isMediumFree());
         auto updatesBeforeResponse = rx->localUpdates;
         auto framesBeforeResponse = mac->types.size();
-        mac->injectBlockAckRequest();
+        mac->injectBlockAckRequest(compressed);
         wait(SimTime(350, SIMTIME_US));
         ASSERT(mac->types.size() == framesBeforeResponse + 1);
-        ASSERT(mac->basicBlockAck != nullptr);
-        ASSERT(mac->basicBlockAck->getReceiverAddress() == MacAddress("02:00:00:00:00:02"));
-        ASSERT(mac->basicBlockAck->getTidInfo() == 5);
-        ASSERT(mac->basicBlockAck->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+        Ptr<const Ieee80211BlockAck> response;
+        if (compressed) {
+            ASSERT(mac->compressedBlockAck != nullptr && mac->basicBlockAck == nullptr);
+            ASSERT(mac->compressedBlockAck->getTidInfo() == 5);
+            ASSERT(mac->compressedBlockAck->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+            ASSERT(mac->compressedBlockAck->getBlockAckBitmap().getSize() == 64);
+            ASSERT(mac->blockAckLength == B(32));
+            ASSERT(mac->blockAckMode == mode && mac->blockAckMode->getHtMcsIndex() < 0);
+            response = mac->compressedBlockAck;
+        }
+        else {
+            ASSERT(mac->basicBlockAck != nullptr);
+            ASSERT(mac->basicBlockAck->getTidInfo() == 5);
+            ASSERT(mac->basicBlockAck->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+            response = mac->basicBlockAck;
+        }
+        ASSERT(response->getReceiverAddress() == MacAddress("02:00:00:00:00:02"));
         // IEEE Std 802.11-2024, 9.2.5.6: subtract SIFS and response airtime from the request duration.
-        auto expectedDuration = SimTime(500, SIMTIME_US) - mode->getSifsTime() - mode->getDuration(LENGTH_BASIC_BLOCKACK);
+        auto expectedDuration = SimTime(500, SIMTIME_US) - mode->getSifsTime() - mode->getDuration(compressed ? LENGTH_COMPRESSED_BLOCKACK : LENGTH_BASIC_BLOCKACK);
         ASSERT(expectedDuration > SIMTIME_ZERO);
-        ASSERT(mac->basicBlockAck->getDurationField() == expectedDuration);
+        ASSERT(response->getDurationField() == expectedDuration);
         ASSERT(rx->localUpdates == updatesBeforeResponse);
         ASSERT(rx->isMediumFree());
-        std::cout << "Basic Block Ack recipient NAV checks passed.\n";
+        std::cout << (compressed ? "Compressed" : "Basic") << " Block Ack recipient NAV checks passed.\n";
     }
     void activity() override {
         wait(SimTime(1, SIMTIME_MS));
         auto mac = check_and_cast<RecipientNavMac *>(getModuleByPath("^.host.wlan[0].mac"));
         auto rx = check_and_cast<RecipientNavRx *>(mac->getSubmodule("rx"));
-        if (par("basicBlockAckOnly").boolValue()) {
-            checkBasicBlockAck(mac, rx);
+        if (par("basicBlockAckOnly").boolValue() || par("compressedBlockAckOnly").boolValue()) {
+            checkBlockAck(mac, rx, par("compressedBlockAckOnly").boolValue());
             std::cout << "Recipient NAV production checks passed.\n";
             return;
         }
@@ -231,6 +279,7 @@ simple RecipientNavRx extends Rx {
 simple RecipientNavTest extends SimpleModule {
     parameters:
         bool basicBlockAckOnly = default(false);
+        bool compressedBlockAckOnly = default(false);
         @class(::inet::ieee80211::RecipientNavTest);
 }
 network RecipientNavNetwork {
@@ -251,14 +300,15 @@ record-vector-results = false
 record-scalar-results = false
 **.wlan[*].agent.typename = ""
 **.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
-**.wlan[*].opMode = "a"
+**.wlan[*].opMode = ${scenario} == "compressedBlockAck" ? "n(mixed-2.4Ghz)" : "a"
 **.wlan[*].bitrate = 6Mbps
 **.wlan[*].mac.typename = "RecipientNavMac"
-**.wlan[*].mac.qosStation = ${scenario="hcf","dcf","blockAck"} != "dcf"
+**.wlan[*].mac.qosStation = ${scenario="hcf","dcf","blockAck","compressedBlockAck"} != "dcf"
 **.wlan[*].mac.rx.typename = "RecipientNavRx"
-**.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} == "blockAck"
-**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.isBlockAckSupported = ${scenario} == "blockAck" || ${scenario} == "compressedBlockAck"
+**.wlan[*].mac.hcf.blockAckVariant = ${scenario} == "compressedBlockAck" ? "compressed" : "basic"
 *.test.basicBlockAckOnly = ${scenario} == "blockAck"
+*.test.compressedBlockAckOnly = ${scenario} == "compressedBlockAck"
 **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = ""
 **.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
@@ -287,3 +337,6 @@ Recipient NAV production checks passed.
 
 %contains: stdout
 Basic Block Ack recipient NAV checks passed.
+
+%contains: stdout
+Compressed Block Ack recipient NAV checks passed.

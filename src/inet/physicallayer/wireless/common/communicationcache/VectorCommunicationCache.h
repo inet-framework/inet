@@ -60,6 +60,7 @@ class INET_API VectorCommunicationCache : public CommunicationCacheBase
 
   public:
     virtual ~VectorCommunicationCache();
+    virtual const IArrival *findCachedArrival(const IRadio *receiver, const ITransmission *transmission) const override;
 
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override { return stream << "VectorCommunicationCache"; }
 

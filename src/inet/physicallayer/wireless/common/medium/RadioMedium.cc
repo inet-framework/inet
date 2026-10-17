@@ -656,6 +656,40 @@ const ITransmission *RadioMedium::getTransmission(int id) const
     return communicationCache->getTransmission(id);
 }
 
+TransmissionTimingSnapshot RadioMedium::getTransmissionTimingSnapshot(int id) const
+{
+    TransmissionTimingSnapshot snapshot;
+    auto transmission = communicationCache->getTransmission(id);
+    if (!transmission)
+        return snapshot;
+    snapshot.transmissionId = transmission->getId();
+    snapshot.transmitterRadioId = transmission->getTransmitterRadioId();
+    snapshot.startTime = transmission->getStartTime();
+    snapshot.endTime = transmission->getEndTime();
+    communicationCache->mapRadios([&](const IRadio *radio) {
+        if (!radio || !radio->getReceiver() || radio->getId() == snapshot.transmitterRadioId)
+            return;
+        auto arrival = communicationCache->findCachedArrival(radio, transmission);
+        if (arrival)
+            snapshot.arrivalEndTimes[radio->getId()] = arrival->getEndTime();
+    });
+    return snapshot;
+}
+
+std::optional<simtime_t> RadioMedium::computePrecedingSignalGap(int currentTransmissionId,
+        const TransmissionTimingSnapshot& preceding) const
+{
+    auto current = communicationCache->getTransmission(currentTransmissionId);
+    if (!current || preceding.transmissionId < 0 || preceding.transmissionId == currentTransmissionId)
+        return std::nullopt;
+    if (current->getTransmitterRadioId() == preceding.transmitterRadioId)
+        return current->getStartTime() - preceding.endTime;
+    auto arrival = preceding.arrivalEndTimes.find(current->getTransmitterRadioId());
+    if (arrival == preceding.arrivalEndTimes.end())
+        return std::nullopt;
+    return current->getStartTime() - arrival->second;
+}
+
 const IListeningDecision *RadioMedium::listenOnMedium(const IRadio *radio, const IListening *listening) const
 {
     Enter_Method("listenOnMedium");

@@ -10,11 +10,12 @@
 
 #include "inet/queueing/base/PacketSchedulerBase.h"
 #include "inet/queueing/contract/IPacketCollection.h"
+#include "inet/queueing/contract/ISelectivePacketCollection.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IPacketCollection
+class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IPacketCollection, public ISelectivePacketCollection
 {
   protected:
     std::vector<IPacketCollection *> collections;
@@ -24,6 +25,8 @@ class INET_API PriorityScheduler : public PacketSchedulerBase, public virtual IP
     virtual int schedulePacket() const override;
 
   public:
+    virtual Packet *peekEligiblePacket(const std::function<bool(Packet *)>& predicate) const override;
+    virtual Packet *extractPacket(Packet *packet) override;
     virtual int getMaxNumPackets() const override { return -1; }
     virtual int getNumPackets() const override;
 

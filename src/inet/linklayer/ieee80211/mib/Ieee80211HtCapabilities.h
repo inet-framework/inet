@@ -70,12 +70,13 @@ struct Ieee80211HtOperation
     int primaryChannel = 0;
     int secondaryChannelOffset = 0;
     Ieee80211HtProtectionMode protectionMode = Ieee80211HtProtectionMode::NO_PROTECTION;
+    bool rifsMode = false;
     std::array<bool, 77> basicMcsSupported = {};
 
     bool operator==(const Ieee80211HtOperation& other) const {
         return operatingChannelWidth == other.operatingChannelWidth && primaryChannel == other.primaryChannel &&
                 secondaryChannelOffset == other.secondaryChannelOffset && protectionMode == other.protectionMode &&
-                basicMcsSupported == other.basicMcsSupported;
+                rifsMode == other.rifsMode && basicMcsSupported == other.basicMcsSupported;
     }
 };
 

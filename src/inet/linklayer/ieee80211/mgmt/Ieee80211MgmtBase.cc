@@ -17,6 +17,7 @@
 #include "inet/common/lifecycle/NodeStatus.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mac/contract/IBlockAckAgreementLifecycle.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
@@ -25,6 +26,12 @@ namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
+
+void Ieee80211MgmtBase::resetPeerAgreements(const MacAddress& peer)
+{
+    auto mac = getModuleFromPar<cModule>(par("macModule"), this);
+    check_and_cast<IBlockAckAgreementLifecycle *>(mac)->resetPeerAgreements(peer);
+}
 
 void Ieee80211MgmtBase::initialize(int stage)
 {

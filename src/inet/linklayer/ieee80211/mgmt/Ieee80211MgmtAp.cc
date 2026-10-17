@@ -130,6 +130,8 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
     if (status == FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED) {
         if (sta->second.pendingAssociationSuccessful) {
             bool wasAssociated = mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED;
+            if (wasAssociated)
+                resetPeerAgreements(address);
             mib->commitAssociationId(address);
             mib->bssAccessPointData.stations[address] = Ieee80211Mib::ASSOCIATED;
             auto peerRateSet = sta->second.pendingPeerRateSet;
@@ -155,6 +157,7 @@ void Ieee80211MgmtAp::frameTransmissionFinished(const Packet *responseFrame, Fra
                 sendAssocNotification(address);
         }
         else if (mib->bssAccessPointData.stations[address] == Ieee80211Mib::ASSOCIATED) {
+            resetPeerAgreements(address);
             // This model does not implement negotiated management-frame protection.
             // IEEE Std 802.11-2024, 11.3.5.3(p) for association and 11.3.5.5(n)
             // for same-AP reassociation therefore require the existing association
@@ -254,6 +257,8 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
         // keep this cancellation scoped to this existing model transition.
         clearPendingAssociation(sta);
         bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
+        if (wasAssociated)
+            resetPeerAgreements(sta->address);
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
         if (wasAssociated)
@@ -294,6 +299,8 @@ void Ieee80211MgmtAp::handleAuthenticationFrame(Packet *packet, const Ptr<const 
     // update status
     if (isLast) {
         bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
+        if (wasAssociated)
+            resetPeerAgreements(sta->address);
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED; // TODO only when ACK of this frame arrives
         if (wasAssociated)
             mib->releaseAssociationId(sta->address);
@@ -320,6 +327,8 @@ void Ieee80211MgmtAp::handleDeauthenticationFrame(Packet *packet, const Ptr<cons
         clearPendingAssociation(sta);
         bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
         // mark STA as not authenticated; alternatively, it could also be removed from staList
+        if (wasAssociated)
+            resetPeerAgreements(sta->address);
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
         if (wasAssociated)
@@ -523,6 +532,8 @@ void Ieee80211MgmtAp::handleDisassociationFrame(Packet *packet, const Ptr<const 
     if (sta) {
         clearPendingAssociation(sta);
         bool wasAssociated = mib->bssAccessPointData.stations[sta->address] == Ieee80211Mib::ASSOCIATED;
+        if (wasAssociated)
+            resetPeerAgreements(sta->address);
         mib->bssAccessPointData.stations[sta->address] = Ieee80211Mib::AUTHENTICATED;
         if (wasAssociated)
             mib->releaseAssociationId(sta->address);
