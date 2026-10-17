@@ -1,0 +1,3 @@
+IEEE 802.11 Block Ack wire types
+
+The serializer supports the complete four-bit Type field for Basic compatibility and Compressed frames. Compressed responses contain a 64-bit bitmap and occupy 32 bytes with FCS. Both BAR profiles occupy 24 bytes with FCS. Basic producers must keep reserved bits that overlap Type zero. Invalid Types and malformed fragment fields now fail validation instead of ambiguous decoding.
