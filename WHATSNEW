@@ -510,6 +510,10 @@ Notable backward compatible changes are the following:
 
    QoS recovery now keeps separate retry counters for each receiver. Frames with equal TID, sequence number, and fragment number no longer share a counter across receivers. An acknowledgment or retry-limit disposal for one receiver preserves the other receiver's counter. This repair applies before DATA lifetime expiration.
 
+16. Optional selected extraction from packet queues
+
+   PacketQueue, CompoundPacketQueueBase, and PriorityScheduler now support the optional ISelectivePacketCollection contract. A consumer can find an eligible packet without a state change. It can extract that packet with ordinary pull events, residence metadata, and ownership transfer. Ordinary head selection remains unchanged. Providers without this capability report UnsupportedPacketSelection before extraction.
+
 Notable bug fixes are the following:
 
 1. IEEE 802.11 HT modes preserve the requested band and preamble
