@@ -15,6 +15,10 @@
 namespace inet {
 namespace ieee80211 {
 
+/** Checks the retained transmit mode without a new rate-control decision. */
+INET_API bool isPeerCompatibleMode(const physicallayer::Ieee80211ModeSet *modeSet,
+        const Ieee80211Mib::PeerHtState *peerHtState, const physicallayer::IIeee80211Mode *mode);
+
 /**
  * Selects a mode compatible with local transmission to the peer.
  * Non-HT modes remain unchanged. Absent peer state selects a legacy mode

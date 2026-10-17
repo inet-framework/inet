@@ -26,6 +26,8 @@ class INET_API IRecipientQosAckPolicy
 
     virtual simtime_t computeAckDurationField(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) const = 0;
     virtual simtime_t computeBasicBlockAckDurationField(Packet *packet, const Ptr<const Ieee80211BasicBlockAckReq>& basicBlockAckReq) const = 0;
+    // The request selects the response variant and its actual airtime.
+    virtual simtime_t computeCompressedBlockAckDurationField(Packet *packet, const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq) const = 0;
 };
 
 } // namespace ieee80211

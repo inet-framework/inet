@@ -7,6 +7,7 @@
 #ifndef __INET_IORIGINATORQOSMACDATASERVICE_H
 #define __INET_IORIGINATORQOSMACDATASERVICE_H
 
+#include <functional>
 #include <memory>
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
@@ -31,6 +32,9 @@ struct INET_API PreparedQosData : public cObject
 class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
 {
   public:
+    // HCF owns the permission decision. An empty callback permits the configured fragmentation policy.
+    // The service retains the callback and queries it before fragmentation, without packet ownership transfer.
+    virtual void setFragmentationPermission(std::function<bool(Packet *)> permission) = 0;
     // Preview borrows the frame without extraction or sequence assignment.
     virtual Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const = 0;
     virtual SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const = 0;

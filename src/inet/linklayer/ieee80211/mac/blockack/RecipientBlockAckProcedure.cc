@@ -31,6 +31,14 @@ void RecipientBlockAckProcedure::processReceivedBlockAckReq(Packet *blockAckPack
             callback->transmitControlResponseFrame(blockAckPacket, blockAck, blockAckPacketReq, basicBlockAckReq);
         }
     }
+    else if (auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
+        auto agreement = blockAckAgreementHandler->getAgreement(compressed->getTidInfo(), compressed->getTransmitterAddress());
+        if (ackPolicy->isBlockAckNeeded(compressed, agreement)) {
+            auto blockAck = buildBlockAck(compressed, agreement);
+            blockAck->setDurationField(ackPolicy->computeCompressedBlockAckDurationField(blockAckPacketReq, compressed));
+            callback->transmitControlResponseFrame(new Packet("CompressedBlockAck", blockAck), blockAck, blockAckPacketReq, compressed);
+        }
+    }
     else
         throw cRuntimeError("Unsupported BlockAckReq");
 }

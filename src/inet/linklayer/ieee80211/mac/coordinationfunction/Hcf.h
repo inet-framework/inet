@@ -8,6 +8,8 @@
 #ifndef __INET_HCF_H
 #define __INET_HCF_H
 
+#include <optional>
+
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
 #include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
@@ -51,6 +53,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 {
   private:
     BlockAckVariant blockAckVariant = BlockAckVariant::BASIC;
+    bool validateBlockAckRequest(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& bar) const;
 
   public:
     static simsignal_t edcaCollisionDetectedSignal;
@@ -140,6 +143,12 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     FrameSequenceContext *buildContext(AccessCategory ac);
     static simtime_t encodeDuration(simtime_t duration, bool holder);
     simtime_t computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
+    DataPreparationResult prepareDataTransmission(FrameSequenceContext *context);
+    bool validatePreparedData(const PreparedDataTransmission& prepared, simtime_t start) const;
+    simtime_t computePreparedDataCost(const PreparedDataTransmission& prepared, bool protect) const;
+    bool canAdmitPreparedData(const FrameSequenceContext *context, const PreparedDataTransmission& prepared,
+            simtime_t ifs, bool protect) const;
+    bool isInitialDataException(const FrameSequenceContext *context, const PreparedDataTransmission& prepared) const;
     simtime_t forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header,
             TxopProcedure *txop, InProgressFrames *frames, simtime_t completionTime);
     static simtime_t computeMultipleProtectionDuration(simtime_t limit, simtime_t remaining,
@@ -173,7 +182,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool isProfileAllowed(MacAddress peer, bool originator) const;
 
     // Recipient
-    virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
+    virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool interframe = false);
     virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header);
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);

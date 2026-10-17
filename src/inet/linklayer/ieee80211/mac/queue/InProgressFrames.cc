@@ -87,6 +87,16 @@ void InProgressFrames::ensureHasFrameToTransmit()
     }
 }
 
+void InProgressFrames::adoptPreparedFrame(Packet *packet)
+{
+    Enter_Method("adoptPreparedFrame");
+    take(packet);
+    ackHandler->frameGotInProgress(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
+    inProgressFrames.push_back(packet);
+    packet->setArrivalTime(simTime());
+    emit(packetEnqueuedSignal, packet);
+}
+
 Packet *InProgressFrames::getFrameToTransmit()
 {
     ensureHasFrameToTransmit();
