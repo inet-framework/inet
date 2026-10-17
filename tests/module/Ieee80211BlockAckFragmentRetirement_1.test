@@ -218,6 +218,8 @@ class FragmentRetirementHcf : public Hcf {
             for (int i = 1; i < 16; i++)
                 bits.appendBit(false);
             header->setBlockAckBitmap(0, bits);
+            for (int position = 1; position < 64; position++)
+                header->setBlockAckBitmap(position, BitVector(std::vector<uint8_t>{0, 0}));
             auto packet = new Packet("block-ack", header);
             packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
             packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(24000000)));
