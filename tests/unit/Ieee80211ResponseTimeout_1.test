@@ -49,6 +49,7 @@ class TestRateSelection : public SimpleModule, public IRateSelection, public IQo
             const Ptr<const Ieee80211MacHeader>& header) override { return responseMode; }
     virtual const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
             const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txopProcedure) override { return responseMode; }
+    const physicallayer::IIeee80211Mode *computeCompressedBlockAckReqMode(Packet *, const Ptr<const Ieee80211CompressedBlockAckReq>&, bool) override { return responseMode; }
 };
 
 Define_Module(TestRateSelection);

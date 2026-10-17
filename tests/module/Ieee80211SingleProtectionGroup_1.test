@@ -28,6 +28,7 @@ class GroupRateSelection : public IQosRateSelection {
     const physicallayer::IIeee80211Mode *computeMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txop) override { return delegate->computeMode(packet, header, txop); }
     const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& header, ResponseQueryRole role) override { return delegate->computeResponseCtsFrameMode(packet, header, role); }
     const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header, ResponseQueryRole role) override { return delegate->computeResponseBlockAckFrameMode(packet, header, role); }
+    const physicallayer::IIeee80211Mode *computeCompressedBlockAckReqMode(Packet *packet, const Ptr<const Ieee80211CompressedBlockAckReq>& header, bool startsTxop) override { return delegate->computeCompressedBlockAckReqMode(packet, header, startsTxop); }
 };
 class GroupMechanism : public SingleProtectionMechanism {
   public:

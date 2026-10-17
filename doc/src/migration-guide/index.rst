@@ -43,6 +43,11 @@ IEEE 802.11 reversible DATA preparation
 
 Custom QoS data services must implement the reversible preparation operations in ``IOriginatorQosMacDataService``. ``prepareFrame()`` creates an owned preview and retains original MSDUs in their queue. ``isPreparationValid()`` checks current source identity, eligibility, lifetime, sequence state, and aggregation permission. ``commitPreparedFrame()`` transfers the same preview pointer only after successful validation. Failure must preserve the preview and all original queue frames.
 
+IEEE 802.11 Compressed control rates
+------------------------------------
+
+Custom QoS rate selectors must implement ``computeCompressedBlockAckReqMode(packet, header, startsTxop)``. This operation prepares legal non-HT BAR rate selection from the supplied TXOP position and applicable BSS or peer rates. HCF retains its Compressed-profile rejection in this prerequisite. Runtime activation will supply the request's actual TXOP position. Existing Basic methods retain their contracts.
+
 IEEE 802.11 Basic Block Ack extension points
 ------------------------------------------
 
