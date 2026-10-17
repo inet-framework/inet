@@ -1,0 +1,3 @@
+Compressed receipt helpers
+
+Compressed receipt helpers now retain positive receipt state independently of delivery. HCF still refuses the Compressed profile until complete exchange support exists.
