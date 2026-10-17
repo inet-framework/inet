@@ -420,11 +420,10 @@ inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters.avgBackoffTime
 inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters.avgErrorRate
 inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters.avgWaitTime
 inet::ieee80211::Ieee80211ProbeResponseFrame::handoverParameters.estAvailBW
-// -- 802.11 Block Ack: multiTid/compressedBitmap are the pair of bits that select
-// the concrete Basic/Compressed/MultiTid variant, so each concrete class pins them;
-// the Starting Sequence Control fragment-number subfield is always 0 (802.11 does
-// not fragment the frames a Block Ack covers), and ADDBA's blockAckAction is the
-// action code its own class fixes
+// The concrete Block Ack classes fix their Type bits. These producers use fragmentNumber = 0.
+// Compressed ACK-policy and reserved fields have no field-preserving wire contract.
+// The serializer writes zero for these fields and ignores received reserved bits.
+// ADDBA fixes its action code through its concrete class.
 inet::ieee80211::Ieee80211AddbaRequest::_fragmentNumber
 inet::ieee80211::Ieee80211AddbaRequest::blockAckAction
 inet::ieee80211::Ieee80211BasicBlockAck::compressedBitmap
@@ -434,11 +433,15 @@ inet::ieee80211::Ieee80211BasicBlockAckReq::compressedBitmap
 inet::ieee80211::Ieee80211BasicBlockAckReq::fragmentNumber
 inet::ieee80211::Ieee80211BasicBlockAckReq::multiTid
 inet::ieee80211::Ieee80211CompressedBlockAck::compressedBitmap
+inet::ieee80211::Ieee80211CompressedBlockAck::blockAckPolicy
 inet::ieee80211::Ieee80211CompressedBlockAck::fragmentNumber
 inet::ieee80211::Ieee80211CompressedBlockAck::multiTid
+inet::ieee80211::Ieee80211CompressedBlockAck::reserved
+inet::ieee80211::Ieee80211CompressedBlockAckReq::barAckPolicy
 inet::ieee80211::Ieee80211CompressedBlockAckReq::compressedBitmap
 inet::ieee80211::Ieee80211CompressedBlockAckReq::fragmentNumber
 inet::ieee80211::Ieee80211CompressedBlockAckReq::multiTid
+inet::ieee80211::Ieee80211CompressedBlockAckReq::reserved
 // -- MRP TLV length bytes: the serializer derives them from what it writes, so
 // the model field is not the value on the wire
 inet::MrpEnd::valueLength

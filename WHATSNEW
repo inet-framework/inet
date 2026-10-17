@@ -462,13 +462,13 @@ Notable backward incompatible changes are the following:
 
    HT duration at 2.4 GHz now includes its six-microsecond signal extension. Previously, that waveform ended early, which could change interframe recognition and airtime. Custom IEEE 802.11 modes must supply the new nominal-extension query. A transmission query supplies the actual extension from its waveform so consumers do not count it twice.
 
+55. IEEE 802.11 Block Ack wire types
+
+   The serializer supports the complete four-bit Type field for Basic compatibility and Compressed frames. Compressed responses contain a 64-bit bitmap and occupy 32 bytes with FCS. Both BAR profiles occupy 24 bytes with FCS. Basic producers must keep reserved bits that overlap Type zero. Invalid Types and malformed fragment fields now fail validation instead of ambiguous decoding.
+
 56. IEEE 802.11 RIFS permission
 
    HT Operation now preserves RIFS Mode through management conversion and equality checks. The MIB permits RIFS under unprotected HT operation and clears the permission for VHT. A recipient can therefore check the actual advertised permission before it recognizes a RIFS relation. This change adds no RIFS transmission scheduler.
-
-57. Block Ack bitmap ownership
-
-   Block Ack decoders now use bitmap values without unowned temporary allocations. Repeated Basic and Compressed decode no longer loses those temporary objects.
 
 Notable backward compatible changes are the following:
 
