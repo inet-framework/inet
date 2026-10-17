@@ -8,10 +8,13 @@
 #ifndef __INET_RX_H
 #define __INET_RX_H
 
-#include "inet/common/SimpleModule.h"
+#include <optional>
+#include "inet/linklayer/ieee80211/mac/common/ModeSetListener.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRx.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -23,7 +26,7 @@ class IStatistics;
 /**
  * The default implementation of IRx.
  */
-class INET_API Rx : public SimpleModule, public IRx
+class INET_API Rx : public ModeSetListener, public IRx
 {
   public:
     static simsignal_t navChangedSignal;
@@ -41,6 +44,24 @@ class INET_API Rx : public SimpleModule, public IRx
     bool contentionFree = true;
     bool contentionBlocked = false;
 
+    struct PrecedingFrame {
+        simtime_t end;
+        bool ack = false;
+    };
+    struct ReceptionEvidence {
+        simtime_t start;
+        simtime_t end;
+        std::optional<PrecedingFrame> preceding;
+        simtime_t sifs;
+        simtime_t tolerance;
+        bool mayBecomePredecessor = true;
+    };
+    opp_component_ptr<cModule> networkInterface;
+    std::optional<PrecedingFrame> precedingFrame;
+    std::optional<ReceptionEvidence> activeReception;
+    std::optional<ReceptionEvidence> completedReception;
+    simtime_t ambiguityEnd = -1;
+
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
@@ -49,6 +70,14 @@ class INET_API Rx : public SimpleModule, public IRx
     virtual bool isFcsOk(Packet *packet) const;
     virtual void recomputeMediumFree();
     std::string getRxStatusTxt() const;
+    void invalidateFutureInterframeHistory();
+    void discardExpiredReception();
+    void observeReceptionStart(const physicallayer::IReception *reception);
+    void observeReceptionEnd(const physicallayer::IReception *reception);
+    bool isCompletedAck(const physicallayer::ITransmission *transmission) const;
+    void attachInterframeResult(Packet *packet, bool accepted);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
   public:
     Rx();
@@ -60,6 +89,7 @@ class INET_API Rx : public SimpleModule, public IRx
     virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState transmissionState) override;
     virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) override;
     virtual bool lowerFrameReceived(Packet *packet) override;
+    virtual void invalidateInterframeHistory() override;
     virtual void frameTransmitted(simtime_t durationField) override;
     virtual simtime_t getTxnavRemaining() const override;
     virtual void successfulFrameTransmitted(simtime_t ppduEnd, simtime_t durationField) override;

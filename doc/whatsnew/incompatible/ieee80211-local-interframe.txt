@@ -1,0 +1,3 @@
+IEEE 802.11 local interval detection
+
+IEEE 802.11 Rx now supplies local interval evidence on accepted frames. Custom IRx implementations must implement invalidateInterframeHistory(). Custom radios must supply local endpoint and completion indications. The detector uses coverage class zero. A gap outside its local tolerance supplies no interval evidence.

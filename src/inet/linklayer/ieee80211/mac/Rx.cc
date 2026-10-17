@@ -9,6 +9,10 @@
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/checksum/Checksum.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211InterframeInd_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
@@ -28,13 +32,23 @@ Rx::Rx()
 
 Rx::~Rx()
 {
+    if (networkInterface) {
+        for (auto signal : {receptionStartedSignal, receptionEndedSignal, transmissionStartedSignal,
+                transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal})
+            networkInterface->unsubscribe(signal, this);
+    }
     cancelAndDelete(endNavTimer);
     cancelAndDelete(endTxnavTimer);
 }
 
 void Rx::initialize(int stage)
 {
+    ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        networkInterface = getContainingNicModule(this);
+        for (auto signal : {receptionStartedSignal, receptionEndedSignal, transmissionStartedSignal,
+                transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal})
+            networkInterface->subscribe(signal, this);
         endNavTimer = new cMessage("NAV");
         endTxnavTimer = new cMessage("endTxnavTimer");
         WATCH(address);
@@ -105,6 +119,7 @@ bool Rx::lowerFrameReceived(Packet *packet)
     take(packet);
 
     bool isFrameOk = isFcsOk(packet);
+    attachInterframeResult(packet, isFrameOk);
     if (isFrameOk) {
         EV_INFO << "Received frame from PHY: " << packet << endl;
         const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
@@ -180,6 +195,13 @@ void Rx::recomputeMediumFree()
 void Rx::receptionStateChanged(IRadio::ReceptionState state)
 {
     Enter_Method("receptionStateChanged");
+    discardExpiredReception();
+    if (state == IRadio::RECEPTION_STATE_BUSY)
+        invalidateFutureInterframeHistory();
+    else if (state == IRadio::RECEPTION_STATE_IDLE && activeReception) {
+        activeReception.reset();
+        precedingFrame.reset();
+    }
     receptionState = state;
     recomputeMediumFree();
 }
@@ -249,6 +271,151 @@ void Rx::setContentionBlocked(bool blocked)
     Enter_Method("setContentionBlocked");
     contentionBlocked = blocked;
     recomputeMediumFree();
+}
+
+void Rx::discardExpiredReception()
+{
+    if (completedReception && completedReception->end < simTime())
+        completedReception.reset();
+}
+
+void Rx::invalidateFutureInterframeHistory()
+{
+    precedingFrame.reset();
+    activeReception.reset();
+    if (completedReception)
+        completedReception->mayBecomePredecessor = false;
+}
+
+void Rx::invalidateInterframeHistory()
+{
+    Enter_Method("invalidateInterframeHistory");
+    invalidateFutureInterframeHistory();
+    completedReception.reset();
+    ambiguityEnd = -1;
+}
+
+void Rx::observeReceptionStart(const IReception *reception)
+{
+    auto start = reception->getStartTime();
+    auto end = reception->getEndTime();
+    if (completedReception)
+        completedReception->mayBecomePredecessor = false;
+    if (start < ambiguityEnd || (activeReception && start < activeReception->end)) {
+        ambiguityEnd = std::max(ambiguityEnd, end);
+        if (activeReception)
+            ambiguityEnd = std::max(ambiguityEnd, activeReception->end);
+        invalidateFutureInterframeHistory();
+        return;
+    }
+    ambiguityEnd = -1;
+    activeReception = ReceptionEvidence{start, end, precedingFrame,
+        modeSet ? modeSet->getSifsTime() : SIMTIME_ZERO,
+        modeSet ? modeSet->getSlotTime() / 10 : SIMTIME_ZERO, true};
+    precedingFrame.reset();
+}
+
+void Rx::observeReceptionEnd(const IReception *reception)
+{
+    if (activeReception && activeReception->start == reception->getStartTime() &&
+            activeReception->end == reception->getEndTime()) {
+        completedReception = std::move(activeReception);
+        activeReception.reset();
+    }
+}
+
+bool Rx::isCompletedAck(const ITransmission *transmission) const
+{
+    auto packet = transmission ? transmission->getPacket() : nullptr;
+    if (!packet || !packet->findTag<PacketProtocolTag>() || packet->getDataLength() <= b(0))
+        return false;
+    auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+    if (protocol != &Protocol::ieee80211FhssPhy && protocol != &Protocol::ieee80211IrPhy &&
+            protocol != &Protocol::ieee80211DsssPhy && protocol != &Protocol::ieee80211HrDsssPhy &&
+            protocol != &Protocol::ieee80211OfdmPhy && protocol != &Protocol::ieee80211ErpOfdmPhy &&
+            protocol != &Protocol::ieee80211HtPhy && protocol != &Protocol::ieee80211VhtPhy)
+        return false;
+    // Optional evidence must not turn an unsupported representation into a MAC error.
+    try {
+        int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet, b(-1), flags);
+        if (!phy->isCorrect() || phy->isIncomplete() || phy->isImproperlyRepresented() ||
+                phy->getChunkLength() <= b(0) || phy->getChunkLength() + LENGTH_ACK > packet->getDataLength())
+            return false;
+        auto mac = packet->peekAt<Ieee80211MacHeader>(phy->getChunkLength(), b(-1), flags);
+        return mac->isCorrect() && !mac->isIncomplete() && !mac->isImproperlyRepresented() && mac->getType() == ST_ACK;
+    }
+    catch (const cRuntimeError&) {
+        return false;
+    }
+}
+
+void Rx::attachInterframeResult(Packet *packet, bool accepted)
+{
+    discardExpiredReception();
+    auto time = packet->findTag<SignalTimeInd>();
+    if (!time || time->getStartTime() < SIMTIME_ZERO || time->getEndTime() <= time->getStartTime()) {
+        invalidateFutureInterframeHistory();
+        if (accepted)
+            packet->addTagIfAbsent<Ieee80211InterframeInd>()->setRelated(false);
+        return;
+    }
+    bool related = false;
+    if (completedReception && completedReception->start == time->getStartTime() &&
+            completedReception->end == time->getEndTime()) {
+        auto evidence = std::move(*completedReception);
+        completedReception.reset();
+        if (accepted) {
+            // Model rule for coverage class zero, based on IEEE Std 802.11-2024, 10.3.2.3.3.
+            if (evidence.preceding && evidence.sifs > SIMTIME_ZERO) {
+                auto gap = evidence.start - evidence.preceding->end;
+                related = gap >= evidence.sifs - evidence.tolerance && gap <= evidence.sifs + evidence.tolerance;
+            }
+            if (evidence.mayBecomePredecessor)
+                precedingFrame = PrecedingFrame{evidence.end, false};
+        }
+    }
+    if (accepted)
+        packet->addTagIfAbsent<Ieee80211InterframeInd>()->setRelated(related);
+}
+
+void Rx::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method_Silent();
+    discardExpiredReception();
+    if (source->getParentModule() == networkInterface && dynamic_cast<IRadio *>(source)) {
+        if (signalID == receptionStartedSignal)
+            observeReceptionStart(check_and_cast<const IReception *>(obj));
+        else if (signalID == receptionEndedSignal)
+            observeReceptionEnd(check_and_cast<const IReception *>(obj));
+        else if (signalID == transmissionStartedSignal)
+            invalidateFutureInterframeHistory();
+        else if (signalID == transmissionEndedSignal) {
+            invalidateFutureInterframeHistory();
+            if (isCompletedAck(dynamic_cast<const ITransmission *>(obj)))
+                precedingFrame = PrecedingFrame{simTime(), true};
+        }
+    }
+    if (signalID == modesetChangedSignal) {
+        invalidateFutureInterframeHistory();
+        ModeSetListener::receiveSignal(source, signalID, obj, details);
+    }
+}
+
+void Rx::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details)
+{
+    Enter_Method_Silent();
+    discardExpiredReception();
+    if (source->getParentModule() != networkInterface || !dynamic_cast<IRadio *>(source))
+        return;
+    if (signalID == FlatRadioBase::listeningChangedSignal)
+        invalidateFutureInterframeHistory();
+    else if (signalID == IRadio::radioModeChangedSignal) {
+        if (value == IRadio::RADIO_MODE_OFF)
+            invalidateInterframeHistory();
+        else if (value == IRadio::RADIO_MODE_SLEEP || value == IRadio::RADIO_MODE_TRANSMITTER)
+            invalidateFutureInterframeHistory();
+    }
 }
 
 } // namespace ieee80211
