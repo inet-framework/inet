@@ -201,7 +201,7 @@ The optional ``peekEligiblePacket(predicate)`` operation returns a borrowed pack
 
 Providers that cannot perform a selected operation must throw ``inet::queueing::UnsupportedPacketSelection``. This exception permits ordinary service and collection inspection without the optional capability. Genuine queue and predicate errors must retain their original type.
 
-External frame-sequence handlers must implement ``interruptFrameSequence(notifyFailure)``. A false argument ends an exchange that an accepted Action already resolves, without obsolete failure feedback. Cleanup must destroy the exchange context before it deletes deferred frame copies. These repairs do not add MAC stop/start recovery or final-transfer teardown.
+External frame-sequence handlers must implement ``interruptFrameSequence()``. The handler owns the interruption outcome after recipient processing. It suppresses failure feedback when the transmitted DATA or management frame no longer belongs to the in-progress queue. Other exchanges retain ordinary failure feedback. Cleanup must destroy the exchange context before it deletes deferred frame copies. These repairs do not add MAC stop/start recovery or final-transfer teardown.
 
 IEEE 802.11 Response Query Roles
 --------------------------------

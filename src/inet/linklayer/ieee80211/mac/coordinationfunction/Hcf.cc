@@ -805,17 +805,12 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
         handlingAgreementAction = true;
         emit(packetReceivedFromPeerSignal, packet);
         std::unique_ptr<Packet> responseSource(packet->dup());
-        auto outgoing = check_and_cast<ITransmitStep *>(frameSequenceHandler->getContext()->getStepBeforeLast())->getFrameToTransmit();
         auto accepted = recipientDataService->managementFrameReceived(packet, action);
         for (auto frame : accepted) {
             take(frame);
             dispatchAgreementAction(frame->peekAtFront<Ieee80211MgmtHeader>());
         }
-        cancelEvent(startRxTimer);
-        bool resolved = obsoleteActions.count(outgoing->getId()) ||
-            (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(outgoing->peekAtFront<Ieee80211MacHeader>()) &&
-                !edcaf->getInProgressFrames()->containsFrame(outgoing));
-        frameSequenceHandler->interruptFrameSequence(!resolved);
+        frameSequenceHandler->interruptFrameSequence();
         recipientAckProcedure->processReceivedFrame(responseSource.get(), action, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
         for (auto frame : accepted)
             delete frame;
@@ -961,6 +956,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
 void Hcf::frameSequenceFinished()
 {
     Enter_Method("frameSequenceFinished");
+    cancelEvent(startRxTimer);
     finishingSequence = true;
     emit(IFrameSequenceHandler::frameSequenceFinishedSignal, frameSequenceHandler->getContext());
     auto edcaf = edca->getChannelOwner();
