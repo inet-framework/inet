@@ -1,0 +1,95 @@
+%description:
+Check RIFS permission through real HT management transmission and station publication.
+HT protection modes 0 and 2 require permission. This model selects zero in modes 1 and 3.
+VHT operation advertises zero for every protection mode.
+The observer uses existing management-element fields so the same test compiles before the repair.
+
+%extraargs: -r 0..7
+
+%file: RifsPermission.cc
+#include "ProtocolTest.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+
+namespace inet::protocoltest {
+using namespace ieee80211;
+class RifsPermissionAudit : public cSimpleModule, public cListener {
+    bool advertised = false;
+    bool published = false;
+  protected:
+    void initialize() override {
+        getModuleByPath("^.ap.wlan[0].mac")->subscribe(packetSentToLowerSignal, this);
+        scheduleAt(SimTime(900, SIMTIME_MS), new cMessage("check-publication"));
+    }
+    void receiveSignal(cComponent *, simsignal_t, cObject *value, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(value);
+        if (!packet)
+            return;
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType() != ST_BEACON)
+            return;
+        auto body = packet->peekAt<Ieee80211BeaconFrame>(header->getChunkLength());
+        ASSERT(body->getHtOperationPresent());
+        if (body->getHtOperation().rifsMode != par("expected").boolValue())
+            throw cRuntimeError("Advertised RIFS permission differs from the configured HT/VHT rule");
+        advertised = true;
+    }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto ap = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto sta = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta1.wlan[0].mib"));
+        ASSERT(sta->bssStationData.isAssociated);
+        auto peer = sta->findPeerHtState(ap->address);
+        ASSERT(peer && peer->valid);
+        auto band = physicallayer::Ieee80211CompliantBands::getBand(par("band").stringValue());
+        auto element = makeHtOperationElement(band, peer->negotiatedCapabilities.operation);
+        if (element.rifsMode != par("expected").boolValue())
+            throw cRuntimeError("Published RIFS permission differs from the received management operation");
+        published = true;
+        emit(registerSignal("testRifsPublicationChecked"), 1L);
+    }
+    void finish() override { ASSERT(advertised && published); }
+};
+Define_Module(RifsPermissionAudit);
+Define_ProtocolTest(wifi_rifs_permission) {
+    return ProtocolTest("wifi_rifs_permission")
+        .once(on("audit").signal("testRifsPublicationChecked").assertValue(1).within(1.0));
+}
+}
+
+%file: RifsPermission.ned
+@namespace(inet::protocoltest);
+import inet.protocoltest.wifi.WifiInfraNetwork;
+simple RifsPermissionAudit {
+    parameters:
+        bool expected;
+        string band;
+        @class(RifsPermissionAudit);
+        @signal[testRifsPublicationChecked](type=long);
+}
+network RifsPermissionNetwork extends WifiInfraNetwork {
+    submodules:
+        audit: RifsPermissionAudit;
+}
+
+%inifile: test.ini
+[General]
+network = RifsPermissionNetwork
+*.tester.testName = "wifi_rifs_permission"
+**.wlan[*].opMode = ${op="n(mixed-2.4Ghz)","ac"}
+**.centerFrequency = ${op} == "ac" ? 5.18GHz : 2.412GHz
+**.wlan[*].radio.channelNumber = 0
+**.bandName = ${op} == "ac" ? "5 GHz (mapped 20 MHz)" : "2.4 GHz"
+**.wlan[*].mib.htProtectionMode = ${protection=0,1,2,3}
+*.audit.expected = (${op} != "ac") && (${protection} == 0 || ${protection} == 2)
+*.audit.band = ${op} == "ac" ? "5 GHz (mapped 20 MHz)" : "2.4 GHz"
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_rifs_permission: PASS
+%not-contains: stdout
+PROTOCOLTEST wifi_rifs_permission: FAIL

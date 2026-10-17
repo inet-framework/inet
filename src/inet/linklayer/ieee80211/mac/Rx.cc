@@ -13,6 +13,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211InterframeInd_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
@@ -45,6 +46,8 @@ void Rx::initialize(int stage)
 {
     ModeSetListener::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        mib.reference(this, "mibModule", true);
+        recipientAckPolicy.reference(this, "recipientAckPolicyModule", *par("recipientAckPolicyModule").stringValue() != '\0');
         networkInterface = getContainingNicModule(this);
         for (auto signal : {receptionStartedSignal, receptionEndedSignal, transmissionStartedSignal,
                 transmissionEndedSignal, FlatRadioBase::listeningChangedSignal, IRadio::radioModeChangedSignal})
@@ -312,6 +315,13 @@ void Rx::observeReceptionStart(const IReception *reception)
     activeReception = ReceptionEvidence{start, end, precedingFrame,
         modeSet ? modeSet->getSifsTime() : SIMTIME_ZERO,
         modeSet ? modeSet->getSlotTime() / 10 : SIMTIME_ZERO, true};
+    // IEEE Std 802.11-2024, 10.27.3.1, 10.27.3.3, and 11.38.1: freeze BSS permission at reception start.
+    activeReception->rifsPermitted = recipientAckPolicy && modeSet &&
+        modeSet->getPhyType() == Ieee80211ModeSet::PhyType::HT &&
+        (mib->mode == Ieee80211Mib::INDEPENDENT || mib->mode == Ieee80211Mib::MESH ||
+            (mib->hasPrimaryChannel() && mib->getHtOperation().rifsMode));
+    if (activeReception->rifsPermitted)
+        activeReception->rifs = modeSet->getReferenceMode()->getRifsTime();
     precedingFrame.reset();
 }
 
@@ -366,13 +376,37 @@ void Rx::attachInterframeResult(Packet *packet, bool accepted)
         auto evidence = std::move(*completedReception);
         completedReception.reset();
         if (accepted) {
+            auto header = packet->peekAtFront<Ieee80211MacHeader>();
+            auto twoAddress = dynamicPtrCast<const Ieee80211TwoAddressHeader>(header);
+            auto indication = packet->findTag<Ieee80211ModeInd>();
+            bool ht = indication && indication->getMode() &&
+                indication->getMode()->getModulationClass() == IIeee80211Mode::ModulationClass::HT;
             // Model rule for coverage class zero, based on IEEE Std 802.11-2024, 10.3.2.3.3.
             if (evidence.preceding && evidence.sifs > SIMTIME_ZERO) {
                 auto gap = evidence.start - evidence.preceding->end;
                 related = gap >= evidence.sifs - evidence.tolerance && gap <= evidence.sifs + evidence.tolerance;
+                auto& preceding = *evidence.preceding;
+                // IEEE Std 802.11-2024, 10.3.2.3.2: RIFS requires HT, the same TA and RA, and no SIFS response.
+                if (evidence.rifsPermitted && preceding.ht && ht && preceding.noSifsResponse &&
+                        preceding.extension >= SIMTIME_ZERO && twoAddress && !preceding.transmitter.isUnspecified() &&
+                        preceding.transmitter == twoAddress->getTransmitterAddress() &&
+                        preceding.receiver == header->getReceiverAddress()) {
+                    auto correctedGap = gap + preceding.extension;
+                    related |= correctedGap >= evidence.rifs - evidence.rifs / 10 &&
+                        correctedGap <= evidence.rifs + evidence.rifs / 10;
+                }
             }
-            if (evidence.mayBecomePredecessor)
-                precedingFrame = PrecedingFrame{evidence.end, false};
+            if (evidence.mayBecomePredecessor) {
+                PrecedingFrame preceding{evidence.end, false};
+                preceding.ht = ht;
+                preceding.transmitter = twoAddress ? twoAddress->getTransmitterAddress() : MacAddress();
+                preceding.receiver = header->getReceiverAddress();
+                preceding.extension = indication ? indication->getSignalExtensionDuration() : SimTime(-1);
+                auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
+                preceding.noSifsResponse = recipientAckPolicy && (dataOrMgmt ? !recipientAckPolicy->isAckNeeded(dataOrMgmt) :
+                    !dynamicPtrCast<const Ieee80211RtsFrame>(header) && !dynamicPtrCast<const Ieee80211BlockAckReq>(header));
+                precedingFrame = preceding;
+            }
         }
     }
     if (accepted)

@@ -3,15 +3,17 @@ Check local SIFS evidence through complete physical receptions and production Rx
 Each run supplies two frames without a Block Ack agreement.
 The receiver accepts FCS independently of the interval result.
 
-%extraargs: -r 0..30
+%extraargs: -r 0..48
 
 %file: LocalInputs.cc
+#include "../../LocalInterframeTestSupport.h"
 #include <iostream>
 #include "inet/common/Simsignals.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
 #include "inet/linklayer/ieee80211/mac/Tx.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211InterframeInd_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
@@ -20,6 +22,13 @@ The receiver accepts FCS independently of the interval result.
 
 namespace inet::ieee80211 {
 using namespace physicallayer;
+class LocalInputTransmitter : public LocalInterframeTransmitterBase {
+  protected:
+    bool omitsSignalExtension(const Packet *packet) const override {
+        return packet->isName("rifs-first") && par("scenario").intValue() != 37;
+    }
+};
+Define_Module(LocalInputTransmitter);
 class LocalInterframeConcurrentReceiver : public Ieee80211Receiver {
   protected:
     bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception,
@@ -31,6 +40,11 @@ Define_Module(LocalInterframeConcurrentReceiver);
 class LocalInputRadio : public Ieee80211Radio {
     int delivered = 0;
   protected:
+    void decapsulate(Packet *packet) const override {
+        Ieee80211Radio::decapsulate(packet);
+        if (packet->isName("rifs-first") && par("unknownExtension").boolValue())
+            packet->getTagForUpdate<Ieee80211ModeInd>()->setSignalExtensionDuration(-1);
+    }
     void sendUp(Packet *packet) override {
         delivered++;
         if (delivered == 1) {
@@ -106,9 +120,9 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
         ackEnd = simTime();
     }
     const IIeee80211Mode *dataMode() const {
-        bool fiveGhz = (scenario >= 23 && scenario <= 26) || scenario == 28;
+        bool fiveGhz = (scenario >= 23 && scenario <= 26) || scenario == 28 || scenario == 36;
         auto catalog = Ieee80211ModeSet::getModeSet(scenario < 19 ? "a" : fiveGhz ? "ac" : "n(mixed-2.4Ghz)");
-        if (scenario < 19)
+        if (scenario < 19 || (scenario == 39 && sent == 0) || (scenario == 40 && sent == 1))
             return catalog->getMode(bps(6000000));
         for (int i = 0; i < catalog->getNumModes(); i++) {
             auto mode = catalog->getMode(i);
@@ -139,7 +153,17 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
         header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
         header->setDurationField(SIMTIME_ZERO);
         header->setSequenceNumber(SequenceNumberCyclic(100 + sent));
-        auto packet = new Packet(busy ? "busy" : "local-input", header);
+        if (scenario >= 31) {
+            header->setType(ST_DATA_WITH_QOS);
+            header->addChunkLength(QOSCONTROL_PART_LENGTH);
+            header->setTid(5);
+            header->setAckPolicy(scenario == 34 && sent == 0 ? NORMAL_ACK : NO_ACK);
+            if (scenario == 32 && sent == 1)
+                header->setTransmitterAddress(MacAddress("02:00:00:00:00:03"));
+            if (scenario == 33 && sent == 1)
+                header->setReceiverAddress(MacAddress("02:00:00:00:00:08"));
+        }
+        auto packet = new Packet(busy ? "busy" : scenario >= 31 && sent == 0 ? "rifs-first" : "local-input", header);
         if (busy) {
             packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
             packet->addTag<SignalPowerReq>()->setPower(W(1e-7));
@@ -156,6 +180,8 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
     void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
         Enter_Method_Silent();
         if (source == receiverRadio) {
+            if (signal == receptionStartedSignal && scenario == 48 && sent == 2)
+                scheduleAfter(SimTime(1, SIMTIME_US), new cMessage("permissionOff"));
             if (signal == receptionStartedSignal && scenario == 17 && sent == 1)
                 scheduleAfter(SimTime(1, SIMTIME_US), new cMessage("abortReception"));
             if (signal == receptionEndedSignal && scenario == 13 && sent == 2) {
@@ -171,7 +197,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
             return;
         }
         ended++;
-        if (scenario >= 29)
+        if (scenario == 29 || scenario == 30)
             scheduleAfter(SimTime(10, SIMTIME_US), new cMessage("check"));
         else if (scenario == 12 || scenario == 13 || scenario == 16 || scenario == 18) {
             if (sent == 1)
@@ -198,7 +224,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
     }
     void handleMessage(cMessage *message) override {
         if (auto packet = dynamic_cast<Packet *>(message)) {
-            ASSERT(scenario >= 29);
+            ASSERT(scenario == 29 || scenario == 30);
             ASSERT(packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK);
             delete packet;
             scheduleAfter(SimTime(10, SIMTIME_US) + (scenario == 30 ? SimTime::fromRaw(1) : SIMTIME_ZERO), new cMessage("ownAckResponse"));
@@ -228,7 +254,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
             if (scenario == 18)
                 gap = SIMTIME_ZERO;
             if (scenario >= 19) {
-                bool fiveGhz = (scenario >= 23 && scenario <= 26) || scenario == 28;
+                bool fiveGhz = (scenario >= 23 && scenario <= 26) || scenario == 28 || scenario == 36;
                 gap = SimTime(fiveGhz ? 16 : 10, SIMTIME_US);
                 if (scenario <= 26) {
                     int boundary = (scenario - 19) % 4;
@@ -238,7 +264,24 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
                         gap += boundary == 2 ? -SimTime::fromRaw(1) : SimTime::fromRaw(1);
                 }
             }
-            if (scenario >= 29)
+            if (scenario >= 31) {
+                if (scenario == 35 || scenario == 45 || scenario == 48)
+                    check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"))->setPrimaryChannel(1);
+                gap = SimTime(2, SIMTIME_US);
+                if (scenario == 41 || scenario == 43)
+                    gap += SimTime(200, SIMTIME_NS);
+                if (scenario == 42 || scenario == 44)
+                    gap -= SimTime(200, SIMTIME_NS);
+                if (scenario == 43)
+                    gap += SimTime::fromRaw(1);
+                if (scenario == 44)
+                    gap -= SimTime::fromRaw(1);
+                if (scenario == 45 || scenario == 46)
+                    gap = SimTime(10, SIMTIME_US);
+                if (scenario == 35 || scenario == 45)
+                    check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"))->mode = Ieee80211Mib::INFRASTRUCTURE;
+            }
+            if (scenario == 29 || scenario == 30)
                 sendLocalAck();
             else
                 sendFrame();
@@ -251,6 +294,8 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
             sendFrame();
         else if (name == "busy")
             sendFrame(true);
+        else if (name == "permissionOff")
+            check_and_cast<Ieee80211Mib *>(getSimulation()->getModuleByPath("receiver.wlan[0].mib"))->mode = Ieee80211Mib::INFRASTRUCTURE;
         else if (name == "abortReception") {
             receiverRadio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
             receiverRadio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
@@ -273,7 +318,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
                 scheduleAfter(SimTime(1, SIMTIME_US), new cMessage("busy"));
         }
         else {
-            if (scenario >= 29) {
+            if (scenario == 29 || scenario == 30) {
                 ASSERT(ackCompletions == 1);
                 ASSERT(rx->accepted == 1);
                 ASSERT(rx->lastStart - ackEnd == SimTime(12, SIMTIME_US) + (scenario == 30 ? SimTime::fromRaw(1) : SIMTIME_ZERO));
@@ -304,7 +349,8 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
                 if (scenario != 14)
                     ASSERT(rx->lastStart - rx->firstEnd == gap);
                 bool expected = scenario == 0 || scenario == 1 || scenario == 4 || scenario == 27 || scenario == 28 ||
-                    (scenario >= 19 && scenario <= 26 && (scenario - 19) % 4 < 2);
+                    (scenario >= 19 && scenario <= 26 && (scenario - 19) % 4 < 2) ||
+                    scenario == 31 || scenario == 41 || scenario == 42 || (scenario >= 45 && scenario <= 48);
                 ASSERT(rx->related == expected);
             }
             completed = true;
@@ -324,6 +370,10 @@ import inet.node.inet.WirelessHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Receiver;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Transmitter;
+module LocalInputTransmitter extends Ieee80211Transmitter {
+    parameters: int scenario; @class(::inet::ieee80211::LocalInputTransmitter);
+}
 module LocalInputRadio extends Ieee80211ScalarRadio {
     parameters:
         bool concurrentReceiver;
@@ -332,6 +382,7 @@ module LocalInputRadio extends Ieee80211ScalarRadio {
         bool missingTime;
         bool corruptFirst;
         bool staleDuplicate;
+        bool unknownExtension;
         @class(::inet::ieee80211::LocalInputRadio);
 }
 module LocalInterframeConcurrentReceiver extends Ieee80211Receiver {
@@ -367,27 +418,32 @@ sim-time-limit = 10ms
 seed-set = 0
 record-vector-results = false
 record-scalar-results = false
-*.peer.driver.scenario = ${scenario=0..30}
+*.peer.driver.scenario = ${scenario=0..48}
+*.peer.radio.transmitter.typename = "LocalInputTransmitter"
+*.peer.radio.transmitter.scenario = ${scenario}
 *.peer.radio.allowConcurrentTransmissions = true
 *.receiver.wlan[0].radio.typename = "LocalInputRadio"
 *.receiver.wlan[0].radio.deferDeliveryPriority = ${scenario} == 13
 *.receiver.wlan[0].radio.missingTime = ${scenario} == 14
 *.receiver.wlan[0].radio.corruptFirst = ${scenario} == 15
 *.receiver.wlan[0].radio.staleDuplicate = ${scenario} == 16
+*.receiver.wlan[0].radio.unknownExtension = ${scenario} == 38 || ${scenario} == 46
 *.receiver.wlan[0].radio.receiver.sensitivity = -70dBm
 *.receiver.wlan[0].radio.receiver.energyDetection = -90dBm
 *.receiver.wlan[0].radio.allowConcurrentReceptions = ${scenario} == 10 || ${scenario} == 11
 *.receiver.wlan[0].radio.concurrentReceiver = ${scenario} == 10 || ${scenario} == 11
 *.radioMedium.propagation.typename = "ConstantTimePropagation"
 *.radioMedium.sameTransmissionStartTimeCheck = "ignore"
-*.radioMedium.propagation.propagationTime = ${scenario} >= 29 ? 1us : (${scenario} == 27 || ${scenario} == 28 ? 5us : 0s)
+*.radioMedium.propagation.propagationTime = ${scenario} == 29 || ${scenario} == 30 ? 1us : (${scenario} == 27 || ${scenario} == 28 || ${scenario} == 47 ? 5us : 0s)
 **.wlan[*].agent.typename = ""
 **.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
-**.wlan[*].opMode = ${scenario} < 19 ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 ? "ac" : "n(mixed-2.4Ghz)")
-**.wlan[*].mac.qosStation = false
+**.wlan[*].opMode = ${scenario} < 19 ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 || ${scenario} == 36 ? "ac" : "n(mixed-2.4Ghz)")
+**.wlan[*].mac.qosStation = ${scenario} >= 31
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mib.htProtectionMode = ${scenario} == 35 || ${scenario} == 45 || ${scenario} == 48 ? 1 : 0
 **.wlan[*].mac.rx.typename = "LocalInputRx"
-*.peer.radio.opMode = ${scenario} < 19 ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 ? "ac" : "n(mixed-2.4Ghz)")
-**.bandName = (${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 ? "5 GHz (mapped 20 MHz)" : "2.4 GHz"
+*.peer.radio.opMode = ${scenario} < 19 ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 || ${scenario} == 36 ? "ac" : "n(mixed-2.4Ghz)")
+**.bandName = (${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 || ${scenario} == 36 ? "5 GHz (mapped 20 MHz)" : "2.4 GHz"
 *.peer.radio.transmitter.bitrate = 6Mbps
 *.peer.radio.antenna.mobilityModule = "^.^.mobility"
 **.mobility.initFromDisplayString = false

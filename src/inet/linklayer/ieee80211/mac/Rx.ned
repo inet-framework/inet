@@ -24,6 +24,8 @@ import inet.linklayer.ieee80211.mac.contract.IRx;
 simple Rx extends SimpleModule like IRx
 {
     parameters:
+        string mibModule; // Path to the local IEEE 802.11 MIB.
+        string recipientAckPolicyModule = default(parent.qosStation ? "^.hcf.recipientAckPolicy" : ""); // Empty disables RIFS evidence.
         @class(Rx);
         displayStringTextFormat = default("{rxStatus}");
         @display("i=block/rx");
