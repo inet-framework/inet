@@ -14,6 +14,17 @@ namespace physicallayer {
 
 Define_Module(VectorCommunicationCache);
 
+const IArrival *VectorCommunicationCache::findCachedArrival(const IRadio *receiver, const ITransmission *transmission) const
+{
+    int transmissionIndex = transmission->getId() - baseTransmissionId;
+    int radioIndex = receiver->getId() - baseRadioId;
+    if (baseTransmissionId < 0 || baseRadioId < 0 || transmissionIndex < 0 ||
+        transmissionIndex >= int(transmissionCache.size()) || radioIndex < 0)
+        return nullptr;
+    auto receptions = transmissionCache[transmissionIndex].receptionCacheEntries;
+    return receptions && radioIndex < int(receptions->size()) ? receptions->at(radioIndex).arrival : nullptr;
+}
+
 VectorCommunicationCache::~VectorCommunicationCache()
 {
     for (auto& transmissionCacheEntry : transmissionCache)
@@ -141,7 +152,8 @@ void VectorCommunicationCache::removeTransmission(const ITransmission *transmiss
 
 const ITransmission *VectorCommunicationCache::getTransmission(int id) const
 {
-    ASSERT(baseTransmissionId != -1);
+    if (baseTransmissionId == -1)
+        return nullptr;
     int transmissionIndex = id - baseTransmissionId;
     if (0 <= transmissionIndex && transmissionIndex < (int)transmissionCache.size())
         return transmissionCache[transmissionIndex].transmission;

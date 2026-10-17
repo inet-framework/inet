@@ -14,6 +14,13 @@ retransmissions do (``synRetries``). When they run out, the connection raises th
 ``TCP_E_TIMEOUT_CONN_ESTAB``, as the timer did before, so a subclass that handles this event needs no
 change.
 
+Radio medium timing queries
+--------------------------
+
+Custom radio media must implement ``getTransmissionTimingSnapshot()`` and ``computePrecedingSignalGap()``. These queries supply copied physical endpoints from actual transmissions and cached arrivals. Unavailable endpoints produce an absent result. The snapshot must not retain transmission, arrival, or radio pointers. Communication caches must implement the const ``findCachedArrival()`` query without insertion or other mutation.
+
+``SignalTimeInd`` now carries the medium's transmission identifier. The receiver supplies this local indication when it accepts a transmission. Consumers can associate later frame delivery with the corresponding physical timing evidence. The identifier is local metadata; it adds no transmitted field.
+
 IEEE 802.11 Basic Block Ack extension points
 ------------------------------------------
 
