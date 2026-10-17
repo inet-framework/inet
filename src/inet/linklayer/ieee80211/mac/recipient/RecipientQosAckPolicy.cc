@@ -61,7 +61,7 @@ bool RecipientQosAckPolicy::isAckNeeded(const Ptr<const Ieee80211DataOrMgmtHeade
 //
 bool RecipientQosAckPolicy::isBlockAckNeeded(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement) const
 {
-    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
+    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq) || dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
         return agreement != nullptr;
         // TODO The Basic BlockAckReq frame shall be discarded if all MSDUs referenced by this
         // frame have been discarded from the transmit buffer due to expiry of their lifetime limit.
@@ -92,6 +92,13 @@ simtime_t RecipientQosAckPolicy::computeAckDurationField(Packet *packet, const P
 simtime_t RecipientQosAckPolicy::computeBasicBlockAckDurationField(Packet *packet, const Ptr<const Ieee80211BasicBlockAckReq>& basicBlockAckReq) const
 {
     return basicBlockAckReq->getDurationField() - modeSet->getSifsTime() - computeBasicBlockAckDuration(packet, basicBlockAckReq);
+}
+
+simtime_t RecipientQosAckPolicy::computeCompressedBlockAckDurationField(Packet *packet, const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq) const
+{
+    // IEEE Std 802.11-2024, 9.2.5.6: subtract the actual response airtime and SIFS.
+    auto airtime = rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq, ResponseQueryRole::RESPOND)->getDuration(LENGTH_COMPRESSED_BLOCKACK);
+    return std::max(SIMTIME_ZERO, blockAckReq->getDurationField() - modeSet->getSifsTime() - airtime);
 }
 
 } /* namespace ieee80211 */

@@ -1,0 +1,17 @@
+IEEE 802.11 immediate Compressed Block Ack
+
+HCF supports explicit immediate Compressed Block Ack. Basic remains the default. Eligible HT infrastructure links and the supported ac path use accepted agreements and 32-byte Compressed responses with FCS. Links without usable local or peer HT state retain Normal Ack. Select blockAckVariant = "basic" at both endpoints for historical Basic compatibility. An HT PHY mode alone does not supply peer capability state.
+
+Both endpoints must select the same blockAckVariant because ADDBA does not negotiate it. A valid addressed BAR with the other profile stops the simulation before agreement updates. The diagnostic identifies the peer, TID, and profiles. Compressed rejects delayedAckPolicySupported = true in either agreement policy at initialization.
+
+Compressed receipt state retains positive bits after delivery and reports zero for absent receipts. HCF recognizes the required SIFS or RIFS relation from actual physical endpoints. It can release individual MPDUs under that relation despite a receive gap. Compressed agreements suppress fragmentation for their peer and TID; Basic retains its fragment bitmap.
+
+Compressed BAR uses a legal non-HT rate. Initial and later BAR consume their applicable BSS and peer rate sets. A configured controlFrameBitrate must satisfy the applicable rule. Response duration, protection, and timeout calculations use the 32-byte response length. Basic retains its separate 152-byte response.
+
+Active Compressed agreements check complete DATA exchange cost before destructive aggregation. If an aggregate cannot qualify, HCF evaluates its first ordinary MSDU with the same selected mode. Refusal preserves original queue frames, deadlines, and sequence state. Single protection reserves only the current exchange; a later BAR can require fresh contention. These changes can alter airtime, contention, delivery times, and simulation results. Basic and traffic outside active Compressed agreements retain their existing admission limits.
+
+Before DATA commitment, failed RTS updates access-category retry state without a provisional sequence counter. Original DATA lifetimes bound repeated attempts. This changes the scoped path's former discard after a fixed number of RTS failures.
+
+Existing demonstrations retain explicit Basic settings, configurations, and result rows. IEEE Std 802.11e-2005 introduced Basic; IEEE Std 802.11-2024 reserves its Type 0 value. Retention does not establish complete historical conformance. A-MPDU requirements for n and ac remain deferred. Multi-TID Block Ack and the existing delayed Basic requirement also remain deferred. Compressed support does not establish complete VHT transfer support or MAC stop/start recovery.
+
+Custom QoS rate selectors, recipient ACK policies, recipient data services, and frame sequences require the interface changes in the migration guide. Custom radio media, communication caches, and IEEE 802.11 modes also require the new timing queries. Basic classes and methods remain available.

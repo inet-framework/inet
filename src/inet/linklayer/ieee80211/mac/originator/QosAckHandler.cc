@@ -109,6 +109,33 @@ void QosAckHandler::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, Seq
         ackStatuses.erase(it);
 }
 
+std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHandler::processReceivedCompressedBlockAck(
+        const Ptr<const Ieee80211CompressedBlockAck>& blockAck, const OriginatorBlockAckAgreement *agreement)
+{
+    std::set<QoSKey> acked;
+    if (!agreement)
+        return acked;
+    auto start = blockAck->getStartingSequenceNumber();
+    const auto& bitmap = blockAck->getBlockAckBitmap();
+    // IEEE Std 802.11-2024, 10.25.6.8: positive bits cover transmitted frames throughout the active window.
+    for (auto& entry : ackStatuses) {
+        if (entry.first.first != blockAck->getTransmitterAddress() || entry.first.second.first != blockAck->getTidInfo())
+            continue;
+        auto sequence = SequenceNumberCyclic(entry.first.second.second.getSequenceNumber());
+        auto& status = entry.second;
+        bool transmitted = status != Status::FRAME_NOT_YET_TRANSMITTED && status != Status::NO_ACK_REQUIRED;
+        int offset = OriginatorBlockAckAgreement::computeSequenceDistance(start, sequence);
+        if (transmitted && agreement->containsSequence(sequence) && entry.first.second.second.getFragmentNumber() == 0 &&
+            offset < 64 && bitmap.getBit(offset)) {
+            status = Status::BLOCK_ACK_ARRIVED_ACKED;
+            acked.insert(entry.first);
+        }
+        else if (status == Status::WAITING_FOR_BLOCK_ACK)
+            status = Status::BLOCK_ACK_ARRIVED_UNACKED;
+    }
+    return acked;
+}
+
 std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHandler::processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck)
 {
     MacAddress receiverAddr = blockAck->getTransmitterAddress();

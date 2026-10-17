@@ -1,3 +1,0 @@
-Compressed control-rate helpers
-
-QoS rate selection now supplies non-HT Compressed BAR and response modes. HCF still refuses the Compressed profile until complete exchange support exists.

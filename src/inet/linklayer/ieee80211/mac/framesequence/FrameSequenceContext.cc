@@ -12,6 +12,21 @@ namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+PreparedDataTransmission::~PreparedDataTransmission()
+{
+    if (rtsPrediction)
+        drop(rtsPrediction.get());
+}
+
+void PreparedDataTransmission::setRtsPrediction(Packet *packet)
+{
+    if (rtsPrediction)
+        drop(rtsPrediction.get());
+    rtsPrediction.reset(packet);
+    if (rtsPrediction)
+        take(rtsPrediction.get());
+}
+
 FrameSequenceContext::FrameSequenceContext(MacAddress address, Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQoSContext, QoSContext *qosContext) :
     address(address),
     modeSet(modeSet),
@@ -29,6 +44,11 @@ void FrameSequenceContext::removeLastStep()
     auto step = steps.back();
     steps.pop_back();
     delete step;
+}
+
+Packet *FrameSequenceContext::getDataFrameToTransmit() const
+{
+    return qosContext && qosContext->preparedData ? qosContext->preparedData->frame : inProgressFrames->getFrameToTransmit();
 }
 
 simtime_t FrameSequenceContext::getIfs() const

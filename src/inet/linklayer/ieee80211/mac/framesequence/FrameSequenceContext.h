@@ -8,13 +8,18 @@
 #ifndef __INET_FRAMESEQUENCECONTEXT_H
 #define __INET_FRAMESEQUENCECONTEXT_H
 
+#include <functional>
+#include <memory>
+
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckProcedure.h"
+#include "inet/linklayer/ieee80211/mac/contract/BlockAckVariant.h"
 #include "inet/linklayer/ieee80211/mac/contract/ICoordinationFunction.h"
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorAckPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckProcedure.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorQoSAckPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 #include "inet/linklayer/ieee80211/mac/originator/RtsProcedure.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
@@ -24,20 +29,46 @@
 namespace inet {
 namespace ieee80211 {
 
+class FrameSequenceContext;
+
+enum class DataPreparationResult { LEGACY, READY, DEFERRED };
+
+/** Retains one actual mode decision until DATA submission or cancellation. */
+struct INET_API PreparedDataTransmission : public cObject
+{
+    std::unique_ptr<PreparedQosData> preparation;
+    Packet *frame = nullptr; // Borrowed from preparation, or from InProgressFrames after commitment.
+    const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
+    const physicallayer::IIeee80211Mode *dataMode = nullptr;
+    const physicallayer::IIeee80211Mode *rtsMode = nullptr;
+    const physicallayer::IIeee80211Mode *ackMode = nullptr;
+    const physicallayer::IIeee80211Mode *ctsMode = nullptr;
+    std::unique_ptr<Packet> rtsPrediction;
+    OriginatorBlockAckAgreement *agreement = nullptr; // Identity only; validation obtains current state from its owner.
+    bool cancelled = false;
+
+    ~PreparedDataTransmission() override;
+    void setRtsPrediction(Packet *packet);
+};
+
 class INET_API QoSContext
 {
   public:
-    QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure) :
+    QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure, BlockAckVariant variant = BlockAckVariant::BASIC) :
         ackPolicy(ackPolicy),
         blockAckProcedure(blockAckProcedure),
         blockAckAgreementHandler(blockAckAgreementHandler),
-        txopProcedure(txopProcedure)
+        txopProcedure(txopProcedure),
+        blockAckVariant(variant)
     {}
 
     IOriginatorQoSAckPolicy *ackPolicy = nullptr;
     IOriginatorBlockAckProcedure *blockAckProcedure = nullptr;
     IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler = nullptr;
     TxopProcedure *txopProcedure = nullptr;
+    const BlockAckVariant blockAckVariant;
+    std::function<DataPreparationResult(FrameSequenceContext *)> prepareData;
+    std::unique_ptr<PreparedDataTransmission> preparedData;
 };
 
 class INET_API NonQoSContext
@@ -79,6 +110,8 @@ class INET_API FrameSequenceContext : public cObject
     virtual IFrameSequenceStep *getStepBeforeLast() const { return steps.size() > 1 ? steps[steps.size() - 2] : nullptr; }
 
     virtual InProgressFrames *getInProgressFrames() const { return inProgressFrames; }
+    // A reversible preview replaces destructive extraction only for the scoped QoS path.
+    Packet *getDataFrameToTransmit() const;
     virtual IRtsProcedure *getRtsProcedure() const { return rtsProcedure; }
     virtual IRtsPolicy *getRtsPolicy() const { return rtsPolicy; }
 

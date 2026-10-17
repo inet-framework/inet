@@ -41,6 +41,8 @@ simtime_t OriginatorBlockAckAgreementPolicy::computeAddbaFailureTimeout() const
 
 bool OriginatorBlockAckAgreementPolicy::isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const
 {
+    if (variant == BlockAckVariant::COMPRESSED && (!localHt || !peerHt))
+        EV_DEBUG << "Compressed Block Ack setup refused: " << (!localHt ? "local HT state is absent" : "peer HT state is absent") << "; DATA uses Normal Ack.\n";
     return variant == BlockAckVariant::BASIC || (localHt && peerHt);
 }
 
