@@ -11,6 +11,7 @@ Protocol comparisons use identical fixtures against each applicable commit and i
 | S5-P1 | Detect SIFS from local endpoints in Rx. | [Local interval and physical completion checks.](../../tests/protocol/wifi/s5-physical-timing.md) |
 | S5-P2 | include the HT signal extension at 2.4 GHz. | [One physical HT exchange; parent duration assertion fails and child passes.](../../tests/protocol/wifi/s5-ht-signal-extension.md) |
 | S5-P3 | preserve advertised RIFS permission. | [Eight management cases; the parent loses permission and the child passes.](../../tests/protocol/wifi/s5-rifs-permission.md) |
+| S5-P4 | release temporary Block Ack bitmap allocations. | [Allocation ownership; a protocol exchange cannot establish leak freedom.](../../tests/protocol/wifi/s5-bitmap-ownership.md) |
 
 ## Execution and evidence boundaries
 
