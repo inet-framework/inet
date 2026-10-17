@@ -1,0 +1,36 @@
+%description:
+Check Basic and Compressed bitmap values after independent byte decode.
+The decoder must preserve the same bitmap contents without unowned temporary objects.
+Type validation remains outside this prerequisite.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+for (bool compressed : {false, true}) {
+    std::vector<uint8_t> bytes(compressed ? 28 : 148, 0);
+    bytes[0] = 0x94;
+    bytes[16] = compressed ? 4 : 0;
+    bytes[20] = 1;
+    MemoryInputStream stream(bytes);
+    auto decoded = Chunk::deserialize(stream, typeid(Ieee80211MacHeader));
+    if (compressed) {
+        auto response = dynamicPtrCast<Ieee80211CompressedBlockAck>(decoded);
+        ASSERT(response && response->getBlockAckBitmap().getSize() == 64);
+        ASSERT(response->getBlockAckBitmap().getBit(0));
+        ASSERT(!response->getBlockAckBitmap().getBit(63));
+    }
+    else {
+        auto response = dynamicPtrCast<Ieee80211BasicBlockAck>(decoded);
+        ASSERT(response && response->getBlockAckBitmapArraySize() == 64);
+        ASSERT(response->getBlockAckBitmap(0).getBit(0));
+        ASSERT(!response->getBlockAckBitmap(63).getBit(15));
+    }
+}
+EV << "Bitmap decode checks passed.\n";
+
+%contains: stdout
+Bitmap decode checks passed.
