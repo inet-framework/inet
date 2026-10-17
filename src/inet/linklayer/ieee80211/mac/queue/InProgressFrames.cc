@@ -179,7 +179,8 @@ std::vector<Packet *> InProgressFrames::getOutstandingFrames()
 {
     std::vector<Packet *> outstandingFrames;
     for (auto frame : inProgressFrames) {
-        if (ackHandler->isOutstandingFrame(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        if ((!lifetimeHandler || !lifetimeHandler->isExpired(frame)) &&
+            ackHandler->isOutstandingFrame(frame->peekAtFront<Ieee80211DataOrMgmtHeader>()))
             outstandingFrames.push_back(frame);
     }
     return outstandingFrames;

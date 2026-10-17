@@ -29,6 +29,8 @@ class DeferralHcf : public Hcf {
     int dataVoice = 0;
     int dataVideo = 0;
     int dataAfterRequest = 0;
+    int dataWithAgreement = 0;
+    int dataAfterDelba = 0;
     int aggregatesAccepted = 0;
     int requestStart = -1;
     int firstData = -1;
@@ -118,6 +120,12 @@ class DeferralHcf : public Hcf {
             if (data->getTid() == 6) dataVoice++;
             if (data->getTid() == 5) dataVideo++;
             if (requestStart >= 0 && data->getTid() == 6) {
+                if (hasAgreement(6))
+                    dataWithAgreement++;
+                if (delbas > 0 && !hasAgreement(6)) {
+                    ASSERT(data->getAckPolicy() == NORMAL_ACK);
+                    dataAfterDelba++;
+                }
                 if (firstData < 0) firstData = data->getSequenceNumber().get();
                 dataAfterRequest++;
             }
@@ -203,7 +211,7 @@ class DeferralTest : public cSimpleModule, public cListener {
                 << ", aggregates=" << sender->aggregatesAccepted << ", request start=" << sender->requestStart
                 << ", first DATA=" << sender->firstData << ".\n";
             ASSERT(deferredBeforeExtraction);
-            ASSERT(sender->requests == 1 && sender->hasAgreement(6));
+            ASSERT(sender->requests == 1 && !sender->hasAgreement(6) && sender->delbas == 1);
             ASSERT(sender->requestStart == 1 && sender->firstData == sender->requestStart);
             ASSERT(sender->dataAfterRequest == 1);
             ASSERT(sender->aggregatesAccepted == (scenario == 11 ? 2 : 0));
@@ -249,10 +257,16 @@ class DeferralTest : public cSimpleModule, public cListener {
                     wait(SimTime(560, SIMTIME_MS) - simTime());
                 ASSERT(sender->rtsFailures >= 1);
                 ASSERT(sender->firstRtsSequence == sender->requestStart);
-                ASSERT(sender->dataAfterRequest == 0 && sender->firstData == -1);
+                ASSERT(sender->dataWithAgreement == 0);
+                if (scenario == 8) {
+                    ASSERT(sender->dataAfterRequest == 1 && sender->dataAfterDelba == 1);
+                    ASSERT(sender->firstData == (sender->requestStart + 1) % 4096);
+                }
+                else
+                    ASSERT(sender->dataAfterRequest == 0 && sender->firstData == -1);
                 ASSERT(!sender->hasAgreement(6));
                 ASSERT(sender->delbas == 1);
-                ASSERT(lifetimeDrops == (scenario == 9 ? 1 : 0));
+                ASSERT(lifetimeDrops == (scenario == 9 ? 2 : 0));
             }
             else if (scenario >= 5) {
                 auto edca = check_and_cast<Edca *>(sender->getSubmodule("edca"));
@@ -271,7 +285,8 @@ class DeferralTest : public cSimpleModule, public cListener {
                         accept(sender, 6);
                     }
                     wait(SimTime(513, SIMTIME_MS) - simTime());
-                    ASSERT(lifetimeDrops == 1 && lifetime->findFrame(deferredId) == nullptr);
+                    // Preview leaves both unsent frames under their original lifetime deadlines.
+                    ASSERT(lifetimeDrops == 2 && lifetime->findFrame(deferredId) == nullptr);
                     if (scenario == 6)
                         ASSERT(sender->delbas == 1 && sender->dataAfterRequest == 0);
                     else {
@@ -284,7 +299,7 @@ class DeferralTest : public cSimpleModule, public cListener {
                     << ", response deadline=" << sender->observedDeadline << ", original DATA deadline=0.512.\n";
             }
             else if (scenario == 2) {
-                ASSERT(sender->dataAfterRequest == 1);
+                ASSERT(sender->dataAfterRequest == 2);
                 ASSERT(sender->firstData == sender->requestStart);
             }
             else {
@@ -315,9 +330,12 @@ class DeferralTest : public cSimpleModule, public cListener {
                         ASSERT(!sender->hasAgreement(6));
                     }
                     else {
-                        ASSERT(sender->delbas == 0);
-                        ASSERT(sender->hasAgreement(6));
-                        ASSERT(sender->dataAfterRequest == 1);
+                        // The accepted response releases the final DATA before completion causes DELBA.
+                        ASSERT(simTime() < sender->observedDeadline);
+                        ASSERT(sender->delbas == 1);
+                        ASSERT(!sender->hasAgreement(6));
+                        std::cout << "Completed deferred DATA: " << sender->dataAfterRequest << ".\n";
+                        ASSERT(sender->dataAfterRequest == 2);
                         ASSERT(sender->firstData == sender->requestStart);
                     }
                 }

@@ -159,6 +159,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool hasNumberedData(MacAddress peer, Tid tid) const;
     bool hasObsoleteActionInFlight(MacAddress peer, Tid tid, bool originator) const;
     void updateAgreementProcedures();
+    void advanceOriginatorWindows();
+    void completeTransfers();
     void updateContention();
     void scheduleAddbaResponseTimer();
     void actionTerminated(Packet *packet, bool acknowledged);

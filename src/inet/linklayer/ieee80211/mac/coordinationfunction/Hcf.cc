@@ -204,6 +204,7 @@ void Hcf::expireDataFrames(bool preserveSequence)
             frames->clearDroppedFrames();
     }
     scheduleDataLifetimeTimer();
+    advanceOriginatorWindows();
 }
 
 void Hcf::forEachChild(cVisitor *v)
@@ -228,6 +229,8 @@ void Hcf::handleMessage(cMessage *msg)
     }
     else if (msg == dataLifetimeTimer) {
         expireDataFrames();
+        if (!frameSequenceHandler->isSequenceRunning())
+            completeTransfers();
         updateAgreementProcedures();
         updateContention();
     }
@@ -433,7 +436,10 @@ bool Hcf::hasQueuedData(MacAddress peer, Tid tid) const
         return data && data->getType() == ST_DATA_WITH_QOS && data->getReceiverAddress() == peer && data->getTid() == tid &&
             !edca->getLifetimeHandler()->isExpired(packet);
     };
-    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+    // Check the TID's category first. Other categories retain support for custom classification.
+    int first = edca->mapTidToAc(tid);
+    for (int offset = 0; offset < AC_NUMCATEGORIES; offset++) {
+        int ac = (first + offset) % AC_NUMCATEGORIES;
         auto queue = edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue();
         if (auto selected = dynamic_cast<queueing::ISelectivePacketCollection *>(queue)) {
             try {
@@ -520,6 +526,48 @@ void Hcf::updateContention()
         if (hasFrameToTransmit(static_cast<AccessCategory>(ac)))
             edcaf->requestChannel(this);
     }
+}
+
+void Hcf::advanceOriginatorWindows()
+{
+    if (!originatorBlockAckAgreementHandler)
+        return;
+    auto service = check_and_cast<IOriginatorQosMacDataService *>(originatorDataService);
+    for (const auto& entry : originatorBlockAckAgreementHandler->getAgreements()) {
+        auto agreement = entry.second;
+        if (!agreement->getIsAddbaResponseReceived())
+            continue;
+        auto start = agreement->getStartingSequenceNumber();
+        auto next = service->getNextSequenceNumber(entry.first.first, entry.first.second);
+        int distance = (next.get() - start.get() + 4096) % 4096;
+        for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+            auto frames = edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
+            for (int i = 0; i < frames->getLength(); i++) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(frames->getFrames(i)->peekAtFront<Ieee80211MacHeader>());
+                if (data && data->getType() == ST_DATA_WITH_QOS &&
+                    data->getReceiverAddress() == entry.first.first && data->getTid() == entry.first.second)
+                    distance = std::min(distance, (data->getSequenceNumber().get() - start.get() + 4096) % 4096);
+            }
+        }
+        // IEEE Std 802.11-2024, 10.25.6.7.1: resolved positions permit transmit-window progress.
+        agreement->setStartingSequenceNumber(start + distance);
+    }
+}
+
+void Hcf::completeTransfers()
+{
+    if (!originatorBlockAckAgreementHandler)
+        return;
+    std::vector<std::pair<MacAddress, Tid>> completed;
+    for (const auto& entry : originatorBlockAckAgreementHandler->getAgreements()) {
+        auto agreement = entry.second;
+        if (agreement->getIsAddbaResponseReceived() && agreement->getFirstDataTransmitted() &&
+            !hasNumberedData(entry.first.first, entry.first.second) && !hasQueuedData(entry.first.first, entry.first.second))
+            completed.push_back(entry.first);
+    }
+    // IEEE Std 802.11-2024, 10.25.4; INET uses the accepted queue predicate at an exchange boundary.
+    for (const auto& id : completed)
+        beginTeardown(id.first, id.second, true, 37);
 }
 
 void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highestTransmittedDataIndex)
@@ -902,6 +950,11 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
     for (auto edcaf : internallyCollidedEdcafs) {
         AccessCategory ac = edcaf->getAccessCategory();
         auto dataRecoveryProcedure = edcaf->getRecoveryProcedure();
+        if (originatorAckPolicy->isBlockAckReqNeeded(edcaf->getInProgressFrames(), edcaf->getTxopProcedure(), originatorBlockAckAgreementHandler)) {
+            dataRecoveryProcedure->controlFrameTransmissionFailed();
+            edcaf->requestChannel(this);
+            continue;
+        }
         Packet *internallyCollidedFrame = edcaf->getInProgressFrames()->getFrameToTransmit();
         if (internallyCollidedFrame == nullptr)
             continue;
@@ -963,6 +1016,8 @@ void Hcf::frameSequenceFinished()
     if (edcaf) {
         // The context still owns references. dropFrame defers deletion until context disposal.
         expireDataFrames(false);
+        advanceOriginatorWindows();
+        completeTransfers();
         updateAgreementProcedures();
         bool startContention = !handlingAgreementAction && hasFrameToTransmit();
         edcaf->releaseChannel(this);
@@ -1291,8 +1346,12 @@ void Hcf::originatorProcessTransmittedManagementFrame(const Ptr<const Ieee80211M
 void Hcf::originatorProcessTransmittedControlFrame(const Ptr<const Ieee80211MacHeader>& controlHeader, AccessCategory ac)
 {
     auto edcaf = edca->getEdcaf(ac);
-    if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(controlHeader))
-        edcaf->getAckHandler()->processTransmittedBlockAckReq(blockAckReq);
+    if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(controlHeader)) {
+        auto agreement = originatorBlockAckAgreementHandler ?
+            originatorBlockAckAgreementHandler->getAgreement(blockAckReq->getReceiverAddress(), blockAckReq->getTidInfo()) : nullptr;
+        if (agreement)
+            edcaf->getAckHandler()->processTransmittedBlockAckReq(blockAckReq, agreement);
+    }
     else if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(controlHeader))
         rtsProcedure->processTransmittedRts(rtsFrame);
     else
@@ -1332,6 +1391,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
         }
         else if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(failedHeader)) {
             edcaf->getAckHandler()->processFailedBlockAckReq(blockAckReq);
+            edcaf->getRecoveryProcedure()->controlFrameTransmissionFailed();
             return;
         }
         else
@@ -1426,6 +1486,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         auto lastTransmittedDataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(lastTransmittedHeader);
         edcaf->getAckHandler()->processReceivedAck(ackFrame, lastTransmittedDataOrMgmtHeader);
         edcaf->getInProgressFrames()->dropFrame(lastTransmittedPacket);
+        advanceOriginatorWindows();
         edcaf->getAckHandler()->dropFrame(lastTransmittedDataOrMgmtHeader);
         if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
             actionTerminated(lastTransmittedPacket, true);
@@ -1433,8 +1494,12 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
             transmissionDetails.setStatus(FRAME_TRANSMISSION_STATUS_ACKNOWLEDGED);
             emit(Ieee80211Mac::frameTransmissionOutcomeSignal, lastTransmittedPacket, &transmissionDetails);
         }
+        completeTransfers();
     }
     else if (auto blockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(header)) {
+        if (!originatorBlockAckAgreementHandler ||
+            !originatorBlockAckAgreementHandler->getAgreement(blockAck->getTransmitterAddress(), blockAck->getTidInfo()))
+            return;
         EV_INFO << "BasicBlockAck has arrived" << std::endl;
         edcaf->getRecoveryProcedure()->blockAckFrameReceived();
         auto ackedSeqAndFragNums = edcaf->getAckHandler()->processReceivedBlockAck(blockAck);
@@ -1444,7 +1509,9 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         for (auto it : ackedSeqAndFragNums)
             EV_TRACE << "   sequenceNumber = " << it.second.second.getSequenceNumber() << ", fragmentNumber = " << (int)it.second.second.getFragmentNumber() << std::endl;
         edcaf->getInProgressFrames()->dropFrames(ackedSeqAndFragNums);
+        advanceOriginatorWindows();
         edcaf->getAckHandler()->dropFrames(ackedSeqAndFragNums);
+        completeTransfers();
     }
     else if (dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ; // void
@@ -1483,7 +1550,9 @@ bool Hcf::hasEligibleFrameToTransmit(AccessCategory ac) const
 {
     auto edcaf = edca->getEdcaf(ac);
     if (edcaf)
-        return edcaf->getInProgressFrames()->hasEligibleInProgressFrames() ||
+        return (originatorBlockAckAgreementHandler &&
+            originatorAckPolicy->isBlockAckReqNeeded(edcaf->getInProgressFrames(), edcaf->getTxopProcedure(), originatorBlockAckAgreementHandler)) ||
+            edcaf->getInProgressFrames()->hasEligibleInProgressFrames() ||
             check_and_cast<OriginatorQosMacDataService *>(originatorDataService)->peekEligibleFrame(edcaf->getPendingQueue()) != nullptr;
     else
         throw cRuntimeError("Hcca is unimplemented");
@@ -1629,6 +1698,17 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             return false;
         if (!isFrameEligible(packet, true))
             return false;
+        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            auto status = channelOwner->getAckHandler()->getQoSDataAckStatus(dataHeader);
+            if (dataHeader->getType() == ST_DATA_WITH_QOS &&
+                (status == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED || status == QosAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED)) {
+                // IEEE Std 802.11-2024, 9.2.4.1.6: DATA after a failed Block Ack exchange is a retransmission.
+                auto updated = packet->removeAtFront<Ieee80211DataHeader>();
+                updated->setRetry(true);
+                packet->insertAtFront(updated);
+                header = updated;
+            }
+        }
         auto lifetimeHandler = edca->getLifetimeHandler();
         auto step = frameSequenceHandler->getContext()->getLastStep();
         auto protectedPacket = dynamic_cast<RtsTransmitStep *>(step);
@@ -1652,6 +1732,19 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         auto mode = dataAfterCts ? packet->getTag<Ieee80211ModeReq>()->getMode() : rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
+        if (auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header)) {
+            auto agreement = originatorBlockAckAgreementHandler ?
+                originatorBlockAckAgreementHandler->getAgreement(bar->getReceiverAddress(), bar->getTidInfo()) : nullptr;
+            if (!agreement || !agreement->getIsAddbaResponseReceived())
+                return false;
+            auto response = rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT)->getDuration(LENGTH_BASIC_BLOCKACK);
+            auto cost = mode->getDuration(packet->getDataLength()) + modeSet->getSifsTime() + response;
+            // IEEE Std 802.11-2024, 10.23.2.8 and 10.23.2.9: a later BAR must fit both bounds.
+            if (context->getNumSteps() > 1 &&
+                ((txop->getLimit() > 0 && ifs + cost > txop->getRemaining()) ||
+                 (txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION && cost >= rx->getTxnavRemaining())))
+                return false;
+        }
         if (scopedSingle) {
             auto sifs = modeSet->getSifsTime();
             auto cost = mode->getDuration(packet->getDataLength());
@@ -1704,7 +1797,16 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             packet->insertAtFront(updated);
         }
         else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::SINGLE_PROTECTION) {
-            auto pendingPacket = channelOwner->getInProgressFrames()->getPendingFrameFor(packet);
+            auto pendingPacket = dynamicPtrCast<const Ieee80211BlockAckReq>(header) ? nullptr :
+                channelOwner->getInProgressFrames()->getPendingFrameFor(packet, false);
+            if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header) && txop->getLimit() == 0) {
+                // The zero-limit frame sequence ends after this exchange; it has no successor reservation.
+                pendingPacket = nullptr;
+            }
+            else if (pendingPacket && !channelOwner->getInProgressFrames()->containsFrame(pendingPacket)) {
+                // HcfFs ends this TXOP before extraction can change the successor's size or setup state.
+                pendingPacket = nullptr;
+            }
             const auto& pendingHeader = pendingPacket == nullptr ? nullptr : pendingPacket->peekAtFront<Ieee80211DataOrMgmtHeader>();
             auto duration = singleProtectionMechanism->computeDurationField(packet, header, pendingPacket, pendingHeader, txop, recipientAckPolicy);
             auto header = packet->removeAtFront<Ieee80211MacHeader>();

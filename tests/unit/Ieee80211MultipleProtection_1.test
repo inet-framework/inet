@@ -39,11 +39,12 @@ class PredicateFrames : public InProgressFrames {
     int reads = 0;
     bool hasInProgressFrames() override { return true; }
     Packet *getFrameToTransmit() override { reads++; return selected; }
+    Packet *peekFrameToTransmit() override { reads++; return selected; }
 };
 class PredicateAckPolicy : public OriginatorQosAckPolicy {
   public:
     bool bar = false;
-    bool isBlockAckReqNeeded(InProgressFrames *, TxopProcedure *) const override { return bar; }
+    bool isBlockAckReqNeeded(InProgressFrames *, TxopProcedure *, IOriginatorBlockAckAgreementHandler *) const override { return bar; }
 };
 class PredicateRtsPolicy : public IRtsPolicy {
   public:

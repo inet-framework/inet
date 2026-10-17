@@ -444,9 +444,15 @@ Notable backward incompatible changes are the following:
 
    Basic remains the default. Compressed selection still stops initialization. Custom agreement handlers, recipient services, and management implementations require the changes in the migration guide. External queues need the optional selected-extraction contract only when deferred DATA hides eligible work. Built-in queues preserve ordinary pull accounting for that extraction.
 
-51. IEEE 802.11 QoS DATA preview contract
+51. IEEE 802.11 Basic Block Ack transfer completion
 
-   The QoS data service now exposes candidate preview through IOriginatorQosMacDataService. The in-progress queue can preview DATA without extraction or sequence assignment. Ordinary successor queries retain extraction as their default. Custom in-progress queues must accept the extract argument in getPendingFrameFor(). The migration guide describes this interface change.
+   Callers must supply agreement arguments explicitly for BAR selection and transmitted-BAR processing. An omitted argument now fails compilation instead of silently selecting behavior without agreement state.
+
+   Basic BAR selection now separates each peer and TID. Short bursts and small negotiated windows can cause BAR below the configured threshold. BAR can obtain channel access without queued DATA. After final completion or final DATA expiration, the originator sends DELBA even with zero inactivity timeout. Later bursts can require another ADDBA exchange. These changes affect exchange order, airtime, simulation results, and fingerprints for Basic Block Ack configurations.
+
+   Basic single protection now reserves only an already prepared successor. Further DATA extraction starts a new TXOP and can require more contention. Final DATA in a zero-limit TXOP reserves only its immediate response. These corrections can change Duration fields, airtime, and fingerprints.
+
+   Custom QoS ACK policies must accept the agreement-handler argument in isBlockAckReqNeeded() and computeBlockAckReqParameters(). Custom in-progress queues must preserve the extract argument in getPendingFrameFor(). QoS data services must implement IOriginatorQosMacDataService for candidate preview without extraction.
 
 Notable backward compatible changes are the following:
 
