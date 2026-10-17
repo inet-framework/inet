@@ -39,6 +39,8 @@ The medium cache retains each aggregate decision. PREAMBLE calculates no HEADER 
 
 With a present model, aggregate ``ErrorRateInd`` fields contain ``NaN`` for unknown probabilities. The receiver does not calculate the former whole-PSDU estimate for these fields. Member outcomes are separate from probability estimates. Without a model, the receiver preserves the common base's tag presence and values. Ordinary MPDUs retain their current metadata. Custom readers of aggregate error-rate fields must accept unknown values.
 
+NIST and Yans calculate each range probability from its byte length and the configured scalar SNIR reduction. The receive profile includes HT20 long GI and short GI. Each range uses an independent draw when its success probability lies strictly between zero and one. This model does not represent correlated FEC errors or interference changes within one member. Alignment padding contributes duration but receives no separate outcome. The model checks establish no new error-accuracy or goodput claim.
+
 Radio medium timing queries
 --------------------------
 

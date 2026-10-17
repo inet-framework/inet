@@ -1,10 +1,10 @@
-# PHY P0, P1, and P2 execution record
+# PHY P0 through P4 execution record
 
 The user authorizes P0, P1, and P2 on `4fa5cc0de15ee57388bcb3f20e866cab5972a670` before PRs #1343, #1344, and #1345 merge. This exception replaces the merge prerequisite for this execution only. The user also authorizes commits and a branch push. No baseline change forms part of this task.
 
 The active checkout is `/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack`, on branch `work/ieee80211-ampdu-implicit-blockack`. The implementation uses the approved base. The commit series separates the plans, P1 representation, and P2 reception.
 
-P0, P1, and P2 are complete on 2026-10-17. The implementation supplies HT-SIG bytes, validation, bounded ranges, and cached partial-reception outcomes. Debug and release compilation pass. The direct fixtures and selected regression controls pass. P3, P4, and MAC acceptance remain pending.
+P0 through P4 are complete on 2026-10-17. The implementation supplies HT-SIG bytes, validation, bounded ranges, and cached partial-reception outcomes. P3 verifies NIST/Yans probabilities and seeded outcomes. P4 closes ordinary reception comparisons with the pinned parent. D1 and D2 are complete for the declared PHY profile. MAC acceptance and implicit Block Ack remain pending.
 
 ## Implementation contract
 
@@ -84,7 +84,7 @@ The runner's dry-run path fails with `ValueError('list.index(x): x not in list')
 
 The local corpus identifies `ieee80211-2024` as IEEE Std 802.11-2024. Table 19-11 spans physical PDF pages 3431–3432. Clause 19.3.9.4.4 is on page 3434. Its Figure 19-8 reference resolves. The corpus cannot resolve Clause 9.7.1, so PDF text on pages 1841–1843 supplies delimiter evidence. PDF text on pages 3486–3487 confirms invalid-CRC and unsupported-mode behavior. These clauses are normative. The corpus linter reports unrelated heading ambiguities and unresolved references; the selected CRC node is unambiguous. Local artifacts `/tmp/ampdu-htsig-clause.json`, `/tmp/ampdu-htsig-table.json`, `/tmp/ampdu-htsig-refs.json`, and `/tmp/ampdu-standards-lint.json` retain the retrieved evidence.
 
-The implementation does not enable MAC receipt, MPDU release, or an implicit Block Ack response. Feature A2 and A4 retain those acceptance duties. A failed MPDU range must become that member's bit-error flag before the normal Rx FCS check. The aggregate probability fields are not member estimates. P3 and P4 remain pending for broader NIST/Yans and compatibility evidence. The commit and push authorization does not permit baseline changes.
+The implementation does not enable MAC receipt, MPDU release, or an implicit Block Ack response. Feature A2 and A4 retain those acceptance duties. A failed MPDU range must become that member's bit-error flag before the normal Rx FCS check. The aggregate probability fields are not member estimates. P3 and P4 supply the additional evidence below. The commit and push authorization does not permit baseline changes.
 
 Independent range draws at the current scalar SNIR are a packet-level model choice. This abstraction does not model correlated FEC errors or interference changes within one member. Alignment padding contributes duration but has no separate outcome. These checks establish representation, integration, and selected regression behavior. They establish no new PHY accuracy result. Release-mode behavioral tests and feature-isolation builds remain unverified.
 
@@ -99,3 +99,56 @@ The final debug and release builds pass in `/tmp/ampdu-push-debug.log` and `/tmp
 The repeated fingerprint filter passes all five controls without expectation changes. Its log is `/tmp/ampdu-push-fingerprints.log`. The full series since `origin/master` also passes its mechanical checks, with notes. The first publication attempt did not complete. The connector rejected the first tree request because tool approval was required and the approval policy was `never`. No remote branch update occurred. The original checkout retained its previous HEAD and local files.
 
 The user requested a retry after the permissions changed. Git metadata writes and shell access to GitHub now succeed. All 28 prepared files match the active checkout before commit transfer. The active branch now contains the three prepared commits. The separate `AGENTS.md` edit remains outside those commits. Only this publication record changes after the transfer; the tested source and test files remain unchanged.
+
+## P3 and P4 execution
+
+The user requested P3 and P4 after publication of P1 and P2. The active HEAD is `0221daf515e1bdc7dcaa79b12b6547c11a977d75`. The comparison parent remains `4fa5cc0de15ee57388bcb3f20e866cab5972a670`. The active checkout and branch remain those recorded above. This execution changes tests, migration text, and plan records. It changes no production source, interface, ownership rule, model assumption, or stored fingerprint expectation. The separate `AGENTS.md` edit remains unchanged.
+
+The additional module fixture separates ordinary reception from the new aggregate interfaces. The same fixture source compiles on both revisions. This necessary test separation adds one PHY fixture, so the combined PHY and MAC inventory increases from nine to ten. The MAC feature's seven fixtures remain proposed.
+
+### P3: NIST/Yans probabilities and seeded outcomes
+
+The extended `Ieee80211AmpduPhyReception_1.test` executes 468 runs. Its original 31 scenarios now run with seeds 0, 1, and 2. Eight additional scenarios cover NIST and Yans, MCS 0 and 7, and long GI and short GI. Every scenario uses scalar and dimensional reception with whole and separate signal parts. The bounded campaign adds no distributional or error-accuracy claim.
+
+Test subclasses call the unchanged NIST and Yans implementations through the production receiver. Each range probability must equal the existing per-length DATA calculation at the configured scalar SNIR. The subclasses observe calls; they do not substitute probabilities. A separate reference matrix checks all 64 HT20 modes, including MCS 0 through 31 with both guard intervals. Each mode uses seven SNIR inputs and lengths 4, 100, 101, 102, 4095, and 65535 bytes. The minimum and mean reductions use distinct synthetic SNIR values. The four matrix instances execute 10752 exact comparisons without random draws. This matrix establishes calculation coverage; actual aggregate radio runs use MCS 0 and 7.
+
+For example, a three-member aggregate includes a spacing delimiter and three alignment bytes. Seven scored ranges use the real model probabilities. An independent generator with the same seed replays the HEADER draw and each eligible range draw. The fixture compares every retained outcome, draw count, and subsequent random value with that reference. Partial member failure preserves the envelope and copied outcomes. Alignment padding causes no eighth range or extra draw.
+
+At the PREAMBLE boundary, repeated cached and direct success queries cause no HEADER or DATA call or draw. At the result boundary, repeated queries reuse all retained outcomes and metadata. The fixture also checks indication values after cache cleanup. All 96 real-model records match between whole and separate signal parts. A repeated execution produces the same 96 records. The campaign contains 76 all-good records and 20 partial-failure records. Both models produce partial failure in this campaign.
+
+### P4: Ordinary reception and compatibility limits
+
+`Ieee80211AmpduPhyCompatibility_1.test` executes 576 runs on each revision. The inputs cover NIST, Yans, an absent model, and a non-HT custom model without the aggregate role. The HT controls select MCS 0 or 7 with either guard interval. The custom model selects ERP OFDM at 6 Mbit/s. Each input uses scalar or dimensional reception, whole or separate signal parts, and seeds 0, 1, and 2. The non-HT controls repeat the unused MCS and GI labels but always select that same ERP mode.
+
+Three noise levels distinguish all-good controls, fractional probabilities, and failures. The low-noise power is -110 dBm. The two higher powers are -30 and -28 dBm for MCS 0, or -50 and -43 dBm for MCS 7. The receiver's energy threshold exceeds the configured noise power. This condition avoids an initialization failure that would supply no reception evidence. The SNIR threshold remains -10 dB for these bounded controls.
+
+All 576 records match the parent exactly. The comparison includes delivery count, packet error, duration, PER, BER, SER, received power, minimum SNIR, reception endpoints, draw count, and subsequent random value. Assertions also check mode, channel presence, and transmission identity availability. The records include 498 successful receptions, 66 delivered failure containers, and 12 attempts without a delivered container. NIST supplies the twelve separate-part header aborts. The absent and non-HT custom models add no error draws.
+
+The ordinary record stream has SHA-256 `f62dbea0e379e33e13df3246a2213d53ba6e52cc4a46852510f7f61bd5a01869`. `/tmp/ampdu-p4-comparison.json` records the fixture hash, revisions, counts, and equality result. The parent executable resolves `libINET_dbg.so` and `libtest_dbg.so` from the parent checkout. The active executable resolves the corresponding active libraries.
+
+The extended reception fixture retains the unsupported-model checks from P2. The production MAC handoff refuses a missing role and incomplete short-GI coverage before its MIB update. It accepts unsupported modes outside the effective NSS limit. The fixture retains absent-model, runtime mode-set, non-HT custom, and BerTable initialization controls. The migration guide now states independent range draws, scalar SNIR reduction, guard intervals, padding treatment, and accuracy limits.
+
+The separate BerTable reproduction still exits with SIGSEGV, status 139, on both revisions. Both logs identify `bitModel->getDataLength()` at line 62 with a null bit model. They are `/tmp/ampdu-p4-bertable-parent.log` and `/tmp/ampdu-p4-bertable-feature.log`. This comparison confirms the documented prior limitation. It is not a passing reception result. P4 does not repair BerTable or claim support for that configuration.
+
+### Commands and evidence
+
+All active commands run from `/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack` unless a command names another directory. Debug compilation precedes the tests. Release compilation also passes. The final source tree equals the published P2 source tree. The debug library has SHA-256 `3df8db6dba916c23bada8ea83583b41e9a425c81fc5a3bf90c83f7b75566044d`. The parent debug library has SHA-256 `877fa150f8cc41a21c765277aeb0ec478f99a6a9092a60462110496a68c99841`.
+
+```sh
+MAKEFLAGS=--jobserver-style=pipe make MODE=debug -j8
+MAKEFLAGS=--jobserver-style=pipe make MODE=release -j8
+MAKEFLAGS=--jobserver-style=pipe MPLCONFIGDIR=/tmp/ampdu-matplotlib inet_run_unit_tests -m debug -f 'Ieee80211(AmpduWire|MpduSubframeHeaderSerializer|MpduDelimiterWire|HtModeSet|HtModeCache|VhtHtCapabilities)_1\.test$' --no-concurrent
+MAKEFLAGS=--jobserver-style=pipe MPLCONFIGDIR=/tmp/ampdu-matplotlib inet_run_module_tests -m debug -f 'Ieee80211(AmpduPhyReception|AmpduPhyCompatibility|VhtHtSupport|HtAssociation|HtAntennaRateControl)_1\.test$' --no-concurrent
+```
+
+The build logs are `/tmp/ampdu-p34-debug.log` and `/tmp/ampdu-p34-release.log`. Six unit fixtures and five module fixtures pass. The unit log is `/tmp/ampdu-p34-units.log`. The final module log is `/tmp/ampdu-p34-final-modules.log`. The direct compatibility logs are `/tmp/ampdu-p4-feature.log` and `/tmp/ampdu-p4-parent.log`.
+
+The parent command uses the identical compatibility fixture at `/tmp/inet-ampdu-parent-4fa5cc0de1`, after `source setenv -q`, with the explicit filter `Ieee80211AmpduPhyCompatibility_1\.test$`. Its debug build remains the clean P0 parent build. The receiver's first model records are `/tmp/ampdu-p3-first-model-results.txt`. Later records match them exactly.
+
+The module fixture writes its detailed output under `tests/module/work/<fixture-name>/test.out` in each checkout. To reproduce the comparison, select the lines that start with `CONTROL ` from each compatibility output. Require exactly 576 lines in each file. Compare the lines byte for byte in their original order. The fixture's post-run checker separately requires all 576 successful simulation runs and unique input combinations. The reception fixture's checker requires all 468 successful simulation runs and equality across signal-part modes.
+
+Scoped architecture checks pass for both WLAN subtrees. Their logs are `/tmp/ampdu-p34-architecture-phy.log` and `/tmp/ampdu-p34-architecture-mac.log`. The source-seal check reports no changed production files. `git diff --check` passes. The earlier filtered fingerprint results remain evidence for the unchanged production source. This test-only extension requires no new fingerprint baseline or broad fingerprint campaign.
+
+Early fixture revisions failed on invalid noise thresholds, typename expression syntax, and an incorrect ERP header-length assumption. A post-run check also exposed insufficient ordinary failure coverage. The final fixture corrects those setup and coverage defects. The earlier mixed batches retain their actual failure status. They do not replace the final clean runs.
+
+The self-audit checks actual model dispatch, byte-to-bit conversion, mode coverage, SNIR reduction, probability bounds, cache order, sample reuse, metadata, and normal cleanup. It also checks identical parent inputs and library selection. It finds no unresolved defect in the requested scope. This result is a self-audit. Release behavioral tests, feature-isolation builds, correlated FEC behavior, and MAC acceptance remain outside this evidence. P4 closes D2 for the declared PHY profile, not the complete MAC feature.

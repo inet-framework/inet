@@ -8,7 +8,7 @@ Plan revision: 11, 2026-10-17. The user's `proceed, including the optional simpl
 
 The project plan procedure remains a draft.
 
-Execution status, 2026-10-17: P0, P1, and P2 are complete under the user's approved exception to the merge prerequisite. The [execution record](ieee80211-ampdu-phy-execution.md) identifies the active checkout, implementation, checks, and limits. The proposal below retains its pre-implementation design and evidence status. P3 and P4 remain pending.
+Execution status, 2026-10-17: P0 through P4 are complete under the user's approved exception to the merge prerequisite. D1 and D2 are complete for the declared PHY profile. The [execution record](ieee80211-ampdu-phy-execution.md) identifies the active checkout, checks, and limits. P4 adds one parent-compatible module fixture for exact ordinary reception comparisons. This test addition changes no production contract. The proposal below retains its original design context. MAC acceptance and the feature stages remain pending.
 
 ## 1. Problem and intended behavior
 
@@ -289,12 +289,13 @@ D1 includes the shared NIST/Yans implementation and basic compatibility checks. 
 
 ## 7. Verification methods and expected results
 
-Both fixture names are proposed. Neither exists at this revision. The feature plan owns seven additional fixtures; the combined inventory remains nine.
+The PHY plan now owns three fixtures. P1 and P2 supplied the wire and partial-reception fixtures. P4 adds `Ieee80211AmpduPhyCompatibility_1.test` because its ordinary controls must compile on the parent without the new PHY interfaces. The feature plan owns seven proposed fixtures, so the combined inventory is ten. The execution record separates current PHY evidence from proposed MAC evidence.
 
 | Proposed fixture | Boundary and required observations |
 | --- | --- |
 | `Ieee80211AmpduWire_1.test`, unit/serializer. | HT-SIG golden bytes and independent decode preserve length, Aggregation, CRC, and the current 48-bit header length. Cover standalone, singleton, and multiple-member cases. Validator cases reject invalid CRC and unsupported field combinations. A separate bounds case refuses content shorter than valid HT Length. Real delimiter/member layouts prove CRC/signature, lengths 0/4095/4096, every alignment remainder, no final HT padding, truncation, and bounded resynchronization. |
 | `Ieee80211AmpduPhyReception_1.test`, module. | Actual reception proves all-good, first/middle/last member loss, regular/spacing delimiter failure, all-member failure, per-part header failure, and query consistency. It distinguishes HT-SIG rejection from structural DATA refusal before range draws. It also verifies copied indication lifetime, metadata with reachable consumers, and HT20 short-GI indications without MAC response acceptance. D1 checks NIST/Yans initialization, ordinary reception, absent-model operation, BerTable controls, and exact coverage at the MAC handoff. Absent roles and incomplete advertised coverage fail; unsupported unadvertised modes do not cause failure. D2 extends NIST/Yans aggregate evidence. |
+| `Ieee80211AmpduPhyCompatibility_1.test`, module. | The same source runs on the pinned parent and feature branch. NIST, Yans, absent-model, and non-HT custom controls expose exact outcomes, duration, metadata, draw counts, and subsequent random values. Three noise levels and seeds 0, 1, and 2 cover scalar and dimensional reception with whole and separate signal parts. |
 
 Use deterministic probabilities and seed 0 for the causal cases. Cover whole-signal and separate-part reception with scalar and dimensional models. Verify indication values after the producer's source objects leave their normal lifetime.
 

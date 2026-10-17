@@ -424,7 +424,7 @@ A1 and A3 can supply reviewed preparation changes before the complete feature ex
 
 ### Proposed direct checks
 
-The seven fixtures below belong to this feature plan. The [PHY plan](ieee80211-ampdu-phy-reception.md#7-verification-methods-and-expected-results) owns `Ieee80211AmpduWire_1.test` and `Ieee80211AmpduPhyReception_1.test`. Together, the plans retain the original nine proposed fixtures. None exists at this revision.
+The seven fixtures below belong to this feature plan and remain proposed. The [PHY plan](ieee80211-ampdu-phy-reception.md#7-verification-methods-and-expected-results) owns three implemented fixtures: `Ieee80211AmpduWire_1.test`, `Ieee80211AmpduPhyReception_1.test`, and `Ieee80211AmpduPhyCompatibility_1.test`. P4 adds the third fixture for parent-compatible ordinary reception comparisons. The combined inventory is ten. The [PHY execution record](ieee80211-ampdu-phy-execution.md) states the completed PHY evidence and its limits. That evidence does not establish MAC feature completion.
 
 Fixed causal cases use seed 0. Injected agreements or deterministic error models establish only the stated boundary. Infrastructure cases separately prove production negotiation. [Appendix B](#appendix-b-verification-commands-and-campaigns) contains commands, campaign bounds, and evidence requirements.
 
