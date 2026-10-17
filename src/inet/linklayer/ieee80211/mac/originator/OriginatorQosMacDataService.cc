@@ -309,7 +309,7 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
 //        if (msduIntegrityAndProtection)
 //            frame = protectMsduIfNeeded(frame);
         std::vector<Packet *> *fragments = nullptr;
-        if (fragmentationPolicy)
+        if (fragmentationPolicy && (!fragmentationPermitted || fragmentationPermitted(packet)))
             fragments = fragmentIfNeeded(packet);
         if (!fragments)
             fragments = new std::vector<Packet *>({ packet });

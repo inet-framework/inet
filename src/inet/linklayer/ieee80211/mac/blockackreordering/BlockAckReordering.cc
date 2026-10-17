@@ -50,11 +50,12 @@ void BlockAckReordering::clearPeer(MacAddress peer)
     }
 }
 
-BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
+BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe)
 {
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
     auto sequenceNumber = dataHeader->getSequenceNumber();
     auto windowStart = receiveBuffer->getNextExpectedSequenceNumber();
+    bool insideWindow = windowStart <= sequenceNumber && sequenceNumber < windowStart + receiveBuffer->getBufferSize();
     ReleasedFrames releasedFrames;
     // IEEE Std 802.11-2024, 10.25.6.6.2.1(b,c): advance for newer DATA beyond the window; discard older DATA.
     // The shared reorder service also retains Basic fragment reassembly as an INET compatibility choice.
@@ -69,8 +70,15 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(R
     // This allows the recipient to delete the Block Ack if the originator does not switch
     // back to using Block Ack.
     if (receiveBuffer->insertFrame(dataPacket, dataHeader)) {
-        if (dataHeader->getAckPolicy() == BLOCK_ACK)
+        if (dataHeader->getAckPolicy() == BLOCK_ACK && agreement->getVariant() == BlockAckVariant::BASIC)
             agreement->blockAckPolicyFrameReceived(dataHeader);
+        auto record = agreement->getBlockAckRecord();
+        // IEEE Std 802.11-2024, 10.25.6.6.2.1(a)(2)(v) and 10.25.6.6.1: release the complete prefix in order.
+        if (agreement->getVariant() == BlockAckVariant::COMPRESSED && insideWindow && windowStart < sequenceNumber &&
+            interframe && record->hasCompleteReceipt(record->getWindowStart() - 1)) {
+            auto preceding = advanceReceiveBuffer(agreement, receiveBuffer, sequenceNumber);
+            releasedFrames.insert(releasedFrames.end(), preceding.begin(), preceding.end());
+        }
         // IEEE Std 802.11-2024, 10.25.6.6.2.1(a)(2): release every consecutive complete unit at the window start.
         auto consecutiveFrames = collectConsecutiveCompleteFollowingMpdus(receiveBuffer, receiveBuffer->getNextExpectedSequenceNumber());
         releaseReceiveBuffer(agreement, receiveBuffer, consecutiveFrames);
@@ -91,6 +99,14 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedBlockAckRe
             basicReq->getTidInfo() < 0 || basicReq->getTidInfo() > 15 || !basicReq->getStartingSequenceNumber().isSpecified())
             return ReleasedFrames();
         startingSequenceNumber = basicReq->getStartingSequenceNumber();
+    }
+    else if (auto compressedReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
+        if (compressedReq->getFragmentNumber() != 0 || compressedReq->getMultiTid() || !compressedReq->getCompressedBitmap() ||
+            compressedReq->getTidInfo() < 0 || compressedReq->getTidInfo() > 15 || !compressedReq->getStartingSequenceNumber().isSpecified() ||
+            compressedReq->getChunkLength() != LENGTH_BLOCKACKREQ - B(4))
+            return ReleasedFrames();
+        startingSequenceNumber = compressedReq->getStartingSequenceNumber();
+        agreement->getBlockAckRecord()->advanceCompressedWindow(startingSequenceNumber);
     }
     else {
         throw cRuntimeError("Multi-Tid BlockAckReq is currently an unimplemented feature");
@@ -209,7 +225,8 @@ void BlockAckReordering::passedUp(RecipientBlockAckAgreement *agreement, Receive
     receiveBuffer->setNextExpectedSequenceNumber(sequenceNumber + 1);
     receiveBuffer->dropFramesUntil(sequenceNumber);
     receiveBuffer->removeFrame(sequenceNumber);
-    agreement->getBlockAckRecord()->removeAckStates(sequenceNumber);
+    if (agreement->getVariant() == BlockAckVariant::BASIC)
+        agreement->getBlockAckRecord()->removeAckStates(sequenceNumber);
 }
 
 std::vector<Packet *> BlockAckReordering::getEarliestCompleteMsduOrAMsduIfExists(ReceiveBuffer *receiveBuffer)

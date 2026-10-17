@@ -149,6 +149,48 @@ choice = policy.computeBlockAckReqParameters(&frames, nullptr, &agreements);
 ASSERT(std::get<0>(choice) == peer && std::get<2>(choice) == 2);
 ASSERT(std::get<1>(choice) == SequenceNumberCyclic(100));
 ASSERT(otherAgreement->getStartingSequenceNumber() == SequenceNumberCyclic(4094));
+for (int start : {100, 4094}) {
+    for (int responseOffset : {0, 6, 100}) {
+        QosAckHandler compressedAck;
+        SchedulingFrames compressedFrames;
+        compressedFrames.configure(&compressedAck);
+        OriginatorBlockAckAgreement active(peer, 5, SequenceNumberCyclic(start), 64, false, false);
+        auto earlier = compressedFrames.add(peer, 5, (start + 2) % 4096);
+        auto requested = compressedFrames.add(peer, 5, (start + 4) % 4096);
+        auto unsent = compressedFrames.add(peer, 5, (start + 5) % 4096, false);
+        auto outsideWindow = compressedFrames.add(peer, 5, (start + 64) % 4096);
+        auto otherTid = compressedFrames.add(peer, 2, (start + 2) % 4096);
+        auto request = makeShared<Ieee80211CompressedBlockAckReq>();
+        request->setReceiverAddress(peer);
+        request->setTidInfo(5);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(start) + 4);
+        compressedAck.processTransmittedBlockAckReq(request, &active);
+        ASSERT(compressedAck.getQoSDataAckStatus(earlier) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+        ASSERT(compressedAck.getQoSDataAckStatus(requested) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+        auto response = makeShared<Ieee80211CompressedBlockAck>();
+        response->setTransmitterAddress(peer);
+        response->setTidInfo(5);
+        response->setStartingSequenceNumber(SequenceNumberCyclic(start) + responseOffset);
+        BitVector bitmap;
+        for (int bit = 0; bit < 64; bit++)
+            bitmap.appendBit(responseOffset == 0 && (bit == 2 || bit == 5));
+        response->setBlockAckBitmap(bitmap);
+        compressedAck.processReceivedCompressedBlockAck(response, &active);
+        ASSERT(compressedAck.getQoSDataAckStatus(earlier) == (responseOffset == 0 ?
+            QosAckHandler::Status::BLOCK_ACK_ARRIVED_ACKED : QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED));
+        ASSERT(compressedAck.isEligibleToTransmit(requested));
+        ASSERT(compressedAck.getQoSDataAckStatus(unsent) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+        ASSERT(compressedAck.getQoSDataAckStatus(otherTid) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+        ASSERT(compressedAck.getQoSDataAckStatus(outsideWindow) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+        response->setStartingSequenceNumber(SequenceNumberCyclic(start) + 4);
+        BitVector outsideBitmap;
+        for (int bit = 0; bit < 64; bit++)
+            outsideBitmap.appendBit(bit == 60);
+        response->setBlockAckBitmap(outsideBitmap);
+        compressedAck.processReceivedCompressedBlockAck(response, &active);
+        ASSERT(compressedAck.getQoSDataAckStatus(outsideWindow) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+    }
+}
 auto duration = SimTime(1, SIMTIME_US);
 EdcaTransmitLifetimeHandler lifetime(duration, duration, duration, duration);
 frames.setLifetimeHandler(&lifetime);
