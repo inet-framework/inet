@@ -47,6 +47,11 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual ~OriginatorBlockAckAgreement() {}
 
     virtual int getBufferSize() const { return bufferSize; }
+    int getWindowSize() const { return std::min(bufferSize, 64); }
+    bool containsSequence(SequenceNumberCyclic sequence) const
+    {
+        return (sequence.get() - startingSequenceNumber.get() + 4096) % 4096 < getWindowSize();
+    }
     virtual SequenceNumberCyclic getStartingSequenceNumber() { return startingSequenceNumber; }
     virtual void setStartingSequenceNumber(SequenceNumberCyclic sequenceNumber) { startingSequenceNumber = sequenceNumber; }
     virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }

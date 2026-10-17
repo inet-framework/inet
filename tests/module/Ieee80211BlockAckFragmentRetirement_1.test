@@ -2,7 +2,7 @@
 Check the sequence boundary after ordinary originator teardown of fragmented DATA.
 IEEE Std 802.11-2024, 11.5.3.4 requires the next MPDU to use a later sequence
 when the originator discards the last transmitted MPDU.
-The fixture supplies accepted Basic agreements and injects immediate ACKs.
+The fixture supplies accepted Basic agreements and injects immediate ACKs and Basic Block Ack responses.
 Production fragmentation, inactivity expiry, retirement, and transmission remain active.
 Runs cover sequence 0 and wraparound at 4095, with expiry during transmission
 or after the first fragment receives its Normal Ack.
@@ -10,6 +10,7 @@ Later intact DATA and an unrelated peer must retain their transmissions.
 Additional runs transmit an earlier DATA unit before a gap in sequence allocation.
 The fixture extracts and disposes of the skipped DATA through the production allocator.
 Distances 2047, 2048, 2049, and 4096 cover the half-range boundary and a full wrap.
+A deferred successor keeps the transfer open while the fixture advances the allocator.
 
 %extraargs: -r 0..19
 
@@ -45,6 +46,9 @@ class FragmentRetirementHcf : public Hcf {
     bool retired = false;
     bool successorSent = false;
     bool otherSent = false;
+    bool otherRetired = false;
+    Ptr<const Ieee80211BasicBlockAckReq> pendingBar;
+    Packet *deferredSuccessor = nullptr;
     int delbas = 0;
 
     void skipData(int count) {
@@ -75,7 +79,7 @@ class FragmentRetirementHcf : public Hcf {
         scheduleAfter(SimTime(acknowledgedFirst ? 650 : 974, SIMTIME_US), new cMessage("queue-data"));
     }
 
-    void queueData(const char *name, MacAddress address, int length) {
+    Packet *queueData(const char *name, MacAddress address, int length) {
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS);
         header->addChunkLength(QOSCONTROL_PART_LENGTH);
@@ -87,6 +91,7 @@ class FragmentRetirementHcf : public Hcf {
         packet->insertAtBack(makeShared<ByteCountChunk>(B(length)));
         packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
         processUpperFrame(packet, header);
+        return packet;
     }
 
   public:
@@ -106,9 +111,13 @@ class FragmentRetirementHcf : public Hcf {
         if (distance == 0)
             startRetirement();
         else {
+            check_and_cast<OriginatorQosMacDataService *>(originatorDataService)->setEligibility(
+                [this](Packet *packet) { return !packet->isName("deferred-successor") && isFrameEligible(packet, false); },
+                [this](Packet *packet) { return isAMsduPermitted(packet); });
             // Force Normal Ack for the earlier DATA, independent of the fragment ACK policy.
             handler->getAgreement(peer, 5)->setStartingSequenceNumber(SequenceNumberCyclic(start) + 1);
             queueData("earlier-data", peer, 20);
+            deferredSuccessor = queueData("deferred-successor", peer, 20);
         }
         scheduleAfter(SimTime(10, SIMTIME_MS), new cMessage("verify"));
     }
@@ -117,6 +126,13 @@ class FragmentRetirementHcf : public Hcf {
     void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
         if (signal != blockAckAgreementDeletedSignal) {
             Hcf::receiveSignal(source, signal, object, details);
+            return;
+        }
+        auto agreement = check_and_cast<OriginatorBlockAckAgreement *>(object);
+        if (agreement->getReceiverAddr() == other) {
+            ASSERT(otherSent);
+            ASSERT(!hasQueuedData(other, 5) && !hasNumberedData(other, 5));
+            otherRetired = true;
             return;
         }
         ASSERT(!retired);
@@ -164,6 +180,11 @@ class FragmentRetirementHcf : public Hcf {
     void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
         Enter_Method("transmissionComplete");
         auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header);
+        if (bar) {
+            ASSERT(bar->getReceiverAddress() == other);
+            pendingBar = bar;
+        }
         bool earlier = packet->isName("earlier-data");
         bool first = !earlier && data && data->getReceiverAddress() == peer && data->getSequenceNumber() == SequenceNumberCyclic(start);
         bool ack = dynamicPtrCast<const Ieee80211Delba>(header) || (data && data->getAckPolicy() == NORMAL_ACK);
@@ -174,6 +195,8 @@ class FragmentRetirementHcf : public Hcf {
         Hcf::transmissionComplete(packet, header);
         if (ack)
             scheduleAfter(SimTime(20, SIMTIME_US), new cMessage(earlier ? "ack-earlier" : first ? "ack-first" : "ack"));
+        if (bar)
+            scheduleAfter(SimTime(20, SIMTIME_US), new cMessage("block-ack"));
     }
 
     void handleMessage(cMessage *message) override {
@@ -182,6 +205,24 @@ class FragmentRetirementHcf : public Hcf {
             queueData("fragmented-data", peer, 400);
             queueData("intact-successor", peer, 20);
             queueData("other-peer", other, 20);
+        }
+        else if (message->isName("block-ack")) {
+            delete message;
+            auto header = makeShared<Ieee80211BasicBlockAck>();
+            header->setReceiverAddress(mac->getAddress());
+            header->setTransmitterAddress(other);
+            header->setTidInfo(5);
+            header->setStartingSequenceNumber(pendingBar->getStartingSequenceNumber());
+            BitVector bits;
+            bits.appendBit(true);
+            for (int i = 1; i < 16; i++)
+                bits.appendBit(false);
+            header->setBlockAckBitmap(0, bits);
+            auto packet = new Packet("block-ack", header);
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(24000000)));
+            pendingBar = nullptr;
+            processLowerFrame(packet, header);
         }
         else if (message->isName("ack") || message->isName("ack-first") || message->isName("ack-earlier")) {
             bool first = message->isName("ack-first");
@@ -196,6 +237,12 @@ class FragmentRetirementHcf : public Hcf {
             if (first)
                 firstAcknowledged = true;
             if (earlier) {
+                auto queue = edca->getEdcaf(AC_VI)->getPendingQueue();
+                queue->removePacket(deferredSuccessor);
+                take(deferredSuccessor);
+                edca->getLifetimeHandler()->forgetFrame(deferredSuccessor->getId());
+                delete deferredSuccessor;
+                deferredSuccessor = nullptr;
                 skipData(distance - 1);
                 start = (start + distance) % 4096;
                 startRetirement();
@@ -203,9 +250,11 @@ class FragmentRetirementHcf : public Hcf {
         }
         else if (message->isName("verify")) {
             delete message;
+            std::cout << "Fragment retirement state: retired=" << retired << " firstCompleted=" << firstCompleted
+                << " successorSent=" << successorSent << " otherSent=" << otherSent << " delbas=" << delbas << "\n";
             ASSERT(retired && firstCompleted && successorSent && otherSent);
-            ASSERT(delbas == 1);
-            ASSERT(originatorBlockAckAgreementHandler->getAgreement(other, 5) != nullptr);
+            ASSERT(delbas == 2 && otherRetired);
+            ASSERT(originatorBlockAckAgreementHandler->getAgreement(other, 5) == nullptr);
             unsubscribe(blockAckAgreementDeletedSignal, this);
             std::cout << "Fragment retirement passed: start=" << start << ", acknowledgedFirst=" << acknowledgedFirst
                       << ", distance=" << distance << std::endl;
