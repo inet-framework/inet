@@ -131,6 +131,17 @@ static const IIeee80211Mode *selectCompatibleMode(const Ieee80211ModeSet *modeSe
 
 } // namespace
 
+bool isPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
+        const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode)
+{
+    if (!modeSet || !mode || !modeSet->containsMode(mode))
+        return false;
+    if (mode->getHtMcsIndex() < 0)
+        return true;
+    return peerHtState && peerHtState->valid &&
+        isCompatibleHtMode(mode, peerHtState->negotiatedCapabilities.localTxPeerRx, peerHtState->negotiatedCapabilities.operation);
+}
+
 const IIeee80211Mode *selectPeerCompatibleMode(const Ieee80211ModeSet *modeSet,
         const Ieee80211Mib::PeerHtState *peerHtState, const IIeee80211Mode *mode, const MacAddress& peerAddress)
 {

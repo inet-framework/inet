@@ -53,14 +53,18 @@ Packet *RecipientQosMacDataService::defragment(Packet *mgmtFragment)
         return nullptr;
 }
 
-std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
+std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, bool interframe)
 {
     Enter_Method("dataFrameReceived");
     take(dataPacket);
-    if (blockAckAgreementHandler) {
+    // IEEE Std 802.11-2024, 10.25.1: these agreements apply to QoS DATA, which carries a TID.
+    if (blockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS) {
         auto agreement = blockAckAgreementHandler->getAgreement(dataHeader->getTid(), dataHeader->getTransmitterAddress());
-        if (agreement)
+        if (agreement) {
             agreement->recordReceived(dataHeader);
+            if (agreement->getVariant() == BlockAckVariant::COMPRESSED)
+                agreement->getBlockAckRecord()->compressedFrameReceived(dataHeader);
+        }
     }
     // TODO A-MPDU Deaggregation, MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
@@ -72,12 +76,12 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         return std::vector<Packet *>();
     }
     BlockAckReordering::ReleasedFrames frames = {{dataHeader->getSequenceNumber().get(), {dataPacket}}};
-    if (blockAckReordering && blockAckAgreementHandler) {
+    if (blockAckReordering && blockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS) {
         Tid tid = dataHeader->getTid();
         MacAddress originatorAddr = dataHeader->getTransmitterAddress();
         RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
         if (agreement)
-            frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader);
+            frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe);
     }
     std::vector<Packet *> defragmentedFrames;
     if (basicReassembly) { // FIXME defragmentation
@@ -137,14 +141,19 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
 {
     Enter_Method("controlFrameReceived");
-    if (auto blockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(controlHeader)) {
+    if (auto blockAckReq = dynamicPtrCast<const Ieee80211BlockAckReq>(controlHeader)) {
         BlockAckReordering::ReleasedFrames frames;
         if (blockAckReordering) {
-            Tid tid = blockAckReq->getTidInfo();
+            auto basic = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq);
+            auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq);
+            if (!basic && !compressed)
+                return {};
+            Tid tid = basic ? basic->getTidInfo() : compressed->getTidInfo();
             MacAddress originatorAddr = blockAckReq->getTransmitterAddress();
             RecipientBlockAckAgreement *agreement = blockAckAgreementHandler->getAgreement(tid, originatorAddr);
-            if (agreement)
+            if (agreement) {
                 frames = blockAckReordering->processReceivedBlockAckReq(agreement, blockAckReq);
+            }
             else
                 return std::vector<Packet *>();
         }

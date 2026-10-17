@@ -1,12 +1,18 @@
 %description:
 802.11n Block Ack session: ADDBA action (type 13), BlockAckReq (type 24), BlockAck (type 25). [Required]
+Check explicit Basic and Compressed with concrete BAR/BA types and positive receipt bits.
+
+%extraargs: -r 0..1
 
 %file: N_BlockAck.cc
 
 #include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace protocoltest {
+
+using namespace inet::ieee80211;
 
 // Block Ack session flow: STA sends ADDBA Request (action frame, type 13),
 // AP responds with ADDBA Response (type 13), then after enough frames are
@@ -19,10 +25,52 @@ Define_ProtocolTest(wifi_11n_block_ack)
                   .describe("ADDBA action frame from sta1").within(2.5))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
                   .filterPacket("ieee80211mac.type == 24")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.packet && c.event.packet->peekAtFront<Ieee80211BasicBlockAckReq>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+                  })
                   .describe("BlockAckReq from sta1").within(1.0))
         .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
                   .filterPacket("ieee80211mac.type == 25")
+                  .filterEvent([](const MatchContext& c) {
+                      if (!c.event.packet) return false;
+                      auto ba = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+                      if (!ba) return false;
+                      for (int i = 0; i < 64; i++)
+                          for (unsigned int j = 0; j < ba->getBlockAckBitmap(i).getSize(); j++)
+                              if (ba->getBlockAckBitmap(i).getBit(j)) return true;
+                      return false;
+                  })
                   .describe("BlockAck received at sta1").within(0.02));
+}
+
+Define_ProtocolTest(wifi_11n_compressed_exchange)
+{
+    return ProtocolTest("wifi_11n_compressed_exchange")
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ieee80211mac.type == 13")
+                  .filterEvent([](const MatchContext& c) {
+                      if (!c.event.packet) return false;
+                      auto response = c.event.packet->peekAtFront<Ieee80211AddbaResponse>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+                      return response && response->getStatusCode() == 0 && response->getBlockAckPolicy();
+                  })
+                  .describe("successful immediate ADDBA response").within(2.5))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                  .filterPacket("ieee80211mac.type == 24")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.packet && c.event.packet->peekAtFront<Ieee80211CompressedBlockAckReq>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+                  })
+                  .describe("Compressed BAR from sta1").within(1.0))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ieee80211mac.type == 25")
+                  .filterEvent([](const MatchContext& c) {
+                      if (!c.event.packet) return false;
+                      auto ba = c.event.packet->peekAtFront<Ieee80211CompressedBlockAck>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+                      if (!ba) return false;
+                      for (unsigned int i = 0; i < ba->getBlockAckBitmap().getSize(); i++)
+                          if (ba->getBlockAckBitmap().getBit(i)) return true;
+                      return false;
+                  })
+                  .describe("Compressed Block Ack with positive receipt evidence").within(0.02));
 }
 
 } // namespace protocoltest
@@ -31,9 +79,9 @@ Define_ProtocolTest(wifi_11n_block_ack)
 %inifile: test.ini
 
 [General]
-*.tester.testName = "wifi_11n_block_ack"
+*.tester.testName = ${test="wifi_11n_block_ack","wifi_11n_compressed_exchange"}
 *.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
-**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.blockAckVariant = ${profile="basic","compressed" ! test}
 *.ap.wlan[*].mac.hcf.isBlockAckSupported = true
 *.sta*.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
 *.sta1.app[0].sendInterval = 0.1ms
@@ -51,3 +99,6 @@ include ../../ini/_base.ini
 
 %contains: stdout
 PROTOCOLTEST wifi_11n_block_ack: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_compressed_exchange: PASS

@@ -26,7 +26,8 @@ class INET_API IRecipientQosMacDataService
     virtual std::vector<Packet *> retireAgreement(RecipientBlockAckAgreement *agreement, bool associationReset) = 0;
     virtual void clearPeer(MacAddress peer) = 0;
 
-    virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
+    // HCF supplies the observed SIFS or permitted RIFS relation for this frame.
+    virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, bool interframe = false) = 0;
     virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
     virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) = 0;
 };
