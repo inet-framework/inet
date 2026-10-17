@@ -444,6 +444,10 @@ Notable backward incompatible changes are the following:
 
    Basic remains the default. Compressed selection still stops initialization. Custom agreement handlers, recipient services, and management implementations require the changes in the migration guide. External queues need the optional selected-extraction contract only when deferred DATA hides eligible work. Built-in queues preserve ordinary pull accounting for that extraction.
 
+51. IEEE 802.11 QoS DATA preview contract
+
+   The QoS data service now exposes candidate preview through IOriginatorQosMacDataService. The in-progress queue can preview DATA without extraction or sequence assignment. Ordinary successor queries retain extraction as their default. Custom in-progress queues must accept the extract argument in getPendingFrameFor(). The migration guide describes this interface change.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics

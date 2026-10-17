@@ -177,6 +177,14 @@ class DataSelectionTest : public cSimpleModule, public cListener {
         ASSERT(queue->getPacket(0) == first);
         ASSERT(service->peekEligibleFrame(queue) == selected);
         ASSERT(service->getNextSequenceNumber(MacAddress("02:00:00:00:00:02"), 0) == SequenceNumberCyclic(0));
+        auto previewService = check_and_cast<IOriginatorQosMacDataService *>(service);
+        auto frames = edca->getEdcaf(AC_BE)->getInProgressFrames();
+        auto owner = selected->getOwner();
+        ASSERT(previewService->peekEligibleFrame(queue) == selected);
+        ASSERT(frames->peekFrameToTransmit() == selected);
+        ASSERT(frames->getCandidateSequenceNumber(selected) == SequenceNumberCyclic(0));
+        ASSERT(frames->getLength() == 0 && selected->getOwner() == owner);
+        ASSERT(selected->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(77));
         wait(SimTime(100, SIMTIME_MS));
         auto extracted = service->extractFramesToTransmit(queue);
         ASSERT(extracted != nullptr && extracted->size() == 1);

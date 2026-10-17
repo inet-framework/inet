@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQosMacDataService.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -95,9 +97,26 @@ Packet *InProgressFrames::getFrameToTransmit()
     return nullptr;
 }
 
-Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
+Packet *InProgressFrames::peekFrameToTransmit()
 {
-    auto frameToTransmit = getFrameToTransmit();
+    for (auto frame : inProgressFrames) {
+        if (isEligibleToTransmit(frame))
+            return frame;
+    }
+    return check_and_cast<IOriginatorQosMacDataService *>(dataService)->peekEligibleFrame(pendingQueue);
+}
+
+SequenceNumberCyclic InProgressFrames::getCandidateSequenceNumber(Packet *packet) const
+{
+    auto header = packet->peekAtFront<Ieee80211DataHeader>();
+    if (containsFrame(packet))
+        return header->getSequenceNumber();
+    return check_and_cast<IOriginatorQosMacDataService *>(dataService)->getNextSequenceNumber(header->getReceiverAddress(), header->getTid());
+}
+
+Packet *InProgressFrames::getPendingFrameFor(Packet *frame, bool extract)
+{
+    auto frameToTransmit = extract ? getFrameToTransmit() : peekFrameToTransmit();
     if (dynamicPtrCast<const Ieee80211RtsFrame>(frame->peekAtFront<Ieee80211MacHeader>()))
         return frameToTransmit;
     else {
@@ -105,6 +124,8 @@ Packet *InProgressFrames::getPendingFrameFor(Packet *frame)
             if (isEligibleToTransmit(frame) && frameToTransmit != frame)
                 return frame;
         }
+        if (!extract)
+            return check_and_cast<IOriginatorQosMacDataService *>(dataService)->peekEligibleFrame(pendingQueue);
         auto frames = dataService->extractFramesToTransmit(pendingQueue);
         if (frames) {
             auto firstFrame = (*frames)[0];
