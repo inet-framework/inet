@@ -14,6 +14,7 @@ Protocol comparisons use identical fixtures against each applicable commit and i
 | S5-P4 | release temporary Block Ack bitmap allocations. | [Allocation ownership; a protocol exchange cannot establish leak freedom.](../../tests/protocol/wifi/s5-bitmap-ownership.md) |
 | S5-P5 | serialize Basic and Compressed Block Ack Types. | [Reserved BAR Types fail in the parent; three child cases pass.](../../tests/protocol/wifi/s5-wire-types.md) |
 | S5-P6 | prepare QoS DATA without queue extraction. | [Owned preparation; the protocol caller enters in S5-P9.](../../tests/protocol/wifi/s5-reversible-preparation.md) |
+| S5-P7 | retain explicit Compressed receipt state. | [Receipt representation; the protocol caller enters in S5-P9.](../../tests/protocol/wifi/s5-receipt-state.md) |
 
 ## Execution and evidence boundaries
 

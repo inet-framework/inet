@@ -25,6 +25,9 @@ class INET_API BlockAckRecord
     MacAddress originatorAddress = MacAddress::UNSPECIFIED_ADDRESS;
     Tid tid = -1;
     std::map<SequenceControlField, bool> acknowledgmentState;
+    SequenceNumberCyclic windowStart;
+    int windowSize = 64; // Sequence positions; the Compressed profile permits 1..64.
+    std::set<SequenceNumber> completeReceipts;
 
   public:
     BlockAckRecord(MacAddress originatorAddress, Tid tid);
@@ -33,6 +36,12 @@ class INET_API BlockAckRecord
     void blockAckPolicyFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
     bool getAckState(SequenceNumberCyclic sequenceNumber, FragmentNumber fragmentNumber);
     void removeAckStates(SequenceNumberCyclic sequenceNumber);
+    void initializeCompressedWindow(SequenceNumberCyclic start, int size);
+    void compressedFrameReceived(const Ptr<const Ieee80211DataHeader>& header);
+    void advanceCompressedWindow(SequenceNumberCyclic start);
+    bool getCompressedAckState(SequenceNumberCyclic sequenceNumber) const;
+    bool hasCompleteReceipt(SequenceNumberCyclic sequenceNumber) const;
+    SequenceNumberCyclic getWindowStart() const { return windowStart; }
 
     MacAddress getOriginatorAddress() { return originatorAddress; }
     Tid getTid() { return tid; }
