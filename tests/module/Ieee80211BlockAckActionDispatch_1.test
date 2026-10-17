@@ -62,6 +62,7 @@ class ActionDispatchHcf : public Hcf {
         bar->setStartingSequenceNumber(SequenceNumberCyclic(104));
         bar->setFragmentNumber(0);
         auto request = new Packet("bar-before-data", bar);
+        request->insertAtBack(makeShared<Ieee80211MacTrailer>());
         request->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
         processLowerFrame(request, bar);
         ASSERT(delivered == 0);
