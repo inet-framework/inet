@@ -428,6 +428,22 @@ Notable backward incompatible changes are the following:
 
    The new parameter urgentOutOfBand, which LinuxTcp sets, gives the receive side of urgent data of Linux without SO_OOBINLINE: the last byte of urgent data leaves the stream, and a read stops before it. INET does not deliver that byte, which Linux gives to recv(MSG_OOB), and it sends no urgent data. Tcp keeps treating URG-marked bytes as ordinary data. Simulations change only where a peer sends urgent data to LinuxTcp.
 
+55. IEEE 802.11 Block Ack agreement lifecycle
+
+   HCF now dispatches accepted Block Ack Actions once after duplicate checks. Setup correlates the peer, TID, and dialog token. The recipient response determines the accepted buffer size and inactivity timeout. Both negotiated flags control A-MSDU use.
+
+   HCF defers new DATA extraction during setup and recovery. The first DATA under an accepted agreement retains the request sequence number. The response timeout starts after the request ACK, with a configurable default of 100 ms. Uncertain setup requires DELBA before surviving unsent DATA can resume. Failed DELBA discards the current deferred batch. Later DATA can start a fresh recovery exchange.
+
+   If an internal collision discards the first DATA before transmission, HCF retires the agreement and queues DELBA. The unsent successor remains deferred until recovery resolves. Lifetime expiry and RTS failure use the same retirement mechanism.
+
+   Directional teardown preserves the opposite agreement. The originator discards transmitted, unacknowledged DATA, even when its lifetime remains valid at inactivity expiration. It also discards unsent fragments through the highest transmitted allocation index. This local index records allocation order before fragmentation. This prevents transmission of an incomplete unit outside the agreement. Later intact DATA remains eligible, including across sequence wraparound.
+
+   Originator retirement now uses local allocation indices to preserve this boundary across large sequence gaps. A distance of exactly 2048 between DATA transmissions no longer lets unsent fragments survive teardown. The wire sequence numbers remain unchanged.
+
+   The recipient delivers complete buffered units in cyclic order across receive gaps before resource release. Association reset instead discards old buffered units in both directions. With Block Ack enabled, reset also discards queued and in-progress QoS DATA for the old peer, including unsent Normal Ack DATA. These changes can alter delivery, disposal, frame exchanges, and fingerprints.
+
+   Basic remains the default. Compressed selection still stops initialization. Custom agreement handlers, recipient services, and management implementations require the changes in the migration guide. External queues need the optional selected-extraction contract only when deferred DATA hides eligible work. Built-in queues preserve ordinary pull accounting for that extraction.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -509,6 +525,10 @@ Notable backward compatible changes are the following:
 15. IEEE 802.11 retry counters for each receiver
 
    QoS recovery now keeps separate retry counters for each receiver. Frames with equal TID, sequence number, and fragment number no longer share a counter across receivers. An acknowledgment or retry-limit disposal for one receiver preserves the other receiver's counter. This repair applies before DATA lifetime expiration.
+
+16. Optional selected extraction from packet queues
+
+   PacketQueue, CompoundPacketQueueBase, and PriorityScheduler now support the optional ISelectivePacketCollection contract. A consumer can find an eligible packet without a state change. It can extract that packet with ordinary pull events, residence metadata, and ownership transfer. Ordinary head selection remains unchanged. Providers without this capability report UnsupportedPacketSelection before extraction.
 
 Notable bug fixes are the following:
 

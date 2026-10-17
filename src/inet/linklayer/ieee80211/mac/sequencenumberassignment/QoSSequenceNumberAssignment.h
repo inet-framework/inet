@@ -36,6 +36,7 @@ class INET_API QoSSequenceNumberAssignment : public ISequenceNumberAssignment
     virtual CacheType getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming);
 
   public:
+    SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const;
     virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header) override;
 };
 

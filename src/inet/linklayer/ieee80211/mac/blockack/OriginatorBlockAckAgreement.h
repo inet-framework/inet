@@ -24,6 +24,9 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     SequenceNumberCyclic startingSequenceNumber;
     int bufferSize = -1;
     bool isAMsduSupported = false;
+    bool responseAMsduSupported = false;
+    int dialogToken = -1;
+    int64_t highestTransmittedDataIndex = -1;
     bool isDelayedBlockAckPolicySupported = false;
     bool isAddbaResponseReceived = false;
     bool isAddbaRequestSent = false;
@@ -49,6 +52,19 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     virtual bool getIsAddbaResponseReceived() const { return isAddbaResponseReceived; }
     virtual bool getIsAddbaRequestSent() const { return isAddbaRequestSent; }
     virtual bool getIsAMsduSupported() const { return isAMsduSupported; }
+    // IEEE Std 802.11-2024, 10.25.2 defines ADDBA negotiation; INET requires both flags before A-MSDU aggregation.
+    bool isAMsduPermitted() const { return isAMsduSupported && responseAMsduSupported; }
+    int getDialogToken() const { return dialogToken; }
+    void setDialogToken(int token) { dialogToken = token; }
+    void setResponseAMsduSupported(bool value) { responseAMsduSupported = value; }
+    bool getFirstDataTransmitted() const { return highestTransmittedDataIndex >= 0; }
+    int64_t getHighestTransmittedDataIndex() const { return highestTransmittedDataIndex; }
+    void recordTransmittedData(int64_t allocationIndex)
+    {
+        ASSERT(allocationIndex >= 0);
+        if (highestTransmittedDataIndex < allocationIndex)
+            highestTransmittedDataIndex = allocationIndex;
+    }
     virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
     virtual MacAddress getReceiverAddr() const { return receiverAddr; }
     virtual Tid getTid() const { return tid; }

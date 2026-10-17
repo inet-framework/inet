@@ -6,11 +6,57 @@
 
 
 #include "inet/queueing/scheduler/PriorityScheduler.h"
+#include "inet/common/Simsignals.h"
 
 namespace inet {
 namespace queueing {
 
 Define_Module(PriorityScheduler);
+
+Packet *PriorityScheduler::peekEligiblePacket(const std::function<bool(Packet *)>& predicate) const
+{
+    if (isStreamingPacket())
+        throw UnsupportedPacketSelection("Selected extraction does not support packet streaming");
+    for (size_t i = 0; i < providers.size(); i++) {
+        int index = getInputGateIndex(i);
+        if (auto selected = dynamic_cast<ISelectivePacketCollection *>(collections[index])) {
+            if (auto packet = selected->peekEligiblePacket(predicate))
+                return packet;
+        }
+        else if (!collections[index] || !collections[index]->isEmpty())
+            throw UnsupportedPacketSelection("PriorityScheduler child does not support ISelectivePacketCollection");
+    }
+    return nullptr;
+}
+
+Packet *PriorityScheduler::extractPacket(Packet *packet)
+{
+    Enter_Method("extractPacket");
+    if (isStreamingPacket())
+        throw UnsupportedPacketSelection("Selected extraction does not support packet streaming");
+    for (size_t i = 0; i < collections.size(); i++) {
+        auto collection = collections[i];
+        if (!collection)
+            throw UnsupportedPacketSelection("PriorityScheduler provider does not support IPacketCollection");
+        for (int j = 0; j < collection->getNumPackets(); j++) {
+            if (collection->getPacket(j) != packet)
+                continue;
+            auto selected = dynamic_cast<ISelectivePacketCollection *>(collection);
+            if (!selected)
+                throw UnsupportedPacketSelection("Provider does not support selected extraction");
+            selected->extractPacket(packet);
+            take(packet);
+            handlePacketScheduled(packet, i);
+            handlePacketProcessed(packet);
+            emit(packetPulledSignal, packet);
+            if (collector != nullptr)
+                animatePullPacket(packet, outputGate, collector.getReferencedGate());
+            drop(packet);
+            return packet;
+        }
+    }
+    throw cRuntimeError("Selected packet is not in this scheduler");
+}
 
 void PriorityScheduler::initialize(int stage)
 {
