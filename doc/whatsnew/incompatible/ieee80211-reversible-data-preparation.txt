@@ -1,0 +1,5 @@
+IEEE 802.11 reversible DATA preparation
+
+QoS data services now supply an owned DATA preview before queue extraction or sequence assignment. A successful commit transfers that same preview to the caller. A refused commit preserves the preview and original queue frames. Custom services must implement the preparation contract in the migration guide. The existing extraction path remains available.
+
+Commitment of ordinary DATA now preserves normal queue service effects. Queue output statistics count the departure, and the retained preview includes elapsed queueing time and queue events. This also applies when a deferred head causes selection of a later eligible frame.
