@@ -34,6 +34,7 @@ class Ieee80211ModeReq extends Ieee80211ModeTagBase
 //
 class Ieee80211ModeInd extends Ieee80211ModeTagBase
 {
+    simtime_t signalExtensionDuration = -1; // Actual received extension in seconds; a negative value means unavailable.
 }
 
 //

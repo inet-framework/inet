@@ -1,0 +1,3 @@
+IEEE 802.11 signal extension
+
+HT duration at 2.4 GHz now includes its six-microsecond signal extension. This correction can change airtime and simulation results. Custom IEEE 802.11 modes must supply the nominal-extension query. The radio derives actual received extension from local duration and decoded PHY length. Ieee80211ModeInd supplies that value. A negative value means unavailable.

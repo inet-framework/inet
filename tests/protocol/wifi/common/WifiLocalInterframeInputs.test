@@ -3,7 +3,7 @@ Check local SIFS evidence through complete physical receptions and production Rx
 Each run supplies two frames without a Block Ack agreement.
 The receiver accepts FCS independently of the interval result.
 
-%extraargs: -r 0..18
+%extraargs: -r 0..30
 
 %file: LocalInputs.cc
 #include <iostream>
@@ -11,6 +11,7 @@ The receiver accepts FCS independently of the interval result.
 #include "inet/common/packet/chunk/ByteCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/Tx.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211InterframeInd_m.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
@@ -81,7 +82,6 @@ class LocalInputRx : public Rx {
             eligible.push_back(precedingFrame.has_value());
             lastStart = start;
             if (accepted == 1) {
-                ASSERT(!related);
                 firstEnd = end;
             }
         }
@@ -90,7 +90,7 @@ class LocalInputRx : public Rx {
 };
 Define_Module(LocalInputRx);
 
-class LocalInputDriver : public cSimpleModule, public cListener {
+class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICallback {
     Ieee80211Radio *radio = nullptr;
     Ieee80211Radio *receiverRadio = nullptr;
     LocalInputRx *rx = nullptr;
@@ -99,6 +99,37 @@ class LocalInputDriver : public cSimpleModule, public cListener {
     int scenario = -1;
     simtime_t gap;
     bool completed = false;
+    int ackCompletions = 0;
+    simtime_t ackEnd;
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        ackCompletions++;
+        ackEnd = simTime();
+    }
+    const IIeee80211Mode *dataMode() const {
+        bool fiveGhz = (scenario >= 23 && scenario <= 26) || scenario == 28;
+        auto catalog = Ieee80211ModeSet::getModeSet(scenario < 19 ? "a" : fiveGhz ? "ac" : "n(mixed-2.4Ghz)");
+        if (scenario < 19)
+            return catalog->getMode(bps(6000000));
+        for (int i = 0; i < catalog->getNumModes(); i++) {
+            auto mode = catalog->getMode(i);
+            if (mode->getHtMcsIndex() == 0 && !mode->isHtShortGuardInterval() &&
+                    mode->getDataMode()->getBandwidth() == MHz(20))
+                return mode;
+        }
+        throw cRuntimeError("Missing HT mode");
+    }
+    void sendLocalAck() {
+        auto tx = check_and_cast<Tx *>(getSimulation()->getModuleByPath("receiver.wlan[0].mac.tx"));
+        auto header = makeShared<Ieee80211AckFrame>();
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        header->setDurationField(SIMTIME_ZERO);
+        auto packet = new Packet("own-ack", header);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        packet->addTag<Ieee80211ModeReq>()->setMode(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")->getMode(bps(1000000)));
+        tx->transmitFrame(packet, header, false, this);
+        delete packet;
+    }
     void initialize() override {
         scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("start"));
     }
@@ -117,7 +148,7 @@ class LocalInputDriver : public cSimpleModule, public cListener {
         fcs->setFcsMode(FCS_DECLARED_CORRECT);
         packet->insertAtBack(fcs);
         packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
-        packet->addTag<Ieee80211ModeReq>()->setMode(Ieee80211ModeSet::getModeSet("a")->getMode(bps(6000000)));
+        packet->addTag<Ieee80211ModeReq>()->setMode(dataMode());
         if (!busy)
             sent++;
         send(packet, "out");
@@ -140,7 +171,9 @@ class LocalInputDriver : public cSimpleModule, public cListener {
             return;
         }
         ended++;
-        if (scenario == 12 || scenario == 13 || scenario == 16 || scenario == 18) {
+        if (scenario >= 29)
+            scheduleAfter(SimTime(10, SIMTIME_US), new cMessage("check"));
+        else if (scenario == 12 || scenario == 13 || scenario == 16 || scenario == 18) {
             if (sent == 1)
                 scheduleAfter(gap, new cMessage("second"));
             else if (sent == 2 && (scenario == 16 || scenario == 18))
@@ -164,6 +197,13 @@ class LocalInputDriver : public cSimpleModule, public cListener {
             scheduleAfter(SimTime(10, SIMTIME_US), new cMessage("check"));
     }
     void handleMessage(cMessage *message) override {
+        if (auto packet = dynamic_cast<Packet *>(message)) {
+            ASSERT(scenario >= 29);
+            ASSERT(packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK);
+            delete packet;
+            scheduleAfter(SimTime(10, SIMTIME_US) + (scenario == 30 ? SimTime::fromRaw(1) : SIMTIME_ZERO), new cMessage("ownAckResponse"));
+            return;
+        }
         std::string name = message->getName();
         delete message;
         if (name == "start") {
@@ -187,13 +227,27 @@ class LocalInputDriver : public cSimpleModule, public cListener {
                 gap += SimTime::fromRaw(1);
             if (scenario == 18)
                 gap = SIMTIME_ZERO;
-            sendFrame();
+            if (scenario >= 19) {
+                bool fiveGhz = (scenario >= 23 && scenario <= 26) || scenario == 28;
+                gap = SimTime(fiveGhz ? 16 : 10, SIMTIME_US);
+                if (scenario <= 26) {
+                    int boundary = (scenario - 19) % 4;
+                    auto tolerance = fiveGhz ? SimTime(900, SIMTIME_NS) : SimTime(2, SIMTIME_US);
+                    gap += boundary % 2 == 0 ? -tolerance : tolerance;
+                    if (boundary >= 2)
+                        gap += boundary == 2 ? -SimTime::fromRaw(1) : SimTime::fromRaw(1);
+                }
+            }
+            if (scenario >= 29)
+                sendLocalAck();
+            else
+                sendFrame();
             if (scenario == 10)
                 scheduleAfter(SimTime(1, SIMTIME_US), new cMessage("overlap"));
             if (scenario == 11)
                 sendFrame();
         }
-        else if (name == "overlap" || name == "recovery" || name == "successor")
+        else if (name == "overlap" || name == "recovery" || name == "successor" || name == "ownAckResponse")
             sendFrame();
         else if (name == "busy")
             sendFrame(true);
@@ -219,7 +273,13 @@ class LocalInputDriver : public cSimpleModule, public cListener {
                 scheduleAfter(SimTime(1, SIMTIME_US), new cMessage("busy"));
         }
         else {
-            if (scenario == 18) {
+            if (scenario >= 29) {
+                ASSERT(ackCompletions == 1);
+                ASSERT(rx->accepted == 1);
+                ASSERT(rx->lastStart - ackEnd == SimTime(12, SIMTIME_US) + (scenario == 30 ? SimTime::fromRaw(1) : SIMTIME_ZERO));
+                ASSERT(rx->related == (scenario == 29));
+            }
+            else if (scenario == 18) {
                 ASSERT(rx->relations == (std::vector<bool>{false, false, true}));
                 ASSERT(rx->overlappingStarts == 0);
             }
@@ -240,9 +300,12 @@ class LocalInputDriver : public cSimpleModule, public cListener {
             }
             else {
                 ASSERT(rx->accepted == 2);
+                ASSERT(!rx->relations.front());
                 if (scenario != 14)
                     ASSERT(rx->lastStart - rx->firstEnd == gap);
-                ASSERT(rx->related == (scenario == 0 || scenario == 1 || scenario == 4));
+                bool expected = scenario == 0 || scenario == 1 || scenario == 4 || scenario == 27 || scenario == 28 ||
+                    (scenario >= 19 && scenario <= 26 && (scenario - 19) % 4 < 2);
+                ASSERT(rx->related == expected);
             }
             completed = true;
             std::cout << "Local SIFS input scenario=" << scenario << ": PASS\n";
@@ -263,6 +326,8 @@ import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMed
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Receiver;
 module LocalInputRadio extends Ieee80211ScalarRadio {
     parameters:
+        bool concurrentReceiver;
+        receiver.typename = default(this.concurrentReceiver ? "LocalInterframeConcurrentReceiver" : "Ieee80211Receiver");
         bool deferDeliveryPriority;
         bool missingTime;
         bool corruptFirst;
@@ -302,7 +367,7 @@ sim-time-limit = 10ms
 seed-set = 0
 record-vector-results = false
 record-scalar-results = false
-*.peer.driver.scenario = ${scenario=0..18}
+*.peer.driver.scenario = ${scenario=0..30}
 *.peer.radio.allowConcurrentTransmissions = true
 *.receiver.wlan[0].radio.typename = "LocalInputRadio"
 *.receiver.wlan[0].radio.deferDeliveryPriority = ${scenario} == 13
@@ -312,16 +377,17 @@ record-scalar-results = false
 *.receiver.wlan[0].radio.receiver.sensitivity = -70dBm
 *.receiver.wlan[0].radio.receiver.energyDetection = -90dBm
 *.receiver.wlan[0].radio.allowConcurrentReceptions = ${scenario} == 10 || ${scenario} == 11
-*.receiver.wlan[0].radio.receiver.typename = ${receiverType="Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","LocalInterframeConcurrentReceiver","LocalInterframeConcurrentReceiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver","Ieee80211Receiver" ! scenario}
+*.receiver.wlan[0].radio.concurrentReceiver = ${scenario} == 10 || ${scenario} == 11
 *.radioMedium.propagation.typename = "ConstantTimePropagation"
 *.radioMedium.sameTransmissionStartTimeCheck = "ignore"
-*.radioMedium.propagation.propagationTime = 0s
+*.radioMedium.propagation.propagationTime = ${scenario} >= 29 ? 1us : (${scenario} == 27 || ${scenario} == 28 ? 5us : 0s)
 **.wlan[*].agent.typename = ""
 **.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
-**.wlan[*].opMode = "a"
+**.wlan[*].opMode = ${scenario} < 19 ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 ? "ac" : "n(mixed-2.4Ghz)")
 **.wlan[*].mac.qosStation = false
 **.wlan[*].mac.rx.typename = "LocalInputRx"
-*.peer.radio.opMode = "a"
+*.peer.radio.opMode = ${scenario} < 19 ? "a" : ((${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 ? "ac" : "n(mixed-2.4Ghz)")
+**.bandName = (${scenario} >= 23 && ${scenario} <= 26) || ${scenario} == 28 ? "5 GHz (mapped 20 MHz)" : "2.4 GHz"
 *.peer.radio.transmitter.bitrate = 6Mbps
 *.peer.radio.antenna.mobilityModule = "^.^.mobility"
 **.mobility.initFromDisplayString = false
