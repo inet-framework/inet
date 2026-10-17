@@ -9,6 +9,7 @@ Protocol comparisons use identical fixtures against each applicable commit and i
 | Stable identifier | Commit responsibility | Verification and reviewer document |
 | --- | --- | --- |
 | S5-P1 | Detect SIFS from local endpoints in Rx. | [Local interval and physical completion checks.](../../tests/protocol/wifi/s5-physical-timing.md) |
+| S5-P2 | include the HT signal extension at 2.4 GHz. | [One physical HT exchange; parent duration assertion fails and child passes.](../../tests/protocol/wifi/s5-ht-signal-extension.md) |
 
 ## Execution and evidence boundaries
 

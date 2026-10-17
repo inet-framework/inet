@@ -1,0 +1,196 @@
+%description:
+Check the complete duration of HT MCS 0 DATA through the radio during a real infrastructure exchange.
+The independent long-GI, 20 MHz, one-stream formula includes the six-microsecond 2.4 GHz signal extension.
+The observer reads the transmitted PHY Length field and exact physical endpoints.
+No changed mode-duration helper supplies the expected value.
+
+%extraargs: -r 0..4
+
+%file: HtSignalExtension.cc
+#include "ProtocolTest.h"
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmitterAnalogModel.h"
+#include "inet/mobility/contract/IMobility.h"
+
+namespace inet::protocoltest {
+using namespace physicallayer;
+using namespace ieee80211;
+template<typename T> auto actualExtension(const T *tag, int) -> decltype(tag->getSignalExtensionDuration()) {
+    return tag->getSignalExtensionDuration();
+}
+template<typename T> simtime_t actualExtension(const T *, long) { return SimTime(-1); }
+
+class ExtensionTransmitter : public Ieee80211Transmitter {
+  public:
+    const IIeee80211Mode *computeTransmissionMode(const Packet *packet) const override {
+        auto selected = Ieee80211Transmitter::computeTransmissionMode(packet);
+        if (par("scenario").intValue() != 1 ||
+                selected->getModulationClass() != IIeee80211Mode::ModulationClass::VHT)
+            return selected;
+        // Bitrate configuration cannot distinguish HT from VHT at 6.5 Mbps.
+        auto catalog = Ieee80211ModeSet::getModeSet("ac");
+        for (int i = 0; i < catalog->getNumModes(); i++) {
+            auto candidate = catalog->getMode(i);
+            if (candidate->getModulationClass() == IIeee80211Mode::ModulationClass::HT &&
+                    candidate->getHtMcsIndex() == 0 && !candidate->isHtShortGuardInterval() &&
+                    candidate->getDataMode()->getBandwidth() == MHz(20))
+                return candidate;
+        }
+        throw cRuntimeError("Missing 5 GHz HT MCS 0 mode");
+    }
+    const ITransmission *createTransmission(const IRadio *radio, const Packet *packet, simtime_t start) const override {
+        auto selected = computeTransmissionMode(packet);
+        if (par("scenario").intValue() != 2 || selected->getHtMcsIndex() < 0)
+            return Ieee80211Transmitter::createTransmission(radio, packet, start);
+        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto duration = selected->getDuration(B(phy->getLengthField())) - SimTime(6, SIMTIME_US);
+        auto preamble = selected->getPreambleMode()->getDuration();
+        auto header = selected->getHeaderMode()->getDuration();
+        auto data = duration - preamble - header;
+        auto mobility = radio->getAntenna()->getMobility();
+        auto position = mobility->getCurrentPosition();
+        auto orientation = mobility->getCurrentAngularPosition();
+        auto analog = getAnalogModel()->createAnalogModel(preamble, header, data, centerFrequency,
+                selected->getDataMode()->getBandwidth(), computeTransmissionPower(packet));
+        return new Ieee80211Transmission(radio, packet, start, start + duration, preamble, header, data,
+                position, position, orientation, orientation, nullptr, nullptr, nullptr, nullptr,
+                analog, selected, computeTransmissionChannel(packet));
+    }
+};
+Define_Module(ExtensionTransmitter);
+class ExtensionRadio : public Ieee80211Radio {
+  protected:
+    void decapsulate(Packet *packet) const override {
+        int scenario = par("scenario");
+        if (scenario == 3)
+            packet->removeTagIfPresent<SignalTimeInd>();
+        if (scenario == 4) {
+            auto time = packet->getTagForUpdate<SignalTimeInd>();
+            time->setEndTime(time->getStartTime() - SimTime(1, SIMTIME_US));
+        }
+        Ieee80211Radio::decapsulate(packet);
+    }
+};
+Define_Module(ExtensionRadio);
+class HtSignalExtensionAudit : public cSimpleModule, public cListener {
+    cModule *radio = nullptr;
+    cModule *sink = nullptr;
+    cModule *recipientRadio = nullptr;
+    bool delivered = false;
+    bool checked = false;
+    bool extensionChecked = false;
+  protected:
+    void initialize() override {
+        radio = getModuleByPath("^.sta1.wlan[0].radio");
+        radio->subscribe(transmissionStartedSignal, this);
+        sink = getModuleByPath("^.sta2.app[0]");
+        sink->subscribe(packetReceivedSignal, this);
+        recipientRadio = getModuleByPath("^.ap.wlan[0].radio");
+        recipientRadio->subscribe(packetSentToUpperSignal, this);
+    }
+    void receiveSignal(cComponent *source, simsignal_t, cObject *value, cObject *) override {
+        if (source == sink) {
+            delivered = true;
+            emit(registerSignal("testPayloadDelivered"), 1L);
+            return;
+        }
+        int scenario = par("scenario");
+        if (source == recipientRadio) {
+            auto packet = check_and_cast<Packet *>(value);
+            auto header = packet->peekAtFront<Ieee80211MacHeader>();
+            auto mode = packet->getTag<Ieee80211ModeInd>();
+            if (extensionChecked || header->getType() != ST_DATA_WITH_QOS || mode->getMode()->getHtMcsIndex() < 0)
+                return;
+            auto expected = scenario >= 3 ? SimTime(-1) : scenario == 1 || scenario == 2 ? SIMTIME_ZERO : SimTime(6, SIMTIME_US);
+            ASSERT(actualExtension(mode.get(), 0) == expected);
+            extensionChecked = true;
+            emit(registerSignal("testActualExtensionChecked"), 1L);
+            return;
+        }
+        auto transmission = dynamic_cast<const Ieee80211Transmission *>(value);
+        if (!transmission || transmission->getMode()->getHtMcsIndex() < 0 || checked)
+            return;
+        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+        auto mac = transmission->getPacket()->peekAt<Ieee80211MacHeader>(phy->getChunkLength());
+        if (mac->getType() != ST_DATA_WITH_QOS)
+            return;
+        ASSERT(transmission->getMode()->getHtMcsIndex() == 0);
+        int64_t octets = phy->getLengthField().get();
+        int64_t symbols = (16 + 8 * octets + 6 + 25) / 26;
+        auto expected = SimTime(36 + 4 * symbols + (scenario == 1 || scenario == 2 ? 0 : 6), SIMTIME_US);
+        auto actual = transmission->getEndTime() - transmission->getStartTime();
+        if (actual != expected)
+            throw cRuntimeError("HT PPDU duration: expected %s, received %s", expected.str().c_str(), actual.str().c_str());
+        checked = true;
+        emit(registerSignal("testHtDurationChecked"), 1L);
+    }
+    void finish() override { ASSERT(checked && delivered && extensionChecked); }
+};
+Define_Module(HtSignalExtensionAudit);
+Define_ProtocolTest(wifi_ht_signal_extension) {
+    return ProtocolTest("wifi_ht_signal_extension")
+        .once(on("audit").signal("testHtDurationChecked").assertValue(1).within(2.0))
+        .once(on("audit").signal("testActualExtensionChecked").assertValue(1).within(2.0))
+        .once(on("audit").signal("testPayloadDelivered").assertValue(1).within(0.5));
+}
+}
+
+%file: HtSignalExtension.ned
+@namespace(inet::protocoltest);
+import inet.protocoltest.wifi.WifiInfraNetwork;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Transmitter;
+module ExtensionRadio extends Ieee80211ScalarRadio {
+    parameters:
+        int scenario;
+        transmitter.typename = default(scenario == 1 || scenario == 2 ? "ExtensionTransmitter" : "Ieee80211Transmitter");
+        @class(::inet::protocoltest::ExtensionRadio);
+}
+module ExtensionTransmitter extends Ieee80211Transmitter {
+    parameters: int scenario; @class(::inet::protocoltest::ExtensionTransmitter);
+}
+simple HtSignalExtensionAudit {
+    parameters:
+        int scenario;
+        @class(HtSignalExtensionAudit);
+        @signal[testHtDurationChecked](type=long);
+        @signal[testPayloadDelivered](type=long);
+        @signal[testActualExtensionChecked](type=long);
+}
+network HtSignalExtensionNetwork extends WifiInfraNetwork {
+    submodules:
+        audit: HtSignalExtensionAudit;
+}
+
+%inifile: test.ini
+[General]
+network = HtSignalExtensionNetwork
+*.tester.testName = "wifi_ht_signal_extension"
+*.audit.scenario = ${scenario=0..4}
+**.wlan[*].radio.typename = "ExtensionRadio"
+**.wlan[*].radio.scenario = ${scenario}
+**.wlan[*].radio.transmitter.scenario = ${scenario}
+*.sta*.wlan[*].opMode = ${scenario} == 1 ? "ac" : "n(mixed-2.4Ghz)"
+*.ap.wlan[*].opMode = ${scenario} == 1 ? "ac" : "n(mixed-2.4Ghz)"
+**.bandName = ${scenario} == 1 ? "5 GHz (mapped 20 MHz)" : "2.4 GHz"
+**.centerFrequency = ${scenario} == 1 ? 5.18GHz : 2.412GHz
+**.wlan[*].bitrate = 6.5Mbps
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6.5Mbps
+**.wlan[*].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+**.wlan[*].mac.hcf.rateSelection.dataFrameBandwidth = 20MHz
+**.wlan[*].radio.antenna.numAntennas = 1
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+*.sta1.app[0].sendInterval = 100s
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_ht_signal_extension: PASS
+%not-contains: stdout
+PROTOCOLTEST wifi_ht_signal_extension: FAIL

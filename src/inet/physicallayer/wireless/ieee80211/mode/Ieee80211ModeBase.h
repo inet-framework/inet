@@ -31,6 +31,7 @@ class INET_API Ieee80211ModeBase : public IIeee80211Mode
     virtual bool isHtShortGuardInterval() const override { return false; }
     virtual int getVhtMcsIndex() const override { return -1; }
     virtual bool isVhtShortGuardInterval() const override { return false; }
+    virtual const simtime_t getSignalExtensionTime() const override { return SIMTIME_ZERO; }
     virtual const char *getName() const override { return name.c_str(); }
 };
 

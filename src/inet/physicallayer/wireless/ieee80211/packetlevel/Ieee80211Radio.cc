@@ -308,6 +308,18 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
     const auto& phyHeader = popIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented() || !verifyFcs(phyHeader))
         packet->setBitError(true);
+    auto indication = packet->getTagForUpdate<Ieee80211ModeInd>();
+    indication->setSignalExtensionDuration(-1);
+    auto time = packet->findTag<SignalTimeInd>();
+    if (time && time->getEndTime() > time->getStartTime() && phyHeader->isCorrect() &&
+            !phyHeader->isIncomplete() && !phyHeader->isImproperlyRepresented() && verifyFcs(phyHeader)) {
+        auto nominalExtension = mode->getSignalExtensionTime();
+        auto receivedDuration = time->getEndTime() - time->getStartTime();
+        auto actualExtension = receivedDuration - mode->getDuration(B(phyHeader->getLengthField())) + nominalExtension;
+        // The packet-level representation supports zero or the nominal signal extension.
+        if (actualExtension == SIMTIME_ZERO || actualExtension == nominalExtension)
+            indication->setSignalExtensionDuration(actualExtension);
+    }
     if (auto ofdmHeader = dynamicPtrCast<const Ieee80211OfdmPhyHeader>(phyHeader)) {
         auto signal = unpackIeee80211OfdmSignalField(packIeee80211OfdmSignalField(ofdmHeader->getRate(),
                 ofdmHeader->getReserved(), ofdmHeader->getLengthField().get<B>(), ofdmHeader->getParity(), ofdmHeader->getTail()));
