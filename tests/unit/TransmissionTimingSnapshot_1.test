@@ -1,0 +1,138 @@
+%description:
+Check shared transmission timing without a WLAN consumer or a propagation model.
+Use generic transmissions and cached arrivals with exact endpoints.
+Require snapshots to retain their values after cache expiry deletes the original objects.
+Check positive, zero, and negative gaps for the same transmitter and different transmitters.
+Check missing transmissions, missing arrivals, and the same transmission identity.
+Require absent arrival queries to leave all three cache implementations unchanged before their first transmission.
+This unit test does not establish physical reception or interframe protocol behavior.
+
+%includes:
+#include <memory>
+#include "inet/physicallayer/wireless/common/antenna/IsotropicAntenna.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/wireless/common/communicationcache/MapCommunicationCache.h"
+#include "inet/physicallayer/wireless/common/communicationcache/ReferenceCommunicationCache.h"
+#include "inet/physicallayer/wireless/common/communicationcache/VectorCommunicationCache.h"
+#include "inet/physicallayer/wireless/common/medium/RadioMedium.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/Radio.h"
+#include "inet/physicallayer/wireless/common/signal/Arrival.h"
+
+%global:
+using namespace inet;
+using namespace inet::physicallayer;
+
+class TimingMedium : public RadioMedium {
+  public:
+    void attach(ICommunicationCache *cache) { communicationCache = cache; }
+};
+
+// These adapters supply identity and component references. No radio procedure executes.
+class TimingRadio : public Radio {
+    int identity;
+    const IRadioMedium *attachedMedium;
+    const IAntenna *attachedAntenna;
+    const IReceiver *attachedReceiver;
+  public:
+    TimingRadio(int identity, const IRadioMedium *medium, const IAntenna *antenna, const IReceiver *receiver) :
+        identity(identity), attachedMedium(medium), attachedAntenna(antenna), attachedReceiver(receiver) {}
+    int getId() const override { return identity; }
+    const IRadioMedium *getMedium() const override { return attachedMedium; }
+    const IAntenna *getAntenna() const override { return attachedAntenna; }
+    const IReceiver *getReceiver() const override { return attachedReceiver; }
+};
+
+class TimingCache : public MapCommunicationCache {
+  public:
+    size_t receptionSlots() const {
+        size_t count = 0;
+        for (const auto& entry : transmissionCache)
+            if (entry.second.receptionCacheEntries)
+                count += entry.second.receptionCacheEntries->size();
+        return count;
+    }
+};
+
+static TransmissionBase *makeTiming(const IRadio *radio, const Packet *packet, int startUs, int endUs)
+{
+    return new TransmissionBase(radio, packet, SimTime(startUs, SIMTIME_US), SimTime(endUs, SIMTIME_US),
+            SIMTIME_ZERO, SIMTIME_ZERO, SimTime(endUs - startUs, SIMTIME_US), Coord(), Coord(),
+            Quaternion(), Quaternion(), nullptr, nullptr, nullptr, nullptr, nullptr);
+}
+
+template<typename Cache>
+static void checkAbsentArrival(const IRadio *radio, const ITransmission *transmission)
+{
+    Cache cache;
+    ASSERT(cache.getNumRadios() == 0 && cache.getNumTransmissions() == 0);
+    for (int i = 0; i < 3; i++)
+        ASSERT(cache.findCachedArrival(radio, transmission) == nullptr);
+    ASSERT(cache.getNumRadios() == 0 && cache.getNumTransmissions() == 0);
+}
+
+%activity:
+Packet packet("timing-input");
+IsotropicAntenna antenna;
+FlatReceiverBase receiver;
+TimingMedium medium;
+TimingRadio transmitter(1, &medium, &antenna, &receiver);
+TimingRadio recipient(2, &medium, &antenna, &receiver);
+TimingRadio absentArrival(3, &medium, &antenna, &receiver);
+TimingCache cache;
+medium.attach(&cache);
+auto previous = std::unique_ptr<TransmissionBase>(makeTiming(&transmitter, &packet, 100, 140));
+checkAbsentArrival<MapCommunicationCache>(&recipient, previous.get());
+checkAbsentArrival<VectorCommunicationCache>(&recipient, previous.get());
+checkAbsentArrival<ReferenceCommunicationCache>(&recipient, previous.get());
+int previousId = previous->getId();
+ASSERT(medium.getTransmissionTimingSnapshot(previousId).transmissionId == -1);
+ASSERT(!medium.computePrecedingSignalGap(previousId, TransmissionTimingSnapshot()).has_value());
+cache.addRadio(&transmitter);
+cache.addRadio(&recipient);
+cache.addRadio(&absentArrival);
+auto previousPointer = previous.release();
+cache.addTransmission(previousPointer);
+cache.setCachedArrival(&recipient, previousPointer, new Arrival(SimTime(7, SIMTIME_US), SimTime(7, SIMTIME_US),
+        SimTime(107, SIMTIME_US), SimTime(147, SIMTIME_US), SIMTIME_ZERO, SIMTIME_ZERO,
+        SimTime(40, SIMTIME_US), Coord(), Coord(), Quaternion(), Quaternion()));
+auto snapshot = medium.getTransmissionTimingSnapshot(previousId);
+ASSERT(snapshot.transmissionId == previousId && snapshot.transmitterRadioId == 1);
+ASSERT(snapshot.startTime == SimTime(100, SIMTIME_US) && snapshot.endTime == SimTime(140, SIMTIME_US));
+ASSERT(snapshot.arrivalEndTimes.size() == 1 && snapshot.arrivalEndTimes.at(2) == SimTime(147, SIMTIME_US));
+ASSERT(cache.findCachedArrival(&absentArrival, previousPointer) == nullptr);
+ASSERT(cache.receptionSlots() == 1);
+cache.setCachedInterferenceEndTime(previousPointer, SimTime(160, SIMTIME_US));
+wait(SimTime(200, SIMTIME_US));
+int expired = 0;
+cache.removeNonInterferingTransmissions([&](const ITransmission *transmission) {
+    ASSERT(transmission->getId() == previousId);
+    expired++;
+});
+ASSERT(expired == 1 && cache.getNumTransmissions() == 0);
+ASSERT(medium.getTransmissionTimingSnapshot(previousId).transmissionId == -1);
+ASSERT(!medium.computePrecedingSignalGap(previousId, snapshot).has_value());
+ASSERT(snapshot.endTime == SimTime(140, SIMTIME_US) && snapshot.arrivalEndTimes.at(2) == SimTime(147, SIMTIME_US));
+for (const TimingRadio *source : {&transmitter, &recipient}) {
+    int precedingEndUs = source == &transmitter ? 140 : 147;
+    for (int gapUs : {10, 0, -5}) {
+        auto current = makeTiming(source, &packet, precedingEndUs + gapUs, precedingEndUs + gapUs + 10);
+        cache.addTransmission(current);
+        auto gap = medium.computePrecedingSignalGap(current->getId(), snapshot);
+        ASSERT(gap.has_value() && *gap == SimTime(gapUs, SIMTIME_US));
+        ASSERT(!medium.computePrecedingSignalGap(current->getId(), TransmissionTimingSnapshot()).has_value());
+        auto sameId = snapshot;
+        sameId.transmissionId = current->getId();
+        ASSERT(!medium.computePrecedingSignalGap(current->getId(), sameId).has_value());
+        auto noArrival = snapshot;
+        noArrival.arrivalEndTimes.clear();
+        auto withoutArrival = medium.computePrecedingSignalGap(current->getId(), noArrival);
+        ASSERT(source == &transmitter ? withoutArrival.has_value() : !withoutArrival.has_value());
+        cache.removeTransmission(current);
+    }
+}
+ASSERT(snapshot.transmissionId == previousId && snapshot.arrivalEndTimes.at(2) == SimTime(147, SIMTIME_US));
+EV << "Shared transmission timing snapshot checks passed\n";
+
+%contains: stdout
+Shared transmission timing snapshot checks passed

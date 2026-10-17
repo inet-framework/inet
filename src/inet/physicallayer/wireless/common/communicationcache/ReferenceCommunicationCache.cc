@@ -14,6 +14,16 @@ namespace physicallayer {
 
 Define_Module(ReferenceCommunicationCache);
 
+const IArrival *ReferenceCommunicationCache::findCachedArrival(const IRadio *receiver, const ITransmission *transmission) const
+{
+    int transmissionIndex = transmission->getId();
+    int radioIndex = receiver->getId();
+    if (transmissionIndex < 0 || transmissionIndex >= int(transmissionCache.size()) || radioIndex < 0)
+        return nullptr;
+    auto receptions = transmissionCache[transmissionIndex].receptionCacheEntries;
+    return receptions && radioIndex < int(receptions->size()) ? receptions->at(radioIndex).arrival : nullptr;
+}
+
 ReferenceCommunicationCache::~ReferenceCommunicationCache()
 {
     for (auto& transmissionCacheEntry : transmissionCache)

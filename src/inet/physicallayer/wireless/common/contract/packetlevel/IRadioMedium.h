@@ -8,6 +8,8 @@
 #ifndef __INET_IRADIOMEDIUM_H
 #define __INET_IRADIOMEDIUM_H
 
+#include <optional>
+
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/environment/contract/IMaterial.h"
@@ -25,6 +27,7 @@
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReceptionDecision.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/TransmissionTimingSnapshot.h"
 
 namespace inet {
 namespace physicallayer {
@@ -170,6 +173,24 @@ class INET_API IRadioMedium : public virtual IPrintableObject
      * May return a nullptr if no matching transmission is registered.
      */
     virtual const ITransmission *getTransmission(int id) const = 0;
+
+    /**
+     * Copies the physical endpoints of a live transmission without new propagation calculations.
+     * An absent transmission returns a snapshot with transmissionId equal to -1.
+     * An absent radio entry means that the medium has no cached arrival for that radio.
+     * The caller owns the returned value. Later cache removal does not change it.
+     */
+    virtual TransmissionTimingSnapshot getTransmissionTimingSnapshot(int id) const = 0;
+
+    /**
+     * Returns the interval before the current transmission at its transmitter.
+     * For the same transmitter, the interval starts at the previous transmission end.
+     * For different transmitters, it starts at the previous signal arrival end at the current transmitter.
+     * Missing current transmission or arrival data returns no value.
+     * The method uses the supplied snapshot and changes no cache or propagation state.
+     */
+    virtual std::optional<simtime_t> computePrecedingSignalGap(int currentTransmissionId,
+            const TransmissionTimingSnapshot& preceding) const = 0;
 
     /**
      * Returns the listening decision that describes what the receiver detects
