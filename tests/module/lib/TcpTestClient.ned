@@ -38,6 +38,7 @@ simple TcpTestClient like IApp
         string synRetriesScript = default(""); // "time value; ..." -- at each time, set the SYN retries of the first connection (TcpSocket::setSynRetries(), TCP_SYNCNT on an open socket)
         string corkScript = default(""); // "time 1; time 0; ..." -- at each time, turn TCP_CORK on (1) or off (0) for the first connection (TcpSocket::setCork()), also before its open
         string maxSegScript = default(""); // "time value; ..." -- at each time, set TCP_MAXSEG of the first connection (TcpSocket::setMaxSeg()), also before its open
+        string notsentLowatScript = default(""); // "time value; ..." -- at each time, set TCP_NOTSENT_LOWAT of the first connection (TcpSocket::setNotsentLowat())
         string pathMtuScript = default(""); // "time value; ..." -- at each time, set the route MTU of the first connection (TcpSocket::setPathMtu(), as ip route change), also before its open
         string noDelayScript = default(""); // "time 1; time 0; ..." -- at each time, turn TCP_NODELAY on (1) or off (0) for the first connection (TcpSocket::setNoDelay()), also before its open
         string keepAliveScript = default(""); // "time 1; time 0; ..." -- at each time, turn keepalive on (1) or off (0) for the first connection (TcpSocket::setKeepAlive()), also before its open
