@@ -494,9 +494,11 @@ Notable backward incompatible changes are the following:
 
    Commitment of ordinary DATA now preserves normal queue service effects. Queue output statistics count the departure, and the retained preview includes elapsed queueing time and queue events. This also applies when a deferred head causes selection of a later eligible frame.
 
-58. VHT PHY header identity
+58. IEEE 802.11 HT-SIG bytes and aggregate boundaries
 
-   VHT signal modes now create the existing VHT PHY header type. This corrects their former use of the HT header type.
+   HT transmissions now preserve the complete HT-SIG header through byte conversion. Receivers check its CRC, supported fields, and length before length-based trailer removal. Invalid headers mark packets as erroneous. Delimiter inspection supplies bounded MPDU ranges, including singleton aggregates. Ordinary valid HT duration inputs remain unchanged. VHT modes now create their own header type.
+
+   Delimiter recovery now scans across typed MPDU headers. An invalid delimiter no longer causes a chunk conversion error at those headers. Bounded recovery retains later complete MPDU ranges.
 
 Notable backward compatible changes are the following:
 
