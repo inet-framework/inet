@@ -43,6 +43,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     std::function<void()> expireFrames;
     std::function<bool(Packet *)> extractionEligible;
     std::function<bool(Packet *)> aMsduPermitted;
+    std::function<bool(Packet *)> fragmentationPermitted;
     int64_t nextDataAllocationIndex = 0;
 
   protected:
@@ -54,6 +55,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
 
   public:
+    void setFragmentationPermission(std::function<bool(Packet *)> permission) { fragmentationPermitted = permission; }
     void setEligibility(std::function<bool(Packet *)> eligible, std::function<bool(Packet *)> permission) {
         extractionEligible = eligible;
         aMsduPermitted = permission;

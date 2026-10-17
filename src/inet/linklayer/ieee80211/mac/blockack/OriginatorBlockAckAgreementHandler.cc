@@ -174,6 +174,13 @@ void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const
             scheduleInactivityTimer(callback);
         }
     }
+    else if (auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAck)) {
+        auto agreement = getAgreement(compressed->getTransmitterAddress(), compressed->getTidInfo());
+        if (agreement) {
+            agreement->calculateExpirationTime();
+            scheduleInactivityTimer(callback);
+        }
+    }
     else
         throw cRuntimeError("Unsupported BlockAck");
 }

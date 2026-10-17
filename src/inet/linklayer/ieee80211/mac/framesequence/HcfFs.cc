@@ -64,6 +64,14 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
     auto frames = context->getInProgressFrames();
     auto qos = context->getQoSContext();
     bool bar = qos->ackPolicy->isBlockAckReqNeeded(frames, qos->txopProcedure, qos->blockAckAgreementHandler);
+    qos->preparedData.reset();
+    if (!bar && qos->prepareData) {
+        auto preparation = qos->prepareData(context);
+        if (preparation == DataPreparationResult::READY)
+            return true;
+        if (preparation == DataPreparationResult::DEFERRED)
+            return false;
+    }
     bool hasFrameToTransmit = qos->blockAckAgreementHandler ?
         bar || frames->peekFrameToTransmit() != nullptr : frames->hasInProgressFrames();
     if (hasFrameToTransmit) {
@@ -101,7 +109,7 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
 
 bool HcfFs::hasMoreTxOpsAndMulticast(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    return hasMoreTxOps(frameSequence, context) && context->getInProgressFrames()->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
+    return hasMoreTxOps(frameSequence, context) && context->getDataFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
 }
 
 } // namespace ieee80211
