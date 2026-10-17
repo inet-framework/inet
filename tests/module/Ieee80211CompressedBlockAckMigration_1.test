@@ -1,0 +1,179 @@
+%description:
+An external configuration enables Block Ack without an explicit profile.
+Legacy g and a links, and an HT ad hoc link without peer HT records, must deliver twelve UDP payloads with Normal Ack.
+Require a queued successor without ADDBA, BAR, or BA. Check profile and capability diagnostics with support enabled and disabled.
+
+%extraargs: -r 0..5
+
+%postrun-command: python3 check-diagnostics.py
+
+%file: Migration.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/queueing/contract/IPacketQueue.h"
+
+namespace inet::ieee80211 {
+class MigrationHcf : public Hcf {
+  public:
+    int normalData = 0;
+    int requests = 0;
+    int bars = 0;
+    int responses = 0;
+    bool queuedSuccessor = false;
+    bool compressed() const { return std::string(par("blockAckVariant").stringValue()) == "compressed"; }
+    bool clean() const {
+        return (!originatorBlockAckAgreementHandler || (originatorBlockAckAgreementHandler->getAgreements().empty() &&
+            originatorBlockAckAgreementHandler->getProcedures().empty())) &&
+            (!recipientBlockAckAgreementHandler || recipientBlockAckAgreementHandler->getAgreements().empty());
+    }
+  protected:
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        bool accepted = Hcf::transmitFrame(packet, ifs);
+        if (!accepted)
+            return false;
+        requests += dynamicPtrCast<const Ieee80211AddbaRequest>(header) != nullptr;
+        bars += dynamicPtrCast<const Ieee80211BlockAckReq>(header) != nullptr;
+        responses += dynamicPtrCast<const Ieee80211BlockAck>(header) != nullptr;
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            ASSERT(data->getAckPolicy() == NORMAL_ACK);
+            ASSERT(!mib->findPeerHtState(data->getReceiverAddress()));
+            normalData++;
+        }
+        return true;
+    }
+    void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, AccessCategory ac) override {
+        queuedSuccessor |= edca->getEdcaf(ac)->getPendingQueue()->getNumPackets() > 0;
+        Hcf::originatorProcessTransmittedDataFrame(packet, header, ac);
+    }
+};
+Define_Module(MigrationHcf);
+
+class MigrationTest : public cSimpleModule, public cListener {
+    int received = 0;
+    int bytes = 0;
+  protected:
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("subscribe")); }
+    void receiveSignal(cComponent *, simsignal_t, cObject *value, cObject *) override {
+        auto packet = check_and_cast<Packet *>(value);
+        received++;
+        bytes += packet->getByteLength();
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("subscribe")) {
+            delete message;
+            getModuleByPath("^.host2.app[0]")->subscribe(packetReceivedSignal, this);
+            scheduleAt(SimTime(99, SIMTIME_MS), new cMessage("verify"));
+            return;
+        }
+        delete message;
+        ASSERT(received == 12 && bytes == 8400);
+        for (const char *path : {"^.host1.wlan[0].mac.hcf", "^.host2.wlan[0].mac.hcf"}) {
+            auto hcf = check_and_cast<MigrationHcf *>(getModuleByPath(path));
+            ASSERT(hcf->compressed() && hcf->clean());
+            ASSERT(hcf->requests == 0 && hcf->bars == 0 && hcf->responses == 0);
+            if (hcf->normalData > 0)
+                ASSERT(hcf->normalData >= 12 && hcf->queuedSuccessor);
+        }
+        ASSERT(check_and_cast<MigrationHcf *>(getModuleByPath("^.host1.wlan[0].mac.hcf"))->normalData >= 12);
+        std::cout << "Compressed default migration assertions passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(MigrationTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module MigrationHcf extends Hcf { parameters: @class(::inet::ieee80211::MigrationHcf); }
+simple MigrationTest { parameters: string opMode; bool supported; @class(::inet::ieee80211::MigrationTest); }
+network MigrationNetwork {
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host1: AdhocHost;
+        host2: AdhocHost;
+        test: MigrationTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = MigrationNetwork
+ned-path = .;../../../../src
+sim-time-limit = 100ms
+seed-set = 0
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.mac.hcf.originatorBlockAckAgreementPolicy.cmdenv-log-level = debug
+**.mac.hcf.cmdenv-log-level = info
+**.cmdenv-log-level = off
+record-vector-results = false
+record-scalar-results = false
+*.test.opMode = ${opMode="g(mixed)","a","n(mixed-2.4Ghz)"}
+*.test.supported = ${supported=true,false}
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 700B
+*.host1.app[0].startTime = 10ms
+*.host1.app[0].stopTime = 11.15ms
+*.host1.app[0].sendInterval = 100us
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 1000
+*.host*.ipv4.arp.typename = "GlobalArp"
+*.host*.wlan[*].opMode = ${opMode}
+*.host*.wlan[*].radio.bandName = ${opMode} == "a" ? "5 GHz (mapped 20 MHz)" : "2.4 GHz"
+*.host*.wlan[*].radio.channelNumber = 0
+*.host*.wlan[*].bitrate = 6Mbps
+*.host*.wlan[*].classifier.typename = "QosClassifier"
+*.host*.wlan[*].mac.qosStation = true
+*.host*.wlan[*].mac.hcf.typename = "MigrationHcf"
+*.host*.wlan[*].mac.hcf.isBlockAckSupported = ${supported}
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 2346B
+*.host*.wlan[*].radio.receiver.energyDetection = -105dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -105dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 0dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.host1.mobility.initialX = 0m
+*.host2.mobility.initialX = 10m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%file: check-diagnostics.py
+from pathlib import Path
+import re
+
+text = Path("test.out").read_text()
+runs = re.split(r"Preparing for running configuration General, run #\d+\.\.\.", text)[1:]
+assert len(runs) == 6, len(runs)
+warning = "Compressed Block Ack has no usable local HT support"
+profile = "Block Ack profile: compressed"
+for run in runs:
+    ht = '$opMode="n(mixed-2.4Ghz)"' in run
+    supported = "$supported=true" in run
+    assert "Compressed default migration assertions passed." in run
+    assert run.count(profile) == (2 if supported else 0), run
+    assert run.count(warning) == (2 if supported and not ht else 0), run
+    if supported:
+        reason = "peer HT state is absent" if ht else "local HT state is absent"
+        assert f"Compressed Block Ack setup refused: {reason}; DATA uses Normal Ack." in run, run
+    else:
+        assert "Compressed Block Ack setup refused:" not in run, run
+print("Compressed default migration diagnostics passed.")
+
+%contains: stdout
+Compressed default migration assertions passed.
