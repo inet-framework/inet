@@ -1,0 +1,33 @@
+%description:
+Tests that a TCP_NOTSENT_LOWAT that the server sets on its listening socket
+reaches the connections that the listener forks, as Linux copies the mark of
+the listener (sk_clone_lock()). The server listens with fork=true and sets the
+mark 2000 after its listen; the connection of the client gets the mark.
+
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = .;../../../../src;../../lib
+
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+*.testing=true
+cmdenv-log-prefix="[%c]: "
+
+*.cli_app.sendScript="1.0 6000"
+*.*_tcp.mss = 1000
+*.*_tcp.delayedAcksEnabled = false
+*.srv_app.fork = true
+*.srv_app.notsentLowat = 2000
+
+include ../../lib/defaults.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+TCP_NOTSENT_LOWAT: the low-water mark is 2000
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

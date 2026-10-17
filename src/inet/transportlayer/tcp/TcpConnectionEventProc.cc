@@ -283,8 +283,17 @@ void TcpConnection::process_OPTIONS(TcpEventCode& event, TcpCommand *tcpCommand,
     else if (auto cmd = dynamic_cast<TcpSetNotsentLowatCommand *>(tcpCommand)) {
         // the command can come before the open: configureStateVariables() takes it then
         notsentLowatSockopt = cmd->getValue();
-        if (state != nullptr)
+        if (state != nullptr) {
             state->notsentLowat = notsentLowatSockopt < 0 ? (uint32_t)-1 : (uint32_t)notsentLowatSockopt;
+            // a writer that waits for the old mark is told at once when the unsent bytes
+            // are at the new one, or when the mark is off (Linux calls sk_write_space()
+            // in the setsockopt)
+            uint32_t notsentBytes = sendQueue->getBytesAvailable(state->snd_nxt);
+            if (!state->notsentLowatUpdate && (state->notsentLowat == (uint32_t)-1 || notsentBytes <= state->notsentLowat)) {
+                sendIndicationToApp(TCP_I_SEND_MSG, notsentBytes);
+                state->notsentLowatUpdate = true;
+            }
+        }
     }
     else if (auto cmd = dynamic_cast<TcpSetTimestampingCommand *>(tcpCommand)) {
         rxTimestampingEnabled = cmd->getEnabled();

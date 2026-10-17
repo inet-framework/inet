@@ -278,6 +278,7 @@ void TcpConnection::initClonedConnection(TcpConnection *listenerConn)
     noDelaySockopt = listenerConn->noDelaySockopt;
     maxSegSockopt = listenerConn->maxSegSockopt;
     pathMtuSockopt = listenerConn->pathMtuSockopt;
+    notsentLowatSockopt = listenerConn->notsentLowatSockopt;
     corkSockopt = listenerConn->corkSockopt;
     rcvBufSockopt = listenerConn->rcvBufSockopt;
     state = tcpAlgorithm->getStateVariables();
@@ -1261,6 +1262,8 @@ void TcpConnection::configureStateVariables()
     // the parameter
     int notsentLowat = notsentLowatSockopt != INT_MIN ? notsentLowatSockopt : (int)tcpMain->par("notsentLowat").intValue();
     state->notsentLowat = notsentLowat < 0 ? (uint32_t)-1 : (uint32_t)notsentLowat;
+    if (state->notsentLowat != (uint32_t)-1)
+        EV_DETAIL << "TCP_NOTSENT_LOWAT: the low-water mark is " << state->notsentLowat << "\n";
     state->sndbufLimitedStartTime = -1;
 
     WATCH_EXPR("snd_nxt", state->snd_nxt);
