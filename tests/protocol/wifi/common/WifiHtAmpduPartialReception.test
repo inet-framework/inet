@@ -1,0 +1,228 @@
+%description:
+Check copied partial HT A-MPDU outcomes through physical reception and production Rx rejection.
+The selected MPDU or all delimiters fail. The aggregate bytes and every range outcome must remain available at the drop.
+A later valid CTS must set NAV. The protocol tester requires both observations in order.
+Four loss patterns, both byte representations, both GIs, and both reception-part modes form 32 runs.
+
+%extraargs: -r 0..31
+
+%file: HtAmpduPartialReception.cc
+#include "ProtocolTest.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/checksum/Checksum.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::protocoltest;
+
+class HtAmpduPartialErrorModel : public Ieee80211NistErrorModel
+{
+  public:
+    double computePacketErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return 0; }
+    double computeAmpduRangeSuccessRate(const ISnir *, const IIeee80211Mode *, B length) const override {
+        return length == B(par("failedLength").intValue()) ? 0 : 1;
+    }
+};
+Define_Module(HtAmpduPartialErrorModel);
+
+class HtAmpduPartialDriver : public cSimpleModule, public cListener
+{
+    int sent = 0;
+    bool dropped = false;
+    bool nav = false;
+  protected:
+    void initialize() override {
+        auto rx = getModuleByPath("^.receiver.wlan[0].mac.rx");
+        rx->subscribe(packetDroppedSignal, this);
+        rx->subscribe(Rx::navChangedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("send"));
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        ASSERT(signal == packetDroppedSignal && !dropped);
+        auto packet = check_and_cast<Packet *>(object);
+        ASSERT(packet->isName("partial") && !packet->hasBitError());
+        ASSERT(packet->getDataLength() == B(318));
+        // Read the generated indication without a compile-time dependency on its new class.
+        cObject *indication = nullptr;
+        for (int i = 0; i < packet->getNumTags(); i++) {
+            auto tag = packet->getTag(i);
+            if (strcmp(tag->getClassName(), "inet::physicallayer::Ieee80211AmpduInd") == 0)
+                indication = const_cast<TagBase *>(tag.get());
+        }
+        ASSERT(indication != nullptr);
+        auto descriptor = cClassDescriptor::getDescriptorFor(indication);
+        auto field = [](cClassDescriptor *type, any_ptr objectPointer, const char *name) {
+            int index = type->findField(name);
+            ASSERT(index >= 0);
+            return type->getFieldValue(objectPointer, index, 0);
+        };
+        auto objectPointer = toAnyPtr(indication);
+        ASSERT(field(descriptor, objectPointer, "aggregation").boolValue());
+        ASSERT(field(descriptor, objectPointer, "headerSuccessful").boolValue());
+        ASSERT(field(descriptor, objectPointer, "contentComplete").boolValue());
+        int ranges = descriptor->findField("ranges");
+        ASSERT(ranges >= 0 && descriptor->getFieldArraySize(objectPointer, ranges) == 6);
+        auto rangeDescriptor = cClassDescriptor::getDescriptorFor(descriptor->getFieldStructName(ranges));
+        ASSERT(rangeDescriptor != nullptr);
+        const int offsets[]{0, 4, 104, 108, 212, 216};
+        const int lengths[]{4, 100, 4, 101, 4, 102};
+        for (size_t i = 0; i < 6; i++) {
+            auto rangePointer = descriptor->getFieldStructValuePointer(objectPointer, ranges, i);
+            ASSERT(field(rangeDescriptor, rangePointer, "kind").intValue() == int(i % 2));
+            ASSERT(field(rangeDescriptor, rangePointer, "valid").boolValue());
+            ASSERT(field(rangeDescriptor, rangePointer, "offset").intValueInUnit("B") == offsets[i]);
+            ASSERT(field(rangeDescriptor, rangePointer, "length").intValueInUnit("B") == lengths[i]);
+            ASSERT(field(rangeDescriptor, rangePointer, "successful").boolValue() == (lengths[i] != par("failedLength").intValue()));
+        }
+        dropped = true;
+        emit(registerSignal("testHtAmpduPartial"), 1L);
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, const SimTime& value, cObject *) override {
+        Enter_Method_Silent();
+        ASSERT(signal == Rx::navChangedSignal);
+        if (value > SIMTIME_ZERO) {
+            ASSERT(sent == 2 && dropped && !nav && value == SimTime(50, SIMTIME_US));
+            nav = true;
+            emit(registerSignal("testHtAmpduControl"), 1L);
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto packet = new Packet(sent == 0 ? "partial" : "control");
+        if (sent == 0) {
+            for (int length : {100, 101, 102}) {
+                auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+                delimiter->setLength(length);
+                packet->insertAtBack(delimiter);
+                packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(length, 0)));
+                if (length == 101)
+                    packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(3, 0)));
+            }
+        }
+        else {
+            auto header = makeShared<Ieee80211CtsFrame>();
+            header->setReceiverAddress(MacAddress("02:00:00:00:00:99"));
+            header->setDurationField(SimTime(50, SIMTIME_US));
+            packet->insertAtBack(header);
+            auto bytes = packet->peekAllAsBytes()->getBytes();
+            auto trailer = makeShared<Ieee80211MacTrailer>();
+            trailer->setFcsMode(FCS_COMPUTED);
+            trailer->setFcs(ethernetFcs(bytes.data(), bytes.size()));
+            packet->insertAtBack(trailer);
+        }
+        auto modes = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+        const IIeee80211Mode *selected = nullptr;
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto mode = modes->getMode(i);
+            if (mode->getHtMcsIndex() == 0 && mode->getDataMode()->getBandwidth() == MHz(20) &&
+                    mode->isHtShortGuardInterval() == par("shortGi").boolValue())
+                selected = mode;
+        }
+        ASSERT(selected);
+        packet->addTag<Ieee80211ModeReq>()->setMode(selected);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        sent++;
+        send(packet, "out");
+        if (sent == 1)
+            scheduleAt(simTime() + SimTime(1, SIMTIME_MS), new cMessage("send"));
+    }
+    using cListener::finish;
+    void finish() override { ASSERT(sent == 2 && dropped && nav); }
+};
+Define_Module(HtAmpduPartialDriver);
+
+Define_ProtocolTest(wifi_ht_ampdu_partial_reception) {
+    return ProtocolTest("wifi_ht_ampdu_partial_reception")
+        .once(on("driver").signal("testHtAmpduPartial").assertValue(1).within(0.01))
+        .once(on("driver").signal("testHtAmpduControl").assertValue(1).within(0.01));
+}
+
+%file: test.ned
+import inet.protocoltest.ProtocolTester;
+import inet.mobility.static.StationaryMobility;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+module HtAmpduPartialErrorModel extends Ieee80211NistErrorModel {
+    parameters:
+        @class(::HtAmpduPartialErrorModel);
+        int failedLength;
+}
+simple HtAmpduPartialDriver {
+    parameters:
+        @class(::HtAmpduPartialDriver);
+        bool shortGi;
+        int failedLength;
+        @signal[testHtAmpduPartial](type=long);
+        @signal[testHtAmpduControl](type=long);
+    gates: output out;
+}
+module HtAmpduPartialSender {
+    parameters: @networkNode;
+    gates: input in; input radioIn @directIn;
+    submodules:
+        mobility: StationaryMobility;
+        radio: Ieee80211ScalarRadio;
+    connections allowunconnected:
+        in --> radio.upperLayerIn;
+        radioIn --> radio.radioIn;
+}
+network Test {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        tester: ProtocolTester;
+        driver: HtAmpduPartialDriver;
+        sender: HtAmpduPartialSender;
+        receiver: AdhocHost;
+    connections: driver.out --> sender.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 4ms
+seed-set = 0
+*.tester.testName = "wifi_ht_ampdu_partial_reception"
+*.tester.stateSignals = "testHtAmpduPartial testHtAmpduControl"
+*.driver.shortGi = ${shortGi=false,true}
+*.driver.failedLength = ${failedLength=100,101,102,4}
+*.receiver.numWlanInterfaces = 1
+*.receiver.wlan[0].opMode = "n(mixed-2.4Ghz)"
+*.receiver.wlan[0].mac.qosStation = true
+*.receiver.wlan[0].radio.receiver.errorModel.typename = "HtAmpduPartialErrorModel"
+*.receiver.wlan[0].radio.receiver.errorModel.failedLength = ${failedLength}
+*.receiver.wlan[0].radio.separateReceptionParts = ${parts=false,true}
+*.sender.radio.separateReceptionParts = ${parts}
+*.sender.radio.opMode = "n(mixed-2.4Ghz)"
+*.sender.radio.initialRadioMode = "transmitter"
+*.sender.radio.antenna.mobilityModule = "^.^.mobility"
+*.sender.radio.sendRawBytes = ${raw=false,true}
+*.radioMedium.backgroundNoise.power = -110dBm
+**.radio.receiver.bandwidth = 20MHz
+**.vector-recording = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+PROTOCOLTEST wifi_ht_ampdu_partial_reception: PASS
+%contains: stdout
+Run statistics: total 32, successful 32
+%not-contains: stdout
+PROTOCOLTEST wifi_ht_ampdu_partial_reception: FAIL

@@ -18,6 +18,8 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
     EV_DEBUG << "Deaggregating A-MPDU " << *aggregatedFrame << " into multiple packets.\n";
     std::vector<Packet *> *frames = new std::vector<Packet *>();
     auto layout = inspectMpduAggregate(aggregatedFrame, B(0), B(aggregatedFrame->getDataLength()));
+    // An incomplete layout can contain bounded recovered members. Extraction does not establish MAC acceptance.
+    // The caller must check delimiter validity, PHY outcomes, member FCS, and MAC conditions before acceptance.
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
     for (const auto& range : layout.ranges) {
         if (range.kind != MpduRangeKind::MPDU)
