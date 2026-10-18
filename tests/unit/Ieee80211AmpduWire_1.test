@@ -163,7 +163,13 @@ auto refusedLayout = inspectMpduAggregate(&missingMember, B(0), B(4));
 ASSERT(!refusedLayout.complete && refusedLayout.ranges.size() == 1 && !refusedLayout.ranges[0].valid);
 for (int size : {0, 1, 2, 3}) {
     Packet shortInput("short", makeShared<BytesChunk>(std::vector<uint8_t>(size, 0)));
-    ASSERT(inspectMpduAggregate(&shortInput, B(0), B(size)).ranges.empty());
+    auto layout = inspectMpduAggregate(&shortInput, B(0), B(size));
+    ASSERT(layout.ranges.size() == (size == 0 ? 0 : 1));
+    ASSERT(layout.complete == (size == 0));
+    if (size != 0) {
+        ASSERT(layout.ranges[0].kind == MpduRangeKind::DELIMITER);
+        ASSERT(!layout.ranges[0].valid && layout.ranges[0].length == B(size));
+    }
 }
 auto tooLong = makeShared<Ieee80211MpduSubframeHeader>();
 tooLong->setLength(4096);

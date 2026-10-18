@@ -7,7 +7,8 @@
 namespace inet {
 namespace ieee80211 {
 
-MpduLayout inspectMpduAggregate(const Packet *packet, B offset, B length)
+MpduLayout inspectMpduAggregate(const Packet *packet, B offset, B length,
+        const std::function<bool(B, B)>& delimiterSuccessful)
 {
     MpduLayout layout;
     if (offset < B(0) || length < B(0) || offset + length > packet->getDataLength()) {
@@ -18,6 +19,7 @@ MpduLayout inspectMpduAggregate(const Packet *packet, B offset, B length)
     // IEEE Std 802.11-2024, 9.7.1: delimiter boundaries are four octets apart after loss of continuity.
     while (position < length) {
         if (length - position < B(4)) {
+            layout.ranges.push_back({MpduRangeKind::DELIMITER, position, length - position, false});
             layout.complete = false;
             break;
         }
@@ -27,7 +29,8 @@ MpduLayout inspectMpduAggregate(const Packet *packet, B offset, B length)
                 Chunk::PF_ALLOW_REINTERPRETATION);
         bool valid = delimiter->isCorrect() && delimiter->isComplete() && delimiter->isProperlyRepresented() &&
                 delimiter->getLength() >= 0 && delimiter->getLength() <= 4095 &&
-                B(delimiter->getLength()) <= length - position - B(4);
+                B(delimiter->getLength()) <= length - position - B(4) &&
+                (!delimiterSuccessful || delimiterSuccessful(position, B(4)));
         layout.ranges.push_back({MpduRangeKind::DELIMITER, position, B(4), valid});
         position += B(4);
         if (!valid) {
@@ -43,12 +46,15 @@ MpduLayout inspectMpduAggregate(const Packet *packet, B offset, B length)
             break;
         B padding((4 - memberLength.get<B>() % 4) % 4);
         if (padding > length - position) {
+            layout.ranges.push_back({MpduRangeKind::DELIMITER, position, length - position, false});
             layout.complete = false;
             break;
         }
         position += padding;
-        if (position == length)
+        if (position == length) {
+            layout.ranges.push_back({MpduRangeKind::DELIMITER, position - padding, padding, false});
             layout.complete = false; // HT has no final alignment padding.
+        }
     }
     return layout;
 }

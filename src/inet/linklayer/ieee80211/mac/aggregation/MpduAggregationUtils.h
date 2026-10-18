@@ -3,6 +3,8 @@
 #ifndef __INET_MPDUAGGREGATIONUTILS_H
 #define __INET_MPDUAGGREGATIONUTILS_H
 
+#include <functional>
+
 #include "inet/common/packet/Packet.h"
 
 namespace inet {
@@ -26,7 +28,8 @@ struct INET_API MpduLayout
 };
 
 // Offsets are relative to the PSDU, without the PHY header or PHY padding.
-INET_API MpduLayout inspectMpduAggregate(const Packet *packet, B offset, B length);
+INET_API MpduLayout inspectMpduAggregate(const Packet *packet, B offset, B length,
+        const std::function<bool(B, B)>& delimiterSuccessful = {});
 
 } // namespace ieee80211
 } // namespace inet
