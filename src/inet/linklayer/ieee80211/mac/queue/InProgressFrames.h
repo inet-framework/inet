@@ -63,6 +63,7 @@ class INET_API InProgressFrames : public SimpleModule
 
     virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
     virtual std::vector<Packet *> getOutstandingFrames();
+    std::vector<Packet *> getEligibleFrames();
 
     virtual void clearDroppedFrames();
 };

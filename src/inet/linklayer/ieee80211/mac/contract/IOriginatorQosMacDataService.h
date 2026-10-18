@@ -11,6 +11,7 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/contract/IMpduAggregationPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -28,6 +29,13 @@ struct INET_API PreparedQosData : public cObject
     Packet *releasePacket();
 };
 
+/** Owns queued previews and borrows canonical members. The order is the proposed transmit order. */
+struct INET_API PreparedQosBatch
+{
+    std::vector<std::unique_ptr<PreparedQosData>> queued;
+    std::vector<Packet *> members;
+};
+
 class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
 {
   public:
@@ -35,6 +43,13 @@ class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
     virtual Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const = 0;
     virtual SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const = 0;
     virtual bool hasAMsduAggregation() const = 0;
+    virtual bool hasAMpduAggregation() const = 0;
+    virtual std::unique_ptr<PreparedQosBatch> prepareBatch(queueing::IPacketQueue *queue,
+            const std::vector<Packet *>& retained, const MpduAggregationLimits& limits) = 0;
+    virtual bool isBatchValid(const PreparedQosBatch& batch, simtime_t start) const = 0;
+    // Success transfers each new member to the caller; canonical members remain borrowed.
+    virtual bool commitPreparedBatch(PreparedQosBatch& batch, std::vector<Packet *>& committed) = 0;
+    virtual Packet *buildAggregate(const PreparedQosBatch& batch, const MpduAggregationLimits& limits) const = 0;
     // These QoS DATA methods separate reversible preparation from extraction and sequence assignment.
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) = 0;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const = 0;

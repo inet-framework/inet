@@ -53,6 +53,8 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
     virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected);
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
+    bool isPreparationValidForSequence(const PreparedQosData& preparation, simtime_t start, SequenceNumberCyclic sequence) const;
+    Packet *commitValidatedFrame(PreparedQosData& preparation);
 
   public:
     void setFragmentationPermission(std::function<bool(Packet *)> permission) { fragmentationPermitted = permission; }
@@ -63,6 +65,12 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     virtual Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const override;
     virtual SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const override;
     virtual bool hasAMsduAggregation() const override { return aMsduAggregationPolicy != nullptr; }
+    virtual bool hasAMpduAggregation() const override { return aMpduAggregationPolicy && aMpduAggregationPolicy->isEnabled(); }
+    virtual std::unique_ptr<PreparedQosBatch> prepareBatch(queueing::IPacketQueue *queue,
+            const std::vector<Packet *>& retained, const MpduAggregationLimits& limits) override;
+    virtual bool isBatchValid(const PreparedQosBatch& batch, simtime_t start) const override;
+    virtual bool commitPreparedBatch(PreparedQosBatch& batch, std::vector<Packet *>& committed) override;
+    virtual Packet *buildAggregate(const PreparedQosBatch& batch, const MpduAggregationLimits& limits) const override;
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) override;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const override;
     virtual Packet *commitPreparedFrame(PreparedQosData& preparation) override;

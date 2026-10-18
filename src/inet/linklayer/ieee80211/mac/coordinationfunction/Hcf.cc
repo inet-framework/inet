@@ -87,6 +87,8 @@ void Hcf::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_LAST) {
+        if (check_and_cast<IOriginatorQosMacDataService *>(originatorDataService)->hasAMpduAggregation() && dataAndMgmtRateControl)
+            throw cRuntimeError("HT A-MPDU transmission requires fixed DATA rates without a rate-control submodule");
         if (blockAckVariant == BlockAckVariant::COMPRESSED && par("isBlockAckSupported").boolValue()) {
             interframeRadio = check_and_cast<IRadio *>(mac->gate("lowerLayerOut")->getNextGate()->getOwnerModule());
             auto radioModule = check_and_cast<cModule *>(interframeRadio.get());

@@ -12,6 +12,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
@@ -109,10 +110,19 @@ std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queue
 
 bool OriginatorQosMacDataService::isPreparationValid(const PreparedQosData& preparation, simtime_t start) const
 {
+    if (!preparation.packet)
+        return false;
+    auto header = preparation.packet->peekAtFront<Ieee80211DataHeader>();
+    return isPreparationValidForSequence(preparation, start, getNextSequenceNumber(header->getReceiverAddress(), header->getTid()));
+}
+
+bool OriginatorQosMacDataService::isPreparationValidForSequence(const PreparedQosData& preparation,
+        simtime_t start, SequenceNumberCyclic sequence) const
+{
     if (!preparation.packet || !preparation.queue || preparation.sourceIds.empty())
         return false;
     auto header = preparation.packet->peekAtFront<Ieee80211DataHeader>();
-    if (header->getSequenceNumber() != getNextSequenceNumber(header->getReceiverAddress(), header->getTid()))
+    if (header->getSequenceNumber() != sequence)
         return false;
     for (auto id : preparation.sourceIds) {
         Packet *source = nullptr;
@@ -136,6 +146,11 @@ Packet *OriginatorQosMacDataService::commitPreparedFrame(PreparedQosData& prepar
     Enter_Method("commitPreparedFrame");
     if (!isPreparationValid(preparation, simTime()))
         return nullptr;
+    return commitValidatedFrame(preparation);
+}
+
+Packet *OriginatorQosMacDataService::commitValidatedFrame(PreparedQosData& preparation)
+{
     std::vector<Packet *> sources;
     std::vector<int64_t> trackedIds;
     simtime_t deadline = SIMTIME_MAX;
@@ -188,6 +203,84 @@ Packet *OriginatorQosMacDataService::commitPreparedFrame(PreparedQosData& prepar
     if (preparation.aggregate)
         emit(packetAggregatedSignal, packet);
     return packet;
+}
+
+std::unique_ptr<PreparedQosBatch> OriginatorQosMacDataService::prepareBatch(queueing::IPacketQueue *queue,
+        const std::vector<Packet *>& retained, const MpduAggregationLimits& limits)
+{
+    Enter_Method("prepareBatch");
+    if (!hasAMpduAggregation())
+        return nullptr;
+    auto batch = std::make_unique<PreparedQosBatch>();
+    std::vector<Packet *> candidates = retained;
+    auto sequence = getNextSequenceNumber(limits.receiver, limits.tid);
+    for (int i = 0; i < queue->getNumPackets() && candidates.size() < size_t(std::min(64, limits.windowSize)); i++) {
+        auto source = queue->getPacket(i);
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(source->peekAtFront<Ieee80211MacHeader>());
+        if (!header || header->getType() != ST_DATA_WITH_QOS || header->getReceiverAddress() != limits.receiver ||
+                header->getTid() != limits.tid ||
+                header->getAMsduPresent() || header->getMoreFragments() || header->getFragmentNumber() != 0 ||
+                source->getDataLength() > B(4095) ||
+                (lifetimeHandler && lifetimeHandler->isExpired(source)) || (extractionEligible && !extractionEligible(source)))
+            continue;
+        int distance = OriginatorBlockAckAgreement::computeSequenceDistance(limits.windowStart, sequence);
+        if (distance >= limits.windowSize)
+            break;
+        auto preview = std::make_unique<PreparedQosData>();
+        preview->queue = queue;
+        preview->sourceIds.push_back(source->getId());
+        preview->setPacket(source->dup());
+        auto updated = preview->packet->removeAtFront<Ieee80211DataHeader>();
+        // IEEE Std 802.11-2024, 9.3.2.1.2: preview the local TA that Tx assigns before its FCS calculation.
+        updated->setTransmitterAddress(limits.transmitter);
+        updated->setSequenceNumber(sequence);
+        updated->setRetry(false);
+        updated->setAckPolicy(NORMAL_ACK);
+        preview->packet->insertAtFront(updated);
+        candidates.push_back(preview->packet.get());
+        batch->queued.push_back(std::move(preview));
+        sequence = sequence + 1;
+    }
+    batch->members = aMpduAggregationPolicy->selectFrames(candidates, limits);
+    batch->queued.erase(std::remove_if(batch->queued.begin(), batch->queued.end(), [&batch](const auto& preview) {
+        return std::find(batch->members.begin(), batch->members.end(), preview->packet.get()) == batch->members.end();
+    }), batch->queued.end());
+    return batch->members.empty() ? nullptr : std::move(batch);
+}
+
+bool OriginatorQosMacDataService::isBatchValid(const PreparedQosBatch& batch, simtime_t start) const
+{
+    if (batch.members.empty())
+        return false;
+    if (batch.queued.empty())
+        return true;
+    auto first = batch.queued.front()->packet->peekAtFront<Ieee80211DataHeader>();
+    auto sequence = getNextSequenceNumber(first->getReceiverAddress(), first->getTid());
+    for (const auto& preview : batch.queued) {
+        if (!preview->packet || std::find(batch.members.begin(), batch.members.end(), preview->packet.get()) == batch.members.end() ||
+                !isPreparationValidForSequence(*preview, start, sequence))
+            return false;
+        sequence = sequence + 1;
+    }
+    return true;
+}
+
+bool OriginatorQosMacDataService::commitPreparedBatch(PreparedQosBatch& batch, std::vector<Packet *>& committed)
+{
+    Enter_Method("commitPreparedBatch");
+    if (!isBatchValid(batch, simTime()))
+        return false;
+    // One synchronous validation precedes all extraction. Each member retains its own lifetime entry.
+    for (auto& preview : batch.queued)
+        committed.push_back(commitValidatedFrame(*preview));
+    batch.queued.clear();
+    return true;
+}
+
+Packet *OriginatorQosMacDataService::buildAggregate(const PreparedQosBatch& batch, const MpduAggregationLimits& limits) const
+{
+    return aMpduAggregation ? aMpduAggregation->aggregateFrames(batch.members, limits.mode,
+            limits.minimumMpduStartSpacing, limits.maxLength) : nullptr;
 }
 
 Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected)
