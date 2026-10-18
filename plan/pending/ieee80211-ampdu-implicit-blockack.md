@@ -8,9 +8,13 @@ Plan revision: 12, 2026-10-17. The user's `proceed, including the optional simpl
 
 The project plan procedure remains a draft; this document uses its structure without an additional approval requirement.
 
+A1 is complete on the separately approved base `56b75c959af104b5db931bef022bdfe5578eead9`. The user authorizes A1 before the prerequisite merges on 2026-10-18. The later request `Execute stages A2-A7` extends that authority on the same base. A2 through A7 are complete within the recorded profile and verification limits. The user subsequently authorizes commit, push, and PR creation.
+
+The [execution record](ieee80211-ampdu-implicit-blockack-execution.md) states the changes, evidence, and limits. This exception does not close A0. Expected-result changes, commits, and publication retain their separate authority requirements.
+
 This feature plan consumes the [PHY prerequisite plan](ieee80211-ampdu-phy-reception.md). That plan owns aggregate representation, bounded delimiter parsing, cached partial reception, and error-model integration. This plan owns member selection, MAC reception, mandatory release, implicit responses, and recovery.
 
-Implementation waits for merged PRs [#1343](https://github.com/inet-framework/inet/pull/1343), [#1344](https://github.com/inet-framework/inet/pull/1344), and [#1345](https://github.com/inet-framework/inet/pull/1345). The assessment on 2026-10-16 confirmed all three as open. Read-only A0 checks can occur before merge. A0 cannot close until the merged dependency chain and refreshed implementation base exist.
+Implementation normally waits for merged PRs [#1343](https://github.com/inet-framework/inet/pull/1343), [#1344](https://github.com/inet-framework/inet/pull/1344), and [#1345](https://github.com/inet-framework/inet/pull/1345). The assessment on 2026-10-16 confirmed all three as open. The exception above permits A1 through A7 on the approved base. Read-only A0 checks can occur before merge. A0 cannot close until the merged dependency chain and refreshed implementation base exist.
 
 The [delivery table](#6-implementation-steps-and-dependencies) identifies the stages and their prerequisites. The [fixture table](#7-verification-methods-and-expected-results) identifies acceptance evidence. Detailed standards and execution commands remain in the appendices.
 
@@ -391,7 +395,7 @@ The proposed transmit configuration is:
 **.mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
 ```
 
-`HtMpduAggregationPolicy` does not exist yet. The fixed rate above selects HT MCS 0 with one spatial stream under the required HT20 long-GI configuration. These settings also require compatible modes, usable peer HT state, and accepted agreements. The example must configure those conditions explicitly. The initial policy adds no local count or byte cap. It derives those limits from the agreement, peer, and PHY.
+`HtMpduAggregationPolicy` implements this opt-in profile. The fixed rate above selects HT MCS 0 with one spatial stream under the required HT20 long-GI configuration. These settings also require compatible modes, usable peer HT state, and accepted agreements. The example configures those conditions explicitly. The initial policy adds no local count or byte cap. It derives those limits from the agreement, peer, and PHY.
 
 Custom data services, MPDU policies, Tx/Rx modules, response policies, and response-rate selectors can need interface updates. The migration guide must list each changed method and distinguish unsupported capability from an empty valid result. It must cover aggregate start, cancellation, member finalization, and the complete receive outcome. The DATA rate-control API remains unchanged; aggregate transmit opt-in requires its HCF submodule to be absent. Current `BasicMpduAggregationPolicy` configurations retain their rate-control behavior. The PHY plan owns error-model migration and preserves operation without an error model.
 
@@ -424,11 +428,13 @@ A1 and A3 can supply reviewed preparation changes before the complete feature ex
 
 ### Proposed direct checks
 
-The seven fixtures below belong to this feature plan and remain proposed. The [PHY plan](ieee80211-ampdu-phy-reception.md#7-verification-methods-and-expected-results) owns three implemented fixtures: `Ieee80211AmpduWire_1.test`, `Ieee80211AmpduPhyReception_1.test`, and `Ieee80211AmpduPhyCompatibility_1.test`. P4 adds the third fixture for parent-compatible ordinary reception comparisons. The combined inventory is ten. The [PHY execution record](ieee80211-ampdu-phy-execution.md) states the completed PHY evidence and its limits. That evidence does not establish MAC feature completion.
+The seven fixtures below belong to this feature plan. A1 implements `Ieee80211AmpduCapabilities_1.test` with the existing association and PHY controls. The other six fixtures remain proposed. A1 also adds the unit fixtures `Ieee80211AmpduCapabilityEncoding_1.test` and `Ieee80211AmpduConstruction_1.test`. The [A1 execution record](ieee80211-ampdu-implicit-blockack-execution.md) states their coverage and limits.
+
+The [PHY plan](ieee80211-ampdu-phy-reception.md#7-verification-methods-and-expected-results) owns three implemented fixtures: `Ieee80211AmpduWire_1.test`, `Ieee80211AmpduPhyReception_1.test`, and `Ieee80211AmpduPhyCompatibility_1.test`. P4 adds the third fixture for parent-compatible ordinary reception comparisons. The combined inventory is twelve. The [PHY execution record](ieee80211-ampdu-phy-execution.md) states the completed PHY evidence and its limits. That evidence does not establish MAC feature completion.
 
 Fixed causal cases use seed 0. Injected agreements or deterministic error models establish only the stated boundary. Infrastructure cases separately prove production negotiation. [Appendix B](#appendix-b-verification-commands-and-campaigns) contains commands, campaign bounds, and evidence requirements.
 
-| Proposed fixture and category | Trigger and production boundary | Required observation |
+| Fixture and category | Trigger and production boundary | Required observation |
 | --- | --- | --- |
 | `Ieee80211AmpduCapabilities_1.test`, module. | Full and simplified management with asymmetric receive limits. Include an absent aggregate role, a role without advertised short-GI support, and an absent error model. Use exact MAC inputs with a one-antenna limit and catalog modes outside that limit. | Exponents 0–3 and spacing values 0–7 reach the correct directional consumer; reset removes old peer limits. Absent roles fail before advertisement; incomplete coverage fails before the MIB changes local HT capability. Unsupported unadvertised modes do not cause rejection. An absent model retains valid HT initialization and negotiation. Compatible models retain advertised HT20 short-GI support. |
 | `Ieee80211AmpduPreparation_1.test`, module. | Production queues, HT policy, fixed DATA rates, batch preparation, and commitment. Include internal collision survivors and aggregate transmit opt-in with AARF. | Source identities, sequence wrap, independent deadlines, count/window/byte limits, and refusal before extraction. Numbered, unsent members keep their allocation and first-DATA Retry value. Internal collision terminal disposal still affects its selected frame only. Batch reduction retains one rate decision. AARF fails initialization with and without fixed-rate overrides. |
@@ -463,6 +469,8 @@ A valid zero-bit Block Ack must cause retry without a probe. Probe failure must 
 A6 must also prove DATA progress for a healthy agreement under deterministic response loss. Keep fresh DATA queued with inactivity timeout zero. Appendix C separates full, partial, and failed probe cases and defines the required DATA observations. A5 checks the state transitions and counters for these cases.
 
 ### Evidence status
+
+The paragraphs below record the plan review on 2026-10-17. The [A1 execution record](ieee80211-ampdu-implicit-blockack-execution.md) supplies the later implementation and test evidence on its approved base. A1 completion does not establish the later MAC stages.
 
 The source assessment checked the commented invocation, error-model APIs, mandatory release text, HT duration table, and prerequisite PR state. These are source and standards observations. No INET build, module test, protocol test, or simulation ran for this revision. Document checks cannot establish PHY or MAC behavior.
 
