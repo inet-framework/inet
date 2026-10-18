@@ -105,10 +105,11 @@ bool Rx::lowerFrameReceived(Packet *packet)
     Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
-    // Aggregate containers need member acceptance before standalone FCS or header checks.
-    // Reject them until MAC aggregate reception exists; PHY range outcomes stay separate.
+    // A failed HT header supplies no decoded Aggregation property. Refuse its container before MAC peeks.
+    // Aggregate containers use the separate member acceptance path.
     auto aggregate = packet->findTag<Ieee80211AmpduInd>();
-    bool isFrameOk = !(aggregate && aggregate->getAggregation()) && isFcsOk(packet);
+    bool isFrameOk = !(aggregate && (!aggregate->getHeaderSuccessful() || !aggregate->getContentComplete() ||
+            aggregate->getAggregation())) && isFcsOk(packet);
     if (isFrameOk) {
         EV_INFO << "Received frame from PHY: " << packet << endl;
         const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
