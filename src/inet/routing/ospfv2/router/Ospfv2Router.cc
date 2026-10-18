@@ -44,9 +44,9 @@ Router::~Router()
 
 void Router::addWatches()
 {
-    WATCH(areas);
-    WATCH(asExternalLSAs);
-    WATCH(ospfRoutingTable);
+    watches.add(WATCH(areas));
+    watches.add(WATCH(asExternalLSAs));
+    watches.add(WATCH(ospfRoutingTable));
 }
 
 std::string Router::getInterfaceInfo() const

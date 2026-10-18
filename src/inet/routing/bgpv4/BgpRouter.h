@@ -8,6 +8,7 @@
 #define __INET_BGPROUTER_H
 
 #include "inet/common/Protocol.h"
+#include "inet/common/WatchList.h"
 #include "inet/common/socket/SocketMap.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/contract/ipv4/Ipv4Address.h"
@@ -47,6 +48,7 @@ class INET_API BgpRouter : public TcpSocket::BufferingCallback
     };
     redistributeOspfType_t redistributeOspfType = {};
     SocketMap _socketMap;
+    WatchList watches; // the WATCHes of the members; the router may be deleted before the BGP module
     // A single shared listening socket per router accepts all incoming BGP connections
     // on TCP_PORT (wildcard bind) and demuxes them to sessions by peer address in
     // processMessageFromTcp(). RFC 4271: a BGP speaker listens for connections on port 179.

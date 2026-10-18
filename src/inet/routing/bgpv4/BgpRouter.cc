@@ -73,10 +73,10 @@ void BgpRouter::printSessionSummary()
 
 void BgpRouter::addWatches()
 {
-    WATCH(myAsId);
-    WATCH(_bgpSessions);
-    WATCH(bgpRoutingTable);
-    WATCH(adjRibInTable);
+    watches.add(WATCH(myAsId));
+    watches.add(WATCH(_bgpSessions));
+    watches.add(WATCH(bgpRoutingTable));
+    watches.add(WATCH(adjRibInTable));
     _socketMap.addWatch();
 }
 

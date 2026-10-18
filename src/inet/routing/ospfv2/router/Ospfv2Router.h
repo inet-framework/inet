@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 
+#include "inet/common/WatchList.h"
 #include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/messagehandler/MessageHandler.h"
 #include "inet/routing/ospfv2/router/Lsa.h"
@@ -42,6 +43,7 @@ class INET_API Router
     std::vector<Ospfv2RoutingTableEntry *> ospfRoutingTable; ///< The OSPF routing table - contains more information than the one in the IP layer.
     MessageHandler *messageHandler; ///< The message dispatcher class.
     bool rfc1583Compatibility; ///< Decides whether to handle the preferred routing table entry to an AS boundary router as defined in RFC1583 or not.
+    WatchList watches; ///< The WATCHes of the members; the router may be deleted before the OSPF module.
 
   public:
     /**

@@ -10,6 +10,7 @@
 
 #include <map>
 
+#include "inet/common/WatchList.h"
 #include "inet/common/socket/ISocket.h"
 
 namespace inet {
@@ -21,6 +22,7 @@ class INET_API SocketMap
 {
   protected:
     std::map<int, ISocket *> socketMap; // socketId, socketPtr
+    WatchList watches; // see addWatch()
 
   public:
     SocketMap() {}
@@ -66,6 +68,9 @@ class INET_API SocketMap
      */
     void deleteSockets();
 
+    /**
+     * Adds a WATCH for the socket map. It is deleted together with this object.
+     */
     void addWatch();
 };
 

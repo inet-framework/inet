@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 
+#include "inet/common/WatchList.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/routing/ospfv2/interface/Ospfv2Interface.h"
 #include "inet/routing/ospfv2/router/Lsa.h"
@@ -44,6 +45,8 @@ class INET_API Ospfv2Area : public cObject
     RouterLsa *spfTreeRoot;
 
     Router *parentRouter;
+
+    WatchList watches; // the WATCHes of the members; the area may be deleted before the OSPF module
 
   public:
     Ospfv2Area(ChecksumMode checksumMode, IInterfaceTable *ift, AreaId id = BACKBONE_AREAID);
