@@ -1,0 +1,68 @@
+%description:
+Verify all HT receive length exponents and MPDU spacing encodings through management conversion and bytes.
+Asymmetric negotiation preserves the receiver's limits in each direction.
+Invalid encoded spacing cannot enter capability state through management conversion.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+for (int exponent = 0; exponent < 4; exponent++) {
+    for (int spacing = 0; spacing < 8; spacing++) {
+        Ieee80211HtCapabilities local;
+        local.supportedChannelWidths.insert(MHz(20));
+        local.rxMcsSupported[0] = true;
+        local.txMcsNss.maxMcsPerNss[0] = 0;
+        local.maxAmpduLengthExponent = exponent;
+        local.minimumMpduStartSpacing = spacing;
+        auto peer = local;
+        peer.maxAmpduLengthExponent = 3 - exponent;
+        peer.minimumMpduStartSpacing = 7 - spacing;
+        ASSERT(!(local == peer));
+        auto element = makeHtCapabilitiesElement(local);
+        ASSERT(element.minimumMpduStartSpacing == spacing);
+        ASSERT(makeHtCapabilities(element) == local);
+        auto response = makeShared<Ieee80211AssociationResponseFrame>();
+        response->setStatusCode(SC_SUCCESSFUL);
+        response->setAid(1);
+        Ieee80211SupportedRatesElement rates;
+        rates.numRates = 1;
+        rates.rate[0] = 6;
+        response->setSupportedRates(rates);
+        setHtCapabilities(response, local);
+        response->setChunkLength(B(37));
+        Packet output("response", response);
+        auto bytes = output.peekAllAsBytes()->getBytes();
+        ASSERT(bytes.size() == 37);
+        ASSERT(bytes[13] == (exponent | (spacing << 2)));
+        Packet input("fresh", makeShared<BytesChunk>(bytes));
+        auto decoded = input.popAtFront<Ieee80211AssociationResponseFrame>(B(37));
+        ASSERT(makeHtCapabilities(decoded->getHtCapabilities()) == local);
+        auto negotiated = negotiateHtCapabilities(local, peer, Ieee80211HtOperation());
+        ASSERT(negotiated.localTxPeerRx.valid && negotiated.localRxPeerTx.valid);
+        ASSERT(negotiated.localTxPeerRx.receiverMaxAmpduLengthExponent == 3 - exponent);
+        ASSERT(negotiated.localRxPeerTx.receiverMaxAmpduLengthExponent == exponent);
+        ASSERT(negotiated.localTxPeerRx.receiverMinimumMpduStartSpacing == 7 - spacing);
+        ASSERT(negotiated.localRxPeerTx.receiverMinimumMpduStartSpacing == spacing);
+        auto changed = local;
+        changed.minimumMpduStartSpacing = (spacing + 1) % 8;
+        ASSERT(!(local == changed));
+    }
+}
+for (int spacing : {-1, 8}) {
+    Ieee80211HtCapabilitiesElement element;
+    element.minimumMpduStartSpacing = spacing;
+    Ieee80211HtCapabilities result;
+    std::string reason;
+    ASSERT(!decodeHtCapabilities(element, result, reason));
+    ASSERT(reason.find("Minimum MPDU Start Spacing") != std::string::npos);
+}
+EV << "HT aggregate capability checks passed\n";
+
+%contains: stdout
+HT aggregate capability checks passed

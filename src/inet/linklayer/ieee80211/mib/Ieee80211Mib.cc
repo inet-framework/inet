@@ -188,6 +188,9 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     localHtCapabilities.maxAmpduLengthExponent = par("htMaxAmpduLengthExponent");
     if (localHtCapabilities.maxAmpduLengthExponent < 0 || localHtCapabilities.maxAmpduLengthExponent > 3)
         throw cRuntimeError("htMaxAmpduLengthExponent must be between 0 and 3");
+    localHtCapabilities.minimumMpduStartSpacing = par("htMinimumMpduStartSpacing");
+    if (localHtCapabilities.minimumMpduStartSpacing < 0 || localHtCapabilities.minimumMpduStartSpacing > 7)
+        throw cRuntimeError("htMinimumMpduStartSpacing must be between 0 and 7");
 
     configuredSecondaryChannelOffset = par("htSecondaryChannelOffset");
     if (configuredSecondaryChannelOffset != 0 && configuredSecondaryChannelOffset != 1 && configuredSecondaryChannelOffset != 3)
