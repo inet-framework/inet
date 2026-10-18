@@ -21,6 +21,8 @@ class INET_API BasicMpduAggregationPolicy : public IMpduAggregationPolicy, publi
 
   public:
     virtual std::vector<Packet *> *computeAggregateFrames(std::vector<Packet *> *frames) override;
+    virtual bool isEnabled() const override { return false; }
+    virtual std::vector<Packet *> selectFrames(const std::vector<Packet *>& candidates, const MpduAggregationLimits& limits) const override { return {}; }
 };
 
 } /* namespace ieee80211 */
