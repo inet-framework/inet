@@ -609,7 +609,7 @@ minimum.
 
 Outside active Compressed agreements, multiple protection does not check complete exchange cost against the remaining budget. For example, that retained policy can start a 120 us exchange with only 100 us left. Active Compressed agreements use their separate complete-cost admission. The reference scope assumes whole-microsecond positive limits, integral initial PPDU airtime, and integral legacy RTS airtime.
 
-Multiple protection adds no A-MPDU, new fragmentation, CTS-to-self, dual CTS, PIFS recovery, or TXOP sharing. Reverse direction, beamforming, S1G, multi-user operation, and general MAC lifecycle support remain outside this implementation. General rate selection and recipient response timing retain their separate limits.
+Multiple protection supports the HT aggregate profile below. New fragmentation, CTS-to-self, dual CTS, PIFS recovery, and TXOP sharing remain outside this implementation. Reverse direction, beamforming, S1G, multi-user operation, and general MAC lifecycle support also remain outside this implementation. General rate selection and recipient response timing retain their separate limits.
 
 .. _ug:sec:80211:fragmentation:
 
@@ -642,16 +642,46 @@ default policy is :ned:`BasicMsduAggregationPolicy` with these parameters:
 -  :par:`aggregationLengthThreshold`: the smallest aggregated payload that
    makes an A-MSDU. The default, ``-1``, means no check.
 
-Set ``msduAggregationPolicy.typename = ""`` to turn aggregation off. A-MSDU
-aggregation needs packets in the queue; it has an effect only when the
-traffic source is faster than the channel. A-MPDU aggregation is not
-available: the ``mpduAggregationPolicy`` slot exists, but the default policy
-never aggregates, and the MAC does not build A-MPDU frames.
+Set ``msduAggregationPolicy.typename = ""`` to turn A-MSDU aggregation off. A-MSDU aggregation needs packets in the queue. The default MPDU policy also leaves A-MPDU transmission disabled. The HT policy below enables A-MPDU transmission with implicit Compressed Block Ack.
 
 .. code-block:: ini
 
    **.wlan[*].mac.qosStation = true
    **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = 3000
+
+.. _ug:sec:80211:htampdu:
+
+HT A-MPDU and implicit Block Ack
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Select ``HtMpduAggregationPolicy`` to combine independent MPDUs after an accepted Compressed Block Ack agreement. The first transmit profile uses HT mixed format, 20 MHz, and long GI. Configure a fixed DATA rate without a rate-control submodule. HCF rejects aggregate opt-in with rate control at initialization. The receiver also accepts advertised HT20 short-GI aggregates.
+
+.. code-block:: ini
+
+   **.wlan[*].opMode = "n(mixed-2.4Ghz)"
+   **.wlan[*].mac.qosStation = true
+   **.wlan[*].mac.hcf.isBlockAckSupported = true
+   **.wlan[*].mac.hcf.blockAckVariant = "compressed"
+   **.wlan[*].mac.hcf.rateControl.typename = ""
+   **.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 65Mbps
+   **.wlan[*].mac.hcf.rateSelection.dataFrameBandwidth = 20MHz
+   **.wlan[*].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+   **.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+   **.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
+
+Production infrastructure management supplies peer capabilities and receiver limits. An HT mode alone does not supply this state. Each aggregate contains unfragmented QoS DATA for one receiver and TID. HCF applies the peer's byte limit, minimum MPDU start spacing, transmit window, and both HT duration limits. A-MSDU members remain outside this aggregate profile.
+
+HCF selects transmitted retries first, followed by numbered unsent members and new queued members. New members retain separate sequence numbers and deadlines. HCF commits queued members at actual DATA submission after the IFS interval. Expiry or agreement loss before submission cancels the batch without a DATA attempt. RTS protection uses the complete PSDU length, including delimiters and spacing.
+
+Every member carries ACK policy bits ``00`` and the same Duration value. Aggregate context makes those bits an implicit Block Ack request. The recipient validates each member against its copied PHY outcome and FCS. A valid member can arrive despite another member's failure. One correct member prevents EIFS, including an overheard member or DATA without an agreement.
+
+The recipient sends one Compressed Block Ack after SIFS for accepted aggregate DATA. Positive bits release only transmitted members. Missing bits retain the affected members for selective retry. A valid zero-bit response completes the response exchange without a probe. An absent or invalid response arms one explicit BAR probe before further DATA for that agreement.
+
+The probe is an INET recovery policy. It can expose lost recipient agreement state while fresh DATA remains queued. Probe submission consumes the pending flag. Probe failure returns to DATA retry without another probe until a later DATA attempt. Each probe adds airtime and channel access delay.
+
+A zero TXOP limit permits one aggregate DATA PPDU with its protection and response. Multiple-member aggregates must fit a positive limit. A singleton retry can use the applicable single-MPDU exception. The example at ``examples/wireless/htampdu`` provides scalar, dimensional, and zero-limit configurations.
+
+NIST and Yans supply cached per-range outcomes under scalar SNIR reduction. This abstraction does not model correlated FEC errors or interference changes within a member. Adaptive aggregate rates, HT40 transmit aggregation, VHT aggregates, and Multi-TID Block Ack remain outside this profile. These capabilities do not establish complete amendment conformance or throughput validation.
 
 .. _ug:sec:80211:ack:
 
@@ -1041,7 +1071,7 @@ The model does not contain:
 -  PCF and HCCA, the polled channel access methods. The module
    :ned:`Hcca` exists as a placeholder.
 
--  A-MPDU aggregation and self-CTS protection.
+-  HT40 transmit aggregation, VHT aggregates, and self-CTS protection.
 
 -  Multi-TID block acknowledgement and delayed Compressed Block Ack.
 

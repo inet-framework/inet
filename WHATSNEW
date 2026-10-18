@@ -468,7 +468,7 @@ Notable backward incompatible changes are the following:
 
    Before DATA commitment, failed RTS updates access-category retry state without a provisional sequence counter. Original DATA lifetimes bound repeated attempts. This changes the scoped path's former discard after a fixed number of RTS failures.
 
-   Existing demonstrations retain explicit Basic settings, configurations, and result rows. IEEE Std 802.11e-2005 introduced Basic; IEEE Std 802.11-2024 reserves its Type 0 value. Retention does not establish complete historical conformance. A-MPDU requirements for n and ac remain deferred. Multi-TID Block Ack and the existing delayed Basic requirement also remain deferred. Compressed support does not establish complete VHT transfer support or MAC stop/start recovery.
+   Existing demonstrations retain explicit Basic settings, configurations, and result rows. IEEE Std 802.11e-2005 introduced Basic; IEEE Std 802.11-2024 reserves its Type 0 value. Retention does not establish complete historical conformance. VHT A-MPDU, Multi-TID Block Ack, and the existing delayed Basic requirement remain deferred. Compressed support does not establish complete VHT transfer support or MAC stop/start recovery.
 
    Custom QoS rate selectors, recipient ACK policies, recipient data services, and frame sequences require the interface changes in the migration guide. Custom radio media, communication caches, and IEEE 802.11 modes also require the new timing queries. Basic classes and methods remain available.
 
@@ -505,6 +505,16 @@ Notable backward incompatible changes are the following:
    Rx now drops aggregate containers before standalone FCS or MAC header checks. This prevents parser errors for successful and partially failed aggregates. PHY range outcomes remain available in the drop signal. MAC aggregate acceptance remains pending.
 
    Delimiter recovery now scans across typed MPDU headers. An invalid delimiter no longer causes a chunk conversion error at those headers. Bounded recovery retains later complete MPDU ranges.
+
+60. IEEE 802.11 HT A-MPDU and implicit Compressed Block Ack
+
+   HtMpduAggregationPolicy enables HT20 mixed-format A-MPDU transmission after an accepted Compressed agreement. The default policy leaves aggregation disabled. The first transmit profile requires long GI and fixed DATA rates without rate control. The receiver also accepts advertised HT20 short-GI aggregates. The htampdu example supplies scalar, dimensional, and zero-TXOP configurations.
+
+   Each member retains its sequence number, retry state, and independent deadline. HCF commits new members after the IFS interval at actual DATA submission. The complete PSDU length controls RTS protection and exchange admission. Partial PHY loss permits separate member acceptance and one implicit response after SIFS. One correct member prevents EIFS, including overheard DATA and DATA without an agreement.
+
+   Missing or invalid implicit responses cause one contention failure and one pending explicit BAR probe. Probe submission consumes that flag. Probe failure permits DATA retry without another probe until a later DATA attempt. This INET policy exposes lost recipient agreement state under continuous traffic. It adds probe airtime and channel access delay. Valid zero-bit responses do not arm a probe.
+
+   Custom aggregation policies, QoS data services, Rx, Tx, recipient services, ACK policies, and response procedures require the migration changes. NIST and Yans use cached range outcomes. Adaptive aggregate rates, HT40 transmit aggregation, VHT aggregates, nested A-MSDUs, and correlated FEC errors remain outside this profile. These changes can alter affected exchange order, delivery times, and simulation results.
 
 Notable backward compatible changes are the following:
 
