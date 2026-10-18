@@ -210,6 +210,25 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
 
 void Ieee80211Mac::handleLowerPacket(Packet *packet)
 {
+    auto aggregate = packet->findTag<Ieee80211AmpduInd>();
+    if (aggregate && aggregate->getHeaderSuccessful() && aggregate->getContentComplete() && aggregate->getAggregation()) {
+        auto reception = rx->lowerAggregateReceived(packet);
+        take(packet);
+        for (auto& member : reception.members)
+            take(member.packet.get());
+        if (!reception.anyCorrect) {
+            delete packet;
+            if (mib->qos)
+                hcf->corruptedFrameReceived();
+            else
+                dcf->corruptedFrameReceived();
+        }
+        else if (mib->qos)
+            hcf->processLowerAggregate(packet, std::move(reception));
+        else
+            delete packet;
+        return;
+    }
     if (rx->lowerFrameReceived(packet)) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         processLowerFrame(packet, header);

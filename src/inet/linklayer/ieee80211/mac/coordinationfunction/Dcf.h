@@ -113,6 +113,7 @@ class INET_API Dcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void scheduleStartRxTimer(simtime_t timeout) override;
 
     // ITx::ICallback
+    virtual void frameTransmissionStarted(Packet *packet) override;
     virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 
     // IProcedureCallback

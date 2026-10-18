@@ -34,8 +34,11 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     bool isAddbaRequestSent = false;
     simtime_t blockAckTimeoutValue = -1;
     simtime_t expirationTime = -1;
+    bool pendingProbe = false;
 
   public:
+    bool hasPendingProbe() const { return pendingProbe; }
+    void setPendingProbe(bool value) { pendingProbe = value; }
     OriginatorBlockAckAgreement(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, bool isAMsduSupported, bool isDelayedBlockAckPolicySupported) :
         receiverAddr(receiverAddr),
         tid(tid),

@@ -24,6 +24,7 @@ class INET_API Tx : public SimpleModule, public ITx
 {
   protected:
     ITx::ICallback *txCallback = nullptr;
+    ITx::IAggregateCallback *aggregateCallback = nullptr;
     Ieee80211Mac *mac = nullptr;
     IRx *rx = nullptr;
     Packet *frame = nullptr;
@@ -35,6 +36,7 @@ class INET_API Tx : public SimpleModule, public ITx
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    void startTransmission();
 
   public:
     Tx() {}
@@ -42,7 +44,10 @@ class INET_API Tx : public SimpleModule, public ITx
 
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ITx::ICallback *txCallback) override;
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback) override;
-    [[nodiscard]] bool hasTransmission() const override { return txCallback != nullptr; }
+    void transmitAggregate(simtime_t ifs, IAggregateCallback *callback) override;
+    bool cancelPendingAggregate(IAggregateCallback *callback) override;
+    void finalizeMpdu(Packet *packet) override;
+    [[nodiscard]] bool hasTransmission() const override { return txCallback != nullptr || aggregateCallback != nullptr; }
     virtual void radioTransmissionFinished() override;
 };
 

@@ -156,6 +156,18 @@ class INET_API LastFrameAckFs : public IFrameSequence
     virtual std::string getHistory() const override { return std::string("LAST-FRAME") + (step == 2 ? " ACK" : ""); } // TODO completeStep = true?
 };
 
+class INET_API AmpduBlockAckFs : public IFrameSequence
+{
+    int step = 0;
+  public:
+    void startSequence(FrameSequenceContext *context, int firstStep) override { step = 0; }
+    IFrameSequenceStep *prepareStep(FrameSequenceContext *context) override;
+    bool completeStep(FrameSequenceContext *context) override;
+    std::string getHistory() const override { return "A-MPDU BLOCKACK"; }
+};
+
+INET_API bool isValidCompressedBlockAck(Packet *packet, MacAddress local, MacAddress peer, Tid tid);
+
 class INET_API BlockAckReqBlockAckFs : public IFrameSequence
 {
   protected:

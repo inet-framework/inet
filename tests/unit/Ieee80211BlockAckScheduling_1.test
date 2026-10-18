@@ -200,6 +200,47 @@ ASSERT(policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
 wait(duration);
 ASSERT(!policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
 ASSERT(ack.getQoSDataAckStatus(unrelated.front()) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+// A pending probe survives complete member expiry. The caller's EDCA predicate limits its owner.
+agreements.getAgreement(peer, 2)->setPendingProbe(true);
+selectedAgreement->setPendingProbe(true);
+otherAgreement->setPendingProbe(true);
+policy.setProbeEligibility([](InProgressFrames *, Tid) { return false; });
+ASSERT(!policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
+policy.setProbeEligibility([&frames](InProgressFrames *candidate, Tid tid) { return candidate == &frames && tid == 5; });
+choice = policy.computeBlockAckReqParameters(&frames, nullptr, &agreements);
+ASSERT(std::get<0>(choice) == peer && std::get<2>(choice) == 5);
+ASSERT(std::get<1>(choice) == selectedAgreement->getStartingSequenceNumber());
+selectedAgreement->setPendingProbe(false);
+choice = policy.computeBlockAckReqParameters(&frames, nullptr, &agreements);
+ASSERT(std::get<0>(choice) == other && std::get<2>(choice) == 5);
+otherAgreement->setPendingProbe(false);
+ASSERT(!policy.isBlockAckReqNeeded(&frames, nullptr, &agreements));
+// A probe wait includes failed transmitted members, but excludes a numbered unsent member.
+QosAckHandler implicitAck;
+SchedulingFrames implicitFrames;
+implicitFrames.configure(&implicitAck);
+OriginatorBlockAckAgreement implicitAgreement(peer, 5, SequenceNumberCyclic(4095), 2, false, false);
+auto attempted = implicitFrames.add(peer, 5, 4095, false);
+auto numberedUnsent = implicitFrames.add(peer, 5, 0, false);
+implicitAck.processTransmittedImplicitBlockAckMember(attempted);
+implicitAck.processFailedImplicitBlockAckMember(attempted);
+ASSERT(implicitAck.getQoSDataAckStatus(attempted) == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED);
+auto probe = makeShared<Ieee80211CompressedBlockAckReq>();
+probe->setReceiverAddress(peer);
+probe->setTidInfo(5);
+probe->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+implicitAck.processTransmittedBlockAckReq(probe, &implicitAgreement);
+ASSERT(implicitAck.getQoSDataAckStatus(attempted) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+ASSERT(implicitAck.getQoSDataAckStatus(numberedUnsent) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+auto zeroResponse = makeShared<Ieee80211CompressedBlockAck>();
+zeroResponse->setTransmitterAddress(peer);
+zeroResponse->setTidInfo(5);
+zeroResponse->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+zeroResponse->setBlockAckBitmap(BitVector(0, 64));
+ASSERT(implicitAck.processReceivedCompressedBlockAck(zeroResponse, &implicitAgreement).empty());
+ASSERT(implicitAck.getQoSDataAckStatus(attempted) == QosAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED);
+ASSERT(implicitAck.isEligibleToTransmit(attempted));
+ASSERT(implicitAck.getQoSDataAckStatus(numberedUnsent) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
 std::cout << "Block Ack scheduling isolation assertions passed.\n";
 
 %contains: stdout

@@ -23,6 +23,9 @@ class NavRx : public IRx {
     void transmissionStateChanged(physicallayer::IRadio::TransmissionState) override {}
     void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart) override {}
     bool lowerFrameReceived(Packet *) override { return false; }
+    AmpduReception lowerAggregateReceived(Packet *) override {
+        throw cRuntimeError("NavRx does not receive aggregate frames in this fixture");
+    }
 };
 
 class ForwardingTx : public Tx {
@@ -60,6 +63,7 @@ class CompletionCallback : public ITx::ICallback {
     CompletionTx *tx;
     bool replacementChoice;
     CompletionCallback(CompletionTx *tx, bool choice) : tx(tx), replacementChoice(choice) {}
+    void frameTransmissionStarted(Packet *) override {}
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
         ASSERT(!tx->hasTransmission());
         tx->replaceChoice(replacementChoice);

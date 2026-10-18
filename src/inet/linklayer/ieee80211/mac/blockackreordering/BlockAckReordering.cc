@@ -50,7 +50,44 @@ void BlockAckReordering::clearPeer(MacAddress peer)
     }
 }
 
-BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe)
+bool BlockAckReordering::isMandatoryRelease(RecipientBlockAckAgreement *agreement,
+        const Ptr<const Ieee80211DataHeader>& header, bool interframe, const BlockAckReceiveContext *context) const
+{
+    auto record = agreement->getBlockAckRecord();
+    auto priorSequence = record->getWindowStart() - 1;
+    if (!record->hasCompleteReceipt(priorSequence))
+        return false;
+    if (!context)
+        return interframe;
+    auto hasDelimiterChain = [&](const std::shared_ptr<const AmpduTopology>& aggregate, B endpoint) {
+        if (!aggregate || aggregate->transmitter != header->getTransmitterAddress() ||
+            aggregate->receiver != header->getReceiverAddress() || aggregate->tid != header->getTid())
+            return false;
+        for (const auto& member : aggregate->members) {
+            if (!member.sequence || *member.sequence != priorSequence || !(member.offset < endpoint))
+                continue;
+            bool valid = true;
+            for (const auto& range : aggregate->ranges) {
+                if (range.kind == MpduRangeKind::DELIMITER && member.offset < range.offset && range.offset < endpoint)
+                    valid &= range.valid;
+            }
+            if (valid)
+                return true;
+        }
+        return false;
+    };
+    // IEEE Std 802.11-2024, 10.25.6.6.2.1(a)(2)(i): a later member needs the complete delimiter chain.
+    if (context->aggregate && !context->firstMember)
+        return hasDelimiterChain(context->aggregate, context->memberOffset);
+    // Conditions (ii) and (iii) require the preceding aggregate's valid delimiter tail.
+    if (context->followsAggregate)
+        return hasDelimiterChain(context->previousAggregate,
+                context->previousAggregate ? context->previousAggregate->length : B(0));
+    // Conditions (iv) and (v) follow an individual MPDU or a local ACK.
+    return context->followsIndividual;
+}
+
+BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, bool interframe, const BlockAckReceiveContext *context)
 {
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
     auto sequenceNumber = dataHeader->getSequenceNumber();
@@ -72,10 +109,9 @@ BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(R
     if (receiveBuffer->insertFrame(dataPacket, dataHeader)) {
         if (dataHeader->getAckPolicy() == BLOCK_ACK && agreement->getVariant() == BlockAckVariant::BASIC)
             agreement->blockAckPolicyFrameReceived(dataHeader);
-        auto record = agreement->getBlockAckRecord();
         // IEEE Std 802.11-2024, 10.25.6.6.2.1(a)(2)(v) and 10.25.6.6.1: release the complete prefix in order.
         if (agreement->getVariant() == BlockAckVariant::COMPRESSED && insideWindow && windowStart < sequenceNumber &&
-            interframe && record->hasCompleteReceipt(record->getWindowStart() - 1)) {
+            isMandatoryRelease(agreement, dataHeader, interframe, context)) {
             auto preceding = advanceReceiveBuffer(agreement, receiveBuffer, sequenceNumber);
             releasedFrames.insert(releasedFrames.end(), preceding.begin(), preceding.end());
         }

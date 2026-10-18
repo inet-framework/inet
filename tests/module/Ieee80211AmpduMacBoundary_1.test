@@ -1,7 +1,8 @@
 %description:
 The production radio sends aggregate containers to the production MAC and Rx.
-Rx rejects successful, partially failed, and entirely failed aggregates before standalone FCS or header checks.
-The drop signal retains the PHY range outcomes and the clear container bit-error flag.
+Rx accepts correct members with valid FCS trailers and drops failed members.
+The aggregate retains the PHY range outcomes and the clear container bit-error flag.
+Separate members retain their own outcomes and omit the aggregate indication.
 A standalone CTS still sets NAV through the normal acceptance path.
 Scalar and dimensional radios cover whole-signal and separate-part reception with DCF and HCF.
 Malformed delimiters before typed MPDUs permit bounded recovery without a radio exception.
@@ -38,27 +39,17 @@ class BoundaryErrorModel : public Ieee80211NistErrorModel
 };
 Define_Module(BoundaryErrorModel);
 
-class BoundaryDriver : public cSimpleModule, public cListener
+class BoundaryRx : public Rx
 {
-    int sent = 0;
-    int dropped = 0;
-    int navSet = 0;
-  protected:
-    void initialize() override {
-        auto rx = getModuleByPath("^.receiver.wlan[0].mac.rx");
-        rx->subscribe(packetDroppedSignal, this);
-        rx->subscribe(Rx::navChangedSignal, this);
-        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("send"));
-    }
-    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
-        ASSERT(signal == packetDroppedSignal);
-        auto packet = check_and_cast<Packet *>(object);
-        ASSERT(dropped < 4);
-        ASSERT(packet->isName(dropped == 0 ? "good" : dropped == 1 ? "partial" : dropped == 2 ? "failed" : "malformed"));
+  public:
+    int received = 0;
+    AmpduReception lowerAggregateReceived(Packet *packet) override {
+        ASSERT(received < 4);
+        ASSERT(packet->isName(received == 0 ? "good" : received == 1 ? "partial" : received == 2 ? "failed" : "malformed"));
         ASSERT(!packet->hasBitError());
         auto indication = packet->getTag<Ieee80211AmpduInd>();
         ASSERT(indication->getAggregation() && indication->getHeaderSuccessful() && indication->getContentComplete());
-        if (dropped == 3) {
+        if (received == 3) {
             ASSERT(indication->getRangesArraySize() == 30);
             ASSERT(!indication->getRanges(0).valid && indication->getRanges(0).offset == B(0));
             int members = 0;
@@ -74,23 +65,68 @@ class BoundaryDriver : public cSimpleModule, public cListener
                 }
             }
             ASSERT(members == 2);
-            dropped++;
-            return;
         }
-        ASSERT(indication->getRangesArraySize() == 6);
-        int failed = 0;
-        for (size_t i = 0; i < indication->getRangesArraySize(); i++) {
-            auto& range = indication->getRanges(i);
-            ASSERT(range.valid);
-            failed += !range.successful;
+        else {
+            ASSERT(indication->getRangesArraySize() == 6);
+            int failed = 0;
+            for (size_t i = 0; i < indication->getRangesArraySize(); i++) {
+                const auto& range = indication->getRanges(i);
+                ASSERT(range.valid);
+                failed += !range.successful;
+            }
+            ASSERT(failed == (received == 0 ? 0 : received == 1 ? 1 : 3));
         }
-        ASSERT(failed == (dropped == 0 ? 0 : dropped == 1 ? 1 : 3));
+        auto reception = Rx::lowerAggregateReceived(packet);
+        std::vector<int> expected = received == 0 ? std::vector<int>{0, 1, 2} :
+                received == 1 ? std::vector<int>{0, 2} : received == 2 ? std::vector<int>{} : std::vector<int>{1, 2};
+        ASSERT(reception.anyCorrect == !expected.empty());
+        ASSERT(reception.members.size() == expected.size());
+        ASSERT(reception.topology && reception.topology->length == B(318));
+        ASSERT(reception.topology->members.size() == (received == 3 ? 2 : 3));
+        for (size_t i = 0; i < expected.size(); i++) {
+            const auto& member = reception.members[i];
+            ASSERT(member.offset == (expected[i] == 0 ? B(4) : B(108 * expected[i])));
+            ASSERT(member.packet->getDataLength() == B(100 + expected[i]));
+            ASSERT(member.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get() == expected[i]);
+            ASSERT(!member.packet->hasBitError());
+            ASSERT(!member.packet->findTag<Ieee80211AmpduInd>());
+        }
+        received++;
+        return reception;
+    }
+};
+Define_Module(BoundaryRx);
+
+class BoundaryDriver : public cSimpleModule, public cListener
+{
+    BoundaryRx *rx = nullptr;
+    int sent = 0;
+    int dropped = 0;
+    int navSet = 0;
+  protected:
+    void initialize() override {
+        rx = check_and_cast<BoundaryRx *>(getModuleByPath("^.receiver.wlan[0].mac.rx"));
+        rx->subscribe(packetDroppedSignal, this);
+        rx->subscribe(Rx::navChangedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("send"));
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *details) override {
+        ASSERT(signal == packetDroppedSignal);
+        auto packet = check_and_cast<Packet *>(object);
+        ASSERT(dropped < 4);
+        ASSERT(packet->isName(dropped == 0 ? "partial" : "failed"));
+        int sequence = dropped == 0 ? 1 : dropped - 1;
+        ASSERT(packet->getDataLength() == B(100 + sequence));
+        ASSERT(packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get() == sequence);
+        ASSERT(packet->hasBitError());
+        ASSERT(!packet->findTag<Ieee80211AmpduInd>());
+        ASSERT(check_and_cast<PacketDropDetails *>(details)->getReason() == INCORRECTLY_RECEIVED);
         dropped++;
     }
     void receiveSignal(cComponent *, simsignal_t signal, const SimTime& value, cObject *) override {
         ASSERT(signal == Rx::navChangedSignal);
         if (value > SIMTIME_ZERO) {
-            ASSERT(sent == 5 && dropped == 4);
+            ASSERT(sent == 5 && rx->received == 4 && dropped == 4);
             ASSERT(value == SimTime(50, SIMTIME_US));
             navSet++;
         }
@@ -103,10 +139,18 @@ class BoundaryDriver : public cSimpleModule, public cListener
                 auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
                 delimiter->setLength(sent == 3 && length == 100 ? 2000 : length);
                 packet->insertAtBack(delimiter);
+                Packet mpdu("member");
                 auto member = makeShared<Ieee80211DataHeader>();
-                member->setSequenceNumber(SequenceNumberCyclic(0));
-                packet->insertAtBack(member);
-                packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(length - member->getChunkLength().get<B>(), 0)));
+                member->setDurationField(SIMTIME_ZERO);
+                member->setSequenceNumber(SequenceNumberCyclic(length - 100));
+                mpdu.insertAtBack(member);
+                mpdu.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(length - member->getChunkLength().get<B>() - 4, 0)));
+                auto bytes = mpdu.peekAllAsBytes()->getBytes();
+                auto trailer = makeShared<Ieee80211MacTrailer>();
+                trailer->setFcsMode(FCS_COMPUTED);
+                trailer->setFcs(ethernetFcs(bytes.data(), bytes.size()));
+                mpdu.insertAtBack(trailer);
+                packet->insertAtBack(mpdu.peekData());
                 if (length != 102 && length % 4)
                     packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(4 - length % 4, 0)));
             }
@@ -139,13 +183,14 @@ class BoundaryDriver : public cSimpleModule, public cListener
     }
     using cListener::finish;
     void finish() override {
-        ASSERT(sent == 5 && dropped == 4 && navSet == 1);
+        ASSERT(sent == 5 && rx->received == 4 && dropped == 4 && navSet == 1);
         EV << "MAC aggregate boundary checks passed\n";
     }
 };
 Define_Module(BoundaryDriver);
 
 %file: test.ned
+import inet.linklayer.ieee80211.mac.Rx;
 import inet.mobility.static.StationaryMobility;
 import inet.node.inet.AdhocHost;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
@@ -156,6 +201,11 @@ module BoundaryErrorModel extends Ieee80211NistErrorModel
 {
     parameters:
         @class(::BoundaryErrorModel);
+}
+simple BoundaryRx extends Rx
+{
+    parameters:
+        @class(::BoundaryRx);
 }
 simple BoundaryDriver
 {
@@ -200,6 +250,7 @@ cmdenv-express-mode = false
 *.receiver.numWlanInterfaces = 1
 *.receiver.wlan[0].opMode = "n(mixed-2.4Ghz)"
 *.receiver.wlan[0].mac.qosStation = ${qos=false,true}
+*.receiver.wlan[0].mac.rx.typename = "BoundaryRx"
 *.receiver.wlan[0].radio.receiver.errorModel.typename = "BoundaryErrorModel"
 *.receiver.wlan[0].radio.separateReceptionParts = ${parts=false,true}
 *.sender.radio.separateReceptionParts = ${parts}

@@ -229,6 +229,24 @@ void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211D
         mgmtAckStatuses[std::make_pair(header->getReceiverAddress(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()))] = Status::WAITING_FOR_NORMAL_ACK;
 }
 
+void QosAckHandler::processTransmittedImplicitBlockAckMember(const Ptr<const Ieee80211DataHeader>& header)
+{
+    // IEEE Std 802.11-2024, 10.25.6.5: aggregate context makes policy 00 an implicit request.
+    QoSKey id = {header->getReceiverAddress(), {header->getTid(),
+        SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())}};
+    ackStatuses.at(id) = Status::WAITING_FOR_BLOCK_ACK;
+}
+
+void QosAckHandler::processFailedImplicitBlockAckMember(const Ptr<const Ieee80211DataHeader>& header)
+{
+    // IEEE Std 802.11-2024, 10.25.6.7.1 permits DATA retry after the Block Ack response fails.
+    QoSKey id = {header->getReceiverAddress(), {header->getTid(),
+        SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())}};
+    auto found = ackStatuses.find(id);
+    if (found != ackStatuses.end() && found->second == Status::WAITING_FOR_BLOCK_ACK)
+        found->second = Status::BLOCK_ACK_NOT_ARRIVED;
+}
+
 void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, const OriginatorBlockAckAgreement *agreement)
 {
     for (auto& ackStatus : ackStatuses) {
@@ -250,7 +268,9 @@ void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211Block
         else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
             if (compressedBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = compressedBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && OriginatorBlockAckAgreement::isInBitmap(sequence, startingSeqNum) && seqCtrlField.getFragmentNumber() == 0)
+                bool transmitted = status == Status::BLOCK_ACK_NOT_YET_REQUESTED || status == Status::BLOCK_ACK_NOT_ARRIVED ||
+                    status == Status::BLOCK_ACK_ARRIVED_UNACKED || status == Status::NORMAL_ACK_NOT_ARRIVED;
+                if (transmitted && OriginatorBlockAckAgreement::isInBitmap(sequence, startingSeqNum) && seqCtrlField.getFragmentNumber() == 0)
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }

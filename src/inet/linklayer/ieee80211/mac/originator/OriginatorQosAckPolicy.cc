@@ -39,6 +39,13 @@ bool OriginatorQosAckPolicy::isBlockAckReqNeeded(InProgressFrames *frames, TxopP
 std::tuple<MacAddress, SequenceNumberCyclic, Tid> OriginatorQosAckPolicy::computeBlockAckReqParameters(InProgressFrames *frames, TxopProcedure *txop, IOriginatorBlockAckAgreementHandler *agreements) const
 {
     using Id = std::pair<MacAddress, Tid>;
+    if (agreements && probeEligibility) {
+        for (const auto& entry : agreements->getAgreements()) {
+            auto agreement = entry.second;
+            if (agreement->getIsAddbaResponseReceived() && agreement->hasPendingProbe() && probeEligibility(frames, entry.first.second))
+                return std::make_tuple(entry.first.first, agreement->getStartingSequenceNumber(), entry.first.second);
+        }
+    }
     std::map<Id, std::vector<Packet *>> groups;
     for (auto frame : frames->getOutstandingFrames()) {
         auto header = frame->peekAtFront<Ieee80211DataHeader>();
@@ -125,6 +132,11 @@ simtime_t OriginatorQosAckPolicy::getAckTimeout(Packet *packet, const Ptr<const 
 simtime_t OriginatorQosAckPolicy::getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const
 {
     return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq, ResponseQueryRole::PREDICT)->getPhyRxStartDelay() : blockAckTimeout;
+}
+
+simtime_t OriginatorQosAckPolicy::getImplicitBlockAckTimeout(const physicallayer::IIeee80211Mode *responseMode) const
+{
+    return blockAckTimeout == -1 ? modeSet->getSifsTime() + modeSet->getSlotTime() + responseMode->getPhyRxStartDelay() : blockAckTimeout;
 }
 
 } /* namespace ieee80211 */

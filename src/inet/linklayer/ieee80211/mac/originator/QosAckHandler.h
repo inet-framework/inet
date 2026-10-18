@@ -63,6 +63,8 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
 
     virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
     virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
+    void processTransmittedImplicitBlockAckMember(const Ptr<const Ieee80211DataHeader>& header);
+    void processFailedImplicitBlockAckMember(const Ptr<const Ieee80211DataHeader>& header);
     virtual void processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, const OriginatorBlockAckAgreement *agreement);
     virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
     virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);

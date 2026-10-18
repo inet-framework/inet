@@ -29,6 +29,7 @@ class INET_API FrameSequenceHandler : public IFrameSequenceHandler
     virtual void abortFrameSequence();
 
   public:
+    void transmissionCancelled() override;
     virtual const FrameSequenceContext *getContext() const override { return context; }
     virtual const IFrameSequence *getFrameSequence() const override { return frameSequence; }
     virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback) override;

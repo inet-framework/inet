@@ -60,6 +60,7 @@ class INET_API Rx : public SimpleModule, public IRx
     virtual void transmissionStateChanged(physicallayer::IRadio::TransmissionState transmissionState) override;
     virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) override;
     virtual bool lowerFrameReceived(Packet *packet) override;
+    virtual AmpduReception lowerAggregateReceived(Packet *packet) override;
     virtual void frameTransmitted(simtime_t durationField) override;
     virtual simtime_t getTxnavRemaining() const override;
     virtual void successfulFrameTransmitted(simtime_t ppduEnd, simtime_t durationField) override;

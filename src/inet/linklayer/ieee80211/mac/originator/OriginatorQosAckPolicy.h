@@ -25,6 +25,7 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
 
     simtime_t blockAckTimeout = -1;
     simtime_t ackTimeout = -1;
+    std::function<bool(InProgressFrames *, Tid)> probeEligibility;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
@@ -33,6 +34,8 @@ class INET_API OriginatorQosAckPolicy : public ModeSetListener, public IOriginat
     virtual bool checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const;
 
   public:
+    void setProbeEligibility(std::function<bool(InProgressFrames *, Tid)> predicate) override { probeEligibility = predicate; }
+    simtime_t getImplicitBlockAckTimeout(const physicallayer::IIeee80211Mode *responseMode) const override;
     virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const override;
     virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const override;
     virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const override;

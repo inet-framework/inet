@@ -70,9 +70,10 @@ class InputDataSpy : public IRecipientQosMacDataService {
     }
     void clearPeer(MacAddress peer) override { delegate->clearPeer(peer); }
     std::vector<Packet *> dataFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& header,
-            IRecipientBlockAckAgreementHandler *agreements, bool interframe = false) override {
+            IRecipientBlockAckAgreementHandler *agreements, bool interframe = false,
+            const BlockAckReceiveContext *context = nullptr) override {
         dataCalls++;
-        return delegate->dataFrameReceived(packet, header, agreements, interframe);
+        return delegate->dataFrameReceived(packet, header, agreements, interframe, context);
     }
     std::vector<Packet *> controlFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
             IRecipientBlockAckAgreementHandler *agreements) override {

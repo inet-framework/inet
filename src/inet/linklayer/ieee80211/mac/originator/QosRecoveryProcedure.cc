@@ -126,6 +126,11 @@ void QosRecoveryProcedure::controlFrameTransmissionFailed()
     }
 }
 
+void QosRecoveryProcedure::implicitBlockAckMemberFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
+{
+    incrementCounter(header, packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter);
+}
+
 //
 // This SRC and the SSRC shall be reset when a MAC frame of length less than or equal
 // to dot11RTSThreshold succeeds for that MPDU of type Data or MMPDU.
