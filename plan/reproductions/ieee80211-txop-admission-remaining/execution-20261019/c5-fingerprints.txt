@@ -1,0 +1,18 @@
+Hint: You may want to use the '-F tyf' option to exclude graphical (tyf) fingerprints, as they are not regularly kept up to date
+/showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'cb71-81f8/tyf', expected: '27f2-4a52/tyf'
+/showcases/wireless/blockack/ -f omnetpp.ini -c Fragmentation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '9fd0-6388/tplx;22f5-8db8/~tNl;68cc-5669/~tND', expected: '36f4-5c22/tplx;66b0-94cd/~tNl;45f3-af4f/~tND'
+/showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf', expected: '0e94-675b/tplx;4545-c0de/~tNl;a778-2f83/~tND;95cc-1859/tyf'
+
+Failures:
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'cb71-81f8/tyf', expected: '27f2-4a52/tyf')
+  /showcases/wireless/blockack/ -f omnetpp.ini -c Fragmentation -r 0 wireless Ipv4 (some fingerprint mismatch: actual '9fd0-6388/tplx;22f5-8db8/~tNl;68cc-5669/~tND', expected: '36f4-5c22/tplx;66b0-94cd/~tNl;45f3-af4f/~tND')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf', expected: '0e94-675b/tplx;4545-c0de/~tNl;a778-2f83/~tND;95cc-1859/tyf')
+----------------------------------------------------------------------
+Ran 3 tests in 32.511s
+
+FAILED (failures=3)
+
+Check showcases.csv.UPDATED for updated fingerprints
+Check showcases.csv.FAILED for failed fingerprints
+Log has been saved to fingerprinttest.out
+Test results differ from expected results

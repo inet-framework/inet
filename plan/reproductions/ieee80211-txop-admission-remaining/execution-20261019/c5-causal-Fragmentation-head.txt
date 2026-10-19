@@ -1,0 +1,46 @@
+E # 39 t 0.00031761726 m 62 ce 38 msg 132
+CMB sm 62 tm 71 m "lowerFrameReceived(\"WlanAck\")"
+- [INFO]	Received frame from PHY: (inet::Packet)WlanAck (14 B) (inet::SequenceChunk) length = 27 B
+CME
+CMB sm 62 tm 69 m processLowerFrame(WlanAck)
+- [INFO]	Processing lower frame: WlanAck
+- [INFO]	Finishing last frame sequence step: history = ({(DATA ACK)})
+- [INFO]	Processing received frame WlanAck as originator in frame sequence.
+CMB sm 69 tm 71 m successfulFrameTransmitted
+BS id 26 tid 26 eid 26 etid 26 c omnetpp::cMessage n endTxnavTimer sm 71 st 0.00031761726 am 71 at 0.000432 pe 39
+ES id 26 tid 26 eid 26 etid 26 c omnetpp::cMessage n endTxnavTimer sm 71 st 0.00031761726 am 71 at 0.000432 pe 39
+CME
+CMB sm 69 tm 117 m msduAckReceived
+CMB sm 117 tm 101 m resetCw
+- [DEBUG]	Contention window is reset: cw = 31
+CME
+CME
+- [DEBUG]	Dropping frame Data-0-frag0.
+- [INFO]	Starting next frame sequence step: history = ({(DATA ACK) ()})
+- [INFO]	Transmitting, frame = (inet::Packet)Data-0-frag1 (100 B) (inet::SequenceChunk) length = 100 B.
+- [DEBUG]	Datarate for Data-0-frag1 is set to 24 Mbps.
+CMB sm 69 tm 72 m "transmitFrame(\"Data-0-frag1\")"
+CL id 133 tid 96 eid 133 etid 96 c omnetpp::cMessage n Data-0-frag1 m 72 pe -1 cid 96
+BS id 27 tid 27 eid 27 etid 27 c omnetpp::cMessage n endIFS sm 72 st 0.00031761726 am 72 at 0.00032761726 pe 39
+ES id 27 tid 27 eid 27 etid 27 c omnetpp::cMessage n endIFS sm 72 st 0.00031761726 am 72 at 0.00032761726 pe 39
+CME
+CMB sm 69 tm 117 m registerMsdu
+CME
+CE id 13 tid 13 eid 13 etid 13 c omnetpp::cMessage n startRxTimeout m 69 pe 22
+CME
+
+E # 40 t 0.00032761726 m 72 ce 39 msg 27
+- [DETAIL]	Tx: endIfsTimer expired
+CMB sm 72 tm 69 m frameTransmissionStarted
+CME
+CL id 134 tid 96 eid 134 etid 96 c omnetpp::cMessage n Data-0-frag1 m 72 pe -1 cid 133
+CMB sm 72 tm 62 m "sendDownFrame(\"Data-0-frag1\")"
+CM id 135 tid 135 eid 135 etid 135 c omnetpp::cMessage n configureRadioMode k 1 pe -1
+BS id 135 tid 135 eid 135 etid 135 c inet::Request n configureRadioMode k 1 m 62 pe 40
+SH sm 62 sg 7
+ES id 135 tid 135 eid 135 etid 135 c inet::Request n configureRadioMode k 1 sm 62 sg 7 st 0.00032761726 am 63 ag 0 at 0.00032761726 pe 40
+BS id 134 tid 96 eid 134 etid 96 c inet::Packet n Data-0-frag1 l 800 m 62 pe 40
+SH sm 62 sg 7
+ES id 134 tid 96 eid 134 etid 96 c inet::Packet n Data-0-frag1 l 800 sm 62 sg 7 st 0.00032761726 am 63 ag 0 at 0.00032761726 pe 40
+CME
+

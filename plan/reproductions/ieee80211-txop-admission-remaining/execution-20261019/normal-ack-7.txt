@@ -1,0 +1,61 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2025 Andras Varga, OpenSim Ltd.
+Version: 6.4.0aipre2, build: 260526-7b9114f72c, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+
+Setting up Cmdenv...
+
+Loading NED files from .:  2
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/src:  1287
+
+Preparing for running configuration General, run #7...
+Scenario: $rate=24, $profile="disabled", $protection="multiple", $repetition=0
+Assigned runID=General-7-20261019-02:43:19-19
+Setting up network "ProbeNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 2.4e-05s (0m 00s)  0% completed  (0% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 197.879MiB
+DATA node=sta1 decision=1.000102 ifs=0.00001 allocation=0 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1 bound=1.001 count=1 agreement=0 aggregate=0 retry=0 exception=0
+DATA node=sta1 decision=1.000554 ifs=0.00001 allocation=1 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1 bound=1.001 count=2 agreement=0 aggregate=0 retry=0 exception=0
+DATA node=ap decision=1.001126 ifs=0.00001 allocation=0 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.001024 bound=1.002024 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.002236 ifs=0.00001 allocation=2 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.002134 bound=1.003134 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.00369 ifs=0.00001 allocation=1 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.003588 bound=1.004588 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.00498 ifs=0.00001 allocation=3 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.004878 bound=1.005878 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.005984 ifs=0.00001 allocation=2 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.005882 bound=1.006882 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.007094 ifs=0.00001 allocation=4 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.006992 bound=1.007992 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.008108 ifs=0.00001 allocation=3 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.008006 bound=1.009006 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.009178 ifs=0.00001 allocation=5 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.009076 bound=1.010076 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.010332 ifs=0.00001 allocation=4 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.01023 bound=1.01123 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.011502 ifs=0.00001 allocation=6 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.0114 bound=1.0124 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.012936 ifs=0.00001 allocation=5 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.012834 bound=1.013834 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.014086 ifs=0.00001 allocation=7 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.013984 bound=1.014984 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.01515 ifs=0.00001 allocation=6 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.015048 bound=1.016048 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.0163 ifs=0.00001 allocation=8 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.016198 bound=1.017198 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.017934 ifs=0.00001 allocation=7 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.017832 bound=1.018832 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.019204 ifs=0.00001 allocation=9 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.019102 bound=1.020102 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.020268 ifs=0.00001 allocation=8 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.020166 bound=1.021166 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.021498 ifs=0.00001 allocation=10 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.021396 bound=1.022396 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.022592 ifs=0.00001 allocation=9 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.02249 bound=1.02349 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.023682 ifs=0.00001 allocation=11 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.02358 bound=1.02458 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.024856 ifs=0.00001 allocation=10 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.024754 bound=1.025754 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.026106 ifs=0.00001 allocation=12 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.026004 bound=1.027004 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.02738 ifs=0.00001 allocation=11 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.027278 bound=1.028278 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.02859 ifs=0.00001 allocation=13 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.028488 bound=1.029488 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.029634 ifs=0.00001 allocation=12 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.029532 bound=1.030532 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.030744 ifs=0.00001 allocation=14 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.030642 bound=1.031642 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.031728 ifs=0.00001 allocation=13 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.031626 bound=1.032626 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=sta1 decision=1.032798 ifs=0.00001 allocation=15 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.032696 bound=1.033696 count=1 agreement=0 aggregate=1 retry=0 exception=0
+DATA node=ap decision=1.033842 ifs=0.00001 allocation=14 bitrate=24 Mbps airtime=0.000538 bytes=1532 txopStart=1.03374 bound=1.03474 count=1 agreement=0 aggregate=1 retry=0 exception=0
+SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=0 agreedData=0 outsideData=16 aggregates=14 delivered=30
+SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=0 agreedData=0 outsideData=15 aggregates=15 delivered=30
+** Event #2736   t=1.2   Elapsed: 0.095134s (0m 00s)  92% completed  (92% total)
+     Speed:     ev/sec=28764.6   simsec/sec=12.3396   ev/simsec=2331.08
+     Messages:  created: 3610   present: 120   in FES: 4   Memory (RSS): 199.281MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::ProbeTest) ProbeNetwork.test (id=7), at t=1.2s, event #2736
+
+Calling finish() at end of Run #7...
+
+End.

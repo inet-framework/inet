@@ -1,0 +1,333 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2025 Andras Varga, OpenSim Ltd.
+Version: 6.4.0aipre2, build: 260526-7b9114f72c, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+
+Setting up Cmdenv...
+
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/module/work/Ieee80211TxopAdmission_1:  2
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/src:  1287
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/module/lib:  33
+
+Preparing for running configuration General, run #0...
+Scenario: $zero=false, $loss=0, $rate=6, $rts=0, $protection="single", $repetition=0
+Assigned runID=General-0-20261019-09:39:07-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 4.2e-05s (0m 00s)  0% completed  (0% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 198.414MiB
+TXOP delivered=30 expected=30
+Normal Ack TXOP admission assertions passed.
+** Event #7806   t=1.35   Elapsed: 0.587262s (0m 00s)  96% completed  (6% total)
+     Speed:     ev/sec=13292.8   simsec/sec=2.16783   ev/simsec=6131.82
+     Messages:  created: 12825   present: 120   in FES: 4   Memory (RSS): 199.98MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #7806
+
+Calling finish() at end of Run #0...
+
+Preparing for running configuration General, run #1...
+Scenario: $zero=false, $loss=0, $rate=6, $rts=0, $protection="multiple", $repetition=0
+Assigned runID=General-1-20261019-09:39:08-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 9e-06s (0m 00s)  0% completed  (6% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=30 expected=30
+Normal Ack TXOP admission assertions passed.
+** Event #8126   t=1.35   Elapsed: 0.577318s (0m 00s)  96% completed  (12% total)
+     Speed:     ev/sec=14075.6   simsec/sec=2.20511   ev/simsec=6383.18
+     Messages:  created: 13234   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #8126
+
+Calling finish() at end of Run #1...
+
+Preparing for running configuration General, run #2...
+Scenario: $zero=false, $loss=0, $rate=6, $rts=5000, $protection="single", $repetition=0
+Assigned runID=General-2-20261019-09:39:09-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (12% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=30 expected=30
+Normal Ack TXOP admission assertions passed.
+** Event #4354   t=1.35   Elapsed: 0.339259s (0m 00s)  96% completed  (18% total)
+     Speed:     ev/sec=12834.2   simsec/sec=3.7525   ev/simsec=3420.18
+     Messages:  created: 6826   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #4354
+
+Calling finish() at end of Run #2...
+
+Preparing for running configuration General, run #3...
+Scenario: $zero=false, $loss=0, $rate=6, $rts=5000, $protection="multiple", $repetition=0
+Assigned runID=General-3-20261019-09:39:09-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.2e-05s (0m 00s)  0% completed  (18% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=30 expected=30
+Normal Ack TXOP admission assertions passed.
+** Event #4479   t=1.35   Elapsed: 0.335182s (0m 00s)  96% completed  (24% total)
+     Speed:     ev/sec=13363.4   simsec/sec=3.79818   ev/simsec=3518.37
+     Messages:  created: 6386   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #4479
+
+Calling finish() at end of Run #3...
+
+Preparing for running configuration General, run #4...
+Scenario: $zero=false, $loss=0, $rate=24, $rts=0, $protection="single", $repetition=0
+Assigned runID=General-4-20261019-09:39:10-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.3e-05s (0m 00s)  0% completed  (25% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=30 expected=30
+Normal Ack TXOP admission assertions passed.
+** Event #7806   t=1.35   Elapsed: 0.549982s (0m 00s)  96% completed  (31% total)
+     Speed:     ev/sec=14193.6   simsec/sec=2.31474   ev/simsec=6131.82
+     Messages:  created: 12825   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #7806
+
+Calling finish() at end of Run #4...
+
+Preparing for running configuration General, run #5...
+Scenario: $zero=false, $loss=0, $rate=24, $rts=0, $protection="multiple", $repetition=0
+Assigned runID=General-5-20261019-09:39:11-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.4e-05s (0m 00s)  0% completed  (31% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=30 expected=30
+Normal Ack TXOP admission assertions passed.
+** Event #8126   t=1.35   Elapsed: 0.580839s (0m 00s)  96% completed  (37% total)
+     Speed:     ev/sec=13990.3   simsec/sec=2.19175   ev/simsec=6383.18
+     Messages:  created: 13234   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #8126
+
+Calling finish() at end of Run #5...
+
+Preparing for running configuration General, run #6...
+Scenario: $zero=false, $loss=0, $rate=24, $rts=5000, $protection="single", $repetition=0
+Assigned runID=General-6-20261019-09:39:12-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (37% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=30 expected=30
+Normal Ack TXOP admission assertions passed.
+** Event #4354   t=1.35   Elapsed: 0.359106s (0m 00s)  96% completed  (43% total)
+     Speed:     ev/sec=12124.8   simsec/sec=3.54508   ev/simsec=3420.18
+     Messages:  created: 6826   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #4354
+
+Calling finish() at end of Run #6...
+
+Preparing for running configuration General, run #7...
+Scenario: $zero=false, $loss=0, $rate=24, $rts=5000, $protection="multiple", $repetition=0
+Assigned runID=General-7-20261019-09:39:12-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.2e-05s (0m 00s)  0% completed  (43% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=30 expected=30
+Normal Ack TXOP admission assertions passed.
+** Event #4479   t=1.35   Elapsed: 0.321226s (0m 00s)  96% completed  (49% total)
+     Speed:     ev/sec=13943.8   simsec/sec=3.96315   ev/simsec=3518.37
+     Messages:  created: 6386   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #4479
+
+Calling finish() at end of Run #7...
+
+Preparing for running configuration General, run #48...
+Scenario: $zero=true, $loss=0, $rate=6, $rts=0, $protection="single", $repetition=0
+Assigned runID=General-48-20261019-09:39:13-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.2e-05s (0m 00s)  0% completed  (50% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=2 expected=2
+Normal Ack TXOP admission assertions passed.
+** Event #1490   t=1.35   Elapsed: 0.090585s (0m 00s)  96% completed  (56% total)
+     Speed:     ev/sec=16450.6   simsec/sec=14.0552   ev/simsec=1170.43
+     Messages:  created: 1881   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #1490
+
+Calling finish() at end of Run #48...
+
+Preparing for running configuration General, run #49...
+Scenario: $zero=true, $loss=0, $rate=6, $rts=0, $protection="multiple", $repetition=0
+Assigned runID=General-49-20261019-09:39:13-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.3e-05s (0m 00s)  0% completed  (56% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=2 expected=2
+Normal Ack TXOP admission assertions passed.
+** Event #1490   t=1.35   Elapsed: 0.083382s (0m 00s)  96% completed  (62% total)
+     Speed:     ev/sec=17871.9   simsec/sec=15.2695   ev/simsec=1170.43
+     Messages:  created: 1895   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #1490
+
+Calling finish() at end of Run #49...
+
+Preparing for running configuration General, run #50...
+Scenario: $zero=true, $loss=0, $rate=6, $rts=5000, $protection="single", $repetition=0
+Assigned runID=General-50-20261019-09:39:13-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (62% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=2 expected=2
+Normal Ack TXOP admission assertions passed.
+** Event #1036   t=1.35   Elapsed: 0.068442s (0m 00s)  96% completed  (68% total)
+     Speed:     ev/sec=15138.7   simsec/sec=18.6023   ev/simsec=813.805
+     Messages:  created: 1293   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #1036
+
+Calling finish() at end of Run #50...
+
+Preparing for running configuration General, run #51...
+Scenario: $zero=true, $loss=0, $rate=6, $rts=5000, $protection="multiple", $repetition=0
+Assigned runID=General-51-20261019-09:39:13-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (68% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=2 expected=2
+Normal Ack TXOP admission assertions passed.
+** Event #1036   t=1.35   Elapsed: 0.063622s (0m 00s)  96% completed  (74% total)
+     Speed:     ev/sec=16286   simsec/sec=20.0121   ev/simsec=813.805
+     Messages:  created: 1293   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #1036
+
+Calling finish() at end of Run #51...
+
+Preparing for running configuration General, run #52...
+Scenario: $zero=true, $loss=0, $rate=24, $rts=0, $protection="single", $repetition=0
+Assigned runID=General-52-20261019-09:39:14-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.3e-05s (0m 00s)  0% completed  (75% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=2 expected=2
+Normal Ack TXOP admission assertions passed.
+** Event #1490   t=1.35   Elapsed: 0.144643s (0m 00s)  96% completed  (81% total)
+     Speed:     ev/sec=10302   simsec/sec=8.80187   ev/simsec=1170.43
+     Messages:  created: 1881   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #1490
+
+Calling finish() at end of Run #52...
+
+Preparing for running configuration General, run #53...
+Scenario: $zero=true, $loss=0, $rate=24, $rts=0, $protection="multiple", $repetition=0
+Assigned runID=General-53-20261019-09:39:14-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 9e-06s (0m 00s)  0% completed  (81% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=2 expected=2
+Normal Ack TXOP admission assertions passed.
+** Event #1490   t=1.35   Elapsed: 0.082756s (0m 00s)  96% completed  (87% total)
+     Speed:     ev/sec=18006.7   simsec/sec=15.3846   ev/simsec=1170.43
+     Messages:  created: 1895   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #1490
+
+Calling finish() at end of Run #53...
+
+Preparing for running configuration General, run #54...
+Scenario: $zero=true, $loss=0, $rate=24, $rts=5000, $protection="single", $repetition=0
+Assigned runID=General-54-20261019-09:39:14-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (87% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=2 expected=2
+Normal Ack TXOP admission assertions passed.
+** Event #1036   t=1.35   Elapsed: 0.053406s (0m 00s)  96% completed  (93% total)
+     Speed:     ev/sec=19402.2   simsec/sec=23.8413   ev/simsec=813.805
+     Messages:  created: 1293   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #1036
+
+Calling finish() at end of Run #54...
+
+Preparing for running configuration General, run #55...
+Scenario: $zero=true, $loss=0, $rate=24, $rts=5000, $protection="multiple", $repetition=0
+Assigned runID=General-55-20261019-09:39:14-12
+Setting up network "TxopAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (93% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.117MiB
+TXOP delivered=2 expected=2
+Normal Ack TXOP admission assertions passed.
+** Event #1036   t=1.35   Elapsed: 0.062293s (0m 00s)  96% completed  (99% total)
+     Speed:     ev/sec=16633.2   simsec/sec=20.4388   ev/simsec=813.805
+     Messages:  created: 1293   present: 120   in FES: 4   Memory (RSS): 200.117MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::TxopAdmissionTest) TxopAdmissionNetwork.test (id=7), at t=1.35s, event #1036
+
+Calling finish() at end of Run #55...
+
+Run statistics: total 16, successful 16
+
+End.

@@ -1,0 +1,11 @@
+== AR-ORG-DOMAINS: N/A (scope does not intersect src/inet/common) ==
+
+== AR-ORG-VIS-SPLIT: non-visualizer code must not #include visualizer/ ==
+  ok
+
+== AR-COM-SOCKETS: N/A (scope does not intersect src/inet/applications) ==
+
+== AR-QUAL-DETERMINISM: src/inet/linklayer/ieee80211 ==
+  ok
+
+PASS: architecture checks clean.

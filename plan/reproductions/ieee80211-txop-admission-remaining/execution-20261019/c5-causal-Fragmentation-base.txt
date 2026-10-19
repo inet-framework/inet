@@ -1,0 +1,78 @@
+E # 39 t 0.00031761726 m 62 ce 38 msg 129
+CMB sm 62 tm 71 m "lowerFrameReceived(\"WlanAck\")"
+- [INFO]	Received frame from PHY: (inet::Packet)WlanAck (14 B) (inet::SequenceChunk) length = 27 B
+CME
+CMB sm 62 tm 69 m processLowerFrame(WlanAck)
+- [INFO]	Processing lower frame: WlanAck
+- [INFO]	Finishing last frame sequence step: history = ({(DATA ACK)})
+- [INFO]	Processing received frame WlanAck as originator in frame sequence.
+CMB sm 69 tm 71 m successfulFrameTransmitted
+CME
+CMB sm 69 tm 101 m resetCw
+- [DEBUG]	Contention window is reset: cw = 31
+CME
+- [DEBUG]	Dropping frame Data-0-frag0.
+- [INFO]	Starting next frame sequence step: history = ({(DATA ACK)})
+- [INFO]	Frame sequence finished.
+CE id 13 tid 13 eid 13 etid 13 c omnetpp::cMessage n startRxTimeout m 69 pe 22
+CMB sm 69 tm 101 m releaseChannel
+- [INFO]	Channel released.
+CME
+CMB sm 69 tm 116 m endTxop
+- [INFO]	Txop ended.
+CME
+CMB sm 69 tm 71 m setContentionBlocked
+CMB sm 71 tm 86 m "medium FREE"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CMB sm 71 tm 107 m "medium FREE"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CMB sm 71 tm 114 m "medium FREE"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CMB sm 71 tm 121 m "medium FREE"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CMB sm 71 tm 128 m "medium FREE"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CME
+CMB sm 69 tm 101 m requestChannel
+CMB sm 101 tm 114 m startContention
+- [DETAIL]	Starting contention: cw = 31, slots = 4, slotTime = 0.00002, ifs = 0.00007, eifs = 0.000384
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: leaving state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "(event == START && mediumFree)" holds, taking transition "Starting-IFS-and-Backoff" to state IFS_AND_BACKOFF
+- [INFO]	Scheduling contention end: backoffslots = 4, slotTime = 0.00002, lastBusyTime = 0.00031761726, lastIdle = 0.00021, waitInterval = 0.00015.
+BS id 19 tid 19 eid 19 etid 19 c omnetpp::cMessage n startTx p 1000 sm 114 st 0.00031761726 am 114 at 0.00046761726 pe 39
+ES id 19 tid 19 eid 19 etid 19 c omnetpp::cMessage n startTx p 1000 sm 114 st 0.00031761726 am 114 at 0.00046761726 pe 39
+- [INFO]	The expected channel access of the Best effort queue is: 0.00046761726
+- [DEBUG]	FSM Backoff procedure: done processing associated actions
+- [DEBUG]	FSM Backoff procedure: entering state IFS_AND_BACKOFF
+CME
+CME
+DM id 129 tid 118 eid 129 etid 118 c omnetpp::cMessage n WlanAck m 69 pe 39
+CMB sm 69 tm 113 m clearDroppedFrames
+DM id 92 tid 92 eid 92 etid 92 c omnetpp::cMessage n Data-0-frag0 m 113 pe 18
+CME
+CME
+
+E # 40 t 0.0004 m 53 ce 30 msg 42
+CM id 130 tid 130 eid 130 etid 130 c omnetpp::cMessage n Data-3 pe -1
+- [DEBUG]	Sending to UDP protocol, [1mmsg[0m = [2m(Packet)[0m[3mData-3[0m (1080 B) [2mApplicationPacket[0m, [1msequenceNumber[0m = 3.
+BS id 130 tid 130 eid 130 etid 130 c inet::Packet n Data-3 l 8640 m 53 pe 40
+SH sm 53 sg 3
+CMB sm 53 tm 54 m arrived
+- [INFO]	Dispatching packet to service, [1mprotocol[0m = udp(69), [1mservicePrimitive[0m = 1, [1minGate[0m = (omnetpp::cGate)in[0] <-- app[0].socketOut, [1moutGate[0m = (omnetpp::cGate)out[1] --> udp.appIn, [1mpacket[0m = [2m(Packet)[0m[3mData-3[0m (1080 B) [2mApplicationPacket[0m, [1msequenceNumber[0m = 3.
+SH sm 54 sg 2621441
+CME
+ES id 130 tid 130 eid 130 etid 130 c inet::Packet n Data-3 l 8640 sm 53 sg 3 st 0.0004 am 50 ag 0 at 0.0004 pe 40
+BS id 42 tid 42 eid 42 etid 42 c inet::ClockEvent n sendTimer k 2 sm 53 st 0.0004 am 53 at 0.0005 pe 40
+ES id 42 tid 42 eid 42 etid 42 c inet::ClockEvent n sendTimer k 2 sm 53 st 0.0004 am 53 at 0.0005 pe 40
+

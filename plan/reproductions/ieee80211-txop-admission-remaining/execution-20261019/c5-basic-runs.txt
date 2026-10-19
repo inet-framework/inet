@@ -1,0 +1,736 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2025 Andras Varga, OpenSim Ltd.
+Version: 6.4.0aipre2, build: 260526-7b9114f72c, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+
+Setting up Cmdenv...
+
+Loading NED files from ../../../../src:  1287
+Loading NED files from .:  2
+Loading NED files from ../../lib:  33
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/module/work/Ieee80211BasicTxopAdmission_1:  2
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/src:  1287
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/module/lib:  33
+
+Preparing for running configuration General, run #0...
+Scenario: $scenario=0, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-0-20261019-09:38:16-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 3.8e-05s (0m 00s)  0% completed  (0% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 199.16MiB
+Basic admission state: scenario=0 delivered=30 agreed=29/28 failures=0
+Basic admission assertions passed: scenario=0 delivered=30 retainedFailures=0 collisions=0
+** Event #4190   t=1.2   Elapsed: 0.612776s (0m 00s)  92% completed  (2% total)
+     Speed:     ev/sec=6838.04   simsec/sec=1.91546   ev/simsec=3569.92
+     Messages:  created: 5177   present: 120   in FES: 4   Memory (RSS): 200.543MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4190
+
+Calling finish() at end of Run #0...
+
+Preparing for running configuration General, run #1...
+Scenario: $scenario=0, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-1-20261019-09:38:17-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 2.4e-05s (0m 00s)  0% completed  (2% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.707MiB
+Basic admission state: scenario=0 delivered=30 agreed=34/35 failures=0
+Basic admission assertions passed: scenario=0 delivered=30 retainedFailures=0 collisions=0
+** Event #4973   t=1.2   Elapsed: 0.48448s (0m 00s)  92% completed  (5% total)
+     Speed:     ev/sec=10265   simsec/sec=2.42267   ev/simsec=4237.04
+     Messages:  created: 6089   present: 120   in FES: 4   Memory (RSS): 200.707MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4973
+
+Calling finish() at end of Run #1...
+
+Preparing for running configuration General, run #2...
+Scenario: $scenario=0, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-2-20261019-09:38:18-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.8e-05s (0m 00s)  0% completed  (5% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.707MiB
+Basic admission state: scenario=0 delivered=30 agreed=33/23 failures=0
+Basic admission assertions passed: scenario=0 delivered=30 retainedFailures=0 collisions=0
+** Event #4941   t=1.2   Elapsed: 0.417158s (0m 00s)  92% completed  (8% total)
+     Speed:     ev/sec=11844.8   simsec/sec=2.81363   ev/simsec=4209.78
+     Messages:  created: 6103   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4941
+
+Calling finish() at end of Run #2...
+
+Preparing for running configuration General, run #3...
+Scenario: $scenario=0, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-3-20261019-09:38:18-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (8% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=0 delivered=30 agreed=29/21 failures=0
+Basic admission assertions passed: scenario=0 delivered=30 retainedFailures=0 collisions=0
+** Event #4904   t=1.2   Elapsed: 0.653808s (0m 00s)  92% completed  (10% total)
+     Speed:     ev/sec=7500.76   simsec/sec=1.79519   ev/simsec=4178.25
+     Messages:  created: 6335   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4904
+
+Calling finish() at end of Run #3...
+
+Preparing for running configuration General, run #4...
+Scenario: $scenario=1, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-4-20261019-09:38:19-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (11% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=1 delivered=30 agreed=44/22 failures=9
+Basic admission assertions passed: scenario=1 delivered=30 retainedFailures=9 collisions=0
+** Event #5937   t=1.2   Elapsed: 0.55043s (0m 00s)  92% completed  (13% total)
+     Speed:     ev/sec=10786.3   simsec/sec=2.13236   ev/simsec=5058.38
+     Messages:  created: 7412   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5937
+
+Calling finish() at end of Run #4...
+
+Preparing for running configuration General, run #5...
+Scenario: $scenario=1, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-5-20261019-09:38:20-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (13% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=1 delivered=30 agreed=29/26 failures=9
+Basic admission assertions passed: scenario=1 delivered=30 retainedFailures=9 collisions=0
+** Event #4765   t=1.2   Elapsed: 0.31628s (0m 00s)  92% completed  (16% total)
+     Speed:     ev/sec=15066.2   simsec/sec=3.71106   ev/simsec=4059.82
+     Messages:  created: 5848   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4765
+
+Calling finish() at end of Run #5...
+
+Preparing for running configuration General, run #6...
+Scenario: $scenario=1, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-6-20261019-09:38:21-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 7e-06s (0m 00s)  0% completed  (16% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=1 delivered=30 agreed=29/32 failures=9
+Basic admission assertions passed: scenario=1 delivered=30 retainedFailures=9 collisions=0
+** Event #4794   t=1.2   Elapsed: 0.377289s (0m 00s)  92% completed  (19% total)
+     Speed:     ev/sec=12706.7   simsec/sec=3.11093   ev/simsec=4084.53
+     Messages:  created: 5879   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4794
+
+Calling finish() at end of Run #6...
+
+Preparing for running configuration General, run #7...
+Scenario: $scenario=1, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-7-20261019-09:38:21-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.3e-05s (0m 00s)  0% completed  (19% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=1 delivered=30 agreed=29/15 failures=9
+Basic admission assertions passed: scenario=1 delivered=30 retainedFailures=9 collisions=0
+** Event #5788   t=1.2   Elapsed: 0.370459s (0m 00s)  92% completed  (22% total)
+     Speed:     ev/sec=15624.3   simsec/sec=3.16832   ev/simsec=4931.43
+     Messages:  created: 7560   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5788
+
+Calling finish() at end of Run #7...
+
+Preparing for running configuration General, run #8...
+Scenario: $scenario=2, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-8-20261019-09:38:22-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 9e-06s (0m 00s)  0% completed  (22% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=2 delivered=30 agreed=30/28 failures=9
+Basic admission assertions passed: scenario=2 delivered=30 retainedFailures=9 collisions=0
+** Event #4899   t=1.2   Elapsed: 0.498286s (0m 00s)  92% completed  (24% total)
+     Speed:     ev/sec=9831.86   simsec/sec=2.35551   ev/simsec=4173.99
+     Messages:  created: 6097   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4899
+
+Calling finish() at end of Run #8...
+
+Preparing for running configuration General, run #9...
+Scenario: $scenario=2, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-9-20261019-09:38:22-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.2e-05s (0m 00s)  0% completed  (25% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=2 delivered=30 agreed=30/26 failures=9
+Basic admission assertions passed: scenario=2 delivered=30 retainedFailures=9 collisions=0
+** Event #5184   t=1.2   Elapsed: 0.719873s (0m 00s)  92% completed  (27% total)
+     Speed:     ev/sec=7201.39   simsec/sec=1.63045   ev/simsec=4416.82
+     Messages:  created: 6388   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5184
+
+Calling finish() at end of Run #9...
+
+Preparing for running configuration General, run #10...
+Scenario: $scenario=2, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-10-20261019-09:38:23-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 9e-06s (0m 00s)  0% completed  (27% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=2 delivered=30 agreed=30/22 failures=9
+Basic admission assertions passed: scenario=2 delivered=30 retainedFailures=9 collisions=0
+** Event #5349   t=1.2   Elapsed: 0.535536s (0m 00s)  92% completed  (30% total)
+     Speed:     ev/sec=9988.29   simsec/sec=2.19167   ev/simsec=4557.4
+     Messages:  created: 6666   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5349
+
+Calling finish() at end of Run #10...
+
+Preparing for running configuration General, run #11...
+Scenario: $scenario=2, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-11-20261019-09:38:24-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (30% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=2 delivered=30 agreed=30/19 failures=10
+Basic admission assertions passed: scenario=2 delivered=30 retainedFailures=10 collisions=0
+** Event #5681   t=1.2   Elapsed: 0.367469s (0m 00s)  92% completed  (33% total)
+     Speed:     ev/sec=15460.2   simsec/sec=3.19408   ev/simsec=4840.26
+     Messages:  created: 7258   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5681
+
+Calling finish() at end of Run #11...
+
+Preparing for running configuration General, run #12...
+Scenario: $scenario=3, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-12-20261019-09:38:25-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 9e-06s (0m 00s)  0% completed  (33% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=3 delivered=30 agreed=29/29 failures=0
+Basic admission assertions passed: scenario=3 delivered=30 retainedFailures=0 collisions=1
+** Event #4427   t=1.2   Elapsed: 0.32344s (0m 00s)  92% completed  (35% total)
+     Speed:     ev/sec=13687.6   simsec/sec=3.62889   ev/simsec=3771.84
+     Messages:  created: 5493   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4427
+
+Calling finish() at end of Run #12...
+
+Preparing for running configuration General, run #13...
+Scenario: $scenario=3, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-13-20261019-09:38:25-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 9e-06s (0m 00s)  0% completed  (36% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=3 delivered=30 agreed=29/25 failures=0
+Basic admission assertions passed: scenario=3 delivered=30 retainedFailures=0 collisions=1
+** Event #5028   t=1.2   Elapsed: 0.311351s (0m 00s)  92% completed  (38% total)
+     Speed:     ev/sec=16149.4   simsec/sec=3.76979   ev/simsec=4283.9
+     Messages:  created: 6184   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5028
+
+Calling finish() at end of Run #13...
+
+Preparing for running configuration General, run #14...
+Scenario: $scenario=3, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-14-20261019-09:38:26-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (38% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=3 delivered=30 agreed=29/22 failures=0
+Basic admission assertions passed: scenario=3 delivered=30 retainedFailures=0 collisions=1
+** Event #4996   t=1.2   Elapsed: 0.46724s (0m 00s)  92% completed  (41% total)
+     Speed:     ev/sec=10692.8   simsec/sec=2.51202   ev/simsec=4256.64
+     Messages:  created: 6235   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4996
+
+Calling finish() at end of Run #14...
+
+Preparing for running configuration General, run #15...
+Scenario: $scenario=3, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-15-20261019-09:38:26-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (41% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=3 delivered=30 agreed=29/16 failures=0
+Basic admission assertions passed: scenario=3 delivered=30 retainedFailures=0 collisions=1
+** Event #5547   t=1.2   Elapsed: 0.433772s (0m 00s)  92% completed  (44% total)
+     Speed:     ev/sec=12788.1   simsec/sec=2.70586   ev/simsec=4726.09
+     Messages:  created: 7217   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5547
+
+Calling finish() at end of Run #15...
+
+Preparing for running configuration General, run #16...
+Scenario: $scenario=4, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-16-20261019-09:38:27-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 8e-06s (0m 00s)  0% completed  (44% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=4 delivered=1 agreed=0/0 failures=30
+Basic admission assertions passed: scenario=4 delivered=1 retainedFailures=30 collisions=0
+** Event #2018   t=1.2   Elapsed: 0.14234s (0m 00s)  92% completed  (47% total)
+     Speed:     ev/sec=14178.2   simsec/sec=8.24625   ev/simsec=1719.35
+     Messages:  created: 2397   present: 121   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #2018
+
+Calling finish() at end of Run #16...
+
+Preparing for running configuration General, run #17...
+Scenario: $scenario=4, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-17-20261019-09:38:27-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (47% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=4 delivered=1 agreed=0/0 failures=28
+Basic admission assertions passed: scenario=4 delivered=1 retainedFailures=28 collisions=0
+** Event #2029   t=1.2   Elapsed: 0.129226s (0m 00s)  92% completed  (49% total)
+     Speed:     ev/sec=15702.3   simsec/sec=9.08314   ev/simsec=1728.73
+     Messages:  created: 2314   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #2029
+
+Calling finish() at end of Run #17...
+
+Preparing for running configuration General, run #18...
+Scenario: $scenario=4, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-18-20261019-09:38:28-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.5e-05s (0m 00s)  0% completed  (50% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=4 delivered=1 agreed=0/0 failures=30
+Basic admission assertions passed: scenario=4 delivered=1 retainedFailures=30 collisions=0
+** Event #1936   t=1.2   Elapsed: 0.110597s (0m 00s)  92% completed  (52% total)
+     Speed:     ev/sec=17506.9   simsec/sec=10.6135   ev/simsec=1649.49
+     Messages:  created: 2274   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #1936
+
+Calling finish() at end of Run #18...
+
+Preparing for running configuration General, run #19...
+Scenario: $scenario=4, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-19-20261019-09:38:28-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (52% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=4 delivered=1 agreed=0/0 failures=29
+Basic admission assertions passed: scenario=4 delivered=1 retainedFailures=29 collisions=0
+** Event #1959   t=1.2   Elapsed: 0.134818s (0m 00s)  92% completed  (55% total)
+     Speed:     ev/sec=14531.7   simsec/sec=8.70636   ev/simsec=1669.09
+     Messages:  created: 2278   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #1959
+
+Calling finish() at end of Run #19...
+
+Preparing for running configuration General, run #20...
+Scenario: $scenario=5, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-20-20261019-09:38:29-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (55% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=5 delivered=30 agreed=95/77 failures=0
+Basic admission assertions passed: scenario=5 delivered=30 retainedFailures=0 collisions=0
+** Event #5839   t=1.2   Elapsed: 0.513441s (0m 00s)  92% completed  (58% total)
+     Speed:     ev/sec=11372.5   simsec/sec=2.28599   ev/simsec=4974.88
+     Messages:  created: 7165   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5839
+
+Calling finish() at end of Run #20...
+
+Preparing for running configuration General, run #21...
+Scenario: $scenario=5, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-21-20261019-09:38:29-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 0.000138s (0m 00s)  0% completed  (58% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=5 delivered=30 agreed=99/68 failures=0
+Basic admission assertions passed: scenario=5 delivered=30 retainedFailures=0 collisions=0
+** Event #6034   t=1.2   Elapsed: 0.660558s (0m 00s)  92% completed  (60% total)
+     Speed:     ev/sec=9136.58   simsec/sec=1.77719   ev/simsec=5141.02
+     Messages:  created: 7354   present: 120   in FES: 4   Memory (RSS): 200.832MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #6034
+
+Calling finish() at end of Run #21...
+
+Preparing for running configuration General, run #22...
+Scenario: $scenario=5, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-22-20261019-09:38:30-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (61% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.832MiB
+Basic admission state: scenario=5 delivered=30 agreed=101/72 failures=0
+Basic admission assertions passed: scenario=5 delivered=30 retainedFailures=0 collisions=0
+** Event #5950   t=1.2   Elapsed: 0.552853s (0m 00s)  92% completed  (63% total)
+     Speed:     ev/sec=10762.6   simsec/sec=2.12302   ev/simsec=5069.45
+     Messages:  created: 7258   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5950
+
+Calling finish() at end of Run #22...
+
+Preparing for running configuration General, run #23...
+Scenario: $scenario=5, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-23-20261019-09:38:31-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.2e-05s (0m 00s)  0% completed  (63% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=5 delivered=30 agreed=107/68 failures=0
+Basic admission assertions passed: scenario=5 delivered=30 retainedFailures=0 collisions=0
+** Event #5942   t=1.2   Elapsed: 0.499037s (0m 00s)  92% completed  (66% total)
+     Speed:     ev/sec=11907.1   simsec/sec=2.35196   ev/simsec=5062.64
+     Messages:  created: 7264   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5942
+
+Calling finish() at end of Run #23...
+
+Preparing for running configuration General, run #24...
+Scenario: $scenario=6, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-24-20261019-09:38:32-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (66% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=6 delivered=30 agreed=0/0 failures=0
+Basic admission assertions passed: scenario=6 delivered=30 retainedFailures=0 collisions=0
+** Event #5855   t=1.2   Elapsed: 0.421748s (0m 00s)  92% completed  (69% total)
+     Speed:     ev/sec=13883   simsec/sec=2.78299   ev/simsec=4988.51
+     Messages:  created: 9464   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5855
+
+Calling finish() at end of Run #24...
+
+Preparing for running configuration General, run #25...
+Scenario: $scenario=6, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-25-20261019-09:38:32-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 0.000177s (0m 00s)  0% completed  (69% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=6 delivered=30 agreed=0/0 failures=0
+Basic admission assertions passed: scenario=6 delivered=30 retainedFailures=0 collisions=0
+** Event #6705   t=1.2   Elapsed: 0.473519s (0m 00s)  92% completed  (72% total)
+     Speed:     ev/sec=14165.1   simsec/sec=2.47957   ev/simsec=5712.72
+     Messages:  created: 10124   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #6705
+
+Calling finish() at end of Run #25...
+
+Preparing for running configuration General, run #26...
+Scenario: $scenario=6, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-26-20261019-09:38:33-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.3e-05s (0m 00s)  0% completed  (72% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=6 delivered=30 agreed=0/0 failures=0
+Basic admission assertions passed: scenario=6 delivered=30 retainedFailures=0 collisions=0
+** Event #4276   t=1.2   Elapsed: 0.262441s (0m 00s)  92% completed  (74% total)
+     Speed:     ev/sec=16293.8   simsec/sec=4.4724   ev/simsec=3643.19
+     Messages:  created: 7125   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4276
+
+Calling finish() at end of Run #26...
+
+Preparing for running configuration General, run #27...
+Scenario: $scenario=6, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-27-20261019-09:38:34-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.2e-05s (0m 00s)  0% completed  (75% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=6 delivered=30 agreed=0/0 failures=0
+Basic admission assertions passed: scenario=6 delivered=30 retainedFailures=0 collisions=0
+** Event #4301   t=1.2   Elapsed: 0.269428s (0m 00s)  92% completed  (77% total)
+     Speed:     ev/sec=15964   simsec/sec=4.35641   ev/simsec=3664.49
+     Messages:  created: 6964   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4301
+
+Calling finish() at end of Run #27...
+
+Preparing for running configuration General, run #28...
+Scenario: $scenario=7, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-28-20261019-09:38:35-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 8e-06s (0m 00s)  0% completed  (77% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=7 delivered=30 agreed=34/28 failures=0
+Basic admission assertions passed: scenario=7 delivered=30 retainedFailures=0 collisions=0
+** Event #4319   t=1.2   Elapsed: 0.285922s (0m 00s)  92% completed  (80% total)
+     Speed:     ev/sec=15105.9   simsec/sec=4.10531   ev/simsec=3679.61
+     Messages:  created: 5362   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4319
+
+Calling finish() at end of Run #28...
+
+Preparing for running configuration General, run #29...
+Scenario: $scenario=7, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-29-20261019-09:38:35-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 9e-06s (0m 00s)  0% completed  (80% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=7 delivered=30 agreed=39/27 failures=0
+Basic admission assertions passed: scenario=7 delivered=30 retainedFailures=0 collisions=0
+** Event #4730   t=1.2   Elapsed: 0.314081s (0m 00s)  92% completed  (83% total)
+     Speed:     ev/sec=15060.2   simsec/sec=3.73723   ev/simsec=4029.77
+     Messages:  created: 5802   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4730
+
+Calling finish() at end of Run #29...
+
+Preparing for running configuration General, run #30...
+Scenario: $scenario=7, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-30-20261019-09:38:35-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (83% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=7 delivered=30 agreed=29/29 failures=0
+Basic admission assertions passed: scenario=7 delivered=30 retainedFailures=0 collisions=0
+** Event #4030   t=1.2   Elapsed: 0.280467s (0m 00s)  92% completed  (85% total)
+     Speed:     ev/sec=14369.4   simsec/sec=4.18518   ev/simsec=3433.4
+     Messages:  created: 4863   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #4030
+
+Calling finish() at end of Run #30...
+
+Preparing for running configuration General, run #31...
+Scenario: $scenario=7, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-31-20261019-09:38:36-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.3e-05s (0m 00s)  0% completed  (86% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=7 delivered=30 agreed=29/29 failures=0
+Basic admission assertions passed: scenario=7 delivered=30 retainedFailures=0 collisions=0
+** Event #3961   t=1.2   Elapsed: 0.276716s (0m 00s)  92% completed  (88% total)
+     Speed:     ev/sec=14314.9   simsec/sec=4.24193   ev/simsec=3374.61
+     Messages:  created: 4903   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #3961
+
+Calling finish() at end of Run #31...
+
+Preparing for running configuration General, run #32...
+Scenario: $scenario=8, $rate=6, $protection="single", $repetition=0
+Assigned runID=General-32-20261019-09:38:36-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 8e-06s (0m 00s)  0% completed  (88% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=8 delivered=30 agreed=38/27 failures=0
+Basic admission assertions passed: scenario=8 delivered=30 retainedFailures=0 collisions=0
+** Event #5170   t=1.2   Elapsed: 0.279616s (0m 00s)  92% completed  (91% total)
+     Speed:     ev/sec=18490.2   simsec/sec=4.19766   ev/simsec=4404.89
+     Messages:  created: 6431   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5170
+
+Calling finish() at end of Run #32...
+
+Preparing for running configuration General, run #33...
+Scenario: $scenario=8, $rate=6, $protection="multiple", $repetition=0
+Assigned runID=General-33-20261019-09:38:37-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.1e-05s (0m 00s)  0% completed  (91% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=8 delivered=30 agreed=38/26 failures=0
+Basic admission assertions passed: scenario=8 delivered=30 retainedFailures=0 collisions=0
+** Event #5442   t=1.2   Elapsed: 0.294129s (0m 00s)  92% completed  (94% total)
+     Speed:     ev/sec=18502.7   simsec/sec=3.99054   ev/simsec=4636.63
+     Messages:  created: 6702   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5442
+
+Calling finish() at end of Run #33...
+
+Preparing for running configuration General, run #34...
+Scenario: $scenario=8, $rate=24, $protection="single", $repetition=0
+Assigned runID=General-34-20261019-09:38:37-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 9e-06s (0m 00s)  0% completed  (94% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=8 delivered=30 agreed=38/20 failures=0
+Basic admission assertions passed: scenario=8 delivered=30 retainedFailures=0 collisions=0
+** Event #5638   t=1.2   Elapsed: 0.300194s (0m 00s)  92% completed  (97% total)
+     Speed:     ev/sec=18781.7   simsec/sec=3.9099   ev/simsec=4803.63
+     Messages:  created: 7036   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5638
+
+Calling finish() at end of Run #34...
+
+Preparing for running configuration General, run #35...
+Scenario: $scenario=8, $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-35-20261019-09:38:38-881
+Setting up network "BasicAdmissionNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1.9e-05s (0m 00s)  0% completed  (97% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 200.957MiB
+Basic admission state: scenario=8 delivered=30 agreed=38/17 failures=0
+Basic admission assertions passed: scenario=8 delivered=30 retainedFailures=0 collisions=0
+** Event #5985   t=1.2   Elapsed: 0.36504s (0m 00s)  92% completed  (99% total)
+     Speed:     ev/sec=16396.1   simsec/sec=3.21539   ev/simsec=5099.27
+     Messages:  created: 7703   present: 120   in FES: 4   Memory (RSS): 200.957MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::BasicAdmissionTest) BasicAdmissionNetwork.test (id=7), at t=1.2s, event #5985
+
+Calling finish() at end of Run #35...
+
+Run statistics: total 36, successful 36
+
+End.
