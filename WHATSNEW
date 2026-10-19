@@ -528,6 +528,22 @@ Notable bug fixes are the following:
 
    Nagle's algorithm counted data as unacknowledged up to the highest sequence number sent. After a go-back, after a retransmission timeout or after a SYN-ACK that did not acknowledge the data of a Fast Open SYN, the partial segment at the end is a retransmission, and Nagle held it until the next retransmission timeout. Nagle now holds only new data, as RFC 9293 section 3.7.4 says and as Linux does. Simulations with losses and Nagle on (the default of Tcp and LegacyTcp) can change; 27 fingerprints and 11 statistical results of the INET examples moved. LinuxTcp, with the Nagle variant of Minshall, was not affected in the packetdrill suite.
 
+5. TCP repairs that reach the algorithms of INET 4.7
+
+   A review of all TCP parameters found defects. Most of their repairs concern features that are new in this release (entry 34), but the repairs below also reach the algorithms and the parameters of INET 4.7. Simulations that use them can change; 30 fingerprints and 20 statistical results of the INET examples moved.
+
+   TcpVegas decided once per RTT to grow or to shrink cwnd by one segment, but it applied the step again at each later ACK until the next decision. So in congestion avoidance, cwnd moved by more than one segment per RTT, and alpha and beta did not hold the number of extra segments between them. TcpVegas now applies the step once per RTT, as the Vegas paper and Linux tcp_vegas_cong_avoid() do. TcpVegas and TcpWestwood also ignored initialSsthresh and ended slow start at 64 KiB; now they take initialSsthresh, as the other algorithms do.
+
+   After a retransmission timeout, TcpReno, TcpNewReno and DcTcp restarted slow start with a cwnd of the MSS. With the timestamp option, a segment carries 12 bytes less data, so a segment of 12 bytes went out after the retransmission. The loss window is now one full-sized segment of data, as RFC 5681 section 3.1 says. Also as RFC 5681 says, only the first timeout of a segment sets ssthresh now; the value of these algorithms stays the same, but their ssthresh statistic no longer records it a second time.
+
+   A receiver with delayedAcksEnabled acknowledged at once only after two segments of the length of its own send MSS. When the segments of the peer were shorter, for example after the path MTU discovery of the sender, each ACK waited for the delayed ACK timeout. Now the ACK also goes at once when the unacknowledged data reach 2*RMSS bytes, as RFC 9293 SHLD-19 says. RMSS is the MSS that the receiver announced.
+
+   With windowScalingSupport and an advertisedWindow above 65535, a SYN-ACK wrote the window into its 16-bit field without a limit, so 131072 became 0. The SYN and the SYN-ACK now carry at most 65535, because RFC 7323 section 2.2 says that their window is never scaled.
+
+   A receiver with classic ECN echoed a CE mark only on a pure ACK, and only for the last segment that arrived. A delayed ACK lost the echo when a segment without CE came after the marked one, and data and FIN segments never had ECE. Now each segment that acknowledges has ECE in the echo state, as RFC 3168 section 6.1.3 says.
+
+   Values without a meaning now stop the simulation with an error that names the parameter and its range: an mss below 88, other than -1; a dupthresh or an initialSsthresh below 1; and a gain g of DcTcp (formerly dctcpGamma) that is not in the range 0 < g <= 1. Before, mss = 0 stalled the connection, dupthresh = 0 gave contradictory loss detection, and a g out of its range moved alpha out of the range 0 to 1. The new parameters of Tcp and TcpCubic check their ranges in the same way.
+
 
 INET-4.7 (July 2026) — feature release
 --------------------------------------
