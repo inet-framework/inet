@@ -184,6 +184,18 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     static simtime_t encodeDuration(simtime_t duration, bool holder);
     simtime_t computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     DataPreparationResult prepareDataTransmission(FrameSequenceContext *context);
+    bool usesModernMsduRecovery(Packet *packet) const;
+    bool usesMsduRecovery(Packet *packet) const;
+    void registerMsduRecovery(Edcaf *edcaf, Packet *packet);
+    Packet *findFragmentSource(const PreparedQosFragments& preparation) const;
+    void prepareDataModes(PreparedDataTransmission& prepared, TxopProcedure *txop,
+            const physicallayer::IIeee80211Mode *&selectedRtsMode);
+    int computeFreshMpduBound(PreparedDataTransmission& prepared, TxopProcedure *txop,
+            const physicallayer::IIeee80211Mode *&selectedRtsMode);
+    bool commitPreparedData(const FrameSequenceContext *context, PreparedDataTransmission& prepared);
+    void disposeMsdu(Edcaf *edcaf, Packet *packet);
+    simtime_t forecastPreparedSuccessor(const FrameSequenceContext *context,
+            const PreparedDataTransmission& prepared, simtime_t ifs);
     bool prepareAggregateData(FrameSequenceContext *context, const PreparedDataTransmission& selected);
     void processAggregateOutcome(const Ptr<const Ieee80211CompressedBlockAck>& response);
     bool validatePreparedData(const PreparedDataTransmission& prepared, simtime_t start) const;

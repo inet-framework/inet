@@ -77,7 +77,7 @@ bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 {
     auto protectedFrame = context->getDataFrameToTransmit();
     auto prepared = context->getQoSContext()->preparedData.get();
-    if (prepared && prepared->batch)
+    if (prepared)
         return prepared->rtsMode != nullptr;
     return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekAtFront<Ieee80211MacHeader>());
 }
