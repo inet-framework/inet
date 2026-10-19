@@ -11,6 +11,7 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/contract/IFragmentationPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IMpduAggregationPolicy.h"
 
 namespace inet {
@@ -36,6 +37,19 @@ struct INET_API PreparedQosBatch
     std::vector<Packet *> members;
 };
 
+/** Owns fragment previews. A nonnegative retainedId identifies a numbered source supplied by the caller. */
+struct INET_API PreparedQosFragments : public cObject
+{
+    std::unique_ptr<PreparedQosData> source;
+    int64_t retainedId = -1;
+    FragmentPartitionStatus status = FragmentPartitionStatus::IMPOSSIBLE;
+    std::vector<Packet *> fragments;
+
+    ~PreparedQosFragments() override;
+    void addFragment(Packet *packet);
+    std::vector<Packet *> releaseFragments();
+};
+
 class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
 {
   public:
@@ -55,6 +69,14 @@ class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const = 0;
     // Success transfers the preview to the caller. Failure retains the preview and all queued sources.
     virtual Packet *commitPreparedFrame(PreparedQosData& preparation) = 0;
+    // A null numberedSource selects a queued source. Otherwise the caller supplies a live, never-transmitted source.
+    virtual std::unique_ptr<PreparedQosFragments> prepareFragments(queueing::IPacketQueue *queue,
+            Packet *numberedSource, int maxMpduBytes) = 0;
+    virtual bool isFragmentPreparationValid(const PreparedQosFragments& preparation,
+            Packet *numberedSource, simtime_t start) const = 0;
+    // Success transfers previews. The caller replaces a numbered source through InProgressFrames.
+    virtual bool commitPreparedFragments(PreparedQosFragments& preparation,
+            Packet *numberedSource, std::vector<Packet *>& committed) = 0;
 };
 
 } // namespace ieee80211

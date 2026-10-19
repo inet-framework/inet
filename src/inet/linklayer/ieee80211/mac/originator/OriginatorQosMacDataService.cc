@@ -44,6 +44,144 @@ Packet *PreparedQosData::releasePacket()
     return packet.release();
 }
 
+PreparedQosFragments::~PreparedQosFragments()
+{
+    for (auto packet : fragments) {
+        drop(packet);
+        delete packet;
+    }
+}
+
+void PreparedQosFragments::addFragment(Packet *packet)
+{
+    take(packet);
+    fragments.push_back(packet);
+}
+
+std::vector<Packet *> PreparedQosFragments::releaseFragments()
+{
+    for (auto packet : fragments)
+        drop(packet);
+    auto result = std::move(fragments);
+    fragments.clear();
+    return result;
+}
+
+std::unique_ptr<PreparedQosFragments> OriginatorQosMacDataService::prepareFragments(
+        queueing::IPacketQueue *queue, Packet *numberedSource, int maxMpduBytes)
+{
+    Enter_Method("prepareFragments");
+    if (!fragmentationPolicy)
+        return nullptr;
+    auto result = std::make_unique<PreparedQosFragments>();
+    if (numberedSource) {
+        if (!numberedSource->findTag<Ieee80211DataSequenceTag>())
+            return nullptr;
+        result->retainedId = numberedSource->getId();
+        result->source = std::make_unique<PreparedQosData>();
+        result->source->setPacket(numberedSource->dup());
+    }
+    else
+        result->source = prepareFrame(queue, false);
+    if (!result->source)
+        return nullptr;
+    auto source = result->source->packet.get();
+    if (fragmentationPermitted && !fragmentationPermitted(source))
+        return nullptr;
+    auto partition = fragmentationPolicy->computeBoundedFragmentSizes(source, maxMpduBytes);
+    result->status = partition.status;
+    if (partition.status != FragmentPartitionStatus::FRAGMENTED)
+        return result;
+    // The builder consumes only this duplicate. All previews exist before any source extraction.
+    std::unique_ptr<std::vector<Packet *>> fragments(fragmentation->fragmentFrame(source->dup(), partition.payloadSizes));
+    for (auto packet : *fragments)
+        result->addFragment(packet);
+    return result;
+}
+
+bool OriginatorQosMacDataService::isFragmentPreparationValid(const PreparedQosFragments& preparation,
+        Packet *numberedSource, simtime_t start) const
+{
+    if (!preparation.source || preparation.fragments.empty())
+        return false;
+    if (preparation.retainedId < 0) {
+        if (numberedSource || !isPreparationValid(*preparation.source, start))
+            return false;
+    }
+    else {
+        if (!numberedSource || numberedSource->getId() != preparation.retainedId ||
+                (lifetimeHandler && lifetimeHandler->isExpired(numberedSource, start)))
+            return false;
+        auto expected = preparation.source->packet->getTag<Ieee80211DataSequenceTag>();
+        auto actual = numberedSource->findTag<Ieee80211DataSequenceTag>();
+        if (!actual || expected->getAllocationIndex() != actual->getAllocationIndex() ||
+                numberedSource->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() !=
+                preparation.source->packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber())
+            return false;
+    }
+    auto source = numberedSource ? numberedSource : preparation.source->packet.get();
+    return !fragmentationPermitted || fragmentationPermitted(source);
+}
+
+void OriginatorQosMacDataService::transferFragmentMetadata(PreparedQosFragments& preparation, Packet *source,
+        SequenceNumberCyclic sequence, int64_t allocation, simtime_t deadline)
+{
+    auto sourceHeader = source->peekAtFront<Ieee80211DataHeader>();
+    auto offset = source->getFrontOffset() + sourceHeader->getChunkLength();
+    for (auto packet : preparation.fragments) {
+        auto header = packet->removeAtFront<Ieee80211DataHeader>();
+        header->setSequenceNumber(sequence);
+        packet->insertAtFront(header);
+        packet->addTagIfAbsent<Ieee80211DataSequenceTag>()->setAllocationIndex(allocation);
+        auto length = packet->getDataLength() - header->getChunkLength() - B(4);
+        packet->copyRegionTags(*source, offset, packet->getFrontOffset() + header->getChunkLength(), length);
+        offset += length;
+    }
+    if (lifetimeHandler) {
+        lifetimeHandler->prepareFrameReplacement({source->getId()});
+        if (deadline != SIMTIME_MAX)
+            lifetimeHandler->registerFragments(preparation.fragments, deadline);
+    }
+}
+
+bool OriginatorQosMacDataService::commitPreparedFragments(PreparedQosFragments& preparation,
+        Packet *numberedSource, std::vector<Packet *>& committed)
+{
+    Enter_Method("commitPreparedFragments");
+    if (!isFragmentPreparationValid(preparation, numberedSource, simTime()))
+        return false;
+    Packet *source = numberedSource;
+    if (!source) {
+        auto queue = preparation.source->queue;
+        for (int i = 0; i < queue->getNumPackets(); i++)
+            if (queue->getPacket(i)->getId() == preparation.source->sourceIds.front())
+                source = queue->getPacket(i);
+        auto module = dynamic_cast<cModule *>(queue);
+        auto next = queue->canPullPacket(module ? module->gate("out") : nullptr);
+        auto extracted = source == next ? queue->dequeuePacket() :
+            check_and_cast<queueing::ISelectivePacketCollection *>(queue)->extractPacket(source);
+        ASSERT(extracted == source);
+        take(source);
+    }
+    auto deadline = lifetimeHandler ? lifetimeHandler->getDeadline(source) : SIMTIME_MAX;
+    auto header = preparation.source->packet->removeAtFront<Ieee80211DataHeader>();
+    if (!numberedSource)
+        assignSequenceNumber(header);
+    auto sequence = header->getSequenceNumber();
+    preparation.source->packet->insertAtFront(header);
+    auto allocation = numberedSource ? source->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() : nextDataAllocationIndex++;
+    transferFragmentMetadata(preparation, source, sequence, allocation, deadline);
+    emit(packetFragmentedSignal, source);
+    auto fragments = preparation.releaseFragments();
+    for (auto packet : fragments) {
+        take(packet);
+        committed.push_back(packet);
+    }
+    if (!numberedSource)
+        delete source;
+    return true;
+}
+
 void OriginatorQosMacDataService::initialize()
 {
     aMsduAggregationPolicy = dynamic_cast<IMsduAggregationPolicy *>(getSubmodule("msduAggregationPolicy"));
