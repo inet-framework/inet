@@ -7,9 +7,7 @@ of two classes to two branches, which it creates when the first packet of a
 class arrives. Each branch is a delayer (PacketDelayer), and a multiplexer
 (PacketMultiplexer) joins the branches before a passive packet sink
 (PassivePacketSink). The server asks canPushPacket() about each packet, and
-for the first packet of a class this query creates the branch. An active
-source cannot feed the classifier directly, because it asks
-canPushSomePacket(), which a classifier without branches answers with no.
+for the first packet of a class this query creates the branch.
 The query probe between the server and the classifier asks no query
 (numRepeats = 0).
 

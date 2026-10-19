@@ -33,6 +33,7 @@ class INET_API DynamicClassifier : public PacketClassifier
     virtual void startPacketStreaming(Packet *packet) override;
 
   public:
+    virtual bool canPushSomePacket(const cGate *gate) const override;
     virtual bool canPushPacket(Packet *packet, const cGate *gate) const override;
     virtual void pushPacket(Packet *packet, const cGate *gate) override;
 };

@@ -1,3 +1,5 @@
 A dynamic classifier creates a branch only for a packet
 
 DynamicClassifier creates the branch of a class when the first packet of the class goes through, or when a module asks canPushPacket() about such a packet, because the answer depends on the branch. Before, its other queries created branches too. The classifier now refuses the reverseOrder parameter, because it creates its output gates in the order in which the classes appear. With reverseOrder = true, it created more branches than classes, and it sent packets of different classes into one branch.
+
+A dynamic classifier now always answers canPushSomePacket() with yes, because a packet of a class without a branch gets a new branch, so an active source can feed it directly; before, a classifier without a branch answered no, and such a source stopped and never started again. The new aggregatorSubmoduleName parameter names the submodule that the branches are wired into, which was always the submodule named "multiplexer" before, and that submodule may also be a pull scheduler. A branch is initialized only after it is connected to that submodule. The defaults keep the behavior of existing models.
