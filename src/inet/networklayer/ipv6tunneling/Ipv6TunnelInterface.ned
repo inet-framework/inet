@@ -18,6 +18,7 @@ import inet.networklayer.common.NetworkInterface;
 module Ipv6TunnelInterface extends NetworkInterface like ITunnelInterface
 {
     parameters:
+        bool isWireless = default(false);
         string interfaceTableModule;
         string source;      // tunnel entry point (an address of this node)
         string destination; // tunnel exit point
