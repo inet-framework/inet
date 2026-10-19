@@ -81,13 +81,14 @@ html_theme_options = {
     'icon': {
         'repo': 'fontawesome/brands/github',
     },
-    'site_url': cfg.baseurl + '/',
+    'site_url': cfg.page_root_url,
     'repo_url': 'https://github.com/inet-framework/inet',
     'repo_name': 'inet-framework/inet',
     'globaltoc_collapse': True,
     'toc_title_is_page_title': True,
     'features': [
         'content.code.copy',
+        'navigation.instant',
         'navigation.tabs',
         'navigation.top',
         'search.highlight',

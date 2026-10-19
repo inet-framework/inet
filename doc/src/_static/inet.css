@@ -172,3 +172,13 @@ video {
     font-size: 1.8rem;
   }
 }
+
+/* The NED reference navigation (_static/apinav.js): the tree keeps the width of the sidebar, long package names
+   wrap at their dots, long type names are cut. */
+.md-nav__item.inet-apinav > .md-nav > .md-nav__list {
+  min-width: 0;
+}
+
+.md-nav__item--nested.inet-apinav > .md-nav__container .md-ellipsis {
+  white-space: normal;
+}
