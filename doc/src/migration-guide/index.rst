@@ -89,6 +89,11 @@ The serializer decodes the complete four-bit Type field. Type 0 retains Basic co
 
 Compressed producers must supply Fragment Number zero and a 64-bit bitmap. A Compressed Block Ack header chunk contains 28 bytes before FCS. Both BAR profiles occupy 24 bytes with FCS. Keep the corresponding header chunk and trailer lengths consistent. The serializer rejects malformed wire fields before runtime processing.
 
+IEEE 802.11 bounded fragment preparation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Custom ``IFragmentationPolicy`` implementations must implement ``computeBoundedFragmentSizes(frame, maxMpduBytes)``. The bound includes the MAC header and FCS. The result distinguishes an unfragmented frame, a legal fragment partition, and an impossible partition. Each nonfinal fragment must have the same even length. A partition must contain at most sixteen fragments. The existing unbounded operation remains available to non-QoS callers.
+
 IEEE 802.11 reversible DATA preparation
 -------------------------------------
 
