@@ -182,3 +182,34 @@ video {
 .md-nav__item--nested.inet-apinav > .md-nav__container .md-ellipsis {
   white-space: normal;
 }
+
+/* The diagrams inlined into the NED reference pages (_ext/inetsite/ned.py) shrink to the width of the page. */
+.md-typeset .neddoc-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* opp_docgen draws for a light page. What is on the page itself (the name of a compound module above its box, the
+   diagram of a simple module, which has no boxes, and the arrows of the usage and inheritance diagrams) follows the
+   colour scheme; the labels on the boxes, which keep their colours, stay black. */
+.md-typeset .neddoc-diagram svg > text,
+.md-typeset .neddoc-diagram svg:not(:has(rect)) text {
+  fill: var(--md-typeset-color);
+}
+
+.md-typeset .neddoc-diagram svg:not(:has(rect)) text[fill="#666666"] {
+  fill: var(--md-default-fg-color--light);
+}
+
+.md-typeset .neddoc-diagram svg line[stroke="#404040"] {
+  stroke: var(--md-default-fg-color--light);
+}
+
+.md-typeset .neddoc-diagram svg polygon[fill="#404040"] {
+  fill: var(--md-default-fg-color--light);
+}
+
+.md-typeset .neddoc-diagram svg polygon[stroke="#404040"] {
+  stroke: var(--md-default-fg-color--light);
+  fill: var(--md-default-bg-color);
+}

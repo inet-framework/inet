@@ -3,9 +3,16 @@
 The targets come from the nedtags.xml / msgtags.xml tag files that opp_docgen writes next to the API pages.
 Documents use short type names (e.g. :ned:`StandardHost`); if a short name is ambiguous, the first type in
 the tag file wins. When the build does not include the API, the roles render as plain literals.
+
+The diagrams of the API pages are inlined into the pages, so that the types in them link to their pages as in
+the HTML output of opp_docgen; as images, they would only open in the lightbox of sphinxcontrib.images.
 """
 
+import html
 import os
+import posixpath
+import re
+import shutil
 import xml.etree.ElementTree as ElementTree
 
 from docutils import nodes, utils
@@ -65,7 +72,45 @@ class TypeRoles:
         return role
 
 
+def inline_svg(svg, svg_dir, page_dir, alt):
+    """Returns the SVG for inlining into a page, with its links (written relative to the SVG, to the .rst
+    sources) made relative to the page and pointed to the HTML pages."""
+    def relink(match):
+        attr, url = match.groups()
+        if re.match(r'[a-zA-Z][a-zA-Z0-9+.-]*:', url) or url.startswith('#'):
+            return match.group(0)
+        target = posixpath.normpath(posixpath.join(svg_dir, url))
+        if target.endswith('.rst'):
+            target = target[:-len('.rst')] + '.html'
+        return f'{attr}="{posixpath.relpath(target, page_dir)}"'
+    svg = re.sub(r'^\s*<\?xml[^>]*\?>\s*', '', svg)
+    svg = re.sub(r'\b((?:xlink:)?href)="([^"]*)"', relink, svg)
+    svg = re.sub(r'\s+target="_top"', '', svg)
+    return svg.replace('<svg', f'<svg role="img" aria-label="{html.escape(alt)}"', 1)
+
+
+def inline_diagrams(app, doctree, docname):
+    if not docname.startswith(API_DIR + '/'):
+        return
+    for image in list(doctree.findall(nodes.image)):
+        uri = image['uri']
+        if not uri.endswith('.svg'):
+            continue
+        with open(os.path.join(app.srcdir, uri)) as f:
+            svg = inline_svg(f.read(), posixpath.dirname(uri), posixpath.dirname(docname), image.get('alt', ''))
+        image.replace_self(nodes.raw('', f'<div class="neddoc-diagram">{svg}</div>', format='html'))
+
+
+def copy_icons(app, exception):
+    """The inlined diagrams refer to the module icons, which no Sphinx directive copies."""
+    source = os.path.join(app.srcdir, API_DIR, 'icons')
+    if exception is None and app.builder.format == 'html' and os.path.isdir(source):
+        shutil.copytree(source, os.path.join(app.outdir, API_DIR, 'icons'), dirs_exist_ok=True)
+
+
 def setup(app):
+    app.connect('doctree-resolved', inline_diagrams)
+    app.connect('build-finished', copy_icons)
     roles = TypeRoles()
     app.connect('builder-inited', roles.load)
     for kind in TAG_FILES:
