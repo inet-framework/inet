@@ -3,7 +3,7 @@
 Checkout and revision: `inet-master`, branch `master` at `1b5dba65d3`. Two untracked files at the repository root (`ieee80211-edca-management-recovery.md`, `ieee80211-txop-boundaries-and-rate-selection.md`) are not related to this plan.
 Plan revision: draft 3, 2026-10-16. Draft 2 records the decisions of the owner (section 8). Draft 3 records the work (section 9): the fingerprint check compares before with after (section 7), and the internal code follows D-6, which the owner asked for after a review of the first internal names.
 Approval: the owner approved the implementation of steps 1 to 5 of draft 2 on 2026-10-16 ("let's implement it"), on the branch `topic/queueing-filtered-pull` from `master` at `8f45b42ca2`. The owner decided D-4, D-5, the test category and the recommendation for the MAC on the same day.
-Status: implemented, ready for review, rebased onto master `ee4afb459d` on 2026-10-19. Section 9 records the work. The plan stays in `plan/pending/` until the change lands on master.
+Status: landed on master on 2026-10-19 with the approval of the owner, as a fast-forward of master `ee4afb459d` to `538ce90a74`; not pushed. Section 9 records the work. The use in the IEEE 802.11 MAC belongs to pull request #1343, which replaces its own first commit with this API.
 Consumer: pull request inet-framework/inet#1343, branch `work/compressed-blockack-s3b`. Its first commit `45f4da2e28` ("queueing: add: preserve pull effects for selected packet extraction", parent `bba1db4c81`) solves the same problem in a different way. This plan replaces that commit.
 
 ## 1. Problem and intended behavior
