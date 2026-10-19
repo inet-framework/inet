@@ -111,6 +111,12 @@ bool DynamicClassifier::canPushPacket(Packet *packet, const cGate *gate) const
     return PacketClassifier::canPushPacket(packet, gate);
 }
 
+bool DynamicClassifier::canPushSomePacket(const cGate *gate) const
+{
+    // a packet of a class without a branch gets a new branch, which takes it
+    return true;
+}
+
 void DynamicClassifier::pushPacket(Packet *packet, const cGate *gate)
 {
     Enter_Method("pushPacket");
