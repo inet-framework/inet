@@ -34,8 +34,12 @@ HcfFs::HcfFs() :
 
 int HcfFs::selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
-    auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    return frameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast() ? 0 : 1;
+    auto qos = context->getQoSContext();
+    auto frameToTransmit = qos->blockAckAgreementHandler ? context->getInProgressFrames()->peekFrameToTransmit() :
+        context->getInProgressFrames()->getFrameToTransmit();
+    if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
+        return 1;
+    return frameToTransmit && frameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast() ? 0 : 1;
 }
 
 int HcfFs::selectDataOrManagementSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
@@ -57,15 +61,29 @@ bool HcfFs::isSelfCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *con
 
 bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    bool hasFrameToTransmit = context->getInProgressFrames()->hasInProgressFrames();
+    auto frames = context->getInProgressFrames();
+    auto qos = context->getQoSContext();
+    bool bar = qos->ackPolicy->isBlockAckReqNeeded(frames, qos->txopProcedure, qos->blockAckAgreementHandler);
+    qos->preparedData.reset();
+    if (!bar && qos->prepareData) {
+        auto preparation = qos->prepareData(context);
+        if (preparation == DataPreparationResult::READY)
+            return true;
+        if (preparation == DataPreparationResult::DEFERRED)
+            return false;
+    }
+    bool hasFrameToTransmit = qos->blockAckAgreementHandler ?
+        bar || frames->peekFrameToTransmit() != nullptr : frames->hasInProgressFrames();
     if (hasFrameToTransmit) {
-        auto nextFrameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-        const auto& nextHeader = nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>();
+        auto nextFrameToTransmit = qos->blockAckAgreementHandler ? frames->peekFrameToTransmit() : frames->getFrameToTransmit();
         if (frameSequence->getCount() == 0)
             return true;
-        auto qos = context->getQoSContext();
         auto txop = qos->txopProcedure;
-        if (nextHeader->getReceiverAddress().isMulticast() || txop->getRemaining() <= 0)
+        // Basic single protection reserves only prepared MPDUs. Unextracted DATA starts a new TXOP.
+        if (qos->blockAckAgreementHandler && txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION &&
+            !bar && !frames->containsFrame(nextFrameToTransmit))
+            return false;
+        if ((!bar && nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast()) || txop->getRemaining() <= 0)
             return false;
         if (txop->getProtectionMechanism() == TxopProcedure::MULTIPLE_PROTECTION) {
             auto deadline = txop->getStart() + txop->getLimit();
@@ -77,8 +95,7 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
             if (projectedStart >= deadline)
                 return false;
             // BAR precedes DATA in TxOpFs and does not use RTS.
-            if (!qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), txop) &&
-                context->getRtsPolicy()->isRtsNeeded(nextFrameToTransmit, nextHeader))
+            if (!bar && context->getRtsPolicy()->isRtsNeeded(nextFrameToTransmit, nextFrameToTransmit->peekAtFront<Ieee80211MacHeader>()))
             {
                 // Integer legacy RTS airtime requires its start on the deadline's microsecond grid.
                 if ((projectedStart - deadline).raw() % SimTime(1, SIMTIME_US).raw() != 0)
@@ -92,7 +109,7 @@ bool HcfFs::hasMoreTxOps(RepeatingFs *frameSequence, FrameSequenceContext *conte
 
 bool HcfFs::hasMoreTxOpsAndMulticast(RepeatingFs *frameSequence, FrameSequenceContext *context)
 {
-    return hasMoreTxOps(frameSequence, context) && context->getInProgressFrames()->getFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
+    return hasMoreTxOps(frameSequence, context) && context->getDataFrameToTransmit()->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast();
 }
 
 } // namespace ieee80211

@@ -1,0 +1,70 @@
+%description:
+Check complete Block Ack Action delivery through the production recipient data service.
+An original Action reaches HCF. Its MAC retry does not reach the agreement handler.
+A new Action with another sequence number remains eligible for dispatch.
+Two management fragments produce one complete Action after the final fragment.
+
+%file: ActionDelivery.cc
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosMacDataService.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+
+namespace inet::ieee80211 {
+class ActionDeliveryTest : public cSimpleModule {
+  protected:
+    void initialize() override {
+        scheduleAt(SIMTIME_ZERO, new cMessage("test"));
+    }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto service = check_and_cast<RecipientQosMacDataService *>(getModuleByPath("^.recipient"));
+        for (int index = 0; index < 6; index++) {
+            auto header = makeShared<Ieee80211AddbaRequest>();
+            header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+            header->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+            header->setSequenceNumber(SequenceNumberCyclic(index < 2 ? 10 : index == 2 ? 11 : 12));
+            header->setStartingSequenceNumber(SequenceNumberCyclic(100));
+            header->setDialogToken(37);
+            header->setTid(5);
+            header->setBufferSize(8);
+            header->setBlockAckPolicy(true);
+            header->setRetry(index == 1 || index == 5);
+            header->setMoreFragments(index == 3);
+            header->setFragmentNumber(index >= 4 ? 1 : 0);
+            auto packet = new Packet("action", header);
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(2)));
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            auto frames = service->managementFrameReceived(packet, header);
+            ASSERT(frames.size() == (index == 0 || index == 2 || index == 4 ? 1 : 0));
+            for (auto frame : frames) {
+                ASSERT(frame->peekAtFront<Ieee80211AddbaRequest>() != nullptr);
+                take(frame);
+                delete frame;
+            }
+        }
+        std::cout << "Block Ack Action delivery assertions passed.\n";
+    }
+};
+Define_Module(ActionDeliveryTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.recipient.RecipientQosMacDataService;
+simple ActionDeliveryTest { parameters: @class(::inet::ieee80211::ActionDeliveryTest); }
+network ActionDeliveryNetwork {
+    submodules:
+        recipient: RecipientQosMacDataService;
+        test: ActionDeliveryTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ActionDeliveryNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+
+%contains: stdout
+Block Ack Action delivery assertions passed.

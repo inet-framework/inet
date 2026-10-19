@@ -1,0 +1,325 @@
+%description:
+Check peer reset during actual Normal Ack DATA exchanges through HCF and Tx. Reset occurs during ACK wait, transmission, or the SIFS before a second DATA frame. The accepted transmission retains safe ownership until completion. Each completed target transmission must emit one packetSentToPeer signal from its EDCAF. A late ACK must not restore ACK state or cause another DATA attempt. The test injects ACK frames at the HCF receive boundary and uses no peer radio.
+
+The late ACK must emit one packetReceivedFromPeer signal. Further cases reset during accepted RTS transmission or CTS wait. DATA and owned Actions must not return to transmission after CTS. The old management exchange must not select another peer's frame after reset. Another peer's DATA retains its lifetime record.
+
+%extraargs: -r 0..8
+
+%file: RetiredData.cc
+#include <iostream>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class RetiredOriginator : public OriginatorBlockAckAgreementHandler {
+  public:
+    void prepare(const Ptr<const Ieee80211AddbaRequest>& request) { createAgreement(request); }
+};
+class RetiredDataHcf : public Hcf {
+    const MacAddress peer = MacAddress("02:00:00:00:00:02");
+    Ptr<const Ieee80211DataHeader> retiredHeader;
+    int64_t retiredId = -1;
+    int attempts = 0;
+    int completions = 0;
+    bool reset = false;
+    bool targetCompleted = false;
+    int targetSentSignals = 0;
+    int lateAckSignals = 0;
+    int64_t lateAckId = -1;
+    int64_t otherId = -1;
+    bool rtsCompleted = false;
+    bool injectingCts = false;
+  public:
+    void begin() {
+        Enter_Method("begin");
+        edca->getEdcaf(AC_VI)->subscribe("packetSentToPeer", this);
+        subscribe("packetReceivedFromPeer", this);
+        int scenario = par("scenario");
+        if (scenario >= 5) {
+            delete originatorBlockAckAgreementHandler;
+            auto originator = new RetiredOriginator();
+            originatorBlockAckAgreementHandler = originator;
+            auto request = makeShared<Ieee80211AddbaRequest>();
+            request->setTransmitterAddress(mac->getAddress());
+            request->setReceiverAddress(peer);
+            request->setTid(5);
+            request->setDialogToken(37);
+            request->setBlockAckPolicy(true);
+            request->setBufferSize(64);
+            request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+            originator->prepare(request);
+            queueData("deferred");
+            processMgmtFrame(new Packet("owned-request", request), request);
+            return;
+        }
+        queueData("first");
+        if (par("scenario").intValue() == 2)
+            queueData("second");
+    }
+  protected:
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override {
+        if (signal == packetSentToPeerSignal) {
+            ASSERT(source == edca->getEdcaf(AC_VI));
+            auto packet = check_and_cast<Packet *>(value);
+            if (packet->getId() == retiredId)
+                targetSentSignals++;
+        }
+        else if (signal == packetReceivedFromPeerSignal) {
+            if (check_and_cast<Packet *>(value)->getId() == lateAckId)
+                lateAckSignals++;
+        }
+        else
+            Hcf::receiveSignal(source, signal, value, details);
+    }
+    void queueData(const char *name, bool other = false) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTransmitterAddress(mac->getAddress());
+        header->setReceiverAddress(other ? MacAddress("02:00:00:00:00:03") : peer);
+        header->setAddress3(peer);
+        header->setTid(5);
+        auto packet = new Packet(name, header);
+        if (other)
+            otherId = packet->getId();
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(1500)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+    void injectAck() {
+        auto header = makeShared<Ieee80211AckFrame>();
+        header->setReceiverAddress(mac->getAddress());
+        auto packet = new Packet("ack", header);
+        if (reset)
+            lateAckId = packet->getId();
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+        processLowerFrame(packet, header);
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        ASSERT(packet != nullptr);
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        int scenario = par("scenario");
+        bool obsoleteSubmission = scenario >= 3 && reset && header->getReceiverAddress() == peer && header->getType() != ST_RTS;
+        bool substitutedSubmission = scenario >= 7 && injectingCts && header->getType() != ST_RTS;
+        bool accepted = Hcf::transmitFrame(packet, ifs);
+        if (obsoleteSubmission || substitutedSubmission) {
+            std::cout << "Post-reset protected frame accepted: " << accepted << std::endl;
+            ASSERT(!accepted);
+            return false;
+        }
+        if (scenario >= 3 && header->getType() == ST_RTS && accepted && header->getReceiverAddress() == peer) {
+            ASSERT(!reset);
+            ASSERT(tx->hasTransmission());
+            if (scenario == 3 || scenario == 5 || scenario == 7)
+                scheduleAfter(SimTime(1, SIMTIME_NS), new cMessage("resetRts"));
+            return accepted;
+        }
+        if (data && accepted) {
+            attempts++;
+            int scenario = par("scenario");
+            bool target = scenario == 2 ? attempts == 2 : attempts == 1;
+            if (target) {
+                retiredHeader = packet->peekAtFront<Ieee80211DataHeader>();
+                retiredId = packet->getId();
+                ASSERT(retiredHeader->getAckPolicy() == NORMAL_ACK);
+                if (scenario != 0) {
+                    if (scenario == 2)
+                        ASSERT(ifs > SIMTIME_ZERO);
+                    scheduleAfter(SimTime(1, SIMTIME_NS), new cMessage("reset"));
+                }
+            }
+        }
+        return accepted;
+    }
+    void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        Enter_Method("transmissionComplete");
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        bool isData = data != nullptr;
+        bool isTarget = data && retiredHeader && data->getSequenceNumber() == retiredHeader->getSequenceNumber();
+        bool isRts = header->getType() == ST_RTS;
+        Hcf::transmissionComplete(packet, header);
+        if (par("scenario").intValue() >= 3 && isRts) {
+            rtsCompleted = true;
+            scheduleAfter(SimTime(60, SIMTIME_US), new cMessage(reset ? "cts" : "resetCtsWait"));
+            return;
+        }
+        if (isData) {
+            completions++;
+            int scenario = par("scenario");
+            if (isTarget) {
+                targetCompleted = true;
+                if (scenario == 0)
+                    scheduleAfter(SimTime(100, SIMTIME_US), new cMessage("reset"));
+                else
+                    scheduleAfter(SimTime(60, SIMTIME_US), new cMessage("lateAck"));
+            }
+            else if (scenario == 2 && completions == 1)
+                scheduleAfter(SimTime(60, SIMTIME_US), new cMessage("firstAck"));
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("resetRts") || message->isName("resetCtsWait")) {
+            bool waiting = message->isName("resetCtsWait");
+            delete message;
+            ASSERT(frameSequenceHandler->isSequenceRunning());
+            ASSERT(rtsCompleted == waiting);
+            ASSERT(tx->hasTransmission() == !waiting);
+            queueData("other-peer", true);
+            if (par("scenario").intValue() >= 7) {
+                auto header = makeShared<Ieee80211MgmtHeader>();
+                header->setType(ST_PROBEREQUEST);
+                header->setReceiverAddress(MacAddress("02:00:00:00:00:03"));
+                auto packet = new Packet("other-management", header);
+                packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+                processUpperFrame(packet, header);
+            }
+            ASSERT(edca->getLifetimeHandler()->findFrame(otherId) != nullptr);
+            resetPeer(peer);
+            reset = true;
+            ASSERT(edca->getLifetimeHandler()->findFrame(otherId) != nullptr);
+            ASSERT(!hasQueuedData(peer, 5));
+            if (waiting)
+                scheduleAfter(SimTime(60, SIMTIME_US), new cMessage("cts"));
+        }
+        else if (message->isName("cts")) {
+            delete message;
+            ASSERT(reset && rtsCompleted);
+            auto header = makeShared<Ieee80211CtsFrame>();
+            header->setReceiverAddress(mac->getAddress());
+            auto packet = new Packet("late-cts", header);
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+            injectingCts = true;
+            processLowerFrame(packet, header);
+            injectingCts = false;
+            scheduleAfter(SimTime(1, SIMTIME_NS), new cMessage("verifyRts"));
+        }
+        else if (message->isName("verifyRts")) {
+            delete message;
+            ASSERT(!hasQueuedData(peer, 5));
+            ASSERT(edca->getLifetimeHandler()->findFrame(otherId) != nullptr);
+            ASSERT(originatorBlockAckAgreementHandler->getProcedures().count({peer, 5}) == 0);
+            ASSERT(ownedActions.empty());
+            edca->getEdcaf(AC_VI)->unsubscribe("packetSentToPeer", this);
+            unsubscribe("packetReceivedFromPeer", this);
+            std::cout << "Block Ack retired-DATA assertions passed.\n";
+            endSimulation();
+        }
+        else if (message->isName("reset")) {
+            delete message;
+            ASSERT(!reset);
+            int scenario = par("scenario");
+            ASSERT(frameSequenceHandler->isSequenceRunning());
+            if (scenario == 0) {
+                ASSERT(targetCompleted);
+                ASSERT(frameSequenceHandler->getContext()->getLastStep()->getType() == IFrameSequenceStep::Type::RECEIVE);
+            }
+            else {
+                ASSERT(!targetCompleted);
+                ASSERT(tx->hasTransmission());
+                ASSERT(frameSequenceHandler->getContext()->getLastStep()->getType() == IFrameSequenceStep::Type::TRANSMIT);
+            }
+            resetPeer(peer);
+            reset = true;
+            ASSERT(edca->getLifetimeHandler()->findFrame(retiredId) == nullptr);
+            if (scenario != 0)
+                ASSERT(tx->hasTransmission());
+            else
+                scheduleAfter(SimTime(100, SIMTIME_US), new cMessage("lateAck"));
+        }
+        else if (message->isName("firstAck")) {
+            delete message;
+            injectAck();
+        }
+        else if (message->isName("lateAck")) {
+            delete message;
+            ASSERT(reset);
+            ASSERT(targetCompleted);
+            injectAck();
+            scheduleAfter(SimTime(2, SIMTIME_MS), new cMessage("verify"));
+        }
+        else if (message->isName("verify")) {
+            delete message;
+            ASSERT(reset && targetCompleted);
+            ASSERT(attempts == (par("scenario").intValue() == 2 ? 2 : 1));
+            ASSERT(!tx->hasTransmission());
+            ASSERT(!frameSequenceHandler->isSequenceRunning());
+            ASSERT(edca->getLifetimeHandler()->getNumFrames() == 0);
+            ASSERT(edca->getEdcaf(AC_VI)->getAckHandler()->getQoSDataAckStatus(retiredHeader) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+            edca->getEdcaf(AC_VI)->unsubscribe("packetSentToPeer", this);
+            std::cout << "Retired target sent signals: " << targetSentSignals << std::endl;
+            std::cout << "Late ACK received signals: " << lateAckSignals << std::endl;
+            unsubscribe("packetReceivedFromPeer", this);
+            ASSERT(targetSentSignals == 1);
+            ASSERT(lateAckSignals == 1);
+            std::cout << "Block Ack retired-DATA assertions passed.\n";
+            endSimulation();
+        }
+        else
+            Hcf::handleMessage(message);
+    }
+};
+Define_Module(RetiredDataHcf);
+class RetiredDataTest : public cSimpleModule {
+  protected:
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("test")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        check_and_cast<RetiredDataHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"))->begin();
+    }
+};
+Define_Module(RetiredDataTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module RetiredDataHcf extends Hcf { parameters: int scenario; @class(::inet::ieee80211::RetiredDataHcf); }
+simple RetiredDataTest { parameters: @class(::inet::ieee80211::RetiredDataTest); }
+network RetiredDataNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: RetiredDataTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RetiredDataNetwork
+ned-path = .;../../../../src
+sim-time-limit = 20ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "RetiredDataHcf"
+**.wlan[*].mac.hcf.scenario = ${scenario=0..8}
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.originatorAckPolicy.ackTimeout = 1ms
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = ${scenario} >= 3 ? 0B : 2346B
+**.wlan[*].mac.hcf.rtsPolicy.ctsTimeout = 1ms
+**.wlan[*].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = 10ms
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+
+%contains: stdout
+Block Ack retired-DATA assertions passed.

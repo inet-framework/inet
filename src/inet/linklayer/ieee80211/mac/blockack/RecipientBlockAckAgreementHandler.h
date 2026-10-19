@@ -26,6 +26,7 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
 {
   protected:
     std::map<std::pair<MacAddress, Tid>, RecipientBlockAckAgreement *> blockAckAgreements;
+    std::set<std::pair<MacAddress, Tid>> pendingTeardowns;
 
   protected:
     virtual void terminateAgreement(MacAddress originatorAddr, Tid tid);
@@ -33,10 +34,16 @@ class INET_API RecipientBlockAckAgreementHandler : public IRecipientBlockAckAgre
     virtual void updateAgreement(const Ptr<const Ieee80211AddbaResponse>& addbaResponse);
     virtual const Ptr<Ieee80211AddbaResponse> buildAddbaResponse(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy);
     virtual const Ptr<Ieee80211Delba> buildDelba(MacAddress receiverAddr, Tid tid, int reasonCode);
-    virtual simtime_t computeEarliestExpirationTime();
     virtual void scheduleInactivityTimer(IBlockAckAgreementHandlerCallback *callback);
 
   public:
+    virtual simtime_t computeEarliestExpirationTime() override;
+    const std::map<std::pair<MacAddress, Tid>, RecipientBlockAckAgreement *>& getAgreements() const override { return blockAckAgreements; }
+    bool isTeardownPending(MacAddress peer, Tid tid) const override { return pendingTeardowns.count({peer, tid}) != 0; }
+    void beginTeardown(MacAddress peer, Tid tid) override { pendingTeardowns.insert({peer, tid}); }
+    void finishTeardown(MacAddress peer, Tid tid) override { pendingTeardowns.erase({peer, tid}); }
+    RecipientBlockAckAgreement *detachAgreement(MacAddress peer, Tid tid) override;
+    std::vector<RecipientBlockAckAgreement *> detachPeer(MacAddress peer) override;
     virtual ~RecipientBlockAckAgreementHandler();
     virtual void processTransmittedAddbaResp(const Ptr<const Ieee80211AddbaResponse>& addbaResp, IBlockAckAgreementHandlerCallback *callback) override;
     virtual void processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback) override;

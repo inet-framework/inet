@@ -9,6 +9,7 @@
 #define __INET_IRECIPIENTBLOCKACKAGREEMENTPOLICY_H
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/BlockAckVariant.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -17,6 +18,8 @@ class INET_API IRecipientBlockAckAgreementPolicy
 {
   public:
     virtual ~IRecipientBlockAckAgreementPolicy() {}
+
+    virtual bool isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const = 0;
 
     virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq) = 0;
     virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) = 0;

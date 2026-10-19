@@ -138,6 +138,20 @@ class Ieee80211HtPhyPreamble extends Ieee80211PhyPreamble
 
 class Ieee80211HtPhyHeader extends Ieee80211PhyHeader
 {
+    // IEEE Std 802.11-2024, Table 19-11 and Figure 19-6.
+    chunkLength = b(48);
+    uint8_t mcs @bit(7) = 0;
+    bool channelWidth40 = false;
+    bool smoothing = true;
+    bool notSounding = true;
+    bool reserved = true;
+    bool aggregation = false;
+    uint8_t stbc @bit(2) = 0;
+    bool fecCoding = false;
+    bool shortGi = false;
+    uint8_t extensionSpatialStreams @bit(2) = 0;
+    uint8_t crc = 0;
+    uint8_t tail @bit(6) = 0;
 }
 
 // IEEE 802.11 21. High Throughput (VHT)

@@ -32,6 +32,7 @@ class INET_API OriginatorBlockAckAgreementPolicy : public ModeSetListener, publi
     virtual void initialize(int stage) override;
 
   public:
+    virtual bool isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const override;
     virtual bool isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override;
     virtual bool isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement *agreement) override;
     virtual bool isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba) override;

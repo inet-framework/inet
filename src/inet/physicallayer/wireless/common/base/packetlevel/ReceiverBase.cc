@@ -102,6 +102,7 @@ const IReceptionResult *ReceiverBase::computeReceptionResult(const IListening *l
     auto signalTimeInd = packet->addTagIfAbsent<SignalTimeInd>();
     signalTimeInd->setStartTime(reception->getStartTime());
     signalTimeInd->setEndTime(reception->getEndTime());
+    signalTimeInd->setTransmissionId(reception->getTransmission()->getId());
     if (snir->getMax() == 0) {
         auto errorRateInd = packet->addTagIfAbsent<ErrorRateInd>();
         errorRateInd->setSymbolErrorRate(1);

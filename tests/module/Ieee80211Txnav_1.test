@@ -32,6 +32,7 @@ class TxnavSelection : public IQosRateSelection {
     const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& header, ResponseQueryRole role) override { return delegate->computeResponseCtsFrameMode(packet, header, role); }
     const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header, ResponseQueryRole role) override { return delegate->computeResponseAckFrameMode(packet, header, role); }
     const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header, ResponseQueryRole role) override { return delegate->computeResponseBlockAckFrameMode(packet, header, role); }
+    const physicallayer::IIeee80211Mode *computeCompressedBlockAckReqMode(Packet *packet, const Ptr<const Ieee80211CompressedBlockAckReq>& header, bool startsTxop) override { return delegate->computeCompressedBlockAckReqMode(packet, header, startsTxop); }
 };
 class TxnavRx : public Rx {
   public:

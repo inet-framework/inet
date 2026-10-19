@@ -34,6 +34,13 @@
 namespace inet {
 namespace ieee80211 {
 
+void Ieee80211Mac::resetPeerAgreements(const MacAddress& peer)
+{
+    Enter_Method("resetPeerAgreements");
+    if (hcf)
+        hcf->resetPeer(peer);
+}
+
 using namespace inet::physicallayer;
 
 Define_Module(Ieee80211Mac);
@@ -83,6 +90,7 @@ void Ieee80211Mac::initialize(int stage)
                 if (transmitter->isHtChannelWidthSupported(channelWidth) &&
                         receiver->isHtChannelWidthSupported(channelWidth))
                     operationalChannelWidths.insert(channelWidth);
+            receiver->validateHtReceptionCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         }
         mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         emit(modesetChangedSignal, modeSet);

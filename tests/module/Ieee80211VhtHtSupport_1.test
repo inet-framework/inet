@@ -68,6 +68,9 @@ class VhtHtSelection : public IQosRateSelection {
             const Ptr<const Ieee80211BlockAckReq>& header, ResponseQueryRole role) override {
         return delegate->computeResponseBlockAckFrameMode(packet, header, role);
     }
+    const IIeee80211Mode *computeCompressedBlockAckReqMode(Packet *packet, const Ptr<const Ieee80211CompressedBlockAckReq>& header, bool startsTxop) override {
+        return delegate->computeCompressedBlockAckReqMode(packet, header, startsTxop);
+    }
 };
 class VhtHtRx : public Rx {
   public:

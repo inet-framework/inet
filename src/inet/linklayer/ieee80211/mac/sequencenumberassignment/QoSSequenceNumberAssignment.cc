@@ -10,6 +10,12 @@
 namespace inet {
 namespace ieee80211 {
 
+SequenceNumberCyclic QoSSequenceNumberAssignment::getNextSequenceNumber(MacAddress peer, Tid tid) const
+{
+    auto it = lastSentSeqNums.find({peer, tid});
+    return it == lastSentSeqNums.end() ? SequenceNumberCyclic(0) : it->second + 1;
+}
+
 QoSSequenceNumberAssignment::CacheType QoSSequenceNumberAssignment::getCacheType(const Ptr<const Ieee80211DataOrMgmtHeader>& header, bool incoming)
 {
     bool isTimePriorityFrame = false; // TODO

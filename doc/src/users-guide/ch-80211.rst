@@ -533,7 +533,7 @@ The first exchange proceeds even when its cost exceeds a positive TXOP limit. Th
 
 A zero limit permits the initial exchange and its existing RTS/CTS and immediate response. Each later fragment or unrelated unit needs a fresh TXOP. Prepared fragments and A-MSDUs use the same complete-cost check under positive limits.
 
-``isBlockAckSupported = true`` disables complete-cost continuation admission, even without a Block Ack agreement. Multiple protection also retains its separate admission policy. Both paths use shared TXNAV. Basic Block Ack admission, BAR forecasts, zero-limit companion rules, and optional overrun exceptions remain outside this repair.
+With Block Ack support enabled, active Compressed agreements use the admission described in :ref:`ug:sec:80211:blockack`. Basic and traffic outside those agreements retain their existing admission policy. Those retained paths can exceed DATA exchange bounds. All paths use shared TXNAV. Basic Block Ack admission and BAR forecasts remain outside the Compressed correction.
 
 All single protection paths classify group frames before the current-frame ACK equation. With Block Ack support disabled, the current one-frame group sequence advertises zero. With support enabled, its legacy forecast can reserve a queued successor that the sequence cannot transmit. This limit applies to group management and non-QoS DATA too.
 
@@ -607,13 +607,9 @@ The standard separately requires AIFSN of at least 1 for APs and at least 2 for 
 example, a non-AP station with AIFSN 1 meets the ownership condition but violates the standard's
 minimum.
 
-Multiple protection does not check a complete exchange against the remaining budget.
-For example, its admission policy can start a 120 us exchange with only
-100 us left. The reference scope assumes whole-microsecond positive limits, integral initial PPDU
-airtime, and integral legacy RTS airtime. It adds no A-MPDU, Compressed Block Ack, new
-fragmentation, CTS-to-self, dual CTS, PIFS recovery, or TXOP sharing. It also adds no reverse
-direction, beamforming, S1G, multi-user, or general MAC lifecycle support. It does not repair
-general rate selection, recipient response timing, or TXOP overruns.
+Outside active Compressed agreements, multiple protection does not check complete exchange cost against the remaining budget. For example, that retained policy can start a 120 us exchange with only 100 us left. Active Compressed agreements use their separate complete-cost admission. The reference scope assumes whole-microsecond positive limits, integral initial PPDU airtime, and integral legacy RTS airtime.
+
+Multiple protection adds no A-MPDU, new fragmentation, CTS-to-self, dual CTS, PIFS recovery, or TXOP sharing. Reverse direction, beamforming, S1G, multi-user operation, and general MAC lifecycle support remain outside this implementation. General rate selection and recipient response timing retain their separate limits.
 
 .. _ug:sec:80211:fragmentation:
 
@@ -700,16 +696,35 @@ station then sets up an agreement with its peer automatically (with ADDBA
 frames) when it sends a QoS data frame shorter than
 :par:`maxBlockAckPolicyFrameLength` (default 1000 bytes). After that, the
 frames of that traffic class go out without an immediate acknowledgement,
-and the station sends a Block Ack Request after :par:`blockAckReqThreshold`
-(default 5) unacknowledged frames. Both parameters are on
-``mac.hcf.originatorAckPolicy``.
+and the station normally sends BAR after :par:`blockAckReqThreshold` unacknowledged frames. The default threshold is five. Both parameters are on ``mac.hcf.originatorAckPolicy``.
 
-The agreement policies, ``mac.hcf.originatorBlockAckAgreementPolicy`` and
-``mac.hcf.recipientBlockAckAgreementPolicy``, set the buffer size
-(:par:`maximumAllowedBufferSize`, default 64), the A-MSDU support
-(:par:`aMsduSupported`, default ``true``) and the inactivity timeout
-(:par:`blockAckTimeoutValue`, default ``0s``, which means no timeout). Only
-the basic Block Ack variant is modeled.
+The station applies the threshold separately to each peer and TID. It sends BAR below the threshold when the next eligible DATA belongs to another agreement or cannot fit the transmit window. The station also sends BAR when no eligible DATA remains. For example, a burst of four frames ends with BAR even with the default threshold of five. A negotiated buffer size of one requires BAR before the second sequence number.
+
+BAR can obtain channel access without a queued DATA frame. A later BAR within a TXOP must fit the applicable TXOP and TXNAV bounds with its response. If BAR cannot fit, the station retains that work for another contention.
+
+After the final exchange, the originator sends DELBA when its agreement has no queued DATA, in-progress DATA, or active BAR exchange. A zero inactivity timeout does not disable this transfer-completion rule. DATA that arrives after this boundary waits for DELBA completion. A later transfer can require another ADDBA exchange. If the last unresolved DATA expires, the originator uses the same teardown path. Ordinary recipient teardown releases complete units behind a receive gap before it releases agreement resources.
+
+The agreement policies, ``mac.hcf.originatorBlockAckAgreementPolicy`` and ``mac.hcf.recipientBlockAckAgreementPolicy``, set the buffer size. ``maximumAllowedBufferSize`` defaults to 64. Both negotiated ``aMsduSupported`` flags control A-MSDU use; each defaults to ``true``. ``blockAckTimeoutValue`` defaults to ``0s``, which disables the inactivity timeout. Transfer completion and DATA lifetime expiry retain their separate teardown rules.
+
+HCF defaults to ``mac.hcf.blockAckVariant = "compressed"`` for immediate Compressed Block Ack. Block Ack support itself remains disabled by default. The response contains a 64-bit bitmap and occupies 32 bytes with FCS. Each positive bit acknowledges one unfragmented MPDU. The recipient retains receipt bits after delivery, so a later BAR can still obtain those positive bits. Missing receipt evidence produces zero.
+
+Compressed agreements require usable local HT support and directional peer HT state. Infrastructure association supplies that peer state for eligible HT links and the supported ``ac`` path. An HT radio mode alone does not supply peer capabilities. Without usable state, DATA uses Normal Ack. Local non-HT operation produces a warning when Block Ack support is enabled. HT ad hoc links without peer state retain Normal Ack.
+
+Explicit ``blockAckVariant = "basic"`` selects historical Basic compatibility on both endpoints. Basic retains its 64 fragment bitmap entries and its 152-byte response with FCS. IEEE Std 802.11e-2005 introduced this format. IEEE Std 802.11-2024 reserves its Type 0 value. INET retains Basic for existing studies; this compatibility does not establish complete historical conformance.
+
+Both endpoints must select the same profile because ADDBA does not negotiate it. A valid addressed BAR with the other profile stops the simulation before agreement updates. The diagnostic identifies the peer, TID, and profiles. Configure matching profiles before a new run. Malformed frames follow input rejection instead of this configuration diagnostic.
+
+Compressed agreements suppress fragmentation for their peer and TID. The recipient rejects fragmented DATA under those agreements before receipt or reorder updates. Basic retains fragmentation. Outside a Compressed agreement, the configured fragmentation threshold retains its existing effect.
+
+Keep ``delayedAckPolicySupported = false`` in both agreement policies for Compressed support. HCF rejects true at initialization because the Compressed path supplies immediate responses only. Retained Basic delayed-policy configuration does not establish a complete delayed exchange implementation.
+
+The Compressed originator sends BAR with a non-HT PHY mode. Initial BAR uses the applicable BSS basic or mandatory rate rule. Later BAR uses the peer operational rate rule. A configured ``controlFrameBitrate`` must satisfy that rule. The response selector uses the actual 32-byte response length when a legal alternate rate is available. These rules retain separate Basic, ACK, and CTS contracts.
+
+Active Compressed agreements check the complete DATA exchange before source commitment. If an aggregate cannot qualify, HCF evaluates its first ordinary MSDU with the same selected DATA mode. If neither form qualifies, HCF ends the sequence without queue removal, sequence assignment, or deadline replacement. RTS/CTS retains the selected mode. Expiry or capability changes before DATA cancel invalid preparation.
+
+An initial unaggregated MSDU can use the applicable TXOP overrun exception. A same-size single-MPDU retransmission can also use its exception. That retransmission can carry an A-MSDU. Each exception permits at most one Data or Management frame in that TXOP. A new A-MSDU must fit a positive limit. A zero limit permits one DATA PPDU with one MSDU or A-MSDU, plus its required protection and response.
+
+Single protection reserves only the current Compressed exchange. A later BAR can require fresh contention. This policy can change airtime and delivery times. Before DATA commitment, failed RTS updates QSRC and the contention window without a provisional sequence counter. QSRC is the short retry counter for an access category. Original MSDU lifetimes bound repeated attempts; QSRC rollover does not discard them.
 
 .. code-block:: ini
 
@@ -1026,9 +1041,9 @@ The model does not contain:
 -  PCF and HCCA, the polled channel access methods. The module
    :ned:`Hcca` exists as a placeholder.
 
--  A-MPDU aggregation, the MSDU lifetime limit, and self-CTS protection.
+-  A-MPDU aggregation and self-CTS protection.
 
--  Compressed and multi-TID block acknowledgement.
+-  Multi-TID block acknowledgement and delayed Compressed Block Ack.
 
 -  Operational HT widths above 20 MHz, and a primary/secondary channel relationship for wider VHT modes.
 

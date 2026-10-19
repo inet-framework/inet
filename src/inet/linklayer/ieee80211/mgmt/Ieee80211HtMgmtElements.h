@@ -101,6 +101,7 @@ inline Ieee80211HtOperationElement makeHtOperationElement(const physicallayer::I
     element.secondaryChannelOffset = operation.secondaryChannelOffset;
     element.staChannelWidth40Mhz = operation.operatingChannelWidth == MHz(40);
     element.protectionMode = static_cast<int>(operation.protectionMode);
+    element.rifsMode = operation.rifsMode;
     for (int i = 0; i < 77; i++)
         element.basicMcsSupported[i] = operation.basicMcsSupported[i];
     return element;
@@ -119,6 +120,7 @@ inline Ieee80211HtOperation makeHtOperation(const physicallayer::IIeee80211Band 
     operation.secondaryChannelOffset = element.secondaryChannelOffset;
     operation.operatingChannelWidth = element.staChannelWidth40Mhz ? MHz(40) : MHz(20);
     operation.protectionMode = static_cast<Ieee80211HtProtectionMode>(element.protectionMode);
+    operation.rifsMode = element.rifsMode;
     for (int i = 0; i < 77; i++)
         operation.basicMcsSupported[i] = element.basicMcsSupported[i];
     return operation;

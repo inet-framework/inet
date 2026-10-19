@@ -1,0 +1,203 @@
+%description:
+Check a pending EDCA request after production inactivity teardown defers its DATA.
+The fixture supplies an accepted Basic agreement; it does not test negotiation.
+VI and BE request the same grant time, at 34 microseconds.
+The VI agreement expires at 33 microseconds and queues DELBA in VO.
+VO uses six AIFS slots and grants later, at 70 microseconds.
+Deferred VI must not cause collision feedback or disposal of eligible BE DATA.
+The control retains eligible VI and must preserve the genuine collision.
+The third run gives BE an accepted agreement with SSN zero and two DATA frames.
+An internal collision discards sequence zero before transmission.
+HCF must retire that agreement and queue DELBA before a successor can transmit.
+
+%extraargs: -r 0..2
+
+%file: DeferredCollision.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/contract/IContention.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class DeferredCollisionOriginator : public OriginatorBlockAckAgreementHandler {
+  public:
+    void accept(simtime_t timeout, Tid tid) {
+        MacAddress peer("02:00:00:00:00:02");
+        auto agreement = new OriginatorBlockAckAgreement(peer, tid, SequenceNumberCyclic(0), 64, false, false);
+        agreement->setIsAddbaRequestSent(true);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(timeout);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, tid}] = agreement;
+    }
+};
+
+class DeferredCollisionHcf : public Hcf {
+  public:
+    int videoAccepted = 0;
+    int bestEffortAccepted = 0;
+    int delbas = 0;
+    void prepare(bool expire, Tid tid) {
+        Enter_Method("prepare");
+        delete originatorBlockAckAgreementHandler;
+        auto handler = new DeferredCollisionOriginator();
+        originatorBlockAckAgreementHandler = handler;
+        handler->accept(expire ? SimTime(33, SIMTIME_US) : SIMTIME_ZERO, tid);
+        if (expire)
+            scheduleInactivityTimer();
+    }
+    bool contending(AccessCategory ac) const {
+        return check_and_cast<IContention *>(edca->getEdcaf(ac)->getSubmodule("contention"))->isContentionInProgress();
+    }
+    bool eligible(AccessCategory ac) { return hasFrameToTransmit(ac); }
+    int queued(AccessCategory ac) const { return edca->getEdcaf(ac)->getPendingQueue()->getNumPackets(); }
+    bool hasAgreement(Tid tid) const {
+        return originatorBlockAckAgreementHandler->getAgreement(MacAddress("02:00:00:00:00:02"), tid) != nullptr;
+    }
+  protected:
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (dynamicPtrCast<const Ieee80211Delba>(header))
+            delbas++;
+        Hcf::processMgmtFrame(packet, header);
+    }
+    bool transmitFrame(Packet *frame, simtime_t ifs) override {
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(frame->peekAtFront<Ieee80211MacHeader>());
+        bool accepted = Hcf::transmitFrame(frame, ifs);
+        if (accepted && header) {
+            if (header->getTid() == 5) videoAccepted++;
+            if (header->getTid() == 0) bestEffortAccepted++;
+        }
+        return accepted;
+    }
+};
+Define_Module(DeferredCollisionHcf);
+
+class DeferredCollisionTest : public cSimpleModule, public cListener {
+    int collisions = 0;
+    int bestEffortRetryDrops = 0;
+  protected:
+    void receiveSignal(cComponent *, simsignal_t, unsigned long count, cObject *) override { collisions += count; }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *details) override {
+        auto drop = check_and_cast<PacketDropDetails *>(details);
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(check_and_cast<Packet *>(object)->peekAtFront<Ieee80211MacHeader>());
+        if (drop->getReason() == RETRY_LIMIT_REACHED && header && header->getTid() == 0)
+            bestEffortRetryDrops++;
+    }
+    void accept(DeferredCollisionHcf *hcf, Tid tid) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(tid);
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+        header->setAddress3(header->getReceiverAddress());
+        auto frame = new Packet(tid == 5 ? "video-data" : "best-effort-data", header);
+        frame->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+        frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        hcf->processUpperFrame(frame, header);
+    }
+    void activity() override {
+        auto hcf = check_and_cast<DeferredCollisionHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"));
+        int scenario = par("scenario");
+        bool expire = scenario == 0;
+        Tid agreementTid = scenario == 2 ? 0 : 5;
+        hcf->prepare(expire, agreementTid);
+        hcf->subscribe(Hcf::edcaCollisionDetectedSignal, this);
+        hcf->subscribe(packetDroppedSignal, this);
+        accept(hcf, 5);
+        accept(hcf, 0);
+        if (scenario == 2)
+            accept(hcf, 0);
+        ASSERT(hcf->contending(AC_VI) && hcf->contending(AC_BE));
+        wait(SimTime(33500, SIMTIME_NS));
+        ASSERT(hcf->hasAgreement(agreementTid) == !expire);
+        ASSERT(hcf->eligible(AC_VI) == !expire);
+        ASSERT(hcf->eligible(AC_BE));
+        std::cout << "At " << simTime() << ": VI eligible=" << hcf->eligible(AC_VI)
+            << ", VI pending request=" << hcf->contending(AC_VI)
+            << ", BE pending request=" << hcf->contending(AC_BE)
+            << ", VO pending request=" << hcf->contending(AC_VO) << ".\n";
+        wait(SimTime(16500, SIMTIME_NS));
+        std::cout << "At " << simTime() << ": VI DATA accepted=" << hcf->videoAccepted
+            << ", BE DATA accepted=" << hcf->bestEffortAccepted
+            << ", collisions=" << collisions << ", BE retry drops=" << bestEffortRetryDrops << ".\n";
+        ASSERT(hcf->videoAccepted == (expire ? 0 : 1));
+        ASSERT(hcf->bestEffortAccepted == (expire ? 1 : 0));
+        ASSERT(collisions == (expire ? 0 : 1));
+        ASSERT(bestEffortRetryDrops == (expire ? 0 : 1));
+        if (scenario == 2) {
+            ASSERT(!hcf->hasAgreement(0));
+            ASSERT(hcf->delbas == 1);
+            ASSERT(!hcf->eligible(AC_BE));
+            ASSERT(hcf->queued(AC_BE) == 1);
+            ASSERT(hcf->bestEffortAccepted == 0);
+            std::cout << "First-DATA collision retires the agreement before successor transmission.\n";
+        }
+        hcf->unsubscribe(Hcf::edcaCollisionDetectedSignal, this);
+        hcf->unsubscribe(packetDroppedSignal, this);
+        std::cout << "Deferred collision scenario " << par("scenario").intValue() << " passed.\n";
+        endSimulation();
+    }
+  public:
+    DeferredCollisionTest() : cSimpleModule(65536) {}
+};
+Define_Module(DeferredCollisionTest);
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module DeferredCollisionHcf extends Hcf { parameters: @class(::DeferredCollisionHcf); }
+simple DeferredCollisionTest { parameters: int scenario; @class(::DeferredCollisionTest); }
+network DeferredCollisionNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: DeferredCollisionTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DeferredCollisionNetwork
+sim-time-limit = 1ms
+seed-set = 0
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = true
+record-scalar-results = false
+record-vector-results = false
+*.test.scenario = ${scenario=0,1,2}
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "DeferredCollisionHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMin = 0
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMax = 0
+*.host.wlan[0].mac.hcf.edca.edcaf[3].aifsn = 6
+**.wlan[*].mac.hcf.edca.edcaf[*].aifsn = 2
+**.wlan[*].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = 1
+*.host.wlan[0].address = "02:00:00:00:00:01"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Deferred collision scenario 1 passed.
+
+%contains: stdout
+First-DATA collision retires the agreement before successor transmission.

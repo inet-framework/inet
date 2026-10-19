@@ -1,0 +1,230 @@
+%description:
+Check Basic Type 0 and Compressed Type 2 BAR and Block Ack against independent octets.
+Check reserved bits, unsupported Types, malformed fragment subfields, and fixed lengths.
+The wire oracle follows the C1 contract in the Compressed Block Ack replacement plan.
+Basic fields preserve the retained Type 0 compatibility contract.
+Compressed uses the non-HE, 64-position format from IEEE Std 802.11-2024, 9.3.1.7.2 and 9.3.1.8.2.
+This test does not establish complete exchanges or response airtime.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/Ieee80211MacHeaderSerializer.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckProcedure.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+class BlockAckWireSerializer : public Ieee80211MacHeaderSerializer
+{
+  public:
+    using Ieee80211MacHeaderSerializer::serializeFields;
+    using Ieee80211MacHeaderSerializer::deserializeFields;
+};
+
+static std::vector<uint8_t> encode(const Ptr<const Chunk>& header)
+{
+    BlockAckWireSerializer serializer;
+    MemoryOutputStream stream;
+    serializer.serializeFields(stream, header);
+    return stream.getData();
+}
+
+static Ptr<Chunk> decode(const std::vector<uint8_t>& bytes)
+{
+    MemoryInputStream stream(bytes);
+    return Chunk::deserialize(stream, typeid(Ieee80211MacHeader));
+}
+
+static void requireWriteFailure(const Ptr<const Chunk>& header)
+{
+    bool rejected = false;
+    try { encode(header); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+
+static void addresses(const Ptr<Ieee80211TwoAddressHeader>& header)
+{
+    header->setReceiverAddress(MacAddress("02:11:22:33:44:55"));
+    header->setTransmitterAddress(MacAddress("06:aa:bb:cc:dd:ee"));
+    header->setDurationField(SimTime(0x1234, SIMTIME_US));
+}
+
+// Each vector is independent of the serializer output.
+static std::vector<uint8_t> golden(bool response, bool compressed)
+{
+    std::vector<uint8_t> bytes = {
+        uint8_t(response ? 0x94 : 0x84), 0x00, 0x34, 0x12,
+        0x02, 0x11, 0x22, 0x33, 0x44, 0x55,
+        0x06, 0xaa, 0xbb, 0xcc, 0xdd, 0xee,
+        uint8_t(compressed ? 0x04 : 0x21), 0x50, 0xe0, 0xff
+    };
+    if (response) {
+        bytes.resize(compressed ? 28 : 148, 0);
+        // SSN 4094: positions 0, 1, 2, and 63 represent 4094, 4095, 0, and 61.
+        if (compressed) {
+            bytes[20] = 0x07;
+            bytes[27] = 0x80;
+        }
+        else {
+            // Basic position 0 reports fragments 0 and 15; position 63 reports fragment 8.
+            bytes[20] = 0x01;
+            bytes[21] = 0x80;
+            bytes[147] = 0x01;
+        }
+    }
+    return bytes;
+}
+
+%activity:
+OriginatorBlockAckProcedure procedure;
+auto built = dynamicPtrCast<Ieee80211CompressedBlockAckReq>(
+        procedure.buildCompressedBlockAckReqFrame(MacAddress("02:11:22:33:44:55"), 5, SequenceNumberCyclic(4094)));
+ASSERT(built && built->getReceiverAddress() == MacAddress("02:11:22:33:44:55"));
+ASSERT(built->getTidInfo() == 5 && built->getStartingSequenceNumber().get() == 4094);
+ASSERT(built->getFragmentNumber() == 0 && built->getChunkLength() == B(20));
+addresses(built);
+ASSERT(encode(built) == golden(false, true));
+
+for (bool response : {false, true}) {
+    for (bool compressed : {false, true}) {
+        Ptr<Ieee80211TwoAddressHeader> header;
+        if (response) {
+            if (compressed) {
+                auto ba = makeShared<Ieee80211CompressedBlockAck>();
+                ba->setBlockAckPolicy(true);
+                ba->setReserved(0x1ff);
+                ba->setTidInfo(5);
+                ba->setStartingSequenceNumber(SequenceNumberCyclic(4094));
+                ba->setBlockAckBitmap(BitVector(std::vector<uint8_t>{7, 0, 0, 0, 0, 0, 0, 0x80}));
+                ASSERT(ba->getChunkLength() == B(28));
+                header = ba;
+            }
+            else {
+                auto ba = makeShared<Ieee80211BasicBlockAck>();
+                ba->setBlockAckPolicy(true);
+                ba->setReserved(4);
+                ba->setTidInfo(5);
+                ba->setStartingSequenceNumber(SequenceNumberCyclic(4094));
+                for (int i = 0; i < 64; i++)
+                    ba->setBlockAckBitmap(i, BitVector(std::vector<uint8_t>{uint8_t(i == 0), uint8_t(i == 0 ? 0x80 : i == 63 ? 1 : 0)}));
+                ASSERT(ba->getChunkLength() == B(148));
+                header = ba;
+            }
+        }
+        else {
+            if (compressed) {
+                auto bar = makeShared<Ieee80211CompressedBlockAckReq>();
+                bar->setBarAckPolicy(true);
+                bar->setReserved(0x1ff);
+                bar->setTidInfo(5);
+                bar->setStartingSequenceNumber(SequenceNumberCyclic(4094));
+                header = bar;
+            }
+            else {
+                auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+                bar->setBarAckPolicy(true);
+                bar->setReserved(4);
+                bar->setTidInfo(5);
+                bar->setStartingSequenceNumber(SequenceNumberCyclic(4094));
+                header = bar;
+            }
+        }
+        addresses(header);
+        auto expected = golden(response, compressed);
+        ASSERT(encode(header) == expected);
+        ASSERT(header->getChunkLength() == B(expected.size()));
+        if (response) {
+            auto fcs = makeShared<Ieee80211MacTrailer>();
+            ASSERT(header->getChunkLength() + fcs->getChunkLength() == B(compressed ? 32 : 152));
+        }
+        auto result = decode(expected);
+        ASSERT(result->isCorrect());
+        ASSERT(result->isComplete());
+        ASSERT(encode(result) == expected);
+        if (response) {
+            if (compressed) {
+                auto ba = dynamicPtrCast<Ieee80211CompressedBlockAck>(result);
+                ASSERT(ba && ba->getTidInfo() == 5 && ba->getStartingSequenceNumber().get() == 4094);
+                ASSERT(ba->getBlockAckBitmap().getSize() == 64);
+                ASSERT(ba->getBlockAckBitmap().getBit(0) && ba->getBlockAckBitmap().getBit(2));
+                ASSERT(ba->getBlockAckBitmap().getBit(63) && !ba->getBlockAckBitmap().getBit(62));
+            }
+            else {
+                auto ba = dynamicPtrCast<Ieee80211BasicBlockAck>(result);
+                ASSERT(ba && ba->getReserved() == 4 && ba->getBlockAckPolicy());
+                ASSERT(ba->getBlockAckBitmap(0).getBit(15));
+                ASSERT(ba->getBlockAckBitmap(63).getBit(8));
+            }
+        }
+        else {
+            if (compressed) {
+                auto bar = dynamicPtrCast<Ieee80211CompressedBlockAckReq>(result);
+                ASSERT(bar && bar->getTidInfo() == 5 && bar->getStartingSequenceNumber().get() == 4094);
+            }
+            else {
+                auto bar = dynamicPtrCast<Ieee80211BasicBlockAckReq>(result);
+                ASSERT(bar && bar->getReserved() == 4 && bar->getBarAckPolicy());
+            }
+        }
+        if (compressed) {
+            auto reserved = expected;
+            reserved[16] |= 0xe1;
+            reserved[17] |= 0x0f;
+            auto ignored = decode(reserved);
+            ASSERT(ignored->isCorrect());
+            ASSERT(encode(ignored) == expected);
+            if (response) {
+                auto ba = dynamicPtrCast<Ieee80211CompressedBlockAck>(ignored);
+                ASSERT(ba && !ba->getBlockAckPolicy() && ba->getReserved() == 0);
+            }
+            else {
+                auto bar = dynamicPtrCast<Ieee80211CompressedBlockAckReq>(ignored);
+                ASSERT(bar && !bar->getBarAckPolicy() && bar->getReserved() == 0);
+            }
+            auto malformed = expected;
+            malformed[18] |= 1;
+            ASSERT(!decode(malformed)->isCorrect());
+            if (response)
+                dynamicPtrCast<Ieee80211CompressedBlockAck>(header)->setFragmentNumber(1);
+            else
+                dynamicPtrCast<Ieee80211CompressedBlockAckReq>(header)->setFragmentNumber(1);
+            requireWriteFailure(header);
+        }
+        else {
+            for (int reserved : {1, 2, 3}) {
+                if (response)
+                    dynamicPtrCast<Ieee80211BasicBlockAck>(header)->setReserved(reserved);
+                else
+                    dynamicPtrCast<Ieee80211BasicBlockAckReq>(header)->setReserved(reserved);
+                requireWriteFailure(header);
+            }
+        }
+        for (size_t length : {size_t(17), expected.size() - 1}) {
+            auto shortFrame = expected;
+            shortFrame.resize(length);
+            ASSERT(!decode(shortFrame)->isComplete());
+        }
+    }
+    for (int type = 0; type < 16; type++) {
+        if (type == 0 || type == 2)
+            continue;
+        auto unsupported = golden(response, true);
+        unsupported[16] = type << 1;
+        auto result = decode(unsupported);
+        ASSERT(!result->isCorrect());
+        ASSERT(!dynamicPtrCast<Ieee80211BasicBlockAck>(result));
+        ASSERT(!dynamicPtrCast<Ieee80211CompressedBlockAck>(result));
+        ASSERT(!dynamicPtrCast<Ieee80211BasicBlockAckReq>(result));
+        ASSERT(!dynamicPtrCast<Ieee80211CompressedBlockAckReq>(result));
+    }
+}
+for (int bits : {0, 63, 65}) {
+    auto ba = makeShared<Ieee80211CompressedBlockAck>();
+    ba->setBlockAckBitmap(bits == 0 ? BitVector() : BitVector(0u, bits));
+    requireWriteFailure(ba);
+}
+EV << "Block Ack wire checks passed\n";
+
+%contains: stdout
+Block Ack wire checks passed
