@@ -5,7 +5,7 @@ when the originator discards the last transmitted MPDU.
 The fixture supplies accepted Basic agreements and injects immediate ACKs and Basic Block Ack responses.
 Production fragmentation, inactivity expiry, retirement, and transmission remain active.
 Runs cover sequence 0 and wraparound at 4095, with expiry during transmission
-or after the first fragment receives its Normal Ack.
+or during the next fragment after the first fragment receives its Normal Ack.
 Later intact DATA and an unrelated peer must retain their transmissions.
 Additional runs transmit an earlier DATA unit before a gap in sequence allocation.
 The fixture extracts and disposes of the skipped DATA through the production allocator.
@@ -160,7 +160,7 @@ class FragmentRetirementHcf : public Hcf {
             if (data->getReceiverAddress() == peer) {
                 if (!retired) {
                     ASSERT(data->getSequenceNumber() == SequenceNumberCyclic(start));
-                    ASSERT(data->getFragmentNumber() == 0);
+                    ASSERT(data->getFragmentNumber() == 0 || (acknowledgedFirst && data->getFragmentNumber() == 1));
                 }
                 else {
                     ASSERT(data->getSequenceNumber() == SequenceNumberCyclic(start) + 1);
