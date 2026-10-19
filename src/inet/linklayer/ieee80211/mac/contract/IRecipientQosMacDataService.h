@@ -10,6 +10,7 @@
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/contract/AmpduReception.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRecipientBlockAckAgreementHandler.h"
 
 namespace inet {
@@ -23,8 +24,11 @@ class INET_API IRecipientQosMacDataService
 
   public:
     virtual ~IRecipientQosMacDataService() {}
+    virtual std::vector<Packet *> retireAgreement(RecipientBlockAckAgreement *agreement, bool associationReset) = 0;
+    virtual void clearPeer(MacAddress peer) = 0;
 
-    virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
+    // HCF supplies the observed SIFS or permitted RIFS relation for this frame.
+    virtual std::vector<Packet *> dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, bool interframe = false, const BlockAckReceiveContext *context = nullptr) = 0;
     virtual std::vector<Packet *> controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler) = 0;
     virtual std::vector<Packet *> managementFrameReceived(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader) = 0;
 };

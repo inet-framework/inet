@@ -14,6 +14,135 @@ retransmissions do (``synRetries``). When they run out, the connection raises th
 ``TCP_E_TIMEOUT_CONN_ESTAB``, as the timer did before, so a subclass that handles this event needs no
 change.
 
+IEEE 802.11 implicit Block Ack extension points
+---------------------------------------------
+
+The default MPDU policy remains disabled. ``HtMpduAggregationPolicy`` enables independent HT20 long-GI members with fixed DATA rates. Custom MPDU policies implement ``isEnabled()`` and ``selectFrames()``. The caller supplies negotiated receiver limits and one retained DATA mode. A policy returns borrowed member references without queue extraction or state changes.
+
+Custom QoS data services implement batch preparation, validation, commitment, and construction through ``IOriginatorQosMacDataService``. Each new member owns one reversible preview. The batch borrows canonical members from the in-progress queue. Commitment validates every queued source before the first extraction. Failed preparation preserves sequence state and independent deadlines.
+
+``IRx::lowerAggregateReceived()`` returns separately owned correct members and immutable delimiter topology. The caller retains the envelope. Custom recipient services pass ``BlockAckReceiveContext`` to the reorder owner. This context supplies physical interval and delimiter facts; it does not replace receipt state. Custom agreement handlers implement ``implicitBlockAckRequested()`` to refresh inactivity for valid implicit DATA.
+
+Custom Tx implementations support ``transmitAggregate()``, ``cancelPendingAggregate()``, and ``finalizeMpdu()``. The aggregate callback validates and commits members at actual submission after the existing IFS timer. Cancellation removes a delayed request before exchange-context disposal. Aggregate completion supplies a null MAC header because the envelope has no outer MAC header or FCS. Every Tx callback implements ``frameTransmissionStarted()`` for an actual-submission notification. A concrete callback can use an empty override when submission requires no state change.
+
+Custom QoS ACK policies accept probe eligibility through existing EDCA classification. They also supply the implicit Block Ack receive-start timeout from the actual response mode. Every custom rate selector implements ``computeCompressedBlockAckResponseMode()`` for implicit callers. A selector without this capability must throw a diagnostic from its concrete override. Explicit Compressed BAR and implicit DATA share this rate calculation without a fabricated BAR.
+
+Custom recipient procedures construct a Compressed response directly from peer, TID, and current agreement state. ``FrameTransmissionDetails`` adds ``FRAME_TRANSMISSION_STATUS_UNACKNOWLEDGED`` for unsuccessful aggregate member attempts. A probe supplies no second DATA attempt outcome. Existing packet-drop signals retain terminal disposal observations.
+
+IEEE 802.11 HT aggregate construction
+------------------------------------
+
+The MIB parameter ``htMinimumMpduStartSpacing`` supplies the encoded receiver limit from zero through seven. Zero preserves the default with no spacing restriction. The remaining values represent 0.25, 0.5, 1, 2, 4, 8, and 16 microseconds. Full and simplified management preserve the receiver's value in each negotiated direction. The negotiated transmit direction stores the peer receiver's value.
+
+Custom ``IMpduAggregation`` implementations must supply two HT operations. ``computeAggregateLength()`` previews the PSDU length at the supplied mode and spacing. Zero means an empty batch, unsupported mode, invalid member length, or excessive HT PSDU length. The new ``aggregateFrames()`` overload accepts source references, the mode, encoded spacing, and the peer byte limit. It returns ``nullptr`` when construction exceeds a limit, including either HT duration limit. These operations retain all source Packets and their state.
+
+The existing pointer overload retains its consuming contract. The supplied builder copies region tags from each source's data range to the member's position. It inserts alignment padding and zero-length delimiters between members as necessary. The final member has no padding. A singleton retains its delimiter, so HT-SIG byte conversion preserves its aggregate identity. These construction operations do not enable aggregate selection or implicit Block Ack responses.
+
+IEEE 802.11 HT A-MPDU PHY reception
+---------------------------------
+
+HT receivers require a present error model to implement ``IIeee80211AmpduErrorModel``. This optional WLAN contract provides pure mode-support queries and probabilities for bounded PSDU ranges. ``Ieee80211ErrorModelBase`` supplies the implementation for NIST and Yans. Custom HT models outside this base must implement the C++ contract and its NED module interface. Non-HT models require no aggregate role.
+
+An absent error model remains valid. The receiver retains its acquisition, sensitivity, attempt, and SNIR checks without error draws. This includes ordinary HT operation with ``Ieee80211UnitDiskRadio``. The aggregate profile covers scalar and dimensional HT20 reception; it adds no unit-disk aggregate support claim.
+
+The receiver checks role presence at physical-layer initialization. Before the MIB update, the MAC supplies its exact mode set, channel widths, and spatial-stream limit for receive coverage validation. The model must support the modes that these inputs advertise, including HT20 short GI. Unsupported modes outside the effective stream limit cause no rejection. Runtime mode-set changes also check role presence. Any later capability-update caller must validate its exact inputs before the MIB update.
+
+BerTable retains its current limit. Its NED type rejects the radio's HT operation string. The allowed ``n`` value reaches its initializer, which also rejects HT. Both failures precede the new role check. BerTable does not gain HT aggregate support. Supported HT configurations can use NIST or Yans.
+
+The new role diagnostic applies to otherwise valid custom HT models without the contract. The current packet-level BerTable reception path also requires a transmission bit model. Scalar packet-level transmissions do not supply that model. This existing limitation remains outside the HT A-MPDU change.
+
+The modeled HT-SIG header preserves all 48 bits through byte conversion. ``lengthField`` supplies HT Length. ``aggregation`` distinguishes an A-MPDU from a standalone MPDU, including singleton aggregates. The radio derives mode fields from the selected mode and calculates the CRC after field assignment. Decode preserves the received CRC. HEADER validation rejects invalid CRC and unsupported fields before delimiter or MPDU outcomes.
+
+Separate-part reception retains its current abort; whole-signal reception supplies a failed container. DATA separately refuses modeled content shorter than a valid HT Length. This refusal retains the accepted header property but supplies no range outcomes. It represents malformed model input, not physical carrier loss. Decapsulation never uses an invalid header or insufficient content for length-based trailer removal. Ordinary valid HT duration inputs remain unchanged.
+
+``Ieee80211AmpduInd`` carries copied PHY facts without reception or transmission pointers. Each range identifies a delimiter or complete MPDU by PSDU-relative byte offset, byte length, validity, and physical success. Spacing delimiters have four-byte ranges. Alignment padding has no range outcome or separate draw. MAC delimiter and FCS checks still control acceptance; the PHY indication alone grants no delivery or response permission.
+
+The default ``Rx`` sends aggregate containers through a separate member-validation path before standalone FCS or MAC header checks. A failed common header or incomplete content prevents member acceptance. Custom receive modules must keep aggregate containers separate from standalone frame parsing until they implement member acceptance. MPDU deaggregation can extract bounded recovered members from an incomplete layout. Extraction alone grants no MAC acceptance.
+
+The medium cache retains each aggregate decision. PREAMBLE calculates no HEADER or DATA outcome. HEADER, DATA, WHOLE, and direct success queries reuse retained prerequisites and samples. WHOLE summarizes all ranges. Partial DATA failure preserves the aggregate bytes for MAC member validation. The PHY indication alone does not authorize MAC receipt or an implicit Block Ack response.
+
+With a present model, aggregate ``ErrorRateInd`` fields contain ``NaN`` for unknown probabilities. The receiver does not calculate the former whole-PSDU estimate for these fields. Member outcomes are separate from probability estimates. Without a model, the receiver preserves the common base's tag presence and values. Ordinary MPDUs retain their current metadata. Custom readers of aggregate error-rate fields must accept unknown values.
+
+NIST and Yans calculate each range probability from its byte length and the configured scalar SNIR reduction. The receive profile includes HT20 long GI and short GI. Each range uses an independent draw when its success probability lies strictly between zero and one. This model does not represent correlated FEC errors or interference changes within one member. Alignment padding contributes duration but receives no separate outcome. The model checks establish no new error-accuracy or goodput claim.
+
+Radio medium timing queries
+--------------------------
+
+Custom radio media must implement ``getTransmissionTimingSnapshot()`` and ``computePrecedingSignalGap()``. These queries supply copied physical endpoints from actual transmissions and cached arrivals. Unavailable endpoints produce an absent result. The snapshot must not retain transmission, arrival, or radio pointers. Communication caches must implement the const ``findCachedArrival()`` query without insertion or other mutation.
+
+``SignalTimeInd`` now carries the medium's transmission identifier. The receiver supplies this local indication when it accepts a transmission. Consumers can associate later frame delivery with the corresponding physical timing evidence. The identifier is local metadata; it adds no transmitted field.
+
+IEEE 802.11 signal extension
+---------------------------
+
+Custom IEEE 802.11 modes must implement ``getSignalExtensionTime()``. ``Ieee80211ModeBase`` supplies zero. ERP and 2.4 GHz HT modes supply their six-microsecond extension. HT duration now includes that extension, which can change airtime and simulation results. The transmission query derives the actual extension from its waveform, so consumers must not add the nominal value again.
+
+IEEE 802.11 RIFS permission
+--------------------------
+
+HT Operation now preserves RIFS Mode through management conversion and equality checks. VHT operation clears that permission. The change preserves the received permission for a consumer that checks RIFS relations; it adds no RIFS transmission scheduler.
+
+IEEE 802.11 Block Ack wire producers
+-----------------------------------
+
+The serializer decodes the complete four-bit Type field. Type 0 retains Basic compatibility; Type 2 selects Compressed. Other Types produce invalid input. Basic producers must keep the two low bits of their reserved field zero because those bits overlap Type. The serializer rejects inconsistent Basic objects. Compressed reserved fields write zero; received reserved values do not affect the decoded result.
+
+Compressed producers must supply Fragment Number zero and a 64-bit bitmap. A Compressed Block Ack header chunk contains 28 bytes before FCS. Both BAR profiles occupy 24 bytes with FCS. Keep the corresponding header chunk and trailer lengths consistent. The serializer rejects malformed wire fields before runtime processing.
+
+IEEE 802.11 bounded fragment preparation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Custom ``IFragmentationPolicy`` implementations must implement ``computeBoundedFragmentSizes(frame, maxMpduBytes)``. The bound includes the MAC header and FCS. The result distinguishes an unfragmented frame, a legal fragment partition, and an impossible partition. Each nonfinal fragment must have the same even length. A partition must contain at most sixteen fragments. The existing unbounded operation remains available to non-QoS callers.
+
+Custom ``IOriginatorQosMacDataService`` implementations must implement the fragment preparation, validation, and commitment operations. Preparation retains queued sources and owns all fragment previews. Commitment transfers those exact previews with one sequence identity, one allocation identity, and the source's absolute deadline. For a numbered source, the caller supplies a live source with no local DATA transmission. The caller replaces that source through ``InProgressFrames::replaceWithPreparedFragments()`` after commitment succeeds.
+
+A fragment preparation can report an unfragmented or impossible partition without fragment previews. The caller must check its status before commitment.
+
+Custom ``IAckHandler`` implementations must expose ``dropFrame()`` through the interface. Both built-in handlers already supply this operation. The committed-frame owner uses it to remove the old ACK entry before fragment replacement.
+
+IEEE 802.11 reversible DATA preparation
+-------------------------------------
+
+Custom QoS data services must implement the reversible preparation operations in ``IOriginatorQosMacDataService``. ``prepareFrame()`` creates an owned preview and retains original MSDUs in their queue. ``isPreparationValid()`` checks current source identity, eligibility, lifetime, sequence state, and aggregation permission. ``commitPreparedFrame()`` transfers the same preview pointer only after successful validation. Failure must preserve the preview and all original queue frames. ``InProgressFrames::adoptPreparedFrame()`` accepts a committed frame without another extraction.
+
+IEEE 802.11 Compressed Block Ack extension points
+------------------------------------------------
+
+HCF defaults to ``mac.hcf.blockAckVariant = "compressed"``. Both endpoints must select the same profile. ADDBA does not negotiate this selector. A valid addressed BAR with the other profile stops the simulation before agreement updates. The diagnostic identifies the peer, TID, local profile, and received profile. Configure the same selectors before a new run.
+
+Compressed agreements require usable local HT support and directional peer HT state. An HT PHY mode alone does not supply that state. Without it, HCF retains Normal Ack DATA. Explicit ``blockAckVariant = "basic"`` retains historical Basic compatibility without that HT requirement. Compressed agreements suppress fragmentation for their peer and TID. Fragmentation outside those agreements retains its existing threshold.
+
+Compressed supports immediate Block Ack only. Keep ``delayedAckPolicySupported = false`` in both agreement policies. HCF rejects either true value during initialization when Compressed support is enabled. Basic retains its existing delayed-policy configuration contract.
+
+Custom QoS rate selectors must implement ``computeCompressedBlockAckReqMode(packet, header, startsTxop)``. HCF supplies the request's actual position in the TXOP. Select a legal non-HT mode from the applicable BSS or peer rates. A configured ``controlFrameBitrate`` must satisfy that rule. The existing Basic rate-selection methods remain available.
+
+Custom recipient ACK policies must implement ``computeCompressedBlockAckDurationField()``. This operation subtracts SIFS and the actual Compressed response airtime from the request reservation. Compressed Block Ack contains 32 bytes with FCS; Basic contains 152 bytes. Retain the existing Basic operation.
+
+Custom recipient data services must accept ``bool interframe = false`` in ``dataFrameReceived()``. The value states whether HCF established the required SIFS or RIFS relation. A false value supplies no interval evidence. Preserve that value through the recipient reorder path. Custom callers that omit it retain false.
+
+Custom frame sequences must supply HCF's resolved profile to ``QoSContext``. Its constructor retains Basic for callers that omit the profile. Custom agreement creation must set the recipient agreement's variant before use. An agreement must retain that variant throughout its lifetime.
+
+Custom frame sequences must preserve BAR arbitration before DATA preparation. The HCF preparation callback distinguishes the legacy path, accepted preparation, and admission refusal. Refusal must end the sequence without a DATA failure. Keep the selected DATA mode through RTS/CTS. Validate that decision without another adaptive rate query. Admit the complete exchange before source removal.
+
+The active Compressed path reserves only the current exchange under single protection. A later BAR can require fresh contention. Before DATA commitment, failed RTS updates QSRC and the contention window without a provisional sequence counter. QSRC is the short retry counter for an access category. QSRC rollover does not discard queued DATA. Original lifetimes bound repeated RTS attempts.
+
+Basic and outside-agreement fallback retain their existing preparation and recovery paths.
+
+IEEE 802.11 Basic Block Ack extension points
+------------------------------------------
+
+HCF previews the next eligible DATA before BAR selection. Preview must preserve queue ownership and the next sequence number. Custom QoS data services must implement ``IOriginatorQosMacDataService``. This contract extends ``IOriginatorMacDataService`` with ``peekEligibleFrame()``, ``getNextSequenceNumber()``, and ``hasAMsduAggregation()``.
+
+Basic single protection reserves only an already prepared successor. HCF ends the TXOP before further DATA extraction. A queued unit can change size or require agreement setup before transmission. Custom frame sequences must preserve this boundary when they use the same forecast.
+
+Custom QoS ACK policies must add ``IOriginatorBlockAckAgreementHandler *agreements`` to ``isBlockAckReqNeeded()`` and ``computeBlockAckReqParameters()``. The argument supplies current agreement windows. Policies must keep peer and TID identities separate. The supplied policy can request BAR without a DATA candidate.
+
+Callers must supply the agreement handler explicitly through both the interface and concrete policy types. An omitted argument fails compilation. Pass ``nullptr`` explicitly when no agreement handler is available; the supplied policy then requests no BAR. Custom overrides must also require the argument.
+
+Calls to ``QosAckHandler::processTransmittedBlockAckReq()`` must supply the originator agreement explicitly. The agreement restricts processing to the negotiated window. An explicit ``nullptr`` retains bitmap-only coverage without that restriction. Production HCF always supplies the active agreement.
+
+Custom ``InProgressFrames`` classes must add ``bool extract = true`` to their ``getPendingFrameFor()`` override. When ``extract`` is false, the method must return a borrowed candidate without extraction or sequence assignment. The default value preserves ordinary extraction. Custom candidate sources must also implement ``peekFrameToTransmit()`` without extraction.
+
 TCP Algorithms
 --------------
 
@@ -157,6 +286,51 @@ Replace explicit ``BlockAckReordering::ReorderBuffer`` result declarations with 
 The protected ``getEarliestCompleteMsduOrAMsduIfExists()`` helper remains available for one release but is deprecated. It retains its lookup behavior for external subclasses and returns fragments owned by the receive buffer. The helper does not remove frames or transfer ownership. Its returned pointers remain valid only while the buffer retains those fragments. For delivery, consume the ordered ``ReleasedFrames`` results from ``processReceivedQoSFrame()`` or ``processReceivedBlockAckReq()``. These methods remove complete units from storage and transfer their ownership to the caller.
 
 No configuration change is necessary. Gap release, window movement, and BAR before DATA can change delivery times and fingerprints in affected Basic Block Ack scenarios. These repairs do not enable Compressed Block Ack.
+
+IEEE 802.11 Block Ack Agreement Lifecycle
+------------------------------------------
+
+HCF now defers new DATA extraction for a peer and TID during Block Ack setup or recovery. Already numbered DATA resolves before HCF creates ADDBA. The first DATA under an accepted agreement therefore retains the request sequence number. Both supported profiles use this lifecycle contract.
+
+The recipient response now determines the buffer size and inactivity timeout. The built-in recipient selects the smaller of 64 and its configured maximum. A request size of zero supplies no size guidance. The response copies the request dialog token. Both negotiated A-MSDU flags must permit aggregation under an active agreement.
+
+The originator starts ``mac.hcf.originatorBlockAckAgreementPolicy.addbaFailureTimeout`` after the request receives its ACK. Its default is 100 ms. The value must be positive and finite.
+
+If the response does not arrive, HCF sends DELBA before it releases surviving unsent DATA. DATA lifetime separately limits retained DATA. Failed DELBA disposes of the current deferred batch. Later DATA starts one fresh recovery exchange.
+
+At ordinary teardown, the originator discards every transmitted, unacknowledged MPDU for the selected agreement. This includes DATA whose lifetime remains valid when inactivity expires. It also discards unsent fragments through the highest transmitted allocation index, even if an earlier fragment received an ACK. This local index records allocation order before fragmentation. Later unsent DATA retains sequence continuity.
+
+For example, fragment 0 of sequence 4095 enters transmission before teardown. Teardown discards its unsent fragments and preserves the intact successor with sequence 0. The recipient delivers complete buffered units in cyclic order before it releases resources. It discards incomplete units. For example, complete units 101 and 102 can reach the upper process after teardown across absent unit 100.
+
+Custom originator code must call ``recordTransmittedData(allocationIndex)`` instead of ``markFirstDataTransmitted()`` or the former cyclic-sequence overload. The QoS data service assigns an increasing local index before fragmentation. All fragments retain this index in ``Ieee80211DataSequenceTag``. Custom QoS data services must supply the same metadata. The agreement exposes its highest transmitted index through ``getHighestTransmittedDataIndex()``, which replaces ``getHighestTransmittedSequence()``. HCF records this index when the transmitter accepts DATA.
+
+The index remains available after ACK processing removes a frame. Teardown compares allocation indices to remove unsent fragments of a partially transmitted unit. This comparison remains valid across sequence gaps and wraparound. For example, transmission of sequences 0 and 2048 updates the boundary correctly when intervening DATA receives allocation indices but never transmits. Retransmission of older DATA cannot move the boundary backward.
+
+Association reset instead discards all buffered units from the old association. Management calls ``IBlockAckAgreementLifecycle::resetPeerAgreements()`` with the old peer address before replacement. The MAC implements this contract and forwards the reset to HCF. Custom management implementations must supply this handoff for association replacement and loss. A rate-state notification alone cannot identify replacement with identical capabilities.
+
+With Block Ack support enabled, peer reset also discards queued and in-progress QoS DATA addressed to the old peer. This includes unsent Normal Ack DATA without an agreement. Accepted physical exchanges retain their context until safe completion. Reset preserves other peers' queued DATA and lifetime records.
+
+Custom MAC implementations that use these management modules must implement ``IBlockAckAgreementLifecycle``. The reset must complete both agreement roles' cleanup before it reports deletion. It must preserve an unrelated management exchange that already holds an accepted transmission.
+
+``blockAckAgreementDeleted`` now supplies a nonnull agreement after removal from lookup and completion of the required cleanup. The payload identifies the selected role through its agreement class. The payload remains valid only during the synchronous callback. Listeners must not retain or modify it. Association reset removes both roles before the first callback. Ordinary directional teardown preserves the opposite role.
+
+Custom QoS recipient services must return accepted, complete Actions from ``managementFrameReceived()``. HCF owns their agreement dispatch after duplicate checks. Services must implement directional retirement and peer cleanup through the recipient-service contract. Custom agreement policies must implement ``isProfileAllowed()`` with the supplied typed profile and usable capability inputs. Basic admission must preserve its historical non-HT compatibility.
+
+Custom agreement handlers must implement the new procedure and retirement operations in their handler contracts. The originator handler owns setup intent, request identity, response deadlines, teardown, and recovery state. Its ``noteEligibleDataTransmission(peer, tid)`` operation records ``WAITING_FOR_SUCCESSOR`` after an eligible DATA transmission. This phase permits ordinary DATA access and has no request or deadline. A later queued successor promotes the phase to setup intent before extraction. Peer reset clears the phase.
+
+The recipient handler owns its active agreements and pending teardown. Detachment removes an agreement from lookup and transfers it to the caller. The caller retains the object through its deletion callback. Const observations expose current state without a second agreement store.
+
+Custom implementations of ``IBlockAckAgreementHandlerCallback`` must implement ``scheduleInactivityTimer()`` without a deadline argument. Agreement handlers request recomputation after their state changes. HCF queries both roles and schedules their earliest absolute deadline. It cancels the timer when neither role has a finite deadline. Custom callers must remove the old deadline argument.
+
+Custom subclasses of ``OriginatorQosMacDataService`` must adapt the protected ``aMsduAggregateIfNeeded(queue, selected)`` helper. The selected packet is the first eligible packet in service order. An aggregate candidate list must start with that packet. The service validates every candidate before source removal and calls the aggregation policy once.
+
+Custom queues need ``inet::queueing::ISelectivePacketCollection`` only when a deferred next frame hides eligible work. HCF retains ordinary dequeue when the advertised next frame is eligible. It waits when every frame is deferred. It reports the missing capability before mutation when eligible work requires a bypass.
+
+The optional ``peekEligiblePacket(predicate)`` operation returns a borrowed packet in configured service order without mutation. ``extractPacket(packet)`` transfers that exact packet to its caller. Implementations must preserve their ordinary pull effects, including ownership, residence metadata, events, statistics, and applicable animation. Built-in simple queues, priority schedulers, and compound queues support this contract. Custom subclasses that change pull effects must adapt selected extraction. The optional contract supports complete packets only.
+
+Providers that cannot perform a selected operation must throw ``inet::queueing::UnsupportedPacketSelection``. This exception permits ordinary service and collection inspection without the optional capability. Genuine queue and predicate errors must retain their original type.
+
+External frame-sequence handlers must implement ``interruptFrameSequence()``. The handler owns the interruption outcome after recipient processing. It suppresses failure feedback when the transmitted DATA or management frame no longer belongs to the in-progress queue. Other exchanges retain ordinary failure feedback. Cleanup must destroy the exchange context before it deletes deferred frame copies. These repairs do not add MAC stop/start recovery or final-transfer teardown.
 
 IEEE 802.11 Response Query Roles
 --------------------------------

@@ -10,6 +10,7 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorBlockAckAgreementHandler.h"
 #include "inet/linklayer/ieee80211/mac/originator/TxopProcedure.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 
@@ -20,12 +21,14 @@ class INET_API IOriginatorQoSAckPolicy
 {
   public:
     virtual ~IOriginatorQoSAckPolicy() {}
+    virtual void setProbeEligibility(std::function<bool(InProgressFrames *, Tid)> predicate) = 0;
+    virtual simtime_t getImplicitBlockAckTimeout(const physicallayer::IIeee80211Mode *responseMode) const = 0;
 
     virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const = 0;
     virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const = 0;
-    virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const = 0;
+    virtual bool isBlockAckReqNeeded(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const = 0;
     virtual bool isBlockAckPolicyEligibleFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) const = 0;
-    virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure) const = 0;
+    virtual std::tuple<MacAddress, SequenceNumberCyclic, Tid> computeBlockAckReqParameters(InProgressFrames *inProgressFrames, TxopProcedure *txopProcedure, IOriginatorBlockAckAgreementHandler *agreements) const = 0;
 
     virtual simtime_t getAckTimeout(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) const = 0;
     virtual simtime_t getBlockAckTimeout(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq) const = 0;

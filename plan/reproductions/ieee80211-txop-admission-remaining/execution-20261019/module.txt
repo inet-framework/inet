@@ -1,0 +1,34 @@
+No module named 'py4j': optional inet.common.ide package will not work
+[38;2;200;200;200m[00/31][0;0m ▶ 30 inet-ieee80211-txop-admission-remaining module tests (concurrently)
+[38;2;200;200;200m[01/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211QosRecoveryPeerIdentity_1.test [0;32mPASS[0;0m in 0.912
+[38;2;200;200;200m[02/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeInvalid_3.test [0;32mPASS[0;0m in 1.003
+[38;2;200;200;200m[03/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211BasicCompatibility_1.test [0;32mPASS[0;0m in 1.118
+[38;2;200;200;200m[04/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeInvalid_4.test [0;32mPASS[0;0m in 1.135
+[38;2;200;200;200m[05/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeInvalid_2.test [0;32mPASS[0;0m in 1.348
+[38;2;200;200;200m[06/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211SingleProtectionGroup_1.test [0;32mPASS[0;0m in 1.342
+[38;2;200;200;200m[07/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211CompressedBlockAckAdmission_1.test [0;32mPASS[0;0m in 2.601
+[38;2;200;200;200m[08/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211AmpduPreparation_1.test [0;32mPASS[0;0m in 2.966
+[38;2;200;200;200m[09/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfManagementRecovery_1.test [0;32mPASS[0;0m in 2.992
+[38;2;200;200;200m[10/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeCongestion_1.test [0;32mPASS[0;0m in 1.695
+[38;2;200;200;200m[11/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetime_1.test [0;32mPASS[0;0m in 3.256
+[38;2;200;200;200m[12/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfSingleProtection_1.test [0;32mPASS[0;0m in 3.398
+[38;2;200;200;200m[13/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211TxopMsduRecovery_1.test [0;32mPASS[0;0m in 1.135
+[38;2;200;200;200m[14/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeInvalid_1.test [0;32mPASS[0;0m in 1.025
+[38;2;200;200;200m[15/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeAggregation_1.test [0;32mPASS[0;0m in 1.585
+[38;2;200;200;200m[16/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211PreparedQosFragments_1.test [0;32mPASS[0;0m in 1.147
+[38;2;200;200;200m[17/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfInternalCollision_1.test [0;32mPASS[0;0m in 1.251
+[38;2;200;200;200m[18/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfMultipleProtection_1.test [0;32mPASS[0;0m in 3.47
+[38;2;200;200;200m[19/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211PreparedCancellation_1.test [0;32mPASS[0;0m in 1.148
+[38;2;200;200;200m[20/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeDefaults_1.test [0;32mPASS[0;0m in 1.183
+[38;2;200;200;200m[21/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeArbitration_1.test [0;32mPASS[0;0m in 1.52
+[38;2;200;200;200m[22/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211PreparedQosData_1.test [0;32mPASS[0;0m in 1.312
+[38;2;200;200;200m[23/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211BlockAckFragmentRetirement_1.test [0;32mPASS[0;0m in 4.505
+[38;2;200;200;200m[24/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfMultipleProtection_2.test [0;32mPASS[0;0m in 2.341
+[38;2;200;200;200m[25/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211CompressedBlockAckExchange_1.test [0;32mPASS[0;0m in 8.227
+[38;2;200;200;200m[26/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211AmpduExchange_1.test [0;32mPASS[0;0m in 9.128
+[38;2;200;200;200m[27/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211AmpduRecovery_1.test [0;32mPASS[0;0m in 12.773
+[38;2;200;200;200m[28/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211AmpduAdmission_1.test [0;32mPASS[0;0m in 11.561
+[38;2;200;200;200m[29/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211BlockAckVariant_1.test [0;32mPASS[0;0m in 11.425
+[38;2;200;200;200m[30/31][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211TxopAdmission_1.test [0;32mPASS[0;0m in 24.253
+[38;2;200;200;200m[31/31][0;0m ◉ 30 inet-ieee80211-txop-admission-remaining module tests (concurrently) Multiple module tests: [0;32m30 PASS[0;0m in 28.693  
+Multiple module test results: [0;32mPASS[0;0m, summary: [0;32m30 PASS[0;0m in 28.693

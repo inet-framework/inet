@@ -12,6 +12,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -104,7 +105,11 @@ bool Rx::lowerFrameReceived(Packet *packet)
     Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
-    bool isFrameOk = isFcsOk(packet);
+    // A failed HT header supplies no decoded Aggregation property. Refuse its container before MAC peeks.
+    // Aggregate containers use the separate member acceptance path.
+    auto aggregate = packet->findTag<Ieee80211AmpduInd>();
+    bool isFrameOk = !(aggregate && (!aggregate->getHeaderSuccessful() || !aggregate->getContentComplete() ||
+            aggregate->getAggregation())) && isFcsOk(packet);
     if (isFrameOk) {
         EV_INFO << "Received frame from PHY: " << packet << endl;
         const auto& header = packet->peekAtFront<Ieee80211MacHeader>();
@@ -122,6 +127,72 @@ bool Rx::lowerFrameReceived(Packet *packet)
             contention->corruptedFrameReceived();
         return false;
     }
+}
+
+AmpduReception Rx::lowerAggregateReceived(Packet *packet)
+{
+    Enter_Method("lowerAggregateReceived");
+    take(packet);
+    AmpduReception result;
+    auto indication = packet->findTag<Ieee80211AmpduInd>();
+    auto topology = std::make_shared<AmpduTopology>();
+    result.topology = topology;
+    if (indication && indication->getHeaderSuccessful() && indication->getAggregation() && indication->getContentComplete()) {
+        auto successful = [indication](int kind, B offset, B length) {
+            for (size_t i = 0; i < indication->getRangesArraySize(); i++) {
+                const auto& range = indication->getRanges(i);
+                if (range.kind == kind && range.offset == offset && range.length == length)
+                    return range.valid && range.successful;
+            }
+            return false;
+        };
+        // IEEE Std 802.11-2024, 9.7.1: a failed delimiter forces four-octet resynchronization.
+        auto layout = inspectMpduAggregate(packet, B(0), B(packet->getDataLength()),
+                [&successful](B offset, B length) { return successful(0, offset, length); });
+        topology->ranges = layout.ranges;
+        topology->length = B(packet->getDataLength());
+        bool first = true;
+        for (const auto& range : layout.ranges) {
+            if (range.kind == MpduRangeKind::DELIMITER) {
+                if (!range.valid)
+                    first = false;
+                continue;
+            }
+            topology->members.push_back({range.offset, {}, first});
+            first = false;
+            auto member = std::make_unique<Packet>(packet->getName());
+            member->insertAtBack(packet->peekDataAt(range.offset, range.length));
+            member->getRegionTags().copyTags(packet->getRegionTags(), packet->getFrontOffset() + range.offset,
+                    member->getFrontOffset(), range.length);
+            member->copyTags(*packet);
+            member->removeTagIfPresent<Ieee80211AmpduInd>();
+            // The member outcome precedes every FCS mode, including declared-correct FCS.
+            member->setBitError(!successful(1, range.offset, range.length));
+            bool correct = range.length >= B(4) && member->hasAtBack<Ieee80211MacTrailer>(B(4)) &&
+                    isFcsOk(member.get()) && member->hasAtFront<Ieee80211MacHeader>();
+            if (!correct) {
+                PacketDropDetails details;
+                details.setReason(INCORRECTLY_RECEIVED);
+                emit(packetDroppedSignal, member.get(), &details);
+                continue;
+            }
+            result.anyCorrect = true;
+            const auto& header = member->peekAtFront<Ieee80211MacHeader>();
+            if (header->getReceiverAddress() != address)
+                setOrExtendNav(header->getDurationField());
+            if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+                if (data->getSequenceNumber().isSpecified())
+                    topology->members.back().sequence = data->getSequenceNumber();
+            }
+            result.members.push_back({std::move(member), range.offset});
+        }
+    }
+    // IEEE Std 802.11-2024, 10.3.2.3.7: any correct MPDU excludes EIFS for this PPDU.
+    if (!result.anyCorrect) {
+        for (auto contention : contentions)
+            contention->corruptedFrameReceived();
+    }
+    return result;
 }
 
 void Rx::frameTransmitted(simtime_t durationField)

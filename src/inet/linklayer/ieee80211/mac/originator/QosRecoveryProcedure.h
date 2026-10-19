@@ -28,8 +28,19 @@ namespace ieee80211 {
  */
 class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProcedure
 {
+  public:
+    enum class MsduRetryContract { IEEE80211_2024, BASIC_2016 };
 
   protected:
+    struct MsduRetryRecord {
+        MsduRetryContract contract;
+        int frameCount = 0;
+        int shortCount = 0;
+        int longCount = 0;
+        bool lifetimeOnly = false;
+    };
+    std::map<int64_t, MsduRetryRecord> msduRetryRecords;
+    MsduRetryRecord *findMsduRetryRecord(Packet *packet);
     ICwCalculator *cwCalculator = nullptr;
 
     using RetryKey = std::pair<MacAddress, std::pair<Tid, SequenceControlField>>;
@@ -61,11 +72,20 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
     bool isMulticastFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
   public:
+    // These operations apply only to allocations that the caller explicitly registers.
+    void registerMsdu(Packet *packet, MsduRetryContract contract, bool lifetimeOnly = false);
+    void msduTransmissionFailed(Packet *packet, bool rts);
+    void msduAckReceived(Packet *packet, bool finalMember);
+    bool isMsduRetryLimitReached(Packet *packet);
+    void retireMsdu(Packet *packet);
+    bool hasMsduRetryRecord(Packet *packet);
+    void implicitBlockAckMemberFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);
     virtual void multicastFrameTransmitted();
 
     virtual void ctsFrameReceived();
     virtual void ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader);
     virtual void blockAckFrameReceived();
+    virtual void controlFrameTransmissionFailed();
 
     virtual void rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataHeader>& protectedHeader);
     virtual void dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader);

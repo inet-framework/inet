@@ -1,0 +1,50 @@
+{
+  "head": "d841dc77db7d0b141bf31e5e215a0de9bb281957",
+  "library_sha256": "36bab27ac268afe81ca4913bf29953ca12e2c10ff9e6c8f47b5ee2209e20c90a",
+  "production_diff_sha256": "5ff7a92152dee57747baf23608c0f0ce9f7c1bcc23e6a6eb0ea771913044477b",
+  "basic_runs": [
+    {
+      "run": 0,
+      "name": "basic-6-single",
+      "invalid_boundaries": 10,
+      "invalid_continuations": 0
+    },
+    {
+      "run": 1,
+      "name": "basic-6-multiple",
+      "invalid_boundaries": 10,
+      "invalid_continuations": 0
+    },
+    {
+      "run": 2,
+      "name": "basic-24-single",
+      "invalid_boundaries": 0,
+      "invalid_continuations": 0
+    },
+    {
+      "run": 3,
+      "name": "basic-24-multiple",
+      "invalid_boundaries": 18,
+      "invalid_continuations": 18
+    }
+  ],
+  "raw_artifacts": {
+    "aarf.txt": "556ecedbf3bfdcf94bacb69ccf2343eeb2fbc2816a0492edca4b3f38b7793845",
+    "admission.txt": "ebcb704e542a1062d20b75711a9cccf8331144fc57ec6813c972a2b66cb77de8",
+    "architecture.txt": "a13a5db7d35fdb39758c6d472c6798b09115edae4a47aa7541cd67aaec3b56a4",
+    "basic-24-multiple.txt": "5da60e08b0b0ba79fa8d5bc29a193d685c8c304432cec4e86005568ebf5a8585",
+    "basic-24-single.txt": "9e17f597420ad0d435e1a5f60800b374f90e2dcd3b94bbdb2343b21a57298477",
+    "basic-6-multiple.txt": "bae64ecc523008c56e2cc23ff886c58bcab03faa5401c5f83be9ac901d9dd7ce",
+    "basic-6-single.txt": "70fc7303939ff2e1266148080eb79519fcc7c68f10f5d7ab3a9ac48c73577039",
+    "build.txt": "877403940c9f5c331b229de107825d9028fee55d75b95ffc7ed8513e00197716",
+    "fingerprints.txt": "6c0aabbf8c5c0a416e2f124ff8f5617096feef131fa86a510a3d673dc6ebfa96",
+    "module.txt": "14a487b9829f3bb2f89dfc5d5c32ade7187b85a3d14451af29cb6900aaa947ca",
+    "normal-ack-2.txt": "1977241414a3ac3764d33b8984935a2bee225389b359ac23a54b4b6a9cab30cd",
+    "normal-ack-3.txt": "156708812c4f9201effe04d247a213109a618bc7abe513816b38d81c1dee6d1b",
+    "normal-ack-6.txt": "4e386b2a12385a99b21137e85d1a88e0cc78c65500bc8fa7124ff20dd3ac8e4b",
+    "normal-ack-7.txt": "4c239adfae357365eb9f1945860f395581747472e7c324673bf46de5554c01e1",
+    "onoe.txt": "11f4d405fa35e6b8908369eccfd6afb1f9ca097e8560e0846dd608e90d6fe2ae",
+    "protocol.txt": "e378df9fe86d120bb950fef6308df6b20714e41a9955621b6a82bcf79d77343f",
+    "unit.txt": "9e5bd762204ed4a47ecd5b0d4d4279568c6dad6ee6ec54557c3224c2ebd6825f"
+  }
+}

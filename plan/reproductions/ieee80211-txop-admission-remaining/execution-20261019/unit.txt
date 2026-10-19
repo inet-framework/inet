@@ -1,0 +1,8 @@
+No module named 'py4j': optional inet.common.ide package will not work
+[38;2;200;200;200m[0/5][0;0m ▶ 4 inet-ieee80211-txop-admission-remaining unit tests (concurrently)
+[38;2;200;200;200m[1/5][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211BoundedFragmentation_1.test [0;32mPASS[0;0m in 0.613
+[38;2;200;200;200m[2/5][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211SingleProtection_1.test [0;32mPASS[0;0m in 0.613
+[38;2;200;200;200m[3/5][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211MultipleProtection_1.test [0;32mPASS[0;0m in 0.615
+[38;2;200;200;200m[4/5][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211TxopProcedure_1.test [0;32mPASS[0;0m in 0.657
+[38;2;200;200;200m[5/5][0;0m ◉ 4 inet-ieee80211-txop-admission-remaining unit tests (concurrently) Multiple unit tests: [0;32m4 PASS[0;0m in 0.699  
+Multiple unit test results: [0;32mPASS[0;0m, summary: [0;32m4 PASS[0;0m in 0.699

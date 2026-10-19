@@ -1,0 +1,207 @@
+%description:
+Check fragment preparation through the production QoS data service, queue, ACK handler, and committed-frame owner.
+Cancellation and stale inputs preserve queued sources and sequence allocation.
+Commitment transfers the preview pointers and preserves group identity, deadlines, and queue service metadata.
+Numbered replacement retains its allocation without a second sequence assignment.
+This fixture does not exercise HCF admission or real transmission.
+
+%extraargs: -r 0..7
+
+%file: PreparedFragments.cc
+#include <iostream>
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/queueing/queue/PacketQueue.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+class FragmentService : public OriginatorQosMacDataService {
+    std::unique_ptr<EdcaTransmitLifetimeHandler> lifetime;
+  protected:
+    void initialize() override {
+        OriginatorQosMacDataService::initialize();
+        lifetime = std::make_unique<EdcaTransmitLifetimeHandler>(1, 1, 1, 1);
+        setLifetimeHandler(lifetime.get(), {});
+    }
+  public:
+    EdcaTransmitLifetimeHandler *getLifetime() { return lifetime.get(); }
+    int64_t allocations() const { return nextDataAllocationIndex; }
+};
+Define_Module(FragmentService);
+
+class FragmentTest : public cSimpleModule {
+    const MacAddress peer{"02:00:00:00:00:02"};
+    FragmentService *service = nullptr;
+    queueing::PacketQueue *queue = nullptr;
+    InProgressFrames *frames = nullptr;
+    QosAckHandler *ack = nullptr;
+    Packet *source = nullptr;
+    Packet *numbered = nullptr;
+    int64_t sourceId = -1;
+    simtime_t deadline;
+    std::unique_ptr<PreparedQosFragments> preparation;
+
+    std::string operation() { return par("operation").stdstringValue(); }
+    Packet *enqueue(const char *name) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setReceiverAddress(peer);
+        header->setTid(0);
+        auto packet = new Packet(name, header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        auto time = packet->addRegionTag<QueueingTimeTag>(header->getChunkLength(), B(100));
+        time->setPacketTotalTimesArraySize(1);
+        time->setPacketTotalTimes(0, SIMTIME_ZERO);
+        packet->setArrivalTime(simTime());
+        queue->enqueuePacket(packet);
+        service->getLifetime()->registerFrame(packet, AC_BE);
+        return packet;
+    }
+    void prepare() {
+        source = enqueue("first");
+        sourceId = source->getId();
+        deadline = service->getLifetime()->getDeadline(source);
+        enqueue("unrelated");
+        if (operation() == "numbered") {
+            auto ordinary = service->prepareFrame(queue, false);
+            numbered = service->commitPreparedFrame(*ordinary);
+            frames->adoptPreparedFrame(numbered);
+        }
+        if (operation() == "prohibited")
+            service->setFragmentationPermission([](Packet *) { return false; });
+        preparation = service->prepareFragments(queue, numbered, operation() == "impossible" ? 31 : 62);
+        if (operation() == "prohibited" || operation() == "impossible") {
+            ASSERT(queue->getNumPackets() == 2 && service->allocations() == 0);
+            ASSERT(operation() == "prohibited" ? !preparation :
+                preparation && preparation->status == FragmentPartitionStatus::IMPOSSIBLE);
+            preparation.reset();
+        }
+        else {
+            ASSERT(preparation && preparation->fragments.size() == 4);
+            ASSERT(queue->getNumPackets() == (numbered ? 1 : 2));
+            ASSERT(service->allocations() == (numbered ? 1 : 0));
+            ASSERT(service->isFragmentPreparationValid(*preparation, numbered, simTime()));
+            for (auto packet : preparation->fragments)
+                ASSERT(packet->getOwner() == preparation.get());
+        }
+        scheduleAt(SimTime(3, SIMTIME_MS), new cMessage("check"));
+    }
+    void check() {
+        if (preparation) {
+            if (operation() == "stale") {
+                queue->removePacket(source);
+                service->getLifetime()->forgetFrame(sourceId);
+                take(source);
+                delete source;
+            }
+            if (operation() == "expired")
+                ASSERT(!service->isFragmentPreparationValid(*preparation, numbered, deadline));
+            if (operation() == "permissionChange")
+                service->setFragmentationPermission([](Packet *) { return false; });
+            if (operation() == "stale" || operation() == "permissionChange") {
+                std::vector<Packet *> result;
+                ASSERT(!service->commitPreparedFragments(*preparation, numbered, result) && result.empty());
+                ASSERT(service->allocations() == 0);
+            }
+            if (operation() == "commit" || operation() == "numbered") {
+                auto pointers = preparation->fragments;
+                std::vector<Packet *> result;
+                ASSERT(service->commitPreparedFragments(*preparation, numbered, result));
+                ASSERT(result == pointers && preparation->fragments.empty());
+                ASSERT(service->allocations() == 1 && service->getNextSequenceNumber(peer, 0) == SequenceNumberCyclic(1));
+                if (numbered)
+                    frames->replaceWithPreparedFragments(numbered, result);
+                else
+                    frames->adoptPreparedFragments(result);
+                ASSERT(frames->getLength() == 4 && queue->getNumPackets() == 1);
+                ASSERT(service->getLifetime()->findFrame(sourceId) == nullptr);
+                ASSERT(!service->isFragmentPreparationValid(*preparation, numbered, simTime()));
+                for (int i = 0; i < 4; i++) {
+                    auto packet = result[i];
+                    auto header = packet->peekAtFront<Ieee80211DataHeader>();
+                    ASSERT(packet->getOwner() == frames && frames->getFrames(0) == packet);
+                    ASSERT(header->getSequenceNumber() == SequenceNumberCyclic(0));
+                    ASSERT(header->getFragmentNumber() == i && header->getMoreFragments() == (i < 3));
+                    ASSERT(packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == 0);
+                    ASSERT(service->getLifetime()->getDeadline(packet) == deadline);
+                    auto length = packet->getDataLength() - header->getChunkLength() - B(4);
+                    ASSERT(length == B(i == 3 ? 4 : 32));
+                    auto time = packet->findRegionTag<QueueingTimeTag>(header->getChunkLength(), length);
+                    ASSERT(time && time->getPacketTotalTimes(0) == (numbered ? SIMTIME_ZERO : SimTime(2, SIMTIME_MS)));
+                    ack->dropFrame(header);
+                    service->getLifetime()->forgetFrame(packet->getId());
+                    frames->dropFrame(packet);
+                }
+                frames->clearDroppedFrames();
+            }
+            preparation.reset();
+        }
+        while (!queue->isEmpty()) {
+            auto packet = queue->getPacket(0);
+            queue->removePacket(packet);
+            service->getLifetime()->forgetFrame(packet->getId());
+            take(packet);
+            delete packet;
+        }
+        ASSERT(service->getLifetime()->getNumFrames() == 0);
+        std::cout << "Prepared fragment assertions passed: " << operation() << ".\n";
+        endSimulation();
+    }
+  protected:
+    void initialize() override {
+        service = check_and_cast<FragmentService *>(getModuleByPath("^.service"));
+        queue = check_and_cast<queueing::PacketQueue *>(getModuleByPath("^.queue"));
+        frames = check_and_cast<InProgressFrames *>(getModuleByPath("^.frames"));
+        ack = check_and_cast<QosAckHandler *>(getModuleByPath("^.ack"));
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("prepare"));
+    }
+    void handleMessage(cMessage *message) override {
+        bool first = message->isName("prepare");
+        delete message;
+        if (first) prepare(); else check();
+    }
+};
+Define_Module(FragmentTest);
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
+import inet.linklayer.ieee80211.mac.originator.QosAckHandler;
+import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
+import inet.queueing.queue.PacketQueue;
+module FragmentService extends OriginatorQosMacDataService { parameters: @class(::FragmentService); }
+simple FragmentTest { parameters: string operation; @class(::FragmentTest); }
+network FragmentNetwork {
+    submodules:
+        service: FragmentService;
+        queue: PacketQueue;
+        ack: QosAckHandler;
+        frames: InProgressFrames {
+            pendingQueueModule = "^.queue";
+            originatorMacDataServiceModule = "^.service";
+            ackHandlerModule = "^.ack";
+        }
+        test: FragmentTest;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = FragmentNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-scalar-results = false
+record-vector-results = false
+*.test.operation = ${"cancel","commit","numbered","stale","expired","prohibited","impossible","permissionChange"}
+*.service.msduAggregationPolicy.typename = ""
+*.service.mpduAggregationPolicy.typename = ""
+*.service.fragmentationPolicy.fragmentationThreshold = 2346B
+
+%contains: stdout
+Prepared fragment assertions passed:

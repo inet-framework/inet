@@ -1,0 +1,242 @@
+%description:
+Check Action reception during the final ADDBA Request ACK wait through initialized Basic HCF. The request uses production contention, transmission, and frame-sequence handling. The fixture supplies the initial request record and injects an incoming Action after transmission. Matching success and rejection must suppress obsolete request failure. Wrong-token and unrelated-Action controls must retain ordinary request failure. The test does not model wireless reception or peer contention.
+
+%extraargs: -r 0..3
+
+%file: ResponseWait.cc
+#include <iostream>
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class ResponseWaitOriginator : public OriginatorBlockAckAgreementHandler {
+  public:
+    void prepare(const Ptr<const Ieee80211AddbaRequest>& request) { createAgreement(request); }
+};
+class ResponseWaitHcf : public Hcf {
+  public:
+    const MacAddress peer = MacAddress("02:00:00:00:00:02");
+    int attempts = 0;
+    int failures = 0;
+    int acknowledgments = 0;
+    int delbas = 0;
+    int linkBreaks = 0;
+    int requestOutcomes = 0;
+    bool injected = false;
+    bool dispatchingAction = false;
+    void begin() {
+        Enter_Method("begin");
+        subscribe(linkBrokenSignal, this);
+        subscribe(Ieee80211Mac::frameTransmissionOutcomeSignal, this);
+        delete originatorBlockAckAgreementHandler;
+        auto handler = new ResponseWaitOriginator();
+        originatorBlockAckAgreementHandler = handler;
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setTransmitterAddress(mac->getAddress());
+        request->setReceiverAddress(peer);
+        request->setTid(5);
+        request->setDialogToken(37);
+        request->setBlockAckPolicy(true);
+        request->setBufferSize(64);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(100));
+        handler->prepare(request);
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setType(ST_DATA_WITH_QOS);
+        data->addChunkLength(QOSCONTROL_PART_LENGTH);
+        data->setTransmitterAddress(mac->getAddress());
+        data->setReceiverAddress(peer);
+        data->setAddress3(peer);
+        data->setTid(5);
+        auto packet = new Packet("deferred-data", data);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, data);
+        Hcf::processMgmtFrame(new Packet("request", request), request);
+    }
+    void verify() {
+        Enter_Method("verify");
+        ASSERT(injected);
+        ASSERT(attempts == 1);
+        ASSERT(acknowledgments == 1);
+        auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, 5);
+        int scenario = par("scenario");
+        if (scenario < 2) {
+            ASSERT(failures == 0);
+            ASSERT(delbas == 0);
+            ASSERT(linkBreaks == 0);
+            ASSERT(requestOutcomes <= 1);
+            ASSERT(!addbaResponseTimer->isScheduled());
+            ASSERT(!startRxTimer->isScheduled());
+            if (scenario == 0) {
+                ASSERT(agreement != nullptr);
+                ASSERT(agreement->getIsAddbaResponseReceived());
+                ASSERT(agreement->getBufferSize() == 32);
+            }
+            else
+                ASSERT(agreement == nullptr || !agreement->getIsAddbaResponseReceived());
+        }
+        else {
+            ASSERT(failures == 1);
+            ASSERT(linkBreaks == 1);
+            ASSERT(requestOutcomes == 1);
+            ASSERT(agreement == nullptr || !agreement->getIsAddbaResponseReceived());
+        }
+        std::cout << "Block Ack response-wait assertions passed.\n";
+        endSimulation();
+    }
+  protected:
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        if (signal == linkBrokenSignal)
+            linkBreaks++;
+        else if (signal == Ieee80211Mac::frameTransmissionOutcomeSignal) {
+            auto packet = check_and_cast<Packet *>(object);
+            if (dynamicPtrCast<const Ieee80211AddbaRequest>(packet->peekAtFront<Ieee80211MacHeader>()))
+                requestOutcomes++;
+        }
+        else
+            Hcf::receiveSignal(source, signal, object, details);
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("injectAction")) {
+            delete message;
+            ASSERT(frameSequenceHandler->isSequenceRunning());
+            ASSERT(frameSequenceHandler->getContext()->getLastStep()->getType() == IFrameSequenceStep::Type::RECEIVE);
+            ASSERT(startRxTimer->isScheduled());
+            int scenario = par("scenario");
+            Ptr<Ieee80211MgmtHeader> header;
+            if (scenario == 3) {
+                auto request = makeShared<Ieee80211AddbaRequest>();
+                request->setTid(6);
+                request->setDialogToken(91);
+                request->setBlockAckPolicy(true);
+                request->setBufferSize(64);
+                header = request;
+            }
+            else {
+                auto response = makeShared<Ieee80211AddbaResponse>();
+                response->setTid(5);
+                response->setDialogToken(scenario == 2 ? 38 : 37);
+                response->setStatusCode(scenario == 1 ? 37 : 0);
+                response->setBlockAckPolicy(true);
+                response->setBufferSize(32);
+                response->setBlockAckTimeoutValue(SIMTIME_ZERO);
+                header = response;
+            }
+            header->setTransmitterAddress(peer);
+            header->setReceiverAddress(mac->getAddress());
+            header->setSequenceNumber(SequenceNumberCyclic(77));
+            auto packet = new Packet("incoming-action", header);
+            packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            injected = true;
+            dispatchingAction = true;
+            processLowerFrame(packet, header);
+            dispatchingAction = false;
+            scheduleAfter(SimTime(1, SIMTIME_NS), new cMessage("verify"));
+        }
+        else if (message->isName("verify")) {
+            delete message;
+            verify();
+        }
+        else
+            Hcf::handleMessage(message);
+    }
+    void originatorProcessTransmittedFrame(Packet *packet) override {
+        auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(packet->peekAtFront<Ieee80211MacHeader>());
+        Hcf::originatorProcessTransmittedFrame(packet);
+        if (request) {
+            attempts++;
+            scheduleAfter(SimTime(100, SIMTIME_US), new cMessage("injectAction"));
+        }
+    }
+    void originatorProcessFailedFrame(Packet *packet) override {
+        if (dynamicPtrCast<const Ieee80211AddbaRequest>(packet->peekAtFront<Ieee80211MacHeader>()))
+            failures++;
+        Hcf::originatorProcessFailedFrame(packet);
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>()))
+            ASSERT(!dispatchingAction);
+        return Hcf::transmitFrame(packet, ifs);
+    }
+    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&,
+            Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        acknowledgments++;
+        delete packet;
+    }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (dynamicPtrCast<const Ieee80211Delba>(header))
+            delbas++;
+        delete packet;
+    }
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto packet : frames) {
+            take(packet);
+            delete packet;
+        }
+    }
+};
+Define_Module(ResponseWaitHcf);
+class ResponseWaitTest : public cSimpleModule {
+  protected:
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("test")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        check_and_cast<ResponseWaitHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"))->begin();
+    }
+};
+Define_Module(ResponseWaitTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module ResponseWaitHcf extends Hcf {
+    parameters:
+        int scenario;
+        @class(::inet::ieee80211::ResponseWaitHcf);
+}
+simple ResponseWaitTest { parameters: @class(::inet::ieee80211::ResponseWaitTest); }
+network ResponseWaitNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: ResponseWaitTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ResponseWaitNetwork
+ned-path = .;../../../../src
+sim-time-limit = 5ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "ResponseWaitHcf"
+**.wlan[*].mac.hcf.scenario = ${0..3}
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.originatorAckPolicy.ackTimeout = 1ms
+**.mgmtAndNonQoSRecoveryProcedure.shortRetryLimit = 1
+**.mgmtAndNonQoSRecoveryProcedure.longRetryLimit = 1
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+
+%contains: stdout
+Block Ack response-wait assertions passed.

@@ -1,0 +1,326 @@
+%description:
+Check malformed input and profile conflicts through initialized HCF.
+Both local profiles receive valid addressed BAR from the opposite profile.
+HCF must stop before receipt, reorder, inactivity, recovery, or response updates.
+Malformed BAR and unaddressed BAR must not cause a profile conflict.
+An active Compressed agreement rejects fragmented DATA before ACK and data-service callbacks.
+A valid Compressed BAR without an agreement requests DELBA. A malformed BAR does not.
+The fixture supplies an accepted agreement. It does not test ADDBA negotiation or wireless reception.
+The separate Compressed exchange fixture tests negotiation and frame exchange.
+
+%extraargs: -r 0..1
+
+%file: CompressedInput.cc
+#include <iostream>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class InputAgreement : public RecipientBlockAckAgreement {
+  public:
+    int refreshes = 0;
+    using RecipientBlockAckAgreement::RecipientBlockAckAgreement;
+    void calculateExpirationTime() override {
+        refreshes++;
+        RecipientBlockAckAgreement::calculateExpirationTime();
+    }
+};
+class InputAgreements : public RecipientBlockAckAgreementHandler {
+  public:
+    int dataUpdates = 0;
+    InputAgreement *accept(MacAddress peer, BlockAckVariant variant) {
+        auto agreement = new InputAgreement(peer, 5, SequenceNumberCyclic(100), 64, SimTime(5, SIMTIME_MS));
+        agreement->setVariant(variant);
+        agreement->addbaResposneSent();
+        blockAckAgreements[{peer, 5}] = agreement;
+        return agreement;
+    }
+    void qosFrameReceived(const Ptr<const Ieee80211DataHeader>& header, IBlockAckAgreementHandlerCallback *callback) override {
+        dataUpdates++;
+        RecipientBlockAckAgreementHandler::qosFrameReceived(header, callback);
+    }
+};
+class InputAckSpy : public IRecipientAckProcedure {
+  public:
+    IRecipientAckProcedure *delegate;
+    int calls = 0;
+    explicit InputAckSpy(IRecipientAckProcedure *delegate) : delegate(delegate) {}
+    ~InputAckSpy() override { delete delegate; }
+    void processReceivedFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header,
+            IRecipientAckPolicy *policy, IProcedureCallback *callback) override {
+        calls++;
+        delegate->processReceivedFrame(packet, header, policy, callback);
+    }
+    void processTransmittedAck(const Ptr<const Ieee80211AckFrame>& header) override {
+        delegate->processTransmittedAck(header);
+    }
+};
+class InputDataSpy : public IRecipientQosMacDataService {
+  public:
+    IRecipientQosMacDataService *delegate = nullptr;
+    int dataCalls = 0;
+    int controlCalls = 0;
+    int retireCalls = 0;
+    std::vector<Packet *> retireAgreement(RecipientBlockAckAgreement *agreement, bool reset) override {
+        retireCalls++;
+        return delegate->retireAgreement(agreement, reset);
+    }
+    void clearPeer(MacAddress peer) override { delegate->clearPeer(peer); }
+    std::vector<Packet *> dataFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& header,
+            IRecipientBlockAckAgreementHandler *agreements, bool interframe = false,
+            const BlockAckReceiveContext *context = nullptr) override {
+        dataCalls++;
+        return delegate->dataFrameReceived(packet, header, agreements, interframe, context);
+    }
+    std::vector<Packet *> controlFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            IRecipientBlockAckAgreementHandler *agreements) override {
+        controlCalls++;
+        return delegate->controlFrameReceived(packet, header, agreements);
+    }
+    std::vector<Packet *> managementFrameReceived(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        return delegate->managementFrameReceived(packet, header);
+    }
+};
+class CompressedInputHcf : public Hcf {
+  protected:
+    InputDataSpy dataSpy;
+    InputAckSpy *ackSpy = nullptr;
+    InputAgreements *agreements = nullptr;
+    InputAgreement *accepted = nullptr;
+    BlockAckVariant localVariant = BlockAckVariant::BASIC;
+    int responses = 0;
+    int deliveries = 0;
+    int delbas = 0;
+    const MacAddress peer = MacAddress("02:00:00:00:00:02");
+    const MacAddress absent = MacAddress("02:00:00:00:00:04");
+    std::vector<bool> receiptSnapshot;
+    simtime_t expirationSnapshot;
+
+    std::vector<bool> receipts() {
+        std::vector<bool> result;
+        auto record = accepted->getBlockAckRecord();
+        for (int sequence = 100; sequence < 164; sequence++) {
+            if (localVariant == BlockAckVariant::COMPRESSED)
+                result.push_back(record->hasCompleteReceipt(SequenceNumberCyclic(sequence)));
+            else
+                for (int fragment = 0; fragment < 16; fragment++)
+                    result.push_back(record->getAckState(SequenceNumberCyclic(sequence), fragment));
+        }
+        return result;
+    }
+    void unchanged() {
+        ASSERT(agreements->getAgreement(5, peer) == accepted);
+        ASSERT(!agreements->isTeardownPending(peer, 5));
+        ASSERT(accepted->refreshes == 0);
+        ASSERT(accepted->getExpirationTime() == expirationSnapshot);
+        ASSERT(accepted->getHighestReceivedSequence() == SequenceNumberCyclic(100));
+        ASSERT(receipts() == receiptSnapshot);
+        if (localVariant == BlockAckVariant::COMPRESSED)
+            ASSERT(accepted->getBlockAckRecord()->getWindowStart() == SequenceNumberCyclic(100));
+        ASSERT(inactivityTimer->isScheduled());
+        ASSERT(inactivityTimer->getArrivalTime() == expirationSnapshot);
+        ASSERT(agreements->dataUpdates == 0);
+        ASSERT(dataSpy.dataCalls == 0 && dataSpy.controlCalls == 0 && dataSpy.retireCalls == 0);
+        ASSERT(ackSpy->calls == 0);
+        ASSERT(responses == 0 && deliveries == 0 && delbas == 0);
+    }
+    Ptr<Ieee80211BlockAckReq> makeBar(bool compressed, MacAddress transmitter, bool addressed,
+            int fragment = 0, bool unsupported = false) {
+        Ptr<Ieee80211BlockAckReq> bar;
+        if (unsupported)
+            bar = makeShared<Ieee80211MultiTidBlockAckReq>();
+        else if (compressed) {
+            auto concrete = makeShared<Ieee80211CompressedBlockAckReq>();
+            concrete->setTidInfo(5);
+            concrete->setFragmentNumber(fragment);
+            concrete->setStartingSequenceNumber(SequenceNumberCyclic(101));
+            bar = concrete;
+        }
+        else {
+            auto concrete = makeShared<Ieee80211BasicBlockAckReq>();
+            concrete->setTidInfo(5);
+            concrete->setFragmentNumber(fragment);
+            concrete->setStartingSequenceNumber(SequenceNumberCyclic(101));
+            bar = concrete;
+        }
+        bar->setTransmitterAddress(transmitter);
+        bar->setReceiverAddress(addressed ? mac->getAddress() : MacAddress("02:00:00:00:00:09"));
+        return bar;
+    }
+    void injectBar(bool compressed, MacAddress transmitter, bool addressed, bool conflict,
+            int fragment = 0, int extraBytes = 0, bool unsupported = false) {
+        auto bar = makeBar(compressed, transmitter, addressed, fragment, unsupported);
+        auto packet = new Packet("bar", bar);
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+        if (extraBytes)
+            packet->insertAtBack(makeShared<ByteCountChunk>(B(extraBytes)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        bool caught = false;
+        try {
+            processLowerFrame(packet, bar);
+        }
+        catch (const cRuntimeError& error) {
+            // processLowerFrame takes the Packet before the exception. This wrapper owns its disposal.
+            take(packet);
+            delete packet;
+            std::string message = error.what();
+            ASSERT(message.find("Block Ack profile conflict at ") == 0);
+            ASSERT(message.find("peer=" + peer.str() + " TID=5") != std::string::npos);
+            ASSERT(message.find(compressed ? "local=basic received=compressed" : "local=compressed received=basic") != std::string::npos);
+            caught = true;
+        }
+        ASSERT(caught == conflict);
+    }
+    void injectFragment(int fragment, bool more, AckPolicy policy) {
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setType(ST_DATA_WITH_QOS);
+        data->addChunkLength(QOSCONTROL_PART_LENGTH);
+        data->setTransmitterAddress(peer);
+        data->setReceiverAddress(mac->getAddress());
+        data->setAddress3(peer);
+        data->setTid(5);
+        data->setAckPolicy(policy);
+        data->setSequenceNumber(SequenceNumberCyclic(101));
+        data->setFragmentNumber(fragment);
+        data->setMoreFragments(more);
+        auto packet = new Packet("fragment", data);
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processLowerFrame(packet, data);
+    }
+    void sendUp(const std::vector<Packet *>& frames) override {
+        deliveries += frames.size();
+        for (auto frame : frames) {
+            take(frame);
+            delete frame;
+        }
+    }
+    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&,
+            Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        responses++;
+        delete packet;
+    }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        auto delba = dynamicPtrCast<const Ieee80211Delba>(header);
+        ASSERT(delba && delba->getReceiverAddress() == absent && delba->getTid() == 5);
+        ASSERT(!delba->getInitiator() && delba->getReasonCode() == 38);
+        delbas++;
+        delete packet;
+    }
+  public:
+    void runChecks() {
+        Enter_Method("runChecks");
+        localVariant = std::string(par("blockAckVariant").stringValue()) == "compressed" ? BlockAckVariant::COMPRESSED : BlockAckVariant::BASIC;
+        delete recipientBlockAckAgreementHandler;
+        agreements = new InputAgreements();
+        recipientBlockAckAgreementHandler = agreements;
+        accepted = agreements->accept(peer, localVariant);
+        ackSpy = new InputAckSpy(recipientAckProcedure);
+        recipientAckProcedure = ackSpy;
+        dataSpy.delegate = recipientDataService;
+        recipientDataService = &dataSpy;
+        auto seed = makeShared<Ieee80211DataHeader>();
+        seed->setAckPolicy(BLOCK_ACK);
+        seed->setSequenceNumber(SequenceNumberCyclic(100));
+        accepted->recordReceived(seed);
+        if (localVariant == BlockAckVariant::COMPRESSED)
+            accepted->getBlockAckRecord()->compressedFrameReceived(seed);
+        else
+            accepted->blockAckPolicyFrameReceived(seed);
+        receiptSnapshot = receipts();
+        expirationSnapshot = accepted->getExpirationTime();
+        scheduleInactivityTimer();
+        unchanged();
+
+        bool oppositeCompressed = localVariant == BlockAckVariant::BASIC;
+        injectBar(oppositeCompressed, peer, true, true);
+        unchanged();
+        injectBar(oppositeCompressed, peer, false, false);
+        unchanged();
+        for (bool compressed : {false, true}) {
+            injectBar(compressed, peer, true, false, 1);
+            unchanged();
+            injectBar(compressed, peer, true, false, 0, 1);
+            unchanged();
+            injectBar(compressed, peer, true, false, 0, 0, true);
+            unchanged();
+            injectBar(compressed, absent, true, false, 1);
+            unchanged();
+            injectBar(compressed, absent, true, false, 0, 1);
+            unchanged();
+        }
+        if (localVariant == BlockAckVariant::COMPRESSED) {
+            for (AckPolicy policy : {NORMAL_ACK, BLOCK_ACK}) {
+                injectFragment(0, true, policy);
+                unchanged();
+                injectFragment(1, false, policy);
+                unchanged();
+            }
+        }
+        injectBar(true, absent, true, false);
+        ASSERT(delbas == 1 && responses == 0 && deliveries == 0);
+        ASSERT(agreements->getAgreement(5, absent) == nullptr);
+        ASSERT(agreements->isTeardownPending(absent, 5));
+        ASSERT(agreements->getAgreement(5, peer) == accepted);
+        ASSERT(receipts() == receiptSnapshot && accepted->refreshes == 0);
+        std::cout << "Compressed Block Ack input assertions passed.\n";
+    }
+};
+Define_Module(CompressedInputHcf);
+class CompressedInputTest : public cSimpleModule {
+  protected:
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("test")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        check_and_cast<CompressedInputHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"))->runChecks();
+        endSimulation();
+    }
+};
+Define_Module(CompressedInputTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module CompressedInputHcf extends Hcf { parameters: @class(::inet::ieee80211::CompressedInputHcf); }
+simple CompressedInputTest { parameters: @class(::inet::ieee80211::CompressedInputTest); }
+network CompressedInputNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: CompressedInputTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = CompressedInputNetwork
+ned-path = .;../../../../src
+sim-time-limit = 2ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "CompressedInputHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = ${"basic", "compressed"}
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+
+%contains: stdout
+Compressed Block Ack input assertions passed.

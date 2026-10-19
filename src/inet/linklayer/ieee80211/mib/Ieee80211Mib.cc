@@ -162,8 +162,10 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
             modeSet->isHtShortGuardIntervalSupported(MHz(20));
     localHtCapabilities.shortGi40 = localHtCapabilities.supportedChannelWidths.count(MHz(40)) != 0 &&
             modeSet->isHtShortGuardIntervalSupported(MHz(40));
+    bool vhtSupported = false;
     for (int index = 0; index < modeSet->getNumModes(); index++) {
         const auto *mode = modeSet->getMode(index);
+        vhtSupported |= mode->getModulationClass() == physicallayer::IIeee80211Mode::ModulationClass::VHT;
         int mcs = mode->getHtMcsIndex();
         if (mcs >= 0 && mcs < 77 && operationalChannelWidths.count(mode->getDataMode()->getBandwidth()) != 0 &&
                 mode->getDataMode()->getNumberOfSpatialStreams() <= operationalHtSpatialStreamLimit)
@@ -186,6 +188,9 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     localHtCapabilities.maxAmpduLengthExponent = par("htMaxAmpduLengthExponent");
     if (localHtCapabilities.maxAmpduLengthExponent < 0 || localHtCapabilities.maxAmpduLengthExponent > 3)
         throw cRuntimeError("htMaxAmpduLengthExponent must be between 0 and 3");
+    localHtCapabilities.minimumMpduStartSpacing = par("htMinimumMpduStartSpacing");
+    if (localHtCapabilities.minimumMpduStartSpacing < 0 || localHtCapabilities.minimumMpduStartSpacing > 7)
+        throw cRuntimeError("htMinimumMpduStartSpacing must be between 0 and 7");
 
     configuredSecondaryChannelOffset = par("htSecondaryChannelOffset");
     if (configuredSecondaryChannelOffset != 0 && configuredSecondaryChannelOffset != 1 && configuredSecondaryChannelOffset != 3)
@@ -199,6 +204,10 @@ void Ieee80211Mib::updateLocalHtCapabilities(const physicallayer::Ieee80211ModeS
     if (protectionMode < 0 || protectionMode > 3)
         throw cRuntimeError("htProtectionMode must be between 0 and 3");
     htOperation.protectionMode = static_cast<Ieee80211HtProtectionMode>(protectionMode);
+    // IEEE Std 802.11-2024, 10.27.3.3: the protected modes permit the conservative zero policy.
+    // IEEE Std 802.11-2024, 11.38.1: a VHT AP advertises zero.
+    htOperation.rifsMode = !vhtSupported && (htOperation.protectionMode == Ieee80211HtProtectionMode::NO_PROTECTION ||
+        htOperation.protectionMode == Ieee80211HtProtectionMode::TWENTY_MHZ_PROTECTION);
     bool peerStateChanged = false;
     for (auto& entry : peerHtStates) {
         if (entry.second.valid) {

@@ -1,0 +1,373 @@
+%description:
+Production association establishes HT limits before two aggregate DATA hops.
+The source sends sixty UDP payloads through an AP to a second station.
+The fixture checks actual member FCS, shared addresses and Duration, policy bits, and implicit responses.
+The matrix varies scalar or dimensional PHY, NIST or Yans, protection, and TXOP limit.
+All cases use seed zero and fixed HT20 long-GI DATA rates.
+
+%extraargs: -r 0..15
+
+%postrun-command: python3 check-exchange.py
+
+%file: Exchange.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/common/checksum/Checksum.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregationUtils.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class AmpduExchangeLossModel : public Ieee80211NistErrorModel
+{
+    mutable std::map<int, bool> losses;
+    mutable int implicitResponses = 0;
+    mutable int probeResponses = 0;
+    mutable int partialTransmission = -1;
+    mutable int partialMembers = 0;
+  public:
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override {
+        auto transmission = snir->getReception()->getTransmission();
+        auto packet = transmission->getPacket();
+        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto ht = dynamicPtrCast<const Ieee80211HtPhyHeader>(phy);
+        if (ht && ht->getAggregation())
+            return 0;
+        auto header = packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength());
+        if (header->getType() != ST_BLOCKACK || par("lossMode").intValue() == 0)
+            return 0;
+        auto id = transmission->getId();
+        auto found = losses.find(id);
+        if (found == losses.end()) {
+            bool implicit = strstr(packet->getName(), "Implicit") != nullptr;
+            bool lose = implicit ? implicitResponses++ == 0 :
+                implicitResponses > 0 && par("lossMode").intValue() == 2 && probeResponses++ == 0;
+            found = losses.emplace(id, lose).first;
+        }
+        return found->second ? 1 : 0;
+    }
+    double computeAmpduRangeSuccessRate(const ISnir *snir, const IIeee80211Mode *, B length) const override {
+        if (par("lossMode").intValue() != 3 || length == B(4))
+            return 1;
+        auto id = snir->getReception()->getTransmission()->getId();
+        if (partialTransmission == -1)
+            partialTransmission = id;
+        return id == partialTransmission && partialMembers++ == 0 ? 0 : 1;
+    }
+};
+Define_Module(AmpduExchangeLossModel);
+
+class AmpduExchangeHcf : public Hcf
+{
+  public:
+    int aggregates = 0;
+    int members = 0;
+    int responses = 0;
+    int positive = 0;
+    int responsesSent = 0;
+    int acceptedDialogs = 0;
+    int failedImplicit = 0;
+    int probes = 0;
+    int dataAfterProbe = 0;
+    int barsSinceData = 0;
+    bool awaitProbe = false;
+    int attemptOutcomes = 0;
+    int retryBatches = 0;
+    int mixedBatches = 0;
+    std::map<int64_t, simtime_t> deadlines;
+    static bool isAggregate(Packet *packet) {
+        return dynamicPtrCast<const Ieee80211MpduSubframeHeader>(packet->peekAtFront<Chunk>()) != nullptr;
+    }
+  protected:
+    void initialize(int stage) override {
+        Hcf::initialize(stage);
+        if (stage == INITSTAGE_LOCAL)
+            subscribe(Ieee80211Mac::frameTransmissionOutcomeSignal, this);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        if (signal == Ieee80211Mac::frameTransmissionOutcomeSignal) {
+            auto packet = check_and_cast<Packet *>(object);
+            if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Chunk>()))
+                attemptOutcomes++;
+        }
+        else
+            Hcf::receiveSignal(source, signal, object, details);
+    }
+    void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        if (isAggregate(packet)) {
+            auto prepared = frameSequenceHandler->getContext()->getQoSContext()->preparedData.get();
+            bool newMember = false;
+            bool retryMember = false;
+            int previousRetry = -1;
+            int previousNew = -1;
+            for (auto member : prepared->batch->members) {
+                auto data = member->peekAtFront<Ieee80211DataHeader>();
+                int offset = OriginatorBlockAckAgreement::computeSequenceDistance(prepared->limits.windowStart, data->getSequenceNumber());
+                if (data->getRetry()) {
+                    ASSERT(!newMember && offset > previousRetry);
+                    previousRetry = offset;
+                    retryMember = true;
+                }
+                else {
+                    ASSERT(offset > previousNew);
+                    previousNew = offset;
+                    newMember = true;
+                }
+                auto index = member->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+                auto deadline = edca->getLifetimeHandler()->getDeadline(member);
+                auto previous = deadlines.find(index);
+                if (previous != deadlines.end())
+                    ASSERT(previous->second == deadline);
+                else
+                    deadlines.emplace(index, deadline);
+            }
+            retryBatches += retryMember;
+            mixedBatches += retryMember && newMember;
+            if (probes > 0)
+                dataAfterProbe++;
+            barsSinceData = 0;
+            auto mode = packet->getTag<Ieee80211ModeReq>()->getMode();
+            ASSERT(mode->getHtMcsIndex() >= 0 && !mode->isHtShortGuardInterval());
+            ASSERT(mode->getDataMode()->getBandwidth() == MHz(20));
+            auto layout = inspectMpduAggregate(packet, B(0), B(packet->getDataLength()));
+            ASSERT(layout.complete);
+            MacAddress receiver, transmitter;
+            Tid tid = -1;
+            simtime_t duration = -1;
+            int count = 0;
+            for (const auto& range : layout.ranges) {
+                ASSERT(range.valid);
+                if (range.kind != MpduRangeKind::MPDU)
+                    continue;
+                Packet member("observed-member", packet->peekDataAt(range.offset, range.length));
+                auto data = member.peekAtFront<Ieee80211DataHeader>();
+                ASSERT(data->getType() == ST_DATA_WITH_QOS && data->getAckPolicy() == NORMAL_ACK);
+                ASSERT(!data->getAMsduPresent() && !data->getMoreFragments() && data->getFragmentNumber() == 0);
+                if (count == 0) {
+                    receiver = data->getReceiverAddress();
+                    transmitter = data->getTransmitterAddress();
+                    tid = data->getTid();
+                    duration = data->getDurationField();
+                }
+                ASSERT(data->getReceiverAddress() == receiver && data->getTransmitterAddress() == transmitter);
+                ASSERT(data->getTid() == tid && data->getDurationField() == duration);
+                auto trailer = member.removeAtBack<Ieee80211MacTrailer>(B(4));
+                ASSERT(trailer->getFcsMode() == FCS_COMPUTED);
+                auto bytes = member.peekAllAsBytes()->getBytes();
+                ASSERT(ethernetFcs(bytes.data(), bytes.size()) == trailer->getFcs());
+                count++;
+            }
+            ASSERT(count > 0 && count <= 64);
+            ASSERT(mib->findPeerHtState(receiver) && mib->findPeerHtState(receiver)->valid);
+            aggregates++;
+            members += count;
+        }
+        else if (header && dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(header) && awaitProbe) {
+            ASSERT(++barsSinceData == 1);
+            if (par("requireFreshProbe").boolValue())
+                ASSERT(!edca->getChannelOwner()->getPendingQueue()->isEmpty());
+            probes++;
+            awaitProbe = false;
+        }
+        Hcf::transmissionComplete(packet, header);
+    }
+    void originatorProcessFailedFrame(Packet *packet) override {
+        if (isAggregate(packet)) {
+            failedImplicit++;
+            awaitProbe = true;
+        }
+        Hcf::originatorProcessFailedFrame(packet);
+    }
+    void originatorProcessReceivedFrame(Packet *received, Packet *transmitted) override {
+        if (isAggregate(transmitted)) {
+            auto blockAck = received->peekAtFront<Ieee80211CompressedBlockAck>();
+            ASSERT(received->getDataLength() == LENGTH_COMPRESSED_BLOCKACK);
+            ASSERT(blockAck->getReceiverAddress() == mib->address);
+            responses++;
+            positive += blockAck->getBlockAckBitmap() != BitVector(0, 64);
+        }
+        Hcf::originatorProcessReceivedFrame(received, transmitted);
+    }
+    void recipientProcessTransmittedControlResponseFrame(Packet *packet,
+            const Ptr<const Ieee80211MacHeader>& header) override {
+        if (dynamicPtrCast<const Ieee80211CompressedBlockAck>(header)) {
+            auto mode = packet->getTag<Ieee80211ModeReq>()->getMode();
+            ASSERT(mode->getHtMcsIndex() < 0);
+            responsesSent++;
+        }
+        Hcf::recipientProcessTransmittedControlResponseFrame(packet, header);
+    }
+};
+Define_Module(AmpduExchangeHcf);
+
+class AmpduExchangeTest : public cSimpleModule, public cListener
+{
+    int delivered = 0;
+    int bytes = 0;
+  protected:
+    void initialize() override { scheduleAt(SimTime(10, SIMTIME_MS), new cMessage("subscribe")); }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        auto packet = check_and_cast<Packet *>(object);
+        delivered++;
+        bytes += packet->getByteLength();
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("subscribe")) {
+            delete message;
+            getModuleByPath("^.sta2.app[0]")->subscribe(packetReceivedSignal, this);
+            scheduleAt(SimTime(1400, SIMTIME_MS), new cMessage("verify"));
+            return;
+        }
+        delete message;
+        ASSERT(delivered == 60 && bytes == 72000);
+        for (const char *path : {"^.sta1.wlan[0].mac.hcf", "^.ap.wlan[0].mac.hcf"}) {
+            auto hcf = check_and_cast<AmpduExchangeHcf *>(getModuleByPath(path));
+            std::cout << "Aggregate exchange: node=" << path << " aggregates=" << hcf->aggregates
+                << " members=" << hcf->members << " responses=" << hcf->responses
+                << " positive=" << hcf->positive << " probes=" << hcf->probes
+                << " failures=" << hcf->failedImplicit << " dataAfterProbe=" << hcf->dataAfterProbe
+                << " outcomes=" << hcf->attemptOutcomes << " retries=" << hcf->retryBatches
+                << " mixed=" << hcf->mixedBatches << "\n";
+            ASSERT(hcf->aggregates > 0 && hcf->members > hcf->aggregates);
+            ASSERT(hcf->responses > 0 && hcf->positive > 0);
+            ASSERT(hcf->attemptOutcomes == hcf->members);
+            if (par("recovery").boolValue()) {
+                ASSERT(hcf->failedImplicit > 0 && hcf->probes > 0 && hcf->dataAfterProbe > 0);
+            }
+        }
+        if (par("recovery").boolValue()) {
+            auto mode = getModuleByPath("^.sta1.wlan[0].radio.receiver.errorModel")->par("lossMode").intValue();
+            auto source = check_and_cast<AmpduExchangeHcf *>(getModuleByPath("^.sta1.wlan[0].mac.hcf"));
+            if (mode == 2 || mode == 3)
+                ASSERT(source->retryBatches > 0);
+            if (mode == 3)
+                ASSERT(source->mixedBatches > 0);
+        }
+        std::cout << "Implicit aggregate exchange assertions passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(AmpduExchangeTest);
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+module AmpduExchangeHcf extends Hcf { parameters: bool requireFreshProbe = default(false); @class(::AmpduExchangeHcf); }
+module AmpduExchangeLossModel extends Ieee80211NistErrorModel { parameters: int lossMode = default(0); @class(::AmpduExchangeLossModel); }
+simple AmpduExchangeTest { parameters: bool recovery = default(false); @class(::AmpduExchangeTest); }
+network AmpduExchangeNetwork {
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: <default("Ieee80211ScalarRadioMedium")> like IRadioMedium;
+        ap: AccessPoint;
+        sta1: WirelessHost;
+        sta2: WirelessHost;
+        test: AmpduExchangeTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AmpduExchangeNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1.5s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.radioMedium.typename = ${medium="Ieee80211ScalarRadioMedium","Ieee80211DimensionalRadioMedium"}
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.sta1.numApps = 1
+*.sta1.app[0].typename = "UdpBasicApp"
+*.sta1.app[0].destAddresses = "sta2"
+*.sta1.app[0].destPort = 1000
+*.sta1.app[0].messageLength = 1200B
+*.sta1.app[0].startTime = 1s
+*.sta1.app[0].stopTime = 1.00119s
+*.sta1.app[0].sendInterval = 20us
+*.sta2.numApps = 1
+*.sta2.app[0].typename = "UdpSink"
+*.sta2.app[0].localPort = 1000
+*.sta*.ipv4.arp.typename = "GlobalArp"
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].radio.typename = ${radio="Ieee80211ScalarRadio","Ieee80211DimensionalRadio" ! medium}
+**.wlan[*].radio.receiver.errorModel.typename = ${model="Ieee80211NistErrorModel","Ieee80211YansErrorModel"}
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.fcsMode = "computed"
+**.checksumMode = "computed"
+**.wlan[*].classifier.typename = "QosClassifier"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "AmpduExchangeHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 65Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.originatorMacDataService.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.originatorAckPolicy.blockAckReqThreshold = 5
+**.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+**.rtsPolicy.rtsThreshold = 2346B
+**.txopProcedure.protectionMechanism = ${protection="single","multiple"}
+**.txopProcedure.txopLimit = ${limit=0s,4ms}
+**.bandName = "2.4 GHz"
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sta1.mobility.initialX = 0m
+*.ap.mobility.initialX = 5m
+*.sta2.mobility.initialX = 10m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+[Config Recovery]
+constraint = $medium == "Ieee80211ScalarRadioMedium" && $model == "Ieee80211NistErrorModel" && $protection == "multiple" && $limit == 0s
+*.test.recovery = true
+*.sta1.wlan[0].mac.hcf.requireFreshProbe = true
+*.radioMedium.typename = "Ieee80211ScalarRadioMedium"
+**.wlan[*].radio.typename = "Ieee80211ScalarRadio"
+**.wlan[*].radio.receiver.errorModel.typename = "AmpduExchangeLossModel"
+**.wlan[*].radio.receiver.errorModel.lossMode = ${loss=1,2,3}
+**.txopProcedure.txopLimit = 0s
+**.txopProcedure.protectionMechanism = "multiple"
+
+%file: check-exchange.py
+from pathlib import Path
+import os
+import subprocess
+
+text = Path("test.out").read_text()
+assert "Run statistics: total 16, successful 16" in text
+assert "Warning:" not in text
+executables = [path for path in Path.cwd().glob("Ieee80211AmpduExchange_1*") if path.is_file() and os.access(path, os.X_OK)]
+assert len(executables) == 1, executables
+command = [str(executables[0]), "-u", "Cmdenv", "--check-signals=false", "-n", "../../../../src:.:../../lib", "omnetpp.ini", "_defaults.ini", "-c", "Recovery", "-r", "0..2"]
+result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+Path("recovery.out").write_text(result.stdout)
+assert result.returncode == 0, result.stdout
+assert "Run statistics: total 3, successful 3" in result.stdout
+assert "Warning:" not in result.stdout
+print("Sixteen infrastructure cases and three response-loss recovery cases passed.")
+
+%contains: stdout
+Implicit aggregate exchange assertions passed.

@@ -23,6 +23,7 @@ inline Ieee80211HtCapabilitiesElement makeHtCapabilitiesElement(const Ieee80211H
     element.shortGi20 = capabilities.shortGi20;
     element.shortGi40 = capabilities.shortGi40;
     element.maxAmpduLengthExponent = capabilities.maxAmpduLengthExponent;
+    element.minimumMpduStartSpacing = capabilities.minimumMpduStartSpacing;
     for (int i = 0; i < 77; i++)
         element.rxMcsSupported[i] = capabilities.rxMcsSupported[i];
     element.txMcsSetDefined = capabilities.txMcsSetDefined;
@@ -46,6 +47,8 @@ inline Ieee80211HtCapabilities makeHtCapabilities(const Ieee80211HtCapabilitiesE
 {
     if (element.maxAmpduLengthExponent < 0 || element.maxAmpduLengthExponent > 3)
         throw cRuntimeError("Invalid Maximum A-MPDU Length Exponent: %d", element.maxAmpduLengthExponent);
+    if (element.minimumMpduStartSpacing < 0 || element.minimumMpduStartSpacing > 7)
+        throw cRuntimeError("Invalid Minimum MPDU Start Spacing: %d", element.minimumMpduStartSpacing);
     if (!element.txMcsSetDefined && (element.txRxMcsSetNotEqual || element.txMaxNss != 0 || element.txUnequalModulation))
         throw cRuntimeError("Malformed undefined HT Tx MCS Set");
     if (element.txMcsSetDefined && !element.txRxMcsSetNotEqual &&
@@ -63,6 +66,7 @@ inline Ieee80211HtCapabilities makeHtCapabilities(const Ieee80211HtCapabilitiesE
     capabilities.shortGi20 = element.shortGi20;
     capabilities.shortGi40 = element.shortGi40;
     capabilities.maxAmpduLengthExponent = element.maxAmpduLengthExponent;
+    capabilities.minimumMpduStartSpacing = element.minimumMpduStartSpacing;
     capabilities.txMcsSetDefined = element.txMcsSetDefined;
     capabilities.txRxMcsSetNotEqual = element.txRxMcsSetNotEqual;
     capabilities.txMaxNss = element.txMaxNss;
@@ -101,6 +105,7 @@ inline Ieee80211HtOperationElement makeHtOperationElement(const physicallayer::I
     element.secondaryChannelOffset = operation.secondaryChannelOffset;
     element.staChannelWidth40Mhz = operation.operatingChannelWidth == MHz(40);
     element.protectionMode = static_cast<int>(operation.protectionMode);
+    element.rifsMode = operation.rifsMode;
     for (int i = 0; i < 77; i++)
         element.basicMcsSupported[i] = operation.basicMcsSupported[i];
     return element;
@@ -119,6 +124,7 @@ inline Ieee80211HtOperation makeHtOperation(const physicallayer::IIeee80211Band 
     operation.secondaryChannelOffset = element.secondaryChannelOffset;
     operation.operatingChannelWidth = element.staChannelWidth40Mhz ? MHz(40) : MHz(20);
     operation.protectionMode = static_cast<Ieee80211HtProtectionMode>(element.protectionMode);
+    operation.rifsMode = element.rifsMode;
     for (int i = 0; i < 77; i++)
         operation.basicMcsSupported[i] = element.basicMcsSupported[i];
     return operation;

@@ -1,0 +1,124 @@
+%description:
+Production simplified management preserves all four HT length exponents and eight spacing encodings.
+Opposite receiver limits must reach the local transmit direction.
+Peer cleanup must remove the old limits before a replacement peer state arrives.
+The separate full association fixture checks management frame exchange.
+
+%extraargs: -r 0..31
+
+%file: AmpduCapabilities.cc
+#include <iostream>
+#include "inet/common/InitStages.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class AmpduCapabilities : public cSimpleModule
+{
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage != INITSTAGE_LAST)
+            return;
+        auto ap = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        auto sta = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        ASSERT(ap->findPeerHtState(sta->address) != nullptr);
+        ASSERT(sta->findPeerHtState(ap->address) != nullptr);
+        const auto& tx = sta->findPeerHtState(ap->address)->negotiatedCapabilities.localTxPeerRx;
+        const auto& rx = sta->findPeerHtState(ap->address)->negotiatedCapabilities.localRxPeerTx;
+        ASSERT(tx.receiverMinimumMpduStartSpacing == ap->par("htMinimumMpduStartSpacing").intValue());
+        ASSERT(rx.receiverMinimumMpduStartSpacing == sta->par("htMinimumMpduStartSpacing").intValue());
+        ASSERT(tx.receiverMaxAmpduLengthExponent == ap->par("htMaxAmpduLengthExponent").intValue());
+        ASSERT(rx.receiverMaxAmpduLengthExponent == sta->par("htMaxAmpduLengthExponent").intValue());
+        Packet first("first", makeShared<BytesChunk>(std::vector<uint8_t>(30, 0)));
+        Packet second("second", makeShared<BytesChunk>(std::vector<uint8_t>(30, 0)));
+        std::vector<Packet *> sources = {&first, &second};
+        const physicallayer::IIeee80211Mode *mode = nullptr;
+        auto modes = physicallayer::Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto candidate = modes->getMode(i);
+            if (candidate->getHtMcsIndex() == 7 && !candidate->isHtShortGuardInterval() &&
+                    candidate->getDataMode()->getBandwidth() == MHz(20))
+                mode = candidate;
+        }
+        ASSERT(mode != nullptr);
+        MpduAggregation builder;
+        auto envelope = builder.aggregateFrames(sources, mode, tx.receiverMinimumMpduStartSpacing,
+                B((1 << (13 + tx.receiverMaxAmpduLengthExponent)) - 1));
+        ASSERT(envelope != nullptr);
+        const int EXPECTED_DISTANCE[] = {36, 36, 36, 36, 36, 36, 68, 132};
+        ASSERT(envelope->getDataLength() == B(EXPECTED_DISTANCE[ap->par("htMinimumMpduStartSpacing").intValue()] + 34));
+        delete envelope;
+        auto saved = ap->localHtCapabilities;
+        auto operation = ap->getHtOperation();
+        sta->clearBssAndPeerState(ap->address);
+        ASSERT(sta->findPeerHtState(ap->address) == nullptr);
+        saved.minimumMpduStartSpacing = (saved.minimumMpduStartSpacing + 1) % 8;
+        sta->setPeerHtCapabilities(ap->address, saved, operation);
+        ASSERT(sta->findPeerHtState(ap->address)->negotiatedCapabilities.localTxPeerRx.receiverMinimumMpduStartSpacing ==
+                saved.minimumMpduStartSpacing);
+        std::cout << "HT aggregate receiver limits passed\n";
+    }
+};
+
+Define_Module(AmpduCapabilities);
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple AmpduCapabilities
+{
+    parameters:
+        @class(::AmpduCapabilities);
+}
+
+network AmpduCapabilitiesNetwork
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta: WirelessHost;
+        checker: AmpduCapabilities;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AmpduCapabilitiesNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 0s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+**.scalar-recording = false
+*.ap.wlan[0].mgmt.typename = "Ieee80211MgmtApSimplified"
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtStaSimplified"
+**.wlan[0].agent.typename = ""
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+*.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
+*.ap.wlan[0].mib.htMaxAmpduLengthExponent = ${exponent=0..3}
+*.sta.wlan[0].mib.htMaxAmpduLengthExponent = 3 - ${exponent}
+*.ap.wlan[0].mib.htMinimumMpduStartSpacing = ${spacing=0..7}
+*.sta.wlan[0].mib.htMinimumMpduStartSpacing = 7 - ${spacing}
+**.wlan[0].opMode = "n(mixed-2.4Ghz)"
+**.wlan[0].bitrate = 65Mbps
+**.wlan[0].radio.bandName = "2.4 GHz"
+**.wlan[0].radio.channelNumber = 1
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+HT aggregate receiver limits passed

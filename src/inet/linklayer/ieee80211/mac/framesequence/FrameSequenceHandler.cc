@@ -14,6 +14,25 @@
 namespace inet {
 namespace ieee80211 {
 
+void FrameSequenceHandler::interruptFrameSequence()
+{
+    ASSERT(isSequenceRunning());
+    ASSERT(dynamic_cast<IReceiveStep *>(context->getLastStep()));
+    context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
+    auto outgoing = check_and_cast<ITransmitStep *>(context->getStepBeforeLast())->getFrameToTransmit();
+    // Retirement removes DATA and management frames from the queue before this transition.
+    // Control exchanges retain their ordinary failure path through the recovery callback.
+    auto prepared = context->getQoSContext() ? context->getQoSContext()->preparedData.get() : nullptr;
+    bool aggregate = prepared && prepared->batch && prepared->envelope.get() == outgoing;
+    bool retired = aggregate ? prepared->cancelled :
+        dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(outgoing->peekAtFront<Ieee80211MacHeader>()) &&
+            !context->getInProgressFrames()->containsFrame(outgoing);
+    if (retired)
+        finishFrameSequence();
+    else
+        abortFrameSequence();
+}
+
 void FrameSequenceHandler::handleStartRxTimeout()
 {
     auto lastStep = context->getLastStep();
@@ -56,6 +75,13 @@ void FrameSequenceHandler::transmissionComplete()
         if (isSequenceRunning())
             startFrameSequenceStep();
     }
+}
+
+void FrameSequenceHandler::transmissionCancelled()
+{
+    ASSERT(isSequenceRunning() && dynamic_cast<AmpduTransmitStep *>(context->getLastStep()));
+    context->removeLastStep();
+    finishFrameSequence();
 }
 
 void FrameSequenceHandler::startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, IFrameSequenceHandler::ICallback *callback)
@@ -157,8 +183,10 @@ void FrameSequenceHandler::abortFrameSequence()
     auto step = context->getLastStep();
     auto failedTxStep = check_and_cast<ITransmitStep *>(dynamic_cast<IReceiveStep *>(step) ? context->getStepBeforeLast() : step);
     auto frameToTransmit = failedTxStep->getFrameToTransmit();
-    auto header = frameToTransmit->peekAtFront<Ieee80211MacHeader>();
-    if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
+    auto header = dynamic_cast<AmpduTransmitStep *>(failedTxStep) ? nullptr : frameToTransmit->peekAtFront<Ieee80211MacHeader>();
+    if (dynamic_cast<AmpduTransmitStep *>(failedTxStep))
+        callback->originatorProcessFailedFrame(frameToTransmit);
+    else if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         callback->originatorProcessFailedFrame(frameToTransmit);
     else if (auto rtsTxStep = dynamic_cast<RtsTransmitStep *>(failedTxStep))
         callback->originatorProcessRtsProtectionFailed(const_cast<Packet *>(rtsTxStep->getProtectedFrame()));

@@ -1,0 +1,63 @@
+E # 88 t 0.00043623452 m 63 ce 86 msg 149
+CMB sm 63 tm 3 m transmitPacket
+CM id 151 tid 151 eid 151 etid 151 c omnetpp::cMessage n "" pe -1
+- [DEBUG]	Sending (inet::physicallayer::WirelessSignal)UdpBasicAppData-2 (54 us 192 B) (inet::Packet)UdpBasicAppData-2 (192 B) (inet::SequenceChunk) length = 192 B with 1536 bits in 54 us transmission duration from (inet::physicallayer::Ieee80211Radio)radio id=63, antenna = { IsotropicAntenna }, transmitter = { Ieee80211Transmitter, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 } }, receiver = { Ieee80211Receiver, channel = { Ieee80211Channel, channelNumber = 0 }, energyDetection = 3.16228 pW, sensitivity = 3.16228 pW, considering interference } on (inet::physicallayer::RadioMedium)radioMedium id=3, propagation = { ConstantSpeedPropagation }, pathLoss = { FreeSpacePathLoss }, analogModel = { ScalarMediumAnalogModel, ignorePartialInterference = 0 }, obstacleLoss = <nullptr>, backgroundNoise = { IsotropicScalarBackgroundNoise, power = 0.01 pW, bandwidth = 22 MHz }, mediumLimitCache = { RadioMediumLimits }, neighborCache = <nullptr>, communicationCache = { VectorCommunicationCache }.
+CMB sm 3 tm 63 m sendToRadio
+- [DEBUG]	Sending (inet::physicallayer::WirelessSignal)UdpBasicAppData-2 (54 us 192 B) (inet::Packet)UdpBasicAppData-2 (192 B) (inet::SequenceChunk) length = 192 B from (inet::physicallayer::Ieee80211Radio)radio id=63, antenna = { IsotropicAntenna }, transmitter = { Ieee80211Transmitter, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 } }, receiver = { Ieee80211Receiver, channel = { Ieee80211Channel, channelNumber = 0 }, energyDetection = 3.16228 pW, sensitivity = 3.16228 pW, considering interference } at (288, 110, 0) m to (inet::physicallayer::Ieee80211Radio)radio id=177, antenna = { IsotropicAntenna }, transmitter = { Ieee80211Transmitter, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 } }, receiver = { Ieee80211Receiver, channel = { Ieee80211Channel, channelNumber = 0 }, energyDetection = 3.16228 pW, sensitivity = 3.16228 pW, considering interference } at (480, 258, 0) m in 0.80863 us propagation time.
+CM id 152 tid 152 eid 152 etid 152 c omnetpp::cMessage n "" pe -1
+CL id 153 tid 117 eid 153 etid 117 c omnetpp::cMessage n UdpBasicAppData-2 m 63 pe -1 cid 149
+BS id 152 tid 152 eid 153 etid 117 c inet::physicallayer::WirelessSignal n UdpBasicAppData-2 l 1536 m 63 pe 88
+SD sm 63 dm 6 dg 1048576 pd 0.00000080863 td 0.000054 rd 0.000054
+SH sm 6 sg 1048576
+SH sm 160 sg 4
+ES id 152 tid 152 eid 153 etid 117 c inet::physicallayer::WirelessSignal n UdpBasicAppData-2 l 1536 sm 63 st 0.00043623452 am 177 ag 4 at 0.00043704315 pe 88 i 1
+CME
+CME
+BS id 31 tid 31 eid 31 etid 31 c omnetpp::cMessage n transmissionTimer sm 63 st 0.00043623452 am 63 at 0.00049023452 pe 88
+ES id 31 tid 31 eid 31 etid 31 c omnetpp::cMessage n transmissionTimer sm 63 st 0.00043623452 am 63 at 0.00049023452 pe 88
+- [INFO]	Transmission started: (inet::physicallayer::WirelessSignal)UdpBasicAppData-2 (54 us 192 B) (inet::Packet)UdpBasicAppData-2 (192 B) (inet::SequenceChunk) length = 192 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 4, transmitterRadioId = 0, startTime = 0.00043623452, endTime = 0.00049023452, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000034, startPosition = (288, 110, 0) m, endPosition = (288, 110, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)
+- [INFO]	Changing radio transmission state from [1mIDLE[0m to [1mTRANSMITTING[0m.
+CMB sm 63 tm 62 m transmissionStateChanged
+CMB sm 62 tm 71 m transmissionStateChanged
+CME
+CME
+- [INFO]	Changing radio transmitted signal part from [1mNONE[0m to [1mWHOLE[0m.
+
+E # 89 t 0.00043704315 m 177 ce 88 msg 152
+CM id 154 tid 154 eid 154 etid 154 c omnetpp::cMessage n receptionTimer pe -1
+- [DEBUG]	Receiving Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 4, transmitterRadioId = 0, startTime = 0.00043623452, endTime = 0.00049023452, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000034, startPosition = (288, 110, 0) m, endPosition = (288, 110, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0) from medium by (inet::physicallayer::Ieee80211Radio)radio id=177, antenna = { IsotropicAntenna }, transmitter = { Ieee80211Transmitter, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 } }, receiver = { Ieee80211Receiver, channel = { Ieee80211Channel, channelNumber = 0 }, energyDetection = 3.16228 pW, sensitivity = 3.16228 pW, considering interference } arrives as Reception, transmissionId = 4, receiverdRadioId = 1, startTime = 0.00043704315, endTime = 0.00049104315, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000034, startPosition = (480, 258, 0) m, endPosition = (480, 258, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0), analogModel = { ScalarSignalAnalogModel, power = 33.2932 pW, centerFrequency = 2.412 GHz }
+- [DEBUG]	Computing whether reception is possible, [1mminReceptionPower[0m = 33.2932 pW, [1msensitivity[0m = 3.16228 pW -> reception is possible
+- [INFO]	Reception started: [1mattempting[0m (inet::physicallayer::WirelessSignal)UdpBasicAppData-2 (54 us 192 B) (inet::Packet)UdpBasicAppData-2 (192 B) (inet::SequenceChunk) length = 192 B WHOLE as Reception, transmissionId = 4, receiverdRadioId = 1, startTime = 0.00043704315, endTime = 0.00049104315, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000034, startPosition = (480, 258, 0) m, endPosition = (480, 258, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0), analogModel = { ScalarSignalAnalogModel, power = 33.2932 pW, centerFrequency = 2.412 GHz }
+BS id 154 tid 154 eid 154 etid 154 c omnetpp::cMessage n receptionTimer sm 177 st 0.00043704315 am 177 at 0.00049104315 pe 89
+ES id 154 tid 154 eid 154 etid 154 c omnetpp::cMessage n receptionTimer sm 177 st 0.00043704315 am 177 at 0.00049104315 pe 89
+- [INFO]	Changing radio reception state from [1mIDLE[0m to [1mRECEIVING[0m.
+CMB sm 177 tm 176 m receptionStateChanged
+CMB sm 176 tm 185 m receptionStateChanged
+CMB sm 185 tm 200 m "medium BUSY"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CMB sm 185 tm 219 m "medium BUSY"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CMB sm 185 tm 226 m "medium BUSY"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CMB sm 185 tm 233 m "medium BUSY"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CMB sm 185 tm 240 m "medium BUSY"
+- [DEBUG]	FSM Backoff procedure: processing event in state IDLE
+- [DEBUG]	FSM Backoff procedure: condition "event==MEDIUM_STATE_CHANGED" holds, ignoring in current state
+CME
+CME
+CME
+- [INFO]	Changing radio received signal part from [1mNONE[0m to [1mWHOLE[0m.
+CMB sm 177 tm 176 m receivedSignalPartChanged
+CMB sm 176 tm 185 m receivedSignalPartChanged
+CME
+CME
+

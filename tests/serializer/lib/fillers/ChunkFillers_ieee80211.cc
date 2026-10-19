@@ -432,13 +432,8 @@ void addFillers_ieee80211(std::vector<ChunkFiller>& fillers)
         setChunkLength(c, LENGTH_DELBA);
     }});
 
-    // --- Block Ack request / response, Basic and Compressed variants: multiTid and
-    // compressedBitmap are the serializer's variant discriminator (see
-    // Ieee80211MacHeaderSerializer's ST_BLOCKACK_REQ/ST_BLOCKACK cases), pinned per
-    // subclass by the .msg -- kept at that pinned pair. fragmentNumber is the Fragment
-    // Number subfield of the Block Ack (Req) Starting Sequence Control, which 802.11
-    // always sets to 0 in a Block Ack context (no fragmentation) -- kept at the .msg
-    // default in all four subtypes.
+    // The concrete classes fix the Type bits. Basic reserved values must retain Type 0.
+    // Compressed reserved fields write zero. All producers retain fragmentNumber = 0.
     fillers.push_back({"inet::ieee80211::Ieee80211BasicBlockAckReq", "", [](Chunk *c) {
         auto h = check_and_cast<Ieee80211BasicBlockAckReq *>(c);
         FillValues v;
@@ -451,7 +446,7 @@ void addFillers_ieee80211(std::vector<ChunkFiller>& fillers)
         h->setMultiTid(false); // pinned by the class: selects the (non-multi-TID) Basic/Compressed branch
         h->setCompressedBitmap(false); // pinned by the class: selects the Basic (non-compressed) branch
         h->setBarAckPolicy(true);
-        h->setReserved(v.uint(9));
+        h->setReserved(v.uint(9) & ~3u);
         h->setTidInfo((int)v.uint(4));
         h->setStartingSequenceNumber(SequenceNumberCyclic(v.uint(12)));
     }});
@@ -466,8 +461,8 @@ void addFillers_ieee80211(std::vector<ChunkFiller>& fillers)
         h->setType(ST_BLOCKACK_REQ);
         h->setMultiTid(false); // pinned by the class
         h->setCompressedBitmap(true); // pinned by the class: selects the Compressed branch
-        h->setBarAckPolicy(true);
-        h->setReserved(v.uint(9));
+        h->setBarAckPolicy(false);
+        h->setReserved(0);
         h->setTidInfo((int)v.uint(4));
         h->setStartingSequenceNumber(SequenceNumberCyclic(v.uint(12)));
     }});
@@ -483,7 +478,7 @@ void addFillers_ieee80211(std::vector<ChunkFiller>& fillers)
         h->setMultiTid(false); // pinned by the class
         h->setCompressedBitmap(false); // pinned by the class: selects the Basic bitmap branch
         h->setBlockAckPolicy(true);
-        h->setReserved(v.uint(9));
+        h->setReserved(v.uint(9) & ~3u);
         h->setStartingSequenceNumber(SequenceNumberCyclic(v.uint(12)));
         // The Block Ack bitmap: 64 elements of 2 bytes (16 bits) each; never leave any at
         // the default empty BitVector -- getBytes()[0]/[1] would read out of bounds.
@@ -502,15 +497,11 @@ void addFillers_ieee80211(std::vector<ChunkFiller>& fillers)
         h->setType(ST_BLOCKACK);
         h->setMultiTid(false); // pinned by the class
         h->setCompressedBitmap(true); // pinned by the class: selects the Compressed bitmap branch
-        h->setBlockAckPolicy(true);
-        h->setReserved(v.uint(9));
+        h->setBlockAckPolicy(false);
+        h->setReserved(0);
         h->setStartingSequenceNumber(SequenceNumberCyclic(v.uint(12)));
         h->setBlockAckBitmap(BitVector(std::vector<uint8_t>{v.u8(), v.u8(), v.u8(), v.u8(), v.u8(), v.u8(), v.u8(), v.u8()}));
         h->setTidInfo((int)v.uint(4));
-        // the .msg leaves chunkLength unset ("TODO"); the wire layout is fixed at
-        // 16 (header) + 2 (BA control) + 2 (starting-sequence control) + 8 (compressed
-        // bitmap) = 28 bytes.
-        setChunkLength(c, B(28));
     }});
 
     // --- management frame bodies. Each is content-length-dependent (SSID, rates, the

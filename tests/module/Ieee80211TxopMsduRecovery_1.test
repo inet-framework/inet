@@ -1,0 +1,159 @@
+%description:
+Check allocation-scoped recovery with the production recovery procedure and committed-frame owner.
+The fixture supplies only contention-window state and module references.
+Modern counts persist across fragment ACKs and size changes. Basic uses distinct short and long counts.
+Group disposal removes ACK and lifetime entries without removal of an unrelated allocation.
+Accepted Basic agreements retain the MSDU beyond both retry limits. These direct calls do not activate HCF dispatch.
+
+%file: MsduRecovery.cc
+#include <iostream>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+class MsduRecovery : public QosRecoveryProcedure, public IRecoveryProcedure::ICwCalculator {
+    int cw = 15;
+  protected:
+    void initialize(int) override {
+        cwCalculator = this;
+        rtsThreshold = 100;
+        shortRetryLimit = 3;
+        longRetryLimit = 2;
+    }
+  public:
+    void incrementCw() override { cw = 2 * cw + 1; }
+    void resetCw() override { cw = 15; }
+    int getCw() override { return cw; }
+    int src() const { return stationShortRetryCounter; }
+    int lrc() const { return stationLongRetryCounter; }
+    bool legacyEmpty() const { return shortRetryCounter.empty() && longRetryCounter.empty(); }
+};
+Define_Module(MsduRecovery);
+
+class MsduFrames : public InProgressFrames {
+    std::unique_ptr<EdcaTransmitLifetimeHandler> lifetime;
+  protected:
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LOCAL) {
+            ackHandler = check_and_cast<QosAckHandler *>(getModuleByPath("^.ack"));
+            lifetime = std::make_unique<EdcaTransmitLifetimeHandler>(1, 1, 1, 1);
+            lifetimeHandler = lifetime.get();
+        }
+    }
+  public:
+    EdcaTransmitLifetimeHandler *getLifetime() { return lifetime.get(); }
+};
+Define_Module(MsduFrames);
+
+class MsduTest : public cSimpleModule {
+    Packet *frame(int64_t allocation, int number, int length, bool more) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setReceiverAddress(MacAddress("02:00:00:00:00:02"));
+        header->setSequenceNumber(SequenceNumberCyclic(allocation));
+        header->setFragmentNumber(number);
+        header->setMoreFragments(more);
+        auto packet = new Packet("member", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(length) - header->getChunkLength() - B(4)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<Ieee80211DataSequenceTag>()->setAllocationIndex(allocation);
+        return packet;
+    }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto recovery = check_and_cast<MsduRecovery *>(getModuleByPath("^.recovery"));
+        auto frames = check_and_cast<MsduFrames *>(getModuleByPath("^.frames"));
+        auto first = frame(7, 0, 200, true);
+        auto second = frame(7, 1, 100, false);
+        auto other = frame(8, 0, 99, false);
+        frames->adoptPreparedFragments({first, second});
+        frames->adoptPreparedFrame(other);
+        frames->getLifetime()->registerFragments({first, second, other}, SimTime(1));
+        recovery->registerMsdu(first, QosRecoveryProcedure::MsduRetryContract::IEEE80211_2024);
+        recovery->registerMsdu(other, QosRecoveryProcedure::MsduRetryContract::BASIC_2016);
+        recovery->msduTransmissionFailed(first, true);
+        ASSERT(recovery->getRetryCount(second, second->peekAtFront<Ieee80211DataHeader>()) == 1);
+        ASSERT(recovery->src() == 1 && recovery->lrc() == 0 && recovery->getCw() == 31);
+        ASSERT(!frames->isSameSizeDataRetry(first));
+        frames->recordDataTransmission(first);
+        frames->recordDataTransmission(first);
+        recovery->msduTransmissionFailed(first, false);
+        recovery->msduAckReceived(first, false);
+        ASSERT(recovery->getRetryCount(second, second->peekAtFront<Ieee80211DataHeader>()) == 2);
+        ASSERT(recovery->src() == 0 && recovery->getCw() == 15);
+        frames->getLifetime()->forgetFrame(first->getId());
+        frames->dropFrame(first);
+        ASSERT(frames->hasRetriedPreviousFragment(second) && frames->getFragmentCount(second) == 2);
+        recovery->msduTransmissionFailed(second, false);
+        ASSERT(recovery->isMsduRetryLimitReached(second));
+        recovery->retireMsdu(second);
+        frames->dropAllocation(second);
+        ASSERT(!recovery->hasMsduRetryRecord(second));
+        ASSERT(frames->getLength() == 1 && frames->getFrames(0) == other);
+        ASSERT(frames->getLifetime()->getNumFrames() == 1 && !frames->hasRetriedPreviousFragment(second));
+        recovery->msduTransmissionFailed(other, false);
+        ASSERT(recovery->getRetryCount(other, other->peekAtFront<Ieee80211DataHeader>()) == 1);
+        recovery->msduAckReceived(other, false);
+        ASSERT(recovery->getRetryCount(other, other->peekAtFront<Ieee80211DataHeader>()) == 0);
+        recovery->msduTransmissionFailed(other, true);
+        recovery->msduTransmissionFailed(other, true);
+        recovery->msduTransmissionFailed(other, true);
+        ASSERT(recovery->isMsduRetryLimitReached(other) && recovery->legacyEmpty());
+        recovery->registerMsdu(other, QosRecoveryProcedure::MsduRetryContract::BASIC_2016, true);
+        ASSERT(!recovery->isMsduRetryLimitReached(other));
+        recovery->msduTransmissionFailed(other, true);
+        recovery->msduTransmissionFailed(other, false);
+        ASSERT(recovery->getRetryCount(other, other->peekAtFront<Ieee80211DataHeader>()) == 5);
+        ASSERT(!recovery->isRtsFrameRetryLimitReached(other, other->peekAtFront<Ieee80211DataHeader>()));
+        auto large = frame(9, 0, 101, false);
+        frames->adoptPreparedFrame(large);
+        recovery->registerMsdu(large, QosRecoveryProcedure::MsduRetryContract::BASIC_2016, true);
+        recovery->msduTransmissionFailed(large, false);
+        recovery->msduTransmissionFailed(large, false);
+        ASSERT(!recovery->isMsduRetryLimitReached(large) && recovery->lrc() == 2);
+        ASSERT(recovery->getRetryCount(large, large->peekAtFront<Ieee80211DataHeader>()) == 2);
+        recovery->registerMsdu(large, QosRecoveryProcedure::MsduRetryContract::BASIC_2016, false);
+        ASSERT(recovery->isMsduRetryLimitReached(large));
+        recovery->retireMsdu(large);
+        frames->dropAllocation(large);
+        recovery->retireMsdu(other);
+        frames->dropAllocation(other);
+        frames->clearDroppedFrames();
+        std::cout << "MSDU recovery assertions passed.\n";
+        endSimulation();
+    }
+    void initialize() override { scheduleAt(SIMTIME_ZERO, new cMessage()); }
+};
+Define_Module(MsduTest);
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.originator.QosAckHandler;
+import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
+import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
+simple MsduRecovery extends QosRecoveryProcedure { parameters: @class(::MsduRecovery); cwCalculatorModule = ""; rtsPolicyModule = ""; }
+simple MsduFrames extends InProgressFrames { parameters: @class(::MsduFrames); pendingQueueModule = ""; originatorMacDataServiceModule = ""; ackHandlerModule = ""; }
+simple MsduTest { parameters: @class(::MsduTest); }
+network MsduNetwork {
+    submodules:
+        recovery: MsduRecovery;
+        ack: QosAckHandler;
+        frames: MsduFrames;
+        test: MsduTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = MsduNetwork
+ned-path = .;../../../../src;../../lib
+seed-set = 0
+cmdenv-express-mode = true
+record-scalar-results = false
+record-vector-results = false
+
+%contains: stdout
+MSDU recovery assertions passed.

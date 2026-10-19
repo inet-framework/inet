@@ -13,6 +13,7 @@
 
 #include "inet/linklayer/ieee80211/mac/common/SequenceControlField.h"
 #include "inet/linklayer/ieee80211/mac/contract/IAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -56,13 +57,17 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
 
     virtual void processReceivedAck(const Ptr<const Ieee80211AckFrame>& ack, const Ptr<const Ieee80211DataOrMgmtHeader>& ackedHeader);
     virtual std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck);
+    std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> processReceivedCompressedBlockAck(
+            const Ptr<const Ieee80211CompressedBlockAck>& blockAck, const OriginatorBlockAckAgreement *agreement);
     virtual void processFailedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
 
     virtual void frameGotInProgress(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
     virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
-    virtual void processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq);
+    void processTransmittedImplicitBlockAckMember(const Ptr<const Ieee80211DataHeader>& header);
+    void processFailedImplicitBlockAckMember(const Ptr<const Ieee80211DataHeader>& header);
+    virtual void processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, const OriginatorBlockAckAgreement *agreement);
     virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
-    virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+    virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader) override;
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
     virtual Status getQoSDataAckStatus(const Ptr<const Ieee80211DataHeader>& header);

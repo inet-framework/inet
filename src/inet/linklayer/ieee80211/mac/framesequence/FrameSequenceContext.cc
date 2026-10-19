@@ -6,11 +6,48 @@
 
 
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 
 namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
+
+AmpduTransmitStep::AmpduTransmitStep(std::shared_ptr<PreparedDataTransmission> prepared, simtime_t ifs) :
+    TransmitStep(nullptr, ifs), prepared(std::move(prepared))
+{
+}
+
+Packet *AmpduTransmitStep::getFrameToTransmit()
+{
+    return prepared->envelope.get();
+}
+
+PreparedDataTransmission::~PreparedDataTransmission()
+{
+    if (rtsPrediction)
+        drop(rtsPrediction.get());
+    if (envelope)
+        drop(envelope.get());
+}
+
+void PreparedDataTransmission::setEnvelope(Packet *packet)
+{
+    if (envelope)
+        drop(envelope.get());
+    envelope.reset(packet);
+    if (envelope)
+        take(envelope.get());
+}
+
+void PreparedDataTransmission::setRtsPrediction(Packet *packet)
+{
+    if (rtsPrediction)
+        drop(rtsPrediction.get());
+    rtsPrediction.reset(packet);
+    if (rtsPrediction)
+        take(rtsPrediction.get());
+}
 
 FrameSequenceContext::FrameSequenceContext(MacAddress address, Ieee80211ModeSet *modeSet, InProgressFrames *inProgressFrames, IRtsProcedure *rtsProcedure, IRtsPolicy *rtsPolicy, NonQoSContext *nonQoSContext, QoSContext *qosContext) :
     address(address),
@@ -29,6 +66,11 @@ void FrameSequenceContext::removeLastStep()
     auto step = steps.back();
     steps.pop_back();
     delete step;
+}
+
+Packet *FrameSequenceContext::getDataFrameToTransmit() const
+{
+    return qosContext && qosContext->preparedData ? qosContext->preparedData->frame : inProgressFrames->getFrameToTransmit();
 }
 
 simtime_t FrameSequenceContext::getIfs() const

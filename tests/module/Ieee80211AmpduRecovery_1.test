@@ -1,0 +1,359 @@
+%description:
+Real infrastructure association establishes HT state before the production HCF accepts test DATA.
+The AP silently loses its recipient agreement at the first aggregate. The originator retains its agreement.
+Continuous arrivals must permit an actual Compressed BAR, recipient DELBA, originator retirement, later ADDBA, and later aggregate DATA.
+The pending DATA queue must remain nonempty from recipient state loss through the first BAR transmission.
+Finite traffic loses every actual BAR at the AP PHY. MSDU expiry must close the originator agreement before inactivity expiry.
+Four runs combine finite or continuous arrivals with zero or 200 ms inactivity timeout. Seed zero fixes contention.
+The fixture injects complete QoS DATA at the HCF upper boundary. It does not test an application or the IP path.
+
+%extraargs: -r 0..3
+
+%file: AmpduRecovery.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ISnir.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class RecoveryPhysicalModel : public Ieee80211NistErrorModel
+{
+  public:
+    mutable int barLosses = 0;
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart) const override {
+        auto packet = snir->getReception()->getTransmission()->getPacket();
+        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto ht = dynamicPtrCast<const Ieee80211HtPhyHeader>(phy);
+        if ((!ht || !ht->getAggregation()) && par("dropBars").boolValue()) {
+            auto header = packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength());
+            if (dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(header)) {
+                barLosses++;
+                return 1;
+            }
+        }
+        return 0;
+    }
+    double computeAmpduRangeSuccessRate(const ISnir *, const IIeee80211Mode *, B) const override { return 1; }
+};
+Define_Module(RecoveryPhysicalModel);
+
+class RecoveryHcf : public Hcf
+{
+  public:
+    bool recipientStateLost = false;
+    simtime_t lossTime;
+    int aggregateReceptions = 0;
+    int receivedDelbas = 0;
+    int deliveredData = 0;
+    MacAddress address() const { return mac->getAddress(); }
+    queueing::IPacketQueue *dataQueue() const { return edca->getEdcaf(AC_BE)->getPendingQueue(); }
+    int queuedData() const { return dataQueue()->getNumPackets(); }
+    int retainedData() const { return edca->getEdcaf(AC_BE)->getInProgressFrames()->getLength(); }
+    size_t trackedData() const { return edca->getLifetimeHandler()->getNumFrames(); }
+    OriginatorBlockAckAgreement *originatorAgreement(MacAddress peer) const {
+        return originatorBlockAckAgreementHandler->getAgreement(peer, 0);
+    }
+    void injectData(MacAddress receiver, int count) {
+        Enter_Method("injectData");
+        for (int i = 0; i < count; i++) {
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(ST_DATA_WITH_QOS);
+            header->addChunkLength(QOSCONTROL_PART_LENGTH);
+            header->setReceiverAddress(receiver);
+            header->setTransmitterAddress(mac->getAddress());
+            header->setAddress3(receiver);
+            header->setToDS(true);
+            header->setTid(0);
+            auto frame = new Packet("recovery-data", header);
+            frame->insertAtBack(makeShared<ByteCountChunk>(B(200)));
+            frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            processUpperFrame(frame, header);
+        }
+    }
+    void processLowerAggregate(Packet *packet, AmpduReception reception) override {
+        aggregateReceptions++;
+        if (par("loseRecipientState").boolValue() && !recipientStateLost && !reception.members.empty()) {
+            const auto& header = reception.members.front().packet->peekAtFront<Ieee80211DataHeader>();
+            auto peer = header->getTransmitterAddress();
+            auto tid = header->getTid();
+            ASSERT(recipientBlockAckAgreementHandler->getAgreement(tid, peer));
+            recipientStateLost = true;
+            lossTime = simTime();
+            // Model lost recipient state without a local DELBA or a peer reset.
+            retireAgreement(peer, tid, false, true);
+            ASSERT(!recipientBlockAckAgreementHandler->getAgreement(tid, peer));
+        }
+        Hcf::processLowerAggregate(packet, std::move(reception));
+    }
+  protected:
+    void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
+            if (!delba->getInitiator()) receivedDelbas++;
+        }
+        Hcf::recipientProcessReceivedManagementFrame(header);
+    }
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto frame : frames) {
+            if (dynamicPtrCast<const Ieee80211DataHeader>(frame->peekAtFront<Ieee80211MacHeader>())) {
+                deliveredData++;
+                take(frame);
+                delete frame;
+            }
+            else
+                Hcf::sendUp({frame});
+        }
+    }
+};
+Define_Module(RecoveryHcf);
+
+class RecoveryDriver : public cSimpleModule, public cListener
+{
+    RecoveryHcf *originator = nullptr;
+    RecoveryHcf *recipient = nullptr;
+    cModule *originatorRadio = nullptr;
+    cModule *recipientRadio = nullptr;
+    int originatorAdditions = 0;
+    int originatorDeletions = 0;
+    int addbaTransmissions = 0;
+    int barTransmissions = 0;
+    int recipientDelbaTransmissions = 0;
+    int aggregateTransmissions = 0;
+    int laterAggregateTransmissions = 0;
+    int lifetimeDrops = 0;
+    int queuedAtProbe = -1;
+    bool drainedBeforeProbe = false;
+    bool retirementAtInactivity = false;
+    simtime_t firstProbeTime;
+    simtime_t firstRetirementTime;
+    simtime_t laterSetupTime;
+    simtime_t firstRecipientDelbaTime;
+    bool continuous() const { return par("continuous"); }
+    void checkBacklog() {
+        if (continuous() && recipient->recipientStateLost && barTransmissions == 0 && originator->queuedData() == 0)
+            drainedBeforeProbe = true;
+    }
+    void observeTransmission(cComponent *source, const Ieee80211Transmission *transmission) {
+        auto packet = transmission->getPacket();
+        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+        auto ht = dynamicPtrCast<const Ieee80211HtPhyHeader>(phy);
+        if (source == originatorRadio && ht && ht->getAggregation()) {
+            ASSERT(transmission->getMode()->getHtMcsIndex() == 7);
+            ASSERT(transmission->getMode()->getDataMode()->getBandwidth() == MHz(20));
+            ASSERT(!transmission->getMode()->isHtShortGuardInterval());
+            aggregateTransmissions++;
+            if (originatorDeletions > 0 && originatorAdditions >= 2)
+                laterAggregateTransmissions++;
+            return;
+        }
+        if (ht && ht->getAggregation()) return;
+        auto header = packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength());
+        if (source == originatorRadio) {
+            if (dynamicPtrCast<const Ieee80211AddbaRequest>(header)) {
+                addbaTransmissions++;
+                if (originatorDeletions > 0) laterSetupTime = simTime();
+            }
+            if (auto bar = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(header)) {
+                if (recipient->recipientStateLost) {
+                    ASSERT(bar->getTidInfo() == 0);
+                    checkBacklog();
+                    if (barTransmissions == 0) {
+                        firstProbeTime = simTime();
+                        queuedAtProbe = originator->queuedData();
+                    }
+                    barTransmissions++;
+                }
+            }
+        }
+        if (source == recipientRadio) {
+            if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
+                if (!delba->getInitiator() && recipient->recipientStateLost) {
+                    if (recipientDelbaTransmissions == 0) firstRecipientDelbaTime = simTime();
+                    recipientDelbaTransmissions++;
+                }
+            }
+        }
+    }
+  public:
+    RecoveryDriver() : cSimpleModule(65536) {}
+  protected:
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        if (signal == transmissionStartedSignal) {
+            observeTransmission(source, check_and_cast<const Ieee80211Transmission *>(object));
+            return;
+        }
+        if (source == originator && signal == Hcf::blockAckAgreementAddedSignal && dynamic_cast<OriginatorBlockAckAgreement *>(object))
+            originatorAdditions++;
+        if (source == originator && signal == Hcf::blockAckAgreementDeletedSignal) {
+            if (auto agreement = dynamic_cast<OriginatorBlockAckAgreement *>(object)) {
+                if (recipient->recipientStateLost) {
+                    if (originatorDeletions == 0) firstRetirementTime = simTime();
+                    originatorDeletions++;
+                    retirementAtInactivity |= agreement->getExpirationTime() <= simTime();
+                }
+            }
+        }
+        if (source == originator && signal == packetDroppedSignal) {
+            auto drop = dynamic_cast<PacketDropDetails *>(details);
+            if (drop && drop->getReason() == LIFETIME_EXPIRED) lifetimeDrops++;
+        }
+        checkBacklog();
+    }
+    void activity() override {
+        originator = check_and_cast<RecoveryHcf *>(getModuleByPath("^.sta.wlan[0].mac.hcf"));
+        recipient = check_and_cast<RecoveryHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+        originatorRadio = getModuleByPath("^.sta.wlan[0].radio");
+        recipientRadio = getModuleByPath("^.ap.wlan[0].radio");
+        originatorRadio->subscribe(transmissionStartedSignal, this);
+        recipientRadio->subscribe(transmissionStartedSignal, this);
+        originator->subscribe(Hcf::blockAckAgreementAddedSignal, this);
+        originator->subscribe(Hcf::blockAckAgreementDeletedSignal, this);
+        originator->subscribe(packetDroppedSignal, this);
+        auto queue = check_and_cast<cModule *>(originator->dataQueue());
+        for (auto signal : {packetPushedSignal, packetPulledSignal, packetRemovedSignal}) queue->subscribe(signal, this);
+        wait(SimTime(30, SIMTIME_MS));
+        auto staMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta.wlan[0].mib"));
+        auto apMib = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+        ASSERT(staMib->bssStationData.isAssociated);
+        ASSERT(staMib->bssData.bssid == apMib->address);
+        auto peer = staMib->findPeerHtState(apMib->address);
+        ASSERT(peer && peer->valid && peer->negotiatedCapabilities.localTxPeerRx.valid);
+        ASSERT(apMib->findPeerHtState(staMib->address));
+        ASSERT(peer->negotiatedCapabilities.localTxPeerRx.receiverMaxAmpduLengthExponent == 1);
+        ASSERT(peer->negotiatedCapabilities.localTxPeerRx.receiverMinimumMpduStartSpacing == 2);
+        originator->injectData(recipient->address(), continuous() ? 256 : 32);
+        if (continuous()) {
+            while (simTime() < SimTime(110, SIMTIME_MS)) {
+                wait(SimTime(100, SIMTIME_US));
+                checkBacklog();
+                originator->injectData(recipient->address(), 4);
+            }
+        }
+        wait(SimTime(120, SIMTIME_MS) - simTime());
+        ASSERT(recipient->recipientStateLost && recipient->aggregateReceptions > 0);
+        ASSERT(aggregateTransmissions > 0 && barTransmissions > 0);
+        ASSERT(firstProbeTime > recipient->lossTime);
+        ASSERT(originatorDeletions > 0 && !retirementAtInactivity);
+        if (continuous()) {
+            ASSERT(!drainedBeforeProbe && queuedAtProbe > 0);
+            ASSERT(recipientDelbaTransmissions > 0 && originator->receivedDelbas > 0);
+            ASSERT(firstRecipientDelbaTime > firstProbeTime);
+            ASSERT(firstRetirementTime >= firstRecipientDelbaTime);
+            ASSERT(originatorAdditions >= 2 && addbaTransmissions >= 2);
+            ASSERT(laterSetupTime > firstRetirementTime && laterAggregateTransmissions > 0);
+        }
+        else {
+            auto model = check_and_cast<RecoveryPhysicalModel *>(recipientRadio->getSubmodule("receiver")->getSubmodule("errorModel"));
+            ASSERT(model->barLosses > 0);
+            ASSERT(recipientDelbaTransmissions == 0 && originator->receivedDelbas == 0);
+            ASSERT(lifetimeDrops > 0 && firstRetirementTime >= SimTime(60, SIMTIME_MS));
+            ASSERT(originatorAdditions == 1);
+            ASSERT(!originator->originatorAgreement(recipient->address()));
+            ASSERT(originator->queuedData() == 0 && originator->retainedData() == 0 && originator->trackedData() == 0);
+        }
+        std::cout << "Absent-agreement recovery passed: continuous=" << continuous()
+                  << " probes=" << barTransmissions << " delbas=" << recipientDelbaTransmissions
+                  << " retirements=" << originatorDeletions << " setups=" << addbaTransmissions
+                  << " laterAggregates=" << laterAggregateTransmissions << " lifetimeDrops=" << lifetimeDrops << "\n";
+        endSimulation();
+    }
+};
+Define_Module(RecoveryDriver);
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+module RecoveryPhysicalModel extends Ieee80211NistErrorModel { parameters: bool dropBars = default(false); @class(::RecoveryPhysicalModel); }
+module RecoveryHcf extends Hcf { parameters: bool loseRecipientState = default(false); @class(::RecoveryHcf); }
+simple RecoveryDriver { parameters: bool continuous; @class(::RecoveryDriver); }
+network RecoveryNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        sta: WirelessHost;
+        ap: AccessPoint;
+        test: RecoveryDriver;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = RecoveryNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 125ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+*.test.continuous = ${continuous=false,true}
+*.ap.wlan[0].mgmt.typename = "Ieee80211MgmtAp"
+*.sta.wlan[0].mgmt.typename = "Ieee80211MgmtSta"
+*.sta.wlan[0].agent.typename = "Ieee80211AgentSta"
+*.sta.wlan[0].agent.startingTime = 0s
+*.sta.wlan[0].agent.channelsToScan = "6"
+*.sta.wlan[0].agent.probeDelay = 1ms
+*.sta.wlan[0].agent.minChannelTime = 5ms
+*.sta.wlan[0].agent.maxChannelTime = 5ms
+*.sta.wlan[0].agent.authenticationTimeout = 20ms
+*.sta.wlan[0].agent.associationTimeout = 20ms
+**.mgmt.numChannels = 1
+*.ap.wlan[0].address = "02:00:00:00:00:01"
+*.sta.wlan[0].address = "02:00:00:00:00:02"
+**.wlan[0].opMode = "n(mixed-2.4Ghz)"
+**.wlan[0].bitrate = 65Mbps
+**.wlan[0].radio.bandName = "2.4 GHz"
+**.wlan[0].radio.channelNumber = 6
+**.wlan[0].radio.receiver.bandwidth = 20MHz
+**.wlan[0].radio.receiver.errorModel.typename = "RecoveryPhysicalModel"
+*.ap.wlan[0].radio.receiver.errorModel.dropBars = !${continuous}
+*.ap.wlan[0].mib.htMaxAmpduLengthExponent = 1
+*.ap.wlan[0].mib.htMinimumMpduStartSpacing = 2
+*.sta.wlan[0].mib.htMaxAmpduLengthExponent = 0
+*.sta.wlan[0].mib.htMinimumMpduStartSpacing = 1
+**.wlan[0].mac.qosStation = true
+**.wlan[0].mac.hcf.typename = "RecoveryHcf"
+*.ap.wlan[0].mac.hcf.loseRecipientState = true
+**.wlan[0].mac.hcf.isBlockAckSupported = true
+**.wlan[0].mac.hcf.blockAckVariant = "compressed"
+**.wlan[0].mac.hcf.rateControl.typename = ""
+**.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 65Mbps
+**.wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = 20MHz
+**.wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+**.wlan[0].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
+**.wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[0].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 2
+**.wlan[0].mac.hcf.originatorBlockAckAgreementPolicy.blockAckTimeoutValue = ${inactivity=0s,200ms}
+**.wlan[0].mac.hcf.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = ${inactivity}
+**.wlan[0].mac.hcf.edca.edcaf[*].msduLifetime = 30ms
+**.wlan[0].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = 1024
+**.wlan[0].mac.hcf.edca.edcaf[*].recoveryProcedure.longRetryLimit = 1024
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sta.mobility.initialX = 10m
+*.ap.mobility.initialX = 20m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+*.radioMedium.backgroundNoise.power = -110dBm
+
+%contains: stdout
+Absent-agreement recovery passed:
+
+%contains: stdout
+Run statistics: total 4, successful 4

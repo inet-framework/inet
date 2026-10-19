@@ -264,6 +264,11 @@ FrameSequenceContext *Dcf::buildContext()
     return new FrameSequenceContext(mac->getAddress(), modeSet, channelAccess->getInProgressFrames(), rtsProcedure, rtsPolicy, nonQoSContext, nullptr);
 }
 
+void Dcf::frameTransmissionStarted(Packet *packet)
+{
+    // DCF has no state transition at submission.
+}
+
 void Dcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");

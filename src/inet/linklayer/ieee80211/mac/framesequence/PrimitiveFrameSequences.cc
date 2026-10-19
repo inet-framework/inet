@@ -10,6 +10,36 @@
 namespace inet {
 namespace ieee80211 {
 
+bool isValidCompressedBlockAck(Packet *packet, MacAddress local, MacAddress peer, Tid tid)
+{
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(packet->peekAtFront<Ieee80211MacHeader>());
+    return response && response->getReceiverAddress() == local && response->getTransmitterAddress() == peer &&
+        response->getTidInfo() == tid && !response->getMultiTid() && response->getCompressedBitmap() &&
+        response->getFragmentNumber() == 0 && response->getStartingSequenceNumber().isSpecified() &&
+        response->getBlockAckBitmap().getSize() == 64 &&
+        response->getChunkLength() == LENGTH_COMPRESSED_BLOCKACK - B(4) && packet->getDataLength() == LENGTH_COMPRESSED_BLOCKACK;
+}
+
+IFrameSequenceStep *AmpduBlockAckFs::prepareStep(FrameSequenceContext *context)
+{
+    auto prepared = context->getQoSContext()->preparedData.get();
+    if (step == 0)
+        return new AmpduTransmitStep(context->getQoSContext()->preparedData, context->getIfs());
+    if (step == 1)
+        return new ReceiveStep(context->getQoSContext()->ackPolicy->getImplicitBlockAckTimeout(prepared->ackMode));
+    return nullptr;
+}
+
+bool AmpduBlockAckFs::completeStep(FrameSequenceContext *context)
+{
+    if (step++ == 0)
+        return true;
+    auto prepared = context->getQoSContext()->preparedData.get();
+    auto receive = check_and_cast<IReceiveStep *>(context->getLastStep());
+    return !prepared->cancelled && isValidCompressedBlockAck(receive->getReceivedFrame(),
+        prepared->limits.transmitter, prepared->limits.receiver, prepared->limits.tid);
+}
+
 // TODO remove isForUs checks it's already done in framesequencehandler
 
 void SelfCtsFs::startSequence(FrameSequenceContext *context, int firstStep)
@@ -40,7 +70,7 @@ IFrameSequenceStep *RtsFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto dataOrMgmtPacket = context->getInProgressFrames()->getFrameToTransmit();
+            auto dataOrMgmtPacket = context->getDataFrameToTransmit();
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
             auto rtsPacket = new Packet("RTS");
             rtsPacket->insertAtBack(rtsFrame);
@@ -119,7 +149,7 @@ IFrameSequenceStep *DataFs::prepareStep(FrameSequenceContext *context)
             // RTS/CTS retains its selected DATA even if its lifetime expires during protection.
             // HCF rejects the next submission before Tx accepts that expired DATA.
             if (packet == nullptr)
-                packet = context->getInProgressFrames()->getFrameToTransmit();
+                packet = context->getDataFrameToTransmit();
             return new TransmitStep(packet, context->getIfs());
         }
         case 1:
@@ -150,7 +180,13 @@ IFrameSequenceStep *ManagementAckFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            Packet *packet = nullptr;
+            if (context->getQoSContext() && dynamic_cast<IReceiveStep *>(context->getLastStep())) {
+                if (auto rts = dynamic_cast<RtsTransmitStep *>(context->getStepBeforeLast()))
+                    packet = const_cast<Packet *>(rts->getProtectedFrame());
+            }
+            if (packet == nullptr)
+                packet = context->getInProgressFrames()->getFrameToTransmit();
             return new TransmitStep(packet, context->getIfs());
         }
         case 1: {
@@ -195,7 +231,13 @@ IFrameSequenceStep *ManagementFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            Packet *packet = nullptr;
+            if (context->getQoSContext() && dynamic_cast<IReceiveStep *>(context->getLastStep())) {
+                if (auto rts = dynamic_cast<RtsTransmitStep *>(context->getStepBeforeLast()))
+                    packet = const_cast<Packet *>(rts->getProtectedFrame());
+            }
+            if (packet == nullptr)
+                packet = context->getInProgressFrames()->getFrameToTransmit();
             return new TransmitStep(packet, context->getIfs());
         }
         case 1:
@@ -263,7 +305,7 @@ IFrameSequenceStep *RtsCtsFs::prepareStep(FrameSequenceContext *context)
 {
     switch (step) {
         case 0: {
-            auto packet = context->getInProgressFrames()->getFrameToTransmit();
+            auto packet = context->getDataFrameToTransmit();
             auto dataOrMgmtHeader = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
             auto rtsFrame = context->getRtsProcedure()->buildRtsFrame(dataOrMgmtHeader);
             auto rtsPacket = new Packet("RTS");
@@ -400,12 +442,15 @@ IFrameSequenceStep *BlockAckReqBlockAckFs::prepareStep(FrameSequenceContext *con
 {
     switch (step) {
         case 0: {
-            auto blockAckReqParams = context->getQoSContext()->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), context->getQoSContext()->txopProcedure);
+            auto qos = context->getQoSContext();
+            auto blockAckReqParams = qos->ackPolicy->computeBlockAckReqParameters(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler);
             auto receiverAddr = std::get<0>(blockAckReqParams);
             auto startingSequenceNumber = std::get<1>(blockAckReqParams);
             auto tid = std::get<2>(blockAckReqParams);
-            auto blockAckReq = context->getQoSContext()->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
-            auto blockAckPacket = new Packet("BasicBlockAckReq", blockAckReq);
+            bool compressed = qos->blockAckVariant == BlockAckVariant::COMPRESSED;
+            auto blockAckReq = compressed ? qos->blockAckProcedure->buildCompressedBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber) :
+                qos->blockAckProcedure->buildBasicBlockAckReqFrame(receiverAddr, tid, startingSequenceNumber);
+            auto blockAckPacket = new Packet(compressed ? "CompressedBlockAckReq" : "BasicBlockAckReq", blockAckReq);
             blockAckPacket->insertAtBack(makeShared<Ieee80211MacTrailer>());
             return new TransmitStep(blockAckPacket, context->getIfs(), true);
         }
@@ -433,7 +478,27 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
             step++;
             auto receivedPacket = receiveStep->getReceivedFrame();
             const auto& receivedHeader = receivedPacket->peekAtFront<Ieee80211MacHeader>();
-            return context->isForUs(receivedHeader) && receivedHeader->getType() == ST_BLOCKACK;
+            auto requestStep = check_and_cast<ITransmitStep *>(context->getStep(firstStep));
+            auto request = requestStep->getFrameToTransmit()->peekAtFront<Ieee80211BlockAckReq>();
+            if (auto basic = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(request)) {
+                auto response = dynamicPtrCast<const Ieee80211BasicBlockAck>(receivedHeader);
+                bool valid = response && !response->getMultiTid() && !response->getCompressedBitmap() &&
+                    response->getFragmentNumber() == 0 && response->getStartingSequenceNumber().isSpecified() &&
+                    (response->getReserved() & 3) == 0 && response->getChunkLength() == LENGTH_BASIC_BLOCKACK - B(4) &&
+                    receivedPacket->getDataLength() == LENGTH_BASIC_BLOCKACK && response->getBlockAckBitmapArraySize() == 64;
+                if (valid)
+                    for (int i = 0; i < 64; i++)
+                        valid &= response->getBlockAckBitmap(i).getSize() == 16;
+                return valid && context->isForUs(receivedHeader) &&
+                    response->getReceiverAddress() == basic->getTransmitterAddress() &&
+                    response->getTransmitterAddress() == basic->getReceiverAddress() &&
+                    response->getTidInfo() == basic->getTidInfo();
+            }
+            auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(request);
+            auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(receivedHeader);
+            // IEEE Std 802.11-2024, 9.3.1.8.2: this profile supports the 64-bit bitmap without dynamic fragmentation.
+            return compressed && isValidCompressedBlockAck(receivedPacket, compressed->getTransmitterAddress(),
+                compressed->getReceiverAddress(), compressed->getTidInfo());
         }
         default:
             throw cRuntimeError("Unknown step");

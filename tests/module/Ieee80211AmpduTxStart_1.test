@@ -1,0 +1,225 @@
+%description:
+Production Tx calls aggregate preparation at the exact submission time after IFS, or immediately for zero IFS.
+Cancellation before IFS expiry prevents preparation and submission. Refusal clears the request before its cancellation callback.
+Completion accepts a one-byte envelope without a MAC header or trailer and supplies a null header to the callback.
+The completion callback can submit a replacement before the earlier completion returns.
+A minimal MAC subclass captures submissions. The fixture calls the production radio-completion entry directly.
+This module evidence does not establish production HCF cancellation or real radio completion.
+
+%file: AggregateTxStart.cc
+#include <iostream>
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Tx.h"
+#include "inet/linklayer/ieee80211/mac/contract/IRx.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class AggregateTxNavProbe : public IRx
+{
+  public:
+    int updates = 0;
+    bool isReceptionInProgress() const override { return false; }
+    bool isMediumFree() const override { return true; }
+    simtime_t getTxnavRemaining() const override { return SIMTIME_ZERO; }
+    void successfulFrameTransmitted(simtime_t, simtime_t) override {}
+    void setContentionBlocked(bool) override {}
+    void frameTransmitted(simtime_t) override { updates++; }
+    void registerContention(IContention *) override {}
+    void receptionStateChanged(physicallayer::IRadio::ReceptionState) override {}
+    void transmissionStateChanged(physicallayer::IRadio::TransmissionState) override {}
+    void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart) override {}
+    bool lowerFrameReceived(Packet *) override { throw cRuntimeError("Unexpected receive operation"); }
+    AmpduReception lowerAggregateReceived(Packet *) override { throw cRuntimeError("Unexpected aggregate receive operation"); }
+};
+
+class AggregateCaptureMac : public Ieee80211Mac
+{
+  protected:
+    int numInitStages() const override { return 1; }
+    void initialize(int) override {}
+  public:
+    std::vector<simtime_t> submissions;
+    std::vector<int64_t> submittedIds;
+    void sendDownFrame(Packet *packet) override {
+        Enter_Method("sendDownFrame");
+        take(packet);
+        ASSERT(packet->getDataLength() == B(1));
+        ASSERT(packet->peekAllAsBytes()->getBytes() == std::vector<uint8_t>{0x5a});
+        submissions.push_back(simTime());
+        submittedIds.push_back(packet->getId());
+        delete packet;
+    }
+};
+Define_Module(AggregateCaptureMac);
+
+class AggregateBoundaryTx : public Tx
+{
+  protected:
+    int numInitStages() const override { return 1; }
+    void initialize(int) override {
+        mac = check_and_cast<AggregateCaptureMac *>(getModuleByPath("^.mac"));
+        rx = &navProbe;
+        endIfsTimer = new cMessage("endIFS");
+    }
+  public:
+    AggregateTxNavProbe navProbe;
+};
+Define_Module(AggregateBoundaryTx);
+
+class AggregateUnusedCallback : public ITx::IAggregateCallback
+{
+  public:
+    void frameTransmissionStarted(Packet *) override { throw cRuntimeError("Unexpected callback"); }
+    Packet *prepareAggregateTransmission() override { throw cRuntimeError("Unexpected callback"); }
+    void aggregateTransmissionCancelled() override { throw cRuntimeError("Unexpected callback"); }
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override { throw cRuntimeError("Unexpected callback"); }
+};
+
+class AggregateTxStartTest : public cSimpleModule, public ITx::IAggregateCallback
+{
+    AggregateBoundaryTx *tx = nullptr;
+    AggregateCaptureMac *capture = nullptr;
+    AggregateUnusedCallback unrelated;
+    std::unique_ptr<Packet> source;
+    int prepared = 0;
+    int cancelled = 0;
+    int completed = 0;
+    int ordinaryStarted = 0;
+    bool refuse = false;
+    bool replaceAtCompletion = false;
+    simtime_t expectedSubmission;
+    std::vector<simtime_t> preparationTimes;
+
+  public:
+    AggregateTxStartTest() : cSimpleModule(65536) {}
+    Packet *prepareAggregateTransmission() override {
+        ASSERT(tx->hasTransmission());
+        ASSERT(simTime() == expectedSubmission);
+        prepared++;
+        preparationTimes.push_back(simTime());
+        ASSERT(source->getOwner() == this);
+        return refuse ? nullptr : source.get();
+    }
+    void aggregateTransmissionCancelled() override {
+        ASSERT(!tx->hasTransmission());
+        ASSERT(simTime() == expectedSubmission);
+        cancelled++;
+    }
+    void frameTransmissionStarted(Packet *) override { ordinaryStarted++; }
+    void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        ASSERT(!tx->hasTransmission());
+        ASSERT(header == nullptr);
+        ASSERT(packet != source.get() && packet->getId() != source->getId());
+        ASSERT(packet->getDataLength() == B(1));
+        ASSERT(packet->peekAllAsBytes()->getBytes() == std::vector<uint8_t>{0x5a});
+        ASSERT(source->getOwner() == this);
+        completed++;
+        if (replaceAtCompletion) {
+            replaceAtCompletion = false;
+            expectedSubmission = simTime();
+            tx->transmitAggregate(SIMTIME_ZERO, this);
+            ASSERT(tx->hasTransmission());
+        }
+    }
+  protected:
+    void activity() override {
+        tx = check_and_cast<AggregateBoundaryTx *>(getModuleByPath("^.tx"));
+        capture = check_and_cast<AggregateCaptureMac *>(getModuleByPath("^.mac"));
+        wait(SimTime(1, SIMTIME_MS));
+        int passed = 0;
+        for (const std::string operation : {"delayed", "zero", "cancel", "refuse", "zeroRefuse", "replace"}) {
+            ASSERT(!tx->hasTransmission());
+            prepared = cancelled = completed = ordinaryStarted = 0;
+            refuse = operation == "refuse" || operation == "zeroRefuse";
+            replaceAtCompletion = operation == "replace";
+            source = std::make_unique<Packet>("one-byte-envelope", makeShared<BytesChunk>(std::vector<uint8_t>{0x5a}));
+            auto originalId = source->getId();
+            auto before = capture->submissions.size();
+            auto delay = operation == "zero" || operation == "zeroRefuse" ? SIMTIME_ZERO : SimTime(16, SIMTIME_US);
+            expectedSubmission = simTime() + delay;
+            tx->transmitAggregate(delay, this);
+            ASSERT(!tx->cancelPendingAggregate(&unrelated));
+            if (operation == "cancel") {
+                ASSERT(tx->hasTransmission() && prepared == 0);
+                wait(delay / 2);
+                ASSERT(tx->cancelPendingAggregate(this));
+                ASSERT(!tx->hasTransmission());
+                ASSERT(!tx->cancelPendingAggregate(this));
+                wait(delay);
+                ASSERT(prepared == 0 && cancelled == 0 && completed == 0);
+                ASSERT(capture->submissions.size() == before);
+            }
+            else {
+                if (delay > SIMTIME_ZERO) {
+                    ASSERT(tx->hasTransmission() && prepared == 0);
+                    ASSERT(capture->submissions.size() == before);
+                    wait(delay / 2);
+                    ASSERT(prepared == 0 && tx->hasTransmission());
+                    wait(delay / 2 + SimTime(1, SIMTIME_NS));
+                }
+                ASSERT(prepared == 1);
+                if (refuse) {
+                    ASSERT(cancelled == 1 && completed == 0 && !tx->hasTransmission());
+                    ASSERT(capture->submissions.size() == before);
+                    ASSERT(!tx->cancelPendingAggregate(this));
+                }
+                else {
+                    ASSERT(cancelled == 0 && completed == 0 && tx->hasTransmission());
+                    ASSERT(capture->submissions.size() == before + 1);
+                    ASSERT(capture->submissions.back() == preparationTimes.back());
+                    ASSERT(capture->submittedIds.back() != originalId);
+                    ASSERT(!tx->cancelPendingAggregate(this));
+                    tx->radioTransmissionFinished();
+                    if (operation == "replace") {
+                        ASSERT(completed == 1 && prepared == 2 && tx->hasTransmission());
+                        ASSERT(capture->submissions.size() == before + 2);
+                        tx->radioTransmissionFinished();
+                        ASSERT(completed == 2);
+                    }
+                    else
+                        ASSERT(completed == 1);
+                    ASSERT(!tx->hasTransmission());
+                    tx->radioTransmissionFinished();
+                    ASSERT(completed == (operation == "replace" ? 2 : 1));
+                }
+            }
+            ASSERT(ordinaryStarted == 0 && tx->navProbe.updates == 0);
+            ASSERT(source->getId() == originalId && source->getOwner() == this);
+            ASSERT(source->getDataLength() == B(1));
+            source.reset();
+            passed++;
+            std::cout << "Aggregate Tx boundary passed: " << operation << "\n";
+        }
+        ASSERT(passed == 6);
+        std::cout << "All six aggregate Tx boundary cases passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(AggregateTxStartTest);
+
+%file: test.ned
+import inet.common.SimpleModule;
+simple AggregateCaptureMac extends SimpleModule { parameters: @class(::AggregateCaptureMac); }
+simple AggregateBoundaryTx extends SimpleModule { parameters: @class(::AggregateBoundaryTx); }
+simple AggregateTxStartTest extends SimpleModule { parameters: @class(::AggregateTxStartTest); }
+network Test {
+    submodules:
+        mac: AggregateCaptureMac;
+        tx: AggregateBoundaryTx;
+        test: AggregateTxStartTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+%contains: stdout
+All six aggregate Tx boundary cases passed.

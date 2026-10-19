@@ -622,6 +622,7 @@ void Ieee80211MgmtSta::clearCurrentAssociation()
 {
     ASSERT(mib->bssStationData.isAssociated);
     auto address = assocAP.address;
+    resetPeerAgreements(address);
     mib->bssStationData.isAssociated = false;
     cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;

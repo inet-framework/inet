@@ -62,6 +62,7 @@ class INET_API Ieee80211MgmtBase : public OperationalBase, public cListener
 
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Packet *frame);
+    void resetPeerAgreements(const MacAddress& peer);
 
     // Convert the modeled legacy rate elements to the existing MIB representation.
     static Ieee80211RateSetState makeRateSet(const Ieee80211SupportedRatesElement& rates,

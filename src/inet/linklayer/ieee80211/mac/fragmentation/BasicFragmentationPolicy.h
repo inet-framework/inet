@@ -25,6 +25,7 @@ class INET_API BasicFragmentationPolicy : public IFragmentationPolicy, public Si
 
   public:
     virtual std::vector<int> computeFragmentSizes(Packet *frame) override;
+    virtual FragmentPartition computeBoundedFragmentSizes(Packet *frame, int maxMpduBytes) override;
 };
 
 } // namespace ieee80211

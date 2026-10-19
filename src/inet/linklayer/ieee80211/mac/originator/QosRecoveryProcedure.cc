@@ -8,12 +8,98 @@
 #include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
 
 #include "inet/common/stlutils.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 
 namespace inet {
 namespace ieee80211 {
 
 Define_Module(QosRecoveryProcedure);
+
+QosRecoveryProcedure::MsduRetryRecord *QosRecoveryProcedure::findMsduRetryRecord(Packet *packet)
+{
+    auto tag = packet->findTag<Ieee80211DataSequenceTag>();
+    if (!tag)
+        return nullptr;
+    auto it = msduRetryRecords.find(tag->getAllocationIndex());
+    return it == msduRetryRecords.end() ? nullptr : &it->second;
+}
+
+void QosRecoveryProcedure::registerMsdu(Packet *packet, MsduRetryContract contract, bool lifetimeOnly)
+{
+    Enter_Method("registerMsdu");
+    auto allocation = packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+    auto result = msduRetryRecords.emplace(allocation, MsduRetryRecord{contract});
+    ASSERT(result.second || result.first->second.contract == contract);
+    result.first->second.lifetimeOnly = lifetimeOnly;
+}
+
+bool QosRecoveryProcedure::hasMsduRetryRecord(Packet *packet)
+{
+    return findMsduRetryRecord(packet) != nullptr;
+}
+
+void QosRecoveryProcedure::msduTransmissionFailed(Packet *packet, bool rts)
+{
+    Enter_Method("msduTransmissionFailed");
+    auto record = findMsduRetryRecord(packet);
+    ASSERT(record);
+    if (record->contract == MsduRetryContract::IEEE80211_2024) {
+        // IEEE Std 802.11-2024, 10.23.2.12.1: one count includes associated RTS and internal collisions.
+        record->frameCount++;
+        controlFrameTransmissionFailed();
+    }
+    else if (rts || packet->getByteLength() <= rtsThreshold) {
+        // IEEE Std 802.11-2016, 10.22.2.11.1: the MSDU retains both counts across fragment changes.
+        record->shortCount++;
+        incrementStationSrc();
+    }
+    else {
+        record->longCount++;
+        incrementStationLrc();
+    }
+}
+
+void QosRecoveryProcedure::msduAckReceived(Packet *packet, bool finalMember)
+{
+    Enter_Method("msduAckReceived");
+    auto record = findMsduRetryRecord(packet);
+    ASSERT(record);
+    if (record->contract == MsduRetryContract::BASIC_2016) {
+        if (packet->getByteLength() <= rtsThreshold) {
+            record->shortCount = 0;
+            resetStationSrc();
+        }
+        else {
+            record->longCount = 0;
+            resetStationLrc();
+        }
+    }
+    else
+        resetStationSrc();
+    resetContentionWindow();
+    if (finalMember)
+        retireMsdu(packet);
+}
+
+bool QosRecoveryProcedure::isMsduRetryLimitReached(Packet *packet)
+{
+    auto record = findMsduRetryRecord(packet);
+    ASSERT(record);
+    // IEEE Std 802.11-2016, 10.24.3: the accepted Basic agreement limits the MSDU by lifetime.
+    if (record->lifetimeOnly)
+        return false;
+    return record->contract == MsduRetryContract::IEEE80211_2024 ? record->frameCount >= shortRetryLimit :
+        record->shortCount >= shortRetryLimit || record->longCount >= longRetryLimit;
+}
+
+void QosRecoveryProcedure::retireMsdu(Packet *packet)
+{
+    Enter_Method("retireMsdu");
+    auto tag = packet->findTag<Ieee80211DataSequenceTag>();
+    if (tag)
+        msduRetryRecords.erase(tag->getAllocationIndex());
+}
 
 inline std::ostream& operator<<(std::ostream& os, const std::pair<Tid, SequenceControlField>& p) { return os << p.first << "#" << p.second; }
 
@@ -110,6 +196,25 @@ void QosRecoveryProcedure::ctsFrameReceived()
 void QosRecoveryProcedure::blockAckFrameReceived()
 {
     resetStationSrc();
+    resetContentionWindow();
+}
+
+void QosRecoveryProcedure::controlFrameTransmissionFailed()
+{
+    // IEEE Std 802.11-2024, 10.23.2.2: control failures update EDCA backoff without DATA retry feedback.
+    if (stationShortRetryCounter < shortRetryLimit) {
+        stationShortRetryCounter++;
+        incrementContentionWindow();
+    }
+    else {
+        resetStationSrc();
+        resetContentionWindow();
+    }
+}
+
+void QosRecoveryProcedure::implicitBlockAckMemberFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
+{
+    incrementCounter(header, packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter);
 }
 
 //
@@ -121,6 +226,10 @@ void QosRecoveryProcedure::blockAckFrameReceived()
 //
 void QosRecoveryProcedure::ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader)
 {
+    if (findMsduRetryRecord(packet)) {
+        msduAckReceived(packet, !ackedHeader->getMoreFragments());
+        return;
+    }
     auto id = getRetryKey(ackedHeader);
     if (packet->getByteLength() >= rtsThreshold) {
         resetStationLrc();
@@ -149,6 +258,7 @@ void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Iee
 {
     EV_WARN << "Retry limit reached for " << *packet << ".\n";
     dropFrame(header);
+    retireMsdu(packet);
     emit(retryLimitReachedSignal, packet);
 }
 
@@ -171,6 +281,10 @@ void QosRecoveryProcedure::dropFrame(const Ptr<const Ieee80211DataHeader>& heade
 //
 void QosRecoveryProcedure::dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader)
 {
+    if (findMsduRetryRecord(packet)) {
+        msduTransmissionFailed(packet, false);
+        return;
+    }
     if (packet->getByteLength() >= rtsThreshold) {
         incrementStationLrc();
         incrementCounter(failedHeader, longRetryCounter);
@@ -198,6 +312,8 @@ void QosRecoveryProcedure::rtsFrameTransmissionFailed(const Ptr<const Ieee80211D
 //
 bool QosRecoveryProcedure::isRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader)
 {
+    if (findMsduRetryRecord(packet))
+        return isMsduRetryLimitReached(packet);
     if (packet->getByteLength() >= rtsThreshold)
         return getRc(packet, failedHeader, longRetryCounter) >= longRetryLimit;
     else
@@ -206,6 +322,9 @@ bool QosRecoveryProcedure::isRetryLimitReached(Packet *packet, const Ptr<const I
 
 int QosRecoveryProcedure::getRetryCount(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
 {
+    if (auto record = findMsduRetryRecord(packet))
+        return record->contract == MsduRetryContract::IEEE80211_2024 ? record->frameCount :
+            packet->getByteLength() > rtsThreshold ? record->longCount : record->shortCount;
     if (packet->getByteLength() >= rtsThreshold)
         return getRc(packet, header, longRetryCounter);
     else
@@ -232,6 +351,8 @@ void QosRecoveryProcedure::resetContentionWindow()
 
 bool QosRecoveryProcedure::isRtsFrameRetryLimitReached(Packet *packet, const Ptr<const Ieee80211DataHeader>& protectedHeader)
 {
+    if (findMsduRetryRecord(packet))
+        return isMsduRetryLimitReached(packet);
     return getRc(packet, protectedHeader, shortRetryCounter) >= shortRetryLimit;
 }
 

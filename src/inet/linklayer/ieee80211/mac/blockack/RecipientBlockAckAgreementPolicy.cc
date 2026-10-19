@@ -19,12 +19,29 @@ void RecipientBlockAckAgreementPolicy::initialize(int stage)
         isAMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
+        if (maximumAllowedBufferSize <= 0 || blockAckTimeoutValue < SIMTIME_ZERO)
+            throw cRuntimeError("Invalid Block Ack buffer size or inactivity timeout");
     }
 }
 
 bool RecipientBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<const Ieee80211AddbaRequest>& addbaReq)
 {
-    return true;
+    // IEEE Std 802.11-2024, 10.25.2 and Table 9-466: validate ordinary setup; the requested buffer size is advisory.
+    // INET supports immediate Block Ack for historical Basic compatibility and selects at most 64 entries in the response.
+    return !addbaReq->getTransmitterAddress().isUnspecified() &&
+        !addbaReq->getTransmitterAddress().isMulticast() &&
+        addbaReq->getTid() >= 0 && addbaReq->getTid() <= 15 &&
+        addbaReq->getDialogToken() > 0 && addbaReq->getDialogToken() <= 255 &&
+        addbaReq->getBlockAckPolicy() && addbaReq->getBufferSize() >= 0 &&
+        addbaReq->getBufferSize() <= 1023 && addbaReq->getStartingSequenceNumber().isSpecified() &&
+        addbaReq->getBlockAckTimeoutValue() >= SIMTIME_ZERO;
+}
+
+bool RecipientBlockAckAgreementPolicy::isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const
+{
+    if (variant == BlockAckVariant::COMPRESSED && (!localHt || !peerHt))
+        EV_DEBUG << "Compressed Block Ack setup refused: " << (!localHt ? "local HT state is absent" : "peer HT state is absent") << "; DATA uses Normal Ack.\n";
+    return variant == BlockAckVariant::BASIC || (localHt && peerHt);
 }
 
 bool RecipientBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba)

@@ -91,6 +91,12 @@ class SingleRateSelection : public IQosRateSelection {
             const Ptr<const Ieee80211BlockAckReq>& header, ResponseQueryRole role) override {
         return delegate->computeResponseBlockAckFrameMode(packet, header, role);
     }
+    const physicallayer::IIeee80211Mode *computeCompressedBlockAckReqMode(Packet *packet, const Ptr<const Ieee80211CompressedBlockAckReq>& header, bool startsTxop) override {
+        return delegate->computeCompressedBlockAckReqMode(packet, header, startsTxop);
+    }
+    const physicallayer::IIeee80211Mode *computeCompressedBlockAckResponseMode(const physicallayer::IIeee80211Mode *mode) override {
+        return delegate->computeCompressedBlockAckResponseMode(mode);
+    }
 };
 class SingleRateControl : public IRateControl {
   public:
@@ -154,7 +160,22 @@ class SingleHcf : public Hcf {
         auto selectedTag = selected->findTag<physicallayer::Ieee80211ModeReq>();
         auto selectedMode = selectedTag ? selectedTag->getMode() : nullptr;
         auto pending = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(h) ?
-            context->getInProgressFrames()->getPendingFrameFor(packet) : nullptr;
+            context->getInProgressFrames()->getPendingFrameFor(packet, false) : nullptr;
+        auto prepared = context->getQoSContext()->preparedData.get();
+        auto preparation = prepared ? (prepared->preparation ? prepared->preparation.get() :
+            prepared->fragments ? prepared->fragments->source.get() : nullptr) : nullptr;
+        if (preparation) {
+            pending = nullptr;
+            auto queue = edca->getChannelOwner()->getPendingQueue();
+            for (int i = 0; i < queue->getNumPackets(); i++) {
+                auto candidate = queue->getPacket(i);
+                const auto& ids = preparation->sourceIds;
+                if (std::find(ids.begin(), ids.end(), candidate->getId()) == ids.end()) {
+                    pending = candidate;
+                    break;
+                }
+            }
+        }
         if (pending && sender() && forecastChecks == 0) {
             if (scenario() != 1)
                 pending->addTagIfAbsent<physicallayer::Ieee80211ModeReq>()->setMode(mode(54e6));
@@ -199,7 +220,21 @@ class SingleHcf : public Hcf {
     void channelGranted(IChannelAccess *access) override {
         grants++;
         grantTimes.push_back(simTime());
-        Hcf::channelGranted(access);
+        try {
+            Hcf::channelGranted(access);
+        }
+        catch (const cRuntimeError& error) {
+            if (!sender() || (scenario() != 7 && scenario() != 20) ||
+                    std::string(error.what()).find("TXOP admission: no permitted form fits") == std::string::npos)
+                throw;
+            auto owner = edca->getChannelOwner();
+            ASSERT(owner->getPendingQueue()->getNumPackets() == 1);
+            ASSERT(owner->getInProgressFrames()->getLength() == 0 && timerStarts == 0);
+            auto service = check_and_cast<IOriginatorQosMacDataService *>(originatorDataService);
+            ASSERT(service->getNextSequenceNumber(MacAddress("02:00:00:00:00:02"), 5) == SequenceNumberCyclic(0));
+            std::cout << "Single-protection production admission assertions passed.\n";
+            endSimulation();
+        }
     }
     void scheduleStartRxTimer(simtime_t timeout) override {
         timerStarts++;
@@ -234,7 +269,7 @@ class SingleHcf : public Hcf {
         auto receive = dynamic_cast<IReceiveStep *>(last);
         finishTypes.push_back(receive ? receive->getReceivedFrame()->peekAtFront<Ieee80211MacHeader>()->getType() : -1);
         currentData = 0;
-        if (sender() && scenario() == 4 && refusals)
+        if (sender() && scenario() == 4 && edca->getChannelOwner()->getPendingQueue()->getNumPackets() > 0)
             selection.dataMode = mode(54e6);
         Hcf::frameSequenceFinished();
     }
@@ -299,7 +334,7 @@ class SingleTest : public cSimpleModule {
         ASSERT(!mac->transmissions.empty());
         for (auto frame : mac->transmissions) ASSERT(!frame.retry);
         if (s >= 11 && s <= 13) {
-            ASSERT(sender->acknowledgments == (s == 13 ? 5 : 4));
+            ASSERT(sender->acknowledgments == (s == 13 ? 8 : 7));
             ASSERT(sender->grants >= 3);
             int voice = 0, bestEffort = 0;
             for (auto frame : mac->transmissions) {
@@ -308,7 +343,7 @@ class SingleTest : public cSimpleModule {
                     if (frame.tid == 0) bestEffort++;
                 }
             }
-            ASSERT(voice == 4 && bestEffort == (s == 13 ? 1 : 0));
+            ASSERT(voice == 7 && bestEffort == (s == 13 ? 1 : 0));
         }
         else if (s == 7 || s == 20) {
             ASSERT(sender->acknowledgments == 1);
@@ -320,16 +355,16 @@ class SingleTest : public cSimpleModule {
             ASSERT(sender->acknowledgments >= 2);
             ASSERT(mac->transmissions.size() >= 2);
             if (s == 18) {
-                ASSERT(sender->grants == sender->acknowledgments);
-                for (auto count : sender->burstData) ASSERT(count == 1);
+                ASSERT(sender->grants == 1 && sender->acknowledgments == 3);
+                ASSERT(sender->burstData.size() == 1 && sender->burstData[0] == 3);
             }
             else ASSERT(sender->burstData[0] > 1);
         }
         else if (s == 17) {
-            ASSERT(sender->acknowledgments == 2);
-            ASSERT(mac->transmissions.size() == 2);
-            ASSERT(sender->burstData[0] == 2);
-            for (auto frame : mac->transmissions) ASSERT(frame.aggregated);
+            ASSERT(sender->acknowledgments == 4);
+            ASSERT(mac->transmissions.size() == 4);
+            ASSERT(sender->burstData[0] == 4);
+            for (auto frame : mac->transmissions) ASSERT(!frame.aggregated);
         }
         else if (s == 25) {
             ASSERT(sender->acknowledgments == 3);
@@ -355,7 +390,7 @@ class SingleTest : public cSimpleModule {
                 ASSERT(sender->decisions[1] == mac->transmissions[0].start + SimTime(160, SIMTIME_US));
             }
             if (s == 1 || s == 4 || s == 8 || s == 16 || s == 22 || s == 24) {
-                ASSERT(sender->refusals == 1);
+                ASSERT(sender->refusals == (s == 1 || s == 24 ? 1 : 0)); // Preparation can refuse before a TransmitStep exists.
                 ASSERT(sender->finishTypes[0] == ST_ACK);
                 ASSERT(sender->finishSteps[0] == 2);
                 ASSERT(sender->grants == 2);
@@ -381,7 +416,8 @@ class SingleTest : public cSimpleModule {
                 ASSERT(mac->transmissions.size() == 3);
                 ASSERT(mac->transmissions[0].duration == SimTime(188, SIMTIME_US));
                 ASSERT(mac->transmissions[1].type == ST_RTS);
-                ASSERT(sender->admissionGrants[1] == 1 && sender->admissionGrants[2] == 2);
+                ASSERT(sender->admissionGrants.size() == 3);
+                ASSERT(sender->admissionGrants[1] == 2 && sender->admissionGrants[2] == 2);
             }
             if (s == 3 || s == 4)
                 ASSERT(mac->transmissions.back().mode == sender->mode(54e6));

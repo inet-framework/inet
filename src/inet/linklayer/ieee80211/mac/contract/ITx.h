@@ -26,6 +26,14 @@ class INET_API ITx
         virtual ~ICallback() {}
 
         virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
+        virtual void frameTransmissionStarted(Packet *packet) = 0;
+    };
+
+    class INET_API IAggregateCallback : public ICallback {
+      public:
+        // The caller validates and finalizes members at the actual submission boundary.
+        virtual Packet *prepareAggregateTransmission() = 0;
+        virtual void aggregateTransmissionCancelled() = 0;
     };
 
   public:
@@ -56,6 +64,10 @@ class INET_API ITx
      */
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ICallback *callback) = 0;
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ICallback *callback) = 0;
+    virtual void transmitAggregate(simtime_t ifs, IAggregateCallback *callback) = 0;
+    // Cancellation removes only a delayed request. It cannot cancel a submitted PPDU.
+    virtual bool cancelPendingAggregate(IAggregateCallback *callback) = 0;
+    virtual void finalizeMpdu(Packet *packet) = 0;
     /**
      * The query returns true while Tx retains an accepted frame,
      * including any wait before transmission and the transmission itself.

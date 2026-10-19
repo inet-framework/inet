@@ -1,0 +1,49 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2025 Andras Varga, OpenSim Ltd.
+Version: 6.4.0aipre2, build: 260526-7b9114f72c, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+
+Setting up Cmdenv...
+
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples:  210
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases:  75
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/src:  1239
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/validation:  1
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/networks:  6
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tutorials:  52
+
+Preparing for running configuration NoAggregation, run #0...
+
+*** WARNING: FAKEGUI IS AN EXPERIMENTAL FEATURE -- DO NOT RELY ON FINGERPRINTS GENERATED UNDER FAKEGUI UNTIL CODE IS FINALIZED!
+
+Assigned runID=NoAggregation-0-20261019-09:33:31-26
+Setting up network "AggregationShowcase"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 2.6e-05s (0m 00s)  0% completed  (0% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 87   present: 87   in FES: 3   Memory (RSS): 204.84MiB
+** Event #19456   t=0.20349230863   Elapsed: 2.01732s (0m 02s)  20% completed  (20% total)
+     Speed:     ev/sec=9645.12   simsec/sec=0.100874   ev/simsec=95615.4
+     Messages:  created: 14403   present: 218   in FES: 6   Memory (RSS): 206.152MiB
+** Event #38912   t=0.40625   Elapsed: 4.03296s (0m 04s)  40% completed  (40% total)
+     Speed:     ev/sec=9652.46   simsec/sec=0.100592   ev/simsec=95956.9
+     Messages:  created: 28669   present: 216   in FES: 3   Memory (RSS): 206.152MiB
+** Event #57600   t=0.60072461726   Elapsed: 6.05662s (0m 06s)  60% completed  (60% total)
+     Speed:     ev/sec=9234.76   simsec/sec=0.0961005   ev/simsec=96094.8
+     Messages:  created: 42374   present: 215   in FES: 2   Memory (RSS): 206.152MiB
+** Event #78336   t=0.816875   Elapsed: 8.0846s (0m 08s)  81% completed  (81% total)
+     Speed:     ev/sec=10225   simsec/sec=0.106584   ev/simsec=95933.2
+     Messages:  created: 57577   present: 216   in FES: 4   Memory (RSS): 206.152MiB
+** Event #95921   t=1   Elapsed: 9.73083s (0m 09s)  100% completed  (100% total)
+     Speed:     ev/sec=10681.3   simsec/sec=0.111239   ev/simsec=96021.8
+     Messages:  created: 70475   present: 221   in FES: 5   Memory (RSS): 206.559MiB
+
+<!> Simulation time limit reached -- at t=1s, event #95921
+
+Calling finish() at end of Run #0...
+
+<!> Fingerprint mismatch! calculated: 21a4-c882/tplx, ecf2-6e33/~tNl, 5d9e-8fdf/~tND, cb71-81f8/tyf, expected: 21a4-c882/tplx, ecf2-6e33/~tNl, 5d9e-8fdf/~tND, 27f2-4a52/tyf
+
+
+End.

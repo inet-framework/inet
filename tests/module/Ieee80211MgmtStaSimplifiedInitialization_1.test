@@ -28,6 +28,18 @@ class TestInitializationObserver : public cSimpleModule
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
 
+    void checkReceiverLimits(ieee80211::Ieee80211Mib *apMib, ieee80211::Ieee80211Mib *staMib)
+    {
+        const auto& ap = apMib->findPeerHtState(staMib->address)->negotiatedCapabilities;
+        const auto& sta = staMib->findPeerHtState(apMib->address)->negotiatedCapabilities;
+        ASSERT(ap.localTxPeerRx.receiverMinimumMpduStartSpacing == 1);
+        ASSERT(ap.localRxPeerTx.receiverMinimumMpduStartSpacing == 7);
+        ASSERT(sta.localTxPeerRx.receiverMinimumMpduStartSpacing == 7);
+        ASSERT(sta.localRxPeerTx.receiverMinimumMpduStartSpacing == 1);
+        ASSERT(ap.localTxPeerRx.receiverMaxAmpduLengthExponent == 1);
+        ASSERT(sta.localTxPeerRx.receiverMaxAmpduLengthExponent == 3);
+    }
+
     virtual void initialize(int stage) override
     {
         if (stage == INITSTAGE_NETWORK_CONFIGURATION || stage == INITSTAGE_LAST) {
@@ -54,6 +66,7 @@ class TestInitializationObserver : public cSimpleModule
             else {
                 ASSERT(apMib->findPeerHtState(staMib->address) != nullptr);
                 ASSERT(staMib->findPeerHtState(apMib->address) != nullptr);
+                checkReceiverLimits(apMib, staMib);
                 ASSERT(apMib->findPeerHtState(staMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
                 ASSERT(staMib->findPeerHtState(apMib->address)->negotiatedCapabilities.operation.primaryChannel == 6);
                 std::cout << "Simplified STA HT peer state installed at last initialization stage.\n";
@@ -81,6 +94,7 @@ class TestInitializationObserver : public cSimpleModule
             std::cout << "Simplified STA AP-side association and HT peer state removed after shutdown.\n";
         }
         else if (!strcmp(message->getName(), "checkShutdownRestart")) {
+            checkReceiverLimits(apMib, staMib);
             ASSERT(staMib->bssStationData.isAssociated);
             ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
             ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
@@ -96,6 +110,7 @@ class TestInitializationObserver : public cSimpleModule
             std::cout << "Simplified STA AP-side association and HT peer state removed after resolvable crash.\n";
         }
         else if (!strcmp(message->getName(), "checkCrashRestart")) {
+            checkReceiverLimits(apMib, staMib);
             ASSERT(staMib->bssStationData.isAssociated);
             ASSERT(staMib->bssData.ssid == apMib->bssData.ssid);
             ASSERT(apMib->bssAccessPointData.stations.at(staMib->address) == ieee80211::Ieee80211Mib::ASSOCIATED);
@@ -187,6 +202,10 @@ record-scalar-results = false
 *.ap.wlan[0].radio.channelNumber = 6
 *.sta.wlan[0].mgmt.accessPointAddress = "02:00:00:00:00:01"
 **.wlan[0].opMode = "n(mixed-2.4Ghz)"
+*.ap.wlan[0].mib.htMinimumMpduStartSpacing = 7
+*.sta.wlan[0].mib.htMinimumMpduStartSpacing = 1
+*.ap.wlan[0].mib.htMaxAmpduLengthExponent = 3
+*.sta.wlan[0].mib.htMaxAmpduLengthExponent = 1
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 **.wlan[0].bitrate = 65Mbps

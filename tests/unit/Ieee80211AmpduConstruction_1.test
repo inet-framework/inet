@@ -1,0 +1,188 @@
+%description:
+Verify HT aggregate construction with all receiver spacing encodings at two DATA modes.
+Independent bytes prove alignment, zero-length delimiters, and the absence of final padding.
+Source Packets retain their content and region tags after construction and refusal.
+HT-SIG byte conversion preserves singleton identity through the P1 representation.
+
+%includes:
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregationUtils.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211HtSignalField.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%global:
+static const Ieee80211HtMode *findMode(int mcs, bool use24Ghz = false)
+{
+    const Ieee80211Htmcs *parameters = mcs == 0 ? &Ieee80211HtmcsTable::htMcs0BW20MHz :
+            mcs == 7 ? &Ieee80211HtmcsTable::htMcs7BW20MHz : &Ieee80211HtmcsTable::htMcs15BW20MHz;
+    return Ieee80211HtCompliantModes::getCompliantMode(parameters,
+            use24Ghz ? Ieee80211HtMode::BAND_2_4GHZ : Ieee80211HtMode::BAND_5GHZ,
+            Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_LONG);
+}
+
+static Packet *makeMember(int length, int prefix = 0)
+{
+    auto packet = new Packet("member", makeShared<BytesChunk>(std::vector<uint8_t>(length + prefix, 0xA5)));
+    packet->addRegionTag<CreationTimeTag>(B(prefix + 2), B(3));
+    if (prefix)
+        packet->popAtFront<BytesChunk>(B(prefix));
+    return packet;
+}
+
+%activity:
+MpduAggregation builder;
+const int spacingNanoseconds[] = {0, 250, 500, 1000, 2000, 4000, 8000, 16000};
+for (int mcs : {0, 7}) {
+    auto mode = findMode(mcs);
+    const int rate = mcs == 0 ? 6500000 : 65000000;
+    for (int spacing = 0; spacing < 8; spacing++) {
+        for (int length : {29, 30, 31, 32}) {
+            std::vector<Packet *> frames = {makeMember(length, 6), makeMember(33)};
+            int alignedDistance = ((length + 4 + 3) / 4) * 4;
+            int minimumDistance = (int64_t(spacingNanoseconds[spacing]) * rate + 7999999999LL) / 8000000000LL;
+            int distance = std::max(alignedDistance, ((minimumDistance + 3) / 4) * 4);
+            int extraDelimiters = (distance - alignedDistance) / 4;
+            ASSERT(mode->getMinimumMpduStartDistance(spacing) == B(minimumDistance));
+            B expectedLength(distance + 4 + 33);
+            ASSERT(builder.computeAggregateLength(frames, mode, spacing) == expectedLength);
+            auto aggregate = builder.aggregateFrames(frames, mode, spacing, B(65535));
+            ASSERT(aggregate != nullptr && aggregate->getDataLength() == expectedLength);
+            auto tags = aggregate->getAllRegionTags<CreationTimeTag>();
+            ASSERT(tags.size() == 2);
+            ASSERT(tags[0].getStartOffset() == B(6) && tags[0].getLength() == B(3));
+            ASSERT(tags[1].getStartOffset() == B(distance + 6) && tags[1].getLength() == B(3));
+            auto bytes = aggregate->peekAllAsBytes()->getBytes();
+            ASSERT(bytes.size() == expectedLength.get<B>());
+            ASSERT(bytes[0] == uint8_t(length << 4) && bytes[1] == (length >> 4) && bytes[3] == 0x4E);
+            for (int i = 0; i < length; i++)
+                ASSERT(bytes[4 + i] == 0xA5);
+            for (int i = length + 4; i < alignedDistance; i++)
+                ASSERT(bytes[i] == 0);
+            for (int i = 0; i < extraDelimiters; i++) {
+                int offset = alignedDistance + 4 * i;
+                ASSERT(bytes[offset] == 0 && bytes[offset + 1] == 0 && bytes[offset + 3] == 0x4E);
+            }
+            Packet independent("wire", makeShared<BytesChunk>(bytes));
+            auto layout = inspectMpduAggregate(&independent, B(0), expectedLength);
+            ASSERT(layout.complete && layout.ranges.size() == size_t(4 + extraDelimiters));
+            ASSERT(layout.ranges.back().offset == B(distance + 4));
+            ASSERT(layout.ranges.back().length == B(33));
+            auto refused = builder.aggregateFrames(frames, mode, spacing, expectedLength - B(1));
+            ASSERT(refused == nullptr);
+            MpduDeaggregation deaggregation;
+            auto extracted = deaggregation.deaggregateFrame(aggregate->dup());
+            ASSERT(extracted->size() == 2);
+            for (auto frame : *extracted) {
+                auto memberTags = frame->getAllRegionTags<CreationTimeTag>();
+                ASSERT(memberTags.size() == 1);
+                ASSERT(memberTags.front().getStartOffset() == B(2));
+                ASSERT(memberTags.front().getLength() == B(3));
+                delete frame;
+            }
+            delete extracted;
+            for (auto frame : frames) {
+                ASSERT(frame->peekAllAsBytes()->getBytes().front() == 0xA5);
+                ASSERT(frame->getAllRegionTags<CreationTimeTag>().size() == 1);
+                delete frame;
+            }
+            // The envelope retains immutable member content after source disposal.
+            ASSERT(aggregate->peekAllAsBytes()->getBytes() == bytes);
+            delete aggregate;
+        }
+    }
+}
+auto mode = findMode(7);
+std::vector<Packet *> singleton = {makeMember(31)};
+auto aggregate = builder.aggregateFrames(singleton, mode, 7, B(35));
+ASSERT(aggregate != nullptr && aggregate->getDataLength() == B(35));
+auto ht = makeShared<Ieee80211HtPhyHeader>();
+ht->setLengthField(B(35));
+ht->setAggregation(true);
+ht->setMcs(7);
+ht->setCrc(computeIeee80211HtSignalCrc(*ht));
+aggregate->insertAtFront(ht);
+Packet fresh("fresh", makeShared<BytesChunk>(aggregate->peekAllAsBytes()->getBytes()));
+auto decoded = fresh.popAtFront<Ieee80211HtPhyHeader>(B(6));
+ASSERT(decoded->getAggregation() && decoded->getLengthField() == B(35));
+ASSERT(isIeee80211HtSignalValid(*decoded, mode));
+ASSERT(inspectMpduAggregate(&fresh, B(0), B(35)).complete);
+delete aggregate;
+delete singleton.front();
+std::vector<Packet *> empty;
+ASSERT(builder.aggregateFrames(empty, mode, 0, B(65535)) == nullptr);
+for (int length : {4095, 4096}) {
+    std::vector<Packet *> frames = {makeMember(length)};
+    auto result = builder.aggregateFrames(frames, mode, 0, B(65535));
+    ASSERT((result != nullptr) == (length == 4095));
+    delete result;
+    delete frames.front();
+}
+// 15 * (4 + 4092) + (4 + 4091) = 65535 octets, without final padding.
+std::vector<Packet *> maximum;
+for (int i = 0; i < 15; i++)
+    maximum.push_back(makeMember(4092));
+maximum.push_back(makeMember(4091));
+ASSERT(builder.computeAggregateLength(maximum, mode, 0) == B(65535));
+auto maximumAggregate = builder.aggregateFrames(maximum, findMode(15), 0, B(65535));
+ASSERT(maximumAggregate != nullptr);
+delete maximumAggregate;
+maximum.push_back(makeMember(30));
+ASSERT(builder.aggregateFrames(maximum, mode, 0, B(65535)) == nullptr);
+for (auto frame : maximum)
+    delete frame;
+// A low DATA rate reaches the L-SIG limit before the separate 10 ms limit.
+auto slow = findMode(0);
+auto slow24 = findMode(0, true);
+bool sawLastValid = false;
+for (int length = 4000; length < 5000; length++) {
+    auto duration = slow->getDuration(B(length)) - slow->getSignalExtensionTime();
+    ASSERT(slow->isPpduDurationValid(B(length)) == (duration <= SimTime(5484, SIMTIME_US)));
+    ASSERT(slow24->getDuration(B(length)) == slow->getDuration(B(length)) + SimTime(6, SIMTIME_US));
+    ASSERT(slow24->getLSigLength(B(length)) == slow->getLSigLength(B(length)));
+    ASSERT(slow24->isPpduDurationValid(B(length)) == slow->isPpduDurationValid(B(length)));
+    if (duration == SimTime(5484, SIMTIME_US)) {
+        ASSERT(slow->getLSigLength(B(length)) == 4095);
+        sawLastValid = true;
+    }
+}
+ASSERT(sawLastValid);
+bool sawTenMilliseconds = false;
+for (int length = 8000; length < 8200; length++) {
+    auto duration = slow->getDuration(B(length));
+    ASSERT(slow->isPpduDurationWithinLimit(B(length)) == (duration <= SimTime(10, SIMTIME_MS)));
+    if (duration == SimTime(10, SIMTIME_MS))
+        sawTenMilliseconds = true;
+}
+ASSERT(sawTenMilliseconds);
+std::vector<Packet *> slowBatch = {makeMember(4000), makeMember(1000)};
+ASSERT(slow->getDuration(B(5008)) < SimTime(10, SIMTIME_MS));
+ASSERT(builder.aggregateFrames(slowBatch, slow, 0, B(65535)) == nullptr);
+for (auto frame : slowBatch)
+    delete frame;
+for (int spacing : {-1, 8}) {
+    bool rejected = false;
+    try { mode->getMinimumMpduStartDistance(spacing); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+std::vector<Packet *> consumed = {makeMember(29, 6), makeMember(31)};
+auto legacy = builder.aggregateFrames(&consumed);
+ASSERT(legacy->getDataLength() == B(71));
+ASSERT(inspectMpduAggregate(legacy, B(0), B(71)).complete);
+auto legacyTags = legacy->getAllRegionTags<CreationTimeTag>();
+ASSERT(legacyTags.size() == 2);
+ASSERT(legacyTags[0].getStartOffset() == B(6));
+ASSERT(legacyTags[1].getStartOffset() == B(42));
+delete legacy;
+EV << "HT aggregate construction checks passed\n";
+
+%contains: stdout
+HT aggregate construction checks passed

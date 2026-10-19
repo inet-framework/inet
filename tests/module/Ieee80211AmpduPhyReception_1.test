@@ -1,0 +1,664 @@
+%description:
+Real HT20 radios preserve separate delimiter and MPDU outcomes after partial loss.
+Scalar and dimensional controls use whole-signal and separate-part reception with seeds 0, 1, and 2.
+Repeated decision and result queries must reuse probabilities and draws.
+Invalid headers and insufficient content must prevent member outcomes through distinct decisions.
+Production MAC initialization must refuse absent roles and incomplete advertised receive coverage before the MIB update.
+Ordinary NIST, Yans, absent-model, and non-HT controls retain their defined behavior and metadata.
+
+%extraargs: -r 0..467
+
+%postrun-command: python3 check-models.py
+
+%file: AmpduPhyReception.cc
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+#include "inet/physicallayer/wireless/common/signal/WirelessSignal.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211AmpduReceptionDecision.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211HtSignalField.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211YansErrorModel.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/SnirBase.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+class AmpduReferenceSnir : public SnirBase
+{
+    double value;
+  public:
+    explicit AmpduReferenceSnir(double value) : SnirBase(nullptr, nullptr), value(value) {}
+    double getMin() const override { return value; }
+    double getMax() const override { return 2 * value; }
+    double getMean() const override { return 1.5 * value; }
+};
+
+class AmpduModelAudit
+{
+  public:
+    virtual ~AmpduModelAudit() = default;
+    mutable int rangeCalls = 0;
+    mutable int headerCalls = 0;
+    mutable int preambleCalls = 0;
+    mutable int wholeCalls = 0;
+    mutable double headerError = NaN;
+    mutable std::vector<double> probabilities;
+    std::vector<Ieee80211AmpduRange> outcomes;
+};
+
+template<typename Base> class AmpduSharedModel : public Base, public AmpduModelAudit
+{
+  protected:
+    void initialize(int stage) override {
+        Base::initialize(stage);
+        if (stage != INITSTAGE_PHYSICAL_LAYER || !this->par("referenceMatrix").boolValue())
+            return;
+        auto draws = this->getRNG(0)->getNumbersDrawn();
+        int checked = 0;
+        auto modes = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+        ASSERT(!this->supportsAmpduMode(nullptr));
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto mode = modes->getMode(i);
+            bool supported = mode->getHtMcsIndex() >= 0 && mode->getHtMcsIndex() <= 31 && mode->getDataMode()->getBandwidth() == MHz(20);
+            ASSERT(this->supportsAmpduMode(mode) == supported);
+            if (!supported)
+                continue;
+            for (double value : {0.01, 0.1, 1.0, 3.0, 10.0, 100.0, 1000.0}) {
+                AmpduReferenceSnir snir(value);
+                double scalar = (this->par("snirMode").stdstringValue() == "min" ? value : 1.5 * value) *
+                        inet::math::dB2fraction(this->par("snirOffset"));
+                for (int length : {4, 100, 101, 102, 4095, 65535}) {
+                    double expected = Base::getDataSuccessRate(mode, length * 8, scalar);
+                    double actual = Base::computeAmpduRangeSuccessRate(&snir, mode, B(length));
+                    ASSERT(actual == expected && actual >= 0 && actual <= 1);
+                    checked++;
+                }
+            }
+        }
+        ASSERT(checked == 64 * 7 * 6);
+        ASSERT(this->getRNG(0)->getNumbersDrawn() == draws);
+        ASSERT(rangeCalls == 0 && headerCalls == 0 && preambleCalls == 0 && wholeCalls == 0);
+    }
+  public:
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override {
+        double probability = Base::computePacketErrorRate(snir, part);
+        if (part == IRadioSignal::SIGNAL_PART_PREAMBLE) preambleCalls++;
+        else if (part == IRadioSignal::SIGNAL_PART_HEADER) { headerCalls++; headerError = probability; }
+        else wholeCalls++;
+        return probability;
+    }
+    double computeAmpduRangeSuccessRate(const ISnir *snir, const IIeee80211Mode *mode, B length) const override {
+        auto draws = this->getRNG(0)->getNumbersDrawn();
+        double actual = Base::computeAmpduRangeSuccessRate(snir, mode, length);
+        double expected = Base::getDataSuccessRate(mode, b(length).template get<b>(), this->getScalarSnir(snir));
+        ASSERT(actual == expected);
+        ASSERT(this->getRNG(0)->getNumbersDrawn() == draws);
+        probabilities.push_back(expected);
+        rangeCalls++;
+        return actual;
+    }
+};
+
+class AmpduNistProbe : public AmpduSharedModel<Ieee80211NistErrorModel> {};
+class AmpduYansProbe : public AmpduSharedModel<Ieee80211YansErrorModel> {};
+Define_Module(AmpduNistProbe);
+Define_Module(AmpduYansProbe);
+
+class AmpduDeterministicModel : public Ieee80211NistErrorModel
+{
+  public:
+    mutable int rangeCalls = 0;
+    mutable int headerCalls = 0;
+    mutable int preambleCalls = 0;
+    mutable int wholeCalls = 0;
+    double computePacketErrorRate(const ISnir *, IRadioSignal::SignalPart part) const override {
+        int scenario = par("scenario");
+        if (part == IRadioSignal::SIGNAL_PART_PREAMBLE) { preambleCalls++; return scenario == 11 ? 1 : 0; }
+        if (part == IRadioSignal::SIGNAL_PART_HEADER) { headerCalls++; return scenario == 10 ? 1 : 0; }
+        wholeCalls++;
+        return 0;
+    }
+    double computeAmpduRangeSuccessRate(const ISnir *, const IIeee80211Mode *, B length) const override {
+        int index = rangeCalls++;
+        int scenario = par("scenario");
+        if (scenario == 16) return 0.5;
+        if ((scenario == 4 && length == B(100)) || (scenario == 5 && length == B(101)) ||
+                (scenario == 6 && length == B(102)) || (scenario == 7 && index == 0) ||
+                (scenario == 8 && index == 2) || (scenario == 9 && length != B(4)))
+            return 0;
+        return 1;
+    }
+};
+Define_Module(AmpduDeterministicModel);
+
+class AmpduLimitedModel : public Ieee80211NistErrorModel
+{
+  public:
+    mutable int probabilityCalls = 0;
+    bool supportsAmpduMode(const IIeee80211Mode *mode) const override {
+        return Ieee80211NistErrorModel::supportsAmpduMode(mode) &&
+                (!par("longOnly").boolValue() || !mode->isHtShortGuardInterval()) &&
+                mode->getDataMode()->getNumberOfSpatialStreams() == 1;
+    }
+    double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override {
+        probabilityCalls++;
+        return Ieee80211NistErrorModel::computePacketErrorRate(snir, part);
+    }
+    double computeAmpduRangeSuccessRate(const ISnir *snir, const IIeee80211Mode *mode, B length) const override {
+        probabilityCalls++;
+        return Ieee80211NistErrorModel::computeAmpduRangeSuccessRate(snir, mode, length);
+    }
+};
+Define_Module(AmpduLimitedModel);
+
+class AmpduNoRoleModel : public ErrorModelBase
+{
+  public:
+    double computePacketErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return 0; }
+    double computeBitErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return 0; }
+    double computeSymbolErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return 0; }
+};
+Define_Module(AmpduNoRoleModel);
+
+class AmpduProbeRadio : public Ieee80211Radio
+{
+  protected:
+    void encapsulate(Packet *packet) const override {
+        Ieee80211Radio::encapsulate(packet);
+        int scenario = par("scenario");
+        if (scenario == 12 || scenario == 13 || scenario == 14 || scenario == 17 || scenario == 18 || scenario == 19) {
+            auto header = packet->removeAtFront<Ieee80211HtPhyHeader>();
+            if (scenario == 12 || scenario == 17)
+                header->setCrc(header->getCrc() ^ 1);
+            else if (scenario == 13 || scenario == 18) {
+                header->setFecCoding(true);
+                header->setCrc(computeIeee80211HtSignalCrc(*header));
+            }
+            else {
+                header->setLengthField(B(600));
+                header->setCrc(computeIeee80211HtSignalCrc(*header));
+            }
+            packet->insertAtFront(header);
+        }
+    }
+    void continueReception(cMessage *timer) override {
+        Ieee80211Radio::continueReception(timer);
+        auto model = dynamic_cast<const AmpduDeterministicModel *>(getSubmodule("receiver")->getSubmodule("errorModel"));
+        if (model != nullptr && timer->getKind() == IRadioSignal::SIGNAL_PART_HEADER) {
+            ASSERT(model->headerCalls == 0);
+            ASSERT(model->rangeCalls == 0);
+        }
+        auto audit = dynamic_cast<const AmpduModelAudit *>(getSubmodule("receiver")->getSubmodule("errorModel"));
+        if (audit && timer->getKind() == IRadioSignal::SIGNAL_PART_HEADER) {
+            ASSERT(audit->preambleCalls == 1 && audit->headerCalls == 0 && audit->rangeCalls == 0 && audit->wholeCalls == 0);
+            auto signal = check_and_cast<WirelessSignal *>(timer->getControlInfo());
+            auto draws = getSubmodule("receiver")->getRNG(0)->getNumbersDrawn();
+            for (int repeat = 0; repeat < 3; repeat++) {
+                ASSERT(medium->getReceptionDecision(this, signal->getListening(), signal->getTransmission(), IRadioSignal::SIGNAL_PART_PREAMBLE)->isReceptionSuccessful());
+                ASSERT(medium->isReceptionSuccessful(this, signal->getTransmission(), IRadioSignal::SIGNAL_PART_PREAMBLE));
+            }
+            ASSERT(audit->preambleCalls == 1 && audit->headerCalls == 0 && audit->rangeCalls == 0 && audit->wholeCalls == 0);
+            ASSERT(draws == getSubmodule("receiver")->getRNG(0)->getNumbersDrawn());
+        }
+    }
+    void endReception(cMessage *timer) override {
+        auto signal = check_and_cast<WirelessSignal *>(timer->getControlInfo());
+        if (getParentModule()->getIndex() == 1 && par("scenario").intValue() >= 3 &&
+                par("scenario").intValue() != 21 && par("scenario").intValue() != 10 && par("scenario").intValue() != 11 &&
+                par("scenario").intValue() != 30 &&
+                !(par("separateReceptionParts").boolValue() &&
+                  (par("scenario").intValue() == 12 || par("scenario").intValue() == 13 || par("scenario").intValue() == 17 || par("scenario").intValue() == 18))) {
+            auto transmission = signal->getTransmission();
+            auto listening = signal->getListening();
+            auto whole = medium->getReceptionDecision(this, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE);
+            auto model = dynamic_cast<const AmpduDeterministicModel *>(getSubmodule("receiver")->getSubmodule("errorModel"));
+            auto audit = dynamic_cast<AmpduModelAudit *>(getSubmodule("receiver")->getSubmodule("errorModel"));
+            int calls = model ? model->rangeCalls : 0;
+            int auditCalls = audit ? audit->rangeCalls + audit->headerCalls + audit->preambleCalls + audit->wholeCalls : 0;
+            auto draws = getSubmodule("receiver")->getRNG(0)->getNumbersDrawn();
+            auto result = medium->getReceptionResult(this, listening, transmission);
+            for (int repeat = 0; repeat < 3; repeat++) {
+                for (auto part : {IRadioSignal::SIGNAL_PART_PREAMBLE, IRadioSignal::SIGNAL_PART_HEADER,
+                        IRadioSignal::SIGNAL_PART_DATA, IRadioSignal::SIGNAL_PART_WHOLE}) {
+                    auto decision = medium->getReceptionDecision(this, listening, transmission, part);
+                    ASSERT(medium->isReceptionSuccessful(this, transmission, part) == decision->isReceptionSuccessful());
+                }
+                ASSERT(medium->getReceptionDecision(this, listening, transmission, IRadioSignal::SIGNAL_PART_WHOLE) == whole);
+                ASSERT(medium->getReceptionResult(this, listening, transmission) == result);
+            }
+            ASSERT(draws == getSubmodule("receiver")->getRNG(0)->getNumbersDrawn());
+            ASSERT(model == nullptr || calls == model->rangeCalls);
+            if (audit) {
+                ASSERT(auditCalls == audit->rangeCalls + audit->headerCalls + audit->preambleCalls + audit->wholeCalls);
+                auto data = check_and_cast<const Ieee80211AmpduReceptionDecision *>(medium->getReceptionDecision(this, listening, transmission, IRadioSignal::SIGNAL_PART_DATA));
+                audit->outcomes = data->getRanges();
+            }
+        }
+        Ieee80211Radio::endReception(timer);
+    }
+};
+Define_Module(AmpduProbeRadio);
+
+class AmpduPhyDriver : public cSimpleModule, public cListener
+{
+  protected:
+    int received = 0;
+    simtime_t duration;
+    Ptr<Ieee80211AmpduInd> retained;
+    int scenario() const { return par("scenario"); }
+    bool ordinary() const { return scenario() < 3 || scenario() == 21 || scenario() == 29; }
+    void checkCapabilities() {
+        auto type = cModuleType::get("inet.node.inet.WirelessHost");
+        auto host = type->create("probe", getParentModule());
+        bool failed = false;
+        try {
+            host->finalizeParameters();
+            host->buildInside();
+            host->scheduleStart(simTime());
+            host->callInitialize();
+        }
+        catch (const cRuntimeError& error) {
+            failed = true;
+            std::string message(error.what());
+            EV << "Capability initialization error: " << message << "\n";
+            if (scenario() == 22)
+                ASSERT(message.find("requires IIeee80211AmpduErrorModel") != std::string::npos);
+            else if (scenario() == 23)
+                ASSERT(message.find("does not cover an advertised") != std::string::npos);
+            else if (scenario() == 28)
+                ASSERT(message.find("Value \"n(mixed-2.4Ghz)\" is not allowed") != std::string::npos);
+            else
+                throw;
+            auto mib = check_and_cast<ieee80211::Ieee80211Mib *>(host->getSubmodule("wlan", 0)->getSubmodule("mib"));
+            ASSERT(!mib->isHtOperationSupported());
+        }
+        ASSERT(failed == (scenario() == 22 || scenario() == 23 || scenario() == 28));
+        if (!failed) {
+            auto radio = check_and_cast<Ieee80211Radio *>(host->getSubmodule("wlan", 0)->getSubmodule("radio"));
+            auto model = dynamic_cast<AmpduLimitedModel *>(radio->getSubmodule("receiver")->getSubmodule("errorModel"));
+            if (model) ASSERT(model->probabilityCalls == 0);
+            if (scenario() == 26) {
+                auto receiver = check_and_cast<Ieee80211Receiver *>(radio->getSubmodule("receiver"));
+                bool refused = false;
+                try { receiver->setModeSet(Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)")); }
+                catch (const cRuntimeError& error) { refused = std::string(error.what()).find("requires IIeee80211AmpduErrorModel") != std::string::npos; }
+                ASSERT(refused);
+            }
+        }
+        host->deleteModule();
+        if (scenario() == 28) {
+            auto model = cModuleType::get("inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211BerTableErrorModel")->create("berProbe", getParentModule());
+            model->par("opMode").setStringValue("n");
+            model->par("berTableFile").setStringValue("berTable.dat");
+            bool refused = false;
+            try {
+                model->finalizeParameters();
+                model->buildInside();
+                model->callInitialize();
+            }
+            catch (const cRuntimeError& error) { refused = std::string(error.what()).find("Unknown opMode") != std::string::npos; }
+            ASSERT(refused);
+            model->deleteModule();
+        }
+        EV << "PHY capability checks passed\n";
+    }
+    void initialize() override {
+        getModuleByPath("^.node[0].radio")->subscribe(transmissionStartedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("send"));
+    }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        auto transmission = check_and_cast<const Ieee80211Transmission *>(object);
+        if (scenario() != 29)
+            ASSERT(transmission->getPacket()->peekAtFront<Ieee80211HtPhyHeader>()->getChunkLength() == b(48));
+        duration = transmission->getEndTime() - transmission->getStartTime();
+        if (scenario() < 3 || scenario() == 21)
+            ASSERT(duration == SimTime(170, SIMTIME_US));
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isSelfMessage()) {
+            delete message;
+            if (scenario() >= 22 && scenario() <= 28) {
+                checkCapabilities();
+                endSimulation();
+                return;
+            }
+            auto packet = new Packet("input");
+            if (ordinary())
+                packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+            else {
+                for (int length : {100, 0, 101, 102}) {
+                    auto delimiter = makeShared<ieee80211::Ieee80211MpduSubframeHeader>();
+                    delimiter->setLength(length);
+                    packet->insertAtBack(delimiter);
+                    if (length)
+                        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(length, 0)));
+                    if (length == 101)
+                        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(3, 0)));
+                }
+            }
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+            auto modes = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+            if (scenario() == 29)
+                packet->addTag<Ieee80211ModeReq>()->setMode(Ieee80211ModeSet::getModeSet("g(mixed)")->getMode(Mbps(6)));
+            for (int i = 0; scenario() != 29 && i < modes->getNumModes(); i++) {
+                auto mode = modes->getMode(i);
+                if (mode->getHtMcsIndex() == (scenario() >= 35 ? 7 : 0) && mode->getDataMode()->getBandwidth() == MHz(20) &&
+                        mode->isHtShortGuardInterval() == (scenario() == 15 || (scenario() >= 31 && (scenario() - 31) % 4 >= 2))) {
+                    packet->addTag<Ieee80211ModeReq>()->setMode(mode);
+                    break;
+                }
+            }
+            send(packet, "out", 0);
+        }
+        else {
+            auto packet = check_and_cast<Packet *>(message);
+            if (scenario() >= 31) {
+                auto indication = packet->getTag<Ieee80211AmpduInd>();
+                retained = makeShared<Ieee80211AmpduInd>(*indication);
+                ASSERT(packet->getDataLength() == B(322));
+                ASSERT(packet->hasBitError() == !indication->getHeaderSuccessful());
+                auto error = packet->getTag<ErrorRateInd>();
+                ASSERT(std::isnan(error->getPacketErrorRate()) && std::isnan(error->getBitErrorRate()) && std::isnan(error->getSymbolErrorRate()));
+                received++;
+                delete packet;
+                return;
+            }
+            bool refused = scenario() == 10 || scenario() == 11 || scenario() == 12 || scenario() == 13 ||
+                    scenario() == 14 || scenario() == 17 || scenario() == 18 || scenario() == 19 || scenario() == 30;
+            ASSERT(packet->hasBitError() == refused);
+            if (ordinary())
+                ASSERT(packet->getDataLength() == B(100));
+            else {
+                auto indication = packet->getTag<Ieee80211AmpduInd>();
+                ASSERT(packet->getDataLength() == B(322));
+                retained = makeShared<Ieee80211AmpduInd>(*indication);
+                bool badHeader = refused && scenario() != 14 && scenario() != 19;
+                ASSERT(indication->getHeaderSuccessful() == !badHeader);
+                ASSERT(indication->getAggregation() == !badHeader);
+                ASSERT(indication->getContentComplete() == !refused);
+                ASSERT(indication->getRangesArraySize() == (refused ? 0 : 7));
+                if (!refused) {
+                    int failed = 0;
+                    for (size_t i = 0; i < indication->getRangesArraySize(); i++)
+                        failed += !indication->getRanges(i).successful;
+                    if (scenario() >= 4 && scenario() <= 8) ASSERT(failed == 1);
+                    else if (scenario() == 9) ASSERT(failed == 3);
+                    else if (scenario() != 16) ASSERT(failed == 0);
+                }
+            }
+            ASSERT(packet->getTag<Ieee80211ModeInd>()->getMode()->getHtMcsIndex() == (scenario() == 29 ? -1 : 0));
+            ASSERT(packet->getTag<Ieee80211ChannelInd>()->getChannel() != nullptr);
+            ASSERT(packet->getTag<SignalPowerInd>()->getPower() > W(0));
+            ASSERT(packet->getTag<SnirInd>()->getMinimumSnir() > 0);
+            ASSERT(packet->getTag<SignalTimeInd>()->getTransmissionId() >= 0);
+            ASSERT(packet->getTag<SignalTimeInd>()->getEndTime() - packet->getTag<SignalTimeInd>()->getStartTime() == duration);
+            auto error = packet->findTag<ErrorRateInd>();
+            if (scenario() >= 3 && scenario() <= 16) {
+                ASSERT(error != nullptr);
+                ASSERT(std::isnan(error->getPacketErrorRate()));
+                ASSERT(std::isnan(error->getBitErrorRate()));
+                ASSERT(std::isnan(error->getSymbolErrorRate()));
+            }
+            if ((scenario() >= 17 && scenario() <= 20) || scenario() == 30)
+                ASSERT(error == nullptr);
+            if (error)
+                EV << "ordinary PER=" << error->getPacketErrorRate() << " BER=" << error->getBitErrorRate() << " SER=" << error->getSymbolErrorRate() << "\n";
+            received++;
+            delete packet;
+        }
+    }
+    using cListener::finish;
+    void finish() override {
+        if (scenario() >= 22 && scenario() <= 28) {
+            EV << "PHY reception checks passed\n";
+            return;
+        }
+        bool headerFailure = scenario() == 10 || scenario() == 11 || scenario() == 12 || scenario() == 13 || scenario() == 17 || scenario() == 18 || scenario() == 30;
+        bool separate = getModuleByPath("^.node[1].radio")->par("separateReceptionParts");
+        auto rx = getModuleByPath("^.node[1].radio.receiver");
+        if (scenario() >= 31) {
+            auto audit = check_and_cast<AmpduModelAudit *>(rx->getSubmodule("errorModel"));
+            auto reference = getRNG(1);
+            bool header = audit->headerError == 0 || (audit->headerError != 1 && reference->doubleRand() > audit->headerError);
+            ASSERT(audit->preambleCalls == 1 && audit->headerCalls == 1 && audit->wholeCalls == 0);
+            ASSERT(audit->rangeCalls == (header ? 7 : 0));
+            ASSERT(received == (separate && !header ? 0 : 1));
+            std::string bits;
+            for (size_t i = 0; i < audit->probabilities.size(); i++) {
+                double probability = audit->probabilities[i];
+                bool expected = probability == 1 || (probability != 0 && reference->doubleRand() > 1 - probability);
+                ASSERT(audit->outcomes.at(i).successful == expected);
+                ASSERT(retained && retained->getRanges(i).successful == expected);
+                bits += expected ? '1' : '0';
+            }
+            auto draws = rx->getRNG(0)->getNumbersDrawn();
+            ASSERT(draws == reference->getNumbersDrawn());
+            auto next = rx->getRNG(0)->intRand();
+            ASSERT(next == reference->intRand());
+            auto cache = check_and_cast<IRadioMedium *>(getModuleByPath("^.radioMedium"))->getCommunicationCache();
+            ASSERT(cache->getNumTransmissions() == 0);
+            EV << "MODEL_RESULT scenario=" << scenario() << " seed=" << par("seed").intValue()
+               << " analog=" << getModuleByPath("^.radioMedium")->par("signalAnalogRepresentation").stdstringValue()
+               << " parts=" << separate << " header=" << header << " bits=" << (bits.empty() ? "none" : bits)
+               << " draws=" << draws << " next=" << next << "\n";
+            EV << "PHY reception checks passed\n";
+            return;
+        }
+        ASSERT(received == (headerFailure && separate ? 0 : 1));
+        if (scenario() == 30) ASSERT(rx->getRNG(0)->getNumbersDrawn() == 0);
+        auto model = dynamic_cast<const AmpduDeterministicModel *>(rx->getSubmodule("errorModel"));
+        if (model) {
+            ASSERT(model->wholeCalls == 0);
+            ASSERT(model->rangeCalls == (scenario() >= 10 && scenario() <= 14 ? 0 : 7));
+            if (scenario() == 11) ASSERT(model->headerCalls == 0);
+            ASSERT(rx->getRNG(0)->getNumbersDrawn() == (scenario() == 16 ? 7 : 0));
+        }
+        auto medium = check_and_cast<IRadioMedium *>(getModuleByPath("^.radioMedium"));
+        ASSERT(medium->getCommunicationCache()->getNumTransmissions() == 0);
+        if (retained && !headerFailure && scenario() != 14 && scenario() != 19)
+            ASSERT(retained->getRangesArraySize() == 7);
+        auto radio = check_and_cast<cModule *>(getModuleByPath("^.node[1].radio"));
+        EV << "ordinary next RNG=" << radio->getSubmodule("receiver")->getRNG(0)->intRand() << "\n";
+        EV << "PHY reception checks passed\n";
+    }
+};
+Define_Module(AmpduPhyDriver);
+
+%file: test.ned
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211YansErrorModel;
+import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
+
+module AmpduNistProbe extends Ieee80211NistErrorModel
+{
+    parameters:
+        bool referenceMatrix = default(false);
+        @class(::AmpduNistProbe);
+}
+module AmpduYansProbe extends Ieee80211YansErrorModel
+{
+    parameters:
+        bool referenceMatrix = default(false);
+        @class(::AmpduYansProbe);
+}
+module AmpduLimitedModel extends Ieee80211NistErrorModel
+{
+    parameters:
+        bool longOnly;
+        @class(::AmpduLimitedModel);
+}
+module AmpduNoRoleModel extends ErrorModelBase
+{
+    parameters:
+        @class(::AmpduNoRoleModel);
+}
+
+module AmpduDeterministicModel extends Ieee80211NistErrorModel
+{
+    parameters:
+        int scenario;
+        @class(::AmpduDeterministicModel);
+}
+module AmpduProbeRadio extends Ieee80211Radio
+{
+    parameters:
+        int scenario;
+        receiver.errorModel.typename = default(scenario >= 31 ? ((scenario - 31) % 2 == 0 ? "AmpduNistProbe" : "AmpduYansProbe") : (scenario == 29 ? "AmpduNoRoleModel" : (scenario == 0 ? "Ieee80211NistErrorModel" : (scenario == 1 || scenario == 21 ? "Ieee80211YansErrorModel" : (scenario == 2 || scenario >= 17 ? "" : "AmpduDeterministicModel")))));
+        @class(::AmpduProbeRadio);
+}
+module AmpduCapabilityRadio extends Ieee80211Radio
+{
+    parameters:
+        int scenario;
+        signalAnalogRepresentation = default(scenario == 25 ? "unitDisk" : "scalar");
+        radioMediumModule = default(scenario == 25 ? "unitDiskMedium" : "radioMedium");
+        receiver.errorModel.typename = default(scenario == 22 || scenario == 26 ? "AmpduNoRoleModel" : (scenario == 23 || scenario == 24 ? "AmpduLimitedModel" : (scenario == 27 || scenario == 28 ? "Ieee80211BerTableErrorModel" : "")));
+}
+
+simple AmpduPhyDriver
+{
+    parameters:
+        @class(::AmpduPhyDriver);
+        int scenario;
+        int seed;
+    gates:
+        input in[2];
+        output out[2];
+}
+module AmpduPhyNode
+{
+    parameters:
+        @networkNode;
+    gates:
+        input in;
+        output out;
+        input radioIn @directIn;
+    submodules:
+        mobility: StationaryMobility;
+        radio: AmpduProbeRadio;
+    connections:
+        in --> radio.upperLayerIn;
+        radio.upperLayerOut --> out;
+        radioIn --> radio.radioIn;
+}
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211RadioMedium;
+        unitDiskMedium: RadioMedium {
+            signalAnalogRepresentation = "unitDisk";
+        }
+        driver: AmpduPhyDriver;
+        node[2]: AmpduPhyNode;
+    connections:
+        for i=0..1 {
+            driver.out[i] --> node[i].in;
+            node[i].out --> driver.in[i];
+        }
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 20ms
+seed-set = ${seed=0,1,2}
+num-rngs = 2
+seed-0-mt = ${seed}
+seed-1-mt = ${seed}
+cmdenv-express-mode = false
+**.scalar-recording = true
+**.vector-recording = false
+*.node[*].radio.opMode = ${scenario} == 29 ? "g(mixed)" : "n(mixed-2.4Ghz)"
+*.node[*].radio.initialRadioMode = "transceiver"
+*.driver.scenario = ${scenario=0..38}
+*.driver.seed = ${seed}
+*.node[*].radio.scenario = ${scenario}
+*.node[*].radio.receiver.errorModel.scenario = ${scenario}
+*.node[1].radio.receiver.errorModel.referenceMatrix = (${scenario} == 31 || ${scenario} == 32) && !${parts} && ${seed} == 0
+*.node[*].radio.receiver.errorModel.snirMode = ${analog} == "scalar" ? "min" : "mean"
+*.node[*].radio.receiver.errorModel.cmdenv-log-level = off
+*.node[*].radio.separateReceptionParts = ${parts=false,true}
+*.node[*].radio.signalAnalogRepresentation = ${analog="scalar","dimensional"}
+*.radioMedium.signalAnalogRepresentation = ${analog}
+*.node[*].radio.sendRawBytes = ${scenario} >= 3 && ${scenario} < 22
+*.node[*].radio.receiver.bandwidth = 20MHz
+*.node[*].radio.receiver.energyDetection = ${scenario} >= 35 ? -49dBm : (${scenario} >= 31 ? -29dBm : -85dBm)
+*.node[*].radio.receiver.snirThreshold = ${scenario} == 30 ? 100dB : (${scenario} >= 31 ? -10dB : 4dB)
+*.node[*].radio.antenna.mobilityModule = "^.^.mobility"
+*.node[*].mobility.initFromDisplayString = false
+*.node[*].mobility.initialX = 10m + parentIndex() * 1m
+*.node[*].mobility.initialY = 10m
+*.node[*].mobility.initialZ = 0m
+*.node[*].mobility.constraintAreaMinX = 0m
+*.node[*].mobility.constraintAreaMinY = 0m
+*.node[*].mobility.constraintAreaMinZ = 0m
+*.node[*].mobility.constraintAreaMaxX = 100m
+*.node[*].mobility.constraintAreaMaxY = 100m
+*.node[*].mobility.constraintAreaMaxZ = 0m
+*.radioMedium.backgroundNoise.power = ${scenario} >= 35 ? -50dBm : (${scenario} >= 31 ? -30dBm : -110dBm)
+*.probe.wlan[0].opMode = ${scenario} == 26 || ${scenario} == 27 ? "g(mixed)" : "n(mixed-2.4Ghz)"
+*.probe.wlan[0].radio.typename = "AmpduCapabilityRadio"
+*.probe.wlan[0].radio.scenario = ${scenario}
+*.probe.wlan[0].radio.receiver.bandwidth = 20MHz
+*.probe.wlan[0].radio.transmitter.analogModel.communicationRange = 100m
+*.probe.wlan[0].radio.receiver.errorModel.longOnly = ${scenario} == 23
+*.probe.wlan[0].radio.receiver.errorModel.berTableFile = "berTable.dat"
+*.probe.wlan[0].mac.qosStation = true
+*.probe.wlan[0].mgmt.typename = "Ieee80211MgmtAdhoc"
+*.probe.mobility.initFromDisplayString = false
+*.probe.mobility.initialX = 20m
+*.probe.mobility.initialY = 10m
+*.probe.mobility.initialZ = 0m
+*.probe.mobility.constraintAreaMinX = 0m
+*.probe.mobility.constraintAreaMinY = 0m
+*.probe.mobility.constraintAreaMinZ = 0m
+*.probe.mobility.constraintAreaMaxX = 100m
+*.probe.mobility.constraintAreaMaxY = 100m
+*.probe.mobility.constraintAreaMaxZ = 0m
+
+%file: berTable.dat
+$self add Mode6Mb 128 0 0
+$self add Mode9Mb 128 0 0
+$self add Mode12Mb 128 0 0
+$self add Mode18Mb 128 0 0
+$self add Mode24Mb 128 0 0
+$self add Mode36Mb 128 0 0
+$self add Mode48Mb 128 0 0
+$self add Mode54Mb 128 0 0
+
+%contains: stdout
+PHY reception checks passed
+
+%file: check-models.py
+from pathlib import Path
+import re
+
+text = Path("test.out").read_text()
+assert "Run statistics: total 468, successful 468" in text
+rows = [dict(re.findall(r"(\w+)=([^ ]+)", line)) for line in text.splitlines() if line.startswith("MODEL_RESULT ")]
+assert len(rows) == 96, len(rows)
+groups = {}
+for row in rows:
+    key = tuple(row[name] for name in ("scenario", "seed", "analog"))
+    outcome = tuple(row[name] for name in ("header", "bits", "draws", "next"))
+    groups.setdefault(key, []).append(outcome)
+assert len(groups) == 48
+assert all(len(values) == 2 and values[0] == values[1] for values in groups.values())
+for model in (0, 1):
+    selected = [row for row in rows if (int(row["scenario"]) - 31) % 2 == model]
+    assert any("0" in row["bits"] and "1" in row["bits"] for row in selected), selected
+print("NIST/Yans references, seeded outcomes, and signal-part equivalence passed.")

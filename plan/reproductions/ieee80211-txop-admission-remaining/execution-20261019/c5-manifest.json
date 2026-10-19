@@ -1,0 +1,65 @@
+{
+  "head": "d841dc77db7d0b141bf31e5e215a0de9bb281957",
+  "library_sha256": "1de36100640807565d8456334072201ff3f412a3e5fbfe28e0376a5e0fc57bf2",
+  "production_diff_sha256": "c9fcdf6d41741a78ee30414c3f1df7777264815b04ca844ce31dd26758115f15",
+  "base_library_sha256": "bc3595467d81df205051bc14f684b4e7ccae7c367c0efea7358fed1599efcaf7",
+  "causality": {
+    "NoAggregation": {
+      "base_events": 883,
+      "head_events": 883,
+      "first_event_time_or_module_difference": null
+    },
+    "Aggregation": {
+      "base_events": 2078,
+      "head_events": 1927,
+      "first_event_time_or_module_difference": {
+        "base": "E # 90 t 0.0005089 m 53 ce 79 msg 42",
+        "head": "E # 90 t 0.00049023452 m 63 ce 88 msg 31"
+      }
+    },
+    "Fragmentation": {
+      "base_events": 993,
+      "head_events": 1508,
+      "first_event_time_or_module_difference": {
+        "base": "E # 40 t 0.0004 m 53 ce 30 msg 42",
+        "head": "E # 40 t 0.00032761726 m 72 ce 39 msg 27"
+      }
+    }
+  },
+  "results": {
+    "module_fixtures": 31,
+    "normal_ack_runs": 96,
+    "basic_runs": 36,
+    "unit_fixtures": 4,
+    "protocol_fixtures": 1,
+    "onoe_runs": 16,
+    "aarf_runs": 16,
+    "corrected_basic_probe_runs": 4,
+    "fingerprint_rows": 3,
+    "fingerprint_mismatches": 3,
+    "baseline_updated": false
+  },
+  "artifacts": {
+    "c5-aarf.txt": "0474cf2aba5d24bf98f373d5b14902498f99d0488c6489a819e325a66405f949",
+    "c5-architecture.txt": "a13a5db7d35fdb39758c6d472c6798b09115edae4a47aa7541cd67aaec3b56a4",
+    "c5-basic-corrected.txt": "b4e670a803d49f70bdca7b2d145bf7885c9af7506a2171cd4b00c0136775c2f5",
+    "c5-basic-runs.txt": "878b275ed8459cc79c7870921b785d9e35c2398bbfc247dba9b2bc3df968d643",
+    "c5-build.txt": "d6c63d55b07f715e1cfccc30b02ba9cdcd5cd5bad79e5628c30e62e3c5f1dd9b",
+    "c5-causal-Aggregation-base.txt": "9f2dd10e6de0fbe8e34c2265e294a95f5f79de797c241d6d1eea75cfdaf381a9",
+    "c5-causal-Aggregation-head.txt": "da47f6df15a7f6479e18c24e62fc617a4424f8a4f5b10d84625f6befb9a3cbef",
+    "c5-causal-Fragmentation-base.txt": "8068f867558291740bc5450722e40eb7776bd093ce60169fe1d46247e008f784",
+    "c5-causal-Fragmentation-head.txt": "26c6de2e6c52d3a64de9966e5457479c0870bbeb1f9b3138432164217de67422",
+    "c5-causal-commands.json": "f7fc968cc45beb6d8f4423f4476176620b8029c338f4b51232d62546bcfa8176",
+    "c5-fingerprint-causality.md": "926a58fb9dd83588d88dee147f47a38964e35fe56d9ac452fd9b147bdbf5955b",
+    "c5-fingerprints.txt": "c786a41e2b8131d6a34c775257e5580f89cfef19ae220588e1fb48d159ea75cf",
+    "c5-module.txt": "34b8391c0f87b8112e25d9c790a498ac9d65611b667cc03a44e5e8d0cae6318c",
+    "c5-noaggregation-base.txt": "c528a65c150f5452d301c1a0ee99612e46f21d8e3a9136811c3cd40b870fef92",
+    "c5-noaggregation-commands.json": "51c6a78ff08664d0b32887696ef652fd4325d279d48d0c7c41dc1214b4793cd7",
+    "c5-noaggregation-head.txt": "19723422c7ee468be4983cb466105e40b4614dd258d24ee92e45717465d2d35d",
+    "c5-onoe.txt": "2539d8297399aed9f0e6a2715f23e882b1bc6677bf866f90c1e4fcfffb981d6a",
+    "c5-protocol.txt": "91f01e92f030a5624efa53201eda5dfb376258decd58d4e3591461f0a7e38ed7",
+    "c5-tidy-hcf-final.txt": "15b4b375d4db9ee19d98e6a372ecf78fe4842f62ee190e6bbf8a771b6ee710c1",
+    "c5-tidy.txt": "594c6ebca05ddd6055ef69d82f769e82d9d90bc85ddfb5f212ec201151e98c23",
+    "c5-unit.txt": "1e424d41b35c6d2856ef87afcd4cb4d5c8d479f91a66516b399062e05b071a48"
+  }
+}

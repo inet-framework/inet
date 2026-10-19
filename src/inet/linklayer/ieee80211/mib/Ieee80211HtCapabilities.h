@@ -53,13 +53,15 @@ struct Ieee80211HtCapabilities
     bool shortGi20 = false;
     bool shortGi40 = false;
     int maxAmpduLengthExponent = 0;
+    int minimumMpduStartSpacing = 0; // Encoded receiver limit, 0..7 (IEEE Std 802.11-2024, Table 9-225).
 
     bool operator==(const Ieee80211HtCapabilities& other) const {
         return supportedChannelWidths == other.supportedChannelWidths && rxMcsSupported == other.rxMcsSupported &&
                 txMcsSetDefined == other.txMcsSetDefined && txRxMcsSetNotEqual == other.txRxMcsSetNotEqual &&
                 txMaxNss == other.txMaxNss && txUnequalModulation == other.txUnequalModulation &&
                 txMcsNss.maxMcsPerNss == other.txMcsNss.maxMcsPerNss && ldpc == other.ldpc && greenfield == other.greenfield &&
-                shortGi20 == other.shortGi20 && shortGi40 == other.shortGi40 && maxAmpduLengthExponent == other.maxAmpduLengthExponent;
+                shortGi20 == other.shortGi20 && shortGi40 == other.shortGi40 && maxAmpduLengthExponent == other.maxAmpduLengthExponent &&
+                minimumMpduStartSpacing == other.minimumMpduStartSpacing;
     }
 };
 
@@ -70,12 +72,13 @@ struct Ieee80211HtOperation
     int primaryChannel = 0;
     int secondaryChannelOffset = 0;
     Ieee80211HtProtectionMode protectionMode = Ieee80211HtProtectionMode::NO_PROTECTION;
+    bool rifsMode = false;
     std::array<bool, 77> basicMcsSupported = {};
 
     bool operator==(const Ieee80211HtOperation& other) const {
         return operatingChannelWidth == other.operatingChannelWidth && primaryChannel == other.primaryChannel &&
                 secondaryChannelOffset == other.secondaryChannelOffset && protectionMode == other.protectionMode &&
-                basicMcsSupported == other.basicMcsSupported;
+                rifsMode == other.rifsMode && basicMcsSupported == other.basicMcsSupported;
     }
 };
 
@@ -89,6 +92,7 @@ struct Ieee80211HtDirectionalCapabilities
     bool receiverShortGi20 = false;
     bool receiverShortGi40 = false;
     int receiverMaxAmpduLengthExponent = 0;
+    int receiverMinimumMpduStartSpacing = 0; // Encoded receiver limit, 0..7.
 };
 
 struct Ieee80211NegotiatedHtCapabilities
@@ -139,6 +143,8 @@ inline Ieee80211NegotiatedHtCapabilities negotiateHtCapabilities(const Ieee80211
     negotiated.localRxPeerTx.receiverShortGi40 = local.shortGi40;
     negotiated.localTxPeerRx.receiverMaxAmpduLengthExponent = peer.maxAmpduLengthExponent;
     negotiated.localRxPeerTx.receiverMaxAmpduLengthExponent = local.maxAmpduLengthExponent;
+    negotiated.localTxPeerRx.receiverMinimumMpduStartSpacing = peer.minimumMpduStartSpacing;
+    negotiated.localRxPeerTx.receiverMinimumMpduStartSpacing = local.minimumMpduStartSpacing;
     // The HT Operation width is the BSS maximum. A 20 MHz-only STA may join a
     // 20/40 MHz BSS, so validity requires a common usable width, not equality
     // with the advertised BSS width (IEEE Std 802.11-2024, 11.15.2).

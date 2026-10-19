@@ -23,6 +23,7 @@ class INET_API IRecipientBlockAckProcedure
 
     virtual void processReceivedBlockAckReq(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, IProcedureCallback *callback) = 0;
     virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) = 0;
+    virtual Ptr<Ieee80211CompressedBlockAck> buildCompressedBlockAck(MacAddress peer, Tid tid, RecipientBlockAckAgreement *agreement) = 0;
 };
 
 } // namespace ieee80211
