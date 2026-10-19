@@ -1,0 +1,48 @@
+[
+  {
+    "command": [
+      "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+      "--debug",
+      "-u",
+      "Cmdenv",
+      "-c",
+      "MacQosWithoutAggregation",
+      "-r",
+      "0",
+      "--sim-time-limit=1.02s",
+      "--scalar-recording=false",
+      "--vector-recording=false",
+      "--cmdenv-express-mode=true",
+      "--**.fcsMode=\"computed\"",
+      "--**.checksumMode=\"computed\"",
+      "--**.numPcapRecorders=1",
+      "--**.pcapRecorder[*].verbose=false",
+      "--result-dir=/tmp/inet-txop-fingerprint-update/pcap-base"
+    ],
+    "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+    "status": 0
+  },
+  {
+    "command": [
+      "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+      "--debug",
+      "-u",
+      "Cmdenv",
+      "-c",
+      "MacQosWithoutAggregation",
+      "-r",
+      "0",
+      "--sim-time-limit=1.02s",
+      "--scalar-recording=false",
+      "--vector-recording=false",
+      "--cmdenv-express-mode=true",
+      "--**.fcsMode=\"computed\"",
+      "--**.checksumMode=\"computed\"",
+      "--**.numPcapRecorders=1",
+      "--**.pcapRecorder[*].verbose=false",
+      "--result-dir=/tmp/inet-txop-fingerprint-update/pcap-head"
+    ],
+    "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+    "status": 0
+  }
+]

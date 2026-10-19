@@ -1,0 +1,7 @@
+No module named 'py4j': optional inet.common.ide package will not work
+[38;2;200;200;200m[0/3][0;0m ▶ 1 protocol tests (sequentially)
+[38;2;200;200;200m[0/3][0;0m [38;2;200;200;200m [0;0m ▶ 1 inet-ieee80211-txop-admission-remaining protocol wifi tests (concurrently)
+[38;2;200;200;200m[0/3][0;0m [38;2;200;200;200m   [0;0m ⏺ legacy/Legacy_Fragmentation.test [0;32mPASS[0;0m in 0.959
+[38;2;200;200;200m[2/3][0;0m [38;2;200;200;200m [0;0m ◉ 1 inet-ieee80211-txop-admission-remaining protocol wifi tests (concurrently) Multiple protocol wifi tests: [0;32mPASS[0;0m in 0.959  
+[38;2;200;200;200m[3/3][0;0m ◉ 1 protocol tests (sequentially) Multiple protocol tests: Multiple protocol wifi tests: [0;32mPASS[0;0m in 0.959    
+Single protocol test result: Single protocol wifi test result: Result: [0;32mPASS[0;0m in 0.959

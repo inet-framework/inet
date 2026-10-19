@@ -1,0 +1,911 @@
+{
+  "kind": "TXOP admission diagnostic observations",
+  "date": "2026-10-18",
+  "probe": "plan/reproductions/ieee80211-txop-admission-remaining/TxopAdmissionProbe.test",
+  "probe_sha256": "7dc84ca3bb0e8ff1b647590c0fad54a6796dc097bc67bd5ca134dd1a94ba7a1b",
+  "production_source_changes": false,
+  "build": {
+    "mode": "debug",
+    "inet_library_rebuilt": false,
+    "reason": "The diagnostic changes no compiled INET input. Each probe uses its checkout headers and library.",
+    "s5_commands": [
+      "opp_test gen -v -w work TxopAdmissionProbe.test",
+      "opp_makemake -f --deep -lINET_dbg -L/home/user/omnetpp_ws/inet-compressed-blockack-s5/src -I/home/user/omnetpp_ws/inet-compressed-blockack-s5/src",
+      "make MODE=debug -j2"
+    ],
+    "current_makefile_command": "opp_makemake -f --deep -o TxopAdmissionProbe -lINET_dbg -L/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src -I/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src",
+    "s5_build_log": "/tmp/inet-txop-admission-remaining-20261018/s5-build.log",
+    "current_build_log": "/tmp/inet-txop-admission-remaining-20261018/current-build.log"
+  },
+  "boundary_note": "Counts describe completion boundaries. DATA and ACK observations can refer to the same exchange.",
+  "scope": "Positive one-millisecond TXOPs, unfragmented unicast QoS DATA, zero propagation time. This probe is not a general standards oracle.",
+  "matching_s5_and_current_runs": [
+    0,
+    5,
+    6,
+    7
+  ],
+  "standards_lint_counts": {
+    "error": {
+      "unresolved-heading-ambiguity": 76
+    },
+    "info": {
+      "duplicate-label-candidates": 11473
+    },
+    "warning": {
+      "false-heading-candidate": 920,
+      "missing-parent": 68,
+      "oversized-node": 1,
+      "tiny-node": 10,
+      "unresolved-reference": 425
+    }
+  },
+  "txop_limit_reference_statuses": [
+    {
+      "text": "10.6",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.6"
+    },
+    {
+      "text": "10.3.2.10",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.3.2.10"
+    },
+    {
+      "text": "10.30",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.30"
+    },
+    {
+      "text": "10.35.5",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.35.5"
+    },
+    {
+      "text": "26.7",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:26.7"
+    },
+    {
+      "text": "10.41",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.41"
+    },
+    {
+      "text": "10.31",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.31"
+    },
+    {
+      "text": "10.4",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.4"
+    },
+    {
+      "text": "10.2.7",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.2.7"
+    },
+    {
+      "text": "10.23.4.2",
+      "status": "resolved",
+      "target": "ieee80211-2024:clause:10.23.4.2"
+    }
+  ],
+  "runs": [
+    {
+      "target": "s5",
+      "checkout": "/home/user/omnetpp_ws/inet-compressed-blockack-s5",
+      "revision": "1dd4ca23785b14b058693e9e20434a4257c3831f",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-compressed-blockack-s5/src/libINET_dbg.so",
+      "library_sha256": "dae587741f22406c701471c286dcffc03348f3f1f6c0f715c12ecd223ada0b23",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/work/TxopAdmissionProbe",
+      "configuration": "General",
+      "run": 0,
+      "seed_set": 0,
+      "rate_mbps": 6,
+      "profile": "basic",
+      "protection": "single",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-compressed-blockack-s5/src' --check-signals=false -c General -r 0",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/run-0.log",
+      "raw_log_sha256": "0394c386c82ef4c069b2af6ed33f6b841a062e98495454d18bef5b86165eac89",
+      "observation_sha256": "ee6a55c7536f380b5046268695c4b2221c2f96bbe9646eb28f31eb68145b32f6",
+      "data_completions_beyond_bound": 30,
+      "ack_completions_beyond_bound": 7,
+      "maximum_excess_seconds": "0.001246",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001166",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000166",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001226",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000226",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.003914",
+          "txopStart": "1.001728",
+          "bound": "1.002728",
+          "excess": "0.001186",
+          "count": "1",
+          "agreement": "1",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "ap",
+          "allocation": "0",
+          "time": "1.00625",
+          "txopStart": "1.004064",
+          "bound": "1.005064",
+          "excess": "0.001186",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "ap",
+          "allocation": "0",
+          "time": "1.00631",
+          "txopStart": "1.004064",
+          "bound": "1.005064",
+          "excess": "0.001246",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=16 agreedData=20 outsideData=1 aggregates=19 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=21 agreedData=10 outsideData=6 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "s5",
+      "checkout": "/home/user/omnetpp_ws/inet-compressed-blockack-s5",
+      "revision": "1dd4ca23785b14b058693e9e20434a4257c3831f",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-compressed-blockack-s5/src/libINET_dbg.so",
+      "library_sha256": "dae587741f22406c701471c286dcffc03348f3f1f6c0f715c12ecd223ada0b23",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/work/TxopAdmissionProbe",
+      "configuration": "General",
+      "run": 1,
+      "seed_set": 0,
+      "rate_mbps": 6,
+      "profile": "basic",
+      "protection": "multiple",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-compressed-blockack-s5/src' --check-signals=false -c General -r 1",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/run-1.log",
+      "raw_log_sha256": "495bdeafc740b01fa0086674ea0d6851e5aaab9c622f30eadd97d74dc1d6a99f",
+      "observation_sha256": "aefb424c5a7856b44eadc59a31ae31a216986c14c6c70ddcf5c28b511660f5b9",
+      "data_completions_beyond_bound": 29,
+      "ack_completions_beyond_bound": 6,
+      "maximum_excess_seconds": "0.001314",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001166",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000166",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001226",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000226",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.004592",
+          "txopStart": "1.002406",
+          "bound": "1.003406",
+          "excess": "0.001186",
+          "count": "1",
+          "agreement": "1",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "ap",
+          "allocation": "0",
+          "time": "1.006928",
+          "txopStart": "1.004742",
+          "bound": "1.005742",
+          "excess": "0.001186",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "ap",
+          "allocation": "0",
+          "time": "1.006988",
+          "txopStart": "1.004742",
+          "bound": "1.005742",
+          "excess": "0.001246",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=16 agreedData=20 outsideData=1 aggregates=19 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=19 agreedData=17 outsideData=5 aggregates=20 delivered=30"
+      ]
+    },
+    {
+      "target": "s5",
+      "checkout": "/home/user/omnetpp_ws/inet-compressed-blockack-s5",
+      "revision": "1dd4ca23785b14b058693e9e20434a4257c3831f",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-compressed-blockack-s5/src/libINET_dbg.so",
+      "library_sha256": "dae587741f22406c701471c286dcffc03348f3f1f6c0f715c12ecd223ada0b23",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/work/TxopAdmissionProbe",
+      "configuration": "General",
+      "run": 2,
+      "seed_set": 0,
+      "rate_mbps": 6,
+      "profile": "disabled",
+      "protection": "single",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-compressed-blockack-s5/src' --check-signals=false -c General -r 2",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/run-2.log",
+      "raw_log_sha256": "089c5294390b5e16f627b45f56d9a7adbfbe6479bcebbfccecf235b14a7aeff8",
+      "observation_sha256": "ade4456e66a1bc8e1397baf7c8a9e754c0c350bc411d5348dc85242a5d9e97ed",
+      "data_completions_beyond_bound": 31,
+      "ack_completions_beyond_bound": 31,
+      "maximum_excess_seconds": "0.001246",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001166",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000166",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001226",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000226",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "2",
+          "time": "1.004918",
+          "txopStart": "1.002732",
+          "bound": "1.003732",
+          "excess": "0.001186",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "2",
+          "time": "1.004978",
+          "txopStart": "1.002732",
+          "bound": "1.003732",
+          "excess": "0.001246",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=32 agreedData=0 outsideData=16 aggregates=14 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=30 agreedData=0 outsideData=15 aggregates=15 delivered=30"
+      ]
+    },
+    {
+      "target": "s5",
+      "checkout": "/home/user/omnetpp_ws/inet-compressed-blockack-s5",
+      "revision": "1dd4ca23785b14b058693e9e20434a4257c3831f",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-compressed-blockack-s5/src/libINET_dbg.so",
+      "library_sha256": "dae587741f22406c701471c286dcffc03348f3f1f6c0f715c12ecd223ada0b23",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/work/TxopAdmissionProbe",
+      "configuration": "General",
+      "run": 3,
+      "seed_set": 0,
+      "rate_mbps": 6,
+      "profile": "disabled",
+      "protection": "multiple",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-compressed-blockack-s5/src' --check-signals=false -c General -r 3",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/run-3.log",
+      "raw_log_sha256": "e5f050f3059fe847dafd2555ccf8d5ac0a7951dd8b319b34624d0b0a08f518be",
+      "observation_sha256": "23df505b9b389ce0a01850aa81ce497efcee3c806661ea6b975b0e1f348fe5fc",
+      "data_completions_beyond_bound": 32,
+      "ack_completions_beyond_bound": 32,
+      "maximum_excess_seconds": "0.001246",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001166",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000166",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001226",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000226",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.003542",
+          "txopStart": "1.001356",
+          "bound": "1.002356",
+          "excess": "0.001186",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.003602",
+          "txopStart": "1.001356",
+          "bound": "1.002356",
+          "excess": "0.001246",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=32 agreedData=0 outsideData=16 aggregates=14 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=32 agreedData=0 outsideData=16 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "s5",
+      "checkout": "/home/user/omnetpp_ws/inet-compressed-blockack-s5",
+      "revision": "1dd4ca23785b14b058693e9e20434a4257c3831f",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-compressed-blockack-s5/src/libINET_dbg.so",
+      "library_sha256": "dae587741f22406c701471c286dcffc03348f3f1f6c0f715c12ecd223ada0b23",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/work/TxopAdmissionProbe",
+      "configuration": "General",
+      "run": 4,
+      "seed_set": 0,
+      "rate_mbps": 24,
+      "profile": "basic",
+      "protection": "single",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-compressed-blockack-s5/src' --check-signals=false -c General -r 4",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/run-4.log",
+      "raw_log_sha256": "8f483899979a9670ce1e7276da7e8f38fe34d707221aa88648962864957ddfd5",
+      "observation_sha256": "cdeea8a573af712129b650ee0ea07bd8b5fc2979a8dc077e35779437d7aee202",
+      "data_completions_beyond_bound": 2,
+      "ack_completions_beyond_bound": 0,
+      "maximum_excess_seconds": "0.00031",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "2",
+          "time": "1.01439",
+          "txopStart": "1.01308",
+          "bound": "1.01408",
+          "excess": "0.00031",
+          "count": "2",
+          "agreement": "1",
+          "aggregate": "1",
+          "retry": "1"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=2 agreedData=20 outsideData=1 aggregates=19 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=0 agreedData=12 outsideData=4 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "s5",
+      "checkout": "/home/user/omnetpp_ws/inet-compressed-blockack-s5",
+      "revision": "1dd4ca23785b14b058693e9e20434a4257c3831f",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-compressed-blockack-s5/src/libINET_dbg.so",
+      "library_sha256": "dae587741f22406c701471c286dcffc03348f3f1f6c0f715c12ecd223ada0b23",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/work/TxopAdmissionProbe",
+      "configuration": "General",
+      "run": 5,
+      "seed_set": 0,
+      "rate_mbps": 24,
+      "profile": "basic",
+      "protection": "multiple",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-compressed-blockack-s5/src' --check-signals=false -c General -r 5",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/run-5.log",
+      "raw_log_sha256": "31c0c0192ab2ac64e98d5ea1838ec9dba9060968e4fbc52d4478eb0efb46dda3",
+      "observation_sha256": "e6ee063803800753deb132692935d756869fbc6590841f9731b8b19491595792",
+      "data_completions_beyond_bound": 14,
+      "ack_completions_beyond_bound": 0,
+      "maximum_excess_seconds": "0.000438",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "2",
+          "time": "1.004902",
+          "txopStart": "1.003592",
+          "bound": "1.004592",
+          "excess": "0.00031",
+          "count": "2",
+          "agreement": "1",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "ap",
+          "allocation": "15",
+          "time": "1.122",
+          "txopStart": "1.120942",
+          "bound": "1.121942",
+          "excess": "0.000058",
+          "count": "2",
+          "agreement": "1",
+          "aggregate": "0",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=7 agreedData=15 outsideData=1 aggregates=14 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=7 agreedData=14 outsideData=2 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "s5",
+      "checkout": "/home/user/omnetpp_ws/inet-compressed-blockack-s5",
+      "revision": "1dd4ca23785b14b058693e9e20434a4257c3831f",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-compressed-blockack-s5/src/libINET_dbg.so",
+      "library_sha256": "dae587741f22406c701471c286dcffc03348f3f1f6c0f715c12ecd223ada0b23",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/work/TxopAdmissionProbe",
+      "configuration": "General",
+      "run": 6,
+      "seed_set": 0,
+      "rate_mbps": 24,
+      "profile": "disabled",
+      "protection": "single",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-compressed-blockack-s5/src' --check-signals=false -c General -r 6",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/run-6.log",
+      "raw_log_sha256": "97a514ecf561b1aba259036dadf4047f80709963e3a5260af967f9debd990e06",
+      "observation_sha256": "3297f24c781b986db12c5495d7e43d6314083a8353ac12f4f6ffb6ca90680b1e",
+      "data_completions_beyond_bound": 0,
+      "ack_completions_beyond_bound": 0,
+      "maximum_excess_seconds": "0",
+      "first_event_by_violation_class": [],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=0 agreedData=0 outsideData=16 aggregates=14 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=0 agreedData=0 outsideData=16 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "s5",
+      "checkout": "/home/user/omnetpp_ws/inet-compressed-blockack-s5",
+      "revision": "1dd4ca23785b14b058693e9e20434a4257c3831f",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-compressed-blockack-s5/src/libINET_dbg.so",
+      "library_sha256": "dae587741f22406c701471c286dcffc03348f3f1f6c0f715c12ecd223ada0b23",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/work/TxopAdmissionProbe",
+      "configuration": "General",
+      "run": 7,
+      "seed_set": 0,
+      "rate_mbps": 24,
+      "profile": "disabled",
+      "protection": "multiple",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-compressed-blockack-s5/src' --check-signals=false -c General -r 7",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/run-7.log",
+      "raw_log_sha256": "edafa6a911ee186595a5730b425d0a95e591ab38ec661039d3e8cfd0c30e9991",
+      "observation_sha256": "292645837d3fe19a2a9ad28abe7f615256392a16d7f7ffc0dde9f49f4146818e",
+      "data_completions_beyond_bound": 16,
+      "ack_completions_beyond_bound": 16,
+      "maximum_excess_seconds": "0.000398",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.001102",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000102",
+          "count": "2",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.001146",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000146",
+          "count": "2",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "ap",
+          "allocation": "3",
+          "time": "1.005354",
+          "txopStart": "1.004252",
+          "bound": "1.005252",
+          "excess": "0.000102",
+          "count": "2",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "ap",
+          "allocation": "3",
+          "time": "1.005398",
+          "txopStart": "1.004252",
+          "bound": "1.005252",
+          "excess": "0.000146",
+          "count": "2",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=16 agreedData=0 outsideData=16 aggregates=14 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=16 agreedData=0 outsideData=16 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "a1-a7",
+      "checkout": "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7",
+      "revision": "d841dc77db7d0b141bf31e5e215a0de9bb281957",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src/libINET_dbg.so",
+      "library_sha256": "bc3595467d81df205051bc14f684b4e7ccae7c367c0efea7358fed1599efcaf7",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/current",
+      "configuration": "General",
+      "run": 0,
+      "seed_set": 0,
+      "rate_mbps": 6,
+      "profile": "basic",
+      "protection": "single",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src' --check-signals=false -c General -r 0",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/current-run-0.log",
+      "raw_log_sha256": "450279ae790acd669f63c33b4431054ed12133da5bd50455ef862fc695d59d95",
+      "observation_sha256": "ee6a55c7536f380b5046268695c4b2221c2f96bbe9646eb28f31eb68145b32f6",
+      "data_completions_beyond_bound": 30,
+      "ack_completions_beyond_bound": 7,
+      "maximum_excess_seconds": "0.001246",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001166",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000166",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "0",
+          "time": "1.001226",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000226",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.003914",
+          "txopStart": "1.001728",
+          "bound": "1.002728",
+          "excess": "0.001186",
+          "count": "1",
+          "agreement": "1",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "ap",
+          "allocation": "0",
+          "time": "1.00625",
+          "txopStart": "1.004064",
+          "bound": "1.005064",
+          "excess": "0.001186",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "ap",
+          "allocation": "0",
+          "time": "1.00631",
+          "txopStart": "1.004064",
+          "bound": "1.005064",
+          "excess": "0.001246",
+          "count": "1",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=16 agreedData=20 outsideData=1 aggregates=19 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=21 agreedData=10 outsideData=6 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "a1-a7",
+      "checkout": "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7",
+      "revision": "d841dc77db7d0b141bf31e5e215a0de9bb281957",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src/libINET_dbg.so",
+      "library_sha256": "bc3595467d81df205051bc14f684b4e7ccae7c367c0efea7358fed1599efcaf7",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/current",
+      "configuration": "General",
+      "run": 5,
+      "seed_set": 0,
+      "rate_mbps": 24,
+      "profile": "basic",
+      "protection": "multiple",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src' --check-signals=false -c General -r 5",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/current-run-5.log",
+      "raw_log_sha256": "b996e2e88dc18d1c3f073b378df6c36845e11eee270f95c4cea926e48f1f36fc",
+      "observation_sha256": "e6ee063803800753deb132692935d756869fbc6590841f9731b8b19491595792",
+      "data_completions_beyond_bound": 14,
+      "ack_completions_beyond_bound": 0,
+      "maximum_excess_seconds": "0.000438",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "2",
+          "time": "1.004902",
+          "txopStart": "1.003592",
+          "bound": "1.004592",
+          "excess": "0.00031",
+          "count": "2",
+          "agreement": "1",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "ap",
+          "allocation": "15",
+          "time": "1.122",
+          "txopStart": "1.120942",
+          "bound": "1.121942",
+          "excess": "0.000058",
+          "count": "2",
+          "agreement": "1",
+          "aggregate": "0",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=7 agreedData=15 outsideData=1 aggregates=14 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=7 agreedData=14 outsideData=2 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "a1-a7",
+      "checkout": "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7",
+      "revision": "d841dc77db7d0b141bf31e5e215a0de9bb281957",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src/libINET_dbg.so",
+      "library_sha256": "bc3595467d81df205051bc14f684b4e7ccae7c367c0efea7358fed1599efcaf7",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/current",
+      "configuration": "General",
+      "run": 6,
+      "seed_set": 0,
+      "rate_mbps": 24,
+      "profile": "disabled",
+      "protection": "single",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src' --check-signals=false -c General -r 6",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/current-run-6.log",
+      "raw_log_sha256": "cce2126db8a6155a4764e21f6592506b7a7dd24211cacc4094cfa2e0d1c24875",
+      "observation_sha256": "3297f24c781b986db12c5495d7e43d6314083a8353ac12f4f6ffb6ca90680b1e",
+      "data_completions_beyond_bound": 0,
+      "ack_completions_beyond_bound": 0,
+      "maximum_excess_seconds": "0",
+      "first_event_by_violation_class": [],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=0 agreedData=0 outsideData=16 aggregates=14 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=0 agreedData=0 outsideData=16 aggregates=14 delivered=30"
+      ]
+    },
+    {
+      "target": "a1-a7",
+      "checkout": "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7",
+      "revision": "d841dc77db7d0b141bf31e5e215a0de9bb281957",
+      "mode": "debug",
+      "library": "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src/libINET_dbg.so",
+      "library_sha256": "bc3595467d81df205051bc14f684b4e7ccae7c367c0efea7358fed1599efcaf7",
+      "working_directory": "/tmp/inet-txop-admission-remaining-20261018/current",
+      "configuration": "General",
+      "run": 7,
+      "seed_set": 0,
+      "rate_mbps": 24,
+      "profile": "disabled",
+      "protection": "multiple",
+      "command": "./TxopAdmissionProbe_dbg -u Cmdenv -n '.;/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/src' --check-signals=false -c General -r 7",
+      "exit_code": 0,
+      "raw_log": "/tmp/inet-txop-admission-remaining-20261018/current-run-7.log",
+      "raw_log_sha256": "7b837b41be9aa7ffa8f9dbd29c39aa68e131160d60b8d617aab48caec706836e",
+      "observation_sha256": "292645837d3fe19a2a9ad28abe7f615256392a16d7f7ffc0dde9f49f4146818e",
+      "data_completions_beyond_bound": 16,
+      "ack_completions_beyond_bound": 16,
+      "maximum_excess_seconds": "0.000398",
+      "first_event_by_violation_class": [
+        {
+          "boundary": "DATA-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.001102",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000102",
+          "count": "2",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "sta1",
+          "allocation": "1",
+          "time": "1.001146",
+          "txopStart": "1",
+          "bound": "1.001",
+          "excess": "0.000146",
+          "count": "2",
+          "agreement": "0",
+          "aggregate": "1",
+          "retry": "0"
+        },
+        {
+          "boundary": "DATA-complete",
+          "node": "ap",
+          "allocation": "3",
+          "time": "1.005354",
+          "txopStart": "1.004252",
+          "bound": "1.005252",
+          "excess": "0.000102",
+          "count": "2",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        },
+        {
+          "boundary": "ACK-complete",
+          "node": "ap",
+          "allocation": "3",
+          "time": "1.005398",
+          "txopStart": "1.004252",
+          "bound": "1.005252",
+          "excess": "0.000146",
+          "count": "2",
+          "agreement": "0",
+          "aggregate": "0",
+          "retry": "0"
+        }
+      ],
+      "summary_lines": [
+        "SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=16 agreedData=0 outsideData=16 aggregates=14 delivered=30",
+        "SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=16 agreedData=0 outsideData=16 aggregates=14 delivered=30"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2025 Andras Varga, OpenSim Ltd.
+Version: 6.4.0aipre2, build: 260526-7b9114f72c, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+
+Setting up Cmdenv...
+
+Loading NED files from .:  2
+Loading NED files from /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/src:  1287
+
+Preparing for running configuration General, run #3...
+Scenario: $rate=24, $protection="multiple", $repetition=0
+Assigned runID=General-3-20261019-02:46:13-15
+Setting up network "ProbeNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 2.6e-05s (0m 00s)  0% completed  (0% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 121   present: 121   in FES: 7   Memory (RSS): 197.621MiB
+DATA node=sta1 decision=1.000078 ifs=0.00001 allocation=0 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1 bound=1.001024 count=1 agreement=0 aggregate=0 retry=0 exception=0 ackPolicy=0
+DATA node=ap decision=1.001141 ifs=0.00001 allocation=0 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.001063 bound=1.002087 count=1 agreement=0 aggregate=0 retry=0 exception=0 ackPolicy=0
+DATA node=sta1 decision=1.003335 ifs=0.00001 allocation=1 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.003257 bound=1.004281 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.003719 ifs=0.00001 allocation=2 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.003257 bound=1.004281 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.004103 ifs=0.00001 allocation=3 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.003257 bound=1.004281 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=3 time=1.004399 txopStart=1.003257 bound=1.004281 excess=0.000118 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=3 firstHolderStart=1.004025 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.004514 ifs=0.00001 allocation=4 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.004436 bound=1.00546 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.004898 ifs=0.00001 allocation=5 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.004436 bound=1.00546 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.005418 ifs=0.00001 allocation=6 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.004436 bound=1.00546 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=6 time=1.005714 txopStart=1.004436 bound=1.00546 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=6 firstHolderStart=1.00534 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.00598 ifs=0.00001 allocation=7 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.005902 bound=1.006926 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.006364 ifs=0.00001 allocation=8 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.005902 bound=1.006926 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.006748 ifs=0.00001 allocation=9 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.005902 bound=1.006926 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=9 time=1.007044 txopStart=1.005902 bound=1.006926 excess=0.000118 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=9 firstHolderStart=1.00667 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.008265 ifs=0.00001 allocation=10 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.008187 bound=1.009211 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.008785 ifs=0.00001 allocation=11 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.008187 bound=1.009211 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.009169 ifs=0.00001 allocation=12 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.008187 bound=1.009211 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=12 time=1.009465 txopStart=1.008187 bound=1.009211 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=12 firstHolderStart=1.009091 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.009634 ifs=0.00001 allocation=13 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.009556 bound=1.01058 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.010018 ifs=0.00001 allocation=14 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.009556 bound=1.01058 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.010402 ifs=0.00001 allocation=15 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.009556 bound=1.01058 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=15 time=1.010698 txopStart=1.009556 bound=1.01058 excess=0.000118 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=15 firstHolderStart=1.010324 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.011021 ifs=0.00001 allocation=16 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.010807 bound=1.011831 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.011405 ifs=0.00001 allocation=17 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.010807 bound=1.011831 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.011789 ifs=0.00001 allocation=18 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.010807 bound=1.011831 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=18 time=1.012085 txopStart=1.010807 bound=1.011831 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=18 firstHolderStart=1.011711 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.012236 ifs=0.00001 allocation=19 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.012158 bound=1.013182 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.01262 ifs=0.00001 allocation=20 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.012158 bound=1.013182 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.01314 ifs=0.00001 allocation=21 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.012158 bound=1.013182 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=21 time=1.013436 txopStart=1.012158 bound=1.013182 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=21 firstHolderStart=1.013062 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.01356 ifs=0.00001 allocation=22 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.013482 bound=1.014506 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.013944 ifs=0.00001 allocation=23 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.013482 bound=1.014506 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.014328 ifs=0.00001 allocation=24 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.013482 bound=1.014506 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=24 time=1.014624 txopStart=1.013482 bound=1.014506 excess=0.000118 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=24 firstHolderStart=1.01425 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.014874 ifs=0.00001 allocation=25 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.014796 bound=1.01582 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.015394 ifs=0.00001 allocation=26 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.014796 bound=1.01582 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=sta1 decision=1.015778 ifs=0.00001 allocation=27 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.014796 bound=1.01582 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=sta1 allocation=27 time=1.016074 txopStart=1.014796 bound=1.01582 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=sta1 allocation=27 firstHolderStart=1.0157 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=sta1 decision=1.016225 ifs=0.00001 allocation=28 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.016147 bound=1.017171 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=sta1 decision=1.016609 ifs=0.00001 allocation=29 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.016147 bound=1.017171 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.108441 ifs=0.00001 allocation=1 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.108363 bound=1.109387 count=1 agreement=0 aggregate=0 retry=0 exception=0 ackPolicy=0
+DATA node=ap decision=1.110563 ifs=0.00001 allocation=2 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.110485 bound=1.111509 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.110947 ifs=0.00001 allocation=3 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.110485 bound=1.111509 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.111331 ifs=0.00001 allocation=4 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.110485 bound=1.111509 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=4 time=1.111627 txopStart=1.110485 bound=1.111509 excess=0.000118 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=4 firstHolderStart=1.111253 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.111805 ifs=0.00001 allocation=5 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.111727 bound=1.112751 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.112189 ifs=0.00001 allocation=6 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.111727 bound=1.112751 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.112709 ifs=0.00001 allocation=7 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.111727 bound=1.112751 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=7 time=1.113005 txopStart=1.111727 bound=1.112751 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=7 firstHolderStart=1.112631 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.113201 ifs=0.00001 allocation=8 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.113123 bound=1.114147 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.113585 ifs=0.00001 allocation=9 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.113123 bound=1.114147 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.113969 ifs=0.00001 allocation=10 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.113123 bound=1.114147 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=10 time=1.114265 txopStart=1.113123 bound=1.114147 excess=0.000118 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=10 firstHolderStart=1.113891 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.114461 ifs=0.00001 allocation=11 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.114383 bound=1.115407 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.114981 ifs=0.00001 allocation=12 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.114383 bound=1.115407 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.115365 ifs=0.00001 allocation=13 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.114383 bound=1.115407 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=13 time=1.115661 txopStart=1.114383 bound=1.115407 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=13 firstHolderStart=1.115287 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.115803 ifs=0.00001 allocation=14 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.115725 bound=1.116749 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.116187 ifs=0.00001 allocation=15 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.115725 bound=1.116749 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.116571 ifs=0.00001 allocation=16 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.115725 bound=1.116749 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=16 time=1.116867 txopStart=1.115725 bound=1.116749 excess=0.000118 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=16 firstHolderStart=1.116493 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.117172 ifs=0.00001 allocation=17 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.116958 bound=1.117982 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.117556 ifs=0.00001 allocation=18 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.116958 bound=1.117982 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.11794 ifs=0.00001 allocation=19 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.116958 bound=1.117982 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=19 time=1.118236 txopStart=1.116958 bound=1.117982 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=19 firstHolderStart=1.117862 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.118414 ifs=0.00001 allocation=20 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.118336 bound=1.11936 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.118798 ifs=0.00001 allocation=21 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.118336 bound=1.11936 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.119318 ifs=0.00001 allocation=22 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.118336 bound=1.11936 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=22 time=1.119614 txopStart=1.118336 bound=1.11936 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=22 firstHolderStart=1.11924 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.119828 ifs=0.00001 allocation=23 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.11975 bound=1.120774 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.120212 ifs=0.00001 allocation=24 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.11975 bound=1.120774 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.120596 ifs=0.00001 allocation=25 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.11975 bound=1.120774 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=25 time=1.120892 txopStart=1.11975 bound=1.120774 excess=0.000118 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=25 firstHolderStart=1.120518 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.121133 ifs=0.00001 allocation=26 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.121055 bound=1.122079 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+DATA node=ap decision=1.121653 ifs=0.00001 allocation=27 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.121055 bound=1.122079 count=2 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+DATA node=ap decision=1.122037 ifs=0.00001 allocation=28 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.121055 bound=1.122079 count=3 agreement=1 aggregate=0 retry=0 exception=0 ackPolicy=3
+INVALID boundary=DATA-complete node=ap allocation=28 time=1.122333 txopStart=1.121055 bound=1.122079 excess=0.000254 count=3 agreement=1 aggregate=0 retry=0
+EXCHANGE node=ap allocation=28 firstHolderStart=1.121959 boundary=DATA-complete costThroughBoundary=0.000374
+DATA node=ap decision=1.122466 ifs=0.00001 allocation=29 bitrate=24 Mbps airtime=0.000286 bytes=766 txopStart=1.122388 bound=1.123412 count=1 agreement=1 aggregate=0 retry=0 exception=1 ackPolicy=3
+SUMMARY node=^.sta1.wlan[0].mac.hcf invalidBoundaries=9 agreedData=29 outsideData=1 aggregates=0 delivered=30
+SUMMARY node=^.ap.wlan[0].mac.hcf invalidBoundaries=9 agreedData=28 outsideData=2 aggregates=0 delivered=30
+** Event #3930   t=1.2   Elapsed: 0.12834s (0m 00s)  92% completed  (92% total)
+     Speed:     ev/sec=30626.8   simsec/sec=9.14671   ev/simsec=3348.4
+     Messages:  created: 4454   present: 120   in FES: 4   Memory (RSS): 199.336MiB
+
+<!> Simulation stopped with endSimulation() -- in module (inet::ieee80211::ProbeTest) ProbeNetwork.test (id=7), at t=1.2s, event #3930
+
+Calling finish() at end of Run #3...
+
+End.

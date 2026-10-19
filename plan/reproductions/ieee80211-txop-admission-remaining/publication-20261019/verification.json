@@ -1,0 +1,257 @@
+{
+  "date": "2026-10-19",
+  "dependency_head": "d841dc77db7d0b141bf31e5e215a0de9bb281957",
+  "source_head": "a6c85b80ba735641b2e4b5386563fab34dc92a78",
+  "upstream_master": "0f1458fbdc1379ad93ad6d7a04975e5607b26197",
+  "debug_library_sha256": "1de36100640807565d8456334072201ff3f412a3e5fbfe28e0376a5e0fc57bf2",
+  "release_library_sha256": "70436a0ffc1aa69d1a74059609e6cb1cd02035fa959fe12c95861dbebace6b2b",
+  "source_commits": [
+    {
+      "commit": "a8557bc6513a5c48bebdd0ce11923fefbe71b1b7",
+      "label": "c1a",
+      "commands": [
+        {
+          "command": [
+            "make",
+            "MODE=debug",
+            "-j8"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c1a-0.log"
+        },
+        {
+          "command": [
+            "inet_run_unit_tests",
+            "-m",
+            "debug",
+            "-f",
+            "Ieee80211BoundedFragmentation_.*\\.test"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c1a-1.log"
+        }
+      ]
+    },
+    {
+      "commit": "9c4bf543d8039e82d7217d19a757ca73dff8e5e4",
+      "label": "c1b",
+      "commands": [
+        {
+          "command": [
+            "make",
+            "MODE=debug",
+            "-j8"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c1b-0.log"
+        },
+        {
+          "command": [
+            "inet_run_module_tests",
+            "-m",
+            "debug",
+            "-f",
+            "Ieee80211PreparedQosFragments_.*\\.test"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c1b-1.log"
+        }
+      ]
+    },
+    {
+      "commit": "04b2e32c659336117e81fc3d579667d6ce135c61",
+      "label": "c2",
+      "commands": [
+        {
+          "command": [
+            "make",
+            "MODE=debug",
+            "-j8"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c2-0.log"
+        },
+        {
+          "command": [
+            "inet_run_module_tests",
+            "-m",
+            "debug",
+            "-f",
+            "Ieee80211TxopMsduRecovery_.*\\.test"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c2-1.log"
+        }
+      ]
+    },
+    {
+      "commit": "d98c98fcfb08b223ed6b88482493e87f0ed274b3",
+      "label": "c3",
+      "commands": [
+        {
+          "command": [
+            "make",
+            "MODE=debug",
+            "-j8"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c3-0.log"
+        },
+        {
+          "command": [
+            "inet_run_module_tests",
+            "-m",
+            "debug",
+            "-f",
+            "Ieee80211(CompressedBlockAckAdmission|CompressedBlockAckExchange|AmpduAdmission|AmpduPreparation|AmpduRecovery|AmpduExchange)_.*\\.test"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c3-1.log"
+        }
+      ]
+    },
+    {
+      "commit": "c419a072519da0cc402d0285e255ee9ac72aa6e6",
+      "label": "c4",
+      "commands": [
+        {
+          "command": [
+            "make",
+            "MODE=debug",
+            "-j8"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c4-0.log"
+        },
+        {
+          "command": [
+            "inet_run_module_tests",
+            "-m",
+            "debug",
+            "-f",
+            "Ieee80211(TxopAdmission|CompressedBlockAckAdmission|HcfSingleProtection|HcfMultipleProtection|PreparedCancellation|HcfInternalCollision|HcfManagementRecovery)_.*\\.test"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c4-1.log"
+        }
+      ]
+    },
+    {
+      "commit": "a6c85b80ba735641b2e4b5386563fab34dc92a78",
+      "label": "c5",
+      "commands": [
+        {
+          "command": [
+            "make",
+            "MODE=debug",
+            "-j8"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c5-0.log"
+        },
+        {
+          "command": [
+            "inet_run_module_tests",
+            "-m",
+            "debug",
+            "-f",
+            "Ieee80211(BasicTxopAdmission|BasicCompatibility|BlockAckFragmentRetirement|CompressedBlockAckAdmission|BlockAckVariant)_.*\\.test"
+          ],
+          "exit_status": 0,
+          "log": "/tmp/inet-txop-publication/c5-1.log"
+        }
+      ]
+    }
+  ],
+  "final_results": {
+    "debug_build": 0,
+    "release_build": 0,
+    "module_fixtures": 31,
+    "module_exit_status": 0,
+    "unit_fixtures": 4,
+    "unit_exit_status": 0,
+    "protocol_fixtures": 1,
+    "protocol_exit_status": 0,
+    "normal_ack_runs": 96,
+    "basic_runs": 36,
+    "onoe_runs": 16,
+    "onoe_exit_status": 0,
+    "aarf_runs": 16,
+    "aarf_exit_status": 0,
+    "fingerprint_rows": 3,
+    "fingerprint_exit_status": 1,
+    "baseline_updated": false
+  },
+  "global_gates": {
+    "architecture": {
+      "exit_status": 1,
+      "identical_to_dependency_head": true,
+      "report_sha256": "1f8e91c0592212fad19fb2069d676af09c9d5f561420faa7c0e44aa50c7c1609"
+    },
+    "naming": {
+      "exit_status": 1,
+      "identical_to_dependency_head": true,
+      "report_sha256": "b2e935923ba378056fbaa076fbbe63d6bfd773fbdc6265aae9be93f337d193f6"
+    },
+    "interfaces": {
+      "exit_status": 1,
+      "identical_to_dependency_head": true,
+      "report_sha256": "39b80badfe3e5df49a17d16d96d34cdd42aa700d3ddeffb514ff0643dbbb1454"
+    },
+    "source_seals": {
+      "exit_status": 0,
+      "report_sha256": "4d5110553efecb3ef3b5837e2c26e345ad8bdd3edeeaf3aab5502dc60769dc16"
+    }
+  },
+  "topic_series_before_documentation": {
+    "exit_status": 0,
+    "notes": 1,
+    "report_sha256": "debb0050ce940ac673ea44cbd98587b3ef7cf0472cca80a5e49fb4ff615652fc"
+  },
+  "mermaid_diagrams": {
+    "count": 3,
+    "syntax_status": "PASS",
+    "visual_rendering": "NOT_CHECKED"
+  },
+  "logs": {
+    "base-architecture.log": "1f8e91c0592212fad19fb2069d676af09c9d5f561420faa7c0e44aa50c7c1609",
+    "base-interfaces.log": "39b80badfe3e5df49a17d16d96d34cdd42aa700d3ddeffb514ff0643dbbb1454",
+    "base-naming.log": "b2e935923ba378056fbaa076fbbe63d6bfd773fbdc6265aae9be93f337d193f6",
+    "base-seals.log": "4d5110553efecb3ef3b5837e2c26e345ad8bdd3edeeaf3aab5502dc60769dc16",
+    "base-series.log": "8d060412b0b92424128fa16f1fa3bf938754cd6a9d81e2e28f8a3c8f6bd8981d",
+    "c1a-0.log": "1f2faa3924a5aa6779e09c900ddd9a9b72dd873c46211ca42a55a200c332882e",
+    "c1a-1.log": "ec45171c7f35e9be4eb39edcae77093423a880f5153a7f3ce11b4a45d4ca2219",
+    "c1a-summary.log": "37145c70c8e529618c7761f80b2361ee9d3e9a0885831d720d92b5ee0a8a4e9f",
+    "c1b-0.log": "20a7036c026dfd58e5d9e6a4feb41971b0b92e5558c1982385c92d8e460dabf7",
+    "c1b-1.log": "cb08e83b35308fe5fbbeefc8045d56f96987907fa0e951ebeeb8393c9c8751f0",
+    "c1b-summary.log": "02f3dac5fde8f1c045efaa6f4a8baa3fcc7fc7e3132eaba2a1c9ab4d506850f5",
+    "c2-0.log": "aae51aedbc408ead1c42b1142057b6450a272dc18e95677dc2def5e492a16c1b",
+    "c2-1.log": "175705439a3657d2d58178783848d720e65c5a6e61a74b45e02d87f20a46be29",
+    "c2-summary.log": "f2f3b356a1e926f31df76b8d8a90ae5a05ba8d584a9d0fb39c41ba712ed75582",
+    "c3-0.log": "578ee061e6aa1f51812a89e7556134006a688d13a79ad01eb40f5d12c1286e5d",
+    "c3-1.log": "5c278d9dea9e9d8eb2b73140b2abeba33a74c4815f601773fd736074150185d3",
+    "c3-summary.log": "c649bc21aa30cabd67dc42a2202dddcf276346725eab6569bbb11dea7d68dc19",
+    "c4-0.log": "bf3385c2409635c546e8f4cc63363c4e3456bcbe0f3d3f08e62014ad76744f66",
+    "c4-1.log": "cb0c8ac58dbfacbacedbab402b60cca0a2ea98bfacee907bb77fdaf64d916354",
+    "c4-summary.log": "739beafcc6398ddecd1ac767c1808a7725fd8859b9789244540d0557ad4d93e3",
+    "c5-0.log": "1216ad1c52e1579b5e27731768a09f2e98f49837137cc11acff03326eef84571",
+    "c5-1.log": "2ace93cb53271260b107761050539ddc354f651ca8580246d48694af6b08af10",
+    "c5-summary.log": "870434f2dfe88de390f5dba849738d1057f5f65f033f9dd4a8e95046073010fa",
+    "description-check.log": "86ada05bf13cf158a3a787c44e056b1919bfb6776e29acc0a59704327af656c3",
+    "diagram-check.log": "bd898937b92390895905a2d2cd9b91abaafe851a448ab5a88701f33afa329f87",
+    "diagram-install.log": "068a3510ec890c74b50dbc89097705590968d452dc20dd019d73af0ae67df8d2",
+    "final-aarf.log": "e9bbf0f4c39c88751df4bb80393f92b67e5437563625cc3a5b957df1f2bfe59a",
+    "final-debug-build.log": "8986b95376e61c858871cdd4ad2b451bc4c4e22c2c4c4ab0c5b7d6814cfc6ace",
+    "final-fingerprints.log": "8af24dfa9dc3b8b395800867438f81ea30a3ce3199bc400f87b78f80fc073184",
+    "final-module.log": "a145de0f816274d475c1b69efae75d62c5967ca9ec9f64af077dc49f20177620",
+    "final-onoe.log": "1540cb1d60814f3adb2e8f84eac34a6ef3d7301f121623e1bee3c3f9b93a2eb5",
+    "final-protocol.log": "b37dc5c09d62b20ae5d73eb9b556cdd96762b17afad0bcd5abcfc68652e4a577",
+    "final-unit.log": "381839f9d8a318605feb534d9fdf657b6a2fc7d75b19ce24629d4810f38bae16",
+    "head-architecture.log": "1f8e91c0592212fad19fb2069d676af09c9d5f561420faa7c0e44aa50c7c1609",
+    "head-interfaces.log": "39b80badfe3e5df49a17d16d96d34cdd42aa700d3ddeffb514ff0643dbbb1454",
+    "head-naming.log": "b2e935923ba378056fbaa076fbbe63d6bfd773fbdc6265aae9be93f337d193f6",
+    "head-seals.log": "4d5110553efecb3ef3b5837e2c26e345ad8bdd3edeeaf3aab5502dc60769dc16",
+    "release-build.log": "3fa848ea586774c88c52b5ad3cef83f21156e39af11195f3f032859c201c991a",
+    "topic-series-pre-docs.log": "debb0050ce940ac673ea44cbd98587b3ef7cf0472cca80a5e49fb4ff615652fc"
+  }
+}

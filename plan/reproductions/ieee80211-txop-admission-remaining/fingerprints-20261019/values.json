@@ -1,0 +1,783 @@
+[
+  {
+    "case": "/showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "21a4-c882/tplx",
+      "ecf2-6e33/~tNl",
+      "5d9e-8fdf/~tND",
+      "27f2-4a52/tyf"
+    ],
+    "base": [
+      "21a4-c882/tplx",
+      "ecf2-6e33/~tNl",
+      "5d9e-8fdf/~tND",
+      "cb71-81f8/tyf"
+    ],
+    "c3": [
+      "21a4-c882/tplx",
+      "ecf2-6e33/~tNl",
+      "5d9e-8fdf/~tND",
+      "cb71-81f8/tyf"
+    ],
+    "c4": [
+      "21a4-c882/tplx",
+      "ecf2-6e33/~tNl",
+      "5d9e-8fdf/~tND",
+      "cb71-81f8/tyf"
+    ],
+    "head": [
+      "21a4-c882/tplx",
+      "ecf2-6e33/~tNl",
+      "5d9e-8fdf/~tND",
+      "cb71-81f8/tyf"
+    ],
+    "owners": [
+      "inherited"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "0e94-675b/tplx",
+      "4545-c0de/~tNl",
+      "a778-2f83/~tND",
+      "95cc-1859/tyf"
+    ],
+    "base": [
+      "0e94-675b/tplx",
+      "4545-c0de/~tNl",
+      "a778-2f83/~tND",
+      "6cdd-e65e/tyf"
+    ],
+    "c3": [
+      "0e94-675b/tplx",
+      "4545-c0de/~tNl",
+      "a778-2f83/~tND",
+      "6cdd-e65e/tyf"
+    ],
+    "c4": [
+      "b7d0-1c67/tplx",
+      "d8f8-2120/~tNl",
+      "b2ba-0919/~tND",
+      "7c83-f2e4/tyf"
+    ],
+    "head": [
+      "b7d0-1c67/tplx",
+      "d8f8-2120/~tNl",
+      "b2ba-0919/~tND",
+      "7c83-f2e4/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/aggregation/ -f omnetpp.ini -c VoicePriorityAggregation -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "1ad6-ebce/tplx",
+      "cc40-e9c2/~tNl",
+      "5421-bc6d/~tND",
+      "bd88-5ba6/tyf"
+    ],
+    "base": [
+      "1ad6-ebce/tplx",
+      "cc40-e9c2/~tNl",
+      "5421-bc6d/~tND",
+      "c99f-3188/tyf"
+    ],
+    "c3": [
+      "1ad6-ebce/tplx",
+      "cc40-e9c2/~tNl",
+      "5421-bc6d/~tND",
+      "c99f-3188/tyf"
+    ],
+    "c4": [
+      "455e-1981/tplx",
+      "c6ed-de44/~tNl",
+      "6c9a-8f21/~tND",
+      "2267-c230/tyf"
+    ],
+    "head": [
+      "455e-1981/tplx",
+      "c6ed-de44/~tNl",
+      "6c9a-8f21/~tND",
+      "2267-c230/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/blockack/ -f omnetpp.ini -c Fragmentation -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "36f4-5c22/tplx",
+      "66b0-94cd/~tNl",
+      "45f3-af4f/~tND"
+    ],
+    "base": [
+      "36f4-5c22/tplx",
+      "66b0-94cd/~tNl",
+      "45f3-af4f/~tND"
+    ],
+    "c3": [
+      "36f4-5c22/tplx",
+      "66b0-94cd/~tNl",
+      "45f3-af4f/~tND"
+    ],
+    "c4": [
+      "36f4-5c22/tplx",
+      "66b0-94cd/~tNl",
+      "45f3-af4f/~tND"
+    ],
+    "head": [
+      "9fd0-6388/tplx",
+      "22f5-8db8/~tNl",
+      "68cc-5669/~tND"
+    ],
+    "owners": [
+      "C5"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFfrag -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "8df2-40a3/tplx",
+      "dab9-5e8d/~tNl",
+      "2e7b-0729/~tND",
+      "f985-34fb/tyf"
+    ],
+    "base": [
+      "8df2-40a3/tplx",
+      "dab9-5e8d/~tNl",
+      "2e7b-0729/~tND",
+      "74c3-9ba0/tyf"
+    ],
+    "c3": [
+      "8df2-40a3/tplx",
+      "dab9-5e8d/~tNl",
+      "2e7b-0729/~tND",
+      "74c3-9ba0/tyf"
+    ],
+    "c4": [
+      "8df2-40a3/tplx",
+      "dab9-5e8d/~tNl",
+      "2e7b-0729/~tND",
+      "74c3-9ba0/tyf"
+    ],
+    "head": [
+      "8df2-40a3/tplx",
+      "dab9-5e8d/~tNl",
+      "2e7b-0729/~tND",
+      "74c3-9ba0/tyf"
+    ],
+    "owners": [
+      "inherited"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfrag -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "c99f-354d/tplx",
+      "8e10-a3f0/~tNl",
+      "ac4b-3ba1/~tND",
+      "335d-6687/tyf"
+    ],
+    "base": [
+      "c99f-354d/tplx",
+      "8e10-a3f0/~tNl",
+      "ac4b-3ba1/~tND",
+      "e394-4985/tyf"
+    ],
+    "c3": [
+      "c99f-354d/tplx",
+      "8e10-a3f0/~tNl",
+      "ac4b-3ba1/~tND",
+      "e394-4985/tyf"
+    ],
+    "c4": [
+      "d7c1-fb92/tplx",
+      "b7b8-b4e1/~tNl",
+      "7035-d6cb/~tND",
+      "e791-f124/tyf"
+    ],
+    "head": [
+      "d7c1-fb92/tplx",
+      "b7b8-b4e1/~tNl",
+      "7035-d6cb/~tND",
+      "e791-f124/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfragblockack -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "2597-1e2e/tplx",
+      "d269-c6ae/~tNl",
+      "2f5c-4cca/~tND",
+      "6f6e-b101/tyf"
+    ],
+    "base": [
+      "2597-1e2e/tplx",
+      "d269-c6ae/~tNl",
+      "2f5c-4cca/~tND",
+      "77f4-58c1/tyf"
+    ],
+    "c3": [
+      "2597-1e2e/tplx",
+      "d269-c6ae/~tNl",
+      "2f5c-4cca/~tND",
+      "77f4-58c1/tyf"
+    ],
+    "c4": [
+      "2597-1e2e/tplx",
+      "d269-c6ae/~tNl",
+      "2f5c-4cca/~tND",
+      "77f4-58c1/tyf"
+    ],
+    "head": [
+      "99bc-a74d/tplx",
+      "fffd-4625/~tNl",
+      "5543-fbef/~tND",
+      "821e-8bed/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C5"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/qos/ -f omnetpp.ini -c NonQos -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "5734-43a3/tplx",
+      "9c39-00a3/~tNl",
+      "03a9-2f02/~tND",
+      "093e-1ca4/tyf"
+    ],
+    "base": [
+      "5734-43a3/tplx",
+      "9c39-00a3/~tNl",
+      "03a9-2f02/~tND",
+      "34ac-bc95/tyf"
+    ],
+    "c3": [
+      "5734-43a3/tplx",
+      "9c39-00a3/~tNl",
+      "03a9-2f02/~tND",
+      "34ac-bc95/tyf"
+    ],
+    "c4": [
+      "5734-43a3/tplx",
+      "9c39-00a3/~tNl",
+      "03a9-2f02/~tND",
+      "34ac-bc95/tyf"
+    ],
+    "head": [
+      "5734-43a3/tplx",
+      "9c39-00a3/~tNl",
+      "03a9-2f02/~tND",
+      "34ac-bc95/tyf"
+    ],
+    "owners": [
+      "inherited"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/qos/ -f omnetpp.ini -c Qos -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "2f30-f17c/tplx",
+      "0683-d978/~tNl",
+      "a879-de03/~tND",
+      "bda9-15d1/tyf"
+    ],
+    "base": [
+      "2f30-f17c/tplx",
+      "0683-d978/~tNl",
+      "a879-de03/~tND",
+      "64d2-47e3/tyf"
+    ],
+    "c3": [
+      "2f30-f17c/tplx",
+      "0683-d978/~tNl",
+      "a879-de03/~tND",
+      "64d2-47e3/tyf"
+    ],
+    "c4": [
+      "c105-8907/tplx",
+      "f17b-f24c/~tNl",
+      "c055-873b/~tND",
+      "1c08-f8f1/tyf"
+    ],
+    "head": [
+      "c105-8907/tplx",
+      "f17b-f24c/~tNl",
+      "c055-873b/~tND",
+      "1c08-f8f1/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/showcases/wireless/txop/ -f omnetpp.ini -c General -r 0",
+    "file": "showcases.csv",
+    "old": [
+      "ab91-87f3/tplx",
+      "f30c-6aa4/~tNl",
+      "c87d-3f3a/tyf"
+    ],
+    "base": [
+      "ab91-87f3/tplx",
+      "f30c-6aa4/~tNl",
+      "6175-eb06/tyf"
+    ],
+    "c3": [
+      "ab91-87f3/tplx",
+      "f30c-6aa4/~tNl",
+      "6175-eb06/tyf"
+    ],
+    "c4": [
+      "ab91-87f3/tplx",
+      "f30c-6aa4/~tNl",
+      "6175-eb06/tyf"
+    ],
+    "head": [
+      "92af-e665/tplx",
+      "7960-ff7c/~tNl",
+      "0ec4-ff6b/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C5"
+    ]
+  },
+  {
+    "case": "/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 0",
+    "file": "examples.csv",
+    "old": [
+      "dd36-1076/tplx",
+      "b703-3ef2/~tNl",
+      "e07d-2980/~tND",
+      "2c1e-66e5/tyf"
+    ],
+    "base": [
+      "dd36-1076/tplx",
+      "b703-3ef2/~tNl",
+      "e07d-2980/~tND",
+      "f74f-a0c0/tyf"
+    ],
+    "c3": [
+      "dd36-1076/tplx",
+      "b703-3ef2/~tNl",
+      "e07d-2980/~tND",
+      "f74f-a0c0/tyf"
+    ],
+    "c4": [
+      "a78c-7701/tplx",
+      "cedf-054d/~tNl",
+      "91a9-683f/~tND",
+      "f841-fef5/tyf"
+    ],
+    "head": [
+      "a78c-7701/tplx",
+      "cedf-054d/~tNl",
+      "91a9-683f/~tND",
+      "f841-fef5/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 1",
+    "file": "examples.csv",
+    "old": [
+      "4fd2-bb56/tplx",
+      "ecaf-89f7/~tNl",
+      "9398-0fae/~tND",
+      "a587-3a4d/tyf"
+    ],
+    "base": [
+      "4fd2-bb56/tplx",
+      "ecaf-89f7/~tNl",
+      "9398-0fae/~tND",
+      "57c2-84bd/tyf"
+    ],
+    "c3": [
+      "4fd2-bb56/tplx",
+      "ecaf-89f7/~tNl",
+      "9398-0fae/~tND",
+      "57c2-84bd/tyf"
+    ],
+    "c4": [
+      "4fd2-bb56/tplx",
+      "ecaf-89f7/~tNl",
+      "9398-0fae/~tND",
+      "57c2-84bd/tyf"
+    ],
+    "head": [
+      "33e1-5ba7/tplx",
+      "f321-055c/~tNl",
+      "b439-5b70/~tND",
+      "5cb1-cbfe/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C5"
+    ]
+  },
+  {
+    "case": "/examples/adhoc/qos/ -f omnetpp.ini -c Fragmentation",
+    "file": "examples.csv",
+    "old": [
+      "2f2d-73b1/tplx",
+      "cc9e-d1a6/~tNl",
+      "e740-f7d4/~tND",
+      "33b7-00f9/tyf"
+    ],
+    "base": [
+      "2f2d-73b1/tplx",
+      "cc9e-d1a6/~tNl",
+      "e740-f7d4/~tND",
+      "97f7-655d/tyf"
+    ],
+    "c3": [
+      "2f2d-73b1/tplx",
+      "cc9e-d1a6/~tNl",
+      "e740-f7d4/~tND",
+      "97f7-655d/tyf"
+    ],
+    "c4": [
+      "2f2d-73b1/tplx",
+      "cc9e-d1a6/~tNl",
+      "e740-f7d4/~tND",
+      "97f7-655d/tyf"
+    ],
+    "head": [
+      "2f2d-73b1/tplx",
+      "cc9e-d1a6/~tNl",
+      "e740-f7d4/~tND",
+      "97f7-655d/tyf"
+    ],
+    "owners": [
+      "inherited"
+    ]
+  },
+  {
+    "case": "/examples/adhoc/qos/ -f omnetpp.ini -c MsduAggregation",
+    "file": "examples.csv",
+    "old": [
+      "2c80-6844/tplx",
+      "4e9e-cf86/~tNl",
+      "ea3d-e802/~tND",
+      "df04-18f7/tyf"
+    ],
+    "base": [
+      "2c80-6844/tplx",
+      "4e9e-cf86/~tNl",
+      "ea3d-e802/~tND",
+      "734c-15d1/tyf"
+    ],
+    "c3": [
+      "2c80-6844/tplx",
+      "4e9e-cf86/~tNl",
+      "ea3d-e802/~tND",
+      "734c-15d1/tyf"
+    ],
+    "c4": [
+      "e24a-3845/tplx",
+      "5509-e838/~tNl",
+      "636c-9cea/~tND",
+      "cc7a-9b26/tyf"
+    ],
+    "head": [
+      "e24a-3845/tplx",
+      "5509-e838/~tNl",
+      "636c-9cea/~tND",
+      "cc7a-9b26/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/examples/wireless/mactest/ -f omnetpp.ini -c MacEdca -r 0",
+    "file": "examples.csv",
+    "old": [
+      "5635-3aae/tplx",
+      "c574-69b7/~tNl",
+      "bb83-14c4/~tND",
+      "dfcf-4644/tyf"
+    ],
+    "base": [
+      "5635-3aae/tplx",
+      "c574-69b7/~tNl",
+      "bb83-14c4/~tND",
+      "24e0-2e48/tyf"
+    ],
+    "c3": [
+      "5635-3aae/tplx",
+      "c574-69b7/~tNl",
+      "bb83-14c4/~tND",
+      "24e0-2e48/tyf"
+    ],
+    "c4": [
+      "c4a0-ea53/tplx",
+      "9c3d-fe57/~tNl",
+      "ec7b-7e1e/~tND",
+      "b459-aecf/tyf"
+    ],
+    "head": [
+      "c4a0-ea53/tplx",
+      "9c3d-fe57/~tNl",
+      "ec7b-7e1e/~tND",
+      "b459-aecf/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/examples/wireless/mactest/ -f omnetpp.ini -c MacDcf -r 0",
+    "file": "examples.csv",
+    "old": [
+      "031d-548a/tplx",
+      "4db6-9460/~tNl",
+      "4c1d-35a0/~tND",
+      "f37f-cd48/tyf"
+    ],
+    "base": [
+      "031d-548a/tplx",
+      "4db6-9460/~tNl",
+      "4c1d-35a0/~tND",
+      "3edc-eb8d/tyf"
+    ],
+    "c3": [
+      "031d-548a/tplx",
+      "4db6-9460/~tNl",
+      "4c1d-35a0/~tND",
+      "3edc-eb8d/tyf"
+    ],
+    "c4": [
+      "031d-548a/tplx",
+      "4db6-9460/~tNl",
+      "4c1d-35a0/~tND",
+      "3edc-eb8d/tyf"
+    ],
+    "head": [
+      "031d-548a/tplx",
+      "4db6-9460/~tNl",
+      "4c1d-35a0/~tND",
+      "3edc-eb8d/tyf"
+    ],
+    "owners": [
+      "inherited"
+    ]
+  },
+  {
+    "case": "/examples/wireless/qos/ -f omnetpp.ini -c MacNonQos -r 0",
+    "file": "examples.csv",
+    "old": [
+      "0be7-a22e/tplx",
+      "5eb9-6cea/~tNl",
+      "87a5-11a1/~tND",
+      "6097-a429/tyf"
+    ],
+    "base": [
+      "0be7-a22e/tplx",
+      "5eb9-6cea/~tNl",
+      "87a5-11a1/~tND",
+      "b802-9992/tyf"
+    ],
+    "c3": [
+      "0be7-a22e/tplx",
+      "5eb9-6cea/~tNl",
+      "87a5-11a1/~tND",
+      "b802-9992/tyf"
+    ],
+    "c4": [
+      "0be7-a22e/tplx",
+      "5eb9-6cea/~tNl",
+      "87a5-11a1/~tND",
+      "b802-9992/tyf"
+    ],
+    "head": [
+      "0be7-a22e/tplx",
+      "5eb9-6cea/~tNl",
+      "87a5-11a1/~tND",
+      "b802-9992/tyf"
+    ],
+    "owners": [
+      "inherited"
+    ]
+  },
+  {
+    "case": "/examples/wireless/qos/ -f omnetpp.ini -c MacQos -r 0",
+    "file": "examples.csv",
+    "old": [
+      "d929-5913/tplx",
+      "f602-4424/~tNl",
+      "f2fb-4d98/~tND",
+      "9f3c-4512/tyf"
+    ],
+    "base": [
+      "d929-5913/tplx",
+      "f602-4424/~tNl",
+      "f2fb-4d98/~tND",
+      "b06a-f098/tyf"
+    ],
+    "c3": [
+      "d929-5913/tplx",
+      "f602-4424/~tNl",
+      "f2fb-4d98/~tND",
+      "b06a-f098/tyf"
+    ],
+    "c4": [
+      "0473-f9d2/tplx",
+      "e92c-7352/~tNl",
+      "1906-1f5f/~tND",
+      "4196-a696/tyf"
+    ],
+    "head": [
+      "0473-f9d2/tplx",
+      "e92c-7352/~tNl",
+      "1906-1f5f/~tND",
+      "4196-a696/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithoutAggregation -r 0",
+    "file": "examples.csv",
+    "old": [
+      "0473-f9d2/tplx",
+      "e92c-7352/~tNl",
+      "317d-aa4f/~tND",
+      "a4c3-19bf/tyf"
+    ],
+    "base": [
+      "0473-f9d2/tplx",
+      "e92c-7352/~tNl",
+      "317d-aa4f/~tND",
+      "57cd-2e76/tyf"
+    ],
+    "c3": [
+      "0473-f9d2/tplx",
+      "e92c-7352/~tNl",
+      "317d-aa4f/~tND",
+      "57cd-2e76/tyf"
+    ],
+    "c4": [
+      "0473-f9d2/tplx",
+      "e92c-7352/~tNl",
+      "1906-1f5f/~tND",
+      "761d-e145/tyf"
+    ],
+    "head": [
+      "0473-f9d2/tplx",
+      "e92c-7352/~tNl",
+      "1906-1f5f/~tND",
+      "761d-e145/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithRtsCts -r 0",
+    "file": "examples.csv",
+    "old": [
+      "e07a-4c5f/tplx",
+      "9f6c-7889/~tNl",
+      "29ea-169c/~tND",
+      "b2d6-1329/tyf"
+    ],
+    "base": [
+      "e07a-4c5f/tplx",
+      "9f6c-7889/~tNl",
+      "29ea-169c/~tND",
+      "8cb9-109e/tyf"
+    ],
+    "c3": [
+      "e07a-4c5f/tplx",
+      "9f6c-7889/~tNl",
+      "29ea-169c/~tND",
+      "8cb9-109e/tyf"
+    ],
+    "c4": [
+      "5269-1e09/tplx",
+      "b291-6797/~tNl",
+      "0378-ab11/~tND",
+      "9b3b-150c/tyf"
+    ],
+    "head": [
+      "5269-1e09/tplx",
+      "b291-6797/~tNl",
+      "0378-ab11/~tND",
+      "9b3b-150c/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C4"
+    ]
+  },
+  {
+    "case": "/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithBlockAck -r 0",
+    "file": "examples.csv",
+    "old": [
+      "6edb-0326/tplx",
+      "2a8a-50ee/~tNl",
+      "4301-882d/~tND",
+      "08b5-d005/tyf"
+    ],
+    "base": [
+      "6edb-0326/tplx",
+      "2a8a-50ee/~tNl",
+      "4301-882d/~tND",
+      "0db4-29ea/tyf"
+    ],
+    "c3": [
+      "6edb-0326/tplx",
+      "2a8a-50ee/~tNl",
+      "4301-882d/~tND",
+      "0db4-29ea/tyf"
+    ],
+    "c4": [
+      "6edb-0326/tplx",
+      "2a8a-50ee/~tNl",
+      "4301-882d/~tND",
+      "0db4-29ea/tyf"
+    ],
+    "head": [
+      "7866-b50d/tplx",
+      "cf3d-0664/~tNl",
+      "5912-f4f1/~tND",
+      "7ed5-dd85/tyf"
+    ],
+    "owners": [
+      "inherited",
+      "C5"
+    ]
+  }
+]

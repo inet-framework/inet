@@ -1,0 +1,19 @@
+Hint: You may want to use the '-F tyf' option to exclude graphical (tyf) fingerprints, as they are not regularly kept up to date
+/examples/wireless/mactest/ -f omnetpp.ini -c MacEdca -r 0 wireless ... : PASS
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfrag -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/aggregation/ -f omnetpp.ini -c VoicePriorityAggregation -r 0 wireless Ipv4 ... : PASS
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithoutAggregation -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/qos/ -f omnetpp.ini -c Qos -r 0 wireless Ipv4 ... : PASS
+/examples/wireless/qos/ -f omnetpp.ini -c MacQos -r 0 wireless Ipv4 ... : PASS
+/examples/adhoc/qos/ -f omnetpp.ini -c MsduAggregation wireless adhoc Ipv4 ... : PASS
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithRtsCts -r 0 wireless Ipv4 ... : PASS
+/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 0 wireless adhoc Ipv4 ... : PASS
+
+----------------------------------------------------------------------
+Ran 10 tests in 175.212s
+
+OK
+
+Log has been saved to fingerprinttest.out
+Test results equals to expected results

@@ -1,0 +1,230 @@
+[
+  {
+    "case": [
+      "showcases/wireless/aggregation",
+      "VoicePriorityAggregation",
+      0,
+      "10ms"
+    ],
+    "previous": "base",
+    "current": "c4",
+    "transmission_index": 2,
+    "before": {
+      "event": "** Event #60  t=0.00020061726  on UdpBasicAppData-1+UdpBasicAppData-2+UdpBasicAppData-3 (inet::Packet)  in AggregationShowcase.host1.wlan[0].radio (Ieee80211Radio, id=63)    2% completed  (2% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)UdpBasicAppData-1+UdpBasicAppData-2+UdpBasicAppData-3 (102 us 516 B) (inet::Packet)UdpBasicAppData-1+UdpBasicAppData-2+UdpBasicAppData-3 (516 B) (inet::SequenceChunk) length = 516 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 2, transmitterRadioId = 0, startTime = 0.00020061726, endTime = 0.00030261726, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000082, startPosition = (288, 110, 0) m, endPosition = (288, 110, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #60  t=0.00020061726  on UdpBasicAppData-1 (inet::Packet)  in AggregationShowcase.host1.wlan[0].radio (Ieee80211Radio, id=63)    2% completed  (2% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)UdpBasicAppData-1 (54 us 192 B) (inet::Packet)UdpBasicAppData-1 (192 B) (inet::SequenceChunk) length = 192 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 2, transmitterRadioId = 0, startTime = 0.00020061726, endTime = 0.00025461726, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000034, startPosition = (288, 110, 0) m, endPosition = (288, 110, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "showcases/wireless/fragmentation",
+      "HCFfrag",
+      0,
+      "10ms"
+    ],
+    "previous": "base",
+    "current": "c4",
+    "transmission_index": 22,
+    "before": {
+      "event": "** Event #237  t=0.00345597088  on UdpBasicAppData-1-frag0 (inet::Packet)  in FragmentationShowcase.wifiHost1.wlan[0].radio (Ieee80211Radio, id=30)    34% completed  (34% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)UdpBasicAppData-1-frag0 (114 us 267 B) (inet::Packet)UdpBasicAppData-1-frag0 (267 B) (inet::SequenceChunk) length = 267 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 22, transmitterRadioId = 0, startTime = 0.00345597088, endTime = 0.00356997088, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000094, startPosition = (215, 99, 0) m, endPosition = (215, 99, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #244  t=0.00379597088  on UdpBasicAppData-1-frag0 (inet::Packet)  in FragmentationShowcase.wifiHost1.wlan[0].radio (Ieee80211Radio, id=30)    37% completed  (37% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)UdpBasicAppData-1-frag0 (114 us 267 B) (inet::Packet)UdpBasicAppData-1-frag0 (267 B) (inet::SequenceChunk) length = 267 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 22, transmitterRadioId = 0, startTime = 0.00379597088, endTime = 0.00390997088, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000094, startPosition = (215, 99, 0) m, endPosition = (215, 99, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "showcases/wireless/qos",
+      "Qos",
+      0,
+      "1.02s"
+    ],
+    "previous": "base",
+    "current": "c4",
+    "transmission_index": 47,
+    "before": {
+      "event": "** Event #824  t=1.001525886924  on video-0+video-1 (inet::Packet)  in QosShowcase.client.wlan[0].radio (Ieee80211Radio, id=241)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)video-0+video-1 (226 us 1353 B) (inet::Packet)video-0+video-1 (1353 B) (inet::SequenceChunk) length = 1353 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 47, transmitterRadioId = 2, startTime = 1.001525886924, endTime = 1.001751886924, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000206, startPosition = (200, 100, 0) m, endPosition = (200, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #824  t=1.001525886924  on video-0 (inet::Packet)  in QosShowcase.client.wlan[0].radio (Ieee80211Radio, id=241)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)video-0 (126 us 678 B) (inet::Packet)video-0 (678 B) (inet::SequenceChunk) length = 678 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 47, transmitterRadioId = 2, startTime = 1.001525886924, endTime = 1.001651886924, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000106, startPosition = (200, 100, 0) m, endPosition = (200, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "examples/adhoc/qos",
+      "MacQos",
+      0,
+      "0.51s"
+    ],
+    "previous": "base",
+    "current": "c4",
+    "transmission_index": 2,
+    "before": {
+      "event": "** Event #231  t=0.500541334256  on Voice-1+Voice-2+Voice-3-frag0 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=151)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Voice-1+Voice-2+Voice-3-frag0 (530 us 1515 B) (inet::Packet)Voice-1+Voice-2+Voice-3-frag0 (1515 B) (inet::SequenceChunk) length = 1515 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 2, transmitterRadioId = 1, startTime = 0.500541334256, endTime = 0.501071334256, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.00051, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #231  t=0.500541334256  on Voice-1 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=151)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Voice-1 (386 us 1083 B) (inet::Packet)Voice-1 (1083 B) (inet::SequenceChunk) length = 1083 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 2, transmitterRadioId = 1, startTime = 0.500541334256, endTime = 0.500927334256, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000366, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "examples/adhoc/qos",
+      "MsduAggregation",
+      0,
+      "0.51s"
+    ],
+    "previous": "base",
+    "current": "c4",
+    "transmission_index": 4,
+    "before": {
+      "event": "** Event #92  t=0.500422668512  on Voice-2+Voice-3 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=147)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Voice-2+Voice-3 (138 us 339 B) (inet::Packet)Voice-2+Voice-3 (339 B) (inet::SequenceChunk) length = 339 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 4, transmitterRadioId = 1, startTime = 0.500422668512, endTime = 0.500560668512, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000118, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #92  t=0.500422668512  on Voice-2 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=147)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Voice-2 (86 us 183 B) (inet::Packet)Voice-2 (183 B) (inet::SequenceChunk) length = 183 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 4, transmitterRadioId = 1, startTime = 0.500422668512, endTime = 0.500508668512, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000066, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "examples/wireless/mactest",
+      "MacEdca",
+      0,
+      "6.1s"
+    ],
+    "previous": "base",
+    "current": "c4",
+    "transmission_index": 92,
+    "before": {
+      "event": "** Event #1160  t=2.335881047819  on FTP-7-frag1 (inet::Packet)  in MacTest.cliHost.wlan[0].radio (Ieee80211Radio, id=145)    38% completed  (38% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)FTP-7-frag1 (50 us 75 B) (inet::Packet)FTP-7-frag1 (75 B) (inet::SequenceChunk) length = 75 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 92, transmitterRadioId = 1, startTime = 2.335881047819, endTime = 2.335931047819, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.00003, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #1159  t=2.335461047819  on FTP-7-frag1 (inet::Packet)  in MacTest.cliHost.wlan[0].radio (Ieee80211Radio, id=145)    38% completed  (38% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)FTP-7-frag1 (50 us 75 B) (inet::Packet)FTP-7-frag1 (75 B) (inet::SequenceChunk) length = 75 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 92, transmitterRadioId = 1, startTime = 2.335461047819, endTime = 2.335511047819, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.00003, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "examples/wireless/qos",
+      "MacQos",
+      0,
+      "1.02s"
+    ],
+    "previous": "base",
+    "current": "c4",
+    "transmission_index": 51,
+    "before": {
+      "event": "** Event #843  t=1.002155302117  on Voice-0+Voice-1 (inet::Packet)  in QosThroughput.ap.wlan[0].radio (Ieee80211Radio, id=18)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Voice-0+Voice-1 (138 us 339 B) (inet::Packet)Voice-0+Voice-1 (339 B) (inet::SequenceChunk) length = 339 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 51, transmitterRadioId = 0, startTime = 1.002155302117, endTime = 1.002293302117, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000118, startPosition = (200, 200, 0) m, endPosition = (200, 200, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #843  t=1.002155302117  on Voice-0 (inet::Packet)  in QosThroughput.ap.wlan[0].radio (Ieee80211Radio, id=18)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Voice-0 (86 us 183 B) (inet::Packet)Voice-0 (183 B) (inet::SequenceChunk) length = 183 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 51, transmitterRadioId = 0, startTime = 1.002155302117, endTime = 1.002241302117, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000066, startPosition = (200, 200, 0) m, endPosition = (200, 200, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "examples/wireless/qos",
+      "MacQosWithRtsCts",
+      0,
+      "1.02s"
+    ],
+    "previous": "base",
+    "current": "c4",
+    "transmission_index": 69,
+    "before": {
+      "event": "** Event #1091  t=1.003351712338  on WWW-0+WWW-1+WWW-2+WWW-3 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=240)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)WWW-0+WWW-1+WWW-2+WWW-3 (242 us 651 B) (inet::Packet)WWW-0+WWW-1+WWW-2+WWW-3 (651 B) (inet::SequenceChunk) length = 651 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 69, transmitterRadioId = 2, startTime = 1.003351712338, endTime = 1.003593712338, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000222, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #1091  t=1.003351712338  on WWW-0 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=240)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)WWW-0 (86 us 183 B) (inet::Packet)WWW-0 (183 B) (inet::SequenceChunk) length = 183 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 69, transmitterRadioId = 2, startTime = 1.003351712338, endTime = 1.003437712338, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000066, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "showcases/wireless/fragmentation",
+      "HCFfragblockack",
+      0,
+      "10ms"
+    ],
+    "previous": "c4",
+    "current": "head",
+    "transmission_index": 31,
+    "before": {
+      "event": "** Event #330  t=0.004589367968  on BasicBlockAckReq (inet::Packet)  in FragmentationShowcase.wifiHost1.wlan[0].radio (Ieee80211Radio, id=30)    45% completed  (45% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)BasicBlockAckReq (38 us 39 B) (inet::Packet)BasicBlockAckReq (39 B) (inet::SequenceChunk) length = 39 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 31, transmitterRadioId = 0, startTime = 0.004589367968, endTime = 0.004627367968, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000018, startPosition = (215, 99, 0) m, endPosition = (215, 99, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #336  t=0.004773367968  on BasicBlockAckReq (inet::Packet)  in FragmentationShowcase.wifiHost1.wlan[0].radio (Ieee80211Radio, id=30)    47% completed  (47% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)BasicBlockAckReq (38 us 39 B) (inet::Packet)BasicBlockAckReq (39 B) (inet::SequenceChunk) length = 39 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 31, transmitterRadioId = 0, startTime = 0.004773367968, endTime = 0.004811367968, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000018, startPosition = (215, 99, 0) m, endPosition = (215, 99, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "showcases/wireless/txop",
+      "General",
+      0,
+      "20ms"
+    ],
+    "previous": "c4",
+    "current": "head",
+    "transmission_index": 12,
+    "before": {
+      "event": "** Event #426  t=0.003836408613  on small-1+small-2 (inet::Packet)  in TxopShowcase.host1.wlan[0].radio (Ieee80211Radio, id=64)    19% completed  (19% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)small-1+small-2 (874 us 2547 B) (inet::Packet)small-1+small-2 (2547 B) (inet::SequenceChunk) length = 2547 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 12, transmitterRadioId = 0, startTime = 0.003836408613, endTime = 0.004710408613, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000854, startPosition = (288, 110, 0) m, endPosition = (288, 110, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #426  t=0.003836408613  on small-1 (inet::Packet)  in TxopShowcase.host1.wlan[0].radio (Ieee80211Radio, id=64)    19% completed  (19% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)small-1 (450 us 1275 B) (inet::Packet)small-1 (1275 B) (inet::SequenceChunk) length = 1275 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 12, transmitterRadioId = 0, startTime = 0.003836408613, endTime = 0.004286408613, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.00043, startPosition = (288, 110, 0) m, endPosition = (288, 110, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "examples/adhoc/qos",
+      "MacQos",
+      1,
+      "0.51s"
+    ],
+    "previous": "c4",
+    "current": "head",
+    "transmission_index": 4,
+    "before": {
+      "event": "** Event #402  t=0.501082668512  on FTP-0 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=153)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)FTP-0 (386 us 1083 B) (inet::Packet)FTP-0 (1083 B) (inet::SequenceChunk) length = 1083 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 4, transmitterRadioId = 1, startTime = 0.501082668512, endTime = 0.501468668512, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000366, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #371  t=0.500942668512  on Video-1 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=153)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Video-1 (386 us 1083 B) (inet::Packet)Video-1 (1083 B) (inet::SequenceChunk) length = 1083 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 4, transmitterRadioId = 1, startTime = 0.500942668512, endTime = 0.501328668512, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000366, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  },
+  {
+    "case": [
+      "examples/wireless/qos",
+      "MacQosWithBlockAck",
+      0,
+      "1.02s"
+    ],
+    "previous": "c4",
+    "current": "head",
+    "transmission_index": 51,
+    "before": {
+      "event": "** Event #845  t=1.002106830386  on Voice-0+Voice-1 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=244)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Voice-0+Voice-1 (138 us 339 B) (inet::Packet)Voice-0+Voice-1 (339 B) (inet::SequenceChunk) length = 339 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 51, transmitterRadioId = 2, startTime = 1.002106830386, endTime = 1.002244830386, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000118, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    },
+    "after": {
+      "event": "** Event #845  t=1.002106830386  on Voice-0 (inet::Packet)  in QosThroughput.cliHost.wlan[0].radio (Ieee80211Radio, id=244)    98% completed  (98% total)",
+      "transmission": "[INFO]\tTransmission started: (inet::physicallayer::WirelessSignal)Voice-0 (86 us 183 B) (inet::Packet)Voice-0 (183 B) (inet::SequenceChunk) length = 183 B WHOLE as Ieee80211Transmission, mode = { Ieee80211ErpOfdmMode }, channel = { Ieee80211Channel, channelNumber = 0 }, id = 51, transmitterRadioId = 2, startTime = 1.002106830386, endTime = 1.002192830386, preambleDuration = 0.000016, headerDuration = 0.000004, dataDuration = 0.000066, startPosition = (100, 100, 0) m, endPosition = (100, 100, 0) m, startOrientation = (1, 0, 0, 0), endOrientation = (1, 0, 0, 0)"
+    }
+  }
+]

@@ -1,0 +1,59 @@
+Hint: You may want to use the '-F tyf' option to exclude graphical (tyf) fingerprints, as they are not regularly kept up to date
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFnofrag -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFfrag -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '74c3-9ba0/tyf', expected: 'f985-34fb/tyf'
+/showcases/wireless/blockack/ -f omnetpp.ini -c NoFragmentation -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'cb71-81f8/tyf', expected: '27f2-4a52/tyf'
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfrag -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'e394-4985/tyf', expected: '335d-6687/tyf'
+/showcases/wireless/blockack/ -f omnetpp.ini -c Fragmentation -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/blockack/ -f omnetpp.ini -c MixedTraffic -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfragblockack -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '77f4-58c1/tyf', expected: '6f6e-b101/tyf'
+/showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '6cdd-e65e/tyf', expected: '95cc-1859/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c Fragmentation wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '97f7-655d/tyf', expected: '33b7-00f9/tyf'
+/showcases/wireless/aggregation/ -f omnetpp.ini -c VoicePriorityAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'c99f-3188/tyf', expected: 'bd88-5ba6/tyf'
+/examples/wireless/mactest/ -f omnetpp.ini -c MacEdca -r 0 wireless ... : FAILED (should be PASS): some fingerprint mismatch: actual '24e0-2e48/tyf', expected: 'dfcf-4644/tyf'
+/examples/wireless/mactest/ -f omnetpp.ini -c MacDcf -r 0 wireless ... : FAILED (should be PASS): some fingerprint mismatch: actual '3edc-eb8d/tyf', expected: 'f37f-cd48/tyf'
+/showcases/wireless/txop/ -f omnetpp.ini -c General -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '6175-eb06/tyf', expected: 'c87d-3f3a/tyf'
+/showcases/wireless/qos/ -f omnetpp.ini -c NonQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '34ac-bc95/tyf', expected: '093e-1ca4/tyf'
+/showcases/wireless/qos/ -f omnetpp.ini -c Qos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '64d2-47e3/tyf', expected: 'bda9-15d1/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless adhoc Ipv4 ... : PASS
+/examples/adhoc/qos/ -f omnetpp.ini -c MsduAggregation wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '734c-15d1/tyf', expected: 'df04-18f7/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'b802-9992/tyf', expected: '6097-a429/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'b06a-f098/tyf', expected: '9f3c-4512/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 0 wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'f74f-a0c0/tyf', expected: '2c1e-66e5/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 1 wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '57c2-84bd/tyf', expected: 'a587-3a4d/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithoutAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '57cd-2e76/tyf', expected: 'a4c3-19bf/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithRtsCts -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '8cb9-109e/tyf', expected: 'b2d6-1329/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithBlockAck -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '0db4-29ea/tyf', expected: '08b5-d005/tyf'
+
+Failures:
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFfrag -r 0 wireless Ipv4 (some fingerprint mismatch: actual '74c3-9ba0/tyf', expected: 'f985-34fb/tyf')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'cb71-81f8/tyf', expected: '27f2-4a52/tyf')
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfrag -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'e394-4985/tyf', expected: '335d-6687/tyf')
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfragblockack -r 0 wireless Ipv4 (some fingerprint mismatch: actual '77f4-58c1/tyf', expected: '6f6e-b101/tyf')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual '6cdd-e65e/tyf', expected: '95cc-1859/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c Fragmentation wireless adhoc Ipv4 (some fingerprint mismatch: actual '97f7-655d/tyf', expected: '33b7-00f9/tyf')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c VoicePriorityAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'c99f-3188/tyf', expected: 'bd88-5ba6/tyf')
+  /examples/wireless/mactest/ -f omnetpp.ini -c MacEdca -r 0 wireless (some fingerprint mismatch: actual '24e0-2e48/tyf', expected: 'dfcf-4644/tyf')
+  /examples/wireless/mactest/ -f omnetpp.ini -c MacDcf -r 0 wireless (some fingerprint mismatch: actual '3edc-eb8d/tyf', expected: 'f37f-cd48/tyf')
+  /showcases/wireless/txop/ -f omnetpp.ini -c General -r 0 wireless Ipv4 (some fingerprint mismatch: actual '6175-eb06/tyf', expected: 'c87d-3f3a/tyf')
+  /showcases/wireless/qos/ -f omnetpp.ini -c NonQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual '34ac-bc95/tyf', expected: '093e-1ca4/tyf')
+  /showcases/wireless/qos/ -f omnetpp.ini -c Qos -r 0 wireless Ipv4 (some fingerprint mismatch: actual '64d2-47e3/tyf', expected: 'bda9-15d1/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MsduAggregation wireless adhoc Ipv4 (some fingerprint mismatch: actual '734c-15d1/tyf', expected: 'df04-18f7/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'b802-9992/tyf', expected: '6097-a429/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'b06a-f098/tyf', expected: '9f3c-4512/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 0 wireless adhoc Ipv4 (some fingerprint mismatch: actual 'f74f-a0c0/tyf', expected: '2c1e-66e5/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 1 wireless adhoc Ipv4 (some fingerprint mismatch: actual '57c2-84bd/tyf', expected: 'a587-3a4d/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithoutAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual '57cd-2e76/tyf', expected: 'a4c3-19bf/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithRtsCts -r 0 wireless Ipv4 (some fingerprint mismatch: actual '8cb9-109e/tyf', expected: 'b2d6-1329/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithBlockAck -r 0 wireless Ipv4 (some fingerprint mismatch: actual '0db4-29ea/tyf', expected: '08b5-d005/tyf')
+----------------------------------------------------------------------
+Ran 25 tests in 373.594s
+
+FAILED (failures=20)
+
+Check showcases.csv.UPDATED for updated fingerprints
+Check examples.csv.UPDATED for updated fingerprints
+Check showcases.csv.FAILED for failed fingerprints
+Check examples.csv.FAILED for failed fingerprints
+Log has been saved to /tmp/inet-txop-fingerprint-update/base-runner.log
+Test results differ from expected results

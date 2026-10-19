@@ -1,0 +1,11 @@
+*** CREATING Makefile with:
+opp_makemake --make-so -f --deep -o INET -O out -pINET -I. -Xinet/applications/voipstream -Xinet/emulation -Xinet/linklayer/configurator/gatescheduling/z3 -Xinet/transportlayer/tcp_lwip -Xinet/visualizer/osg  
+make[1]: Entering directory '/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/src'
+*** CCACHE detected - precompiled headers disabled
+*** COMPILING with:
+ccache clang++ -c -std=c++17 -O0 -Wall -glldb -fstandalone-debug   -MMD -MP -MF .d  -fPIC -I/usr/include/python3.14 -I/usr/include/python3.14  -Wno-deprecated-register -Wno-unused-function -fno-omit-frame-pointer -DBACKWARD_HAS_DW=1  -Wno-overloaded-virtual -DOMNETPPLIBS_IMPORT -DINET_EXPORT -I. -I/home/user/omnetpp-6.4.0aipre2/include
+*** LINKING with:
+clang++ -shared -fPIC -o ../out/clang-debug/src/libINET_dbg.so -Wl,--no-as-needed -Wl,--whole-archive  -Wl,--no-whole-archive -loppenvir_dbg -loppsim_dbg -lstdc++  -lpython3.14 -ldl -lm -ldw -lelf   -fuse-ld=lld -Wl,-rpath,/home/user/omnetpp-6.4.0aipre2/lib -Wl,-rpath,. -Wl,-rpath,/home/user/omnetpp-6.4.0aipre2/tools/linux.x86_64/lib  -Wl,--export-dynamic -L/home/user/omnetpp-6.4.0aipre2/lib 
+Building...
+make[1]: Nothing to be done for 'all-pch'.
+make[1]: Leaving directory '/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/src'

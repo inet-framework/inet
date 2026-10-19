@@ -1,0 +1,60 @@
+Hint: You may want to use the '-F tyf' option to exclude graphical (tyf) fingerprints, as they are not regularly kept up to date
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFnofrag -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFfrag -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '74c3-9ba0/tyf', expected: 'f985-34fb/tyf'
+/showcases/wireless/blockack/ -f omnetpp.ini -c NoFragmentation -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'cb71-81f8/tyf', expected: '27f2-4a52/tyf'
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfrag -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'd7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf', expected: 'c99f-354d/tplx;8e10-a3f0/~tNl;ac4b-3ba1/~tND;335d-6687/tyf'
+/showcases/wireless/blockack/ -f omnetpp.ini -c MixedTraffic -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfragblockack -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '99bc-a74d/tplx;fffd-4625/~tNl;5543-fbef/~tND;821e-8bed/tyf', expected: '2597-1e2e/tplx;d269-c6ae/~tNl;2f5c-4cca/~tND;6f6e-b101/tyf'
+/showcases/wireless/blockack/ -f omnetpp.ini -c Fragmentation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '9fd0-6388/tplx;22f5-8db8/~tNl;68cc-5669/~tND', expected: '36f4-5c22/tplx;66b0-94cd/~tNl;45f3-af4f/~tND'
+/showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf', expected: '0e94-675b/tplx;4545-c0de/~tNl;a778-2f83/~tND;95cc-1859/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c Fragmentation wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '97f7-655d/tyf', expected: '33b7-00f9/tyf'
+/showcases/wireless/aggregation/ -f omnetpp.ini -c VoicePriorityAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf', expected: '1ad6-ebce/tplx;cc40-e9c2/~tNl;5421-bc6d/~tND;bd88-5ba6/tyf'
+/examples/wireless/mactest/ -f omnetpp.ini -c MacEdca -r 0 wireless ... : FAILED (should be PASS): some fingerprint mismatch: actual 'c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf', expected: '5635-3aae/tplx;c574-69b7/~tNl;bb83-14c4/~tND;dfcf-4644/tyf'
+/examples/wireless/mactest/ -f omnetpp.ini -c MacDcf -r 0 wireless ... : FAILED (should be PASS): some fingerprint mismatch: actual '3edc-eb8d/tyf', expected: 'f37f-cd48/tyf'
+/showcases/wireless/txop/ -f omnetpp.ini -c General -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '92af-e665/tplx;7960-ff7c/~tNl;0ec4-ff6b/tyf', expected: 'ab91-87f3/tplx;f30c-6aa4/~tNl;c87d-3f3a/tyf'
+/showcases/wireless/qos/ -f omnetpp.ini -c NonQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '34ac-bc95/tyf', expected: '093e-1ca4/tyf'
+/showcases/wireless/qos/ -f omnetpp.ini -c Qos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf', expected: '2f30-f17c/tplx;0683-d978/~tNl;a879-de03/~tND;bda9-15d1/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless adhoc Ipv4 ... : PASS
+/examples/adhoc/qos/ -f omnetpp.ini -c MsduAggregation wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf', expected: '2c80-6844/tplx;4e9e-cf86/~tNl;ea3d-e802/~tND;df04-18f7/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'b802-9992/tyf', expected: '6097-a429/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 0 wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf', expected: 'dd36-1076/tplx;b703-3ef2/~tNl;e07d-2980/~tND;2c1e-66e5/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 1 wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '33e1-5ba7/tplx;f321-055c/~tNl;b439-5b70/~tND;5cb1-cbfe/tyf', expected: '4fd2-bb56/tplx;ecaf-89f7/~tNl;9398-0fae/~tND;a587-3a4d/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithoutAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '1906-1f5f/~tND;761d-e145/tyf', expected: '317d-aa4f/~tND;a4c3-19bf/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf', expected: 'd929-5913/tplx;f602-4424/~tNl;f2fb-4d98/~tND;9f3c-4512/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithRtsCts -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf', expected: 'e07a-4c5f/tplx;9f6c-7889/~tNl;29ea-169c/~tND;b2d6-1329/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithBlockAck -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '7866-b50d/tplx;cf3d-0664/~tNl;5912-f4f1/~tND;7ed5-dd85/tyf', expected: '6edb-0326/tplx;2a8a-50ee/~tNl;4301-882d/~tND;08b5-d005/tyf'
+
+Failures:
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFfrag -r 0 wireless Ipv4 (some fingerprint mismatch: actual '74c3-9ba0/tyf', expected: 'f985-34fb/tyf')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'cb71-81f8/tyf', expected: '27f2-4a52/tyf')
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfrag -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'd7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf', expected: 'c99f-354d/tplx;8e10-a3f0/~tNl;ac4b-3ba1/~tND;335d-6687/tyf')
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfragblockack -r 0 wireless Ipv4 (some fingerprint mismatch: actual '99bc-a74d/tplx;fffd-4625/~tNl;5543-fbef/~tND;821e-8bed/tyf', expected: '2597-1e2e/tplx;d269-c6ae/~tNl;2f5c-4cca/~tND;6f6e-b101/tyf')
+  /showcases/wireless/blockack/ -f omnetpp.ini -c Fragmentation -r 0 wireless Ipv4 (some fingerprint mismatch: actual '9fd0-6388/tplx;22f5-8db8/~tNl;68cc-5669/~tND', expected: '36f4-5c22/tplx;66b0-94cd/~tNl;45f3-af4f/~tND')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf', expected: '0e94-675b/tplx;4545-c0de/~tNl;a778-2f83/~tND;95cc-1859/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c Fragmentation wireless adhoc Ipv4 (some fingerprint mismatch: actual '97f7-655d/tyf', expected: '33b7-00f9/tyf')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c VoicePriorityAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual '455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf', expected: '1ad6-ebce/tplx;cc40-e9c2/~tNl;5421-bc6d/~tND;bd88-5ba6/tyf')
+  /examples/wireless/mactest/ -f omnetpp.ini -c MacEdca -r 0 wireless (some fingerprint mismatch: actual 'c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf', expected: '5635-3aae/tplx;c574-69b7/~tNl;bb83-14c4/~tND;dfcf-4644/tyf')
+  /examples/wireless/mactest/ -f omnetpp.ini -c MacDcf -r 0 wireless (some fingerprint mismatch: actual '3edc-eb8d/tyf', expected: 'f37f-cd48/tyf')
+  /showcases/wireless/txop/ -f omnetpp.ini -c General -r 0 wireless Ipv4 (some fingerprint mismatch: actual '92af-e665/tplx;7960-ff7c/~tNl;0ec4-ff6b/tyf', expected: 'ab91-87f3/tplx;f30c-6aa4/~tNl;c87d-3f3a/tyf')
+  /showcases/wireless/qos/ -f omnetpp.ini -c NonQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual '34ac-bc95/tyf', expected: '093e-1ca4/tyf')
+  /showcases/wireless/qos/ -f omnetpp.ini -c Qos -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf', expected: '2f30-f17c/tplx;0683-d978/~tNl;a879-de03/~tND;bda9-15d1/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MsduAggregation wireless adhoc Ipv4 (some fingerprint mismatch: actual 'e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf', expected: '2c80-6844/tplx;4e9e-cf86/~tNl;ea3d-e802/~tND;df04-18f7/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'b802-9992/tyf', expected: '6097-a429/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 0 wireless adhoc Ipv4 (some fingerprint mismatch: actual 'a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf', expected: 'dd36-1076/tplx;b703-3ef2/~tNl;e07d-2980/~tND;2c1e-66e5/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 1 wireless adhoc Ipv4 (some fingerprint mismatch: actual '33e1-5ba7/tplx;f321-055c/~tNl;b439-5b70/~tND;5cb1-cbfe/tyf', expected: '4fd2-bb56/tplx;ecaf-89f7/~tNl;9398-0fae/~tND;a587-3a4d/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithoutAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual '1906-1f5f/~tND;761d-e145/tyf', expected: '317d-aa4f/~tND;a4c3-19bf/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual '0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf', expected: 'd929-5913/tplx;f602-4424/~tNl;f2fb-4d98/~tND;9f3c-4512/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithRtsCts -r 0 wireless Ipv4 (some fingerprint mismatch: actual '5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf', expected: 'e07a-4c5f/tplx;9f6c-7889/~tNl;29ea-169c/~tND;b2d6-1329/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithBlockAck -r 0 wireless Ipv4 (some fingerprint mismatch: actual '7866-b50d/tplx;cf3d-0664/~tNl;5912-f4f1/~tND;7ed5-dd85/tyf', expected: '6edb-0326/tplx;2a8a-50ee/~tNl;4301-882d/~tND;08b5-d005/tyf')
+----------------------------------------------------------------------
+Ran 25 tests in 375.692s
+
+FAILED (failures=21)
+
+Check showcases.csv.UPDATED for updated fingerprints
+Check examples.csv.UPDATED for updated fingerprints
+Check showcases.csv.FAILED for failed fingerprints
+Check examples.csv.FAILED for failed fingerprints
+Log has been saved to fingerprinttest.out
+Test results differ from expected results

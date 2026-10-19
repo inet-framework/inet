@@ -4,6 +4,10 @@ Recent changes in the INET Framework
 INET-4.7.x (in development)
 ---------------------------
 
+IEEE 802.11 HCF now checks complete Basic and Normal Ack exchanges before it consumes queued QoS MSDUs. It can select one ordinary MSDU or legal fragments when a larger form cannot fit. A short TXOP tail preserves queued sources. An impossible fresh exchange stops with a diagnostic at the selected mode. Fragments retain one allocation and an absolute deadline. Modern recovery retains one cumulative retry count. Basic recovery retains the 2016 short and long counters. An accepted Basic agreement limits disposal by lifetime, including failed RTS attempts and internal collisions. Without an accepted agreement, Basic still applies its retry limits. A zero TXOP limit permits all fragments of one MSDU. These changes can alter timing, adaptive rate queries, and fingerprints.
+
+The aggregation, fragmentation, QoS, TXOP, and MAC examples have revised fingerprints for these changes. HCF excludes A-MSDUs without local and peer HT capabilities. HCF also derives Retry from local ACK state, so forwarded MSDUs do not retain the previous hop's Retry bit.
+
 Notable backward incompatible changes are the following:
 
 1. IEEE 802.11 rate control per receiver

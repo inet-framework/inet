@@ -1,0 +1,1570 @@
+{
+  "base": [
+    {
+      "case": [
+        "showcases/wireless/aggregation",
+        "VoicePriorityAggregation",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "VoicePriorityAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/aggregation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-base.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/fragmentation",
+        "HCFfrag",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "HCFfrag",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/fragmentation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-base.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/fragmentation",
+        "HCFfragblockack",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "HCFfragblockack",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/fragmentation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-base.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/qos",
+        "Qos",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "Qos",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-base.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/txop",
+        "General",
+        0,
+        "20ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "General",
+        "-r",
+        "0",
+        "--sim-time-limit=20ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/txop",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-base.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MacQos",
+        0,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "0",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-base.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MacQos",
+        1,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "1",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-base.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MsduAggregation",
+        0,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MsduAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-base.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/mactest",
+        "MacEdca",
+        0,
+        "6.1s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacEdca",
+        "-r",
+        "0",
+        "--sim-time-limit=6.1s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/mactest",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-base.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQos",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-base.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithoutAggregation",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithoutAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-base.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithRtsCts",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithRtsCts",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-base.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithBlockAck",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithBlockAck",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-base.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-base-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-base.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-base.elog"
+    }
+  ],
+  "c3": [
+    {
+      "case": [
+        "showcases/wireless/aggregation",
+        "VoicePriorityAggregation",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "VoicePriorityAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/aggregation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-c3.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/fragmentation",
+        "HCFfrag",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "HCFfrag",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/fragmentation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-c3.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/fragmentation",
+        "HCFfragblockack",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "HCFfragblockack",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/fragmentation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-c3.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/qos",
+        "Qos",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "Qos",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-c3.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/txop",
+        "General",
+        0,
+        "20ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "General",
+        "-r",
+        "0",
+        "--sim-time-limit=20ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/txop",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-c3.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MacQos",
+        0,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "0",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-c3.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MacQos",
+        1,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "1",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-c3.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MsduAggregation",
+        0,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MsduAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-c3.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/mactest",
+        "MacEdca",
+        0,
+        "1.5s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacEdca",
+        "-r",
+        "0",
+        "--sim-time-limit=1.5s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/mactest",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-c3.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQos",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-c3.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithoutAggregation",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithoutAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-c3.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithRtsCts",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithRtsCts",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-c3.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithBlockAck",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithBlockAck",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-c3.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-c3-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-c3.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-c3.elog"
+    }
+  ],
+  "c4": [
+    {
+      "case": [
+        "showcases/wireless/aggregation",
+        "VoicePriorityAggregation",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "VoicePriorityAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/aggregation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-c4.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/fragmentation",
+        "HCFfrag",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "HCFfrag",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/fragmentation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-c4.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/fragmentation",
+        "HCFfragblockack",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "HCFfragblockack",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/fragmentation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-c4.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/qos",
+        "Qos",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "Qos",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-c4.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/txop",
+        "General",
+        0,
+        "20ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "General",
+        "-r",
+        "0",
+        "--sim-time-limit=20ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/txop",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-c4.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MacQos",
+        0,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "0",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-c4.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MacQos",
+        1,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "1",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-c4.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MsduAggregation",
+        0,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MsduAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-c4.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/mactest",
+        "MacEdca",
+        0,
+        "6.1s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacEdca",
+        "-r",
+        "0",
+        "--sim-time-limit=6.1s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/mactest",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-c4.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQos",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-c4.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithoutAggregation",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithoutAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-c4.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithRtsCts",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithRtsCts",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-c4.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithBlockAck",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithBlockAck",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-c4.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-c4-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-c4.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-c4.elog"
+    }
+  ],
+  "head": [
+    {
+      "case": [
+        "showcases/wireless/aggregation",
+        "VoicePriorityAggregation",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "VoicePriorityAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/aggregation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-aggregation-VoicePriorityAggregation-0-head.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/fragmentation",
+        "HCFfrag",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "HCFfrag",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/fragmentation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfrag-0-head.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/fragmentation",
+        "HCFfragblockack",
+        0,
+        "10ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "HCFfragblockack",
+        "-r",
+        "0",
+        "--sim-time-limit=10ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/fragmentation",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-fragmentation-HCFfragblockack-0-head.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/qos",
+        "Qos",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "Qos",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-qos-Qos-0-head.elog"
+    },
+    {
+      "case": [
+        "showcases/wireless/txop",
+        "General",
+        0,
+        "20ms"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "General",
+        "-r",
+        "0",
+        "--sim-time-limit=20ms",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases/wireless/txop",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/showcases-wireless-txop-General-0-head.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MacQos",
+        0,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "0",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-0-head.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MacQos",
+        1,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "1",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MacQos-1-head.elog"
+    },
+    {
+      "case": [
+        "examples/adhoc/qos",
+        "MsduAggregation",
+        0,
+        "0.51s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MsduAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=0.51s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/adhoc/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-adhoc-qos-MsduAggregation-0-head.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/mactest",
+        "MacEdca",
+        0,
+        "1.5s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacEdca",
+        "-r",
+        "0",
+        "--sim-time-limit=1.5s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/mactest",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-mactest-MacEdca-0-head.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQos",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQos",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQos-0-head.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithoutAggregation",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithoutAggregation",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithoutAggregation-0-head.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithRtsCts",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithRtsCts",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithRtsCts-0-head.elog"
+    },
+    {
+      "case": [
+        "examples/wireless/qos",
+        "MacQosWithBlockAck",
+        0,
+        "1.02s"
+      ],
+      "command": [
+        "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/bin/inet",
+        "--debug",
+        "-u",
+        "Cmdenv",
+        "-c",
+        "MacQosWithBlockAck",
+        "-r",
+        "0",
+        "--sim-time-limit=1.02s",
+        "--cmdenv-express-mode=false",
+        "--**.cmdenv-log-level=debug",
+        "--record-eventlog=true",
+        "--eventlog-file=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-head.elog",
+        "--scalar-recording=false",
+        "--vector-recording=false",
+        "--result-dir=/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-head-results"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples/wireless/qos",
+      "status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-head.log",
+      "eventlog": "/tmp/inet-txop-fingerprint-update/examples-wireless-qos-MacQosWithBlockAck-0-head.elog"
+    }
+  ]
+}

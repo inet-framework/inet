@@ -1,0 +1,203 @@
+Hint: You may want to use the '-F tyf' option to exclude graphical (tyf) fingerprints, as they are not regularly kept up to date
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFfrag -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '74c3-9ba0/tyf', expected: 'f985-34fb/tyf'
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFnofrag -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/blockack/ -f omnetpp.ini -c MixedTraffic -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/blockack/ -f omnetpp.ini -c NoFragmentation -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'cb71-81f8/tyf', expected: '27f2-4a52/tyf'
+/showcases/wireless/blockack/ -f omnetpp.ini -c Fragmentation -r 0 wireless Ipv4 ... : PASS
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfrag -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'd7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf', expected: 'c99f-354d/tplx;8e10-a3f0/~tNl;ac4b-3ba1/~tND;335d-6687/tyf'
+/showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf', expected: '0e94-675b/tplx;4545-c0de/~tNl;a778-2f83/~tND;95cc-1859/tyf'
+/showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfragblockack -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '77f4-58c1/tyf', expected: '6f6e-b101/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c Fragmentation wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '97f7-655d/tyf', expected: '33b7-00f9/tyf'
+/showcases/wireless/aggregation/ -f omnetpp.ini -c VoicePriorityAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf', expected: '1ad6-ebce/tplx;cc40-e9c2/~tNl;5421-bc6d/~tND;bd88-5ba6/tyf'
+/examples/wireless/mactest/ -f omnetpp.ini -c MacEdca -r 0 wireless ... : FAILED (should be PASS): some fingerprint mismatch: actual 'c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf', expected: '5635-3aae/tplx;c574-69b7/~tNl;bb83-14c4/~tND;dfcf-4644/tyf'
+/examples/wireless/mactest/ -f omnetpp.ini -c MacDcf -r 0 wireless ... : FAILED (should be PASS): some fingerprint mismatch: actual '3edc-eb8d/tyf', expected: 'f37f-cd48/tyf'
+/showcases/wireless/txop/ -f omnetpp.ini -c General -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '6175-eb06/tyf', expected: 'c87d-3f3a/tyf'
+/showcases/wireless/qos/ -f omnetpp.ini -c NonQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '34ac-bc95/tyf', expected: '093e-1ca4/tyf'
+/showcases/wireless/qos/ -f omnetpp.ini -c Qos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf', expected: '2f30-f17c/tplx;0683-d978/~tNl;a879-de03/~tND;bda9-15d1/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MsduAggregation wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf', expected: '2c80-6844/tplx;4e9e-cf86/~tNl;ea3d-e802/~tND;df04-18f7/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'b802-9992/tyf', expected: '6097-a429/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQos -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf', expected: 'd929-5913/tplx;f602-4424/~tNl;f2fb-4d98/~tND;9f3c-4512/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 0 wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual 'a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf', expected: 'dd36-1076/tplx;b703-3ef2/~tNl;e07d-2980/~tND;2c1e-66e5/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithoutAggregation -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '1906-1f5f/~tND;761d-e145/tyf', expected: '317d-aa4f/~tND;a4c3-19bf/tyf'
+/examples/adhoc/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless adhoc Ipv4 ... : PASS
+/examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 1 wireless adhoc Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '57c2-84bd/tyf', expected: 'a587-3a4d/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithRtsCts -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf', expected: 'e07a-4c5f/tplx;9f6c-7889/~tNl;29ea-169c/~tND;b2d6-1329/tyf'
+/examples/wireless/qos/ -f omnetpp.ini -c MacQosWithBlockAck -r 0 wireless Ipv4 ... : FAILED (should be PASS): some fingerprint mismatch: actual '0db4-29ea/tyf', expected: '08b5-d005/tyf'
+
+Failures:
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c DCFfrag -r 0 wireless Ipv4 (some fingerprint mismatch: actual '74c3-9ba0/tyf', expected: 'f985-34fb/tyf')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c NoAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'cb71-81f8/tyf', expected: '27f2-4a52/tyf')
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfrag -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'd7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf', expected: 'c99f-354d/tplx;8e10-a3f0/~tNl;ac4b-3ba1/~tND;335d-6687/tyf')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c Aggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf', expected: '0e94-675b/tplx;4545-c0de/~tNl;a778-2f83/~tND;95cc-1859/tyf')
+  /showcases/wireless/fragmentation/ -f omnetpp.ini -c HCFfragblockack -r 0 wireless Ipv4 (some fingerprint mismatch: actual '77f4-58c1/tyf', expected: '6f6e-b101/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c Fragmentation wireless adhoc Ipv4 (some fingerprint mismatch: actual '97f7-655d/tyf', expected: '33b7-00f9/tyf')
+  /showcases/wireless/aggregation/ -f omnetpp.ini -c VoicePriorityAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual '455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf', expected: '1ad6-ebce/tplx;cc40-e9c2/~tNl;5421-bc6d/~tND;bd88-5ba6/tyf')
+  /examples/wireless/mactest/ -f omnetpp.ini -c MacEdca -r 0 wireless (some fingerprint mismatch: actual 'c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf', expected: '5635-3aae/tplx;c574-69b7/~tNl;bb83-14c4/~tND;dfcf-4644/tyf')
+  /examples/wireless/mactest/ -f omnetpp.ini -c MacDcf -r 0 wireless (some fingerprint mismatch: actual '3edc-eb8d/tyf', expected: 'f37f-cd48/tyf')
+  /showcases/wireless/txop/ -f omnetpp.ini -c General -r 0 wireless Ipv4 (some fingerprint mismatch: actual '6175-eb06/tyf', expected: 'c87d-3f3a/tyf')
+  /showcases/wireless/qos/ -f omnetpp.ini -c NonQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual '34ac-bc95/tyf', expected: '093e-1ca4/tyf')
+  /showcases/wireless/qos/ -f omnetpp.ini -c Qos -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf', expected: '2f30-f17c/tplx;0683-d978/~tNl;a879-de03/~tND;bda9-15d1/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MsduAggregation wireless adhoc Ipv4 (some fingerprint mismatch: actual 'e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf', expected: '2c80-6844/tplx;4e9e-cf86/~tNl;ea3d-e802/~tND;df04-18f7/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacNonQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual 'b802-9992/tyf', expected: '6097-a429/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQos -r 0 wireless Ipv4 (some fingerprint mismatch: actual '0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf', expected: 'd929-5913/tplx;f602-4424/~tNl;f2fb-4d98/~tND;9f3c-4512/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 0 wireless adhoc Ipv4 (some fingerprint mismatch: actual 'a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf', expected: 'dd36-1076/tplx;b703-3ef2/~tNl;e07d-2980/~tND;2c1e-66e5/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithoutAggregation -r 0 wireless Ipv4 (some fingerprint mismatch: actual '1906-1f5f/~tND;761d-e145/tyf', expected: '317d-aa4f/~tND;a4c3-19bf/tyf')
+  /examples/adhoc/qos/ -f omnetpp.ini -c MacQos -r 1 wireless adhoc Ipv4 (some fingerprint mismatch: actual '57c2-84bd/tyf', expected: 'a587-3a4d/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithRtsCts -r 0 wireless Ipv4 (some fingerprint mismatch: actual '5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf', expected: 'e07a-4c5f/tplx;9f6c-7889/~tNl;29ea-169c/~tND;b2d6-1329/tyf')
+  /examples/wireless/qos/ -f omnetpp.ini -c MacQosWithBlockAck -r 0 wireless Ipv4 (some fingerprint mismatch: actual '0db4-29ea/tyf', expected: '08b5-d005/tyf')
+----------------------------------------------------------------------
+Ran 25 tests in 323.237s
+
+FAILED (failures=20)
+
+ERROR: Cannot replace fingerprint '27f2-4a52/tyf' to 'cb71-81f8/tyf' at 'showcases.csv' line 194 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c NoAggregation -r 0,                                      1s,            21a4-c882/tplx;ecf2-6e33/~tNl;5d9e-8fdf/~tND;cb71-81f8/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '0e94-675b/tplx' to 'b7d0-1c67/tplx' at 'showcases.csv' line 195 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '4545-c0de/~tNl' to 'd8f8-2120/~tNl' at 'showcases.csv' line 195 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'a778-2f83/~tND' to 'b2ba-0919/~tND' at 'showcases.csv' line 195 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '95cc-1859/tyf' to '7c83-f2e4/tyf' at 'showcases.csv' line 195 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '1ad6-ebce/tplx' to '455e-1981/tplx' at 'showcases.csv' line 196 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'cc40-e9c2/~tNl' to 'c6ed-de44/~tNl' at 'showcases.csv' line 196 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '5421-bc6d/~tND' to '6c9a-8f21/~tND' at 'showcases.csv' line 196 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'bd88-5ba6/tyf' to '2267-c230/tyf' at 'showcases.csv' line 196 (cnt: 0):
+     /showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'f985-34fb/tyf' to '74c3-9ba0/tyf' at 'showcases.csv' line 268 (cnt: 0):
+     /showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFfrag -r 0,                                         1s,            8df2-40a3/tplx;dab9-5e8d/~tNl;2e7b-0729/~tND;74c3-9ba0/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'c99f-354d/tplx' to 'd7c1-fb92/tplx' at 'showcases.csv' line 269 (cnt: 0):
+     /showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            d7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '8e10-a3f0/~tNl' to 'b7b8-b4e1/~tNl' at 'showcases.csv' line 269 (cnt: 0):
+     /showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            d7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'ac4b-3ba1/~tND' to '7035-d6cb/~tND' at 'showcases.csv' line 269 (cnt: 0):
+     /showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            d7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '335d-6687/tyf' to 'e791-f124/tyf' at 'showcases.csv' line 269 (cnt: 0):
+     /showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            d7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '6f6e-b101/tyf' to '77f4-58c1/tyf' at 'showcases.csv' line 270 (cnt: 0):
+     /showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfragblockack -r 0,                                 1s,            99bc-a74d/tplx;fffd-4625/~tNl;5543-fbef/~tND;821e-8bed/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '093e-1ca4/tyf' to '34ac-bc95/tyf' at 'showcases.csv' line 316 (cnt: 0):
+     /showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            5734-43a3/tplx;9c39-00a3/~tNl;03a9-2f02/~tND;34ac-bc95/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '2f30-f17c/tplx' to 'c105-8907/tplx' at 'showcases.csv' line 317 (cnt: 0):
+     /showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint '0683-d978/~tNl' to 'f17b-f24c/~tNl' at 'showcases.csv' line 317 (cnt: 0):
+     /showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'a879-de03/~tND' to 'c055-873b/~tND' at 'showcases.csv' line 317 (cnt: 0):
+     /showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'bda9-15d1/tyf' to '1c08-f8f1/tyf' at 'showcases.csv' line 317 (cnt: 0):
+     /showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf, PASS,    wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'c87d-3f3a/tyf' to '6175-eb06/tyf' at 'showcases.csv' line 344 (cnt: 0):
+     /showcases/wireless/txop/,     -f omnetpp.ini -c General -r 0,                5s,         92af-e665/tplx;7960-ff7c/~tNl;0ec4-ff6b/tyf, PASS,    wireless Ipv4
+
+Check showcases.csv.UPDATED for updated fingerprints
+ERROR: Cannot replace fingerprint 'dd36-1076/tplx' to 'a78c-7701/tplx' at 'examples.csv' line 9 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint 'b703-3ef2/~tNl' to 'cedf-054d/~tNl' at 'examples.csv' line 9 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint 'e07d-2980/~tND' to '91a9-683f/~tND' at 'examples.csv' line 9 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint '2c1e-66e5/tyf' to 'f841-fef5/tyf' at 'examples.csv' line 9 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint 'a587-3a4d/tyf' to '57c2-84bd/tyf' at 'examples.csv' line 10 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             33e1-5ba7/tplx;f321-055c/~tNl;b439-5b70/~tND;5cb1-cbfe/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint '33b7-00f9/tyf' to '97f7-655d/tyf' at 'examples.csv' line 11 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c Fragmentation,               10s,             2f2d-73b1/tplx;cc9e-d1a6/~tNl;e740-f7d4/~tND;97f7-655d/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint '2c80-6844/tplx' to 'e24a-3845/tplx' at 'examples.csv' line 12 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint '4e9e-cf86/~tNl' to '5509-e838/~tNl' at 'examples.csv' line 12 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint 'ea3d-e802/~tND' to '636c-9cea/~tND' at 'examples.csv' line 12 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint 'df04-18f7/tyf' to 'cc7a-9b26/tyf' at 'examples.csv' line 12 (cnt: 0):
+     /examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf, PASS, wireless adhoc Ipv4
+
+ERROR: Cannot replace fingerprint '5635-3aae/tplx' to 'c4a0-ea53/tplx' at 'examples.csv' line 608 (cnt: 0):
+     /examples/wireless/mactest/,         -f omnetpp.ini -c MacEdca -r 0,                100s,            c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf, PASS, wireless
+
+ERROR: Cannot replace fingerprint 'c574-69b7/~tNl' to '9c3d-fe57/~tNl' at 'examples.csv' line 608 (cnt: 0):
+     /examples/wireless/mactest/,         -f omnetpp.ini -c MacEdca -r 0,                100s,            c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf, PASS, wireless
+
+ERROR: Cannot replace fingerprint 'bb83-14c4/~tND' to 'ec7b-7e1e/~tND' at 'examples.csv' line 608 (cnt: 0):
+     /examples/wireless/mactest/,         -f omnetpp.ini -c MacEdca -r 0,                100s,            c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf, PASS, wireless
+
+ERROR: Cannot replace fingerprint 'dfcf-4644/tyf' to 'b459-aecf/tyf' at 'examples.csv' line 608 (cnt: 0):
+     /examples/wireless/mactest/,         -f omnetpp.ini -c MacEdca -r 0,                100s,            c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf, PASS, wireless
+
+ERROR: Cannot replace fingerprint 'f37f-cd48/tyf' to '3edc-eb8d/tyf' at 'examples.csv' line 609 (cnt: 0):
+     /examples/wireless/mactest/,         -f omnetpp.ini -c MacDcf -r 0,                100s,            031d-548a/tplx;4db6-9460/~tNl;4c1d-35a0/~tND;3edc-eb8d/tyf, PASS, wireless
+
+ERROR: Cannot replace fingerprint '6097-a429/tyf' to 'b802-9992/tyf' at 'examples.csv' line 657 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                 10s,         0be7-a22e/tplx;5eb9-6cea/~tNl;87a5-11a1/~tND;b802-9992/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'd929-5913/tplx' to '0473-f9d2/tplx' at 'examples.csv' line 658 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'f602-4424/~tNl' to 'e92c-7352/~tNl' at 'examples.csv' line 658 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'f2fb-4d98/~tND' to '1906-1f5f/~tND' at 'examples.csv' line 658 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint '9f3c-4512/tyf' to '4196-a696/tyf' at 'examples.csv' line 658 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint '317d-aa4f/~tND' to '1906-1f5f/~tND' at 'examples.csv' line 659 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;761d-e145/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'a4c3-19bf/tyf' to '761d-e145/tyf' at 'examples.csv' line 659 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;761d-e145/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'e07a-4c5f/tplx' to '5269-1e09/tplx' at 'examples.csv' line 660 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint '9f6c-7889/~tNl' to 'b291-6797/~tNl' at 'examples.csv' line 660 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint '29ea-169c/~tND' to '0378-ab11/~tND' at 'examples.csv' line 660 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint 'b2d6-1329/tyf' to '9b3b-150c/tyf' at 'examples.csv' line 660 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf, PASS, wireless Ipv4
+
+ERROR: Cannot replace fingerprint '08b5-d005/tyf' to '0db4-29ea/tyf' at 'examples.csv' line 661 (cnt: 0):
+     /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         7866-b50d/tplx;cf3d-0664/~tNl;5912-f4f1/~tND;7ed5-dd85/tyf, PASS, wireless Ipv4
+
+Check examples.csv.UPDATED for updated fingerprints
+Check showcases.csv.FAILED for failed fingerprints
+Check examples.csv.FAILED for failed fingerprints
+Log has been saved to fingerprinttest.out
+Test results differ from expected results

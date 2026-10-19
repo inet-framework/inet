@@ -1,0 +1,37 @@
+/home/user/.config/matplotlib is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-vzcw6qfy because there was an issue with the default path ({configdir}); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+No module named 'py4j': optional inet.common.ide package will not work
+[38;2;200;200;200m[00/32][0;0m ▶ 31 inet-ieee80211-txop-admission-remaining module tests (concurrently)
+[38;2;200;200;200m[01/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211QosRecoveryPeerIdentity_1.test [0;32mPASS[0;0m in 2.238
+[38;2;200;200;200m[02/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeInvalid_3.test [0;32mPASS[0;0m in 2.885
+[38;2;200;200;200m[03/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeInvalid_2.test [0;32mPASS[0;0m in 3.064
+[38;2;200;200;200m[04/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211BasicCompatibility_1.test [0;32mPASS[0;0m in 4.023
+[38;2;200;200;200m[05/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeInvalid_4.test [0;32mPASS[0;0m in 3.147
+[38;2;200;200;200m[06/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211CompressedBlockAckAdmission_1.test [0;32mPASS[0;0m in 6.114
+[38;2;200;200;200m[07/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfManagementRecovery_1.test [0;32mPASS[0;0m in 6.299
+[38;2;200;200;200m[08/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211AmpduPreparation_1.test [0;32mPASS[0;0m in 7.17
+[38;2;200;200;200m[09/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetime_1.test [0;32mPASS[0;0m in 7.85
+[38;2;200;200;200m[10/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211SingleProtectionGroup_1.test [0;32mPASS[0;0m in 2.616
+[38;2;200;200;200m[11/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeCongestion_1.test [0;32mPASS[0;0m in 2.515
+[38;2;200;200;200m[12/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeAggregation_1.test [0;32mPASS[0;0m in 3.06
+[38;2;200;200;200m[13/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211TxopMsduRecovery_1.test [0;32mPASS[0;0m in 2.219
+[38;2;200;200;200m[14/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeInvalid_1.test [0;32mPASS[0;0m in 2.307
+[38;2;200;200;200m[15/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfMultipleProtection_1.test [0;32mPASS[0;0m in 7.369
+[38;2;200;200;200m[16/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211PreparedQosFragments_1.test [0;32mPASS[0;0m in 2.258
+[38;2;200;200;200m[17/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211PreparedCancellation_1.test [0;32mPASS[0;0m in 2.735
+[38;2;200;200;200m[18/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfInternalCollision_1.test [0;32mPASS[0;0m in 3.534
+[38;2;200;200;200m[19/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfSingleProtection_1.test [0;32mPASS[0;0m in 12.354
+[38;2;200;200;200m[20/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211BlockAckFragmentRetirement_1.test [0;32mPASS[0;0m in 10.23
+[38;2;200;200;200m[21/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeDefaults_1.test [0;32mPASS[0;0m in 3.156
+[38;2;200;200;200m[22/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211EdcaDataLifetimeArbitration_1.test [0;32mPASS[0;0m in 3.894
+[38;2;200;200;200m[23/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211PreparedQosData_1.test [0;32mPASS[0;0m in 2.14
+[38;2;200;200;200m[24/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211HcfMultipleProtection_2.test [0;32mPASS[0;0m in 4.141
+[38;2;200;200;200m[25/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211CompressedBlockAckExchange_1.test [0;32mPASS[0;0m in 17.018
+[38;2;200;200;200m[26/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211AmpduExchange_1.test [0;32mPASS[0;0m in 21.601
+[38;2;200;200;200m[27/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211AmpduRecovery_1.test [0;32mPASS[0;0m in 24.194
+[38;2;200;200;200m[28/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211AmpduAdmission_1.test [0;32mPASS[0;0m in 20.837
+[38;2;200;200;200m[29/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211BlockAckVariant_1.test [0;32mPASS[0;0m in 20.69
+[38;2;200;200;200m[30/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211BasicTxopAdmission_1.test [0;32mPASS[0;0m in 35.232
+[38;2;200;200;200m[31/32][0;0m [38;2;200;200;200m [0;0m ⏺ Ieee80211TxopAdmission_1.test [0;32mPASS[0;0m in 39.356
+[38;2;200;200;200m[32/32][0;0m ◉ 31 inet-ieee80211-txop-admission-remaining module tests (concurrently) Multiple module tests: [0;32m31 PASS[0;0m in 51.79  
+Multiple module test results: [0;32mPASS[0;0m, summary: [0;32m31 PASS[0;0m in 51.79

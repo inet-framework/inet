@@ -1,0 +1,215 @@
+{
+  "approval": "User request on 2026-10-19: Update fingerprints, justifiying each update in the corresponding commit. Then push and update PR",
+  "original_head": "67bacef61cd4031598c0aec6c1d3b7d6958f0b0f",
+  "base": "d841dc77db7d0b141bf31e5e215a0de9bb281957",
+  "mode": "debug",
+  "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/fingerprint",
+  "selector": "((showcases/wireless/(aggregation|blockack|fragmentation|qos|txop)|examples/(adhoc/qos|wireless/(qos|mactest)))/)",
+  "base_command": [
+    "./fingerprinttest",
+    "-d",
+    "-t",
+    "8",
+    "-e",
+    "/tmp/inet-txop-fingerprint-update/base",
+    "-m",
+    "((showcases/wireless/(aggregation|blockack|fragmentation|qos|txop)|examples/(adhoc/qos|wireless/(qos|mactest)))/)",
+    "-l",
+    "/tmp/inet-txop-fingerprint-update/base-runner.log"
+  ],
+  "base_launcher": "#!/bin/sh\nexec /home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack-a1-a7/bin/inet --debug \"$@\"\n",
+  "base_status": 1,
+  "base_library_sha256": "bc3595467d81df205051bc14f684b4e7ccae7c367c0efea7358fed1599efcaf7",
+  "prefixes": [
+    {
+      "label": "c3-build",
+      "command": [
+        "make",
+        "MODE=debug",
+        "-j8"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining",
+      "exit_status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/c3-build.log"
+    },
+    {
+      "label": "c3",
+      "revision": "d98c98fcfb",
+      "library_sha256": "9f7b4dccf195ed7b88a30c8cd337f5d069882c049ec7ac632744fac60c8933f3"
+    },
+    {
+      "label": "c3-traces",
+      "command": [
+        "python3",
+        "/tmp/inet-txop-fingerprint-update/trace.py",
+        "c3"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining",
+      "exit_status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/c3-traces.log"
+    },
+    {
+      "label": "c3",
+      "command": [
+        "./fingerprinttest",
+        "-d",
+        "-t",
+        "8",
+        "-m",
+        "((showcases/wireless/(aggregation|blockack|fragmentation|qos|txop)|examples/(adhoc/qos|wireless/(qos|mactest)))/)"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/fingerprint",
+      "exit_status": 1,
+      "log": "/tmp/inet-txop-fingerprint-update/c3.log"
+    },
+    {
+      "label": "c4-build",
+      "command": [
+        "make",
+        "MODE=debug",
+        "-j8"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining",
+      "exit_status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/c4-build.log"
+    },
+    {
+      "label": "c4",
+      "revision": "c419a07251",
+      "library_sha256": "319b48aeac19e566411c37749d5c11bb70ba3f4fd1759a877dbdf4fe3d0dfb04"
+    },
+    {
+      "label": "c4-traces",
+      "command": [
+        "python3",
+        "/tmp/inet-txop-fingerprint-update/trace.py",
+        "c4"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining",
+      "exit_status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/c4-traces.log"
+    },
+    {
+      "label": "c4",
+      "command": [
+        "./fingerprinttest",
+        "-d",
+        "-t",
+        "8",
+        "-m",
+        "((showcases/wireless/(aggregation|blockack|fragmentation|qos|txop)|examples/(adhoc/qos|wireless/(qos|mactest)))/)"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/fingerprint",
+      "exit_status": 1,
+      "log": "/tmp/inet-txop-fingerprint-update/c4.log"
+    },
+    {
+      "label": "restored-build",
+      "command": [
+        "make",
+        "MODE=debug",
+        "-j8"
+      ],
+      "cwd": "/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining",
+      "exit_status": 0,
+      "log": "/tmp/inet-txop-fingerprint-update/restored-build.log"
+    }
+  ],
+  "head_library_sha256": "1de36100640807565d8456334072201ff3f412a3e5fbfe28e0376a5e0fc57bf2",
+  "c4_saved_library_sha256": "319b48aeac19e566411c37749d5c11bb70ba3f4fd1759a877dbdf4fe3d0dfb04",
+  "c4_approved_launcher": "#!/bin/sh\nexec /home/user/omnetpp-6.4.0aipre2/bin/opp_run_dbg -l /tmp/inet-txop-fingerprint-update/c4-library/INET -x 'inet.applications.voipstream;inet.emulation;inet.examples.emulation;inet.examples.voipstream;inet.linklayer.configurator.gatescheduling.z3;inet.showcases.emulation;inet.showcases.visualizer.osg;inet.transportlayer.tcp_lwip;inet.validation.tsn;inet.visualizer.osg' -n /home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/examples:/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/showcases:/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/src:/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/validation:/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tests/networks:/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/tutorials: --image-path=/home/user/omnetpp_ws/inet-ieee80211-txop-admission-remaining/images \"$@\"\n\n",
+  "c4_approved_csv": "/showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf, PASS,    wireless Ipv4\n/showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf, PASS,    wireless Ipv4\n/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            d7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf, PASS,    wireless Ipv4\n/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf, PASS,    wireless Ipv4\n/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf, PASS, wireless adhoc Ipv4\n/examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf, PASS, wireless adhoc Ipv4\n/examples/wireless/mactest/,         -f omnetpp.ini -c MacEdca -r 0,                100s,            c4a0-ea53/tplx;9c3d-fe57/~tNl;ec7b-7e1e/~tND;b459-aecf/tyf, PASS, wireless\n/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf, PASS, wireless Ipv4\n/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;761d-e145/tyf, PASS, wireless Ipv4\n/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf, PASS, wireless Ipv4\n",
+  "source_equivalence": [
+    {
+      "original": "a8557bc6513a5c48bebdd0ce11923fefbe71b1b7",
+      "amended": "ac7109fb42df21c0fc33ea01b9b34e7d1c4dd4a5",
+      "source_tree": "8c902ca5b4694a4a2aebadfffee15aec9acf593f",
+      "test_definitions_equal": true
+    },
+    {
+      "original": "9c4bf543d8039e82d7217d19a757ca73dff8e5e4",
+      "amended": "01d95368a6dd08daa314aae1eedd7bcada87db6d",
+      "source_tree": "08c68cae1fda6e863a77360688d2373693fff55b",
+      "test_definitions_equal": true
+    },
+    {
+      "original": "04b2e32c659336117e81fc3d579667d6ce135c61",
+      "amended": "57f454d86a9b93a7ab7b8c4276e48460d229f903",
+      "source_tree": "1c1b29139b06edf1b21b3858d55eaba26786c6b6",
+      "test_definitions_equal": true
+    },
+    {
+      "original": "d98c98fcfb08b223ed6b88482493e87f0ed274b3",
+      "amended": "f9ac9ed3a901b6099448b6fa3a1ccd32aa163673",
+      "source_tree": "fb866d5bd53c5a76d7bbaa1d6312113d4baad2ac",
+      "test_definitions_equal": true
+    },
+    {
+      "original": "c419a072519da0cc402d0285e255ee9ac72aa6e6",
+      "amended": "25d9c94ddacc53fd7cba4544d7b79523039ccc6a",
+      "source_tree": "600bed39f9f23cc00ef3e53a9a00b45aae115f0c",
+      "test_definitions_equal": true
+    },
+    {
+      "original": "a6c85b80ba735641b2e4b5386563fab34dc92a78",
+      "amended": "e01bb3bd5aba46711e3f657ed92c8feeb18e9654",
+      "source_tree": "da6d4e06c3e106bfd8a6eabf53428b88a5300176",
+      "test_definitions_equal": true
+    }
+  ],
+  "inherited_commit": "f4d63d184087c904d745d9fe6a15305fdcec41ed",
+  "c4_approved": {
+    "command": [
+      "./fingerprinttest",
+      "-d",
+      "-t",
+      "8",
+      "-e",
+      "/tmp/inet-txop-fingerprint-update/c4-run",
+      "-m",
+      "(showcases|examples)/",
+      "/tmp/inet-txop-fingerprint-update/c4-verification.csv"
+    ],
+    "status": 0,
+    "rows": 10
+  },
+  "final": {
+    "command": [
+      "./fingerprinttest",
+      "-d",
+      "-t",
+      "8",
+      "-m",
+      "((showcases/wireless/(aggregation|blockack|fragmentation|qos|txop)|examples/(adhoc/qos|wireless/(qos|mactest)))/)",
+      "-l",
+      "/tmp/inet-txop-fingerprint-update/final-runner.log"
+    ],
+    "status": 0,
+    "rows": 25
+  },
+  "release_build": {
+    "command": [
+      "make",
+      "MODE=release",
+      "-j8"
+    ],
+    "status": 0,
+    "library_sha256": "70436a0ffc1aa69d1a74059609e6cb1cd02035fa959fe12c95861dbebace6b2b"
+  },
+  "base_approved": {
+    "command": [
+      "./fingerprinttest",
+      "-d",
+      "-t",
+      "8",
+      "-e",
+      "/tmp/inet-txop-fingerprint-update/base",
+      "-m",
+      "(showcases|examples)/",
+      "/tmp/inet-txop-fingerprint-update/base-verification.csv"
+    ],
+    "status": 0,
+    "rows": 25,
+    "csv": "/examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             5749-0281/tplx;f38a-cb93/~tNl;c2ed-b352/~tND;0eb8-3e3b/tyf, PASS, wireless adhoc Ipv4\n/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             dd36-1076/tplx;b703-3ef2/~tNl;e07d-2980/~tND;f74f-a0c0/tyf, PASS, wireless adhoc Ipv4\n/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             4fd2-bb56/tplx;ecaf-89f7/~tNl;9398-0fae/~tND;57c2-84bd/tyf, PASS, wireless adhoc Ipv4\n/examples/adhoc/qos/,                -f omnetpp.ini -c Fragmentation,               10s,             2f2d-73b1/tplx;cc9e-d1a6/~tNl;e740-f7d4/~tND;97f7-655d/tyf, PASS, wireless adhoc Ipv4\n/examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             2c80-6844/tplx;4e9e-cf86/~tNl;ea3d-e802/~tND;734c-15d1/tyf, PASS, wireless adhoc Ipv4\n/examples/wireless/mactest/,         -f omnetpp.ini -c MacEdca -r 0,                100s,            5635-3aae/tplx;c574-69b7/~tNl;bb83-14c4/~tND;24e0-2e48/tyf, PASS, wireless\n/examples/wireless/mactest/,         -f omnetpp.ini -c MacDcf -r 0,                100s,            031d-548a/tplx;4db6-9460/~tNl;4c1d-35a0/~tND;3edc-eb8d/tyf, PASS, wireless\n/examples/wireless/qos/,             -f omnetpp.ini -c MacNonQos -r 0,                 10s,         0be7-a22e/tplx;5eb9-6cea/~tNl;87a5-11a1/~tND;b802-9992/tyf, PASS, wireless Ipv4\n/examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         d929-5913/tplx;f602-4424/~tNl;f2fb-4d98/~tND;b06a-f098/tyf, PASS, wireless Ipv4\n/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         0473-f9d2/tplx;e92c-7352/~tNl;317d-aa4f/~tND;57cd-2e76/tyf, PASS, wireless Ipv4\n/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         e07a-4c5f/tplx;9f6c-7889/~tNl;29ea-169c/~tND;8cb9-109e/tyf, PASS, wireless Ipv4\n/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         6edb-0326/tplx;2a8a-50ee/~tNl;4301-882d/~tND;0db4-29ea/tyf, PASS, wireless Ipv4\n/showcases/wireless/aggregation/,     -f omnetpp.ini -c NoAggregation -r 0,                                      1s,            21a4-c882/tplx;ecf2-6e33/~tNl;5d9e-8fdf/~tND;cb71-81f8/tyf, PASS,    wireless Ipv4\n/showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            0e94-675b/tplx;4545-c0de/~tNl;a778-2f83/~tND;6cdd-e65e/tyf, PASS,    wireless Ipv4\n/showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            1ad6-ebce/tplx;cc40-e9c2/~tNl;5421-bc6d/~tND;c99f-3188/tyf, PASS,    wireless Ipv4\n/showcases/wireless/blockack/,     -f omnetpp.ini -c NoFragmentation -r 0,                                        1s,            9161-625d/tplx;6a02-09aa/~tNl;cbc0-3b0a/~tND, PASS,    wireless Ipv4\n/showcases/wireless/blockack/,     -f omnetpp.ini -c Fragmentation -r 0,                                          1s,            36f4-5c22/tplx;66b0-94cd/~tNl;45f3-af4f/~tND, PASS,    wireless Ipv4\n/showcases/wireless/blockack/,     -f omnetpp.ini -c MixedTraffic -r 0,                                           1s,            351b-d4ba/tplx;5c1f-69a8/~tNl;6182-6da3/~tND, PASS,    wireless Ipv4\n/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFnofrag -r 0,                                       1s,            52b9-628f/tplx;3fec-74a2/~tNl;dbb5-67b0/~tND;8871-1dd1/tyf, PASS,    wireless Ipv4\n/showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFfrag -r 0,                                         1s,            8df2-40a3/tplx;dab9-5e8d/~tNl;2e7b-0729/~tND;74c3-9ba0/tyf, PASS,    wireless Ipv4\n/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            c99f-354d/tplx;8e10-a3f0/~tNl;ac4b-3ba1/~tND;e394-4985/tyf, PASS,    wireless Ipv4\n/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfragblockack -r 0,                                 1s,            2597-1e2e/tplx;d269-c6ae/~tNl;2f5c-4cca/~tND;77f4-58c1/tyf, PASS,    wireless Ipv4\n/showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            5734-43a3/tplx;9c39-00a3/~tNl;03a9-2f02/~tND;34ac-bc95/tyf, PASS,    wireless Ipv4\n/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            2f30-f17c/tplx;0683-d978/~tNl;a879-de03/~tND;64d2-47e3/tyf, PASS,    wireless Ipv4\n/showcases/wireless/txop/,     -f omnetpp.ini -c General -r 0,                5s,         ab91-87f3/tplx;f30c-6aa4/~tNl;6175-eb06/tyf, PASS,    wireless Ipv4\n"
+  }
+}
