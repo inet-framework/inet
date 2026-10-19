@@ -432,6 +432,10 @@ anyway.
 
 ## Untested serializers (registered, but no real-capture coverage)
 
+The Block Ack producers retain Basic BAR and Block Ack with Type 0. Their `reserved` fields clear the two bits that overlap Type. The Compressed producers use Type 2 and leave ACK-policy and `reserved` fields at zero. These Compressed fields have no field-preserving wire contract. The serializer writes zero for reserved bits B0 and B5–B11 and ignores their received values.
+
+`Ieee80211BlockAckWire_1.test` checks independent octets for both variants and both frame types. It also checks unsupported Types, malformed Compressed fragment subfields, and response lengths. Basic response headers contain 148 bytes; Compressed response headers contain 28 bytes. The four-byte FCS gives MPDU lengths of 152 and 32 bytes. These checks do not establish a complete frame exchange or complete historical Basic conformance.
+
 The tests cover different things. `serializer_chunk_roundtrip` **constructs** an
 instance of every registered chunk type — from hand-written typed fillers in
 `tests/serializer/lib/fillers/`, one or more per type, a variant per branch the serializer takes

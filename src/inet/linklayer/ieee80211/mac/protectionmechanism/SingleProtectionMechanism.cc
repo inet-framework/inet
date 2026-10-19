@@ -67,8 +67,9 @@ simtime_t SingleProtectionMechanism::computeCtsDurationField(const Ptr<const Iee
 simtime_t SingleProtectionMechanism::computeBlockAckReqDurationField(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
 {
     // TODO ACK or BlockAck frame, as applicable
-    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
-        simtime_t blockAckFrameDuration = rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq, ResponseQueryRole::PREDICT)->getDuration(LENGTH_BASIC_BLOCKACK);
+    if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq) || dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
+        simtime_t blockAckFrameDuration = rateSelection->computeResponseBlockAckFrameMode(packet, blockAckReq, ResponseQueryRole::PREDICT)->getDuration(
+            dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq) ? LENGTH_COMPRESSED_BLOCKACK : LENGTH_BASIC_BLOCKACK);
         simtime_t blockAckReqDurationPerId = blockAckFrameDuration + modeSet->getSifsTime();
         return blockAckReqDurationPerId;
     }

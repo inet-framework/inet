@@ -1,0 +1,186 @@
+%description:
+Check runtime Compressed fallback under a controlled peer HT capability gap.
+Simplified management supplies static association and valid HT state after initialization.
+Before DATA, the fixture removes peer HT records at both ends of both wireless hops.
+The fixture retains association, local HT support, ac operation, and Compressed Block Ack support.
+During traffic, require delivered Normal Ack QoS DATA without ADDBA, BAR, or Block Ack.
+Check absent peer HT records during traffic and at the final audit.
+This fixture does not establish an on-air association exchange or a limitation of all ac stations.
+
+%file: Ac_BlockAckFallback.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+
+namespace inet::protocoltest {
+using namespace inet::ieee80211;
+
+class FallbackHcf : public Hcf {
+  public:
+    bool hasNoAgreements() const {
+        return originatorBlockAckAgreementHandler->getAgreements().empty() &&
+                recipientBlockAckAgreementHandler->getAgreements().empty();
+    }
+};
+Define_Module(FallbackHcf);
+
+class BlockAckFallbackAudit : public cSimpleModule, public cListener {
+  protected:
+    Ieee80211Mib *ap = nullptr;
+    Ieee80211Mib *sta1 = nullptr;
+    Ieee80211Mib *sta2 = nullptr;
+    std::vector<FallbackHcf *> hcfs;
+    std::map<std::string, cComponent *> macs;
+    bool removed = false;
+    bool completed = false;
+    int delivered = 0;
+    int sentFirstHop = 0;
+    int receivedFirstHop = 0;
+    int sentSecondHop = 0;
+    int receivedSecondHop = 0;
+    simsignal_t sentSignal;
+    simsignal_t receivedSignal;
+    simsignal_t appSignal;
+
+    void checkAssociation() const {
+        for (auto sta : {sta1, sta2}) {
+            ASSERT(sta->bssStationData.isAssociated);
+            ASSERT(sta->bssData.bssid == ap->address);
+            auto it = ap->bssAccessPointData.stations.find(sta->address);
+            ASSERT(it != ap->bssAccessPointData.stations.end() && it->second == Ieee80211Mib::ASSOCIATED);
+        }
+        for (auto mib : {ap, sta1, sta2})
+            ASSERT(mib->isHtOperationSupported() && mib->localHtCapabilitiesValid);
+        for (auto hcf : hcfs) {
+            ASSERT(hcf->par("isBlockAckSupported").boolValue());
+            ASSERT(std::string(hcf->par("blockAckVariant").stringValue()) == "compressed");
+            ASSERT(hcf->hasNoAgreements());
+        }
+    }
+    void checkGap() const {
+        checkAssociation();
+        ASSERT(ap->findPeerHtState(sta1->address) == nullptr);
+        ASSERT(ap->findPeerHtState(sta2->address) == nullptr);
+        ASSERT(sta1->findPeerHtState(ap->address) == nullptr);
+        ASSERT(sta2->findPeerHtState(ap->address) == nullptr);
+    }
+    void initialize() override {
+        sentSignal = registerSignal("packetSentToLower");
+        receivedSignal = registerSignal("packetReceivedFromLower");
+        appSignal = registerSignal("packetReceived");
+        scheduleAt(SIMTIME_ZERO, new cMessage("remove"));
+        scheduleAt(SimTime(1100, SIMTIME_MS), new cMessage("audit"));
+    }
+    void handleMessage(cMessage *message) override {
+        bool remove = message->isName("remove");
+        delete message;
+        if (remove) {
+            ap = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.ap.wlan[0].mib"));
+            sta1 = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta1.wlan[0].mib"));
+            sta2 = check_and_cast<Ieee80211Mib *>(getModuleByPath("^.sta2.wlan[0].mib"));
+            for (const char *name : {"ap", "sta1", "sta2"}) {
+                auto wlan = getParentModule()->getSubmodule(name)->getSubmodule("wlan", 0);
+                ASSERT(std::string(wlan->par("opMode").stringValue()) == "ac");
+                auto mac = check_and_cast<Ieee80211Mac *>(wlan->getSubmodule("mac"));
+                macs[name] = mac;
+                hcfs.push_back(check_and_cast<FallbackHcf *>(mac->getSubmodule("hcf")));
+                mac->subscribe(sentSignal, this);
+                mac->subscribe(receivedSignal, this);
+            }
+            checkAssociation();
+            for (auto sta : {sta1, sta2}) {
+                auto atAp = ap->findPeerHtState(sta->address);
+                auto atSta = sta->findPeerHtState(ap->address);
+                ASSERT(atAp && atAp->valid && atSta && atSta->valid);
+            }
+            for (auto sta : {sta1, sta2}) {
+                ap->removePeerHtCapabilities(sta->address);
+                sta->removePeerHtCapabilities(ap->address);
+            }
+            getModuleByPath("^.sta2.app[0]")->subscribe(appSignal, this);
+            removed = true;
+            checkGap();
+        }
+        else {
+            ASSERT(removed);
+            checkGap();
+            ASSERT(delivered >= 5);
+            ASSERT(sentFirstHop >= 5 && receivedFirstHop >= 5);
+            ASSERT(sentSecondHop >= 5 && receivedSecondHop >= 5);
+            completed = true;
+            std::cout << "Absent peer HT fallback: Normal Ack delivered=" << delivered
+                      << " firstHop=" << receivedFirstHop << " secondHop=" << receivedSecondHop << "\n";
+            emit(registerSignal("fallbackAuditPassed"), intval_t(1));
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        ASSERT(removed);
+        checkGap();
+        auto packet = check_and_cast<Packet *>(object);
+        if (signal == appSignal) {
+            delivered++;
+            return;
+        }
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        ASSERT(!dynamicPtrCast<const Ieee80211AddbaRequest>(header));
+        ASSERT(!dynamicPtrCast<const Ieee80211AddbaResponse>(header));
+        ASSERT(header->getType() != ST_BLOCKACK_REQ && header->getType() != ST_BLOCKACK);
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        if (!data)
+            return;
+        ASSERT(data->getType() == ST_DATA_WITH_QOS && data->getAckPolicy() == NORMAL_ACK);
+        bool firstHop = data->getTransmitterAddress() == sta1->address && data->getReceiverAddress() == ap->address;
+        bool secondHop = data->getTransmitterAddress() == ap->address && data->getReceiverAddress() == sta2->address;
+        if (signal == sentSignal) {
+            sentFirstHop += firstHop && source == macs.at("sta1");
+            sentSecondHop += secondHop && source == macs.at("ap");
+        }
+        else if (signal == receivedSignal) {
+            receivedFirstHop += firstHop && source == macs.at("ap");
+            receivedSecondHop += secondHop && source == macs.at("sta2");
+        }
+    }
+    void finish() override { ASSERT(completed); }
+};
+Define_Module(BlockAckFallbackAudit);
+
+Define_ProtocolTest(wifi_11ac_blockack_fallback)
+{
+    return ProtocolTest("wifi_11ac_blockack_fallback")
+        .once(on("audit").signal("fallbackAuditPassed")
+                .describe("Normal Ack delivery with absent peer HT state on both hops").within(1.2));
+}
+}
+
+%file: FallbackNetwork.ned
+import inet.protocoltest.wifi.WifiInfraNetwork;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+module FallbackHcf extends Hcf { parameters: @class(::inet::protocoltest::FallbackHcf); }
+simple BlockAckFallbackAudit { parameters: @class(::inet::protocoltest::BlockAckFallbackAudit); }
+network FallbackNetwork extends WifiInfraNetwork {
+    submodules:
+        audit: BlockAckFallbackAudit;
+}
+
+%inifile: test.ini
+[General]
+network = FallbackNetwork
+*.tester.testName = "wifi_11ac_blockack_fallback"
+*.ap.wlan[*].mgmt.typename = "Ieee80211MgmtApSimplified"
+*.sta*.wlan[*].mgmt.typename = "Ieee80211MgmtStaSimplified"
+*.sta*.wlan[*].agent.typename = ""
+*.sta*.wlan[*].mgmt.accessPointAddress = "ap"
+**.wlan[*].mac.hcf.typename = "FallbackHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "compressed"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.01s
+include ../../ini/_ac.ini
+include ../../ini/_base.ini
+**.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+**.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 100
+**.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 10000
+
+%contains: stdout
+PROTOCOLTEST wifi_11ac_blockack_fallback: PASS

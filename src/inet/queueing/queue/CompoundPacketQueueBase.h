@@ -13,11 +13,12 @@
 #include "inet/queueing/common/PassivePacketSourceRef.h"
 #include "inet/queueing/contract/IPacketCollection.h"
 #include "inet/queueing/contract/IPacketDropperFunction.h"
+#include "inet/queueing/contract/ISelectivePacketCollection.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListener
+class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListener, public ISelectivePacketCollection
 {
   protected:
     int packetCapacity = -1;
@@ -37,6 +38,8 @@ class INET_API CompoundPacketQueueBase : public PacketQueueBase, public cListene
     virtual bool isOverloaded() const;
 
   public:
+    virtual Packet *peekEligiblePacket(const std::function<bool(Packet *)>& predicate) const override;
+    virtual Packet *extractPacket(Packet *packet) override;
     virtual ~CompoundPacketQueueBase() { delete packetDropperFunction; }
 
     virtual int getMaxNumPackets() const override { return packetCapacity; }

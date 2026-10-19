@@ -36,9 +36,9 @@ bool EdcaCollisionController::isInternalCollision(Edcaf *edcaf)
     simtime_t now = simTime();
     AccessCategory accessCategory = edcaf->getAccessCategory();
     auto hasFrames = [](const Edcaf *candidate) {
-        return !candidate->getPendingQueue()->isEmpty() || candidate->getInProgressFrames()->getLength() != 0;
+        return candidate->hasEligibleFrames();
     };
-    // An expired empty queue cannot initiate a TXOP or cause an internal collision.
+    // Deferred or expired DATA cannot initiate a TXOP or cause an internal collision.
     // Keep the winner's in-progress frame visible until its transmission completes.
     if (txStartTimes[accessCategory] == now && hasFrames(edcaf)) {
         for (int ac = accessCategory + 1; ac < 4; ac++) {

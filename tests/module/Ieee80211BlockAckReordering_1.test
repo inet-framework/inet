@@ -3,9 +3,10 @@ Check S1 recipient delivery through RecipientQosMacDataService.
 Supply accepted Basic agreements with known buffer sizes.
 Check fragment capacity, complete gap release, cyclic delivery, and BAR before DATA.
 Check window movement, incomplete-unit disposal, peer/TID isolation, and A-MSDU order.
-The fixture supplies agreements; it does not test ADDBA negotiation or Compressed exchanges.
+The fixture supplies agreements; it does not test ADDBA negotiation.
+Compressed cases check gap release, cyclic delivery, peer/TID isolation, and receipt retention through the production recipient service.
 
-%extraargs: -r 0..7
+%extraargs: -r 0..10
 
 %file: RecipientReordering.cc
 #include "inet/common/packet/chunk/ByteCountChunk.h"
@@ -40,8 +41,9 @@ Define_Module(ReorderingRecipient);
 
 class ReorderingAgreements : public RecipientBlockAckAgreementHandler {
   public:
-    void accept(MacAddress peer, Tid tid, int start, int size) {
+    void accept(MacAddress peer, Tid tid, int start, int size, BlockAckVariant variant = BlockAckVariant::BASIC) {
         auto agreement = new RecipientBlockAckAgreement(peer, tid, SequenceNumberCyclic(start), size, SIMTIME_ZERO);
+        agreement->setVariant(variant);
         agreement->addbaResposneSent();
         blockAckAgreements[{peer, tid}] = agreement;
     }
@@ -224,6 +226,33 @@ class RecipientReorderingTest : public cSimpleModule {
                 checkDelivery(receive(makeData(101, "fragmented-frag1", 1)), {"fragmented", "third"});
                 checkWindow(103, 0, peer);
                 break;
+            case 8:
+            case 9: {
+                int start = scenario == 8 ? 100 : 4095;
+                agreements.accept(peer, 5, start, 4, BlockAckVariant::COMPRESSED);
+                checkDelivery(receive(makeData(start, "first")), {"first"});
+                checkDelivery(receive(makeData((start + 2) % 4096, "third")), {});
+                checkDelivery(receive(makeData((start + 1) % 4096, "second")), {"second", "third"});
+                checkWindow((start + 3) % 4096, 0, peer);
+                auto record = agreements.getAgreement(5, peer)->getBlockAckRecord();
+                for (int offset = 0; offset < 4; offset++)
+                    ASSERT(record->getCompressedAckState(SequenceNumberCyclic(start) + offset) == (offset < 3));
+                break;
+            }
+            case 10:
+                agreements.accept(peer, 5, 100, 4, BlockAckVariant::COMPRESSED);
+                agreements.accept(otherPeer, 5, 100, 4, BlockAckVariant::COMPRESSED);
+                agreements.accept(peer, 6, 100, 4, BlockAckVariant::COMPRESSED);
+                checkDelivery(receive(makeData(101, "peer-one")), {});
+                checkDelivery(receive(makeData(101, "peer-two", 0, false, otherPeer)), {});
+                checkDelivery(receive(makeData(101, "tid-six", 0, false, peer, 6)), {});
+                checkDelivery(receive(makeData(100, "first")), {"first", "peer-one"});
+                checkWindow(102, 0, peer);
+                checkWindow(100, 1, otherPeer);
+                checkWindow(100, 1, peer, 6);
+                ASSERT(!agreements.getAgreement(5, otherPeer)->getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(100)));
+                ASSERT(!agreements.getAgreement(6, peer)->getBlockAckRecord()->getCompressedAckState(SequenceNumberCyclic(100)));
+                break;
             default:
                 throw cRuntimeError("Unknown recipient scenario");
         }
@@ -267,7 +296,7 @@ seed-set = 0
 cmdenv-express-mode = true
 record-vector-results = false
 record-scalar-results = false
-*.test.scenario = ${scenario=0..7}
+*.test.scenario = ${scenario=0..10}
 
 %contains: stdout
 Recipient reordering checks passed.

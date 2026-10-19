@@ -9,6 +9,7 @@
 #define __INET_RECIPIENTBLOCKACKAGREEMENT_H
 
 #include "inet/linklayer/ieee80211/mac/blockack/BlockAckRecord.h"
+#include "inet/linklayer/ieee80211/mac/contract/BlockAckVariant.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -23,6 +24,9 @@ class INET_API RecipientBlockAckAgreement : public cObject
     simtime_t blockAckTimeoutValue = 0;
     bool isAddbaResponseSent = false;
     simtime_t expirationTime = -1;
+    SequenceNumberCyclic highestReceivedSequence;
+    int highestReceivedFragment = 0;
+    BlockAckVariant variant = BlockAckVariant::BASIC;
 
   public:
     RecipientBlockAckAgreement(MacAddress originatorAddress, Tid tid, SequenceNumberCyclic startingSequenceNumber, int bufferSize, simtime_t blockAckTimeoutValue);
@@ -33,6 +37,23 @@ class INET_API RecipientBlockAckAgreement : public cObject
     virtual BlockAckRecord *getBlockAckRecord() const { return blockAckRecord; }
     virtual simtime_t getBlockAckTimeoutValue() const { return blockAckTimeoutValue; }
     virtual int getBufferSize() const { return bufferSize; }
+    BlockAckVariant getVariant() const { return variant; }
+    void setVariant(BlockAckVariant value) {
+        variant = value;
+        if (variant == BlockAckVariant::COMPRESSED)
+            blockAckRecord->initializeCompressedWindow(startingSequenceNumber, bufferSize);
+    }
+    void recordReceived(const Ptr<const Ieee80211DataHeader>& header) {
+        auto sequence = header->getSequenceNumber();
+        if (!highestReceivedSequence.isSpecified() || highestReceivedSequence < sequence) {
+            highestReceivedSequence = sequence;
+            highestReceivedFragment = header->getFragmentNumber();
+        }
+        else if (highestReceivedSequence == sequence)
+            highestReceivedFragment = std::max(highestReceivedFragment, int(header->getFragmentNumber()));
+    }
+    const SequenceNumberCyclic& getHighestReceivedSequence() const { return highestReceivedSequence; }
+    int getHighestReceivedFragment() const { return highestReceivedFragment; }
     virtual SequenceNumberCyclic getStartingSequenceNumber() const { return startingSequenceNumber; }
 
     virtual void addbaResposneSent() { isAddbaResponseSent = true; }

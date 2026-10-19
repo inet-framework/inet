@@ -258,6 +258,8 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
     virtual const simtime_t getShortSlotTime() const;
     virtual const simtime_t getSifsTime() const override;
     virtual const simtime_t getRifsTime() const override { return 2E-6; }
+    // IEEE Std 802.11-2024, Table 19-25: the 2.4 GHz HT PPDU includes a 6 us extension.
+    virtual const simtime_t getSignalExtensionTime() const override { return centerFrequencyMode == BAND_2_4GHZ ? SimTime(6, SIMTIME_US) : SIMTIME_ZERO; }
     virtual const simtime_t getCcaTime() const override { return 4E-6; } // < 4
     virtual const simtime_t getPhyRxStartDelay() const override { return 24E-6; }
     virtual const simtime_t getRxTxTurnaroundTime() const override { return 2E-6; } // < 2
@@ -266,7 +268,16 @@ class INET_API Ieee80211HtMode : public Ieee80211ModeBase
     virtual int getMpduMaxLength() const override { return 65535; } // in octets
     virtual BandMode getCenterFrequencyMode() const { return centerFrequencyMode; }
 
-    virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataLength); }
+    // IEEE Std 802.11-2024, 10.12.3 and Table 9-225. The input is the encoded receiver limit (0..7).
+    B getMinimumMpduStartDistance(int minimumMpduStartSpacing) const;
+    // IEEE Std 802.11-2024, 10.27.4. The result is the L-SIG LENGTH field in octets, before its 4095 limit.
+    int getLSigLength(b dataLength) const;
+    // IEEE Std 802.11-2024, Table 19-25. This predicate checks the separate 10 ms bound.
+    bool isPpduDurationWithinLimit(b dataLength) const;
+    // Both the 10 ms bound and the mixed-format L-SIG bound apply.
+    bool isPpduDurationValid(b dataLength) const;
+
+    virtual const simtime_t getDuration(b dataLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataLength) + getSignalExtensionTime(); }
 };
 
 // A specification of the high-throughput (HT) physical layer (PHY)

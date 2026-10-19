@@ -428,6 +428,94 @@ Notable backward incompatible changes are the following:
 
    The new parameter urgentOutOfBand, which LinuxTcp sets, gives the receive side of urgent data of Linux without SO_OOBINLINE: the last byte of urgent data leaves the stream, and a read stops before it. INET does not deliver that byte, which Linux gives to recv(MSG_OOB), and it sends no urgent data. Tcp keeps treating URG-marked bytes as ordinary data. Simulations change only where a peer sends urgent data to LinuxTcp.
 
+55. IEEE 802.11 Block Ack agreement lifecycle
+
+   HCF now dispatches accepted Block Ack Actions once after duplicate checks. Setup correlates the peer, TID, and dialog token. The recipient response determines the accepted buffer size and inactivity timeout. Both negotiated flags control A-MSDU use.
+
+   HCF defers new DATA extraction during setup and recovery. The first DATA under an accepted agreement retains the request sequence number. The response timeout starts after the request ACK, with a configurable default of 100 ms. Uncertain setup requires DELBA before surviving unsent DATA can resume. Failed DELBA discards the current deferred batch. Later DATA can start a fresh recovery exchange.
+
+   If an internal collision discards the first DATA before transmission, HCF retires the agreement and queues DELBA. The unsent successor remains deferred until recovery resolves. Lifetime expiry and RTS failure use the same retirement mechanism.
+
+   Directional teardown preserves the opposite agreement. The originator discards transmitted, unacknowledged DATA, even when its lifetime remains valid at inactivity expiration. It also discards unsent fragments through the highest transmitted allocation index. This local index records allocation order before fragmentation. This prevents transmission of an incomplete unit outside the agreement. Later intact DATA remains eligible, including across sequence wraparound.
+
+   Originator retirement now uses local allocation indices to preserve this boundary across large sequence gaps. A distance of exactly 2048 between DATA transmissions no longer lets unsent fragments survive teardown. The wire sequence numbers remain unchanged.
+
+   The recipient delivers complete buffered units in cyclic order across receive gaps before resource release. Association reset instead discards old buffered units in both directions. With Block Ack enabled, reset also discards queued and in-progress QoS DATA for the old peer, including unsent Normal Ack DATA. These changes can alter delivery, disposal, frame exchanges, and fingerprints.
+
+   Custom agreement handlers, recipient services, and management implementations require the changes in the migration guide. External queues need the optional selected-extraction contract only when deferred DATA hides eligible work. Built-in queues preserve ordinary pull accounting for that extraction.
+
+51. IEEE 802.11 Basic Block Ack transfer completion
+
+   Callers must supply agreement arguments explicitly for BAR selection and transmitted-BAR processing. An omitted argument now fails compilation instead of silently selecting behavior without agreement state.
+
+   Basic BAR selection now separates each peer and TID. Short bursts and small negotiated windows can cause BAR below the configured threshold. BAR can obtain channel access without queued DATA. After final completion or final DATA expiration, the originator sends DELBA even with zero inactivity timeout. Later bursts can require another ADDBA exchange. These changes affect exchange order, airtime, simulation results, and fingerprints for Basic Block Ack configurations.
+
+   Basic single protection now reserves only an already prepared successor. Further DATA extraction starts a new TXOP and can require more contention. Final DATA in a zero-limit TXOP reserves only its immediate response. These corrections can change Duration fields, airtime, and fingerprints.
+
+   Custom QoS ACK policies must accept the agreement-handler argument in isBlockAckReqNeeded() and computeBlockAckReqParameters(). Custom in-progress queues must preserve the extract argument in getPendingFrameFor(). QoS data services must implement IOriginatorQosMacDataService for candidate preview without extraction.
+
+52. IEEE 802.11 immediate Compressed Block Ack
+
+   HCF defaults to immediate Compressed Block Ack. Eligible HT infrastructure links and the supported ac path use accepted agreements and 32-byte Compressed responses with FCS. Links without usable local or peer HT state retain Normal Ack. Select blockAckVariant = "basic" at both endpoints for historical Basic compatibility. An HT PHY mode alone does not supply peer capability state.
+
+   Both endpoints must select the same blockAckVariant because ADDBA does not negotiate it. A valid addressed BAR with the other profile stops the simulation before agreement updates. The diagnostic identifies the peer, TID, and profiles. Compressed rejects delayedAckPolicySupported = true in either agreement policy at initialization.
+
+   Compressed receipt state retains positive bits after delivery and reports zero for absent receipts. HCF recognizes the required SIFS or RIFS relation from actual physical endpoints. It can release individual MPDUs under that relation despite a receive gap. Compressed agreements suppress fragmentation for their peer and TID; Basic retains its fragment bitmap.
+
+   Compressed BAR uses a legal non-HT rate. Initial and later BAR consume their applicable BSS and peer rate sets. A configured controlFrameBitrate must satisfy the applicable rule. Response duration, protection, and timeout calculations use the 32-byte response length. Basic retains its separate 152-byte response.
+
+   Active Compressed agreements check complete DATA exchange cost before destructive aggregation. If an aggregate cannot qualify, HCF evaluates its first ordinary MSDU with the same selected mode. Refusal preserves original queue frames, deadlines, and sequence state. Single protection reserves only the current exchange; a later BAR can require fresh contention. These changes can alter airtime, contention, delivery times, and simulation results. Basic and traffic outside active Compressed agreements retain their existing admission limits.
+
+   Before DATA commitment, failed RTS updates access-category retry state without a provisional sequence counter. Original DATA lifetimes bound repeated attempts. This changes the scoped path's former discard after a fixed number of RTS failures.
+
+   Existing demonstrations retain explicit Basic settings, configurations, and result rows. IEEE Std 802.11e-2005 introduced Basic; IEEE Std 802.11-2024 reserves its Type 0 value. Retention does not establish complete historical conformance. VHT A-MPDU, Multi-TID Block Ack, and the existing delayed Basic requirement remain deferred. Compressed support does not establish complete VHT transfer support or MAC stop/start recovery.
+
+   Custom QoS rate selectors, recipient ACK policies, recipient data services, and frame sequences require the interface changes in the migration guide. Custom radio media, communication caches, and IEEE 802.11 modes also require the new timing queries. Basic classes and methods remain available.
+
+53. Radio medium timing queries
+
+   Radio media now expose copied transmission endpoints and cached arrival endpoints. Consumers can preserve physical timing evidence after cache expiry without retained transmission pointers or new propagation calculations. Receivers attach the transmission identifier to SignalTimeInd so later frame delivery can identify that evidence. Custom radio media and communication caches must implement the new query methods described in the migration guide.
+
+54. IEEE 802.11 signal extension
+
+   HT duration at 2.4 GHz now includes its six-microsecond signal extension. Previously, that waveform ended early, which could change interframe recognition and airtime. Custom IEEE 802.11 modes must supply the new nominal-extension query. A transmission query supplies the actual extension from its waveform so consumers do not count it twice.
+
+55. IEEE 802.11 Block Ack wire types
+
+   The serializer supports the complete four-bit Type field for Basic compatibility and Compressed frames. Compressed responses contain a 64-bit bitmap and occupy 32 bytes with FCS. Both BAR profiles occupy 24 bytes with FCS. Basic producers must keep reserved bits that overlap Type zero. Invalid Types and malformed fragment fields now fail validation instead of ambiguous decoding.
+
+56. IEEE 802.11 RIFS permission
+
+   HT Operation now preserves RIFS Mode through management conversion and equality checks. The MIB permits RIFS under unprotected HT operation and clears the permission for VHT. A recipient can therefore check the actual advertised permission before it recognizes a RIFS relation. This change adds no RIFS transmission scheduler.
+
+57. IEEE 802.11 reversible DATA preparation
+
+   QoS data services now supply an owned DATA preview before queue extraction or sequence assignment. A successful commit transfers that same preview to the caller. A refused commit preserves the preview and original queue frames. Custom services must implement the preparation contract in the migration guide. The existing extraction path remains available.
+
+   Commitment of ordinary DATA now preserves normal queue service effects. Queue output statistics count the departure, and the retained preview includes elapsed queueing time and queue events. This also applies when a deferred head causes selection of a later eligible frame.
+
+58. IEEE 802.11 HT-SIG bytes and aggregate boundaries
+
+   HT transmissions now preserve the complete HT-SIG header through byte conversion. Receivers check its CRC, supported fields, and length before length-based trailer removal. Invalid headers mark packets as erroneous. Delimiter inspection supplies bounded MPDU ranges, including singleton aggregates. Ordinary valid HT duration inputs remain unchanged. VHT modes now create their own header type.
+
+59. IEEE 802.11 partial HT aggregate reception
+
+   NIST and Yans receivers now retain separate delimiter and MPDU outcomes for HT20 aggregates. Partial DATA loss preserves aggregate bytes for later MAC acceptance. This change does not enable MAC aggregate receipt or implicit Block Ack. Custom HT error models must implement the optional WLAN aggregate contract. Aggregate error-rate estimates can be unknown. The migration guide describes the contract and metadata changes.
+
+   Rx now drops aggregate containers before standalone FCS or MAC header checks. This prevents parser errors for successful and partially failed aggregates. PHY range outcomes remain available in the drop signal. MAC aggregate acceptance remains pending.
+
+   Delimiter recovery now scans across typed MPDU headers. An invalid delimiter no longer causes a chunk conversion error at those headers. Bounded recovery retains later complete MPDU ranges.
+
+60. IEEE 802.11 HT A-MPDU and implicit Compressed Block Ack
+
+   HtMpduAggregationPolicy enables HT20 mixed-format A-MPDU transmission after an accepted Compressed agreement. The default policy leaves aggregation disabled. The first transmit profile requires long GI and fixed DATA rates without rate control. The receiver also accepts advertised HT20 short-GI aggregates. The htampdu example supplies scalar, dimensional, and zero-TXOP configurations.
+
+   Each member retains its sequence number, retry state, and independent deadline. HCF commits new members after the IFS interval at actual DATA submission. The complete PSDU length controls RTS protection and exchange admission. Partial PHY loss permits separate member acceptance and one implicit response after SIFS. One correct member prevents EIFS, including overheard DATA and DATA without an agreement.
+
+   Missing or invalid implicit responses cause one contention failure and one pending explicit BAR probe. Probe submission consumes that flag. Probe failure permits DATA retry without another probe until a later DATA attempt. This INET policy exposes lost recipient agreement state under continuous traffic. It adds probe airtime and channel access delay. Valid zero-bit responses do not arm a probe.
+
+   Custom aggregation policies, QoS data services, Rx, Tx, recipient services, ACK policies, and response procedures require the migration changes. NIST and Yans use cached range outcomes. Adaptive aggregate rates, HT40 transmit aggregation, VHT aggregates, nested A-MSDUs, and correlated FEC errors remain outside this profile. These changes can alter affected exchange order, delivery times, and simulation results.
+
 Notable backward compatible changes are the following:
 
 1. IEEE 802.11 per-station rate statistics
@@ -504,11 +592,15 @@ Notable backward compatible changes are the following:
 
 14. Explicit historical Basic Block Ack selection
 
-   HCF adds blockAckVariant = "basic" for historical compatibility. Existing Block Ack, TXOP, QoS, and fragmentation demonstrations select it explicitly. Basic remains the default. HCF rejects unknown values and the reserved "compressed" value during initialization until Compressed exchanges exist. These checks also apply when Block Ack support is disabled. Basic originated in IEEE Std 802.11e-2005; IEEE Std 802.11-2024 reserves its type value.
+   HCF retains blockAckVariant = "basic" for historical compatibility. Existing Block Ack, TXOP, QoS, and fragmentation demonstrations select it explicitly. HCF rejects unknown selector values during initialization, also when Block Ack support is disabled. Basic originated in IEEE Std 802.11e-2005; IEEE Std 802.11-2024 reserves its type value.
 
 15. IEEE 802.11 retry counters for each receiver
 
    QoS recovery now keeps separate retry counters for each receiver. Frames with equal TID, sequence number, and fragment number no longer share a counter across receivers. An acknowledgment or retry-limit disposal for one receiver preserves the other receiver's counter. This repair applies before DATA lifetime expiration.
+
+16. Optional selected extraction from packet queues
+
+   PacketQueue, CompoundPacketQueueBase, and PriorityScheduler now support the optional ISelectivePacketCollection contract. A consumer can find an eligible packet without a state change. It can extract that packet with ordinary pull events, residence metadata, and ownership transfer. Ordinary head selection remains unchanged. Providers without this capability report UnsupportedPacketSelection before extraction.
 
 Notable bug fixes are the following:
 

@@ -26,8 +26,10 @@ Packet *BasicReassembly::addFragment(Packet *packet)
     // Frame is not fragmented
     if (!header->getMoreFragments() && header->getFragmentNumber() == 0)
         return packet;
-    // FIXME temporary fix for mgmt frames
-    if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
+    // IEEE Std 802.11-2024, 10.4: dispatch Block Ack Actions only after complete MMPDU reassembly.
+    bool blockAckAction = dynamicPtrCast<const Ieee80211AddbaRequest>(header) ||
+        dynamicPtrCast<const Ieee80211AddbaResponse>(header) || dynamicPtrCast<const Ieee80211Delba>(header);
+    if (dynamicPtrCast<const Ieee80211MgmtHeader>(header) && !blockAckAction)
         return packet;
     // find entry for this frame
     Key key;

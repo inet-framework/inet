@@ -1,0 +1,373 @@
+%description:
+The production QoS data service prepares independent MPDUs through a production PacketQueue and HT aggregation policy.
+Twelve deterministic cases check cancellation, refusal, commitment, sequence wrap, retained members, aggregate limits, and forwarded DATA previews.
+Preparation preserves queued identities, owners, headers, deadlines, and sequence state.
+Commitment preserves each deadline. Retained unsent and retry members preserve their numbers and Retry values.
+Production InProgressFrames and QosAckHandler supply eligible retained members.
+The fixture tests the service boundary. It does not test HCF aggregate arbitration or internal collision disposal.
+Two postrun controls require HCF initialization to reject AARF with aggregate transmission, with and without fixed-rate overrides.
+
+%extraargs: -c Preparation -r 0..11
+
+%postrun-command: python3 check-preparation.py
+
+%file: AmpduPreparation.cc
+#include <iostream>
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregation.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosAckHandler.h"
+#include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/queueing/queue/PacketQueue.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+class AmpduPreparationService : public OriginatorQosMacDataService
+{
+    std::unique_ptr<EdcaTransmitLifetimeHandler> ownedLifetime;
+  protected:
+    void initialize() override {
+        OriginatorQosMacDataService::initialize();
+        auto lifetime = SimTime(1, SIMTIME_S);
+        ownedLifetime = std::make_unique<EdcaTransmitLifetimeHandler>(lifetime, lifetime, lifetime, lifetime);
+        setLifetimeHandler(ownedLifetime.get(), {});
+        setEligibility([](Packet *) { return true; }, [](Packet *) { return true; });
+    }
+  public:
+    EdcaTransmitLifetimeHandler *lifetime() const { return ownedLifetime.get(); }
+    int64_t allocations() const { return nextDataAllocationIndex; }
+    // Advance the real sequence owner without a queue extraction or allocation.
+    void advanceTo(MacAddress peer, Tid tid, int next) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->setReceiverAddress(peer);
+        header->setTid(tid);
+        while (getNextSequenceNumber(peer, tid) != SequenceNumberCyclic(next))
+            assignSequenceNumber(header);
+    }
+};
+Define_Module(AmpduPreparationService);
+
+class AmpduPreparationTest : public cSimpleModule
+{
+    const MacAddress peer{"02:00:00:00:00:02"};
+    const MacAddress sender{"02:00:00:00:00:01"};
+    AmpduPreparationService *service = nullptr;
+    queueing::PacketQueue *queue = nullptr;
+    InProgressFrames *inProgress = nullptr;
+    QosAckHandler *ack = nullptr;
+    struct Source {
+        Packet *packet;
+        int64_t id;
+        cObject *owner;
+        simtime_t deadline;
+    };
+    std::vector<Source> sources;
+    std::string operation() const { return par("operation").stdstringValue(); }
+
+    Packet *enqueue(int index, bool nested = false) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setReceiverAddress(peer);
+        header->setTransmitterAddress(operation() == "forwarded" ? MacAddress("02:00:00:00:00:03") : sender);
+        header->setAddress3(peer);
+        header->setTid(0);
+        header->setSequenceNumber(SequenceNumberCyclic(77));
+        header->setAMsduPresent(nested);
+        auto packet = new Packet("queued-msdu", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->setArrivalTime(simTime());
+        queue->enqueuePacket(packet);
+        auto deadline = operation() == "expired" ? SimTime(2, SIMTIME_MS) : SimTime(100 + index, SIMTIME_MS);
+        service->lifetime()->registerFragments({packet}, deadline);
+        sources.push_back({packet, packet->getId(), packet->getOwner(), deadline});
+        return packet;
+    }
+    void checkSources(int nextSequence, int64_t allocations) const {
+        ASSERT(queue->getNumPackets() == int(sources.size()));
+        ASSERT(service->getNextSequenceNumber(peer, 0) == SequenceNumberCyclic(nextSequence));
+        ASSERT(service->allocations() == allocations);
+        for (size_t i = 0; i < sources.size(); i++) {
+            const auto& source = sources[i];
+            ASSERT(queue->getPacket(i) == source.packet && source.packet->getId() == source.id);
+            ASSERT(source.packet->getOwner() == source.owner);
+            ASSERT(source.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(77));
+            ASSERT(source.packet->peekAtFront<Ieee80211DataHeader>()->getTransmitterAddress() ==
+                (operation() == "forwarded" ? MacAddress("02:00:00:00:00:03") : sender));
+            ASSERT(!source.packet->findTag<Ieee80211DataSequenceTag>());
+            ASSERT(service->lifetime()->findFrame(source.id) == source.packet);
+            ASSERT(service->lifetime()->getDeadline(source.packet) == source.deadline);
+        }
+    }
+    void dispose(Packet *packet) {
+        service->lifetime()->forgetFrame(packet->getId());
+        take(packet);
+        delete packet;
+    }
+    MpduAggregationLimits limits() const {
+        MpduAggregationLimits result;
+        result.receiver = peer;
+        result.transmitter = sender;
+        result.tid = 0;
+        result.windowStart = SequenceNumberCyclic(0);
+        result.windowSize = 64;
+        result.maxLength = B(65535);
+        auto modes = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto mode = modes->getMode(i);
+            if (mode->getHtMcsIndex() == 7 && mode->getDataMode()->getBandwidth() == MHz(20) && !mode->isHtShortGuardInterval())
+                result.mode = mode;
+        }
+        ASSERT(result.mode);
+        return result;
+    }
+    std::vector<Packet *> retainTwo() {
+        for (int i = 0; i < 2; i++) {
+            enqueue(i);
+            auto preview = service->prepareFrame(queue, false);
+            ASSERT(preview);
+            auto frame = service->commitPreparedFrame(*preview);
+            ASSERT(frame);
+            sources.clear();
+            inProgress->adoptPreparedFrame(frame);
+            if (i == 1) {
+                ack->processTransmittedDataOrMgmtFrame(frame->peekAtFront<Ieee80211DataHeader>());
+                ack->processFailedFrame(frame->peekAtFront<Ieee80211DataHeader>());
+                auto header = frame->removeAtFront<Ieee80211DataHeader>();
+                header->setRetry(true);
+                frame->insertAtFront(header);
+            }
+        }
+        auto retained = inProgress->getEligibleFrames();
+        ASSERT(retained.size() == 2);
+        ASSERT(ack->getQoSDataAckStatus(retained[0]->peekAtFront<Ieee80211DataHeader>()) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+        ASSERT(ack->getQoSDataAckStatus(retained[1]->peekAtFront<Ieee80211DataHeader>()) == QosAckHandler::Status::NORMAL_ACK_NOT_ARRIVED);
+        return retained;
+    }
+
+  public:
+    AmpduPreparationTest() : cSimpleModule(65536) {}
+  protected:
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        service = check_and_cast<AmpduPreparationService *>(getModuleByPath("^.service"));
+        queue = check_and_cast<queueing::PacketQueue *>(getModuleByPath("^.queue"));
+        inProgress = check_and_cast<InProgressFrames *>(getModuleByPath("^.inProgress"));
+        ack = check_and_cast<QosAckHandler *>(getModuleByPath("^.ack"));
+        inProgress->setLifetimeHandler(service->lifetime());
+        ASSERT(service->hasAMpduAggregation() && service->hasAMsduAggregation());
+        std::vector<Packet *> retained;
+        if (operation() == "retained")
+            retained = retainTwo();
+        int start = operation() == "wrap" ? 4095 : (retained.empty() ? 0 : 2);
+        if (operation() == "wrap")
+            service->advanceTo(peer, 0, start);
+        auto bounds = limits();
+        bounds.windowStart = SequenceNumberCyclic(operation() == "wrap" ? 4095 : 0);
+        int count = operation() == "count" ? 66 : 3;
+        for (int i = 0; i < count; i++)
+            enqueue(10 + i, operation() == "nested" && i == 1);
+        int expected = count;
+        if (operation() == "window") {
+            bounds.windowSize = 2;
+            expected = 2;
+        }
+        if (operation() == "count") expected = 64;
+        if (operation() == "nested") expected = 2;
+        if (operation() == "bytes") {
+            MpduAggregation builder;
+            bounds.maxLength = builder.computeAggregateLength({sources[0].packet, sources[1].packet}, bounds.mode, 0) - B(1);
+            expected = 1;
+        }
+        auto allocationBase = service->allocations();
+        auto noFit = bounds;
+        noFit.maxLength = B(0);
+        ASSERT(!service->prepareBatch(queue, retained, noFit));
+        checkSources(start, allocationBase);
+        auto batch = service->prepareBatch(queue, retained, bounds);
+        ASSERT(batch && batch->queued.size() == size_t(expected));
+        ASSERT(batch->members.size() == retained.size() + expected);
+        for (size_t i = 0; i < retained.size(); i++) ASSERT(batch->members[i] == retained[i]);
+        for (int i = 0; i < expected; i++) {
+            auto& preview = batch->queued[i];
+            ASSERT(!preview->aggregate && preview->sourceIds.size() == 1);
+            ASSERT(preview->sourceIds[0] == sources[operation() == "nested" && i == 1 ? 2 : i].id);
+            auto header = preview->packet->peekAtFront<Ieee80211DataHeader>();
+            ASSERT(header->getSequenceNumber() == SequenceNumberCyclic((start + i) % 4096));
+            ASSERT(header->getTransmitterAddress() == sender);
+            ASSERT(!header->getAMsduPresent() && !header->getRetry());
+        }
+        checkSources(start, allocationBase);
+        auto aggregate = service->buildAggregate(*batch, bounds);
+        ASSERT(aggregate && aggregate->getDataLength() <= bounds.maxLength);
+        ASSERT(check_and_cast<const Ieee80211HtMode *>(bounds.mode)->isPpduDurationValid(aggregate->getDataLength()));
+        delete aggregate;
+        ASSERT(service->isBatchValid(*batch, simTime()));
+        wait(SimTime(2, SIMTIME_MS));
+        checkSources(start, allocationBase);
+        std::vector<Packet *> committed;
+        if (operation() == "staleSource") {
+            auto packet = sources[0].packet;
+            queue->removePacket(packet);
+            dispose(packet);
+            sources.erase(sources.begin());
+        }
+        if (operation() == "staleSequence") {
+            service->advanceTo(peer, 0, start + 1);
+            start++;
+        }
+        bool refused = operation() == "staleSource" || operation() == "staleSequence" || operation() == "expired";
+        if (refused) {
+            ASSERT(!service->isBatchValid(*batch, simTime()));
+            ASSERT(!service->commitPreparedBatch(*batch, committed));
+            ASSERT(committed.empty());
+            checkSources(start, allocationBase);
+        }
+        else if (operation() != "cancel") {
+            std::vector<simtime_t> deadlines;
+            std::vector<Packet *> previews;
+            for (const auto& preview : batch->queued) {
+                previews.push_back(preview->packet.get());
+                deadlines.push_back(service->lifetime()->getDeadline(service->lifetime()->findFrame(preview->sourceIds[0])));
+            }
+            ASSERT(service->commitPreparedBatch(*batch, committed));
+            ASSERT(batch->queued.empty() && committed == previews);
+            ASSERT(committed.size() == size_t(expected));
+            for (int i = 0; i < expected; i++) {
+                auto frame = committed[i];
+                ASSERT(frame->getOwner() == service);
+                ASSERT(frame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic((start + i) % 4096));
+                ASSERT(frame->peekAtFront<Ieee80211DataHeader>()->getTransmitterAddress() == sender);
+                ASSERT(frame->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == allocationBase + i);
+                ASSERT(service->lifetime()->getDeadline(frame) == deadlines[i]);
+            }
+            ASSERT(service->getNextSequenceNumber(peer, 0) == SequenceNumberCyclic((start + expected) % 4096));
+            ASSERT(queue->getNumPackets() == count - expected);
+            if (operation() == "nested") ASSERT(queue->getPacket(0)->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent());
+        }
+        batch.reset();
+        if (operation() == "cancel") checkSources(start, allocationBase);
+        for (size_t i = 0; i < retained.size(); i++) {
+            auto frame = retained[i];
+            ASSERT(inProgress->getFrames(i) == frame);
+            auto header = frame->peekAtFront<Ieee80211DataHeader>();
+            ASSERT(header->getSequenceNumber() == SequenceNumberCyclic(i));
+            ASSERT(header->getRetry() == (i == 1));
+            ASSERT(frame->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == int64_t(i));
+            ASSERT(service->lifetime()->getDeadline(frame) == SimTime(100 + i, SIMTIME_MS));
+            ASSERT(ack->getQoSDataAckStatus(header) == (i == 0 ? QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED : QosAckHandler::Status::NORMAL_ACK_NOT_ARRIVED));
+            service->lifetime()->forgetFrame(frame->getId());
+        }
+        for (auto frame : committed) dispose(frame);
+        while (!queue->isEmpty()) {
+            auto frame = queue->dequeuePacket();
+            dispose(frame);
+        }
+        ASSERT(service->lifetime()->getNumFrames() == 0);
+        std::cout << "A-MPDU preparation passed: " << operation() << "\n";
+        endSimulation();
+    }
+};
+Define_Module(AmpduPreparationTest);
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
+import inet.linklayer.ieee80211.mac.originator.QosAckHandler;
+import inet.linklayer.ieee80211.mac.queue.InProgressFrames;
+import inet.queueing.queue.PacketQueue;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module AmpduPreparationService extends OriginatorQosMacDataService { parameters: @class(::AmpduPreparationService); }
+simple AmpduPreparationTest { parameters: string operation; @class(::AmpduPreparationTest); }
+network PreparationNetwork {
+    submodules:
+        service: AmpduPreparationService;
+        queue: PacketQueue;
+        ack: QosAckHandler;
+        inProgress: InProgressFrames {
+            pendingQueueModule = "^.queue";
+            originatorMacDataServiceModule = "^.service";
+            ackHandlerModule = "^.ack";
+        }
+        test: AmpduPreparationTest;
+    connections allowunconnected:
+}
+network AarfNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = false
+record-vector-results = false
+record-scalar-results = false
+
+[Config Preparation]
+network = PreparationNetwork
+*.test.operation = ${operation="cancel","commit","staleSource","staleSequence","expired","wrap","retained","bytes","window","count","nested","forwarded"}
+*.service.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
+*.service.msduAggregationPolicy.subframeNumThreshold = 2
+*.service.msduAggregationPolicy.maxAMsduSize = 1000
+*.service.fragmentationPolicy.typename = ""
+
+[Config Aarf]
+network = AarfNetwork
+*.host.wlan[0].opMode = "n(mixed-2.4Ghz)"
+*.host.wlan[0].mac.qosStation = true
+*.host.wlan[0].mac.hcf.rateControl.typename = "AarfRateControl"
+*.host.wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
+*.host.wlan[0].mgmt.typename = "Ieee80211MgmtAdhoc"
+*.host.wlan[0].agent.typename = ""
+*.host.wlan[0].radio.receiver.bandwidth = 20MHz
+*.host.mobility.initFromDisplayString = false
+*.host.mobility.initialX = 0m
+*.host.mobility.initialY = 0m
+*.host.mobility.initialZ = 0m
+*.host.mobility.constraintAreaMinX = 0m
+*.host.mobility.constraintAreaMinY = 0m
+*.host.mobility.constraintAreaMinZ = 0m
+*.host.mobility.constraintAreaMaxX = 100m
+*.host.mobility.constraintAreaMaxY = 100m
+*.host.mobility.constraintAreaMaxZ = 0m
+
+[Config AarfFixedOverride]
+extends = Aarf
+*.host.wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 6.5Mbps
+*.host.wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = 20MHz
+*.host.wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+
+%file: check-preparation.py
+from pathlib import Path
+import os
+import subprocess
+
+text = Path("test.out").read_text()
+assert "Run statistics: total 12, successful 12" in text
+operations = ("cancel", "commit", "staleSource", "staleSequence", "expired", "wrap", "retained", "bytes", "window", "count", "nested", "forwarded")
+for operation in operations:
+    assert text.count(f"A-MPDU preparation passed: {operation}\n") == 1, operation
+diagnostic = "HT A-MPDU transmission requires fixed DATA rates without a rate-control submodule"
+executables = [path for path in Path.cwd().glob("Ieee80211AmpduPreparation_1*") if path.is_file() and os.access(path, os.X_OK)]
+assert len(executables) == 1, executables
+for config in ("Aarf", "AarfFixedOverride"):
+    command = [str(executables[0]), "-u", "Cmdenv", "--check-signals=false", "-n", "../../../../src:.:../../lib", "omnetpp.ini", "_defaults.ini", "-c", config, "-r", "0"]
+    result = subprocess.run(command, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    Path(f"control-{config}.out").write_text(result.stdout)
+    assert result.returncode != 0, (config, result.stdout)
+    assert diagnostic in result.stdout, (config, result.stdout)
+print("Eleven preparation cases and both AARF initialization controls passed.")
+
+%contains: stdout
+A-MPDU preparation passed:

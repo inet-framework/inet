@@ -1,0 +1,226 @@
+%description:
+Ordinary MPDU controls use the same source on the pinned parent and feature branch.
+NIST, Yans, absent-model, and non-HT custom controls cover three noise levels and seeds 0, 1, and 2.
+Scalar and dimensional radios cover whole-signal and separate-part reception.
+CONTROL records expose outcomes, duration, metadata, draw counts, and the next random value for exact comparison.
+
+%extraargs: -r 0..575
+
+%postrun-command: python3 check-controls.py
+
+%file: Compatibility.cc
+#include <iomanip>
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/ErrorModelBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+class CompatibilityNoRole : public ErrorModelBase
+{
+  public:
+    double computePacketErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return 0; }
+    double computeBitErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return 0; }
+    double computeSymbolErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return 0; }
+};
+Define_Module(CompatibilityNoRole);
+
+class CompatibilityDriver : public cSimpleModule, public cListener
+{
+    int received = 0;
+    bool error = false;
+    simtime_t duration;
+    std::string metadata = "absent";
+  protected:
+    void initialize() override {
+        getModuleByPath("^.node[0].radio")->subscribe(transmissionStartedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("send"));
+    }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        auto transmission = check_and_cast<const Ieee80211Transmission *>(object);
+        auto header = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+        ASSERT(header->getChunkLength() == transmission->getMode()->getHeaderMode()->getLength());
+        duration = transmission->getEndTime() - transmission->getStartTime();
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isSelfMessage()) {
+            delete message;
+            auto packet = new Packet("ordinary", makeShared<ByteCountChunk>(B(100)));
+            packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+            auto modes = Ieee80211ModeSet::getModeSet(par("model").intValue() == 3 ? "g(mixed)" : "n(mixed-2.4Ghz)");
+            const IIeee80211Mode *selected = nullptr;
+            if (par("model").intValue() == 3)
+                selected = modes->getMode(Mbps(6));
+            else {
+                for (int i = 0; i < modes->getNumModes(); i++) {
+                    auto mode = modes->getMode(i);
+                    if (mode->getHtMcsIndex() == par("mcs").intValue() && mode->getDataMode()->getBandwidth() == MHz(20) &&
+                            mode->isHtShortGuardInterval() == par("shortGi").boolValue())
+                        selected = mode;
+                }
+            }
+            ASSERT(selected);
+            packet->addTag<Ieee80211ModeReq>()->setMode(selected);
+            send(packet, "out", 0);
+            return;
+        }
+        auto packet = check_and_cast<Packet *>(message);
+        ASSERT(packet->getDataLength() == B(100));
+        auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
+        ASSERT(mode->getHtMcsIndex() == (par("model").intValue() == 3 ? -1 : par("mcs").intValue()));
+        ASSERT(packet->getTag<Ieee80211ChannelInd>()->getChannel() != nullptr);
+        auto time = packet->getTag<SignalTimeInd>();
+        ASSERT(time->getTransmissionId() >= 0);
+        ASSERT(time->getEndTime() - time->getStartTime() == duration);
+        std::ostringstream output;
+        output << std::setprecision(17);
+        auto rate = packet->findTag<ErrorRateInd>();
+        ASSERT((rate != nullptr) == (par("model").intValue() != 2));
+        if (rate)
+            output << "per:" << rate->getPacketErrorRate() << ",ber:" << rate->getBitErrorRate() << ",ser:" << rate->getSymbolErrorRate();
+        else
+            output << "absent";
+        output << ",power:" << packet->getTag<SignalPowerInd>()->getPower().get()
+               << ",snir:" << packet->getTag<SnirInd>()->getMinimumSnir()
+               << ",start:" << time->getStartTime().raw() << ",end:" << time->getEndTime().raw();
+        metadata = output.str();
+        error = packet->hasBitError();
+        received++;
+        delete packet;
+    }
+    using cListener::finish;
+    void finish() override {
+        ASSERT(received <= 1);
+        if (par("noise").intValue() == 0 || par("model").intValue() >= 2)
+            ASSERT(received == 1 && !error);
+        auto rng = getModuleByPath("^.node[1].radio.receiver")->getRNG(0);
+        auto draws = rng->getNumbersDrawn();
+        if (par("model").intValue() >= 2) ASSERT(draws == 0);
+        EV << "CONTROL model=" << par("model").intValue() << " mcs=" << par("mcs").intValue()
+           << " gi=" << par("shortGi").boolValue() << " noise=" << par("noise").intValue()
+           << " seed=" << par("seed").intValue() << " parts=" << par("parts").boolValue()
+           << " analog=" << par("analog").stdstringValue() << " received=" << received << " error=" << error
+           << " duration=" << duration.raw() << " metadata=" << metadata << " draws=" << draws << " next=" << rng->intRand() << "\n";
+    }
+};
+Define_Module(CompatibilityDriver);
+
+%file: test.ned
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211Radio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211RadioMedium;
+import inet.physicallayer.wireless.common.base.packetlevel.ErrorModelBase;
+
+module CompatibilityNoRole extends ErrorModelBase { parameters: @class(::CompatibilityNoRole); }
+module CompatibilityRadio extends Ieee80211Radio
+{
+    parameters:
+        int model;
+        receiver.errorModel.typename = default(model == 0 ? "Ieee80211NistErrorModel" : (model == 1 ? "Ieee80211YansErrorModel" : (model == 2 ? "" : "CompatibilityNoRole")));
+}
+simple CompatibilityDriver
+{
+    parameters:
+        @class(::CompatibilityDriver);
+        int model;
+        int mcs;
+        bool shortGi;
+        int noise;
+        int seed;
+        bool parts;
+        string analog;
+    gates:
+        input in[2];
+        output out[2];
+}
+module CompatibilityNode
+{
+    parameters:
+        @networkNode;
+    gates:
+        input in;
+        output out;
+        input radioIn @directIn;
+    submodules:
+        mobility: StationaryMobility;
+        radio: CompatibilityRadio;
+    connections:
+        in --> radio.upperLayerIn;
+        radio.upperLayerOut --> out;
+        radioIn --> radio.radioIn;
+}
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211RadioMedium;
+        driver: CompatibilityDriver;
+        node[2]: CompatibilityNode;
+    connections:
+        for i=0..1 {
+            driver.out[i] --> node[i].in;
+            node[i].out --> driver.in[i];
+        }
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 20ms
+seed-set = ${seed=0,1,2}
+seed-0-mt = ${seed}
+cmdenv-express-mode = false
+**.vector-recording = false
+**.scalar-recording = false
+*.driver.model = ${model=0,1,2,3}
+*.driver.mcs = ${mcs=0,7}
+*.driver.shortGi = ${gi=false,true}
+*.driver.noise = ${noise=0,1,2}
+*.driver.seed = ${seed}
+*.driver.parts = ${parts=false,true}
+*.driver.analog = ${analog="scalar","dimensional"}
+*.node[*].radio.opMode = ${model} == 3 ? "g(mixed)" : "n(mixed-2.4Ghz)"
+*.node[*].radio.initialRadioMode = "transceiver"
+*.node[*].radio.separateReceptionParts = ${parts}
+*.node[*].radio.signalAnalogRepresentation = ${analog}
+*.radioMedium.signalAnalogRepresentation = ${analog}
+*.node[*].radio.model = ${model}
+*.node[*].radio.receiver.bandwidth = 20MHz
+*.node[*].radio.receiver.energyDetection = ${noise} == 0 ? -85dBm : (${noise} == 1 ? (${mcs} == 0 ? -29dBm : -49dBm) : (${mcs} == 0 ? -27.9dBm : -42.9dBm))
+*.node[*].radio.receiver.snirThreshold = -10dB
+*.node[*].radio.antenna.mobilityModule = "^.^.mobility"
+*.node[*].mobility.initFromDisplayString = false
+*.node[*].mobility.initialX = 10m + parentIndex() * 1m
+*.node[*].mobility.initialY = 10m
+*.node[*].mobility.initialZ = 0m
+*.node[*].mobility.constraintAreaMinX = 0m
+*.node[*].mobility.constraintAreaMinY = 0m
+*.node[*].mobility.constraintAreaMinZ = 0m
+*.node[*].mobility.constraintAreaMaxX = 100m
+*.node[*].mobility.constraintAreaMaxY = 100m
+*.node[*].mobility.constraintAreaMaxZ = 0m
+*.radioMedium.backgroundNoise.power = ${noise} == 0 ? -110dBm : (${noise} == 1 ? (${mcs} == 0 ? -30dBm : -50dBm) : (${mcs} == 0 ? -28dBm : -43dBm))
+
+%contains: stdout
+CONTROL model=
+
+%file: check-controls.py
+from pathlib import Path
+import re
+
+text = Path("test.out").read_text()
+assert "Run statistics: total 576, successful 576" in text
+rows = [dict(re.findall(r"(\w+)=([^ ]+)", line)) for line in text.splitlines() if line.startswith("CONTROL ")]
+keys = [tuple(row[name] for name in ("model", "mcs", "gi", "noise", "seed", "parts", "analog")) for row in rows]
+assert len(rows) == len(set(keys)) == 576
+for model in ("0", "1"):
+    selected = [row for row in rows if row["model"] == model]
+    assert any(int(row["draws"]) > 0 for row in selected)
+    assert any(row["error"] == "1" or row["received"] == "0" for row in selected)
+print("All 576 ordinary reception controls passed.")

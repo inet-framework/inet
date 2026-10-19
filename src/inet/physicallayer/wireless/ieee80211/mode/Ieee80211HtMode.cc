@@ -19,6 +19,36 @@
 namespace inet {
 namespace physicallayer {
 
+B Ieee80211HtMode::getMinimumMpduStartDistance(int minimumMpduStartSpacing) const
+{
+    // IEEE Std 802.11-2024, Table 9-225 and Equation (10-12).
+    static const int SPACING_NS[] = {0, 250, 500, 1000, 2000, 4000, 8000, 16000};
+    if (minimumMpduStartSpacing < 0 || minimumMpduStartSpacing > 7)
+        throw cRuntimeError("Minimum MPDU Start Spacing must be between 0 and 7");
+    return B(int64_t(ceil(dataMode->getNetBitrate().get() * SPACING_NS[minimumMpduStartSpacing] / 8e9)));
+}
+
+int Ieee80211HtMode::getLSigLength(b dataLength) const
+{
+    if (preambleMode->getPreambleFormat() != Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED)
+        throw cRuntimeError("L-SIG length requires HT mixed format");
+    // IEEE Std 802.11-2024, 10.27.4, Equation (10-17). Exact ticks preserve the symbol boundary.
+    auto remaining = getDuration(dataLength) - getSignalExtensionTime() - SimTime(20, SIMTIME_US);
+    auto symbol = SimTime(4, SIMTIME_US);
+    return (remaining.raw() + symbol.raw() - 1) / symbol.raw() * 3 - 3;
+}
+
+bool Ieee80211HtMode::isPpduDurationWithinLimit(b dataLength) const
+{
+    return getDuration(dataLength) <= SimTime(10, SIMTIME_MS);
+}
+
+bool Ieee80211HtMode::isPpduDurationValid(b dataLength) const
+{
+    return isPpduDurationWithinLimit(dataLength) &&
+            (preambleMode->getPreambleFormat() != Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED || getLSigLength(dataLength) <= 4095);
+}
+
 OPP_THREAD_LOCAL const Ieee80211HtCompliantModes Ieee80211HtCompliantModes::singleton;
 
 bps Ieee80211HtMode::getNonHtReferenceRate() const

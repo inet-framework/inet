@@ -10,12 +10,13 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/ErrorModelBase.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
+#include "inet/physicallayer/wireless/ieee80211/contract/packetlevel/IIeee80211AmpduErrorModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
+class INET_API Ieee80211ErrorModelBase : public ErrorModelBase, public IIeee80211AmpduErrorModel
 {
   protected:
     double spectralEfficiency1bit = 2000000.0 / 1000000.0; // 1 bit per symbol with 1 MSPS
@@ -36,6 +37,9 @@ class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
 
   public:
     Ieee80211ErrorModelBase();
+
+    virtual bool supportsAmpduMode(const IIeee80211Mode *mode) const override;
+    virtual double computeAmpduRangeSuccessRate(const ISnir *snir, const IIeee80211Mode *mode, B length) const override;
 
     virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
     virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;

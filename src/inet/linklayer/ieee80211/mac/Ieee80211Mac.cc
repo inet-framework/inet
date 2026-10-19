@@ -34,6 +34,13 @@
 namespace inet {
 namespace ieee80211 {
 
+void Ieee80211Mac::resetPeerAgreements(const MacAddress& peer)
+{
+    Enter_Method("resetPeerAgreements");
+    if (hcf)
+        hcf->resetPeer(peer);
+}
+
 using namespace inet::physicallayer;
 
 Define_Module(Ieee80211Mac);
@@ -83,6 +90,7 @@ void Ieee80211Mac::initialize(int stage)
                 if (transmitter->isHtChannelWidthSupported(channelWidth) &&
                         receiver->isHtChannelWidthSupported(channelWidth))
                     operationalChannelWidths.insert(channelWidth);
+            receiver->validateHtReceptionCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         }
         mib->updateLocalHtCapabilities(modeSet, operationalChannelWidths, operationalHtSpatialStreamLimit);
         emit(modesetChangedSignal, modeSet);
@@ -202,6 +210,25 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
 
 void Ieee80211Mac::handleLowerPacket(Packet *packet)
 {
+    auto aggregate = packet->findTag<Ieee80211AmpduInd>();
+    if (aggregate && aggregate->getHeaderSuccessful() && aggregate->getContentComplete() && aggregate->getAggregation()) {
+        auto reception = rx->lowerAggregateReceived(packet);
+        take(packet);
+        for (auto& member : reception.members)
+            take(member.packet.get());
+        if (!reception.anyCorrect) {
+            delete packet;
+            if (mib->qos)
+                hcf->corruptedFrameReceived();
+            else
+                dcf->corruptedFrameReceived();
+        }
+        else if (mib->qos)
+            hcf->processLowerAggregate(packet, std::move(reception));
+        else
+            delete packet;
+        return;
+    }
     if (rx->lowerFrameReceived(packet)) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         processLowerFrame(packet, header);

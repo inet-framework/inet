@@ -32,6 +32,7 @@ class INET_API InProgressFrames : public SimpleModule
     EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr; // Borrowed from EDCA; null for DCF.
     std::vector<Packet *> inProgressFrames;
     std::vector<Packet *> droppedFrames;
+    std::function<bool(Packet *)> transmissionEligible;
 
   protected:
     virtual void initialize(int stage) override;
@@ -43,19 +44,26 @@ class INET_API InProgressFrames : public SimpleModule
   public:
     virtual ~InProgressFrames();
     void setLifetimeHandler(EdcaTransmitLifetimeHandler *handler) { lifetimeHandler = handler; }
+    void setTransmissionEligibility(std::function<bool(Packet *)> predicate) { transmissionEligible = predicate; }
+    bool hasEligibleInProgressFrames() { return hasEligibleFrameToTransmit(); }
 
     virtual std::string str() const override;
     virtual void forEachChild(cVisitor *v) override;
     virtual int getLength() const { return inProgressFrames.size(); }
     virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
     bool containsFrame(const Packet *packet) const;
+    // Takes ownership after the data service commits a reversible preparation.
+    void adoptPreparedFrame(Packet *packet);
     virtual Packet *getFrameToTransmit();
-    virtual Packet *getPendingFrameFor(Packet *frame);
+    virtual Packet *peekFrameToTransmit();
+    SequenceNumberCyclic getCandidateSequenceNumber(Packet *packet) const;
+    virtual Packet *getPendingFrameFor(Packet *frame, bool extract = true);
     virtual void dropFrame(Packet *packet);
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 
     virtual bool hasInProgressFrames() { ensureHasFrameToTransmit(); return hasEligibleFrameToTransmit(); }
     virtual std::vector<Packet *> getOutstandingFrames();
+    std::vector<Packet *> getEligibleFrames();
 
     virtual void clearDroppedFrames();
 };

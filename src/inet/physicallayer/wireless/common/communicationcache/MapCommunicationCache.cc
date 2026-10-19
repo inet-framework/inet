@@ -14,6 +14,16 @@ namespace physicallayer {
 
 Define_Module(MapCommunicationCache);
 
+const IArrival *MapCommunicationCache::findCachedArrival(const IRadio *receiver, const ITransmission *transmission) const
+{
+    auto entry = transmissionCache.find(transmission->getId());
+    if (entry == transmissionCache.end() || !entry->second.receptionCacheEntries)
+        return nullptr;
+    const auto& receptions = *entry->second.receptionCacheEntries;
+    auto reception = receptions.find(receiver->getId());
+    return reception == receptions.end() ? nullptr : reception->second.arrival;
+}
+
 MapCommunicationCache::~MapCommunicationCache()
 {
     for (auto& it : transmissionCache)

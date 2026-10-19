@@ -126,4 +126,5 @@ class SignalTimeInd extends SignalTagBase
 {
     simtime_t startTime;
     simtime_t endTime;
+    int transmissionId = -1; // Medium transmission identity; -1 means unavailable.
 }

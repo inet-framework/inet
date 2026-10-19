@@ -1,0 +1,153 @@
+%description:
+Real association and application traffic use HT aggregates on both AP hops.
+Computed member FCS and a matched implicit response permit exactly sixty upper deliveries.
+A deterministic partial-loss case requires an aggregate member with Retry set.
+Both cases use seed zero. This fixture does not claim performance validation.
+
+%extraargs: -r 0..1
+
+%postrun-command: python3 check-implicit.py
+
+%file: check-implicit.py
+from pathlib import Path
+
+output = Path("test.out").read_text()
+for name in ("wifi_11n_implicit_ba", "wifi_11n_implicit_ba_partial"):
+    assert output.count(f"PROTOCOLTEST {name}: PASS") == 1
+assert output.count("WifiInfraNetwork.sta2.app[0]: received 60 packets") == 2
+assert "<!> Warning:" not in output
+assert "<!> Error:" not in output
+assert ": FAIL" not in output
+
+%file: N_AmpduImplicitBa.cc
+#include <memory>
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregationUtils.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+
+namespace inet::protocoltest {
+using namespace ieee80211;
+using namespace physicallayer;
+
+class ImplicitProtocolErrorModel : public Ieee80211NistErrorModel
+{
+    mutable bool firstMember = true;
+  public:
+    double computePacketErrorRate(const ISnir *, IRadioSignal::SignalPart) const override { return 0; }
+    double computeAmpduRangeSuccessRate(const ISnir *, const IIeee80211Mode *, B length) const override {
+        if (length == B(4))
+            return 1;
+        bool fail = par("partialLoss").boolValue() && firstMember;
+        firstMember = false;
+        return fail ? 0 : 1;
+    }
+};
+Define_Module(ImplicitProtocolErrorModel);
+
+static bool hasAggregate(const MatchContext& context, bool requireRetry)
+{
+    auto packet = context.event.packet;
+    if (!packet || !dynamicPtrCast<const Ieee80211MpduSubframeHeader>(packet->peekAtFront<Chunk>()))
+        return false;
+    auto mode = packet->getTag<Ieee80211ModeReq>()->getMode();
+    if (mode->getHtMcsIndex() < 0 || mode->isHtShortGuardInterval())
+        return false;
+    auto layout = inspectMpduAggregate(packet, B(0), B(packet->getDataLength()));
+    bool retry = false;
+    int members = 0;
+    for (const auto& range : layout.ranges) {
+        if (range.kind != MpduRangeKind::MPDU)
+            continue;
+        auto data = packet->peekDataAt<Ieee80211DataHeader>(range.offset);
+        ASSERT(data->getAckPolicy() == NORMAL_ACK && data->getFragmentNumber() == 0 && !data->getMoreFragments());
+        retry |= data->getRetry();
+        members++;
+    }
+    return layout.complete && members > 0 && (!requireRetry || retry);
+}
+
+static ProtocolTest implicitProgram(const char *name, bool partialLoss)
+{
+    auto program = ProtocolTest(name)
+        .meanwhile(exactlyTimes(60, on("sta2.udp").signal("packetSentToUpper").within(1.5)));
+    if (partialLoss)
+        program.meanwhile(atLeastTimes(1, on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return hasAggregate(c, true); })
+            .describe("selective DATA retry after partial receipt").within(1.5)));
+    program.once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                if (!c.event.packet) return false;
+                auto header = c.event.packet->peekAtFront<Chunk>();
+                auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(header);
+                return response && response->getStatusCode() == SC_SUCCESSFUL && response->getBlockAckPolicy();
+            }).describe("accepted immediate agreement after infrastructure association").within(1.2))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return hasAggregate(c, false); })
+            .describe("production HT aggregate from the source").within(0.1))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                if (!c.event.packet) return false;
+                auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(c.event.packet->peekAtFront<Chunk>());
+                return response && response->getBlockAckBitmap().getSize() == 64;
+            }).describe("implicit Compressed Block Ack").within(0.02))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return hasAggregate(c, false); })
+            .describe("production HT aggregate from the AP").within(0.1));
+    return program;
+}
+
+Define_ProtocolTest(wifi_11n_implicit_ba)
+{
+    return implicitProgram("wifi_11n_implicit_ba", false);
+}
+
+Define_ProtocolTest(wifi_11n_implicit_ba_partial)
+{
+    return implicitProgram("wifi_11n_implicit_ba_partial", true);
+}
+}
+
+%file: ImplicitProtocolErrorModel.ned
+import inet.physicallayer.wireless.ieee80211.packetlevel.errormodel.Ieee80211NistErrorModel;
+module ImplicitProtocolErrorModel extends Ieee80211NistErrorModel {
+    parameters:
+        bool partialLoss = default(false);
+        @class(::inet::protocoltest::ImplicitProtocolErrorModel);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = ${test="wifi_11n_implicit_ba","wifi_11n_implicit_ba_partial"}
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "compressed"
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 65Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.wlan[*].mac.hcf.rateControl.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+**.wlan[*].mac.fcsMode = "computed"
+**.checksumMode = "computed"
+**.wlan[*].radio.receiver.errorModel.typename = "ImplicitProtocolErrorModel"
+**.wlan[*].radio.receiver.errorModel.partialLoss = ${test} == "wifi_11n_implicit_ba_partial"
+**.txopProcedure.txopLimit = 0s
+*.sta1.app[0].messageLength = 1200B
+*.sta1.app[0].sendInterval = 20us
+*.sta1.app[0].stopTime = 1.00119s
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_implicit_ba: PASS
+
+%contains: stdout
+PROTOCOLTEST wifi_11n_implicit_ba_partial: PASS

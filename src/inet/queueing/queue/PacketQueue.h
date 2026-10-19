@@ -17,11 +17,12 @@
 #include "inet/queueing/contract/IPacketBuffer.h"
 #include "inet/queueing/contract/IPacketComparatorFunction.h"
 #include "inet/queueing/contract/IPacketDropperFunction.h"
+#include "inet/queueing/contract/ISelectivePacketCollection.h"
 
 namespace inet {
 namespace queueing {
 
-class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICallback, public TransparentProtocolRegistrationListener
+class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICallback, public TransparentProtocolRegistrationListener, public ISelectivePacketCollection
 {
   protected:
     int packetCapacity = -1;
@@ -43,8 +44,11 @@ class INET_API PacketQueue : public PacketQueueBase, public IPacketBuffer::ICall
     virtual IPacketComparatorFunction *createComparatorFunction(const char *comparatorClass) const;
 
     virtual bool isOverloaded() const;
+    Packet *pullSelectedPacket(Packet *packet);
 
   public:
+    virtual Packet *peekEligiblePacket(const std::function<bool(Packet *)>& predicate) const override;
+    virtual Packet *extractPacket(Packet *packet) override;
     virtual ~PacketQueue() { delete packetDropperFunction; }
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;

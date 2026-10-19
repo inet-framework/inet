@@ -110,6 +110,25 @@ void QosRecoveryProcedure::ctsFrameReceived()
 void QosRecoveryProcedure::blockAckFrameReceived()
 {
     resetStationSrc();
+    resetContentionWindow();
+}
+
+void QosRecoveryProcedure::controlFrameTransmissionFailed()
+{
+    // IEEE Std 802.11-2024, 10.23.2.2: control failures update EDCA backoff without DATA retry feedback.
+    if (stationShortRetryCounter < shortRetryLimit) {
+        stationShortRetryCounter++;
+        incrementContentionWindow();
+    }
+    else {
+        resetStationSrc();
+        resetContentionWindow();
+    }
+}
+
+void QosRecoveryProcedure::implicitBlockAckMemberFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
+{
+    incrementCounter(header, packet->getByteLength() >= rtsThreshold ? longRetryCounter : shortRetryCounter);
 }
 
 //

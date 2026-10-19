@@ -1,0 +1,665 @@
+%description:
+Check reversible DATA preparation and Compressed TXOP admission through HCF, EDCA, frame sequences, and Tx.
+The fixture supplies accepted agreements and peer capabilities. It injects timed CTS, ACK, and Block Ack responses at HCF.
+Service cases check queue ownership, deadlines, sequence assignment, and allocation before refusal and after commitment.
+Runtime cases check ordinary fallback, one mode decision, RTS recovery, expiry, capability loss, and mode-set changes.
+Ordinary commitment preserves elapsed queueing time and one queue pull; retransmission retains that measurement without another pull.
+This fixture does not establish association behavior. The infrastructure exchange fixture supplies that evidence.
+
+%extraargs: -r 0..23
+
+%file: Admission.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/originator/QosRecoveryProcedure.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class AdmissionService : public OriginatorQosMacDataService {
+  public:
+    int preparations = 0;
+    int commits = 0;
+    int64_t allocations() const { return nextDataAllocationIndex; }
+    std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool aggregate) override {
+        preparations++;
+        return OriginatorQosMacDataService::prepareFrame(queue, aggregate);
+    }
+    Packet *commitPreparedFrame(PreparedQosData& preparation) override {
+        auto preview = preparation.packet.get();
+        auto result = OriginatorQosMacDataService::commitPreparedFrame(preparation);
+        if (result) {
+            ASSERT(result == preview);
+            commits++;
+        }
+        return result;
+    }
+};
+Define_Module(AdmissionService);
+
+class AdmissionRecovery : public QosRecoveryProcedure {
+  public:
+    int controls = 0;
+    int dataFailures = 0;
+    int numberedRtsFailures = 0;
+    std::vector<int> qsrcHistory;
+    int qsrc() const { return stationShortRetryCounter; }
+    size_t numberedCounters() const { return shortRetryCounter.size() + longRetryCounter.size(); }
+    void controlFrameTransmissionFailed() override {
+        controls++;
+        QosRecoveryProcedure::controlFrameTransmissionFailed();
+        qsrcHistory.push_back(stationShortRetryCounter);
+    }
+    void dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override {
+        dataFailures++;
+        QosRecoveryProcedure::dataFrameTransmissionFailed(packet, header);
+    }
+    void rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataHeader>& header) override {
+        numberedRtsFailures++;
+        QosRecoveryProcedure::rtsFrameTransmissionFailed(header);
+    }
+};
+Define_Module(AdmissionRecovery);
+
+class AdmissionRateControl : public ModeSetListener, public IRateControl {
+  public:
+    int queries = 0;
+    int failedDataFeedback = 0;
+    const physicallayer::IIeee80211Mode *getRate(const MacAddress&) override {
+        queries++;
+        int scenario = getParentModule()->par("scenario");
+        int rate = scenario == 22 ? 6 : scenario == 6 || scenario == 19 || scenario == 20 ? (queries % 2 ? 6 : 24) :
+            scenario == 17 ? (queries <= 2 ? 24 : 6) : queries % 2 ? 24 : 6;
+        return modeSet->getMode(Mbps(rate));
+    }
+    void frameTransmitted(Packet *packet, int, bool successful, bool) override {
+        if (!successful && dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>()))
+            failedDataFeedback++;
+    }
+    void frameReceived(Packet *) override {}
+};
+Define_Module(AdmissionRateControl);
+
+class AdmissionAgreements : public OriginatorBlockAckAgreementHandler {
+  public:
+    void accept(MacAddress peer) {
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setReceiverAddress(peer);
+        request->setTid(5);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        request->setBufferSize(64);
+        request->setBlockAckPolicy(true);
+        request->setAMsduSupported(true);
+        createAgreement(request);
+        auto agreement = getAgreement(peer, 5);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setResponseAMsduSupported(true);
+        agreement->setBlockAckTimeoutValue(SIMTIME_ZERO);
+        agreement->calculateExpirationTime();
+        finishProcedure(peer, 5);
+    }
+};
+
+class AdmissionHcf : public Hcf {
+    const MacAddress peer{"02:00:00:00:00:02"};
+    Ptr<const Ieee80211RtsFrame> pendingRts;
+    Ptr<const Ieee80211DataOrMgmtHeader> pendingAck;
+    bool pendingBasic = false;
+    Tid pendingTid = -1;
+    SequenceNumberCyclic pendingStart;
+    const physicallayer::IIeee80211Mode *responseMode = nullptr;
+    simtime_t firstDeadline;
+    bool responsePending = false;
+    b firstDataLength;
+    int failuresWanted() const { return scenario() == 7 ? 1 : scenario() == 8 ? 2 : scenario() == 9 ? 1000 : 0; }
+  public:
+    std::vector<int64_t> sourceIds;
+    std::vector<Packet *> sourcePackets;
+    std::vector<cObject *> sourceOwners;
+    std::vector<simtime_t> deadlines;
+    int data = 0;
+    int scopedData = 0;
+    int rts = 0;
+    int aggregates = 0;
+    int refusedSequences = 0;
+    int mutation = 0;
+    int queueRemovals = 0;
+    int aggregationEvents = 0;
+    int queuePulls = 0;
+    int ordinaryMeasurements = 0;
+    simtime_t ordinaryQueueTime;
+    int internalCollisions = 0;
+    std::vector<int> queriesAtData;
+    int scenario() const { return par("scenario"); }
+    AdmissionService *service() const { return check_and_cast<AdmissionService *>(getSubmodule("originatorMacDataService")); }
+    AdmissionRecovery *recovery() const { return check_and_cast<AdmissionRecovery *>(edca->getEdcaf(AC_VI)->getRecoveryProcedure()); }
+    AdmissionRateControl *control() const { return check_and_cast<AdmissionRateControl *>(getSubmodule("rateControl")); }
+    queueing::IPacketQueue *queue() const { return edca->getEdcaf(AC_VI)->getPendingQueue(); }
+    EdcaTransmitLifetimeHandler *lifetime() const { return edca->getLifetimeHandler(); }
+    InProgressFrames *frames() const { return edca->getEdcaf(AC_VI)->getInProgressFrames(); }
+    void setup() {
+        Enter_Method("setup");
+        rx->setContentionBlocked(true);
+        Ieee80211RateSetState rates;
+        rates.supported.known = rates.basic.known = rates.operational.known = true;
+        rates.supported.legacyRates = rates.basic.legacyRates = rates.operational.legacyRates = {Mbps(6), Mbps(12), Mbps(24)};
+        mib->setLocalRateSet(rates);
+        mib->installBssAndPeerRateSets(rates, peer, rates);
+        if (scenario() != 16) {
+            auto radio = check_and_cast<physicallayer::IRadio *>(mac->gate("lowerLayerOut")->getNextGate()->getOwnerModule());
+            auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
+            auto channel = transmitter->getChannel();
+            mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
+            mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+            delete originatorBlockAckAgreementHandler;
+            auto agreements = new AdmissionAgreements();
+            originatorBlockAckAgreementHandler = agreements;
+            agreements->accept(peer);
+        }
+        int firstLength = scenario() == 13 ? 1400 : scenario() == 17 ? 2000 : 700;
+        if (scenario() == 21)
+            enqueue(100, 5, false, true);
+        enqueue(firstLength);
+        enqueue(scenario() == 17 ? 100 : 700);
+        if (scenario() == 17)
+            enqueue(700);
+        if (scenario() == 18)
+            enqueue(100, 6, false);
+        firstDeadline = deadlines.front();
+        check_and_cast<cModule *>(queue())->subscribe(packetRemovedSignal, this);
+        check_and_cast<cModule *>(queue())->subscribe(packetPulledSignal, this);
+        service()->subscribe(IOriginatorMacDataService::packetAggregatedSignal, this);
+    }
+    void enqueue(int bytes, Tid tid = 5, bool record = true, bool group = false) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(tid);
+        header->setSequenceNumber(SequenceNumberCyclic(77));
+        auto receiver = group ? MacAddress("01:00:5e:00:00:01") : peer;
+        header->setReceiverAddress(receiver);
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(receiver);
+        auto packet = new Packet("admission-data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(bytes)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        auto time = packet->addRegionTag<QueueingTimeTag>(header->getChunkLength(), B(bytes));
+        time->setPacketTotalTimesArraySize(1);
+        time->setPacketTotalTimes(0, SIMTIME_ZERO);
+        packet->setArrivalTime(simTime());
+        processUpperFrame(packet, header);
+        if (record) {
+            sourcePackets.push_back(packet);
+            sourceIds.push_back(packet->getId());
+            deadlines.push_back(lifetime()->getDeadline(packet));
+            sourceOwners.push_back(packet->getOwner());
+        }
+    }
+    void unchanged(int expectedAllocations = 0) const {
+        ASSERT(queue()->getNumPackets() == int(sourceIds.size()));
+        ASSERT(frames()->getLength() == 0 && service()->allocations() == expectedAllocations);
+        ASSERT(service()->getNextSequenceNumber(peer, 5) == SequenceNumberCyclic(0));
+        for (int i = 0; i < int(sourceIds.size()); i++) {
+            auto packet = queue()->getPacket(i);
+            ASSERT(packet == sourcePackets[i] && packet->getId() == sourceIds[i]);
+            ASSERT(packet->getOwner() == sourceOwners[i]);
+            ASSERT(packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(77));
+            ASSERT(lifetime()->findFrame(sourceIds[i]) == packet && lifetime()->getDeadline(packet) == deadlines[i]);
+        }
+    }
+    void run() { Enter_Method("run"); rx->setContentionBlocked(false); }
+    void stop() { Enter_Method("stop"); rx->setContentionBlocked(true); }
+    void serviceCheck() {
+        Enter_Method("serviceCheck");
+        auto preparation = service()->prepareFrame(queue(), scenario() != 1);
+        ASSERT(preparation && preparation->packet && preparation->sourceIds.size() == (scenario() == 1 ? 1 : 2));
+        ASSERT(preparation->aggregate == (scenario() != 1));
+        unchanged();
+        ASSERT(queueRemovals == 0 && aggregationEvents == 0);
+        auto preview = preparation->packet.get();
+        ASSERT(lifetime()->findFrame(preview->getId()) == nullptr);
+        ASSERT(service()->isPreparationValid(*preparation, simTime()));
+        if (scenario() == 0) {
+            preparation.reset();
+            unchanged();
+            ASSERT(queueRemovals == 0 && aggregationEvents == 0);
+        }
+        else if (scenario() == 1 || scenario() == 2) {
+            auto committed = service()->commitPreparedFrame(*preparation);
+            ASSERT(committed == preview && !preparation->packet);
+            ASSERT(service()->allocations() == 1 && service()->getNextSequenceNumber(peer, 5) == SequenceNumberCyclic(1));
+            ASSERT(committed->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == 0);
+            ASSERT(lifetime()->findFrame(sourceIds.front()) == nullptr);
+            ASSERT(lifetime()->getDeadline(committed) == (scenario() == 1 ? firstDeadline : simTime() + SimTime(100, SIMTIME_MS)));
+            ASSERT(queue()->getNumPackets() == (scenario() == 1 ? 1 : 0));
+            ASSERT(queueRemovals == (scenario() == 1 ? 1 : 2));
+            ASSERT(aggregationEvents == (scenario() == 1 ? 0 : 1));
+            if (scenario() == 1) {
+                ASSERT(queue()->getPacket(0) == sourcePackets[1]);
+                ASSERT(lifetime()->getDeadline(sourcePackets[1]) == deadlines[1]);
+            }
+            lifetime()->forgetFrame(committed->getId());
+            take(committed);
+            delete committed;
+        }
+        else if (scenario() == 3) {
+            auto removed = queue()->dequeuePacket();
+            lifetime()->forgetFrame(removed->getId());
+            take(removed);
+            delete removed;
+            ASSERT(!service()->isPreparationValid(*preparation, simTime()));
+            ASSERT(service()->commitPreparedFrame(*preparation) == nullptr);
+            ASSERT(service()->allocations() == 0 && queue()->getNumPackets() == 1);
+        }
+        else if (scenario() == 4) {
+            ASSERT(!service()->isPreparationValid(*preparation, firstDeadline));
+            unchanged();
+        }
+        else {
+            service()->setEligibility([](Packet *) { return true; }, [](Packet *) { return false; });
+            ASSERT(!service()->isPreparationValid(*preparation, simTime()));
+            ASSERT(service()->commitPreparedFrame(*preparation) == nullptr);
+            unchanged();
+        }
+    }
+  protected:
+    void initialize(int stage) override {
+        if (stage == INITSTAGE_LOCAL) {
+            // Replace fixed submodules before their parent caches pointers.
+            getSubmodule("originatorMacDataService")->deleteModule();
+            auto service = cModuleType::get("AdmissionService")->create("originatorMacDataService", this);
+            service->finalizeParameters();
+            service->buildInside();
+            auto access = getSubmodule("edca");
+            for (int i = 0; i < 4; i++) {
+                auto edcaf = access->getSubmodule("edcaf", i);
+                edcaf->getSubmodule("recoveryProcedure")->deleteModule();
+                auto recovery = cModuleType::get("AdmissionRecovery")->create("recoveryProcedure", edcaf);
+                recovery->finalizeParameters();
+                recovery->buildInside();
+            }
+        }
+        Hcf::initialize(stage);
+    }
+    void channelGranted(IChannelAccess *access) override {
+        auto collided = edca->getInternallyCollidedEdcafs();
+        Hcf::channelGranted(access);
+        if (scenario() == 18 && !collided.empty()) {
+            internalCollisions += collided.size();
+            ASSERT(frames()->getLength() == 1 && queue()->getNumPackets() == 1);
+            auto committed = frames()->getFrames(0);
+            auto header = committed->peekAtFront<Ieee80211DataHeader>();
+            ASSERT(!header->getAMsduPresent() && !header->getRetry());
+            ASSERT(queue()->getPacket(0) == sourcePackets[1]);
+            ASSERT(lifetime()->getDeadline(sourcePackets[1]) == deadlines[1]);
+            ASSERT(recovery()->dataFailures == 1 && recovery()->getRetryCount(committed, header) == 1);
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override {
+        if (signal == packetRemovedSignal || signal == packetPulledSignal) {
+            queueRemovals++;
+            if (signal == packetPulledSignal)
+                queuePulls++;
+        }
+        else if (signal == IOriginatorMacDataService::packetAggregatedSignal)
+            aggregationEvents++;
+        else
+            Hcf::receiveSignal(source, signal, value, details);
+    }
+    bool isReceptionInProgress() override { return responsePending || Hcf::isReceptionInProgress(); }
+    void frameSequenceFinished() override {
+        if (data == 0 && rts > 0 && scenario() != 9 && mutation == 0) {
+            if (scenario() != 18)
+                unchanged();
+            ASSERT(recovery()->numberedCounters() == 0);
+        }
+        if (scenario() == 13 && data == 1)
+            refusedSequences++;
+        Hcf::frameSequenceFinished();
+        if ((scenario() >= 22 ? data >= 2 : scenario() == 18 ? scopedData > 0 : data > 0) || mutation > 0)
+            rx->setContentionBlocked(true);
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto context = frameSequenceHandler->getContext();
+        if (auto protectedRts = dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
+            auto state = context->getQoSContext()->preparedData.get();
+            if (state) {
+                if (state->preparation) {
+                    ASSERT(state->frame == state->preparation->packet.get());
+                    ASSERT(!frames()->containsFrame(state->frame));
+                    if (scenario() != 18)
+                        unchanged();
+                }
+                else
+                    ASSERT(frames()->containsFrame(state->frame));
+            }
+            else
+                ASSERT(scenario() == 15 || scenario() == 16 || scenario() == 18);
+            pendingRts = protectedRts;
+        }
+        bool accepted = Hcf::transmitFrame(packet, ifs);
+        if (!accepted)
+            return false;
+        header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+        auto end = simTime() + ifs + mode->getDuration(packet->getDataLength());
+        if (dynamicPtrCast<const Ieee80211RtsFrame>(header)) {
+            pendingRts = staticPtrCast<const Ieee80211RtsFrame>(header);
+            rts++;
+            if (scenario() == 19 || scenario() == 20) {
+                auto state = context->getQoSContext()->preparedData.get();
+                ASSERT(state && !state->frame->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent());
+                auto required = modeSet->getSifsTime() + state->ctsMode->getDuration(LENGTH_CTS) +
+                    modeSet->getSifsTime() + state->dataMode->getDuration(state->frame->getDataLength());
+                if (state->ackMode)
+                    required += modeSet->getSifsTime() + state->ackMode->getDuration(LENGTH_ACK);
+                ASSERT(pendingRts->getDurationField() >= required);
+            }
+            if (rts == 1 && (scenario() == 10 || scenario() == 11 || scenario() == 12))
+                scheduleAt(end + SimTime(1, SIMTIME_PS), new cMessage("mutation"));
+            if (rts > failuresWanted()) {
+                responsePending = true;
+                responseMode = rateSelection->computeResponseCtsFrameMode(packet, pendingRts, ResponseQueryRole::PREDICT);
+                scheduleAt(end + modeSet->getSifsTime() + responseMode->getDuration(LENGTH_CTS), new cMessage("cts"));
+            }
+        }
+        else if (auto ordinary = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            data++;
+            scopedData += ordinary->getTid() == 5 && !ordinary->getReceiverAddress().isMulticast();
+            aggregates += ordinary->getAMsduPresent();
+            queriesAtData.push_back(control()->queries);
+            if (scenario() != 15 && scenario() != 16 && ordinary->getTid() == 5 && !ordinary->getReceiverAddress().isMulticast()) {
+                auto state = context->getQoSContext()->preparedData.get();
+                ASSERT(state && frames()->containsFrame(packet) && state->dataMode == mode);
+                if (!ordinary->getAMsduPresent() && (scenario() == 6 || scenario() == 19 || scenario() == 20 || scenario() == 22)) {
+                    auto offset = ordinary->getChunkLength();
+                    auto time = packet->findRegionTag<QueueingTimeTag>(offset, packet->getDataLength() - offset - B(4));
+                    if (!ordinary->getRetry()) {
+                        ASSERT(time && time->getPacketTotalTimes(0) == simTime() - SimTime(1, SIMTIME_MS));
+                        ASSERT(queuePulls >= 1);
+                        ordinaryQueueTime = time->getPacketTotalTimes(0);
+                        ordinaryMeasurements++;
+                    }
+                    else if (scenario() == 22)
+                        ASSERT(time && time->getPacketTotalTimes(0) == ordinaryQueueTime && queuePulls == 1);
+                }
+            }
+            if (scenario() == 20)
+                ASSERT(ordinary->getAckPolicy() == NORMAL_ACK && ordinary->getDurationField() >= modeSet->getSifsTime() +
+                    rateSelection->computeResponseAckFrameMode(packet, ordinary, ResponseQueryRole::PREDICT)->getDuration(LENGTH_ACK));
+            if (scenario() >= 22 && data == 2) {
+                ASSERT(ordinary->getRetry());
+                ASSERT(packet->getDataLength() == firstDataLength);
+                ASSERT(mode->getDuration(packet->getDataLength()) > SimTime(1, SIMTIME_MS));
+                ASSERT(ordinary->getAMsduPresent() == (scenario() == 23));
+            }
+            if (scenario() >= 22 && data == 1) {
+                firstDataLength = packet->getDataLength();
+                ASSERT(!ordinary->getRetry());
+                return true; // No ACK forces a retry of the same committed MPDU.
+            }
+            if (ordinary->getAckPolicy() == NORMAL_ACK) {
+                responsePending = true;
+                pendingAck = ordinary;
+                responseMode = rateSelection->computeResponseAckFrameMode(packet, ordinary, ResponseQueryRole::PREDICT);
+                scheduleAt(end + modeSet->getSifsTime() + responseMode->getDuration(LENGTH_ACK), new cMessage("ack"));
+            }
+        }
+        else if (auto management = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
+            responsePending = true;
+            pendingAck = management;
+            responseMode = rateSelection->computeResponseAckFrameMode(packet, management, ResponseQueryRole::PREDICT);
+            scheduleAt(end + modeSet->getSifsTime() + responseMode->getDuration(LENGTH_ACK), new cMessage("ack"));
+        }
+        else if (auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(header)) {
+            responsePending = true;
+            pendingBasic = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(bar) != nullptr;
+            pendingTid = pendingBasic ? staticPtrCast<const Ieee80211BasicBlockAckReq>(bar)->getTidInfo() :
+                staticPtrCast<const Ieee80211CompressedBlockAckReq>(bar)->getTidInfo();
+            pendingStart = pendingBasic ? staticPtrCast<const Ieee80211BasicBlockAckReq>(bar)->getStartingSequenceNumber() :
+                staticPtrCast<const Ieee80211CompressedBlockAckReq>(bar)->getStartingSequenceNumber();
+            responseMode = rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT);
+            scheduleAt(end + modeSet->getSifsTime() + responseMode->getDuration(pendingBasic ? LENGTH_BASIC_BLOCKACK : LENGTH_COMPRESSED_BLOCKACK), new cMessage("ba"));
+        }
+        return true;
+    }
+    void receive(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) {
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(responseMode);
+        if (!frameSequenceHandler->isSequenceRunning()) {
+            delete packet;
+            return;
+        }
+        processLowerFrame(packet, header);
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("mutation")) {
+            delete message;
+            mutation++;
+            int queries = control()->queries;
+            if (scenario() == 10)
+                mib->removePeerHtCapabilities(peer);
+            else if (scenario() == 11) {
+                auto rates = mib->getBssRateSet();
+                rates.basic.legacyRates.erase(Mbps(12));
+                mib->setBssRateSet(rates);
+            }
+            else {
+                auto radio = check_and_cast<physicallayer::Ieee80211Radio *>(getModuleByPath("^.^.radio"));
+                radio->setMode(modeSet->getMode(Mbps(24)));
+                auto replacement = physicallayer::Ieee80211ModeSet::getModeSet("g(mixed)");
+                radio->setModeSet(replacement);
+                getContainingNicModule(this)->emit(modesetChangedSignal, replacement);
+            }
+            ASSERT(control()->queries == queries);
+            if (scenario() != 11)
+                rx->setContentionBlocked(true);
+            return;
+        }
+        if (message->isName("cts")) {
+            delete message;
+            responsePending = false;
+            auto header = makeShared<Ieee80211CtsFrame>();
+            header->setReceiverAddress(mac->getAddress());
+            header->setDurationField(std::max(SIMTIME_ZERO, pendingRts->getDurationField() - modeSet->getSifsTime() - responseMode->getDuration(LENGTH_CTS)));
+            receive(new Packet("synthetic-cts", header), header);
+            return;
+        }
+        if (message->isName("ack")) {
+            delete message;
+            responsePending = false;
+            auto header = makeShared<Ieee80211AckFrame>();
+            header->setReceiverAddress(mac->getAddress());
+            receive(new Packet("synthetic-ack", header), header);
+            return;
+        }
+        if (message->isName("ba")) {
+            delete message;
+            responsePending = false;
+            Ptr<Ieee80211BlockAck> header;
+            if (pendingBasic) {
+                auto basic = makeShared<Ieee80211BasicBlockAck>();
+                basic->setTidInfo(pendingTid);
+                basic->setStartingSequenceNumber(pendingStart);
+                for (int i = 0; i < 64; i++) basic->setBlockAckBitmap(i, BitVector("1000000000000000"));
+                header = basic;
+            }
+            else {
+                auto compressed = makeShared<Ieee80211CompressedBlockAck>();
+                compressed->setTidInfo(pendingTid);
+                compressed->setStartingSequenceNumber(pendingStart);
+                compressed->setBlockAckBitmap(BitVector(std::string(64, '1').c_str()));
+                header = compressed;
+            }
+            header->setReceiverAddress(mac->getAddress());
+            header->setTransmitterAddress(peer);
+            receive(new Packet("synthetic-ba", header), header);
+            return;
+        }
+        Hcf::handleMessage(message);
+    }
+};
+Define_Module(AdmissionHcf);
+
+class AdmissionTest : public cSimpleModule {
+  public:
+    AdmissionTest() : cSimpleModule(131072) {}
+  protected:
+    void activity() override {
+        wait(SimTime(1, SIMTIME_MS));
+        auto hcf = check_and_cast<AdmissionHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"));
+        hcf->setup();
+        int scenario = par("scenario");
+        if (scenario < 6)
+            hcf->serviceCheck();
+        else {
+            hcf->run();
+            wait(SimTime(20, SIMTIME_MS));
+            hcf->stop();
+            if (scenario == 6 || scenario == 19 || scenario == 20 || scenario == 22)
+                ASSERT(hcf->ordinaryMeasurements == 1 && hcf->queuePulls == 1);
+            auto recovery = hcf->recovery();
+            ASSERT(recovery->dataFailures == (scenario == 18 || scenario >= 22 ? 1 : 0));
+            ASSERT(hcf->control()->failedDataFeedback == (scenario >= 22 ? 1 : 0));
+            if (scenario == 9) {
+                ASSERT(hcf->rts > 0 && hcf->data == 0 && hcf->queue()->isEmpty());
+                ASSERT(hcf->service()->allocations() == 0);
+                int queries = hcf->control()->queries;
+                wait(SimTime(1, SIMTIME_MS));
+                ASSERT(hcf->control()->queries == queries);
+            }
+            else if (scenario == 10 || scenario == 12) {
+                ASSERT(hcf->data == 0 && hcf->mutation == 1);
+                hcf->unchanged();
+                ASSERT(hcf->control()->queries == 1 && recovery->numberedCounters() == 0);
+            }
+            else {
+                ASSERT(hcf->data > 0);
+                if (scenario == 6 || scenario == 19 || scenario == 20) {
+                    ASSERT(hcf->data == 1 && hcf->aggregates == 0 && hcf->queriesAtData.front() == 1);
+                    ASSERT(hcf->queue()->getNumPackets() == 1 && hcf->service()->allocations() == 1);
+                    ASSERT(hcf->lifetime()->getDeadline(hcf->queue()->getPacket(0)) == hcf->deadlines[1]);
+                }
+                if (scenario == 7 || scenario == 8) {
+                    ASSERT(recovery->controls == (scenario == 7 ? 1 : 2));
+                    ASSERT(recovery->numberedRtsFailures == 0);
+                    ASSERT(hcf->queriesAtData.front() == (scenario == 7 ? 2 : 3));
+                    ASSERT(recovery->qsrcHistory[0] == 1);
+                    if (scenario == 8) ASSERT(recovery->qsrcHistory[1] == 0);
+                }
+                else
+                    ASSERT(recovery->controls == 0);
+                if (scenario == 11)
+                    ASSERT(hcf->queriesAtData.front() == 1 && hcf->mutation == 1);
+                if (scenario == 13) {
+                    ASSERT(hcf->data == 1 && hcf->refusedSequences == 1);
+                    ASSERT(hcf->queue()->getNumPackets() == 1 && hcf->service()->allocations() == 1);
+                    ASSERT(hcf->queue()->getPacket(0) == hcf->sourcePackets[1]);
+                    ASSERT(hcf->lifetime()->getDeadline(hcf->queue()->getPacket(0)) == hcf->deadlines[1]);
+                }
+                if (scenario == 14)
+                    ASSERT(hcf->data == 1 && hcf->aggregates == 1 && hcf->queriesAtData.front() == 1);
+                if (scenario == 15 || scenario == 16)
+                    ASSERT(hcf->service()->preparations == 0);
+                if (scenario == 17) {
+                    ASSERT(hcf->data == 2 && hcf->aggregates == 0);
+                    ASSERT(hcf->queriesAtData[0] == 1 && hcf->queriesAtData[1] == 2);
+                    ASSERT(hcf->queue()->getNumPackets() == 1 && hcf->service()->allocations() == 2);
+                }
+                if (scenario == 18) {
+                    ASSERT(hcf->internalCollisions == 1 && hcf->scopedData == 1 && hcf->aggregates == 0);
+                    ASSERT(hcf->queue()->getNumPackets() == 1);
+                    ASSERT(hcf->lifetime()->getDeadline(hcf->queue()->getPacket(0)) == hcf->deadlines[1]);
+                }
+                if (scenario == 21) {
+                    ASSERT(hcf->data == 1 && hcf->scopedData == 0 && hcf->service()->commits == 0);
+                    ASSERT(hcf->service()->preparations > 0);
+                    hcf->unchanged(1);
+                }
+                if (scenario >= 22) {
+                    ASSERT(hcf->data == 2 && hcf->aggregates == (scenario == 23 ? 2 : 0));
+                    ASSERT(hcf->service()->commits == 1 && hcf->service()->allocations() == 1);
+                    ASSERT(hcf->queue()->getNumPackets() == (scenario == 22 ? 1 : 0));
+                }
+            }
+        }
+        std::cout << "Compressed admission scenario " << scenario << " passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(AdmissionTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosMacDataService;
+import inet.linklayer.ieee80211.mac.originator.QosRecoveryProcedure;
+import inet.linklayer.ieee80211.mac.contract.IRateControl;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module AdmissionService extends OriginatorQosMacDataService { parameters: @class(::inet::ieee80211::AdmissionService); }
+simple AdmissionRecovery extends QosRecoveryProcedure { parameters: @class(::inet::ieee80211::AdmissionRecovery); }
+simple AdmissionRateControl like IRateControl { parameters: @class(::inet::ieee80211::AdmissionRateControl); }
+module AdmissionHcf extends Hcf { parameters: int scenario; @class(::inet::ieee80211::AdmissionHcf); }
+simple AdmissionTest { parameters: int scenario; @class(::inet::ieee80211::AdmissionTest); @display("i=block/cogwheel"); }
+network AdmissionNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: AdhocHost;
+        test: AdmissionTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AdmissionNetwork
+ned-path = .;../../../../src
+sim-time-limit = 100ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.scenario = ${scenario=0..23}
+*.host.wlan[*].opMode = "n(mixed-2.4Ghz)"
+*.host.wlan[*].mac.qosStation = true
+*.host.wlan[*].mac.hcf.typename = "AdmissionHcf"
+*.host.wlan[*].mac.hcf.scenario = ${scenario}
+*.host.wlan[*].mac.hcf.isBlockAckSupported = true
+*.host.wlan[*].mac.hcf.blockAckVariant = ${scenario} == 15 ? "basic" : "compressed"
+*.host.wlan[*].mac.hcf.rateControl.typename = "AdmissionRateControl"
+*.host.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = -1bps
+*.host.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+*.host.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = ${scenario} == 20 || ${scenario} >= 22 ? 0B : 10000B
+*.host.wlan[*].mac.hcf.originatorAckPolicy.blockAckReqThreshold = 5
+*.host.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = 1600
+*.host.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+*.host.wlan[*].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = 1
+*.host.wlan[*].mac.hcf.edca.edcaf[*].cwMin = ${scenario} == 18 ? 0 : -1
+*.host.wlan[*].mac.hcf.edca.edcaf[*].cwMax = ${scenario} == 18 ? 0 : -1
+*.host.wlan[*].mac.hcf.edca.edcaf[*].aifsn = ${scenario} == 18 ? 2 : -1
+*.host.wlan[*].mac.hcf.edca.edcaf[*].msduLifetime = ${scenario} == 9 ? 250us : 100ms
+*.host.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.txopLimit = ${scenario} == 14 ? 0s : 1ms
+*.host.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = ${scenario} == 13 || ${scenario} == 17 || ${scenario} == 19 || ${scenario} == 20 || ${scenario} == 21 ? "multiple" : "single"
+*.host.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 500B
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+Compressed admission scenario 23 passed.

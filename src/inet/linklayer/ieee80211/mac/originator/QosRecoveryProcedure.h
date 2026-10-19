@@ -61,11 +61,13 @@ class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProce
     bool isMulticastFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
 
   public:
+    void implicitBlockAckMemberFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& header);
     virtual void multicastFrameTransmitted();
 
     virtual void ctsFrameReceived();
     virtual void ackFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& ackedHeader);
     virtual void blockAckFrameReceived();
+    virtual void controlFrameTransmissionFailed();
 
     virtual void rtsFrameTransmissionFailed(const Ptr<const Ieee80211DataHeader>& protectedHeader);
     virtual void dataFrameTransmissionFailed(Packet *packet, const Ptr<const Ieee80211DataHeader>& failedHeader);
