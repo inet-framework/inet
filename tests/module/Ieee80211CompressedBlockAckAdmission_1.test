@@ -569,8 +569,10 @@ class AdmissionTest : public cSimpleModule {
                 }
                 if (scenario == 14)
                     ASSERT(hcf->data == 1 && hcf->aggregates == 1 && hcf->queriesAtData.front() == 1);
-                if (scenario == 15 || scenario == 16)
+                if (scenario == 15)
                     ASSERT(hcf->service()->preparations == 0);
+                if (scenario == 16)
+                    ASSERT(hcf->service()->preparations > 0 && hcf->service()->commits == 1);
                 if (scenario == 17) {
                     ASSERT(hcf->data == 2 && hcf->aggregates == 0);
                     ASSERT(hcf->queriesAtData[0] == 1 && hcf->queriesAtData[1] == 2);

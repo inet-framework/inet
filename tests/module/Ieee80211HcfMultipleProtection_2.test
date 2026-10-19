@@ -301,9 +301,8 @@ class RateProtectionTest : public cSimpleModule {
         }
         if (scenario == 2) {
             auto rate = check_and_cast<TraceAarf *>(getModuleByPath("^.sender.wlan[0].mac.hcf.rateControl"));
-            ASSERT(rate->rates.size() == 2);
-            ASSERT(rate->rates[0] == bps(9000000) && rate->rates[1] == bps(12000000));
-            ASSERT(rate->queries[1] - rate->queries[0] == SimTime(112, SIMTIME_US));
+            ASSERT(rate->rates.size() == 1);
+            ASSERT(rate->rates[0] == bps(9000000));
             ASSERT(senderMac->starts[1] - senderMac->starts[0] == SimTime(128, SIMTIME_US));
             ASSERT(senderMac->ends[0] + senderMac->durations[0] - senderMac->starts[0] == SimTime(296, SIMTIME_US));
             ASSERT(sender->acknowledgments == 1);
@@ -313,7 +312,7 @@ class RateProtectionTest : public cSimpleModule {
             ASSERT(receiverMac->suppressed);
             ASSERT(sender->failures == 1);
             ASSERT(rate->rates[0] == bps(9000000));
-            ASSERT(rate->queries.size() >= 3);
+            ASSERT(rate->queries.size() == 2);
             ASSERT(senderMac->types[0] == ST_RTS && senderMac->types[1] == ST_RTS);
             ASSERT(sender->acknowledgments == 1);
             for (size_t i = 0; i < rate->rates.size(); i++)
@@ -325,10 +324,10 @@ class RateProtectionTest : public cSimpleModule {
                 std::cout << "Recipient transmitted NAV duration: " << duration << "\n";
         }
         if (scenario == 4) {
-            ASSERT(senderMac->rates[1] == bps(6000000));
+            ASSERT(senderMac->rates[1] == bps(9000000));
             ASSERT(senderMac->ends[0] + senderMac->durations[0] - senderMac->starts[0] == SimTime(296, SIMTIME_US));
-            ASSERT(senderMac->durations[1] == SimTime(16, SIMTIME_US));
-            ASSERT(receiverMac->ends[1] - senderMac->starts[0] == SimTime(340, SIMTIME_US));
+            ASSERT(senderMac->durations[1] == SimTime(60, SIMTIME_US));
+            ASSERT(receiverMac->ends[1] - senderMac->starts[0] == SimTime(296, SIMTIME_US));
             ASSERT(sender->acknowledgments == 1);
         }
         if (scenario == 5) {

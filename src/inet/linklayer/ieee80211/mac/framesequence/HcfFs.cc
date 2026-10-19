@@ -35,8 +35,7 @@ HcfFs::HcfFs() :
 int HcfFs::selectHcfSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
     auto qos = context->getQoSContext();
-    auto frameToTransmit = qos->blockAckAgreementHandler ? context->getInProgressFrames()->peekFrameToTransmit() :
-        context->getInProgressFrames()->getFrameToTransmit();
+    auto frameToTransmit = context->getInProgressFrames()->peekFrameToTransmit();
     if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 1;
     return frameToTransmit && frameToTransmit->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast() ? 0 : 1;
