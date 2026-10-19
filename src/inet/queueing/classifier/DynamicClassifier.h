@@ -28,6 +28,8 @@ class INET_API DynamicClassifier : public PacketClassifier
     virtual int getClassIndex(Packet *packet) const;
     virtual int classifyPacket(Packet *packet) const override;
     virtual void createBranchIfNeeded(Packet *packet);
+    virtual int createBranch();
+    virtual cModule *createBranchModule(int index, cGate *classifierOutputGate);
     virtual void startPacketStreaming(Packet *packet) override;
 
   public:
