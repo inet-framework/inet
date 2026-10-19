@@ -37,6 +37,7 @@ enum class DataPreparationResult { LEGACY, READY, DEFERRED };
 struct INET_API PreparedDataTransmission : public cObject
 {
     std::unique_ptr<PreparedQosData> preparation;
+    std::unique_ptr<PreparedQosFragments> fragments;
     std::unique_ptr<PreparedQosBatch> batch;
     MpduAggregationLimits limits;
     std::unique_ptr<Packet> envelope;
