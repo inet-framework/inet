@@ -7,7 +7,7 @@
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,            0000-0000/tplx;0000-0000/~tNl;0000-0000/~tND, ERROR, wireless adhoc # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacNonQos -r 0,              10s,             5749-0281/tplx;f38a-cb93/~tNl;c2ed-b352/~tND;0eb8-3e3b/tyf, PASS, wireless adhoc Ipv4
 /examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 0,                 10s,             a78c-7701/tplx;cedf-054d/~tNl;91a9-683f/~tND;f841-fef5/tyf, PASS, wireless adhoc Ipv4
-/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             4fd2-bb56/tplx;ecaf-89f7/~tNl;9398-0fae/~tND;57c2-84bd/tyf, PASS, wireless adhoc Ipv4
+/examples/adhoc/qos/,                -f omnetpp.ini -c MacQos -r 1,                 10s,             33e1-5ba7/tplx;f321-055c/~tNl;b439-5b70/~tND;5cb1-cbfe/tyf, PASS, wireless adhoc Ipv4
 /examples/adhoc/qos/,                -f omnetpp.ini -c Fragmentation,               10s,             2f2d-73b1/tplx;cc9e-d1a6/~tNl;e740-f7d4/~tND;97f7-655d/tyf, PASS, wireless adhoc Ipv4
 /examples/adhoc/qos/,                -f omnetpp.ini -c MsduAggregation,             10s,             e24a-3845/tplx;5509-e838/~tNl;636c-9cea/~tND;cc7a-9b26/tyf, PASS, wireless adhoc Ipv4
 
@@ -658,7 +658,7 @@
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQos -r 0,                    10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;4196-a696/tyf, PASS, wireless Ipv4
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithoutAggregation -r 0,                10s,         0473-f9d2/tplx;e92c-7352/~tNl;1906-1f5f/~tND;761d-e145/tyf, PASS, wireless Ipv4
 /examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithRtsCts -r 0,          10s,         5269-1e09/tplx;b291-6797/~tNl;0378-ab11/~tND;9b3b-150c/tyf, PASS, wireless Ipv4
-/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         6edb-0326/tplx;2a8a-50ee/~tNl;4301-882d/~tND;0db4-29ea/tyf, PASS, wireless Ipv4
+/examples/wireless/qos/,             -f omnetpp.ini -c MacQosWithBlockAck -r 0,        10s,         7866-b50d/tplx;cf3d-0664/~tNl;5912-f4f1/~tND;7ed5-dd85/tyf, PASS, wireless Ipv4
 
 /examples/wireless/ratecontrol/, -f omnetpp.ini -c Mac -r 0,                    100s,            bf30-2f13/tplx;7b2f-653d/~tNl;6f09-d8eb/~tND;19fe-8b0e/tyf, PASS, wireless
 

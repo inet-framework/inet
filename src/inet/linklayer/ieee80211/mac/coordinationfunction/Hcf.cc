@@ -126,10 +126,13 @@ void Hcf::initialize(int stage)
             [this](Packet *packet) { return isAMsduPermitted(packet); });
         check_and_cast<OriginatorQosMacDataService *>(originatorDataService)->setFragmentationPermission([this](Packet *packet) {
             auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
-            if (blockAckVariant != BlockAckVariant::COMPRESSED || !data || data->getType() != ST_DATA_WITH_QOS || !originatorBlockAckAgreementHandler)
+            if (!data || data->getType() != ST_DATA_WITH_QOS || !originatorBlockAckAgreementHandler)
                 return true;
             auto agreement = originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid());
-            return !agreement || !agreement->getIsAddbaResponseReceived();
+            auto peer = mib->findPeerHtState(data->getReceiverAddress());
+            bool htAgreement = blockAckVariant == BlockAckVariant::COMPRESSED ||
+                (mib->isHtOperationSupported() && peer && peer->valid);
+            return !agreement || !agreement->getIsAddbaResponseReceived() || !htAgreement;
         });
         mib->subscribe(Ieee80211Mib::rateStateChangedSignal, this);
         for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
@@ -1315,8 +1318,7 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
         auto frames = edcaf->getInProgressFrames();
         Packet *internallyCollidedFrame = nullptr;
         bool scopedQueuedData = false;
-        if ((blockAckVariant == BlockAckVariant::COMPRESSED && originatorBlockAckAgreementHandler) ||
-                !originatorBlockAckAgreementHandler) {
+        {
             auto candidate = frames->peekFrameToTransmit();
             auto data = candidate ? dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>()) : nullptr;
             auto agreement = data && originatorBlockAckAgreementHandler ?
@@ -2298,7 +2300,9 @@ bool Hcf::usesModernMsduRecovery(Packet *packet) const
 
 bool Hcf::usesMsduRecovery(Packet *packet) const
 {
-    return usesModernMsduRecovery(packet);
+    auto header = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+    return header && header->getType() == ST_DATA_WITH_QOS && !header->getReceiverAddress().isMulticast() &&
+        ((originatorBlockAckAgreementHandler && blockAckVariant == BlockAckVariant::BASIC) || usesModernMsduRecovery(packet));
 }
 
 void Hcf::registerMsduRecovery(Edcaf *edcaf, Packet *packet)
@@ -2481,8 +2485,6 @@ simtime_t Hcf::forecastPreparedSuccessor(const FrameSequenceContext *context,
 DataPreparationResult Hcf::prepareDataTransmission(FrameSequenceContext *context)
 {
     Enter_Method("prepareDataTransmission");
-    if (blockAckVariant == BlockAckVariant::BASIC && originatorBlockAckAgreementHandler)
-        return DataPreparationResult::LEGACY;
     auto frames = context->getInProgressFrames();
     auto candidate = frames->peekFrameToTransmit();
     auto header = candidate ? dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>()) : nullptr;

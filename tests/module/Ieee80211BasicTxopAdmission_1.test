@@ -1,0 +1,355 @@
+%description:
+Check Basic admission through production infrastructure association, HCF, EDCA, radio, and peer MACs.
+Non-HT peers use no aggregation. Both protection classes use 6 and 24 Mbit/s.
+The observer checks complete exchange containment and the initial ordinary-MSDU exception.
+CTS loss before DATA and after DATA must retain the MSDU beyond the short limit.
+Internal collisions under an accepted agreement must retain the MSDU and its absolute deadline.
+The expiry case must remove the retained allocation and its recovery record.
+The Normal Ack policy subclass changes only the response policy under an accepted agreement.
+The zero eligibility threshold checks Basic fallback without an accepted agreement.
+Mixed HT and non-HT peers retain legal Basic exchanges in both endpoint roles.
+
+%extraargs: -r 0..35
+
+%file: BasicAdmission.cc
+#include <iostream>
+#include <map>
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosAckPolicy.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+namespace inet::ieee80211 {
+class BasicAdmissionAckPolicy : public OriginatorQosAckPolicy {
+  public:
+    AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header,
+            OriginatorBlockAckAgreement *agreement) const override {
+        if (par("normalUnderAgreement").boolValue() && agreement && agreement->getIsAddbaResponseReceived())
+            return NORMAL_ACK;
+        return OriginatorQosAckPolicy::computeAckPolicy(packet, header, agreement);
+    }
+};
+Define_Module(BasicAdmissionAckPolicy);
+class BasicAdmissionHcf : public Hcf {
+    std::map<int64_t, simtime_t> bounds;
+    std::map<simtime_t, int> holders;
+    std::map<int64_t, b> lengths;
+    std::map<simtime_t, int64_t> zeroAllocations;
+    int64_t target = -1;
+    int lostCts = 0;
+    bool lostAck = false;
+    int lostDataAcks = 0;
+    bool collision = false;
+    Packet *expiredTarget = nullptr;
+    Edcaf *targetOwner = nullptr;
+    int scenario() const { return par("scenario"); }
+    bool source() const { return getParentModule()->getParentModule()->getParentModule()->isName("sta1"); }
+    bool accepted(const Packet *packet) {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        auto agreement = data && originatorBlockAckAgreementHandler ?
+            originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid()) : nullptr;
+        return agreement && agreement->getIsAddbaResponseReceived();
+    }
+    void checkBoundary(Packet *packet) {
+        auto it = bounds.find(packet->getId());
+        if (it != bounds.end())
+            ASSERT(simTime() <= it->second);
+    }
+  public:
+    int agreedData = 0;
+    int exceptions = 0;
+    int retainedFailures = 0;
+    int collisionChecks = 0;
+    int expiryChecks = 0;
+    int fallbackData = 0;
+    int retainedDataFailures = 0;
+    int injectedCtsLosses() const { return lostCts; }
+    void checkExpiry() {
+        if (!expiredTarget)
+            return;
+        ASSERT(!targetOwner->getInProgressFrames()->containsFrame(expiredTarget));
+        // The deferred owner can delete the packet after the sequence ends. Inspect the record by allocation instead.
+        auto probe = new Packet("allocation-probe");
+        probe->addTag<Ieee80211DataSequenceTag>()->setAllocationIndex(target);
+        ASSERT(!targetOwner->getRecoveryProcedure()->hasMsduRetryRecord(probe));
+        delete probe;
+        expiryChecks++;
+    }
+  protected:
+    void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        auto context = frameSequenceHandler->getContext();
+        auto rts = context ? dynamic_cast<RtsTransmitStep *>(context->getStepBeforeLast()) : nullptr;
+        auto protectedPacket = rts ? rts->getProtectedFrame() : nullptr;
+        if (source() && protectedPacket && header->getType() == ST_CTS && accepted(protectedPacket)) {
+            auto allocation = protectedPacket->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+            bool select = scenario() == 1 || scenario() == 4 || (scenario() == 2 && lostAck);
+            if (select && target == -1)
+                target = allocation;
+            if (allocation == target && (scenario() == 4 || lostCts < 9)) {
+                lostCts++;
+                delete packet;
+                Hcf::corruptedFrameReceived();
+                return;
+            }
+        }
+        if (source() && scenario() == 2 && !lostAck && header->getType() == ST_ACK && context) {
+            auto transmit = dynamic_cast<TransmitStep *>(context->getStepBeforeLast());
+            auto data = transmit ? transmit->getFrameToTransmit() : nullptr;
+            if (data && accepted(data)) {
+                target = data->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+                lostAck = true;
+                delete packet;
+                Hcf::corruptedFrameReceived();
+                return;
+            }
+        }
+        if (source() && scenario() == 8 && header->getType() == ST_ACK && context) {
+            auto transmit = dynamic_cast<TransmitStep *>(context->getStepBeforeLast());
+            auto data = transmit ? transmit->getFrameToTransmit() : nullptr;
+            if (data && accepted(data) && lostDataAcks < 9) {
+                lostDataAcks++;
+                delete packet;
+                Hcf::corruptedFrameReceived();
+                return;
+            }
+        }
+        Hcf::processLowerFrame(packet, header);
+    }
+    void originatorProcessFailedFrame(Packet *packet) override {
+        bool tracked = source() && scenario() == 8 && accepted(packet);
+        auto owner = edca->getChannelOwner();
+        auto deadline = tracked ? edca->getLifetimeHandler()->getDeadline(packet) : SIMTIME_MAX;
+        Hcf::originatorProcessFailedFrame(packet);
+        if (tracked) {
+            ASSERT(owner->getInProgressFrames()->containsFrame(packet));
+            ASSERT(edca->getLifetimeHandler()->getDeadline(packet) == deadline);
+            ASSERT(!owner->getRecoveryProcedure()->isMsduRetryLimitReached(packet));
+            retainedDataFailures++;
+        }
+    }
+    void originatorProcessRtsProtectionFailed(Packet *packet) override {
+        auto owner = edca->getChannelOwner();
+        auto recovery = owner->getRecoveryProcedure();
+        bool tracked = source() && accepted(packet) &&
+            packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == target;
+        auto deadline = tracked ? edca->getLifetimeHandler()->getDeadline(packet) : SIMTIME_MAX;
+        Packet shortView("short-counter-view");
+        shortView.insertAtFront(packet->peekAtFront<Ieee80211DataHeader>());
+        shortView.addTag<Ieee80211DataSequenceTag>()->setAllocationIndex(target);
+        int shortCount = tracked ? recovery->getRetryCount(&shortView, shortView.peekAtFront<Ieee80211DataHeader>()) : -1;
+        if (tracked)
+            ASSERT(owner->getInProgressFrames()->isSameSizeDataRetry(packet) == (scenario() == 2));
+        Hcf::originatorProcessRtsProtectionFailed(packet);
+        if (tracked && simTime() < deadline) {
+            ASSERT(owner->getInProgressFrames()->containsFrame(packet));
+            ASSERT(edca->getLifetimeHandler()->getDeadline(packet) == deadline);
+            ASSERT(recovery->hasMsduRetryRecord(packet) && !recovery->isMsduRetryLimitReached(packet));
+            ASSERT(recovery->getRetryCount(&shortView, shortView.peekAtFront<Ieee80211DataHeader>()) == shortCount + 1);
+            retainedFailures++;
+            if (scenario() == 4) {
+                expiredTarget = packet;
+                targetOwner = owner;
+            }
+        }
+    }
+    void frameSequenceFinished() override {
+        auto owner = edca->getChannelOwner();
+        Hcf::frameSequenceFinished();
+        if (source() && scenario() == 3 && !collision && owner) {
+            auto frames = owner->getInProgressFrames();
+            auto candidate = frames->peekFrameToTransmit();
+            if (candidate && accepted(candidate) && frames->getOutstandingFrames().empty()) {
+                collision = true;
+                auto deadline = edca->getLifetimeHandler()->getDeadline(candidate);
+                int limit = owner->getRecoveryProcedure()->getShortRetryLimit();
+                for (int i = 0; i < limit + 2; i++)
+                    Hcf::handleInternalCollision({owner});
+                auto retained = frames->peekFrameToTransmit();
+                ASSERT(retained && frames->containsFrame(retained));
+                ASSERT(edca->getLifetimeHandler()->getDeadline(retained) == deadline);
+                ASSERT(!owner->getRecoveryProcedure()->isMsduRetryLimitReached(retained));
+                ASSERT(owner->getRecoveryProcedure()->getRetryCount(retained, retained->peekAtFront<Ieee80211DataHeader>()) >= limit);
+                collisionChecks++;
+            }
+        }
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        bool admitted = Hcf::transmitFrame(packet, ifs);
+        if (!admitted)
+            return false;
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto owner = edca->getChannelOwner();
+        auto txop = owner->getTxopProcedure();
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header)) {
+            bool first = holders[txop->getStart()]++ == 0;
+            if (data && data->getType() == ST_DATA_WITH_QOS && !data->getReceiverAddress().isMulticast()) {
+                auto prior = lengths.find(packet->getId());
+                bool retry = prior != lengths.end() && prior->second == packet->getDataLength();
+                bool exception = first && (retry || (accepted(packet) && !data->getAMsduPresent() && !data->getRetry()));
+                ASSERT(!data->getAMsduPresent());
+                lengths.emplace(packet->getId(), packet->getDataLength());
+                agreedData += accepted(packet);
+                fallbackData += !accepted(packet) && data->getAckPolicy() == NORMAL_ACK;
+                exceptions += exception;
+                if (scenario() == 7)
+                    ASSERT(mib->isHtOperationSupported() == source());
+                if (txop->getLimit() == 0) {
+                    auto allocation = packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+                    auto result = zeroAllocations.emplace(txop->getStart(), allocation);
+                    ASSERT(result.second || result.first->second == allocation);
+                    if (data->getAckPolicy() == BLOCK_ACK) {
+                        simtime_t expected = SIMTIME_ZERO;
+                        for (auto member : owner->getInProgressFrames()->getAllocationFrames(packet))
+                            if (member->peekAtFront<Ieee80211DataHeader>()->getFragmentNumber() == data->getFragmentNumber() + 1)
+                                expected = modeSet->getSifsTime() +
+                                    packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode()->getDuration(member->getDataLength());
+                        ASSERT(data->getDurationField() == expected);
+                    }
+                }
+                if (txop->getLimit() > 0 && !exception)
+                    bounds[packet->getId()] = txop->getStart() + txop->getLimit();
+                else
+                    bounds.erase(packet->getId());
+            }
+        }
+        return true;
+    }
+    void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        checkBoundary(packet);
+        Hcf::transmissionComplete(packet, header);
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *transmitted) override {
+        if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK)
+            checkBoundary(transmitted);
+        Hcf::originatorProcessReceivedFrame(packet, transmitted);
+    }
+};
+Define_Module(BasicAdmissionHcf);
+class BasicAdmissionTest : public cSimpleModule, public cListener {
+    int received = 0;
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("subscribe")); }
+    void receiveSignal(cComponent *, simsignal_t, cObject *, cObject *) override { received++; }
+    void handleMessage(cMessage *message) override {
+        bool first = message->isName("subscribe");
+        delete message;
+        if (first) {
+            getModuleByPath("^.sta2.app[0]")->subscribe(packetReceivedSignal, this);
+            scheduleAt(SimTime(1200, SIMTIME_MS), new cMessage("check"));
+            return;
+        }
+        auto source = check_and_cast<BasicAdmissionHcf *>(getModuleByPath("^.sta1.wlan[0].mac.hcf"));
+        auto ap = check_and_cast<BasicAdmissionHcf *>(getModuleByPath("^.ap.wlan[0].mac.hcf"));
+        int scenario = par("scenario");
+        std::cout << "Basic admission state: scenario=" << scenario << " delivered=" << received
+            << " agreed=" << source->agreedData << "/" << ap->agreedData
+            << " failures=" << source->retainedFailures << "\n";
+        if (scenario != 4 && scenario != 6) {
+            ASSERT(source->agreedData > 0 && ap->agreedData > 0);
+            ASSERT(source->exceptions > 0 && ap->exceptions > 0);
+        }
+        if (scenario == 1 || scenario == 2)
+            ASSERT(source->injectedCtsLosses() == 9 && source->retainedFailures >= 9);
+        if (scenario == 3)
+            ASSERT(source->collisionChecks == 1);
+        if (scenario == 6)
+            ASSERT(source->agreedData == 0 && ap->agreedData == 0 && source->fallbackData > 0);
+        if (scenario == 8)
+            ASSERT(source->retainedDataFailures >= 9);
+        if (scenario == 4) {
+            source->checkExpiry();
+            ASSERT(source->expiryChecks == 1 && source->retainedFailures >= 7);
+        }
+        else
+            ASSERT(received == 30);
+        std::cout << "Basic admission assertions passed: scenario=" << scenario << " delivered=" << received
+            << " retainedFailures=" << source->retainedFailures << " collisions=" << source->collisionChecks << "\n";
+        endSimulation();
+    }
+};
+Define_Module(BasicAdmissionTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.originator.OriginatorQosAckPolicy;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module BasicAdmissionHcf extends Hcf { parameters: int scenario; @class(::inet::ieee80211::BasicAdmissionHcf); }
+simple BasicAdmissionAckPolicy extends OriginatorQosAckPolicy { parameters: bool normalUnderAgreement; @class(::inet::ieee80211::BasicAdmissionAckPolicy); }
+simple BasicAdmissionTest { parameters: int scenario; @class(::inet::ieee80211::BasicAdmissionTest); }
+network BasicAdmissionNetwork {
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta1: WirelessHost;
+        sta2: WirelessHost;
+        test: BasicAdmissionTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = BasicAdmissionNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1.3s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.scenario = ${scenario=0..8}
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.sta1.numApps = 1
+*.sta1.app[0].typename = "UdpBasicApp"
+*.sta1.app[0].destAddresses = "sta2"
+*.sta1.app[0].destPort = 1000
+*.sta1.app[0].messageLength = 700B
+*.sta1.app[0].startTime = 1s
+*.sta1.app[0].stopTime = 1.00295s
+*.sta1.app[0].sendInterval = 100us
+*.sta2.numApps = 1
+*.sta2.app[0].typename = "UdpSink"
+*.sta2.app[0].localPort = 1000
+*.sta*.ipv4.arp.typename = "GlobalArp"
+*.sta*.wlan[*].opMode = ${scenario} == 7 ? "n(mixed-2.4Ghz)" : "g(erp)"
+*.ap.wlan[*].opMode = ${scenario} == 7 ? "g(mixed)" : "g(erp)"
+**.wlan[*].opMode = "g(erp)"
+**.wlan[*].bitrate = ${rate=6,24}Mbps
+**.rateSelection.mgmtFrameBitrate = ${scenario} == 7 ? 6Mbps : -1bps
+**.rateSelection.controlFrameBitrate = ${scenario} == 7 ? 6Mbps : -1bps
+**.bandName = "2.4 GHz"
+**.wlan[*].classifier.typename = "QosClassifier"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "BasicAdmissionHcf"
+**.wlan[*].mac.hcf.scenario = ${scenario}
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.hcf.originatorAckPolicy.typename = "BasicAdmissionAckPolicy"
+**.hcf.originatorAckPolicy.normalUnderAgreement = ${scenario} == 2 || ${scenario} == 3 || ${scenario} == 8
+**.originatorAckPolicy.blockAckReqThreshold = 5
+**.originatorAckPolicy.maxBlockAckPolicyFrameLength = ${scenario} == 6 ? 0B : 10000B
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.originatorMacDataService.mpduAggregationPolicy.typename = ""
+**.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = ${scenario} == 5 ? 300B : 2346B
+**.rtsPolicy.rtsThreshold = 500B
+**.recoveryProcedure.shortRetryLimit = 7
+**.recoveryProcedure.longRetryLimit = 7
+**.txopProcedure.protectionMechanism = ${protection="single","multiple"}
+**.txopProcedure.txopLimit = ${scenario} == 5 ? 0s : 1024us
+**.edcaf[*].msduLifetime = ${scenario} == 4 ? 100ms : 512ms
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Basic admission assertions passed:
