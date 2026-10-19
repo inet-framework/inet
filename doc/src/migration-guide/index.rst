@@ -94,6 +94,12 @@ IEEE 802.11 bounded fragment preparation
 
 Custom ``IFragmentationPolicy`` implementations must implement ``computeBoundedFragmentSizes(frame, maxMpduBytes)``. The bound includes the MAC header and FCS. The result distinguishes an unfragmented frame, a legal fragment partition, and an impossible partition. Each nonfinal fragment must have the same even length. A partition must contain at most sixteen fragments. The existing unbounded operation remains available to non-QoS callers.
 
+Custom ``IOriginatorQosMacDataService`` implementations must implement the fragment preparation, validation, and commitment operations. Preparation retains queued sources and owns all fragment previews. Commitment transfers those exact previews with one sequence identity, one allocation identity, and the source's absolute deadline. For a numbered source, the caller supplies a live source with no local DATA transmission. The caller replaces that source through ``InProgressFrames::replaceWithPreparedFragments()`` after commitment succeeds.
+
+A fragment preparation can report an unfragmented or impossible partition without fragment previews. The caller must check its status before commitment.
+
+Custom ``IAckHandler`` implementations must expose ``dropFrame()`` through the interface. Both built-in handlers already supply this operation. The committed-frame owner uses it to remove the old ACK entry before fragment replacement.
+
 IEEE 802.11 reversible DATA preparation
 -------------------------------------
 

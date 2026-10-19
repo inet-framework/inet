@@ -55,8 +55,16 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
     bool isPreparationValidForSequence(const PreparedQosData& preparation, simtime_t start, SequenceNumberCyclic sequence) const;
     Packet *commitValidatedFrame(PreparedQosData& preparation);
+    void transferFragmentMetadata(PreparedQosFragments& preparation, Packet *source,
+            SequenceNumberCyclic sequence, int64_t allocation, simtime_t deadline);
 
   public:
+    virtual std::unique_ptr<PreparedQosFragments> prepareFragments(queueing::IPacketQueue *queue,
+            Packet *numberedSource, int maxMpduBytes) override;
+    virtual bool isFragmentPreparationValid(const PreparedQosFragments& preparation,
+            Packet *numberedSource, simtime_t start) const override;
+    virtual bool commitPreparedFragments(PreparedQosFragments& preparation,
+            Packet *numberedSource, std::vector<Packet *>& committed) override;
     void setFragmentationPermission(std::function<bool(Packet *)> permission) { fragmentationPermitted = permission; }
     void setEligibility(std::function<bool(Packet *)> eligible, std::function<bool(Packet *)> permission) {
         extractionEligible = eligible;

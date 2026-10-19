@@ -33,6 +33,12 @@ class INET_API InProgressFrames : public SimpleModule
     std::vector<Packet *> inProgressFrames;
     std::vector<Packet *> droppedFrames;
     std::function<bool(Packet *)> transmissionEligible;
+    struct FragmentHistory {
+        int count = 1;
+        std::map<int, b> transmittedLengths;
+        std::set<int> retransmitted;
+    };
+    std::map<int64_t, FragmentHistory> fragmentHistory;
 
   protected:
     virtual void initialize(int stage) override;
@@ -54,6 +60,15 @@ class INET_API InProgressFrames : public SimpleModule
     bool containsFrame(const Packet *packet) const;
     // Takes ownership after the data service commits a reversible preparation.
     void adoptPreparedFrame(Packet *packet);
+    void adoptPreparedFragments(const std::vector<Packet *>& fragments);
+    // The caller establishes that source has no local DATA transmission.
+    void replaceWithPreparedFragments(Packet *source, const std::vector<Packet *>& fragments);
+    std::vector<Packet *> getAllocationFrames(Packet *packet) const;
+    void recordDataTransmission(Packet *packet);
+    bool isSameSizeDataRetry(Packet *packet) const;
+    bool hasRetriedPreviousFragment(Packet *packet) const;
+    int getFragmentCount(Packet *packet) const;
+    void dropAllocation(Packet *packet);
     virtual Packet *getFrameToTransmit();
     virtual Packet *peekFrameToTransmit();
     SequenceNumberCyclic getCandidateSequenceNumber(Packet *packet) const;
