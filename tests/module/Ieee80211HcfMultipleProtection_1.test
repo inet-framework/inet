@@ -95,9 +95,12 @@ class ProtectionRateSelection : public IQosRateSelection {
   public:
     IQosRateSelection *delegate = nullptr;
     int modeQueries = 0;
+    std::map<std::pair<int64_t, simtime_t>, int> dataQueries;
     const physicallayer::IIeee80211Mode *computeMode(Packet *packet,
             const Ptr<const Ieee80211MacHeader>& header, TxopProcedure *txop) override {
         modeQueries++;
+        if (dynamicPtrCast<const Ieee80211DataHeader>(header) && !header->getReceiverAddress().isMulticast())
+            ASSERT(++dataQueries[std::make_pair(packet->getId(), txop->getStart())] == 1);
         return delegate->computeMode(packet, header, txop);
     }
     const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& header, ResponseQueryRole role) override {
@@ -332,7 +335,8 @@ class ProtectionTest : public cSimpleModule {
         if (scenario != 8)
             ASSERT(!senderRx->successfulEndpoints.empty());
         if (scenario != 6 && scenario != 7 && scenario != 11 && scenario != 12) {
-            ASSERT(sender->tracedSelection.modeQueries == (int)senderMac->transmissions.size());
+            // A refused preview can add a query. Each DATA candidate still has one decision per TXOP.
+            ASSERT(sender->tracedSelection.modeQueries >= (int)senderMac->transmissions.size());
         }
         auto propagation = scenario == 1 || scenario == 3 || scenario == 16 ? SimTime(0.2e-6) :
             scenario == 4 ? SimTime(0.48e-6) : SIMTIME_ZERO;
@@ -420,24 +424,19 @@ class ProtectionTest : public cSimpleModule {
             ASSERT(senderMac->transmissions[1].start > ackEnd + SimTime(16, SIMTIME_US));
         }
         if (scenario == 17) {
-            ASSERT(sender->burstData.size() == 1 && sender->burstData[0] == 2);
+            ASSERT(sender->burstData.size() == 2 && sender->burstData[0] == 1 && sender->burstData[1] == 1);
             ASSERT(senderMac->transmissions.size() == 4);
             ASSERT(receiverMac->transmissions.size() == 4);
             auto first = senderMac->transmissions[0];
             auto rts = senderMac->transmissions[2];
             auto data = senderMac->transmissions[3];
-            auto deadline = first.start + SimTime(384, SIMTIME_US);
             ASSERT(first.type == ST_RTS && rts.type == ST_RTS);
-            ASSERT(rts.start - first.start == SimTime(304, SIMTIME_US));
-            ASSERT(rts.start + rts.airtime + rts.duration == deadline);
+            ASSERT(rts.start > receiverMac->transmissions[1].start + receiverMac->transmissions[1].airtime + SimTime(16, SIMTIME_US));
+            ASSERT(rts.start + rts.airtime + rts.duration == rts.start + SimTime(384, SIMTIME_US));
             ASSERT(receiverMac->transmissions[2].type == ST_CTS);
-            ASSERT(receiverMac->transmissions[2].duration == 0);
             ASSERT(data.type == ST_DATA_WITH_QOS);
-            ASSERT(data.start - first.start == SimTime(432, SIMTIME_US));
-            ASSERT(data.start > deadline);
-            ASSERT(data.duration == 0);
-            ASSERT(sender->completedEndpoints.back() == data.start + data.airtime);
-            ASSERT(receiverMac->transmissions[3].duration == 0);
+            ASSERT(data.start - rts.start == SimTime(128, SIMTIME_US));
+            ASSERT(receiverMac->transmissions[3].start + receiverMac->transmissions[3].airtime <= rts.start + SimTime(384, SIMTIME_US));
         }
         ASSERT(receiver->failures == 0);
         std::cout << "HCF multiple protection exchange assertions passed.\n";

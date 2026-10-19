@@ -192,8 +192,8 @@
 /showcases/visualizer/canvas/transportpathactivity/, -f omnetpp.ini -c Filtering -r 0,     100s,         8bcf-d426/tplx;8f09-7a80/~tNl;92a4-c3ec/~tND;0694-d5be/tyf, PASS,    wireless EthernetMac Ipv4
 
 /showcases/wireless/aggregation/,     -f omnetpp.ini -c NoAggregation -r 0,                                      1s,            21a4-c882/tplx;ecf2-6e33/~tNl;5d9e-8fdf/~tND;cb71-81f8/tyf, PASS,    wireless Ipv4
-/showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            0e94-675b/tplx;4545-c0de/~tNl;a778-2f83/~tND;6cdd-e65e/tyf, PASS,    wireless Ipv4
-/showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            1ad6-ebce/tplx;cc40-e9c2/~tNl;5421-bc6d/~tND;c99f-3188/tyf, PASS,    wireless Ipv4
+/showcases/wireless/aggregation/,     -f omnetpp.ini -c Aggregation -r 0,                                        1s,            b7d0-1c67/tplx;d8f8-2120/~tNl;b2ba-0919/~tND;7c83-f2e4/tyf, PASS,    wireless Ipv4
+/showcases/wireless/aggregation/,     -f omnetpp.ini -c VoicePriorityAggregation -r 0,                           1s,            455e-1981/tplx;c6ed-de44/~tNl;6c9a-8f21/~tND;2267-c230/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Routing -r 0,                5s,         56b0-3510/tplx;baeb-0d2c/~tNl;3d4b-65fc/~tND;00a2-e4ee/tyf, PASS,    wireless Ipv4
 /showcases/wireless/analogmodel/,     -f omnetpp.ini -c Distance -r 0,                2.5s,         1e75-270e/tplx;6d7a-d84c/~tNl;7b7c-2bfb/~tND;5575-fd8f/tyf, PASS,    wireless Ipv4
@@ -266,7 +266,7 @@
 
 /showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFnofrag -r 0,                                       1s,            52b9-628f/tplx;3fec-74a2/~tNl;dbb5-67b0/~tND;8871-1dd1/tyf, PASS,    wireless Ipv4
 /showcases/wireless/fragmentation/,     -f omnetpp.ini -c DCFfrag -r 0,                                         1s,            8df2-40a3/tplx;dab9-5e8d/~tNl;2e7b-0729/~tND;74c3-9ba0/tyf, PASS,    wireless Ipv4
-/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            c99f-354d/tplx;8e10-a3f0/~tNl;ac4b-3ba1/~tND;e394-4985/tyf, PASS,    wireless Ipv4
+/showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfrag -r 0,                                         1s,            d7c1-fb92/tplx;b7b8-b4e1/~tNl;7035-d6cb/~tND;e791-f124/tyf, PASS,    wireless Ipv4
 /showcases/wireless/fragmentation/,     -f omnetpp.ini -c HCFfragblockack -r 0,                                 1s,            2597-1e2e/tplx;d269-c6ae/~tNl;2f5c-4cca/~tND;77f4-58c1/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/handover/,       -f omnetpp.ini -c General -r 0,                                            250s,            6150-7a8b/tplx;bcc9-11d2/~tNl;99fd-923d/~tND;02e9-9ad3/tyf, PASS,    wireless
@@ -314,7 +314,7 @@
 /showcases/wireless/power/,          -f omnetpp.ini -c General -r 0,                                            100s,            498f-b665/tplx;6f50-5caf/~tNl;1403-6fb2/~tND, PASS,    wireless Ipv4
 
 /showcases/wireless/qos/,     -f omnetpp.ini -c NonQos -r 0,                                       10s,            5734-43a3/tplx;9c39-00a3/~tNl;03a9-2f02/~tND;34ac-bc95/tyf, PASS,    wireless Ipv4
-/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            2f30-f17c/tplx;0683-d978/~tNl;a879-de03/~tND;64d2-47e3/tyf, PASS,    wireless Ipv4
+/showcases/wireless/qos/,     -f omnetpp.ini -c Qos -r 0,                                        10s,            c105-8907/tplx;f17b-f24c/~tNl;c055-873b/~tND;1c08-f8f1/tyf, PASS,    wireless Ipv4
 
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c NoRateControl -r 0,                        14s,            7ee9-503a/tplx;0816-e58f/~tNl;ec30-e32d/~tND;dad3-7f89/tyf, PASS,    wireless Ipv4
 /showcases/wireless/ratecontrol/,    -f omnetpp.ini -c AarfRateControl -r 0,                  12s,            a7bc-05bb/tplx;9de0-4dd3/~tNl;de90-6575/~tND;7539-d32d/tyf, PASS,    wireless Ipv4

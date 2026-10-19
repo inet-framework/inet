@@ -1315,7 +1315,8 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
         auto frames = edcaf->getInProgressFrames();
         Packet *internallyCollidedFrame = nullptr;
         bool scopedQueuedData = false;
-        if (blockAckVariant == BlockAckVariant::COMPRESSED && originatorBlockAckAgreementHandler) {
+        if ((blockAckVariant == BlockAckVariant::COMPRESSED && originatorBlockAckAgreementHandler) ||
+                !originatorBlockAckAgreementHandler) {
             auto candidate = frames->peekFrameToTransmit();
             auto data = candidate ? dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>()) : nullptr;
             auto agreement = data && originatorBlockAckAgreementHandler ?
@@ -2285,12 +2286,19 @@ bool Hcf::validatePreparedData(const PreparedDataTransmission& prepared, simtime
 
 bool Hcf::usesModernMsduRecovery(Packet *packet) const
 {
-    return false;
+    if (originatorBlockAckAgreementHandler && blockAckVariant == BlockAckVariant::BASIC)
+        return false;
+    auto header = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+    if (!header || header->getType() != ST_DATA_WITH_QOS || header->getReceiverAddress().isMulticast())
+        return false;
+    auto agreement = originatorBlockAckAgreementHandler ?
+        originatorBlockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid()) : nullptr;
+    return !agreement || !agreement->getIsAddbaResponseReceived();
 }
 
 bool Hcf::usesMsduRecovery(Packet *packet) const
 {
-    return false;
+    return usesModernMsduRecovery(packet);
 }
 
 void Hcf::registerMsduRecovery(Edcaf *edcaf, Packet *packet)
@@ -2473,7 +2481,7 @@ simtime_t Hcf::forecastPreparedSuccessor(const FrameSequenceContext *context,
 DataPreparationResult Hcf::prepareDataTransmission(FrameSequenceContext *context)
 {
     Enter_Method("prepareDataTransmission");
-    if (blockAckVariant != BlockAckVariant::COMPRESSED || !originatorBlockAckAgreementHandler)
+    if (blockAckVariant == BlockAckVariant::BASIC && originatorBlockAckAgreementHandler)
         return DataPreparationResult::LEGACY;
     auto frames = context->getInProgressFrames();
     auto candidate = frames->peekFrameToTransmit();
@@ -2484,8 +2492,6 @@ DataPreparationResult Hcf::prepareDataTransmission(FrameSequenceContext *context
         originatorBlockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid()) : nullptr;
     if (agreement && !agreement->getIsAddbaResponseReceived())
         agreement = nullptr;
-    if (!agreement)
-        return DataPreparationResult::LEGACY;
     auto prepared = std::make_unique<PreparedDataTransmission>();
     prepared->modeSet = modeSet;
     prepared->agreement = agreement;
