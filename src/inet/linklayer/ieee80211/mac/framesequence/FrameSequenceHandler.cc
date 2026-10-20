@@ -14,15 +14,20 @@
 namespace inet {
 namespace ieee80211 {
 
-void FrameSequenceHandler::interruptFrameSequence(bool notifyFailure)
+void FrameSequenceHandler::interruptFrameSequence()
 {
     ASSERT(isSequenceRunning());
     ASSERT(dynamic_cast<IReceiveStep *>(context->getLastStep()));
     context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
-    if (notifyFailure)
-        abortFrameSequence();
-    else
+    auto outgoing = check_and_cast<ITransmitStep *>(context->getStepBeforeLast())->getFrameToTransmit();
+    // Retirement removes DATA and management frames from the queue before this transition.
+    // Control exchanges retain their ordinary failure path through the recovery callback.
+    bool retired = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(outgoing->peekAtFront<Ieee80211MacHeader>()) &&
+        !context->getInProgressFrames()->containsFrame(outgoing);
+    if (retired)
         finishFrameSequence();
+    else
+        abortFrameSequence();
 }
 
 void FrameSequenceHandler::handleStartRxTimeout()
