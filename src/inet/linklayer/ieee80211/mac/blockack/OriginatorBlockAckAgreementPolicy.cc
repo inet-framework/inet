@@ -9,7 +9,6 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
-
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
 namespace inet {
@@ -26,15 +25,23 @@ void OriginatorBlockAckAgreementPolicy::initialize(int stage)
         aMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
-        // TODO addbaFailureTimeout = par("addbaFailureTimeout");
+        addbaFailureTimeout = par("addbaFailureTimeout");
+        if (addbaFailureTimeout <= SIMTIME_ZERO || addbaFailureTimeout == SIMTIME_MAX)
+            throw cRuntimeError("addbaFailureTimeout must be positive and finite");
+        if (maximumAllowedBufferSize <= 0 || blockAckTimeoutValue < SIMTIME_ZERO)
+            throw cRuntimeError("Invalid Block Ack buffer size or inactivity timeout");
         WATCH(blockAckReqThreshold);
     }
 }
 
 simtime_t OriginatorBlockAckAgreementPolicy::computeAddbaFailureTimeout() const
 {
-    // TODO ADDBAFailureTimeout -- 6.3.29.2.2 Semantics of the service primitive
-    throw cRuntimeError("Unimplemented");
+    return addbaFailureTimeout;
+}
+
+bool OriginatorBlockAckAgreementPolicy::isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const
+{
+    return variant == BlockAckVariant::BASIC || (localHt && peerHt);
 }
 
 bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const Ptr<const Ieee80211DataHeader>& header)
@@ -59,11 +66,6 @@ bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<const Ieee8
 bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba)
 {
     return true;
-}
-
-bool OriginatorBlockAckAgreementPolicy::isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const
-{
-    return variant == BlockAckVariant::BASIC || (localHt && peerHt);
 }
 
 } /* namespace ieee80211 */

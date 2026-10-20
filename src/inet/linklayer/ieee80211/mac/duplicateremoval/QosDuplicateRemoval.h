@@ -28,6 +28,8 @@ class INET_API QoSDuplicateRemoval : public IDuplicateRemoval
     Mac2SeqValMap lastSeenTimePriorityManagementSeqNumCache;
 
   public:
+    void setLastReceived(MacAddress peer, Tid tid, const SequenceNumberCyclic& sequence, int fragment);
+    void clearPeer(MacAddress peer);
     virtual bool isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
 };
 

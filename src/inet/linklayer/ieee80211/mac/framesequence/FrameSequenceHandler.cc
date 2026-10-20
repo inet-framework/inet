@@ -14,6 +14,17 @@
 namespace inet {
 namespace ieee80211 {
 
+void FrameSequenceHandler::interruptFrameSequence(bool notifyFailure)
+{
+    ASSERT(isSequenceRunning());
+    ASSERT(dynamic_cast<IReceiveStep *>(context->getLastStep()));
+    context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
+    if (notifyFailure)
+        abortFrameSequence();
+    else
+        finishFrameSequence();
+}
+
 void FrameSequenceHandler::handleStartRxTimeout()
 {
     auto lastStep = context->getLastStep();

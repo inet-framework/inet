@@ -1,0 +1,134 @@
+%description:
+A crafted Basic BAR crosses the production transmitter and wireless receive path.
+Without an agreement, the AP must send recipient-role DELBA for the selected peer and TID.
+The control establishes an agreement through ADDBA and requires a Basic Block Ack response.
+These checks cover INET Basic compatibility behavior, not full standards conformance.
+
+%extraargs: -r 0..1
+
+%file: BarWithoutAgreement.cc
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet::protocoltest {
+class LifecycleBarMac : public Ieee80211Mac
+{
+  public:
+    bool testBarOutstanding = false;
+  protected:
+    void handleLowerPacket(Packet *frame) override {
+        auto ba = dynamicPtrCast<const Ieee80211BasicBlockAck>(frame->peekAtFront<Ieee80211MacHeader>());
+        if (testBarOutstanding && ba && ba->getReceiverAddress() == mib->address) {
+            ASSERT(rx->lowerFrameReceived(frame));
+            take(frame);
+            ASSERT(ba->getTidInfo() == 6);
+            testBarOutstanding = false;
+            emit(registerSignal("testBarResponseReceived"), 1L);
+            delete frame;
+        }
+        else
+            Ieee80211Mac::handleLowerPacket(frame);
+    }
+};
+Define_Module(LifecycleBarMac);
+
+class LifecycleBarStimulus : public cSimpleModule, public ITx::ICallback
+{
+  protected:
+    void initialize() override { scheduleAt(SimTime(1100, SIMTIME_MS), new cMessage("bar")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto network = getParentModule();
+        bool control = par("control");
+        Tid tid = control ? 6 : 5;
+        auto sender = lifecycleHcf(network, "sta1");
+        auto recipient = lifecycleHcf(network, "ap");
+        auto peer = lifecycleMib(network, "ap")->address;
+        auto station = lifecycleMib(network, "sta1")->address;
+        ASSERT(sender->hasOriginator(peer, tid) == control);
+        ASSERT(recipient->hasRecipient(station, tid) == control);
+        if (control)
+            check_and_cast<LifecycleBarMac *>(network->getSubmodule("sta1")->getSubmodule("wlan", 0)->getSubmodule("mac"))->testBarOutstanding = true;
+        sender->sendTestBar(peer, tid, this);
+    }
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+};
+Define_Module(LifecycleBarStimulus);
+
+Define_ProtocolTest(wifi_block_ack_orphan_bar)
+{
+    return ProtocolTest("wifi_block_ack_orphan_bar")
+        .once(on("ap.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                return bar && bar->getTidInfo() == 5 && bar->getTransmitterAddress() == MacAddress("02:00:00:00:00:03");
+            }).describe("orphan BAR received through the radio").within(1.2))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211Delba>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).assertEvent([](const MatchContext& c) {
+                auto delba = c.event.packet->peekAtFront<Ieee80211Delba>();
+                return delba->getReceiverAddress() == MacAddress("02:00:00:00:00:03") &&
+                    delba->getTid() == 5 && !delba->getInitiator() &&
+                    !lifecycleHcf(c.event.node->getParentModule(), "ap")->hasRecipient(MacAddress("02:00:00:00:00:03"), 5);
+            }).describe("recipient-role DELBA without agreement allocation").within(0.02));
+}
+
+Define_ProtocolTest(wifi_block_ack_known_bar)
+{
+    return ProtocolTest("wifi_block_ack_known_bar")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) { return std::string(c.event.packet->getName()) == "test-bar"; })
+            .describe("control BAR after real ADDBA setup").within(1.2))
+        .meanwhile(never(on("ap.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211Delba>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).describe("no DELBA for the established agreement").within(0.02)))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211BasicBlockAck>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).assertEvent([](const MatchContext& c) {
+                auto ba = c.event.packet->peekAtFront<Ieee80211BasicBlockAck>();
+                return ba->getReceiverAddress() == MacAddress("02:00:00:00:00:03") && ba->getTidInfo() == 6;
+            }).describe("Basic Block Ack for an established agreement").within(0.02))
+        .once(on("sta1.wlan[0].mac").signal("testBarResponseReceived").assertValue(1)
+            .describe("test peer receives the Basic Block Ack through the radio").within(0.01));
+}
+}
+
+%file: BarWithoutAgreement.ned
+@namespace(inet::protocoltest);
+import inet.protocoltest.wifi.WifiInfraNetwork;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+module LifecycleBarMac extends Ieee80211Mac {
+    parameters:
+        @class(LifecycleBarMac);
+        @signal[testBarResponseReceived](type=long);
+}
+simple LifecycleBarStimulus {
+    parameters:
+        bool control;
+        @class(LifecycleBarStimulus);
+}
+network LifecycleBarNetwork extends WifiInfraNetwork {
+    submodules:
+        stimulus: LifecycleBarStimulus;
+}
+
+%inifile: test.ini
+[General]
+network = LifecycleBarNetwork
+*.sta1.wlan[*].mac.typename = "LifecycleBarMac"
+*.stimulus.control = ${control=false,true}
+*.tester.testName = ${control} ? "wifi_block_ack_known_bar" : "wifi_block_ack_orphan_bar"
+*.sta1.app[0].startTime = ${control} ? 1s : 2s
+*.sta1.app[0].stopTime = ${control} ? 1.003s : 2.003s
+*.sta1.app[0].sendInterval = 0.1ms
+sim-time-limit = 1.2s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_orphan_bar: PASS
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_known_bar: PASS
+%not-contains: stdout
+: FAIL

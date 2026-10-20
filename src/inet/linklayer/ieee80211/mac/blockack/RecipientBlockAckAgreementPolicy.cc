@@ -7,8 +7,6 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementPolicy.h"
 
-#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
-
 namespace inet {
 namespace ieee80211 {
 
@@ -21,6 +19,8 @@ void RecipientBlockAckAgreementPolicy::initialize(int stage)
         isAMsduSupported = par("aMsduSupported");
         maximumAllowedBufferSize = par("maximumAllowedBufferSize");
         blockAckTimeoutValue = par("blockAckTimeoutValue");
+        if (maximumAllowedBufferSize <= 0 || blockAckTimeoutValue < SIMTIME_ZERO)
+            throw cRuntimeError("Invalid Block Ack buffer size or inactivity timeout");
     }
 }
 
@@ -37,14 +37,14 @@ bool RecipientBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<const Ieee80
         addbaReq->getBlockAckTimeoutValue() >= SIMTIME_ZERO;
 }
 
-bool RecipientBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba)
-{
-    return true;
-}
-
 bool RecipientBlockAckAgreementPolicy::isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const
 {
     return variant == BlockAckVariant::BASIC || (localHt && peerHt);
+}
+
+bool RecipientBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba)
+{
+    return true;
 }
 
 } /* namespace ieee80211 */

@@ -12,6 +12,44 @@
 namespace inet {
 namespace ieee80211 {
 
+BlockAckReordering::ReleasedFrames BlockAckReordering::detachAgreement(MacAddress peer, Tid tid,
+        bool deliverComplete, std::vector<Packet *>& discarded)
+{
+    auto it = receiveBuffers.find({tid, peer});
+    if (it == receiveBuffers.end())
+        return {};
+    auto buffer = it->second;
+    receiveBuffers.erase(it);
+    ReleasedFrames released;
+    auto start = buffer->getNextExpectedSequenceNumber();
+    for (int i = 0; i < buffer->getBufferSize(); i++) {
+        auto sequence = start + i;
+        auto position = buffer->getBuffer().find(sequence.get());
+        if (position == buffer->getBuffer().end())
+            continue;
+        auto fragments = position->second;
+        if (deliverComplete && isComplete(fragments))
+            released.push_back({sequence.get(), fragments});
+        else
+            discarded.insert(discarded.end(), fragments.begin(), fragments.end());
+        buffer->removeFrame(sequence);
+    }
+    delete buffer;
+    return released;
+}
+
+void BlockAckReordering::clearPeer(MacAddress peer)
+{
+    for (auto it = receiveBuffers.begin(); it != receiveBuffers.end();) {
+        if (it->first.second == peer) {
+            delete it->second;
+            it = receiveBuffers.erase(it);
+        }
+        else
+            ++it;
+    }
+}
+
 BlockAckReordering::ReleasedFrames BlockAckReordering::processReceivedQoSFrame(RecipientBlockAckAgreement *agreement, Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader)
 {
     ReceiveBuffer *receiveBuffer = createReceiveBufferIfNecessary(agreement);
