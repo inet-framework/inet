@@ -56,6 +56,7 @@ extensions = [
     'sphinxcontrib.jquery',
     'sphinxcontrib.images',
     'tools.doxylink',
+    'tools.includefiles',
     'IPython.sphinxext.ipython_console_highlighting',
     'IPython.sphinxext.ipython_directive',
 ]
