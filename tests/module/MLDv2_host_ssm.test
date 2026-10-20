@@ -70,12 +70,16 @@ seed-set = 0
 %# First check that the set-filter commands modified the interface state
 %#
 %postrun-command: grep "TestMld: .* groups = " test.out > groups.out || true
+%# ff02::1:ff00:1 is the solicited-node multicast group of the interface's own address,
+%# joined when that address is assigned (RFC 4861 Section 7.2.1), so it is a member of
+%# every dump. It carries no source filter, hence the bare "E" (EXCLUDE of nothing).
 %contains: groups.out
-TestMld: eth0: groups = ff3e::1 I 2001::1 2001::2.
-TestMld: eth0: groups = ff3e::1 I 2001::1.
-TestMld: eth0: groups = ff3e::1 E 2001::2.
-TestMld: eth0: groups = ff3e::1 E 2001::1 2001::2.
-TestMld: eth0: groups = ff3e::1 I 2001::1.
+TestMld: eth0: groups = ff02::1:ff00:1 E.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 I 2001::1 2001::2.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 I 2001::1.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 E 2001::2.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 E 2001::1 2001::2.
+TestMld: eth0: groups = ff02::1:ff00:1 E, ff3e::1 I 2001::1.
 
 %#
 %# Now check the state transitions of the Mldv2 module
@@ -105,7 +109,12 @@ State of group 'ff3e::1' on interface 'eth0' has changed:
 %# Unsolicited Report Interval, before the next scenario step.
 %#
 %postrun-command: grep "TestMld: Received" test.out > received.out || true
+%# The first two reports are the State-Change Report for the solicited-node
+%# group of the interface's own address, joined when that address is assigned
+%# (RFC 4861 Section 7.2.1) and, like every state change, sent twice.
 %contains: received.out
+TestMld: Received: inet::Mldv2Report<ff02::1:ff00:1=TO_EX>.
+TestMld: Received: inet::Mldv2Report<ff02::1:ff00:1=TO_EX>.
 TestMld: Received: inet::Mldv2Report<ff3e::1=ALLOW (2001::1,2001::2)>.
 TestMld: Received: inet::Mldv2Report<ff3e::1=ALLOW (2001::1,2001::2)>.
 TestMld: Received: inet::Mldv2Report<ff3e::1=BLOCK (2001::2)>.
