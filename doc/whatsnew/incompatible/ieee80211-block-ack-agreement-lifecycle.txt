@@ -1,3 +1,5 @@
 IEEE 802.11 Block Ack agreement lifecycle
 
 HCF now dispatches accepted Block Ack Actions once after duplicate checks. Setup correlates the peer, TID, and dialog token. The recipient response determines the accepted buffer size and inactivity timeout.
+
+The data service uses filtered pullPacket() calls when deferred DATA hides eligible work. Custom queues must support these operations. Built-in queues preserve ordinary pull effects.

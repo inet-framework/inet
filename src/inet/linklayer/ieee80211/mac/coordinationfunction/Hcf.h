@@ -129,6 +129,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
             simtime_t reservation, simtime_t ppduDuration, simtime_t exchangeDuration, bool reservationEstablished);
     simtime_t estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
             TxopProcedure *txop, simtime_t ppduDuration);
+    bool hasQueuedData(MacAddress peer, Tid tid) const;
     virtual bool hasFrameToTransmit();
     virtual bool hasFrameToTransmit(AccessCategory ac);
     virtual bool isReceptionInProgress();

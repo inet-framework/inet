@@ -41,16 +41,25 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
     IMpduAggregation *aMpduAggregation = nullptr;
     EdcaTransmitLifetimeHandler *lifetimeHandler = nullptr; // Borrowed from EDCA.
     std::function<void()> expireFrames;
+    std::function<bool(const Packet *)> extractionEligible;
+    std::function<bool(Packet *)> aMsduPermitted;
 
   protected:
     virtual void initialize() override;
 
     virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
     virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
-    virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue);
+    virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected);
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
 
   public:
+    void setEligibility(std::function<bool(const Packet *)> eligible, std::function<bool(Packet *)> permission) {
+        extractionEligible = eligible;
+        aMsduPermitted = permission;
+    }
+    Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const;
+    SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const;
+    bool hasAMsduAggregation() const { return aMsduAggregationPolicy != nullptr; }
     virtual ~OriginatorQosMacDataService();
     void setLifetimeHandler(EdcaTransmitLifetimeHandler *handler, std::function<void()> expiration) {
         lifetimeHandler = handler;

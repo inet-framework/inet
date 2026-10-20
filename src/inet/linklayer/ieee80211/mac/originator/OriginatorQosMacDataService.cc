@@ -14,6 +14,7 @@
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/fragmentation/Fragmentation.h"
 #include "inet/linklayer/ieee80211/mac/sequencenumberassignment/QoSSequenceNumberAssignment.h"
+#include "inet/queueing/function/PacketFilterFunction.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -33,9 +34,29 @@ void OriginatorQosMacDataService::initialize()
     fragmentation = new Fragmentation();
 }
 
-Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue)
+Packet *OriginatorQosMacDataService::aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected)
 {
     auto subframes = aMsduAggregationPolicy->computeAggregateFrames(pendingQueue);
+    if (subframes) {
+        bool valid = !subframes->empty() && subframes->front() == selected;
+        std::set<Packet *> unique;
+        for (auto frame : *subframes) {
+            bool present = false;
+            for (int i = 0; i < pendingQueue->getNumPackets(); i++) {
+                if (pendingQueue->getPacket(i) == frame) {
+                    present = true;
+                    break;
+                }
+            }
+            valid &= present && unique.insert(frame).second &&
+                (!extractionEligible || extractionEligible(frame)) &&
+                (!aMsduPermitted || aMsduPermitted(frame));
+        }
+        if (!valid) {
+            delete subframes;
+            return nullptr;
+        }
+    }
     if (subframes) {
         std::vector<int64_t> sourceIds;
         AccessCategory ac = AC_BE;
@@ -105,16 +126,21 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
     Enter_Method("extractFramesToTransmit");
     if (expireFrames)
         expireFrames();
-    if (pendingQueue->isEmpty())
+    auto selected = peekEligibleFrame(pendingQueue);
+    if (selected == nullptr)
         return nullptr;
     else {
 //        if (msduRateLimiting)
 //            txRateLimitingIfNeeded();
         Packet *packet = nullptr;
-        if (aMsduAggregationPolicy)
-            packet = aMsduAggregateIfNeeded(pendingQueue);
+        auto module = dynamic_cast<cModule *>(pendingQueue);
+        auto next = pendingQueue->canPullPacket(module ? module->gate("out") : nullptr);
+        if (selected == next && aMsduAggregationPolicy && (!aMsduPermitted || aMsduPermitted(selected)))
+            packet = aMsduAggregateIfNeeded(pendingQueue, selected);
         if (!packet) {
-            packet = pendingQueue->dequeuePacket();
+            queueing::CPacketFilterFunction filter([selected](const Packet *candidate) { return candidate == selected; });
+            packet = selected == next ? pendingQueue->dequeuePacket() :
+                pendingQueue->pullPacket(module ? module->gate("out") : nullptr, &filter);
             take(packet);
         }
         // PS Defer Queueing
@@ -141,6 +167,23 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
 //            fragments = new Fragments({aMpdu});
         return fragments;
     }
+}
+
+Packet *OriginatorQosMacDataService::peekEligibleFrame(queueing::IPacketQueue *queue) const
+{
+    if (queue->isEmpty())
+        return nullptr;
+    queueing::CPacketFilterFunction filter([this](const Packet *packet) { return !extractionEligible || extractionEligible(packet); });
+    auto module = dynamic_cast<cModule *>(queue);
+    auto packet = queue->canPullPacket(module ? module->gate("out") : nullptr);
+    if (packet && filter.matchesPacket(packet))
+        return packet;
+    return queue->canPullPacket(module ? module->gate("out") : nullptr, &filter);
+}
+
+SequenceNumberCyclic OriginatorQosMacDataService::getNextSequenceNumber(MacAddress peer, Tid tid) const
+{
+    return check_and_cast<QoSSequenceNumberAssignment *>(sequenceNumberAssignment)->getNextSequenceNumber(peer, tid);
 }
 
 OriginatorQosMacDataService::~OriginatorQosMacDataService()
