@@ -1,0 +1,191 @@
+%description:
+Check filtered pulls through simple and compound queues.
+A filtered pull must preserve ownership, residence metadata, and one pull event per queue layer.
+The filter captures a selected packet. Its query must preserve storage and configured scheduler order.
+
+%extraargs: -r 0..5
+
+%file: SelectiveExtraction.cc
+#include "inet/common/PacketEventTag.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/TimeTag.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/queueing/contract/IPacketQueue.h"
+#include "inet/queueing/function/PacketFilterFunction.h"
+#include "inet/queueing/scheduler/PriorityScheduler.h"
+
+namespace inet::queueing {
+class SelectiveScheduler : public PriorityScheduler {
+  public:
+    int getProcessedCount() const { return numProcessedPackets; }
+};
+Define_Module(SelectiveScheduler);
+
+class SelectiveExtractionTest : public cSimpleModule, public cListener {
+  protected:
+    IPacketQueue *queue = nullptr;
+    cModule *queueModule = nullptr;
+    Packet *first = nullptr;
+    Packet *second = nullptr;
+    std::map<std::string, int> pulls;
+    int removals = 0;
+
+    Packet *makePacket(const char *name, bool multicast) {
+        auto header = makeShared<ieee80211::Ieee80211DataHeader>();
+        header->setType(ieee80211::ST_DATA_WITH_QOS);
+        header->addChunkLength(ieee80211::QOSCONTROL_PART_LENGTH);
+        header->setTid(5);
+        header->setReceiverAddress(MacAddress(multicast ? "01:00:00:00:00:01" : "02:00:00:00:00:02"));
+        auto packet = new Packet(name, header);
+        packet->setArrivalTime(simTime());
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(20)));
+        auto timeTag = packet->addRegionTag<QueueingTimeTag>();
+        timeTag->setPacketTotalTimesArraySize(1);
+        timeTag->setPacketTotalTimes(0, SIMTIME_ZERO);
+        packet->addRegionTag<PacketEventTag>();
+        return packet;
+    }
+
+    void initialize() override {
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("enqueue"));
+    }
+
+    void handleMessage(cMessage *message) override {
+        bool enqueue = !strcmp(message->getName(), "enqueue");
+        delete message;
+        if (enqueue) {
+            queueModule = getModuleByPath(par("compound").boolValue() ? "^.compound" : "^.simpleQueue");
+            queue = check_and_cast<IPacketQueue *>(queueModule);
+            queueModule->subscribe(packetPulledSignal, this);
+            queueModule->subscribe(packetRemovedSignal, this);
+            first = makePacket("first", true);
+            second = makePacket("second", false);
+            queue->enqueuePacket(first);
+            queue->enqueuePacket(second);
+            scheduleAt(SimTime(11, SIMTIME_MS), new cMessage("extract"));
+            return;
+        }
+        auto gate = queueModule->gate("out");
+        auto selected = par("head").boolValue() ? first : second;
+        CPacketFilterFunction filter([selected](const Packet *packet) { return packet == selected; });
+        ASSERT(queue->canPullPacket(gate, &filter) == selected);
+        ASSERT(queue->getNumPackets() == 2);
+        ASSERT(pulls.empty() && removals == 0);
+        auto outsider = makePacket("outsider", false);
+        CPacketFilterFunction absent([outsider](const Packet *packet) { return packet == outsider; });
+        ASSERT(queue->canPullPacket(gate, &absent) == nullptr);
+        bool rejected = false;
+        try {
+            queue->pullPacket(gate, &absent);
+        }
+        catch (const cRuntimeError&) {
+            rejected = true;
+        }
+        ASSERT(rejected && queue->getNumPackets() == 2);
+        ASSERT(pulls.empty() && removals == 0);
+        delete outsider;
+        if (par("compound").boolValue()) {
+            CPacketFilterFunction all(+[](const Packet *) { return true; });
+            auto any = queue->canPullPacket(gate, &all);
+            ASSERT(any == (par("reverse").boolValue() ? second : first));
+        }
+        auto extracted = queue->pullPacket(gate, &filter);
+        ASSERT(extracted == selected);
+        take(extracted);
+        ASSERT(extracted->getOwner() == this);
+        ASSERT(queue->getNumPackets() == 1);
+        ASSERT(queue->getPacket(0) == (selected == first ? second : first));
+        ASSERT(removals == 0);
+        auto timeTag = extracted->findRegionTag<QueueingTimeTag>();
+        ASSERT(timeTag != nullptr);
+        ASSERT(timeTag->getPacketTotalTimes(0) == SimTime(10, SIMTIME_MS));
+        auto eventTag = extracted->findRegionTag<PacketEventTag>();
+        ASSERT(eventTag != nullptr && eventTag->getPacketEventsArraySize() == 1);
+        ASSERT(eventTag->getPacketEvents(0)->getKind() == PEK_QUEUED);
+        ASSERT(eventTag->getPacketEvents(0)->getPacketDuration() == SimTime(10, SIMTIME_MS));
+        auto retained = queue->getPacket(0);
+        ASSERT(retained->findRegionTag<QueueingTimeTag>()->getPacketTotalTimes(0) == SIMTIME_ZERO);
+        ASSERT(retained->findRegionTag<PacketEventTag>()->getPacketEventsArraySize() == 0);
+        if (par("compound").boolValue()) {
+            ASSERT(pulls.size() == 3);
+            auto scheduler = check_and_cast<SelectiveScheduler *>(queueModule->getSubmodule("prioritizer"));
+            ASSERT(scheduler->getProcessedCount() == 1);
+        }
+        else
+            ASSERT(pulls.size() == 1);
+        for (auto entry : pulls)
+            ASSERT(entry.second == 1);
+        delete extracted;
+        queueModule->unsubscribe(packetPulledSignal, this);
+        queueModule->unsubscribe(packetRemovedSignal, this);
+        std::cout << "Selected extraction assertions passed.\n";
+    }
+
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *, cObject *) override {
+        if (signal == packetPulledSignal)
+            pulls[source->getFullPath()]++;
+        else if (signal == packetRemovedSignal)
+            removals++;
+    }
+};
+Define_Module(SelectiveExtractionTest);
+}
+
+%file: test.ned
+import inet.queueing.classifier.PacketClassifier;
+import inet.queueing.queue.CompoundPacketQueueBase;
+import inet.queueing.queue.PacketQueue;
+import inet.queueing.scheduler.PriorityScheduler;
+simple SelectiveScheduler extends PriorityScheduler { parameters: @class(::inet::queueing::SelectiveScheduler); }
+module SelectiveCompoundQueue extends CompoundPacketQueueBase {
+    submodules:
+        classifier: PacketClassifier {
+            parameters: classifierClass = "inet::ieee80211::MgmtOverMulticastOverUnicastClassifier";
+        }
+        managementQueue: PacketQueue;
+        multicastQueue: PacketQueue;
+        unicastQueue: PacketQueue;
+        prioritizer: SelectiveScheduler;
+    connections:
+        in --> classifier.in;
+        classifier.out++ --> managementQueue.in;
+        classifier.out++ --> multicastQueue.in;
+        classifier.out++ --> unicastQueue.in;
+        managementQueue.out --> prioritizer.in++;
+        multicastQueue.out --> prioritizer.in++;
+        unicastQueue.out --> prioritizer.in++;
+        prioritizer.out --> out;
+}
+simple SelectiveExtractionTest {
+    parameters:
+        bool compound;
+        bool head;
+        bool reverse;
+        @class(::inet::queueing::SelectiveExtractionTest);
+}
+network SelectiveExtractionNetwork {
+    submodules:
+        simpleQueue: PacketQueue;
+        compound: SelectiveCompoundQueue;
+        test: SelectiveExtractionTest;
+    connections allowunconnected:
+}
+
+%inifile: omnetpp.ini
+[General]
+network = SelectiveExtractionNetwork
+ned-path = .;../../../../src
+sim-time-limit = 12ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.compound = ${compound=false,true,true}
+*.test.reverse = ${reverse=false,false,true ! compound}
+*.test.head = ${head=false,true}
+*.compound.classifier.classifierClass = "inet::ieee80211::MgmtOverMulticastOverUnicastClassifier"
+*.compound.prioritizer.reverseOrder = ${reverse}
+
+%contains: stdout
+Selected extraction assertions passed.
