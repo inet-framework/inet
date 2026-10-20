@@ -8,6 +8,8 @@
 #ifndef __INET_PACKETFILTERFUNCTION_H
 #define __INET_PACKETFILTERFUNCTION_H
 
+#include <functional>
+
 #include "inet/queueing/contract/IPacketFilterFunction.h"
 
 namespace inet {
@@ -18,10 +20,10 @@ typedef bool (*PacketFilterFunction)(const Packet *packet);
 class INET_API CPacketFilterFunction : public cObject, public virtual IPacketFilterFunction
 {
   protected:
-    PacketFilterFunction packetFilterFunction;
+    std::function<bool(const Packet *)> packetFilterFunction;
 
   public:
-    CPacketFilterFunction(PacketFilterFunction packetFilterFunction) : packetFilterFunction(packetFilterFunction) {}
+    CPacketFilterFunction(std::function<bool(const Packet *)> packetFilterFunction) : packetFilterFunction(packetFilterFunction) {}
 
     virtual bool matchesPacket(const Packet *packet) const override { return packetFilterFunction(packet); }
 };

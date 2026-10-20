@@ -1,0 +1,3 @@
+Packet filters can retain local state
+
+CPacketFilterFunction now accepts a callable with captured values. A consumer can supply its current acceptance condition to canPullPacket() and pullPacket(). Existing function pointers remain valid. Filter queries must not change simulation state.
