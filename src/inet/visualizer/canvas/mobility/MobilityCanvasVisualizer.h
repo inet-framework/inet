@@ -8,6 +8,7 @@
 #ifndef __INET_MOBILITYCANVASVISUALIZER_H
 #define __INET_MOBILITYCANVASVISUALIZER_H
 
+#include "inet/common/figures/ProjectionClipFigure.h"
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/MobilityVisualizerBase.h"
@@ -27,8 +28,7 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
         cLineFigure *orientationLineFigure[2] = {nullptr, nullptr}; // the two projected cone-side lines (children of orientationFigure)
         cLineFigure *velocityFigure = nullptr;
         TrailFigure *trailFigure = nullptr;
-        // last true (unclipped) trail position; trail segments are clipped for display, so the chain
-        // is continued from this stored position rather than from the last (clipped) figure's end
+        // last trail position; the trail chain is continued from it
         cFigure::Point lastTrailPosition;
         bool hasLastTrailPosition = false;
 
@@ -40,6 +40,7 @@ class INET_API MobilityCanvasVisualizer : public MobilityVisualizerBase
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
+    ProjectionClipFigure *mobilityGroup = nullptr; // parent of the figures; clips to the map area, if any
     // how the velocity arrow / orientation cone follow the (equirectangular) map distortion; parsed in initialize()
     CanvasProjection::DirectionProjection velocityProjection = CanvasProjection::DIRECTION_PROJECTED;
     CanvasProjection::DirectionProjection orientationProjection = CanvasProjection::DIRECTION_PROJECTED;

@@ -53,6 +53,9 @@ void MobilityCanvasVisualizer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         zIndex = par("zIndex");
         canvasProjection = CanvasProjection::getCanvasProjection(visualizationTargetModule->getCanvas());
+        mobilityGroup = new ProjectionClipFigure("mobility", canvasProjection);
+        mobilityGroup->setZIndex(zIndex);
+        visualizationTargetModule->getCanvas()->addFigure(mobilityGroup);
         velocityProjection = parseDirectionProjection(par("velocityProjection"));
         orientationProjection = parseDirectionProjection(par("orientationProjection"));
     }
@@ -75,7 +78,6 @@ void MobilityCanvasVisualizer::refreshDisplay() const
             double radius = positionCircleRadius / getEnvir()->getZoomLevel(visualizationTargetModule);
             cFigure::Rectangle bounds(position.x - radius, position.y - radius, 2 * radius, 2 * radius);
             mobilityVisualization->positionFigure->setBounds(bounds);
-            mobilityVisualization->positionFigure->setVisible(canvasProjection->isRectVisibleInClip(bounds)); // hide on a limited map when fully outside
         }
         if (displayOrientations) {
             // Draw the orientation as a 3D cone whose axis is the node's forward direction, rendered as
@@ -99,10 +101,7 @@ void MobilityCanvasVisualizer::refreshDisplay() const
             double zoom = getEnvir()->getZoomLevel(visualizationTargetModule);
             double refExtent = std::max(std::max(axisRef.getLength(), uRef.getLength()), vRef.getLength());
             auto baseFigure = mobilityVisualization->orientationBaseFigure;
-            // on a limited map, hide the whole cone once its extent (around the node) is fully outside
-            double coneExtent = orientationPieRadius / zoom;
-            bool coneVisible = canvasProjection->isRectVisibleInClip(cFigure::Rectangle(position.x - coneExtent, position.y - coneExtent, 2 * coneExtent, 2 * coneExtent));
-            bool valid = coneVisible && refExtent >= 1e-9; // a degenerate (or off-map) projection produces nothing to draw
+            bool valid = refExtent >= 1e-9; // a degenerate projection produces nothing to draw
             baseFigure->setVisible(valid);
             if (valid) {
                 double scale = (orientationPieRadius / zoom) / refExtent;
@@ -151,10 +150,8 @@ void MobilityCanvasVisualizer::refreshDisplay() const
             auto velocity = canvasProjection->computeCanvasDirection(positionCoord, velocityCoord, velocityProjection);
             mobilityVisualization->velocityFigure->setStart(position);
             mobilityVisualization->velocityFigure->setEnd(position + velocity * velocityArrowScale);
-            // hide when the projected arrow has no length (e.g. a (near-)vertical velocity on the map);
-            // the arrow is NOT clipped (that would move the arrowhead and fake a velocity change) - like
-            // the orientation cone it simply disappears once the node leaves the map area
-            mobilityVisualization->velocityFigure->setVisible(velocity.getLength() != 0 && canvasProjection->isPointInsideClip(position));
+            // hide when the projected arrow has no length (e.g. a (near-)vertical velocity on the map)
+            mobilityVisualization->velocityFigure->setVisible(velocity.getLength() != 0);
         }
         if (displayMovementTrails)
             extendMovementTrail(mobility, mobilityVisualization, position);
@@ -166,29 +163,27 @@ void MobilityCanvasVisualizer::addMobilityVisualization(const IMobility *mobilit
 {
     MobilityVisualizerBase::addMobilityVisualization(mobility, mobilityVisualization);
     auto mobilityCanvasVisualization = static_cast<MobilityCanvasVisualization *>(mobilityVisualization);
-    auto canvas = visualizationTargetModule->getCanvas();
     if (displayPositions)
-        canvas->addFigure(mobilityCanvasVisualization->positionFigure);
+        mobilityGroup->addFigure(mobilityCanvasVisualization->positionFigure);
     if (displayOrientations)
-        canvas->addFigure(mobilityCanvasVisualization->orientationFigure);
+        mobilityGroup->addFigure(mobilityCanvasVisualization->orientationFigure);
     if (displayVelocities)
-        canvas->addFigure(mobilityCanvasVisualization->velocityFigure);
+        mobilityGroup->addFigure(mobilityCanvasVisualization->velocityFigure);
     if (displayMovementTrails)
-        canvas->addFigure(mobilityCanvasVisualization->trailFigure);
+        mobilityGroup->addFigure(mobilityCanvasVisualization->trailFigure);
 }
 
 void MobilityCanvasVisualizer::removeMobilityVisualization(const MobilityVisualization *mobilityVisualization)
 {
-    auto canvas = visualizationTargetModule->getCanvas();
     auto mobilityCanvasVisualization = static_cast<const MobilityCanvasVisualization *>(mobilityVisualization);
     if (displayPositions)
-        canvas->removeFigure(mobilityCanvasVisualization->positionFigure);
+        mobilityGroup->removeFigure(mobilityCanvasVisualization->positionFigure);
     if (displayOrientations)
-        canvas->removeFigure(mobilityCanvasVisualization->orientationFigure);
+        mobilityGroup->removeFigure(mobilityCanvasVisualization->orientationFigure);
     if (displayVelocities)
-        canvas->removeFigure(mobilityCanvasVisualization->velocityFigure);
+        mobilityGroup->removeFigure(mobilityCanvasVisualization->velocityFigure);
     if (displayMovementTrails)
-        canvas->removeFigure(mobilityCanvasVisualization->trailFigure);
+        mobilityGroup->removeFigure(mobilityCanvasVisualization->trailFigure);
     MobilityVisualizerBase::removeMobilityVisualization(mobilityVisualization);
 }
 
@@ -200,7 +195,6 @@ MobilityCanvasVisualizer::MobilityVisualization *MobilityCanvasVisualizer::creat
         positionFigure = new cOvalFigure("position");
         positionFigure->setTags((std::string("position ") + tags).c_str());
         positionFigure->setTooltip("This circle represents the current position of the mobility model");
-        positionFigure->setZIndex(zIndex);
         positionFigure->setLineColor(positionCircleLineColorSet.getColor(module->getId()));
         positionFigure->setLineWidth(positionCircleLineWidth);
         positionFigure->setFilled(true);
@@ -213,7 +207,6 @@ MobilityCanvasVisualizer::MobilityVisualization *MobilityCanvasVisualizer::creat
         // a 3D orientation cone, drawn as its (rotated) base ellipse plus the two cone-side lines;
         // geometry is recomputed per frame in refreshDisplay()
         orientationFigure = new cGroupFigure("orientation");
-        orientationFigure->setZIndex(zIndex);
         orientationBaseFigure = new cOvalFigure("orientationBase");
         orientationBaseFigure->setTags((std::string("orientation ") + tags).c_str());
         orientationBaseFigure->setTooltip("This ellipse is the base of the 3D orientation cone; it can be filled with a different color depending on whether the cone points up or down");
@@ -241,7 +234,6 @@ MobilityCanvasVisualizer::MobilityVisualization *MobilityCanvasVisualizer::creat
         velocityFigure = new cLineFigure("velocity");
         velocityFigure->setTags((std::string("velocity ") + tags).c_str());
         velocityFigure->setTooltip("This arrow represents the current velocity of the mobility model");
-        velocityFigure->setZIndex(zIndex);
         velocityFigure->setVisible(false);
         velocityFigure->setEndArrowhead(cFigure::ARROW_SIMPLE);
         velocityFigure->setLineColor(velocityLineColor);
@@ -252,7 +244,6 @@ MobilityCanvasVisualizer::MobilityVisualization *MobilityCanvasVisualizer::creat
     if (displayMovementTrails) {
         trailFigure = new TrailFigure(trailLength, true, "movement trail");
         trailFigure->setTags((std::string("movement_trail recent_history ") + tags).c_str());
-        trailFigure->setZIndex(zIndex);
     }
     auto visualization = new MobilityCanvasVisualization(positionFigure, orientationFigure, velocityFigure, trailFigure, mobility);
     visualization->orientationBaseFigure = orientationBaseFigure;
@@ -264,8 +255,7 @@ MobilityCanvasVisualizer::MobilityVisualization *MobilityCanvasVisualizer::creat
 void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, MobilityCanvasVisualization *visualization, cFigure::Point position) const
 {
     auto trailFigure = visualization->trailFigure;
-    // the chain is continued from the last true (unclipped) position, because the stored figures may
-    // have been clipped for display on a limited map area
+    // the chain is continued from the last trail position
     cFigure::Point startPosition = visualization->hasLastTrailPosition ? visualization->lastTrailPosition : position;
     cFigure::Point endPosition = position;
     double dx = startPosition.x - endPosition.x;
@@ -275,12 +265,8 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Mo
         cLineFigure *movementLine = new cLineFigure("movementTrail");
         movementLine->setTags((std::string("movement_trail recent_history ") + tags).c_str());
         movementLine->setTooltip("This line represents the recent movement trail of the mobility model");
-        // clip the drawn segment to the map area (a no-op when no clip rect is set); the unclipped
-        // endpoints are remembered separately so the trail chain stays continuous
-        cFigure::Point drawnStart = startPosition, drawnEnd = endPosition;
-        bool inside = canvasProjection->clipLine(drawnStart, drawnEnd);
-        movementLine->setStart(drawnStart);
-        movementLine->setEnd(drawnEnd);
+        movementLine->setStart(startPosition);
+        movementLine->setEnd(endPosition);
         auto module = const_cast<cModule *>(check_and_cast<const cModule *>(mobility));
         movementLine->setLineColor(movementTrailLineColorSet.getColor(module->getId()));
         movementLine->setLineStyle(movementTrailLineStyle);
@@ -288,9 +274,9 @@ void MobilityCanvasVisualizer::extendMovementTrail(const IMobility *mobility, Mo
         movementLine->setZoomLineWidth(false);
         // hide trail discontinuities: an over-long segment (e.g. a node wrapping across the map
         // on an equirectangular projection) is treated as a jump and hidden, so the visible trail breaks
-        // into disjoint pieces; also hide segments clipped fully outside the map area. The segment is
-        // still added so the trail (and its length window) continues past the jump/off-map excursion.
-        if (!inside || dx * dx + dy * dy > movementTrailSegmentHideThreshold * movementTrailSegmentHideThreshold)
+        // into disjoint pieces. The segment is still added so the trail (and its length window) continues
+        // past the jump.
+        if (dx * dx + dy * dy > movementTrailSegmentHideThreshold * movementTrailSegmentHideThreshold)
             movementLine->setVisible(false);
         trailFigure->addFigure(movementLine);
         visualization->lastTrailPosition = position;

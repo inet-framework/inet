@@ -8,6 +8,7 @@
 #ifndef __INET_NETWORKNODECANVASVISUALIZER_H
 #define __INET_NETWORKNODECANVASVISUALIZER_H
 
+#include "inet/common/figures/ProjectionClipFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/NetworkNodeVisualizerBase.h"
 #include "inet/visualizer/canvas/scene/NetworkNodeCanvasVisualization.h"
@@ -21,6 +22,7 @@ class INET_API NetworkNodeCanvasVisualizer : public NetworkNodeVisualizerBase
   protected:
     const CanvasProjection *canvasProjection = nullptr;
     double zIndex = NaN;
+    ProjectionClipFigure *networkNodeGroup = nullptr; // parent of the visualizations; clips to the map area, if any
     std::map<int, NetworkNodeCanvasVisualization *> networkNodeVisualizations;
 
   protected:
