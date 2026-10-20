@@ -1,11 +1,5 @@
 Half-duplex Ethernet drops a frame after 16 collisions, not 17
 
-The two half-duplex Ethernet medium access control (MAC) modules,
-EthernetCsmaMac and EthernetCsmaMacPhy, made a 17th transmission attempt
-before they dropped a frame whose attempts all collided. IEEE 802.3 allows
-16 (attemptLimit, clause 4.2.3.2.5 and Table 4-2), and both modules now
-stop there. The backoff before each retransmission is unchanged.
+The two half-duplex Ethernet medium access control (MAC) modules, EthernetCsmaMac and EthernetCsmaMacPhy, made a 17th transmission attempt before they dropped a frame whose attempts all collided. IEEE 802.3 allows 16 (attemptLimit, clause 4.2.3.2.5 and Table 4-2), and both modules now stop there. The backoff before each retransmission is unchanged.
 
-This changes the results of half-duplex simulations in which a frame
-collides 16 times in a row: the frame is dropped without the 17th attempt
-and the backoff before it.
+This changes the results of half-duplex simulations in which a frame collides 16 times in a row: the frame is dropped without the 17th attempt and the backoff before it.
