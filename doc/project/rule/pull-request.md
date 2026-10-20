@@ -260,7 +260,7 @@ A subject says what the commit does. Where that is the whole story, the commit i
 
 **A body is required when the change is substantial, and whenever it repairs a defect, changes behavior, or implements a standard** — the last three at any size, because each has a reason that no subject has room for. A one-line fix for a null dereference still owes the reader the crash.
 
-**A body is not required when the subject is the whole story.** A rename, an include ordering, a whitespace commit, a mechanical sweep whose rule fits the subject. Nor when the change *is* its own explanation: a plan or documentation commit, a regenerated file, a `WHATSNEW` entry. In each of those the reader's next step is to read the file, not the message.
+**A body is not required when the subject is the whole story.** A rename, an include ordering, a whitespace commit, a mechanical sweep whose rule fits the subject. Nor when the change *is* its own explanation: a plan or documentation commit, a regenerated file, a release note. In each of those the reader's next step is to read the file, not the message.
 
 **Where the line falls.** The gate fails an empty body above **50 changed lines**, and that number is measured rather than chosen: across master's last 300 commits the share with no body is flat at 3 to 4 % for every threshold from 50 upward, so 50 is where the project already draws the line itself. Of the nine commits above it that carry no body, six are the exempt kinds above.
 

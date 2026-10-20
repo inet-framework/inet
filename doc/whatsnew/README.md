@@ -1,6 +1,6 @@
 # Release notes of the version in development
 
-Each release note of the version in development is a file of its own in this folder. At the release, `doc/project/enforcement/whatsnew.py release` writes the files into `WHATSNEW` as numbered lists and removes them. Two pull requests that add two release notes therefore add two different files, and they cannot conflict. [RR-WHATSNEW](../project/rule/release.md#rr-whatsnew) says what a release note says.
+Each release note of the version in development is a file of its own in this folder. At the release, `doc/project/enforcement/whatsnew.py release` writes the files into `WHATSNEW` as numbered lists and removes them. Two pull requests that add two release notes therefore add two different files, and they cannot conflict. [RR-WHATSNEW-FILE](../project/rule/release.md#rr-whatsnew-file) gives the rule, and [RR-WHATSNEW](../project/rule/release.md#rr-whatsnew) says what a release note says.
 
 ## Add a release note
 
