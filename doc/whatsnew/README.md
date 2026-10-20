@@ -50,9 +50,9 @@ doc/project/enforcement/whatsnew.py check     # the folder, the name and the for
 doc/project/enforcement/whatsnew.py preview   # the section as the release will show it
 ```
 
-## Rebase a branch that adds its entry to WHATSNEW
+## Rebase a branch that adds its entry to WHATSNEW or its section to the migration guide
 
-A branch from before 2026-10-20 adds its entry to `WHATSNEW`, and it conflicts there. `whatsnew.py rebase` rebases the branch and moves its entries into files. Such a branch has no `whatsnew.py`, so take the script from `master`:
+A branch from before 2026-10-20 adds its entry to `WHATSNEW` and its section to `doc/src/migration-guide/index.rst`, and it conflicts there. `whatsnew.py rebase` rebases the branch and moves its entries into files. Such a branch has no `whatsnew.py`, so take the script from `master`:
 
 ```sh
 git checkout <branch>
@@ -62,13 +62,15 @@ python3 ../whatsnew.py rebase origin/master
 
 When a commit stops on a conflict in `WHATSNEW`, the tool writes the entries that the commit adds, changes or removes as files, takes `WHATSNEW` from the new base, and continues. A new file gets the area of the commit subject; a note tells you when no other release note has that area, so that you can rename the file. When another file conflicts too, the tool stops: resolve that file, `git add` it, and run `python3 ../whatsnew.py rebase --continue`. At the end, the tool checks the rebased commits.
 
+The tool does the same for a conflict in `doc/src/migration-guide/index.rst`: a section that the commit adds becomes a file of `doc/src/migration-guide/development/`, with `~` below its title and `^` below a subsection, and a section that the commit changes or removes changes or removes its file. The tool stops when the commit changes the guide of INET 3.x, which stays in `index.rst`.
+
 ## Make a release
 
 Run `whatsnew.py release` with the heading of the release and the heading of the next version in development, then write the introduction of the release in `WHATSNEW`:
 
 ```sh
 doc/project/enforcement/whatsnew.py release "INET-4.8 (March 2027) — feature release" --next "INET-4.8.x (in development)"
-git add -A WHATSNEW doc/whatsnew
+git add -A WHATSNEW doc/whatsnew doc/src/migration-guide
 ```
 
-Text in the section of the version in development other than the sentence that points here becomes the introduction of the release.
+Text in the section of the version in development other than the sentence that points here becomes the introduction of the release. In the migration guide, the release moves the section files of `development/` into the folder of the release, for example `4.8/`, and writes the heading of the release below the heading of the next version in development.

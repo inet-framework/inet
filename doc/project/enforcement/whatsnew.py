@@ -14,12 +14,15 @@ The file doc/whatsnew/README.md says how to write one. The commands, from the re
       objects, so the pull-request workflow can run it on untrusted content.
   whatsnew.py release HEADING --next HEADING
       Write the entries into WHATSNEW as the section HEADING, put the heading of the next version in
-      development above it, and remove the entry files.
+      development above it, and remove the entry files. In the migration guide, move the section
+      files of development/ into the folder of the release, for example 4.8/, and write the two
+      headings.
   whatsnew.py rebase UPSTREAM | --continue
       Rebase the current branch onto UPSTREAM. When a commit stops on a conflict in WHATSNEW, write
       the entries that the commit adds, changes or removes in the section of the version in
-      development as entry files, take WHATSNEW from the new base, and continue. Stop on any other
-      conflict; resolve it, then run whatsnew.py rebase --continue.
+      development as entry files, take WHATSNEW from the new base, and continue. Do the same for
+      the sections of the index.rst of the migration guide. Stop on any other conflict; resolve it,
+      then run whatsnew.py rebase --continue.
 
 Exit status 0 = clean, 1 = a violation or a stop, 2 = invalid usage.
 """
@@ -366,10 +369,9 @@ def section_text(section):
     return "\n".join([section.title, "~" * len(section.title), ""] + section.body) + "\n"
 
 
-def guide_sections(text):
-    """(preamble, sections) of an index.rst text: the lines before the first section, and for each
-    section with a - underline (title, body, lines), where the lines start at the labels above it."""
-    lines = (text or "").splitlines()
+def section_bounds(lines):
+    """(start, head, end) of each section of index.rst with a - underline: the first label above it,
+    its title line, and the line after its last line."""
     heads = [i - 1 for i in range(1, len(lines))
              if is_underline(lines[i], "-") and lines[i - 1].strip()
              and not is_underline(lines[i - 1], lines[i - 1].strip()[0])]
@@ -381,16 +383,57 @@ def guide_sections(text):
         while start < head and not LABEL.match(lines[start]):
             start += 1
         starts.append(start)
+    return [(starts[n], head, starts[n + 1] if n + 1 < len(heads) else len(lines))
+            for n, head in enumerate(heads)]
+
+
+def guide_sections(text):
+    """(preamble, sections) of an index.rst text: the lines before the first section, and for each
+    section with a - underline (title, body, lines), where the lines start at the labels above it."""
+    lines = (text or "").splitlines()
+    bounds = section_bounds(lines)
     sections = []
-    for n, head in enumerate(heads):
-        end = starts[n + 1] if n + 1 < len(heads) else len(lines)
+    for start, head, end in bounds:
         body = lines[head + 2:end]
         while body and not body[0].strip():
             body.pop(0)
         while body and not body[-1].strip():
             body.pop()
-        sections.append((lines[head].strip(), body, lines[starts[n]:end]))
-    return lines[:starts[0] if starts else len(lines)], sections
+        sections.append((lines[head].strip(), body, lines[start:end]))
+    return lines[:bounds[0][0] if bounds else len(lines)], sections
+
+
+def demote(body):
+    """The body of a section of index.rst as the body of a section file: a ~ subsection becomes ^."""
+    return [("^" * len(line.rstrip()) if n and body[n - 1].strip() and is_underline(line, "~") else line)
+            for n, line in enumerate(body)]
+
+
+def guide_release(heading, next_heading):
+    """(index.rst text, moves, error) of a release: the text with the heading of the next version
+    in development above the heading of the release, and the (source, target) of each section file
+    of development/. (None, [], None) when the tree has no migration guide."""
+    path = Path(GUIDE)
+    if not path.is_file():
+        return None, [], None
+    lines = path.read_text(encoding="utf-8").splitlines()
+    block = next(((start, end) for start, head, end in section_bounds(lines)
+                  if "(in development)" in lines[head]), None)
+    if not block:
+        return None, [], f"{GUIDE} has no heading of the version in development"
+    match = re.match(r"INET-(\S+)", heading)
+    folder = match[1] if match else ""
+    if not FOLDER.match(folder) or folder == DEVELOPMENT:
+        return None, [], f"the heading \"{heading}\" names no version such as INET-4.8"
+    target = Path(GUIDE_DIR) / folder
+    sources = sorted((Path(GUIDE_DIR) / DEVELOPMENT).glob("*.rst"))
+    if sources and target.exists():
+        return None, [], f"{target} exists already"
+    new = heading_lines(next_heading) + [f"{INCLUDE} {DEVELOPMENT}/*.rst", ""]
+    if sources:
+        new += heading_lines(heading) + [f"{INCLUDE} {folder}/*.rst", ""]
+    text = lines[:block[0]] + new + lines[block[1]:]
+    return "\n".join(text).rstrip("\n") + "\n", [(source, target / source.name) for source in sources], None
 
 
 def is_version_section(body):
@@ -561,6 +604,10 @@ def release(args):
         for path, problem in problems:
             print(f"whatsnew.py: {path} {problem}", file=sys.stderr)
         return 1
+    guide, moves, error = guide_release(args.heading, args.next)
+    if error:
+        print(f"whatsnew.py: {error}", file=sys.stderr)
+        return 1
     start, end = bounds
     # The text of the section other than the stub sentence is the introduction of the release.
     intro = dedent([line for line in lines[start + 2:end] if line.strip() != STUB])
@@ -571,8 +618,16 @@ def release(args):
         (Path(ENTRY_DIR) / entry.section / entry.name).unlink()
     print(f"WHATSNEW has the section \"{args.heading}\" with {len(entries)} entries, and "
           f"{len(entries)} entry files are removed.")
+    if guide is not None:
+        Path(GUIDE).write_text(guide, encoding="utf-8")
+        for source, target in moves:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            source.rename(target)
+        print(f"{GUIDE} has the heading \"{args.next}\" above the heading of the release, and "
+              f"{len(moves)} section files moved from {DEVELOPMENT}/ into the folder of the release.")
     if not intro:
-        print(f"Write the introduction of \"{args.heading}\", then run: git add -A {WHATSNEW} {ENTRY_DIR}")
+        print(f"Write the introduction of \"{args.heading}\" in WHATSNEW.")
+    print(f"Then run: git add -A {WHATSNEW} {ENTRY_DIR} {GUIDE_DIR}")
     return 0
 
 
@@ -665,6 +720,64 @@ def convert(sha):
     return True, messages
 
 
+def write_section(path, section):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(section_text(section), encoding="utf-8")
+    git("add", "--", str(path))
+
+
+def convert_guide(sha):
+    """Resolve the conflict in the index.rst of the migration guide of the commit that the rebase
+    stopped on: write the section changes of the commit as section files of development/, and take
+    index.rst from HEAD. (done, messages)."""
+    short, subject = sha[:9], git("log", "-1", "--format=%s", sha).stdout.strip()
+    old_text, new_text = GitTree(f"{sha}^").read(GUIDE), GitTree(sha).read(GUIDE)
+    if guide_sections(old_text)[0] != guide_sections(new_text)[0]:
+        return False, [f"{short} changes the part of {GUIDE} above its sections; resolve it by hand"]
+    added, changed, removed = section_changes(old_text, new_text)
+    kept = {t for t, b, _ in guide_sections(GitTree("HEAD").read(GUIDE))[1] if not is_version_section(b)}
+    files = {section.title: section for section in read_sections(WorkTree())[0]}
+    for title, _ in changed + removed:
+        if title in kept:
+            return False, [f"{short} changes the section \"{title}\", which stays in {GUIDE}; resolve it by hand"]
+    for title, _ in changed:
+        if title not in files:
+            return False, [f"{short} changes the section \"{title}\", and no section file has that title; "
+                           f"resolve {GUIDE} by hand"]
+    area = area_of(subject)
+    if area in (None, "doc", "plan"):
+        area = branch_area()
+    messages = []
+    for title, body in added:
+        if title in files:
+            changed.append((title, body))
+            continue
+        stem = file_name(title, area, suffix="")
+        path, n = Path(GUIDE_DIR) / DEVELOPMENT / f"{stem}.rst", 2
+        while path.exists():
+            path, n = path.with_name(f"{stem}-{n}.rst"), n + 1
+        write_section(path, Section(DEVELOPMENT, path.name, title, demote(body)))
+        messages.append(f"{short} adds {path}")
+    for title, body in changed:
+        current = files[title]
+        path = Path(GUIDE_DIR) / current.folder / current.name
+        if current.body == demote(body):
+            messages.append(f"{short} keeps {path}, which has the same section")
+            continue
+        write_section(path, current._replace(body=demote(body)))
+        messages.append(f"{short} changes {path}")
+    for title, _ in removed:
+        if title in files:
+            current = files[title]
+            path = Path(GUIDE_DIR) / current.folder / current.name
+            git("rm", "-q", "--", str(path))
+            messages.append(f"{short} removes {path}")
+    git("checkout", "HEAD", "--", GUIDE)
+    if not messages:
+        messages.append(f"{short} changes no section")
+    return True, messages
+
+
 def rebase(args):
     state = git_path("whatsnew-rebase")
     editor = {**os.environ, "GIT_EDITOR": "true"}
@@ -691,13 +804,14 @@ def rebase(args):
         if not sha or not conflicts:
             print("whatsnew.py: the rebase stopped without a conflict; see git status", file=sys.stderr)
             return 1
-        if WHATSNEW in conflicts:
-            done, messages = convert(sha)
-            for message in messages:
-                print(f"whatsnew.py: {message}")
-            if not done:
-                return 1
-        others = [p for p in conflicts if p != WHATSNEW]
+        for path, converter in ((WHATSNEW, convert), (GUIDE, convert_guide)):
+            if path in conflicts:
+                done, messages = converter(sha)
+                for message in messages:
+                    print(f"whatsnew.py: {message}")
+                if not done:
+                    return 1
+        others = [p for p in conflicts if p not in (WHATSNEW, GUIDE)]
         if others:
             print(f"whatsnew.py: {sha[:9]} also conflicts in {', '.join(others)}. Resolve them, add them, "
                   "then run whatsnew.py rebase --continue")

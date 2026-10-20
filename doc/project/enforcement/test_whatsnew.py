@@ -348,6 +348,35 @@ class CommandTest(RepositoryTest):
         self.assertNotIn("INET-4.7.x", text)
         self.assertEqual(self.run_tool("check").returncode, 0)
 
+    def test_release_moves_the_guide_sections(self):
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW)
+        self.commit("doc: add: the guide")
+        self.base = self.head()
+        self.write("doc/src/migration-guide/development/udp-sockets.rst", "UDP Sockets\n~~~~~~~~~~~\n\nIt changed.\n")
+        self.commit("udp: change: the socket")
+        result = self.run_tool("release", "INET-4.8 (March 2027) — feature release",
+                               "--next", "INET-4.8.x (in development)")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        guide = (self.root / "doc/src/migration-guide/index.rst").read_text(encoding="utf-8")
+        self.assertIn("Release: |release|\n\n"
+                      "INET-4.8.x (in development)\n---------------------------\n\n"
+                      ".. include-files:: development/*.rst\n\n"
+                      "INET-4.8 (March 2027) — feature release\n---------------------------------------\n\n"
+                      ".. include-files:: 4.8/*.rst\n\n.. _mg:sec:old:", guide)
+        self.assertTrue((self.root / "doc/src/migration-guide/4.8/udp-sockets.rst").is_file())
+        self.assertFalse((self.root / "doc/src/migration-guide/development/udp-sockets.rst").exists())
+        self.git("add", "-A")
+        self.git("commit", "-qm", "doc: change: release 4.8")
+        result = self.run_tool("check", "--range", f"{self.base}..HEAD")
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_release_needs_a_version_in_the_heading(self):
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW)
+        result = self.run_tool("release", "Next release", "--next", "INET-4.8.x (in development)")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('the heading "Next release" names no version such as INET-4.8', result.stderr)
+        self.assertEqual((self.root / "WHATSNEW").read_text(encoding="utf-8"), STUBBED)
+
     def test_release_keeps_an_introduction(self):
         self.write("WHATSNEW", STUBBED.replace(whatsnew.STUB, whatsnew.STUB + "\n\nThis release adds X."))
         self.write("doc/whatsnew/fixes/tcp-a.txt", "A repair\n\nIt is repaired.\n")
@@ -433,6 +462,55 @@ class RebaseTest(RepositoryTest):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertFalse(self.in_rebase())
         self.assertEqual(self.entry("incompatible/tcp-third-change.txt"), "A third change\n\nIt changes too.\n")
+
+    def guide_branch(self):
+        """master has GUIDE_OLD, topic adds a section with a subsection and changes TCP Algorithms."""
+        self.git("checkout", "-q", "master")
+        self.write("doc/src/migration-guide/index.rst", GUIDE_OLD)
+        self.commit("doc: add: the guide")
+        self.git("checkout", "-q", "-B", "topic")
+        self.write("doc/src/migration-guide/index.rst", GUIDE_OLD.replace(
+            "TCP Algorithms\n", "UDP Sockets\n-----------\n\nThe socket changed.\n\nA Detail\n~~~~~~~~\n\n"
+            "The detail.\n\nTCP Algorithms\n").replace("The algorithm is a module.", "The algorithm is a submodule."))
+        self.write("src/b.cc", "int b = 0;\n")
+        self.commit("udp: change: the socket")
+
+    def move_guide(self):
+        self.git("checkout", "-q", "master")
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW)
+        self.write("doc/src/migration-guide/development/tcp-algorithms.rst",
+                   "TCP Algorithms\n~~~~~~~~~~~~~~\n\nThe algorithm is a module.\n")
+        self.commit("doc: change: the guide sections are files")
+        self.git("checkout", "-q", "topic")
+
+    def test_guide_sections_become_files(self):
+        self.guide_branch()
+        self.move_guide()
+        result = self.run_tool("rebase", "master")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.in_rebase())
+        self.assertEqual((self.root / "doc/src/migration-guide/index.rst").read_text(encoding="utf-8"), GUIDE_NEW)
+        guide = self.root / "doc/src/migration-guide/development"
+        self.assertEqual((guide / "udp-sockets.rst").read_text(encoding="utf-8"),
+                         "UDP Sockets\n~~~~~~~~~~~\n\nThe socket changed.\n\nA Detail\n^^^^^^^^\n\nThe detail.\n")
+        self.assertEqual((guide / "tcp-algorithms.rst").read_text(encoding="utf-8"),
+                         "TCP Algorithms\n~~~~~~~~~~~~~~\n\nThe algorithm is a submodule.\n")
+
+    def test_a_change_of_a_section_that_stays_stops(self):
+        self.guide_branch()
+        self.write("doc/src/migration-guide/index.rst", (self.root / "doc/src/migration-guide/index.rst").read_text()
+                   .replace("Old text.", "Old text, changed."))
+        self.commit("udp: change: the old section")
+        self.move_guide()
+        self.git("checkout", "-q", "master")
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW.replace("Old text.", "Old text on master."))
+        self.commit("doc: change: the old section on master")
+        self.git("checkout", "-q", "topic")
+        result = self.run_tool("rebase", "master")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn('changes the section "Old Section", which stays in doc/src/migration-guide/index.rst',
+                      result.stdout)
+        self.git("rebase", "--abort")
 
     def test_a_change_of_a_released_section_stops(self):
         self.add_entry(FIXES, "3. A third change\n\n   It changes too.\n\n")
