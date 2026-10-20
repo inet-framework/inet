@@ -1,0 +1,175 @@
+%description:
+Check duplicate Block Ack Actions through initialized production HCF.
+The test observes response submission without a wireless transmission.
+HCF must acknowledge a MAC retry without a second agreement dispatch.
+
+The fixture selects duplicate dispatch only at this prerequisite stage.
+
+%extraargs: -r 0
+
+%file: ActionDispatch.cc
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class ActionDispatchHcf : public Hcf {
+  public:
+    int dispatches = 0;
+    int acknowledgments = 0;
+    int responses = 0;
+    int delivered = 0;
+    Ptr<const Ieee80211AddbaResponse> response;
+    void checkAgreementDeadline() {
+        Enter_Method("checkAgreementDeadline");
+        receiveRequest(false);
+        auto expectedDeadline = SimTime(5, SIMTIME_MS);
+        scheduleInactivityTimer(expectedDeadline);
+        ASSERT(inactivityTimer->getArrivalTime() == expectedDeadline);
+        cancelEvent(inactivityTimer);
+    }
+    void receiveRequest(bool retry) {
+        Enter_Method("receiveRequest");
+        auto header = makeShared<Ieee80211AddbaRequest>();
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+        header->setReceiverAddress(mac->getAddress());
+        header->setSequenceNumber(SequenceNumberCyclic(10));
+        header->setRetry(retry);
+        header->setTid(5);
+        header->setDialogToken(37);
+        header->setBlockAckPolicy(true);
+        header->setBufferSize(8);
+        header->setStartingSequenceNumber(SequenceNumberCyclic(100));
+        auto packet = new Packet("request", header);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(
+                modeSet->getMode(bps(6000000)));
+        processLowerFrame(packet, header);
+    }
+    void checkNegotiatedWindow() {
+        Enter_Method("checkNegotiatedWindow");
+        receiveRequest(false);
+        ASSERT(response != nullptr && response->getBufferSize() == 8);
+        auto agreement = recipientBlockAckAgreementHandler->getAgreement(5, MacAddress("02:00:00:00:00:02"));
+        ASSERT(agreement != nullptr && agreement->getBufferSize() == 8);
+        auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+        bar->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+        bar->setReceiverAddress(mac->getAddress());
+        bar->setTidInfo(5);
+        bar->setStartingSequenceNumber(SequenceNumberCyclic(104));
+        bar->setFragmentNumber(0);
+        auto request = new Packet("bar-before-data", bar);
+        request->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+        processLowerFrame(request, bar);
+        ASSERT(delivered == 0);
+        auto data = makeShared<Ieee80211DataHeader>();
+        data->setType(ST_DATA_WITH_QOS);
+        data->addChunkLength(QOSCONTROL_PART_LENGTH);
+        data->setTransmitterAddress(MacAddress("02:00:00:00:00:02"));
+        data->setReceiverAddress(mac->getAddress());
+        data->setAddress3(data->getTransmitterAddress());
+        data->setTid(5);
+        data->setSequenceNumber(SequenceNumberCyclic(104));
+        data->setAckPolicy(BLOCK_ACK);
+        auto packet = new Packet("first-data", data);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(modeSet->getMode(bps(6000000)));
+        processLowerFrame(packet, data);
+        ASSERT(delivered == 1);
+    }
+  protected:
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto frame : frames) {
+            delivered++;
+            take(frame);
+            delete frame;
+        }
+    }
+    void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header) override {
+        dispatches++;
+        Hcf::recipientProcessReceivedManagementFrame(header);
+    }
+    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&,
+            Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        acknowledgments++;
+        delete packet;
+    }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        responses++;
+        response = dynamicPtrCast<const Ieee80211AddbaResponse>(header);
+        delete packet;
+    }
+};
+Define_Module(ActionDispatchHcf);
+class ActionDispatchTest : public cSimpleModule {
+  protected:
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("test")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto hcf = check_and_cast<ActionDispatchHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"));
+        if (par("scenario").intValue() == 1)
+            hcf->checkAgreementDeadline();
+        else if (par("scenario").intValue() == 2)
+            hcf->checkNegotiatedWindow();
+        else {
+            hcf->receiveRequest(false);
+            hcf->receiveRequest(true);
+            ASSERT(hcf->acknowledgments == 2);
+            ASSERT(hcf->dispatches == 1);
+            ASSERT(hcf->responses == 1);
+            ASSERT(hcf->response != nullptr && hcf->response->getStatusCode() == SC_SUCCESSFUL);
+            ASSERT(hcf->response->getBufferSize() == 8);
+        }
+        std::cout << "Block Ack Action dispatch assertions passed.\n";
+    }
+};
+Define_Module(ActionDispatchTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module ActionDispatchHcf extends Hcf { parameters: @class(::inet::ieee80211::ActionDispatchHcf); }
+simple ActionDispatchTest { parameters: int scenario; @class(::inet::ieee80211::ActionDispatchTest); }
+network ActionDispatchNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: ActionDispatchTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ActionDispatchNetwork
+ned-path = .;../../../../src
+sim-time-limit = 2ms
+seed-set = 0
+*.test.scenario = ${scenario=0,1,2}
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "ActionDispatchHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = 4ms
+**.wlan[*].mac.hcf.recipientBlockAckAgreementPolicy.maximumAllowedBufferSize = ${scenario} == 2 ? 8 : 64
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+
+%contains: stdout
+Block Ack Action dispatch assertions passed.

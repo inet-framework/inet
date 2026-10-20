@@ -471,8 +471,17 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler));
     }
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
-        sendUp(recipientDataService->managementFrameReceived(packet, mgmtHeader));
-        recipientProcessReceivedManagementFrame(mgmtHeader);
+        auto accepted = recipientDataService->managementFrameReceived(packet, mgmtHeader);
+        for (auto frame : accepted) {
+            take(frame);
+            auto completeHeader = frame->peekAtFront<Ieee80211MgmtHeader>();
+            if (dynamicPtrCast<const Ieee80211ActionFrame>(completeHeader)) {
+                recipientProcessReceivedManagementFrame(completeHeader);
+                delete frame;
+            }
+            else
+                sendUp({frame});
+        }
     }
     else { // TODO else if (auto ctrlFrame = dynamic_cast<Ieee80211ControlFrame*>(frame))
         sendUp(recipientDataService->controlFrameReceived(packet, header, recipientBlockAckAgreementHandler));
