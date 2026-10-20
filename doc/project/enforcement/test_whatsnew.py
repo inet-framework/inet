@@ -47,6 +47,54 @@ Notable bug fixes are the following:
 
 {RELEASED}"""
 
+GUIDE_OLD = """.. _mg:cha:migrationguide:
+
+Migrating Code
+==============
+Release: |release|
+
+TCP Algorithms
+--------------
+
+The algorithm is a module.
+
+.. _mg:sec:old:
+
+Old Section
+-----------
+
+Old text.
+
+An Old Subsection
+~~~~~~~~~~~~~~~~~
+
+Old subsection text.
+"""
+
+GUIDE_NEW = """.. _mg:cha:migrationguide:
+
+Migrating Code
+==============
+Release: |release|
+
+INET-4.7.x (in development)
+---------------------------
+
+.. include-files:: development/*.rst
+
+.. _mg:sec:old:
+
+Old Section
+-----------
+
+Old text.
+
+An Old Subsection
+~~~~~~~~~~~~~~~~~
+
+Old subsection text.
+"""
+
 STUBBED = f"""Recent changes in the INET Framework
 ====================================
 
@@ -116,6 +164,30 @@ class FunctionTest(unittest.TestCase):
         self.assertEqual(whatsnew.file_name("The ICMPv6 checksum is written", "icmpv6"),
                          "icmpv6-checksum-is-written.txt")
         self.assertLessEqual(len(whatsnew.file_name("word " * 40, "tcp")), len("tcp-.txt") + 50)
+
+    def test_the_problems_of_a_section_file(self):
+        def problems(text):
+            return whatsnew.parse_section_file(text)[2]
+        self.assertEqual(problems("A Title\n~~~~~~~\n\nText.\n\nSub\n^^^\n\nMore.\n"), [])
+        self.assertIn("does not underline its title with ~ on line 2", problems("A Title\n-------\n\nText.\n"))
+        self.assertIn("underlines its title with fewer ~ than the title has characters",
+                      problems("A Title\n~~~~\n\nText.\n"))
+        self.assertIn("has no empty line after the underline", problems("A Title\n~~~~~~~\nText.\n"))
+        self.assertIn("line 7 underlines a heading with ~; a subsection uses ^",
+                      problems("A Title\n~~~~~~~\n\nText.\n\nSub\n~~~\n\nMore.\n"))
+
+    def test_the_sections_of_the_guide_take_their_labels(self):
+        preamble, sections = whatsnew.guide_sections(GUIDE_OLD)
+        self.assertEqual([line for line in preamble if line][-1], "Release: |release|")
+        self.assertEqual([t for t, _, _ in sections], ["TCP Algorithms", "Old Section"])
+        self.assertEqual(sections[0][1], ["The algorithm is a module."])
+        self.assertEqual(sections[1][2][0], ".. _mg:sec:old:")
+        self.assertIn("An Old Subsection", sections[1][1])
+
+    def test_a_version_heading_is_no_section_change(self):
+        added, changed, removed = whatsnew.section_changes(GUIDE_OLD, GUIDE_NEW)
+        self.assertEqual((added, changed), ([], []))
+        self.assertEqual([t for t, _ in removed], ["TCP Algorithms"])
 
     def test_an_entry_change_is_matched_by_title(self):
         new = OLD_STYLE.replace("It is repaired.", "It is repaired well.").replace(
@@ -206,6 +278,49 @@ class CommandTest(RepositoryTest):
         self.assertIn("has a name that is not lower-case words", result.stdout)
         self.assertIn("has the same title as", result.stdout)
         self.assertIn("is not in incompatible/, compatible/ or fixes/", result.stdout)
+
+    def test_a_section_in_the_guide_fails_with_the_file_to_write(self):
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW)
+        self.commit("doc: add: the guide")
+        base = self.head()
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW.replace(
+            ".. _mg:sec:old:", "UDP Sockets\n-----------\n\nThe socket changed.\n\n.. _mg:sec:old:"))
+        self.commit("udp: change: the socket")
+        result = self.run_tool("check", "--range", f"{base}..HEAD")
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn('adds the section "UDP Sockets" to doc/src/migration-guide/index.rst; write it as '
+                      "doc/src/migration-guide/development/udp-sockets.rst", result.stdout)
+
+    def test_a_version_heading_and_a_section_file_pass(self):
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW)
+        self.commit("doc: add: the guide")
+        base = self.head()
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW.replace(
+            "INET-4.7.x (in development)\n---------------------------\n\n.. include-files:: development/*.rst",
+            "INET-4.8.x (in development)\n---------------------------\n\n.. include-files:: development/*.rst"
+            "\n\nINET-4.8\n--------\n\n.. include-files:: 4.8/*.rst"))
+        self.write("doc/src/migration-guide/4.8/udp-sockets.rst", "UDP Sockets\n~~~~~~~~~~~\n\nIt changed.\n")
+        self.commit("doc: change: release 4.8")
+        for args in (["check", "--range", f"{base}..HEAD"], ["check"]):
+            result = self.run_tool(*args)
+            self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_bad_section_files_fail(self):
+        self.write("doc/src/migration-guide/index.rst", GUIDE_NEW)
+        self.write("doc/src/migration-guide/development/Bad.rst", "Bad\n~~~\n\nText.\n")
+        self.write("doc/src/migration-guide/other/udp-x.rst", "X\n~~~\n\nText.\n")
+        self.write("doc/src/migration-guide/development/udp-y.rst", "Y Title\n-------\n\nText.\n")
+        result = self.run_tool("check")
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("has a name that is not lower-case words with hyphens and .rst", result.stdout)
+        self.assertIn("is not in development/ or in a version folder", result.stdout)
+        self.assertIn("does not underline its title with ~ on line 2", result.stdout)
+
+    def test_a_guide_without_the_directive_fails(self):
+        self.write("doc/src/migration-guide/index.rst", GUIDE_OLD)
+        result = self.run_tool("check")
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("does not include development/*.rst", result.stdout)
 
     def test_preview_numbers_the_entries(self):
         self.write("doc/whatsnew/incompatible/udp-b.txt", "Second\n\nB.\n")

@@ -56,7 +56,7 @@ Each section is one file with the name `<area>-<topic>.rst`, as a release note h
 
 The reason is the same as for the release notes. When each pull request adds its section at the top of `index.rst`, all of them change the same lines, and each landing makes every other open pull request conflict: on 2026-10-20, 18 of the 70 open pull requests that conflicted with `master` conflicted in the migration guide. The version folders also tell a reader which sections are new since the version that they use.
 
-*Enforced at T4 — agent review of the diff.*
+*Enforced at T3 — [check-whatsnew.sh](../enforcement/check-whatsnew.sh), a series gate of the pull-request CI; [whatsnew.py](../enforcement/whatsnew.py) `check` by hand.*
 
 ### RR-DEPRECATE-FIRST
 

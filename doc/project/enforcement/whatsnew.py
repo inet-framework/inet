@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""The release notes of the version in development: one file for each entry, in doc/whatsnew/.
+"""The release notes and the migration guide sections of the version in development: one file for
+each entry in doc/whatsnew/, and one file for each section in doc/src/migration-guide/development/.
 
-Rule RR-WHATSNEW-FILE in doc/project/rule/release.md says why the entries are files. The file
-doc/whatsnew/README.md says how to write one. The commands, from the repository root:
+Rules RR-WHATSNEW-FILE and RR-MIGRATE-FILE in doc/project/rule/release.md say why they are files.
+The file doc/whatsnew/README.md says how to write one. The commands, from the repository root:
 
   whatsnew.py preview [--rev REV]
       Print the section of the version in development, numbered, as the release will show it.
   whatsnew.py check [--rev REV | --range BASE..HEAD]
-      Check the entry files, and that the section of the version in development in WHATSNEW has no
-      entry. With --range, check each commit of the range; this reads only git objects, so the
-      pull-request workflow can run it on untrusted content.
+      Check the entry files and the section files, and that the section of the version in
+      development in WHATSNEW has no entry. With --range, check each commit of the range, and also
+      that no commit adds a section to the index.rst of the migration guide; this reads only git
+      objects, so the pull-request workflow can run it on untrusted content.
   whatsnew.py release HEADING --next HEADING
       Write the entries into WHATSNEW as the section HEADING, put the heading of the next version in
       development above it, and remove the entry files.
@@ -260,7 +262,7 @@ def area_of(subject):
     return area or None
 
 
-def file_name(title, area=None, limit=50):
+def file_name(title, area=None, limit=50, suffix=".txt"):
     """A file name for an entry: the area, then the words of the title, at most `limit` characters."""
     words = re.findall(r"[a-z0-9]+", title.lower())
     while words and words[0] in ARTICLES:
@@ -278,7 +280,132 @@ def file_name(title, area=None, limit=50):
             break
         kept.append(word)
     stem = "-".join(([area] if area else []) + kept) or "entry"
-    return stem + ".txt"
+    return stem + suffix
+
+
+# --- the migration guide ----------------------------------------------------------------------
+
+GUIDE_DIR = "doc/src/migration-guide"
+GUIDE = f"{GUIDE_DIR}/index.rst"
+GUIDE_RULE = "RR-MIGRATE-FILE"
+DEVELOPMENT = "development"
+FOLDER = re.compile(r"^(development|\d+(\.\d+)*)$")
+SECTION_NAME = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*\.rst$")
+INCLUDE = ".. include-files::"
+LABEL = re.compile(r"^\.\. _.*:\s*$")
+
+# A section file of the migration guide: its folder, its file name, its title, and its body.
+Section = namedtuple("Section", "folder name title body")
+
+
+def is_underline(line, char):
+    text = line.rstrip()
+    return len(text) >= 3 and set(text) == {char}
+
+
+def parse_section_file(text):
+    """(title, body, problems) of the text of one section file."""
+    problems = []
+    if not text.endswith("\n"):
+        problems.append("does not end with a newline")
+    if "\t" in text:
+        problems.append("has a tab")
+    lines = text.splitlines()
+    for n, line in enumerate(lines, 1):
+        if line != line.rstrip():
+            problems.append(f"line {n} ends with a space")
+    if not lines or not lines[0].strip():
+        return None, [], problems + ["has no title on line 1"]
+    title = lines[0].strip()
+    if lines[0] != title:
+        problems.append("starts its title with a space")
+    if len(lines) < 2 or not is_underline(lines[1], "~"):
+        problems.append("does not underline its title with ~ on line 2")
+    elif len(lines[1].rstrip()) < len(title):
+        problems.append("underlines its title with fewer ~ than the title has characters")
+    if len(lines) < 3 or lines[2].strip():
+        problems.append("has no empty line after the underline")
+    body = lines[3:]
+    if not any(line.strip() for line in body):
+        problems.append("has no text after the title")
+    elif not body[0].strip():
+        problems.append("has more than one empty line after the underline")
+    if body and not body[-1].strip():
+        problems.append("ends with an empty line")
+    for n in range(1, len(body)):
+        if body[n - 1].strip() and any(is_underline(body[n], c) for c in "=-~"):
+            problems.append(f"line {n + 4} underlines a heading with {body[n][0]}; a subsection uses ^")
+            break
+    return title, [line.rstrip() for line in body], problems
+
+
+def read_sections(tree):
+    """(sections, problems) of all section files of a tree; a problem is (path, text)."""
+    sections, problems, titles = [], [], {}
+    for path in tree.list(GUIDE_DIR):
+        parts = path[len(GUIDE_DIR) + 1:].split("/")
+        if len(parts) == 1 or not parts[-1].endswith(".rst"):
+            continue
+        if len(parts) != 2 or not FOLDER.match(parts[0]):
+            problems.append((path, f"is not in {DEVELOPMENT}/ or in a version folder of {GUIDE_DIR}/"))
+            continue
+        if not SECTION_NAME.match(parts[1]):
+            problems.append((path, "has a name that is not lower-case words with hyphens and .rst"))
+        title, body, file_problems = parse_section_file(tree.read(path))
+        problems += [(path, p) for p in file_problems]
+        if title is None:
+            continue
+        if title in titles:
+            problems.append((path, f"has the same title as {titles[title]}"))
+        titles.setdefault(title, path)
+        sections.append(Section(parts[0], parts[1], title, body))
+    return sections, problems
+
+
+def section_text(section):
+    return "\n".join([section.title, "~" * len(section.title), ""] + section.body) + "\n"
+
+
+def guide_sections(text):
+    """(preamble, sections) of an index.rst text: the lines before the first section, and for each
+    section with a - underline (title, body, lines), where the lines start at the labels above it."""
+    lines = (text or "").splitlines()
+    heads = [i - 1 for i in range(1, len(lines))
+             if is_underline(lines[i], "-") and lines[i - 1].strip()
+             and not is_underline(lines[i - 1], lines[i - 1].strip()[0])]
+    starts = []
+    for head in heads:
+        start = head
+        while start > 0 and (LABEL.match(lines[start - 1]) or not lines[start - 1].strip()):
+            start -= 1
+        while start < head and not LABEL.match(lines[start]):
+            start += 1
+        starts.append(start)
+    sections = []
+    for n, head in enumerate(heads):
+        end = starts[n + 1] if n + 1 < len(heads) else len(lines)
+        body = lines[head + 2:end]
+        while body and not body[0].strip():
+            body.pop(0)
+        while body and not body[-1].strip():
+            body.pop()
+        sections.append((lines[head].strip(), body, lines[starts[n]:end]))
+    return lines[:starts[0] if starts else len(lines)], sections
+
+
+def is_version_section(body):
+    """A version heading only includes the files of its folder."""
+    return bool(body) and all(line.startswith(INCLUDE) for line in body if line.strip())
+
+
+def section_changes(old_text, new_text):
+    """The sections that new_text adds, changes or removes in an index.rst text against old_text,
+    matched by title, without the version headings: (added, changed, removed) as (title, body)."""
+    old = {t: b for t, b, _ in guide_sections(old_text)[1] if not is_version_section(b)}
+    new = {t: b for t, b, _ in guide_sections(new_text)[1] if not is_version_section(b)}
+    return ([(t, new[t]) for t in new if t not in old],
+            [(t, new[t]) for t in new if t in old and old[t] != new[t]],
+            [(t, old[t]) for t in old if t not in new])
 
 
 # --- the commands -----------------------------------------------------------------------------
@@ -332,22 +459,26 @@ def entry_changes(old_text, new_text):
     return added, changed, removed
 
 
-def check_range(commit_range):
-    """The violations of each commit of a range that touches WHATSNEW or doc/whatsnew/."""
-    found = 0
-    commits = git("rev-list", "--reverse", commit_range).stdout.split()
-    for sha in commits:
+def commits_touching(commit_range, files, folder):
+    """(sha, parent, touched paths, short sha, subject) of each commit of a range that touches one
+    of the files or a path below the folder."""
+    for sha in git("rev-list", "--reverse", commit_range).stdout.split():
         parents = git("rev-list", "--parents", "-n", "1", sha).stdout.split()[1:]
         if not parents:
             continue
         paths = git("diff-tree", "-r", "-z", "--name-only", "--no-commit-id", parents[0], sha).stdout.split("\0")
-        touched = [p for p in paths if p == WHATSNEW or p.startswith(ENTRY_DIR + "/")]
-        if not touched:
-            continue
-        short, subject = sha[:9], git("log", "-1", "--format=%s", sha).stdout.strip()
+        touched = [p for p in paths if p in files or p.startswith(folder + "/")]
+        if touched:
+            yield sha, parents[0], touched, sha[:9], git("log", "-1", "--format=%s", sha).stdout.strip()
+
+
+def check_range(commit_range):
+    """The violations of each commit of a range that touches WHATSNEW or doc/whatsnew/."""
+    found = 0
+    for sha, parent, touched, short, subject in commits_touching(commit_range, [WHATSNEW], ENTRY_DIR):
         tree = GitTree(sha)
         if WHATSNEW in touched:
-            added, changed, _ = entry_changes(GitTree(parents[0]).read(WHATSNEW), tree.read(WHATSNEW))
+            added, changed, _ = entry_changes(GitTree(parent).read(WHATSNEW), tree.read(WHATSNEW))
             for entry in added:
                 flag(f"{short} adds the entry \"{entry.title}\" to WHATSNEW; write it as "
                      f"{suggestion(entry, area_of(subject))}")
@@ -362,20 +493,55 @@ def check_range(commit_range):
     return found
 
 
+def check_guide_tree(tree):
+    """The violations of the migration guide of one tree."""
+    found = 0
+    guide = tree.read(GUIDE)
+    if guide is not None and f"{INCLUDE} {DEVELOPMENT}/*.rst" not in guide.splitlines():
+        flag(f"{GUIDE} does not include {DEVELOPMENT}/*.rst below the heading of the version in development")
+        found += 1
+    for path, problem in read_sections(tree)[1]:
+        flag(f"{path} {problem}")
+        found += 1
+    return found
+
+
+def check_guide_range(commit_range):
+    """The violations of each commit of a range that touches the migration guide."""
+    found = 0
+    for sha, parent, touched, short, subject in commits_touching(commit_range, [GUIDE], GUIDE_DIR):
+        tree = GitTree(sha)
+        if GUIDE in touched:
+            added = section_changes(GitTree(parent).read(GUIDE), tree.read(GUIDE))[0]
+            for title, _ in added:
+                name = file_name(title, area_of(subject), suffix=".rst")
+                flag(f"{short} adds the section \"{title}\" to {GUIDE}; write it as "
+                     f"{GUIDE_DIR}/{DEVELOPMENT}/{name}")
+            found += len(added)
+        for path, problem in read_sections(tree)[1]:
+            if path in touched:
+                flag(f"{short} {path} {problem}")
+                found += 1
+    return found
+
+
 def check(args):
-    print(f"== {RULE}: a release note is a file of its own in {ENTRY_DIR}/ ==")
-    if args.range:
-        found = check_range(args.range)
-    else:
-        found = check_tree(GitTree(args.rev) if args.rev else WorkTree())
-    if not found:
-        print("  ok")
-    print()
+    found = 0
+    for rule, text, by_range, by_tree in (
+            (RULE, f"a release note is a file of its own in {ENTRY_DIR}/", check_range, check_tree),
+            (GUIDE_RULE, f"a migration section is a file of its own in {GUIDE_DIR}/{DEVELOPMENT}/",
+             check_guide_range, check_guide_tree)):
+        print(f"== {rule}: {text} ==")
+        count = by_range(args.range) if args.range else by_tree(GitTree(args.rev) if args.rev else WorkTree())
+        if not count:
+            print("  ok")
+        print()
+        found += count
     if found:
-        print(f"FAIL: see {RULE} in doc/project/rule/release.md and {ENTRY_DIR}/README.md.")
+        print(f"FAIL: see {RULE} and {GUIDE_RULE} in doc/project/rule/release.md, and {ENTRY_DIR}/README.md.")
         return 1
-    print("PASS: release note checks clean. Whether an entry is in the right section, and says what")
-    print("      a user needs, still needs T4 review (RR-WHATSNEW).")
+    print("PASS: release note checks clean. Whether an entry or a section is in the right place, and says")
+    print("      what a user needs, still needs T4 review (RR-WHATSNEW, RR-BREAK-MIGRATE).")
     return 0
 
 

@@ -43,7 +43,7 @@ def gates(commit_range, description):
         ("check-classification.sh", "CR-*", [commit_range]),
         ("check-includes.sh", "PR-SERIES-BUILDS: every #include resolves", [commit_range]),
         ("check-ned-params.sh", "PR-SERIES-BUILDS: every par() is declared", [commit_range]),
-        ("check-whatsnew.sh", "RR-WHATSNEW-FILE", [commit_range]),
+        ("check-whatsnew.sh", "RR-WHATSNEW-FILE, RR-MIGRATE-FILE", [commit_range]),
     ]
     if description:
         found.append(("check-pr-description.sh", "PR-REQ-STORY", [*description, "--range", commit_range]))

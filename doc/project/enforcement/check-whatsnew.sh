@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #
-# RR-WHATSNEW-FILE over a range of commits: no commit adds or changes an entry in the section of the
-# version in development of WHATSNEW, and each entry file that a commit touches has the folder, the
-# name and the format of doc/whatsnew/README.md. It reads only git objects, so the pull-request
+# RR-WHATSNEW-FILE and RR-MIGRATE-FILE over a range of commits: no commit adds or changes an entry in
+# the section of the version in development of WHATSNEW, no commit adds a section to the index.rst of
+# the migration guide, and each entry file and section file that a commit touches has the folder,
+# the name and the format of doc/whatsnew/README.md. It reads only git objects, so the pull-request
 # workflow can run it on untrusted content. The work is in whatsnew.py.
 #
 # Usage (from the INET repository root):
