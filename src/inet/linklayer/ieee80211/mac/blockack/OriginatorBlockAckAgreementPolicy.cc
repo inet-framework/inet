@@ -10,6 +10,8 @@
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -42,13 +44,26 @@ bool OriginatorBlockAckAgreementPolicy::isAddbaReqNeeded(Packet *packet, const P
 
 bool OriginatorBlockAckAgreementPolicy::isAddbaReqAccepted(const Ptr<const Ieee80211AddbaResponse>& addbaResp, OriginatorBlockAckAgreement *agreement)
 {
-    ASSERT(agreement);
-    return true;
+    // IEEE Std 802.11-2024, 10.25.2 and Table 9-466: match the pending setup and its nonzero dialog token.
+    // Immediate Block Ack and the 64-entry bound are INET profile limits for historical Basic compatibility.
+    return agreement != nullptr && !agreement->getIsAddbaResponseReceived() &&
+        addbaResp->getTransmitterAddress() == agreement->getReceiverAddr() &&
+        addbaResp->getTid() == agreement->getTid() &&
+        addbaResp->getDialogToken() > 0 && addbaResp->getDialogToken() <= 255 &&
+        addbaResp->getDialogToken() == agreement->getDialogToken() &&
+        addbaResp->getStatusCode() == SC_SUCCESSFUL && addbaResp->getBlockAckPolicy() &&
+        addbaResp->getBufferSize() > 0 && addbaResp->getBufferSize() <= 64 &&
+        addbaResp->getBlockAckTimeoutValue() >= SIMTIME_ZERO;
 }
 
 bool OriginatorBlockAckAgreementPolicy::isDelbaAccepted(const Ptr<const Ieee80211Delba>& delba)
 {
     return true;
+}
+
+bool OriginatorBlockAckAgreementPolicy::isProfileAllowed(BlockAckVariant variant, bool localHt, bool peerHt) const
+{
+    return variant == BlockAckVariant::BASIC || (localHt && peerHt);
 }
 
 } /* namespace ieee80211 */

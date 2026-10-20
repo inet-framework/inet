@@ -9,6 +9,8 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreement.h"
 
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -110,8 +112,10 @@ const Ptr<Ieee80211AddbaResponse> RecipientBlockAckAgreementHandler::buildAddbaR
     Tid tid = addbaRequest->getTid();
     addbaResponse->setTid(tid);
     addbaResponse->setBlockAckPolicy(!addbaRequest->getBlockAckPolicy() && blockAckAgreementPolicy->delayedBlockAckPolicySupported() ? false : true);
-    addbaResponse->setBufferSize(addbaRequest->getBufferSize() <= blockAckAgreementPolicy->getMaximumAllowedBufferSize() ? addbaRequest->getBufferSize() : blockAckAgreementPolicy->getMaximumAllowedBufferSize());
-    addbaResponse->setBlockAckTimeoutValue(blockAckAgreementPolicy->getBlockAckTimeoutValue() == 0 ? blockAckAgreementPolicy->getBlockAckTimeoutValue() : addbaRequest->getBlockAckTimeoutValue());
+    addbaResponse->setDialogToken(addbaRequest->getDialogToken());
+    // IEEE Std 802.11-2024, 10.25.2: the request allocation and timeout are advisory.
+    addbaResponse->setBufferSize(std::min(64, blockAckAgreementPolicy->getMaximumAllowedBufferSize()));
+    addbaResponse->setBlockAckTimeoutValue(blockAckAgreementPolicy->getBlockAckTimeoutValue());
     addbaResponse->setAMsduSupported(blockAckAgreementPolicy->aMsduSupported());
     return addbaResponse;
 }
@@ -155,15 +159,21 @@ void RecipientBlockAckAgreementHandler::processTransmittedAddbaResp(const Ptr<co
 void RecipientBlockAckAgreementHandler::processReceivedAddbaRequest(const Ptr<const Ieee80211AddbaRequest>& addbaRequest, IRecipientBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)
 {
     EV_INFO << "Processing Addba Request from " << addbaRequest->getTransmitterAddress() << endl;
-    if (blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest)) {
+    auto id = std::make_pair(addbaRequest->getTransmitterAddress(), addbaRequest->getTid());
+    auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
+    bool accepted = blockAckAgreementPolicy->isAddbaReqAccepted(addbaRequest) &&
+        blockAckAgreements.count(id) == 0;
+    addbaResponse->setStatusCode(accepted ? SC_SUCCESSFUL : SC_UNSPECIFIED);
+    if (accepted) {
         EV_DETAIL << "Addba Request has been accepted. Creating a new Block Ack Agreement." << endl;
-        auto agreement = addAgreement(addbaRequest);
+        auto parameters = makeShared<Ieee80211AddbaRequest>(*addbaRequest);
+        parameters->setBufferSize(addbaResponse->getBufferSize());
+        parameters->setBlockAckTimeoutValue(addbaResponse->getBlockAckTimeoutValue());
+        auto agreement = addAgreement(parameters);
         EV_DETAIL << "Agreement is added with the following parameters: " << *agreement << endl;
         EV_DETAIL << "Building Addba Response" << endl;
-        auto addbaResponse = buildAddbaResponse(addbaRequest, blockAckAgreementPolicy);
-        auto addbaResponsePacket = new Packet("AddbaResponse", addbaResponse);
-        callback->processMgmtFrame(addbaResponsePacket, addbaResponse);
     }
+    callback->processMgmtFrame(new Packet("AddbaResponse", addbaResponse), addbaResponse);
 }
 
 void RecipientBlockAckAgreementHandler::processTransmittedDelba(const Ptr<const Ieee80211Delba>& delba)

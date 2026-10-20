@@ -17,6 +17,7 @@ void OriginatorBlockAckAgreementHandler::createAgreement(const Ptr<const Ieee802
     OriginatorBlockAckAgreement *blockAckAgreement = new OriginatorBlockAckAgreement(addbaRequest->getReceiverAddress(), addbaRequest->getTid(), addbaRequest->getStartingSequenceNumber(), addbaRequest->getBufferSize(), addbaRequest->getAMsduSupported(), addbaRequest->getBlockAckPolicy() == 0);
     auto agreementId = std::make_pair(addbaRequest->getReceiverAddress(), addbaRequest->getTid());
     blockAckAgreements[agreementId] = blockAckAgreement;
+    blockAckAgreement->setDialogToken(addbaRequest->getDialogToken());
 }
 
 simtime_t OriginatorBlockAckAgreementHandler::computeEarliestExpirationTime()
@@ -126,6 +127,9 @@ void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *pac
     auto agreement = getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
     if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr) {
         auto addbaReq = buildAddbaRequest(dataHeader->getReceiverAddress(), dataHeader->getTid(), dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
+        auto& token = dialogTokens[{dataHeader->getReceiverAddress(), dataHeader->getTid()}];
+        token = token % 255 + 1;
+        addbaReq->setDialogToken(token);
         createAgreement(addbaReq);
         auto addbaPacket = new Packet("AddbaReq", addbaReq);
         callback->processMgmtFrame(addbaPacket, addbaReq);
@@ -149,6 +153,7 @@ void OriginatorBlockAckAgreementHandler::updateAgreement(OriginatorBlockAckAgree
     agreement->setIsAddbaResponseReceived(true);
     agreement->setBufferSize(addbaResp->getBufferSize());
     agreement->setBlockAckTimeoutValue(addbaResp->getBlockAckTimeoutValue());
+    agreement->setResponseAMsduSupported(addbaResp->getAMsduSupported());
     agreement->calculateExpirationTime();
 }
 

@@ -1,3 +1,3 @@
 IEEE 802.11 Block Ack agreement lifecycle
 
-HCF now dispatches accepted Block Ack Actions once after duplicate checks.
+HCF now dispatches accepted Block Ack Actions once after duplicate checks. Setup correlates the peer, TID, and dialog token. The recipient response determines the accepted buffer size and inactivity timeout.
