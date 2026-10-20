@@ -142,7 +142,7 @@ void EquirectangularProjection::configureCanvasProjection(cCanvas *canvas, bool 
     double latitudeSpan = maxLatitude - minLatitude;
     canvasProjection->setScale(cFigure::Point(mapWidth / longitudeSpan, -mapHeight / latitudeSpan));
     canvasProjection->setTranslation(cFigure::Point(-minLongitude * mapWidth / longitudeSpan, maxLatitude * mapHeight / latitudeSpan));
-    // clip other visualizers' figures to the map area (a no-op on the helpers unless a clip rect is set)
+    // clip other visualizers' figures to the map area (they are placed under ProjectionClipFigures)
     if (clipFigures)
         canvasProjection->setClipRect(cFigure::Rectangle(0, 0, mapWidth, mapHeight));
     else
