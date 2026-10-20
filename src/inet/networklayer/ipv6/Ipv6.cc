@@ -1074,13 +1074,31 @@ void Ipv6::fragmentAndSend(Packet *packet)
     }
 
     // create and send fragments
-    // Pop the base header (extension header chunks, if any, remain in the packet data)
     ipv6Header = packet->popAtFront<Ipv6Header>();
 
-    // Calculate unfragmentable header length: base header + extension headers up to (but not including) the first
-    // fragmentable point. For simplicity, the unfragmentable part is the base header only (40 bytes).
-    // TODO: properly split unfragmentable/fragmentable extension headers
+    // RFC 8200 section 4.5: the per-fragment headers are the base header and every extension
+    // header up to and including the Routing header if present, else the Hop-by-Hop Options
+    // header if present. Every fragment repeats them; only the rest of the packet is split.
+    std::vector<Ptr<const Ipv6ExtensionHeader>> perFragmentExtHdrs;
+    {
+        size_t numPerFragmentExtHdrs = 0;
+        IpProtocolId nextHdr = ipv6Header->getProtocolId();
+        b offset = b(0);
+        while (isIpv6ExtensionHeader(nextHdr) && nextHdr != IP_PROT_IPv6EXT_FRAGMENT) {
+            auto extHdr = peekIpv6ExtensionHeaderAt(packet, offset, nextHdr);
+            perFragmentExtHdrs.push_back(extHdr);
+            if (nextHdr == IP_PROT_IPv6EXT_HOP || nextHdr == IP_PROT_IPv6EXT_ROUTING)
+                numPerFragmentExtHdrs = perFragmentExtHdrs.size();
+            offset += extHdr->getChunkLength();
+            nextHdr = extHdr->getNextHeaderProtocol();
+        }
+        perFragmentExtHdrs.resize(numPerFragmentExtHdrs);
+    }
     B headerLength = IPv6_HEADER_BYTES;
+    for (const auto& extHdr : perFragmentExtHdrs) {
+        packet->popAtFront(extHdr->getChunkLength());
+        headerLength += extHdr->getChunkLength();
+    }
     B payloadLength = packet->getDataLength();
     B fragmentLength = ((B(mtu) - headerLength - IPv6_FRAGMENT_HEADER_LENGTH) / 8) * 8;
     ASSERT(fragmentLength > B(0));
@@ -1091,9 +1109,8 @@ void Ipv6::fragmentAndSend(Packet *packet)
     fragMsgName += "-frag-";
 
     unsigned int identification = curFragmentId++;
-    // The base header's protocolId currently points to the first ext header (or transport).
-    // We need to insert a Fragment Header into the chain.
-    IpProtocolId origNextHdr = ipv6Header->getProtocolId();
+    // the Fragment header names the first header of the part that is split
+    IpProtocolId origNextHdr = perFragmentExtHdrs.empty() ? ipv6Header->getProtocolId() : perFragmentExtHdrs.back()->getNextHeaderProtocol();
 
     for (B offset = B(0); offset < payloadLength; offset += fragmentLength) {
         bool lastFragment = (offset + fragmentLength >= payloadLength);
@@ -1111,15 +1128,22 @@ void Ipv6::fragmentAndSend(Packet *packet)
         fh->setMoreFragments(!lastFragment);
         fh->setNextHeaderProtocol(origNextHdr);
 
-        // Base header points to Fragment Header
+        // The last per-fragment header points to the Fragment header
         const auto& fragBaseHdr = staticPtrCast<Ipv6Header>(ipv6Header->dupShared());
-        fragBaseHdr->setProtocolId(IP_PROT_IPv6EXT_FRAGMENT);
+        if (perFragmentExtHdrs.empty())
+            fragBaseHdr->setProtocolId(IP_PROT_IPv6EXT_FRAGMENT);
         // RFC 8200 section 3: the payload length counts every octet after the base header
         // of this packet. The copy carries the length of the whole datagram, which
         // describes no fragment of it.
-        fragBaseHdr->setPayloadLength(IPv6_FRAGMENT_HEADER_LENGTH + thisFragmentLength);
+        fragBaseHdr->setPayloadLength(headerLength - IPv6_HEADER_BYTES + IPv6_FRAGMENT_HEADER_LENGTH + thisFragmentLength);
 
         fragPk->insertAtFront(fh);
+        for (auto it = perFragmentExtHdrs.rbegin(); it != perFragmentExtHdrs.rend(); ++it) {
+            const auto& extHdr = staticPtrCast<Ipv6ExtensionHeader>((*it)->dupShared());
+            if (it == perFragmentExtHdrs.rbegin())
+                extHdr->setNextHeaderProtocol(IP_PROT_IPv6EXT_FRAGMENT);
+            fragPk->insertAtFront(extHdr);
+        }
         fragPk->insertAtFront(fragBaseHdr);
         fragPk->insertAtBack(packet->peekDataAt(offset, thisFragmentLength));
 

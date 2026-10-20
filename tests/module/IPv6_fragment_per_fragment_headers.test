@@ -1,0 +1,182 @@
+%description:
+A source fragments a datagram that carries a Hop-by-Hop Options header.
+
+Request for Comments (RFC) 8200 section 4.5: the Hop-by-Hop Options header is a
+per-fragment header, so every fragment carries it, with its Next Header set to 44
+(Fragment), and the Fragment header names the header that followed it in the original
+packet (17, User Datagram Protocol, UDP). The destination reassembles the datagram with
+the Hop-by-Hop Options header in front of the UDP header.
+
+A netfilter hook on hostA adds a Hop-by-Hop Options header, holding one skippable
+experimental option (type 0x1E), to every outgoing UDP datagram, the way Greedy Perimeter
+Stateless Routing (GPSR) does. hostA's link has the minimum Internet Protocol version 6
+(IPv6) Maximum Transmission Unit (MTU) of 1280 bytes, so the 1460-byte UDP datagram is
+sent in two fragments. A hook on the router prints the header chain of each forwarded
+fragment, and a hook on hostB prints the chain of the reassembled datagram.
+
+%file: TestHopByHopHooks.cc
+
+#include "inet/common/ModuleAccess.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/L3Tools.h"
+#include "inet/networklayer/contract/INetfilter.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
+#include "inet/networklayer/ipv6/Ipv6Header.h"
+
+namespace inet {
+
+class TestHopByHopHooks : public cSimpleModule, public NetfilterBase::HookBase
+{
+  protected:
+    enum Role { INSERT, OBSERVE_FORWARD, OBSERVE_LOCAL_IN };
+    Role role = INSERT;
+
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+
+    virtual void initialize(int stage) override
+    {
+        if (stage == INITSTAGE_NETWORK_LAYER) {
+            std::string r = par("role").stdstringValue();
+            role = r == "insert" ? INSERT : r == "forward" ? OBSERVE_FORWARD : OBSERVE_LOCAL_IN;
+            auto netfilter = check_and_cast<INetfilter *>(getModuleByPath(par("netfilterModule").stringValue()));
+            netfilter->registerHook(0, this);
+        }
+    }
+
+    static std::string describeChain(Packet *packet)
+    {
+        std::ostringstream os;
+        auto ipv6Header = packet->peekAtFront<Ipv6Header>();
+        os << "payloadLength=" << ipv6Header->getPayloadLength().get() << " chain=" << (int)ipv6Header->getProtocolId();
+        b offset = ipv6Header->getChunkLength();
+        IpProtocolId nextHdr = ipv6Header->getProtocolId();
+        while (isIpv6ExtensionHeader(nextHdr)) {
+            auto extHdr = peekIpv6ExtensionHeaderAt(packet, offset, nextHdr);
+            if (auto hopHdr = dynamicPtrCast<const Ipv6HopByHopOptionsHeader>(extHdr))
+                os << " hop(option0x1E=" << (hopHdr->getTlvOptions().findByType(0x1E) >= 0 ? "yes" : "no") << ")";
+            else if (auto fh = dynamicPtrCast<const Ipv6FragmentHeader>(extHdr))
+                os << " frag(offset=" << fh->getFragmentOffset() << ",M=" << fh->getMoreFragments() << ")";
+            nextHdr = extHdr->getNextHeaderProtocol();
+            os << "->" << (int)nextHdr;
+            offset += extHdr->getChunkLength();
+        }
+        os << " restLength=" << B(packet->getDataLength() - offset).get();
+        return os.str();
+    }
+
+  public:
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramForwardHook(Packet *datagram) override
+    {
+        if (role == OBSERVE_FORWARD)
+            EV_INFO << "TEST forwarded: " << describeChain(datagram) << "\n";
+        return ACCEPT;
+    }
+    virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override
+    {
+        if (role == OBSERVE_LOCAL_IN && datagram->peekAtFront<Ipv6Header>()->getSrcAddress().getScope() == Ipv6Address::GLOBAL)
+            EV_INFO << "TEST delivered: " << describeChain(datagram) << "\n";
+        return ACCEPT;
+    }
+    virtual Result datagramLocalOutHook(Packet *datagram) override
+    {
+        if (role != INSERT)
+            return ACCEPT;
+        auto ipv6Header = removeNetworkProtocolHeader<Ipv6Header>(datagram);
+        if (ipv6Header->getProtocolId() == IP_PROT_UDP) {
+            auto option = new TlvOptionRaw();
+            option->setType(0x1E); // RFC 4727 experimental; action bits 00: skip if unrecognized
+            option->setLength(6);
+            option->setBytesArraySize(4);
+            auto hopHdr = makeShared<Ipv6HopByHopOptionsHeader>();
+            hopHdr->getTlvOptionsForUpdate().appendTlvOption(option);
+            hopHdr->setChunkLength(B(8));
+            hopHdr->setNextHeaderProtocol(ipv6Header->getProtocolId());
+            ipv6Header->setProtocolId(IP_PROT_IPv6EXT_HOP);
+            ipv6Header->setPayloadLength(ipv6Header->getPayloadLength() + hopHdr->getChunkLength());
+            datagram->insertAtFront(hopHdr);
+        }
+        insertNetworkProtocolHeader(datagram, Protocol::ipv6, ipv6Header);
+        return ACCEPT;
+    }
+};
+
+Define_Module(TestHopByHopHooks);
+
+} // namespace inet
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+
+simple TestHopByHopHooks
+{
+    parameters:
+        @class(::inet::TestHopByHopHooks);
+        string role;
+        string netfilterModule;
+}
+
+network TestNetwork
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        hostA: StandardHost6;
+        router: Router6;
+        hostB: StandardHost6;
+        inserter: TestHopByHopHooks { role = "insert"; netfilterModule = "hostA.ipv6.ipv6"; }
+        forwardObserver: TestHopByHopHooks { role = "forward"; netfilterModule = "router.ipv6.ipv6"; }
+        localInObserver: TestHopByHopHooks { role = "localIn"; netfilterModule = "hostB.ipv6.ipv6"; }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 10s
+cmdenv-express-mode = false
+*.forwardObserver.cmdenv-log-level = info
+*.localInObserver.cmdenv-log-level = info
+*.hostB.app[0].cmdenv-log-level = info
+**.cmdenv-log-level = off
+record-eventlog = false
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].localPort = 4000
+*.hostA.app[0].messageLength = 1452B
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+*.hostA.eth[0].mac.mtu = 1280B
+
+%subst: /omnetpp:://
+
+%contains: stdout
+TEST forwarded: payloadLength=1240 chain=0 hop(option0x1E=yes)->44 frag(offset=0,M=1)->17 restLength=1224
+
+%contains: stdout
+TEST forwarded: payloadLength=252 chain=0 hop(option0x1E=yes)->44 frag(offset=1224,M=0)->17 restLength=236
+
+%contains: stdout
+TEST delivered: payloadLength=1468 chain=0 hop(option0x1E=yes)->17 restLength=1460
+
+%contains: stdout
+Received packet: (inet::Packet)UdpBasicAppData-0 (1452 B)
+
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
