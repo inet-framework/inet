@@ -30,8 +30,8 @@ using namespace omnetpp;
 using omnetpp::operator<<;
 } // namespace inet
 
-#if OMNETPP_VERSION < 0x0604
-#  error At least OMNeT++/OMNEST version 6.4 required
+#if OMNETPP_VERSION < 0x0605
+#  error At least OMNeT++/OMNEST version 6.5 required
 #endif
 
 #define INET_VERSION        0x0407
