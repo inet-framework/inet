@@ -11,6 +11,7 @@ import inet.linklayer.contract.IMacProtocol;
 
 //
 // Module interface for the IEEE 802.11 MAC module type.
+// The C++ counterpart IIeee80211Mac declares the MAC operations for management.
 //
 moduleinterface IIeee80211Mac extends IMacProtocol
 {

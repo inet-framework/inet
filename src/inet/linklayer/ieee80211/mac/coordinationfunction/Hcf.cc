@@ -729,6 +729,37 @@ void Hcf::actionTerminated(Packet *packet, bool acknowledged)
     }
 }
 
+void Hcf::resetPeer(MacAddress peer)
+{
+    Enter_Method("resetPeer");
+    if (!originatorBlockAckAgreementHandler)
+        return;
+    bool previous = handlingAgreementAction;
+    handlingAgreementAction = true;
+    auto originators = originatorBlockAckAgreementHandler->detachPeer(peer);
+    auto recipients = recipientBlockAckAgreementHandler->detachPeer(peer);
+    for (int tid = 0; tid < 16; tid++) {
+        invalidateActions(peer, tid, true);
+        invalidateActions(peer, tid, false);
+        discardAgreementData(peer, tid, true);
+    }
+    for (auto agreement : recipients)
+        sendUp(recipientDataService->retireAgreement(agreement, true));
+    recipientDataService->clearPeer(peer);
+    for (auto agreement : originators) {
+        if (agreement->getIsAddbaResponseReceived())
+            emit(blockAckAgreementDeletedSignal, agreement);
+        delete agreement;
+    }
+    for (auto agreement : recipients) {
+        emit(blockAckAgreementDeletedSignal, agreement);
+        delete agreement;
+    }
+    handlingAgreementAction = previous;
+    scheduleInactivityTimer();
+    scheduleAddbaResponseTimer();
+}
+
 void Hcf::receiveSignal(cComponent *source, simsignal_t signalID, bool value, cObject *details)
 {
     if (signalID != Ieee80211Mib::rateStateChangedSignal)

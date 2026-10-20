@@ -622,6 +622,9 @@ void Ieee80211MgmtSta::clearCurrentAssociation()
 {
     ASSERT(mib->bssStationData.isAssociated);
     auto address = assocAP.address;
+    // INET policy: every association loss or replacement discards the old peer's Block Ack and QoS context.
+    // Callers identify the association transition and its applicable standard clause.
+    resetPeerAssociationContext(address);
     mib->bssStationData.isAssociated = false;
     cancelAndDelete(assocAP.beaconTimeoutMsg);
     assocAP.beaconTimeoutMsg = nullptr;
@@ -939,6 +942,9 @@ void Ieee80211MgmtSta::processAssociationResponse(Packet *packet, const Ptr<cons
 
         if (mib->bssStationData.isAssociated) {
             EV << "Breaking existing association with AP address=" << assocAP.address << "\n";
+            // IEEE Std 802.11-2024, 11.3.5.4(c): successful same-AP reassociation
+            // resets non-GCR Block Ack agreements before the new association takes effect.
+            // INET policy: other successful replacements use the same old-peer cleanup.
             clearCurrentAssociation();
         }
 
