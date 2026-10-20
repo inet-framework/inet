@@ -25,27 +25,43 @@ Do not run overlapping invocations that share generated directories. See the
 observations. Shared topology/configuration inputs live under `ned/` and `ini/`;
 individual tests may add local scenario fixtures.
 
+## Block Ack test explanations
+
+Each protocol test has two documents. The guide explains its scenario, assertions, diagrams, and compliance limits. The comparison record reports its result before and after the related fix.
+
+| Test file | Guide | Comparison record |
+| --- | --- | --- |
+| `WifiBlockAckDuplicateAddba.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-duplicate-addba.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-duplicate-addba-comparison.md) |
+| `WifiBlockAckDialogToken.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-dialog-token.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-dialog-token-comparison.md) |
+| `WifiBlockAckBarWithoutAgreement.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-bar-without-agreement.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-bar-without-agreement-comparison.md) |
+| `WifiBlockAckInactivity.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-inactivity.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-inactivity-comparison.md) |
+| `WifiBlockAckSameApReassociation.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-same-ap-reassociation.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-same-ap-reassociation-comparison.md) |
+
+The [shared procedure](../../../doc/project/evidence/model/wifi/pr1343-comparison-method.md) explains how to reproduce each comparison with identical fixture inputs.
+
 ## Source inventory
 
-The suite contains **75 tests: 45 default PASS expectations and 30 declared FAIL expectations**.
+The suite contains **80 tests: 50 default PASS expectations and 30 declared FAIL expectations**.
 These are source declarations, not a fresh full-suite result.
 
 | Directory | Tests | Expected PASS | Expected FAIL |
 | --- | ---: | ---: | ---: |
-| `common/` | 19 | 10 | 9 |
+| `common/` | 24 | 15 | 9 |
 | `legacy/` | 6 | 5 | 1 |
 | `11b/` | 6 | 4 | 2 |
 | `11a/` | 4 | 4 | 0 |
 | `11g/` | 7 | 6 | 1 |
 | `11n/` | 18 | 11 | 7 |
 | `11ac/` | 15 | 5 | 10 |
-| **Total** | **75** | **45** | **30** |
+| **Total** | **80** | **50** | **30** |
 
 The [audit report](../../../doc/project/evidence/model/wifi/results.md) owns the observed
 results, failure classifications, repair dependencies, and verification records. It includes
 six repaired behavior checks: HT Capabilities, HT Operation, the modeled dummy four-message
 authentication exchange, deauthentication, reassociation, and deterministic retransmission.
 The authentication check does not establish WEP cryptography.
+
+The five comparison records isolate each test at its related fix and that fix's parent. The BAR and inactivity records use the same lifecycle commit. Each record identifies its inputs, observations, controls, and executed source revisions. These Basic compatibility tests do not establish full standards conformance.
 
 Of the 30 expected failures, 17 are retained unsupported-feature probes or explicit limitations;
 13 are deferred repairs declared by maintainer decision. Five of those 13 retain explicit
