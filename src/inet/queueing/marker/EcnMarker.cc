@@ -22,6 +22,10 @@
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #endif // ifdef INET_WITH_IPv4
 
+#ifdef INET_WITH_IPv6
+#include "inet/networklayer/ipv6/Ipv6Header.h"
+#endif // ifdef INET_WITH_IPv6
+
 namespace inet {
 namespace queueing {
 
@@ -69,6 +73,19 @@ void EcnMarker::setEcn(Packet *packet, IpEcnCode ecn)
         throw cRuntimeError("IPv4 feature is disabled");
 #endif
     }
+    else if (protocol == &Protocol::ipv6) {
+#ifdef INET_WITH_IPv6
+        packet->removeTagIfPresent<NetworkProtocolInd>();
+        auto ipv6Header = packet->removeDataAt<Ipv6Header>(offset);
+        ipv6Header->setEcn(ecn);
+        auto networkProtocolInd = packet->addTagIfAbsent<NetworkProtocolInd>();
+        networkProtocolInd->setProtocol(protocol);
+        networkProtocolInd->setNetworkProtocolHeader(ipv6Header);
+        packet->insertDataAt(ipv6Header, offset);
+#else
+        throw cRuntimeError("IPv6 feature is disabled");
+#endif
+    }
 }
 
 IpEcnCode EcnMarker::getEcn(const Packet *packet)
@@ -93,6 +110,12 @@ IpEcnCode EcnMarker::getEcn(const Packet *packet)
 #ifdef INET_WITH_IPv4
         auto ipv4Header = packet->peekDataAt<Ipv4Header>(offset);
         return static_cast<IpEcnCode>(ipv4Header->getEcn());
+#endif
+    }
+    else if (protocol == &Protocol::ipv6) {
+#ifdef INET_WITH_IPv6
+        auto ipv6Header = packet->peekDataAt<Ipv6Header>(offset);
+        return static_cast<IpEcnCode>(ipv6Header->getEcn());
 #endif
     }
     return IP_ECN_NOT_ECT;

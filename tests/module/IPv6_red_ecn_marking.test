@@ -1,0 +1,87 @@
+%description:
+A Random Early Detection (RED) queue with useEcn marks an IPv6 packet that is
+Explicit Congestion Notification (ECN) capable with Congestion Experienced (CE)
+instead of dropping it (RFC 3168 section 5; the ECN field is the low two bits
+of the IPv6 Traffic Class).
+
+Topology: client --100Mbps-- router --10Mbps-- server. The RedDropperQueue on
+the router's bottleneck interface has minth = 0, maxth = 1 and wq = 1, so a
+packet that finds another packet waiting in the queue is above maxth. At 10 s,
+after IPv6 address autoconfiguration, the client sends 5 User Datagram Protocol
+(UDP) packets with the ECN codepoint ECT(0) (ECN-Capable Transport, traffic
+class 2), faster than the bottleneck forwards them. Expected:
+- UdpBasicAppData-2, -3 and -4, which arrive above maxth, reach the server
+  with traffic class 3 (CE);
+- all 5 packets reach the server: RED drops none of them.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6RedEcnTestNetwork
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        client: StandardHost6;
+        router: Router6;
+        server: StandardHost6;
+    connections:
+        client.ethg++ <--> DatarateChannel { datarate = 100Mbps; delay = 0.1us; } <--> router.ethg++;
+        router.ethg++ <--> DatarateChannel { datarate = 10Mbps; delay = 0.1us; } <--> server.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Ipv6RedEcnTestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 11s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.router.eth[1].queue.typename = "RedDropperQueue"
+**.router.eth[1].queue.red.useEcn = true
+**.router.eth[1].queue.red.minth = 0
+**.router.eth[1].queue.red.maxth = 1
+**.router.eth[1].queue.red.wq = 1
+**.router.eth[1].queue.red.packetCapacity = 100
+
+**.client.numApps = 1
+**.client.app[0].typename = "UdpBasicApp"
+**.client.app[0].destAddresses = "server"
+**.client.app[0].destPort = 1000
+**.client.app[0].messageLength = 1000B
+**.client.app[0].sendInterval = 0.1ms
+**.client.app[0].startTime = 10s
+**.client.app[0].stopTime = 10.00049s
+**.client.app[0].tos = 2
+
+**.server.numApps = 1
+**.server.app[0].typename = "UdpSink"
+**.server.app[0].localPort = 1000
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Ipv6RedEcnTestNetwork\.server\.app\[0\]: Received packet: \(inet::Packet\)UdpBasicAppData-2 .* TOS=3 DSCP
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Ipv6RedEcnTestNetwork\.server\.app\[0\]: Received packet: \(inet::Packet\)UdpBasicAppData-3 .* TOS=3 DSCP
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Ipv6RedEcnTestNetwork\.server\.app\[0\]: Received packet: \(inet::Packet\)UdpBasicAppData-4 .* TOS=3 DSCP
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Ipv6RedEcnTestNetwork.server.app[0]: received 5 packets
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
