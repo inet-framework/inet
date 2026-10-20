@@ -9,6 +9,7 @@
 #define __INET_PATHCANVASVISUALIZERBASE_H
 
 #include "inet/common/figures/LabeledPolylineFigure.h"
+#include "inet/common/figures/ProjectionClipFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/PathVisualizerBase.h"
 
@@ -31,7 +32,7 @@ class INET_API PathCanvasVisualizerBase : public PathVisualizerBase
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
-    cGroupFigure *pathGroup = nullptr;
+    ProjectionClipFigure *pathGroup = nullptr; // clips to the map area, if any
 
   protected:
     virtual void initialize(int stage) override;

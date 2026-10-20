@@ -9,6 +9,7 @@
 #define __INET_PACKETDROPCANVASVISUALIZER_H
 
 #include "inet/common/figures/LabeledIconFigure.h"
+#include "inet/common/figures/ProjectionClipFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/PacketDropVisualizerBase.h"
 
@@ -31,7 +32,7 @@ class INET_API PacketDropCanvasVisualizer : public PacketDropVisualizerBase
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
-    cGroupFigure *packetDropGroup = nullptr;
+    ProjectionClipFigure *packetDropGroup = nullptr; // clips to the map area, if any
     double dx = NaN;
     double dy = NaN;
 

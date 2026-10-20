@@ -70,7 +70,7 @@ void PathCanvasVisualizerBase::initialize(int stage)
         auto canvas = visualizationTargetModule->getCanvas();
         lineManager = LineManager::getCanvasLineManager(canvas);
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        pathGroup = new cGroupFigure("paths");
+        pathGroup = new ProjectionClipFigure("paths", canvasProjection);
         pathGroup->setZIndex(zIndex);
         canvas->addFigure(pathGroup);
     }
@@ -126,10 +126,7 @@ void PathCanvasVisualizerBase::refreshDisplay() const
             if (index == segments.size() - 1)
                 points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint2()));
         }
-        // clip the polyline to the map area (no-op when no clip rect is set)
-        points = canvasProjection->clipPolyline(points);
         pathCanvasVisualization->figure->setPoints(points);
-        pathCanvasVisualization->figure->setVisible(points.size() >= 2); // hide a route fully outside the map area
     }
     visualizationTargetModule->getCanvas()->setAnimationSpeed(pathVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }

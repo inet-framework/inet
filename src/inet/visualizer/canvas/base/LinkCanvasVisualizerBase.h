@@ -9,6 +9,7 @@
 #define __INET_LINKCANVASVISUALIZERBASE_H
 
 #include "inet/common/figures/LabeledLineFigure.h"
+#include "inet/common/figures/ProjectionClipFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/LinkVisualizerBase.h"
 
@@ -31,7 +32,7 @@ class INET_API LinkCanvasVisualizerBase : public LinkVisualizerBase
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
-    cGroupFigure *linkGroup = nullptr;
+    ProjectionClipFigure *linkGroup = nullptr; // clips to the map area, if any
 
   protected:
     virtual void initialize(int stage) override;

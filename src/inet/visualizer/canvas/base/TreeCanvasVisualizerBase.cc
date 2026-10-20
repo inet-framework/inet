@@ -71,7 +71,7 @@ void TreeCanvasVisualizerBase::initialize(int stage)
         auto canvas = visualizationTargetModule->getCanvas();
         lineManager = LineManager::getCanvasLineManager(canvas);
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        treeGroup = new cGroupFigure("trees");
+        treeGroup = new ProjectionClipFigure("trees", canvasProjection);
         treeGroup->setZIndex(zIndex);
         canvas->addFigure(treeGroup);
     }
@@ -130,10 +130,7 @@ void TreeCanvasVisualizerBase::refreshDisplay() const
                 if (index == segments.size() - 1)
                     points.push_back(canvasProjection->computeCanvasPoint(segments[index].getPoint2()));
             }
-            // clip the polyline to the map area (no-op when no clip rect is set)
-            points = canvasProjection->clipPolyline(points);
             figure->setPoints(points);
-            figure->setVisible(points.size() >= 2);
         }
     }
 }

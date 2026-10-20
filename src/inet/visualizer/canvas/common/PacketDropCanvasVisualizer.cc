@@ -37,7 +37,7 @@ void PacketDropCanvasVisualizer::initialize(int stage)
         dy = par("dy");
         auto canvas = visualizationTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        packetDropGroup = new cGroupFigure("packet drops");
+        packetDropGroup = new ProjectionClipFigure("packet drops", canvasProjection);
         packetDropGroup->setZIndex(zIndex);
         canvas->addFigure(packetDropGroup);
     }
@@ -98,10 +98,7 @@ void PacketDropCanvasVisualizer::setAlpha(const PacketDropVisualization *packetD
     double zoomLevel = getEnvir()->getZoomLevel(packetDropCanvasVisualization->packetDrop->getNetworkNode()->getParentModule());
     if (std::isnan(zoomLevel))
         zoomLevel = 1;
-    cFigure::Point base = canvasProjection->computeCanvasPoint(position);
-    cFigure::Point drawPosition = base + cFigure::Point(px, -py) / zoomLevel;
-    figure->setPosition(drawPosition);
-    figure->setVisible(canvasProjection->isPointInsideClip(drawPosition)); // hide on a limited map when the drawn icon is outside
+    figure->setPosition(canvasProjection->computeCanvasPoint(position) + cFigure::Point(px, -py) / zoomLevel);
 }
 
 } // namespace visualizer

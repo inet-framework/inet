@@ -10,6 +10,7 @@
 
 #include <vector>
 
+#include "inet/common/figures/ProjectionClipFigure.h"
 #include "inet/common/geometry/common/CanvasProjection.h"
 #include "inet/visualizer/base/NetworkConnectionVisualizerBase.h"
 
@@ -22,6 +23,7 @@ class INET_API NetworkConnectionCanvasVisualizer : public NetworkConnectionVisua
   protected:
     double zIndex = NaN;
     const CanvasProjection *canvasProjection = nullptr;
+    ProjectionClipFigure *connectionGroup = nullptr; // clips to the map area, if any
 
     struct ConnectionVisualization {
         cLineFigure *figure = nullptr;

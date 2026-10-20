@@ -33,7 +33,7 @@ void ChannelCanvasVisualizer::initialize(int stage)
         auto canvas = visualizationTargetModule->getCanvas();
         lineManager = LineManager::getCanvasLineManager(canvas);
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        channelActivityGroup = new cGroupFigure("channels");
+        channelActivityGroup = new ProjectionClipFigure("channels", canvasProjection);
         channelActivityGroup->setZIndex(zIndex);
         canvas->addFigure(channelActivityGroup);
     }
@@ -53,12 +53,8 @@ void ChannelCanvasVisualizer::refreshDisplay() const
             auto sourcePosition = getContactPosition(sourceModule, getPosition(destinationModule), lineContactMode, lineContactSpacing);
             auto destinationPosition = getContactPosition(destinationModule, getPosition(sourceModule), lineContactMode, lineContactSpacing);
             auto shift = lineManager->getLineShift(channelVisualization->sourceModuleId, channelVisualization->destinationModuleId, sourcePosition, destinationPosition, lineShiftMode, channelVisualization->shiftOffset) * lineShift;
-            cFigure::Point start = canvasProjection->computeCanvasPoint(sourcePosition + shift);
-            cFigure::Point end = canvasProjection->computeCanvasPoint(destinationPosition + shift);
-            bool visible = canvasProjection->clipLine(start, end); // clip to the map area, hide if fully outside
-            figure->setStart(start);
-            figure->setEnd(end);
-            figure->setVisible(visible);
+            figure->setStart(canvasProjection->computeCanvasPoint(sourcePosition + shift));
+            figure->setEnd(canvasProjection->computeCanvasPoint(destinationPosition + shift));
         }
     }
     visualizationTargetModule->getCanvas()->setAnimationSpeed(channelVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);

@@ -29,7 +29,7 @@ void LinkBreakCanvasVisualizer::initialize(int stage)
         zIndex = par("zIndex");
         auto canvas = visualizationTargetModule->getCanvas();
         canvasProjection = CanvasProjection::getCanvasProjection(canvas);
-        linkBreakGroup = new cGroupFigure("link breaks");
+        linkBreakGroup = new ProjectionClipFigure("link breaks", canvasProjection);
         linkBreakGroup->setZIndex(zIndex);
         canvas->addFigure(linkBreakGroup);
     }
@@ -45,9 +45,7 @@ void LinkBreakCanvasVisualizer::refreshDisplay() const
         auto transmitterPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(transmitter)));
         auto receiverPosition = canvasProjection->computeCanvasPoint(getPosition(getContainingNode(receiver)));
         auto figure = linkBreakVisualization->figure;
-        cFigure::Point center = (transmitterPosition + receiverPosition) / 2;
-        figure->setPosition(center);
-        figure->setVisible(canvasProjection->isPointInsideClip(center)); // hide on a limited map when outside
+        figure->setPosition((transmitterPosition + receiverPosition) / 2);
     }
     visualizationTargetModule->getCanvas()->setAnimationSpeed(linkBreakVisualizations.empty() ? 0 : fadeOutAnimationSpeed, this);
 }
