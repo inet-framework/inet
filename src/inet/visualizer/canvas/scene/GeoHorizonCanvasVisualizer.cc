@@ -70,6 +70,13 @@ void GeoHorizonCanvasVisualizer::initialize(int stage)
         double minLongitude = deg(mapVisualizerModule->par("minLongitude")).get<deg>();
         double maxLongitude = deg(mapVisualizerModule->par("maxLongitude")).get<deg>();
         projection.setWindow(minLatitude, maxLatitude, minLongitude, maxLongitude, mapWidth, mapHeight);
+        // the footprints are tiled across the antimeridian, and the copies are clipped to the map by this figure
+        footprintClipFigure = new cRectangleFigure("satellite visibility");
+        footprintClipFigure->setOutlined(false);
+        footprintClipFigure->setBounds(cFigure::Rectangle(0, 0, mapWidth, mapHeight));
+        footprintClipFigure->setClipChildren(true);
+        footprintClipFigure->setZIndex(zIndex);
+        visualizationTargetModule->getCanvas()->addFigure(footprintClipFigure);
 
         displayVisibility = par("displayVisibility");
         elevationMaskRad = deg(par("elevationMask")).get<rad>();
@@ -114,21 +121,18 @@ GeoHorizonCanvasVisualizer::NodeVisualization *GeoHorizonCanvasVisualizer::getNo
 GeoHorizonCanvasVisualizer::NodeVisualization *GeoHorizonCanvasVisualizer::createNodeVisualization(IMobility *mobility)
 {
     auto visualization = new NodeVisualization(mobility);
-    auto canvas = visualizationTargetModule->getCanvas();
     if (displayVisibility) {
         visualization->visibilityFigure = new cGroupFigure("visibility");
         visualization->visibilityFigure->setTags((std::string("satellite_visibility ") + tags).c_str());
-        visualization->visibilityFigure->setZIndex(zIndex);
-        canvas->addFigure(visualization->visibilityFigure);
+        footprintClipFigure->addFigure(visualization->visibilityFigure);
     }
     return visualization;
 }
 
 void GeoHorizonCanvasVisualizer::removeNodeVisualization(const NodeVisualization *visualization)
 {
-    auto canvas = visualizationTargetModule->getCanvas();
     if (visualization->visibilityFigure != nullptr) {
-        canvas->removeFigure(visualization->visibilityFigure);
+        footprintClipFigure->removeFigure(visualization->visibilityFigure);
         delete visualization->visibilityFigure;
     }
     nodeVisualizations.erase(visualization->mobility->getId());
@@ -184,21 +188,21 @@ void GeoHorizonCanvasVisualizer::rebuildPolygons(cGroupFigure *group, const std:
         while (longitude - referenceLongitudeDeg < -180) longitude += 360;
         continuous.push_back(projection.geoToCanvas(geo.latitude.get<deg>(), longitude, false));
     }
-    auto pieces = projection.clipAndTilePolygon(continuous);
-    // reuse the existing polygon child figures; only add or remove when the piece count changes
-    while (group->getNumFigures() > (int)pieces.size()) {
+    auto tiles = projection.tilePolygon(continuous);
+    // reuse the existing polygon child figures; only add or remove when the tile count changes
+    while (group->getNumFigures() > (int)tiles.size()) {
         auto child = group->getFigure(group->getNumFigures() - 1);
         group->removeFigure(child);
         delete child;
     }
-    while (group->getNumFigures() < (int)pieces.size()) {
-        auto polygon = new cPolygonFigure("piece");
+    while (group->getNumFigures() < (int)tiles.size()) {
+        auto polygon = new cPolygonFigure("tile");
         polygon->setFilled(true);
         group->addFigure(polygon);
     }
-    for (size_t i = 0; i < pieces.size(); i++) {
+    for (size_t i = 0; i < tiles.size(); i++) {
         auto polygon = check_and_cast<cPolygonFigure *>(group->getFigure((int)i));
-        polygon->setPoints(pieces[i]);
+        polygon->setPoints(tiles[i]);
         polygon->setFillColor(fillColor);
         polygon->setFillOpacity(opacity);
         polygon->setLineColor(lineColor);

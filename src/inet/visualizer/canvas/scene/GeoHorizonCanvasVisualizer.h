@@ -59,6 +59,7 @@ class INET_API GeoHorizonCanvasVisualizer : public VisualizerBase, public cListe
     //@}
 
     std::map<int, NodeVisualization *> nodeVisualizations;
+    cRectangleFigure *footprintClipFigure = nullptr; // parent of the visibility figures; clips them to the map rectangle
 
   protected:
     virtual void initialize(int stage) override;
@@ -74,8 +75,9 @@ class INET_API GeoHorizonCanvasVisualizer : public VisualizerBase, public cListe
     virtual void removeAllNodeVisualizations();
 
     virtual void refreshNode(NodeVisualization *visualization) const;
-    // Rebuilds the polygon pieces of a group from a closed ring of geographic points, unwrapping the
-    // longitude continuously around referenceLongitude and clipping/tiling to the map window.
+    // Rebuilds the polygons of a group from a closed ring of geographic points, unwrapping the
+    // longitude continuously around referenceLongitude and tiling across the antimeridian
+    // (the copies are clipped to the map window by footprintClipFigure).
     virtual void rebuildPolygons(cGroupFigure *group, const std::vector<GeoCoord>& ring, double referenceLongitudeDeg,
             const cFigure::Color& fillColor, const cFigure::Color& lineColor, double opacity) const;
 

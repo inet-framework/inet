@@ -79,12 +79,13 @@ class INET_API EquirectangularProjection : public IMapProjection
     void configureCanvasProjection(cCanvas *canvas, bool clipFigures = true) const;
 
     /**
-     * Clips a polygon whose vertices are given in continuous (unwrapped) map pixels to the map rectangle,
-     * tiling at +/-mapWidth when the window wraps the globe so the part running off one side reappears on
-     * the other. Returns one polygon piece per tile copy that has a visible part; pieces with fewer than
-     * 3 vertices are dropped. (The rectangle clipping uses CanvasProjection::clipPolygonToRect.)
+     * Tiles a polygon whose vertices are given in continuous (unwrapped) map pixels: when the window wraps
+     * the globe, the polygon is also copied at +/-mapWidth, so that the part running off one side of the
+     * map reappears on the other. Returns the copies that horizontally overlap the map; they are NOT
+     * clipped, the caller is expected to draw them under a figure that clips to the map rectangle
+     * (see cAbstractShapeFigure::setClipChildren()).
      */
-    std::vector<std::vector<cFigure::Point>> clipAndTilePolygon(const std::vector<cFigure::Point>& continuousPoints) const;
+    std::vector<std::vector<cFigure::Point>> tilePolygon(const std::vector<cFigure::Point>& continuousPoints) const;
 
   private:
     // Wraps a window-relative longitude offset into [0, 360) degrees.

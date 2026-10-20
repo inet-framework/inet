@@ -7,6 +7,7 @@
 
 #include "inet/common/geometry/common/EquirectangularProjection.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "inet/common/geometry/common/CanvasProjection.h"
@@ -148,20 +149,28 @@ void EquirectangularProjection::configureCanvasProjection(cCanvas *canvas, bool 
         canvasProjection->clearClipRect();
 }
 
-std::vector<std::vector<cFigure::Point>> EquirectangularProjection::clipAndTilePolygon(const std::vector<cFigure::Point>& continuousPoints) const
+std::vector<std::vector<cFigure::Point>> EquirectangularProjection::tilePolygon(const std::vector<cFigure::Point>& continuousPoints) const
 {
-    std::vector<std::vector<cFigure::Point>> pieces;
+    std::vector<std::vector<cFigure::Point>> copies;
+    if (continuousPoints.size() < 3)
+        return copies;
+    double minX = INFINITY, maxX = -INFINITY;
+    for (auto& p : continuousPoints) {
+        minX = std::min(minX, p.x);
+        maxX = std::max(maxX, p.x);
+    }
     int shiftRange = wrapsGlobe ? 1 : 0;
     for (int shift = -shiftRange; shift <= shiftRange; shift++) {
+        double dx = shift * mapWidth;
+        if (maxX + dx < 0 || minX + dx > mapWidth)
+            continue; // this copy is entirely off the map
         std::vector<cFigure::Point> shifted;
         shifted.reserve(continuousPoints.size());
         for (auto& p : continuousPoints)
-            shifted.push_back(cFigure::Point(p.x + shift * mapWidth, p.y));
-        auto clipped = CanvasProjection::clipPolygonToRect(shifted, 0, 0, mapWidth, mapHeight);
-        if (clipped.size() >= 3)
-            pieces.push_back(clipped);
+            shifted.push_back(cFigure::Point(p.x + dx, p.y));
+        copies.push_back(shifted);
     }
-    return pieces;
+    return copies;
 }
 
 } // namespace inet
