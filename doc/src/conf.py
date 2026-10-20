@@ -90,6 +90,8 @@ language = "en"
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
 exclude_patterns = ['_build', '_deploy', 'Thumbs.db', '.DS_Store', '**/_docs', 'global.rst']
+# the section files of the migration guide are parts of migration-guide/index.rst (tools/includefiles.py)
+exclude_patterns.append('migration-guide/*/*.rst')
 
 latex_documents = []
 
