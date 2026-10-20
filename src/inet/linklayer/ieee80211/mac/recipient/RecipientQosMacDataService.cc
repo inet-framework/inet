@@ -116,20 +116,19 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
     Enter_Method("managementFrameReceived");
     take(mgmtPacket);
     // TODO MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader))
-        return std::vector<Packet *>();
-    if (basicReassembly) { // FIXME defragmentation
-        mgmtPacket = defragment(mgmtPacket);
-    }
-    if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtHeader))
-        blockAckReordering->processReceivedDelba(delba);
-    // TODO Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
-    if (dynamicPtrCast<const Ieee80211ActionFrame>(mgmtHeader)) {
+    if (duplicateRemoval && duplicateRemoval->isDuplicate(mgmtHeader)) {
         delete mgmtPacket;
         return std::vector<Packet *>();
     }
-    else
-        return std::vector<Packet *>({ mgmtPacket });
+    if (basicReassembly) { // FIXME defragmentation
+        mgmtPacket = defragment(mgmtPacket);
+    }
+    // TODO Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
+    if (mgmtPacket == nullptr)
+        return std::vector<Packet *>();
+    if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtPacket->peekAtFront<Ieee80211MgmtHeader>()))
+        blockAckReordering->processReceivedDelba(delba);
+    return std::vector<Packet *>({ mgmtPacket });
 }
 
 std::vector<Packet *> RecipientQosMacDataService::controlFrameReceived(Packet *controlPacket, const Ptr<const Ieee80211MacHeader>& controlHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler)
