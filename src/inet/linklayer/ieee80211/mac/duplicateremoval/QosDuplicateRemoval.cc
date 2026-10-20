@@ -12,6 +12,24 @@
 namespace inet {
 namespace ieee80211 {
 
+void QoSDuplicateRemoval::setLastReceived(MacAddress peer, Tid tid, const SequenceNumberCyclic& sequence, int fragment)
+{
+    if (sequence.isSpecified())
+        lastSeenSeqNumCache.insert_or_assign(Key(peer, tid), SequenceControlField(sequence.get(), fragment));
+}
+
+void QoSDuplicateRemoval::clearPeer(MacAddress peer)
+{
+    for (auto it = lastSeenSeqNumCache.begin(); it != lastSeenSeqNumCache.end();) {
+        if (it->first.first == peer)
+            it = lastSeenSeqNumCache.erase(it);
+        else
+            ++it;
+    }
+    lastSeenSharedSeqNumCache.erase(peer);
+    lastSeenTimePriorityManagementSeqNumCache.erase(peer);
+}
+
 bool QoSDuplicateRemoval::isDuplicate(const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     SequenceControlField seqVal(header->getSequenceNumber().get(), header->getFragmentNumber());

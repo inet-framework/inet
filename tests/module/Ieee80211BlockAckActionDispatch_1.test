@@ -3,9 +3,9 @@ Check duplicate Block Ack Actions through initialized production HCF.
 The test observes response submission without a wireless transmission.
 HCF must acknowledge a MAC retry without a second agreement dispatch.
 
-The fixture selects duplicate dispatch only at this prerequisite stage.
+The deadline check derives 5 ms from an agreement created at 1 ms with a 4 ms timeout.
 
-%extraargs: -r 0
+%extraargs: -r 0..2
 
 %file: ActionDispatch.cc
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
@@ -26,7 +26,8 @@ class ActionDispatchHcf : public Hcf {
         Enter_Method("checkAgreementDeadline");
         receiveRequest(false);
         auto expectedDeadline = SimTime(5, SIMTIME_MS);
-        scheduleInactivityTimer(expectedDeadline);
+        ASSERT(recipientBlockAckAgreementHandler->computeEarliestExpirationTime() == expectedDeadline);
+        scheduleInactivityTimer();
         ASSERT(inactivityTimer->getArrivalTime() == expectedDeadline);
         cancelEvent(inactivityTimer);
     }

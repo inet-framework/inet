@@ -1,0 +1,133 @@
+%description:
+A controlled peer establishes a recipient agreement through a real ADDBA exchange at 1 s.
+The finite-timeout run observes agreement state before, at, and after its stored absolute deadline.
+The recipient must retire the agreement at that deadline and send recipient-role DELBA.
+The zero-timeout control requires the agreement to remain active without DELBA.
+The fixture reads agreement state; it never changes a deadline or schedules the production timer.
+
+%extraargs: -r 0..1
+
+%file: Inactivity.cc
+#include "BlockAckRequestProbe.h"
+
+namespace inet::protocoltest {
+class BlockAckInactivityObserver : public cSimpleModule
+{
+  public:
+    BlockAckInactivityObserver() : cSimpleModule(65536) {}
+  protected:
+    void activity() override {
+        wait(SimTime(1001, SIMTIME_MS));
+        auto network = getParentModule();
+        auto peer = MacAddress("02:00:00:00:00:03");
+        auto recipient = check_and_cast<BlockAckRequestProbeHcf *>(lifecycleHcf(network, "ap"));
+        auto stationMac = check_and_cast<BlockAckRequestProbeMac *>(network->getSubmodule("sta1")->getSubmodule("wlan", 0)->getSubmodule("mac"));
+        ASSERT(stationMac->responseAcknowledged);
+        ASSERT(recipient->hasRecipient(peer, 5));
+        auto deadline = recipient->recipientDeadline(peer, 5);
+        bool disabled = par("disabled");
+        if (disabled) {
+            ASSERT(deadline == SIMTIME_MAX);
+            emit(registerSignal("disabledAgreementActive"), 1L);
+            wait(SimTime(24, SIMTIME_MS));
+            std::cout << "Zero-timeout agreement at " << simTime() << ": active=" << recipient->hasRecipient(peer, 5) << ".\n";
+            emit(registerSignal("disabledAgreementRetained"), long(recipient->hasRecipient(peer, 5)));
+        }
+        else {
+            ASSERT(deadline > simTime() && deadline < SimTime(1030, SIMTIME_MS));
+            std::cout << "Recipient absolute deadline: " << deadline << ".\n";
+            emit(registerSignal("recipientDeadline"), deadline.dbl());
+            wait(deadline - simTime() - SimTime(1, SIMTIME_NS));
+            emit(registerSignal("agreementBeforeDeadline"), long(recipient->hasRecipient(peer, 5)));
+            wait(SimTime(1, SIMTIME_NS));
+            std::cout << "Agreement at absolute deadline " << simTime() << ": active=" << recipient->hasRecipient(peer, 5) << ".\n";
+            emit(registerSignal("agreementAtDeadline"), long(recipient->hasRecipient(peer, 5)));
+            wait(SimTime(1, SIMTIME_NS));
+            emit(registerSignal("agreementAfterDeadline"), long(recipient->hasRecipient(peer, 5)));
+        }
+    }
+};
+namespace inactivity_observer_registration { Define_Module(::inet::protocoltest::BlockAckInactivityObserver); }
+
+Define_ProtocolTest(wifi_block_ack_inactivity)
+{
+    return ProtocolTest("wifi_block_ack_inactivity")
+        .once(on("sta1.wlan[0].mac").signal("probeResponseAcknowledged").assertValue(1)
+            .describe("actual ADDBA Response receives an ACK").within(1.01))
+        .once(on("observer").signal("recipientDeadline")
+            .assertEvent([](const MatchContext& c) { return c.event.value > 1 && c.event.value < 1.03; })
+            .capture("absoluteDeadline", [](const PacketEvent& event) { return cValue(event.value); })
+            .describe("recipient reports a finite absolute deadline after 1 s").within(0.001))
+        .meanwhile(atLeastTimes(1, on("ap.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211Delba>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).assertEvent([](const MatchContext& c) {
+                auto delba = c.event.packet->peekAtFront<Ieee80211Delba>();
+                return delba->getReceiverAddress() == MacAddress("02:00:00:00:00:03") &&
+                    delba->getTid() == 5 && !delba->getInitiator() && delba->getReasonCode() == 39 &&
+                    c.event.time >= SimTime(c.get("absoluteDeadline").doubleValue());
+            }).describe("recipient transmits timeout DELBA at or after expiry").within(0.03)))
+        .once(on("observer").signal("agreementBeforeDeadline").assertValue(1)
+            .describe("agreement remains active one nanosecond before expiry").within(0.03))
+        .once(on("observer").signal("agreementAtDeadline").assertValue(0)
+            .describe("agreement is absent at the absolute deadline").within(0.000001))
+        .once(on("observer").signal("agreementAfterDeadline").assertValue(0)
+            .describe("agreement remains absent after the deadline").within(0.000001))
+        .once(on("sta1.wlan[0].mac").signal("probeDelbaAcknowledged").assertValue(1)
+            .describe("controlled peer acknowledges timeout DELBA").within(0.005));
+}
+
+Define_ProtocolTest(wifi_block_ack_inactivity_disabled)
+{
+    return ProtocolTest("wifi_block_ack_inactivity_disabled")
+        .once(on("sta1.wlan[0].mac").signal("probeResponseAcknowledged").assertValue(1)
+            .describe("zero-timeout agreement completes ADDBA").within(1.01))
+        .once(on("observer").signal("disabledAgreementActive").assertValue(1)
+            .describe("zero timeout supplies no finite deadline").within(0.001))
+        .meanwhile(never(on("ap.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211Delba>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).describe("no timeout DELBA during the control window").within(0.03)))
+        .once(on("observer").signal("disabledAgreementRetained").assertValue(1)
+            .describe("zero-timeout agreement remains active").within(0.03));
+}
+}
+
+%file: Inactivity.ned
+@namespace(inet::protocoltest);
+import inet.protocoltest.wifi.BlockAckRequestProbeNetwork;
+simple BlockAckInactivityObserver {
+    parameters:
+        bool disabled;
+        @class(BlockAckInactivityObserver);
+        @signal[recipientDeadline](type=double);
+        @signal[agreementBeforeDeadline](type=long);
+        @signal[agreementAtDeadline](type=long);
+        @signal[agreementAfterDeadline](type=long);
+        @signal[disabledAgreementActive](type=long);
+        @signal[disabledAgreementRetained](type=long);
+}
+network BlockAckInactivityNetwork extends BlockAckRequestProbeNetwork {
+    submodules:
+        observer: BlockAckInactivityObserver;
+}
+
+%inifile: test.ini
+[General]
+network = BlockAckInactivityNetwork
+*.observer.disabled = ${disabled=false,true}
+*.stimulus.timeout = ${disabled} ? 0s : 20ms
+*.tester.testName = ${disabled} ? "wifi_block_ack_inactivity_disabled" : "wifi_block_ack_inactivity"
+*.sta1.wlan[*].mac.typename = "inet.protocoltest.wifi.BlockAckRequestProbeMac"
+*.sta1.wlan[*].mac.hcf.typename = "inet.protocoltest.wifi.BlockAckRequestProbeHcf"
+*.ap.wlan[*].mac.hcf.typename = "inet.protocoltest.wifi.BlockAckRequestProbeHcf"
+*.ap.wlan[*].mac.hcf.recipientBlockAckAgreementPolicy.blockAckTimeoutValue = ${disabled} ? 0s : 20ms
+*.sta1.app[0].startTime = 2s
+*.sta1.app[0].stopTime = 2.003s
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_inactivity: PASS
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_inactivity_disabled: PASS

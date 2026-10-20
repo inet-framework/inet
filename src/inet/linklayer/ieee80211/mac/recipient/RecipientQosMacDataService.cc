@@ -57,6 +57,11 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
 {
     Enter_Method("dataFrameReceived");
     take(dataPacket);
+    if (blockAckAgreementHandler) {
+        auto agreement = blockAckAgreementHandler->getAgreement(dataHeader->getTid(), dataHeader->getTransmitterAddress());
+        if (agreement)
+            agreement->recordReceived(dataHeader);
+    }
     // TODO A-MPDU Deaggregation, MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
     if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
         EV_WARN << "Dropping duplicate packet " << *dataPacket << ".\n";
@@ -126,8 +131,6 @@ std::vector<Packet *> RecipientQosMacDataService::managementFrameReceived(Packet
     // TODO Defrag, MSDU Integrity, Replay Detection, RX MSDU Rate Limiting
     if (mgmtPacket == nullptr)
         return std::vector<Packet *>();
-    if (auto delba = dynamicPtrCast<const Ieee80211Delba>(mgmtPacket->peekAtFront<Ieee80211MgmtHeader>()))
-        blockAckReordering->processReceivedDelba(delba);
     return std::vector<Packet *>({ mgmtPacket });
 }
 
@@ -190,6 +193,49 @@ RecipientQosMacDataService::~RecipientQosMacDataService()
     delete aMsduDeaggregation;
     delete aMpduDeaggregation;
     delete blockAckReordering;
+}
+
+std::vector<Packet *> RecipientQosMacDataService::retireAgreement(RecipientBlockAckAgreement *agreement, bool associationReset)
+{
+    Enter_Method("retireAgreement");
+    auto peer = agreement->getBlockAckRecord()->getOriginatorAddress();
+    auto tid = agreement->getBlockAckRecord()->getTid();
+    auto duplicate = check_and_cast<QoSDuplicateRemoval *>(duplicateRemoval);
+    // IEEE Std 802.11-2024, 11.5.3.5: ordinary teardown retains the highest received sequence number.
+    if (!associationReset)
+        duplicate->setLastReceived(peer, tid, agreement->getHighestReceivedSequence(), agreement->getHighestReceivedFragment());
+    std::vector<Packet *> discarded;
+    auto released = blockAckReordering->detachAgreement(peer, tid, !associationReset, discarded);
+    for (auto packet : discarded) {
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
+        delete packet;
+    }
+    std::vector<Packet *> complete;
+    for (const auto& unit : released) {
+        auto frame = defragment(unit.second);
+        if (!frame)
+            continue;
+        if (frame->peekAtFront<Ieee80211DataHeader>()->getAMsduPresent()) {
+            emit(packetDeaggregatedSignal, frame);
+            auto subframes = aMsduDeaggregation->deaggregateFrame(frame);
+            complete.insert(complete.end(), subframes->begin(), subframes->end());
+            delete subframes;
+        }
+        else
+            complete.push_back(frame);
+    }
+    return complete;
+}
+
+void RecipientQosMacDataService::clearPeer(MacAddress peer)
+{
+    Enter_Method("clearPeer");
+    blockAckReordering->clearPeer(peer);
+    check_and_cast<QoSDuplicateRemoval *>(duplicateRemoval)->clearPeer(peer);
+    for (int tid = -1; tid < 16; tid++)
+        basicReassembly->purge(peer, tid, 0, 4095);
 }
 
 } /* namespace ieee80211 */

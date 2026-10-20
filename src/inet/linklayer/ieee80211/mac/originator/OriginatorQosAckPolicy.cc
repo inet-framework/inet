@@ -98,6 +98,8 @@ AckPolicy OriginatorQosAckPolicy::computeAckPolicy(Packet *packet, const Ptr<con
 {
     if (agreement == nullptr)
         return AckPolicy::NORMAL_ACK;
+    if (agreement->getIsAddbaResponseReceived() && header->getAMsduPresent() && !agreement->isAMsduPermitted())
+        throw cRuntimeError("A-MSDU is not permitted by both ADDBA flags");
     if (agreement->getIsAddbaResponseReceived() && isBlockAckPolicyEligibleFrame(packet, header)) {
         if (checkAgreementPolicy(header, agreement))
             return AckPolicy::BLOCK_ACK;
@@ -116,7 +118,7 @@ bool OriginatorQosAckPolicy::isBlockAckPolicyEligibleFrame(Packet *packet, const
 bool OriginatorQosAckPolicy::checkAgreementPolicy(const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const
 {
     bool bufferFull = agreement->getBufferSize() == agreement->getNumSentBaPolicyFrames();
-    bool aMsduOk = agreement->getIsAMsduSupported() || !header->getAMsduPresent();
+    bool aMsduOk = agreement->isAMsduPermitted() || !header->getAMsduPresent();
     // TODO bool baPolicy = agreement->getIsDelayedBlockAckPolicySupported() || !frame->getAckPolicy();
     return !bufferFull && aMsduOk && (header->getSequenceNumber() >= agreement->getStartingSequenceNumber()); // TODO && baPolicy
 }
