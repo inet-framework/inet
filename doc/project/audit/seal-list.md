@@ -64,11 +64,11 @@ A whole-document seal is declared in the document's own header, as `**Seal:** wh
 | `rule/documentation.md` | whole | 0 | 0 | 1 |
 | `rule/naming.md` | by rule | 0 | 0 | 23 |
 | `rule/planning.md` | by rule | 0 | 0 | 8 |
-| `rule/pull-request.md` | by rule | 0 | 0 | 26 |
+| `rule/pull-request.md` | by rule | 0 | 0 | 27 |
 | `rule/quality.md` | by rule | 0 | 0 | 15 |
 | `rule/release.md` | by rule | 0 | 0 | 11 |
 | `rule/sealing.md` | whole | 0 | 0 | 1 |
-| `rule/testing.md` | by rule | 0 | 0 | 14 |
+| `rule/testing.md` | by rule | 0 | 0 | 15 |
 <!-- END SEAL INDEX -->
 
 Nothing is closed yet, and that is the honest state: no document in this set has been audited against [documentation.md](../rule/documentation.md). The requirements are the one document that carries flags on every unit, because it declares `by requirement, complete` — its 30 requirements are all ⬜, which reads as *considered, and deliberately still open*.

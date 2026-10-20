@@ -48,6 +48,7 @@ Every rule in document order. The identifier links to the rule; the statement is
 | [PR-SERIES-BUILDS](#pr-series-builds) | Every commit builds and passes its tests |
 | [PR-SERIES-ORDER](#pr-series-order) | Prerequisites first, no fixup commits |
 | [PR-SERIES-LINEAR](#pr-series-linear) | Rebase the topic branch; do not merge into it |
+| [PR-SERIES-PLAN](#pr-series-plan) | An implementation plan defines each future commit and its verification. |
 
 **Commit messages (PR-MSG)**
 
@@ -224,6 +225,22 @@ Keep the series linear on top of the target branch. Do not merge the target bran
 
 A merge commit inside the series mixes other developers' changes into the diff of the pull request, and a bisect crosses into unrelated history. How the finished branch enters the target branch afterwards is the maintainer's decision; the branch you submit stays linear.
 
+### PR-SERIES-PLAN
+
+**An implementation plan defines each future commit and its verification.**
+
+List the future commits in dependency order. Give each commit a stable plan identifier, proposed subject, purpose, dependencies, responsible component, affected files, expected behavior, and verification. Expand any step that contains several commits into separate commit entries. Explain boundaries under [PR-SPLIT-ONE-CHANGE](#pr-split-one-change).
+
+For each protocol repair or feature, explain the current bug or missing capability through a concrete scenario. Cite the protocol requirement and current source or observed evidence. State the initial condition, trigger, incorrect or absent result, and required result. Explain how the proposed component action will produce that result. State uncertainty when the cause remains unknown.
+
+Compare each proposed commit with its proposed parent. Separate verified current behavior from assumed effects of earlier planned commits. Use [TR-PLAN-PROTOCOL](testing.md#tr-plan-protocol) for explicit test tasks and the associated reviewer document. For other commits, explain their structural purpose and verification. State why protocol tests and a protocol reviewer document do not apply. Do not invent a protocol defect for a refactor or documentation change.
+
+For example, a hypothetical series first adds a shared queue operation and next repairs protocol service order through that operation. The first entry explains the generic contract and its direct tests. The second entry explains the protocol gap, changed caller behavior, protocol tests, and reviewer document. The plan identifies the dependency between those entries.
+
+Keep the commit entries current when boundaries or dependencies change. This content requirement applies whenever a task calls for an implementation plan. It does not activate the separate draft [plan approval process](planning.md#plr-approval).
+
+*Enforced at T4 — review of the plan and its mapping to the commit series.*
+
 ## Commit messages (PR-MSG)
 
 ### PR-MSG-SUBJECT
@@ -323,9 +340,17 @@ A commit that repairs a defect carries, in its body, the way to see the defect h
 1. **Steps.** The configuration, the scenario, and what goes wrong — *"run `examples/inet/tcpwindowscale` with `sackSupport=true`; the sender stalls at t=2.4 s because `nextSeg` rule (2) underflows"*. A few lines, and it is enough for most defects.
 2. **A standalone regression test**, committed beside the repair.
 
-**The test is justified only when the defect is serious enough and likely to bite again.** Most are not. A defect earns a regression test when it sits on a path many things cross, when a future refactor could reintroduce it without noticing, or when it came from a misreading of a standard that the next reader could repeat. A one-off typo in a log message earns steps and nothing more.
+**Outside planned protocol repairs, select a regression test according to the defect's risk.** A test is justified when the defect is serious enough and likely to recur. These conditions justify a regression test:
 
-**Why the steps are required even when the test is not.** A fix is not new behavior, so [TR-SHIP-WITH](testing.md#tr-ship-with) does not reach it, and nothing else in the rule set asks a fix for evidence. Without the steps a reviewer must take the defect on trust, and a later reader who suspects a regression in the same area has no way to tell whether it is the old defect returning.
+- Many components use the affected path.
+- A later refactor could reintroduce the defect without detection.
+- A repeated misinterpretation of the standard could cause the defect again.
+
+A one-off typo in a log message needs reproduction steps alone.
+
+For planned protocol repairs, [TR-PLAN-PROTOCOL](testing.md#tr-plan-protocol) requires explicit protocol tests and a reviewer document. Reproduction steps alone do not satisfy that specific requirement.
+
+**Every fix needs reproducible evidence.** For other fixes without a regression test, the reproduction steps supply the evidence. They let a reviewer check the defect and compare a later failure with the original scenario.
 
 Write the symptom in the words a future reader will search for: the error message, the wrong packet, the failed assertion. That is [PR-MSG-WHY](#pr-msg-why) applied to a fix, and this rule says the searchable symptom is not optional.
 

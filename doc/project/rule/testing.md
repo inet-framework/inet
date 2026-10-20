@@ -19,6 +19,7 @@ Every test rule in document order.
 | [TR-CAT-MATCH](#tr-cat-match) | The test category matches the kind of claim the change makes |
 | [TR-FOCUSED-EVIDENCE](#tr-focused-evidence) | Validation runs the directly related cases and records reproducible evidence |
 | [TR-SHIP-WITH](#tr-ship-with) | New behavior ships with its test, in the same pull request |
+| [TR-PLAN-PROTOCOL](#tr-plan-protocol) | Planned protocol changes include explicit protocol test tasks and a reviewer document for each applicable commit. |
 | [TR-FP-NOT-ENOUGH](#tr-fp-not-enough) | A fingerprint is never the only test of new behavior |
 | [TR-VALIDATE-EXTERNAL](#tr-validate-external) | A claim about the real world is checked against something outside INET |
 
@@ -67,7 +68,9 @@ Every test rule in document order.
 
 The category identifies suitable infrastructure, not proof by itself. Verify that the fixture reaches the claimed production path and that its observations establish the expected result. A module fixture can check integration when it connects the required production components. A recorded scalar cannot establish frame encoding unless it directly measures the required byte-level property. A distributional claim needs appropriate samples and a statistical check, regardless of the directory that contains the test. The limits of statistical baseline evidence are in [test-anatomy.md](../design/test-anatomy.md#the-recorded-expectations).
 
-For example, a hypothetical module test drives a production sender and checks the emitted header's receiver address. That test can establish the address claim. Its directory does not require a second protocol test with the same assertion.
+For example, a hypothetical module test drives a production sender and checks the emitted header's receiver address. That test can establish the address claim. The category guidance alone does not require another test with the same assertion.
+
+For planned protocol repairs and features, [TR-PLAN-PROTOCOL](#tr-plan-protocol) adds a specific requirement for protocol tests. Sufficient module coverage does not remove that requirement. Retain useful module tests as additional evidence.
 
 *Enforced at T4 — agent review: does the test type match the claim?*
 
@@ -88,6 +91,39 @@ A reported result includes the working directory, the exact build and test comma
 Not in a follow-up, and not in an issue. A test written later is written against the code as it turned out, not against the behavior that was intended, and it will pass over a defect that was in the code from the start. The test is also the only durable statement of what the change was *for*.
 
 *Enforced at T4 — agent review; T2 once coverage is gated.*
+
+### TR-PLAN-PROTOCOL
+
+**Planned protocol changes include explicit protocol test tasks and a reviewer document for each applicable commit.**
+
+Apply this rule to each planned commit that repairs a protocol bug or adds a missing protocol capability. The [commit series](pull-request.md#pr-series-plan) identifies those commits. The plan must include explicit tasks to write or extend protocol tests and to write the associated `.md` reviewer document. A general instruction to add regression coverage is insufficient.
+
+For each applicable commit, the plan must specify these items:
+
+1. The protocol requirement, current bug or gap, and source or observed evidence.
+2. The existing tests that expose the gap, or an explicit statement that no such test exists.
+3. The exact test paths and cases to add or extend, with existing and proposed cases clearly distinguished.
+4. Each test's initial state, configuration, stimulus, production path, protocol observation, and assertion.
+5. The expected failure or missing behavior before the change, the expected result after it, and the reason for that difference.
+6. The code action that changes the result, with its responsible component and relevant state changes.
+7. The test runner, explicit selectors, build requirements, and expected coverage limits under [TR-FOCUSED-EVIDENCE](#tr-focused-evidence).
+8. The reviewer document's exact path and planned commit identifier.
+
+Use the protocol test infrastructure described by [derive-tests-from-a-standard.md](../guide/derive-tests-from-a-standard.md). Add required fixture support to the plan when the current infrastructure cannot express the scenario. A helper test or fingerprint alone cannot replace the protocol test task. Keep tests faithful to the requirement. Apply the guide's failure classes before any expected-failure declaration.
+
+Include the tests and reviewer document in the commit that changes the protocol behavior. An earlier test commit is permitted when it respects [PR-SERIES-BUILDS](pull-request.md#pr-series-builds) and the expected-failure rules. In that case, identify both commits in the plan. The behavior commit must update its reviewer document and any test declaration that the repair changes. Do not leave test implementation or documentation to an unspecified later commit.
+
+Write one reviewer document for each applicable commit. Store it beside the protocol tests, for example at `tests/protocol/<suite>/<commit-topic>.md`. Associate it through the stable plan identifier, proposed subject, and test paths. A future commit has no SHA; do not require one. Link the document from the plan and commit body. The document supplements the standalone explanation required by [PR-MSG-STANDALONE](pull-request.md#pr-msg-standalone).
+
+The document must explain the protocol requirement, original scenario, cause or uncertainty, code correction, and every included protocol test. Explain the test setup, stimulus, expected exchanges or state, assertions, result before and after the change, and coverage limits. Use the human audience and explanatory style in [DR-EXPLAIN](documentation.md#dr-explain). A test list or command log alone is insufficient.
+
+Include as many diagrams as the explanation needs. Show relevant participants, exchanges, event order, timer boundaries, or state transitions. Use separate diagrams when distinct scenarios or before-and-after behavior need separate explanations. Do not impose a diagram count. State why diagrams add no useful information if none are necessary.
+
+Check the diagram rendering and its agreement with the test. Report unavailable rendering as unverified.
+
+Keep planned results separate from executed evidence in both artifacts. Record test results under [TR-FOCUSED-EVIDENCE](#tr-focused-evidence) when execution occurs. A plan-only task requires concrete test designs and explicit future document tasks; it does not authorize code or test implementation.
+
+*Enforced at T4 — review of each planned protocol commit, its test changes, and its reviewer document.*
 
 ### TR-FP-NOT-ENOUGH
 

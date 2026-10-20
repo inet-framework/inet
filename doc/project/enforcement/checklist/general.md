@@ -6,6 +6,8 @@ The tier-4 gate from [enforcement/README.md](../README.md). It enforces the **se
 
 For a proposed implementation plan, use the draft [plan review checklist](../../guide/write-an-implementation-plan.md#review-checklist). Its [plan rules](../../rule/planning.md) state when that procedure applies.
 
+Check current [commit series requirements](../../rule/pull-request.md#pr-series-plan) and [protocol test requirements](../../rule/testing.md#tr-plan-protocol) independently of draft approval. Flag absent commit entries or missing protocol test and reviewer document tasks for applicable commits. For implementation, check that the assigned commits contain the required artifacts and explanations. Check necessary diagrams against the scenarios and assertions.
+
 ## How to run
 
 Input: the change under review (a diff, commit, range, branch, pull request, staged diff, or working tree). For **each** checklist item that can be evaluated, output one of:
