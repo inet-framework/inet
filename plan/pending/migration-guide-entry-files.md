@@ -1,6 +1,6 @@
 # Migration guide sections as files of their own
 
-Status: **approved, in progress**.
+Status: **done**. Landed on `master` by a fast-forward and pushed on 2026-10-20, at the maintainer's request.
 
 - Branch `topic/migration-guide-entry-files`, in the worktree `inet-migration-guide-entry-files`, from `origin/master` at `a65e4d59f2` (2026-10-20). No local edits.
 - Approval: on 2026-10-20 the maintainer asked for this plan, as the follow-up that [whatsnew-entry-files.md](../done/whatsnew-entry-files.md) left out of its scope (its D-3), and chose the version groups (D-1). No sealed path is in the scope. No baseline moves, because no model source changes.
@@ -74,14 +74,14 @@ A new rule RR-MIGRATE-FILE in [release.md](../../doc/project/rule/release.md) sa
 
 | Step | Commit | Check |
 | --- | --- | --- |
-| 1 | `plan: add: migration guide sections as files of their own` | — |
-| 2 | `doc: add: a Sphinx directive that includes the files of a folder` | a Sphinx build of a small test project: order, an empty folder, an incremental build after an added file |
-| 3 | `doc: change: the migration guide sections of 4.7.x are files of their own` | the text build of the guide gives the same 20 sections and the same text, before and after |
-| 4 | `doc: add: rule RR-MIGRATE-FILE, a migration section is a file of its own` | `check-links.sh`, `check-seals.sh` |
-| 5 | `doc: add: the release note checks cover the migration guide` | `test_whatsnew.py`; the gate over a pull request that adds a section |
-| 6 | `doc: add: the rebase and the release handle the migration guide` | `test_whatsnew.py`: a branch that adds and changes sections rebases without a stop; a release moves the folder |
-| 7 | `plan: change: record the rebase of the open pull requests` | the trial of section 4 |
-| 8 | `plan: location: migration guide sections as files of their own, done` | — |
+| 1 ✅ | `plan: add: migration guide sections as files of their own` (`19eb39c65b`) | — |
+| 2 ✅ | `doc: add: a Sphinx directive that includes the files of a folder` (`3d3677df50`) | a Sphinx build of a small test project: order, an empty folder, an incremental build after an added, a changed and a removed file, `-j 2` |
+| 3 ✅ | `doc: change: the migration sections of 4.7.x are files of their own` (`1c1ceab2f6`) | the text build of the guide gives the same 20 sections and the same text, before and after (D-5) |
+| 4 ✅ | `doc: add: rule RR-MIGRATE-FILE, a migration section is a file of its own` (`515578736f`) | `check-links.sh`, `check-seals.sh --write` (the index of `rule/release.md` has 11 rules) |
+| 5 ✅ | `doc: add: the release note checks cover the migration guide` (`dff3e2efd0`) | `test_whatsnew.py`; the audit of #1225 |
+| 6 ✅ | `doc: add: the rebase and the release handle the migration guide` (`c89209a2af`) | `test_whatsnew.py`: a branch that adds a section with a subsection and changes a moved one rebases without a stop; a change of a section of INET 3.x stops; a release moves the folder |
+| 7 ✅ | `plan: change: record the rebase of the open pull requests` | the trial of section 7 |
+| 8 ✅ | `plan: location: migration guide sections as files of their own, done` | — |
 
 Each commit carries a `Change:` trailer with the group `migration-guide-entry-files`. The gates `check-links.sh`, `check-seals.sh`, `check-commits.sh` and `check-classification.sh` run over `origin/master..HEAD` before each commit, and `check-pull-request.sh` over the whole series at the end.
 
@@ -98,8 +98,39 @@ Each commit carries a `Change:` trailer with the group `migration-guide-entry-fi
 - **D-2 — The order is the file name, inside each version.** The same as the release notes (D-2 of `whatsnew-entry-files.md`).
 - **D-3 — One tool and one gate for both files.** The rebase and the release must handle `WHATSNEW` and the guide in one run, and a commit that breaks a model usually owes both.
 - **D-4 — The rebase tool is tested on the open pull requests, and nothing is pushed.** As D-4 of `whatsnew-entry-files.md`.
+- **D-5 — The move also removes six warnings.** Six of the 20 sections underlined their titles with fewer `-` than the titles had characters, and Sphinx warned "Title underline too short" for each. The files underline each title to its full length. The text of the guide does not change.
+- **D-6 — The names of the 20 sections are chosen by hand**, with the areas of the release notes: `arp`, `ieee80211`, `ipsec`, `packet`, `queueing` and `tcp`.
+- **D-7 — The gate flags only a section that a commit adds.** A branch from before the move has the sections of 4.7.x in its own `index.rst`, and a commit of it can change one of them; the rebase moves that change into the file. A heading whose text only includes a folder is a version heading and passes, because the release writes one. The check of a tree also flags an `index.rst` without `.. include-files:: development/*.rst`.
+- **D-8 — The rebase matches the sections by title only.** A section has no number, so a section with a new title is a removal and an addition. The rebase stops when the commit changes the lines above the sections, or a section that stays in `index.rst`, because the base has its own version of those lines.
+- **D-9 — The release takes the folder from the heading.** "INET-4.8 …" gives `4.8/`. A heading without a version stops the release before it changes a file. Without a section file in `development/`, the release writes no heading of the release into the guide. After a release, the directive shows "No change of this version needs a migration step." below the new heading of the version in development.
 
 ## 6. Out of scope
 
 - The fingerprint baselines, `tests/fingerprint/*.csv` (section 6 of `whatsnew-entry-files.md`).
 - The title of the guide, "Migrating Code from INET 3.x". It no longer describes the guide, but a new title is a separate decision.
+
+## 7. The record
+
+**The directive (step 2).** A test project built with Sphinx 9.1.0 and docutils 0.21.2 gave the files in the order of their names, the sentence for an empty folder, a second read of the page after an added, a changed and a removed file, no read without a change, and no warning, also with `-j 2`.
+
+**The move (step 3).** `sphinx-build -b text` with `DOC_BUILD_TARGET=users-guide,developers-guide`, before and after: the migration guide has the same 38 blocks, compared by title and body, and one more block for the heading "INET-4.7.x (in development)". The log of warnings went from 89 lines to 41: six warnings "Title underline too short" are gone (D-5), and no warning is new.
+
+**The gate (step 5).** Over #1225, `check-whatsnew.sh` reports two violations: the entry in `WHATSNEW`, and `49e762915 adds the section "Ipv6NetworkConfigurator Gateway-Only Routes" to doc/src/migration-guide/index.rst; write it as doc/src/migration-guide/development/ipv6-ipv6networkconfigurator-gateway-only-routes.rst`. The 189 enforcement tests pass.
+
+**The trial (step 6).** On 2026-10-20, each of the 101 open pull requests was rebased with `whatsnew.py rebase` onto `dff3e2efd0`, in a scratch worktree, and then discarded. Nothing was pushed.
+
+| Pull requests | Rebase without a stop | Stop |
+| --- | --- | --- |
+| Add to `WHATSNEW`: 64 | 32 (30 in the trial of `whatsnew-entry-files.md`) | 32 |
+| Do not add to `WHATSNEW`: 37 | 15 | 22 |
+
+- No pull request stops in `WHATSNEW` or in the migration guide.
+- The first stop of the other 54 is in `tests/fingerprint/*.csv` alone for 26, and in source or other files for 28, most of them in the 802.11 MIB and management. These conflicts are outside this plan.
+- The tool made 15 section files of `development/`. #1225, rebased, builds its section below the heading of 4.7.x without a new warning.
+- The trial stops at the first conflict of a pull request, so a pull request that stopped on the guide before can now stop on a later file. The numbers count the result, not the files that each pull request still has to resolve.
+
+**After the landing.**
+
+- An author of an open pull request that adds a section to the guide runs `whatsnew.py rebase`, as for `WHATSNEW` (`doc/whatsnew/README.md`).
+- The fingerprint CSVs cause 37 of the 54 stops. They stay as they are: the maintainer decided on 2026-10-20 that a rebase must resolve a conflict in a baseline for real.
+
