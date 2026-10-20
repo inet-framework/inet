@@ -46,7 +46,8 @@ class CheckPullRequestTest(unittest.TestCase):
         self.commit("src: change: one value")
         result = self.check()
         self.assertEqual(result.returncode, 0, result.stdout)
-        for gate in ("check-commits.sh", "check-classification.sh", "check-includes.sh", "check-ned-params.sh"):
+        for gate in ("check-commits.sh", "check-classification.sh", "check-includes.sh", "check-ned-params.sh",
+                     "check-whatsnew.sh"):
             self.assertRegex(result.stdout, rf"{gate} +pass")
         self.assertIn("check-pr-description.sh    not run", result.stdout)
 
@@ -55,6 +56,20 @@ class CheckPullRequestTest(unittest.TestCase):
         result = self.check()
         self.assertEqual(result.returncode, 1, result.stdout)
         self.assertRegex(result.stdout, r"check-classification.sh +FAIL +1 violation")
+
+    def test_an_entry_in_whatsnew_fails(self):
+        self.write("WHATSNEW", "INET-4.7.x (in development)\n---------------------------\n\n")
+        self.git("add", ".")
+        self.git("commit", "-qm", "fixture: WHATSNEW")
+        self.git("branch", "-f", "master")
+        self.write("WHATSNEW", "INET-4.7.x (in development)\n---------------------------\n\n"
+                   "Notable bug fixes are the following:\n\n1. A repair\n\n   It is repaired.\n")
+        self.commit("src: fix: one value", trailer="Change: src | behavior.change.fix | whatsnew")
+        result = self.check()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertRegex(result.stdout, r"check-whatsnew.sh +FAIL +1 violation")
+        self.assertIn('adds the entry "A repair" to WHATSNEW; write it as doc/whatsnew/fixes/src-repair.txt',
+                      result.stdout)
 
     def test_the_series_starts_at_the_merge_base(self):
         self.commit("src: change: one value")

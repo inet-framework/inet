@@ -71,7 +71,7 @@ Each entry is one file in `doc/whatsnew/incompatible/`, `compatible/` or `fixes/
 
 The reason is parallel work. When each pull request adds its entry as the next number at the end of a list in `WHATSNEW`, all of them change the same lines and choose the same number. Each landing then makes every other open pull request conflict. On 2026-10-20, 29 of the 70 open pull requests that conflicted with `master` conflicted in `WHATSNEW`, and the numbers on `master` were already wrong. Two files cannot conflict, and a number that a tool writes cannot be wrong.
 
-*Enforced at T3 — [whatsnew.py](../enforcement/whatsnew.py) `check`.*
+*Enforced at T3 — [check-whatsnew.sh](../enforcement/check-whatsnew.sh), a series gate of the pull-request CI; [whatsnew.py](../enforcement/whatsnew.py) `check` by hand.*
 
 ### RR-FINGERPRINT-NOTE
 

@@ -23,7 +23,7 @@ Record the head commit and the merge base in the report. A review of "the branch
 doc/project/enforcement/check-pull-request.sh --base origin/master --head refs/pr/<n> --pr <n>
 ```
 
-It computes the merge base and runs the five series gates over `$MB..refs/pr/<n>`: `check-commits.sh`, `check-classification.sh`, `check-includes.sh`, `check-ned-params.sh` and `check-pr-description.sh`. CI runs the same command on every pull request to `master`, through `check-pull-request.yml`, and the run page of that check holds the same report. **A CI report is evidence only for the head commit that it names.** Use it when that head is the one you review, and run the command yourself when it is not.
+It computes the merge base and runs the six series gates over `$MB..refs/pr/<n>`: `check-commits.sh`, `check-classification.sh`, `check-includes.sh`, `check-ned-params.sh`, `check-whatsnew.sh` and `check-pr-description.sh`. CI runs the same command on every pull request to `master`, through `check-pull-request.yml`, and the run page of that check holds the same report. **A CI report is evidence only for the head commit that it names.** Use it when that head is the one you review, and run the command yourself when it is not.
 
 What `check-commits.sh` covers, and what to run by hand when you want the detail:
 

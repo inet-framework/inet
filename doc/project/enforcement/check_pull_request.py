@@ -22,7 +22,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 GUIDE = "doc/project/guide/review-a-pull-request.md"
-RULES = ["doc/project/rule/pull-request.md", "doc/project/rule/classification.md"]
+RULES = ["doc/project/rule/pull-request.md", "doc/project/rule/classification.md", "doc/project/rule/release.md"]
 
 
 def git(*args, cwd=None):
@@ -43,6 +43,7 @@ def gates(commit_range, description):
         ("check-classification.sh", "CR-*", [commit_range]),
         ("check-includes.sh", "PR-SERIES-BUILDS: every #include resolves", [commit_range]),
         ("check-ned-params.sh", "PR-SERIES-BUILDS: every par() is declared", [commit_range]),
+        ("check-whatsnew.sh", "RR-WHATSNEW-FILE", [commit_range]),
     ]
     if description:
         found.append(("check-pr-description.sh", "PR-REQ-STORY", [*description, "--range", commit_range]))
@@ -69,6 +70,11 @@ def counts(output):
     lines = output.splitlines()
     return (sum("VIOLATION:" in line for line in lines),
             sum(line.lstrip().startswith("note:") for line in lines))
+
+
+def listing(items):
+    """'a, b and c'."""
+    return ", ".join(items[:-1]) + " and " + items[-1] if len(items) > 1 else "".join(items)
 
 
 def link(path, gate_commit):
@@ -100,7 +106,7 @@ def markdown(series, results, gate_commit, description_ran):
         lines.append("No violation. A note asks a question for the reviewer, and it never fails the check.")
     else:
         lines.append(f"{violations} violation(s). A note asks a question for the reviewer, and it never fails the check.")
-    lines += ["", f"The rules are {link(RULES[0], gate_commit)} and {link(RULES[1], gate_commit)}. "
+    lines += ["", f"The rules are {listing([link(rule, gate_commit) for rule in RULES])}. "
                   f"The audit procedure is {link(GUIDE, gate_commit)}.", ""]
     return "\n".join(lines)
 
@@ -154,7 +160,7 @@ def main():
     if worst == 0:
         print("PASS: no violation. A note asks a question, and it does not fail the audit.")
     elif worst == 1:
-        print(f"FAIL: see {RULES[0]} and {RULES[1]} for each rule.")
+        print(f"FAIL: see {listing(RULES)} for each rule.")
     else:
         print("ERROR: a gate could not run; its output above says why.")
     return worst
