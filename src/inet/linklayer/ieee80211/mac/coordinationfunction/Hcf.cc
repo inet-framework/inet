@@ -21,6 +21,8 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtTransactionTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
+#include "inet/queueing/function/PacketFilterFunction.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -850,6 +852,24 @@ bool Hcf::hasFrameToTransmit(AccessCategory ac)
         return !edcaf->getPendingQueue()->isEmpty() || edcaf->getInProgressFrames()->hasInProgressFrames();
     else
         throw cRuntimeError("Hcca is unimplemented");
+}
+
+bool Hcf::hasQueuedData(MacAddress peer, Tid tid) const
+{
+    queueing::CPacketFilterFunction filter([this, peer, tid](const Packet *packet) {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        return data && data->getType() == ST_DATA_WITH_QOS && data->getReceiverAddress() == peer && data->getTid() == tid &&
+            !edca->getLifetimeHandler()->isExpired(packet);
+    });
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        auto queue = edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue();
+        if (queue->isEmpty())
+            continue;
+        auto module = dynamic_cast<cModule *>(queue);
+        if (queue->canPullPacket(module ? module->gate("out") : nullptr, &filter))
+            return true;
+    }
+    return false;
 }
 
 bool Hcf::hasFrameToTransmit()

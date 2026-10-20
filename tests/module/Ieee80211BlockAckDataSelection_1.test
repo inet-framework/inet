@@ -1,0 +1,321 @@
+%description:
+Check DATA extraction through the production QoS data service.
+A compound queue uses reversed service order and a multicast/unicast classifier.
+The service must extract unicast DATA individually without a multicast aggregate.
+The multicast sources must retain their identities, sequence numbers, and deadlines.
+Other cases use a compound queue whose provider supports filtered queries but rejects filtered pulls.
+Ordinary service and filtered queries must work. A refused pull must preserve queued DATA.
+
+%extraargs: -r 0..3
+
+%file: DataSelection.cc
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/queueing/base/PacketQueueBase.h"
+#include "inet/queueing/queue/CompoundPacketQueueBase.h"
+#include "inet/common/PacketEventTag.h"
+#include "inet/common/TimeTag.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+class LegacySelectionQueue : public queueing::PacketQueueBase {
+    cPacketQueue frames;
+  public:
+    int getMaxNumPackets() const override { return -1; }
+    int getNumPackets() const override { return frames.getLength(); }
+    b getMaxTotalLength() const override { return b(-1); }
+    b getTotalLength() const override { return b(frames.getBitLength()); }
+    Packet *getPacket(int index) const override { return check_and_cast<Packet *>(frames.get(index)); }
+    bool isEmpty() const override { return frames.isEmpty(); }
+    void removePacket(Packet *frame) override { frames.remove(frame); }
+    void removeAllPackets() override { frames.clear(); }
+    bool supportsPacketPushing(const cGate *) const override { return true; }
+    bool supportsPacketPulling(const cGate *) const override { return true; }
+    bool canPushPacket(Packet *, const cGate *) const override { return true; }
+    void pushPacket(Packet *frame, const cGate *) override { frames.insert(frame); }
+    Packet *canPullPacket(const cGate *) const override { return isEmpty() ? nullptr : getPacket(0); }
+    Packet *canPullPacket(const cGate *, const queueing::IPacketFilterFunction *filter) const override {
+        for (cQueue::Iterator it(frames); !it.end(); it++) {
+            auto frame = check_and_cast<Packet *>(*it);
+            if (filter->matchesPacket(frame))
+                return frame;
+        }
+        return nullptr;
+    }
+    Packet *pullPacket(const cGate *) override { return check_and_cast<Packet *>(frames.pop()); }
+    void enqueuePacket(Packet *frame) override { frames.insert(frame); }
+    Packet *dequeuePacket() override { return check_and_cast<Packet *>(frames.pop()); }
+};
+Define_Module(LegacySelectionQueue);
+
+class CompatibilityCompoundQueue : public queueing::CompoundPacketQueueBase {
+  public:
+    bool unrelatedFailure = false;
+    Packet *canPullPacket(const cGate *gate, const queueing::IPacketFilterFunction *filter) const override {
+        if (unrelatedFailure)
+            throw cRuntimeError("Unrelated fixture query failure");
+        return CompoundPacketQueueBase::canPullPacket(gate, filter);
+    }
+};
+Define_Module(CompatibilityCompoundQueue);
+
+class DataSelectionHcf : public Hcf {
+  public:
+    bool queued(MacAddress peer, Tid tid) const { return hasQueuedData(peer, tid); }
+};
+Define_Module(DataSelectionHcf);
+
+class DataSelectionTest : public cSimpleModule, public cListener {
+    int pulls = 0;
+    int removals = 0;
+    int aggregates = 0;
+  protected:
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *) override {
+        if (signal == packetPulledSignal) pulls++;
+        if (signal == packetRemovedSignal) removals++;
+        if (signal == IOriginatorMacDataService::packetAggregatedSignal) aggregates++;
+    }
+    Packet *makeFrame(const char *name, MacAddress receiver) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(0);
+        header->setSequenceNumber(SequenceNumberCyclic(77));
+        header->setReceiverAddress(receiver);
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+        header->setAddress3(receiver);
+        auto frame = new Packet(name, header);
+        frame->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+        frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        auto timeTag = frame->addRegionTag<QueueingTimeTag>();
+        timeTag->setPacketTotalTimesArraySize(1);
+        timeTag->setPacketTotalTimes(0, SIMTIME_ZERO);
+        frame->addRegionTag<PacketEventTag>();
+        return frame;
+    }
+    Packet *accept(Hcf *hcf, const char *name, MacAddress receiver) {
+        auto frame = makeFrame(name, receiver);
+        hcf->processUpperFrame(frame, frame->peekAtFront<Ieee80211DataHeader>());
+        return frame;
+    }
+    void activity() override {
+        auto mac = getModuleByPath("^.host.wlan[0].mac");
+        auto hcf = check_and_cast<DataSelectionHcf *>(mac->getSubmodule("hcf"));
+        auto edca = check_and_cast<Edca *>(hcf->getSubmodule("edca"));
+        auto queue = edca->getEdcaf(AC_BE)->getPendingQueue();
+        auto lifetime = edca->getLifetimeHandler();
+        auto service = check_and_cast<OriginatorQosMacDataService *>(hcf->getSubmodule("originatorMacDataService"));
+        auto queueModule = check_and_cast<cModule *>(queue);
+        check_and_cast<Rx *>(mac->getSubmodule("rx"))->setContentionBlocked(true);
+        int scenario = par("scenario");
+        if (scenario != 0) {
+            MacAddress firstPeer("02:00:00:00:00:02");
+            MacAddress secondPeer("02:00:00:00:00:03");
+            Packet *head;
+            Packet *tail;
+            if (scenario == 1) {
+                head = accept(hcf, "ordinary-head", firstPeer);
+                tail = accept(hcf, "ordinary-tail", secondPeer);
+                ASSERT(hcf->queued(firstPeer, 0));
+                ASSERT(hcf->queued(secondPeer, 0));
+                ASSERT(!hcf->queued(firstPeer, 5));
+                service->setEligibility([](const Packet *) { return true; }, [](Packet *) { return false; });
+                ASSERT(service->peekEligibleFrame(queue) == head);
+                auto ordinary = service->extractFramesToTransmit(queue);
+                ASSERT(ordinary != nullptr && ordinary->size() == 1 && ordinary->front() == head);
+                ASSERT(queue->getNumPackets() == 1 && queue->getPacket(0) == tail);
+                ASSERT(head->getOwner() == service);
+                ASSERT(head->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(0));
+                lifetime->forgetFrame(head->getId());
+                take(head);
+                delete head;
+                delete ordinary;
+                auto composite = check_and_cast<CompatibilityCompoundQueue *>(queue);
+                composite->unrelatedFailure = true;
+                bool propagated = false;
+                try { hcf->queued(firstPeer, 0); }
+                catch (const cRuntimeError& error) {
+                    propagated = std::string(error.what()).find("Unrelated fixture query failure") != std::string::npos;
+                }
+                ASSERT(propagated);
+            }
+            else {
+                head = makeFrame("deferred-head", firstPeer);
+                tail = makeFrame("eligible-tail", secondPeer);
+                queue->enqueuePacket(head);
+                queue->enqueuePacket(tail);
+                lifetime->registerFrame(head, AC_BE);
+                lifetime->registerFrame(tail, AC_BE);
+                service->setEligibility([scenario, tail](const Packet *frame) { return scenario == 3 && frame == tail; },
+                    [](Packet *) { return false; });
+                if (scenario == 2) {
+                    ASSERT(service->peekEligibleFrame(queue) == nullptr);
+                    ASSERT(service->extractFramesToTransmit(queue) == nullptr);
+                    ASSERT(hcf->queued(secondPeer, 0));
+                }
+                else {
+                    ASSERT(hcf->queued(secondPeer, 0));
+                    bool refused = false;
+                    try { service->extractFramesToTransmit(queue); }
+                    catch (const cRuntimeError& error) {
+                        refused = std::string(error.what()).find("Invalid operation") != std::string::npos;
+                    }
+                    ASSERT(refused);
+                }
+                ASSERT(queue->getNumPackets() == 2 && queue->getPacket(0) == head && queue->getPacket(1) == tail);
+                ASSERT(head->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(77));
+                ASSERT(lifetime->getDeadline(head) == SimTime(512, SIMTIME_MS));
+            }
+            ASSERT(tail->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(77));
+            ASSERT(lifetime->getDeadline(tail) == SimTime(512, SIMTIME_MS));
+            std::cout << "Compound compatibility scenario " << scenario << " passed.\n";
+            endSimulation();
+        }
+        queueModule->subscribe(packetPulledSignal, this);
+        queueModule->subscribe(packetRemovedSignal, this);
+        service->subscribe(IOriginatorMacDataService::packetAggregatedSignal, this);
+        auto first = accept(hcf, "multicast-first", MacAddress("01:00:5e:00:00:01"));
+        auto second = accept(hcf, "multicast-second", MacAddress("01:00:5e:00:00:01"));
+        auto selected = accept(hcf, "selected-unicast", MacAddress("02:00:00:00:00:02"));
+        auto deadline = lifetime->getDeadline(first);
+        ASSERT(deadline == SimTime(512, SIMTIME_MS));
+        ASSERT(queue->getPacket(0) == first);
+        ASSERT(service->peekEligibleFrame(queue) == selected);
+        ASSERT(service->getNextSequenceNumber(MacAddress("02:00:00:00:00:02"), 0) == SequenceNumberCyclic(0));
+        wait(SimTime(100, SIMTIME_MS));
+        auto extracted = service->extractFramesToTransmit(queue);
+        ASSERT(extracted != nullptr && extracted->size() == 1);
+        ASSERT(extracted->front() == selected);
+        ASSERT(selected->getOwner() == service);
+        auto header = selected->peekAtFront<Ieee80211DataHeader>();
+        ASSERT(!header->getAMsduPresent());
+        ASSERT(header->getSequenceNumber() == SequenceNumberCyclic(0));
+        ASSERT(queue->getNumPackets() == 2);
+        ASSERT(queue->getPacket(0) == first && queue->getPacket(1) == second);
+        for (auto source : {first, second}) {
+            ASSERT(source->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber() == SequenceNumberCyclic(77));
+            ASSERT(lifetime->getDeadline(source) == deadline);
+            ASSERT(lifetime->findFrame(source->getId()) == source);
+            ASSERT(source->findRegionTag<QueueingTimeTag>()->getPacketTotalTimes(0) == SIMTIME_ZERO);
+            ASSERT(source->findRegionTag<PacketEventTag>()->getPacketEventsArraySize() == 0);
+        }
+        auto times = selected->getAllRegionTags<QueueingTimeTag>();
+        ASSERT(times.size() == 1);
+        ASSERT(times.front().getTag()->getPacketTotalTimes(0) == SimTime(100, SIMTIME_MS));
+        auto eventRegions = selected->getAllRegionTags<PacketEventTag>();
+        ASSERT(eventRegions.size() == 1);
+        auto events = eventRegions.front().getTag();
+        ASSERT(events->getPacketEventsArraySize() == 1);
+        ASSERT(events->getPacketEvents(0)->getKind() == PEK_QUEUED);
+        ASSERT(events->getPacketEvents(0)->getPacketDuration() == SimTime(100, SIMTIME_MS));
+        ASSERT(lifetime->getDeadline(selected) == deadline);
+        ASSERT(lifetime->getNumFrames() == 3);
+        ASSERT(pulls == 3);
+        ASSERT(removals == 0 && aggregates == 0);
+        lifetime->forgetFrame(selected->getId());
+        take(selected);
+        delete selected;
+        delete extracted;
+        queueModule->unsubscribe(packetPulledSignal, this);
+        queueModule->unsubscribe(packetRemovedSignal, this);
+        service->unsubscribe(IOriginatorMacDataService::packetAggregatedSignal, this);
+        auto legacy = check_and_cast<LegacySelectionQueue *>(getModuleByPath("^.legacy"));
+        auto head = first->dup();
+        auto tail = first->dup();
+        legacy->enqueuePacket(head);
+        legacy->enqueuePacket(tail);
+        service->setEligibility([](const Packet *) { return false; }, [](Packet *) { return false; });
+        ASSERT(service->extractFramesToTransmit(legacy) == nullptr);
+        ASSERT(legacy->getNumPackets() == 2 && legacy->getPacket(0) == head);
+        service->setEligibility([tail](const Packet *frame) { return frame == tail; }, [](Packet *) { return false; });
+        bool refused = false;
+        try { service->extractFramesToTransmit(legacy); }
+        catch (const cRuntimeError& error) {
+            refused = std::string(error.what()).find("Invalid operation") != std::string::npos;
+        }
+        ASSERT(refused);
+        ASSERT(legacy->getNumPackets() == 2 && legacy->getPacket(0) == head && legacy->getPacket(1) == tail);
+        service->setEligibility([](const Packet *) { return true; }, [](Packet *) { return false; });
+        auto ordinary = service->extractFramesToTransmit(legacy);
+        ASSERT(ordinary != nullptr && ordinary->size() == 1 && ordinary->front() == head);
+        ASSERT(legacy->getNumPackets() == 1 && legacy->getPacket(0) == tail);
+        take(ordinary->front());
+        delete ordinary->front();
+        delete ordinary;
+        std::cout << "Block Ack DATA selection assertions passed.\n";
+        endSimulation();
+    }
+  public:
+    DataSelectionTest() : cSimpleModule(65536) {}
+};
+Define_Module(DataSelectionTest);
+
+%file: test.ned
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.queueing.base.PacketQueueBase;
+import inet.queueing.queue.CompoundPacketQueueBase;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+simple LegacySelectionQueue extends PacketQueueBase { parameters: @class(::LegacySelectionQueue); }
+module CompatibilityCompoundQueue extends CompoundPacketQueueBase {
+    parameters:
+        @class(::CompatibilityCompoundQueue);
+    submodules:
+        provider: LegacySelectionQueue;
+    connections:
+        in --> provider.in;
+        provider.out --> out;
+}
+module DataSelectionHcf extends Hcf { parameters: @class(::DataSelectionHcf); }
+simple DataSelectionTest { parameters: int scenario; @class(::DataSelectionTest); }
+network DataSelectionNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        legacy: LegacySelectionQueue;
+        test: DataSelectionTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DataSelectionNetwork
+sim-time-limit = 1s
+seed-set = 0
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = true
+record-scalar-results = false
+record-vector-results = false
+*.test.scenario = ${scenario=0..3}
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.isBlockAckSupported = false
+**.wlan[*].mac.hcf.typename = "DataSelectionHcf"
+**.wlan[*].mac.hcf.edca.edcaf[*].pendingQueue.typename = ${queueType="CompoundPendingQueue","CompatibilityCompoundQueue","CompatibilityCompoundQueue","CompatibilityCompoundQueue" ! scenario}
+**.pendingQueue.classifier.classifierClass = "inet::ieee80211::MgmtOverMulticastOverUnicastClassifier"
+**.pendingQueue.prioritizer.reverseOrder = true
+**.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+**.originatorMacDataService.msduAggregationPolicy.qOsCheck = true
+**.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
+*.host.wlan[0].address = "02:00:00:00:00:01"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Block Ack DATA selection assertions passed.
+
+%contains: stdout
+Compound compatibility scenario 3 passed.
