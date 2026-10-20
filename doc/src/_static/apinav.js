@@ -25,10 +25,7 @@
   function link(entry, active) {
     const a = element('a', 'md-nav__link' + (active ? ' md-nav__link--active' : ''), {href: entry.href, title: entry.title});
     const span = element('span', 'md-ellipsis');
-    entry.title.split(/(?<=\.|::)/).forEach((part, i) => {
-      if (i) span.appendChild(element('wbr'));
-      span.appendChild(document.createTextNode(part));
-    });
+    span.textContent = entry.title;
     a.appendChild(span);
     return a;
   }
@@ -60,7 +57,11 @@
     const open = inContext && (entry.follow !== false || group === entry) && contains(entry, page);
     const id = '__apinav_' + (++counter);
     const li = element('li', 'md-nav__item md-nav__item--nested inet-apinav' + (open ? ' md-nav__item--active' : ''));
-    if (level === groupLevel) li.dataset.apinavGroup = entry.title;
+    if (level === groupLevel) {
+      li.dataset.apinavGroup = entry.title;
+      // The menus of the tabs (omnetpp_immaterial) list the groups, but not their types, too many for a menu.
+      li.dataset.omnetppMenu = 'leaf';
+    }
     const toggle = element('input', 'md-nav__toggle md-toggle', {type: 'checkbox', id: id});
     toggle.checked = open;
     li.appendChild(toggle);

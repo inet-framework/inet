@@ -173,16 +173,6 @@ video {
   }
 }
 
-/* The NED reference navigation (_static/apinav.js): the tree keeps the width of the sidebar, long package names
-   wrap at their dots, long type names are cut. */
-.md-nav__item.inet-apinav > .md-nav > .md-nav__list {
-  min-width: 0;
-}
-
-.md-nav__item--nested.inet-apinav > .md-nav__container .md-ellipsis {
-  white-space: normal;
-}
-
 /* The diagrams inlined into the NED reference pages (_ext/inetsite/ned.py) shrink to the width of the page. */
 .md-typeset .neddoc-diagram svg {
   max-width: 100%;
@@ -248,26 +238,31 @@ video {
   color: var(--inet-heading-color);
 }
 
-/* The strip is under the tabs while they are shown, and under the header otherwise. */
+/* The strip is the bottom border of the tab bar, which stays below the header also while the tab bar is away
+   (omnetpp_immaterial puts it away when the reader scrolls down, and casts the shadow of the header from it). Narrow
+   screens have no tab bar: there the strip is under the header, and casts its shadow. */
+:root {
+  --omnetpp-tabs-edge: 0.2rem;
+}
+
 .md-tabs {
-  border-bottom: 0.2rem solid var(--inet-strip-color);
-}
-
-.md-header::after {
-  content: "";
-  position: absolute;
-  inset: 100% 0 auto;
-  height: 0.2rem;
-  background-color: var(--inet-strip-color);
-  opacity: 0;
-}
-
-.md-header--shadow::after {
-  opacity: 1;
+  border-bottom: var(--omnetpp-tabs-edge) solid var(--inet-strip-color);
 }
 
 @media screen and (max-width: 76.2344em) {
   .md-header::after {
-    opacity: 1;
+    content: "";
+    position: absolute;
+    inset: 100% 0 auto;
+    height: 0.2rem;
+    background-color: var(--inet-strip-color);
+  }
+
+  .md-header--shadow {
+    box-shadow: none;
+  }
+
+  .md-header--shadow::after {
+    box-shadow: 0 0 0.2rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
   }
 }

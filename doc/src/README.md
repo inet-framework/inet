@@ -13,6 +13,8 @@ version. The documentation of the build's own tree (`dev`) is built locally only
 - `site/`: the website pages; news posts are the dated `YYYY-MM-DD-*.rst` files. They exist **only on the
   `website` branch**, which is `master` plus these pages
 - `conf.py`, `_ext/`, `_static/`, `global.rst`: the Sphinx configuration
+- `omnetpp_immaterial`: the extension of `sphinx_immaterial` that gives the OMNeT++ sites their look; it is part of
+  the doc-builder image (omnetpp-dev `doc/src/site/doc-builder`), and `_static/inet.css` styles it for this site
 - `build`, `tools/build.py`: the build; `versions.toml`: the published versions; `.doc-builder-image`: the
   container image the build runs in
 
