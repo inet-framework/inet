@@ -5,8 +5,10 @@
 #         the INET tree that runs the build, i.e. the website branch on the site
 # latest  the version that /docs/latest/, the old /docs/<manual>/ URLs and the site's links point to;
 #         exactly one version must have it
-# parts   optional subset of: users-guide, developers-guide, migration-guide, showcases, tutorials,
-#         python-api, api (default: all)
+# parts   optional subset of: users-guide, developers-guide, migration-guide, python-api, api (default: all)
+#
+# The showcases and tutorials are not versioned: they are built once, from the INET tree that runs the build,
+# and published under https://inet.omnetpp.org/docs/showcases/ and .../docs/tutorials/.
 #
 # Releasing a new INET version: add it here (usually as the new latest), and prune old entries when
 # the site approaches the GitHub Pages size limit.

@@ -2,7 +2,13 @@ import dataclasses
 import functools
 import os
 
-PARTS = ('users-guide', 'developers-guide', 'migration-guide', 'showcases', 'tutorials', 'python-api', 'api')
+VERSIONED_PARTS = ('users-guide', 'developers-guide', 'migration-guide', 'python-api', 'api')
+# Built once, from the tree of the site, and published without a version (mode "shared").
+SHARED_PARTS = ('showcases', 'tutorials')
+PARTS = VERSIONED_PARTS + SHARED_PARTS
+# The directory of a version build's output (not published) with what the shared build needs to link to it:
+# the opp_docgen tag files of its NED reference.
+REFS_DIR = '.inetsite-refs'
 
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -22,13 +28,15 @@ class Config:
     pdfs: frozenset
     latex: bool
     sample: bool
+    dev_version: str
+    dev_docs: str
 
     @classmethod
     def from_environment(cls):
         env = os.environ.get
         mode = env('INETSITE_MODE', 'site')
-        if mode not in ('site', 'version'):
-            raise ValueError(f'INETSITE_MODE must be "site" or "version", not "{mode}"')
+        if mode not in ('site', 'version', 'shared'):
+            raise ValueError(f'INETSITE_MODE must be "site", "version" or "shared", not "{mode}"')
         baseurl = env('INETSITE_BASEURL', 'https://inet.omnetpp.org').rstrip('/')
         parts = frozenset(p for p in env('INETSITE_PARTS', ','.join(PARTS)).split(',') if p)
         # All parts of the version; those not in parts are built by another Sphinx run (see build.py).
@@ -50,10 +58,12 @@ class Config:
             pdfs=frozenset(p for p in env('INETSITE_PDFS', '').split(',') if p),
             latex=env('INETSITE_LATEX', '0') == '1',
             sample=env('INETSITE_SAMPLE', '0') == '1',
+            dev_version=env('INETSITE_DEV_VERSION', 'dev'),
+            dev_docs=env('INETSITE_DEV_DOCS', ''),
         )
 
     def has_part(self, part):
-        return self.mode == 'version' and part in self.parts
+        return self.mode in ('version', 'shared') and part in self.parts
 
     def has_version_part(self, part):
         return self.mode == 'version' and part in self.version_parts
@@ -62,13 +72,21 @@ class Config:
     def page_root_url(self):
         if self.mode == 'version':
             return f'{self.baseurl}/docs/{self.version}/'
+        if self.mode == 'shared':
+            return f'{self.baseurl}/docs/'
         return self.baseurl + '/'
 
     def site_url(self, page):
         return f'{self.baseurl}/{page}.html'
 
     def docs_url(self, path):
+        if path.split('/', 1)[0] in SHARED_PARTS:
+            return f'{self.baseurl}/docs/{path}'
         return f'{self.baseurl}/docs/{self.latest}/{path}'
+
+    def dev_url(self, path):
+        """The URL of a page of the documentation built from the same tree as the shared parts."""
+        return f'{self.baseurl}/docs/{self.dev_version}/{path}'
 
     def read_prolog(self):
         # The version's own prolog matches its content.

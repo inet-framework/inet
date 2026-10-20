@@ -1,12 +1,15 @@
 INET documentation and the inet.omnetpp.org website
 ===================================================
 
-This directory builds https://inet.omnetpp.org with Sphinx: the website pages and, for each INET version
-listed in `versions.toml`, the User's, Developer's and Migration Guides, the showcases and tutorials, the
-Python API, and the NED reference (generated with `opp_docgen`).
+This directory builds https://inet.omnetpp.org with Sphinx: the website pages; for each INET version listed
+in `versions.toml`, the User's, Developer's and Migration Guides, the Python API, and the NED reference
+(generated with `opp_docgen`), under `docs/<version>/`; and the showcases and tutorials, which are not
+versioned: they are built once, from the INET tree of the build (`master`, or `website` on the site), under
+`docs/showcases/` and `docs/tutorials/`. Their references to the manuals and to NED types link to the version
+built from the same tree (`dev`).
 
-- `users-guide/`, `developers-guide/`, `migration-guide/` (and `../../showcases`, `../../tutorials`):
-  the documentation, versioned with the INET sources
+- `users-guide/`, `developers-guide/`, `migration-guide/`: the documentation, versioned with the INET
+  sources; `../../showcases`, `../../tutorials`: the showcases and tutorials
 - `site/`: the website pages; news posts are the dated `YYYY-MM-DD-*.rst` files. They exist **only on the
   `website` branch**, which is `master` plus these pages
 - `conf.py`, `_ext/`, `_static/`, `global.rst`: the Sphinx configuration
@@ -32,10 +35,11 @@ Requires podman, or docker with `ENGINE=docker`. With `ENGINE=none`, the build r
     doc/src/build --versions 4.7           # one released version, built from its tag
     doc/src/build --sample --serve         # a small site (about 30 MB, in seconds) for working on the site
 
-The parts for `--only` are `site` (the website pages), and of each version `users-guide`,
-`developers-guide`, `migration-guide`, `showcases`, `tutorials`, `python-api` and `api` (the NED reference).
-Without `--only`, all of them are built. Without the `api` part, `:ned:` references render as plain
-text. `--inet PATH` builds another INET tree (e.g. a second workspace) instead of this one.
+The parts for `--only` are `site` (the website pages), `showcases` and `tutorials`, and of each version
+`users-guide`, `developers-guide`, `migration-guide`, `python-api` and `api` (the NED reference). Without
+`--only`, all of them are built. Without the `api` part, `:ned:` references render as plain text. The
+showcases and tutorials link to the `dev` build of this run or of an earlier one in the cache; without one,
+their links to it render as plain text. `--inet PATH` builds another INET tree (e.g. a second workspace) instead of this one.
 
 The site's links to the documentation, and the `docs/latest/` and old `docs/<manual>/` redirects, point to the
 `latest` version of `versions.toml`. A build without that version points them to the first version it builds

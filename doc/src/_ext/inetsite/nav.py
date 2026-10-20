@@ -1,8 +1,8 @@
-"""The site navigation, shared by the site build and the version builds.
+"""The site navigation, shared by the site build, the version builds and the build of the shared parts.
 
 Targets are written as `site:<page>` (an unversioned page in site/), `docs:<part>/<path>` (a page of the
-versioned documentation) or `url:<url>`. Each build turns the targets it contains into document references
-and the others into absolute links, so that every build shows the same navigation.
+documentation, versioned or shared) or `url:<url>`. Each build turns the targets it contains into document
+references and the others into absolute links, so that every build shows the same navigation.
 """
 
 from docutils import nodes
@@ -71,6 +71,8 @@ def toctree_entry(cfg, title, target):
             return f'{title} <{path}>'
         if cfg.has_version_part(part):
             return f'{title} <{cfg.page_root_url}{path}.html>'
+        if cfg.mode == 'shared' or part in config.SHARED_PARTS:
+            return f'{title} <{cfg.docs_url(path + ".html")}>'
         return None
     raise ValueError(f'invalid navigation target: {target}')
 

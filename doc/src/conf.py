@@ -1,9 +1,11 @@
 # Sphinx configuration of inet.omnetpp.org; run it through ./build (see README.md), not sphinx-build directly.
 #
-# The same configuration builds two kinds of output, selected by INETSITE_MODE:
+# The same configuration builds three kinds of output, selected by INETSITE_MODE:
 #   site     the unversioned website pages (sources in site/, on the website branch only)
 #   version  the documentation of one INET version (manuals, NED and Python API),
 #            assembled by tools/build.py from an INET tree
+#   shared   the showcases and tutorials, built once from the tree of the site, without a version; they
+#            link to the version built from the same tree
 # Everything else comes in through INETSITE_* environment variables set by tools/build.py.
 
 import os
@@ -39,7 +41,8 @@ extensions = [
     'inetsite',
 ]
 
-root_doc = 'index'
+# The shared parts are published in docs/, whose index.html leads to the latest version.
+root_doc = 'overview' if cfg.mode == 'shared' else 'index'
 exclude_patterns = ['_build', '_extra', 'Thumbs.db', '.DS_Store', '**/_docs', '**/README.md']
 # The section files of the migration guide are parts of migration-guide/index.rst (tools/includefiles.py).
 exclude_patterns.append('migration-guide/*/*.rst')
@@ -120,8 +123,9 @@ html_theme_options = {
 if not cfg.fetch_fonts:
     html_theme_options['font'] = False
 
-if cfg.mode == 'version':
+if cfg.mode in ('version', 'shared'):
     rst_prolog = cfg.read_prolog()
+if cfg.mode == 'version':
     if cfg.latex:
         extensions.append('sphinx.ext.imgconverter')
     latex_engine = 'pdflatex'

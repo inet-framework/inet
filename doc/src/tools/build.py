@@ -36,8 +36,11 @@ SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TREE = os.path.dirname(os.path.dirname(SRC))
 SITE = os.path.join(SRC, 'site')
 SITE_URL = 'https://inet.omnetpp.org'
-PARTS = ('users-guide', 'developers-guide', 'migration-guide', 'showcases', 'tutorials', 'python-api', 'api')
-MANUALS = ('users-guide', 'developers-guide', 'migration-guide', 'showcases', 'tutorials')
+PARTS = ('users-guide', 'developers-guide', 'migration-guide', 'python-api', 'api')
+# Built once, from the tree of the site (like the version without a ref), and published in docs/ without a
+# version; they link to the documentation of that version.
+SHARED_PARTS = ('showcases', 'tutorials')
+MANUALS = ('users-guide', 'developers-guide', 'migration-guide')
 PDF_MANUALS = ('users-guide', 'developers-guide', 'migration-guide')
 # Parts built by a Sphinx run of their own and merged into the output of the others: Sphinx's parallel reader
 # sends the whole environment back from every batch of documents, and AutoAPI's object tree in it would make
@@ -52,7 +55,7 @@ PART_SOURCES = {
     'tutorials': 'tutorials',
 }
 # The start page of each part; AutoAPI's is that of the top-level package.
-PART_ROOTS = {part: f'{part}/index' for part in PARTS} | {'python-api': 'python-api/inet/index'}
+PART_ROOTS = {part: f'{part}/index' for part in PARTS + SHARED_PARTS} | {'python-api': 'python-api/inet/index'}
 PART_TITLES = {
     'users-guide': "User's Guide",
     'developers-guide': "Developer's Guide",
@@ -76,9 +79,13 @@ SAMPLE_API_FILES = ('src/inet/package.ned', 'src/inet/inet-index.ned', 'WHATSNEW
 SITE_REDIRECTS = {
     'index.php/index.html': 'index.html',
     'doc/INET/index.html': 'docs/{latest}/api/index.html',
-    'inet-showcases/index.html': 'docs/{latest}/showcases/index.html',
-    'inet-tutorials/index.html': 'docs/{latest}/tutorials/index.html',
+    'inet-showcases/index.html': 'docs/showcases/index.html',
+    'inet-tutorials/index.html': 'docs/tutorials/index.html',
 }
+# What the build of the shared parts needs of the version it links to, kept with that version's build (see
+# REFS_DIR in _ext/inetsite/config.py).
+REFS_DIR = '.inetsite-refs'
+
 CONFIG_FILES = ('conf.py', 'global.rst', '_ext', '_static', 'tools/build.py', 'tools/includefiles.py')
 SIZE_LIMIT = 900 * 1024 * 1024
 # The search index format of sphinx_immaterial, which lists the pages by URL instead of docname and filename.
@@ -298,16 +305,18 @@ class Builder:
         self.data, self.versions, self.latest = load_versions(os.path.join(SRC, 'versions.toml'))
         known = {v['label']: v for v in self.versions}
         tree_version = next((v for v in self.versions if not v.get('ref')), {'label': 'dev'})
+        self.dev_label = tree_version['label']
         self.only = None
         if args.only:
             self.only = [p for p in args.only.split(',') if p]
-            unknown = set(self.only) - {'site', *PARTS}
+            unknown = set(self.only) - {'site', *PARTS, *SHARED_PARTS}
             if unknown:
                 raise BuildError(f'--only: unknown parts: {", ".join(sorted(unknown))}')
-        site_only = self.only is not None and not set(self.only) & set(PARTS)
-        if site_only and (args.versions or args.pdf):
-            raise BuildError('--versions and --pdf need a part of the documentation in --only')
-        if site_only:
+        self.shared_parts = [p for p in SHARED_PARTS if self.only is None or p in self.only]
+        unversioned = self.only is not None and not set(self.only) & set(PARTS)
+        if unversioned and (args.versions or args.pdf):
+            raise BuildError('--versions and --pdf need a versioned part in --only')
+        if unversioned:
             self.versions = []
         elif args.versions == 'all':
             # A version without any of the parts of --only (e.g. one with the NED reference only) is left out.
@@ -348,6 +357,18 @@ class Builder:
         })
         env.update({f'INETSITE_{k.upper()}': v for k, v in values.items()})
         return env
+
+    def doctrees(self, name):
+        """Returns the doctrees directory of a Sphinx run, emptied if the configuration files have changed: Sphinx
+        sees a change of the configuration values, but not of the extensions (e.g. of the navigation)."""
+        path = os.path.join(self.cache, 'doctrees', name)
+        stamp = os.path.join(path, '.inetsite-config')
+        if not os.path.exists(stamp) or open(stamp).read() != self.config_hash:
+            shutil.rmtree(path, ignore_errors=True)
+            os.makedirs(path)
+            with open(stamp, 'w') as f:
+                f.write(self.config_hash)
+        return path
 
     def sphinx(self, srcdir, outdir, doctrees, env, jobs=None):
         cmd = ['sphinx-build', '-b', 'html', '-c', SRC, '-d', doctrees, '-j', jobs or self.args.jobs]
@@ -438,7 +459,8 @@ class Builder:
         parts = version.get('parts', PARTS)
         return [p for p in PARTS if p in parts and (self.only is None or p in self.only)]
 
-    def assemble_sources(self, label, inet_root, parts, version_parts=None):
+    def assemble_sources(self, label, inet_root, parts, index):
+        """Assembles the sources of the given parts, with the root document index = (docname, text)."""
         work = os.path.join(self.cache, 'work', label)
         os.makedirs(work, exist_ok=True)
         for name in os.listdir(work):
@@ -451,7 +473,7 @@ class Builder:
             if part in PART_SOURCES:
                 source = os.path.join(inet_root, PART_SOURCES[part])
                 if not os.path.isdir(source):
-                    raise BuildError(f'version {label}: {source} does not exist')
+                    raise BuildError(f'{label}: {source} does not exist')
                 if self.args.sample and part in SAMPLE:
                     self.sample_part(source, os.path.join(work, part), part)
                 else:
@@ -462,8 +484,9 @@ class Builder:
             else:
                 source, ned_path = inet_root, None
             self.generate_api(source, os.path.join(work, 'api'), ned_path)
-        with open(os.path.join(work, 'index.rst'), 'w') as f:
-            f.write(self.version_index(label, parts, version_parts or parts))
+        docname, text = index
+        with open(os.path.join(work, docname + '.rst'), 'w') as f:
+            f.write(text)
         return work
 
     def sample_part(self, source, target, part):
@@ -547,19 +570,20 @@ class Builder:
         if not pdf_parts:
             return
         log(f'version {label}: building the PDFs of {", ".join(pdf_parts)}')
-        work = self.assemble_sources(label + '-pdf', inet_root, pdf_parts)
+        work = self.assemble_sources(label + '-pdf', inet_root, pdf_parts,
+                                     ('index', self.version_index(label, pdf_parts, pdf_parts)))
         builddir = os.path.join(self.cache, 'pdf', label)
         shutil.rmtree(builddir, ignore_errors=True)
         env = dict(env, INETSITE_PARTS=','.join(pdf_parts), INETSITE_VERSION_PARTS=','.join(pdf_parts),
                    INETSITE_LATEX='1')
-        self.sphinx_pdf(work, builddir, os.path.join(self.cache, 'doctrees', label + '-pdf'), env)
+        self.sphinx_pdf(work, builddir, self.doctrees(label + '-pdf'), env)
         for part in pdf_parts:
             shutil.copy(os.path.join(builddir, 'latex', f'inet-{part}.pdf'), cached)
 
-    def version_key(self, content, parts):
+    def version_key(self, content, parts, **extra):
         key = {'content': content, 'media': self.media_commit()[1], 'parts': parts, 'config': self.config_hash,
                'image': os.environ.get('INETSITE_IMAGE', ''), 'baseurl': self.baseurl, 'pdf': self.args.pdf,
-               'sample': self.args.sample, 'latest': self.latest}
+               'sample': self.args.sample, 'latest': self.latest, **extra}
         return hashlib.sha256(json.dumps(key, sort_keys=True).encode()).hexdigest()
 
     def forced(self, label):
@@ -595,14 +619,19 @@ class Builder:
         runs = [run_parts for run_parts in runs if run_parts]
         for i, run_parts in enumerate(runs):
             name = label + self.suffix if i == 0 else f'{label}{self.suffix}-{"-".join(run_parts)}'
-            work = self.assemble_sources(name, inet_root, run_parts, parts)
+            index = ('index', self.version_index(label, run_parts, parts))
+            work = self.assemble_sources(name, inet_root, run_parts, index)
             outdir = cached if i == 0 else os.path.join(self.cache, 'parts', name)
             shutil.rmtree(outdir, ignore_errors=True)
             env = self.environment(mode='version', version=label, parts=','.join(run_parts),
                                    version_parts=','.join(parts), inet_root=inet_root, media_root=media_root,
                                    pdfs=','.join(self.pdf_parts(parts)))
-            self.sphinx(work, outdir, os.path.join(self.cache, 'doctrees', name), env,
+            self.sphinx(work, outdir, self.doctrees(name), env,
                         jobs='1' if run_parts[0] in SEPARATE_PARTS else None)
+            if 'api' in run_parts:
+                os.makedirs(os.path.join(cached, REFS_DIR))
+                for tag_file in ('nedtags.xml', 'msgtags.xml'):
+                    shutil.copy(os.path.join(work, 'api', tag_file), os.path.join(cached, REFS_DIR))
             if i > 0:
                 merge_output(cached, outdir, run_parts)
         self.build_pdfs(label, inet_root, parts, cached, env)
@@ -614,13 +643,51 @@ class Builder:
     def copy_version(self, label, cached):
         target = os.path.join(self.out, 'docs', label)
         shutil.rmtree(target, ignore_errors=True)
-        shutil.copytree(cached, target, ignore=shutil.ignore_patterns('.inetsite-key', '.buildinfo'))
+        shutil.copytree(cached, target, ignore=shutil.ignore_patterns('.inetsite-key', '.buildinfo', REFS_DIR))
+
+    # -- shared parts ---------------------------------------------------------------------------------------
+
+    def shared_index(self, parts):
+        title = 'INET Showcases and Tutorials'
+        lines = [':hide-toc:', '', '=' * len(title), title, '=' * len(title), '', '.. inet-nav::', '']
+        lines += [f'- :doc:`{PART_TITLES[part]} <{PART_ROOTS[part]}>`' for part in parts]
+        return '\n'.join(lines) + '\n'
+
+    def build_shared(self):
+        parts = self.shared_parts
+        name = '_shared' + self.suffix
+        # The build of the version without a ref, of this run or an earlier one, to link to.
+        dev = os.path.join(self.cache, 'out', self.dev_label + self.suffix)
+        if not os.path.isfile(os.path.join(dev, 'objects.inv')):
+            log(f'no build of version {self.dev_label}: the links of {", ".join(parts)} to it are left out')
+            dev = ''
+        cached = os.path.join(self.cache, 'out', name)
+        stamp = os.path.join(cached, '.inetsite-key')
+        content = git_tree_key(self.tree)
+        media = self.local_media(self.tree)
+        refs = tree_hash(os.path.join(dev, 'objects.inv'), os.path.join(dev, REFS_DIR)) if dev else ''
+        key = self.version_key(content, parts, refs=refs) if content and media is None else None
+        if key and not self.forced('shared') and os.path.exists(stamp) and open(stamp).read() == key:
+            log(f'{", ".join(parts)}: unchanged, reusing the cached build')
+        else:
+            media_root = self.link_media(self.tree, media)
+            log(f'building {", ".join(parts)} from {self.tree}')
+            work = self.assemble_sources(name, self.tree, parts, ('overview', self.shared_index(parts)))
+            shutil.rmtree(cached, ignore_errors=True)
+            env = self.environment(mode='shared', parts=','.join(parts), inet_root=self.tree, media_root=media_root,
+                                   dev_version=self.dev_label, dev_docs=dev)
+            self.sphinx(work, cached, self.doctrees(name), env)
+            if key:
+                with open(stamp, 'w') as f:
+                    f.write(key)
+        shutil.copytree(cached, os.path.join(self.out, 'docs'), dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns('.inetsite-key', '.buildinfo'))
 
     # -- site -----------------------------------------------------------------------------------------------
 
     def build_site(self):
         log('building the site pages')
-        self.sphinx(SITE, self.out, os.path.join(self.cache, 'doctrees', '_site'), self.environment(mode='site'))
+        self.sphinx(SITE, self.out, self.doctrees('_site'), self.environment(mode='site'))
         with open(os.path.join(self.out, '.nojekyll'), 'w'):
             pass
         for path, target in SITE_REDIRECTS.items():
@@ -697,6 +764,8 @@ class Builder:
             log(f'no site pages in {SITE} (they are on the website branch); building the documentation only')
         for version in self.versions:
             self.build_version(version)
+        if self.shared_parts:
+            self.build_shared()
         if self.versions:
             self.write_versions_json([v['label'] for v in self.versions])
             self.write_latest_redirects()
@@ -725,15 +794,17 @@ def main():
     parser.add_argument('--media', metavar='PATH', help='media repository checkout (default: <inet>/media, or '
                                                         'exported from git if there is none)')
     parser.add_argument('--only', metavar='PARTS',
-                        help=f'build only these parts: site (the website pages), and of each version '
-                             f'{",".join(PARTS)} (default: all)')
+                        help=f'build only these parts: site (the website pages), {",".join(SHARED_PARTS)} '
+                             f'(built once, from the INET tree), and of each version {",".join(PARTS)} '
+                             '(default: all)')
     parser.add_argument('--pdf', action='store_true', help=f'also build PDFs of the {", ".join(PDF_MANUALS)} '
                                                            '(needs the -pdf image)')
     parser.add_argument('--sample', action='store_true',
                         help='build only a sample of the NED reference (about 20 types), the showcases and the '
                              'tutorials: a small site for working on the site itself')
     parser.add_argument('--force', nargs='?', const='all', metavar='LABELS',
-                        help='rebuild these versions (default: all) even if their cached build is current')
+                        help='rebuild these versions, or "shared" for the showcases and tutorials (default: all), '
+                             'even if their cached build is current')
     parser.add_argument('--serve', action='store_true', help='serve the output over HTTP after building')
     parser.add_argument('--port', type=int, default=8000)
     parser.add_argument('--baseurl', default=SITE_URL,
