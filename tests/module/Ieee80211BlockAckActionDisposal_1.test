@@ -5,7 +5,7 @@ Later DATA starts another recovery DELBA. Recipient DELBA disposal preserves the
 
 The fixture supplies agreement records and does not transmit frames through a peer radio.
 
-%extraargs: -r 0..6,8,10
+%extraargs: -r 0..10
 
 %file: ActionDisposal.cc
 #include <iostream>
@@ -107,7 +107,7 @@ class ActionDisposalHcf : public Hcf {
             ASSERT(request->getSequenceNumber() == other->getSequenceNumber());
             ASSERT(request->getFragmentNumber() == other->getFragmentNumber());
             ASSERT(attempts == 0);
-            throw cRuntimeError("Association reset requires the next commit");
+            resetPeer(peer);
             ASSERT(recovery->getRetryCount(otherPacket, other) == 1);
             ASSERT(ownedActions.empty());
             delete otherPacket;
@@ -225,7 +225,7 @@ class ActionDisposalHcf : public Hcf {
             ASSERT(rtsChargedHeader != nullptr);
             ASSERT(recovery->getShortRetryCount(nullptr, rtsChargedHeader) == 1);
             ASSERT(requestAttempts == 0);
-            throw cRuntimeError("Association reset requires the next commit");
+            resetPeer(peer);
             ASSERT(recovery->getShortRetryCount(nullptr, rtsChargedHeader) == 0);
             ASSERT(ownedActions.empty());
             std::cout << "Block Ack Action disposal assertions passed.\n";

@@ -1,0 +1,178 @@
+%description:
+Bidirectional UDP traffic establishes real Basic agreements between an AP and a station.
+Same-AP reassociation retains identical peer rates and HT capabilities, with inactivity disabled.
+Both endpoints must clear both agreement roles before a new traffic batch starts.
+The new batch must establish fresh agreements and reach both UDP destinations.
+Read-only queries observe agreement state; the fixture never supplies agreements or calls reset.
+
+%file: SameApReassociation.cc
+#include "BlockAckLifecycleTestSupport.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211AgentSta.h"
+
+namespace inet::protocoltest {
+class BlockAckReassociationAgent : public Ieee80211AgentSta
+{
+    cMessage *replace = nullptr;
+    cMessage *verify = nullptr;
+    Ieee80211RateSetState stationRates;
+    Ieee80211RateSetState apRates;
+    Ieee80211HtCapabilities stationCapabilities;
+    Ieee80211HtCapabilities apCapabilities;
+    bool scheduled = false;
+    int agreementRoles() {
+        auto network = getContainingNode(this)->getParentModule();
+        auto station = lifecycleMib(network, "sta1")->address;
+        auto ap = lifecycleMib(network, "ap")->address;
+        auto stationHcf = lifecycleHcf(network, "sta1");
+        auto apHcf = lifecycleHcf(network, "ap");
+        return stationHcf->hasOriginator(ap, 6) + stationHcf->hasRecipient(ap, 6) +
+            apHcf->hasOriginator(station, 6) + apHcf->hasRecipient(station, 6);
+    }
+  public:
+    ~BlockAckReassociationAgent() { cancelAndDelete(replace); cancelAndDelete(verify); }
+  protected:
+    void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *response) override {
+        bool success = response->getResultCode() == PRC_SUCCESS;
+        Ieee80211AgentSta::processAssociateConfirm(response);
+        if (success && !scheduled) {
+            scheduled = true;
+            replace = new cMessage("same-ap-reassociation");
+            scheduleAt(SimTime(1100, SIMTIME_MS), replace);
+        }
+    }
+    void processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *response) override {
+        bool success = response->getResultCode() == PRC_SUCCESS;
+        Ieee80211AgentSta::processReassociateConfirm(response);
+        ASSERT(success);
+        // AP management commits after the response ACK. Let that exchange finish.
+        verify = new cMessage("verify-reset");
+        scheduleAfter(SimTime(1, SIMTIME_MS), verify);
+    }
+    void handleMessage(cMessage *message) override {
+        if (message == replace) {
+            delete replace;
+            replace = nullptr;
+            auto network = getContainingNode(this)->getParentModule();
+            auto stationMib = lifecycleMib(network, "sta1");
+            auto apMib = lifecycleMib(network, "ap");
+            ASSERT(stationMib->findPeerRateSet(apMib->address) != nullptr);
+            ASSERT(apMib->findPeerRateSet(stationMib->address) != nullptr);
+            ASSERT(stationMib->findPeerHtState(apMib->address) != nullptr);
+            ASSERT(apMib->findPeerHtState(stationMib->address) != nullptr);
+            stationRates = *stationMib->findPeerRateSet(apMib->address);
+            apRates = *apMib->findPeerRateSet(stationMib->address);
+            stationCapabilities = stationMib->findPeerHtState(apMib->address)->advertisedCapabilities;
+            apCapabilities = apMib->findPeerHtState(stationMib->address)->advertisedCapabilities;
+            std::cout << "Agreement roles before replacement at " << simTime() << ": " << agreementRoles() << ".\n";
+            emit(registerSignal("rolesBeforeReplacement"), long(agreementRoles()));
+            sendReassociateRequest(apMib->address);
+        }
+        else if (message == verify) {
+            bool fresh = message->isName("verify-fresh-setup");
+            delete verify;
+            verify = nullptr;
+            if (fresh) {
+                emit(registerSignal("rolesAfterFreshSetup"), long(agreementRoles()));
+                return;
+            }
+            auto network = getContainingNode(this)->getParentModule();
+            auto stationMib = lifecycleMib(network, "sta1");
+            auto apMib = lifecycleMib(network, "ap");
+            auto stationRate = stationMib->findPeerRateSet(apMib->address);
+            auto apRate = apMib->findPeerRateSet(stationMib->address);
+            auto stationHt = stationMib->findPeerHtState(apMib->address);
+            auto apHt = apMib->findPeerHtState(stationMib->address);
+            bool equal = stationRate && apRate && stationHt && apHt &&
+                *stationRate == stationRates && *apRate == apRates &&
+                stationHt->advertisedCapabilities == stationCapabilities && apHt->advertisedCapabilities == apCapabilities;
+            std::cout << "Agreement roles after replacement at " << simTime() << ": " << agreementRoles()
+                << "; equal peer parameters=" << equal << ".\n";
+            emit(registerSignal("equalPeerParameters"), long(equal));
+            emit(registerSignal("rolesAfterReplacement"), long(agreementRoles()));
+            verify = new cMessage("verify-fresh-setup");
+            scheduleAt(SimTime(1400, SIMTIME_MS), verify);
+        }
+        else
+            Ieee80211AgentSta::handleMessage(message);
+    }
+};
+Define_Module(BlockAckReassociationAgent);
+
+Define_ProtocolTest(wifi_block_ack_same_ap_reassociation)
+{
+    return ProtocolTest("wifi_block_ack_same_ap_reassociation")
+        .once(on("sta1.wlan[0].agent").signal("rolesBeforeReplacement").assertValue(4)
+            .describe("both endpoints have both agreement roles before replacement").within(1.2))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 2")
+            .assertEvent([](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211MgmtHeader>();
+                auto body = managementBody<Ieee80211ReassociationRequestFrame>(c.event);
+                return header->getReceiverAddress() == MacAddress("02:00:00:00:00:01") && body &&
+                    body->getCurrentAP() == MacAddress("02:00:00:00:00:01");
+            }).describe("reassociation with the current AP").within(0.02))
+        .once(on("sta1.wlan[0].agent").signal("equalPeerParameters").assertValue(1)
+            .describe("peer rates and HT capabilities remain equal").within(0.02))
+        .once(on("sta1.wlan[0].agent").signal("rolesAfterReplacement").assertValue(0)
+            .describe("both endpoints cleared both old agreement roles").within(0.001))
+        .meanwhile(atLeastTimes(1, on("sta1.udp").signal("packetSentToUpper")
+            .describe("new downlink DATA reaches UDP").within(0.3)))
+        .meanwhile(atLeastTimes(1, on("sta2.udp").signal("packetSentToUpper")
+            .describe("new uplink DATA reaches UDP").within(0.3)))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211AddbaRequest>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).describe("fresh uplink ADDBA setup").within(0.3))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                return request && request->getReceiverAddress() == MacAddress("02:00:00:00:00:03");
+            }).describe("fresh downlink ADDBA setup").within(0.1))
+        .once(on("sta1.wlan[0].agent").signal("rolesAfterFreshSetup").assertValue(4)
+            .describe("both endpoints accepted both fresh agreement roles").within(0.15));
+}
+}
+
+%file: SameApReassociation.ned
+@namespace(inet::protocoltest);
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSta;
+simple BlockAckReassociationAgent extends Ieee80211AgentSta {
+    parameters:
+        @class(BlockAckReassociationAgent);
+        @signal[rolesBeforeReplacement](type=long);
+        @signal[equalPeerParameters](type=long);
+        @signal[rolesAfterReplacement](type=long);
+        @signal[rolesAfterFreshSetup](type=long);
+}
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_block_ack_same_ap_reassociation"
+*.sta1.wlan[*].agent.typename = "BlockAckReassociationAgent"
+*.sta1.numApps = 3
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.003s
+*.sta1.app[1].typename = "UdpSink"
+*.sta1.app[1].localPort = 5001
+*.sta1.app[2].typename = "UdpBasicApp"
+*.sta1.app[2].destAddresses = "sta2"
+*.sta1.app[2].destPort = 5000
+*.sta1.app[2].messageLength = 1000B
+*.sta1.app[2].sendInterval = 0.1ms
+*.sta1.app[2].startTime = 1.3s
+*.sta1.app[2].stopTime = 1.303s
+*.sta2.numApps = 3
+*.sta2.app[1..2].typename = "UdpBasicApp"
+*.sta2.app[1..2].destAddresses = "sta1"
+*.sta2.app[1..2].destPort = 5001
+*.sta2.app[1..2].messageLength = 1000B
+*.sta2.app[1..2].sendInterval = 0.1ms
+*.sta2.app[1].startTime = 1.01s
+*.sta2.app[1].stopTime = 1.013s
+*.sta2.app[2].startTime = 1.31s
+*.sta2.app[2].stopTime = 1.313s
+sim-time-limit = 1.5s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_same_ap_reassociation: PASS

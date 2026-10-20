@@ -34,6 +34,13 @@
 namespace inet {
 namespace ieee80211 {
 
+void Ieee80211Mac::resetPeerAssociationContext(const MacAddress& peer)
+{
+    Enter_Method("resetPeerAssociationContext");
+    if (hcf)
+        hcf->resetPeer(peer);
+}
+
 using namespace inet::physicallayer;
 
 Define_Module(Ieee80211Mac);

@@ -10,6 +10,7 @@
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/base/MacProtocolBase.h"
+#include "inet/linklayer/ieee80211/IIeee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IDs.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateControl.h"
 #include "inet/linklayer/ieee80211/mac/contract/IRateSelection.h"
@@ -35,7 +36,7 @@ class Ieee80211MacHeader;
  * exact operation of the MAC depend on the plugged-in components (see IUpperMac,
  * IRx, ITx, IContention and other interface classes).
  */
-class INET_API Ieee80211Mac : public MacProtocolBase
+class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
 {
   public:
     static simsignal_t frameTransmissionOutcomeSignal;
@@ -106,6 +107,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
+    virtual void resetPeerAssociationContext(const MacAddress& peer) override;
 
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
