@@ -1,0 +1,121 @@
+%description:
+Tests that a host that is both the tunnel entry point and the source of the
+original packet gets an ICMPv6 Packet Too Big about its tunnel packet with the
+MTU of the original packet (RFC 2473 Section 8.2).
+
+Topology: hostA --- borderA --- transit --- borderB --- hostB. hostA routes
+traffic for hostB's prefix into an Ipv6TunnelInterface whose exit point is
+borderB. The transit -- borderB link has a 1400-byte MTU.
+
+hostA opens a TCP connection to hostB with an MSS of 1380 bytes and Path MTU
+Discovery (pmtudEnabled) on. The first full segment makes a 1440-byte inner
+packet and a 1480-byte tunnel packet, and transit sends a Packet Too Big
+reporting 1400. The MTU for the inner packet is 1400 minus the 40-byte tunnel
+header, so TCP must lower its MSS to 1300 and deliver all 100000 bytes. With
+1400, TCP lowered its MSS to 1340: every full segment then made a 1440-byte
+tunnel packet, which transit refused again, and no data arrived.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network Ipv6TunnelPtbHostTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        hostA: StandardHost6;
+        borderA: Router6;
+        transit: Router6;
+        borderB: Router6;
+        hostB: StandardHost6;
+    connections:
+        hostA.ethg++ <--> ethline <--> borderA.ethg++;
+        borderA.ethg++ <--> ethline <--> transit.ethg++;
+        transit.ethg++ <--> ethline <--> borderB.ethg++;
+        borderB.ethg++ <--> ethline <--> hostB.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Ipv6TunnelPtbHostTestNetwork
+ned-path = ../../../../src;.
+sim-time-limit = 10s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.configurator.addStaticRoutes = false
+**.configurator.config = xml("<config> \
+    <interface hosts='hostA' names='eth0' address='2001:db8:1::a'/> \
+    <interface hosts='borderA' names='eth0' address='2001:db8:1::1'/> \
+    <interface hosts='borderA' names='eth1' address='2001:db8:2::1'/> \
+    <interface hosts='transit' names='eth0' address='2001:db8:2::2'/> \
+    <interface hosts='transit' names='eth1' address='2001:db8:3::1'/> \
+    <interface hosts='borderB' names='eth0' address='2001:db8:3::2'/> \
+    <interface hosts='borderB' names='eth1' address='2001:db8:4::1'/> \
+    <interface hosts='hostB' names='eth0' address='2001:db8:4::b'/> \
+    <route hosts='hostA' destination='::' prefixLength='0' gateway='2001:db8:1::1' interface='eth0'/> \
+    <route hosts='hostA' destination='2001:db8:4::' prefixLength='64' interface='tun0'/> \
+    <route hosts='hostB' destination='::' prefixLength='0' gateway='2001:db8:4::1' interface='eth0'/> \
+    <route hosts='borderA' destination='2001:db8:1::' prefixLength='64' interface='eth0'/> \
+    <route hosts='borderA' destination='2001:db8:2::' prefixLength='64' interface='eth1'/> \
+    <route hosts='borderA' destination='::' prefixLength='0' gateway='2001:db8:2::2' interface='eth1'/> \
+    <route hosts='transit' destination='2001:db8:2::' prefixLength='64' interface='eth0'/> \
+    <route hosts='transit' destination='2001:db8:3::' prefixLength='64' interface='eth1'/> \
+    <route hosts='transit' destination='::' prefixLength='0' gateway='2001:db8:2::1' interface='eth0'/> \
+    <route hosts='borderB' destination='2001:db8:3::' prefixLength='64' interface='eth0'/> \
+    <route hosts='borderB' destination='2001:db8:4::' prefixLength='64' interface='eth1'/> \
+    <route hosts='borderB' destination='::' prefixLength='0' gateway='2001:db8:3::1' interface='eth0'/> \
+  </config>")
+
+**.neighbourDiscovery.dupAddrDetectTransmits = 0
+**.neighbourDiscovery.hostBootupTime = 0s
+**.neighbourDiscovery.routerBootupTime = 0s
+
+*.hostA.numTunInterfaces = 1
+*.hostA.tun[0].typename = "Ipv6TunnelInterface"
+*.hostA.tun[0].source = "2001:db8:1::a"
+*.hostA.tun[0].destination = "2001:db8:3::2"
+*.transit.eth[1].mac.mtu = 1400B
+*.borderB.eth[0].mac.mtu = 1400B
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "TcpSessionApp"
+*.hostA.app[0].connectAddress = "2001:db8:4::b"
+*.hostA.app[0].localAddress = "2001:db8:1::a"
+*.hostA.app[0].connectPort = 5000
+*.hostA.app[0].tOpen = 1s
+*.hostA.app[0].tSend = 1s
+*.hostA.app[0].sendBytes = 100000B
+*.hostA.app[0].tClose = -1s
+*.hostA.tcp.pmtudEnabled = true
+**.tcp.mss = 1380
+
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "TcpSinkApp"
+*.hostB.app[0].localPort = 5000
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+PMTUD: reducing snd_mss from 1380 to 1300 (reported MTU=1360)
+%#--------------------------------------------------------------------------------------------------------------
+%# the initial sequence number is 250000: ack 350001 acknowledges all 100000 bytes, ack 350002 also the FIN
+%contains-regex: stdout
+hostA\.tcp\.conn-2: Seg arrived: \.5000 > \.1025: (FIN\(\+ACK\) )?ack 35000[12] 
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
