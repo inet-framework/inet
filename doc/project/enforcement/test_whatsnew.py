@@ -113,6 +113,8 @@ class FunctionTest(unittest.TestCase):
                          "ieee80211-rate-control-per-receiver.txt")
         self.assertEqual(whatsnew.file_name("A packet drop reason", "common"),
                          "common-packet-drop-reason.txt")
+        self.assertEqual(whatsnew.file_name("The ICMPv6 checksum is written", "icmpv6"),
+                         "icmpv6-checksum-is-written.txt")
         self.assertLessEqual(len(whatsnew.file_name("word " * 40, "tcp")), len("tcp-.txt") + 50)
 
     def test_an_entry_change_is_matched_by_title(self):
@@ -126,17 +128,15 @@ class FunctionTest(unittest.TestCase):
         self.assertEqual(removed, [])
 
 
-class CommandTest(unittest.TestCase):
+class RepositoryTest(unittest.TestCase):
+    """A test in a git repository of its own."""
+
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tempdir.name)
         self.git("init", "-q")
         self.git("config", "user.email", "test@example.invalid")
         self.git("config", "user.name", "Whatsnew Test")
-        self.write("WHATSNEW", STUBBED)
-        self.write("doc/whatsnew/README.md", "How to write an entry.\n")
-        self.commit("fixture")
-        self.base = self.head()
 
     def tearDown(self):
         self.tempdir.cleanup()
@@ -159,6 +159,15 @@ class CommandTest(unittest.TestCase):
     def run_tool(self, *args):
         return subprocess.run([sys.executable, str(TOOL), *args], cwd=self.root,
                               capture_output=True, text=True)
+
+
+class CommandTest(RepositoryTest):
+    def setUp(self):
+        super().setUp()
+        self.write("WHATSNEW", STUBBED)
+        self.write("doc/whatsnew/README.md", "How to write an entry.\n")
+        self.commit("fixture")
+        self.base = self.head()
 
     def test_entry_files_pass(self):
         self.write("doc/whatsnew/fixes/tcp-repair.txt", "A repair\n\nIt is repaired.\n")
@@ -231,6 +240,94 @@ class CommandTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         text = (self.root / "WHATSNEW").read_text(encoding="utf-8")
         self.assertIn("INET-4.8\n--------\n\nThis release adds X.\n\nNotable bug fixes", text)
+
+
+FIXES = "Notable bug fixes are the following:\n\n1. A repair\n"
+
+
+class RebaseTest(RepositoryTest):
+    """A branch from before the move rebases onto a master after the move."""
+
+    def setUp(self):
+        super().setUp()
+        self.write("WHATSNEW", OLD_STYLE)
+        self.write("src/a.cc", "int a = 0;\n")
+        self.commit("fixture")
+        self.git("branch", "-M", "master")
+        self.git("checkout", "-qb", "topic")
+
+    def add_entry(self, before, text):
+        whatsnew_path = self.root / "WHATSNEW"
+        content = whatsnew_path.read_text(encoding="utf-8")
+        self.assertEqual(content.count(before), 1)
+        whatsnew_path.write_text(content.replace(before, text + before), encoding="utf-8")
+
+    def move_master(self, source="int a = 0;\n"):
+        self.git("checkout", "-q", "master")
+        self.write("WHATSNEW", STUBBED)
+        self.write("doc/whatsnew/README.md", "How to write an entry.\n")
+        self.write("doc/whatsnew/incompatible/ieee80211-rate-control.txt",
+                   "Rate control per receiver\n\nThe rate control adapts for each receiver.\n\n  getRate(receiver)\n")
+        self.write("doc/whatsnew/incompatible/ieee80211-second-change.txt", "A second change\n\nIt changes.\n")
+        self.write("doc/whatsnew/fixes/ipv4-repair.txt", "A repair\n\nIt is repaired.\n")
+        self.write("doc/whatsnew/fixes/arp-other.txt", "Another repair\n\nIt is repaired too.\n")
+        self.write("src/a.cc", source)
+        self.commit("doc: change: the release notes are files")
+        self.git("checkout", "-q", "topic")
+
+    def entry(self, path):
+        return (self.root / "doc/whatsnew" / path).read_text(encoding="utf-8")
+
+    def in_rebase(self):
+        return (self.root / ".git/rebase-merge").is_dir()
+
+    def test_a_branch_rebases_and_its_entries_become_files(self):
+        self.add_entry(FIXES, "3. A third change\n\n   It changes too.\n\n")
+        self.write("src/b.cc", "int b = 0;\n")
+        self.commit("tcp: fix: a third change")
+        self.write("WHATSNEW", (self.root / "WHATSNEW").read_text().replace("It changes too.", "It changes, too."))
+        self.commit("doc: change: the release note of the third change")
+        self.write("WHATSNEW", (self.root / "WHATSNEW").read_text().replace("It is repaired.", "It is repaired well."))
+        self.add_entry("INET-4.7 (July", "2. A fourth repair\n\n   It is new.\n\n")
+        self.commit("udp: fix: a fourth repair")
+        self.move_master()
+        result = self.run_tool("rebase", "master")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.in_rebase())
+        self.assertIn("PASS: release note checks clean", result.stdout)
+        self.assertEqual(self.git("rev-list", "--count", "master..topic").stdout.strip(), "3")
+        self.assertEqual((self.root / "WHATSNEW").read_text(encoding="utf-8"), STUBBED)
+        self.assertEqual(self.entry("incompatible/tcp-third-change.txt"), "A third change\n\nIt changes, too.\n")
+        self.assertEqual(self.entry("fixes/ipv4-repair.txt"), "A repair\n\nIt is repaired well.\n")
+        self.assertEqual(self.entry("fixes/udp-fourth-repair.txt"), "A fourth repair\n\nIt is new.\n")
+        files = self.git("show", "--name-only", "--format=", "topic~2").stdout.split()
+        self.assertEqual(sorted(files), ["doc/whatsnew/incompatible/tcp-third-change.txt", "src/b.cc"])
+
+    def test_another_conflict_stops_and_continue_finishes(self):
+        self.add_entry(FIXES, "3. A third change\n\n   It changes too.\n\n")
+        self.write("src/a.cc", "int a = 1;\n")
+        self.commit("tcp: fix: a third change")
+        self.move_master(source="int a = 2;\n")
+        result = self.run_tool("rebase", "master")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("also conflicts in src/a.cc", result.stdout)
+        self.assertTrue(self.in_rebase())
+        self.write("src/a.cc", "int a = 3;\n")
+        self.git("add", "src/a.cc")
+        result = self.run_tool("rebase", "--continue")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(self.in_rebase())
+        self.assertEqual(self.entry("incompatible/tcp-third-change.txt"), "A third change\n\nIt changes too.\n")
+
+    def test_a_change_of_a_released_section_stops(self):
+        self.add_entry(FIXES, "3. A third change\n\n   It changes too.\n\n")
+        self.write("WHATSNEW", (self.root / "WHATSNEW").read_text().replace("It was repaired.", "It was repaired at last."))
+        self.commit("tcp: fix: a third change")
+        self.move_master()
+        result = self.run_tool("rebase", "master")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("changes WHATSNEW outside the section of the version in development", result.stdout)
+        self.git("rebase", "--abort")
 
 
 if __name__ == "__main__":

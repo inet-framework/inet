@@ -13,8 +13,13 @@ doc/whatsnew/README.md says how to write one. The commands, from the repository 
   whatsnew.py release HEADING --next HEADING
       Write the entries into WHATSNEW as the section HEADING, put the heading of the next version in
       development above it, and remove the entry files.
+  whatsnew.py rebase UPSTREAM | --continue
+      Rebase the current branch onto UPSTREAM. When a commit stops on a conflict in WHATSNEW, write
+      the entries that the commit adds, changes or removes in the section of the version in
+      development as entry files, take WHATSNEW from the new base, and continue. Stop on any other
+      conflict; resolve it, then run whatsnew.py rebase --continue.
 
-Exit status 0 = clean, 1 = a violation, 2 = invalid usage.
+Exit status 0 = clean, 1 = a violation or a stop, 2 = invalid usage.
 """
 import argparse
 import os
@@ -258,6 +263,8 @@ def area_of(subject):
 def file_name(title, area=None, limit=50):
     """A file name for an entry: the area, then the words of the title, at most `limit` characters."""
     words = re.findall(r"[a-z0-9]+", title.lower())
+    while words and words[0] in ARTICLES:
+        words = words[1:]
     if area:
         for k in range(min(4, len(words)), 0, -1):
             if "".join(words[:k]) == area:
@@ -403,6 +410,141 @@ def release(args):
     return 0
 
 
+# --- the rebase ---------------------------------------------------------------------------------
+
+def git_path(name):
+    return Path(git("rev-parse", "--git-path", name).stdout.strip())
+
+
+def rebase_in_progress():
+    return git_path("rebase-merge").is_dir() or git_path("rebase-apply").is_dir()
+
+
+def outside_development(text):
+    """The lines of a WHATSNEW text without the section of the version in development."""
+    lines = (text or "").splitlines()
+    bounds = development_section(lines)
+    return lines if not bounds else lines[:bounds[0]] + lines[bounds[1]:]
+
+
+def branch_area():
+    """The most frequent area of the commits that the rebase replays, other than doc and plan."""
+    state = git_path("rebase-merge")
+    if not state.is_dir():
+        return None
+    onto, head = ((state / name).read_text().strip() for name in ("onto", "orig-head"))
+    base = git("merge-base", onto, head).stdout.strip()
+    areas = [area_of(s) for s in git("log", "--format=%s", f"{base}..{head}").stdout.splitlines()]
+    areas = [a for a in areas if a and a not in ("doc", "plan")]
+    return max(sorted(set(areas)), key=areas.count) if areas else None
+
+
+def write_entry(path, entry):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(entry_text(entry), encoding="utf-8")
+    git("add", "--", str(path))
+
+
+def convert(sha):
+    """Resolve the conflict in WHATSNEW of the commit that the rebase stopped on: write the entry
+    changes of the commit as entry files, and take WHATSNEW from HEAD. (done, messages)."""
+    short, subject = sha[:9], git("log", "-1", "--format=%s", sha).stdout.strip()
+    old_text, new_text = GitTree(f"{sha}^").read(WHATSNEW), GitTree(sha).read(WHATSNEW)
+    if outside_development(old_text) != outside_development(new_text):
+        return False, [f"{short} changes WHATSNEW outside the section of the version in development; "
+                       "resolve WHATSNEW by hand"]
+    added, changed, removed = entry_changes(old_text, new_text)
+    files = {e.title: e for e in read_entries(WorkTree())[0]}
+    for old, _ in changed:
+        if old.title not in files:
+            return False, [f"{short} changes the entry \"{old.title}\", and no entry file has that title; "
+                           "resolve WHATSNEW by hand"]
+    area = area_of(subject)
+    if area in (None, "doc", "plan"):
+        area = branch_area()
+    messages = []
+    for entry in added:
+        if entry.title in files:
+            current = files[entry.title]
+            if (current.section, current.body) == (entry.section, entry.body):
+                messages.append(f"{short} keeps {ENTRY_DIR}/{current.section}/{current.name}, which has the same entry")
+            else:
+                changed.append((current, entry))
+            continue
+        stem = file_name(entry.title, area)[:-len(".txt")]
+        path, n = Path(ENTRY_DIR) / entry.section / f"{stem}.txt", 2
+        while path.exists():
+            path, n = path.with_name(f"{stem}-{n}.txt"), n + 1
+        write_entry(path, entry)
+        messages.append(f"{short} adds {path}")
+        if area and not any(e.name.startswith(f"{area}-") for e in files.values()):
+            messages.append(f"note: no other release note has the area '{area}'; rename {path} if another area fits")
+    for old, new in changed:
+        current = files[old.title]
+        path = Path(ENTRY_DIR) / current.section / current.name
+        if new.section != current.section:
+            git("rm", "-q", "--", str(path))
+            path = Path(ENTRY_DIR) / new.section / current.name
+        write_entry(path, new)
+        messages.append(f"{short} changes {path}")
+    for entry in removed:
+        if entry.title in files:
+            current = files[entry.title]
+            path = Path(ENTRY_DIR) / current.section / current.name
+            git("rm", "-q", "--", str(path))
+            messages.append(f"{short} removes {path}")
+    git("checkout", "HEAD", "--", WHATSNEW)
+    if not messages:
+        messages.append(f"{short} changes no entry")
+    return True, messages
+
+
+def rebase(args):
+    state = git_path("whatsnew-rebase")
+    editor = {**os.environ, "GIT_EDITOR": "true"}
+    if args.upstream:
+        if rebase_in_progress():
+            print("whatsnew.py: a rebase is in progress; run whatsnew.py rebase --continue", file=sys.stderr)
+            return 2
+        upstream = git("rev-parse", "--verify", f"{args.upstream}^{{commit}}").stdout.strip()
+        state.write_text(upstream + "\n")
+        started = subprocess.run(["git", "rebase", upstream], env=editor, capture_output=True, text=True)
+        if started.returncode != 0 and not rebase_in_progress():
+            state.unlink(missing_ok=True)
+            print(f"whatsnew.py: git rebase did not start: {started.stderr.strip()}", file=sys.stderr)
+            return 1
+    else:
+        if not rebase_in_progress() or not state.is_file():
+            print("whatsnew.py: no rebase of whatsnew.py is in progress", file=sys.stderr)
+            return 2
+        upstream = state.read_text().strip()
+        subprocess.run(["git", "rebase", "--continue"], env=editor, capture_output=True, text=True)
+    while rebase_in_progress():
+        sha = git("rev-parse", "--verify", "-q", "REBASE_HEAD", check=False).stdout.strip()
+        conflicts = [p for p in git("diff", "--name-only", "-z", "--diff-filter=U").stdout.split("\0") if p]
+        if not sha or not conflicts:
+            print("whatsnew.py: the rebase stopped without a conflict; see git status", file=sys.stderr)
+            return 1
+        if WHATSNEW in conflicts:
+            done, messages = convert(sha)
+            for message in messages:
+                print(f"whatsnew.py: {message}")
+            if not done:
+                return 1
+        others = [p for p in conflicts if p != WHATSNEW]
+        if others:
+            print(f"whatsnew.py: {sha[:9]} also conflicts in {', '.join(others)}. Resolve them, add them, "
+                  "then run whatsnew.py rebase --continue")
+            return 1
+        if git("diff", "--cached", "--quiet", check=False).returncode == 0:
+            print(f"whatsnew.py: {sha[:9]} is empty after the conversion, and the rebase skips it")
+            subprocess.run(["git", "rebase", "--skip"], env=editor, capture_output=True, text=True)
+        else:
+            subprocess.run(["git", "rebase", "--continue"], env=editor, capture_output=True, text=True)
+    state.unlink(missing_ok=True)
+    return check(argparse.Namespace(range=f"{upstream}..HEAD", rev=None))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     commands = parser.add_subparsers(dest="command", required=True)
@@ -415,6 +557,11 @@ def main(argv=None):
     command = commands.add_parser("release", help="write the entries into WHATSNEW for a release")
     command.add_argument("heading", help='for example "INET-4.8 (March 2027) — feature release"')
     command.add_argument("--next", required=True, help='for example "INET-4.8.x (in development)"')
+    command = commands.add_parser("rebase", help="rebase, and move the WHATSNEW entries into files")
+    group = command.add_mutually_exclusive_group(required=True)
+    group.add_argument("upstream", nargs="?", help="the branch to rebase onto, for example origin/master")
+    group.add_argument("--continue", dest="continue_", action="store_true",
+                       help="continue after the other conflicts are resolved")
     args = parser.parse_args(argv)
     try:
         os.chdir(git("rev-parse", "--show-toplevel").stdout.strip())
@@ -423,6 +570,8 @@ def main(argv=None):
             return 0
         if args.command == "check":
             return check(args)
+        if args.command == "rebase":
+            return rebase(args)
         return release(args)
     except RuntimeError as error:
         print(f"whatsnew.py: {error}", file=sys.stderr)
