@@ -1,0 +1,10 @@
+CSMA/CD medium access delay statistic
+
+EthernetCsmaMac, the Carrier Sense Multiple Access with Collision Detection
+(CSMA/CD) medium access control (MAC) module, records packetPendingDelay:
+the time from the start of a frame's first transmission attempt to the
+start of the attempt that succeeds. EthernetPlca records a statistic of the
+same name, so the medium access delay of a 10BASE-T1S link can be compared
+with and without Physical Layer Collision Avoidance (PLCA). It appears in
+the results of every simulation that uses EthernetCsmaMac, including those
+with EthernetPlcaInterface.

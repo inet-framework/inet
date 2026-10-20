@@ -1,0 +1,3 @@
+DumbTcp no longer sends an acknowledged FIN again
+
+The retransmission timer of DumbTcp restarted at each expiry, also when nothing was outstanding, so DumbTcp sent an acknowledged FIN again every 2 seconds until the connection closed; with a peer that does not close, it went on to the end of the simulation. The timer now stops when all data, the FIN included, is acknowledged, as RFC 6298 section 5.2 says. Simulations that select DumbTcp can change.

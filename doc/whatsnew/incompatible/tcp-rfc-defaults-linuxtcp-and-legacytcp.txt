@@ -1,0 +1,38 @@
+TCP takes the defaults of the RFCs, and gains LinuxTcp and LegacyTcp
+
+The TCP model was reworked. A flavour is now a choice of congestion control (ITcpCongestionControl) and of loss recovery (ITcpRecovery). The model gained CUBIC (TcpCubic), RACK-TLP loss detection, Proportional Rate Reduction, F-RTO, the undo of a spurious loss, Accurate ECN, TCP Fast Open, keepalive probes, the path MTU search of RFC 4821, and many parameters that select a behavior of Linux. The documentation of the Tcp module lists each RFC, what the model implements, and where it departs from the RFC.
+
+The defaults of Tcp now follow the RFCs. This changes each simulation that uses TCP without setting these parameters (INET 4.7 -> now):
+
+  sackSupport              false             -> true
+  timestampSupport         false             -> true
+  windowScalingSupport     false             -> true
+  delayedAcksEnabled       false             -> true
+  limitedTransmitEnabled   false             -> true
+  advertisedWindow         14 * this.mss     -> 65535
+  mss                      536               -> -1 (1460 for IPv4, 1440
+                                                for IPv6)
+  initial window           one segment       -> initialWindow = "rfc3390"
+                                                (RFC 5681 section 3.1)
+  tcpAlgorithmClass        "TcpReno"         -> "TcpNewReno"
+  initial RTO              3 s               -> initialRto = 1s
+  loss detection           three duplicates  -> RACK-TLP (lossDetectionMode,
+                                                tlpEnabled)
+  recovery window          halved at once    -> PRR (prrEnabled)
+  PSH                      never set         -> on the last buffered segment
+                                                (pushLastBufferedSegment)
+  ECN                      off               -> answers a request
+                                                (tcpEcnMode = "passive")
+  pmtudEnabled             false             -> true (DF on IPv4 segments)
+
+The results of TCP simulations differ from INET 4.7 in any case, also because many defects were repaired. To keep the old defaults, select LegacyTcp, which extends Tcp and changes only defaults:
+
+  **.tcp.typename = "LegacyTcp"
+
+LinuxTcp extends Tcp in the same way, with the defaults of Linux 7.1: CUBIC with the hybrid slow start, an initial window of ten segments, the timers and the delayed ACK of Linux, and the other behaviors of Linux that parameters select. A parameter that the ini file sets takes precedence over the defaults of the selected module.
+
+Two parameters are deprecated: increasedIWEnabled (use initialWindow = "rfc3390") and ecnWillingness (use tcpEcnMode = "rfc3168"). They still work in this release.
+
+Two C++ base classes were renamed: TcpBaseAlg is now TcpAlgorithmBase, and TcpTahoeRenoFamily is now TcpClassicAlgorithmBase. The old names remain as deprecated aliases in this release. A TCP algorithm implemented outside INET needs more than the rename, however: the split into congestion control and recovery moved much of the protected interface that a flavour overrides, so such an algorithm must be written against ITcpCongestionControl and ITcpRecovery.
+
+The connection has the new signals sndMax, delivered and deliveredCe.

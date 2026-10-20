@@ -1,0 +1,3 @@
+MPLS knows the IPv4 Explicit NULL and the Implicit NULL labels
+
+An LSR now pops the label 0 at the bottom of the stack with no binding and forwards the datagram by its IPv4 header, and pops the stack where a swap would give the label 3, as RFC 3032 section 2.1 states. The LIB accepts these values as outgoing labels; before, a debug build refused the label 0, and the label 3 went onto the wire. The LIB now allocates labels from 16, after the reserved values; before, RSVP-TE and LDP got labels from 1.

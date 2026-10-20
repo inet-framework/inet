@@ -1,0 +1,5 @@
+IEEE 802.11 management recovery belongs to each EDCAF
+
+Management failures and completion now update the contention window and retry state of the affected access category. Previously the shared recovery procedure changed the best-effort window even for voice management frames.
+
+The hcf.edca.mgmtAndNonQoSRecoveryProcedure module moves beneath each edcaf[i], and its C++ getter moves from Edca to Edcaf. Update configuration, signal subscriptions and result paths as described in the migration guide. Management-recovery trajectories may change, including Block Ack agreement negotiation. The MacQosWithBlockAck example fingerprints are updated; the QoS and NonQos showcase fingerprint controls remain unchanged.

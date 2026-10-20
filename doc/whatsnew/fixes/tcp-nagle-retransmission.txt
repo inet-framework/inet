@@ -1,0 +1,3 @@
+Nagle no longer holds a TCP retransmission
+
+Nagle's algorithm counted data as unacknowledged up to the highest sequence number sent. After a go-back, after a retransmission timeout or after a SYN-ACK that did not acknowledge the data of a Fast Open SYN, the partial segment at the end is a retransmission, and Nagle held it until the next retransmission timeout. Nagle now holds only new data, as RFC 9293 section 3.7.4 says and as Linux does. Simulations with losses and Nagle on (the default of Tcp and LegacyTcp) can change; 27 fingerprints and 11 statistical results of the INET examples moved. LinuxTcp, with the Nagle variant of Minshall, was not affected in the packetdrill suite.

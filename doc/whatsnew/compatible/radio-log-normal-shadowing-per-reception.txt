@@ -1,0 +1,3 @@
+Log-normal shadowing once per reception
+
+Without a correlation distance, LogNormalShadowing draws one shadowing value per reception. With DimensionalMediumAnalogModel it drew one per evaluation of the attenuation, so the frequencies of one reception had independent values, and an evaluation repeated later gave a different one. With ScalarMediumAnalogModel, or with the dimensional model attenuating with the center frequency (the default), nothing changes.

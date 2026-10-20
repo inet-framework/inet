@@ -1,0 +1,3 @@
+Random Early Detection (RED) reports its early drops as congestion
+
+RedDropper emitted every drop with reason OTHER_PACKET_DROP, so its packetDropCongestion statistic always read 0. An early drop is now reported with reason CONGESTION and a drop at the packet capacity with QUEUE_OVERFLOW. Which packets are dropped does not change; the packetDropCongestion scalars and vectors of RED queues that make early drops, including those in EthernetQosRedQueue and AFxyQueue, become non-zero.

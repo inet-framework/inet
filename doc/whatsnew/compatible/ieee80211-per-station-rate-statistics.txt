@@ -1,0 +1,3 @@
+IEEE 802.11 per-station rate statistics
+
+The datarateChanged signal of the rate controls is now emitted with the name of the receiving station as a named details object, and a new dataratePerStation statistic demultiplexes it into one data rate vector per peer. The datarateSelected signal of Dcf and Hcf is tagged the same way, which also covers fixed and configured rates. The declaration of the aggregate datarateChanged statistic is unchanged and it still ignores the details, but the values it records move: the rate control no longer reports a rate when the mode set changes, and reports one per station when that station is first seen instead.

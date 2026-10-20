@@ -1,0 +1,3 @@
+An ordinal based dropper counts a streamed packet one time
+
+OrdinalBasedDropper counted a packet in processPacket() and dropPacket(), which the filter base class calls for each packet instance of a packet stream. So it counted a streamed packet more than one time, and it dropped other packets than its dropsVector names. It now counts each packet one time, in handlePacketFiltered().

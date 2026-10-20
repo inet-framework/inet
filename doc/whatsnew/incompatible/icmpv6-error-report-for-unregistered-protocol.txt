@@ -1,0 +1,5 @@
+ICMPv6 drops an error report for a protocol nothing registered
+
+Icmpv6 handed the error indication up to the protocol the quoted datagram names without asking whether anything on the node had registered it. The MessageDispatcher then knew no route and stopped the run, so any node could be halted by an ICMPv6 error about a protocol it does not run.
+
+Icmpv6 already kept the set of registered transport protocols and never read it. It reads it now and drops the report, as Icmp has always done for IPv4.

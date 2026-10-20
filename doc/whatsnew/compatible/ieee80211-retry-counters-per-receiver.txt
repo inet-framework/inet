@@ -1,0 +1,3 @@
+IEEE 802.11 retry counters for each receiver
+
+QoS recovery now keeps separate retry counters for each receiver. Frames with equal TID, sequence number, and fragment number no longer share a counter across receivers. An acknowledgment or retry-limit disposal for one receiver preserves the other receiver's counter. This repair applies before DATA lifetime expiration.

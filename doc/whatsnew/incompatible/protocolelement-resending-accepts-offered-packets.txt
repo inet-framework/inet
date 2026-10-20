@@ -1,0 +1,5 @@
+Resending accepts the packets that a producer offers
+
+The canPushPacket() method of the Resending protocol element tested its packet argument instead of the packet that the module holds, so it refused every packet that a producer asked about. An active producer that asks before it pushes, for example a PacketServer after a queue, therefore never passed a packet to Resending. Resending now accepts a packet whenever it holds none, as its canPushSomePacket() method already did.
+
+This changes the results of simulations that feed Resending from such a producer. Inside INET, the client in the Network6 and Network7 steps of tutorials/protocol now sends its packet; before, it sent none.

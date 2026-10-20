@@ -1,0 +1,3 @@
+A dynamic classifier creates a branch only for a packet
+
+DynamicClassifier creates the branch of a class when the first packet of the class goes through, or when a module asks canPushPacket() about such a packet, because the answer depends on the branch. Before, its other queries created branches too. The classifier now refuses the reverseOrder parameter, because it creates its output gates in the order in which the classes appear. With reverseOrder = true, it created more branches than classes, and it sent packets of different classes into one branch.

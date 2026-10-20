@@ -1,0 +1,11 @@
+IEEE 802.11 management publishes legacy rate state
+
+Full and simplified management now populate the existing MIB rate records from local advertisements and accepted associations. Associated-AP Beacons refresh the STA's BSS and peer rates. Peer departure, association loss, and management stop clear the corresponding records. External models can query these records after rateStateChanged notifications. Current built-in rate selectors retain their existing behavior.
+
+STA teardown clears BSS rates and peer HT and rate state before one notification. Management clears its association snapshot and Beacon timer first. Listeners see complete cleanup, and the local rate record remains available.
+
+Association and valid associated-AP Beacons commit HT state and rate records before one notification. AP management clears its pending transaction first. STA management sets its Beacon timer first. Listeners can query the complete state from the callback.
+
+Full AP departure completes the station downgrade before peer cleanup notification. Full AP stop clears station and association-ID tables, peer state, and BSS rates before one notification. Rate publication excludes BSS membership selectors from legacy rate records. Selector-based join checks remain outside this change.
+
+Management rejects nonfinite numeric rates in abstract frames before ordered-set insertion. Previously, a NaN after a valid rate could escape validation and replace committed records. Malformed rate elements now preserve committed records and emit no rate notification. Wire-decoded rate octets cannot produce these nonfinite values.

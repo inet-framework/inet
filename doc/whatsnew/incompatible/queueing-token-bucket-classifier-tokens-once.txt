@@ -1,0 +1,3 @@
+A token bucket classifier takes the tokens of a packet one time
+
+TokenBucketClassifier and MultiTokenBucketClassifier, and the classifiers that extend them in NED (SingleRateTwoColorClassifier, SingleRateThreeColorClassifier and DualRateThreeColorClassifier), removed the tokens of a packet in each query about the packet, and again when the packet went through. For example, a PacketServer asks canPushPacket() before it pushes a packet. In pull mode, each peek removed tokens. The classifier now removes the tokens one time, when the packet goes through. This can change the results of simulations in which a module asks a token bucket classifier about a packet before it pushes the packet.

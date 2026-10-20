@@ -1,0 +1,3 @@
+A label scheduler skips an empty input
+
+LabelScheduler read the labels of the packet that each input offered, and it crashed when an input had no packet. It now skips an empty input.

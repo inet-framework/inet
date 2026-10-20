@@ -1,0 +1,3 @@
+The out-of-band byte of received TCP urgent data, as Linux
+
+The new parameter urgentOutOfBand, which LinuxTcp sets, gives the receive side of urgent data of Linux without SO_OOBINLINE: the last byte of urgent data leaves the stream, and a read stops before it. INET does not deliver that byte, which Linux gives to recv(MSG_OOB), and it sends no urgent data. Tcp keeps treating URG-marked bytes as ordinary data. Simulations change only where a peer sends urgent data to LinuxTcp.

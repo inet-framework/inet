@@ -1,0 +1,5 @@
+MPLS follows the TTL rules of RFC 3032
+
+The TTL field of every label stack entry was 0. A pushed entry now copies the TTL of the entry below it, or of the IPv4 header when it is the first label, and each LSR forwards a labeled packet with the incoming TTL minus one, as RFC 3032 section 2.4 and the Uniform Model of RFC 3443 state.
+
+The IPv4 TTL also counts the LSRs now. The ingress decrements it before it labels a datagram, and leaves a datagram with TTL 1 to IPv4, which reports it; a pop that empties the label stack writes the outgoing TTL into the IPv4 header. Before, a datagram left an LSP with the TTL it had at the ingress. An LSR now discards a labeled packet whose outgoing TTL is zero, with a packetDropped signal; before, no LSR looked at the TTL.

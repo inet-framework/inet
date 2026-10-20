@@ -1,0 +1,9 @@
+IEEE 802.11 rate control per receiver
+
+IEEE 802.11 rate control now selects and adapts the transmission rate separately for each peer a station transmits to. The rate controls previously kept a single set of adaptive state per module, so the feedback of all peers was blended into one rate.
+
+To make this possible, the getRate() method of the IRateControl C++ interface, implemented by AarfRateControl and OnoeRateControl, now takes the MAC address of the receiver. This change requires the modification of rate control models implemented outside INET, which no longer compile until their getRate() is given the new argument. Simulation models that only configure a rate control are unaffected.
+
+Rate selection no longer consults the rate control for group-addressed frames, which are never acknowledged and so could never have their rate corrected by feedback. They now take a mandatory rate, as they already did when no rate control was configured.
+
+These changes may change the statistical results of simulations that use an adaptive rate control, either where a station transmits to several peers or where it sends group-addressed traffic.

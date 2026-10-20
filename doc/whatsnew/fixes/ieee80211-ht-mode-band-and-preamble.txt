@@ -1,0 +1,3 @@
+IEEE 802.11 HT modes preserve the requested band and preamble
+
+The HT mode factory now includes band and preamble format in its cache key. A 5 GHz request after an equivalent 2.4 GHz request therefore receives the requested band and timing. Previously, that request could receive the earlier mode. Identical complete requests still reuse one object.

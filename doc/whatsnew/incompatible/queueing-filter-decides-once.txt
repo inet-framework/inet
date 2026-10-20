@@ -1,0 +1,3 @@
+Packet filters decide one time for each packet
+
+PacketFilterBase called matchesPacket() and processPacket() again on each call of a push stream, so its verdict could change in the middle of a stream. It now decides at the start of the stream and keeps the verdict for the stream; processPacket() still runs for each packet instance of the stream. The base class calls the new function handlePacketFiltered() one time for each packet that goes through the filter or that the filter drops, and one time for each packet stream. A filter that keeps state, such as a dropper that counts packets, changes that state there, not in matchesPacket(), processPacket() or dropPacket(). See the migration guide.

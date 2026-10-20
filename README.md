@@ -33,7 +33,8 @@ WORK CORRECTLY, AND YOU'RE GETTING VALID RESULTS.
 
 Contributions are highly welcome. You can make a difference!
 
-See the WHATSNEW file for recent changes.
+See the WHATSNEW file for recent changes, and the doc/whatsnew folder for the
+changes of the version in development.
 
 
 GETTING STARTED

@@ -1,0 +1,5 @@
+The distance form of the path loss is computeDistancePathLoss()
+
+IPathLoss::computePathLoss(propagationSpeed, frequency, distance) was renamed to computeDistancePathLoss(), so that it is no longer an overload of the method that computes the path loss of a reception (see the next item): a model that overrode one of the overloads hid the other. Its documentation now states that the value is independent of the transmitter and the receiver, and may be NaN when the model cannot tell the loss from the distance alone (TwoRayInterference).
+
+This change requires the modification of C++ code that implements or calls computePathLoss(propagationSpeed, frequency, distance): every path loss model derived from PathLossBase overrides it.

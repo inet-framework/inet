@@ -1,0 +1,3 @@
+A filter in pull mode drops a packet in its own operations
+
+In pull mode, PacketFilterBase::canPullPacket(), a query, pulled and dropped each packet of its provider that did not match. The filter now drops such packets when they become available: when its provider reports a packet, and after each pull. canPullPacket() returns the packet of the provider if it matches. This can change the time of a drop in simulations that pull packets through a filter. ReceiveWithLifetime and EligibilityTimeFilter no longer support pull mode, because their verdict about a packet changes with time without an event of the module.

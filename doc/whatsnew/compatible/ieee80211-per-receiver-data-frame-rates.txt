@@ -1,0 +1,3 @@
+IEEE 802.11 per-receiver configured data frame rates
+
+RateSelection and QosRateSelection gained a dataFrameBitratePerReceiver parameter, a map from peer interface module path to bitrate, which fixes the rate of originated unicast data frames separately for each peer. It is empty by default, so it changes nothing unless it is configured. The dataFrameBitrate parameter, which fixes one rate for the whole interface, is unchanged.

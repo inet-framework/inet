@@ -1,0 +1,3 @@
+IEEE 802.11 MIB state commit operations
+
+The MIB now supplies combined operations for peer HT state, BSS rates, and peer rates. Each operation completes its mutations before notification. AP cleanup can also clear station and association-ID tables in the same transition. Standalone setters retain their existing behavior. Local records remain available after cleanup.

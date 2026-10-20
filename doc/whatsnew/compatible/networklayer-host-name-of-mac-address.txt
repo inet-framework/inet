@@ -1,0 +1,3 @@
+Naming the host owning a MAC address
+
+A new L3AddressResolver::getHostNameWithMacAddress() method names the host that owns a MAC address, by the host's path relative to the network, and falls back to the MAC address string when no host owns the address.

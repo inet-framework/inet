@@ -1,0 +1,7 @@
+Packet classifiers answer a query without a change of state
+
+PacketClassifierBase::classifyPacket() is now a const function. The base class calls it from queries, such as canPushPacket() and canPullPacket(), and again from the operation that moves the packet, so it must not change the state of the module. The base class calls the new function handlePacketClassified() one time for each packet that goes through the module, and one time for each packet stream, before the packet leaves the module. A classifier that keeps state changes it there.
+
+This change requires the modification of classifiers implemented outside INET, which no longer compile until their classifyPacket() is const. See the migration guide.
+
+A pull stream through a classifier now classifies its packet one time, at the start of the stream. Before, each call of the stream classified it.

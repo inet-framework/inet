@@ -1,0 +1,19 @@
+IPsec corrections to the AH and ESP packets
+
+The first packet of an SA now carries the Sequence Number 1, as RFC 4302 and RFC 4303 state; before, it carried 0. The C++ method SecurityAssociation::getAndIncSeqNum() is now incrementAndGetSeqNum(), and returns the incremented value.
+
+The AH header now has the layout of RFC 4302: its Payload Length holds the length of the header in 32-bit words minus 2 (before, 0), and the ICV field ends the header, before the payload (before, the ICV followed the payload). In IPv6 the ICV field has the padding that makes the header a multiple of 8 octets, so an AH packet over IPv6 is 4 octets longer with a 16-octet ICV. The payload of AH is no longer an EncryptedChunk, because AH does not encrypt, and the AH dissector reads the new layout.
+
+The padding of an ESP packet now holds the octets 1, 2, 3 and so on, as RFC 4303 section 2.4 states; before, every octet held the default 63 of a ByteCountChunk.
+
+After AH or ESP processing, the receiver now checks that the packet matches the selectors of the SA that protected it, and discards it if not (RFC 4301 section 5.2). Before, an SA accepted every packet with its SPI, so a sender could reach any port of the receiver through one SA.
+
+A packet that matches a PROTECT entry, and no SA of it, is now discarded (RFC 4301 section 5.1); before, it left the host in clear.
+
+One policy can now protect a packet with ESP and AH together. The new Protection element of a SecurityAssociation overrides the Protection of its SecurityPolicy, so an ESP policy can hold an AH SA as well. The sender applies ESP first and AH around it, whatever the order of the SAs, and the receiver processes the ESP header that follows an AH header. Before, the documentation named a Protection AH_ESP that the configuration refused.
+
+An SA can now have a hard lifetime (RFC 4301 section 4.4.2.1): the new elements HardLifetimeSeconds and HardLifetimeBytes of a SecurityAssociation or of its SecurityPolicy. With no key management to replace it, an SA whose lifetime has ended is not used any more, and its packets are discarded.
+
+An SA can now have a set of DSCP values, the new DSCP element of a SecurityAssociation (RFC 4301 section 4.4.2.1). Of the SAs of one policy, the sender uses the first whose set holds the DSCP of the packet, so that classes of traffic can have SAs of their own. Before, the first matching SA carried every packet.
+
+An outbound ESP SA can now send dummy packets (RFC 4303 section 2.6), with the new DummyPacketInterval element of a SecurityAssociation: ESP packets with Next Header 59 and an empty payload, to the peer of the last packet that the SA protected. The receiver discards them without an error. For this, the IPsec module has the new gates ipIn and ipOut, which the IPv4 and IPv6 network layers connect to their dispatcher.

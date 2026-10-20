@@ -1,0 +1,5 @@
+UDP no longer reports a received datagram twice
+
+The Udp module emitted packetReceivedFromLower a second time for every datagram it received from the network layer. Its base class, LayeredProtocolBase, already emits the signal before it calls handleLowerPacket, and Udp emitted it again in processUDPPacket. Every other protocol module emits it once.
+
+No statistic changes, because Udp.ned declares the signal and sources no statistic from it. Code that subscribes to the signal on a UDP module is affected: it now runs once per datagram instead of twice, so a listener that counted arrivals or summed bytes reported twice the true value and now reports the true one.

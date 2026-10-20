@@ -1,0 +1,5 @@
+IEEE 802.11 response queries require an explicit caller role
+
+Sender estimates now query the recipient's HT capabilities instead of the sender's own peer address. This correction can change response reservations, timeout estimates, and TXOP admission in existing HT simulations.
+
+External IRateSelection and IQosRateSelection implementations and callers must add ResponseQueryRole to their response queries. Use PREDICT for sender estimates. Use RESPOND for recipient responses. The migration guide supplies the signatures and links to the prediction limits.

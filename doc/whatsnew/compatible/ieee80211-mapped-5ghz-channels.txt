@@ -1,0 +1,3 @@
+IEEE 802.11 mapped 5 GHz channel subset
+
+The new "5 GHz (mapped 20 MHz)" band supplies standard channels 36, 40, 44, and 48 for HT management. The IEEE 802.11 user guide describes its indices, frequencies, and HT40 pair validation. The subset does not enable 40 MHz HT operation or provide a complete regulatory-domain model.
