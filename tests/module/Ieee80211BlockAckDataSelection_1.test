@@ -10,6 +10,8 @@ Ordinary service and filtered queries must work. A refused pull must preserve qu
 
 %file: DataSelection.cc
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mac/originator/OriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/Rx.h"
@@ -189,6 +191,12 @@ class DataSelectionTest : public cSimpleModule, public cListener {
         auto extracted = service->extractFramesToTransmit(queue);
         ASSERT(extracted != nullptr && extracted->size() == 1);
         ASSERT(extracted->front() == selected);
+        ASSERT(selected->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == 0);
+        OriginatorBlockAckAgreement metadata(MacAddress("02:00:00:00:00:02"), 0, SequenceNumberCyclic(0), 64, false, false);
+        metadata.recordTransmittedData(0);
+        metadata.recordTransmittedData(2048);
+        metadata.recordTransmittedData(1);
+        ASSERT(metadata.getHighestTransmittedDataIndex() == 2048);
         ASSERT(selected->getOwner() == service);
         auto header = selected->peekAtFront<Ieee80211DataHeader>();
         ASSERT(!header->getAMsduPresent());
@@ -240,6 +248,8 @@ class DataSelectionTest : public cSimpleModule, public cListener {
         ASSERT(legacy->getNumPackets() == 2 && legacy->getPacket(0) == head && legacy->getPacket(1) == tail);
         service->setEligibility([](const Packet *) { return true; }, [](Packet *) { return false; });
         auto ordinary = service->extractFramesToTransmit(legacy);
+        ASSERT(ordinary != nullptr && ordinary->size() == 1);
+        ASSERT(ordinary->front()->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex() == 1);
         ASSERT(ordinary != nullptr && ordinary->size() == 1 && ordinary->front() == head);
         ASSERT(legacy->getNumPackets() == 1 && legacy->getPacket(0) == tail);
         take(ordinary->front());

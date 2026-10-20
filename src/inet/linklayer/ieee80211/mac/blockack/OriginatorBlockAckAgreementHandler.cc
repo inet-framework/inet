@@ -9,6 +9,8 @@
 
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -125,6 +127,8 @@ void OriginatorBlockAckAgreementHandler::terminateAgreement(MacAddress originato
 void OriginatorBlockAckAgreementHandler::processTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& dataHeader, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy, IProcedureCallback *callback)
 {
     auto agreement = getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
+    if (agreement && agreement->getIsAddbaResponseReceived())
+        agreement->recordTransmittedData(packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
     if (blockAckAgreementPolicy->isAddbaReqNeeded(packet, dataHeader) && agreement == nullptr) {
         auto addbaReq = buildAddbaRequest(dataHeader->getReceiverAddress(), dataHeader->getTid(), dataHeader->getSequenceNumber() + 1, blockAckAgreementPolicy);
         auto& token = dialogTokens[{dataHeader->getReceiverAddress(), dataHeader->getTid()}];
