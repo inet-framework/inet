@@ -913,8 +913,10 @@ void Ipv6NeighbourDiscovery::makeTentativeAddressPermanent(const Ipv6Address& te
 
         // moved from processRAPrefixInfoForAddrAutoConf()
         // we can remove the old CoA now
-        if (!entry.CoA.isUnspecified())
+        if (!entry.CoA.isUnspecified()) {
+            cancelDad(entry.CoA, ie);
             ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeAddress(entry.CoA);
+        }
 
         // set addresses on this interface to tentative=false
         for (int i = 0; i < ie->getProtocolData<Ipv6InterfaceData>()->getNumAddresses(); i++) {
@@ -980,16 +982,7 @@ void Ipv6NeighbourDiscovery::dadHasFailed(const Ipv6Address& duplicateAddr, Netw
     EV_WARN << "DAD failed for address " << duplicateAddr << " on " << ie->getInterfaceName()
             << " -- Loss of DAD, address will not be assigned\n";
 
-    for (auto it = dadList.begin(); it != dadList.end(); ++it) {
-        DadEntry *dadEntry = *it;
-        if (dadEntry->interfaceId == ie->getInterfaceId() && dadEntry->address == duplicateAddr) {
-            cancelAndDelete(dadEntry->timeoutMsg);
-            dadList.erase(it);
-            delete dadEntry;
-            break;
-        }
-    }
-
+    cancelDad(duplicateAddr, ie);
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeAddress(duplicateAddr);
 
     auto git = dadGlobalList.find(ie->getInterfaceId());
@@ -999,6 +992,19 @@ void Ipv6NeighbourDiscovery::dadHasFailed(const Ipv6Address& duplicateAddr, Netw
     ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->setDadInProgress(false);
 
     emit(dadFailedSignal, 1);
+}
+
+void Ipv6NeighbourDiscovery::cancelDad(const Ipv6Address& addr, NetworkInterface *ie)
+{
+    for (auto it = dadList.begin(); it != dadList.end(); ++it) {
+        DadEntry *dadEntry = *it;
+        if (dadEntry->interfaceId == ie->getInterfaceId() && dadEntry->address == addr) {
+            cancelAndDelete(dadEntry->timeoutMsg);
+            dadList.erase(it);
+            delete dadEntry;
+            break;
+        }
+    }
 }
 
 void Ipv6NeighbourDiscovery::createAndSendRsPacket(NetworkInterface *ie)
@@ -1609,9 +1615,10 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfo(const Ipv6RouterAdvertisement *
                 auto *ipv6Data = ie->getProtocolDataForUpdate<Ipv6InterfaceData>();
                 for (int j = ipv6Data->getNumAddresses() - 1; j >= 0; j--) {
                     if (ipv6Data->getAddress(j).matches(prefix, prefixLength)) {
-                        EV_INFO << "Removing address " << ipv6Data->getAddress(j)
-                                << " (prefix invalidated)\n";
-                        ipv6Data->removeAddress(ipv6Data->getAddress(j));
+                        Ipv6Address address = ipv6Data->getAddress(j);
+                        EV_INFO << "Removing address " << address << " (prefix invalidated)\n";
+                        cancelDad(address, ie);
+                        ipv6Data->removeAddress(address);
                     }
                 }
                 return;
@@ -2545,6 +2552,7 @@ void Ipv6NeighbourDiscovery::processRaPrefixInfoForAddrAutoConf(const Ipv6NdPref
             // we have to remove the CoA before we create a new one
             EV_INFO << "Node returning home - removing CoA...\n";
             CoA = ie->getProtocolDataForUpdate<Ipv6InterfaceData>()->removeAddress(Ipv6InterfaceData::CoA);
+            cancelDad(CoA, ie);
 
             // nothing to do more wrt managing addresses, as we are at home and a HoA is
             // already existing at the interface

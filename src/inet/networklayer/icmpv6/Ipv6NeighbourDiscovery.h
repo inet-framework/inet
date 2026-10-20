@@ -277,6 +277,13 @@ class INET_API Ipv6NeighbourDiscovery : public OperationalBase, protected cListe
      */
     virtual void dadHasFailed(const Ipv6Address& duplicateAddr, NetworkInterface *ie);
 
+    /**
+     * Stops the DAD of the given address on the given interface, if one is running.
+     * To be called wherever an address is removed from the interface, so that its DAD
+     * cannot complete for an address the interface no longer holds.
+     */
+    virtual void cancelDad(const Ipv6Address& addr, NetworkInterface *ie);
+
     /************Address Autoconfiguration Stuff***************************/
     /**
      *  as it is not possbile to explicitly define RFC 2462. ND is the next
