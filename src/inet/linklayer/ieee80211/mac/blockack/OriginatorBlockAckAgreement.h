@@ -26,6 +26,7 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     bool isAMsduSupported = false;
     bool responseAMsduSupported = false;
     int dialogToken = -1;
+    int64_t highestTransmittedDataIndex = -1;
     bool isDelayedBlockAckPolicySupported = false;
     bool isAddbaResponseReceived = false;
     bool isAddbaRequestSent = false;
@@ -56,6 +57,14 @@ class INET_API OriginatorBlockAckAgreement : public cObject
     int getDialogToken() const { return dialogToken; }
     void setDialogToken(int token) { dialogToken = token; }
     void setResponseAMsduSupported(bool value) { responseAMsduSupported = value; }
+    bool getFirstDataTransmitted() const { return highestTransmittedDataIndex >= 0; }
+    int64_t getHighestTransmittedDataIndex() const { return highestTransmittedDataIndex; }
+    void recordTransmittedData(int64_t allocationIndex)
+    {
+        ASSERT(allocationIndex >= 0);
+        if (highestTransmittedDataIndex < allocationIndex)
+            highestTransmittedDataIndex = allocationIndex;
+    }
     virtual bool getIsDelayedBlockAckPolicySupported() const { return isDelayedBlockAckPolicySupported; }
     virtual MacAddress getReceiverAddr() const { return receiverAddr; }
     virtual Tid getTid() const { return tid; }

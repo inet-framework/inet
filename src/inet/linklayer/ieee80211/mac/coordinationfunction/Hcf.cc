@@ -23,6 +23,8 @@
 
 #include "inet/queueing/function/PacketFilterFunction.h"
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+
 namespace inet {
 namespace ieee80211 {
 
@@ -1109,6 +1111,13 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         RateSelection::emitDatarateSelected(this, header, mode);
         EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
         tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
+        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            if (originatorBlockAckAgreementHandler) {
+                auto agreement = originatorBlockAckAgreementHandler->getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
+                if (agreement && agreement->getIsAddbaResponseReceived())
+                    agreement->recordTransmittedData(packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
+            }
+        }
         return true;
     }
     else

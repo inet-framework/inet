@@ -43,6 +43,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
     std::function<void()> expireFrames;
     std::function<bool(const Packet *)> extractionEligible;
     std::function<bool(Packet *)> aMsduPermitted;
+    int64_t nextDataAllocationIndex = 0;
 
   protected:
     virtual void initialize() override;
