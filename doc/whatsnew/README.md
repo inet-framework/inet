@@ -26,6 +26,21 @@ The parameters that only one algorithm reads moved from Tcp to the type of that 
 
 Do not add an entry to `WHATSNEW` itself. Its section of the version in development has only a sentence that points to this folder.
 
+## Add a section to the migration guide
+
+A change that breaks a model also owes a section of the migration guide ([RR-BREAK-MIGRATE](../project/rule/release.md#rr-break-migrate)). The section is a file of its own too ([RR-MIGRATE-FILE](../project/rule/release.md#rr-migrate-file)): `doc/src/migration-guide/development/<area>-<topic>.rst`, with the same name rules as a release note. Line 1 is the title, line 2 underlines the title with `~` to its full length, and line 3 is empty. Then write the reStructuredText of the section. A subsection uses `^`. Do not use the underlines `=`, `-` and `~` in the text, because they belong to the guide, to the versions and to the sections.
+
+An example, `doc/src/migration-guide/development/tcp-algorithms.rst`:
+
+```rst
+TCP Algorithms
+~~~~~~~~~~~~~~
+
+The algorithm of a TCP connection is a module now: each connection creates it as its submodule.
+```
+
+Do not add a section to `doc/src/migration-guide/index.rst` itself. The directive `include-files` below the heading of the version in development inserts the files of `development/` in the order of their names.
+
 ## Check and read the release notes
 
 From the repository root:

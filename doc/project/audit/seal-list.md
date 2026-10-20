@@ -66,7 +66,7 @@ A whole-document seal is declared in the document's own header, as `**Seal:** wh
 | `rule/planning.md` | by rule | 0 | 0 | 8 |
 | `rule/pull-request.md` | by rule | 0 | 0 | 26 |
 | `rule/quality.md` | by rule | 0 | 0 | 15 |
-| `rule/release.md` | by rule | 0 | 0 | 10 |
+| `rule/release.md` | by rule | 0 | 0 | 11 |
 | `rule/sealing.md` | whole | 0 | 0 | 1 |
 | `rule/testing.md` | by rule | 0 | 0 | 14 |
 <!-- END SEAL INDEX -->
