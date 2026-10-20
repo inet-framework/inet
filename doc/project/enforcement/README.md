@@ -26,6 +26,8 @@ The draft [plan procedure](../guide/write-an-implementation-plan.md) includes a 
 
 This is a manual review procedure. No automated gate checks plan approval. A successful document check establishes neither design quality nor human approval.
 
+Current [series requirements](../rule/pull-request.md#pr-series-plan) and [protocol test requirements](../rule/testing.md#tr-plan-protocol) apply to plan content independently of draft approval. T4 review checks future commit entries, explicit test tasks, and reviewer documents with the necessary diagrams. No automated gate verifies these explanations or their technical correctness.
+
 ## The gate inventory
 
 One row per check that exists. The table lists **machinery, not intent**, so it cannot drift from the rules: a row disappears when its check is deleted, and coverage is read from the side that can be measured.

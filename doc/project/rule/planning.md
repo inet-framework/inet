@@ -6,6 +6,8 @@ This document proposes requirements for tasks that call for an implementation pl
 
 These rules govern the plan. The linked technical rules govern the implementation. The procedure and template are in [write-an-implementation-plan.md](../guide/write-an-implementation-plan.md).
 
+The current [commit series rule](pull-request.md#pr-series-plan) requires explicit future commits. The current [protocol test rule](testing.md#tr-plan-protocol) requires test tasks and reviewer documents for applicable commits. Those content requirements apply independently of this draft approval process.
+
 ## Index
 
 | Rule | Statement |
@@ -75,6 +77,8 @@ Map each acceptance criterion to evidence under [TR-CAT-MATCH](testing.md#tr-cat
 
 Distinguish existing checks from checks that the implementation must add. Verify existing commands and selectors in the checkout. Label proposed commands whose test targets do not yet exist. State what each check cannot establish.
 
+For each applicable commit, define the protocol tests and reviewer document under [TR-PLAN-PROTOCOL](testing.md#tr-plan-protocol). Include explicit tasks to write both artifacts. Explain how the code change will correct the observed or source-grounded protocol gap. Identify absent tests directly.
+
 Separate planned checks from observed results. A plan does not need successful results from code that does not yet exist. An observed result needs the reproducible evidence required by the test rules. Identify expected changes to recorded expectations under [TR-BASELINE-DELIBERATE](testing.md#tr-baseline-deliberate).
 
 *Enforced at T4 — agent review through the [plan review checklist](../guide/write-an-implementation-plan.md#review-checklist).*
@@ -113,6 +117,8 @@ Explain difficult decisions and material risks in detail. Keep routine edits bri
 
 Use an existing plan explanation to answer a review question when it already supplies the required evidence. Do not duplicate that explanation in a separate checklist report. Choose the [compact example or expanded template](../guide/write-an-implementation-plan.md#plan-template) according to the interactions that need explanation.
 
-Order implementation steps by their dependencies under [PR-SERIES-ORDER](pull-request.md#pr-series-order). Give each step a coherent purpose and a verification method. Each step becomes one commit, or a short series of commits, under [PR-SPLIT-ONE-CHANGE](pull-request.md#pr-split-one-change). A commit does not span two steps unless the plan says why. When the implementation shows that a step divides further, or that two steps cannot be divided, update the plan; [PLR-REVISION](#plr-revision) decides whether that needs approval. Avoid empty sections and repeated policy text.
+Order implementation steps by their dependencies under [PR-SERIES-ORDER](pull-request.md#pr-series-order). Enumerate every future commit under [PR-SERIES-PLAN](pull-request.md#pr-series-plan), even when several commits serve one step. Give each commit a coherent purpose and verification method. Explain any commit that spans two steps.
+
+Update the entries when implementation changes their boundaries. [PLR-REVISION](#plr-revision) decides whether that revision needs approval. Avoid empty sections and repeated policy text.
 
 *Enforced at T4 — agent review through the [plan review checklist](../guide/write-an-implementation-plan.md#review-checklist).*

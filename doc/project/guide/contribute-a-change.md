@@ -22,6 +22,8 @@ Apply [QR-DESIGN-MINIMAL](../rule/quality.md#qr-design-minimal) to design and co
 
 For a task that calls for a plan, use [write-an-implementation-plan.md](write-an-implementation-plan.md) before implementation. The plan rules remain a draft. Their [approval rule](../rule/planning.md#plr-approval) applies when the maintainer accepts the policy or explicitly selects it for the task. The guide covers preparation, review, and approval in that order.
 
+Apply the current [series requirement](../rule/pull-request.md#pr-series-plan) to every future commit in that plan. Apply [TR-PLAN-PROTOCOL](../rule/testing.md#tr-plan-protocol) to explicit protocol test tasks and reviewer documents for applicable commits. These content requirements do not activate the draft approval process.
+
 Establish who owns which state before you edit. Then make the smallest change that satisfies the contracts, the ownership, the observability, the configuration, the determinism and the test rules.
 
 ## 5. The mechanisms that already exist

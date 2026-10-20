@@ -46,7 +46,7 @@ history/       How did the current state come to be?
 7. **Asking "why does INET not do X?"** — [design/rejected-designs.md](design/rejected-designs.md).
 8. **About to derive protocol tests from a standard** — [guide/derive-tests-from-a-standard.md](guide/derive-tests-from-a-standard.md).
 9. **Writing in this folder** — [rule/documentation.md](rule/documentation.md).
-10. **About to write or review an implementation plan** — [guide/write-an-implementation-plan.md](guide/write-an-implementation-plan.md) and its [plan rules](rule/planning.md). Both documents are drafts.
+10. **About to write or review an implementation plan** — [guide/write-an-implementation-plan.md](guide/write-an-implementation-plan.md) and its [plan rules](rule/planning.md). Both documents are drafts. Current requirements for [future commits](rule/pull-request.md#pr-series-plan) and [protocol tests with reviewer documents](rule/testing.md#tr-plan-protocol) apply independently of draft approval.
 
 ## Every document
 
