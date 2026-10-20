@@ -27,5 +27,6 @@ simple OpenStreetMapSceneCanvasVisualizer extends SceneVisualizerBase like IScen
 
         double zIndex = default(-17); // Determines the drawing order of figures relative to other visualizers (below GeoMapCanvasVisualizer's -16 so the two backgrounds do not share a z-level)
         bool adjustBackgroundBox = default(true); // If true, sets the background box (bgb tag) to match map bounds
+        bool clipToBounds = default(true); // If true, the map is clipped to its bounds (OSM exports contain the complete ways that cross the bounds, so they extend beyond it)
 }
 

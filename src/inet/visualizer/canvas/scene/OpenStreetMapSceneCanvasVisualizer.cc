@@ -29,7 +29,7 @@ void OpenStreetMapSceneCanvasVisualizer::initialize(int stage)
         cXMLElement *mapXml = par("mapFile").xmlValue();
         OpenStreetMap map = OpenStreetMap::from(mapXml);
         EV << "Loaded " << map.getNodes().size() << " nodes, " << map.getWays().size() << " ways\n";
-        auto mapGroupFigure = createMapFigure(map);
+        auto mapGroupFigure = createMapFigure(map, par("clipToBounds"));
         mapGroupFigure->setZIndex(par("zIndex"));
         visualizationTargetModule->getCanvas()->addFigure(mapGroupFigure);
 
@@ -49,7 +49,7 @@ cFigure::Point OpenStreetMapSceneCanvasVisualizer::toCanvas(const OpenStreetMap&
     return canvasProjection->computeCanvasPoint(coord);
 }
 
-cGroupFigure *OpenStreetMapSceneCanvasVisualizer::createMapFigure(const OpenStreetMap& map)
+cFigure *OpenStreetMapSceneCanvasVisualizer::createMapFigure(const OpenStreetMap& map, bool clipToBounds)
 {
     const cFigure::Color COLOR_HIGHWAY_PRIMARY = { 255, 255, 120 };
     const cFigure::Color COLOR_HIGHWAY_RESIDENTIAL = { 240, 240, 240 };
@@ -64,8 +64,17 @@ cGroupFigure *OpenStreetMapSceneCanvasVisualizer::createMapFigure(const OpenStre
     auto pathways = new cGroupFigure("pathways");
     pathways->setTags("pathways");
 
-    auto mapFigure = new cGroupFigure("openStreetMap");
+    // An invisible polygon of the (projected) map bounds, which clips the map to the bounds if requested.
+    // (A polygon, not a rectangle, so that it also works with a rotated canvas projection.)
+    auto mapFigure = new cPolygonFigure("openStreetMap");
     mapFigure->setTags("street_map");
+    mapFigure->setOutlined(false);
+    const osm::Bounds& bounds = map.getBounds();
+    if (clipToBounds && std::isfinite(bounds.minlat) && std::isfinite(bounds.maxlat) && std::isfinite(bounds.minlon) && std::isfinite(bounds.maxlon)) {
+        mapFigure->setPoints({ toCanvas(map, bounds.maxlat, bounds.minlon), toCanvas(map, bounds.maxlat, bounds.maxlon),
+                               toCanvas(map, bounds.minlat, bounds.maxlon), toCanvas(map, bounds.minlat, bounds.minlon) });
+        mapFigure->setClipChildren(true);
+    }
     mapFigure->addFigure(buildings);
     mapFigure->addFigure(pathways);
     mapFigure->addFigure(residentialStreets);

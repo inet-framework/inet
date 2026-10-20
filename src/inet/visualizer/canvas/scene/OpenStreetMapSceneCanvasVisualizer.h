@@ -27,7 +27,7 @@ class INET_API OpenStreetMapSceneCanvasVisualizer : public SceneVisualizerBase
   protected:
     virtual void initialize(int stage) override;
     cFigure::Point toCanvas(const osm::OpenStreetMap& map, double lat, double lon);
-    cGroupFigure *createMapFigure(const osm::OpenStreetMap& map);
+    cFigure *createMapFigure(const osm::OpenStreetMap& map, bool clipToBounds);
 };
 
 } // namespace visualizer
