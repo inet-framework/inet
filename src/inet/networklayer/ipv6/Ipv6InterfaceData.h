@@ -491,6 +491,12 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
     AddressType getAddressType(int i) const;
 
     /**
+     * Returns the time at which the valid lifetime of the ith address of the
+     * interface expires, or zero if that lifetime is infinite.
+     */
+    simtime_t getAddressExpiryTime(int i) const;
+
+    /**
      * Returns the address type (HoA, CoA) of the provided address of the interface.
      */
     AddressType getAddressType(const Ipv6Address& addr) const;
