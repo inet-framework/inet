@@ -30,6 +30,7 @@ class INET_API PlotFigure : public cGroupFigure, public inet::IIndicatorFigure
     cLabelFigure *xAxisLabelFigure;
     cLabelFigure *yAxisLabelFigure;
     cRectangleFigure *backgroundFigure;
+    cRectangleFigure *seriesClipFigure; // invisible; clips the series to the plot area, see plot()
     std::vector<Tick> xTicks;
     std::vector<Tick> yTicks;
 

@@ -7,8 +7,6 @@
 
 #include "inet/common/figures/PlotFigure.h"
 
-#include "inet/common/figures/InstrumentUtil.h"
-
 namespace inet {
 
 Register_Figure("plot", PlotFigure);
@@ -47,14 +45,14 @@ void PlotFigure::setNumSeries(int numSeries)
     this->numSeries = numSeries;
     seriesValues.resize(numSeries);
     for (auto plotFigure : seriesPlotFigures) {
-        removeFigure(plotFigure);
+        seriesClipFigure->removeFigure(plotFigure);
         delete plotFigure;
     }
     seriesPlotFigures.clear();
     for (int i = 0; i < numSeries; i++) {
         auto plotFigure = new cPathFigure("plot");
         plotFigure->setLineColor(INIT_PLOT_COLOR);
-        addFigure(plotFigure);
+        seriesClipFigure->addFigure(plotFigure);
         seriesPlotFigures.push_back(plotFigure);
     }
 }
@@ -298,7 +296,12 @@ void PlotFigure::addChildren()
     backgroundFigure->setFilled(true);
     backgroundFigure->setFillColor(INIT_BACKGROUND_COLOR);
 
+    seriesClipFigure = new cRectangleFigure("series");
+    seriesClipFigure->setOutlined(false);
+    seriesClipFigure->setClipChildren(true);
+
     addFigure(backgroundFigure);
+    addFigure(seriesClipFigure);
     addFigure(labelFigure);
     addFigure(xAxisLabelFigure);
     addFigure(yAxisLabelFigure);
@@ -483,6 +486,15 @@ void PlotFigure::plot()
     double minX = std::isnan(timeWindow) ? this->minX : simTime().dbl() - timeWindow;
     double maxX = std::isnan(timeWindow) ? this->maxX : simTime().dbl();
 
+    // Clip the series to the plot area, enlarged by half the line width: the clip region of a shape
+    // excludes its outline, so clipping to the plot area itself would cut lines that run along its
+    // edge (i.e. values at the ends of the axes) in half.
+    double halfLineWidth = 0;
+    for (auto plotFigure : seriesPlotFigures)
+        halfLineWidth = std::max(halfLineWidth, plotFigure->getLineWidth() / 2);
+    auto plotArea = backgroundFigure->getBounds();
+    seriesClipFigure->setBounds(Rectangle(plotArea.x - halfLineWidth, plotArea.y - halfLineWidth, plotArea.width + 2 * halfLineWidth, plotArea.height + 2 * halfLineWidth));
+
     for (int i = 0; i < numSeries; i++) {
         auto values = seriesValues[i];
         auto plotFigure = seriesPlotFigures[i];
@@ -505,23 +517,11 @@ void PlotFigure::plot()
         do {
             double endX = r.x + r.width - (maxX - it->first) / (maxX - minX) * r.width;
             double endY = std::min(r.y + 100 * r.height, r.y + (maxY - it->second) / std::abs(maxY - minY) * r.height);
-
-            double originalStartX = startX;
-            double originalStartY = startY;
-            double originalEndX = endX;
-            double originalEndY = endY;
-            if (InstrumentUtil::CohenSutherlandLineClip(startX, startY, endX, endY, r.x, r.x + r.width, r.y, r.y + r.height)) {
-                if (originalStartX != startX || originalStartY != startY)
-                    plotFigure->addMoveTo(startX, startY);
-
-                plotFigure->addLineTo(endX, endY);
-            }
+            plotFigure->addLineTo(endX, endY); // seriesClipFigure clips it to the plot area
 
             if (minX > it->first)
                 break;
 
-            startX = originalEndX;
-            startY = originalEndY;
             ++it;
         } while (it != values.end());
 
