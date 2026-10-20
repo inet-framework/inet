@@ -1,6 +1,6 @@
 # Release notes as files of their own
 
-Status: **approved, in progress**.
+Status: **done**. Landed on `master` by a fast-forward and pushed on 2026-10-20, at the maintainer's request.
 
 - Branch `topic/whatsnew-entry-files`, in the worktree `inet-whatsnew-entry-files`, from `origin/master` at `666f0f0bc2` (2026-10-16). No local edits.
 - Approval: the maintainer approved the scope on 2026-10-20, in the conversation that found the problem. The four decisions of that approval are D-1 to D-4 below. No sealed path is in the scope ([seal-list.md](../../doc/project/audit/seal-list.md): `rule/release.md`, `rule/classification.md` and `rule/pull-request.md` have no closed unit). No baseline moves, because no source file changes.
@@ -85,15 +85,16 @@ Then the tool takes `WHATSNEW` from the new base and continues the rebase. It st
 
 | Step | Commit | Check |
 | --- | --- | --- |
-| 1 | `plan: add: release notes as files of their own` | — |
-| 2 | `doc: add: a tool that checks and shows the release note files` | `test_whatsnew.py` (new): parse, render, check, release |
-| 3 | `doc: location: the release notes of 4.7.x are files of their own` | `whatsnew.py preview` gives the 80 entries of `origin/master`, the same text, numbered again |
-| 4 | `doc: format: three release notes keep each paragraph on one line` | the Ethernet entries of `f6f082f3ed`, `3c7861ddd7` and `136e6c2198` |
-| 5 | `doc: add: rule RR-WHATSNEW-FILE, a release note is a file of its own` | `check-links.sh`, `check-seals.sh` |
-| 6 | `doc: add: the pull-request gates check the release notes` | `test_check_pull_request.py`, `test_whatsnew.py` |
-| 7 | `doc: add: a rebase that moves the release notes of a branch into files` | `test_whatsnew.py`: a branch with two entries rebases without a conflict |
-| 8 | `plan: change: record the rebase of the open pull requests` | the trial of section 4 |
-| 9 | `plan: location: release notes as files of their own, done` | — |
+| 1 ✅ | `plan: add: release notes as files of their own` (`e78a4beaab`) | — |
+| 2 ✅ | `doc: add: a tool that checks and shows the release note files` (`882053b0dd`) | `test_whatsnew.py` (new): parse, render, check, release |
+| 3 ✅ | `doc: change: the release notes of 4.7.x are files of their own` (`9bc2f3d958`, D-5) | `whatsnew.py preview` gives the 80 entries of `origin/master`, the same text, numbered again |
+| 4 ✅ | `doc: format: three release notes keep each paragraph on one line` (`f98587dd7e`) | the Ethernet entries of `f6f082f3ed`, `3c7861ddd7` and `136e6c2198`; `git diff --word-diff` shows no changed word |
+| 5 ✅ | `doc: add: rule RR-WHATSNEW-FILE, a release note is a file of its own` (`96bdc7762a`) | `check-links.sh`, `check-seals.sh --write` (the index of `rule/release.md` has 10 rules) |
+| 6 ✅ | `doc: add: the pull-request gates check the release notes` (`61a8c25ea0`) | `test_check_pull_request.py`, `test_whatsnew.py`; the audit of #1354 |
+| 7 ✅ | `doc: add: a rebase that moves the release notes of a branch into files` (`7c43c6608b`) | `test_whatsnew.py`: three commits that add, change and add entries rebase without a stop; another conflict stops, and `--continue` finishes |
+| 8 ✅ | `doc: location: the CSMA/CD statistics are backward compatible changes` (`e3cf85f04b`, D-13) | — |
+| 9 ✅ | `plan: change: record the rebase of the open pull requests` | the trial of section 7 |
+| 10 ✅ | `plan: location: release notes as files of their own, done` | — |
 
 Each commit carries a `Change:` trailer with the group `whatsnew-entry-files`. The gates `check-links.sh`, `check-seals.sh`, `check-commits.sh` and `check-classification.sh` run over `origin/master..HEAD` before each commit, and `check-pull-request.sh` over the whole series at the end.
 
@@ -101,7 +102,7 @@ Each commit carries a `Change:` trailer with the group `whatsnew-entry-files`. T
 
 - **The move loses no text (step 3).** A script reads the section of 4.7.x from `origin/master:WHATSNEW` and from `whatsnew.py preview`, and compares the entries by section and title, with the numbers removed. The bodies must be equal. Only the order and the numbers change.
 - **The gate fails on the old way (step 6).** `check-pull-request.sh` over #1354 must report the entry in `WHATSNEW`; over the series of this plan, it must pass.
-- **The rebase works on real pull requests (steps 7 and 8).** For each open pull request that adds to `WHATSNEW`, `whatsnew.py rebase` onto the end of this branch, in a scratch worktree. The record gives, for each one, whether `WHATSNEW` still conflicts, which other files conflict, and whether the entry files pass `check`. Expected: the 14 pull requests whose only conflict is `WHATSNEW` rebase without a stop. Nothing is pushed to a pull request.
+- **The rebase works on real pull requests (steps 7 and 9).** For each open pull request that adds to `WHATSNEW`, `whatsnew.py rebase` onto the end of this branch, in a scratch worktree. The record gives, for each one, whether `WHATSNEW` still conflicts, which other files conflict, and whether the entry files pass `check`. Expected: the 14 pull requests whose only conflict is `WHATSNEW` rebase without a stop. Nothing is pushed to a pull request.
 - **What the checks cannot show.** They do not show that an entry stands in the right section, or that its text is good for a user. RR-WHATSNEW stays a T4 review rule.
 
 ## 5. The decisions
@@ -110,9 +111,41 @@ Each commit carries a `Change:` trailer with the group `whatsnew-entry-files`. T
 - **D-2 — The order is the file name.** The maintainer chose the order of the file names, with the area first, over the landing order.
 - **D-3 — `WHATSNEW` only.** The migration guide has the same problem, but it needs a Sphinx directive and its own decision about the order. It gets a plan of its own.
 - **D-4 — A rebase tool, tested, nothing pushed.** The maintainer asked for a tool that converts the open pull requests, and for a test on them. Each landing stays the decision of the maintainer.
+- **D-5 — The move is `behavior.change`, not `location`.** The depth `location` keeps the text ([classification.md](../../doc/project/rule/classification.md)). The move also removes the numbers, and it adds the sentence of the stub and `doc/whatsnew/README.md`.
+- **D-6 — The names of the 80 entries are chosen by hand.** The area of the commit that added a title was often a component (`TokenBucketClassifier`, `IPathLoss`) or `doc`, and such names put an entry far from its area. The 80 names use 19 areas: `arp`, `common`, `dhcp`, `ethernet`, `icmp`, `icmpv6`, `ieee80211`, `ipsec`, `ipv4`, `ipv6`, `mpls`, `networklayer`, `packet`, `protocolelement`, `queueing`, `quic`, `radio`, `tcp` and `udp`.
+- **D-7 — The tool lives beside the gates.** `doc/project/enforcement/` holds the gates, their tests and their helpers, and the enforcement test workflow already runs every `test_*.py` there. The release checklist and `doc/whatsnew/README.md` give the path.
+- **D-8 — The gate flags only the entries that a commit adds or changes.** A commit of a branch from before the move has the old entries of `master` in its `WHATSNEW`. A check of the whole tree would flag a commit that only corrects a released section. The check of the working tree, without `--range`, flags every entry.
+- **D-9 — The body of a rendered entry has an indent of three spaces.** 75 of the 80 entries of 4.7.x used three spaces, and 5 entries with a number of two digits used four.
+- **D-10 — The rebase matches the entries by title, and an entry with a new title by its section and number.** This handles a commit that changes its own entry of an earlier commit, a commit that changes an entry of `master`, and a commit that gives an entry a new title. The tool stops when a commit changes a released section of `WHATSNEW`, because then `WHATSNEW` of the new base is not the full resolution.
+- **D-11 — A name drops a leading article before it drops the area.** The trial showed `icmpv6-icmpv6-checksum-…` for "The ICMPv6 checksum …".
+- **D-12 — A branch from before the move takes the script from `master`.** The branch has no `whatsnew.py`; `doc/whatsnew/README.md` gives the `git show origin/master:…` command.
+- **D-13 — The CSMA/CD statistics are backward compatible changes.** The entries of `3c7861ddd7` and `136e6c2198` are additions (`ethernet: add:`), but they stood in the bug fixes on `master`. The maintainer agreed on 2026-10-20 to move them to `compatible/`; the text does not change.
 
 ## 6. Out of scope
 
 - The migration guide, `doc/src/migration-guide/index.rst` (D-3).
 - The fingerprint baselines, `tests/fingerprint/*.csv`. A commit carries its own baseline rows ([PR-SPLIT-BASELINE](../../doc/project/rule/pull-request.md#pr-split-baseline)), so parallel pull requests change the same rows. [architecture.md](../../doc/project/rule/architecture.md) already asks for baseline stores that parallel branches do not conflict over. That is a different design.
 - The citations by line number into `WHATSNEW` in `doc/project/evidence/model/*/conformance.md`. They were wrong before this change, and the move changes the line numbers again.
+
+## 7. The record
+
+**The move (step 3).** `whatsnew.py preview` gives the same 80 entries as the section of 4.7.x of `origin/master` `666f0f0bc2`, compared by section, title and body: 57 backward incompatible changes, 15 backward compatible changes and 8 bug fixes. The released sections of `WHATSNEW` are unchanged, byte for byte. `whatsnew.py check` passes.
+
+**The gate (step 6).** `check-pull-request.sh` over the series passes the six gates. Over #1354 it reports one violation: `3d0ea6d40 adds the entry "The default Router Lifetime follows MaxRtrAdvInterval" to WHATSNEW; write it as doc/whatsnew/incompatible/ipv6-default-router-lifetime-follows-maxrtradvinterval.txt`. The 175 enforcement tests pass.
+
+**The trial (steps 7 and 9).** On 2026-10-20, each of the 101 open pull requests was rebased with `whatsnew.py rebase` onto `7c43c6608b`, in a scratch worktree, and then discarded. Nothing was pushed.
+
+| Pull requests | Rebase without a stop | Stop |
+| --- | --- | --- |
+| Add to `WHATSNEW`: 64 | 30 | 34, none of them in `WHATSNEW` |
+| Do not add to `WHATSNEW`: 37 | 15 | 22 |
+
+- The 30 include the 14 whose only conflict was `WHATSNEW`, and the 16 that merged without a conflict before the move: #1122, #1123, #1232, #1246, #1250, #1252, #1254, #1256, #1264, #1266, #1284, #1290, #1292, #1294, #1297, #1306, #1322, #1324, #1326, #1334, #1337, #1340, #1342, #1343, #1351, #1353, #1354, #1356, #1358, #1362.
+- The first stop of the other 34 is in other files: 10 only in `tests/fingerprint/*.csv`, 4 only in the migration guide, 9 in the migration guide and in source, and 11 in source or other files. These conflicts are outside this plan (section 6).
+- The rebased #1354 has one commit: its source change, its test, its baseline rows and the new entry file, and no change to `WHATSNEW`.
+- The tool made 62 entry files. 12 notes said that no other release note has the area, for example `figures`, `recorder`, `mipv6`, `pmipv6` and `ipv6networkconfigurator`. A maintainer can rename such a file in the landing.
+
+**After the landing.**
+
+- After the landing, an author of an open pull request needs to know about `whatsnew.py rebase`. The gate message names the file to write, and `doc/whatsnew/README.md` gives the command.
+
