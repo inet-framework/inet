@@ -121,7 +121,9 @@ class ActionDispatchTest : public cSimpleModule {
             ASSERT(hcf->dispatches == 1);
             ASSERT(hcf->responses == 1);
             ASSERT(hcf->response != nullptr && hcf->response->getStatusCode() == SC_SUCCESSFUL);
-            ASSERT(hcf->response->getBufferSize() == 8);
+            ASSERT(hcf->response->getDialogToken() == 37);
+            ASSERT(hcf->response->getBufferSize() == 64);
+            ASSERT(hcf->response->getBlockAckTimeoutValue() == SimTime(4, SIMTIME_MS));
         }
         std::cout << "Block Ack Action dispatch assertions passed.\n";
     }

@@ -1,0 +1,137 @@
+%description:
+Run 0 checks token echo for a crafted ADDBA Request with token 37.
+Run 1 changes the response token before transmission during real production setup.
+The originator must reject that response and defer Block Ack-policy DATA.
+Run 2 retains the response token and requires accepted setup and Block Ack-policy DATA.
+All frames cross the radio. Read-only observations check production agreement state.
+
+%extraargs: -r 0..2
+
+%file: DialogToken.cc
+#include "BlockAckRequestProbe.h"
+
+namespace inet::protocoltest {
+class DialogTokenHcf : public BlockAckRequestProbeHcf
+{
+  protected:
+    void processMgmtFrame(Packet *frame, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (par("wrongToken") && dynamicPtrCast<const Ieee80211AddbaResponse>(header)) {
+            auto response = frame->removeAtFront<Ieee80211AddbaResponse>();
+            response->setDialogToken(response->getDialogToken() == 255 ? 1 : response->getDialogToken() + 1);
+            frame->insertAtFront(response);
+            std::cout << "Response token changed at " << simTime() << ": " << int(response->getDialogToken()) << ".\n";
+            emit(registerSignal("responseTokenChanged"), 1L);
+            Hcf::processMgmtFrame(frame, response);
+        }
+        else
+            Hcf::processMgmtFrame(frame, header);
+    }
+    void processLowerFrame(Packet *frame, const Ptr<const Ieee80211MacHeader>& header) override {
+        Enter_Method("processLowerFrame");
+        auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(header);
+        Hcf::processLowerFrame(frame, header);
+        if (response) {
+            bool accepted = hasOriginator(response->getTransmitterAddress(), response->getTid());
+            std::cout << "Response processed at " << simTime() << ": token=" << int(response->getDialogToken())
+                << ", originator accepted=" << accepted << ".\n";
+            emit(registerSignal("originatorAccepted"), long(accepted));
+        }
+    }
+};
+namespace dialog_token_registration { Define_Module(::inet::protocoltest::DialogTokenHcf); }
+
+Define_ProtocolTest(wifi_block_ack_token_echo)
+{
+    return ProtocolTest("wifi_block_ack_token_echo")
+        .once(on("ap.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211AddbaRequest>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).assertEvent([](const MatchContext& c) {
+                auto request = c.event.packet->peekAtFront<Ieee80211AddbaRequest>();
+                return request->getDialogToken() == 37 && request->getTid() == 5;
+            }).describe("recipient receives request token 37").within(1.1))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211AddbaResponse>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).assertEvent([](const MatchContext& c) {
+                auto response = c.event.packet->peekAtFront<Ieee80211AddbaResponse>();
+                std::cout << "Echo response token at " << simTime() << ": " << int(response->getDialogToken()) << ".\n";
+                return response->getDialogToken() == 37 && response->getTid() == 5 &&
+                    response->getStatusCode() == SC_SUCCESSFUL && response->getTransmitterAddress() == MacAddress("02:00:00:00:00:01");
+            }).describe("response echoes request token 37").within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("probeResponseAcknowledged").assertValue(1)
+            .describe("controlled peer acknowledges the actual response").within(0.01));
+}
+
+ProtocolTest tokenCorrelationTest(const char *name, bool accepted)
+{
+    auto test = ProtocolTest(name);
+    test.once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211AddbaRequest>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).capture("requestToken", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211AddbaRequest>()->getDialogToken());
+            }).describe("production request identifies its token").within(1.1));
+    if (!accepted)
+        test.once(on("ap.wlan[0].mac.hcf").signal("responseTokenChanged").assertValue(1)
+            .describe("one response token changes before transmission").within(0.01));
+    test.once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterEvent([](const MatchContext& c) {
+                return dynamicPtrCast<const Ieee80211AddbaResponse>(c.event.packet->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+            }).assertEvent([accepted](const MatchContext& c) {
+                auto response = c.event.packet->peekAtFront<Ieee80211AddbaResponse>();
+                return (response->getDialogToken() == c.get("requestToken").intValue()) == accepted &&
+                    response->getTid() == 6 && response->getStatusCode() == SC_SUCCESSFUL;
+            }).describe("actual response has the selected token relationship").within(0.01));
+    if (!accepted)
+        test.meanwhile(never(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                return data && data->getTid() == 6 && data->getAckPolicy() == BLOCK_ACK;
+            }).describe("wrong token cannot release Block Ack-policy DATA").within(0.005)));
+    test.once(on("sta1.wlan[0].mac.hcf").signal("originatorAccepted").assertValue(accepted ? 1 : 0)
+            .describe("originator applies response correlation").within(0.001));
+    if (accepted)
+        test.once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                return data && data->getTid() == 6 && data->getAckPolicy() == BLOCK_ACK;
+            }).describe("matching response permits Block Ack-policy DATA").within(0.01));
+    return test;
+}
+Define_ProtocolTest(wifi_block_ack_wrong_token) { return tokenCorrelationTest("wifi_block_ack_wrong_token", false); }
+Define_ProtocolTest(wifi_block_ack_matching_token) { return tokenCorrelationTest("wifi_block_ack_matching_token", true); }
+}
+
+%file: DialogToken.ned
+@namespace(inet::protocoltest);
+import inet.protocoltest.wifi.BlockAckRequestProbeHcf;
+module DialogTokenHcf extends BlockAckRequestProbeHcf {
+    parameters:
+        bool wrongToken = default(false);
+        @class(DialogTokenHcf);
+        @signal[responseTokenChanged](type=long);
+        @signal[originatorAccepted](type=long);
+}
+
+%inifile: test.ini
+[General]
+network = inet.protocoltest.wifi.BlockAckRequestProbeNetwork
+*.stimulus.active = ${scenario=0,1,2} == 0
+*.tester.testName = ${scenario} == 0 ? "wifi_block_ack_token_echo" : (${scenario} == 1 ? "wifi_block_ack_wrong_token" : "wifi_block_ack_matching_token")
+*.sta1.wlan[*].mac.typename = "inet.protocoltest.wifi.BlockAckRequestProbeMac"
+*.sta1.wlan[*].mac.hcf.typename = "DialogTokenHcf"
+*.ap.wlan[*].mac.hcf.typename = "DialogTokenHcf"
+*.ap.wlan[*].mac.hcf.wrongToken = ${scenario} == 1
+*.sta1.app[0].startTime = ${scenario} == 0 ? 2s : 1s
+*.sta1.app[0].stopTime = ${scenario} == 0 ? 2.003s : 1.003s
+*.sta1.app[0].sendInterval = 0.1ms
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_token_echo: PASS
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_wrong_token: PASS
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_matching_token: PASS

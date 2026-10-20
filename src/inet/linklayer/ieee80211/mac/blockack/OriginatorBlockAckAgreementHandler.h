@@ -21,6 +21,7 @@ class INET_API OriginatorBlockAckAgreementHandler : public IOriginatorBlockAckAg
 {
   protected:
     std::map<std::pair<MacAddress, Tid>, OriginatorBlockAckAgreement *> blockAckAgreements;
+    std::map<std::pair<MacAddress, Tid>, int> dialogTokens;
 
   protected:
     virtual const Ptr<Ieee80211AddbaRequest> buildAddbaRequest(MacAddress receiverAddr, Tid tid, SequenceNumberCyclic startingSequenceNumber, IOriginatorBlockAckAgreementPolicy *blockAckAgreementPolicy);
