@@ -1,0 +1,85 @@
+%description:
+
+An Ethernet receiver discards a frame that carries a bit error, also under IPv6.
+
+A relay on the link sets the bit error flag of the frame that carries the first UDP datagram. The flag is on the frame, not on the signal of the channel: a device on the path made the frame wrong. The receiving interface must discard the frame, and IPv6 must never see it. IPv6 does not check for bit errors, because it expects the link layer to drop such a frame, and it asserts that no packet has a bit error. Before the repair, EthernetMacPhy read only the flag of the signal and passed the frame up, so a debug run stopped at that assert.
+
+The topology is the mockup with a relay of the IPv6 suite: hostA, router, tap, hostB.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("ethernet_bit_error_frame_discarded_ipv6")
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1)
+                     .mutate([](Packet *frame) { frame->setBitError(true); })
+                     .describe("the frame of the first datagram (set its bit error flag)"))
+        .once(on("hostA.udp").signal("packetSentToLower").filterPacket("udp.destPort == 5000")
+                  .describe("host A sends the datagram")
+                  .within(6.0))
+        .meanwhile(never(on("hostB.ipv6").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                             .describe("the datagram at IPv6 of host B")
+                             .within(0.5)))
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                             .describe("data from UDP of host B to the application")
+                             .within(0.5)))
+        .once(on("hostB.eth[0]").signal("packetDropped").filterPacket("udp.destPort == 5000")
+                  .describe("the interface of host B discards the frame")
+                  .within(0.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "ethernet_bit_error_frame_discarded_ipv6 compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// hostA -- router -- tap -- hostB, IPv6 only.
+network BitErrorIpv6Net
+{
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost6 { @display("p=200,100"); }
+        router: Router6 { @display("p=350,100"); }
+        tap: PacketTap { @display("p=500,100"); }
+        hostB: StandardHost6 { @display("p=650,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> router.ethg++;
+        router.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = BitErrorIpv6Net
+sim-time-limit = 10s
+seed-set = 0
+
+# One UDP datagram from host A to host B. The applications start at 5 s, after router
+# discovery, address configuration and duplicate address detection have run.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 5s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST ethernet_bit_error_frame_discarded_ipv6: PASS

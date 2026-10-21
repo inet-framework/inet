@@ -384,8 +384,9 @@ void EthernetCsmaPhy::handleEndReception()
         auto signalType = static_cast<EthernetSignalType>(signal->getKind());
         if (!signal->hasBitError() && signalType == DATA)
             decapsulate(packet);
-        if (packet != nullptr)
-            packet->setBitError(signal->hasBitError());
+        // the bit error of the signal adds to the frame's own one, and never clears it
+        if (packet != nullptr && signal->hasBitError())
+            packet->setBitError(true);
         auto esd1 = signal->getEsd1();
         // NOTE: mac=mac is needed instead of 'this' to eliminate different warnings on both std=c++17 and std=c++20
         fsm.insertDelayedAction([=, mac=mac] () { mac->handleReceptionEnd(signalType, packet, esd1); });

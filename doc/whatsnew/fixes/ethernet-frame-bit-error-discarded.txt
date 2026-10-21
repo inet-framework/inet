@@ -1,0 +1,3 @@
+Ethernet discards a frame that carries its own bit error
+
+EthernetMacPhy and EthernetCsmaMacPhy read only the bit error flag of the received signal, and EthernetCsmaPhy wrote that flag over the flag of the frame. A frame that carried a bit error of its own, but arrived in a signal without one, therefore passed up: IPv4 answered it with an ICMP Parameter Problem, and IPv6 stopped at its assertion that the link layer drops such a frame. Now these receivers discard the frame, as they discard a frame whose signal has a bit error.

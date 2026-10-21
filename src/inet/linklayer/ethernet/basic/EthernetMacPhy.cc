@@ -290,8 +290,9 @@ void EthernetMacPhy::processMsgFromNetwork(Signal *signal)
     if (dynamic_cast<EthernetJamSignal *>(signal))
         throw cRuntimeError("There is no JAM signal in full-duplex operation: EthernetJamSignal is unexpected");
 
-    bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
+    // the channel marks the signal, but the frame itself can also carry a bit error
+    bool hasBitError = signal->hasBitError() || packet->hasBitError();
     delete signal;
     decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);

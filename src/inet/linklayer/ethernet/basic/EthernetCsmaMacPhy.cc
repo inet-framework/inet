@@ -705,8 +705,9 @@ void EthernetCsmaMacPhy::frameReceptionComplete()
 
     emit(receptionEndedSignal, signal);
 
-    bool hasBitError = signal->hasBitError();
     auto packet = check_and_cast<Packet *>(signal->decapsulate());
+    // the channel marks the signal, but the frame itself can also carry a bit error
+    bool hasBitError = signal->hasBitError() || packet->hasBitError();
     delete signal;
     decapsulate(packet);
     emit(packetReceivedFromLowerSignal, packet);
