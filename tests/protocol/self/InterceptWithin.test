@@ -1,0 +1,77 @@
+%description:
+
+Protocol Test Framework self test -- a rule ends a given time after its start.
+
+The rule drops every datagram for 15 ms from its start, the moment when host A sends its first datagram. Host A sends a datagram every 10 ms, so the rule drops the first two, and the third reaches host B, after the rule has ended. Without within(), the rule also drops the third datagram, and the test fails.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("intercept_within")
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower").filterPacket("udp.destPort == 5000")
+                  .describe("host A sends the first datagram")
+                  .within(0.5))
+        .meanwhile(tap("tap").filterPacket("udp.destPort == 5000").drop().within(0.015)
+                     .describe("every datagram"))
+        .meanwhile(never(on("hostB.udp").signal("packetSentToUpper")
+                             .describe("a datagram at host B while the rule acts")
+                             .within(0.015)))
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .describe("the third datagram at host B, after the rule has ended")
+                  .within(0.03));
+}
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_within compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network WithinNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = WithinNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Host A sends a UDP datagram to host B every 10 ms, from 0.1 s on.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 10ms
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Static ARP: the only frames on the link are the IPv4 ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_within: PASS

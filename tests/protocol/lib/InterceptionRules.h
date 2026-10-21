@@ -31,8 +31,11 @@ class INET_API InterceptionRules
         Interception interception;
         // By pointer, and never by value: a PacketFilter does not survive a copy, and a
         // Rule is copied when it goes into the container. The pointer is made in place.
-        std::shared_ptr<PacketFilter> filter;
-        long numSelected = 0;          // frames this rule has selected, for its occurrence
+        std::shared_ptr<PacketFilter> filter;   // null when the expression is empty or names captures
+        const CaptureStore *captures = nullptr; // where the rule reads the values of {name}
+        bool active = false;           // a rule of meanwhile(...) waits for its step
+        simtime_t startTime = 0;       // when the rule started, for within(...)
+        long numSelected = 0;          // frames this rule has selected since its start
     };
 
     // A frame as a tap offers it to the rules: the packet, the nodes it comes from and goes
@@ -51,8 +54,11 @@ class INET_API InterceptionRules
     long numSelected = 0;              // frames that any rule selected
 
   public:
-    // Throws for a rule whose words have no meaning together.
-    void add(const Interception& interception);
+    // Appends a rule and returns its index. Throws for a rule whose words have no meaning
+    // together. A rule of intercept(...) starts at once, a rule of meanwhile(...) waits.
+    int add(const Interception& interception, const CaptureStore *captures);
+    // Starts a rule that waits for its step.
+    void start(int index);
     void clear() { rules.clear(); }
 
     // The first rule that matches the frame and is at its targeted occurrence, else null.

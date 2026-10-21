@@ -9,7 +9,7 @@
 namespace inet {
 namespace protocoltest {
 
-void InterceptionRules::add(const Interception& interception)
+int InterceptionRules::add(const Interception& interception, const CaptureStore *captures)
 {
     if (interception.action == "duplicate") {
         if (interception.onlyCopies)
@@ -21,14 +21,27 @@ void InterceptionRules::add(const Interception& interception)
     }
     Rule rule;
     rule.interception = interception;
+    rule.captures = captures;
+    rule.active = !interception.startsAtStep;
+    rule.startTime = simTime();
     rules.push_back(std::move(rule));
     // Compile the expression into the rule's own filter. A PacketFilter is set once;
-    // setting it again on the same object is what a shared compile step would do.
+    // setting it again on the same object is what a shared compile step would do. An
+    // expression that names captures compiles fresh for each frame instead.
     auto& added = rules.back();
-    if (!added.interception.matchExpression.empty()) {
+    const auto& expression = added.interception.matchExpression;
+    if (!expression.empty() && expression.find('{') == std::string::npos) {
         added.filter = std::make_shared<PacketFilter>();
-        added.filter->setExpression(added.interception.matchExpression.c_str());
+        added.filter->setExpression(expression.c_str());
     }
+    return (int)rules.size() - 1;
+}
+
+void InterceptionRules::start(int index)
+{
+    auto& rule = rules.at(index);
+    rule.active = true;
+    rule.startTime = simTime();
 }
 
 InterceptionRules::Rule *InterceptionRules::select(const Frame& frame)
@@ -36,6 +49,10 @@ InterceptionRules::Rule *InterceptionRules::select(const Frame& frame)
     const Packet *packet = frame.packet;
     for (auto& rule : rules) {
         const auto& interception = rule.interception;
+        // A rule acts only between its start and its end, and it counts only what it sees
+        // there.
+        if (!rule.active || (interception.hasWithin && simTime() >= rule.startTime + interception.withinTime))
+            continue;
         // A copy goes through the rules again, but not through the rule that made it, and a
         // copiesOnly() rule sees nothing else.
         if (&rule == frame.copyOf || (interception.onlyCopies && frame.copyOf == nullptr))
@@ -55,6 +72,13 @@ InterceptionRules::Rule *InterceptionRules::select(const Frame& frame)
                 matched = false;
             }
             if (!matched)
+                continue;
+        }
+        else if (!interception.matchExpression.empty()) {
+            // The expression names captures: it compiles fresh with the values of now, and a
+            // capture that does not exist yet makes it a non-match.
+            static const CaptureStore noCaptures;
+            if (!matchesWithCaptures(interception.matchExpression, rule.captures != nullptr ? *rule.captures : noCaptures, packet))
                 continue;
         }
         if (interception.minimumBytes > 0 && packet->getByteLength() < interception.minimumBytes)

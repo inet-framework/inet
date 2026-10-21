@@ -1,0 +1,81 @@
+%description:
+
+Protocol Test Framework self test -- a rule of a tap reads a capture.
+
+The rule is active from the start, and its filter names {id}, which a later step captures from the second datagram that host A sends. Until then the capture does not exist, so the rule selects nothing, and the first datagram reaches host B. The tap sees the second datagram after the step has captured its IPv4 identification, so the rule drops it. The third datagram reaches host B. Without the substitution of {id}, the rule would never select the second datagram, and the test fails.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("intercept_capture")
+        .intercept(tap("tap").filterPacket("ipv4.identification == {id}").drop()
+                     .describe("the frame whose IPv4 identification step 2 captures"))
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .describe("the first datagram at host B")
+                  .within(0.5))
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower").filterPacket("udp.destPort == 5000")
+                  .capture("id", "ipv4.identification")
+                  .describe("host A sends the second datagram")
+                  .within(0.02))
+        .meanwhile(never(on("hostB.ipv4").signal("packetReceivedFromLower").filterPacket("ipv4.identification == {id}")
+                             .describe("the second datagram at IPv4 of host B")
+                             .within(0.005)))
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .describe("the third datagram at host B")
+                  .within(0.02));
+}
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_capture compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network CaptureNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CaptureNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Host A sends a UDP datagram to host B every 10 ms, from 0.1 s on.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 10ms
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Static ARP: the only frames on the link are the IPv4 ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_capture: PASS

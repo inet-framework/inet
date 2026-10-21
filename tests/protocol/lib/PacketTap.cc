@@ -35,10 +35,10 @@ void PacketTap::initialize()
     rule.action = par("action").stdstringValue();
     rule.occurrence = par("occurrence").intValue();
     rule.delayTime = par("delayTime");
-    rules.add(rule);
+    rules.add(rule, nullptr);
 }
 
-void PacketTap::addInterception(const Interception& interception)
+int PacketTap::addInterception(const Interception& interception, const CaptureStore *captures)
 {
     // A node that is on neither side would make the rule select nothing, in silence.
     for (const auto& node : { interception.fromNode, interception.toNode })
@@ -51,7 +51,13 @@ void PacketTap::addInterception(const Interception& interception)
         rules.clear();
         programmaticallyConfigured = true;
     }
-    rules.add(interception);
+    return rules.add(interception, captures);
+}
+
+void PacketTap::startInterception(int handle)
+{
+    Enter_Method("startInterception");
+    rules.start(handle);
 }
 
 const std::string& PacketTap::getSideNode(bool sideB)

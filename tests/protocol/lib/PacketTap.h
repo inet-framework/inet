@@ -77,7 +77,8 @@ class INET_API PacketTap : public SimpleModule, public ITap
 
     // Wins over the NED/ini parameters regardless of module initialization order: the
     // first rule from a test program discards the rule that the parameters describe.
-    virtual void addInterception(const Interception& interception) override;
+    virtual int addInterception(const Interception& interception, const CaptureStore *captures) override;
+    virtual void startInterception(int handle) override;
 };
 
 } // namespace protocoltest

@@ -356,6 +356,8 @@ static std::string renderInterception(const Interception& i)
         os << ", occurrence " << i.occurrence;
     if (i.fromOccurrence > 0)
         os << ", occurrence " << i.fromOccurrence << " and every one after it";
+    if (i.hasWithin)
+        os << ", for " << formatTime(i.withinTime) << " from its start";
     return capitalize(os.str()) + ".";
 }
 
@@ -363,8 +365,10 @@ std::string describe(const ProtocolTest& test)
 {
     std::ostringstream os;
     os << "ProtocolTest \"" << test.name << "\":\n";
+    // A rule of meanwhile(...) starts at its step, so it is described there.
     for (const auto& interception : test.interceptions)
-        os << "  * Fault injection: " << renderInterception(interception) << "\n";
+        if (!interception.startsAtStep)
+            os << "  * Fault injection: " << renderInterception(interception) << "\n";
     for (size_t i = 0; i < test.steps.size(); i++) {
         const Step& step = test.steps[i];
         std::string clause;
@@ -378,6 +382,12 @@ std::string describe(const ProtocolTest& test)
             case StepType::Count:        clause = renderCount(step.pattern, step.cardMin, step.cardMax); break;
             case StepType::Delivery:  clause = renderDelivery(step.pattern, step.pattern2); break;
             case StepType::Inject:    clause = renderInject(step.injection); break;
+            case StepType::Intercept: {
+                std::string rule = renderInterception(test.interceptions[step.interceptionIndex]);
+                rule[0] = std::tolower(rule[0]);
+                clause = "From here on, fault injection: " + rule;
+                break;
+            }
         }
         // A guard runs beside the steps after it. Without a word for that, a reader cannot
         // tell it from an ordered step, and the two mean different things.

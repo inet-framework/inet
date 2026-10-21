@@ -1,0 +1,80 @@
+%description:
+
+Protocol Test Framework self test -- the program text gives the priority of the rules of a tap.
+
+The drop rule comes first in the text, and it starts at a step. The pass rule for port 5001 comes second, and it is active from the start. Before the step, only the pass rule acts, so a datagram to port 5001 reaches host B. After the step, the drop rule applies first, also to the datagrams to port 5001, because the place in the text decides and not the time at which a rule starts. If the start time decided, the pass rule would apply first, the datagrams to port 5001 would reach host B, and the test fails.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("intercept_priority")
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5001")
+                  .describe("a datagram to port 5001 at host B, before the step")
+                  .within(0.5))
+        .meanwhile(tap("tap").filterPacket("udp.destPort == 5000 || udp.destPort == 5001").drop()
+                     .describe("every datagram"))
+        .intercept(tap("tap").filterPacket("udp.destPort == 5001").pass()
+                     .describe("the datagrams to port 5001"))
+        .meanwhile(never(on("hostB.eth[0].mac").signal("packetReceivedFromLower")
+                             .filterPacket("udp.destPort == 5000 || udp.destPort == 5001")
+                             .describe("a datagram at host B after the step")
+                             .within(0.03)));
+}
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_priority compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network PriorityNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PriorityNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Host A sends a UDP datagram to port 5000 and one to port 5001 of host B every 10 ms.
+*.hostA.numApps = 2
+*.hostA.app[*].typename = "UdpBasicApp"
+*.hostA.app[*].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[1].destPort = 5001
+*.hostA.app[*].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[1].startTime = 0.105s
+*.hostA.app[*].sendInterval = 10ms
+*.hostB.numApps = 2
+*.hostB.app[*].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+*.hostB.app[1].localPort = 5001
+
+# Static ARP: the only frames on the link are the IPv4 ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_priority: PASS

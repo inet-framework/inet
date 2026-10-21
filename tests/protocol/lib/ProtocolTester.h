@@ -11,6 +11,7 @@
 #include <optional>
 
 #include "inet/common/SimpleModule.h"
+#include "ITap.h"
 #include "PacketEvent.h"
 #include "ProtocolTest.h"
 
@@ -61,6 +62,9 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
         cMessage *timer = nullptr;
     };
     std::vector<Guard> guards;
+    // The tap and the handle of each rule of the program, in the order of
+    // ProtocolTest::interceptions, so that a meanwhile(tap(...)) step can start its rule.
+    std::vector<std::pair<ITap *, int>> interceptionHandles;
     cMessage *injectMsg = nullptr;                 // fires when the current inject step is due
     cMessage *endMsg = nullptr;                    // ends the simulation once a verdict is reached
     bool decided = false;
@@ -99,6 +103,7 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     bool patternMatches(const EventPattern& pattern, const PacketEvent& event, simtime_t anchor = -1); // selector + earliest gate
     void runCaptures(const EventPattern& pattern, const PacketEvent& event);
     void startGuard(size_t stepIndex);             // begin a meanwhile(...) step
+    void startInterception(const Step& step);      // begin a meanwhile(tap(...)) step
     void offerToGuards(const PacketEvent& event);  // every running guard sees the event
     void resolveGuard(Guard& guard);               // its window closed: judge it
     bool guardsOutstanding() const;                // a meanwhile(...) step is still running

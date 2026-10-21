@@ -1,0 +1,81 @@
+%description:
+
+Protocol Test Framework self test -- a rule that starts at a step counts from that step.
+
+The rule drops the first datagram that it selects, and it starts when host A sends its second datagram. The tap sees that datagram after the step, so the rule drops it, and the first and the third datagram reach host B. A rule that counted from the start would drop the first datagram instead, and a rule that never started would drop nothing. Both make the test fail.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("intercept_from_step")
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .describe("the first datagram at host B")
+                  .within(0.5))
+        .once(on("hostA.eth[0].mac").signal("packetSentToLower").filterPacket("udp.destPort == 5000")
+                  .capture("id", "ipv4.identification")
+                  .describe("host A sends the second datagram")
+                  .within(0.02))
+        .meanwhile(tap("tap").filterPacket("udp.destPort == 5000").nth(1).drop()
+                     .describe("the first datagram that the tap sees from this step on"))
+        .meanwhile(never(on("hostB.ipv4").signal("packetReceivedFromLower").filterPacket("ipv4.identification == {id}")
+                             .describe("the second datagram at IPv4 of host B")
+                             .within(0.005)))
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .describe("the third datagram at host B")
+                  .within(0.02));
+}
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_from_step compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network FromStepNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = FromStepNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Host A sends a UDP datagram to host B every 10 ms, from 0.1 s on.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 10ms
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Static ARP: the only frames on the link are the IPv4 ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_from_step: PASS

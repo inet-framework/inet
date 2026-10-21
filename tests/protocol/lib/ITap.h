@@ -22,8 +22,14 @@ class INET_API ITap
   public:
     virtual ~ITap() {}
 
-    // Appends a rule. The rules of one tap apply in the order they were added.
-    virtual void addInterception(const Interception& interception) = 0;
+    // Appends a rule, and returns its handle on this tap. The rules of one tap apply in the
+    // order they were added. The rule reads the values of its {name} placeholders from
+    // `captures` each time it examines a frame. A rule of meanwhile(...) waits until
+    // startInterception() names its handle.
+    virtual int addInterception(const Interception& interception, const CaptureStore *captures) = 0;
+
+    // Starts a rule that waits for its step. The rule counts frames from now on.
+    virtual void startInterception(int handle) = 0;
 };
 
 } // namespace protocoltest
