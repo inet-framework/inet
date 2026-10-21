@@ -1,0 +1,3 @@
+A protocol-element receiver keeps the bit error of the packet
+
+PacketReceiverBase, the base of PacketReceiver, DestreamingReceiver and StreamThroughReceiver, wrote the bit error flag of the received signal over the flag of the packet in it. A packet that carried a bit error of its own, but arrived in a signal without one, therefore lost its bit error, and the layers above accepted it. Now the flag of the signal can only add a bit error to the packet. For example, the FCS checker of LayeredEthernetInterface now discards such a frame.
