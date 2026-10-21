@@ -3,8 +3,9 @@
 A framework for writing **protocol conformance / behavioural tests** against INET
 simulations. A test does two things in one program: it **matches the packet trace** of a
 running simulation against an expected pattern (direction, node/interface, packet contents,
-timing), and it can **inject** crafted packets or **intercept** (drop/delay/mutate) frames
-in flight. Tests are plain C++ — no DSL, no parser.
+timing), and it can **inject** crafted packets or **intercept** frames in flight (drop,
+delay, mutate, corrupt, duplicate), on wired and on wireless links. Tests are plain C++ — no
+DSL, no parser.
 
 This guide is the authoring reference. For the design rationale see
 [`plan/pending/protocol-test-framework.md`](../../../plan/pending/protocol-test-framework.md).
@@ -231,10 +232,12 @@ Inject steps are ordered like any other step.
 
 ---
 
-## 7. Interception (MITM) — drop / delay / mutate
+## 7. Interception (MITM) — drop, delay, mutate, corrupt, duplicate
 
-A `PacketTap` module spliced onto a link can drop/delay/mutate frames in flight. `tap(...)`
-builds the clause and `.intercept(...)` adds it, so the two roles read differently:
+A tap acts on frames in flight. On a wired link the tap is a `PacketTap` module spliced onto
+the link. On a wireless link the tap is the radio medium itself (see "The radio medium as a
+tap" below). `tap(...)` builds the clause and `.intercept(...)` adds it, so the two roles
+read differently:
 
 ```cpp
 .intercept(tap("relay")
@@ -256,13 +259,92 @@ condition inside the other rule's expression.
 .intercept(tap("relay").filterPacket("tcp.destPort == 1000").drop().describe("drop the data"))
 ```
 
-Interceptions are **standing** rules (armed for the whole run, not ordered steps). The
-`ProtocolTester` resolves the named tap at startup and installs the rule.
+A rule of `.intercept(...)` is active for the whole run. The `ProtocolTester` resolves the
+named tap at startup and installs the rule. A rule can also start at a step (see "A rule from
+a step" below).
 
-- `.drop()` — discard the frame (force a retransmission).
-- `.delay(t)` — forward after a hold time.
-- `.mutate(fn)` — run `void(Packet*)` on the inner frame, then forward. `setBitError(true)`
-  makes the receiving Ethernet MAC discard it (a corruption fault).
+The form of a rule is `tap(<name>) <selectors> <one action> [.describe(<text>)]`. All
+selectors must hold, and a rule has exactly one action.
+
+| Selector | The frame |
+| --- | --- |
+| `.filterPacket(expr)` | matches a PacketFilter expression; the expression can name `{captures}` |
+| `.minBytes(n)` | has at least `n` bytes |
+| `.from(node)` / `.to(node)` | comes from the node / goes to the node. On a `PacketTap`, the node behind a side; on the radio medium, the node of the transmitter / of the receiver radio |
+| `.copiesOnly()` | is a copy that a `duplicate(...)` rule made |
+| `.nth(k)` / `.fromNth(k)` | is the k-th frame that the rule selects / the k-th and each one after it |
+| `.within(d)` | comes less than `d` after the start of the rule; then the rule ends |
+
+| Action | On a `PacketTap` | On the radio medium |
+| --- | --- | --- |
+| `.pass()` | forward unchanged | deliver unchanged |
+| `.drop()` | discard the frame | the frame does not exist for the receiver: no signal, no energy |
+| `.delay(t)` | forward after `t` | refused: a radio signal cannot arrive late |
+| `.mutate(fn)` | run `void(Packet*)` on the inner frame, then forward | run `fn` on the copy that the receiver gets |
+| `.corrupt()` | set the bit error flag on the object on the wire, as the bit error model of a channel does | the receiver receives the frame, and its data part fails to decode |
+| `.duplicate(spacing, copies = 1)` | forward the frame, then the copies, each `spacing` after the one before; a copy waits while the channel is busy | new transmissions from the same transmitter; each receiver in range gets them, and `.to(node)` limits them; the spacing must be above 0 |
+
+A copy goes through the rules again, but not through the rule that made it. So "duplicate the
+frame, then change the copy" is two rules:
+
+```cpp
+.intercept(tap("radioMedium").from("sta1").filterPacket("ieee80211mac.type == 32").nth(1).duplicate(0.001))
+.intercept(tap("radioMedium").copiesOnly().mutate(setRetryBit))
+```
+
+A rule counts frames, not receptions: on the radio medium, a rule that selects the third frame
+acts at each receiver of that frame. A tap refuses a rule that names a node it does not know,
+because such a rule would select nothing.
+
+`.mutate([](Packet *f) { f->setBitError(true); })` on a `PacketTap` sets the flag on the inner
+frame, not on the object on the wire. The Ethernet receivers discard such a frame too, since
+`ethernet: fix: discard a frame that carries its own bit error`. Use `.corrupt()` for a frame
+that a channel corrupted.
+
+### A rule from a step
+
+`.meanwhile(tap(...)...)` starts a rule at its step, and the next step starts at the same time.
+The rule counts frames from its start, and it has no verdict, so the run does not wait for it.
+
+```cpp
+.once(on("hostA.tcp").signal("packetSentToLower").filterPacket("tcp.destPort == 1000")
+          .capture("seq", "tcp.sequenceNo").within(0.5))               // t1: host A sends the segment
+.meanwhile(tap("tap").filterPacket("tcp.sequenceNo == {seq}").nth(1)
+             .corrupt())                                               // the rule starts at t1
+// The segment arrives at the tap after t1, so the rule acts on the segment that the step observed.
+```
+
+- A rule acts where the tap sees the frame. A `PacketTap` sees a frame when the frame has
+  arrived completely at the tap; the radio medium sees it when its transmission starts. A step
+  observes the frame earlier, at the sender.
+- A rule reads its `{captures}` each time it examines a frame. Before the capture exists, the
+  rule matches nothing.
+- `.within(d)` ends the rule `d` after its start. With it, a burst of faults is one rule:
+  `.meanwhile(tap("radioMedium").to("sta1").filterPacket("ieee80211mac.type == 29").corrupt().within(0.01))`.
+- The order of the program text gives the priority of the rules of one tap, also for a rule
+  that starts later. The first active rule that matches applies.
+
+### The radio medium as a tap
+
+Every radio medium NED type uses the C++ class `RadioMedium`. `TapRadioMedium` is that class
+with the interception rules, and a NED type that extends a medium type with
+`@class(TapRadioMedium)` makes the medium a tap. The library has `TapRadioMedium` (extends
+`RadioMedium`) and `Ieee80211ScalarTapRadioMedium`. A test selects it with one ini line, if the
+network declares its medium with `like IRadioMedium`:
+
+```ini
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+```
+
+The medium decides once for each pair of a frame and a receiver radio, when the frame starts.
+`to(node)` names the receiver radio, not the receiver address: the radio of sta1 also hears
+the ACK that sta2 sends to the AP. To select the frames addressed to a station, filter by the
+address, for example `ieee80211mac.receiverAddress.getInt() == {sta1}`.
+
+A copy is a frame that its transmitter does not know about. The station that sent the
+original gets the ACK of the copy, and the `Dcf` of INET stops with "Unknown control frame"
+when it gets an ACK that it does not expect. `WifiDuplicateWithRetry.test` keeps that ACK
+away from the station with a rule.
 
 **Splicing a tap into a network** (the tap must carry `@networkNode()` so the IPv4
 configurator merges both sides into one link):
@@ -473,6 +555,34 @@ A 4000-byte datagram over a 1500-byte MTU yields several fragments.
 The full agreement: ADDBA handshake (each frame ACKed), then a block of 5 QoS data frames,
 a Block Ack Request, and one Block Ack — using `nextTimes(5, ...)` for the block. See
 `wifi_block_ack_full` for the complete sequence.
+
+### TCP duplicate segment (`Rfc9293DuplicateSegment`)
+The relay delivers the one data segment of a 1000-octet transfer two times, 2 ms apart. Host B
+must answer the copy with an empty acknowledgment that names the octet after the transfer, and
+pass none of its data to the application.
+```cpp
+.intercept(tap("tap").from("host1").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+             .duplicate(0.002).describe("the first data segment, and one copy of it 2 ms later"))
+```
+
+### 802.11 duplicate detection on the air (`WifiDuplicateWithRetry`)
+A copy of the first DATA frame of sta1 goes on the air 1 ms later, with the Retry bit. The AP
+acknowledges both, and sta2 gets the data one time. Without the second rule, the copy has no
+Retry bit, and the AP delivers the data two times (`WifiDuplicateWithoutRetry`).
+```cpp
+.intercept(tap("radioMedium").from("sta1").filterPacket("ieee80211mac.type == 32").nth(1).duplicate(0.001))
+.intercept(tap("radioMedium").copiesOnly().mutate(setRetryBit))
+```
+
+### Lose one ACK on the air (`WifiCorruptAck`, `WifiBlockAckDuplicateAddba`)
+After a step observes the DATA frame, a rule corrupts the next ACK to sta1, and sta1 must
+retransmit with the Retry bit. `WifiBlockAckDuplicateAddba` drops the ACK of an ADDBA Request
+instead, and one ini line, the AIFSN of AC_VO at the AP, makes the retry reach the AP before its
+response. The test needs no class of its own.
+```cpp
+.meanwhile(tap("radioMedium").to("sta1").filterPacket("ieee80211mac.type == 29").nth(1).corrupt()
+             .describe("the next ACK to sta1"))
+```
 
 ### DHCP (pattern)
 Not bundled (needs a DHCP server/client scenario), but the shape is the standard four-way
