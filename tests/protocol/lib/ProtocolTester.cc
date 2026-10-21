@@ -6,7 +6,7 @@
 
 #include "ProtocolTester.h"
 #include "ProtocolTestDescriber.h"
-#include "PacketTap.h"
+#include "ITap.h"
 
 #include <iostream>
 #include <set>
@@ -157,16 +157,14 @@ void ProtocolTester::subscribeStateSignals()
 
 void ProtocolTester::installInterceptions()
 {
-    // Push each standing tap(...) rule onto its named PacketTap (a sibling module).
+    // Push each standing tap(...) rule onto its named tap (a sibling module).
     for (const auto& interception : program->interceptions) {
         cModule *module = getParentModule()->getSubmodule(interception.tapName.c_str());
-        auto tap = dynamic_cast<PacketTap *>(module);
+        auto tap = dynamic_cast<ITap *>(module);
         if (tap == nullptr)
-            throw cRuntimeError("ProtocolTest '%s': intercept target '%s' is not a PacketTap",
+            throw cRuntimeError("ProtocolTest '%s': intercept target '%s' is not a tap",
                                 program->name.c_str(), interception.tapName.c_str());
-        tap->configure(interception.matchExpression, interception.minimumBytes, interception.occurrence,
-                       interception.fromOccurrence,
-                       interception.action, interception.delayTime, interception.mutator);
+        tap->addInterception(interception);
     }
 }
 

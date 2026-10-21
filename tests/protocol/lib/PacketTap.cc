@@ -21,34 +21,22 @@ void PacketTap::initialize()
 {
     pumpA = new cMessage("pumpA");
     pumpB = new cMessage("pumpB");
-    // A test program may have already driven us via configure(); if so, keep that and
-    // ignore the parameters (configure() always wins, whatever the init order).
+    // A test program may have already driven us via addInterception(); if so, keep that
+    // and ignore the parameters (the program always wins, whatever the init order).
     if (programmaticallyConfigured)
         return;
     // The parameters describe a single rule, which is what an ini file can express.
-    Rule rule;
+    Interception rule;
+    rule.tapName = getName();
     rule.matchExpression = par("matchExpression").stdstringValue();
-    rule.minPacketBytes = par("minPacketBytes").intValue();
+    rule.minimumBytes = par("minPacketBytes").intValue();
     rule.action = par("action").stdstringValue();
     rule.occurrence = par("occurrence").intValue();
     rule.delayTime = par("delayTime");
-    rules.push_back(std::move(rule));
-    compileRule(rules.back());
+    rules.add(rule);
 }
 
-void PacketTap::compileRule(Rule& rule)
-{
-    if (!rule.matchExpression.empty()) {
-        rule.filter = std::make_shared<PacketFilter>();
-        rule.filter->setExpression(rule.matchExpression.c_str());
-        rule.hasFilter = true;
-    }
-    else
-        rule.hasFilter = false;
-}
-
-void PacketTap::configure(const std::string& matchExpr, long minBytes, int occ, int fromOcc,
-                          const std::string& act, simtime_t delay, std::function<void(Packet *)> mut)
+void PacketTap::addInterception(const Interception& interception)
 {
     // Append. The first call from a test program also discards whatever the parameters put
     // there, so an ini rule and a program rule never mix.
@@ -56,54 +44,13 @@ void PacketTap::configure(const std::string& matchExpr, long minBytes, int occ, 
         rules.clear();
         programmaticallyConfigured = true;
     }
-    Rule rule;
-    rule.matchExpression = matchExpr;
-    rule.minPacketBytes = minBytes;
-    rule.occurrence = occ;
-    rule.fromOccurrence = fromOcc;
-    rule.action = act;
-    rule.delayTime = delay;
-    rule.mutator = std::move(mut);
-    rules.push_back(std::move(rule));
-    compileRule(rules.back());
+    rules.add(interception);
 }
 
 cGate *PacketTap::forwardGate(const cGate *arrivalGate)
 {
     // Frames in on side "a" leave on side "b" and vice versa.
     return gate(std::string(arrivalGate->getBaseName()) == "a" ? "b$o" : "a$o");
-}
-
-PacketTap::Rule *PacketTap::selectRule(Packet *packet)
-{
-    // The rules are tried in order and the first that matches applies. A rule counts its
-    // own occurrences, so two rules on one tap can name the second and the third frame of
-    // the same kind without either counting the other's.
-    for (auto& rule : rules) {
-        if (rule.hasFilter) {
-            bool matched = false;
-            try {
-                matched = rule.filter->matches(packet);
-            }
-            catch (const std::exception&) {
-                // An expression that doesn't apply to this frame (e.g. a tcp.* test on an
-                // ARP frame) is simply a non-match, never an error.
-                matched = false;
-            }
-            if (!matched)
-                continue;
-        }
-        if (rule.minPacketBytes > 0 && packet->getByteLength() < rule.minPacketBytes)
-            continue;
-        rule.numSelected++;
-        bool wanted = rule.fromOccurrence > 0 ? rule.numSelected >= rule.fromOccurrence
-                                              : (rule.occurrence == 0 || rule.numSelected == rule.occurrence);
-        if (wanted) {
-            numSelected++;
-            return &rule;
-        }
-    }
-    return nullptr;
 }
 
 void PacketTap::enqueueForward(cPacket *packet, bool towardB)
@@ -164,11 +111,12 @@ void PacketTap::handleMessage(cMessage *msg)
     if (inner == nullptr)
         inner = dynamic_cast<Packet *>(frame->getEncapsulatedPacket());
 
-    Rule *rule = inner != nullptr ? selectRule(inner) : nullptr;
+    auto rule = inner != nullptr ? rules.select(inner) : nullptr;
     if (rule != nullptr) {
-        const std::string& action = rule->action;
-        const simtime_t& delayTime = rule->delayTime;
-        const auto& mutator = rule->mutator;
+        const std::string& action = rule->interception.action;
+        const simtime_t& delayTime = rule->interception.delayTime;
+        const auto& mutator = rule->interception.mutator;
+        long numSelected = rules.getNumSelected();
         if (action == "drop") {
             EV_INFO << "PacketTap dropping " << inner->getName() << " (selected #" << numSelected << ")" << endl;
             numDropped++;
@@ -200,7 +148,7 @@ void PacketTap::handleMessage(cMessage *msg)
 void PacketTap::finish()
 {
     EV_INFO << "PacketTap: forwarded " << numForwarded << ", dropped " << numDropped
-            << ", mutated " << numMutated << " (" << numSelected << " selected)" << endl;
+            << ", mutated " << numMutated << " (" << rules.getNumSelected() << " selected)" << endl;
 }
 
 } // namespace protocoltest
