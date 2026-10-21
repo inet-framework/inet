@@ -1,0 +1,50 @@
+%description:
+The radio medium drops the first DATA frame of sta1 for the AP, and corrupts the next one for the AP. A dropped frame does not exist for the AP: its radio does not start a reception, and its MAC gets nothing. A corrupted frame exists: the radio of the AP receives it, and the MAC discards it. The third attempt reaches the AP, and sta2 gets the datagram one time. The two rules count separately: the first rule takes the first frame, so the first frame that the second rule counts is the retransmission.
+
+%file: WifiDropFrame.cc
+#include "WifiTestSupport.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+
+Define_ProtocolTest(wifi_drop_frame)
+{
+    return ProtocolTest("wifi_drop_frame")
+        .intercept(tap("radioMedium").to("ap").filterPacket("ieee80211mac.type == 32").nth(1).drop()
+                     .describe("the first DATA frame of sta1, for the AP"))
+        .intercept(tap("radioMedium").to("ap").filterPacket("ieee80211mac.type == 32").nth(1).corrupt()
+                     .describe("the next DATA frame of sta1, for the AP"))
+        .meanwhile(exactlyTimes(1, on("sta2.udp").signal("packetSentToUpper")
+                                    .describe("one delivery from UDP of sta2 to the application").within(2.5)))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 32")
+                  .describe("sta1 sends the DATA frame").within(2))
+        // The dropped frame: the radio of the AP does not start a reception while it is on the air.
+        .meanwhile(never(on("ap.wlan[0].radio").signal("receptionStateChanged").filterValue(IRadio::RECEPTION_STATE_RECEIVING)
+                             .describe("the radio of the AP starts a reception").within(0.0002)))
+        .meanwhile(never(on("ap.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 32")
+                             .describe("the MAC of the AP gets the frame").within(0.0002)))
+        // The corrupted retransmission: the radio of the AP receives it, and the MAC discards it.
+        .once(on("ap.wlan[0].radio").signal("receptionStateChanged").filterValue(IRadio::RECEPTION_STATE_RECEIVING)
+                  .notBefore(0.0002)
+                  .describe("the radio of the AP receives the retransmission").within(0.01))
+        .once(on("ap.wlan[0].mac").signal("packetDropped").filterPacket("ieee80211mac.type == 32")
+                  .describe("the MAC of the AP discards the corrupted retransmission").within(0.001));
+}
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_drop_frame"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.app[0].stopTime = 1.001s
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_drop_frame: PASS
+
+%contains: stdout
+WifiInfraNetwork.sta2.app[0]: received 1 packets

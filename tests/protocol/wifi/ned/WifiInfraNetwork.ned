@@ -12,7 +12,7 @@ package inet.protocoltest.wifi;
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
 import inet.protocoltest.ProtocolTester;
 
 network WifiInfraNetwork
@@ -21,7 +21,8 @@ network WifiInfraNetwork
         configurator: Ipv4NetworkConfigurator {
             @display("p=50,50");
         }
-        radioMedium: Ieee80211ScalarRadioMedium {
+        // A test can replace the medium, for example with Ieee80211ScalarTapRadioMedium.
+        radioMedium: <default("Ieee80211ScalarRadioMedium")> like IRadioMedium {
             @display("p=50,120");
         }
         tester: ProtocolTester {

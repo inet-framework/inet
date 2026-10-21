@@ -1,0 +1,54 @@
+%description:
+The radio medium sends a copy of the first DATA frame of sta1 on the air 1 ms after the original, and the copy is the same frame, without the Retry bit. IEEE 802.11 rejects a duplicate only when it has the Retry bit, so the AP must take the copy in as a new frame: it acknowledges both, and sta2 gets the datagram two times.
+
+The AP also acknowledges the copy, and sta1 did not ask for that ACK. The Dcf of INET stops the simulation with "Unknown control frame" when it gets an ACK that it does not expect, although IEEE 802.11 has no rule that makes a station act on such an ACK. So a rule keeps the ACK of the copy away from sta1. The AP still sends it, and the test counts it. The rule selects the ACK by its receiver address, because to("sta1") names the radio of sta1, and that radio also hears the ACK that sta2 sends to the AP.
+
+%file: WifiDuplicateWithoutRetry.cc
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+
+static cValue sequenceOf(const PacketEvent& e) { return cValue(e.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get()); }
+static cValue transmitterOf(const PacketEvent& e) { return cValue((intval_t)e.packet->peekAtFront<Ieee80211DataHeader>()->getTransmitterAddress().getInt()); }
+static bool hasRetry(const PacketEvent& e) { return e.packet->peekAtFront<Ieee80211DataHeader>()->getRetry(); }
+
+Define_ProtocolTest(wifi_duplicate_without_retry)
+{
+    return ProtocolTest("wifi_duplicate_without_retry")
+        .intercept(tap("radioMedium").from("sta1").filterPacket("ieee80211mac.type == 32").nth(1).duplicate(0.001)
+                     .describe("the first DATA frame of sta1, and one copy 1 ms later"))
+        .meanwhile(exactlyTimes(2, on("sta2.udp").signal("packetSentToUpper")
+                                    .describe("a datagram from UDP of sta2 to the application").within(2.5)))
+        .once(on("ap.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 32")
+                  .capture("sequence", sequenceOf)
+                  .capture("sta1", transmitterOf)
+                  .describe("the original DATA frame at the AP").within(2))
+        .meanwhile(tap("radioMedium").to("sta1").filterPacket("ieee80211mac.type == 29 && ieee80211mac.receiverAddress.getInt() == {sta1}").nth(2).drop()
+                     .describe("the ACK of the copy, which sta1 does not expect"))
+        .meanwhile(exactlyTimes(2, on("ap.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 29")
+                                    .describe("an ACK from the AP").within(0.002)))
+        .once(on("ap.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 32")
+                  .notBefore(0.001)
+                  .assertEvent([](const MatchContext& c) {
+                      return !hasRetry(c.event) && sequenceOf(c.event).intValue() == c.get("sequence").intValue();
+                  })
+                  .describe("the copy at the AP, 1 ms after the original, without the Retry bit").within(0.0011));
+}
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_duplicate_without_retry"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.app[0].stopTime = 1.001s
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_duplicate_without_retry: PASS
+
+%contains: stdout
+WifiInfraNetwork.sta2.app[0]: received 2 packets

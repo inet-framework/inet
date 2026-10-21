@@ -1,0 +1,39 @@
+%description:
+A dropped frame also leaves no energy at its receiver. The radio medium sends a copy of the first DATA frame of sta1 50 us after the original, so that the copy overlaps the original on the air, and drops the copy for the AP. If the energy of the copy stayed at the AP, it would interfere with the original, and the AP would receive the original with a bit error. So the AP must receive the original without an error and acknowledge it. Without the drop rule, the AP discards the original, and the test fails.
+
+%file: WifiDropRemovesEnergy.cc
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+
+Define_ProtocolTest(wifi_drop_removes_energy)
+{
+    return ProtocolTest("wifi_drop_removes_energy")
+        .intercept(tap("radioMedium").from("sta1").filterPacket("ieee80211mac.type == 32").nth(1).duplicate(0.00005)
+                     .describe("the first DATA frame of sta1, and a copy 50 us later that overlaps it"))
+        .intercept(tap("radioMedium").copiesOnly().to("ap").drop()
+                     .describe("the copy, for the AP"))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 32")
+                  .describe("sta1 sends the DATA frame").within(2))
+        .meanwhile(never(on("ap.wlan[0].mac").signal("packetDropped")
+                             .describe("the MAC of the AP discards a frame").within(0.001)))
+        .once(on("ap.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 32")
+                  .describe("the AP receives the DATA frame").within(0.001))
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 29")
+                  .describe("the AP acknowledges the DATA frame").within(0.0001));
+}
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_drop_removes_energy"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.app[0].stopTime = 1.001s
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_drop_removes_energy: PASS

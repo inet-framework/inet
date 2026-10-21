@@ -1,0 +1,51 @@
+%description:
+After sta1 sends its first DATA frame, the radio medium corrupts the next ACK to sta1: sta1 receives the ACK, but its data part fails to decode. The MAC of sta1 must discard the ACK and retransmit the same DATA frame, with the Retry bit and the same sequence number. sta2 gets the datagram one time. WifiRetransmission.test loses an ACK in a MAC subclass; this test loses it on the air. The MAC of sta1 also drops the ACKs that it overhears for other stations, so the step that observes the discard selects the ACK by the address of sta1.
+
+%file: WifiCorruptAck.cc
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+
+static cValue sequenceOf(const PacketEvent& e) { return cValue(e.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get()); }
+static cValue transmitterOf(const PacketEvent& e) { return cValue((intval_t)e.packet->peekAtFront<Ieee80211DataHeader>()->getTransmitterAddress().getInt()); }
+static bool hasRetry(const PacketEvent& e) { return e.packet->peekAtFront<Ieee80211DataHeader>()->getRetry(); }
+
+Define_ProtocolTest(wifi_corrupt_ack)
+{
+    return ProtocolTest("wifi_corrupt_ack")
+        .meanwhile(exactlyTimes(1, on("sta2.udp").signal("packetSentToUpper")
+                                    .describe("one delivery from UDP of sta2 to the application despite the retry").within(2.5)))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 32")
+                  .assertEvent([](const MatchContext& c) { return !hasRetry(c.event); })
+                  .capture("sequence", sequenceOf)
+                  .capture("sta1", transmitterOf)
+                  .describe("the original DATA frame").within(2))
+        .meanwhile(tap("radioMedium").to("sta1").filterPacket("ieee80211mac.type == 29").nth(1).corrupt()
+                     .describe("the next ACK to sta1"))
+        .once(on("sta1.wlan[0].mac").signal("packetDropped")
+                  .filterPacket("ieee80211mac.type == 29 && ieee80211mac.receiverAddress.getInt() == {sta1}")
+                  .describe("the MAC of sta1 discards the corrupted ACK").within(0.001))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 32")
+                  .assertEvent([](const MatchContext& c) {
+                      return hasRetry(c.event) && sequenceOf(c.event).intValue() == c.get("sequence").intValue();
+                  })
+                  .describe("the same DATA frame again, with the Retry bit").within(0.01));
+}
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_corrupt_ack"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.app[0].stopTime = 1.001s
+include ../../ini/_g.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_corrupt_ack: PASS
+
+%contains: stdout
+WifiInfraNetwork.sta2.app[0]: received 1 packets

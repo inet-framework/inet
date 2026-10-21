@@ -36,6 +36,7 @@ class INET_API InterceptionRules
         bool active = false;           // a rule of meanwhile(...) waits for its step
         simtime_t startTime = 0;       // when the rule started, for within(...)
         long numSelected = 0;          // frames this rule has selected since its start
+        long lastFrameId = -1;         // the last frame that this rule counted
     };
 
     // A frame as a tap offers it to the rules: the packet, the nodes it comes from and goes
@@ -45,6 +46,9 @@ class INET_API InterceptionRules
         std::string fromNode;
         std::string toNode;
         const Rule *copyOf = nullptr;  // the duplicate rule that made this copy; null for an original
+        // A frame that reaches several receivers is offered once for each of them, with one
+        // id, and a rule counts it once. -1: the frame is new each time it is offered.
+        long frameId = -1;
     };
 
   protected:
@@ -65,6 +69,7 @@ class INET_API InterceptionRules
     Rule *select(const Frame& frame);
 
     long getNumSelected() const { return numSelected; }
+    const std::deque<Rule>& getRules() const { return rules; }
 };
 
 } // namespace protocoltest

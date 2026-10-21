@@ -130,6 +130,21 @@ inline double txNetBitrateMbps(const PacketEvent& e)
     return m != nullptr ? m->getDataMode()->getNetBitrate().get() / 1e6 : -1.0;
 }
 
+// A mutator for a tap: sets the Retry bit of the MAC header of a frame. On the radio medium
+// the frame starts with its PHY header, so the chunks in front of the MAC header are taken
+// off and put back unchanged.
+inline void setRetryBit(Packet *frame)
+{
+    std::vector<Ptr<Chunk>> prefix;
+    while (dynamicPtrCast<const ieee80211::Ieee80211MacHeader>(frame->peekAtFront<Chunk>()) == nullptr)
+        prefix.push_back(frame->removeAtFront<Chunk>(frame->peekAtFront<Chunk>()->getChunkLength()));
+    auto header = frame->removeAtFront<ieee80211::Ieee80211MacHeader>();
+    header->setRetry(true);
+    frame->insertAtFront(header);
+    for (auto it = prefix.rbegin(); it != prefix.rend(); ++it)
+        frame->insertAtFront(*it);
+}
+
 } // namespace protocoltest
 } // namespace inet
 

@@ -83,7 +83,11 @@ InterceptionRules::Rule *InterceptionRules::select(const Frame& frame)
         }
         if (interception.minimumBytes > 0 && packet->getByteLength() < interception.minimumBytes)
             continue;
-        rule.numSelected++;
+        // A rule counts frames, not receptions.
+        if (frame.frameId < 0 || frame.frameId != rule.lastFrameId) {
+            rule.numSelected++;
+            rule.lastFrameId = frame.frameId;
+        }
         bool wanted = interception.fromOccurrence > 0 ? rule.numSelected >= interception.fromOccurrence
                                                       : (interception.occurrence == 0 || rule.numSelected == interception.occurrence);
         if (wanted) {

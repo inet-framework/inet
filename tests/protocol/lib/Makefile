@@ -34,7 +34,8 @@ OBJS = \
     $O/ProtocolTest.o \
     $O/ProtocolTestAttach.o \
     $O/ProtocolTestDescriber.o \
-    $O/ProtocolTester.o
+    $O/ProtocolTester.o \
+    $O/TapRadioMedium.o
 
 # Message files
 MSGFILES =
