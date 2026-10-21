@@ -52,6 +52,14 @@ Eight of the eleven new tests pass, and they are the ones that matter most for a
 
 Summary of pass 2: 8 tests, 7 PASS, 1 FAIL (expected), in 2.1 s. The runner's overall verdict is PASS, because the one failure is declared. The SYN's header length was captured as 24 octets: the MSS option is present, so the `should` of RFC9293-OPT-1 is met.
 
+Added on 2026-10-21, with the duplicate action of the relay (`plan/pending/protocol-test-duplicate-and-corrupt-frames.md`):
+
+| Test | Checks | Verdict |
+| --- | --- | --- |
+| Rfc9293DuplicateSegment.test | RFC9293-SEGA-1, SEGA-2, RST-2 | PASS |
+
+Host B finds the copy not acceptable, answers it at once with an empty acknowledgment that names the octet after the transfer, and passes none of its data to the application. The first version of the test used the common transfer of 5000 octets and expected the acknowledgment to name the octet after all of them. It failed, because at the time of the copy host B had only 4344 octets: the initial window holds three segments, and Nagle holds the last 656 octets back until the delayed acknowledgment of the third. With one segment of 1000 octets, the next sequence number expected is known.
+
 ## Pass 4, level 4: the two control loops
 
 RFC 6298 and RFC 5681 entered the in-scope set, and ten checks were written against them. The suite is 27 tests: **22 PASS, 2 FAIL (expected), 3 FAIL (unexpected)**.

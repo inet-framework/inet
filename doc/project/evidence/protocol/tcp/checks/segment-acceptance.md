@@ -34,3 +34,34 @@ RFC 9293 §3.10.7.4: a segment is acceptable when its sequence number falls in t
 
 - Observation 3 is the point of the rule. A receiver that answered with a reset would give anyone who can guess a connection the power to destroy it.
 - The empty acknowledgment is not a courtesy: it is how an honest peer that lost its place learns where the stream stands.
+
+## Duplicate segment
+
+Checks: **RFC9293-SEGA-1** and **RFC9293-SEGA-2** (description, rules of the state machine), **RFC9293-RST-2** (must not).
+
+### Requirement
+
+RFC 9293 §3.10.7.4: a segment is acceptable when its sequence number falls in the receive window. A copy of a segment that the receiver has already taken in lies wholly before the next sequence number expected, so it is not acceptable. §3.5.2 and §3.10.7.4: an unacceptable segment must be answered with an empty acknowledgment that carries the current send sequence number and the next sequence number expected; the segment is then dropped, and the connection stays in the same state. §3.5.2: a reset must not be sent when it is not clear that the segment does not belong to the connection.
+
+### Scenario constants
+
+- A transfer of 1000 octets in one segment, with a relay on the path. With one segment, the next sequence number expected after it is known: the octet after the transfer.
+- The relay delivers that segment two times: the segment itself, and a copy 2 ms after it. By then host B has taken in the segment, so the copy lies wholly before the next sequence number expected.
+
+### Procedure
+
+1. Build the mockup with a relay between host A and host B.
+2. Let the connection open and the transfer run. The relay sends the copy.
+3. Watch what host B does with the copy, and then watch whether the connection closes in the normal way.
+
+### Expected observations
+
+1. The data segment reaches host B, and its copy reaches host B 2 ms later.
+2. Host B answers the copy with an acknowledgment that carries no data and that names the next sequence number expected: the octet after the last octet of the transfer.
+3. Host B passes no data of the copy to its user.
+4. Host B never answers with a reset.
+5. The connection stays in the same state: host B acknowledges the FIN of host A.
+
+### Notes
+
+- A network can deliver a segment two times, for example when a link repeats a frame. The receiver must not take the octets in a second time, and the empty acknowledgment tells the sender where the stream stands.

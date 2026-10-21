@@ -22,6 +22,7 @@ The governing document is RFC 9293, not RFC 793. The reason is in [`standards.md
 | [Checksum discard](checks/checksum.md#checksum-discard) | `checks/checksum.md` | RFC9293-CKSUM-2 |
 | [Checksum by default](checks/checksum.md#checksum-by-default) | `checks/checksum.md` | RFC9293-CKSUM-1 (the value) |
 | [Out-of-window segment](checks/segment-acceptance.md#out-of-window-segment) | `checks/segment-acceptance.md` | RFC9293-SEGA-1, SEGA-2, RST-2 |
+| [Duplicate segment](checks/segment-acceptance.md#duplicate-segment) | `checks/segment-acceptance.md` | RFC9293-SEGA-1, SEGA-2, RST-2 |
 | [Shrunk window](checks/window.md#shrunk-window) | `checks/window.md` | RFC9293-WND-4 |
 | [No new data past a shrunk edge](checks/window.md#no-new-data-past-a-shrunk-edge) | `checks/window.md` | RFC9293-WND-5 |
 | [No window shrink](checks/window.md#no-window-shrink) | `checks/window.md` | RFC9293-WND-3 |
