@@ -73,17 +73,15 @@ bool EventPattern::scopeMatches(const PacketEvent& event) const
     return true;
 }
 
-// Evaluates one content expression against the event's packet, with the same capture
-// substitution and the same "absent protocol is a non-match" rule the filter side uses.
-// An assertion runs once per step, so it compiles fresh rather than caching.
-static bool evaluateAssertionExpression(const std::string& text, const MatchContext& context)
+bool matchesWithCaptures(const std::string& text, const CaptureStore& captures, const Packet *packet)
 {
-    const Packet *packet = context.event.packet;
     if (packet == nullptr)
         return false;
     std::string expression = text;
-    for (auto& capture : context.captures) {
+    for (auto& capture : captures) {
         std::string placeholder = "{" + capture.first + "}";
+        // Only convert a capture this expression names. Converting every stored capture
+        // made one step fail on a capture that belonged to another step.
         if (expression.find(placeholder) == std::string::npos)
             continue;
         std::string value = formatCaptureValue(capture.second);
@@ -92,7 +90,7 @@ static bool evaluateAssertionExpression(const std::string& text, const MatchCont
             expression.replace(pos, placeholder.size(), value);
     }
     if (expression.find('{') != std::string::npos)
-        return false;
+        return false; // an unresolved {capture} -- not satisfiable yet
     try {
         PacketFilter filter;
         filter.setExpression(expression.c_str());
@@ -101,6 +99,14 @@ static bool evaluateAssertionExpression(const std::string& text, const MatchCont
     catch (const std::exception&) {
         return false;
     }
+}
+
+// Evaluates one content expression against the event's packet, with the same capture
+// substitution and the same "absent protocol is a non-match" rule the filter side uses.
+// An assertion runs once per step, so it compiles fresh rather than caching.
+static bool evaluateAssertionExpression(const std::string& text, const MatchContext& context)
+{
+    return matchesWithCaptures(text, context.captures, context.event.packet);
 }
 
 static std::string describeValue(double v)
@@ -225,28 +231,7 @@ bool EventPattern::matchesExpression(const MatchContext& context) const
     }
 
     // Dynamic expression: substitute {name} with captured values, then compile fresh.
-    std::string expression = fltExpr;
-    for (auto& capture : context.captures) {
-        std::string placeholder = "{" + capture.first + "}";
-        // Only convert a capture this expression names. Converting every stored capture
-        // made one step fail on a capture that belonged to another step.
-        if (expression.find(placeholder) == std::string::npos)
-            continue;
-        std::string value = formatCaptureValue(capture.second);
-        size_t pos;
-        while ((pos = expression.find(placeholder)) != std::string::npos)
-            expression.replace(pos, placeholder.size(), value);
-    }
-    if (expression.find('{') != std::string::npos)
-        return false; // an unresolved {capture} -- not satisfiable yet
-    try {
-        PacketFilter dynamicFilter;
-        dynamicFilter.setExpression(expression.c_str());
-        return dynamicFilter.matches(packet);
-    }
-    catch (const std::exception&) {
-        return false;
-    }
+    return matchesWithCaptures(fltExpr, context.captures, packet);
 }
 
 std::string EventPattern::str() const

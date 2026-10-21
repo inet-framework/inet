@@ -168,6 +168,12 @@ class INET_API EventPattern
 // Entry point of the fluent selector chain.
 EventPattern on(const char *nodeName);
 
+// Matches a PacketFilter expression against a packet. Each {name} that the expression names
+// takes the value of that capture first, so the expression compiles fresh on each call. An
+// expression that names a capture that does not exist yet, or a protocol that the packet
+// does not carry, is a non-match, never an error. The steps and the rules of a tap use it.
+bool matchesWithCaptures(const std::string& expression, const CaptureStore& captures, const Packet *packet);
+
 } // namespace protocoltest
 } // namespace inet
 
