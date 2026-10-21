@@ -1,0 +1,28 @@
+%description:
+The framework rejects a target that is not a TriggeredNoiseSource.
+
+%file: InterferenceInvalidSource.cc
+#include "ProtocolTest.h"
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("interference_invalid_source").interfere("tester");
+}
+
+%file: test.ned
+import inet.protocoltest.ProtocolTester;
+network InterferenceInvalidSourceNetwork
+{
+    submodules:
+        tester: ProtocolTester;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = InterferenceInvalidSourceNetwork
+sim-time-limit = 1ms
+
+%exitcode: 1
+%contains: stderr
+interfere: source 'tester' is not a TriggeredNoiseSource

@@ -277,6 +277,44 @@ transparent unless a rule fires. A bare tap (default `action = "pass"`) changes 
 
 ---
 
+### Event-triggered interference
+
+Use `interfere(source, offset)` to start one noise transmission after a matched event. The source path is relative to the network. The offset uses simulation seconds and defaults to zero.
+
+```cpp
+.once(on("ap.wlan[0].radio").signal("transmissionStarted")
+          .filterPacket("ieee80211mac.type == 29").within(1.0))
+.interfere("jammer", SimTime(1, SIMTIME_US))
+.once(on("jammer").signal("interferenceStarted").assertValue(1).within(0.001))
+.once(on("jammer").signal("interferenceEnded").assertValue(1).within(0.001))
+```
+
+Add a `inet.protocoltest.TriggeredNoiseSource` submodule named `jammer` to the test network. This module extends the production `NoiseSource`. It starts only through an explicit action. It does not transmit periodically.
+
+Configure its physical properties in the INI file. This example uses a scalar transmitter:
+
+```ini
+*.jammer.transmitter.signalAnalogRepresentation = "scalar"
+*.jammer.transmitter.centerFrequency = 5.01GHz
+*.jammer.transmitter.bandwidth = 20MHz
+*.jammer.transmitter.power = 1W
+*.jammer.transmitter.duration = 100us
+*.jammer.mobility.initFromDisplayString = false
+*.jammer.mobility.initialX = 201m
+*.jammer.mobility.initialY = 260m
+*.jammer.mobility.initialZ = 0m
+```
+
+Select a frequency that overlaps the target channel. Select an analog representation compatible with the radio medium. The duration must be positive. The production noise transmitter and radio medium determine interference at each receiver. The action does not discard a packet or force a reception result.
+
+The radio emits `transmissionStarted` with a transmission object. The tester exposes its packet to the usual filters, assertions, and captures. The offset starts at the previous step's completion time. After a transmission-start match, that time is the transmitter's start time. Propagation determines the arrival time at each receiver.
+
+The action uses a self-message, including for a zero offset. Thus, it starts noise after the current callback returns. It does not change the medium from inside the transmission notification. For deliberate simultaneous transmissions, set `*.radioMedium.sameTransmissionStartTimeCheck = "ignore"` in the test.
+
+The action advances after it schedules the source trigger. The next step can observe `interferenceStarted` or reception failure. Observe `interferenceEnded` when the test must wait for completion. A later action can reuse the same source. A trigger fails if the source already has a pending trigger or an active transmission. An invalid source or negative offset also causes an error.
+
+The [interference test](../wifi/common/WifiTriggeredInterference.test) checks a clean ACK, an ACK with a bit error, and retransmission of the same DATA frame. It also checks the exact offset, a zero offset, source reuse, and silence before the first trigger. It does not establish the event order for duplicate ADDBA Requests.
+
 ## 8. State machines — assert FSM / scalar-signal state
 
 Some behaviour lives in a module's **state machine or counters**, not in the packet trace

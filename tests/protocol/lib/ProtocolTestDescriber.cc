@@ -366,6 +366,10 @@ std::string describe(const ProtocolTest& test)
             case StepType::Count:        clause = renderCount(step.pattern, step.cardMin, step.cardMax); break;
             case StepType::Delivery:  clause = renderDelivery(step.pattern, step.pattern2); break;
             case StepType::Inject:    clause = renderInject(step.injection); break;
+            case StepType::Interfere:
+                clause = "Start one noise transmission from '" + step.interferenceSource + "', "
+                       + formatTime(step.interferenceOffset) + " after the previous step.";
+                break;
         }
         // A guard runs beside the steps after it. Without a word for that, a reader cannot
         // tell it from an ordered step, and the two mean different things.

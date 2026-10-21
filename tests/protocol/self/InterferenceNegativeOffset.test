@@ -1,0 +1,29 @@
+%description:
+The framework rejects an interference offset before the matched event.
+
+%file: InterferenceNegativeOffset.cc
+#include "ProtocolTest.h"
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("interference_negative_offset").interfere("jammer", SimTime(-1, SIMTIME_US));
+}
+
+%file: test.ned
+import inet.protocoltest.ProtocolTester;
+network InterferenceNegativeOffsetNetwork
+{
+    submodules:
+        tester: ProtocolTester;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = InterferenceNegativeOffsetNetwork
+sim-time-limit = 1ms
+
+%exitcode: 1
+%contains: stderr
+interfere: offset must be nonnegative

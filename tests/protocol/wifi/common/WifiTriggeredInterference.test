@@ -1,0 +1,84 @@
+%description:
+A clean ACK reaches the station before the test arms interference.
+The next selected ACK triggers noise through the production radio medium.
+The station receives that ACK with a bit error and retries the same DATA frame.
+The source stops after its configured duration and supports a second trigger.
+
+%file: TriggeredInterference.cc
+#include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+
+namespace inet::protocoltest {
+using namespace ieee80211;
+
+Define_ProtocolTest(wifi_triggered_interference)
+{
+    return ProtocolTest("wifi_triggered_interference")
+        .meanwhile(never(on("jammer").signal("interferenceStarted").within(1.0)))
+        .once(on("sta1.wlan[0].radio").signal("packetSentToUpper")
+            .filterPacket("ieee80211mac.type == 29")
+            .assertEvent([](const MatchContext& c) { return !c.event.packet->hasBitError(); })
+            .notBefore(1.0).within(1.1))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 32 && ieee80211mac.retry == false")
+            .capture("sequence", [](const PacketEvent& e) {
+                return cValue(e.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            }).within(0.02))
+        .once(on("ap.wlan[0].radio").signal("transmissionStarted")
+            .filterPacket("ieee80211mac.type == 29")
+            .capture("ackStart", [](const PacketEvent& e) { return cValue(e.time.raw()); }).within(0.01))
+        .interfere("jammer", SimTime(1, SIMTIME_US))
+        .once(on("jammer").signal("interferenceStarted").assertValue(1)
+            .assertEvent([](const MatchContext& c) {
+                return c.event.time.raw() - c.get("ackStart").intValue() == SimTime(1, SIMTIME_US).raw();
+            }).within(0.001))
+        .once(on("sta1.wlan[0].radio").signal("packetSentToUpper")
+            .filterPacket("ieee80211mac.type == 29")
+            .assertEvent([](const MatchContext& c) { return c.event.packet->hasBitError(); }).within(0.001))
+        .once(on("jammer").signal("interferenceEnded").assertValue(1).within(0.001))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 32 && ieee80211mac.retry == true")
+            .capture("retryStart", [](const PacketEvent& e) { return cValue(e.time.raw()); })
+            .assertEvent([](const MatchContext& c) {
+                return c.event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get() == c.get("sequence").intValue();
+            }).within(0.01))
+        .interfere("jammer")
+        .once(on("jammer").signal("interferenceStarted").assertValue(1)
+            .assertEvent([](const MatchContext& c) { return c.event.time.raw() == c.get("retryStart").intValue(); })
+            .within(0.001))
+        .once(on("jammer").signal("interferenceEnded").assertValue(1).within(0.001));
+}
+}
+
+%file: InterferenceNetwork.ned
+import inet.protocoltest.wifi.WifiInfraNetwork;
+import inet.protocoltest.TriggeredNoiseSource;
+
+network InterferenceNetwork extends WifiInfraNetwork
+{
+    submodules:
+        jammer: TriggeredNoiseSource;
+}
+
+%inifile: test.ini
+[General]
+network = InterferenceNetwork
+*.tester.testName = "wifi_triggered_interference"
+# The second trigger deliberately starts at the same time as the DATA retry.
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.jammer.transmitter.duration = 100us
+*.jammer.transmitter.power = 1W
+*.jammer.transmitter.centerFrequency = 5.01GHz
+*.jammer.transmitter.bandwidth = 20MHz
+*.jammer.mobility.initialX = 201m
+*.jammer.mobility.initialY = 260m
+*.jammer.mobility.initialZ = 0m
+*.jammer.mobility.initFromDisplayString = false
+**.wlan[*].radio.channelNumber = 0
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+include ../../ini/_a.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_triggered_interference: PASS

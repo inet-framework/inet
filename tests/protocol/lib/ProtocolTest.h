@@ -27,12 +27,13 @@ namespace protocoltest {
 //                  total to fall in range; a match beyond cardMax fails immediately.
 //                  Backs oneOrMoreTimes/anyNumberOfTimes/atLeastTimes/atMostTimes/betweenTimes.
 //  Inject       -- fire a crafted packet (reactively), then advance
+//  Interfere    -- trigger one noise transmission after the specified offset
 //  Unordered    -- a group of patterns that must all match, in any order
 //  AnyOf        -- a group of patterns; the first to match wins
 //  Delivery     -- a "from" send correlated to a "to" receive of the same packet (treeId)
 // A pattern may select a packet signal or a scalar signal (e.g. an FSM state via is(v)); the
 // same cardinalities apply to both (once = "reaches the value", never = "must not").
-enum class StepType { Once, AtMostOnce, Never, ExactlyTimes, Count, Inject, Unordered, AnyOf, Delivery };
+enum class StepType { Once, AtMostOnce, Never, ExactlyTimes, Count, Inject, Unordered, AnyOf, Delivery, Interfere };
 
 //
 // A packet injection. When the engine reaches an inject step it resolves the target
@@ -109,6 +110,8 @@ struct Step {
     int count = 0;                     // ExactlyTimes
     int cardMin = 0, cardMax = 0;      // Count: required occurrences [min, max]; max < 0 = unbounded
     bool concurrent = false;           // meanwhile(...): runs beside the steps after it
+    std::string interferenceSource;
+    simtime_t interferenceOffset = 0;
 };
 
 // Free builders that make a step without a program to hold it. They exist so that a guard
@@ -247,6 +250,20 @@ class INET_API ProtocolTest
     ProtocolTest& inject(const Injection& injection)
     {
         steps.push_back(Step{StepType::Inject, {}, injection, {}});
+        return *this;
+    }
+
+    // Start one noise transmission at the previous step's event time plus the offset.
+    // The source path is relative to the network. Its NED parameters define the transmission.
+    ProtocolTest& interfere(const char *source, simtime_t offset = SIMTIME_ZERO)
+    {
+        if (offset < SIMTIME_ZERO)
+            throw cRuntimeError("interfere: offset must be nonnegative");
+        Step step;
+        step.type = StepType::Interfere;
+        step.interferenceSource = source;
+        step.interferenceOffset = offset;
+        steps.push_back(std::move(step));
         return *this;
     }
 
