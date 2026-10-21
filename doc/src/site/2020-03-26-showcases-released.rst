@@ -12,4 +12,5 @@ for example, why a particular signal was received or not received successfully i
 of interference from other signals or noise.
 
 Links:
-\* `Visualizing the Spectrum of Radio Signals <https://inet.omnetpp.org/docs/showcases/visualizer/spectrum/doc/>`__
+
+- `Visualizing the Spectrum of Radio Signals <https://inet.omnetpp.org/docs/showcases/visualizer/canvas/spectrum/doc/>`__

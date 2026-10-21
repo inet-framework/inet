@@ -21,4 +21,5 @@ tutorial pages themselves. If you wish to contribute, you can do so
 by submitting pull requests against the ``inet-tutorials`` repository.
 
 Links:
-\* `IPv4 Network Configurator Tutorial <https://inet.omnetpp.org/docs/tutorials/configurator/doc/>`__
+
+- `IPv4 Network Configurator Tutorial <https://inet.omnetpp.org/docs/tutorials/configurator/doc/>`__

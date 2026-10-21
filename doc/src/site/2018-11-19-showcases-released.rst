@@ -13,4 +13,5 @@ and Bluetooth interfaces, or a dual-band wireless router. This
 showcase demonstrates how such devices can be simulated in INET.
 
 Links:
-\* `Multiple Wireless Interfaces <https://inet.omnetpp.org/docs/showcases/wireless/multiradio/doc/>`__
+
+- `Multiple Wireless Interfaces <https://inet.omnetpp.org/docs/showcases/wireless/multiradio/doc/>`__

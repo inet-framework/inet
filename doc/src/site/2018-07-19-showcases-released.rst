@@ -18,4 +18,5 @@ and records PCAP traces of TCP, UDP, and ICMP traffic, using
 various physical layer protocols like ethernet and 802.11.
 
 Links:
-\* `PCAP Recording <https://inet.omnetpp.org/docs/showcases/general/pcaprecording/doc/>`__
+
+- `PCAP Recording <https://inet.omnetpp.org/docs/showcases/general/pcaprecording/doc/>`__

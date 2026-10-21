@@ -15,4 +15,5 @@ protocols with three example simulations, using a reactive (AODV), a proactive (
 and a location based (GPSR) routing protocol.
 
 Links:
-\* `MANET Routing Protocols <https://inet.omnetpp.org/docs/showcases/routing/manet/doc/>`__
+
+- `MANET Routing Protocols <https://inet.omnetpp.org/docs/showcases/routing/manet/doc/>`__

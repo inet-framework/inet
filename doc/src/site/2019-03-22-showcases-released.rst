@@ -13,4 +13,5 @@ available in INET. It contains an example simulation which features
 a wireless sensor network.
 
 Links:
-\* `IEEE 802.15.4 Smart Home <https://inet.omnetpp.org/docs/showcases/wireless/ieee802154/doc/>`__
+
+- `IEEE 802.15.4 Smart Home <https://inet.omnetpp.org/docs/showcases/wireless/ieee802154/doc/>`__

@@ -34,5 +34,6 @@ non-overlapping Wifi channels in simulations, and how transmissions on different
 interfere with each other.
 
 Links:
-\* `Coexistence of IEEE 802.11 and 802.15.4 <https://inet.omnetpp.org/docs/showcases/wireless/coexistence/doc/>`__
-\* `Crosstalk Between Adjacent IEEE 802.11 Channels <https://inet.omnetpp.org/docs/showcases/wireless/crosstalk/doc/>`__
+
+- `Coexistence of IEEE 802.11 and 802.15.4 <https://inet.omnetpp.org/docs/showcases/wireless/coexistence/doc/>`__
+- `Crosstalk Between Adjacent IEEE 802.11 Channels <https://inet.omnetpp.org/docs/showcases/wireless/crosstalk/doc/>`__

@@ -20,5 +20,6 @@ If you wish to contribute, you can do so by submitting pull requests
 against the ``inet-showcases`` repository.
 
 Links:
-\* `Styling and Appearance <https://inet.omnetpp.org/docs/showcases/visualizer/styling/doc>`__
-\* `The Hidden Node Problem <https://inet.omnetpp.org/docs/showcases/wireless/hiddennode/doc>`__
+
+- `Styling and Appearance <https://inet.omnetpp.org/docs/showcases/visualizer/canvas/styling/doc>`__
+- `The Hidden Node Problem <https://inet.omnetpp.org/docs/showcases/wireless/hiddennode/doc>`__

@@ -26,5 +26,6 @@ and test its behavior over a real network. Or, by letting the model talk to real
 implementations of the same application, you can test its interoperability and validate its behavior.
 
 Links:
-\* `Testing a Linux Routing Daemon in a Simulated Environment <https://inet.omnetpp.org/docs/showcases/emulation/babel/doc/>`__
-\* `Using Simulated Applications in a Real Network <https://inet.omnetpp.org/docs/showcases/emulation/voip/doc/>`__
+
+- `Testing a Linux Routing Daemon in a Simulated Environment <https://inet.omnetpp.org/docs/showcases/emulation/babel/doc/>`__
+- `Using Simulated Applications in a Real Network <https://inet.omnetpp.org/docs/showcases/emulation/voip/doc/>`__

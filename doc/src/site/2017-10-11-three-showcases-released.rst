@@ -24,6 +24,7 @@ If you wish to contribute, you can do so by submitting pull requests
 against the ``inet-showcases`` repository.
 
 Links:
-\* `Path Loss Models <https://inet.omnetpp.org/docs/showcases/wireless/pathloss/doc>`__
-\* `Power Consumption <https://inet.omnetpp.org/docs/showcases/wireless/power/doc>`__
-\* `Visualizing Transport Connections <https://inet.omnetpp.org/docs/showcases/visualizer/transportconnection/doc>`__
+
+- `Path Loss Models <https://inet.omnetpp.org/docs/showcases/wireless/pathloss/doc>`__
+- `Power Consumption <https://inet.omnetpp.org/docs/showcases/wireless/power/doc>`__
+- `Visualizing Transport Connections <https://inet.omnetpp.org/docs/showcases/visualizer/canvas/transportconnection/doc>`__

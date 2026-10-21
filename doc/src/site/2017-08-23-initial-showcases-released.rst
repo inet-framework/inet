@@ -27,5 +27,6 @@ web pages, which means that pages are easy to write (Markdown),
 and easy to be contributed to (via GitHub pull requests).
 
 Links:
-\* `Showcases <https://inet.omnetpp.org/docs/showcases>`__
-\* `Tutorials <https://inet.omnetpp.org/docs/tutorials>`__
+
+- `Showcases <https://inet.omnetpp.org/docs/showcases>`__
+- `Tutorials <https://inet.omnetpp.org/docs/tutorials>`__

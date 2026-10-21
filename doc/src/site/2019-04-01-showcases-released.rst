@@ -13,4 +13,5 @@ known antenna models, while the last one is a universal antenna
 which can model any rotationally symmetrical antenna pattern.
 
 Links:
-\* `Modeling Directional Antennas <https://inet.omnetpp.org/docs/showcases/wireless/directionalantennas/doc/>`__
+
+- `Modeling Directional Antennas <https://inet.omnetpp.org/docs/showcases/wireless/directionalantennas/doc/>`__

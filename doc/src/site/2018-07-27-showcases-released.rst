@@ -15,4 +15,5 @@ This showcase contains three configurations of increasing
 complexity, each showing different features of the visualization.
 
 Links:
-\* `Visualizing Radio Medium Activity <https://inet.omnetpp.org/docs/showcases/routing/manet/doc/>`__
+
+- `Visualizing Radio Medium Activity <https://inet.omnetpp.org/docs/showcases/routing/manet/doc/>`__

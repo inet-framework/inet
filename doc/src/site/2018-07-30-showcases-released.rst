@@ -14,4 +14,5 @@ simulations of a wireless sensor network. In Part 2, we compare the three
 protocols using statistics.
 
 Links:
-\* `MAC Protocols for Wireless Sensor Networks <https://inet.omnetpp.org/docs/showcases/wireless/sensornetwork/doc/>`__
+
+- `MAC Protocols for Wireless Sensor Networks <https://inet.omnetpp.org/docs/showcases/wireless/sensornetwork/doc/>`__
