@@ -1,0 +1,79 @@
+%description:
+
+Protocol Test Framework self test -- a rule that selects only the copies of another rule.
+
+A PacketTap is spliced on the link. The first rule corrupts the copies only. The second rule duplicates the first UDP datagram of host A, with one copy 2 ms later. The original passes the first rule, because it is not a copy, and the second rule duplicates it. The copy goes through the rules again: the first rule corrupts it. Host B must deliver the original and discard the copy. Without copiesOnly(), the first rule corrupts the original, and no copy is made. Without the first rule, UDP delivers two datagrams. Both make the test fail.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("intercept_copies_only")
+        .intercept(tap("tap").copiesOnly().corrupt()
+                     .describe("the copies"))
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1).duplicate(0.002)
+                     .describe("the first datagram, and one copy 2 ms later"))
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                  .describe("the original at host B")
+                  .within(0.5))
+        .meanwhile(exactlyTimes(1, on("hostB.udp").signal("packetSentToUpper")
+                                    .describe("a datagram from UDP of host B to the application")
+                                    .within(0.01)))
+        .once(on("hostB.eth[0].mac").signal("packetDropped").filterPacket("udp.destPort == 5000")
+                  .describe("the MAC of host B discards the copy")
+                  .within(0.0021));
+}
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_copies_only compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network CopiesOnlyNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CopiesOnlyNet
+sim-time-limit = 1s
+seed-set = 0
+
+# One UDP datagram from host A to host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Static ARP: the only frames on the link are the IPv4 ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_copies_only: PASS

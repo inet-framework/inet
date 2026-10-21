@@ -334,16 +334,28 @@ static std::string renderInterception(const Interception& i)
 {
     std::ostringstream os;
     os << "on tap '" << i.tapName << "', ";
-    if (i.action == "delay")       os << "delay (by " << formatTime(i.delayTime) << ") ";
-    else if (i.action == "mutate") os << "mutate ";
-    else                           os << "drop ";
+    if (i.action == "delay")          os << "delay (by " << formatTime(i.delayTime) << ") ";
+    else if (i.action == "mutate")    os << "mutate ";
+    else if (i.action == "corrupt")   os << "corrupt ";
+    else if (i.action == "duplicate") os << "duplicate (" << i.numCopies << (i.numCopies == 1 ? " copy, " : " copies, ")
+                                         << formatTime(i.spacing) << " apart) ";
+    else if (i.action == "pass")      os << "pass ";
+    else                              os << "drop ";
     if (!i.description.empty())          os << i.description;
     else if (!i.matchExpression.empty()) os << "frames matching \"" << i.matchExpression << "\"";
     else                                 os << "every frame";
+    if (i.onlyCopies)
+        os << ", copies only";
+    if (!i.fromNode.empty())
+        os << ", from " << i.fromNode;
+    if (!i.toNode.empty())
+        os << ", to " << i.toNode;
     if (i.minimumBytes > 0)
         os << " (≥ " << i.minimumBytes << " bytes)";
     if (i.occurrence > 0)
         os << ", occurrence " << i.occurrence;
+    if (i.fromOccurrence > 0)
+        os << ", occurrence " << i.fromOccurrence << " and every one after it";
     return capitalize(os.str()) + ".";
 }
 

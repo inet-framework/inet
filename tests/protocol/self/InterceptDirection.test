@@ -1,0 +1,77 @@
+%description:
+
+Protocol Test Framework self test -- the to selector.
+
+A PacketTap is spliced on the link. Host A sends a UDP datagram to the echo application of host B, which sends it back. The rule drops the UDP frames that go to host A, and it names no other condition. So the request reaches host B, and the echo never reaches host A. Without the to selector, the rule would also drop the request; without the rule, the echo reaches host A. Both make the test fail.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("intercept_direction")
+        .intercept(tap("tap").to("hostA").filterPacket("udp.srcPort == 5000 || udp.destPort == 5000").drop()
+                     .describe("the UDP frames that go to host A"))
+        .once(on("hostB.udp").signal("packetSentToUpper")
+                  .describe("the request at the echo application of host B")
+                  .within(0.5))
+        .once(on("hostB.udp").signal("packetSentToLower").filterPacket("udp.srcPort == 5000")
+                  .describe("host B sends the echo")
+                  .within(0.01))
+        .never(on("hostA.udp").signal("packetReceivedFromLower")
+                   .describe("the echo at UDP of host A")
+                   .within(0.01));
+}
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_direction compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network DirectionNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = DirectionNet
+sim-time-limit = 1s
+seed-set = 0
+
+# Host A sends one UDP datagram to the echo application of host B, which sends it back.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpEchoApp"
+*.hostB.app[0].localPort = 5000
+
+# Static ARP: the only frames on the link are the IPv4 ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_direction: PASS

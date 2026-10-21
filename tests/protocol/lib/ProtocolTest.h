@@ -61,25 +61,34 @@ class INET_API Injection
 };
 
 //
-// A man-in-the-middle interception rule, applied by a named PacketTap spliced on a link.
-// The tap selects frames by a PacketFilter expression (over the dissected frame), an
-// optional minimum size, and an occurrence index, and applies an action:
-//   drop  -- discard the frame (force a retransmission)
-//   delay -- forward it after a hold time
-//   mutate-- run a C++ mutator on the (inner) frame, then forward it
+// A man-in-the-middle interception rule, applied by a named tap: a PacketTap spliced on a
+// link. The tap selects frames by a PacketFilter expression (over the dissected frame), an
+// optional minimum size, the nodes the frame comes from and goes to, and an occurrence
+// index, and applies an action:
+//   drop      -- discard the frame (force a retransmission)
+//   delay     -- forward it after a hold time
+//   mutate    -- run a C++ mutator on the (inner) frame, then forward it
+//   corrupt   -- forward it with a bit error, so that the receiver discards it
+//   duplicate -- forward it, then copies of it at a given spacing
+//   pass      -- forward it unchanged
 // The ProtocolTester installs these on the tap module at startup (see tap(...)).
 //
 class INET_API Interception
 {
   public:
-    std::string tapName;          // PacketTap module name (a sibling of the tester)
+    std::string tapName;          // tap module name (a sibling of the tester)
     std::string matchExpression;  // PacketFilter expression over the dissected frame
     long minimumBytes = 0;        // also require the (inner) frame to be at least this big
+    std::string fromNode;         // the frame comes from this node; "" = any
+    std::string toNode;           // the frame goes to this node; "" = any
+    bool onlyCopies = false;      // select only the copies that a duplicate rule made
     int occurrence = 0;               // act on the Nth selected frame (1-based); 0 = every
     int fromOccurrence = 0;           // act on the Nth and every one after it; 0 = unused
-    std::string action = "drop";  // "drop" | "delay" | "mutate"
+    std::string action = "drop";  // "drop" | "delay" | "mutate" | "corrupt" | "duplicate" | "pass"
     simtime_t delayTime = 0;
     std::function<void(Packet *)> mutator; // for action == "mutate"
+    simtime_t spacing = 0;        // for action == "duplicate": the time between two copies
+    int numCopies = 0;            // for action == "duplicate"
     std::string description;      // optional human phrase
 
     Interception& filterPacket(const char *expr) { matchExpression = expr; return *this; }
@@ -90,6 +99,14 @@ class INET_API Interception
     // the window still reaches the receiver, which answers with the duplicate
     // acknowledgments that repair the loss before the timer can see it.
     Interception& fromNth(int k) { fromOccurrence = k; return *this; }
+    // The node the frame comes from, and the node it goes to. On a tap, each names a side of
+    // the link: the node behind that side.
+    Interception& from(const char *node) { fromNode = node; return *this; }
+    Interception& to(const char *node) { toNode = node; return *this; }
+    // Select only the copies that a duplicate(...) rule made. A copy goes through the rules
+    // again, but not through the rule that made it, so "duplicate the frame, then change
+    // the copy" is two rules.
+    Interception& copiesOnly() { onlyCopies = true; return *this; }
     Interception& drop() { action = "drop"; return *this; }
     // An explicit no-op. It earns its place now that the rules are ordered: it shadows a
     // later rule for the frames it names, so "never touch a SYN, drop the data" is two
@@ -97,6 +114,13 @@ class INET_API Interception
     Interception& pass() { action = "pass"; return *this; }
     Interception& delay(double t) { action = "delay"; delayTime = t; return *this; }
     Interception& mutate(std::function<void(Packet *)> fn) { action = "mutate"; mutator = std::move(fn); return *this; }
+    // The receiver gets the frame with a bit error, so its MAC discards it. A tap sets the
+    // flag on the object on the wire, as the bit error model of a channel does.
+    Interception& corrupt() { action = "corrupt"; return *this; }
+    // Forward the frame, then `copies` copies of it, each `spacing` after the one before.
+    // On a tap, a copy starts on the outgoing channel at its time, or later while the
+    // channel is busy.
+    Interception& duplicate(double spacing, int copies = 1) { action = "duplicate"; this->spacing = spacing; numCopies = copies; return *this; }
     Interception& describe(const char *phrase) { description = phrase; return *this; }
 };
 

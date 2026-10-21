@@ -1,0 +1,84 @@
+%description:
+
+Protocol Test Framework self test -- the intercept duplicate action, and the from selector.
+
+A PacketTap is spliced on the link. The test drives it to forward the first UDP datagram of host A and one copy of it, 2 ms after the original. Host B must receive the frame two times, exactly 2 ms apart, and its UDP delivers both datagrams, because UDP does not detect a duplicate. Without the rule, the second reception never occurs and the test fails.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    auto receptionTime = [](const PacketEvent& e) { return cValue((intval_t)e.time.raw()); };
+    return ProtocolTest("intercept_duplicate")
+        .intercept(tap("tap").from("hostA").filterPacket("udp.destPort == 5000").nth(1)
+                     .duplicate(0.002)
+                     .describe("the first datagram, and one copy 2 ms later"))
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                  .capture("t1", receptionTime)
+                  .describe("the original at host B")
+                  .within(0.5))
+        .meanwhile(exactlyTimes(2, on("hostB.udp").signal("packetSentToUpper")
+                                    .describe("a datagram from UDP of host B to the application")
+                                    .within(0.01)))
+        .once(on("hostB.eth[0].mac").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                  .assertEvent([](const MatchContext& c) {
+                      return c.event.time.raw() - c.get("t1").intValue() == SimTime(0.002).raw();
+                  })
+                  .describe("the copy at host B, exactly 2 ms after the original")
+                  .within(0.0021));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_duplicate compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network DuplicateNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = DuplicateNet
+sim-time-limit = 1s
+seed-set = 0
+
+# One UDP datagram from host A to host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Static ARP: the only frames on the link are the IPv4 ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_duplicate: PASS

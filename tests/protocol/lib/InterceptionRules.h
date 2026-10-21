@@ -35,16 +35,28 @@ class INET_API InterceptionRules
         long numSelected = 0;          // frames this rule has selected, for its occurrence
     };
 
+    // A frame as a tap offers it to the rules: the packet, the nodes it comes from and goes
+    // to, and the rule that made it when it is a copy.
+    struct Frame {
+        const Packet *packet = nullptr;
+        std::string fromNode;
+        std::string toNode;
+        const Rule *copyOf = nullptr;  // the duplicate rule that made this copy; null for an original
+    };
+
   protected:
+    // A deque, because a copy keeps a pointer to the rule that made it, and push_back keeps
+    // the elements of a deque where they are.
     std::deque<Rule> rules;
     long numSelected = 0;              // frames that any rule selected
 
   public:
+    // Throws for a rule whose words have no meaning together.
     void add(const Interception& interception);
     void clear() { rules.clear(); }
 
     // The first rule that matches the frame and is at its targeted occurrence, else null.
-    Rule *select(const Packet *packet);
+    Rule *select(const Frame& frame);
 
     long getNumSelected() const { return numSelected; }
 };

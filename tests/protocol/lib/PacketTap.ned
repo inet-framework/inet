@@ -16,6 +16,10 @@
 //   mutate -- apply a mutation, then forward (the mutator is a C++ lambda, so this action
 //             is only reachable via a test program's intercept(...).mutate(...), not params)
 //
+// A test program can also corrupt a frame (the receiver gets it with a bit error) and
+// duplicate it (forward it, then copies of it at a given spacing), and it can select frames
+// by the node they come from or go to. These are reachable only via a test program.
+//
 // Configurable two ways: from these parameters (self-contained), or programmatically by
 // the ProtocolTester from a test program's intercept(...) clause. The ProtocolTester
 // observes the resulting trace as usual.

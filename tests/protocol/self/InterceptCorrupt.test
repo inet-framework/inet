@@ -1,0 +1,77 @@
+%description:
+
+Protocol Test Framework self test -- the intercept corrupt action.
+
+A PacketTap is spliced on the link. The test drives it to corrupt the frame of the first UDP datagram of host A: the tap sets the bit error flag of the EthernetSignal on the wire, as the bit error model of a channel does. The MAC of host B must discard the frame, and IPv4 of host B must never see the datagram. Without the rule, the datagram reaches IPv4 and the test fails.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("intercept_corrupt")
+        .intercept(tap("tap").filterPacket("udp.destPort == 5000").nth(1).corrupt()
+                     .describe("the frame of the first datagram"))
+        .once(on("hostA.udp").signal("packetSentToLower").filterPacket("udp.destPort == 5000")
+                  .describe("host A sends the datagram")
+                  .within(0.5))
+        .meanwhile(never(on("hostB.ipv4").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                             .describe("the datagram at IPv4 of host B")
+                             .within(0.01)))
+        .once(on("hostB.eth[0].mac").signal("packetDropped").filterPacket("udp.destPort == 5000")
+                  .describe("the MAC of host B discards the frame")
+                  .within(0.01));
+}
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_corrupt compiled\n";
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+// Two hosts with a PacketTap spliced on the link -- note: NO tester (attached at runtime).
+network CorruptNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        hostA: StandardHost { @display("p=200,100"); }
+        tap: PacketTap { @display("p=350,100"); }
+        hostB: StandardHost { @display("p=500,100"); }
+    connections:
+        hostA.ethg++ <--> Eth100M <--> tap.a;
+        tap.b <--> Eth100M <--> hostB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CorruptNet
+sim-time-limit = 1s
+seed-set = 0
+
+# One UDP datagram from host A to host B.
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "UdpBasicApp"
+*.hostA.app[0].destAddresses = "hostB"
+*.hostA.app[0].destPort = 5000
+*.hostA.app[0].messageLength = 100B
+*.hostA.app[0].startTime = 0.1s
+*.hostA.app[0].sendInterval = 10s
+*.hostB.numApps = 1
+*.hostB.app[0].typename = "UdpSink"
+*.hostB.app[0].localPort = 5000
+
+# Static ARP: the only frames on the link are the IPv4 ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_corrupt: PASS

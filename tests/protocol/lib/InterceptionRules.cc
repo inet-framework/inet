@@ -11,6 +11,14 @@ namespace protocoltest {
 
 void InterceptionRules::add(const Interception& interception)
 {
+    if (interception.action == "duplicate") {
+        if (interception.onlyCopies)
+            throw cRuntimeError("tap '%s': a rule cannot duplicate the copies of another rule (copiesOnly() with duplicate())",
+                                interception.tapName.c_str());
+        if (interception.numCopies < 1 || interception.spacing < SIMTIME_ZERO)
+            throw cRuntimeError("tap '%s': duplicate() needs at least one copy and a spacing that is not negative",
+                                interception.tapName.c_str());
+    }
     Rule rule;
     rule.interception = interception;
     rules.push_back(std::move(rule));
@@ -23,9 +31,19 @@ void InterceptionRules::add(const Interception& interception)
     }
 }
 
-InterceptionRules::Rule *InterceptionRules::select(const Packet *packet)
+InterceptionRules::Rule *InterceptionRules::select(const Frame& frame)
 {
+    const Packet *packet = frame.packet;
     for (auto& rule : rules) {
+        const auto& interception = rule.interception;
+        // A copy goes through the rules again, but not through the rule that made it, and a
+        // copiesOnly() rule sees nothing else.
+        if (&rule == frame.copyOf || (interception.onlyCopies && frame.copyOf == nullptr))
+            continue;
+        if (!interception.fromNode.empty() && interception.fromNode != frame.fromNode)
+            continue;
+        if (!interception.toNode.empty() && interception.toNode != frame.toNode)
+            continue;
         if (rule.filter != nullptr) {
             bool matched = false;
             try {
@@ -39,7 +57,6 @@ InterceptionRules::Rule *InterceptionRules::select(const Packet *packet)
             if (!matched)
                 continue;
         }
-        const auto& interception = rule.interception;
         if (interception.minimumBytes > 0 && packet->getByteLength() < interception.minimumBytes)
             continue;
         rule.numSelected++;

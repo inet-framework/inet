@@ -7,6 +7,9 @@
 #ifndef __INET_PROTOCOLTEST_PACKETTAP_H
 #define __INET_PROTOCOLTEST_PACKETTAP_H
 
+#include <map>
+#include <string>
+
 #include "inet/common/SimpleModule.h"
 #include "inet/common/packet/Packet.h"
 
@@ -19,8 +22,8 @@ namespace protocoltest {
 //
 // Inline man-in-the-middle tap (see PacketTap.ned). Forwards frames between its two
 // inout gates `a` and `b`; frames selected by its rules get the action of the rule
-// applied (drop / delay / mutate / pass). Pure observation/fault-injection on a gate
-// path, with no INET source changes.
+// applied (drop / delay / mutate / corrupt / duplicate / pass). Pure observation and
+// fault injection on a gate path, with no INET source changes.
 //
 // Because the link sides are Ethernet (datarate) channels, the tap is a store-and-forward
 // relay: each direction has a queue, and the next frame is transmitted only once the
@@ -36,9 +39,15 @@ class INET_API PacketTap : public SimpleModule, public ITap
   protected:
     InterceptionRules rules;
     bool programmaticallyConfigured = false; // addInterception() called -> ignore params
+    std::string nodeA, nodeB;      // the nodes behind side a and side b, found on first use
+    // Frames waiting in a queue whose duplicate rule wants copies of them. The copies are
+    // scheduled when the frame starts on the outgoing channel.
+    std::map<cPacket *, const InterceptionRules::Rule *> pendingCopies;
     long numForwarded = 0;
     long numDropped = 0;
     long numMutated = 0;
+    long numCorrupted = 0;
+    long numCopied = 0;
 
     // store-and-forward, one queue + transmit timer per outgoing side
     cPacketQueue queueA, queueB;   // frames waiting for a$o / b$o
@@ -52,6 +61,12 @@ class INET_API PacketTap : public SimpleModule, public ITap
 
     // The output gate on the side opposite the frame's arrival gate.
     cGate *forwardGate(const cGate *arrivalGate);
+    // The name of the node behind a side.
+    const std::string& getSideNode(bool sideB);
+    // Offer a frame to the rules and apply the action of the rule that selects it.
+    void processFrame(cPacket *frame, bool towardB, const InterceptionRules::Rule *copyOf);
+    // Schedule the copies that a duplicate rule wants of a frame that starts now.
+    void scheduleCopies(cPacket *frame, bool towardB);
     // Enqueue toward the given output side and (re)start draining it.
     void enqueueForward(cPacket *packet, bool towardB);
     // Transmit the head of a side's queue if its channel is free, else arm the timer.
