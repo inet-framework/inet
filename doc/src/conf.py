@@ -32,6 +32,7 @@ extensions = [
     'sphinxcontrib.katex',
     'sphinxcontrib.jquery',
     'sphinxcontrib.images',
+    'sphinx_design',
     'IPython.sphinxext.ipython_console_highlighting',
     'tools.includefiles',
     'inetsite',

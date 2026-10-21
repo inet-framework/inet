@@ -118,7 +118,8 @@ class IniLexer(RegexLexer):
             (r'[;#].*$', Comment.Single),
             (r'\s+', Text),
             (r'\[.*?\]', Keyword),
-            (r'(.*?)([ \t]*)(=)([ \t]*)([^#\n]*(?:\n[ \t].+)*)',
+            # A key or a value may continue on the next line after a backslash.
+            (r'((?:\\\n|[^=\n])*?)([ \t]*)(=)([ \t]*)((?:\\\n|[^#\n])*(?:\n[ \t].+)*)',
              bygroups(Name.Attribute, Text, Operator, Text, String)),
         ],
     }
