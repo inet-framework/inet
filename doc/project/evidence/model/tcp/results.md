@@ -52,7 +52,7 @@ Eight of the eleven new tests pass, and they are the ones that matter most for a
 
 Summary of pass 2: 8 tests, 7 PASS, 1 FAIL (expected), in 2.1 s. The runner's overall verdict is PASS, because the one failure is declared. The SYN's header length was captured as 24 octets: the MSS option is present, so the `should` of RFC9293-OPT-1 is met.
 
-Added on 2026-10-21, with the duplicate action of the relay (`plan/pending/protocol-test-duplicate-and-corrupt-frames.md`):
+Added on 2026-10-21, with the duplicate action of the relay (`plan/done/protocol-test-duplicate-and-corrupt-frames.md`):
 
 | Test | Checks | Verdict |
 | --- | --- | --- |
