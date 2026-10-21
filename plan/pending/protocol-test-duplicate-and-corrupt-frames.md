@@ -433,7 +433,7 @@ These differences from the present test remain:
 
 | Step | Purpose | Files and owner | Proposed change | Expected behavior | Verification |
 | --- | --- | --- | --- | --- | --- |
-| 1 [ ] | R1 | `src/inet/linklayer/ethernet/basic/`, `src/inet/physicallayer/wired/ethernet/EthernetCsmaPhy.cc`, `src/inet/protocolelement/transceiver/base/PacketReceiverBase.cc`; new tests in `tests/protocol/ethernet/` | Section 4.6. Tests: a tap sets the flag on the inner packet, for IPv4 and for IPv6, for `EthernetMacPhy` and for `EthernetPhyLayer`. | A1 | The new tests fail before the repair and pass after it. Run the Ethernet suite and the fingerprint tests. |
+| 1 [x] | R1 | `src/inet/linklayer/ethernet/basic/`, `src/inet/physicallayer/wired/ethernet/EthernetCsmaPhy.cc`, `src/inet/protocolelement/transceiver/base/PacketReceiverBase.cc`; new tests in `tests/protocol/ethernet/` | Section 4.6. Tests: a tap sets the flag on the inner packet, for IPv4 and for IPv6, for `EthernetMacPhy` and for `EthernetPhyLayer`. | A1 | The new tests fail before the repair and pass after it. Run the Ethernet suite and the fingerprint tests. |
 | 2 [ ] | Shared rules | `tests/protocol/lib/`: new `InterceptionRules`, `ITap`; `PacketTap`, `ProtocolTester` | Move the rules and the selection out of `PacketTap`. No behavior change. | A5 | Run every protocol suite. The verdicts do not change. |
 | 3 [ ] | R2 and R3 on wired links | `PacketTap`, `ProtocolTest.h`, `ProtocolTestDescriber.cc` | `from`, `to`, `copiesOnly`, `duplicate`, `corrupt` | A2, A4 (Ethernet, PPP), A6 | New self tests: `InterceptDuplicate` (exact times of the two receptions), `InterceptCorrupt` (MAC drop, no ICMP), `InterceptDirection`, `InterceptCopiesOnly`. A TCP test for scenario 2 in `tests/protocol/tcp/rfc/`. |
 | 4 [ ] | `{name}` in rule filters and R4 | `EventPattern.cc`, `InterceptionRules`, `ProtocolTest.h`, `ProtocolTester.cc` | Section 4.3 and section 4.4, with `within(d)` and the priority by program text | A rule selects by a captured value. A rule that starts at a step does not count the frames before that step. A rule with `within(d)` stops after `d`. | New self tests: `InterceptCapture`, `InterceptFromStep`, `InterceptWithin`, `InterceptPriority`. |
@@ -455,7 +455,11 @@ tests/protocol/wifi/run-tests.sh                     # the Wi-Fi suite has its o
 
 Expected results:
 
-- Step 1: before the repair, the new Ethernet tests fail because IPv4 receives the frame; the IPv6 variant stops at the assert. After the repair, they pass. Planned check, not run.
+- Step 1, observed on 2026-10-21. The step is the commits `protocolelement: fix: a receiver keeps the bit error of the packet` and `ethernet: fix: discard a frame that carries its own bit error`. It adds four tests to `tests/protocol/ethernet/`: `BitErrorFrameDiscarded` (EthernetMacPhy), `BitErrorFrameDiscardedHalfDuplex` (EthernetCsmaMacPhy, a test beyond the plan), `BitErrorFrameDiscardedLayered` (PacketReceiverBase) and `BitErrorFrameDiscardedIpv6`.
+  - Before the repair, the three IPv4 tests fail because IPv4 of the receiver gets the datagram, and the IPv6 test stops at the assert in `Ipv6.cc:240`. After the repair, the Ethernet suite passes (5 tests). At the state of the first fix commit, its own test `BitErrorFrameDiscardedLayered` passes alone.
+  - No test reaches `EthernetCsmaPhy`, because a relay cannot sit on the multidrop bus of 10BASE-T1S.
+  - The fingerprint runner runs 753 simulations in this tree, 110 of them with Ethernet or TSN: frame preemption, cut-through, 10BASE-T1S and others. Each one gives the same result and the same computed fingerprint as `master`. The runner skips the other CSV entries on `master` too, and the features `TcpLwip`, VoIP, Z3 and OSG are off in this tree. So no fingerprint obligation follows.
+  - `check-pull-request.sh`, `check-source-seals.sh` and the architecture checks of the two changed subtrees pass. The findings of `check-naming.sh` and `check-interfaces.sh` are in other places and also exist on `master`.
 - Step 2: no verdict changes.
 - Steps 3 to 5: each new self test also runs once with the rule removed, and it must then fail (A6). Record this check in the commit message.
 - Unverified until implementation: the fingerprint effect of R1, and the behavior of a wireless copy with the transmitter (see section 8).
