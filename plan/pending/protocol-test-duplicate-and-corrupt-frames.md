@@ -437,8 +437,8 @@ These differences from the present test remain:
 | 2 [x] | Shared rules | `tests/protocol/lib/`: new `InterceptionRules`, `ITap`; `PacketTap`, `ProtocolTester` | Move the rules and the selection out of `PacketTap`. No behavior change. | A5 | Run every protocol suite. The verdicts do not change. |
 | 3 [x] | R2 and R3 on wired links | `PacketTap`, `ProtocolTest.h`, `ProtocolTestDescriber.cc` | `from`, `to`, `copiesOnly`, `duplicate`, `corrupt` | A2, A4 (Ethernet, PPP), A6 | New self tests: `InterceptDuplicate` (exact times of the two receptions), `InterceptCorrupt` (MAC drop, no ICMP), `InterceptDirection`, `InterceptCopiesOnly`. A TCP test for scenario 2 in `tests/protocol/tcp/rfc/`. |
 | 4 [x] | `{name}` in rule filters and R4 | `EventPattern.cc`, `InterceptionRules`, `ProtocolTest.h`, `ProtocolTester.cc` | Section 4.3 and section 4.4, with `within(d)` and the priority by program text | A rule selects by a captured value. A rule that starts at a step does not count the frames before that step. A rule with `within(d)` stops after `d`. | New self tests: `InterceptCapture`, `InterceptFromStep`, `InterceptWithin`, `InterceptPriority`. |
-| 5 [ ] | R2 and R3 on wireless links | New `TapRadioMedium`, `Ieee80211ScalarTapRadioMedium.ned`; `WifiInfraNetwork.ned` | Section 4.2, wireless column | A3, A4 (802.11), A7 | New Wi-Fi tests: `WifiDuplicateWithRetry` (two ACKs, one delivery), `WifiDuplicateWithoutRetry` (two deliveries), `WifiCorruptAck` (retransmission with the Retry bit), `WifiDropFrame` (example E6, both rules). Rewrite `WifiBlockAckDuplicateAddba.test` as in example E8, and remove its two classes and its NED file section. |
-| 6 [ ] | R5 | `tests/protocol/lib/AUTHORING.md` | Section 7 and the cookbook. Correct the statement of line 264, which becomes true after R1. | The guide agrees with the code. | Read it against the self tests. |
+| 5 [x] | R2 and R3 on wireless links | New `TapRadioMedium`, `Ieee80211ScalarTapRadioMedium.ned`; `WifiInfraNetwork.ned` | Section 4.2, wireless column | A3, A4 (802.11), A7 | New Wi-Fi tests: `WifiDuplicateWithRetry` (two ACKs, one delivery), `WifiDuplicateWithoutRetry` (two deliveries), `WifiCorruptAck` (retransmission with the Retry bit), `WifiDropFrame` (example E6, both rules). Rewrite `WifiBlockAckDuplicateAddba.test` as in example E8, and remove its two classes and its NED file section. |
+| 6 [x] | R5 | `tests/protocol/lib/AUTHORING.md` | Section 7 and the cookbook. Correct the statement of line 264, which becomes true after R1. | The guide agrees with the code. | Read it against the self tests. |
 
 Step 1 is on its own branch, with its pull request to `master`. It is two commits, because `PacketReceiverBase` is a shared component ([PR-SPLIT-UPSTREAM](../../doc/project/rule/pull-request.md#pr-split-upstream)): first the shared receiver, then the Ethernet receivers. The plan itself is the first commit of that branch, because the R1 commits name it. Steps 2 to 6 are one commit each on a second branch, which starts from the R1 branch until R1 lands. Step 3 needs step 2, and step 5 needs steps 2 and 3.
 
@@ -474,7 +474,16 @@ Expected results:
   - `within(d)` keeps a rule active while the time is less than its start plus `d`.
   - Each of the four self tests fails when its word has no effect. `InterceptPriority` puts a startup rule after a `meanwhile(...)` rule in the text, so that the order of the text and the order of the start times give different results. 814 protocol tests keep their verdicts and the four new ones pass.
 - Steps 3 to 5: each new self test also runs once with the rule removed, and it must then fail (A6). Record this check in the commit message.
-- Unverified until implementation: the fingerprint effect of R1, and the behavior of a wireless copy with the transmitter (see section 8).
+- Step 5, observed on 2026-10-21 (`tests: add: the radio medium can be a tap`, then `tests: change: WifiBlockAckDuplicateAddba needs no classes of its own`). Decisions and facts:
+  - `TapRadioMedium` decides in `addTransmission` for each radio that `communicationCache->mapRadios` lists, before the medium sends a signal. A frame that reaches several receivers is offered once for each, with the transmission id as its frame id, and a rule counts it once (`InterceptionRules::Frame::frameId`).
+  - The from/to nodes of the rules are checked when the first frame starts, because the radios register in a later stage of initialization than the one in which a tester in the NED installs the rules.
+  - A copy is a new transmission through `transmitPacket`, and the medium owns its signal like any other. `createTransmission` of the 802.11 scalar transmitter makes a copy at a later time without trouble (every duplicate test).
+  - `to(node)` names the receiver radio. The radio of sta1 also hears the ACK that sta2 sends to the AP, so a rule or a step that means "the ACK to sta1" filters by `ieee80211mac.receiverAddress.getInt() == {sta1}`, with the address captured from an earlier frame.
+  - Finding: a copy is a frame that its transmitter does not know about. The station that sent the original gets the ACK of the copy, and `Dcf` stops the simulation with "Unknown control frame". IEEE 802.11 has no rule that makes a station act on an ACK that it does not expect. The two duplicate tests keep that ACK away from the station with a rule; the repair of `Dcf` is outside this plan.
+  - `WifiDropRemovesEnergy` shows that a dropped frame leaves no energy: without the drop rule, the overlapping copy makes the AP discard the original.
+  - The rewrite of `WifiBlockAckDuplicateAddba.test` removes its two classes (99 lines of C++) and its NED section, and goes from 174 to 73 lines. Without the AIFSN line, the AP sends its response first, and the retry never reaches it, so the line decides the order.
+  - Each of the five new Wi-Fi tests and the rewritten test fail when their rule has no effect. 819 protocol tests keep their verdicts and the five new ones pass.
+- Step 6, done on 2026-10-21 (`tests: comment: the authoring guide shows the new words of a tap`): section 7 of `AUTHORING.md` has the form of a rule, the tables of selectors and actions for both kinds of tap, the rules of a rule from a step, and the radio medium as a tap; the cookbook has three new entries.
 
 ## 8. Risks, unresolved decisions, and approval scope
 
@@ -491,11 +500,11 @@ Expected results:
 
 ### Risks
 
-- Wireless `drop()` removes the energy only if every computation of energy goes through `isInterferingTransmission`. Section 2.3 shows this for the carrier sense and for the SNIR of other receptions. Step 5 must check that no other path of the medium or of the communication cache adds the energy of a transmission without this filter.
-- The transmitter radio does not know about a wireless copy. It can receive while the copy is on the air, and its MAC does not see the copy. This is acceptable for a test, and the guide must say it.
-- `createTransmission` of the transmitter can read the state of the radio at the time of the copy, for example its mode or its power. Step 5 must examine this for the 802.11 scalar transmitter.
-- R1 can change fingerprints through the abort paths of the streaming transmitters (section 5).
-- A wired copy that waits for a busy channel follows the frame before it with no inter-frame gap. Step 3 must examine whether a full-duplex Ethernet receiver accepts this.
+- Wireless `drop()` removes the energy only if every computation of energy goes through `isInterferingTransmission`. Resolved in step 5: `WifiDropRemovesEnergy` fails without the drop rule and passes with it.
+- The transmitter radio does not know about a wireless copy. It can receive while the copy is on the air, and its MAC does not see the copy. This came true in step 5 as the `Dcf` finding above; the guide says it.
+- `createTransmission` of the transmitter can read the state of the radio at the time of the copy. Resolved in step 5 for the 802.11 scalar transmitter: the copies work.
+- R1 can change fingerprints through the abort paths of the streaming transmitters (section 5). Resolved in step 1: no computed fingerprint moves in the local run.
+- A wired copy that waits for a busy channel follows the frame before it with no inter-frame gap. Resolved by reading the code: `EthernetMacPhy` keeps the gap only before it transmits (`WAIT_IFG_STATE`), and its receive path does not check the gap between two frames. No test sends two frames back to back on purpose.
 
 ### Approval scope
 
