@@ -1,0 +1,46 @@
+%description:
+The framework rejects a second trigger while the source still transmits.
+
+%file: InterferenceBusy.cc
+#include "ProtocolTest.h"
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("interference_busy")
+        .interfere("jammer")
+        .once(on("jammer").signal("interferenceStarted").within(0.001))
+        .interfere("jammer", SimTime(1, SIMTIME_US));
+}
+
+%file: test.ned
+import inet.protocoltest.ProtocolTester;
+import inet.protocoltest.TriggeredNoiseSource;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+network InterferenceBusyNetwork
+{
+    submodules:
+        tester: ProtocolTester;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        jammer: TriggeredNoiseSource;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = InterferenceBusyNetwork
+sim-time-limit = 1ms
+seed-set = 0
+*.jammer.transmitter.duration = 100us
+*.jammer.transmitter.centerFrequency = 5.01GHz
+*.jammer.transmitter.bandwidth = 20MHz
+*.jammer.transmitter.power = 1W
+*.jammer.mobility.initFromDisplayString = false
+*.jammer.mobility.initialX = 0m
+*.jammer.mobility.initialY = 0m
+*.jammer.mobility.initialZ = 0m
+
+%exitcode: 1
+%contains: stderr
+interfere: source 'InterferenceBusyNetwork.jammer' is busy

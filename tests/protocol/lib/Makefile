@@ -33,7 +33,8 @@ OBJS = \
     $O/ProtocolTest.o \
     $O/ProtocolTestAttach.o \
     $O/ProtocolTestDescriber.o \
-    $O/ProtocolTester.o
+    $O/ProtocolTester.o \
+    $O/TriggeredNoiseSource.o
 
 # Message files
 MSGFILES =

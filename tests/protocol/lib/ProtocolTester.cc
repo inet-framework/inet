@@ -7,6 +7,7 @@
 #include "ProtocolTester.h"
 #include "ProtocolTestDescriber.h"
 #include "PacketTap.h"
+#include "TriggeredNoiseSource.h"
 
 #include <iostream>
 #include <set>
@@ -21,6 +22,7 @@
 #include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/contract/IPassivePacketSink.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
 
 namespace inet {
 namespace protocoltest {
@@ -125,9 +127,13 @@ void ProtocolTester::subscribeStateSignals()
         "packetSentToLower", "packetReceivedFromLower", "packetSentToUpper",
         "packetReceivedFromUpper", "packetSentToPeer", "packetReceivedFromPeer", "packetDropped",
         "packetPushed", "packetPushedIn", "packetPushedOut",
-        "packetPulled", "packetPulledIn", "packetPulledOut"
+        "packetPulled", "packetPulledIn", "packetPulledOut", "transmissionStarted"
     };
     auto collect = [&](const EventPattern& p) {
+        if (p.fltSignal == "transmissionStarted" && signalKinds.count(transmissionStartedSignal) == 0) {
+            signalKinds[transmissionStartedSignal] = EventKind::Other;
+            subscriptionModule->subscribe(transmissionStartedSignal, this);
+        }
         if (!p.fltSignal.empty() && packetSignals.find(p.fltSignal) == packetSignals.end())
             names.insert(p.fltSignal);
     };
@@ -190,7 +196,15 @@ void ProtocolTester::handleMessage(cMessage *msg)
         return;
     }
     if (msg == injectMsg) {
-        performInjection(program->steps[currentStep].injection);
+        const auto& step = program->steps[currentStep];
+        if (step.type == StepType::Interfere) {
+            auto source = dynamic_cast<TriggeredNoiseSource *>(getSystemModule()->getModuleByPath(("." + step.interferenceSource).c_str()));
+            if (source == nullptr)
+                throw cRuntimeError("interfere: source '%s' is not a TriggeredNoiseSource", step.interferenceSource.c_str());
+            source->trigger();
+        }
+        else
+            performInjection(step.injection);
         advance(simTime());
         return;
     }
@@ -286,6 +300,7 @@ void ProtocolTester::finish()
         std::string what = step.type == StepType::Unordered
                              ? "[unordered: " + std::to_string(groupRemaining) + " pattern(s) unmatched]"
                          : step.type == StepType::Inject ? "[inject pending]"
+                         : step.type == StepType::Interfere ? "[interference pending]"
                          : "[" + step.pattern.str() + "]";
         decide(false, "simulation ended with step " + std::to_string(currentStep) + " pending " + what);
     }
@@ -296,7 +311,8 @@ void ProtocolTester::receiveSignal(cComponent *source, simsignal_t signalID, cOb
     auto it = signalKinds.find(signalID);
     if (it == signalKinds.end())
         return;
-    auto packet = dynamic_cast<const Packet *>(obj);
+    auto transmission = dynamic_cast<const physicallayer::ITransmission *>(obj);
+    auto packet = transmission != nullptr ? transmission->getPacket() : dynamic_cast<const Packet *>(obj);
     if (packet == nullptr)
         return;
     PacketEvent event = normalize(source, it->second, packet);
@@ -528,6 +544,11 @@ void ProtocolTester::enterStep()
             scheduleAt(fireTime, injectMsg);
             break;
         }
+        case StepType::Interfere:
+            if (injectMsg == nullptr)
+                injectMsg = new cMessage("inject");
+            scheduleAt(anchorTime + step.interferenceOffset, injectMsg);
+            break;
     }
 }
 
