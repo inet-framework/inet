@@ -1623,6 +1623,17 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             return false;
         if (!isFrameEligible(packet, true))
             return false;
+        if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            auto status = channelOwner->getAckHandler()->getQoSDataAckStatus(dataHeader);
+            if (dataHeader->getType() == ST_DATA_WITH_QOS &&
+                (status == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED || status == QosAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED)) {
+                // IEEE Std 802.11-2024, 9.2.4.1.6: DATA after a failed Block Ack exchange is a retransmission.
+                auto updated = packet->removeAtFront<Ieee80211DataHeader>();
+                updated->setRetry(true);
+                packet->insertAtFront(updated);
+                header = updated;
+            }
+        }
         auto lifetimeHandler = edca->getLifetimeHandler();
         auto step = frameSequenceHandler->getContext()->getLastStep();
         auto protectedPacket = dynamic_cast<RtsTransmitStep *>(step);
