@@ -1,0 +1,30 @@
+%description:
+Shared originator operations preserve the earliest unresolved sequence across wraparound.
+The accepted transmit window and the 64-position response bitmap have distinct boundaries.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+const MacAddress peer("02:00:00:00:00:02");
+OriginatorBlockAckAgreement window(peer, 5, SequenceNumberCyclic(4094), 4, false, false);
+ASSERT(window.containsSequence(SequenceNumberCyclic(4094)));
+ASSERT(window.containsSequence(SequenceNumberCyclic(1)));
+ASSERT(!window.containsSequence(SequenceNumberCyclic(2)));
+ASSERT(!window.containsSequence(SequenceNumberCyclic(4093)));
+window.advanceWindow(SequenceNumberCyclic(2), {SequenceNumberCyclic(0), SequenceNumberCyclic(4095)});
+ASSERT(window.getStartingSequenceNumber() == SequenceNumberCyclic(4095));
+window.advanceWindow(SequenceNumberCyclic(2), {SequenceNumberCyclic(0)});
+ASSERT(window.getStartingSequenceNumber() == SequenceNumberCyclic(0));
+window.advanceWindow(SequenceNumberCyclic(2), {});
+ASSERT(window.getStartingSequenceNumber() == SequenceNumberCyclic(2));
+ASSERT(OriginatorBlockAckAgreement::isInBitmap(SequenceNumberCyclic(62), SequenceNumberCyclic(4095)));
+ASSERT(!OriginatorBlockAckAgreement::isInBitmap(SequenceNumberCyclic(63), SequenceNumberCyclic(4095)));
+ASSERT(!OriginatorBlockAckAgreement::isInBitmap(SequenceNumberCyclic(4094), SequenceNumberCyclic(4095)));
+ASSERT(!window.containsSequence(SequenceNumberCyclic(62)));
+std::cout << "Originator Block Ack window assertions passed.\n";
+
+%contains: stdout
+Originator Block Ack window assertions passed.
