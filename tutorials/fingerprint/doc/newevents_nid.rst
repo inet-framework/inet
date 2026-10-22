@@ -41,7 +41,7 @@ Here is the workflow:
 
 - Before making the change in the model, run the fingerprint with ``~tID`` ingredients only
 - Make the changes in the model
-- Run the fingerprint tests again
+- Run the simulations again with the same ingredients
 
 If fingerprint tests pass, there was no change in the communication between network nodes,
 and the model can be assumed to be correct with respect to the data of the exchanged packets staying the same.
@@ -49,48 +49,43 @@ and the model can be assumed to be correct with respect to the data of the excha
 As a simplistic example, we will make the same change to the :ned:`Udp` module as in the previous step.
 We will use only network communication ingredients to calculate fingerprints and verify the model.
 
-We replace the default ingredients with ``~tID`` in the .csv file:
+We run the simulations with the ``~tID`` ingredients. The fingerprint ``0000-0000/~tID`` is a dummy value.
+It makes the run fail, and the run prints the calculated value:
 
-.. code-block:: text
+.. code-block:: bash
 
-  .,        -f omnetpp.ini -c Ethernet -r 0,           5s,         aeb0-6fd3/~tID, PASS,
-  .,        -f omnetpp.ini -c Wifi -r 0,               5s,         c1f4-8059/~tID, PASS,
-
-Then we run the fingerprint tests:
-
-.. code-block:: fp
-
-  $ inet_fingerprinttest -m AddingNewEvents2
-  . -f omnetpp.ini -c Ethernet -r 0  ... : FAILED
-  . -f omnetpp.ini -c Wifi -r 0  ... : FAILED
-
-.. **TODO** do we need the new value?
-
-  . -f omnetpp.ini -c Ethernet -r 0  ... : FAILED: actual  'b47f-d0db/~NID'
-
-As there was no change in the model, the new fingerprints can be accepted:
+  $ inet -u Cmdenv -c Ethernet -r 0 --sim-time-limit=0.2s --fingerprint=0000-0000/~tID
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=0000-0000/~tID
 
 .. code-block:: fp
 
-   $ mv baseline.csv.UPDATED baseline.csv
+  Fingerprint mismatch! calculated: XXXX-XXXX/~tID, expected: 0000-0000/~tID
+  Fingerprint mismatch! calculated: XXXX-XXXX/~tID, expected: 0000-0000/~tID
+
+Note the two calculated values. There was no change in the model, so they are correct.
+The commands do not change the store, so the stored ``tplx`` values stay as they are.
 
 We make the change:
 
 .. literalinclude:: ../sources/Udp_mod.cc
    :diff: ../sources/Udp_orig.cc
 
-We run the fingerprint tests again:
+We run the simulations again with the calculated values:
+
+.. code-block:: bash
+
+  $ inet -u Cmdenv -c Ethernet -r 0 --sim-time-limit=0.2s --fingerprint=XXXX-XXXX/~tID
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=XXXX-XXXX/~tID
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m AddingNewEvents2
-  . -f omnetpp.ini -c Ethernet -r 0  ... : PASS
-  . -f omnetpp.ini -c Wifi -r 0  ... : PASS
+  Fingerprint successfully verified
+  Fingerprint successfully verified
 
-After making the change, the fingerprint tests pass, thus the model can be assumed correct.
+After making the change, the fingerprints match, thus the model can be assumed correct.
 
 .. pittfalls
 
 It might turn out that the selected fingerprint ingredients are too sensitive. For example, the ``~tID`` ingredients take into account the interfaces between which the packets pass. If due to the model change, a packet uses another interface of a host with multiple interfaces, but the data and the source and destination hosts stay the same, the model might be valid, but the fingerprint tests don't pass. Using ``~tND`` instead would not be sensitive to the interfaces, and the tests would pass.
 
-When the model is verified, we can change the ingredients back to ``tplx`` (or some other default), re-run the tests, and accept the new values. This process is described in more detail in the :doc:`accepting` step.
+When the model is verified, run the update command with the ``tplx`` ingredients to record the new values in the store. This process is described in more detail in the :doc:`accepting` step.

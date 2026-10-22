@@ -25,30 +25,33 @@ The tests should pass.
 As a simplistic example, we'll change how the ``removeNonInterferingTransmissionsTimer`` is scheduled in ``RadioMedium.cc``.
 The timer deletes transmissions that no longer cause any interference (e.g. they have already left the vicinity of network nodes).
 
-We run the fingerprint tests and filter the events in the ``RadioMedium`` module:
+We run the simulation and filter the events of the timer. We use the ``inet`` command in the tutorial directory.
+The fingerprint ``0000-0000/tplx`` is a dummy value. It makes the run fail, and the run prints the calculated value:
+
+.. code-block:: bash
+
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=0000-0000/tplx --fingerprint-events='"not name=~removeNonInterferingTransmissions"'
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m ChangingTimer -a --fingerprint-events='"not name=~removeNonInterferingTransmissions"'
-  . -f omnetpp.ini -c Wifi -r 0  ... : FAILED
+  Fingerprint mismatch! calculated: XXXX-XXXX/tplx, expected: 0000-0000/tplx
 
-The tests fail because the set of events used to calculate them changed.
-Since there was no change in the model, just in how the fingerprints are calculated, the .csv file can be updated with the new values:
-
-.. code-block:: fp
-
-   $ mv baseline.csv.UPDATED baseline.csv
+Note the calculated value. The model did not change. The filter changed the set of events that the fingerprint uses.
+The command does not change the store, so the stored ``tplx`` values stay as they are.
 
 Now, we change the timer:
 
 .. literalinclude:: ../sources/RadioMedium.cc.mod
    :diff: ../sources/RadioMedium.cc.orig
 
-We re-run the fingerprint tests:
+We run the simulation again with the same filter and the calculated fingerprint:
+
+.. code-block:: bash
+
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=XXXX-XXXX/tplx --fingerprint-events='"not name=~removeNonInterferingTransmissions"'
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m ChangingTimer -a --fingerprint-events='"not name=~removeNonInterferingTransmissions"'
-  . -f omnetpp.ini -c Wifi -r 0  ... : PASS
+  Fingerprint successfully verified
 
-The model is verified. The fingerprints can be calculated without filtering, and the .csv file can be updated with the new values. This process is described in more detail in the :doc:`accepting` step.
+The model is verified. The fingerprints can be calculated without filtering. Then the update command records the new values in the store. This process is described in more detail in the :doc:`accepting` step.
