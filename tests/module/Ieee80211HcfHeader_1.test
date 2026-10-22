@@ -20,7 +20,7 @@ class HeaderAckPolicy : public OriginatorQosAckPolicy {
         selections++;
         return BLOCK_ACK;
     }
-    bool isBlockAckReqNeeded(InProgressFrames *, TxopProcedure *) const override { return false; }
+    bool isBlockAckReqNeeded(InProgressFrames *, TxopProcedure *, IOriginatorBlockAckAgreementHandler *) const override { return false; }
 };
 Define_Module(HeaderAckPolicy);
 class HeaderAgreementHandler : public OriginatorBlockAckAgreementHandler {

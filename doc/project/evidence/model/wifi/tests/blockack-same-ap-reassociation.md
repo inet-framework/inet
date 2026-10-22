@@ -40,7 +40,9 @@ The fixture creates these roles through real ADDBA exchanges. It never inserts a
 
 ## Test sequence
 
-The initial uplink batch starts at `1 s`. The reverse batch starts at `1.01 s`. Both batches end before replacement. At `1.1 s`, the station agent requires all four roles and saves the peer rate sets and advertised HT capabilities at both endpoints.
+The initial uplink batch starts at `1 s`. The reverse batch starts one microsecond later. Both batches end before replacement. At `1.008 s`, the station agent requires all four roles and saves the peer rate sets and advertised HT capabilities at both endpoints. This early probe precedes S4's completion teardown.
+
+The fixture uses 6 Mbit/s and disables A-MSDU aggregation. It disables Block Ack on sta2 and uses 100-byte downlink packets. The AP's Block Ack length limit excludes its larger forwarded uplink packets. These controls isolate agreements on the target link. Coincident transmissions produce a warning; this diagnostic setting changes no reception calculation.
 
 The agent requests reassociation with its current AP without another authentication exchange. This condition matters because authentication could clear the old association before the test reaches the replacement path. The request's receiver and Current AP field must both identify the current AP.
 
@@ -50,7 +52,7 @@ sequenceDiagram
     participant G as Station test agent
     participant A as AP management and HCF
     Note over S,A: Real traffic establishes both agreement directions
-    G->>G: Require four roles and save peer parameters at 1.1 s
+    G->>G: Require four roles and save peer parameters at 1.008 s
     G->>S: Request reassociation with current AP
     S->>A: Reassociation Request
     A-->>S: Successful Reassociation Response
@@ -61,7 +63,7 @@ sequenceDiagram
     Note over S,A: New traffic starts at 1.3 s and 1.31 s
     S->>A: Fresh uplink ADDBA setup
     A->>S: Fresh downlink ADDBA setup
-    G->>G: Require four fresh roles at 1.4 s
+    G->>G: Require four fresh roles at 1.38 s
 ```
 
 The one-millisecond delay follows station reassociation confirmation. It permits the AP to receive the response ACK and commit replacement before the joint query. Inactivity expiration remains disabled, so it cannot explain removal of the agreements.
@@ -70,7 +72,7 @@ The one-millisecond delay follows station reassociation confirmation. It permits
 
 The first state assertion requires four old roles. The next frame assertion checks same-AP reassociation. After completion, the fixture requires equal peer rate sets and advertised HT capabilities. It then requires zero old roles before the new traffic batches start.
 
-The later batches must trigger fresh ADDBA Requests in both directions. Concurrent observations require new traffic at UDP on both destination stations. At `1.4 s`, the fixture requires four fresh agreement roles. This final condition excludes a repair that clears state but prevents later setup.
+The later batches must trigger fresh ADDBA Requests in both directions. Concurrent observations require new traffic at UDP on both destination stations. The batches continue until `1.4 s` to retain useful transfer context. At `1.38 s`, the fixture requires four fresh agreement roles. This final condition excludes a repair that clears state but prevents later setup.
 
 The test agent, `BlockAckReassociationAgent`, supplies only the reassociation request, state queries, and observation times. Production management performs the association transitions. Production HCF and its agreement handlers perform setup and cleanup. The agent never calls the peer reset operation.
 
@@ -93,7 +95,7 @@ inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$' \
 
 The file contains one simulation run with seed 0. Its required result is `PROTOCOLTEST wifi_block_ack_same_ap_reassociation: PASS`.
 
-This test uses the Basic profile and successful same-AP reassociation. It does not cover another AP, refused reassociation, association loss, or replacement during an active DATA exchange. The state queries complement the frame trace. They do not establish full standards conformance.
+This test uses the Basic profile and successful same-AP reassociation. It does not cover another AP, refused reassociation, or association loss. The state queries complement the frame trace. They do not establish full standards conformance.
 
 ## Profile limits
 
