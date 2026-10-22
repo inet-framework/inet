@@ -22,7 +22,7 @@ Map each changed path, symbol or behavioral contract to the directly related cas
 
 ```bash
 doc/project/enforcement/check-architecture.sh src/inet/<affected-subtree>
-( cd tests/fingerprint && ./fingerprinttest -m '<affected-case-or-tag-regex>' )
+opp_run_fingerprint_tests --load @opp -p inet -f '<affected-case-regex>'
 # Use the category runner's explicit selector for unit, module, protocol and other tests.
 ```
 

@@ -147,7 +147,7 @@ An analytical result, a measurement, a reference implementation, or a figure fro
 
 **A recorded expectation changes only after its exact scope and reason receive explicit approval, never as a side effect of another change.**
 
-A fingerprint `.csv`, a statistical baseline, an expected output: each is a claim that *these values are correct*. Regenerating one to make CI green is the single fastest way to lose every regression guarantee the suite provides, and it is invisible in a large diff. Before regeneration, present the specific baselines or configurations that would move, the behavior that caused the movement, and why the new values would be right; the human responsible for accepting the change approves that proposal explicitly. Approval of the source change is not implicit approval to rewrite its recorded expectations.
+A fingerprint in `tests/fingerprint/store.json`, a statistical baseline, an expected output: each is a claim that *these values are correct*. Regenerating one to make CI green is the single fastest way to lose every regression guarantee the suite provides, and it is invisible in a large diff. Before regeneration, present the specific baselines or configurations that would move, the behavior that caused the movement, and why the new values would be right; the human responsible for accepting the change approves that proposal explicitly. Approval of the source change is not implicit approval to rewrite its recorded expectations.
 
 The defence continues in the commit message: the commit that moves the values states which behavior moved and why the new values are right ([PR-SPLIT-BASELINE](pull-request.md#pr-split-baseline)).
 

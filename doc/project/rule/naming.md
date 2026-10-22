@@ -344,7 +344,7 @@ A self-message or timer is held in a `camelCase` member named for its purpose, e
 
 **A test file is named for what it tests, and a fingerprint tag is a lowercase descriptive word.**
 
-- **A fingerprint test is identified by its working directory plus its run command**, not a separate name: `<dir>, -f <inifile> -c <ConfigName> -r <run#>, <timelimit>, <fingerprint>, <result>, <tags>`, one per line in a per-area CSV (`ethernet.csv`, `examples.csv`). The trailing **tags** are lowercase, space-separated model-area words used for filtering (`wireless adhoc Ipv4`, `routing`).
+- **A fingerprint test is identified by its run**, not a separate name: the working directory, the ini file, the config and the run number of its entries in `tests/fingerprint/store.json`. Each entry also names the sim-time-limit, the ingredients, the value and the expected result. A test selection uses these fields (`-f`, `-w`, `-i`, `-c`, `-r` of `opp_run_fingerprint_tests`), not tags.
 - **`tests/module/*.test` and `tests/unit/*.test` files are `<Subject>[_<n>].test`** (`AntennaOrientation_1.test`, `Clock_SettableLinear_1.test`) — `PascalCase` subject, optional numeric variant.
 
 *Enforced at T3 — [check-naming.sh](../enforcement/check-naming.sh).*

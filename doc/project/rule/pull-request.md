@@ -169,7 +169,7 @@ The division is also a design check. If you cannot describe the first commit wit
 
 **A regenerated baseline travels with the change that causes it**
 
-When one source change moves a recorded expectation — a fingerprint (`tests/fingerprint/*.csv`), a statistical baseline, an expected output — the regenerated values go in the same commit as that source change. The message of that commit says which behavior moved and why the new values are correct.
+When one source change moves a recorded expectation — a fingerprint (`tests/fingerprint/store.json`), a statistical baseline, an expected output — the regenerated values go in the same commit as that source change. The message of that commit says which behavior moved and why the new values are correct.
 
 A baseline update is a claim, not a side effect: *these values change on purpose, and the new values are correct*. The claim lives in the message. It does not live in the commit boundary. One commit also makes the attribution exact, which is what [AR-QUAL-TRACEABILITY](architecture.md) asks for: the change that justifies the new values is the change that carries them.
 
@@ -517,7 +517,7 @@ The [compact plan](../guide/write-an-implementation-plan.md#compact-worked-examp
 | A feature needs a defect repaired first | fold the fix into the feature | the fix with its own baselines, then the feature (PR-SPLIT-PREPARE) |
 | A feature needs a new contract | the contract and its first user in one commit | the contract with its tests, then a small commit that turns the behavior on (PR-SPLIT-PREPARE) |
 | An 802.11 fix needs a queueing feature | one commit | generic queueing feature, then 802.11 fix (PR-SPLIT-UPSTREAM) |
-| Your fix changes fingerprints | a baseline commit after the fix | the source and the `.csv` in one commit, with the reason in the message (PR-SPLIT-BASELINE) |
+| Your fix changes fingerprints | a baseline commit after the fix | the source and the fingerprint store in one commit, with the reason in the message (PR-SPLIT-BASELINE) |
 | A compiler update moves fingerprints | fold them into the next fix | a baseline-only commit that names the cause (PR-SPLIT-BASELINE) |
 | You see an unrelated bug on the way | fold it in | separate commit, or separate pull request (PR-SPLIT-DRIVEBY) |
 | A reviewer finds a defect in commit 2 of 5 | add commit 6 | rebase the correction into commit 2 (PR-SERIES-ORDER) |

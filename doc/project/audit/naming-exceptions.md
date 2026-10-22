@@ -80,7 +80,7 @@ Ids are stable references you can cite in a commit or PR that does the rename. N
 
 | Id | Deviation | Should be | Where | Status |
 |---|---|---|---|---|
-| NV-15 | `PascalCase` type-name fingerprint tags mixed with lowercase descriptive tags (`EthernetCsmaMac`) | lowercase descriptive words | `tests/fingerprint/*.csv` tag column | Open (low priority) |
+| NV-15 | `PascalCase` type-name fingerprint tags mixed with lowercase descriptive tags (`EthernetCsmaMac`) | lowercase descriptive words | `tests/fingerprint/*.csv` tag column | Closed 2026-10-22: the CSV files and their tags are gone; `tests/fingerprint/store.json` has no tags |
 | NV-16 | `.test` names using `IPv6Address`-style acronym casing / mixed case | acronym-as-word (`Ipv6Address`) | `tests/{module,unit}/*.test` | Open |
 
 ### Icons
