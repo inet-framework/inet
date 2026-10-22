@@ -1,0 +1,15 @@
+# configs of decisions D4 and D8, recorded later
+examples/empty omnetpp.ini General
+examples/wireless/lan80211ac omnetpp.ini General
+showcases/visualizer/osg/earth omnetpp.ini DefaultSettings
+showcases/visualizer/osg/earth omnetpp.ini NetworkNodes
+showcases/visualizer/osg/earth omnetpp.ini PhysicalObjects
+tutorials/protocol Network90.ini General
+tutorials/protocol Network91.ini General
+tutorials/protocol omnetpp.ini Network1
+tutorials/protocol omnetpp.ini Network2
+tutorials/protocol omnetpp.ini Network3
+tutorials/protocol omnetpp.ini Network4
+tutorials/protocol omnetpp.ini Network5
+tutorials/protocol omnetpp.ini Network6
+tutorials/protocol omnetpp.ini Network7
