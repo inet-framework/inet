@@ -101,9 +101,6 @@ def run_simulations_main():
 def run_smoke_tests_main():
     run_tasks_main(run_smoke_tests, "smoke tests")
 
-def run_fingerprint_tests_main():
-    run_tasks_main(run_fingerprint_tests, "fingerprint tests")
-
 def run_chart_tests_main():
     run_tasks_main(run_chart_tests, "chart tests")
 
@@ -142,9 +139,6 @@ def run_all_tests_main():
 
 def run_release_tests_main():
     run_tasks_main(run_release_tests, "release tests")
-
-def update_correct_fingerprints_main():
-    run_tasks_main(update_correct_fingerprints, "update correct fingerprints")
 
 def parse_build_project_arguments():
     description = "Builds the specified or enclosing simulation project."
