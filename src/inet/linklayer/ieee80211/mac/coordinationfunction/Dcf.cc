@@ -254,6 +254,10 @@ void Dcf::recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const I
 {
     if (auto rtsFrame = dynamicPtrCast<const Ieee80211RtsFrame>(header))
         ctsProcedure->processReceivedRts(packet, rtsFrame, ctsPolicy, this);
+    else if (dynamicPtrCast<const Ieee80211AckFrame>(header) || dynamicPtrCast<const Ieee80211CtsFrame>(header))
+        // no frame exchange waits for this response: it came after its timeout, or its frame
+        // was repeated on the air (IEEE 802.11-2024 10.3.2.9, 10.3.2.11)
+        EV_WARN << "Response frame received outside a frame exchange, ignoring it.\n";
     else
         throw cRuntimeError("Unknown control frame");
 }

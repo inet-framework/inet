@@ -1,0 +1,39 @@
+%description:
+A BlockAck that no exchange waits for has no effect. sta1 sets up a Block Ack agreement with the AP and sends a burst of 2 ms of DATA frames with the Block Ack policy. The radio medium sends a copy of the first BlockAck of the AP 60 ms after the original. sta1 sends its last frame at about 1.007 s, and the AP forwards the data to sta2 until about 1.055 s, so the copy arrives at about 1.062 s, when the air is free and no exchange of sta1 waits for a BlockAck. sta1 must ignore the copy: it sends nothing because of it, and the run goes on. The stations are QoS stations, so the Hcf of sta1 receives the copy.
+
+%file: WifiLateBlockAck.cc
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+
+Define_ProtocolTest(wifi_late_block_ack)
+{
+    return ProtocolTest("wifi_late_block_ack")
+        .once(on("ap.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 25")
+                  .describe("the AP sends its first BlockAck to sta1").within(1.2))
+        .meanwhile(tap("radioMedium").from("ap").filterPacket("ieee80211mac.type == 25").nth(1).duplicate(0.06)
+                     .describe("this BlockAck, and one copy 60 ms later"))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 25")
+                  .describe("the BlockAck at sta1").within(0.001))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower").filterPacket("ieee80211mac.type == 25")
+                  .notBefore(0.055)
+                  .describe("the copy of the BlockAck at sta1, which no exchange of sta1 waits for").within(0.062))
+        .never(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                   .describe("a frame that sta1 sends because of the copy").within(0.01));
+}
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_late_block_ack"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.002s
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_late_block_ack: PASS

@@ -342,9 +342,8 @@ the ACK that sta2 sends to the AP. To select the frames addressed to a station, 
 address, for example `ieee80211mac.receiverAddress.getInt() == {sta1}`.
 
 A copy is a frame that its transmitter does not know about. The station that sent the
-original gets the ACK of the copy, and the `Dcf` of INET stops with "Unknown control frame"
-when it gets an ACK that it does not expect. `WifiDuplicateWithRetry.test` keeps that ACK
-away from the station with a rule.
+original gets the ACK of the copy, which no exchange of its own waits for, and it ignores that
+ACK (IEEE 802.11-2024 10.3.2.11).
 
 **Splicing a tap into a network** (the tap must carry `@networkNode()` so the IPv4
 configurator merges both sides into one link):

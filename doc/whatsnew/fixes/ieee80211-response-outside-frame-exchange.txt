@@ -1,0 +1,3 @@
+An 802.11 response outside its frame exchange is ignored
+
+A station stopped the simulation with "Unknown control frame" when it received a response frame that no frame exchange of its own waited for: an Ack or a CTS at a non-QoS station (Dcf), and a CTS or a BlockAck at a QoS station (Hcf). Such a frame arrives when it starts after its timeout, for example from a peer far away, or when a frame is repeated on the air. IEEE 802.11-2024 counts an Ack or a CTS only when it starts within its timeout (10.3.2.11, 10.3.2.9), so the station now ignores such a frame, as the Hcf already did for a late Ack.

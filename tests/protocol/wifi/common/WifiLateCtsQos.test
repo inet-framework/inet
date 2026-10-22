@@ -1,0 +1,51 @@
+%description:
+A CTS that no exchange waits for has no effect, also at a QoS station. The test is WifiLateCts with QoS stations (802.11n), so the Hcf of sta1 receives the copy of the CTS.
+
+%file: WifiLateCtsQos.cc
+#include "WifiTestSupport.h"
+
+namespace inet {
+namespace protocoltest {
+using namespace ieee80211;
+
+static cValue transmitterOf(const PacketEvent& e) { return cValue((intval_t)e.packet->peekAtFront<Ieee80211TwoAddressHeader>()->getTransmitterAddress().getInt()); }
+
+Define_ProtocolTest(wifi_late_cts_qos)
+{
+    return ProtocolTest("wifi_late_cts_qos")
+        .intercept(tap("radioMedium").from("ap").filterPacket("ieee80211mac.type == 28").nth(1).duplicate(0.002)
+                     .describe("the first CTS of the AP, and one copy 2 ms later"))
+        .meanwhile(exactlyTimes(1, on("sta2.udp").signal("packetSentToUpper")
+                                    .describe("a datagram from UDP of sta2 to the application").within(2.5)))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 27")
+                  .capture("sta1", transmitterOf)
+                  .describe("sta1 sends an RTS for its DATA frame").within(2))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ieee80211mac.type == 28 && ieee80211mac.receiverAddress.getInt() == {sta1}")
+                  .describe("the CTS of the AP at sta1").within(0.001))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower").filterPacket("ieee80211mac.type == 40")
+                  .describe("sta1 sends the DATA frame").within(0.001))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ieee80211mac.type == 28 && ieee80211mac.receiverAddress.getInt() == {sta1}")
+                  .describe("the copy of the CTS at sta1, which no exchange of sta1 waits for").within(0.003))
+        .never(on("sta1.wlan[0].mac").signal("packetSentToLower")
+                   .describe("a frame that sta1 sends because of the copy").within(0.01));
+}
+} // namespace protocoltest
+} // namespace inet
+
+%inifile: test.ini
+[General]
+*.tester.testName = "wifi_late_cts_qos"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+# RTS/CTS for the DATA frames only: the management frames are shorter.
+**.rtsPolicy.rtsThreshold = 500B
+*.sta1.app[0].stopTime = 1.001s
+include ../../ini/_n.ini
+include ../../ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_late_cts_qos: PASS
+
+%contains: stdout
+WifiInfraNetwork.sta2.app[0]: received 1 packets
