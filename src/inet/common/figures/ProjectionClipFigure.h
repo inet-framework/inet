@@ -18,10 +18,10 @@ namespace inet {
  * GeoMapCanvasVisualizer. It has no visual appearance.
  *
  * While the projection has a clip rectangle, the figure clips its children to it
- * (see cAbstractShapeFigure::setClipChildren()), which also isolates them in the
- * stacking order. While the projection has no clip rectangle (e.g. in scenes
- * without a geographic map), the figure does not clip, and it behaves exactly
- * like a cGroupFigure.
+ * (see cAbstractShapeFigure::setClipChildren()). While the projection has no clip
+ * rectangle (e.g. in scenes without a geographic map), the figure does not clip.
+ * Otherwise it behaves like a cGroupFigure; in particular, clipping does not affect
+ * the stacking order of the children.
  *
  * The figure follows the clip rectangle in refreshDisplay(), which the GUI calls
  * before rendering the canvas. (The clip rectangle is only set up in the last
