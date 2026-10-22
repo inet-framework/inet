@@ -43,7 +43,7 @@ Both runs use real association, production transmission, and the wireless medium
 | 0 | No agreement for station `sta1` and TID 5 | Recipient-role DELBA for that station and TID |
 | 1 | Real ADDBA establishes an agreement for `sta1` and TID 6 | Basic Block Ack for that station and TID |
 
-Run 0 starts application traffic after the simulation's time limit. Run 1 supplies a short traffic batch before the crafted BAR. Read-only queries check the required agreement state at both endpoints before transmission. The control must establish its agreement before the response assertion can test normal behavior.
+Run 0 starts application traffic after the simulation's time limit. Run 1 supplies a short traffic batch before the crafted BAR. At 1.002 seconds, the fixture blocks station contention while queued DATA remains. This control retains the agreement until the crafted BAR, despite S4's completion teardown. It changes no agreement state. Read-only queries check the required agreement state at both endpoints before transmission.
 
 ```mermaid
 sequenceDiagram

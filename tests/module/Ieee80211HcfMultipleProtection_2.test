@@ -116,6 +116,7 @@ Define_Module(RateProtectionMac);
 class RateProtectionHcf : public Hcf {
   public:
     int acknowledgments = 0;
+    int managementAcknowledgments = 0;
     int blockAcks = 0;
     int failures = 0;
     void seedOriginator() {
@@ -168,7 +169,12 @@ class RateProtectionHcf : public Hcf {
     }
     void originatorProcessReceivedFrame(Packet *packet, Packet *request) override {
         auto type = packet->peekAtFront<Ieee80211MacHeader>()->getType();
-        if (type == ST_ACK) acknowledgments++;
+        if (type == ST_ACK) {
+            if (dynamicPtrCast<const Ieee80211DataHeader>(request->peekAtFront<Ieee80211MacHeader>()))
+                acknowledgments++;
+            else
+                managementAcknowledgments++;
+        }
         if (type == ST_BLOCKACK) blockAcks++;
         Hcf::originatorProcessReceivedFrame(packet, request);
     }
@@ -208,12 +214,13 @@ class RateProtectionTest : public cSimpleModule {
         else {
             sender->inject(66, scenario == 6);
             if (scenario == 0 || scenario == 1)
-                sender->inject(); // The existing BAR branch needs a next selected frame.
+                sender->inject();
         }
         wait(SimTime(5, SIMTIME_MS));
         if (scenario == 0 || scenario == 1) {
             ASSERT(sender->blockAcks >= 1);
             ASSERT(sender->acknowledgments == 0);
+            ASSERT(sender->managementAcknowledgments == 1);
             ASSERT(std::find(senderMac->types.begin(), senderMac->types.end(), ST_BLOCKACK_REQ) != senderMac->types.end());
             ASSERT(receiverMac->types[0] == ST_CTS);
             auto firstRtsEndpoint = senderMac->ends[0] + senderMac->durations[0];
