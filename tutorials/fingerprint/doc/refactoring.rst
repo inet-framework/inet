@@ -18,14 +18,6 @@ The refactoring doesn't change the fingerprint because the code is functionally 
 
 .. code-block:: fp
 
-   $ inet_fingerprinttest -m EasyToHandleChanges
-   . -f omnetpp.ini -c Ethernet -r 0  ... : PASS
-   . -f omnetpp.ini -c Wifi -r 0  ... : PASS
-
-   ----------------------------------------------------------------------
-   Ran 2 tests in 6.714s
-
-   OK
-
-   Log has been saved to test.out
-   Test results equals to expected results
+   $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
+   tutorials/fingerprint -c Ethernet for 0.2s PASS
+   tutorials/fingerprint -c Wifi for 5s PASS

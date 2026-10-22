@@ -5,46 +5,44 @@ Renaming submodules can cause the fingerprints to change, because the default in
 
 To go around the problem of fingerprints failing due to renaming, the fingerprints need to be calculated without the full path:
 
-- Before making the change, rerun fingerprint tests without the full path ingredient
-- Update fingerprints; the new values can be accepted because the model didn't change
+- Before making the change, run the simulations without the full path ingredient
+- Note the new fingerprints; they are correct because the model didn't change
 - Perform renaming
-- Run fingerprint tests again; the new fingerprints are not sensitive to changes in submodule names
+- Run the simulations again with the new fingerprints; the new fingerprints are not sensitive to changes in submodule names
 
-.. note:: To run fingerprints with ``tlx``, delete the ``p`` from the ingredient in the .csv file. When the fingerprint test is run again, the fingerprints will be calculated with the new ingredients. The tests will fail, as the values are still the ones calculated with ``tplx``, but it is safe to overwrite them with the updated values, as the model didn't change.
+.. note:: To run fingerprints with ``tlx``, delete the ``p`` from the ingredients. Use the ``inet`` command in the tutorial directory. The command does not change the store.
 
 Here is the workflow demonstrated using a simplistic example:
 
-We set the fingerprint ingredients to ``tlx`` in the .csv file:
+We run the simulations with the ``tlx`` ingredients. The fingerprint ``0000-0000/tlx`` is a dummy value.
+It makes the run fail, and the run prints the calculated value:
 
-.. code-block:: text
+.. code-block:: bash
 
-  .,        -f omnetpp.ini -c Ethernet -r 0,           5s,         a92f-8bfe/tlx, PASS,
-  .,        -f omnetpp.ini -c Wifi -r 0,               5s,         5e6e-3064/tlx, PASS,
-
-Then we run the fingerprint tests:
-
-.. code-block:: fp
-
-  $ inet_fingerprinttest -m RenamingSubmodule
-  . -f omnetpp.ini -c Ethernet -r 0  ... : FAILED (should be PASS)
-  . -f omnetpp.ini -c Wifi -r 0  ... : FAILED (should be PASS)
-
-As expected, they fail because the values are still the ones calculated with ``tplx``.
-We can update the .csv file with the new values:
+  $ inet -u Cmdenv -c Ethernet -r 0 --sim-time-limit=0.2s --fingerprint=0000-0000/tlx
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=0000-0000/tlx
 
 .. code-block:: fp
 
-   $ mv baseline.csv.UPDATED baseline.csv
+  Fingerprint mismatch! calculated: XXXX-XXXX/tlx, expected: 0000-0000/tlx
+  Fingerprint mismatch! calculated: XXXX-XXXX/tlx, expected: 0000-0000/tlx
+
+As expected, they fail because the dummy value is wrong.
+Note the two calculated values. There was no change in the model, so they are correct.
 
 .. **TODO** show that if we run the tests again they pass -> just for now, not needed later
 
-When we rerun the fingerprint tests, now they PASS:
+When we run the simulations again with the calculated values, they pass:
+
+.. code-block:: bash
+
+  $ inet -u Cmdenv -c Ethernet -r 0 --sim-time-limit=0.2s --fingerprint=XXXX-XXXX/tlx
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=XXXX-XXXX/tlx
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m RenamingSubmodule
-  . -f omnetpp.ini -c Ethernet -r 0  ... : PASS
-  . -f omnetpp.ini -c Wifi -r 0  ... : PASS
+  Fingerprint successfully verified
+  Fingerprint successfully verified
 
 As a simplisic example, we rename the ``eth`` module vector to ``ethernet`` in :ned:`LinkLayerNodeBase` and :ned:`NetworkLayerNodeBase`. This change affects all host-types such as :ned:`StandardHost` and :ned:`AdhocHost` since they are derived modules:
 
@@ -54,19 +52,23 @@ As a simplisic example, we rename the ``eth`` module vector to ``ethernet`` in :
 .. literalinclude:: ../sources/NetworkLayerNodeBase.ned.modified
    :diff: ../sources/NetworkLayerNodeBase.ned.orig
 
-We run the fingerprint tests again:
+We run the simulations again with the same fingerprints:
+
+.. code-block:: bash
+
+  $ inet -u Cmdenv -c Ethernet -r 0 --sim-time-limit=0.2s --fingerprint=XXXX-XXXX/tlx
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=XXXX-XXXX/tlx
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m RenamingSubmodule
-  . -f omnetpp.ini -c Ethernet -r 0  ... : PASS
-  . -f omnetpp.ini -c Wifi -r 0  ... : PASS
+  Fingerprint successfully verified
+  Fingerprint successfully verified
 
 As expected, the fingerprints didn't change, so we can assume the model is correct.
 
 .. TODO: change to tplx, rerun, and accept (show all steps)
 
-Now, we can change the ingredients back to ``tplx``, rerun the tests, and accept the new values (described in more detail in the :doc:`accepting` step).
+Now, we can run the update command with the ``tplx`` ingredients to record the new values in the store (described in more detail in the :doc:`accepting` step).
 
 .. **TODO** or show it here as well
 
@@ -87,18 +89,15 @@ In :ned:`Ipv4NetworkLayer`, we rename the ``routingTable`` submodule to ``ipv4Ro
 .. literalinclude:: ../sources/Ipv4NetworkLayer.ned.routingtable.modified
    :diff: ../sources/Ipv4NetworkLayer.ned.orig
 
-Here are the results of the fingerprint tests:
+We run the simulation with the ``tlx`` fingerprint:
 
-.. code-block:: fp
+.. code-block:: bash
 
-  $ inet_fingerprinttest -m RenamingSubmodule
-  . -f omnetpp.ini -c Wifi -r 0  ... : ERROR (should be PASS)
-  . -f omnetpp.ini -c Ethernet -r 0  ... : ERROR (should be PASS)
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=XXXX-XXXX/tlx
 
-The simulations finished with an error, because the :ned:`Ipv4NetworkConfigurator` module was looking for the routing table module by the original name, and couldn't find it.
+The simulation finished with an error, because the :ned:`Ipv4NetworkConfigurator` module was looking for the routing table module by the original name, and couldn't find it.
 
-Note that we omitted the error messages from the above output to make it more concise.
-The simulations give the following error message:
+The simulation gives the following error message:
 
 .. code-block:: text
 

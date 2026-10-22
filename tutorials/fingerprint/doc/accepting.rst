@@ -1,45 +1,49 @@
 Accepting Fingerprint Changes
 =============================
 
-After successfully validating a set of changes using the methods demonstrated in this tutorial, the baseline fingerprints should be updated. The new baseline will be used in the future to validate new changes by comparing against.
+After you validate a set of changes with the methods of this tutorial, update the stored fingerprints.
+The new values are the baseline for later changes. The tests compare new changes against them.
 
-For example, if the fingerprint ingredients have been changed, then it's advisable to revert the changes because the default ingredients were selected to have the right amount of sensitivity to a broad range of changes, thus may be more suitable for detecting regressions.
+The temporary runs of the previous steps do not change the store.
+They use the ``inet`` command with ingredients or event filters of their own.
+The store keeps the values for the ``tplx`` ingredients. These ingredients have the right sensitivity to a broad range of changes.
+They are suitable for the detection of regressions.
 
-To do that, replace the ingredients with ``tplx`` (or another chosen set of baseline ingredients):
+First, run the fingerprint tests with the ``tplx`` ingredients:
 
-.. code-block:: text
+.. code-block:: bash
 
-  .,        -f omnetpp.ini -c Ethernet -r 0,               5s,         a92f-8bfe/tplx, PASS,
-  .,        -f omnetpp.ini -c EthernetShortPacket -r 0,    5s,         879f-5956/tplx, PASS,
-  .,        -f omnetpp.ini -c Wifi -r 0,                   5s,         5e6e-3064/tplx, PASS,
-  .,        -f omnetpp.ini -c WifiShortPacket -r 0,        5s,         7678-3e16/tplx, PASS,
-
-Then run the fingerprint tests:
-
-.. code-block:: fp
-
-  $ inet_fingerprinttest
-  . -f omnetpp.ini -c Ethernet -r 0  ... : FAILED
-  . -f omnetpp.ini -c Wifi -r 0  ... : FAILED
-  . -f omnetpp.ini -c WifiShortPacket -r 0  ... : FAILED
-  . -f omnetpp.ini -c EthernetShortPacket -r 0  ... : FAILED
-
-The tests fail because the fingerprint values in the .csv file correspond to the previous set of ingredients or filtering. Since there was no change in the model since validation, it is safe to accept the new values/the new values can be accepted/it is safe to overwrite the .csv file with the new values:
+  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
 
 .. code-block:: fp
 
-   $ mv baseline.csv.UPDATED baseline.csv
+  tutorials/fingerprint -c Ethernet for 0.2s FAIL (unexpected) (Fingerprint mismatch) calculated XXXX-XXXX/tplx (correct b7af-fca4/tplx)
+  tutorials/fingerprint -c Wifi for 5s FAIL (unexpected) (Fingerprint mismatch) calculated XXXX-XXXX/tplx (correct daf0-4199/tplx)
 
-It is advisable to re-run the tests to check whether the fingerprints are stable; i.e., it might happen that each run gives different values, e.g., when the simulation trajectory depends on memory layout (caused by iteration on std::map of object pointers, for example).
+The tests fail because the stored values are from before the change.
+The model is validated, so the new values are correct. Record them in the store:
 
-When we re-run the tests, they pass:
+.. code-block:: bash
+
+  $ opp_update_fingerprint_test_results --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest fingerprintshowcase.csv
-  . -f omnetpp.ini -c Ethernet -r 0  ... : PASS
-  . -f omnetpp.ini -c Wifi -r 0  ... : PASS
-  . -f omnetpp.ini -c WifiShortPacket -r 0  ... : PASS
-  . -f omnetpp.ini -c EthernetShortPacket -r 0  ... : PASS
+  tutorials/fingerprint -c Ethernet for 0.2s UPDATE XXXX-XXXX/tplx
+  tutorials/fingerprint -c Wifi for 5s UPDATE XXXX-XXXX/tplx
 
-If the fingerprints are not stable, it indicates that something's wrong with the model.
+The command changes the file ``tests/fingerprint/store.json``.
+Use ``git diff tests/fingerprint/store.json`` to see the new values.
+
+Run the tests again to check that the fingerprints are stable. Sometimes each run gives different values.
+For example, this happens when the simulation trajectory depends on the memory layout.
+Iteration on a ``std::map`` of object pointers can cause this.
+
+When we run the tests again, they pass:
+
+.. code-block:: fp
+
+  tutorials/fingerprint -c Ethernet for 0.2s PASS
+  tutorials/fingerprint -c Wifi for 5s PASS
+
+If the fingerprints are not stable, something is wrong with the model.

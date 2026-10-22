@@ -30,38 +30,35 @@ As a simplistic example, we'll delete the ``removeNonInterferingTransmissions`` 
 
 .. **TODO** we'll use the event filtering
 
-First, we create alternate fingerprints by filtering out the ``removeNonInterferingTransmissions`` events:
+First, we create alternate fingerprints by filtering out the ``removeNonInterferingTransmissions`` events.
+The fingerprint ``0000-0000/tplx`` is a dummy value. It makes the run fail, and the run prints the calculated value:
+
+.. code-block:: bash
+
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=0000-0000/tplx --fingerprint-events='"not fullName=~removeNonInterferingTransmissions"'
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m RemovingEvent -a --fingerprint-events='"not fullName=~removeNonInterferingTransmissions"'
-  . -f omnetpp.ini -c Wifi -r 0 ... : FAILED
+  Fingerprint mismatch! calculated: XXXX-XXXX/tplx, expected: 0000-0000/tplx
 
-Now, we can update the .csv file with the new fingerprints:
-
-.. code-block:: fp
-
-  $ mv baseline.csv.UPDATED baseline.csv
+Note the calculated value. The command does not change the store.
 
 We remove the ``nonInterferingTransmissions`` message from the code of ``RadioMedium.cc``; we delete the declaration, and all instances of its scheduling.
-We build INET and run the fingerprint tests again with the filter expression:
+We build INET and run the simulation again with the same filter expression and the calculated fingerprint:
+
+.. code-block:: bash
+
+  $ inet -u Cmdenv -c Wifi -r 0 --sim-time-limit=5s --fingerprint=XXXX-XXXX/tplx --fingerprint-events='"not fullName=~removeNonInterferingTransmissions"'
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m RemoveEvent -a --fingerprint-events='"not fullName=~removeNonInterferingTransmissions"'
-  . -f omnetpp.ini -c Wifi -r 0 ... : PASS
+  Fingerprint successfully verified
 
 .. **TODO** accepting
 
-We can restore the baseline fingerprints by re-running the tests without filtering and accept the new values. This process is described in more detail in the :doc:`accepting` step.
+We can restore the baseline fingerprints. Run the update command without filtering to record the new values in the store. This process is described in more detail in the :doc:`accepting` step.
 
 .. .. literalinclude:: ../sources/RadioMedium.cc.removeevent
    :diff: ../sources/RadioMedium.cc.orig
 
 .. **TODO** this is too long, not sure it's needed
-
-.. user@legendre:~/Integration/inet/tutorials/fingerprint$ inet_fingerprinttest removeevent.csv -a --fingerprint-events='"not fullName=~removeNonInterferingTransmissions"'
-  . -f omnetpp.ini -c Ethernet -r 0 ... : PASS
-  . -f omnetpp.ini -c EthernetShortPacket -r 0 ... : PASS
-  . -f omnetpp.ini -c Wifi -r 0 ... : PASS
-  . -f omnetpp.ini -c WifiShortPacket -r 0 ... : PASS

@@ -84,73 +84,40 @@ Qtenv and Cmdenv indicate whether the fingerprint is verified, and print the cal
 
 .. It automates the process to help with development.
 
-INET's fingerprint test tool automates this process, making it easier to work with many simulations and fingerprints.
+INET's fingerprint test commands automate this process, making it easier to work with many simulations and fingerprints.
 
-The fingerprint tool
---------------------
+The fingerprint tests
+---------------------
 
-..  - the fingerprint tool can automate the process
-  - its a command line tool, found in inet/tests/fingerprint -> actually, its inet/bin
-  - its the inet_fingerprinttest script
+INET keeps the correct fingerprints in the JSON file ``tests/fingerprint/store.json``. This file is the fingerprint store.
+A store entry defines one simulation run. It has the working directory, the configuration, the run number, the sim time limit, and the fingerprint with its ingredients.
+The store file is part of the INET repository. The tests of the tutorial use the entries of the ``tutorials/fingerprint`` working directory.
 
-  - csv file format
-  - reports PASS, FAIL or ERROR
-  - creates files
-  - can be updated by overwriting
-  - can be run in release or debug
-  - can be filtered with -m which is a regex?
-  - for more info -h
+Two commands of ``opp_repl`` work with the store:
 
-The fingerprint tool is a convenient way to run fingerprint tests. It is located in the ``inet/bin`` folder, and when the ``inet`` directory is added to the PATH, it can be run from any project directory.
+- ``opp_run_fingerprint_tests`` runs the simulations. It compares the calculated fingerprints with the stored ones.
+- ``opp_update_fingerprint_test_results`` runs the simulations. It records the calculated fingerprints in the store.
 
-.. (inet subdirectory?).
+Each test has one of these results: ``PASS``, ``FAIL`` or ``ERROR``.
+A test results in ``FAIL`` if the calculated fingerprint differs from the stored one.
+A test results in ``ERROR`` if there is an error during the simulation.
 
-The fingerprint test tool uses .csv files to run fingerprint tests. It uses .csv files to keep track of test runs.
-A line in the .csv file defines a simulation run by specifying the working directory, command line arguments, sim time limit, fingerprint+ingredients, expected result, and tags.
-The result of one fingerprint test can either be PASS, FAILED or ERROR. A test results in FAILED if the calculated fingerprint differs from the one in the .csv file; it results in ERROR when there was an error during the simulation.
+The commands run the tests at the same time. They use all CPU cores.
+To select tests, use the ``-w`` option for the working directory, the ``-c`` option for the configuration, and the ``-f`` option for a general filter.
+Each option takes a regular expression. The ``--ingredients`` option selects the fingerprint ingredients.
+The ``-m`` option selects the build mode, ``debug`` or ``release``. The default is ``debug``.
+Use the ``--help`` option to see all options.
 
-.. By default, the fingerprint test tool runs all simulations defined in .csv files in the current folder. TODO later
-   The set of simulations can be filtered with the ``-m`` command line option.
+The update command prints one line for each simulation:
 
-When run without arguments, the fingerprint test tool runs all tests in all .csv files in the current directory. Specific .csv files to run can be selected with the first argument.
-Also, the set of tests to run can be filtered with the ``-m`` command line option, by providing a regex expression/regex that is matched against all information in the .csv files.
+- ``KEEP`` means that the stored fingerprint is correct.
+- ``UPDATE`` means that the fingerprint is different. The command replaces the stored value.
+- ``INSERT`` means that the store has no value for these ingredients. The command adds the new value.
 
-The fingerprint test tool runs tests concurrently by default, using all CPU cores.
-
-.. which matches regex? TODO.
-
-For the list of all available options, run the tool with the ``-h`` argument.
-
-.. Note that ``-h`` lists all available options.
-
-.. The first argument specifies a .csv file.
-
-.. **TODO** the script runs all tests in all .csv files in the current directory by default/if otherwise specified
-.. for example, a .csv file can be added as an argument. or the -m to filter
-   it appends UPDATED FAILED ERROR to the .csv filename so xy.csv.UPDATED
-
-.. A line in the .csv file defines a simulation run, by specifying the working directory, command line arguments, sim time limit, fingerprint+ingredients, expected result, and tags.
-   The result can either be PASS, FAIL or ERROR.
-
-.. **V1** When the tests are finished, and not all of them passed, the tool creates additional .csv files;
-   it appends UPDATED, FAILED, or ERROR to the original .csv file's name:
-
-  - The UPDATED file contains the updated fingerprint values for all tests
-  - The FAILED file contains only those lines which failed
-  - The ERROR file contains only those lines which resulted in an error
-
-.. When the tests are finished, the tool creates an additional .csv file, with "UPDATED" appended to the .csv file's name. This contains the
-
-When the tests are finished, the tool may create additional .csv files (appending UPDATED, FAILED, and ERROR to the .csv file's name):
-
-- an UPDATED file, which has the fingerprints just calculated for all lines
-- a FAILED file, which contains just the lines for the failed simulations, with the calculated fingerprint. This file is useful for re-running just the simulations with failed fingerprints
-- an ERROR file, which contains the lines for simulations which finished with errors, making it easier to rerun just those simulations
-
-.. /when specifying this file to run
-
-
-The updated file can be used to overwrite the original one to accept the new fingerprints.
+The update command changes the file ``tests/fingerprint/store.json``.
+Use ``git diff tests/fingerprint/store.json`` to see the changes.
+To accept new fingerprints, run the update command and keep the changes of the store file.
+To reject them, restore the file with ``git checkout tests/fingerprint/store.json``.
 
 The configurations
 ------------------
@@ -186,16 +153,13 @@ The tutorial contains several simulations, which will be used to demonstrate how
 
 - ``WifiShortPacket``: The same as the ``Wifi`` configuration, but the host sends 10-Byte UDP packets.
 
-The ``baseline.csv`` file in the tutorial's directory containing the fingerprints:
+The fingerprint store ``tests/fingerprint/store.json`` contains the fingerprints of these four configurations.
+All four configurations have run number 0. The ``Ethernet`` and ``EthernetShortPacket`` configurations run for 0.2 s.
+The ``Wifi`` and ``WifiShortPacket`` configurations run for 5 s. The stored fingerprints use the ``tplx`` ingredients.
 
-.. literalinclude:: ../baseline.csv
-   :language: text
-
-.. **V1** The .csv file contains the correct fingerprints **TODO** what does that mean?. The changes mentioned in the tutorial are not contained in the anywhere, the user is expected to make them and run the fingerprint tests to see how the model changes affect the fingerprints.
-
-.. The .csv file contains the correct fingerprints **TODO** what does that mean?. The user is expected to make the changes and run the fingerprint tests to see how the model changes affect the fingerprints.
-
-The .csv file contains the correct fingerprints for the latest INET version, i.e. they all pass (the actual values in the ``baseline.csv`` might differ from the values in the tutorial text). To try the examples, the user is expected to make the changes described in the tutorial (or experiment with others) and run the fingerprint tests to see how the model changes affect the fingerprints.
+The store contains the correct fingerprints for the latest INET version, i.e. they all pass.
+To try the examples, make the changes that the tutorial describes, or try other changes.
+Then run the fingerprint tests to see how the changes affect the fingerprints.
 
 .. **TODO** resetting
 
@@ -208,7 +172,7 @@ The .csv file contains the correct fingerprints for the latest INET version, i.e
 Running the tests
 -----------------
 
-The fingerprints can be run from the command line. Make sure to run ``. setenv`` in both the ``omnetpp`` and ``inet`` folders:
+Run the fingerprint tests from the command line. Make sure to run ``. setenv`` in both the ``omnetpp`` and ``inet`` folders:
 
 .. code-block:: bash
 
@@ -217,48 +181,37 @@ The fingerprints can be run from the command line. Make sure to run ``. setenv``
    $ cd ~/workspace/inet
    $ . setenv
    $ cd ~/workspace/inet/tutorials/fingerprint
-   $ inet_fingerprinttest
 
-.. TODO: the setenv and the fingerprinttest separately ?
+The ``opp_run_fingerprint_tests`` command runs the simulations of the tutorial.
+Always give the project and the working directory filter. Use ``tplx`` as the ingredients:
 
-The ``inet_fingerprinttest`` runs all simulations specified in all .csv files in the current folder:
+.. code-block:: bash
+
+  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest
-  . -f omnetpp.ini -c Ethernet -r 0 ... : PASS
-  . -f omnetpp.ini -c EthernetShortPacket -r 0 ... : PASS
-  . -f omnetpp.ini -c Wifi -r 0 ... : PASS
-  . -f omnetpp.ini -c WifiShortPacket -r 0 ... : PASS
-
-  ----------------------------------------------------------------------
-  Ran 4 tests in 12.451s
-
-  OK
-
-  Log has been saved to test.out
-  Test results equals to expected results
+  tutorials/fingerprint -c Ethernet for 0.2s PASS
+  tutorials/fingerprint -c EthernetShortPacket for 0.2s PASS
+  tutorials/fingerprint -c Wifi for 5s PASS
+  tutorials/fingerprint -c WifiShortPacket for 5s PASS
 
 .. .. figure:: media/1.png
    :width: 80%
    :align: center
 
-Each simulation in ``baseline.csv`` has tags specified indicating which step it is relevant for, so that only the relevant simulations can be run for each step. The tags can be filtered for with the ``-m`` command line arguments. For example, running the simulations for the `Changing a Timer` step:
+Each step of the tutorial needs only some of the configurations. Use the ``-c`` option to run only those.
+For example, the `Changing a Timer` step needs the ``Wifi`` configuration only:
+
+.. code-block:: bash
+
+  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^Wifi$'
 
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m ChangingTimer
-  . -f omnetpp.ini -c Wifi -r 0 ... : PASS
+  tutorials/fingerprint -c Wifi for 5s PASS
 
-  ----------------------------------------------------------------------
-  Ran 1 test in 8.013s
-
-  OK
-
-  Log has been saved to test.out
-  Test results equals to expected results
-
-The tags to use is indicated at each step.
+Each step shows the ``-c`` option to use.
 
 .. TODO rules of thumb, default fingerprints, workflow, resetting,
 
