@@ -29,14 +29,13 @@ docker_command: &DOCKER_COMMAND travis_wait 30 sleep infinity &
                    # the last two (STAGE and INNER_ARGS) come from export statements, not env: lines
 
 # The "build" stage inherits this, so we won't have to repeat it 6 more times.
-# The "fingerprints" stage overwrites it for all of its jobs.
 script:
   - export STAGE=build # not env, so it doesn't affect the cache key
   - *DOCKER_COMMAND
 
 # Note that the "env:" values must match EXACTLY (the whole string, even the spaces between the assignments)
 # between the jobs in the "build" stage (which prepare the cache) and the corresponding jobs in the
-# "fingerprints" stage (which use the cache). See: https://github.com/travis-ci/travis-ci/issues/9043
+# test stages (which use the cache). See: https://github.com/travis-ci/travis-ci/issues/9043
 jobs:
   include:
 
@@ -47,54 +46,6 @@ jobs:
     - env: TARGET_PLATFORM=windows MODE=debug
     - env: TARGET_PLATFORM=macosx MODE=release
     - env: TARGET_PLATFORM=macosx MODE=debug
-
-    # The following atrocity was necessitated by the timeout limits on Travis.
-
-    # release mode fingerprints, split into three arbitrary parts using filters, to avoid freaking timeouts
-    - stage: fingerprints
-      script:
-        - export STAGE=fingerprints INNER_ARGS="-n 2 -i 0" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=release
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 2 -i 1" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=release
-
-
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 0" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=debug
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 1" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=debug
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 2" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=debug
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 3" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=debug
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 4" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=debug
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 5" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=debug
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 6" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=debug
-    - script:
-        - export STAGE=fingerprints INNER_ARGS="-n 8 -i 7" # not env, so it doesn't affect the cache key
-        - *DOCKER_COMMAND
-      env: TARGET_PLATFORM=linux MODE=debug
-
 
     - stage: moduletests
       script:
