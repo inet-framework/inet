@@ -9,8 +9,9 @@ echo "NOTE: make EXTRA_MAKEMAKE_OPTIONS=-DINET_WITH_SELFDOC"
 echo
 
 rm -f /tmp/SelfDoc.txt
-./fingerprinttest -d -f tplx "$@" \
-    -a --generate-selfdoc=true --fingerprintcalculator-class='inet::SelfDocumenterFingerprintCalculator' \
+# the arguments of this script (for example a filter) go before --append-args, which takes the rest of the line
+opp_run_fingerprint_tests --load @opp -p inet -m debug --no-build --ingredients tplx "$@" \
+    --append-args --generate-selfdoc=true --fingerprintcalculator-class='inet::SelfDocumenterFingerprintCalculator' \
     --record-eventlog=false --vector-recording=false --scalar-recording=false
 
 grep '^=SelfDoc=' /tmp/SelfDoc.txt | cut -c 10- | sort -u  | ./fingerprinttest_selfdoc_txt2json >SelfDoc.json

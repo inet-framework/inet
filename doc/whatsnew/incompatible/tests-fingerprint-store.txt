@@ -1,0 +1,11 @@
+The fingerprint test runs with opp_repl and reads tests/fingerprint/store.json
+
+The fingerprint baseline is now only tests/fingerprint/store.json, and opp_repl's opp_run_fingerprint_tests checks it; install opp_repl as the GitHub workflow does: pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@opp_ci". The CSV files tests/fingerprint/*.csv, the fingerprinttest script with bin/inet_fingerprinttest, the smoke test script with bin/inet_smoketest, and INET's own Python fingerprint test with inet_run_fingerprint_tests and inet_update_correct_fingerprints are gone. The GitHub fingerprint workflow runs opp_run_fingerprint_tests.
+
+The store holds all former CSV fingerprints, and also run-0 fingerprints of the ingredients tplx, ~tNl and ~tND for each concrete config that can run without user input. CI checks these three ingredients, as before.
+
+  ./fingerprinttest -m <regex>                    -> opp_run_fingerprint_tests -f <regex>
+  ./fingerprinttest -f tplx                       -> opp_run_fingerprint_tests --ingredients tplx
+  ./fingerprinttest -a <opp_run arguments>        -> opp_run_fingerprint_tests --append-args <opp_run arguments>
+  ./fingerprinttest -n 4 -i 0                     -> opp_run_fingerprint_tests --split-count 4 --split-index 0
+  mv examples.csv.UPDATED examples.csv            -> opp_update_fingerprint_test_results -f <regex>
