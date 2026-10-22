@@ -17,8 +17,12 @@ update gives ERROR or its debug check gives an unexpected result. Pass 2 removes
 for a failed config (pass 1 recorded them with the ~tND arguments), records tplx and ~tNl, and checks them in debug
 mode. A config that asks for user input cannot run, and the report only names it.
 
-The exclude file names configs to skip, one "<working directory> <ini file> <config>" line each. The report holds one
-JSON line for each recorded run.
+A config in the expected-error file stops with an error at its limit, also without ~tND. It gets tplx and ~tNl entries
+at the limit of its ini file with the expected result ERROR (and the value 0000-0000), and the debug check must give
+the expected ERROR.
+
+The exclude and the expected-error files name configs, one "<working directory> <ini file> <config>" line each. The
+report holds one JSON line for each recorded run.
 """
 
 import argparse
@@ -65,12 +69,16 @@ def report_line(name, r, debug):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--exclude", help="a file with configs to skip")
+    parser.add_argument("--expected-error", help="a file with configs whose run 0 stops with an error")
     parser.add_argument("--report", required=True, help="the report file")
     args = parser.parse_args()
-    excluded = set()
-    if args.exclude:
-        with open(args.exclude) as f:
-            excluded = {tuple(line.split()) for line in f if line.strip() and not line.startswith("#")}
+    def read_configs(file_name):
+        if not file_name:
+            return set()
+        with open(file_name) as f:
+            return {tuple(line.split()) for line in f if line.strip() and not line.startswith("#")}
+    excluded = read_configs(args.exclude)
+    expected_error = read_configs(args.expected_error)
     load_opp_file("@opp")
     project = get_simulation_project("inet")
     store = store_module.get_correct_fingerprint_store(project)
@@ -99,13 +107,30 @@ def main():
     print(f"pass 2: {len(failed)} configs failed pass 1, {len(added)} of their pass-1 entries removed, {len(interactive)} configs ask for user input")
     failed_configs = [c for c in configs if config_key(c) in failed]
     update_results_2, debug_2 = record_and_check(project, failed_configs, WITHOUT_TND)
+    store = store_module.get_correct_fingerprint_store(project)
+    error_configs = [c for c in configs if config_key(c) in expected_error]
+    for c in error_configs:
+        for ingredients in WITHOUT_TND:
+            if not store.filter_entries(ingredients=ingredients, sim_time_limit=None, working_directory=c.working_directory, ini_file=c.ini_file, config=c.config, run_number=0):
+                store.insert_fingerprint("0000-0000", ingredients=ingredients, test_result="ERROR", sim_time_limit=c.sim_time_limit,
+                                         working_directory=c.working_directory, ini_file=c.ini_file, config=c.config, run_number=0)
+    store.write()
+    store_module._correct_fingerprint_stores.clear()
+    error_results = fptask.run_fingerprint_tests(simulation_project=project, simulation_configs=error_configs, run_number=0, mode="debug", build=False,
+                                                 stored_only=True, ingredients_list=WITHOUT_TND)
+    print(f"expected errors: {len(error_configs)} configs")
     with open(args.report, "w") as f:
         for r in update_results_1.results:
             f.write(report_line("1", r, debug_1) + "\n")
         for r in update_results_2.results:
             f.write(report_line("2", r, debug_2) + "\n")
+        for r in flat(error_results):
+            t = r.task.simulation_task
+            f.write(json.dumps({"pass": "expected error", "config": " ".join(config_key(t.simulation_config)), "sim_time_limit": t.sim_time_limit,
+                                "ingredients": r.task.ingredients, "debug": r.result, "expected": r.expected, "reason": r.reason}) + "\n")
     print("pass 1:", update_results_1)
     print("pass 2:", update_results_2)
+    print("expected errors:", error_results)
 
 if __name__ == "__main__":
     main()

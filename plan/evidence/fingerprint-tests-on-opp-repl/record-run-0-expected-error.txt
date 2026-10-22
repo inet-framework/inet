@@ -1,0 +1,2 @@
+# run 0 stops with an error at its limit, also without ~tND (decision D4, 2026-10-22)
+showcases/wireless/sensornetwork omnetpp.ini StatisticLMac
