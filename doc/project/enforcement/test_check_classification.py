@@ -55,7 +55,7 @@ class CheckClassificationTest(unittest.TestCase):
 
     def test_a_commit_without_a_trailer_is_reported_once(self):
         self.write("src/inet/a/A.cc", "int a = 1;\n")
-        self.write("tests/fingerprint/a.csv", "row\n")
+        self.write("tests/fingerprint/store.json", "[]\n")
         self.git("add", ".")
         self.git("commit", "-q", "-m", "a: fix: one value\n\nThe value changes.")
         result = self.check()

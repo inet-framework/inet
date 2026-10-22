@@ -1,48 +1,38 @@
-# Reads a unified diff of tests/fingerprint/*.csv on stdin and prints how the moved rows move.
+# Compares two versions of tests/fingerprint/store.json and prints how the moved runs move.
 #
-# A row is one simulation run: "<directory>, <arguments>, <time limit>, <fingerprints>, ...".
-# The fingerprint field holds one "<value>/<ingredients>" part for each ingredient set, separated
-# by ';'. A moved row changes some of those parts. Rows that change different sets of parts
-# usually have different causes, so a commit with more than one pattern asks whether it holds
-# more than one behavior change (PR-SPLIT-ONE-CHANGE).
+# The store holds one entry for each run, sim-time-limit and ingredient set. A run is one
+# simulation: its working directory, ini file, config and run number. A moved run changes the
+# values of some of its ingredient sets. Runs that change different sets usually have different
+# causes, so a commit with more than one pattern asks whether it holds more than one behavior
+# change (PR-SPLIT-ONE-CHANGE).
 #
-# Output: one line per pattern, "<rows>\t<changed ingredient sets>", most rows first, and in name
-# order between equal counts, so that the same diff always gives the same output.
-# A row that is only added or only removed is a first recording or a retirement, not a move.
+# Usage: fingerprint_moves.py <old store> <new store>; an empty file is an empty store.
+# Output: one line per pattern, "<runs>\t<changed ingredient sets>", most runs first, and in name
+# order between equal counts, so that the same stores always give the same output.
+# A run that is in one store only is a first recording or a retirement, not a move. A run whose
+# values stay but whose limit or expected result changes counts as "(other fields)".
 import collections
+import json
 import sys
 
 
-def parse(row):
-    fields = [f.strip() for f in row.split(",")]
-    if len(fields) < 4 or fields[0].startswith("#"):
-        return None
-    parts = {}
-    for part in fields[3].split(";"):
-        value, _, ingredients = part.strip().partition("/")
-        parts[ingredients or value] = value
-    return (fields[0], fields[1]), parts
+def load(path):
+    with open(path) as f:
+        text = f.read()
+    runs = collections.defaultdict(dict)
+    for entry in json.loads(text) if text.strip() else []:
+        run = (entry["working_directory"], entry["ini_file"], entry["config"], json.dumps(entry["run_number"]))
+        runs[run][entry["ingredients"]] = (entry["fingerprint"], entry["sim_time_limit"], entry["test_result"])
+    return runs
 
 
-removed, added = {}, {}
-path = ""
-for line in sys.stdin:
-    line = line.rstrip("\n")
-    if line.startswith("+++ "):
-        path = line[6:] if line.startswith("+++ b/") else line[4:]
-    elif line.startswith("--- "):
-        continue
-    elif line.startswith("-") or line.startswith("+"):
-        parsed = parse(line[1:])
-        if parsed:
-            key, parts = parsed
-            (removed if line[0] == "-" else added)[(path, key)] = parts
-
+old, new = load(sys.argv[1]), load(sys.argv[2])
 patterns = collections.Counter()
-for key in sorted(removed.keys() & added.keys()):
-    old, new = removed[key], added[key]
-    changed = sorted(k for k in old.keys() | new.keys() if old.get(k) != new.get(k))
+for run in sorted(old.keys() & new.keys()):
+    if old[run] == new[run]:
+        continue
+    changed = sorted(i for i in old[run].keys() | new[run].keys() if old[run].get(i, (None,))[0] != new[run].get(i, (None,))[0])
     patterns[",".join(changed) or "(other fields)"] += 1
 
-for pattern, rows in sorted(patterns.items(), key=lambda item: (-item[1], item[0])):
-    print(f"{rows}\t{pattern}")
+for pattern, runs in sorted(patterns.items(), key=lambda item: (-item[1], item[0])):
+    print(f"{runs}\t{pattern}")
