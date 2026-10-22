@@ -39,3 +39,13 @@ Tests in `tests/protocol/wifi/common/`:
 Each new test fails before the repair with "Unknown control frame" and passes after it. Then the Wi-Fi suite and the fingerprint tests run.
 
 The guide (`tests/protocol/lib/AUTHORING.md`, section 7) loses its sentence about the open problem with the ACK of a copy.
+
+## Result (2026-10-22)
+
+Done in `ieee80211: fix: a response outside its frame exchange is ignored`, as designed.
+
+- Before the repair, each of the five tests stopped with "Unknown control frame": the two duplicate tests and `WifiLateCts` in `Dcf`, `WifiLateCtsQos` and `WifiLateBlockAck` in `Hcf`. After it, each passes.
+- The timing of the copies needed care, because a copy that overlaps another frame at sta1 collides and is never received. In `WifiLateCts` and `WifiLateCtsQos` the copy comes 2 ms after the CTS: at 1 ms, the AP still forwards the datagram to sta2 with RTS/CTS, and the copy collides with the ACK of sta2. In `WifiLateBlockAck`, sta1 sends a burst of 2 ms (a shorter burst ends before the agreement exists), sta1 sends its last frame at about 1.007 s, and the air is busy until about 1.055 s, so the copy comes 60 ms after the first BlockAck of the AP.
+- The Wi-Fi suite has 87 tests: on `master`, 52 PASS, 30 expected FAIL and the 5 tests of this plan as unexpected FAIL; with the repair, 57 PASS and 30 expected FAIL. No other verdict changes.
+- The 753 local fingerprint runs, 178 of them wireless, give the same computed fingerprints on `master` and with the repair.
+- `check-pull-request.sh`, `check-source-seals.sh`, and the architecture and naming checks of `coordinationfunction` pass.
