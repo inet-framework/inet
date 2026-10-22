@@ -37,24 +37,25 @@ Each protocol test has two documents. The guide explains its scenario, assertion
 | `WifiBlockAckInactivity.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-inactivity.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-inactivity-comparison.md) |
 | `WifiBlockAckSameApReassociation.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-same-ap-reassociation.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-same-ap-reassociation-comparison.md) |
 | `WifiBlockAckDataRetry.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-data-retry.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-data-retry-comparison.md) |
+| `WifiBlockAckTransferCompletion.test` | [Guide](../../../doc/project/evidence/model/wifi/tests/blockack-transfer-completion.md) | [Before and after](../../../doc/project/evidence/model/wifi/tests/blockack-transfer-completion-comparison.md) |
 
 The [shared procedure](../../../doc/project/evidence/model/wifi/pr1343-comparison-method.md) explains how to reproduce each comparison with identical fixture inputs.
 
 ## Source inventory
 
-The suite contains **81 tests: 51 default PASS expectations and 30 declared FAIL expectations**.
+The suite contains **82 tests: 52 default PASS expectations and 30 declared FAIL expectations**.
 These are source declarations, not a fresh full-suite result.
 
 | Directory | Tests | Expected PASS | Expected FAIL |
 | --- | ---: | ---: | ---: |
-| `common/` | 25 | 16 | 9 |
+| `common/` | 26 | 17 | 9 |
 | `legacy/` | 6 | 5 | 1 |
 | `11b/` | 6 | 4 | 2 |
 | `11a/` | 4 | 4 | 0 |
 | `11g/` | 7 | 6 | 1 |
 | `11n/` | 18 | 11 | 7 |
 | `11ac/` | 15 | 5 | 10 |
-| **Total** | **81** | **51** | **30** |
+| **Total** | **82** | **52** | **30** |
 
 The [audit report](../../../doc/project/evidence/model/wifi/results.md) owns the observed
 results, failure classifications, repair dependencies, and verification records. It includes

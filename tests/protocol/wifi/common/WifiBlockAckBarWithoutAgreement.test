@@ -34,10 +34,21 @@ Define_Module(LifecycleBarMac);
 class LifecycleBarStimulus : public cSimpleModule, public ITx::ICallback
 {
   protected:
-    void initialize() override { scheduleAt(SimTime(1100, SIMTIME_MS), new cMessage("bar")); }
+    void initialize() override {
+        if (par("control").boolValue())
+            scheduleAt(SimTime(1002, SIMTIME_MS), new cMessage("hold-contention"));
+        scheduleAt(SimTime(1100, SIMTIME_MS), new cMessage("bar"));
+    }
     void handleMessage(cMessage *message) override {
+        bool hold = message->isName("hold-contention");
         delete message;
         auto network = getParentModule();
+        if (hold) {
+            // Retained queued DATA prevents completion DELBA before the control BAR.
+            auto mac = network->getSubmodule("sta1")->getSubmodule("wlan", 0)->getSubmodule("mac");
+            check_and_cast<IRx *>(mac->getSubmodule("rx"))->setContentionBlocked(true);
+            return;
+        }
         bool control = par("control");
         Tid tid = control ? 6 : 5;
         auto sender = lifecycleHcf(network, "sta1");
