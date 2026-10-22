@@ -19,7 +19,6 @@ import subprocess
 from omnetpp.scave.results import *
 
 from inet.simulation import *
-from inet.test.fingerprint import *
 from inet.test.simulation import *
 
 _logger = logging.getLogger(__name__)

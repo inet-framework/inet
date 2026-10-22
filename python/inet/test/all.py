@@ -3,7 +3,6 @@ import logging
 from inet.project.inet import *
 from inet.test.chart import *
 from inet.test.feature import *
-from inet.test.fingerprint import *
 from inet.test.opp import *
 from inet.test.sanitizer import *
 from inet.test.simulation import *
@@ -94,7 +93,6 @@ def get_all_test_tasks(**kwargs):
     test_task_functions = [
                            get_chart_test_tasks,
                            get_feature_test_tasks,
-                           get_fingerprint_test_tasks,
                            get_module_test_tasks,
                            get_packet_test_tasks,
                            get_protocol_test_tasks,

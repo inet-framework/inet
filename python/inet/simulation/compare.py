@@ -4,11 +4,32 @@ from omnetpp.scave.results import *
 
 from inet.common.util import *
 from inet.simulation.task import *
-from inet.test.fingerprint.task import *
+from inet.test.simulation import *
 
 __sphinx_mock__ = True # ignore this module in documentation
 
 _logger = logging.getLogger(__name__)
+
+# the opp_run arguments that a fingerprint ingredient needs; the comparison computes a fingerprint
+all_fingerprint_ingredients_append_args = {
+    "~tNl": {},
+    "~tND": {"--**.checksumMode=\"computed\"",
+             "--**.crcMode=\"computed\"",
+             "--**.fcsMode=\"computed\""},
+    "tyf" : {"--cmdenv-fake-gui=true",
+             "--cmdenv-fake-gui-before-event-probability=0.1",
+             "--cmdenv-fake-gui-after-event-probability=0.1",
+             "--cmdenv-fake-gui-on-hold-probability=0.1",
+             "--cmdenv-fake-gui-on-hold-numsteps=3",
+             "--cmdenv-fake-gui-on-simtime-probability=0.1",
+             "--cmdenv-fake-gui-on-simtime-numsteps=3",
+             "--**.fadeOutMode=\"animationTime\"",
+             "--**.signalAnimationSpeedChangeTimeMode=\"animationTime\""}}
+
+def get_ingredients_append_args(ingredients):
+    global all_fingerprint_ingredients_append_args
+    append_args = ["--fingerprintcalculator-class", "inet::FingerprintCalculator"] if "~" in ingredients else []
+    return append_args + list(all_fingerprint_ingredients_append_args[ingredients]) if ingredients in all_fingerprint_ingredients_append_args else []
 
 class CompareSimulationsTaskResult(TaskResult):
     def __init__(self, multiple_task_results=None, **kwargs):

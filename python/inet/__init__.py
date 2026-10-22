@@ -440,44 +440,9 @@ The result is the same as before. Of course, you can filter the results to re-ru
 Fingerprint Testing
 -------------------
 
-
-Detecting regressions during the development of simulation projects is a very time consuming task.
-
-Running fingerprint tests is somewhat more complicated, because the test framework needs a database to store fingerprints.
-If there are no fingerprints in the database yet, then they must be first calculated and inserted:
-
-.. code-block:: ipython
-
-    In [1]: update_correct_fingerprints(simulation_project=p, config_filter="PureAlohaExperiment", sim_time_limit="1s")
-    [04/42] Updating fingerprint . -c PureAlohaExperiment -r 3 for 1s INSERT 856a-c13d/tplx
-    [11/42] Updating fingerprint . -c PureAlohaExperiment -r 10 for 1s INSERT 835c-d8e8/tplx
-    ...
-    [28/42] Updating fingerprint . -c PureAlohaExperiment -r 27 for 1s INSERT 1b5b-3e28/tplx
-    [09/42] Updating fingerprint . -c PureAlohaExperiment -r 8 for 1s INSERT 83fb-e5d5/tplx
-    Out[1]:
-
-    Details:
-      . -c PureAlohaExperiment for 1s INSERT ec03-9cdf/tplx
-      . -c PureAlohaExperiment -r 1 for 1s INSERT 27df-ce58/tplx
-      ...
-      . -c PureAlohaExperiment -r 40 for 1s INSERT 3fbc-cdb2/tplx
-      . -c PureAlohaExperiment -r 41 for 1s INSERT f657-bebb/tplx
-
-    Multiple update fingerprint results: INSERT, summary: 42 INSERT (unexpected) in 0:00:01.567479
-
-When the fingerprints are already present in the database, then the fingerprint tests can be run:
-
-.. code-block:: ipython
-
-    In [1]: run_fingerprint_tests(simulation_project=p, config_filter="PureAlohaExperiment", sim_time_limit="1s")
-    [02/42] Checking fingerprint . -c PureAlohaExperiment -r 1 for 1s PASS
-    [06/42] Checking fingerprint . -c PureAlohaExperiment -r 5 for 1s PASS
-    ...
-    [16/42] Checking fingerprint . -c PureAlohaExperiment -r 15 for 1s PASS
-    [08/42] Checking fingerprint . -c PureAlohaExperiment -r 7 for 1s PASS
-    Out[1]: Multiple fingerprint test results: PASS, summary: 42 PASS in 0:00:01.129969
-
-The PASS result means that the calculated fingerprint of the simulation matches the fingerprint stored in the database.
+The fingerprint tests are not part of this package: run them with the ``run_fingerprint_tests()`` and
+``update_fingerprint_test_results()`` functions of opp_repl, or with its command line tools, see
+:doc:`/developers-guide/ch-testing`.
 
 Command Line Tools
 ==================
@@ -489,8 +454,6 @@ The following list gives a brief overview of these command line tools:
 - :command:`inet_build_project`: builds a simulation project using tasks
 - :command:`inet_run_simulations`: runs multiple simulations matching a filter criteria
 - :command:`inet_run_smoke_tests`: runs multiple smoke tests matching a filter criteria
-- :command:`inet_run_fingerprint_tests`: runs multiple fingerprint tests matching a filter criteria
-- :command:`inet_update_correct_fingerprints`: updates stored correct fingerprints matching a filter criteria
 
 .. note::
 
@@ -547,57 +510,8 @@ Running all simulation runs from the `PureAlohaExperiment` config for 1 second o
     levy@valardohaeris:~/workspace/omnetpp/samples/aloha$ inet_run_simulations -m debug -t 1s --filter PureAlohaExperiment --hosts valarmorghulis.local,valardohaeris.local
     Multiple simulation results: DONE, summary: 42 DONE in 0:00:01.196147
 
-Running the fingerprint tests from the `fifo` sample project using the default fingerprint database:
-
-.. code-block:: console
-
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_fingerprint_tests -t 1s
-    Multiple fingerprint test results: SKIP, summary: 7 SKIP (unexpected) in 0:00:00.004558
-
-Not surprisingly all tests are skipped because the database doesn't have any correct fingerprints yet.
-We first need to update the correct fingerprints in the database:
-
-.. code-block:: console
-
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_update_correct_fingerprints -t 1s
-    [2/7] Updating fingerprint . -c Fifo2 for 1s INSERT 6593-438a/tplx
-    [3/7] Updating fingerprint . -c TandemQueueExperiment for 1s INSERT 4cbd-3dae/tplx
-    ...
-    [4/7] Updating fingerprint . -c TandemQueueExperiment -r 1 for 1s INSERT f27b-15fd/tplx
-    [6/7] Updating fingerprint . -c TandemQueueExperiment -r 3 for 1s INSERT 4cbd-3dae/tplx
-
-    Details:
-      . -c Fifo1 for 1s INSERT 01de-529f/tplx
-      . -c Fifo2 for 1s INSERT 6593-438a/tplx
-      ...
-      . -c TandemQueueExperiment -r 3 for 1s INSERT 4cbd-3dae/tplx
-      . -c TandemQueues for 1s INSERT 4cbd-3dae/tplx
-
-    Multiple update fingerprint results: INSERT, summary: 7 INSERT (unexpected) in 0:00:00.172821
-
-Now, we can run all fingerprint tests comparing the fingerprints against the latest results:
-
-.. code-block:: console
-
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_run_fingerprint_tests -t 1s
-    [3/7] Checking fingerprint . -c TandemQueueExperiment for 1s PASS
-    [5/7] Checking fingerprint . -c TandemQueueExperiment -r 2 for 1s PASS
-    ...
-    [7/7] Checking fingerprint . -c TandemQueues for 1s PASS
-    [4/7] Checking fingerprint . -c TandemQueueExperiment -r 1 for 1s PASS
-    Multiple fingerprint test results: PASS, summary: 7 PASS in 0:00:00.164720
-
-Of course, trying to update the correct fingerprints again doesn't change the stored values:
-
-.. code-block:: console
-
-    levy@valardohaeris:~/workspace/omnetpp/samples/fifo$ inet_update_correct_fingerprints -t 1s
-    [5/7] Updating fingerprint . -c TandemQueueExperiment -r 2 for 1s KEEP 4cbd-3dae/tplx
-    [7/7] Updating fingerprint . -c TandemQueues for 1s KEEP 4cbd-3dae/tplx
-    ...
-    [4/7] Updating fingerprint . -c TandemQueueExperiment -r 1 for 1s KEEP f27b-15fd/tplx
-    [2/7] Updating fingerprint . -c Fifo2 for 1s KEEP 6593-438a/tplx
-    Multiple update fingerprint results: KEEP, summary: 7 KEEP in 0:00:00.218112
+The fingerprint tests are not part of this package: run them with the :command:`opp_run_fingerprint_tests` and
+:command:`opp_update_fingerprint_test_results` commands of opp_repl, see :doc:`/developers-guide/ch-testing`.
 
 Tips and Tricks
 ===============
