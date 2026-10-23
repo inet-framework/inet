@@ -23,6 +23,8 @@ class Ipv6Address
     @editable;
     @toString(.str());
     @fromString(inet::Ipv6Address($));
+    @toValue(.str());
+    @fromValue(inet::Ipv6Address($.stringValue()));
 }
 
 class Ipv6AddressVector

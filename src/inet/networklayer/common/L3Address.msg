@@ -19,4 +19,6 @@ class L3Address
     @editable;
     @toString(.str());
     @fromString(inet::L3Address($));
+    @toValue(.str());
+    @fromValue(inet::L3Address($.stringValue()));
 }
