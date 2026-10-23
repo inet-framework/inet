@@ -40,15 +40,15 @@ class Chunk extends cObject
     @existingClass;
     @beforeChange(handleChange());
     @descriptor(readonly);
-    int id @packetData(false) @getter("getChunkId");
-    bool mutable @packetData(false) @getter("isMutable");
-    bool complete @packetData(false) @getter("isComplete");
-    bool correct @packetData(false) @getter("isCorrect");
-    bool properlyRepresented @packetData(false) @getter("isProperlyRepresented");
+    int id @packetData(false) @group(chunk) @getter("getChunkId");
+    bool mutable @packetData(false) @group(chunk) @getter("isMutable");
+    bool complete @packetData(false) @group(chunk) @getter("isComplete");
+    bool correct @packetData(false) @group(chunk) @getter("isCorrect");
+    bool properlyRepresented @packetData(false) @group(chunk) @getter("isProperlyRepresented");
     b chunkLength @packetData(false);
     string rawBin[] @label("raw bin ") @getter("getBinDumpLine") @sizeGetter("getBinDumpNumLines");
     string rawHex[] @label("raw hex ") @getter("getHexDumpLine") @sizeGetter("getHexDumpNumLines");
-    SharingRegionTagSet::TagBaseRegionTag regionTags[] @packetData(false) @getter(_getTag) @sizeGetter(getNumTags);
+    SharingRegionTagSet::TagBaseRegionTag regionTags[] @packetData(false) @group(chunk) @getter(_getTag) @sizeGetter(getNumTags);
 }
 
 class BitCountChunk extends Chunk
