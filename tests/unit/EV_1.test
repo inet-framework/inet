@@ -137,9 +137,9 @@ EV_FORMAT_OBJECT\(c\) -> \[2mByteCountChunk\[0m, \[1mlength\[0m = 42 B, \[1
 EV_FORMAT_OBJECT\(&c\) -> \[2mByteCountChunk\[0m, \[1mlength\[0m = 42 B, \[1mdata\[0m = 63
 
 Packet p1\("name"\)
-p1 -> \(inet::Packet\)name \(0 B\) \(inet::EmptyChunk\)
+p1 -> \(inet::Packet\)name 0 B
 EV_FORMAT_OBJECT\(p1\) -> \[2m\(Packet\)\[0m\[3mname\[0m \(0 B\) \[2mEmptyChunk\[0m
-\&p1 -> \(inet::Packet\)name \(0 B\) \(inet::EmptyChunk\)
+\&p1 -> \(inet::Packet\)name 0 B
 EV_FORMAT_OBJECT\(\&p1\) -> \[2m\(Packet\)\[0m\[3mname\[0m \(0 B\) \[2mEmptyChunk\[0m
 
 Packet \*p2 = nullptr
@@ -147,14 +147,14 @@ p2 -> <nullptr>
 EV_FORMAT_OBJECT\(p2\) -> <nullptr>
 
 cObject \*p3 = new Packet\("name"\)
-\*p3 -> \(inet::Packet\)name \(0 B\) \(inet::EmptyChunk\)
+\*p3 -> \(inet::Packet\)name 0 B
 EV_FORMAT_OBJECT\(\*p3\) -> \[2m\(Packet\)\[0m\[3mname\[0m \(0 B\) \[2mEmptyChunk\[0m
-p3 -> \(inet::Packet\)name \(0 B\) \(inet::EmptyChunk\)
+p3 -> \(inet::Packet\)name 0 B
 EV_FORMAT_OBJECT\(p3\) -> \[2m\(Packet\)\[0m\[3mname\[0m \(0 B\) \[2mEmptyChunk\[0m
 
 Signal s1\("name"\)
-s1 -> \(inet::physicallayer::Signal\)name \(42 s 0 B\) \(inet::Packet\) \(0 B\) \(inet::EmptyChunk\)
+s1 -> \(inet::physicallayer::Signal\)name \(42 s 0 B\) \(inet::Packet\) 0 B
 EV_FORMAT_OBJECT\(s1\) -> \[2m\(Signal\)\[0m\[3mname\[0m \(42 s 0 B\)\[2m\(Packet\)\[0m\[3m\[0m \(0 B\) \[2mEmptyChunk\[0m
-\&s1 -> \(inet::physicallayer::Signal\)name \(42 s 0 B\) \(inet::Packet\) \(0 B\) \(inet::EmptyChunk\)
+\&s1 -> \(inet::physicallayer::Signal\)name \(42 s 0 B\) \(inet::Packet\) 0 B
 EV_FORMAT_OBJECT\(\&s1\) -> \[2m\(Signal\)\[0m\[3mname\[0m \(42 s 0 B\)\[2m\(Packet\)\[0m\[3m\[0m \(0 B\) \[2mEmptyChunk\[0m
 

@@ -10,6 +10,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/chunk/SliceChunk.h"
 #include "inet/common/packet/dissector/PacketDissector.h"
 
 namespace inet {
@@ -347,8 +348,69 @@ std::ostream& Packet::printToStream(std::ostream& stream, int level, int evFlags
 
 std::string Packet::str() const
 {
+    // only describes the data part, because that is what the current module works with;
+    // the popped parts are only mentioned by their lengths
     std::stringstream stream;
-    stream << "(" << getDataLength() << ") " << content;
+    stream << getDataLength();
+    std::string dataChunks = getDataChunksString(5);
+    if (!dataChunks.empty())
+        stream << ": " << dataChunks;
+    std::string poppedLengths = getPoppedLengthsString();
+    if (!poppedLengths.empty())
+        stream << "  (" << poppedLengths << ")";
+    return stream.str();
+}
+
+std::string Packet::getDataChunksString(int maxChunks) const
+{
+    std::stringstream stream;
+    b dataBegin = getFrontOffset();
+    b dataEnd = getBackOffset(); // position where the data ends, not the popped length
+    int count = 0;
+    auto printChunk = [&] (const Chunk *chunk, b chunkBegin) {
+        b chunkEnd = chunkBegin + chunk->getChunkLength();
+        if (chunkEnd <= dataBegin || chunkBegin >= dataEnd)
+            return; // entirely popped
+        if (count < maxChunks) {
+            bool isPartial = chunkBegin < dataBegin || chunkEnd > dataEnd;
+            if (chunk->getChunkType() == Chunk::CT_SLICE) {
+                chunk = static_cast<const SliceChunk *>(chunk)->getChunk().get();
+                isPartial = true;
+            }
+            std::string className = chunk->getClassName();
+            auto index = className.rfind("::");
+            if (index != std::string::npos)
+                className = className.substr(index + 2);
+            stream << (count == 0 ? "" : " | ") << className << (isPartial ? " (part)" : "");
+        }
+        else if (count == maxChunks)
+            stream << " | ...";
+        count++;
+    };
+    if (content->getChunkType() == Chunk::CT_SEQUENCE) {
+        b offset = b(0);
+        for (const auto& chunk : static_cast<const SequenceChunk *>(content.get())->getChunks()) {
+            printChunk(chunk.get(), offset);
+            offset += chunk->getChunkLength();
+        }
+    }
+    else
+        printChunk(content.get(), b(0));
+    return stream.str();
+}
+
+std::string Packet::getPoppedLengthsString() const
+{
+    b headerPopped = getFrontOffset();
+    b trailerPopped = getTotalLength() - getBackOffset();
+    if (headerPopped == b(0) && trailerPopped == b(0))
+        return "";
+    std::stringstream stream;
+    if (headerPopped != b(0))
+        stream << headerPopped << " header";
+    if (trailerPopped != b(0))
+        stream << (headerPopped != b(0) ? " + " : "") << trailerPopped << " trailer";
+    stream << " popped from " << getTotalLength() << " packet";
     return stream.str();
 }
 
