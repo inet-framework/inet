@@ -71,7 +71,10 @@ class INET_API TemporarySharedPtr : public cObject
     virtual ~TemporarySharedPtr() { delete classDescriptor; }
 
     const Ptr<const T>& getObject() const { return object; }
+    virtual const char *getClassName() const override { return object->getClassName(); }
     virtual cClassDescriptor *getDescriptor() const override { return classDescriptor; }
+    virtual std::string str() const override { return object->str(); }
+    virtual void forEachChild(cVisitor *v) override { const_cast<T *>(object.get())->forEachChild(v); }
 };
 
 } // namespace
