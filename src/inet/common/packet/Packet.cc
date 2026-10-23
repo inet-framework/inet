@@ -351,13 +351,31 @@ std::string Packet::str() const
     // only describes the data part, because that is what the current module works with;
     // the popped parts are only mentioned by their lengths
     std::stringstream stream;
-    stream << getDataLength();
+    stream << getDataLengthString();
     std::string dataChunks = getDataChunksString(5);
     if (!dataChunks.empty())
         stream << ": " << dataChunks;
-    std::string poppedLengths = getPoppedLengthsString();
-    if (!poppedLengths.empty())
-        stream << "  (" << poppedLengths << ")";
+    return stream.str();
+}
+
+std::string Packet::getDataLengthString() const
+{
+    b headerPopped = getFrontOffset();
+    b trailerPopped = getTotalLength() - getBackOffset();
+    std::stringstream stream;
+    if (headerPopped == b(0) && trailerPopped == b(0))
+        stream << getDataLength();
+    else {
+        // all numbers are printed in the same unit, so that the unit is printed only once
+        bool inBytes = getTotalLength().get<b>() % 8 == 0 && headerPopped.get<b>() % 8 == 0 && trailerPopped.get<b>() % 8 == 0;
+        int divisor = inBytes ? 8 : 1;
+        stream << getDataLength().get<b>() / divisor << " (" << getTotalLength().get<b>() / divisor;
+        if (headerPopped != b(0))
+            stream << "-" << headerPopped.get<b>() / divisor;
+        if (trailerPopped != b(0))
+            stream << "-" << trailerPopped.get<b>() / divisor;
+        stream << ") " << (inBytes ? "B" : "b");
+    }
     return stream.str();
 }
 
@@ -396,21 +414,6 @@ std::string Packet::getDataChunksString(int maxChunks) const
     }
     else
         printChunk(content.get(), b(0));
-    return stream.str();
-}
-
-std::string Packet::getPoppedLengthsString() const
-{
-    b headerPopped = getFrontOffset();
-    b trailerPopped = getTotalLength() - getBackOffset();
-    if (headerPopped == b(0) && trailerPopped == b(0))
-        return "";
-    std::stringstream stream;
-    if (headerPopped != b(0))
-        stream << headerPopped << " header";
-    if (trailerPopped != b(0))
-        stream << (headerPopped != b(0) ? " + " : "") << trailerPopped << " trailer";
-    stream << " popped from " << getTotalLength() << " packet";
     return stream.str();
 }
 

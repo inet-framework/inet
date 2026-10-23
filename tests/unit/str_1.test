@@ -72,6 +72,14 @@ using namespace inet::units::values;
     STR_TEST(&r);
     std::cout << std::endl;
 
+    Packet t("name");
+    t.insertAtBack(makeShared<BitsChunk>(std::vector<bool>(3, false)));
+    t.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(1, 0)));
+    t.popAtFront(b(3));
+    std::cout << "Packet t(\"name\") with 3 bits popped" << std::endl;
+    STR_TEST(&t);
+    std::cout << std::endl;
+
     Signal s("name");
     s.setDuration(42);
     s.encapsulate(new Packet());
@@ -99,14 +107,17 @@ Packet p("name")
 Packet q("name") with 4 chunks
 (&q)->str() -> 41 B: ByteCountChunk | BytesChunk | ByteCountChunk | BitsChunk
 q.popAtFront(B(10))
-(&q)->str() -> 31 B: BytesChunk | ByteCountChunk | BitsChunk  (10 B header popped from 41 B packet)
+(&q)->str() -> 31 (41-10) B: BytesChunk | ByteCountChunk | BitsChunk
 q.popAtFront(B(4))
-(&q)->str() -> 27 B: BytesChunk (part) | ByteCountChunk | BitsChunk  (14 B header popped from 41 B packet)
+(&q)->str() -> 27 (41-14) B: BytesChunk (part) | ByteCountChunk | BitsChunk
 q.popAtBack(B(1))
-(&q)->str() -> 26 B: BytesChunk (part) | ByteCountChunk  (14 B header + 1 B trailer popped from 41 B packet)
+(&q)->str() -> 26 (41-14-1) B: BytesChunk (part) | ByteCountChunk
 
 Packet r("name") with 8 chunks
 (&r)->str() -> 8 B: ByteCountChunk | BytesChunk | ByteCountChunk | BytesChunk | ByteCountChunk | ...
+
+Packet t("name") with 3 bits popped
+(&t)->str() -> 8 (11-3) b: BytesChunk
 
 Signal s("name")
 (&s)->str() -> (42 s 0 B) (inet::Packet) 0 B

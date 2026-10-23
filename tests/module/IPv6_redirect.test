@@ -84,7 +84,7 @@ Sending ICMPv6 Redirect to
 Received ICMPv6 Redirect from
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-RedirectTestNetwork.srv.app[0]: Received packet: (inet::Packet)UdpBasicAppData-0 64 B: ApplicationPacket
+RedirectTestNetwork.srv.app[0]: Received packet: (inet::Packet)UdpBasicAppData-0 64 (138-70-4) B: ApplicationPacket
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
