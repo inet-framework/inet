@@ -43,7 +43,7 @@ cmdenv-express-mode=false
 This fragment completes the datagram.
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-Received packet: (inet::Packet)UdpBasicAppData-0 5000 B: ApplicationPacket
+Received packet: (inet::Packet)UdpBasicAppData-0 5000 (5048-48) B: ApplicationPacket
 %#--------------------------------------------------------------------------------------------------------------
 %postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
 %not-contains: test_undisposed.out
