@@ -83,6 +83,7 @@ class SequenceChunk extends Chunk
 {
     @existingClass;
     @descriptor(readonly);
+    @displayMode(children);
     Chunk* chunks[] @getter(getChunk) @sizeGetter(getNumChunks);
 }
 
