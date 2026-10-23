@@ -21,7 +21,7 @@ class Packet extends cPacket
     b dataLength @hint("Length of packet data excluding popped parts");
     b totalLength @hint("Length of packet data including popped parts");
     ChunkTemporarySharedPtr *data @packetData @getter(getData) @hint("Packet data, excluding popped parts");
-    ChunkTemporarySharedPtr *dissection @packetData @getter(getDissection) @hint("Complete packet data according to protocol dissectors");
+    ChunkTemporarySharedPtr *dissection @packetData @getter(getDissection) @hint("Packet data, excluding popped parts, according to protocol dissectors");
     Chunk *content @packetData @getter(getContent) @hint("Complete packet data, including popped parts");
     cObject *tags[] @getter(_getTag) @sizeGetter(getNumTags) @hint("Metadata attached to the whole packet");
     SharingRegionTagSet::TagBaseRegionTag regionTags[] @getter(_getRegionTag) @sizeGetter(getNumRegionTags) @hint("Metadata attached to bit regions");
