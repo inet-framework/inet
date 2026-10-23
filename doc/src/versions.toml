@@ -24,7 +24,6 @@ latest = true
 
 [[version]]
 label = "dev"
-parts = ["users-guide", "developers-guide", "migration-guide", "python-api"]
 
 [[version]]
 label = "3.8"

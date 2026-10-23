@@ -590,13 +590,19 @@ class Builder:
     def forced(self, label):
         return self.force is not None and (self.force == {'all'} or label in self.force)
 
-    def api_refs(self, what):
-        """Returns the build of the latest version, of this run or an earlier one, whose NED reference the builds
-        without one of their own link to, or '' if there is none."""
-        path = os.path.join(self.cache, 'out', self.latest + self.suffix)
-        if os.path.isfile(os.path.join(path, REFS_DIR, 'nedtags.xml')):
+    def linked_version(self, part):
+        """Returns the label of the version that the builds without the given part link to: the version without a
+        ref if this run builds it with that part, otherwise the latest version. An earlier build of the former is
+        never linked to, as it is not published."""
+        dev = next((v for v in self.versions if v['label'] == self.dev_label), None)
+        return self.dev_label if dev and part in self.parts_of(dev) else self.latest
+
+    def linked_build(self, label, marker, what):
+        """Returns the build of the given version, of this run or an earlier one, if it has marker, or ''."""
+        path = os.path.join(self.cache, 'out', label + self.suffix)
+        if os.path.isfile(os.path.join(path, marker)):
             return path
-        log(f'no NED reference of version {self.latest}: the NED types of {what} are not linked')
+        log(f'no build of version {label}: {what} are not linked')
         return ''
 
     def build_version(self, version):
@@ -604,7 +610,9 @@ class Builder:
         parts = self.parts_of(version)
         if not parts:
             raise BuildError(f'version {label}: nothing to build')
-        api = '' if 'api' in parts else self.api_refs(f'version {label}')
+        api_label = self.linked_version('api')
+        api = '' if 'api' in parts else self.linked_build(api_label, os.path.join(REFS_DIR, 'nedtags.xml'),
+                                                          f'the NED types of version {label}')
         cached = os.path.join(self.cache, 'out', label + self.suffix)
         stamp = os.path.join(cached, '.inetsite-key')
         from_tree = not version.get('ref')
@@ -615,7 +623,7 @@ class Builder:
         media = self.local_media(self.tree if from_tree else None)
         # A local media checkout can change without a commit, so only builds from git exports are cached.
         refs = tree_hash(os.path.join(api, REFS_DIR)) if api else ''
-        key = self.version_key(content, parts, refs=refs) if content and media is None else None
+        key = self.version_key(content, parts, refs=refs, api=api_label) if content and media is None else None
         if key and not self.forced(label) and os.path.exists(stamp) and open(stamp).read() == key:
             log(f'version {label}: unchanged, reusing the cached build')
             self.copy_version(label, cached)
@@ -637,7 +645,7 @@ class Builder:
             shutil.rmtree(outdir, ignore_errors=True)
             env = self.environment(mode='version', version=label, parts=','.join(run_parts),
                                    version_parts=','.join(parts), inet_root=inet_root, media_root=media_root,
-                                   pdfs=','.join(self.pdf_parts(parts)), api_version=self.latest, api_docs=api)
+                                   pdfs=','.join(self.pdf_parts(parts)), api_version=api_label, api_docs=api)
             self.sphinx(work, outdir, self.doctrees(name), env,
                         jobs='1' if run_parts[0] in SEPARATE_PARTS else None)
             if 'api' in run_parts:
@@ -668,22 +676,21 @@ class Builder:
     def build_shared(self):
         parts = self.shared_parts
         name = '_shared' + self.suffix
-        # The manuals to link to: those of the version without a ref if this run builds it, otherwise those of the
-        # latest version, of this run or an earlier one. An earlier build of the former is not published.
-        manuals_label = self.dev_label if any(v['label'] == self.dev_label for v in self.versions) else self.latest
-        manuals = os.path.join(self.cache, 'out', manuals_label + self.suffix)
-        if not os.path.isfile(os.path.join(manuals, 'objects.inv')):
-            log(f'no build of version {manuals_label}: the links of {", ".join(parts)} to its manuals are left out')
-            manuals = ''
+        manuals_label = self.linked_version('users-guide')
+        manuals = self.linked_build(manuals_label, 'objects.inv',
+                                    f'the references of {", ".join(parts)} to the manuals')
+        api_label = self.linked_version('api')
+        api = self.linked_build(api_label, os.path.join(REFS_DIR, 'nedtags.xml'),
+                                f'the NED types of {", ".join(parts)}')
         cached = os.path.join(self.cache, 'out', name)
         stamp = os.path.join(cached, '.inetsite-key')
         content = git_tree_key(self.tree)
         media = self.local_media(self.tree)
-        api = self.api_refs(', '.join(parts))
         linked = (([os.path.join(manuals, 'objects.inv')] if manuals else [])
                   + ([os.path.join(api, REFS_DIR)] if api else []))
         refs = tree_hash(*linked) if linked else ''
-        key = self.version_key(content, parts, refs=refs, manuals=manuals_label) if content and media is None else None
+        key = (self.version_key(content, parts, refs=refs, manuals=manuals_label, api=api_label)
+               if content and media is None else None)
         if key and not self.forced('shared') and os.path.exists(stamp) and open(stamp).read() == key:
             log(f'{", ".join(parts)}: unchanged, reusing the cached build')
         else:
@@ -692,7 +699,7 @@ class Builder:
             work = self.assemble_sources(name, self.tree, parts, ('overview', self.shared_index(parts)))
             shutil.rmtree(cached, ignore_errors=True)
             env = self.environment(mode='shared', parts=','.join(parts), inet_root=self.tree, media_root=media_root,
-                                   manuals_version=manuals_label, manuals_docs=manuals, api_version=self.latest,
+                                   manuals_version=manuals_label, manuals_docs=manuals, api_version=api_label,
                                    api_docs=api)
             self.sphinx(work, cached, self.doctrees(name), env)
             if key:

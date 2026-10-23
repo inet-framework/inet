@@ -2,9 +2,10 @@
 
 The targets come from the nedtags.xml / msgtags.xml tag files that opp_docgen writes next to the API pages.
 Documents use short type names (e.g. :ned:`StandardHost`); if a short name is ambiguous, the first type in
-the tag file wins. A build without a NED reference of its own (the dev version, the shared parts) links to that of
-the latest version, whose build keeps its tag files (config.REFS_DIR); the types that it does not have, e.g. those
-newer than the latest release, render as plain literals, as all types do when there is no API to link to.
+the tag file wins. A build without a NED reference of its own (the shared parts, or a version built without its api
+part) links to that of the dev version if the same run builds it, otherwise to that of the latest version, whose
+build keeps its tag files (config.REFS_DIR); the types that it does not have, e.g. those newer than the latest
+release, render as plain literals, as all types do when there is no API to link to.
 
 The diagrams of the API pages are inlined into the pages, so that the types in them link to their pages as in
 the HTML output of opp_docgen; as images, they would only open in the lightbox of sphinxcontrib.images.

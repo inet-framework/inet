@@ -6,7 +6,7 @@ listed in `versions.toml`, the User's, Developer's and Migration Guides, the Pyt
 (generated with `opp_docgen`), under `docs/<version>/`; and the showcases and tutorials, which are not
 versioned: they are built once, from the INET tree of the build (`master`, or `website` on the site), under
 `docs/showcases/` and `docs/tutorials/`. Their references to the manuals and to NED types link to the latest
-version. The documentation of the build's own tree (`dev`) is built locally only.
+version. The documentation of the build's own tree (`dev`) is built locally only, where they link to it.
 
 - `users-guide/`, `developers-guide/`, `migration-guide/`: the documentation, versioned with the INET
   sources; `../../showcases`, `../../tutorials`: the showcases and tutorials
@@ -31,7 +31,7 @@ Requires podman, or docker with `ENGINE=docker`. With `ENGINE=none`, the build r
     doc/src/build                          # the docs of this tree as "dev" (+ the site pages on website)
     doc/src/build --serve                  # the same, then served at http://localhost:8000/
     doc/src/build --only showcases --serve # only the showcases
-    doc/src/build --versions 4.7 --only showcases,tutorials,api
+    doc/src/build --only showcases,tutorials,api
     doc/src/build --only site --serve      # only the website pages (website branch)
     doc/src/build --versions all --pdf     # everything that is published: what CI builds
     doc/src/build --pdf --only users-guide # the User's Guide, also as PDF
@@ -40,20 +40,17 @@ Requires podman, or docker with `ENGINE=docker`. With `ENGINE=none`, the build r
 
 The parts for `--only` are `site` (the website pages), `showcases` and `tutorials`, and of each version
 `users-guide`, `developers-guide`, `migration-guide`, `python-api` and `api` (the NED reference). Without
-`--only`, all of them are built. Only the released versions have the `api` part, the NED reference: the `dev`
-documentation and the showcases and tutorials link their `:ned:` references to that of the `latest` version, of
-this run or of an earlier one in the cache, and render them as plain text without one, or for a type that it does
-not have. The showcases and tutorials link to the manuals of `dev` if the run builds it, otherwise to those
-of the `latest` version, of this run or of an earlier one in the cache; without one, or for a document or label
-that it does not have, those links render as plain text. `--inet PATH` builds another INET tree (e.g. a second workspace) instead of this one.
+`--only`, all of them are built. The showcases and tutorials link their references to the manuals and their
+`:ned:` references to `dev` if the run builds it with those parts, otherwise to the `latest` version, of this run
+or of an earlier one in the cache, never to an earlier build of `dev`, which is not published. Without a build to
+link to, or for a document, label or type that it does not have, those references render as plain text. `--inet PATH` builds another INET tree (e.g. a second workspace) instead of this one.
 
 The site's links to the documentation, and the `docs/latest/` and old `docs/<manual>/` redirects, point to the
 `latest` version of `versions.toml`. A build without that version points them to the first version it builds
 instead, i.e. `dev` in a local build.
 
 `--sample` builds only a few NED types, showcases and tutorials (listed in `SAMPLE` in `tools/build.py`), and
-the rest in full (add `--versions dev,4.7` for a sample of the NED reference); combine it with `--only` to leave
-parts out. Its builds are cached apart from the full ones.
+the rest in full; combine it with `--only` to leave parts out. Its builds are cached apart from the full ones.
 
 `--pdf` also builds the User's, Developer's and Migration Guides as PDFs (`docs/<label>/inet-<manual>.pdf`),
 in the `-pdf` variant of the image, which adds TeX Live. `releng/makedist` uses it for the release tarball.
