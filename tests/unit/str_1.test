@@ -107,17 +107,17 @@ Packet p("name")
 Packet q("name") with 4 chunks
 (&q)->str() -> 41 B: ByteCountChunk | BytesChunk | ByteCountChunk | BitsChunk
 q.popAtFront(B(10))
-(&q)->str() -> 31 (41-10) B: BytesChunk | ByteCountChunk | BitsChunk
+(&q)->str() -> 31 B (41 B - 10 B): BytesChunk | ByteCountChunk | BitsChunk
 q.popAtFront(B(4))
-(&q)->str() -> 27 (41-14) B: BytesChunk (part) | ByteCountChunk | BitsChunk
+(&q)->str() -> 27 B (41 B - 14 B): BytesChunk (part) | ByteCountChunk | BitsChunk
 q.popAtBack(B(1))
-(&q)->str() -> 26 (41-14-1) B: BytesChunk (part) | ByteCountChunk
+(&q)->str() -> 26 B (41 B - 14 B - 1 B): BytesChunk (part) | ByteCountChunk
 
 Packet r("name") with 8 chunks
 (&r)->str() -> 8 B: ByteCountChunk | BytesChunk | ByteCountChunk | BytesChunk | ByteCountChunk | ...
 
 Packet t("name") with 3 bits popped
-(&t)->str() -> 8 (11-3) b: BytesChunk
+(&t)->str() -> 1 B (11 b - 3 b): BytesChunk
 
 Signal s("name")
 (&s)->str() -> (42 s 0 B) (inet::Packet) 0 B

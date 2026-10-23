@@ -366,15 +366,12 @@ std::string Packet::getDataLengthString() const
     if (headerPopped == b(0) && trailerPopped == b(0))
         stream << getDataLength();
     else {
-        // all numbers are printed in the same unit, so that the unit is printed only once
-        bool inBytes = getTotalLength().get<b>() % 8 == 0 && headerPopped.get<b>() % 8 == 0 && trailerPopped.get<b>() % 8 == 0;
-        int divisor = inBytes ? 8 : 1;
-        stream << getDataLength().get<b>() / divisor << " (" << getTotalLength().get<b>() / divisor;
+        stream << getDataLength() << " (" << getTotalLength();
         if (headerPopped != b(0))
-            stream << "-" << headerPopped.get<b>() / divisor;
+            stream << " - " << headerPopped;
         if (trailerPopped != b(0))
-            stream << "-" << trailerPopped.get<b>() / divisor;
-        stream << ") " << (inBytes ? "B" : "b");
+            stream << " - " << trailerPopped;
+        stream << ")";
     }
     return stream.str();
 }
