@@ -4,7 +4,9 @@ Test EV macros.
 %includes:
 #include "inet/common/IPrintableObject.h"
 #include "inet/common/Units.h"
+#include "inet/common/packet/chunk/BitsChunk.h"
 #include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/physicallayer/common/Signal.h"
 
@@ -43,6 +45,33 @@ using namespace inet::units::values;
     PRINTON_TEST(&p);
     std::cout << std::endl;
 
+    Packet q("name");
+    q.insertAtBack(makeShared<ByteCountChunk>(B(10)));
+    q.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(10, 0)));
+    q.insertAtBack(makeShared<ByteCountChunk>(B(20)));
+    q.insertAtBack(makeShared<BitsChunk>(std::vector<bool>(8, false)));
+    std::cout << "Packet q(\"name\") with 4 chunks" << std::endl;
+    STR_TEST(&q);
+    q.popAtFront(B(10));
+    std::cout << "q.popAtFront(B(10))" << std::endl;
+    STR_TEST(&q);
+    q.popAtFront(B(4));
+    std::cout << "q.popAtFront(B(4))" << std::endl;
+    STR_TEST(&q);
+    q.popAtBack(B(1));
+    std::cout << "q.popAtBack(B(1))" << std::endl;
+    STR_TEST(&q);
+    std::cout << std::endl;
+
+    Packet r("name");
+    for (int i = 0; i < 4; i++) {
+        r.insertAtBack(makeShared<ByteCountChunk>(B(1)));
+        r.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(1, 0)));
+    }
+    std::cout << "Packet r(\"name\") with 8 chunks" << std::endl;
+    STR_TEST(&r);
+    std::cout << std::endl;
+
     Signal s("name");
     s.setDuration(42);
     s.encapsulate(new Packet());
@@ -64,9 +93,21 @@ ByteCountChunk c(B(42))
 (&c)->printOn(std::cout) -> (inet::ByteCountChunk) length = 42 B, data = 63
 
 Packet p("name")
-(&p)->str() -> (0 B) (inet::EmptyChunk)
-(&p)->printOn(std::cout) -> (inet::Packet)name (0 B) (inet::EmptyChunk)
+(&p)->str() -> 0 B
+(&p)->printOn(std::cout) -> (inet::Packet)name 0 B
+
+Packet q("name") with 4 chunks
+(&q)->str() -> 41 B: ByteCountChunk | BytesChunk | ByteCountChunk | BitsChunk
+q.popAtFront(B(10))
+(&q)->str() -> 31 B: BytesChunk | ByteCountChunk | BitsChunk  (10 B header popped from 41 B packet)
+q.popAtFront(B(4))
+(&q)->str() -> 27 B: BytesChunk (part) | ByteCountChunk | BitsChunk  (14 B header popped from 41 B packet)
+q.popAtBack(B(1))
+(&q)->str() -> 26 B: BytesChunk (part) | ByteCountChunk  (14 B header + 1 B trailer popped from 41 B packet)
+
+Packet r("name") with 8 chunks
+(&r)->str() -> 8 B: ByteCountChunk | BytesChunk | ByteCountChunk | BytesChunk | ByteCountChunk | ...
 
 Signal s("name")
-(&s)->str() -> (42 s 0 B) (inet::Packet) (0 B) (inet::EmptyChunk)
-(&s)->printOn(std::cout) -> (inet::physicallayer::Signal)name (42 s 0 B) (inet::Packet) (0 B) (inet::EmptyChunk)
+(&s)->str() -> (42 s 0 B) (inet::Packet) 0 B
+(&s)->printOn(std::cout) -> (inet::physicallayer::Signal)name (42 s 0 B) (inet::Packet) 0 B

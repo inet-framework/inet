@@ -162,6 +162,9 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
     }
     //@}
 
+    std::string getDataChunksString(int maxChunks) const;
+    std::string getPoppedLengthsString() const;
+
 #ifdef INET_WITH_SELFDOC
     static void selfDoc(const char * packetAction, const char *typeName);
 #endif
