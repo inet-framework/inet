@@ -1,7 +1,7 @@
 # Sphinx configuration of inet.omnetpp.org; run it through ./build (see README.md), not sphinx-build directly.
 #
 # The same configuration builds three kinds of output, selected by INETSITE_MODE:
-#   site     the unversioned website pages (sources in site/, on the website branch only)
+#   site     the unversioned website pages (sources in site/)
 #   version  the documentation of one INET version (manuals, NED and Python API),
 #            assembled by tools/build.py from an INET tree
 #   shared   the showcases and tutorials, built once from the tree of the site, without a version; they

@@ -2,7 +2,7 @@
 """Builds inet.omnetpp.org: the website pages and the documentation of INET versions.
 
 Runs inside the doc-builder image (see doc/src/build, which starts the container). By default it builds the
-website pages (doc/src/site, present on the website branch only) and the documentation of the INET tree it is part
+website pages (doc/src/site) and the documentation of the INET tree it is part
 of, as the version in versions.toml that has no ref (dev). Other versions are built from git with --versions.
 
 Output layout:
@@ -336,7 +336,7 @@ class Builder:
             self.latest = built[0]
         self.with_site = (self.only is None or 'site' in self.only) and os.path.isdir(SITE)
         if self.only is not None and 'site' in self.only and not self.with_site:
-            raise BuildError(f'no site pages in {SITE} (they are on the website branch)')
+            raise BuildError(f'no site pages in {SITE}')
         self.force = None if args.force is None else {f for f in args.force.split(',') if f}
         if args.pdf and not shutil.which('latexmk'):
             raise BuildError('--pdf needs the PDF toolchain (TeX Live): the -pdf variant of the doc-builder image')
@@ -786,7 +786,7 @@ class Builder:
         if self.with_site:
             self.build_site()
         elif self.only is None:
-            log(f'no site pages in {SITE} (they are on the website branch); building the documentation only')
+            log(f'no site pages in {SITE}; building the documentation only')
         # The latest version first, whose NED reference the builds without one of their own link to.
         for version in sorted(self.versions, key=lambda v: v['label'] != self.latest):
             self.build_version(version)

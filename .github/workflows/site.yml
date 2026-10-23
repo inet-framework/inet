@@ -1,6 +1,6 @@
 name: Build and deploy inet.omnetpp.org
 
-# The site pages exist only on the website branch, so this runs (and deploys) from there; see doc/src/README.md.
+# The site is published from the website branch, which points to a commit of master; see doc/src/README.md.
 on:
   push:
     branches: [website]
