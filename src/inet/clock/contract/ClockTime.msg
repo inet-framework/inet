@@ -24,5 +24,5 @@ class clocktime_t
     @fromString(SIMTIME_AS_CLOCKTIME(string2simtime($))); @toString(simtime2string(CLOCKTIME_AS_SIMTIME($)));
     @defaultValue(CLOCKTIME_ZERO);
     @castFunction(false);
-    @toValue(cValue($.dbl(),"s"));
+    @toValue(cValue($.dbl(),"s")); @fromValue(SIMTIME_AS_CLOCKTIME(SimTime($.doubleValueInUnit("s"))));
 }
