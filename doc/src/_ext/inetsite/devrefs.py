@@ -1,6 +1,7 @@
-"""The references of the shared parts (showcases, tutorials) to the documents and labels of the version built
-from the same tree (e.g. :doc:`/users-guide/ch-emulation`, :ref:`ug:sec:tsn:framereplication`), which are
-built by a Sphinx run of their own. They are resolved from that build's objects.inv.
+"""The references of the shared parts (showcases, tutorials) to the documents and labels of the manuals (e.g.
+:doc:`/users-guide/ch-emulation`, :ref:`ug:sec:tsn:framereplication`), which are built by a Sphinx run of their
+own: those of the version built from the same tree if the run builds it, otherwise those of the latest version.
+They are resolved from that build's objects.inv; the references that it does not have render as plain text.
 """
 
 import os
@@ -33,7 +34,7 @@ def read_inventory(path):
 
 def setup(app):
     cfg = config.current()
-    path = os.path.join(cfg.dev_docs, 'objects.inv')
+    path = os.path.join(cfg.manuals_docs, 'objects.inv')
     if cfg.mode != 'shared' or not os.path.isfile(path):
         return
     inventory = read_inventory(path)
@@ -55,6 +56,6 @@ def setup(app):
         location, display = item
         if not node.get('refexplicit'):
             contnode = nodes.inline(display, display, classes=contnode.get('classes', []))
-        return nodes.reference('', '', contnode, internal=False, refuri=cfg.dev_url(location), reftitle=display)
+        return nodes.reference('', '', contnode, internal=False, refuri=cfg.manuals_url(location), reftitle=display)
 
     app.connect('missing-reference', missing_reference)

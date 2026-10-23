@@ -6,8 +6,8 @@ VERSIONED_PARTS = ('users-guide', 'developers-guide', 'migration-guide', 'python
 # Built once, from the tree of the site, and published without a version (mode "shared").
 SHARED_PARTS = ('showcases', 'tutorials')
 PARTS = VERSIONED_PARTS + SHARED_PARTS
-# The directory of a version build's output (not published) with what the shared build needs to link to it:
-# the opp_docgen tag files of its NED reference.
+# The directory of a version build's output (not published) with what other builds need to link to it: the
+# opp_docgen tag files of its NED reference.
 REFS_DIR = '.inetsite-refs'
 
 SRC_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -28,8 +28,10 @@ class Config:
     pdfs: frozenset
     latex: bool
     sample: bool
-    dev_version: str
-    dev_docs: str
+    manuals_version: str
+    manuals_docs: str
+    api_version: str
+    api_docs: str
 
     @classmethod
     def from_environment(cls):
@@ -58,8 +60,10 @@ class Config:
             pdfs=frozenset(p for p in env('INETSITE_PDFS', '').split(',') if p),
             latex=env('INETSITE_LATEX', '0') == '1',
             sample=env('INETSITE_SAMPLE', '0') == '1',
-            dev_version=env('INETSITE_DEV_VERSION', 'dev'),
-            dev_docs=env('INETSITE_DEV_DOCS', ''),
+            manuals_version=env('INETSITE_MANUALS_VERSION', 'dev'),
+            manuals_docs=env('INETSITE_MANUALS_DOCS', ''),
+            api_version=env('INETSITE_API_VERSION', ''),
+            api_docs=env('INETSITE_API_DOCS', ''),
         )
 
     def has_part(self, part):
@@ -84,9 +88,13 @@ class Config:
             return f'{self.baseurl}/docs/{path}'
         return f'{self.baseurl}/docs/{self.latest}/{path}'
 
-    def dev_url(self, path):
-        """The URL of a page of the documentation built from the same tree as the shared parts."""
-        return f'{self.baseurl}/docs/{self.dev_version}/{path}'
+    def manuals_url(self, path):
+        """The URL of a page of the manuals that the shared parts link to."""
+        return f'{self.baseurl}/docs/{self.manuals_version}/{path}'
+
+    def api_url(self, path):
+        """The URL of a page of the NED reference that a build without one of its own links to."""
+        return f'{self.baseurl}/docs/{self.api_version}/{path}'
 
     def read_prolog(self):
         # The version's own prolog matches its content.

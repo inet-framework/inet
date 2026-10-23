@@ -2,8 +2,9 @@
 
 The targets come from the nedtags.xml / msgtags.xml tag files that opp_docgen writes next to the API pages.
 Documents use short type names (e.g. :ned:`StandardHost`); if a short name is ambiguous, the first type in
-the tag file wins. The shared parts link to the API of the version built from the same tree, whose build keeps
-its tag files (config.REFS_DIR). When there is no API to link to, the roles render as plain literals.
+the tag file wins. A build without a NED reference of its own (the dev version, the shared parts) links to that of
+the latest version, whose build keeps its tag files (config.REFS_DIR); the types that it does not have, e.g. those
+newer than the latest release, render as plain literals, as all types do when there is no API to link to.
 
 The diagrams of the API pages are inlined into the pages, so that the types in them link to their pages as in
 the HTML output of opp_docgen; as images, they would only open in the lightbox of sphinxcontrib.images.
@@ -49,8 +50,8 @@ class TypeRoles:
         cfg = config.current()
         if cfg.has_part('api'):
             tag_dir = os.path.join(app.srcdir, API_DIR)
-        elif cfg.mode == 'shared' and os.path.isfile(os.path.join(cfg.dev_docs, config.REFS_DIR, TAG_FILES['ned'])):
-            tag_dir = os.path.join(cfg.dev_docs, config.REFS_DIR)
+        elif cfg.api_docs and os.path.isfile(os.path.join(cfg.api_docs, config.REFS_DIR, TAG_FILES['ned'])):
+            tag_dir = os.path.join(cfg.api_docs, config.REFS_DIR)
         else:
             return
         for kind, filename in TAG_FILES.items():
@@ -69,12 +70,12 @@ class TypeRoles:
             env = inliner.document.settings.env
             docname = self.tags[kind].get(target)
             if docname is None:
-                # A sample build documents only a few types.
-                if not cfg.sample:
+                # A sample build documents only a few types, and another version's reference not the newer ones.
+                if not cfg.sample and cfg.has_part('api'):
                     logger.warning('unknown %s type: %s', kind.upper(), target, location=(env.docname, lineno))
                 return [literal], []
             if not cfg.has_part('api'):
-                return [nodes.reference(rawtext, '', literal, refuri=cfg.dev_url(docname + '.html'))], []
+                return [nodes.reference(rawtext, '', literal, refuri=cfg.api_url(docname + '.html'))], []
             ref = addnodes.pending_xref(rawtext, literal, refdomain='std', reftype='doc', reftarget='/' + docname,
                                         refexplicit=True, refwarn=True, refdoc=env.docname)
             return [ref], []

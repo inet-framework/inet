@@ -2,7 +2,8 @@
 #
 # label   path component and name in the version switcher
 # ref     git branch or tag in the INET repository; the version without a ref (at most one) is built from
-#         the INET tree that runs the build, i.e. the website branch on the site
+#         the INET tree that runs the build, and only when asked for (a local build, or --versions dev): it is
+#         not published, as --versions all, what the site is built with, builds the versions with a ref
 # latest  the version that /docs/latest/, the old /docs/<manual>/ URLs and the site's links point to;
 #         exactly one version must have it
 # parts   optional subset of: users-guide, developers-guide, migration-guide, python-api, api (default: all)
@@ -23,6 +24,7 @@ latest = true
 
 [[version]]
 label = "dev"
+parts = ["users-guide", "developers-guide", "migration-guide", "python-api"]
 
 [[version]]
 label = "3.8"

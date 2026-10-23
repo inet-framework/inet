@@ -82,8 +82,8 @@ SITE_REDIRECTS = {
     'inet-showcases/index.html': 'docs/showcases/index.html',
     'inet-tutorials/index.html': 'docs/tutorials/index.html',
 }
-# What the build of the shared parts needs of the version it links to, kept with that version's build (see
-# REFS_DIR in _ext/inetsite/config.py).
+# What the builds without a NED reference of their own need of the latest version's, kept with that version's
+# build (see REFS_DIR in _ext/inetsite/config.py).
 REFS_DIR = '.inetsite-refs'
 
 CONFIG_FILES = ('conf.py', 'global.rst', '_ext', '_static', 'tools/build.py', 'tools/includefiles.py')
@@ -319,8 +319,9 @@ class Builder:
         if unversioned:
             self.versions = []
         elif args.versions == 'all':
-            # A version without any of the parts of --only (e.g. one with the NED reference only) is left out.
-            self.versions = [v for v in self.versions if self.parts_of(v)]
+            # What is published: the released versions (with a ref), without those that have none of the parts of
+            # --only (e.g. one with the NED reference only).
+            self.versions = [v for v in self.versions if v.get('ref') and self.parts_of(v)]
         elif args.versions is not None:
             wanted = [v for v in args.versions.split(',') if v]
             missing = [w for w in wanted if w not in known]
@@ -589,11 +590,21 @@ class Builder:
     def forced(self, label):
         return self.force is not None and (self.force == {'all'} or label in self.force)
 
+    def api_refs(self, what):
+        """Returns the build of the latest version, of this run or an earlier one, whose NED reference the builds
+        without one of their own link to, or '' if there is none."""
+        path = os.path.join(self.cache, 'out', self.latest + self.suffix)
+        if os.path.isfile(os.path.join(path, REFS_DIR, 'nedtags.xml')):
+            return path
+        log(f'no NED reference of version {self.latest}: the NED types of {what} are not linked')
+        return ''
+
     def build_version(self, version):
         label = version['label']
         parts = self.parts_of(version)
         if not parts:
             raise BuildError(f'version {label}: nothing to build')
+        api = '' if 'api' in parts else self.api_refs(f'version {label}')
         cached = os.path.join(self.cache, 'out', label + self.suffix)
         stamp = os.path.join(cached, '.inetsite-key')
         from_tree = not version.get('ref')
@@ -603,7 +614,8 @@ class Builder:
             ref, content = self.resolve(self.data['inet_repository'], version['ref'])
         media = self.local_media(self.tree if from_tree else None)
         # A local media checkout can change without a commit, so only builds from git exports are cached.
-        key = self.version_key(content, parts) if content and media is None else None
+        refs = tree_hash(os.path.join(api, REFS_DIR)) if api else ''
+        key = self.version_key(content, parts, refs=refs) if content and media is None else None
         if key and not self.forced(label) and os.path.exists(stamp) and open(stamp).read() == key:
             log(f'version {label}: unchanged, reusing the cached build')
             self.copy_version(label, cached)
@@ -625,7 +637,7 @@ class Builder:
             shutil.rmtree(outdir, ignore_errors=True)
             env = self.environment(mode='version', version=label, parts=','.join(run_parts),
                                    version_parts=','.join(parts), inet_root=inet_root, media_root=media_root,
-                                   pdfs=','.join(self.pdf_parts(parts)))
+                                   pdfs=','.join(self.pdf_parts(parts)), api_version=self.latest, api_docs=api)
             self.sphinx(work, outdir, self.doctrees(name), env,
                         jobs='1' if run_parts[0] in SEPARATE_PARTS else None)
             if 'api' in run_parts:
@@ -656,17 +668,22 @@ class Builder:
     def build_shared(self):
         parts = self.shared_parts
         name = '_shared' + self.suffix
-        # The build of the version without a ref, of this run or an earlier one, to link to.
-        dev = os.path.join(self.cache, 'out', self.dev_label + self.suffix)
-        if not os.path.isfile(os.path.join(dev, 'objects.inv')):
-            log(f'no build of version {self.dev_label}: the links of {", ".join(parts)} to it are left out')
-            dev = ''
+        # The manuals to link to: those of the version without a ref if this run builds it, otherwise those of the
+        # latest version, of this run or an earlier one. An earlier build of the former is not published.
+        manuals_label = self.dev_label if any(v['label'] == self.dev_label for v in self.versions) else self.latest
+        manuals = os.path.join(self.cache, 'out', manuals_label + self.suffix)
+        if not os.path.isfile(os.path.join(manuals, 'objects.inv')):
+            log(f'no build of version {manuals_label}: the links of {", ".join(parts)} to its manuals are left out')
+            manuals = ''
         cached = os.path.join(self.cache, 'out', name)
         stamp = os.path.join(cached, '.inetsite-key')
         content = git_tree_key(self.tree)
         media = self.local_media(self.tree)
-        refs = tree_hash(os.path.join(dev, 'objects.inv'), os.path.join(dev, REFS_DIR)) if dev else ''
-        key = self.version_key(content, parts, refs=refs) if content and media is None else None
+        api = self.api_refs(', '.join(parts))
+        linked = (([os.path.join(manuals, 'objects.inv')] if manuals else [])
+                  + ([os.path.join(api, REFS_DIR)] if api else []))
+        refs = tree_hash(*linked) if linked else ''
+        key = self.version_key(content, parts, refs=refs, manuals=manuals_label) if content and media is None else None
         if key and not self.forced('shared') and os.path.exists(stamp) and open(stamp).read() == key:
             log(f'{", ".join(parts)}: unchanged, reusing the cached build')
         else:
@@ -675,7 +692,8 @@ class Builder:
             work = self.assemble_sources(name, self.tree, parts, ('overview', self.shared_index(parts)))
             shutil.rmtree(cached, ignore_errors=True)
             env = self.environment(mode='shared', parts=','.join(parts), inet_root=self.tree, media_root=media_root,
-                                   dev_version=self.dev_label, dev_docs=dev)
+                                   manuals_version=manuals_label, manuals_docs=manuals, api_version=self.latest,
+                                   api_docs=api)
             self.sphinx(work, cached, self.doctrees(name), env)
             if key:
                 with open(stamp, 'w') as f:
@@ -762,7 +780,8 @@ class Builder:
             self.build_site()
         elif self.only is None:
             log(f'no site pages in {SITE} (they are on the website branch); building the documentation only')
-        for version in self.versions:
+        # The latest version first, whose NED reference the builds without one of their own link to.
+        for version in sorted(self.versions, key=lambda v: v['label'] != self.latest):
             self.build_version(version)
         if self.shared_parts:
             self.build_shared()
@@ -787,8 +806,9 @@ def exit_on_signal(signum, frame):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--versions', metavar='LABELS',
-                        help='comma-separated labels from versions.toml to build, or "all" (default: the version '
-                             'without a ref, built from the INET tree)')
+                        help='comma-separated labels from versions.toml to build, or "all" for the released versions '
+                             '(those with a ref, which are published) (default: the version without a ref, built from '
+                             'the INET tree)')
     parser.add_argument('--inet', metavar='PATH', help='INET tree for the version without a ref (default: the tree '
                                                        'this script is in)')
     parser.add_argument('--media', metavar='PATH', help='media repository checkout (default: <inet>/media, or '
