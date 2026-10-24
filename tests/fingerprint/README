@@ -14,3 +14,35 @@ Fingerprints are fragile to NED changes and parameter value changes.
 When a fingerprint test fails, the simulation's correctness has to be
 verified by some other means, and the fingerprints in the tests
 updated.
+
+The fingerprints are in store.json. Each entry names one run (working
+directory, ini file, config, run number), its sim-time-limit, the
+fingerprint ingredients, the expected value and the expected result.
+The ethernet-*.ini files of this folder are simulations that exist
+only for the fingerprint test.
+
+Run the tests and accept new values with the opp_repl commands, after
+the OMNeT++ and INET setenv:
+
+  opp_run_fingerprint_tests --load @opp -p inet [-f <regex>]
+  opp_update_fingerprint_test_results --load @opp -p inet [-f <regex>]
+
+doc/src/developers-guide/ch-testing.rst describes the options.
+
+Each concrete config has run-0 fingerprints of tplx, ~tNl and ~tND,
+with these exceptions:
+
+- A run whose packets cannot be serialized has no ~tND: ~tND computes
+  checksums, CRCs and FCSs, which needs a serializer for each packet.
+- showcases/wireless/sensornetwork StatisticLMac expects ERROR: its
+  run 0 stops with an error at its limit.
+- These configs ask for user input, so they have no fingerprint:
+  examples/adhoc/idealwireless Ping2, examples/adhoc/ieee80211 Ping2,
+  examples/inet/tcpthroughput Delay-100ms-advWin1MB,
+  examples/wireless/lan80211 NHosts (omnetpp-ftp.ini),
+  Streaming2 (omnetpp-streaming.ini) and Ping2,
+  examples/wireless/lan80211ac General and Ping2,
+  tutorials/protocol General of Network90.ini and Network91.ini.
+
+fingerprinttest_selfdoc runs the fingerprint tests with the
+self-documentation of INET, to make SelfDoc.json.

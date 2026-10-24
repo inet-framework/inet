@@ -16,7 +16,7 @@
 #                          and is reported as a note between 73 and 80
 #   PR-MSG-WRAP          — notes for adjacent prose lines and extra blank lines
 #   PR-MSG-FACTS         — no attribution trailer; note: words of revision history, a test log
-#   PR-SPLIT-ONE-CHANGE  — note: the fingerprint rows of one commit move in more than one way
+#   PR-SPLIT-ONE-CHANGE  — note: the fingerprint runs of one commit move in more than one way
 #   PR-SPLIT-SIZE        — note: more than 400 changed source lines in one commit
 #   PR-MSG-SUMMARY       — note: a first paragraph above 120 words, a body above 300 words, or a
 #                          body that opens with an action and names no problem
@@ -215,18 +215,20 @@ done <<< "$COMMITS"
 
 echo
 echo "== PR-SPLIT-ONE-CHANGE: signs of a second change (notes only) =="
-# Fingerprint rows that move in different ways usually have different causes. 26 rows that move
-# only in the event order and 11 rows that move in every ingredient set are two explanations, and
+# Fingerprint runs that move in different ways usually have different causes. 26 runs that move
+# only in the event order and 11 runs that move in every ingredient set are two explanations, and
 # each explanation is a behavior change that can be a commit of its own.
 quiet=1
+store=tests/fingerprint/store.json
 while read -r sha; do
   [ -z "$sha" ] && continue
-  moves=$(git show -U0 --format= "$sha" -- 'tests/fingerprint/*.csv' \
-          | python3 "$(dirname "$0")/fingerprint_moves.py")
+  git diff --quiet "$sha^" "$sha" -- "$store" 2>/dev/null && continue
+  moves=$(python3 "$(dirname "$0")/fingerprint_moves.py" \
+          <(git show "$sha^:$store" 2>/dev/null) <(git show "$sha:$store" 2>/dev/null))
   ways=$(grep -c . <<< "$moves")
   if [ "$ways" -gt 1 ]; then
-    detail=$(awk -F'\t' '{printf "%s%s %s %s", (NR > 1 ? "; " : ""), $1, ($1 == 1 ? "row changes" : "rows change"), $2}' <<< "$moves")
-    note "${sha:0:9} moves fingerprint rows in $ways ways, one explanation each? $detail"; quiet=0
+    detail=$(awk -F'\t' '{printf "%s%s %s %s", (NR > 1 ? "; " : ""), $1, ($1 == 1 ? "run changes" : "runs change"), $2}' <<< "$moves")
+    note "${sha:0:9} moves fingerprint runs in $ways ways, one explanation each? $detail"; quiet=0
   fi
 done <<< "$COMMITS"
 [ "$quiet" -eq 1 ] && echo "  ok"

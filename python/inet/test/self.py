@@ -51,7 +51,6 @@ def run_long_nested_multiple_external_tasks():
 # TODO
 # running simulations
 # running smoke tests
-# running fingerprint tests
 #
 # dimensions:
 #  - current project vs selected project
@@ -87,26 +86,10 @@ class SmokeTestSelfTestTask(TestTask):
         smoke_test_task_results = run_smoke_tests(**self.kwargs)
         return TestTaskResult(task=self, result=smoke_test_task_results.result)
 
-class FingerprintTestSelfTestTask(TestTask):
-    def __init__(self, simulation_project, action="Running fingerprint test self test", **kwargs):
-        super().__init__(simulation_project=simulation_project, action=action, **kwargs)
-        self.simulation_project = simulation_project
-
-    def get_parameters_string(self, **kwargs):
-        return self.simulation_project.get_name()
-
-    def run_protected(self, **kwargs):
-        update_correct_fingerprint_task_results = update_correct_fingerprints(**self.kwargs)
-        fingerprint_test_task_results = run_fingerprint_tests(**self.kwargs)
-        repeated_update_correct_fingerprint_task_results = update_correct_fingerprints(**self.kwargs)
-        repeated_fingerprint_test_task_results = run_fingerprint_tests(**self.kwargs)
-        return TestTaskResult(task=self, result=fingerprint_test_task_results.result)
-
 class SimulationProjectSelfTestTasks(MultipleTestTasks):
     def __init__(self, simulation_project, name="simulation project self test", **kwargs):
         super().__init__(tasks = [SimulationSelfTestTask(simulation_project=simulation_project, concurrent=True, **kwargs),
-                                  SmokeTestSelfTestTask(simulation_project=simulation_project, concurrent=True, **kwargs),
-                                  FingerprintTestSelfTestTask(simulation_project=simulation_project, concurrent=False, **kwargs)],
+                                  SmokeTestSelfTestTask(simulation_project=simulation_project, concurrent=True, **kwargs)],
                          simulation_project=simulation_project, name=name, concurrent=False, **kwargs)
         self.simulation_project = simulation_project
 

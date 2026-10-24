@@ -39,12 +39,15 @@ The :ned:`Ipv4NetworkLayer` module sets the ``forwarding`` parameters in its :ne
 Now, the ``forwarding = true`` key in :ned:`Router` doesn't take effect in the router's submodules,
 and the router doesn't forward packets. This change causes the fingerprint tests/``tplx`` fingerprint tests to fail:
 
+.. code-block:: bash
+
+  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
+
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m RenamingParameter
-  . -f omnetpp.ini -c Ethernet -r 0  ... : FAILED
+  tutorials/fingerprint -c Ethernet for 0.2s FAIL (unexpected) (Fingerprint mismatch) calculated XXXX-XXXX/tplx (correct b7af-fca4/tplx)
 
-To correct the model, the renaming needs to be followed everywhere. When we change the deep parameter assignment of the ``forwarding`` parameter in :ned:`NetworkLayerNodeBase` to ``unicastForwarding``, the fingerprint tests pass:
+To correct the model, the renaming needs to be followed everywhere. When we change the deep parameter assignment of the ``forwarding`` parameter in :ned:`NetworkLayerNodeBase` to ``unicastForwarding``, the fingerprint test passes:
 
 .. When we rewrite the parameter nesting? in networklayernodebase...
 
@@ -53,10 +56,13 @@ To correct the model, the renaming needs to be followed everywhere. When we chan
 .. literalinclude:: ../sources/NetworkLayerNodeBase.ned.forwarding
    :diff: ../sources/NetworkLayerNodeBase.ned.orig
 
+.. code-block:: bash
+
+  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
+
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m RenamingParameter
-  . -f omnetpp.ini -c Ethernet -r 0  ... : PASS
+  tutorials/fingerprint -c Ethernet for 0.2s PASS
 
 This time we don't have to accept the fingerprint changes, because they didn't change.
 
@@ -69,10 +75,13 @@ Renaming module parameters can also lead to ERROR in the fingerprint tests. For 
 
 When run the ``tplx`` fingerprint tests, they result in ERROR:
 
+.. code-block:: bash
+
+  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
+
 .. code-block:: fp
 
-  $ inet_fingerprinttest -m RenamingParameter
-  . -f omnetpp.ini -c Ethernet -r 0  ... : ERROR
+  tutorials/fingerprint -c Ethernet for 0.2s ERROR
 
 This error message was omitted from the above output for simplicity:
 
