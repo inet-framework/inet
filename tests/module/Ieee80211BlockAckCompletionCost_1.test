@@ -1,0 +1,210 @@
+%description:
+Measure production Basic setup and transfer completion with equal UDP payload totals.
+One run sends twelve packets continuously. The other run sends three bursts of four packets.
+Both runs use seed zero, 6 Mbit/s, zero inactivity timeout, and a fixed 100 ms interval.
+The measurements describe these traffic shapes. They do not estimate agreement-reuse performance.
+
+%extraargs: -r 0..1
+
+%file: CompletionCost.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/TimeTag_m.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class CompletionCostHcf : public Hcf {
+    simtime_t deferredAt = -1;
+    simtime_t requestQueuedAt = -1;
+    simtime_t requestSentAt = -1;
+    simtime_t delbaQueuedAt = -1;
+  public:
+    simtime_t deferral;
+    simtime_t requestContention;
+    simtime_t responseAfterRequest;
+    simtime_t delbaCompletion;
+  protected:
+    void originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, AccessCategory ac) override {
+        Hcf::originatorProcessTransmittedDataFrame(packet, header, ac);
+        const auto& procedures = originatorBlockAckAgreementHandler->getProcedures();
+        if (procedures.count({header->getReceiverAddress(), header->getTid()}) && deferredAt < 0)
+            deferredAt = simTime();
+    }
+    void processMgmtFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override {
+        if (dynamicPtrCast<const Ieee80211AddbaRequest>(header))
+            requestQueuedAt = simTime();
+        if (dynamicPtrCast<const Ieee80211Delba>(header))
+            delbaQueuedAt = simTime();
+        Hcf::processMgmtFrame(packet, header);
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(packet->peekAtFront<Ieee80211MacHeader>());
+        bool accepted = Hcf::transmitFrame(packet, ifs);
+        if (accepted && request) {
+            requestContention += simTime() + ifs - requestQueuedAt;
+            requestSentAt = simTime() + ifs;
+        }
+        return accepted;
+    }
+    void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        bool response = dynamicPtrCast<const Ieee80211AddbaResponse>(header) != nullptr;
+        Hcf::processLowerFrame(packet, header);
+        if (response && deferredAt >= 0) {
+            deferral += simTime() - deferredAt;
+            responseAfterRequest += simTime() - requestSentAt;
+            deferredAt = -1;
+        }
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *transmitted) override {
+        bool delba = dynamicPtrCast<const Ieee80211Delba>(transmitted->peekAtFront<Ieee80211MacHeader>()) != nullptr;
+        Hcf::originatorProcessReceivedFrame(packet, transmitted);
+        if (delba)
+            delbaCompletion += simTime() - delbaQueuedAt;
+    }
+};
+Define_Module(CompletionCostHcf);
+class CompletionCostTest : public cSimpleModule, public cListener {
+    cModule *sender = nullptr;
+    cModule *sink = nullptr;
+    int sent = 0;
+    int received = 0;
+    int requests = 0;
+    int responses = 0;
+    int delbas = 0;
+    int drops = 0;
+    int64_t payloadBytes = 0;
+    simtime_t managementAirtime;
+    simtime_t deliveryDelay;
+  protected:
+    void initialize() override {
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("subscribe"));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override {
+        auto packet = check_and_cast<Packet *>(value);
+        if (source == sender) {
+            sent++;
+            return;
+        }
+        if (source == sink) {
+            received++;
+            payloadBytes += packet->getByteLength();
+            auto creation = packet->peekAtFront<Chunk>()->getTag<CreationTimeTag>()->getCreationTime();
+            deliveryDelay += simTime() - creation;
+            return;
+        }
+        if (signal == packetDroppedSignal) {
+            drops++;
+            return;
+        }
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (dynamicPtrCast<const Ieee80211AddbaRequest>(header))
+            requests++;
+        if (dynamicPtrCast<const Ieee80211AddbaResponse>(header))
+            responses++;
+        if (dynamicPtrCast<const Ieee80211Delba>(header))
+            delbas++;
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(header))
+            managementAirtime += packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode()->getDuration(packet->getDataLength());
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("subscribe")) {
+            delete message;
+            sender = getModuleByPath("^.host1.app[0]");
+            sink = getModuleByPath("^.host2.app[0]");
+            sender->subscribe(packetSentSignal, this);
+            sink->subscribe(packetReceivedSignal, this);
+            for (const char *path : {"^.host1.wlan[0].mac.hcf", "^.host2.wlan[0].mac.hcf"}) {
+                getModuleByPath(path)->subscribe(packetSentToPeerSignal, this);
+                getModuleByPath(path)->subscribe(packetDroppedSignal, this);
+            }
+            scheduleAt(SimTime(99, SIMTIME_MS), new cMessage("verify"));
+            return;
+        }
+        delete message;
+        auto hcf = check_and_cast<CompletionCostHcf *>(getModuleByPath("^.host1.wlan[0].mac.hcf"));
+        std::cout << "Completion cost: gaps=" << par("gaps").boolValue() << " sent=" << sent
+            << " received=" << received << " bytes=" << payloadBytes << " requests=" << requests
+            << " responses=" << responses << " delbas=" << delbas << " drops=" << drops
+            << " managementAirtime=" << managementAirtime << " deferral=" << hcf->deferral
+            << " requestContention=" << hcf->requestContention << " responseAfterRequest=" << hcf->responseAfterRequest
+            << " delbaCompletion=" << hcf->delbaCompletion << " deliveryDelaySum=" << deliveryDelay
+            << " goodputBps=" << payloadBytes * 8 / 0.1 << "\n";
+        ASSERT(sent == 12 && received == 12 && payloadBytes == 8400 && drops == 0);
+        ASSERT(requests == (par("gaps").boolValue() ? 3 : 1));
+        ASSERT(responses == requests && delbas == requests);
+        std::cout << "Block Ack completion cost assertions passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(CompletionCostTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module CompletionCostHcf extends Hcf { parameters: @class(::inet::ieee80211::CompletionCostHcf); }
+simple CompletionCostTest { parameters: bool gaps; @class(::inet::ieee80211::CompletionCostTest); }
+network CompletionCostNetwork {
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host1: AdhocHost;
+        host2: AdhocHost;
+        test: CompletionCostTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = CompletionCostNetwork
+ned-path = .;../../../../src
+sim-time-limit = 100ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.test.gaps = ${gaps=false,true}
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicBurst"
+*.host1.app[0].destAddresses = "host2"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 700B
+*.host1.app[0].chooseDestAddrMode = "once"
+*.host1.app[0].startTime = 10ms
+*.host1.app[0].stopTime = ${gaps} ? 52ms : 11.15ms
+*.host1.app[0].sendInterval = 100us
+*.host1.app[0].burstDuration = ${gaps} ? 350us : 0s
+*.host1.app[0].sleepDuration = ${gaps} ? 20ms : 0s
+*.host2.numApps = 1
+*.host2.app[0].typename = "UdpSink"
+*.host2.app[0].localPort = 1000
+*.host*.ipv4.arp.typename = "GlobalArp"
+*.host*.wlan[*].opMode = "a"
+*.host*.wlan[*].bitrate = 6Mbps
+*.host*.wlan[*].classifier.typename = "QosClassifier"
+*.host*.wlan[*].mac.qosStation = true
+*.host*.wlan[*].mac.hcf.typename = "CompletionCostHcf"
+*.host*.wlan[*].mac.hcf.isBlockAckSupported = true
+*.host*.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 2346B
+*.host*.wlan[*].radio.receiver.energyDetection = -105dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -105dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 0dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.host1.mobility.initialX = 0m
+*.host2.mobility.initialX = 10m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Block Ack completion cost assertions passed.

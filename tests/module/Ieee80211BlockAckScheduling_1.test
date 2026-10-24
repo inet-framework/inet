@@ -1,0 +1,455 @@
+%description:
+Exercise Basic BAR selection and final DELBA through HCF, frame sequences, EDCA, and Tx.
+The fixture supplies accepted agreements and injects responses at the HCF receive boundary.
+Response events include SIFS and the selected response airtime.
+Cases cover short bursts, windows smaller than the threshold, two peers, BAR timeout,
+negative bitmap bits, Normal Ack window progress, and late BAR admission.
+
+%extraargs: -r 0..29
+
+%file: Scheduling.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/blockack/RecipientBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class SchedulingRecipientAgreements : public RecipientBlockAckAgreementHandler {
+  public:
+    void accept(MacAddress peer) {
+        auto agreement = new RecipientBlockAckAgreement(peer, 5, SequenceNumberCyclic(0), 64, SIMTIME_ZERO);
+        agreement->addbaResposneSent();
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, 5}] = agreement;
+    }
+};
+class SchedulingRecipient : public Hcf {
+  public:
+    std::vector<int> delivered;
+    bool checkedBitmap = false;
+    void prepare() {
+        Enter_Method("prepare");
+        delete recipientBlockAckAgreementHandler;
+        auto agreements = new SchedulingRecipientAgreements();
+        recipientBlockAckAgreementHandler = agreements;
+        agreements->accept(MacAddress("02:00:00:00:00:01"));
+        subscribe(blockAckAgreementDeletedSignal, this);
+    }
+    void receive(Packet *packet) {
+        Enter_Method("receive");
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            if (data->getSequenceNumber() == SequenceNumberCyclic(0) && data->getFragmentNumber() != 0) {
+                delete packet;
+                return;
+            }
+        }
+        auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+        packet->addTagIfAbsent<physicallayer::Ieee80211ModeInd>()->setMode(mode);
+        processLowerFrame(packet, header);
+    }
+    bool retired() const { return recipientBlockAckAgreementHandler->getAgreements().empty(); }
+  protected:
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override {
+        if (signal == blockAckAgreementDeletedSignal)
+            ASSERT((delivered == std::vector<int>{1, 2}));
+        else
+            Hcf::receiveSignal(source, signal, value, details);
+    }
+    void sendUp(const std::vector<Packet *>& frames) override {
+        for (auto frame : frames) {
+            delivered.push_back(frame->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            take(frame);
+            delete frame;
+        }
+    }
+    void transmitControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header,
+            Packet *, const Ptr<const Ieee80211MacHeader>&) override {
+        if (auto response = dynamicPtrCast<const Ieee80211BasicBlockAck>(header)) {
+            ASSERT(response->getStartingSequenceNumber() == SequenceNumberCyclic(0));
+            ASSERT(response->getBlockAckBitmap(0).getBit(0));
+            ASSERT(!response->getBlockAckBitmap(0).getBit(1));
+            if (response->getBlockAckBitmap(1).getBit(0) && response->getBlockAckBitmap(2).getBit(0)) {
+                checkedBitmap = true;
+                ASSERT(delivered.empty());
+            }
+        }
+        delete packet;
+    }
+};
+Define_Module(SchedulingRecipient);
+class SchedulingAgreements : public OriginatorBlockAckAgreementHandler {
+  public:
+    void accept(MacAddress peer, int size) {
+        auto request = makeShared<Ieee80211AddbaRequest>();
+        request->setReceiverAddress(peer);
+        request->setTid(5);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(0));
+        request->setBufferSize(size);
+        request->setBlockAckPolicy(true);
+        createAgreement(request);
+        auto agreement = getAgreement(peer, 5);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(SIMTIME_ZERO);
+        agreement->calculateExpirationTime();
+        finishProcedure(peer, 5);
+    }
+};
+class SchedulingHcf : public Hcf {
+    const MacAddress peer{"02:00:00:00:00:02"};
+    const MacAddress other{"02:00:00:00:00:03"};
+    int dataCount = 0;
+    int bars = 0;
+    int delbas = 0;
+    int refusedBars = 0;
+    int retries = 0;
+    int dataInTxop = 0;
+    bool responsePending = false;
+    Ptr<const Ieee80211BasicBlockAckReq> pendingBar;
+    const physicallayer::IIeee80211Mode *pendingResponseMode = nullptr;
+    bool firstBarWasStandalone = false;
+    int expired = 0;
+    int collisions = 0;
+    SchedulingRecipient *recipient = nullptr;
+    simtime_t responseEnd;
+    simtime_t txopDeadline;
+    int scenario() const { return par("scenario"); }
+    int burst() const {
+        switch (scenario()) {
+            case 0: return 1;
+            case 1: return 4;
+            case 2: return 6;
+            case 3: return 9;
+            case 4: return 4;
+            case 5: return 1;
+            case 6: return 1;
+            case 7: return 2;
+            case 9: return 3;
+            case 10: return 1;
+            case 11: return 8;
+            case 12: return 1;
+            case 13: return 1;
+            case 14: return 1;
+            default: return 4;
+        }
+    }
+    int window() const { return scenario() == 2 || scenario() == 7 ? 1 : scenario() == 3 ? 4 : 64; }
+  public:
+    void begin() {
+        Enter_Method("begin");
+        delete originatorBlockAckAgreementHandler;
+        auto agreements = new SchedulingAgreements();
+        originatorBlockAckAgreementHandler = agreements;
+        agreements->accept(peer, window());
+        if (scenario() == 9) {
+            recipient = check_and_cast<SchedulingRecipient *>(getModuleByPath("^.^.^.^.recipient.wlan[0].mac.hcf"));
+            recipient->prepare();
+            subscribe(packetDroppedSignal, this);
+        }
+        if (scenario() == 4)
+            agreements->accept(other, 64);
+        rx->setContentionBlocked(true);
+        for (int i = 0; i < burst(); i++)
+            queueData(peer, scenario() == 9 ? (i == 0 ? 200 : 10) : scenario() == 7 && i == 0 ? 1100 : 100);
+        if (scenario() == 12 || scenario() == 14) {
+            auto frames = edca->getEdcaf(AC_VI)->getInProgressFrames();
+            auto frame = frames->getFrameToTransmit();
+            auto header = frame->removeAtFront<Ieee80211DataHeader>();
+            header->setAckPolicy(BLOCK_ACK);
+            frame->insertAtFront(header);
+            edca->getEdcaf(AC_VI)->getAckHandler()->processTransmittedDataOrMgmtFrame(header);
+            originatorBlockAckAgreementHandler->getAgreement(peer, 5)->recordTransmittedData(
+                frame->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
+            dataCount = 1;
+            queueData(other, 1100, 6);
+        }
+        if (scenario() == 4) {
+            for (int i = 0; i < 8; i++)
+                queueData(other, 100);
+        }
+        rx->setContentionBlocked(false);
+        scheduleAfter(SimTime(40, SIMTIME_MS), new cMessage("verify"));
+    }
+  protected:
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *value, cObject *details) override {
+        if (signal == packetDroppedSignal) {
+            auto drop = dynamic_cast<PacketDropDetails *>(details);
+            if (drop && drop->getReason() == LIFETIME_EXPIRED)
+                expired++;
+            if (source == this)
+                return;
+        }
+        Hcf::receiveSignal(source, signal, value, details);
+    }
+    void queueData(MacAddress receiver, int length, Tid tid = 5) {
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS);
+        header->addChunkLength(QOSCONTROL_PART_LENGTH);
+        header->setTid(tid);
+        header->setSequenceNumber(SequenceNumberCyclic(77));
+        header->setReceiverAddress(receiver);
+        header->setTransmitterAddress(mac->getAddress());
+        header->setAddress3(receiver);
+        auto packet = new Packet("data", header);
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(length)));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        processUpperFrame(packet, header);
+    }
+    void frameSequenceStarted() override {
+        dataInTxop = 0;
+        Hcf::frameSequenceStarted();
+    }
+    void channelGranted(IChannelAccess *access) override {
+        auto collided = edca->getInternallyCollidedEdcafs();
+        if (scenario() == 12 || scenario() == 14)
+            collisions += collided.size();
+        Hcf::channelGranted(access);
+        if (scenario() == 14 && !collided.empty()) {
+            auto edcaf = edca->getEdcaf(AC_VI);
+            ASSERT(edcaf->getCw() == 1);
+            auto frame = edcaf->getInProgressFrames()->getFrames(0);
+            bool absent = false;
+            try {
+                edcaf->getRecoveryProcedure()->getRetryCount(frame, frame->peekAtFront<Ieee80211DataHeader>());
+            }
+            catch (const cRuntimeError& error) {
+                absent = std::string(error.what()).find("retry counter entry doesn't exist") != std::string::npos;
+            }
+            ASSERT(absent);
+        }
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header);
+        if (bar) {
+            auto frames = edca->getChannelOwner()->getInProgressFrames();
+            auto candidate = frames->peekFrameToTransmit();
+            if (candidate && !frames->containsFrame(candidate)) {
+                auto sequence = candidate->peekAtFront<Ieee80211DataOrMgmtHeader>()->getSequenceNumber();
+                auto size = frames->getLength();
+                ASSERT(frames->peekFrameToTransmit() == candidate);
+                ASSERT(frames->getLength() == size);
+                ASSERT(candidate->peekAtFront<Ieee80211DataOrMgmtHeader>()->getSequenceNumber() == sequence);
+            }
+        }
+        bool accepted = Hcf::transmitFrame(packet, ifs);
+        if (bar && !accepted) {
+            refusedBars++;
+            return false;
+        }
+        if (!accepted)
+            return false;
+        header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            auto txop = edca->getChannelOwner()->getTxopProcedure();
+            if (!par("multiple").boolValue() && txop->getLimit() == 0 && data->getAckPolicy() == BLOCK_ACK)
+                ASSERT(data->getDurationField() == SIMTIME_ZERO);
+            if (!par("multiple").boolValue() && scenario() == 3) {
+                ASSERT(dataInTxop == 0);
+                ASSERT(data->getDurationField() == SIMTIME_ZERO);
+            }
+            if (scenario() == 4 && data->getReceiverAddress() == other)
+                ASSERT(bars >= 1);
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid());
+            if ((scenario() == 12 || scenario() == 14) && data->getTid() == 6)
+                ASSERT(!data->getRetry());
+            else
+                ASSERT(agreement != nullptr && agreement->containsSequence(data->getSequenceNumber()));
+            if (scenario() != 7 && data->getSequenceNumber().get() >= window() && data->getReceiverAddress() == peer)
+                ASSERT(bars >= 1);
+            if (data->getRetry())
+                retries++;
+            dataCount++;
+            dataInTxop++;
+        }
+        if (bar) {
+            bars++;
+            if (bars == 1) {
+                firstBarWasStandalone = dataInTxop == 0;
+                ASSERT(bar->getReceiverAddress() == peer);
+                ASSERT(bar->getTidInfo() == 5);
+                if (scenario() != 9)
+                    ASSERT(dataCount == (scenario() == 2 ? 1 : scenario() == 3 ? 4 : scenario() == 7 || scenario() == 12 || scenario() == 14 ? 2 : scenario() == 11 ? 5 : burst()));
+            }
+            auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            auto responseMode = rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT);
+            auto cost = mode->getDuration(packet->getDataLength()) + modeSet->getSifsTime() + responseMode->getDuration(LENGTH_BASIC_BLOCKACK);
+            auto txop = edca->getChannelOwner()->getTxopProcedure();
+            auto end = simTime() + ifs + cost;
+            if (dataInTxop > 1 && txop->getLimit() > 0)
+                ASSERT(end <= txop->getStart() + txop->getLimit());
+            std::cout << "BAR timing: scenario=" << scenario() << " multiple=" << par("multiple").boolValue()
+                << " start=" << simTime() << " ifs=" << ifs << " bytes=" << packet->getByteLength()
+                << " rate=" << mode->getDataMode()->getNetBitrate() << " responseRate=" << responseMode->getDataMode()->getNetBitrate()
+                << " response=" << responseMode->getDuration(LENGTH_BASIC_BLOCKACK) << " end=" << end
+                << " deadline=" << txop->getStart() + txop->getLimit() << " data=" << dataInTxop << "\n";
+        }
+        if (auto delba = dynamicPtrCast<const Ieee80211Delba>(header)) {
+            ASSERT(delba->getInitiator());
+            ASSERT(!hasQueuedData(delba->getReceiverAddress(), delba->getTid()));
+            ASSERT(!hasNumberedData(delba->getReceiverAddress(), delba->getTid()));
+            delbas++;
+        }
+        return true;
+    }
+    void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        Enter_Method("transmissionComplete");
+        auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header);
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        if (recipient && (data || bar || dynamicPtrCast<const Ieee80211Delba>(header)))
+            recipient->receive(packet->dup());
+        bool ack = dynamicPtrCast<const Ieee80211MgmtHeader>(header) || (data && data->getAckPolicy() == NORMAL_ACK);
+        if (bar || ack) {
+            if (!(bar && scenario() == 5 && bars == 1)) {
+                pendingBar = bar;
+                responsePending = true;
+                pendingResponseMode = bar ?
+                    rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT) :
+                    rateSelection->computeResponseAckFrameMode(packet, dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header), ResponseQueryRole::PREDICT);
+                auto duration = pendingResponseMode->getDuration(bar ? LENGTH_BASIC_BLOCKACK : LENGTH_ACK);
+                responseEnd = simTime() + modeSet->getSifsTime() + duration;
+                txopDeadline = edca->getChannelOwner()->getTxopProcedure()->getStart() + edca->getChannelOwner()->getTxopProcedure()->getLimit();
+                scheduleAt(responseEnd, new cMessage("response"));
+            }
+        }
+        Hcf::transmissionComplete(packet, header);
+    }
+    bool isReceptionInProgress() override { return responsePending || Hcf::isReceptionInProgress(); }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("response")) {
+            delete message;
+            responsePending = false;
+            Ptr<Ieee80211MacHeader> header;
+            if (pendingBar) {
+                auto response = makeShared<Ieee80211BasicBlockAck>();
+                response->setTransmitterAddress(pendingBar->getReceiverAddress());
+                response->setTidInfo(pendingBar->getTidInfo());
+                response->setStartingSequenceNumber(pendingBar->getStartingSequenceNumber());
+                for (int i = 0; i < 64; i++) {
+                    BitVector bits;
+                    for (int j = 0; j < 16; j++)
+                        bits.appendBit(scenario() == 9 ? (i != 0 || j == 0) : !(scenario() == 6 && bars == 1));
+                    response->setBlockAckBitmap(i, bits);
+                }
+                header = response;
+            }
+            else
+                header = makeShared<Ieee80211AckFrame>();
+            header->setReceiverAddress(mac->getAddress());
+            auto packet = new Packet("response", header);
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            packet->addTag<physicallayer::Ieee80211ModeInd>()->setMode(pendingResponseMode);
+            pendingBar = nullptr;
+            processLowerFrame(packet, header);
+        }
+        else if (message->isName("verify")) {
+            delete message;
+            std::cout << "Scheduling totals: data=" << dataCount << " bars=" << bars << " delbas=" << delbas << " refused=" << refusedBars << "\n";
+            ASSERT(bars > 0);
+            ASSERT(delbas == (scenario() == 4 ? 2 : 1));
+            if (scenario() != 9)
+                ASSERT(dataCount == burst() + (scenario() == 4 ? 8 : scenario() == 5 || scenario() == 6 || scenario() == 12 || scenario() == 14 ? 1 : 0));
+            else {
+                ASSERT(recipient->checkedBitmap && recipient->retired());
+                ASSERT((recipient->delivered == std::vector<int>{1, 2}));
+                ASSERT(dataCount > 3);
+                ASSERT(expired > 0);
+            }
+            ASSERT(originatorBlockAckAgreementHandler->getAgreements().empty());
+            ASSERT(originatorBlockAckAgreementHandler->getProcedures().empty());
+            ASSERT(edca->getLifetimeHandler()->getNumFrames() == 0);
+            ASSERT(!frameSequenceHandler->isSequenceRunning());
+            if (scenario() == 5 || scenario() == 6)
+                ASSERT(retries == 1 && bars == 2);
+            if (scenario() == 8 || scenario() == 10 || scenario() == 13)
+                ASSERT(firstBarWasStandalone);
+            if (scenario() == 12 || scenario() == 14)
+                ASSERT(collisions == 1 && retries == 0);
+            std::cout << "Block Ack scheduling assertions passed.\n";
+            endSimulation();
+        }
+        else
+            Hcf::handleMessage(message);
+    }
+};
+Define_Module(SchedulingHcf);
+class SchedulingTest : public cSimpleModule {
+  protected:
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("begin")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        check_and_cast<SchedulingHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"))->begin();
+    }
+};
+Define_Module(SchedulingTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module SchedulingHcf extends Hcf { parameters: int scenario; bool multiple; @class(::inet::ieee80211::SchedulingHcf); }
+module SchedulingRecipient extends Hcf { parameters: @class(::inet::ieee80211::SchedulingRecipient); }
+simple SchedulingTest { parameters: @class(::inet::ieee80211::SchedulingTest); }
+network SchedulingNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        recipient: WirelessHost;
+        test: SchedulingTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = SchedulingNetwork
+ned-path = .;../../../../src
+sim-time-limit = 50ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "a"
+**.wlan[*].bitrate = 6Mbps
+*.host.wlan[*].address = "02:00:00:00:00:01"
+*.recipient.wlan[*].address = "02:00:00:00:00:02"
+**.wlan[*].mac.qosStation = true
+*.recipient.wlan[*].mac.hcf.typename = "SchedulingRecipient"
+*.host.wlan[*].mac.hcf.typename = "SchedulingHcf"
+**.wlan[*].mac.hcf.scenario = ${scenario=0..14}
+**.wlan[*].mac.hcf.multiple = ${multiple=false,true}
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "basic"
+**.wlan[*].mac.hcf.originatorAckPolicy.ackTimeout = 1ms
+**.wlan[*].mac.hcf.originatorAckPolicy.blockAckTimeout = 1ms
+**.wlan[*].mac.hcf.rtsPolicy.rtsThreshold = 2346B
+**.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = ${scenario} == 9 ? 128B : 2346B
+**.wlan[*].mac.hcf.edca.edcaf[*].msduLifetime = ${scenario} == 9 ? 10ms : 512ms
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMin = ${scenario} == 12 || ${scenario} == 14 ? 0 : -1
+**.wlan[*].mac.hcf.edca.edcaf[2].cwMax = ${scenario} == 14 ? 3 : ${scenario} == 12 ? 0 : -1
+**.wlan[*].mac.hcf.edca.edcaf[2].recoveryProcedure.shortRetryLimit = ${scenario} == 14 ? 1 : 7
+**.wlan[*].mac.hcf.edca.edcaf[*].cwMax = ${scenario} == 12 || ${scenario} == 14 ? 0 : -1
+**.wlan[*].mac.hcf.edca.edcaf[*].txopProcedure.protectionMechanism = ${multiple} ? "multiple" : "single"
+**.wlan[*].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = ${scenario} == 8 ? 900us : ${scenario} == 10 ? 0s : ${scenario} == 11 ? 1160us : ${scenario} == 13 ? 50us : 10ms
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 2000000m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.recipient.mobility.initialX = 1000000m
+*.host.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Block Ack scheduling assertions passed.

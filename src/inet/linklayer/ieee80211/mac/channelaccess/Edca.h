@@ -30,11 +30,10 @@ class INET_API Edca : public SimpleModule
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
 
-    virtual AccessCategory mapTidToAc(Tid tid);
-
   public:
     virtual ~Edca();
 
+    virtual AccessCategory mapTidToAc(Tid tid);
     virtual AccessCategory classifyFrame(const Ptr<const Ieee80211DataHeader>& header);
     virtual Edcaf *getEdcaf(AccessCategory ac) const { return edcafs[ac]; }
     EdcaTransmitLifetimeHandler *getLifetimeHandler() const { return lifetimeHandler; }

@@ -700,9 +700,13 @@ station then sets up an agreement with its peer automatically (with ADDBA
 frames) when it sends a QoS data frame shorter than
 :par:`maxBlockAckPolicyFrameLength` (default 1000 bytes). After that, the
 frames of that traffic class go out without an immediate acknowledgement,
-and the station sends a Block Ack Request after :par:`blockAckReqThreshold`
-(default 5) unacknowledged frames. Both parameters are on
-``mac.hcf.originatorAckPolicy``.
+and the station normally sends BAR after :par:`blockAckReqThreshold` unacknowledged frames. The default threshold is five. Both parameters are on ``mac.hcf.originatorAckPolicy``.
+
+The station applies the threshold separately to each peer and TID. It sends BAR below the threshold when the next eligible DATA belongs to another agreement or cannot fit the transmit window. The station also sends BAR when no eligible DATA remains. For example, a burst of four frames ends with BAR even with the default threshold of five. A negotiated buffer size of one requires BAR before the second sequence number.
+
+BAR can obtain channel access without a queued DATA frame. A later BAR within a TXOP must fit the applicable TXOP and TXNAV bounds with its response. If BAR cannot fit, the station retains that work for another contention.
+
+After the final exchange, the originator sends DELBA when its agreement has no queued DATA, in-progress DATA, or active BAR exchange. A zero inactivity timeout does not disable this transfer-completion rule. DATA that arrives after this boundary waits for DELBA completion. A later transfer can require another ADDBA exchange. If the last unresolved DATA expires, the originator uses the same teardown path. Ordinary recipient teardown releases complete units behind a receive gap before it releases agreement resources.
 
 The agreement policies, ``mac.hcf.originatorBlockAckAgreementPolicy`` and
 ``mac.hcf.recipientBlockAckAgreementPolicy``, set the buffer size
