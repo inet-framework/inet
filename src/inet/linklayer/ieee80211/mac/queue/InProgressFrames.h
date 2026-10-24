@@ -52,8 +52,12 @@ class INET_API InProgressFrames : public SimpleModule
     virtual int getLength() const { return inProgressFrames.size(); }
     virtual Packet *getFrames(int i) const { return inProgressFrames[i]; }
     bool containsFrame(const Packet *packet) const;
+    // Takes ownership after the data service commits a reversible preparation.
+    void adoptPreparedFrame(Packet *packet);
     virtual Packet *getFrameToTransmit();
-    virtual Packet *getPendingFrameFor(Packet *frame);
+    virtual Packet *peekFrameToTransmit();
+    SequenceNumberCyclic getCandidateSequenceNumber(Packet *packet) const;
+    virtual Packet *getPendingFrameFor(Packet *frame, bool extract = true);
     virtual void dropFrame(Packet *packet);
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 

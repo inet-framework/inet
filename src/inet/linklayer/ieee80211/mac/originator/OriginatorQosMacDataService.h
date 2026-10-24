@@ -16,14 +16,14 @@
 #include "inet/linklayer/ieee80211/mac/contract/IMpduAggregationPolicy.h"
 #include "inet/linklayer/ieee80211/mac/contract/IMsduAggregation.h"
 #include "inet/linklayer/ieee80211/mac/contract/IMsduAggregationPolicy.h"
-#include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/contract/IOriginatorQosMacDataService.h"
 #include "inet/linklayer/ieee80211/mac/contract/ISequenceNumberAssignment.h"
 #include "inet/linklayer/ieee80211/mac/lifetime/EdcaTransmitLifetimeHandler.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, public SimpleModule
+class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService, public SimpleModule
 {
   protected:
     // Figure 5-1—MAC data plane architecture
@@ -43,6 +43,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
     std::function<void()> expireFrames;
     std::function<bool(const Packet *)> extractionEligible;
     std::function<bool(Packet *)> aMsduPermitted;
+    std::function<bool(Packet *)> fragmentationPermitted;
     int64_t nextDataAllocationIndex = 0;
 
   protected:
@@ -54,13 +55,17 @@ class INET_API OriginatorQosMacDataService : public IOriginatorMacDataService, p
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
 
   public:
+    void setFragmentationPermission(std::function<bool(Packet *)> permission) { fragmentationPermitted = permission; }
     void setEligibility(std::function<bool(const Packet *)> eligible, std::function<bool(Packet *)> permission) {
         extractionEligible = eligible;
         aMsduPermitted = permission;
     }
-    Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const;
-    SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const;
-    bool hasAMsduAggregation() const { return aMsduAggregationPolicy != nullptr; }
+    virtual Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const override;
+    virtual SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const override;
+    virtual bool hasAMsduAggregation() const override { return aMsduAggregationPolicy != nullptr; }
+    virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) override;
+    virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const override;
+    virtual Packet *commitPreparedFrame(PreparedQosData& preparation) override;
     virtual ~OriginatorQosMacDataService();
     void setLifetimeHandler(EdcaTransmitLifetimeHandler *handler, std::function<void()> expiration) {
         lifetimeHandler = handler;

@@ -33,6 +33,18 @@ peer.maxAmpduLengthExponent = 3;
 
 Ieee80211HtOperation operation;
 operation.operatingChannelWidth = MHz(20);
+for (bool permitted : {false, true}) {
+    auto advertised = operation;
+    advertised.primaryChannel = 0;
+    advertised.rifsMode = permitted;
+    auto band = physicallayer::Ieee80211CompliantBands::getBand("2.4 GHz");
+    auto element = makeHtOperationElement(band, advertised);
+    ASSERT(element.rifsMode == permitted);
+    auto received = makeHtOperation(band, element);
+    ASSERT(received == advertised);
+    received.rifsMode = !permitted;
+    ASSERT(!(received == advertised));
+}
 operation.basicMcsSupported[0] = true;
 
 auto negotiated = negotiateHtCapabilities(local, peer, operation);

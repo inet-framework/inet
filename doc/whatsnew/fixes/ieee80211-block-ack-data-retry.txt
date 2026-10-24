@@ -1,0 +1,3 @@
+IEEE 802.11 DATA Retry after Block Ack failure
+
+HCF now sets Retry when it retransmits standalone QoS DATA after lost or negative Block Ack feedback. The retransmission retains its sequence number and TID. Configurations with these retransmissions can produce different network-data fingerprints, including computed FCS values. The correction changes no packet length or transmission schedule by itself.

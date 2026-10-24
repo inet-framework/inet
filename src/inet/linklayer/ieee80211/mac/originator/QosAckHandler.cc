@@ -109,6 +109,33 @@ void QosAckHandler::dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, Seq
         ackStatuses.erase(it);
 }
 
+std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHandler::processReceivedCompressedBlockAck(
+        const Ptr<const Ieee80211CompressedBlockAck>& blockAck, const OriginatorBlockAckAgreement *agreement)
+{
+    std::set<QoSKey> acked;
+    if (!agreement)
+        return acked;
+    auto start = blockAck->getStartingSequenceNumber();
+    const auto& bitmap = blockAck->getBlockAckBitmap();
+    // IEEE Std 802.11-2024, 10.25.6.8: positive bits cover transmitted frames throughout the active window.
+    for (auto& entry : ackStatuses) {
+        if (entry.first.first != blockAck->getTransmitterAddress() || entry.first.second.first != blockAck->getTidInfo())
+            continue;
+        auto sequence = SequenceNumberCyclic(entry.first.second.second.getSequenceNumber());
+        auto& status = entry.second;
+        bool transmitted = status != Status::FRAME_NOT_YET_TRANSMITTED && status != Status::NO_ACK_REQUIRED;
+        int offset = OriginatorBlockAckAgreement::computeSequenceDistance(start, sequence);
+        if (transmitted && agreement->containsSequence(sequence) && entry.first.second.second.getFragmentNumber() == 0 &&
+            offset < 64 && bitmap.getBit(offset)) {
+            status = Status::BLOCK_ACK_ARRIVED_ACKED;
+            acked.insert(entry.first);
+        }
+        else if (status == Status::WAITING_FOR_BLOCK_ACK)
+            status = Status::BLOCK_ACK_ARRIVED_UNACKED;
+    }
+    return acked;
+}
+
 std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHandler::processReceivedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck)
 {
     MacAddress receiverAddr = blockAck->getTransmitterAddress();
@@ -146,6 +173,13 @@ std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> QosAckHand
     }
     else {
         throw cRuntimeError("Multi-TID BlockReq is unimplemented");
+    }
+    auto basic = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck);
+    auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAck);
+    auto tid = basic ? basic->getTidInfo() : compressed->getTidInfo();
+    for (auto& entry : ackStatuses) {
+        if (entry.first.first == receiverAddr && entry.first.second.first == tid && entry.second == Status::WAITING_FOR_BLOCK_ACK)
+            entry.second = Status::BLOCK_ACK_ARRIVED_UNACKED;
     }
     return ackedFrames;
 }
@@ -195,23 +229,28 @@ void QosAckHandler::processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211D
         mgmtAckStatuses[std::make_pair(header->getReceiverAddress(), SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber()))] = Status::WAITING_FOR_NORMAL_ACK;
 }
 
-void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq)
+void QosAckHandler::processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, const OriginatorBlockAckAgreement *agreement)
 {
     for (auto& ackStatus : ackStatuses) {
+        if (ackStatus.first.first != blockAckReq->getReceiverAddress())
+            continue;
         auto tid = ackStatus.first.second.first;
         auto seqCtrlField = ackStatus.first.second.second;
+        auto sequence = SequenceNumberCyclic(seqCtrlField.getSequenceNumber());
+        if (agreement && !agreement->containsSequence(sequence))
+            continue;
         auto& status = ackStatus.second;
         if (auto basicBlockAckReq = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
             if (basicBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = basicBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && SequenceNumberCyclic(seqCtrlField.getSequenceNumber()) >= startingSeqNum)
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && OriginatorBlockAckAgreement::isInBitmap(sequence, startingSeqNum))
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }
         else if (auto compressedBlockAckReq = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
             if (compressedBlockAckReq->getTidInfo() == tid) {
                 auto startingSeqNum = compressedBlockAckReq->getStartingSequenceNumber();
-                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && SequenceNumberCyclic(seqCtrlField.getSequenceNumber()) >= startingSeqNum && seqCtrlField.getFragmentNumber() == 0) // TODO ASSERT(seqCtrlField.second == 0)?
+                if (status == Status::BLOCK_ACK_NOT_YET_REQUESTED && OriginatorBlockAckAgreement::isInBitmap(sequence, startingSeqNum) && seqCtrlField.getFragmentNumber() == 0)
                     status = Status::WAITING_FOR_BLOCK_ACK;
             }
         }

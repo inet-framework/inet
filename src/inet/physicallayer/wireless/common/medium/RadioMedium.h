@@ -337,6 +337,9 @@ class INET_API RadioMedium : public SimpleModule, public cListener, public IRadi
     virtual IWirelessSignal *transmitPacket(const IRadio *transmitter, Packet *packet) override;
     virtual Packet *receivePacket(const IRadio *receiver, IWirelessSignal *signal) override;
     virtual const ITransmission *getTransmission(int id) const override;
+    virtual TransmissionTimingSnapshot getTransmissionTimingSnapshot(int id) const override;
+    virtual std::optional<simtime_t> computePrecedingSignalGap(int currentTransmissionId,
+            const TransmissionTimingSnapshot& preceding) const override;
 
     virtual const IListeningDecision *listenOnMedium(const IRadio *receiver, const IListening *listening) const override;
 

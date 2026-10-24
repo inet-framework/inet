@@ -170,7 +170,13 @@ void OriginatorBlockAckAgreementHandler::processReceivedBlockAck(const Ptr<const
     if (auto basicBlockAck = dynamicPtrCast<const Ieee80211BasicBlockAck>(blockAck)) {
         auto agreement = getAgreement(basicBlockAck->getTransmitterAddress(), basicBlockAck->getTidInfo());
         if (agreement) {
-            agreement->setStartingSequenceNumber(basicBlockAck->getStartingSequenceNumber());
+            agreement->calculateExpirationTime();
+            scheduleInactivityTimer(callback);
+        }
+    }
+    else if (auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAck>(blockAck)) {
+        auto agreement = getAgreement(compressed->getTransmitterAddress(), compressed->getTidInfo());
+        if (agreement) {
             agreement->calculateExpirationTime();
             scheduleInactivityTimer(callback);
         }

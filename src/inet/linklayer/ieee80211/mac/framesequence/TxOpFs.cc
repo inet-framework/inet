@@ -44,10 +44,11 @@ int TxOpFs::selectMgmtOrDataQap(AlternativesFs *frameSequence, FrameSequenceCont
 
 int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceContext *context)
 {
-    auto frameToTransmit = context->getInProgressFrames()->getFrameToTransmit();
-    const auto& macHeader = frameToTransmit->peekAtFront<Ieee80211MacHeader>();
-    if (context->getQoSContext()->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), context->getQoSContext()->txopProcedure))
+    auto qos = context->getQoSContext();
+    if (qos->ackPolicy->isBlockAckReqNeeded(context->getInProgressFrames(), qos->txopProcedure, qos->blockAckAgreementHandler))
         return 2;
+    auto frameToTransmit = context->getDataFrameToTransmit();
+    const auto& macHeader = frameToTransmit->peekAtFront<Ieee80211MacHeader>();
     if (dynamicPtrCast<const Ieee80211MgmtHeader>(macHeader))
         return 3;
     else {
@@ -70,7 +71,7 @@ int TxOpFs::selectTxOpSequence(AlternativesFs *frameSequence, FrameSequenceConte
 
 bool TxOpFs::isRtsCtsNeeded(OptionalFs *frameSequence, FrameSequenceContext *context)
 {
-    auto protectedFrame = context->getInProgressFrames()->getFrameToTransmit();
+    auto protectedFrame = context->getDataFrameToTransmit();
     return context->getRtsPolicy()->isRtsNeeded(protectedFrame, protectedFrame->peekAtFront<Ieee80211MacHeader>());
 }
 

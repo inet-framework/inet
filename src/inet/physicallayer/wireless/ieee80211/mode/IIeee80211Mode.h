@@ -83,6 +83,8 @@ class INET_API IIeee80211Mode : public cObject, public IPrintableObject
     virtual const simtime_t getSlotTime() const = 0;
     virtual const simtime_t getSifsTime() const = 0;
     virtual const simtime_t getRifsTime() const = 0;
+    // Default extension after the PPDU, in seconds. A received waveform can omit it for RIFS.
+    virtual const simtime_t getSignalExtensionTime() const = 0;
     virtual const simtime_t getCcaTime() const = 0;
     virtual const simtime_t getPhyRxStartDelay() const = 0;
     virtual const simtime_t getRxTxTurnaroundTime() const = 0;

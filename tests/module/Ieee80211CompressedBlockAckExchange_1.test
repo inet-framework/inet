@@ -1,0 +1,427 @@
+%description:
+Use real association and management rate publication for two Compressed Block Ack hops.
+The STA sends thirty UDP payloads through the AP to the other STA.
+Observe accepted ADDBA dialogs, matched Compressed BAR/BA, positive receipt bits, and final agreement retirement.
+After setup, remove one BSS basic rate through the MIB API. Require the agreement and HT generation to remain unchanged.
+Record actual frame modes, lengths, airtime, IFS, and TXOP bounds for both protection modes at 6 and 24 Mbps.
+The medium uses zero propagation time. Compare local receipt completion with the exact TXOP endpoint without a timing allowance.
+The fixture enforces DATA and ACK bounds under active Compressed agreements, with the permitted initial MSDU and same-size retry exceptions.
+The fixture records overruns outside active agreements separately. StrictAllTiming retains the original aggregate assertion for inherited failures.
+Repeat each case with a non-HT link. Require payload delivery without ADDBA or BAR.
+Repeat each case with A-MSDU aggregation enabled. Require actual A-MSDUs under accepted agreements at 24 Mbps.
+The LowestResponse configuration supplies two extra runs with a 6 Mbps BAR and BA, one per protection mode.
+
+%extraargs: -r 0..15
+
+%file: Exchange.cc
+#include <iostream>
+#include "inet/common/Simsignals.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211DataSequenceTag_m.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+namespace inet::ieee80211 {
+class ExchangeHcf : public Hcf {
+    struct DataScope {
+        bool activeCompressed;
+        AckPolicy policy;
+    };
+    std::map<int64_t, DataScope> dataScopes;
+    struct PendingBar {
+        SequenceNumberCyclic start;
+        simtime_t bound;
+        int dataManagementCount;
+        bool aggregate;
+    };
+    std::map<std::pair<MacAddress, int>, int> dialogs;
+    std::map<std::pair<MacAddress, int>, PendingBar> pendingBars;
+    simtime_t observedTxopStart = -1;
+    int dataManagementCount = 0;
+    bool aggregate = false;
+    simtime_t controlReceivedAt = -1;
+  public:
+    int requests = 0;
+    int acceptedResponses = 0;
+    int bars = 0;
+    int positiveResponses = 0;
+    int activeData = 0;
+    int activeAggregates = 0;
+    int retired = 0;
+    int initialOverruns = 0;
+    int generalDataOverruns = 0;
+    int generalAckOverruns = 0;
+    int initialAckOverruns = 0;
+    int initialBlockAckOverruns = 0;
+    int outsideAgreementDataOverruns = 0;
+    int outsideAgreementAckOverruns = 0;
+    int permittedRetryOverruns = 0;
+    bool refreshedRates = false;
+    bool clean() const {
+        std::cout << "Exchange cleanup: node=" << getParentModule()->getParentModule()->getParentModule()->getFullName()
+            << " originator=" << originatorBlockAckAgreementHandler->getAgreements().size()
+            << " recipient=" << recipientBlockAckAgreementHandler->getAgreements().size()
+            << " pendingBars=" << pendingBars.size()
+            << " inactivityTimer=" << inactivityTimer->isScheduled() << " addbaTimer=" << addbaResponseTimer->isScheduled() << "\n";
+        for (const auto& entry : originatorBlockAckAgreementHandler->getProcedures()) {
+            std::cout << "Exchange procedure: peer=" << entry.first.first << " tid=" << int(entry.first.second)
+                << " state=" << int(entry.second.state) << " deadline=" << entry.second.responseDeadline << "\n";
+            ASSERT(entry.second.state == IOriginatorBlockAckAgreementHandler::ProcedureState::WAITING_FOR_SUCCESSOR);
+            ASSERT(!entry.second.requestAttempted && entry.second.responseDeadline == SIMTIME_MAX);
+        }
+        for (auto category : {AC_BK, AC_BE, AC_VI, AC_VO}) {
+            std::cout << "Exchange remaining: ac=" << category
+                << " queued=" << edca->getEdcaf(category)->getPendingQueue()->getNumPackets()
+                << " committed=" << edca->getEdcaf(category)->getInProgressFrames()->getLength() << "\n";
+            ASSERT(edca->getEdcaf(category)->getPendingQueue()->isEmpty());
+            ASSERT(edca->getEdcaf(category)->getInProgressFrames()->getLength() == 0);
+        }
+        ASSERT(!inactivityTimer->isScheduled() && !addbaResponseTimer->isScheduled());
+        return originatorBlockAckAgreementHandler->getAgreements().empty() &&
+            recipientBlockAckAgreementHandler->getAgreements().empty() && pendingBars.empty();
+    }
+    void checkPublishedState(MacAddress peer) {
+        ASSERT(mib->getLocalRateSet().operational.known);
+        ASSERT(mib->getBssRateSet().basic.known);
+        ASSERT(!mib->getBssRateSet().basic.legacyRates.empty());
+        auto rates = mib->findPeerRateSet(peer);
+        ASSERT(rates && rates->operational.known && !rates->operational.legacyRates.empty());
+        auto ht = mib->findPeerHtState(peer);
+        ASSERT(mib->isHtOperationSupported() && ht && ht->valid);
+    }
+  protected:
+    void transmitControlResponseFrame(Packet *responsePacket, const Ptr<const Ieee80211MacHeader>& responseHeader,
+            Packet *receivedPacket, const Ptr<const Ieee80211MacHeader>& receivedHeader) override {
+        controlReceivedAt = simTime();
+        Hcf::transmitControlResponseFrame(responsePacket, responseHeader, receivedPacket, receivedHeader);
+    }
+    void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+        auto airtime = mode->getDuration(packet->getDataLength());
+        ASSERT(simTime() - airtime - controlReceivedAt == modeSet->getSifsTime());
+        if (dynamicPtrCast<const Ieee80211CompressedBlockAck>(header))
+            ASSERT(packet->getDataLength() == LENGTH_COMPRESSED_BLOCKACK);
+        std::cout << "Exchange response: node=" << getParentModule()->getParentModule()->getParentModule()->getFullName()
+            << " start=" << simTime() - airtime << " end=" << simTime() << " type=" << header->getType()
+            << " bytes=" << packet->getByteLength() << " bitrate=" << mode->getDataMode()->getNetBitrate()
+            << " airtime=" << airtime << " ifs=" << modeSet->getSifsTime() << "\n";
+        Hcf::recipientProcessTransmittedControlResponseFrame(packet, header);
+    }
+    void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            auto index = packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+            ASSERT(dataScopes.count(index));
+            const auto& scope = dataScopes.at(index);
+            std::cout << "Exchange scope: node=" << getParentModule()->getParentModule()->getParentModule()->getFullName()
+                << " at=" << simTime() << " allocation=" << index << " activeCompressed=" << scope.activeCompressed
+                << " ackPolicy=" << scope.policy << " aggregate=" << data->getAMsduPresent() << " retry=" << data->getRetry() << "\n";
+            auto owner = edca->getChannelOwner();
+            ASSERT(owner);
+            auto txop = owner->getTxopProcedure();
+            auto bound = txop->getStart() + txop->getLimit();
+            if (simTime() > bound) {
+                if (par("strictAllTiming").boolValue())
+                    ASSERT(!data->getAMsduPresent());
+                if (scope.activeCompressed) {
+                    ASSERT(dataManagementCount == 1);
+                    ASSERT(!data->getAMsduPresent() || data->getRetry());
+                    permittedRetryOverruns += data->getRetry();
+                }
+                else
+                    outsideAgreementDataOverruns++;
+                if (dataManagementCount == 1)
+                    initialOverruns++;
+                else
+                    generalDataOverruns++;
+            }
+        }
+        Hcf::transmissionComplete(packet, header);
+    }
+    void originatorProcessReceivedFrame(Packet *packet, Packet *transmitted) override {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(transmitted->peekAtFront<Ieee80211MacHeader>());
+        if (data) {
+            auto owner = edca->getChannelOwner();
+            ASSERT(owner);
+            auto txop = owner->getTxopProcedure();
+            if (simTime() > txop->getStart() + txop->getLimit()) {
+                auto index = transmitted->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex();
+                const auto& scope = dataScopes.at(index);
+                if (par("strictAllTiming").boolValue())
+                    ASSERT(!data->getAMsduPresent());
+                if (scope.activeCompressed) {
+                    ASSERT(dataManagementCount == 1);
+                    ASSERT(!data->getAMsduPresent() || data->getRetry());
+                }
+                else
+                    outsideAgreementAckOverruns++;
+                if (dataManagementCount > 1)
+                    generalAckOverruns++;
+                else
+                    initialAckOverruns++;
+            }
+        }
+        Hcf::originatorProcessReceivedFrame(packet, transmitted);
+    }
+    bool transmitFrame(Packet *packet, simtime_t ifs) override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        bool activeCompressed = false;
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid());
+            activeCompressed = std::string(par("blockAckVariant").stringValue()) == "compressed" &&
+                agreement && agreement->getIsAddbaResponseReceived();
+        }
+        bool sent = Hcf::transmitFrame(packet, ifs);
+        if (!sent)
+            return false;
+        header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header))
+            dataScopes.insert_or_assign(packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex(),
+                DataScope{activeCompressed, data->getAckPolicy()});
+        auto owner = edca->getChannelOwner();
+        if (owner) {
+            auto txop = owner->getTxopProcedure();
+            if (txop->getStart() != observedTxopStart) {
+                observedTxopStart = txop->getStart();
+                dataManagementCount = 0;
+                aggregate = false;
+            }
+            if (dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
+                dataManagementCount++;
+        }
+        if (auto request = dynamicPtrCast<const Ieee80211AddbaRequest>(header)) {
+            checkPublishedState(request->getReceiverAddress());
+            dialogs[{request->getReceiverAddress(), request->getTid()}] = request->getDialogToken();
+            requests++;
+        }
+        if (auto bar = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(header)) {
+            ASSERT(bar->getCompressedBitmap() && !bar->getMultiTid());
+            ASSERT(packet->getDataLength() == LENGTH_BLOCKACKREQ);
+            ASSERT(owner);
+            auto txop = owner->getTxopProcedure();
+            pendingBars.insert_or_assign({bar->getReceiverAddress(), bar->getTidInfo()},
+                PendingBar{bar->getStartingSequenceNumber(), txop->getStart() + txop->getLimit(), dataManagementCount, aggregate});
+            bars++;
+        }
+        ASSERT(!dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header));
+        if (dynamicPtrCast<const Ieee80211CompressedBlockAck>(header))
+            ASSERT(packet->getDataLength() == LENGTH_COMPRESSED_BLOCKACK);
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            aggregate |= data->getAMsduPresent();
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid());
+            if (agreement && agreement->getIsAddbaResponseReceived()) {
+                ASSERT(data->getFragmentNumber() == 0 && !data->getMoreFragments());
+                activeData++;
+                activeAggregates += data->getAMsduPresent();
+            }
+        }
+        if (dynamicPtrCast<const Ieee80211Delba>(header))
+            retired++;
+        if (header->getType() == ST_DATA_WITH_QOS || header->getType() == ST_RTS ||
+            header->getType() == ST_CTS || header->getType() == ST_BLOCKACK_REQ || header->getType() == ST_BLOCKACK) {
+            auto mode = packet->getTag<physicallayer::Ieee80211ModeReq>()->getMode();
+            std::cout << "Exchange frame: node=" << getParentModule()->getParentModule()->getParentModule()->getFullName()
+                << " at=" << simTime() << " type=" << header->getType() << " bytes=" << packet->getByteLength()
+                << " bitrate=" << mode->getDataMode()->getNetBitrate() << " ifs=" << ifs
+                << " airtime=" << mode->getDuration(packet->getDataLength());
+            if (owner) {
+                auto txop = owner->getTxopProcedure();
+                std::cout << " txopStart=" << txop->getStart() << " txopLimit=" << txop->getLimit()
+                    << " protection=" << txop->getProtectionMechanism() << " dataManagementCount=" << dataManagementCount;
+            }
+            std::cout << "\n";
+        }
+        return true;
+    }
+    void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override {
+        if (auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(header); response && response->getReceiverAddress() == mib->address) {
+            auto key = std::make_pair(response->getTransmitterAddress(), int(response->getTid()));
+            ASSERT(dialogs.count(key) && dialogs.at(key) == response->getDialogToken());
+            ASSERT(response->getStatusCode() == 0 && response->getBlockAckPolicy());
+            acceptedResponses++;
+        }
+        if (auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(header); response && response->getReceiverAddress() == mib->address) {
+            auto key = std::make_pair(response->getTransmitterAddress(), int(response->getTidInfo()));
+            ASSERT(pendingBars.count(key));
+            auto pending = pendingBars.at(key);
+            ASSERT(response->getStartingSequenceNumber() == pending.start);
+            ASSERT(response->getCompressedBitmap() && !response->getMultiTid());
+            ASSERT(response->getBlockAckBitmap().getSize() == 64);
+            bool positive = false;
+            for (unsigned int i = 0; i < response->getBlockAckBitmap().getSize(); i++)
+                positive |= response->getBlockAckBitmap().getBit(i);
+            ASSERT(positive);
+            std::cout << "Exchange completion: at=" << simTime() << " bound=" << pending.bound
+                << " dataManagementCount=" << pending.dataManagementCount << "\n";
+            // One initial unaggregated MSDU can overrun. A later exchange must finish within the TXOP.
+            if (pending.dataManagementCount != 1 || pending.aggregate)
+                ASSERT(simTime() <= pending.bound);
+            else if (simTime() > pending.bound)
+                initialBlockAckOverruns++;
+            positiveResponses++;
+            pendingBars.erase(key);
+        }
+        ASSERT(!dynamicPtrCast<const Ieee80211BasicBlockAck>(header));
+        Hcf::processLowerFrame(packet, header);
+        if (auto response = dynamicPtrCast<const Ieee80211AddbaResponse>(header);
+                response && response->getReceiverAddress() == mib->address && !refreshedRates) {
+            auto peer = response->getTransmitterAddress();
+            auto tid = response->getTid();
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(peer, tid);
+            ASSERT(agreement && agreement->getIsAddbaResponseReceived());
+            auto generation = mib->findPeerHtState(peer)->generation;
+            auto rates = mib->getBssRateSet();
+            ASSERT(rates.basic.legacyRates.size() > 1);
+            rates.basic.legacyRates.erase(std::prev(rates.basic.legacyRates.end()));
+            // Association supplies the initial rates. This rate-only update exercises the production subscriber.
+            mib->setBssRateSet(rates);
+            ASSERT(originatorBlockAckAgreementHandler->getAgreement(peer, tid) == agreement);
+            ASSERT(mib->findPeerHtState(peer)->generation == generation);
+            refreshedRates = true;
+        }
+    }
+};
+Define_Module(ExchangeHcf);
+
+class ExchangeTest : public cSimpleModule, public cListener {
+    int received = 0;
+    int64_t bytes = 0;
+  protected:
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("subscribe")); }
+    void receiveSignal(cComponent *, simsignal_t, cObject *value, cObject *) override {
+        auto packet = check_and_cast<Packet *>(value);
+        received++;
+        bytes += packet->getByteLength();
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->isName("subscribe")) {
+            delete message;
+            getModuleByPath("^.sta2.app[0]")->subscribe(packetReceivedSignal, this);
+            scheduleAt(SimTime(1200, SIMTIME_MS), new cMessage("verify"));
+            return;
+        }
+        delete message;
+        ASSERT(received == 30 && bytes == 21000);
+        for (const char *path : {"^.sta1.wlan[0].mac.hcf", "^.ap.wlan[0].mac.hcf"}) {
+            auto hcf = check_and_cast<ExchangeHcf *>(getModuleByPath(path));
+            std::cout << "Exchange summary: node=" << path << " accepted=" << hcf->acceptedResponses
+                << " bars=" << hcf->bars << " positiveResponses=" << hcf->positiveResponses
+                << " activeData=" << hcf->activeData << " retired=" << hcf->retired
+                << " activeAggregates=" << hcf->activeAggregates << " initialOverruns=" << hcf->initialOverruns
+                << " generalDataOverruns=" << hcf->generalDataOverruns << " generalAckOverruns=" << hcf->generalAckOverruns
+                << " outsideAgreementDataOverruns=" << hcf->outsideAgreementDataOverruns
+                << " outsideAgreementAckOverruns=" << hcf->outsideAgreementAckOverruns
+                << " permittedRetryOverruns=" << hcf->permittedRetryOverruns
+                << " initialAckOverruns=" << hcf->initialAckOverruns << " initialBlockAckOverruns=" << hcf->initialBlockAckOverruns << "\n";
+            if (par("ht").boolValue()) {
+                ASSERT(hcf->requests > 0 && hcf->acceptedResponses > 0 && hcf->bars > 0);
+                ASSERT(hcf->positiveResponses > 0 && hcf->positiveResponses <= hcf->bars && hcf->activeData > 0 && hcf->retired > 0);
+                ASSERT(hcf->refreshedRates);
+                if (par("aggregate").boolValue() && par("rate").intValue() == 24)
+                    ASSERT(hcf->activeAggregates > 0);
+            }
+            else
+                ASSERT(hcf->requests == 0 && hcf->acceptedResponses == 0 && hcf->bars == 0 && hcf->activeData == 0);
+            ASSERT(hcf->clean());
+        }
+        ASSERT(check_and_cast<ExchangeHcf *>(getModuleByPath("^.sta2.wlan[0].mac.hcf"))->clean());
+        std::cout << "Compressed infrastructure exchange assertions passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(ExchangeTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module ExchangeHcf extends Hcf { parameters: bool strictAllTiming = default(false); @class(::inet::ieee80211::ExchangeHcf); }
+simple ExchangeTest { parameters: bool ht; bool aggregate; int rate; @class(::inet::ieee80211::ExchangeTest); }
+network ExchangeNetwork {
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: Ieee80211ScalarRadioMedium;
+        ap: AccessPoint;
+        sta1: WirelessHost;
+        sta2: WirelessHost;
+        test: ExchangeTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = ExchangeNetwork
+ned-path = .;../../../../src
+sim-time-limit = 1.3s
+seed-set = 0
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+*.sta1.numApps = 1
+*.sta1.app[0].typename = "UdpBasicApp"
+*.sta1.app[0].destAddresses = "sta2"
+*.sta1.app[0].destPort = 1000
+*.sta1.app[0].messageLength = 700B
+*.sta1.app[0].startTime = 1s
+*.sta1.app[0].stopTime = 1.00295s
+*.sta1.app[0].sendInterval = 100us
+*.sta2.numApps = 1
+*.sta2.app[0].typename = "UdpSink"
+*.sta2.app[0].localPort = 1000
+*.sta*.ipv4.arp.typename = "GlobalArp"
+*.test.ht = ${ht=true,false}
+*.test.aggregate = ${aggregationPolicy="","BasicMsduAggregationPolicy"} != ""
+*.test.rate = ${rate=6,24}
+**.wlan[*].opMode = ${ht} ? "n(mixed-2.4Ghz)" : "g(mixed)"
+**.wlan[*].bitrate = ${rate}Mbps
+**.bandName = "2.4 GHz"
+**.wlan[*].radio.antenna.numAntennas = 2
+**.wlan[*].classifier.typename = "QosClassifier"
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "ExchangeHcf"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.originatorAckPolicy.blockAckReqThreshold = 5
+**.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+**.originatorMacDataService.msduAggregationPolicy.typename = ${aggregationPolicy}
+**.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+**.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = 1600
+**.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 2346B
+**.rtsPolicy.rtsThreshold = 500B
+**.txopProcedure.protectionMechanism = ${protection="single","multiple"}
+**.txopProcedure.txopLimit = 1ms
+**.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+*.sta1.mobility.initialX = 0m
+*.ap.mobility.initialX = 5m
+*.sta2.mobility.initialX = 10m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+[Config StrictAllTiming]
+**.wlan[*].mac.hcf.strictAllTiming = true
+
+[Config LowestResponse]
+constraint = $ht == true && $aggregationPolicy == "" && $rate == 6
+*.test.ht = true
+*.test.aggregate = false
+*.test.rate = 6
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 6Mbps
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+
+%contains: stdout
+Compressed infrastructure exchange assertions passed.

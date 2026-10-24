@@ -1,0 +1,87 @@
+%description:
+Production DATA retransmission after one lost Block Ack must retain its sequence and TID with Retry set.
+The radio tap drops the first Block Ack or clears its bitmap at sta1.
+Real association and ADDBA precede the DATA exchange.
+IEEE Std 802.11-2024, 9.2.4.1.6 defines Retry for retransmitted standalone DATA.
+
+%extraargs: -r 0..1
+
+%file: BlockAckDataRetry.cc
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet::protocoltest {
+static void clearBitmap(Packet *packet)
+{
+    std::vector<Ptr<Chunk>> prefix;
+    while (!dynamicPtrCast<const Ieee80211MacHeader>(packet->peekAtFront<Chunk>()))
+        prefix.push_back(packet->removeAtFront<Chunk>(packet->peekAtFront<Chunk>()->getChunkLength()));
+    auto response = packet->removeAtFront<Ieee80211BasicBlockAck>();
+    for (int i = 0; i < 64; i++) {
+        BitVector bits;
+        for (int fragment = 0; fragment < 16; fragment++)
+            bits.appendBit(false);
+        response->setBlockAckBitmap(i, bits);
+    }
+    packet->insertAtFront(response);
+    for (auto it = prefix.rbegin(); it != prefix.rend(); ++it)
+        packet->insertAtFront(*it);
+}
+
+static ProtocolTest retryProgram(const char *name, bool negative)
+{
+    auto test = ProtocolTest(name);
+    if (negative)
+        test.intercept(tap("radioMedium").to("sta1").filterPacket("ieee80211mac.type == 25").nth(1).mutate(clearBitmap)
+            .describe("clear the first feedback bitmap at the originator"));
+    else
+        test.intercept(tap("radioMedium").to("sta1").filterPacket("ieee80211mac.type == 25").nth(1).drop()
+            .describe("lose the first Block Ack at the originator"));
+    return test.once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                return data && data->getAckPolicy() == BLOCK_ACK;
+            })
+            .capture("sequence", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            })
+            .capture("tid", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getTid());
+            })
+            .assertEvent([](const MatchContext& c) {
+                return !c.event.packet->peekAtFront<Ieee80211DataHeader>()->getRetry();
+            })
+            .describe("first standalone DATA under the accepted agreement").within(1.05))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("ieee80211mac.type == 24")
+            .describe("BAR requests feedback for the outstanding DATA").within(0.02))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                return data && data->getType() == ST_DATA_WITH_QOS &&
+                    data->getSequenceNumber().get() == c.get("sequence").intValue() && data->getTid() == c.get("tid").intValue();
+            })
+            .assertEvent([](const MatchContext& c) {
+                return c.event.packet->peekAtFront<Ieee80211DataHeader>()->getRetry();
+            })
+            .describe("the same DATA identity returns with Retry set").within(0.02));
+}
+
+Define_ProtocolTest(wifi_block_ack_data_retry) { return retryProgram("wifi_block_ack_data_retry", false); }
+Define_ProtocolTest(wifi_block_ack_data_retry_negative) { return retryProgram("wifi_block_ack_data_retry_negative", true); }
+}
+
+%inifile: test.ini
+[General]
+cmdenv-stop-batch-on-error = false
+*.tester.testName = ${negative=false,true} ? "wifi_block_ack_data_retry_negative" : "wifi_block_ack_data_retry"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = 1.02s
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_data_retry: PASS
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_data_retry_negative: PASS

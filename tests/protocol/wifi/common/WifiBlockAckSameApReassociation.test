@@ -4,6 +4,7 @@ Same-AP reassociation retains identical peer rates and HT capabilities, with ina
 Both endpoints must clear both agreement roles before a new traffic batch starts.
 The new batch must establish fresh agreements and reach both UDP destinations.
 Read-only queries observe agreement state; the fixture never supplies agreements or calls reset.
+The fixture requests reassociation before the old traffic completes.
 
 %file: SameApReassociation.cc
 #include "BlockAckLifecycleTestSupport.h"
@@ -29,7 +30,10 @@ class BlockAckReassociationAgent : public Ieee80211AgentSta
             apHcf->hasOriginator(station, 6) + apHcf->hasRecipient(station, 6);
     }
   public:
-    ~BlockAckReassociationAgent() { cancelAndDelete(replace); cancelAndDelete(verify); }
+    ~BlockAckReassociationAgent() {
+        cancelAndDelete(replace);
+        cancelAndDelete(verify);
+    }
   protected:
     void processAssociateConfirm(Ieee80211Prim_AssociateConfirm *response) override {
         bool success = response->getResultCode() == PRC_SUCCESS;
@@ -37,7 +41,7 @@ class BlockAckReassociationAgent : public Ieee80211AgentSta
         if (success && !scheduled) {
             scheduled = true;
             replace = new cMessage("same-ap-reassociation");
-            scheduleAt(SimTime(1100, SIMTIME_MS), replace);
+            scheduleAt(SimTime(1008, SIMTIME_MS), replace);
         }
     }
     void processReassociateConfirm(Ieee80211Prim_ReassociateConfirm *response) override {
@@ -90,7 +94,7 @@ class BlockAckReassociationAgent : public Ieee80211AgentSta
             emit(registerSignal("equalPeerParameters"), long(equal));
             emit(registerSignal("rolesAfterReplacement"), long(agreementRoles()));
             verify = new cMessage("verify-fresh-setup");
-            scheduleAt(SimTime(1400, SIMTIME_MS), verify);
+            scheduleAt(SimTime(1380, SIMTIME_MS), verify);
         }
         else
             Ieee80211AgentSta::handleMessage(message);
@@ -147,6 +151,13 @@ simple BlockAckReassociationAgent extends Ieee80211AgentSta {
 
 %inifile: test.ini
 [General]
+**.wlan[*].bitrate = 6Mbps
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+# Only the AP-sta1 link needs Block Ack for the reset assertions.
+*.sta2.wlan[*].mac.hcf.isBlockAckSupported = false
+*.ap.wlan[*].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 500B
+# Slotted bidirectional contention can produce simultaneous transmissions.
+*.radioMedium.sameTransmissionStartTimeCheck = "warning"
 *.tester.testName = "wifi_block_ack_same_ap_reassociation"
 *.sta1.wlan[*].agent.typename = "BlockAckReassociationAgent"
 *.sta1.numApps = 3
@@ -160,17 +171,17 @@ simple BlockAckReassociationAgent extends Ieee80211AgentSta {
 *.sta1.app[2].messageLength = 1000B
 *.sta1.app[2].sendInterval = 0.1ms
 *.sta1.app[2].startTime = 1.3s
-*.sta1.app[2].stopTime = 1.303s
+*.sta1.app[2].stopTime = 1.4s
 *.sta2.numApps = 3
 *.sta2.app[1..2].typename = "UdpBasicApp"
 *.sta2.app[1..2].destAddresses = "sta1"
 *.sta2.app[1..2].destPort = 5001
-*.sta2.app[1..2].messageLength = 1000B
+*.sta2.app[1..2].messageLength = 100B
 *.sta2.app[1..2].sendInterval = 0.1ms
-*.sta2.app[1].startTime = 1.01s
-*.sta2.app[1].stopTime = 1.013s
+*.sta2.app[1].startTime = 1.000001s
+*.sta2.app[1].stopTime = 1.003001s
 *.sta2.app[2].startTime = 1.31s
-*.sta2.app[2].stopTime = 1.313s
+*.sta2.app[2].stopTime = 1.4s
 sim-time-limit = 1.5s
 include ../../ini/_blockackLifecycle.ini
 

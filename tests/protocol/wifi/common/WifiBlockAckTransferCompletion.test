@@ -1,0 +1,76 @@
+%description:
+Production Basic transfers below the BAR threshold must request final feedback and end with DELBA.
+The two-packet case exhausts the queue after one Block Ack DATA frame.
+The four-packet case uses a one-position window and requires BAR before more DATA.
+Both cases use real association, production ADDBA, threshold five, and seed zero.
+IEEE Std 802.11-2024, 10.25.4 supplies the final-transfer teardown requirement.
+Basic remains an INET compatibility profile.
+
+%extraargs: -r 0..1
+
+%file: BlockAckTransferCompletion.cc
+#include "BlockAckLifecycleTestSupport.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(wifi_block_ack_transfer_completion)
+{
+    return ProtocolTest("wifi_block_ack_transfer_completion")
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("has(Ieee80211AddbaRequest)")
+            .capture("tid", "Ieee80211AddbaRequest.tid")
+            .describe("originator requests the production agreement").within(1.05))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("has(Ieee80211AddbaResponse)")
+            .assertPacket("Ieee80211AddbaResponse.statusCode == 0 && Ieee80211AddbaResponse.tid == {tid}")
+            .describe("recipient accepts the agreement").within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                return data && data->getAckPolicy() == BLOCK_ACK;
+            })
+            .capture("firstSequence", [](const PacketEvent& event) {
+                return cValue(event.packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().get());
+            })
+            .describe("standalone DATA uses the accepted agreement").within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterEvent([](const MatchContext& c) {
+                auto header = c.event.packet->peekAtFront<Ieee80211MacHeader>();
+                return dynamicPtrCast<const Ieee80211BasicBlockAckReq>(header) != nullptr || header->getType() == ST_DATA_WITH_QOS;
+            })
+            .assertEvent([](const MatchContext& c) {
+                auto bar = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(c.event.packet->peekAtFront<Ieee80211MacHeader>());
+                return bar && bar->getTidInfo() == c.get("tid").intValue() &&
+                    bar->getReceiverAddress() == MacAddress("02:00:00:00:00:01") &&
+                    bar->getStartingSequenceNumber().get() == c.get("firstSequence").intValue();
+            })
+            .describe("BAR proceeds below threshold five").within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("has(Ieee80211BasicBlockAck)")
+            .assertPacket("Ieee80211BasicBlockAck.tidInfo == {tid}")
+            .describe("matching Block Ack resolves the group").within(0.01))
+        .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
+            .filterPacket("has(Ieee80211Delba)")
+            .assertPacket("Ieee80211Delba.initiator == true && Ieee80211Delba.tid == {tid}")
+            .describe("originator ends the completed transfer").within(0.03))
+        .once(on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+            .filterPacket("ieee80211mac.type == 29")
+            .describe("recipient acknowledges completion DELBA").within(0.01));
+}
+}
+
+%inifile: test.ini
+[General]
+cmdenv-stop-batch-on-error = false
+*.tester.testName = "wifi_block_ack_transfer_completion"
+*.sta1.app[0].sendInterval = 0.1ms
+*.sta1.app[0].stopTime = ${smallWindow=false,true} ? 1.00035s : 1.00015s
+**.recipientBlockAckAgreementPolicy.maximumAllowedBufferSize = ${smallWindow} ? 1 : 64
+**.originatorMacDataService.msduAggregationPolicy.typename = ""
+sim-time-limit = 1.1s
+include ../../ini/_blockackLifecycle.ini
+
+%contains: stdout
+PROTOCOLTEST wifi_block_ack_transfer_completion: PASS
+
+%not-contains: stdout
+PROTOCOLTEST wifi_block_ack_transfer_completion: FAIL

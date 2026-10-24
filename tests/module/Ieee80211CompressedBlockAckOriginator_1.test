@@ -1,0 +1,175 @@
+%description:
+Check Compressed responses through the HCF control callback and real EDCAF state.
+The fixture supplies accepted agreements and numbered frames with known ACK states.
+The fixture supplies peer HT capabilities; it does not test capability negotiation.
+An earlier response acknowledges a sent frame outside the current BAR wait.
+Later and disjoint responses release every current BAR wait for retry.
+Unsent frames, frames outside the active window, other peers, and other TIDs retain their state.
+Cases use ordinary sequence numbers and wrap across 4095.
+Scheduling_1 separately checks shifted responses through an active frame sequence.
+
+%extraargs: -r 0..5
+
+%file: Originator.cc
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreementHandler.h"
+#include "inet/linklayer/ieee80211/mac/Rx.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+
+namespace inet::ieee80211 {
+class OriginatorAgreements : public OriginatorBlockAckAgreementHandler {
+  public:
+    OriginatorBlockAckAgreement *accept(MacAddress peer, int start) {
+        auto agreement = new OriginatorBlockAckAgreement(peer, 5, SequenceNumberCyclic(start), 64, false, false);
+        agreement->setIsAddbaResponseReceived(true);
+        agreement->setBlockAckTimeoutValue(SIMTIME_ZERO);
+        agreement->calculateExpirationTime();
+        blockAckAgreements[{peer, 5}] = agreement;
+        return agreement;
+    }
+};
+class OriginatorHcf : public Hcf {
+  public:
+    void check() {
+        Enter_Method("check");
+        rx->setContentionBlocked(true);
+        const MacAddress peer("02:00:00:00:00:02");
+        const MacAddress other("02:00:00:00:00:03");
+        auto radio = check_and_cast<physicallayer::IRadio *>(mac->gate("lowerLayerOut")->getNextGate()->getOwnerModule());
+        auto transmitter = check_and_cast<const physicallayer::Ieee80211Transmitter *>(radio->getTransmitter());
+        auto channel = transmitter->getChannel();
+        mib->setPrimaryChannel(channel->getChannelNumber(), channel->getBand());
+        mib->setPeerHtCapabilities(peer, mib->localHtCapabilities, mib->getHtOperation());
+        int start = par("start");
+        int offset = par("offset");
+        delete originatorBlockAckAgreementHandler;
+        auto agreements = new OriginatorAgreements();
+        originatorBlockAckAgreementHandler = agreements;
+        auto agreement = agreements->accept(peer, start);
+        auto edcaf = edca->getEdcaf(AC_VI);
+        auto frames = edcaf->getInProgressFrames();
+        auto ack = edcaf->getAckHandler();
+        auto add = [&](MacAddress receiver, Tid tid, int position, bool sent) {
+            auto header = makeShared<Ieee80211DataHeader>();
+            header->setType(ST_DATA_WITH_QOS);
+            header->addChunkLength(QOSCONTROL_PART_LENGTH);
+            header->setReceiverAddress(receiver);
+            header->setTransmitterAddress(mac->getAddress());
+            header->setTid(tid);
+            header->setAckPolicy(BLOCK_ACK);
+            header->setSequenceNumber(SequenceNumberCyclic(start) + position);
+            auto packet = new Packet("supplied-data", header);
+            packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+            frames->adoptPreparedFrame(packet);
+            if (sent)
+                ack->processTransmittedDataOrMgmtFrame(header);
+            return packet;
+        };
+        auto earlier = add(peer, 5, 2, true);
+        auto earlierHeader = earlier->peekAtFront<Ieee80211DataHeader>();
+        auto requested = add(peer, 5, 4, true);
+        auto requestedHeader = requested->peekAtFront<Ieee80211DataHeader>();
+        auto unsent = add(peer, 5, 5, false);
+        auto outside = add(peer, 5, 64, true);
+        auto otherTid = add(peer, 6, 2, true);
+        auto otherPeer = add(other, 5, 2, true);
+        auto request = makeShared<Ieee80211CompressedBlockAckReq>();
+        request->setReceiverAddress(peer);
+        request->setTidInfo(5);
+        request->setStartingSequenceNumber(SequenceNumberCyclic(start) + 4);
+        ack->processTransmittedBlockAckReq(request, agreement);
+        ASSERT(ack->getQoSDataAckStatus(earlierHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+        ASSERT(ack->getQoSDataAckStatus(requestedHeader) == QosAckHandler::Status::WAITING_FOR_BLOCK_ACK);
+        auto response = makeShared<Ieee80211CompressedBlockAck>();
+        response->setTransmitterAddress(peer);
+        response->setReceiverAddress(mac->getAddress());
+        response->setTidInfo(5);
+        response->setStartingSequenceNumber(SequenceNumberCyclic(start) + offset);
+        BitVector bits;
+        for (int bit = 0; bit < 64; bit++)
+            bits.appendBit((offset == 0 && (bit == 2 || bit == 5)) || (offset == 6 && bit == 58) || offset == 100);
+        response->setBlockAckBitmap(bits);
+        auto packet = new Packet("supplied-response", response);
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        originatorProcessReceivedControlFrame(packet, response, nullptr, request, AC_VI);
+        delete packet;
+        ASSERT(frames->containsFrame(earlier) == (offset != 0));
+        if (offset != 0)
+            ASSERT(ack->getQoSDataAckStatus(earlierHeader) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+        ASSERT(frames->containsFrame(requested));
+        ASSERT(ack->isEligibleToTransmit(requestedHeader));
+        ASSERT(frames->containsFrame(unsent));
+        ASSERT(ack->getQoSDataAckStatus(unsent->peekAtFront<Ieee80211DataHeader>()) == QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
+        for (auto untouched : {outside, otherTid, otherPeer}) {
+            ASSERT(frames->containsFrame(untouched));
+            ASSERT(ack->getQoSDataAckStatus(untouched->peekAtFront<Ieee80211DataHeader>()) == QosAckHandler::Status::BLOCK_ACK_NOT_YET_REQUESTED);
+        }
+        ASSERT(frames->getLength() == (offset == 0 ? 5 : 6));
+        std::cout << "Compressed HCF originator assertions passed.\n";
+        endSimulation();
+    }
+};
+Define_Module(OriginatorHcf);
+class OriginatorTest : public cSimpleModule {
+    void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("check")); }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        check_and_cast<OriginatorHcf *>(getModuleByPath("^.host.wlan[0].mac.hcf"))->check();
+    }
+};
+Define_Module(OriginatorTest);
+}
+
+%file: test.ned
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+module OriginatorHcf extends Hcf {
+    parameters:
+        int start;
+        int offset;
+        @class(::inet::ieee80211::OriginatorHcf);
+}
+simple OriginatorTest { parameters: @class(::inet::ieee80211::OriginatorTest); }
+network OriginatorNetwork {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        host: WirelessHost;
+        test: OriginatorTest;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = OriginatorNetwork
+ned-path = .;../../../../src
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+record-scalar-results = false
+**.wlan[*].agent.typename = ""
+**.wlan[*].mgmt.typename = "Ieee80211MgmtAdhoc"
+**.wlan[*].opMode = "n(mixed-2.4Ghz)"
+**.wlan[*].bitrate = 6Mbps
+**.wlan[*].radio.channelNumber = 0
+**.wlan[*].mac.qosStation = true
+**.wlan[*].mac.hcf.typename = "OriginatorHcf"
+**.wlan[*].mac.hcf.blockAckVariant = "compressed"
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.start = ${start=100,4094}
+**.wlan[*].mac.hcf.offset = ${offset=0,6,100}
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 0m
+**.mobility.initialY = 0m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+Compressed HCF originator assertions passed.
