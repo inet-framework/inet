@@ -1171,6 +1171,7 @@
                        inet.physicallayer.wireless.common.neighborcache
                        inet.physicallayer.wireless.common.obstacleloss
                        inet.physicallayer.wireless.common.pathloss
+                       inet.physicallayer.wireless.common.pcap
                        inet.physicallayer.wireless.common.propagation
                        inet.physicallayer.wireless.common.radio
                        inet.physicallayer.wireless.common.signal
