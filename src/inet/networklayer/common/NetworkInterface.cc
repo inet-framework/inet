@@ -195,6 +195,13 @@ void NetworkInterface::arrived(cMessage *message, cGate *gate, const SendOptions
     cModule::arrived(message, gate, options, time);
 }
 
+void NetworkInterface::preDelete(cComponent *root)
+{
+    PacketProcessorBase::preDelete(root);
+    if (interfaceTable != nullptr && !check_and_cast<cModule *>(root)->containsModule(check_and_cast<cModule *>(interfaceTable.get())))
+        interfaceTable->removeInterface(this);
+}
+
 bool NetworkInterface::canPushSomePacket(const cGate *gate) const
 {
     auto pathEndGate = gate->getPathEndGate();
