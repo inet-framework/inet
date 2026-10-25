@@ -1,0 +1,118 @@
+%description:
+
+Tests that a dispatcher forgets an interface that is deleted during the run,
+so that a packet still addressed to it (a stale InterfaceReq) fails with the
+dispatcher's "Unknown network interface" error instead of being sent on a
+gate that is no longer connected.
+
+A node has two loopback interfaces under a dispatcher, and a sender that
+remembers the interface id of lo1. At 1 s, lo[1] is deleted. At 2 s, the
+sender sends a packet with an InterfaceReq for that id into the dispatcher.
+
+%file: test.cc
+
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+#include "inet/networklayer/contract/IInterfaceTable.h"
+
+using namespace inet;
+
+namespace MessageDispatcher_deleted_interface_1 {
+
+class StaleInterfaceSender : public cSimpleModule
+{
+  protected:
+    int interfaceId = -1;
+
+  protected:
+    virtual int numInitStages() const override { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *msg) override;
+};
+
+Define_Module(StaleInterfaceSender);
+
+void StaleInterfaceSender::initialize(int stage)
+{
+    if (stage == INITSTAGE_LAST) {
+        auto interfaceTable = check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"));
+        interfaceId = interfaceTable->findInterfaceByName("lo1")->getInterfaceId();
+        scheduleAt(par("sendTime"), new cMessage("send"));
+    }
+}
+
+void StaleInterfaceSender::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage()) {
+        delete msg;
+        auto packet = new Packet("stale");
+        packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
+        EV_INFO << "Sending packet to interface " << interfaceId << endl;
+        send(packet, "out");
+    }
+    else
+        delete msg;
+}
+
+} // namespace MessageDispatcher_deleted_interface_1
+
+%file: test.ned
+
+import inet.common.MessageDispatcher;
+import inet.common.scenario.ScenarioManager;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.networklayer.common.InterfaceTable;
+
+simple StaleInterfaceSender
+{
+    parameters:
+        @class(StaleInterfaceSender);
+        double sendTime @unit(s);
+    gates:
+        input in;
+        output out;
+}
+
+module TestNode
+{
+    parameters:
+        @networkNode;
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+    submodules:
+        interfaceTable: InterfaceTable;
+        sender: StaleInterfaceSender;
+        li: MessageDispatcher;
+        lo[2]: LoopbackInterface;
+    connections:
+        sender.out --> li.in++;
+        li.out++ --> sender.in;
+        for i=0..1 {
+            li.out++ --> lo[i].upperLayerIn;
+            lo[i].upperLayerOut --> li.in++;
+        }
+}
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        node: TestNode;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3s
+cmdenv-express-mode = true
+record-vector-results = false
+
+*.node.sender.sendTime = 2s
+*.scenarioManager.script = xml("<scenario><at t='1s'><delete-module module='node.lo[1]'/></at></scenario>")
+
+%exitcode: 1
+
+%contains-regex: stderr
+Unknown network interface: interfaceId = 101,.*at t=2s

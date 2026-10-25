@@ -1,0 +1,75 @@
+%description:
+
+Tests that an interface module deleted during the run, by ScenarioManager
+rather than through InterfaceTable::deleteInterface(), leaves its interface
+table, and that the MAC forwarding table of the switch forgets the entries
+that name it. The switch relay is BridgingLayer.
+
+host1 sends UDP to host3 every 1 ms. At 50 ms, host3's switch port
+(switch.eth[2]) is deleted. The switch must then flood host1's frames to
+host3 to its remaining ports (host3's MAC address is unknown again), without
+accessing the deleted interface. The relay logs every frame, which is where
+it would dereference a deleted interface.
+
+host3 receives the 49 packets sent before the deletion. host2 receives the
+initial ARP request, and from 50 ms on the 50 frames for host3 that the
+switch floods.
+
+%file: test.ned
+
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        configurator: Ipv4NetworkConfigurator;
+        host1: StandardHost;
+        host2: StandardHost;
+        host3: StandardHost;
+        switch: EthernetSwitch;
+    connections:
+        host1.ethg++ <--> Eth100M <--> switch.ethg++;
+        host2.ethg++ <--> Eth100M <--> switch.ethg++;
+        host3.ethg++ <--> Eth100M <--> switch.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 100ms
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+record-vector-results = false
+
+*.switch.bridging.**.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+*.*.eth[*].typename = "LayeredEthernetInterface"
+*.*.eth[*].bitrate = 100Mbps
+*.*.ethernet.typename = "EthernetLayer"
+*.*.llc.typename = ""
+*.switch.bridging.typename = "BridgingLayer"
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "UdpBasicApp"
+*.host1.app[0].destAddresses = "host3"
+*.host1.app[0].destPort = 1000
+*.host1.app[0].messageLength = 100B
+*.host1.app[0].sendInterval = 1ms
+*.host3.numApps = 1
+*.host3.app[0].typename = "UdpSink"
+*.host3.app[0].localPort = 1000
+
+*.scenarioManager.script = xml("<scenario><at t='50ms'><delete-module module='switch.eth[2]'/></at></scenario>")
+
+%contains: results/General-#0.sca
+scalar Test.host3.app[0] packetReceived:count 49
+%contains: results/General-#0.sca
+scalar Test.host2.eth[0].macLayer.fcsChecker incomingPackets:count 51
