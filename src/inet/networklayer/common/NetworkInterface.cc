@@ -728,5 +728,25 @@ NetworkInterface *getContainingNicModule(const cModule *from)
     return networkInterface;
 }
 
+// Returns the interface that the object of an interface signal is about: the
+// NetworkInterface of interfaceCreatedSignal and interfaceDeletedSignal, or the
+// interface of the NetworkInterfaceChangeDetails of the interface change signals.
+// Returns nullptr for other objects.
+static const NetworkInterface *findSignalNetworkInterface(const cObject *obj)
+{
+    if (auto networkInterface = dynamic_cast<const NetworkInterface *>(obj))
+        return networkInterface;
+    else if (auto details = dynamic_cast<const NetworkInterfaceChangeDetails *>(obj))
+        return details->getNetworkInterface();
+    else
+        return nullptr;
+}
+
+bool isSignalForInterfaceTable(const cObject *obj, const IInterfaceTable *interfaceTable)
+{
+    auto networkInterface = findSignalNetworkInterface(obj);
+    return networkInterface == nullptr || networkInterface->getInterfaceTable() == interfaceTable;
+}
+
 } // namespace inet
 

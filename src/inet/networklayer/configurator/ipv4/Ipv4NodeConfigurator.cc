@@ -147,6 +147,8 @@ void Ipv4NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalI
         return; // ignore notifications during initialize
 
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (!isSignalForInterfaceTable(obj, interfaceTable.get()))
+        return;
 
     printSignalBanner(signalID, obj, details);
 

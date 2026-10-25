@@ -559,7 +559,7 @@ void DhcpClient::receiveSignal(cComponent *source, int signalID, cObject *obj, c
         }
     }
     else if (signalID == interfaceDeletedSignal) {
-        if (isUp())
+        if (isUp() && isSignalForInterfaceTable(obj, ie->getInterfaceTable()))
             throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
     }
 }

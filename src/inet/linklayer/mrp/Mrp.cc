@@ -445,6 +445,8 @@ void Mrp::clearFDB(simtime_t time)
 void Mrp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("receiveSignal");
+    if (!isSignalForInterfaceTable(obj, interfaceTable.get()))
+        return;
     EV_DETAIL << "Received Signal:" << EV_FIELD(signalID) << EV_ENDL;
     if (signalID == interfaceStateChangedSignal) {
         NetworkInterfaceChangeDetails *interfaceDetails = static_cast<NetworkInterfaceChangeDetails*>(obj);

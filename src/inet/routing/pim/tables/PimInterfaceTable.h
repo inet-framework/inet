@@ -62,6 +62,7 @@ class INET_API PimInterfaceTable : public SimpleModule, protected cListener
   protected:
     typedef std::vector<PimInterface *> PimInterfaceVector;
 
+    ModuleRefByPar<IInterfaceTable> ift;
     PimInterfaceVector pimInterfaces;
 
   public:

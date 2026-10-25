@@ -160,6 +160,8 @@ void Ipv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
         return; // ignore notifications during initialize
 
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (!isSignalForInterfaceTable(obj, ift.get()))
+        return;
 
     printSignalBanner(signalID, obj, details);
 

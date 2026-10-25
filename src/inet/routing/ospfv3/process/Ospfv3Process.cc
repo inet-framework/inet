@@ -70,6 +70,8 @@ void Ospfv3Process::initialize(int stage)
 void Ospfv3Process::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (!isSignalForInterfaceTable(obj, ift.get()))
+        return;
 
     // interfaces going down while the network is being torn down must not drive the FSM
     // (e.g. a DR-state exit would try to leave a multicast group on a half-deleted interface)
