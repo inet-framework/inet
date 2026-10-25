@@ -10,6 +10,7 @@
 #include <map>
 
 #include "inet/common/ModuleAccess.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/stlutils.h"
 #include "inet/common/StringFormat.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -55,6 +56,7 @@ void MacForwardingTable::initialize(int stage)
         agingTime = par("agingTime");
         lastPurge = SIMTIME_ZERO;
         ifTable.reference(this, "interfaceTableModule", true);
+        check_and_cast<cModule *>(ifTable.get())->subscribe(interfaceDeletedSignal, this);
         WATCH(lastPurge);
         WATCH(forwardingTable);
         WATCH(multicastForwardingTable);
@@ -114,7 +116,24 @@ std::string MacForwardingTable::resolveDirective(char directive) const
         case 'v':
             return "";
         default:
-            return SimpleModule::resolveDirective(directive);   
+            return SimpleModule::resolveDirective(directive);
+    }
+}
+
+void MacForwardingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (signalID == interfaceDeletedSignal) {
+        // the interface table emits the signal for its own interfaces only
+        int interfaceId = check_and_cast<NetworkInterface *>(obj)->getInterfaceId();
+        removeForwardingInterface(interfaceId);
+        for (auto it = multicastForwardingTable.begin(); it != multicastForwardingTable.end();) {
+            remove(it->second.interfaceIds, interfaceId);
+            if (it->second.interfaceIds.empty())
+                it = multicastForwardingTable.erase(it);
+            else
+                ++it;
+        }
     }
 }
 
