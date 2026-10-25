@@ -305,6 +305,8 @@ void Rip::sendRIPRequest(const RipNetworkInterface& ripInterface)
 void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (!isSignalForInterfaceTable(obj, ift.get()))
+        return;
 
     const NetworkInterface *ie;
     const NetworkInterfaceChangeDetails *change;

@@ -214,6 +214,8 @@ void Mldv1::handleMessageWhenUp(cMessage *msg)
 void Mldv1::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (!isSignalForInterfaceTable(obj, ift.get()))
+        return;
 
     NetworkInterface *ie;
     int interfaceId;

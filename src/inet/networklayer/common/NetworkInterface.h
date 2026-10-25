@@ -415,6 +415,16 @@ INET_API NetworkInterface *findContainingNicModule(const cModule *from);
  */
 INET_API NetworkInterface *getContainingNicModule(const cModule *from);
 
+/**
+ * Returns true if the signal object obj is for the given interface table: it is
+ * about an interface of that table, or it is not about an interface at all.
+ * Returns false for the interface signals of other interface tables, e.g. those
+ * of an interface table nested inside the node. Listeners subscribed on a node
+ * use it to ignore the interfaces of other interface tables in the node.
+ * Interface ids are per table, so the tables are compared as objects.
+ */
+INET_API bool isSignalForInterfaceTable(const cObject *obj, const IInterfaceTable *interfaceTable);
+
 } // namespace inet
 
 #endif

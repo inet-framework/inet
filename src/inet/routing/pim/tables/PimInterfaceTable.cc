@@ -33,6 +33,7 @@ void PimInterfaceTable::initialize(int stage)
     SimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
+        ift.reference(this, "interfaceTableModule", true);
         WATCH(pimInterfaces);
         WATCH_EXPR("numInterfaces", pimInterfaces.size());
     }
@@ -52,8 +53,6 @@ void PimInterfaceTable::configureInterfaces(cXMLElement *config)
 {
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
     InterfaceMatcher matcher(interfaceElements);
-    IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-
     for (int k = 0; k < ift->getNumInterfaces(); ++k) {
         NetworkInterface *ie = ift->getInterface(k);
         if (ie->isMulticast() && !ie->isLoopback()) {
@@ -99,6 +98,8 @@ PimInterface *PimInterfaceTable::getInterfaceById(int interfaceId)
 void PimInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
 {
     Enter_Method("%s", cComponent::getSignalName(signalID));
+    if (!isSignalForInterfaceTable(obj, ift.get()))
+        return;
 
     printSignalBanner(signalID, obj, details);
 
