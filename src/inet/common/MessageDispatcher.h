@@ -98,6 +98,7 @@ class INET_API MessageDispatcher :
 #endif // #ifdef INET_WITH_QUEUEING
 
     virtual void handleRegisterInterface(const NetworkInterface& interface, cGate *out, cGate *in) override;
+    virtual void handleUnregisterInterface(const NetworkInterface& interface, cGate *out, cGate *in) override;
 
     virtual void handleRegisterService(const Protocol& protocol, cGate *gate, ServicePrimitive servicePrimitive) override;
     virtual void handleRegisterAnyService(cGate *gate, ServicePrimitive servicePrimitive) override;

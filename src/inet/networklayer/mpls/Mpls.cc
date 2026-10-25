@@ -472,6 +472,12 @@ void Mpls::handleRegisterInterface(const NetworkInterface& interface, cGate *out
         registerInterface(interface, gate("upperLayerIn"), gate("upperLayerOut"));
 }
 
+void Mpls::handleUnregisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
+{
+    if (!strcmp("lowerLayerIn", in->getBaseName()))
+        unregisterInterface(interface, gate("upperLayerIn"), gate("upperLayerOut"));
+}
+
 void Mpls::handleRegisterService(const Protocol& protocol, cGate *g, ServicePrimitive servicePrimitive)
 {
     Enter_Method("handleRegisterService");

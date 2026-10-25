@@ -198,7 +198,10 @@ void NetworkInterface::arrived(cMessage *message, cGate *gate, const SendOptions
 void NetworkInterface::preDelete(cComponent *root)
 {
     PacketProcessorBase::preDelete(root);
-    if (interfaceTable != nullptr && !check_and_cast<cModule *>(root)->containsModule(check_and_cast<cModule *>(interfaceTable.get())))
+    auto rootModule = check_and_cast<cModule *>(root);
+    if (!rootModule->containsModule(gate("upperLayerOut")->getPathEndGate()->getOwnerModule()))
+        inet::unregisterInterface(*this, gate("upperLayerIn"), gate("upperLayerOut"));
+    if (interfaceTable != nullptr && !rootModule->containsModule(check_and_cast<cModule *>(interfaceTable.get())))
         interfaceTable->removeInterface(this);
 }
 

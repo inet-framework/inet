@@ -490,6 +490,20 @@ void MessageDispatcher::handleRegisterInterface(const NetworkInterface& interfac
     }
 }
 
+void MessageDispatcher::handleUnregisterInterface(const NetworkInterface& interface, cGate *out, cGate *in)
+{
+    Enter_Method("handleUnregisterInterface");
+    EV_INFO << "Handling interface unregistration" << EV_FIELD(interface) << EV_FIELD(out, out) << EV_FIELD(in) << EV_ENDL;
+    auto it = interfaceIdToGateIndex.find(interface.getInterfaceId());
+    if (it != interfaceIdToGateIndex.end() && it->second == out->getIndex()) {
+        interfaceIdToGateIndex.erase(it);
+        int size = gateSize("out");
+        for (int i = 0; i < size; i++)
+            if (i != in->getIndex())
+                unregisterInterface(interface, gate("in", i), gate("out", i));
+    }
+}
+
 int MessageDispatcher::getGateIndexToConnectedModule(const char *moduleName)
 {
     int size = gateSize("out");
