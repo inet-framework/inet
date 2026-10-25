@@ -20,5 +20,16 @@ void registerInterface(const NetworkInterface& interface, cGate *in, cGate *out)
         outInterfaceRegistration->handleRegisterInterface(interface, inPathStart, outPathEnd);
 }
 
+void unregisterInterface(const NetworkInterface& interface, cGate *in, cGate *out)
+{
+    EV_INFO << "Unregistering network interface" << EV_FIELD(interface) << EV_FIELD(in) << EV_FIELD(out) << EV_ENDL;
+    auto outPathEnd = out->getPathEndGate();
+    auto inPathStart = in->getPathStartGate();
+    IInterfaceRegistrationListener *outInterfaceRegistration = dynamic_cast<IInterfaceRegistrationListener *>(outPathEnd->getOwner());
+    IInterfaceRegistrationListener *inInterfaceRegistration = dynamic_cast<IInterfaceRegistrationListener *>(inPathStart->getOwner());
+    if (outInterfaceRegistration != nullptr && inInterfaceRegistration != nullptr && outInterfaceRegistration == inInterfaceRegistration)
+        outInterfaceRegistration->handleUnregisterInterface(interface, inPathStart, outPathEnd);
+}
+
 } // namespace inet
 
