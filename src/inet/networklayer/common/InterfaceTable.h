@@ -138,6 +138,14 @@ class INET_API InterfaceTable : public OperationalBase, public IInterfaceTable, 
     virtual void addInterface(NetworkInterface *entry) override;
 
     /**
+     * Removes the given interface from the table without deleting it, and fires
+     * interfaceDeletedSignal. The interface calls it when it is being deleted,
+     * whatever deletes it. It is an error if the given interface is not in the
+     * table.
+     */
+    virtual void removeInterface(NetworkInterface *entry) override;
+
+    /**
      * Deletes the given interface from the table. Indices of existing
      * interfaces (see getInterface(int)) may change. It is an error if
      * the given interface is not in the table.

@@ -185,6 +185,12 @@ class INET_API NetworkInterface : public queueing::PacketProcessorBase, public q
 
     virtual void arrived(cMessage *message, cGate *gate, const SendOptions& options, simtime_t time) override;
 
+    /**
+     * Removes the interface from its interface table, unless the table is
+     * deleted together with it (e.g. with the node, or at the end of the run).
+     */
+    virtual void preDelete(cComponent *root) override;
+
   public:
     NetworkInterface();
     virtual ~NetworkInterface();

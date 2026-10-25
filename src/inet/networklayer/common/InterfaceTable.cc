@@ -346,17 +346,24 @@ void InterfaceTable::discoverConnectingGates(NetworkInterface *entry)
     }
 }
 
-void InterfaceTable::deleteInterface(NetworkInterface *entry)
+void InterfaceTable::removeInterface(NetworkInterface *entry)
 {
+    Enter_Method("removeInterface");
     int id = entry->getInterfaceId();
-    if (entry != getInterfaceById(id))
-        throw cRuntimeError("deleteInterface(): interface '%s' not found in interface table", entry->getInterfaceName());
+    if (entry != findInterfaceById(id))
+        throw cRuntimeError("removeInterface(): interface '%s' not found in interface table", entry->getInterfaceName());
 
     emit(interfaceDeletedSignal, entry); // actually, only going to be deleted
 
     idToInterface[id - INTERFACEIDS_START] = nullptr;
-    entry->deleteModule();
     invalidateTmpInterfaceList();
+}
+
+void InterfaceTable::deleteInterface(NetworkInterface *entry)
+{
+    if (entry != findInterfaceById(entry->getInterfaceId()))
+        throw cRuntimeError("deleteInterface(): interface '%s' not found in interface table", entry->getInterfaceName());
+    entry->deleteModule(); // the interface removes itself from the table, see NetworkInterface::preDelete()
 }
 
 void InterfaceTable::invalidateTmpInterfaceList()
