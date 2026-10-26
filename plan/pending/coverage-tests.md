@@ -1,7 +1,7 @@
 # Implementation plan: coverage tests in GitHub CI
 
 Checkout and revision: INET `origin/master` at `c8afbf7a96`, branch `topic/coverage-tests` in the worktree `/home/levy/workspace/inet-coverage-tests`. opp_repl `main` at `a502e9d` (`opp_ci` and `github_ci` at the same commit). This plan builds on the plan `tests-on-opp-repl` (branch `topic/tests-on-opp-repl`, approved on 2026-10-26, steps S0 to S7 open).
-Plan revision: 2026-10-26, steps O1 to O6 done (decisions D1 to D4 of the maintainer, D5 to D10 approved with the plan).
+Plan revision: 2026-10-26, steps O1 to O6 and I2 done (decisions D1 to D4 of the maintainer, D5 to D10 approved with the plan).
 Approval: 2026-10-26, the maintainer in the chat: "yes", to the question "Do you approve the plan, or do you want changes first?". The approval covers this plan revision with the proposed decisions D5 to D10. Each push, the pull request and the change of the Pages setting are asked when a step needs them.
 
 ## 1. Problem and intended behavior
@@ -194,14 +194,22 @@ The opp_repl worktree started from `main` at `b7b827b`, which already holds the 
 
 - [x] **I0. This plan.** The commit `plan: add: coverage tests`.
 - [ ] **I1. The coverage entry.** Add the entry of section 4 to INET's `inet.opp`. Needs S0 of the other plan. Check: `opp_export_coverage --load $INET_ROOT -p inet` reads the exclusions from the INET file.
-- [ ] **I2. Measure in the GitHub-job container.** Use the podman copy of the job (`/home/levy/workspace/ghci-statistical`), with the workflow's package list and the LLVM tools of its compiler. Build both projects in coverage mode, run the six suites as the workflow will, export and report. Record these values:
+- [x] **I2. Measure in the GitHub-job container.** Use the podman copy of the job (`/home/levy/workspace/ghci-statistical`), with the workflow's package list and the LLVM tools of its compiler. Build both projects in coverage mode, run the six suites as the workflow will, export and report. Record these values:
   - the time of each suite and each fingerprint slice, measured on 4 cores, and the peak disk use of the profile pool and of the build tree
   - the size of the lcov files and of the HTML
   - the runs that reach the CPU time limit
   - the verdicts compared with debug mode on the same commit
   - the difference between two runs on one build
 
-  The record goes to `plan/evidence/coverage-tests/local-run.md`. Then decide the number of slices, the timeout, the CPU time limit and a disk cleanup, and record each decision in section 8.
+  The record goes to `plan/evidence/coverage-tests/local-run.md`. Then decide the number of slices, the timeout, the CPU time limit and a disk cleanup, and record each decision in section 8. Done on 2026-10-26, see [local-run.md](../evidence/coverage-tests/local-run.md). The other plan also uses `ghci-statistical`, so the measurement used a separate copy, `/home/levy/workspace/ghci-coverage`, with an image that adds `llvm-16`, `libclang-rt-16-dev` and `lcov`. Facts found:
+  - The coverage link needs `libclang-rt-<version>-dev`, which `--no-install-recommends` leaves out; the workflow installs it.
+  - `tests/packet/Makefile` linked `-lINET_dbg` in every mode; repaired in `3590d9fc4c` (`tests: change: the packet test links the INET library of its build mode`).
+  - `src/3rdparty/sgp4` is third-party code; the INET entry excludes it (O5).
+  - inet-gpl could not build in coverage mode, and its packetdrill runner builds in debug mode only (decision D11).
+
+  Results: line coverage 66.79% (138345 of 207142 lines), functions 67.59%, branches 51.99%. Two runs on one build cover the same lines, functions and branches in every suite: the noise is 0. Coverage mode costs about the same time as debug mode (fingerprint slice 0: 998 s against 1084 s at the same load). No run reached the CPU time limit. The only verdict that coverage mode changes is `Ieee80211BlockAckVariant_1.test`, which starts `inet_dbg` itself. A pool stays at about 130 to 170 MB, an lcov file at about 11.5 MB, and the HTML at 167 MB.
+
+  Decisions from the measurement: 4 fingerprint slices, as in the fingerprint workflow (their coverage times differ by less than a factor of 1.4); `timeout-minutes: 240` stays until I3 gives the runner times; the CPU time limit stays at 600 s; no disk cleanup, because the build tree (5.6 GB) and a pool fit on the runner.
 - [ ] **I3. The workflow without publication.** Add `coverage-tests.yml` with the test jobs, the report job, the artifacts and the job summary. GitHub starts `workflow_dispatch` only for a workflow on the default branch. For the check, a throwaway branch `test/coverage-tests` therefore gets one more commit that adds a `push` trigger for itself, and nobody merges that branch. A push of the branch needs the maintainer's word. Check: all jobs pass, and the summary values equal those of I2 within the noise of I2. Record the job times and `clang --version`.
 - [ ] **I4. Publication.** Add the publish step. For the check, the throwaway branch publishes to the branches `test-master` and `test-gh-pages` of the coverage repository. Delete those branches after the check. Add the README to the coverage repository. Each push to that repository needs the maintainer's word. Check: the test branches hold the expected files, and a manual start on another branch publishes nothing.
 - [ ] **I5. Developer guide.** Add a coverage section to `ch-testing.rst`: the Pages site, the manual start, the local commands, and what coverage cannot show. Add a release note if `check-whatsnew.sh` asks for one. Check: the documentation builds, and the local commands run.
