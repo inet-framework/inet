@@ -2,7 +2,7 @@
 
 Checkout and revision: INET `origin/master` at `c8afbf7a96`, branch `topic/coverage-tests` in the worktree `/home/levy/workspace/inet-coverage-tests`. opp_repl `main` at `a502e9d` (`opp_ci` and `github_ci` at the same commit). This plan builds on the plan `tests-on-opp-repl` (branch `topic/tests-on-opp-repl`, approved on 2026-10-26, steps S0 to S7 open).
 Plan revision: 2026-10-26, first draft (decisions D1 to D4 of the maintainer recorded, D5 to D10 proposed).
-Approval: pending.
+Approval: 2026-10-26, the maintainer in the chat: "yes", to the question "Do you approve the plan, or do you want changes first?". The approval covers this plan revision with the proposed decisions D5 to D10. Each push, the pull request and the change of the Pages setting are asked when a step needs them.
 
 ## 1. Problem and intended behavior
 
