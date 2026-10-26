@@ -429,10 +429,15 @@ PacketInfo IPsec::extractEgressPacketInfo(Packet *packet, const L3Address& local
 
     IpProtocolId protocol = networkHeaderProtocol(datagram);
     packetInfo.setNextProtocol(protocol);
-    if (auto ipv4Header = dynamicPtrCast<const Ipv4Header>(datagram))
+    if (false) ;
+#ifdef INET_WITH_IPv4
+    else if (auto ipv4Header = dynamicPtrCast<const Ipv4Header>(datagram))
         packetInfo.setDscp(ipv4Header->getDscp());
+#endif
+#ifdef INET_WITH_IPv6
     else if (auto ipv6Header = dynamicPtrCast<const Ipv6Header>(datagram))
         packetInfo.setDscp(ipv6Header->getDscp());
+#endif
     b transportOffset = datagram->getChunkLength();
 
     if (false) ;
