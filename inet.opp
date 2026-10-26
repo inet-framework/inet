@@ -16,8 +16,8 @@ SimulationProject(
     msg_folders=["src"],
     # INET's description for opp_repl. It lives in the INET repository, so that a change of INET's
     # test setup lands with the INET change; opp_repl bundles an older copy as a fallback for INET
-    # versions without this file. Load it with --load $INET_ROOT (or from the INET root, where
-    # opp_repl loads every *.opp file of the current folder).
+    # versions without this file. An opp_repl command finds this file without an option in the
+    # INET root and in each folder below it; elsewhere, load it with --load $INET_ROOT.
     #
     # Per-kind test configuration. Only INET-specific aspects are declared here;
     # opp_repl's generic defaults (run everything, mode=debug, smoke/sanitizer
