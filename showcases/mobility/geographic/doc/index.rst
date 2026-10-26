@@ -37,7 +37,8 @@ The shortest path between two points on the Earth is a great circle. A map that
 draws latitude and longitude as straight axes is an equirectangular map. On such a
 map, most great circles appear curved; only the meridians and the equator are
 straight lines. A flight from New York to London first heads north-east, passes
-north of both airports over the Atlantic, and then turns south-east toward London.
+north of both airports over the Atlantic, and then turns east-south-east toward
+London.
 
 A GNSS track is a sequence of position fixes, usually with a time stamp for each
 fix. Common formats are CSV (comma-separated values), GPX (GPS Exchange Format,
@@ -67,13 +68,17 @@ The nodes in this showcase share one coordinate system module, a
 :ned:`Wgs84EcefGeographicCoordinateSystem`. It makes the scene coordinates ECEF
 coordinates, so a node's scene position is its position relative to the center of
 the Earth. Each mobility module finds this module through its
-:par:`coordinateSystemModule` parameter. The map visualizer projects these
-positions onto the map image, so the node icons appear at their geographic
-positions.
+:par:`coordinateSystemModule` parameter. The map visualizer sets up a projection
+from these positions onto the map image. A mobility module with
+:par:`updateDisplayString` set to ``true`` places the icon of its node through this
+projection, so the icon appears at the node's geographic position. The showcase
+sets it for every node, because :ned:`SatelliteMobility` sets it to ``false`` by
+default.
 
 A stationary node, such as a ground station, uses a :ned:`StationaryMobility`
 with the :par:`initialLatitude`, :par:`initialLongitude` and :par:`initialAltitude`
-parameters, and with :par:`initFromDisplayString` set to ``false``. All altitudes
+parameters, and with :par:`initFromDisplayString` and
+:par:`updateFromDisplayString` set to ``false``. All altitudes
 are heights above the WGS84 ellipsoid. GPX elevations are usually heights above
 mean sea level, which differ from these by up to about 100 m.
 
@@ -84,8 +89,8 @@ and changes the altitude linearly. Its main parameters are the following:
   ``readFile("track.csv")``. A CSV row is ``latitude,longitude,altitude,time``, in
   degrees, meters and seconds. Only the differences between the time stamps
   matter: the first fix is played at :par:`trackStartTime` (0 s by default).
-- :par:`trackJson`: the track as a GeoJSON object, instead of :par:`trackData`.
-  Time stamps are read from a ``coordTimes`` array in the properties of the
+- :par:`trackJson`: the track as a GeoJSON object, instead of :par:`trackData`,
+  for example ``readJSON("track.geojson")``. Time stamps are read from a ``coordTimes`` array in the properties of the
   feature.
 - :par:`speed`: a constant ground speed, used only when the track has no time
   stamps. With time stamps, the time stamps set the speed.
@@ -110,7 +115,7 @@ following:
    :ned:`SatelliteMobility` converts the orbit into ECEF coordinates using the
    rotation of the Earth only. It ignores polar motion and the difference between
    UTC and UT1, the time given by the actual rotation of the Earth. The resulting
-   position error is at most a few hundred meters, far less than one pixel of the
+   position error is less than 1 km, far less than one pixel of the
    world map in this showcase (about 55 km).
 
 Four canvas visualizers show the result:
@@ -122,6 +127,10 @@ Four canvas visualizers show the result:
 - :ned:`GeoHorizonCanvasVisualizer` draws the footprints. Its elevation mask is 0°
   by default.
 - :ned:`GeoSkyViewCanvasVisualizer` draws a sky view for each ground station.
+
+In your own network, the :ned:`IntegratedCanvasVisualizer` has optional
+``geoMapVisualizer``, ``geoHorizonVisualizer`` and ``geoSkyViewVisualizer``
+submodules for these. They are enabled by setting their ``typename``.
 
 These visualizers draw on the 2D canvas, so the showcase runs in a standard OMNeT++
 build, without OpenSceneGraph (OSG) or osgEarth.
@@ -149,7 +158,7 @@ communication. The configurations share the coordinate system and the world map:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: coordinateSystem.typename
-   :end-at: map.maxLongitude
+   :end-at: skyView.coordinateSystemModule
    :language: ini
 
 The map starts at 170°W and ends 360° further east, at 190°E, which is 170°W
@@ -178,13 +187,13 @@ mobility settings and the track of the New York–London (JFK–LHR) flight:
 Each track has six rows: the departure airport twice (the plane waits 30 minutes
 at the gate), the end of the climb at 10,000 m, the start of the descent, and the
 arrival airport twice (the plane waits again). The climb and descent points lie on
-the great circle between the two airports. The time stamps give an average speed
+or near the great circle between the two airports. The time stamps give an average speed
 of about 250 m/s on all four routes. With ``pingPong``, each plane then flies the
 track backward, so it waits for one hour at each turnaround: 30 minutes at the end
 of the track and 30 minutes at the start of the reversed track.
 
-The map clock starts at 2000-06-28 00:20:19 UTC, the date of the original INET
-example that this configuration comes from. The date affects only the clock.
+The map clock starts at 2000-06-28 00:20:19 UTC, the date used by the
+satellite example in ``examples/mobility``, which this configuration comes from. The date affects only the clock.
 
 When a plane climbs, its footprint grows to its cruising size (with the default
 0° elevation mask). The trail of the
