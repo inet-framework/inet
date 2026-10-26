@@ -65,6 +65,7 @@ SimulationProject(
     github_repository="inet",
     github_workflows=[
         "chart-tests.yml",
+        "coverage-tests.yml",
         "feature-tests.yml",
         "fingerprint-tests.yml",
         "module-tests.yml",
