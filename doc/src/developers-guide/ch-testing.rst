@@ -234,3 +234,50 @@ These ingredients add path information to the fingerprint hash for packet arriva
 - Filter ingredients (``~`` and ``U``) work as exclusion filters and are processed
   before other ingredients
 - Path and content ingredients (``N``, ``I``, ``D``) only apply to packet arrival events
+
+Code Coverage
+-------------
+
+A coverage report shows which lines, functions and branches of :file:`src/inet` the
+tests execute. The report leaves out the message files that :command:`opp_msgc`
+generates and the third-party code (the lwIP stack and :file:`src/3rdparty`).
+
+The GitHub workflow *Test: coverage* runs on each push to master. It builds OMNeT++
+and INET in coverage mode, runs the fingerprint tests and the unit, module, packet,
+queueing and protocol tests, and makes one report of all of them. The report of the
+latest master commit is at `inet-framework.github.io/coverage
+<https://inet-framework.github.io/coverage/>`__. The `coverage repository
+<https://github.com/inet-framework/coverage>`__ keeps one summary line for each
+reported commit, so the history shows how the coverage changes.
+
+To see the coverage of a branch, start the workflow by hand on that branch: on the
+*Actions* page of the repository, select *Test: coverage*, then *Run workflow*. When
+the run ends, download its ``coverage-report`` artifact. Its :file:`html` folder
+holds the report, and its :file:`summary.md` the totals.
+
+A local report needs Clang, the ``llvm-profdata`` and ``llvm-cov`` tools of the same
+LLVM version as the compiler (for example the ``llvm-18`` package for Clang 18), and
+``genhtml`` from the ``lcov`` package for the HTML. Build OMNeT++ and INET in
+coverage mode, run some tests in coverage mode, export their coverage, and make the
+report:
+
+.. code-block:: shell
+
+   $ cd ~/workspace/omnetpp && make MODE=coverage base
+   $ cd ~/workspace/inet && make MODE=coverage
+   $ opp_run_module_tests -m coverage -f Ipv4
+   $ opp_export_coverage -t module -o module.lcov
+   $ opp_coverage_report module.lcov -o coverage-report --html
+
+Each test process of a coverage build adds its profile to the folder
+:file:`coverage/profiles` in the INET root. :command:`opp_export_coverage` merges the
+profiles of that folder, so delete the folder before you start a new set of tests,
+and after a rebuild. :command:`opp_coverage_report` can merge several exports, for
+example one for each test kind, and then gives the coverage of each kind too. The
+`coverage guide of opp_repl <https://github.com/omnetpp/opp_repl/blob/main/doc/coverage.md>`__
+describes all options.
+
+Coverage shows that a test executes some code. It does not show that the test checks
+the result of that code. Some code has no coverage in CI, because CI cannot execute
+it: for example, emulation needs real network interfaces, and most visualizers need
+Qtenv.
