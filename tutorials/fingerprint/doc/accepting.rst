@@ -13,7 +13,7 @@ First, run the fingerprint tests with the ``tplx`` ingredients:
 
 .. code-block:: bash
 
-  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
+  $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
 
 .. code-block:: fp
 
@@ -25,7 +25,7 @@ The model is validated, so the new values are correct. Record them in the store:
 
 .. code-block:: bash
 
-  $ opp_update_fingerprint_test_results --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
+  $ opp_update_fingerprint_test_results --load $INET_ROOT -p inet -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
 
 .. code-block:: fp
 

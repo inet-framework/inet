@@ -187,7 +187,7 @@ Always give the project and the working directory filter. Use ``tplx`` as the in
 
 .. code-block:: bash
 
-  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx
+  $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -w tutorials/fingerprint --ingredients tplx
 
 .. code-block:: fp
 
@@ -205,7 +205,7 @@ For example, the `Changing a Timer` step needs the ``Wifi`` configuration only:
 
 .. code-block:: bash
 
-  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^Wifi$'
+  $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -w tutorials/fingerprint --ingredients tplx -c '^Wifi$'
 
 .. code-block:: fp
 

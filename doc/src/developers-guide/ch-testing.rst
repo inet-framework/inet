@@ -36,12 +36,13 @@ environment first. Then run all fingerprint tests from anywhere in the INET tree
 
 .. code-block:: shell
 
-   $ opp_run_fingerprint_tests --load @opp -p inet
+   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet
 
-The ``--load @opp`` option loads the project descriptions that come with opp_repl,
-and ``-p inet`` selects INET. The INET description sets the store, the ingredients
-that CI checks (``tplx``, ``~tNl`` and ``~tND``) and a CPU time limit of 600s for
-each simulation. The command shows its options with ``-h``.
+The ``--load $INET_ROOT`` option loads INET's project description, the file
+:file:`inet.opp` in the INET root, and ``-p inet`` selects INET. From the INET root,
+opp_repl loads the file without the option. The description sets the store, the
+ingredients that CI checks (``tplx``, ``~tNl`` and ``~tND``) and a CPU time limit of
+600s for each simulation. The command shows its options with ``-h``.
 
 Running all INET fingerprint tests takes several minutes even on a modern
 computer. The command runs the simulations in parallel on all CPUs.
@@ -59,7 +60,7 @@ For example, the following command runs all wireless tests in release mode:
 
 .. code-block:: shell
 
-   $ opp_run_fingerprint_tests --load @opp -p inet -m release -f wireless
+   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -m release -f wireless
 
 While the tests are running, the command prints a line for each simulation. The
 test result of each fingerprint is PASS, FAIL or ERROR, and a FAIL line shows the
@@ -77,13 +78,13 @@ To accept new fingerprints, run the update command with the same filter:
 
 .. code-block:: shell
 
-   $ opp_update_fingerprint_test_results --load @opp -p inet -f wireless
+   $ opp_update_fingerprint_test_results --load $INET_ROOT -p inet -f wireless
 
 The update runs each stored run at its stored limit, and writes the new values into
 the store. It reports KEEP, UPDATE or INSERT for each simulation, and
 :command:`git diff tests/fingerprint/store.json` shows the changed values. A new
 config gets its run-0 fingerprints with ``--no-stored-only``, for example
-``opp_update_fingerprint_test_results --load @opp -p inet --no-stored-only -c '^MyConfig$' -r 0``.
+``opp_update_fingerprint_test_results --load $INET_ROOT -p inet --no-stored-only -c '^MyConfig$' -r 0``.
 The new entries take the ``sim-time-limit`` of the ini file.
 
 Usually, when a simulation model is being developed, the fingerprint tests should
@@ -125,8 +126,8 @@ the affected runs. After the change, check them:
 
 .. code-block:: shell
 
-   $ opp_update_fingerprint_test_results --load @opp -p inet --no-stored-only -f <filter> -r 0 --ingredients plx
-   $ opp_run_fingerprint_tests --load @opp -p inet -f <filter> --ingredients plx
+   $ opp_update_fingerprint_test_results --load $INET_ROOT -p inet --no-stored-only -f <filter> -r 0 --ingredients plx
+   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -f <filter> --ingredients plx
 
 Another common example is when a submodule is renamed. Since the default fingerprint
 ingredients contain the full module path of all events, this change will break
@@ -146,8 +147,8 @@ and the test after the change. ``--append-args`` passes the rest of the line to
 .. code-block:: shell
 
    # please note the quoting uses both ' and " in the right order
-   $ opp_update_fingerprint_test_results --load @opp -p inet -f <filter> --append-args --fingerprint-modules='"not(fullPath(**.wlan[*].mac.**))"'
-   $ opp_run_fingerprint_tests --load @opp -p inet -f <filter> --append-args --fingerprint-modules='"not(fullPath(**.wlan[*].mac.**))"'
+   $ opp_update_fingerprint_test_results --load $INET_ROOT -p inet -f <filter> --append-args --fingerprint-modules='"not(fullPath(**.wlan[*].mac.**))"'
+   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -f <filter> --append-args --fingerprint-modules='"not(fullPath(**.wlan[*].mac.**))"'
 
 INET uses continuous integration on Github. Fingerprint and other tests are run
 automatically for changes on the master and integration branches. Moreover, all

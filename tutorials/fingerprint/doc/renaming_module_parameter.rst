@@ -41,7 +41,7 @@ and the router doesn't forward packets. This change causes the fingerprint tests
 
 .. code-block:: bash
 
-  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
+  $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
 
 .. code-block:: fp
 
@@ -58,7 +58,7 @@ To correct the model, the renaming needs to be followed everywhere. When we chan
 
 .. code-block:: bash
 
-  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
+  $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
 
 .. code-block:: fp
 
@@ -77,7 +77,7 @@ When run the ``tplx`` fingerprint tests, they result in ERROR:
 
 .. code-block:: bash
 
-  $ opp_run_fingerprint_tests --load @opp -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
+  $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -w tutorials/fingerprint --ingredients tplx -c '^Ethernet$'
 
 .. code-block:: fp
 
