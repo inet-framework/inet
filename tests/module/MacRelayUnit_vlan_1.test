@@ -1,0 +1,55 @@
+%description:
+
+Tests that MacRelayUnit forwards VLAN-tagged frames in a switch that has an
+802.1Q layer: the frames leave the switch tagged with their VLAN ID, PCP and
+DEI, and destinations are looked up in the VLAN of the frame (independent VLAN
+learning). The network and the traffic are described in
+lib/relay-vlan.ini; two host pairs tag their frames with VLANs 42 and 81, and
+a third pair with the same MAC addresses sends untagged frames.
+
+Every pair must receive its data. The expected frame counts at the hosts are
+those of the same network with a BridgingLayer relay in the switch. The tag
+inserter of the switch must set the VLAN IDs of both VLANs, and the PCP and
+DEI that a1 sent.
+
+The relays lose the VLAN tag of a forwarded frame and look up destinations
+in VLAN 0, so the test fails; the failure is declared expected until both
+are repaired.
+
+%# expected-result: FAIL
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+*.switch.bridging.typename = "MacRelayUnit"
+include ../../lib/relay-vlan.ini
+
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.a1.eth[0].macLayer.fcsChecker incomingPackets:count 28
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.a2.eth[0].macLayer.fcsChecker incomingPackets:count 51
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.a2.app[0] packetReceived:sum(packetBytes) 65536
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.b1.eth[0].macLayer.fcsChecker incomingPackets:count 28
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.b2.eth[0].macLayer.fcsChecker incomingPackets:count 51
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.b2.app[0] packetReceived:sum(packetBytes) 65536
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.c1.eth[0].macLayer.fcsChecker incomingPackets:count 28
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.c2.eth[0].macLayer.fcsChecker incomingPackets:count 51
+%contains: results/General-#0.sca
+scalar RelayVlanTestNetwork.c2.app[0] packetReceived:sum(packetBytes) 65536
+%contains: stdout
+Setting VID, vid = 42.
+%contains: stdout
+Setting VID, vid = 81.
+%contains: stdout
+Setting PCP, pcp = 5.
+%contains: stdout
+Setting dropEligible, dei = 1.
