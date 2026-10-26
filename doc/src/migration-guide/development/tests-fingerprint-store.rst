@@ -5,12 +5,13 @@ INET no longer has its own fingerprint test tool. The baseline is the JSON
 store ``tests/fingerprint/store.json``, and the commands of opp_repl run and
 update it. Install opp_repl as the GitHub workflow does, with
 ``pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"``, set up the OMNeT++
-and INET environment, and run the commands from anywhere in the INET tree:
+and INET environment, and run the commands in the INET tree, where they find INET's
+:file:`inet.opp` by themselves:
 
 .. code-block:: bash
 
-   opp_run_fingerprint_tests --load $INET_ROOT -p inet -m release -f wireless
-   opp_update_fingerprint_test_results --load $INET_ROOT -p inet -m release -f wireless
+   opp_run_fingerprint_tests -m release -f wireless
+   opp_update_fingerprint_test_results -m release -f wireless
 
 The second command replaces the ``.UPDATED`` files of ``fingerprinttest``: it
 writes the new values into the store, and ``git diff`` shows them. The command

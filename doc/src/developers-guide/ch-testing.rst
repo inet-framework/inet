@@ -32,15 +32,19 @@ for each concrete config that can run without user input, and some more runs.
 
 The fingerprint tests run with the :command:`opp_run_fingerprint_tests` command of
 `opp_repl <https://github.com/omnetpp/opp_repl>`__. Set up the OMNeT++ and INET
-environment first. Then run all fingerprint tests from anywhere in the INET tree:
+environment first. Then run all fingerprint tests from the INET root:
 
 .. code-block:: shell
 
-   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet
+   $ cd $INET_ROOT
+   $ opp_run_fingerprint_tests
 
-The ``--load $INET_ROOT`` option loads INET's project description, the file
-:file:`inet.opp` in the INET root, and ``-p inet`` selects INET. From the INET root,
-opp_repl loads the file without the option. The description sets the store, the
+The opp_repl commands find INET's project description, the file :file:`inet.opp` in
+the INET root, without an option: they look for ``*.opp`` files in the current folder
+and then in its parent folders. So the commands of this chapter work in each folder
+of the INET tree. In a subfolder, a command without a filter tests only that
+subfolder. Outside the INET tree, add ``--load $INET_ROOT -p inet``. The description
+sets the store, the
 ingredients that CI checks (``tplx``, ``~tNl`` and ``~tND``) and a CPU time limit of
 600s for each simulation. The command shows its options with ``-h``.
 
@@ -60,7 +64,7 @@ For example, the following command runs all wireless tests in release mode:
 
 .. code-block:: shell
 
-   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -m release -f wireless
+   $ opp_run_fingerprint_tests -m release -f wireless
 
 While the tests are running, the command prints a line for each simulation. The
 test result of each fingerprint is PASS, FAIL or ERROR, and a FAIL line shows the
@@ -78,13 +82,13 @@ To accept new fingerprints, run the update command with the same filter:
 
 .. code-block:: shell
 
-   $ opp_update_fingerprint_test_results --load $INET_ROOT -p inet -f wireless
+   $ opp_update_fingerprint_test_results -f wireless
 
 The update runs each stored run at its stored limit, and writes the new values into
 the store. It reports KEEP, UPDATE or INSERT for each simulation, and
 :command:`git diff tests/fingerprint/store.json` shows the changed values. A new
 config gets its run-0 fingerprints with ``--no-stored-only``, for example
-``opp_update_fingerprint_test_results --load $INET_ROOT -p inet --no-stored-only -c '^MyConfig$' -r 0``.
+``opp_update_fingerprint_test_results --no-stored-only -c '^MyConfig$' -r 0``.
 The new entries take the ``sim-time-limit`` of the ini file.
 
 Usually, when a simulation model is being developed, the fingerprint tests should
@@ -126,8 +130,8 @@ the affected runs. After the change, check them:
 
 .. code-block:: shell
 
-   $ opp_update_fingerprint_test_results --load $INET_ROOT -p inet --no-stored-only -f <filter> -r 0 --ingredients plx
-   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -f <filter> --ingredients plx
+   $ opp_update_fingerprint_test_results --no-stored-only -f <filter> -r 0 --ingredients plx
+   $ opp_run_fingerprint_tests -f <filter> --ingredients plx
 
 Another common example is when a submodule is renamed. Since the default fingerprint
 ingredients contain the full module path of all events, this change will break
@@ -147,8 +151,8 @@ and the test after the change. ``--append-args`` passes the rest of the line to
 .. code-block:: shell
 
    # please note the quoting uses both ' and " in the right order
-   $ opp_update_fingerprint_test_results --load $INET_ROOT -p inet -f <filter> --append-args --fingerprint-modules='"not(fullPath(**.wlan[*].mac.**))"'
-   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -f <filter> --append-args --fingerprint-modules='"not(fullPath(**.wlan[*].mac.**))"'
+   $ opp_update_fingerprint_test_results -f <filter> --append-args --fingerprint-modules='"not(fullPath(**.wlan[*].mac.**))"'
+   $ opp_run_fingerprint_tests -f <filter> --append-args --fingerprint-modules='"not(fullPath(**.wlan[*].mac.**))"'
 
 INET uses continuous integration on Github. Fingerprint and other tests are run
 automatically for changes on the master and integration branches. Moreover, all

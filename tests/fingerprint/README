@@ -22,10 +22,10 @@ The ethernet-*.ini files of this folder are simulations that exist
 only for the fingerprint test.
 
 Run the tests and accept new values with the opp_repl commands, after
-the OMNeT++ and INET setenv:
+the OMNeT++ and INET setenv, anywhere in the INET tree:
 
-  opp_run_fingerprint_tests --load $INET_ROOT -p inet [-f <regex>]
-  opp_update_fingerprint_test_results --load $INET_ROOT -p inet [-f <regex>]
+  opp_run_fingerprint_tests [-f <regex>]
+  opp_update_fingerprint_test_results [-f <regex>]
 
 doc/src/developers-guide/ch-testing.rst describes the options.
 

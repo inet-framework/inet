@@ -18,6 +18,6 @@ The refactoring doesn't change the fingerprint because the code is functionally 
 
 .. code-block:: fp
 
-   $ opp_run_fingerprint_tests --load $INET_ROOT -p inet -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
+   $ opp_run_fingerprint_tests -w tutorials/fingerprint --ingredients tplx -c '^(Ethernet|Wifi)$'
    tutorials/fingerprint -c Ethernet for 0.2s PASS
    tutorials/fingerprint -c Wifi for 5s PASS
