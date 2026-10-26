@@ -1,0 +1,75 @@
+SimulationProject(
+    name="inet",
+    root_folder=".",
+    omnetpp_project="omnetpp",
+    bin_folder="bin",
+    library_folder="src",
+    executables=["INET"],
+    dynamic_libraries=["INET"],
+    static_libraries=["INET"],
+    ned_folders=["src", "examples", "showcases", "tutorials", "tests/networks", "tests/validation"],
+    ini_file_folders=["examples", "showcases", "tutorials", "tests/fingerprint", "tests/validation"],
+    image_folders=["images"],
+    include_folders=["src", "src/inet/transportlayer/tcp_lwip/lwip/include", "src/inet/transportlayer/tcp_lwip/lwip/include/ipv4", "src/inet/transportlayer/tcp_lwip/lwip/include/ipv6"],
+    cpp_folders=["src"],
+    dll_symbol="INET",
+    msg_folders=["src"],
+    # INET's description for opp_repl. It lives in the INET repository, so that a change of INET's
+    # test setup lands with the INET change; opp_repl bundles an older copy as a fallback for INET
+    # versions without this file. Load it with --load $INET_ROOT (or from the INET root, where
+    # opp_repl loads every *.opp file of the current folder).
+    #
+    # Per-kind test configuration. Only INET-specific aspects are declared here;
+    # opp_repl's generic defaults (run everything, mode=debug, smoke/sanitizer
+    # cpu_time_limit=1s) are not repeated. INET configs have many runs, so the
+    # single-run kinds pin run_number=0. The statistical and chart tests run in
+    # release mode, as INET's CI does. Baseline repos are checked out by opp_ci into
+    # `folder` (relative to the inet root) before those kinds run. A baseline has two
+    # folders: `folder` (clone location) and `read_folder` (where the test reads
+    # baselines, default = `folder`). They coincide for statistical; chart clones into
+    # `media` but reads `doc/media` (the per-showcase doc/media symlinks point back
+    # into media/).
+    test_parameters={
+        "smoke":       {"defaults": {"run_number": 0}},
+        "sanitizer":   {"defaults": {"run_number": 0}},
+        "statistical": {"defaults": {"run_number": 0, "mode": "release"},
+                        "baseline": {"repository": "inet-framework/statistics", "folder": "statistics"}},
+        "speed":       {"defaults": {"run_number": 0}, "store": "tests/speed/store.json"},
+        "fingerprint": {"store": "tests/fingerprint/store.json", "defaults": {"stored_only": True, "select_fingerprint": "shortest",
+                        "ingredients_list": ["tplx", "~tNl", "~tND"], "cpu_time_limit": "600s"}},
+        "chart":       {"defaults": {"filter": "showcases", "mode": "release"},
+                        "baseline": {"repository": "inet-framework/media", "folder": "media", "read_folder": "doc/media"}},
+        "validation":  {"runner": "inet.test.validation:run_validation_tests"},
+        "unit":        {"defaults": {"test_folder": "tests/unit", "mode": "debug"}},
+        "module":      {"defaults": {"test_folder": "tests/module", "mode": "debug"}},
+        "packet":      {"defaults": {"test_folder": "tests/packet", "executable": "packet_test", "config": "UnitTest", "mode": "debug"}},
+        "queueing":    {"defaults": {"test_folder": "tests/queueing", "mode": "debug"}},
+        # every direct subfolder of tests/protocol is a suite: its tests run from the suite
+        # folder, at any depth below it, and link the shared tests/protocol/lib
+        "protocol":    {"defaults": {"test_folder": "tests/protocol", "mode": "debug", "suite_folders": True,
+                                     "lib_folder": "tests/protocol/lib", "lib_name": "protocoltest"}},
+    },
+    external_include_folders=["/usr/include/x86_64-linux-gnu"],
+    feature_libraries={
+        "VoipStream": {"pkg_config": ["libavcodec", "libavformat", "libavutil", "libswresample"], "defines": ["HAVE_FFMPEG", "HAVE_FFMPEG_SWRESAMPLE"]},
+        "Z3GateSchedulingConfigurator": {"pkg_config": ["z3"]},
+        "VisualizationOsg": {"makefile_inc_libs": "OSG_LIBS"},
+        "OpenMP": {"makefile_inc_flags": "OPENMP_FLAGS"},
+    },
+    opp_defines_file="src/inet/opp_defines.h",
+    extra_cflags=["-Wno-overloaded-virtual"],
+    github_owner="inet-framework",
+    github_repository="inet",
+    github_workflows=[
+        "chart-tests.yml",
+        "feature-tests.yml",
+        "fingerprint-tests.yml",
+        "module-tests.yml",
+        "packet-tests.yml",
+        "protocol-tests.yml",
+        "queueing-tests.yml",
+        "statistical-tests.yml",
+        "unit-tests.yml",
+        "validation-tests.yml",
+    ],
+)

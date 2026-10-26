@@ -57,7 +57,7 @@ jobs:
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
           echo "::group::Running fingerprint tests"
-          # the bundled inet.opp gives the store, the ingredients (tplx, ~tNl, ~tND) and the CPU time limit
+          # INET's inet.opp gives the store, the ingredients (tplx, ~tNl, ~tND) and the CPU time limit
           cd $GITHUB_WORKSPACE/inet
-          opp_run_fingerprint_tests --load @opp -p inet -m $MODE --no-build --split-count 4 --split-index ${{ matrix.split }}
+          opp_run_fingerprint_tests --load $INET_ROOT -p inet -m $MODE --no-build --split-count 4 --split-index ${{ matrix.split }}
           echo "::endgroup::"
