@@ -1,0 +1,6 @@
+# The GitHub-job container of ghci-statistical (ubuntu 24.04, clang 16 as clang), plus the LLVM
+# tools of clang 16, genhtml, and the dependencies of opp_repl, for the coverage tests of INET's
+# plan/pending/coverage-tests.md. The run script mounts the opp_repl worktree over the package.
+FROM localhost/ghci-statistical:24.04-clang16
+RUN apt-get update && apt-get install -y --no-install-recommends llvm-16 libclang-rt-16-dev lcov && rm -rf /var/lib/apt/lists/*
+RUN /opt/venv/bin/pip install -q "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci" pyyaml
