@@ -10,7 +10,7 @@ echo
 
 rm -f /tmp/SelfDoc.txt
 # the arguments of this script (for example a filter) go before --append-args, which takes the rest of the line
-opp_run_fingerprint_tests --load @opp -p inet -m debug --no-build --ingredients tplx "$@" \
+opp_run_fingerprint_tests --load $INET_ROOT -p inet -m debug --no-build --ingredients tplx "$@" \
     --append-args --generate-selfdoc=true --fingerprintcalculator-class='inet::SelfDocumenterFingerprintCalculator' \
     --record-eventlog=false --vector-recording=false --scalar-recording=false
 

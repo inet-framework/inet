@@ -19,14 +19,14 @@ If investigation is still needed, keep the failing outputs as evidence. Investig
 ## 3. Check the scope of the movement
 
 ```bash
-opp_run_fingerprint_tests --load @opp -p inet -f '<affected-case-regex>'
+opp_run_fingerprint_tests --load $INET_ROOT -p inet -f '<affected-case-regex>'
 ```
 
 Start with an explicit filter for the configurations directly related to the changed contract and record the command, mode, configuration, run/seed, status and generated artifacts ([TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence)). A broader integration run may then look for collateral movement, but it does not replace the focused evidence. A change that moves far more configurations than expected is telling you something. A serializer change that moves a mobility fingerprint is not a serializer change.
 
 ## 4. Regenerate
 
-After approval, regenerate only the baselines the change actually moves. A blanket regeneration sweeps up unrelated drift and hides it under your reason. For fingerprints, run `opp_update_fingerprint_test_results --load @opp -p inet -f '<affected-case-regex>'` with the filter of step 3, and read `git diff tests/fingerprint/store.json`.
+After approval, regenerate only the baselines the change actually moves. A blanket regeneration sweeps up unrelated drift and hides it under your reason. For fingerprints, run `opp_update_fingerprint_test_results --load $INET_ROOT -p inet -f '<affected-case-regex>'` with the filter of step 3, and read `git diff tests/fingerprint/store.json`.
 
 ## 5. Commit it with the change that causes it
 

@@ -9,8 +9,8 @@ and INET environment, and run the commands from anywhere in the INET tree:
 
 .. code-block:: bash
 
-   opp_run_fingerprint_tests --load @opp -p inet -m release -f wireless
-   opp_update_fingerprint_test_results --load @opp -p inet -m release -f wireless
+   opp_run_fingerprint_tests --load $INET_ROOT -p inet -m release -f wireless
+   opp_update_fingerprint_test_results --load $INET_ROOT -p inet -m release -f wireless
 
 The second command replaces the ``.UPDATED`` files of ``fingerprinttest``: it
 writes the new values into the store, and ``git diff`` shows them. The command
