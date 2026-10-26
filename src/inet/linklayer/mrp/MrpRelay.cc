@@ -123,7 +123,7 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
             broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
         //handling Multicast
         else if (destinationAddress.isMulticast()) {
-            auto outgoingInterfaceIds = mrpMacForwardingTable->getMulticastAddressForwardingInterfaces(destinationAddress);
+            auto outgoingInterfaceIds = mrpMacForwardingTable->getMulticastAddressForwardingInterfaces(destinationAddress, vlanId);
             if (outgoingInterfaceIds.size() == 0)
                 broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
             else {
@@ -158,7 +158,7 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
         }
         //handling Unicast
         else {
-            auto outgoingInterfaceId = mrpMacForwardingTable->getUnicastAddressForwardingInterface(destinationAddress);
+            auto outgoingInterfaceId = mrpMacForwardingTable->getUnicastAddressForwardingInterface(destinationAddress, vlanId);
             if (outgoingInterfaceId == -1)
                 broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
             else {
@@ -228,6 +228,9 @@ void MrpRelay::handleUpperPacket(Packet *packet)
     EV_INFO << "Processing upper packet" << EV_FIELD(packet) << EV_ENDL;
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto destinationAddress = macAddressReq->getDestAddress();
+    unsigned int vlanId = 0;
+    if (auto vlanReq = packet->findTag<VlanReq>())
+        vlanId = vlanReq->getVlanId();
     auto interfaceReq = packet->findTag<InterfaceReq>();
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol == &Protocol::ieee8021qCFM || protocol == &Protocol::mrp)
@@ -238,7 +241,7 @@ void MrpRelay::handleUpperPacket(Packet *packet)
     } else if (destinationAddress.isBroadcast())
         broadcastPacket(packet, destinationAddress, nullptr);
     else if (destinationAddress.isMulticast()) {
-        auto outgoingInterfaceIds = mrpMacForwardingTable->getMulticastAddressForwardingInterfaces(destinationAddress);
+        auto outgoingInterfaceIds = mrpMacForwardingTable->getMulticastAddressForwardingInterfaces(destinationAddress, vlanId);
         if (outgoingInterfaceIds.size() == 0)
             broadcastPacket(packet, destinationAddress, nullptr);
         else {
@@ -250,7 +253,7 @@ void MrpRelay::handleUpperPacket(Packet *packet)
         }
     }
     else {
-        int interfaceId = mrpMacForwardingTable->getUnicastAddressForwardingInterface(destinationAddress);
+        int interfaceId = mrpMacForwardingTable->getUnicastAddressForwardingInterface(destinationAddress, vlanId);
         if (interfaceId == -1)
             broadcastPacket(packet, destinationAddress, nullptr);
         else {

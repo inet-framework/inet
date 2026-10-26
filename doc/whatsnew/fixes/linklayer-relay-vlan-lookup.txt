@@ -1,0 +1,3 @@
+The classic MAC relays look up destinations in the VLAN of the frame
+
+Ieee8021dRelay, MacRelayUnit and MrpRelay learned addresses per VLAN, but looked up destinations in VLAN 0, so in a switch with an 802.1Q layer they flooded every tagged unicast frame, or sent it to a port where the address had been learned untagged. Destinations are now looked up in the VLAN of the frame, so learning per VLAN and the static forwarding table entries of a VLAN take effect.

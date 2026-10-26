@@ -12,12 +12,6 @@ those of the same network with a BridgingLayer relay in the switch. The tag
 inserter of the switch must set the VLAN IDs of both VLANs, and the PCP and
 DEI that a1 sent.
 
-The relays lose the VLAN tag of a forwarded frame and look up destinations
-in VLAN 0, so the test fails; the failure is declared expected until both
-are repaired.
-
-%# expected-result: FAIL
-
 %inifile: omnetpp.ini
 
 [General]
