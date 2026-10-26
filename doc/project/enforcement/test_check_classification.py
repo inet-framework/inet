@@ -53,6 +53,14 @@ class CheckClassificationTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertNotIn("can a part stand alone?", result.stdout)
 
+    def test_the_project_description_is_build(self):
+        self.write("inet.opp", "SimulationProject(name=\"inet\")\n")
+        self.git("add", ".")
+        self.git("commit", "-q", "-m", "build: change: the description\n\nThe description changes.\n\nChange: build | behavior.change | -")
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertNotIn("claims area", result.stdout)
+
     def test_a_commit_without_a_trailer_is_reported_once(self):
         self.write("src/inet/a/A.cc", "int a = 1;\n")
         self.write("tests/fingerprint/store.json", "[]\n")

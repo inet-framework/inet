@@ -149,7 +149,7 @@ while read -r sha; do
   grep -qE '^tests/'                    <<< "$files" && seen="$seen tests"
   grep -qE '^(doc/|WHATSNEW)'           <<< "$files" && seen="$seen doc"
   grep -qE '^(examples|showcases|tutorials)/' <<< "$files" && seen="$seen examples"
-  grep -qE '^(bin/|python/|\.github/|Makefile|configure)' <<< "$files" && seen="$seen build"
+  grep -qE '^(bin/|python/|\.github/|Makefile|configure|[^/]+\.opp$)' <<< "$files" && seen="$seen build"
   grep -q '^plan/'                      <<< "$files" && seen="$seen plan"
   case " $seen " in *" $claimed "*) ;; *) flag "${sha:0:9} claims area '$claimed' and touches:$seen"; ok=0 ;; esac
 done <<< "$COMMITS"
