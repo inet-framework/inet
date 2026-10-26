@@ -11,7 +11,10 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
+#include "inet/common/SequenceNumberTag_m.h"
 #include "inet/common/StringFormat.h"
+#include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -62,9 +65,22 @@ Packet *MacRelayUnitBase::createForwardedPacket(const Packet *incomingPacket) co
         outgoingPacket->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
     if (auto userPriorityInd = incomingPacket->findTag<UserPriorityInd>())
         outgoingPacket->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
+    if (auto dropEligibleInd = incomingPacket->findTag<DropEligibleInd>())
+        outgoingPacket->addTag<DropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
+    if (auto sequenceNumberInd = incomingPacket->findTag<SequenceNumberInd>())
+        outgoingPacket->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumberInd->getSequenceNumber());
     auto& macAddressReq = outgoingPacket->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(macAddressInd->getSrcAddress());
     macAddressReq->setDestAddress(macAddressInd->getDestAddress());
+    // the frame is sent down through the protocols it was received through (e.g. the 802.1Q
+    // layer, which inserts the VLAN tag), in reverse order
+    if (auto encapsulationProtocolInd = incomingPacket->findTag<EncapsulationProtocolInd>()) {
+        int n = encapsulationProtocolInd->getProtocolArraySize();
+        auto encapsulationProtocolReq = outgoingPacket->addTag<EncapsulationProtocolReq>();
+        encapsulationProtocolReq->setProtocolArraySize(n);
+        for (int i = 0; i < n; i++)
+            encapsulationProtocolReq->setProtocol(n - i - 1, encapsulationProtocolInd->getProtocol(i));
+    }
     return outgoingPacket;
 }
 
@@ -87,11 +103,9 @@ void MacRelayUnitBase::sendPacket(Packet *packet, const MacAddress& destinationA
     EV_INFO << "Sending packet to peer" << EV_FIELD(destinationAddress) << EV_FIELD(outgoingInterface) << EV_FIELD(packet) << EV_ENDL;
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-    auto protocol = outgoingInterface->getProtocol();
-    if (protocol != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
+    if (auto protocol = outgoingInterface->getProtocol())
+        ensureEncapsulationProtocolReq(packet, protocol, true, false);
+    setDispatchProtocol(packet);
     emit(packetSentToLowerSignal, packet);
     send(packet, "lowerLayerOut");
 }

@@ -1,0 +1,3 @@
+The classic MAC relays keep the VLAN tag of a forwarded frame
+
+In a switch with an 802.1Q layer (`ieee8021q.typename = "Ieee8021qProtocol"`), Ieee8021dRelay (the default relay of EthernetSwitch), MacRelayUnit and MrpRelay sent every forwarded VLAN-tagged frame out untagged, so hosts that accept only tagged frames dropped it. A forwarded frame now keeps its tag, with the tag type it arrived with, and its VLAN ID, PCP and DEI.
