@@ -1,0 +1,200 @@
+name: "Test: coverage"
+
+# Runs the fingerprint tests and the unit, module, packet, queueing and protocol tests in coverage
+# mode, and makes one line, function and branch coverage report of src/. The test verdicts belong
+# to the other workflows: a failed test does not fail this workflow, a missing coverage export
+# does. A push to master publishes the report to https://inet-framework.github.io/coverage/ and
+# adds one line to the history of inet-framework/coverage. A manual start gives the report as an
+# artifact only. The plan is plan/pending/coverage-tests.md.
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    # nothing
+
+concurrency:
+  group: coverage-tests-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      matrix:
+        job: ["fingerprint-0", "fingerprint-1", "fingerprint-2", "fingerprint-3", "suites"]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: omnetpp/omnetpp
+          path: omnetpp
+          ref: omnetpp-6.x
+      - uses: actions/checkout@v6
+        with:
+          path: inet
+      # no inet-gpl: its packetdrill runner builds in debug mode only, so the packetdrill wrappers
+      # of the protocol suite skip ("inet-gpl not found")
+      - run: mkdir -p /home/runner/work/ccache
+      - uses: actions/cache/restore@v5
+        with:
+          path: /home/runner/work/ccache
+          key: native-coverage-ccache-${{ github.run_id }}
+          # See: https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
+          restore-keys: native-coverage-ccache
+      - name: Build and test
+        env:
+          MODE: coverage
+          JOB: ${{ matrix.job }}
+        run: |
+          echo "::group::Installing packages"
+          sudo apt update
+          sudo apt install -y --no-install-recommends git wget curl ca-certificates \
+            make ccache clang lld gdb bison flex perl doxygen graphviz libxml2-dev zlib1g-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libz3-dev libopenscenegraph-dev \
+            python3 python3-venv
+          # the profile runtime of the compiler and the LLVM tools of its version
+          clang --version | head -1
+          llvm_version=$(clang -dumpversion | cut -d. -f1)
+          sudo apt install -y --no-install-recommends libclang-rt-$llvm_version-dev llvm-$llvm_version
+          echo "::endgroup::"
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-omnetpp.sh
+
+          echo "::group::Installing opp_repl"
+          python3 -m venv $GITHUB_WORKSPACE/venv
+          source $GITHUB_WORKSPACE/venv/bin/activate
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
+          echo "::endgroup::"
+
+          source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
+
+          mkdir -p $GITHUB_WORKSPACE/lcov
+          df -h $GITHUB_WORKSPACE
+          # Runs one suite with its own profile pool, and exports the pool as <suite>.lcov. A test
+          # failure gives a warning and its counts in the job summary; a failed export fails the job.
+          run_suite() {
+            local suite=$1; shift
+            echo "::group::Running $suite tests in coverage mode"
+            export LLVM_PROFILE_FILE=$GITHUB_WORKSPACE/profiles/$suite/%4m.profraw
+            set +e
+            "$@" 2>&1 | tee $GITHUB_WORKSPACE/$suite.log
+            local status=${PIPESTATUS[0]}
+            set -e
+            [ $status -eq 0 ] || echo "::warning::$suite tests in coverage mode: exit code $status"
+            echo "- $suite: $(sed 's/\x1b\[[0-9;]*m//g' $GITHUB_WORKSPACE/$suite.log | grep -a '◉' | tail -1 | sed 's/^.*): //')" >> $GITHUB_STEP_SUMMARY
+            du -sh $GITHUB_WORKSPACE/profiles/$suite || true
+            opp_export_coverage --load $INET_ROOT -p inet -t ${suite%-*} -o $GITHUB_WORKSPACE/lcov/$suite.lcov
+            rm -rf $GITHUB_WORKSPACE/profiles/$suite
+            unset LLVM_PROFILE_FILE
+            echo "::endgroup::"
+          }
+
+          cd $GITHUB_WORKSPACE/inet
+          echo "### Test verdicts in coverage mode" >> $GITHUB_STEP_SUMMARY
+          if [ "$JOB" = suites ]; then
+            for kind in unit module packet queueing protocol; do
+              run_suite $kind opp_run_${kind}_tests --load $INET_ROOT -p inet -m coverage
+            done
+          else
+            run_suite $JOB opp_run_fingerprint_tests --load $INET_ROOT -p inet -m coverage --no-build --split-count 4 --split-index ${JOB#fingerprint-}
+          fi
+          df -h $GITHUB_WORKSPACE
+      - uses: actions/cache/save@v5
+        if: github.event_name == 'push' && matrix.job == 'fingerprint-0'
+        with:
+          path: /home/runner/work/ccache
+          key: native-coverage-ccache-${{ github.run_id }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage-lcov-${{ matrix.job }}
+          path: lcov/*.lcov
+          if-no-files-found: error
+          retention-days: 7
+
+  report:
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # the branches of inet-framework/coverage that hold the history and the HTML report
+      HISTORY_BRANCH: master
+      PAGES_BRANCH: gh-pages
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          path: inet
+      - uses: actions/download-artifact@v7
+        with:
+          pattern: coverage-lcov-*
+          path: lcov
+          merge-multiple: true
+      - name: Report
+        run: |
+          echo "::group::Installing packages"
+          sudo apt update
+          sudo apt install -y --no-install-recommends lcov python3 python3-venv jq
+          python3 -m venv $GITHUB_WORKSPACE/venv
+          source $GITHUB_WORKSPACE/venv/bin/activate
+          python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
+          echo "::endgroup::"
+
+          echo "::group::Reading the history of the earlier reports"
+          git clone --depth 1 --branch $HISTORY_BRANCH https://github.com/inet-framework/coverage.git $GITHUB_WORKSPACE/coverage \
+            || mkdir -p $GITHUB_WORKSPACE/coverage
+          previous=()
+          [ -s $GITHUB_WORKSPACE/coverage/history.jsonl ] && previous=(--previous $GITHUB_WORKSPACE/coverage/history.jsonl)
+          echo "::endgroup::"
+
+          echo "::group::Making the report"
+          export INET_ROOT=$GITHUB_WORKSPACE/inet
+          opp_coverage_report --load $INET_ROOT -p inet $GITHUB_WORKSPACE/lcov/*.lcov -o $GITHUB_WORKSPACE/report "${previous[@]}" --html \
+            --commit $GITHUB_SHA --date "$(git -C $GITHUB_WORKSPACE/inet log -1 --format=%cI)"
+          cat $GITHUB_WORKSPACE/report/summary.md >> $GITHUB_STEP_SUMMARY
+          change=$(jq -r '.change.lines // empty' $GITHUB_WORKSPACE/report/summary.json)
+          if [ -n "$change" ] && awk -v change="$change" 'BEGIN { exit !(change < -0.5) }'; then
+            echo "::warning::Line coverage dropped by $change percentage points against the previous report"
+          fi
+          du -sh $GITHUB_WORKSPACE/report/html
+          echo "::endgroup::"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: report
+          retention-days: ${{ github.event_name == 'push' && 30 || 7 }}
+      - name: Publish
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          COVERAGE_DEPLOY_KEY: ${{ secrets.COVERAGE_DEPLOY_KEY }}
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "$COVERAGE_DEPLOY_KEY"
+          mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          remote=git@github.com:inet-framework/coverage.git
+
+          echo "::group::Adding the summary to the history on $HISTORY_BRANCH"
+          cd $GITHUB_WORKSPACE/coverage
+          [ -d .git ] || { git init -q -b $HISTORY_BRANCH && git remote add origin $remote; }
+          git remote set-url origin $remote
+          cat $GITHUB_WORKSPACE/report/history.json >> history.jsonl
+          cp $GITHUB_WORKSPACE/report/summary.json latest.json
+          git add history.jsonl latest.json
+          git commit -q -m "coverage of inet ${GITHUB_SHA::10}"
+          git push origin $HISTORY_BRANCH
+          echo "::endgroup::"
+
+          echo "::group::Replacing the HTML report on $PAGES_BRANCH"
+          pages=$GITHUB_WORKSPACE/pages
+          mkdir -p $pages && cd $pages
+          git init -q -b $PAGES_BRANCH
+          cp -r $GITHUB_WORKSPACE/report/html/. .
+          cp $GITHUB_WORKSPACE/report/summary.json .
+          touch .nojekyll
+          git add -A
+          git commit -q -m "coverage report of inet ${GITHUB_SHA::10}"
+          git push --force $remote $PAGES_BRANCH
+          echo "::endgroup::"
