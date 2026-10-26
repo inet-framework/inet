@@ -4,7 +4,7 @@ Fingerprint Tests
 INET no longer has its own fingerprint test tool. The baseline is the JSON
 store ``tests/fingerprint/store.json``, and the commands of opp_repl run and
 update it. Install opp_repl as the GitHub workflow does, with
-``pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@opp_ci"``, set up the OMNeT++
+``pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"``, set up the OMNeT++
 and INET environment, and run the commands from anywhere in the INET tree:
 
 .. code-block:: bash
