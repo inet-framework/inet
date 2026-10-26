@@ -1,7 +1,7 @@
 # Implementation plan: coverage tests in GitHub CI
 
 Checkout and revision: INET `origin/master` at `c8afbf7a96`, branch `topic/coverage-tests` in the worktree `/home/levy/workspace/inet-coverage-tests`. opp_repl `main` at `a502e9d` (`opp_ci` and `github_ci` at the same commit). This plan builds on the plan `tests-on-opp-repl` (branch `topic/tests-on-opp-repl`, approved on 2026-10-26, steps S0 to S7 open).
-Plan revision: 2026-10-26, steps O1 to O5 done (decisions D1 to D4 of the maintainer, D5 to D10 approved with the plan).
+Plan revision: 2026-10-26, steps O1 to O6 done (decisions D1 to D4 of the maintainer, D5 to D10 approved with the plan).
 Approval: 2026-10-26, the maintainer in the chat: "yes", to the question "Do you approve the plan, or do you want changes first?". The approval covers this plan revision with the proposed decisions D5 to D10. Each push, the pull request and the change of the Pages setting are asked when a step needs them.
 
 ## 1. Problem and intended behavior
@@ -187,8 +187,8 @@ The opp_repl worktree started from `main` at `b7b827b`, which already holds the 
   - a delta against a previous history line
 
   Check: the self tests pass, the totals equal the counts by hand, and the merge of a file with itself keeps the covered set. Done in opp_repl `778002b`. The 9 self tests (`opp_repl.test.self.coverage`, now part of `opp_repl_self_test`) pass. A branch whose block never ran keeps the lcov `-`. The `--html` check moves to I2, because `genhtml` is not installed on this machine.
-- [x] **O5. Parameters and documentation.** Add the `coverage` entry to the bundled `opp/inet.opp`, and rewrite `doc/coverage.md`: collection, export, report, the CI recipe and the limits. Check: each command in the document runs on the sample. Done in opp_repl `85d645c` (the entry) and `4009f05` (the guide). Checked: the commands of the guide run on `fifo`, including a second report with `--previous` against the history line of the first; the bundled `inet.opp` loads with the new entry.
-- [ ] **O6. Push.** Push to `main`, then fast-forward `github_ci` and `opp_ci`. This is an outward-facing action that needs the maintainer's word. Check: `pip install` from `github_ci` in a new venv gives the two commands.
+- [x] **O5. Parameters and documentation.** Add the `coverage` entry to the bundled `opp/inet.opp`, and rewrite `doc/coverage.md`: collection, export, report, the CI recipe and the limits. Check: each command in the document runs on the sample. Done in opp_repl `b7051d9` (the entry) and `944790f` (the guide). Checked: the commands of the guide run on `fifo`, including a second report with `--previous` against the history line of the first; the bundled `inet.opp` loads with the new entry. Fact found in I2: INET has a second piece of third-party code, `src/3rdparty/sgp4`, so the entry also excludes `/3rdparty/`. In the GitHub-job container, the export of two unit tests names 2557 files, all below `src/inet/`, without `_m`, lwIP and `3rdparty` files.
+- [x] **O6. Push.** Push to `main`, then fast-forward `github_ci` and `opp_ci`. This is an outward-facing action that needs the maintainer's word. Check: `pip install` from `github_ci` in a new venv gives the two commands. Done on 2026-10-26 with the maintainer's word: `main` and `github_ci` b7b827b..944790f, `opp_ci` a502e9d..944790f (6 commits). Checked: a new venv with `pip install` from `github_ci` has `opp_export_coverage` and `opp_coverage_report`. The opp_ci service takes the new opp_repl only after a restart.
 
 ### INET (branch `topic/coverage-tests`, worktree `/home/levy/workspace/inet-coverage-tests`)
 
@@ -255,6 +255,10 @@ Proposed decisions, which the approval of this plan covers:
 - **D8, triggers:** a push to master and `workflow_dispatch`; no `pull_request` trigger (D2).
 - **D9, opp_repl branch:** `topic/coverage-tests` in its own worktree, then `main`, `github_ci` and `opp_ci`.
 - **D10, storage:** `history.jsonl` and `latest.json` on `master` of the coverage repository; the HTML on `gh-pages` as one force-pushed commit.
+
+Decision made during I2, open for the maintainer to change:
+
+- **D11, inet-gpl:** the coverage workflow does not check out inet-gpl, so the 306 packetdrill wrappers of the protocol suite report SKIP ("inet-gpl not found"). inet-gpl could not build in coverage mode, because the precompiled headers of the coverage and profile modes were absent; the maintainer pushed that repair as inet-gpl `ca17ec6`. But the packetdrill runner of `tests/packetdrill` still builds in debug mode only (`-lINET_dbg`, `MODE=debug`, and `suite.py` looks for `packetdrill_inet_dbg`). In a coverage job, the wrappers would need a second, debug build of OMNeT++ and INET, and would add no coverage. A runner that follows the build mode is a follow-up in inet-gpl; then the coverage workflow can check out inet-gpl as the protocol workflow does.
 
 Separate permissions: each push (opp_repl branches, the INET topic branch, the throwaway branch, the coverage repository) and the pull request. Pages is turned on in I6. No seal edit and no baseline change are planned.
 
