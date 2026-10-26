@@ -115,9 +115,18 @@ The Model and Results
 
 The showcase uses the :ned:`GeographicMobilityShowcase` network:
 
-.. figure:: media/placeholder-network.png
-   :width: 80%
+.. figure:: media/network.png
+   :width: 100%
    :align: center
+
+..
+   FIGURE RECIPE
+   type:     canvas
+   config:   Aircraft, t=0
+   shows:    world map with the four planes and the europe node
+   capture:  set_canvas_view <root> zoom=1.352; get_canvas_image <root>
+             area=module_rectangle margin=5; crop the 5 px margin (978x491)
+   stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
 The nodes contain only a mobility submodule: the showcase shows movement, not
 communication. The configurations share the coordinate system and the world map:
@@ -163,20 +172,54 @@ circle, drawn on a flat map. The Los Angeles–Tokyo (LAX–HND) flight leaves t
 at its left edge and enters it again at the right edge. The trail skips the
 segment that would cross the whole map.
 
-Here is a video of the world map (each trail shows the recent path of one plane;
-the blue disks are the footprints):
+Here is a video of the world map during the first 11 hours (each trail shows the
+recent path of one plane; the blue disks are the footprints):
 
-.. figure:: media/placeholder-aircraft-world.png
+.. video:: media/aircraft-world.mp4
    :width: 100%
-   :align: center
+
+..
+   VIDEO RECIPE (frames grabbed one by one, not with record_video)
+   config:   Aircraft
+   seed:     default (the config uses no random numbers)
+   shows:    JFK-LHR curving north and landing, LAX-HND wrapping from the left
+             map edge to the right edge, DXB-GRU over Africa, footprints
+   anchors:  JFK-LHR lands at 6.6 h; LAX-HND lands at 10.2 h (from the tracks)
+   window:   t = 0 to 39600 s, step 120 s (331 frames)
+   frames:   one get_canvas_image per step (MCP of the simulation itself,
+             --mcp-server-address); before each, run_simulation mode=fast,
+             inclusive, time_limit=<t>; skip the run at t=0 (0s = no limit)
+   capture:  set_canvas_view <root> zoom=1.352; get_canvas_image <root>
+             area=module_rectangle margin=5 (988x501)
+   encode:   ffmpeg -framerate 15 -i f_%04d.png -vf crop=978:490:5:5
+             -vcodec libx264 -pix_fmt yuv420p -crf 20
+   stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
 The ``europe`` node is a second map, an :ned:`EuropeMap`, placed on the world map
-near Paris. Here is the same run on the Europe map, where the London–Budapest
-(LHR–BUD) flight stays inside the map:
+near Paris. Here is the same run on the Europe map during the first 7 hours. The
+London–Budapest (LHR–BUD) flight stays inside the map, and the New York–London
+(JFK–LHR) flight enters it from the west before it lands:
 
-.. figure:: media/placeholder-aircraft-europe.png
+.. video:: media/aircraft-europe.mp4
    :width: 100%
-   :align: center
+
+..
+   VIDEO RECIPE (frames grabbed one by one, not with record_video)
+   config:   Aircraft
+   seed:     default (the config uses no random numbers)
+   shows:    LHR-BUD out, one hour turnaround in Budapest, back to London, out again;
+             JFK-LHR arriving from the west
+   anchors:  LHR-BUD lands in Budapest at 2.17 h, leaves again at 3.17 h;
+             JFK-LHR lands at 6.6 h
+   window:   t = 0 to 25200 s, step 60 s (421 frames)
+   frames:   one get_canvas_image per step (MCP of the simulation itself,
+             --mcp-server-address); before each, run_simulation mode=fast,
+             inclusive, time_limit=<t>; skip the run at t=0 (0s = no limit)
+   capture:  set_canvas_view europe zoom=1.0 (opens the inspector);
+             get_canvas_image europe area=module_rectangle margin=5 (668x636)
+   encode:   ffmpeg -framerate 15 -i f_%04d.png -vf crop=658:626:5:5
+             -vcodec libx264 -pix_fmt yuv420p -crf 20
+   stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
 | New York to London: **5,541 km, flight time 6.1 hours**
 | Northernmost point of the New York–London trail: **about 54°N**
@@ -199,10 +242,11 @@ of the start of the simulation:
    :end-at: satellite[1].display-name
    :language: ini
 
-The ground stations in Lima and Los Angeles each have a sky view, which ignores
-satellites below 10° elevation. The footprints use the same elevation mask, so a
-satellite appears in the sky view of a station while the station is
-inside the footprint of the satellite:
+The ground stations in Lima and Los Angeles each have a sky view with a 10°
+elevation mask. The sky view draws the band below the mask in grey, and a
+satellite in that band as a faded dot. The footprints use the same elevation mask,
+so a satellite is above the mask in the sky view of a station while the station
+is inside the footprint of the satellite:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: skyView.observerFilter
@@ -211,26 +255,62 @@ inside the footprint of the satellite:
 
 The ground track of a satellite is the path of the point directly below it. The
 ground track of the ISS is a wave between about 52°N and 52°S, close to the
-inclination of its orbit (51.6°). After each orbit, the wave is further west, because the Earth has
-turned under the orbit in the meantime. Vanguard 1 is on an eccentric orbit, so
+inclination of its orbit (51.6°). After each orbit, the wave is further west,
+because the Earth has turned under the orbit in the meantime. Vanguard 1 is on an eccentric orbit, so
 its altitude changes during each orbit, and its footprint grows and shrinks with
 it.
 
-Here is a video of the world map (each trail is the ground track of one satellite;
-the arrows show the direction of flight):
+The satellite trails are 1,700 position updates long, about 4.7 hours, so the
+trails keep the last three orbits of the ISS. Here is a video of the world map
+during the first 6 hours (each trail is the ground track of one satellite; the
+arrows show the direction of flight):
 
-.. figure:: media/placeholder-satellites-world.png
+.. video:: media/satellites-world.mp4
    :width: 100%
+
+..
+   VIDEO RECIPE (frames grabbed one by one, not with record_video)
+   config:   Satellites
+   seed:     default (the config uses no random numbers)
+   shows:    ISS waves shifting west orbit by orbit (blue trail); Vanguard 1 on its
+             slower, lower-inclination orbit (purple trail); footprints, arrows
+   anchors:  ISS ascending-node crossings 92.8-93.0 min apart, 23.4-23.7 deg further
+             west each orbit (from recorded positions of a full-length run)
+   window:   t = 0 to 21600 s, step 60 s (361 frames)
+   frames:   one get_canvas_image per step (MCP of the simulation itself,
+             --mcp-server-address); before each, run_simulation mode=fast,
+             inclusive, time_limit=<t>; skip the run at t=0 (0s = no limit)
+   capture:  set_canvas_view <root> zoom=1.352; get_canvas_image <root>
+             area=module_rectangle margin=5 (988x501)
+   encode:   ffmpeg -framerate 15 -i f_%04d.png -vf crop=978:490:5:5
+             -vcodec libx264 -pix_fmt yuv420p -crf 20
+   stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
+
+The sky views are below the world map, in the order of the ground stations: Lima
+on the left, Los Angeles on the right. The center of a sky view is the zenith,
+the rim is the horizon, and north is up. When the ISS passes over Los Angeles, it
+rises above 10° elevation, crosses the sky of the station, and sets again a few
+minutes later. Here is the sky view of Los Angeles near the end of the pass that
+starts at about 8 hours 15 minutes. The ISS rose in the south-west, passed 71°
+elevation, and is now at about 14° in the north-east:
+
+.. figure:: media/satellites-skyview.png
+   :width: 60%
    :align: center
 
-Each sky view shows the satellites that are above 10° elevation at the station.
-When the ISS passes over Los Angeles, it rises above 10° elevation, crosses the
-sky of the station, and sets again a few minutes later. Here is the sky view of
-Los Angeles during such a pass:
-
-.. figure:: media/placeholder-satellites-skyview.png
-   :width: 70%
-   :align: center
+..
+   FIGURE RECIPE
+   type:     canvas
+   config:   Satellites, t=30060 s
+   shows:    Los Angeles sky view, the ISS trail from SW through ~71 deg to the
+             current dot at ~14 deg NE
+   anchors:  ISS above 10 deg over Los Angeles from 29700 s to 30090 s, peak 71 deg
+             at 29890 s (recorded positions of a full-length run)
+   capture:  run_simulation mode=fast inclusive time_limit=30060s;
+             set_canvas_view <root> zoom=3.5 center_x=871 center_y=1610;
+             get_canvas_image <root> area=viewport margin=0 (1030x723);
+             crop (236,180)-(766,716) around the right-hand plot
+   stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
 | ISS orbital period: **93 minutes**
 | Westward shift of the ISS ground track per orbit: **about 23.5°**

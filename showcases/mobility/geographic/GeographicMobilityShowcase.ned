@@ -33,16 +33,20 @@ module GeoNode
 // A street-level OpenStreetMap view of the Óbuda district of Budapest, placed on the
 // Europe map by its own mobility. Open the module to see the map.
 //
-module BudapestMap extends GeoNode
+module BudapestMap
 {
     parameters:
+        @networkNode;
         @display("i=misc/town;is=vs;bgb=800,800");
     submodules:
+        mobility: <default("inet.mobility.static.StationaryMobility")> like IMobility {
+            @display("p=880,60");
+        }
         coordinateSystem: Wgs84AnchoredGeographicCoordinateSystem {
-            @display("p=60,60");
+            @display("p=880,160");
         }
         map: OpenStreetMapSceneCanvasVisualizer {
-            @display("p=60,160");
+            @display("p=880,260");
         }
 }
 
@@ -51,25 +55,29 @@ module BudapestMap extends GeoNode
 // module to see the nodes, their trails and their footprints on the Europe map, and
 // the Budapest module that opens the street-level view.
 //
-module EuropeMap extends GeoNode
+module EuropeMap
 {
     parameters:
+        @networkNode;
         @display("i=misc/globe;is=vs;bgb=654,622");
     submodules:
+        mobility: <default("inet.mobility.static.StationaryMobility")> like IMobility {
+            @display("p=820,60");
+        }
         map: GeoMapCanvasVisualizer {
-            @display("p=60,60");
+            @display("p=820,160");
         }
         mobilityVisualizer: MobilityCanvasVisualizer {
-            @display("p=60,160");
+            @display("p=820,260");
         }
         geoHorizon: GeoHorizonCanvasVisualizer {
-            @display("p=60,260");
+            @display("p=820,360");
         }
         networkNodeVisualizer: NetworkNodeCanvasVisualizer {
-            @display("p=60,360");
+            @display("p=820,460");
         }
         infoVisualizer: InfoCanvasVisualizer {
-            @display("p=60,460");
+            @display("p=820,560");
         }
         budapest: BudapestMap {
             @display("i=misc/town;is=vs");
