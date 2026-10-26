@@ -8,6 +8,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/ProtocolUtils.h"
 #include "inet/common/DirectionTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -286,11 +287,9 @@ void MrpRelay::sendPacket(Packet *packet, const MacAddress &destinationAddress, 
             << EV_ENDL;
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
-    auto protocol = outgoingInterface->getProtocol();
-    if (protocol != nullptr)
-        packet->addTagIfAbsent<DispatchProtocolReq>()->setProtocol(protocol);
-    else
-        packet->removeTagIfPresent<DispatchProtocolReq>();
+    if (auto protocol = outgoingInterface->getProtocol())
+        ensureEncapsulationProtocolReq(packet, protocol, true, false);
+    setDispatchProtocol(packet);
     emit(packetSentToLowerSignal, packet);
     if (packet->findTag<MacAddressReq>() == nullptr) {
         auto &macAddressReq = packet->addTag<MacAddressReq>();
