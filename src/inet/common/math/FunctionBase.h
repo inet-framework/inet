@@ -170,7 +170,8 @@ class INET_API FunctionBase : public IFunction<R, D>
             className += 12;
         else if (!strncmp(className, "inet::", 6))
             className += 6;
-        os << className;
+        // since OMNeT++ 6.5, the class name contains the template arguments
+        os << std::string(className, strcspn(className, "<"));
     }
 };
 
