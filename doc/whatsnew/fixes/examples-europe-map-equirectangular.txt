@@ -1,0 +1,8 @@
+The Europe map image lines up with what visualizers draw on it
+
+images/maps/europe-er.png was a Web Mercator image, but GeoMapCanvasVisualizer stretches its map image linearly in latitude, so figures drawn on it (node icons, trails, satellite footprints, the graticule) were offset from the map by up to 5.4 degrees of latitude with the window that examples/mobility declared (13.8 W to 44.3 E and 37 N to 73 N). The image is now equirectangular and covers 13.3 W to 44.1 E and 35.6 N to 67.6 N. A model that shows this image with GeoMapCanvasVisualizer has to declare that window:
+
+  *.map.minLatitude = 35.6deg
+  *.map.maxLatitude = 67.6deg
+  *.map.minLongitude = -13.3deg
+  *.map.maxLongitude = 44.1deg
