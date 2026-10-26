@@ -20,7 +20,7 @@ std::ostream& ListeningDecision::printToStream(std::ostream& stream, int level, 
 {
     stream << "ListeningDecision";
     if (level <= PRINT_LEVEL_DETAIL)
-        stream << (isListeningPossible_ ? ", \x1b[1mpossible\x1b[0m" : ", \x1b[1mimpossible\x1b[0m");
+        stream << ", " << EV_BOLD << (isListeningPossible_ ? "possible" : "impossible") << EV_NORMAL;
     if (level <= PRINT_LEVEL_TRACE)
         stream << EV_FIELD(listening, printFieldToString(listening, level + 1, evFlags));
     return stream;
