@@ -41,14 +41,17 @@ north of both airports over the Atlantic, and then turns south-east toward Londo
 
 A GNSS track is a sequence of position fixes, usually with a time stamp for each
 fix. Common formats are CSV (comma-separated values), GPX (GPS Exchange Format,
-where GPS is the Global Positioning System) and GeoJSON.
+where GPS is the Global Positioning System) and GeoJSON. GeoJSON has no standard
+field for time stamps.
 
 A two-line element set (TLE) describes an orbit by its mean orbital elements at
 one moment, the epoch of the TLE. The SGP4 (Simplified General Perturbations 4)
 model computes the satellite's position at other times from these elements. It
-includes the effects of the Earth's flattening and of atmospheric drag. The
+includes the effects of the Earth's flattening and of atmospheric drag. For orbits
+with a period of 225 minutes or more, its deep-space variant SDP4 is used. The
 accuracy of SGP4 decreases as the time from the epoch grows, so a TLE is used
-close to its epoch. Organizations such as CelesTrak publish fresh TLEs every day.
+close to its epoch: the error is about 1 km at the epoch and grows by a few
+kilometers per day. Organizations such as CelesTrak publish fresh TLEs every day.
 
 The footprint of a node is the area of the Earth's surface from which the node is
 above a minimum elevation angle (the elevation mask). The footprint grows with
@@ -60,18 +63,30 @@ the horizon).
 Geographic Mobility in INET
 ---------------------------
 
-All nodes in this showcase share one coordinate system module, a
+The nodes in this showcase share one coordinate system module, a
 :ned:`Wgs84EcefGeographicCoordinateSystem`. It makes the scene coordinates ECEF
 coordinates, so a node's scene position is its position relative to the center of
 the Earth. Each mobility module finds this module through its
-:par:`coordinateSystemModule` parameter.
+:par:`coordinateSystemModule` parameter. The map visualizer projects these
+positions onto the map image, so the node icons appear at their geographic
+positions.
+
+A stationary node, such as a ground station, uses a :ned:`StationaryMobility`
+with the :par:`initialLatitude`, :par:`initialLongitude` and :par:`initialAltitude`
+parameters, and with :par:`initFromDisplayString` set to ``false``. All altitudes
+are heights above the WGS84 ellipsoid. GPX elevations are usually heights above
+mean sea level, which differ from these by up to about 100 m.
 
 :ned:`GnssTrackMobility` moves the node along the great circle between two fixes,
 and changes the altitude linearly. Its main parameters are the following:
 
-- :par:`trackData`: the track as CSV or GPX text. A CSV row is
-  ``latitude,longitude,altitude,time``.
+- :par:`trackData`: the track as CSV or GPX text, inline or from a file with
+  ``readFile("track.csv")``. A CSV row is ``latitude,longitude,altitude,time``, in
+  degrees, meters and seconds. Only the differences between the time stamps
+  matter: the first fix is played at :par:`trackStartTime` (0 s by default).
 - :par:`trackJson`: the track as a GeoJSON object, instead of :par:`trackData`.
+  Time stamps are read from a ``coordTimes`` array in the properties of the
+  feature.
 - :par:`speed`: a constant ground speed, used only when the track has no time
   stamps. With time stamps, the time stamps set the speed.
 - :par:`loopMode`: the track plays once (``none``), repeats from the start
@@ -84,7 +99,9 @@ following:
 - :par:`satelliteName`, :par:`satelliteIndex` or :par:`satelliteCatalogNumber`:
   selects one satellite from the TLE text.
 - :par:`epoch`: the date and time, in UTC (Coordinated Universal Time), that
-  corresponds to the start of the simulation.
+  corresponds to the start of the simulation. The map visualizer has an
+  :par:`epoch` parameter for its clock too, so the showcase sets both with
+  ``**.epoch``.
 - :par:`attitudeMode`: where the satellite points its forward axis, for example
   along its velocity.
 
@@ -99,12 +116,11 @@ following:
 Four canvas visualizers show the result:
 
 - :ned:`GeoMapCanvasVisualizer` draws the map image, optionally a clock that shows
-  the date and time, and sets up the projection that the other visualizers use. A
-  map can contain further, more detailed maps; double-clicking one in Qtenv opens
-  it.
+  the date and time, and sets up the projection that the other visualizers use.
 - :ned:`MobilityCanvasVisualizer` draws the movement trails (and, optionally,
   positions, orientations and velocities) on that map.
-- :ned:`GeoHorizonCanvasVisualizer` draws the footprints.
+- :ned:`GeoHorizonCanvasVisualizer` draws the footprints. Its elevation mask is 0°
+  by default.
 - :ned:`GeoSkyViewCanvasVisualizer` draws a sky view for each ground station.
 
 These visualizers draw on the 2D canvas, so the showcase runs in a standard OMNeT++
@@ -136,8 +152,9 @@ communication. The configurations share the coordinate system and the world map:
    :end-at: map.maxLongitude
    :language: ini
 
-The map starts at 170°W. The edge of the map, where a trail wraps around, falls in
-the Pacific Ocean, so only a trans-Pacific flight crosses it.
+The map starts at 170°W and ends 360° further east, at 190°E, which is 170°W
+again. The edge of the map, where a trail wraps around, falls in the Pacific
+Ocean, so only a trans-Pacific flight crosses it.
 
 There are two configurations:
 
@@ -166,11 +183,17 @@ of about 250 m/s on all four routes. With ``pingPong``, each plane then flies th
 track backward, so it waits for one hour at each turnaround: 30 minutes at the end
 of the track and 30 minutes at the start of the reversed track.
 
-When a plane climbs, its footprint grows to its cruising size. The trail of the
+The map clock starts at 2000-06-28 00:20:19 UTC, the date of the original INET
+example that this configuration comes from. The date affects only the clock.
+
+When a plane climbs, its footprint grows to its cruising size (with the default
+0° elevation mask). The trail of the
 New York–London (JFK–LHR) flight curves north over the Atlantic: this is the great
 circle, drawn on a flat map. The Los Angeles–Tokyo (LAX–HND) flight leaves the map
 at its left edge and enters it again at the right edge. The trail skips the
-segment that would cross the whole map.
+segment that would cross the whole map, because the
+:par:`movementTrailSegmentHideThreshold` parameter of the visualizer hides trail
+segments longer than 100 pixels.
 
 Here is a video of the world map during the first 11 hours (each trail shows the
 recent path of one plane; the blue disks are the footprints):
@@ -195,8 +218,10 @@ recent path of one plane; the blue disks are the footprints):
              -vcodec libx264 -pix_fmt yuv420p -crf 20
    stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
-The ``europe`` node is a second map, an :ned:`EuropeMap`, placed on the world map
-near Paris. Here is the same run on the Europe map during the first 7 hours. The
+The ``europe`` node, placed on the world map near Paris, is an :ned:`EuropeMap`: a
+compound module defined in the showcase, with its own map visualizer and its own
+mobility, footprint, node and label visualizers. Double-clicking it in Qtenv opens
+its canvas, the Europe map. Here is the same run on the Europe map during the first 7 hours. The
 London–Budapest (LHR–BUD) flight stays inside the map, and the New York–London
 (JFK–LHR) flight enters it from the west before it lands:
 
@@ -227,15 +252,21 @@ London–Budapest (LHR–BUD) flight stays inside the map, and the New York–Lo
 
 .. note::
 
-   The Budapest icon on the Europe map is a third map: double-clicking it shows
-   the streets of the Óbuda district from OpenStreetMap.
+   The Budapest icon on the Europe map is a third compound module, with its own
+   :ned:`Wgs84AnchoredGeographicCoordinateSystem` and an OpenStreetMap
+   visualizer: double-clicking it shows the streets of the Óbuda district.
 
 Satellites
 ~~~~~~~~~~
 
-Each satellite has a :ned:`SatelliteMobility`. The two TLEs are in
-:download:`satellites.tle <../satellites.tle>`, and their epochs are within a day
-of the start of the simulation:
+Each satellite has a :ned:`SatelliteMobility`. The two TLEs are from CelesTrak:
+
+.. literalinclude:: ../satellites.tle
+
+The epoch of a TLE is the fourth field of its first line, as a two-digit year and
+a fractional day of the year: ``26298.976`` is day 298 of 2026, 23:25 UTC. Both
+epochs are within a day of the start of the simulation. With fresh TLEs, change
+the ``epoch`` of the simulation too:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: **.epoch = "2026
@@ -260,9 +291,9 @@ because the Earth has turned under the orbit in the meantime. Vanguard 1 is on a
 its altitude changes during each orbit, and its footprint grows and shrinks with
 it.
 
-The satellite trails are 1,700 position updates long, about 4.7 hours, so the
-trails keep the last three orbits of the ISS. Here is a video of the world map
-during the first 6 hours (each trail is the ground track of one satellite; the
+The satellite visualizer keeps up to 1,700 trail sections (:par:`trailLength`),
+instead of the default 100, so the trails keep several orbits. Here is a video of
+the world map during the first 6 hours (each trail is the ground track of one satellite; the
 arrows show the direction of flight):
 
 .. video:: media/satellites-world.mp4
@@ -286,8 +317,9 @@ arrows show the direction of flight):
              -vcodec libx264 -pix_fmt yuv420p -crf 20
    stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
-The sky views are below the world map, in the order of the ground stations: Lima
-on the left, Los Angeles on the right. The center of a sky view is the zenith,
+In Qtenv, the sky views are below the world map, in the order of the ground
+stations: Lima on the left, Los Angeles on the right. A sky view labels a
+satellite with its name in the TLE, here ``ISS (ZARYA)``. The center of a sky view is the zenith,
 the rim is the horizon, and north is up. When the ISS passes over Los Angeles, it
 rises above 10° elevation, crosses the sky of the station, and sets again a few
 minutes later. Here is the sky view of Los Angeles near the end of the pass that
