@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for packet_test
 #
 # This file was generated with the command:
-#  opp_makemake -I../../src -f -L../../src -lINET_dbg -o packet_test
+#  opp_makemake -I../../src -f -L../../src -lINET$(D) -o packet_test
 #
 
 # Name of target to be created (-o option)
@@ -25,7 +25,7 @@ INCLUDE_PATH = -I../../src
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = $(LDFLAG_LIBPATH)../../src  -lINET_dbg
+LIBS = $(LDFLAG_LIBPATH)../../src  -lINET$(D)
 
 # Output directory
 PROJECT_OUTPUT_DIR = ../../out
