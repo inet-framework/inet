@@ -21,8 +21,15 @@ above a ground station.
 In this showcase, we fly four planes between major airports and follow two
 satellites, Vanguard 1 and the International Space Station (ISS).
 
-| Verified with INET version: ``4.7``
+| Verified with INET version: ``TODO``
 | Source files location: `inet/showcases/mobility/geographic <https://github.com/inet-framework/inet/tree/master/showcases/mobility/geographic>`__
+
+.. todo::
+
+   The showcase is not in any release yet, and it needs the equirectangular
+   Europe map image (commit c532ab3365 on topic/gy/europe-map-equirectangular).
+   Fill in the version above, and change the ``inet-4.7`` release in the Try It
+   Yourself ``opp_env`` commands, once a release contains them.
 
 About Geographic Positions
 --------------------------
@@ -395,4 +402,7 @@ then start exploring.
 Discussion
 ----------
 
-Use `this <https://github.com/inet-framework/inet/discussions>`__ page in the GitHub issue tracker for commenting on this showcase.
+Use `this page <https://github.com/inet-framework/inet-showcases/issues/TODO>`__ in
+the GitHub issue tracker for commenting on this showcase.
+
+.. TODO: create the tracker issue for this showcase and replace the link above
