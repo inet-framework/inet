@@ -154,7 +154,8 @@ at the gate), the end of the climb at 10,000 m, the start of the descent, and th
 arrival airport twice (the plane waits again). The climb and descent points lie on
 the great circle between the two airports. The time stamps give an average speed
 of about 250 m/s on all four routes. With ``pingPong``, each plane then flies the
-track backward.
+track backward, so it waits for one hour at each turnaround: 30 minutes at the end
+of the track and 30 minutes at the start of the reversed track.
 
 When a plane climbs, its footprint grows to its cruising size. The trail of the
 New York–London (JFK–LHR) flight curves north over the Atlantic: this is the great
@@ -199,16 +200,18 @@ of the start of the simulation:
    :language: ini
 
 The ground stations in Lima and Los Angeles each have a sky view, which ignores
-satellites below 10° elevation:
+satellites below 10° elevation. The footprints use the same elevation mask, so a
+satellite appears in the sky view of a station while the station is
+inside the footprint of the satellite:
 
 .. literalinclude:: ../omnetpp.ini
    :start-at: skyView.observerFilter
-   :end-at: skyView.elevationMask
+   :end-at: geoHorizon.elevationMask
    :language: ini
 
 The ground track of a satellite is the path of the point directly below it. The
-ground track of the ISS is a wave between 51.6°N and 51.6°S, the inclination of
-its orbit. After each orbit, the wave is further west, because the Earth has
+ground track of the ISS is a wave between about 52°N and 52°S, close to the
+inclination of its orbit (51.6°). After each orbit, the wave is further west, because the Earth has
 turned under the orbit in the meantime. Vanguard 1 is on an eccentric orbit, so
 its altitude changes during each orbit, and its footprint grows and shrinks with
 it.
@@ -230,8 +233,8 @@ Los Angeles during such a pass:
    :align: center
 
 | ISS orbital period: **93 minutes**
-| Westward shift of the ISS ground track per orbit: **about 23°**
-| Vanguard 1 altitude: **about 660 km to 3,830 km**, footprint radius **about 2,800 km to 5,700 km**
+| Westward shift of the ISS ground track per orbit: **about 23.5°**
+| Vanguard 1 altitude: **about 650 km to 3,820 km**, footprint radius **about 1,850 km to 4,670 km**
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`GeographicMobilityShowcase.ned <../GeographicMobilityShowcase.ned>`, :download:`satellites.tle <../satellites.tle>`
 
