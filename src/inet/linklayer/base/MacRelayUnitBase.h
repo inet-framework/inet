@@ -33,6 +33,13 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase
     virtual std::string resolveDirective(char directive) const override;
 
     virtual bool isForwardingInterface(NetworkInterface *networkInterface) const { return !networkInterface->isLoopback() && networkInterface->isBroadcast(); }
+
+    /**
+     * Returns the packet to forward for a frame received from the network: a copy
+     * of its data, with the requests that make the lower layers send it with the
+     * addresses and tag fields it was received with.
+     */
+    virtual Packet *createForwardedPacket(const Packet *incomingPacket) const;
     virtual void broadcastPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *incomingInterface);
     virtual void sendPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *outgoingInterface);
     virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId);

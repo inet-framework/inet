@@ -21,7 +21,6 @@ Define_Module(MacRelayUnit);
 // FIXME should handle multicast mac addresses correctly
 void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
 {
-    auto protocol = incomingPacket->getTag<PacketProtocolTag>()->getProtocol();
     auto macAddressInd = incomingPacket->getTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
     auto destinationAddress = macAddressInd->getDestAddress();
@@ -34,17 +33,7 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
     EV_INFO << "Processing packet from network" << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
     updatePeerAddress(incomingInterface, sourceAddress, vlanId);
 
-    auto outgoingPacket = incomingPacket->dup();
-    outgoingPacket->trim();
-    outgoingPacket->clearTags();
-    outgoingPacket->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    if (auto vlanInd = incomingPacket->findTag<VlanInd>())
-        outgoingPacket->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
-    if (auto userPriorityInd = incomingPacket->findTag<UserPriorityInd>())
-        outgoingPacket->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
-    auto& macAddressReq = outgoingPacket->addTag<MacAddressReq>();
-    macAddressReq->setSrcAddress(sourceAddress);
-    macAddressReq->setDestAddress(destinationAddress);
+    auto outgoingPacket = createForwardedPacket(incomingPacket);
     if (destinationAddress.isBroadcast())
         broadcastPacket(outgoingPacket, destinationAddress, incomingInterface);
     else if (destinationAddress.isMulticast()) {

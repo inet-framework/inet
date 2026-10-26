@@ -51,7 +51,6 @@ void MrpRelay::initialize(int stage)
 void MrpRelay::handleLowerPacket(Packet *incomingPacket)
 {
     numReceivedNetworkFrames++;
-    auto protocol = incomingPacket->getTag<PacketProtocolTag>()->getProtocol();
     auto macAddressInd = incomingPacket->getTag<MacAddressInd>();
     auto sourceAddress = macAddressInd->getSrcAddress();
     auto destinationAddress = macAddressInd->getDestAddress();
@@ -68,17 +67,7 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
     const auto* stpData = incomingInterface->findProtocolData<Ieee8021dInterfaceData>();
     const auto* mrpInterfaceData = incomingInterface->findProtocolData<MrpInterfaceData>();
 
-    auto outgoingPacket = incomingPacket->dup();
-    outgoingPacket->trim();
-    outgoingPacket->clearTags();
-    outgoingPacket->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    if (auto vlanInd = incomingPacket->findTag<VlanInd>())
-        outgoingPacket->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
-    if (auto userPriorityInd = incomingPacket->findTag<UserPriorityInd>())
-        outgoingPacket->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
-    auto &macAddressReq = outgoingPacket->addTag<MacAddressReq>();
-    macAddressReq->setSrcAddress(sourceAddress);
-    macAddressReq->setDestAddress(destinationAddress);
+    auto outgoingPacket = createForwardedPacket(incomingPacket);
 
     if (!mrpInterfaceData)
         throw cRuntimeError("MrpInterfaceData not found on interface '%s'; enable hasMrp in the network node configuration", incomingInterface->getInterfaceName());

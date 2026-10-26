@@ -10,8 +10,12 @@
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
+#include "inet/common/ProtocolTag_m.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -44,6 +48,24 @@ std::string MacRelayUnitBase::resolveDirective(char directive) const
         default:
             return SimpleModule::resolveDirective(directive);   
     }
+}
+
+Packet *MacRelayUnitBase::createForwardedPacket(const Packet *incomingPacket) const
+{
+    auto protocol = incomingPacket->getTag<PacketProtocolTag>()->getProtocol();
+    auto macAddressInd = incomingPacket->getTag<MacAddressInd>();
+    auto outgoingPacket = incomingPacket->dup();
+    outgoingPacket->trim();
+    outgoingPacket->clearTags();
+    outgoingPacket->addTag<PacketProtocolTag>()->setProtocol(protocol);
+    if (auto vlanInd = incomingPacket->findTag<VlanInd>())
+        outgoingPacket->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
+    if (auto userPriorityInd = incomingPacket->findTag<UserPriorityInd>())
+        outgoingPacket->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
+    auto& macAddressReq = outgoingPacket->addTag<MacAddressReq>();
+    macAddressReq->setSrcAddress(macAddressInd->getSrcAddress());
+    macAddressReq->setDestAddress(macAddressInd->getDestAddress());
+    return outgoingPacket;
 }
 
 void MacRelayUnitBase::broadcastPacket(Packet *outgoingPacket, const MacAddress& destinationAddress, NetworkInterface *incomingInterface)
