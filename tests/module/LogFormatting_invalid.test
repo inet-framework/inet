@@ -1,0 +1,25 @@
+%description:
+
+An unrecognized inet-log-formatting value stops the run with an error that
+lists the possible values. A quoted keyword is unrecognized too, because the
+option is a keyword (CFG_CUSTOM) option, not a string.
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+record-scalar-results = false
+ned-path = .;../../../../src;../../lib
+network = inet.test.moduletest.lib.ClientServer
+sim-time-limit = 1s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+inet-log-formatting = "auto"
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+Unrecognized value '"auto"' for option 'inet-log-formatting', possible values: true, false, auto
+%#--------------------------------------------------------------------------------------------------------------
