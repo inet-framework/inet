@@ -108,16 +108,16 @@ std::vector<std::string> PacketPrinter::getColumnNames(const Options *options) c
 void PacketPrinter::printContext(std::ostream& stream, const Options *options, Context& context) const
 {
     if (!context.isCorrect)
-        stream << "\x1b[103m";
-    stream << "\x1b[39m";
+        stream << EV_FORMAT_STYLE("\x1b[103m");
+    stream << EV_FORMAT_STYLE("\x1b[39m");
     if (isEnabledOption(options, "Show 'Source' column"))
         stream << context.sourceColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Destination' column"))
         stream << context.destinationColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Protocol' column"))
-        stream << "\x1b[34m" << context.protocolColumn.str() << "\x1b[39m\t";
+        stream << EV_FORMAT_STYLE("\x1b[34m") << context.protocolColumn.str() << EV_FORMAT_STYLE("\x1b[39m") << "\t";
     if (isEnabledOption(options, "Show 'Type' column"))
-        stream << "\x1b[34m" << context.typeColumn.str() << "\x1b[39m\t";
+        stream << EV_FORMAT_STYLE("\x1b[34m") << context.typeColumn.str() << EV_FORMAT_STYLE("\x1b[39m") << "\t";
     if (isEnabledOption(options, "Show 'Length' column"))
         stream << context.lengthColumn.str() << "\t";
     if (isEnabledOption(options, "Show 'Info' column"))
