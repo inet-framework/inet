@@ -108,6 +108,30 @@ class CheckCommitsTest(unittest.TestCase):
         self.assertEqual(result.returncode, 1, result.stdout)
         self.assertIn("is not 'area: what it does': Fix one value", result.stdout)
 
+    def subject_of(self, length):
+        head = "a: change: "
+        return head + "x" * (length - len(head))
+
+    def test_a_subject_of_100_characters_is_quiet(self):
+        self.commit(self.subject_of(100) + "\n\nThe value was wrong.", {"src/inet/a/A.cc": "int a = 1;\n"})
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertNotIn("subject is 100 characters", result.stdout)
+
+    def test_a_subject_of_140_characters_gives_a_note(self):
+        self.commit(self.subject_of(140) + "\n\nThe value was wrong.", {"src/inet/a/A.cc": "int a = 1;\n"})
+        result = self.check()
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("note: ", result.stdout)
+        self.assertIn("subject is 140 characters, above 100", result.stdout)
+
+    def test_a_subject_above_140_characters_is_a_violation(self):
+        self.commit(self.subject_of(141) + "\n\nThe value was wrong.", {"src/inet/a/A.cc": "int a = 1;\n"})
+        result = self.check()
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("VIOLATION: ", result.stdout)
+        self.assertIn("subject is 141 characters, above 140", result.stdout)
+
     def words(self, count):
         return " ".join("word" for _ in range(count))
 

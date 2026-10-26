@@ -411,7 +411,7 @@ The first writes the class and drops the area, the second writes the subsystem a
 
 A missing kind is not a third way of saying something. In a scheme with three markers, absence can carry the fourth value — this is what simu5g does, where an unmarked subject is a feature. **This scheme has six depths and three directions, so absence carries nothing**: an unmarked subject may be `behavior.add`, `behavior.change`, `behavior.add+change`, or an author in a hurry. A gate cannot see a marker that is not there either, so an optional kind leaves the check silent on every subject that omits it.
 
-The scope is different. A reader recovers most of it from the topic and all of it from the file paths, so a subject survives its loss. Give up the scope first, the kind last, and the topic never. Where even `fix: ` will not fit, the topic is too long, and that is the thing to repair.
+The scope is different. A reader recovers most of it from the topic and all of it from the file paths, so a subject survives its loss. Give up the scope first, the kind last, and the topic never. Where the subject runs past 100 characters even without the scope, the topic is too long, and that is the thing to repair.
 
 **What the author must not do is disagree with the trailer.** A subject that says `fix:` over a trailer with no `.fix`, or `linklayer:` over a trailer that says `src.tcp`, is one commit with two classifications. That, and not the choice of prefix, is what a gate checks.
 
@@ -421,4 +421,4 @@ Take care with one look-alike. `tests(fingerprint): update the MIPv6 roaming bas
 
 **Why the rule was widened.** An earlier version told the author to leave out what the trailer states. Applying it to the 61 commits of `topic/tcp-new` showed the fault (`audit/sweep/classification-on-tcp-new.md`, F-1): it permitted dropping `tcp:` from 47 subjects, and dropping it would have made `git log --oneline` worse in every one. A rule that pushes an author toward a worse log is wrong, whatever the trailer holds.
 
-*Enforced at T3 — a gate compares each prefix with the trailer and reports a disagreement. The length band of [PR-MSG-SUBJECT](pull-request.md#pr-msg-subject) still holds: aim for 72 characters, and a gate fails above 80.*
+*Enforced at T3 — a gate compares each prefix with the trailer and reports a disagreement. The length band of [PR-MSG-SUBJECT](pull-request.md#pr-msg-subject) still holds: a gate gives a note above 100 characters and fails above 140.*
