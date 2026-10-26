@@ -1,5 +1,11 @@
 %description:
-Test EV macros.
+Test EV macros. The expected output contains ANSI escape sequences, so the test
+sets inet-log-formatting = true. The default, auto, turns the formatting off,
+because the test runner writes the output into a file.
+
+%inifile: omnetpp.ini
+[General]
+inet-log-formatting = true
 
 %includes:
 #include "inet/common/IPrintableObject.h"
