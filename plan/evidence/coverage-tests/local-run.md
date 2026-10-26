@@ -98,7 +98,7 @@ The suites ran in coverage mode and in debug mode in the same container with the
 | queueing | 77 PASS | not run | — |
 | packet | PASS | not run | — |
 
-The only different verdict is `Ieee80211BlockAckVariant_1.test`: its check script starts `inet_dbg`, which a coverage build does not have. The other unexpected results are the same in debug mode, so coverage mode does not cause them: the 4 `ExternalProcess` tests need `ping` and `killall`, the 3 module errors need `gawk`, and none of these is in the image. The 2 unit failures (`EV_1`, `MathFunction_1`) and the 76 protocol failures also occur in debug mode with the opp_repl runner; steps S1 and S2 of the plan `tests-on-opp-repl` compare that runner with INET's own runner. The 306 SKIPs are the packetdrill wrappers without inet-gpl (decision D11).
+The only different verdict is `Ieee80211BlockAckVariant_1.test`: its check script starts `inet_dbg`, which a coverage build does not have. The other unexpected results are the same in debug mode, so coverage mode does not cause them: the 4 `ExternalProcess` tests need `ping` and `killall`, the 3 module errors need `gawk`, and none of these is in the image. The 2 unit failures (`EV_1`, `MathFunction_1`) are failures of master: the GitHub unit workflow on `c8afbf7a96` (run [40334828199](https://github.com/inet-framework/inet/actions/runs/40334828199)) gives the same two, `EV_1` since that commit and `MathFunction_1` before it. The 76 protocol failures also occur in debug mode with the opp_repl runner; steps S1 and S2 of the plan `tests-on-opp-repl` compare that runner with INET's own runner. The 306 SKIPs are the packetdrill wrappers without inet-gpl (decision D11).
 
 ## Noise
 
