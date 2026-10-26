@@ -48,6 +48,9 @@ SimulationProject(
         # folder, at any depth below it, and link the shared tests/protocol/lib
         "protocol":    {"defaults": {"test_folder": "tests/protocol", "mode": "debug", "suite_folders": True,
                                      "lib_folder": "tests/protocol/lib", "lib_name": "protocoltest"}},
+        # coverage reports leave out the generated message files and the third-party code: the lwIP
+        # stack (not INET's tcp_lwip glue) and src/3rdparty; each folder below src/inet is one area
+        "coverage":    {"report": {"exclude": ["_m\\.(cc|h)$", "/lwip/", "/3rdparty/"], "areas": "src/inet/*"}},
     },
     external_include_folders=["/usr/include/x86_64-linux-gnu"],
     feature_libraries={
