@@ -280,12 +280,13 @@ Proposed decisions, which the approval of this plan covers:
 Decision made during I2, open for the maintainer to change:
 
 - **D11, inet-gpl:** the coverage workflow does not check out inet-gpl, so the 306 packetdrill wrappers of the protocol suite report SKIP ("inet-gpl not found"). inet-gpl could not build in coverage mode, because the precompiled headers of the coverage and profile modes were absent; the maintainer pushed that repair as inet-gpl `ca17ec6`. But the packetdrill runner of `tests/packetdrill` still builds in debug mode only (`-lINET_dbg`, `MODE=debug`, and `suite.py` looks for `packetdrill_inet_dbg`). In a coverage job, the wrappers would need a second, debug build of OMNeT++ and INET, and would add no coverage. A runner that follows the build mode is a follow-up in inet-gpl; then the coverage workflow can check out inet-gpl as the protocol workflow does.
+- **D12, schedule, follow-up of I6 (2026-10-27):** the maintainer decided that the coverage tests do not run on commits or pull requests, but once a week, as the feature tests do. This replaces the push trigger of D8. The workflow runs on Sunday at 16:00 UTC, a day after the feature tests and the macOS and Windows builds, so that its 6 jobs do not wait for the same runners. Only the scheduled run saves the ccache and publishes; a manual start still gives an artifact only. The workflow, the developer guide and the README of the coverage repository say so.
 
 Separate permissions: each push (opp_repl branches, the INET topic branch, the throwaway branch, the coverage repository) and the pull request. Pages is turned on in I6. No seal edit and no baseline change are planned.
 
 ## 9. Deferred: a check on pull requests
 
-Decision D2 defers this check. The design from the discussion of 2026-10-26 is kept here, so that a later plan can start from it:
+Decision D2 defers this check. Decision D12 then took the coverage tests off pull requests, so this check is not planned. The design from the discussion of 2026-10-26 is kept here as a record:
 
 - **The check enforces TR-SHIP-WITH at T2.** The rule is: "a CI test enters each function that a `refactor` or `behavior` commit adds or changes." The line percentage stays in the report and is not a gate.
 - **Which lines count:** the `Change:` depth of each commit decides. `git blame --ignore-revs-file` gets the `comment`, `format`, `location` and `name` commits of the pull request, so a line goes back to the commit that wrote its content. Only lines from `refactor` and `behavior` commits in the pull request count.
