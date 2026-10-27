@@ -66,4 +66,21 @@ std::map<std::string, std::map<int, int>> parseMappedVlanIds(const cComponent *c
     return result;
 }
 
+void checkAcceptedVlanIds(const cComponent *component, const char *interfaceName, const std::set<int>& vlanIds)
+{
+    for (int vlanId : vlanIds)
+        if (vlanId < -1 || vlanId > 4094)
+            throw cRuntimeError(component, "Invalid accepted VLAN id %d for interface '%s': expected -1 or 0 to 4094", vlanId, interfaceName);
+}
+
+void checkMappedVlanIds(const cComponent *component, const char *interfaceName, const std::map<int, int>& vlanIdMap, int minMappedVlanId)
+{
+    for (const auto& [vlanId, mappedVlanId] : vlanIdMap) {
+        if (vlanId < -1 || vlanId > 4094)
+            throw cRuntimeError(component, "Invalid VLAN id %d in the VLAN id map of interface '%s': expected -1 or 0 to 4094", vlanId, interfaceName);
+        if (mappedVlanId != -1 && (mappedVlanId < minMappedVlanId || mappedVlanId > 4094))
+            throw cRuntimeError(component, "Invalid mapped VLAN id %d for VLAN id %d of interface '%s': expected -1 or %d to 4094", mappedVlanId, vlanId, interfaceName, minMappedVlanId);
+    }
+}
+
 } // namespace inet

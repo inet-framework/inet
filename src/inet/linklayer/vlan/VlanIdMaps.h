@@ -32,6 +32,19 @@ INET_API std::map<std::string, std::set<int>> parseAcceptedVlanIds(const cCompon
 INET_API std::map<std::string, std::map<int, int>> parseMappedVlanIds(const cComponent *component, const cValueMap *mappedVlanIds, int minMappedVlanId);
 
 /**
+ * Checks the accepted VLAN ids of one interface: each from -1 to 4094. Throws
+ * a cRuntimeError on behalf of the component otherwise.
+ */
+INET_API void checkAcceptedVlanIds(const cComponent *component, const char *interfaceName, const std::set<int>& vlanIds);
+
+/**
+ * Checks the VLAN id map of one interface: each key from -1 to 4094, each
+ * mapped VLAN id -1, or from minMappedVlanId to 4094. Throws a cRuntimeError
+ * on behalf of the component otherwise.
+ */
+INET_API void checkMappedVlanIds(const cComponent *component, const char *interfaceName, const std::map<int, int>& vlanIdMap, int minMappedVlanId);
+
+/**
  * Returns the entry of the named interface, or the entry of the "*" interface
  * name if the interface has none, or nullptr if neither exists.
  */

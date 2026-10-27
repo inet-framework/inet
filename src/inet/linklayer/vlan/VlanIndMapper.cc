@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/vlan/VlanIndMapper.h"
 
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
@@ -21,6 +22,8 @@ void VlanIndMapper::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable.reference(this, "interfaceTableModule", true);
         mappedVlanIds = parseMappedVlanIds(this, check_and_cast<cValueMap *>(par("mappedVlanIds").objectValue()), 1);
+        WATCH(mappedVlanIds);
+        check_and_cast<cModule *>(interfaceTable.get())->subscribe(interfaceDeletedSignal, this);
     }
 }
 
@@ -52,6 +55,34 @@ void VlanIndMapper::processPacket(Packet *packet)
                 packet->addTagIfAbsent<VlanInd>()->setVlanId(mappedVlanId);
         }
     }
+}
+
+void VlanIndMapper::setInterfaceVlanIdMap(const NetworkInterface *networkInterface, const std::map<int, int>& vlanIdMap)
+{
+    Enter_Method("setInterfaceVlanIdMap");
+    auto interfaceName = networkInterface->getInterfaceName();
+    if (interfaceTable->getInterfaceById(networkInterface->getInterfaceId()) != networkInterface)
+        throw cRuntimeError("Interface '%s' is not in the interface table of this module", interfaceName);
+    checkMappedVlanIds(this, interfaceName, vlanIdMap, 1);
+    EV_INFO << "Setting VLAN id map" << EV_FIELD(interfaceName) << EV_ENDL;
+    mappedVlanIds[interfaceName] = vlanIdMap;
+}
+
+void VlanIndMapper::removeInterfaceVlanIdMap(const NetworkInterface *networkInterface)
+{
+    Enter_Method("removeInterfaceVlanIdMap");
+    auto interfaceName = networkInterface->getInterfaceName();
+    EV_INFO << "Removing VLAN id map" << EV_FIELD(interfaceName) << EV_ENDL;
+    mappedVlanIds.erase(interfaceName);
+}
+
+void VlanIndMapper::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signal));
+    if (signal == interfaceDeletedSignal)
+        mappedVlanIds.erase(check_and_cast<NetworkInterface *>(object)->getInterfaceName());
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 } // namespace inet

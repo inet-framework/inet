@@ -8,6 +8,7 @@
 #include "inet/linklayer/vlan/VlanReqMapper.h"
 
 #include "inet/common/ProtocolUtils.h"
+#include "inet/common/Simsignals.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
@@ -24,6 +25,8 @@ void VlanReqMapper::initialize(int stage)
         protocol = Protocol::getProtocol(par("protocol").stringValue());
         interfaceTable.reference(this, "interfaceTableModule", true);
         mappedVlanIds = parseMappedVlanIds(this, check_and_cast<cValueMap *>(par("mappedVlanIds").objectValue()), 0);
+        WATCH(mappedVlanIds);
+        check_and_cast<cModule *>(interfaceTable.get())->subscribe(interfaceDeletedSignal, this);
     }
 }
 
@@ -56,6 +59,34 @@ void VlanReqMapper::processPacket(Packet *packet)
     }
     ensureEncapsulationProtocolReq(packet, protocol, packet->hasTag<VlanReq>() || packet->hasTag<PcpReq>());
     setDispatchProtocol(packet);
+}
+
+void VlanReqMapper::setInterfaceVlanIdMap(const NetworkInterface *networkInterface, const std::map<int, int>& vlanIdMap)
+{
+    Enter_Method("setInterfaceVlanIdMap");
+    auto interfaceName = networkInterface->getInterfaceName();
+    if (interfaceTable->getInterfaceById(networkInterface->getInterfaceId()) != networkInterface)
+        throw cRuntimeError("Interface '%s' is not in the interface table of this module", interfaceName);
+    checkMappedVlanIds(this, interfaceName, vlanIdMap, 0);
+    EV_INFO << "Setting VLAN id map" << EV_FIELD(interfaceName) << EV_ENDL;
+    mappedVlanIds[interfaceName] = vlanIdMap;
+}
+
+void VlanReqMapper::removeInterfaceVlanIdMap(const NetworkInterface *networkInterface)
+{
+    Enter_Method("removeInterfaceVlanIdMap");
+    auto interfaceName = networkInterface->getInterfaceName();
+    EV_INFO << "Removing VLAN id map" << EV_FIELD(interfaceName) << EV_ENDL;
+    mappedVlanIds.erase(interfaceName);
+}
+
+void VlanReqMapper::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signal));
+    if (signal == interfaceDeletedSignal)
+        mappedVlanIds.erase(check_and_cast<NetworkInterface *>(object)->getInterfaceName());
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 } // namespace inet
