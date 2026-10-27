@@ -9,7 +9,7 @@
             <script><![CDATA[import sys
 import os
 sys.path.append(os.path.join(os.path.os.getcwd(), "../../../../../../python"))
-import inet
+import inet.test.validation
 import re
 import pandas as pd
 from omnetpp.scave import results, chart, utils
