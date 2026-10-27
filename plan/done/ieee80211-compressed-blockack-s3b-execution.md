@@ -1,6 +1,6 @@
 # S3b implementation state and verification
 
-> **Kind:** report · **Status:** snapshot 2026-10-21 · **Seal:** none · **Owns:** — · **Stands on:** [S3b summary](ieee80211-compressed-blockack-s3b-summary.md), [lifecycle plan](../pending/ieee80211-blockack-agreement-lifecycle.md)
+> **Kind:** report · **Status:** snapshot 2026-10-21 · **Seal:** none · **Owns:** — · **Stands on:** [S3b summary](ieee80211-compressed-blockack-s3b-summary.md), [lifecycle plan](ieee80211-blockack-agreement-lifecycle.md)
 
 S3b implements safe Basic Block Ack agreement setup, teardown, and association reset. HCF rejects production Compressed selection during initialization. S4 BAR-only channel access, A5 transfer completion, and S5 Compressed exchanges remain outside this stage.
 

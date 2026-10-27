@@ -95,7 +95,7 @@ HCF accepts only Basic as an operational profile in this checkout. Compressed se
 
 ## 4. Standard requirements and INET choices
 
-The current Basic format is a compatibility profile. IEEE Std 802.11-2024 reserves its type value. The [standards boundary](ieee80211-compressed-blockack-replacement.md#2-standard-support-and-model-boundary) separates that profile from current-standard Compressed operation.
+The current Basic format is a compatibility profile. IEEE Std 802.11-2024 reserves its type value. The [standards boundary](ieee80211-compressed-blockack-replacement.md#excluded-features-and-fragmentation) separates that profile from current-standard Compressed operation.
 
 The source cites IEEE Std 802.11-2024 for shared lifecycle requirements. Clause 10.25.2 supplies setup and first-sequence conditions. Clause 10.25.4 covers completion DELBA. Clause 11.5.3.4 supplies teardown disposal alternatives; this implementation selects discard-all. Clause 11.5.3.5 covers recipient duplicate-state retention. These shared rules do not establish complete conformance for Basic.
 

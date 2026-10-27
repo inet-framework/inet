@@ -7,7 +7,7 @@ Status: nominal timing implementation is complete. Section 8 records verificatio
 Authorization: on 2026-10-07, the user requested removal of aligned timing from the current branch and PR #1301. The request includes simpler source, documentation, this plan, and its summary. The request authorizes publication of the revised branch and PR description. It does not authorize new fingerprint baseline values.
 Contract check: source inspection confirms the owners, callers, frame sequence, and completion paths. The source paths are unsealed. The change removes the timing selector, timing state, IFS helper, and policy branches in tests. HCF uses the frame sequence's nominal IFS directly. Endpoint arithmetic, RTS phase refusal, deadline checks, and expired-reservation behavior retain their nominal results.
 
-Dependencies: the independent [recipient NAV fix](../pending/ieee80211-recipient-nav.md). Its commit owns the Tx contract, caller choices, migration instructions, and all 24 causal fingerprint rows.
+Dependencies: the independent [recipient NAV fix](ieee80211-recipient-nav.md). Its commit owns the Tx contract, caller choices, migration instructions, and all 24 causal fingerprint rows.
 Evidence: source inspection and local IEEE Std 802.11-2024 retrieval.
 Verification: section 8 records executed checks and exact fingerprint differences. Revision 19 changes explanatory text only; runtime source and tests retain revision 18 content.
 
@@ -345,7 +345,7 @@ The runners support the shown mode and filter options. Confirm that each filter 
 
 Compare compatibility cases against the recorded master baseline. Expected shared changes are the response exclusion from local NAV updates and HCF response clamp or ceiling. Before publication, follow [run-the-gates.md](../../doc/project/guide/run-the-gates.md), including debug and release compilation. Select related Wi-Fi fingerprint rows explicitly. A baseline update requires the cause, exact scope, and approval specified in [change-a-baseline.md](../../doc/project/guide/change-a-baseline.md).
 
-The table below names candidate rows in [examples.csv](../../tests/fingerprint/examples.csv) and [showcases.csv](../../tests/fingerprint/showcases.csv). These checks retain single protection. The independent recipient NAV fix owns the confirmed fingerprint changes from recipient responses. These candidates are not a prediction that every row changes. Establish actual changes through a master comparison before any baseline update.
+The table below names candidate rows in historical [examples.csv](https://github.com/inet-framework/inet/blob/69dc19af44881f4019f3f468f068ac4e19f4acb4/tests/fingerprint/examples.csv) and [showcases.csv](https://github.com/inet-framework/inet/blob/69dc19af44881f4019f3f468f068ac4e19f4acb4/tests/fingerprint/showcases.csv). These checks retain single protection. The independent recipient NAV fix owns the confirmed fingerprint changes from recipient responses. These candidates are not a prediction that every row changes. Establish actual changes through a master comparison before any baseline update.
 
 | Simulation path | Configuration | Run and duration | Relevant shared behavior |
 | --- | --- | --- | --- |

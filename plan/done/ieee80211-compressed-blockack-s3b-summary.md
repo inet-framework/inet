@@ -1,6 +1,6 @@
 # S3b: safe Block Ack agreement setup and teardown
 
-> **Kind:** reference · **Status:** snapshot 2026-10-21 · **Seal:** none · **Owns:** — · **Stands on:** [replacement summary](../pending/ieee80211-compressed-blockack-replacement-summary.md), [lifecycle plan](../pending/ieee80211-blockack-agreement-lifecycle.md), [implementation record](ieee80211-compressed-blockack-s3b-execution.md)
+> **Kind:** reference · **Status:** snapshot 2026-10-21 · **Seal:** none · **Owns:** — · **Stands on:** [replacement summary](ieee80211-compressed-blockack-replacement-summary.md), [lifecycle plan](ieee80211-blockack-agreement-lifecycle.md), [implementation record](ieee80211-compressed-blockack-s3b-execution.md)
 
 S3b implements the Basic Block Ack agreement lifecycle. It controls when DATA can use an agreement, how agreement Actions change state, and how cleanup affects queued and received DATA. Production HCF rejects Compressed selection at initialization.
 
@@ -14,7 +14,7 @@ Safe DATA transmission requires more than a correct Block Ack bitmap. Both stati
 
 For example, a request ACK can be lost after the recipient accepts ADDBA Request. The retry must receive another ACK without a second agreement dispatch. The recipient data service checks duplicates before HCF dispatches returned Actions. The [HCF receive path](../../src/inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.cc) therefore separates immediate acknowledgment from agreement acceptance.
 
-BAR-only channel access, final-transfer completion, and production Compressed exchanges remain outside this implementation. The [replacement summary](../pending/ieee80211-compressed-blockack-replacement-summary.md) defines those separate requirements.
+BAR-only channel access, final-transfer completion, and production Compressed exchanges remain outside this implementation. The [replacement summary](ieee80211-compressed-blockack-replacement-summary.md) defines those separate requirements.
 
 ## Who owns the state
 
@@ -51,7 +51,7 @@ This diagram separates decisions; it does not prescribe ACK timing relative to d
 
 Hypothetical example: the peer receives ADDBA Request, but the request ACK is lost. A matched successful ADDBA Response arrives during the request's final ACK wait. The originator accepts the response before request-failure notification. Cleanup must not turn that success into teardown, DATA disposal, or another request retry. An unrelated Action does not suppress the interrupted exchange's ordinary failure result.
 
-The [Action contract](../pending/ieee80211-blockack-agreement-lifecycle.md#3-agreement-behavior) owns this order. The [HCF source](../../src/inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.cc) contains dispatch and response-wait integration. The frame-sequence handler owns the interruption outcome after recipient processing. It suppresses obsolete failure feedback for retired frames. An Action attempt that Tx already accepts retains its context until safe completion; logical retirement does not permit immediate destruction of that context.
+The [Action contract](ieee80211-blockack-agreement-lifecycle.md#3-agreement-behavior) owns this order. The [HCF source](../../src/inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.cc) contains dispatch and response-wait integration. The frame-sequence handler owns the interruption outcome after recipient processing. It suppresses obsolete failure feedback for retired frames. An Action attempt that Tx already accepts retains its context until safe completion; logical retirement does not permit immediate destruction of that context.
 
 ## A2: use the parameters that both stations accept
 
@@ -78,7 +78,7 @@ Hypothetical example: the request suggests eight positions, but the recipient co
 
 A-MSDU permission also belongs to negotiation. An A-MSDU combines multiple MSDUs within one MPDU. Both the request and response flags must permit it before the originator constructs an A-MSDU under the agreement. If either flag denies permission, individual DATA can still use Block Ack. Normal Ack must not bypass a denial for an A-MSDU that already exists.
 
-Basic admission preserves non-HT and legacy ad hoc compatibility. Compressed admission requires local HT operation and valid peer HT state for the relevant direction. S3b checks Compressed admission through isolated policies; this does not enable production Compressed exchanges. The [negotiation contract](../pending/ieee80211-blockack-agreement-lifecycle.md#3-agreement-behavior) defines these conditions and policy choices.
+Basic admission preserves non-HT and legacy ad hoc compatibility. Compressed admission requires local HT operation and valid peer HT state for the relevant direction. S3b checks Compressed admission through isolated policies; this does not enable production Compressed exchanges. The [negotiation contract](ieee80211-blockack-agreement-lifecycle.md#3-agreement-behavior) defines these conditions and policy choices.
 
 ## A3: end the correct agreement without stale work
 
@@ -134,7 +134,7 @@ flowchart LR
     MIN -->|No finite deadline| CANCEL["Cancel inactivity timer"]
 ```
 
-Hypothetical timing example: the current time is 1 ms and the absolute deadline is 5 ms. HCF schedules expiration at 5 ms. A relative delay of 5 ms would incorrectly schedule 6 ms. The [timeout contract](../pending/ieee80211-blockack-agreement-lifecycle.md#response-timeout-and-data-lifetime) distinguishes the INET response timeout from DATA lifetime.
+Hypothetical timing example: the current time is 1 ms and the absolute deadline is 5 ms. HCF schedules expiration at 5 ms. A relative delay of 5 ms would incorrectly schedule 6 ms. The [timeout contract](ieee80211-blockack-agreement-lifecycle.md#response-timeout-and-data-lifetime) distinguishes the INET response timeout from DATA lifetime.
 
 ### Peer reset clears both roles before callbacks
 
@@ -160,7 +160,7 @@ sequenceDiagram
     M->>M: Complete association state replacement
 ```
 
-With Block Ack enabled, reset discards the old peer's queued and in-progress QoS DATA, including unsent Normal Ack DATA without an agreement. The recipient data service clears reorder, duplicate, and reassembly state before deletion callbacks. Another peer retains its agreements, DATA, and lifetime records. Management changes association and MIB state separately. The MIB publishes coherent committed state through its boolean notification. The [association-reset contract](../pending/ieee80211-blockack-agreement-lifecycle.md#reassociation-consumers-and-callback-order) explains why the reset call is necessary.
+With Block Ack enabled, reset discards the old peer's queued and in-progress QoS DATA, including unsent Normal Ack DATA without an agreement. The recipient data service clears reorder, duplicate, and reassembly state before deletion callbacks. Another peer retains its agreements, DATA, and lifetime records. Management changes association and MIB state separately. The MIB publishes coherent committed state through its boolean notification. The [association-reset contract](ieee80211-blockack-agreement-lifecycle.md#reassociation-consumers-and-callback-order) explains why the reset call is necessary.
 
 An accepted physical exchange retains its context until completion. Physical statistics still record that exchange, but its callbacks cannot submit retired DATA after CTS. The frame-sequence handler destroys the context before it deletes deferred frame copies.
 
@@ -182,7 +182,7 @@ flowchart TD
 
 S3b treats a DELBA ACK as teardown confirmation for this INET profile. This policy assumes that the peer processes a valid DELBA. Failed originator DELBA drops the current deferred batch and leaves recovery-needed state without a periodic retry timer. New DATA triggers one fresh DELBA exchange; DATA that arrives during that exchange shares its result.
 
-Failed recipient-role DELBA clears its teardown procedure without an originator recovery record or disposal of opposite-direction DATA. Valid Block Ack-policy DATA or a valid BAR without an agreement triggers recipient-role DELBA. That DATA does not reach upper delivery, and that BAR does not create receive state. Malformed BAR input does not trigger this recovery path. The [lifecycle contract](../pending/ieee80211-blockack-agreement-lifecycle.md#3-agreement-behavior) owns these separate outcomes.
+Failed recipient-role DELBA clears its teardown procedure without an originator recovery record or disposal of opposite-direction DATA. Valid Block Ack-policy DATA or a valid BAR without an agreement triggers recipient-role DELBA. That DATA does not reach upper delivery, and that BAR does not create receive state. Malformed BAR input does not trigger this recovery path. The [lifecycle contract](ieee80211-blockack-agreement-lifecycle.md#3-agreement-behavior) owns these separate outcomes.
 
 ## A4: preserve the first sequence number and unrelated DATA access
 
