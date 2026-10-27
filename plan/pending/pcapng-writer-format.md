@@ -5,10 +5,10 @@
 | Step | Commit | State |
 | --- | --- | --- |
 | P1 | the plan | done |
-| P2 | snaplen limits | to do |
-| P3 | packets without a network interface | to do |
-| P4 | one interface description for each link type | to do |
-| P5 | new interface numbers in each new file | to do |
+| P2 | snaplen limits | done, `10c4449080` |
+| P3 | packets without a network interface | done, `fbceb2089d` |
+| P4 | one interface description for each link type | done, `a7012aad80` |
+| P5 | new interface numbers in each new file | done, `96a8e2ff51` |
 | P6 | block-level write functions (refactor) | to do |
 | P7 | the public block API with options | to do |
 | P8 | move the plan to `plan/done/` | to do |
@@ -141,4 +141,10 @@ Before each commit: `check-commits.sh` and `check-classification.sh` on `origin/
 
 ## Evidence
 
-(Filled in as the steps finish.)
+Environment: OMNeT++ `omnetpp-6.x`, debug build of the worktree, `opp_run_unit_tests -m debug -f 'PcapngWriter'`. tshark and capinfos 4.x from `/usr/bin` read the files that a temporary, untracked probe test wrote to `/var/tmp/claude-pcapng-files/`.
+
+- **P2:** `PcapngWriterSnaplen_1.test` PASS. tshark: `frame.len` 6, `frame.cap_len` 4. capinfos: the interface "Capture length = 4".
+- **P3:** at the parent, the probe stopped with "Segmentation fault (Address not mapped to object [0x48])". After the repair, `PcapngWriterNoInterface_1.test` PASS. tshark reads the packet without an interface on interface 0 and the other packet on interface 1. capinfos shows no name for interface 0.
+- **P4:** at the parent, tshark gave both packets encapsulation 198 and decoded the MAC frame as `fpp:eth`. After the repair, `PcapngWriterLinkTypes_1.test` PASS, and tshark shows interface 0 with encapsulation 198 and interface 1 with encapsulation 1 (`eth`).
+- **P5:** at the parent, tshark reported the second file as damaged: "interface index 0 is not less than section interface count 0". My first probe met the same defect without intent, because it opened two files with one writer. After the repair, `PcapngWriterReopen_1.test` PASS, and tshark reads the second file.
+- Gates after P5: `check-commits.sh` and `check-classification.sh` on `origin/master..HEAD` PASS. P5 has the obligation `test` only, without a release note, because no simulation can show the defect. The gate accepts this.
