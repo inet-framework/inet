@@ -1,0 +1,3 @@
+PcapngWriter writes PCAPng blocks with their options
+
+PcapngWriter has public functions for the blocks of the PCAPng format: writeSectionHeaderBlock(), writeInterfaceDescriptionBlock() and writeEnhancedPacketBlock(). Each one takes the options of its block type: PcapngSectionOptions, PcapngInterfaceOptions and PcapngPacketOptions. Typed functions add the interface name, description, addresses and FCS length, the packet flags (direction, reception type, FCS length and link-layer errors) and comments, and addOption() adds any other option, for example a custom option. A caller can mix these functions with writePacket() in one file. A packet that writePacket() gets with an undefined direction now has no epb_flags option, instead of an error.

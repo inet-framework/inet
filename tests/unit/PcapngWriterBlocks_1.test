@@ -1,0 +1,258 @@
+%description:
+The PCAPng block functions write sections, interfaces and packets with the
+options of the caller. The typed options give the bytes of the PCAPng
+specification, a new section starts the interface IDs again, and writePacket()
+can share a file with the block functions. A packet without a direction has no
+epb_flags option. Each wrong use of the format causes an error. The bytes are
+those of a little-endian host.
+
+%includes:
+#include <cstdio>
+#include <fstream>
+#include <functional>
+#include <iterator>
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapngWriter.h"
+
+%global:
+using namespace inet;
+
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+typedef std::vector<uint8_t> Bytes;
+
+struct Block {
+    uint32_t type;
+    Bytes fields; // the bytes between the total length and the options
+    std::vector<std::pair<uint16_t, Bytes>> options;
+};
+
+static uint32_t readUint32(const Bytes& bytes, size_t offset)
+{
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; i++)
+        value |= static_cast<uint32_t>(bytes.at(offset + i)) << (8 * i);
+    return value;
+}
+
+static uint16_t readUint16(const Bytes& bytes, size_t offset)
+{
+    return bytes.at(offset) | (bytes.at(offset + 1) << 8);
+}
+
+// the length of the fixed fields and the padded data of each block type, from the offset of the fields
+static size_t getFieldsLength(uint32_t type, const Bytes& bytes, size_t offset)
+{
+    switch (type) {
+        case PCAPNG_SECTION_HEADER_BLOCK: return 16;
+        case PCAPNG_INTERFACE_DESCRIPTION_BLOCK: return 8;
+        case PCAPNG_ENHANCED_PACKET_BLOCK: return 20 + (readUint32(bytes, offset + 12) + 3) / 4 * 4;
+        default: throw cRuntimeError("Unknown block type");
+    }
+}
+
+static std::vector<Block> readBlocks(const char *fileName)
+{
+    std::ifstream file(fileName, std::ios::binary);
+    Bytes bytes(std::istreambuf_iterator<char>(file), {});
+    std::vector<Block> blocks;
+    for (size_t offset = 0; offset < bytes.size();) {
+        Block block;
+        block.type = readUint32(bytes, offset);
+        uint32_t length = readUint32(bytes, offset + 4);
+        REQUIRE(length >= 12 && length % 4 == 0);
+        REQUIRE(readUint32(bytes, offset + length - 4) == length);
+        size_t fieldsLength = getFieldsLength(block.type, bytes, offset + 8);
+        block.fields = Bytes(bytes.begin() + offset + 8, bytes.begin() + offset + 8 + fieldsLength);
+        size_t optionOffset = offset + 8 + fieldsLength;
+        size_t end = offset + length - 4;
+        if (optionOffset < end) {
+            while (true) {
+                uint16_t code = readUint16(bytes, optionOffset);
+                uint16_t valueLength = readUint16(bytes, optionOffset + 2);
+                if (code == PCAPNG_OPT_ENDOFOPT) {
+                    REQUIRE(valueLength == 0 && optionOffset + 4 == end);
+                    break;
+                }
+                block.options.push_back({code, Bytes(bytes.begin() + optionOffset + 4, bytes.begin() + optionOffset + 4 + valueLength)});
+                optionOffset += 4 + (valueLength + 3) / 4 * 4;
+                REQUIRE(optionOffset < end);
+            }
+        }
+        blocks.push_back(block);
+        offset += length;
+    }
+    return blocks;
+}
+
+static Bytes uint32Bytes(uint32_t value)
+{
+    return Bytes{uint8_t(value), uint8_t(value >> 8), uint8_t(value >> 16), uint8_t(value >> 24)};
+}
+
+static Bytes stringBytes(const char *value)
+{
+    return Bytes(value, value + strlen(value));
+}
+
+static void requireError(std::function<void()> f, const char *expected)
+{
+    try {
+        f();
+    }
+    catch (cRuntimeError& e) {
+        if (strstr(e.what(), expected) == nullptr)
+            throw cRuntimeError("Unexpected error: %s", e.what());
+        return;
+    }
+    throw cRuntimeError("Missing error: %s", expected);
+}
+
+%activity:
+const Bytes data = {0x10, 0x11, 0x12, 0x13, 0x14, 0x15};
+
+// the block functions with options, in two sections
+{
+    PcapngWriter writer;
+    writer.open("blocks.pcapng");
+    PcapngSectionOptions sectionOptions;
+    sectionOptions.addString(PCAPNG_SHB_USERAPPL, "INET");
+    sectionOptions.addComment("first section");
+    writer.writeSectionHeaderBlock(sectionOptions);
+    PcapngInterfaceOptions interfaceOptions;
+    interfaceOptions.addName("wlan0");
+    interfaceOptions.addMacAddress(MacAddress("0A-AA-00-00-00-01"));
+    interfaceOptions.addIpv4Address(Ipv4Address(10, 0, 0, 1), Ipv4Address(255, 255, 255, 0));
+    interfaceOptions.addFcsLength(b(32));
+    REQUIRE(writer.writeInterfaceDescriptionBlock(LINKTYPE_ETHERNET, 0, 9, interfaceOptions) == 0);
+    REQUIRE(writer.writeInterfaceDescriptionBlock(LINKTYPE_IEEE802_11, 4, 6) == 1);
+    PcapngPacketFlags flags;
+    flags.direction = DIRECTION_INBOUND;
+    flags.receptionType = PCAPNG_RECEPTION_BROADCAST;
+    flags.fcsLength = B(4);
+    flags.linkLayerErrors = PCAPNG_ERROR_CRC | PCAPNG_ERROR_SYMBOL;
+    PcapngPacketOptions packetOptions;
+    packetOptions.addFlags(flags);
+    packetOptions.addComment("a comment");
+    packetOptions.addComment("another comment");
+    packetOptions.addUint64(PCAPNG_EPB_PACKETID, 0x0102030405060708);
+    Bytes customValue = uint32Bytes(32473);
+    customValue.push_back(0xAB);
+    packetOptions.addOption(PCAPNG_OPT_CUSTOM_BINARY, customValue);
+    writer.writeEnhancedPacketBlock(0, SimTime(1.5), data.data(), data.size(), 1500, packetOptions);
+    writer.writeEnhancedPacketBlock(1, SimTime(2), data.data(), data.size(), data.size());
+    writer.writeSectionHeaderBlock();
+    REQUIRE(writer.writeInterfaceDescriptionBlock(LINKTYPE_IEEE802_11_RADIOTAP, 0, 6) == 0);
+    writer.writeEnhancedPacketBlock(0, SimTime(3), data.data(), 2, 2);
+    writer.close();
+
+    auto blocks = readBlocks("blocks.pcapng");
+    REQUIRE(blocks.size() == 8);
+    REQUIRE(blocks[0].type == PCAPNG_SECTION_HEADER_BLOCK);
+    REQUIRE(blocks[0].options.size() == 2);
+    REQUIRE(blocks[0].options[0] == std::make_pair(uint16_t(PCAPNG_SHB_USERAPPL), stringBytes("INET")));
+    REQUIRE(blocks[0].options[1] == std::make_pair(uint16_t(PCAPNG_OPT_COMMENT), stringBytes("first section")));
+
+    REQUIRE(blocks[1].type == PCAPNG_INTERFACE_DESCRIPTION_BLOCK);
+    REQUIRE(readUint16(blocks[1].fields, 0) == LINKTYPE_ETHERNET);
+    REQUIRE(readUint32(blocks[1].fields, 4) == 0);
+    REQUIRE(blocks[1].options.size() == 5);
+    REQUIRE(blocks[1].options[0] == std::make_pair(uint16_t(PCAPNG_IF_NAME), stringBytes("wlan0")));
+    REQUIRE(blocks[1].options[1] == std::make_pair(uint16_t(PCAPNG_IF_MACADDR), Bytes{0x0A, 0xAA, 0, 0, 0, 1}));
+    REQUIRE(blocks[1].options[2] == std::make_pair(uint16_t(PCAPNG_IF_IPV4ADDR), Bytes{10, 0, 0, 1, 255, 255, 255, 0}));
+    REQUIRE(blocks[1].options[3] == std::make_pair(uint16_t(PCAPNG_IF_FCSLEN), Bytes{32}));
+    REQUIRE(blocks[1].options[4] == std::make_pair(uint16_t(PCAPNG_IF_TSRESOL), Bytes{9}));
+
+    REQUIRE(blocks[2].type == PCAPNG_INTERFACE_DESCRIPTION_BLOCK);
+    REQUIRE(readUint16(blocks[2].fields, 0) == LINKTYPE_IEEE802_11);
+    REQUIRE(readUint32(blocks[2].fields, 4) == 4);
+    REQUIRE(blocks[2].options.size() == 1);
+    REQUIRE(blocks[2].options[0] == std::make_pair(uint16_t(PCAPNG_IF_TSRESOL), Bytes{6}));
+
+    REQUIRE(blocks[3].type == PCAPNG_ENHANCED_PACKET_BLOCK);
+    REQUIRE(readUint32(blocks[3].fields, 0) == 0);
+    REQUIRE(readUint32(blocks[3].fields, 4) == 0);
+    REQUIRE(readUint32(blocks[3].fields, 8) == 1500000000);
+    REQUIRE(readUint32(blocks[3].fields, 12) == 6);
+    REQUIRE(readUint32(blocks[3].fields, 16) == 1500);
+    REQUIRE(Bytes(blocks[3].fields.begin() + 20, blocks[3].fields.begin() + 26) == data);
+    REQUIRE(blocks[3].options.size() == 5);
+    // direction 01, reception type 011, FCS length 0100, CRC error bit 24, symbol error bit 31
+    REQUIRE(blocks[3].options[0] == std::make_pair(uint16_t(PCAPNG_EPB_FLAGS), uint32Bytes(0b01 | (0b011 << 2) | (4 << 5) | (1u << 24) | (1u << 31))));
+    REQUIRE(blocks[3].options[1] == std::make_pair(uint16_t(PCAPNG_OPT_COMMENT), stringBytes("a comment")));
+    REQUIRE(blocks[3].options[2] == std::make_pair(uint16_t(PCAPNG_OPT_COMMENT), stringBytes("another comment")));
+    REQUIRE(blocks[3].options[3] == std::make_pair(uint16_t(PCAPNG_EPB_PACKETID), Bytes{8, 7, 6, 5, 4, 3, 2, 1}));
+    REQUIRE(blocks[3].options[4] == std::make_pair(uint16_t(PCAPNG_OPT_CUSTOM_BINARY), customValue));
+
+    // the snaplen of interface 1 truncates the data
+    REQUIRE(blocks[4].type == PCAPNG_ENHANCED_PACKET_BLOCK);
+    REQUIRE(readUint32(blocks[4].fields, 0) == 1);
+    REQUIRE(readUint32(blocks[4].fields, 8) == 2000000);
+    REQUIRE(readUint32(blocks[4].fields, 12) == 4);
+    REQUIRE(readUint32(blocks[4].fields, 16) == 6);
+    REQUIRE(blocks[4].options.empty());
+
+    // the second section numbers its interfaces from 0
+    REQUIRE(blocks[5].type == PCAPNG_SECTION_HEADER_BLOCK);
+    REQUIRE(blocks[5].options.empty());
+    REQUIRE(blocks[6].type == PCAPNG_INTERFACE_DESCRIPTION_BLOCK);
+    REQUIRE(readUint16(blocks[6].fields, 0) == LINKTYPE_IEEE802_11_RADIOTAP);
+    REQUIRE(blocks[7].type == PCAPNG_ENHANCED_PACKET_BLOCK);
+    REQUIRE(readUint32(blocks[7].fields, 0) == 0);
+    REQUIRE(readUint32(blocks[7].fields, 12) == 2);
+    std::remove("blocks.pcapng");
+}
+
+// writePacket() and the block functions share one file, and an undefined direction gives no epb_flags
+{
+    Packet packet("packet", makeShared<BytesChunk>(data));
+    NetworkInterface networkInterface;
+    PcapngWriter writer;
+    writer.open("mixed.pcapng", 0, 6);
+    writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_OUTBOUND, &networkInterface, LINKTYPE_ETHERNET);
+    REQUIRE(writer.writeInterfaceDescriptionBlock(LINKTYPE_IEEE802_11, 0, 6) == 1);
+    writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_UNDEFINED, nullptr, LINKTYPE_ETHERNET);
+    writer.writeEnhancedPacketBlock(1, SIMTIME_ZERO, data.data(), data.size(), data.size());
+    writer.close();
+    auto blocks = readBlocks("mixed.pcapng");
+    REQUIRE(blocks.size() == 7);
+    REQUIRE(blocks[2].type == PCAPNG_ENHANCED_PACKET_BLOCK);
+    REQUIRE(blocks[2].options[0] == std::make_pair(uint16_t(PCAPNG_EPB_FLAGS), uint32Bytes(0b10)));
+    REQUIRE(blocks[3].type == PCAPNG_INTERFACE_DESCRIPTION_BLOCK);
+    REQUIRE(blocks[4].type == PCAPNG_INTERFACE_DESCRIPTION_BLOCK);
+    REQUIRE(blocks[5].type == PCAPNG_ENHANCED_PACKET_BLOCK);
+    REQUIRE(readUint32(blocks[5].fields, 0) == 2);
+    REQUIRE(blocks[5].options.empty());
+    REQUIRE(readUint32(blocks[6].fields, 0) == 1);
+    std::remove("mixed.pcapng");
+}
+
+// the errors
+{
+    PcapngWriter writer;
+    writer.open("errors.pcapng");
+    requireError([&] () { writer.writeInterfaceDescriptionBlock(LINKTYPE_ETHERNET, 0, 6); }, "no section header block");
+    requireError([&] () { writer.writeEnhancedPacketBlock(0, SIMTIME_ZERO, data.data(), data.size(), data.size()); }, "no section header block");
+    writer.writeSectionHeaderBlock();
+    requireError([&] () { writer.writeEnhancedPacketBlock(0, SIMTIME_ZERO, data.data(), data.size(), data.size()); }, "no interface 0");
+    writer.writeInterfaceDescriptionBlock(LINKTYPE_ETHERNET, 0, 6);
+    requireError([&] () { writer.writeEnhancedPacketBlock(0, SIMTIME_ZERO, data.data(), data.size(), 5); }, "less than the data length");
+    PcapngInterfaceOptions interfaceOptions;
+    interfaceOptions.addUint8(PCAPNG_IF_TSRESOL, 3);
+    requireError([&] () { writer.writeInterfaceDescriptionBlock(LINKTYPE_ETHERNET, 0, 6, interfaceOptions); }, "if_tsresol");
+    writer.close();
+    std::remove("errors.pcapng");
+    PcapngOptions options;
+    requireError([&] () { options.addOption(PCAPNG_OPT_COMMENT, Bytes(65536)); }, "longer than");
+    requireError([&] () { PcapngInterfaceOptions().addFcsLength(b(256)); }, "FCS length of an interface");
+    PcapngPacketFlags flags;
+    flags.fcsLength = B(16);
+    requireError([&] () { flags.getValue(); }, "FCS length of a packet");
+    flags.fcsLength = B(0);
+    flags.linkLayerErrors = 1;
+    requireError([&] () { flags.getValue(); }, "bits 16-31");
+}
+EV << "PCAPng block functions verified.\n";
+
+%contains: stdout
+PCAPng block functions verified.

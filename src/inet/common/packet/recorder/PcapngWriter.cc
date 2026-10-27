@@ -34,8 +34,37 @@ static void appendValue(std::vector<uint8_t>& bytes, T value)
     bytes.insert(bytes.end(), valueBytes, valueBytes + sizeof(value));
 }
 
+uint32_t PcapngPacketFlags::getValue() const
+{
+    uint32_t value = 0;
+    switch (direction) {
+        case DIRECTION_UNDEFINED:
+            break;
+        case DIRECTION_INBOUND:
+            value |= 0b01;
+            break;
+        case DIRECTION_OUTBOUND:
+            value |= 0b10;
+            break;
+        default:
+            throw cRuntimeError("Unknown direction value");
+    }
+    if (receptionType > PCAPNG_RECEPTION_PROMISCUOUS)
+        throw cRuntimeError("Unknown PCAPng reception type: %d", receptionType);
+    value |= receptionType << 2;
+    if (fcsLength < B(0) || fcsLength > B(15))
+        throw cRuntimeError("The PCAPng FCS length of a packet must be between 0 and 15 bytes: %s", fcsLength.str().c_str());
+    value |= fcsLength.get<B>() << 5;
+    if ((linkLayerErrors & 0x0000FFFF) != 0)
+        throw cRuntimeError("The PCAPng link-layer errors use bits 16-31 only: 0x%08x", linkLayerErrors);
+    value |= linkLayerErrors;
+    return value;
+}
+
 void PcapngOptions::addOption(uint16_t code, const std::vector<uint8_t>& value)
 {
+    if (value.size() > UINT16_MAX)
+        throw cRuntimeError("The value of PCAPng option %d is longer than %d bytes", code, UINT16_MAX);
     options.push_back({code, value});
 }
 
@@ -56,12 +85,52 @@ void PcapngOptions::addUint32(uint16_t code, uint32_t value)
     addOption(code, bytes);
 }
 
+void PcapngOptions::addUint64(uint16_t code, uint64_t value)
+{
+    std::vector<uint8_t> bytes;
+    appendValue(bytes, value);
+    addOption(code, bytes);
+}
+
+void PcapngInterfaceOptions::addIpv4Address(const Ipv4Address& address, const Ipv4Address& netmask)
+{
+    std::vector<uint8_t> bytes;
+    for (int i = 0; i < 4; i++) bytes.push_back(address.getDByte(i));
+    for (int i = 0; i < 4; i++) bytes.push_back(netmask.getDByte(i));
+    addOption(PCAPNG_IF_IPV4ADDR, bytes);
+}
+
+void PcapngInterfaceOptions::addMacAddress(const MacAddress& address)
+{
+    uint8_t bytes[6];
+    address.getAddressBytes(bytes);
+    addOption(PCAPNG_IF_MACADDR, std::vector<uint8_t>(bytes, bytes + 6));
+}
+
+void PcapngInterfaceOptions::addFcsLength(b fcsLength)
+{
+    if (fcsLength < b(0) || fcsLength > b(UINT8_MAX))
+        throw cRuntimeError("The PCAPng FCS length of an interface must be between 0 and %d bits: %s", UINT8_MAX, fcsLength.str().c_str());
+    addUint8(PCAPNG_IF_FCSLEN, fcsLength.get<b>());
+}
+
 PcapngWriter::~PcapngWriter()
 {
     PcapngWriter::close(); // NOTE: admitting that this will not call overridden methods from the destructor
 }
 
 void PcapngWriter::open(const char *filename, unsigned int snaplen, int timePrecision)
+{
+    open(filename);
+    this->snaplen = snaplen;
+
+    // TODO check validity of timePrecision
+    this->timePrecision = timePrecision;
+
+    writeSectionHeaderBlock();
+}
+
+void PcapngWriter::open(const char *filename)
 {
     if (opp_isempty(filename))
         throw cRuntimeError("Cannot open pcap file: file name is empty");
@@ -74,12 +143,10 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen, int timePrec
         throw cRuntimeError("Cannot open pcap file [%s] for writing: %s", filename, strerror(errno));
 
     flush = false;
-    this->snaplen = snaplen;
-
-    // TODO check validity of timePrecision
-    this->timePrecision = timePrecision;
-
-    writeSectionHeaderBlock(PcapngOptions());
+    hasSection = false;
+    interfaces.clear();
+    interfaceModuleIdAndLinkTypeToPcapngInterfaceId.clear();
+    linkTypeToPcapngInterfaceIdWithoutNetworkInterface.clear();
 }
 
 void PcapngWriter::writeBlock(uint32_t blockType, const std::vector<uint8_t>& fields, const uint8_t *data, size_t dataLength, const PcapngOptions& options)
@@ -123,37 +190,49 @@ void PcapngWriter::writeBlock(uint32_t blockType, const std::vector<uint8_t>& fi
     fwrite(&blockTotalLength, sizeof(blockTotalLength), 1, dumpfile);
 }
 
-void PcapngWriter::writeSectionHeaderBlock(const PcapngOptions& options)
+void PcapngWriter::writeSectionHeaderBlock(const PcapngSectionOptions& options)
 {
     std::vector<uint8_t> fields;
     appendValue<uint32_t>(fields, PCAP_MAGIC);
     appendValue<uint16_t>(fields, 1); // major version
     appendValue<uint16_t>(fields, 0); // minor version
     appendValue<uint64_t>(fields, -1L); // section length is not specified
-    writeBlock(0x0A0D0D0A, fields, nullptr, 0, options);
+    writeBlock(PCAPNG_SECTION_HEADER_BLOCK, fields, nullptr, 0, options);
 
     // interface IDs are unique only in their section
+    hasSection = true;
     interfaces.clear();
     interfaceModuleIdAndLinkTypeToPcapngInterfaceId.clear();
     linkTypeToPcapngInterfaceIdWithoutNetworkInterface.clear();
 }
 
-int PcapngWriter::writeInterfaceDescriptionBlock(PcapLinkType linkType, unsigned int snaplen, int timePrecision, const PcapngOptions& options)
+int PcapngWriter::writeInterfaceDescriptionBlock(PcapLinkType linkType, unsigned int snaplen, int timePrecision, const PcapngInterfaceOptions& options)
 {
+    if (!hasSection)
+        throw cRuntimeError("Cannot write interface: the PCAPng file has no section header block");
+    for (const auto& option : options.getOptions())
+        if (option.code == PCAPNG_IF_TSRESOL)
+            throw cRuntimeError("Cannot write interface: the time precision gives the if_tsresol option");
     std::vector<uint8_t> fields;
     appendValue<uint16_t>(fields, linkType);
     appendValue<uint16_t>(fields, 0); // reserved
     appendValue<uint32_t>(fields, snaplen);
-    PcapngOptions interfaceOptions = options;
-    interfaceOptions.addUint8(0x0009, timePrecision); // tsresol
-    writeBlock(0x00000001, fields, nullptr, 0, interfaceOptions);
+    PcapngInterfaceOptions interfaceOptions = options;
+    interfaceOptions.addUint8(PCAPNG_IF_TSRESOL, timePrecision);
+    writeBlock(PCAPNG_INTERFACE_DESCRIPTION_BLOCK, fields, nullptr, 0, interfaceOptions);
     interfaces.push_back({snaplen, timePrecision});
     return interfaces.size() - 1;
 }
 
-void PcapngWriter::writeEnhancedPacketBlock(int interfaceId, simtime_t time, const uint8_t *data, size_t dataLength, size_t originalLength, const PcapngOptions& options)
+void PcapngWriter::writeEnhancedPacketBlock(int interfaceId, simtime_t time, const uint8_t *data, size_t dataLength, size_t originalLength, const PcapngPacketOptions& options)
 {
-    const auto& interface = interfaces.at(interfaceId);
+    if (!hasSection)
+        throw cRuntimeError("Cannot write packet: the PCAPng file has no section header block");
+    if (interfaceId < 0 || interfaceId >= (int)interfaces.size())
+        throw cRuntimeError("Cannot write packet: the PCAPng section has no interface %d", interfaceId);
+    if (originalLength < dataLength)
+        throw cRuntimeError("Cannot write packet: the original length %zu is less than the data length %zu", originalLength, dataLength);
+    const auto& interface = interfaces[interfaceId];
     size_t capturedLength = interface.snaplen == 0 ? dataLength : std::min<size_t>(dataLength, interface.snaplen);
     ASSERT(time >= SIMTIME_ZERO);
     uint64_t timestamp = time.inUnit(static_cast<SimTimeUnit>(-interface.timePrecision));
@@ -163,7 +242,7 @@ void PcapngWriter::writeEnhancedPacketBlock(int interfaceId, simtime_t time, con
     appendValue<uint32_t>(fields, timestamp & 0xFFFFFFFFLLU);
     appendValue<uint32_t>(fields, capturedLength);
     appendValue<uint32_t>(fields, originalLength);
-    writeBlock(0x00000006, fields, data, capturedLength, options);
+    writeBlock(PCAPNG_ENHANCED_PACKET_BLOCK, fields, data, capturedLength, options);
 
     if (flush)
         fflush(dumpfile);
@@ -175,27 +254,13 @@ int PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTyp
     if (!dumpfile)
         throw cRuntimeError("Cannot write interface: pcap output file is not open");
 
-    PcapngOptions options;
+    PcapngInterfaceOptions options;
     if (networkInterface != nullptr) {
-        // interface name option
-        options.addString(0x0002, networkInterface->getInterfaceName());
-
-        // interface description option
+        options.addName(networkInterface->getInterfaceName());
         std::string fullPath = networkInterface->getInterfaceFullPath();
-        options.addString(0x0003, fullPath.substr(fullPath.find('.') + 1));
-
-        // MAC address option
-        uint8_t macAddressBytes[6];
-        networkInterface->getMacAddress().getAddressBytes(macAddressBytes);
-        options.addOption(0x0006, std::vector<uint8_t>(macAddressBytes, macAddressBytes + 6));
-
-        // IP address/netmask option
-        std::vector<uint8_t> ipAddressBytes;
-        auto ipv4Address = networkInterface->getIpv4Address();
-        for (int i = 0; i < 4; i++) ipAddressBytes.push_back(ipv4Address.getDByte(i));
-        auto ipv4Netmask = networkInterface->getIpv4Netmask();
-        for (int i = 0; i < 4; i++) ipAddressBytes.push_back(ipv4Netmask.getDByte(i));
-        options.addOption(0x0004, ipAddressBytes);
+        options.addDescription(fullPath.substr(fullPath.find('.') + 1));
+        options.addMacAddress(networkInterface->getMacAddress());
+        options.addIpv4Address(networkInterface->getIpv4Address(), networkInterface->getIpv4Netmask());
     }
     return writeInterfaceDescriptionBlock(linkType, snaplen, timePrecision, options);
 }
@@ -228,20 +293,12 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
         }
     }
 
-    // direction option
-    PcapngOptions options;
-    uint32_t flagsOptionValue = 0;
-    switch (direction) {
-        case DIRECTION_INBOUND:
-            flagsOptionValue = 0b01;
-            break;
-        case DIRECTION_OUTBOUND:
-            flagsOptionValue = 0b10;
-            break;
-        default:
-            throw cRuntimeError("Unknown direction value");
+    PcapngPacketOptions options;
+    if (direction != DIRECTION_UNDEFINED) {
+        PcapngPacketFlags flags;
+        flags.direction = direction;
+        options.addFlags(flags);
     }
-    options.addUint32(0x0002, flagsOptionValue);
 
     b originalLength = packet->getDataLength() - frontOffset - backOffset;
     b capturedLength = snaplen == 0 ? originalLength : std::min(originalLength, b(B(snaplen)));
