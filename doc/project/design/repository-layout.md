@@ -15,7 +15,7 @@ Where everything lives, and what keeps it there. [decisions.md](decisions.md) ho
 | `tests/` | every test, in twelve categories |
 | `doc/src/` | the published guides: user's, developer's, migration |
 | `doc/project/` | this document set |
-| `python/inet/` | the test drivers, the simulation runner, the chart and result tooling |
+| `python/inet/` | the INET-specific Python code: the chart helpers, the validation tests and the documentation helper |
 | `_scripts/` | maintenance and release scripts |
 | `images/` | the icon set that `@display` draws from |
 | `templates/` | the project and model templates the IDE offers |
@@ -102,10 +102,10 @@ statistical  validation  fingerprint  speed  features  misc
 
 | Path | Holds |
 | --- | --- |
-| `python/inet/test/` | the test drivers for every category |
-| `python/inet/simulation/` | building, running and collecting a simulation |
-| `python/inet/scave/` | reading result files and making charts |
-| `python/inet/documentation/` | generating documentation from the sources |
+| `inet.opp` | the project description of INET, which the commands of opp_repl load to build INET, run simulations and run each kind of test |
+| `python/inet/test/` | the validation tests, which opp_repl runs through `inet.opp` |
+| `python/inet/scave/` | the helpers of the chart scripts in the analysis files |
+| `python/inet/documentation/` | building, uploading and opening the HTML documentation |
 | `doc/project/enforcement/` | the rule gates, and only the rule gates |
 | `_scripts/` | maintenance sweeps, release steps, IDE helpers |
 
