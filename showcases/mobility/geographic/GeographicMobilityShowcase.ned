@@ -5,7 +5,6 @@
 
 package inet.showcases.mobility.geographic;
 
-import inet.common.geometry.common.Wgs84AnchoredGeographicCoordinateSystem;
 import inet.common.geometry.common.Wgs84EcefGeographicCoordinateSystem;
 import inet.mobility.contract.IMobility;
 import inet.visualizer.canvas.common.InfoCanvasVisualizer;
@@ -14,7 +13,6 @@ import inet.visualizer.canvas.scene.GeoHorizonCanvasVisualizer;
 import inet.visualizer.canvas.scene.GeoMapCanvasVisualizer;
 import inet.visualizer.canvas.scene.GeoSkyViewCanvasVisualizer;
 import inet.visualizer.canvas.scene.NetworkNodeCanvasVisualizer;
-import inet.visualizer.canvas.scene.OpenStreetMapSceneCanvasVisualizer;
 
 //
 // A node that carries only a mobility submodule.
@@ -30,30 +28,8 @@ module GeoNode
 }
 
 //
-// A street-level OpenStreetMap view of the Óbuda district of Budapest, placed on the
-// Europe map by its own mobility. Open the module to see the map.
-//
-module BudapestMap
-{
-    parameters:
-        @networkNode;
-        @display("i=misc/town;is=vs;bgb=800,800");
-    submodules:
-        mobility: <default("inet.mobility.static.StationaryMobility")> like IMobility {
-            @display("p=880,60");
-        }
-        coordinateSystem: Wgs84AnchoredGeographicCoordinateSystem {
-            @display("p=880,160");
-        }
-        map: OpenStreetMapSceneCanvasVisualizer {
-            @display("p=880,260");
-        }
-}
-
-//
 // A regional map of Europe, placed on the world map by its own mobility. Open the
-// module to see the nodes, their trails and their footprints on the Europe map, and
-// the Budapest module that opens the street-level view.
+// module to see the nodes, their trails and their footprints on the Europe map.
 //
 module EuropeMap
 {
@@ -78,9 +54,6 @@ module EuropeMap
         }
         infoVisualizer: InfoCanvasVisualizer {
             @display("p=820,560");
-        }
-        budapest: BudapestMap {
-            @display("i=misc/town;is=vs");
         }
 }
 

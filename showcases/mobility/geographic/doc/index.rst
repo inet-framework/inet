@@ -267,12 +267,6 @@ London–Budapest (LHR–BUD) flight stays inside the map, and the New York–Lo
 | Northernmost point of the New York–London trail: **about 54°N**
 | Footprint radius at cruising altitude: **about 360 km**
 
-.. note::
-
-   The Budapest icon on the Europe map is a third compound module, with its own
-   :ned:`Wgs84AnchoredGeographicCoordinateSystem` and an OpenStreetMap
-   visualizer: double-clicking it shows the streets of the Óbuda district.
-
 Satellites
 ~~~~~~~~~~
 
