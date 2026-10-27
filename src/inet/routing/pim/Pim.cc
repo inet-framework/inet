@@ -87,7 +87,9 @@ INetfilter::IHook::Result PimChecksumInsertionHook::datagramPostRoutingHook(Pack
     auto networkProtocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (*networkProtocol == Protocol::ipv6) {
         const auto& networkHeader = getNetworkProtocolHeader(packet);
-        if (*networkHeader->getProtocol() == Protocol::pim) {
+        // an extension header after the IPv6 header names no protocol
+        auto protocol = networkHeader->getProtocol();
+        if (protocol != nullptr && *protocol == Protocol::pim) {
             ASSERT(!networkHeader->isFragment());
             packet->eraseAtFront(networkHeader->getChunkLength());
             auto pimPacket = packet->removeAtFront<PimPacket>();
