@@ -10,17 +10,26 @@ import itertools
 import logging
 import math
 import numpy
+import os
 import pandas as pd
 import random
+import re
 from statistics import fmean
 
 from omnetpp.scave.results import *
 
-from inet.project.inet import *
-from inet.simulation.project import *
-from inet.test.simulation import *
+from opp_repl.simulation.task import get_simulation_tasks
+from opp_repl.simulation.workspace import get_default_simulation_project
+from opp_repl.test.task import MultipleTestTasks, TaskTestTask, TestTask, TestTaskResult
 
 _logger = logging.getLogger(__name__)
+
+# The INET root folder, from the location of this file. The chart scripts of two analysis files call the
+# functions of this module outside opp_repl, where no simulation project is loaded.
+_inet_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+
+def _get_full_path(path):
+    return os.path.join(_inet_root, path)
 
 class ValidationTestTask(TaskTestTask):
     def __init__(self, check_function=None, name="validation test", **kwargs):
@@ -40,7 +49,7 @@ def compare_test_results(result1, result2, accuracy=0.01):
 # 0.6578411405295316
 def compute_frame_replication_success_rate_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND ((module =~ "*.destination.udp" AND name =~ packetReceived:count) OR (module =~ "*.source.udp" AND name =~ packetSent:count))"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/framereplication/results/*.sca"), filter_expression=filter_expression)
+    df = read_result_files(_get_full_path("tests/validation/tsn/framereplication/results/*.sca"), filter_expression=filter_expression)
     df = get_scalars(df)
     packetSent = float(df[df.name == "packetSent:count"].value.iloc[0])
     packetReceived = float(df[df.name == "packetReceived:count"].value.iloc[0])
@@ -110,7 +119,7 @@ def run_tsn_framereplication_validation_test(test_accuracy=0.01, **kwargs):
 # Flow 8, Best Effort  34913.16
 def compute_asynchronousshaper_icct_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND name =~ meanBitLifeTimePerPacket:histogram:max"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(_get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/icct/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max)", "\\1", name))
     df["module"] = df["module"].map(lambda name: re.sub(r".*N6.app\[[0-4]\].*", "Flow 4, Class A", name))
@@ -156,7 +165,7 @@ def run_tsn_trafficshaping_asynchronousshaper_icct_validation_test(**kwargs):
 # Medium    535.939  247.258720   88.259  106.588325
 def compute_asynchronousshaper_core4inet_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min OR name =~ meanBitLifeTimePerPacket:histogram:max OR name =~ meanBitLifeTimePerPacket:histogram:mean OR name =~ meanBitLifeTimePerPacket:histogram:stddev)"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(_get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max|mean|stddev)", "\\1", name))
     df["module"] = df["module"].map(lambda name: re.sub(r".*app\[0\].*", "Best effort", name))
@@ -171,7 +180,7 @@ def compute_asynchronousshaper_core4inet_endtoend_delay_from_simulation_results(
 # 2.0
 def compute_asynchronousshaper_core4inet_max_queuelength_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND module =~ \"*.switch.eth[4].macLayer.queue.queue[5..7]\" AND name =~ queueLength:max"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(_get_full_path("tests/validation/tsn/trafficshaping/asynchronousshaper/core4inet/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     return numpy.max(df["value"])
 
@@ -223,7 +232,7 @@ def run_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test(test_acc
 # Medium    535.939  247.258720   88.259  106.588325
 def compute_creditbasedshaper_endtoend_delay_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND (name =~ meanBitLifeTimePerPacket:histogram:min OR name =~ meanBitLifeTimePerPacket:histogram:max OR name =~ meanBitLifeTimePerPacket:histogram:mean OR name =~ meanBitLifeTimePerPacket:histogram:stddev)"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(_get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     df["name"] = df["name"].map(lambda name: re.sub(r".*(min|max|mean|stddev)", "\\1", name))
     df["module"] = df["module"].map(lambda name: re.sub(r".*app\[0\].*", "Best effort", name))
@@ -238,7 +247,7 @@ def compute_creditbasedshaper_endtoend_delay_from_simulation_results(**kwargs):
 # 2.0
 def compute_creditbasedshaper_max_queuelength_from_simulation_results(**kwargs):
     filter_expression = """type =~ scalar AND module =~ \"*.switch.eth[4].macLayer.queue.queue[5..7]\" AND name =~ queueLength:max"""
-    df = read_result_files(inet_project.get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
+    df = read_result_files(_get_full_path("tests/validation/tsn/trafficshaping/creditbasedshaper/results/*.sca"), filter_expression=filter_expression, include_fields_as_scalars=True)
     df = get_scalars(df)
     return numpy.max(df["value"])
 
@@ -313,7 +322,7 @@ def _quic_get_throughput_from_vec_file(file, module_name, start, end):
     return tp
 
 def compute_quic_link_utilization_from_simulation_results(**kwargs):
-    results_path = inet_project.get_full_path("examples/quic/link_utilization/results/")
+    results_path = _get_full_path("examples/quic/link_utilization/results/")
     bandwidth = 10  # Mb/s
     mtus = ['1280', '1452', '1500', '9000']  # B
     start = 4
@@ -360,7 +369,7 @@ def run_quic_link_utilization_validation_test(test_accuracy=0.02, **kwargs):
 # QUIC throughput packet loss test
 
 def compute_quic_throughput_packet_loss_from_simulation_results(**kwargs):
-    results_path = inet_project.get_full_path("examples/quic/throughput_packet_loss/results/throughput_validation_")
+    results_path = _get_full_path("examples/quic/throughput_packet_loss/results/throughput_validation_")
     ps = [".008", ".01", ".02"]
     rtts_measured = [20, 40, 60]
     start = 4
@@ -408,7 +417,7 @@ def run_quic_throughput_packet_loss_validation_test(test_accuracy=0.15, **kwargs
 # QUIC shared link test
 
 def compute_quic_shared_link_from_simulation_results(**kwargs):
-    results_path = inet_project.get_full_path("examples/quic/shared_link/results/")
+    results_path = _get_full_path("examples/quic/shared_link/results/")
     t0 = 3
     t1 = 13
     senders = 2
@@ -461,7 +470,7 @@ def run_quic_shared_link_validation_test(test_accuracy=0.05, **kwargs):
 # QUIC flow control limited test
 
 def compute_quic_flow_control_from_simulation_results(**kwargs):
-    results_path = inet_project.get_full_path("examples/quic/flow_control_limited/results/flow_control_validation_")
+    results_path = _get_full_path("examples/quic/flow_control_limited/results/flow_control_validation_")
     rtts = [10, 20]
     initial_max_data_sizes = [65, 100, 140]
     start = 3
@@ -525,11 +534,11 @@ def run_quic_flow_control_validation_test(test_accuracy=0.02, **kwargs):
 def get_validation_test_tasks(**kwargs):
     """
     Returns multiple validation test tasks matching the provided filter criteria. The returned tasks can be run by
-    calling the :py:meth:`run <inet.common.task.MultipleTasks.run>` method.
+    calling the :py:meth:`run <opp_repl.common.task.MultipleTasks.run>` method.
 
     Parameters:
         kwargs (dict):
-            The filter criteria parameters are inherited from the :py:meth:`get_simulation_tasks <inet.simulation.task.get_simulation_tasks>` method.
+            The filter criteria parameters are inherited from the :py:meth:`get_simulation_tasks <opp_repl.simulation.task.get_simulation_tasks>` method.
 
     Returns (:py:class:`MultipleTestTasks`):
         an object that contains a list of :py:class:`ValidationTestTask` objects matching the provided filter criteria.
@@ -554,15 +563,23 @@ def get_validation_test_tasks(**kwargs):
             validation_test_tasks.append(validation_test_task)
     return MultipleTestTasks(tasks=validation_test_tasks, name="validation test", **kwargs)
 
-def run_validation_tests(**kwargs):
+def run_validation_tests(build=True, **kwargs):
     """
     Runs one or more validation tests that match the provided filter criteria.
 
     Parameters:
+        build (bool):
+            Build the simulation project once before the tests.
+
         kwargs (dict):
             The filter criteria parameters are inherited from the :py:func:`get_validation_test_tasks` function.
 
     Returns (:py:class:`MultipleTestTaskResults`):
         an object that contains a list of :py:class:`TestTaskResult` objects. Each object describes the result of running one test task.
     """
-    return get_validation_test_tasks(**kwargs).run(**kwargs)
+    # the tests run at the same time, and each tested simulation would build the project, so build it once
+    # before them, as a batch of simulations does
+    if build:
+        simulation_project = kwargs.get("simulation_project") or get_default_simulation_project()
+        simulation_project.build(mode=kwargs.get("mode") or "release")
+    return get_validation_test_tasks(**kwargs).run(build=False, **kwargs)
