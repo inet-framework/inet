@@ -1,0 +1,56 @@
+%description:
+PCAPng writes a complete file with fixed bytes: the section header, the
+interface descriptions of an interface and of packets without an interface, and
+three packets with truncation, padding, timestamps and directions. A change of
+the writer that keeps the format keeps these bytes. The bytes are those of a
+little-endian host.
+
+%includes:
+#include <cstdio>
+#include <fstream>
+#include <iterator>
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapngWriter.h"
+
+%global:
+using namespace inet;
+
+%activity:
+NetworkInterface networkInterface;
+networkInterface.setInterfaceName("eth0");
+networkInterface.setMacAddress(MacAddress("0A-AA-00-00-00-01"));
+Packet packet("packet", makeShared<BytesChunk>(std::vector<uint8_t>{0x10, 0x11, 0x12, 0x13, 0x14, 0x15}));
+PcapngWriter writer;
+writer.open("bytes.pcapng", 4, 9);
+writer.writePacket(SimTime(1.5), &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
+writer.writePacket(SimTime(2.25), &packet, B(1), b(0), DIRECTION_OUTBOUND, nullptr, LINKTYPE_IEEE802_11);
+writer.writePacket(SimTime(3), &packet, B(3), B(1), DIRECTION_OUTBOUND, &networkInterface, LINKTYPE_ETHERNET);
+writer.close();
+std::ifstream file("bytes.pcapng", std::ios::binary);
+std::vector<uint8_t> bytes(std::istreambuf_iterator<char>(file), {});
+std::remove("bytes.pcapng");
+std::string actual;
+for (auto byte : bytes) {
+    char hex[3];
+    snprintf(hex, sizeof(hex), "%02x", byte);
+    actual += hex;
+}
+std::string expected =
+    // section header
+    "0a0d0d0a1c0000004d3c2b1a01000000ffffffffffffffff1c000000"
+    // interface description
+    "0100000048000000010000000400000002000400657468300300040065746830060006000aaa00000001000004000800000000000000000009000100090000000000000048000000"
+    // enhanced packet
+    "06000000300000000000000000000000002f685904000000060000001011121302000400010000000000000030000000"
+    // interface description
+    "0100000020000000690000000400000009000100090000000000000020000000"
+    // enhanced packet
+    "0600000030000000010000000000000080461c8604000000050000001112131402000400020000000000000030000000"
+    // enhanced packet
+    "06000000300000000000000000000000005ed0b202000000020000001314000002000400020000000000000030000000";
+if (actual != expected)
+    throw cRuntimeError("Unexpected PCAPng bytes: %s", actual.c_str());
+EV << "PCAPng bytes verified.\n";
+
+%contains: stdout
+PCAPng bytes verified.
