@@ -1,0 +1,120 @@
+%description:
+IEEE 802.1CB-2017 7.4.2 and 7.4.3.2: members share history, independent groups do not; unmapped traffic bypasses recovery.
+The frame trace is a declared input. Production VectorStreamMerger receives it through its gate.
+The protocol observer verifies all input contents/times and the exact output order and cardinality.
+See vector-recovery.md, VRA-2, for the requirement, before/after behavior and limits.
+
+%includes:
+#include "ProtocolTest.h"
+#include "FrameSource.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::frertest;
+
+Define_ProtocolTestProgram()
+{
+    ProtocolTest test("vector_recovery_groups");
+    test.meanwhile(exactlyTimes(8, on("merger").signal("packetPushedIn").within(0.06)));
+    test.meanwhile(exactlyTimes(5, on("merger").signal("packetPushedOut").within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "first"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "first", "a", 100, 1000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "memberCopy"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "memberCopy", "b", 100, 2000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "independentFirst"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "independentFirst", "c", 100, 3000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "next"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "next", "a", 101, 4000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "nextCopy"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "nextCopy", "b", 101, 5000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "tagless"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "tagless", "c", -1, 6000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "independentNext"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "independentNext", "c", 101, 7000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "unmapped"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "unmapped", "x", 999, 8000);
+        }).within(0.06)));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "first", "merged", 100, 1000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "independentFirst", "other", 100, 3000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "next", "merged", 101, 4000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "independentNext", "other", 101, 7000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "unmapped", "x", 999, 8000);
+        }).within(0.06));
+    return test;
+}
+
+%activity:
+// The framework attaches its observer to the network after initialization.
+
+%file: test.ned
+import inet.protocolelement.redundancy.VectorStreamMerger;
+import inet.queueing.sink.PassivePacketSink;
+simple FrameSource {
+    parameters:
+        @class(::inet::frertest::FrameSource);
+        object frames;
+    gates:
+        output out;
+}
+network VectorRecoveryNet {
+    submodules:
+        source: FrameSource;
+        merger: VectorStreamMerger;
+        sink: PassivePacketSink;
+    connections:
+        source.out --> merger.in;
+        merger.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = VectorRecoveryNet
+sim-time-limit = 70ms
+seed-set = 0
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.merger.historyLength = 5
+*.merger.mapping = {a: "merged", b: "merged", c: "other"}
+*.merger.resetTimeout = 0ms
+*.source.frames = ["1000,a,100,first", "2000,b,100,memberCopy", "3000,c,100,independentFirst", "4000,a,101,next", "5000,b,101,nextCopy", "6000,c,-1,tagless", "7000,c,101,independentNext", "8000,x,999,unmapped"]
+
+%contains: stdout
+PROTOCOLTEST vector_recovery_groups: PASS

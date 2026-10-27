@@ -1,0 +1,84 @@
+%description:
+IEEE 802.1CB-2017 7.4.3.4: 11ms at 100 ticks/s rounds to two ticks; this model expires 20ms after acceptance.
+The frame trace is a declared input. Production VectorStreamMerger receives it through its gate.
+The protocol observer verifies all input contents/times and the exact output order and cardinality.
+See vector-recovery.md, VRA-2, for the requirement, before/after behavior and limits.
+
+%includes:
+#include "ProtocolTest.h"
+#include "FrameSource.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::frertest;
+
+Define_ProtocolTestProgram()
+{
+    ProtocolTest test("vector_recovery_tick_rounding");
+    test.meanwhile(exactlyTimes(3, on("merger").signal("packetPushedIn").within(0.06)));
+    test.meanwhile(exactlyTimes(2, on("merger").signal("packetPushedOut").within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "first"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "first", "a", 50000, 1000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "beforeRoundedTimeout"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "beforeRoundedTimeout", "a", 0, 15000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "atRoundedTimeout"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "atRoundedTimeout", "a", 0, 21000);
+        }).within(0.06)));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "first", "merged", 50000, 1000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "atRoundedTimeout", "merged", 0, 21000);
+        }).within(0.06));
+    return test;
+}
+
+%activity:
+// The framework attaches its observer to the network after initialization.
+
+%file: test.ned
+import inet.protocolelement.redundancy.VectorStreamMerger;
+import inet.queueing.sink.PassivePacketSink;
+simple FrameSource {
+    parameters:
+        @class(::inet::frertest::FrameSource);
+        object frames;
+    gates:
+        output out;
+}
+network VectorRecoveryNet {
+    submodules:
+        source: FrameSource;
+        merger: VectorStreamMerger;
+        sink: PassivePacketSink;
+    connections:
+        source.out --> merger.in;
+        merger.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = VectorRecoveryNet
+sim-time-limit = 70ms
+seed-set = 0
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.merger.historyLength = 5
+*.merger.mapping = {a: "merged", b: "merged"}
+*.merger.resetTimeout = 11ms
+*.merger.ticksPerSecond = 100
+*.source.frames = ["1000,a,50000,first", "15000,a,0,beforeRoundedTimeout", "21000,a,0,atRoundedTimeout"]
+
+%contains: stdout
+PROTOCOLTEST vector_recovery_tick_rounding: PASS

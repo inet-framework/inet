@@ -1,0 +1,115 @@
+%description:
+IEEE 802.1CB-2017 7.4.3.4: signed 16-bit wraparound, retained duplicate history and half-space rejection.
+The frame trace is a declared input. Production VectorStreamMerger receives it through its gate.
+The protocol observer verifies all input contents/times and the exact output order and cardinality.
+See vector-recovery.md, VRA-2, for the requirement, before/after behavior and limits.
+
+%includes:
+#include "ProtocolTest.h"
+#include "FrameSource.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::frertest;
+
+Define_ProtocolTestProgram()
+{
+    ProtocolTest test("vector_recovery_wraparound");
+    test.meanwhile(exactlyTimes(7, on("merger").signal("packetPushedIn").within(0.06)));
+    test.meanwhile(exactlyTimes(5, on("merger").signal("packetPushedOut").within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "first"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "first", "a", 65534, 1000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "next"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "next", "a", 65535, 2000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "wrap"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "wrap", "b", 0, 3000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "afterWrap"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "afterWrap", "a", 1, 4000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "duplicate"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "duplicate", "b", 65535, 5000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "halfSpace"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "halfSpace", "a", 32769, 6000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "last"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "last", "a", 2, 7000);
+        }).within(0.06)));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "first", "merged", 65534, 1000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "next", "merged", 65535, 2000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "wrap", "merged", 0, 3000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "afterWrap", "merged", 1, 4000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "last", "merged", 2, 7000);
+        }).within(0.06));
+    return test;
+}
+
+%activity:
+// The framework attaches its observer to the network after initialization.
+
+%file: test.ned
+import inet.protocolelement.redundancy.VectorStreamMerger;
+import inet.queueing.sink.PassivePacketSink;
+simple FrameSource {
+    parameters:
+        @class(::inet::frertest::FrameSource);
+        object frames;
+    gates:
+        output out;
+}
+network VectorRecoveryNet {
+    submodules:
+        source: FrameSource;
+        merger: VectorStreamMerger;
+        sink: PassivePacketSink;
+    connections:
+        source.out --> merger.in;
+        merger.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = VectorRecoveryNet
+sim-time-limit = 70ms
+seed-set = 0
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.merger.historyLength = 5
+*.merger.mapping = {a: "merged", b: "merged"}
+*.merger.resetTimeout = 0ms
+*.source.frames = ["1000,a,65534,first", "2000,a,65535,next", "3000,b,0,wrap", "4000,a,1,afterWrap", "5000,b,65535,duplicate", "6000,a,32769,halfSpace", "7000,a,2,last"]
+
+%contains: stdout
+PROTOCOLTEST vector_recovery_wraparound: PASS

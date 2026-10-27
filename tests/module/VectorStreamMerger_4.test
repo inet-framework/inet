@@ -1,0 +1,26 @@
+%description:
+Reject invalid VRA configuration: historyLength = 1.
+
+%file: TestNetwork.ned
+import inet.protocolelement.redundancy.VectorStreamMerger;
+network TestNetwork {
+    submodules:
+        merger: VectorStreamMerger;
+    connections allowunconnected:
+}
+
+%file: Fixture.cc
+// Empty compilation unit for this NED-only initialization test.
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src
+network = TestNetwork
+sim-time-limit = 1ms
+*.merger.mapping = {a: "out"}
+*.merger.historyLength = 1
+
+%exitcode: 1
+%postrun-command: cat test.out test.err > diagnostics.out
+%contains: diagnostics.out
+Recovery history length must be between 2 and 32768

@@ -1,0 +1,143 @@
+%description:
+Push integration: shared and isolated recovery states, pure admission queries,
+renaming/removal of tags, tagless handling, amended boundaries, wraparound, timer
+tick rounding and exact-deadline reset. Timer changes must occur on actual
+processing rather than repeated canPushPacket queries.
+
+%file: Driver.cc
+#include "inet/protocolelement/redundancy/VectorStreamMerger.h"
+#include "inet/common/SequenceNumberTag_m.h"
+#include "inet/protocolelement/redundancy/StreamTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+using namespace inet;
+namespace VectorStreamMerger_1 {
+class ObservedMerger : public VectorStreamMerger
+{
+  public:
+    bool wouldForward(const Packet *packet) const { return matchesPacket(packet); }
+};
+Define_Module(ObservedMerger);
+
+class Driver : public cSimpleModule
+{
+  public:
+    Driver() : cSimpleModule(65536) {}
+  protected:
+    virtual void activity() override {
+        auto merger = check_and_cast<ObservedMerger *>(getParentModule()->getSubmodule("merger"));
+        auto accepting = check_and_cast<ObservedMerger *>(getParentModule()->getSubmodule("accepting"));
+        auto transmit = [&](ObservedMerger *target, const char *name, const char *stream, int sequence, bool expected) {
+            auto packet = new Packet(name, makeShared<ByteCountChunk>(B(10)));
+            if (stream != nullptr)
+                packet->addTag<StreamInd>()->setStreamName(stream);
+            if (sequence != -1)
+                packet->addTag<SequenceNumberInd>()->setSequenceNumber(sequence);
+            for (int i = 0; i < 3; i++) {
+                // Readiness to consume includes packets the filter will drop.
+                if (!target->canPushPacket(packet, target->gate("in")) || target->wouldForward(packet) != expected) {
+                    delete packet;
+                    throw cRuntimeError("Unexpected readiness or forwarding decision for %s", name);
+                }
+            }
+            target->pushPacket(packet, target->gate("in"));
+        };
+        transmit(merger, "first", "a", 65534, true);
+        transmit(merger, "duplicate", "b", 65534, false);
+        transmit(merger, "wrap", "b", 0, true);
+        transmit(merger, "gap", "a", 65535, true);
+        transmit(merger, "independent", "c", 0, true);
+        transmit(merger, "upper-boundary", "a", 5, true);
+        transmit(merger, "lower-boundary", "b", 0, false);
+        transmit(merger, "tagless-drop", "a", -1, false);
+        transmit(merger, "invalid-number-drop", "a", 65536, false);
+        transmit(merger, "unmapped", "other", 0, true);
+        transmit(merger, "unidentified", nullptr, -1, true);
+        transmit(accepting, "tagless-pass", "a", -1, true);
+        transmit(accepting, "invalid-number-pass", "a", 65536, true);
+        transmit(accepting, "first-numbered", "a", 40000, true);
+        transmit(accepting, "second-numbered", "b", 40000, true);
+        // resetTimeout=11ms, ticksPerSecond=100 => expiry after 20ms.
+        wait(0.015);
+        transmit(merger, "too-early", "a", 0, false);
+        transmit(accepting, "tagless-reload", "a", -1, true);
+        wait(0.005);
+        transmit(merger, "at-timeout", "a", 0, true);
+        transmit(merger, "after-reset-duplicate", "b", 0, false);
+        wait(0.010);
+        transmit(accepting, "retained-after-tagless", "a", 40000, false);
+        wait(0.005);
+        transmit(accepting, "after-tagless-timeout", "a", 40000, true);
+    }
+};
+Define_Module(Driver);
+
+class Sink : public cSimpleModule
+{
+  protected:
+    virtual void handleMessage(cMessage *message) override {
+        auto packet = check_and_cast<Packet *>(message);
+        auto stream = packet->findTag<StreamInd>();
+        auto sequence = packet->findTag<SequenceNumberInd>();
+        std::cout << getName() << " " << packet->getName() << " stream="
+                  << (stream == nullptr ? "none" : stream->getStreamName())
+                  << " sequence=" << (sequence == nullptr ? -1 : sequence->getSequenceNumber()) << "\n";
+        delete packet;
+    }
+};
+Define_Module(Sink);
+}
+
+%file: TestNetwork.ned
+import inet.protocolelement.redundancy.VectorStreamMerger;
+simple ObservedMerger extends VectorStreamMerger { @class(::VectorStreamMerger_1::ObservedMerger); }
+simple Driver { @class(::VectorStreamMerger_1::Driver); }
+simple Sink { @class(::VectorStreamMerger_1::Sink); gates: input in; }
+network TestNetwork {
+    submodules:
+        driver: Driver;
+        merger: ObservedMerger {
+            parameters:
+                mapping = {a: "merged", b: "merged", c: "independent"};
+        }
+        accepting: ObservedMerger {
+            parameters:
+                mapping = {a: "", b: ""};
+                recoveryMapping = {a: "first-flow", b: "second-flow"};
+                takeNoSequence = true;
+        }
+        sink: Sink;
+        acceptingSink: Sink;
+    connections allowunconnected:
+        merger.out --> sink.in;
+        accepting.out --> acceptingSink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src
+network = TestNetwork
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+**.historyLength = 5
+**.resetTimeout = 11ms
+**.ticksPerSecond = 100
+sim-time-limit = 41ms
+
+%contains: stdout
+sink first stream=merged sequence=65534
+sink wrap stream=merged sequence=0
+sink gap stream=merged sequence=65535
+sink independent stream=independent sequence=0
+sink upper-boundary stream=merged sequence=5
+sink unmapped stream=other sequence=0
+sink unidentified stream=none sequence=-1
+acceptingSink tagless-pass stream=none sequence=-1
+acceptingSink invalid-number-pass stream=none sequence=-1
+acceptingSink first-numbered stream=none sequence=-1
+acceptingSink second-numbered stream=none sequence=-1
+acceptingSink tagless-reload stream=none sequence=-1
+sink at-timeout stream=merged sequence=0
+acceptingSink after-tagless-timeout stream=none sequence=-1
+
+%not-contains-regex: stdout
+(sink (duplicate|too-early|lower-boundary|tagless-drop|invalid-number-drop|after-reset-duplicate)|acceptingSink retained-after-tagless)
