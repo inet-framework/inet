@@ -139,6 +139,31 @@ In your own network, the :ned:`IntegratedCanvasVisualizer` has optional
 ``geoMapVisualizer``, ``geoHorizonVisualizer`` and ``geoSkyViewVisualizer``
 submodules for these. They are enabled by setting their ``typename``.
 
+A footprint is the area of the surface of the Earth from which a satellite is above
+the elevation mask. Its size depends on the altitude of the satellite and on the
+mask. Here is the footprint of Vanguard 1 in the Satellites configuration at 9 hours
+20 minutes, with a 10° mask. Vanguard 1 is at about 3,790 km. Lima is inside the
+footprint and sees the satellite at 57° elevation. Los Angeles is just outside, and
+sees it at 4°:
+
+.. figure:: media/satellites-footprint.png
+   :width: 80%
+   :align: center
+
+..
+   FIGURE RECIPE
+   type:     canvas
+   config:   Satellites, t=33600 s
+   shows:    Vanguard 1 footprint over South America, Lima inside, Los Angeles just
+             outside the edge
+   anchors:  at 33600 s Vanguard 1 at 1.0S 83.9W, 3793 km; elevation from Lima 57.2
+             deg, from Los Angeles 3.7 deg (recorded positions of a full-length run)
+   capture:  run_simulation mode=fast inclusive time_limit=33600s;
+             set_canvas_view <root> zoom=2.5; get_canvas_image <root>
+             area=module_rectangle margin=0 (1804x904);
+             crop (100,175)-(776,713) = longitude 160W-25W, latitude 55N-52S
+   stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
+
 A sky view is a polar plot of the sky above one ground station. The center is the
 zenith, the rim is the horizon, and north is up. A sky view labels a satellite with
 its name in the TLE, for example ``ISS (ZARYA)``, and draws its recent path across
