@@ -113,16 +113,17 @@ inline bool icmpv6ErrorLeaves(const PacketEvent& e, const char *node)
         && matchesExpression(e.packet, "icmpv6.type < 128");
 }
 
-// An IPv6 address field of an observed packet, e.g. ipv6AddressOf(p, "ipv6.srcAddress").
-inline const Ipv6Address *ipv6AddressOf(const Packet *packet, const char *fieldPath)
-{
-    return evalPacketField(packet, fieldPath).pointerValue().get<Ipv6Address>();
-}
-
 // An IPv6 address field of an observed packet as text, e.g. ipv6Address(p, "ipv6.srcAddress").
+// The value of an Ipv6Address field is its text (the @toValue of Ipv6Address.msg).
 inline std::string ipv6Address(const Packet *packet, const char *fieldPath)
 {
-    return evalPacketField(packet, fieldPath).pointerValue().get<Ipv6Address>()->str();
+    return evalPacketField(packet, fieldPath).stdstringValue();
+}
+
+// An IPv6 address field of an observed packet, e.g. ipv6AddressOf(p, "ipv6.srcAddress").
+inline Ipv6Address ipv6AddressOf(const Packet *packet, const char *fieldPath)
+{
+    return Ipv6Address(ipv6Address(packet, fieldPath).c_str());
 }
 
 // The routable IPv6 address of a node of the network, as text.

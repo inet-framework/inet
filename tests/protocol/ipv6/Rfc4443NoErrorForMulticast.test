@@ -24,7 +24,7 @@ Define_ProtocolTestProgram()
         // Expected observation 1: the datagram to ff02::1, port 5001, on link 1.
         .once(on("hostA.eth[0].mac").signal("packetSentToLower")
                   .filterPacket("udp.destPort == 5001")
-                  .filterEvent([](const MatchContext& c) { return ipv6AddressOf(c.event.packet, "ipv6.destAddress")->isMulticast(); })
+                  .filterEvent([](const MatchContext& c) { return ipv6AddressOf(c.event.packet, "ipv6.destAddress").isMulticast(); })
                   .describe("the datagram to the all-nodes multicast address and the closed port 5001")
                   .within(6.0))
         // Expected observation 2: host B's UDP finds no program for port 5001.
