@@ -3,14 +3,15 @@ name: "Test: coverage"
 # Runs the fingerprint tests and the unit, module, packet, queueing and protocol tests in coverage
 # mode, and makes one line, function and branch coverage report of src/. The test verdicts belong
 # to the other workflows: a failed test does not fail this workflow, a missing coverage export
-# does. A push to master publishes the report to https://inet-framework.github.io/coverage/ and
-# adds one line to the history of inet-framework/coverage. A manual start gives the report as an
-# artifact only. The plan is plan/done/coverage-tests.md.
+# does. It runs once a week on master, not on each push or pull request. The scheduled run
+# publishes the report to https://inet-framework.github.io/coverage/ and adds one line to the
+# history of inet-framework/coverage. A manual start gives the report as an artifact only. The plan
+# is plan/done/coverage-tests.md.
 
 on:
-  push:
-    branches:
-      - master
+  schedule:
+      # https://crontab.guru/#0_16_*_*_0
+    - cron: "0 16 * * 0" # “At 16:00 on Sunday.”, a day after the feature tests and the builds
   workflow_dispatch:
     # nothing
 
@@ -103,7 +104,7 @@ jobs:
           fi
           df -h $GITHUB_WORKSPACE
       - uses: actions/cache/save@v5
-        if: github.event_name == 'push' && matrix.job == 'fingerprint-0'
+        if: github.event_name == 'schedule' && matrix.job == 'fingerprint-0'
         with:
           path: /home/runner/work/ccache
           key: native-coverage-ccache-${{ github.run_id }}
@@ -163,9 +164,9 @@ jobs:
         with:
           name: coverage-report
           path: report
-          retention-days: ${{ github.event_name == 'push' && 30 || 7 }}
+          retention-days: ${{ github.event_name == 'schedule' && 30 || 7 }}
       - name: Publish
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'schedule' && github.ref == 'refs/heads/master'
         env:
           COVERAGE_DEPLOY_KEY: ${{ secrets.COVERAGE_DEPLOY_KEY }}
         run: |
