@@ -139,6 +139,31 @@ In your own network, the :ned:`IntegratedCanvasVisualizer` has optional
 ``geoMapVisualizer``, ``geoHorizonVisualizer`` and ``geoSkyViewVisualizer``
 submodules for these. They are enabled by setting their ``typename``.
 
+A sky view is a polar plot of the sky above one ground station. The center is the
+zenith, the rim is the horizon, and north is up. A sky view labels a satellite with
+its name in the TLE, for example ``ISS (ZARYA)``, and draws its recent path across
+the sky. Here is the sky view of Los Angeles in the Satellites configuration, near
+the end of the pass of the ISS that starts at about 8 hours 15 minutes. The ISS rose
+in the south-west, passed 71° elevation, and is now at about 14° in the north-east:
+
+.. figure:: media/satellites-skyview.png
+   :width: 60%
+   :align: center
+
+..
+   FIGURE RECIPE
+   type:     canvas
+   config:   Satellites, t=30060 s
+   shows:    Los Angeles sky view, the ISS trail from SW through ~71 deg to the
+             current dot at ~14 deg NE
+   anchors:  ISS above 10 deg over Los Angeles from 29700 s to 30090 s, peak 71 deg
+             at 29890 s (recorded positions of a full-length run)
+   capture:  run_simulation mode=fast inclusive time_limit=30060s;
+             set_canvas_view <root> zoom=3.5 center_x=871 center_y=1610;
+             get_canvas_image <root> area=viewport margin=0 (1030x723);
+             crop (236,180)-(766,716) around the right-hand plot
+   stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
+
 These visualizers draw on the 2D canvas, so the showcase runs in a standard OMNeT++
 build, without OpenSceneGraph (OSG) or osgEarth.
 
@@ -329,33 +354,41 @@ arrows show the direction of flight):
    stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
 In Qtenv, the sky views are below the world map, in the order of the ground
-stations: Lima on the left, Los Angeles on the right. A sky view labels a
-satellite with its name in the TLE, here ``ISS (ZARYA)``. The center of a sky view is the zenith,
-the rim is the horizon, and north is up. When the ISS passes over Los Angeles, it
-rises above 10° elevation, crosses the sky of the station, and sets again a few
-minutes later. Here is the sky view of Los Angeles near the end of the pass that
-starts at about 8 hours 15 minutes. The ISS rose in the south-west, passed 71°
-elevation, and is now at about 14° in the north-east:
+stations: Lima on the left, Los Angeles on the right. Here is a video of the world
+map and the two sky views from 6 hours 20 minutes to 10 hours. Vanguard 1, on its
+higher orbit, stays above the mask for 26 to 44 minutes at a time. It passes over
+Los Angeles twice and over Lima twice. The ISS crosses the sky of Los Angeles in
+about 7 minutes, starting at about 8 hours 15 minutes, and again low in the sky at
+about 9 hours 54 minutes:
 
-.. figure:: media/satellites-skyview.png
-   :width: 60%
-   :align: center
+.. video:: media/satellites-skyview.mp4
+   :width: 100%
 
 ..
-   FIGURE RECIPE
-   type:     canvas
-   config:   Satellites, t=30060 s
-   shows:    Los Angeles sky view, the ISS trail from SW through ~71 deg to the
-             current dot at ~14 deg NE
-   anchors:  ISS above 10 deg over Los Angeles from 29700 s to 30090 s, peak 71 deg
-             at 29890 s (recorded positions of a full-length run)
-   capture:  run_simulation mode=fast inclusive time_limit=30060s;
-             set_canvas_view <root> zoom=3.5 center_x=871 center_y=1610;
-             get_canvas_image <root> area=viewport margin=0 (1030x723);
-             crop (236,180)-(766,716) around the right-hand plot
+   VIDEO RECIPE (frames grabbed one by one, not with record_video)
+   config:   Satellites
+   seed:     default (the config uses no random numbers)
+   shows:    world map plus both sky views (Lima left, Los Angeles right); six passes
+             above 10 deg: Vanguard 1 over LA 06:23-06:49 (88 deg) and 08:43-09:17
+             (60 deg), over Lima 06:44-07:20 (32 deg) and 09:05-09:49 (79 deg); ISS
+             over LA 08:15-08:22 (71 deg) and 09:54-09:58 (14 deg)
+   anchors:  ISS above 10 deg over Los Angeles from 29700 s to 30100 s, peak 71 deg
+             (recorded positions of a full-length run, 10 s resolution)
+   window:   t = 22800 to 36000 s, step 20 s (661 frames)
+   frames:   express-run to 22800 s first; then one get_canvas_image per step (MCP
+             of the simulation itself, --mcp-server-address); before each,
+             run_simulation mode=fast, inclusive, time_limit=<t>
+   capture:  set_canvas_view <root> zoom=1.352; get_canvas_image <root>
+             area=all_elements margin=5 (1130-1181x756; the box grows when a label
+             hangs past the map edge)
+   align:    per frame, find the map's black left border (x=18 in an unshifted
+             frame), d = x - 18; crop (d+5, 5)-(d+1001, 751) to 996x746
+   encode:   ffmpeg -framerate 15 -i f_%04d.png -vcodec libx264 -pix_fmt yuv420p
+             -crf 20
    stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
 | ISS orbital period: **93 minutes**
+| ISS pass over Los Angeles: **about 7 minutes above 10°, up to 71°**
 | Westward shift of the ISS ground track per orbit: **about 23.5°**
 | Vanguard 1 altitude: **about 650 km to 3,820 km**, footprint radius **about 1,850 km to 4,670 km**
 
