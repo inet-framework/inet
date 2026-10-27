@@ -242,13 +242,13 @@ A coverage report shows which lines, functions and branches of :file:`src/inet` 
 tests execute. The report leaves out the message files that :command:`opp_msgc`
 generates and the third-party code (the lwIP stack and :file:`src/3rdparty`).
 
-The GitHub workflow *Test: coverage* runs on each push to master. It builds OMNeT++
-and INET in coverage mode, runs the fingerprint tests and the unit, module, packet,
-queueing and protocol tests, and makes one report of all of them. The report of the
-latest master commit is at `inet-framework.github.io/coverage
-<https://inet-framework.github.io/coverage/>`__. The `coverage repository
-<https://github.com/inet-framework/coverage>`__ keeps one summary line for each
-reported commit, so the history shows how the coverage changes.
+The GitHub workflow *Test: coverage* runs once a week on master, on Sunday. It does
+not run on each push or on pull requests. It builds OMNeT++ and INET in coverage mode,
+runs the fingerprint tests and the unit, module, packet, queueing and protocol tests,
+and makes one report of all of them. The report of the latest weekly run is at
+`inet-framework.github.io/coverage <https://inet-framework.github.io/coverage/>`__.
+The `coverage repository <https://github.com/inet-framework/coverage>`__ keeps one
+summary line for each weekly report, so the history shows how the coverage changes.
 
 To see the coverage of a branch, start the workflow by hand on that branch: on the
 *Actions* page of the repository, select *Test: coverage*, then *Run workflow*. When
