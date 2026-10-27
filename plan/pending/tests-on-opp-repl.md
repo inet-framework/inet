@@ -106,6 +106,14 @@ Optional follow-up, not in this plan: the opp_ci run of each kind on master, and
 - [x] **S6. validation.** Compare both runners; switch the workflow to `opp_run_validation_tests -m release`. Done in `e04075233a` on branch `topic/tests-on-opp-repl-validation`. The workflow runs `opp_run_validation_tests --load $INET_ROOT -p inet -m $MODE`. `inet.opp` names `inet.test.validation:run_validation_tests` as the runner of this kind, so opp_repl calls INET's own validation tests. That module still imports INET's own Python package until S7 rewrites it, and `inet.common.task` imports `dask`, which opp_repl installs only as an option, so the workflow still installs INET's Python requirements.
   - Results. In the GitHub-job container on one release build, both runners run the same 27 simulations and pass all 8 validation tests. The GitHub master run 40465659433 passes the same 8 tests, also with the limits of S4 in the QUIC examples.
 - [ ] **S7. Remove the duplicate layer.** Rewrite `inet.test.validation` to import from opp_repl; remove the generic modules of `python/inet` and the tools of decision D4; rewrite `inet_run_serializer_tests` as a thin wrapper of `opp_run_opp_tests` in `tests/serializer`; trim `python/requirements.txt`; update the developer guide, the Python package documentation, the release note and the migration guide. Check: each workflow passes, the `.anf` scripts import `inet.scave`, and the documentation builds.
+  - The inventory of `python/inet` and `bin/` (2026-10-27) gives these parts, one commit each:
+  - [ ] S7a. `inet.scave.plot` takes its four helpers from `inet.common.util` (`COLOR_RESET`, `LoggerLevel`, `ensure_logging_initialized`, `get_logging_formatter`); it gets small copies of its own (decision D13).
+  - [ ] S7b. `inet.test.validation` imports from opp_repl. It gets the INET root from its own location, because the chart scripts of two validation `.anf` files call it outside opp_repl; these two files import `inet.test.validation` themselves.
+  - [ ] S7c. `inet.documentation.html` imports from opp_repl (decision D12).
+  - [ ] S7d. `bin/` loses the tools of decision D4, and `inet_run_serializer_tests` runs `opp_run_opp_tests` in `tests/serializer`.
+  - [ ] S7e. `python/inet` loses `common`, `simulation`, `project`, `cffi` (decision D11), `main.py`, `repl.py`, `__main__.py`, each `test` module except `validation.py`, and `documentation/chart.py` and `ned.py`; `inet/__init__.py` gets a short docstring. `python/requirements.txt` goes, because no remaining module needs its packages; `INSTALL.md` and the validation workflow follow. The release note and the migration guide section come with this commit.
+  - [ ] S7f. The guides, READMEs, design documents and the two rule examples name the `opp_run_*` commands (decision D14); the evidence records stay.
+
 
 Dependencies: S0 before every other step. S1 to S6 in any order after S0, one pull request each (S0 with S1). S7 after S1 to S6. The opp_repl changes of S3 go to `main` and then to `github_ci` before the INET pull request of S3.
 
@@ -141,5 +149,9 @@ Decisions of the maintainer, later on 2026-10-26:
 - **D8, where the feature test runs:** only on GitHub CI, not on a developer's computer; the comparison of S3 uses GitHub runs.
 - **D9, feature collection:** the feature test collects the simulations of each case after the build of that case, so that it knows the run count of each config with iterations.
 - **D10, `.oppfeatures` gaps:** repair them in their own pull requests to master before S3 lands, and check the repair with a GitHub feature run, so that the weekly job stays green.
+- **D11, `inet.cffi`:** remove it. Its only caller is `inet.simulation.task`, which S7 removes, and opp_repl's in-process runner is unfinished; git history keeps the code for a later hook in opp_repl.
+- **D12, documentation helpers:** keep `inet.documentation.html`, which builds and uploads the INET documentation; remove `chart.py` and `ned.py`, which opp_repl has.
+- **D13, `inet.scave`:** it keeps no dependency on opp_repl, so that the chart scripts work in a Python without opp_repl, for example in the IDE.
+- **D14, documents:** update the guides, the READMEs, the design documents and the two rule examples (`rule/pull-request.md`, `rule/naming.md`); leave the evidence records in `doc/project/evidence`, which record past runs.
 
 Separate permissions: each push and pull request; the baseline changes of D2 under TR-BASELINE-DELIBERATE; seal permission if a rule text changes.
