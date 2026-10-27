@@ -11,8 +11,8 @@ From the repository root, with the normal OMNeT++/INET environment sourced:
 
 ```sh
 make MODE=debug -j$(nproc)
-inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$'
-inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$' \
+opp_run_protocol_tests -m debug -w '^tests/protocol/wifi$'
+opp_run_protocol_tests -m debug -w '^tests/protocol/wifi$' \
   -f '/N_BlockAck\.test$'
 ```
 

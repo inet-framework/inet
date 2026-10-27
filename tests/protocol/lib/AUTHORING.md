@@ -433,10 +433,10 @@ The runner builds the applicable test support library and generated executables 
 Run from the repository root, selecting the suite and test files for focused development:
 
 ```sh
-inet_run_protocol_tests -p inet -m debug -w '<suite-regex>' -f '<test-path-regex>'
-inet_run_protocol_tests -p inet -m debug -w self  # one suite (the folder name)
-inet_run_protocol_tests -p inet -m debug -w ipv   # every suite whose folder matches
-inet_run_protocol_tests -p inet -m debug          # every suite
+opp_run_protocol_tests -m debug -w '<suite-regex>' -f '<test-path-regex>'
+opp_run_protocol_tests -m debug -w self  # one suite (the folder name)
+opp_run_protocol_tests -m debug -w ipv   # every suite whose folder matches
+opp_run_protocol_tests -m debug          # every suite
 ```
 
 The runner finds the suites itself: every direct subfolder of `tests/protocol` that holds
