@@ -9,9 +9,9 @@
 | P3 | packets without a network interface | done, `fbceb2089d` |
 | P4 | one interface description for each link type | done, `a7012aad80` |
 | P5 | new interface numbers in each new file | done, `96a8e2ff51` |
-| P6 | block-level write functions (refactor) | to do |
-| P7 | the public block API with options | to do |
-| P8 | move the plan to `plan/done/` | to do |
+| P6 | block-level write functions (refactor) | done, `461ddbfede` |
+| P7 | the public block API with options | done, `566c451674` |
+| P8 | move the plan to `plan/done/` | done, in the commit that moves this file |
 
 Branch `topic/pcapng-writer-format`, worktree `/home/levy/workspace/inet-pcapng-writer-format`, base `origin/master` `d48ae1fe10`. Local branch only, no pull request, no push until the user asks.
 
@@ -69,6 +69,10 @@ The writer does not use these parts of the format: Simple Packet Block, Name Res
 - **D-9** Each block type has its own option class, because the option codes overlap. With one class for all blocks, an `epb_flags` option in an IDB becomes an `if_name`.
 - **D-10** The writer converts a `simtime_t` timestamp with the time precision of the interface. It writes `if_tsresol` itself, and it refuses an `if_tsresol` in the options of the caller.
 - **D-11** The writer writes an empty option list as no options and no end-of-options marker. This keeps the SHB bytes of today, and the format permits it.
+- **D-12** (found in P7) The draft gives `if_fcslen` in bits, but the `epb_flags` FCS length in octets. The API uses the INET unit types: `PcapngInterfaceOptions::addFcsLength(b)` and `PcapngPacketFlags::fcsLength` of type `B`. Thus a caller cannot confuse the two units.
+- **D-13** (found in P7) `PcapngWriter.h` gets no new include. `MacAddress` and `Ipv4Address` come in through `NetworkInterface.h`, which the writer already includes. The architecture gate reports each include from `common/` into a protocol layer, and that old include already has an open exception (AV-ORG-01).
+- **D-14** (found in P6) The bytes tests compare the bytes of a little-endian host, as `PcapngWriterSnaplen_1.test` of PR #1130 already does. The writer writes the host byte order, and the section header declares it.
+- **D-15** (found in P7) `writeBlock()` stays protected. A public generic block function would give custom blocks, but no user needs them now (see "The format").
 
 ## Commits
 
@@ -148,3 +152,8 @@ Environment: OMNeT++ `omnetpp-6.x`, debug build of the worktree, `opp_run_unit_t
 - **P4:** at the parent, tshark gave both packets encapsulation 198 and decoded the MAC frame as `fpp:eth`. After the repair, `PcapngWriterLinkTypes_1.test` PASS, and tshark shows interface 0 with encapsulation 198 and interface 1 with encapsulation 1 (`eth`).
 - **P5:** at the parent, tshark reported the second file as damaged: "interface index 0 is not less than section interface count 0". My first probe met the same defect without intent, because it opened two files with one writer. After the repair, `PcapngWriterReopen_1.test` PASS, and tshark reads the second file.
 - Gates after P5: `check-commits.sh` and `check-classification.sh` on `origin/master..HEAD` PASS. P5 has the obligation `test` only, without a release note, because no simulation can show the defect. The gate accepts this.
+- **P6:** `PcapngWriterBytes_1.test` compares a complete file (SHB, two IDBs, three EPBs) with fixed bytes. It passes at P5 and at P6. `examples/inet/pcaprecorder`, config `General`, `--sim-time-limit=100s`, writes four PCAPng files (4552 packets). They are byte-identical at P5 and at P6: I built the P5 sources of the writer in the worktree for this comparison, and then the P6 sources again.
+- **P7:** `PcapngWriterBlocks_1.test` PASS. When I changed one expected value (the reception type) for a moment, the test failed at the `epb_flags` check, so the check can fail. All six writer tests PASS. The four files of `examples/inet/pcaprecorder` are byte-identical at P6 and at P7.
+- **P7 with tshark 4.6.4:** a probe file had three Ethernet interfaces and a second section with a Radiotap interface. tshark found the FCS on the interface with `if_fcslen = 32` and on the packet with the `epb_flags` FCS length 4. With `-o eth.check_fcs:TRUE` it reported `0xc279fd35 [correct]` for both. The packet without FCS information had no FCS. tshark showed the flags of that packet as direction inbound, reception type 3 (broadcast), FCS length 4, CRC error, and its comment. capinfos showed "Capture application: INET probe" from `shb_userappl`. The Radiotap record (an 8-byte Radiotap header and an 802.11 ACK, made by the caller as complete bytes) decoded as `radiotap.length` 8 and `wlan.fc.type_subtype` 0x001d.
+- Gates at P7: `check-commits.sh`, `check-classification.sh`, `check-includes.sh`, `check-ned-params.sh`, `check-whatsnew.sh` and `whatsnew.py check` PASS (through `check-pull-request.sh --base origin/master --head HEAD`; the description gate did not run, because a local branch has no description). `check-source-seals.sh` reports the two sealed files, under the permission of D-3. `check-naming.sh` and `check-architecture.sh` fail on old hits only: none names a PCAPng symbol, and the only recorder hit is the unchanged `NetworkInterface.h` include. `check-interfaces.sh` reports classes outside the recorder. `check-cpp.sh` did not run, because clang-tidy is not installed.
+- Builds at P7: `make MODE=debug` and `make MODE=release` PASS, and `nm -DC --undefined-only` finds no undefined `inet::` symbol in either library. The unit tests ran in debug mode only, because a release build drops the `EV` lines that they expect.
