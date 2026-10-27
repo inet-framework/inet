@@ -18,7 +18,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API VlanIndFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener
+class INET_API VlanIndFilter : public PacketFilterBase, public TransparentProtocolRegistrationListener, public cListener
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
@@ -31,8 +31,23 @@ class INET_API VlanIndFilter : public PacketFilterBase, public TransparentProtoc
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
 
+  protected:
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+
   public:
     virtual bool matchesPacket(const Packet *packet) const override;
+
+    /**
+     * Replaces the accepted VLAN ids of the interface, which must be in the
+     * interface table of this module. -1 accepts untagged packets.
+     */
+    void setInterfaceAcceptedVlanIds(const NetworkInterface *networkInterface, const std::set<int>& vlanIds);
+
+    /**
+     * Removes the accepted VLAN ids of the interface, so that the entry of
+     * "*" applies to it, or, without such an entry, no packet is accepted.
+     */
+    void removeInterfaceAcceptedVlanIds(const NetworkInterface *networkInterface);
 };
 
 } // namespace inet

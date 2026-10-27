@@ -1,0 +1,186 @@
+%description:
+
+Tests that the VLAN policy of a port can be set during the run, through the
+C++ setters of the four VLAN policy modules, and that the modules forget a
+port when its interface is deleted. The network and the traffic are those of
+lib/vlan-access-trunk.ini (see VlanIndMapper_1), except that bridge1 has no
+static VLAN policy entry for eth2, the port of b1.
+
+Until 0.5 s, the inbound filter of bridge1 drops everything that b1 sends: the
+first ARP request of b1 is dropped. At 0.5 s, a test module makes eth2 an access
+port of VLAN 20 with the four setters. The ARP retry of b1 at 1 s gets through,
+and from then on b1 and b2 exchange their data: b2 gets all of it. The
+applications close their connections at 2 s. The frame counts of the VLAN 10
+hosts equal those of the same hosts on two separate pairs of plain switches
+without VLANs, run for 3 s (as in VlanIndMapper_1), so they see none of the
+VLAN 20 traffic. b1 and b2 receive only the frames of their own connection
+(checked once by their addresses in a traced run): one SYN, one SYN+ACK and one
+ACK more than on the plain switches with b1 opening at 1 s, because TCP
+retransmits the SYN that waited for the ARP retry. At 2.5 s, after the last frame, the test module deletes the
+interface eth2 with InterfaceTable::deleteInterface(), and none of the four
+modules holds an entry for eth2 afterwards.
+
+%file: test.cc
+
+#include "inet/linklayer/vlan/VlanIndFilter.h"
+#include "inet/linklayer/vlan/VlanIndMapper.h"
+#include "inet/linklayer/vlan/VlanReqFilter.h"
+#include "inet/linklayer/vlan/VlanReqMapper.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+
+using namespace inet;
+
+namespace VlanPolicyLayer_runtime_1 {
+
+class TestVlanReqFilter : public VlanReqFilter
+{
+  public:
+    bool hasEntry(const char *interfaceName) const { return acceptedVlanIds.count(interfaceName) != 0; }
+};
+
+class TestVlanIndFilter : public VlanIndFilter
+{
+  public:
+    bool hasEntry(const char *interfaceName) const { return acceptedVlanIds.count(interfaceName) != 0; }
+};
+
+class TestVlanReqMapper : public VlanReqMapper
+{
+  public:
+    bool hasEntry(const char *interfaceName) const { return mappedVlanIds.count(interfaceName) != 0; }
+};
+
+class TestVlanIndMapper : public VlanIndMapper
+{
+  public:
+    bool hasEntry(const char *interfaceName) const { return mappedVlanIds.count(interfaceName) != 0; }
+};
+
+Define_Module(TestVlanReqFilter);
+Define_Module(TestVlanIndFilter);
+Define_Module(TestVlanReqMapper);
+Define_Module(TestVlanIndMapper);
+
+// Sets the VLAN policy of bridge1's eth2 at 0.5 s and deletes the interface at 2.5 s.
+class TestController : public cSimpleModule
+{
+  protected:
+    cModule *bridge = nullptr;
+    IInterfaceTable *interfaceTable = nullptr;
+
+  protected:
+    virtual void initialize() override
+    {
+        bridge = getModuleByPath(par("bridgeModule"));
+        interfaceTable = check_and_cast<IInterfaceTable *>(bridge->getSubmodule("interfaceTable"));
+        scheduleAt(0.5, new cMessage("set"));
+        scheduleAt(2.5, new cMessage("delete"));
+    }
+
+    template<typename T>
+    T *getPolicyModule(const char *name) { return check_and_cast<T *>(bridge->getModuleByPath(std::string(".bridging.vlanPolicy.").append(name).c_str())); }
+
+    virtual void handleMessage(cMessage *msg) override
+    {
+        auto networkInterface = interfaceTable->findInterfaceByName("eth2");
+        if (!strcmp(msg->getName(), "set")) {
+            getPolicyModule<VlanIndFilter>("inboundFilter")->setInterfaceAcceptedVlanIds(networkInterface, {-1, 0});
+            getPolicyModule<VlanIndMapper>("inboundMapper")->setInterfaceVlanIdMap(networkInterface, {{-1, 20}, {0, 20}});
+            getPolicyModule<VlanReqMapper>("outboundMapper")->setInterfaceVlanIdMap(networkInterface, {{20, -1}});
+            getPolicyModule<VlanReqFilter>("outboundFilter")->setInterfaceAcceptedVlanIds(networkInterface, {-1});
+        }
+        else {
+            interfaceTable->deleteInterface(networkInterface);
+            EV_INFO << "After deletion: inboundFilter " << getPolicyModule<TestVlanIndFilter>("inboundFilter")->hasEntry("eth2")
+                    << ", inboundMapper " << getPolicyModule<TestVlanIndMapper>("inboundMapper")->hasEntry("eth2")
+                    << ", outboundMapper " << getPolicyModule<TestVlanReqMapper>("outboundMapper")->hasEntry("eth2")
+                    << ", outboundFilter " << getPolicyModule<TestVlanReqFilter>("outboundFilter")->hasEntry("eth2") << EV_ENDL;
+        }
+        delete msg;
+    }
+};
+
+Define_Module(TestController);
+
+} // namespace VlanPolicyLayer_runtime_1
+
+%file: test.ned
+
+import inet.linklayer.vlan.VlanIndFilter;
+import inet.linklayer.vlan.VlanIndMapper;
+import inet.linklayer.vlan.VlanReqFilter;
+import inet.linklayer.vlan.VlanReqMapper;
+import inet.test.moduletest.lib.VlanAccessTrunkTestNetwork;
+
+simple TestVlanReqFilter extends VlanReqFilter
+{
+    @class(TestVlanReqFilter);
+}
+
+simple TestVlanIndFilter extends VlanIndFilter
+{
+    @class(TestVlanIndFilter);
+}
+
+simple TestVlanReqMapper extends VlanReqMapper
+{
+    @class(TestVlanReqMapper);
+}
+
+simple TestVlanIndMapper extends VlanIndMapper
+{
+    @class(TestVlanIndMapper);
+}
+
+simple TestController
+{
+    parameters:
+        string bridgeModule;
+}
+
+network TestNetwork extends VlanAccessTrunkTestNetwork
+{
+    submodules:
+        controller: TestController {
+            bridgeModule = "^.bridge1";
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+sim-time-limit = 3s
+*.controller.cmdenv-log-level = info
+*.bridge1.bridging.vlanPolicy.inboundFilter.cmdenv-log-level = warn
+*.bridge1.bridging.vlanPolicy.inboundFilter.typename = "TestVlanIndFilter"
+*.bridge1.bridging.vlanPolicy.inboundMapper.typename = "TestVlanIndMapper"
+*.bridge1.bridging.vlanPolicy.outboundMapper.typename = "TestVlanReqMapper"
+*.bridge1.bridging.vlanPolicy.outboundFilter.typename = "TestVlanReqFilter"
+*.bridge1.bridging.vlanPolicy.inboundMapper.mappedVlanIds = {"eth0" : {"-1" : 10, "0" : 10}, "eth1" : {"-1" : 10, "0" : 10}}
+*.bridge1.bridging.vlanPolicy.inboundFilter.acceptedVlanIds = {"eth0" : [-1, 0], "eth1" : [-1, 0], "eth3" : [10, 20]}
+*.bridge1.bridging.vlanPolicy.outboundFilter.acceptedVlanIds = {"eth0" : [-1], "eth1" : [-1], "eth3" : [10, 20]}
+*.bridge1.bridging.vlanPolicy.outboundMapper.mappedVlanIds = {"eth0" : {"10" : -1}, "eth1" : {"10" : -1}}
+include ../../lib/vlan-access-trunk.ini
+
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: stdout
+TestNetwork.bridge1.bridging.vlanPolicy.inboundFilter: Received packet is not accepted, dropping packet, packet = (Packet)arpREQ
+%contains: stdout
+TestNetwork.controller: After deletion: inboundFilter 0, inboundMapper 0, outboundMapper 0, outboundFilter 0
+%contains: results/General-#0.sca
+scalar TestNetwork.a1.eth[0].macLayer.fcsChecker incomingPackets:count 29
+%contains: results/General-#0.sca
+scalar TestNetwork.a2.eth[0].macLayer.fcsChecker incomingPackets:count 29
+%contains: results/General-#0.sca
+scalar TestNetwork.b1.eth[0].macLayer.fcsChecker incomingPackets:count 29
+%contains: results/General-#0.sca
+scalar TestNetwork.a3.eth[0].macLayer.fcsChecker incomingPackets:count 102
+%contains: results/General-#0.sca
+scalar TestNetwork.b2.eth[0].macLayer.fcsChecker incomingPackets:count 53
+%contains: results/General-#0.sca
+scalar TestNetwork.b2.app[0] packetReceived:sum(packetBytes) 65536
+%contains: results/General-#0.sca
+scalar TestNetwork.a3.app[0] packetReceived:sum(packetBytes) 131072

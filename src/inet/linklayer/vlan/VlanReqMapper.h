@@ -18,7 +18,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API VlanReqMapper : public PacketFlowBase, public TransparentProtocolRegistrationListener
+class INET_API VlanReqMapper : public PacketFlowBase, public TransparentProtocolRegistrationListener, public cListener
 {
   protected:
     const Protocol *protocol = nullptr;
@@ -30,6 +30,22 @@ class INET_API VlanReqMapper : public PacketFlowBase, public TransparentProtocol
     virtual void processPacket(Packet *packet) override;
 
     virtual cGate *getRegistrationForwardingGate(cGate *gate) override;
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+
+  public:
+    /**
+     * Replaces the VLAN id map of the interface, which must be in the
+     * interface table of this module. -1 stands for no tag, as key and as
+     * mapped VLAN id.
+     */
+    void setInterfaceVlanIdMap(const NetworkInterface *networkInterface, const std::map<int, int>& vlanIdMap);
+
+    /**
+     * Removes the VLAN id map of the interface, so that the entry of "*"
+     * applies to it, or, without such an entry, packets pass unchanged.
+     */
+    void removeInterfaceVlanIdMap(const NetworkInterface *networkInterface);
 };
 
 } // namespace inet
