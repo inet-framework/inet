@@ -11,6 +11,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/linklayer/vlan/VlanIdMaps.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -25,6 +26,7 @@ void VlanReqMapper::initialize(int stage)
         interfaceTable.reference(this, "interfaceTableModule", true);
         cObject *object = par("mappedVlanIds");
         mappedVlanIds = check_and_cast<cValueMap *>(object);
+        checkMappedVlanIds(this, mappedVlanIds, 0);
         WATCH(mappedVlanIds);
     }
 }

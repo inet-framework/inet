@@ -1,0 +1,18 @@
+%description:
+
+Tests that a VLAN policy module rejects a filter VLAN id that is not an integer in its map parameter at
+initialization, naming the interface and the entry. Before the check, the entry
+was ignored or failed only when a packet reached it. The network is the one of
+lib/vlan-access-trunk.ini, with one malformed parameter.
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+*.bridge1.bridging.vlanPolicy.inboundFilter.acceptedVlanIds = {"eth3" : [10, "20"]}
+include ../../lib/vlan-access-trunk.ini
+
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > vlan-map-error.out || true
+%contains: vlan-map-error.out
+Invalid VLAN id "20" in the acceptedVlanIds entry for interface 'eth3': expected an integer, -1 or 0 to 4094
