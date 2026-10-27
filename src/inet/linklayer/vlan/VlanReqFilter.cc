@@ -9,7 +9,6 @@
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/vlan/VlanIdMaps.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -21,10 +20,7 @@ void VlanReqFilter::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         interfaceTable.reference(this, "interfaceTableModule", true);
-        cObject *object = par("acceptedVlanIds");
-        acceptedVlanIds = check_and_cast<cValueMap *>(object);
-        checkAcceptedVlanIds(this, acceptedVlanIds);
-        WATCH(acceptedVlanIds);
+        acceptedVlanIds = parseAcceptedVlanIds(this, check_and_cast<cValueMap *>(par("acceptedVlanIds").objectValue()));
     }
 }
 
@@ -48,17 +44,13 @@ bool VlanReqFilter::matchesPacket(const Packet *packet) const
 {
     auto interfaceReq = packet->findTag<InterfaceReq>();
     auto networkInterface = interfaceReq != nullptr ? interfaceTable->getInterfaceById(interfaceReq->getInterfaceId()) : nullptr;
-    auto interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
-    auto key = acceptedVlanIds->containsKey(interfaceName) ? interfaceName : "*";
-    if (acceptedVlanIds->containsKey(key)) {
-        auto vlanReq = packet->findTag<VlanReq>();
-        auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : -1;
-        auto interfaceVlanIdList = check_and_cast<cValueArray *>(acceptedVlanIds->get(key).objectValue());
-        for (int i = 0; i < interfaceVlanIdList->size(); i++)
-            if (interfaceVlanIdList->get(i).intValue() == vlanId)
-                return true;
-    }
-    return false;
+    std::string interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
+    auto interfaceVlanIds = findInterfaceEntry(acceptedVlanIds, interfaceName);
+    if (interfaceVlanIds == nullptr)
+        return false;
+    auto vlanReq = packet->findTag<VlanReq>();
+    auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : -1;
+    return interfaceVlanIds->count(vlanId) != 0;
 }
 
 } // namespace inet
