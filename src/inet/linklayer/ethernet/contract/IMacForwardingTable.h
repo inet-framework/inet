@@ -18,14 +18,14 @@ namespace inet {
 class INET_API IMacForwardingTable
 {
   public:
-    virtual int getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid = 0) const = 0;
-    virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
-    virtual void removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
-    virtual void learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
+    virtual int getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid) const = 0;
+    virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) = 0;
+    virtual void removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) = 0;
+    virtual void learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) = 0;
 
-    virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress& address, unsigned int vid = 0) const = 0;
-    virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
-    virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) = 0;
+    virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress& address, unsigned int vid) const = 0;
+    virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) = 0;
+    virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) = 0;
 
     virtual void removeForwardingInterface(int interfaceId) = 0;
     virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) = 0;

@@ -69,14 +69,14 @@ class INET_API MacForwardingTable : public OperationalBase, public IMacForwardin
 
   public:
     // IMacForwardingTable
-    virtual int getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid = 0) const override;
-    virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
-    virtual void removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
-    virtual void learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual int getUnicastAddressForwardingInterface(const MacAddress& address, unsigned int vid) const override;
+    virtual void setUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) override;
+    virtual void removeUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) override;
+    virtual void learnUnicastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) override;
 
-    virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress& address, unsigned int vid = 0) const override;
-    virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
-    virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid = 0) override;
+    virtual std::vector<int> getMulticastAddressForwardingInterfaces(const MacAddress& address, unsigned int vid) const override;
+    virtual void addMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) override;
+    virtual void removeMulticastAddressForwardingInterface(int interfaceId, const MacAddress& address, unsigned int vid) override;
 
     virtual void removeForwardingInterface(int interfaceId) override;
     virtual void replaceForwardingInterface(int oldInterfaceId, int newInterfaceId) override;
