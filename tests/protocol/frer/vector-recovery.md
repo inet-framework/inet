@@ -91,7 +91,7 @@ Install `opp_repl` as described by [INSTALL.md](../../../INSTALL.md); see the
 runner configuration and options.
 
 The [showcase README](../../../showcases/tsn/framereplication/vectorrecovery/README.md)
-describes the four complete-network demonstrations and their result checker.
+describes the four complete-network demonstrations and their recorded results.
 Run existing FRER fingerprint cases through the repository's fingerprint runner;
 do not regenerate their baselines. Build status, selected cases, configurations,
 runs, seeds, exit statuses and result paths belong in the PR execution evidence.
