@@ -1,0 +1,187 @@
+%description:
+Sender restart with rogue traffic, individual recovery rogue-timer behavior,
+discarded tagless frames near timeout, dynamic mappings while timers are active,
+large-history wraparound, and rejection of incomplete streaming operations.
+
+%file: Driver.cc
+#include "inet/protocolelement/redundancy/VectorStreamMerger.h"
+#include "inet/common/SequenceNumberTag_m.h"
+#include "inet/protocolelement/redundancy/StreamTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+using namespace inet;
+namespace VectorStreamMerger_3 {
+class ObservedMerger : public VectorStreamMerger
+{
+  public:
+    bool wouldForward(const Packet *packet) const { return matchesPacket(packet); }
+    void checkCounters(int passed, int discarded, int rogue, int resets) {
+        Enter_Method("checkCounters");
+        if (passedPackets != passed || discardedPackets != discarded || roguePackets != rogue || recoveryResets != resets)
+            throw cRuntimeError("Unexpected counters in %s: passed=%lld discarded=%lld rogue=%lld resets=%lld",
+                                getName(), (long long)passedPackets, (long long)discardedPackets,
+                                (long long)roguePackets, (long long)recoveryResets);
+    }
+    void checkLargeGap() {
+        Enter_Method("checkLargeGap");
+        if (lostPackets != 32767 || outOfOrderPackets != 1)
+            throw cRuntimeError("Large-gap history accounting mismatch");
+    }
+};
+Define_Module(ObservedMerger);
+
+class Driver : public cSimpleModule
+{
+  public:
+    Driver() : cSimpleModule(65536) {}
+  protected:
+    virtual void activity() override {
+        auto get = [&](const char *name) { return check_and_cast<ObservedMerger *>(getParentModule()->getSubmodule(name)); };
+        auto ordinary = get("ordinary");
+        auto individual = get("individual");
+        auto dynamic = get("dynamic");
+        auto large = get("large");
+        auto packet = [](const char *stream, int sequence) {
+            auto p = new Packet("frame", makeShared<ByteCountChunk>(B(10)));
+            p->addTag<StreamInd>()->setStreamName(stream);
+            if (sequence >= 0)
+                p->addTag<SequenceNumberInd>()->setSequenceNumber(sequence);
+            return p;
+        };
+        auto push = [&](ObservedMerger *target, const char *stream, int sequence, bool expected) {
+            auto p = packet(stream, sequence);
+            if (!target->canPushPacket(p, target->gate("in")) || target->wouldForward(p) != expected) {
+                delete p;
+                throw cRuntimeError("Wrong readiness or forwarding decision in %s for sequence %d", target->getName(), sequence);
+            }
+            target->pushPacket(p, target->gate("in"));
+        };
+        auto probe = [&](ObservedMerger *target, const char *stream, int sequence, bool expected) {
+            auto p = packet(stream, sequence);
+            bool ready = target->canPushPacket(p, target->gate("in"));
+            bool forwarded = target->wouldForward(p);
+            delete p;
+            if (!ready || forwarded != expected)
+                throw cRuntimeError("Wrong probe result");
+        };
+        auto remap = [&](std::initializer_list<std::pair<const char *, const char *>> entries) {
+            auto mapping = new cValueMap();
+            for (auto entry : entries)
+                mapping->set(entry.first, cValue(entry.second));
+            dynamic->par("mapping").setObjectValue(mapping);
+        };
+
+        push(ordinary, "a", 50000, true);
+        push(individual, "a", 50000, true);
+        push(dynamic, "a", 7, true);
+        push(dynamic, "c", 7, true);
+        push(dynamic, "b", 7, false);
+        push(large, "a", 65530, true);
+        push(large, "a", 32761, true); // +32767 across wraparound.
+        push(large, "a", 65530, false); // Still remembered at the oldest bit.
+        push(large, "a", 32762, true);
+        push(large, "a", 65530, false); // Half-space endpoint, now rogue.
+        large->checkCounters(3, 1, 1, 1);
+        large->checkLargeGap();
+        std::cout << "maximum-history module wraparound passed\n";
+
+        if (ordinary->supportsPacketStreaming(ordinary->gate("in")))
+            throw cRuntimeError("Streaming advertised unexpectedly");
+        for (int operation = 0; operation < 3; operation++) {
+            auto p = packet("a", 50001);
+            bool rejected = false;
+            try {
+                if (operation == 0)
+                    ordinary->pushPacketStart(p, ordinary->gate("in"), bps(1000000));
+                else if (operation == 1)
+                    ordinary->pushPacketEnd(p, ordinary->gate("in"));
+                else
+                    ordinary->pushPacketProgress(p, ordinary->gate("in"), bps(1000000), b(1), b(0));
+            }
+            catch (cRuntimeError&) { rejected = true; }
+            delete p;
+            if (!rejected)
+                throw cRuntimeError("Incomplete frame was processed");
+        }
+        ordinary->checkCounters(1, 0, 0, 1);
+        std::cout << "complete-frame requirement passed\n";
+
+        wait(0.009);
+        push(ordinary, "a", 0, false);
+        push(individual, "a", 0, false);
+        remap({{"a", "renamed"}, {"b", "renamed"}, {"c", "renamed"}});
+        probe(dynamic, "a", 7, false);
+        probe(dynamic, "c", 7, false);
+        remap({{"c", "renamed"}}); // Cancel flow1's pending timer.
+        remap({{"a", "renamed"}, {"b", "renamed"}, {"c", "renamed"}});
+        push(dynamic, "b", 7, true); // Newly created flow1 starts empty.
+        probe(dynamic, "c", 7, false); // flow2 kept its history.
+        remap({}); // Cancel both pending timers and delete their contexts.
+
+        wait(0.001);
+        push(ordinary, "a", 0, true); // Rogues did not extend its 10ms timer.
+        probe(individual, "a", 0, false); // Rogue reloaded its timer to 19ms.
+        remap({{"a", "renamed"}});
+        push(dynamic, "a", 7, true);
+        dynamic->checkCounters(4, 1, 0, 4);
+
+        wait(0.009);
+        push(individual, "a", 0, true); // Exact 19ms expiry, probe was pure.
+        push(ordinary, "a", -1, false); // Does not postpone its 20ms expiry.
+        wait(0.001);
+        push(ordinary, "a", 50000, true);
+        push(dynamic, "a", 7, true);
+        ordinary->checkCounters(3, 1, 1, 3);
+        individual->checkCounters(2, 0, 1, 2);
+        dynamic->checkCounters(5, 1, 0, 5);
+        std::cout << "sender restart and rogue/tagless timers passed\n";
+        std::cout << "mutable mapping state and timer cleanup passed\n";
+    }
+};
+Define_Module(Driver);
+class Sink : public cSimpleModule
+{
+  protected:
+    virtual void handleMessage(cMessage *message) override { delete message; }
+};
+Define_Module(Sink);
+}
+
+%file: TestNetwork.ned
+import inet.protocolelement.redundancy.VectorStreamMerger;
+simple ObservedMerger extends VectorStreamMerger { @class(::VectorStreamMerger_3::ObservedMerger); }
+simple Driver { @class(::VectorStreamMerger_3::Driver); }
+simple Sink { @class(::VectorStreamMerger_3::Sink); gates: input in; }
+network TestNetwork {
+    submodules:
+        driver: Driver;
+        ordinary: ObservedMerger { parameters: mapping = {a: ""}; }
+        individual: ObservedMerger { parameters: mapping = {a: ""}; individualRecovery = true; }
+        dynamic: ObservedMerger {
+            parameters:
+                mapping = {a: "out", b: "out", c: "out"};
+                recoveryMapping = {a: "flow1", b: "flow1", c: "flow2"};
+        }
+        large: ObservedMerger { parameters: mapping = {a: ""}; historyLength = 32768; resetTimeout = 0ms; }
+        sink[4]: Sink;
+    connections allowunconnected:
+        ordinary.out --> sink[0].in;
+        individual.out --> sink[1].in;
+        dynamic.out --> sink[2].in;
+        large.out --> sink[3].in;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src
+network = TestNetwork
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+**.historyLength = 5
+**.resetTimeout = 10ms
+sim-time-limit = 21ms
+
+%contains: stdout
+maximum-history module wraparound passed
+complete-frame requirement passed
+sender restart and rogue/tagless timers passed
+mutable mapping state and timer cleanup passed
