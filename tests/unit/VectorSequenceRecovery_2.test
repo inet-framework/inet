@@ -1,0 +1,138 @@
+%description:
+Deterministic stress and differential tests for IEEE 802.1CB-2017 VRA with CBdb-2021 item 0257.
+Compare the optimized bit-vector implementation with an independent model that
+stores explicit received sequence numbers. Exercise history eviction, gaps,
+reordering, duplicates, window endpoints, resets, and multiple complete wraps.
+
+%includes:
+#include "inet/protocolelement/redundancy/VectorSequenceRecovery.h"
+#include <set>
+#include <random>
+#include <stdexcept>
+using namespace inet;
+
+%global:
+struct RecoveryOracle
+{
+    using Decision = VectorSequenceRecovery::Decision;
+    int length;
+    int reference = 0;
+    bool initialized = false;
+    std::set<int> received;
+
+    explicit RecoveryOracle(int length) : length(length) {}
+    static int number(int value) { return (value % 65536 + 65536) % 65536; }
+    void reset() { initialized = false; received.clear(); }
+
+    Decision classify(int sequence) const {
+        if (!initialized)
+            return VectorSequenceRecovery::ACCEPT;
+        int ahead = number(sequence - reference);
+        int behind = number(reference - sequence);
+        if (ahead == 0)
+            return received.count(sequence) ? VectorSequenceRecovery::DUPLICATE : VectorSequenceRecovery::ACCEPT_OUT_OF_ORDER;
+        if (ahead <= length && ahead < 32768)
+            return ahead == 1 ? VectorSequenceRecovery::ACCEPT : VectorSequenceRecovery::ACCEPT_OUT_OF_ORDER;
+        if (behind < length)
+            return received.count(sequence) ? VectorSequenceRecovery::DUPLICATE : VectorSequenceRecovery::ACCEPT_OUT_OF_ORDER;
+        return VectorSequenceRecovery::ROGUE;
+    }
+
+    VectorSequenceRecovery::Result process(int sequence) {
+        Decision decision = classify(sequence);
+        if (decision == VectorSequenceRecovery::DUPLICATE || decision == VectorSequenceRecovery::ROGUE)
+            return {decision, 0};
+        int lost = 0;
+        if (!initialized) {
+            initialized = true;
+            reference = sequence;
+        }
+        else {
+            int ahead = number(sequence - reference);
+            if (ahead > 0 && ahead <= length && ahead < 32768) {
+                // Count explicit sequence positions that leave the old interval.
+                // No history shifting or bit-vector representation is used.
+                for (int offset = length - ahead; offset < length; offset++)
+                    if (!received.count(number(reference - offset)))
+                        lost++;
+                reference = sequence;
+            }
+        }
+        received.insert(sequence);
+        for (auto it = received.begin(); it != received.end(); ) {
+            if (number(reference - *it) >= length)
+                it = received.erase(it);
+            else
+                ++it;
+        }
+        return {decision, lost};
+    }
+};
+
+%activity:
+using Recovery = VectorSequenceRecovery;
+uint64_t transitions = 0;
+for (int historyLength : {2, 3, 5, 8, 32, 127, 1024, 32768}) {
+    for (unsigned int seed = 1; seed <= 8; seed++) {
+        std::mt19937 random(seed * 7919 + historyLength);
+        Recovery recovery(historyLength);
+        Recovery shifted(historyLength);
+        RecoveryOracle oracle(historyLength);
+        int translation = random() % 65536;
+        int steps = historyLength == 32768 ? 256 : 5000;
+        for (int step = 0; step < steps; step++) {
+            if (random() % 37 == 0) {
+                recovery.reset();
+                shifted.reset();
+                oracle.reset();
+            }
+            int offsets[] = {0, 1, -1, historyLength, -historyLength,
+                             historyLength - 1, 1 - historyLength, 32768};
+            int sequence;
+            switch (random() % 4) {
+                case 0: sequence = random() % 65536; break;
+                case 1: sequence = RecoveryOracle::number(oracle.reference + offsets[random() % 8]); break;
+                case 2: sequence = RecoveryOracle::number(oracle.reference + int(random() % historyLength)); break;
+                default: sequence = RecoveryOracle::number(oracle.reference - int(random() % historyLength)); break;
+            }
+            auto expected = oracle.classify(sequence);
+            // Repeat queries and probe an unrelated frame before processing.
+            if (recovery.classify(sequence) != expected || recovery.classify(sequence) != expected)
+                throw std::runtime_error("Differential admission mismatch");
+            int probe = random() % 65536;
+            if (recovery.classify(probe) != oracle.classify(probe))
+                throw std::runtime_error("Differential probe mismatch");
+            auto actual = recovery.process(sequence);
+            auto reference = oracle.process(sequence);
+            auto translated = shifted.process(RecoveryOracle::number(sequence + translation));
+            if (actual.decision != reference.decision || actual.lostPackets != reference.lostPackets)
+                throw std::runtime_error("Differential processing mismatch at history=" + std::to_string(historyLength) +
+                                         ", seed=" + std::to_string(seed) + ", step=" + std::to_string(step));
+            if (actual.decision != translated.decision || actual.lostPackets != translated.lostPackets)
+                throw std::runtime_error("Sequence-number translation changed behavior");
+            transitions++;
+        }
+    }
+}
+std::cout << "randomized differential transitions passed: " << transitions << "\n";
+
+Recovery continuous(128);
+int lost = 0;
+for (int i = 0; i < 200000; i++) {
+    int sequence = RecoveryOracle::number(60000 + i);
+    auto result = continuous.process(sequence);
+    if (result.decision != Recovery::ACCEPT)
+        throw std::runtime_error("Sequential frame rejected across wraparound");
+    lost += result.lostPackets;
+    if (i % 113 == 0 && continuous.process(sequence).decision != Recovery::DUPLICATE)
+        throw std::runtime_error("Duplicate passed in continuous stream");
+    if (i % 997 == 0 && continuous.process(RecoveryOracle::number(sequence + 129)).decision != Recovery::ROGUE)
+        throw std::runtime_error("Frame beyond forward window passed in continuous stream");
+}
+if (lost != 127)
+    throw std::runtime_error("Unexpected losses after filling a continuous history");
+std::cout << "200000-frame multiple-wrap stream passed\n";
+
+%contains: stdout
+randomized differential transitions passed: 282048
+200000-frame multiple-wrap stream passed
