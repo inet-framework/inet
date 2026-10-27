@@ -4,6 +4,8 @@ This is the Python package of the INET Framework. It holds only the Python code 
 - :py:mod:`inet.scave`: the helpers of the chart scripts in the analysis (``.anf``) files
 - :py:mod:`inet.test.validation`: the validation tests, which compare simulation results with analytical models and
   with the results of other simulators
+- :py:mod:`inet.test.core4inet`: the reference delays of Core4INET, which the validation tests and the charts of two
+  validation analysis files use
 - :py:mod:`inet.documentation`: build, upload and open the HTML documentation of INET
 
 To build INET, run simulations and run the tests, use opp_repl (https://github.com/omnetpp/opp_repl), for example

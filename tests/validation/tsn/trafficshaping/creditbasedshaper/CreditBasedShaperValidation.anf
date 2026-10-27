@@ -9,7 +9,7 @@
             <script><![CDATA[import sys
 import os
 sys.path.append(os.path.join(os.path.os.getcwd(), "../../../../../python"))
-import inet.test.validation
+import inet.test.core4inet
 import re
 import pandas as pd
 from omnetpp.scave import results, chart, utils
@@ -43,7 +43,7 @@ df_simulated["statistic"] = df["name"].map(lambda name: re.sub(".*:", "", name))
 df_simulated['type'] = "simulated"
 df_simulated.reset_index(inplace=True, drop=True)
 
-df_validation_test = inet.test.validation.compute_creditbasedshaper_endtoend_delay_alternatively()
+df_validation_test = inet.test.core4inet.compute_endtoend_delay()
 df_validation_test = pd.DataFrame(df_validation_test.stack())
 df_validation_test.reset_index(inplace=True)
 df_analytical = df_simulated.copy()

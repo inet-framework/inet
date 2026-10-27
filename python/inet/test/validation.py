@@ -22,6 +22,8 @@ from opp_repl.simulation.task import get_simulation_tasks
 from opp_repl.simulation.workspace import get_default_simulation_project
 from opp_repl.test.task import MultipleTestTasks, TaskTestTask, TestTask, TestTaskResult
 
+from inet.test.core4inet import compute_endtoend_delay
+
 _logger = logging.getLogger(__name__)
 
 # The INET root folder, from the location of this file. The chart scripts of two analysis files call the
@@ -184,24 +186,9 @@ def compute_asynchronousshaper_core4inet_max_queuelength_from_simulation_results
     df = get_scalars(df)
     return numpy.max(df["value"])
 
-def compute_asynchronousshaper_core4inet_endtoend_delay_alternatively(**kwargs):
-    # This validation test compares simulation results to analytical results and also
-    # to results from a different simulation using Core4INET.
-    # https://github.com/CoRE-RG/CoRE4INET/tree/master/examples/tsn/medium_network
-    df = pd.DataFrame(index=["Medium", "High", "Critical"],
-                      data={"min": [88.16, 60.8, 252.8],
-                            "max": [540, 307.2, 375.84],
-                            "mean": [247.1, 161.19, 298.52],
-                            "stddev": [106.53, 73.621, 36.633]})
-    df["min"] -= 0.001 # 1 ns initial production offset, see INI file
-    df = df + 0.05 * 2 # 50 ns propagation delay per hop
-    df.index.set_names(["trafficclass"], inplace=True)
-    df.columns.set_names(["name"], inplace=True)
-    return df
-
 def compute_tsn_trafficshaping_asynchronousshaper_core4inet_validation_test_results(test_accuracy=0.01, **kwargs):
     df1 = compute_asynchronousshaper_core4inet_endtoend_delay_from_simulation_results(**kwargs)
-    df2 = compute_asynchronousshaper_core4inet_endtoend_delay_alternatively(**kwargs)
+    df2 = compute_endtoend_delay()
     df1 = df1.sort_index(axis=0).sort_index(axis=1)
     df2 = df2.sort_index(axis=0).sort_index(axis=1)
     maxQueueLength = compute_asynchronousshaper_core4inet_max_queuelength_from_simulation_results()
@@ -251,24 +238,9 @@ def compute_creditbasedshaper_max_queuelength_from_simulation_results(**kwargs):
     df = get_scalars(df)
     return numpy.max(df["value"])
 
-def compute_creditbasedshaper_endtoend_delay_alternatively(**kwargs):
-    # This validation test compares simulation results to analytical results and also
-    # to results from a different simulation using Core4INET.
-    # https://github.com/CoRE-RG/CoRE4INET/tree/master/examples/tsn/medium_network
-    df = pd.DataFrame(index=["Medium", "High", "Critical"],
-                      data={"min": [88.16, 60.8, 252.8],
-                            "max": [540, 307.2, 375.84],
-                            "mean": [247.1, 161.19, 298.52],
-                            "stddev": [106.53, 73.621, 36.633]})
-    df["min"] -= 0.001 # 1 ns initial production offset, see INI file
-    df = df + 0.05 * 2 # 50 ns propagation delay per hop
-    df.index.set_names(["trafficclass"], inplace=True)
-    df.columns.set_names(["name"], inplace=True)
-    return df
-
 def compute_tsn_trafficshaping_creditbasedshaper_validation_test_results(test_accuracy=0.01, **kwargs):
     df1 = compute_creditbasedshaper_endtoend_delay_from_simulation_results(**kwargs)
-    df2 = compute_creditbasedshaper_endtoend_delay_alternatively(**kwargs)
+    df2 = compute_endtoend_delay()
     df1 = df1.sort_index(axis=0).sort_index(axis=1)
     df2 = df2.sort_index(axis=0).sort_index(axis=1)
     maxQueueLength = compute_creditbasedshaper_max_queuelength_from_simulation_results()
