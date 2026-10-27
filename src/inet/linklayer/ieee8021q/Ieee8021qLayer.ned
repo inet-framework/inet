@@ -19,6 +19,13 @@ import inet.protocolelement.contract.IProtocolLayer;
 // traffic control in Ethernet networks by processing VLAN tags according to
 // configured policies.
 //
+// The policy submodule sits above the protocol submodule, so it sees only
+// frames that carried a tag on reception, and frames that are already headed
+// for tagging on transmission. Untagged frames pass between the Ethernet layer
+// and the upper layers without entering this module. To classify untagged
+// frames into a VLAN per port, use the `vlanPolicy` submodule of ~BridgingLayer
+// with a ~VlanIndMapper; see ~VlanPolicyLayer.
+//
 module Ieee8021qLayer like IIeee8021qLayer
 {
     parameters:

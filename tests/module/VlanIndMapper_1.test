@@ -1,0 +1,52 @@
+%description:
+
+Tests that VlanIndMapper classifies the frames received on the access ports of
+a VLAN-aware bridge into the VLAN of the port, as the port VLAN id (PVID) based
+classification of IEEE 802.1Q-2018 clause 6.9.1 f does. The network and the
+traffic are described in lib/vlan-access-trunk.ini: two bridges joined by a
+trunk, VLAN 10 with the hosts a1, a2 and a3, and VLAN 20 with b1 and b2, where
+a1 and b1, and a3 and b2, use the same MAC address.
+
+Every receiver must get all of its data. The tag inserter of bridge1 must tag
+frames with VLAN 10 and with VLAN 20, which it only does on the trunk, because
+the hosts of the access ports have no 802.1Q layer and cannot receive tagged
+frames. a2 sends priority-tagged frames, and the inbound mapper of bridge1
+must classify them into VLAN 10.
+
+The frame counts at the hosts check that each VLAN is a forwarding domain of
+its own. Each count equals the count of the same host in a network where the
+two VLANs are two separate pairs of plain switches without any VLAN
+configuration, and a2 sends untagged frames: no frame crosses from one VLAN to
+the other, broadcasts included, and no unicast frame is flooded to a host it
+is not addressed to once its destination is learned.
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+include ../../lib/vlan-access-trunk.ini
+
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.a1.eth[0].macLayer.fcsChecker incomingPackets:count 27
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.a2.eth[0].macLayer.fcsChecker incomingPackets:count 27
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.b1.eth[0].macLayer.fcsChecker incomingPackets:count 26
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.a3.eth[0].macLayer.fcsChecker incomingPackets:count 98
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.b2.eth[0].macLayer.fcsChecker incomingPackets:count 49
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.a3.app[0] packetReceived:sum(packetBytes) 131072
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.b2.app[0] packetReceived:sum(packetBytes) 65536
+%contains: stdout
+VlanAccessTrunkTestNetwork.bridge1.ieee8021q.qTagHeaderInserter: Setting VID, vid = 10.
+%contains: stdout
+VlanAccessTrunkTestNetwork.bridge1.ieee8021q.qTagHeaderInserter: Setting VID, vid = 20.
+%contains: stdout
+VlanAccessTrunkTestNetwork.a2.ieee8021q.qTagHeaderInserter: Setting VID, vid = 0.
+%contains: stdout
+VlanAccessTrunkTestNetwork.bridge1.bridging.vlanPolicy.inboundMapper: Mapping VLAN id, interfaceName = eth1, receivedVlanId = 0, mappedVlanId = 10.
