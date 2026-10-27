@@ -1,0 +1,3 @@
+PCAPng files accept packets without a network interface
+
+PcapngWriter read the network interface of a packet before it checked that the packet had one. A simulation therefore crashed when PacketFlowPcapFileRecorder or PcapFilePacketConsumer wrote a PCAPng file outside a network interface. Now such a packet refers to an interface description that has no name and no addresses.

@@ -28,6 +28,7 @@ class INET_API PcapngWriter : public IPcapWriter
     int nextPcapngInterfaceId = 0;
     int timePrecision = 6;
     std::map<int, int> interfaceModuleIdToPcapngInterfaceId;
+    int pcapngInterfaceIdWithoutNetworkInterface = -1;
 
   public:
     /**
@@ -52,7 +53,8 @@ class INET_API PcapngWriter : public IPcapWriter
     bool isOpen() const override { return dumpfile != nullptr; }
 
     /**
-     * Records the interface into the output file.
+     * Records the interface into the output file. Without a network interface,
+     * the interface description has no name and no addresses.
      */
     void writeInterface(NetworkInterface *networkInterface, PcapLinkType linkType);
 

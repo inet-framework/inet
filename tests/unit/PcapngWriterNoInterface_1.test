@@ -1,0 +1,65 @@
+%description:
+PCAPng writes packets that have no network interface. These packets refer to
+one interface description without a name and without addresses. A packet of a
+network interface refers to an interface description of its own.
+
+%includes:
+#include <cstdio>
+#include <fstream>
+#include <iterator>
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapngWriter.h"
+
+%global:
+using namespace inet;
+
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+static uint16_t readUint16(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    return bytes.at(offset) | (bytes.at(offset + 1) << 8);
+}
+
+static uint32_t readUint32(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; i++)
+        value |= static_cast<uint32_t>(bytes.at(offset + i)) << (8 * i);
+    return value;
+}
+
+%activity:
+Packet packet("packet", makeShared<BytesChunk>(std::vector<uint8_t>{0, 1, 2, 3}));
+NetworkInterface networkInterface;
+PcapngWriter writer;
+writer.open("nointerface.pcapng", 0, 6);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, nullptr, LINKTYPE_ETHERNET);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_OUTBOUND, nullptr, LINKTYPE_ETHERNET);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
+writer.close();
+std::ifstream file("nointerface.pcapng", std::ios::binary);
+std::vector<uint8_t> bytes(std::istreambuf_iterator<char>(file), {});
+std::vector<size_t> blocks;
+for (size_t offset = 0; offset < bytes.size(); offset += readUint32(bytes, offset + 4)) {
+    REQUIRE(readUint32(bytes, offset + 4) >= 12);
+    blocks.push_back(offset);
+}
+// SHB, IDB without interface, EPB, EPB, IDB of the interface, EPB
+REQUIRE(blocks.size() == 6);
+REQUIRE(readUint32(bytes, blocks[1]) == 1);
+REQUIRE(readUint16(bytes, blocks[1] + 8) == LINKTYPE_ETHERNET);
+REQUIRE(readUint32(bytes, blocks[1] + 4) == 32);
+REQUIRE(readUint16(bytes, blocks[1] + 16) == 9);
+REQUIRE(readUint32(bytes, blocks[2]) == 6);
+REQUIRE(readUint32(bytes, blocks[2] + 8) == 0);
+REQUIRE(readUint32(bytes, blocks[3]) == 6);
+REQUIRE(readUint32(bytes, blocks[3] + 8) == 0);
+REQUIRE(readUint32(bytes, blocks[4]) == 1);
+REQUIRE(readUint16(bytes, blocks[4] + 16) == 2);
+REQUIRE(readUint32(bytes, blocks[5]) == 6);
+REQUIRE(readUint32(bytes, blocks[5] + 8) == 1);
+std::remove("nointerface.pcapng");
+EV << "PCAPng packets without a network interface verified.\n";
+
+%contains: stdout
+PCAPng packets without a network interface verified.

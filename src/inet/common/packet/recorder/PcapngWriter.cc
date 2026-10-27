@@ -124,10 +124,16 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
     if (!dumpfile)
         throw cRuntimeError("Cannot write interface: pcap output file is not open");
 
-    std::string name = networkInterface->getInterfaceName();
-    std::string fullPath = networkInterface->getInterfaceFullPath();
-    fullPath = fullPath.substr(fullPath.find('.') + 1);
-    uint32_t optionsLength = (4 + roundUp(name.length())) + (4 + roundUp(fullPath.length())) + (4 + 8) + (4 + 4 + 4) + (4 + 4) + 4;
+    std::string name;
+    std::string fullPath;
+    uint32_t interfaceOptionsLength = 0;
+    if (networkInterface != nullptr) {
+        name = networkInterface->getInterfaceName();
+        fullPath = networkInterface->getInterfaceFullPath();
+        fullPath = fullPath.substr(fullPath.find('.') + 1);
+        interfaceOptionsLength = (4 + roundUp(name.length())) + (4 + roundUp(fullPath.length())) + (4 + 8) + (4 + 4 + 4);
+    }
+    uint32_t optionsLength = interfaceOptionsLength + (4 + 4) + 4;
     uint32_t blockTotalLength = 20 + optionsLength;
     ASSERT(blockTotalLength % 4 == 0);
 
@@ -139,44 +145,47 @@ void PcapngWriter::writeInterface(NetworkInterface *networkInterface, PcapLinkTy
     ibh.snaplen = snaplen;
     fwrite(&ibh, sizeof(ibh), 1, dumpfile);
 
-    // interface name option
     pcapng_option_header doh;
-    doh.code = 0x0002;
-    doh.length = name.length();
-    fwrite(&doh, sizeof(doh), 1, dumpfile);
-    fwrite(name.c_str(), name.length(), 1, dumpfile);
     char padding[] = { 0, 0, 0, 0 };
-    int paddingLength = pad(name.length());
-    fwrite(padding, paddingLength, 1, dumpfile);
+    int paddingLength;
+    if (networkInterface != nullptr) {
+        // interface name option
+        doh.code = 0x0002;
+        doh.length = name.length();
+        fwrite(&doh, sizeof(doh), 1, dumpfile);
+        fwrite(name.c_str(), name.length(), 1, dumpfile);
+        paddingLength = pad(name.length());
+        fwrite(padding, paddingLength, 1, dumpfile);
 
-    // interface description option
-    doh.code = 0x0003;
-    doh.length = fullPath.length();
-    fwrite(&doh, sizeof(doh), 1, dumpfile);
-    fwrite(fullPath.c_str(), fullPath.length(), 1, dumpfile);
-    paddingLength = pad(fullPath.length());
-    fwrite(padding, paddingLength, 1, dumpfile);
+        // interface description option
+        doh.code = 0x0003;
+        doh.length = fullPath.length();
+        fwrite(&doh, sizeof(doh), 1, dumpfile);
+        fwrite(fullPath.c_str(), fullPath.length(), 1, dumpfile);
+        paddingLength = pad(fullPath.length());
+        fwrite(padding, paddingLength, 1, dumpfile);
 
-    // MAC address option
-    doh.code = 0x0006;
-    doh.length = 6;
-    fwrite(&doh, sizeof(doh), 1, dumpfile);
-    uint8_t macAddressBytes[6];
-    networkInterface->getMacAddress().getAddressBytes(macAddressBytes);
-    fwrite(macAddressBytes, 6, 1, dumpfile);
-    fwrite(padding, 2, 1, dumpfile);
+        // MAC address option
+        doh.code = 0x0006;
+        doh.length = 6;
+        fwrite(&doh, sizeof(doh), 1, dumpfile);
+        uint8_t macAddressBytes[6];
+        networkInterface->getMacAddress().getAddressBytes(macAddressBytes);
+        fwrite(macAddressBytes, 6, 1, dumpfile);
+        fwrite(padding, 2, 1, dumpfile);
 
-    // IP address/netmask option
-    doh.code = 0x0004;
-    doh.length = 4 + 4;
-    fwrite(&doh, sizeof(doh), 1, dumpfile);
-    uint8_t ipAddressBytes[4];
-    auto ipv4Address = networkInterface->getIpv4Address();
-    for (int i = 0; i < 4; i++) ipAddressBytes[i] = ipv4Address.getDByte(i);
-    fwrite(ipAddressBytes, 4, 1, dumpfile);
-    auto ipv4Netmask = networkInterface->getIpv4Netmask();
-    for (int i = 0; i < 4; i++) ipAddressBytes[i] = ipv4Netmask.getDByte(i);
-    fwrite(ipAddressBytes, 4, 1, dumpfile);
+        // IP address/netmask option
+        doh.code = 0x0004;
+        doh.length = 4 + 4;
+        fwrite(&doh, sizeof(doh), 1, dumpfile);
+        uint8_t ipAddressBytes[4];
+        auto ipv4Address = networkInterface->getIpv4Address();
+        for (int i = 0; i < 4; i++) ipAddressBytes[i] = ipv4Address.getDByte(i);
+        fwrite(ipAddressBytes, 4, 1, dumpfile);
+        auto ipv4Netmask = networkInterface->getIpv4Netmask();
+        for (int i = 0; i < 4; i++) ipAddressBytes[i] = ipv4Netmask.getDByte(i);
+        fwrite(ipAddressBytes, 4, 1, dumpfile);
+    }
 
     // tsresol option
     doh.code = 0x0009;
@@ -203,18 +212,24 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
-    auto it = interfaceModuleIdToPcapngInterfaceId.find(networkInterface->getId());
     int pcapngInterfaceId;
-    if (it != interfaceModuleIdToPcapngInterfaceId.end())
-        pcapngInterfaceId = it->second;
-    else {
-        writeInterface(networkInterface, linkType);
-        pcapngInterfaceId = nextPcapngInterfaceId++;
-        interfaceModuleIdToPcapngInterfaceId[networkInterface->getId()] = pcapngInterfaceId;
+    if (networkInterface == nullptr) {
+        if (pcapngInterfaceIdWithoutNetworkInterface == -1) {
+            writeInterface(nullptr, linkType);
+            pcapngInterfaceIdWithoutNetworkInterface = nextPcapngInterfaceId++;
+        }
+        pcapngInterfaceId = pcapngInterfaceIdWithoutNetworkInterface;
     }
-
-    if (networkInterface == nullptr)
-        throw cRuntimeError("The interface entry not found for packet");
+    else {
+        auto it = interfaceModuleIdToPcapngInterfaceId.find(networkInterface->getId());
+        if (it != interfaceModuleIdToPcapngInterfaceId.end())
+            pcapngInterfaceId = it->second;
+        else {
+            writeInterface(networkInterface, linkType);
+            pcapngInterfaceId = nextPcapngInterfaceId++;
+            interfaceModuleIdToPcapngInterfaceId[networkInterface->getId()] = pcapngInterfaceId;
+        }
+    }
 
     b originalLength = packet->getDataLength() - frontOffset - backOffset;
     b capturedLength = snaplen == 0 ? originalLength : std::min(originalLength, b(B(snaplen)));
