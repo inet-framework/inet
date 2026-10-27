@@ -1,0 +1,3 @@
+The MAC forwarding table methods take the VLAN ID without a default
+
+The lookup and update methods of IMacForwardingTable, MacForwardingTable and MrpMacForwardingTable defaulted the VLAN ID to 0, so a caller that forgot the VLAN of the frame silently used VLAN 0; this is how the classic relays came to look up tagged frames in the wrong VLAN. The VLAN ID now has no default. Code outside INET that calls these methods without one no longer compiles: pass the VLAN of the frame, or 0 where the caller is not VLAN-aware.
