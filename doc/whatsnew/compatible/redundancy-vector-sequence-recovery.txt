@@ -1,0 +1,3 @@
+Reusable vector sequence recovery state
+
+VectorSequenceRecovery provides packet-independent sequence-position history, signed 16-bit modular comparisons, duplicate and rogue classification, reset and loss accounting. It implements the documented IEEE 802.1CB-2017 base vector-recovery computation with the IEEE 802.1CBdb-2021 forward-window boundary correction. Callers supply packet handling and timeout scheduling.
