@@ -1,5 +1,4 @@
-#!/usr/bin/env python3
-
-from inet.main import *
-
-run_serializer_tests_main()
+#!/bin/sh
+# Runs the serializer tests in tests/serializer with opp_repl's opp_run_opp_tests; the arguments go
+# to opp_run_opp_tests, for example -m release or -f <regex>.
+cd "$(dirname "$0")/../tests/serializer" && exec opp_run_opp_tests "$@"

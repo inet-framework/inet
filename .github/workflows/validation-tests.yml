@@ -50,8 +50,6 @@ jobs:
           source $GITHUB_WORKSPACE/venv/bin/activate
           # the validation tests read the results with omnetpp.scave, which needs these packages
           python3 -m pip install -r $GITHUB_WORKSPACE/omnetpp/python/requirements.txt
-          # INET's validation module still imports INET's own Python package, which needs these
-          python3 -m pip install -r $GITHUB_WORKSPACE/inet/python/requirements.txt
           python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
           echo "::endgroup::"
 

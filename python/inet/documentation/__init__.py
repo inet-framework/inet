@@ -1,6 +1,4 @@
-from inet.documentation.chart import *
 from inet.documentation.html import *
-from inet.documentation.ned import *
 
 __sphinx_mock__ = True # ignore this module in documentation
 

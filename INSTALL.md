@@ -38,8 +38,9 @@ If you are building from command line:
 
        $ source setenv
 
-4. Make sure that any required Python modules are properly installed by executing
-  `pip install -r python/requirements.txt`
+4. To run simulations and tests with Python tools, install opp_repl:
+  `pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git"`.
+  The build does not need it.
 
 5. Type `make` to build the inet executable (release version). Use `make MODE=debug`
    to build debug version.
