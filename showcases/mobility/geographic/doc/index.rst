@@ -159,7 +159,7 @@ ISS at 24° elevation:
              --*.satelliteVisualizer.displayVelocities=false
              '--*.geoHorizon.moduleFilter="**.satellite[1].mobility"'
    shows:    the ISS footprint alone, the ISS south-west of Los Angeles, Los Angeles
-             inside; Vanguard 1 is over the Indian Ocean side, out of frame
+             inside; Vanguard 1 is near Borneo (1.6N 113.0E), out of frame
    anchors:  at 29780 s the ISS at 28.1N 122.9W, 421 km; elevation from Los Angeles
              23.7 deg; footprint radius 1391 km for a 10 deg mask on a 6371 km sphere
              (recorded positions of a full-length run)
