@@ -10,6 +10,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/vlan/VlanIdMaps.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
@@ -21,7 +22,7 @@ class INET_API VlanIndFilter : public PacketFilterBase, public TransparentProtoc
 {
   protected:
     ModuleRefByPar<IInterfaceTable> interfaceTable;
-    cValueMap *acceptedVlanIds = nullptr;
+    std::map<std::string, std::set<int>> acceptedVlanIds; // interface name or "*" -> accepted VLAN ids
 
   protected:
     virtual void initialize(int stage) override;

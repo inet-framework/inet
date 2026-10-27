@@ -11,7 +11,6 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
-#include "inet/linklayer/vlan/VlanIdMaps.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -24,10 +23,7 @@ void VlanReqMapper::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         protocol = Protocol::getProtocol(par("protocol").stringValue());
         interfaceTable.reference(this, "interfaceTableModule", true);
-        cObject *object = par("mappedVlanIds");
-        mappedVlanIds = check_and_cast<cValueMap *>(object);
-        checkMappedVlanIds(this, mappedVlanIds, 0);
-        WATCH(mappedVlanIds);
+        mappedVlanIds = parseMappedVlanIds(this, check_and_cast<cValueMap *>(par("mappedVlanIds").objectValue()), 0);
     }
 }
 
@@ -45,19 +41,17 @@ void VlanReqMapper::processPacket(Packet *packet)
 {
     auto interfaceReq = packet->findTag<InterfaceReq>();
     auto networkInterface = interfaceReq != nullptr ? interfaceTable->getInterfaceById(interfaceReq->getInterfaceId()) : nullptr;
-    auto interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
-    auto key = mappedVlanIds->containsKey(interfaceName) ? interfaceName : "*";
-    if (mappedVlanIds->containsKey(key)) {
-        auto interfaceMappedVlanIds = check_and_cast<cValueMap *>(mappedVlanIds->get(key).objectValue());
+    std::string interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
+    if (auto interfaceMappedVlanIds = findInterfaceEntry(mappedVlanIds, interfaceName)) {
         auto vlanReq = packet->findTag<VlanReq>();
-        auto oldVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : -1;
-        auto key = std::to_string(oldVlanId);
-        if (interfaceMappedVlanIds->containsKey(key.c_str())) {
-            auto newVlanId = interfaceMappedVlanIds->get(key.c_str()).intValue();
-            if (newVlanId == -1)
+        auto requestedVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : -1;
+        auto it = interfaceMappedVlanIds->find(requestedVlanId);
+        if (it != interfaceMappedVlanIds->end()) {
+            auto mappedVlanId = it->second;
+            if (mappedVlanId == -1)
                 packet->removeTagIfPresent<VlanReq>();
             else
-                packet->addTagIfAbsent<VlanReq>()->setVlanId(newVlanId);
+                packet->addTagIfAbsent<VlanReq>()->setVlanId(mappedVlanId);
         }
     }
     ensureEncapsulationProtocolReq(packet, protocol, packet->hasTag<VlanReq>() || packet->hasTag<PcpReq>());

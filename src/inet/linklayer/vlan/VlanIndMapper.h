@@ -10,6 +10,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/vlan/VlanIdMaps.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
