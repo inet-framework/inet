@@ -206,8 +206,8 @@ API contains two sets of self checking operations, see Chunk.h for more details.
 
 In the simplest case, you can run all speed tests with the following command:
 
-$ inet_run_speed_tests
+$ opp_run_speed_tests
 
 For more details on command line options, run:
 
-$ inet_run_speed_tests -h
+$ opp_run_speed_tests -h

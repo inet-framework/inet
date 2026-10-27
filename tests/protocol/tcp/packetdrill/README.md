@@ -24,7 +24,7 @@ inet-gpl. These files hold no line of a script. Without inet-gpl, every wrapper 
 
 ```sh
 cd <inet> && source setenv -q && cd <inet-gpl> && source setenv -q
-inet_run_protocol_tests --filter tcp/packetdrill/
+opp_run_protocol_tests --filter tcp/packetdrill/
 ```
 
 `tests/packetdrill/suite.py gen-wrappers` in inet-gpl writes the wrappers and this file, and
