@@ -141,27 +141,32 @@ submodules for these. They are enabled by setting their ``typename``.
 
 A footprint is the area of the surface of the Earth from which a satellite is above
 the elevation mask. Its size depends on the altitude of the satellite and on the
-mask. Here is the footprint of Vanguard 1 in the Satellites configuration at 9 hours
-20 minutes, with a 10° mask. Vanguard 1 is at about 3,790 km. Lima is inside the
-footprint and sees the satellite at 57° elevation. Los Angeles is just outside, and
-sees it at 4°:
+mask. Here is the footprint of the ISS in the Satellites configuration at about
+8 hours 16 minutes, with a 10° mask. The ISS is at about 420 km, so its footprint
+has a radius of about 1,400 km. Los Angeles is inside the footprint and sees the
+ISS at 24° elevation:
 
 .. figure:: media/satellites-footprint.png
-   :width: 80%
+   :width: 60%
    :align: center
 
 ..
    FIGURE RECIPE
    type:     canvas
-   config:   Satellites, t=33600 s
-   shows:    Vanguard 1 footprint over South America, Lima inside, Los Angeles just
-             outside the edge
-   anchors:  at 33600 s Vanguard 1 at 1.0S 83.9W, 3793 km; elevation from Lima 57.2
-             deg, from Los Angeles 3.7 deg (recorded positions of a full-length run)
-   capture:  run_simulation mode=fast inclusive time_limit=33600s;
-             set_canvas_view <root> zoom=2.5; get_canvas_image <root>
-             area=module_rectangle margin=0 (1804x904);
-             crop (100,175)-(776,713) = longitude 160W-25W, latitude 55N-52S
+   config:   Satellites, t=29780 s, with display-only overrides:
+             --*.satelliteVisualizer.displayMovementTrails=false
+             --*.satelliteVisualizer.displayOrientations=false
+             --*.satelliteVisualizer.displayVelocities=false
+             '--*.geoHorizon.moduleFilter="**.satellite[1].mobility"'
+   shows:    the ISS footprint alone, the ISS south-west of Los Angeles, Los Angeles
+             inside; Vanguard 1 is over the Indian Ocean side, out of frame
+   anchors:  at 29780 s the ISS at 28.1N 122.9W, 421 km; elevation from Los Angeles
+             23.7 deg; footprint radius 1391 km for a 10 deg mask on a 6371 km sphere
+             (recorded positions of a full-length run)
+   capture:  run_simulation mode=fast inclusive time_limit=29780s;
+             set_canvas_view <root> zoom=8 center_x=830 center_y=930;
+             get_canvas_image <root> area=viewport margin=0 (1030x723);
+             crop (172,180)-(708,660)
    stamp:    recorded 2026-10, INET 4.7 (branch topic/gy/geographic-mobility-showcase)
 
 A sky view is a polar plot of the sky above one ground station. The center is the
