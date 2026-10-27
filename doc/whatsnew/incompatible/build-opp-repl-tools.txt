@@ -1,0 +1,13 @@
+The Python test tools of INET are gone; opp_repl runs the tests
+
+INET's Python package in python/inet no longer holds its own copy of opp_repl's simulation and test framework, and bin/ no longer has the tools that called it. Use the commands of opp_repl, as the GitHub workflows do. Install opp_repl with pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git". In the INET tree, the commands find INET's project description inet.opp by themselves. The tools go without aliases, because each one has an opp_repl command that takes its place directly:
+
+  inet_run_<kind>_tests     -> opp_run_<kind>_tests, for all, chart, feature, module, packet, protocol,
+                               queueing, release, sanitizer, smoke, speed, statistical, unit and validation
+  inet_run_simulations      -> opp_run_simulations
+  inet_build_project        -> opp_build_project
+  inet_python_repl          -> opp_repl
+  inet_run_self_tests       -> opp_repl_self_test
+  inet_diffcharts           -> opp_diff_charts
+
+inet_run_serializer_tests stays, and runs opp_run_opp_tests in tests/serializer. The package keeps inet.scave, which the chart scripts import, inet.test.validation, which opp_run_validation_tests calls, and inet.documentation.html. python/requirements.txt is gone. A Python program that imported inet.common, inet.simulation, inet.project or a test module other than inet.test.validation imports from opp_repl now.

@@ -50,8 +50,6 @@ jobs:
           source $GITHUB_WORKSPACE/venv/bin/activate
           # the chart test draws the charts with omnetpp.scave, which needs these packages
           python3 -m pip install -r $GITHUB_WORKSPACE/omnetpp/python/requirements.txt
-          # the chart scripts import inet.scave, and import inet still imports INET's whole Python package
-          python3 -m pip install -r $GITHUB_WORKSPACE/inet/python/requirements.txt
           python3 -m pip install "opp_repl @ git+https://github.com/omnetpp/opp_repl.git@github_ci"
           echo "::endgroup::"
 
