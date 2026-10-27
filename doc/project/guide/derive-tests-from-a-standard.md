@@ -276,7 +276,7 @@ Translate the English document into a self-contained `opp_test` file in `tests/p
 Source the `setenv` script of OMNeT++ and then the one of INET; the runner is not on the path otherwise. Follow [run-the-gates.md](run-the-gates.md) for matching library freshness and focused test selection. For an explicitly requested complete IPv4 suite:
 
 ```sh
-inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/ipv4$'
+opp_run_protocol_tests -m debug -w '^tests/protocol/ipv4$'
 ```
 
 `-p inet` selects the project explicitly. The normal runner invocation builds the applicable shared protocol-test support library automatically.
@@ -338,7 +338,7 @@ It gives a block of this shape:
 - Build: debug, built from this commit
 - Compiler: Ubuntu clang version 23.0.0 (...)
 - Platform: Ubuntu 26.04.1 LTS, Linux 7.0.0-31-generic x86_64
-- Command: `inet_run_protocol_tests -p inet -w ipv4`
+- Command: `opp_run_protocol_tests -w ipv4`
 ```
 
 Add the command line yourself, and add anything else that changed the run: a configuration option, a patched source file, or a container image.

@@ -373,7 +373,7 @@ A trailing `_vs`, `_s`, `_l` or `_vl` is the **OMNeT++ icon size suffix** and is
 
 **A Python module is lowercase and run-together; a script is a lowercase hyphenated verb phrase that says what it does.**
 
-`python/inet/simulation/`, `python/inet/scave/` for the modules; `check-ned-file-names`, `removetrailingspaces` for the scripts under `_scripts/`. A script that checks something starts with `check-`, and one that changes files in place says so in its name. The historical run-together script names (`removetrailingspaces`, `namespaceize.pl`) are the departures, not the rule.
+`python/inet/scave/`, `python/inet/documentation/` for the modules; `check-ned-file-names`, `removetrailingspaces` for the scripts under `_scripts/`. A script that checks something starts with `check-`, and one that changes files in place says so in its name. The historical run-together script names (`removetrailingspaces`, `namespaceize.pl`) are the departures, not the rule.
 
 *Enforced at T4 — agent review.*
 

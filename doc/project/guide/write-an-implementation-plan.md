@@ -135,7 +135,7 @@ Advance beyond that timeout while the client remains down. Check that no send ca
 Use the [focused test procedure](run-the-gates.md#during-focused-development) for execution with a fresh debug library. From the checkout root, the proposed command selects the existing case and the new variant:
 
 ```sh
-inet_run_module_tests -m debug -f 'udpapp_lifecycle_(6|timer_restart)\.test'
+opp_run_module_tests -m debug -f 'udpapp_lifecycle_(6|timer_restart)\.test'
 ```
 
 Confirm that the selector includes both cases after the new test exists. The existing case covers shutdown and teardown; it does not establish restart behavior. The hypothetical edit should fail when the old timeout reaches the stopped application. The repair should suppress that timeout and permit later sends after restart. The new variant's results remain unverified until implementation and execution.
@@ -195,7 +195,7 @@ sequenceDiagram
 **Verification and limits:** Follow [run-the-gates.md](run-the-gates.md) for a fresh debug build before execution. Run this command from the checkout root after the proposed changes:
 
 ```sh
-inet_run_protocol_tests -p inet -m debug -w '^tests/protocol/ipv4$' -f '^(Rfc791Ttl(Decrement|Expiry)|Rfc1122TtlOneAtDestination)\.test$'
+opp_run_protocol_tests -m debug -w '^tests/protocol/ipv4$' -f '^(Rfc791Ttl(Decrement|Expiry)|Rfc1122TtlOneAtDestination)\.test$'
 ```
 
 Confirm selection of all three files. Record their actual outcomes under [TR-FOCUSED-EVIDENCE](../rule/testing.md#tr-focused-evidence). The cases cover unicast TTL decrement, the TTL-1 expiry response, and delivery to B's UDP module after the TTL-2 boundary. They do not establish multicast behavior, fragmentation, application delivery, or complete checksum correctness. The proposed extension has no executed result. Check diagram rendering before the reviewer document is complete.

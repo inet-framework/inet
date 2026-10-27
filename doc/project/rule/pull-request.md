@@ -498,7 +498,7 @@ The change affects the application stop handler and its module test. It preserve
 No simulation ran for this example. The proposed command selects the existing lifecycle case and the new restart variant:
 
 ```sh
-inet_run_module_tests -m debug -f 'udpapp_lifecycle_(6|timer_restart)\.test'
+opp_run_module_tests -m debug -f 'udpapp_lifecycle_(6|timer_restart)\.test'
 ```
 
 The new test must show no send callback after shutdown and a successful send after restart. The existing case alone does not establish restart behavior. Runtime results and baseline effects remain unverified.

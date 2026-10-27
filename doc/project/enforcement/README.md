@@ -92,7 +92,7 @@ The repository environment named `sealed-source-change` is part of that fail-clo
 
 ## What belongs in this folder
 
-**Only what a gate runs.** Heavy tooling stays in `python/inet/` and `_scripts/`; this folder holds the direct transcription of a numbered rule, plus the small script that reads it.
+**Only what a gate runs.** Heavy tooling stays in opp_repl, `python/inet/` and `_scripts/`; this folder holds the direct transcription of a numbered rule, plus the small script that reads it.
 
 **No copies.** A tool file that must sit at the repository root sits at the root, and this folder cites it. The clang-tidy configuration is the case that taught the rule: clang-tidy finds its configuration by a walk up from the source file, so a copy staged under `doc/` was never read by anything. It now lives at [`/.clang-tidy`](../../../.clang-tidy) and covers two rule families at once — the C++ names of [naming.md](../rule/naming.md) and the bug and modernization checks of [quality.md](../rule/quality.md).
 
