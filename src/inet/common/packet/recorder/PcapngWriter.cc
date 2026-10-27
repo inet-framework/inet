@@ -97,6 +97,10 @@ void PcapngWriter::open(const char *filename, unsigned int snaplen, int timePrec
 
     flush = false;
     this->snaplen = snaplen;
+    // interface IDs are unique only in their section, and each file starts a new section
+    nextPcapngInterfaceId = 0;
+    interfaceModuleIdAndLinkTypeToPcapngInterfaceId.clear();
+    linkTypeToPcapngInterfaceIdWithoutNetworkInterface.clear();
 
     // TODO check validity of timePrecision
     this->timePrecision = timePrecision;
