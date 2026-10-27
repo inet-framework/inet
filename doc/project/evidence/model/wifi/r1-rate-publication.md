@@ -1,6 +1,6 @@
 # R1: management publishes legacy rate state
 
-> **Kind:** report · **Status:** snapshot 2026-10-14 · **Seal:** none · **Owns:** — · **Stands on:** [testing rules](../../../rule/testing.md), [R1 plan](../../../../../plan/pending/ieee80211-compressed-blockack-replacement.md#r1-publish-production-rate-state)
+> **Kind:** report · **Status:** snapshot 2026-10-14 · **Seal:** none · **Owns:** — · **Stands on:** [testing rules](../../../rule/testing.md), [R1 context](../../../../../plan/done/ieee80211-compressed-blockack-replacement.md#previous-prs-and-s4-scope)
 
 R1 populates the existing MIB records through full and simplified management. The new production fixture passes. All 23 existing controls pass on both R1 and its parent. The same new fixture fails on the parent because local operational rates remain unknown. The comparison establishes the missing publication path and the result of its repair.
 

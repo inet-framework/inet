@@ -8,7 +8,7 @@ The [S5 execution record](ieee80211-compressed-blockack-s5-execution.md) reports
 
 ## What S5 adds to the earlier stages
 
-The earlier stages supply recipient delivery, finite DATA lifetimes, agreement management, rate state, and BAR channel access. S5 connects these mechanisms to the Compressed frame format. It also verifies response airtime before it activates the default. The [replacement steps](ieee80211-compressed-blockack-replacement.md#compressed-replacement-steps) define C1 through C4.
+The earlier stages supply recipient delivery, finite DATA lifetimes, agreement management, rate state, and BAR channel access. S5 connects these mechanisms to the Compressed frame format. It also verifies response airtime before it activates the default. The [implementation status](ieee80211-compressed-blockack-replacement.md) defines the supported source and limits. The diagram groups that behavior into four design phases.
 
 ```mermaid
 flowchart TD
@@ -28,7 +28,7 @@ C1 establishes valid protocol bytes. C2 establishes the complete runtime path. C
 
 HCF resolves one profile for the interface at initialization. Both endpoints must select the same profile. ADDBA establishes a Block Ack agreement, but it does not negotiate this profile selector. Each agreement identifies one peer and traffic identifier, or TID. State for another peer or TID remains separate.
 
-Compressed requires usable local HT support and peer HT state for the relevant direction. HT means high throughput. A PHY mode name alone does not supply peer capability state. An associated `ac` peer can qualify through its inherited HT support. Without usable HT state, the Compressed selection uses Normal Ack and does not establish a Compressed agreement. [Profile and capability contract](ieee80211-compressed-blockack-replacement.md#1-core-intended-behavior).
+Compressed requires usable local HT support and peer HT state for the relevant direction. HT means high throughput. A PHY mode name alone does not supply peer capability state. An associated `ac` peer can qualify through its inherited HT support. Without usable HT state, the Compressed selection uses Normal Ack and does not establish a Compressed agreement. [Profile and capability contract](ieee80211-compressed-blockack-replacement.md#supported-behavior-and-configuration).
 
 ```mermaid
 flowchart TD
@@ -50,7 +50,7 @@ HCF reports the selected profile when Block Ack is enabled. If local HT support 
 
 Compressed reports one complete-unit receipt bit per sequence position. Its response bitmap contains 64 bits. Basic retains its fragment bitmap. A positive Compressed bit acknowledges the complete MSDU or A-MSDU at that position. An MSDU is the data unit that the MAC receives from its service user. An A-MSDU combines MSDUs within one MPDU.
 
-Both BAR profiles contain 24 bytes with FCS. The Compressed Block Ack response contains 32 bytes with FCS; the Basic response contains 152 bytes. The serializer decodes the complete four-bit Type field. Type 2 selects Compressed. Type 0 retains Basic compatibility. Unsupported types follow the invalid-frame path. [Frame format contract](ieee80211-compressed-blockack-replacement.md#41-select-the-current-or-historical-profile).
+Both BAR profiles contain 24 bytes with FCS. The Compressed Block Ack response contains 32 bytes with FCS; the Basic response contains 152 bytes. The serializer decodes the complete four-bit Type field. Type 2 selects Compressed. Type 0 retains Basic compatibility. Unsupported types follow the invalid-frame path. [Frame format contract](ieee80211-compressed-blockack-replacement.md#wire-format-and-control-rates).
 
 ```mermaid
 flowchart LR
@@ -74,7 +74,7 @@ A smaller response does not by itself prove lower exchange airtime or higher app
 
 ## How a complete exchange works
 
-After ADDBA acceptance, the originator sends eligible individual QoS DATA frames for the agreement's peer and TID. HCF can request channel access for BAR even when no unsent DATA remains. The recipient answers a valid addressed Compressed BAR after SIFS, the short interframe space. Its response describes actual receipt state. [Exchange contract](ieee80211-compressed-blockack-replacement.md#43-keep-bar-selection-and-response-state-exact).
+After ADDBA acceptance, the originator sends eligible individual QoS DATA frames for the agreement's peer and TID. HCF can request channel access for BAR even when no unsent DATA remains. The recipient answers a valid addressed Compressed BAR after SIFS, the short interframe space. Its response describes actual receipt state. [Exchange contract](ieee80211-compressed-blockack-replacement.md#data-selection-and-bar-operation).
 
 The following hypothetical example uses an accepted agreement and a recipient scoreboard that starts at 100. DATA 101 is lost. DATA 102 remains in the reorder buffer until retransmission fills the gap. The example omits other release conditions to show ordinary gap recovery.
 
@@ -104,7 +104,7 @@ A zero bit leaves its frame unacknowledged. Frames outside the response coverage
 
 ## Why receipt state survives delivery
 
-Receipt state answers whether a frame arrived. The reorder buffer answers whether the recipient can deliver a frame in order. S5 keeps these responsibilities separate. Delivery removes a buffered unit, but it must preserve the receipt bit for a later BAR. Scoreboard movement controls receipt retirement. [Recipient state contract](ieee80211-compressed-blockack-replacement.md#45-build-recipient-state-and-select-response-airtime).
+Receipt state answers whether a frame arrived. The reorder buffer answers whether the recipient can deliver a frame in order. S5 keeps these responsibilities separate. Delivery removes a buffered unit, but it must preserve the receipt bit for a later BAR. Scoreboard movement controls receipt retirement. [Recipient state contract](ieee80211-compressed-blockack-replacement.md#receipt-state-and-delivery).
 
 The recorded recipient test receives DATA 100, 102, and 101. It delivers 100, 101, and 102 in order. A subsequent BAR still receives three positive bits. An empty record produces zero bits, and absent sequence positions remain zero.
 
@@ -123,7 +123,7 @@ Basic keeps its fragment receipt state and reassembly. For an active Compressed 
 
 ## When the recipient can release DATA across a gap
 
-S5 also implements the supported individual-MPDU release condition. The current DATA sequence must lie inside the reorder window and above its start. The recipient must retain positive receipt evidence immediately before the scoreboard start. The required SIFS or RIFS relation must also exist. RIFS means reduced interframe space. The [recipient interframe design](ieee80211-compressed-blockack-s5-execution.md#recipient-interframe-design) defines the remaining profile conditions and timing rules.
+S5 also implements the supported individual-MPDU release condition. The current DATA sequence must lie inside the reorder window and above its start. The recipient must retain positive receipt evidence immediately before the scoreboard start. The required SIFS or RIFS relation must also exist. RIFS means reduced interframe space. The [recipient interframe design](../../tests/protocol/wifi/s5-compressed-exchange.md#local-interval-consequences) defines the remaining profile conditions and timing rules.
 
 For example, the execution record describes an agreement with start 100 and size four. Normal Ack DATA 100 arrives first. DATA 104 later moves the scoreboard start to 101. Receipt evidence for 100 remains. If the required interframe relation exists, the recipient can release 104 despite the gap. Without that evidence or relation, this rule does not permit release.
 
@@ -149,7 +149,7 @@ RIFS recognition requires permitted HT operation and its additional transmitter 
 
 ## How invalid input and failed exchanges behave
 
-Only a matched, valid response can cause exchange success. The checks include profile, addresses, TID, Fragment Number zero, 64 bitmap bits, and supported length. Malformed responses cannot acknowledge DATA, refresh inactivity, or produce success feedback. The existing failed-BAR path makes requested DATA available for retry. Existing absolute DATA deadlines still apply. [Response validation and recovery](ieee80211-compressed-blockack-replacement.md#43-keep-bar-selection-and-response-state-exact).
+Only a matched, valid response can cause exchange success. The checks include profile, addresses, TID, Fragment Number zero, 64 bitmap bits, and supported length. Malformed responses cannot acknowledge DATA, refresh inactivity, or produce success feedback. The existing failed-BAR path makes requested DATA available for retry. Existing absolute DATA deadlines still apply. [Response validation and recovery](ieee80211-compressed-blockack-replacement.md#data-selection-and-bar-operation).
 
 ```mermaid
 flowchart TD
@@ -225,7 +225,7 @@ Each replacement receives debug and release builds and its focused checks. The l
 
 ## What remains outside S5
 
-S5 supports immediate, one-TID, explicit Compressed BAR exchanges with a 64-position response bitmap. Its DATA path uses individual MPDUs and can use A-MSDU. It does not provide A-MPDU transfer. The [scope contract](ieee80211-compressed-blockack-replacement.md#2-standard-support-and-model-boundary) defines this intermediate model for bitmap, response, and recovery studies.
+S5 supports immediate, one-TID, explicit Compressed BAR exchanges with a 64-position response bitmap. Its DATA path uses individual MPDUs and can use A-MSDU. It does not provide A-MPDU transfer. The [scope contract](ieee80211-compressed-blockack-replacement.md#excluded-features-and-fragmentation) defines this intermediate model for bitmap, response, and recovery studies.
 
 The following limits remain relevant:
 
