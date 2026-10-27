@@ -9,6 +9,7 @@
 
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/linklayer/vlan/VlanIdMaps.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 
 namespace inet {
@@ -22,6 +23,7 @@ void VlanIndFilter::initialize(int stage)
         interfaceTable.reference(this, "interfaceTableModule", true);
         cObject *object = par("acceptedVlanIds");
         acceptedVlanIds = check_and_cast<cValueMap *>(object);
+        checkAcceptedVlanIds(this, acceptedVlanIds);
         WATCH(acceptedVlanIds);
     }
 }
