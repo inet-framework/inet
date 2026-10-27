@@ -545,8 +545,8 @@ def run_validation_tests(build=True, **kwargs):
         an object that contains a list of :py:class:`TestTaskResult` objects. Each object describes the result of running one test task.
     """
     # the tests run at the same time, and each tested simulation would build the project, so build it once
-    # before them, as a batch of simulations does
+    # before them, as a batch of simulations does; the collection of the simulation configs builds no more
     if build:
         simulation_project = kwargs.get("simulation_project") or get_default_simulation_project()
         simulation_project.build(mode=kwargs.get("mode") or "release")
-    return get_validation_test_tasks(**kwargs).run(build=False, **kwargs)
+    return get_validation_test_tasks(build=False, **kwargs).run(build=False, **kwargs)
