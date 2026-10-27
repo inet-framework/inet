@@ -199,8 +199,9 @@ of about 250 m/s on all four routes. With ``pingPong``, each plane then flies th
 track backward, so it waits for one hour at each turnaround: 30 minutes at the end
 of the track and 30 minutes at the start of the reversed track.
 
-The map clock starts at 2000-06-28 00:20:19 UTC, the date used by the
-satellite example in ``examples/mobility``, which this configuration comes from. The date affects only the clock.
+The map clock starts at 2000-06-28 00:20:19 UTC. This is 5 hours 30 minutes after
+the epoch of a year-2000 two-line element set (TLE) of Vanguard 1, 2000-06-27 18:50:19 UTC
+(day 179.78495062 of 2000). The date affects only the clock.
 
 When a plane climbs, its footprint grows to its cruising size (with the default
 0° elevation mask). The trail of the
