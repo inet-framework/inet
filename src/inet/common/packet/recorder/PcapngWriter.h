@@ -27,8 +27,8 @@ class INET_API PcapngWriter : public IPcapWriter
     bool flush = false;
     int nextPcapngInterfaceId = 0;
     int timePrecision = 6;
-    std::map<int, int> interfaceModuleIdToPcapngInterfaceId;
-    int pcapngInterfaceIdWithoutNetworkInterface = -1;
+    std::map<std::pair<int, PcapLinkType>, int> interfaceModuleIdAndLinkTypeToPcapngInterfaceId;
+    std::map<PcapLinkType, int> linkTypeToPcapngInterfaceIdWithoutNetworkInterface;
 
   public:
     /**

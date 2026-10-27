@@ -1,0 +1,3 @@
+PCAPng files keep the link type of each packet
+
+PcapngWriter wrote one interface description for each network interface, with the link type of its first packet. A later packet of the same interface with a different link type, for example an Ethernet MAC frame after an Ethernet PHY frame, referred to that description, so a reader decoded it with the wrong link type. Now each link type of an interface has its own interface description.

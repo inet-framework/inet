@@ -212,22 +212,27 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
     if (!dumpfile)
         throw cRuntimeError("Cannot write frame: pcap output file is not open");
 
+    // an interface description has one link type, so each link type of an interface needs its own
     int pcapngInterfaceId;
     if (networkInterface == nullptr) {
-        if (pcapngInterfaceIdWithoutNetworkInterface == -1) {
+        auto it = linkTypeToPcapngInterfaceIdWithoutNetworkInterface.find(linkType);
+        if (it != linkTypeToPcapngInterfaceIdWithoutNetworkInterface.end())
+            pcapngInterfaceId = it->second;
+        else {
             writeInterface(nullptr, linkType);
-            pcapngInterfaceIdWithoutNetworkInterface = nextPcapngInterfaceId++;
+            pcapngInterfaceId = nextPcapngInterfaceId++;
+            linkTypeToPcapngInterfaceIdWithoutNetworkInterface[linkType] = pcapngInterfaceId;
         }
-        pcapngInterfaceId = pcapngInterfaceIdWithoutNetworkInterface;
     }
     else {
-        auto it = interfaceModuleIdToPcapngInterfaceId.find(networkInterface->getId());
-        if (it != interfaceModuleIdToPcapngInterfaceId.end())
+        auto interfaceKey = std::make_pair(networkInterface->getId(), linkType);
+        auto it = interfaceModuleIdAndLinkTypeToPcapngInterfaceId.find(interfaceKey);
+        if (it != interfaceModuleIdAndLinkTypeToPcapngInterfaceId.end())
             pcapngInterfaceId = it->second;
         else {
             writeInterface(networkInterface, linkType);
             pcapngInterfaceId = nextPcapngInterfaceId++;
-            interfaceModuleIdToPcapngInterfaceId[networkInterface->getId()] = pcapngInterfaceId;
+            interfaceModuleIdAndLinkTypeToPcapngInterfaceId[interfaceKey] = pcapngInterfaceId;
         }
     }
 

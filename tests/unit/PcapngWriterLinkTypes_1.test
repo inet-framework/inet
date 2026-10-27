@@ -1,0 +1,73 @@
+%description:
+PCAPng gives each link type of an interface its own interface description,
+because an interface description has only one link type. A packet refers to
+the description of its interface and link type. Packets without a network
+interface follow the same rule.
+
+%includes:
+#include <cstdio>
+#include <fstream>
+#include <iterator>
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapngWriter.h"
+
+%global:
+using namespace inet;
+
+#define REQUIRE(...) do { if (!(__VA_ARGS__)) throw cRuntimeError("REQUIRE failed at line %d: %s", __LINE__, #__VA_ARGS__); } while (false)
+
+static uint16_t readUint16(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    return bytes.at(offset) | (bytes.at(offset + 1) << 8);
+}
+
+static uint32_t readUint32(const std::vector<uint8_t>& bytes, size_t offset)
+{
+    uint32_t value = 0;
+    for (size_t i = 0; i < 4; i++)
+        value |= static_cast<uint32_t>(bytes.at(offset + i)) << (8 * i);
+    return value;
+}
+
+%activity:
+Packet packet("packet", makeShared<BytesChunk>(std::vector<uint8_t>{0, 1, 2, 3}));
+NetworkInterface networkInterface;
+PcapngWriter writer;
+writer.open("linktypes.pcapng", 0, 6);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET_MPACKET);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET_MPACKET);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, nullptr, LINKTYPE_ETHERNET);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, nullptr, LINKTYPE_IEEE802_11);
+writer.writePacket(SIMTIME_ZERO, &packet, b(0), b(0), DIRECTION_INBOUND, nullptr, LINKTYPE_ETHERNET);
+writer.close();
+std::ifstream file("linktypes.pcapng", std::ios::binary);
+std::vector<uint8_t> bytes(std::istreambuf_iterator<char>(file), {});
+std::vector<size_t> blocks;
+for (size_t offset = 0; offset < bytes.size(); offset += readUint32(bytes, offset + 4)) {
+    REQUIRE(readUint32(bytes, offset + 4) >= 12);
+    blocks.push_back(offset);
+}
+// the expected blocks: the type, and the link type of an IDB or the interface ID of an EPB
+std::vector<std::pair<uint32_t, uint32_t>> expected = {
+    {0x0A0D0D0A, 0},
+    {1, LINKTYPE_ETHERNET_MPACKET}, {6, 0},
+    {1, LINKTYPE_ETHERNET}, {6, 1},
+    {6, 0},
+    {1, LINKTYPE_ETHERNET}, {6, 2},
+    {1, LINKTYPE_IEEE802_11}, {6, 3},
+    {6, 2},
+};
+REQUIRE(blocks.size() == expected.size());
+for (size_t i = 1; i < blocks.size(); i++) {
+    REQUIRE(readUint32(bytes, blocks[i]) == expected[i].first);
+    if (expected[i].first == 1)
+        REQUIRE(readUint16(bytes, blocks[i] + 8) == expected[i].second);
+    else
+        REQUIRE(readUint32(bytes, blocks[i] + 8) == expected[i].second);
+}
+std::remove("linktypes.pcapng");
+EV << "PCAPng interface descriptions for each link type verified.\n";
+
+%contains: stdout
+PCAPng interface descriptions for each link type verified.
