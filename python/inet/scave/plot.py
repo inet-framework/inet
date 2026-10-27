@@ -12,7 +12,6 @@ import inspect
 import math
 from cycler import cycler
 import logging
-import inet.common.util
 from omnetpp.scave.utils import make_legend_label
 import logging
 from matplotlib.legend_handler import HandlerLine2D
@@ -20,12 +19,16 @@ from matplotlib.legend_handler import HandlerLine2D
 logger = logging.getLogger(__name__)
 
 BOLD = "\033[1;1m"
-COLOR_RESET = inet.common.util.COLOR_RESET
+COLOR_RESET = "\033[0;0m"
 
-class DebugLevel(inet.common.util.LoggerLevel):
-    def __init__(self):
-        super().__init__(inet.scave.plot.logger, logging.DEBUG)
-        
+class DebugLevel(object):
+    def __enter__(self):
+        self.old_level = logger.getEffectiveLevel()
+        logger.setLevel(logging.DEBUG)
+
+    def __exit__(self, type, value, traceback):
+        logger.setLevel(self.old_level)
+
 def enable_debug():
     logger.setLevel(logging.DEBUG)
     
@@ -34,8 +37,9 @@ def log_chart_name(logger, props):
 
 logger = logging.getLogger(__name__)
 
-if inet.common.util.ensure_logging_initialized(logging.WARN, logging.WARN, None):
-    inet.common.util.get_logging_formatter().print_function_name = True
+# a chart script in the IDE has no logging set up; a test runner keeps its own
+if not logging.getLogger().handlers:
+    logging.basicConfig(level=logging.WARN, format="%(levelname)s %(name)s %(funcName)s: %(message)s")
 
 def scale_lightness(rgb, scale_l):
     # convert rgb to hls
