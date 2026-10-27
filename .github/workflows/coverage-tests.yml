@@ -5,7 +5,7 @@ name: "Test: coverage"
 # to the other workflows: a failed test does not fail this workflow, a missing coverage export
 # does. A push to master publishes the report to https://inet-framework.github.io/coverage/ and
 # adds one line to the history of inet-framework/coverage. A manual start gives the report as an
-# artifact only. The plan is plan/pending/coverage-tests.md.
+# artifact only. The plan is plan/done/coverage-tests.md.
 
 on:
   push:
