@@ -149,7 +149,7 @@ def get_tsn_trafficshaping_asynchronousshaper_icct_simulation_test_task(**kwargs
     return ValidationTestTask(tested_task=simulation_task, check_function=compute_tsn_trafficshaping_asynchronousshaper_icct_validation_test_results, **kwargs)
 
 def run_tsn_trafficshaping_asynchronousshaper_icct_validation_test(**kwargs):
-    return get_tsn_trafficshaping_asynchronousshaper_icct_simulation_test_task(**kwargs).run(test_accuracy=test_accuracy, **kwargs)
+    return get_tsn_trafficshaping_asynchronousshaper_icct_simulation_test_task(**kwargs).run(**kwargs)
 
 ########################################################
 # TSN traffic shaping asynchronous shaper Core4INET test
