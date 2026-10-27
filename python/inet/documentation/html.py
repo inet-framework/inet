@@ -4,14 +4,12 @@ import subprocess
 import webbrowser
 
 from opp_repl.common.util import run_command_with_logging
+from opp_repl.simulation.workspace import get_default_simulation_project
 
 _logger = logging.getLogger(__name__)
 
-# The INET root folder, from the location of this file
-_inet_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-
 def _get_full_path(path):
-    return os.path.join(_inet_root, path)
+    return get_default_simulation_project().get_full_path(path)
 
 _BUILD_PARTS = {"ned": "api", "python": "python-api"}
 
