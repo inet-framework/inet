@@ -40,8 +40,10 @@ The following is a short description of several commonly used packet tags:
 - :cpp:`L3AddressReq`: Specifies source and destination network addresses.
 - :cpp:`InterfaceReq`: Specifies the outgoing network interface.
 - :cpp:`NextHopAddressReq`: Specifies the next-hop address for packet routing.
-- :cpp:`CVlanReq`: Specifies the virtual LAN identifier of IEEE 802.1Q.
-- :cpp:`CPcpReq`: Specifies the priority code point of IEEE 802.1Q.
+- :cpp:`CVlanReq`, :cpp:`SVlanReq`: Specify the virtual LAN identifier of the
+  IEEE 802.1Q C-tag and of the IEEE 802.1ad S-tag.
+- :cpp:`CPcpReq`, :cpp:`SPcpReq`: Specify the priority code point of the C-tag
+  and of the S-tag.
 - :cpp:`StreamReq`: Specifies the TSN stream identifier inside the network node.
 - :cpp:`MacAddressReq`: Specifies source and destination MAC addresses.
 - :cpp:`Ieee80211ModeReq`: Specifies the IEEE 802.11 PHY mode.

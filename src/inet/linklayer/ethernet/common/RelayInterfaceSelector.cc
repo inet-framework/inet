@@ -21,6 +21,7 @@ void RelayInterfaceSelector::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         macForwardingTable.reference(this, "macTableModule", true);
         interfaceTable.reference(this, "interfaceTableModule", true);
         WATCH(numProcessedFrames);
@@ -52,7 +53,7 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, const cGate *gates)
     else {
         auto interfaceInd = packet->findTag<InterfaceInd>();
         auto incomingInterface = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
-        auto vlanReq = packet->findTag<CVlanReq>();
+        auto vlanReq = findVlanReq(packet, vlanTagType);
         int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
         if (destinationAddress.isBroadcast())
             broadcastPacket(packet, destinationAddress, incomingInterface);

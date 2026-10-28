@@ -20,6 +20,7 @@ void RelayInterfaceLearner::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         macForwardingTable.reference(this, "macTableModule", true);
         interfaceTable.reference(this, "interfaceTableModule", true);
     }
@@ -38,7 +39,7 @@ cGate *RelayInterfaceLearner::getRegistrationForwardingGate(cGate *gate)
 void RelayInterfaceLearner::processPacket(Packet *packet)
 {
     unsigned int vid = 0;
-    if (auto vlanInd = packet->findTag<CVlanInd>())
+    if (auto vlanInd = findVlanInd(packet, vlanTagType))
         vid = vlanInd->getVlanId();
     auto incomingInterface = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     auto sourceAddress = packet->getTag<MacAddressInd>()->getSrcAddress();

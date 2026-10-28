@@ -20,6 +20,7 @@ simple RelayInterfaceLearner extends PacketFlowBase like IPacketFlow
     parameters:
         string macTableModule; // Relative module path of MAC table
         string interfaceTableModule; // Relative module path of the interface table
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose VLAN id the relay learns and forwards by: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
         @class(RelayInterfaceLearner);
         @display("i=block/blackboard");
 }

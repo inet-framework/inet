@@ -48,9 +48,12 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     auto cutthroughTag = packet->findTag<CutthroughTag>();
     auto eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
     auto macAddressInd = packet->findTag<MacAddressInd>();
-    auto dropEligibleInd = packet->findTag<CDropEligibleInd>();
-    auto vlanInd = packet->findTag<CVlanInd>();
-    auto pcpInd = packet->findTag<CPcpInd>();
+    auto cDropEligibleInd = packet->findTag<CDropEligibleInd>();
+    auto sDropEligibleInd = packet->findTag<SDropEligibleInd>();
+    auto cVlanInd = packet->findTag<CVlanInd>();
+    auto sVlanInd = packet->findTag<SVlanInd>();
+    auto cPcpInd = packet->findTag<CPcpInd>();
+    auto sPcpInd = packet->findTag<SPcpInd>();
     auto userPriorityInd = packet->findTag<UserPriorityInd>();
     auto streamInd = packet->findTag<StreamInd>();
     auto sequenceNumberInd = packet->findTag<SequenceNumberInd>();
@@ -79,12 +82,18 @@ void PacketDirectionReverser::processPacket(Packet *packet)
         macAddressReq->setSrcAddress(macAddressInd->getSrcAddress());
         macAddressReq->setDestAddress(macAddressInd->getDestAddress());
     }
-    if (dropEligibleInd != nullptr)
-        packet->addTag<CDropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
-    if (vlanInd != nullptr && forwardVlan)
-        packet->addTag<CVlanReq>()->setVlanId(vlanInd->getVlanId());
-    if (pcpInd != nullptr && forwardPcp)
-        packet->addTag<CPcpReq>()->setPcp(pcpInd->getPcp());
+    if (cDropEligibleInd != nullptr)
+        packet->addTag<CDropEligibleReq>()->setDropEligible(cDropEligibleInd->getDropEligible());
+    if (sDropEligibleInd != nullptr)
+        packet->addTag<SDropEligibleReq>()->setDropEligible(sDropEligibleInd->getDropEligible());
+    if (cVlanInd != nullptr && forwardVlan)
+        packet->addTag<CVlanReq>()->setVlanId(cVlanInd->getVlanId());
+    if (sVlanInd != nullptr && forwardVlan)
+        packet->addTag<SVlanReq>()->setVlanId(sVlanInd->getVlanId());
+    if (cPcpInd != nullptr && forwardPcp)
+        packet->addTag<CPcpReq>()->setPcp(cPcpInd->getPcp());
+    if (sPcpInd != nullptr && forwardPcp)
+        packet->addTag<SPcpReq>()->setPcp(sPcpInd->getPcp());
     if (userPriorityInd != nullptr)
         packet->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
     if (streamInd != nullptr)

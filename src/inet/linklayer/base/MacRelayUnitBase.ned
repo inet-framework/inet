@@ -26,6 +26,7 @@ simple MacRelayUnitBase extends SimpleModule
         @class(MacRelayUnitBase);
         string macTableModule;
         string interfaceTableModule;
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose VLAN id the relay learns and forwards by: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
         displayStringTextFormat = default("proc: %p\ndisc: %d");
         @display("i=block/switch");
         @signal[packetSentToLower](type=inet::Packet);

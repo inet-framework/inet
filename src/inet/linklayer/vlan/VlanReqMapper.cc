@@ -22,7 +22,8 @@ void VlanReqMapper::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        protocol = Protocol::getProtocol(par("protocol").stringValue());
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
+        protocol = getVlanTagProtocol(vlanTagType);
         interfaceTable.reference(this, "interfaceTableModule", true);
         mappedVlanIds = parseMappedVlanIds(this, check_and_cast<cValueMap *>(par("mappedVlanIds").objectValue()), 0);
         WATCH(mappedVlanIds);
@@ -46,18 +47,18 @@ void VlanReqMapper::processPacket(Packet *packet)
     auto networkInterface = interfaceReq != nullptr ? interfaceTable->getInterfaceById(interfaceReq->getInterfaceId()) : nullptr;
     std::string interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
     if (auto interfaceMappedVlanIds = findInterfaceEntry(mappedVlanIds, interfaceName)) {
-        auto vlanReq = packet->findTag<CVlanReq>();
+        auto vlanReq = findVlanReq(packet, vlanTagType);
         auto requestedVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : -1;
         auto it = interfaceMappedVlanIds->find(requestedVlanId);
         if (it != interfaceMappedVlanIds->end()) {
             auto mappedVlanId = it->second;
             if (mappedVlanId == -1)
-                packet->removeTagIfPresent<CVlanReq>();
+                removeVlanReqIfPresent(packet, vlanTagType);
             else
-                packet->addTagIfAbsent<CVlanReq>()->setVlanId(mappedVlanId);
+                addVlanReqIfAbsent(packet, vlanTagType)->setVlanId(mappedVlanId);
         }
     }
-    ensureEncapsulationProtocolReq(packet, protocol, packet->hasTag<CVlanReq>() || packet->hasTag<CPcpReq>());
+    ensureEncapsulationProtocolReq(packet, protocol, findVlanReq(packet, vlanTagType) != nullptr || findPcpReq(packet, vlanTagType) != nullptr);
     setDispatchProtocol(packet);
 }
 

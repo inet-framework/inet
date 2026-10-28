@@ -11,6 +11,7 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/packet/PacketFilter.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
@@ -34,6 +35,7 @@ class INET_API StreamDecoder : public PacketFlowBase, public TransparentProtocol
     };
 
   protected:
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     std::vector<Mapping> mappings;
 

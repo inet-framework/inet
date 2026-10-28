@@ -20,6 +20,7 @@ void VlanIndFilter::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         interfaceTable.reference(this, "interfaceTableModule", true);
         acceptedVlanIds = parseAcceptedVlanIds(this, check_and_cast<cValueMap *>(par("acceptedVlanIds").objectValue()));
         WATCH(acceptedVlanIds);
@@ -51,7 +52,7 @@ bool VlanIndFilter::matchesPacket(const Packet *packet) const
     auto interfaceVlanIds = findInterfaceEntry(acceptedVlanIds, interfaceName);
     if (interfaceVlanIds == nullptr)
         return false;
-    auto vlanInd = packet->findTag<CVlanInd>();
+    auto vlanInd = findVlanInd(packet, vlanTagType);
     auto vlanId = vlanInd != nullptr ? vlanInd->getVlanId() : -1;
     return interfaceVlanIds->count(vlanId) != 0;
 }

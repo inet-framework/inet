@@ -11,12 +11,14 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// Filters out packets based on the attached `CVlanReq` tag.
+// Filters out packets based on the attached VLAN request tag (`CVlanReq` or
+// `SVlanReq`, see `vlanTagType`).
 //
 simple VlanReqFilter extends PacketFilterBase like IPacketFilter
 {
     parameters:
         string interfaceTableModule;
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose tags the module uses: "c" for the C-tag (CVlanReq, CVlanInd), "s" for the S-tag (SVlanReq, SVlanInd)
         object acceptedVlanIds = default({}); // Maps network interface name to a list of accepted VLAN ids, '*' as interface name matches all interfaces, -1 VLAN id matches if no tag is present
         @class(VlanReqFilter);
         @display("i=block/filter");

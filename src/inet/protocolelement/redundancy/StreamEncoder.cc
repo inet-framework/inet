@@ -20,7 +20,9 @@ Define_Module(StreamEncoder);
 void StreamEncoder::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_QUEUEING)
+    if (stage == INITSTAGE_LOCAL)
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
+    else if (stage == INITSTAGE_QUEUEING)
         configureMappings();
 }
 
@@ -61,13 +63,13 @@ void StreamEncoder::processPacket(Packet *packet)
         for (auto& mapping : mappings) {
             if (!strcmp(mapping.stream.c_str(), streamName)) {
                 if (mapping.pcp != -1)
-                    packet->addTagIfAbsent<CPcpReq>()->setPcp(mapping.pcp);
+                    addPcpReqIfAbsent(packet, vlanTagType)->setPcp(mapping.pcp);
                 if (mapping.vlanId != -1)
-                    packet->addTagIfAbsent<CVlanReq>()->setVlanId(mapping.vlanId);
+                    addVlanReqIfAbsent(packet, vlanTagType)->setVlanId(mapping.vlanId);
                 if (packet->hasTag<SequenceNumberReq>())
                     ensureEncapsulationProtocolReq(packet, &Protocol::ieee8021rTag);
                 if (mapping.pcp != -1 || mapping.vlanId != -1)
-                    ensureEncapsulationProtocolReq(packet, &Protocol::ieee8021qCTag);
+                    ensureEncapsulationProtocolReq(packet, getVlanTagProtocol(vlanTagType));
                 setDispatchProtocol(packet);
                 break;
             }

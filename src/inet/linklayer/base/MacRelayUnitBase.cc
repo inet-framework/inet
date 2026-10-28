@@ -29,6 +29,7 @@ void MacRelayUnitBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         macForwardingTable.reference(this, "macTableModule", true);
         interfaceTable.reference(this, "interfaceTableModule", true);
         numProcessedFrames = numDroppedFrames = 0;
@@ -63,10 +64,14 @@ Packet *MacRelayUnitBase::createForwardedPacket(const Packet *incomingPacket) co
     outgoingPacket->addTag<PacketProtocolTag>()->setProtocol(protocol);
     if (auto vlanInd = incomingPacket->findTag<CVlanInd>())
         outgoingPacket->addTag<CVlanReq>()->setVlanId(vlanInd->getVlanId());
+    if (auto vlanInd = incomingPacket->findTag<SVlanInd>())
+        outgoingPacket->addTag<SVlanReq>()->setVlanId(vlanInd->getVlanId());
     if (auto userPriorityInd = incomingPacket->findTag<UserPriorityInd>())
         outgoingPacket->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
     if (auto dropEligibleInd = incomingPacket->findTag<CDropEligibleInd>())
         outgoingPacket->addTag<CDropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
+    if (auto dropEligibleInd = incomingPacket->findTag<SDropEligibleInd>())
+        outgoingPacket->addTag<SDropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
     if (auto sequenceNumberInd = incomingPacket->findTag<SequenceNumberInd>())
         outgoingPacket->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumberInd->getSequenceNumber());
     auto& macAddressReq = outgoingPacket->addTag<MacAddressReq>();

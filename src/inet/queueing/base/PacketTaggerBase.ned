@@ -20,6 +20,7 @@ simple PacketTaggerBase extends PacketMarkerBase
         int hopLimit = default(-1); // Specifies network layer TTL, unused by default
         int vlanId = default(-1); // Specifies VLAN, unused by default
         int pcp = default(-1); // Specifies PCP, unused by default
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose VLAN id and PCP the vlanId and pcp parameters specify: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
         int userPriority = default(-1); // Specifies user priority, unused by default
         double transmissionPower @unit(W) = default(nan W); // Specifies signal transmission power, unused by default
         object encapsulationProtocols = default([]);

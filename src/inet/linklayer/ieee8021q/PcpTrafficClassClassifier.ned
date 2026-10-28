@@ -12,7 +12,8 @@ import inet.queueing.contract.IPacketClassifier;
 
 //
 // Classifies packets based on the attached PCP value [0, 7]. The
-// PCP is determined by a `CPcpReq` or a `CPcpInd` or both. The output gate index is
+// PCP is determined by a PCP request or indication or both, `CPcpReq` and
+// `CPcpInd` or `SPcpReq` and `SPcpInd` (see `vlanTagType`). The output gate index is
 // the value found in the mapping matrix using the PCP value as the row index
 // and the number of connected consumers (traffic categories) as the column
 // index.
@@ -21,6 +22,7 @@ module PcpTrafficClassClassifier extends PacketClassifierBase like IPacketClassi
 {
     parameters:
         string mode @enum("req", "ind", "both") = default("both");
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose PCP the module classifies by: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
         // IEEE Standard for Local and Metropolitan Area Networks, Bridges and Bridged Networks
         // Table 8-5—Recommended priority to traffic class mappings
         object mapping = default([[0, 0, 0, 0, 0, 1, 1, 1],   // BE best effort

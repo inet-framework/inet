@@ -10,6 +10,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/linklayer/vlan/VlanIdMaps.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
@@ -25,6 +26,7 @@ using namespace inet::queueing;
 class INET_API VlanIndMapper : public PacketFlowBase, public TransparentProtocolRegistrationListener, public cListener
 {
   protected:
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     std::map<std::string, std::map<int, int>> mappedVlanIds; // interface name or "*" -> received VLAN id -> mapped VLAN id
 

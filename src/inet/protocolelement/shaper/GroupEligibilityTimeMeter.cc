@@ -20,6 +20,7 @@ void GroupEligibilityTimeMeter::initialize(int stage)
     EligibilityTimeMeter::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         groupEligibilityTimeTable.reference(this, "groupEligibilityTimeTableModule", true);
     }
 }
@@ -39,12 +40,12 @@ void GroupEligibilityTimeMeter::meterPacket(Packet *packet)
     int pcp = 0;
     if (packetDirection->getDirection() == DIRECTION_INBOUND)
     {
-        auto  pcpTag = packet->findTag<CPcpInd>();
+        auto  pcpTag = findPcpInd(packet, vlanTagType);
         pcp = pcpTag->getPcp();
     }
     else
     {
-        auto pcpTag = packet->findTag<CPcpReq>();
+        auto pcpTag = findPcpReq(packet, vlanTagType);
         pcp = pcpTag->getPcp();
     }
     auto iterface = packet->findTag<InterfaceInd>();

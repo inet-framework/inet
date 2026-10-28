@@ -9,6 +9,7 @@
 #define __INET_STREAMENCODER_H
 
 #include "inet/common/IProtocolRegistrationListener.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
@@ -26,6 +27,7 @@ class INET_API StreamEncoder : public PacketFlowBase, public TransparentProtocol
         std::string stream;
     };
 
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     std::vector<Mapping> mappings;
 
   protected:

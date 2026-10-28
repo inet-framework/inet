@@ -37,6 +37,8 @@ module VlanPolicyLayer like IProtocolLayer
     parameters:
         @display("i=block/layer");
         string interfaceTableModule;
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose tags the submodules use: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
+        *.vlanTagType = default(this.vlanTagType);
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
     gates:
         input upperLayerIn;

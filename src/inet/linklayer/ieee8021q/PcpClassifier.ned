@@ -12,13 +12,15 @@ import inet.queueing.contract.IPacketClassifier;
 
 //
 // Classifies packets based on the attached PCP value [0, 7]. The
-// PCP is determined by a `CPcpReq` or a `CPcpInd` or both. The output gate index is
+// PCP is determined by a PCP request or indication or both, `CPcpReq` and
+// `CPcpInd` or `SPcpReq` and `SPcpInd` (see `vlanTagType`). The output gate index is
 // the ith value in the `pcpToGateIndex` parameter.
 //
 simple PcpClassifier extends PacketClassifierBase like IPacketClassifier
 {
     parameters:
         string mode @enum("req", "ind", "both") = default("both");
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose PCP the module classifies by: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
         object pcpToGateIndex; // Specifies the gate index for all PCP values in ascending order
         int defaultGateIndex = default(0); // Default gate index if no PCP is found
         @class(PcpClassifier);

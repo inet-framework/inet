@@ -35,6 +35,7 @@ void PacketTaggerBase::initialize(int stage)
         if (tos != -1 && dscp != -1)
             throw cRuntimeError("parameter error: 'tos' and 'dscp' parameters specified together");
         hopLimit = par("hopLimit");
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         vlanId = par("vlanId");
         pcp = par("pcp");
         userPriority = par("userPriority");
@@ -78,12 +79,12 @@ void PacketTaggerBase::markPacket(Packet *packet)
         packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     }
     if (vlanId != -1) {
-        EV_DEBUG << "Attaching CVlanReq" << EV_FIELD(packet) << EV_FIELD(vlanId) << EV_ENDL;
-        packet->addTagIfAbsent<CVlanReq>()->setVlanId(vlanId);
+        EV_DEBUG << "Attaching VLAN request" << EV_FIELD(packet) << EV_FIELD(vlanId) << EV_ENDL;
+        addVlanReqIfAbsent(packet, vlanTagType)->setVlanId(vlanId);
     }
     if (pcp != -1) {
-        EV_DEBUG << "Attaching CPcpReq" << EV_FIELD(packet) << EV_FIELD(pcp) << EV_ENDL;
-        packet->addTagIfAbsent<CPcpReq>()->setPcp(pcp);
+        EV_DEBUG << "Attaching PCP request" << EV_FIELD(packet) << EV_FIELD(pcp) << EV_ENDL;
+        addPcpReqIfAbsent(packet, vlanTagType)->setPcp(pcp);
     }
     if (userPriority != -1) {
         EV_DEBUG << "Attaching UserPriorityReq" << EV_FIELD(packet) << EV_FIELD(userPriority) << EV_ENDL;
