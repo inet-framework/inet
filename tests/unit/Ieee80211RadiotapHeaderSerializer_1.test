@@ -1,0 +1,174 @@
+%description:
+Ieee80211RadiotapHeaderSerializer writes the fields of Ieee80211RadiotapHeader
+with the alignment and the little-endian byte order of the Radiotap format, and
+it reads the same bytes back. The expected bytes follow the field definitions
+of https://www.radiotap.org/fields/defined. A header with a field that the
+chunk cannot represent keeps the length of the header in the record, and it is
+improperly represented.
+
+%includes:
+#include <vector>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/physicallayer/wireless/ieee80211/radiotap/Ieee80211RadiotapHeaderSerializer.h"
+#include "inet/physicallayer/wireless/ieee80211/radiotap/Ieee80211RadiotapHeader_m.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%global:
+static void require(bool condition, const char *message)
+{
+    if (!condition)
+        throw cRuntimeError("%s", message);
+}
+
+static std::vector<uint8_t> serialize(const Ptr<Ieee80211RadiotapHeader>& header)
+{
+    header->setChunkLength(computeIeee80211RadiotapHeaderLength(header->getPresent()));
+    Packet packet("output", header);
+    return packet.peekAllAsBytes()->getBytes();
+}
+
+// A record has the 802.11 frame after the header; two bytes stand in for it.
+static Ptr<const Ieee80211RadiotapHeader> deserialize(std::vector<uint8_t> bytes)
+{
+    bytes.push_back(0xd4);
+    bytes.push_back(0x00);
+    Packet packet("input", makeShared<BytesChunk>(bytes));
+    auto header = packet.popAtFront<Ieee80211RadiotapHeader>(b(-1), Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED | Chunk::PF_ALLOW_INCORRECT);
+    require(packet.getDataLength() == B(2), "the deserializer must stop at it_len");
+    require(header->getChunkLength() == B(bytes.size() - 2), "the chunk length must be it_len");
+    return header;
+}
+
+static bool hasSameFields(const Ieee80211RadiotapHeader& a, const Ieee80211RadiotapHeader& b)
+{
+    for (int user = 0; user < 4; user++)
+        if (a.getVhtMcsNss(user) != b.getVhtMcsNss(user))
+            return false;
+    return a.getPresent() == b.getPresent() && a.getTsft() == b.getTsft() && a.getFlags() == b.getFlags() &&
+           a.getRate() == b.getRate() && a.getChannelFrequency() == b.getChannelFrequency() &&
+           a.getChannelFlags() == b.getChannelFlags() && a.getAntennaSignal() == b.getAntennaSignal() &&
+           a.getAntennaNoise() == b.getAntennaNoise() && a.getTxPower() == b.getTxPower() &&
+           a.getMcsKnown() == b.getMcsKnown() && a.getMcsFlags() == b.getMcsFlags() && a.getMcsIndex() == b.getMcsIndex() &&
+           a.getAmpduReference() == b.getAmpduReference() && a.getAmpduFlags() == b.getAmpduFlags() &&
+           a.getAmpduDelimiterCrc() == b.getAmpduDelimiterCrc() && a.getVhtKnown() == b.getVhtKnown() &&
+           a.getVhtFlags() == b.getVhtFlags() && a.getVhtBandwidth() == b.getVhtBandwidth() &&
+           a.getVhtCoding() == b.getVhtCoding() && a.getVhtGroupId() == b.getVhtGroupId() &&
+           a.getVhtPartialAid() == b.getVhtPartialAid();
+}
+
+static void check(const Ptr<Ieee80211RadiotapHeader>& header, const std::vector<uint8_t>& expected, const char *name)
+{
+    if (serialize(header) != expected)
+        throw cRuntimeError("%s: the serialized bytes differ from the expected bytes", name);
+    if (header->getChunkLength() != B(expected.size()))
+        throw cRuntimeError("%s: computeIeee80211RadiotapHeaderLength() gives a wrong length", name);
+    auto copy = deserialize(expected);
+    if (copy->isImproperlyRepresented() || copy->isIncorrect())
+        throw cRuntimeError("%s: the deserialized header is not proper", name);
+    if (!hasSameFields(*copy, *header))
+        throw cRuntimeError("%s: the deserialized fields differ", name);
+    EV << name << ": " << expected.size() << " bytes\n";
+}
+
+%activity:
+// Flags, Rate, Channel, antenna signal and antenna noise: no padding.
+auto legacy = makeShared<Ieee80211RadiotapHeader>();
+legacy->setPresent((1 << RADIOTAP_FLAGS) | (1 << RADIOTAP_RATE) | (1 << RADIOTAP_CHANNEL) | (1 << RADIOTAP_DBM_ANTSIGNAL) | (1 << RADIOTAP_DBM_ANTNOISE));
+legacy->setFlags(RADIOTAP_FLAG_FCS_AT_END);
+legacy->setRate(108);
+legacy->setChannelFrequency(2437);
+legacy->setChannelFlags(RADIOTAP_CHANNEL_OFDM | RADIOTAP_CHANNEL_2GHZ);
+legacy->setAntennaSignal(-61);
+legacy->setAntennaNoise(-95);
+check(legacy, {0x00, 0x00, 0x10, 0x00, 0x6e, 0x00, 0x00, 0x00, 0x10, 0x6c, 0x85, 0x09, 0xc0, 0x00, 0xc3, 0xa1}, "legacy");
+
+// Flags and MCS: 40 MHz, short guard interval, MCS 7.
+auto ht = makeShared<Ieee80211RadiotapHeader>();
+ht->setPresent((1 << RADIOTAP_FLAGS) | (1 << RADIOTAP_MCS));
+ht->setFlags(RADIOTAP_FLAG_FCS_AT_END);
+ht->setMcsKnown(RADIOTAP_MCS_KNOWN_BANDWIDTH | RADIOTAP_MCS_KNOWN_INDEX | RADIOTAP_MCS_KNOWN_GUARD_INTERVAL | RADIOTAP_MCS_KNOWN_FEC);
+ht->setMcsFlags(RADIOTAP_MCS_FLAG_BANDWIDTH_40 | RADIOTAP_MCS_FLAG_SHORT_GUARD_INTERVAL);
+ht->setMcsIndex(7);
+check(ht, {0x00, 0x00, 0x0c, 0x00, 0x02, 0x00, 0x08, 0x00, 0x10, 0x17, 0x05, 0x07}, "ht");
+
+// Flags and VHT: one padding byte, because the VHT field has 2-byte alignment.
+auto vht = makeShared<Ieee80211RadiotapHeader>();
+vht->setPresent((1 << RADIOTAP_FLAGS) | (1 << RADIOTAP_VHT));
+vht->setFlags(RADIOTAP_FLAG_FCS_AT_END);
+vht->setVhtKnown(RADIOTAP_VHT_KNOWN_GUARD_INTERVAL | RADIOTAP_VHT_KNOWN_BANDWIDTH);
+vht->setVhtFlags(RADIOTAP_VHT_FLAG_SHORT_GUARD_INTERVAL);
+vht->setVhtBandwidth(4);
+vht->setVhtMcsNss(0, (8 << 4) | 2);
+check(vht, {0x00, 0x00, 0x16, 0x00, 0x02, 0x00, 0x20, 0x00, 0x10, 0x00, 0x44, 0x00, 0x04, 0x04, 0x82, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, "vht");
+
+// TSFT, Flags and TX power: TSFT is on an 8-byte boundary after the 8-byte header.
+auto sent = makeShared<Ieee80211RadiotapHeader>();
+sent->setPresent((1 << RADIOTAP_TSFT) | (1 << RADIOTAP_FLAGS) | (1 << RADIOTAP_DBM_TX_POWER));
+sent->setTsft(0x0102030405060708ull);
+sent->setFlags(RADIOTAP_FLAG_FCS_AT_END);
+sent->setTxPower(20);
+check(sent, {0x00, 0x00, 0x12, 0x00, 0x03, 0x04, 0x00, 0x00, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01,
+             0x10, 0x14}, "tsft");
+
+// Flags and A-MPDU status: three padding bytes, because the field has 4-byte alignment.
+auto ampdu = makeShared<Ieee80211RadiotapHeader>();
+ampdu->setPresent((1 << RADIOTAP_FLAGS) | (1 << RADIOTAP_AMPDU_STATUS));
+ampdu->setFlags(RADIOTAP_FLAG_FCS_AT_END);
+ampdu->setAmpduReference(0x11223344);
+ampdu->setAmpduFlags(0x000c);
+check(ampdu, {0x00, 0x00, 0x14, 0x00, 0x02, 0x00, 0x10, 0x00, 0x10, 0x00, 0x00, 0x00, 0x44, 0x33, 0x22, 0x11,
+              0x0c, 0x00, 0x00, 0x00}, "ampdu");
+
+// RX flags (bit 14) has a known size but no place in the chunk: the deserializer
+// skips it, reads the MCS field after it, and the chunk keeps the original bytes.
+std::vector<uint8_t> rxFlagsBytes = {0x00, 0x00, 0x0f, 0x00, 0x02, 0x40, 0x08, 0x00, 0x10, 0x00, 0x34, 0x12, 0x17, 0x05, 0x07};
+auto rxFlags = deserialize(rxFlagsBytes);
+require(rxFlags->isImproperlyRepresented(), "rxFlags: the header must be improperly represented");
+require(rxFlags->getFlags() == RADIOTAP_FLAG_FCS_AT_END && rxFlags->getMcsIndex() == 7, "rxFlags: the represented fields must be read");
+Packet rxFlagsCopy("copy", rxFlags);
+require(rxFlagsCopy.peekAllAsBytes()->getBytes() == rxFlagsBytes, "rxFlags: an unchanged header must serialize to its original bytes");
+EV << "rxFlags: skipped\n";
+
+// Bit 18 has no defined size, so the deserializer stops after the Flags field.
+auto unknown = deserialize({0x00, 0x00, 0x14, 0x00, 0x02, 0x00, 0x04, 0x00, 0x10, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+                            0xaa, 0xaa, 0xaa, 0xaa});
+require(unknown->isImproperlyRepresented() && unknown->getFlags() == RADIOTAP_FLAG_FCS_AT_END, "unknown: wrong result");
+EV << "unknown: stopped\n";
+
+// A second present word moves the fields to offset 12.
+auto extended = deserialize({0x00, 0x00, 0x0d, 0x00, 0x02, 0x00, 0x00, 0x80, 0x01, 0x00, 0x00, 0x00, 0x10});
+require(extended->isImproperlyRepresented() && extended->getFlags() == RADIOTAP_FLAG_FCS_AT_END, "extended: wrong result");
+EV << "extended: read\n";
+
+// Only version 0 exists.
+auto version = deserialize({0x01, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00});
+require(version->isIncorrect(), "version: the header must be incorrect");
+EV << "version: incorrect\n";
+
+// The length function refuses a field that the chunk cannot represent.
+bool refused = false;
+try {
+    computeIeee80211RadiotapHeaderLength(1 << 14);
+}
+catch (cRuntimeError& e) {
+    refused = true;
+}
+require(refused, "length: bit 14 must be refused");
+EV << "length: refused\n";
+
+%contains: stdout
+legacy: 16 bytes
+ht: 12 bytes
+vht: 22 bytes
+tsft: 18 bytes
+ampdu: 20 bytes
+rxFlags: skipped
+unknown: stopped
+extended: read
+version: incorrect
+length: refused
