@@ -19,6 +19,8 @@ module InterfaceRelayLayer like IProtocolLayer
     parameters:
         string macTableModule;
         string interfaceTableModule;
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose tags the submodules use: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
+        *.vlanTagType = default(this.vlanTagType);
         *.macTableModule = default(absPath(this.macTableModule));
         *.interfaceTableModule = default(absPath(this.interfaceTableModule));
         @display("i=block/layer");

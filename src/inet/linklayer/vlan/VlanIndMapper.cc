@@ -20,6 +20,7 @@ void VlanIndMapper::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         interfaceTable.reference(this, "interfaceTableModule", true);
         mappedVlanIds = parseMappedVlanIds(this, check_and_cast<cValueMap *>(par("mappedVlanIds").objectValue()), 1);
         WATCH(mappedVlanIds);
@@ -43,16 +44,16 @@ void VlanIndMapper::processPacket(Packet *packet)
     auto networkInterface = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
     std::string interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
     if (auto interfaceMappedVlanIds = findInterfaceEntry(mappedVlanIds, interfaceName)) {
-        auto vlanInd = packet->findTag<CVlanInd>();
+        auto vlanInd = findVlanInd(packet, vlanTagType);
         auto receivedVlanId = vlanInd != nullptr ? vlanInd->getVlanId() : -1;
         auto it = interfaceMappedVlanIds->find(receivedVlanId);
         if (it != interfaceMappedVlanIds->end()) {
             auto mappedVlanId = it->second;
             EV_INFO << "Mapping VLAN id" << EV_FIELD(interfaceName) << EV_FIELD(receivedVlanId) << EV_FIELD(mappedVlanId) << EV_ENDL;
             if (mappedVlanId == -1)
-                packet->removeTagIfPresent<CVlanInd>();
+                removeVlanIndIfPresent(packet, vlanTagType);
             else
-                packet->addTagIfAbsent<CVlanInd>()->setVlanId(mappedVlanId);
+                addVlanIndIfAbsent(packet, vlanTagType)->setVlanId(mappedVlanId);
         }
     }
 }

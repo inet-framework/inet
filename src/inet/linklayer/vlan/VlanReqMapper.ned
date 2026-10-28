@@ -11,13 +11,14 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// Updates the `CVlanReq` tag on packets.
+// Updates the VLAN request tag (`CVlanReq` or `SVlanReq`, see `vlanTagType`)
+// on packets.
 //
 simple VlanReqMapper extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string interfaceTableModule;
-        string protocol = default("ieee8021qctag");
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose tags the module uses, and whose protocol it requests: "c" for the C-tag (CVlanReq, CVlanInd), "s" for the S-tag (SVlanReq, SVlanInd)
         object mappedVlanIds = default({}); // Maps network interface name to another map which maps accepted VLAN ids to replacement VLAN ids, '*' as interface name matches all interfaces, -1 VLAN id matches if no tag is present
         @class(VlanReqMapper);
         @display("i=block/switch");

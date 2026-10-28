@@ -22,13 +22,8 @@ void Ieee8021qTagTpidHeaderChecker::initialize(int stage)
 {
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        const char *vlanTagType = par("vlanTagType");
-        if (!strcmp("s", vlanTagType))
-            tpid = 0x88A8;
-        else if (!strcmp("c", vlanTagType))
-            tpid = 0x8100;
-        else
-            throw cRuntimeError("Unknown tag type");
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
+        tpid = vlanTagType == VLAN_TAG_TYPE_S ? 0x88A8 : 0x8100;
         vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
         WATCH(tpid);
     }
@@ -38,9 +33,9 @@ void Ieee8021qTagTpidHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8021qTagTpidHeader>();
     packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(header->getPcp());
-    packet->addTagIfAbsent<CPcpInd>()->setPcp(header->getPcp());
-    packet->addTagIfAbsent<CVlanInd>()->setVlanId(header->getVid());
-    packet->addTagIfAbsent<CDropEligibleInd>()->setDropEligible(header->getDei());
+    addPcpIndIfAbsent(packet, vlanTagType)->setPcp(header->getPcp());
+    addVlanIndIfAbsent(packet, vlanTagType)->setVlanId(header->getVid());
+    addDropEligibleIndIfAbsent(packet, vlanTagType)->setDropEligible(header->getDei());
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(packetProtocolTag->getFrontOffset() - header->getChunkLength());
 }

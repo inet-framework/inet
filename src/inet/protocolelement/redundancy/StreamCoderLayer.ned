@@ -19,6 +19,8 @@ module StreamCoderLayer like IProtocolLayer
 {
     parameters:
         string interfaceTableModule;
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose tags the submodules use: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
+        *.vlanTagType = default(this.vlanTagType);
         *.interfaceTableModule = default(this.interfaceTableModule);
         @display("i=block/layer");
     gates:

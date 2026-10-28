@@ -1,0 +1,9 @@
+A node can insert and remove an S-tag and a C-tag together
+
+A node can now carry the VLAN id, PCP and drop eligible indicator of an S-tag (IEEE 802.1ad) and of a C-tag at the same time, so it can insert or remove both tags, as a provider edge bridge or the UPF of a 3GPP Ethernet PDU session does. The S-tag has request and indication tags of its own: SVlanReq, SVlanInd, SPcpReq, SPcpInd, SDropEligibleReq and SDropEligibleInd. An 802.1Q tag inserter or checker whose vlanTagType is "s" reads and writes these tags only. PacketDirectionReverser and the MAC relays turn the indications of both tags into requests, so a bridge that decodes both tags keeps both when it forwards a frame. The classifier functions PacketSVlanReqClassifier and PacketSVlanIndClassifier join those of the C-tag.
+
+The modules that use the VLAN tags have a vlanTagType parameter, "c" by default: the VLAN policy modules, the relays with their learners and selectors, Ieee8021qSocketPacketProcessor, PcpClassifier, PcpTrafficClassClassifier, GroupEligibilityTimeMeter, StreamEncoder, StreamDecoder and the packet taggers. Ieee8021qLayer, VlanPolicyLayer, BridgingLayer, InterfaceRelayLayer and StreamCoderLayer pass theirs to their submodules, so one line makes a whole node an S-VLAN bridge:
+
+  *.switch.**.vlanTagType = "s"
+
+An S-VLAN node must set vlanTagType on all of these modules. Setting it only on the 802.1Q layer, which used to be enough, leaves the relay and the VLAN policy with the C-tag: the run either stops with an error about something else or runs without VLAN separation, and no message names the cause. The protocol parameter of VlanReqMapper is replaced by vlanTagType, from which the requested protocol follows; delete the lines that set it. The migration guide has the details.

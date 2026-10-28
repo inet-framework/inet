@@ -10,6 +10,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/queueing/base/PacketFlowBase.h"
@@ -21,6 +22,7 @@ using namespace inet::queueing;
 class INET_API RelayInterfaceLearner : public PacketFlowBase, public TransparentProtocolRegistrationListener
 {
   protected:
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<IMacForwardingTable> macForwardingTable;
 

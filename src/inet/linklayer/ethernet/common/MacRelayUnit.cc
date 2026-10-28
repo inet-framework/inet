@@ -28,7 +28,7 @@ void MacRelayUnit::handleLowerPacket(Packet *incomingPacket)
     int incomingInterfaceId = interfaceInd->getInterfaceId();
     auto incomingInterface = interfaceTable->getInterfaceById(incomingInterfaceId);
     unsigned int vlanId = 0;
-    if (auto vlanInd = incomingPacket->findTag<CVlanInd>())
+    if (auto vlanInd = findVlanInd(incomingPacket, vlanTagType))
         vlanId = vlanInd->getVlanId();
     EV_INFO << "Processing packet from network" << EV_FIELD(incomingInterface) << EV_FIELD(incomingPacket) << EV_ENDL;
     updatePeerAddress(incomingInterface, sourceAddress, vlanId);

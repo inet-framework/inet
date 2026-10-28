@@ -8,6 +8,7 @@
 #ifndef __INET_IEEE8021QTAGTPIDHEADERCHECKER_H
 #define __INET_IEEE8021QTAGTPIDHEADERCHECKER_H
 
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/queueing/base/PacketFilterBase.h"
 
 namespace inet {
@@ -17,6 +18,7 @@ using namespace inet::queueing;
 class INET_API Ieee8021qTagTpidHeaderChecker : public PacketFilterBase
 {
   protected:
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     int tpid = -1;
     cValueArray *vlanIdFilter = nullptr;
 

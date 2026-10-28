@@ -20,8 +20,10 @@ Define_Module(Ieee8021qSocketPacketProcessor);
 void Ieee8021qSocketPacketProcessor::initialize(int stage)
 {
     PacketPusherBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         socketTable.reference(this, "socketTableModule", true);
+    }
 }
 
 cGate *Ieee8021qSocketPacketProcessor::getRegistrationForwardingGate(cGate *gate)
@@ -40,7 +42,7 @@ void Ieee8021qSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gat
     take(packet);
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
-    const auto& vlanInd = packet->findTag<CVlanInd>();
+    const auto& vlanInd = findVlanInd(packet, vlanTagType);
     auto vlanId = vlanInd ? vlanInd->getVlanId() : -1;
     auto sockets = socketTable->findSockets(protocol, vlanId);
     bool steal = false;

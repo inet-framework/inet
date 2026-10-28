@@ -11,14 +11,15 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// Updates the `CVlanInd` tag on received packets, per incoming network
-// interface. This is the ingress counterpart of ~VlanReqMapper: it assigns the
-// VLAN that a received frame belongs to inside the node.
+// Updates the VLAN indication tag (`CVlanInd` or `SVlanInd`, see `vlanTagType`)
+// on received packets, per incoming network interface. This is the ingress
+// counterpart of ~VlanReqMapper: it assigns the VLAN that a received frame
+// belongs to inside the node.
 //
 // The `mappedVlanIds` parameter maps the name of the incoming network interface
 // to a map from the received VLAN id to the VLAN id that the packet gets. The
 // received VLAN id is -1 for an untagged frame and 0 for a priority-tagged
-// frame. A mapped VLAN id of -1 removes the `CVlanInd` tag. The interface name
+// frame. A mapped VLAN id of -1 removes the indication tag. The interface name
 // '*' matches every interface that has no entry of its own. Packets from an
 // interface without an entry, and packets whose VLAN id has no entry, pass
 // unchanged.
@@ -37,6 +38,7 @@ simple VlanIndMapper extends PacketFlowBase like IPacketFlow
 {
     parameters:
         string interfaceTableModule;
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose tags the module uses: "c" for the C-tag (CVlanReq, CVlanInd), "s" for the S-tag (SVlanReq, SVlanInd)
         object mappedVlanIds = default({}); // Maps network interface name to another map which maps received VLAN ids to replacement VLAN ids, '*' as interface name matches all interfaces, -1 VLAN id matches if no tag is present, 0 if the frame is priority-tagged
         @class(VlanIndMapper);
         @display("i=block/switch");

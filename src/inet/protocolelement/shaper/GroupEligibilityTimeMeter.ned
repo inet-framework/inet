@@ -20,5 +20,6 @@ simple GroupEligibilityTimeMeter extends EligibilityTimeMeter
 {
 	parameters:
         string groupEligibilityTimeTableModule; // Relative path to the eligibilityTimeTable
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose PCP selects the group: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
         @class(GroupEligibilityTimeMeter);
 }

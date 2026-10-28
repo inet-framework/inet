@@ -9,6 +9,7 @@
 #define __INET_PACKETTAGGERBASE_H
 
 #include "inet/common/Protocol.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/queueing/base/PacketMarkerBase.h"
 
 namespace inet {
@@ -23,6 +24,7 @@ class INET_API PacketTaggerBase : public PacketMarkerBase
     int userPriority = -1;
     int interfaceId = -1;
     int hopLimit = -1;
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     int vlanId = -1;
     int pcp = -1;
     W transmissionPower = W(NaN);

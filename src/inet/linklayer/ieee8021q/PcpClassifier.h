@@ -8,6 +8,7 @@
 #ifndef __INET_PCPCLASSIFIER_H
 #define __INET_PCPCLASSIFIER_H
 
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/queueing/base/PacketClassifierBase.h"
 
 namespace inet {
@@ -15,6 +16,7 @@ namespace inet {
 class INET_API PcpClassifier : public queueing::PacketClassifierBase
 {
   protected:
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     const char *mode = nullptr;
     cValueArray *pcpToGateIndex = nullptr;
     int defaultGateIndex = -1;

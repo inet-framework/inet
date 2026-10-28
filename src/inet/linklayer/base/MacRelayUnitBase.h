@@ -12,6 +12,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/StringFormat.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/linklayer/ethernet/contract/IMacForwardingTable.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -21,6 +22,7 @@ namespace inet {
 class INET_API MacRelayUnitBase : public LayeredProtocolBase
 {
   protected:
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<IMacForwardingTable> macForwardingTable;
 

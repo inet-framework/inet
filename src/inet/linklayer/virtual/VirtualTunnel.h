@@ -11,6 +11,7 @@
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/socket/ISocket.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/queueing/base/PassivePacketSinkBase.h"
 
 #ifdef INET_WITH_ETHERNET
@@ -37,6 +38,7 @@ class INET_API VirtualTunnel : public queueing::PassivePacketSinkBase
     NetworkInterface *realNetworkInterface = nullptr;
     NetworkInterface *networkInterface = nullptr;
     const Protocol *protocol = nullptr;
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     int vlanId = -1;
 
     ISocket *socket = nullptr;

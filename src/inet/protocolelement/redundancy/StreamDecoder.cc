@@ -28,8 +28,10 @@ StreamDecoder::~StreamDecoder()
 void StreamDecoder::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         interfaceTable.reference(this, "interfaceTableModule", true);
+    }
     else if (stage == INITSTAGE_QUEUEING)
         configureMappings();
 }
@@ -84,12 +86,12 @@ cGate *StreamDecoder::getRegistrationForwardingGate(cGate *gate)
 
 void StreamDecoder::processPacket(Packet *packet)
 {
-    auto vlanInd = packet->findTag<CVlanInd>();
+    auto vlanInd = findVlanInd(packet, vlanTagType);
     for (auto& mapping : mappings) {
         bool matches = true;
         const auto& macAddressInd = packet->findTag<MacAddressInd>();
-        const auto& pcpInd = packet->findTag<CPcpInd>();
-        const auto& vlanInd = packet->findTag<CVlanInd>();
+        const auto& pcpInd = findPcpInd(packet, vlanTagType);
+        const auto& vlanInd = findVlanInd(packet, vlanTagType);
         const auto& interfaceInd = packet->findTag<InterfaceInd>();
         matches &= mapping.packetFilter.matches(packet);
         if (mapping.interfaceNameMatcher != nullptr) {

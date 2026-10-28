@@ -1,0 +1,199 @@
+%description:
+
+Tests that an S-tag over a C-tag (IEEE 802.1ad) passes through stacked 802.1Q
+protocol elements without losing either tag.
+
+A requester asks for C-VLAN 10 with PCP 3 and S-VLAN 100 with PCP 5. A C-tag
+inserter and an S-tag inserter put the two tags on the frame, an S-tag checker
+and a C-tag checker remove them, a PacketDirectionReverser turns the
+indications into requests as a bridge does when it forwards the frame, and a
+second pair of inserters puts the tags back. The probes print the headers on
+the wire and the tags that the protocol elements leave on the packet. The
+frame that leaves the second pair of inserters must be the same as the one
+that left the first.
+
+%file: StackedTagProbes.cc
+
+#include "inet/common/DirectionTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/PcpTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/queueing/base/PacketFlowBase.h"
+
+namespace inet {
+
+class DoubleTagRequester : public queueing::PacketFlowBase
+{
+  protected:
+    virtual void processPacket(Packet *packet) override
+    {
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->addTag<CVlanReq>()->setVlanId(10);
+        packet->addTag<CPcpReq>()->setPcp(3);
+        packet->addTag<SVlanReq>()->setVlanId(100);
+        packet->addTag<SPcpReq>()->setPcp(5);
+        auto encapsulationProtocolReq = packet->addTag<EncapsulationProtocolReq>();
+        encapsulationProtocolReq->appendProtocol(&Protocol::ieee8021qCTag);
+        encapsulationProtocolReq->appendProtocol(&Protocol::ieee8021qSTag);
+    }
+};
+
+Define_Module(DoubleTagRequester);
+
+class StackedTagProbe : public queueing::PacketFlowBase
+{
+  protected:
+    static std::vector<uint8_t> firstFrame;
+
+  protected:
+    void printTag(const char *name, const TagBase *tag, int value)
+    {
+        std::cout << " " << name << "=";
+        if (tag == nullptr)
+            std::cout << "none";
+        else
+            std::cout << value;
+    }
+
+    virtual void processPacket(Packet *packet) override
+    {
+        std::cout << getFullName() << ":";
+        auto data = packet->peekAllAsBytes()->getBytes();
+        if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ieee8021qSTag) {
+            b offset = b(0);
+            for (int i = 0; i < 2; i++) {
+                const auto& header = packet->peekDataAt<Ieee8021qTagEpdHeader>(offset);
+                std::cout << " header" << i << "(vid=" << header->getVid() << " pcp=" << (int)header->getPcp() << " typeOrLength=0x" << std::hex << header->getTypeOrLength() << std::dec << ")";
+                offset += header->getChunkLength();
+            }
+            if (firstFrame.empty())
+                firstFrame = data;
+            else
+                std::cout << " sameAsFirst=" << (data == firstFrame ? "yes" : "no");
+        }
+        auto cVlanInd = packet->findTag<CVlanInd>();
+        auto sVlanInd = packet->findTag<SVlanInd>();
+        auto cVlanReq = packet->findTag<CVlanReq>();
+        auto sVlanReq = packet->findTag<SVlanReq>();
+        auto cPcpReq = packet->findTag<CPcpReq>();
+        auto sPcpReq = packet->findTag<SPcpReq>();
+        printTag("CVlanInd", cVlanInd.get(), cVlanInd ? cVlanInd->getVlanId() : 0);
+        printTag("SVlanInd", sVlanInd.get(), sVlanInd ? sVlanInd->getVlanId() : 0);
+        printTag("CVlanReq", cVlanReq.get(), cVlanReq ? cVlanReq->getVlanId() : 0);
+        printTag("SVlanReq", sVlanReq.get(), sVlanReq ? sVlanReq->getVlanId() : 0);
+        printTag("CPcpReq", cPcpReq.get(), cPcpReq ? cPcpReq->getPcp() : 0);
+        printTag("SPcpReq", sPcpReq.get(), sPcpReq ? sPcpReq->getPcp() : 0);
+        if (auto encapsulationProtocolReq = packet->findTag<EncapsulationProtocolReq>()) {
+            std::cout << " EncapsulationProtocolReq=";
+            for (size_t i = 0; i < encapsulationProtocolReq->getProtocolArraySize(); i++)
+                std::cout << (i == 0 ? "" : ",") << encapsulationProtocolReq->getProtocol(i)->getName();
+        }
+        std::cout << "\n";
+        if (par("wire")) {
+            // the receiver gets the bytes of the frame only
+            auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+            packet->clearTags();
+            packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
+            packet->addTag<DirectionTag>()->setDirection(DIRECTION_INBOUND);
+        }
+    }
+};
+
+std::vector<uint8_t> StackedTagProbe::firstFrame;
+
+Define_Module(StackedTagProbe);
+
+} // namespace inet
+
+%file: test.ned
+
+import inet.linklayer.ethernet.common.PacketDirectionReverser;
+import inet.linklayer.ieee8021q.Ieee8021qTagEpdHeaderChecker;
+import inet.linklayer.ieee8021q.Ieee8021qTagEpdHeaderInserter;
+import inet.queueing.base.PacketFlowBase;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+simple DoubleTagRequester extends PacketFlowBase
+{
+    parameters:
+        @class(::inet::DoubleTagRequester);
+}
+
+simple StackedTagProbe extends PacketFlowBase
+{
+    parameters:
+        bool wire = default(false);
+        @class(::inet::StackedTagProbe);
+}
+
+network Test
+{
+    submodules:
+        source: ActivePacketSource {
+            productionInterval = 1s;
+            packetLength = 46B;
+        }
+        requester: DoubleTagRequester;
+        cInserter: Ieee8021qTagEpdHeaderInserter {
+            vlanTagType = "c";
+        }
+        sInserter: Ieee8021qTagEpdHeaderInserter {
+            vlanTagType = "s";
+        }
+        sent: StackedTagProbe {
+            wire = true;
+        }
+        sChecker: Ieee8021qTagEpdHeaderChecker {
+            vlanTagType = "s";
+        }
+        cChecker: Ieee8021qTagEpdHeaderChecker {
+            vlanTagType = "c";
+        }
+        received: StackedTagProbe;
+        reverser: PacketDirectionReverser;
+        reversed: StackedTagProbe;
+        cInserter2: Ieee8021qTagEpdHeaderInserter {
+            vlanTagType = "c";
+        }
+        sInserter2: Ieee8021qTagEpdHeaderInserter {
+            vlanTagType = "s";
+        }
+        forwarded: StackedTagProbe;
+        sink: PassivePacketSink;
+    connections:
+        source.out --> requester.in;
+        requester.out --> cInserter.in;
+        cInserter.out --> sInserter.in;
+        sInserter.out --> sent.in;
+        sent.out --> sChecker.in;
+        sChecker.out --> cChecker.in;
+        cChecker.out --> received.in;
+        received.out --> reverser.in;
+        reverser.out --> reversed.in;
+        reversed.out --> cInserter2.in;
+        cInserter2.out --> sInserter2.in;
+        sInserter2.out --> forwarded.in;
+        forwarded.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 0.5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+
+%contains: stdout
+sent: header0(vid=100 pcp=5 typeOrLength=0x8100) header1(vid=10 pcp=3 typeOrLength=0x800) CVlanInd=10 SVlanInd=100 CVlanReq=none SVlanReq=none CPcpReq=none SPcpReq=none
+%contains: stdout
+received: CVlanInd=10 SVlanInd=100 CVlanReq=none SVlanReq=none CPcpReq=none SPcpReq=none
+%contains: stdout
+reversed: CVlanInd=none SVlanInd=none CVlanReq=10 SVlanReq=100 CPcpReq=3 SPcpReq=5 EncapsulationProtocolReq=ieee8021qctag,ieee8021qstag
+%contains: stdout
+forwarded: header0(vid=100 pcp=5 typeOrLength=0x8100) header1(vid=10 pcp=3 typeOrLength=0x800) sameAsFirst=yes CVlanInd=10 SVlanInd=100 CVlanReq=none SVlanReq=none CPcpReq=none SPcpReq=none

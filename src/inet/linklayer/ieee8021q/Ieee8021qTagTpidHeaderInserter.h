@@ -9,6 +9,7 @@
 #define __INET_IEEE8021QTAGTPIDHEADERINSERTER_H
 
 #include "inet/common/Protocol.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/queueing/base/PacketFlowBase.h"
 
 namespace inet {
@@ -18,6 +19,7 @@ using namespace inet::queueing;
 class INET_API Ieee8021qTagTpidHeaderInserter : public PacketFlowBase
 {
   protected:
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     int tpid = -1;
     const Protocol *nextProtocol = nullptr;
     int defaultVlanId = -1;

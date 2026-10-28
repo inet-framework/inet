@@ -17,6 +17,7 @@ void PcpClassifier::initialize(int stage)
 {
     PacketClassifierBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
         mode = par("mode");
         pcpToGateIndex = check_and_cast<cValueArray *>(par("pcpToGateIndex").objectValue());
         defaultGateIndex = par("defaultGateIndex");
@@ -28,23 +29,23 @@ int PcpClassifier::classifyPacket(Packet *packet) const
     int pcp = -1;
     switch (*mode) {
         case 'r': {
-            auto pcpReq = packet->findTag<CPcpReq>();
+            auto pcpReq = findPcpReq(packet, vlanTagType);
             if (pcpReq != nullptr)
                 pcp = pcpReq->getPcp();
             break;
         }
         case 'i': {
-            auto pcpInd = packet->findTag<CPcpInd>();
+            auto pcpInd = findPcpInd(packet, vlanTagType);
             if (pcpInd != nullptr)
                 pcp = pcpInd->getPcp();
             break;
         }
         case 'b': {
-            auto pcpReq = packet->findTag<CPcpReq>();
+            auto pcpReq = findPcpReq(packet, vlanTagType);
             if (pcpReq != nullptr)
                 pcp = pcpReq->getPcp();
             else {
-                auto pcpInd = packet->findTag<CPcpInd>();
+                auto pcpInd = findPcpInd(packet, vlanTagType);
                 if (pcpInd != nullptr)
                     pcp = pcpInd->getPcp();
             }

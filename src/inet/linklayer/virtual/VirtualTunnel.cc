@@ -27,6 +27,7 @@ void VirtualTunnel::initialize(int stage)
         const char *protocolAsString = par("protocol");
         if (*protocolAsString != '\0')
             protocol = Protocol::findProtocol(protocolAsString);
+        vlanTagType = protocol == &Protocol::ieee8021qSTag ? VLAN_TAG_TYPE_S : VLAN_TAG_TYPE_C;
     }
     else if (stage == INITSTAGE_NETWORK_INTERFACE_CONFIGURATION) {
         auto interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -84,7 +85,7 @@ void VirtualTunnel::handleMessage(cMessage *message)
     else {
         auto packet = check_and_cast<Packet *>(message);
         if (vlanId != -1)
-            packet->addTagIfAbsent<CVlanReq>()->setVlanId(vlanId);
+            addVlanReqIfAbsent(packet, vlanTagType)->setVlanId(vlanId);
         packet->addTagIfAbsent<MacAddressReq>()->setSrcAddress(networkInterface->getMacAddress());
         socket->send(packet);
     }

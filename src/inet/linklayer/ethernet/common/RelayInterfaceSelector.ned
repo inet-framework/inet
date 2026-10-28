@@ -22,6 +22,7 @@ simple RelayInterfaceSelector extends PacketPusherBase like IPacketFlow
     parameters:
         string macTableModule; // Relative module path of MAC table
         string interfaceTableModule; // Relative module path of interface table
+        string vlanTagType @enum("c","s") = default("c"); // The VLAN tag whose VLAN id the relay learns and forwards by: "c" for the C-tag, "s" for the S-tag (IEEE 802.1ad)
         @class(RelayInterfaceSelector);
         @display("i=block/fork");
         @signal[packetDropped](type=inet::Packet);

@@ -10,6 +10,7 @@
 
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ModuleRefByPar.h"
+#include "inet/linklayer/common/VlanTagType.h"
 #include "inet/linklayer/ieee8021q/Ieee8021qSocketTable.h"
 #include "inet/queueing/base/PacketPusherBase.h"
 
@@ -18,6 +19,7 @@ namespace inet {
 class INET_API Ieee8021qSocketPacketProcessor : public queueing::PacketPusherBase, public TransparentProtocolRegistrationListener
 {
   protected:
+    VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     ModuleRefByPar<Ieee8021qSocketTable> socketTable;
 
   protected:

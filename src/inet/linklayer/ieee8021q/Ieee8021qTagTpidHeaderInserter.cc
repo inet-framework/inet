@@ -22,13 +22,8 @@ void Ieee8021qTagTpidHeaderInserter::initialize(int stage)
 {
     PacketFlowBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        const char *vlanTagType = par("vlanTagType");
-        if (!strcmp("s", vlanTagType))
-            tpid = 0x88A8;
-        else if (!strcmp("c", vlanTagType))
-            tpid = 0x8100;
-        else
-            throw cRuntimeError("Unknown tag type");
+        vlanTagType = parseVlanTagType(par("vlanTagType"));
+        tpid = vlanTagType == VLAN_TAG_TYPE_S ? 0x88A8 : 0x8100;
         const char *nextProtocolAsString = par("nextProtocol");
         if (*nextProtocolAsString != '\0')
             nextProtocol = Protocol::getProtocol(nextProtocolAsString);
@@ -54,28 +49,28 @@ void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
         packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(userPriority);
     }
 
-    auto pcpReq = packet->removeTagIfPresent<CPcpReq>();
+    auto pcpReq = removePcpReqIfPresent(packet, vlanTagType);
     auto pcp = pcpReq != nullptr ? pcpReq->getPcp() : defaultPcp;
     if (pcp != -1) {
         EV_INFO << "Setting PCP" << EV_FIELD(vid, pcp) << EV_ENDL;
         header->setPcp(pcp);
-        packet->addTagIfAbsent<CPcpInd>()->setPcp(pcp);
+        addPcpIndIfAbsent(packet, vlanTagType)->setPcp(pcp);
     }
 
-    auto vlanReq = packet->removeTagIfPresent<CVlanReq>();
+    auto vlanReq = removeVlanReqIfPresent(packet, vlanTagType);
     auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : defaultVlanId;
     if (vlanId != -1) {
         EV_INFO << "Setting VID" << EV_FIELD(vid, vlanId) << EV_ENDL;
         header->setVid(vlanId);
-        packet->addTagIfAbsent<CVlanInd>()->setVlanId(vlanId);
+        addVlanIndIfAbsent(packet, vlanTagType)->setVlanId(vlanId);
     }
 
-    auto dropEligibleReq = packet->removeTagIfPresent<CDropEligibleReq>();
+    auto dropEligibleReq = removeDropEligibleReqIfPresent(packet, vlanTagType);
     auto dropEligible = dropEligibleReq != nullptr ? (dropEligibleReq->getDropEligible() ? 1 : 0) : defaultDropEligible;
     if (dropEligible >= 0) {
         EV_INFO << "Setting dropEligible" << EV_FIELD(dei, dropEligible) << EV_ENDL;
         header->setDei(dropEligible > 0);
-        packet->addTagIfAbsent<CDropEligibleInd>()->setDropEligible(dropEligible);
+        addDropEligibleIndIfAbsent(packet, vlanTagType)->setDropEligible(dropEligible);
     }
 
     packet->insertAtFront(header);

@@ -16,21 +16,37 @@ namespace inet {
 
 using namespace inet::physicallayer;
 
-static int classifyPacketByVlanReq(Packet *packet)
+static int classifyPacketByCVlanReq(Packet *packet)
 {
     const auto& vlanReq = packet->findTag<CVlanReq>();
     return vlanReq != nullptr ? vlanReq->getVlanId() : 0;
 }
 
-Register_Packet_Classifier_Function(PacketCVlanReqClassifier, classifyPacketByVlanReq);
+Register_Packet_Classifier_Function(PacketCVlanReqClassifier, classifyPacketByCVlanReq);
 
-static int classifyPacketByVlanInd(Packet *packet)
+static int classifyPacketByCVlanInd(Packet *packet)
 {
     const auto& vlanInd = packet->findTag<CVlanInd>();
     return vlanInd != nullptr ? vlanInd->getVlanId() : 0;
 }
 
-Register_Packet_Classifier_Function(PacketCVlanIndClassifier, classifyPacketByVlanInd);
+Register_Packet_Classifier_Function(PacketCVlanIndClassifier, classifyPacketByCVlanInd);
+
+static int classifyPacketBySVlanReq(Packet *packet)
+{
+    const auto& vlanReq = packet->findTag<SVlanReq>();
+    return vlanReq != nullptr ? vlanReq->getVlanId() : 0;
+}
+
+Register_Packet_Classifier_Function(PacketSVlanReqClassifier, classifyPacketBySVlanReq);
+
+static int classifyPacketBySVlanInd(Packet *packet)
+{
+    const auto& vlanInd = packet->findTag<SVlanInd>();
+    return vlanInd != nullptr ? vlanInd->getVlanId() : 0;
+}
+
+Register_Packet_Classifier_Function(PacketSVlanIndClassifier, classifyPacketBySVlanInd);
 
 static int classifyPacketByFragmentTag(Packet *packet)
 {

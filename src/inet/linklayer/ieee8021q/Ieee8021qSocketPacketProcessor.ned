@@ -27,5 +27,6 @@ simple Ieee8021qSocketPacketProcessor extends PacketPusherBase like IPacketFlow
         @class(Ieee8021qSocketPacketProcessor);
         @display("i=block/cogwheel");
         string socketTableModule;
+        string vlanTagType @enum("c","s") = default("c"); // The tag type whose VLAN indication selects the socket: "c" for the C-tag (CVlanInd), "s" for the S-tag (SVlanInd)
 }
 
