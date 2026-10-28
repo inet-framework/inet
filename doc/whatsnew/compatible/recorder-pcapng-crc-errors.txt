@@ -1,0 +1,3 @@
+PCAPng records mark frames with bit errors as CRC errors
+
+PcapngWriter sets the CRC error bit in the flags of each packet that has a bit error, for each link type. Wireshark shows such a record as "CRC error", so the frames that a receiver could not decode stand out in the file. The records of PcapRecorder keep frames with bit errors when dumpBadFrames is true, which is the default.

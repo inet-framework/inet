@@ -1,8 +1,9 @@
 %description:
 PCAPng writes a complete file with fixed bytes: the section header, the
 interface descriptions of an interface and of packets without an interface, and
-three packets with truncation, padding, timestamps and directions. A change of
-the writer that keeps the format keeps these bytes. The bytes are those of a
+four packets with truncation, padding, timestamps and directions. The fourth
+packet has a bit error, so its flags have the CRC error bit. A change of the
+writer that keeps the format keeps these bytes. The bytes are those of a
 little-endian host.
 
 %includes:
@@ -25,6 +26,9 @@ writer.open("bytes.pcapng", 4, 9);
 writer.writePacket(SimTime(1.5), &packet, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
 writer.writePacket(SimTime(2.25), &packet, B(1), b(0), DIRECTION_OUTBOUND, nullptr, LINKTYPE_IEEE802_11);
 writer.writePacket(SimTime(3), &packet, B(3), B(1), DIRECTION_OUTBOUND, &networkInterface, LINKTYPE_ETHERNET);
+Packet badPacket("badPacket", makeShared<BytesChunk>(std::vector<uint8_t>{0x10, 0x11, 0x12, 0x13, 0x14, 0x15}));
+badPacket.setBitError(true);
+writer.writePacket(SimTime(4), &badPacket, b(0), b(0), DIRECTION_INBOUND, &networkInterface, LINKTYPE_ETHERNET);
 writer.close();
 std::ifstream file("bytes.pcapng", std::ios::binary);
 std::vector<uint8_t> bytes(std::istreambuf_iterator<char>(file), {});
@@ -47,7 +51,9 @@ std::string expected =
     // enhanced packet
     "0600000030000000010000000000000080461c8604000000050000001112131402000400020000000000000030000000"
     // enhanced packet
-    "06000000300000000000000000000000005ed0b202000000020000001314000002000400020000000000000030000000";
+    "06000000300000000000000000000000005ed0b202000000020000001314000002000400020000000000000030000000"
+    // enhanced packet with a CRC error
+    "0600000030000000000000000000000000286bee04000000060000001011121302000400010000010000000030000000";
 if (actual != expected)
     throw cRuntimeError("Unexpected PCAPng bytes: %s", actual.c_str());
 EV << "PCAPng bytes verified.\n";

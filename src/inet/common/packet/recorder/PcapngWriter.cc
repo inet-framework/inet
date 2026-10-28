@@ -294,9 +294,12 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
     }
 
     PcapngPacketOptions options;
-    if (direction != DIRECTION_UNDEFINED) {
+    // the receiver of a frame with bit errors finds a wrong frame check sequence
+    uint32_t linkLayerErrors = packet->hasBitError() ? PCAPNG_ERROR_CRC : 0;
+    if (direction != DIRECTION_UNDEFINED || linkLayerErrors != 0) {
         PcapngPacketFlags flags;
         flags.direction = direction;
+        flags.linkLayerErrors = linkLayerErrors;
         options.addFlags(flags);
     }
 
