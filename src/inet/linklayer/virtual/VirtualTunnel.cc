@@ -84,7 +84,7 @@ void VirtualTunnel::handleMessage(cMessage *message)
     else {
         auto packet = check_and_cast<Packet *>(message);
         if (vlanId != -1)
-            packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
+            packet->addTagIfAbsent<CVlanReq>()->setVlanId(vlanId);
         packet->addTagIfAbsent<MacAddressReq>()->setSrcAddress(networkInterface->getMacAddress());
         socket->send(packet);
     }

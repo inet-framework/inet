@@ -51,7 +51,7 @@ bool VlanReqFilter::matchesPacket(const Packet *packet) const
     auto interfaceVlanIds = findInterfaceEntry(acceptedVlanIds, interfaceName);
     if (interfaceVlanIds == nullptr)
         return false;
-    auto vlanReq = packet->findTag<VlanReq>();
+    auto vlanReq = packet->findTag<CVlanReq>();
     auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : -1;
     return interfaceVlanIds->count(vlanId) != 0;
 }

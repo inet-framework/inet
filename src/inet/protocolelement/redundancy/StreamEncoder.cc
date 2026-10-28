@@ -61,9 +61,9 @@ void StreamEncoder::processPacket(Packet *packet)
         for (auto& mapping : mappings) {
             if (!strcmp(mapping.stream.c_str(), streamName)) {
                 if (mapping.pcp != -1)
-                    packet->addTagIfAbsent<PcpReq>()->setPcp(mapping.pcp);
+                    packet->addTagIfAbsent<CPcpReq>()->setPcp(mapping.pcp);
                 if (mapping.vlanId != -1)
-                    packet->addTagIfAbsent<VlanReq>()->setVlanId(mapping.vlanId);
+                    packet->addTagIfAbsent<CVlanReq>()->setVlanId(mapping.vlanId);
                 if (packet->hasTag<SequenceNumberReq>())
                     ensureEncapsulationProtocolReq(packet, &Protocol::ieee8021rTag);
                 if (mapping.pcp != -1 || mapping.vlanId != -1)

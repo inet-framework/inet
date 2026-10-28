@@ -28,23 +28,23 @@ int PcpClassifier::classifyPacket(Packet *packet) const
     int pcp = -1;
     switch (*mode) {
         case 'r': {
-            auto pcpReq = packet->findTag<PcpReq>();
+            auto pcpReq = packet->findTag<CPcpReq>();
             if (pcpReq != nullptr)
                 pcp = pcpReq->getPcp();
             break;
         }
         case 'i': {
-            auto pcpInd = packet->findTag<PcpInd>();
+            auto pcpInd = packet->findTag<CPcpInd>();
             if (pcpInd != nullptr)
                 pcp = pcpInd->getPcp();
             break;
         }
         case 'b': {
-            auto pcpReq = packet->findTag<PcpReq>();
+            auto pcpReq = packet->findTag<CPcpReq>();
             if (pcpReq != nullptr)
                 pcp = pcpReq->getPcp();
             else {
-                auto pcpInd = packet->findTag<PcpInd>();
+                auto pcpInd = packet->findTag<CPcpInd>();
                 if (pcpInd != nullptr)
                     pcp = pcpInd->getPcp();
             }

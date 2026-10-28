@@ -38,7 +38,7 @@ cGate *RelayInterfaceLearner::getRegistrationForwardingGate(cGate *gate)
 void RelayInterfaceLearner::processPacket(Packet *packet)
 {
     unsigned int vid = 0;
-    if (auto vlanInd = packet->findTag<VlanInd>())
+    if (auto vlanInd = packet->findTag<CVlanInd>())
         vid = vlanInd->getVlanId();
     auto incomingInterface = interfaceTable->getInterfaceById(packet->getTag<InterfaceInd>()->getInterfaceId());
     auto sourceAddress = packet->getTag<MacAddressInd>()->getSrcAddress();

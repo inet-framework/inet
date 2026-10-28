@@ -39,12 +39,12 @@ void GroupEligibilityTimeMeter::meterPacket(Packet *packet)
     int pcp = 0;
     if (packetDirection->getDirection() == DIRECTION_INBOUND)
     {
-        auto  pcpTag = packet->findTag<PcpInd>();
+        auto  pcpTag = packet->findTag<CPcpInd>();
         pcp = pcpTag->getPcp();
     }
     else
     {
-        auto pcpTag = packet->findTag<PcpReq>();
+        auto pcpTag = packet->findTag<CPcpReq>();
         pcp = pcpTag->getPcp();
     }
     auto iterface = packet->findTag<InterfaceInd>();

@@ -21,7 +21,7 @@ class PcpTagBase extends TagBase
 // This request determines the PCP that should be used to send the packet.
 // It may be present on a packet from the application to the mac protocol.
 //
-class PcpReq extends PcpTagBase
+class CPcpReq extends PcpTagBase
 {
 }
 
@@ -29,6 +29,6 @@ class PcpReq extends PcpTagBase
 // This indication specifies the PCP that was used to receive the packet.
 // It may be present on a packet from the mac protocol to the application.
 //
-class PcpInd extends PcpTagBase
+class CPcpInd extends PcpTagBase
 {
 }

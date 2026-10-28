@@ -1,0 +1,9 @@
+The VLAN, PCP and drop eligible tags are named after the C-tag
+
+The request and indication tags of the IEEE 802.1Q tag fields carry the C-tag in their names now, which makes room for tags of the S-tag (IEEE 802.1ad). There are no aliases: code that attaches or reads these tags no longer compiles until it uses the new names, and a classifierClass parameter that names an old classifier function must name the new one.
+
+  VlanReq, VlanInd                    -> CVlanReq, CVlanInd
+  PcpReq, PcpInd                      -> CPcpReq, CPcpInd
+  DropEligibleReq, DropEligibleInd    -> CDropEligibleReq, CDropEligibleInd
+  inet::PacketVlanReqClassifier       -> inet::PacketCVlanReqClassifier
+  inet::PacketVlanIndClassifier       -> inet::PacketCVlanIndClassifier

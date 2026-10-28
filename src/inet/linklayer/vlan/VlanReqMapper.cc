@@ -46,18 +46,18 @@ void VlanReqMapper::processPacket(Packet *packet)
     auto networkInterface = interfaceReq != nullptr ? interfaceTable->getInterfaceById(interfaceReq->getInterfaceId()) : nullptr;
     std::string interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
     if (auto interfaceMappedVlanIds = findInterfaceEntry(mappedVlanIds, interfaceName)) {
-        auto vlanReq = packet->findTag<VlanReq>();
+        auto vlanReq = packet->findTag<CVlanReq>();
         auto requestedVlanId = vlanReq != nullptr ? vlanReq->getVlanId() : -1;
         auto it = interfaceMappedVlanIds->find(requestedVlanId);
         if (it != interfaceMappedVlanIds->end()) {
             auto mappedVlanId = it->second;
             if (mappedVlanId == -1)
-                packet->removeTagIfPresent<VlanReq>();
+                packet->removeTagIfPresent<CVlanReq>();
             else
-                packet->addTagIfAbsent<VlanReq>()->setVlanId(mappedVlanId);
+                packet->addTagIfAbsent<CVlanReq>()->setVlanId(mappedVlanId);
         }
     }
-    ensureEncapsulationProtocolReq(packet, protocol, packet->hasTag<VlanReq>() || packet->hasTag<PcpReq>());
+    ensureEncapsulationProtocolReq(packet, protocol, packet->hasTag<CVlanReq>() || packet->hasTag<CPcpReq>());
     setDispatchProtocol(packet);
 }
 

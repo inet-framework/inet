@@ -36,7 +36,7 @@ module EthernetPreemptingMacLayer like IEthernetMacLayer
             @display("p=200,100");
         }
         outboundClassifier: <default("PacketClassifier")> like IPacketClassifier {
-            classifierClass = default("inet::PacketVlanReqClassifier");
+            classifierClass = default("inet::PacketCVlanReqClassifier");
             @display("p=200,200");
         }
         expressMacLayer: <default("EthernetStreamingMacLayer")> like IEthernetMacLayer {

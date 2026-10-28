@@ -535,7 +535,7 @@ void Mrp::handleMrpPDU(Packet* packet)
     int ringPort = interfaceInd->getInterfaceId();
     auto incomingInterface = interfaceTable->getInterfaceById(ringPort);
     //unsigned int vlanId = 0;
-    //if (auto vlanInd = Packet->findTag<VlanInd>())
+    //if (auto vlanInd = Packet->findTag<CVlanInd>())
     //    vlanId = vlanInd->getVlanId();
 
     auto version = packet->peekAtFront<MrpVersion>();

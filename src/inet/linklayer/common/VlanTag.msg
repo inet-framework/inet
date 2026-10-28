@@ -21,7 +21,7 @@ class VlanTagBase extends TagBase
 // This request determines the vlan that should be used to send the packet.
 // It may be present on a packet from the application to the mac protocol.
 //
-class VlanReq extends VlanTagBase
+class CVlanReq extends VlanTagBase
 {
 }
 
@@ -29,6 +29,6 @@ class VlanReq extends VlanTagBase
 // This indication specifies the vlan that was used to receive the packet.
 // It may be present on a packet from the mac protocol to the application.
 //
-class VlanInd extends VlanTagBase
+class CVlanInd extends VlanTagBase
 {
 }

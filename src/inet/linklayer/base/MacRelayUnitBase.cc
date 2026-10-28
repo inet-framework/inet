@@ -61,12 +61,12 @@ Packet *MacRelayUnitBase::createForwardedPacket(const Packet *incomingPacket) co
     outgoingPacket->trim();
     outgoingPacket->clearTags();
     outgoingPacket->addTag<PacketProtocolTag>()->setProtocol(protocol);
-    if (auto vlanInd = incomingPacket->findTag<VlanInd>())
-        outgoingPacket->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
+    if (auto vlanInd = incomingPacket->findTag<CVlanInd>())
+        outgoingPacket->addTag<CVlanReq>()->setVlanId(vlanInd->getVlanId());
     if (auto userPriorityInd = incomingPacket->findTag<UserPriorityInd>())
         outgoingPacket->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
-    if (auto dropEligibleInd = incomingPacket->findTag<DropEligibleInd>())
-        outgoingPacket->addTag<DropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
+    if (auto dropEligibleInd = incomingPacket->findTag<CDropEligibleInd>())
+        outgoingPacket->addTag<CDropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
     if (auto sequenceNumberInd = incomingPacket->findTag<SequenceNumberInd>())
         outgoingPacket->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumberInd->getSequenceNumber());
     auto& macAddressReq = outgoingPacket->addTag<MacAddressReq>();

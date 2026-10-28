@@ -40,7 +40,7 @@ void Ieee8021qSocketPacketProcessor::pushPacket(Packet *packet, const cGate *gat
     take(packet);
     const auto& protocolTag = packet->findTag<PacketProtocolTag>();
     auto protocol = protocolTag ? protocolTag->getProtocol() : nullptr;
-    const auto& vlanInd = packet->findTag<VlanInd>();
+    const auto& vlanInd = packet->findTag<CVlanInd>();
     auto vlanId = vlanInd ? vlanInd->getVlanId() : -1;
     auto sockets = socketTable->findSockets(protocol, vlanId);
     bool steal = false;

@@ -78,12 +78,12 @@ void PacketTaggerBase::markPacket(Packet *packet)
         packet->addTagIfAbsent<HopLimitReq>()->setHopLimit(hopLimit);
     }
     if (vlanId != -1) {
-        EV_DEBUG << "Attaching VlanReq" << EV_FIELD(packet) << EV_FIELD(vlanId) << EV_ENDL;
-        packet->addTagIfAbsent<VlanReq>()->setVlanId(vlanId);
+        EV_DEBUG << "Attaching CVlanReq" << EV_FIELD(packet) << EV_FIELD(vlanId) << EV_ENDL;
+        packet->addTagIfAbsent<CVlanReq>()->setVlanId(vlanId);
     }
     if (pcp != -1) {
-        EV_DEBUG << "Attaching PcpReq" << EV_FIELD(packet) << EV_FIELD(pcp) << EV_ENDL;
-        packet->addTagIfAbsent<PcpReq>()->setPcp(pcp);
+        EV_DEBUG << "Attaching CPcpReq" << EV_FIELD(packet) << EV_FIELD(pcp) << EV_ENDL;
+        packet->addTagIfAbsent<CPcpReq>()->setPcp(pcp);
     }
     if (userPriority != -1) {
         EV_DEBUG << "Attaching UserPriorityReq" << EV_FIELD(packet) << EV_FIELD(userPriority) << EV_ENDL;

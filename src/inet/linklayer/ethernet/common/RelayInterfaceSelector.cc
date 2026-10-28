@@ -52,7 +52,7 @@ void RelayInterfaceSelector::pushPacket(Packet *packet, const cGate *gates)
     else {
         auto interfaceInd = packet->findTag<InterfaceInd>();
         auto incomingInterface = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
-        auto vlanReq = packet->findTag<VlanReq>();
+        auto vlanReq = packet->findTag<CVlanReq>();
         int vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : 0;
         if (destinationAddress.isBroadcast())
             broadcastPacket(packet, destinationAddress, incomingInterface);

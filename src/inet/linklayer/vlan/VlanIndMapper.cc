@@ -43,16 +43,16 @@ void VlanIndMapper::processPacket(Packet *packet)
     auto networkInterface = interfaceInd != nullptr ? interfaceTable->getInterfaceById(interfaceInd->getInterfaceId()) : nullptr;
     std::string interfaceName = networkInterface != nullptr ? networkInterface->getInterfaceName() : "";
     if (auto interfaceMappedVlanIds = findInterfaceEntry(mappedVlanIds, interfaceName)) {
-        auto vlanInd = packet->findTag<VlanInd>();
+        auto vlanInd = packet->findTag<CVlanInd>();
         auto receivedVlanId = vlanInd != nullptr ? vlanInd->getVlanId() : -1;
         auto it = interfaceMappedVlanIds->find(receivedVlanId);
         if (it != interfaceMappedVlanIds->end()) {
             auto mappedVlanId = it->second;
             EV_INFO << "Mapping VLAN id" << EV_FIELD(interfaceName) << EV_FIELD(receivedVlanId) << EV_FIELD(mappedVlanId) << EV_ENDL;
             if (mappedVlanId == -1)
-                packet->removeTagIfPresent<VlanInd>();
+                packet->removeTagIfPresent<CVlanInd>();
             else
-                packet->addTagIfAbsent<VlanInd>()->setVlanId(mappedVlanId);
+                packet->addTagIfAbsent<CVlanInd>()->setVlanId(mappedVlanId);
         }
     }
 }
