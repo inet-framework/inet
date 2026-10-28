@@ -1,6 +1,6 @@
 # Implementation plan: Radiotap records for IEEE 802.11
 
-Checkout and revision: the plan was written at `master` `7fda2e3987`. The branch starts at `origin/master` `5ac997f379`. The five commits between them change no file that the plan cites, so the line numbers in the links are correct for both. PR #1130 is in the local ref `refs/remotes/pr/1130`, head `c2c11be0f3`.
+Checkout and revision: the plan was written at `master` `7fda2e3987`. The branch starts at `origin/master` `5ac997f379`. The five commits between them change no file that the plan cites, so the line numbers in the links are correct for both. PR #1130 is in the local ref `refs/remotes/pr/1130`, head `c2c11be0f3`. Before the landing on 2026-10-29, the branch was rebased onto `master` `3e51de989f`, which is `origin/master` `a40c4ffcdc` and one local plan commit; the hashes in this plan are those after the rebase.
 
 Plan revision: 1, 2026-10-27.
 
@@ -22,10 +22,10 @@ Implementation: in the worktree `/home/levy/workspace/inet-ieee80211-radiotap-ca
 | C8 | helpers first, with the direction | done, `af80d4c7f1` |
 | C9 | the Radiotap helper | done, `910c44d6d2` |
 | C10 | record C6 to C9 in the plan | done, in the commit that records it |
-| C11 | the showcase | to do |
-| C12 | the User's Guide | to do |
-| C13 | record C11 and C12 in the plan | to do |
-| C14 | move the plan to `plan/done/` | to do |
+| C11 | the showcase | done, `47c7b839ba` |
+| C12 | the User's Guide | done, `d4a6604c8b` |
+| C13 | record C11 and C12 in the plan | done, in the commit that records it |
+| C14 | move the plan to `plan/done/` | done, in the commit that moves this file |
 
 ## 1. Problem and intended behavior
 
@@ -219,8 +219,8 @@ C6 adds no class and no tag type. It sets tag types that exist.
 | C8 `recorder: change: ask the helpers first and give them the direction` | C1 |
 | C9 `ieee80211: add: Radiotap records through a PCAP recorder helper` | C2, C3, C6, C7, C8 |
 | C10 `plan: change: record steps C6 to C9` | C9 |
-| C11 `showcases: add: Radiotap records in the PCAP recording showcase` | C9 |
-| C12 `doc: change: describe Radiotap records and the receiver's copy in the User's Guide` | C3, C9 |
+| C11 `examples: add: Radiotap records in the PCAP recording showcase` | C9 |
+| C12 `doc: change: describe Radiotap records and receiver copies in the User's Guide` | C3, C9 |
 | C13 `plan: change: record steps C11 and C12` | C11, C12 |
 | C14 `plan: location: move the Radiotap capture plan to done` | C13 |
 
@@ -452,22 +452,30 @@ Tests:
 
 The status table, the hashes, the tshark output, and the facts that the implementation found.
 
-### C11: `showcases: add: Radiotap records in the PCAP recording showcase`
+### C11: `examples: add: Radiotap records in the PCAP recording showcase`
+
+The classification gate accepts only the area `examples` or the group as the subject prefix of a showcase commit, so the subject starts with `examples:`.
 
 Files: [showcases/general/pcaprecording/omnetpp.ini](../../showcases/general/pcaprecording/omnetpp.ini) and the showcase page in `doc/`.
 
-The commit adds a configuration `Radiotap` that extends `PcapRecording`. In it, `host1` writes a Radiotap file. The present configuration does not change. The page gets a section with a Wireshark screenshot that shows the rate, channel and signal columns. If the fingerprint store needs an entry for the new configuration, the commit adds it ([TR-BASELINE-DELIBERATE](../../doc/project/rule/testing.md#tr-baseline-deliberate)).
+The commit adds a configuration `Radiotap` that extends `PcapRecording`. In it, `host1` writes its 802.11 frames as Radiotap records into a PCAPng file. The present configuration does not change. The page gets a section "Radiotap Records" that explains the helper, includes the three ini lines, and shows the first records as tshark text.
+
+Two facts changed the planned shape:
+- **No screenshot.** Wireshark with its graphical interface is not installed, only tshark, and the media of the showcases are in the separate `media` repository. The page therefore shows the tshark command and its output as text.
+- **No store entry.** The fingerprint runner tests only configurations that have an entry in `tests/fingerprint/store.json`, so the new configuration causes no error. The configuration `Radiotap` gives the stored fingerprint of `PcapRecording`, `2f08-8bc7/tplx`, because the record does not change the simulation. An entry of its own would test nothing new, so the commit adds none, and the baseline does not change.
 
 Test: run the configuration, check the file with tshark, and build the documentation.
 
-### C12: `doc: change: describe Radiotap records and the receiver's copy in the User's Guide`
+### C12: `doc: change: describe Radiotap records and receiver copies in the User's Guide`
+
+The planned subject had 82 characters, more than the limit of 80, so the commit has a shorter subject.
 
 File: [ch-collecting-results.rst](../../doc/src/users-guide/ch-collecting-results.rst), in the section on PCAP records.
 
 The text tells:
 - that inbound radio records are the receiver's copy, and how `dumpBadFrames` works for them;
 - how to select Radiotap, and which fields a record has;
-- that a PCAP file holds only one link type. A host with Ethernet and Wi-Fi interfaces needs PCAPng or two recorders.
+- that a PCAP file holds only one link type. A host with Ethernet and Wi-Fi interfaces needs PCAPng or two recorders. The PCAP writer stops with an error at the first record of a second link type, and the text says so.
 
 Test: build the documentation.
 
@@ -566,5 +574,11 @@ tshark also noted that the MCS field did not declare the HT format, STBC and the
 | 4 | sent | ACK | the same values as record 1 | 28 µs |
 
 The TSFT of record 2 is its end time minus its duration of 28 µs, which is the start time. The full decode of a record has no malformed field and no expert note. The plain file has the encapsulation "IEEE 802.11 Wireless LAN" and the Radiotap file has "IEEE 802.11 plus radiotap radio header", both with 12 records.
+
+**C11.** The configuration `Radiotap` runs for 10 s and writes 10 k Radiotap records for `host1`. tshark shows data frames at 54 Mb/s and ACK frames at 24 Mb/s on 2412 MHz, 13 dBm transmit power, and -71 dBm signal, -110 dBm noise and 39 dB SNR on the received frames. No frame has bit errors, because the two hosts are near. With `--fingerprint=2f08-8bc7/tplx`, the run reports "Fingerprint successfully verified". The showcase documentation builds (`doc/src/build --only showcases`); the one warning of the page, an undefined label of the User's Guide at line 56, is older than this plan and comes from the partial build.
+
+**C12.** `doc/src/build --only users-guide,migration-guide` builds. The new paragraphs and the two new migration sections of C7 and C8 are in the HTML. The one warning, a link to the Developer's Guide, comes from the partial build.
+
+**The series.** `check-series-builds.sh origin/master..HEAD debug` builds each of the 12 commits C1 to C12. `check-pull-request.sh --base origin/master` passes: no violation and no note. The body of C9 first had 405 words, above the note threshold of 300; C9 was rebuilt with a shorter message, and C10 cites its new hash.
 
 **A fact of the band model.** `Ieee80211CompliantBands::band5GHz` gives the center frequencies 5002.5 + 5n MHz, which are not whole MHz values. The Radiotap channel field has whole MHz values, so the helper rounds the frequency.
