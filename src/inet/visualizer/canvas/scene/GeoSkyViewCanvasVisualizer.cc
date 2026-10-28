@@ -57,6 +57,7 @@ void GeoSkyViewCanvasVisualizer::initialize(int stage)
         cardinalColor = cFigure::parseColor(par("cardinalColor"));
         labelColor = cFigure::parseColor(par("labelColor"));
         displayTitles = par("displayTitles");
+        titleFormat.parseFormat(par("titleFormat"));
         targetColorSet.parseColors(par("targetColor"));
         targetRadius = par("targetRadius");
         lowElevationOpacity = par("lowElevationOpacity");
@@ -314,13 +315,8 @@ void GeoSkyViewCanvasVisualizer::buildPlotDecorations(ObserverPlot *plot)
 
     // title above the N label: in grid mode the plots are away from the observer icons,
     // so the title is what tells the plots apart
-    if (displayTitles) {
-        auto observerModule = check_and_cast<const cModule *>(plot->observer);
-        auto observerNode = observerModule->getParentModule() != nullptr ? observerModule->getParentModule() : observerModule;
-        const char *displayName = observerNode->getDisplayName();
-        std::string title = displayName != nullptr && *displayName != '\0' ? displayName : observerNode->getFullName();
-        addLabel(title.c_str(), cFigure::Point(0, -R - TITLE_HEIGHT), cFigure::ANCHOR_S, labelColor, 0);
-    }
+    if (displayTitles)
+        addLabel(getObserverTitle(plot->observer).c_str(), cFigure::Point(0, -R - TITLE_HEIGHT), cFigure::ANCHOR_S, labelColor, 0);
 
     // elevation labels sitting just above their ring along the North spoke, in a small
     // (half-size) font; the 0 deg ring is the disc rim and is not labeled
@@ -377,6 +373,27 @@ std::string GeoSkyViewCanvasVisualizer::getTargetLabel(const IMobility *target) 
     }
     auto node = module->getParentModule();
     return node != nullptr ? node->getFullName() : module->getFullName();
+}
+
+std::string GeoSkyViewCanvasVisualizer::getObserverTitle(const IMobility *observer) const
+{
+    auto module = check_and_cast<const cModule *>(observer);
+    auto node = module->getParentModule() != nullptr ? module->getParentModule() : module;
+    std::function<std::string(char)> resolver = [&] (char directive) -> std::string {
+        switch (directive) {
+            case 'n':
+                return node->getFullName();
+            case 'N': {
+                const char *displayName = node->getDisplayName();
+                return displayName != nullptr && *displayName != '\0' ? displayName : node->getFullName();
+            }
+            case 'p':
+                return node->getFullPath();
+            default:
+                throw cRuntimeError("Unknown directive: %c", directive);
+        }
+    };
+    return titleFormat.formatString(resolver);
 }
 
 void GeoSkyViewCanvasVisualizer::refreshDisplay() const

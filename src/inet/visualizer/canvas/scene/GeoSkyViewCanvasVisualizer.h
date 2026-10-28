@@ -10,6 +10,7 @@
 
 #include <map>
 
+#include "inet/common/StringFormat.h"
 #include "inet/common/figures/TrailFigure.h"
 #include "inet/common/geometry/common/GeographicCoordinateSystem.h"
 #include "inet/mobility/contract/IMobility.h"
@@ -89,6 +90,7 @@ class INET_API GeoSkyViewCanvasVisualizer : public VisualizerBase, public cListe
     cFigure::Color cardinalColor;
     cFigure::Color labelColor;
     bool displayTitles = false;
+    StringFormat titleFormat;
 
     ColorSet targetColorSet;
     double targetRadius = NaN;
@@ -123,6 +125,9 @@ class INET_API GeoSkyViewCanvasVisualizer : public VisualizerBase, public cListe
 
     virtual cFigure::Point elevationAzimuthToCanvas(double elevationDeg, double azimuthDeg) const;
     virtual std::string getTargetLabel(const IMobility *target) const;
+    // the title of an observer's plot from titleFormat; override to name the observer from
+    // other data, as getTargetLabel() reads satelliteName
+    virtual std::string getObserverTitle(const IMobility *observer) const;
     virtual cFigure::Rectangle getViewportBounds() const; // the target module's drawing area, used to tile detached plots below it
 
   public:
