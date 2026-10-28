@@ -36,11 +36,6 @@ using namespace std;
 
 Define_Module(Igmpv3);
 
-static bool isEmptyRecord(const GroupRecord& record)
-{
-    return record.getSourceList().empty();
-}
-
 static bool isSorted(const Ipv4AddressVector& v)
 {
     int n = (int)v.size();
@@ -68,14 +63,18 @@ void Igmpv3::initialize(int stage)
 
         enabled = par("enabled");
         // robustnessVariable also seeds the NED default() expressions of
-        // groupMembershipInterval / otherQuerierPresentInterval / startupQueryCount /
-        // lastMemberQueryCount; in addition it controls how many times a host
+        // groupMembershipInterval / otherQuerierPresentInterval / olderHostPresentInterval /
+        // startupQueryCount / lastMemberQueryCount; in addition it controls how many times a host
         // (re)transmits a State-Change Report (RFC 3376 6.1).
         robustnessVariable = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
         groupMembershipInterval = par("groupMembershipInterval");
         otherQuerierPresentInterval = par("otherQuerierPresentInterval");
+        olderHostPresentInterval = par("olderHostPresentInterval");
+        routerVersion = par("routerVersion");
+        if (routerVersion < 1 || routerVersion > 3)
+            throw cRuntimeError("Igmpv3: routerVersion must be 1, 2 or 3, got %d", routerVersion);
         startupQueryInterval = par("startupQueryInterval");
         startupQueryCount = par("startupQueryCount");
         lastMemberQueryInterval = par("lastMemberQueryInterval");
@@ -198,15 +197,25 @@ void Igmpv3::multicastSourceListChanged(NetworkInterface *ie, Ipv4Address group,
     if (interfaceData->compatVersion != IGMP_COMPAT_NONE) {
         bool wasJoined = groupData->filter == IGMPV3_FM_EXCLUDE || !groupData->sourceAddressList.empty();
         bool nowJoined = filter == IGMPV3_FM_EXCLUDE || !sourceList.sources.empty();
-        if (!wasJoined && nowJoined)
+        if (!wasJoined && nowJoined) {
+            // RFC 2236 section 6, "join group": send a Report, set the flag, and start the timer
+            // with a value from (0, [Unsolicited Report Interval]] for the repetition
             sendOlderVersionReport(ie, group, interfaceData->compatVersion);
-        else if (wasJoined && !nowJoined) {
-            // leaving the group: send an older-version Leave (suppressed under v1 compat)
-            if (interfaceData->compatVersion == IGMP_COMPAT_V2)
-                sendOlderVersionLeave(ie, group);
+            groupData->lastReporter = true;
+            startTimer(groupData->olderVersionReportTimer, uniform(0, unsolicitedReportInterval));
         }
-        else if (nowJoined)
+        else if (wasJoined && !nowJoined) {
+            // "leave group": stop the timer, and send a Leave if the flag is set (no Leave under
+            // v1 compat)
+            cancelEvent(groupData->olderVersionReportTimer);
+            if (interfaceData->compatVersion == IGMP_COMPAT_V2 && groupData->lastReporter)
+                sendOlderVersionLeave(ie, group);
+            groupData->lastReporter = false;
+        }
+        else if (nowJoined) {
             sendOlderVersionReport(ie, group, interfaceData->compatVersion); // refresh membership
+            groupData->lastReporter = true;
+        }
         groupData->filter = filter;
         groupData->sourceAddressList = sourceList.sources;
         sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
@@ -215,73 +224,93 @@ void Igmpv3::multicastSourceListChanged(NetworkInterface *ie, Ipv4Address group,
 
     // Check if IF state is different
     if (!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList.sources)) {
-        vector<GroupRecord> records;
-        // INCLUDE(A) -> INCLUDE(B): Send ALLOW(B-A), BLOCK(A-B)
-        if (groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != sourceList.sources) {
+        // RFC 9776 section 5.1: the sources of the difference between the old and the new state
+        // (Table 3) get retransmission state for [Robustness Variable] State-Change Reports, and
+        // a filter-mode change makes the next [Robustness Variable] Reports hold a
+        // Filter-Mode-Change record. The Report built from this state merges the pending one.
+        Ipv4AddressVector changedSources;
+        if (groupData->filter == filter) {
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            records.resize(2);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(IGMPV3_RT_ALLOW);
-            records[0].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
-            records[1].setGroupAddress(group);
-            records[1].setRecordType(IGMPV3_RT_BLOCK);
-            records[1].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
-            records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
+            Ipv4AddressVector added = set_complement(sourceList.sources, groupData->sourceAddressList);
+            Ipv4AddressVector removed = set_complement(groupData->sourceAddressList, sourceList.sources);
+            changedSources.insert(changedSources.end(), added.begin(), added.end());
+            changedSources.insert(changedSources.end(), removed.begin(), removed.end());
         }
-        // EXCLUDE(A) -> EXCLUDE(B): Send ALLOW(A-B), BLOCK(B-A)
-        else if (groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_EXCLUDE && groupData->sourceAddressList != sourceList.sources) {
-            EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            records.resize(2);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(IGMPV3_RT_ALLOW);
-            records[0].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
-            records[1].setGroupAddress(group);
-            records[1].setRecordType(IGMPV3_RT_BLOCK);
-            records[1].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
-            records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
+        else {
+            EV_DETAIL << (filter == IGMPV3_FM_EXCLUDE ? "Sending TO_EX report.\n" : "Sending TO_IN report.\n");
+            groupData->filterModeChangeCount = robustnessVariable;
+            changedSources = sourceList.sources;
         }
-        // INCLUDE(A) -> EXCLUDE(B): Send TO_EX(B)
-        else if (groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_EXCLUDE) {
-            EV_DETAIL << "Sending TO_EX report.\n";
-            records.resize(1);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(IGMPV3_RT_TO_EX);
-            records[0].setSourceList(sourceList.sources);
-        }
-        // EXCLUDE(A) -> INCLUDE(B): Send TO_IN(B)
-        else if (groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_INCLUDE) {
-            EV_DETAIL << "Sending TO_IN report.\n";
-            records.resize(1);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(IGMPV3_RT_TO_IN);
-            records[0].setSourceList(sourceList.sources);
-        }
-
-        if (!records.empty()) {
-            sendGroupReport(ie, records);
-
-            // RFC 3376 6.1: the State-Change Report is (re)transmitted [Robustness
-            // Variable] times in total, i.e. robustnessVariable - 1 additional times,
-            // at intervals chosen at random from (0, Unsolicited Report Interval].
-            //
-            // If a new change arrives while a retransmission is still pending, the
-            // records above were recomputed from the current (just-updated) interface
-            // state, so they already reflect the merged result: we simply replace the
-            // pending records and restart the retransmission counter (this is the
-            // 6.1 "merge by recomputation" of the old and new pending reports).
-            groupData->pendingRecords = records;
-            groupData->retransmitCount = robustnessVariable - 1;
-            if (groupData->retransmitCount > 0)
-                startTimer(groupData->retransmitTimer, uniform(0, unsolicitedReportInterval));
-            else
-                cancelEvent(groupData->retransmitTimer); // RV<=1: nothing to retransmit, drop any leftover schedule
-        }
+        for (const auto& source : changedSources)
+            groupData->sourceChangeCounts[source] = robustnessVariable;
 
         // Go to new state
         groupData->filter = filter;
         groupData->sourceAddressList = sourceList.sources;
         sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
+
+        // the merged Report ends the retransmissions of the earlier ones, and is the first of
+        // [Robustness Variable] transmissions
+        sendStateChangeReport(groupData);
     }
+}
+
+// RFC 9776 section 5.1, Table 4: the records of the next State-Change Report of the group. Every
+// State-Change Report counts once for the retransmission state of each source.
+std::vector<GroupRecord> Igmpv3::buildStateChangeRecords(HostGroupData *group)
+{
+    vector<GroupRecord> records;
+    if (group->filterModeChangeCount > 0) {
+        GroupRecord record;
+        record.setGroupAddress(group->groupAddr);
+        record.setRecordType(group->filter == IGMPV3_FM_INCLUDE ? IGMPV3_RT_TO_IN : IGMPV3_RT_TO_EX);
+        record.setSourceList(group->sourceAddressList);
+        records.push_back(record);
+        group->filterModeChangeCount--;
+    }
+    else {
+        // a source that must be forwarded goes into ALLOW, one that must be blocked into BLOCK
+        Ipv4AddressVector allowSources, blockSources;
+        for (const auto& elem : group->sourceChangeCounts) {
+            bool listed = std::binary_search(group->sourceAddressList.begin(), group->sourceAddressList.end(), elem.first);
+            bool forwarded = (group->filter == IGMPV3_FM_INCLUDE) == listed;
+            (forwarded ? allowSources : blockSources).push_back(elem.first);
+        }
+        if (!allowSources.empty()) {
+            GroupRecord record;
+            record.setGroupAddress(group->groupAddr);
+            record.setRecordType(IGMPV3_RT_ALLOW);
+            record.setSourceList(allowSources);
+            records.push_back(record);
+        }
+        if (!blockSources.empty()) {
+            GroupRecord record;
+            record.setGroupAddress(group->groupAddr);
+            record.setRecordType(IGMPV3_RT_BLOCK);
+            record.setSourceList(blockSources);
+            records.push_back(record);
+        }
+    }
+    for (auto it = group->sourceChangeCounts.begin(); it != group->sourceChangeCounts.end(); ) {
+        if (--it->second <= 0)
+            it = group->sourceChangeCounts.erase(it);
+        else
+            ++it;
+    }
+    return records;
+}
+
+// Sends the next State-Change Report of the group, and schedules the one after it while
+// retransmission state is left, at a random interval from (0, [Unsolicited Report Interval]).
+void Igmpv3::sendStateChangeReport(HostGroupData *group)
+{
+    vector<GroupRecord> records = buildStateChangeRecords(group);
+    if (!records.empty())
+        sendGroupReport(group->parent->ie, records);
+    if (group->filterModeChangeCount > 0 || !group->sourceChangeCounts.empty())
+        startTimer(group->retransmitTimer, uniform(0, unsolicitedReportInterval));
+    else
+        cancelEvent(group->retransmitTimer);
 }
 
 void Igmpv3::configureInterface(NetworkInterface *ie)
@@ -366,6 +395,10 @@ void Igmpv3::handleMessage(cMessage *msg)
                 processHostOlderVersionTimer(msg);
                 break;
 
+            case IGMPV3_H_OLDER_VERSION_REPORT_TIMER:
+                processHostOlderVersionReportTimer(msg);
+                break;
+
             default:
                 ASSERT(false);
                 break;
@@ -408,10 +441,12 @@ void Igmpv3::processRouterGroupTimer(cMessage *msg)
 
     if (groupData->filter == IGMPV3_FM_EXCLUDE) {
         bool timerRunning = false;
-        for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-            if (!it->second->sourceTimer->isScheduled()) {
-                EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                groupData->deleteSourceRecord(it->first);
+        for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ) {
+            // deleteSourceRecord() erases the entry, so step past it first
+            auto current = it++;
+            if (!current->second->sourceTimer->isScheduled()) {
+                EV_DETAIL << "Deleting source record of '" << current->first << "'.\n";
+                groupData->deleteSourceRecord(current->first);
             }
             else {
                 timerRunning = true;
@@ -458,77 +493,52 @@ void Igmpv3::processRouterSourceTimer(cMessage *msg)
     }
 }
 
-// RFC 3376 6.4.2: retransmit a pending Group-Specific or Group-and-Source-Specific
-// Query. The Query is sent [Last Member Query Count] times in total; this handler
-// covers the extra transmissions after the initial one in sendGroup[AndSource]SpecificQuery().
+// RFC 9776 section 6.6.3: retransmit the pending Group-Specific Query and the pending sources of
+// the Group-and-Source-Specific Queries; the first transmission is done in
+// sendGroup[AndSource]SpecificQuery().
 void Igmpv3::processRexmtTimer(cMessage *msg)
 {
     RouterGroupData *groupData = (RouterGroupData *)msg->getContextPointer();
     NetworkInterface *ie = groupData->parent->ie;
-    ASSERT(groupData->rexmtCount > 0);
-
-    Ipv4AddressVector sourcesToQuery;
-    if (groupData->rexmtGroupAndSource) {
-        // RFC 3376 6.4.2: on retransmission, query only the sources that are still
-        // being queried, i.e. those with a source timer still running above LMQT.
-        // A Report that moved a source back (raising its timer) or away (deleting it)
-        // thus drops it from the retransmitted Query; if none remain, stop.
-        simtime_t lmqt = simTime() + lastMemberQueryTime;
-        for (auto& src : groupData->rexmtSources) {
-            auto it = groupData->sources.find(src);
-            if (it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
-                && it->second->sourceTimer->getArrivalTime() > lmqt)
-                sourcesToQuery.push_back(src);
-        }
-        if (sourcesToQuery.empty()) {
-            EV_INFO << "No sources are still being queried for group '" << groupData->groupAddr
-                    << "', stopping Group-and-Source-Specific Query retransmission.\n";
-            groupData->rexmtCount = 0;
-            groupData->rexmtSources.clear();
-            return;
-        }
-        EV_INFO << "Retransmitting Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->rexmtCount
-                << " transmission(s) left).\n";
-    }
-    else {
-        EV_INFO << "Retransmitting Group-Specific Query for group '" << groupData->groupAddr
-                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->rexmtCount
-                << " transmission(s) left).\n";
-    }
+    ASSERT(groupData->groupRexmtCount > 0 || !groupData->sourceRexmtCounts.empty());
 
     RouterInterfaceData *interfaceData = groupData->parent;
-    if (interfaceData->state == IGMPV3_RS_QUERIER) {
-        Packet *packet = new Packet("Igmpv3 query");
-        const auto& query = makeShared<Igmpv3Query>();
-        query->setType(IGMP_MEMBERSHIP_QUERY);
-        query->setGroupAddress(groupData->groupAddr);
-        query->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
-        if (groupData->rexmtGroupAndSource) {
-            query->setSourceList(sourcesToQuery);
-            query->setChunkLength(B(12 + (4 * sourcesToQuery.size())));
+    if (groupData->groupRexmtCount > 0) {
+        EV_INFO << "Retransmitting Group-Specific Query for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->groupRexmtCount
+                << " transmission(s) left).\n";
+        if (interfaceData->state == IGMPV3_RS_QUERIER && interfaceData->version < 3) {
+            if (interfaceData->version == 2) {
+                sendOlderVersionQuery(interfaceData, groupData->groupAddr, lastMemberQueryInterval);
+                numQueriesSent++;
+                numGroupSpecificQueriesSent++;
+            }
         }
-        else {
-            // suppressRouterProc is set on retransmissions: receivers' reports keep the
-            // group/source timers up, but the querier already lowered its own timers.
-            query->setSuppressRouterProc(true);
+        else if (interfaceData->state == IGMPV3_RS_QUERIER) {
+            Packet *packet = new Packet("Igmpv3 query");
+            const auto& query = makeShared<Igmpv3Query>();
+            query->setType(IGMP_MEMBERSHIP_QUERY);
+            query->setGroupAddress(groupData->groupAddr);
+            query->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
+            setQuerierFields(query);
+            // the S flag is set when the group timer is larger than LMQT, which a Report since
+            // the first Query makes it (RFC 9776 section 6.6.3.1)
+            query->setSuppressRouterProc(groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime);
             query->setChunkLength(B(12));
-        }
-        insertChecksum(query, packet);
-        packet->insertAtFront(query);
-        sendQueryToIP(packet, ie, groupData->groupAddr);
-
-        numQueriesSent++;
-        if (groupData->rexmtGroupAndSource)
-            numGroupAndSourceSpecificQueriesSent++;
-        else
+            insertChecksum(query, packet);
+            packet->insertAtFront(query);
+            sendQueryToIP(packet, ie, groupData->groupAddr);
+            numQueriesSent++;
             numGroupSpecificQueriesSent++;
+        }
+        groupData->groupRexmtCount--;
     }
-
-    if (--groupData->rexmtCount > 0)
-        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-    else
-        groupData->rexmtSources.clear();
+    if (!groupData->sourceRexmtCounts.empty()) {
+        EV_INFO << "Retransmitting Group-and-Source-Specific Query for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "'.\n";
+        sendSourceSpecificQueries(groupData);
+    }
+    scheduleQueryRetransmission(groupData);
 }
 
 // RFC3376 5.2  report generation, point 1.
@@ -546,15 +556,17 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
     unsigned int byteLength = 8; // Igmpv3Report header size
     report->setType(IGMPV3_MEMBERSHIP_REPORT);
     int counter = 0;
-    report->setGroupRecordArraySize(interfaceData->groups.size());
 
     // FIXME Do not create reports larger than MTU of the interface
     //
 
     /*
-     * creating GroupRecord for each group on interface
+     * creating GroupRecord for each group on interface that has reception state: an entry in
+     * INCLUDE mode with no sources is a group that the host has left (RFC 9776 section 5.2)
      */
     for (auto& elem : interfaceData->groups) {
+        if (elem.second->filter == IGMPV3_FM_INCLUDE && elem.second->sourceAddressList.empty())
+            continue;
         GroupRecord gr;
         if (elem.second->filter == IGMPV3_FM_INCLUDE) {
             gr.setRecordType(IGMPV3_RT_IS_IN);
@@ -564,7 +576,8 @@ void Igmpv3::processHostGeneralQueryTimer(cMessage *msg)
         }
         gr.setGroupAddress(elem.second->groupAddr);
         gr.setSourceList(elem.second->sourceAddressList);
-        report->setGroupRecord(counter++, gr);
+        report->appendGroupRecord(gr);
+        counter++;
         byteLength += 8 + gr.getSourceList().size() * 4; // 8 byte header + n * 4 byte (Ipv4Address)
     }
     report->setChunkLength(B(byteLength));
@@ -592,13 +605,15 @@ void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
 
     // checking if query is group or group-and-source specific
     if (group->queriedSources.empty()) {
-        // Send report for a Group-Specific Query
+        // Send report for a Group-Specific Query, if and only if the interface has reception
+        // state for the group (RFC 9776 section 5.2)
         EV_INFO << "Response timer for a Group-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getInterfaceName() << "'\n";
 
         records[0].setGroupAddress(group->groupAddr);
         records[0].setRecordType(group->filter == IGMPV3_FM_INCLUDE ? IGMPV3_RT_IS_IN : IGMPV3_RT_IS_EX);
         records[0].setSourceList(group->sourceAddressList);
-        sendGroupReport(ie, records);
+        if (group->filter == IGMPV3_FM_EXCLUDE || !group->sourceAddressList.empty())
+            sendGroupReport(ie, records);
     }
     else {
         // Send report for a Group-and-Source-Specific Query
@@ -608,32 +623,30 @@ void Igmpv3::processHostGroupQueryTimer(cMessage *msg)
         records[0].setRecordType(IGMPV3_RT_IS_IN);
         records[0].setSourceList(group->filter == IGMPV3_FM_INCLUDE ? set_intersection(group->sourceAddressList, group->queriedSources) :
             set_complement(group->queriedSources, group->sourceAddressList));
-        sendGroupReport(ie, records);
+        // a Current-State Record with no sources is not sent (RFC 9776 section 5.2)
+        if (!records[0].getSourceList().empty())
+            sendGroupReport(ie, records);
     }
 
     group->queriedSources.clear();
 }
 
-// RFC 3376 6.1: retransmit a pending State-Change Report. The report is sent
-// [Robustness Variable] times in total; this handler covers the extra
-// transmissions after the initial one done in multicastSourceListChanged().
+// RFC 9776 section 5.1: retransmit the State-Change Report of the group while retransmission
+// state is left; the first transmission is done in multicastSourceListChanged().
 void Igmpv3::processHostStateChangeTimer(cMessage *msg)
 {
     HostGroupData *group = (HostGroupData *)msg->getContextPointer();
     NetworkInterface *ie = group->parent->ie;
-    ASSERT(group->retransmitCount > 0);
-    ASSERT(!group->pendingRecords.empty());
+    int transmissionsLeft = group->filterModeChangeCount;
+    for (const auto& elem : group->sourceChangeCounts)
+        transmissionsLeft = std::max(transmissionsLeft, elem.second);
+    ASSERT(transmissionsLeft > 0);
 
     EV_INFO << "Retransmitting State-Change Report for group '" << group->groupAddr
-            << "' on interface '" << ie->getInterfaceName() << "' (" << group->retransmitCount
+            << "' on interface '" << ie->getInterfaceName() << "' (" << transmissionsLeft
             << " transmission(s) left).\n";
 
-    sendGroupReport(ie, group->pendingRecords);
-
-    if (--group->retransmitCount > 0)
-        startTimer(group->retransmitTimer, uniform(0, unsolicitedReportInterval));
-    else
-        group->pendingRecords.clear();
+    sendStateChangeReport(group);
 }
 
 void Igmpv3::startTimer(cMessage *timer, double interval)
@@ -793,6 +806,8 @@ void Igmpv3::processQuery(Packet *packet)
     if (rt->isMulticastForwardingEnabled()) {
         // Querier Election
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        if (routerInterfaceData->version < 3)
+            warnAboutQueryVersion(routerInterfaceData, 3);
         if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4() < ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
@@ -849,15 +864,6 @@ void Igmpv3::processReport(Packet *packet)
 
             EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
 
-            // RFC 3376 6.4.2: a new Report for this group supersedes any in-progress
-            // Last-Member Query retransmission. Cancel it; if this record still needs
-            // a Query, the send below re-arms the retransmission from scratch.
-            if (groupData->rexmtCount > 0) {
-                groupData->rexmtCount = 0;
-                groupData->rexmtSources.clear();
-                cancelEvent(groupData->rexmtTimer);
-            }
-
             // RFC 3376 6.4.1: Reception of Current State Record
             if (gr.getRecordType() == IGMPV3_RT_IS_IN) {
                 EV_DETAIL << "Received IS_IN" << receivedSources << " report.\n";
@@ -878,10 +884,12 @@ void Igmpv3::processReport(Packet *packet)
 
                 // INCLUDE(A)   -> IS_EX(B) -> EXCLUDE(A*B,B-A): Delete (A-B)
                 // EXCLUDE(X,Y) -> IS_EX(A) -> EXCLUDE(A-Y,Y*A): Delete (X-A) Delete (Y-A)
-                for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-                    if (!contains(receivedSources, it->first)) {
-                        EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                        groupData->deleteSourceRecord(it->first);
+                for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ) {
+                    // deleteSourceRecord() erases the entry, so step past it first
+                    auto current = it++;
+                    if (!contains(receivedSources, current->first)) {
+                        EV_DETAIL << "Deleting source record of '" << current->first << "'.\n";
+                        groupData->deleteSourceRecord(current->first);
                     }
                 }
 
@@ -929,11 +937,11 @@ void Igmpv3::processReport(Packet *packet)
                 }
                 else if (groupData->filter == IGMPV3_FM_EXCLUDE) {
                     // EXCLUDE (X,Y) -> BLOCK (A) -> EXCLUDE (X+(A-Y),Y): (A-X-Y)=Group Timer
-                    for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-                        if (!groupData->hasSourceRecord(it->first)) {
-                            SourceRecord *record = groupData->createSourceRecord(it->first);
+                    for (auto& receivedSource : receivedSources) {
+                        if (!groupData->hasSourceRecord(receivedSource)) {
+                            SourceRecord *record = groupData->createSourceRecord(receivedSource);
                             double grouptimertime = groupData->timer->getArrivalTime().dbl() - simTime().dbl();
-                            EV_DETAIL << "Setting source timer of '" << it->first << "' to '" << grouptimertime << "'.\n";
+                            EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '" << grouptimertime << "'.\n";
                             startTimer(record->sourceTimer, grouptimertime);
                         }
                     }
@@ -1057,8 +1065,8 @@ void Igmpv3::processReport(Packet *packet)
                     // Delete (X-A) Delete (Y-A)
                     for (auto it = groupData->sources.begin(); it != groupData->sources.end();) {
                         auto rec = it->first;
-                        ++it; // let's advance the iterator now because the deleteSourcerecord call will invalidate it and we wont be able to increment it after that
-                        if (!contains(receivedSources, it->first)) {
+                        ++it; // advance now: deleteSourceRecord invalidates the current iterator
+                        if (!contains(receivedSources, rec)) {
                             EV_DETAIL << "Deleting source record of '" << rec << "'.\n";
                             groupData->deleteSourceRecord(rec);
                         }
@@ -1113,24 +1121,35 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
 
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
 
+    // An IGMPv1 Query has no Max Response Time, and a host reads it as 10 s (RFC 2236 section 4).
+    double maxResponseTime = 10;
+    auto v2Query = dynamicPtrCast<const Igmpv2Query>(query);
+    if (v2Query != nullptr && v2Query->getMaxRespTimeCode() != 0)
+        maxResponseTime = v2Query->getMaxRespTimeCode() / 10.0;
+
     // For a General Query, start/refresh the Older Version Querier Present timer.
     // (A v1/v2 group-specific Query does not change the present-version state per RFC.)
     if (groupAddr.isUnspecified()) {
-        if (interfaceData->compatVersion != version)
+        if (interfaceData->compatVersion != version) {
             EV_INFO << "Received older-version (IGMPv" << (int)version << ") General Query on interface '"
                     << ie->getInterfaceName() << "': entering IGMPv" << (int)version << " compatibility.\n";
+            cancelHostTimers(interfaceData);
+        }
         else
             EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
                     << "', refreshing IGMPv" << (int)version << " compatibility.\n";
         interfaceData->compatVersion = version;
-        startTimer(interfaceData->olderVersionTimer, otherQuerierPresentInterval);
+        // the Older Version Querier Present Interval (RFC 9776 section 8.12): [Robustness
+        // Variable] x [Query Interval] + 10 x the Max Response Time of this Query
+        startTimer(interfaceData->olderVersionTimer, robustnessVariable * queryInterval + 10 * maxResponseTime);
 
-        // Answer the General Query in older-version style for every joined group.
+        // Answer the General Query in older-version style for every joined group, after the
+        // report delay of RFC 2236 section 6.
         for (auto& elem : interfaceData->groups) {
             HostGroupData *g = elem.second;
             bool joined = g->filter == IGMPV3_FM_EXCLUDE || !g->sourceAddressList.empty();
             if (joined)
-                sendOlderVersionReport(ie, g->groupAddr, version);
+                startOlderVersionReportTimer(g, maxResponseTime);
         }
     }
     else {
@@ -1142,7 +1161,7 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
             HostGroupData *g = it->second;
             bool joined = g->filter == IGMPV3_FM_EXCLUDE || !g->sourceAddressList.empty();
             if (joined)
-                sendOlderVersionReport(ie, groupAddr, interfaceData->compatVersion != IGMP_COMPAT_NONE ? interfaceData->compatVersion : version);
+                startOlderVersionReportTimer(g, maxResponseTime);
         }
     }
 
@@ -1150,6 +1169,17 @@ void Igmpv3::processOlderVersionQuery(NetworkInterface *ie, Packet *packet, Comp
     // election); mirror the v3 path so a co-located router yields appropriately.
     if (rt->isMulticastForwardingEnabled()) {
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        // RFC 9776 section 6.6.2: an older General Query makes the router use the oldest version
+        // of the network; section 7.3.1 asks for a warning when it was not configured so
+        if (groupAddr.isUnspecified() && version < routerInterfaceData->version) {
+            if (version < routerVersion)
+                warnAboutQueryVersion(routerInterfaceData, version);
+            EV_INFO << "Received an IGMPv" << (int)version << " General Query on interface '" << ie->getInterfaceName()
+                    << "': the router acts in IGMPv" << (int)version << " mode from now on.\n";
+            routerInterfaceData->version = version;
+        }
+        else if (version > routerInterfaceData->version)
+            warnAboutQueryVersion(routerInterfaceData, version);
         if (packet->getTag<L3AddressInd>()->getSrcAddress().toIpv4() < ie->getProtocolData<Ipv4InterfaceData>()->getIPAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->state = IGMPV3_RS_NON_QUERIER;
@@ -1231,6 +1261,18 @@ void Igmpv3::processOlderVersionReport(NetworkInterface *ie, Packet *packet, Com
         enterRouterOlderVersionCompat(ie, groupData, version);
     }
 
+    // RFC 2236 section 6, "report received" in the Delaying Member state: another member
+    // answered for the group, so stop the timer and clear the flag
+    auto hostIt = hostData.find(ie->getInterfaceId());
+    if (hostIt != hostData.end()) {
+        auto groupIt = hostIt->second->groups.find(group);
+        if (groupIt != hostIt->second->groups.end() && groupIt->second->olderVersionReportTimer->isScheduled()) {
+            EV_INFO << "Another member reported group '" << group << "', suppressing the own Report.\n";
+            cancelEvent(groupIt->second->olderVersionReportTimer);
+            groupIt->second->lastReporter = false;
+        }
+    }
+
     delete packet;
 }
 
@@ -1246,7 +1288,11 @@ void Igmpv3::processOlderVersionLeave(NetworkInterface *ie, Packet *packet)
     EV_INFO << "Igmpv3: received IGMPv2 Leave Group for group '" << group
             << "' on interface '" << ie->getInterfaceName() << "'.\n";
 
-    if (rt->isMulticastForwardingEnabled()) {
+    if (rt->isMulticastForwardingEnabled() && getRouterInterfaceData(ie)->version == 1) {
+        // RFC 9776 section 7.3.1: a router in IGMPv1 mode ignores Leave Group messages
+        EV_INFO << "Ignoring IGMPv2 Leave for group '" << group << "': the router acts in IGMPv1 mode.\n";
+    }
+    else if (rt->isMulticastForwardingEnabled()) {
         RouterGroupData *groupData = getRouterGroupData(ie, group);
         if (groupData) {
             if (groupData->olderVersionCompat == IGMP_COMPAT_V1 && groupData->olderVersionTimer->isScheduled()) {
@@ -1296,7 +1342,7 @@ void Igmpv3::enterRouterOlderVersionCompat(NetworkInterface *ie, RouterGroupData
     if (!(groupData->olderVersionCompat == IGMP_COMPAT_V1 && version == IGMP_COMPAT_V2 && groupData->olderVersionTimer->isScheduled()))
         groupData->olderVersionCompat = version;
 
-    startTimer(groupData->olderVersionTimer, groupMembershipInterval);
+    startTimer(groupData->olderVersionTimer, olderHostPresentInterval);
 
     // Force EXCLUDE{} forwarding and the v3 router group/filter state.
     Ipv4MulticastSourceList oldSourceList;
@@ -1322,6 +1368,46 @@ void Igmpv3::processHostOlderVersionTimer(cMessage *msg)
     EV_INFO << "Older Version Querier Present timer expired on interface '"
             << interfaceData->ie->getInterfaceName() << "': reverting to IGMPv3.\n";
     interfaceData->compatVersion = IGMP_COMPAT_NONE;
+    cancelHostTimers(interfaceData);
+    for (auto& elem : interfaceData->groups)
+        elem.second->lastReporter = false;
+}
+
+// RFC 9776 section 7.2.1: a change of the Host Compatibility Mode cancels all pending response and
+// retransmission timers of the interface.
+void Igmpv3::cancelHostTimers(HostInterfaceData *interfaceData)
+{
+    cancelEvent(interfaceData->generalQueryTimer);
+    for (auto& elem : interfaceData->groups) {
+        HostGroupData *group = elem.second;
+        cancelEvent(group->timer);
+        group->queriedSources.clear();
+        cancelEvent(group->retransmitTimer);
+        group->filterModeChangeCount = 0;
+        group->sourceChangeCounts.clear();
+        cancelEvent(group->olderVersionReportTimer);
+    }
+}
+
+// RFC 2236 section 6, "timer expired" in the Delaying Member state: send the Report and set the
+// flag. A Group-Specific Query is IGMPv2 only, so it is answered in IGMPv2 outside the modes.
+void Igmpv3::processHostOlderVersionReportTimer(cMessage *msg)
+{
+    HostGroupData *group = (HostGroupData *)msg->getContextPointer();
+    HostInterfaceData *interfaceData = group->parent;
+    CompatVersion version = interfaceData->compatVersion != IGMP_COMPAT_NONE ? interfaceData->compatVersion : IGMP_COMPAT_V2;
+    sendOlderVersionReport(interfaceData->ie, group->groupAddr, version);
+    group->lastReporter = true;
+}
+
+// RFC 2236 section 6, "query received": in the Idle Member state start the report delay timer
+// with a value from (0, Max Response Time]; in the Delaying Member state reset it only if the Max
+// Response Time is less than the time left.
+void Igmpv3::startOlderVersionReportTimer(HostGroupData *group, double maxResponseTime)
+{
+    cMessage *timer = group->olderVersionReportTimer;
+    if (!timer->isScheduled() || maxResponseTime < (timer->getArrivalTime() - simTime()).dbl())
+        startTimer(timer, uniform(0, maxResponseTime));
 }
 
 // RFC 3376 7.3.2: the Older Version Host Present timer for a group expired; revert that
@@ -1338,11 +1424,17 @@ void Igmpv3::processRouterOlderVersionTimer(cMessage *msg)
 
 void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxRespTime)
 {
-    if (interfaceData->state == IGMPV3_RS_QUERIER) {
+    if (interfaceData->state == IGMPV3_RS_QUERIER && interfaceData->version < 3) {
+        sendOlderVersionQuery(interfaceData, Ipv4Address::UNSPECIFIED_ADDRESS, maxRespTime);
+        numQueriesSent++;
+        numGeneralQueriesSent++;
+    }
+    else if (interfaceData->state == IGMPV3_RS_QUERIER) {
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setMaxRespTimeCode(codeTime((uint16_t)(maxRespTime * 10.0)));
+        setQuerierFields(msg);
         msg->setChunkLength(B(12));
         insertChecksum(msg, packet);
         packet->insertAtFront(msg);
@@ -1361,17 +1453,27 @@ void Igmpv3::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxResp
 void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
 {
     RouterInterfaceData *interfaceData = groupData->parent;
-    bool suppressFlag = groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
-    // Set group timer to LMQT
+    // Set group timer to LMQT, then set the S flag if the group timer is larger than LMQT
+    // (RFC 9776 section 6.6.3.1)
     startTimer(groupData->timer, lastMemberQueryTime);
+    bool suppressFlag = groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
-    if (interfaceData->state == IGMPV3_RS_QUERIER) {
+    // an IGMPv2 router sends an IGMPv2 Group-Specific Query; IGMPv1 has none
+    if (interfaceData->state == IGMPV3_RS_QUERIER && interfaceData->version < 3) {
+        if (interfaceData->version == 2) {
+            sendOlderVersionQuery(interfaceData, groupData->groupAddr, lastMemberQueryInterval);
+            numQueriesSent++;
+            numGroupSpecificQueriesSent++;
+        }
+    }
+    else if (interfaceData->state == IGMPV3_RS_QUERIER) {
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
+        setQuerierFields(msg);
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(12));
         insertChecksum(msg, packet);
@@ -1382,17 +1484,10 @@ void Igmpv3::sendGroupSpecificQuery(RouterGroupData *groupData)
         numGroupSpecificQueriesSent++;
     }
 
-    // RFC 3376 6.4.2: the Group-Specific Query is (re)transmitted [Last Member
-    // Query Count] times in total, lastMemberQueryInterval apart.
-    groupData->rexmtGroupAndSource = false;
-    groupData->rexmtSources.clear();
-    groupData->rexmtCount = lastMemberQueryCount - 1;
-    if (groupData->rexmtCount > 0 && lastMemberQueryInterval > 0)
-        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-    else {
-        groupData->rexmtCount = 0;
-        cancelEvent(groupData->rexmtTimer); // nothing to retransmit, drop any leftover schedule
-    }
+    // RFC 9776 section 6.6.3.1: [Last Member Query Count] - 1 retransmissions follow,
+    // lastMemberQueryInterval apart
+    groupData->groupRexmtCount = lastMemberQueryCount - 1;
+    scheduleQueryRetransmission(groupData);
 }
 
 void Igmpv3::sendGroupReport(NetworkInterface *ie, const vector<GroupRecord>& records)
@@ -1416,19 +1511,51 @@ void Igmpv3::sendGroupReport(NetworkInterface *ie, const vector<GroupRecord>& re
     numReportsSent++;
 }
 
-// See RFC 3376 6.6.3.2.
+// See RFC 9776 section 6.6.3.2: each source of the Query whose Source Timer is larger than LMQT
+// gets [Last Member Query Count] transmissions and its timer lowered to LMQT, and the Queries
+// leave at once.
 void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const Ipv4AddressVector& sources)
 {
     ASSERT(!sources.empty());
+    for (const auto& source : sources) {
+        auto it = groupData->sources.find(source);
+        if (it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
+            && it->second->sourceTimer->getArrivalTime() > simTime() + lastMemberQueryTime)
+        {
+            groupData->sourceRexmtCounts[source] = lastMemberQueryCount;
+            startTimer(it->second->sourceTimer, lastMemberQueryTime);
+        }
+    }
+    sendSourceSpecificQueries(groupData);
+    scheduleQueryRetransmission(groupData);
+}
 
+// RFC 9776 section 6.6.3.2: two Group-and-Source-Specific Queries for the sources with
+// retransmission state, one with the S flag for the sources whose timer is larger than LMQT, and
+// one without it for the others; a Query with no sources is not sent. Each source counts one
+// transmission.
+void Igmpv3::sendSourceSpecificQueries(RouterGroupData *groupData)
+{
     RouterInterfaceData *interfaceData = groupData->parent;
-
-    if (interfaceData->state == IGMPV3_RS_QUERIER) {
+    Ipv4AddressVector suppressedSources, otherSources;
+    for (const auto& elem : groupData->sourceRexmtCounts) {
+        auto it = groupData->sources.find(elem.first);
+        bool aboveLmqt = it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
+            && it->second->sourceTimer->getArrivalTime() > simTime() + lastMemberQueryTime;
+        (aboveLmqt ? suppressedSources : otherSources).push_back(elem.first);
+    }
+    for (bool suppressFlag : {true, false}) {
+        const Ipv4AddressVector& sources = suppressFlag ? suppressedSources : otherSources;
+        // IGMPv1 and IGMPv2 have no Group-and-Source-Specific Query
+        if (sources.empty() || interfaceData->state != IGMPV3_RS_QUERIER || interfaceData->version < 3)
+            continue;
         Packet *packet = new Packet("Igmpv3 query");
         const auto& msg = makeShared<Igmpv3Query>();
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupData->groupAddr);
         msg->setMaxRespTimeCode(codeTime((uint16_t)(10.0 * lastMemberQueryInterval)));
+        setQuerierFields(msg);
+        msg->setSuppressRouterProc(suppressFlag);
         msg->setSourceList(sources);
         msg->setChunkLength(B(12 + (4 * sources.size())));
         insertChecksum(msg, packet);
@@ -1438,19 +1565,57 @@ void Igmpv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const I
         numQueriesSent++;
         numGroupAndSourceSpecificQueriesSent++;
     }
+    for (auto it = groupData->sourceRexmtCounts.begin(); it != groupData->sourceRexmtCounts.end(); ) {
+        if (--it->second <= 0)
+            it = groupData->sourceRexmtCounts.erase(it);
+        else
+            ++it;
+    }
+}
 
-    // RFC 3376 6.4.2: the Group-and-Source-Specific Query is (re)transmitted
-    // [Last Member Query Count] times in total, lastMemberQueryInterval apart.
-    // On each retransmission the set of queried sources is recomputed (see
-    // processRexmtTimer), so remember the queried sources here.
-    groupData->rexmtGroupAndSource = true;
-    groupData->rexmtSources = sources;
-    sort(groupData->rexmtSources.begin(), groupData->rexmtSources.end());
-    groupData->rexmtCount = lastMemberQueryCount - 1;
-    if (groupData->rexmtCount > 0 && lastMemberQueryInterval > 0)
+// RFC 9776 section 7.3.1: in the IGMPv2 mode a Query is 8 octets, with the Max Response Time in
+// tenths of a second in the Max Resp Code, not the exponential code; in the IGMPv1 mode the code is 0.
+void Igmpv3::sendOlderVersionQuery(RouterInterfaceData *interfaceData, Ipv4Address groupAddr, double maxRespTime)
+{
+    Packet *packet;
+    Ptr<IgmpQuery> msg;
+    if (interfaceData->version == 1) {
+        packet = new Packet("Igmpv1 query");
+        msg = makeShared<Igmpv1Query>();
+    }
+    else {
+        packet = new Packet("Igmpv2 query");
+        const auto& query = makeShared<Igmpv2Query>();
+        query->setMaxRespTimeCode((uint8_t)std::min(255.0, std::round(10.0 * maxRespTime)));
+        msg = query;
+    }
+    msg->setType(IGMP_MEMBERSHIP_QUERY);
+    msg->setGroupAddress(groupAddr);
+    msg->setChunkLength(B(8));
+    insertChecksum(msg, packet);
+    packet->insertAtFront(msg);
+    sendQueryToIP(packet, interfaceData->ie, groupAddr.isUnspecified() ? Ipv4Address::ALL_HOSTS_MCAST : groupAddr);
+}
+
+// RFC 9776 section 7.3.1: a Query of another version than the configured one gets a warning; the
+// warning is rate-limited to one for each interface.
+void Igmpv3::warnAboutQueryVersion(RouterInterfaceData *interfaceData, int queryVersion)
+{
+    if (interfaceData->versionWarned)
+        return;
+    interfaceData->versionWarned = true;
+    EV_WARN << "Received an IGMPv" << queryVersion << " Query on interface '" << interfaceData->ie->getInterfaceName()
+            << "', where the router is configured to act in IGMPv" << routerVersion << " mode.\n";
+}
+
+// Schedules the next retransmission of the Queries of the group while any is left.
+void Igmpv3::scheduleQueryRetransmission(RouterGroupData *groupData)
+{
+    if ((groupData->groupRexmtCount > 0 || !groupData->sourceRexmtCounts.empty()) && lastMemberQueryInterval > 0)
         startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
     else {
-        groupData->rexmtCount = 0;
+        groupData->groupRexmtCount = 0;
+        groupData->sourceRexmtCounts.clear();
         cancelEvent(groupData->rexmtTimer); // nothing to retransmit, drop any leftover schedule
     }
 }
@@ -1469,8 +1634,8 @@ void Igmpv3::sendReportToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest)
     // TODO fill Router Alert option
     auto raOption = new Ipv4OptionRouterAlert();
     msg->addTag<Ipv4OptionsReq>()->appendOption(raOption);
-    // TODO set Type of Service to 0xc0
-//    msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
+    // the precedence of Internetwork Control, Type of Service 0xc0 (RFC 9776 section 4)
+    msg->addTag<DscpReq>()->setDifferentiatedServicesCodePoint(0xc0 >> 2);
     send(msg, "ipOut");
 }
 
@@ -1558,12 +1723,16 @@ Igmpv3::HostGroupData::HostGroupData(HostInterfaceData *parent, Ipv4Address grou
 
     retransmitTimer = new cMessage("Igmpv3 Host State-Change Retransmit Timer", IGMPV3_H_STATE_CHANGE_TIMER);
     retransmitTimer->setContextPointer(this);
+
+    olderVersionReportTimer = new cMessage("Igmpv3 Host Older Version Report Timer", IGMPV3_H_OLDER_VERSION_REPORT_TIMER);
+    olderVersionReportTimer->setContextPointer(this);
 }
 
 Igmpv3::HostGroupData::~HostGroupData()
 {
     parent->owner->cancelAndDelete(timer);
     parent->owner->cancelAndDelete(retransmitTimer);
+    parent->owner->cancelAndDelete(olderVersionReportTimer);
 }
 
 string Igmpv3::HostGroupData::getStateInfo() const
@@ -1749,6 +1918,7 @@ Igmpv3::RouterInterfaceData::RouterInterfaceData(Igmpv3 *owner, NetworkInterface
     ASSERT(ie);
 
     state = IGMPV3_RS_INITIAL;
+    version = owner->routerVersion;
     generalQueryTimer = new cMessage("Igmpv3 General Query timer", IGMPV3_R_GENERAL_QUERY_TIMER);
     generalQueryTimer->setContextPointer(this);
 }
@@ -1826,6 +1996,13 @@ Ipv4AddressVector Igmpv3::set_union(const Ipv4AddressVector& first, const Ipv4Ad
 
 // Miscellaneous
 
+void Igmpv3::setQuerierFields(const Ptr<Igmpv3Query>& query)
+{
+    // a Robustness Variable above 7 does not fit, and the QRV is then zero (RFC 9776 section 4.1.6)
+    query->setRobustnessVariable(robustnessVariable <= 7 ? robustnessVariable : 0);
+    query->setQueryIntervalCode(codeTime((uint16_t)queryInterval));
+}
+
 uint16_t Igmpv3::decodeTime(uint8_t code)
 {
     uint16_t time;
@@ -1855,7 +2032,7 @@ uint8_t Igmpv3::codeTime(uint16_t time)
             exp++;
         }
         ASSERT(exp <= 7);
-        ASSERT(time <= 15);
+        ASSERT(time >= 0x10 && time <= 0x1f); // the mantissa with its implicit leading bit
         code = 0x80 | ((exp << 4) & 0x70) | (time & 0x0f);
     }
 

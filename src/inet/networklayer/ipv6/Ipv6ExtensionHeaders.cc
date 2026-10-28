@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 //
 
-#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 
 namespace inet {
 
@@ -53,6 +53,21 @@ int Ipv6ExtensionHeader::getOrder() const
         default:
             return -1;
     }
+}
+
+Ipv6HopByHopOptionsHeader *createIpv6RouterAlertHeader(uint16_t value)
+{
+    auto header = new Ipv6HopByHopOptionsHeader();
+    auto routerAlert = new Ipv6RouterAlertOption();
+    routerAlert->setValue(value);
+    header->getTlvOptionsForUpdate().appendTlvOption(routerAlert);
+    // a PadN option without data fills the header to 8 octets: 2 + 4 + 2
+    auto padding = new TlvOptionBase();
+    padding->setType(IPv6TLVOPTION_NOPN);
+    padding->setLength(0);
+    header->getTlvOptionsForUpdate().appendTlvOption(padding);
+    header->setChunkLength(B(8));
+    return header;
 }
 
 } // namespace inet

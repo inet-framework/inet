@@ -17,13 +17,6 @@ section 9.11; Rfc9777StartRepeated.test checks the default itself.
 An answer that leaves less than 1 ms after the Query leaves at the instant of the Query (the
 rules of checks.md).
 
-Defect: in MLDv1 mode, a host answers a Query at the instant that the Query arrives.
-Mldv2::processOlderVersionQuery sends the MLDv1 Reports in the same event, with no timer
-(src/inet/networklayer/icmpv6/Mldv2.cc:1115-1136). RFC 2710 section 5 sets a timer to a random
-value in the Maximum Response Delay. Observations 1, 2 and 5 hold; observation 4 fails. This
-test FAILS, and the failure is deliberately NOT declared expected: the model has the mechanism,
-and the mechanism does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "MldChecks.h"
@@ -186,6 +179,10 @@ sim-time-limit = 202s
 seed-set = 0
 **.mld.unsolicitedReportInterval = 1s
 *.router.ipv6.mld.typename = "Mldv1"
+# the MLDv1 router is up at the start with its link-local address (checks.md): no boot delay,
+# and no Duplicate Address Detection (DupAddrDetectTransmits 0, RFC 4862 section 5.1)
+*.router.ipv6.neighbourDiscovery.routerBootupTime = 0s
+*.router.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
 
 **.ipv6.configurator.networkConfiguratorModule = "configurator"
 **.ipv6.hasMld = true

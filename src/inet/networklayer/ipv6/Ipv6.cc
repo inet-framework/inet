@@ -36,6 +36,9 @@
 #include "inet/networklayer/ipv6/Ipv6MulticastRoute.h"
 #include "inet/networklayer/ipv6/Mipv6InterfaceData.h"
 
+#ifdef INET_WITH_MIPV6
+#include "inet/networklayer/mipv6/MobilityHeader_m.h"
+#endif
 
 namespace inet {
 
@@ -613,6 +616,17 @@ void Ipv6::resolveMACAddressAndSendPacket(Packet *packet, int interfaceId, Ipv6A
     fragmentPostRouting(packet, ie, macAddr, fromHL);
 }
 
+// True when the datagram carries the Router Alert option of RFC 2711, in the Hop-by-Hop
+// Options header, which immediately follows the IPv6 header (RFC 8200 section 4.1).
+static bool hasRouterAlertOption(const Packet *packet)
+{
+    const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    if (ipv6Header->getProtocolId() != IP_PROT_IPv6EXT_HOP)
+        return false;
+    const auto& hopByHopHeader = packet->peekDataAt<Ipv6HopByHopOptionsHeader>(ipv6Header->getChunkLength());
+    return hopByHopHeader->getTlvOptions().findByType(IPv6TLVOPTION_ROUTER_ALERT) != -1;
+}
+
 void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, const NetworkInterface *fromIE, bool fromHL)
 {
     auto ipv6Header = packet->peekAtFront<Ipv6Header>();
@@ -647,13 +661,15 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
     // preassigned addresses (all-nodes/all-routers/solicited-node) used by ND, while
     // the incoming interface's membership covers application groups joined on it
     // (e.g. a routing protocol's LL-MANET-Routers group) -- mirroring Ipv4.
-    // Additionally, multicast routers must receive MLD messages (ICMPv6 types 130-132)
-    // regardless of group membership, mirroring the IPv4 rule that multicast routers
+    // Additionally, a multicast router examines every datagram that carries the Router
+    // Alert option (RFC 2711), regardless of group membership. Every MLD message carries
+    // it (RFC 2710 section 3, RFC 9777 section 5), also a Report to the address of a group
+    // that the router does not listen to. This mirrors the IPv4 rule that multicast routers
     // always receive IGMP datagrams (see Ipv4.cc: IP_PROT_IGMP special case).
     auto fromIeIpv6Data = fromIE->findProtocolData<Ipv6InterfaceData>();
     if (rt->isLocalAddress(destAddr) ||
         (fromIeIpv6Data && fromIeIpv6Data->isMemberOfMulticastGroup(destAddr)) ||
-        (rt->isMulticastForwardingEnabled() && ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP))
+        (rt->isMulticastForwardingEnabled() && hasRouterAlertOption(packet)))
     {
         EV_INFO << "local delivery of multicast packet\n";
         numLocalDeliver++;
@@ -730,8 +746,9 @@ void Ipv6::routeMulticastPacket(Packet *packet, const NetworkInterface *destIE, 
         Ipv6MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
         const NetworkInterface *outIE = outInterface->getInterface();
         if (outIE != fromIE) {
-            // TRPB: on a leaf interface, forward only if there are group listeners
-            if (outInterface->isLeaf() && !outIE->getProtocolData<Ipv6InterfaceData>()->hasMulticastListener(destAddr))
+            // TRPB: on a leaf interface, forward only if there is a listener of the source
+            // (RFC 9777 section 7.3)
+            if (outInterface->isLeaf() && !outIE->getProtocolData<Ipv6InterfaceData>()->hasMulticastListener(destAddr, srcAddr))
                 EV_DETAIL << "Not forwarding to " << outIE->getInterfaceName() << " (leaf interface with no listeners)\n";
             else {
                 EV_DETAIL << "Forwarding to " << outIE->getInterfaceName() << "\n";
@@ -942,8 +959,6 @@ void Ipv6::encapsulate(Packet *transportPacket)
     auto hopLimitReq = transportPacket->removeTagIfPresent<HopLimitReq>();
     short ttl = (hopLimitReq != nullptr) ? hopLimitReq->getHopLimit() : -1;
 
-    ipv6Header->setPayloadLength(transportPacket->getDataLength());
-
     // set source and destination address
     ipv6Header->setDestAddress(dest);
     ipv6Header->setSrcAddress(src);
@@ -990,11 +1005,50 @@ void Ipv6::encapsulate(Packet *transportPacket)
     // Insert extension headers (in reverse order, each at front, so they end up in correct order)
     for (int i = (int)extHeaders.size() - 1; i >= 0; i--)
         transportPacket->insertAtFront(Ptr<Ipv6ExtensionHeader>(extHeaders[i]->dup()));
+    // the Payload Length counts the extension headers too (RFC 8200 section 3)
+    ipv6Header->setPayloadLength(transportPacket->getDataLength());
     insertNetworkProtocolHeader(transportPacket, Protocol::ipv6, ipv6Header);
     // Clean up owned ext headers from tag (originals)
     for (auto *eh : extHeaders)
         delete eh;
     // setting IP options is currently not supported
+}
+
+// Computes the checksum of an ICMPv6 message in CHECKSUM_COMPUTED mode. The checksum covers the
+// pseudo-header (RFC 4443 section 2.3), so it waits until the source address is final. With a
+// Routing header, the pseudo-header holds the final destination (RFC 8200 section 8.1): the
+// last address of the header, which is the first one of a Segment Routing Header (RFC 8754).
+// With a Home Address option, it holds the home address as the source (RFC 6275 section 11.3.1).
+static void insertIcmpv6Checksum(Packet *packet)
+{
+    const auto& ipv6Header = packet->peekAtFront<Ipv6Header>();
+    Ipv6Address srcAddress = ipv6Header->getSrcAddress();
+    Ipv6Address destAddress = ipv6Header->getDestAddress();
+    b offset = ipv6Header->getChunkLength();
+    IpProtocolId nextHeader = ipv6Header->getProtocolId();
+    while (isIpv6ExtensionHeader(nextHeader)) {
+        auto extensionHeader = peekIpv6ExtensionHeaderAt(packet, offset, nextHeader);
+        auto routingHeader = dynamicPtrCast<const Ipv6RoutingHeader>(extensionHeader);
+        if (routingHeader != nullptr && routingHeader->getSegmentsLeft() > 0 && routingHeader->getAddressArraySize() > 0)
+            destAddress = routingHeader->getAddress(routingHeader->getRoutingType() == 4 ? 0 : routingHeader->getAddressArraySize() - 1);
+#ifdef INET_WITH_MIPV6
+        if (auto destinationOptionsHeader = dynamicPtrCast<const Ipv6DestinationOptionsHeader>(extensionHeader)) {
+            const TlvOptions& options = destinationOptionsHeader->getTlvOptions();
+            int k = options.findByType(IPv6TLVOPTION_HOME_ADDRESS);
+            if (k != -1)
+                srcAddress = check_and_cast<const HomeAddressOption *>(options.getTlvOption(k))->getHomeAddress();
+        }
+#endif
+        offset += extensionHeader->getChunkLength();
+        nextHeader = extensionHeader->getNextHeaderProtocol();
+    }
+    if (nextHeader != IP_PROT_IPv6_ICMP || packet->peekDataAt<Icmpv6Header>(offset)->getChecksumMode() != CHECKSUM_COMPUTED)
+        return;
+    auto headers = packet->removeAtFront(offset);
+    auto icmpHeader = packet->removeAtFront<Icmpv6Header>();
+    Icmpv6::insertComputedChecksum(srcAddress, destAddress, icmpHeader, packet);
+    packet->insertAtFront(icmpHeader);
+    packet->insertAtFront(headers);
 }
 
 void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const MacAddress& nextHopAddr, bool fromHL)
@@ -1028,6 +1082,8 @@ void Ipv6::fragmentPostRouting(Packet *packet, const NetworkInterface *ie, const
             return;
         }
     }
+    if (fromHL)
+        insertIcmpv6Checksum(packet);
     // Reduce the (already resolved) egress decision to packet tags so that the
     // POST_ROUTING continuation -- fragmentAndSend(), possibly reached via a hook's
     // QUEUE/reinject -- can recover it from the packet alone (cf. IPv4). MAC resolution
@@ -1202,6 +1258,10 @@ bool Ipv6::processExtensionHeaders(Packet *packet)
                         const TlvOptionBase *opt = opts.getTlvOption(j);
                         int optType = opt->getType();
                         if (optType == IPv6TLVOPTION_NOP1 || optType == IPv6TLVOPTION_NOPN)
+                            continue;
+                        // the Router Alert option (RFC 2711) asks a router to examine the
+                        // datagram; routeMulticastPacket already delivered it for that
+                        if (optType == IPv6TLVOPTION_ROUTER_ALERT)
                             continue;
                         auto it = hopByHopOptionHandlers.find(optType);
                         if (it != hopByHopOptionHandlers.end()) {

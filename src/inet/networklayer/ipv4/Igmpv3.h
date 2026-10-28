@@ -75,6 +75,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         IGMPV3_H_GROUP_TIMER,
         IGMPV3_H_STATE_CHANGE_TIMER,
         IGMPV3_H_OLDER_VERSION_TIMER, // Older Version Querier Present timer (RFC 3376 7.2.1), per HostInterfaceData
+        IGMPV3_H_OLDER_VERSION_REPORT_TIMER, // report delay timer of the IGMPv1 and IGMPv2 modes (RFC 2236 section 6), per HostGroupData
     };
 
     // Older-version compatibility level (RFC 3376 7.2/7.3). NONE means native v3.
@@ -95,11 +96,18 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         cMessage *timer; // for scheduling responses to Group-Specific and Group-and-Source-Specific Queries
         Ipv4AddressVector queriedSources; // saved from last Group-Specific or Group-and-Source-Specific Query; sorted
 
-        // State-Change Report retransmission (RFC 3376 6.1): the last State-Change
-        // Report is (re)transmitted [Robustness Variable] times in total.
-        std::vector<GroupRecord> pendingRecords; // records of the pending State-Change Report
-        int retransmitCount = 0; // remaining retransmissions (0 = nothing pending)
+        // State-Change Report retransmission (RFC 9776 section 5.1): a State-Change Report holds
+        // a Filter-Mode-Change record while filterModeChangeCount is positive, else the
+        // Source-List-Change records of the sources with a positive count. Every State-Change
+        // Report that leaves decrements the counts.
+        int filterModeChangeCount = 0; // State-Change Reports that must still hold a Filter-Mode-Change record
+        std::map<Ipv4Address, int> sourceChangeCounts; // per source: State-Change Reports that must still hold it
         cMessage *retransmitTimer; // fires at uniform(0, unsolicitedReportInterval)
+
+        // The IGMPv1 and IGMPv2 modes (RFC 2236 section 6): the report delay timer runs in the
+        // Delaying Member state, and the flag tells that this host sent the last Report.
+        cMessage *olderVersionReportTimer;
+        bool lastReporter = false;
 
         HostGroupData(HostInterfaceData *parent, Ipv4Address group);
         virtual ~HostGroupData();
@@ -118,7 +126,7 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         // Older Version Querier Present (RFC 3376 7.2.1): while olderVersionTimer is
         // scheduled, an older-version querier is present on this interface and the host
         // emits older-version (v1/v2) Reports/Leaves instead of v3 reports.
-        cMessage *olderVersionTimer; // fires at otherQuerierPresentInterval
+        cMessage *olderVersionTimer; // fires at the Older Version Querier Present Interval
         CompatVersion compatVersion = IGMP_COMPAT_NONE;
 
         HostInterfaceData(Igmpv3 *owner, NetworkInterface *ie);
@@ -167,18 +175,18 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         SourceToSourceRecordMap sources; // TODO should map source addresses to source timers
                                          // i.e. map<Ipv4Address,cMessage*>
 
-        // Last-Member/Group-Specific Query retransmission (RFC 3376 6.4.2): a
-        // Group-Specific or Group-and-Source-Specific Query is sent [Last Member
-        // Query Count] times in total, lastMemberQueryInterval apart.
+        // Query retransmission (RFC 9776 section 6.6.3): a Group-Specific Query is sent [Last
+        // Member Query Count] times, and a source of a Group-and-Source-Specific Query is in
+        // [Last Member Query Count] of them, lastMemberQueryInterval apart. A Report changes only
+        // the timers, and so the S flags.
         cMessage *rexmtTimer; // fires at lastMemberQueryInterval
-        int rexmtCount = 0; // remaining retransmissions (0 = nothing pending)
-        bool rexmtGroupAndSource = false; // false=Group-Specific, true=Group-and-Source-Specific
-        Ipv4AddressVector rexmtSources; // for the group-and-source case: sources to resend; sorted
+        int groupRexmtCount = 0; // Group-Specific Queries still to send
+        std::map<Ipv4Address, int> sourceRexmtCounts; // per source: Group-and-Source-Specific Queries still to hold it
 
         // Older Version Host Present (RFC 3376 7.3.2): while olderVersionTimer is
         // scheduled, an older-version (v1/v2) host is present for this group. The group
         // is forwarded as EXCLUDE{} (any-source) and v3 per-source processing is bypassed.
-        cMessage *olderVersionTimer; // fires at groupMembershipInterval
+        cMessage *olderVersionTimer; // fires at olderHostPresentInterval
         CompatVersion olderVersionCompat = IGMP_COMPAT_NONE;
 
         RouterGroupData(RouterInterfaceData *parent, Ipv4Address group);
@@ -202,6 +210,8 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
         GroupToRouterDataMap groups;
         RouterState state;
         cMessage *generalQueryTimer;
+        int version; // the IGMP version of the Queries (RFC 9776 sections 6.6.2 and 7.3.1)
+        bool versionWarned = false; // the warning about a Query of another version is given once
 
         RouterInterfaceData(Igmpv3 *owner, NetworkInterface *ie);
         virtual ~RouterInterfaceData();
@@ -236,6 +246,8 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     double queryResponseInterval;
     double groupMembershipInterval;
     double otherQuerierPresentInterval;
+    double olderHostPresentInterval;
+    int routerVersion;
     double startupQueryInterval;
     int startupQueryCount;
     double lastMemberQueryInterval;
@@ -303,9 +315,18 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void startTimer(cMessage *timer, double interval);
 
     virtual void sendGeneralQuery(RouterInterfaceData *interface, double maxRespTime);
+    // the QRV and the QQIC of every Query: the Robustness Variable and the Query Interval of the
+    // querier (RFC 9776 sections 4.1.6 and 4.1.7)
+    virtual void setQuerierFields(const Ptr<Igmpv3Query>& query);
     virtual void sendGroupSpecificQuery(RouterGroupData *group);
     virtual void sendGroupAndSourceSpecificQuery(RouterGroupData *group, const Ipv4AddressVector& sources);
+    virtual void sendOlderVersionQuery(RouterInterfaceData *interfaceData, Ipv4Address groupAddr, double maxRespTime);
+    virtual void warnAboutQueryVersion(RouterInterfaceData *interfaceData, int queryVersion);
+    virtual void sendSourceSpecificQueries(RouterGroupData *group);
+    virtual void scheduleQueryRetransmission(RouterGroupData *group);
     virtual void sendGroupReport(NetworkInterface *ie, const std::vector<GroupRecord>& records);
+    virtual void sendStateChangeReport(HostGroupData *group);
+    virtual std::vector<GroupRecord> buildStateChangeRecords(HostGroupData *group);
     virtual void sendQueryToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest);
     virtual void sendReportToIP(Packet *msg, NetworkInterface *ie, Ipv4Address dest);
 
@@ -313,6 +334,9 @@ class INET_API Igmpv3 : public SimpleModule, protected cListener
     virtual void processHostGroupQueryTimer(cMessage *msg);
     virtual void processHostStateChangeTimer(cMessage *msg);
     virtual void processHostOlderVersionTimer(cMessage *msg);
+    virtual void processHostOlderVersionReportTimer(cMessage *msg);
+    virtual void startOlderVersionReportTimer(HostGroupData *group, double maxResponseTime);
+    virtual void cancelHostTimers(HostInterfaceData *interfaceData);
     virtual void processRouterGeneralQueryTimer(cMessage *msg);
     virtual void processRouterGroupTimer(cMessage *msg);
     virtual void processRouterSourceTimer(cMessage *msg);

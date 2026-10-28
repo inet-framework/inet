@@ -8,14 +8,6 @@ doc/project/evidence/protocol/igmp/checks/compatibility.md#querier-with-an-igmpv
 the program steps below map onto its expected observations. Step 1 is observation 1; the guard
 and step 2 are observations 2 and 3.
 
-Expected result FAIL, model gap: an IGMPv3 router that hears an IGMPv2 General Query uses it
-only for the querier election (Igmpv3::processOlderVersionQuery,
-src/inet/networklayer/ipv4/Igmpv3.cc:1151). The router has no IGMPv2 querier mode: it goes on
-with Version 3 Queries of 12 octets. Observation 1 holds; observation 2 fails with the General
-Query of R1 at 31.25 s. The assertion stays as the standard states it; see results.md.
-
-%# expected-result: FAIL
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"

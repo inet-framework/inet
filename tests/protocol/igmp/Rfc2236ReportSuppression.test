@@ -11,13 +11,6 @@ guards are observation 2, and step 2 is observation 1.
 The test sets the Unsolicited Report Interval of the model to 1 second, the default of RFC 9776
 section 8.11; Rfc9776JoinRepeated.test checks the default itself.
 
-Defect: in IGMPv2 mode, A and B both answer the General Query at the instant that it arrives
-(the defect of Rfc9776HostV2Mode.test, src/inet/networklayer/ipv4/Igmpv3.cc:1128-1133). With no
-delay, neither host can hear the Report of the other first, so both Reports leave. Observation
-2 fails with the Report of B, at the same instant as the Report of A. This test FAILS, and the
-failure is deliberately NOT declared expected: the model has the mechanism, and the mechanism
-does the wrong thing, which is a defect. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "IgmpChecks.h"

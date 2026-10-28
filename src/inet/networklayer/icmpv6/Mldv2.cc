@@ -21,19 +21,27 @@
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/icmpv6/Icmpv6.h"
 #include "inet/networklayer/icmpv6/MldMessage_m.h" // MLDv1 MldQuery/MldReport/MldDone for older-version interop
+#include "inet/networklayer/ipv6/Ipv6ExtHeaderTag_m.h"
+#include "inet/networklayer/ipv6/Ipv6ExtensionHeaders.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #include "inet/networklayer/ipv6/Ipv6RoutingTable.h"
 
 namespace inet {
 
+// true when the interface has a link-local address that Duplicate Address Detection has tested:
+// every MLD Query leaves from such an address (RFC 3810 section 5.1.13, RFC 9777 section 5.1.14)
+static bool hasValidLinkLocalAddress(const NetworkInterface *ie)
+{
+    auto ipv6Data = ie->findProtocolData<Ipv6InterfaceData>();
+    if (ipv6Data == nullptr)
+        return false;
+    const Ipv6Address& linkLocalAddress = ipv6Data->getLinkLocalAddress();
+    return !linkLocalAddress.isUnspecified() && !ipv6Data->isTentativeAddress(linkLocalAddress);
+}
+
 using namespace std;
 
 Define_Module(Mldv2);
-
-static bool isEmptyRecord(const Mldv2MulticastAddressRecord& record)
-{
-    return record.getSourceList().empty();
-}
 
 static bool isSorted(const Ipv6AddressVector& v)
 {
@@ -47,6 +55,8 @@ static bool isSorted(const Ipv6AddressVector& v)
 
 Mldv2::~Mldv2()
 {
+    while (!heldMessages.empty())
+        deleteHeldMessages(heldMessages.begin()->first);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
 
@@ -61,14 +71,18 @@ void Mldv2::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         enabled = par("enabled");
         // robustnessVariable also seeds the NED default() expressions of
-        // groupMembershipInterval / otherQuerierPresentInterval / startupQueryCount /
-        // lastMemberQueryCount; in addition it controls how many times a host
+        // groupMembershipInterval / otherQuerierPresentInterval / olderVersionHostPresentInterval /
+        // startupQueryCount / lastMemberQueryCount; in addition it controls how many times a host
         // (re)transmits a State-Change Report (RFC 3810 6.1).
         robustnessVariable = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
         groupMembershipInterval = par("groupMembershipInterval");
         otherQuerierPresentInterval = par("otherQuerierPresentInterval");
+        olderVersionHostPresentInterval = par("olderVersionHostPresentInterval");
+        routerVersion = par("routerVersion");
+        if (routerVersion < 1 || routerVersion > 2)
+            throw cRuntimeError("Mldv2: routerVersion must be 1 or 2, got %d", routerVersion);
         startupQueryInterval = par("startupQueryInterval");
         startupQueryCount = par("startupQueryCount");
         lastMemberQueryInterval = par("lastMemberQueryInterval");
@@ -107,6 +121,7 @@ void Mldv2::initialize(int stage)
         host->subscribe(interfaceCreatedSignal, this);
         host->subscribe(interfaceDeletedSignal, this);
         host->subscribe(ipv6MulticastChangeSignal, this);
+        host->subscribe(interfaceIpv6ConfigChangedSignal, this);
 
         // in multicast routers: join the all-MLDv2-routers address on all interfaces
         if (enabled && rt->isMulticastForwardingEnabled()) {
@@ -153,6 +168,22 @@ void Mldv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         info = check_and_cast<const Ipv6MulticastGroupSourceInfo *>(obj);
         multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
     }
+    else if (signalID == interfaceIpv6ConfigChangedSignal) {
+        // a router interface that waited for a tested link-local address starts its querier
+        ie = const_cast<NetworkInterface *>(check_and_cast<const NetworkInterfaceChangeDetails *>(obj)->getNetworkInterface());
+        if (hasValidLinkLocalAddress(ie))
+            sendHeldMessages(ie);
+        auto it = routerData.find(ie->getInterfaceId());
+        if (it != routerData.end() && it->second->waitsForLinkLocalAddress && hasValidLinkLocalAddress(ie)) {
+            RouterInterfaceData *data = it->second;
+            data->waitsForLinkLocalAddress = false;
+            if (data->state == MLDV2_RS_QUERIER && !data->generalQueryTimer->isScheduled()) {
+                EV_INFO << "Interface '" << ie->getInterfaceName() << "' has a valid link-local address, starting the querier.\n";
+                sendGeneralQuery(data, queryResponseInterval);
+                startTimer(data->generalQueryTimer, startupQueryInterval);
+            }
+        }
+    }
     else if (signalID == interfaceCreatedSignal) {
         ie = check_and_cast<NetworkInterface *>(obj);
         if (ie->isMulticast())
@@ -164,6 +195,7 @@ void Mldv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
             interfaceId = ie->getInterfaceId();
             deleteHostInterfaceData(interfaceId);
             deleteRouterInterfaceData(interfaceId);
+            deleteHeldMessages(interfaceId);
         }
     }
 }
@@ -198,12 +230,24 @@ void Mldv2::multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& 
     if (interfaceData->olderVersionPresent) {
         bool wasJoined = groupData->filter == MLDV2_FM_EXCLUDE || !groupData->sourceAddressList.empty();
         bool nowJoined = filter == MLDV2_FM_EXCLUDE || !sourceList.sources.empty();
-        if (!wasJoined && nowJoined)
+        if (!wasJoined && nowJoined) {
+            // RFC 2710 section 5, "start listening": send a Report, set the flag, and start the
+            // timer with a value from [0, [Unsolicited Report Interval]] for the repetition
             sendOlderVersionReport(ie, group);
-        else if (wasJoined && !nowJoined)
-            sendOlderVersionDone(ie, group);
-        else if (nowJoined)
+            groupData->lastReporter = true;
+            startTimer(groupData->olderVersionReportTimer, uniform(0, unsolicitedReportInterval));
+        }
+        else if (wasJoined && !nowJoined) {
+            // "stop listening": stop the timer, and send a Done if the flag is set
+            cancelEvent(groupData->olderVersionReportTimer);
+            if (groupData->lastReporter)
+                sendOlderVersionDone(ie, group);
+            groupData->lastReporter = false;
+        }
+        else if (nowJoined) {
             sendOlderVersionReport(ie, group); // refresh membership
+            groupData->lastReporter = true;
+        }
         groupData->filter = filter;
         groupData->sourceAddressList = sourceList.sources;
         sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
@@ -212,83 +256,108 @@ void Mldv2::multicastSourceListChanged(NetworkInterface *ie, const Ipv6Address& 
 
     // Check if IF state is different
     if (!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList.sources)) {
-        vector<Mldv2MulticastAddressRecord> records;
-        // INCLUDE(A) -> INCLUDE(B): Send ALLOW(B-A), BLOCK(A-B)
-        if (groupData->filter == MLDV2_FM_INCLUDE && filter == MLDV2_FM_INCLUDE && groupData->sourceAddressList != sourceList.sources) {
+        // RFC 9777 section 6.1: the sources of the difference between the old and the new state
+        // (Table 1) get retransmission state for [Robustness Variable] State-Change Reports, and
+        // a filter-mode change makes the next [Robustness Variable] Reports hold a
+        // Filter-Mode-Change record. The Report built from this state merges the pending one.
+        Ipv6AddressVector changedSources;
+        if (groupData->filter == filter) {
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            records.resize(2);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(MLD_ALLOW_NEW_SOURCES);
-            records[0].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
-            records[1].setGroupAddress(group);
-            records[1].setRecordType(MLD_BLOCK_OLD_SOURCES);
-            records[1].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
-            records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
+            Ipv6AddressVector added = set_complement(sourceList.sources, groupData->sourceAddressList);
+            Ipv6AddressVector removed = set_complement(groupData->sourceAddressList, sourceList.sources);
+            changedSources.insert(changedSources.end(), added.begin(), added.end());
+            changedSources.insert(changedSources.end(), removed.begin(), removed.end());
         }
-        // EXCLUDE(A) -> EXCLUDE(B): Send ALLOW(A-B), BLOCK(B-A)
-        else if (groupData->filter == MLDV2_FM_EXCLUDE && filter == MLDV2_FM_EXCLUDE && groupData->sourceAddressList != sourceList.sources) {
-            EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            records.resize(2);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(MLD_ALLOW_NEW_SOURCES);
-            records[0].setSourceList(set_complement(groupData->sourceAddressList, sourceList.sources));
-            records[1].setGroupAddress(group);
-            records[1].setRecordType(MLD_BLOCK_OLD_SOURCES);
-            records[1].setSourceList(set_complement(sourceList.sources, groupData->sourceAddressList));
-            records.erase(remove_if(records.begin(), records.end(), isEmptyRecord), records.end());
+        else {
+            EV_DETAIL << (filter == MLDV2_FM_EXCLUDE ? "Sending TO_EX report.\n" : "Sending TO_IN report.\n");
+            groupData->filterModeChangeCount = robustnessVariable;
+            changedSources = sourceList.sources;
         }
-        // INCLUDE(A) -> EXCLUDE(B): Send TO_EX(B)
-        else if (groupData->filter == MLDV2_FM_INCLUDE && filter == MLDV2_FM_EXCLUDE) {
-            EV_DETAIL << "Sending TO_EX report.\n";
-            records.resize(1);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(MLD_CHANGE_TO_EXCLUDE_MODE);
-            records[0].setSourceList(sourceList.sources);
-        }
-        // EXCLUDE(A) -> INCLUDE(B): Send TO_IN(B)
-        else if (groupData->filter == MLDV2_FM_EXCLUDE && filter == MLDV2_FM_INCLUDE) {
-            EV_DETAIL << "Sending TO_IN report.\n";
-            records.resize(1);
-            records[0].setGroupAddress(group);
-            records[0].setRecordType(MLD_CHANGE_TO_INCLUDE_MODE);
-            records[0].setSourceList(sourceList.sources);
-        }
-
-        if (!records.empty()) {
-            sendGroupReport(ie, records);
-
-            // RFC 3810 6.1: the State-Change Report is (re)transmitted [Robustness
-            // Variable] times in total, i.e. robustnessVariable - 1 additional times,
-            // at intervals chosen at random from (0, Unsolicited Report Interval].
-            //
-            // If a new change arrives while a retransmission is still pending, the
-            // records above were recomputed from the current (just-updated) interface
-            // state, so they already reflect the merged result: we simply replace the
-            // pending records and restart the retransmission counter (this is the
-            // 6.1 "merge by recomputation" of the old and new pending reports).
-            groupData->pendingRecords = records;
-            groupData->retransmitCount = robustnessVariable - 1;
-            if (groupData->retransmitCount > 0)
-                startTimer(groupData->retransmitTimer, uniform(0, unsolicitedReportInterval));
-            else
-                cancelEvent(groupData->retransmitTimer); // RV<=1: nothing to retransmit, drop any leftover schedule
-        }
+        for (const auto& source : changedSources)
+            groupData->sourceChangeCounts[source] = robustnessVariable;
 
         // Go to new state
         groupData->filter = filter;
         groupData->sourceAddressList = sourceList.sources;
         sort(groupData->sourceAddressList.begin(), groupData->sourceAddressList.end());
+
+        // the merged Report ends the retransmissions of the earlier ones, and is the first of
+        // [Robustness Variable] transmissions
+        sendStateChangeReport(groupData);
     }
+}
+
+// RFC 9777 section 6.1, Table 2: the records of the next State-Change Report of the multicast
+// address. Every State-Change Report counts once for the retransmission state of each source.
+std::vector<Mldv2MulticastAddressRecord> Mldv2::buildStateChangeRecords(HostGroupData *group)
+{
+    vector<Mldv2MulticastAddressRecord> records;
+    if (group->filterModeChangeCount > 0) {
+        Mldv2MulticastAddressRecord record;
+        record.setGroupAddress(group->groupAddr);
+        record.setRecordType(group->filter == MLDV2_FM_INCLUDE ? MLD_CHANGE_TO_INCLUDE_MODE : MLD_CHANGE_TO_EXCLUDE_MODE);
+        record.setSourceList(group->sourceAddressList);
+        records.push_back(record);
+        group->filterModeChangeCount--;
+    }
+    else {
+        // a source that must be forwarded goes into ALLOW, one that must be blocked into BLOCK
+        Ipv6AddressVector allowSources, blockSources;
+        for (const auto& elem : group->sourceChangeCounts) {
+            bool listed = std::binary_search(group->sourceAddressList.begin(), group->sourceAddressList.end(), elem.first);
+            bool forwarded = (group->filter == MLDV2_FM_INCLUDE) == listed;
+            (forwarded ? allowSources : blockSources).push_back(elem.first);
+        }
+        if (!allowSources.empty()) {
+            Mldv2MulticastAddressRecord record;
+            record.setGroupAddress(group->groupAddr);
+            record.setRecordType(MLD_ALLOW_NEW_SOURCES);
+            record.setSourceList(allowSources);
+            records.push_back(record);
+        }
+        if (!blockSources.empty()) {
+            Mldv2MulticastAddressRecord record;
+            record.setGroupAddress(group->groupAddr);
+            record.setRecordType(MLD_BLOCK_OLD_SOURCES);
+            record.setSourceList(blockSources);
+            records.push_back(record);
+        }
+    }
+    for (auto it = group->sourceChangeCounts.begin(); it != group->sourceChangeCounts.end(); ) {
+        if (--it->second <= 0)
+            it = group->sourceChangeCounts.erase(it);
+        else
+            ++it;
+    }
+    return records;
+}
+
+// Sends the next State-Change Report of the multicast address, and schedules the one after it
+// while retransmission state is left, at a random interval from (0, [Unsolicited Report Interval]).
+void Mldv2::sendStateChangeReport(HostGroupData *group)
+{
+    vector<Mldv2MulticastAddressRecord> records = buildStateChangeRecords(group);
+    if (!records.empty())
+        sendGroupReport(group->parent->ie, records);
+    if (group->filterModeChangeCount > 0 || !group->sourceChangeCounts.empty())
+        startTimer(group->retransmitTimer, uniform(0, unsolicitedReportInterval));
+    else
+        cancelEvent(group->retransmitTimer);
 }
 
 void Mldv2::configureInterface(NetworkInterface *ie)
 {
     if (enabled && rt->isMulticastForwardingEnabled()) {
         // start querier on this interface
-        EV_INFO << "Sending General Query on interface '" << ie->getInterfaceName() << "', and scheduling next Query to '"
-                << (simTime() + startupQueryInterval) << "'.\n";
         RouterInterfaceData *routerData = getRouterInterfaceData(ie);
         routerData->state = MLDV2_RS_QUERIER;
+        if (!hasValidLinkLocalAddress(ie)) {
+            EV_INFO << "Interface '" << ie->getInterfaceName() << "' has no valid link-local address yet; the querier starts when it has one.\n";
+            routerData->waitsForLinkLocalAddress = true;
+            return;
+        }
+        EV_INFO << "Sending General Query on interface '" << ie->getInterfaceName() << "', and scheduling next Query to '"
+                << (simTime() + startupQueryInterval) << "'.\n";
 
         sendGeneralQuery(routerData, queryResponseInterval);
         startTimer(routerData->generalQueryTimer, startupQueryInterval);
@@ -363,6 +432,10 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
                 processHostOlderVersionTimer(msg);
                 break;
 
+            case MLDV2_H_OLDER_VERSION_REPORT_TIMER:
+                processHostOlderVersionReportTimer(msg);
+                break;
+
             default:
                 throw cRuntimeError("Mldv2: Unknown self-message kind %d: %s", msg->getKind(), msg->getName());
         }
@@ -385,8 +458,33 @@ void Mldv2::handleMessageWhenUp(cMessage *msg)
 
 // --- Lifecycle ---
 
+void Mldv2::sendHeldMessages(NetworkInterface *ie)
+{
+    auto it = heldMessages.find(ie->getInterfaceId());
+    if (it == heldMessages.end())
+        return;
+    std::vector<Packet *> messages = it->second;
+    heldMessages.erase(it);
+    for (auto msg : messages) {
+        msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
+        send(msg, "ipOut");
+    }
+}
+
+void Mldv2::deleteHeldMessages(int interfaceId)
+{
+    auto it = heldMessages.find(interfaceId);
+    if (it == heldMessages.end())
+        return;
+    for (auto msg : it->second)
+        delete msg;
+    heldMessages.erase(it);
+}
+
 void Mldv2::handleStopOperation(LifecycleOperation *operation)
 {
+    while (!heldMessages.empty())
+        deleteHeldMessages(heldMessages.begin()->first);
     // Clear per-interface state and cancel timers. Signal subscriptions are NOT
     // removed here: like Mldv1/Igmpv2, MLD subscribes once in initialize() and
     // keeps the subscription for the module's lifetime, so a stop/start cycle does
@@ -399,6 +497,8 @@ void Mldv2::handleStopOperation(LifecycleOperation *operation)
 
 void Mldv2::handleCrashOperation(LifecycleOperation *operation)
 {
+    while (!heldMessages.empty())
+        deleteHeldMessages(heldMessages.begin()->first);
     while (!hostData.empty())
         deleteHostInterfaceData(hostData.begin()->first);
     while (!routerData.empty())
@@ -437,10 +537,12 @@ void Mldv2::processRouterGroupTimer(cMessage *msg)
 
     if (groupData->filter == MLDV2_FM_EXCLUDE) {
         bool timerRunning = false;
-        for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-            if (!it->second->sourceTimer->isScheduled()) {
-                EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                groupData->deleteSourceRecord(it->first);
+        for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ) {
+            // deleteSourceRecord() erases the entry, so step past it first
+            auto current = it++;
+            if (!current->second->sourceTimer->isScheduled()) {
+                EV_DETAIL << "Deleting source record of '" << current->first << "'.\n";
+                groupData->deleteSourceRecord(current->first);
             }
             else {
                 timerRunning = true;
@@ -487,78 +589,50 @@ void Mldv2::processRouterSourceTimer(cMessage *msg)
     }
 }
 
-// RFC 3810 7.6.3: retransmit a pending Multicast-Address-Specific or
-// -and-Source-Specific Query. The Query is sent [Last Listener Query Count] times in
-// total; this handler covers the extra transmissions after the initial one in
+// RFC 9777 section 7.6.3: retransmit the pending Multicast Address Specific Query and the pending
+// sources of the Multicast Address and Source Specific Queries; the first transmission is done in
 // sendGroup[AndSource]SpecificQuery().
 void Mldv2::processRexmtTimer(cMessage *msg)
 {
     RouterGroupData *groupData = (RouterGroupData *)msg->getContextPointer();
     NetworkInterface *ie = groupData->parent->ie;
-    ASSERT(groupData->rexmtCount > 0);
-
-    Ipv6AddressVector sourcesToQuery;
-    if (groupData->rexmtGroupAndSource) {
-        // RFC 3810 7.6.3: on retransmission, query only the sources that are still
-        // being queried, i.e. those with a source timer still running above LMQT.
-        // A Report that moved a source back (raising its timer) or away (deleting it)
-        // thus drops it from the retransmitted Query; if none remain, stop.
-        simtime_t lmqt = simTime() + lastMemberQueryTime;
-        for (auto& src : groupData->rexmtSources) {
-            auto it = groupData->sources.find(src);
-            if (it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
-                && it->second->sourceTimer->getArrivalTime() > lmqt)
-                sourcesToQuery.push_back(src);
-        }
-        if (sourcesToQuery.empty()) {
-            EV_INFO << "No sources are still being queried for group '" << groupData->groupAddr
-                    << "', stopping Multicast-Address-and-Source-Specific Query retransmission.\n";
-            groupData->rexmtCount = 0;
-            groupData->rexmtSources.clear();
-            return;
-        }
-        EV_INFO << "Retransmitting Multicast-Address-and-Source-Specific Query for group '" << groupData->groupAddr
-                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->rexmtCount
-                << " transmission(s) left).\n";
-    }
-    else {
-        EV_INFO << "Retransmitting Multicast-Address-Specific Query for group '" << groupData->groupAddr
-                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->rexmtCount
-                << " transmission(s) left).\n";
-    }
+    ASSERT(groupData->groupRexmtCount > 0 || !groupData->sourceRexmtCounts.empty());
 
     RouterInterfaceData *interfaceData = groupData->parent;
-    if (interfaceData->state == MLDV2_RS_QUERIER) {
-        Packet *packet = new Packet("Mldv2 query");
-        const auto& query = makeShared<Mldv2Query>();
-        query->setType(ICMPv6_MLD_QUERY);
-        query->setMulticastAddress(groupData->groupAddr);
-        query->setMaxRespDelay(codeMaxRespCode((uint16_t)(1000.0 * lastMemberQueryInterval))); // milliseconds
-        if (groupData->rexmtGroupAndSource) {
-            query->setSourceList(sourcesToQuery);
-            query->setChunkLength(B(28 + (16 * sourcesToQuery.size())));
-        }
-        else {
-            // suppressRouterProc is set on retransmissions: listeners' reports keep the
-            // group/source timers up, but the querier already lowered its own timers.
-            query->setSuppressRouterProc(true);
-            query->setChunkLength(B(28));
-        }
-        Icmpv6::insertChecksum(checksumMode, query, packet);
-        packet->insertAtFront(query);
-        sendQueryToIPv6(packet, ie, groupData->groupAddr);
-
-        numQueriesSent++;
-        if (groupData->rexmtGroupAndSource)
-            numGroupAndSourceSpecificQueriesSent++;
-        else
+    if (groupData->groupRexmtCount > 0) {
+        EV_INFO << "Retransmitting Multicast-Address-Specific Query for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "' (" << groupData->groupRexmtCount
+                << " transmission(s) left).\n";
+        if (interfaceData->state == MLDV2_RS_QUERIER && routerVersion == 1) {
+            sendOlderVersionQuery(interfaceData, groupData->groupAddr, lastMemberQueryInterval);
+            numQueriesSent++;
             numGroupSpecificQueriesSent++;
+        }
+        else if (interfaceData->state == MLDV2_RS_QUERIER) {
+            Packet *packet = new Packet("Mldv2 query");
+            const auto& query = makeShared<Mldv2Query>();
+            query->setType(ICMPv6_MLD_QUERY);
+            query->setMulticastAddress(groupData->groupAddr);
+            query->setMaxRespDelay(codeMaxRespCode((uint16_t)(1000.0 * lastMemberQueryInterval))); // milliseconds
+            setQuerierFields(query);
+            // the S flag is set when the Filter Timer is larger than LLQT, which a Report since
+            // the first Query makes it (RFC 9777 section 7.6.3.1)
+            query->setSuppressRouterProc(groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime);
+            query->setChunkLength(B(28));
+            Icmpv6::insertChecksum(checksumMode, query, packet);
+            packet->insertAtFront(query);
+            sendQueryToIPv6(packet, ie, groupData->groupAddr);
+            numQueriesSent++;
+            numGroupSpecificQueriesSent++;
+        }
+        groupData->groupRexmtCount--;
     }
-
-    if (--groupData->rexmtCount > 0)
-        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-    else
-        groupData->rexmtSources.clear();
+    if (!groupData->sourceRexmtCounts.empty()) {
+        EV_INFO << "Retransmitting Multicast-Address-and-Source-Specific Query for group '" << groupData->groupAddr
+                << "' on interface '" << ie->getInterfaceName() << "'.\n";
+        sendSourceSpecificQueries(groupData);
+    }
+    scheduleQueryRetransmission(groupData);
 }
 
 // RFC 3810 §6.1  report generation, point 1.
@@ -575,12 +649,15 @@ void Mldv2::processHostGeneralQueryTimer(cMessage *msg)
     unsigned int byteLength = 8; // Mldv2Report header size
     report->setType(ICMPv6_MLDv2_REPORT);
     int counter = 0;
-    report->setMulticastAddressRecordArraySize(interfaceData->groups.size());
 
     // FIXME Do not create reports larger than the interface MTU.
 
-    // Create a Multicast Address Record for each group on the interface.
+    // Create a Multicast Address Record for each group on the interface that has listening
+    // state: an entry in INCLUDE mode with no sources is an address that the node has stopped
+    // listening to (RFC 9777 section 6.3)
     for (auto& elem : interfaceData->groups) {
+        if (elem.second->filter == MLDV2_FM_INCLUDE && elem.second->sourceAddressList.empty())
+            continue;
         Mldv2MulticastAddressRecord gr;
         if (elem.second->filter == MLDV2_FM_INCLUDE) {
             gr.setRecordType(MLD_MODE_IS_INCLUDE);
@@ -590,7 +667,8 @@ void Mldv2::processHostGeneralQueryTimer(cMessage *msg)
         }
         gr.setGroupAddress(elem.second->groupAddr);
         gr.setSourceList(elem.second->sourceAddressList);
-        report->setMulticastAddressRecord(counter++, gr);
+        report->appendMulticastAddressRecord(gr);
+        counter++;
         byteLength += 20 + gr.getSourceList().size() * 16; // 20 byte record header + n * 16 byte (Ipv6Address)
     }
     report->setChunkLength(B(byteLength));
@@ -624,7 +702,9 @@ void Mldv2::processHostGroupQueryTimer(cMessage *msg)
         records[0].setGroupAddress(group->groupAddr);
         records[0].setRecordType(group->filter == MLDV2_FM_INCLUDE ? MLD_MODE_IS_INCLUDE : MLD_MODE_IS_EXCLUDE);
         records[0].setSourceList(group->sourceAddressList);
-        sendGroupReport(ie, records);
+        // only if the interface has listening state for the address (RFC 9777 section 6.3)
+        if (group->filter == MLDV2_FM_EXCLUDE || !group->sourceAddressList.empty())
+            sendGroupReport(ie, records);
     }
     else {
         // Send report for a Multicast-Address-and-Source-Specific Query
@@ -634,32 +714,30 @@ void Mldv2::processHostGroupQueryTimer(cMessage *msg)
         records[0].setRecordType(MLD_MODE_IS_INCLUDE);
         records[0].setSourceList(group->filter == MLDV2_FM_INCLUDE ? set_intersection(group->sourceAddressList, group->queriedSources) :
             set_complement(group->queriedSources, group->sourceAddressList));
-        sendGroupReport(ie, records);
+        // a Current State Record with no sources is not sent (RFC 9777 section 6.3)
+        if (!records[0].getSourceList().empty())
+            sendGroupReport(ie, records);
     }
 
     group->queriedSources.clear();
 }
 
-// RFC 3810 6.1: retransmit a pending State-Change Report. The report is sent
-// [Robustness Variable] times in total; this handler covers the extra
-// transmissions after the initial one done in multicastSourceListChanged().
+// RFC 9777 section 6.1: retransmit the State-Change Report of the multicast address while
+// retransmission state is left; the first transmission is done in multicastSourceListChanged().
 void Mldv2::processHostStateChangeTimer(cMessage *msg)
 {
     HostGroupData *group = (HostGroupData *)msg->getContextPointer();
     NetworkInterface *ie = group->parent->ie;
-    ASSERT(group->retransmitCount > 0);
-    ASSERT(!group->pendingRecords.empty());
+    int transmissionsLeft = group->filterModeChangeCount;
+    for (const auto& elem : group->sourceChangeCounts)
+        transmissionsLeft = std::max(transmissionsLeft, elem.second);
+    ASSERT(transmissionsLeft > 0);
 
     EV_INFO << "Retransmitting State-Change Report for group '" << group->groupAddr
-            << "' on interface '" << ie->getInterfaceName() << "' (" << group->retransmitCount
+            << "' on interface '" << ie->getInterfaceName() << "' (" << transmissionsLeft
             << " transmission(s) left).\n";
 
-    sendGroupReport(ie, group->pendingRecords);
-
-    if (--group->retransmitCount > 0)
-        startTimer(group->retransmitTimer, uniform(0, unsolicitedReportInterval));
-    else
-        group->pendingRecords.clear();
+    sendStateChangeReport(group);
 }
 
 void Mldv2::startTimer(cMessage *timer, double interval)
@@ -785,6 +863,8 @@ void Mldv2::processQuery(Packet *packet)
     // Router part | Querier Election
     if (rt->isMulticastForwardingEnabled()) {
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        if (routerVersion == 1)
+            warnAboutQueryVersion(routerInterfaceData, 2);
         Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
         if (srcAddr < ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
@@ -842,15 +922,6 @@ void Mldv2::processReport(Packet *packet)
 
             EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
 
-            // RFC 3810 7.6.3: a new Report for this group supersedes any in-progress
-            // Last-Listener Query retransmission. Cancel it; if this record still needs
-            // a Query, the send below re-arms the retransmission from scratch.
-            if (groupData->rexmtCount > 0) {
-                groupData->rexmtCount = 0;
-                groupData->rexmtSources.clear();
-                cancelEvent(groupData->rexmtTimer);
-            }
-
             // RFC 3810 §7.4: Reception of Current State Record
             if (gr.getRecordType() == MLD_MODE_IS_INCLUDE) {
                 EV_DETAIL << "Received IS_IN" << receivedSources << " report.\n";
@@ -871,10 +942,12 @@ void Mldv2::processReport(Packet *packet)
 
                 // INCLUDE(A)   -> IS_EX(B) -> EXCLUDE(A*B,B-A): Delete (A-B)
                 // EXCLUDE(X,Y) -> IS_EX(A) -> EXCLUDE(A-Y,Y*A): Delete (X-A) Delete (Y-A)
-                for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-                    if (!contains(receivedSources, it->first)) {
-                        EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                        groupData->deleteSourceRecord(it->first);
+                for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ) {
+                    // deleteSourceRecord() erases the entry, so step past it first
+                    auto current = it++;
+                    if (!contains(receivedSources, current->first)) {
+                        EV_DETAIL << "Deleting source record of '" << current->first << "'.\n";
+                        groupData->deleteSourceRecord(current->first);
                     }
                 }
 
@@ -922,11 +995,11 @@ void Mldv2::processReport(Packet *packet)
                 }
                 else if (groupData->filter == MLDV2_FM_EXCLUDE) {
                     // EXCLUDE (X,Y) -> BLOCK (A) -> EXCLUDE (X+(A-Y),Y): (A-X-Y)=Group Timer
-                    for (auto it = groupData->sources.begin(); it != groupData->sources.end(); ++it) {
-                        if (!groupData->hasSourceRecord(it->first)) {
-                            SourceRecord *record = groupData->createSourceRecord(it->first);
+                    for (auto& receivedSource : receivedSources) {
+                        if (!groupData->hasSourceRecord(receivedSource)) {
+                            SourceRecord *record = groupData->createSourceRecord(receivedSource);
                             double grouptimertime = groupData->timer->getArrivalTime().dbl() - simTime().dbl();
-                            EV_DETAIL << "Setting source timer of '" << it->first << "' to '" << grouptimertime << "'.\n";
+                            EV_DETAIL << "Setting source timer of '" << receivedSource << "' to '" << grouptimertime << "'.\n";
                             startTimer(record->sourceTimer, grouptimertime);
                         }
                     }
@@ -1104,23 +1177,30 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
     Ipv6Address groupAddr = query->getMulticastAddress();
 
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
+    double maxResponseDelay = query->getMaxRespDelay() / 1000.0; // milliseconds in an MLDv1 Query
 
     if (groupAddr.isUnspecified()) {
-        if (!interfaceData->olderVersionPresent)
+        if (!interfaceData->olderVersionPresent) {
             EV_INFO << "Received older-version (MLDv1) General Query on interface '"
                     << ie->getInterfaceName() << "': entering MLDv1 compatibility.\n";
+            cancelHostTimers(interfaceData, true);
+        }
         else
             EV_INFO << "older-version querier present on interface '" << ie->getInterfaceName()
                     << "', refreshing MLDv1 compatibility.\n";
         interfaceData->olderVersionPresent = true;
-        startTimer(interfaceData->olderVersionTimer, otherQuerierPresentInterval);
+        // the Older Version Querier Present Interval (RFC 9777 section 9.12): [Robustness
+        // Variable] x [Query Interval] + [Query Response Interval]; an MLDv1 Query carries no
+        // Query Interval, so the node's own one stands for it
+        startTimer(interfaceData->olderVersionTimer, robustnessVariable * queryInterval + queryResponseInterval);
 
-        // Answer the General Query in MLDv1 style for every joined group.
+        // Answer the General Query in MLDv1 style for every joined group, after the report
+        // delay of RFC 2710 section 5.
         for (auto& elem : interfaceData->groups) {
             HostGroupData *g = elem.second;
             bool joined = g->filter == MLDV2_FM_EXCLUDE || !g->sourceAddressList.empty();
             if (joined)
-                sendOlderVersionReport(ie, g->groupAddr);
+                startOlderVersionReportTimer(g, maxResponseDelay);
         }
     }
     else {
@@ -1132,13 +1212,17 @@ void Mldv2::processOlderVersionQuery(NetworkInterface *ie, Packet *packet)
             HostGroupData *g = it->second;
             bool joined = g->filter == MLDV2_FM_EXCLUDE || !g->sourceAddressList.empty();
             if (joined)
-                sendOlderVersionReport(ie, groupAddr);
+                startOlderVersionReportTimer(g, maxResponseDelay);
         }
     }
 
     // Router/Querier election still applies (an older-version querier may win).
     if (rt->isMulticastForwardingEnabled()) {
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+        // RFC 9777 section 8.3.1: a router that is not configured to act in MLDv1 mode logs a
+        // warning about an MLDv1 General Query; only the administrator changes the mode
+        if (routerVersion == 2 && groupAddr.isUnspecified())
+            warnAboutQueryVersion(routerInterfaceData, 1);
         Ipv6Address srcAddr = packet->getTag<L3AddressInd>()->getSrcAddress().toIpv6();
         if (srcAddr < ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress()) {
             startTimer(routerInterfaceData->generalQueryTimer, otherQuerierPresentInterval);
@@ -1200,6 +1284,18 @@ void Mldv2::processOlderVersionReport(NetworkInterface *ie, Packet *packet)
         enterRouterOlderVersionCompat(ie, groupData);
     }
 
+    // RFC 2710 section 5, "report received" in the Delaying Listener state: another node
+    // answered for the address, so stop the timer and clear the flag
+    auto hostIt = hostData.find(ie->getInterfaceId());
+    if (hostIt != hostData.end()) {
+        auto groupIt = hostIt->second->groups.find(group);
+        if (groupIt != hostIt->second->groups.end() && groupIt->second->olderVersionReportTimer->isScheduled()) {
+            EV_INFO << "Another node reported group '" << group << "', suppressing the own Report.\n";
+            cancelEvent(groupIt->second->olderVersionReportTimer);
+            groupIt->second->lastReporter = false;
+        }
+    }
+
     delete packet;
 }
 
@@ -1249,7 +1345,7 @@ void Mldv2::enterRouterOlderVersionCompat(NetworkInterface *ie, RouterGroupData 
                 << "' on interface '" << ie->getInterfaceName() << "'.\n";
 
     groupData->olderVersionPresent = true;
-    startTimer(groupData->olderVersionTimer, groupMembershipInterval);
+    startTimer(groupData->olderVersionTimer, olderVersionHostPresentInterval);
 
     // Force EXCLUDE{} forwarding and the v2 router group/filter state.
     Ipv6MulticastSourceList oldSourceList;
@@ -1274,6 +1370,58 @@ void Mldv2::processHostOlderVersionTimer(cMessage *msg)
     EV_INFO << "Older Version Querier Present timer expired on interface '"
             << interfaceData->ie->getInterfaceName() << "': reverting to MLDv2.\n";
     interfaceData->olderVersionPresent = false;
+    cancelHostTimers(interfaceData, false);
+    for (auto& elem : interfaceData->groups)
+        elem.second->lastReporter = false;
+}
+
+// RFC 9777 section 8.2.1: a change of the Host Compatibility Mode cancels all pending responses
+// and retransmission timers of the interface. The Reports of the old mode that wait for the
+// link-local address are pending too, so they are deleted.
+void Mldv2::cancelHostTimers(HostInterfaceData *interfaceData, bool mldv1Mode)
+{
+    cancelEvent(interfaceData->generalQueryTimer);
+    for (auto& elem : interfaceData->groups) {
+        HostGroupData *group = elem.second;
+        cancelEvent(group->timer);
+        group->queriedSources.clear();
+        cancelEvent(group->retransmitTimer);
+        group->filterModeChangeCount = 0;
+        group->sourceChangeCounts.clear();
+        cancelEvent(group->olderVersionReportTimer);
+    }
+    auto it = heldMessages.find(interfaceData->ie->getInterfaceId());
+    if (it != heldMessages.end()) {
+        std::vector<Packet *>& messages = it->second;
+        for (auto msgIt = messages.begin(); msgIt != messages.end(); ) {
+            bool mldv2Report = (*msgIt)->peekAtFront<Icmpv6Header>()->getType() == ICMPv6_MLDv2_REPORT;
+            if (mldv2Report == mldv1Mode) {
+                delete *msgIt;
+                msgIt = messages.erase(msgIt);
+            }
+            else
+                ++msgIt;
+        }
+    }
+}
+
+// RFC 2710 section 5, "timer expired" in the Delaying Listener state: send the Report and set
+// the flag.
+void Mldv2::processHostOlderVersionReportTimer(cMessage *msg)
+{
+    HostGroupData *group = (HostGroupData *)msg->getContextPointer();
+    sendOlderVersionReport(group->parent->ie, group->groupAddr);
+    group->lastReporter = true;
+}
+
+// RFC 2710 section 5, "query received": in the Idle Listener state start the report delay timer
+// with a value from [0, Maximum Response Delay]; in the Delaying Listener state reset it only if
+// the Maximum Response Delay is less than the time left.
+void Mldv2::startOlderVersionReportTimer(HostGroupData *group, double maxResponseDelay)
+{
+    cMessage *timer = group->olderVersionReportTimer;
+    if (!timer->isScheduled() || maxResponseDelay < (timer->getArrivalTime() - simTime()).dbl())
+        startTimer(timer, uniform(0, maxResponseDelay));
 }
 
 // RFC 3810 8.3.2: the Older Version Host Present timer for a group expired; revert that
@@ -1290,11 +1438,17 @@ void Mldv2::processRouterOlderVersionTimer(cMessage *msg)
 
 void Mldv2::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxRespTime)
 {
-    if (interfaceData->state == MLDV2_RS_QUERIER) {
+    if (interfaceData->state == MLDV2_RS_QUERIER && routerVersion == 1) {
+        sendOlderVersionQuery(interfaceData, Ipv6Address::UNSPECIFIED_ADDRESS, maxRespTime);
+        numQueriesSent++;
+        numGeneralQueriesSent++;
+    }
+    else if (interfaceData->state == MLDV2_RS_QUERIER) {
         Packet *packet = new Packet("Mldv2 query");
         const auto& msg = makeShared<Mldv2Query>();
         msg->setType(ICMPv6_MLD_QUERY);
         msg->setMaxRespDelay(codeMaxRespCode((uint16_t)(maxRespTime * 1000.0))); // milliseconds
+        setQuerierFields(msg);
         msg->setChunkLength(B(28));
         Icmpv6::insertChecksum(checksumMode, msg, packet);
         packet->insertAtFront(msg);
@@ -1309,17 +1463,24 @@ void Mldv2::sendGeneralQuery(RouterInterfaceData *interfaceData, double maxRespT
 void Mldv2::sendGroupSpecificQuery(RouterGroupData *groupData)
 {
     RouterInterfaceData *interfaceData = groupData->parent;
-    bool suppressFlag = groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
-    // Set group timer to LMQT
+    // Set the Filter Timer to LLQT, then set the S flag if the Filter Timer is larger than LLQT
+    // (RFC 9777 section 7.6.3.1)
     startTimer(groupData->timer, lastMemberQueryTime);
+    bool suppressFlag = groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
 
-    if (interfaceData->state == MLDV2_RS_QUERIER) {
+    if (interfaceData->state == MLDV2_RS_QUERIER && routerVersion == 1) {
+        sendOlderVersionQuery(interfaceData, groupData->groupAddr, lastMemberQueryInterval);
+        numQueriesSent++;
+        numGroupSpecificQueriesSent++;
+    }
+    else if (interfaceData->state == MLDV2_RS_QUERIER) {
         Packet *packet = new Packet("Mldv2 query");
         const auto& msg = makeShared<Mldv2Query>();
         msg->setType(ICMPv6_MLD_QUERY);
         msg->setMulticastAddress(groupData->groupAddr);
         msg->setMaxRespDelay(codeMaxRespCode((uint16_t)(1000.0 * lastMemberQueryInterval))); // milliseconds
+        setQuerierFields(msg);
         msg->setSuppressRouterProc(suppressFlag);
         msg->setChunkLength(B(28));
         Icmpv6::insertChecksum(checksumMode, msg, packet);
@@ -1332,15 +1493,8 @@ void Mldv2::sendGroupSpecificQuery(RouterGroupData *groupData)
 
     // RFC 3810 7.6.3: the Multicast-Address-Specific Query is (re)transmitted [Last
     // Listener Query Count] times in total, lastMemberQueryInterval apart.
-    groupData->rexmtGroupAndSource = false;
-    groupData->rexmtSources.clear();
-    groupData->rexmtCount = lastMemberQueryCount - 1;
-    if (groupData->rexmtCount > 0 && lastMemberQueryInterval > 0)
-        startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-    else {
-        groupData->rexmtCount = 0;
-        cancelEvent(groupData->rexmtTimer); // nothing to retransmit, drop any leftover schedule
-    }
+    groupData->groupRexmtCount = lastMemberQueryCount - 1;
+    scheduleQueryRetransmission(groupData);
 }
 
 void Mldv2::sendGroupReport(NetworkInterface *ie, const vector<Mldv2MulticastAddressRecord>& records)
@@ -1364,19 +1518,51 @@ void Mldv2::sendGroupReport(NetworkInterface *ie, const vector<Mldv2MulticastAdd
     numReportsSent++;
 }
 
-// See RFC 3810 §7.6.3.2.
+// See RFC 9777 section 7.6.3.2: each source of the Query whose Source Timer is larger than LLQT
+// gets [Last Listener Query Count] transmissions and its timer lowered to LLQT, and the Queries
+// leave at once.
 void Mldv2::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const Ipv6AddressVector& sources)
 {
     ASSERT(!sources.empty());
+    for (const auto& source : sources) {
+        auto it = groupData->sources.find(source);
+        if (it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
+            && it->second->sourceTimer->getArrivalTime() > simTime() + lastMemberQueryTime)
+        {
+            groupData->sourceRexmtCounts[source] = lastMemberQueryCount;
+            startTimer(it->second->sourceTimer, lastMemberQueryTime);
+        }
+    }
+    sendSourceSpecificQueries(groupData);
+    scheduleQueryRetransmission(groupData);
+}
 
+// RFC 9777 section 7.6.3.2: two Multicast Address and Source Specific Queries for the sources with
+// retransmission state, one with the S flag for the sources whose timer is larger than LLQT, and
+// one without it for the others; a Query with no sources is not sent. Each source counts one
+// transmission.
+void Mldv2::sendSourceSpecificQueries(RouterGroupData *groupData)
+{
     RouterInterfaceData *interfaceData = groupData->parent;
-
-    if (interfaceData->state == MLDV2_RS_QUERIER) {
+    Ipv6AddressVector suppressedSources, otherSources;
+    for (const auto& elem : groupData->sourceRexmtCounts) {
+        auto it = groupData->sources.find(elem.first);
+        bool aboveLlqt = it != groupData->sources.end() && it->second->sourceTimer->isScheduled()
+            && it->second->sourceTimer->getArrivalTime() > simTime() + lastMemberQueryTime;
+        (aboveLlqt ? suppressedSources : otherSources).push_back(elem.first);
+    }
+    for (bool suppressFlag : {true, false}) {
+        const Ipv6AddressVector& sources = suppressFlag ? suppressedSources : otherSources;
+        // MLDv1 has no Multicast Address and Source Specific Query
+        if (sources.empty() || interfaceData->state != MLDV2_RS_QUERIER || routerVersion == 1)
+            continue;
         Packet *packet = new Packet("Mldv2 query");
         const auto& msg = makeShared<Mldv2Query>();
         msg->setType(ICMPv6_MLD_QUERY);
         msg->setMulticastAddress(groupData->groupAddr);
         msg->setMaxRespDelay(codeMaxRespCode((uint16_t)(1000.0 * lastMemberQueryInterval))); // milliseconds
+        setQuerierFields(msg);
+        msg->setSuppressRouterProc(suppressFlag);
         msg->setSourceList(sources);
         msg->setChunkLength(B(28 + (16 * sources.size())));
         Icmpv6::insertChecksum(checksumMode, msg, packet);
@@ -1386,19 +1572,48 @@ void Mldv2::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const Ip
         numQueriesSent++;
         numGroupAndSourceSpecificQueriesSent++;
     }
+    for (auto it = groupData->sourceRexmtCounts.begin(); it != groupData->sourceRexmtCounts.end(); ) {
+        if (--it->second <= 0)
+            it = groupData->sourceRexmtCounts.erase(it);
+        else
+            ++it;
+    }
+}
 
-    // RFC 3810 7.6.3: the Multicast-Address-and-Source-Specific Query is
-    // (re)transmitted [Last Listener Query Count] times in total,
-    // lastMemberQueryInterval apart. On each retransmission the set of queried
-    // sources is recomputed (see processRexmtTimer), so remember them here.
-    groupData->rexmtGroupAndSource = true;
-    groupData->rexmtSources = sources;
-    sort(groupData->rexmtSources.begin(), groupData->rexmtSources.end());
-    groupData->rexmtCount = lastMemberQueryCount - 1;
-    if (groupData->rexmtCount > 0 && lastMemberQueryInterval > 0)
+// RFC 9777 section 8.3.1: in the MLDv1 mode a Query is 24 octets, with the Maximum Response Delay
+// in milliseconds in the Maximum Response Code, not the exponential code.
+void Mldv2::sendOlderVersionQuery(RouterInterfaceData *interfaceData, const Ipv6Address& groupAddr, double maxRespDelay)
+{
+    Packet *packet = new Packet("Mldv1 query");
+    const auto& msg = makeShared<MldQuery>();
+    msg->setType(ICMPv6_MLD_QUERY);
+    msg->setMulticastAddress(groupAddr);
+    msg->setMaxRespDelay((uint16_t)std::min(65535.0, std::round(1000.0 * maxRespDelay)));
+    msg->setChunkLength(B(24));
+    Icmpv6::insertChecksum(checksumMode, msg, packet);
+    packet->insertAtFront(msg);
+    sendQueryToIPv6(packet, interfaceData->ie, groupAddr.isUnspecified() ? Ipv6Address::ALL_NODES_2 : groupAddr);
+}
+
+// RFC 9777 section 8.3.1: a Query of another version than the configured one gets a warning; the
+// warning is rate-limited to one for each interface.
+void Mldv2::warnAboutQueryVersion(RouterInterfaceData *interfaceData, int queryVersion)
+{
+    if (interfaceData->versionWarned)
+        return;
+    interfaceData->versionWarned = true;
+    EV_WARN << "Received an MLDv" << queryVersion << " Query on interface '" << interfaceData->ie->getInterfaceName()
+            << "', where the router is configured to act in MLDv" << routerVersion << " mode.\n";
+}
+
+// Schedules the next retransmission of the Queries of the multicast address while any is left.
+void Mldv2::scheduleQueryRetransmission(RouterGroupData *groupData)
+{
+    if ((groupData->groupRexmtCount > 0 || !groupData->sourceRexmtCounts.empty()) && lastMemberQueryInterval > 0)
         startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
     else {
-        groupData->rexmtCount = 0;
+        groupData->groupRexmtCount = 0;
+        groupData->sourceRexmtCounts.clear();
         cancelEvent(groupData->rexmtTimer); // nothing to retransmit, drop any leftover schedule
     }
 }
@@ -1427,6 +1642,25 @@ void Mldv2::sendToIPv6(Packet *msg, NetworkInterface *ie, const Ipv6Address& des
     msg->addTagIfAbsent<InterfaceReq>()->setInterfaceId(ie->getInterfaceId());
     msg->addTagIfAbsent<L3AddressReq>()->setDestAddress(dest);
     msg->addTagIfAbsent<HopLimitReq>()->setHopLimit(1);
+    // every MLD message carries the Router Alert option in a Hop-by-Hop Options header (RFC 2710
+    // section 3, RFC 9777 section 5)
+    msg->addTagIfAbsent<Ipv6ExtHeaderReq>()->appendExtensionHeader(createIpv6RouterAlertHeader(IPv6_ROUTER_ALERT_MLD));
+    // every MLD message from a link-local address (RFC 2710 section 3, RFC 9777 section 5). While
+    // the interface has no tested one, a Query is not sent, and a Report or a Done waits for it
+    if (hasValidLinkLocalAddress(ie))
+        msg->addTagIfAbsent<L3AddressReq>()->setSrcAddress(ie->getProtocolData<Ipv6InterfaceData>()->getLinkLocalAddress());
+    else if (msg->peekAtFront<Icmpv6Header>()->getType() == ICMPv6_MLD_QUERY) {
+        EV_WARN << "Interface '" << ie->getInterfaceName() << "' has no valid link-local address, dropping the Query.\n";
+        delete msg;
+        return;
+    }
+    else {
+        // RFC 3810 section 5.2.13 sends it from the unspecified address, which the IPv6 layer of
+        // the model replaces with its preferred address; so it waits for the link-local address
+        EV_INFO << "Interface '" << ie->getInterfaceName() << "' has no valid link-local address yet, holding the message.\n";
+        heldMessages[ie->getInterfaceId()].push_back(msg);
+        return;
+    }
     send(msg, "ipOut");
 }
 
@@ -1494,6 +1728,8 @@ Mldv2::HostGroupData::HostGroupData(HostInterfaceData *parent, const Ipv6Address
     timer->setContextPointer(this);
 
     retransmitTimer = new cMessage("Mldv2 Host State-Change Retransmit Timer", MLDV2_H_STATE_CHANGE_TIMER);
+    olderVersionReportTimer = new cMessage("Mldv2 Host Older Version Report Timer", MLDV2_H_OLDER_VERSION_REPORT_TIMER);
+    olderVersionReportTimer->setContextPointer(this);
     retransmitTimer->setContextPointer(this);
 }
 
@@ -1501,6 +1737,7 @@ Mldv2::HostGroupData::~HostGroupData()
 {
     parent->owner->cancelAndDelete(timer);
     parent->owner->cancelAndDelete(retransmitTimer);
+    parent->owner->cancelAndDelete(olderVersionReportTimer);
 }
 
 string Mldv2::HostGroupData::getStateInfo() const
@@ -1759,6 +1996,30 @@ Ipv6AddressVector Mldv2::set_union(const Ipv6AddressVector& first, const Ipv6Add
     auto it = std::set_union(first.begin(), first.end(), second.begin(), second.end(), result.begin());
     result.resize(it - result.begin());
     return result;
+}
+
+void Mldv2::setQuerierFields(const Ptr<Mldv2Query>& query)
+{
+    // a Robustness Variable above 7 does not fit, and the QRV is then zero (RFC 9777 section 5.1.8)
+    query->setRobustnessVariable(robustnessVariable <= 7 ? robustnessVariable : 0);
+    query->setQueryIntervalCode(codeQqic((uint16_t)queryInterval));
+}
+
+// the QQIC in seconds (RFC 9777 section 5.1.9): the value itself below 128, and above it
+// 1eeemmmm, which stands for (mant | 0x10) << (exp + 3)
+uint8_t Mldv2::codeQqic(uint16_t value)
+{
+    if (value < 128)
+        return (uint8_t)value;
+    if (value >= (0x1f << 10))
+        return 0xff;
+    unsigned exp = 0;
+    value >>= 3;
+    while (value > 0x1f) {
+        value >>= 1;
+        exp++;
+    }
+    return (uint8_t)(0x80 | ((exp << 4) & 0x70) | (value & 0x0f));
 }
 
 // --- 16-bit MLDv2 Max Response Code / QQIC codec (RFC 3810 §5.1.3) ---
