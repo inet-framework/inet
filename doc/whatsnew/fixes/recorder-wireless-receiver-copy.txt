@@ -1,0 +1,3 @@
+PCAP records of received radio frames show what the receiver received
+
+PcapRecorder wrote the packet of the transmitter for each frame that a radio received. A frame that the receiver could not decode thus looked like a good frame in the file, and dumpBadFrames = false did not remove it. The radio now gives its own copy of the frame with the receptionEnded signal, and the recorder writes that copy: it has the bit error flag and the tags of the receiver.

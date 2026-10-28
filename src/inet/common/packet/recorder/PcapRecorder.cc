@@ -192,8 +192,11 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 #ifdef INET_WITH_PHYSICALLAYERWIRELESSCOMMON
         else if (auto transmission = dynamic_cast<const physicallayer::ITransmission *>(obj))
             recordPacket(transmission->getPacket(), direction, source);
-        else if (auto reception = dynamic_cast<const physicallayer::IReception *>(obj))
-            recordPacket(reception->getTransmission()->getPacket(), direction, source);
+        else if (auto reception = dynamic_cast<const physicallayer::IReception *>(obj)) {
+            // a radio gives the packet that it received as the details
+            auto receivedPacket = dynamic_cast<const Packet *>(details);
+            recordPacket(receivedPacket != nullptr ? receivedPacket : reception->getTransmission()->getPacket(), direction, source);
+        }
 #endif
     }
 }

@@ -1,0 +1,107 @@
+%description:
+PcapRecorder writes the receiver's copy of each frame that a radio received.
+Two senders ping the receiver at the same time, so the receiver gets the first
+ping with bit errors. One second later, the first sender pings again without
+interference. Two recorders listen to the receiver: one writes all frames, and
+one has dumpBadFrames = false. The second recorder must leave out the frame
+with bit errors, because the receiver's copy has the bit error flag.
+
+%file: test.ned
+
+import inet.common.packet.recorder.PcapRecorder;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+
+simple CountingPcapRecorder extends PcapRecorder
+{
+    @class(::inet::PcapRecorder);
+    @statistic[packetRecorded](record=count);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        hostSender1: WirelessHost;
+        hostSender2: WirelessHost;
+        hostReceiver: WirelessHost;
+        allFrames: CountingPcapRecorder;
+        goodFrames: CountingPcapRecorder;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 1.5s
+ned-path = .;../../../../src
+
+**.arp.typename = "GlobalArp"
+**.checksumMode = "computed"
+**.fcsMode = "computed"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobility.typename = "StationaryMobility"
+*.hostSender1.mobility.initialX = 200m
+*.hostSender2.mobility.initialX = 800m
+*.hostReceiver.mobility.initialX = 400m
+
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+
+# nic
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].mac.useAck = false
+*.host*.wlan[*].radio.typename = "GenericUnitDiskRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 96b
+*.host*.wlan[*].radio.receiver.ignoreInterference = false
+*.host*.wlan[*].radio.transmitter.analogModel.communicationRange = 1km
+*.host*.wlan[*].radio.transmitter.analogModel.interferenceRange = 2km
+*.host*.wlan[*].radio.transmitter.analogModel.detectionRange = 4km
+
+# ping app: the first pings collide at the receiver, the second ping of hostSender1 does not
+*.hostSender*.numApps = 1
+*.hostSender*.app[0].typename = "PingApp"
+*.hostSender*.app[0].destAddr = "hostReceiver"
+*.hostSender*.app[0].startTime = 0s
+*.hostSender1.app[0].count = 2
+*.hostSender2.app[0].count = 1
+
+# recorders of the frames that the receiver received
+*.*Frames.moduleNamePatterns = "hostReceiver"
+*.*Frames.sendingSignalNames = ""
+*.*Frames.receivingSignalNames = "receptionEnded"
+*.*Frames.dumpProtocols = "ackingmac"
+*.*Frames.helpers = "inet::AckingMacToEthernetPcapRecorderHelper"
+*.*Frames.fileFormat = "pcap"
+*.*Frames.verbose = false
+*.allFrames.pcapFile = "all.pcap"
+*.allFrames.dumpBadFrames = true
+*.goodFrames.pcapFile = "good.pcap"
+*.goodFrames.dumpBadFrames = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-#0.sca
+scalar Test.allFrames packetRecorded:count 2
+%contains: results/General-#0.sca
+scalar Test.goodFrames packetRecorded:count 1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

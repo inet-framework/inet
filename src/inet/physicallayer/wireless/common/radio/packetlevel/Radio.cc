@@ -526,8 +526,9 @@ void Radio::endReception(cMessage *timer)
         take(macFrame);
         // FIXME see handling packets with incorrect PHY headers in the TODO file
         decapsulate(macFrame);
+        // the details give the received packet to the listeners, for example to PcapRecorder
+        emit(receptionEndedSignal, check_and_cast<const cObject *>(reception), macFrame);
         sendUp(macFrame);
-        emit(receptionEndedSignal, check_and_cast<const cObject *>(reception));
     }
     else
         EV_INFO << "Reception ended: " << EV_BOLD << "ignoring" << EV_NORMAL << " " << (IWirelessSignal *)signal << " " << IRadioSignal::getSignalPartName(part) << " as " << reception << endl;
