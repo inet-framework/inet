@@ -10,6 +10,7 @@
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211DsssOfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
@@ -252,6 +253,13 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
 {
     auto ieee80211Transmitter = check_and_cast<const Ieee80211Transmitter *>(transmitter);
     auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
+    // keep the values that the transmitter uses on the packet: recorders read them;
+    // compute all values before a new empty tag can hide the default of the transmitter
+    auto transmissionChannel = ieee80211Transmitter->computeTransmissionChannel(packet);
+    auto transmissionPower = ieee80211Transmitter->computeTransmissionPower(packet);
+    packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
+    packet->addTagIfAbsent<Ieee80211ChannelReq>()->setChannel(transmissionChannel);
+    packet->addTagIfAbsent<SignalPowerReq>()->setPower(transmissionPower);
     // ERP reuses OFDM's SIGNAL mode objects, whose factory creates a base
     // OFDM header. Preserve the selected PHY family when constructing the PPDU.
     auto phyHeader = dynamic_cast<const Ieee80211ErpOfdmMode *>(mode) != nullptr ?

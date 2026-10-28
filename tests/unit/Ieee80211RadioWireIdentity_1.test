@@ -60,6 +60,8 @@ class TestRx : public inet::ieee80211::Rx
 
 %activity:
 Ieee80211Transmitter transmitter;
+// encapsulate() puts the channel of the transmission on the packet, as in a configured radio
+transmitter.setChannel(new Ieee80211Channel(&Ieee80211CompliantBands::band2_4GHz, 1));
 TestRadio radio;
 radio.configure(&transmitter);
 const auto *ofdm = &Ieee80211OfdmCompliantModes::getCompliantMode(13, MHz(20));

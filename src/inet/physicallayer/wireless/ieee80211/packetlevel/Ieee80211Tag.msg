@@ -22,6 +22,7 @@ class Ieee80211ModeTagBase extends TagBase
 //
 // This request determines the IEEE 802.11 mode that should be used to transmit the packet.
 // It may be present on a packet from the application to the phyisical layer.
+// On the packet of a transmission, it specifies the mode that the radio used.
 //
 class Ieee80211ModeReq extends Ieee80211ModeTagBase
 {
@@ -46,6 +47,7 @@ class Ieee80211ChannelTagBase extends TagBase
 //
 // This request determines the IEEE 802.11 channel that should be used to transmit the packet.
 // It may be present on a packet from the application to the phyisical layer.
+// On the packet of a transmission, it specifies the channel that the radio used.
 //
 class Ieee80211ChannelReq extends Ieee80211ChannelTagBase
 {

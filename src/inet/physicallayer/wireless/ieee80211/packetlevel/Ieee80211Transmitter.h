@@ -37,6 +37,7 @@ class INET_API Ieee80211Transmitter : public FlatTransmitterBase
 
     virtual const IIeee80211Mode *computeTransmissionMode(const Packet *packet) const;
     virtual const Ieee80211Channel *computeTransmissionChannel(const Packet *packet) const;
+    using FlatTransmitterBase::computeTransmissionPower;
 
     virtual void setModeSet(const Ieee80211ModeSet *modeSet);
     virtual void setMode(const IIeee80211Mode *mode);

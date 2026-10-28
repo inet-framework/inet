@@ -32,6 +32,7 @@ class SignalPowerTagBase extends SignalTagBase
 //
 // This request determines the average analog signal power that should be used to transmit the packet.
 // It may be present on a packet from the application to the phyisical layer.
+// On the packet of an IEEE 802.11 transmission, it specifies the power that the radio used.
 //
 class SignalPowerReq extends SignalPowerTagBase
 {
