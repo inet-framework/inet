@@ -9,8 +9,8 @@ This is the Python package of the INET Framework. It holds only the Python code 
 
 To build INET, run simulations and run the tests, use opp_repl (https://github.com/omnetpp/opp_repl), for example
 :command:`opp_build_project`, :command:`opp_run_simulations` and the :command:`opp_run_*_tests` commands. The file
-``inet.opp`` in the INET root describes the INET project for opp_repl. :doc:`/developers-guide/ch-testing` describes
-the tests.
+``inet.opp`` in the INET root describes the INET project for opp_repl. The Testing chapter of the INET Developer's
+Guide describes the tests.
 
 The package imports no sub-package, so that a chart script that imports :py:mod:`inet.scave` needs no opp_repl.
 """
