@@ -1,0 +1,6 @@
+<config>
+  <interface hosts="hostA*" address="10.1.10.x" netmask="255.255.255.0"/>
+  <interface hosts="hostB*" address="10.1.20.x" netmask="255.255.255.0"/>
+  <interface hosts="hostC*" address="10.2.10.x" netmask="255.255.255.0"/>
+  <interface hosts="hostD*" address="10.2.20.x" netmask="255.255.255.0"/>
+</config>
