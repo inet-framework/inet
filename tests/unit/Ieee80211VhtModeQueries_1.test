@@ -1,0 +1,38 @@
+%description:
+The mode interface gives the VHT MCS index and the VHT guard interval of a mode,
+in the same way as the HT queries. A VHT mode gives its own values. HT modes
+and legacy modes give -1 and false, so a caller needs no concrete mode class.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%activity:
+const IIeee80211Mode *vhtShort = Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss2,
+        Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT);
+ASSERT(vhtShort->getVhtMcsIndex() == 8);
+ASSERT(vhtShort->isVhtShortGuardInterval());
+ASSERT(vhtShort->getHtMcsIndex() == -1 && !vhtShort->isHtShortGuardInterval());
+
+const IIeee80211Mode *vhtLong = Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs0BW20MHzNss1,
+        Ieee80211VhtMode::BAND_5GHZ, Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_LONG);
+ASSERT(vhtLong->getVhtMcsIndex() == 0);
+ASSERT(!vhtLong->isVhtShortGuardInterval());
+
+const IIeee80211Mode *ht = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs7BW40MHz,
+        Ieee80211HtMode::BAND_5GHZ, Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+ASSERT(ht->getVhtMcsIndex() == -1 && !ht->isVhtShortGuardInterval());
+ASSERT(ht->getHtMcsIndex() == 7 && ht->isHtShortGuardInterval());
+
+const IIeee80211Mode *legacy = &Ieee80211OfdmCompliantModes::getCompliantMode(13, MHz(20));
+ASSERT(legacy->getVhtMcsIndex() == -1 && !legacy->isVhtShortGuardInterval());
+
+EV << "VHT mode queries verified.\n";
+
+%contains: stdout
+VHT mode queries verified.

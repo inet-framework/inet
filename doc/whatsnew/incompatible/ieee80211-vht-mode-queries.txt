@@ -1,0 +1,5 @@
+IEEE 802.11 PHY modes give the VHT MCS index and guard interval
+
+The physical layer (PHY) mode interface now gives the MCS index and the guard interval of a VHT mode, in the same way as for an HT mode. Code that records or selects VHT rates can use these queries without a dependency on a concrete mode class. VHT means Very High Throughput.
+
+IIeee80211Mode gains two pure virtual methods: getVhtMcsIndex() and isVhtShortGuardInterval(). Direct implementations outside INET must implement them before they compile again. Ieee80211ModeBase supplies -1 and false for custom subclasses. The migration guide explains the return values.
