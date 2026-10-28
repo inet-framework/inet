@@ -17,11 +17,11 @@ Implementation: in the worktree `/home/levy/workspace/inet-ieee80211-radiotap-ca
 | C3 | the receiver's copy of radio frames | done, `340be81284` |
 | C4 | CRC errors in PCAPng records (O-2) | done, `f9933f4950` |
 | C5 | record C2 to C4 in the plan | done, in the commit that records it |
-| C6 | the used mode, channel and power as tags | to do |
-| C7 | VHT queries of the mode contract | to do |
-| C8 | helpers first, with the direction | to do |
-| C9 | the Radiotap helper | to do |
-| C10 | record C6 to C9 in the plan | to do |
+| C6 | the used mode, channel and power as tags | done, `65a4f03da7` |
+| C7 | VHT queries of the mode contract | done, `7b499cf659` |
+| C8 | helpers first, with the direction | done, `af80d4c7f1` |
+| C9 | the Radiotap helper | done, `910c44d6d2` |
+| C10 | record C6 to C9 in the plan | done, in the commit that records it |
 | C11 | the showcase | to do |
 | C12 | the User's Guide | to do |
 | C13 | record C11 and C12 in the plan | to do |
@@ -106,6 +106,7 @@ Follow-up work, not in this plan:
 - A Radiotap dissector and printer. They become useful with the import (section 4.2).
 - Radiotap as the default record format for 802.11 (D-8).
 - HE fields. INET has no HE PHY.
+- The HT format bit (mixed or greenfield) of the MCS field. The mode contract has no query for the HT preamble format, so the helper does not declare the format as known. tshark then notes "No plcp type information was available, assuming non greenfield".
 
 Preserved conditions: the PCAPng block API, the `IPcapWriter` interface, and the rule of the PCAP writer of one link type in each file.
 
@@ -167,14 +168,14 @@ The direction parameter is an incompatible change of the helper API, so C8 adds 
 | Radiotap field (bit) | Received frame | Sent frame |
 | --- | --- | --- |
 | TSFT (0) | The start time from `SignalTimeInd`, in µs. INET has no TSF timer, so the simulation time stands in for it. | Not written |
-| Flags (1) | 0x10 FCS at end if `FcsInd` says so, or else if the MAC frame ends with an `Ieee80211MacTrailer`. INET writes the trailer with a computed FCS only (F5). 0x40 bad FCS if `hasBitError()`. 0x02 if `getLegacyPreambleType()` is `SHORT`. | 0x10 and 0x02 as for a received frame |
+| Flags (1) | 0x10 FCS at end as `FcsInd` says, or always if the frame has no `FcsInd`. Each code path of the 802.11 MAC adds an `Ieee80211MacTrailer`, the serializer writes it only with a computed FCS (F5), and `sendRawBytes` keeps its bytes. Only an imported frame can have no FCS. 0x40 bad FCS if `hasBitError()`. 0x02 if `getLegacyPreambleType()` is `SHORT`. | Same |
 | Rate (2) | The net bit rate of the data mode in 500 kb/s units, for the modulation classes `DSSS_HRDSSS`, `OFDM` and `ERP_OFDM` | Same |
 | Channel (3) | `Ieee80211ChannelInd`: the center frequency in MHz. Flags: 2 GHz or 5 GHz from the frequency, CCK for `DSSS_HRDSSS`, OFDM for the other classes. | `Ieee80211ChannelReq` |
 | Antenna signal (5) | `SignalPowerInd` in dBm, rounded and limited to -128..127 | Not written |
 | Antenna noise (6) | The antenna signal minus the minimum SNIR of `SnirInd`, in dB: the noise plus the interference (O-1) | Not written |
 | TX power (10) | Not written | `SignalPowerReq` in dBm |
-| MCS (19) | For `HT`: `getHtMcsIndex()`, 20 MHz or 40 MHz from the data mode, `isHtShortGuardInterval()` | Same |
-| VHT (21) | For `VHT`: `getVhtMcsIndex()`, `getNumberOfSpatialStreams()`, the bandwidth code for 20, 40, 80 or 160 MHz, `isVhtShortGuardInterval()` | Same |
+| MCS (19) | For `HT`: `getHtMcsIndex()`, 20 MHz or 40 MHz from the data mode, `isHtShortGuardInterval()`. Known: bandwidth, index, guard interval, FEC (BCC), STBC (none) and extension streams (none), 0x77. | Same |
+| VHT (21) | For `VHT`: `getVhtMcsIndex()`, `getNumberOfSpatialStreams()`, the bandwidth code for 20, 40, 80 or 160 MHz, `isVhtShortGuardInterval()`. Known: STBC (none), guard interval and bandwidth, 0x0045. | Same |
 
 The field encoding follows the adapter of PR #1130. The test values of `PcapRecorderRadiotapHtVht_1.test` and `PcapRecorderRadiotapRoundTrip_1.test` of the PR can be expected values for C2 and C9. The messages of C2 and C9 name this source.
 
@@ -198,8 +199,8 @@ C6 adds no class and no tag type. It sets tag types that exist.
 | C2 | New `.msg` file and serializer | Compatible | None, because no user can see it alone |
 | C3 | `Radio.cc`, `PcapRecorder.cc` | Inbound radio records change (a repair) | `doc/whatsnew/fixes/recorder-wireless-receiver-copy.txt` |
 | C4 | `PcapngWriter.cc` | New flag bits in PCAPng records | `doc/whatsnew/compatible/recorder-pcapng-crc-errors.txt` |
-| C6 | `Ieee80211Radio.cc`, `FlatTransmitterBase.h`, tag comments | Compatible. A sent packet carries more tags. | None |
-| C7 | `IIeee80211Mode.h`, `Ieee80211ModeBase.h`, `Ieee80211VhtMode.{h,cc}` | A mode class that implements `IIeee80211Mode` without `Ieee80211ModeBase` must add two functions | `doc/whatsnew/incompatible/ieee80211-vht-mode-queries.txt`, `doc/src/migration-guide/development/ieee80211-vht-mode-queries.rst` |
+| C6 | `Ieee80211Radio.cc`, `Ieee80211Transmitter.h`, tag comments, `Ieee80211RadioWireIdentity_1.test` | Compatible. A sent packet carries more tags. | None |
+| C7 | `IIeee80211Mode.h`, `Ieee80211ModeBase.h`, `Ieee80211VhtMode.h` | A mode class that implements `IIeee80211Mode` without `Ieee80211ModeBase` must add two functions | `doc/whatsnew/incompatible/ieee80211-vht-mode-queries.txt`, `doc/src/migration-guide/development/ieee80211-vht-mode-queries.rst` |
 | C8 | `PcapRecorder.{h,cc}`, `AckingMacHeaderSerializer.{h,cc}` | Each helper must add the direction parameter | `doc/whatsnew/incompatible/recorder-helper-direction.txt`, `doc/src/migration-guide/development/recorder-helper-direction.rst` |
 | C9 | New helper, `Protocol.{h,cc}`, `PcapRecorder.ned` (comment only) | Compatible and opt-in | `doc/whatsnew/compatible/ieee80211-radiotap-capture.txt` |
 | C11, C12 | Showcase, User's Guide | Documentation | None |
@@ -213,7 +214,7 @@ C6 adds no class and no tag type. It sets tag types that exist.
 | C3 `recorder: fix: record the receiver's copy of radio frames` | C1 |
 | C4 `recorder: add: mark frames with bit errors as CRC errors in PCAPng` (optional) | C3 |
 | C5 `plan: change: record steps C2 to C4` | C2, C3, C4 |
-| C6 `ieee80211: change: keep the used mode, channel and power as tags on the sent packet` | C1 |
+| C6 `ieee80211: change: tag the sent packet with the used mode, channel and power` | C1 |
 | C7 `ieee80211: add: VHT MCS index and guard interval queries for PHY modes` | C1 |
 | C8 `recorder: change: ask the helpers first and give them the direction` | C1 |
 | C9 `ieee80211: add: Radiotap records through a PCAP recorder helper` | C2, C3, C6, C7, C8 |
@@ -327,18 +328,29 @@ The writer change does not need C3. But radio frames with bit errors reach the w
 
 The status table, the hashes, and the facts that the implementation found.
 
-### C6: `ieee80211: change: keep the used mode, channel and power as tags on the sent packet`
+### C6: `ieee80211: change: tag the sent packet with the used mode, channel and power`
 
-Files: `Ieee80211Radio.cc`, `FlatTransmitterBase.h` (`computeTransmissionPower()` becomes public), and the comments in `Ieee80211Tag.msg` and `SignalTag.msg`.
+The planned subject had 83 characters, more than the limit of 80, so the commit has a shorter subject.
+
+Files: `Ieee80211Radio.cc`, `Ieee80211Transmitter.h`, the comments in `Ieee80211Tag.msg` and `SignalTag.msg`, and `Ieee80211RadioWireIdentity_1.test`.
 
 ```cpp
 // Ieee80211Radio::encapsulate()
     auto mode = ieee80211Transmitter->computeTransmissionMode(packet);
-    // keep the values that the transmitter uses on the packet: recorders read them
+    // keep the values that the transmitter uses on the packet: recorders read them;
+    // compute all values before a new empty tag can hide the default of the transmitter
+    auto transmissionChannel = ieee80211Transmitter->computeTransmissionChannel(packet);
+    auto transmissionPower = ieee80211Transmitter->computeTransmissionPower(packet);
     packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
-    packet->addTagIfAbsent<Ieee80211ChannelReq>()->setChannel(ieee80211Transmitter->computeTransmissionChannel(packet));
-    packet->addTagIfAbsent<SignalPowerReq>()->setPower(ieee80211Transmitter->computeTransmissionPower(packet));
+    packet->addTagIfAbsent<Ieee80211ChannelReq>()->setChannel(transmissionChannel);
+    packet->addTagIfAbsent<SignalPowerReq>()->setPower(transmissionPower);
 ```
+
+Two facts changed the planned shape:
+- **The order of evaluation.** The planned code computed each value in the argument of the setter. In C++17, `packet->addTagIfAbsent<X>()` runs before the argument, so the transmitter found the new empty tag: an empty channel request, and a power of NaN. 293 fingerprint simulations stopped with "Transmission channel is undefined". The code now computes all values first.
+- **The visibility of the power function.** Only the 802.11 radio calls `computeTransmissionPower()` from outside. A `using` declaration in the public part of `Ieee80211Transmitter`, beside `computeTransmissionMode()` and `computeTransmissionChannel()`, makes it public there only ([AR-EXT-MINIMAL-SURFACE](../../doc/project/rule/architecture.md#ar-ext-minimal-surface)). The plan named `FlatTransmitterBase.h`, which would make it public for each flat transmitter.
+
+`Ieee80211RadioWireIdentity_1.test` calls `encapsulate()` without a simulation, with a transmitter that had no channel. `encapsulate()` now needs the channel. In a simulation, only `Radio::createSignal()` calls `encapsulate()`, and `createTransmission()` follows at once and needs the channel too. So the test transmitter gets a channel, and the assertions do not change.
 
 The tag comments say this: after the radio, the `Req` tags show the values that the radio used.
 
@@ -353,7 +365,7 @@ Test: the fingerprint tests of the 802.11 configurations must give the same valu
 
 ### C7: `ieee80211: add: VHT MCS index and guard interval queries for PHY modes`
 
-Files: `IIeee80211Mode.h`, `Ieee80211ModeBase.h`, `Ieee80211VhtMode.{h,cc}`, the release note, the migration guide section, and a new unit test.
+Files: `IIeee80211Mode.h`, `Ieee80211ModeBase.h`, `Ieee80211VhtMode.h`, the release note, the migration guide section, and a new unit test. The VHT functions are inline in the header, as the HT functions are, so `Ieee80211VhtMode.cc` does not change.
 
 ```cpp
 // IIeee80211Mode.h
@@ -426,7 +438,7 @@ Tests:
   - a received VHT frame with MCS 8, 2 spatial streams and 80 MHz gives the VHT field;
   - a sent frame with `Req` tags, a PHY header and a PHY tail gives a copy without PHY bytes, with TX power and without antenna signal;
   - another protocol gives `nullptr`.
-- New `tests/module/PcapRecorderRadiotap_1.test`. Two Wi-Fi hosts use `fcsMode = "computed"`. One host has two recorders, one with the helper and one without. After the run, the test reads both files with `PcapReader`. The files must have the same number of records and the same MAC bytes, and the Radiotap file must give `FcsInd` with `hasFcs` true. This test checks A2 and a part of A1.
+- New `tests/module/PcapRecorderRadiotap_1.test`. Two `AdhocHost` nodes use `fcsMode = "computed"`, and the first host pings the second 3 times. Two recorders at the network level listen to the first host, one with the helper and one without, with PCAP files. A small module of the test, which comes after the recorders, reads both files with `PcapReader` in its `finish()`. The files must have the link types 127 and 105, the same number of records and the same MAC bytes, and the Radiotap file must give `FcsInd` with `hasFcs` true. This test checks A2 and a part of A1.
 - A manual check with tshark on the file of the module test:
 
   ```
@@ -498,9 +510,9 @@ Decisions that the maintainer made on 2026-10-28:
 - **O-2. Do C4.** Wireshark then marks bad frames for each link type, also for link type 105 and Ethernet.
 
 Risks:
-- **R-1. The order of the listeners (C3).** In `Radio::endReception()`, the listeners of `receptionEnded` now run before the listeners of `packetSentToUpper`, in the same event. The listeners of `receptionEnded` in INET are `Gptp` (Ethernet NICs), `ResidenceTimeMeasurer` (if configured) and `PcapRecorder`. The fingerprint tests check that nothing changes.
+- **R-1. The order of the listeners (C3).** In `Radio::endReception()`, the listeners of `receptionEnded` now run before the listeners of `packetSentToUpper`, in the same event. The listeners of `receptionEnded` in INET are `Gptp` (Ethernet NICs), `ResidenceTimeMeasurer` (if configured) and `PcapRecorder`. The full fingerprint suite gave the same results before and after C3, so the risk did not occur.
 - **R-2. What the `Req` tags show (C6).** After the radio, the `Req` tags show the values that the radio used. Only the transmitters read them (F3). A module outside INET that reads them sees more tags.
-- **R-3. Fingerprints (C6).** I assume that tags are not a part of a fingerprint. The fingerprint tests check this assumption.
+- **R-3. Fingerprints (C6).** I assumed that tags are not a part of a fingerprint. The full fingerprint suite gave the same results before and after C6, so the assumption holds for the ingredients of the suite.
 - **R-4. Incompatible APIs (C7, C8).** Code outside INET that implements `IIeee80211Mode` directly, or that implements `PcapRecorder::IHelper`, must change. The migration guide sections tell how.
 - **R-5. Bit-level receivers (C3).** The receiver's copy of a bit-level receiver holds the decoded bits. After C3, both configurations of [examples/wireless/layered80211](../../examples/wireless/layered80211/omnetpp.ini) write records that tshark decodes as correct 802.11 frames (see "Evidence"). The risk did not occur there.
 
@@ -537,3 +549,22 @@ tshark also noted that the MCS field did not declare the HT format, STBC and the
 **Fingerprints.** The full fingerprint suite in release mode gave the same results at C2 and at C3: 1792 tests, 1768 PASS, 2 expected and 22 unexpected ERROR. All 24 errors come from optional features that this build does not have: lwIP, VoIP and Z3.
 
 **C4.** `PcapngWriterBytes_1.test` and the other five writer tests pass. The collision scenario of `PcapRecorderReceiverCopy_1.test`, with PCAPng files, gives this tshark output: the first file shows "CRC error" for the frame that collided at 0 s and not for the frame at 1 s, and the second file holds only the frame at 1 s.
+
+**C6.** With the planned code, the full fingerprint suite had 293 new errors "Transmission channel is undefined" (see the C6 entry). With the committed code, the suite gives the same results as at C2. All 137 unit tests pass after the change of `Ieee80211RadioWireIdentity_1.test`, and the 774 module tests of radios and recorders pass.
+
+**C7.** `Ieee80211VhtModeQueries_1.test` and the earlier mode tests `Ieee80211NonHtReferenceRate_1`, `Ieee80211HtModeCache_1` and `Ieee80211PeerModeSelection_1` pass.
+
+**C8.** The configurations `AckingMacWithUnitDiskRadio`, `AckingMacWithApskScalarRadio` and `AckingMacWithApskDimensionalRadio` of `examples/wireless/nic`, with 20 s of simulation time, write 42 records each. `cmp` finds no difference between the files of C7 and C8. The full fingerprint suite gives the same results as at C2.
+
+**C9.** `Ieee80211RadiotapPcapRecorderHelper_1.test` and `PcapRecorderRadiotap_1.test` pass; the module test finds 12 equal records. The full fingerprint suite gives the same results as at C2, all 139 unit tests pass, and 775 module tests of radios and recorders pass. The scenario of the module test, with PCAPng files, gives this tshark 4.6.4 output for the first ping (the other two pings give the same values):
+
+| Record | Direction | Frame | Radiotap values | Wireshark duration |
+| --- | --- | --- | --- | --- |
+| 1 | sent | data | 24 Mb/s, 2412 MHz, TX power 13 dBm, FCS at end | 64 µs |
+| 2 | received | ACK | 24 Mb/s, 2412 MHz, signal -67 dBm, noise -110 dBm, SNR 43 dB, TSFT 1000080 µs | 28 µs |
+| 3 | received | data | the same values as record 2, TSFT 1000464 µs | 64 µs |
+| 4 | sent | ACK | the same values as record 1 | 28 µs |
+
+The TSFT of record 2 is its end time minus its duration of 28 µs, which is the start time. The full decode of a record has no malformed field and no expert note. The plain file has the encapsulation "IEEE 802.11 Wireless LAN" and the Radiotap file has "IEEE 802.11 plus radiotap radio header", both with 12 records.
+
+**A fact of the band model.** `Ieee80211CompliantBands::band5GHz` gives the center frequencies 5002.5 + 5n MHz, which are not whole MHz values. The Radiotap channel field has whole MHz values, so the helper rounds the frequency.
