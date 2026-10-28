@@ -6,7 +6,7 @@ Step 5 artifact of the standards test workflow. The procedures come from the spe
 
 ## Common mockups
 
-Every link is an Ethernet link. Every host is an IPsec host in the sense of RFC 4301: a native implementation, with one SPD and one SAD. The SAs are keyed manually before the start (RFC 4301 §4.5.1); no key management protocol runs.
+Every link is an Ethernet link. Every host is an IPsec host in the sense of RFC 4301: a native implementation, with one SPD and one SAD. The SAs are keyed manually before the start (RFC 4301 §4.5.1); no key management protocol runs. On IPv6, no node does Duplicate Address Detection (DupAddrDetectTransmits 0, RFC 4862 §5.1), so its addresses are usable at the start, as on IPv4.
 
 | Link | IPv4 prefix | IPv6 prefix | Addresses |
 | --- | --- | --- | --- |
