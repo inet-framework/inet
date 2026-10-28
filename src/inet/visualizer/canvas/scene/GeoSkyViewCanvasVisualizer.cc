@@ -22,6 +22,8 @@ namespace visualizer {
 
 Define_Module(GeoSkyViewCanvasVisualizer);
 
+static const double TITLE_HEIGHT = 14; // pixels between the plot rim and the bottom of the title above it
+
 GeoSkyViewCanvasVisualizer::ObserverPlot::~ObserverPlot()
 {
     delete groupFigure; // deletes all child figures (plot decorations and target dots/labels/trails)
@@ -54,6 +56,7 @@ void GeoSkyViewCanvasVisualizer::initialize(int stage)
         maskOpacity = par("maskOpacity");
         cardinalColor = cFigure::parseColor(par("cardinalColor"));
         labelColor = cFigure::parseColor(par("labelColor"));
+        displayTitles = par("displayTitles");
         targetColorSet.parseColors(par("targetColor"));
         targetRadius = par("targetRadius");
         lowElevationOpacity = par("lowElevationOpacity");
@@ -309,9 +312,18 @@ void GeoSkyViewCanvasVisualizer::buildPlotDecorations(ObserverPlot *plot)
     addLabel("E", cFigure::Point(R + 1, 0), cFigure::ANCHOR_W, cardinalColor, 0);
     addLabel("W", cFigure::Point(-R - 1, 0), cFigure::ANCHOR_E, cardinalColor, 0);
 
+    // title above the N label: in grid mode the plots are away from the observer icons,
+    // so the title is what tells the plots apart
+    if (displayTitles) {
+        auto observerModule = check_and_cast<const cModule *>(plot->observer);
+        auto observerNode = observerModule->getParentModule() != nullptr ? observerModule->getParentModule() : observerModule;
+        const char *displayName = observerNode->getDisplayName();
+        std::string title = displayName != nullptr && *displayName != '\0' ? displayName : observerNode->getFullName();
+        addLabel(title.c_str(), cFigure::Point(0, -R - TITLE_HEIGHT), cFigure::ANCHOR_S, labelColor, 0);
+    }
+
     // elevation labels sitting just above their ring along the North spoke, in a small
-    // (half-size) font; the 0 deg ring is the disc rim and is not labeled. No title is
-    // drawn: the observer module icon is right next to the plot and already shows its name.
+    // (half-size) font; the 0 deg ring is the disc rim and is not labeled
     for (double el : { 30.0, 60.0 }) {
         double r = R * (90 - el) / 90;
         char buf[8];
@@ -373,12 +385,13 @@ void GeoSkyViewCanvasVisualizer::refreshDisplay() const
     // grid below the target module's viewport; otherwise each plot is anchored to its observer icon
     bool gridMode = std::isinf(plotOffsetX) || std::isinf(plotOffsetY);
     double cell = 2 * plotRadius + plotRadius / 2; // plot diameter plus a gap
+    double rowTitleHeight = displayTitles ? TITLE_HEIGHT : 0; // the title line above each plot
     double gridX0 = 0, gridY0 = 0;
     int columns = 1;
     if (gridMode) {
         cFigure::Rectangle viewport = getViewportBounds();
         gridX0 = viewport.x;
-        gridY0 = viewport.y + viewport.height + plotRadius / 2; // just below the viewport
+        gridY0 = viewport.y + viewport.height + plotRadius / 2 + rowTitleHeight; // just below the viewport
         columns = std::max(1, (int)std::floor(viewport.width / cell));
     }
 
@@ -390,7 +403,7 @@ void GeoSkyViewCanvasVisualizer::refreshDisplay() const
             // disc center, so seat the cell's top-left at the grid cell by offsetting by plotRadius
             int col = index % columns;
             int row = index / columns;
-            plot->groupFigure->setTransform(cFigure::Transform().translate(gridX0 + col * cell + plotRadius, gridY0 + row * cell + plotRadius));
+            plot->groupFigure->setTransform(cFigure::Transform().translate(gridX0 + col * cell + plotRadius, gridY0 + row * (cell + rowTitleHeight) + plotRadius));
         }
         else {
             auto observerModule = check_and_cast<const cModule *>(plot->observer);

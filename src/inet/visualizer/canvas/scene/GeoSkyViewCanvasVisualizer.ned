@@ -19,7 +19,9 @@ import inet.visualizer.contract.IGeoSkyViewVisualizer;
 // rings mark elevations, the cardinal points (N/E/S/W) are drawn, and the band
 // below `elevationMask` is masked translucently. Each visible target is a
 // colored dot (optionally named, with a fading sky trail); targets below the
-// horizon are hidden.
+// horizon are hidden. By default, a title above each plot names its observer node:
+// its display name, or its full name if no display name is set. In the grid layout
+// the plots are 2.5 * `plotRadius` apart, so a wider title overlaps the next one.
 //
 // Look angles are computed from the geographic positions of the observer and the
 // targets via the `IGeographicCoordinateSystem` given by `coordinateSystemModule`.
@@ -50,6 +52,7 @@ simple GeoSkyViewCanvasVisualizer extends VisualizerBase like IGeoSkyViewVisuali
         double maskOpacity = default(0.25); // Opacity of the below-minimum-elevation mask
         string cardinalColor = default("#888888"); // Color of the N-S/W-E lines and the N/E/S/W labels
         string labelColor = default("black"); // Color of the title and elevation labels
+        bool displayTitles = default(true); // Display a title with the observer node's name above each plot
 
         string targetColor = default("dark"); // Target dot color, a list of colors or a color group name (e.g. dark, light)
         double targetRadius = default(3); // Radius of a target dot in pixels

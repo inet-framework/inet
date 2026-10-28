@@ -489,8 +489,11 @@ Visualizing the Sky View
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The :ned:`GeoSkyViewCanvasVisualizer` draws an azimuth/elevation polar
-plot, the "sky view", next to each observer node, showing where the target
-nodes currently are in the observer's sky. It is primarily intended for
+plot, the "sky view", for each observer node, showing where the target
+nodes currently are in the observer's sky. By default the plots are tiled in a
+grid below the map, each with the observer's name as its title; with finite
+:par:`plotOffsetX` and :par:`plotOffsetY` each plot is drawn next to its
+observer node instead. The visualizer is primarily intended for
 ground stations observing satellites.
 
 The nodes that get a plot are selected with the :par:`observerFilter`

@@ -88,6 +88,7 @@ class INET_API GeoSkyViewCanvasVisualizer : public VisualizerBase, public cListe
     double maskOpacity = NaN;
     cFigure::Color cardinalColor;
     cFigure::Color labelColor;
+    bool displayTitles = false;
 
     ColorSet targetColorSet;
     double targetRadius = NaN;
