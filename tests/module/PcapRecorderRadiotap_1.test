@@ -1,0 +1,148 @@
+%description:
+A PcapRecorder with Ieee80211RadiotapPcapRecorderHelper writes the 802.11
+frames of a host as Radiotap records (link type 127), and a recorder without
+the helper writes the same frames as plain 802.11 records (link type 105). One
+host pings the other. Both recorders listen to the first host. After the run,
+PcapReader reads both files: they have the same records with the same MAC
+bytes, and each Radiotap record has the FCS flag.
+
+%file: test.cc
+
+#include <fstream>
+#include <memory>
+
+#include "inet/common/FcsInd_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/recorder/PcapReader.h"
+
+using namespace inet;
+
+namespace PcapRecorderRadiotap_1 {
+
+// Compares the two files after the recorders closed them in their finish().
+class RecordChecker : public cSimpleModule
+{
+  protected:
+    static uint32_t readLinkType(const char *filename)
+    {
+        std::ifstream file(filename, std::ios::binary);
+        pcap_hdr header;
+        file.read(reinterpret_cast<char *>(&header), sizeof(header));
+        if (!file.good())
+            throw cRuntimeError("Cannot read the header of %s", filename);
+        return header.network;
+    }
+
+    virtual void finish() override
+    {
+        if (readLinkType("radiotap.pcap") != 127 || readLinkType("plain.pcap") != 105)
+            throw cRuntimeError("Wrong link types");
+        PcapReader radiotapReader;
+        PcapReader plainReader;
+        radiotapReader.openPcap("radiotap.pcap", nullptr);
+        plainReader.openPcap("plain.pcap", nullptr);
+        int numRecords = 0;
+        while (true) {
+            std::unique_ptr<Packet> radiotapRecord(radiotapReader.readPacket().second);
+            std::unique_ptr<Packet> plainRecord(plainReader.readPacket().second);
+            if (radiotapRecord == nullptr || plainRecord == nullptr) {
+                if (radiotapRecord != nullptr || plainRecord != nullptr)
+                    throw cRuntimeError("The files have different numbers of records");
+                break;
+            }
+            if (!radiotapRecord->getTag<FcsInd>()->getHasFcs())
+                throw cRuntimeError("Record %d has no FCS flag", numRecords);
+            if (radiotapRecord->peekDataAsBytes()->getBytes() != plainRecord->peekDataAsBytes()->getBytes())
+                throw cRuntimeError("Record %d has other MAC bytes", numRecords);
+            numRecords++;
+        }
+        radiotapReader.closePcap();
+        plainReader.closePcap();
+        EV << "Equal records: " << numRecords << "\n";
+    }
+};
+
+Define_Module(RecordChecker);
+
+} // namespace PcapRecorderRadiotap_1
+
+%file: test.ned
+
+import inet.common.packet.recorder.PcapRecorder;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+simple CountingPcapRecorder extends PcapRecorder
+{
+    @class(::inet::PcapRecorder);
+    @statistic[packetRecorded](record=count);
+}
+
+simple RecordChecker
+{
+    @class(RecordChecker);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        hostA: AdhocHost;
+        hostB: AdhocHost;
+        radiotapRecorder: CountingPcapRecorder;
+        plainRecorder: CountingPcapRecorder;
+        checker: RecordChecker;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 4s
+record-vector-results = false
+cmdenv-express-mode = false
+*.checker.cmdenv-log-level = info
+**.cmdenv-log-level = off
+ned-path = .;../../../../src
+
+**.checksumMode = "computed"
+**.fcsMode = "computed"
+**.arp.typename = "GlobalArp"
+
+*.host*.mobility.typename = "StationaryMobility"
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.hostA.mobility.initialX = 400m
+*.hostB.mobility.initialX = 500m
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "hostB"
+*.hostA.app[0].startTime = 1s
+*.hostA.app[0].count = 3
+
+*.*Recorder.moduleNamePatterns = "hostA"
+*.*Recorder.fileFormat = "pcap"
+*.*Recorder.verbose = false
+*.radiotapRecorder.pcapFile = "radiotap.pcap"
+*.radiotapRecorder.helpers = "inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper"
+*.plainRecorder.pcapFile = "plain.pcap"
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /\x1B\[[0-9;]*m//
+%contains-regex: stdout
+Equal records: [1-9][0-9]*
+%contains-regex: results/General-#0.sca
+scalar Test.radiotapRecorder packetRecorded:count [1-9][0-9]*
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

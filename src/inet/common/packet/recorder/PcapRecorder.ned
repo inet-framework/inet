@@ -49,7 +49,8 @@ simple PcapRecorder extends SimpleModule
         string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // Space-separated list of protocol names as defined in the Protocol class
         object packetFilter = default("*"); // Which packets are considered, matches all packets by default
         string helpers = default("");    // Usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
-                                         // currently available: "inet::AckingMacToEthernetPcapRecorderHelper"
+                                         // currently available: "inet::AckingMacToEthernetPcapRecorderHelper",
+                                         // "inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper" (IEEE 802.11 frames as Radiotap records)
         bool alwaysFlush = default(false); // Flush the pcapFile after each write to ensure that all packets are captured in case of a crash
         displayStringTextFormat = default("rec: %n pks");
         @display("i=block/blackboard");

@@ -114,6 +114,7 @@ const Protocol Protocol::ieee80211IrPhy("ieee80211irphy", "IEEE 802.11 IR PHY", 
 const Protocol Protocol::ieee80211Mac("ieee80211mac", "IEEE 802.11 MAC", Protocol::LinkLayer);
 const Protocol Protocol::ieee80211Mgmt("ieee80211mgmt", "IEEE 802.11 MGMT", Protocol::LinkLayer);
 const Protocol Protocol::ieee80211OfdmPhy("ieee80211ofdmphy", "IEEE 802.11 OFDM PHY", Protocol::PhysicalLayer);
+const Protocol Protocol::ieee80211Radiotap("ieee80211radiotap", "IEEE 802.11 Radiotap", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee80211VhtPhy("ieee80211vhtphy", "IEEE 802.11 VHT PHY", Protocol::PhysicalLayer);
 const Protocol Protocol::ieee802154("ieee802154", "IEEE 802.15.4");
 const Protocol Protocol::ieee8021ae("ieee8021ae", "IEEE 802.1AE");

@@ -1,0 +1,161 @@
+%description:
+Ieee80211RadiotapPcapRecorderHelper converts an 802.11 record to a Radiotap
+record. A received frame gives the Radiotap fields from the indication tags of
+the receiver's copy: legacy, HT and VHT modes, the channel, the signal power,
+the noise from the minimum SNIR, the start time and the bad FCS flag. A sent
+frame gives them from the request tags, and the helper removes the PHY header
+and the PHY tail. An imported frame without FCS gets no FCS flag. The helper
+does not convert other protocols.
+
+%includes:
+#include "inet/common/FcsInd_m.h"
+#include "inet/common/INETMath.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ErpOfdmMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HrDsssMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/radiotap/Ieee80211RadiotapPcapRecorderHelper.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%global:
+static void require(bool condition, const char *message)
+{
+    if (!condition)
+        throw cRuntimeError("%s", message);
+}
+
+// An ACK frame with a computed FCS: 14 bytes.
+static Packet *createMacFrame()
+{
+    auto packet = new Packet("ack");
+    auto ack = makeShared<Ieee80211AckFrame>();
+    ack->setReceiverAddress(MacAddress("02:00:00:00:00:01"));
+    packet->insertAtBack(ack);
+    auto trailer = makeShared<Ieee80211MacTrailer>();
+    trailer->setFcsMode(FCS_COMPUTED);
+    packet->insertAtBack(trailer);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+    return packet;
+}
+
+static void addReceptionTags(Packet *packet, const IIeee80211Mode *mode, const Ieee80211Channel *channel)
+{
+    packet->addTag<Ieee80211ModeInd>()->setMode(mode);
+    packet->addTag<Ieee80211ChannelInd>()->setChannel(channel);
+    packet->addTag<SignalPowerInd>()->setPower(mW(math::dBmW2mW(-61)));
+    packet->addTag<SnirInd>()->setMinimumSnir(math::dB2fraction(34));
+    packet->addTag<SignalTimeInd>()->setStartTime(SimTime(0.001234567));
+}
+
+static Ptr<const Ieee80211RadiotapHeader> convert(const Ieee80211RadiotapPcapRecorderHelper& helper, Packet *packet, b frontOffset, b backOffset, Direction direction)
+{
+    std::unique_ptr<Packet> record(helper.tryConvertToLinkType(packet, frontOffset, backOffset, LINKTYPE_IEEE802_11_RADIOTAP, &Protocol::ieee80211Mac, direction));
+    require(record != nullptr, "the helper must convert an 802.11 frame");
+    require(record->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ieee80211Radiotap, "the record must have the Radiotap protocol");
+    auto header = record->popAtFront<Ieee80211RadiotapHeader>();
+    require(record->getDataLength() == B(14), "the record must hold the MAC frame and nothing else");
+    require(record->peekAtFront<Ieee80211AckFrame>()->getReceiverAddress() == MacAddress("02:00:00:00:00:01"), "the MAC frame must follow the header");
+    Packet bytes("bytes", header);
+    require(bytes.peekAllAsBytes()->getChunkLength() == header->getChunkLength(), "the header must serialize");
+    delete packet;
+    return header;
+}
+
+%activity:
+Ieee80211RadiotapPcapRecorderHelper helper;
+require(helper.protocolToLinkType(&Protocol::ieee80211Mac) == LINKTYPE_IEEE802_11_RADIOTAP, "ieee80211Mac must map to link type 127");
+require(helper.protocolToLinkType(&Protocol::ethernetMac) == LINKTYPE_INVALID, "ethernetMac must not map");
+require(!helper.matchesLinkType(LINKTYPE_IEEE802_11_RADIOTAP, &Protocol::ieee80211Mac), "each frame needs the conversion");
+// INET numbers the channels of a band from 0
+Ieee80211Channel channel6(&Ieee80211CompliantBands::band2_4GHz, 5);
+Ieee80211Channel channel1(&Ieee80211CompliantBands::band2_4GHz, 0);
+Ieee80211Channel channel36(&Ieee80211CompliantBands::band5GHzMapped20MHz, 0);
+
+// a received ERP-OFDM frame at 54 Mb/s on channel 6
+auto packet = createMacFrame();
+addReceptionTags(packet, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps, &channel6);
+auto header = convert(helper, packet, b(0), b(0), DIRECTION_INBOUND);
+require(header->getPresent() == ((1 << RADIOTAP_TSFT) | (1 << RADIOTAP_FLAGS) | (1 << RADIOTAP_RATE) | (1 << RADIOTAP_CHANNEL) | (1 << RADIOTAP_DBM_ANTSIGNAL) | (1 << RADIOTAP_DBM_ANTNOISE)), "erp: wrong fields");
+require(header->getTsft() == 1234, "erp: wrong TSFT");
+require(header->getFlags() == RADIOTAP_FLAG_FCS_AT_END, "erp: wrong flags");
+require(header->getRate() == 108, "erp: wrong rate");
+require(header->getChannelFrequency() == 2437 && header->getChannelFlags() == (RADIOTAP_CHANNEL_OFDM | RADIOTAP_CHANNEL_2GHZ), "erp: wrong channel");
+require(header->getAntennaSignal() == -61 && header->getAntennaNoise() == -95, "erp: wrong signal or noise");
+EV << "erp: received\n";
+
+// the same frame with bit errors
+packet = createMacFrame();
+addReceptionTags(packet, &Ieee80211ErpOfdmCompliantModes::erpOfdmMode54Mbps, &channel6);
+packet->setBitError(true);
+header = convert(helper, packet, b(0), b(0), DIRECTION_INBOUND);
+require(header->getFlags() == (RADIOTAP_FLAG_FCS_AT_END | RADIOTAP_FLAG_BAD_FCS), "bad: wrong flags");
+EV << "bad: bad FCS\n";
+
+// a received HT frame: MCS 7, 40 MHz, short guard interval
+packet = createMacFrame();
+addReceptionTags(packet, Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs7BW40MHz, Ieee80211HtMode::BAND_5GHZ,
+        Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT), &channel36);
+header = convert(helper, packet, b(0), b(0), DIRECTION_INBOUND);
+require(!(header->getPresent() & (1 << RADIOTAP_RATE)) && (header->getPresent() & (1 << RADIOTAP_MCS)), "ht: wrong fields");
+require(header->getMcsKnown() == 0x77 && header->getMcsFlags() == 0x05 && header->getMcsIndex() == 7, "ht: wrong MCS field");
+require(header->getChannelFrequency() == 5180 && header->getChannelFlags() == (RADIOTAP_CHANNEL_OFDM | RADIOTAP_CHANNEL_5GHZ), "ht: wrong channel");
+EV << "ht: received\n";
+
+// a received VHT frame: MCS 8, 2 spatial streams, 80 MHz, short guard interval
+packet = createMacFrame();
+addReceptionTags(packet, Ieee80211VhtCompliantModes::getCompliantMode(&Ieee80211VhtmcsTable::vhtMcs8BW80MHzNss2, Ieee80211VhtMode::BAND_5GHZ,
+        Ieee80211VhtPreambleMode::HT_PREAMBLE_MIXED, Ieee80211VhtModeBase::HT_GUARD_INTERVAL_SHORT), &channel36);
+header = convert(helper, packet, b(0), b(0), DIRECTION_INBOUND);
+require(!(header->getPresent() & (1 << RADIOTAP_RATE)) && (header->getPresent() & (1 << RADIOTAP_VHT)), "vht: wrong fields");
+require(header->getVhtKnown() == 0x0045 && header->getVhtFlags() == 0x04 && header->getVhtBandwidth() == 4, "vht: wrong VHT field");
+require(header->getVhtMcsNss(0) == 0x82 && header->getVhtMcsNss(1) == 0, "vht: wrong MCS and NSS");
+EV << "vht: received\n";
+
+// a sent HR/DSSS frame with a short preamble, with a PHY header and a PHY tail around the MAC frame
+packet = createMacFrame();
+packet->insertAtFront(makeShared<ByteCountChunk>(B(6)));
+packet->insertAtBack(makeShared<BitCountChunk>(b(6)));
+packet->addTag<Ieee80211ModeReq>()->setMode(&Ieee80211HrDsssCompliantModes::hrDsssMode11MbpsCckShortPreamble);
+packet->addTag<Ieee80211ChannelReq>()->setChannel(&channel1);
+packet->addTag<SignalPowerReq>()->setPower(mW(20));
+header = convert(helper, packet, B(6), b(6), DIRECTION_OUTBOUND);
+require(header->getPresent() == ((1 << RADIOTAP_FLAGS) | (1 << RADIOTAP_RATE) | (1 << RADIOTAP_CHANNEL) | (1 << RADIOTAP_DBM_TX_POWER)), "sent: wrong fields");
+require(header->getFlags() == (RADIOTAP_FLAG_FCS_AT_END | RADIOTAP_FLAG_SHORT_PREAMBLE), "sent: wrong flags");
+require(header->getRate() == 22 && header->getTxPower() == 13, "sent: wrong rate or power");
+require(header->getChannelFrequency() == 2412 && header->getChannelFlags() == (RADIOTAP_CHANNEL_CCK | RADIOTAP_CHANNEL_2GHZ), "sent: wrong channel");
+EV << "sent: converted\n";
+
+// an imported frame without FCS
+packet = createMacFrame();
+packet->addTag<FcsInd>()->setHasFcs(false);
+header = convert(helper, packet, b(0), b(0), DIRECTION_INBOUND);
+require(header->getFlags() == 0 && header->getPresent() == (1 << RADIOTAP_FLAGS), "imported: wrong flags");
+EV << "imported: no FCS\n";
+
+// another protocol
+packet = createMacFrame();
+require(helper.tryConvertToLinkType(packet, b(0), b(0), LINKTYPE_ETHERNET, &Protocol::ethernetMac, DIRECTION_INBOUND) == nullptr, "other: must not convert");
+delete packet;
+EV << "other: not converted\n";
+
+%contains: stdout
+erp: received
+bad: bad FCS
+ht: received
+vht: received
+sent: converted
+imported: no FCS
+other: not converted

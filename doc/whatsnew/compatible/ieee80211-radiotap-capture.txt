@@ -1,0 +1,7 @@
+PCAP records of IEEE 802.11 frames can show the PHY values in a Radiotap header
+
+A PcapRecorder with the helper inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper writes 802.11 frames as Radiotap records (link type 127), the format of Linux monitor mode:
+
+  *.host1.pcapRecorder[0].helpers = "inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper"
+
+Wireshark then shows for each frame the data rate or the HT or VHT MCS, the channel frequency, the transmit power of a sent frame, and the signal power, the noise and the start time of a received frame. A frame that the receiver could not decode has the "bad FCS" flag. The noise is the signal power divided by the minimum SNIR, so it includes the interference. Without the helper, the records stay plain 802.11 records (link type 105).
