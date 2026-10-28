@@ -90,6 +90,8 @@ sim-time-limit = 11s
 seed-set = 0
 *.host*.ipv6.hasIpsec = true
 **.ipv6.configurator.networkConfiguratorModule = "configurator"
+# the common mockups: no Duplicate Address Detection on IPv6, the addresses are usable at the start
+**.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
 *.hostA.numApps = 2
 *.hostA.app[0].typename = "UdpBasicApp"
 *.hostA.app[0].localPort = 1000

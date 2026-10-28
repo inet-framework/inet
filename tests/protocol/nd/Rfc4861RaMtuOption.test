@@ -11,14 +11,6 @@ other observations of the check are in Rfc4861RaFields.test and Rfc4861RaCurHopL
 AdvLinkMTU keeps its default, zero in RFC 4861: an MTU option is then not expected at all, and
 an option that is present must at least hold the MTU of the link.
 
-Defect: the default of AdvLinkMTU is 1280
-(src/inet/networklayer/ipv6/Ipv6RoutingTable.ned:101), so a router that keeps the default sends
-an MTU option of 1280 on a link with MTU 1500. RFC 4861 section 6.2.1: "AdvLinkMTU The value to
-be placed in MTU options sent by the router. A value of zero indicates that no MTU options are
-sent." and "Default: 0". Observation 1 holds; observation 4 fails. This test FAILS, and the
-failure is deliberately NOT declared expected: a value that the model sets wrong is a defect,
-not a missing feature. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "NdChecks.h"
