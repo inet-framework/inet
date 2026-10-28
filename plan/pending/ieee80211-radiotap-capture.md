@@ -13,10 +13,10 @@ Implementation: in the worktree `/home/levy/workspace/inet-ieee80211-radiotap-ca
 | Commit | Subject | State |
 | --- | --- | --- |
 | C1 | the plan | done, in the commit that adds this file |
-| C2 | Radiotap header chunk and serializer | to do |
-| C3 | the receiver's copy of radio frames | to do |
-| C4 | CRC errors in PCAPng records (optional, O-2) | to do |
-| C5 | record C2 to C4 in the plan | to do |
+| C2 | Radiotap header chunk and serializer | done, `2306aaae90` |
+| C3 | the receiver's copy of radio frames | done, `340be81284` |
+| C4 | CRC errors in PCAPng records (O-2) | done, `f9933f4950` |
+| C5 | record C2 to C4 in the plan | done, in the commit that records it |
 | C6 | the used mode, channel and power as tags | to do |
 | C7 | VHT queries of the mode contract | to do |
 | C8 | helpers first, with the direction | to do |
@@ -167,7 +167,7 @@ The direction parameter is an incompatible change of the helper API, so C8 adds 
 | Radiotap field (bit) | Received frame | Sent frame |
 | --- | --- | --- |
 | TSFT (0) | The start time from `SignalTimeInd`, in µs. INET has no TSF timer, so the simulation time stands in for it. | Not written |
-| Flags (1) | 0x10 FCS at end, always (F5). 0x40 bad FCS if `hasBitError()`. 0x02 if `getLegacyPreambleType()` is `SHORT`. | 0x10, and 0x02 as for a received frame |
+| Flags (1) | 0x10 FCS at end if `FcsInd` says so, or else if the MAC frame ends with an `Ieee80211MacTrailer`. INET writes the trailer with a computed FCS only (F5). 0x40 bad FCS if `hasBitError()`. 0x02 if `getLegacyPreambleType()` is `SHORT`. | 0x10 and 0x02 as for a received frame |
 | Rate (2) | The net bit rate of the data mode in 500 kb/s units, for the modulation classes `DSSS_HRDSSS`, `OFDM` and `ERP_OFDM` | Same |
 | Channel (3) | `Ieee80211ChannelInd`: the center frequency in MHz. Flags: 2 GHz or 5 GHz from the frequency, CCK for `DSSS_HRDSSS`, OFDM for the other classes. | `Ieee80211ChannelReq` |
 | Antenna signal (5) | `SignalPowerInd` in dBm, rounded and limited to -128..127 | Not written |
@@ -237,7 +237,7 @@ The change:
 - The `.msg` file declares the field bits and the header class (shape below).
 - A function `computeIeee80211RadiotapHeaderLength()` calculates the length from the present bits and the alignment rules. The code that makes a header sets the chunk length from this function.
 - The serializer writes `it_version`, `it_pad`, `it_len` and `it_present`, and then each present field in bit order. Each field starts at a multiple of its alignment, with zero bytes before it. All values are little-endian (`MemoryOutputStream::writeUint16Le()` and the other `Le` functions).
-- The deserializer reads in the same order, and it skips extended present words (bit 31). At the first unknown present bit, it stops, goes to `it_len`, and marks the chunk as improperly represented. It cannot know the size of an unknown field.
+- The deserializer reads in the same order, and it skips extended present words (bit 31). A table gives the alignment and the size of the fields 0 to 27 of the Radiotap namespace. The deserializer skips a field that has a size in the table but no place in the chunk, for example RX flags, and it reads the fields after it. At a field without a size, for example bit 18, it stops. In both cases, it goes to `it_len` and marks the chunk as improperly represented. An unchanged chunk then serializes to its original bytes, because `FieldsChunkSerializer` keeps the bytes of a deserialized chunk.
 
 ```
 enum Ieee80211RadiotapField   // bit numbers in it_present
@@ -308,11 +308,10 @@ Behavior against the parent:
 - Ethernet records do not change. The Ethernet PHY emits `receptionEnded` with a `Signal` and no details.
 - The simulation does not change. The order of two listener calls in one event changes (risk R-1).
 
-Test: new `tests/module/PcapRecorderReceiverCopy_1.test` (proposed scenario).
-- Three hosts with UnitDisk radios and `ignoreInterference = false`. Two hosts send to the third at the same time, so the third host gets collisions.
-- The third host has two recorders, with `dumpBadFrames` true and false.
-- After the run, the test reads both files with `PcapReader`, as the round-trip test of the PR does. The file of the second recorder must have fewer records, and the difference must be the number of collisions.
-- Against C2, the test fails, because both files have the same number of records. After C3, the test passes.
+Test: new `tests/module/PcapRecorderReceiverCopy_1.test`.
+- Three hosts with UnitDisk radios, AckingMac without acknowledgements, and `ignoreInterference = false`. The scenario comes from `Interference_IdealRadio_Collision_SS_1.test`. Both senders ping the receiver at 0 s, so the first ping arrives with bit errors. The first sender pings again at 1 s, without interference.
+- Two recorders at the network level listen to the receiving host, with `dumpBadFrames` true and false. They use the AckingMac helper. The node type fixes its recorders as `PcapRecorder`, so a NED subtype in the test adds a statistic that counts `packetRecorded`.
+- The test checks the two scalars: 2 frames and 1 frame. Against C2, both scalars are 2, so the test fails. After C3, the test passes.
 
 ### C4 (optional): `recorder: add: mark frames with bit errors as CRC errors in PCAPng`
 
@@ -490,7 +489,7 @@ Coverage limits:
 - The tests do not cover bit-level receivers (risk R-5) or A-MPDU.
 - C6 has no direct test before C9.
 
-Observed results: none yet.
+Observed results: see the section "Evidence".
 
 ## 8. Risks, unresolved decisions, and approval scope
 
@@ -503,7 +502,7 @@ Risks:
 - **R-2. What the `Req` tags show (C6).** After the radio, the `Req` tags show the values that the radio used. Only the transmitters read them (F3). A module outside INET that reads them sees more tags.
 - **R-3. Fingerprints (C6).** I assume that tags are not a part of a fingerprint. The fingerprint tests check this assumption.
 - **R-4. Incompatible APIs (C7, C8).** Code outside INET that implements `IIeee80211Mode` directly, or that implements `PcapRecorder::IHelper`, must change. The migration guide sections tell how.
-- **R-5. Bit-level receivers (C3).** The receiver's copy of a bit-level receiver holds the decoded bits. I did not check that the recorder can write such a copy. Check: run [examples/wireless/layered80211](../../examples/wireless/layered80211/omnetpp.ini) with a recorder after C3.
+- **R-5. Bit-level receivers (C3).** The receiver's copy of a bit-level receiver holds the decoded bits. After C3, both configurations of [examples/wireless/layered80211](../../examples/wireless/layered80211/omnetpp.ini) write records that tshark decodes as correct 802.11 frames (see "Evidence"). The risk did not occur there.
 
 Seal permissions that the plan needs. The maintainer granted all of them on 2026-10-28, for this branch:
 
@@ -518,4 +517,23 @@ Approval scope: revision 1, C1 to C14, with C4 and with the field of O-1 (b).
 
 ## Evidence
 
-No results yet.
+**Build environment.** On 2026-10-28, the tools of `omnetpp-6.x` were coverage builds, for example `opp_msgtool`, but the coverage libraries were not in `lib/`. The build therefore used `LD_LIBRARY_PATH` with links from `liboppcommon_coverage.so` and the other coverage names to the release libraries, and `LLVM_PROFILE_FILE` in `/var/tmp`. This affects only the tools, not the INET libraries.
+
+**C2.** `Ieee80211RadiotapHeaderSerializer_1.test` passes. tshark 4.6.4 decoded the fixed bytes of the test, each in front of an 802.11 ACK frame with a correct FCS:
+
+| Case | Length | tshark shows |
+| --- | --- | --- |
+| legacy | 16 | 54 Mb/s, 2437 MHz, OFDM, 2 GHz, -61 dBm signal, -95 dBm noise, FCS at end |
+| HT | 12 | MCS 7, 40 MHz, short guard interval, 150 Mb/s |
+| VHT | 22 | MCS 8, 2 spatial streams, 80 MHz, short guard interval |
+| TSFT | 18 | MAC time 72623859790382856 (0x0102030405060708), TX power 20 dBm |
+| A-MPDU | 20 | reference 287454020 (0x11223344), last subframe |
+| RX flags | 15 | RX flags 0x1234, and the MCS field after it |
+
+tshark also noted that the MCS field did not declare the HT format, STBC and the extension streams as known, and that the VHT field did not declare STBC as known. C2 therefore also defines these bits. INET has no STBC and no extension streams, so C9 can declare them as known with the value 0.
+
+**C3.** Against C2, `PcapRecorderReceiverCopy_1.test` fails with 2 frames in both recorders. After C3, the recorders write 2 frames and 1 frame. 774 module tests with the filter `Pcap|pcap|Interference|IdealRadio|tun-echo|UDP_dscp|ieee80211|Ieee80211|wireless|Wireless|apsk|Apsk|802154` pass in debug mode. Both configurations of `examples/wireless/layered80211`, with a recorder and 1 s of simulation time, write 4 records each. tshark decodes them as two data frames of 120 bytes and two ACK frames.
+
+**Fingerprints.** The full fingerprint suite in release mode gave the same results at C2 and at C3: 1792 tests, 1768 PASS, 2 expected and 22 unexpected ERROR. All 24 errors come from optional features that this build does not have: lwIP, VoIP and Z3.
+
+**C4.** `PcapngWriterBytes_1.test` and the other five writer tests pass. The collision scenario of `PcapRecorderReceiverCopy_1.test`, with PCAPng files, gives this tshark output: the first file shows "CRC error" for the frame that collided at 0 s and not for the frame at 1 s, and the second file holds only the frame at 1 s.
