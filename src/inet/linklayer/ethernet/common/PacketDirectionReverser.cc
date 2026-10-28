@@ -48,9 +48,9 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     auto cutthroughTag = packet->findTag<CutthroughTag>();
     auto eligibilityTimeTag = packet->findTag<EligibilityTimeTag>();
     auto macAddressInd = packet->findTag<MacAddressInd>();
-    auto dropEligibleInd = packet->findTag<DropEligibleInd>();
-    auto vlanInd = packet->findTag<VlanInd>();
-    auto pcpInd = packet->findTag<PcpInd>();
+    auto dropEligibleInd = packet->findTag<CDropEligibleInd>();
+    auto vlanInd = packet->findTag<CVlanInd>();
+    auto pcpInd = packet->findTag<CPcpInd>();
     auto userPriorityInd = packet->findTag<UserPriorityInd>();
     auto streamInd = packet->findTag<StreamInd>();
     auto sequenceNumberInd = packet->findTag<SequenceNumberInd>();
@@ -80,11 +80,11 @@ void PacketDirectionReverser::processPacket(Packet *packet)
         macAddressReq->setDestAddress(macAddressInd->getDestAddress());
     }
     if (dropEligibleInd != nullptr)
-        packet->addTag<DropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
+        packet->addTag<CDropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
     if (vlanInd != nullptr && forwardVlan)
-        packet->addTag<VlanReq>()->setVlanId(vlanInd->getVlanId());
+        packet->addTag<CVlanReq>()->setVlanId(vlanInd->getVlanId());
     if (pcpInd != nullptr && forwardPcp)
-        packet->addTag<PcpReq>()->setPcp(pcpInd->getPcp());
+        packet->addTag<CPcpReq>()->setPcp(pcpInd->getPcp());
     if (userPriorityInd != nullptr)
         packet->addTag<UserPriorityReq>()->setUserPriority(userPriorityInd->getUserPriority());
     if (streamInd != nullptr)

@@ -54,28 +54,28 @@ void Ieee8021qTagTpidHeaderInserter::processPacket(Packet *packet)
         packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(userPriority);
     }
 
-    auto pcpReq = packet->removeTagIfPresent<PcpReq>();
+    auto pcpReq = packet->removeTagIfPresent<CPcpReq>();
     auto pcp = pcpReq != nullptr ? pcpReq->getPcp() : defaultPcp;
     if (pcp != -1) {
         EV_INFO << "Setting PCP" << EV_FIELD(vid, pcp) << EV_ENDL;
         header->setPcp(pcp);
-        packet->addTagIfAbsent<PcpInd>()->setPcp(pcp);
+        packet->addTagIfAbsent<CPcpInd>()->setPcp(pcp);
     }
 
-    auto vlanReq = packet->removeTagIfPresent<VlanReq>();
+    auto vlanReq = packet->removeTagIfPresent<CVlanReq>();
     auto vlanId = vlanReq != nullptr ? vlanReq->getVlanId() : defaultVlanId;
     if (vlanId != -1) {
         EV_INFO << "Setting VID" << EV_FIELD(vid, vlanId) << EV_ENDL;
         header->setVid(vlanId);
-        packet->addTagIfAbsent<VlanInd>()->setVlanId(vlanId);
+        packet->addTagIfAbsent<CVlanInd>()->setVlanId(vlanId);
     }
 
-    auto dropEligibleReq = packet->removeTagIfPresent<DropEligibleReq>();
+    auto dropEligibleReq = packet->removeTagIfPresent<CDropEligibleReq>();
     auto dropEligible = dropEligibleReq != nullptr ? (dropEligibleReq->getDropEligible() ? 1 : 0) : defaultDropEligible;
     if (dropEligible >= 0) {
         EV_INFO << "Setting dropEligible" << EV_FIELD(dei, dropEligible) << EV_ENDL;
         header->setDei(dropEligible > 0);
-        packet->addTagIfAbsent<DropEligibleInd>()->setDropEligible(dropEligible);
+        packet->addTagIfAbsent<CDropEligibleInd>()->setDropEligible(dropEligible);
     }
 
     packet->insertAtFront(header);

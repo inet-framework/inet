@@ -50,9 +50,9 @@ void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
     const auto& header = packet->popAtFront<Ieee8021qTagEpdHeader>();
     appendEncapsulationProtocolInd(packet, qtagProtocol);
     packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(header->getPcp());
-    packet->addTagIfAbsent<PcpInd>()->setPcp(header->getPcp());
-    packet->addTagIfAbsent<VlanInd>()->setVlanId(header->getVid());
-    packet->addTagIfAbsent<DropEligibleInd>()->setDropEligible(header->getDei());
+    packet->addTagIfAbsent<CPcpInd>()->setPcp(header->getPcp());
+    packet->addTagIfAbsent<CVlanInd>()->setVlanId(header->getVid());
+    packet->addTagIfAbsent<CDropEligibleInd>()->setDropEligible(header->getDei());
     auto typeOrLength = header->getTypeOrLength();
     const Protocol *protocol;
     if (isIeee8023Length(typeOrLength))

@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFlowBase;
 import inet.queueing.contract.IPacketFlow;
 
 //
-// Updates the `VlanReq` tag on packets.
+// Updates the `CVlanReq` tag on packets.
 //
 simple VlanReqMapper extends PacketFlowBase like IPacketFlow
 {

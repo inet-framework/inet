@@ -11,7 +11,7 @@ import inet.queueing.base.PacketFilterBase;
 import inet.queueing.contract.IPacketFilter;
 
 //
-// Filters out packets based on the attached `VlanReq` tag.
+// Filters out packets based on the attached `CVlanReq` tag.
 //
 simple VlanReqFilter extends PacketFilterBase like IPacketFilter
 {

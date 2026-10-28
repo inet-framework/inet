@@ -15,13 +15,13 @@ import inet.queueing.contract.IPacketFlow;
 // Applies the VLAN policy of a node to the packets that pass between its
 // upper layers and its network interfaces.
 //
-// Outbound, the `outboundMapper` (~VlanReqMapper) updates the `VlanReq` tag per
+// Outbound, the `outboundMapper` (~VlanReqMapper) updates the `CVlanReq` tag per
 // outgoing interface, for example to tag or untag the frame, and then the
 // `outboundFilter` (~VlanReqFilter) drops the packets whose resulting VLAN id
 // the outgoing interface does not accept. Inbound, the `inboundFilter`
 // (~VlanIndFilter) drops the packets whose received VLAN id the incoming
 // interface does not accept, and then the optional `inboundMapper`
-// (~VlanIndMapper) updates the `VlanInd` tag per incoming interface, for
+// (~VlanIndMapper) updates the `CVlanInd` tag per incoming interface, for
 // example to classify untagged frames into the VLAN of the port. Both filters
 // thus check the VLAN id as it is on the wire: -1 for an untagged frame, 0 for
 // a priority-tagged frame.

@@ -40,8 +40,8 @@ The following is a short description of several commonly used packet tags:
 - :cpp:`L3AddressReq`: Specifies source and destination network addresses.
 - :cpp:`InterfaceReq`: Specifies the outgoing network interface.
 - :cpp:`NextHopAddressReq`: Specifies the next-hop address for packet routing.
-- :cpp:`VlanReq`: Specifies the virtual LAN identifier of IEEE 802.1Q.
-- :cpp:`PcpReq`: Specifies the priority code point of IEEE 802.1Q.
+- :cpp:`CVlanReq`: Specifies the virtual LAN identifier of IEEE 802.1Q.
+- :cpp:`CPcpReq`: Specifies the priority code point of IEEE 802.1Q.
 - :cpp:`StreamReq`: Specifies the TSN stream identifier inside the network node.
 - :cpp:`MacAddressReq`: Specifies source and destination MAC addresses.
 - :cpp:`Ieee80211ModeReq`: Specifies the IEEE 802.11 PHY mode.
@@ -238,7 +238,7 @@ the packet reaches the relevant protocol modules for encapsulation.
 
 The encapsulation process may need to be different for each packet. For example,
 an application may need to send a packet to a specific VLAN. In this case, the
-application should attach a :cpp:`VlanReq` tag to the packet with the desired
+application should attach a :cpp:`CVlanReq` tag to the packet with the desired
 VLAN ID. However, it cannot directly send the packet to the relevant 802.1Q
 protocol module because the packet may need to be delivered to the UDP protocol
 first. To achieve the desired protocol encapsulation order, the application should
@@ -276,7 +276,7 @@ and back parts. However, it changes the attached packet tags significantly.
 
 The inbound packet usually contains a few tags such as :cpp:`PacketProtocolTag`
 and :cpp:`DirectionTag`, and it also contains several indications such as the
-:cpp:`InterfaceInd`, :cpp:`MacAddressInd`, :cpp:`VlandInd`, :cpp:`PcpInd`,
+:cpp:`InterfaceInd`, :cpp:`MacAddressInd`, :cpp:`CVlanInd`, :cpp:`CPcpInd`,
 :cpp:`EncapsulationProtocolInd`, etc. During the transformation, only the
 :cpp:`PacketProtocolTag` is kept, and all attached indications are removed.
 Additionally, a set of requests is attached to the packet so that the packet will

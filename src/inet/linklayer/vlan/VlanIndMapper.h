@@ -19,7 +19,7 @@ namespace inet {
 using namespace inet::queueing;
 
 /**
- * Updates the VlanInd tag of received packets per incoming network interface.
+ * Updates the CVlanInd tag of received packets per incoming network interface.
  * See the corresponding NED file for more details.
  */
 class INET_API VlanIndMapper : public PacketFlowBase, public TransparentProtocolRegistrationListener, public cListener

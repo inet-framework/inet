@@ -18,19 +18,19 @@ using namespace inet::physicallayer;
 
 static int classifyPacketByVlanReq(Packet *packet)
 {
-    const auto& vlanReq = packet->findTag<VlanReq>();
+    const auto& vlanReq = packet->findTag<CVlanReq>();
     return vlanReq != nullptr ? vlanReq->getVlanId() : 0;
 }
 
-Register_Packet_Classifier_Function(PacketVlanReqClassifier, classifyPacketByVlanReq);
+Register_Packet_Classifier_Function(PacketCVlanReqClassifier, classifyPacketByVlanReq);
 
 static int classifyPacketByVlanInd(Packet *packet)
 {
-    const auto& vlanInd = packet->findTag<VlanInd>();
+    const auto& vlanInd = packet->findTag<CVlanInd>();
     return vlanInd != nullptr ? vlanInd->getVlanId() : 0;
 }
 
-Register_Packet_Classifier_Function(PacketVlanIndClassifier, classifyPacketByVlanInd);
+Register_Packet_Classifier_Function(PacketCVlanIndClassifier, classifyPacketByVlanInd);
 
 static int classifyPacketByFragmentTag(Packet *packet)
 {

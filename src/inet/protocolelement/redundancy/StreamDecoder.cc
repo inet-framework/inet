@@ -84,12 +84,12 @@ cGate *StreamDecoder::getRegistrationForwardingGate(cGate *gate)
 
 void StreamDecoder::processPacket(Packet *packet)
 {
-    auto vlanInd = packet->findTag<VlanInd>();
+    auto vlanInd = packet->findTag<CVlanInd>();
     for (auto& mapping : mappings) {
         bool matches = true;
         const auto& macAddressInd = packet->findTag<MacAddressInd>();
-        const auto& pcpInd = packet->findTag<PcpInd>();
-        const auto& vlanInd = packet->findTag<VlanInd>();
+        const auto& pcpInd = packet->findTag<CPcpInd>();
+        const auto& vlanInd = packet->findTag<CVlanInd>();
         const auto& interfaceInd = packet->findTag<InterfaceInd>();
         matches &= mapping.packetFilter.matches(packet);
         if (mapping.interfaceNameMatcher != nullptr) {
