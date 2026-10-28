@@ -152,6 +152,42 @@ protocol work and verification rather than merely changing recorder output, so
 they are part of the simulation configuration and should be held constant when
 comparing runs.
 
+For a frame that a radio receives, the recorder writes the copy of the
+receiver, with the receptionEnded signal of the radio. If the receiver could not
+decode the frame, the copy has the bit error flag. :par:`dumpBadFrames` selects
+whether the file contains such frames; the default is ``true``. A PCAPng record
+of a frame with bit errors has the "CRC error" flag, so Wireshark shows the
+frames that the receiver could not decode. Packet-level radios do not change
+the bytes of such a frame, so its FCS in the file is still correct.
+
+By default, an IEEE 802.11 record holds only the MAC frame (link type 105). The
+helper ``inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper`` writes
+Radiotap records (link type 127) instead, the format of Linux monitor mode:
+
+.. code-block:: ini
+
+   *.host1.pcapRecorder[0].helpers = "inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper"
+
+The Radiotap header of a record has these physical layer values of the frame:
+
+- the data rate of a legacy mode, or the MCS, the bandwidth and the guard
+  interval of an HT mode, or the MCS, the number of spatial streams, the
+  bandwidth and the guard interval of a VHT mode;
+- the center frequency of the channel;
+- the transmit power of a sent frame;
+- the signal power and the start time of a received frame, and the noise. The
+  noise is the signal power divided by the minimum SNIR of the reception, so it
+  includes the interference. INET has no TSF timer, so the start time is the
+  simulation time of the first bit, in microseconds;
+- the FCS flags: "FCS at end", and "bad FCS" for a frame with bit errors.
+
+The Radiotap header exists only in the file, not in the simulated frame, and it
+does not change the simulation. A PCAP file holds the records of only one link
+type, and the recorder stops with an error at the first record of a second link
+type. To record a node that has Ethernet and Wi-Fi interfaces into one file
+with Radiotap records, use the PCAPng format, or use one recorder for each
+interface.
+
 .. _ug:sec:results:recording-routing-tables:
 
 Recording Routing Tables
