@@ -6,7 +6,6 @@ This is the Python package of the INET Framework. It holds only the Python code 
   with the results of other simulators
 - :py:mod:`inet.test.core4inet`: the reference delays of Core4INET, which the validation tests and the charts of two
   validation analysis files use
-- :py:mod:`inet.documentation`: build, upload and open the HTML documentation of INET
 
 To build INET, run simulations and run the tests, use opp_repl (https://github.com/omnetpp/opp_repl), for example
 :command:`opp_build_project`, :command:`opp_run_simulations` and the :command:`opp_run_*_tests` commands. The file

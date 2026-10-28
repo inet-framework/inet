@@ -27,7 +27,10 @@ stays, and runs ``opp_run_opp_tests`` in :file:`tests/serializer`.
 
 The INET package keeps :py:mod:`inet.scave`, which the chart scripts of the
 analysis files import, :py:mod:`inet.test.validation`, which
-``opp_run_validation_tests`` calls, and :py:mod:`inet.documentation`. A Python
+``opp_run_validation_tests`` calls, and :py:mod:`inet.test.core4inet`, the
+reference delays of Core4INET. ``inet.documentation`` is gone too:
+:file:`doc/src/build` builds the documentation, ``doc/src/build --serve`` also
+serves it at http://localhost:8000/, and the site workflow publishes it. A Python
 program of your own that imported ``inet.common``, ``inet.simulation``,
 ``inet.project`` or another ``inet.test`` module imports the same names from
 opp_repl, for example ``from opp_repl import *``, and loads the INET project

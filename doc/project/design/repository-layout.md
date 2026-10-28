@@ -105,7 +105,6 @@ statistical  validation  fingerprint  speed  features  misc
 | `inet.opp` | the project description of INET, which the commands of opp_repl load to build INET, run simulations and run each kind of test |
 | `python/inet/test/` | the validation tests, which opp_repl runs through `inet.opp` |
 | `python/inet/scave/` | the helpers of the chart scripts in the analysis files |
-| `python/inet/documentation/` | building, uploading and opening the HTML documentation |
 | `doc/project/enforcement/` | the rule gates, and only the rule gates |
 | `_scripts/` | maintenance sweeps, release steps, IDE helpers |
 
