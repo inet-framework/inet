@@ -1,0 +1,13 @@
+RIP and RIPng corrections
+
+A RIPng message now carries the version 1 of RFC 2080; before, every RIPng message carried the version 2 of RIP.
+
+A RIPng answer to a request now leaves on the interface that the request came from, from the link-local address of that interface (RFC 2080 section 2.5). Before, an answer to the link-local address of a requester left on the first interface of the router, and was lost; so trajectories of RIPng simulations with requests change.
+
+When a static or default route that RIP imported returns to the routing table, for example when the carrier of its interface returns, RIP now takes it back and advertises it again with the metric 1. Before, RIP kept the route at the metric 16. Because the IPv6 routes of the configuration now return with the carrier, a RIPng router also advertises the network of a link again after the link returns.
+
+A learned route now expires 180 seconds (routeExpiryTime) after its last update, when a timer of its own fires. Before, the router looked at the age of its routes only when it sent an update, so it noticed an expiry up to one update interval late. Trajectories of RIP simulations in which a route expires change.
+
+A router now removes a network of its own that it lost (an interface, static or default route) 120 seconds (routePurgeTime) after the loss. Before, it kept the network at the metric 16 and advertised it in every update without end. When the route of such a network returns after the removal, RIP imports it again and triggers an update. Trajectories of RIP simulations in which a link of a router goes down for more than 120 seconds change.
+
+The garbage collection of an invalid route now runs 120 seconds from the invalidation of the route, and nothing restarts it (RFC 2453 section 3.9.2). Before, a learned route was purged 300 seconds after its last update, so a repeated withdrawal from its next hop kept it without end, and a single withdrawal kept it for 300 seconds. Before, the router also invalidated an expired route again at each update, and each time triggered an update, so it sent a triggered update every 1 to 5 seconds until the purge.

@@ -79,6 +79,7 @@ Rip::~Rip()
     cancelAndDelete(triggeredUpdateTimer);
     cancelAndDelete(startupTimer);
     cancelAndDelete(shutdownTimer);
+    cancelAndDelete(expiryTimer);
 }
 
 simsignal_t Rip::sentRequestSignal = registerSignal("sentRequest");
@@ -122,6 +123,7 @@ void Rip::initialize(int stage)
         triggeredUpdateTimer = new cMessage("RIP-trigger");
         startupTimer = new cMessage("RIP-startup");
         shutdownTimer = new cMessage("RIP-shutdown");
+        expiryTimer = new cMessage("RIP-expiry");
 
         WATCH(ripInterfaces);
         WATCH(ripRoutingTable);
@@ -144,6 +146,9 @@ void Rip::handleMessageWhenUp(cMessage *msg)
         else if (msg == shutdownTimer) {
             ASSERT(operationalState == State::STOPPING_OPERATION);
             finishActiveOperation();
+        }
+        else if (msg == expiryTimer) {
+            checkExpiredRoutes();
         }
         else
             throw cRuntimeError("unknown self message");
@@ -251,6 +256,7 @@ void Rip::stopRIPRouting()
     // cancel timers
     cancelEvent(updateTimer);
     cancelEvent(triggeredUpdateTimer);
+    cancelEvent(expiryTimer);
 
     // clear data
     for (auto& elem : ripRoutingTable)
@@ -285,6 +291,7 @@ void Rip::sendRIPRequest(const RipNetworkInterface& ripInterface)
 {
     const auto& packet = makeShared<RipPacket>();
     packet->setCommand(RIP_REQUEST);
+    packet->setVersion(getMessageVersion());
     packet->setEntryArraySize(1);
     RipEntry& entry = packet->getEntryForUpdate(0);
     entry.addressFamilyId = RIP_AF_NONE;
@@ -330,8 +337,9 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
         if (fieldId == NetworkInterface::F_STATE || fieldId == NetworkInterface::F_CARRIER) {
             ie = change->getNetworkInterface();
             if (!ie->isUp() || !ie->hasCarrier()) {
+                // a route in its garbage collection keeps it: the deletion starts only once
                 for (auto& elem : ripRoutingTable)
-                    if ((elem)->getInterface() == ie) {
+                    if ((elem)->getInterface() == ie && (elem)->getMetric() != RIP_INFINITE_METRIC) {
                         invalidateRoute(elem);
                     }
             }
@@ -372,11 +380,34 @@ void Rip::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, 
                 }
                 else {
                     RipNetworkInterface *ripIe = findRipInterfaceById(ie->getInterfaceId());
-                    if (!ripIe || ripIe->mode != NO_RIP)
-                        importRoute(route, RipRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+                    if (!ripIe || ripIe->mode != NO_RIP) {
+                        ripRoute = importRoute(route, RipRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+                        ripRoute->setChanged(true);
+                        triggerUpdate();
+                    }
                 }
             }
             else {
+                // a static or default route that returns, for example when its interface is up again
+                RipRoute::RouteType type = isDefaultRoute(route) ? RipRoute::RIP_ROUTE_DEFAULT : RipRoute::RIP_ROUTE_STATIC;
+                RipRoute *ripRoute = findRipRoute(route->getDestinationAsGeneric(), route->getPrefixLength(), type);
+                if (ripRoute && ripRoute->getRoute() == nullptr) { // readded
+                    ripRoute->setRoute(route);
+                    ripRoute->setNextHop(route->getNextHopAsGeneric());
+                    ripRoute->setInterface(route->getInterface());
+                    ripRoute->setMetric(1);
+                    ripRoute->setChanged(true);
+                    triggerUpdate();
+                }
+                else if (!ripRoute && (route->getSourceType() == IRoute::MANUAL || route->getSourceType() == IRoute::OWN_ADV_PREFIX)) {
+                    // a route of the configuration that returns after its RIP route was purged
+                    const L3Address& destAddr = route->getDestinationAsGeneric();
+                    if (type == RipRoute::RIP_ROUTE_DEFAULT || (!destAddr.isMulticast() && !destAddr.isLinkLocal())) {
+                        ripRoute = importRoute(route, type);
+                        ripRoute->setChanged(true);
+                        triggerUpdate();
+                    }
+                }
                 // TODO import external routes from other routing daemons
             }
         }
@@ -517,9 +548,12 @@ void Rip::processRequest(Packet *packet)
     }
 
     ripPacket->setCommand(RIP_RESPONSE);
+
+    ripPacket->setVersion(getMessageVersion());
     Packet *outPacket = new Packet("RIP response");
     outPacket->insertAtBack(ripPacket);
-    socket.sendTo(outPacket, srcAddr, srcPort);
+    RipNetworkInterface *ripInterface = findRipInterfaceById(interfaceId);
+    sendPacket(outPacket, srcAddr, srcPort, ripInterface != nullptr ? ripInterface->ie : nullptr);
 }
 
 /**
@@ -545,6 +579,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipNetworkInterfa
     Packet *pk = new Packet("RIP response");
     auto packet = makeShared<RipPacket>();
     packet->setCommand(RIP_RESPONSE);
+    packet->setVersion(getMessageVersion());
     packet->setEntryArraySize(maxEntries);
     int k = 0; // index into RIP entries
 
@@ -597,6 +632,7 @@ void Rip::sendRoutes(const L3Address& address, int port, const RipNetworkInterfa
             pk = new Packet("RIP response");
             packet = makeShared<RipPacket>();
             packet->setCommand(RIP_RESPONSE);
+            packet->setVersion(getMessageVersion());
             packet->setEntryArraySize(maxEntries);
             k = 0;
         }
@@ -718,6 +754,7 @@ void Rip::processResponse(Packet *packet)
         }
     }
 
+    rescheduleExpiryTimer();
     delete packet;
 }
 
@@ -908,18 +945,48 @@ void Rip::checkExpiredRoutes()
     // note that the iterator becomes invalid after calling purgeRoute
     for (RouteVector::iterator iter = ripRoutingTable.begin(); iter != ripRoutingTable.end();) {
         RipRoute *ripRoute = (*iter);
-        if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE) {
-            simtime_t now = simTime();
-            if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime + routePurgeTime) {
+        simtime_t now = simTime();
+        if (ripRoute->getMetric() == RIP_INFINITE_METRIC) {
+            // the garbage collection runs from the invalidation of the route, and nothing restarts
+            // it (RFC 2453 section 3.8); a route of the router itself is deleted too, unless a
+            // route of the routing table is attached to it again
+            if ((ripRoute->getType() == RipRoute::RIP_ROUTE_RTE || ripRoute->getRoute() == nullptr) &&
+                now >= ripRoute->getLastInvalidationTime() + routePurgeTime)
+            {
                 iter = purgeRoute(ripRoute);
                 continue;
             }
-            else if (now >= ripRoute->getLastUpdateTime() + routeExpiryTime)
-                invalidateRoute(ripRoute);
         }
+        else if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE && now >= ripRoute->getLastUpdateTime() + routeExpiryTime)
+            invalidateRoute(ripRoute);
 
         iter++;
     }
+
+    rescheduleExpiryTimer();
+}
+
+/**
+ * Schedules the expiry timer at the next instant at which a learned route expires (RFC 2453
+ * section 3.8, the timeout) or a route is purged, so that the router notices the event when it
+ * occurs, not at its next update.
+ */
+void Rip::rescheduleExpiryTimer()
+{
+    simtime_t next = SIMTIME_MAX;
+    for (auto& ripRoute : ripRoutingTable) {
+        if (ripRoute->getMetric() == RIP_INFINITE_METRIC) {
+            if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE || ripRoute->getRoute() == nullptr)
+                next = std::min(next, ripRoute->getLastInvalidationTime() + routePurgeTime);
+        }
+        else if (ripRoute->getType() == RipRoute::RIP_ROUTE_RTE)
+            next = std::min(next, ripRoute->getLastUpdateTime() + routeExpiryTime);
+    }
+
+    if (next == SIMTIME_MAX)
+        cancelEvent(expiryTimer);
+    else if (!expiryTimer->isScheduled() || expiryTimer->getArrivalTime() != next)
+        rescheduleAt(std::max(next, simTime()), expiryTimer);
 }
 
 /*
@@ -946,6 +1013,7 @@ void Rip::invalidateRoute(RipRoute *ripRoute)
     ripRoute->setChanged(true);
     ripRoute->setLastInvalidationTime(simTime());
     triggerUpdate();
+    rescheduleExpiryTimer();
 }
 
 /**
@@ -953,8 +1021,6 @@ void Rip::invalidateRoute(RipRoute *ripRoute)
  */
 Rip::RouteVector::iterator Rip::purgeRoute(RipRoute *ripRoute)
 {
-    ASSERT(ripRoute->getType() == RipRoute::RIP_ROUTE_RTE);
-
     EV_INFO << "purging route dest:" << ripRoute->getDestination() << "\n";
 
     IRoute *route = ripRoute->getRoute();
@@ -987,6 +1053,14 @@ void Rip::sendPacket(Packet *packet, const L3Address& destAddr, int destPort, co
             socket.setTimeToLive(255);
             packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
         }
+    }
+    else if (mode == RIPng && destInterface != nullptr) {
+        // RFC 2080 section 2.5: a response to a request leaves on the interface that the request
+        // came from, which a link-local requester needs, and from the link-local address of that
+        // interface, unless the request came from a port other than the RIPng port
+        packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(destInterface->getInterfaceId());
+        if (destPort == ripUdpPort)
+            packet->addTagIfAbsent<L3AddressReq>()->setSrcAddress(addressType->getLinkLocalAddress(destInterface));
     }
     numSent++;
     socket.sendTo(packet, destAddr, destPort);
