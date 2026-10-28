@@ -1,0 +1,5 @@
+PCAP recorder helpers get the direction and come before the built-in link types
+
+PcapRecorder now asks its helpers before its built-in table of link types. A helper can therefore select another link type for a protocol that the recorder knows, for example Radiotap records for IEEE 802.11 frames in place of link type 105. Recorders without helpers write the same files as before.
+
+PcapRecorder::IHelper::tryConvertToLinkType() has a new last parameter, Direction direction: it tells whether the network interface sent or received the packet. A helper outside INET must add the parameter before it compiles again. The migration guide shows the new signature.

@@ -208,7 +208,7 @@ void PcapRecorder::writePacket(const Protocol *protocol, const Packet *packet, b
         throw cRuntimeError("Cannot determine the PCAP link type from protocol '%s'", protocol->getName());
     bool convertPacket = !matchesLinkType(pcapLinkType, protocol);
     if (convertPacket) {
-        packet = tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol);
+        packet = tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol, direction);
         if (packet == nullptr)
             throw cRuntimeError("The protocol '%s' doesn't match PCAP link type %d", protocol->getName(), pcapLinkType);
         frontOffset = b(0);
@@ -283,7 +283,11 @@ bool PcapRecorder::matchesLinkType(PcapLinkType pcapLinkType, const Protocol *pr
 {
     if (protocol == nullptr)
         return false;
-    else if (*protocol == Protocol::ethernetPhy)
+    for (auto helper : helpers) {
+        if (helper->matchesLinkType(pcapLinkType, protocol))
+            return true;
+    }
+    if (*protocol == Protocol::ethernetPhy)
         return pcapLinkType == LINKTYPE_ETHERNET_MPACKET;
     else if (*protocol == Protocol::ethernetMac)
         return pcapLinkType == LINKTYPE_ETHERNET;
@@ -297,17 +301,16 @@ bool PcapRecorder::matchesLinkType(PcapLinkType pcapLinkType, const Protocol *pr
         return pcapLinkType == LINKTYPE_RAW || pcapLinkType == LINKTYPE_IPV6;
     else if (*protocol == Protocol::ieee802154)
         return pcapLinkType == LINKTYPE_IEEE802_15_4 || pcapLinkType == LINKTYPE_IEEE802_15_4_NOFCS;
-    else {
-        for (auto helper : helpers) {
-            if (helper->matchesLinkType(pcapLinkType, protocol))
-                return true;
-        }
-    }
     return false;
 }
 
 PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
 {
+    for (auto helper : helpers) {
+        auto lt = helper->protocolToLinkType(protocol);
+        if (lt != LINKTYPE_INVALID)
+            return lt;
+    }
     if (*protocol == Protocol::ethernetPhy)
         return LINKTYPE_ETHERNET_MPACKET;
     else if (*protocol == Protocol::ethernetMac)
@@ -320,21 +323,14 @@ PcapLinkType PcapRecorder::protocolToLinkType(const Protocol *protocol) const
         return LINKTYPE_RAW;
     else if (*protocol == Protocol::ieee802154)
         return LINKTYPE_IEEE802_15_4;
-    else {
-        for (auto helper : helpers) {
-            auto lt = helper->protocolToLinkType(protocol);
-            if (lt != LINKTYPE_INVALID)
-                return lt;
-        }
-    }
     return LINKTYPE_INVALID;
 }
 
-Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const
+Packet *PcapRecorder::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol, Direction direction) const
 {
     if (enableConvertingPackets) {
         for (IHelper *helper : helpers) {
-            if (auto newPacket = helper->tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol))
+            if (auto newPacket = helper->tryConvertToLinkType(packet, frontOffset, backOffset, pcapLinkType, protocol, direction))
                 return newPacket;
         }
     }

@@ -24,6 +24,8 @@ namespace inet {
 class INET_API PcapRecorder : public SimpleModule, protected cListener, public PacketDissector::ICallback
 {
   public:
+    /// The recorder asks its helpers before its built-in table, so a helper
+    /// can also select another link type for a protocol that the recorder knows.
     class INET_API IHelper {
       public:
         virtual ~IHelper() {}
@@ -35,7 +37,8 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
         virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
 
         /// Create a new Packet or return nullptr. The new packet contains the original packet converted to pcapLinkType format.
-        virtual Packet *tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const = 0;
+        /// The direction tells whether the network interface sent or received the packet.
+        virtual Packet *tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol, Direction direction) const = 0;
     };
 
   protected:
@@ -80,7 +83,7 @@ class INET_API PcapRecorder : public SimpleModule, protected cListener, public P
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void recordPacket(const cPacket *msg, Direction direction, cComponent *source);
     virtual bool matchesLinkType(PcapLinkType pcapLinkType, const Protocol *protocol) const;
-    virtual Packet *tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const;
+    virtual Packet *tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol, Direction direction) const;
     virtual PcapLinkType protocolToLinkType(const Protocol *protocol) const;
     virtual void writePacket(const Protocol *protocol, const Packet *packet, b frontOffset, b backOffset, Direction direction, NetworkInterface *networkInterface);
 };

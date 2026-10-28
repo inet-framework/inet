@@ -66,7 +66,7 @@ PcapLinkType AckingMacToEthernetPcapRecorderHelper::protocolToLinkType(const Pro
     return LINKTYPE_INVALID;
 }
 
-Packet *AckingMacToEthernetPcapRecorderHelper::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol) const
+Packet *AckingMacToEthernetPcapRecorderHelper::tryConvertToLinkType(const Packet *packet, b frontOffset, b backOffset, PcapLinkType pcapLinkType, const Protocol *protocol, Direction direction) const
 {
 #if defined(INET_WITH_ETHERNET)
     if (*protocol == Protocol::ackingMac && pcapLinkType == LINKTYPE_ETHERNET) {
