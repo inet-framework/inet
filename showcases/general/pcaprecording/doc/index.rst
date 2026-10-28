@@ -309,6 +309,49 @@ The TCP data packets from ``router2``:
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`PcapRecordingShowcase.ned <../PcapRecordingShowcase.ned>`
 
+Radiotap Records
+----------------
+
+The records of ``host1`` above hold only the 802.11 MAC frames, so Wireshark
+cannot show the physical layer values of a frame. With the helper
+``inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper``, the recorder
+writes Radiotap records (link type 127). Linux writes the same format in
+monitor mode. A Radiotap header comes before each MAC frame. It has the data
+rate or the HT or VHT MCS, the channel frequency, the transmit power of a sent
+frame, and the signal power, the noise and the start time of a received frame.
+A frame that the receiver could not decode has the "bad FCS" flag. The noise
+is the signal power divided by the minimum SNIR, so it includes the
+interference. The ``Radiotap`` configuration selects the helper for ``host1``:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-after: Radiotap records show
+   :end-at: Ieee80211RadiotapPcapRecorderHelper
+
+The following lines are the first records of ``host1.radiotap.pcapng``. The
+columns are the direction (2 for a sent frame, 1 for a received frame), the data
+rate in Mb/s, the channel frequency in MHz, the signal power and the noise in
+dBm, the signal-to-noise ratio in dB, the transmit power in dBm, the frame
+duration in µs that Wireshark calculates, and the frame type (0x0020 for data,
+0x001d for an ACK):
+
+.. code-block:: text
+
+   $ tshark -r results/host1.radiotap.pcapng -T fields -E separator=, \
+       -e frame.packet_flags_direction -e radiotap.datarate -e radiotap.channel.freq \
+       -e radiotap.dbm_antsignal -e radiotap.dbm_antnoise -e wlan_radio.snr \
+       -e radiotap.txpower -e wlan_radio.duration -e wlan.fc.type_subtype
+   0x00000002,54,2412,,,,13,32,0x0020
+   0x00000001,54,2412,-71,-110,39,,32,0x0020
+   0x00000002,24,2412,,,,13,28,0x001d
+   0x00000002,54,2412,,,,13,180,0x0020
+   0x00000001,24,2412,-71,-110,39,,28,0x001d
+
+``host1`` sends the data frames at 54 Mb/s and the ACK frames at 24 Mb/s, with
+the default transmit power of 20 mW (13 dBm). The frames from ``host2`` arrive
+with -71 dBm. In Wireshark, the same values are in the "802.11 radio
+information" and "Radiotap Header" parts of each frame, and they can be shown
+as columns.
 
 Try It Yourself
 ---------------
