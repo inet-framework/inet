@@ -25,6 +25,20 @@ Interception tap(const char *tapName)
     return interception;
 }
 
+Action action()
+{
+    return Action();
+}
+
+Action& Action::setParameter(const char *path, const char *name, const char *value)
+{
+    std::string parameter = name;
+    std::string text = value;
+    if (description.empty())
+        description = std::string("set ") + path + "." + name + " to " + value;
+    return run(path, [parameter, text](cModule *module) { module->par(parameter.c_str()).parse(text.c_str()); });
+}
+
 std::map<std::string, ProtocolTestBuilderFn>& ProtocolTestRegistry::all()
 {
     // Function-local static: safe across static-initializer registration order.

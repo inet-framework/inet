@@ -196,8 +196,14 @@ void ProtocolTester::handleMessage(cMessage *msg)
         return;
     }
     if (msg == injectMsg) {
-        performInjection(program->steps[currentStep].injection);
-        advance(simTime());
+        // The timer of an injection is the timer of an action too.
+        const Step& step = program->steps[currentStep];
+        if (step.type == StepType::Act)
+            performAction(step.action);
+        else
+            performInjection(step.injection);
+        if (!decided)
+            advance(simTime());
         return;
     }
     for (auto& guard : guards) {
@@ -293,6 +299,7 @@ void ProtocolTester::finish()
         std::string what = step.type == StepType::Unordered
                              ? "[unordered: " + std::to_string(groupRemaining) + " pattern(s) unmatched]"
                          : step.type == StepType::Inject ? "[inject pending]"
+                         : step.type == StepType::Act ? "[action pending]"
                          : "[" + step.pattern.str() + "]";
         decide(false, "simulation ended with step " + std::to_string(currentStep) + " pending " + what);
     }
@@ -529,10 +536,14 @@ void ProtocolTester::enterStep()
             deliveryStage = 0;
             deliveryTreeId = -1;
             break;
-        case StepType::Inject: {
-            const Injection& injection = step.injection;
-            simtime_t fireTime = injection.hasAtTime ? injection.atTime
-                               : injection.hasAfter ? anchorTime + injection.afterDelay
+        case StepType::Inject:
+        case StepType::Act: {
+            bool hasAtTime = step.type == StepType::Act ? step.action.hasAtTime : step.injection.hasAtTime;
+            bool hasAfter = step.type == StepType::Act ? step.action.hasAfter : step.injection.hasAfter;
+            simtime_t atTime = step.type == StepType::Act ? step.action.atTime : step.injection.atTime;
+            simtime_t afterDelay = step.type == StepType::Act ? step.action.afterDelay : step.injection.afterDelay;
+            simtime_t fireTime = hasAtTime ? atTime
+                               : hasAfter ? anchorTime + afterDelay
                                : simTime();
             if (injectMsg == nullptr)
                 injectMsg = new cMessage("inject");
@@ -748,6 +759,31 @@ void ProtocolTester::performInjection(const Injection& injection)
             << " at t=" << simTime() << endl;
     // pushPacket() does its own Enter_Method; the interface adds InterfaceInd etc.
     sink->pushPacket(packet, gate);
+}
+
+void ProtocolTester::performAction(const Action& action)
+{
+    EV_INFO << "ProtocolTest " << program->name << ": action at t=" << simTime()
+            << (action.description.empty() ? "" : ": " + action.description) << endl;
+    for (const auto& call : action.calls) {
+        cModule *module = findModuleByPattern(call.first);
+        // The code runs as a method call of the module, so that it can send from it.
+        cMethodCallContextSwitcher contextSwitcher(module);
+        contextSwitcher.methodCall("protocol test action");
+        call.second(module);
+    }
+    for (const auto& assertion : action.moduleAssertions) {
+        Step step;
+        step.pattern.assertModule(assertion.first.c_str(), assertion.second.c_str());
+        PacketEvent event;
+        event.time = simTime();
+        MatchContext context{event, captureStore};
+        std::string reason;
+        if (!step.pattern.assertionsHold(context, reason)) {
+            decide(false, "the action of step " + std::to_string(currentStep) + ": " + reason);
+            return;
+        }
+    }
 }
 
 void ProtocolTester::startGuard(size_t stepIndex)

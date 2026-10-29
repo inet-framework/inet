@@ -1,0 +1,90 @@
+%description:
+
+Protocol Test Framework self test -- the action step act(action()...).
+
+host1 opens two connections, at 0.1 s and at 1.5 s. After the handshake of the first one, an
+action checks that the connection uses timestamps, and runs code in the context of host1. At
+1 s, a second action turns off timestampSupport of host1, a mutable parameter that each
+connection reads at its open. The SYN of the second connection must then be shorter than the
+first SYN, because it has no timestamp option.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+static double codeRanAt = -1;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("action_step")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("firstSyn", "tcp.headerLength")
+                  .describe("the first SYN of host1")
+                  .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false")
+                  .describe("the last segment of the first handshake")
+                  .within(0.5))
+        .act(action().after(0.01)
+                 .run("host1", [](cModule *module) { codeRanAt = simTime().dbl(); })
+                 .assertModule("host1.tcp.conn-*", "state.ts_enabled"))
+        .act(action().at(1.0).setParameter("host1.tcp", "timestampSupport", "false"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertPacket("tcp.headerLength < {firstSyn}")
+                  .assertEvent([](const MatchContext&) { return codeRanAt > 0; })
+                  .describe("the SYN of the second connection")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "action_step compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network ActionStepNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = ActionStepNet
+sim-time-limit = 3s
+seed-set = 0
+
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpSessionApp"
+*.host1.app[*].connectAddress = "host2"
+*.host1.app[*].connectPort = 1000
+*.host1.app[*].sendBytes = 100B
+*.host1.app[*].tClose = -1s
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[1].tOpen = 1.5s
+*.host1.app[1].tSend = 1.6s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST action_step: PASS

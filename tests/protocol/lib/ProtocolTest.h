@@ -33,7 +33,7 @@ namespace protocoltest {
 //  Intercept    -- start a rule of a tap (meanwhile(tap(...))), then advance at once
 // A pattern may select a packet signal or a scalar signal (e.g. an FSM state via is(v)); the
 // same cardinalities apply to both (once = "reaches the value", never = "must not").
-enum class StepType { Once, AtMostOnce, Never, ExactlyTimes, Count, Inject, Unordered, AnyOf, Delivery, Intercept };
+enum class StepType { Once, AtMostOnce, Never, ExactlyTimes, Count, Inject, Unordered, AnyOf, Delivery, Intercept, Act };
 
 //
 // A packet injection. When the engine reaches an inject step it resolves the target
@@ -59,6 +59,41 @@ class INET_API Injection
     Injection& after(double d) { hasAfter = true; afterDelay = d; return *this; }
     Injection& describe(const char *phrase) { description = phrase; return *this; }
     Injection& packet(std::function<Packet *(const CaptureStore&)> fn) { builder = std::move(fn); return *this; }
+};
+
+//
+// An action that the tester takes at a time, or after the previous step: calls of C++ code in
+// the context of a module, the change of a parameter, and checks of the fields of a module.
+// The step after it starts when the action is done.
+//
+//     .act(action().at(1.0).setParameter("host1.tcp", "timestampSupport", "false"))
+//     .act(action().after(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().close(); }))
+//
+class INET_API Action
+{
+  public:
+    bool hasAtTime = false; simtime_t atTime = 0;
+    bool hasAfter = false; simtime_t afterDelay = 0;
+    std::string description;     // optional human phrase
+    std::vector<std::pair<std::string, std::function<void(cModule *)>>> calls; // module path, code
+    std::vector<std::pair<std::string, std::string>> moduleAssertions;        // module path, expression
+
+    Action& at(double t) { hasAtTime = true; atTime = t; return *this; }
+    Action& after(double d) { hasAfter = true; afterDelay = d; return *this; }
+    Action& describe(const char *phrase) { description = phrase; return *this; }
+    // Calls fn in the context of the module, so that fn can send from it, as a socket call
+    // does. The path is as in assertModule(...): relative to the network, with a * in its last
+    // name for the newest matching module.
+    Action& run(const char *path, std::function<void(cModule *)> fn) { calls.emplace_back(path, std::move(fn)); return *this; }
+    // The same, with the module cast to its class: run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { ... }).
+    template<typename T, typename F>
+    Action& run(const char *path, F fn) { return run(path, std::function<void(cModule *)>([fn](cModule *module) { fn(*check_and_cast<T *>(module)); })); }
+    // Changes a parameter of a module. The value is NED expression text, so a string value
+    // has its quotes: setParameter("host1.tcp", "tcpEcnMode", "\"accecn\"").
+    Action& setParameter(const char *path, const char *name, const char *value);
+    // The fields of a module must satisfy the expression when the action is done, as for
+    // the assertion assertModule(...) of a step.
+    Action& assertModule(const char *path, const char *expression) { moduleAssertions.emplace_back(path, expression); return *this; }
 };
 
 //
@@ -149,6 +184,7 @@ struct Step {
     int cardMin = 0, cardMax = 0;      // Count: required occurrences [min, max]; max < 0 = unbounded
     bool concurrent = false;           // meanwhile(...): runs beside the steps after it
     int interceptionIndex = -1;        // Intercept: the rule in ProtocolTest::interceptions
+    Action action;                     // Act
 };
 
 // Free builders that make a step without a program to hold it. They exist so that a guard
@@ -176,6 +212,7 @@ Step anyNumberOfTimes(EventPattern pattern);
 //
 Injection at(const char *nodeName);
 Interception tap(const char *tapName);
+Action action();
 
 
 //
@@ -311,6 +348,16 @@ class INET_API ProtocolTest
     ProtocolTest& inject(const Injection& injection)
     {
         steps.push_back(Step{StepType::Inject, {}, injection, {}});
+        return *this;
+    }
+
+    // Take an action at its time; the next step starts when it is done.
+    ProtocolTest& act(const Action& action)
+    {
+        Step step;
+        step.type = StepType::Act;
+        step.action = action;
+        steps.push_back(std::move(step));
         return *this;
     }
 

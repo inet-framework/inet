@@ -266,6 +266,33 @@ Inject a packet built in C++ into a module's gate, scheduled or reactively:
 
 Inject steps are ordered like any other step.
 
+### An action at a time
+
+`act(action()...)` is a step that the tester takes itself, at a time (`.at(t)`) or after the
+previous step (`.after(d)`). The step after it starts when the action is done. An action can
+hold these words, in any number:
+
+| Word | What the tester does |
+| --- | --- |
+| `.setParameter(module, name, value)` | changes a parameter; the value is NED expression text, so a string keeps its quotes: `"\"accecn\""` |
+| `.run(module, fn)` | calls `void(cModule*)` as a method call of the module, so the code can send from it, as a socket call does |
+| `.run<T>(module, fn)` | the same, with the module cast to `T&` |
+| `.assertModule(module, expression)` | checks the fields of a module, as the assertion of a step does; the test fails if they do not satisfy it |
+
+The module paths are as in `assertModule`: relative to the network, with a `*` in the last
+name for the newest matching module ([`ActionStep`](../self/ActionStep.test)):
+
+```cpp
+.act(action().after(0.01).assertModule("host1.tcp.conn-*", "state.ts_enabled"))
+.act(action().at(1.0).setParameter("host1.tcp", "timestampSupport", "false"))   // a @mutable parameter
+.once(on("host1.tcp").signal("packetSentToLower").filterPacket("tcp.synBit == true").first()
+          .assertPacket("tcp.headerLength < {firstSyn}"))
+```
+
+A parameter that is not `@mutable` refuses the change. Use `setParameter` for the run-time
+change of a mutable parameter, and `run` for a call that no parameter can express, such as a
+socket call.
+
 ---
 
 ## 7. Interception (MITM) — drop, delay, mutate, corrupt, duplicate

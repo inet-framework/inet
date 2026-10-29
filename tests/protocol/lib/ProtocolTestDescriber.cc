@@ -347,6 +347,28 @@ static std::string renderInject(const Injection& inj)
     return capitalize(os.str()) + ".";
 }
 
+static std::string renderAct(const Action& action)
+{
+    std::ostringstream os;
+    if (action.hasAtTime)
+        os << "at " << formatTime(action.atTime) << ", ";
+    else if (action.hasAfter)
+        os << formatTime(action.afterDelay) << " after the previous step, ";
+    else
+        os << "then, ";
+    if (!action.description.empty())
+        os << action.description;
+    else if (!action.calls.empty()) {
+        os << "run code in ";
+        for (size_t k = 0; k < action.calls.size(); k++)
+            os << (k == 0 ? "" : " and ") << action.calls[k].first;
+    }
+    for (const auto& assertion : action.moduleAssertions)
+        os << (action.description.empty() && action.calls.empty() ? "" : ", and ")
+           << "the module " << assertion.first << " must satisfy \"" << assertion.second << "\"";
+    return capitalize(os.str()) + ".";
+}
+
 static std::string renderInterception(const Interception& i)
 {
     std::ostringstream os;
@@ -405,6 +427,7 @@ std::string describe(const ProtocolTest& test)
             case StepType::Count:        clause = renderCount(step.pattern, step.cardMin, step.cardMax); break;
             case StepType::Delivery:  clause = renderDelivery(step.pattern, step.pattern2); break;
             case StepType::Inject:    clause = renderInject(step.injection); break;
+            case StepType::Act:       clause = renderAct(step.action); break;
             case StepType::Intercept: {
                 std::string rule = renderInterception(test.interceptions[step.interceptionIndex]);
                 rule[0] = std::tolower(rule[0]);
