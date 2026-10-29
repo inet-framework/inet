@@ -1,0 +1,100 @@
+%description:
+
+Tcp.fastopenKey:random -- the cookie comes from a key of the RNG, and it brings in the data of the next SYN.
+
+The claim (Tcp.ned): "TCP Fast Open, server: the key of the cookies, in the format of Linux
+net.ipv4.tcp_fastopen_key ...; a cookie of 8 bytes is then the cookie of Linux with this key;
+empty: a key from the RNG".
+
+The classes: random ("", the default: a key from the RNG), fixed (a key of Linux: the cookie of
+8 bytes is that of Linux), invalid (another format: an error at the first cookie), and changed
+(the parameter is @mutable: a new key refuses the cookies of the old one). The code:
+Tcp::generateFastOpenCookie() reads the key at each cookie that it makes or checks. The cookie
+of Linux comes from a Linux run of the packetdrill script fastopen/server/simple1.pkt (inet-gpl):
+the key a0bf63f7-ed803d81-cd641d30-cebc4a90 gives the client 10.248.0.2 at the server
+192.168.0.2 the cookie 00abaaabe8e954c2 (the script sets these addresses itself). This test separates "random" from "fixed".
+
+Host under test: host2, a Fast Open server; host1 is a Fast Open client (preconditions). host1
+has the address 10.248.0.2 and host2 192.168.0.2, as in the Linux run, with the router between
+them. host1 opens connection 1 at 0.1 s with Fast Open, which requests a cookie; at 0.5 s it opens
+connection 2 with Fast Open and sends 500 bytes, which go on the SYN when host1 has a cookie
+of host2. Observation: level 1, the cookie of connection 1 has 8 bytes and is not the cookie of the
+Linux key; the SYN-ACK of connection 2 acknowledges its 500 bytes.
+
+%# parameter: Tcp.fastopenKey
+%# class: random
+%# value: ""
+%# key: *.host2.tcp.fastopenKey
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenKeyRandom")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "";
+                  })
+                  .describe("the SYN of connection 1: a cookie request")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie.size() == 16 && cookie != "00abaaabe8e954c2";
+                  })
+                  .describe("the SYN-ACK of connection 1: a cookie of 8 bytes, not that of the Linux key")
+                  .within(0.5))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 2 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false && pk.dataLength > tcp.headerLength")
+                  .capture("isn2", "tcp.sequenceNo")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie.size() == 16;
+                  })
+                  .describe("the SYN of connection 2, with 500 bytes and the cookie")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.ackNo == {isn2} + 501")
+             .describe("the SYN-ACK of connection 2 acknowledges the SYN and the 500 bytes")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenKeyRandom compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.fastopenKey = ""    # the parameter under test
+network = inet.protocoltest.TapRouterNetwork
+*.configurator.config = xml("<config><interface hosts='host1' names='eth0' address='10.248.0.2' netmask='255.255.255.0'/><interface hosts='router' names='eth0' address='10.248.0.1' netmask='255.255.255.0'/><interface hosts='router' names='eth1' address='192.168.0.1' netmask='255.255.255.0'/><interface hosts='host2' names='eth0' address='192.168.0.2' netmask='255.255.255.0'/></config>")
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenKeyRandom: PASS

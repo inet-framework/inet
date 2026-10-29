@@ -332,6 +332,43 @@ inline void hideTcpOption(Packet *frame, int kind)
     });
 }
 
+// The cookie of the Fast Open option of a segment (RFC 7413 section 4.1.1), in hexadecimal: ""
+// for a cookie request, and "-" when the segment has no such option. With exp, the
+// experimental option (kind 254, RFC 7413 appendix A), else kind 34.
+inline std::string tcpFastOpenCookieOf(const Packet *packet, bool exp = false)
+{
+    const auto& header = tcpHeaderOf(packet);
+    for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++) {
+        auto option = header->getHeaderOption(i);
+        std::vector<uint8_t> cookie;
+        if (auto fastOpen = dynamic_cast<const inet::tcp::TcpOptionTcpFastOpen *>(option); fastOpen && !exp)
+            for (size_t k = 0; k < fastOpen->getCookieArraySize(); k++)
+                cookie.push_back(fastOpen->getCookie(k));
+        else if (auto fastOpenExp = dynamic_cast<const inet::tcp::TcpOptionTcpFastOpenExp *>(option); fastOpenExp && exp)
+            for (size_t k = 0; k < fastOpenExp->getCookieArraySize(); k++)
+                cookie.push_back(fastOpenExp->getCookie(k));
+        else
+            continue;
+        std::string hex;
+        for (uint8_t byte : cookie)
+            hex += opp_stringf("%02x", byte);
+        return hex;
+    }
+    return "-";
+}
+
+// Changes the first byte of the cookie of the Fast Open option (kind 34) of a segment, as a
+// forged cookie would carry it. A segment without a cookie stays as it is.
+inline void forgeFastOpenCookie(Packet *frame)
+{
+    rewriteTcpHeader(frame, [](TcpHeader& header) {
+        for (size_t i = 0; i < header.getHeaderOptionArraySize(); i++)
+            if (auto option = dynamic_cast<inet::tcp::TcpOptionTcpFastOpen *>(header.getHeaderOptionForUpdate(i)))
+                if (option->getCookieArraySize() > 0)
+                    option->setCookie(0, option->getCookie(0) ^ 0xff);
+    });
+}
+
 // Adds delta to the TSval of the Timestamps option of the segment (RFC 7323 section 3.2), as a
 // forged or a late segment would carry it. A segment without the option stays as it is.
 inline void addToTsval(Packet *frame, uint32_t delta)

@@ -1,0 +1,96 @@
+%description:
+
+Tcp.fastopenBlackholeTimeout:hour -- 5 s after a black hole, the SYN has no Fast Open option; 15 s after it, no Fast Open option.
+
+The claim (Tcp.ned): "TCP Fast Open, client: when a SYN with a Fast Open option or data times out
+the second time, so that it goes the third time (a negative response, RFC 7413 section 4.1.3.1),
+no connection uses Fast Open for this time ...; 0s: no detection".
+
+The classes: hour (3600 s, the default), other (another value), off (0 s, the value of
+LinuxTcp: no detection). The code: TcpConnection::process_TIMEOUT_SYN_REXMIT() records a black
+hole when a SYN with a Fast Open option or data goes the third time;
+Tcp::recordFastOpenBlackhole() then stops Fast Open for the value, and
+TcpConnection::process_OPEN_ACTIVE() opens without it. This test separates "hour" from the other values.
+
+Host under test: host1, a Fast Open client; host2 is a Fast Open server (preconditions). host1
+opens connection 1 at 0.1 s with Fast Open; the tap drops the SYNs of host1 in the first 2.5 s,
+so the SYN goes at 0.1 s, 1.1 s and the third time at 3.1 s. host1 opens connection 2 at 8.1 s
+and connection 3 at 18.1 s with Fast Open and 500 bytes, 5 s and 15 s after the black hole. A Fast
+Open option is a cookie request or, after a cookie, the cookie. Observation: level 1, the SYN of connection 2 has no Fast Open option, and the SYN of connection 3 has no Fast Open option.
+
+%# parameter: Tcp.fastopenBlackholeTimeout
+%# class: hour
+%# value: 3600s
+%# key: *.host1.tcp.fastopenBlackholeTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenBlackholeTimeoutHour")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true").drop().within(2.5)
+                     .describe("each SYN of host1 in the first 2.5 s"))
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the first SYN of connection 1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the second SYN of connection 1")
+             .within(1.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the third SYN of connection 1: a black hole")
+             .within(2.5))
+        .act(action().at(8.1).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 2 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "-";
+                  })
+                  .describe("the SYN of connection 2: no Fast Open option")
+                  .within(0.5))
+        .act(action().at(18.1).run<TcpTestApp>("host1.app[2]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 3 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "-";
+                  })
+                  .describe("the SYN of connection 3: no Fast Open option")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenBlackholeTimeoutHour compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.fastopenBlackholeTimeout = 3600s    # the parameter under test
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.numApps = 3
+*.host1.app[*].typename = "TcpTestApp"
+sim-time-limit = 20s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenBlackholeTimeoutHour: PASS

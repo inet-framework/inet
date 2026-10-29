@@ -1,0 +1,33 @@
+%description:
+
+Tcp.fastopenCookieCacheSize:invalid -- a cache of 0 entries stops the run with an error.
+
+The claim (Tcp.ned): "at least 1".
+
+The classes: ample (1024, the default: more servers than the test uses), evicts (a value below
+the number of servers: a new server replaces an entry), invalid (below 1). The code:
+Tcp::setFastOpenCookie() removes an arbitrary entry when the cache is full; Tcp::initialize()
+checks the value.
+
+Host under test: host1. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.fastopenCookieCacheSize
+%# class: invalid
+%# value: 0
+%# key: *.host1.tcp.fastopenCookieCacheSize
+%# expected-result: PASS
+
+%activity:
+EV << "TcpFastopenCookieCacheSizeInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.fastopenCookieCacheSize = 0    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+fastopenCookieCacheSize must be 1 or more, but it is 0

@@ -1,0 +1,65 @@
+%description:
+
+Tcp.fastopenClientNoCookieRequired:on -- the SYN carries the data without a cookie and without a Fast Open option.
+
+The claim (Tcp.ned): "TCP Fast Open, client: send the data on the SYN without a cookie and without a
+Fast Open option (Linux tcp_fastopen bit 0x4), for a server that accepts it; RFC 7413 requires a
+cookie".
+
+The classes: off (false, the default), on (true), and changed (the parameter is @mutable). The
+code: with true, TcpConnection::process_OPEN_ACTIVE() lets the SYN wait for the first SEND also
+without a cookie, and TcpConnection::writeHeaderOptions() puts no Fast Open option on it. This test separates "on" from "off".
+
+Host under test: host1, a Fast Open client (precondition), without a cookie of host2; host2 is a
+Fast Open server that takes data without a cookie (preconditions). host1 opens a connection with
+Fast Open and sends 500 bytes. Observation: level 1, the SYN of host1 carries 500 bytes and no Fast Open option.
+
+%# parameter: Tcp.fastopenClientNoCookieRequired
+%# class: on
+%# value: true
+%# key: *.host1.tcp.fastopenClientNoCookieRequired
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenClientNoCookieRequiredOn")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 1 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "-" && matchesExpression(context.event.packet, "pk.dataLength > tcp.headerLength");
+                  })
+                  .describe("the SYN of connection 1: 500 bytes, no Fast Open option")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenClientNoCookieRequiredOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.fastopenClientNoCookieRequired = true    # the parameter under test
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host2.tcp.fastopenAcceptWithoutCookie = true
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenClientNoCookieRequiredOn: PASS

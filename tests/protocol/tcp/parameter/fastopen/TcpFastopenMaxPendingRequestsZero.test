@@ -1,0 +1,104 @@
+%description:
+
+Tcp.fastopenMaxPendingRequests:zero -- no SYN gets Fast Open.
+
+The claim (Tcp.ned): "TCP Fast Open, server: the largest number of Fast Open connections of a
+listener in SYN_RCVD (PendingFastOpenRequests, RFC 7413 section 4.2 ...); above it, a SYN gets no
+Fast Open: no cookie, and its data is not acknowledged".
+
+The classes: ample (16, the default: more than the pending connections of the test), limit (a
+value that the pending connections reach), zero (0: no Fast Open at all). The code:
+TcpConnection::processSynInListen() gives a SYN no Fast Open when the Fast Open
+connections of the listener in SYN_RCVD reach the value: no cookie, and the data of the SYN is
+not acknowledged (RFC 7413 section 4.2). This test separates "zero" from the other values.
+
+Host under test: host2, a Fast Open server; host1 is a Fast Open client (preconditions). host1
+gets a cookie at 0.1 s; at 0.5 s it opens connection A with 500 bytes on the SYN, and the tap
+drops each later segment of connection A, so that it stays in SYN_RCVD at host2; at 0.6 s host1
+opens connection B with 500 bytes on the SYN. Observation: level 1, no SYN gets Fast Open: no cookie, and no SYN-ACK acknowledges data.
+
+%# parameter: Tcp.fastopenMaxPendingRequests
+%# class: zero
+%# value: 0
+%# key: *.host2.tcp.fastopenMaxPendingRequests
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenMaxPendingRequestsZero")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "";
+                  })
+                  .describe("the SYN of connection 1: a cookie request")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "-";
+                  })
+                  .describe("the SYN-ACK of the first connection: no cookie")
+                  .within(0.5))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 2 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isnA", "tcp.sequenceNo").capture("portA", "tcp.srcPort")
+             .describe("the SYN of connection A")
+             .within(0.5))
+        .meanwhile(tap("tap").from("host1").filterPacket("tcp.srcPort == {portA} && tcp.synBit == false").drop()
+                       .describe("each later segment of connection A: it stays in SYN_RCVD at host2"))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.ackNo == {isnA} + 1")
+             .describe("the SYN-ACK of connection A")
+             .within(0.5))
+        .act(action().at(0.6).run<TcpTestApp>("host1.app[2]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 3 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isnB", "tcp.sequenceNo")
+             .describe("the SYN of connection B")
+             .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.ackNo == {isnB} + 1")
+             .describe("the SYN-ACK of connection B")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenMaxPendingRequestsZero compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.fastopenMaxPendingRequests = 0    # the parameter under test
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.numApps = 3
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenMaxPendingRequestsZero: PASS

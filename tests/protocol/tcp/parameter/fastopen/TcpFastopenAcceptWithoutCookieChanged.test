@@ -1,0 +1,84 @@
+%description:
+
+Tcp.fastopenAcceptWithoutCookie:changed -- a new value acts at the next connection.
+
+The claim (Tcp.ned): "TCP Fast Open, server: accept the data of a SYN without a valid cookie, if the
+SYN has data or a Fast Open option, and give no cookie (Linux tcp_fastopen bit 0x200); RFC 7413
+requires a valid cookie".
+
+The classes: off (false, the default), on (true), and changed (the parameter is @mutable). The
+code: TcpConnection::processSynInListen() takes the data of a SYN without a valid cookie
+with true, when the SYN has data or a Fast Open option, and gives no cookie. This test separates "changed" from "off".
+
+Host under test: host2, a Fast Open server (precondition); host1 is a Fast Open client that
+sends data on the SYN without a cookie (fastopenClientNoCookieRequired, a precondition): 500
+bytes on the SYN of each connection. host1 opens connection 1 at 0.1 s and connection 2 at 0.5 s; at 0.3 s, the test sets
+fastopenAcceptWithoutCookie of host2 to false. Observation: level 1, the SYN-ACK of connection 1
+acknowledges the 500 bytes; that of connection 2 only the SYN.
+
+%# parameter: Tcp.fastopenAcceptWithoutCookie
+%# class: changed
+%# value: true
+%# key: *.host2.tcp.fastopenAcceptWithoutCookie
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenAcceptWithoutCookieChanged")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 1 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false && pk.dataLength > tcp.headerLength")
+             .capture("isn1", "tcp.sequenceNo")
+             .describe("the SYN of connection 1, with 500 bytes")
+             .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.ackNo == {isn1} + 501")
+             .describe("the SYN-ACK of connection 1 acknowledges the 500 bytes")
+             .within(0.5))
+        .act(action().at(0.3).setParameter("host2.tcp", "fastopenAcceptWithoutCookie", "false")
+                 .describe("fastopenAcceptWithoutCookie of host2 becomes false"))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 2 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false && pk.dataLength > tcp.headerLength")
+             .capture("isn2", "tcp.sequenceNo")
+             .describe("the SYN of connection 2, with 500 bytes")
+             .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.ackNo == {isn2} + 1")
+             .describe("the SYN-ACK of connection 2 acknowledges only the SYN")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenAcceptWithoutCookieChanged compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.fastopenAcceptWithoutCookie = true    # the parameter under test
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.tcp.fastopenClientNoCookieRequired = true
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenAcceptWithoutCookieChanged: PASS

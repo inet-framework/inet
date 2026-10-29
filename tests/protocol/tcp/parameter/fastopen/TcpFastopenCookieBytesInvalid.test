@@ -1,0 +1,33 @@
+%description:
+
+Tcp.fastopenCookieBytes:invalid -- an odd length stops the run with an error.
+
+The claim (Tcp.ned): "an even number from 4 to 16".
+
+The classes: linux (8, the default, the cookie of Linux), long (above 8: the cookie continues
+with a second MAC), invalid (an odd number, below 4, above 16). The code:
+Tcp::generateFastOpenCookie() makes the cookie; TcpConnection::configureStateVariables() checks
+the value.
+
+Host under test: host2. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.fastopenCookieBytes
+%# class: invalid
+%# value: 5
+%# key: *.host2.tcp.fastopenCookieBytes
+%# expected-result: PASS
+
+%activity:
+EV << "TcpFastopenCookieBytesInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.fastopenCookieBytes = 5    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+fastopenCookieBytes must be an even number from 4 to 16 \(RFC 7413 section 4.1.1\), but it is 5

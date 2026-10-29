@@ -1,0 +1,72 @@
+%description:
+
+Tcp.fastopenKey:invalid -- a key in another format stops the run with an error at the first cookie.
+
+The claim (Tcp.ned): "in the format of Linux net.ipv4.tcp_fastopen_key
+("xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx", the primary key)".
+
+The classes: random ("", the default: a key from the RNG), fixed (a key of Linux: the cookie of
+8 bytes is that of Linux), invalid (another format: an error at the first cookie), and changed
+(the parameter is @mutable: a new key refuses the cookies of the old one). The code:
+Tcp::generateFastOpenCookie() reads the key at each cookie that it makes or checks. The cookie
+of Linux comes from a Linux run of the packetdrill script fastopen/server/simple1.pkt (inet-gpl):
+the key a0bf63f7-ed803d81-cd641d30-cebc4a90 gives the client 10.248.0.2 at the server
+192.168.0.2 the cookie 00abaaabe8e954c2 (the script sets these addresses itself).
+
+Host under test: host2, a Fast Open server; host1 requests a cookie at 0.1 s (preconditions).
+Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.fastopenKey
+%# class: invalid
+%# value: "xyz"
+%# key: *.host2.tcp.fastopenKey
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenKeyInvalid")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "";
+                  })
+                  .describe("the SYN of connection 1: a cookie request")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .describe("the SYN-ACK of host2, which the error prevents")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenKeyInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.fastopenKey = "xyz"    # the parameter under test
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+fastopenKey must have the format xxxxxxxx-xxxxxxxx-xxxxxxxx-xxxxxxxx, but it is 'xyz'

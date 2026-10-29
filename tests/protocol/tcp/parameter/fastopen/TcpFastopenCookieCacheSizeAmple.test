@@ -1,0 +1,82 @@
+%description:
+
+Tcp.fastopenCookieCacheSize:ample -- the cookie of the first server is still in the cache.
+
+The claim (Tcp.ned): "TCP Fast Open, client: the number of servers whose Fast Open state is kept
+...; a new server then replaces an arbitrary entry; at least 1".
+
+The classes: ample (1024, the default: more servers than the test uses), evicts (a value below
+the number of servers: a new server replaces an entry), invalid (below 1). The code:
+Tcp::setFastOpenCookie() removes an arbitrary entry when the cache is full; Tcp::initialize()
+checks the value. This test separates "ample" from "evicts".
+
+Host under test: host1, a Fast Open client (precondition), on TapSwitchNetwork with two Fast Open
+servers, peer[0] and peer[1]. host1 gets a cookie of peer[0] at 0.1 s and one of peer[1] at
+0.3 s, and at 0.5 s opens a connection to peer[0] with Fast Open and sends 500 bytes. Observation: level 1, the SYN of connection 3 carries the cookie of peer[0] and the 500 bytes.
+
+%# parameter: Tcp.fastopenCookieCacheSize
+%# class: ample
+%# value: 1024
+%# key: *.host1.tcp.fastopenCookieCacheSize
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenCookieCacheSizeAmple")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("peer[0]"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the SYN to peer[0]")
+             .within(0.5))
+        .act(action().at(0.3).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("peer[1]"), 1000, true); })
+                 .describe("host1 opens connection 2 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the SYN to peer[1]")
+             .within(0.5))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[2]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("peer[0]"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 3, to peer[0], with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false && pk.dataLength > tcp.headerLength")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie.size() == 16;
+                  })
+                  .describe("the SYN of connection 3, with the cookie and the 500 bytes")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenCookieCacheSizeAmple compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.fastopenCookieCacheSize = 1024    # the parameter under test
+network = inet.protocoltest.TapSwitchNetwork
+*.numPeers = 2
+*.peer[*].numApps = 1
+*.peer[*].app[0].typename = "TcpEchoApp"
+*.peer[*].app[0].localPort = 1000
+*.peer[*].app[0].echoFactor = 0
+*.peer[*].tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.numApps = 3
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenCookieCacheSizeAmple: PASS

@@ -1,0 +1,94 @@
+%description:
+
+Tcp.fastopenExpOptionEnabled:on-server -- the server answers a request in the experimental option with a cookie in it.
+
+The claim (Tcp.ned): "TCP Fast Open: also use the experimental option (kind 254 with the magic
+number 0xF989, RFC 7413 appendix A), as Linux: the server answers it in the same option, and the
+client tries it once when a cookie request had no answer".
+
+The classes: off (false, the default) and on (true, the value of LinuxTcp), with the facets
+client and server. The code: TcpConnection::processSegmentInSynSent() lets a client whose
+cookie request got no answer use the experimental option at the next request, once, with true;
+TcpConnection::readHeaderOptions() lets a server read the experimental option, and
+TcpConnection::writeHeaderOptions() answers in it. The parameter is @mutable, but it acts only at
+the SYN-ACK of a cookie request without an answer and at the next open, so the open connection
+shows no old value that a later step can see: no test of a class changed can separate it. This test separates "on" from "off".
+
+Host under test: host2, a Fast Open server; host1 is a Fast Open client with the experimental
+option (preconditions). The tap hides the Fast Open option of the first SYN-ACK of host2 (NOP
+options of the same length), so host1 sees no answer to its request of connection 1 and
+requests a cookie in the experimental option on connection 2 at 0.5 s. Observation: level 1,
+the SYN-ACK of connection 2 carries a cookie of 8 bytes in the experimental option.
+
+%# parameter: Tcp.fastopenExpOptionEnabled
+%# class: on-server
+%# value: true
+%# key: *.host2.tcp.fastopenExpOptionEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenExpOptionEnabledOnServer")
+        .intercept(tap("tap").from("host2").filterPacket("tcp.synBit == true").nth(1)
+                     .mutate([](Packet *frame) { hideTcpOption(frame, inet::tcp::TCPOPTION_TCP_FASTOPEN); })
+                     .describe("the first SYN-ACK of host2: its Fast Open option hidden"))
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "";
+                  })
+                  .describe("the SYN of connection 1: a cookie request")
+                  .within(0.5))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 2 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet, true);
+                      return cookie == "";
+                  })
+                  .describe("the SYN of connection 2: a request of kind 254")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet, true);
+                      return cookie.size() == 16;
+                  })
+                  .describe("the SYN-ACK of connection 2: a cookie of 8 bytes in kind 254")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenExpOptionEnabledOnServer compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.fastopenExpOptionEnabled = true    # the parameter under test
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.tcp.fastopenExpOptionEnabled = true
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenExpOptionEnabledOnServer: PASS

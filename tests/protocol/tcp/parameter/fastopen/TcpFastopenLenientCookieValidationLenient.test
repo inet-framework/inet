@@ -1,0 +1,96 @@
+%description:
+
+Tcp.fastopenLenientCookieValidation:lenient -- host2 accepts the forged cookie.
+
+The claim (Tcp.ned): "TCP Fast Open, server: accept each cookie of a valid length without a check;
+false: accept only the cookie that this server gives the address of the client (RFC 7413
+section 4.2.2)".
+
+The classes: strict (false, the default) and lenient (true). The code:
+TcpConnection::processFastOpenCookieBytes() accepts a cookie of a valid length without a check
+with true; with false, only the cookie that the server gives the address of the client, and
+for another cookie it gives a new one (RFC 7413 section 4.1.2). This test separates "lenient" from the other value.
+
+Host under test: host2, a Fast Open server; host1 is a Fast Open client (preconditions). host1 opens connection 1 at 0.1 s with Fast Open, which requests a cookie; at 0.5 s it opens
+connection 2 with Fast Open and sends 500 bytes, which go on the SYN when host1 has a cookie
+of host2. The tap
+changes the first byte of the cookie on the SYN of connection 2: a forged cookie. Observation: level 1, host2 accepts the forged cookie: the SYN-ACK acknowledges the 500 bytes.
+
+%# parameter: Tcp.fastopenLenientCookieValidation
+%# class: lenient
+%# value: true
+%# key: *.host2.tcp.fastopenLenientCookieValidation
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenLenientCookieValidationLenient")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true && ipv4.totalLengthField > 100B").nth(1)
+                     .mutate([](Packet *frame) { forgeFastOpenCookie(frame); })
+                     .describe("the SYN of connection 2, with data: its cookie forged"))
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "";
+                  })
+                  .describe("the SYN of connection 1: a cookie request")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie.size() == 16;
+                  })
+                  .describe("the SYN-ACK of connection 1: a cookie of 8 bytes")
+                  .within(0.5))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 2 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false && pk.dataLength > tcp.headerLength")
+                  .capture("isn2", "tcp.sequenceNo")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie.size() == 16;
+                  })
+                  .describe("the SYN of connection 2, with 500 bytes and the cookie")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.ackNo == {isn2} + 501")
+             .describe("the SYN-ACK of connection 2 acknowledges the SYN and the 500 bytes")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenLenientCookieValidationLenient compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.fastopenLenientCookieValidation = true    # the parameter under test
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenLenientCookieValidationLenient: PASS

@@ -1,0 +1,77 @@
+%description:
+
+Tcp.fastopenClientEnabled:changed -- a new value acts at the next connection.
+
+The claim (Tcp.ned): "TCP Fast Open (RFC 7413), client: a connect() with fastOpen requests a cookie
+from the server, and with a cached cookie it sends its first data on the SYN".
+
+The classes: off (false, the default), on (true, the value of LinuxTcp), and changed (the
+parameter is @mutable). The code: TcpConnection::process_OPEN_ACTIVE() requests a cookie at a
+connect() with fastOpen, or with a cached cookie lets the SYN wait for the first SEND, whose data
+it carries; without Fast Open, the connect() is an ordinary one. This test separates "changed" from "off".
+
+Host under test: host1, the client; host2 is a Fast Open server (precondition). host1 opens connection 1 at 0.1 s with Fast Open, which requests a cookie; at 0.5 s it opens
+connection 2 with Fast Open and sends 500 bytes, which go on the SYN when host1 has a cookie
+of host2. At 0.3 s, the test sets fastopenClientEnabled of host1 to false. Observation: level 1, the SYN
+of connection 1 requests a cookie; the SYN of connection 2 has no Fast Open option.
+
+%# parameter: Tcp.fastopenClientEnabled
+%# class: changed
+%# value: true
+%# key: *.host1.tcp.fastopenClientEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenClientEnabledChanged")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "";
+                  })
+                  .describe("the SYN of connection 1: a cookie request")
+                  .within(0.5))
+        .act(action().at(0.3).setParameter("host1.tcp", "fastopenClientEnabled", "false")
+                 .describe("fastopenClientEnabled of host1 becomes false"))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 2 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie == "-";
+                  })
+                  .describe("the SYN of connection 2: no Fast Open option")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenClientEnabledChanged compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.fastopenClientEnabled = true    # the parameter under test
+*.host2.tcp.fastopenServerEnabled = true
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenClientEnabledChanged: PASS
