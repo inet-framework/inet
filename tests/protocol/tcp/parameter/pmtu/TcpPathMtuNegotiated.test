@@ -1,0 +1,57 @@
+%description:
+
+Tcp.pathMtu:negotiated -- the search ends at the MSS of the handshake.
+
+The claim (Tcp.ned): "with mtuProbing: the MTU of the route, the largest MTU that the search can
+give the connection (Linux dst_mtu()); 0 = the MTU of the negotiated MSS".
+
+The classes: negotiated (0, the default: the MTU of the MSS of the handshake) and route (a
+route MTU below it). The code: TcpConnection::initMtuProbing() takes the value as the route
+MTU, and TcpConnection::getMtuProbeBytes() keeps the probes at or below it. This test separates "negotiated" from the other value.
+
+Host under test: host1, with mtuProbing 2 (precondition); host1 sends 1000000 bytes to host2; the path carries 1500 bytes, and the MSS of the handshake
+is 1460 (1448 bytes of data with the Timestamps option). A frame carries 52 bytes of IP, TCP and
+option headers more than its data: 1500 bytes of IP for 1448 bytes of data. Observation: level 1, until 1.9 s,
+the largest frame of data of host1 has more than 1400 bytes of IP: the search goes to within 8 bytes of the MTU of the MSS of the handshake, 1500.
+
+%# parameter: Tcp.pathMtu
+%# class: negotiated
+%# value: 0
+%# key: *.host1.tcp.pathMtu
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpPathMtuNegotiated")
+        .meanwhile(anyNumberOfTimes(on("host1.eth[0].mac").signal("packetSentToLower")
+                                        .filterPacket("ipv4.totalLengthField > 100B")
+                                        .captureMax("largest", "ipv4.totalLengthField")
+                                        .within(2.0)))
+        .act(action().at(1.9)
+                 .describe("the largest frame of data until 1.9 s")
+                 .assertModule("host1.tcp.conn-*", "{largest} > 1400B"));
+}
+
+%activity:
+EV << "TcpPathMtuNegotiated compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.pathMtu = 0    # the parameter under test
+*.host1.app[0].sendBytes = 1000000B
+sim-time-limit = 2s
+*.host1.tcp.mtuProbing = 2
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpPathMtuNegotiated: PASS

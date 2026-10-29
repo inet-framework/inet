@@ -1,0 +1,34 @@
+%description:
+
+Tcp.baseMss:invalid -- a base MSS below 88 stops the run with an error.
+
+The claim (Tcp.ned): "at least 88".
+
+The classes: linux (1024, the default, the value of Linux tcp_base_mss), other (another value),
+invalid (below 88). The code: TcpConnection::initMtuProbing() checks the value, takes the MTU
+of the value as the lower end of the search, and starts an active opener at it.
+
+Host under test: host1, with mtuProbing 2 (precondition). Observation: the error, and the exit
+code of the run.
+
+%# parameter: Tcp.baseMss
+%# class: invalid
+%# value: 87
+%# key: *.host1.tcp.baseMss
+%# expected-result: PASS
+
+%activity:
+EV << "TcpBaseMssInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.baseMss = 87    # the parameter under test
+*.host1.tcp.mtuProbing = 2
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+baseMss must be at least 88, but it is 87

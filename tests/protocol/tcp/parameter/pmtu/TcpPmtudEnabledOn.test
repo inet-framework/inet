@@ -1,0 +1,54 @@
+%description:
+
+Tcp.pmtudEnabled:on -- DF and a Fragmentation Needed make host1 send smaller segments.
+
+The claim (Tcp.ned): "Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled".
+
+The classes: on (true, the default) and off (false, the value of LegacyTcp). The code:
+TcpConnection::sendToIP() sets DF on each IPv4 segment with true;
+TcpConnection::processIcmpv4Error() reduces the MSS at a Fragmentation Needed and sends the
+lost segment again. This test separates "on" from "off".
+
+Host under test: host1, which sends 10000 bytes to host2 through the router, whose link to
+host2 has an MTU of 1000 bytes; the segments of host1 carry 1500 bytes of IP. Observation: level 1, the first data frame that reaches host2 has DF and at most 1000 bytes
+of IP: the router dropped the larger segment and sent a Fragmentation Needed.
+
+%# parameter: Tcp.pmtudEnabled
+%# class: on
+%# value: true
+%# key: *.host1.tcp.pmtudEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpPmtudEnabledOn")
+        .once(on("host2.eth[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("ipv4.totalLengthField > 100B")
+                  .first()
+                  .assertPacket("ipv4.dontFragment == true && ipv4.totalLengthField <= 1000B && ipv4.moreFragments == false")
+                  .describe("the first data frame at host2")
+                  .within(1.0));
+}
+
+%activity:
+EV << "TcpPmtudEnabledOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.pmtudEnabled = true    # the parameter under test
+network = inet.protocoltest.TapRouterNetwork
+*.router.eth[1].mac.mtu = 1000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpPmtudEnabledOn: PASS

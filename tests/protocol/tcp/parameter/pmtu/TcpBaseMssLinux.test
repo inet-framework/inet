@@ -1,0 +1,56 @@
+%description:
+
+Tcp.baseMss:linux -- the first data segment of the search carries 1024 bytes.
+
+The claim (Tcp.ned): "with mtuProbing: the lower end of the path MTU search ...; an active
+opener starts at it, as Linux; at least 88".
+
+The classes: linux (1024, the default, the value of Linux tcp_base_mss), other (another value),
+invalid (below 88). The code: TcpConnection::initMtuProbing() checks the value, takes the MTU
+of the value as the lower end of the search, and starts an active opener at it. This test separates "linux" from the other value.
+
+Host under test: host1, with mtuProbing 2 (precondition); host1 sends 1000000 bytes to host2; the path carries 1500 bytes, and the MSS of the handshake
+is 1460 (1448 bytes of data with the Timestamps option). A frame carries 52 bytes of IP, TCP and
+option headers more than its data: 1500 bytes of IP for 1448 bytes of data. Observation: level 1, the first
+data segment carries 1024 bytes (1076 bytes of IP).
+
+%# parameter: Tcp.baseMss
+%# class: linux
+%# value: 1024
+%# key: *.host1.tcp.baseMss
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpBaseMssLinux")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("ipv4.totalLengthField > 100B")
+             .first()
+                  .assertPacket("ipv4.totalLengthField == 1076B")
+             .describe("the first frame of data of host1")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpBaseMssLinux compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.baseMss = 1024    # the parameter under test
+*.host1.app[0].sendBytes = 1000000B
+sim-time-limit = 2s
+*.host1.tcp.mtuProbing = 2
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpBaseMssLinux: PASS

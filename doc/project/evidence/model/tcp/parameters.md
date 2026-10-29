@@ -327,3 +327,22 @@ Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode. The tests of
 | `Tcp.accEcnBareTimeWaitAck:bare` | `true` | LinuxTcp | the ACK of TIME_WAIT carries no ACE field | NED; code: the same | W | P | [TcpAccEcnBareTimeWaitAckBare](../../../../../tests/protocol/tcp/parameter/ecn/TcpAccEcnBareTimeWaitAckBare.test) | PASS |
 | `Tcp.ecnMarkAll:new-data` | `false` | — | ECT only on new data: the pure ACKs are Not-ECT | NED; code: `sendToIP()` | W | P | [TcpEcnMarkAllNewData](../../../../../tests/protocol/tcp/parameter/ecn/TcpEcnMarkAllNewData.test) | PASS |
 | `Tcp.ecnMarkAll:all` | `true` | LinuxTcp | ECT also on the pure ACKs of an AccECN connection | NED; code: the same | W | P | [TcpEcnMarkAllAll](../../../../../tests/protocol/tcp/parameter/ecn/TcpEcnMarkAllAll.test) | PASS |
+
+### pmtu — path MTU
+
+Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode. The host under test is host1. The tests of the path MTU discovery use `TapRouterNetwork` with an MTU of 1000 bytes on the link of the router to host2 (`*.router.eth[1].mac.mtu`): a segment with DF gets a real Fragmentation Needed. The tests measure the frames that leave host1 by `ipv4.totalLengthField`: 52 bytes of IP, TCP and the Timestamps option more than the data.
+
+| Class | Value | Preset | Claim | Source | Obs | Net | Test | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `Tcp.pmtudEnabled:on` | `true` | — | DF on each segment; a Fragmentation Needed reduces the MSS | NED; code: `TcpConnection::sendToIP()`, `TcpConnection::processIcmpv4Error()` | W | R | [TcpPmtudEnabledOn](../../../../../tests/protocol/tcp/parameter/pmtu/TcpPmtudEnabledOn.test) | PASS |
+| `Tcp.pmtudEnabled:off` | `false` | LegacyTcp | no DF: the router fragments the segments | NED; code: `sendToIP()` | W | R | [TcpPmtudEnabledOff](../../../../../tests/protocol/tcp/parameter/pmtu/TcpPmtudEnabledOff.test) | PASS |
+| `Tcp.pmtudTimeout:rfc1191` | `600s` | — | the MSS of the handshake comes back 600 s after the reduction | NED; code: `TcpConnection::sendSegment()` | W | R | [TcpPmtudTimeoutRfc1191](../../../../../tests/protocol/tcp/parameter/pmtu/TcpPmtudTimeoutRfc1191.test) | PASS |
+| `Tcp.pmtudTimeout:other` | `2s` | — | the MSS of the handshake comes back after the value | NED; code: the same | W | R | [TcpPmtudTimeoutOther](../../../../../tests/protocol/tcp/parameter/pmtu/TcpPmtudTimeoutOther.test) | PASS |
+| `Tcp.mtuProbing:off` | `0` | — | no search: the first segment has the MSS of the handshake; 1 is the same | NED; code: `TcpConnection::configureStateVariables()` | W | P | [TcpMtuProbingOff](../../../../../tests/protocol/tcp/parameter/pmtu/TcpMtuProbingOff.test) | PASS |
+| `Tcp.mtuProbing:search` | `2` | — | an active opener starts at the base MSS, and probes raise the MSS | NED; code: `TcpConnection::initMtuProbing()`, `TcpConnection::sendData()` | W | P | [TcpMtuProbingSearch](../../../../../tests/protocol/tcp/parameter/pmtu/TcpMtuProbingSearch.test) | PASS |
+| `Tcp.mtuProbing:invalid` | `3` | — | the error "mtuProbing must be 0, 1 or 2" | code: `configureStateVariables()` | E | P | [TcpMtuProbingInvalid](../../../../../tests/protocol/tcp/parameter/pmtu/TcpMtuProbingInvalid.test) | PASS |
+| `Tcp.baseMss:linux` | `1024` | — | with the search, the first data segment carries 1024 bytes | NED; code: `initMtuProbing()` | W | P | [TcpBaseMssLinux](../../../../../tests/protocol/tcp/parameter/pmtu/TcpBaseMssLinux.test) | PASS |
+| `Tcp.baseMss:other` | `512` | — | with the search, the first data segment carries the value | NED; code: the same | W | P | [TcpBaseMssOther](../../../../../tests/protocol/tcp/parameter/pmtu/TcpBaseMssOther.test) | PASS |
+| `Tcp.baseMss:invalid` | `87` | — | the error "baseMss must be at least 88" | NED; code: the same | E | P | [TcpBaseMssInvalid](../../../../../tests/protocol/tcp/parameter/pmtu/TcpBaseMssInvalid.test) | PASS |
+| `Tcp.pathMtu:negotiated` | `0` | — | the search goes to the MTU of the MSS of the handshake | NED; code: `initMtuProbing()`, `TcpConnection::getMtuProbeBytes()` | W | P | [TcpPathMtuNegotiated](../../../../../tests/protocol/tcp/parameter/pmtu/TcpPathMtuNegotiated.test) | PASS |
+| `Tcp.pathMtu:route` | `1400` | — | the search stops at the value | NED; code: the same | W | P | [TcpPathMtuRoute](../../../../../tests/protocol/tcp/parameter/pmtu/TcpPathMtuRoute.test) | PASS |

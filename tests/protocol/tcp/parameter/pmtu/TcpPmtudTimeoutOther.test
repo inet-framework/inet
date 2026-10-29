@@ -1,0 +1,68 @@
+%description:
+
+Tcp.pmtudTimeout:other -- the MSS of the handshake comes back 2s after the reduction.
+
+The claim (Tcp.ned): "Time after which the original MSS is restored to probe for increased path
+MTU (RFC 1191, Section 6.3)".
+
+The classes: rfc1191 (600 s, the default, the 10 minutes of RFC 1191 section 6.3) and other
+(another value). The code: TcpConnection::sendSegment() restores the MSS of the handshake at
+the first segment after the value has passed since the last reduction. This test separates "other" from the other value.
+
+Host under test: host1, which sends to host2 through the router, whose link to host2 has an MTU
+of 1000 bytes: 10000 bytes at 0.2 s, which reduce the MSS, and then 20000 bytes at 1 s and at
+3 s. The restore comes at the first segment after the timeout; the burst of that segment keeps
+the segment size that the sender computed before, and the next burst has the MSS of the
+handshake, after the delayed ACK of host2 (200 ms). The test looks for 0.5 s at each part. Observation: level 1, the data of 1 s leave host1 in frames of at most 1000 bytes of IP; the
+data of 3 s include a frame above 1000 bytes.
+
+%# parameter: Tcp.pmtudTimeout
+%# class: other
+%# value: 2s
+%# key: *.host1.tcp.pmtudTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpPmtudTimeoutOther")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("ipv4.totalLengthField > 100B && ipv4.totalLengthField <= 1000B")
+             .describe("the first frame of data at the reduced MSS")
+             .within(1.0))
+        .act(action().at(0.95).describe("before the restore"))
+        .never(on("host1.eth[0].mac").signal("packetSentToLower")
+              .filterPacket("ipv4.totalLengthField > 100B && ipv4.totalLengthField > 1000B")
+              .describe("a frame above 1000 bytes before the restore")
+              .within(0.5))
+        .act(action().at(2.95).describe("after the restore"))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("ipv4.totalLengthField > 100B && ipv4.totalLengthField > 1000B")
+             .describe("a frame of the MSS of the handshake, after the restore")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpPmtudTimeoutOther compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.pmtudTimeout = 2s    # the parameter under test
+network = inet.protocoltest.TapRouterNetwork
+*.router.eth[1].mac.mtu = 1000B
+*.host1.app[0].sendBytes = 0B
+*.host1.app[0].sendScript = "0.2 10000; 1 20000; 3 20000"
+sim-time-limit = 4s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpPmtudTimeoutOther: PASS

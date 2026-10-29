@@ -1,0 +1,64 @@
+%description:
+
+Tcp.mtuProbing:search -- host1 starts at the base MSS and raises the MSS by probes.
+
+The claim (Tcp.ned): "the path MTU search of RFC 4821, as Linux tcp_mtu_probing: 2 = from the
+start of each connection, the sender sends single segments larger than its MSS and raises the
+MSS when the peer acknowledges them; 0 and 1 = no search (1, the search after a black hole,
+needs a detector that INET does not have)".
+
+The classes: off (0, the default; 1 is the same, because INET has no detector of black holes),
+search (2), invalid (below 0, above 2). The code: TcpConnection::configureStateVariables()
+checks the value; with 2, TcpConnection::initMtuProbing() starts an active opener at the base
+MSS, and TcpConnection::sendData() sends a probe larger than the MSS when the window has 11
+segments; the ACK of the probe raises the MSS. This test separates "search" from "off".
+
+Host under test: host1; host1 sends 1000000 bytes to host2; the path carries 1500 bytes, and the MSS of the handshake
+is 1460 (1448 bytes of data with the Timestamps option). A frame carries 52 bytes of IP, TCP and
+option headers more than its data: 1500 bytes of IP for 1448 bytes of data. Observation: level 1, the first data segment carries 1024 bytes, the
+base MSS (1076 bytes of IP); later, a segment has more than 1400 bytes of IP. The search
+stops when its range is narrower than 8 bytes, at about 1493 bytes.
+
+%# parameter: Tcp.mtuProbing
+%# class: search
+%# value: 2
+%# key: *.host1.tcp.mtuProbing
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMtuProbingSearch")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("ipv4.totalLengthField > 100B")
+             .first()
+                  .assertPacket("ipv4.totalLengthField == 1076B")
+             .describe("the first frame of data of host1")
+             .within(0.5))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("ipv4.totalLengthField > 1400B")
+             .describe("a frame above 1400 bytes of IP, after the search")
+             .within(1.5));
+}
+
+%activity:
+EV << "TcpMtuProbingSearch compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.mtuProbing = 2    # the parameter under test
+*.host1.app[0].sendBytes = 1000000B
+sim-time-limit = 2s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMtuProbingSearch: PASS

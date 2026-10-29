@@ -1,0 +1,34 @@
+%description:
+
+Tcp.mtuProbing:invalid -- the value 3 stops the run with an error.
+
+The claim: the code accepts 0, 1 and 2.
+
+The classes: off (0, the default; 1 is the same, because INET has no detector of black holes),
+search (2), invalid (below 0, above 2). The code: TcpConnection::configureStateVariables()
+checks the value; with 2, TcpConnection::initMtuProbing() starts an active opener at the base
+MSS, and TcpConnection::sendData() sends a probe larger than the MSS when the window has 11
+segments; the ACK of the probe raises the MSS.
+
+Host under test: host1. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.mtuProbing
+%# class: invalid
+%# value: 3
+%# key: *.host1.tcp.mtuProbing
+%# expected-result: PASS
+
+%activity:
+EV << "TcpMtuProbingInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.mtuProbing = 3    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+mtuProbing must be 0, 1 or 2, but it is 3
