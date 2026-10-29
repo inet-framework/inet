@@ -580,6 +580,25 @@ an explicit `@namespace`, which keeps them immune to a consumer `.test`'s root `
 > one in `%inifile`). And avoid writing a literal `%word` in a `%description` — opp_test reads
 > it as a section directive.
 
+### Shared networks
+
+A test that needs one of the common shapes names a network of the library and has no `%file`
+of its own. The library folder is on the NED path of every suite.
+
+| Network | Shape | For |
+| --- | --- | --- |
+| `inet.protocoltest.TapPairNetwork` | host1 — tap — host2 | two peers on one link |
+| `inet.protocoltest.TapRouterNetwork` | host1 — tap — router — host2 | real ICMP errors from the router (a TTL of 1 gives Time Exceeded); a second link with its own rate, MTU (`*.router.eth[1].mtu`) and queue |
+| `inet.protocoltest.TapSwitchNetwork` | host1 — tap — switch — peer[numPeers] | one host with many peers |
+
+The node types and the configurator are parameters: `*.host*.typename = "StandardHost6"`,
+`*.router.typename = "Router6"` and `*.configurator.typename = "Ipv6FlatNetworkConfigurator"`
+make a network IPv6. `linkDatarate` and `linkDelay` set the links of host1 (and of the peers),
+and `bottleneckDatarate` and `bottleneckDelay` the second link of the router; a rate must be
+one that Ethernet knows. The ARP is `GlobalArp`, so the wire carries no ARP frames
+([`TapRouterNetwork`](../self/TapRouterNetwork.test),
+[`TapSwitchNetwork`](../self/TapSwitchNetwork.test)).
+
 ### Declaring an expected result (`%# expected-result`)
 
 A test's verdict (pass/fail) is one dimension; whether that verdict was *expected* is a

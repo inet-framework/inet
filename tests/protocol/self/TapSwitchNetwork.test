@@ -1,0 +1,57 @@
+%description:
+
+Protocol Test Framework self test -- the shared network TapSwitchNetwork.
+
+host1 opens a connection to the third of three peers on the switch. Each frame of host1 goes
+through the tap. The third peer must answer the SYN, and host1 must receive the SYN-ACK
+through the tap; no other peer sends a segment.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("tap_switch_network")
+        .meanwhile(never(on("peer[0].tcp").signal("packetSentToLower").within(1.0)))
+        .meanwhile(never(on("peer[1].tcp").signal("packetSentToLower").within(1.0)))
+        .once(on("peer[2].tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .describe("the SYN-ACK of the third peer")
+                  .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .describe("the same SYN-ACK at host1")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "tap_switch_network compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapSwitchNetwork
+sim-time-limit = 2s
+seed-set = 0
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "peer[2]"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 100B
+*.host1.app[0].tClose = -1s
+*.peer[*].numApps = 1
+*.peer[*].app[0].typename = "TcpEchoApp"
+*.peer[*].app[0].localPort = 1000
+*.peer[*].app[0].echoFactor = 0
+
+%contains: stdout
+PROTOCOLTEST tap_switch_network: PASS
