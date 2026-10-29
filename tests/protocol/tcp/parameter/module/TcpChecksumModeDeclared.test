@@ -1,0 +1,81 @@
+%description:
+
+Tcp.checksumMode:declared -- the segments carry no checksum, and a receiver cannot find a wrong one.
+
+The claim (Tcp.ned): "Checksums are declared correct rather than computed, unless
+`checksumMode` is "computed" (MUST-2 asks for computed checksums; gap 2 of the TCP
+evidence)".
+
+The classes: declared ("declared", the default: the sender writes no checksum and marks the
+header as correct) and computed ("computed": the sender computes the checksum of RFC 9293).
+The code: Tcp::initialize() puts a TcpChecksumInsertionHook into the IPv4 and IPv6 modules
+of the host for "computed"; Tcp::checkChecksum() of the receiver follows the mode that the
+header carries, so the parameter of the sender decides whether a receiver can find a wrong
+checksum. An invalid value fails at the @enum of the NED. This test separates "declared" from "computed".
+
+Host under test: host1; host1 sends 10000 bytes at 0.2 s to host2, which computes no checksum of its
+own (the default). The tap replaces the checksum of the first data segment of host1 with its
+one's complement and changes nothing else. Observation: level 1, the data segment of host1 does not carry the
+checksum of RFC 9293, host2 does not discard the segment whose checksum the tap changed, and
+host2 acknowledges all data.
+
+%# parameter: Tcp.checksumMode
+%# class: declared
+%# value: "declared"
+%# key: *.host1.tcp.checksumMode
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// True when the checksum field of the TCP header of the frame holds the value that RFC 9293
+// defines for the segment.
+static bool hasRfc9293Checksum(const MatchContext& context)
+{
+    return tcpChecksumField(context.event.packet) == expectedTcpChecksum(context.event.packet);
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpChecksumModeDeclared")
+        .intercept(tap("tap").filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B").nth(1)
+                     .mutate([](Packet *frame) { corruptTcpChecksum(frame); })
+                     .describe("the first data segment of host1: replace its checksum with the one's complement"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.destPort == 1000 && ipv4.totalLengthField > 100B")
+             .filterEvent([](const MatchContext& context) { return !hasRfc9293Checksum(context); })
+             .describe("the first data segment of host1, without the checksum of RFC 9293")
+             .within(0.5))
+        .meanwhile(never(on("host2.tcp").signal("packetDropped")
+                             .filterPacket("tcp.destPort == 1000")
+                             .describe("a discard of a segment of host1 at host2")
+                             .within(1.0)))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.ackNo >= {isn} + 1 + 10000")
+             .describe("the ACK of all data of host1")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpChecksumModeDeclared compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.checksumMode = "declared"    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpChecksumModeDeclared: PASS

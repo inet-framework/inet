@@ -1,0 +1,71 @@
+%description:
+
+Tcp.stopOperationTimeout:longer -- the stop of TCP ends at the end of the extra time.
+
+The claim (Tcp.ned): "Timeout value for lifecycle stop operation".
+
+The classes: longer (2s, the default: longer than the extra time, so the stage of TCP ends at
+the end of the extra time) and shorter (shorter than stopOperationExtraTime: the stage ends at
+the timeout). The code: Tcp::handleStopOperation() deletes all connections at once, then
+delayActiveOperationFinish() schedules the timeout and startActiveOperationExtraTimeOrFinish()
+the end of the extra time; OperationalMixin::handleMessage() ends the stage at the first of
+the two, and at the timeout it calls handleCrashOperation() first. The stage of TCP waits for
+no connection, so the timeout matters only when the extra time is longer (finding PF-10). This test separates "longer" from the other class.
+
+Host under test: host1, with an extra time of 1 s (precondition); host1 has no application. host2 sends a ping to host1 every 50 ms from 0.525 s on, so the
+ping n leaves at 0.525 s + n * 50 ms. The tester stops host1 at 1.0 s with the lifecycle
+operation of INET (stopNode). The stages of the stop go from the applications down: the
+network layer of host1 goes down, and stops to answer pings, when the stage of TCP ends. Observation: level 1, the
+last reply that host2 gets is the reply to the ping 29 (1.975 s): the stage of TCP ends at 2 s.
+
+%# parameter: Tcp.stopOperationTimeout
+%# class: longer
+%# value: 2s
+%# key: *.host1.tcp.stopOperationTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpStopOperationTimeoutLonger")
+        .once(on("host2.app[0]").signal("pingRxSeq")
+                  .filterValue(0)
+                  .describe("the reply to the first ping")
+                  .within(0.6))
+        .act(action().at(1.0).stopNode("host1").describe("stop host1"))
+        .once(on("host2.app[0]").signal("pingRxSeq")
+                  .filterValue(29)
+                  .describe("the reply to the ping 29, sent at 1.975 s")
+                  .within(0.985))
+        .never(on("host2.app[0]").signal("pingRxSeq")
+                   .filterValueAtLeast(30)
+                   .describe("a reply after the end of the stage of TCP")
+                   .within(3.0));
+}
+
+%activity:
+EV << "TcpStopOperationTimeoutLonger compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.stopOperationTimeout = 2s    # the parameter under test
+*.host1.tcp.stopOperationExtraTime = 1s
+*.host1.numApps = 0
+*.host2.numApps = 1
+*.host2.app[0].typename = "PingApp"
+*.host2.app[0].destAddr = "host1"
+*.host2.app[0].startTime = 0.525s
+*.host2.app[0].sendInterval = 0.05s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpStopOperationTimeoutLonger: PASS

@@ -1,0 +1,64 @@
+%description:
+
+Tcp.stopOperationExtraTime:zero -- the stop of TCP ends at once.
+
+The claim (Tcp.ned): "Extra time after lifecycle stop operation finished".
+
+The classes: zero (0s, the default: the stage of TCP ends at once, after the other events of
+the same time) and other (a positive time: the stage ends the value later; the network layer
+and the layers under it stay up until then). The code: OperationalMixin::
+startActiveOperationExtraTimeOrFinish() schedules the end of the stage the value later, and
+sets the state of TCP to down at once. This test separates "zero" from the other class.
+
+Host under test: host1; host1 has no application. host2 sends a ping to host1 every 50 ms from 0.525 s on, so the
+ping n leaves at 0.525 s + n * 50 ms. The tester stops host1 at 1.0 s with the lifecycle
+operation of INET (stopNode). The stages of the stop go from the applications down: the
+network layer of host1 goes down, and stops to answer pings, when the stage of TCP ends. Observation: level 1, the last reply that host2 gets is the reply to
+the ping 9 (0.975 s): the stage of TCP ends at 1 s.
+
+%# parameter: Tcp.stopOperationExtraTime
+%# class: zero
+%# value: 0s
+%# key: *.host1.tcp.stopOperationExtraTime
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpStopOperationExtraTimeZero")
+        .once(on("host2.app[0]").signal("pingRxSeq")
+                  .filterValue(9)
+                  .describe("the reply to the ping 9, sent at 0.975 s")
+                  .within(1.0))
+        .act(action().at(1.0).stopNode("host1").describe("stop host1"))
+        .never(on("host2.app[0]").signal("pingRxSeq")
+                   .filterValueAtLeast(10)
+                   .describe("a reply after the end of the stage of TCP")
+                   .within(3.0));
+}
+
+%activity:
+EV << "TcpStopOperationExtraTimeZero compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.stopOperationExtraTime = 0s    # the parameter under test
+*.host1.numApps = 0
+*.host2.numApps = 1
+*.host2.app[0].typename = "PingApp"
+*.host2.app[0].destAddr = "host1"
+*.host2.app[0].startTime = 0.525s
+*.host2.app[0].sendInterval = 0.05s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpStopOperationExtraTimeZero: PASS
