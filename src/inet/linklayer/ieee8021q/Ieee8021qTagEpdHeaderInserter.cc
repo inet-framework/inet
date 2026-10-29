@@ -43,7 +43,10 @@ void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)
 {
     auto header = makeShared<Ieee8021qTagEpdHeader>();
 
-    auto userPriorityReq = packet->removeTagIfPresent<UserPriorityReq>();
+    // the user priority belongs to the frame, not to this tag, which only encodes it
+    // (IEEE 802.1Q-2018 6.9.3); the request to the layer below carries it unchanged
+    // (6.9.2), so the tags below this one and the MAC get it too
+    auto userPriorityReq = packet->findTag<UserPriorityReq>();
     auto userPriority = userPriorityReq != nullptr ? userPriorityReq->getUserPriority() : defaultUserPriority;
     if (userPriority != -1) {
         EV_INFO << "Setting PCP" << EV_FIELD(pcp, userPriority) << EV_ENDL;

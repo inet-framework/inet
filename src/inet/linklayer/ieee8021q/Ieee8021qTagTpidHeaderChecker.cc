@@ -32,6 +32,9 @@ void Ieee8021qTagTpidHeaderChecker::initialize(int stage)
 void Ieee8021qTagTpidHeaderChecker::processPacket(Packet *packet)
 {
     const auto& header = packet->popAtFront<Ieee8021qTagTpidHeader>();
+    // IEEE 802.1Q-2018 6.9.1 h): the priority of a tagged frame is decoded from the
+    // tag header, and replaces the one that the layer below indicated, so in a stack
+    // the innermost tag, which is checked last, determines the user priority
     packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(header->getPcp());
     addPcpIndIfAbsent(packet, vlanTagType)->setPcp(header->getPcp());
     addVlanIndIfAbsent(packet, vlanTagType)->setVlanId(header->getVid());
