@@ -441,7 +441,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [ ] **Step 5 — the pilot: `ack`, 15 tests.** Code pass, tests, run, cross-class check, coverage. Measure the time of the build and of the run of one test, and of the whole group. Count the lambdas that repeat (D3). Report to the user, and change the design where the pilot shows a problem, before the other groups start. The tests are done (`4ae6534722`). The user decided on 2026-10-29: the coverage is measured only in step 18, after all the tests.
 - [x] **Step 6 — `setup`, 34 tests.** Done: `4d280c2293`; 33 PASS, 1 FAIL (PF-4).
 - [x] **Step 7 — `send`, 17 tests.** Done: `a82f12fdec`; 17 PASS.
-- [ ] **Step 8 — `rto`, 12 tests.**
+- [x] **Step 8 — `rto`, 12 tests.** Done: `caa51a2dcd`; 12 PASS.
 - [ ] **Step 9 — `congestion`, 60 tests.** The algorithm classes first, because they give the largest coverage gain.
 - [ ] **Step 10 — `recovery`, 27 tests.**
 - [ ] **Step 11 — `receive`, 24 tests.**
@@ -523,3 +523,9 @@ The user settled these on 2026-10-29.
 - A step with `notBefore` skips the events before its time, so a test of an interval uses a `never` step for the early part and a `once` step for the window; the generator calls this a gap. With `notBefore` alone, probes 0.5 s apart passed a test of 1, 2 and 4 s.
 - A time in an error message prints without its unit ("but it is 0").
 - PF-5: TCP_NODELAY of a socket takes the place of `nagleEnabled`, and the NED does not say so.
+
+**Step 8 (`rto`).**
+- 12 tests, as the draft said; all pass at the first run, and the cross-class check confirms each one.
+- The classes `binds` and `free` of `minRexmitTimeout` and `caps` and `free` of `maxRexmitTimeout` are facets of the path, not of the code: a limit binds or it does not. The tests fix the path (a round trip of 100 ms) and pick a value on each side.
+- The signal `rto` comes only with a measurement of the round trip, not at the open; so the tests read its first value after the first ACK of data.
+- The tests of the timer of data turn `tlpEnabled` off: a tail loss probe is a copy of the segment on the wire, but not a retransmission of the timer.
