@@ -448,7 +448,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 12 — `close`, 14 tests.** Done: `6e2bf3fc72`; 14 PASS.
 - [x] **Step 13 — `ecn`, 19 tests.** Done: `3d9eb039d5`; 19 PASS.
 - [x] **Step 14 — `pmtu`, 12 tests.** Done: `a87c9acdd3` (the comment of `TapRouterNetwork`), `e9c1ba160d`; 12 PASS.
-- [ ] **Step 15 — `keepalive`, 7 tests.**
+- [x] **Step 15 — `keepalive`, 10 tests.** Done: `c5486012b5`; 10 PASS.
 - [ ] **Step 16 — `fastopen`, 29 tests.**
 - [ ] **Step 17 — `module` and `spoof`, 14 tests.**
 - [ ] **Step 18 — the coverage gap loop** (above), and the final numbers in this plan.
@@ -583,3 +583,10 @@ The user settled these on 2026-10-29.
 - The search of RFC 4821 stops when its range is narrower than 8 bytes: on a path of 1500 bytes its last probe has an MTU of 1493, so no segment reaches 1448 bytes of data. The tests compare with 1400 bytes of IP.
 - The tests measure the frames that leave host1 at its MAC (`host1.eth[0].mac`, `packetSentToLower`) by `ipv4.totalLengthField`, which needs no arithmetic on the lengths of the headers.
 - The group runs in 3 s of wall time with 32 cores. D3: no socket call, and no new library word.
+
+**Step 15 (`keepalive`).**
+- The code pass changed the draft from 7 to 10 tests. The idle time and the interval each have the class of the default (`rfc` 7200 s, `linux` 75 s; the runs last up to 7202 s of simulated time, and the idle time costs nothing) and `other`. `keepAliveProbeCount` has the classes `linux` (9), `other` (3) and `zero` (0: the abort at the idle time, without a probe); the draft class `answered` is gone, because it is a scenario, not a value. The socket class is `socket-override`, so the cross-class check skips it.
+- PF-8: a negative idle time or interval has no check and reaches the scheduler ("Cannot schedule message KEEPALIVE to the past"), as PF-2 for the delayed ACK. The NED names no such value, so no class tests it.
+- `_bulk.ini` closes the connection at 1000 s; the test of two hours sets a later close.
+- The abort shows in the signal `state` (CLOSED is 1); a signal step can assert the captures with `assertModule()` of the module that emits it.
+- The group runs in 1 s of wall time with 32 cores. D3: one socket call (`setKeepAlive()`), no new library word.
