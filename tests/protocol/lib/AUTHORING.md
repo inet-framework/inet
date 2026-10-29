@@ -293,6 +293,33 @@ A parameter that is not `@mutable` refuses the change. Use `setParameter` for th
 change of a mutable parameter, and `run` for a call that no parameter can express, such as a
 socket call.
 
+### TCP socket calls: `TcpTestApp`
+
+A socket call needs an application module, because TCP sends its indications to the module
+that owns the socket. `TcpTestApp` (`like IApp`) is that module: it owns one socket for an
+active open or a listener, and the sockets that the listener forks, and it calls nothing by
+itself. An action calls its sockets with the whole API of `TcpSocket`; `addressOf(node)` and
+`sendData(socket, bytes, eor)` save a few lines ([`TcpTestAppSockets`](../self/TcpTestAppSockets.test)):
+
+```cpp
+.act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+    app.socket().bind(1000);
+    app.socket().listen();
+}))
+.act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+    app.socket().connect(app.addressOf("host2"), 1000, true);    // with Fast Open
+}))
+.once(on("host1.app[0]").signal("socketEstablished").within(0.1))
+```
+
+The application emits the data that it receives and sends as `packetReceivedFromLower` and
+`packetSentToLower`, so the steps observe them as packets. The other indications are scalar
+signals with the id of the socket: `socketEstablished`, `socketPeerClosed`, `socketClosed`,
+`socketSendReady` (the notification of `TCP_NOTSENT_LOWAT`), and `socketFailure`, which
+carries the code of the failure. Include `TcpTestApp.h` in `%includes`, and do not name a test
+file `TcpTestApp.test`: opp_test makes a namespace of the file name, which then collides
+with the class.
+
 ---
 
 ## 7. Interception (MITM) — drop, delay, mutate, corrupt, duplicate

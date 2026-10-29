@@ -1,0 +1,60 @@
+%description:
+
+Protocol Test Framework self test -- TcpTestApp and the shared network TapPairNetwork.
+
+Both hosts run a TcpTestApp, which makes no call by itself. Actions of the program make
+host2 listen, make host1 connect, and, when the connection is established, send 3000 bytes
+and close. host2 must receive the 3000 bytes, which a guard adds up from its application
+signal, and then see that its peer closed. The network is the shared one of the library: the
+test has no network of its own.
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("tcp_test_app")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .meanwhile(anyNumberOfTimes(on("host2.app[0]").signal("packetReceivedFromLower")
+                                        .captureSum("received", "length")
+                                        .describe("the data that the application of host2 receives")
+                                        .within(1.0)))
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+        }))
+        .once(on("host1.app[0]").signal("socketEstablished").within(0.1))
+        .act(action().after(0.001).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.sendData(app.socket(), 3000);
+            app.socket().close();
+        }))
+        .once(on("host2.app[0]").signal("socketPeerClosed")
+                  .assertEvent([](const MatchContext& context) { return context.get("received").intValueInUnit("B") == 3000; })
+                  .describe("the close of host1, after the 3000 bytes")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "tcp_test_app compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.protocoltest.TapPairNetwork
+sim-time-limit = 2s
+seed-set = 0
+
+*.host*.numApps = 1
+*.host*.app[0].typename = "TcpTestApp"
+
+%contains: stdout
+PROTOCOLTEST tcp_test_app: PASS
