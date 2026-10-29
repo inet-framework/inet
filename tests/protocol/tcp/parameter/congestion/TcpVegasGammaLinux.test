@@ -1,0 +1,69 @@
+%description:
+
+TcpVegas.gamma:linux -- slow start ends before the window is larger than the path.
+
+The claim (TcpVegas.ned): "in slow start, above this many extra segments, Vegas leaves slow
+start".
+
+The classes: linux (1, the default, the value of Linux tcp_vegas.c), other (a larger value),
+invalid (below 0). The code: once
+each round trip, TcpVegas::receivedAckForUnackedData() compares the extra segments, diff,
+with the thresholds; TcpVegas::initializeAlgorithm() checks them. In slow start, the window grows only in each second round
+trip. This test separates "linux" from "other".
+
+Host under test: host1, with TcpVegas, which sends to host2 in slow start; the path
+is host1 -- tap -- router -- host2, with a bottleneck of 10 Mbps from the router to host2 and
+a round trip of 40 ms, so the path holds 34 segments; host2 has no delayed ACK
+(precondition: a delayed ACK makes the round trips longer than the queue does) and a window
+of 1000000 bytes. Observation: level 2, at the first slow-start threshold, the largest window was at most
+50000 bytes (about 24 segments).
+
+%# parameter: TcpVegas.gamma
+%# class: linux
+%# value: 1
+%# key: *.host1.tcp.conn-*.algorithm.gamma
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpVegasGammaLinux")
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .captureMax("cwndMax", "value")
+                                        .within(3.0)))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .first()
+                  .assertModule("host1.tcp.conn-*", "{cwndMax} <= 50000")
+                  .describe("the slow-start threshold at the end of slow start")
+                  .within(2.0));
+}
+
+%activity:
+EV << "TcpVegasGammaLinux compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.gamma = 1    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpVegas"
+network = inet.protocoltest.TapRouterNetwork
+*.linkDelay = 5ms
+*.bottleneckDatarate = 10Mbps
+*.bottleneckDelay = 10ms
+*.host2.tcp.delayedAcksEnabled = false
+*.host2.tcp.advertisedWindow = 1000000
+*.host1.app[0].sendBytes = 10000000B
+sim-time-limit = 3.5s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpVegasGammaLinux: PASS

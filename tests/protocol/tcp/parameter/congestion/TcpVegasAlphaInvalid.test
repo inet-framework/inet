@@ -1,0 +1,34 @@
+%description:
+
+TcpVegas.alpha:invalid -- a threshold below 0 stops the run with an error.
+
+The claim: the code accepts 0 <= alpha <= beta.
+
+The classes: linux (2, the default, the value of Linux tcp_vegas.c), zero (0: in congestion
+avoidance, the window never grows), invalid (below 0, or above beta). The code: once
+each round trip, TcpVegas::receivedAckForUnackedData() compares the extra segments, diff,
+with the thresholds; TcpVegas::initializeAlgorithm() checks them.
+
+Host under test: host1, with TcpVegas. Observation: the error, and the exit code of the run.
+
+%# parameter: TcpVegas.alpha
+%# class: invalid
+%# value: -1
+%# key: *.host1.tcp.conn-*.algorithm.alpha
+%# expected-result: PASS
+
+%activity:
+EV << "TcpVegasAlphaInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.alpha = -1    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpVegas"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+the thresholds must be 0 <= alpha <= beta and 0 <= gamma, but alpha=-1, beta=4, gamma=1

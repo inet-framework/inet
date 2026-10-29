@@ -1,0 +1,64 @@
+%description:
+
+TcpVegas.alpha:zero -- in congestion avoidance, the window does not grow.
+
+The claim (TcpVegas.ned): "in congestion avoidance, below this many extra segments, cwnd grows
+by one segment for each RTT".
+
+The classes: linux (2, the default, the value of Linux tcp_vegas.c), zero (0: in congestion
+avoidance, the window never grows), invalid (below 0, or above beta). The code: once
+each round trip, TcpVegas::receivedAckForUnackedData() compares the extra segments, diff,
+with the thresholds; TcpVegas::initializeAlgorithm() checks them. This test separates "zero" from "linux": the number of extra segments is never below 0.
+
+Host under test: host1, with TcpVegas and an initial threshold of 8000 bytes (congestion
+avoidance from the start), which sends to host2; the path
+is host1 -- tap -- router -- host2, with a bottleneck of 10 Mbps from the router to host2 and
+a round trip of 40 ms, so the path holds 34 segments; host2 has no delayed ACK
+(precondition: a delayed ACK makes the round trips longer than the queue does) and a window
+of 1000000 bytes. Observation: level 3, at 3 s, the window
+is at the threshold, 8000 to 10220 bytes (at most 7 segments).
+
+%# parameter: TcpVegas.alpha
+%# class: zero
+%# value: 0
+%# key: *.host1.tcp.conn-*.algorithm.alpha
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpVegasAlphaZero")
+        .act(action().at(3.0)
+                 .describe("the window at 3 s")
+                 .assertModule("host1.tcp.conn-*", "state.snd_cwnd >= 8000 && state.snd_cwnd <= 10220"));
+}
+
+%activity:
+EV << "TcpVegasAlphaZero compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.alpha = 0    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpVegas"
+network = inet.protocoltest.TapRouterNetwork
+*.linkDelay = 5ms
+*.bottleneckDatarate = 10Mbps
+*.bottleneckDelay = 10ms
+*.host2.tcp.delayedAcksEnabled = false
+*.host2.tcp.advertisedWindow = 1000000
+*.host1.app[0].sendBytes = 10000000B
+sim-time-limit = 3.5s
+*.host1.tcp.initialSsthresh = 8000
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpVegasAlphaZero: PASS
