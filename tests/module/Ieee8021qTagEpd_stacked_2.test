@@ -1,3 +1,4 @@
+%# expected-result: FAIL
 %description:
 
 Tests the user priority of a frame that carries a C-tag and an S-tag (IEEE
@@ -8,7 +9,9 @@ parameters of its request to the layer below "carry values equal to the
 corresponding parameters in the received data request" (6.9.2). So each tag
 inserter takes the PCP of its tag from the user priority unless a PCP request of
 its own tag type overrides it, and the user priority request is still on the
-frame below the inserters, for the MAC.
+frame below the inserters, for the MAC. Each inserter indicates the PCP of its
+tag as the user priority of the frame, so below the inserters the user priority
+indication is the PCP of the S-tag, whose inserter runs last.
 
 On receive, the priority of a tagged frame is "decoded from the tag header"
 (6.9.1 h), and the priority that the layer below indicated counts only for an
@@ -25,8 +28,9 @@ take their PCPs from the user priority of the received frame.
 The first frame has a user priority request of 6 and no PCP request, so both
 tags must get PCP 6, and the receiver user priority 6. The second frame also
 requests PCP 3 for the C-tag and PCP 5 for the S-tag, so the tags must get
-those, the receiver must get user priority 3, the PCP of the inner tag, and
-both forwarded tags PCP 3. The chain is the one of Ieee8021qTagEpd_stacked_1.
+those, the user priority indication below the inserters must be 5, the receiver
+must get user priority 3, the PCP of the inner tag, and both forwarded tags
+PCP 3. The chain is the one of Ieee8021qTagEpd_stacked_1.
 
 %file: UserPriorityTagProbes.cc
 
@@ -199,7 +203,7 @@ received: UserPriorityReq=none UserPriorityInd=6
 reversed: UserPriorityReq=6 UserPriorityInd=none
 forwarded: header0(vid=100 pcp=6 typeOrLength=0x8100) header1(vid=10 pcp=6 typeOrLength=0x800) UserPriorityReq=6 UserPriorityInd=6
 %contains: stdout
-sent: header0(vid=100 pcp=5 typeOrLength=0x8100) header1(vid=10 pcp=3 typeOrLength=0x800) UserPriorityReq=6 UserPriorityInd=6
+sent: header0(vid=100 pcp=5 typeOrLength=0x8100) header1(vid=10 pcp=3 typeOrLength=0x800) UserPriorityReq=6 UserPriorityInd=5
 received: UserPriorityReq=none UserPriorityInd=3
 reversed: UserPriorityReq=3 UserPriorityInd=none
 forwarded: header0(vid=100 pcp=3 typeOrLength=0x8100) header1(vid=10 pcp=3 typeOrLength=0x800) UserPriorityReq=3 UserPriorityInd=3

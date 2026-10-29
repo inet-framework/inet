@@ -1,0 +1,31 @@
+%# expected-result: FAIL
+%description:
+
+Tests that an 802.1Q tag inserter rejects a PCP request outside [0, 7].
+The chain is PcpTestChain of lib/Ieee8021qPcpTest.ned.
+
+%file: test.ned
+
+import inet.test.moduletest.lib.PcpTestChain;
+
+network Test
+{
+    submodules:
+        a: PcpTestChain;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3.5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.a.requester.cPcps = [8]
+
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > pcp-error.out || true
+%contains: pcp-error.out
+Invalid PCP request: 8, must be in [0, 7]

@@ -1,0 +1,66 @@
+%# expected-result: FAIL
+%description:
+
+Tests the PCP steps of the 802.1Q tag inserters (see Ieee8021qTagEpd_pcp_1) in a
+node that inserts a C-tag and then an S-tag (IEEE 802.1ad). Both inserters map
+the user priority request, which the C-tag inserter leaves on the packet, so
+both tags get the user priority unless a PCP request of their own tag type
+overrides it. Each inserter that maps its PCP indication overwrites the user
+priority indication, so the S-tag inserter, which runs last, wins.
+
+The probe prints the PCP of the outer (S) tag as pcp0 and of the inner (C) tag
+as pcp1. The chains:
+- a: default parameters; a user priority alone, and with an S-tag PCP request
+- b: the S-tag inserter does not map its PCP indication, so the user priority
+  indication is the PCP of the C-tag
+- c: neither inserter maps its PCP indication; no user priority indication
+- d: the C-tag inserter removes the user priority request, so the S-tag gets
+  the defaultPcp of its inserter, 2
+
+%file: test.ned
+
+import inet.test.moduletest.lib.PcpTestChain;
+
+network Test
+{
+    submodules:
+        a: PcpTestChain { sTag = true; };
+        b: PcpTestChain { sTag = true; };
+        c: PcpTestChain { sTag = true; };
+        d: PcpTestChain { sTag = true; };
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3.5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.a.requester.userPriorities = [6, 6]
+*.a.requester.sPcps = [-1, 5]
+*.b.requester.userPriorities = [6]
+*.b.requester.sPcps = [5]
+*.b.sInserter.mapPcpIndToUserPriorityInd = false
+*.c.requester.userPriorities = [6]
+*.c.*Inserter.mapPcpIndToUserPriorityInd = false
+*.d.requester.userPriorities = [6]
+*.d.cInserter.removeUserPriorityReq = true
+*.d.sInserter.defaultPcp = 2
+
+%contains: stdout
+a #0: pcp0=6 pcp1=6 UserPriorityReq=6 UserPriorityInd=6 CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=6
+
+%contains: stdout
+a #1: pcp0=5 pcp1=6 UserPriorityReq=6 UserPriorityInd=5 CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=5
+
+%contains: stdout
+b #0: pcp0=5 pcp1=6 UserPriorityReq=6 UserPriorityInd=6 CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=5
+
+%contains: stdout
+c #0: pcp0=6 pcp1=6 UserPriorityReq=6 UserPriorityInd=none CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=6
+
+%contains: stdout
+d #0: pcp0=2 pcp1=6 UserPriorityReq=none UserPriorityInd=2 CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=2
