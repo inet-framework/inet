@@ -444,7 +444,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 8 — `rto`, 12 tests.** Done: `caa51a2dcd`; 12 PASS.
 - [x] **Step 9 — `congestion`, 73 tests.** The algorithm classes first, because they give the largest coverage gain. Done: `8876619f7f` (the check skips `-alias`), `e6648b83cc` (the initial window and threshold), `2a19ee2456` (the algorithms), `af106bb2be` (TcpCubic and DcTcp), `9717a2cb35` (HyStart), `d815e75754` (TcpVegas); 72 PASS, 1 FAIL (PF-6).
 - [x] **Step 10 — `recovery`, 25 tests.** Done: `d41a5f4b8c`; 25 PASS.
-- [ ] **Step 11 — `receive`, 24 tests.**
+- [x] **Step 11 — `receive`, 25 tests.** Done: `dccaa84b57`; 25 PASS.
 - [ ] **Step 12 — `close`, 13 tests.**
 - [ ] **Step 13 — `ecn`, 18 tests.**
 - [ ] **Step 14 — `pmtu`, 11 tests.**
@@ -551,3 +551,11 @@ The user settled these on 2026-10-29.
 - The threshold of a timeout is 2 * `snd_mss` = 2920 bytes, also with timestamps, where the segments carry 1448 bytes; RFC 5681 excludes the options from SMSS. No claim of a parameter depends on it; the plan of the repairs looks at it.
 - The test of `retainSackAfterRto` needs a peer that reports no SACK blocks after the timeout, because the next ACK marks the data again in both classes. The new helper `hideSackBlocks()` of `TcpMutations.h` replaces the SACK option with NOP options of the same length.
 - The group runs in 3 s of wall time with 32 cores. D3: no socket call, and no new library word.
+
+**Step 11 (`receive`).**
+- The code pass changed the draft from 24 to 25 tests. `advertisedWindow` got the error class `too-large`, above 65535 << 14 bytes; the NED does not name that limit (PF-7, a documentation gap). `receiveBufferSize` has the classes `none`, `limiting` and `ample` (a buffer above the advertised window, the value of LinuxTcp): the draft class `out-of-order` is gone, because the right edge of the window never moves back, so the out-of-order data never make the offer smaller on the wire. `windowShrinkAllowed = true` has the facets `first` (half the buffer in the SYN-ACK) and `shrink`. The class `exception` of `dropBeyondWindowEdge` is gone: there the result is the same as with false.
+- A tap rule that writes 65535 into the window field of host2 makes host1 send beyond the offer. With an offer of 16384 bytes and no reads, the highest ACK of host2 counts the segments that got in: 11 (the buffer is the window), 5 (a buffer of 8192 bytes), 12 (a larger buffer takes the segment that crosses the edge), and 11 again with `dropBeyondWindowEdge`. One scenario separates the classes of two parameters.
+- The window of a receiver that does not read does not reach 0: the rule "do not shrink the window" keeps the last 375 bytes open, and the sender does not send so few bytes. The tests wait for a window below one segment.
+- `windowUpdateAfterRead` acts only at an explicit READ, so its tests use `TcpTestApp` without auto-read; a delivery with auto-read is no such read.
+- `receiveBufferLowRtt` acts only through Dynamic Right-Sizing, once in each receive RTT (40 ms here). Every value below the RTT gives the same growth; above it, the growth is in proportion to the RTT over the value (100 ms gives about 900000 bytes at 0.7 s, 1 s about 440000, below the RTT 1330000). Later, the growth for the overflow of the buffer hides the difference, so the tests read the buffer at 0.7 s.
+- The group runs in 4 s of wall time with 32 cores. D3: the socket calls are the listen without auto-read and the read of `TcpTestApp`; no new library word.
