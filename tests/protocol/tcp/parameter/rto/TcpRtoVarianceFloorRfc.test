@@ -1,0 +1,51 @@
+%description:
+
+Tcp.rtoVarianceFloor:rfc -- the RTO is the estimate, rounded up to the minimum.
+
+The claim (Tcp.ned): "false: RTO = SRTT + 4*RTTVAR, rounded up to minRexmitTimeout (RFC 6298
+sections 2.3 and 2.4)".
+
+The classes: rfc (false, the default) and linux (true; LinuxTcp). The code:
+TcpAlgorithmBase::rttMeasurementComplete(). This test separates "rfc" from "linux".
+
+Host under test: host1, with the minimum of 1 s, which sends 10000 bytes on a path with a
+round trip of 100 ms. Observation: level 2, the signal rto after the first measurement is
+max(0.1 + 4 * 0.05, 1) = 1 s.
+
+%# parameter: Tcp.rtoVarianceFloor
+%# class: rfc
+%# value: false
+%# key: *.host1.tcp.rtoVarianceFloor
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpRtoVarianceFloorRfc")
+        .once(on("host1.tcp").signal("rto")
+                  .first()
+                  .assertValueBetween(0.99, 1.01)
+                  .describe("the RTO after the first measurement, the minimum")
+                  .within(1.0));
+}
+
+%activity:
+EV << "TcpRtoVarianceFloorRfc compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.rtoVarianceFloor = false    # the parameter under test
+*.linkDelay = 25ms
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpRtoVarianceFloorRfc: PASS

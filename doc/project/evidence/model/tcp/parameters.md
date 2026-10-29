@@ -115,3 +115,22 @@ Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode: 17 PASS. The
 | `Tcp.notsentLowat:off` | `-1B` | — | the application gets no send-ready indication | NED; code: `sendData()` | A | P, K | [TcpNotsentLowatOff](../../../../../tests/protocol/tcp/parameter/send/TcpNotsentLowatOff.test) | PASS |
 | `Tcp.notsentLowat:mark` | `4096B` | — | when the unsent bytes fall to the mark, the application gets one send-ready indication | NED; code: the same | A | P, K | [TcpNotsentLowatMark](../../../../../tests/protocol/tcp/parameter/send/TcpNotsentLowatMark.test) | PASS |
 | `Tcp.notsentLowat:socket-override` | `-1B` | — | TCP_NOTSENT_LOWAT of the socket takes the place of the parameter | NED; code: `initConnection()` | A | P, K | [TcpNotsentLowatSocketOverride](../../../../../tests/protocol/tcp/parameter/send/TcpNotsentLowatSocketOverride.test) | PASS |
+
+### rto — retransmission timeout
+
+Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode: 12 PASS. The classes of `minRexmitTimeout` and `maxRexmitTimeout` are facets of the path: a limit binds or it does not, here on a path with a round trip of 100 ms. No parameter of the group has a check of its value.
+
+| Class | Value | Preset | Claim | Source | Obs | Net | Test | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `Tcp.initialRto:rfc6298` | `1s` | — | the first retransmission of a SYN comes after 1 s | NED; code: `startSynRexmitTimer()` | W | P, T | [TcpInitialRtoRfc6298](../../../../../tests/protocol/tcp/parameter/rto/TcpInitialRtoRfc6298.test) | PASS |
+| `Tcp.initialRto:rfc1122` | `3s` | LegacyTcp | the first retransmission of a SYN comes after 3 s | NED; code: the same | W | P, T | [TcpInitialRtoRfc1122](../../../../../tests/protocol/tcp/parameter/rto/TcpInitialRtoRfc1122.test) | PASS |
+| `Tcp.minRexmitTimeout:binds` | `1s` | — | the RTO is the minimum when the estimate is below it | NED; code: `rttMeasurementComplete()` | S | P | [TcpMinRexmitTimeoutBinds](../../../../../tests/protocol/tcp/parameter/rto/TcpMinRexmitTimeoutBinds.test) | PASS |
+| `Tcp.minRexmitTimeout:free` | `0.2s` | LinuxTcp | the RTO is the estimate when it is above the minimum | NED; code: the same | S | P | [TcpMinRexmitTimeoutFree](../../../../../tests/protocol/tcp/parameter/rto/TcpMinRexmitTimeoutFree.test) | PASS |
+| `Tcp.maxRexmitTimeout:caps` | `2s` | — | the backoff stops at the maximum | NED; code: `processRexmitTimer()`, `process_TIMEOUT_SYN_REXMIT()` | W | P, T | [TcpMaxRexmitTimeoutCaps](../../../../../tests/protocol/tcp/parameter/rto/TcpMaxRexmitTimeoutCaps.test) | PASS |
+| `Tcp.maxRexmitTimeout:free` | `240s` | LinuxTcp | below the maximum, the backoff doubles | NED; code: the same | W | P, T | [TcpMaxRexmitTimeoutFree](../../../../../tests/protocol/tcp/parameter/rto/TcpMaxRexmitTimeoutFree.test) | PASS |
+| `Tcp.maxRexmitCount:limit` | `2` | LinuxTcp | after this many retransmissions of a segment, the connection aborts | NED; code: `processRexmitTimer()` | W, A | P, T, K | [TcpMaxRexmitCountLimit](../../../../../tests/protocol/tcp/parameter/rto/TcpMaxRexmitCountLimit.test) | PASS |
+| `Tcp.maxRexmitCount:zero` | `0` | — | the connection aborts at the first timeout, without a retransmission | code: the same | W, A | P, T, K | [TcpMaxRexmitCountZero](../../../../../tests/protocol/tcp/parameter/rto/TcpMaxRexmitCountZero.test) | PASS |
+| `Tcp.rtoVarianceFloor:rfc` | `false` | — | RTO = SRTT + 4 RTTVAR, rounded up to the minimum | NED; code: `rttMeasurementComplete()` | S | P | [TcpRtoVarianceFloorRfc](../../../../../tests/protocol/tcp/parameter/rto/TcpRtoVarianceFloorRfc.test) | PASS |
+| `Tcp.rtoVarianceFloor:linux` | `true` | LinuxTcp | RTO = SRTT + max(4 RTTVAR, minimum) | NED; code: the same | S | P | [TcpRtoVarianceFloorLinux](../../../../../tests/protocol/tcp/parameter/rto/TcpRtoVarianceFloorLinux.test) | PASS |
+| `Tcp.seedRttFromHandshake:off` | `false` | — | the first data segment has the initial RTO | NED | W | P, T, K | [TcpSeedRttFromHandshakeOff](../../../../../tests/protocol/tcp/parameter/rto/TcpSeedRttFromHandshakeOff.test) | PASS |
+| `Tcp.seedRttFromHandshake:on` | `true` | LinuxTcp | the round trip of the handshake gives the first RTO | NED; code: `processSegmentInSynSent()` | W | P, T, K | [TcpSeedRttFromHandshakeOn](../../../../../tests/protocol/tcp/parameter/rto/TcpSeedRttFromHandshakeOn.test) | PASS |

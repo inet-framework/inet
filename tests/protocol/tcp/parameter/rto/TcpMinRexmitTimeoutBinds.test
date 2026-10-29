@@ -1,0 +1,52 @@
+%description:
+
+Tcp.minRexmitTimeout:binds -- the RTO is the minimum when the estimate is smaller.
+
+The claim (Tcp.ned): "the lower limit of the retransmission timeout (RFC 6298 section 2.4:
+1 s; Linux: 200 ms)".
+
+The classes: binds (a minimum above SRTT + 4 RTTVAR; 1s is the default) and free (a minimum
+below it; 200ms is the value of LinuxTcp), on a path whose round trip is 100 ms. The code:
+TcpAlgorithmBase::rttMeasurementComplete(). This test separates "binds" from "free".
+
+Host under test: host1, which sends 10000 bytes on a path with a round trip of 100 ms. The
+first measurement gives SRTT = 0.1 s and RTTVAR = 0.05 s, so the estimate is 0.3 s.
+Observation: level 2, the signal rto after the first measurement is 1 s.
+
+%# parameter: Tcp.minRexmitTimeout
+%# class: binds
+%# value: 1s
+%# key: *.host1.tcp.minRexmitTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMinRexmitTimeoutBinds")
+        .once(on("host1.tcp").signal("rto")
+                  .first()
+                  .assertValueBetween(0.99, 1.01)
+                  .describe("the RTO after the first measurement, the minimum")
+                  .within(1.0));
+}
+
+%activity:
+EV << "TcpMinRexmitTimeoutBinds compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.minRexmitTimeout = 1s    # the parameter under test
+*.linkDelay = 25ms
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMinRexmitTimeoutBinds: PASS

@@ -1,0 +1,78 @@
+%description:
+
+Tcp.seedRttFromHandshake:off -- the first data segment has the initial RTO.
+
+The claim (Tcp.ned): "Seed the RTT estimator (srtt/rttvar/RTO) from the SYN<->SYN-ACK
+exchange, as Linux does"; false: the first RTO is the initial RTO.
+
+The classes: off (false, the default) and on (true; LinuxTcp). The code: the end of the
+handshake measures the round trip of the SYN and the SYN-ACK
+(TcpConnection::processSegmentInSynSent(), processSegmentInSynRcvd()). This test separates "off" from "on".
+
+Host under test: host1, with a minimum RTO of 0.2 s and without the tail loss probe, which
+sends 100 bytes after the handshake on a path with a round trip of 100 ms; the tap drops the
+first data segment. Observation: level 1, the retransmission comes after the initial RTO of
+1 s.
+
+%# parameter: Tcp.seedRttFromHandshake
+%# class: off
+%# value: false
+%# key: *.host1.tcp.seedRttFromHandshake
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSeedRttFromHandshakeOff")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.1))
+        .once(on("host1.app[0]").signal("socketEstablished").within(0.5))
+        .act(action().after(0.001).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.sendData(app.socket(), 100);
+        }))
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == false && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the first data segment of host1"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+             .describe("the data segment of host1")
+             .within(0.1))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+              .describe("an early retransmission, after the initial RTO of 1 s")
+              .within(0.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+             .describe("retransmission, after the initial RTO of 1 s")
+             .within(0.2));
+}
+
+%activity:
+EV << "TcpSeedRttFromHandshakeOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.seedRttFromHandshake = false    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+*.host1.tcp.tlpEnabled = false
+*.host1.tcp.minRexmitTimeout = 0.2s
+*.linkDelay = 25ms
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSeedRttFromHandshakeOff: PASS

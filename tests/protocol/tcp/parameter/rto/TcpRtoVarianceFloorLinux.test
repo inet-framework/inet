@@ -1,0 +1,51 @@
+%description:
+
+Tcp.rtoVarianceFloor:linux -- the minimum limits the variance term, as Linux.
+
+The claim (Tcp.ned): "true: RTO = SRTT + max(4*RTTVAR, minRexmitTimeout), as Linux
+(tcp_set_rto()), whose minimum limits the variance term".
+
+The classes: rfc (false, the default) and linux (true; LinuxTcp). The code:
+TcpAlgorithmBase::rttMeasurementComplete(). This test separates "linux" from "rfc".
+
+Host under test: host1, with the minimum of 1 s, which sends 10000 bytes on a path with a
+round trip of 100 ms. Observation: level 2, the signal rto after the first measurement is
+0.1 + max(4 * 0.05, 1) = 1.1 s.
+
+%# parameter: Tcp.rtoVarianceFloor
+%# class: linux
+%# value: true
+%# key: *.host1.tcp.rtoVarianceFloor
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpRtoVarianceFloorLinux")
+        .once(on("host1.tcp").signal("rto")
+                  .first()
+                  .assertValueBetween(1.09, 1.12)
+                  .describe("the RTO after the first measurement, SRTT plus the minimum")
+                  .within(1.0));
+}
+
+%activity:
+EV << "TcpRtoVarianceFloorLinux compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.rtoVarianceFloor = true    # the parameter under test
+*.linkDelay = 25ms
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpRtoVarianceFloorLinux: PASS

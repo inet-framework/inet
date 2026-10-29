@@ -1,0 +1,64 @@
+%description:
+
+Tcp.maxRexmitCount:limit -- after this many retransmissions of a segment, the connection aborts.
+
+The claim (Tcp.ned): "the retransmissions of one segment, after which the connection aborts".
+
+The classes: limit (1 and more; 12 is the default, 15 the value of LinuxTcp) and zero (0).
+The code: TcpAlgorithmBase::processRexmitTimer() aborts the connection when the count of
+retransmissions of a segment exceeds the value. This test separates "limit" from "zero".
+
+Host under test: host1, with 2 and without the tail loss probe (a precondition: a probe is not
+a retransmission of the timer), which sends 100 bytes; the tap drops each data segment, and
+the RTO is 1 s. Observation: level 1, three data segments of host1 (the first and two
+retransmissions, at 1 and 3 s), and level 1 at the application: the connection aborts at the
+third timeout, 7 s after the first segment.
+
+%# parameter: Tcp.maxRexmitCount
+%# class: limit
+%# value: 2
+%# key: *.host1.tcp.maxRexmitCount
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMaxRexmitCountLimit")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == false && ipv4.totalLengthField > 100B").drop()
+                     .describe("each data segment of host1"))
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+            app.sendData(app.socket(), 100);
+        }))
+        .meanwhile(exactlyTimes(3, on("host1.tcp").signal("packetSentToLower")
+                                       .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                                       .describe("a data segment of host1")
+                                       .within(9.0)))
+        .once(on("host1.app[0]").signal("socketFailure")
+                  .notBefore(6.9)
+                  .describe("the abort of the connection")
+                  .within(7.2));
+}
+
+%activity:
+EV << "TcpMaxRexmitCountLimit compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.maxRexmitCount = 2    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+*.host1.tcp.tlpEnabled = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMaxRexmitCountLimit: PASS

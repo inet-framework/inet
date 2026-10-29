@@ -1,0 +1,75 @@
+%description:
+
+Tcp.maxRexmitTimeout:caps -- the backoff stops at the maximum.
+
+The claim (Tcp.ned): "the upper limit of the retransmission timeout (RFC 6298 section 2.5:
+at least 60 s)".
+
+The classes: caps (a value that the backoff reaches) and free (a value that it does not
+reach; 240s is the default, 120s the value of LinuxTcp). The code: the backoff of the data
+(TcpAlgorithmBase::processRexmitTimer()) and of a SYN (TcpConnection::process_TIMEOUT_SYN_REXMIT()). This test separates "caps" from "free".
+
+Host under test: host1, with 2 s; the tap drops each SYN, whose timeout starts at 1 s and
+doubles. Observation: level 1, the SYNs of host1 come 1, 2 and 2 s apart.
+
+%# parameter: Tcp.maxRexmitTimeout
+%# class: caps
+%# value: 2s
+%# key: *.host1.tcp.maxRexmitTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMaxRexmitTimeoutCaps")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true").drop()
+                     .describe("every SYN of host1"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the first SYN of host1")
+             .within(0.5))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+              .describe("an early second SYN, 1 s later")
+              .within(0.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("second SYN, 1 s later")
+             .within(0.2))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+              .describe("an early third SYN, 2 s later")
+              .within(1.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("third SYN, 2 s later")
+             .within(0.2))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+              .describe("an early fourth SYN, 2 s later again")
+              .within(1.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("fourth SYN, 2 s later again")
+             .within(0.2));
+}
+
+%activity:
+EV << "TcpMaxRexmitTimeoutCaps compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.maxRexmitTimeout = 2s    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMaxRexmitTimeoutCaps: PASS

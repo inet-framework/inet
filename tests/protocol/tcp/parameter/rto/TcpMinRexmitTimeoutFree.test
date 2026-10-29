@@ -1,0 +1,51 @@
+%description:
+
+Tcp.minRexmitTimeout:free -- the RTO is the estimate when it is above the minimum.
+
+The claim (Tcp.ned): "the lower limit of the retransmission timeout".
+
+The classes: binds (a minimum above SRTT + 4 RTTVAR; 1s is the default) and free (a minimum
+below it; 200ms is the value of LinuxTcp), on a path whose round trip is 100 ms. The code:
+TcpAlgorithmBase::rttMeasurementComplete(). This test separates "free" from "binds".
+
+Host under test: host1, which sends 10000 bytes on a path with a round trip of 100 ms.
+Observation: level 2, the signal rto after the first measurement is the estimate,
+SRTT + 4 RTTVAR = 0.3 s.
+
+%# parameter: Tcp.minRexmitTimeout
+%# class: free
+%# value: 0.2s
+%# key: *.host1.tcp.minRexmitTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMinRexmitTimeoutFree")
+        .once(on("host1.tcp").signal("rto")
+                  .first()
+                  .assertValueBetween(0.29, 0.32)
+                  .describe("the RTO after the first measurement, the estimate")
+                  .within(1.0));
+}
+
+%activity:
+EV << "TcpMinRexmitTimeoutFree compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.minRexmitTimeout = 0.2s    # the parameter under test
+*.linkDelay = 25ms
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMinRexmitTimeoutFree: PASS
