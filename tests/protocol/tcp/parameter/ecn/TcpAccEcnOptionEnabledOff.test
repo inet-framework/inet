@@ -1,0 +1,56 @@
+%description:
+
+Tcp.accEcnOptionEnabled:off -- the ACK of the handshake comes without the AccECN option.
+
+The claim (Tcp.ned): "AccECN: send the AccECN option, which gives the byte counts of each ECN
+codepoint (RFC 9768 section 3.2.3.3: RECOMMENDED); false: only the ACE field (Linux
+tcp_ecn_option=0). Each connection reads it at its open".
+
+The classes: on (true, the default), off (false), and changed (the value changes during the
+run; the parameter is @mutable). The code: TcpConnection::configureStateVariables() reads it at
+the open; the AccECN option goes on the SYN-ACK, on the ACK of the handshake and on the first
+data segment of the client, and later after a byte count changed (TcpConnection::writeHeaderOptions()). This test separates "off" from the other value.
+
+Host under test: host1, an AccECN client (tcpEcnMode "accecn"; host2 "accecn-passive":
+preconditions). A header of 32 bytes has the Timestamps option only; the AccECN option adds 12
+bytes. Observation: level 1, the ACK of host1 at the end of the handshake comes without the AccECN option.
+
+%# parameter: Tcp.accEcnOptionEnabled
+%# class: off
+%# value: false
+%# key: *.host1.tcp.accEcnOptionEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAccEcnOptionEnabledOff")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && tcp.ackBit == true && pk.dataLength <= tcp.headerLength")
+             .first()
+                  .assertPacket("tcp.headerLength == 32B")
+             .describe("the ACK of the handshake of host1")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpAccEcnOptionEnabledOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.accEcnOptionEnabled = false    # the parameter under test
+*.host1.tcp.tcpEcnMode = "accecn"
+*.host2.tcp.tcpEcnMode = "accecn-passive"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAccEcnOptionEnabledOff: PASS

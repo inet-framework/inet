@@ -1,0 +1,63 @@
+%description:
+
+Tcp.accEcnOptionPolicy:rfc -- the SYN-ACK carries the AccECN option of kind 172.
+
+The claim (Tcp.ned): "AccECN: when the option goes out and which fields it has. "rfc": the
+recommended scheme of RFC 9768 section 3.2.3.3 ...; "linux": as Linux tcp_ecn_option=2: on each
+segment, kind 174 with each field that fits".
+
+The classes: rfc (the default) and linux (the value of LinuxTcp), with the facets kind and
+duplicate. The code:
+TcpConnection::writeHeaderOptions() puts the option of order 0 (kind 172: EE0B, ECEB, EE1B) on
+the SYN-ACK with "rfc", and the option of order 1 (kind 174: EE1B, ECEB, EE0B) with "linux";
+after the handshake, TcpConnection::getAccEcnOptionFields() decides when the option goes out.
+With "linux", TcpConnection::processSegment1stThru8th() counts a duplicate segment that ends at
+RCV.NXT in the AccECN counters, as Linux tests the acceptability against the left edge of the
+window that it advertised last. This test separates "rfc" from the other value.
+
+Host under test: host2, an AccECN server (tcpEcnMode "accecn-passive"; host1 "accecn":
+preconditions). Observation: level 1, the SYN-ACK of host2 has an option of kind 172 and none of
+kind 174.
+
+%# parameter: Tcp.accEcnOptionPolicy
+%# class: rfc
+%# value: "rfc"
+%# key: *.host2.tcp.accEcnOptionPolicy
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAccEcnOptionPolicyRfc")
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      return tcpOptionCount(context.event.packet, 172) == 1 && tcpOptionCount(context.event.packet, 174) == 0;
+                  })
+                  .describe("the SYN-ACK of host2")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpAccEcnOptionPolicyRfc compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.accEcnOptionPolicy = "rfc"    # the parameter under test
+*.host1.tcp.tcpEcnMode = "accecn"
+*.host2.tcp.tcpEcnMode = "accecn-passive"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAccEcnOptionPolicyRfc: PASS

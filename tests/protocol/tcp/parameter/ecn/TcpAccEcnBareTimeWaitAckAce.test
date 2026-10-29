@@ -1,0 +1,60 @@
+%description:
+
+Tcp.accEcnBareTimeWaitAck:ace -- the ACK of the FIN of the peer has the ACE field 5.
+
+The claim (Tcp.ned): "AccECN: the ACKs of TIME_WAIT carry no ACE field, as in Linux ...; false:
+they carry it, as each ACK after the handshake (RFC 9768 section 3.2.2.2: MUST)".
+
+The classes: ace (false, the default) and bare (true, the value of LinuxTcp). The code:
+TcpConnection::sendToIP() writes the ACE field into each ACK of an AccECN connection, but not
+into the ACKs of a time-wait socket with true; a connection that closed fully is a time-wait
+socket from FIN_WAIT_2 on, as in Linux. This test separates "ace" from the other value.
+
+Host under test: host1, an AccECN client (tcpEcnMode "accecn"; host2 "accecn-passive":
+preconditions), which closes the connection at 0.5 s; host2 closes too. No packet was CE-marked,
+so the ACE field holds 5 (RFC 9768 section 3.2.2.1): AE 1, CWR 0, ECE 1. Observation: level 1, the ACK of host1 to the FIN of host2 has the ACE field 5.
+
+%# parameter: Tcp.accEcnBareTimeWaitAck
+%# class: ace
+%# value: false
+%# key: *.host1.tcp.accEcnBareTimeWaitAck
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAccEcnBareTimeWaitAckAce")
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.finBit == true")
+             .describe("the FIN of host2")
+             .within(1.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.aeBit == true && tcp.cwrBit == false && tcp.eceBit == true")
+             .describe("the ACK of host1 to the FIN")
+             .within(0.01));
+}
+
+%activity:
+EV << "TcpAccEcnBareTimeWaitAckAce compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.accEcnBareTimeWaitAck = false    # the parameter under test
+*.host1.tcp.tcpEcnMode = "accecn"
+*.host2.tcp.tcpEcnMode = "accecn-passive"
+*.host1.app[0].tClose = 0.5s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAccEcnBareTimeWaitAckAce: PASS

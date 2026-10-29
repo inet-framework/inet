@@ -1,0 +1,34 @@
+%description:
+
+Tcp.ecnWillingness:conflict -- true with tcpEcnMode "accecn" stops the run with an error.
+
+The claim: true replaces "off" or "passive" only.
+
+The classes: off (false, the default: tcpEcnMode decides), on (true: "rfc3168" in place of
+"off" or "passive"), conflict (true with a tcpEcnMode that requests ECN: an error). The code:
+TcpConnection::configureStateVariables().
+
+Host under test: host1, with tcpEcnMode "accecn". Observation: the error, and the exit code of
+the run.
+
+%# parameter: Tcp.ecnWillingness
+%# class: conflict
+%# value: true
+%# key: *.host1.tcp.ecnWillingness
+%# expected-result: PASS
+
+%activity:
+EV << "TcpEcnWillingnessConflict compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.ecnWillingness = true    # the parameter under test
+*.host1.tcp.tcpEcnMode = "accecn"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+Set the deprecated ecnWillingness or tcpEcnMode, not both

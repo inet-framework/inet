@@ -1,0 +1,86 @@
+%description:
+
+Tcp.accEcnOptionEnabled:changed -- a new value acts at the next open; the open connection keeps the option.
+
+The claim (Tcp.ned): "AccECN: send the AccECN option, which gives the byte counts of each ECN
+codepoint (RFC 9768 section 3.2.3.3: RECOMMENDED); false: only the ACE field (Linux
+tcp_ecn_option=0). Each connection reads it at its open".
+
+The classes: on (true, the default), off (false), and changed (the value changes during the
+run; the parameter is @mutable). The code: TcpConnection::configureStateVariables() reads it at
+the open; the AccECN option goes on the SYN-ACK, on the ACK of the handshake and on the first
+data segment of the client, and later after a byte count changed (TcpConnection::writeHeaderOptions()). This test separates "changed" from "off".
+
+Host under test: host1, an AccECN client (tcpEcnMode "accecn"; host2 "accecn-passive":
+preconditions). A header of 32 bytes has the Timestamps option only; the AccECN option adds 12
+bytes. host1 sends the data of its first connection at 0.6 s. At 0.5 s, the test sets
+accEcnOptionEnabled of host1 to false, and host1 opens a second connection at 1 s.
+Observation: level 1, the ACK of the first handshake and the first data segment have the
+option; the ACK of the second handshake has none.
+
+%# parameter: Tcp.accEcnOptionEnabled
+%# class: changed
+%# value: true
+%# key: *.host1.tcp.accEcnOptionEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAccEcnOptionEnabledChanged")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && tcp.ackBit == true && pk.dataLength <= tcp.headerLength")
+             .first()
+                  .assertPacket("tcp.headerLength > 32B")
+             .describe("the ACK of the first handshake")
+             .within(0.5))
+        .act(action().at(0.5).setParameter("host1.tcp", "accEcnOptionEnabled", "false")
+                 .describe("accEcnOptionEnabled of host1 becomes false"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("pk.dataLength > tcp.headerLength")
+             .first()
+                  .assertPacket("tcp.headerLength > 32B")
+             .describe("the first data segment of the first connection")
+             .within(0.3))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the SYN of the second connection")
+             .within(1.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && tcp.ackBit == true && pk.dataLength <= tcp.headerLength")
+             .first()
+                  .assertPacket("tcp.headerLength == 32B")
+             .describe("the ACK of the second handshake")
+             .within(0.1));
+}
+
+%activity:
+EV << "TcpAccEcnOptionEnabledChanged compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.accEcnOptionEnabled = true    # the parameter under test
+*.host1.tcp.tcpEcnMode = "accecn"
+*.host2.tcp.tcpEcnMode = "accecn-passive"
+*.host1.app[0].tSend = 0.6s
+*.host1.numApps = 2
+*.host1.app[1].typename = "TcpSessionApp"
+*.host1.app[1].connectAddress = "host2"
+*.host1.app[1].connectPort = 1000
+*.host1.app[1].tOpen = 1.0s
+*.host1.app[1].tSend = 1.1s
+*.host1.app[1].sendBytes = 1000B
+*.host1.app[1].tClose = 1000s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAccEcnOptionEnabledChanged: PASS

@@ -1,0 +1,83 @@
+%description:
+
+Tcp.tcpEcnMode:changed -- a new value acts at the next open; the open connection keeps AccECN.
+
+The claim (Tcp.ned): "ECN: "off": no ECN; "passive": answer an ECN-setup SYN (RFC 3168), but
+request no ECN in an active open ...; "rfc3168": request and answer ECN; "accecn": request
+Accurate ECN (RFC 9768), and answer it and ECN; "accecn-passive": answer Accurate ECN and ECN,
+but request nothing. Each connection reads it at its open".
+
+The classes: off (the value of LegacyTcp), passive (the default), rfc3168, accecn,
+accecn-passive, and changed (the value changes during the run; the parameter is @mutable).
+The code: TcpConnection::configureStateVariables() reads the mode at the open; the SYN of an
+active open requests ECN (ECE, CWR) with "rfc3168" and AccECN (AE, CWR, ECE) with "accecn";
+a passive connection answers an AccECN SYN with AccECN ("accecn", "accecn-passive"), with
+ECN (ECE; "passive", "rfc3168"), or not at all ("off"). This test separates "changed" from the values other than "accecn".
+
+Host under test: host1, which opens a connection to host2 at 0.1 s with "accecn" and sends its
+data at 0.6 s; host2 answers AccECN (tcpEcnMode "accecn-passive", a precondition). At 0.5 s,
+the test sets tcpEcnMode of host1 to "off", and host1 opens a second connection at 1 s.
+Observation: level 1, the first SYN has AE, CWR and ECE; the data of the first connection
+reach host2 with ECT(0); the second SYN has no ECN bits.
+
+%# parameter: Tcp.tcpEcnMode
+%# class: changed
+%# value: "accecn"
+%# key: *.host1.tcp.tcpEcnMode
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpTcpEcnModeChanged")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .first()
+                  .assertPacket("tcp.aeBit == true && tcp.cwrBit == true && tcp.eceBit == true")
+             .describe("the SYN of the first connection")
+             .within(0.5))
+        .act(action().at(0.5).setParameter("host1.tcp", "tcpEcnMode", "\"off\"")
+                 .describe("tcpEcnMode of host1 becomes \"off\""))
+        .once(on("host2.eth[0].mac").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && ipv4.totalLengthField > 100B")
+                  .first()
+                  .assertPacket("ipv4.ecn == 2")
+                  .describe("the data of the first connection at host2, with ECT(0)")
+                  .within(0.3))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .first()
+                  .assertPacket("tcp.aeBit == false && tcp.cwrBit == false && tcp.eceBit == false")
+             .describe("the SYN of the second connection")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpTcpEcnModeChanged compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpEcnMode = "accecn"    # the parameter under test
+*.host2.tcp.tcpEcnMode = "accecn-passive"
+*.host1.app[0].tSend = 0.6s
+*.host1.numApps = 2
+*.host1.app[1].typename = "TcpSessionApp"
+*.host1.app[1].connectAddress = "host2"
+*.host1.app[1].connectPort = 1000
+*.host1.app[1].tOpen = 1.0s
+*.host1.app[1].tSend = 1.1s
+*.host1.app[1].sendBytes = 1000B
+*.host1.app[1].tClose = 1000s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpTcpEcnModeChanged: PASS

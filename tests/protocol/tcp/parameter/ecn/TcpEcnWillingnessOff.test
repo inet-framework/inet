@@ -1,0 +1,51 @@
+%description:
+
+Tcp.ecnWillingness:off -- tcpEcnMode decides: the SYN of the default "passive" requests no ECN.
+
+The claim (Tcp.ned): "deprecated: true is tcpEcnMode="rfc3168", in place of "off" or
+"passive"".
+
+The classes: off (false, the default: tcpEcnMode decides), on (true: "rfc3168" in place of
+"off" or "passive"), conflict (true with a tcpEcnMode that requests ECN: an error). The code:
+TcpConnection::configureStateVariables(). This test separates "off" from "on".
+
+Host under test: host1, with the default tcpEcnMode. Observation: level 1, the SYN of host1 has
+no ECN bits.
+
+%# parameter: Tcp.ecnWillingness
+%# class: off
+%# value: false
+%# key: *.host1.tcp.ecnWillingness
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpEcnWillingnessOff")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .first()
+                  .assertPacket("tcp.aeBit == false && tcp.cwrBit == false && tcp.eceBit == false")
+             .describe("the SYN of host1")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpEcnWillingnessOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.ecnWillingness = false    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpEcnWillingnessOff: PASS

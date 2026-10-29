@@ -1,0 +1,78 @@
+%description:
+
+Tcp.tcpEcnMode:rfc3168 -- the SYN of host1 has ECE and CWR; its SYN-ACK to an AccECN SYN has ECE: ECN.
+
+The claim (Tcp.ned): "ECN: "off": no ECN; "passive": answer an ECN-setup SYN (RFC 3168), but
+request no ECN in an active open ...; "rfc3168": request and answer ECN; "accecn": request
+Accurate ECN (RFC 9768), and answer it and ECN; "accecn-passive": answer Accurate ECN and ECN,
+but request nothing. Each connection reads it at its open".
+
+The classes: off (the value of LegacyTcp), passive (the default), rfc3168, accecn,
+accecn-passive, and changed (the value changes during the run; the parameter is @mutable).
+The code: TcpConnection::configureStateVariables() reads the mode at the open; the SYN of an
+active open requests ECN (ECE, CWR) with "rfc3168" and AccECN (AE, CWR, ECE) with "accecn";
+a passive connection answers an AccECN SYN with AccECN ("accecn", "accecn-passive"), with
+ECN (ECE; "passive", "rfc3168"), or not at all ("off"). This test separates "rfc3168" from the other values.
+
+Host under test: host1, which opens a connection to host2 at 0.1 s, and listens on port 2000;
+host2 requests AccECN (tcpEcnMode "accecn", a precondition) and opens a connection to host1 at
+0.3 s. Each value gives another pair: the ECN bits of the SYN of host1, and those of its
+SYN-ACK. An AccECN SYN-ACK feeds back the IP ECN field of the SYN, here Not-ECT: AE 0, CWR 1,
+ECE 0 (RFC 9768 Table 2). Observation: level 1, the SYN of host1 has ECE and CWR, and its SYN-ACK has ECE: ECN.
+
+%# parameter: Tcp.tcpEcnMode
+%# class: rfc3168
+%# value: "rfc3168"
+%# key: *.host1.tcp.tcpEcnMode
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpTcpEcnModeRfc3168")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .first()
+                  .assertPacket("tcp.aeBit == false && tcp.cwrBit == true && tcp.eceBit == true")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.aeBit == false && tcp.cwrBit == false && tcp.eceBit == true")
+             .describe("the SYN-ACK of host1 to the AccECN SYN of host2")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpTcpEcnModeRfc3168 compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpEcnMode = "rfc3168"    # the parameter under test
+*.host2.tcp.tcpEcnMode = "accecn"
+*.host1.numApps = 2
+*.host1.app[1].typename = "TcpEchoApp"
+*.host1.app[1].localPort = 2000
+*.host1.app[1].echoFactor = 0
+*.host2.numApps = 2
+*.host2.app[1].typename = "TcpSessionApp"
+*.host2.app[1].connectAddress = "host1"
+*.host2.app[1].connectPort = 2000
+*.host2.app[1].tOpen = 0.3s
+*.host2.app[1].tSend = 0.4s
+*.host2.app[1].sendBytes = 1000B
+*.host2.app[1].tClose = 1000s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpTcpEcnModeRfc3168: PASS
