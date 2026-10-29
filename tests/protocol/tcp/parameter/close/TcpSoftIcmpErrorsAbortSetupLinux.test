@@ -1,0 +1,58 @@
+%description:
+
+Tcp.softIcmpErrorsAbortSetup:linux -- a Time Exceeded aborts the setup: no second SYN.
+
+The claim (Tcp.ned): "true: a soft ICMP error ... aborts a connection in SYN_SENT or SYN_RCVD, as
+Linux (tcp_v4_err(), tcp_v6_err()) and RFC 5461 section 4 describe; false: RFC 9293 MUST-56, a
+soft error never aborts a connection".
+
+The classes: rfc (false, the default) and linux (true, the value of LinuxTcp). The code:
+TcpConnection::processIcmpv4Error() aborts a connection in SYN_SENT or SYN_RCVD at a hard
+error; with true, also at a soft error: a Destination Unreachable with the codes 0, 1 and 5,
+a Time Exceeded and a Parameter Problem. This test separates "linux" from "rfc".
+
+Host under test: host1, behind a router; the tap sets the TTL of the first SYN of host1 to 1,
+so the router answers with an ICMP Time Exceeded, a soft error. Observation: level 1, host1 sends no second SYN in 2 s.
+
+%# parameter: Tcp.softIcmpErrorsAbortSetup
+%# class: linux
+%# value: true
+%# key: *.host1.tcp.softIcmpErrorsAbortSetup
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSoftIcmpErrorsAbortSetupLinux")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true").nth(1).set("ipv4.timeToLive", "1")
+                     .describe("the first SYN of host1: a TTL of 1, so that the router sends a Time Exceeded"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+              .describe("a second SYN of host1")
+              .within(2.0));
+}
+
+%activity:
+EV << "TcpSoftIcmpErrorsAbortSetupLinux compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.softIcmpErrorsAbortSetup = true    # the parameter under test
+network = inet.protocoltest.TapRouterNetwork
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSoftIcmpErrorsAbortSetupLinux: PASS

@@ -1,0 +1,62 @@
+%description:
+
+Tcp.abortRstWithAck:linux -- the RST of an abort comes with the ACK bit and RCV.NXT.
+
+The claim (Tcp.ned): "true: the RST of an abort carries the ACK bit and RCV.NXT, as Linux
+(tcp_send_active_reset()); false: <SEQ=SND.NXT><CTL=RST> of RFC 9293".
+
+The classes: rfc (false, the default) and linux (true, the value of LinuxTcp). The code:
+TcpConnection::sendAbortRst() sends <SEQ=SND.NXT><CTL=RST>, or with true a RST with the ACK bit
+and RCV.NXT. This test separates "linux" from the other value.
+
+Host under test: host1, whose TcpTestApp connects to host2 at 0.1 s and aborts the connection
+at 0.5 s. Observation: level 1, the RST of host1 comes with the ACK bit and RCV.NXT.
+
+%# parameter: Tcp.abortRstWithAck
+%# class: linux
+%# value: true
+%# key: *.host1.tcp.abortRstWithAck
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAbortRstWithAckLinux")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000); })
+                 .describe("host1 connects to host2"))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .capture("peerIsn", "tcp.sequenceNo")
+             .describe("the SYN-ACK of host2")
+             .within(0.5))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().abort(); })
+                 .describe("host1 aborts the connection"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.rstBit == true")
+             .first()
+                  .assertPacket("tcp.ackBit == true && tcp.ackNo == {peerIsn} + 1")
+             .describe("the RST of host1")
+             .within(0.1));
+}
+
+%activity:
+EV << "TcpAbortRstWithAckLinux compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.abortRstWithAck = true    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAbortRstWithAckLinux: PASS

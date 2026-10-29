@@ -1,0 +1,61 @@
+%description:
+
+Tcp.icmpSequenceCheck:off -- an ICMP error with a stale sequence number counts: it aborts the setup.
+
+The claim (Tcp.ned): "true: an ICMP error whose quoted TCP segment has a sequence number outside
+SND.UNA to SND.MAX is ignored as stale or forged ...; false: each ICMP error of the connection
+counts, as RFC 9293 section 3.9.2.2 says".
+
+The classes: off (false, the default) and on (true, the value of LinuxTcp). The code:
+TcpConnection::isIcmpErrorInWindow() ignores an ICMP error whose quoted segment has a sequence
+number outside SND.UNA to SND.MAX, with true. This test separates "off" from "on".
+
+Host under test: host1, behind a router, with softIcmpErrorsAbortSetup (precondition: an ICMP
+error that counts then aborts the setup). The tap sets the TTL of the first SYN of host1 to 1
+and its sequence number 100 higher, so the Time Exceeded of the router quotes a sequence number
+outside SND.UNA to SND.MAX. Observation: level 1, host1 sends no second SYN in 2 s.
+
+%# parameter: Tcp.icmpSequenceCheck
+%# class: off
+%# value: false
+%# key: *.host1.tcp.icmpSequenceCheck
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpIcmpSequenceCheckOff")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true").nth(1)
+                     .set("ipv4.timeToLive", "1").set("tcp.sequenceNo", "tcp.sequenceNo + 100")
+                     .describe("the first SYN of host1: a TTL of 1 and a sequence number 100 higher"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+              .describe("a second SYN of host1")
+              .within(2.0));
+}
+
+%activity:
+EV << "TcpIcmpSequenceCheckOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.icmpSequenceCheck = false    # the parameter under test
+network = inet.protocoltest.TapRouterNetwork
+*.host1.tcp.softIcmpErrorsAbortSetup = true
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpIcmpSequenceCheckOff: PASS

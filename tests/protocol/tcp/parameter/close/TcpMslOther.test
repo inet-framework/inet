@@ -1,0 +1,62 @@
+%description:
+
+Tcp.msl:other -- TIME_WAIT lasts 10 s.
+
+The claim (Tcp.ned): "Maximum Segment Lifetime"; RFC 9293 section 3.6: the TIME-WAIT state
+lasts 2 MSL.
+
+The classes: rfc (120 s, the default, two minutes as RFC 9293 section 3.4.2 says) and other
+(another value, such as 30 s of LinuxTcp). The code: the connection schedules the 2MSL timer for 2 * msl when it enters
+TIME_WAIT (TcpConnection::processSegment1stThru8th() and the other places of the FIN), and
+closes the connection when it expires. This test separates "other" from the other value.
+
+Host under test: host1, which sends 1000 bytes and closes the connection at 0.5 s; host2
+closes when host1 closes, so host1 enters TIME_WAIT at the FIN of host2. Observation: level 2, the connection of host1 goes to the state CLOSED (the signal state,
+value 1) 10 s after the FIN of host2, and not before.
+
+%# parameter: Tcp.msl
+%# class: other
+%# value: 5s
+%# key: *.host1.tcp.msl
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMslOther")
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.finBit == true")
+             .describe("the FIN of host2: host1 enters TIME_WAIT")
+             .within(1.0))
+        .never(on("host1.tcp").signal("state")
+                   .filterValue(1)
+                   .describe("an early end of TIME_WAIT: the state CLOSED")
+                   .within(9.9))
+        .once(on("host1.tcp").signal("state")
+                  .filterValue(1)
+                  .describe("the end of TIME_WAIT: the state CLOSED")
+                  .within(0.2));
+}
+
+%activity:
+EV << "TcpMslOther compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.msl = 5s    # the parameter under test
+*.host1.app[0].sendBytes = 1000B
+*.host1.app[0].tClose = 0.5s
+sim-time-limit = 11s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMslOther: PASS

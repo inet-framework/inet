@@ -332,6 +332,17 @@ inline void hideSackBlocks(Packet *frame)
     });
 }
 
+// Adds delta to the TSval of the Timestamps option of the segment (RFC 7323 section 3.2), as a
+// forged or a late segment would carry it. A segment without the option stays as it is.
+inline void addToTsval(Packet *frame, uint32_t delta)
+{
+    rewriteTcpHeader(frame, [delta](TcpHeader& header) {
+        for (size_t i = 0; i < header.getHeaderOptionArraySize(); i++)
+            if (auto option = dynamic_cast<inet::tcp::TcpOptionTimestamp *>(header.getHeaderOptionForUpdate(i)))
+                option->setSenderTimestamp(option->getSenderTimestamp() + delta);
+    });
+}
+
 // The octets that the options of a segment occupy, counted from the options themselves and
 // padded to a whole number of 32-bit words (RFC 9293 section 3.1). The header length field of
 // a correct segment is 20 octets more than this.

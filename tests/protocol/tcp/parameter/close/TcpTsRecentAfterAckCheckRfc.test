@@ -1,0 +1,63 @@
+%description:
+
+Tcp.tsRecentAfterAckCheck:rfc -- TS.Recent takes the TSval of a segment that acknowledges unsent data, and PAWS then drops the ACKs of the peer.
+
+The claim (Tcp.ned): "false: TS.Recent takes the TSval of each acceptable segment before its ACK
+is processed (RFC 7323 section 5.3, R3); true: not from a segment that acknowledges data that
+was not sent, as Linux".
+
+The classes: rfc (false, the default) and linux (true, the value of LinuxTcp). The code:
+TcpConnection::updateTsRecent() (RFC 7323 section 5.3, R3) takes the TSval of an acceptable
+segment before its ACK is processed; with true, not from a segment that acknowledges data that
+was not sent. This test separates "rfc" from "linux".
+
+Host under test: host1, which sends 100000 bytes. The tap changes the first ACK of host2 that
+acknowledges more than 20000 bytes: its ACK number goes 1000000 beyond the data that host1
+sent, and its TSval 100000 ahead, as a forged segment would carry them. When TS.Recent takes
+that TSval, PAWS (RFC 7323 section 5.3, R1) drops each later segment of host2, whose TSval is
+older. Observation: level 2, the retransmission timer of host1 expires (the signal numRtos): the
+later ACKs of host2 do not reach the connection.
+
+%# parameter: Tcp.tsRecentAfterAckCheck
+%# class: rfc
+%# value: false
+%# key: *.host1.tcp.tsRecentAfterAckCheck
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpTsRecentAfterAckCheckRfc")
+        .intercept(tap("tap").from("host2").filterPacket("tcp.ackNo > {isn} + 1 + 20000").nth(1)
+                     .set("tcp.ackNo", "tcp.ackNo + 1000000")
+                     .mutate([](Packet *frame) { addToTsval(frame, 100000); })
+                     .describe("the first ACK of host2 above 20000 bytes: an ACK of unsent data, and a TSval 100000 ahead"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("numRtos").describe("a timeout of host1").within(3.0));
+}
+
+%activity:
+EV << "TcpTsRecentAfterAckCheckRfc compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tsRecentAfterAckCheck = false    # the parameter under test
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpTsRecentAfterAckCheckRfc: PASS
