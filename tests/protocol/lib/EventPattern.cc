@@ -13,6 +13,33 @@
 namespace inet {
 namespace protocoltest {
 
+cModule *findModuleByPattern(const std::string& path)
+{
+    cModule *network = getSimulation()->getSystemModule();
+    auto star = path.find('*');
+    if (star == std::string::npos) {
+        cModule *module = network->findModuleByPath(("." + path).c_str());
+        if (module == nullptr)
+            throw cRuntimeError("ProtocolTest: no module '%s'", path.c_str());
+        return module;
+    }
+    auto dot = path.rfind('.', star);
+    std::string pattern = dot == std::string::npos ? path : path.substr(dot + 1);
+    if (pattern.find('.') != std::string::npos)
+        throw cRuntimeError("ProtocolTest: only the last name of the module path '%s' can have a *", path.c_str());
+    cModule *parent = dot == std::string::npos ? network : network->findModuleByPath(("." + path.substr(0, dot)).c_str());
+    if (parent == nullptr)
+        throw cRuntimeError("ProtocolTest: no module '%s'", path.substr(0, dot).c_str());
+    cPatternMatcher matcher(pattern.c_str(), false, true, true);
+    cModule *newest = nullptr;
+    for (cModule::SubmoduleIterator it(parent); !it.end(); ++it)
+        if (matcher.matches((*it)->getFullName()) && (newest == nullptr || (*it)->getId() > newest->getId()))
+            newest = *it;
+    if (newest == nullptr)
+        throw cRuntimeError("ProtocolTest: no module matches '%s'", path.c_str());
+    return newest;
+}
+
 EventPattern on(const char *path)
 {
     // A module path (the subscribe/source subtree): "MN[0]", "MN[0].wlan[0]",
@@ -112,6 +139,23 @@ bool EventPattern::assertionsHold(const MatchContext& context, std::string& reas
                     return false;
                 }
                 break;
+            case Assertion::Module: {
+                bool holds = false;
+                std::string error;
+                try {
+                    cModule *module = findModuleByPattern(assertion.modulePath);
+                    holds = evalObjectExpression(assertion.expr, context.captures, module).boolValue();
+                }
+                catch (const std::exception& e) {
+                    error = std::string(": ") + e.what();
+                }
+                if (!holds) {
+                    reason = "the module " + assertion.modulePath + " does not satisfy "
+                             + quoteExpression(assertion.expr, context.captures) + error;
+                    return false;
+                }
+                break;
+            }
             case Assertion::Event:
                 try {
                     if (assertion.predicate && !assertion.predicate(context)) {
@@ -249,6 +293,7 @@ std::string EventPattern::str() const
                 case Assertion::NotValue: os << "value != " << assertion.value; break;
                 case Assertion::ValueAtLeast: os << "value >= " << assertion.value; break;
                 case Assertion::ValueAtMost: os << "value <= " << assertion.value; break;
+                case Assertion::Module: os << "module " << assertion.modulePath << " '" << assertion.expr << "'"; break;
             }
         }
     }

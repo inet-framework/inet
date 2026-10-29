@@ -1,0 +1,81 @@
+%description:
+
+Protocol Test Framework self test -- the white-box assertion assertModule.
+
+host2 does not support timestamps. When host1 sends the last segment of the handshake, its
+connection must have window scaling and no timestamps, an MSS of 1460 bytes, a congestion
+window (a field of the state of the algorithm, a subclass of the state of the connection),
+and it must be the active opener. When host2 receives the data, the newest connection module
+of host2 must be the connection that its listener forked: it knows the MSS of host1, where
+the listener still has the 536 bytes that a connection has before it knows its peer.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("assert_module")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false")
+                  .first()
+                  .assertModule("host1.tcp.conn-*", "state.ws_enabled && !state.ts_enabled && state.snd_mss == 1460 && state.snd_cwnd > 0 && state.active")
+                  .describe("the last segment of the handshake")
+                  .within(1.0))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false")
+                  .first()
+                  .assertModule("host2.tcp.conn-*", "state.snd_mss == 1460 && !state.active")
+                  .describe("the first segment after the SYN at host2")
+                  .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "assert_module compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network AssertModuleNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = AssertModuleNet
+sim-time-limit = 2s
+seed-set = 0
+
+*.host2.tcp.timestampSupport = false
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 1000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST assert_module: PASS

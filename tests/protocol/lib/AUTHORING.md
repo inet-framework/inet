@@ -459,6 +459,29 @@ The value is the raw index; map it with the module's public enum or its `@statis
 declaration, and write assertions against the enum (`EthernetPlca::CS_*` / `DS_*`), not the bare
 number.
 
+### White box: the fields of a module
+
+Some state has no signal: the options that a TCP connection negotiated, the MSS it learned, a
+cache. `assertModule(path, expression)` reads it when the filter picks the event. The names of
+the expression are the fields that the class descriptor of the module shows, and the fields
+of the objects that they point to; the expression can name the captures too
+([`AssertModule`](../self/AssertModule.test)):
+
+```cpp
+.once(on("host1.tcp").signal("packetSentToLower")
+          .filterPacket("tcp.ackBit == true && tcp.synBit == false").first()
+          .assertModule("host1.tcp.conn-*", "state.ws_enabled && !state.ts_enabled && state.snd_mss == 1460"))
+```
+
+The path is relative to the network. Its last name can have a `*`, and then the newest module
+that matches is the one: `host2.tcp.conn-*` is the connection that a listener forked, not the
+listener. A module whose C++ class has no descriptor field for the state cannot be read this
+way; a lambda of `assertEvent` can still read it.
+
+Use this word last. A test that reads the internal state establishes a fact about the
+implementation, and the wire, the application and the signals establish the behavior. A
+parameter test says in its description why it needs the white box.
+
 ---
 
 ## 9. Self-description

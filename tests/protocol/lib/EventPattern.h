@@ -88,10 +88,11 @@ class INET_API EventPattern
     // split, because a value written as a filter turns a wrong first value into a silent
     // search for a right later one.
     struct Assertion {
-        enum Kind { Packet, NotPacket, Event, Value, NotValue, ValueAtLeast, ValueAtMost } kind = Packet;
-        std::string expr;                                 // Expr / NotExpr
+        enum Kind { Packet, NotPacket, Event, Value, NotValue, ValueAtLeast, ValueAtMost, Module } kind = Packet;
+        std::string expr;                                 // Expr / NotExpr / Module
         MatchPredicate predicate;                         // That
         double value = 0;                                 // Equal / NotEqual / AtLeast / AtMost
+        std::string modulePath;                           // Module
     };
     std::vector<Assertion> assertions;
 
@@ -137,6 +138,23 @@ class INET_API EventPattern
     EventPattern& assertValueAtLeast(double v) { assertions.push_back({Assertion::ValueAtLeast, "", nullptr, v}); return *this; }
     EventPattern& assertValueAtMost(double v) { assertions.push_back({Assertion::ValueAtMost, "", nullptr, v}); return *this; }
     EventPattern& assertValueBetween(double lo, double hi) { return assertValueAtLeast(lo).assertValueAtMost(hi); }
+    // A white-box assertion: an expression over the fields of a module, which its class
+    // descriptor shows, when the filter picks the event: assertModule("host1.tcp.conn-*",
+    // "state.ts_enabled && state.snd_mss == 1448"). The names of the expression are the
+    // fields of the module and of the objects that its fields point to; the expression can
+    // name the captures too. The path is relative to the network, and its last name can have
+    // a *: the newest module that matches is the one, so "host2.tcp.conn-*" is the connection
+    // that a listener forked, not the listener. Use it when the wire, the application and the
+    // signals cannot show the state.
+    EventPattern& assertModule(const char *modulePath, const char *e)
+    {
+        Assertion assertion;
+        assertion.kind = Assertion::Module;
+        assertion.modulePath = modulePath;
+        assertion.expr = e;
+        assertions.push_back(assertion);
+        return *this;
+    }
     // There is deliberately no assertNotThat: a lambda negates itself, so it would be
     // exactly assertEvent of the negation. assertNotPacket is not redundant in the same way,
     // because it differs from assertPacket of a negated expression when the chunk is absent.
@@ -185,6 +203,10 @@ class INET_API EventPattern
 
 // Entry point of the fluent selector chain.
 EventPattern on(const char *nodeName);
+
+// The module of a path relative to the network, as assertModule(...) reads it: the last name
+// can have a *, and then the newest matching module is the one. Throws if no module matches.
+cModule *findModuleByPattern(const std::string& path);
 
 // Matches a PacketFilter expression against a packet. Each {name} that the expression names
 // takes the value of that capture first, so the expression compiles fresh on each call. An
