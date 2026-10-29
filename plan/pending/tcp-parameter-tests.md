@@ -438,8 +438,8 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 2 — the library extensions E1 to E4**, one commit each, each with its self test and its section in `AUTHORING.md`. Run every protocol suite after each one. Done: `64c9ab1805` (E1), `d43de56157` (E2), `4f1c8ddced` (E3), `1668c6dbba` (E4).
 - [x] **Step 3 — the shared networks (I1) and `TcpTestApp` (I2)** in `tests/protocol/lib`, with a self test for each. Done: `321083cb2e` (networks), `4621ab2d0d` (`TcpTestApp`).
 - [x] **Step 4 — the TCP parts.** The shared ini (I3), the two checks (I4, I5), and the move of `TcpMutations.h` to the suite folder. Check that a command-line assignment `--*.host2.tcp.<parameter>=<value>` takes the place of the ini assignment of the test (I5 needs it). Done: `a2feecf0e8` (the move), `1e9f747388` (the ini, the checks, the README). The command line beats the ini line.
-- [ ] **Step 5 — the pilot: `ack`, 15 tests.** Code pass, tests, run, cross-class check, coverage. Measure the time of the build and of the run of one test, and of the whole group. Count the lambdas that repeat (D3). Report to the user, and change the design where the pilot shows a problem, before the other groups start. The tests are done (`4ae6534722`); the coverage is open, see the record.
-- [ ] **Step 6 — `setup`, 36 tests.**
+- [ ] **Step 5 — the pilot: `ack`, 15 tests.** Code pass, tests, run, cross-class check, coverage. Measure the time of the build and of the run of one test, and of the whole group. Count the lambdas that repeat (D3). Report to the user, and change the design where the pilot shows a problem, before the other groups start. The tests are done (`4ae6534722`). The user decided on 2026-10-29: the coverage is measured only in step 18, after all the tests.
+- [x] **Step 6 — `setup`, 34 tests.** Done: `4d280c2293`; 33 PASS, 1 FAIL (PF-4).
 - [ ] **Step 7 — `send`, 16 tests.**
 - [ ] **Step 8 — `rto`, 12 tests.**
 - [ ] **Step 9 — `congestion`, 60 tests.** The algorithm classes first, because they give the largest coverage gain.
@@ -507,3 +507,11 @@ The user settled these on 2026-10-29.
 - The time: a test builds in about 1 s, also without ccache, and runs in about 0.4 s; the 13 tests take 3 s of wall time with 32 cores. About 280 tests take a few minutes on a CI runner with 4 cores, below the limit of D5.
 - D3: the group needs no socket call. One lambda (`hasDsackBlock()` of `TcpMutations.h`) is in two tests; nothing repeats enough for a new word.
 - The coverage of the pilot is not measured. `omnetpp-6.x` has no coverage libraries since 2026-10-27, and a coverage build of them changes the shared tree, which also holds the broken `opp_msgtool` of step 0. The user decides how to measure.
+
+**Step 6 (`setup`).**
+- The user decided on 2026-10-29 to measure the coverage only after all the tests (step 18), and to go on with the groups.
+- The code pass changed the draft from 36 to 34 tests. `mss:minimum` is gone: 88 takes the path of any explicit value. `sackSupport:forced-off` is gone: `true` with an algorithm without SACK recovery is the class `off` on the wire, so no test of `sackSupport` can separate them; the tests of `tcpAlgorithmClass` (step 9) check it. `synRetries` has the facets `active` and `passive` of one class and the class `zero`, so that each test has another value to fail with.
+- PF-4 is a defect of `windowScalingFactor = -1`: its test fails, as a plain FAIL, because a later plan repairs it. The boundaries show the cause: 131071 gets the factor 1, 262141 to 262144 get 2, 262145 gets 3.
+- `dropSynData`: the INET client sends the data of its SYN again with the ACK of the SYN-ACK, and with `keep` the server ignores that copy without an ACK at once; so the two classes look the same on the wire. The tests remove the data from that ACK in the tap (`removeTcpData()`): then only the queue of the server can hold the data.
+- The NED function `intuniform()` takes 32-bit integers: `intuniform(0, 4294967295)` gives an error.
+- The group has no new library word. Two lambdas repeat: the check of an option of the SYN (`tcpOptionCount()`, `tcpMssOptionOf()`, `tcpWindowScaleOptionOf()` in 18 tests) and the D-SACK check; both are one-line calls of `TcpMutations.h`.
