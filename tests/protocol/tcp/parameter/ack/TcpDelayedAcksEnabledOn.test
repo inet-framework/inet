@@ -1,0 +1,61 @@
+%description:
+
+Tcp.delayedAcksEnabled:on -- with the delayed ACK, the receiver does not acknowledge a lone
+segment at once.
+
+The claim (Tcp.ned): "Delayed ACK algorithm (RFC 1122) enabled/disabled"; RFC 9293 section
+3.8.6.3: a delayed ACK waits less than 0.5 s (MUST-40).
+
+The classes: on (true, the default), off (false; LegacyTcp). The code: with the delayed ACK
+and without adaptiveDelayedAcks, a segment that is not the second full-sized one starts the
+delayed ACK timer (TcpAlgorithmBase::receiveSeqChanged()). This test separates "on" from
+"off": with "off", the ACK goes at once.
+
+Host under test: host2, the receiver. Peer: host1 sends one segment of 100 bytes.
+Observation: level 1, the ACK that host2 sends: none in the first 100 ms after the segment
+arrives, and one before 0.5 s.
+
+%# parameter: Tcp.delayedAcksEnabled
+%# class: on
+%# value: true
+%# key: *.host2.tcp.delayedAcksEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDelayedAcksEnabledOn")
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the segment of 100 bytes at host2")
+                  .within(0.5))
+        .never(on("host2.tcp").signal("packetSentToLower")
+                   .filterPacket("tcp.ackBit == true")
+                   .describe("an ACK of host2 in the first 100 ms")
+                   .within(0.1))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .describe("the delayed ACK of host2")
+                  .within(0.4));
+}
+
+%activity:
+EV << "TcpDelayedAcksEnabledOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.delayedAcksEnabled = true    # the parameter under test
+*.host1.app[0].sendBytes = 100B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDelayedAcksEnabledOn: PASS

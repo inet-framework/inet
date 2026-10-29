@@ -1,0 +1,32 @@
+%description:
+
+Tcp.delayedAckFrameCount:invalid -- a count below 1 stops the run with an error.
+
+The claim (Tcp.ned): "at least 1". The code checks the value when a connection reads its
+parameters (TcpConnection::initConnection()).
+
+The classes: one (1), many (2 and more), invalid (0 and less).
+
+Host under test: host2, whose listening connection reads the parameter. Observation: the
+error at the open of the connection, and the exit code of the run.
+
+%# parameter: Tcp.delayedAckFrameCount
+%# class: invalid
+%# value: 0
+%# key: *.host2.tcp.delayedAckFrameCount
+%# expected-result: PASS
+
+%activity:
+EV << "TcpDelayedAckFrameCountInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.delayedAckFrameCount = 0    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+delayedAckFrameCount must be 1 or more, but it is 0

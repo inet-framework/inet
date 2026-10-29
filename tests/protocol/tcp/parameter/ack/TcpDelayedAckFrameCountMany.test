@@ -1,0 +1,68 @@
+%description:
+
+Tcp.delayedAckFrameCount:many -- the receiver acknowledges each second full-sized segment.
+
+The claim (Tcp.ned): "with delayedAcksEnabled, the ACK goes at once when this number of
+full-sized segments waits for it [...]". RFC 9293 SHLD-19 asks for an ACK for at least each
+second full-sized segment.
+
+The classes: one (1), many (2 and more; 2 is the default, and the value here), invalid (0 and
+less). This test separates "many" from "one": with 1, each segment gets its own ACK.
+
+Host under test: host2, the receiver. Peer: host1 sends 10000 bytes. Observation: level 1,
+the ACKs without data of host2, counted, and the data segments that host2 receives, counted:
+when host1 receives the ACK of the last byte, there are fewer ACKs than segments, and at
+least one ACK for each two segments.
+
+%# parameter: Tcp.delayedAckFrameCount
+%# class: many
+%# value: 2
+%# key: *.host2.tcp.delayedAckFrameCount
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDelayedAckFrameCountMany")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo")
+                  .describe("the SYN of host1")
+                  .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host2.tcp").signal("packetReceivedFromLower")
+                                        .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                                        .captureCount("segments")
+                                        .describe("each data segment at host2")
+                                        .within(2.0)))
+        .meanwhile(anyNumberOfTimes(on("host2.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.synBit == false && pk.dataLength == tcp.headerLength")
+                                        .captureCount("acks")
+                                        .describe("each ACK without data of host2")
+                                        .within(2.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.ackNo == {isn} + 10001")
+                  .first()
+                  .assertPacket("{acks} < {segments} && {acks} * 2 >= {segments}")
+                  .describe("the ACK of the last byte at host1")
+                  .within(1.5));
+}
+
+%activity:
+EV << "TcpDelayedAckFrameCountMany compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.delayedAckFrameCount = 2    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDelayedAckFrameCountMany: PASS

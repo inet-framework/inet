@@ -1,0 +1,60 @@
+%description:
+
+Tcp.delayedAckTimeout:value -- the delayed ACK of a lone segment comes after the timeout.
+
+The claim (Tcp.ned): "with delayedAcksEnabled, the longest delay of an ACK (RFC 9293 MUST-40:
+less than 0.5 s)".
+
+The classes: value (a time above 0; 100ms here, the default is 200ms), zero (0s). The code
+schedules the delayed ACK timer with this time (TcpAlgorithmBase::receiveSeqChanged()); a
+negative time has no check (a finding of the catalog). This test separates "value" from
+"zero": with 0s, the ACK goes in the same instant.
+
+Host under test: host2, the receiver, with the delayed ACK. Peer: host1 sends one segment of
+100 bytes. Observation: level 1, the ACK of host2: none in the first 99 ms after the arrival,
+one in the next 2 ms.
+
+%# parameter: Tcp.delayedAckTimeout
+%# class: value
+%# value: 100ms
+%# key: *.host2.tcp.delayedAckTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDelayedAckTimeoutValue")
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the segment of 100 bytes at host2")
+                  .within(0.5))
+        .never(on("host2.tcp").signal("packetSentToLower")
+                   .filterPacket("tcp.ackBit == true")
+                   .describe("an ACK of host2 before the timeout")
+                   .within(0.099))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .describe("the delayed ACK of host2, at the timeout")
+                  .within(0.002));
+}
+
+%activity:
+EV << "TcpDelayedAckTimeoutValue compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.delayedAckTimeout = 100ms    # the parameter under test
+*.host1.app[0].sendBytes = 100B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDelayedAckTimeoutValue: PASS

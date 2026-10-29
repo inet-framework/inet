@@ -1,0 +1,53 @@
+%description:
+
+Tcp.delayedAcksEnabled:off -- without the delayed ACK, the receiver acknowledges each segment at once.
+
+The claim (Tcp.ned): "Delayed ACK algorithm (RFC 1122) enabled/disabled".
+
+The classes: on (true, the default), off (false; LegacyTcp). The code: without the delayed
+ACK, each change of RCV.NXT sends an ACK (TcpAlgorithmBase::receiveSeqChanged()). This test
+separates "off" from "on": with "on", a lone segment waits for the delayed ACK timer.
+
+Host under test: host2, the receiver. Peer: host1 sends one segment of 100 bytes.
+Observation: level 1, the ACK that host2 sends within 1 ms of the arrival.
+
+%# parameter: Tcp.delayedAcksEnabled
+%# class: off
+%# value: false
+%# key: *.host2.tcp.delayedAcksEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDelayedAcksEnabledOff")
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the segment of 100 bytes at host2")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .describe("the ACK of host2, at once")
+                  .within(0.001));
+}
+
+%activity:
+EV << "TcpDelayedAcksEnabledOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.delayedAcksEnabled = false    # the parameter under test
+*.host1.app[0].sendBytes = 100B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDelayedAcksEnabledOff: PASS

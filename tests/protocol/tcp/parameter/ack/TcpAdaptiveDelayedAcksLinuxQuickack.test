@@ -1,0 +1,57 @@
+%description:
+
+Tcp.adaptiveDelayedAcks:linux-quickack -- the quickack mode acknowledges the first data of a connection at once.
+
+The claim (Tcp.ned): "with delayedAcksEnabled, the delayed ACK of Linux: a quickack budget
+(ACKs at once at the start of a connection, after out-of-order data and after a long
+pause) [...]".
+
+The classes: rfc (false), and three facets of true (LinuxTcp); this is the facet of the
+quickack mode at the start. The code: the first data segment gives the quickack budget, and
+an ACK goes at once while the budget lasts (TcpAlgorithmBase::dataArrivedAtoUpdate(),
+receiveSeqChanged()). This test separates the facet from "rfc": with false, the lone
+segment waits for the delayed ACK timer.
+
+Host under test: host2, the receiver. Peer: host1 sends one segment of 100 bytes, the first
+data of the connection. Observation: level 1, the ACK of host2 within 1 ms of the arrival.
+
+%# parameter: Tcp.adaptiveDelayedAcks
+%# class: linux-quickack
+%# value: true
+%# key: *.host2.tcp.adaptiveDelayedAcks
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAdaptiveDelayedAcksLinuxQuickack")
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the segment of 100 bytes at host2")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .describe("the ACK of host2, at once")
+                  .within(0.001));
+}
+
+%activity:
+EV << "TcpAdaptiveDelayedAcksLinuxQuickack compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.adaptiveDelayedAcks = true    # the parameter under test
+*.host1.app[0].sendBytes = 100B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAdaptiveDelayedAcksLinuxQuickack: PASS

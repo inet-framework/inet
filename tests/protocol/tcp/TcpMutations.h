@@ -27,6 +27,7 @@
 #include "inet/networklayer/ipv4/IcmpHeader_m.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/transportlayer/common/TransportPseudoHeader_m.h"
+#include "inet/transportlayer/tcp_common/TcpHeader.h"
 #include "inet/transportlayer/tcp_common/TcpHeader_m.h"
 
 namespace inet {
@@ -233,6 +234,27 @@ inline uint32_t tcpMssOptionOf(const Packet *packet)
         if (auto mss = dynamic_cast<const inet::tcp::TcpOptionMaxSegmentSize *>(header->getHeaderOption(i)))
             return mss->getMaxSegmentSize();
     return 0;
+}
+
+// True if the first SACK block of the segment is a D-SACK block (RFC 2883 section 4): a block
+// that reports data below the cumulative acknowledgment, or a part of the second block.
+inline bool hasDsackBlock(const Packet *packet)
+{
+    const auto& header = tcpHeaderOf(packet);
+    for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++) {
+        auto sack = dynamic_cast<const inet::tcp::TcpOptionSack *>(header->getHeaderOption(i));
+        if (sack == nullptr || sack->getSackItemArraySize() == 0)
+            continue;
+        const auto& first = sack->getSackItem(0);
+        if (inet::tcp::seqLE(first.getEnd(), header->getAckNo()))
+            return true;
+        if (sack->getSackItemArraySize() > 1) {
+            const auto& second = sack->getSackItem(1);
+            return inet::tcp::seqGE(first.getStart(), second.getStart()) && inet::tcp::seqLE(first.getEnd(), second.getEnd());
+        }
+        return false;
+    }
+    return false;
 }
 
 // The octets that the options of a segment occupy, counted from the options themselves and

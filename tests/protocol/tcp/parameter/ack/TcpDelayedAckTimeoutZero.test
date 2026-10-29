@@ -1,0 +1,53 @@
+%description:
+
+Tcp.delayedAckTimeout:zero -- with a timeout of 0, the delayed ACK of a lone segment goes at once.
+
+The claim (Tcp.ned): "with delayedAcksEnabled, the longest delay of an ACK". A longest delay
+of 0 is no delay.
+
+The classes: value (a time above 0), zero (0s). This test separates "zero" from "value": with
+a time above 0, the ACK waits.
+
+Host under test: host2, the receiver, with the delayed ACK. Peer: host1 sends one segment of
+100 bytes. Observation: level 1, the ACK of host2 within 1 ms of the arrival.
+
+%# parameter: Tcp.delayedAckTimeout
+%# class: zero
+%# value: 0s
+%# key: *.host2.tcp.delayedAckTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDelayedAckTimeoutZero")
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the segment of 100 bytes at host2")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .describe("the ACK of host2, at once")
+                  .within(0.001));
+}
+
+%activity:
+EV << "TcpDelayedAckTimeoutZero compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.delayedAckTimeout = 0s    # the parameter under test
+*.host1.app[0].sendBytes = 100B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDelayedAckTimeoutZero: PASS

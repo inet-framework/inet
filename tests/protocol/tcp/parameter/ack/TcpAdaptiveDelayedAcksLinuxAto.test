@@ -1,0 +1,67 @@
+%description:
+
+Tcp.adaptiveDelayedAcks:linux-ato -- after the quickack budget, a lone segment waits for the ATO, not for delayedAckTimeout.
+
+The claim (Tcp.ned): "[...] an adaptive delay (ATO: from 40 ms, after the gaps between
+arrivals, at most the SRTT and 200 ms) in place of delayedAckTimeout".
+
+The classes: rfc (false), and three facets of true (LinuxTcp); this is the facet of the
+adaptive delay. The code: each ACK uses one ACK of the quickack budget (ackSent()); when the
+budget is gone, a lone segment schedules the delayed ACK after the ATO, which starts at 40 ms
+(scheduleDelayedAck()). A pause shorter than the RTO gives no new budget. This test
+separates the facet from "rfc": with false, the lone segment waits 200 ms.
+
+Host under test: host2, the receiver. Peer: host1 sends 30000 bytes at 0.2 s, which use up
+the quickack budget, and one segment of 100 bytes at 0.8 s. Observation: level 1, the ACK of
+host2 for the lone segment: none in the first 30 ms after its arrival, one in the next 70 ms.
+
+%# parameter: Tcp.adaptiveDelayedAcks
+%# class: linux-ato
+%# value: true
+%# key: *.host2.tcp.adaptiveDelayedAcks
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAdaptiveDelayedAcksLinuxAto")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo")
+                  .describe("the SYN of host1")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.sequenceNo == {isn} + 30001 && pk.dataLength > tcp.headerLength")
+                  .describe("the lone segment of 100 bytes at host2")
+                  .within(1.0))
+        .never(on("host2.tcp").signal("packetSentToLower")
+                   .filterPacket("tcp.ackBit == true")
+                   .describe("an ACK of host2 in the first 30 ms")
+                   .within(0.03))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .describe("the delayed ACK of host2, after the ATO")
+                  .within(0.07));
+}
+
+%activity:
+EV << "TcpAdaptiveDelayedAcksLinuxAto compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.adaptiveDelayedAcks = true    # the parameter under test
+*.host1.app[0].sendBytes = 0B
+*.host1.app[0].sendScript = "0.2 30000; 0.8 100"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAdaptiveDelayedAcksLinuxAto: PASS

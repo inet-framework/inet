@@ -1,0 +1,59 @@
+%description:
+
+Tcp.adaptiveDelayedAcks:rfc -- the delayed ACK of RFC 9293 waits also at the start of a connection.
+
+The claim (Tcp.ned): "false: the delayed ACK of RFC 9293 section 3.8.6.3 (delayedAckTimeout,
+delayedAckFrameCount)".
+
+The classes: rfc (false, the default), and three facets of true (LinuxTcp): linux-quickack,
+linux-ato and linux-pingpong. This test separates "rfc" from the facets: with true, the
+quickack mode acknowledges the first segments of a connection at once.
+
+Host under test: host2, the receiver. Peer: host1 sends one segment of 100 bytes, the first
+data of the connection. Observation: level 1, the ACK of host2: none in the first 100 ms
+after the arrival, one before 0.5 s.
+
+%# parameter: Tcp.adaptiveDelayedAcks
+%# class: rfc
+%# value: false
+%# key: *.host2.tcp.adaptiveDelayedAcks
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAdaptiveDelayedAcksRfc")
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the segment of 100 bytes at host2")
+                  .within(0.5))
+        .never(on("host2.tcp").signal("packetSentToLower")
+                   .filterPacket("tcp.ackBit == true")
+                   .describe("an ACK of host2 in the first 100 ms")
+                   .within(0.1))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .describe("the delayed ACK of host2")
+                  .within(0.4));
+}
+
+%activity:
+EV << "TcpAdaptiveDelayedAcksRfc compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.adaptiveDelayedAcks = false    # the parameter under test
+*.host1.app[0].sendBytes = 100B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAdaptiveDelayedAcksRfc: PASS

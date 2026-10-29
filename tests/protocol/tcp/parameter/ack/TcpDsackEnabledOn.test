@@ -1,0 +1,67 @@
+%description:
+
+Tcp.dsackEnabled:on -- the receiver reports a duplicate segment by a D-SACK block.
+
+The claim (Tcp.ned): "report duplicate segments by D-SACK blocks (RFC 2883), when SACK is in
+use". The default is the value of sackSupport.
+
+The classes: on (true), off (false). The code: a duplicate segment sets the D-SACK report
+when SACK is in use and D-SACK is on (TcpConnection::processSegment1stThru8th()), and the
+next SACK option starts with that block (TcpConnection::addSacks()). This test separates
+"on" from "off": with "off", the ACK has no D-SACK block.
+
+Host under test: host2, the receiver; both hosts support SACK (the default). Peer: host1
+sends one segment of 1000 bytes, and the tap delivers a copy of it 2 ms later. Observation:
+level 1, the first ACK of host2 after the copy: its first SACK block reports data below the
+cumulative ACK.
+
+%# parameter: Tcp.dsackEnabled
+%# class: on
+%# value: true
+%# key: *.host2.tcp.dsackEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDsackEnabledOn")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == false && ipv4.totalLengthField > 100B").nth(1)
+                     .duplicate(0.002)
+                     .describe("the data segment, and a copy of it 2 ms later"))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the data segment at host2")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the copy at host2")
+                  .within(0.01))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return hasDsackBlock(context.event.packet); })
+                  .describe("the ACK of the copy, with a D-SACK block")
+                  .within(0.01));
+}
+
+%activity:
+EV << "TcpDsackEnabledOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.dsackEnabled = true    # the parameter under test
+*.host1.app[0].sendBytes = 1000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDsackEnabledOn: PASS

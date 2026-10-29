@@ -1,0 +1,79 @@
+%description:
+
+Tcp.adaptiveDelayedAcks:linux-pingpong -- after a reply, the ACK of a request goes with the next reply.
+
+The claim (Tcp.ned): "[...] and a pingpong mode, which delays the ACKs of interactive
+traffic".
+
+The classes: rfc (false), and three facets of true (LinuxTcp); this is the facet of the
+pingpong mode. The code: data that host2 sends within one ATO of the last arrival is a reply
+(dataSent()), and a reply ends the quickack mode (inQuickackMode()), so the ACK of the next
+request waits, and the reply carries it. This test separates the facet from "rfc", in which
+the first request gets no ACK at once, and from a quickack mode without the pingpong mode,
+in which the second request gets an ACK at once too.
+
+Host under test: host2, an echo server that replies 10 ms after each request. Peer: host1
+sends a request of 100 bytes at 0.2 s and another at 0.3 s. Observation: level 1: host2
+acknowledges the first request at once, without data; for the second request, host2 sends no
+ACK without data, and its reply acknowledges the request.
+
+%# parameter: Tcp.adaptiveDelayedAcks
+%# class: linux-pingpong
+%# value: true
+%# key: *.host2.tcp.adaptiveDelayedAcks
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAdaptiveDelayedAcksLinuxPingpong")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .capture("isn", "tcp.sequenceNo")
+                  .describe("the SYN of host1")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+                  .describe("the first request at host2")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .first()
+                  .assertPacket("pk.dataLength == tcp.headerLength && tcp.ackNo == {isn} + 101")
+                  .describe("the ACK of the first request, at once and without data")
+                  .within(0.001))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.sequenceNo == {isn} + 101 && pk.dataLength > tcp.headerLength")
+                  .describe("the second request at host2")
+                  .within(0.2))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .first()
+                  .assertPacket("pk.dataLength > tcp.headerLength && tcp.ackNo == {isn} + 201")
+                  .describe("the reply of host2, which acknowledges the second request")
+                  .within(0.05));
+}
+
+%activity:
+EV << "TcpAdaptiveDelayedAcksLinuxPingpong compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.adaptiveDelayedAcks = true    # the parameter under test
+*.host1.app[0].sendBytes = 0B
+*.host1.app[0].sendScript = "0.2 100; 0.3 100"
+*.host2.app[0].echoFactor = 1
+*.host2.app[0].echoDelay = 10ms
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAdaptiveDelayedAcksLinuxPingpong: PASS

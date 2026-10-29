@@ -1,0 +1,64 @@
+%description:
+
+Tcp.dsackEnabled:off -- the receiver does not report a duplicate segment by a D-SACK block.
+
+The claim (Tcp.ned): "report duplicate segments by D-SACK blocks (RFC 2883), when SACK is in
+use"; false turns the report off.
+
+The classes: on (true), off (false). This test separates "off" from "on": with "on", the ACK
+of the copy starts its SACK option with a D-SACK block.
+
+Host under test: host2, the receiver; both hosts support SACK. Peer: host1 sends one segment
+of 1000 bytes, and the tap delivers a copy of it 2 ms later. Observation: level 1, the first
+ACK of host2 after the copy has no D-SACK block.
+
+%# parameter: Tcp.dsackEnabled
+%# class: off
+%# value: false
+%# key: *.host2.tcp.dsackEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDsackEnabledOff")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == false && ipv4.totalLengthField > 100B").nth(1)
+                     .duplicate(0.002)
+                     .describe("the data segment, and a copy of it 2 ms later"))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the data segment at host2")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .describe("the copy at host2")
+                  .within(0.01))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return !hasDsackBlock(context.event.packet); })
+                  .describe("the ACK of the copy, without a D-SACK block")
+                  .within(0.01));
+}
+
+%activity:
+EV << "TcpDsackEnabledOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.dsackEnabled = false    # the parameter under test
+*.host1.app[0].sendBytes = 1000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDsackEnabledOff: PASS
