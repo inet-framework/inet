@@ -1,0 +1,74 @@
+%description:
+
+Tcp.synLinearTimeouts:linear -- the first retransmissions of a SYN keep the initial timeout.
+
+The claim (Tcp.ned): "the first retransmissions of a SYN that keep the initial timeout before
+it doubles [...]: with 4 and an initial RTO of 1 s, the SYN timeouts are 1, 1, 1, 1, 1, 2, 4 s".
+
+The classes: doubling (0, the default), linear (1 and more; 4 is the value of LinuxTcp). The
+code: TcpConnection::process_TIMEOUT_SYN_REXMIT() keeps the timeout of a SYN for this many
+retransmissions, and then doubles it. This test separates "linear" from "doubling".
+
+Host under test: host1, with 2; the tap drops each SYN. Observation: level 1, the times of the
+SYNs of host1: 1 s apart three times, then 2 s.
+
+%# parameter: Tcp.synLinearTimeouts
+%# class: linear
+%# value: 2
+%# key: *.host1.tcp.synLinearTimeouts
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSynLinearTimeoutsLinear")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true").drop()
+                     .describe("every SYN of host1"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .describe("the first SYN of host1")
+                  .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .notBefore(0.99)
+                  .describe("the second SYN, 1 s later")
+                  .within(1.01))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .notBefore(0.99)
+                  .describe("the third SYN, 1 s later")
+                  .within(1.01))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .notBefore(0.99)
+                  .describe("the fourth SYN, 1 s later")
+                  .within(1.01))
+        .never(on("host1.tcp").signal("packetSentToLower")
+                   .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                   .describe("a SYN less than 2 s after the fourth")
+                   .within(1.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .describe("the fifth SYN, 2 s after the fourth")
+                  .within(0.11));
+}
+
+%activity:
+EV << "TcpSynLinearTimeoutsLinear compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.synLinearTimeouts = 2    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSynLinearTimeoutsLinear: PASS

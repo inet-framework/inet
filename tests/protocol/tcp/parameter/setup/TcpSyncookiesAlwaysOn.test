@@ -1,0 +1,55 @@
+%description:
+
+Tcp.syncookiesAlways:on -- the cookie quantizes the MSS of the peer down to the table of Linux.
+
+The claim (Tcp.ned): "a SYN cookie on every passive open: the cookie quantizes the MSS of the
+peer down to the IPv4 msstab {536, 1300, 1440, 1460} of net/ipv4/syncookies.c".
+
+The classes: off (false, the default), on (true). The code: with a cookie, the MSS of the peer
+goes down to the IPv4 table {536, 1300, 1440, 1460} of Linux
+(TcpConnection::processSegmentInListen()). This test separates "on" from "off".
+
+Host under test: host2, the server, an echo server. Peer: host1 announces the MSS 1000 and
+sends 3000 bytes. Observation: level 1, the first data segment of host2 carries 524 bytes:
+the MSS 536 of the table less the 12 bytes of the timestamps.
+
+%# parameter: Tcp.syncookiesAlways
+%# class: on
+%# value: true
+%# key: *.host2.tcp.syncookiesAlways
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSyncookiesAlwaysOn")
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                  .first()
+                  .assertPacket("pk.dataLength == tcp.headerLength + 524B")
+                  .describe("the first data segment of host2, with 524 bytes")
+                  .within(1.0));
+}
+
+%activity:
+EV << "TcpSyncookiesAlwaysOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.syncookiesAlways = true    # the parameter under test
+*.host1.tcp.mss = 1000
+*.host1.app[0].sendBytes = 3000B
+*.host2.app[0].echoFactor = 1
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSyncookiesAlwaysOn: PASS

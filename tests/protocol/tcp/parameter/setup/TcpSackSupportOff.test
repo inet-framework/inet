@@ -1,0 +1,50 @@
+%description:
+
+Tcp.sackSupport:off -- the SYN does not offer SACK.
+
+The claim (Tcp.ned): "Selective Acknowledgment (RFC 2018, 2883, 6675) support".
+
+The classes: on (true, the default), off (false; LegacyTcp). An algorithm without SACK recovery
+turns the support off even with true; the tests of tcpAlgorithmClass check that, because on
+the wire it is the same as false. This test separates "off" from "on".
+
+Host under test: host1. Observation: level 1, the SYN of host1 has no SACK-Permitted option.
+
+%# parameter: Tcp.sackSupport
+%# class: off
+%# value: false
+%# key: *.host1.tcp.sackSupport
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSackSupportOff")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpOptionCount(context.event.packet, inet::tcp::TCPOPTION_SACK_PERMITTED) == 0; })
+                  .describe("the SYN of host1, without a SACK-Permitted option")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpSackSupportOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.sackSupport = false    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSackSupportOff: PASS

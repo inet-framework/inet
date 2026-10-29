@@ -203,6 +203,39 @@ inline void makeReset(Packet *frame, uint32_t sequenceNumber)
     });
 }
 
+// Removes the data of the segment, and keeps its header, so that the receiver gets an ACK
+// without data. The total length of the IPv4 header follows, and both checksums are computed
+// again; the trailer of the link layer stays where it is.
+inline void removeTcpData(Packet *frame)
+{
+    const auto& ipv4 = ipv4HeaderOf(frame);
+    B segmentLength = ipv4->getTotalLengthField() - ipv4->getHeaderLength();
+
+    std::vector<Ptr<Chunk>> prefix;
+    while (true) {
+        const auto& front = frame->peekAtFront<Chunk>();
+        if (dynamicPtrCast<const TcpHeader>(front) != nullptr)
+            break;
+        prefix.push_back(frame->removeAtFront<Chunk>(front->getChunkLength()));
+    }
+    auto header = frame->removeAtFront<TcpHeader>();
+    B dataLength = segmentLength - header->getChunkLength();
+    if (dataLength > B(0))
+        frame->removeAtFront<Chunk>(dataLength);
+    B tcpHeaderLength = header->getChunkLength();
+    frame->insertAtFront(header);
+    for (auto it = prefix.rbegin(); it != prefix.rend(); ++it)
+        frame->insertAtFront(*it);
+    rewriteIpv4Header(frame, [tcpHeaderLength](Ipv4Header& h) {
+        h.setTotalLengthField(h.getHeaderLength() + tcpHeaderLength);
+    });
+    uint16_t checksum = expectedTcpChecksum(frame);
+    rewriteHeader<TcpHeader>(frame, [checksum](TcpHeader& h) {
+        h.setChecksum(checksum);
+        h.setChecksumMode(CHECKSUM_COMPUTED);
+    });
+}
+
 // The data length of a TCP segment, in octets: the IPv4 total length less the two header
 // lengths. All three are byte-unit fields, so the subtraction is ordinary arithmetic. The
 // packet must carry its IPv4 header, so this reads a frame at an interface and not a segment
@@ -234,6 +267,29 @@ inline uint32_t tcpMssOptionOf(const Packet *packet)
         if (auto mss = dynamic_cast<const inet::tcp::TcpOptionMaxSegmentSize *>(header->getHeaderOption(i)))
             return mss->getMaxSegmentSize();
     return 0;
+}
+
+// The number of options of a kind in a segment: inet::tcp::TCPOPTION_NO_OPERATION,
+// TCPOPTION_SACK_PERMITTED, TCPOPTION_TIMESTAMP, ...
+inline int tcpOptionCount(const Packet *packet, int kind)
+{
+    const auto& header = tcpHeaderOf(packet);
+    int count = 0;
+    for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++)
+        if (header->getHeaderOption(i)->getKind() == kind)
+            count++;
+    return count;
+}
+
+// The shift count of the Window Scale option of a segment (RFC 7323 section 2.2), or -1 when
+// it has none.
+inline int tcpWindowScaleOptionOf(const Packet *packet)
+{
+    const auto& header = tcpHeaderOf(packet);
+    for (size_t i = 0; i < header->getHeaderOptionArraySize(); i++)
+        if (auto option = dynamic_cast<const inet::tcp::TcpOptionWindowScale *>(header->getHeaderOption(i)))
+            return option->getWindowScale();
+    return -1;
 }
 
 // True if the first SACK block of the segment is a D-SACK block (RFC 2883 section 4): a block

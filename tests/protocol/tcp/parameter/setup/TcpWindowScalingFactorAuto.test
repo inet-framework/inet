@@ -1,0 +1,55 @@
+%description:
+
+Tcp.windowScalingFactor:auto -- the factor is the smallest that represents the window.
+
+The claim (Tcp.ned): "-1 for automatic selection: the smallest shift count that represents
+the largest window that the connection can offer, advertisedWindow [...]".
+
+The classes: auto (-1, the default), explicit (0 to 14), invalid (below -1 or above 14),
+too-small (a factor that cannot represent advertisedWindow). The code:
+TcpConnection::configureStateVariables() checks the value, and the options of the SYN select
+the factor. This test separates "auto" from "explicit".
+
+Host under test: host1, with advertisedWindow = 262144 (a precondition: the default of 65535
+needs no scale). Observation: level 1, the Window Scale option of the SYN of host1 has the
+shift count 3 (262144 >> 3 = 32768; >> 2 does not fit in 16 bits).
+
+%# parameter: Tcp.windowScalingFactor
+%# class: auto
+%# value: -1
+%# key: *.host1.tcp.windowScalingFactor
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpWindowScalingFactorAuto")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpWindowScaleOptionOf(context.event.packet) == 3; })
+                  .describe("the SYN of host1, with the shift count 3")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpWindowScalingFactorAuto compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.windowScalingFactor = -1    # the parameter under test
+*.host1.tcp.advertisedWindow = 262144
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpWindowScalingFactorAuto: PASS

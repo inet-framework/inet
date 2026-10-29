@@ -1,0 +1,37 @@
+%description:
+
+Tcp.windowScalingFactor:too-small -- a factor that cannot represent the window stops the run with an error.
+
+The claim: the code refuses a factor whose largest window is below advertisedWindow
+(TcpConnection::configureStateVariables()); the NED does not say it (a documentation gap,
+PF-3 of the catalog).
+
+The classes: auto (-1, the default), explicit (0 to 14), invalid (below -1 or above 14),
+too-small (a factor that cannot represent advertisedWindow). The code:
+TcpConnection::configureStateVariables() checks the value, and the options of the SYN select
+the factor.
+
+Host under test: host1, with advertisedWindow = 131072. Observation: the error, and the exit
+code of the run.
+
+%# parameter: Tcp.windowScalingFactor
+%# class: too-small
+%# value: 0
+%# key: *.host1.tcp.windowScalingFactor
+%# expected-result: PASS
+
+%activity:
+EV << "TcpWindowScalingFactorTooSmall compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.windowScalingFactor = 0    # the parameter under test
+*.host1.tcp.advertisedWindow = 131072
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+advertisedWindow=131072 exceeds representable maximum 65535 with windowScalingFactor=0

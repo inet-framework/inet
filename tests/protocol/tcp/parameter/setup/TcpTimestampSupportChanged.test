@@ -1,0 +1,69 @@
+%description:
+
+Tcp.timestampSupport:changed -- a change during the run applies to the next connection.
+
+The claim (Tcp.ned): "Each connection reads it at its open, so a run can change it as the
+host-wide sysctl net.ipv4.tcp_timestamps".
+
+The classes: on (true, the default), off (false; LegacyTcp), changed (a change during the run,
+because the parameter is @mutable: each connection reads it at its open). This test separates "changed" from "off": with false from the start, the
+first SYN has no Timestamps option.
+
+Host under test: host1, which opens a connection at 0.1 s and another at 1.5 s; an action
+turns the parameter off at 1 s. Observation: level 1, the first SYN of host1 has a Timestamps
+option, and the second has none.
+
+%# parameter: Tcp.timestampSupport
+%# class: changed
+%# value: true
+%# key: *.host1.tcp.timestampSupport
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpTimestampSupportChanged")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpOptionCount(context.event.packet, inet::tcp::TCPOPTION_TIMESTAMP) == 1; })
+                  .describe("the first SYN of host1, with a Timestamps option")
+                  .within(0.5))
+        .act(action().at(1.0).setParameter("host1.tcp", "timestampSupport", "false"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpOptionCount(context.event.packet, inet::tcp::TCPOPTION_TIMESTAMP) == 0; })
+                  .describe("the second SYN of host1, without a Timestamps option")
+                  .within(1.0));
+}
+
+%activity:
+EV << "TcpTimestampSupportChanged compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.timestampSupport = true    # the parameter under test
+*.host1.numApps = 2
+*.host1.app[1].typename = "TcpSessionApp"
+*.host1.app[1].connectAddress = "host2"
+*.host1.app[1].connectPort = 1000
+*.host1.app[1].tSend = 0.2s
+*.host1.app[1].sendBytes = 100B
+*.host1.app[1].tClose = 1000s
+*.host1.app[1].tOpen = 1.5s
+*.host1.app[1].tSend = 1.6s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpTimestampSupportChanged: PASS

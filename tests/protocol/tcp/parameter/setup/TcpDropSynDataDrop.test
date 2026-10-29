@@ -1,0 +1,75 @@
+%description:
+
+Tcp.dropSynData:drop -- the data of a SYN is dropped, and the client sends it again.
+
+The claim (Tcp.ned): "the data of a SYN that Fast Open does not accept is dropped, so the
+SYN-ACK acknowledges only the SYN and the client sends the data again, as Linux".
+
+The classes: keep (false, the default), drop (true; LinuxTcp). The code: the text of a SYN that
+Fast Open does not accept waits in the receive queue, and the ACK that ends the handshake
+processes it (TcpConnection::processSegmentInSynRcvd()), or it is dropped
+(processSegmentInListen()). The client sends the data again with the ACK of the SYN-ACK in
+both classes, because the SYN-ACK acknowledges only the SYN; so the tap removes that data, and
+only the queue of host2 can hold it. This test separates "drop" from "keep", with which
+host2 acknowledges the 500 bytes at once.
+
+Host under test: host2, the server, without Fast Open. Peer: host1 sends 500 bytes on its SYN,
+without a cookie. Observation: level 1, host2 acknowledges the 500 bytes only after host1
+sends them again, after its retransmission timeout of 1 s.
+
+%# parameter: Tcp.dropSynData
+%# class: drop
+%# value: true
+%# key: *.host2.tcp.dropSynData
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDropSynDataDrop")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == false && ipv4.totalLengthField > 100B").nth(1)
+                     .mutate([](Packet *frame) { removeTcpData(frame); })
+                     .describe("the data that host1 sends again with the ACK of the SYN-ACK (remove it)"))
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000, true);
+            app.sendData(app.socket(), 500);
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && pk.dataLength > tcp.headerLength")
+                  .capture("isn", "tcp.sequenceNo")
+                  .describe("the SYN of host1, with 500 bytes and without a cookie")
+                  .within(0.5))
+        .never(on("host2.tcp").signal("packetSentToLower")
+                   .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {isn} + 501")
+                   .describe("an ACK of host2 for the 500 bytes before host1 sends them again")
+                   .within(0.8))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.ackNo == {isn} + 501")
+                  .describe("the ACK of host2 for the 500 bytes, after host1 sends them again")
+                  .within(2.0));
+}
+
+%activity:
+EV << "TcpDropSynDataDrop compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.dropSynData = true    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.tcp.fastopenClientNoCookieRequired = true
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDropSynDataDrop: PASS

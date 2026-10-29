@@ -1,0 +1,50 @@
+%description:
+
+Tcp.initialSendSequenceNumber:fixed -- a value from 0 to 4294967295 is the ISS of each connection.
+
+The claim (Tcp.ned): "the initial send sequence number (ISS) of each connection".
+
+The classes: clock (-1, the default), fixed (a value from 0 to 4294967295), random (a
+distribution, which the parameter takes again for each connection, because it is volatile),
+invalid (below -1 or above 4294967295). The code: TcpConnection::selectInitialSeqNum(). This test separates "fixed" from "clock" and "random".
+
+Host under test: host1, the active opener. Observation: level 1, the sequence number of the
+SYN of host1 is 1000.
+
+%# parameter: Tcp.initialSendSequenceNumber
+%# class: fixed
+%# value: 1000
+%# key: *.host1.tcp.initialSendSequenceNumber
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpInitialSendSequenceNumberFixed")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertPacket("tcp.sequenceNo == 1000")
+                  .describe("the SYN of host1, with the ISS 1000")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpInitialSendSequenceNumberFixed compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.initialSendSequenceNumber = 1000    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpInitialSendSequenceNumberFixed: PASS

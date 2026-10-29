@@ -1,0 +1,33 @@
+%description:
+
+Tcp.windowScalingFactor:invalid -- a factor above 14 stops the run with an error.
+
+The claim (Tcp.ned): "Valid values are 0..14, and -1 for automatic selection".
+
+The classes: auto (-1, the default), explicit (0 to 14), invalid (below -1 or above 14),
+too-small (a factor that cannot represent advertisedWindow). The code:
+TcpConnection::configureStateVariables() checks the value, and the options of the SYN select
+the factor.
+
+Host under test: host1. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.windowScalingFactor
+%# class: invalid
+%# value: 15
+%# key: *.host1.tcp.windowScalingFactor
+%# expected-result: PASS
+
+%activity:
+EV << "TcpWindowScalingFactorInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.windowScalingFactor = 15    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+Invalid parameter value windowScalingFactor=15

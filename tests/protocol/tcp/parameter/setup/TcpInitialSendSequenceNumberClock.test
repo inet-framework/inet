@@ -1,0 +1,52 @@
+%description:
+
+Tcp.initialSendSequenceNumber:clock -- the ISS comes from the clock, one tick in 4 microseconds.
+
+The claim (Tcp.ned): "-1: from the clock, one tick in 4 microseconds (RFC 9293 section
+3.4.1)".
+
+The classes: clock (-1, the default), fixed (a value from 0 to 4294967295), random (a
+distribution, which the parameter takes again for each connection, because it is volatile),
+invalid (below -1 or above 4294967295). The code: TcpConnection::selectInitialSeqNum(). This test separates "clock" from "fixed" and "random": their
+ISS does not follow the time of the SYN.
+
+Host under test: host1, the active opener. Observation: level 1, the sequence number of the
+SYN of host1 is the time of the SYN times 250000, modulo 2^32.
+
+%# parameter: Tcp.initialSendSequenceNumber
+%# class: clock
+%# value: -1
+%# key: *.host1.tcp.initialSendSequenceNumber
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpInitialSendSequenceNumberClock")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return (uint32_t)evalPacketField(context.event.packet, "tcp.sequenceNo").intValue() == (uint32_t)(unsigned long)std::fmod(context.event.time.dbl() * 250000.0, 4294967296.0); })
+                  .describe("the SYN of host1, with the ISS of the clock")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpInitialSendSequenceNumberClock compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.initialSendSequenceNumber = -1    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpInitialSendSequenceNumberClock: PASS

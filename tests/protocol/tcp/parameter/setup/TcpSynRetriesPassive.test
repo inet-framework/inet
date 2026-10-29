@@ -1,0 +1,58 @@
+%description:
+
+Tcp.synRetries:passive -- the SYN-ACK goes this many times again, and then the passive open gives up.
+
+The claim (Tcp.ned): "the retransmissions of a SYN or of a SYN-ACK, after which the open
+fails (Linux net.ipv4.tcp_syn_retries [...]; Linux has tcp_synack_retries for the SYN-ACK)".
+
+The classes: retries (1 and more; 12 is the default, 6 the value of LinuxTcp), with a facet for
+the SYN of an active open and one for the SYN-ACK of a passive open; zero (0). The code:
+TcpConnection::process_TIMEOUT_SYN_REXMIT() gives up when the count of retransmissions
+exceeds the value. This test separates the facet from "zero": with 0, the
+SYN-ACK goes only once.
+
+Host under test: host2, the passive opener; the tap drops each segment of host1 after the SYN,
+so the handshake never completes at host2. Observation: level 1, three SYN-ACKs of host2.
+
+%# parameter: Tcp.synRetries
+%# class: passive
+%# value: 2
+%# key: *.host2.tcp.synRetries
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSynRetriesPassive")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == false").drop()
+                     .describe("each segment of host1 after its SYN"))
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+        }))
+        .meanwhile(exactlyTimes(3, on("host2.tcp").signal("packetSentToLower")
+                                       .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                                       .describe("a SYN-ACK of host2")
+                                       .within(9.0)));
+}
+
+%activity:
+EV << "TcpSynRetriesPassive compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.synRetries = 2    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSynRetriesPassive: PASS

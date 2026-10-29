@@ -1,0 +1,49 @@
+%description:
+
+Tcp.sendMssOption:on -- the SYN carries the MSS option.
+
+The claim (Tcp.ned): "send the MSS option in the SYN and the SYN-ACK".
+
+The classes: on (true, the default), off (false). The code: the MSS option goes into a SYN and
+a SYN-ACK only with this flag (TcpAlgorithmBase). This test separates "on" from "off".
+
+Host under test: host1. Observation: level 1, the SYN of host1 has an MSS option.
+
+%# parameter: Tcp.sendMssOption
+%# class: on
+%# value: true
+%# key: *.host1.tcp.sendMssOption
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSendMssOptionOn")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpMssOptionOf(context.event.packet) > 0; })
+                  .describe("the SYN of host1, with an MSS option")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpSendMssOptionOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.sendMssOption = true    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSendMssOptionOn: PASS

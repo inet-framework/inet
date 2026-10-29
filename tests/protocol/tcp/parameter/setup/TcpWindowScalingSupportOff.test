@@ -1,0 +1,49 @@
+%description:
+
+Tcp.windowScalingSupport:off -- the SYN does not offer window scaling.
+
+The claim (Tcp.ned): "Window Scale (RFC 7323) support (header option) (WS will be enabled
+for a connection if both endpoints support it)".
+
+The classes: on (true, the default), off (false; LegacyTcp). This test separates "off" from "on".
+
+Host under test: host1. Observation: level 1, the SYN of host1 has no Window Scale option.
+
+%# parameter: Tcp.windowScalingSupport
+%# class: off
+%# value: false
+%# key: *.host1.tcp.windowScalingSupport
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpWindowScalingSupportOff")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpWindowScaleOptionOf(context.event.packet) == -1; })
+                  .describe("the SYN of host1, without a Window Scale option")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpWindowScalingSupportOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.windowScalingSupport = false    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpWindowScalingSupportOff: PASS

@@ -1,0 +1,61 @@
+%description:
+
+Tcp.synRetries:zero -- the SYN goes once, and the open fails at the first timeout.
+
+The claim (Tcp.ned): "the retransmissions of a SYN [...], after which the open fails"; with
+0, there is no retransmission.
+
+The classes: retries (1 and more; 12 is the default, 6 the value of LinuxTcp), with a facet for
+the SYN of an active open and one for the SYN-ACK of a passive open; zero (0). The code:
+TcpConnection::process_TIMEOUT_SYN_REXMIT() gives up when the count of retransmissions
+exceeds the value. This test separates "zero" from the facets of "retries".
+
+Host under test: host1, the active opener; the tap drops each SYN of host1. Observation:
+level 1, one SYN of host1, and the failure of the open at the application after 1 s.
+
+%# parameter: Tcp.synRetries
+%# class: zero
+%# value: 0
+%# key: *.host1.tcp.synRetries
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSynRetriesZero")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true").drop()
+                     .describe("every SYN of host1"))
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+        }))
+        .meanwhile(exactlyTimes(1, on("host1.tcp").signal("packetSentToLower")
+                                       .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                                       .describe("a SYN of host1")
+                                       .within(3.0)))
+        .once(on("host1.app[0]").signal("socketFailure")
+                  .notBefore(0.9)
+                  .describe("the failure of the open")
+                  .within(1.1));
+}
+
+%activity:
+EV << "TcpSynRetriesZero compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.synRetries = 0    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSynRetriesZero: PASS

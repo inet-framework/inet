@@ -1,0 +1,32 @@
+%description:
+
+Tcp.mss:invalid -- an MSS below 88 stops the run with an error.
+
+The claim (Tcp.ned): "else at least 88 (Linux TCP_MIN_MSS)".
+
+The classes: auto (-1, the default), with a facet for IPv4 and one for IPv6; explicit (88 and
+more); invalid (0 to 87, and below -1). The code: TcpConnection::initConnection() and
+resolveAddressFamilyMss().
+
+Host under test: host1. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.mss
+%# class: invalid
+%# value: 87
+%# key: *.host1.tcp.mss
+%# expected-result: PASS
+
+%activity:
+EV << "TcpMssInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.mss = 87    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+mss must be -1 or at least 88, but it is 87

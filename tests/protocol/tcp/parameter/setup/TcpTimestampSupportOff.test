@@ -1,0 +1,50 @@
+%description:
+
+Tcp.timestampSupport:off -- the SYN does not offer timestamps.
+
+The claim (Tcp.ned): "Timestamps (RFC 7323) support (header option) (TS will be enabled for
+a connection if both endpoints support it)".
+
+The classes: on (true, the default), off (false; LegacyTcp), changed (a change during the run,
+because the parameter is @mutable: each connection reads it at its open). This test separates "off" from "on".
+
+Host under test: host1. Observation: level 1, the SYN of host1 has no Timestamps option.
+
+%# parameter: Tcp.timestampSupport
+%# class: off
+%# value: false
+%# key: *.host1.tcp.timestampSupport
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpTimestampSupportOff")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpOptionCount(context.event.packet, inet::tcp::TCPOPTION_TIMESTAMP) == 0; })
+                  .describe("the SYN of host1, without a Timestamps option")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpTimestampSupportOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.timestampSupport = false    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpTimestampSupportOff: PASS

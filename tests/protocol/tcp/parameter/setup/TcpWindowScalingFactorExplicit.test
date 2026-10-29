@@ -1,0 +1,53 @@
+%description:
+
+Tcp.windowScalingFactor:explicit -- a factor from 0 to 14 is the shift count of the SYN.
+
+The claim (Tcp.ned): "Window Scaling Factor given as a shift count. Valid values are 0..14".
+
+The classes: auto (-1, the default), explicit (0 to 14), invalid (below -1 or above 14),
+too-small (a factor that cannot represent advertisedWindow). The code:
+TcpConnection::configureStateVariables() checks the value, and the options of the SYN select
+the factor. This test separates "explicit" from "auto".
+
+Host under test: host1, with advertisedWindow = 262144. Observation: level 1, the Window Scale
+option of the SYN of host1 has the shift count 7.
+
+%# parameter: Tcp.windowScalingFactor
+%# class: explicit
+%# value: 7
+%# key: *.host1.tcp.windowScalingFactor
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpWindowScalingFactorExplicit")
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpWindowScaleOptionOf(context.event.packet) == 7; })
+                  .describe("the SYN of host1, with the shift count 7")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpWindowScalingFactorExplicit compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.windowScalingFactor = 7    # the parameter under test
+*.host1.tcp.advertisedWindow = 262144
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpWindowScalingFactorExplicit: PASS

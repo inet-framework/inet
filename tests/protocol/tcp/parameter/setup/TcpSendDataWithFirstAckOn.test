@@ -1,0 +1,57 @@
+%description:
+
+Tcp.sendDataWithFirstAck:on -- data that waits during the handshake goes with the ACK of the SYN-ACK.
+
+The claim (Tcp.ned): "an active open sends data that waits at the end of the handshake with
+the ACK of the SYN-ACK".
+
+The classes: on (true, the default), off (false). The code: the end of an active open sends
+the data that waits with the ACK of the SYN-ACK, or a bare ACK first
+(TcpAlgorithmBase::established()). This test separates "on" from "off".
+
+Host under test: host1, which sends 1000 bytes in the same instant as its open. Observation:
+level 1, the first segment of host1 after the SYN carries data.
+
+%# parameter: Tcp.sendDataWithFirstAck
+%# class: on
+%# value: true
+%# key: *.host1.tcp.sendDataWithFirstAck
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSendDataWithFirstAckOn")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+            app.sendData(app.socket(), 1000);
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == false")
+                  .first()
+                  .assertPacket("pk.dataLength > tcp.headerLength")
+                  .describe("the first segment of host1 after the SYN, with data")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpSendDataWithFirstAckOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.sendDataWithFirstAck = true    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSendDataWithFirstAckOn: PASS
