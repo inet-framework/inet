@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregationUtils.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -16,20 +17,17 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
 {
     EV_DEBUG << "Deaggregating A-MPDU " << *aggregatedFrame << " into multiple packets.\n";
     std::vector<Packet *> *frames = new std::vector<Packet *>();
-    int paddingLength = 0;
+    auto layout = inspectMpduAggregate(aggregatedFrame, B(0), B(aggregatedFrame->getDataLength()));
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
-    while (aggregatedFrame->getDataLength() > b(0)) {
-        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
-        const auto& mpduSubframeHeader = aggregatedFrame->popAtFront<Ieee80211MpduSubframeHeader>();
-        const auto& mpdu = aggregatedFrame->peekDataAt(b(0), B(mpduSubframeHeader->getLength()));
-        paddingLength = 4 - (mpduSubframeHeader->getChunkLength() + mpdu->getChunkLength()).get<B>() % 4;
-        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + mpdu->getChunkLength());
+    for (const auto& range : layout.ranges) {
+        if (range.kind != MpduRangeKind::MPDU)
+            continue;
+        const auto& mpdu = aggregatedFrame->peekDataAt(range.offset, range.length);
         auto frame = new Packet();
-        frame->setName(tokenizer.nextToken());
+        frame->setName(tokenizer.hasMoreTokens() ? tokenizer.nextToken() : aggregatedFrame->getName());
         frame->insertAtBack(mpdu);
-        frame->getRegionTags().copyTags(aggregatedFrame->getRegionTags(), aggregatedFrame->getFrontOffset() - frame->getDataLength(), frame->getFrontOffset(), frame->getDataLength());
+        frame->getRegionTags().copyTags(aggregatedFrame->getRegionTags(), aggregatedFrame->getFrontOffset() + range.offset, frame->getFrontOffset(), range.length);
         EV_TRACE << "Created " << *frame << " from A-MPDU.\n";
-        // TODO check CRC?
         frames->push_back(frame);
     }
     delete aggregatedFrame;
