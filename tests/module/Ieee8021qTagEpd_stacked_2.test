@@ -1,0 +1,206 @@
+%# expected-result: FAIL
+%description:
+
+Tests the user priority of a frame that carries a C-tag and an S-tag (IEEE
+802.1ad), as IEEE Std 802.1Q-2018 defines it.
+
+On send, a tagging layer passes the priority of a request down unchanged: the
+parameters of its request to the layer below "carry values equal to the
+corresponding parameters in the received data request" (6.9.2). So each tag
+inserter takes the PCP of its tag from the user priority unless a PCP request of
+its own tag type overrides it, and the user priority request is still on the
+frame below the inserters, for the MAC.
+
+On receive, the priority of a tagged frame is "decoded from the tag header"
+(6.9.1 h), and the priority that the layer below indicated counts only for an
+untagged frame (6.9.1 i). So the PCP of a tag replaces a user priority that the
+MAC indicated, and in a stack the innermost tag, which is checked last, sets the
+user priority: in a provider edge bridge, the C-VLAN component decodes the C-tag
+of a frame that the S-VLAN component passed it with the priority of the S-tag
+(15.4, 6.14).
+
+The receiving side gets a user priority indication of 1 from the "MAC" before
+the tag checkers. The reverser does not forward the PCPs, so the forwarded tags
+take their PCPs from the user priority of the received frame.
+
+The first frame has a user priority request of 6 and no PCP request, so both
+tags must get PCP 6, and the receiver user priority 6. The second frame also
+requests PCP 3 for the C-tag and PCP 5 for the S-tag, so the tags must get
+those, the receiver must get user priority 3, the PCP of the inner tag, and
+both forwarded tags PCP 3. The chain is the one of Ieee8021qTagEpd_stacked_1.
+
+%file: StackedTagProbes.cc
+
+#include "inet/common/DirectionTag_m.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/common/PcpTag_m.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/queueing/base/PacketFlowBase.h"
+
+namespace inet {
+
+class DoubleTagRequester : public queueing::PacketFlowBase
+{
+  protected:
+    int numPackets = 0;
+
+  protected:
+    virtual void processPacket(Packet *packet) override
+    {
+        packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ipv4);
+        packet->addTag<CVlanReq>()->setVlanId(10);
+        packet->addTag<SVlanReq>()->setVlanId(100);
+        packet->addTag<UserPriorityReq>()->setUserPriority(6);
+        if (numPackets++ == 1) {
+            packet->addTag<CPcpReq>()->setPcp(3);
+            packet->addTag<SPcpReq>()->setPcp(5);
+        }
+        auto encapsulationProtocolReq = packet->addTag<EncapsulationProtocolReq>();
+        encapsulationProtocolReq->appendProtocol(&Protocol::ieee8021qCTag);
+        encapsulationProtocolReq->appendProtocol(&Protocol::ieee8021qSTag);
+    }
+};
+
+Define_Module(DoubleTagRequester);
+
+class StackedTagProbe : public queueing::PacketFlowBase
+{
+  protected:
+    void printTag(const char *name, const TagBase *tag, int value)
+    {
+        std::cout << " " << name << "=";
+        if (tag == nullptr)
+            std::cout << "none";
+        else
+            std::cout << value;
+    }
+
+    virtual void processPacket(Packet *packet) override
+    {
+        std::cout << getFullName() << ":";
+        if (packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ieee8021qSTag) {
+            b offset = b(0);
+            for (int i = 0; i < 2; i++) {
+                const auto& header = packet->peekDataAt<Ieee8021qTagEpdHeader>(offset);
+                std::cout << " header" << i << "(vid=" << header->getVid() << " pcp=" << (int)header->getPcp() << " typeOrLength=0x" << std::hex << header->getTypeOrLength() << std::dec << ")";
+                offset += header->getChunkLength();
+            }
+        }
+        auto userPriorityReq = packet->findTag<UserPriorityReq>();
+        auto userPriorityInd = packet->findTag<UserPriorityInd>();
+        printTag("UserPriorityReq", userPriorityReq.get(), userPriorityReq ? userPriorityReq->getUserPriority() : 0);
+        printTag("UserPriorityInd", userPriorityInd.get(), userPriorityInd ? userPriorityInd->getUserPriority() : 0);
+        std::cout << "\n";
+        if (par("wire")) {
+            // the receiver gets the bytes of the frame, and the user priority that its MAC indicates
+            auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+            packet->clearTags();
+            packet->addTag<PacketProtocolTag>()->setProtocol(protocol);
+            packet->addTag<DirectionTag>()->setDirection(DIRECTION_INBOUND);
+            packet->addTag<UserPriorityInd>()->setUserPriority(par("macUserPriority"));
+        }
+    }
+};
+
+Define_Module(StackedTagProbe);
+
+} // namespace inet
+
+%file: test.ned
+
+import inet.linklayer.ethernet.common.PacketDirectionReverser;
+import inet.linklayer.ieee8021q.Ieee8021qTagEpdHeaderChecker;
+import inet.linklayer.ieee8021q.Ieee8021qTagEpdHeaderInserter;
+import inet.queueing.base.PacketFlowBase;
+import inet.queueing.sink.PassivePacketSink;
+import inet.queueing.source.ActivePacketSource;
+
+simple DoubleTagRequester extends PacketFlowBase
+{
+    parameters:
+        @class(::inet::DoubleTagRequester);
+}
+
+simple StackedTagProbe extends PacketFlowBase
+{
+    parameters:
+        bool wire = default(false);
+        int macUserPriority = default(1);
+        @class(::inet::StackedTagProbe);
+}
+
+network Test
+{
+    submodules:
+        source: ActivePacketSource {
+            productionInterval = 1s;
+            packetLength = 46B;
+        }
+        requester: DoubleTagRequester;
+        cInserter: Ieee8021qTagEpdHeaderInserter {
+            vlanTagType = "c";
+        }
+        sInserter: Ieee8021qTagEpdHeaderInserter {
+            vlanTagType = "s";
+        }
+        sent: StackedTagProbe {
+            wire = true;
+        }
+        sChecker: Ieee8021qTagEpdHeaderChecker {
+            vlanTagType = "s";
+        }
+        cChecker: Ieee8021qTagEpdHeaderChecker {
+            vlanTagType = "c";
+        }
+        received: StackedTagProbe;
+        reverser: PacketDirectionReverser {
+            forwardPcp = false;
+        }
+        reversed: StackedTagProbe;
+        cInserter2: Ieee8021qTagEpdHeaderInserter {
+            vlanTagType = "c";
+        }
+        sInserter2: Ieee8021qTagEpdHeaderInserter {
+            vlanTagType = "s";
+        }
+        forwarded: StackedTagProbe;
+        sink: PassivePacketSink;
+    connections:
+        source.out --> requester.in;
+        requester.out --> cInserter.in;
+        cInserter.out --> sInserter.in;
+        sInserter.out --> sent.in;
+        sent.out --> sChecker.in;
+        sChecker.out --> cChecker.in;
+        cChecker.out --> received.in;
+        received.out --> reverser.in;
+        reverser.out --> reversed.in;
+        reversed.out --> cInserter2.in;
+        cInserter2.out --> sInserter2.in;
+        sInserter2.out --> forwarded.in;
+        forwarded.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 1.5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+
+%contains: stdout
+sent: header0(vid=100 pcp=6 typeOrLength=0x8100) header1(vid=10 pcp=6 typeOrLength=0x800) UserPriorityReq=6 UserPriorityInd=6
+received: UserPriorityReq=none UserPriorityInd=6
+reversed: UserPriorityReq=6 UserPriorityInd=none
+forwarded: header0(vid=100 pcp=6 typeOrLength=0x8100) header1(vid=10 pcp=6 typeOrLength=0x800) UserPriorityReq=6 UserPriorityInd=6
+%contains: stdout
+sent: header0(vid=100 pcp=5 typeOrLength=0x8100) header1(vid=10 pcp=3 typeOrLength=0x800) UserPriorityReq=6 UserPriorityInd=6
+received: UserPriorityReq=none UserPriorityInd=3
+reversed: UserPriorityReq=3 UserPriorityInd=none
+forwarded: header0(vid=100 pcp=3 typeOrLength=0x8100) header1(vid=10 pcp=3 typeOrLength=0x800) UserPriorityReq=3 UserPriorityInd=3
