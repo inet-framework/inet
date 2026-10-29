@@ -1,0 +1,3 @@
+IEEE 802.11 bounded MPDU deaggregation
+
+MPDU deaggregation now extracts only complete bounded members. An invalid or overlong delimiter can no longer force an unchecked member extraction. Delimiter recovery crosses typed MPDU headers and retains later complete members. Extraction alone grants no PHY success, FCS acceptance, or MAC delivery permission.

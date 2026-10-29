@@ -6,10 +6,30 @@
 
 import inet.common.INETDefs;
 import inet.common.TagBase;
+import inet.common.Units;
 import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
 import inet.physicallayer.wireless.ieee80211.mode.Ieee80211Channel;
 
 namespace inet::physicallayer;
+
+// A value copy of one scored PSDU range. Kind 0 denotes a delimiter; kind 1 denotes an MPDU.
+struct Ieee80211AmpduRange
+{
+    int kind = 0;
+    B offset = B(0);
+    B length = B(0);
+    bool successful = false;
+    bool valid = false;
+}
+
+// PHY facts only. MAC delimiter and FCS checks still control acceptance.
+class Ieee80211AmpduInd extends TagBase
+{
+    bool headerSuccessful = false;
+    bool aggregation = false;
+    bool contentComplete = false;
+    Ieee80211AmpduRange ranges[];
+}
 
 //
 // This is an abstract base class that should not be directly added as a tag.

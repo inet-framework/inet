@@ -1,0 +1,3 @@
+IEEE 802.11 HT-SIG bytes and aggregate boundaries
+
+HT transmissions now preserve the complete HT-SIG header through byte conversion. Receivers check its CRC, supported fields, and length before length-based trailer removal. Invalid headers mark packets as erroneous. Delimiter inspection supplies bounded MPDU ranges, including singleton aggregates. Ordinary valid HT duration inputs remain unchanged. VHT modes now create their own header type.

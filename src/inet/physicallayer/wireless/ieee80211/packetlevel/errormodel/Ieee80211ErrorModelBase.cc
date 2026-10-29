@@ -18,17 +18,35 @@ Ieee80211ErrorModelBase::Ieee80211ErrorModelBase()
 {
 }
 
+bool Ieee80211ErrorModelBase::supportsAmpduMode(const IIeee80211Mode *mode) const
+{
+    return mode != nullptr && mode->getModulationClass() == IIeee80211Mode::ModulationClass::HT &&
+            mode->getHtMcsIndex() >= 0 && mode->getHtMcsIndex() <= 31 && mode->getDataMode()->getBandwidth() == MHz(20);
+}
+
+double Ieee80211ErrorModelBase::computeAmpduRangeSuccessRate(const ISnir *snir, const IIeee80211Mode *mode, B length) const
+{
+    Enter_Method("computeAmpduRangeSuccessRate");
+    if (!supportsAmpduMode(mode))
+        throw cRuntimeError("Unsupported HT A-MPDU receive mode");
+    if (snir == nullptr || length <= B(0) || length > B(65535))
+        throw cRuntimeError("Invalid A-MPDU probability range");
+    return getDataSuccessRate(mode, b(length).get<b>(), getScalarSnir(snir));
+}
+
 double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const
 {
     Enter_Method("computePacketErrorRate");
+    if (part == IRadioSignal::SIGNAL_PART_PREAMBLE)
+        return 0;
     auto transmission = check_and_cast<const Ieee80211Transmission *>(snir->getReception()->getTransmission());
     auto mode = transmission->getMode();
     auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
     auto headerLength = mode->getHeaderMode()->getLength();
     auto dataLength = b(mode->getDataMode()->getCompleteLength(B(phyHeader->getLengthField())));
     // TODO check header length and data length for OFDM (signal) field
-    double headerSuccessRate = getHeaderSuccessRate(mode, headerLength.get<b>(), getScalarSnir(snir));
-    double dataSuccessRate = getDataSuccessRate(mode, dataLength.get<b>(), getScalarSnir(snir));
+    double headerSuccessRate = part == IRadioSignal::SIGNAL_PART_DATA ? 1 : getHeaderSuccessRate(mode, headerLength.get<b>(), getScalarSnir(snir));
+    double dataSuccessRate = part == IRadioSignal::SIGNAL_PART_HEADER ? 1 : getDataSuccessRate(mode, dataLength.get<b>(), getScalarSnir(snir));
     switch (part) {
         case IRadioSignal::SIGNAL_PART_WHOLE:
             return 1.0 - headerSuccessRate * dataSuccessRate;

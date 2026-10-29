@@ -121,7 +121,10 @@ bool Rx::lowerFrameReceived(Packet *packet)
     Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
-    bool isFrameOk = isFcsOk(packet);
+    // Aggregate containers need member acceptance before standalone FCS or header checks.
+    // Reject them until MAC aggregate reception exists; PHY range outcomes stay separate.
+    auto aggregate = packet->findTag<Ieee80211AmpduInd>();
+    bool isFrameOk = !(aggregate && aggregate->getAggregation()) && isFcsOk(packet);
     attachInterframeResult(packet, isFrameOk);
     if (isFrameOk) {
         EV_INFO << "Received frame from PHY: " << packet << endl;
