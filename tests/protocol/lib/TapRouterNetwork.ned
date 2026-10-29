@@ -14,7 +14,7 @@ import inet.node.ethernet.EthernetLink;
 // host1 -- tap -- router -- host2. The tap sees the frames of host1 before the router, so a
 // rule can make the router answer with a real ICMP error: a TTL of 1 gives Time Exceeded.
 // The link from the router to host2 is the second one, router.eth[1]; the ini can give it a
-// lower rate, a smaller MTU (*.router.eth[1].mtu) and another queue
+// lower rate, a smaller MTU (*.router.eth[1].mac.mtu) and another queue
 // (*.router.eth[1].queue.typename), for path MTU discovery and congestion. The node types
 // and the configurator are parameters, as in TapPairNetwork; the router is "Router6" for
 // IPv6.
