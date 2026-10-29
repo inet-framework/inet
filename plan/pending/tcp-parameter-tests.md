@@ -445,7 +445,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 9 — `congestion`, 73 tests.** The algorithm classes first, because they give the largest coverage gain. Done: `8876619f7f` (the check skips `-alias`), `e6648b83cc` (the initial window and threshold), `2a19ee2456` (the algorithms), `af106bb2be` (TcpCubic and DcTcp), `9717a2cb35` (HyStart), `d815e75754` (TcpVegas); 72 PASS, 1 FAIL (PF-6).
 - [x] **Step 10 — `recovery`, 25 tests.** Done: `d41a5f4b8c`; 25 PASS.
 - [x] **Step 11 — `receive`, 25 tests.** Done: `dccaa84b57`; 25 PASS.
-- [ ] **Step 12 — `close`, 13 tests.**
+- [x] **Step 12 — `close`, 14 tests.** Done: `6e2bf3fc72`; 14 PASS.
 - [ ] **Step 13 — `ecn`, 18 tests.**
 - [ ] **Step 14 — `pmtu`, 11 tests.**
 - [ ] **Step 15 — `keepalive`, 7 tests.**
@@ -559,3 +559,11 @@ The user settled these on 2026-10-29.
 - `windowUpdateAfterRead` acts only at an explicit READ, so its tests use `TcpTestApp` without auto-read; a delivery with auto-read is no such read.
 - `receiveBufferLowRtt` acts only through Dynamic Right-Sizing, once in each receive RTT (40 ms here). Every value below the RTT gives the same growth; above it, the growth is in proportion to the RTT over the value (100 ms gives about 900000 bytes at 0.7 s, 1 s about 440000, below the RTT 1330000). Later, the growth for the overflow of the buffer hides the difference, so the tests read the buffer at 0.7 s.
 - The group runs in 4 s of wall time with 32 cores. D3: the socket calls are the listen without auto-read and the read of `TcpTestApp`; no new library word.
+
+**Step 12 (`close`).**
+- The code pass changed the draft from 13 to 14 tests: `msl` has the classes `rfc` (120 s) and `other` (5 s; LinuxTcp sets 30 s, which the completeness check found when the first rows forgot it). The code does not check `msl`, and the NED names no invalid value, so it has no class `invalid`.
+- The end of TIME_WAIT shows in the signal `state` (CLOSED is 1). The signal `tcpConnectionRemoved` does not come at that time.
+- The field writer of a tap rule reaches only the fields of a header, not those of an option. The new helper `addToTsval()` of `TcpMutations.h` changes the TSval of a segment.
+- `tsRecentAfterAckCheck`: with the rule of RFC 7323, a forged ACK of unsent data with a TSval far ahead moves TS.Recent, and PAWS then drops each later ACK of the peer, so the sender times out. The check of Linux prevents it. The test observes that timeout, not TS.Recent.
+- `icmpSequenceCheck`: the tap sets the TTL of the first SYN to 1 and its sequence number 100 higher, so the Time Exceeded of the router quotes a stale sequence number. The tests turn `softIcmpErrorsAbortSetup` on, because only an error that aborts the setup shows whether it counted.
+- The group runs in 2 s of wall time with 32 cores. D3: the socket calls are connect, close, abort, listen and send of `TcpTestApp`; no new library word.
