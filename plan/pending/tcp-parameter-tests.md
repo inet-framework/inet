@@ -443,7 +443,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 7 — `send`, 17 tests.** Done: `a82f12fdec`; 17 PASS.
 - [x] **Step 8 — `rto`, 12 tests.** Done: `caa51a2dcd`; 12 PASS.
 - [x] **Step 9 — `congestion`, 73 tests.** The algorithm classes first, because they give the largest coverage gain. Done: `8876619f7f` (the check skips `-alias`), `e6648b83cc` (the initial window and threshold), `2a19ee2456` (the algorithms), `af106bb2be` (TcpCubic and DcTcp), `9717a2cb35` (HyStart), `d815e75754` (TcpVegas); 72 PASS, 1 FAIL (PF-6).
-- [ ] **Step 10 — `recovery`, 27 tests.**
+- [x] **Step 10 — `recovery`, 25 tests.** Done: `d41a5f4b8c`; 25 PASS.
 - [ ] **Step 11 — `receive`, 24 tests.**
 - [ ] **Step 12 — `close`, 13 tests.**
 - [ ] **Step 13 — `ecn`, 18 tests.**
@@ -540,3 +540,14 @@ The user settled these on 2026-10-29.
 - The exit of HyStart does not move up monotonically with `hystartLowWindow` below the natural exit point: 100 gave an exit at 117 segments, 16 at 145, because the rounds of HyStart start at other times. The test of `other` uses 400.
 - D3: the group needs one socket call (`socket-override`). One file-scope helper repeats: the delay setter of the links is in 4 tests and inline in `TcpCubicDeltaLong`. The generator of the tests got a slot for file-scope helpers. If more groups need the helper, it goes into the library.
 - The group runs in 21 s of wall time with 32 cores; the tests with two connections take 18 s each. The regression run has 69 unexpected FAILs: the 67 of the baseline, PF-4 and PF-6.
+
+**Step 10 (`recovery`).**
+- The code pass changed the draft from 27 to 25 tests. The classes without SACK (`rack-no-sack`, the `no-sack` classes of `tlpEnabled` and `prrEnabled`) are gone: each parameter of the group needs SACK, and without it the class is the same as `off`, so no test can separate them (the rule of `sackSupport:forced-off` in step 6). `dupthresh` has the classes `rfc5681` (3), `other` (5) and `invalid`, and each value has a facet for each loss detection, because the code reads the value on two paths. `lossUndoEnabled = true` has the facets `dsack` and `eifel`; each test turns the other proof off (no timestamps, or no D-SACK at host2). `rackReoTimerGranularity` has no `invalid` class: the code takes a value below 0 as 0, and the NED names no such value.
+- At a tap, `pk.dataLength` is the length of the frame, so `pk.dataLength > tcp.headerLength` does not tell data from a pure ACK: a rule for the first data segment dropped the last ACK of the handshake, which has the same sequence number. Tap rules compare `ipv4.totalLengthField > 100B`, as the earlier groups do; at the TCP module, `pk.dataLength` works.
+- RFC 6675 counts an ACK with new SACK information as a duplicate ACK, also when it moves the cumulative ACK. So the first ACK at a hole is a duplicate when the ACK of the segment before the hole was delayed. The tests of `dupthresh` count the ACKs that carry a SACK option (a header longer than 32 bytes).
+- With DupThresh 5 and RACK, more than 5 segments must follow the hole in its flight; else the timer of the reordering window acts first. The tests drop the 100th segment.
+- The probe timeout before the first RTT sample is the RTO, 1 s. After the ACK of new data, it is 2 * SRTT + 200 ms with one segment in flight, as RFC 8985 says.
+- Without PRR, the window does not change during the recovery; the first value after it is above the threshold (13908 against 13756). The test of `off` checks that the window does not change in 30 ms after the threshold.
+- The threshold of a timeout is 2 * `snd_mss` = 2920 bytes, also with timestamps, where the segments carry 1448 bytes; RFC 5681 excludes the options from SMSS. No claim of a parameter depends on it; the plan of the repairs looks at it.
+- The test of `retainSackAfterRto` needs a peer that reports no SACK blocks after the timeout, because the next ACK marks the data again in both classes. The new helper `hideSackBlocks()` of `TcpMutations.h` replaces the SACK option with NOP options of the same length.
+- The group runs in 3 s of wall time with 32 cores. D3: no socket call, and no new library word.
