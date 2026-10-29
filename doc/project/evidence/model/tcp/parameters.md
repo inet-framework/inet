@@ -36,6 +36,7 @@ Defects and gaps that the parameter tests found. This pass changes nothing in `s
 | PF-11 | `TcpSpoof` sets no checksum mode in its header (`CHECKSUM_MODE_UNDEFINED`), so `Tcp::checkChecksum()` of the receiver stops the run with "unknown checksum mode: -1" at the first segment of the spoof. No TCP can take a segment of `TcpSpoof`, and its NED says that it "sends fabricated TCP packets". | `TcpSpoof::sendSpoofPacket()` | `TcpSpoofIsSYNTrueAnswer` |
 | PF-12 | `TcpSpoof.destAddress`: the default "" cannot work. At the time t the run stops with the error "Address contains no value" of `L3Address`, not with a message about the parameter. The NED does not say that the parameter needs a value. | `TcpSpoof.ned`; `TcpSpoof::sendToIP()` | `TcpSpoofDestAddressEmpty` |
 | PF-13 | `TcpSpoof.seqNo = -1` stops the run at the time t with "simtime_t: Cannot represent 4.29497e+09": `chooseInitialSeqNum()` calls `fmod()` with `simTime() * 250000.0`, so the modulus 2^32 + 1 becomes a `simtime_t` too, out of the range of the time scale. The NED says "-1 for TCP ISS". | `TcpSpoof::chooseInitialSeqNum()` | `TcpSpoofSeqNoIss` |
+| PF-14 | `Tcp.stopOperationExtraTime`: a positive value keeps the network layer up while TCP is down already, so the network layer gives each arriving segment to TCP. `Tcp` does not override `handleMessageWhenDown()`, so a segment that reaches TCP in the extra time stops the run with "Message 'SYN' received when Tcp is down". | `Tcp`; `OperationalMixin::handleMessageWhenDown()` | `TcpStopOperationExtraTimeOtherSegment` |
 
 ## The classes
 
@@ -412,7 +413,7 @@ Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode. host1 is the
 
 ### module — the checksum and the stop of the module
 
-Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode: 8 PASS, 1 FAIL (PF-9). The host under test is host1. The checksum tests: host1 sends 10000 bytes to host2, and the tap replaces the checksum of the first data segment of host1 with its one's complement. The stop tests: host1 has no application, host2 sends a ping to host1 every 50 ms, and the tester stops host1 at 1 s (`stopNode`); the network layer goes down after the stage of TCP, so the last echo reply that host2 gets shows when that stage ends.
+Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode: 8 PASS, 2 FAIL (PF-9, PF-14). The host under test is host1. The checksum tests: host1 sends 10000 bytes to host2, and the tap replaces the checksum of the first data segment of host1 with its one's complement. The stop tests: host1 has no application, host2 sends a ping to host1 every 50 ms, and the tester stops host1 at 1 s (`stopNode`); the network layer goes down after the stage of TCP, so the last echo reply that host2 gets shows when that stage ends.
 
 | Class | Value | Preset | Claim | Source | Obs | Net | Test | Verdict |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -424,6 +425,7 @@ Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode: 8 PASS, 1 FA
 | `Tcp.stopOperationTimeout:shorter` | `0.5s` | — | a timeout shorter than the extra time ends the stage of TCP at the timeout | code: the same, `handleActiveOperationTimeout()` | A | P, L | [TcpStopOperationTimeoutShorter](../../../../../tests/protocol/tcp/parameter/module/TcpStopOperationTimeoutShorter.test) | PASS |
 | `Tcp.stopOperationExtraTime:zero` | `0s` | — | the stage of TCP ends at once, so the network layer goes down at the stop | code: `OperationalMixin::startActiveOperationExtraTimeOrFinish()` | A | P, L | [TcpStopOperationExtraTimeZero](../../../../../tests/protocol/tcp/parameter/module/TcpStopOperationExtraTimeZero.test) | PASS |
 | `Tcp.stopOperationExtraTime:other` | `1s` | — | the stage of TCP ends the value after the stop, and the network layer answers until then | code: the same | A | P, L | [TcpStopOperationExtraTimeOther](../../../../../tests/protocol/tcp/parameter/module/TcpStopOperationExtraTimeOther.test) | PASS |
+| `Tcp.stopOperationExtraTime:other-segment` | `1s` | — | a segment that reaches TCP in the extra time gets no answer, and the run goes on | code: the same, `OperationalMixin::handleMessageWhenDown()` | A, W | P, L | [TcpStopOperationExtraTimeOtherSegment](../../../../../tests/protocol/tcp/parameter/module/TcpStopOperationExtraTimeOtherSegment.test) | FAIL (PF-14) |
 | `Tcp.stopOperationExtraTime:negative-alias` | `-1s` | — | a negative value ends the stage at once, as zero does; it is the default of the 28 other modules with this parameter | code: the same | A | P, L | [TcpStopOperationExtraTimeNegativeAlias](../../../../../tests/protocol/tcp/parameter/module/TcpStopOperationExtraTimeNegativeAlias.test) | FAIL (PF-9) |
 
 ### spoof — TcpSpoof
