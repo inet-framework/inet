@@ -313,6 +313,25 @@ inline bool hasDsackBlock(const Packet *packet)
     return false;
 }
 
+// Replaces the SACK option of the segment with NOP options of the same length, so that the
+// receiver learns nothing from its blocks; the lengths of the headers stay the same. A segment
+// without a SACK option stays as it is.
+inline void hideSackBlocks(Packet *frame)
+{
+    rewriteTcpHeader(frame, [](TcpHeader& header) {
+        for (size_t i = 0; i < header.getHeaderOptionArraySize(); i++) {
+            auto sack = dynamic_cast<const inet::tcp::TcpOptionSack *>(header.getHeaderOption(i));
+            if (sack == nullptr)
+                continue;
+            int length = sack->getLength();
+            header.eraseHeaderOption(i);
+            for (int j = 0; j < length; j++)
+                header.insertHeaderOption(i, new inet::tcp::TcpOptionNop());
+            return;
+        }
+    });
+}
+
 // The octets that the options of a segment occupy, counted from the options themselves and
 // padded to a whole number of 32-bit words (RFC 9293 section 3.1). The header length field of
 // a correct segment is 20 octets more than this.

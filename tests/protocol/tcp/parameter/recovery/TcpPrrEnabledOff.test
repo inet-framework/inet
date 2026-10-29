@@ -1,0 +1,65 @@
+%description:
+
+Tcp.prrEnabled:off -- in the recovery, the window is the threshold.
+
+The claim (Tcp.ned): "Proportional Rate Reduction (RFC 6937) during fast recovery instead of
+classic cwnd inflation/halving".
+
+The classes: on (true, the default) and off (false, the value of LegacyTcp). The code: at the
+start of a recovery, cwnd and ssthresh become the reduced value
+(Rfc6675Recovery::step4()); with PRR, Rfc6675Recovery::prrCwndReduction() then sets cwnd to
+pipe + sndcnt at each ACK, so the window comes down over the recovery; without PRR, cwnd
+stays at ssthresh. PRR needs SACK; without SACK, the class is the same as off. This test separates "off" from "on".
+
+Host under test: host1, which sends 200000 bytes; the round trip is 40 ms, and the tap drops the 30th data segment
+once. Observation: level 2, the window does not change in 30 ms after the threshold of the
+recovery, which lasts about two round trips.
+
+%# parameter: Tcp.prrEnabled
+%# class: off
+%# value: false
+%# key: *.host1.tcp.prrEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpPrrEnabledOff")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 41992 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 30th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .captureMax("threshold", "value")
+                  .describe("the threshold at the start of the recovery")
+                  .within(2.0))
+        .never(on("host1.tcp").signal("cwnd")
+                   .describe("a change of the window in the recovery")
+                   .within(0.03));
+}
+
+%activity:
+EV << "TcpPrrEnabledOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.prrEnabled = false    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 200000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpPrrEnabledOff: PASS

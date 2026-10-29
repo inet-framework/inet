@@ -1,0 +1,69 @@
+%description:
+
+Tcp.tlpEnabled:off -- only the timer sends the lost last segment again.
+
+The claim (Tcp.ned): "Tail Loss Probe (RFC 8985 section 7): about two SRTTs after the last
+transmission or ACK of new data, send one probe, so that its ACK starts the repair of a lost
+tail before the RTO".
+
+The classes: on (true, the default, the value of LinuxTcp) and off (false, the value of
+LegacyTcp). The code: after each transmission of new data, TcpAlgorithmBase arms the probe
+timer of RFC 8985 section 7 (about two SRTTs), and its expiry sends new data or the last
+segment again. The probe needs SACK; without SACK, the class is the same as off. This test separates "off" from "on".
+
+Host under test: host1, which sends three segments; the round trip is 40 ms, and the tap drops the third segment
+once. Nothing follows it, so no SACK can show the loss. Observation: level 1, no transmission of the third segment in 0.8 s after the first one; the
+timer retransmits it about 1 s after the ACK of the first two segments.
+
+%# parameter: Tcp.tlpEnabled
+%# class: off
+%# value: false
+%# key: *.host1.tcp.tlpEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpTlpEnabledOff")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 2896 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the third data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 2896 && pk.dataLength > tcp.headerLength")
+             .describe("the third data segment of host1")
+             .within(2.0))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.sequenceNo == {isn} + 1 + 2896 && pk.dataLength > tcp.headerLength")
+              .describe("an early retransmission of the third segment, by the timer")
+              .within(0.8))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 2896 && pk.dataLength > tcp.headerLength")
+             .describe("retransmission of the third segment, by the timer")
+             .within(0.7));
+}
+
+%activity:
+EV << "TcpTlpEnabledOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tlpEnabled = false    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 4344B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpTlpEnabledOff: PASS

@@ -1,0 +1,67 @@
+%description:
+
+Tcp.maxReordering:linux -- the degree grows to the reordering of the path.
+
+The claim (Tcp.ned): "Upper bound on the learned reordering degree in segments (Linux
+tcp_max_reordering); at least dupthresh".
+
+The classes: linux (300, the default, the value of Linux tcp_max_reordering), caps (a value
+below the reordering of the path), invalid (below dupthresh). The code:
+Rfc6675Recovery::checkSackReordering() limits the degree to the value;
+TcpConnection::configureStateVariables() checks it. This test separates "linux" from "caps".
+
+Host under test: host1, with the adaptive reordering and the loss detection "dupthresh" (precondition: RACK tolerates
+the reordering by time), which sends 1000000 bytes; the round trip is 40 ms, and the tap delays each 20th data
+segment by 3 ms, so that more than DupThresh segments pass it. Nothing is lost. Observation: level 2 and 3, at 2.5 s, the reordering degree is above 4, and the signal
+ssthresh shows one reduction or none.
+
+%# parameter: Tcp.maxReordering
+%# class: linux
+%# value: 300
+%# key: *.host1.tcp.maxReordering
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMaxReorderingLinux")
+        .intercept(tap("tap").from("host1").filterPacket("(tcp.sequenceNo - {isn} - 1) % 28960 == 0 && ipv4.totalLengthField > 100B").delay(0.003)
+                     .describe("each 20th data segment of host1: 3 ms late, so that the next segments pass it"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("ssthresh")
+                                        .filterValueAtMost(1e8)
+                                        .captureCount("recoveries")
+                                        .within(2.5)))
+        .act(action().at(2.5)
+                 .describe("the reordering degree and the reductions at 2.5 s")
+                 .assertModule("host1.tcp.conn-*", "state.reordering > 4 && {recoveries} <= 1"));
+}
+
+%activity:
+EV << "TcpMaxReorderingLinux compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.maxReordering = 300    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 1000000B
+*.host1.tcp.lossDetectionMode = "dupthresh"
+sim-time-limit = 2.6s
+*.host1.tcp.adaptiveReorderingEnabled = true
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMaxReorderingLinux: PASS

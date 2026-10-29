@@ -1,0 +1,33 @@
+%description:
+
+Tcp.maxReordering:invalid -- a value below dupthresh stops the run with an error.
+
+The claim (Tcp.ned): "at least dupthresh".
+
+The classes: linux (300, the default, the value of Linux tcp_max_reordering), caps (a value
+below the reordering of the path), invalid (below dupthresh). The code:
+Rfc6675Recovery::checkSackReordering() limits the degree to the value;
+TcpConnection::configureStateVariables() checks it.
+
+Host under test: host1. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.maxReordering
+%# class: invalid
+%# value: 2
+%# key: *.host1.tcp.maxReordering
+%# expected-result: PASS
+
+%activity:
+EV << "TcpMaxReorderingInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.maxReordering = 2    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+maxReordering must be at least dupthresh \(3\), but it is 2

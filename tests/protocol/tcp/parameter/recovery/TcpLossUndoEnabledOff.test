@@ -1,0 +1,67 @@
+%description:
+
+Tcp.lossUndoEnabled:off -- the reduction of a spurious fast retransmission stays.
+
+The claim (Tcp.ned): "Undo a spurious cwnd/ssthresh reduction when D-SACK (RFC 2883) or
+timestamps (RFC 3522 Eifel) reveal the retransmission was unnecessary".
+
+The classes: off (false, the default) and on (true, the value of LinuxTcp), with the facets
+dsack and eifel. The code: Rfc6675Recovery::step4() and onRexmitTimeout() keep the window and
+the threshold of before the reduction (undoInit()); Rfc6675Recovery::segmentsAcked() restores
+them when each retransmission of the episode has a D-SACK (noteDsack()), or when an ACK echoes
+a timestamp older than the first retransmission (packetDelayed(), RFC 3522). The undo needs
+SACK. This test separates "off" from "on".
+
+Host under test: host1, which sends 200000 bytes; the round trip is 40 ms, and the tap delays the 30th data
+segment by 5 ms once, so that the next segments pass it and host2 SACKs them. RACK
+retransmits the 30th segment at the third SACK, before the late original arrives: a spurious
+fast retransmission. Observation: level 2, no value of the signal ssthresh above 1e8 in 1 s after the reduction.
+
+%# parameter: Tcp.lossUndoEnabled
+%# class: off
+%# value: false
+%# key: *.host1.tcp.lossUndoEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpLossUndoEnabledOff")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 41992 && ipv4.totalLengthField > 100B").nth(1).delay(0.005)
+                     .describe("the 30th data segment of host1, the first time: 5 ms late"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .describe("the reduction at the fast retransmission")
+                  .within(2.0))
+        .never(on("host1.tcp").signal("ssthresh")
+                   .filterValueAtLeast(1e8)
+                   .describe("an undo of the reduction")
+                   .within(1.0));
+}
+
+%activity:
+EV << "TcpLossUndoEnabledOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.lossUndoEnabled = false    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 200000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpLossUndoEnabledOff: PASS

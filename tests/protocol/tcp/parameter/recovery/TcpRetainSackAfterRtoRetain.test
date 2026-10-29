@@ -1,0 +1,75 @@
+%description:
+
+Tcp.retainSackAfterRto:retain -- after a timeout, host1 does not send the SACKed data again.
+
+The claim (Tcp.ned): "false: a retransmission timeout clears the SACKed marks of the
+scoreboard (RFC 2018 section 8, RFC 5682 step 1); true: the marks survive the timeout, as Linux
+keeps them".
+
+The classes: clear (false, the default) and retain (true, the value of LinuxTcp). The code:
+at a timeout, TcpAlgorithmBase::processRexmitTimer() clears the SACKed marks of the
+retransmission queue unless the value is true; after the timeout, TcpConnection::sendSegment()
+skips the data with a SACKed mark. This test separates "retain" from "clear".
+
+Host under test: host1, with an initial window of 4 segments and without the tail loss probe
+(preconditions), which sends four segments; the round trip is 40 ms. The tap drops each transmission of the first
+and the third segment in the first 0.5 s; host2 SACKs the second and the fourth segment, and
+the timer of host1 expires. After the timeout, the tap hides the SACK blocks of host2 (NOP
+options of the same length), so the marks of before the timeout are the only knowledge of
+host1 about the fourth segment. Observation: level 1, after the timeout, host2 acknowledges all four segments, and host1
+does not send the fourth segment again.
+
+%# parameter: Tcp.retainSackAfterRto
+%# class: retain
+%# value: true
+%# key: *.host1.tcp.retainSackAfterRto
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpRetainSackAfterRtoRetain")
+        .intercept(tap("tap").from("host1").filterPacket("(tcp.sequenceNo == {isn} + 1 || tcp.sequenceNo == {isn} + 1 + 2896) && ipv4.totalLengthField > 100B").drop().within(0.5)
+                     .describe("each transmission of the first and the third data segment of host1 in the first 0.5 s"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("numRtos").describe("the timeout of host1").within(3.0))
+        .meanwhile(tap("tap").from("host2").filterPacket("tcp.synBit == false").mutate(hideSackBlocks)
+                       .describe("each ACK of host2 after the timeout: the SACK blocks hidden"))
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterPacket("tcp.sequenceNo == {isn} + 1 + 4344 && pk.dataLength > tcp.headerLength")
+                             .describe("the fourth segment again")
+                             .within(2.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 5792")
+             .describe("the ACK of all four segments")
+             .within(2.0));
+}
+
+%activity:
+EV << "TcpRetainSackAfterRtoRetain compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.retainSackAfterRto = true    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 5792B
+*.host1.tcp.initialCwnd = 4
+*.host1.tcp.tlpEnabled = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpRetainSackAfterRtoRetain: PASS

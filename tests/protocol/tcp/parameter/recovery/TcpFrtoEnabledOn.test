@@ -1,0 +1,65 @@
+%description:
+
+Tcp.frtoEnabled:on -- the ACK of data sent once shows that the timeout was spurious, and the threshold comes back.
+
+The claim (Tcp.ned): "F-RTO spurious-RTO detection (RFC 5682, SACK-enhanced; Linux
+tcp_frto=2)".
+
+The classes: off (false, the default) and on (true, the value of LinuxTcp). The code:
+Rfc6675Recovery::onRexmitTimeout() opens the detection; at the first ACK of new data after the
+timeout, Rfc6675Recovery::segmentsAcked() and processFrtoEpisode() undo the response to the
+timeout when the ACK acknowledges data that was sent only once. F-RTO needs SACK. This test separates "on" from "off".
+
+Host under test: host1, without the tail loss probe and the undo of losses (preconditions:
+they act on the same timeout), which sends three segments; the round trip is 40 ms. The tap delays each ACK of
+data of host2 in the first 0.5 s by 1.5 s, so the timer of host1 expires, although host2
+has all the data. host1 retransmits the first segment; the ACK of the copy acknowledges all
+three segments, two of them sent only once. Observation: level 2, after the timeout, the signal ssthresh gives the threshold of before
+the timeout again, above 1e8.
+
+%# parameter: Tcp.frtoEnabled
+%# class: on
+%# value: true
+%# key: *.host1.tcp.frtoEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFrtoEnabledOn")
+        .intercept(tap("tap").from("host2").filterPacket("tcp.synBit == false && tcp.ackNo > {isn} + 1").delay(1.5).within(0.5)
+                     .describe("each ACK of data of host2 in the first 0.5 s: 1.5 s late"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("numRtos").describe("the timeout of host1").within(2.0))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtLeast(1e8)
+                  .describe("the undo: the threshold of before the timeout")
+                  .within(1.0));
+}
+
+%activity:
+EV << "TcpFrtoEnabledOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.frtoEnabled = true    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 4344B
+*.host1.tcp.tlpEnabled = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFrtoEnabledOn: PASS

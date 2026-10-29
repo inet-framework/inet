@@ -1,0 +1,68 @@
+%description:
+
+Tcp.lossDetectionMode:rack -- two SACKed segments are enough: RACK retransmits the lost segment after a round trip and a quarter.
+
+The claim (Tcp.ned): "SACK loss detection: classic DupThresh (RFC 6675) or RACK time-based (RFC
+8985)".
+
+The classes: dupthresh (the value of LegacyTcp) and rack (the default, the value of LinuxTcp).
+The code: with "rack", a segment is lost when a segment sent after it is SACKed and the time
+RACK.rtt + the reordering window has passed (Rfc6675Recovery::rackDetectAndMarkLost(), with
+the timer of the reordering window); with "dupthresh", at DupThresh duplicate ACKs, or when
+IsLost() counts DupThresh SACKed segments above it (Rfc6675Recovery::receivedDuplicateAck()).
+RACK needs SACK; without it, the connection uses DupThresh. This test separates "rack" from "dupthresh".
+
+Host under test: host1, without the tail loss probe (precondition: the probe would repair the
+loss in both classes), which sends three segments; the round trip is 40 ms, and the tap drops the first segment
+once. host2 SACKs the other two: two duplicate ACKs, one less than DupThresh. Observation: level 1, the retransmission of the first segment comes less than 0.2 s after
+the first transmission (about 50 ms).
+
+%# parameter: Tcp.lossDetectionMode
+%# class: rack
+%# value: "rack"
+%# key: *.host1.tcp.lossDetectionMode
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpLossDetectionModeRack")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the first data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+             .describe("the first data segment of host1")
+             .within(2.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+             .describe("the retransmission of the first segment, by RACK")
+             .within(0.2));
+}
+
+%activity:
+EV << "TcpLossDetectionModeRack compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.lossDetectionMode = "rack"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 4344B
+*.host1.tcp.tlpEnabled = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpLossDetectionModeRack: PASS

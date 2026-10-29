@@ -1,0 +1,72 @@
+%description:
+
+Tcp.rackReoTimerGranularity:exact -- RACK retransmits when the reordering window ends.
+
+The claim (Tcp.ned): "model the kernel's jiffy-quantized REO timeout arming (Linux
+usecs_to_jiffies(timeout)+1: delay rounded UP to this granularity plus one extra tick, e.g.
+4ms for an HZ=250 kernel) ... 0 = exact".
+
+The classes: exact (0 s, the default) and ticks (4 ms, the value of LinuxTcp). The code:
+TcpConnection::rescheduleRackReoTimer() rounds a positive delay of the timer of the
+reordering window up to the granularity and adds one tick, (ceil(delay / g) + 1) * g, when
+the granularity is above 0. A value below 0 acts as 0; the NED names no such value. This test separates "exact" from "ticks".
+
+Host under test: host1, with RACK and without the tail loss probe (precondition), which sends
+three segments; the round trip is 40 ms, and the tap drops the first segment once. At the first duplicate ACK, the
+reordering window is a quarter of the round trip, about 10 ms, and the timer of the
+reordering window waits for it. Observation: level 1, the retransmission of the first segment comes 9 to 11 ms after the
+first duplicate ACK.
+
+%# parameter: Tcp.rackReoTimerGranularity
+%# class: exact
+%# value: 0s
+%# key: *.host1.tcp.rackReoTimerGranularity
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpRackReoTimerGranularityExact")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the first data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == false && tcp.ackNo == {isn} + 1")
+             .describe("the first duplicate ACK, which SACKs the second segment")
+             .within(0.5))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+              .describe("an early retransmission of the first segment, by the timer of RACK")
+              .within(0.009))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+             .describe("retransmission of the first segment, by the timer of RACK")
+             .within(0.002));
+}
+
+%activity:
+EV << "TcpRackReoTimerGranularityExact compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.rackReoTimerGranularity = 0s    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 4344B
+*.host1.tcp.tlpEnabled = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpRackReoTimerGranularityExact: PASS

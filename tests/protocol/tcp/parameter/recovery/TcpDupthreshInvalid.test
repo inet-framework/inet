@@ -1,0 +1,37 @@
+%description:
+
+Tcp.dupthresh:invalid -- a threshold of 0 stops the run with an error.
+
+The claim (Tcp.ned): "at least 1".
+
+The classes: rfc5681 (3, the default, the value of RFC 5681 and RFC 6675), other (another
+count), invalid (0 and less). Each class has two facets: the loss detection "rack", the
+default, and "dupthresh". The code: with "dupthresh", the fast retransmit comes at DupThresh
+duplicate ACKs, or when IsLost() counts DupThresh SACKed segments
+(Rfc6675Recovery::receivedDuplicateAck()); with "rack", the reordering window becomes 0 when
+DupThresh segments are SACKed and no reordering was seen, so RACK marks the hole lost at once
+(Rfc6675Recovery::rackDetectAndMarkLost()). TcpConnection::configureStateVariables() checks
+the value.
+
+Host under test: host1. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.dupthresh
+%# class: invalid
+%# value: 0
+%# key: *.host1.tcp.dupthresh
+%# expected-result: PASS
+
+%activity:
+EV << "TcpDupthreshInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.dupthresh = 0    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+dupthresh must be 1 or more, but it is 0

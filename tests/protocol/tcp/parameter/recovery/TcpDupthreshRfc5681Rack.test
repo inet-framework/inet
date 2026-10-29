@@ -1,0 +1,76 @@
+%description:
+
+Tcp.dupthresh:rfc5681-rack -- the fast retransmission follows the third duplicate ACK.
+
+The claim (Tcp.ned): "the duplicate ACK threshold of the fast retransmit (RFC 5681, RFC 6675)
+...; with RACK, the number of SACKed segments at which the reordering window becomes 0".
+
+The classes: rfc5681 (3, the default, the value of RFC 5681 and RFC 6675), other (another
+count), invalid (0 and less). Each class has two facets: the loss detection "rack", the
+default, and "dupthresh". The code: with "dupthresh", the fast retransmit comes at DupThresh
+duplicate ACKs, or when IsLost() counts DupThresh SACKed segments
+(Rfc6675Recovery::receivedDuplicateAck()); with "rack", the reordering window becomes 0 when
+DupThresh segments are SACKed and no reordering was seen, so RACK marks the hole lost at once
+(Rfc6675Recovery::rackDetectAndMarkLost()). TcpConnection::configureStateVariables() checks
+the value. This test separates "rfc5681" from the other value.
+
+Host under test: host1, with RACK, the default loss detection, which sends 500000 bytes; the round trip is 40 ms, and the tap drops the 100th data
+segment once, where the window holds more than 5 segments after it. Observation: level 1, when
+host1 retransmits the 100th segment, it has received 3 ACKs that acknowledge the data up to
+the segment and SACK data above it: the duplicate ACKs of RFC 6675, which counts an ACK with
+new SACK information. An ACK whose header is longer than 32 bytes has a SACK option.
+
+%# parameter: Tcp.dupthresh
+%# class: rfc5681-rack
+%# value: 3
+%# key: *.host1.tcp.dupthresh
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDupthreshRfc5681Rack")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 143352 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 100th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetReceivedFromLower")
+                                        .filterPacket("tcp.ackNo == {isn} + 1 + 143352 && tcp.headerLength > 32B")
+                                        .captureCount("dupacks")
+                                        .within(5.0)))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 143352 && pk.dataLength > tcp.headerLength")
+             .describe("the 100th data segment of host1")
+             .within(2.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 143352 && pk.dataLength > tcp.headerLength")
+             .first()
+                  .assertPacket("{dupacks} == 3")
+             .describe("the retransmission of the 100th segment")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpDupthreshRfc5681Rack compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.dupthresh = 3    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 500000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDupthreshRfc5681Rack: PASS
