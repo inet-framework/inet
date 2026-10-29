@@ -37,6 +37,30 @@ Defects and gaps that the parameter tests found. This pass changes nothing in `s
 | PF-12 | `TcpSpoof.destAddress`: the default "" cannot work. At the time t the run stops with the error "Address contains no value" of `L3Address`, not with a message about the parameter. The NED does not say that the parameter needs a value. | `TcpSpoof.ned`; `TcpSpoof::sendToIP()` | `TcpSpoofDestAddressEmpty` |
 | PF-13 | `TcpSpoof.seqNo = -1` stops the run at the time t with "simtime_t: Cannot represent 4.29497e+09": `chooseInitialSeqNum()` calls `fmod()` with `simTime() * 250000.0`, so the modulus 2^32 + 1 becomes a `simtime_t` too, out of the range of the time scale. The NED says "-1 for TCP ISS". | `TcpSpoof::chooseInitialSeqNum()` | `TcpSpoofSeqNoIss` |
 | PF-14 | `Tcp.stopOperationExtraTime`: a positive value keeps the network layer up while TCP is down already, so the network layer gives each arriving segment to TCP. `Tcp` does not override `handleMessageWhenDown()`, so a segment that reaches TCP in the extra time stops the run with "Message 'SYN' received when Tcp is down". | `Tcp`; `OperationalMixin::handleMessageWhenDown()` | `TcpStopOperationExtraTimeOtherSegment` |
+| PF-15 | Dead code. `TcpAlgorithmBase::getInitialWindow()`: the default branch, one segment of RFC 2001, is never reached: `initialWindow = "rfc2001"` never calls the function, because `isInitialWindowKept()` is false for it, and `sendData()` sets the restart window of this mode itself. The class `DcTcpFamily` has no NED type and no subclass: `DcTcp` derives from `TcpReno` and uses only the state variables of `DcTcpFamily`. | `TcpAlgorithmBase::getInitialWindow()`; `DcTcpFamily` | the coverage gap loop |
+
+## The coverage
+
+Measured on 2026-10-29 with a coverage build of the worktree and of a private copy of omnetpp-6.x, over the TCP sources (`transportlayer/tcp`, `tcp_common`, `contract/tcp`; 9458 lines, without the generated message files). The packetdrill wrappers ran against a coverage build of inet-gpl master 363e9ea.
+
+| Pool | Tests | Lines covered | On 2026-10-27 |
+| --- | --- | --- | --- |
+| `tcp-inet`: `tcp/rfc/` | 28 | 47.2 % | 47.2 % |
+| `tcp-parameter`: `tcp/parameter/` | 330 | 76.9 % | — |
+| the INET tests: both pools | 358 | 77.9 % | 47.2 % |
+| `tcp-packetdrill`: `tcp/linux/`, `tcp/packetdrill/` | 306 | 67.6 % | — |
+| all pools | 664 | 86.0 % | 73.3 % (`tcp-inet` and `tcp-packetdrill`) |
+
+The seven algorithm files and `TcpSpoof`, which no test reached on 2026-10-27, now have 60 % (`TcpWestwood`, PF-6) to 98 % (`TcpSpoof`) of their lines, except `DcTcpFamily.cc` with 42 %, whose class is dead code (PF-15).
+
+The gap loop sorted the lines that no pool reaches into four kinds. Kind (a), a line behind a parameter value, is a missing class; the loop added 19 facets for it, and they took the coverage of all pools from 83.4 % to 86.0 %. Two blocks behind a value have no facet, because no test could separate them from another class: the timeout of `TcpTahoe` does what that of `TcpReno` does, and DumbTcp acknowledges an out-of-order segment at once, as each algorithm does. The other 1325 lines of the gap list after the loop:
+
+| Kind | Lines | What they are | Where they belong |
+| --- | --- | --- | --- |
+| (a), blocked | 46 | the RTT sample, the threshold and the timeout of `TcpWestwood` | the repair of PF-6 |
+| (b) | 245 | the socket commands and options (TTL, DSCP, TOS, SO_RCVBUF, TCP_CORK, TCP_MAXSEG, the path MTU, SO_TIMESTAMPING), READ, the status, the send queue limit, the ephemeral ports, the stop of a node with connections | a test class of the socket API |
+| (c) | 760 | what the segments of the peer or rare states decide: the parser and the serializer of the header and its options, options of a wrong length, RST and SYN in each state, FIN_WAIT_2, TIME_WAIT and a simultaneous close, D-SACK above the cumulative ACK, a second loss in one window, the bounds of the ATO and of the window | the standards tests |
+| (d) | 274 | model errors, the strings of the inspectors, and dead code (PF-15) | — |
 
 ## The classes
 
