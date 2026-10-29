@@ -1,0 +1,11 @@
+The 802.1Q tag inserters take the PCP in three steps, and defaultUserPriority is removed
+
+An 802.1Q tag inserter (Ieee8021qTagEpdHeaderInserter, Ieee8021qTagTpidHeaderInserter) now takes the PCP of its tag in three steps. First, it maps a user priority request to a PCP request of its tag type, unless the packet has one already (mapUserPriorityReqToPcpReq, true by default), and it removes the user priority request if removeUserPriorityReq is true. The default is false: the request stays on the packet for the layers below, as IEEE Std 802.1Q-2018 6.9.2 requires. Second, it takes the PCP from the PCP request, or from defaultPcp, writes it into the tag and indicates it. Third, it indicates the PCP of the tag as the user priority of the frame (mapPcpIndToUserPriorityInd, true by default). In a node that inserts a C-tag and an S-tag, the S-tag inserter runs last, so its PCP is indicated, unless its mapPcpIndToUserPriorityInd is false. A PCP request, a used user priority request or a defaultPcp outside [0, 7] is an error now, and so is removeUserPriorityReq without mapUserPriorityReqToPcpReq.
+
+Before, defaultPcp overrode an explicit user priority request; a PCP that came from the user priority was not indicated as a PCP, so a PCP classifier below the inserter used its default gate for the frame; and the inserter indicated the requested user priority, not the PCP of its tag.
+
+The defaultUserPriority parameter is removed. Set defaultPcp instead, which also gives the frame the same user priority indication as before:
+
+  **.qTagHeaderInserter.defaultUserPriority = 5  ->  **.qTagHeaderInserter.defaultPcp = 5
+
+The migration guide has the details.

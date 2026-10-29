@@ -24,12 +24,17 @@ class INET_API Ieee8021qTagTpidHeaderInserter : public PacketFlowBase
     const Protocol *nextProtocol = nullptr;
     int defaultVlanId = -1;
     int defaultPcp = -1;
-    int defaultUserPriority = -1;
     int defaultDropEligible = -1;
+    bool userPriorityReqMappingEnabled = true;
+    bool removeUserPriorityReq = false;
+    bool pcpIndMappingEnabled = true;
 
   protected:
     virtual void initialize(int stage) override;
     virtual void processPacket(Packet *packet) override;
+
+    virtual void mapUserPriorityReqToPcpReq(Packet *packet);
+    virtual void mapPcpIndToUserPriorityInd(Packet *packet);
 };
 
 } // namespace inet

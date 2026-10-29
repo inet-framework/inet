@@ -1,4 +1,3 @@
-%# expected-result: FAIL
 %description:
 
 Tests that an 802.1Q tag inserter rejects a PCP request outside [0, 7].
