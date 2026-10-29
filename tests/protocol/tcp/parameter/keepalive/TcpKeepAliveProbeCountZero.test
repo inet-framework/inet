@@ -1,0 +1,78 @@
+%description:
+
+Tcp.keepAliveProbeCount:zero -- the connection aborts after 0 unanswered probes.
+
+The claim (Tcp.ned): "the keepalive probes without an answer, after which the connection
+aborts (Linux tcp_keepalive_probes; RFC 9293 MUST-29: one probe without an answer is not a
+dead connection)".
+
+The classes: linux (9, the default, the value of Linux tcp_keepalive_probes), other (another
+count), zero (0: the connection aborts at the idle time, without a probe). The code:
+TcpAlgorithmBase::processKeepAliveTimer() aborts the connection when the probes without an
+answer reach the value, at the expiry of the timer after the last probe. This test separates "zero" from the other values.
+
+Host under test: host1, with keepalive, an idle time of 1 s and an interval of 1 s
+(preconditions); host1 sends 10000 bytes at 0.2 s and then nothing; host2 sends nothing. A keepalive probe is a
+segment without data with SEG.SEQ = SND.UNA - 1. The tap drops each segment of host2 after the data, so no probe gets an
+answer. Observation: level 1 and 2, the connection goes to the state CLOSED (the signal state,
+value 1) 1 s after the ACK of the data, after 0 probes.
+
+%# parameter: Tcp.keepAliveProbeCount
+%# class: zero
+%# value: 0
+%# key: *.host1.tcp.keepAliveProbeCount
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpKeepAliveProbeCountZero")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 10000")
+             .describe("the ACK of all data of host1: the idle time starts")
+             .within(1.0))
+        .meanwhile(tap("tap").from("host2").drop()
+                       .describe("each segment of host2 after the data: the probes get no answer"))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.synBit == false && tcp.sequenceNo == {isn} + 10000 && pk.dataLength <= tcp.headerLength")
+                                        .captureCount("probes")
+                                        .within(14.0)))
+        .never(on("host1.tcp").signal("state")
+                   .filterValue(1)
+                   .describe("an early abort")
+                   .within(0.9))
+        .once(on("host1.tcp").signal("state")
+                  .filterValue(1)
+                  .assertModule("host1.tcp", "{probes} == 0")
+                  .describe("the abort: the state CLOSED, after 0 probes")
+                  .within(0.2));
+}
+
+%activity:
+EV << "TcpKeepAliveProbeCountZero compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.keepAliveProbeCount = 0    # the parameter under test
+*.host1.tcp.keepAliveEnabled = true
+*.host1.tcp.keepAliveIdleTime = 1s
+*.host1.tcp.keepAliveInterval = 1s
+sim-time-limit = 15s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpKeepAliveProbeCountZero: PASS

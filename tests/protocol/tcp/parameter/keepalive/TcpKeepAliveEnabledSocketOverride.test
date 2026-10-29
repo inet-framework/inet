@@ -1,0 +1,68 @@
+%description:
+
+Tcp.keepAliveEnabled:socket-override -- the socket turns keepalive on for its connection.
+
+The claim (Tcp.ned): "keepalive (RFC 9293 section 3.8.4): after keepAliveIdleTime without a
+received segment and without data in flight, send a probe without data ...; off by default
+(MUST-25); TcpSocket::setKeepAlive() turns it on or off for one connection (MUST-24)".
+
+The classes: off (false, the default), on (true), socket-override (the socket of the
+application turns keepalive on with the parameter false). The code: TcpAlgorithmBase reads
+the value at the open and schedules the keepalive timer at the end of the handshake;
+TcpAlgorithmBase::setKeepAlive() takes the place of the value for one connection. This test separates "socket-override" from "off": the value is false, as in "off".
+
+Host under test: host1, with an idle time of 1 s (precondition), whose TcpTestApp connects to
+host2 at 0.1 s, sends nothing, and turns keepalive on at 0.15 s. Observation: level 1, a probe
+(SEG.SEQ = SND.UNA - 1 = the ISN) comes about 1 s later.
+
+%# parameter: Tcp.keepAliveEnabled
+%# class: socket-override
+%# value: false
+%# key: *.host1.tcp.keepAliveEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpKeepAliveEnabledSocketOverride")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000); })
+                 .describe("host1 connects to host2"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .act(action().at(0.15).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().setKeepAlive(true); })
+                 .describe("the socket of host1 turns keepalive on"))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false && tcp.sequenceNo == {isn} && pk.dataLength <= tcp.headerLength")
+              .describe("an early keepalive probe")
+              .within(0.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && tcp.sequenceNo == {isn} && pk.dataLength <= tcp.headerLength")
+             .describe("keepalive probe")
+             .within(0.2));
+}
+
+%activity:
+EV << "TcpKeepAliveEnabledSocketOverride compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.keepAliveEnabled = false    # the parameter under test
+*.host1.tcp.keepAliveIdleTime = 1s
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpKeepAliveEnabledSocketOverride: PASS

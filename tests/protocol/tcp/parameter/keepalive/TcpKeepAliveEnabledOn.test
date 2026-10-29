@@ -1,0 +1,66 @@
+%description:
+
+Tcp.keepAliveEnabled:on -- an idle connection sends a probe after the idle time.
+
+The claim (Tcp.ned): "keepalive (RFC 9293 section 3.8.4): after keepAliveIdleTime without a
+received segment and without data in flight, send a probe without data ...; off by default
+(MUST-25); TcpSocket::setKeepAlive() turns it on or off for one connection (MUST-24)".
+
+The classes: off (false, the default), on (true), socket-override (the socket of the
+application turns keepalive on with the parameter false). The code: TcpAlgorithmBase reads
+the value at the open and schedules the keepalive timer at the end of the handshake;
+TcpAlgorithmBase::setKeepAlive() takes the place of the value for one connection. This test separates "on" from "off".
+
+Host under test: host1, with an idle time of 1 s (precondition); host1 sends 10000 bytes at 0.2 s and then nothing; host2 sends nothing. A keepalive probe is a
+segment without data with SEG.SEQ = SND.UNA - 1. Observation: level 1, the
+first probe comes 1 s after the ACK of the data, and not before.
+
+%# parameter: Tcp.keepAliveEnabled
+%# class: on
+%# value: true
+%# key: *.host1.tcp.keepAliveEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpKeepAliveEnabledOn")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 10000")
+             .describe("the ACK of all data of host1: the idle time starts")
+             .within(1.0))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false && tcp.sequenceNo == {isn} + 10000 && pk.dataLength <= tcp.headerLength")
+              .describe("an early keepalive probe")
+              .within(0.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && tcp.sequenceNo == {isn} + 10000 && pk.dataLength <= tcp.headerLength")
+             .describe("keepalive probe")
+             .within(0.2));
+}
+
+%activity:
+EV << "TcpKeepAliveEnabledOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.keepAliveEnabled = true    # the parameter under test
+*.host1.tcp.keepAliveIdleTime = 1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpKeepAliveEnabledOn: PASS

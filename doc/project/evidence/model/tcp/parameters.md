@@ -30,6 +30,7 @@ Defects and gaps that the parameter tests found. This pass changes nothing in `s
 | PF-5 | `Tcp.nagleEnabled`: TCP_NODELAY of a socket takes the place of the parameter for its connection, and the NED does not say so, as it does for `notsentLowat` and `keepAliveEnabled`. | `Tcp.ned`; `TcpConnection::initConnection()` | the code pass of the group `send` |
 | PF-6 | `TcpWestwood` takes no RTT sample: `receivedAckForUnackedData()` calls `sentInfo.clearTo(snd_una)` before `sentInfo.get(firstSeqAcked)`, so the item of the first acknowledged segment is always gone. `w_RTTmin` keeps `SIMTIME_MAX`, so the code never computes the threshold from the bandwidth estimate: at a fast retransmit, ssthresh keeps its initial value and no `ssthresh` signal comes, and the window becomes 4294967295 and then wraps to 0. The NED says that Westwood sets the threshold from its estimate. | `TcpWestwood::receivedAckForUnackedData()` | `TcpAlgorithmClassWestwood` |
 | PF-7 | `Tcp.advertisedWindow`: the NED does not say that a window above 65535 << 14 = 1073725440 bytes, the largest window that the shift count of RFC 7323 can carry, stops the run with an error. | `Tcp.ned`; `TcpConnection::configureStateVariables()` | the code pass of the group `receive` |
+| PF-8 | `Tcp.keepAliveIdleTime` and `Tcp.keepAliveInterval` have no check: a negative value reaches the scheduler, and the run stops with its error ("Cannot schedule message KEEPALIVE to the past") instead of a message about the parameter. No class tests it, because the NED does not name such a value. | `TcpAlgorithmBase::initializeAlgorithm()`, `TcpAlgorithmBase::processKeepAliveTimer()` | the code pass of the group `keepalive` |
 
 ## The classes
 
@@ -346,3 +347,20 @@ Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode. The host und
 | `Tcp.baseMss:invalid` | `87` | — | the error "baseMss must be at least 88" | NED; code: the same | E | P | [TcpBaseMssInvalid](../../../../../tests/protocol/tcp/parameter/pmtu/TcpBaseMssInvalid.test) | PASS |
 | `Tcp.pathMtu:negotiated` | `0` | — | the search goes to the MTU of the MSS of the handshake | NED; code: `initMtuProbing()`, `TcpConnection::getMtuProbeBytes()` | W | P | [TcpPathMtuNegotiated](../../../../../tests/protocol/tcp/parameter/pmtu/TcpPathMtuNegotiated.test) | PASS |
 | `Tcp.pathMtu:route` | `1400` | — | the search stops at the value | NED; code: the same | W | P | [TcpPathMtuRoute](../../../../../tests/protocol/tcp/parameter/pmtu/TcpPathMtuRoute.test) | PASS |
+
+### keepalive
+
+Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode. The host under test is host1, which sends 10000 bytes and then nothing; the idle time starts at the ACK of the data. A probe is a segment without data with SEG.SEQ = SND.UNA - 1. The tests of the interval and of the probe count drop each segment of host2 after the data, so no probe gets an answer.
+
+| Class | Value | Preset | Claim | Source | Obs | Net | Test | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `Tcp.keepAliveEnabled:off` | `false` | — | an idle connection sends no probe | NED; code: `TcpAlgorithmBase::startKeepAlive()` | W | P | [TcpKeepAliveEnabledOff](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveEnabledOff.test) | PASS |
+| `Tcp.keepAliveEnabled:on` | `true` | — | an idle connection sends a probe after the idle time | NED; code: the same, `TcpAlgorithmBase::processKeepAliveTimer()` | W | P | [TcpKeepAliveEnabledOn](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveEnabledOn.test) | PASS |
+| `Tcp.keepAliveEnabled:socket-override` | `false` | — | the socket turns keepalive on for its connection | NED; code: `TcpAlgorithmBase::setKeepAlive()` | W | P, K | [TcpKeepAliveEnabledSocketOverride](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveEnabledSocketOverride.test) | PASS |
+| `Tcp.keepAliveIdleTime:rfc` | `7200s` | — | the first probe comes two hours after the last segment | NED; code: `processKeepAliveTimer()` | W | P | [TcpKeepAliveIdleTimeRfc](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveIdleTimeRfc.test) | PASS |
+| `Tcp.keepAliveIdleTime:other` | `10s` | — | the first probe comes the value after the last segment | NED; code: the same | W | P | [TcpKeepAliveIdleTimeOther](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveIdleTimeOther.test) | PASS |
+| `Tcp.keepAliveInterval:linux` | `75s` | — | an unanswered probe is followed by the next one 75 s later | NED; code: `processKeepAliveTimer()` | W | P, T | [TcpKeepAliveIntervalLinux](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveIntervalLinux.test) | PASS |
+| `Tcp.keepAliveInterval:other` | `2s` | — | an unanswered probe is followed by the next one the value later | NED; code: the same | W | P, T | [TcpKeepAliveIntervalOther](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveIntervalOther.test) | PASS |
+| `Tcp.keepAliveProbeCount:linux` | `9` | — | the connection aborts after 9 unanswered probes | NED; code: `processKeepAliveTimer()` | W, S | P, T | [TcpKeepAliveProbeCountLinux](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveProbeCountLinux.test) | PASS |
+| `Tcp.keepAliveProbeCount:other` | `3` | — | the connection aborts after the value of unanswered probes | NED; code: the same | W, S | P, T | [TcpKeepAliveProbeCountOther](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveProbeCountOther.test) | PASS |
+| `Tcp.keepAliveProbeCount:zero` | `0` | — | the connection aborts at the idle time, without a probe | code: the same | W, S | P, T | [TcpKeepAliveProbeCountZero](../../../../../tests/protocol/tcp/parameter/keepalive/TcpKeepAliveProbeCountZero.test) | PASS |
