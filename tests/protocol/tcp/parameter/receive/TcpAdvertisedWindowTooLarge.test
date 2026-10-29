@@ -1,0 +1,36 @@
+%description:
+
+Tcp.advertisedWindow:too-large -- a window above the largest scaled window stops the run with an error.
+
+The claim: the code accepts at most 65535 << 14 = 1073725440 bytes with window scaling (RFC
+7323 section 2.3: the shift count is at most 14).
+
+The classes: unscaled (65535 and less: the default, and 14 * 536 = 7504 of LegacyTcp), scaled
+(above 65535, with window scaling), unscalable (above 65535 without window scaling: an error),
+too-large (above 65535 << 14 = 1073725440: an error). The code:
+TcpConnection::configureStateVariables() checks the value and sets the first offer;
+TcpConnection::synWindow() limits the window of a SYN to 65535; the window scale of the
+connection carries a larger window.
+
+Host under test: host2. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.advertisedWindow
+%# class: too-large
+%# value: 1073741824
+%# key: *.host2.tcp.advertisedWindow
+%# expected-result: PASS
+
+%activity:
+EV << "TcpAdvertisedWindowTooLarge compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.advertisedWindow = 1073741824    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+advertisedWindow=1073741824 exceeds representable maximum 1073725440 with windowScalingFactor=-1

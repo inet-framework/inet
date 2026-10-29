@@ -1,0 +1,37 @@
+%description:
+
+Tcp.advertisedWindow:unscalable -- a window above 65535 without window scaling stops the run with an error.
+
+The claim (Tcp.ned): "above 65535 it needs window scaling".
+
+The classes: unscaled (65535 and less: the default, and 14 * 536 = 7504 of LegacyTcp), scaled
+(above 65535, with window scaling), unscalable (above 65535 without window scaling: an error),
+too-large (above 65535 << 14 = 1073725440: an error). The code:
+TcpConnection::configureStateVariables() checks the value and sets the first offer;
+TcpConnection::synWindow() limits the window of a SYN to 65535; the window scale of the
+connection carries a larger window.
+
+Host under test: host2, without window scaling (precondition). Observation: the error, and the
+exit code of the run.
+
+%# parameter: Tcp.advertisedWindow
+%# class: unscalable
+%# value: 262144
+%# key: *.host2.tcp.advertisedWindow
+%# expected-result: PASS
+
+%activity:
+EV << "TcpAdvertisedWindowUnscalable compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.advertisedWindow = 262144    # the parameter under test
+*.host2.tcp.windowScalingSupport = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+advertisedWindow=262144 exceeds representable maximum 65535, try turning on window scaling

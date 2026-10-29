@@ -1,0 +1,55 @@
+%description:
+
+Tcp.receiveBufferMax:free -- the receive buffer grows above 262144 bytes.
+
+The claim (Tcp.ned): "windowAutoTuning: the largest receive buffer that auto-tuning reaches, by
+Dynamic Right-Sizing, out-of-order data or the overflow of its memory".
+
+The classes: free (32MiB, the default, the value of Linux tcp_rmem[2]: not reached) and capped
+(a value that the growth reaches). The code: TcpConnection::growRcvBuffer() and the growth for
+the overflow of the buffer limit the buffer to the value. This test separates "free" from "capped".
+
+Host under test: host2, with window auto-tuning and a receive buffer of 131072 bytes
+(preconditions), whose application reads at once; host1 sends 20000000 bytes; the round trip
+is 40 ms. Observation: level 3, at 0.7 s, the receive buffer of host2 is above 262144 bytes (about
+1330000).
+
+%# parameter: Tcp.receiveBufferMax
+%# class: free
+%# value: 32MiB
+%# key: *.host2.tcp.receiveBufferMax
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpReceiveBufferMaxFree")
+        .act(action().at(0.7)
+                 .describe("the receive buffer of host2 at 0.7 s")
+                 .assertModule("host2.tcp.conn-*", "state.rcvBufferSize > 262144"));
+}
+
+%activity:
+EV << "TcpReceiveBufferMaxFree compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.receiveBufferMax = 32MiB    # the parameter under test
+*.host2.tcp.windowAutoTuning = true
+*.host2.tcp.receiveBufferSize = 131072B
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 20000000B
+sim-time-limit = 0.8s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpReceiveBufferMaxFree: PASS

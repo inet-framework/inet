@@ -1,0 +1,67 @@
+%description:
+
+Tcp.windowUpdateAfterRead:off -- the read sends no ACK.
+
+The claim (Tcp.ned): "true: as Linux (__tcp_cleanup_rbuf()), a READ after which the receiver can
+offer at least twice the window that is still open sends that window at once in an ACK; false:
+the new window goes with the next ACK".
+
+The classes: off (false, the default) and on (true, the value of LinuxTcp). The code: at a
+READ of the application, TcpConnection::process_READ() sends an ACK when the receiver can
+offer at least twice the window that is still open, with true; with false, the new window goes
+with the next ACK. Only an explicit READ, without auto-read, is such a read. This test separates "off" from "on".
+
+Host under test: host2, whose application does not read (no auto-read); host1 sends 100000
+bytes, and the window of host2 falls below one segment; host1 sends no segment into it. At 0.6
+s, the application of host2 reads 65535 bytes. Observation: level 1, host2 sends no ACK in 0.3 s after the read, before the next window probe
+of host1.
+
+%# parameter: Tcp.windowUpdateAfterRead
+%# class: off
+%# value: false
+%# key: *.host2.tcp.windowUpdateAfterRead
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpWindowUpdateAfterReadOff")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.synBit == false && tcp.window < 1448")
+             .describe("the ACK of host2 that leaves less than one segment open")
+             .within(0.5))
+        .act(action().at(0.6).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) { app.accepted(0).read(65535); })
+                 .describe("the application of host2 reads 65535 bytes"))
+        .never(on("host2.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.ackBit == true && tcp.synBit == false")
+              .describe("an ACK of host2")
+              .within(0.3));
+}
+
+%activity:
+EV << "TcpWindowUpdateAfterReadOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.windowUpdateAfterRead = false    # the parameter under test
+*.host2.app[0].typename = "TcpTestApp"
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpWindowUpdateAfterReadOff: PASS

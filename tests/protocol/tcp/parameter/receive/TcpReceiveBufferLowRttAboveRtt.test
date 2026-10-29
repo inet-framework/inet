@@ -1,0 +1,58 @@
+%description:
+
+Tcp.receiveBufferLowRtt:above-rtt -- the receive buffer grows in proportion to the RTT.
+
+The claim (Tcp.ned): "windowAutoTuning: below this receive RTT, Dynamic Right-Sizing grows the
+receive buffer in proportion to the RTT; above it, the buffer may double each RTT, as for slow
+start".
+
+The classes: below-rtt (1 ms, the default, the value of Linux, below the receive RTT) and
+above-rtt (a value above the receive RTT). The code: TcpConnection::growRcvBuffer(), at each
+read after one receive RTT (Dynamic Right-Sizing), grows the window by the window times the
+receive RTT over the value when the RTT is below the value, else by twice the window times the
+relative growth of the bytes read. This test separates "above-rtt" from "below-rtt".
+
+Host under test: host2, with window auto-tuning and a receive buffer of 131072 bytes
+(preconditions), whose application reads at once; host1 sends 20000000 bytes; the round trip
+is 40 ms. Observation: level 3, at 0.7 s, the receive buffer of host2 is at most 600000 bytes (about
+440000); 100 ms gives about 900000, in proportion to the RTT.
+
+%# parameter: Tcp.receiveBufferLowRtt
+%# class: above-rtt
+%# value: 1s
+%# key: *.host2.tcp.receiveBufferLowRtt
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpReceiveBufferLowRttAboveRtt")
+        .act(action().at(0.7)
+                 .describe("the receive buffer of host2 at 0.7 s")
+                 .assertModule("host2.tcp.conn-*", "state.rcvBufferSize <= 600000"));
+}
+
+%activity:
+EV << "TcpReceiveBufferLowRttAboveRtt compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.receiveBufferLowRtt = 1s    # the parameter under test
+*.host2.tcp.windowAutoTuning = true
+*.host2.tcp.receiveBufferSize = 131072B
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 20000000B
+sim-time-limit = 0.8s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpReceiveBufferLowRttAboveRtt: PASS

@@ -1,0 +1,67 @@
+%description:
+
+Tcp.urgentOutOfBand:oob -- the application receives 4343 of the 4344 bytes.
+
+The claim (Tcp.ned): "true: as Linux without SO_OOBINLINE, the last byte of received urgent data
+leaves the stream ...; INET does not deliver that byte".
+
+The classes: inline (false, the default) and oob (true, the value of LinuxTcp). The code: with
+true, TcpConnection::processUrgentPointer() marks the last urgent byte, at the sequence number
+of the segment plus the urgent pointer, less one, and TcpConnection::extractDataForApp() takes
+that byte out of the stream; with false, the receiver ignores the urgent pointer. This test separates "oob" from the other value.
+
+Host under test: host2, whose application reads at once; host1 sends 4344 bytes, and the tap
+sets the URG bit and an urgent pointer of 100 in the first data segment. Observation: the application of host2 receives 4343 bytes.
+
+%# parameter: Tcp.urgentOutOfBand
+%# class: oob
+%# value: true
+%# key: *.host2.tcp.urgentOutOfBand
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpUrgentOutOfBandOob")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 && ipv4.totalLengthField > 100B").nth(1)
+                     .set("tcp.urgBit", "true").set("tcp.urgentPointer", "100")
+                     .describe("the first data segment of host1: urgent data up to its 100th byte"))
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host2.app[0]").signal("packetReceivedFromLower")
+                                        .captureSum("received", "length")
+                                        .within(2.0)))
+        .act(action().at(1.5)
+                 .describe("the bytes that the application of host2 received")
+                 .assertModule("host2.app[0]", "{received} == 4343B"));
+}
+
+%activity:
+EV << "TcpUrgentOutOfBandOob compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.urgentOutOfBand = true    # the parameter under test
+*.host2.app[0].typename = "TcpTestApp"
+*.host1.app[0].sendBytes = 4344B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpUrgentOutOfBandOob: PASS

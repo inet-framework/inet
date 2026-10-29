@@ -1,0 +1,61 @@
+%description:
+
+Tcp.advertisedWindow:scaled -- the SYN-ACK offers 65535, and the later ACKs a scaled window above 65535.
+
+The claim (Tcp.ned): "the receive window that this host offers, in bytes; ... above 65535 it
+needs window scaling, and a SYN or a SYN-ACK offers at most 65535, because its window is not
+scaled (RFC 7323 section 2.2)".
+
+The classes: unscaled (65535 and less: the default, and 14 * 536 = 7504 of LegacyTcp), scaled
+(above 65535, with window scaling), unscalable (above 65535 without window scaling: an error),
+too-large (above 65535 << 14 = 1073725440: an error). The code:
+TcpConnection::configureStateVariables() checks the value and sets the first offer;
+TcpConnection::synWindow() limits the window of a SYN to 65535; the window scale of the
+connection carries a larger window. This test separates "scaled" from "unscaled".
+
+Host under test: host2, the server, which receives 1000000 bytes. Observation: level 1, the
+SYN-ACK of host2 offers 65535 bytes; level 2, the send window of host1 (the signal sndWnd)
+grows above 200000 bytes.
+
+%# parameter: Tcp.advertisedWindow
+%# class: scaled
+%# value: 262144
+%# key: *.host2.tcp.advertisedWindow
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAdvertisedWindowScaled")
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.window == 65535")
+             .describe("the SYN-ACK of host2")
+             .within(0.5))
+        .once(on("host1.tcp").signal("sndWnd")
+                  .filterValueAtLeast(200000)
+                  .describe("the send window of host1: the scaled offer of host2")
+                  .within(2.0));
+}
+
+%activity:
+EV << "TcpAdvertisedWindowScaled compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.advertisedWindow = 262144    # the parameter under test
+*.host1.app[0].sendBytes = 1000000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAdvertisedWindowScaled: PASS

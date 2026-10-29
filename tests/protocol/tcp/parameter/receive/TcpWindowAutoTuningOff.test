@@ -1,0 +1,57 @@
+%description:
+
+Tcp.windowAutoTuning:off -- the offer stays at the advertised window.
+
+The claim (Tcp.ned): "receive window auto-tuning, as Linux (tcp_grow_window()): the offered
+window starts at advertisedWindow and grows with each received data segment toward a clamp of
+half the receive buffer; needs receiveBufferSize, else an error".
+
+The classes: off (false, the default), on (true, the value of LinuxTcp), no-buffer (true
+without receiveBufferSize: an error). The code: TcpConnection::configureStateVariables() sets
+the offer and the clamp, half the buffer, and checks the buffer; each data segment grows the
+offer by max(2 * MSS, 2 * its length) up to the clamp (TcpConnection::processSegment1stThru8th()). This test separates "off" from "on".
+
+Host under test: host2, with an advertised window of 16384 bytes and a receive buffer of 131072
+bytes (preconditions), whose application reads at once; host1 sends 1000000 bytes. Observation: level 2, until 2 s, the send window of host1 (the signal sndWnd) is at most
+16384 bytes.
+
+%# parameter: Tcp.windowAutoTuning
+%# class: off
+%# value: false
+%# key: *.host2.tcp.windowAutoTuning
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpWindowAutoTuningOff")
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("sndWnd")
+                                        .captureMax("largestWindow", "value")
+                                        .within(3.0)))
+        .act(action().at(2.0)
+                 .describe("the largest send window of host1 until 2 s")
+                 .assertModule("host1.tcp.conn-*", "{largestWindow} <= 16384 && state.snd_una > 100000"));
+}
+
+%activity:
+EV << "TcpWindowAutoTuningOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.windowAutoTuning = false    # the parameter under test
+*.host2.tcp.advertisedWindow = 16384
+*.host2.tcp.receiveBufferSize = 131072B
+*.host1.app[0].sendBytes = 1000000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpWindowAutoTuningOff: PASS

@@ -1,0 +1,55 @@
+%description:
+
+Tcp.advertisedWindow:unscaled -- the SYN-ACK offers the value.
+
+The claim (Tcp.ned): "the receive window that this host offers, in bytes; ... above 65535 it
+needs window scaling, and a SYN or a SYN-ACK offers at most 65535, because its window is not
+scaled (RFC 7323 section 2.2)".
+
+The classes: unscaled (65535 and less: the default, and 14 * 536 = 7504 of LegacyTcp), scaled
+(above 65535, with window scaling), unscalable (above 65535 without window scaling: an error),
+too-large (above 65535 << 14 = 1073725440: an error). The code:
+TcpConnection::configureStateVariables() checks the value and sets the first offer;
+TcpConnection::synWindow() limits the window of a SYN to 65535; the window scale of the
+connection carries a larger window. This test separates "unscaled" from "scaled".
+
+Host under test: host2, the server. Observation: level 1, the SYN-ACK of host2 offers a window
+of 16384 bytes.
+
+%# parameter: Tcp.advertisedWindow
+%# class: unscaled
+%# value: 16384
+%# key: *.host2.tcp.advertisedWindow
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAdvertisedWindowUnscaled")
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.window == 16384")
+             .describe("the SYN-ACK of host2")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpAdvertisedWindowUnscaled compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.advertisedWindow = 16384    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAdvertisedWindowUnscaled: PASS

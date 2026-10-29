@@ -1,0 +1,63 @@
+%description:
+
+Tcp.windowShrinkAllowed:yes-first -- the first offer is half the buffer.
+
+The claim (Tcp.ned): "the offered window follows the free receive buffer and may move its right
+edge back, as Linux with tcp_shrink_window=1 ...; the first offer is half the buffer. RFC 9293
+says that a receiver SHOULD NOT shrink the window (SHLD-14)".
+
+The classes: no (false, the default) and yes (true), with the facets first and shrink. The
+code: TcpConnection::configureStateVariables() makes the first offer half the buffer with
+true; TcpConnection::selectRcvWnd() offers the free buffer, charged at the truesize of the
+segments, and TcpConnection::updateRcvWnd() lets the right edge move back; with false, the
+right edge never moves back. This test separates "yes" from "no", whose first offer is the whole buffer.
+
+Host under test: host2, with a receive buffer of 32768 bytes (precondition: the class needs a
+buffer), whose application does not read; host1 sends 100000 bytes. Observation: level 1, the SYN-ACK of host2 offers 16384 bytes.
+
+%# parameter: Tcp.windowShrinkAllowed
+%# class: yes-first
+%# value: true
+%# key: *.host2.tcp.windowShrinkAllowed
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpWindowShrinkAllowedYesFirst")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.window == 16384")
+             .describe("the SYN-ACK of host2")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpWindowShrinkAllowedYesFirst compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.windowShrinkAllowed = true    # the parameter under test
+*.host2.app[0].typename = "TcpTestApp"
+*.host2.tcp.receiveBufferSize = 32768B
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpWindowShrinkAllowedYesFirst: PASS

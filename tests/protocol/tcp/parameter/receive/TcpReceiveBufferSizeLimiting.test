@@ -1,0 +1,77 @@
+%description:
+
+Tcp.receiveBufferSize:limiting -- host2 takes 5 segments, 7240 bytes of the data beyond its offer.
+
+The claim (Tcp.ned): "the receive buffer, apart from the advertised window (Linux sk_rcvbuf):
+the unread data and the out-of-order data use it, and the offered window is the smaller of its
+free space and the advertised window less the unread data; -1B: the buffer is the advertised
+window".
+
+The classes: none (-1B, the default: the buffer is the advertised window), limiting (a value
+below advertisedWindow: the offer is at most the free buffer), ample (a value above
+advertisedWindow, 131072B of LinuxTcp: the advertised window limits the offer, and the buffer
+limits the data). The code: TcpConnection::hasEnoughSpaceForSegmentInReceiveQueue() accepts a
+segment when it ends within the first unread byte plus the buffer;
+TcpConnection::selectRcvWnd() offers the smaller of the free buffer and the advertised window
+less the unread data. This test separates "limiting" from the other values.
+
+Host under test: host2; host2 offers a window of 16384 bytes (advertisedWindow, a precondition), and its application
+does not read. The tap writes 65535 into the window field of each segment of host2, so that
+host1, which sends 50000 bytes, sends beyond the offer of host2. The 12th segment starts at
+15928, within the window, and ends at 17376, beyond it. Observation: level 1, the highest ACK of host2 at 2 s acknowledges
+5 segments, 7240 bytes: the buffer of 8192 bytes takes 5 segments; the 6th ends beyond it.
+
+%# parameter: Tcp.receiveBufferSize
+%# class: limiting
+%# value: 8192B
+%# key: *.host2.tcp.receiveBufferSize
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpReceiveBufferSizeLimiting")
+        .intercept(tap("tap").from("host2").filterPacket("tcp.ackBit == true").set("tcp.window", "65535")
+                     .describe("each segment of host2: the window field 65535, so that host1 sends beyond the offer of host2"))
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host2.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.ackBit == true")
+                                        .captureMax("highestAck", "tcp.ackNo")
+                                        .within(3.0)))
+        .act(action().at(2.0)
+                 .describe("the highest ACK of host2")
+                 .assertModule("host2.tcp.conn-*", "{highestAck} == {isn} + 1 + 7240"));
+}
+
+%activity:
+EV << "TcpReceiveBufferSizeLimiting compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.receiveBufferSize = 8192B    # the parameter under test
+*.host2.app[0].typename = "TcpTestApp"
+*.host2.tcp.advertisedWindow = 16384
+*.host1.app[0].sendBytes = 50000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpReceiveBufferSizeLimiting: PASS

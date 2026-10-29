@@ -1,0 +1,77 @@
+%description:
+
+Tcp.dropBeyondWindowEdge:rfc -- host2 takes the segment that ends beyond its window.
+
+The claim (Tcp.ned): "true: as Linux (tcp_sequence()), a segment whose data ends beyond the
+highest window edge offered is dropped whole, unless it starts within that edge and the
+in-order receive queue is empty; false: the window test of RFC 9293 section 3.10.7.4, after
+which only the receive buffer limits the data".
+
+The classes: rfc (false, the default) and drop (true, the value of LinuxTcp). The code:
+TcpConnection::isSegmentAcceptable() takes a segment that starts within the window (RFC 9293
+section 3.10.7.4); with true, it drops a segment whose data ends beyond the highest edge
+offered, unless the segment starts within that edge and the in-order receive queue is empty.
+In that exception, the result is the same as with false, so no test can separate it. This test separates "rfc" from the other value.
+
+Host under test: host2, with a receive buffer of 131072 bytes (precondition: the buffer does
+not limit the data); host2 offers a window of 16384 bytes (advertisedWindow, a precondition), and its application
+does not read. The tap writes 65535 into the window field of each segment of host2, so that
+host1, which sends 50000 bytes, sends beyond the offer of host2. The 12th segment starts at
+15928, within the window, and ends at 17376, beyond it. Observation: level 1, the highest ACK of host2 at 2 s acknowledges 12 segments, 17376 bytes:
+the 12th segment starts within the window, and the buffer takes it.
+
+%# parameter: Tcp.dropBeyondWindowEdge
+%# class: rfc
+%# value: false
+%# key: *.host2.tcp.dropBeyondWindowEdge
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpDropBeyondWindowEdgeRfc")
+        .intercept(tap("tap").from("host2").filterPacket("tcp.ackBit == true").set("tcp.window", "65535")
+                     .describe("each segment of host2: the window field 65535, so that host1 sends beyond the offer of host2"))
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host2.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.ackBit == true")
+                                        .captureMax("highestAck", "tcp.ackNo")
+                                        .within(3.0)))
+        .act(action().at(2.0)
+                 .describe("the highest ACK of host2")
+                 .assertModule("host2.tcp.conn-*", "{highestAck} == {isn} + 1 + 17376"));
+}
+
+%activity:
+EV << "TcpDropBeyondWindowEdgeRfc compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.dropBeyondWindowEdge = false    # the parameter under test
+*.host2.app[0].typename = "TcpTestApp"
+*.host2.tcp.advertisedWindow = 16384
+*.host1.app[0].sendBytes = 50000B
+*.host2.tcp.receiveBufferSize = 131072B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpDropBeyondWindowEdgeRfc: PASS
