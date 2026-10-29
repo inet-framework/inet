@@ -1,0 +1,61 @@
+%description:
+
+TcpCubic.hystartEnabled:off -- slow start continues past the size of the path.
+
+The claim (TcpCubic.ned): "HyStart: leave slow start when the path appears full, instead of
+overshooting into loss".
+
+The classes: off (false, the default), on (true, the value of LinuxTcp and LegacyTcp). The code: HyStart acts in slow start when the window is at least hystartLowWindow segments
+(TcpCubic::processRttSample()). TcpCubic::hystartUpdate() looks for the exit: detector 1, the
+ACK train, and detector 2, the delay increase, whose threshold is the minimum RTT / 8, clamped
+to hystartDelayMin and hystartDelayMax (TcpCubic::hystartDelayThresh()). At the exit, ssthresh
+becomes the window. TcpCubic::initializeAlgorithm() checks the values. This test separates "off" from "on".
+
+Host under test: host1, with TcpCubic, which sends to host2; the path is host1 -- tap -- router -- host2, with a bottleneck of 10 Mbps from the router to
+host2 and a round trip of 40 ms. host2 has a window of 1000000 bytes and acknowledges each
+second segment (the delayed ACK), so its ACKs come 2.4 ms apart, more than the ACK delta of 2
+ms: they form no ACK train, and only the queue at the bottleneck can end slow start. Observation: level 3, at 1.2
+s, HyStart found no exit and the window is above 500000 bytes, ten times the path.
+
+%# parameter: TcpCubic.hystartEnabled
+%# class: off
+%# value: false
+%# key: *.host1.tcp.conn-*.algorithm.hystartEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicHystartEnabledOff")
+        .act(action().at(1.2)
+                 .describe("the state at 1.2 s")
+                 .assertModule("host1.tcp.conn-*", "state.hystart_found == false && state.snd_cwnd > 500000"));
+}
+
+%activity:
+EV << "TcpCubicHystartEnabledOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.hystartEnabled = false    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+network = inet.protocoltest.TapRouterNetwork
+*.linkDelay = 5ms
+*.bottleneckDatarate = 10Mbps
+*.bottleneckDelay = 10ms
+*.host2.tcp.advertisedWindow = 1000000
+*.host1.app[0].sendBytes = 10000000B
+sim-time-limit = 1.3s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicHystartEnabledOff: PASS

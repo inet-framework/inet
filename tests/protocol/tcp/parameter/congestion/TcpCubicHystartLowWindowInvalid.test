@@ -1,0 +1,36 @@
+%description:
+
+TcpCubic.hystartLowWindow:invalid -- a window below 0 stops the run with an error.
+
+The claim: the code accepts 0 and more.
+
+The classes: linux (16, the default, the value of Linux tcp_cubic.c), other (a larger
+value), invalid (below 0). The code: HyStart acts in slow start when the window is at least hystartLowWindow segments
+(TcpCubic::processRttSample()). TcpCubic::hystartUpdate() looks for the exit: detector 1, the
+ACK train, and detector 2, the delay increase, whose threshold is the minimum RTT / 8, clamped
+to hystartDelayMin and hystartDelayMax (TcpCubic::hystartDelayThresh()). At the exit, ssthresh
+becomes the window. TcpCubic::initializeAlgorithm() checks the values.
+
+Host under test: host1, with TcpCubic. Observation: the error, and the exit code of the run.
+
+%# parameter: TcpCubic.hystartLowWindow
+%# class: invalid
+%# value: -1
+%# key: *.host1.tcp.conn-*.algorithm.hystartLowWindow
+%# expected-result: PASS
+
+%activity:
+EV << "TcpCubicHystartLowWindowInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.hystartLowWindow = -1    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+hystartLowWindow must be 0 or more, but it is -1

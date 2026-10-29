@@ -1,0 +1,81 @@
+%description:
+
+TcpCubic.hystartDelayMin:other -- the delay threshold is 10 ms, not an eighth of the round trip.
+
+The claim (TcpCubic.ned): "lower clamp on the HyStart delay-increase threshold (an eighth of the
+minimum RTT)".
+
+The classes: linux (4 ms, the default, the value of Linux tcp_cubic.c), other (a larger
+value, at most hystartDelayMax), invalid (below 0). The code: HyStart acts in slow start when the window is at least hystartLowWindow segments
+(TcpCubic::processRttSample()). TcpCubic::hystartUpdate() looks for the exit: detector 1, the
+ACK train, and detector 2, the delay increase, whose threshold is the minimum RTT / 8, clamped
+to hystartDelayMin and hystartDelayMax (TcpCubic::hystartDelayThresh()). At the exit, ssthresh
+becomes the window. TcpCubic::initializeAlgorithm() checks the values. This test separates "other" from the other value.
+
+Host under test: host1, with TcpCubic and HyStart, which sends to host2; the network is host1 -- tap -- host2 at 100 Mbps. host2 has no delayed ACK and a window
+of 65535 bytes, so host1 sends less than the path can carry: there is no queue and no ACK
+train. At two times, the test makes the four links longer, and the round trip grows by a
+known step. The round trip
+is 16 ms, so an eighth of it is 2 ms, below the clamp. Observation: level 3, the round trip grows by 6 ms at 1 s, and HyStart found no exit at
+1.9 s; it grows by 13 ms at 2 s, and HyStart found the exit at 2.9 s.
+
+%# parameter: TcpCubic.hystartDelayMin
+%# class: other
+%# value: 10ms
+%# key: *.host1.tcp.conn-*.algorithm.hystartDelayMin
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// Sets the delay of the four links of TapPairNetwork: the round trip is four times the value.
+static void setLinkDelay(cModule *tap, double delay)
+{
+    cModule *network = tap->getParentModule();
+    for (cModule *node : {network->getSubmodule("host1"), network->getSubmodule("host2")})
+        node->gate("ethg$o", 0)->getChannel()->par("delay").setValue(cValue(delay, "s"));
+    for (const char *name : {"a$o", "b$o"})
+        tap->gate(name)->getChannel()->par("delay").setValue(cValue(delay, "s"));
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicHystartDelayMinOther")
+        .act(action().at(1.0)
+                 .describe("the round trip grows by 6 ms, less than the threshold of 10 ms")
+                 .run("tap", [](cModule *tap) { setLinkDelay(tap, 0.004 + 0.006 / 4); }))
+        .act(action().at(1.9)
+                 .describe("no exit from slow start")
+                 .assertModule("host1.tcp.conn-*", "state.hystart_found == false"))
+        .act(action().at(2.0)
+                 .describe("the round trip grows by 13 ms, more than the threshold")
+                 .run("tap", [](cModule *tap) { setLinkDelay(tap, 0.004 + 0.013 / 4); }))
+        .act(action().at(2.9)
+                 .describe("the exit from slow start")
+                 .assertModule("host1.tcp.conn-*", "state.hystart_found == true"));
+}
+
+%activity:
+EV << "TcpCubicHystartDelayMinOther compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.hystartDelayMin = 10ms    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+*.host1.tcp.conn-*.algorithm.hystartEnabled = true
+*.host2.tcp.advertisedWindow = 65535
+*.host2.tcp.delayedAcksEnabled = false
+*.host1.app[0].sendBytes = 100000000B
+*.linkDelay = 4ms
+sim-time-limit = 3s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicHystartDelayMinOther: PASS

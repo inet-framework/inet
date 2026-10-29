@@ -1,0 +1,86 @@
+%description:
+
+TcpCubic.hystartDetect:train -- the delay detector does not act, the ACK-train detector acts.
+
+The claim (TcpCubic.ned): "HyStart detectors, as a bitmask: 1 = ACK train, 2 = delay
+increase, 3 = both".
+
+The classes: none (0), train (1), delay (2), both (3, the default, the value of Linux
+tcp_cubic.c), invalid (below 0, above 3). The code: HyStart acts in slow start when the window is at least hystartLowWindow segments
+(TcpCubic::processRttSample()). TcpCubic::hystartUpdate() looks for the exit: detector 1, the
+ACK train, and detector 2, the delay increase, whose threshold is the minimum RTT / 8, clamped
+to hystartDelayMin and hystartDelayMax (TcpCubic::hystartDelayThresh()). At the exit, ssthresh
+becomes the window. TcpCubic::initializeAlgorithm() checks the values. This test separates "train" from the other values: each value gives another pair of results.
+
+Host under test: host1, with TcpCubic and HyStart, which opens two connections. Connection A
+at 0.1 s: to host2, where only the delay detector can act; the path is host1 -- tap -- router -- host2, with a bottleneck of 10 Mbps from the router to
+host2 and a round trip of 40 ms. host2 has a window of 1000000 bytes and acknowledges each
+second segment (the delayed ACK), so its ACKs come 2.4 ms apart, more than the ACK delta of 2
+ms: they form no ACK train, and only the queue at the bottleneck can end slow start. Connection B at 2 s: to a TCP
+sink on the router, where only the ACK-train detector can act. The path to the router has
+100 Mbps and no bottleneck; the router has no delayed ACK, and its window of 260000 bytes is
+a little larger than the path holds (about 240000 bytes), so the ACKs come back to back and
+the queue stays below the delay threshold of 4 ms. Observation: level 3, at 1.9 s, HyStart of connection A found no exit; at 3.9 s, HyStart of
+connection B found the exit. At each time, the newest connection is the one under test.
+
+%# parameter: TcpCubic.hystartDetect
+%# class: train
+%# value: 1
+%# key: *.host1.tcp.conn-*.algorithm.hystartDetect
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicHystartDetectTrain")
+        .act(action().at(1.9)
+                 .describe("connection A, to host2 through the bottleneck")
+                 .assertModule("host1.tcp.conn-*", "state.hystart_found == false"))
+        .act(action().at(3.9)
+                 .describe("connection B, to the router without a queue")
+                 .assertModule("host1.tcp.conn-*", "state.hystart_found == true"));
+}
+
+%activity:
+EV << "TcpCubicHystartDetectTrain compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.hystartDetect = 1    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+*.host1.tcp.conn-*.algorithm.hystartEnabled = true
+network = inet.protocoltest.TapRouterNetwork
+*.linkDelay = 5ms
+*.bottleneckDatarate = 10Mbps
+*.bottleneckDelay = 10ms
+*.host2.tcp.advertisedWindow = 1000000
+*.host1.app[0].sendBytes = 1000000B
+*.router.hasTcp = true
+*.router.numApps = 1
+*.router.app[0].typename = "TcpEchoApp"
+*.router.app[0].localPort = 2000
+*.router.app[0].echoFactor = 0
+*.router.tcp.delayedAcksEnabled = false
+*.router.tcp.advertisedWindow = 260000
+*.host1.numApps = 2
+*.host1.app[1].typename = "TcpSessionApp"
+*.host1.app[1].connectAddress = "router"
+*.host1.app[1].connectPort = 2000
+*.host1.app[1].tOpen = 2.0s
+*.host1.app[1].tSend = 2.1s
+*.host1.app[1].sendBytes = 10000000B
+*.host1.app[1].tClose = 1000s
+sim-time-limit = 4s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicHystartDetectTrain: PASS

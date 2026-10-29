@@ -1,0 +1,36 @@
+%description:
+
+TcpCubic.hystartDelayMax:invalid -- a clamp below hystartDelayMin stops the run with an error.
+
+The claim: the code accepts hystartDelayMin and more.
+
+The classes: linux (16 ms, the default, the value of Linux tcp_cubic.c), other (a larger
+value), invalid (below hystartDelayMin). The code: HyStart acts in slow start when the window is at least hystartLowWindow segments
+(TcpCubic::processRttSample()). TcpCubic::hystartUpdate() looks for the exit: detector 1, the
+ACK train, and detector 2, the delay increase, whose threshold is the minimum RTT / 8, clamped
+to hystartDelayMin and hystartDelayMax (TcpCubic::hystartDelayThresh()). At the exit, ssthresh
+becomes the window. TcpCubic::initializeAlgorithm() checks the values.
+
+Host under test: host1, with TcpCubic. Observation: the error, and the exit code of the run.
+
+%# parameter: TcpCubic.hystartDelayMax
+%# class: invalid
+%# value: 1ms
+%# key: *.host1.tcp.conn-*.algorithm.hystartDelayMax
+%# expected-result: PASS
+
+%activity:
+EV << "TcpCubicHystartDelayMaxInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.hystartDelayMax = 1ms    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+hystartDelayMax must be at least hystartDelayMin \(0.004s\), but it is 0.001s
