@@ -442,7 +442,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 6 — `setup`, 34 tests.** Done: `4d280c2293`; 33 PASS, 1 FAIL (PF-4).
 - [x] **Step 7 — `send`, 17 tests.** Done: `a82f12fdec`; 17 PASS.
 - [x] **Step 8 — `rto`, 12 tests.** Done: `caa51a2dcd`; 12 PASS.
-- [ ] **Step 9 — `congestion`, 60 tests.** The algorithm classes first, because they give the largest coverage gain.
+- [x] **Step 9 — `congestion`, 73 tests.** The algorithm classes first, because they give the largest coverage gain. Done: `8876619f7f` (the check skips `-alias`), `e6648b83cc` (the initial window and threshold), `2a19ee2456` (the algorithms), `af106bb2be` (TcpCubic and DcTcp), `9717a2cb35` (HyStart), `d815e75754` (TcpVegas); 72 PASS, 1 FAIL (PF-6).
 - [ ] **Step 10 — `recovery`, 27 tests.**
 - [ ] **Step 11 — `receive`, 24 tests.**
 - [ ] **Step 12 — `close`, 13 tests.**
@@ -529,3 +529,14 @@ The user settled these on 2026-10-29.
 - The classes `binds` and `free` of `minRexmitTimeout` and `caps` and `free` of `maxRexmitTimeout` are facets of the path, not of the code: a limit binds or it does not. The tests fix the path (a round trip of 100 ms) and pick a value on each side.
 - The signal `rto` comes only with a measurement of the round trip, not at the open; so the tests read its first value after the first ACK of data.
 - The tests of the timer of data turn `tlpEnabled` off: a tail loss probe is a copy of the segment on the wire, but not a retransmission of the timer.
+
+**Step 9 (`congestion`).**
+- The code pass changed the draft from 60 to 73 tests. Each parameter whose value the code checks got an `invalid` class (14 error tests). The default of a standard or of Linux is a class with the name of its source (`rfc9438`, `rfc8257`, `linux`); another value is `other`. The qualified NED type name of `tcpAlgorithmClass` is the class `qualified-alias`: it passes with the value that it spells, so the cross-class check skips a class that ends with `-alias`, and uses no `-alias` or `-override` class as the alternative of another class.
+- The tests of the algorithms turn SACK off on the sender: with SACK, the recovery of RFC 6675 makes TcpNewReno, TcpReno and DcTcp the same.
+- PF-6: TcpWestwood takes no RTT sample, so it never computes the threshold from its estimate, and its window wraps to 0 after a fast retransmit. `TcpAlgorithmClassWestwood` fails, as a plain FAIL, because a later plan repairs it.
+- TcpVegas: with the delayed ACK of the receiver, Vegas leaves slow start at 4 segments without a queue, because the round trips include the delay of the ACK; the tests turn the delayed ACK off. The code computes the difference of the expected and the actual rate in unsigned arithmetic, so the difference wraps when the actual rate is higher. No test shows an effect of this; the plan of the repairs looks at it.
+- The exit of HyStart sets ssthresh but emits no signal, so the tests read `state.hystart_found` and `state.ssthresh` with `assertModule`. No new network was necessary: the router of `TapRouterNetwork` runs a TCP sink (`hasTcp = true`), and each test of `hystartDetect` opens a connection to host2 through the bottleneck (only the delay detector acts, because the delayed ACKs come 2.4 ms apart) and then one to the router (only the ACK train acts: a router window of 260000 bytes, a little more than the path holds, keeps the queue below the threshold of 4 ms). At each time, the newest connection is the one under test.
+- The tests of `hystartDelayMin` and `hystartDelayMax` change the delay of the four links at known times, as `TcpCubicDeltaLong` does; a receiver window of 65535 bytes keeps the sender below the rate of the path, so there is no queue and no ACK train. Probes confirmed the clamps: with `hystartDelayMin = 0`, a step of 3 ms at a round trip of 16 ms gives the exit, and with 4 ms it does not.
+- The exit of HyStart does not move up monotonically with `hystartLowWindow` below the natural exit point: 100 gave an exit at 117 segments, 16 at 145, because the rounds of HyStart start at other times. The test of `other` uses 400.
+- D3: the group needs one socket call (`socket-override`). One file-scope helper repeats: the delay setter of the links is in 4 tests and inline in `TcpCubicDeltaLong`. The generator of the tests got a slot for file-scope helpers. If more groups need the helper, it goes into the library.
+- The group runs in 21 s of wall time with 32 cores; the tests with two connections take 18 s each. The regression run has 69 unexpected FAILs: the 67 of the baseline, PF-4 and PF-6.
