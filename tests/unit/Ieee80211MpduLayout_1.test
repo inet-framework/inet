@@ -1,0 +1,123 @@
+%description:
+Check bounded delimiter and MPDU ranges without a production caller.
+Lengths, alignment, truncation, final padding, and typed/raw recovery use independent packet layouts.
+
+%includes:
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduAggregationUtils.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+static void appendMember(Packet& packet, int length)
+{
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(length);
+    packet.insertAtBack(delimiter);
+    if (length)
+        packet.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(length, 0)));
+}
+
+%activity:
+for (int length : {0, 1, 2, 3, 4, 4095}) {
+    Packet packet("layout");
+    appendMember(packet, 0);
+    appendMember(packet, length);
+    if (length) {
+        int padding = (4 - length % 4) % 4;
+        if (padding)
+            packet.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(padding, 0)));
+        appendMember(packet, 20);
+    }
+    auto layout = inspectMpduAggregate(&packet, B(0), B(packet.getDataLength()));
+    ASSERT(layout.complete);
+    ASSERT(layout.ranges.size() == (length ? 5 : 2));
+    ASSERT(layout.ranges.front().kind == MpduRangeKind::DELIMITER);
+    for (const auto& range : layout.ranges)
+        ASSERT(range.offset + range.length <= packet.getDataLength());
+    auto bytes = packet.peekAllAsBytes()->getBytes();
+    Packet independent("wire", makeShared<BytesChunk>(bytes));
+    ASSERT(inspectMpduAggregate(&independent, B(0), B(bytes.size())).complete);
+    if (length) {
+        bytes.pop_back();
+        Packet truncated("truncated", makeShared<BytesChunk>(bytes));
+        ASSERT(!inspectMpduAggregate(&truncated, B(0), B(bytes.size())).complete);
+    }
+}
+Packet recovery("recovery", makeShared<BytesChunk>(std::vector<uint8_t>{0, 0, 0, 0}));
+appendMember(recovery, 20);
+auto recovered = inspectMpduAggregate(&recovery, B(0), B(recovery.getDataLength()));
+ASSERT(!recovered.complete && recovered.ranges.size() == 3);
+ASSERT(!recovered.ranges[0].valid && recovered.ranges[1].offset == B(4));
+// An invalid length forces delimiter recovery through a typed MAC header.
+for (int prefixLength : {0, 6}) {
+    Packet typed("typed-recovery");
+    if (prefixLength)
+        typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(prefixLength, 0)));
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(2000);
+    typed.insertAtBack(delimiter);
+    auto member = makeShared<Ieee80211DataHeader>();
+    member->setSequenceNumber(SequenceNumberCyclic(0));
+    typed.insertAtBack(member);
+    typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(100 - member->getChunkLength().get<B>(), 0)));
+    appendMember(typed, 20);
+    auto bytes = typed.peekAllAsBytes()->getBytes();
+    Packet independent("byte-recovery", makeShared<BytesChunk>(bytes));
+    auto typedLayout = inspectMpduAggregate(&typed, B(prefixLength), B(128));
+    auto byteLayout = inspectMpduAggregate(&independent, B(prefixLength), B(128));
+    ASSERT(!typedLayout.complete && !byteLayout.complete);
+    ASSERT(typedLayout.ranges.size() == byteLayout.ranges.size());
+    for (size_t i = 0; i < typedLayout.ranges.size(); i++) {
+        const auto& actual = typedLayout.ranges[i];
+        const auto& expected = byteLayout.ranges[i];
+        ASSERT(actual.kind == expected.kind && actual.offset == expected.offset &&
+                actual.length == expected.length && actual.valid == expected.valid);
+    }
+    const auto& last = typedLayout.ranges.back();
+    ASSERT(last.kind == MpduRangeKind::MPDU && last.valid && last.offset == B(108) && last.length == B(20));
+}
+// Reinterpretation must not hide an existing typed delimiter's error flag.
+auto incorrectDelimiter = makeShared<Ieee80211MpduSubframeHeader>();
+incorrectDelimiter->setLength(0);
+incorrectDelimiter->markIncorrect();
+Packet incorrect("incorrect-delimiter", incorrectDelimiter);
+appendMember(incorrect, 20);
+auto incorrectLayout = inspectMpduAggregate(&incorrect, B(0), B(incorrect.getDataLength()));
+ASSERT(!incorrectLayout.complete && !incorrectLayout.ranges.front().valid);
+ASSERT(incorrectLayout.ranges.back().kind == MpduRangeKind::MPDU && incorrectLayout.ranges.back().valid);
+for (int byte : {2, 3}) {
+    Packet good("good");
+    appendMember(good, 20);
+    auto bytes = good.peekAllAsBytes()->getBytes();
+    bytes[byte] ^= 1;
+    Packet bad("bad", makeShared<BytesChunk>(bytes));
+    auto layout = inspectMpduAggregate(&bad, B(0), B(bytes.size()));
+    ASSERT(!layout.complete && !layout.ranges.front().valid);
+}
+Packet finalPadding("final-padding");
+appendMember(finalPadding, 1);
+finalPadding.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(3, 0)));
+ASSERT(!inspectMpduAggregate(&finalPadding, B(0), B(finalPadding.getDataLength())).complete);
+auto overrun = makeShared<Ieee80211MpduSubframeHeader>();
+overrun->setLength(4095);
+Packet missingMember("missing-member", overrun);
+auto refusedLayout = inspectMpduAggregate(&missingMember, B(0), B(4));
+ASSERT(!refusedLayout.complete && refusedLayout.ranges.size() == 1 && !refusedLayout.ranges[0].valid);
+for (int size : {0, 1, 2, 3}) {
+    Packet shortInput("short", makeShared<BytesChunk>(std::vector<uint8_t>(size, 0)));
+    ASSERT(inspectMpduAggregate(&shortInput, B(0), B(size)).ranges.empty());
+}
+auto tooLong = makeShared<Ieee80211MpduSubframeHeader>();
+tooLong->setLength(4096);
+Packet overflow("overflow", tooLong);
+bool refused = false;
+try { overflow.peekAllAsBytes(); }
+catch (const cRuntimeError&) { refused = true; }
+ASSERT(refused);
+EV << "MPDU layout checks passed\n";
+
+%contains: stdout
+MPDU layout checks passed
