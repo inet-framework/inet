@@ -1,0 +1,64 @@
+%description:
+
+Tcp.zeroWindowProbe:linux -- the probe of a zero window is an old sequence number without data.
+
+The claim (Tcp.ned): ""linux": a segment without data with SEG.SEQ = SND.UNA - 1, which the
+receiver answers with an ACK, as Linux (tcp_xmit_probe_skb())".
+
+The classes: rfc ("rfc", the default), linux ("linux"; LinuxTcp). The code:
+TcpConnection::sendProbe(). This test separates "linux" from "rfc".
+
+Host under test: host1, which sends 100000 bytes. Peer: host2, whose application reads nothing.
+Observation: level 1, the first segment of host1 after the window closes has no data and the
+sequence number one below the acknowledged one.
+
+%# parameter: Tcp.zeroWindowProbe
+%# class: linux
+%# value: "linux"
+%# key: *.host1.tcp.zeroWindowProbe
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpZeroWindowProbeLinux")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window == 0")
+             .capture("una", "tcp.ackNo")
+             .describe("the ACK of host2 that closes the window")
+             .within(2.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false")
+             .first()
+                  .assertPacket("pk.dataLength == tcp.headerLength && tcp.sequenceNo == {una} - 1")
+             .describe("the probe of host1, without data")
+             .within(2.0));
+}
+
+%activity:
+EV << "TcpZeroWindowProbeLinux compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.zeroWindowProbe = "linux"    # the parameter under test
+*.host1.app[0].sendBytes = 100000B
+*.host2.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpZeroWindowProbeLinux: PASS

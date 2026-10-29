@@ -1,0 +1,64 @@
+%description:
+
+Tcp.nagleEnabled:on -- a small segment waits while sent data is not acknowledged.
+
+The claim (Tcp.ned): "Nagle's algorithm (RFC 896) enabled/disabled"; RFC 9293 section 3.7.4.
+
+The classes: on (true, the default), off (false). The code: a segment shorter than the MSS
+waits while sent data is not acknowledged (TcpConnection::sendData()). TCP_NODELAY of a
+socket takes the place of the parameter; the NED does not say so (PF-5). This test separates "on" from "off".
+
+Host under test: host1, which writes 100 bytes at 0.2 s and 100 bytes at 0.21 s. Peer: host2,
+which acknowledges after its delayed ACK of 200 ms. Observation: level 1, the second segment of
+host1 does not go before the ACK of the first one, about 0.2 s later.
+
+%# parameter: Tcp.nagleEnabled
+%# class: on
+%# value: true
+%# key: *.host1.tcp.nagleEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpNagleEnabledOn")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+             .describe("the first segment of 100 bytes")
+             .within(0.5))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.sequenceNo == {isn} + 101 && pk.dataLength > tcp.headerLength")
+              .describe("an early second segment of 100 bytes, after the ACK of the first")
+              .within(0.15))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 101 && pk.dataLength > tcp.headerLength")
+             .describe("second segment of 100 bytes, after the ACK of the first")
+             .within(0.1));
+}
+
+%activity:
+EV << "TcpNagleEnabledOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.nagleEnabled = true    # the parameter under test
+*.host1.app[0].sendBytes = 0B
+*.host1.app[0].sendScript = "0.2 100; 0.21 100"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpNagleEnabledOn: PASS

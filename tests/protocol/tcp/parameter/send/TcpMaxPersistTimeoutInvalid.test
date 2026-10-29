@@ -1,0 +1,35 @@
+%description:
+
+Tcp.maxPersistTimeout:invalid -- a value of 0 stops the run with an error.
+
+The claim (Tcp.ned): "more than 0".
+
+The classes: caps-growth (a value above the RTO; 60s is the default, 120s the value of
+LinuxTcp): the interval of the probes starts at the RTO, doubles, and stops at the value;
+caps-first (a value below the RTO): the first interval is the value too; invalid (0 and
+less). The code: TcpAlgorithmBase::startPersistTimer() and processPersistTimer(); the
+check in TcpAlgorithm::initialize().
+
+Host under test: host1, whose connection creates its algorithm at the open. Observation: the
+error, and the exit code of the run.
+
+%# parameter: Tcp.maxPersistTimeout
+%# class: invalid
+%# value: 0s
+%# key: *.host1.tcp.maxPersistTimeout
+%# expected-result: PASS
+
+%activity:
+EV << "TcpMaxPersistTimeoutInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.maxPersistTimeout = 0s    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+maxPersistTimeout must be more than 0, but it is 0 

@@ -1,0 +1,57 @@
+%description:
+
+Tcp.notsentLowat:off -- no low-water mark: the application gets no send-ready indication.
+
+The claim (Tcp.ned): "-1B: off".
+
+The classes: off (-1B, the default), mark (0B and more), and socket-override: a
+TCP_NOTSENT_LOWAT of the socket takes the place of the parameter. The code: the indication
+TCP_I_SEND_MSG when the unsent bytes fall to the mark (TcpConnection::sendData()), and the
+socket option in initConnection(). This test separates "off" from "mark".
+
+Host under test: host1, whose application writes 100000 bytes after the handshake.
+Observation: level 1 at the application: no socketSendReady (TCP_I_SEND_MSG) in 3 s.
+
+%# parameter: Tcp.notsentLowat
+%# class: off
+%# value: -1B
+%# key: *.host1.tcp.notsentLowat
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpNotsentLowatOff")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+        }))
+        .once(on("host1.app[0]").signal("socketEstablished").within(0.1))
+        .act(action().after(0.001).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.sendData(app.socket(), 100000);
+        }))
+        .never(on("host1.app[0]").signal("socketSendReady")
+              .describe("a send-ready indication")
+              .within(3.0));
+}
+
+%activity:
+EV << "TcpNotsentLowatOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.notsentLowat = -1B    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpNotsentLowatOff: PASS

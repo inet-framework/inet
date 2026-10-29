@@ -1,0 +1,64 @@
+%description:
+
+Tcp.zeroWindowProbe:rfc -- the probe of a zero window carries the next octet of new data.
+
+The claim (Tcp.ned): ""rfc": the first unacknowledged octet, as RFC 9293 section 3.8.6.1
+says ("at least one octet of new data (if available), or retransmit")".
+
+The classes: rfc ("rfc", the default), linux ("linux"; LinuxTcp). The code:
+TcpConnection::sendProbe(). This test separates "rfc" from "linux".
+
+Host under test: host1, which sends 100000 bytes. Peer: host2, whose application reads nothing,
+so its window closes. Observation: level 1, the first segment of host1 after the window
+closes carries one octet, at the acknowledged sequence number.
+
+%# parameter: Tcp.zeroWindowProbe
+%# class: rfc
+%# value: "rfc"
+%# key: *.host1.tcp.zeroWindowProbe
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpZeroWindowProbeRfc")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window == 0")
+             .capture("una", "tcp.ackNo")
+             .describe("the ACK of host2 that closes the window")
+             .within(2.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false")
+             .first()
+                  .assertPacket("pk.dataLength == tcp.headerLength + 1B && tcp.sequenceNo == {una}")
+             .describe("the probe of host1, with one octet")
+             .within(2.0));
+}
+
+%activity:
+EV << "TcpZeroWindowProbeRfc compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.zeroWindowProbe = "rfc"    # the parameter under test
+*.host1.app[0].sendBytes = 100000B
+*.host2.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpZeroWindowProbeRfc: PASS

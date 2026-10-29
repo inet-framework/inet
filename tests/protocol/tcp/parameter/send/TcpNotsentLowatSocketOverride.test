@@ -1,0 +1,60 @@
+%description:
+
+Tcp.notsentLowat:socket-override -- TCP_NOTSENT_LOWAT of the socket takes the place of the parameter.
+
+The claim (Tcp.ned): "TcpSocket::setNotsentLowat() sets it for one connection".
+
+The classes: off (-1B, the default), mark (0B and more), and socket-override: a
+TCP_NOTSENT_LOWAT of the socket takes the place of the parameter. The code: the indication
+TCP_I_SEND_MSG when the unsent bytes fall to the mark (TcpConnection::sendData()), and the
+socket option in initConnection(). The test passes with each value of the parameter by
+design, so the cross-class check does not run it.
+
+Host under test: host1, with the parameter off, whose application sets a mark of 4096 bytes
+on its socket before the open and writes 100000 bytes after the handshake. Observation:
+level 1 at the application: one socketSendReady.
+
+%# parameter: Tcp.notsentLowat
+%# class: socket-override
+%# value: -1B
+%# key: *.host1.tcp.notsentLowat
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpNotsentLowatSocketOverride")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().setNotsentLowat(4096);
+            app.socket().connect(app.addressOf("host2"), 1000);
+        }))
+        .once(on("host1.app[0]").signal("socketEstablished").within(0.1))
+        .act(action().after(0.001).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.sendData(app.socket(), 100000);
+        }))
+        .once(on("host1.app[0]").signal("socketSendReady")
+              .describe("the send-ready indication")
+              .within(3.0));
+}
+
+%activity:
+EV << "TcpNotsentLowatSocketOverride compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.notsentLowat = -1B    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpNotsentLowatSocketOverride: PASS

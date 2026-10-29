@@ -8,6 +8,8 @@
 # with that value on the command line (--<key>=<value>, which takes the place of the ini line
 # of the test), and expects the verdict FAIL. A class whose observation is E (an error at the
 # open) is no alternative, and a class with the same value as the test is not either: a facet.
+# A class whose name ends with -override claims that something else, such as a socket option,
+# takes the place of the parameter; its test passes with each value, so it is not checked.
 #
 # The script reruns the binary that the last run of the test built, in
 # tests/protocol/tcp/work/<test>/, so run the tests first, from an INET environment:
@@ -66,7 +68,9 @@ def main():
         if row is None:
             print("%s: no catalog row, skipped" % name)
             continue
-        if "E" in row["observation"]:
+        # a class whose claim is that something else takes the place of the parameter (a
+        # socket option) passes with each value of the parameter by design
+        if "E" in row["observation"] or row["cls"].endswith("-override"):
             continue
         # one run for each other value: the facets of one value are one alternative
         alternatives = {}

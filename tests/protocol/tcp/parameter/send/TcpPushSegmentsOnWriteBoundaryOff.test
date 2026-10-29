@@ -1,0 +1,65 @@
+%description:
+
+Tcp.pushSegmentsOnWriteBoundary:off -- the end of a write that is not the end of the buffer has no PSH.
+
+The claim (Tcp.ned): "false: the PSH of pushLastBufferedSegment".
+
+The classes: off (false, the default), and two facets of on (true; LinuxTcp): write-end, PSH
+on the segment that ends a write; long-write, PSH also inside a write longer than half the
+largest window. The code: TcpConnection::sendSegment() and the marks of a SEND
+(enqueueSendCommandData()). This test separates "off" from the facets of "on".
+
+Host under test: host1, which writes 1448 bytes two times during its handshake, so both writes
+wait in the buffer. Observation: level 1, the first data segment, the end of the first write,
+has no PSH, and the second, the end of the buffer, has PSH.
+
+%# parameter: Tcp.pushSegmentsOnWriteBoundary
+%# class: off
+%# value: false
+%# key: *.host1.tcp.pushSegmentsOnWriteBoundary
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpPushSegmentsOnWriteBoundaryOff")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+            app.sendData(app.socket(), 1448);
+            app.sendData(app.socket(), 1448);
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .first()
+                  .assertPacket("tcp.pshBit == false")
+             .describe("the first data segment, without PSH")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .first()
+                  .assertPacket("tcp.pshBit == true")
+             .describe("the second data segment, with PSH")
+             .within(0.01));
+}
+
+%activity:
+EV << "TcpPushSegmentsOnWriteBoundaryOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.pushSegmentsOnWriteBoundary = false    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpPushSegmentsOnWriteBoundaryOff: PASS

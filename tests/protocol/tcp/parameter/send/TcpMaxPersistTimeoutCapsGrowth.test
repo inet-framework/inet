@@ -1,0 +1,94 @@
+%description:
+
+Tcp.maxPersistTimeout:caps-growth -- the interval of the zero-window probes doubles up to the value.
+
+The claim (Tcp.ned): "the upper limit of the interval of the zero-window probes, which starts
+at the RTO and doubles at each probe (RFC 9293 SHLD-29, SHLD-30)".
+
+The classes: caps-growth (a value above the RTO; 60s is the default, 120s the value of
+LinuxTcp): the interval of the probes starts at the RTO, doubles, and stops at the value;
+caps-first (a value below the RTO): the first interval is the value too; invalid (0 and
+less). The code: TcpAlgorithmBase::startPersistTimer() and processPersistTimer(); the
+check in TcpAlgorithm::initialize(). This test separates "caps-growth" from "caps-first" and from
+the default of 60 s, with which the fourth interval is 8 s.
+
+Host under test: host1, with 4 s; its RTO is 1 s. Peer: host2, whose application reads
+nothing. Observation: level 1, the probes of host1 come 1, 2, 4 and 4 s apart.
+
+%# parameter: Tcp.maxPersistTimeout
+%# class: caps-growth
+%# value: 4s
+%# key: *.host1.tcp.maxPersistTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMaxPersistTimeoutCapsGrowth")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackBit == true && tcp.window == 0")
+             .capture("una", "tcp.ackNo")
+             .describe("the ACK of host2 that closes the window")
+             .within(2.0))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false")
+              .describe("an early first probe, 1 s after the window closes")
+              .within(0.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false")
+             .describe("first probe, 1 s after the window closes")
+             .within(0.2))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false")
+              .describe("an early second probe, 2 s later")
+              .within(1.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false")
+             .describe("second probe, 2 s later")
+             .within(0.2))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false")
+              .describe("an early third probe, 4 s later")
+              .within(3.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false")
+             .describe("third probe, 4 s later")
+             .within(0.2))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false")
+              .describe("an early fourth probe, 4 s later again")
+              .within(3.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false")
+             .describe("fourth probe, 4 s later again")
+             .within(0.2));
+}
+
+%activity:
+EV << "TcpMaxPersistTimeoutCapsGrowth compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.maxPersistTimeout = 4s    # the parameter under test
+*.host1.app[0].sendBytes = 100000B
+*.host2.app[0].typename = "TcpTestApp"
+sim-time-limit = 20s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMaxPersistTimeoutCapsGrowth: PASS

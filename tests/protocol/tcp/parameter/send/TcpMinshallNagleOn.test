@@ -1,0 +1,56 @@
+%description:
+
+Tcp.minshallNagle:on -- full-sized segments in flight do not hold the short end of a write.
+
+The claim (Tcp.ned): "with nagleEnabled, the variant of Minshall, as Linux
+(tcp_minshall_check()): a small segment waits only while an earlier small segment is not
+acknowledged, so a flight of full-sized segments does not hold the end of a write".
+
+The classes: off (false, the default), on (true; LinuxTcp). The code: with Minshall, only an
+earlier small segment that is not acknowledged holds a small segment
+(TcpConnection::sendData()). This test separates "on" from "off".
+
+Host under test: host1, with Nagle, which writes 3000 bytes at once; the round trip is 40 ms.
+Observation: level 1, the end of 104 bytes goes at once with the full-sized segments.
+
+%# parameter: Tcp.minshallNagle
+%# class: on
+%# value: true
+%# key: *.host1.tcp.minshallNagle
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMinshallNagleOn")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .describe("the first data segment of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength && pk.dataLength < tcp.headerLength + 1448B")
+             .describe("the end of the write, at once")
+             .within(0.005));
+}
+
+%activity:
+EV << "TcpMinshallNagleOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.minshallNagle = true    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 3000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMinshallNagleOn: PASS

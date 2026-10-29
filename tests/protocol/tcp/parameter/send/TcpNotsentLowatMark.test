@@ -1,0 +1,58 @@
+%description:
+
+Tcp.notsentLowat:mark -- when the unsent bytes fall to the mark, the application gets one send-ready indication.
+
+The claim (Tcp.ned): "when they exceed it, TCP sends no TCP_I_SEND_MSG until they are at or
+below it again, and then it sends one".
+
+The classes: off (-1B, the default), mark (0B and more), and socket-override: a
+TCP_NOTSENT_LOWAT of the socket takes the place of the parameter. The code: the indication
+TCP_I_SEND_MSG when the unsent bytes fall to the mark (TcpConnection::sendData()), and the
+socket option in initConnection(). This test separates "mark" from "off".
+
+Host under test: host1, with 4096 bytes, whose application writes 100000 bytes after the
+handshake. Observation: level 1 at the application: one socketSendReady.
+
+%# parameter: Tcp.notsentLowat
+%# class: mark
+%# value: 4096B
+%# key: *.host1.tcp.notsentLowat
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpNotsentLowatMark")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().connect(app.addressOf("host2"), 1000);
+        }))
+        .once(on("host1.app[0]").signal("socketEstablished").within(0.1))
+        .act(action().after(0.001).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.sendData(app.socket(), 100000);
+        }))
+        .once(on("host1.app[0]").signal("socketSendReady")
+              .describe("the send-ready indication")
+              .within(3.0));
+}
+
+%activity:
+EV << "TcpNotsentLowatMark compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.notsentLowat = 4096B    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpNotsentLowatMark: PASS
