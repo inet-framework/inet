@@ -1,0 +1,68 @@
+%description:
+
+Tcp.tcpAlgorithmClass:nocc-rto -- a timeout retransmits the segment, and the window stays at its largest value.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; the comment of
+each algorithm module names its behavior. The claim of TcpNoCongestionControl (its NED comment): no congestion control;
+the window is always the largest.
+
+The class nocc-rto: TcpNoCongestionControl::processRexmitTimer() retransmits one segment and
+keeps the window. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates "nocc" from the other algorithms, which set the window
+to one segment at a timeout.
+
+Host under test: host1, with TcpNoCongestionControl, without SACK and without TLP
+(preconditions); host1 sends 100000 bytes at 0.2 s, and the tap drops the 15th data segment the
+first time. Observation: level 1 and 2, the timer of RFC 6298 retransmits the segment, within
+1.6 s and so before the fixed timeout of 2 s of DumbTcp, and host1 signals no window below 1e9
+bytes, which the other algorithms do.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: nocc-rto
+%# value: "TcpNoCongestionControl"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassNoCongestionControlRto")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(never(on("host1.tcp").signal("cwnd")
+                             .filterValueAtMost(1e9)
+                             .describe("a window below 1e9 bytes")
+                             .within(4.0)))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && pk.dataLength > tcp.headerLength")
+                  .nth(2)
+                  .describe("the retransmission of the 15th segment, by the timer")
+                  .within(1.6));
+}
+
+%activity:
+EV << "TcpAlgorithmClassNoCongestionControlRto compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpNoCongestionControl"    # the parameter under test
+*.host1.app[0].sendBytes = 100000B
+*.host1.tcp.sackSupport = false
+*.host1.tcp.tlpEnabled = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassNoCongestionControlRto: PASS

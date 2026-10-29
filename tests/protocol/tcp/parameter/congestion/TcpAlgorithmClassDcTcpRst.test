@@ -1,0 +1,60 @@
+%description:
+
+Tcp.tcpAlgorithmClass:dctcp-rst -- the RST of a DCTCP connection carries ECT(0).
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; the comment of
+each algorithm module names its behavior. The claim of DcTcp (RFC 8257 section 3.6): "a DCTCP sender ... SHOULD set ECT
+on all packets", also on a RST.
+
+The class dctcp-rst: TcpConnection::sendRst() and sendRstAck() put ECT(0) on the RST when the
+algorithm needs ECN and the connection uses it. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates "dctcp" from the other
+algorithms, whose RST is Not-ECT.
+
+Host under test: host1, with DcTcp and classic ECN (tcpEcnMode "rfc3168", a precondition), whose
+TcpTestApp connects to host2 at 0.1 s and aborts the
+connection at 0.5 s. Observation: level 1, the RST of host1 carries ECT(0) in its IPv4 header.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: dctcp-rst
+%# value: "DcTcp"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassDcTcpRst")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000); })
+                 .describe("host1 connects to host2"))
+        .act(action().at(0.5).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().abort(); })
+                 .describe("host1 aborts the connection"))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.rstBit == true")
+             .first()
+                  .assertPacket("ipv4.ecn == 2")
+             .describe("the RST of host1")
+             .within(0.1));
+}
+
+%activity:
+EV << "TcpAlgorithmClassDcTcpRst compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "DcTcp"    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+*.host1.tcp.tcpEcnMode = "rfc3168"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassDcTcpRst: PASS

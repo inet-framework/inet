@@ -1,0 +1,84 @@
+%description:
+
+Tcp.tcpAlgorithmClass:vegas-dupack -- a fast retransmission of Vegas keeps 3/4 of the window plus three segments.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; the comment of
+each algorithm module names its behavior. The claim of TcpVegas (its NED comment, after Linux): at a fast retransmission,
+the window becomes 3/4 of the window in segments plus three segments.
+
+The class vegas-dupack: TcpVegas::receivedDuplicateAck() retransmits the segment at the third
+duplicate ACK, or earlier when its fine-grained timer has expired, and sets the window to
+(w - w/4 + 3) segments, where w is min(cwnd, snd_wnd) in segments. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates
+"vegas" from the algorithms that halve the window and from TcpCubic.
+
+Host under test: host1, with TcpVegas, without SACK (precondition); host1 sends 100000 bytes at
+0.2 s, and the tap drops the 15th data segment the first time. Observation: level 2, the window
+that host1 sets before the retransmission is (w - w/4 + 3) segments, where w is the window
+just before it.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: vegas-dupack
+%# value: "TcpVegas"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The window before the last change and after it: the reduction of Vegas changes the window
+// just before the retransmission.
+static double windowBefore = 0, windowLast = 0;
+
+static bool noteWindow(const MatchContext& context)
+{
+    windowBefore = windowLast;
+    windowLast = context.event.value;
+    return true;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassVegasDupack")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .filterEvent(noteWindow)
+                                        .within(4.0)))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && pk.dataLength > tcp.headerLength")
+                  .nth(2)
+                  .assertEvent([](const MatchContext& context) {
+                      double before = windowBefore, last = windowLast;
+                      double mss = 1460; // snd_mss: the MSS of the handshake
+                      double w = std::floor(before / mss);
+                      return std::fabs(last - (w - std::floor(w / 4) + 3) * mss) < 1;
+                  })
+                  .describe("the retransmission of the 15th segment")
+                  .within(2.0));
+}
+
+%activity:
+EV << "TcpAlgorithmClassVegasDupack compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpVegas"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+*.host1.tcp.sackSupport = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassVegasDupack: PASS

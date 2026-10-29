@@ -1,0 +1,77 @@
+%description:
+
+Tcp.tcpAlgorithmClass:dctcp-receiver -- a DCTCP receiver acknowledges at once when the CE state of the arriving data changes.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; the comment of
+each algorithm module names its behavior. The claim of DcTcp (RFC 8257 section 3.2): "If the CE codepoint is set and
+DCTCP.CE is false, set DCTCP.CE to true and send an immediate ACK", and the same when CE is
+clear and DCTCP.CE is true.
+
+The class dctcp-receiver: DcTcp::processEcnInEstablished() sets ack_now at each change of the
+CE state. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates "dctcp" from the other algorithms, which delay the ACK of
+the marked segment.
+
+Host under test: host1, with DcTcp and the delayed ACK (the default), which listens at the
+port 1000; host2 connects with classic ECN (tcpEcnMode "rfc3168") and sends 30000 bytes at
+0.2 s, and the tap marks the 5th data segment of host2 CE. Observation: level 1, host1 sends no
+ACK of exactly three segments, as the delayed ACK of unmarked data, and then an ACK of exactly
+five segments.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: dctcp-receiver
+%# value: "DcTcp"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassDcTcpReceiver")
+        .intercept(tap("tap").from("host2").filterPacket("tcp.sequenceNo == {isn2} + 1 + 4 * 1448 && ipv4.totalLengthField > 100B").nth(1)
+                     .set("ipv4.ecn", "3")
+                     .describe("the 5th data segment of host2: mark it CE"))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn2", "tcp.sequenceNo")
+             .describe("the SYN of host2")
+             .within(0.5))
+        .meanwhile(never(on("host1.tcp").signal("packetSentToLower")
+                             .filterPacket("tcp.ackNo == {isn2} + 1 + 3 * 1448")
+                             .describe("an ACK of exactly three segments: no delayed ACK")
+                             .within(1.0)))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackNo == {isn2} + 1 + 5 * 1448")
+             .describe("the ACK of host1 of exactly five segments")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpAlgorithmClassDcTcpReceiver compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "DcTcp"    # the parameter under test
+*.host2.tcp.tcpEcnMode = "rfc3168"
+*.host1.app[0].typename = "TcpEchoApp"
+*.host1.app[0].localPort = 1000
+*.host1.app[0].echoFactor = 0
+*.host2.app[0].typename = "TcpSessionApp"
+*.host2.app[0].connectAddress = "host1"
+*.host2.app[0].connectPort = 1000
+*.host2.app[0].tOpen = 0.1s
+*.host2.app[0].tSend = 0.2s
+*.host2.app[0].sendBytes = 30000B
+*.host2.app[0].tClose = 1000s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassDcTcpReceiver: PASS

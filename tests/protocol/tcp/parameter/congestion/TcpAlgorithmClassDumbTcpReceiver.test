@@ -1,0 +1,72 @@
+%description:
+
+Tcp.tcpAlgorithmClass:dumb-receiver -- DumbTcp acknowledges each data segment at once, also with the delayed ACK on.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; the comment of
+each algorithm module names its behavior. The claim of DumbTcp (its NED comment): a very simple algorithm that sends an
+ACK for each segment.
+
+The class dumb-receiver: DumbTcp::receiveSeqChanged() sends an ACK at once. This facet comes from the coverage gap loop: no test reached the code of this part. This test
+separates "dumb" from the other algorithms, which delay the ACK (delayedAcksEnabled, the
+default).
+
+Host under test: host1, with DumbTcp, which listens at the port 1000; host2 connects and sends
+10000 bytes (7 segments) at 0.2 s. Observation: level 1, host1 sends at least 7 ACKs of data
+until the ACK of all data.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: dumb-receiver
+%# value: "DumbTcp"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassDumbTcpReceiver")
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn2", "tcp.sequenceNo")
+             .describe("the SYN of host2")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.ackNo > {isn2} + 1 && pk.dataLength <= tcp.headerLength")
+                                        .captureCount("acks")
+                                        .describe("each ACK of data of host1")
+                                        .within(2.0)))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.ackNo == {isn2} + 1 + 10000")
+             .assertPacket("{acks} >= 7")
+             .describe("the ACK of all data")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpAlgorithmClassDumbTcpReceiver compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "DumbTcp"    # the parameter under test
+*.host1.app[0].typename = "TcpEchoApp"
+*.host1.app[0].localPort = 1000
+*.host1.app[0].echoFactor = 0
+*.host2.app[0].typename = "TcpSessionApp"
+*.host2.app[0].connectAddress = "host1"
+*.host2.app[0].connectPort = 1000
+*.host2.app[0].tOpen = 0.1s
+*.host2.app[0].tSend = 0.2s
+*.host2.app[0].sendBytes = 10000B
+*.host2.app[0].tClose = 1000s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassDumbTcpReceiver: PASS

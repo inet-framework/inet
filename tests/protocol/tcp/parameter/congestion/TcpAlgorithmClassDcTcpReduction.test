@@ -1,0 +1,74 @@
+%description:
+
+Tcp.tcpAlgorithmClass:dctcp-reduction -- an ECE reduces the window by alpha/2, and the threshold is 3/4 of the flight.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; the comment of
+each algorithm module names its behavior. The claim of DcTcp (RFC 8257 section 3.3.9): the window shrinks in proportion
+to the fraction of marked bytes, cwnd * (1 - alpha / 2), and not by half.
+
+The class dctcp-reduction: DcTcp::processEce() reduces the window once in each window of data
+that has marks, and sets the threshold to 3/4 of min(cwnd, snd_wnd). This facet comes from the coverage gap loop: no test reached the code of this part. This test separates
+"dctcp" from the classic algorithms, which halve the window, and from TcpCubic, whose
+threshold is 0.7 of the window.
+
+Host under test: host1, with DcTcp; host1 sends 100000 bytes at 0.2 s, and the tap marks the
+15th data segment CE; host1 uses classic ECN (tcpEcnMode "rfc3168", a precondition), and host2
+answers it (passive, the default). Alpha starts at 0, so one marked segment gives a small alpha. Observation:
+level 2, the first threshold after the mark is between 0.73 and 0.76 of the largest window
+before it.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: dctcp-reduction
+%# value: "DcTcp"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassDcTcpReduction")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1)
+                     .set("ipv4.ecn", "3")
+                     .describe("the 15th data segment of host1: mark it CE"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .captureMax("cwndBefore", "value")
+                                        .within(4.0)))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      double ratio = context.event.value / context.get("cwndBefore").doubleValue();
+                      return ratio >= 0.73 && ratio <= 0.76;
+                  })
+                  .describe("the threshold at the reaction to the ECE, 3/4 of the flight")
+                  .within(1.5));
+}
+
+%activity:
+EV << "TcpAlgorithmClassDcTcpReduction compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "DcTcp"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.tcp.tcpEcnMode = "rfc3168"
+*.host1.app[0].sendBytes = 100000B
+*.host1.tcp.sackSupport = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassDcTcpReduction: PASS

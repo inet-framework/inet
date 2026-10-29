@@ -1,0 +1,68 @@
+%description:
+
+Tcp.initialWindow:rfc2001-restart -- after an idle period longer than the RTO, the next flight has one segment.
+
+The claim (Tcp.ned): "the initial window ... "rfc2001": one segment"; RFC 5681 section
+4.1: after an idle period longer than the RTO, the window restarts at min(IW, cwnd).
+
+The class rfc2001-restart: TcpAlgorithmBase::sendData() restarts the window after an idle
+period longer than the RTO, at one segment for "rfc2001" and at min(IW, cwnd) for the other
+values. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates "rfc2001" from "rfc3390" (3 segments) and "rfc6928".
+
+Host under test: host1; host1 sends 30000 bytes at 0.2 s and 30000 bytes at 3 s. Observation:
+level 1, host1 sends one data segment after 3 s before the first ACK of the new data.
+
+%# parameter: Tcp.initialWindow
+%# class: rfc2001-restart
+%# value: "rfc2001"
+%# key: *.host1.tcp.initialWindow
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpInitialWindowRfc2001Restart")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 30000")
+             .describe("the ACK of the first 30000 bytes")
+             .within(2.0))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                                        .captureCount("flight")
+                                        .describe("each data segment of host1 after the idle period")
+                                        .within(4.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo > {isn} + 1 + 30000")
+             .first()
+                  .assertPacket("{flight} == 1")
+             .describe("the first ACK of the new data")
+             .within(3.0));
+}
+
+%activity:
+EV << "TcpInitialWindowRfc2001Restart compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.initialWindow = "rfc2001"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendScript = "0.2 30000; 3 30000"
+*.host1.app[0].sendBytes = 0B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpInitialWindowRfc2001Restart: PASS
