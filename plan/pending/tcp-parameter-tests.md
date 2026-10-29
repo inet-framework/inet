@@ -433,10 +433,10 @@ The estimate before the pilot: the INET TCP tests alone rise from 47 % to more t
 
 Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on the local branch `topic/tcp-parameter-tests`, from `master`. Make a commit at the end of each step. Push only when the user asks.
 
-- [ ] **Step 0 — worktree.** `git worktree add -b topic/tcp-parameter-tests ../inet-tcp-parameter-tests master`. Pair it with a debug build of `omnetpp-6.x`. Measure the TCP coverage baseline (gap loop, step 1).
-- [ ] **Step 1 — the catalog.** Write `doc/project/evidence/model/tcp/parameters.md` from the draft catalog: one row for each class, with the columns parameter, class, value, preset (`LinuxTcp`, `LegacyTcp`, or none), source, observation, network, test file, verdict. Mark the draft rows "draft" until the code pass of their group.
-- [ ] **Step 2 — the library extensions E1 to E4**, one commit each, each with its self test and its section in `AUTHORING.md`. Run every protocol suite after each one.
-- [ ] **Step 3 — the shared networks (I1) and `TcpTestApp` (I2)** in `tests/protocol/lib`, with a self test for each.
+- [x] **Step 0 — worktree.** `git worktree add -b topic/tcp-parameter-tests ../inet-tcp-parameter-tests master`, from `18e41c6d2e`. Pair it with a debug build of `omnetpp-6.x`. The coverage baseline moves to step 5, which needs a coverage build anyway.
+- [ ] **Step 1 — the catalog.** Write `doc/project/evidence/model/tcp/parameters.md`: one row for each class, with the columns class id, value, preset (`LinuxTcp`, `LegacyTcp`, or none), the claim, source, observation, network, test file, verdict. Each group writes its rows in its code pass, so the draft of this plan is not copied twice; the completeness check lists the parameters without rows until the last group.
+- [x] **Step 2 — the library extensions E1 to E4**, one commit each, each with its self test and its section in `AUTHORING.md`. Run every protocol suite after each one. Done: `64c9ab1805` (E1), `d43de56157` (E2), `4f1c8ddced` (E3), `1668c6dbba` (E4).
+- [x] **Step 3 — the shared networks (I1) and `TcpTestApp` (I2)** in `tests/protocol/lib`, with a self test for each. Done: `321083cb2e` (networks), `4621ab2d0d` (`TcpTestApp`).
 - [ ] **Step 4 — the TCP parts.** The shared ini (I3), the two checks (I4, I5), and the move of `TcpMutations.h` to the suite folder. Check that a command-line assignment `--*.host2.tcp.<parameter>=<value>` takes the place of the ini assignment of the test (I5 needs it).
 - [ ] **Step 5 — the pilot: `ack`, 15 tests.** Code pass, tests, run, cross-class check, coverage. Measure the time of the build and of the run of one test, and of the whole group. Count the lambdas that repeat (D3). Report to the user, and change the design where the pilot shows a problem, before the other groups start.
 - [ ] **Step 6 — `setup`, 36 tests.**
@@ -456,6 +456,27 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [ ] **Step 20 — close.** Move this plan to `plan/done/`.
 
 Each step from 6 to 17 does the same: the code pass of the group (update the catalog), the tests, a run with `opp_run_protocol_tests -m debug -w tcp -f parameter/<group>`, the cross-class check, the verdicts in the catalog, the coverage of the group.
+
+## The record of the implementation
+
+Facts and decisions that the work found, in the order of the steps.
+
+**Step 0.**
+- The debug build of the worktree came from the build of `inet-standards-tests-ipv6tunnel-level2` (the `src/` of `3e51de989f`) by hard links and one fresh time, with the 21 changed sources of the Radiotap commits touched after it; `make` compiled 884 files in about 1 minute (ccache).
+- `omnetpp-6.x/bin/opp_msgtool` is a coverage build of 2026-10-27 whose library `liboppnedxml_coverage.so` is gone, so every INET build that runs the message compiler fails. This work does not change the shared tree: the build passes `MSGC=/home/levy/workspace/omnetpp-6.x/out/clang-release/src/nedxml/opp_msgtool` (the release tool of 2026-06-03; no source of `nedxml` changed since), and the runner gets `--no-build`, because this pass changes nothing in `src/`.
+- The baseline of all protocol suites without the packetdrill wrappers: 406 PASS, 47 expected FAIL, 306 SKIP (the wrappers, without inet-gpl), 67 unexpected FAIL. The 67 are the IGMP, MLD, Neighbor Discovery and RIP tests whose repairs are in the open pull requests. Each later step compares its run with this list.
+
+**Step 2.**
+- The words differ from the first design where the reading is clearer: the aggregate words are `captureSum`, `captureCount`, `captureMax` and `captureMin`, because they are captures; the free builder `anyNumberOfTimes(...)` is new, because an aggregate needs a guard that cannot fail; the action step is `act(action().at(t)...)` or `.after(d)`, with the words `setParameter`, `run`, `run<T>` and `assertModule`.
+- A guard of `meanwhile(...)` now runs the captures of the events that it matches; no existing test had a capture in a guard.
+- A failed assertion quotes its expression with the values of its captures. This came from the first run of the E2 self test, whose reason did not show why it failed.
+- The field writer of E1 must sum a computed TCP checksum over the data of the datagram only, not over the Ethernet padding and FCS behind it, so it takes the length from the IPv4 total length or the IPv6 payload length.
+- The start and stop of a node are not words of E4 yet. The group `module` (step 17) adds them, or uses `run` with the lifecycle controller, when it needs them.
+
+**Step 3.**
+- The networks extend `WiredNetworkBase`, and they turn off `MacForwardingTableConfigurator`, which crashes on a tap (it looks for the `macTable` of each node). With GlobalArp, a switch learns the addresses from the frames.
+- In a channel block, a parameter of the network needs `parent.` before its name.
+- A test file must not have the name of a C++ class that it uses: opp_test makes a namespace of the file name, so `TcpTestApp.test` collides with `TcpTestApp`.
 
 ## Decisions
 
