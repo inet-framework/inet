@@ -449,7 +449,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 13 — `ecn`, 19 tests.** Done: `3d9eb039d5`; 19 PASS.
 - [x] **Step 14 — `pmtu`, 12 tests.** Done: `a87c9acdd3` (the comment of `TapRouterNetwork`), `e9c1ba160d`; 12 PASS.
 - [x] **Step 15 — `keepalive`, 10 tests.** Done: `c5486012b5`; 10 PASS.
-- [ ] **Step 16 — `fastopen`, 29 tests.**
+- [x] **Step 16 — `fastopen`, 33 tests.** Done: `8f631bf2ab` (one helper hides any option), `ac2c9abf8d`; 33 PASS.
 - [ ] **Step 17 — `module` and `spoof`, 14 tests.**
 - [ ] **Step 18 — the coverage gap loop** (above), and the final numbers in this plan.
 - [ ] **Step 19 — the documents.** A guide `doc/project/guide/derive-tests-from-parameters.md` that any module can follow; a paragraph in `test-anatomy.md` and a row in `AUTHORING.md` §10; `parameter/README.md`.
@@ -590,3 +590,11 @@ The user settled these on 2026-10-29.
 - `_bulk.ini` closes the connection at 1000 s; the test of two hours sets a later close.
 - The abort shows in the signal `state` (CLOSED is 1); a signal step can assert the captures with `assertModule()` of the module that emits it.
 - The group runs in 1 s of wall time with 32 cores. D3: one socket call (`setKeepAlive()`), no new library word.
+
+**Step 16 (`fastopen`).**
+- The code pass changed the draft from 29 to 33 tests. Each parameter that is `@mutable` and acts at the open got the class `changed` (rule 3), also `fastopenAcceptWithoutCookie` and `fastopenClientNoCookieRequired`. `fastopenExpOptionEnabled` has none: it acts only at the SYN-ACK of a cookie request without an answer and at the next open, so no later step can see an old value in an open connection. It has the facets `on-client` and `on-server` instead. `fastopenCookieBytes` has `linux` (8) and `long` (16: a second MAC), `fastopenCookieCacheSize` `ample`, `evicts` and `invalid`, `fastopenMaxPendingRequests` `ample`, `limit` and `zero`, `fastopenBlackholeTimeout` `hour`, `other` and `off`.
+- The cookie of `fastopenKey:fixed`: the packetdrill script fastopen/server/simple1.pkt sets its own addresses (`--local_ip=192.168.0.2`, `--remote_ip=10.248.0.2`); with the packetdrill defaults the cookie differs. With the addresses of the script, INET gives the cookie of the Linux run, 00abaaabe8e954c2. `TapRouterNetwork` takes the addresses from an XML configuration of the configurator.
+- A test that needs a program and ends with an error waits for the event that the error prevents; else the program ends before the error.
+- The helper `hideSackBlocks()` of step 10 is now `hideTcpOption(frame, kind)`, one name for any option (`8f631bf2ab`). New helpers: `tcpFastOpenCookieOf()` and `forgeFastOpenCookie()`.
+- With a cookie in the cache, the SYN of a connect() with Fast Open waits for the first SEND; a test that wants the SYN at once sends data.
+- The group runs in 3 s of wall time with 32 cores. D3: the socket calls are connect with Fast Open and send of `TcpTestApp`, one application for each connection; no new library word.
