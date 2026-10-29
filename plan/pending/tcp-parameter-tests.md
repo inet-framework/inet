@@ -440,7 +440,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 4 — the TCP parts.** The shared ini (I3), the two checks (I4, I5), and the move of `TcpMutations.h` to the suite folder. Check that a command-line assignment `--*.host2.tcp.<parameter>=<value>` takes the place of the ini assignment of the test (I5 needs it). Done: `a2feecf0e8` (the move), `1e9f747388` (the ini, the checks, the README). The command line beats the ini line.
 - [ ] **Step 5 — the pilot: `ack`, 15 tests.** Code pass, tests, run, cross-class check, coverage. Measure the time of the build and of the run of one test, and of the whole group. Count the lambdas that repeat (D3). Report to the user, and change the design where the pilot shows a problem, before the other groups start. The tests are done (`4ae6534722`). The user decided on 2026-10-29: the coverage is measured only in step 18, after all the tests.
 - [x] **Step 6 — `setup`, 34 tests.** Done: `4d280c2293`; 33 PASS, 1 FAIL (PF-4).
-- [ ] **Step 7 — `send`, 16 tests.**
+- [x] **Step 7 — `send`, 17 tests.** Done: `a82f12fdec`; 17 PASS.
 - [ ] **Step 8 — `rto`, 12 tests.**
 - [ ] **Step 9 — `congestion`, 60 tests.** The algorithm classes first, because they give the largest coverage gain.
 - [ ] **Step 10 — `recovery`, 27 tests.**
@@ -515,3 +515,11 @@ The user settled these on 2026-10-29.
 - `dropSynData`: the INET client sends the data of its SYN again with the ACK of the SYN-ACK, and with `keep` the server ignores that copy without an ACK at once; so the two classes look the same on the wire. The tests remove the data from that ACK in the tap (`removeTcpData()`): then only the queue of the server can hold the data.
 - The NED function `intuniform()` takes 32-bit integers: `intuniform(0, 4294967295)` gives an error.
 - The group has no new library word. Two lambdas repeat: the check of an option of the SYN (`tcpOptionCount()`, `tcpMssOptionOf()`, `tcpWindowScaleOptionOf()` in 18 tests) and the D-SACK check; both are one-line calls of `TcpMutations.h`.
+
+**Step 7 (`send`).**
+- The code pass changed the draft from 16 to 17 tests: `maxPersistTimeout` has an `invalid` class, because the code checks "more than 0"; `pushSegmentsOnWriteBoundary` has the facets `write-end` and `long-write` of `true`.
+- A socket option that takes the place of a parameter stays a class, as the scope says, but its test passes with each value of the parameter by design. Such a class has a name that ends with `-override`, and the cross-class check skips it (`Tcp.notsentLowat:socket-override`).
+- The zero-window tests need a receiver that never reads: a `TcpTestApp` that listens with `setAutoRead(false)`; the forked connection inherits it.
+- A step with `notBefore` skips the events before its time, so a test of an interval uses a `never` step for the early part and a `once` step for the window; the generator calls this a gap. With `notBefore` alone, probes 0.5 s apart passed a test of 1, 2 and 4 s.
+- A time in an error message prints without its unit ("but it is 0").
+- PF-5: TCP_NODELAY of a socket takes the place of `nagleEnabled`, and the NED does not say so.
