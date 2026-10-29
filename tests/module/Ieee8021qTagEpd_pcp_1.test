@@ -1,4 +1,3 @@
-%# expected-result: FAIL
 %description:
 
 Tests where an 802.1Q tag inserter takes the PCP of its tag from, in three steps.

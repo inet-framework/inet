@@ -1,4 +1,3 @@
-%# expected-result: FAIL
 %description:
 
 Tests the PCP steps of the 802.1Q tag inserter with a TPID (see
