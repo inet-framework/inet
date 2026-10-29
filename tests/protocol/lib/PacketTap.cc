@@ -177,7 +177,6 @@ void PacketTap::processFrame(cPacket *frame, bool towardB, const InterceptionRul
     if (rule != nullptr) {
         const std::string& action = rule->interception.action;
         const simtime_t& delayTime = rule->interception.delayTime;
-        const auto& mutator = rule->interception.mutator;
         long numSelected = rules.getNumSelected();
         if (action == "drop") {
             EV_INFO << "PacketTap dropping " << inner->getName() << " (selected #" << numSelected << ")" << endl;
@@ -196,8 +195,7 @@ void PacketTap::processFrame(cPacket *frame, bool towardB, const InterceptionRul
         }
         if (action == "mutate") {
             EV_INFO << "PacketTap mutating " << inner->getName() << " (selected #" << numSelected << ")" << endl;
-            if (mutator)
-                mutator(inner);
+            InterceptionRules::mutate(*rule, inner);
             numMutated++;
             // fall through to forward the (now mutated) frame
         }

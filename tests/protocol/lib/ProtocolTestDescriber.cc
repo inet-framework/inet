@@ -335,6 +335,12 @@ static std::string renderInterception(const Interception& i)
     std::ostringstream os;
     os << "on tap '" << i.tapName << "', ";
     if (i.action == "delay")          os << "delay (by " << formatTime(i.delayTime) << ") ";
+    else if (i.action == "mutate" && !i.assignments.empty()) {
+        os << "set ";
+        for (size_t k = 0; k < i.assignments.size(); k++)
+            os << (k == 0 ? "" : " and ") << i.assignments[k].first << " to " << i.assignments[k].second;
+        os << (i.mutator ? ", and mutate, in " : " in ");
+    }
     else if (i.action == "mutate")    os << "mutate ";
     else if (i.action == "corrupt")   os << "corrupt ";
     else if (i.action == "duplicate") os << "duplicate (" << i.numCopies << (i.numCopies == 1 ? " copy, " : " copies, ")

@@ -281,6 +281,7 @@ selectors must hold, and a rule has exactly one action.
 | `.drop()` | discard the frame | the frame does not exist for the receiver: no signal, no energy |
 | `.delay(t)` | forward after `t` | refused: a radio signal cannot arrive late |
 | `.mutate(fn)` | run `void(Packet*)` on the inner frame, then forward | run `fn` on the copy that the receiver gets |
+| `.set(field, expression)` | write a field of the inner frame, then forward | write the field in the copy that the receiver gets |
 | `.corrupt()` | set the bit error flag on the object on the wire, as the bit error model of a channel does | the receiver receives the frame, and its data part fails to decode |
 | `.duplicate(spacing, copies = 1)` | forward the frame, then the copies, each `spacing` after the one before; a copy waits while the channel is busy | new transmissions from the same transmitter; each receiver in range gets them, and `.to(node)` limits them; the spacing must be above 0 |
 
@@ -295,6 +296,30 @@ frame, then change the copy" is two rules:
 A rule counts frames, not receptions: on the radio medium, a rule that selects the third frame
 acts at each receiver of that frame. A tap refuses a rule that names a node it does not know,
 because such a rule would select nothing.
+
+### Change a field without C++
+
+`.set(field, expression)` writes one field of the frame. The field is a path as in `capture`:
+`tcp.window`, `ipv4.timeToLive`, `Ipv4Header.timeToLive`. The expression has the syntax of a
+filter expression, and it is evaluated over the frame before the change, so it can name the
+field itself and the captures:
+
+```cpp
+.intercept(tap("tap").from("host2").filterPacket("tcp.ackBit == true && tcp.synBit == false").nth(1)
+             .set("tcp.window", "tcp.window - 1000"))              // [InterceptSet]
+.intercept(tap("tap").filterPacket("tcp.destPort == 1000").nth(2)
+             .set("tcp.sequenceNo", "{seq} + 100000"))               // a segment beyond the window
+.intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true").nth(1)
+             .set("ipv4.timeToLive", "1"))                           // a router answers with Time Exceeded
+```
+
+A rule can set more than one field. All the expressions of a rule read the frame before the
+first change, and a `.mutate(fn)` of the same rule runs after them. The rule writes the chunk
+that `capture` reads for the same path. After the change, the tap repairs the checksums that
+the change makes wrong: the IPv4 header checksum, and a computed TCP checksum, over the data
+of the datagram only. A declared checksum stays declared. The checksum of another protocol,
+such as UDP, is not repaired; a test that changes a UDP datagram with a computed checksum
+still needs a `.mutate(fn)`.
 
 `.mutate([](Packet *f) { f->setBitError(true); })` on a `PacketTap` sets the flag on the inner
 frame, not on the object on the wire. The Ethernet receivers discard such a frame too, since

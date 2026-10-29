@@ -13,25 +13,6 @@
 namespace inet {
 namespace protocoltest {
 
-static std::string formatCaptureValue(const cValue& value)
-{
-    // A value that carries a unit keeps it. intValue() and doubleValue() throw on such a
-    // value -- "Attempt to use the value '24B' as a dimensionless number" -- and the
-    // expression engine reads the quantity form, so 24B substitutes and compares correctly.
-    const char *unit = value.getUnit();
-    bool hasUnit = unit != nullptr && *unit != '\0';
-    switch (value.getType()) {
-        case cValue::INT: return hasUnit ? value.str() : std::to_string(value.intValue());
-        case cValue::BOOL: return value.boolValue() ? "true" : "false";
-        case cValue::DOUBLE: {
-            if (hasUnit)
-                return value.str();
-            std::ostringstream os; os << value.doubleValue(); return os.str();
-        }
-        default: return value.str();
-    }
-}
-
 EventPattern on(const char *path)
 {
     // A module path (the subscribe/source subtree): "MN[0]", "MN[0].wlan[0]",
@@ -78,18 +59,7 @@ bool matchesWithCaptures(const std::string& text, const CaptureStore& captures, 
     if (packet == nullptr)
         return false;
     std::string expression = text;
-    for (auto& capture : captures) {
-        std::string placeholder = "{" + capture.first + "}";
-        // Only convert a capture this expression names. Converting every stored capture
-        // made one step fail on a capture that belonged to another step.
-        if (expression.find(placeholder) == std::string::npos)
-            continue;
-        std::string value = formatCaptureValue(capture.second);
-        size_t pos;
-        while ((pos = expression.find(placeholder)) != std::string::npos)
-            expression.replace(pos, placeholder.size(), value);
-    }
-    if (expression.find('{') != std::string::npos)
+    if (!substituteCaptures(expression, captures))
         return false; // an unresolved {capture} -- not satisfiable yet
     try {
         PacketFilter filter;

@@ -1,0 +1,92 @@
+%description:
+
+Protocol Test Framework self test -- the set(...) word of an interception rule.
+
+A PacketTap is spliced on the link, and both hosts compute their TCP checksums. A rule sets
+the window field of the first acknowledgment of data that host2 sends to 1000 less than it
+was: the expression names the field itself. host1 must receive that acknowledgment with the
+changed window, and its TCP must not discard it. Without the repair of the checksum after the
+change, host1 discards the segment for its checksum and the guard fails.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("intercept_set")
+        .intercept(tap("tap").from("host2").filterPacket("tcp.ackBit == true && tcp.synBit == false").nth(1)
+                     .set("tcp.window", "tcp.window - 1000")
+                     .describe("the first acknowledgment of data from host2"))
+        .meanwhile(never(on("host1.tcp").signal("packetDropped")
+                             .describe("a segment that host1 discards")
+                             .within(2.0)))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false")
+                  .capture("window", "tcp.window")
+                  .describe("the first acknowledgment of data that host2 sends")
+                  .within(1.0))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+                  .filterPacket("tcp.ackBit == true && tcp.synBit == false")
+                  .first()
+                  .assertPacket("tcp.window == {window} - 1000")
+                  .describe("the same acknowledgment at host1, with the changed window")
+                  .within(0.1));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "intercept_set compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.protocoltest.PacketTap;
+
+network InterceptSetNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        tap: PacketTap { @display("p=400,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> tap.a;
+        tap.b       <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = InterceptSetNet
+sim-time-limit = 3s
+seed-set = 0
+
+# A wrong checksum must lead to a discarded segment, so the checksums are real.
+**.tcp.checksumMode = "computed"
+# The window field is the window, without a scale factor.
+**.tcp.windowScalingSupport = false
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 1000B
+*.host1.app[0].tClose = -1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+# static ARP: the only frames on the wire are the TCP/IP ones.
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST intercept_set: PASS

@@ -67,6 +67,8 @@ class INET_API InterceptionRules
 
     // The first rule that matches the frame and is at its targeted occurrence, else null.
     Rule *select(const Frame& frame);
+    // Applies the action "mutate" of a rule to a frame: its set(...) words, then its mutator.
+    static void mutate(const Rule& rule, Packet *packet);
 
     long getNumSelected() const { return numSelected; }
     const std::deque<Rule>& getRules() const { return rules; }

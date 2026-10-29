@@ -68,7 +68,7 @@ class INET_API Injection
 // index, and applies an action:
 //   drop      -- discard the frame (force a retransmission)
 //   delay     -- forward it after a hold time
-//   mutate    -- run a C++ mutator on the (inner) frame, then forward it
+//   mutate    -- set fields of the (inner) frame and run a C++ mutator on it, then forward it
 //   corrupt   -- forward it with a bit error, so that the receiver discards it
 //   duplicate -- forward it, then copies of it at a given spacing
 //   pass      -- forward it unchanged
@@ -88,7 +88,8 @@ class INET_API Interception
     std::string action = "drop";  // "drop" | "delay" | "mutate" | "corrupt" | "duplicate" | "pass"
     simtime_t delayTime = 0;
     std::function<void(Packet *)> mutator; // for action == "mutate"
-    simtime_t spacing = 0;        // for action == "duplicate": the time between two copies
+    std::vector<std::pair<std::string, std::string>> assignments; // for action == "mutate": field path, expression
+    simtime_t spacing = 0;       // for action == "duplicate": the time between two copies
     int numCopies = 0;            // for action == "duplicate"
     bool hasWithin = false;       // the rule ends withinTime after its start
     simtime_t withinTime = 0;
@@ -118,6 +119,12 @@ class INET_API Interception
     Interception& pass() { action = "pass"; return *this; }
     Interception& delay(double t) { action = "delay"; delayTime = t; return *this; }
     Interception& mutate(std::function<void(Packet *)> fn) { action = "mutate"; mutator = std::move(fn); return *this; }
+    // Write a field of the frame: set("tcp.window", "100"), set("ipv4.timeToLive", "1"). The
+    // expression is evaluated over the frame before the change, so it can name the field
+    // itself ("tcp.sequenceNo + 100000") and the captures ("{isn} + 1"). The tap repairs the
+    // IPv4 and TCP checksums that the change makes wrong. A rule can set more than one field,
+    // and the fields are set before a mutate(...) of the same rule runs.
+    Interception& set(const char *fieldPath, const char *expression) { action = "mutate"; assignments.emplace_back(fieldPath, expression); return *this; }
     // The receiver gets the frame with a bit error, so its MAC discards it. A tap sets the
     // flag on the object on the wire, as the bit error model of a channel does.
     Interception& corrupt() { action = "corrupt"; return *this; }

@@ -98,5 +98,21 @@ InterceptionRules::Rule *InterceptionRules::select(const Frame& frame)
     return nullptr;
 }
 
+void InterceptionRules::mutate(const Rule& rule, Packet *packet)
+{
+    const auto& interception = rule.interception;
+    // Every expression reads the frame before the change, so the order of the words of one
+    // rule does not change what they write.
+    static const CaptureStore noCaptures;
+    const CaptureStore& captures = rule.captures != nullptr ? *rule.captures : noCaptures;
+    std::vector<cValue> values;
+    for (const auto& assignment : interception.assignments)
+        values.push_back(evalPacketExpression(assignment.second, captures, packet));
+    for (size_t i = 0; i < values.size(); i++)
+        setPacketField(packet, interception.assignments[i].first, values[i]);
+    if (interception.mutator)
+        interception.mutator(packet);
+}
+
 } // namespace protocoltest
 } // namespace inet

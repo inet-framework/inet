@@ -22,9 +22,6 @@ namespace inet { class PacketFilter; }
 namespace inet {
 namespace protocoltest {
 
-// Values captured from earlier matched events, keyed by name.
-typedef std::map<std::string, cValue> CaptureStore;
-
 // Context handed to a lambda predicate: the event under test plus the values
 // captured by earlier steps (read with get()).
 struct MatchContext {

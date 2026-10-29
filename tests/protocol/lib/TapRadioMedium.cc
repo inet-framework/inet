@@ -172,8 +172,7 @@ Packet *TapRadioMedium::receivePacket(const IRadio *receiver, IWirelessSignal *s
     auto decision = getDecision(receiver, signal->getTransmission());
     if (decision.effect == Effect::MUTATE) {
         EV_INFO << "TapRadioMedium: mutating " << packet->getName() << " for " << getNodeName(receiver) << endl;
-        if (decision.rule->interception.mutator)
-            decision.rule->interception.mutator(packet);
+        InterceptionRules::mutate(*decision.rule, packet);
         numMutated++;
     }
     else if (decision.effect == Effect::CORRUPT)
