@@ -1,0 +1,62 @@
+%description:
+
+TcpCubic.cntClamp:tight -- before the first loss, the window grows by one segment for each 2 ACKs or faster.
+
+The claim (TcpCubic.ned): "cap on the per-increment ACK count while no W_max is known: before
+the first loss, and after each RTO, which clears W_max".
+
+The classes: linux (20, the default, the value of Linux) and tight (a smaller value), invalid
+(below 0). The code: while no W_max is known, the ACK count of one increment is at most the
+value (TcpCubic::update()). This test separates "tight" from the other value.
+
+Host under test: host1, with TcpCubic, an initial threshold of 8000 bytes and without the
+Reno-friendly estimate (preconditions: the estimate grows faster than the clamp), which sends
+without a loss to host2, whose window is 1000000 bytes; the round trip is 40 ms.
+Observation: level 3, at 1.5 s, the window is above 1000000 bytes (about 2500000): one segment for each 2 ACKs.
+
+%# parameter: TcpCubic.cntClamp
+%# class: tight
+%# value: 2
+%# key: *.host1.tcp.conn-*.algorithm.cntClamp
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicCntClampTight")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .act(action().at(1.5)
+                 .describe("the window at 1.5 s")
+                 .assertModule("host1.tcp.conn-*", "state.snd_cwnd > 1000000"));
+}
+
+%activity:
+EV << "TcpCubicCntClampTight compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.cntClamp = 2    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+*.linkDelay = 10ms
+*.host1.tcp.initialSsthresh = 8000
+*.host1.tcp.conn-*.algorithm.tcpFriendliness = false
+*.host2.tcp.advertisedWindow = 1000000
+*.host1.app[0].sendBytes = 5000000B
+sim-time-limit = 2s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicCntClampTight: PASS

@@ -1,0 +1,33 @@
+%description:
+
+TcpCubic.c:invalid -- a constant of 0 stops the run with an error.
+
+The claim: the code accepts a constant above 0.
+
+The classes: rfc9438 (0.4, the default, the value of RFC 9438), other (another value above 0),
+invalid (0 and less). The code: at the start of an epoch, K = cbrt((W_max - cwnd) / C)
+(TcpCubic::update()).
+
+Host under test: host1, with TcpCubic. Observation: the error, and the exit code of the run.
+
+%# parameter: TcpCubic.c
+%# class: invalid
+%# value: 0
+%# key: *.host1.tcp.conn-*.algorithm.c
+%# expected-result: PASS
+
+%activity:
+EV << "TcpCubicCInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.c = 0    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+c must be more than 0, but it is 0

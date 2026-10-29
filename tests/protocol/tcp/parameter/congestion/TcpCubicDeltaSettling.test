@@ -1,0 +1,68 @@
+%description:
+
+TcpCubic.delta:settling -- the RTT samples count after the settling time of an epoch.
+
+The claim (TcpCubic.ned): "settling time from the start of each epoch of congestion avoidance
+(its first ACK), during which RTT samples are ignored".
+
+The classes: settling (10ms, the default) and long (a time longer than the run), invalid
+(below 0). The code: the RTT samples of the first delta of an epoch are ignored
+(TcpCubic::processRttSample()); the smallest sample is cubic_delay_min. This test separates "settling" from the other value.
+
+Host under test: host1, with TcpCubic and an initial threshold of 8000 bytes, so its epoch of
+congestion avoidance starts at once; the round trip is 40 ms until 0.5 s, when an action
+shortens it to 4 ms. Observation: level 3, at 1 s, the smallest RTT sample is below 10 ms: the samples after the change count.
+
+%# parameter: TcpCubic.delta
+%# class: settling
+%# value: 10ms
+%# key: *.host1.tcp.conn-*.algorithm.delta
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicDeltaSettling")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .act(action().at(0.5)
+                 .describe("all links get a delay of 1 ms: the round trip falls from 40 ms to 4 ms")
+                 .run("tap", [](cModule *tap) {
+                     cModule *network = tap->getParentModule();
+                     for (cModule *node : {network->getSubmodule("host1"), network->getSubmodule("host2")})
+                         node->gate("ethg$o", 0)->getChannel()->par("delay").setValue(cValue(0.001, "s"));
+                     for (const char *name : {"a$o", "b$o"})
+                         tap->gate(name)->getChannel()->par("delay").setValue(cValue(0.001, "s"));
+                 }))
+        .act(action().at(1.0)
+                 .describe("the smallest RTT sample at 1 s")
+                 .assertModule("host1.tcp.conn-*", "state.cubic_delay_min < 0.01"));
+}
+
+%activity:
+EV << "TcpCubicDeltaSettling compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.delta = 10ms    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+*.linkDelay = 10ms
+*.host1.tcp.initialSsthresh = 8000
+*.host1.app[0].sendBytes = 1000000B
+sim-time-limit = 1.5s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicDeltaSettling: PASS

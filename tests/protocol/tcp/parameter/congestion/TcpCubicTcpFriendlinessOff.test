@@ -1,0 +1,64 @@
+%description:
+
+TcpCubic.tcpFriendliness:off -- the window follows the cubic curve alone.
+
+The claim (TcpCubic.ned): "never grow slower than the Reno-friendly estimate of RFC 9438 section
+4.3, which grows by about 0.53 segments per RTT (alpha_cubic for beta = 0.7); false: no
+estimate".
+
+The classes: on (true, the default) and off (false). The code: with the estimate, the window
+grows at least as fast as the Reno-friendly estimate (TcpCubic::update()); without it, it
+follows the cubic curve, which stays below W_max until K. This test separates "off" from the other value.
+
+Host under test: host1, with TcpCubic and without SACK, which sends 5000000 bytes to host2,
+whose window is 1000000 bytes; the round trip is 40 ms, and the tap drops the 15th data
+segment once. K is about 3 s. Observation: level 3, at 2.6 s, about 2.2 s after the loss,
+the window is not above W_max: the cubic curve before K.
+
+%# parameter: TcpCubic.tcpFriendliness
+%# class: off
+%# value: false
+%# key: *.host1.tcp.conn-*.algorithm.tcpFriendliness
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicTcpFriendlinessOff")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .act(action().at(2.6)
+                 .describe("the window at 2.6 s")
+                 .assertModule("host1.tcp.conn-*", "state.snd_cwnd < (state.cubic_last_max_cwnd + 1) * 1448"));
+}
+
+%activity:
+EV << "TcpCubicTcpFriendlinessOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.tcpFriendliness = false    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+*.linkDelay = 10ms
+*.host1.tcp.sackSupport = false
+*.host2.tcp.advertisedWindow = 1000000
+*.host1.app[0].sendBytes = 5000000B
+sim-time-limit = 4s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicTcpFriendlinessOff: PASS

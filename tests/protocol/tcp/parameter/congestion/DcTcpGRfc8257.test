@@ -1,0 +1,57 @@
+%description:
+
+DcTcp.g:rfc8257 -- after one window of marked data, alpha is g.
+
+The claim (DcTcp.ned): "the estimation gain g of the fraction of marked bytes, alpha (RFC 8257
+section 4.2)".
+
+The classes: rfc8257 (1/16, the default of RFC 8257 section 4.2), other (another value up to
+1), invalid (0 and less, above 1). The code: DcTcp updates alpha once each window,
+alpha = alpha * (1 - g) + g * F, from 0, and emits it as calcLoad (DcTcp::processEce()). This test separates "rfc8257" from the other value.
+
+Host under test: host1, with DcTcp and tcpEcnMode "rfc3168" (preconditions), which sends
+100000 bytes; the tap marks each data segment of host1 CE, so the fraction F is 1.
+Observation: level 2, the first value of the signal calcLoad is g, 0.0625.
+
+%# parameter: DcTcp.g
+%# class: rfc8257
+%# value: 0.0625
+%# key: *.host1.tcp.conn-*.algorithm.g
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("DcTcpGRfc8257")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == false && ipv4.totalLengthField > 100B")
+                     .set("ipv4.ecn", "3")
+                     .describe("each data segment of host1: mark it CE"))
+        .once(on("host1.tcp").signal("calcLoad")
+                  .first()
+                  .assertValueBetween(0.0624, 0.0626)
+                  .describe("the first alpha, after one window of marked data")
+                  .within(1.0));
+}
+
+%activity:
+EV << "DcTcpGRfc8257 compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.g = 0.0625    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "DcTcp"
+*.host1.tcp.tcpEcnMode = "rfc3168"
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST DcTcpGRfc8257: PASS

@@ -1,0 +1,33 @@
+%description:
+
+TcpCubic.delta:invalid -- a negative time stops the run with an error.
+
+The claim: the code accepts 0 and more.
+
+The classes: settling (10ms, the default) and long (a time longer than the run), invalid
+(below 0). The code: the RTT samples of the first delta of an epoch are ignored
+(TcpCubic::processRttSample()); the smallest sample is cubic_delay_min.
+
+Host under test: host1, with TcpCubic. Observation: the error, and the exit code of the run.
+
+%# parameter: TcpCubic.delta
+%# class: invalid
+%# value: -1s
+%# key: *.host1.tcp.conn-*.algorithm.delta
+%# expected-result: PASS
+
+%activity:
+EV << "TcpCubicDeltaInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.delta = -1s    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+delta must be 0 or more, but it is -1s

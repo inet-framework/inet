@@ -1,0 +1,64 @@
+%description:
+
+TcpCubic.c:other -- the window regains its size at the loss after K = cbrt(W_max * (1 - beta) / C).
+
+The claim (TcpCubic.ned): "scaling constant C of the cubic window-growth curve (RFC 9438
+section 4.2)".
+
+The classes: rfc9438 (0.4, the default, the value of RFC 9438), other (another value above 0),
+invalid (0 and less). The code: at the start of an epoch, K = cbrt((W_max - cwnd) / C)
+(TcpCubic::update()). This test separates "other" from the other value: K moves with the cube root of 1 / C.
+
+Host under test: host1, with TcpCubic and without SACK, which sends 100000 bytes; the round
+trip is 40 ms, and the tap drops the 15th data segment once, at a window of about 40
+segments. Observation: level 3, the time K of the epoch after the loss is about 1.4 s; the curve
+itself needs seconds to show on the wire.
+
+%# parameter: TcpCubic.c
+%# class: other
+%# value: 4
+%# key: *.host1.tcp.conn-*.algorithm.c
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicCOther")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 100000")
+             .first()
+                  .assertModule("host1.tcp.conn-*", "state.cubic_K >= 1.0 && state.cubic_K <= 2.0")
+             .describe("the ACK of the last byte, with K of the epoch after the loss")
+             .within(6.0));
+}
+
+%activity:
+EV << "TcpCubicCOther compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.c = 4    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+*.linkDelay = 10ms
+*.host1.tcp.sackSupport = false
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicCOther: PASS

@@ -1,0 +1,33 @@
+%description:
+
+DcTcp.g:invalid -- a gain of 0 stops the run with an error.
+
+The claim: the code accepts a gain above 0 and at most 1.
+
+The classes: rfc8257 (1/16, the default of RFC 8257 section 4.2), other (another value up to
+1), invalid (0 and less, above 1). The code: DcTcp updates alpha once each window,
+alpha = alpha * (1 - g) + g * F, from 0, and emits it as calcLoad (DcTcp::processEce()).
+
+Host under test: host1, with DcTcp. Observation: the error, and the exit code of the run.
+
+%# parameter: DcTcp.g
+%# class: invalid
+%# value: 0
+%# key: *.host1.tcp.conn-*.algorithm.g
+%# expected-result: PASS
+
+%activity:
+EV << "DcTcpGInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.g = 0    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "DcTcp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+g must be more than 0 and at most 1, but it is 0

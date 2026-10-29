@@ -1,0 +1,34 @@
+%description:
+
+TcpCubic.beta:invalid -- a factor of 1 stops the run with an error.
+
+The claim: the code accepts a factor above 0 and below 1.
+
+The classes: rfc9438 (0.7, the default, the value of RFC 9438), other (another value between 0
+and 1), invalid (0 and less, 1 and more). The code: TcpCubic::calculateSsthresh() returns
+max(floor(segCwnd * beta), 2) segments; TcpCubic::initializeAlgorithm() checks the value.
+
+Host under test: host1, with TcpCubic, whose algorithm reads the parameter at the open.
+Observation: the error, and the exit code of the run.
+
+%# parameter: TcpCubic.beta
+%# class: invalid
+%# value: 1.0
+%# key: *.host1.tcp.conn-*.algorithm.beta
+%# expected-result: PASS
+
+%activity:
+EV << "TcpCubicBetaInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.beta = 1.0    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+beta must be more than 0 and less than 1, but it is 1

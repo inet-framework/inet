@@ -1,0 +1,69 @@
+%description:
+
+TcpCubic.beta:rfc9438 -- at a loss, the window goes down to 0.7 of its size.
+
+The claim (TcpCubic.ned): "multiplicative-decrease factor applied to cwnd on loss (RFC 9438
+section 4.6)".
+
+The classes: rfc9438 (0.7, the default, the value of RFC 9438), other (another value between 0
+and 1), invalid (0 and less, 1 and more). The code: TcpCubic::calculateSsthresh() returns
+max(floor(segCwnd * beta), 2) segments; TcpCubic::initializeAlgorithm() checks the value. This test separates "rfc9438" from the other value.
+
+Host under test: host1, with TcpCubic and without SACK, which sends 100000 bytes; the round
+trip is 40 ms, and the tap drops the 15th data segment once. Observation: level 2, the first
+slow-start threshold is 0.7 of the largest window before the loss.
+
+%# parameter: TcpCubic.beta
+%# class: rfc9438
+%# value: 0.7
+%# key: *.host1.tcp.conn-*.algorithm.beta
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicBetaRfc9438")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .captureMax("cwndBefore", "value")
+                                        .within(4.0)))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      double ratio = context.event.value / context.get("cwndBefore").doubleValue();
+                      return ratio >= 0.62 && ratio <= 0.78;
+                  })
+                  .describe("the threshold at the loss, 0.7 of the window")
+                  .within(1.5));
+}
+
+%activity:
+EV << "TcpCubicBetaRfc9438 compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.beta = 0.7    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+*.linkDelay = 10ms
+*.host1.tcp.sackSupport = false
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicBetaRfc9438: PASS

@@ -1,0 +1,67 @@
+%description:
+
+TcpCubic.fastConvergence:on -- at a loss below the previous W_max, W_max goes down further.
+
+The claim (TcpCubic.ned): "on a loss below the previous W_max, release extra window so a newly
+arrived competing flow can grow (RFC 9438 section 4.7)".
+
+The classes: on (true, the default) and off (false). The code: at a loss below the previous
+W_max, fast convergence sets W_max = segCwnd * (1 + beta) / 2, else W_max = segCwnd
+(TcpCubic::calculateSsthresh()). With beta 0.7 and the threshold beta * segCwnd, W_max over
+the threshold is 0.85 / 0.7 = 1.21 with fast convergence and 1 / 0.7 = 1.43 without. This test separates "on" from the other value.
+
+Host under test: host1, with TcpCubic and without SACK, which sends 200000 bytes; the round
+trip is 40 ms, and the tap drops the 15th and the 80th data segment once; the second loss
+comes before the window regains its first W_max. Observation: level 3, at the second loss,
+W_max over the new threshold is 1.21: fast convergence.
+
+%# parameter: TcpCubic.fastConvergence
+%# class: on
+%# value: true
+%# key: *.host1.tcp.conn-*.algorithm.fastConvergence
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpCubicFastConvergenceOn")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 79 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 80th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .nth(2)
+                  .assertModule("host1.tcp.conn-*", "state.cubic_last_max_cwnd * 1448.0 / state.ssthresh >= 1.1 && state.cubic_last_max_cwnd * 1448.0 / state.ssthresh <= 1.32")
+                  .describe("the threshold at the second loss, with W_max over it 1.21: fast convergence")
+                  .within(3.0));
+}
+
+%activity:
+EV << "TcpCubicFastConvergenceOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.conn-*.algorithm.fastConvergence = true    # the parameter under test
+*.host1.tcp.tcpAlgorithmClass = "TcpCubic"
+*.linkDelay = 10ms
+*.host1.tcp.sackSupport = false
+*.host1.app[0].sendBytes = 200000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpCubicFastConvergenceOn: PASS
