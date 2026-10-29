@@ -452,7 +452,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 16 — `fastopen`, 33 tests.** Done: `8f631bf2ab` (one helper hides any option), `ac2c9abf8d`; 33 PASS.
 - [x] **Step 17 — `module` and `spoof`, 24 tests.** Done: `1fa921b193` (the action word `stopNode`), `e857617919` (`module`), `f021d0de88` (`spoof`), `0082f7a6b1` (the facet `other-segment`); 20 PASS, 4 FAIL (PF-9, PF-11, PF-13, PF-14).
 - [x] **Step 18 — the coverage gap loop** (above), and the final numbers in this plan. Done: `33d547ad38` (the facets of the algorithms), `efbb6cd69a` (the other facets), `d63ddf0ff1` (the coverage section of the catalog and PF-15); 19 facets, all PASS; all pools 86.0 % of the TCP lines.
-- [ ] **Step 19 — the documents.** A guide `doc/project/guide/derive-tests-from-parameters.md` that any module can follow; a paragraph in `test-anatomy.md` and a row in `AUTHORING.md` §10; `parameter/README.md`.
+- [x] **Step 19 — the documents.** A guide `doc/project/guide/derive-tests-from-parameters.md` that any module can follow; a paragraph in `test-anatomy.md` and a row in `AUTHORING.md` §10; `parameter/README.md`. Done: `d0dbd2e35c` (the guide, the paragraph of `test-anatomy.md`, the index of `doc/project`), `5030bc915a` (`parameter/README.md` and the row of `AUTHORING.md` §10).
 - [ ] **Step 20 — close.** Move this plan to `plan/done/`.
 
 Each step from 6 to 17 does the same: the code pass of the group (update the catalog), the tests, a run with `opp_run_protocol_tests -m debug -w tcp -f parameter/<group>`, the cross-class check, the verdicts in the catalog, the coverage of the group.
@@ -619,3 +619,8 @@ The user settled these on 2026-10-29.
 - DcTcp negotiates ECN only with `tcpEcnMode` "rfc3168" or "accecn"; without it, it sends an ECN-setup SYN and nothing more. The tests of `DcTcp.g` end at the first alpha, so no test reached the reduction of DcTcp before. TcpVegas computes its window with `snd_mss` (1460), and the window before its reduction is the last value of the signal, not the largest.
 - The 1325 lines after the loop: 46 wait for PF-6, 245 belong to a test class of the socket API, 760 belong to the standards tests, and 274 are model errors, strings of the inspectors, and dead code (PF-15). The catalog has the table.
 - The regression run has 1164 tests and 73 unexpected FAILs, as before.
+
+**Step 19 (the documents).**
+- The guide `doc/project/guide/derive-tests-from-parameters.md` now owns the method: the three principles, the eight rules that find the classes, the observation levels, and the seven steps with the coverage gap loop. The sections of this plan with the same content describe the work of the plan; the guide is what a later module follows.
+- `parameter/README.md` keeps only what is special to the folder and links to the guide for the method (DR-CITE-DONT-REPEAT): the groups and their counts, the parts of a class name that the scripts read, the form of a file, the shared networks with their letters, the helpers, and the commands.
+- The paragraph of `test-anatomy.md` is in its section "The categories" and not in a new section, so the seal index of `audit/seal-list.md` stays as it is (`check-seals.sh` passes). `check-links.sh` reports 18 broken links, all of them older links to the PDF files of the sibling `standards` project; the new links resolve. `check-commits.sh` passes for the commits of steps 17 to 19.
