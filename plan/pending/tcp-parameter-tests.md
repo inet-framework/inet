@@ -447,7 +447,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 11 — `receive`, 25 tests.** Done: `dccaa84b57`; 25 PASS.
 - [x] **Step 12 — `close`, 14 tests.** Done: `6e2bf3fc72`; 14 PASS.
 - [x] **Step 13 — `ecn`, 19 tests.** Done: `3d9eb039d5`; 19 PASS.
-- [ ] **Step 14 — `pmtu`, 11 tests.**
+- [x] **Step 14 — `pmtu`, 12 tests.** Done: `a87c9acdd3` (the comment of `TapRouterNetwork`), `e9c1ba160d`; 12 PASS.
 - [ ] **Step 15 — `keepalive`, 7 tests.**
 - [ ] **Step 16 — `fastopen`, 29 tests.**
 - [ ] **Step 17 — `module` and `spoof`, 14 tests.**
@@ -575,3 +575,11 @@ The user settled these on 2026-10-29.
 - The first data segment of an AccECN client carries the AccECN option, so it holds 1436 bytes, not 1448.
 - A full close makes the connection a time-wait socket already in FIN_WAIT_2, so the ACK of the FIN of the peer is the ACK of TIME_WAIT that `accEcnBareTimeWaitAck` changes.
 - The group runs in 2 s of wall time with 32 cores. D3: no socket call, and no new library word.
+
+**Step 14 (`pmtu`).**
+- The code pass changed the draft from 11 to 12 tests. `pmtudTimeout` has the classes `rfc1191` (600 s; the run lasts 602 s of simulated time, and the idle time costs nothing) and `other`. `mtuProbing` has the classes `off`, `search` and `invalid`: the code turns the search on only for 2, so 1 acts as 0 and falls into `off`, as the NED says. `baseMss` got the class `linux` (1024) beside `other` and `invalid`.
+- The comment of `TapRouterNetwork` named the key `*.router.eth[1].mtu`, which the Ethernet interface does not have; the MTU is a parameter of the MAC, `*.router.eth[1].mac.mtu` (corrected in `a87c9acdd3`).
+- The restore of `pmtudTimeout` comes at the first segment after the timeout, but the burst of that segment keeps the segment size that the sender computed before; the next burst, after the delayed ACK of the peer, has the MSS of the handshake. The tests look for 0.5 s.
+- The search of RFC 4821 stops when its range is narrower than 8 bytes: on a path of 1500 bytes its last probe has an MTU of 1493, so no segment reaches 1448 bytes of data. The tests compare with 1400 bytes of IP.
+- The tests measure the frames that leave host1 at its MAC (`host1.eth[0].mac`, `packetSentToLower`) by `ipv4.totalLengthField`, which needs no arithmetic on the lengths of the headers.
+- The group runs in 3 s of wall time with 32 cores. D3: no socket call, and no new library word.
