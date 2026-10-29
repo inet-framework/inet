@@ -563,6 +563,7 @@ library, one folder per subject:
 | --- | --- |
 | [`../self/`](../self) | the framework itself: the matching engine, the combinators, injection, interception |
 | [`../tcp/`](../tcp) | TCP |
+| [`../tcp/parameter/`](../tcp/parameter/README.md) | TCP: one test for each class of values of each NED parameter ([the procedure](../../../doc/project/guide/derive-tests-from-parameters.md)) |
 | [`../arp/`](../arp), [`../ipv4/`](../ipv4), [`../ipv6/`](../ipv6), [`../ethernet/`](../ethernet) | one folder per protocol |
 | [`../wifi/`](../wifi) | the IEEE 802.11 conformance suite (its own runner) |
 
