@@ -9,6 +9,7 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211OfdmSignalField.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211HtSignalField.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
 
 namespace inet {
@@ -195,11 +196,30 @@ const Ptr<Chunk> Ieee80211ErpOfdmPhyHeaderSerializer::deserializeFields(MemoryIn
 void Ieee80211HtPhyHeaderSerializer::serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const
 {
     auto htPhyHeader = dynamicPtrCast<const Ieee80211HtPhyHeader>(chunk);
+    auto bits = packIeee80211HtSignalField(*htPhyHeader);
+    for (int byte = 0; byte < 6; byte++)
+        stream.writeByte((bits >> (8 * byte)) & 0xFF);
 }
 
 const Ptr<Chunk> Ieee80211HtPhyHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
 {
     auto htPhyHeader = makeShared<Ieee80211HtPhyHeader>();
+    uint64_t bits = 0;
+    for (int byte = 0; byte < 6; byte++)
+        bits |= uint64_t(stream.readByte()) << (8 * byte);
+    htPhyHeader->setMcs(bits & 0x7F);
+    htPhyHeader->setChannelWidth40((bits >> 7) & 1);
+    htPhyHeader->setLengthField(B((bits >> 8) & 0xFFFF));
+    htPhyHeader->setSmoothing((bits >> 24) & 1);
+    htPhyHeader->setNotSounding((bits >> 25) & 1);
+    htPhyHeader->setReserved((bits >> 26) & 1);
+    htPhyHeader->setAggregation((bits >> 27) & 1);
+    htPhyHeader->setStbc((bits >> 28) & 3);
+    htPhyHeader->setFecCoding((bits >> 30) & 1);
+    htPhyHeader->setShortGi((bits >> 31) & 1);
+    htPhyHeader->setExtensionSpatialStreams((bits >> 32) & 3);
+    htPhyHeader->setCrc((bits >> 34) & 0xFF);
+    htPhyHeader->setTail((bits >> 42) & 0x3F);
     return htPhyHeader;
 }
 

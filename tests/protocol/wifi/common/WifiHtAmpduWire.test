@@ -1,0 +1,142 @@
+%description:
+Check HT-SIG octets from a singleton A-MPDU through production radio encapsulation and serialization.
+An independent fixed vector defines MCS 0, 20 MHz, long GI, 104 PSDU octets, aggregation, and CRC.
+Typed and raw-byte transmissions must produce the same six octets.
+
+%extraargs: -r 0..1
+
+%file: HtAmpduWire.cc
+#include "ProtocolTest.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+using namespace inet::protocoltest;
+
+class HtAmpduWireDriver : public cSimpleModule, public cListener
+{
+    bool checked = false;
+  protected:
+    void initialize() override {
+        getModuleByPath("^.sender.radio")->subscribe(transmissionStartedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("send"));
+    }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto packet = new Packet("singleton");
+        auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+        delimiter->setLength(100);
+        packet->insertAtBack(delimiter);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(100, 0)));
+        auto modes = Ieee80211ModeSet::getModeSet("n(mixed-2.4Ghz)");
+        const IIeee80211Mode *selected = nullptr;
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto mode = modes->getMode(i);
+            if (mode->getHtMcsIndex() == 0 && mode->getDataMode()->getBandwidth() == MHz(20) && !mode->isHtShortGuardInterval())
+                selected = mode;
+        }
+        ASSERT(selected);
+        packet->addTag<Ieee80211ModeReq>()->setMode(selected);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        send(packet, "out");
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        ASSERT(signal == transmissionStartedSignal && !checked);
+        auto packet = check_and_cast<const ITransmission *>(object)->getPacket();
+        // IEEE Std 802.11-2024, Figure 19-6 and 19.3.9.4.4. Polynomial division supplies this fixed CRC vector.
+        const std::vector<uint8_t> expected{0x00, 0x68, 0x00, 0x0F, 0xB4, 0x01};
+        ASSERT(packet->peekDataAt<BytesChunk>(b(0), B(6))->getBytes() == expected);
+        Packet independent("independent", makeShared<BytesChunk>(expected));
+        auto header = independent.peekAtFront<Ieee80211HtPhyHeader>(B(6));
+        ASSERT(header->getChunkLength() == b(48) && header->getLengthField() == B(104));
+        // Descriptors keep this fixture source compatible with the parent header.
+        auto descriptor = cClassDescriptor::getDescriptorFor(header.get());
+        auto objectPointer = toAnyPtr(const_cast<Ieee80211HtPhyHeader *>(header.get()));
+        auto field = [&](const char *name) {
+            int index = descriptor->findField(name);
+            ASSERT(index >= 0);
+            return descriptor->getFieldValue(objectPointer, index, 0);
+        };
+        ASSERT(field("mcs").intValue() == 0 && field("aggregation").boolValue() && !field("shortGi").boolValue());
+        ASSERT(field("crc").intValue() == 0x6D);
+        checked = true;
+        emit(registerSignal("testHtAmpduWire"), 1L);
+    }
+    using cListener::finish;
+    void finish() override { ASSERT(checked); }
+};
+Define_Module(HtAmpduWireDriver);
+
+Define_ProtocolTest(wifi_ht_ampdu_wire) {
+    return ProtocolTest("wifi_ht_ampdu_wire")
+        .once(on("driver").signal("testHtAmpduWire").assertValue(1).within(0.01));
+}
+
+%file: test.ned
+import inet.protocoltest.ProtocolTester;
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple HtAmpduWireDriver {
+    parameters:
+        @class(::HtAmpduWireDriver);
+        @signal[testHtAmpduWire](type=long);
+    gates: output out;
+}
+module HtAmpduWireSender {
+    parameters: @networkNode;
+    gates: input in; input radioIn @directIn;
+    submodules:
+        mobility: StationaryMobility;
+        radio: Ieee80211ScalarRadio;
+    connections allowunconnected:
+        in --> radio.upperLayerIn;
+        radioIn --> radio.radioIn;
+}
+network Test {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        tester: ProtocolTester;
+        driver: HtAmpduWireDriver;
+        sender: HtAmpduWireSender;
+    connections: driver.out --> sender.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 2ms
+seed-set = 0
+*.tester.testName = "wifi_ht_ampdu_wire"
+*.tester.stateSignals = "testHtAmpduWire"
+*.sender.radio.opMode = "n(mixed-2.4Ghz)"
+*.sender.radio.initialRadioMode = "transmitter"
+*.sender.radio.sendRawBytes = ${raw=false,true}
+*.sender.radio.antenna.mobilityModule = "^.^.mobility"
+**.vector-recording = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+PROTOCOLTEST wifi_ht_ampdu_wire: PASS
+%contains: stdout
+Run statistics: total 2, successful 2
+%not-contains: stdout
+PROTOCOLTEST wifi_ht_ampdu_wire: FAIL
