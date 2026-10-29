@@ -1,0 +1,73 @@
+%description:
+
+Tcp.tcpAlgorithmClass:dumb -- DumbTcp repairs a loss only after its fixed timeout of 2 s.
+
+The claim (DumbTcp.ned): "a fixed retransmission timeout, no delayed ACKs, no silly window
+avoidance and no congestion control"; the timeout is 2 s (DumbTcp.cc).
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms. This test separates DumbTcp: the six algorithms with a fast retransmit repair the loss
+within a round trip or two, and TcpNoCongestionControl and TcpVegas, whose RTO is 1 s, repair
+it before 2 s.
+
+Host under test: host1, which sends 100000 bytes; the round trip is 40 ms, and the tap drops
+the 15th data segment once. Observation: level 1, the 15th segment goes again only 2 s or
+more after its first transmission.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: dumb
+%# value: "DumbTcp"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassDumbTcp")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && pk.dataLength > tcp.headerLength")
+             .describe("the 15th data segment of host1")
+             .within(1.0))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && pk.dataLength > tcp.headerLength")
+              .describe("an early 15th data segment again, after the fixed timeout")
+              .within(1.95))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && pk.dataLength > tcp.headerLength")
+             .describe("15th data segment again, after the fixed timeout")
+             .within(0.65));
+}
+
+%activity:
+EV << "TcpAlgorithmClassDumbTcp compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "DumbTcp"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+*.host1.tcp.sackSupport = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassDumbTcp: PASS

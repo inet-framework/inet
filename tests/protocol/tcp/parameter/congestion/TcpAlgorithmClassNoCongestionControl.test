@@ -1,0 +1,69 @@
+%description:
+
+Tcp.tcpAlgorithmClass:nocc -- without congestion control, the first flight is the whole window of the peer.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection";
+TcpNoCongestionControl has no congestion window.
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms. This test separates TcpNoCongestionControl: the seven algorithms with congestion control
+send an initial window of three segments, and DumbTcp measures no round trip, so it gives no
+signal rto.
+
+Host under test: host1, which sends 100000 bytes; the round trip is 40 ms and the window of
+host2 is 65535 bytes. Observation: level 1, more than 20 data segments before the first ACK
+of data; level 2, then a value of the signal rto.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: nocc
+%# value: "TcpNoCongestionControl"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassNoCongestionControl")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                                        .captureCount("flight")
+                                        .within(2.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == false && tcp.ackBit == true && tcp.ackNo > {isn} + 1")
+             .first()
+                  .assertPacket("{flight} > 20")
+             .describe("the first ACK of data, after more than 20 data segments")
+             .within(1.0))
+        .once(on("host1.tcp").signal("rto").describe("a value of the RTO, from a measurement").within(1.0));
+}
+
+%activity:
+EV << "TcpAlgorithmClassNoCongestionControl compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpNoCongestionControl"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassNoCongestionControl: PASS

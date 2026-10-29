@@ -1,0 +1,36 @@
+%description:
+
+Tcp.tcpAlgorithmClass:unknown -- a name without a NED type stops the run with an error.
+
+The claim: the code needs a NED type for the name (TcpConnection::createTcpAlgorithm()).
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms.
+
+Host under test: host1, whose connection creates its algorithm at the open. Observation: the
+error, and the exit code of the run.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: unknown
+%# value: "NoSuchTcp"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%activity:
+EV << "TcpAlgorithmClassUnknown compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "NoSuchTcp"    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+The TCP algorithm "NoSuchTcp" has no NED type

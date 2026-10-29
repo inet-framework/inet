@@ -1,0 +1,73 @@
+%description:
+
+Tcp.tcpAlgorithmClass:tahoe -- Tahoe drops the window to one segment at a fast retransmit, and turns SACK off.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; TcpTahoe has no fast
+recovery, and "an algorithm without SACK recovery turns sackSupport off".
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms. This test separates TcpTahoe: TcpNewReno, TcpReno, TcpCubic and DcTcp offer SACK, TcpVegas
+and TcpWestwood keep more than one segment at a fast retransmit, and TcpNoCongestionControl
+and DumbTcp have no window.
+
+Host under test: host1, with sackSupport true (the default), which sends 100000 bytes; the
+round trip is 40 ms, and the tap drops the 15th data segment once. Observation: level 1, the
+SYN of host1 has no SACK-Permitted option; level 2, the smallest window is one MSS, 1460
+bytes, without a timeout.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: tahoe
+%# value: "TcpTahoe"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassTahoe")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+                  .assertEvent([](const MatchContext& context) { return tcpOptionCount(context.event.packet, inet::tcp::TCPOPTION_SACK_PERMITTED) == 0; })
+             .describe("the SYN of host1, without SACK-Permitted")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .captureMin("smallestCwnd", "value")
+                                        .within(4.0)))
+        .meanwhile(never(on("host1.tcp").signal("numRtos").describe("a retransmission timeout").within(4.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 100000")
+             .first()
+                  .assertPacket("{smallestCwnd} == 1460")
+             .describe("the ACK of the last byte; the smallest window was one MSS")
+             .within(6.0));
+}
+
+%activity:
+EV << "TcpAlgorithmClassTahoe compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpTahoe"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassTahoe: PASS

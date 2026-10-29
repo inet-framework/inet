@@ -1,0 +1,83 @@
+%description:
+
+Tcp.tcpAlgorithmClass:westwood -- Westwood sets a threshold at a fast retransmit and inflates the window with each further duplicate ACK.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; TcpWestwood sets the
+threshold from its estimate of the bandwidth.
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms. This test separates TcpWestwood: TcpVegas inflates the window too but sets no threshold at
+a fast retransmit, TcpNewReno, TcpReno, DcTcp and TcpCubic keep the window flat during the
+recovery, TcpTahoe drops it to one segment, and TcpNoCongestionControl and DumbTcp have no
+window.
+
+Host under test: host1, without SACK, which sends 100000 bytes; the round trip is 40 ms, and
+the tap drops the 15th data segment once. Observation: level 2, a slow-start threshold at the
+loss, then a window of at least two segments, and then a larger window: the next duplicate
+ACK adds a segment. The threshold comes in the same instant as the fast retransmission, which
+separates it from the threshold that TcpVegas sets when it leaves slow start.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: westwood
+%# value: "TcpWestwood"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassWestwood")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .describe("the slow-start threshold at the fast retransmit")
+                  .within(1.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && pk.dataLength > tcp.headerLength")
+                  .describe("the fast retransmission, in the same instant as the threshold")
+                  .within(1e-9))
+        .once(on("host1.tcp").signal("cwnd")
+                  .first()
+                  .captureMax("windowAtLoss", "value")
+                  .assertValueAtLeast(2896)
+                  .describe("the window at the fast retransmit, at least two segments")
+                  .within(0.001))
+        .once(on("host1.tcp").signal("cwnd")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return context.event.value > context.get("windowAtLoss").doubleValue(); })
+                  .describe("the next window, larger: the inflation by a duplicate ACK")
+                  .within(0.1));
+}
+
+%activity:
+EV << "TcpAlgorithmClassWestwood compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpWestwood"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+*.host1.tcp.sackSupport = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassWestwood: PASS

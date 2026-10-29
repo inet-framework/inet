@@ -1,0 +1,61 @@
+%description:
+
+Tcp.tcpAlgorithmClass:socket-override -- the open command of a socket selects another algorithm.
+
+The claim (Tcp.ned): "the open command of a socket can choose another one".
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms. The test passes with each value of the parameter by design, so the cross-class check skips
+it.
+
+Host under test: host1, with the parameter TcpNewReno, whose application selects TcpTahoe on
+its socket before the open. Observation: level 3, the algorithm of the connection of host1 is
+inet::tcp::TcpTahoe when its SYN goes.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: socket-override
+%# value: "TcpNewReno"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassSocketOverride")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) {
+            app.socket().setTCPAlgorithmClass("TcpTahoe");
+            app.socket().connect(app.addressOf("host2"), 1000);
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .first()
+                  .assertModule("host1.tcp.conn-*", "tcpAlgorithm.className == \"inet::tcp::TcpTahoe\"")
+             .describe("the SYN of host1")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpAlgorithmClassSocketOverride compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpNewReno"    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassSocketOverride: PASS

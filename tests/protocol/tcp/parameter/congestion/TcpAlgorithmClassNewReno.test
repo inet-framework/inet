@@ -1,0 +1,97 @@
+%description:
+
+Tcp.tcpAlgorithmClass:newreno -- NewReno halves the window, and a partial ACK retransmits the next hole at once.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; TcpNewReno is RFC 6582
+(NewReno) on RFC 5681.
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms. This test separates TcpNewReno: TcpCubic reduces to 0.7 of the window, TcpTahoe drops the
+window to one segment, TcpReno, DcTcp and TcpWestwood leave the recovery at a partial ACK,
+TcpVegas sets no threshold at a fast retransmit, and TcpNoCongestionControl and DumbTcp have
+no fast retransmit.
+
+Host under test: host1, without SACK (a precondition: with SACK, the recovery of RFC 6675 is
+the same for TcpNewReno, TcpReno and DcTcp), which sends 100000 bytes; the round trip is 40
+ms, and the tap drops the 15th and the 17th data segment once. Observation: level 2, the
+first slow-start threshold is about half the window before the loss, and the window never
+falls below two segments without a timeout; level 1, the partial ACK that comes after the
+retransmission of the 15th segment makes host1 retransmit the 17th at once.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: newreno
+%# value: "TcpNewReno"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassNewReno")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 14 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 15th data segment of host1, the first time"))
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 16 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the 17th data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .captureMax("cwndBefore", "value")
+                                        .captureMin("smallestCwnd", "value")
+                                        .within(4.0)))
+        .meanwhile(never(on("host1.tcp").signal("numRtos").describe("a retransmission timeout").within(4.0)))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      double ratio = context.event.value / context.get("cwndBefore").doubleValue();
+                      return ratio >= 0.3 && ratio <= 0.55;
+                  })
+                  .describe("the slow-start threshold at the loss, about half the window")
+                  .within(1.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == false && tcp.ackNo == {isn} + 1 + 16 * 1448")
+             .describe("the partial ACK, up to the second dropped segment")
+             .within(1.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("pk.dataLength > tcp.headerLength")
+             .first()
+                  .assertPacket("tcp.sequenceNo == {isn} + 1 + 16 * 1448")
+             .describe("the next data segment of host1, the second hole")
+             .within(0.001))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 100000")
+             .first()
+                  .assertPacket("{smallestCwnd} > 1460")
+             .describe("the ACK of the last byte; the window stayed above one segment")
+             .within(6.0));
+}
+
+%activity:
+EV << "TcpAlgorithmClassNewReno compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpNewReno"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+*.host1.tcp.sackSupport = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassNewReno: PASS

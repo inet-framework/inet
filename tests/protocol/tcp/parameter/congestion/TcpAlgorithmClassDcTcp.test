@@ -1,0 +1,57 @@
+%description:
+
+Tcp.tcpAlgorithmClass:dctcp -- DCTCP sends its ECN-setup SYN with ECT.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; DcTcp is RFC 8257,
+which needs ECN on each packet, also on the SYN, as Linux.
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms. This test separates DcTcp: the eight others send the SYN Not-ECT (RFC 3168 section 6.1.1).
+
+Host under test: host1, with tcpEcnMode "rfc3168" (a precondition), which sends 100000 bytes.
+Observation: level 1, the SYN of host1 arrives at host2 with ECT(0).
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: dctcp
+%# value: "DcTcp"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassDcTcp")
+        .once(on("host2.eth[0].mac").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .first()
+                  .assertPacket("ipv4.ecn == 2")
+             .describe("the SYN of host1 at host2, with ECT(0)")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpAlgorithmClassDcTcp compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "DcTcp"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+*.host1.tcp.tcpEcnMode = "rfc3168"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassDcTcp: PASS

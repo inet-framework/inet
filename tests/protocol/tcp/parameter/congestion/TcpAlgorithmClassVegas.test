@@ -1,0 +1,70 @@
+%description:
+
+Tcp.tcpAlgorithmClass:vegas -- after a timeout, Vegas restarts with a window of two segments.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; TcpVegas is the
+algorithm of Brakmo and Peterson.
+
+The classes: the nine algorithms of the package inet.transportlayer.tcp.flavours (TcpNewReno is
+the default, TcpReno the value of LegacyTcp, TcpCubic of LinuxTcp), qualified-alias (a
+qualified NED type name), unknown (a name without a NED type: an error) and socket-override
+(the open command of a socket selects another algorithm). Each test of an algorithm checks a
+behavior that none of the other eight algorithms shows. The code:
+TcpConnection::createTcpAlgorithm() and the classes of the algorithms. This test separates TcpVegas: after a timeout, TcpNewReno, TcpReno, DcTcp and TcpCubic
+restart with one segment of data, TcpTahoe and TcpWestwood with one MSS, and
+TcpNoCongestionControl and DumbTcp have no window.
+
+Host under test: host1, without SACK, which sends 100 bytes; the tap drops the segment once,
+so only the timer can repair it. Observation: level 2, a timeout, and the smallest window is
+two MSS, 2920 bytes.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: vegas
+%# value: "TcpVegas"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassVegas")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .captureMin("smallestCwnd", "value")
+                                        .within(4.0)))
+        .once(on("host1.tcp").signal("numRtos").describe("the timeout").within(2.0))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 100")
+             .first()
+                  .assertPacket("{smallestCwnd} >= 2900 && {smallestCwnd} <= 2940")
+             .describe("the ACK of the 100 bytes; the window after the timeout was two MSS")
+             .within(6.0));
+}
+
+%activity:
+EV << "TcpAlgorithmClassVegas compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpVegas"    # the parameter under test
+*.host1.app[0].sendBytes = 100B
+*.host1.tcp.sackSupport = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassVegas: PASS
