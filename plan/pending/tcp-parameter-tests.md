@@ -446,7 +446,7 @@ Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on t
 - [x] **Step 10 — `recovery`, 25 tests.** Done: `d41a5f4b8c`; 25 PASS.
 - [x] **Step 11 — `receive`, 25 tests.** Done: `dccaa84b57`; 25 PASS.
 - [x] **Step 12 — `close`, 14 tests.** Done: `6e2bf3fc72`; 14 PASS.
-- [ ] **Step 13 — `ecn`, 18 tests.**
+- [x] **Step 13 — `ecn`, 19 tests.** Done: `3d9eb039d5`; 19 PASS.
 - [ ] **Step 14 — `pmtu`, 11 tests.**
 - [ ] **Step 15 — `keepalive`, 7 tests.**
 - [ ] **Step 16 — `fastopen`, 29 tests.**
@@ -567,3 +567,11 @@ The user settled these on 2026-10-29.
 - `tsRecentAfterAckCheck`: with the rule of RFC 7323, a forged ACK of unsent data with a TSval far ahead moves TS.Recent, and PAWS then drops each later ACK of the peer, so the sender times out. The check of Linux prevents it. The test observes that timeout, not TS.Recent.
 - `icmpSequenceCheck`: the tap sets the TTL of the first SYN to 1 and its sequence number 100 higher, so the Time Exceeded of the router quotes a stale sequence number. The tests turn `softIcmpErrorsAbortSetup` on, because only an error that aborts the setup shows whether it counted.
 - The group runs in 2 s of wall time with 32 cores. D3: the socket calls are connect, close, abort, listen and send of `TcpTestApp`; no new library word.
+
+**Step 13 (`ecn`).**
+- The code pass changed the draft from 18 to 19 tests: `accEcnOptionPolicy = "linux"` has the facets `kind` (the option of kind 174 on the SYN-ACK) and `duplicate` (a duplicate segment that ends at RCV.NXT counts in the AccECN counters), because the NED claims both.
+- The five values of `tcpEcnMode` differ only in the pair of the SYN that a host sends and the SYN-ACK that it sends to an AccECN SYN. Each test therefore lets host1 open a connection and take one from host2, which requests AccECN; every value gives another pair, so one test structure separates each value from the four others.
+- The classes `changed` of the two `@mutable` parameters set the new value with `setParameter` at 0.5 s. A second application of host1 opens the second connection; the first connection shows the old value on its data after the change. The value of a string parameter needs its quotes: `"\"off\""`.
+- The first data segment of an AccECN client carries the AccECN option, so it holds 1436 bytes, not 1448.
+- A full close makes the connection a time-wait socket already in FIN_WAIT_2, so the ACK of the FIN of the peer is the ACK of TIME_WAIT that `accEcnBareTimeWaitAck` changes.
+- The group runs in 2 s of wall time with 32 cores. D3: no socket call, and no new library word.
