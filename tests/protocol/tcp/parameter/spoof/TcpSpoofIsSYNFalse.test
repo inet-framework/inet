@@ -1,0 +1,67 @@
+%description:
+
+TcpSpoof.isSYN:false -- the segment carries no control bit.
+
+The claim (TcpSpoof.ned): "Sends fabricated TCP packets. ... Compatible with both IPv4
+(~Ipv4) and IPv6 (~Ipv6)." TcpSpoof::sendSpoofPacket() sends one segment at the time t: a
+header of 20 bytes without options and data, with the window 16384, no ACK, and the SYN bit
+of isSYN.
+
+The claim (TcpSpoof.ned): "Whether to set the SYN bit on the packet".
+
+The classes: true (the default: the segment is a SYN) and false (the segment has no
+control bit at all). The code: TcpSpoof::sendSpoofPacket() sets the SYN bit from the value,
+and no other bit. This test separates "false" from the other class.
+
+Node under test: host1; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
+from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
+test changes one of these values. The tap drops the segment after host1 sends
+it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 1, the segment carries no control bit.
+
+%# parameter: TcpSpoof.isSYN
+%# class: false
+%# value: false
+%# key: *.host1.tcp.isSYN
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSpoofIsSYNFalse")
+        .intercept(tap("tap").filterPacket("tcp.srcPort == 5000")
+                     .drop()
+                     .describe("the segment of the spoof: the TCP of a receiver cannot take it (PF-11)"))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.srcPort == 5000 && tcp.synBit == false && tcp.ackBit == false && tcp.rstBit == false && tcp.finBit == false")
+             .describe("the segment of the spoof, with no control bit")
+             .within(1.1));
+}
+
+%activity:
+EV << "TcpSpoofIsSYNFalse compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.isSYN = false    # the parameter under test
+*.host1.tcp.typename = "TcpSpoof"
+*.host1.numApps = 0
+*.host1.tcp.srcAddress = ""
+*.host1.tcp.destAddress = "host2"
+*.host1.tcp.srcPort = 5000
+*.host1.tcp.destPort = 1000
+*.host1.tcp.seqNo = 12345
+*.host1.tcp.isSYN = true
+*.host1.tcp.t = 1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSpoofIsSYNFalse: PASS

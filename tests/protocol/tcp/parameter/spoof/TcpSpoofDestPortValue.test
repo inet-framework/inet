@@ -1,0 +1,64 @@
+%description:
+
+TcpSpoof.destPort:value -- the segment carries the destination port.
+
+The claim (TcpSpoof.ned): "Sends fabricated TCP packets. ... Compatible with both IPv4
+(~Ipv4) and IPv6 (~Ipv6)." TcpSpoof::sendSpoofPacket() sends one segment at the time t: a
+header of 20 bytes without options and data, with the window 16384, no ACK, and the SYN bit
+of isSYN.
+
+The class: value (any port: one class, because TcpSpoof::sendSpoofPacket() writes the value
+into the header without a condition).
+
+Node under test: host1; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
+from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
+test changes one of these values. The tap drops the segment after host1 sends
+it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 1, the segment carries the destination port.
+
+%# parameter: TcpSpoof.destPort
+%# class: value
+%# value: 1000
+%# key: *.host1.tcp.destPort
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSpoofDestPortValue")
+        .intercept(tap("tap").filterPacket("tcp.srcPort == 5000")
+                     .drop()
+                     .describe("the segment of the spoof: the TCP of a receiver cannot take it (PF-11)"))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.destPort == 1000 && tcp.synBit == true")
+             .describe("the segment of the spoof")
+             .within(1.1));
+}
+
+%activity:
+EV << "TcpSpoofDestPortValue compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.destPort = 1000    # the parameter under test
+*.host1.tcp.typename = "TcpSpoof"
+*.host1.numApps = 0
+*.host1.tcp.srcAddress = ""
+*.host1.tcp.destAddress = "host2"
+*.host1.tcp.srcPort = 5000
+*.host1.tcp.destPort = 1000
+*.host1.tcp.seqNo = 12345
+*.host1.tcp.isSYN = true
+*.host1.tcp.t = 1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSpoofDestPortValue: PASS

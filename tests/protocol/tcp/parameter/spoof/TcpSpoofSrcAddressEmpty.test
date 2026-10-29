@@ -1,0 +1,74 @@
+%description:
+
+TcpSpoof.srcAddress:empty -- the segment carries the address of eth0, the outgoing interface.
+
+The claim (TcpSpoof.ned): "Sends fabricated TCP packets. ... Compatible with both IPv4
+(~Ipv4) and IPv6 (~Ipv6)." TcpSpoof::sendSpoofPacket() sends one segment at the time t: a
+header of 20 bytes without options and data, with the window 16384, no ACK, and the SYN bit
+of isSYN.
+
+The claim (TcpSpoof.ned): "Local address; may be left empty ("")".
+
+The classes: empty ("", the default: the network layer writes the address of the outgoing
+interface), local (an address of the node: the segment carries it, also when the segment
+leaves on another interface), and invalid (an address that the node does not have). The code:
+TcpSpoof::sendSpoofPacket() resolves the value and puts it into the L3AddressReq of the
+segment; Ipv4::encapsulate() takes an address that is not unspecified, and stops the run when
+no interface of the node has it, because TcpSpoof does not set nonLocalSrcAddress. This test separates "empty" from the other classes.
+
+Node under test: the router; The network is TapRouterNetwork: host1 -- tap -- router -- host2. The router has TcpSpoof
+in place of its TCP (precondition). The spoof sends one SYN at 1 s from the port 5000 to
+host1:1000; the segment leaves the router on eth0, the interface to host1. The tap drops the segment after the router sends
+it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 1, the segment on the wire carries the address of eth0, the outgoing interface as
+its source address.
+
+%# parameter: TcpSpoof.srcAddress
+%# class: empty
+%# value: ""
+%# key: *.router.tcp.srcAddress
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSpoofSrcAddressEmpty")
+        .intercept(tap("tap").filterPacket("tcp.srcPort == 5000")
+                     .drop()
+                     .describe("the segment of the spoof: the TCP of a receiver cannot take it (PF-11)"))
+        .once(on("router.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.srcPort == 5000")
+             .filterEvent([](const MatchContext& c) { return ipv4HeaderOf(c.event.packet)->getSrcAddress().str() == L3AddressResolver().resolve("router%eth0").str(); })
+             .describe("the segment of the spoof, from the address of eth0, the outgoing interface")
+             .within(1.1));
+}
+
+%activity:
+EV << "TcpSpoofSrcAddressEmpty compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.router.tcp.srcAddress = ""    # the parameter under test
+*.host1.numApps = 0
+*.router.hasTcp = true
+*.router.tcp.typename = "TcpSpoof"
+*.router.tcp.destAddress = "host1"
+*.router.tcp.srcPort = 5000
+*.router.tcp.destPort = 1000
+*.router.tcp.seqNo = 12345
+*.router.tcp.t = 1s
+network = inet.protocoltest.TapRouterNetwork
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSpoofSrcAddressEmpty: PASS

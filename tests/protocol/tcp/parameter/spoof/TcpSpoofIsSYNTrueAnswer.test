@@ -1,0 +1,72 @@
+%description:
+
+TcpSpoof.isSYN:true-answer -- a listener answers the SYN of the spoof with a SYN-ACK.
+
+The claim (TcpSpoof.ned): "Sends fabricated TCP packets. ... Compatible with both IPv4
+(~Ipv4) and IPv6 (~Ipv6)." TcpSpoof::sendSpoofPacket() sends one segment at the time t: a
+header of 20 bytes without options and data, with the window 16384, no ACK, and the SYN bit
+of isSYN.
+
+The claim (TcpSpoof.ned): "Whether to set the SYN bit on the packet".
+
+The classes: true (the default: the segment is a SYN) and false (the segment has no
+control bit at all). The code: TcpSpoof::sendSpoofPacket() sets the SYN bit from the value,
+and no other bit. The facet true-answer: a SYN of the spoof is a segment that a TCP can take, so a listener
+answers it. This test separates "true" from "false", where a listener sends no answer (RFC 9293
+section 3.10.7.2). This test fails: TcpSpoof::sendSpoofPacket() sets no checksum mode in the
+header, so Tcp::checkChecksum() of host2 stops the run with "unknown checksum mode: -1"
+(finding PF-11).
+
+Node under test: host1; host1 has TcpSpoof in place of its TCP and no application; host2
+listens at the port 1000 (TcpEchoApp). The spoof sends one SYN at 1 s from the port 5000 to
+host2:1000 with the sequence number 12345, and the tap lets it through. Observation: level 1,
+host2 answers with a SYN-ACK that acknowledges 12346.
+
+%# parameter: TcpSpoof.isSYN
+%# class: true-answer
+%# value: true
+%# key: *.host1.tcp.isSYN
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSpoofIsSYNTrueAnswer")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.srcPort == 5000 && tcp.synBit == true")
+             .describe("the SYN of the spoof")
+             .within(1.1))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == 12346")
+             .describe("the SYN-ACK of host2")
+             .within(0.1));
+}
+
+%activity:
+EV << "TcpSpoofIsSYNTrueAnswer compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.isSYN = true    # the parameter under test
+*.host1.tcp.typename = "TcpSpoof"
+*.host1.numApps = 0
+*.host1.tcp.srcAddress = ""
+*.host1.tcp.destAddress = "host2"
+*.host1.tcp.srcPort = 5000
+*.host1.tcp.destPort = 1000
+*.host1.tcp.seqNo = 12345
+*.host1.tcp.isSYN = true
+*.host1.tcp.t = 1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSpoofIsSYNTrueAnswer: PASS

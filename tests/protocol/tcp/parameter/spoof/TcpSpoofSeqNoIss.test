@@ -1,0 +1,71 @@
+%description:
+
+TcpSpoof.seqNo:iss -- the segment carries the ISS of the clock, 250000 at 1 s.
+
+The claim (TcpSpoof.ned): "Sends fabricated TCP packets. ... Compatible with both IPv4
+(~Ipv4) and IPv6 (~Ipv6)." TcpSpoof::sendSpoofPacket() sends one segment at the time t: a
+header of 20 bytes without options and data, with the window 16384, no ACK, and the SYN bit
+of isSYN.
+
+The claim (TcpSpoof.ned): "Sequence number (-1 for TCP ISS)".
+
+The classes: iss (-1: the number comes from the clock, as the ISS of TCP: 250000 for each
+second, modulo 2^32) and value (another number: the segment carries it). The code:
+TcpSpoof::sendSpoofPacket() calls chooseInitialSeqNum() for -1. This test separates "iss" from the other class. This test fails: chooseInitialSeqNum() calls
+fmod() with simTime() * 250000.0, so the modulus 2^32 + 1 becomes a simtime_t too, which the
+time scale of the run cannot hold; the run stops with "simtime_t: Cannot represent
+4.29497e+09" (finding PF-13).
+
+Node under test: host1; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
+from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
+test changes one of these values. The tap drops the segment after host1 sends
+it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 1, the segment carries the sequence number
+250000.
+
+%# parameter: TcpSpoof.seqNo
+%# class: iss
+%# value: -1
+%# key: *.host1.tcp.seqNo
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSpoofSeqNoIss")
+        .intercept(tap("tap").filterPacket("tcp.srcPort == 5000")
+                     .drop()
+                     .describe("the segment of the spoof: the TCP of a receiver cannot take it (PF-11)"))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.srcPort == 5000 && tcp.sequenceNo == 250000")
+             .describe("the segment of the spoof, with the sequence number 250000")
+             .within(1.1));
+}
+
+%activity:
+EV << "TcpSpoofSeqNoIss compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.seqNo = -1    # the parameter under test
+*.host1.tcp.typename = "TcpSpoof"
+*.host1.numApps = 0
+*.host1.tcp.srcAddress = ""
+*.host1.tcp.destAddress = "host2"
+*.host1.tcp.srcPort = 5000
+*.host1.tcp.destPort = 1000
+*.host1.tcp.seqNo = 12345
+*.host1.tcp.isSYN = true
+*.host1.tcp.t = 1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSpoofSeqNoIss: PASS

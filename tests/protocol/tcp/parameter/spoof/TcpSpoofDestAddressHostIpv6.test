@@ -1,0 +1,74 @@
+%description:
+
+TcpSpoof.destAddress:host-ipv6 -- on IPv6 hosts, the segment goes to the node over IPv6.
+
+The claim (TcpSpoof.ned): "Sends fabricated TCP packets. ... Compatible with both IPv4
+(~Ipv4) and IPv6 (~Ipv6)." TcpSpoof::sendSpoofPacket() sends one segment at the time t: a
+header of 20 bytes without options and data, with the window 16384, no ACK, and the SYN bit
+of isSYN.
+
+The claim (TcpSpoof.ned): "Destination address".
+
+The classes: host (the name or the address of a node: the segment goes to it, over the
+network protocol of the type of the address) and empty ("", the default: the run stops at
+the time t). The code: TcpSpoof::sendToIP() sets the network protocol of the segment from the
+type of the address; an empty value resolves to an address without a type, whose
+getAddressType() stops the run with "Address contains no value" (finding PF-12). The facet host-ipv6: the address of a node on IPv6 hosts has the type IPv6, so the network
+protocol of the segment is IPv6. This test separates "host" from "empty" on IPv6 hosts.
+
+Node under test: host1, on IPv6 hosts (precondition), with the time 3 s, after the address
+configuration; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
+from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
+test changes one of these values. The tap drops the segment after host1 sends
+it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 1, an IPv6 datagram carries the segment.
+
+%# parameter: TcpSpoof.destAddress
+%# class: host-ipv6
+%# value: "host2"
+%# key: *.host1.tcp.destAddress
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSpoofDestAddressHostIpv6")
+        .intercept(tap("tap").filterPacket("tcp.srcPort == 5000")
+                     .drop()
+                     .describe("the segment of the spoof: the TCP of a receiver cannot take it (PF-11)"))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.srcPort == 5000 && ipv6.hopLimit > 0")
+             .describe("the segment of the spoof, in an IPv6 datagram")
+             .within(3.1));
+}
+
+%activity:
+EV << "TcpSpoofDestAddressHostIpv6 compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.destAddress = "host2"    # the parameter under test
+*.host*.typename = "StandardHost6"
+*.configurator.typename = "Ipv6FlatNetworkConfigurator"
+*.host1.tcp.t = 3s
+*.host1.tcp.typename = "TcpSpoof"
+*.host1.numApps = 0
+*.host1.tcp.srcAddress = ""
+*.host1.tcp.destAddress = "host2"
+*.host1.tcp.srcPort = 5000
+*.host1.tcp.destPort = 1000
+*.host1.tcp.seqNo = 12345
+*.host1.tcp.isSYN = true
+*.host1.tcp.t = 1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSpoofDestAddressHostIpv6: PASS
