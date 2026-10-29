@@ -45,7 +45,7 @@ Out of this plan:
 
 The order of D1 to D3:
 
-1. [ ] IPv6 tunnel — `ipv6tunnel`
+1. [x] IPv6 tunnel — `ipv6tunnel`: done 2026-10-29 on `topic/standards-tests-ipv6tunnel-level2` (9 commits on `3e51de989f`, not merged, not pushed); 23 tests, 14 PASS, 9 FAIL, 4 declared expected; level 2 reached; plan `plan/done/ipv6tunnel-level2-standards-tests.md` on the branch
 2. [ ] SCTP — `sctp`
 3. [ ] OSPFv2, then OSPFv3 — `ospfv2`, `ospfv3`, one pass, the IGMP and MLD pattern
 4. [ ] BGP-4 — `bgp`
@@ -96,7 +96,7 @@ These notes come from the survey cards. Each pass plan copies its note and adds 
 
 1. [x] The user settles D1 to D4. Record each answer in the decision log below.
 2. [x] Commit this plan on `master` (group `standards-tests-wave2`).
-3. [ ] Make one built debug worktree at the base commit, as the source of the hard-linked builds.
+3. [x] Make one built debug worktree at the base commit, as the source of the hard-linked builds. The IPv6 tunnel worktree has a clean debug build of `3e51de989f` (src `23691e83dc`).
 4. [ ] Do the passes of the section "Order". Each pass writes its plan, does steps 2 to 9 and the notes, runs the gates, and moves its plan to `plan/done/`. Mark the pass done in "Order".
 5. [ ] Land the pass branches on `master` with the wave 1 recipe: rebase, map the cited hashes to the new commits, and add a new run-record commit if `src/` changed. Push only when the user asks.
 6. [ ] Write the state of wave 2 into survey §6 (local file), and move this plan to `plan/done/`.
@@ -108,3 +108,5 @@ These notes come from the survey cards. Each pass plan copies its note and adds 
 - 2026-10-28, D2: one pass at a time. Agents draft the catalog of each pass in parallel.
 - 2026-10-28, D3: the IPv6 tunnel joins the wave as the first pass.
 - 2026-10-28, D4: per behavior. Where a class, a field or a function for a BGP behavior exists, the model claims the behavior, and a failure is a plain defect. Only a behavior with no code is an unimplemented feature.
+- 2026-10-29, pass 1 (IPv6 tunnel): three facts for the next passes. The runner is `opp_run_protocol_tests` (opp_repl); `inet_run_protocol_tests` is gone. A clean debug build of a worktree takes 6 minutes, but the tools of `omnetpp-6.x` need the release libraries under the coverage names on `LD_LIBRARY_PATH` (`/var/tmp/claude-standards-fixes/libfix`). The level 1 map had put sections that need only configuration and observation at level 3; each pass checks the levels of its map against the toolset rule of the guide at step 2.
+
