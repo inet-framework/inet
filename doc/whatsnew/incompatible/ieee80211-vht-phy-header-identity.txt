@@ -1,0 +1,3 @@
+VHT PHY header identity
+
+VHT signal modes now create the existing VHT PHY header type. This corrects their former use of the HT header type.
