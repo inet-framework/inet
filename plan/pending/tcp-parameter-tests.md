@@ -42,7 +42,7 @@ A TCP parameter test uses the protocol test library, so its category under [TR-C
 | `DcTcp` | `tcp/flavours/` | 1 | |
 | `TcpNewReno`, `TcpReno`, `TcpTahoe`, `TcpWestwood`, `TcpNoCongestionControl`, `DumbTcp` | `tcp/flavours/` | 0 | each is a class of `Tcp.tcpAlgorithmClass` |
 | `TcpConnection`, `TcpAlgorithm` | `tcp/`, `tcp/flavours/` | 0 | no test |
-| `LinuxTcp`, `LegacyTcp` | `tcp/` | 0 new, 39 and 17 default overrides | no test of their own (D6): each value that they set is in a class of its parameter, and the catalog names the preset of each class |
+| `LinuxTcp`, `LegacyTcp` | `tcp/` | 0 new, 40 and 17 default overrides | no test of their own (D6): each value that they set is in a class of its parameter, and the catalog names the preset of each class |
 | `TcpSpoof` | `tcp_common/` | 7 | not in `tcp/`, but in the scope (D2) |
 
 The C++ code reads exactly the 115 parameter names that these NED files declare (`par("...")` in `tcp/` and `tcp_common/`); there is no hidden parameter.
@@ -434,11 +434,11 @@ The estimate before the pilot: the INET TCP tests alone rise from 47 % to more t
 Do the work in the worktree `/home/levy/workspace/inet-tcp-parameter-tests` on the local branch `topic/tcp-parameter-tests`, from `master`. Make a commit at the end of each step. Push only when the user asks.
 
 - [x] **Step 0 — worktree.** `git worktree add -b topic/tcp-parameter-tests ../inet-tcp-parameter-tests master`, from `18e41c6d2e`. Pair it with a debug build of `omnetpp-6.x`. The coverage baseline moves to step 5, which needs a coverage build anyway.
-- [ ] **Step 1 — the catalog.** Write `doc/project/evidence/model/tcp/parameters.md`: one row for each class, with the columns class id, value, preset (`LinuxTcp`, `LegacyTcp`, or none), the claim, source, observation, network, test file, verdict. Each group writes its rows in its code pass, so the draft of this plan is not copied twice; the completeness check lists the parameters without rows until the last group.
+- [x] **Step 1 — the catalog.** Write `doc/project/evidence/model/tcp/parameters.md`: one row for each class, with the columns class id, value, preset (`LinuxTcp`, `LegacyTcp`, or none), the claim, source, observation, network, test file, verdict. Each group writes its rows in its code pass, so the draft of this plan is not copied twice; the completeness check lists the parameters without rows until the last group. Done: `1e9f747388`.
 - [x] **Step 2 — the library extensions E1 to E4**, one commit each, each with its self test and its section in `AUTHORING.md`. Run every protocol suite after each one. Done: `64c9ab1805` (E1), `d43de56157` (E2), `4f1c8ddced` (E3), `1668c6dbba` (E4).
 - [x] **Step 3 — the shared networks (I1) and `TcpTestApp` (I2)** in `tests/protocol/lib`, with a self test for each. Done: `321083cb2e` (networks), `4621ab2d0d` (`TcpTestApp`).
-- [ ] **Step 4 — the TCP parts.** The shared ini (I3), the two checks (I4, I5), and the move of `TcpMutations.h` to the suite folder. Check that a command-line assignment `--*.host2.tcp.<parameter>=<value>` takes the place of the ini assignment of the test (I5 needs it).
-- [ ] **Step 5 — the pilot: `ack`, 15 tests.** Code pass, tests, run, cross-class check, coverage. Measure the time of the build and of the run of one test, and of the whole group. Count the lambdas that repeat (D3). Report to the user, and change the design where the pilot shows a problem, before the other groups start.
+- [x] **Step 4 — the TCP parts.** The shared ini (I3), the two checks (I4, I5), and the move of `TcpMutations.h` to the suite folder. Check that a command-line assignment `--*.host2.tcp.<parameter>=<value>` takes the place of the ini assignment of the test (I5 needs it). Done: `a2feecf0e8` (the move), `1e9f747388` (the ini, the checks, the README). The command line beats the ini line.
+- [ ] **Step 5 — the pilot: `ack`, 15 tests.** Code pass, tests, run, cross-class check, coverage. Measure the time of the build and of the run of one test, and of the whole group. Count the lambdas that repeat (D3). Report to the user, and change the design where the pilot shows a problem, before the other groups start. The tests are done (`4ae6534722`); the coverage is open, see the record.
 - [ ] **Step 6 — `setup`, 36 tests.**
 - [ ] **Step 7 — `send`, 16 tests.**
 - [ ] **Step 8 — `rto`, 12 tests.**
@@ -497,3 +497,13 @@ The user settled these on 2026-10-29.
 - **The library is shared.** E1 to E4 and the networks change `tests/protocol/lib`, which every suite uses. Each extension adds constructs and changes no existing one, and every suite runs again after each extension.
 - **The changed segments.** Some classes need segments that INET's TCP never sends. E1 must repair the checksums after a change; the cross-class check finds a rule that makes the test pass for the wrong reason.
 - **The Linux cookie.** `Tcp.fastopenKey:fixed` needs a cookie value from a Linux run or from a packetdrill script of inet-gpl, not from INET's own function; else the test only checks INET against itself.
+
+**Steps 1, 4 and 5 (the pilot).**
+- The 13 tests of `ack` pass, and the cross-class check passes: each test fails with the value of each other class of its parameter (12 runs, one for each other value). Every other protocol test keeps its verdict.
+- The code pass changed the draft: 11 classes and 13 tests, not 15. `dsackEnabled:follows` is gone, because a default expression is not a class of values: its value falls into `on` or `off`. `delayedAckFrameCount` has `one`, `many` (2 and more, with the default 2) and `invalid`, because 2 and 4 take the same rule. `delayedAckTimeout:zero` stays, because its behavior differs on the wire (the ACK goes at once).
+- Two findings went into the catalog: PF-1, `TcpSessionApp` closes at once after its last send when `tClose = -1`, against its NED (the shared scenario `_bulk.ini` uses 1000 s); PF-2, `delayedAckTimeout` has no check of a negative value.
+- The filters can tell data from a pure ACK with `pk.dataLength > tcp.headerLength`: `PacketFilter` compares bits with bytes. The expression name `length` of the library is the same data length, without the popped headers, so it is right at a receiver too.
+- In an ini file the first line that matches a key wins, and an include is no error for a key that the test also sets; so a test writes its own lines first and includes the shared files last.
+- The time: a test builds in about 1 s, also without ccache, and runs in about 0.4 s; the 13 tests take 3 s of wall time with 32 cores. About 280 tests take a few minutes on a CI runner with 4 cores, below the limit of D5.
+- D3: the group needs no socket call. One lambda (`hasDsackBlock()` of `TcpMutations.h`) is in two tests; nothing repeats enough for a new word.
+- The coverage of the pilot is not measured. `omnetpp-6.x` has no coverage libraries since 2026-10-27, and a coverage build of them changes the shared tree, which also holds the broken `opp_msgtool` of step 0. The user decides how to measure.
