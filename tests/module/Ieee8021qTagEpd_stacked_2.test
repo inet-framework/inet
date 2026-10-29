@@ -1,4 +1,3 @@
-%# expected-result: FAIL
 %description:
 
 Tests the user priority of a frame that carries a C-tag and an S-tag (IEEE
