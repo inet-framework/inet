@@ -1,0 +1,66 @@
+%description:
+
+Tcp.initialWindow:rfc2001 -- the first flight has one segment.
+
+The claim (Tcp.ned): "the initial congestion window: "rfc2001" = 1 SMSS; "rfc3390" =
+min(4*SMSS, max(2*SMSS, 4380 bytes)) [...]; "rfc6928" = min(10*SMSS, max(2*SMSS, 14600
+bytes)), as Linux".
+
+The classes: rfc2001 (one segment; LegacyTcp), rfc3390 (the default:
+min(4*SMSS, max(2*SMSS, 4380 bytes)), 3 segments of 1448 bytes) and rfc6928 (LinuxTcp:
+min(10*SMSS, max(2*SMSS, 14600 bytes)), 10 segments). The code:
+TcpAlgorithmBase::getInitialWindow(). This test separates "rfc2001" from the other two.
+
+Host under test: host1, which sends 30000 bytes. Observation: level 1, the data segments that host1 sends before the first ACK of data comes
+back: the links have a delay of 10 ms, so the round trip is 40 ms, and a full-sized segment
+has 1448 bytes.
+
+%# parameter: Tcp.initialWindow
+%# class: rfc2001
+%# value: "rfc2001"
+%# key: *.host1.tcp.initialWindow
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpInitialWindowRfc2001")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                                        .captureCount("flight")
+                                        .describe("each data segment of host1")
+                                        .within(2.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == false && tcp.ackBit == true && tcp.ackNo > {isn} + 1")
+             .first()
+                  .assertPacket("{flight} == 1")
+             .describe("the first ACK of data, after 1 data segments")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpInitialWindowRfc2001 compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.initialWindow = "rfc2001"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 30000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpInitialWindowRfc2001: PASS

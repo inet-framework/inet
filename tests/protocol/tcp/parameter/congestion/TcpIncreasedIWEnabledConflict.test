@@ -1,0 +1,33 @@
+%description:
+
+Tcp.increasedIWEnabled:conflict -- with initialWindow "rfc6928", the deprecated parameter stops the run with an error.
+
+The claim (Tcp.ned): "an error with initialWindow = "rfc6928"".
+
+The classes: off (false, the default), on (true: initialWindow "rfc3390") and conflict (true
+with initialWindow "rfc6928": an error). The code: TcpConnection::configureStateVariables().
+
+Host under test: host1, with initialWindow "rfc6928". Observation: the error, and the exit code
+of the run.
+
+%# parameter: Tcp.increasedIWEnabled
+%# class: conflict
+%# value: true
+%# key: *.host1.tcp.increasedIWEnabled
+%# expected-result: PASS
+
+%activity:
+EV << "TcpIncreasedIWEnabledConflict compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.increasedIWEnabled = true    # the parameter under test
+*.host1.tcp.initialWindow = "rfc6928"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+set either the deprecated increasedIWEnabled or initialWindow

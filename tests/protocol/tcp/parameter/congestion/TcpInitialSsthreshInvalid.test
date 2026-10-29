@@ -1,0 +1,33 @@
+%description:
+
+Tcp.initialSsthresh:invalid -- a threshold of 0 stops the run with an error.
+
+The claim (Tcp.ned): "1 to 4294967295".
+
+The classes: high (the default 4294967295, "arbitrarily high"), low (a value that slow start
+reaches), invalid (0, or above 4294967295). The code: the algorithms read it at the start
+(TcpClassicAlgorithmBase, TcpTahoe, TcpVegas, TcpWestwood), and TcpAlgorithmBase checks it.
+
+Host under test: host1, whose algorithm reads the threshold at the open. Observation: the
+error, and the exit code of the run.
+
+%# parameter: Tcp.initialSsthresh
+%# class: invalid
+%# value: 0
+%# key: *.host1.tcp.initialSsthresh
+%# expected-result: PASS
+
+%activity:
+EV << "TcpInitialSsthreshInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.initialSsthresh = 0    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+initialSsthresh must be 1 to 4294967295, but it is 0

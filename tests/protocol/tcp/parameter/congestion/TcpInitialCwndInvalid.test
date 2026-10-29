@@ -1,0 +1,32 @@
+%description:
+
+Tcp.initialCwnd:invalid -- a value below 0 stops the run with an error.
+
+The claim: the code accepts 0 and more; the NED says "0: initialWindow".
+
+The classes: zero (0, the default: initialWindow decides), segments (1 and more), invalid
+(below 0). The code: TcpAlgorithmBase::getInitialWindow(), and the check in
+TcpConnection::configureStateVariables().
+
+Host under test: host1. Observation: the error, and the exit code of the run.
+
+%# parameter: Tcp.initialCwnd
+%# class: invalid
+%# value: -1
+%# key: *.host1.tcp.initialCwnd
+%# expected-result: PASS
+
+%activity:
+EV << "TcpInitialCwndInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.initialCwnd = -1    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+initialCwnd must be 0 or more, but it is -1

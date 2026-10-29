@@ -1,0 +1,62 @@
+%description:
+
+Tcp.initialSsthresh:high -- slow start goes on until a loss.
+
+The claim (Tcp.ned): "the first slow-start threshold of each algorithm with slow start, in
+bytes; RFC 5681 section 3.1: it "SHOULD be set arbitrarily high"".
+
+The classes: high (the default 4294967295, "arbitrarily high"), low (a value that slow start
+reaches), invalid (0, or above 4294967295). The code: the algorithms read it at the start
+(TcpClassicAlgorithmBase, TcpTahoe, TcpVegas, TcpWestwood), and TcpAlgorithmBase checks it. This test separates "high" from "low".
+
+Host under test: host1, which sends 100000 bytes without a loss; the round trip is 40 ms.
+Observation: level 2, the largest value of the signal cwnd: slow start doubles the window
+each round trip, past 30000 bytes.
+
+%# parameter: Tcp.initialSsthresh
+%# class: high
+%# value: 4294967295
+%# key: *.host1.tcp.initialSsthresh
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpInitialSsthreshHigh")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .captureMax("largestCwnd", "value")
+                                        .within(3.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 100001")
+             .first()
+                  .assertPacket("{largestCwnd} > 30000")
+             .describe("the ACK of the last byte, after a congestion window above 30000 bytes")
+             .within(3.0));
+}
+
+%activity:
+EV << "TcpInitialSsthreshHigh compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.initialSsthresh = 4294967295    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpInitialSsthreshHigh: PASS

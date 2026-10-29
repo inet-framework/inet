@@ -1,0 +1,65 @@
+%description:
+
+Tcp.limitedTransmitEnabled:on -- the first duplicate ACK sends a new segment.
+
+The claim (Tcp.ned): "Limited Transmit algorithm (RFC 3042) enabled/disabled".
+
+The classes: on (true, the default) and off (false; LegacyTcp). The code: a new segment at
+each of the first dupthresh - 1 duplicate ACKs (TcpAlgorithmBase::receivedDuplicateAck(),
+Rfc6675Recovery). This test separates "on" from "off".
+
+Host under test: host1, which sends 30000 bytes with an initial window of three segments; the
+tap drops the first one, so host2 answers the two others with duplicate ACKs. Observation:
+level 1, the first segment that host1 sends after the first duplicate ACK is new data: the
+fourth segment.
+
+%# parameter: Tcp.limitedTransmitEnabled
+%# class: on
+%# value: true
+%# key: *.host1.tcp.limitedTransmitEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpLimitedTransmitEnabledOn")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == false && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the first data segment of host1"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == false && tcp.ackNo == {isn} + 1 && pk.dataLength == tcp.headerLength")
+             .describe("the first duplicate ACK at host1")
+             .within(1.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+             .first()
+                  .assertPacket("tcp.sequenceNo == {isn} + 1 + 3 * 1448")
+             .describe("the next segment of host1, the fourth one")
+             .within(2.0));
+}
+
+%activity:
+EV << "TcpLimitedTransmitEnabledOn compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.limitedTransmitEnabled = true    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 30000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpLimitedTransmitEnabledOn: PASS

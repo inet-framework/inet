@@ -134,3 +134,24 @@ Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode: 12 PASS. The
 | `Tcp.rtoVarianceFloor:linux` | `true` | LinuxTcp | RTO = SRTT + max(4 RTTVAR, minimum) | NED; code: the same | S | P | [TcpRtoVarianceFloorLinux](../../../../../tests/protocol/tcp/parameter/rto/TcpRtoVarianceFloorLinux.test) | PASS |
 | `Tcp.seedRttFromHandshake:off` | `false` | — | the first data segment has the initial RTO | NED | W | P, T, K | [TcpSeedRttFromHandshakeOff](../../../../../tests/protocol/tcp/parameter/rto/TcpSeedRttFromHandshakeOff.test) | PASS |
 | `Tcp.seedRttFromHandshake:on` | `true` | LinuxTcp | the round trip of the handshake gives the first RTO | NED; code: `processSegmentInSynSent()` | W | P, T, K | [TcpSeedRttFromHandshakeOn](../../../../../tests/protocol/tcp/parameter/rto/TcpSeedRttFromHandshakeOn.test) | PASS |
+
+### congestion — congestion control and the algorithm modules
+
+Run on 2026-10-29, worktree `inet-tcp-parameter-tests`, debug mode.
+
+| Class | Value | Preset | Claim | Source | Obs | Net | Test | Verdict |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `Tcp.initialWindow:rfc2001` | `"rfc2001"` | LegacyTcp | the first flight has one segment | NED; code: `getInitialWindow()` | W | P | [TcpInitialWindowRfc2001](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialWindowRfc2001.test) | PASS |
+| `Tcp.initialWindow:rfc3390` | `"rfc3390"` | — | the first flight has min(4*SMSS, max(2*SMSS, 4380)) bytes: 3 segments | NED; code: the same | W | P | [TcpInitialWindowRfc3390](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialWindowRfc3390.test) | PASS |
+| `Tcp.initialWindow:rfc6928` | `"rfc6928"` | LinuxTcp | the first flight has min(10*SMSS, max(2*SMSS, 14600)) bytes: 10 segments | NED; code: the same | W | P | [TcpInitialWindowRfc6928](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialWindowRfc6928.test) | PASS |
+| `Tcp.initialCwnd:zero` | `0` | — | initialWindow decides the first flight | NED; code: `getInitialWindow()` | W | P | [TcpInitialCwndZero](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialCwndZero.test) | PASS |
+| `Tcp.initialCwnd:segments` | `5` | — | the first flight has this number of segments | NED; code: the same | W | P | [TcpInitialCwndSegments](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialCwndSegments.test) | PASS |
+| `Tcp.initialCwnd:invalid` | `-1` | — | the error "initialCwnd must be 0 or more" | code: `configureStateVariables()` | E | P | [TcpInitialCwndInvalid](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialCwndInvalid.test) | PASS |
+| `Tcp.increasedIWEnabled:off` | `false` | — | initialWindow decides | NED | W | P | [TcpIncreasedIWEnabledOff](../../../../../tests/protocol/tcp/parameter/congestion/TcpIncreasedIWEnabledOff.test) | PASS |
+| `Tcp.increasedIWEnabled:on` | `true` | — | the first flight is that of "rfc3390" | NED; code: `configureStateVariables()` | W | P | [TcpIncreasedIWEnabledOn](../../../../../tests/protocol/tcp/parameter/congestion/TcpIncreasedIWEnabledOn.test) | PASS |
+| `Tcp.increasedIWEnabled:conflict` | `true` | — | with initialWindow "rfc6928", the error "set either the deprecated increasedIWEnabled or initialWindow = \"rfc6928\", not both" | NED; code: the same | E | P | [TcpIncreasedIWEnabledConflict](../../../../../tests/protocol/tcp/parameter/congestion/TcpIncreasedIWEnabledConflict.test) | PASS |
+| `Tcp.initialSsthresh:high` | `4294967295` | — | slow start goes on until a loss | NED | S | P | [TcpInitialSsthreshHigh](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialSsthreshHigh.test) | PASS |
+| `Tcp.initialSsthresh:low` | `8000` | — | slow start ends at the threshold | NED; code: the algorithms | S | P | [TcpInitialSsthreshLow](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialSsthreshLow.test) | PASS |
+| `Tcp.initialSsthresh:invalid` | `0` | — | the error "initialSsthresh must be 1 to 4294967295" | NED; code: `TcpAlgorithmBase` | E | P | [TcpInitialSsthreshInvalid](../../../../../tests/protocol/tcp/parameter/congestion/TcpInitialSsthreshInvalid.test) | PASS |
+| `Tcp.limitedTransmitEnabled:on` | `true` | — | the first duplicate ACK sends a new segment | NED; code: `receivedDuplicateAck()`, `Rfc6675Recovery` | W | P, T | [TcpLimitedTransmitEnabledOn](../../../../../tests/protocol/tcp/parameter/congestion/TcpLimitedTransmitEnabledOn.test) | PASS |
+| `Tcp.limitedTransmitEnabled:off` | `false` | LegacyTcp | a duplicate ACK sends no new segment | NED; code: the same | W | P, T | [TcpLimitedTransmitEnabledOff](../../../../../tests/protocol/tcp/parameter/congestion/TcpLimitedTransmitEnabledOff.test) | PASS |

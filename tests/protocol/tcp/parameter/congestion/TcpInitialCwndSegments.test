@@ -1,0 +1,64 @@
+%description:
+
+Tcp.initialCwnd:segments -- the first flight has this number of segments.
+
+The claim (Tcp.ned): "the initial congestion window in segments, in place of initialWindow,
+as the initcwnd of a Linux route".
+
+The classes: zero (0, the default: initialWindow decides), segments (1 and more), invalid
+(below 0). The code: TcpAlgorithmBase::getInitialWindow(), and the check in
+TcpConnection::configureStateVariables(). This test separates "segments" from "zero".
+
+Host under test: host1, with 5, which sends 30000 bytes. Observation: level 1, the data segments that host1 sends before the first ACK of data comes
+back: the links have a delay of 10 ms, so the round trip is 40 ms, and a full-sized segment
+has 1448 bytes.
+
+%# parameter: Tcp.initialCwnd
+%# class: segments
+%# value: 5
+%# key: *.host1.tcp.initialCwnd
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpInitialCwndSegments")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                                        .captureCount("flight")
+                                        .describe("each data segment of host1")
+                                        .within(2.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == false && tcp.ackBit == true && tcp.ackNo > {isn} + 1")
+             .first()
+                  .assertPacket("{flight} == 5")
+             .describe("the first ACK of data, after 5 data segments")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpInitialCwndSegments compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.initialCwnd = 5    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 30000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpInitialCwndSegments: PASS

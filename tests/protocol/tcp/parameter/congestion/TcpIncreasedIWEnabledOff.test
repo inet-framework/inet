@@ -1,0 +1,65 @@
+%description:
+
+Tcp.increasedIWEnabled:off -- the deprecated parameter leaves initialWindow alone.
+
+The claim (Tcp.ned): "deprecated: the same as initialWindow = "rfc3390" (RFC 3390)"; false
+changes nothing.
+
+The classes: off (false, the default), on (true: initialWindow "rfc3390") and conflict (true
+with initialWindow "rfc6928": an error). The code: TcpConnection::configureStateVariables(). This test separates "off" from "on".
+
+Host under test: host1, with initialWindow "rfc2001" (a precondition), which sends 30000
+bytes. Observation: level 1, the data segments that host1 sends before the first ACK of data comes
+back: the links have a delay of 10 ms, so the round trip is 40 ms, and a full-sized segment
+has 1448 bytes. The first flight is one segment.
+
+%# parameter: Tcp.increasedIWEnabled
+%# class: off
+%# value: false
+%# key: *.host1.tcp.increasedIWEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpIncreasedIWEnabledOff")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.synBit == false && pk.dataLength > tcp.headerLength")
+                                        .captureCount("flight")
+                                        .describe("each data segment of host1")
+                                        .within(2.0)))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == false && tcp.ackBit == true && tcp.ackNo > {isn} + 1")
+             .first()
+                  .assertPacket("{flight} == 1")
+             .describe("the first ACK of data, after 1 data segment")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpIncreasedIWEnabledOff compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.increasedIWEnabled = false    # the parameter under test
+*.host1.tcp.initialWindow = "rfc2001"
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 30000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpIncreasedIWEnabledOff: PASS
