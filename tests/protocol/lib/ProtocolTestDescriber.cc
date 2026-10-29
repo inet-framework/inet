@@ -358,13 +358,16 @@ static std::string renderAct(const Action& action)
         os << "then, ";
     if (!action.description.empty())
         os << action.description;
-    else if (!action.calls.empty()) {
-        os << "run code in ";
+    else {
+        if (!action.calls.empty())
+            os << "run code in ";
         for (size_t k = 0; k < action.calls.size(); k++)
             os << (k == 0 ? "" : " and ") << action.calls[k].first;
+        for (size_t k = 0; k < action.nodeStops.size(); k++)
+            os << (action.calls.empty() && k == 0 ? "" : ", and ") << "stop the node " << action.nodeStops[k];
     }
     for (const auto& assertion : action.moduleAssertions)
-        os << (action.description.empty() && action.calls.empty() ? "" : ", and ")
+        os << (action.description.empty() && action.calls.empty() && action.nodeStops.empty() ? "" : ", and ")
            << "the module " << assertion.first << " must satisfy \"" << assertion.second << "\"";
     return capitalize(os.str()) + ".";
 }

@@ -17,6 +17,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/DirectionTag_m.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/NetworkInterface.h"
 #include "inet/networklayer/common/L3AddressResolver.h"
@@ -771,6 +772,12 @@ void ProtocolTester::performAction(const Action& action)
         cMethodCallContextSwitcher contextSwitcher(module);
         contextSwitcher.methodCall("protocol test action");
         call.second(module);
+    }
+    for (const auto& path : action.nodeStops) {
+        LifecycleOperation::StringMap params;
+        auto operation = new ModuleStopOperation();
+        operation->initialize(findModuleByPattern(path), params);
+        initiateOperation(operation);
     }
     for (const auto& assertion : action.moduleAssertions) {
         Step step;

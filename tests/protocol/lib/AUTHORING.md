@@ -278,6 +278,7 @@ hold these words, in any number:
 | `.run(module, fn)` | calls `void(cModule*)` as a method call of the module, so the code can send from it, as a socket call does |
 | `.run<T>(module, fn)` | the same, with the module cast to `T&` |
 | `.assertModule(module, expression)` | checks the fields of a module, as the assertion of a step does; the test fails if they do not satisfy it |
+| `.stopNode(node)` | stops the node with the lifecycle operation of INET (`ModuleStopOperation`), as the shutdown of a scenario script does; the stages that a module delays end later, and the next step does not wait for them |
 
 The module paths are as in `assertModule`: relative to the network, with a `*` in the last
 name for the newest matching module ([`ActionStep`](../self/ActionStep.test)):

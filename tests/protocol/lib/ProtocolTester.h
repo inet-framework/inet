@@ -12,6 +12,7 @@
 #include <set>
 
 #include "inet/common/SimpleModule.h"
+#include "inet/common/lifecycle/LifecycleController.h"
 #include "ITap.h"
 #include "PacketEvent.h"
 #include "ProtocolTest.h"
@@ -29,7 +30,7 @@ namespace protocoltest {
 //    event stream as a sequential, timing-guarded matcher and emits a PASS/FAIL
 //    verdict (Phase 1; expect-only).
 //
-class INET_API ProtocolTester : public SimpleModule, protected cListener
+class INET_API ProtocolTester : public SimpleModule, public LifecycleController, protected cListener
 {
   protected:
     std::map<simsignal_t, EventKind> signalKinds; // signal -> normalised kind

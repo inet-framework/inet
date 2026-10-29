@@ -1,0 +1,65 @@
+%description:
+
+Protocol Test Framework self test -- the action word stopNode(...).
+
+host2 sends a ping to host1 every 100 ms from 0.05 s on, so the ping n leaves at
+0.05 s + n * 100 ms. At 1 s, an action stops host1 with the lifecycle operation of INET. The
+reply to the ping 9 (0.95 s) comes before the stop; after the stop, host1 answers no ping,
+because its network layer is down.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("stop_node")
+        .once(on("host2.app[0]").signal("pingRxSeq")
+                  .filterValue(9)
+                  .describe("the reply to the ping 9, before the stop")
+                  .within(1.0))
+        .act(action().at(1.0).stopNode("host1"))
+        .never(on("host2.app[0]").signal("pingRxSeq")
+                   .describe("a reply after the stop")
+                   .within(1.0));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "stop_node compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network StopNodeNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = StopNodeNet
+sim-time-limit = 3s
+seed-set = 0
+
+*.host2.numApps = 1
+*.host2.app[0].typename = "PingApp"
+*.host2.app[0].destAddr = "host1"
+*.host2.app[0].startTime = 0.05s
+*.host2.app[0].sendInterval = 0.1s
+
+%contains: stdout
+PROTOCOLTEST stop_node: PASS

@@ -77,6 +77,7 @@ class INET_API Action
     std::string description;     // optional human phrase
     std::vector<std::pair<std::string, std::function<void(cModule *)>>> calls; // module path, code
     std::vector<std::pair<std::string, std::string>> moduleAssertions;        // module path, expression
+    std::vector<std::string> nodeStops;                                         // node path
 
     Action& at(double t) { hasAtTime = true; atTime = t; return *this; }
     Action& after(double d) { hasAfter = true; afterDelay = d; return *this; }
@@ -94,6 +95,10 @@ class INET_API Action
     // The fields of a module must satisfy the expression when the action is done, as for
     // the assertion assertModule(...) of a step.
     Action& assertModule(const char *path, const char *expression) { moduleAssertions.emplace_back(path, expression); return *this; }
+    // Stops a network node with the lifecycle operation of INET, as the shutdown of a scenario
+    // script does: the stages go from the applications down to the physical layer. The step
+    // after the action starts at once; a stage that a module delays ends later.
+    Action& stopNode(const char *path) { nodeStops.push_back(path); return *this; }
 };
 
 //
