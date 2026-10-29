@@ -46,7 +46,7 @@ Out of this plan:
 The order of D1 to D3:
 
 1. [x] IPv6 tunnel — `ipv6tunnel`: done 2026-10-29 on `topic/standards-tests-ipv6tunnel-level2` (9 commits on `3e51de989f`, not merged, not pushed); 23 tests, 14 PASS, 9 FAIL, 4 declared expected; level 2 reached; plan `plan/done/ipv6tunnel-level2-standards-tests.md` on the branch
-2. [ ] SCTP — `sctp`
+2. [x] SCTP — `sctp`: done 2026-10-29 on `topic/standards-tests-sctp-level2` (8 commits on `3e51de989f`, not merged, not pushed); 23 tests, 18 PASS, 5 FAIL, 2 declared expected; level 2 reached for the normal path; plan `plan/done/sctp-level2-standards-tests.md` on the branch
 3. [ ] OSPFv2, then OSPFv3 — `ospfv2`, `ospfv3`, one pass, the IGMP and MLD pattern
 4. [ ] BGP-4 — `bgp`
 5. [ ] AODV — `aodv`
@@ -109,4 +109,5 @@ These notes come from the survey cards. Each pass plan copies its note and adds 
 - 2026-10-28, D3: the IPv6 tunnel joins the wave as the first pass.
 - 2026-10-28, D4: per behavior. Where a class, a field or a function for a BGP behavior exists, the model claims the behavior, and a failure is a plain defect. Only a behavior with no code is an unimplemented feature.
 - 2026-10-29, pass 1 (IPv6 tunnel): three facts for the next passes. The runner is `opp_run_protocol_tests` (opp_repl); `inet_run_protocol_tests` is gone. A clean debug build of a worktree takes 6 minutes, but the tools of `omnetpp-6.x` need the release libraries under the coverage names on `LD_LIBRARY_PATH` (`/var/tmp/claude-standards-fixes/libfix`). The level 1 map had put sections that need only configuration and observation at level 3; each pass checks the levels of its map against the toolset rule of the guide at step 2.
+- 2026-10-29, pass 2 (SCTP): three facts for the next passes. A pass from the same base commit takes the build of a built worktree with `/var/tmp/claude-wave2/clone-build.sh`, and `make` then compiles nothing. Where the observations of a check are rules for every packet, the tests collect every violation and judge at the end, so that one failure does not hide the others; the shared notes of the branch (`ipv4/notes.md`) have it, with two traps of the tester: `on()` matches whole path components, and a function of `%global` hides a helper with the same name. Both branches add to `ipv4/notes.md`, at different places, for the landing.
 
