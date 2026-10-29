@@ -155,6 +155,21 @@ static std::string contentNoun(const EventPattern& p)
 // New-vocabulary rendering: subject (the attributed counterpart module, named via its
 // protocol; else the honest source) + verb (from the signal, flipped under attributeTo) + the
 // translated message phrase.
+// The aggregate captures of a step, as a phrase that follows its event.
+static std::string renderAggregates(const EventPattern& p)
+{
+    std::ostringstream os;
+    for (const auto& a : p.aggregates) {
+        switch (a.kind) {
+            case EventPattern::Aggregate::Sum:   os << ", adding up \"" << a.expression << "\" as " << a.name; break;
+            case EventPattern::Aggregate::Count: os << ", counting the events as " << a.name; break;
+            case EventPattern::Aggregate::Max:   os << ", keeping the largest \"" << a.expression << "\" as " << a.name; break;
+            case EventPattern::Aggregate::Min:   os << ", keeping the smallest \"" << a.expression << "\" as " << a.name; break;
+        }
+    }
+    return os.str();
+}
+
 static std::string renderNewPattern(const EventPattern& p, const char *modal)
 {
     std::ostringstream os;
@@ -218,6 +233,7 @@ static std::string renderNewPattern(const EventPattern& p, const char *modal)
         for (size_t i = 0; i < p.captures.size(); i++)
             os << (i ? ", " : "") << p.captures[i].first;
     }
+    os << renderAggregates(p);
     if (p.fltHasNotBefore)
         os << " (but not before " << formatTime(p.fltNotBefore) << " after the previous step)";
     return capitalize(os.str()) + ".";
@@ -247,6 +263,7 @@ static std::string renderPattern(const EventPattern& p, const char *modal)
         for (size_t i = 0; i < p.captures.size(); i++)
             os << (i ? ", " : "") << p.captures[i].first;
     }
+    os << renderAggregates(p);
     if (p.fltHasNotBefore)
         os << " (but not before " << formatTime(p.fltNotBefore) << " after the previous step)";
 

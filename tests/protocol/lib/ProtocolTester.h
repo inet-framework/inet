@@ -9,6 +9,7 @@
 
 #include <map>
 #include <optional>
+#include <set>
 
 #include "inet/common/SimpleModule.h"
 #include "ITap.h"
@@ -43,6 +44,7 @@ class INET_API ProtocolTester : public SimpleModule, protected cListener
     std::optional<ProtocolTest> program;
     size_t currentStep = 0;
     CaptureStore captureStore;                     // values bound by capture(...) as steps match
+    std::set<std::string> startedAggregates;       // aggregate captures that an event changed already
     std::vector<char> groupMatched;                // per-pattern matched flags for an Unordered step
     int groupRemaining = 0;                        // unmatched patterns left in the Unordered group
     int repeatRemaining = 0;                       // occurrences left for an ExactlyTimes step

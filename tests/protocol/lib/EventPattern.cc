@@ -86,6 +86,15 @@ static std::string describeValue(double v)
     return os.str();
 }
 
+// The expression of an assertion as the reason of a failure quotes it: with the values of the
+// captures that it names, so that the reader sees what was compared.
+static std::string quoteExpression(const std::string& expression, const CaptureStore& captures)
+{
+    std::string substituted = expression;
+    substituteCaptures(substituted, captures);
+    return "'" + expression + "'" + (substituted != expression ? " ('" + substituted + "')" : "");
+}
+
 bool EventPattern::assertionsHold(const MatchContext& context, std::string& reason) const
 {
     const PacketEvent& event = context.event;
@@ -93,13 +102,13 @@ bool EventPattern::assertionsHold(const MatchContext& context, std::string& reas
         switch (assertion.kind) {
             case Assertion::Packet:
                 if (!evaluateAssertionExpression(assertion.expr, context)) {
-                    reason = "the packet does not satisfy '" + assertion.expr + "'";
+                    reason = "the packet does not satisfy " + quoteExpression(assertion.expr, context.captures);
                     return false;
                 }
                 break;
             case Assertion::NotPacket:
                 if (evaluateAssertionExpression(assertion.expr, context)) {
-                    reason = "the packet satisfies '" + assertion.expr + "', which is forbidden";
+                    reason = "the packet satisfies " + quoteExpression(assertion.expr, context.captures) + ", which is forbidden";
                     return false;
                 }
                 break;

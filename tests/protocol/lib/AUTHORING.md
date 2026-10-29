@@ -180,6 +180,41 @@ the capture keeps its quantity form and the expression engine compares it, so
 `tcp.headerLength == {synHeaderLength} - 4B` is a valid step. A capture is converted only
 where an expression names it, so a capture taken for one step cannot break another.
 
+A failed assertion quotes its expression, and then the same expression with the values of
+its captures, so the reason shows what was compared:
+`'{sent} == 2000B' ('1999B == 2000B')`.
+
+### Aggregate captures: add up a stream without C++
+
+A capture keeps one value. A check that speaks about many events — the data in flight before
+the first acknowledgment, the largest segment, the number of probes — needs a value that each
+event changes. Four words do that, and each event that the step matches changes the capture:
+
+| Word | The capture |
+| --- | --- |
+| `.captureSum(name, expression)` | the sum of the expression over the events; 0 before the first |
+| `.captureCount(name)` | the number of events; 0 before the first |
+| `.captureMax(name, expression)` | the largest value of the expression; not set before the first |
+| `.captureMin(name, expression)` | the smallest value; not set before the first |
+
+The expression has the syntax of a filter expression, and it can name `length`, the length of
+the packet in bytes, and `value`, the value of a scalar signal. Put the words on a guard that
+cannot fail, `anyNumberOfTimes(...)`, and read the result in a later assertion
+([`CaptureAggregate`](../self/CaptureAggregate.test)):
+
+```cpp
+.meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                .filterPacket("tcp.synBit == false && tcp.finBit == false")
+                                .captureSum("sent", "length - tcp.headerLength")
+                                .captureMax("largest", "length - tcp.headerLength").within(1.5)))
+.meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd").captureMin("smallestWindow", "value").within(1.5)))
+.once(on("host1.tcp").signal("packetSentToLower").filterPacket("tcp.finBit == true").first()
+          .assertPacket("{sent} == 2000B && {largest} == 536B"))
+```
+
+A sum keeps the unit of its expression. A guard runs the captures of each event that it
+matches, so a plain `capture` in a guard holds the value of the last such event.
+
 ---
 
 ## 5. Combinators
@@ -207,8 +242,9 @@ running step rather than only the first:
           .filterPacket("ipv4.identification == {id}").within(0.2))
 ```
 
-`never`, `atMostTimes` and `atLeastTimes` exist as free builders for this, and they return a
-step rather than adding one. A guard carries its own window and its own anchor, so a
+`never`, `atMostTimes`, `atLeastTimes`, `exactlyTimes` and `anyNumberOfTimes` exist as free
+builders for this, and they return a step rather than adding one. `anyNumberOfTimes` cannot
+fail: it is the guard for aggregate captures. A guard carries its own window and its own anchor, so a
 `notBefore` inside it is measured from when the guard started.
 
 ---

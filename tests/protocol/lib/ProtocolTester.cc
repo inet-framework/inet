@@ -8,6 +8,7 @@
 #include "ProtocolTestDescriber.h"
 #include "ITap.h"
 
+#include <cmath>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -107,6 +108,13 @@ void ProtocolTester::initialize()
     if (matchingMode) {
         if (par("printDescription").boolValue())
             std::cout << describe(*program);
+        // A sum and a count exist from the start, so an expression can name one that no
+        // event changed.
+        for (const auto& step : program->steps)
+            for (const auto *pattern : {&step.pattern, &step.pattern2})
+                for (const auto& aggregate : pattern->aggregates)
+                    if (aggregate.kind == EventPattern::Aggregate::Sum || aggregate.kind == EventPattern::Aggregate::Count)
+                        captureStore[aggregate.name] = cValue((intval_t)0);
         installInterceptions();
         currentStep = 0;
         anchorTime = simTime();
@@ -570,6 +578,37 @@ void ProtocolTester::runCaptures(const EventPattern& pattern, const PacketEvent&
 {
     for (auto& capture : pattern.captures)
         captureStore[capture.first] = capture.second(event);
+    // An integral scalar value goes into the expression as an integer, so a large window or
+    // threshold keeps its digits when a capture puts it into a later expression.
+    cValue value;
+    if (event.hasValue)
+        value = std::floor(event.value) == event.value && std::fabs(event.value) < 9e15 ? cValue((intval_t)event.value) : cValue(event.value);
+    for (auto& aggregate : pattern.aggregates) {
+        bool started = startedAggregates.count(aggregate.name) != 0;
+        std::string current = "{" + aggregate.name + "}";
+        cValue result;
+        switch (aggregate.kind) {
+            case EventPattern::Aggregate::Count:
+                result = cValue((intval_t)(started ? captureStore[aggregate.name].intValue() + 1 : 1));
+                break;
+            case EventPattern::Aggregate::Sum:
+                // The first value replaces the 0 of the start, which has no unit.
+                result = evalPacketExpression(started ? current + " + (" + aggregate.expression + ")" : aggregate.expression,
+                                              captureStore, event.packet, value);
+                break;
+            case EventPattern::Aggregate::Max:
+            case EventPattern::Aggregate::Min: {
+                result = evalPacketExpression(aggregate.expression, captureStore, event.packet, value);
+                const char *relation = aggregate.kind == EventPattern::Aggregate::Max ? " > " : " < ";
+                if (started && !evalPacketExpression("(" + aggregate.expression + ")" + relation + current,
+                                                     captureStore, event.packet, value).boolValue())
+                    result = captureStore[aggregate.name];
+                break;
+            }
+        }
+        captureStore[aggregate.name] = result;
+        startedAggregates.insert(aggregate.name);
+    }
 }
 
 void ProtocolTester::advance(simtime_t at)
@@ -745,6 +784,9 @@ void ProtocolTester::offerToGuards(const PacketEvent& event)
         if (!patternMatches(step.pattern, event, guard.startTime))
             continue;
         guard.count++;
+        // A guard matches many events, and each one changes its captures: an aggregate
+        // capture in a guard is how a test adds up what a stream carries.
+        runCaptures(step.pattern, event);
         if (step.type == StepType::Never) {
             decide(false, "forbidden event occurred at t=" + event.time.str() + " for the guard of step "
                           + std::to_string(guard.stepIndex) + " [" + step.pattern.str() + "]");

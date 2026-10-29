@@ -103,6 +103,11 @@ Step exactlyTimes(int n, EventPattern pattern)
     return step;
 }
 
+Step anyNumberOfTimes(EventPattern pattern)
+{
+    return atLeastTimes(0, std::move(pattern));
+}
+
 Step atLeastTimes(int n, EventPattern pattern)
 {
     Step step;

@@ -1,0 +1,87 @@
+%description:
+
+Protocol Test Framework self test -- the aggregate captures captureSum, captureCount,
+captureMax and captureMin.
+
+host1 sends 2000 bytes with an MSS of 536 bytes: three full segments and one of 392 bytes. A
+guard over the segments that host1 sends adds up their data, counts them, and keeps the
+largest one; a second guard keeps the smallest congestion window, a scalar signal. When
+host1 closes the connection, the sum must be 2000 bytes, the largest segment 536 bytes, and
+the count at least the four data segments. The sum carries the unit of its expression.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("capture_aggregate")
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+                                        .filterPacket("tcp.synBit == false && tcp.finBit == false")
+                                        .captureSum("sent", "length - tcp.headerLength")
+                                        .captureCount("segments")
+                                        .captureMax("largest", "length - tcp.headerLength")
+                                        .describe("each segment that host1 sends")
+                                        .within(1.5)))
+        .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("cwnd")
+                                        .captureMin("smallestWindow", "value")
+                                        .within(1.5)))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.finBit == true")
+                  .first()
+                  .assertPacket("{sent} == 2000B && {largest} == 536B && {segments} >= 4 && {smallestWindow} >= 536")
+                  .describe("the FIN of host1, after all the data")
+                  .within(1.5));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "capture_aggregate compiled\n";
+
+%file: test.ned
+
+import inet.node.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+
+network CaptureAggregateNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        host1: StandardHost { @display("p=300,100"); }
+        host2: StandardHost { @display("p=500,100"); }
+    connections:
+        host1.ethg++ <--> Eth100M <--> host2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = CaptureAggregateNet
+sim-time-limit = 3s
+seed-set = 0
+
+**.tcp.mss = 536
+# The timestamp option takes 12 bytes of each segment; without it, a full segment is the MSS.
+**.tcp.timestampSupport = false
+
+*.host1.numApps = 1
+*.host1.app[0].typename = "TcpSessionApp"
+*.host1.app[0].connectAddress = "host2"
+*.host1.app[0].connectPort = 1000
+*.host1.app[0].tOpen = 0.1s
+*.host1.app[0].tSend = 0.2s
+*.host1.app[0].sendBytes = 2000B
+*.host1.app[0].tClose = 1s
+*.host2.numApps = 1
+*.host2.app[0].typename = "TcpEchoApp"
+*.host2.app[0].localPort = 1000
+*.host2.app[0].echoFactor = 0
+*.host*.ipv4.arp.typename = "GlobalArp"
+
+%contains: stdout
+PROTOCOLTEST capture_aggregate: PASS

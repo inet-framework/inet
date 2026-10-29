@@ -65,6 +65,14 @@ class INET_API EventPattern
     MatchPredicate predicate;                             // optional typed lambda predicate
     std::string description;                              // optional human phrase for the content (esp. a lambda)
     std::vector<std::pair<std::string, CaptureFn>> captures; // values to bind when this step matches
+    // A capture that each matching event changes: the sum, the number, the largest or the
+    // smallest of the values of an expression over the matching events.
+    struct Aggregate {
+        enum Kind { Sum, Count, Max, Min } kind = Sum;
+        std::string name;
+        std::string expression;                           // Sum, Max, Min
+    };
+    std::vector<Aggregate> aggregates;
     // timing (relative to the step anchor)
     bool fltHasWithin = false; simtime_t fltWithin = 0;       // deadline
     bool fltHasNotBefore = false; simtime_t fltNotBefore = 0; // earliest
@@ -145,6 +153,19 @@ class INET_API EventPattern
         captures.emplace_back(name, [path](const PacketEvent& e) { return evalPacketField(e.packet, path); });
         return *this;
     }
+    // Aggregate captures: each event that the step matches changes the capture, also in a
+    // meanwhile(...) guard, which matches many events. The expression has the syntax of
+    // evalPacketExpression(): it names the fields of the packet, `length` (bytes) and `value`
+    // (a scalar signal). A sum and a count are 0 before the first event; a largest and a
+    // smallest value are not set before it.
+    //
+    //     .meanwhile(anyNumberOfTimes(on("host1.tcp").signal("packetSentToLower")
+    //                                     .captureSum("sent", "length - tcp.headerLength").within(1.0)))
+    //     ... .assertPacket("{sent} <= 2920B")
+    EventPattern& captureSum(const char *name, const char *expression) { aggregates.push_back({Aggregate::Sum, name, expression}); return *this; }
+    EventPattern& captureCount(const char *name) { aggregates.push_back({Aggregate::Count, name, ""}); return *this; }
+    EventPattern& captureMax(const char *name, const char *expression) { aggregates.push_back({Aggregate::Max, name, expression}); return *this; }
+    EventPattern& captureMin(const char *name, const char *expression) { aggregates.push_back({Aggregate::Min, name, expression}); return *this; }
     EventPattern& within(double t) { fltHasWithin = true; fltWithin = t; return *this; }
     EventPattern& after(double t) { fltHasNotBefore = true; fltNotBefore = t; return *this; }
     EventPattern& notBefore(double t) { fltHasNotBefore = true; fltNotBefore = t; return *this; }

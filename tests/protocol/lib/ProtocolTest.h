@@ -158,6 +158,9 @@ Step never(EventPattern pattern);
 Step atMostTimes(int n, EventPattern pattern);
 Step atLeastTimes(int n, EventPattern pattern);
 Step exactlyTimes(int n, EventPattern pattern);
+// A guard that cannot fail: it only runs the captures of the events it matches, which is
+// what an aggregate capture (captureSum, captureCount, ...) needs.
+Step anyNumberOfTimes(EventPattern pattern);
 
 // Entry points of the fluent injection and interception chains.
 //
