@@ -10,7 +10,7 @@ Master contains the merged explicit Compressed Block Ack implementation from PR 
 
 The PHY plan supplies aggregate reception before the MAC feature uses it. Its first gate proves deterministic member outcomes and includes the shared NIST/Yans implementation. It also preserves default HT operation and reception without an error model. Its second gate extends the NIST/Yans and compatibility evidence. The MAC feature can reach deterministic integration between those gates.
 
-The series defines PHY P0 through P4 and gates D1 and D2. The final execution record states verification and its limits. VHT identity, bounded inspection, deaggregation use, and HT-SIG representation have separate commit boundaries. P3 checks NIST/Yans probabilities and seeded outcomes. P4 supplies ordinary controls. MAC aggregate receipt and implicit Block Ack remain pending.
+The ten-commit series supplies PHY P0 through P4 and gates D1 and D2. The [final execution record](ieee80211-ampdu-phy-execution.md) states verification and its limits. VHT identity, bounded inspection, deaggregation use, and HT-SIG representation have separate commit boundaries. P3 checks NIST/Yans probabilities and seeded outcomes. P4 supplies ordinary controls. MAC aggregate receipt and implicit Block Ack remain pending.
 
 The merge prerequisite is satisfied on the integrated master base. MAC step A0 must compare the contracts and record a feature-off baseline before MAC implementation.
 
