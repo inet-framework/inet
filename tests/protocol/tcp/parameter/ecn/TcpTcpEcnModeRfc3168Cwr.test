@@ -1,0 +1,74 @@
+%description:
+
+Tcp.tcpEcnMode:rfc3168-cwr -- after an ECE, the sender sets CWR on its next data segment, and the receiver stops ECE.
+
+The claim (Tcp.ned): "rfc3168": classic ECN (RFC 3168); RFC 3168 section 6.1.2: the
+sender reacts to ECE once and sets CWR on the next new data segment; section 6.1.3: the
+receiver sends ECE until it receives a CWR.
+
+The class rfc3168-cwr: TcpClassicAlgorithmBase::processEce() halves the window and sets
+sndCwr, TcpConnection::sendSegment() sets CWR on the next data segment, and
+processSegment1stThru8th() of the receiver leaves the ECE state at the CWR. This facet comes from the coverage gap loop: no test reached the code of this part. This test
+separates "rfc3168" from "accecn", which sets no CWR on data, and from the modes without ECN.
+
+Host under test: host1; host1 sends 100000 bytes at 0.2 s to host2, which answers classic ECN
+and AccECN (tcpEcnMode "accecn-passive", a precondition: with a classic peer, "accecn" falls
+back to RFC 3168), and the tap marks the 10th data segment of host1 CE. Observation: level 1, an ACK of
+host2 carries ECE, a later data segment of host1 carries CWR, and a later ACK of host2 that
+acknowledges it has no ECE.
+
+%# parameter: Tcp.tcpEcnMode
+%# class: rfc3168-cwr
+%# value: "rfc3168"
+%# key: *.host1.tcp.tcpEcnMode
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpTcpEcnModeRfc3168Cwr")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 9 * 1448 && ipv4.totalLengthField > 100B").nth(1)
+                     .set("ipv4.ecn", "3")
+                     .describe("the 10th data segment of host1: mark it CE"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.synBit == false && tcp.eceBit == true")
+             .describe("an ACK of host2 with ECE")
+             .within(1.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.cwrBit == true && pk.dataLength > tcp.headerLength")
+             .capture("cwrSeq", "tcp.sequenceNo")
+             .describe("a data segment of host1 with CWR")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo > {cwrSeq} && tcp.eceBit == false")
+             .describe("an ACK of host2 beyond the CWR segment, without ECE")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpTcpEcnModeRfc3168Cwr compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpEcnMode = "rfc3168"    # the parameter under test
+*.linkDelay = 10ms
+*.host2.tcp.tcpEcnMode = "accecn-passive"
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpTcpEcnModeRfc3168Cwr: PASS

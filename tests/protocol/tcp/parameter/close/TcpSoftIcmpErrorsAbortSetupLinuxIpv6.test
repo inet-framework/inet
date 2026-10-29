@@ -1,0 +1,64 @@
+%description:
+
+Tcp.softIcmpErrorsAbortSetup:linux-ipv6 -- over IPv6, a Time Exceeded aborts SYN_SENT.
+
+The claim (Tcp.ned): "a soft ICMP error ... aborts the connection setup, as Linux".
+
+The class linux-ipv6: TcpConnection::processIcmpv6Error() counts an ICMPv6 Time Exceeded, a
+Destination Unreachable for no route or address, and a Parameter Problem as errors that abort
+the setup when the value is true. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates "linux" from "rfc" over IPv6, where
+the SYN goes again.
+
+Host under test: host1, on IPv6 nodes (precondition); the network is TapRouterNetwork, and the
+tap sets the hop limit of the first SYN of host1 to 1, so the router sends a Time Exceeded. The
+application of host1 opens at 3 s, after the address configuration. Observation: level 1, host1
+sends no second SYN.
+
+%# parameter: Tcp.softIcmpErrorsAbortSetup
+%# class: linux-ipv6
+%# value: true
+%# key: *.host1.tcp.softIcmpErrorsAbortSetup
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSoftIcmpErrorsAbortSetupLinuxIpv6")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.synBit == true").nth(1).set("ipv6.hopLimit", "1")
+                     .describe("the first SYN of host1: a hop limit of 1, so that the router sends a Time Exceeded"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .describe("the SYN of host1")
+             .within(3.5))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+              .describe("a second SYN of host1")
+              .within(2.0));
+}
+
+%activity:
+EV << "TcpSoftIcmpErrorsAbortSetupLinuxIpv6 compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.softIcmpErrorsAbortSetup = true    # the parameter under test
+*.host*.typename = "StandardHost6"
+*.configurator.typename = "Ipv6NetworkConfigurator"
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.typename = "Router6"
+network = inet.protocoltest.TapRouterNetwork
+*.host1.app[0].tOpen = 3s
+*.host1.app[0].tSend = 3.1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSoftIcmpErrorsAbortSetupLinuxIpv6: PASS

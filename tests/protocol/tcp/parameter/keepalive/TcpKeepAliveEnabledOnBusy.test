@@ -1,0 +1,69 @@
+%description:
+
+Tcp.keepAliveEnabled:on-busy -- during a transfer longer than the idle time no probe goes; the first comes the idle time after the last ACK.
+
+The claim (Tcp.ned): "keepalive (RFC 9293 section 3.8.4): after keepAliveIdleTime
+without a received segment and without data in flight, send a probe"; MUST-26: "Keep-alive
+packets MUST only be sent when no sent data is outstanding".
+
+The class on-busy: TcpAlgorithmBase::processKeepAliveTimer() starts the idle time again when
+data is in flight or waits. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates "on" from "off", where no probe comes.
+
+Host under test: host1, with an idle time of 1 s (precondition); the network is
+TapRouterNetwork with a bottleneck of 10 Mbps, and host1 sends 5000000 bytes at 0.2 s, which
+take about 4 s. Observation: level 1, the first probe comes 1 s after the ACK of all data.
+
+%# parameter: Tcp.keepAliveEnabled
+%# class: on-busy
+%# value: true
+%# key: *.host1.tcp.keepAliveEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpKeepAliveEnabledOnBusy")
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 5000000")
+             .describe("the ACK of all data of host1")
+             .within(10.0))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.synBit == false && tcp.sequenceNo == {isn} + 5000000 && pk.dataLength <= tcp.headerLength")
+              .describe("an early keepalive probe")
+              .within(0.9))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == false && tcp.sequenceNo == {isn} + 5000000 && pk.dataLength <= tcp.headerLength")
+             .describe("keepalive probe")
+             .within(0.2));
+}
+
+%activity:
+EV << "TcpKeepAliveEnabledOnBusy compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.keepAliveEnabled = true    # the parameter under test
+network = inet.protocoltest.TapRouterNetwork
+*.bottleneckDatarate = 10Mbps
+*.host1.tcp.keepAliveIdleTime = 1s
+*.host1.app[0].sendBytes = 5000000B
+*.host1.app[0].tClose = 10000s
+sim-time-limit = 20s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpKeepAliveEnabledOnBusy: PASS

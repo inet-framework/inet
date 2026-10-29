@@ -1,0 +1,62 @@
+%description:
+
+Tcp.sendMssOption:off-peer -- without the MSS option of host1, the peer sends segments of at most 536 bytes.
+
+The claim (Tcp.ned): "send the MSS option"; RFC 9293 MUST-15: without an MSS option
+the peer uses the default of 536 bytes (IPv4).
+
+The class off-peer: TcpConnection::applyDefaultSendMss() of the peer limits its SMSS to 536,
+and TcpAlgorithmBase::getReceiveMss() of host1 takes 536 as its RMSS. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates
+"off" from "on", where the peer sends 1448 bytes.
+
+Host under test: host1, which listens at the port 1000; host2 connects at 0.1 s and sends 10000
+bytes at 0.2 s. Observation: level 1, the first data segment of host2 carries at most 536
+bytes of data.
+
+%# parameter: Tcp.sendMssOption
+%# class: off-peer
+%# value: false
+%# key: *.host1.tcp.sendMssOption
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSendMssOptionOffPeer")
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("pk.dataLength > tcp.headerLength")
+             .first()
+                  .assertPacket("pk.dataLength - tcp.headerLength <= 536B")
+             .describe("the first data segment of host2")
+             .within(1.0));
+}
+
+%activity:
+EV << "TcpSendMssOptionOffPeer compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.sendMssOption = false    # the parameter under test
+*.host1.app[0].typename = "TcpEchoApp"
+*.host1.app[0].localPort = 1000
+*.host1.app[0].echoFactor = 0
+*.host2.app[0].typename = "TcpSessionApp"
+*.host2.app[0].connectAddress = "host1"
+*.host2.app[0].connectPort = 1000
+*.host2.app[0].tOpen = 0.1s
+*.host2.app[0].tSend = 0.2s
+*.host2.app[0].sendBytes = 10000B
+*.host2.app[0].tClose = 1000s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSendMssOptionOffPeer: PASS

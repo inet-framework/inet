@@ -1,0 +1,66 @@
+%description:
+
+Tcp.windowAutoTuning:on-clamp -- when the charged segments outgrow the receive buffer, the buffer grows.
+
+The claim (Tcp.ned): "receive window auto-tuning, as Linux (tcp_grow_window())"; Linux
+tcp_clamp_window(): a buffer that the charged segments outgrow grows, up to the largest buffer.
+
+The class on-clamp: processSegment1stThru8th() grows the receive buffer of a connection that
+the application owns when the charge of its segments is above the buffer and the buffer is
+below receiveBufferMax. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates "on" from "off", where the buffer keeps its
+size.
+
+Host under test: host2, with a receive buffer of 16384 bytes and an advertised window of 16384
+bytes (preconditions), whose TcpTestApp listens at the port 1000 and reads nothing, so the
+received segments stay charged; host1 sends 100000 bytes at 0.2 s. Observation: level 3, the
+receive buffer of host2 is larger than 16384 bytes at 1 s.
+
+%# parameter: Tcp.windowAutoTuning
+%# class: on-clamp
+%# value: true
+%# key: *.host2.tcp.windowAutoTuning
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpWindowAutoTuningOnClamp")
+        .act(action().at(0.0).run<TcpTestApp>("host2.app[0]", [](TcpTestApp& app) {
+            app.socket().setAutoRead(false);
+            app.socket().bind(1000);
+            app.socket().listen();
+        }))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .act(action().at(1.0)
+                 .describe("the receive buffer of host2 at 1 s")
+                 .assertModule("host2.tcp.conn-*", "state.rcvBufferSize > 16384"));
+}
+
+%activity:
+EV << "TcpWindowAutoTuningOnClamp compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.windowAutoTuning = true    # the parameter under test
+*.host2.app[0].typename = "TcpTestApp"
+*.host2.tcp.advertisedWindow = 16384
+*.host2.tcp.receiveBufferSize = 16384B
+*.host1.app[0].sendBytes = 100000B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpWindowAutoTuningOnClamp: PASS

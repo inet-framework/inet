@@ -1,0 +1,72 @@
+%description:
+
+Tcp.mtuProbing:search-icmp -- a Fragmentation Needed of the route limits the search to its MTU.
+
+The claim (Tcp.ned): "RFC 4821 - Packetization Layer Path MTU Discovery. By parameter
+(mtuProbing = 2 ...): a search between baseMss and the MSS of the peer, with one probe segment
+from queued data ... The route MTU bounds the search".
+
+The class search-icmp: TcpConnection::processIcmpv4Error() of a connection with PMTUD and the
+search calls limitMtuSearch(), which sets the top of the search to the MTU of the ICMP
+error. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates "search" from "off", whose first data segment has the MSS of
+the handshake.
+
+Host under test: host1, with PMTUD (the default); the network is TapRouterNetwork, and the
+interface of the router to host2 has an MTU of 1200 bytes. host1 sends 1000000 bytes at 0.2 s.
+Observation: level 1, the first data frame carries 1076 bytes (the base MSS), a probe above
+1200 bytes goes, and after it no frame of host1 is above 1200 bytes, while a frame above 1150
+bytes comes.
+
+%# parameter: Tcp.mtuProbing
+%# class: search-icmp
+%# value: 2
+%# key: *.host1.tcp.mtuProbing
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMtuProbingSearchIcmp")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("ipv4.totalLengthField > 100B")
+             .first()
+                  .assertPacket("ipv4.totalLengthField == 1076B")
+             .describe("the first data frame of host1")
+             .within(0.5))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("ipv4.totalLengthField > 1200B")
+             .describe("a probe above the MTU of the route")
+             .within(1.5))
+        .meanwhile(never(on("host1.eth[0].mac").signal("packetSentToLower")
+                             .filterPacket("ipv4.totalLengthField > 1200B")
+                             .describe("a frame above 1200 bytes after the ICMP error")
+                             .within(2.0)))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("ipv4.totalLengthField > 1150B && ipv4.totalLengthField <= 1200B")
+             .describe("a frame near the MTU of the route")
+             .within(2.0));
+}
+
+%activity:
+EV << "TcpMtuProbingSearchIcmp compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.mtuProbing = 2    # the parameter under test
+network = inet.protocoltest.TapRouterNetwork
+*.router.eth[1].mac.mtu = 1200B
+*.host1.app[0].sendBytes = 1000000B
+sim-time-limit = 4s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMtuProbingSearchIcmp: PASS

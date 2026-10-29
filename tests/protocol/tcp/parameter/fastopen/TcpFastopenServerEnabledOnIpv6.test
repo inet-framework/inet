@@ -1,0 +1,78 @@
+%description:
+
+Tcp.fastopenServerEnabled:on-ipv6 -- over IPv6, the server gives a cookie and takes the data of the next SYN with it.
+
+The claim (Tcp.ned): "TCP Fast Open, server: give cookies and accept data on a SYN with
+a valid cookie (RFC 7413)".
+
+The class on-ipv6: the cookie of the server is a MAC over the address of the client
+(Tcp.cc, appendAddressBytes()), which takes the 16 bytes of an IPv6 address. This facet comes from the coverage gap loop: no test reached the code of this part. This test
+separates "on" from "off" over IPv6, where the server gives no cookie.
+
+Host under test: host2, on IPv6 nodes (precondition). host1 opens connection 1 with Fast Open
+at 3.1 s, and connection 2 at 3.5 s with 500 bytes. Observation: level 1, the SYN-ACK of
+connection 1 carries a cookie of 8 bytes, and the SYN-ACK of connection 2 acknowledges the 500
+bytes of its SYN.
+
+%# parameter: Tcp.fastopenServerEnabled
+%# class: on-ipv6
+%# value: true
+%# key: *.host2.tcp.fastopenServerEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpFastopenServerEnabledOnIpv6")
+        .act(action().at(3.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); })
+                 .describe("host1 opens connection 1 with Fast Open"))
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) {
+                      std::string cookie = tcpFastOpenCookieOf(context.event.packet);
+                      return cookie.size() == 16;
+                  })
+                  .describe("the SYN-ACK of connection 1: a cookie of 8 bytes")
+                  .within(0.5))
+        .act(action().at(3.5).run<TcpTestApp>("host1.app[1]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000, true); app.sendData(app.socket(), 500); })
+                 .describe("host1 opens connection 2 with Fast Open, and sends 500 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == false && pk.dataLength > tcp.headerLength")
+                  .capture("isn2", "tcp.sequenceNo")
+                  .describe("the SYN of connection 2, with 500 bytes")
+                  .within(0.5))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+             .first()
+                  .assertPacket("tcp.ackNo == {isn2} + 501")
+             .describe("the SYN-ACK of connection 2 acknowledges the SYN and the 500 bytes")
+             .within(0.5));
+}
+
+%activity:
+EV << "TcpFastopenServerEnabledOnIpv6 compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.fastopenServerEnabled = true    # the parameter under test
+*.host*.typename = "StandardHost6"
+*.configurator.typename = "Ipv6FlatNetworkConfigurator"
+*.host1.tcp.fastopenClientEnabled = true
+*.host1.numApps = 2
+*.host1.app[*].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpFastopenServerEnabledOnIpv6: PASS

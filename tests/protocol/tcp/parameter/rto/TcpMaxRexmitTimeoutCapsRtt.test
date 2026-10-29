@@ -1,0 +1,68 @@
+%description:
+
+Tcp.maxRexmitTimeout:caps-rtt -- an RTO that the RTT makes larger than the maximum is the maximum.
+
+The claim (Tcp.ned): "the upper limit of the retransmission timeout".
+
+The class caps-rtt: TcpAlgorithmBase::rttMeasurementComplete() limits the RTO that it computes
+from the RTT samples to the value; the class "caps" limits the backoff. This facet comes from the coverage gap loop: no test reached the code of this part. This test separates
+"caps" from "free" (240 s).
+
+Host under test: host1, without TLP (precondition), with a link delay of 220 ms: the RTT is
+0.88 s, so the computed RTO is above 2 s. host1 sends 4344 bytes (3 segments) at 0.2 s, and the
+tap drops the third segment the first time. Observation: level 1, the timer sends the third
+segment again 2 s after the ACK of the first two segments.
+
+%# parameter: Tcp.maxRexmitTimeout
+%# class: caps-rtt
+%# value: 2s
+%# key: *.host1.tcp.maxRexmitTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpMaxRexmitTimeoutCapsRtt")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 2 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the third data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.ackNo == {isn} + 1 + 2896")
+             .describe("the ACK of the first two segments")
+             .within(4.0))
+        .never(on("host1.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.sequenceNo == {isn} + 1 + 2896 && pk.dataLength > tcp.headerLength")
+              .describe("an early retransmission of the third segment")
+              .within(1.95))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 2896 && pk.dataLength > tcp.headerLength")
+             .describe("retransmission of the third segment")
+             .within(0.1));
+}
+
+%activity:
+EV << "TcpMaxRexmitTimeoutCapsRtt compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.maxRexmitTimeout = 2s    # the parameter under test
+*.linkDelay = 220ms
+*.host1.tcp.tlpEnabled = false
+*.host1.app[0].sendBytes = 4344B
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpMaxRexmitTimeoutCapsRtt: PASS

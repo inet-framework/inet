@@ -1,0 +1,61 @@
+%description:
+
+Tcp.pmtudEnabled:on-ipv6 -- over IPv6, a Packet Too Big of the route reduces the MSS.
+
+The claim (Tcp.ned): "Path MTU Discovery (RFC 1191, RFC 1981) enabled/disabled"; RFC
+1981 is the PMTUD of IPv6, where a router sends a Packet Too Big and never fragments.
+
+The class on-ipv6: Tcp::processIcmpv6Error() finds the connection, and
+TcpConnection::processIcmpv6Error() reduces the MSS to the MTU of the Packet Too Big. This facet comes from the coverage gap loop: no test reached the code of this part. This
+test separates "on" from "off", where the segments that are too large never pass the router.
+
+Host under test: host1, on IPv6 nodes (precondition); the network is TapRouterNetwork, and the
+interface of the router to host2 has an MTU of 1280 bytes. The application of host1 opens at
+3 s, after the address configuration, and sends 10000 bytes at 3.1 s. Observation: level 1, a
+data frame reaches host2, and its IPv6 payload is at most 1240 bytes.
+
+%# parameter: Tcp.pmtudEnabled
+%# class: on-ipv6
+%# value: true
+%# key: *.host1.tcp.pmtudEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpPmtudEnabledOnIpv6")
+        .once(on("host2.eth[0].mac").signal("packetReceivedFromLower")
+             .filterPacket("ipv6.payloadLength > 100B")
+             .first()
+                  .assertPacket("ipv6.payloadLength <= 1240B")
+             .describe("the first data frame at host2")
+             .within(4.5));
+}
+
+%activity:
+EV << "TcpPmtudEnabledOnIpv6 compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.pmtudEnabled = true    # the parameter under test
+*.host*.typename = "StandardHost6"
+*.configurator.typename = "Ipv6NetworkConfigurator"
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.router.typename = "Router6"
+network = inet.protocoltest.TapRouterNetwork
+*.router.eth[1].mac.mtu = 1280B
+*.host1.app[0].tOpen = 3s
+*.host1.app[0].tSend = 3.1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpPmtudEnabledOnIpv6: PASS
