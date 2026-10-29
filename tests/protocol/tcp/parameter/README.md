@@ -13,9 +13,11 @@ of each parameter and the test of each class, and the plan
 - **One class, one test.** A class whose behavior has independent parts has one test for each
   part, a facet: `TcpAdaptiveDelayedAcksLinuxQuickack`, `...LinuxAto`, `...LinuxPingpong`.
 - **The test must fail with the value of another class.** A test that passes for every value
-  gives coverage, but no evidence. `cross_class.py` checks this. The one exception is a class
-  whose name ends with `-override`: it claims that a socket option takes the place of the
-  parameter, so its test passes with each value of the parameter by design.
+  gives coverage, but no evidence. `cross_class.py` checks this. There are two exceptions. A
+  class whose name ends with `-override` claims that a socket option takes the place of the
+  parameter, so its test passes with each value of the parameter by design. A class whose
+  name ends with `-alias` is another spelling of the value of another class, so its test
+  passes with that value.
 - **One parameter changes.** The test sets its parameter on the host under test, also when the
   class holds the default, and it sets the preconditions of the class. Everything else keeps
   the defaults of `Tcp`.
