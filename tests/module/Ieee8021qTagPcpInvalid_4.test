@@ -1,0 +1,32 @@
+%description:
+
+Tests that an 802.1Q tag inserter rejects removing the user priority request
+without mapping it, which would discard it unused, at initialization.
+The chain is PcpTestChain of lib/Ieee8021qPcpTest.ned.
+
+%file: test.ned
+
+import inet.test.moduletest.lib.PcpTestChain;
+
+network Test
+{
+    submodules:
+        a: PcpTestChain;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3.5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.a.cInserter.removeUserPriorityReq = true
+*.a.cInserter.mapUserPriorityReqToPcpReq = false
+
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > pcp-error.out || true
+%contains: pcp-error.out
+The removeUserPriorityReq parameter requires mapUserPriorityReqToPcpReq

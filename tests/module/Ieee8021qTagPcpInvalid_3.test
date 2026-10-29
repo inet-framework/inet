@@ -1,0 +1,31 @@
+%description:
+
+Tests that an 802.1Q tag inserter rejects a defaultPcp parameter value other than
+-1 and [0, 7] at initialization.
+The chain is PcpTestChain of lib/Ieee8021qPcpTest.ned.
+
+%file: test.ned
+
+import inet.test.moduletest.lib.PcpTestChain;
+
+network Test
+{
+    submodules:
+        a: PcpTestChain;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3.5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.a.cInserter.defaultPcp = 8
+
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > pcp-error.out || true
+%contains: pcp-error.out
+Invalid defaultPcp parameter value: 8, must be -1 or in [0, 7]

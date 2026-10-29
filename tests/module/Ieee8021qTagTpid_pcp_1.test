@@ -1,0 +1,53 @@
+%description:
+
+Tests the PCP steps of the 802.1Q tag inserter with a TPID (see
+Ieee8021qTagEpd_pcp_1), whose code is a copy of the EPD inserter's. The chains:
+- a: default parameters; a user priority, a user priority overridden by a PCP
+  request, and no request
+- b: removeUserPriorityReq = true and mapPcpIndToUserPriorityInd = false
+- c: mapUserPriorityReqToPcpReq = false and defaultPcp = 4
+
+%file: test.ned
+
+import inet.test.moduletest.lib.PcpTestTpidChain;
+
+network Test
+{
+    submodules:
+        a: PcpTestTpidChain;
+        b: PcpTestTpidChain;
+        c: PcpTestTpidChain;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3.5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.a.requester.userPriorities = [6, 6, -1]
+*.a.requester.cPcps = [-1, 3, -1]
+*.b.requester.userPriorities = [6]
+*.b.cInserter.removeUserPriorityReq = true
+*.b.cInserter.mapPcpIndToUserPriorityInd = false
+*.c.requester.userPriorities = [6]
+*.c.cInserter.mapUserPriorityReqToPcpReq = false
+*.c.cInserter.defaultPcp = 4
+
+%contains: stdout
+a #0: pcp=6 UserPriorityReq=6 UserPriorityInd=6 CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=none
+
+%contains: stdout
+a #1: pcp=3 UserPriorityReq=6 UserPriorityInd=3 CPcpReq=none SPcpReq=none CPcpInd=3 SPcpInd=none
+
+%contains: stdout
+a #2: pcp=0 UserPriorityReq=none UserPriorityInd=none CPcpReq=none SPcpReq=none CPcpInd=none SPcpInd=none
+
+%contains: stdout
+b #0: pcp=6 UserPriorityReq=none UserPriorityInd=none CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=none
+
+%contains: stdout
+c #0: pcp=4 UserPriorityReq=6 UserPriorityInd=4 CPcpReq=none SPcpReq=none CPcpInd=4 SPcpInd=none

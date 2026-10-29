@@ -1,0 +1,91 @@
+%description:
+
+Tests where an 802.1Q tag inserter takes the PCP of its tag from, in three steps.
+Step 1 maps a user priority request to a PCP request of the tag type, unless the
+packet already has one (mapUserPriorityReqToPcpReq), and removes the user
+priority request if removeUserPriorityReq is set; otherwise the request stays on
+the packet for the layers below (IEEE 802.1Q-2018 6.9.2). Step 2 takes the PCP
+from the PCP request, or from defaultPcp; -1 leaves the PCP unspecified: the tag
+gets PCP 0 and the packet no PCP indication. Step 3 indicates the PCP of the tag
+as the user priority of the frame (mapPcpIndToUserPriorityInd).
+
+Each chain sends packets with the requests that its requester lists per packet
+through one C-tag inserter to a probe:
+- a: default parameters; a user priority, a user priority overridden by a PCP
+  request, no request, and a PCP request alone
+- b: mapUserPriorityReqToPcpReq = false and defaultPcp = 4; the user priority
+  request is ignored and stays on the packet
+- c: removeUserPriorityReq = true; the user priority request is removed, also
+  when a PCP request overrides it
+- d: mapPcpIndToUserPriorityInd = false; no user priority indication
+- e: defaultPcp = 5 and no request
+- f: an invalid user priority (9) that a PCP request overrides is not used, so it
+  is not rejected, and stays on the packet
+
+%file: test.ned
+
+import inet.test.moduletest.lib.PcpTestChain;
+
+network Test
+{
+    submodules:
+        a: PcpTestChain;
+        b: PcpTestChain;
+        c: PcpTestChain;
+        d: PcpTestChain;
+        e: PcpTestChain;
+        f: PcpTestChain;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 3.5s
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.a.requester.userPriorities = [6, 6, -1, -1]
+*.a.requester.cPcps = [-1, 3, -1, 2]
+*.b.requester.userPriorities = [6]
+*.b.cInserter.mapUserPriorityReqToPcpReq = false
+*.b.cInserter.defaultPcp = 4
+*.c.requester.userPriorities = [6, 6]
+*.c.requester.cPcps = [-1, 3]
+*.c.cInserter.removeUserPriorityReq = true
+*.d.requester.userPriorities = [6]
+*.d.cInserter.mapPcpIndToUserPriorityInd = false
+*.e.cInserter.defaultPcp = 5
+*.f.requester.userPriorities = [9]
+*.f.requester.cPcps = [3]
+
+%contains: stdout
+a #0: pcp0=6 UserPriorityReq=6 UserPriorityInd=6 CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=none
+
+%contains: stdout
+a #1: pcp0=3 UserPriorityReq=6 UserPriorityInd=3 CPcpReq=none SPcpReq=none CPcpInd=3 SPcpInd=none
+
+%contains: stdout
+a #2: pcp0=0 UserPriorityReq=none UserPriorityInd=none CPcpReq=none SPcpReq=none CPcpInd=none SPcpInd=none
+
+%contains: stdout
+a #3: pcp0=2 UserPriorityReq=none UserPriorityInd=2 CPcpReq=none SPcpReq=none CPcpInd=2 SPcpInd=none
+
+%contains: stdout
+b #0: pcp0=4 UserPriorityReq=6 UserPriorityInd=4 CPcpReq=none SPcpReq=none CPcpInd=4 SPcpInd=none
+
+%contains: stdout
+c #0: pcp0=6 UserPriorityReq=none UserPriorityInd=6 CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=none
+
+%contains: stdout
+c #1: pcp0=3 UserPriorityReq=none UserPriorityInd=3 CPcpReq=none SPcpReq=none CPcpInd=3 SPcpInd=none
+
+%contains: stdout
+d #0: pcp0=6 UserPriorityReq=6 UserPriorityInd=none CPcpReq=none SPcpReq=none CPcpInd=6 SPcpInd=none
+
+%contains: stdout
+e #0: pcp0=5 UserPriorityReq=none UserPriorityInd=5 CPcpReq=none SPcpReq=none CPcpInd=5 SPcpInd=none
+
+%contains: stdout
+f #0: pcp0=3 UserPriorityReq=9 UserPriorityInd=3 CPcpReq=none SPcpReq=none CPcpInd=3 SPcpInd=none
