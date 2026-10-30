@@ -438,31 +438,10 @@ different S-VLANs.
 Ping Results
 ~~~~~~~~~~~~
 
-Every host sent 5 ping requests and received 5 replies, so all 80 pings were
-answered, with 0% loss:
-
-.. code-block:: text
-
-   host      sent  received  loss
-   hostA1a   5     5         0%
-   hostA1b   5     5         0%
-   hostA2a   5     5         0%
-   hostA2b   5     5         0%
-   hostB1a   5     5         0%
-   hostB1b   5     5         0%
-   hostB2a   5     5         0%
-   hostB2b   5     5         0%
-   hostC1a   5     5         0%
-   hostC1b   5     5         0%
-   hostC2a   5     5         0%
-   hostC2b   5     5         0%
-   hostD1a   5     5         0%
-   hostD1b   5     5         0%
-   hostD2a   5     5         0%
-   hostD2b   5     5         0%
-
-The numbers come from the ``Pings sent``, ``pingRxSeq:count`` and ``ping loss
-rate (%)`` scalars of the ping applications.
+Each of the 16 hosts sent 5 ping requests and received 5 replies, so all 80
+pings were answered, with 0% loss. The numbers come from the ``Pings sent``,
+``pingRxSeq:count`` and ``ping loss rate (%)`` scalars of the ping
+applications, which are the same for every host.
 
 Sources: :download:`omnetpp.ini <../omnetpp.ini>`, :download:`SharedCoreShowcase.ned <../SharedCoreShowcase.ned>`, :download:`addresses.xml <../addresses.xml>`
 
