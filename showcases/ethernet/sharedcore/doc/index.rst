@@ -133,7 +133,9 @@ on by the protocol of its payload. If the payload starts with a tag that the
 and passes its contents (VLAN id, PCP and DEI) up as packet tags. Every other
 frame goes directly to the ``bridging`` layer. On the way down, the
 ``ieee8021q`` layer inserts a tag if the bridging layer requested one, and the
-``ethernet`` layer adds the MAC header.
+``ethernet`` layer adds the MAC header. The ``cb`` and ``sc`` dispatchers above
+the ``bridging`` layer connect it to the protocols of the bridge itself, such as
+the Spanning Tree Protocol; none of them runs in this showcase.
 
 The 802.1Q layer handles one kind of tag only, the C-tag or the S-tag; this is
 selected by its :par:`vlanTagType` parameter. In ``pebW``, it handles the
