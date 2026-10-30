@@ -23,15 +23,10 @@ service provider and never looks at the C-tags.
 About Q-in-Q
 ------------
 
-An IEEE 802.1Q VLAN tag is four bytes long, and it is inserted in an Ethernet
-frame between the source MAC address and the EtherType field. It consists of
-a 16-bit Tag Protocol Identifier (TPID), a 3-bit Priority Code Point (PCP), a
-Drop Eligible Indicator (DEI) bit, and a 12-bit VLAN identifier (VID). The TPID
-takes the place of the EtherType, so a receiver recognizes a tagged frame by
-it.
-
-IEEE 802.1ad, now part of IEEE 802.1Q, defines two kinds of tags with the same
-layout:
+IEEE 802.1ad, now part of IEEE 802.1Q, defines two kinds of VLAN tags. Both
+have the familiar four-byte layout: a Tag Protocol Identifier (TPID) in the
+place of the EtherType, followed by the Priority Code Point (PCP), the Drop
+Eligible Indicator (DEI) and the VLAN id. Only the TPID tells them apart:
 
 - The *C-tag* (customer tag, TPID ``0x8100``) is the ordinary VLAN tag. A
   network that uses C-tags is built from *C-VLAN Bridges*.
