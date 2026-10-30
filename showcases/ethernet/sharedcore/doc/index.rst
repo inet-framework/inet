@@ -234,17 +234,6 @@ remain VLAN-unaware:
    :start-at: # The customer switches are VLAN-unaware
    :end-at: *.pb.bridging.vlanPolicy.typename
 
-The direction reverser forwards the PCP of a received frame by default. A
-frame that arrives tagged and leaves on a port that sends its VLAN untagged
-would then keep a tag with VLAN id 0, a so-called priority tag. Neither the
-hosts nor the service provider bridges expect such tags, so PCP forwarding is
-turned off:
-
-.. literalinclude:: ../omnetpp.ini
-   :language: ini
-   :start-at: # A forwarded PCP would keep the tag
-   :end-at: *.pb.bridging.directionReverser.reverser.forwardPcp
-
 The service provider bridges are C-VLAN Bridges, as the :par:`vlanTagType`
 parameter is ``"c"`` by default. Their access ports accept untagged frames
 only, and the inbound mapper puts them into the C-VLAN of the customer. The
@@ -287,6 +276,20 @@ The core bridge carries both S-VLANs on both of its ports:
 .. literalinclude:: ../omnetpp.ini
    :language: ini
    :start-at: # The core bridge relays by S-VLAN only.
+
+One more setting is needed, and it is not specific to Q-in-Q: every INET
+bridge that sends a VLAN untagged on some of its ports needs it. By default,
+the direction reverser turns the PCP of a received tagged frame into a PCP
+request. The outbound mapper of a port that sends the VLAN untagged removes
+only the VLAN request, and the remaining PCP request still makes the 802.1Q
+layer insert a tag, with VLAN id 0: a so-called priority tag. Neither the hosts
+nor the service provider bridges expect such tags, so PCP forwarding is turned
+off:
+
+.. literalinclude:: ../omnetpp.ini
+   :language: ini
+   :start-at: # A forwarded PCP would keep the tag
+   :end-at: *.pb.bridging.directionReverser.reverser.forwardPcp
 
 Finally, ``pebW`` records the traffic of its port toward service provider 1
 and of its port toward the core bridge into PCAP files:
