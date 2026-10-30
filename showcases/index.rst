@@ -18,6 +18,7 @@ the simulations (NED, ini, and other files) and the web pages are in the
 
 Latest updates:
 
+- Added: :doc:`ethernet/sharedcore/doc/index` (2026-10-30)
 - Added: :doc:`quic/linksharing/doc/index` (2026-02-26)
 - Added: :doc:`emulation/webserver/doc/index` (2026-02-26)
 - Added: :doc:`emulation/mininet/doc/index` (2026-02-26)
@@ -46,6 +47,7 @@ All showcases:
 
    emulation/index
    tsn/index
+   ethernet/index
    general/index
    measurement/index
    mobility/index
