@@ -1,0 +1,78 @@
+%description:
+Tests that an interface connected to a scalar ifIn gate and to element 0 of an
+ifOut[] gate vector of a module is rejected.
+
+When an interface is added to its interface table, the table finds the module
+whose ifIn and ifOut gates the interface is connected to, and checks that both
+gates have the same index. A scalar gate is not element 0 of a gate vector, so
+a scalar gate and a gate vector element never have the same index. The node of
+this test connects a loopback interface to the scalar ifIn gate and to
+ifOut[0] of a module, and must stop with a gate index mismatch error.
+
+%file: MixedIfGatesLayer.cc
+
+#include "inet/common/INETDefs.h"
+
+using namespace inet;
+
+namespace InterfaceTable_scalar_and_vector_ifgates {
+
+// Deletes everything it receives
+class MixedIfGatesLayer : public cSimpleModule
+{
+  protected:
+    virtual void handleMessage(cMessage *msg) override { delete msg; }
+};
+
+Define_Module(MixedIfGatesLayer);
+
+} // namespace InterfaceTable_scalar_and_vector_ifgates
+
+%file: test.ned
+
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.networklayer.common.InterfaceTable;
+
+simple MixedIfGatesLayer
+{
+    parameters:
+        @class(MixedIfGatesLayer);
+    gates:
+        input ifIn;
+        output ifOut[1];
+}
+
+module MixedIfGatesNode
+{
+    parameters:
+        @networkNode;
+    submodules:
+        interfaceTable: InterfaceTable;
+        layer: MixedIfGatesLayer;
+        lo0: LoopbackInterface {
+            interfaceTableModule = "^.interfaceTable";
+        }
+    connections:
+        layer.ifOut[0] --> lo0.upperLayerIn;
+        lo0.upperLayerOut --> layer.ifIn;
+}
+
+network MixedIfGatesTestNetwork
+{
+    submodules:
+        node: MixedIfGatesNode;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = MixedIfGatesTestNetwork
+record-vector-results = false
+sim-time-limit = 1s
+cmdenv-express-mode = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stderr
+gate index mismatch: interface module 'MixedIfGatesTestNetwork.node.lo0'
+%#--------------------------------------------------------------------------------------------------------------
