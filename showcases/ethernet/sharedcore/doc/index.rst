@@ -350,11 +350,16 @@ and ``hostA2a`` answers:
 
    <!--internal video recording, run until t=0.999ms, then run with animation until the ping reply reaches hostA1a; playback speed 3x-->
 
-The ARP request is a broadcast, so the bridges send it to all ports of its
-VLAN. It never reaches service provider 2: ``sp1w`` sends it only in C-VLAN 10,
-and ``pebW`` and ``pebE`` send it only in S-VLAN 100, that is, toward ``pb``
-and toward service provider 1. The frames on the links between ``pebW``,
-``pb`` and ``pebE`` carry both tags.
+The ARP request is a broadcast, so each bridge on its way floods it to all of
+its other ports, and the outbound filters drop it on the ports that are not in
+its VLAN. ``sp1w`` floods it in C-VLAN 10, and the outbound filter of ``eth2``
+drops it, because the outbound mapper of that port maps only C-VLAN 20 to
+untagged. ``pebW`` floods it in S-VLAN 100, and the outbound filter of
+``eth1``, toward service provider 2, drops it in the same way, because the
+outbound mapper of that port maps only S-VLAN 200 to untagged. ``pebE`` and
+``sp1e`` drop it on their ports toward service provider 2 and customer B,
+respectively. The request thus reaches only the hosts of customer A, and the
+frames on the links between ``pebW``, ``pb`` and ``pebE`` carry both tags.
 
 Frames on the Wire
 ~~~~~~~~~~~~~~~~~~
