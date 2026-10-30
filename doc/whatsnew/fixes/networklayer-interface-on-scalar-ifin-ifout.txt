@@ -1,0 +1,3 @@
+An interface can be connected to scalar ifIn and ifOut gates
+
+When an interface was added to its interface table, InterfaceTable stopped the simulation during network initialization with "getIndex(): Gate is not member of a gate vector" if the interface was connected to scalar ifIn and ifOut gates of a module. The table takes such a module for the network layer of the interface and checks that both gates have the same index, and it called getIndex() on the scalar gates. Now a scalar gate counts as index -1 in this check, so two scalar gates pass it, and a scalar gate paired with an element of a gate vector, for example ifIn with ifOut[0], fails it with a gate index mismatch error.
