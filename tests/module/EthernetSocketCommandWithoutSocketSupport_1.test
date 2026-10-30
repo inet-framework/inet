@@ -11,8 +11,6 @@ the node's dispatcher, which dispatched it to the ethernetmac service, back up
 to the same layer, and the request circled at t = 0 until the CPU time limit
 ended the run.
 
-%# expected-result: FAIL
-
 %inifile: omnetpp.ini
 
 [General]
