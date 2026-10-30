@@ -1,0 +1,233 @@
+%description:
+
+Tests that a switch built on EthernetLayer forwards frames whose EtherType INET
+does not know, unchanged, as an IEEE 802.1D/Q bridge forwards frames of any
+EtherType. Such frames come from emulation, from PCAP replay, or from modules
+that build their own MAC header; INET's own senders always write a registered
+EtherType.
+
+Two independent switches, one with the layered BridgingLayer relay and one with
+the classic MacRelayUnit, each have an 802.1Q layer. On each, a source sends two
+broadcast frames with EtherType 0x88B5 (IEEE 802 Local Experimental EtherType
+1): an untagged one, and one with a C-tag of VID 42 and PCP 3 around the
+EtherType. The sink on another port must receive both frames as they were sent:
+the untagged frame with EtherType 0x88B5, the tagged frame with its C-tag and
+the EtherType 0x88B5 behind it. A StandardHost on the third port, whose
+EthernetLayer and 802.1Q layer do not accept unknown EtherTypes, still drops
+both frames.
+
+The switches drop both frames: the MAC header checker of their EthernetLayer
+drops the untagged frame, and the tag header checker of their 802.1Q layer
+drops the tagged one, because neither accepts an EtherType without a
+registered protocol. The failure is declared expected until the switches
+accept such frames.
+
+%# expected-result: FAIL
+
+%file: UnknownEtherTypeFrames.cc
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+
+using namespace inet;
+
+namespace EthernetUnknownEtherType_1 {
+
+// Sends an untagged and a C-tagged broadcast frame with EtherType 0x88B5,
+// MAC header to FCS, into the network interface it is connected to
+class UnknownEtherTypeSource : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override
+    {
+        scheduleAt(SimTime(1, SIMTIME_US), new cMessage("untagged"));
+        scheduleAt(SimTime(2, SIMTIME_US), new cMessage("tagged"));
+    }
+
+    virtual void handleMessage(cMessage *msg) override
+    {
+        bool tagged = !strcmp(msg->getName(), "tagged");
+        delete msg;
+        auto packet = new Packet(tagged ? "tagged" : "untagged");
+        auto macHeader = makeShared<EthernetMacHeader>();
+        macHeader->setSrc(MacAddress(par("address").stringValue()));
+        macHeader->setDest(MacAddress::BROADCAST_ADDRESS);
+        macHeader->setTypeOrLength(tagged ? ETHERTYPE_8021Q_TAG : 0x88B5);
+        packet->insertAtBack(macHeader);
+        if (tagged) {
+            auto tagHeader = makeShared<Ieee8021qTagEpdHeader>();
+            tagHeader->setPcp(3);
+            tagHeader->setVid(42);
+            tagHeader->setTypeOrLength(0x88B5);
+            packet->insertAtBack(tagHeader);
+        }
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(tagged ? 42 : 46, 0x5A)));
+        auto fcs = makeShared<EthernetFcs>();
+        fcs->setFcsMode(FCS_DECLARED_CORRECT);
+        fcs->setFcs(0xC00DC00D); // the value that a declared correct FCS has
+        packet->insertAtBack(fcs);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+        send(packet, "out");
+    }
+};
+
+Define_Module(UnknownEtherTypeSource);
+
+// Prints the MAC header and the 802.1Q tag of each frame that its network
+// interface receives
+class UnknownEtherTypeSink : public queueing::PassivePacketSinkBase
+{
+  public:
+    virtual void pushPacket(Packet *packet, const cGate *gate) override
+    {
+        Enter_Method("pushPacket");
+        take(packet);
+        const auto& macHeader = packet->peekAtFront<EthernetMacHeader>();
+        std::cout << getParentModule()->getFullName() << " received " << packet->getName() << ": src=" << macHeader->getSrc() << " typeOrLength=0x" << std::hex << macHeader->getTypeOrLength() << std::dec;
+        if (macHeader->getTypeOrLength() == ETHERTYPE_8021Q_TAG) {
+            const auto& tagHeader = packet->peekDataAt<Ieee8021qTagEpdHeader>(macHeader->getChunkLength());
+            std::cout << " vid=" << tagHeader->getVid() << " pcp=" << (int)tagHeader->getPcp() << " typeOrLength=0x" << std::hex << tagHeader->getTypeOrLength() << std::dec;
+        }
+        std::cout << " length=" << packet->getDataLength() << std::endl;
+        delete packet;
+    }
+};
+
+Define_Module(UnknownEtherTypeSink);
+
+} // namespace EthernetUnknownEtherType_1
+
+%file: test.ned
+
+import inet.linklayer.ethernet.modular.LayeredEthernetInterface;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+import inet.queueing.base.PacketSinkBase;
+
+simple UnknownEtherTypeSource
+{
+    parameters:
+        @class(UnknownEtherTypeSource);
+        string address;
+    gates:
+        output out;
+}
+
+simple UnknownEtherTypeSink extends PacketSinkBase
+{
+    parameters:
+        @class(UnknownEtherTypeSink);
+    gates:
+        input in;
+}
+
+module SourceNode
+{
+    parameters:
+        @networkNode;
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+    gates:
+        inout ethg;
+    submodules:
+        interfaceTable: InterfaceTable;
+        eth: LayeredEthernetInterface {
+            bitrate = 100Mbps;
+        }
+        source: UnknownEtherTypeSource {
+            address = "02-00-00-00-02-01";
+        }
+    connections allowunconnected:
+        source.out --> eth.upperLayerIn;
+        eth.phys <--> ethg;
+}
+
+module SinkNode
+{
+    parameters:
+        @networkNode;
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+    gates:
+        inout ethg;
+    submodules:
+        interfaceTable: InterfaceTable;
+        eth: LayeredEthernetInterface {
+            bitrate = 100Mbps;
+        }
+        sink: UnknownEtherTypeSink;
+    connections allowunconnected:
+        eth.upperLayerOut --> sink.in;
+        eth.phys <--> ethg;
+}
+
+network Test
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        sourceA: SourceNode;
+        sinkA: SinkNode;
+        hostA: StandardHost;
+        switchA: EthernetSwitch;
+        sourceB: SourceNode;
+        sinkB: SinkNode;
+        hostB: StandardHost;
+        switchB: EthernetSwitch;
+    connections:
+        sourceA.ethg <--> Eth100M <--> switchA.ethg++;
+        sinkA.ethg <--> Eth100M <--> switchA.ethg++;
+        hostA.ethg++ <--> Eth100M <--> switchA.ethg++;
+        sourceB.ethg <--> Eth100M <--> switchB.ethg++;
+        sinkB.ethg <--> Eth100M <--> switchB.ethg++;
+        hostB.ethg++ <--> Eth100M <--> switchB.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 1ms
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+cmdenv-log-prefix = "%M: "
+record-vector-results = false
+
+*.host?.ethernet.macHeaderChecker.cmdenv-log-level = info
+*.host?.ieee8021q.qTagHeaderChecker.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+*.*.llc.typename = ""
+*.*.ethernet.typename = "EthernetLayer"
+*.*.ieee8021q.typename = "Ieee8021qProtocol"
+*.*.eth[*].typename = "LayeredEthernetInterface"
+*.*.eth[*].bitrate = 100Mbps
+
+*.switchA.bridging.typename = "BridgingLayer"
+*.switchA.bridging.directionReverser.reverser.forwardPcp = false
+*.switchB.bridging.typename = "MacRelayUnit"
+
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: stdout
+sinkA received untagged: src=02-00-00-00-02-01 typeOrLength=0x88b5 length=64 B
+%contains: stdout
+sinkA received tagged: src=02-00-00-00-02-01 typeOrLength=0x8100 vid=42 pcp=3 typeOrLength=0x88b5 length=64 B
+%contains: stdout
+sinkB received untagged: src=02-00-00-00-02-01 typeOrLength=0x88b5 length=64 B
+%contains: stdout
+sinkB received tagged: src=02-00-00-00-02-01 typeOrLength=0x8100 vid=42 pcp=3 typeOrLength=0x88b5 length=64 B
+%contains-regex: stdout
+hostA\.ethernet\.macHeaderChecker: Filtering out packet.*untagged
+%contains-regex: stdout
+hostA\.ieee8021q\.qTagHeaderChecker: Filtering out packet.*tagged
+%contains-regex: stdout
+hostB\.ethernet\.macHeaderChecker: Filtering out packet.*untagged
+%contains-regex: stdout
+hostB\.ieee8021q\.qTagHeaderChecker: Filtering out packet.*tagged
