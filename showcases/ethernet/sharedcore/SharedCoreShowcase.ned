@@ -3,7 +3,7 @@
 //
 
 
-package inet.examples.ethernet.sharedcore;
+package inet.showcases.ethernet.sharedcore;
 
 import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
 import inet.node.ethernet.Eth100M;
@@ -42,7 +42,7 @@ import inet.node.inet.StandardHost;
 // color of its own. The labels on the links between bridges name the VLANs
 // that the link carries tagged.
 //
-network SharedCoreExample
+network SharedCoreShowcase
 {
     parameters:
         @display("bgb=1700,1260");
