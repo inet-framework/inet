@@ -1,0 +1,29 @@
+%description:
+
+Tests that a socket command which reaches an Ieee8021qProtocol without socket
+support (hasSocketSupport = false, the default) stops the simulation with an
+error. The VirtualTunnel of a virtual interface with a VLAN ID binds an
+Ieee8021qSocket at initialization. Without socket support, the protocol has no
+socket command processor, so the BIND request reaches the tag header inserter.
+
+Before the inserter rejected socket commands, it passed the request down to
+the node's dispatcher, which dispatched it to the ieee8021qctag service, back
+up to the same protocol, and the request circled at t = 0 until the CPU time
+limit ended the run.
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+include ../../lib/socket-command.ini
+
+*.*.ieee8021q.typename = "Ieee8021qProtocol"
+*.host2.numVirtInterfaces = 1
+*.host2.virt[0].tunnel.realInterface = "eth0"
+*.host2.virt[0].tunnel.vlanId = 42
+
+%subst: /\x1B\[[0-9;]*m//
+%exitcode: 1
+%postrun-command: grep "<!>" test.* > test_err.out || true
+%contains: test_err.out
+Received socket command BIND, but the protocol layer has no socket support (hasSocketSupport = false)

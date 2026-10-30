@@ -29,6 +29,7 @@ class INET_API Ieee8021qTagEpdHeaderInserter : public PacketFlowBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
     virtual void processPacket(Packet *packet) override;
 };
 

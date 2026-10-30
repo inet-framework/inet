@@ -10,7 +10,9 @@
 #include "inet/common/IProtocolRegistrationListener.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Message.h"
 #include "inet/common/ProtocolUtils.h"
+#include "inet/common/socket/SocketTag_m.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -37,6 +39,16 @@ void Ieee8021qTagEpdHeaderInserter::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
         registerService(*qtagProtocol, inputGate, nullptr);
+}
+
+void Ieee8021qTagEpdHeaderInserter::handleMessage(cMessage *message)
+{
+    // the socket command processor above this module serves socket commands, and it exists only with socket support;
+    // passed down, a socket command would come back up to the same protocol layer from the node's dispatcher, forever
+    if (auto request = dynamic_cast<Request *>(message))
+        if (request->findTag<SocketReq>() != nullptr)
+            throw cRuntimeError("Received socket command %s, but the protocol layer has no socket support (hasSocketSupport = false)", request->getName());
+    PacketFlowBase::handleMessage(message);
 }
 
 void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)
