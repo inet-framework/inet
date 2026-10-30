@@ -54,7 +54,9 @@ The interface where the provider takes over a customer's frames is called a
 *service interface*. In the *port-based service interface*, the bridge of the
 provider puts all frames that arrive on the port of a customer into the S-VLAN
 of that customer, whatever C-tag they have. The port is then a *Customer
-Network Port*. (IEEE 802.1Q also defines a *Provider Edge Bridge*, which has
+Network Port*. The ports that connect the bridges of the provider to each other
+carry the frames of several S-VLANs, S-tagged; they are *Provider Network
+Ports*. (IEEE 802.1Q also defines a *Provider Edge Bridge*, which has
 C-VLAN components besides the S-VLAN component and can select the S-VLAN by
 the C-VLAN of the frame; this showcase does not need one.)
 
@@ -93,10 +95,11 @@ The nodes play the following roles:
 - **Edge bridges of the core** (``pebW``, ``pebE``) are S-VLAN Bridges whose
   ports toward the service providers are Customer Network Ports: they put all
   frames of service provider 1 into S-VLAN 100, and all frames of service
-  provider 2 into S-VLAN 200. Despite their names, they are not Provider Edge
-  Bridges in the IEEE 802.1Q sense, as they have no C-VLAN components.
+  provider 2 into S-VLAN 200. Their port toward the core bridge is a Provider
+  Network Port. Despite their names, they are not Provider Edge Bridges in the
+  IEEE 802.1Q sense, as they have no C-VLAN components.
 - **The core bridge** (``pb``) is an S-VLAN Bridge that relays the frames by
-  S-VLAN.
+  S-VLAN. Both of its ports are Provider Network Ports.
 
 Note the point of view: for the core network, the customers are the two
 service providers. Service provider 1 has customers A and B, service provider
