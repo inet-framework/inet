@@ -74,6 +74,8 @@ module EthernetSwitch like IEthernetNetworkNode
         llc.registerProtocol = true;
         eth[*].mac.promiscuous = default(true);
         ethernet.*.promiscuous = default(true);
+        ethernet.*.acceptUnknownEtherTypes = default(true);
+        ieee8021q.**.acceptUnknownEtherTypes = default(true);
         ethernet.registerProtocol = default(true);
 
     gates:

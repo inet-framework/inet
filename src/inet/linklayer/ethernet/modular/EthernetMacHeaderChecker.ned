@@ -15,6 +15,7 @@ simple EthernetMacHeaderChecker extends PacketFilterBase like IProtocolHeaderChe
     parameters:
         string interfaceTableModule;
         bool promiscuous = default(false);
+        bool acceptUnknownEtherTypes = default(false); // Accept a frame whose EtherType has no protocol in INET, as a bridge does, and pass its payload up as Protocol::unregisteredEthertype
         @class(EthernetMacHeaderChecker);
         @display("i=block/checker");
 }

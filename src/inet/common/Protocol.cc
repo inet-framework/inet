@@ -186,4 +186,13 @@ const Protocol Protocol::ieee8021rTag("ieee8021rtag", "IEEE 802.1R TAG");
 const Protocol Protocol::dhcp("dhcp", "DHCP");
 const Protocol Protocol::rtp("rtp", "RTP");
 const Protocol Protocol::rtcp("rtcp", "RTCP");
+// The payload of an Ethernet frame or of an IEEE 802.1Q tag whose EtherType has no
+// protocol in INET, which a bridge forwards without knowing what it is. The use case
+// that needs it: a 5G PDU session of type Ethernet carries frames of any EtherType, for
+// example PROFINET (0x8892) frames of industrial devices, and the UPF forwards them in
+// an Ethernet bridge (3GPP TS 23.501, 5.8.2.5.3), which Simu5G builds from EthernetLayer,
+// Ieee8021qProtocol and BridgingLayer. It is not in the EtherType protocol group,
+// because it stands for every such EtherType: the EtherType travels with the payload
+// in an EtherTypeInd or EtherTypeReq.
+const Protocol Protocol::unregisteredEthertype("unregisteredethertype", "Unregistered EtherType");
 } // namespace inet

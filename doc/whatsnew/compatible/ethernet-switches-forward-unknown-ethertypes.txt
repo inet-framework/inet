@@ -1,0 +1,5 @@
+Switches forward frames of EtherTypes that INET does not know
+
+An EthernetSwitch or TsnSwitch built on the modular EthernetLayer now forwards a frame whose EtherType has no protocol in INET, as an IEEE 802.1D/Q bridge forwards frames of any EtherType. Before, the MAC header checker of the switch, or the tag header checker of its 802.1Q layer for a tagged frame, dropped such a frame even in promiscuous mode. Such frames come from emulation, from PCAP replay, or from modules that build their own MAC header, for example with EtherType 0x88B5 (IEEE 802 Local Experimental EtherType 1) or 0x8892 (PROFINET); INET's own senders always write a registered EtherType.
+
+EthernetMacHeaderChecker and Ieee8021qTagEpdHeaderChecker have a new parameter, acceptUnknownEtherTypes, false by default, which EthernetSwitch sets to true. An accepted payload has the protocol unregisteredethertype, and its EtherType travels with it in an EtherTypeInd tag; PacketDirectionReverser and the classic relays turn it into an EtherTypeReq, from which EthernetMacHeaderInserter and Ieee8021qTagEpdHeaderInserter write the EtherType of the frame they send. A host still drops such frames.

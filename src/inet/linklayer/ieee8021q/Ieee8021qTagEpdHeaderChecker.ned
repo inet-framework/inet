@@ -14,6 +14,7 @@ simple Ieee8021qTagEpdHeaderChecker extends PacketFilterBase like IIeee8021qTagE
     parameters:
         string vlanTagType @enum("c","s") = default("c");
         object vlanIdFilter @mutable = default([]);
+        bool acceptUnknownEtherTypes = default(false); // Accept a frame whose EtherType behind the tag has no protocol in INET, as a bridge does, and pass its payload up as Protocol::unregisteredEthertype
         @class(Ieee8021qTagEpdHeaderChecker);
         @display("i=block/checker");
 }

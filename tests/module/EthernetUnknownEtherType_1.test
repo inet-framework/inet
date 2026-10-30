@@ -16,13 +16,9 @@ the EtherType 0x88B5 behind it. A StandardHost on the third port, whose
 EthernetLayer and 802.1Q layer do not accept unknown EtherTypes, still drops
 both frames.
 
-The switches drop both frames: the MAC header checker of their EthernetLayer
-drops the untagged frame, and the tag header checker of their 802.1Q layer
-drops the tagged one, because neither accepts an EtherType without a
-registered protocol. The failure is declared expected until the switches
-accept such frames.
-
-%# expected-result: FAIL
+The header checkers of the switches accept such frames because EthernetSwitch
+sets their acceptUnknownEtherTypes parameter, and the EtherType travels through
+the relay in an EtherTypeInd and an EtherTypeReq.
 
 %file: UnknownEtherTypeFrames.cc
 
