@@ -1,0 +1,55 @@
+%description:
+Tests that a host accepts a Router Advertisement without a Prefix Information
+option. RFC 4861, 6.1.2 lists the validity checks of a Router Advertisement,
+and the presence of a Prefix Information option is not one of them: 4.2 lists
+it as one of the possible options.
+
+There is no network configurator, so the router has only its link-local address
+and advertises no prefix. The host must still take the router as its default
+router.
+
+%# expected-result: FAIL
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network RaWithoutPrefixTestNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        router: Router6;
+        host: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = RaWithoutPrefixTestNetwork
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RaWithoutPrefixTestNetwork.host.ipv6.neighbourDiscovery: RA's router lifetime is non-zero, creating an entry in the Host's default router list
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+RA validation failed
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
