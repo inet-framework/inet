@@ -15,6 +15,7 @@
 #include "inet/common/SequenceNumberTag_m.h"
 #include "inet/common/StringFormat.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -74,6 +75,8 @@ Packet *MacRelayUnitBase::createForwardedPacket(const Packet *incomingPacket) co
         outgoingPacket->addTag<SDropEligibleReq>()->setDropEligible(dropEligibleInd->getDropEligible());
     if (auto sequenceNumberInd = incomingPacket->findTag<SequenceNumberInd>())
         outgoingPacket->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumberInd->getSequenceNumber());
+    if (auto etherTypeInd = incomingPacket->findTag<EtherTypeInd>())
+        outgoingPacket->addTag<EtherTypeReq>()->setEtherType(etherTypeInd->getEtherType());
     auto& macAddressReq = outgoingPacket->addTag<MacAddressReq>();
     macAddressReq->setSrcAddress(macAddressInd->getSrcAddress());
     macAddressReq->setDestAddress(macAddressInd->getDestAddress());
