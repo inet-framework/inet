@@ -186,10 +186,12 @@ name every port of the bridge. A mapper passes the frames of such a port
 unchanged, and also the frames whose VLAN id has no entry in the map of the
 port, so it needs entries only where it changes the VLAN id.
 
-Whether a bridge is a C-VLAN Bridge or an S-VLAN Bridge depends only on the
-:par:`vlanTagType` parameter of its modules, and the VLAN ids in the mappers
-and filters differ. The customer switches, in contrast, have no 802.1Q layer,
-and their ``bridging`` layer is the default :ned:`Ieee8021dRelay`.
+The same structure serves C-VLAN Bridges and S-VLAN Bridges. The kind of the
+bridge is selected by the :par:`vlanTagType` parameter: ``"c"``, the default,
+or ``"s"``. Both :ned:`Ieee8021qProtocol` and :ned:`BridgingLayer` have this
+parameter, and :ned:`BridgingLayer` passes it on to the relay and the VLAN
+policy. The customer switches, in contrast, have no 802.1Q layer, and their
+``bridging`` layer is the default :ned:`Ieee8021dRelay`.
 
 Addresses and Traffic
 ~~~~~~~~~~~~~~~~~~~~~
