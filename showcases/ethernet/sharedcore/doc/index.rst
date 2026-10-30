@@ -180,6 +180,12 @@ port, and then the ``outboundFilter`` drops the frames whose VLAN id the
 outgoing port does not accept. Both filters check the VLAN id as it is on the
 wire: ``-1`` stands for an untagged frame.
 
+The filters and the mappers treat a port without an entry differently. A
+filter drops all frames on a port that it has no entry for, so its list must
+name every port of the bridge. A mapper passes the frames of such a port
+unchanged, and also the frames whose VLAN id has no entry in the map of the
+port, so it needs entries only where it changes the VLAN id.
+
 Whether a bridge is a C-VLAN Bridge or an S-VLAN Bridge depends only on the
 :par:`vlanTagType` parameter of its modules, and the VLAN ids in the mappers
 and filters differ. The customer switches, in contrast, have no 802.1Q layer,
@@ -238,9 +244,8 @@ The service provider bridges are C-VLAN Bridges, as the :par:`vlanTagType`
 parameter is ``"c"`` by default. Their access ports accept untagged frames
 only, and the inbound mapper puts them into the C-VLAN of the customer. The
 outbound mapper removes the C-tag on the access ports. The uplink to the core
-(``eth3``) is a trunk that carries both C-VLANs tagged. Note that a filter
-drops all frames on a port that it has no entry for, so all ports must be
-listed:
+(``eth3``) is a trunk that carries both C-VLANs tagged, so the mappers have no
+entry for it:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
