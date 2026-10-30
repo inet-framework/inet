@@ -295,6 +295,24 @@ and of its port toward the core bridge into PCAP files:
    :start-at: # The port of pebW toward service provider 1
    :end-at: pcapRecorder[1].pcapFile
 
+To sum up, a Q-in-Q network with a port-based service interface takes the
+following settings in INET:
+
+- Every VLAN-aware bridge gets an :ned:`Ieee8021qProtocol` as its
+  ``ieee8021q`` layer, a :ned:`BridgingLayer` as its ``bridging`` layer, and a
+  :ned:`VlanPolicyLayer` as the ``vlanPolicy`` of the latter.
+- The bridges of the provider are S-VLAN Bridges: their :par:`vlanTagType` is
+  ``"s"``. The C-VLAN Bridges in front of them, here the bridges of the
+  service providers, keep the default, ``"c"``.
+- A Customer Network Port accepts untagged frames (``-1``) in both filters, has
+  an inbound mapper entry from ``-1`` to the S-VLAN of the customer, and an
+  outbound mapper entry from that S-VLAN to ``-1``. The inbound mapper is a
+  :ned:`VlanIndMapper`, as the default inbound mapper is empty.
+- A Provider Network Port accepts the S-VLANs that it carries in both filters,
+  and needs no mapper entry.
+- Every bridge that sends a VLAN untagged on some port has PCP forwarding
+  turned off in its direction reverser.
+
 A Frame's Path through an Edge Bridge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
