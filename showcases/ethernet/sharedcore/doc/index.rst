@@ -200,8 +200,7 @@ Each customer is an IP subnet of its own, configured by the
 .. literalinclude:: ../addresses.xml
    :language: xml
 
-The MAC addresses are set explicitly: customer C uses the MAC addresses of
-customer A, and customer D those of customer B. Every host pings its
+Every host pings its
 counterpart at the other site of the same customer five times, 10 ms apart.
 ``hostA1a`` starts at 1 ms, so that its first ping crosses the network alone
 (see `The First Ping`_), and the other hosts start at 2 ms. This is 80 ping
@@ -210,9 +209,9 @@ requests altogether within the 100 ms of simulated time.
 Configuration
 ~~~~~~~~~~~~~
 
-The hosts have no 802.1Q layer, so they send and receive untagged frames. The
-MAC addresses of the hosts of service provider 2 are the same as those of
-service provider 1:
+The hosts have no 802.1Q layer, so they send and receive untagged frames. Their
+MAC addresses are set explicitly: customer C uses the MAC addresses of customer
+A, and customer D those of customer B:
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
