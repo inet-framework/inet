@@ -1762,18 +1762,8 @@ bool Ipv6NeighbourDiscovery::validateRaPacket(Packet *packet, const Ipv6RouterAd
     }
 
     // - All included options have a length that is greater than zero.
-    bool prefixInfoFound = false;
-    for (size_t i = 0; i < ra->getOptions().getOptionArraySize(); i++) {
-        auto option = ra->getOptions().getOption(i);
-        if (option->getType() == IPv6ND_PREFIX_INFORMATION) {
-            prefixInfoFound = true;
-            break;
-        }
-    }
-    if (!prefixInfoFound) {
-        EV_WARN << "No prefix information available! RA validation failed\n";
-        result = false;
-    }
+    // An option object always has a nonzero length, and Icmpv6HeaderSerializer
+    // marks a received option of length zero incorrect.
 
     return result;
 }
