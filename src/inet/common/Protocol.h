@@ -141,6 +141,7 @@ class INET_API Protocol
     static const Protocol shortcutPhy;
     static const Protocol genericPhy;
     static const Protocol unknown;
+    static const Protocol unregisteredEthertype; // a payload whose EtherType has no protocol in INET, see Protocol.cc
     static const Protocol wiseRoute;
 };
 

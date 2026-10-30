@@ -20,6 +20,7 @@ class INET_API EthernetMacHeaderChecker : public PacketFilterBase
 {
   protected:
     bool promiscuous = false;
+    bool acceptUnknownEtherTypes = false;
     ModuleRefByPar<IInterfaceTable> interfaceTable;
 
   protected:

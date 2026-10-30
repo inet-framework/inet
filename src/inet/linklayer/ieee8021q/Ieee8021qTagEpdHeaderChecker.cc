@@ -12,6 +12,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
@@ -29,6 +30,7 @@ void Ieee8021qTagEpdHeaderChecker::initialize(int stage)
         vlanTagType = parseVlanTagType(par("vlanTagType"));
         qtagProtocol = getVlanTagProtocol(vlanTagType);
         vlanIdFilter = check_and_cast<cValueArray *>(par("vlanIdFilter").objectValue());
+        acceptUnknownEtherTypes = par("acceptUnknownEtherTypes");
     }
     else if (stage == INITSTAGE_LINK_LAYER)
         registerProtocol(*qtagProtocol, nullptr, inputGate);
@@ -52,8 +54,14 @@ void Ieee8021qTagEpdHeaderChecker::processPacket(Packet *packet)
     const Protocol *protocol;
     if (isIeee8023Length(typeOrLength))
         protocol = &Protocol::ieee8022llc;
-    else
-        protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(typeOrLength);
+    else {
+        protocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength);
+        if (protocol == nullptr) {
+            ASSERT(acceptUnknownEtherTypes);
+            protocol = &Protocol::unregisteredEthertype;
+            packet->addTag<EtherTypeInd>()->setEtherType(typeOrLength);
+        }
+    }
     auto packetProtocolTag = packet->addTagIfAbsent<PacketProtocolTag>();
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));
@@ -72,7 +80,7 @@ bool Ieee8021qTagEpdHeaderChecker::matchesPacket(const Packet *packet) const
 {
     const auto& header = packet->peekAtFront<Ieee8021qTagEpdHeader>();
     auto typeOrLength = header->getTypeOrLength();
-    if (!isIeee8023Length(typeOrLength) && ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) == nullptr)
+    if (!isIeee8023Length(typeOrLength) && !acceptUnknownEtherTypes && ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) == nullptr)
         return false;
     else {
         auto vlanId = header->getVid();

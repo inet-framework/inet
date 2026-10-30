@@ -12,6 +12,7 @@
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolUtils.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/EtherType_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
@@ -27,6 +28,7 @@ void EthernetMacHeaderChecker::initialize(int stage)
     PacketFilterBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         promiscuous = par("promiscuous");
+        acceptUnknownEtherTypes = par("acceptUnknownEtherTypes");
         interfaceTable.reference(this, "interfaceTableModule", true);
     }
     else if (stage == INITSTAGE_LINK_LAYER)
@@ -45,8 +47,14 @@ void EthernetMacHeaderChecker::processPacket(Packet *packet)
     const Protocol *protocol;
     if (isIeee8023Length(typeOrLength))
         protocol = &Protocol::ieee8022llc;
-    else
-        protocol = ProtocolGroup::getEthertypeProtocolGroup()->getProtocol(typeOrLength);
+    else {
+        protocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength);
+        if (protocol == nullptr) {
+            ASSERT(acceptUnknownEtherTypes);
+            protocol = &Protocol::unregisteredEthertype;
+            packet->addTag<EtherTypeInd>()->setEtherType(typeOrLength);
+        }
+    }
     packetProtocolTag->setFrontOffset(b(0));
     packetProtocolTag->setBackOffset(b(0));
     packetProtocolTag->setProtocol(protocol);
@@ -66,7 +74,7 @@ bool EthernetMacHeaderChecker::matchesPacket(const Packet *packet) const
         if (isIeee8023Length(typeOrLength))
             return true;
         else
-            return ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) != nullptr;
+            return acceptUnknownEtherTypes || ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength) != nullptr;
     }
 }
 

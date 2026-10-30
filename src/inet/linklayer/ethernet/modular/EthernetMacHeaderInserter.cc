@@ -11,6 +11,7 @@
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/ProtocolGroup.h"
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
@@ -44,6 +45,8 @@ void EthernetMacHeaderInserter::processPacket(Packet *packet)
     auto protocol = packetProtocolTag->getProtocol();
     if (protocol == &Protocol::ieee8022llc)
         header->setTypeOrLength(packet->getByteLength());
+    else if (protocol == &Protocol::unregisteredEthertype)
+        header->setTypeOrLength(packet->removeTag<EtherTypeReq>()->getEtherType());
     else
         header->setTypeOrLength(ProtocolGroup::getEthertypeProtocolGroup()->findProtocolNumber(protocol));
     packet->insertAtFront(header);

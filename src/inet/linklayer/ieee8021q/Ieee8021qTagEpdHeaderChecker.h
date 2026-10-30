@@ -23,6 +23,7 @@ class INET_API Ieee8021qTagEpdHeaderChecker : public PacketFilterBase
     VlanTagType vlanTagType = VLAN_TAG_TYPE_C;
     const Protocol *qtagProtocol = nullptr;
     cValueArray *vlanIdFilter = nullptr;
+    bool acceptUnknownEtherTypes = false;
 
   protected:
     virtual void initialize(int stage) override;

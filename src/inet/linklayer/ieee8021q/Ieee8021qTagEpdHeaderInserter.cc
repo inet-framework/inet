@@ -12,6 +12,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/ProtocolUtils.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
@@ -79,6 +80,8 @@ void Ieee8021qTagEpdHeaderInserter::processPacket(Packet *packet)
     auto protocol = packetProtocolTag->getProtocol();
     if (protocol == &Protocol::ieee8022llc)
         header->setTypeOrLength(packet->getByteLength());
+    else if (protocol == &Protocol::unregisteredEthertype)
+        header->setTypeOrLength(packet->removeTag<EtherTypeReq>()->getEtherType());
     else
         header->setTypeOrLength(ProtocolGroup::getEthertypeProtocolGroup()->findProtocolNumber(protocol));
     packet->insertAtFront(header);

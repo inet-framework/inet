@@ -12,6 +12,7 @@
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/SequenceNumberTag_m.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/PcpTag_m.h"
@@ -57,6 +58,7 @@ void PacketDirectionReverser::processPacket(Packet *packet)
     auto userPriorityInd = packet->findTag<UserPriorityInd>();
     auto streamInd = packet->findTag<StreamInd>();
     auto sequenceNumberInd = packet->findTag<SequenceNumberInd>();
+    auto etherTypeInd = packet->findTag<EtherTypeInd>();
     auto interfaceInd = packet->findTag<InterfaceInd>();
     auto encapsulationProtocolInd = packet->findTag<EncapsulationProtocolInd>();
     packet->trim();
@@ -100,6 +102,8 @@ void PacketDirectionReverser::processPacket(Packet *packet)
         packet->addTag<StreamReq>()->setStreamName(streamInd->getStreamName());
     if (sequenceNumberInd != nullptr)
         packet->addTag<SequenceNumberReq>()->setSequenceNumber(sequenceNumberInd->getSequenceNumber());
+    if (etherTypeInd != nullptr)
+        packet->addTag<EtherTypeReq>()->setEtherType(etherTypeInd->getEtherType());
     if (encapsulationProtocolInd != nullptr) {
         int n = encapsulationProtocolInd->getProtocolArraySize();
         auto encapsulationProtocolReq = packet->addTag<EncapsulationProtocolReq>();
