@@ -17,13 +17,19 @@
 namespace inet {
 
 Register_Protocol_Dissector(&Protocol::ethernetMac, EthernetMacProtocolDissector);
+Register_Protocol_Dissector(&Protocol::ethernetMacNoFcs, EthernetMacProtocolDissector);
 
 void EthernetMacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
+    // the protocol tells whether the frame ends with an FCS: ethernetmac does, ethernetmacnofcs does not
     const auto& macHeader = packet->popAtFront<EthernetMacHeader>();
-    callback.startProtocolDataUnit(&Protocol::ethernetMac);
-    callback.visitChunk(macHeader, &Protocol::ethernetMac);
-    const auto& fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+    callback.startProtocolDataUnit(protocol);
+    callback.visitChunk(macHeader, protocol);
+    Ptr<const EthernetFcs> fcs;
+    if (protocol == &Protocol::ethernetMac)
+        fcs = packet->popAtBack<EthernetFcs>(ETHER_FCS_BYTES);
+    else if (protocol != &Protocol::ethernetMacNoFcs)
+        throw cRuntimeError("Unknown protocol: %s", protocol->getName());
     int typeOrLength = macHeader->getTypeOrLength();
     if (isEth2Type(typeOrLength)) {
         auto payloadProtocol = ProtocolGroup::getEthertypeProtocolGroup()->findProtocol(typeOrLength);
@@ -40,10 +46,11 @@ void EthernetMacProtocolDissector::dissect(Packet *packet, const Protocol *proto
     auto paddingLength = packet->getDataLength();
     if (paddingLength > b(0)) {
         const auto& padding = packet->popAtFront(paddingLength);
-        callback.visitChunk(padding, &Protocol::ethernetMac);
+        callback.visitChunk(padding, protocol);
     }
-    callback.visitChunk(fcs, &Protocol::ethernetMac);
-    callback.endProtocolDataUnit(&Protocol::ethernetMac);
+    if (fcs != nullptr)
+        callback.visitChunk(fcs, protocol);
+    callback.endProtocolDataUnit(protocol);
 }
 
 } // namespace inet
