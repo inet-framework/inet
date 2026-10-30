@@ -8,8 +8,6 @@ There is no network configurator, so the router has only its link-local address
 and advertises no prefix. The host must still take the router as its default
 router.
 
-%# expected-result: FAIL
-
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import inet.node.ipv6.Router6;

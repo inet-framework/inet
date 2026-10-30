@@ -1,0 +1,3 @@
+A host accepts a Router Advertisement without a Prefix Information option
+
+Ipv6NeighbourDiscovery rejected every Router Advertisement that carried no Prefix Information option, although RFC 4861, 6.1.2 does not require one. A host therefore never took a router that advertises no prefix, for example a router with only its link-local address, as its default router. Now such an advertisement is valid: the host takes the router as a default router, and it processes the other options as before.
