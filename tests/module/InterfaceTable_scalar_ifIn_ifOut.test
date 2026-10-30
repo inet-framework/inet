@@ -8,8 +8,6 @@ gates have the same index. A scalar gate has no index, and two scalar gates
 are consistent. The node of this test connects a loopback interface to a
 module with scalar ifIn and ifOut gates, and must initialize without an error.
 
-%# expected-result: FAIL
-
 %file: ScalarIfGatesLayer.cc
 
 #include "inet/common/INETDefs.h"

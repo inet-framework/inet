@@ -9,8 +9,6 @@ a scalar gate and a gate vector element never have the same index. The node of
 this test connects a loopback interface to the scalar ifIn gate and to
 ifOut[0] of a module, and must stop with a gate index mismatch error.
 
-%# expected-result: FAIL
-
 %file: MixedIfGatesLayer.cc
 
 #include "inet/common/INETDefs.h"
