@@ -1,0 +1,5 @@
+Ethernet frames without an FCS have a protocol of their own
+
+The new protocol ethernetmacnofcs ("Ethernet MAC without FCS") is an Ethernet MAC frame that has no FCS at its end, for example a frame that a portal or a tunnel carries without one. An ethernetmac frame always ends with an FCS, and its dissector takes the last 4 bytes of the frame for it, so a frame without an FCS could not be labeled correctly before: packet filters, the packet printer and PCAP recording failed on it, or dissected the payload 4 bytes short.
+
+A module that removes the FCS of a frame changes the protocol in its PacketProtocolTag to ethernetmacnofcs, and a module that adds an FCS changes it back to ethernetmac. Packet filter expressions reach the fields of such a frame as ethernetmacnofcs.dest, or as EthernetMacHeader.dest, which matches both kinds of frame. PcapRecorder records such frames with the link type LINKTYPE_ETHERNET, and its dumpProtocols parameter includes the protocol by default.

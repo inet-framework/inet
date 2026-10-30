@@ -133,6 +133,7 @@ class INET_API Protocol
     static const Protocol apskPhy;
     static const Protocol csmaCaMac;
     static const Protocol echo;
+    static const Protocol ethernetMacNoFcs; // an Ethernet MAC frame without its FCS, e.g. in the GTP-U tunnel of a 5G Ethernet PDU session, see Protocol.cc
     static const Protocol flooding;
     static const Protocol linkStateRouting;
     static const Protocol nextHopForwarding;

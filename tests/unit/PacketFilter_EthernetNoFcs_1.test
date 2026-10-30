@@ -1,0 +1,158 @@
+%description:
+Tests the dissection of Ethernet frames without an FCS, which have the protocol
+ethernetmacnofcs, and packet filter expressions over them.
+
+An ethernetmac frame with an FCS is the reference. The ethernetmacnofcs frames
+are dissected without an FCS chunk and with their payload whole, also when the
+payload is a BytesChunk, whose last 4 bytes the ethernetmac dissector would take
+for the FCS, and also when the frame is padded. Their fields are reached by the
+name of their protocol, ethernetmacnofcs, or by the chunk type,
+EthernetMacHeader, which matches both kinds of frame.
+
+%includes:
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/PacketFilter.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+#define TEST(CONDITION, PACKET) filter.setExpression(CONDITION); try { bool result = filter.matches(&(PACKET)); std::cout << (PACKET).getName() << ": " << CONDITION << " -> " << (result ? "true" : "false") << std::endl; } catch (std::exception& e) { std::cout << (PACKET).getName() << ": " << CONDITION << " -> " << e.what() << std::endl; }
+
+%global:
+
+// An Ethernet frame from 0A-AA-00-00-00-01 to 0A-AA-00-00-00-02, with a C-tag
+// of VID 42 if vid is not -1, around a UDP packet to 10.0.0.1 port 42 with the
+// given payload, followed by padding of the given length and an FCS if hasFcs
+static Packet *createFrame(const char *name, int vid, const Ptr<const Chunk>& payload, B paddingLength, bool hasFcs)
+{
+    auto packet = new Packet(name);
+    auto macHeader = makeShared<EthernetMacHeader>();
+    macHeader->setSrc(MacAddress("0A-AA-00-00-00-01"));
+    macHeader->setDest(MacAddress("0A-AA-00-00-00-02"));
+    macHeader->setTypeOrLength(vid == -1 ? ETHERTYPE_IPv4 : ETHERTYPE_8021Q_TAG);
+    packet->insertAtBack(macHeader);
+    if (vid != -1) {
+        auto tagHeader = makeShared<Ieee8021qTagEpdHeader>();
+        tagHeader->setVid(vid);
+        tagHeader->setTypeOrLength(ETHERTYPE_IPv4);
+        packet->insertAtBack(tagHeader);
+    }
+    auto ipv4Header = makeShared<Ipv4Header>();
+    ipv4Header->setProtocolId(IP_PROT_UDP);
+    ipv4Header->setDestAddress(Ipv4Address("10.0.0.1"));
+    auto udpHeader = makeShared<UdpHeader>();
+    udpHeader->setDestPort(42);
+    udpHeader->setTotalLengthField(udpHeader->getChunkLength() + payload->getChunkLength());
+    ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + udpHeader->getTotalLengthField());
+    packet->insertAtBack(ipv4Header);
+    packet->insertAtBack(udpHeader);
+    packet->insertAtBack(payload);
+    if (paddingLength > B(0))
+        packet->insertAtBack(makeShared<ByteCountChunk>(paddingLength, 0));
+    if (hasFcs) {
+        auto fcs = makeShared<EthernetFcs>();
+        fcs->setFcsMode(FCS_DECLARED_CORRECT);
+        packet->insertAtBack(fcs);
+    }
+    packet->addTag<PacketProtocolTag>()->setProtocol(hasFcs ? &Protocol::ethernetMac : &Protocol::ethernetMacNoFcs);
+    return packet;
+}
+
+// Prints the protocol data units and chunks that the dissector reports, as
+// protocol(chunk:length ...)
+class DissectionPrinter : public PacketDissector::ICallback
+{
+  public:
+    virtual bool shouldDissectProtocolDataUnit(const Protocol *protocol) override { return true; }
+    virtual void startProtocolDataUnit(const Protocol *protocol) override { std::cout << " " << (protocol != nullptr ? protocol->getName() : "none") << "("; }
+    virtual void endProtocolDataUnit(const Protocol *protocol) override { std::cout << " )"; }
+    virtual void markIncorrect() override { std::cout << " incorrect"; }
+    virtual void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *protocol) override
+    {
+        std::string className = chunk->getClassName();
+        std::cout << " " << className.substr(className.rfind(':') + 1) << ":" << chunk->getChunkLength();
+    }
+};
+
+static void printDissection(Packet *packet)
+{
+    DissectionPrinter printer;
+    PacketDissector dissector(ProtocolDissectorRegistry::getInstance(), printer);
+    std::cout << packet->getName() << ":";
+    dissector.dissectPacket(packet);
+    std::cout << std::endl;
+}
+
+%activity:
+
+auto fcs = createFrame("fcs", 42, makeShared<ByteCountChunk>(B(100)), B(0), true);
+auto nofcs = createFrame("nofcs", 42, makeShared<ByteCountChunk>(B(100)), B(0), false);
+auto nofcsBytes = createFrame("nofcsBytes", -1, makeShared<BytesChunk>(std::vector<uint8_t>(100, 0x5A)), B(0), false);
+auto nofcsPadded = createFrame("nofcsPadded", -1, makeShared<ByteCountChunk>(B(10)), B(4), false);
+
+for (auto packet : {fcs, nofcs, nofcsBytes, nofcsPadded})
+    printDissection(packet);
+
+PacketFilter filter;
+
+for (auto packet : {fcs, nofcs, nofcsBytes, nofcsPadded}) {
+    // the protocol of the frame
+    TEST("has(ethernetmac)", *packet);
+    TEST("has(ethernetmacnofcs)", *packet);
+    TEST("has(EthernetFcs)", *packet);
+
+    // the MAC header by protocol name and by chunk type
+    TEST("has(ethernetmacnofcs) && ethernetmacnofcs.dest.str() == '0A-AA-00-00-00-02'", *packet);
+    TEST("EthernetMacHeader.dest.str() == '0A-AA-00-00-00-02'", *packet);
+
+    // the protocols behind the MAC header
+    TEST("has(ieee8021qctag) && ieee8021qctag.vid == 42", *packet);
+    TEST("ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42", *packet);
+}
+
+for (auto packet : {fcs, nofcs, nofcsBytes, nofcsPadded})
+    delete packet;
+
+%contains: stdout
+fcs: ethernetmac( EthernetMacHeader:14 B ieee8021qctag( Ieee8021qTagEpdHeader:4 B ipv4( Ipv4Header:20 B udp( UdpHeader:8 B none( ByteCountChunk:100 B ) ) ) ) EthernetFcs:4 B )
+nofcs: ethernetmacnofcs( EthernetMacHeader:14 B ieee8021qctag( Ieee8021qTagEpdHeader:4 B ipv4( Ipv4Header:20 B udp( UdpHeader:8 B none( ByteCountChunk:100 B ) ) ) ) )
+nofcsBytes: ethernetmacnofcs( EthernetMacHeader:14 B ipv4( Ipv4Header:20 B udp( UdpHeader:8 B none( BytesChunk:100 B ) ) ) )
+nofcsPadded: ethernetmacnofcs( EthernetMacHeader:14 B ipv4( Ipv4Header:20 B udp( UdpHeader:8 B none( ByteCountChunk:10 B ) ) ) ByteCountChunk:4 B )
+fcs: has(ethernetmac) -> true
+fcs: has(ethernetmacnofcs) -> false
+fcs: has(EthernetFcs) -> true
+fcs: has(ethernetmacnofcs) && ethernetmacnofcs.dest.str() == '0A-AA-00-00-00-02' -> false
+fcs: EthernetMacHeader.dest.str() == '0A-AA-00-00-00-02' -> true
+fcs: has(ieee8021qctag) && ieee8021qctag.vid == 42 -> true
+fcs: ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
+nofcs: has(ethernetmac) -> false
+nofcs: has(ethernetmacnofcs) -> true
+nofcs: has(EthernetFcs) -> false
+nofcs: has(ethernetmacnofcs) && ethernetmacnofcs.dest.str() == '0A-AA-00-00-00-02' -> true
+nofcs: EthernetMacHeader.dest.str() == '0A-AA-00-00-00-02' -> true
+nofcs: has(ieee8021qctag) && ieee8021qctag.vid == 42 -> true
+nofcs: ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
+nofcsBytes: has(ethernetmac) -> false
+nofcsBytes: has(ethernetmacnofcs) -> true
+nofcsBytes: has(EthernetFcs) -> false
+nofcsBytes: has(ethernetmacnofcs) && ethernetmacnofcs.dest.str() == '0A-AA-00-00-00-02' -> true
+nofcsBytes: EthernetMacHeader.dest.str() == '0A-AA-00-00-00-02' -> true
+nofcsBytes: has(ieee8021qctag) && ieee8021qctag.vid == 42 -> false
+nofcsBytes: ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
+nofcsPadded: has(ethernetmac) -> false
+nofcsPadded: has(ethernetmacnofcs) -> true
+nofcsPadded: has(EthernetFcs) -> false
+nofcsPadded: has(ethernetmacnofcs) && ethernetmacnofcs.dest.str() == '0A-AA-00-00-00-02' -> true
+nofcsPadded: EthernetMacHeader.dest.str() == '0A-AA-00-00-00-02' -> true
+nofcsPadded: has(ieee8021qctag) && ieee8021qctag.vid == 42 -> false
+nofcsPadded: ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true

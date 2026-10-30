@@ -46,7 +46,7 @@ simple PcapRecorder extends SimpleModule
         string moduleNamePatterns = default("wlan[*] eth[*] ppp[*]"); // Space-separated list of sibling module names to listen on
         string sendingSignalNames = default("transmissionEnded"); // Space-separated list of outbound packet signals to subscribe to
         string receivingSignalNames = default("receptionEnded"); // Space-separated list of inbound packet signals to subscribe to
-        string dumpProtocols = default("ethernetmac ppp ieee80211mac"); // Space-separated list of protocol names as defined in the Protocol class
+        string dumpProtocols = default("ethernetmac ethernetmacnofcs ppp ieee80211mac"); // Space-separated list of protocol names as defined in the Protocol class
         object packetFilter = default("*"); // Which packets are considered, matches all packets by default
         string helpers = default("");    // Usable PcapRecorder::IHelper helpers for accept packettype and store/convert packet as specified linktype
                                          // currently available: "inet::AckingMacToEthernetPcapRecorderHelper",
