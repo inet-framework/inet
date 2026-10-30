@@ -1,0 +1,164 @@
+%description:
+Tests packet filter expressions over Ethernet frames with IEEE 802.1Q tags:
+the PCP, DEI and VID of a C-tag, the fields of an S-tag stacked over a C-tag
+(IEEE 802.1ad), the MAC header around the tags, and the IPv4 and UDP headers
+behind them. An untagged frame shows that an expression over the fields of a
+tag needs has() when it also sees frames without that tag. Each frame is a
+complete ethernetmac PDU, MAC header to FCS.
+
+%includes:
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/PacketFilter.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+#define TEST(CONDITION, PACKET) filter.setExpression(CONDITION); try { bool result = filter.matches(&(PACKET)); std::cout << (PACKET).getName() << ": " << CONDITION << " -> " << (result ? "true" : "false") << std::endl; } catch (std::exception& e) { std::cout << (PACKET).getName() << ": " << CONDITION << " -> " << e.what() << std::endl; }
+
+%global:
+
+struct Tag { uint16_t tpid; int pcp; bool dei; int vid; };
+
+// An ethernetmac frame from 0A-AA-00-00-00-01 to 0A-AA-00-00-00-02 with the
+// given tags (outermost first) around a UDP packet to 10.0.0.1 port 42
+static Packet *createFrame(const char *name, std::vector<Tag> tags)
+{
+    auto packet = new Packet(name);
+    auto macHeader = makeShared<EthernetMacHeader>();
+    macHeader->setSrc(MacAddress("0A-AA-00-00-00-01"));
+    macHeader->setDest(MacAddress("0A-AA-00-00-00-02"));
+    macHeader->setTypeOrLength(tags.empty() ? ETHERTYPE_IPv4 : tags[0].tpid);
+    packet->insertAtBack(macHeader);
+    for (size_t i = 0; i < tags.size(); i++) {
+        auto tagHeader = makeShared<Ieee8021qTagEpdHeader>();
+        tagHeader->setPcp(tags[i].pcp);
+        tagHeader->setDei(tags[i].dei);
+        tagHeader->setVid(tags[i].vid);
+        tagHeader->setTypeOrLength(i + 1 < tags.size() ? tags[i + 1].tpid : ETHERTYPE_IPv4);
+        packet->insertAtBack(tagHeader);
+    }
+    auto ipv4Header = makeShared<Ipv4Header>();
+    ipv4Header->setProtocolId(IP_PROT_UDP);
+    ipv4Header->setDestAddress(Ipv4Address("10.0.0.1"));
+    auto udpHeader = makeShared<UdpHeader>();
+    udpHeader->setDestPort(42);
+    udpHeader->setTotalLengthField(udpHeader->getChunkLength() + B(100));
+    ipv4Header->setTotalLengthField(ipv4Header->getChunkLength() + udpHeader->getTotalLengthField());
+    packet->insertAtBack(ipv4Header);
+    packet->insertAtBack(udpHeader);
+    packet->insertAtBack(makeShared<ByteCountChunk>(B(100)));
+    auto fcs = makeShared<EthernetFcs>();
+    fcs->setFcsMode(FCS_DECLARED_CORRECT);
+    packet->insertAtBack(fcs);
+    packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+    return packet;
+}
+
+%activity:
+
+auto untagged = createFrame("untagged", {});
+auto ctag42 = createFrame("ctag42", {{ETHERTYPE_8021Q_TAG, 5, false, 42}});
+auto ctag81 = createFrame("ctag81", {{ETHERTYPE_8021Q_TAG, 3, true, 81}});
+auto stag81ctag42 = createFrame("stag81ctag42", {{ETHERTYPE_8021ad_S_TAG, 2, false, 81}, {ETHERTYPE_8021Q_TAG, 5, false, 42}});
+
+PacketFilter filter;
+
+for (auto packet : {untagged, ctag42, ctag81, stag81ctag42}) {
+    // the presence of the tags
+    TEST("has(ieee8021qctag)", *packet);
+    TEST("has(ieee8021qstag)", *packet);
+    TEST("has(Ieee8021qTagEpdHeader[1])", *packet);
+
+    // the fields of the C-tag; a frame without the tag has no such fields,
+    // so an expression that also sees untagged frames tests for the tag first
+    TEST("ieee8021qctag.pcp == 5", *packet);
+    TEST("ieee8021qctag.dei", *packet);
+    TEST("ieee8021qctag.vid == 42", *packet);
+    TEST("ieee8021qctag.pcp == 5 && ieee8021qctag.vid == 42", *packet);
+    TEST("ieee8021qctag.pcp >= 4 || ieee8021qctag.vid == 81", *packet);
+    TEST("has(ieee8021qctag) && ieee8021qctag.vid == 42", *packet);
+
+    // the fields of the S-tag
+    TEST("ieee8021qstag.pcp == 2 && ieee8021qstag.vid == 81", *packet);
+
+    // the tags by chunk type, outermost first
+    TEST("Ieee8021qTagEpdHeader.vid == 81", *packet);
+    TEST("Ieee8021qTagEpdHeader[1].vid == 42", *packet);
+
+    // the MAC header around the tags, and the IPv4 and UDP headers behind them
+    TEST("ethernetmac.dest.str() == '0A-AA-00-00-00-02'", *packet);
+    TEST("ethernetmac.typeOrLength == 0x8100", *packet);
+    TEST("ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42", *packet);
+}
+
+for (auto packet : {untagged, ctag42, ctag81, stag81ctag42})
+    delete packet;
+
+%contains: stdout
+untagged: has(ieee8021qctag) -> false
+untagged: has(ieee8021qstag) -> false
+untagged: has(Ieee8021qTagEpdHeader[1]) -> false
+untagged: ieee8021qctag.pcp == 5 -> Object nullptr has no member named 'pcp'
+untagged: ieee8021qctag.dei -> Object nullptr has no member named 'dei'
+untagged: ieee8021qctag.vid == 42 -> Object nullptr has no member named 'vid'
+untagged: ieee8021qctag.pcp == 5 && ieee8021qctag.vid == 42 -> Object nullptr has no member named 'pcp'
+untagged: ieee8021qctag.pcp >= 4 || ieee8021qctag.vid == 81 -> Object nullptr has no member named 'pcp'
+untagged: has(ieee8021qctag) && ieee8021qctag.vid == 42 -> false
+untagged: ieee8021qstag.pcp == 2 && ieee8021qstag.vid == 81 -> Object nullptr has no member named 'pcp'
+untagged: Ieee8021qTagEpdHeader.vid == 81 -> Object nullptr has no member named 'vid'
+untagged: Ieee8021qTagEpdHeader[1].vid == 42 -> Object nullptr has no member named 'vid'
+untagged: ethernetmac.dest.str() == '0A-AA-00-00-00-02' -> true
+untagged: ethernetmac.typeOrLength == 0x8100 -> false
+untagged: ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
+ctag42: has(ieee8021qctag) -> true
+ctag42: has(ieee8021qstag) -> false
+ctag42: has(Ieee8021qTagEpdHeader[1]) -> false
+ctag42: ieee8021qctag.pcp == 5 -> true
+ctag42: ieee8021qctag.dei -> false
+ctag42: ieee8021qctag.vid == 42 -> true
+ctag42: ieee8021qctag.pcp == 5 && ieee8021qctag.vid == 42 -> true
+ctag42: ieee8021qctag.pcp >= 4 || ieee8021qctag.vid == 81 -> true
+ctag42: has(ieee8021qctag) && ieee8021qctag.vid == 42 -> true
+ctag42: ieee8021qstag.pcp == 2 && ieee8021qstag.vid == 81 -> Object nullptr has no member named 'pcp'
+ctag42: Ieee8021qTagEpdHeader.vid == 81 -> false
+ctag42: Ieee8021qTagEpdHeader[1].vid == 42 -> Object nullptr has no member named 'vid'
+ctag42: ethernetmac.dest.str() == '0A-AA-00-00-00-02' -> true
+ctag42: ethernetmac.typeOrLength == 0x8100 -> true
+ctag42: ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
+ctag81: has(ieee8021qctag) -> true
+ctag81: has(ieee8021qstag) -> false
+ctag81: has(Ieee8021qTagEpdHeader[1]) -> false
+ctag81: ieee8021qctag.pcp == 5 -> false
+ctag81: ieee8021qctag.dei -> true
+ctag81: ieee8021qctag.vid == 42 -> false
+ctag81: ieee8021qctag.pcp == 5 && ieee8021qctag.vid == 42 -> false
+ctag81: ieee8021qctag.pcp >= 4 || ieee8021qctag.vid == 81 -> true
+ctag81: has(ieee8021qctag) && ieee8021qctag.vid == 42 -> false
+ctag81: ieee8021qstag.pcp == 2 && ieee8021qstag.vid == 81 -> Object nullptr has no member named 'pcp'
+ctag81: Ieee8021qTagEpdHeader.vid == 81 -> true
+ctag81: Ieee8021qTagEpdHeader[1].vid == 42 -> Object nullptr has no member named 'vid'
+ctag81: ethernetmac.dest.str() == '0A-AA-00-00-00-02' -> true
+ctag81: ethernetmac.typeOrLength == 0x8100 -> true
+ctag81: ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
+stag81ctag42: has(ieee8021qctag) -> true
+stag81ctag42: has(ieee8021qstag) -> true
+stag81ctag42: has(Ieee8021qTagEpdHeader[1]) -> true
+stag81ctag42: ieee8021qctag.pcp == 5 -> true
+stag81ctag42: ieee8021qctag.dei -> false
+stag81ctag42: ieee8021qctag.vid == 42 -> true
+stag81ctag42: ieee8021qctag.pcp == 5 && ieee8021qctag.vid == 42 -> true
+stag81ctag42: ieee8021qctag.pcp >= 4 || ieee8021qctag.vid == 81 -> true
+stag81ctag42: has(ieee8021qctag) && ieee8021qctag.vid == 42 -> true
+stag81ctag42: ieee8021qstag.pcp == 2 && ieee8021qstag.vid == 81 -> true
+stag81ctag42: Ieee8021qTagEpdHeader.vid == 81 -> true
+stag81ctag42: Ieee8021qTagEpdHeader[1].vid == 42 -> true
+stag81ctag42: ethernetmac.dest.str() == '0A-AA-00-00-00-02' -> true
+stag81ctag42: ethernetmac.typeOrLength == 0x8100 -> false
+stag81ctag42: ipv4.destAddress.str() == '10.0.0.1' && udp.destPort == 42 -> true
