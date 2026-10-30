@@ -1,0 +1,3 @@
+Sky view plots name their observer
+
+GeoSkyViewCanvasVisualizer drew each observer's sky plot without a title, and in its default grid mode it tiles the plots below the map in observer order, so a plot could not be matched to its ground station. Each plot now has a title above it with the observer node's display name, or its full name if no display name is set. The grid rows are spaced one title line further apart, so a title does not touch the plot above it. The new displayTitles parameter turns the titles off and restores the old layout. Simulation results do not change.

@@ -1,0 +1,141 @@
+%description:
+
+Checks the titles of the GeoSkyViewCanvasVisualizer sky plots. Cmdenv runs with
+its fake graphical user interface, so the visualizers draw. Three visualizers
+watch the same two ground stations: gs[0] has the display name "Lima", gs[1]
+has none. At the end of the run a checker prints the label texts of each sky
+plot group on the network canvas, with the tags of its visualizer, and the
+plot's center with the vertical position of each label relative to it:
+ - default: the title is the display name, or the full name if none is set (%N)
+ - format: titleFormat = "%p (%n)" gives the full path and the full name
+ - hidden: displayTitles = false draws no title
+
+The layout uses the default plotRadius of 70 pixels. The network's bgb of
+300x200 pixels holds one 175-pixel grid column, so each visualizer's two plots
+are in two rows below it. With titles, the title is 84 pixels above the plot
+center (14 above the rim, 13 above the N label at -71), the first center is at
+200 + 35 + 14 + 70 = 319, and the row pitch is 175 + 14 = 189, so a title stays
+clear of the S label (+71) of the plot above it. Without titles, the centers are
+at 305 and 480: the old row pitch of 175.
+
+%file: test.cc
+
+#include "inet/common/INETDefs.h"
+
+using namespace inet;
+
+namespace GeoSkyViewCanvasVisualizer_titles {
+
+class SkyViewLabelChecker : public cSimpleModule
+{
+  protected:
+    virtual void finish() override
+    {
+        auto canvas = getParentModule()->getCanvas();
+        for (int i = 0; i < canvas->getRootFigure()->getNumFigures(); i++) {
+            auto group = dynamic_cast<cGroupFigure *>(canvas->getRootFigure()->getFigure(i));
+            if (group == nullptr || strcmp(group->getName(), "skyView"))
+                continue;
+            std::string text = std::string("SKYVIEW ") + group->getTags() + ":";
+            for (int j = 0; j < group->getNumFigures(); j++)
+                if (auto label = dynamic_cast<cLabelFigure *>(group->getFigure(j)))
+                    text += std::string(" [") + label->getText() + "]";
+            std::cout << text << std::endl;
+            // the plot center (the group's translation) and the label positions relative to it
+            const cFigure::Transform& transform = group->getTransform();
+            std::cout << "LAYOUT " << group->getTags() << ": plot at " << transform.t1 << " " << transform.t2 << ";";
+            for (int j = 0; j < group->getNumFigures(); j++)
+                if (auto label = dynamic_cast<cLabelFigure *>(group->getFigure(j)))
+                    std::cout << " [" << label->getText() << " " << label->getPosition().y << "]";
+            std::cout << std::endl;
+        }
+    }
+};
+
+Define_Module(SkyViewLabelChecker);
+
+} // namespace GeoSkyViewCanvasVisualizer_titles
+
+%file: test.ned
+
+import inet.common.geometry.common.Wgs84EcefGeographicCoordinateSystem;
+import inet.mobility.contract.IMobility;
+import inet.visualizer.canvas.scene.GeoSkyViewCanvasVisualizer;
+
+simple SkyViewLabelChecker
+{
+}
+
+module GroundStation
+{
+    parameters:
+        @networkNode;
+    submodules:
+        mobility: <default("inet.mobility.static.StationaryMobility")> like IMobility;
+}
+
+network Test
+{
+    parameters:
+        @display("bgb=300,200");
+    submodules:
+        coordinateSystem: Wgs84EcefGeographicCoordinateSystem;
+        skyViewDefault: GeoSkyViewCanvasVisualizer;
+        skyViewFormat: GeoSkyViewCanvasVisualizer;
+        skyViewHidden: GeoSkyViewCanvasVisualizer;
+        checker: SkyViewLabelChecker;
+        gs[2]: GroundStation;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 1s
+ned-path = .;../../../../src
+cmdenv-fake-gui = true
+
+*.gs[0].display-name = "Lima"
+*.gs[*].mobility.initFromDisplayString = false
+*.gs[*].mobility.coordinateSystemModule = "^.^.coordinateSystem"
+*.gs[0].mobility.initialLatitude = -12.046deg
+*.gs[0].mobility.initialLongitude = -77.043deg
+*.gs[1].mobility.initialLatitude = 34.052deg
+*.gs[1].mobility.initialLongitude = -118.244deg
+
+*.skyView*.coordinateSystemModule = "^.coordinateSystem"
+*.skyView*.observerFilter = "**.gs[*].mobility"
+*.skyView*.targetFilter = "**.sat[*].mobility"
+*.skyViewDefault.tags = "default"
+*.skyViewFormat.tags = "format"
+*.skyViewFormat.titleFormat = "%p (%n)"
+*.skyViewHidden.tags = "hidden"
+*.skyViewHidden.displayTitles = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+SKYVIEW sky_view default: [N] [S] [E] [W] [Lima] [30
+%contains: stdout
+SKYVIEW sky_view default: [N] [S] [E] [W] [gs[1]] [30
+%contains: stdout
+SKYVIEW sky_view format: [N] [S] [E] [W] [Test.gs[0] (gs[0])] [30
+%contains: stdout
+SKYVIEW sky_view format: [N] [S] [E] [W] [Test.gs[1] (gs[1])] [30
+%contains: stdout
+SKYVIEW sky_view hidden: [N] [S] [E] [W] [30
+%contains: stdout
+LAYOUT sky_view default: plot at 70 319; [N -71] [S 71] [E 0] [W 0] [Lima -84] [30
+%contains: stdout
+LAYOUT sky_view default: plot at 70 508; [N -71] [S 71] [E 0] [W 0] [gs[1] -84] [30
+%contains: stdout
+LAYOUT sky_view hidden: plot at 70 305; [N -71] [S 71] [E 0] [W 0] [30
+%contains: stdout
+LAYOUT sky_view hidden: plot at 70 480; [N -71] [S 71] [E 0] [W 0] [30
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
