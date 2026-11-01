@@ -1,0 +1,48 @@
+%description:
+
+Tests that Ieee8021adPolicy applies the access and trunk port types of IEEE
+802.1Q-2018 in a C-VLAN bridge. The network and the traffic are described in
+lib/vlan-access-trunk.ini, and the bridges are configured by port type as in
+lib/ieee8021ad-access-trunk.ini: two bridges joined by a trunk, VLAN 10 with
+the hosts a1, a2 and a3, and VLAN 20 with b1 and b2, where a1 and b1, and a3
+and b2, use the same MAC address.
+
+The frame counts and the received data are those of VlanIndMapper_1, which
+configures the same ports with the four modules of VlanPolicyLayer, and thus
+those of two separate pairs of plain switches without VLANs: each VLAN is a
+forwarding domain of its own. The bridges forward the PCP (the default), and
+the hosts of the access ports, which have no 802.1Q layer, still receive all
+of their data, so no frame leaves an access port with a priority tag. a2 sends
+priority-tagged frames, and the access port eth1 of bridge1 classifies them
+into VLAN 10 (6.9.1 f).
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+include ../../lib/ieee8021ad-access-trunk.ini
+
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.a1.eth[0].macLayer.fcsChecker incomingPackets:count 27
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.a2.eth[0].macLayer.fcsChecker incomingPackets:count 27
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.b1.eth[0].macLayer.fcsChecker incomingPackets:count 26
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.a3.eth[0].macLayer.fcsChecker incomingPackets:count 98
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.b2.eth[0].macLayer.fcsChecker incomingPackets:count 49
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.a3.app[0] packetReceived:sum(packetBytes) 131072
+%contains: results/General-#0.sca
+scalar VlanAccessTrunkTestNetwork.b2.app[0] packetReceived:sum(packetBytes) 65536
+%contains: stdout
+VlanAccessTrunkTestNetwork.bridge1.ieee8021q.qTagHeaderInserter: Setting VID, vid = 10.
+%contains: stdout
+VlanAccessTrunkTestNetwork.bridge1.ieee8021q.qTagHeaderInserter: Setting VID, vid = 20.
+%contains: stdout
+VlanAccessTrunkTestNetwork.a2.ieee8021q.qTagHeaderInserter: Setting VID, vid = 0.
+%contains: stdout
+VlanAccessTrunkTestNetwork.bridge1.bridging.vlanPolicy: Classifying received frame into the VLAN of the port, interfaceName = eth1, vlanId = 0, portVlanId = 10

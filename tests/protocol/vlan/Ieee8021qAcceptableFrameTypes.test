@@ -1,0 +1,201 @@
+%description:
+
+IEEE 802.1Q-2018 -- an access port admits only untagged and priority-tagged frames, a trunk
+admits only VLAN-tagged frames of its VLANs.
+
+Requirements: 6.9 (Acceptable Frame Types; a frame is priority-tagged if the VID of its tag
+is zero), 6.9.1 a (an untagged frame is discarded where only VLAN-tagged frames are
+admitted), 6.9.1 b 3 (a priority-tagged frame likewise), 6.9.1 b 4 (a VLAN-tagged frame is
+discarded where only untagged and priority-tagged frames are admitted), 6.9.1 f (an untagged
+or priority-tagged frame is classified into the PVID), 8.6.2 (ingress filtering: a frame
+whose VID does not have the port in its member set is discarded).
+
+The bridge b uses Ieee8021adPolicy. eth0 (a1), eth1 (a2) and eth2 (a3) are access ports of
+VLAN 10. eth3 (t0), eth4 (t1) and eth5 (t2) are trunks of VLANs 10 and 20. Each sender has
+an 802.1Q layer with an outbound mapper that tags all of its frames with one VLAN id, except
+t0, which has no 802.1Q layer: a1 sends C-tagged frames of VLAN 10, a2 priority-tagged
+frames, t0 untagged frames, t1 priority-tagged frames, and t2 C-tagged frames of VLAN 30.
+Each sends one UDP datagram to a3, on its own port and at its own time. The hosts use
+GlobalArp, so the datagrams are the only frames on the links.
+
+a2's datagram (0.1 s) is admitted on the access port, classified into VLAN 10, and leaves
+eth2 untagged; a3 gets it. The datagrams of a1 (0.2 s), t0 (0.3 s), t1 (0.4 s) and t2
+(0.5 s) are each discarded by the VLAN policy of b, and a3 gets none of them.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("ieee8021q_acceptable_frame_types")
+        .meanwhile(never(on("a3.udp").signal("packetReceivedFromLower").filterPacket("udp.destPort != 5000")
+                             .describe("a3 gets a datagram that b must discard")
+                             .within(0.9)))
+        .once(on("b.eth[1]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5000 && ieee8021qctag.vid == 0")
+                  .describe("the priority-tagged datagram of a2 on its access port")
+                  .within(0.15))
+        .once(on("b.eth[2]").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5000 && EthernetMacHeader.typeOrLength == 2048")
+                  .describe("the datagram of a2, untagged, on the access port of a3")
+                  .within(0.15))
+        .once(on("a3.udp").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                  .describe("a3 gets the datagram of a2")
+                  .within(0.15))
+        .once(on("b.eth[0]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5001 && ieee8021qctag.vid == 10")
+                  .describe("the datagram of a1, C-tagged with VLAN ID 10, on its access port")
+                  .within(0.25))
+        .once(on("b.bridging.vlanPolicy").signal("packetDropped")
+                  .describe("b discards the VLAN-tagged frame of a1 on the access port")
+                  .within(0.25))
+        .once(on("b.eth[3]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5002 && EthernetMacHeader.typeOrLength == 2048")
+                  .describe("the untagged datagram of t0 on its trunk")
+                  .within(0.35))
+        .once(on("b.bridging.vlanPolicy").signal("packetDropped")
+                  .describe("b discards the untagged frame of t0 on the trunk")
+                  .within(0.35))
+        .once(on("b.eth[4]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5003 && ieee8021qctag.vid == 0")
+                  .describe("the priority-tagged datagram of t1 on its trunk")
+                  .within(0.45))
+        .once(on("b.bridging.vlanPolicy").signal("packetDropped")
+                  .describe("b discards the priority-tagged frame of t1 on the trunk")
+                  .within(0.45))
+        .once(on("b.eth[5]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5004 && ieee8021qctag.vid == 30")
+                  .describe("the datagram of t2, C-tagged with VLAN ID 30, on its trunk")
+                  .within(0.55))
+        .once(on("b.bridging.vlanPolicy").signal("packetDropped")
+                  .describe("b discards the frame of VLAN 30, which is not a VLAN of the trunk")
+                  .within(0.55));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "ieee8021q_acceptable_frame_types compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// One C-VLAN bridge with three access ports and three trunks.
+network AcceptableFrameTypesNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        a1: StandardHost { @display("p=100,150"); }
+        a2: StandardHost { @display("p=100,250"); }
+        a3: StandardHost { @display("p=100,350"); }
+        b: EthernetSwitch { @display("p=300,250"); }
+        t0: StandardHost { @display("p=500,150"); }
+        t1: StandardHost { @display("p=500,250"); }
+        t2: StandardHost { @display("p=500,350"); }
+    connections:
+        a1.ethg++ <--> Eth100M <--> b.ethg++;
+        a2.ethg++ <--> Eth100M <--> b.ethg++;
+        a3.ethg++ <--> Eth100M <--> b.ethg++;
+        t0.ethg++ <--> Eth100M <--> b.ethg++;
+        t1.ethg++ <--> Eth100M <--> b.ethg++;
+        t2.ethg++ <--> Eth100M <--> b.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = AcceptableFrameTypesNet
+sim-time-limit = 1s
+seed-set = 0
+
+*.*.llc.typename = ""
+*.*.ethernet.typename = "EthernetLayer"
+*.*.eth[*].typename = "LayeredEthernetInterface"
+*.*.eth[*].bitrate = 100Mbps
+*.*.ipv4.arp.typename = "GlobalArp"
+
+*.b.ieee8021q.typename = "Ieee8021qProtocol"
+*.b.bridging.typename = "BridgingLayer"
+*.b.bridging.vlanPolicy.typename = "Ieee8021adPolicy"
+*.b.bridging.vlanPolicy.ports = {"eth0" : {"type" : "access", "vid" : 10}, "eth1" : {"type" : "access", "vid" : 10}, "eth2" : {"type" : "access", "vid" : 10}, "*" : {"type" : "trunk", "vids" : [10, 20]}}
+
+# The tagging senders: an 802.1Q layer and an outbound mapper that tags every frame.
+*.a1.ieee8021q.typename = "Ieee8021qProtocol"
+*.a2.ieee8021q.typename = "Ieee8021qProtocol"
+*.t1.ieee8021q.typename = "Ieee8021qProtocol"
+*.t2.ieee8021q.typename = "Ieee8021qProtocol"
+*.a1.bridging.vlanPolicy.outboundMapper.mappedVlanIds = {"eth0" : {"-1" : 10}}
+*.a2.bridging.vlanPolicy.outboundMapper.mappedVlanIds = {"eth0" : {"-1" : 0}}
+*.t1.bridging.vlanPolicy.outboundMapper.mappedVlanIds = {"eth0" : {"-1" : 0}}
+*.t2.bridging.vlanPolicy.outboundMapper.mappedVlanIds = {"eth0" : {"-1" : 30}}
+*.a1.bridging.vlanPolicy.outboundFilter.acceptedVlanIds = {"eth0" : [10]}
+*.a2.bridging.vlanPolicy.outboundFilter.acceptedVlanIds = {"eth0" : [0]}
+*.t1.bridging.vlanPolicy.outboundFilter.acceptedVlanIds = {"eth0" : [0]}
+*.t2.bridging.vlanPolicy.outboundFilter.acceptedVlanIds = {"eth0" : [30]}
+*.a1.bridging.typename = "BridgingLayer"
+*.a2.bridging.typename = "BridgingLayer"
+*.t1.bridging.typename = "BridgingLayer"
+*.t2.bridging.typename = "BridgingLayer"
+*.a1.bridging.vlanPolicy.typename = "VlanPolicyLayer"
+*.a2.bridging.vlanPolicy.typename = "VlanPolicyLayer"
+*.t1.bridging.vlanPolicy.typename = "VlanPolicyLayer"
+*.t2.bridging.vlanPolicy.typename = "VlanPolicyLayer"
+*.a1.bridging.vlanPolicy.inboundFilter.acceptedVlanIds = {"eth0" : [-1]}
+*.a1.bridging.macTableModule = ""
+*.a1.bridging.directionReverser.typename = ""
+*.a1.bridging.interfaceRelay.typename = ""
+*.a2.bridging.vlanPolicy.inboundFilter.acceptedVlanIds = {"eth0" : [-1]}
+*.a2.bridging.macTableModule = ""
+*.a2.bridging.directionReverser.typename = ""
+*.a2.bridging.interfaceRelay.typename = ""
+*.t1.bridging.vlanPolicy.inboundFilter.acceptedVlanIds = {"eth0" : [-1]}
+*.t1.bridging.macTableModule = ""
+*.t1.bridging.directionReverser.typename = ""
+*.t1.bridging.interfaceRelay.typename = ""
+*.t2.bridging.vlanPolicy.inboundFilter.acceptedVlanIds = {"eth0" : [-1]}
+*.t2.bridging.macTableModule = ""
+*.t2.bridging.directionReverser.typename = ""
+*.t2.bridging.interfaceRelay.typename = ""
+
+*.a3.numApps = 1
+*.a3.app[0].typename = "UdpSink"
+*.a3.app[0].localPort = 5000
+
+*.a2.numApps = 1
+*.a2.app[0].typename = "UdpBasicApp"
+*.a2.app[0].destAddresses = "a3"
+*.a2.app[0].destPort = 5000
+*.a2.app[0].startTime = 0.1s
+*.a1.numApps = 1
+*.a1.app[0].typename = "UdpBasicApp"
+*.a1.app[0].destAddresses = "a3"
+*.a1.app[0].destPort = 5001
+*.a1.app[0].startTime = 0.2s
+*.t0.numApps = 1
+*.t0.app[0].typename = "UdpBasicApp"
+*.t0.app[0].destAddresses = "a3"
+*.t0.app[0].destPort = 5002
+*.t0.app[0].startTime = 0.3s
+*.t1.numApps = 1
+*.t1.app[0].typename = "UdpBasicApp"
+*.t1.app[0].destAddresses = "a3"
+*.t1.app[0].destPort = 5003
+*.t1.app[0].startTime = 0.4s
+*.t2.numApps = 1
+*.t2.app[0].typename = "UdpBasicApp"
+*.t2.app[0].destAddresses = "a3"
+*.t2.app[0].destPort = 5004
+*.t2.app[0].startTime = 0.5s
+*.*.app[0].messageLength = 100B
+*.*.app[0].sendInterval = 10s
+
+%contains: stdout
+PROTOCOLTEST ieee8021q_acceptable_frame_types: PASS

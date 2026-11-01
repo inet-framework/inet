@@ -1,0 +1,113 @@
+%description:
+
+IEEE 802.1Q-2018 -- a frame of a VLAN in the untagged set of a port leaves that port without
+a VLAN tag, also when it arrived with a nonzero priority code point.
+
+Requirement: 8.8.2 (the entries of the Port Map that specify untagged transmission compose
+the untagged set for the VID), together with 6.9.1 h (the priority of a tagged frame is
+decoded from its tag). The priority belongs to the frame, not to its tag: forwarding it must
+not make an untagged port send a priority tag (VLAN ID 0).
+
+The bridge b uses Ieee8021adPolicy. eth0 (a1) is an access port of VLAN 10, eth1 (t) a trunk
+of VLAN 10. The direction reverser of b forwards the PCP (forwardPcp = true, the default),
+so a frame received with PCP 5 is about to be sent with a PCP request of 5. t has an 802.1Q
+layer that tags its frames with VLAN ID 10 and PCP 5; a1 has no 802.1Q layer. The hosts use
+GlobalArp.
+
+t sends a UDP datagram to a1 at 0.1 s. It reaches b on the trunk with a C-tag of VLAN ID 10
+and PCP 5, leaves eth0 with the IPv4 type in the type field of its Ethernet header, that is
+without any tag, and a1 gets it. A VLAN policy that kept the tag encapsulation for the PCP
+request, as VlanReqMapper does, would send a priority tag on eth0, which a1, having no
+802.1Q layer, cannot process: the simulation stops with an error.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("ieee8021q_untagged_set_no_priority_tag")
+        .once(on("b.eth[1]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5000 && ieee8021qctag.vid == 10 && ieee8021qctag.pcp == 5")
+                  .describe("the datagram of t on the trunk, C-tagged with VLAN ID 10 and PCP 5")
+                  .within(0.15))
+        .once(on("b.eth[0]").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5000 && EthernetMacHeader.typeOrLength == 2048")
+                  .describe("the datagram of t, without a tag, on the access port")
+                  .within(0.15))
+        .once(on("a1.udp").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                  .describe("a1 gets the datagram of t")
+                  .within(0.15));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "ieee8021q_untagged_set_no_priority_tag compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// One C-VLAN bridge with an access port and a trunk.
+network UntaggedSetNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        a1: StandardHost { @display("p=100,200"); }
+        b: EthernetSwitch { @display("p=300,200"); }
+        t: StandardHost { @display("p=500,200"); }
+    connections:
+        a1.ethg++ <--> Eth100M <--> b.ethg++;
+        b.ethg++ <--> Eth100M <--> t.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = UntaggedSetNet
+sim-time-limit = 1s
+seed-set = 0
+
+*.*.llc.typename = ""
+*.*.ethernet.typename = "EthernetLayer"
+*.*.eth[*].typename = "LayeredEthernetInterface"
+*.*.eth[*].bitrate = 100Mbps
+*.*.ipv4.arp.typename = "GlobalArp"
+
+*.b.ieee8021q.typename = "Ieee8021qProtocol"
+*.b.bridging.typename = "BridgingLayer"
+*.b.bridging.vlanPolicy.typename = "Ieee8021adPolicy"
+*.b.bridging.vlanPolicy.ports = {"eth0" : {"type" : "access", "vid" : 10}, "eth1" : {"type" : "trunk", "vids" : [10]}}
+
+# t tags every frame with VLAN ID 10 and PCP 5, and accepts the frames of VLAN 10.
+*.t.ieee8021q.typename = "Ieee8021qProtocol"
+*.t.ieee8021q.qTagHeaderInserter.defaultPcp = 5
+*.t.bridging.typename = "BridgingLayer"
+*.t.bridging.macTableModule = ""
+*.t.bridging.directionReverser.typename = ""
+*.t.bridging.interfaceRelay.typename = ""
+*.t.bridging.vlanPolicy.typename = "VlanPolicyLayer"
+*.t.bridging.vlanPolicy.outboundMapper.mappedVlanIds = {"eth0" : {"-1" : 10}}
+*.t.bridging.vlanPolicy.outboundFilter.acceptedVlanIds = {"eth0" : [10]}
+*.t.bridging.vlanPolicy.inboundFilter.acceptedVlanIds = {"eth0" : [10]}
+
+*.t.numApps = 1
+*.t.app[0].typename = "UdpBasicApp"
+*.t.app[0].destAddresses = "a1"
+*.t.app[0].destPort = 5000
+*.t.app[0].messageLength = 100B
+*.t.app[0].startTime = 0.1s
+*.t.app[0].sendInterval = 10s
+*.a1.numApps = 1
+*.a1.app[0].typename = "UdpSink"
+*.a1.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST ieee8021q_untagged_set_no_priority_tag: PASS

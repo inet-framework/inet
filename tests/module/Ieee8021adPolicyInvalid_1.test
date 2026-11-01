@@ -1,0 +1,17 @@
+%description:
+
+Tests that Ieee8021adPolicy rejects an unknown port type in its ports parameter
+at initialization, naming the interface. The network is the one of
+lib/ieee8021ad-access-trunk.ini, with one malformed parameter.
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+*.bridge1.bridging.vlanPolicy.ports = {"eth0" : {"type" : "hybrid", "vid" : 10}, "eth1" : {"type" : "access", "vid" : 10}, "eth2" : {"type" : "access", "vid" : 20}, "eth3" : {"type" : "trunk", "vids" : [10, 20]}}
+include ../../lib/ieee8021ad-access-trunk.ini
+
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > vlan-port-error.out || true
+%contains: vlan-port-error.out
+Invalid port type "hybrid" in the ports entry for interface 'eth0': expected "access", "trunk", "cnp" or "pnp"
