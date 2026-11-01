@@ -8,6 +8,7 @@
 #include "inet/linklayer/vlan/Ieee8021adPolicy.h"
 
 #include "inet/common/ProtocolUtils.h"
+#include "inet/common/Simsignals.h"
 #include "inet/common/packet/Message.h"
 #include "inet/linklayer/common/DropEligibleTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
@@ -62,6 +63,7 @@ void Ieee8021adPolicy::initialize(int stage)
         }
         WATCH_MAP(ports);
         WATCH(numDroppedPackets);
+        check_and_cast<cModule *>(interfaceTable.get())->subscribe(interfaceDeletedSignal, this);
     }
     else if (stage == INITSTAGE_QUEUEING) {
         checkPacketOperationSupport(upperLayerInGate);
@@ -195,6 +197,37 @@ const Ieee8021adPolicy::Port& Ieee8021adPolicy::getPort(const NetworkInterface *
     if (port == nullptr)
         throw cRuntimeError("Interface '%s' has no entry in the ports parameter, and there is no '*' entry", networkInterface->getInterfaceName());
     return *port;
+}
+
+void Ieee8021adPolicy::setPort(const NetworkInterface *networkInterface, PortType type, const std::set<int>& vlanIds)
+{
+    Enter_Method("setPort");
+    auto interfaceName = networkInterface->getInterfaceName();
+    if (interfaceTable->getInterfaceById(networkInterface->getInterfaceId()) != networkInterface)
+        throw cRuntimeError("Interface '%s' is not in the interface table of this module", interfaceName);
+    Port port;
+    port.type = type;
+    port.vlanIds = vlanIds;
+    checkPort(interfaceName, port);
+    EV_INFO << "Setting port" << EV_FIELD(interfaceName) << EV_FIELD(port) << EV_ENDL;
+    ports[interfaceName] = port;
+}
+
+void Ieee8021adPolicy::removePort(const NetworkInterface *networkInterface)
+{
+    Enter_Method("removePort");
+    auto interfaceName = networkInterface->getInterfaceName();
+    EV_INFO << "Removing port" << EV_FIELD(interfaceName) << EV_ENDL;
+    ports.erase(interfaceName);
+}
+
+void Ieee8021adPolicy::receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details)
+{
+    Enter_Method("%s", cComponent::getSignalName(signal));
+    if (signal == interfaceDeletedSignal)
+        ports.erase(check_and_cast<NetworkInterface *>(object)->getInterfaceName());
+    else
+        throw cRuntimeError("Unknown signal");
 }
 
 void Ieee8021adPolicy::pushPacket(Packet *packet, const cGate *gate)
