@@ -1,0 +1,124 @@
+%description:
+
+Tests that the port of an Ieee8021adPolicy can be set during the run, with
+setPort(), and that the module forgets a port when its interface is deleted.
+The network and the traffic are those of lib/ieee8021ad-access-trunk.ini (see
+Ieee8021adPolicy_1), except that eth2 of bridge1, the port of b1, starts as an
+access port of VLAN 30, a VLAN without any other port.
+
+Until 0.5 s, bridge1 classifies what b1 sends into VLAN 30, so the first ARP
+request of b1 reaches no host. At 0.5 s, a test module makes eth2 an access
+port of VLAN 20 with setPort(). The ARP retry of b1 at 1 s gets through, and
+from then on b1 and b2 exchange their data: b2 gets all of it. The frame counts
+of the hosts equal those of VlanPolicyLayer_runtime_1, where the port has no
+VLAN policy until 0.5 s and gets the same one then. At 2.5 s, after the last
+frame, the test module deletes the interface eth2 with
+InterfaceTable::deleteInterface(), and the module holds no entry for eth2
+afterwards.
+
+%file: test.cc
+
+#include "inet/linklayer/vlan/Ieee8021adPolicy.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+
+using namespace inet;
+
+namespace Ieee8021adPolicy_runtime_1 {
+
+class TestIeee8021adPolicy : public Ieee8021adPolicy
+{
+  public:
+    bool hasEntry(const char *interfaceName) const { return ports.count(interfaceName) != 0; }
+};
+
+Define_Module(TestIeee8021adPolicy);
+
+// Sets the port of bridge1's eth2 at 0.5 s and deletes the interface at 2.5 s.
+class TestController : public cSimpleModule
+{
+  protected:
+    cModule *bridge = nullptr;
+    IInterfaceTable *interfaceTable = nullptr;
+
+  protected:
+    virtual void initialize() override
+    {
+        bridge = getModuleByPath(par("bridgeModule"));
+        interfaceTable = check_and_cast<IInterfaceTable *>(bridge->getSubmodule("interfaceTable"));
+        scheduleAt(0.5, new cMessage("set"));
+        scheduleAt(2.5, new cMessage("delete"));
+    }
+
+    virtual void handleMessage(cMessage *msg) override
+    {
+        auto policy = check_and_cast<TestIeee8021adPolicy *>(bridge->getModuleByPath(".bridging.vlanPolicy"));
+        auto networkInterface = interfaceTable->findInterfaceByName("eth2");
+        if (!strcmp(msg->getName(), "set"))
+            policy->setPort(networkInterface, Ieee8021adPolicy::PORT_TYPE_ACCESS, {20});
+        else {
+            interfaceTable->deleteInterface(networkInterface);
+            EV_INFO << "After deletion: entry for eth2 " << policy->hasEntry("eth2") << EV_ENDL;
+        }
+        delete msg;
+    }
+};
+
+Define_Module(TestController);
+
+} // namespace Ieee8021adPolicy_runtime_1
+
+%file: test.ned
+
+import inet.linklayer.vlan.Ieee8021adPolicy;
+import inet.test.moduletest.lib.VlanAccessTrunkTestNetwork;
+
+simple TestIeee8021adPolicy extends Ieee8021adPolicy
+{
+    @class(TestIeee8021adPolicy);
+}
+
+simple TestController
+{
+    parameters:
+        string bridgeModule;
+}
+
+network TestNetwork extends VlanAccessTrunkTestNetwork
+{
+    submodules:
+        controller: TestController {
+            bridgeModule = "^.bridge1";
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+sim-time-limit = 3s
+*.controller.cmdenv-log-level = info
+*.bridge1.bridging.vlanPolicy.typename = "TestIeee8021adPolicy"
+*.bridge1.bridging.vlanPolicy.ports = {"eth0" : {"type" : "access", "vid" : 10}, "eth1" : {"type" : "access", "vid" : 10}, "eth2" : {"type" : "access", "vid" : 30}, "eth3" : {"type" : "trunk", "vids" : [10, 20]}}
+include ../../lib/ieee8021ad-access-trunk.ini
+
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: stdout
+TestNetwork.bridge1.bridging.vlanPolicy: Setting port, interfaceName = eth2, port = access [20].
+%contains: stdout
+TestNetwork.controller: After deletion: entry for eth2 0
+%contains: results/General-#0.sca
+scalar TestNetwork.a1.eth[0].macLayer.fcsChecker incomingPackets:count 29
+%contains: results/General-#0.sca
+scalar TestNetwork.a2.eth[0].macLayer.fcsChecker incomingPackets:count 29
+%contains: results/General-#0.sca
+scalar TestNetwork.b1.eth[0].macLayer.fcsChecker incomingPackets:count 29
+%contains: results/General-#0.sca
+scalar TestNetwork.a3.eth[0].macLayer.fcsChecker incomingPackets:count 102
+%contains: results/General-#0.sca
+scalar TestNetwork.b2.eth[0].macLayer.fcsChecker incomingPackets:count 53
+%contains: results/General-#0.sca
+scalar TestNetwork.b2.app[0] packetReceived:sum(packetBytes) 65536
+%contains: results/General-#0.sca
+scalar TestNetwork.a3.app[0] packetReceived:sum(packetBytes) 131072

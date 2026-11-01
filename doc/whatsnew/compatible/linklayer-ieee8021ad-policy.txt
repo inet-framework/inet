@@ -5,4 +5,6 @@ Ieee8021adPolicy is a new VLAN policy for the vlanPolicy submodule of BridgingLa
   *.switch.bridging.vlanPolicy.typename = "Ieee8021adPolicy"
   *.switch.bridging.vlanPolicy.ports = {"eth0" : {"type" : "access", "vid" : 10}, "eth1" : {"type" : "trunk", "vids" : [10, 20]}}
 
+A module that creates network interfaces during the run, such as the port of a new session, sets the port with the C++ method setPort() and removes it with removePort(); the module also forgets the port of a deleted interface.
+
 VlanPolicyLayer stays for VLAN id translation, hosts, and other configurations that are not standard bridge ports.

@@ -41,6 +41,10 @@ import inet.queueing.base.PacketProcessorBase;
 //
 // `{"eth0" : {"type" : "access", "vid" : 10}, "eth1" : {"type" : "trunk", "vids" : [10, 20]}}`
 //
+// A port can also be set and removed during the run, with the C++ methods
+// setPort() and removePort(), for example by a module that creates network
+// interfaces.
+//
 // `access` and `trunk` require `vlanTagType = "c"`, `cnp` and `pnp` require
 // `vlanTagType = "s"`. The VLAN ids are from 1 to 4094.
 //

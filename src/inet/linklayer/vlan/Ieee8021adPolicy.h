@@ -19,7 +19,7 @@ namespace inet {
 
 using namespace inet::queueing;
 
-class INET_API Ieee8021adPolicy : public PacketProcessorBase, public virtual IPassivePacketSink, public TransparentProtocolRegistrationListener
+class INET_API Ieee8021adPolicy : public PacketProcessorBase, public virtual IPassivePacketSink, public TransparentProtocolRegistrationListener, public cListener
 {
   public:
     enum PortType {
@@ -66,7 +66,22 @@ class INET_API Ieee8021adPolicy : public PacketProcessorBase, public virtual IPa
 
     static bool isUntaggedPort(PortType type) { return type == PORT_TYPE_ACCESS || type == PORT_TYPE_CNP; }
 
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+
   public:
+    /**
+     * Replaces the port of the interface, which must be in the interface
+     * table of this module: its type and its VLAN ids, one for an access or
+     * cnp port, one or more for a trunk or pnp port.
+     */
+    void setPort(const NetworkInterface *networkInterface, PortType type, const std::set<int>& vlanIds);
+
+    /**
+     * Removes the port of the interface, so that the entry of "*" applies to
+     * it, or, without such an entry, a frame of the interface is an error.
+     */
+    void removePort(const NetworkInterface *networkInterface);
+
     virtual bool supportsPacketPushing(const cGate *gate) const override { return true; }
     virtual bool supportsPacketPulling(const cGate *gate) const override { return false; }
 
