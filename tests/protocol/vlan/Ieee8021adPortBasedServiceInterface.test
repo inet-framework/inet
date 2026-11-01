@@ -1,0 +1,173 @@
+%description:
+
+IEEE 802.1Q-2018 -- the Customer Network Ports and Provider Network Ports of S-VLAN bridges
+carry a customer's C-tagged frames in the customer's S-VLAN.
+
+Requirements: 15.3 (a port-based service interface: "customers select and identify different
+service instances by associating each with a different CNP. Frames transmitted to a CNP by a
+C-VLAN-aware customer system do not include an S-VID but can be priority-tagged with an
+S-TAG"), 6.9 (one bridge port uses one tag type: here the S-tag, so the C-tag is payload),
+6.9.1 b 4 and f with the S-tag (a CNP admits only frames without an S-tag or with an S
+priority tag, and classifies them into its PVID), 17.5.3.3.1 (a PNP works like a C-VLAN
+port, with the VID from the S-tag).
+
+The customer bridges cb1 and cb2 are C-VLAN bridges: eth0 of cb1 (h1) and eth1 of cb2 (h2)
+are access ports of C-VLAN 10, their uplinks are trunks of C-VLAN 10. The provider edge
+bridges peb1 and peb2 are S-VLAN bridges (vlanTagType = "s"): eth0 of peb1 (cb1), eth2 of
+peb1 (s1), eth3 of peb1 (s2) and eth1 of peb2 (cb2) are CNPs of S-VLAN 100, and the link
+between peb1 (eth1) and peb2 (eth0) is a PNP of S-VLAN 100. All bridges use Ieee8021adPolicy.
+s1 and s2 are customer systems with an 802.1Q layer for the S-tag: s1 sends S priority-tagged
+frames, s2 S-tagged frames of VLAN ID 100. The hosts use GlobalArp.
+
+h1 sends a UDP datagram to h2 at 0.1 s. It arrives at peb1 C-tagged with VLAN ID 10 and no
+S-tag (type 33024, 0x8100), crosses the PNP with an S-tag of VLAN ID 100 over the unchanged
+C-tag (type 34984, 0x88A8), and leaves peb2 toward cb2 with the C-tag only; h2 gets it. s1
+sends a datagram at 0.2 s: its S priority tag is admitted, and the datagram crosses the PNP
+with S-VLAN ID 100. s2 sends a datagram at 0.3 s: peb1 discards it, because a CNP does not
+admit an S-tag with a nonzero VLAN ID, and it never crosses the PNP.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("ieee8021ad_port_based_service_interface")
+        .meanwhile(never(on("peb1.eth[1]").signal("packetSentToLower").filterPacket("udp.destPort == 5002")
+                             .describe("the datagram of s2 on the PNP")
+                             .within(0.9)))
+        .once(on("peb1.eth[0]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5000 && EthernetMacHeader.typeOrLength == 33024 && ieee8021qctag.vid == 10")
+                  .describe("the datagram of h1 on the CNP, C-tagged with VLAN ID 10, without an S-tag")
+                  .within(0.15))
+        .once(on("peb1.eth[1]").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5000 && EthernetMacHeader.typeOrLength == 34984 && ieee8021qstag.vid == 100 && ieee8021qctag.vid == 10")
+                  .describe("the datagram of h1 on the PNP, with an S-tag of VLAN ID 100 over the C-tag of VLAN ID 10")
+                  .within(0.15))
+        .once(on("peb2.eth[1]").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5000 && EthernetMacHeader.typeOrLength == 33024 && ieee8021qctag.vid == 10")
+                  .describe("the datagram of h1 on the CNP of peb2, with the C-tag only")
+                  .within(0.15))
+        .once(on("h2.udp").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                  .describe("h2 gets the datagram of h1")
+                  .within(0.15))
+        .once(on("peb1.eth[2]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5001 && EthernetMacHeader.typeOrLength == 34984 && ieee8021qstag.vid == 0")
+                  .describe("the datagram of s1 on its CNP, with an S priority tag")
+                  .within(0.25))
+        .once(on("peb1.eth[1]").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5001 && ieee8021qstag.vid == 100")
+                  .describe("the datagram of s1 on the PNP, with an S-tag of VLAN ID 100")
+                  .within(0.25))
+        .once(on("peb1.eth[3]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5002 && ieee8021qstag.vid == 100")
+                  .describe("the datagram of s2 on its CNP, with an S-tag of VLAN ID 100")
+                  .within(0.35))
+        .once(on("peb1.bridging.vlanPolicy").signal("packetDropped")
+                  .describe("peb1 discards the S-tagged frame of s2 on the CNP")
+                  .within(0.35));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "ieee8021ad_port_based_service_interface compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// Two customer sites (cb1, cb2) joined by two provider edge bridges (peb1, peb2), and two
+// customer systems (s1, s2) on further CNPs of peb1.
+network PortBasedServiceInterfaceNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        h1: StandardHost { @display("p=100,200"); }
+        cb1: EthernetSwitch { @display("p=250,200"); }
+        peb1: EthernetSwitch { @display("p=400,200"); }
+        peb2: EthernetSwitch { @display("p=550,200"); }
+        cb2: EthernetSwitch { @display("p=700,200"); }
+        h2: StandardHost { @display("p=850,200"); }
+        s1: StandardHost { @display("p=350,350"); }
+        s2: StandardHost { @display("p=450,350"); }
+    connections:
+        h1.ethg++ <--> Eth100M <--> cb1.ethg++;
+        cb1.ethg++ <--> Eth100M <--> peb1.ethg++;
+        peb1.ethg++ <--> Eth100M <--> peb2.ethg++;
+        peb2.ethg++ <--> Eth100M <--> cb2.ethg++;
+        cb2.ethg++ <--> Eth100M <--> h2.ethg++;
+        s1.ethg++ <--> Eth100M <--> peb1.ethg++;
+        s2.ethg++ <--> Eth100M <--> peb1.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = PortBasedServiceInterfaceNet
+sim-time-limit = 1s
+seed-set = 0
+
+*.*.llc.typename = ""
+*.*.ethernet.typename = "EthernetLayer"
+*.*.eth[*].typename = "LayeredEthernetInterface"
+*.*.eth[*].bitrate = 100Mbps
+*.*.ipv4.arp.typename = "GlobalArp"
+
+*.cb*.ieee8021q.typename = "Ieee8021qProtocol"
+*.peb*.ieee8021q.typename = "Ieee8021qProtocol"
+*.cb*.bridging.typename = "BridgingLayer"
+*.peb*.bridging.typename = "BridgingLayer"
+*.cb*.bridging.vlanPolicy.typename = "Ieee8021adPolicy"
+*.peb*.bridging.vlanPolicy.typename = "Ieee8021adPolicy"
+*.cb1.bridging.vlanPolicy.ports = {"eth0" : {"type" : "access", "vid" : 10}, "eth1" : {"type" : "trunk", "vids" : [10]}}
+*.cb2.bridging.vlanPolicy.ports = {"eth0" : {"type" : "trunk", "vids" : [10]}, "eth1" : {"type" : "access", "vid" : 10}}
+
+# The provider edge bridges are S-VLAN bridges.
+*.peb*.**.vlanTagType = "s"
+*.peb1.bridging.vlanPolicy.ports = {"eth1" : {"type" : "pnp", "vids" : [100]}, "*" : {"type" : "cnp", "vid" : 100}}
+*.peb2.bridging.vlanPolicy.ports = {"eth0" : {"type" : "pnp", "vids" : [100]}, "eth1" : {"type" : "cnp", "vid" : 100}}
+
+# s1 and s2 tag every frame with an S-tag: s1 with an S priority tag, s2 with VLAN ID 100.
+*.s*.**.vlanTagType = "s"
+*.s*.ieee8021q.typename = "Ieee8021qProtocol"
+*.s*.bridging.typename = "BridgingLayer"
+*.s*.bridging.macTableModule = ""
+*.s*.bridging.directionReverser.typename = ""
+*.s*.bridging.interfaceRelay.typename = ""
+*.s*.bridging.vlanPolicy.typename = "VlanPolicyLayer"
+*.s1.bridging.vlanPolicy.outboundMapper.mappedVlanIds = {"eth0" : {"-1" : 0}}
+*.s1.bridging.vlanPolicy.outboundFilter.acceptedVlanIds = {"eth0" : [0]}
+*.s2.bridging.vlanPolicy.outboundMapper.mappedVlanIds = {"eth0" : {"-1" : 100}}
+*.s2.bridging.vlanPolicy.outboundFilter.acceptedVlanIds = {"eth0" : [100]}
+*.s*.bridging.vlanPolicy.inboundFilter.acceptedVlanIds = {"eth0" : [-1]}
+
+*.h1.numApps = 1
+*.h1.app[0].typename = "UdpBasicApp"
+*.h1.app[0].destAddresses = "h2"
+*.h1.app[0].destPort = 5000
+*.h1.app[0].startTime = 0.1s
+*.s1.numApps = 1
+*.s1.app[0].typename = "UdpBasicApp"
+*.s1.app[0].destAddresses = "h2"
+*.s1.app[0].destPort = 5001
+*.s1.app[0].startTime = 0.2s
+*.s2.numApps = 1
+*.s2.app[0].typename = "UdpBasicApp"
+*.s2.app[0].destAddresses = "h2"
+*.s2.app[0].destPort = 5002
+*.s2.app[0].startTime = 0.3s
+*.*.app[0].messageLength = 100B
+*.*.app[0].sendInterval = 10s
+*.h2.numApps = 1
+*.h2.app[0].typename = "UdpSink"
+*.h2.app[0].localPort = 5000
+
+%contains: stdout
+PROTOCOLTEST ieee8021ad_port_based_service_interface: PASS

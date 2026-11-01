@@ -1,0 +1,134 @@
+%description:
+
+IEEE 802.1Q-2018 -- a C-VLAN bridge forwards the frames of a VLAN only to the ports of that
+VLAN, sends them untagged on its access ports and C-tagged on its trunk.
+
+Requirements: 6.9.1 f (an untagged frame is classified into the PVID of its port), 8.6.4
+(a port that is not in the member set of the frame's VID is removed from the egress ports),
+8.8.2 (the untagged set of a VID: the ports that send its frames untagged). The bridges b1
+and b2 use Ieee8021adPolicy. On b1, eth0 (a1) and eth1 (a2) are access ports of VLAN 10,
+eth2 (c1) is an access port of VLAN 20, and eth3 is a trunk of VLANs 10 and 20 to b2. On b2,
+eth0 is the trunk, eth1 (a3) is an access port of VLAN 10, and eth2 (c2) one of VLAN 20.
+The hosts have no 802.1Q layer.
+
+a1 sends a UDP datagram to a3 at 0.1 s; its first frame is an ARP request, a broadcast. b1
+floods it to eth1 untagged and to the trunk with a C-tag of VLAN ID 10, and never to eth2,
+the port of VLAN 20; a3 gets the datagram. c2 sends a datagram to c1 at 0.2 s; it crosses the
+trunk with VLAN ID 20 and leaves eth2 of b1 untagged, and c1 gets it. An untagged frame has
+the type of its payload in the type field of its Ethernet header (2054 for ARP, 2048 for
+IPv4), a tagged frame has 33024 (0x8100) there.
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("ieee8021q_access_trunk_forwarding")
+        .meanwhile(never(on("b1.eth[2]").signal("packetSentToLower").filterPacket("arp.opcode == 1")
+                             .describe("an ARP request on the access port of VLAN 20 before c2 starts")
+                             .within(0.15)))
+        .unordered({
+            on("b1.eth[1]").signal("packetSentToLower")
+                .filterPacket("arp.opcode == 1 && EthernetMacHeader.typeOrLength == 2054")
+                .describe("the ARP request of a1, untagged, on the other access port of VLAN 10")
+                .within(0.15),
+            on("b1.eth[3]").signal("packetSentToLower")
+                .filterPacket("arp.opcode == 1 && EthernetMacHeader.typeOrLength == 33024 && ieee8021qctag.vid == 10")
+                .describe("the ARP request of a1 on the trunk, C-tagged with VLAN ID 10")
+                .within(0.15)
+        })
+        .once(on("a3.udp").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5000")
+                  .describe("a3 gets the datagram of a1")
+                  .within(0.2))
+        .once(on("b1.eth[3]").signal("packetReceivedFromLower")
+                  .filterPacket("udp.destPort == 5001 && ieee8021qctag.vid == 20")
+                  .describe("the datagram of c2 on the trunk, C-tagged with VLAN ID 20")
+                  .within(0.4))
+        .once(on("b1.eth[2]").signal("packetSentToLower")
+                  .filterPacket("udp.destPort == 5001 && EthernetMacHeader.typeOrLength == 2048")
+                  .describe("the datagram of c2, untagged, on the access port of VLAN 20")
+                  .within(0.4))
+        .once(on("c1.udp").signal("packetReceivedFromLower").filterPacket("udp.destPort == 5001")
+                  .describe("c1 gets the datagram of c2")
+                  .within(0.4));
+}
+
+%activity:
+// present only so opp_test compiles the %global above; this module is not in the network.
+EV << "ieee8021q_access_trunk_forwarding compiled\n";
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+// Two C-VLAN bridges joined by a trunk, with VLAN 10 (a1, a2, a3) and VLAN 20 (c1, c2).
+network AccessTrunkNet
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator { @display("p=100,50"); }
+        a1: StandardHost { @display("p=100,150"); }
+        a2: StandardHost { @display("p=100,250"); }
+        c1: StandardHost { @display("p=100,350"); }
+        b1: EthernetSwitch { @display("p=300,250"); }
+        b2: EthernetSwitch { @display("p=500,250"); }
+        a3: StandardHost { @display("p=700,200"); }
+        c2: StandardHost { @display("p=700,300"); }
+    connections:
+        a1.ethg++ <--> Eth100M <--> b1.ethg++;
+        a2.ethg++ <--> Eth100M <--> b1.ethg++;
+        c1.ethg++ <--> Eth100M <--> b1.ethg++;
+        b1.ethg++ <--> Eth100M <--> b2.ethg++;
+        a3.ethg++ <--> Eth100M <--> b2.ethg++;
+        c2.ethg++ <--> Eth100M <--> b2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = AccessTrunkNet
+sim-time-limit = 1s
+seed-set = 0
+
+*.*.llc.typename = ""
+*.*.ethernet.typename = "EthernetLayer"
+*.*.eth[*].typename = "LayeredEthernetInterface"
+*.*.eth[*].bitrate = 100Mbps
+
+*.b*.ieee8021q.typename = "Ieee8021qProtocol"
+*.b*.bridging.typename = "BridgingLayer"
+*.b*.bridging.vlanPolicy.typename = "Ieee8021adPolicy"
+*.b1.bridging.vlanPolicy.ports = {"eth0" : {"type" : "access", "vid" : 10}, "eth1" : {"type" : "access", "vid" : 10}, "eth2" : {"type" : "access", "vid" : 20}, "eth3" : {"type" : "trunk", "vids" : [10, 20]}}
+*.b2.bridging.vlanPolicy.ports = {"eth0" : {"type" : "trunk", "vids" : [10, 20]}, "eth1" : {"type" : "access", "vid" : 10}, "eth2" : {"type" : "access", "vid" : 20}}
+
+*.a1.numApps = 1
+*.a1.app[0].typename = "UdpBasicApp"
+*.a1.app[0].destAddresses = "a3"
+*.a1.app[0].destPort = 5000
+*.a1.app[0].messageLength = 100B
+*.a1.app[0].startTime = 0.1s
+*.a1.app[0].sendInterval = 10s
+*.a3.numApps = 1
+*.a3.app[0].typename = "UdpSink"
+*.a3.app[0].localPort = 5000
+
+*.c2.numApps = 1
+*.c2.app[0].typename = "UdpBasicApp"
+*.c2.app[0].destAddresses = "c1"
+*.c2.app[0].destPort = 5001
+*.c2.app[0].messageLength = 100B
+*.c2.app[0].startTime = 0.2s
+*.c2.app[0].sendInterval = 10s
+*.c1.numApps = 1
+*.c1.app[0].typename = "UdpSink"
+*.c1.app[0].localPort = 5001
+
+%contains: stdout
+PROTOCOLTEST ieee8021q_access_trunk_forwarding: PASS

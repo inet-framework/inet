@@ -32,6 +32,10 @@ import inet.queueing.contract.IPacketFlow;
 // In ~Ieee8021qLayer, as `policy`, it sits above the 802.1Q protocol and sees
 // only frames that are tagged or are about to be tagged.
 //
+// For the standard port types of a bridge (access and trunk ports, and the
+// Customer Network Ports and Provider Network Ports of IEEE 802.1ad), see
+// ~Ieee8021adPolicy, which is configured by one entry per port.
+//
 module VlanPolicyLayer like IProtocolLayer
 {
     parameters:

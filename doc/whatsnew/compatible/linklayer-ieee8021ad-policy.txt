@@ -1,0 +1,8 @@
+VLAN policy of a bridge configured by port type
+
+Ieee8021adPolicy is a new VLAN policy for the vlanPolicy submodule of BridgingLayer. Its ports parameter gives the IEEE 802.1Q port type of each port of the bridge and its VLAN ids: "access" and "trunk" for a C-VLAN bridge, and "cnp" (Customer Network Port with a port-based service interface) and "pnp" (Provider Network Port) for an S-VLAN bridge of an IEEE 802.1ad provider network. One line replaces the four maps per port of the filters and mappers of VlanPolicyLayer, and the module follows the rules of IEEE 802.1Q-2018 that those maps had to spell out: an access port also accepts priority-tagged frames, and a frame sent untagged leaves without a priority tag, so the bridges need no forwardPcp = false. Invalid ports, a port type that does not match vlanTagType, and a port of the relay without an entry are errors at initialization. For example:
+
+  *.switch.bridging.vlanPolicy.typename = "Ieee8021adPolicy"
+  *.switch.bridging.vlanPolicy.ports = {"eth0" : {"type" : "access", "vid" : 10}, "eth1" : {"type" : "trunk", "vids" : [10, 20]}}
+
+VlanPolicyLayer stays for VLAN id translation, hosts, and other configurations that are not standard bridge ports.
