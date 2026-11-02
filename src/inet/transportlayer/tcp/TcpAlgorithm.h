@@ -106,6 +106,8 @@ class INET_API TcpAlgorithm : public SimpleModule
         if (maxPersistTimeout <= SIMTIME_ZERO)
             throw cRuntimeError("maxPersistTimeout must be more than 0, but it is %s", maxPersistTimeout.str().c_str());
         delayedAckTimeout = tcpMain->par("delayedAckTimeout");
+        if (delayedAckTimeout < SIMTIME_ZERO)
+            throw cRuntimeError("delayedAckTimeout must be 0 or more, but it is %s", delayedAckTimeout.str().c_str());
         sendDataWithFirstAck = tcpMain->par("sendDataWithFirstAck");
     }
 

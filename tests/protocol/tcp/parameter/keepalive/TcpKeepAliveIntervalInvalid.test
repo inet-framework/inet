@@ -1,0 +1,35 @@
+%description:
+
+Tcp.keepAliveInterval:invalid -- a negative value stops the run with an error at the open.
+
+The claim (Tcp.ned): "the time between two keepalive probes (Linux tcp_keepalive_intvl); 0 or
+more".
+
+The classes: linux (75 s, the default), other (another value) and invalid (a negative value).
+The code: TcpAlgorithmBase::initializeAlgorithm() reads the value at the open of each connection
+and stops the run for a negative value, which would else reach the scheduler, also when
+keepalive is off. This test separates "invalid" from the other classes.
+
+Host under test: host1, with the value -1s; host1 opens a connection to host2 at 0.1 s. Observation:
+level 0, the run stops at the open of the connection with the error of the check.
+
+%# parameter: Tcp.keepAliveInterval
+%# class: invalid
+%# value: -1s
+%# key: *.host1.tcp.keepAliveInterval
+%# expected-result: PASS
+
+%activity:
+EV << "TcpKeepAliveIntervalInvalid compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.keepAliveInterval = -1s    # the parameter under test
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%exitcode: 1
+
+%contains-regex: stderr
+keepAliveInterval must be 0 or more, but it is -1

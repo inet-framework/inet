@@ -106,6 +106,10 @@ void TcpAlgorithmBase::initializeAlgorithm()
     state->keepalive_enabled = conn->getTcpMain()->par("keepAliveEnabled");
     state->keepalive_idle_time = conn->getTcpMain()->par("keepAliveIdleTime");
     state->keepalive_interval = conn->getTcpMain()->par("keepAliveInterval");
+    if (state->keepalive_idle_time < SIMTIME_ZERO)
+        throw cRuntimeError("keepAliveIdleTime must be 0 or more, but it is %s", state->keepalive_idle_time.str().c_str());
+    if (state->keepalive_interval < SIMTIME_ZERO)
+        throw cRuntimeError("keepAliveInterval must be 0 or more, but it is %s", state->keepalive_interval.str().c_str());
     state->keepalive_max_probes = conn->getTcpMain()->par("keepAliveProbeCount");
 }
 

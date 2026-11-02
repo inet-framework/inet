@@ -446,7 +446,7 @@ simple Tcp extends SimpleModule like ITcp
 
         // acknowledgments
         bool delayedAcksEnabled = default(true); // Delayed ACK algorithm (RFC 1122) enabled/disabled
-        double delayedAckTimeout @unit(s) = default(200ms); // with delayedAcksEnabled, the longest delay of an ACK (RFC 9293 MUST-40: less than 0.5 s)
+        double delayedAckTimeout @unit(s) = default(200ms); // with delayedAcksEnabled, the longest delay of an ACK (RFC 9293 MUST-40: less than 0.5 s); 0 or more, 0s: no delay
         int delayedAckFrameCount = default(2); // with delayedAcksEnabled, the ACK goes at once when this number of full-sized segments waits for it, or when the unacknowledged data reach this number times RMSS, the MSS that this host announced (RFC 9293 SHLD-19: an ACK for at least each second full-sized segment or 2*RMSS bytes of new data); at least 1
         bool dsackEnabled = default(this.sackSupport); // report duplicate segments by D-SACK blocks (RFC 2883), when SACK is in use
         // Linux behaviors (no RFC)
@@ -510,8 +510,8 @@ simple Tcp extends SimpleModule like ITcp
 
         // keepalive
         bool keepAliveEnabled = default(false); // keepalive (RFC 9293 section 3.8.4): after keepAliveIdleTime without a received segment and without data in flight, send a probe without data (SEG.SEQ = SND.UNA - 1), again each keepAliveInterval, and abort the connection after keepAliveProbeCount probes without an answer; off by default (MUST-25); TcpSocket::setKeepAlive() turns it on or off for one connection (MUST-24)
-        double keepAliveIdleTime @unit(s) = default(7200s); // the idle time before the first keepalive probe (RFC 9293 MUST-28: at least two hours; Linux tcp_keepalive_time)
-        double keepAliveInterval @unit(s) = default(75s); // the time between two keepalive probes (Linux tcp_keepalive_intvl)
+        double keepAliveIdleTime @unit(s) = default(7200s); // the idle time before the first keepalive probe (RFC 9293 MUST-28: at least two hours; Linux tcp_keepalive_time); 0 or more
+        double keepAliveInterval @unit(s) = default(75s); // the time between two keepalive probes (Linux tcp_keepalive_intvl); 0 or more
         int keepAliveProbeCount = default(9); // the keepalive probes without an answer, after which the connection aborts (Linux tcp_keepalive_probes; RFC 9293 MUST-29: one probe without an answer is not a dead connection)
 
         // TCP Fast Open
