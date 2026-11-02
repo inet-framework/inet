@@ -137,6 +137,9 @@ html_theme_options = {
 }
 if not cfg.fetch_fonts:
     html_theme_options['font'] = False
+# A reader of the showcases and tutorials sees which items have pages below them, and can expand them in place.
+if cfg.mode == 'shared':
+    html_theme_options['globaltoc_collapse'] = False
 
 if cfg.mode in ('version', 'shared'):
     rst_prolog = cfg.read_prolog()
