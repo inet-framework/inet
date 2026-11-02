@@ -1,0 +1,75 @@
+%description:
+Tests that a <lan> element with interface members joins interfaces that no
+wire connects with the LAN behind a bridge port (Ipv4NetworkConfigurator).
+
+The members of the declared LAN are the port of the bridge inside rb, behind
+which hostA is; the wireless interface of mobile[0]; the eth0 interface of a
+switch, behind which hostD is, and hostE on the switch's other port; and
+hostF's eth0, wired directly to hostG. mobile[1] is on the same radio medium as
+mobile[0], but it is not a member. The bridge port member selects all hosts:
+only rb has a module at bridge.interfaceTable, and the other hosts are not
+affected.
+
+hostA, mobile[0], hostD, hostE, hostF and hostG must be on one link: a wired
+member brings in the LAN behind its wire, and a member of a switch brings in
+the LAN of the switch. mobile[1] must be on a link of its own: a wireless
+member is not on the link of its wireless network. The dumped configuration
+must contain the members, so that it configures the same links when it is
+read back.
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.test.moduletest.lib.DeclaredLanInterfacesTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+cmdenv-express-mode = false
+record-vector-results = false
+*.configurator.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+*.configurator.dumpAddresses = true
+*.configurator.dumpConfig = "config.xml"
+*.configurator.config = xml("<config>\
+  <lan id='lan'>\
+    <interface interfaceTableModule='bridge.interfaceTable'/>\
+    <interface hosts='mobile[0]' names='wlan0'/>\
+    <interface hosts='switch' names='eth0'/>\
+    <interface hosts='hostF' names='eth0'/>\
+  </lan>\
+  <interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>\
+</config>")
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 1000m
+**.constraintAreaMaxY = 1000m
+**.constraintAreaMaxZ = 0m
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Printing addresses of 2 links
+Link 0
+    hostA / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.1/29.*\}
+    mobile\[0\] / wlan0 ID:\d+ MTU:2304 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.2/29.*\}
+    hostD / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.3/29.*\}
+    hostE / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.4/29.*\}
+    hostF / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.5/29.*\}
+    hostG / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.6/29.*\}
+Link 1
+    mobile\[1\] / wlan0 ID:\d+ MTU:2304 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.9/30.*\}
+%#--------------------------------------------------------------------------------------------------------------
+%contains: config.xml
+   <wireless interfaces="DeclaredLanInterfacesTestNetwork.mobile[1]%wlan0"/>
+   <lan id="lan">
+      <interface hosts="DeclaredLanInterfacesTestNetwork.mobile[0]" names="wlan0"/>
+      <interface hosts="DeclaredLanInterfacesTestNetwork.switch" names="eth0"/>
+      <interface hosts="DeclaredLanInterfacesTestNetwork.hostF" names="eth0"/>
+      <interface hosts="DeclaredLanInterfacesTestNetwork.rb" names="bridgePort0" interfaceTableModule="bridge.interfaceTable"/>
+   </lan>
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

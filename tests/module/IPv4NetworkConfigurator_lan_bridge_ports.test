@@ -1,0 +1,82 @@
+%description:
+Tests that a <lan> element with bridge port members joins the LANs behind the
+ports of a bridge inside a router-and-bridge node into one link
+(Ipv4NetworkConfigurator).
+
+rb routes on its eth[] interfaces and bridges its bridgeg[] gates through a
+bridge inside the node, whose interface table is its own: the bridge's ports
+are not interfaces of rb's network layer. router, hostA and hostB are on the
+bridged gates; rb.eth0 connects to router through transit, and rb.eth1 to
+hostC. The configuration declares the ports of the bridge a LAN:
+
+  <lan>
+    <interface hosts='rb' interfaceTableModule='bridge.interfaceTable'/>
+  </lan>
+
+router.eth0, hostA and hostB must be on one link and get addresses in one
+subnet, and rb gets no address on it. hostA and hostB take router as their
+default gateway. Routes must not cross rb between its bridged gates and its
+routed interfaces: router must reach hostC through transit, although the path
+through the bridge in rb is shorter. hostA pings hostB across the bridge, and
+hostC across the bridge, router, transit and rb's routed interfaces; the second
+ping fails if router routes hostC's subnet through its bridged-LAN interface.
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.test.moduletest.lib.DeclaredLanTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 4s
+cmdenv-express-mode = false
+record-vector-results = false
+*.configurator.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+*.configurator.dumpAddresses = true
+*.configurator.config = xml("<config>\
+  <lan>\
+    <interface hosts='rb' interfaceTableModule='bridge.interfaceTable'/>\
+  </lan>\
+  <interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>\
+</config>")
+
+*.hostA.numApps = 2
+*.hostA.app[*].typename = "PingApp"
+*.hostA.app[*].printPing = true
+*.hostA.app[*].count = 3
+*.hostA.app[*].startTime = 1s
+*.hostA.app[0].destAddr = "hostB"
+*.hostA.app[1].destAddr = "hostC"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Link 0
+    router / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.1/29.*\}
+    hostA / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.2/29.*\}
+    hostB / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.3/29.*\}
+Link 1
+    router / eth1 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.9/30.*\}
+    transit / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.10/30.*\}
+Link 2
+    transit / eth1 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.13/30.*\}
+    rb / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.14/30.*\}
+Link 3
+    rb / eth1 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.17/30.*\}
+    hostC / eth0 ID:\d+ MTU:1500 UP BROADCAST CARRIER MULTICAST macAddr:[0-9A-F-]+ Ipv4:\{inet_addr:10.0.0.18/30.*\}
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+--------------------------------------------------------
+	DeclaredLanTestNetwork.hostA.app[0]
+--------------------------------------------------------
+sent: 3   received: 3   loss rate (%): 0
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+--------------------------------------------------------
+	DeclaredLanTestNetwork.hostA.app[1]
+--------------------------------------------------------
+sent: 3   received: 3   loss rate (%): 0
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
