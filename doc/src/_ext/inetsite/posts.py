@@ -9,6 +9,7 @@ import re
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
+from sphinx.transforms.post_transforms import SphinxPostTransform
 
 STYLES = ('titles', 'excerpts', 'full')
 MONTHS = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
@@ -101,6 +102,14 @@ def post_header(builder, fromdocname, docname, post, short_date):
     return ref, date
 
 
+class RenderPostLists(SphinxPostTransform):
+    # Runs before ReferencesResolver, so that the references in the copied post bodies get resolved, too.
+    default_priority = 5
+
+    def run(self):
+        render_lists(self.app, self.document, self.env.docname)
+
+
 def render_lists(app, doctree, fromdocname):
     posts = getattr(app.env, 'inet_posts', {})
     for node in list(doctree.findall(postlist)):
@@ -138,4 +147,4 @@ def setup(app):
     app.connect('env-purge-doc', purge_post)
     app.connect('env-merge-info', merge_posts)
     app.connect('env-get-outdated', outdated_lists)
-    app.connect('doctree-resolved', render_lists)
+    app.add_post_transform(RenderPostLists)
