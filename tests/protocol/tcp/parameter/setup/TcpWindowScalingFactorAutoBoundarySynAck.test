@@ -1,0 +1,61 @@
+%description:
+
+Tcp.windowScalingFactor:auto-boundary-synack -- the SYN-ACK of a passive opener one byte above the largest window of a shift count announces the next shift count.
+
+The claim (Tcp.ned): "-1 for automatic selection: the smallest shift count that represents
+the largest window that the connection can offer, advertisedWindow [...]".
+
+The classes: auto (-1, the default), explicit (0 to 14), invalid (below -1 or above 14),
+too-small (a factor that cannot represent advertisedWindow). The code:
+TcpConnection::configureStateVariables() checks the value, and the options of the SYN select
+the factor. This test separates "auto" from "explicit".
+
+The facet auto-boundary: the largest window of the shift count 1 is 65535 << 1 = 131070 bytes,
+so a window of 131071 bytes needs the shift count 2. A selection that shifts the window down
+with truncation gives 1 (131071 >> 1 = 65535), and the connection cannot offer its last byte.
+The facet auto-boundary-synack checks the passive opener, which selects its shift count when
+it answers the SYN.
+
+Host under test: host2, which listens at the port 1000, with advertisedWindow = 131071 (a
+precondition); host1 opens the connection with the defaults. Observation: level 1, the Window
+Scale option of the SYN-ACK of host2 has the shift count 2.
+
+%# parameter: Tcp.windowScalingFactor
+%# class: auto-boundary-synack
+%# value: -1
+%# key: *.host2.tcp.windowScalingFactor
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpMutations.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpWindowScalingFactorAutoBoundarySynAck")
+        .once(on("host2.tcp").signal("packetSentToLower")
+                  .filterPacket("tcp.synBit == true && tcp.ackBit == true")
+                  .first()
+                  .assertEvent([](const MatchContext& context) { return tcpWindowScaleOptionOf(context.event.packet) == 2; })
+                  .describe("the SYN-ACK of host2, with the shift count 2")
+                  .within(0.5));
+}
+
+%activity:
+EV << "TcpWindowScalingFactorAutoBoundarySynAck compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host2.tcp.windowScalingFactor = -1    # the parameter under test
+*.host2.tcp.advertisedWindow = 131071
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpWindowScalingFactorAutoBoundarySynAck: PASS

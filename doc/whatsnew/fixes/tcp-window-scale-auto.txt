@@ -1,0 +1,3 @@
+The automatic window scale factor of TCP represents the whole window
+
+With windowScalingFactor = -1, Tcp selected a shift count one too small for the windows just above the largest window of a shift count s: the SYN of an active opener for the 2^s bytes above it (for example 65536, 131071, 131072, and 262141 to 262144 bytes), and the SYN-ACK of a passive opener for the same windows except the last one of each band. The connection then could not offer its whole advertisedWindow. Tcp now selects the smallest shift count whose largest window is at least the window, as the NED comment of windowScalingFactor says. A simulation with such a window shows other window fields from the SYN on.

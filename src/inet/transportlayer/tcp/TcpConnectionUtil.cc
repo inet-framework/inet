@@ -3192,15 +3192,13 @@ TcpHeader TcpConnection::writeHeaderOptions(const Ptr<TcpHeader>& tcpHeader)
                 // or with windowAutoTuning the window that auto-tuning can reach: the bound
                 // of the receive buffer, unless SO_RCVBUF locks the buffer (Linux
                 // tcp_select_initial_window() represents tcp_rmem[2])
-                ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + std::max(state->maxRcvBuffer, state->window_clamp) - state->rcv_nxt;
+                uint64_t largestWindow = std::max(state->maxRcvBuffer, state->window_clamp);
                 if (state->rcv_ssthresh > 0 && !state->rcvbufLocked)
-                    scaled_rcv_wnd = std::max<ulong>(scaled_rcv_wnd, state->rcvBufferMax);
+                    largestWindow = std::max<uint64_t>(largestWindow, state->rcvBufferMax);
+                // the smallest shift count whose largest window represents it
                 state->rcv_wnd_scale = 0;
-
-                while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) { // RFC 7323 section 2.3: "the shift count MUST be limited to 14"
-                    scaled_rcv_wnd = scaled_rcv_wnd >> 1;
+                while (((uint64_t)TCP_MAX_WIN << state->rcv_wnd_scale) < largestWindow && state->rcv_wnd_scale < 14) // RFC 7323 section 2.3: "the shift count MUST be limited to 14"
                     state->rcv_wnd_scale++;
-                }
             }
 
             TcpOptionWindowScale *option = new TcpOptionWindowScale();
