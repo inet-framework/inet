@@ -36,10 +36,11 @@ The visualizer has several important features:
    Its starting point is the node, and its direction coincides with the
    movement's direction. The arrow's length is proportional to the
    node's speed.
--  **Orientation Arc**: Node orientation is represented by an arc whose
-   size is specified by the :par:`orientationPieSize` parameter. This value
-   is the relative size of the arc compared to a full circle. The arc's
-   default value is 0.2, i.e. a fifth of a circle.
+-  **Orientation Cone**: Node orientation is represented by a 3D cone
+   (its base ellipse and two side lines) whose opening angle is specified
+   by the :par:`orientationPieSize` parameter. This value is the opening
+   angle relative to a full circle. The default value is 0.2, i.e. a fifth
+   of a circle.
 
 These features are disabled by default; they can be enabled by setting
 the visualizer's :par:`displayMovementTrails`, :par:`displayVelocities` and
@@ -64,7 +65,7 @@ settings of mobility visualization are used.
 
 It is difficult to track the nodes because they are moving randomly and
 quite fast. In our next experiment, we enable movement trails, velocity
-vectors, and orientation arcs. We expect that nodes can be tracked
+vectors, and orientation cones. We expect that nodes can be tracked
 easier.
 
 .. literalinclude:: ../omnetpp.ini
