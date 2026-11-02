@@ -85,8 +85,7 @@ todo_include_todos = False
 html_theme = 'sphinx_immaterial'
 omnetpp_homepage = cfg.site_url('index')
 omnetpp_nav_nowrap = ['/api/', '/python-api/']
-# The sections that are short flat lists are navigated by the menus of their tabs alone.
-omnetpp_nav_dropdown = ['Download', 'Development', 'Contributing', 'People']
+inet_nav_blank = ['Download']
 html_theme_options = {
     'icon': {
         'repo': 'fontawesome/brands/github',

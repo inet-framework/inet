@@ -258,6 +258,13 @@ video {
   color: var(--inet-heading-color);
 }
 
+/* inet_nav_blank (_ext/inetsite/nav.py). On narrow screens the sidebar is the drawer of the whole navigation. */
+@media screen and (min-width: 76.25em) {
+  .inet-nav-blank ~ .md-sidebar--primary .md-sidebar__scrollwrap {
+    visibility: hidden;
+  }
+}
+
 /* The strip is the bottom border of the tab bar, which stays below the header also while the tab bar is away
    (omnetpp_immaterial puts it away when the reader scrolls down, and casts the shadow of the header from it). Narrow
    screens have no tab bar: there the strip is under the header, and casts its shadow. */

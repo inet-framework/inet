@@ -5,6 +5,7 @@ documentation, versioned or shared) or `url:<url>`. Each build turns the targets
 references and the others into absolute links, so that every build shows the same navigation.
 """
 
+import markupsafe
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.statemachine import StringList
@@ -100,5 +101,14 @@ class Navigation(Directive):
         return container.children
 
 
+def blank_navigation(app, pagename, templatename, context, doctree):
+    """The pages of the tabs named by inet_nav_blank keep the column of the navigation sidebar, but show nothing in
+    it, e.g. a tab of a single page, whose navigation would be the name of that page alone."""
+    tab = next((entry for entry in context.get('nav', []) if entry.active), None)
+    context['inet_nav_blank'] = tab is not None and markupsafe.Markup(tab.title).striptags() in app.config.inet_nav_blank
+
+
 def setup(app):
+    app.add_config_value('inet_nav_blank', [], 'html')
     app.add_directive('inet-nav', Navigation)
+    app.connect('html-page-context', blank_navigation)

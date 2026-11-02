@@ -4,6 +4,10 @@
   {% if pagename == "404" %}<base href="{{ inet_site_path }}">{% endif %}
   {{ super() }}
 {% endblock %}
+{% block site_nav %}
+  {% if inet_nav_blank %}<div class="inet-nav-blank" hidden></div>{% endif %}
+  {{ super() }}
+{% endblock %}
 {# The hero spans the whole width under the tabs, which the page content cannot. #}
 {% block tabs %}
   {{ super() }}
