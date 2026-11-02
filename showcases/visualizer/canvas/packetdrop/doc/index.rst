@@ -71,7 +71,7 @@ Queue overflow
 
 In this section, we present an example demonstrating packet drops due
 to queue overflow. This simulation can be run by choosing the
-``QueueFull`` configuration from the ini file. The network contains a
+``QueueOverflow`` configuration from the ini file. The network contains a
 bottleneck link where packets will be dropped due to an overflowing
 queue:
 
