@@ -44,8 +44,10 @@ import inet.applications.contract.IApp;
 //
 // <b>Closing the connection</b>
 //
-// The application will issue a TCP CLOSE at time `tClose`. If tClose=-1, no
-// CLOSE will be issued.
+// The application will issue a TCP CLOSE at time `tClose`, but not before its
+// last SEND: with a time before the last SEND, -1 for example, the CLOSE follows
+// the last SEND at once. To keep the connection open, set a time after the end of
+// the simulation.
 //
 // <b>Reception rate limiting</b>
 //
