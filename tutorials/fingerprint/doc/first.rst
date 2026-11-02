@@ -183,7 +183,7 @@ Run the fingerprint tests from the command line. Make sure to run ``. setenv`` i
    $ cd ~/workspace/inet/tutorials/fingerprint
 
 The ``opp_run_fingerprint_tests`` command runs the simulations of the tutorial.
-Always give the project and the working directory filter. Use ``tplx`` as the ingredients:
+Always give the working directory filter. Use ``tplx`` as the ingredients:
 
 .. code-block:: bash
 
