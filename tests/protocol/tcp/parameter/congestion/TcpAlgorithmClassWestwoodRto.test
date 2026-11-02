@@ -1,0 +1,99 @@
+%description:
+
+Tcp.tcpAlgorithmClass:westwood-rto -- at a timeout, Westwood sets the threshold from its bandwidth estimate.
+
+The claim (Tcp.ned): "the NED type of the algorithm of each connection"; TcpWestwood sets the
+threshold from its estimate of the bandwidth, also at a timeout.
+
+The class westwood-rto: TcpWestwood::processRexmitTimer() adapts the reduction factor w_a (one
+more in slow start, at most 4; 1 in congestion avoidance) and sets the slow-start threshold
+to the bandwidth estimate times the smallest RTT divided by w_a
+(TcpWestwood::recalculateSlowStartThreshold()); then the window is one segment. This test
+separates TcpWestwood from the other algorithms, which have no bandwidth estimate: the
+classic ones set the threshold to half the flight at a timeout.
+
+Host under test: host1, with TcpWestwood, without SACK and without TLP (preconditions), which
+sends 100000 bytes; the round trip is 40 ms, and the tap drops the last data segment the first
+time, so only the timer can send it again. Observation: level 3, the threshold that host1
+signals at the timeout is the estimate times the smallest RTT divided by w_a, read from the
+state of the connection; no signal carries the estimate. The smallest RTT is a real sample,
+not the initial value SIMTIME_MAX.
+
+%# parameter: Tcp.tcpAlgorithmClass
+%# class: westwood-rto
+%# value: "TcpWestwood"
+%# key: *.host1.tcp.tcpAlgorithmClass
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "inet/transportlayer/tcp/TcpConnection.h"
+#include "inet/transportlayer/tcp/flavours/TcpWestwoodState_m.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+// The state of the Westwood connection of host1, or nullptr for another algorithm.
+static const tcp::TcpWestwoodStateVariables *westwoodState()
+{
+    cModule *tcpModule = getSimulation()->getSystemModule()->getModuleByPath("host1.tcp");
+    for (cModule::SubmoduleIterator it(tcpModule); !it.end(); ++it)
+        if (auto connection = dynamic_cast<tcp::TcpConnection *>(*it))
+            return dynamic_cast<const tcp::TcpWestwoodStateVariables *>(connection->getState());
+    return nullptr;
+}
+
+// The threshold is the estimate times the smallest RTT divided by w_a, from a real RTT sample.
+static bool thresholdFromEstimate(const MatchContext& context)
+{
+    auto state = westwoodState();
+    if (state == nullptr || state->w_RTTmin == SIMTIME_MAX)
+        return false;
+    double expected = state->w_bwe * SIMTIME_DBL(state->w_RTTmin) / state->w_a;
+    return std::fabs(context.event.value - std::floor(expected)) < 1;
+}
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpAlgorithmClassWestwoodRto")
+        .intercept(tap("tap").from("host1").filterPacket("tcp.sequenceNo == {isn} + 1 + 69 * 1448 && ipv4.totalLengthField > 100B").nth(1).drop()
+                     .describe("the last data segment of host1, the first time"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 69 * 1448 && pk.dataLength > tcp.headerLength")
+             .describe("the last data segment of host1")
+             .within(2.0))
+        .once(on("host1.tcp").signal("ssthresh")
+                  .filterValueAtMost(1e8)
+                  .first()
+                  .assertEvent(thresholdFromEstimate)
+                  .describe("the threshold at the timeout, from the bandwidth estimate")
+                  .within(3.0))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 + 69 * 1448 && pk.dataLength > tcp.headerLength")
+             .describe("the retransmission of the last segment by the timer")
+             .within(0.01));
+}
+
+%activity:
+EV << "TcpAlgorithmClassWestwoodRto compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.tcpAlgorithmClass = "TcpWestwood"    # the parameter under test
+*.linkDelay = 10ms
+*.host1.app[0].sendBytes = 100000B
+*.host1.tcp.sackSupport = false
+*.host1.tcp.tlpEnabled = false
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpAlgorithmClassWestwoodRto: PASS

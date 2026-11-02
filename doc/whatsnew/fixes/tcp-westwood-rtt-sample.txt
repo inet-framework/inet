@@ -1,0 +1,3 @@
+TcpWestwood sets its threshold from its bandwidth estimate
+
+TcpWestwood cleared its list of transmit times before it looked up the acknowledged segment in it, so it never took an RTT sample and never updated its bandwidth estimate. At a fast retransmission the slow-start threshold kept its initial value, and the window became 4294967295 and then wrapped to 0. TcpWestwood now takes a sample from each ACK of new data, and it sets the threshold after a loss or a timeout from its estimate, as Westwood does. A simulation with TcpWestwood gives other results.

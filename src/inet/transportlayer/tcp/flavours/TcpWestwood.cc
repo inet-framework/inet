@@ -108,7 +108,7 @@ void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
 {
     TcpAlgorithmBase::receivedAckForUnackedData(firstSeqAcked);
 
-    state->sentInfo.clearTo(state->snd_una);
+    // the first acknowledged segment gives the RTT sample, so the list is cleared after it
     const TcpSegmentTransmitInfoList::Item *found = state->sentInfo.get(firstSeqAcked);
 
     if (found != nullptr) {
@@ -133,6 +133,7 @@ void TcpWestwood::receivedAckForUnackedData(uint32_t firstSeqAcked)
 
         recalculateBWE(cumul_ack);
     } // Closes if w_sendtime != nullptr
+    state->sentInfo.clearTo(state->snd_una);
 
     // Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
