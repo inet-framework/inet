@@ -71,7 +71,7 @@ routing tables with the :par:`displayRoutingTables` parameter:
 
 .. code-block:: none
 
-   *.visualizer.displayRoutingTables = true
+   *.visualizer.routingTableVisualizer.displayRoutingTables = true
 
 All other parameters of the visualizer are left on default.
 
@@ -193,8 +193,8 @@ Visualizing changing routing tables
 
 The examples so far have had static routes, but in many scenarios,
 routing tables change dynamically. In the following example simulation,
-the routing tables are changed by AODV (Advanced On-Demand Vector
-Routing Protocol). The simulation can be run by choosing the ``Dynamic``
+the routing tables are changed by AODV (Ad hoc On-Demand Distance
+Vector routing protocol). The simulation can be run by choosing the ``Dynamic``
 configuration from the ini file.
 
 The network contains a series of :ned:`AodvRouter`'s. These are mobile hosts
