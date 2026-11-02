@@ -1,0 +1,82 @@
+%description:
+
+TcpSpoof.isSYN:true-no-tcp -- the SYN-ACK comes back as Protocol Unreachable, and the listener closes the forked connection.
+
+The claim (TcpSpoof.ned): "Sends fabricated TCP packets. ... Compatible with both IPv4
+(~Ipv4) and IPv6 (~Ipv6)." TcpSpoof::sendSpoofPacket() sends one segment at the time t: a
+header of 20 bytes without options and data, with the window 16384, no ACK, and the SYN bit
+of isSYN.
+
+The claim (TcpSpoof.ned): "Whether to set the SYN bit on the packet".
+
+The classes: true (the default: the segment is a SYN) and false (the segment has no
+control bit at all). The code: TcpSpoof::sendSpoofPacket() sets the SYN bit from the value,
+and no other bit. The facet true-no-tcp: the node of the spoof has no TCP, so its IP answers the SYN-ACK of a
+listener with an ICMP Destination Unreachable, Protocol Unreachable (3/2), which is a hard
+error (RFC 9293 section 3.9.2.2). The listener of host2 forks a connection for the SYN, and
+that connection closes at the error. Its application has no socket for the connection before
+it accepts it, so it gets no indication (RFC 9293 section 3.10.7.3: "The user need not be
+informed"). This test separates "true" from "false", where the listener sends no SYN-ACK.
+
+Node under test: host1; host1 has TcpSpoof in place of its TCP and no application; host2
+listens at the port 1000 (TcpEchoApp). The spoof sends one SYN at 1 s from the port 5000 to
+host2:1000 with the sequence number 12345. Observation: level 1, host1 answers the SYN-ACK of
+host2 with the ICMP error, and host2 sends no segment in the next 3 s, in which its timer
+would send the SYN-ACK again; the run ends without an error.
+
+%# parameter: TcpSpoof.isSYN
+%# class: true-no-tcp
+%# value: true
+%# key: *.host1.tcp.isSYN
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpSpoofIsSYNTrueNoTcp")
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("tcp.srcPort == 5000 && tcp.synBit == true")
+             .describe("the SYN of the spoof")
+             .within(1.1))
+        .once(on("host2.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == true && tcp.ackNo == 12346")
+             .describe("the SYN-ACK of host2")
+             .within(0.1))
+        .once(on("host1.eth[0].mac").signal("packetSentToLower")
+             .filterPacket("icmpv4.type == 3 && icmpv4.code == 2")
+             .describe("the Protocol Unreachable of host1")
+             .within(0.1))
+        .never(on("host2.tcp").signal("packetSentToLower")
+              .filterPacket("tcp.srcPort == 1000")
+              .describe("a segment of host2 after the error")
+              .within(3.0));
+}
+
+%activity:
+EV << "TcpSpoofIsSYNTrueNoTcp compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.isSYN = true    # the parameter under test
+*.host1.tcp.typename = "TcpSpoof"
+*.host1.numApps = 0
+*.host1.tcp.srcAddress = ""
+*.host1.tcp.destAddress = "host2"
+*.host1.tcp.srcPort = 5000
+*.host1.tcp.destPort = 1000
+*.host1.tcp.seqNo = 12345
+*.host1.tcp.isSYN = true
+*.host1.tcp.t = 1s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpSpoofIsSYNTrueNoTcp: PASS

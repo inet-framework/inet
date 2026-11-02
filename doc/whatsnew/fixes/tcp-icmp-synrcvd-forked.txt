@@ -1,0 +1,3 @@
+A hard ICMP error in SYN_RCVD informs only an application that has the connection
+
+When a hard ICMP error, for example a Protocol Unreachable for the SYN-ACK of a listener, aborted a forked connection in SYN_RCVD, Tcp sent "connection refused" to the socket of the forked connection, which the application did not have yet, and the dispatcher of the node stopped the run with "Unknown socket". As at a RST in SYN_RCVD, Tcp now informs only the application of an active open, or of a Fast Open connection that the application has.

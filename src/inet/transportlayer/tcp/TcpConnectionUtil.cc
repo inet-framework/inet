@@ -689,8 +689,10 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
     // RFC 9293 section 3.9.2.2: a hard error SHOULD abort the connection (SHLD-26), also
-    // in SYN_RCVD; a connection that is neither active nor forked nor Fast Open returns to
-    // LISTEN, and its application, which has no socket for it yet, is not informed
+    // in SYN_RCVD; as at a RST in SYN_RCVD (RFC 9293 section 3.10.7.3), only the application
+    // of an active OPEN or of a Fast Open connection that it has is informed: a connection
+    // of a passive OPEN returns to LISTEN, and the application has no socket for a forked
+    // connection before it accepts it
     // softIcmpErrorsAbortSetup: as Linux tcp_v4_err(), also a soft error aborts a
     // connection setup (RFC 5461 section 4): a Destination Unreachable with the codes 0,
     // 1 and 5, a Time Exceeded and a Parameter Problem (RFC 9293 section 3.9.2.2)
@@ -708,7 +710,7 @@ bool TcpConnection::processIcmpv4Error(Indication *indication)
         if (state->sack_enabled)
             rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
 
-        if (state->active || state->forked || state->fastopenAccelerated)
+        if (state->active || (state->fastopenAccelerated && !isToBeAccepted()))
             sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
         delete indication;
 
@@ -785,8 +787,10 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
     // Once ESTABLISHED, even hard errors are treated as soft to prevent
     // blind reset attacks.
     // RFC 9293 section 3.9.2.2: a hard error SHOULD abort the connection (SHLD-26), also
-    // in SYN_RCVD; a connection that is neither active nor forked nor Fast Open returns to
-    // LISTEN, and its application, which has no socket for it yet, is not informed
+    // in SYN_RCVD; as at a RST in SYN_RCVD (RFC 9293 section 3.10.7.3), only the application
+    // of an active OPEN or of a Fast Open connection that it has is informed: a connection
+    // of a passive OPEN returns to LISTEN, and the application has no socket for a forked
+    // connection before it accepts it
     // softIcmpErrorsAbortSetup: as Linux tcp_v6_err(), also a soft error aborts a
     // connection setup (RFC 5461 section 4): a Destination Unreachable with the codes 0
     // and 3, a Time Exceeded and a Parameter Problem (RFC 9293 section 3.9.2.2)
@@ -803,7 +807,7 @@ bool TcpConnection::processIcmpv6Error(Indication *indication)
         if (state->sack_enabled)
             rexmitQueue->discardUpTo(rexmitQueue->getBufferEndSeq());
 
-        if (state->active || state->forked || state->fastopenAccelerated)
+        if (state->active || (state->fastopenAccelerated && !isToBeAccepted()))
             sendIndicationToApp(TCP_I_CONNECTION_REFUSED);
         delete indication;
 
