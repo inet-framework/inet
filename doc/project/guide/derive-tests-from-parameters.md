@@ -8,7 +8,7 @@ How to turn the NED parameters of a module into tests: one test for each class o
 
 ## Principle: the claim is the NED comment
 
-A test checks what the comment of its parameter says, for one class of values. When the code does something that the comment does not say, the test states the behavior from the code or from the standard that the code cites, and the catalog records a documentation gap: its source column says "code" and not "NED". For example, the comment of `Tcp.stopOperationTimeout` says only "Timeout value for lifecycle stop operation". The code deletes all connections at once and waits for nothing, so the timeout acts only when `stopOperationExtraTime` is longer. The classes follow the code, and the finding PF-10 records the gap.
+A test checks what the comment of its parameter says, for one class of values. When the code does something that the comment does not say, the test states the behavior from the code or from the standard that the code cites, and the catalog records a documentation gap: its source column says "code" and not "NED". For example, the comment of `Tcp.keepAliveProbeCount` names no special value, but with 0 the code aborts the connection at the idle time, without a probe. The class `zero` comes from the code, and its row says so.
 
 ## Principle: a test separates its class
 
@@ -61,7 +61,7 @@ Do these steps for each parameter, one group at a time, just before the tests of
 7. Choose one representative value for each class: the default when it is in the class, else a typical value, and a boundary value only when the code treats the boundary specially.
 8. Write the classes into the catalog with their source: "NED", or "code" with the function. A class with the source "code" and no NED statement is a documentation gap.
 
-A value that the code treats in a branch of its own is a class, also when the comment does not name it. For example, `OperationalMixin::startActiveOperationExtraTimeOrFinish()` has a branch for a negative extra time, and 28 other modules of INET have `-1s` as their default. So `Tcp.stopOperationExtraTime` has the class `negative-alias`, and its test found that a negative value stops the run (PF-9). A value that only reaches a check of another module, such as a negative delay that reaches the scheduler, is not a class: the catalog records it as a finding.
+A value that the code treats in a branch of its own is a class, also when the comment does not name it. For example, `OperationalMixin::startActiveOperationExtraTimeOrFinish()` has a branch for a negative extra time, and 28 other modules of INET have `-1s` as their default. So `Tcp.stopOperationExtraTime` has the class `negative-alias`, and its test found the defect PF-9: a negative value stopped the run. A value that only reaches a check of another module, such as a negative delay that reaches the scheduler, is not a class: the catalog records it as a finding.
 
 ### Step 3 — write the tests
 

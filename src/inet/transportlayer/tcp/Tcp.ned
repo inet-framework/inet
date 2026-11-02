@@ -412,8 +412,8 @@ simple Tcp extends SimpleModule like ITcp
 
         // the module
         string checksumMode @enum("declared", "computed") = default("declared");
-        double stopOperationTimeout @unit(s) = default(2s);    // Timeout value for lifecycle stop operation
-        double stopOperationExtraTime @unit(s) = default(0s);    // Extra time after lifecycle stop operation finished
+        double stopOperationTimeout @unit(s) = default(2s);    // the stop of the node: the longest wait for the connections; each connection that its application left open gets the CLOSE call of RFC 9293 (a FIN), and the stage of TCP ends when each connection has its data and FIN acknowledged (FIN_WAIT_2, TIME_WAIT or CLOSED), or at this timeout; then it deletes the connections. While it waits, TCP ignores the commands of the applications and sends them nothing, because they are down already. 0s: the connections end at once, without a segment
+        double stopOperationExtraTime @unit(s) = default(0s);    // the stop of the node: the time after the wait for the connections during which the layers below TCP stay up, while TCP is down already; 0s or a negative value: no extra time
 
         // connection setup and header options
         volatile int initialSendSequenceNumber = default(-1); // the initial send sequence number (ISS) of each connection; volatile, so a distribution gives each connection its own value; -1: from the clock, one tick in 4 microseconds (RFC 9293 section 3.4.1)

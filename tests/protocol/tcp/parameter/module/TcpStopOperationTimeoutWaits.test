@@ -1,0 +1,87 @@
+%description:
+
+Tcp.stopOperationTimeout:waits -- host1 sends a FIN at the stop, and the stage ends when its ACK arrives at 1.4 s.
+
+The claim (Tcp.ned): "the stop of the node: the longest wait for the connections; each
+connection that its application left open gets the CLOSE call of RFC 9293 (a FIN), and the stage
+of TCP ends when each connection has its data and FIN acknowledged [...], or at this timeout
+[...]. 0s: the connections end at once, without a segment".
+
+The classes: zero (0s: the stage of TCP deletes the connections at once, without a
+segment), waits (a positive value, 2s the default: each connection that its application left
+open gets a FIN, and the stage ends when each connection has its FIN acknowledged) and expires
+(a value that the peer does not meet: the stage ends at the timeout and deletes the
+connections). The code: Tcp::handleStopOperation() issues the CLOSE call of RFC 9293 section
+3.10.4 to each connection that is still open (Tcp::closeConnectionsForStop()), and
+delayActiveOperationFinish() waits while a connection is in SYN_RCVD, ESTABLISHED, CLOSE_WAIT,
+FIN_WAIT_1, CLOSING or LAST_ACK; Tcp::connectionStateChanged() checks the connections at each
+change of their states, and the timeout ends the wait through the crash handler. During the
+wait, Tcp drops what it would send to the applications, which are down already. This test separates "waits" from the other classes.
+
+Host under test: host1; host1 has a TcpTestApp, which connects to host2 at 0.1 s and never closes the connection, also
+not at the stop: TcpTestApp takes no part in the lifecycle. The link delay is 100 ms, so the
+round trip is 400 ms. host2 sends a ping to host1 every 50 ms from 0.525 s on, so the ping n
+leaves at 0.525 s + n * 50 ms and reaches host1 200 ms later. The tester stops host1 at 1.0 s;
+the network layer of host1 goes down, and stops to answer pings, when the stage of TCP ends. Observation: level 1, host1 sends a FIN at the stop, and the stage ends when its ACK arrives at 1.4 s; host2 sees the FIN 200 ms after it
+leaves, because the stop sends it inside the action of the tester. The last reply that host2
+gets is the reply to the ping 13 (1.175 s), whose request reached host1 before the end of the
+stage at 1.4 s.
+
+%# parameter: Tcp.stopOperationTimeout
+%# class: waits
+%# value: 2s
+%# key: *.host1.tcp.stopOperationTimeout
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpStopOperationTimeoutWaits")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000); })
+                 .describe("host1 connects to host2; its application never closes the connection"))
+        .once(on("host2.app[1]").signal("pingRxSeq")
+             .filterValue(0)
+             .describe("the reply to the first ping")
+             .within(1.0))
+        .act(action().at(1.0).stopNode("host1").describe("stop host1"))
+        .once(on("host2.tcp").signal("packetReceivedFromLower")
+             .filterPacket("tcp.finBit == true")
+             .describe("the FIN of the connection that the application left open, at host2")
+             .within(0.3))
+        .once(on("host2.app[1]").signal("pingRxSeq")
+             .filterValue(13)
+             .describe("the reply to the ping 13, sent at 1.175 s")
+             .within(0.385))
+        .never(on("host2.app[1]").signal("pingRxSeq")
+              .filterValueAtLeast(14)
+              .describe("a reply after the end of the stage of TCP")
+              .within(3.0));
+}
+
+%activity:
+EV << "TcpStopOperationTimeoutWaits compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.stopOperationTimeout = 2s    # the parameter under test
+*.linkDelay = 100ms
+*.host1.app[0].typename = "TcpTestApp"
+*.host2.numApps = 2
+*.host2.app[1].typename = "PingApp"
+*.host2.app[1].destAddr = "host1"
+*.host2.app[1].startTime = 0.525s
+*.host2.app[1].sendInterval = 0.05s
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpStopOperationTimeoutWaits: PASS

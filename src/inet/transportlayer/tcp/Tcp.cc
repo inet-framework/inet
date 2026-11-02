@@ -38,6 +38,7 @@ simsignal_t Tcp::tcpConnectionRemovedSignal = registerSignal("tcpConnectionRemov
 
 Tcp::~Tcp()
 {
+    cancelAndDelete(stopCheckTimer);
 }
 
 void Tcp::initialize(int stage)
@@ -57,6 +58,7 @@ void Tcp::initialize(int stage)
         sendMssOption = par("sendMssOption");
         ecnMarkAll = par("ecnMarkAll");
         fastOpenCookieCacheSize = par("fastopenCookieCacheSize");
+        stopCheckTimer = new cMessage("stopCheck");
         if (fastOpenCookieCacheSize < 1)
             throw cRuntimeError("fastopenCookieCacheSize must be 1 or more, but it is %d", fastOpenCookieCacheSize);
 
@@ -99,11 +101,21 @@ void Tcp::finish()
 
 void Tcp::handleSelfMessage(cMessage *msg)
 {
-    throw cRuntimeError("model error: should schedule timers on connection");
+    if (msg != stopCheckTimer)
+        throw cRuntimeError("model error: should schedule timers on connection");
+    if (!hasConnectionsWaitingForStop())
+        finishStop();
 }
 
 void Tcp::handleUpperCommand(cMessage *msg)
 {
+    // during the stop the applications are down already: a command that one of them sent before
+    // it went down arrives after the stage of TCP has closed its connections, so it is ignored
+    if (operationalState == STOPPING_OPERATION) {
+        EV_DETAIL << "Stopping: ignoring the command " << msg->getName() << " of an application\n";
+        delete msg;
+        return;
+    }
     int socketId = check_and_cast<ITaggedObject *>(msg)->getTags().getTag<SocketReq>()->getSocketId();
     TcpConnection *conn = findConnForApp(socketId);
 
@@ -136,6 +148,12 @@ void Tcp::sendToApp(cMessage *msg)
 {
     Enter_Method("sendToApp");
     take(msg);
+    // during the stop the applications are down already, and a message to them would stop the run
+    if (operationalState == STOPPING_OPERATION) {
+        EV_DETAIL << "Stopping: the application is down, dropping " << msg->getName() << "\n";
+        delete msg;
+        return;
+    }
     send(msg, "appOut");
 }
 
@@ -691,9 +709,62 @@ void Tcp::handleStartOperation(LifecycleOperation *operation)
 
 void Tcp::handleStopOperation(LifecycleOperation *operation)
 {
-    // FIXME close connections??? yes, because the applications may not close them!!!
+    // The applications are down when this stage starts. Each connection that an application
+    // left open gets the CLOSE call of RFC 9293 section 3.10.4, and the stage waits until each
+    // connection has its data and its FIN acknowledged, at most stopOperationTimeout; 0s deletes
+    // the connections at once, without a segment.
+    simtime_t timeout = par("stopOperationTimeout");
+    if (timeout > SIMTIME_ZERO) {
+        closeConnectionsForStop();
+        if (hasConnectionsWaitingForStop()) {
+            delayActiveOperationFinish(timeout);
+            return;
+        }
+    }
+    finishStop();
+}
+
+void Tcp::closeConnectionsForStop()
+{
+    std::vector<TcpConnection *> connections;
+    for (auto& elem : tcpAppConnMap)
+        connections.push_back(elem.second);
+    for (auto conn : connections) {
+        int fsmState = conn->getFsmState();
+        if (fsmState == TCP_S_LISTEN || fsmState == TCP_S_SYN_SENT || fsmState == TCP_S_SYN_RCVD
+            || fsmState == TCP_S_ESTABLISHED || fsmState == TCP_S_CLOSE_WAIT)
+        {
+            auto request = new Request("CLOSE", TCP_C_CLOSE);
+            request->setControlInfo(new TcpCommand());
+            if (!conn->processAppCommand(request))
+                removeConnection(conn);
+        }
+    }
+}
+
+bool Tcp::hasConnectionsWaitingForStop() const
+{
+    // a connection in FIN_WAIT_2 or TIME_WAIT has its FIN acknowledged and needs nothing more
+    for (auto& elem : tcpAppConnMap) {
+        int fsmState = elem.second->getFsmState();
+        if (fsmState == TCP_S_SYN_RCVD || fsmState == TCP_S_ESTABLISHED || fsmState == TCP_S_CLOSE_WAIT
+            || fsmState == TCP_S_FIN_WAIT_1 || fsmState == TCP_S_CLOSING || fsmState == TCP_S_LAST_ACK)
+            return true;
+    }
+    return false;
+}
+
+void Tcp::connectionStateChanged()
+{
+    if (operationalState == STOPPING_OPERATION && !stopCheckTimer->isScheduled())
+        scheduleAt(simTime(), stopCheckTimer);
+}
+
+void Tcp::finishStop()
+{
+    // the timeout bounds only the wait for the connections; the extra time follows in full
+    cancelEvent(activeOperationTimeout);
     reset();
-    delayActiveOperationFinish(par("stopOperationTimeout"));
     startActiveOperationExtraTimeOrFinish(par("stopOperationExtraTime"));
 }
 
@@ -704,6 +775,7 @@ void Tcp::handleCrashOperation(LifecycleOperation *operation)
 
 void Tcp::reset()
 {
+    cancelEvent(stopCheckTimer);
     for (auto& elem : tcpAppConnMap)
         elem.second->deleteModule();
     tcpAppConnMap.clear();

@@ -1,0 +1,3 @@
+The stop of a node closes its TCP connections and waits for them
+
+When a node stops, Tcp now sends a FIN on each connection that its application left open, and its stage of the stop ends when each connection has its data and FIN acknowledged, or at stopOperationTimeout (default 2s). Before, Tcp deleted all connections at once, without a segment, so the peer kept a half-open connection. During this wait, Tcp ignores the commands of the applications and sends them nothing, because they are down already. stopOperationExtraTime now follows the wait in full, and a negative value no longer stops the run. Set stopOperationTimeout = 0s to delete the connections at once, as before. A crash does not change.

@@ -204,6 +204,7 @@ class INET_API Tcp : public TransportProtocolBase
     int msl;
     bool alignOptions = true; // from the alignOptions parameter: align the options with NOPs
     bool accEcnBareTimeWaitAck = false; // from the accEcnBareTimeWaitAck parameter
+    cMessage *stopCheckTimer = nullptr; // ends the wait of a stop for the connections, in an event of its own
     bool accEcnOptionLinux = false; // from the accEcnOptionPolicy parameter: "linux"
     bool sendMssOption = true; // from the sendMssOption parameter: send the MSS option in the SYN and the SYN-ACK
     bool ecnMarkAll = false; // from the ecnMarkAll parameter
@@ -283,6 +284,8 @@ class INET_API Tcp : public TransportProtocolBase
     virtual void resetFastOpenBlackhole();
 
     virtual void removeConnection(TcpConnection *conn);
+    /** To be called from TcpConnection at each change of its state; a stop that waits checks its connections. */
+    virtual void connectionStateChanged();
     virtual void sendToIp(Packet *segment);
     virtual void sendToApp(cMessage *msg);
 
@@ -320,6 +323,11 @@ class INET_API Tcp : public TransportProtocolBase
 
     // called at shutdown/crash
     virtual void reset();
+
+    // the stop of the node: close the connections that the applications left open, and wait for them
+    virtual void closeConnectionsForStop();
+    virtual bool hasConnectionsWaitingForStop() const;
+    virtual void finishStop();
 
     bool checkChecksum(Packet *pk);
     int getMsl() { return msl; }

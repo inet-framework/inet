@@ -669,6 +669,8 @@ void TcpConnection::processRackReoTimeout()
 
 void TcpConnection::stateEntered(int state, int oldState, TcpEventCode event)
 {
+    tcpMain->connectionStateChanged();
+
     // cancel timers
     switch (state) {
         case TCP_S_INIT:

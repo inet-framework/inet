@@ -2,19 +2,21 @@
 
 Tcp.stopOperationExtraTime:negative-alias -- a negative value ends the stop of TCP at once, as zero does.
 
-The claim (Tcp.ned): "Extra time after lifecycle stop operation finished".
+The claim (Tcp.ned): "the stop of the node: the time after the wait for the connections
+during which the layers below TCP stay up, while TCP is down already; 0s or a negative value: no
+extra time".
 
 The classes: zero (0s, the default: the stage of TCP ends at once, after the other events of
 the same time) and other (a positive time: the stage ends the value later; the network layer
-and the layers under it stay up until then). The code: OperationalMixin::
-startActiveOperationExtraTimeOrFinish() schedules the end of the stage the value later, and
-sets the state of TCP to down at once. The class negative-alias: OperationalMixin::startActiveOperationExtraTimeOrFinish() ends the
+and the layers under it stay up until then). The code: Tcp::finishStop() calls
+OperationalMixin::startActiveOperationExtraTimeOrFinish() after the wait for the connections,
+or at once when no connection waits; it sets the state of TCP to down at once and schedules
+the end of the stage the value later. The class negative-alias: OperationalMixin::startActiveOperationExtraTimeOrFinish() ends the
 stage at once for a negative value, without a timer, so a negative value is another spelling of
 "no extra time". The default of the 28 other modules of INET with this parameter is -1s, so a
-line such as **.stopOperationExtraTime = -1s also reaches TCP. This test fails: TCP calls
-delayActiveOperationFinish() before, so the stage invokes the done callback of the lifecycle
-controller inside handleOperationStage(), and the run stops with "Usage error: callback may only
-be invoked if (and after) you returned 'false' from initiateStateChange()" (finding PF-9).
+line such as **.stopOperationExtraTime = -1s also reaches TCP. When no connection waits, TCP
+calls it at the stop without delayActiveOperationFinish(), so the stage ends inside the stop
+handler, as the lifecycle controller expects.
 
 Host under test: host1; host1 has no application. host2 sends a ping to host1 every 50 ms from 0.525 s on, so the
 ping n leaves at 0.525 s + n * 50 ms. The tester stops host1 at 1.0 s with the lifecycle

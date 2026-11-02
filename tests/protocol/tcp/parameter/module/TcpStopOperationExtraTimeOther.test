@@ -2,13 +2,16 @@
 
 Tcp.stopOperationExtraTime:other -- the stop of TCP ends the value after the stop starts.
 
-The claim (Tcp.ned): "Extra time after lifecycle stop operation finished".
+The claim (Tcp.ned): "the stop of the node: the time after the wait for the connections
+during which the layers below TCP stay up, while TCP is down already; 0s or a negative value: no
+extra time".
 
 The classes: zero (0s, the default: the stage of TCP ends at once, after the other events of
 the same time) and other (a positive time: the stage ends the value later; the network layer
-and the layers under it stay up until then). The code: OperationalMixin::
-startActiveOperationExtraTimeOrFinish() schedules the end of the stage the value later, and
-sets the state of TCP to down at once. This test separates "other" from the other class.
+and the layers under it stay up until then). The code: Tcp::finishStop() calls
+OperationalMixin::startActiveOperationExtraTimeOrFinish() after the wait for the connections,
+or at once when no connection waits; it sets the state of TCP to down at once and schedules
+the end of the stage the value later. This test separates "other" from the other class.
 
 Host under test: host1; host1 has no application. host2 sends a ping to host1 every 50 ms from 0.525 s on, so the
 ping n leaves at 0.525 s + n * 50 ms. The tester stops host1 at 1.0 s with the lifecycle
