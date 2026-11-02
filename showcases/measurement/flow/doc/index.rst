@@ -58,7 +58,7 @@ attach the time spent in them to the packet as meta-information. The label is
 removed at a measurement recorder module, and the queueing time accumulated by
 the packet is recorded. The data can be found in the analysis tool's browse data
 tab as the ``flowname:statisticname`` result name of the measurement recorder
-module (for example, ``flow1:queueingTime:histogram``). By default,
+module (for example, ``flow1:meanTotalBitQueueingTimePerPacket:histogram``). By default,
 :ned:`FlowMeasurementRecorder` records the specified measurements as both
 vectors and histograms. The statistics can be plotted, exported, and analyzed as
 any other statistic.
@@ -137,7 +137,7 @@ Associating Packets to Flows Based on Multiple Criteria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A measurement module can filter which packets to associate with a flow, using a
-packet filter and a packet data filter. Packets can be associated with multiple
+packet filter. Packets can be associated with multiple
 flows based on multiple criteria by using several measurement modules connected
 in series. The :ned:`MultiMeasurementLayer` module makes this convenient. It can be
 used in place of a :ned:`MeasurementLayer` module. It contains a variable number of
@@ -275,7 +275,7 @@ measure the elapsed time and the queueing time. Some notes:
 
 - The ``sw1sw2`` flow is between the two switch interfaces facing each other (``eth2`` in both switches), so that it's unnecessary for the other switch interfaces to have measurement modules.
 - | It is possible to record multiple flows in a FlowMeasurementRecorder, e.g.: 
-  | ``*.server1.app[*].inbound.flowName = "c1s1 or c1s2 or c2s1 or c2s2"``.
+  | ``*.server1.app[*].measurementRecorder.flowName = "c1s1 or c1s2 or c2s1 or c2s2"``.
 
 .. note:: We don't specify any packet filter parameters of measurement modules, and they match all packets by default. We use packet filters in Example 2.
 
@@ -407,7 +407,7 @@ Here is the flow definition in omnetpp.ini:
 The flow definition sets up two flows (``BG`` and ``VID``) based on the source
 port of packets. The flows have multiple start and end points (in both clients
 and servers, respectively). Each measurement module in :ned:`MultiMeasurementLayer`
-assigns packets to one of the flows, using the packet data filter. As in the
+assigns packets to one of the flows, using the packet filter. As in the
 previous configuration, we measure elapsed time and queueing time. 
 
 Note that:
