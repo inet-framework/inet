@@ -269,6 +269,13 @@ video {
   color: var(--inet-heading-color);
 }
 
+/* The Accept of the cookie consent dialog (conf.py) has the color of the strip, like the one of omnest.com. */
+.md-typeset .md-consent__controls .md-button--primary:not([type=reset]) {
+  background-color: var(--inet-strip-color);
+  border-color: var(--inet-strip-color);
+  color: #fff;
+}
+
 /* The drawer of the navigation on narrow screens puts the name of the site to the right of a smaller logo, not
    under it. A copy of the rule of omnetpp_immaterial, until the doc-builder image has it. */
 @media screen and (max-width: 76.2344em) {
