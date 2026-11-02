@@ -53,6 +53,9 @@ void TcpSpoof::sendSpoofPacket()
 //    tcpseg->setAckNo(...);
     tcpseg->setSynBit(isSYN);
     tcpseg->setWindow(16384);
+    // a receiver checks the checksum by the mode of the header; as by default in Tcp, the
+    // checksum is declared correct
+    tcpseg->setChecksumMode(CHECKSUM_DECLARED_CORRECT);
     insertTransportProtocolHeader(packet, Protocol::tcp, tcpseg);
 
     sendToIP(packet, srcAddr, destAddr);

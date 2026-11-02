@@ -17,8 +17,7 @@ getAddressType() stops the run with "Address contains no value" (finding PF-12).
 
 Node under test: host1; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
 from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
-test changes one of these values. The tap drops the segment after host1 sends
-it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 0, the run stops at 1 s with the error of
+test changes one of these values. Observation: level 0, the run stops at 1 s with the error of
 L3Address.
 
 %# parameter: TcpSpoof.destAddress

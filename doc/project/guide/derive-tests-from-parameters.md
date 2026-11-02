@@ -20,7 +20,7 @@ The cross-class check runs each test again with the value of each other class of
 
 Keep a test that fails, and record the defect in the findings of the catalog. The pass that writes the tests changes no model code; a later plan repairs the findings. Whether a failure is declared expected follows [the class of a failure](derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected).
 
-A defect must not hide the verdicts of other classes. For example, `TcpSpoof` writes no checksum mode into its header, so the TCP of a receiver stops the run at the first spoofed segment (PF-11). If each spoof test waited for the answer of the receiver, all of them would fail for this one defect. The spoof tests therefore check the segment on the wire, and a tap rule drops it before the receiver. One facet, `isSYN:true-answer`, lets the segment through and fails for PF-11.
+A defect must not hide the verdicts of other classes. For example, `TcpSpoof` wrote no checksum mode into its header, so the TCP of a receiver stopped the run at the first spoofed segment (PF-11). A spoof test that waits for the answer of the receiver failed for this one defect. So the spoof tests checked the segment on the wire, and a tap rule dropped it before the receiver. Only the facet `isSYN:true-answer` let the segment through, and it failed until the repair of PF-11.
 
 ## The steps
 

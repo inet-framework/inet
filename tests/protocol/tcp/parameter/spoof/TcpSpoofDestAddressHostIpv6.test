@@ -19,8 +19,7 @@ protocol of the segment is IPv6. This test separates "host" from "empty" on IPv6
 Node under test: host1, on IPv6 hosts (precondition), with the time 3 s, after the address
 configuration; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
 from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
-test changes one of these values. The tap drops the segment after host1 sends
-it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 1, an IPv6 datagram carries the segment.
+test changes one of these values. Observation: level 1, an IPv6 datagram carries the segment.
 
 %# parameter: TcpSpoof.destAddress
 %# class: host-ipv6
@@ -39,9 +38,6 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("TcpSpoofDestAddressHostIpv6")
-        .intercept(tap("tap").filterPacket("tcp.srcPort == 5000")
-                     .drop()
-                     .describe("the segment of the spoof: the TCP of a receiver cannot take it (PF-11)"))
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
              .filterPacket("tcp.srcPort == 5000 && ipv6.hopLimit > 0")
              .describe("the segment of the spoof, in an IPv6 datagram")

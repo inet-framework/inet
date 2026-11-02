@@ -18,8 +18,7 @@ no interface of the node has it, because TcpSpoof does not set nonLocalSrcAddres
 
 Node under test: the router; The network is TapRouterNetwork: host1 -- tap -- router -- host2. The router has TcpSpoof
 in place of its TCP (precondition). The spoof sends one SYN at 1 s from the port 5000 to
-host1:1000; the segment leaves the router on eth0, the interface to host1. The tap drops the segment after the router sends
-it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 0, the run stops at 1 s with the error of
+host1:1000; the segment leaves the router on eth0, the interface to host1. Observation: level 0, the run stops at 1 s with the error of
 Ipv4::encapsulate().
 
 %# parameter: TcpSpoof.srcAddress

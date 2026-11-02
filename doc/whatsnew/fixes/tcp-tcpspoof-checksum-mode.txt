@@ -1,0 +1,3 @@
+TcpSpoof declares the checksum of its segments correct
+
+TcpSpoof set no checksum mode in the header of its segment, so the TCP of the receiver stopped the run with "unknown checksum mode: -1" at the first spoofed segment. TcpSpoof now declares the checksum correct, as Tcp does with its default checksumMode, so a receiver processes the segment and answers it.

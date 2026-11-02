@@ -13,13 +13,12 @@ The classes: true (the default: the segment is a SYN) and false (the segment has
 control bit at all). The code: TcpSpoof::sendSpoofPacket() sets the SYN bit from the value,
 and no other bit. The facet true-answer: a SYN of the spoof is a segment that a TCP can take, so a listener
 answers it. This test separates "true" from "false", where a listener sends no answer (RFC 9293
-section 3.10.7.2). This test fails: TcpSpoof::sendSpoofPacket() sets no checksum mode in the
-header, so Tcp::checkChecksum() of host2 stops the run with "unknown checksum mode: -1"
-(finding PF-11).
+section 3.10.7.2). TcpSpoof::sendSpoofPacket() declares the checksum of its segments correct, the
+default of Tcp, so Tcp::checkChecksum() of host2 accepts the segment.
 
 Node under test: host1; host1 has TcpSpoof in place of its TCP and no application; host2
 listens at the port 1000 (TcpEchoApp). The spoof sends one SYN at 1 s from the port 5000 to
-host2:1000 with the sequence number 12345, and the tap lets it through. Observation: level 1,
+host2:1000 with the sequence number 12345. Observation: level 1,
 host2 answers with a SYN-ACK that acknowledges 12346.
 
 %# parameter: TcpSpoof.isSYN

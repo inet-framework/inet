@@ -17,8 +17,7 @@ getAddressType() stops the run with "Address contains no value" (finding PF-12).
 
 Node under test: host1; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
 from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
-test changes one of these values. The tap drops the segment after host1 sends
-it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 1, an IPv4 datagram to the address of host2
+test changes one of these values. Observation: level 1, an IPv4 datagram to the address of host2
 carries the segment.
 
 %# parameter: TcpSpoof.destAddress
@@ -40,9 +39,6 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("TcpSpoofDestAddressHost")
-        .intercept(tap("tap").filterPacket("tcp.srcPort == 5000")
-                     .drop()
-                     .describe("the segment of the spoof: the TCP of a receiver cannot take it (PF-11)"))
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
              .filterPacket("tcp.srcPort == 5000")
              .filterEvent([](const MatchContext& c) { return ipv4HeaderOf(c.event.packet)->getDestAddress().str() == L3AddressResolver().resolve("host2").str(); })

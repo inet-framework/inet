@@ -12,8 +12,7 @@ into the header without a condition).
 
 Node under test: host1; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
 from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
-test changes one of these values. The tap drops the segment after host1 sends
-it: the TCP of a receiver cannot take a segment of TcpSpoof (finding PF-11). Observation: level 1, the segment carries the source port.
+test changes one of these values. Observation: level 1, the segment carries the source port.
 
 %# parameter: TcpSpoof.srcPort
 %# class: value
@@ -32,9 +31,6 @@ using namespace inet::protocoltest;
 Define_ProtocolTestProgram()
 {
     return ProtocolTest("TcpSpoofSrcPortValue")
-        .intercept(tap("tap").filterPacket("tcp.srcPort == 5000")
-                     .drop()
-                     .describe("the segment of the spoof: the TCP of a receiver cannot take it (PF-11)"))
         .once(on("host1.eth[0].mac").signal("packetSentToLower")
              .filterPacket("tcp.srcPort == 5000 && tcp.synBit == true")
              .describe("the segment of the spoof")
