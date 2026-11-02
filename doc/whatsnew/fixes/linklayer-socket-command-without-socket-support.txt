@@ -1,0 +1,3 @@
+A socket command into a protocol layer without socket support is an error instead of an endless loop
+
+An EthernetLayer or an Ieee8021qProtocol serves socket commands only with hasSocketSupport = true, which is not the default. Without it, the socket command of an application, for example the BIND of an EthernetSinkApp with io.localAddress set, or of a virtual interface with a VLAN ID, went through the layer to the node's dispatcher and back up into the same layer, forever, at t = 0. Now the header inserter of the layer stops the simulation with the error "Received socket command BIND, but the protocol layer has no socket support (hasSocketSupport = false)". Set hasSocketSupport = true in the layer that the application uses.

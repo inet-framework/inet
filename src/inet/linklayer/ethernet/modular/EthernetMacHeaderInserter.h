@@ -23,6 +23,7 @@ class INET_API EthernetMacHeaderInserter : public PacketFlowBase
 
   protected:
     virtual void initialize(int stage) override;
+    virtual void handleMessage(cMessage *message) override;
     virtual void processPacket(Packet *packet) override;
 };
 
