@@ -11,10 +11,9 @@ The claim (TcpSpoof.ned): "Sequence number (-1 for TCP ISS)".
 
 The classes: iss (-1: the number comes from the clock, as the ISS of TCP: 250000 for each
 second, modulo 2^32) and value (another number: the segment carries it). The code:
-TcpSpoof::sendSpoofPacket() calls chooseInitialSeqNum() for -1. This test separates "iss" from the other class. This test fails: chooseInitialSeqNum() calls
-fmod() with simTime() * 250000.0, so the modulus 2^32 + 1 becomes a simtime_t too, which the
-time scale of the run cannot hold; the run stops with "simtime_t: Cannot represent
-4.29497e+09" (finding PF-13).
+TcpSpoof::sendSpoofPacket() calls chooseInitialSeqNum() for -1. This test separates "iss" from the other class. chooseInitialSeqNum() takes the expression of
+TcpConnection::selectInitialSeqNum(), so the spoof and Tcp give the same number at the same
+time.
 
 Node under test: host1; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
 from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the

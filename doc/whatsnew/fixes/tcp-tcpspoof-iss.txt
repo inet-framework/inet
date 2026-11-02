@@ -1,0 +1,3 @@
+TcpSpoof takes the ISS of the clock as Tcp does
+
+With seqNo = -1, TcpSpoof stopped the run at the send with "simtime_t: Cannot represent 4.29497e+09", because it computed the ISS of the clock as a simtime_t. TcpSpoof now computes it as Tcp does, one tick in 4 microseconds modulo 2^32, so the segment carries the number that a TCP of the node would take at the same time.

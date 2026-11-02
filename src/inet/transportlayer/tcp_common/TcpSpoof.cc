@@ -80,8 +80,10 @@ void TcpSpoof::sendToIP(Packet *pk, L3Address src, L3Address dest)
 
 unsigned long TcpSpoof::chooseInitialSeqNum()
 {
-    // choose an initial send sequence number in the same way as TCP does
-    return (unsigned long)SIMTIME_DBL(fmod(simTime() * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
+    // the ISS of the clock as TcpConnection::selectInitialSeqNum() takes it: one tick in 4
+    // microseconds, modulo 2^32 (RFC 9293 section 3.4.1); the time is a double before the
+    // multiplication, because a simtime_t cannot hold the modulus
+    return (unsigned long)fmod(SIMTIME_DBL(simTime()) * 250000.0, 1.0 + (double)(unsigned)0xffffffffUL) & 0xffffffffUL;
 }
 
 } // namespace tcp
