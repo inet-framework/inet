@@ -1,0 +1,61 @@
+:orphan:
+:date: 2026-11-02
+:category: progress
+
+========================
+Progress since INET 4.7
+========================
+
+Since the release of INET 4.7 in July 2026, most of the work has gone into the
+correctness of the protocol models, checked against the standards that they
+implement. The following has landed on the master branch and will be part of the
+next release.
+
+Protocol tests derived from the standards:
+
+- a new black-box protocol test framework, in which a test drives a protocol through
+  tap interfaces and checks the frames it sends against the requirements of the RFC
+- tests derived from the standards for ARP, RIP, IPv6 Neighbor Discovery, IGMP and MLD,
+  IPsec, MPLS, TCP and QUIC, together with the repairs of the defects they found
+- TCP tests that run the packetdrill scripts of the Linux kernel selftests against INET's TCP
+
+TCP:
+
+- LinuxTcp, a TCP with the defaults of Linux, and many Linux behaviors that are
+  available as parameters: Dynamic Right-Sizing, the receive buffer bound, the path
+  MTU search of RFC 4821 with black-hole detection, SYN data handling, and others
+- HyStart++ (RFC 9406), limited transmit, the urgent data of RFC 9293, and many
+  smaller repairs of the defaults and parameters
+
+IEEE 802.11:
+
+- immediate Compressed Block Ack as the default, and a reworked Block Ack agreement
+  lifecycle
+- single and multiple protection of a TXOP, EDCA data lifetime and management
+  recovery, and the recipient NAV
+- HT support for 802.11ac interfaces, VHT mode queries, and 5 GHz channel mapping
+- Radiotap headers in PCAP capture
+
+Other areas:
+
+- queueing elements that answer queries without side effects, an acceptance filter,
+  and repaired schedulers, classifiers, droppers and rate limiters
+- correlated log-normal shadowing, and concurrent transmissions and receptions in
+  the radio
+- IEEE 802.1ad (Q-in-Q) policy, and repaired VLAN tagging in relays
+- PCAPNG writer fixes and a block API, DHCP and ICMP repairs, and IPv4/IPv6
+  reassembly fixes
+
+The following work is in progress on branches:
+
+- the second wave of protocol tests derived from the standards, and the repair of
+  Neighbor Discovery, IPv6 tunneling, Mobile IPv6 and Proxy Mobile IPv6
+- the remaining IEEE 802.11 features found missing by the protocol tests, such as
+  delayed Block Ack and A-MPDU in the QoS data service
+- MPLS: PCEP, IPv6 FECs in LDP, and a 6PE example
+- IS-IS, Babel, LISP and VRRP routing protocols
+- a VulkanSceneGraph based 3D visualizer with LIDAR terrain and geospatial scenes
+- new showcases for Mobile IPv6, Proxy Mobile IPv6, IPv6 autoconfiguration, IPv6
+  tunneling, 10BASE-T1S, the IEEE 802.11 rate anomaly, and geographic mobility
+
+See :doc:`Plans` for what comes after these.
