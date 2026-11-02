@@ -98,7 +98,7 @@ are visible.
 
 The scene's 3D view should look like the following when the simulation is run.
 The map is displayed on the 3D scene. Since there are no nodes or
-objects in the network, the size of the scene is zero and the screen
+objects in the network, the size of the scene is zero and the scene
 floor is not visible.
 
 .. figure:: media/defaultmap.png
