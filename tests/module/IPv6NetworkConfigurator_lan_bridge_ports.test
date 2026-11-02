@@ -1,0 +1,79 @@
+%description:
+Tests that a <lan> element with bridge port members joins the LANs behind the
+ports of a bridge inside a router-and-bridge node into one link
+(Ipv6NetworkConfigurator).
+
+The network and the declaration are those of
+IPv4NetworkConfigurator_lan_bridge_ports: rb bridges its bridgeg[] gates, behind
+which router, hostA and hostB are, and routes on its eth[] interfaces.
+
+router.eth0, hostA and hostB must get one /64 prefix, and rb gets no address
+on it. hostA pings hostB across the bridge, and hostB pings hostC across the
+bridge, router, transit and rb's routed interfaces.
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.test.moduletest.lib.DeclaredLanTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 4s
+cmdenv-express-mode = false
+record-vector-results = false
+*.configurator.cmdenv-log-level = info
+**.cmdenv-log-level = off
+
+**.hasIpv4 = false
+**.hasIpv6 = true
+*.configurator.typename = "Ipv6NetworkConfigurator"
+*.configurator.dumpAddresses = true
+*.configurator.config = xml("<config>\
+  <lan>\
+    <interface hosts='rb' interfaceTableModule='bridge.interfaceTable'/>\
+  </lan>\
+  <interface hosts='**' prefix='2001:db8:x:x::/64'/>\
+</config>")
+# The per-node configurators apply the addresses and routes of the network configurator
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+
+*.host{A,B}.numApps = 1
+*.host{A,B}.app[0].typename = "PingApp"
+*.host{A,B}.app[0].printPing = true
+*.host{A,B}.app[0].count = 3
+*.host{A,B}.app[0].startTime = 1s
+*.hostA.app[0].destAddr = "hostB(ipv6)"
+*.hostB.app[0].destAddr = "hostC(ipv6)"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+DeclaredLanTestNetwork.router:
+  eth0 addr=2001:db8:0:1:8aa:ff:fe00:1/64 prefix=2001:db8:0:1::/64
+  eth1 addr=2001:db8:0:2:8aa:ff:fe00:2/64 prefix=2001:db8:0:2::/64
+DeclaredLanTestNetwork.transit:
+  eth0 addr=2001:db8:0:2:8aa:ff:fe00:3/64 prefix=2001:db8:0:2::/64
+  eth1 addr=2001:db8:0:3:8aa:ff:fe00:4/64 prefix=2001:db8:0:3::/64
+DeclaredLanTestNetwork.rb:
+  eth0 addr=2001:db8:0:3:8aa:ff:fe00:5/64 prefix=2001:db8:0:3::/64
+  eth1 addr=2001:db8:0:4:8aa:ff:fe00:6/64 prefix=2001:db8:0:4::/64
+DeclaredLanTestNetwork.hostA:
+  eth0 addr=2001:db8:0:1:8aa:ff:fe00:a/64 prefix=2001:db8:0:1::/64
+DeclaredLanTestNetwork.hostB:
+  eth0 addr=2001:db8:0:1:8aa:ff:fe00:b/64 prefix=2001:db8:0:1::/64
+DeclaredLanTestNetwork.hostC:
+  eth0 addr=2001:db8:0:4:8aa:ff:fe00:c/64 prefix=2001:db8:0:4::/64
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+--------------------------------------------------------
+	DeclaredLanTestNetwork.hostA.app[0]
+--------------------------------------------------------
+sent: 3   received: 3   loss rate (%): 0
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+--------------------------------------------------------
+	DeclaredLanTestNetwork.hostB.app[0]
+--------------------------------------------------------
+sent: 3   received: 3   loss rate (%): 0
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,28 @@
+%description:
+Tests that the interfaceTableModule attribute of an <interface> element in a
+<lan> element must name an interface table: a module that is not one is an
+error that names the module. rb's bridge.macTable is the MAC address table of
+the bridge inside rb.
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.test.moduletest.lib.DeclaredLanTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+cmdenv-express-mode = false
+**.cmdenv-log-level = off
+
+*.configurator.config = xml("<config>\
+  <lan>\
+    <interface hosts='rb' interfaceTableModule='bridge.macTable'/>\
+  </lan>\
+  <interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>\
+</config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > lan-error.out || true
+%contains: lan-error.out
+Module 'DeclaredLanTestNetwork.rb.bridge.macTable' is not an interface table
+%#--------------------------------------------------------------------------------------------------------------

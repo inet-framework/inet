@@ -1,0 +1,29 @@
+%description:
+Tests that two <lan> elements must not have the same id: each element declares
+one LAN, so the second element with the id is an error.
+
+%inifile: omnetpp.ini
+
+[General]
+network = inet.test.moduletest.lib.DeclaredLanTestNetwork
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+cmdenv-express-mode = false
+**.cmdenv-log-level = off
+
+*.configurator.config = xml("<config>\
+  <lan id='bridged'>\
+    <interface hosts='rb' interfaceTableModule='bridge.interfaceTable'/>\
+  </lan>\
+  <lan id='bridged'>\
+    <interface hosts='hostC' names='eth0'/>\
+  </lan>\
+  <interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>\
+</config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > lan-error.out || true
+%contains: lan-error.out
+Another <lan> element has the id 'bridged'
+%#--------------------------------------------------------------------------------------------------------------
