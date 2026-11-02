@@ -166,6 +166,17 @@ video {
   max-width: 100%;
 }
 
+/* Charts and network diagrams with a transparent background are drawn for a light page (_ext/inetsite/images.py). */
+.md-typeset img.transparent-image {
+  box-sizing: border-box;
+  padding: 0.5em;
+  border-radius: 0.4rem;
+}
+
+[data-md-color-scheme=slate] .md-typeset img.transparent-image {
+  background-color: #fff;
+}
+
 .align-left {
   text-align: left;
 }
