@@ -195,7 +195,7 @@ The network consists of three :ned:`AdhocHost` nodes: ``person1``, ``person2``,
 and ``videoServer``. ``VideoServer`` will be streaming a video to
 ``person1``. ``Person2`` will be inactive in this example.
 
-The type of the visualizer module is :ned:`IntegratedMultiVisualizer`.
+The type of the visualizer module is :ned:`IntegratedMultiCanvasVisualizer`.
 Multi-visualizers are compound visualizer modules containing submodule
 vectors of visualizer simple modules. By default, the multi-visualizers
 contain one submodule of each visualizer simple module. The number of
