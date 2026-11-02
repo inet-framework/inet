@@ -28,6 +28,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 # Object files for local .cc, .msg and .sm files
 OBJS = \
     $O/EthTestApp.o \
+    $O/Ieee8021qPcpTest.o \
     $O/IGMPTester.o \
     $O/MeterTestApp.o \
     $O/NetfilterHookProbe.o \
