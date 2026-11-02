@@ -1,6 +1,6 @@
 # TCP — the catalog of the parameter tests
 
-> **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [Tcp.ned](../../../../../src/inet/transportlayer/tcp/Tcp.ned), [the plan](../../../../../plan/pending/tcp-parameter-tests.md)
+> **Kind:** ledger · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [Tcp.ned](../../../../../src/inet/transportlayer/tcp/Tcp.ned), [the procedure](../../../guide/derive-tests-from-parameters.md)
 
 The classes of values of each NED parameter of the TCP modules, and the parameter test of each class. A class is a set of values that take the same code path and give the same documented behavior. The tests are in [`tests/protocol/tcp/parameter/`](../../../../../tests/protocol/tcp/parameter); each test sets its parameter to the value of its row, and the cross-class check makes sure that it fails with the value of each other row of its parameter.
 
