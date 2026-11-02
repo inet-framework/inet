@@ -1,0 +1,3 @@
+The class DcTcpFamily is removed
+
+The C++ class DcTcpFamily had no NED type, and no class of INET derived from it: DcTcp derives from TcpReno and uses only the state variables DcTcpFamilyStateVariables, which stay. C++ code that derived from DcTcpFamily derives from TcpClassicAlgorithmBase instead; the migration guide gives the steps.

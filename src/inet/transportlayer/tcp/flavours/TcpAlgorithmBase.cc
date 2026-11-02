@@ -146,17 +146,15 @@ uint32_t TcpAlgorithmBase::getReceiveMss() const
 uint32_t TcpAlgorithmBase::getInitialWindow() const
 {
     // initialCwnd, as the initcwnd of a Linux route, which wins over the default
-    // (tcp_init_cwnd()); else initialWindow
+    // (tcp_init_cwnd()); else initialWindow, whose value "rfc2001" (one segment) never comes
+    // here, because the callers keep no initial window for it (isInitialWindowKept())
     if (state->initialCwndSegments > 0)
         return state->initialCwndSegments * state->snd_effmss;
-    switch (state->init_cwnd_mode) {
-        case 1: // RFC 3390, the upper bound of RFC 5681 section 3.1
-            return std::min(4 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)4380));
-        case 2: // RFC 6928 (IW10)
-            return std::min(10 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)14600));
-        default: // RFC 2001: one segment
-            return state->snd_effmss;
-    }
+    ASSERT(state->init_cwnd_mode == 1 || state->init_cwnd_mode == 2);
+    if (state->init_cwnd_mode == 2) // RFC 6928 (IW10)
+        return std::min(10 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)14600));
+    // RFC 3390, the upper bound of RFC 5681 section 3.1
+    return std::min(4 * state->snd_effmss, std::max(2 * state->snd_effmss, (uint32_t)4380));
 }
 
 void TcpAlgorithmBase::established(bool active)

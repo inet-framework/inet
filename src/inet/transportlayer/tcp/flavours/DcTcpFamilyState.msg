@@ -10,7 +10,7 @@ import inet.transportlayer.tcp.flavours.TcpClassicAlgorithmBaseState;
 namespace inet::tcp;
 
 ///
-/// State variables for DcTcpFamily.
+/// State variables for DcTcp.
 ///
 struct DcTcpFamilyStateVariables extends TcpClassicAlgorithmBaseStateVariables
 {

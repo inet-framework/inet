@@ -20,6 +20,31 @@ simsignal_t DcTcp::loadSignal = cComponent::registerSignal("load"); // will reco
 simsignal_t DcTcp::calcLoadSignal = cComponent::registerSignal("calcLoad"); // will record total number of RTOs
 simsignal_t DcTcp::markingProbSignal = cComponent::registerSignal("markingProb"); // will record marking probability
 
+std::string DcTcpFamilyStateVariables::str() const
+{
+    std::stringstream out;
+    out << TcpClassicAlgorithmBaseStateVariables::str();
+    out << " dctcp_alpha=" << dctcp_alpha;
+    out << " dctcp_windEnd=" << dctcp_windEnd;
+    out << " dctcp_bytesAcked=" << dctcp_bytesAcked;
+    out << " dctcp_bytesMarked=" << dctcp_bytesMarked;
+    out << " dctcp_gamma=" << dctcp_gamma;
+
+    return out.str();
+}
+
+std::string DcTcpFamilyStateVariables::detailedInfo() const
+{
+    std::stringstream out;
+    out << TcpClassicAlgorithmBaseStateVariables::detailedInfo();
+    out << " dctcp_alpha=" << dctcp_alpha;
+    out << " dctcp_windEnd=" << dctcp_windEnd;
+    out << " dctcp_bytesAcked=" << dctcp_bytesAcked;
+    out << " dctcp_bytesMarked=" << dctcp_bytesMarked;
+    out << " dctcp_gamma=" << dctcp_gamma;
+    return out.str();
+}
+
 DcTcp::DcTcp() : TcpReno(),
     state((DcTcpStateVariables *&)TcpAlgorithm::state)
 {
