@@ -125,8 +125,8 @@ anywhere in the network (inside network nodes or protocol modules, etc.) in NED
 by editing the NED source of modules or extending them as a new type. However,
 some modules such as the :ned:`LayeredEthernetInterface` already have built-in
 :ned:`MeasurementLayer` submodules. This module contains a
-:ned:`FlowMeasurementStarter` and a :ned:`FlowMeasurementRecorder`, but they are disabled by
-default (the type is set to empty string). The modules can be enabled from the
+:ned:`FlowMeasurementStarter` and a :ned:`FlowMeasurementRecorder`, but the measurement layer is disabled by
+default (its type is set to empty string). It can be enabled from the
 .INI file (e.g. ``*.host.eth[0].measurementLayer.typename =
 "MeasurementLayer"``):
 
