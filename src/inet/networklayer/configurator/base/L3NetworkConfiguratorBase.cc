@@ -94,6 +94,8 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
         node->routingTable = findRoutingTable(node);
     }
 
+    extractDeclaredLans(topology);
+
     // extract links and interfaces
     int numLinks = 0;
     std::map<int, NetworkInterface *> interfacesSeen;
@@ -117,7 +119,16 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
                         InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, isBridgeNode(node) ? nullptr : linkInfo, networkInterface);
                         linkInfo->interfaceInfos.push_back(interfaceInfo);
                         // visit neighbors (and potentially the whole LAN, recursively)
-                        if (networkInterface->isWireless()) {
+                        if (auto lanId = findDeclaredLanId(topology, networkInterface)) {
+                            std::vector<Node *> deviceNodesVisited;
+                            if (!networkInterface->isWireless()) {
+                                Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
+                                if (linkOut)
+                                    extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, deviceNodesVisited);
+                            }
+                            extractDeclaredLanNeighbors(topology, *lanId, linkInfo, interfacesSeen, deviceNodesVisited);
+                        }
+                        else if (networkInterface->isWireless()) {
                             std::vector<Node *> empty;
                             auto wirelessId = getWirelessId(networkInterface);
                             extractWirelessNeighbors(topology, wirelessId.c_str(), linkInfo, interfacesSeen, empty);
@@ -151,12 +162,14 @@ void L3NetworkConfiguratorBase::extractTopology(Topology& topology)
         }
     }
 
+    addDeclaredLanLinks(topology);
+
     // collect wireless LAN interface infos into a map
     std::map<std::string, std::vector<InterfaceInfo *>> wirelessIdToInterfaceInfosMap;
     for (auto& entry : topology.interfaceInfos) {
         InterfaceInfo *interfaceInfo = entry.second;
         NetworkInterface *networkInterface = interfaceInfo->networkInterface;
-        if (!networkInterface->isLoopback() && networkInterface->isWireless()) {
+        if (!networkInterface->isLoopback() && networkInterface->isWireless() && !findDeclaredLanId(topology, networkInterface)) {
             auto wirelessId = getWirelessId(networkInterface);
             wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
         }
@@ -195,13 +208,17 @@ void L3NetworkConfiguratorBase::extractWiredNeighbors(Topology& topology, Topolo
     IInterfaceTable *interfaceTable = node->interfaceTable;
     if (!isBridgeNode(node)) {
         NetworkInterface *networkInterface = interfaceTable->findInterfaceByNodeInputGateId(inputGateId);
-        if (!networkInterface) {
+        if (auto lanId = findDeclaredLanId(topology, node->module->gate(inputGateId)))
+            extractDeclaredLanNeighbors(topology, *lanId, linkInfo, interfacesSeen, deviceNodesVisited);
+        else if (!networkInterface) {
             // no such interface (node is probably down); we should probably get the information from our (future) internal database
         }
         else if (!containsKey(interfacesSeen, networkInterface->getId())) {
             InterfaceInfo *neighborInterfaceInfo = createInterfaceInfo(topology, node, linkInfo, networkInterface);
             linkInfo->interfaceInfos.push_back(neighborInterfaceInfo);
             interfacesSeen[networkInterface->getId()] = networkInterface;
+            if (auto lanId = findDeclaredLanId(topology, networkInterface))
+                extractDeclaredLanNeighbors(topology, *lanId, linkInfo, interfacesSeen, deviceNodesVisited);
         }
     }
     else {
@@ -218,7 +235,7 @@ void L3NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, con
         if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 NetworkInterface *networkInterface = interfaceTable->getInterface(j);
-                if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId()) && networkInterface->isWireless()) {
+                if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId()) && networkInterface->isWireless() && !findDeclaredLanId(topology, networkInterface)) {
                     if (getWirelessId(networkInterface) == wirelessId) {
                         if (!isBridgeNode(node)) {
                             InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, networkInterface);
@@ -239,14 +256,23 @@ void L3NetworkConfiguratorBase::extractWirelessNeighbors(Topology& topology, con
 void L3NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     deviceNodesVisited.push_back(node);
+    // the bridge port members of a bridge node are ports of the bridge, as its interfaces are
+    for (cModule::GateIterator it(node->module); !it.end(); it++)
+        if (auto lanId = findDeclaredLanId(topology, *it))
+            extractDeclaredLanNeighbors(topology, *lanId, linkInfo, interfacesSeen, deviceNodesVisited);
     IInterfaceTable *interfaceTable = node->interfaceTable;
     if (interfaceTable) {
         // switch and access point
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             NetworkInterface *networkInterface = interfaceTable->getInterface(i);
             if (!networkInterface->isLoopback() && !containsKey(interfacesSeen, networkInterface->getId())) {
-                if (networkInterface->isWireless())
-                    extractWirelessNeighbors(topology, getWirelessId(networkInterface).c_str(), linkInfo, interfacesSeen, deviceNodesVisited);
+                auto lanId = findDeclaredLanId(topology, networkInterface);
+                if (lanId)
+                    extractDeclaredLanNeighbors(topology, *lanId, linkInfo, interfacesSeen, deviceNodesVisited);
+                if (networkInterface->isWireless()) {
+                    if (!lanId)
+                        extractWirelessNeighbors(topology, getWirelessId(networkInterface).c_str(), linkInfo, interfacesSeen, deviceNodesVisited);
+                }
                 else {
                     Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
                     if (linkOut)
@@ -262,6 +288,163 @@ void L3NetworkConfiguratorBase::extractDeviceNeighbors(Topology& topology, Node 
             extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, deviceNodesVisited);
         }
     }
+}
+
+void L3NetworkConfiguratorBase::extractDeclaredLans(Topology& topology)
+{
+    std::set<int> bridgePortsSeen;
+    cXMLElementList lanElements = configuration->getChildrenByTagName("lan");
+    for (auto& lanElement : lanElements) {
+        const char *idAttr = lanElement->getAttribute("id"); // identifier of the LAN
+        std::string lanId = idAttr ? idAttr : lanElement->getSourceLocation();
+        try {
+            if (containsKey(topology.declaredLans, lanId))
+                throw cRuntimeError("Another <lan> element has the id '%s'", lanId.c_str());
+            DeclaredLan& lan = topology.declaredLans[lanId];
+            lan.id = idAttr ? idAttr : "";
+            for (auto& interfaceElement : lanElement->getChildrenByTagName("interface")) {
+                const char *hostsAttr = interfaceElement->getAttribute("hosts"); // "host* router[0..3]"
+                const char *namesAttr = interfaceElement->getAttribute("names"); // interface names, like "eth* ppp0"
+                const char *interfaceTableAttr = interfaceElement->getAttribute("interfaceTableModule"); // path relative to the host, like "bridge.interfaceTable"
+                Matcher hostMatcher(hostsAttr);
+                Matcher nameMatcher(namesAttr);
+                for (int i = 0; i < topology.getNumNodes(); i++) {
+                    Node *node = (Node *)topology.getNode(i);
+                    std::string hostFullPath = node->module->getFullPath();
+                    std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
+                    if (!hostMatcher.matchesAny() && !hostMatcher.matches(hostShortenedFullPath.c_str()) && !hostMatcher.matches(hostFullPath.c_str()))
+                        continue;
+                    IInterfaceTable *interfaceTable = node->interfaceTable;
+                    if (!opp_isempty(interfaceTableAttr)) {
+                        cModule *interfaceTableModule = node->module->findModuleByPath((std::string(".") + interfaceTableAttr).c_str());
+                        if (interfaceTableModule == nullptr)
+                            continue; // the host has no such module
+                        interfaceTable = dynamic_cast<IInterfaceTable *>(interfaceTableModule);
+                        if (interfaceTable == nullptr)
+                            throw cRuntimeError("Module '%s' is not an interface table", interfaceTableModule->getFullPath().c_str());
+                    }
+                    if (interfaceTable == nullptr)
+                        continue;
+                    bool isBridgePort = interfaceTable != node->interfaceTable;
+                    for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
+                        NetworkInterface *networkInterface = interfaceTable->getInterface(j);
+                        if (networkInterface->isLoopback() || !nameMatcher.matches(networkInterface->getInterfaceName()))
+                            continue;
+                        if (!isBridgePort) {
+                            if (containsKey(topology.declaredLanIdOfInterface, networkInterface->getId()))
+                                continue; // the first matching element applies
+                            topology.declaredLanIdOfInterface[networkInterface->getId()] = lanId;
+                            lan.interfaces.push_back({node, networkInterface});
+                        }
+                        else {
+                            if (!bridgePortsSeen.insert(networkInterface->getId()).second)
+                                continue; // the first matching element applies
+                            // the node gates of the bridge port carry the frames of the bridge, not of the node's network layer
+                            for (int gateId : { networkInterface->getNodeOutputGateId(), networkInterface->getNodeInputGateId() })
+                                if (gateId != -1)
+                                    topology.declaredLanIdOfGate[node->module->gate(gateId)] = lanId;
+                            lan.bridgePorts.push_back({node, networkInterface});
+                        }
+                    }
+                }
+            }
+        }
+        catch (std::exception& e) {
+            throw cRuntimeError("Error in XML <lan> element at %s: %s", lanElement->getSourceLocation(), e.what());
+        }
+    }
+}
+
+void L3NetworkConfiguratorBase::extractDeclaredLanNeighbors(Topology& topology, const std::string& lanId, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+{
+    if (!linkInfo->declaredLanIds.insert(lanId).second)
+        return;
+    const DeclaredLan& lan = topology.declaredLans[lanId];
+    for (auto& [node, networkInterface] : lan.interfaces) {
+        if (isBridgeNode(node)) {
+            if (!contains(deviceNodesVisited, node))
+                extractDeviceNeighbors(topology, node, linkInfo, interfacesSeen, deviceNodesVisited);
+        }
+        else if (!containsKey(interfacesSeen, networkInterface->getId())) {
+            InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, networkInterface);
+            linkInfo->interfaceInfos.push_back(interfaceInfo);
+            interfacesSeen[networkInterface->getId()] = networkInterface;
+            if (!networkInterface->isWireless()) {
+                Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
+                if (linkOut)
+                    extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, deviceNodesVisited);
+            }
+        }
+    }
+    for (auto& [node, networkInterface] : lan.bridgePorts) {
+        Topology::Link *linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
+        if (linkOut)
+            extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, deviceNodesVisited);
+    }
+}
+
+void L3NetworkConfiguratorBase::addDeclaredLanLinks(Topology& topology)
+{
+    // the node gate of a bridge port carries the frames of a bridge, so its connection is no path of the network layer of its node
+    std::vector<Topology::Link *> gateLinks;
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        for (int j = 0; j < node->getNumOutLinks(); j++) {
+            Topology::Link *linkOut = node->getLinkOut(j);
+            const cGate *localGate = linkOut->getLinkOutLocalNode()->getModule()->gate(linkOut->getLinkOutLocalGateId());
+            const cGate *remoteGate = linkOut->getLinkOutRemoteNode()->getModule()->gate(linkOut->getLinkOutRemoteGateId());
+            if (findDeclaredLanId(topology, localGate) || findDeclaredLanId(topology, remoteGate))
+                gateLinks.push_back(linkOut);
+        }
+    }
+    for (auto linkOut : gateLinks)
+        topology.deleteLink(linkOut);
+    // connect all network layer interfaces of a declared LAN to each other (full graph)
+    for (auto& linkInfo : topology.linkInfos) {
+        if (linkInfo->declaredLanIds.empty())
+            continue;
+        std::vector<InterfaceInfo *>& interfaceInfos = linkInfo->interfaceInfos;
+        for (size_t i = 0; i < interfaceInfos.size(); i++) {
+            InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);
+            for (size_t j = i + 1; j < interfaceInfos.size(); j++) {
+                InterfaceInfo *interfaceInfoJ = interfaceInfos.at(j);
+                if (interfaceInfoI->node == interfaceInfoJ->node)
+                    continue;
+                Link *linkIJ = new Link();
+                linkIJ->sourceInterfaceInfo = interfaceInfoI;
+                linkIJ->destinationInterfaceInfo = interfaceInfoJ;
+                linkIJ->isDeclaredLanLink = true;
+                topology.addLink(linkIJ, interfaceInfoI->node, interfaceInfoJ->node);
+                Link *linkJI = new Link();
+                linkJI->sourceInterfaceInfo = interfaceInfoJ;
+                linkJI->destinationInterfaceInfo = interfaceInfoI;
+                linkJI->isDeclaredLanLink = true;
+                topology.addLink(linkJI, interfaceInfoJ->node, interfaceInfoI->node);
+            }
+        }
+    }
+}
+
+const std::string *L3NetworkConfiguratorBase::findDeclaredLanId(Topology& topology, NetworkInterface *networkInterface)
+{
+    auto it = topology.declaredLanIdOfInterface.find(networkInterface->getId());
+    return it != topology.declaredLanIdOfInterface.end() ? &it->second : nullptr;
+}
+
+const std::string *L3NetworkConfiguratorBase::findDeclaredLanId(Topology& topology, const cGate *gate)
+{
+    auto it = topology.declaredLanIdOfGate.find(gate);
+    return it != topology.declaredLanIdOfGate.end() ? &it->second : nullptr;
+}
+
+std::string L3NetworkConfiguratorBase::getInterfaceTablePathOfBridgePort(Node *node, NetworkInterface *networkInterface)
+{
+    // the interfaceTableModule attribute of the <interface> element in a <lan> element: relative to the host
+    auto interfaceTableModule = check_and_cast<cModule *>(networkInterface->getInterfaceTable());
+    std::string hostFullPath = node->module->getFullPath();
+    std::string interfaceTableFullPath = interfaceTableModule->getFullPath();
+    ASSERT(interfaceTableFullPath.compare(0, hostFullPath.size() + 1, hostFullPath + ".") == 0);
+    return interfaceTableFullPath.substr(hostFullPath.size() + 1);
 }
 
 // TODO replace isBridgeNode with isBridgedInterfaces(NetworkInterface *entry1, NetworkInterface *entry2)
@@ -322,6 +505,8 @@ double L3NetworkConfiguratorBase::computeLinkWeight(Link *link, const char *metr
         return std::numeric_limits<double>::infinity();
     else if (link->destinationInterfaceInfo != nullptr && (!link->destinationInterfaceInfo->networkInterface->isUp() || !link->destinationInterfaceInfo->networkInterface->hasCarrier()))
         return std::numeric_limits<double>::infinity();
+    else if (link->isDeclaredLanLink)
+        return computeDeclaredLanLinkWeight(link, metric, parameters);
     else if ((link->sourceInterfaceInfo && link->sourceInterfaceInfo->networkInterface->isWireless()) ||
         (link->destinationInterfaceInfo && link->destinationInterfaceInfo->networkInterface->isWireless()))
         return computeWirelessLinkWeight(link, metric, parameters);
@@ -368,6 +553,19 @@ double L3NetworkConfiguratorBase::computeWiredLinkWeight(Link *link, const char 
         else
             throw cRuntimeError("Unknown metric");
     }
+}
+
+double L3NetworkConfiguratorBase::computeDeclaredLanLinkWeight(Link *link, const char *metric, cXMLElement *parameters)
+{
+    const char *costAttribute = parameters->getAttribute("cost");
+    if (costAttribute != nullptr)
+        return parseCostAttribute(costAttribute);
+    else if (!strcmp(metric, "hopCount"))
+        return 1;
+    else if (!strcmp(metric, "delay") || !strcmp(metric, "dataRate") || !strcmp(metric, "errorRate"))
+        return minLinkWeight; // the link has no channel to measure
+    else
+        throw cRuntimeError("Unknown metric");
 }
 
 double L3NetworkConfiguratorBase::computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters)

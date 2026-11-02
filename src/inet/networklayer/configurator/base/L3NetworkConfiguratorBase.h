@@ -10,6 +10,7 @@
 
 #include "inet/common/SimpleModule.h"
 #include <algorithm>
+#include <set>
 
 #include "inet/common/INETMath.h"
 #include "inet/common/PatternMatcher.h"
@@ -48,6 +49,7 @@ class INET_API L3NetworkConfiguratorBase : public SimpleModule, public L3Address
       public:
         InterfaceInfo *sourceInterfaceInfo = nullptr;
         InterfaceInfo *destinationInterfaceInfo = nullptr;
+        bool isDeclaredLanLink = false; // connects two interfaces of a declared LAN (see the <lan> element) directly, without a channel
 
       public:
         Link() {}
@@ -83,9 +85,20 @@ class INET_API L3NetworkConfiguratorBase : public SimpleModule, public L3Address
         std::vector<InterfaceInfo *> interfaceInfos; // interfaces on that LAN or point-to-point link
         InterfaceInfo *gatewayInterfaceInfo = nullptr; // non-nullptr if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
         int networkId = 0;
+        std::set<std::string> declaredLanIds; // the declared LANs (<lan> elements) that this link contains
 
       public:
         LinkInfo() {}
+    };
+
+    /**
+     * Represents the members of a LAN declared by a <lan> element of the configuration.
+     */
+    class INET_API DeclaredLan {
+      public:
+        std::string id; // the id attribute of the <lan> element, empty if it has none
+        std::vector<std::pair<Node *, NetworkInterface *>> interfaces; // network layer interfaces on the LAN
+        std::vector<std::pair<Node *, NetworkInterface *>> bridgePorts; // interfaces of another interface table of their node: ports of a bridge inside the node
     };
 
     /**
@@ -95,6 +108,9 @@ class INET_API L3NetworkConfiguratorBase : public SimpleModule, public L3Address
       public:
         std::vector<LinkInfo *> linkInfos; // all links in the network
         std::map<int, InterfaceInfo *> interfaceInfos; // all interfaces in the network
+        std::map<std::string, DeclaredLan> declaredLans; // the declared LANs by id, or by source location when the <lan> element has no id
+        std::map<int, std::string> declaredLanIdOfInterface; // the declared LAN of each network layer interface member, by interface module id
+        std::map<const cGate *, std::string> declaredLanIdOfGate; // the declared LAN of the node gates of each bridge port member, both halves of an inout gate
 
       public:
         virtual ~Topology() { for (auto& linkInfo : linkInfos) delete linkInfo; }
@@ -105,6 +121,9 @@ class INET_API L3NetworkConfiguratorBase : public SimpleModule, public L3Address
                 delete linkInfo;
             linkInfos.clear();
             interfaceInfos.clear();
+            declaredLans.clear();
+            declaredLanIdOfInterface.clear();
+            declaredLanIdOfGate.clear();
         }
 
       protected:
@@ -161,11 +180,18 @@ class INET_API L3NetworkConfiguratorBase : public SimpleModule, public L3Address
     virtual void extractWiredNeighbors(Topology& topology, Topology::Link *linkOut, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& nodesVisited);
     virtual void extractWirelessNeighbors(Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& nodesVisited);
     virtual void extractDeviceNeighbors(Topology& topology, Node *node, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
+    virtual void extractDeclaredLans(Topology& topology);
+    virtual void extractDeclaredLanNeighbors(Topology& topology, const std::string& lanId, LinkInfo *linkInfo, std::map<int, NetworkInterface *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
+    virtual void addDeclaredLanLinks(Topology& topology);
+    virtual const std::string *findDeclaredLanId(Topology& topology, NetworkInterface *networkInterface);
+    virtual const std::string *findDeclaredLanId(Topology& topology, const cGate *gate);
+    static std::string getInterfaceTablePathOfBridgePort(Node *node, NetworkInterface *networkInterface);
     virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
     virtual double computeNodeWeight(Node *node, const char *metric, cXMLElement *parameters);
     virtual double computeLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
     virtual double computeWiredLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
     virtual double computeWirelessLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
+    virtual double computeDeclaredLanLinkWeight(Link *link, const char *metric, cXMLElement *parameters);
     virtual bool isBridgeNode(Node *node);
     virtual std::string getWirelessId(NetworkInterface *networkInterface);
     virtual InterfaceInfo *createInterfaceInfo(Topology& topology, Node *node, LinkInfo *linkInfo, NetworkInterface *networkInterface);

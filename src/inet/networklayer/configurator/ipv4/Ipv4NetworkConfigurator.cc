@@ -950,7 +950,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
         bool hasWireless = false;
         for (auto& element : linkInfo->interfaceInfos) {
             InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(element);
-            if (interfaceInfo->networkInterface->isWireless())
+            if (interfaceInfo->networkInterface->isWireless() && !findDeclaredLanId(topology, interfaceInfo->networkInterface))
                 hasWireless = true;
         }
         if (hasWireless) {
@@ -961,7 +961,7 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
                 if (!first)
                     stream << " ";
                 InterfaceInfo *interfaceInfo = static_cast<InterfaceInfo *>(element);
-                if (interfaceInfo->networkInterface->isWireless()) {
+                if (interfaceInfo->networkInterface->isWireless() && !findDeclaredLanId(topology, interfaceInfo->networkInterface)) {
                     stream << interfaceInfo->node->module->getFullPath() << "%" << interfaceInfo->networkInterface->getInterfaceName();
                     first = false;
                 }
@@ -969,6 +969,21 @@ void Ipv4NetworkConfigurator::dumpConfig(Topology& topology)
             stream << "\"/>" << endl;
             fprintf(f, "%s", stream.str().c_str());
         }
+    }
+
+    // declared LANs
+    for (auto& [lanId, lan] : topology.declaredLans) {
+        if (lan.id.empty())
+            fprintf(f, "   <lan>\n");
+        else
+            fprintf(f, "   <lan id=\"%s\">\n", lan.id.c_str());
+        for (auto& [node, networkInterface] : lan.interfaces)
+            fprintf(f, "      <interface hosts=\"%s\" names=\"%s\"/>\n", node->module->getFullPath().c_str(), networkInterface->getInterfaceName());
+        for (auto& [node, networkInterface] : lan.bridgePorts) {
+            std::string interfaceTablePath = getInterfaceTablePathOfBridgePort(node, networkInterface);
+            fprintf(f, "      <interface hosts=\"%s\" names=\"%s\" interfaceTableModule=\"%s\"/>\n", node->module->getFullPath().c_str(), networkInterface->getInterfaceName(), interfaceTablePath.c_str());
+        }
+        fprintf(f, "   </lan>\n");
     }
 
     // routes

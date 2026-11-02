@@ -239,6 +239,48 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //      patterns. Only interfaces with the specified names are affected. The
 //      default value is "*" that matches all interfaces.
 //
+//  - `<lan>`
+//    The lan element declares a LAN that the configurator cannot find by
+//    following wires: interfaces joined by a path that is not a wire (for
+//    example, a cellular NIC whose frames reach a bridge through a tunnel),
+//    and the ports of a bridge inside a node that routes on its other
+//    interfaces (for example, a router whose bridge has its own interface
+//    table). Its `<interface>` child elements select the members. The
+//    configurator puts the members, and the wired LANs behind them, on one
+//    link: they get addresses in one subnet, and routes among them as among
+//    the hosts of any LAN. When several elements select the same interface,
+//    the first one applies.
+//
+//    - `@id` (optional)
+//      Identifies the LAN in the dumped configuration. Two lan elements with
+//      the same id are an error.
+//
+//    The attributes of the `<interface>` child element:
+//
+//    - `@hosts`
+//      Optional selector attribute that specifies a list of host name patterns.
+//      Only interfaces of the specified hosts are affected. The default value
+//      is "*" that matches all hosts.
+//
+//    - `@names`
+//      Optional selector attribute that specifies a list of interface name
+//      patterns. Only interfaces with the specified names are affected. The
+//      default value is "*" that matches all interfaces.
+//
+//    - `@interfaceTableModule`
+//      Optional path of the interface table that contains the interfaces,
+//      relative to the host (e.g. "bridge.interfaceTable"). The default is
+//      the host's own interface table. The interfaces of the host's own table
+//      are network layer interfaces on the LAN, wired or wireless, with or
+//      without gates. A wired one brings in the LAN behind its wire, too. A
+//      wireless one is not on the link of its wireless network (see
+//      `<wireless>`). The interfaces of another table are ports of a bridge
+//      inside the host: the LAN behind their wires joins the declared LAN,
+//      the host gets no address on it, and their connections are not paths
+//      of the host's network layer when routes are computed. A host that has
+//      no module at the path is not affected; a module that is not an
+//      interface table is an error.
+//
 //  - <multicast-group>
 //    The multicast group element provides multicast network addresses for one
 //    or more interfaces in the network.
