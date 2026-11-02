@@ -17,8 +17,8 @@ The channel utilization statistic is measured by observing the packets which
 are transmitted through the transmission medium over time. For both wired and
 wireless channels, the utilization is measured for any pair of communicating
 network interfaces, separately for both directions. This statistic expresses
-the relative usage of the channel with a value between 0 and 1, where 0 means
-the channel is not used at all and 1 means the channel is fully utilized.
+the relative usage of the channel as a percentage between 0 and 100, where 0 means
+the channel is not used at all and 100 means the channel is fully utilized.
 
 Channel utilization is a statistic of transmitter modules, such as the :ned:`PacketTransmitter` in :ned:`EthernetPhyLayer`.
 The channel utilization is related to channel throughput in the sense that 
@@ -27,12 +27,12 @@ is calculated for the past 0.1s or the last 100 packets, whichever comes first.
 
 .. The parameters of the window, such as the window interval, are configurable from the ini file, as ``module.statistic.parameter``. For example:
 
-These values are configurable from the ini file with the :par:`interval` ([s]) and :par:`numValueLimit` parameters, as ``module.statistic.parameter``.
+These values are configurable from the ini file with the :par:`interval` ([s]) and :par:`numValueLimit` parameters, as ``module.statistic.utilization.parameter``.
 For example:
 
 .. code-block:: ini
 
-   *.host.eth[0].phyLayer.transmitter.utilization.interval = 0.2s
+   *.host.eth[0].phyLayer.transmitter.utilization.utilization.interval = 0.2s
 
 Here is the network:
 
