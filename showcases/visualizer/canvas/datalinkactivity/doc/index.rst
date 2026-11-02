@@ -198,7 +198,9 @@ and ``videoServer``. ``VideoServer`` will be streaming a video to
 The type of the visualizer module is :ned:`IntegratedMultiCanvasVisualizer`.
 Multi-visualizers are compound visualizer modules containing submodule
 vectors of visualizer simple modules. By default, the multi-visualizers
-contain one submodule of each visualizer simple module. The number of
+contain one submodule of each visualizer simple module, except for the
+geographic visualizers (map, sky view, and horizon), which are not
+included unless requested. The number of
 submodules can be specified with parameters for each visualizer
 submodule.
 
