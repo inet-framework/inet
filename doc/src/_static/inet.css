@@ -39,28 +39,46 @@
   opacity: 0.8;
 }
 
+/* In px, as the former site had them: the theme scales rem with the width of the window. */
 .inet-hero__inner {
   position: relative;
-  padding: 2rem 0.8rem 1.6rem;
-  font-size: 1rem;
+  padding: 58px 16px 48px;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1.4286;
 }
 
-.md-typeset .inet-hero__inner h1 {
-  margin: 0 0 0.6rem;
+.inet-hero .inet-hero__inner h1 {
+  margin: 0 0 10px;
   color: inherit;
-  font-size: 2.4rem;
+  font-size: 48px;
   font-weight: 400;
+  line-height: 1.1;
 }
 
 .inet-hero__inner p {
-  margin: 0 0 0.8rem;
+  margin: 0;
+}
+
+.inet-hero__inner p:last-child {
+  margin-bottom: 15px;
+}
+
+.inet-hero .inet-hero__inner .md-button {
+  margin-top: 14px;
+  padding: 8px 12px;
+  border-width: 1px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .md-typeset .inet-hero__highlight,
 .md-typeset .inet-hero__highlight:focus,
 .md-typeset .inet-hero__highlight:hover {
-  background-color: #c71c22;
-  border-color: #c71c22;
+  background-color: var(--inet-strip-color);
+  border-color: var(--inet-strip-color);
   color: #fff;
 }
 
@@ -98,6 +116,8 @@ body:has(.inet-hero) .md-header__title--active .md-header__topic + .md-header__t
   font-size: 1.3em;
   font-weight: 400;
   margin-top: 0.5em;
+  padding-bottom: 3px;
+  border-bottom: 4px solid var(--inet-strip-color);
 }
 
 .md-typeset .rubric.home-subheading {
@@ -168,8 +188,8 @@ video {
     column-count: 1;
   }
 
-  .md-typeset .inet-hero__inner h1 {
-    font-size: 1.8rem;
+  .inet-hero .inet-hero__inner h1 {
+    font-size: 36px;
   }
 }
 

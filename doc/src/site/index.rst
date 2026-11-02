@@ -1,4 +1,5 @@
 :hide-toc:
+:hide-navigation:
 
 ==============
 INET Framework
