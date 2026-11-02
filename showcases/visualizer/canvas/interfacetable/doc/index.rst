@@ -42,18 +42,18 @@ takes a format string, which can contain the following directives:
 -  ``%6``: IPv6 address
 -  ``%n``: network address. This is either the IPv4 or the IPv6 address
 -  ``%l``: netmask length
--  ``%M``: MAC address
+-  ``%m``: MAC address
 -  ``%\\``: conditional newline for wired interfaces. (Note that the backslash
    needs to be doubled, due to escaping.)
 -  ``%s``: the ``str()`` functions for the interface entry class
 
-The default format string is ``"%N %\\%n/%l"``, i.e. interface name, IP
+The default format string is ``"%N %\\%a%/%l"``, i.e. interface name, IP
 address, and netmask length.
 
-The set of visualized interfaces can be selected with the configurator's
+The set of visualized interfaces can be selected with the visualizer's
 :par:`nodeFilter` and :par:`interfaceFilter` parameters. By default, all
 interfaces of all nodes are visualized, except for loopback addresses
-(the default for the :par:`interfaceFilter` parameter is ``"not lo\*"``.)
+(the default for the :par:`interfaceFilter` parameter is ``"not(lo*)"``.)
 
 It is possible to display the labels for wired interfaces above the node
 icons, instead of on the links. This selection can be done by setting the
