@@ -2,11 +2,12 @@
 
 Tcp.nagleEnabled:off -- a small segment goes at once.
 
-The claim (Tcp.ned): "Nagle's algorithm (RFC 896) enabled/disabled".
+The claim (Tcp.ned): "Nagle's algorithm (RFC 896) enabled/disabled; TcpSocket::setNoDelay()
+(TCP_NODELAY) sets it for one connection".
 
-The classes: on (true, the default), off (false). The code: a segment shorter than the MSS
+The classes: on (true, the default), off (false), socket-override (TCP_NODELAY of a socket). The code: a segment shorter than the MSS
 waits while sent data is not acknowledged (TcpConnection::sendData()). TCP_NODELAY of a
-socket takes the place of the parameter; the NED does not say so (PF-5). This test separates "off" from "on".
+socket takes the place of the parameter for its connection (the class socket-override). This test separates "off" from "on".
 
 Host under test: host1, which writes 100 bytes at 0.2 s and 100 bytes at 0.21 s. Observation:
 level 1, the second segment of host1 goes at 0.21 s, before the ACK of the first.

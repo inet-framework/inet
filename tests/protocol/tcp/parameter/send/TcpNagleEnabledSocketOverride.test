@@ -1,0 +1,69 @@
+%description:
+
+Tcp.nagleEnabled:socket-override -- TCP_NODELAY of the socket turns Nagle off for its connection.
+
+The claim (Tcp.ned): "Nagle's algorithm (RFC 896) enabled/disabled; TcpSocket::setNoDelay()
+(TCP_NODELAY) sets it for one connection".
+
+The classes: on (true, the default), off (false), socket-override (TCP_NODELAY of a socket). The code: a segment shorter than the MSS
+waits while sent data is not acknowledged (TcpConnection::sendData()). TCP_NODELAY of a
+socket takes the place of the parameter for its connection (the class socket-override). This test separates "socket-override" from "on": the value is true, as in "on".
+
+Host under test: host1, whose TcpTestApp connects to host2 at 0.1 s, sets TCP_NODELAY on its
+socket at 0.15 s, and writes 100 bytes at 0.2 s and 100 bytes at 0.21 s. Observation: level 1,
+the second segment of host1 goes at 0.21 s, before the ACK of the first.
+
+%# parameter: Tcp.nagleEnabled
+%# class: socket-override
+%# value: true
+%# key: *.host1.tcp.nagleEnabled
+%# expected-result: PASS
+
+%includes:
+#include "ProtocolTest.h"
+#include "TcpTestApp.h"
+
+%global:
+
+using namespace inet;
+using namespace inet::protocoltest;
+
+Define_ProtocolTestProgram()
+{
+    return ProtocolTest("TcpNagleEnabledSocketOverride")
+        .act(action().at(0.1).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().connect(app.addressOf("host2"), 1000); })
+                 .describe("host1 connects to host2"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.synBit == true && tcp.ackBit == false")
+             .capture("isn", "tcp.sequenceNo")
+             .describe("the SYN of host1")
+             .within(0.5))
+        .act(action().at(0.15).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.socket().setNoDelay(true); })
+                 .describe("the socket of host1 sets TCP_NODELAY"))
+        .act(action().at(0.2).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.sendData(app.socket(), 100); })
+                 .describe("host1 writes 100 bytes"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 1 && pk.dataLength > tcp.headerLength")
+             .describe("the first segment of 100 bytes")
+             .within(0.01))
+        .act(action().at(0.21).run<TcpTestApp>("host1.app[0]", [](TcpTestApp& app) { app.sendData(app.socket(), 100); })
+                 .describe("host1 writes 100 bytes again"))
+        .once(on("host1.tcp").signal("packetSentToLower")
+             .filterPacket("tcp.sequenceNo == {isn} + 101 && pk.dataLength > tcp.headerLength")
+             .describe("the second segment of 100 bytes, at once")
+             .within(0.02));
+}
+
+%activity:
+EV << "TcpNagleEnabledSocketOverride compiled\n";
+
+%inifile: omnetpp.ini
+
+[General]
+*.host1.tcp.nagleEnabled = true    # the parameter under test
+*.host1.app[0].typename = "TcpTestApp"
+include ../../parameter/ini/_bulk.ini
+include ../../parameter/ini/_base.ini
+
+%contains: stdout
+PROTOCOLTEST TcpNagleEnabledSocketOverride: PASS
