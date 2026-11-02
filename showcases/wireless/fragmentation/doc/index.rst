@@ -244,9 +244,9 @@ The difference in magnitude between the three curves of ``DCFfrag``, ``HCFfrag``
 and ``HCFfragblockack`` is due to the improvements of each configuration: the use
 of TXOP increases throughput, and the use of TXOP + block acks increases it further.
 
-Secondly, the fragmentation threshold was iterated, using a 1000-byte packet size:
-
 The Block Ack variants in ``parameterstudy.ini`` also select Basic explicitly. Their packet-size, transmit-power, and threshold sweeps retain the historical fragment bitmap. The existing plot series remain measurements of those configurations; they do not demonstrate Compressed support.
+
+Secondly, the fragmentation threshold was iterated, using a 1000-byte packet size:
 
 .. figure:: media/threshold.png
    :width: 90%
