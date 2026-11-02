@@ -79,6 +79,20 @@ import inet.networklayer.configurator.base.L3NetworkConfiguratorBase;
 //    - `@advDefaultLifetime` - Router Lifetime in RAs in seconds (default: 3*maxRtrAdvInterval)
 //    - `@dupAddrDetectTransmits` - number of NS sent for DAD (default: 1; 0 = disable DAD)
 //
+//  - `<lan>`
+//    Declares a LAN that the configurator cannot find by following wires; its
+//    `<interface>` child elements select the members, and the members and the
+//    wired LANs behind them get one /64 prefix. The attributes are those of
+//    ~Ipv4NetworkConfigurator's `<lan>` element.
+//
+//    - `@id` - identifies the LAN (optional; two lan elements with the same id are an error)
+//    - `<interface>` child elements:
+//      - `@hosts` - host name pattern selector (default: "*")
+//      - `@names` - interface name pattern selector (default: "*")
+//      - `@interfaceTableModule` - path of the interface table, relative to the host (default: the host's
+//        own table, whose interfaces are network layer interfaces on the LAN); the interfaces of another
+//        table are ports of a bridge inside the host, whose LANs join the declared LAN
+//
 //  - `<route>`
 //    Adds manual static routes.
 //
