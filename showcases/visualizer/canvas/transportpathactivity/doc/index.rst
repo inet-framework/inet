@@ -15,7 +15,7 @@ of the transport path activity visualizer, allowing for a comprehensive
 understanding of its features.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/transportpathactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/transportpathactivity>`__
+| Source files location: `inet/showcases/visualizer/canvas/transportpathactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/transportpathactivity>`__
 
 About the Visualizer
 --------------------

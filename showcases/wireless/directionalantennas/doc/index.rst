@@ -22,7 +22,7 @@ will understand the different antenna models available in INET and how
 they can be used to simulate the directionality of antennas.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/wireless/directionalantennas <https://github.com/inet-framework/inet/tree/master/showcases/general/directionalantennas>`__
+| Source files location: `inet/showcases/wireless/directionalantennas <https://github.com/inet-framework/inet/tree/master/showcases/wireless/directionalantennas>`__
 
 Concepts
 --------

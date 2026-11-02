@@ -14,7 +14,7 @@ This showcase features five different simulation models, each designed to
 demonstrate different capabilities of the data link activity visualizer.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/datalinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/datalinkactivity>`__
+| Source files location: `inet/showcases/visualizer/canvas/datalinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/datalinkactivity>`__
 
 About the Visualizer
 --------------------

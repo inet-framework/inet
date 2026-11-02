@@ -12,7 +12,7 @@ In this showcase, we demonstrate how to display the SSID of each node, making it
 easier to understand the network membership and how it changes over time.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/ieee80211 <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/ieee80211>`__
+| Source files location: `inet/showcases/visualizer/canvas/ieee80211 <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/ieee80211>`__
 
 About the visualizer
 --------------------

@@ -16,7 +16,7 @@ simulations and how to customize their appearance.
 .. note:: This showcase requires OMNeT++ built with OSG enabled.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/networknode <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/networknode>`__
+| Source files location: `inet/showcases/visualizer/osg/networknode <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/osg/networknode>`__
 
 About the Visualizer
 --------------------

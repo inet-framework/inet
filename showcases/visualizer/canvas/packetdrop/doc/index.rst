@@ -13,7 +13,7 @@ packet drops resulting from issues such as retransmission in wireless networks
 and overflowing queues in bottleneck routers.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/packetdrop <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/packetdrop>`__
+| Source files location: `inet/showcases/visualizer/canvas/packetdrop <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/packetdrop>`__
 
 About the visualizer
 --------------------

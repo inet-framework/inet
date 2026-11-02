@@ -14,7 +14,7 @@ The showcase contains four simulation models, each demonstrating different
 features of the network path activity visualizer.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/networkpathactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/networkpathactivity>`__
+| Source files location: `inet/showcases/visualizer/canvas/networkpathactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/networkpathactivity>`__
 
 About the Visualizer
 --------------------

@@ -11,7 +11,7 @@ taking measurements on them, such as elapsed time, time spent in queues, or
 transmission time.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/general/flowmeasurement <https://github.com/inet-framework/inet/tree/master/showcases/general/flowmeasurement>`__
+| Source files location: `inet/showcases/measurement/flow <https://github.com/inet-framework/inet/tree/master/showcases/measurement/flow>`__
 
 The Model
 ---------

@@ -13,7 +13,7 @@ In this showcase, we will present two example simulations that demonstrate the
 visualization of TCP connections.
 
 | Verified with INET version: ``3.6``
-| Source files location: `inet/showcases/visualizer/transportconnection <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/transportconnection>`__
+| Source files location: `inet/showcases/visualizer/canvas/transportconnection <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/transportconnection>`__
 
 About the visualizer
 --------------------

@@ -15,7 +15,7 @@ features of the radio medium activity visualizer, increasing in complexity
 from one model to the next.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/radiomediumactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/radiomediumactivity>`__
+| Source files location: `inet/showcases/visualizer/canvas/radiomediumactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/radiomediumactivity>`__
 
 About the visualizer
 --------------------

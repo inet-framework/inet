@@ -14,7 +14,7 @@ This showcase consists of three simulation models that demonstrate the different
 capabilities of :ned:`PhysicalLinkCanvasVisualizer`.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/physicallinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/physicallinkactivity>`__
+| Source files location: `inet/showcases/visualizer/canvas/physicallinkactivity <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/physicallinkactivity>`__
 
 About the Visualizer
 --------------------

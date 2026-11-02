@@ -18,7 +18,7 @@ features two example simulations, demonstrating both basic and advanced features
 of the visualization.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/statistic <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/statistic>`__
+| Source files location: `inet/showcases/visualizer/canvas/statistic <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/statistic>`__
 
 About the visualizer
 --------------------

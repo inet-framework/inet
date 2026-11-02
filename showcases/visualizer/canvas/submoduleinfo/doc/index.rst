@@ -19,7 +19,7 @@ display (1) the number of packets sent and received by an application, and (2)
 the IEEE 802.11 MAC state information, on the network level.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/submoduleinfo <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/submoduleinfo>`__
+| Source files location: `inet/showcases/visualizer/canvas/submoduleinfo <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/submoduleinfo>`__
 
 About the visualizer
 --------------------

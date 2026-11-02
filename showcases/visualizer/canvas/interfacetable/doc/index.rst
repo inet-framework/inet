@@ -18,7 +18,7 @@ simulation shows the display of the information with the default settings of the
 visualizer, while the second one focuses on the advanced features.
 
 | Verified with INET version: ``4.6``
-| Source files location: `inet/showcases/visualizer/interfacetable <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/interfacetable>`__
+| Source files location: `inet/showcases/visualizer/canvas/interfacetable <https://github.com/inet-framework/inet/tree/master/showcases/visualizer/canvas/interfacetable>`__
 
 About the visualizer
 --------------------
