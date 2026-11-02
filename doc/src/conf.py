@@ -72,7 +72,6 @@ katex_prerender = False
 
 extlinks = {
     'wiki': ('https://en.wikipedia.org/wiki/%s', '%s'),
-    'docs': (cfg.docs_url('%s'), '%s'),
 }
 
 images_config = {

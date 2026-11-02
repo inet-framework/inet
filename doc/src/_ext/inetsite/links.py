@@ -9,7 +9,9 @@ import posixpath
 import re
 import urllib.parse
 
+from docutils import nodes
 from sphinx.util import logging
+from sphinx.util.nodes import split_explicit_title
 
 from . import config
 
@@ -68,5 +70,13 @@ def on_build_finished(app, exception):
     logger.info(f'made {links} links in {pages} pages relative')
 
 
+def docs_role(name, rawtext, text, lineno, inliner, options=None, content=None):
+    """:docs:`Title <part/path>` links to a page of the documentation: of the latest version, or of the showcases
+    and tutorials, which have no version."""
+    _, title, target = split_explicit_title(text)
+    return [nodes.reference(rawtext, title, refuri=config.current().docs_url(target))], []
+
+
 def setup(app):
+    app.add_role('docs', docs_role)
     app.connect('build-finished', on_build_finished)
