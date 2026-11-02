@@ -13,10 +13,9 @@ OperationalMixin::startActiveOperationExtraTimeOrFinish() after the wait for the
 or at once when no connection waits; it sets the state of TCP to down at once and schedules
 the end of the stage the value later. The facet other-segment: in the extra time the network layer of host1 is up, so it gives
 each arriving segment to TCP, which is down already. TCP takes no part: the segment gets no
-answer, and the run goes on. This test separates "other" from "zero", where the network layer
-is down and the segment does not reach TCP. This test fails: Tcp does not override
-handleMessageWhenDown(), so OperationalMixin stops the run with "Message 'SYN' received when
-Tcp is down" (finding PF-14).
+answer, and the run goes on: Tcp::handleMessageWhenDown() drops what arrives from the network
+layer. This test separates "other" from "zero", where the network layer is down and the segment
+does not reach TCP.
 
 Host under test: host1; host1 has no application. host2 sends a ping to host1 every 50 ms from 0.525 s on, so the
 ping n leaves at 0.525 s + n * 50 ms. The tester stops host1 at 1.0 s with the lifecycle

@@ -168,6 +168,23 @@ TcpConnection *Tcp::findConnForApp(int socketId)
     return i == tcpAppConnMap.end() ? nullptr : i->second;
 }
 
+void Tcp::handleMessageWhenDown(cMessage *msg)
+{
+    // A stopped Tcp takes no part: in the extra time of a stop the network layer is still up and
+    // gives it the segments and ICMP errors that arrive, and they get no answer.
+    if (isLowerMessage(msg)) {
+        EV_WARN << "Tcp is down, dropping " << msg->getName() << "\n";
+        if (auto packet = dynamic_cast<Packet *>(msg)) {
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+        }
+        delete msg;
+    }
+    else
+        TransportProtocolBase::handleMessageWhenDown(msg);
+}
+
 void Tcp::handleLowerPacket(Packet *packet)
 {
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();

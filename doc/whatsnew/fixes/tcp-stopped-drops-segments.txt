@@ -1,0 +1,3 @@
+A stopped Tcp drops the segments that reach it
+
+With a positive stopOperationExtraTime, the layers below TCP stay up after the stage of TCP has ended, and a segment of a peer that reached the stopped Tcp stopped the run with "Message ... received when Tcp is down". Tcp now drops such a segment, and an ICMP error too, without an answer, and emits packetDropped for a segment.

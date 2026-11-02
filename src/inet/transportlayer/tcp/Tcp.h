@@ -223,6 +223,7 @@ class INET_API Tcp : public TransportProtocolBase
     virtual void handleUpperPacket(Packet *packet) override;
     virtual void handleLowerPacket(Packet *packet) override;
     virtual void handleLowerCommand(cMessage *msg) override;
+    virtual void handleMessageWhenDown(cMessage *msg) override;
 
   public:
     /**
