@@ -134,8 +134,8 @@ Further details:
 -  The ``bitrateLinearGauge`` figure's ticks are configured to go from 0 to 54
    Mbps in increments of 6, thus all modes in 802.11g align with ticks,
    e.g. 54, 48, 36, 24 Mbps and so on. The gauge is driven by the
-   ``databitrate`` signal, again divided by 1 million to get the values
-   in Mbps.
+   ``datarateChanged`` signal of the server's rate control module, again
+   divided by 1 million to get the values in Mbps.
 -  The ``perThermometer`` figure displays the packet error rate estimate
    as computed by the client's radio. The ticks go from 0 to 1, in
    increments 0.2. It is driven by the ``packetErrorRate`` signal of the
@@ -149,7 +149,7 @@ Further details:
 -  The ``numRcvdPkCounter`` figure displays the number of data transfers received
    by the client. It takes about 2000 packets to transmit the file, thus
    the number of decimal places to display is set to 4, instead of the
-   default 3. It is driven by the ``rcvdPk`` signal of the client's TCP
+   default 3. It is driven by the ``packetReceived`` signal of the client's TCP
    app, using the ``count`` result filter to count the packets.
 -  The ``progressMeter`` figure is used to display the progress of the file
    transfer. The bytes received by the client's TCP app are summed and
