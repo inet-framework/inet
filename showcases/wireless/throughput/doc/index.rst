@@ -19,7 +19,7 @@ Application-level throughput
 802.11 modes are denoted by the nominal data bitrate (e.g. 54 Mbps).
 However, the bitrate available for an application is less than the
 nominal bitrate because of protocol overhead like preambles, physical and
-MAC headers, TCP and IP headers, interframe spaces, and backoff periods.
+MAC headers, UDP and IP headers, interframe spaces, and backoff periods.
 In this model, the actual application-level throughput is measured.
 
 Configuration
@@ -29,9 +29,9 @@ The network contains two :ned:`WirelessHost`'s, at a distance of 1 meter,
 one of them acting as a traffic source, the other one as a traffic sink. The
 source host sends a UDP stream to the destination host in ad-hoc mode.
 The simulation is run with a small packet size of 100 bytes, 1000 bytes, and the
-default maximum unfragmented packet size in 802.11, 2236 bytes. (The
+default maximum unfragmented packet size in 802.11, 2268 bytes. (The
 maximum transfer unit in 802.11 by default is 2304 bytes, which
-corresponds to 2236 bytes of application data.) The simulation will be
+corresponds to 2268 bytes of application data.) The simulation will be
 run several times, with different bitrates. The UDP application in the
 source host is configured to saturate the channel at all bitrates and
 packet sizes. There will be no packets lost in the physical layer
@@ -74,7 +74,7 @@ the minimal contention window to calculate the theoretical throughput:
 -  and ``backoffDuration`` = ``minContentionWindow`` / 2 \* ``slotTime``
 
 The following plot compares the computed throughput to the results of
-the simulation for all bitrates and both packet sizes:
+the simulation for all bitrates and all three packet sizes:
 
 .. figure:: media/throughput3.png
    :width: 100%
