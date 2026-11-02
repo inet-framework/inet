@@ -1,0 +1,3 @@
+TcpSpoof needs a destination address
+
+The parameter destAddress of TcpSpoof had the default "", which stopped the run at the send with "Address contains no value". The parameter now has no default, and an empty value stops the run at the start with a message about the parameter. A configuration in which the spoof sends its segment sets destAddress already, so it does not change.

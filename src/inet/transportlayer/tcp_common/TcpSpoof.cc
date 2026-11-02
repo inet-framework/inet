@@ -20,6 +20,8 @@ Define_Module(TcpSpoof);
 
 void TcpSpoof::initialize()
 {
+    if (par("destAddress").stdstringValue().empty())
+        throw cRuntimeError("destAddress must name a node or an address, but it is empty");
     simtime_t t = par("t");
     scheduleAt(t, new cMessage("timer"));
 }

@@ -22,7 +22,7 @@ simple TcpSpoof extends SimpleModule like ITcp
     parameters:
         @class(TcpSpoof);
         string srcAddress = default("");  // Local address; may be left empty ("")
-        string destAddress = default(""); // Destination address
+        string destAddress; // Destination address: the name or the address of a node; an empty value stops the run at the start
         int srcPort; // Local port number
         int destPort; // Destination port number
         int seqNo; // Sequence number (-1 for TCP ISS)

@@ -1,6 +1,6 @@
 %description:
 
-TcpSpoof.destAddress:empty -- the default stops the run with an error at the time of the send.
+TcpSpoof.destAddress:empty -- an empty value stops the run at the start with a message about the parameter.
 
 The claim (TcpSpoof.ned): "Sends fabricated TCP packets. ... Compatible with both IPv4
 (~Ipv4) and IPv6 (~Ipv6)." TcpSpoof::sendSpoofPacket() sends one segment at the time t: a
@@ -10,15 +10,15 @@ of isSYN.
 The claim (TcpSpoof.ned): "Destination address".
 
 The classes: host (the name or the address of a node: the segment goes to it, over the
-network protocol of the type of the address) and empty ("", the default: the run stops at
-the time t). The code: TcpSpoof::sendToIP() sets the network protocol of the segment from the
-type of the address; an empty value resolves to an address without a type, whose
-getAddressType() stops the run with "Address contains no value" (finding PF-12). This test separates "empty" from "host".
+network protocol of the type of the address) and empty ("": the run stops at the start). The
+parameter has no default. The code: TcpSpoof::initialize() stops the run for an empty value
+with a message about the parameter; TcpSpoof::sendToIP() sets the network protocol of the
+segment from the type of the address. This test separates "empty" from "host".
 
 Node under test: host1; host1 has TcpSpoof in place of its TCP and no application. The spoof sends one segment at 1 s
 from the port 5000 to host2:1000 with the sequence number 12345 and the SYN bit, unless the
-test changes one of these values. Observation: level 0, the run stops at 1 s with the error of
-L3Address.
+test changes one of these values. Observation: level 0, the run stops at the start with the message
+of TcpSpoof::initialize().
 
 %# parameter: TcpSpoof.destAddress
 %# class: empty
@@ -48,4 +48,4 @@ include ../../parameter/ini/_base.ini
 %exitcode: 1
 
 %contains-regex: stderr
-Address contains no value
+destAddress must name a node or an address, but it is empty

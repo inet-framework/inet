@@ -10,10 +10,10 @@ of isSYN.
 The claim (TcpSpoof.ned): "Destination address".
 
 The classes: host (the name or the address of a node: the segment goes to it, over the
-network protocol of the type of the address) and empty ("", the default: the run stops at
-the time t). The code: TcpSpoof::sendToIP() sets the network protocol of the segment from the
-type of the address; an empty value resolves to an address without a type, whose
-getAddressType() stops the run with "Address contains no value" (finding PF-12). The facet host-ipv6: the address of a node on IPv6 hosts has the type IPv6, so the network
+network protocol of the type of the address) and empty ("": the run stops at the start). The
+parameter has no default. The code: TcpSpoof::initialize() stops the run for an empty value
+with a message about the parameter; TcpSpoof::sendToIP() sets the network protocol of the
+segment from the type of the address. The facet host-ipv6: the address of a node on IPv6 hosts has the type IPv6, so the network
 protocol of the segment is IPv6. This test separates "host" from "empty" on IPv6 hosts.
 
 Node under test: host1, on IPv6 hosts (precondition), with the time 3 s, after the address
