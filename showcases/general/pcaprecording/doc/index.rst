@@ -46,7 +46,7 @@ which are of the specified protocol type at the level of capture, but
 not the protocol type of encapsulated packets. The parameter takes
 protocol names registered in INET (see
 `/inet/src/inet/common/Protocol.cc <https://github.com/inet-framework/inet/blob/master/src/inet/common/Protocol.cc>`__)
-The parameter's default value is ``"ethernetmac ppp ieee80211mac"``.
+The parameter's default value is ``"ethernetmac ethernetmacnofcs ppp ieee80211mac"``.
 
 By default, the PCAP recorder module records L2 frames, but setting the
 :par:`moduleNamePatterns` to ``ipv4``, for example, lets one record L3
@@ -188,7 +188,7 @@ Here is the ini configuration:
 
 In ``ethHost2``, we'll only record IPv4 frames, without network layer protocol information. The
 :par:`dumpProtocols` parameter's default is
-``ethernetmac ppp ieee80211mac``, so it has to be set to ``ipv4``.
+``ethernetmac ethernetmacnofcs ppp ieee80211mac``, so it has to be set to ``ipv4``.
 
 .. literalinclude:: ../omnetpp.ini
    :language: ini
