@@ -137,8 +137,8 @@ class:
    :start-at: host2.numPcapRecorders
    :end-at: packetFilter
 
-The :par:`packetFilter` parameter's value ``*ArpPacket`` matches the
-``inet::ArpPacket`` class. There is an ARP request packet open in the
+The :par:`packetFilter` expression ``has(ArpPacket)`` matches packets that contain an
+``inet::ArpPacket`` chunk. There is an ARP request packet open in the
 packet inspector on the following image:
 
 .. figure:: media/arppacketclass.png
