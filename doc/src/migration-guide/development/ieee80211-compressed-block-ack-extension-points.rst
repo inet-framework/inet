@@ -17,7 +17,7 @@ Custom recipient ACK policies must implement ``computeCompressedBlockAckDuration
 
 Custom recipient data services must accept ``bool interframe = false`` in ``dataFrameReceived()``. Rx establishes the local SIFS or permitted RIFS relation. HCF passes the frame's ``Ieee80211InterframeInd`` result through this boolean argument. An absent indication supplies false. Preserve that value through the recipient reorder path. Custom callers that omit it retain false.
 
-The detector supports coverage class zero. An outside local gap supplies no interval evidence. A valid frame and its positive receipt can remain behind unresolved sequence gaps until BAR processing or another recovery action permits delivery. Custom ``IRx`` implementations must implement the history invalidation operation described in :doc:`ieee80211-local-interframe`.
+The detector supports coverage class zero. An outside local gap supplies no interval evidence. A valid frame and its positive receipt can remain behind unresolved sequence gaps until BAR processing or another recovery action permits delivery. Custom ``IRx`` implementations must implement the history invalidation operation described in `Local IEEE 802.11 interval evidence`_.
 
 Custom frame sequences must supply HCF's resolved profile to ``QoSContext``. Its constructor retains Basic for callers that omit the profile. Custom agreement creation must set the recipient agreement's variant before use. An agreement must retain that variant throughout its lifetime.
 
