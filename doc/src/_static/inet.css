@@ -276,29 +276,6 @@ video {
   color: #fff;
 }
 
-/* The drawer of the navigation on narrow screens puts the name of the site to the right of a smaller logo, not
-   under it. A copy of the rule of omnetpp_immaterial, until the doc-builder image has it. */
-@media screen and (max-width: 76.2344em) {
-  .md-nav--primary .md-nav__title[for="__drawer"] {
-    min-height: 0;
-    padding: 0.6rem 0.8rem;
-    align-items: center;
-    line-height: 1.6rem;
-  }
-
-  .md-nav--primary .md-nav__title[for="__drawer"] .md-logo {
-    position: static;
-    flex-shrink: 0;
-    margin: 0 0.6rem 0 0;
-    padding: 0;
-  }
-
-  .md-nav--primary .md-nav__title[for="__drawer"] .md-logo img {
-    width: auto;
-    height: 1.6rem;
-  }
-}
-
 /* inet_nav_blank (_ext/inetsite/nav.py). On narrow screens the sidebar is the drawer of the whole navigation. */
 @media screen and (min-width: 76.25em) {
   .inet-nav-blank ~ .md-sidebar--primary .md-sidebar__scrollwrap {
