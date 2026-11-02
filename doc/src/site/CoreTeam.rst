@@ -5,7 +5,6 @@ Core Team
 The INET Framework is maintained for the community by a small team of OMNeT++
 developers, relying on contributions from the community.
 
-| Zoltan Bojthe (`zbojthe <https://github.com/ZoltanBojthe>`__)
 | Levente Meszaros (`levy <https://github.com/levy>`__)
 | György Szászkő (`adam.szaszko <https://github.com/adamgeorge309>`__)
 | Rudolf Hornig (`rudi <https://github.com/rhornig>`__)
