@@ -90,8 +90,8 @@ The :ned:`Gptp` module has the following distinct mechanisms:
 
 Nodes send sync and peer delay measurement messages periodically. The period and
 offset of sync and peer delay measurement messages can be specified by
-parameters (:par:`syncInterval`, :par:`pDelayInterval`,
-:par:`syncInitialOffset`, :par:`pDelayInitialOffset`).
+parameters (:par:`syncInterval`, :par:`pdelayInterval`,
+:par:`syncInitialOffset`, :par:`pdelayInitialOffset`).
 
 When nodes have multiple gPTP time domains, each time domain has a corresponding
 :ned:`Gptp` module. The :ned:`MultiDomainGptp` module makes this convenient, as
@@ -239,7 +239,7 @@ Here is the configuration for the switches:
 
 We configure the switches to have two clocks and two :ned:`Gptp` modules (one
 for each domain). We then specify the spanning tree by setting the ports (the
-:par:`gptpModuleType` is ``BRIDGE_NODE`` by default in :ned:`TsnSwitch`, so we
+:par:`gptpNodeType` is ``BRIDGE_NODE`` by default in :ned:`TsnSwitch`, so we
 don't need to specify that). In both domains, the interface connecting to the
 clock node is the slave port, and the others are master ports. The only
 exception is that ``tsnSwitch1`` shouldn't send sync messages to ``tsnClock1``
