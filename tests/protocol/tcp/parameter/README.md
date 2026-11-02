@@ -12,25 +12,25 @@ this file gives what is special to this folder.
 
 ## The groups
 
-The 330 tests cover the 116 parameters of the modules of `transportlayer/tcp` and of
+The 339 tests cover the 116 parameters of the modules of `transportlayer/tcp` and of
 `TcpSpoof`. Each folder is a group of parameters, in the order of the NED comment of `Tcp`:
 
 | Folder | Parameters | Tests |
 | --- | --- | ---: |
-| `ack/` | acknowledgments | 13 |
-| `setup/` | connection setup and header options | 35 |
-| `send/` | sending data | 17 |
+| `ack/` | acknowledgments | 14 |
+| `setup/` | connection setup and header options | 37 |
+| `send/` | sending data | 18 |
 | `rto/` | retransmission timeout | 13 |
-| `congestion/` | congestion control and the algorithm modules | 81 |
+| `congestion/` | congestion control and the algorithm modules | 82 |
 | `recovery/` | loss detection and recovery | 26 |
 | `receive/` | receive window and buffer | 26 |
 | `close/` | connection close, the checks of arriving segments, ICMP errors | 15 |
 | `ecn/` | ECN and AccECN | 20 |
 | `pmtu/` | path MTU | 15 |
-| `keepalive/` | keepalive | 11 |
+| `keepalive/` | keepalive | 13 |
 | `fastopen/` | TCP Fast Open | 34 |
-| `module/` | the checksum and the stop of the module `Tcp` | 10 |
-| `spoof/` | `TcpSpoof` | 14 |
+| `module/` | the checksum and the stop of the module `Tcp` | 11 |
+| `spoof/` | `TcpSpoof` | 15 |
 
 ## The names of the classes
 
