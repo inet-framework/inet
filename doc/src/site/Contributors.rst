@@ -16,7 +16,7 @@ The following people have contributed to the INET Framework. Scroll down for aff
 - Adriano :small:`(SimpleVoIP)`
 - Ahmed Ayadi :small:`(RTP)`
 - Alberto Cortes :small:`(SCTP)`
-- Alfonso Ariza Quintana :small:`(MANET protocols, IEEE 802.11)`
+- Alfonso Ariza Quintana :small:`(MANET protocols, IEEE 802.11, 802.11ac VHT)`
 - Alvaro Torres Cortes :small:`(TraCI)`
 - Amre El-Hoiydi :small:`(CSMA)`
 - Andras Babos :small:`(OSPFv2)`
@@ -26,33 +26,45 @@ The following people have contributed to the INET Framework. Scroll down for aff
 - Anna Foerster :small:`(LMAC, BMAC)`
 - Arndt Buschmann :small:`(RTP)`
 - Bastian Halmos :small:`(TraCI)`
+- Attila Torok\* :small:`(examples, physical layer, tests, QUIC showcase)`
 - Benjamin Martin Seregi\* :small:`(RSTP, physical layer, etc.)`
 - Carlos Calafate :small:`(TCP Vegas/Westwood)`
 - Christian Bauer :small:`(xMIPv6)`
 - Christian Dankbar :small:`(serializers, ExtInterface)`
 - Christian Frank :small:`(Coord)`
 - Christoph Sommer :small:`(TraCI, DYMO-FAU, etc.)`
+- Daniel Zeitler :small:`(MRP)`
 - Damien Piguet :small:`(ProbabilisticBroadcast, WiseRoute)`
 - Daniel Willkomm :small:`(Mobility, Flood, CSMA)`
 - David Eckhoff :small:`(TraCI)`
 - Dimitris Kotsakos :small:`(ProbabilisticBroadcast)`
 - Dirk Holzhausen :small:`(IPSuite)`
+- Ekaterina Volodina :small:`(QUIC)`
 - Emin Ilker Cetinbas :small:`(mobility)`
+- Enkhtuvshin Janchivnyambuu :small:`(gPTP)`
 - Eric Wu :small:`(IPv6, IEEE 802.11)`
 - Erwin Paul Rathgeb :small:`(SCTP)`
 - Falko Dressler :small:`(TraCI)`
 - Faqir Zarrar Yousaf :small:`(Mobile IPv6)`
 - Felix Schmidt-Eisenlohr :small:`(path loss)`
-- Florian Meier :small:`(IEEE 802.15.4)`
+- Felix Weinrank :small:`(traffic generator)`
+- Florian Kauer (formerly Meier) :small:`(IEEE 802.15.4)`
+- Giovanni Nardini :small:`(BGP)`
 - George Alyfantis :small:`(ProbabilisticBroadcast)`
 - Georg Lutz :small:`(RandomWPMobility)`
+- Gyorgy Szaszko\* :small:`(showcases, tutorials)`
 - Hakim Adhari :small:`(SCTP)`
+- Henning Puttnies :small:`(gPTP)`
 - Helene Lageber :small:`(BGP)`
 - Ingmar Baumgart :small:`(IPv4, fixes)`
-- Irene Ruengeler :small:`(SCTP, SCTP apps, serializers)`
+- Irene Ruengeler :small:`(SCTP, SCTP apps, serializers, Packetdrill)`
 - Isabel Dietrich :small:`(StaticGridMobility)`
+- Jan Bloudicek :small:`(EIGRP)`
+- Jan Peter Drees :small:`(XMAC)`
+- Jan Zavrel :small:`(EIGRP)`
 - Jerome Rousselot :small:`(802.15.4 UWB-IR, CSMA, WiseRoute)`
 - Jochen Reber :small:`(IPSuite's IPv4)`
+- Joaquim Oller :small:`(XMAC)`
 - Johnny Lai :small:`(UDPVideoStream, PingApp)`
 - Juan-Carlos Cano :small:`(TCP Vegas/Westwood)`
 - Juan-Carlos Maureira :small:`(DHCP)`
@@ -63,21 +75,31 @@ The following people have contributed to the INET Framework. Scroll down for aff
 - Kristjan V. Jonsson :small:`(HttpTools)`
 - Krzysztof Grochla :small:`(SUIPathLoss)`
 - Levente Meszaros\* :small:`(IEEE 802.11, physical layer, Dymo, GPSR, etc; maintenance)`
+- Lukas Galbicka :small:`(OSPFv3)`
 - Luca Bedogni :small:`(TraCI)`
+- Mani Amoozadeh :small:`(BGP, OSPF, RIP)`
 - Lukas Hluze :small:`(Ieee80211Mac)`
+- Marcel Marek :small:`(IPsec, OSPFv3, DCTCP, RED marker)`
+- Marcell Juhasz :small:`(serializers)`
 - Marcel Steine :small:`(CSMA)`
+- Marcin Bosk :small:`(HTB scheduler)`
 - Marcin Kosiba :small:`(ChiangMobility, GaussMarkovMobility)`
 - Marc Loebbers :small:`(CSMA, ConstSpeedMobility, SnrEval)`
 - Maria Fernandez :small:`(TCP Vegas/Westwood)`
 - Martin Becke :small:`(SCTP, netperfmeter)`
 - Matthias Oppitz :small:`(RTP)`
 - Mathias Bohge :small:`(VoIPStream)`
-- Michael Tuexen :small:`(SCTP, ExtInterface)`
+- Michael Tuexen :small:`(SCTP, ExtInterface, Packetdrill)`
+- Miguel Gonzalez Lopez :small:`(IEEE 802.11 Block Ack, HT)`
+- Mihaly Palenik :small:`(instrument figures)`
+- Mohammad HabibAllah :small:`(TCP ECN)`
 - Mohamed Louizi :small:`(DYMO-FAU)`
 - Martin Renwanz :small:`(VoIPStream)`
 - Oliver Graute :small:`(path loss)`
+- Peter Danielis :small:`(gPTP)`
 - Peterpaul Klein Haneveld :small:`(TractorMobility)`
 - Pietro Manzoni :small:`(TCP Vegas/Westwood)`
+- Raphael Riebl :small:`(IEEE 802.11p, antenna, path loss)`
 - Robin Seggelmann :small:`(SCTP)`
 - Rudolf Hornig\* :small:`(maintenance)`
 - Sorin Cocorada :small:`(IEEE 802.11)`
@@ -86,13 +108,15 @@ The following people have contributed to the INET Framework. Scroll down for aff
 - Tamas Borbely\* :small:`(DiffServ, RIP, PIM, IPv4, etc.)`
 - Thomas Dreibholz :small:`(SCTP, SCTP apps, TCPDump, PCAP)`
 - Thomas Reschka :small:`(TCP SACK)`
+- Timo Voelker :small:`(QUIC)`
 - Tobias Mayer :small:`(TraCI)`
 - Tomas Prochazka :small:`(PIM-SM)`
 - Ulrich Kaage :small:`(IPSuite's TCPModule)`
 - Verena Kahmann :small:`(IPSuite's TCPModule)`
 - Veronika Rybova :small:`(PIM-SM, PIM-DM)`
 - Vincent Oberle :small:`(IPv4)`
-- Vladimir Vesely :small:`(IGMPv3, PIM-SM, PIM-DM)`
+- Vit Rek :small:`(EIGRP)`
+- Vladimir Vesely :small:`(IGMPv3, PIM-SM, PIM-DM, EIGRP)`
 - Vojtech Janota :small:`(MPLS, LDP, RSVP-TE, TED)`
 - Volker Boehm :small:`(IPSuite's TCPModule)`
 - Wei Yang Ng :small:`(IPv6)`
@@ -122,14 +146,20 @@ Contributor Affiliations
 - TDR Group, University of Duisburg-Essen, Germany.
 - Hamburg University of Applied Sciences (HAW Hamburg), Germany.
 - Universitaet Paderborn, Germany.
+- University of Rostock, Germany.
+- Technical University of Munich (TUM), Germany.
+- Technische Hochschule Ingolstadt, Germany.
 - Communications Network Laboratory, University of Athens, Greece.
 - Budapest University Technology and Economics, Hungary.
 - Laboratory for Dependable Systems, Reykjavik University, Iceland.
 - University of Pisa, Italy.
 - Eindhoven University of Technology, the Netherlands.
 - Simula Research Laboratory, Norway.
+- University of Oslo, Norway.
 - Universita della Svizzera Italiana, Lugano, Switzerland.
 - Universidad de Malaga, Spain.
+- Universidade da Coruna, Spain.
+- University of California, Davis, USA.
 
 ----
 
