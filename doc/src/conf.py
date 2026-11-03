@@ -30,6 +30,7 @@ extensions = [
     'sphinx_immaterial',
     'sphinx_immaterial.graphviz',
     'omnetpp_immaterial',
+    'omnetpp_neddoc',
     'sphinx.ext.extlinks',
     'sphinx.ext.todo',
     'sphinx.ext.napoleon',
@@ -63,10 +64,25 @@ html_show_sourcelink = False
 html_last_updated_fmt = None
 
 suppress_warnings = []
-if cfg.mode == 'version':
-    # NED type pages are reached from the package and type listings, not from the navigation tree:
-    # a toctree over thousands of pages would be embedded into every page.
-    suppress_warnings.append('toc.not_included')
+neddoc_dir = config.API_DIR
+if not cfg.has_part('api'):
+    # The roles link to the NED reference of the dev version if the same run builds it, otherwise to that of the latest
+    # version, whose build keeps its tag files (config.REFS_DIR). Without either, they render as plain literals, as do
+    # the types that the linked reference does not have: silently if it is of another version, e.g. one older than
+    # the types, or a sample.
+    if cfg.api_docs:
+        neddoc_tags_dir = os.path.join(cfg.api_docs, config.REFS_DIR)
+        neddoc_url = cfg.api_url(config.API_DIR)
+        # omnetpp_neddoc silently does without a missing tag file, which would leave the roles of its kind unlinked.
+        for tag_file in ('nedtags.xml', 'msgtags.xml'):
+            if not os.path.isfile(os.path.join(neddoc_tags_dir, tag_file)):
+                raise FileNotFoundError(f'{tag_file} is missing from {neddoc_tags_dir}')
+    suppress_warnings.append('neddoc.no_reference')
+    if cfg.sample or not cfg.api_same_tree:
+        suppress_warnings.append('neddoc.unknown')
+elif cfg.sample:
+    # A sample build documents only a few types.
+    suppress_warnings += ['neddoc.unknown', 'neddoc.missing']
 
 katex_prerender = False
 
@@ -86,6 +102,7 @@ omnetpp_homepage = cfg.site_url('index')
 omnetpp_nav_nowrap = ['/api/', '/python-api/']
 inet_nav_blank = ['Download']
 omnetpp_privacy_url = cfg.site_url('Privacy')
+omnetpp_commit = cfg.commit or None
 html_theme_options = {
     'icon': {
         'repo': 'fontawesome/brands/github',

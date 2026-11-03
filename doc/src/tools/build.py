@@ -107,6 +107,10 @@ def run(cmd, **kwargs):
     subprocess.run(cmd, check=True, **kwargs)
 
 
+# As in the footers of docs.omnetpp.org.
+COMMIT_DIGITS = 10
+
+
 def git(repo, *args):
     return subprocess.run(['git', '-C', repo, *args], check=True, capture_output=True, text=True).stdout.strip()
 
@@ -161,6 +165,16 @@ def git_tree_key(root):
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None
     return hashlib.sha256('\n'.join(entries).encode()).hexdigest()
+
+
+def tree_commit(root):
+    """Names the commit that a tree is checked out at, for the page footers: its short hash, with a '+' if the tree
+    has changes that are not committed, or '' if the tree is not a git checkout."""
+    try:
+        commit = git(root, 'rev-parse', f'--short={COMMIT_DIGITS}', 'HEAD')
+        return commit + '+' if git(root, 'status', '--porcelain') else commit
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return ''
 
 
 def directory_size(path):
@@ -339,7 +353,7 @@ class Builder:
             raise BuildError(f'no site pages in {SITE}')
         self.force = None if args.force is None else {f for f in args.force.split(',') if f}
         if args.pdf and not shutil.which('latexmk'):
-            raise BuildError('--pdf needs the PDF toolchain (TeX Live): the -pdf variant of the doc-builder image')
+            raise BuildError('--pdf needs the PDF toolchain of the doc-builder image (TeX Live)')
         self.media_ref = None
         # Sample builds have their own cache entries, so switching between sample and full builds rebuilds neither.
         self.suffix = '-sample' if args.sample else ''
@@ -541,14 +555,6 @@ class Builder:
         if ned_path:
             cmd.append(f'--ned-path={ned_path}')
         run(cmd + [inet_root])
-        index = os.path.join(outdir, 'index.rst')
-        with open(index) as f:
-            text = f.read()
-        # Only the overview pages go into the navigation; the thousands of type and file pages are reached
-        # through the listings (see suppress_warnings in conf.py).
-        text = re.sub(r'^   (types|files)/.*\n', '', text, flags=re.M)
-        with open(index, 'w') as f:
-            f.write(text)
 
     def version_index(self, label, parts, version_parts):
         title = f'INET {label} Documentation'
@@ -618,8 +624,10 @@ class Builder:
         from_tree = not version.get('ref')
         if from_tree:
             content = git_tree_key(self.tree)
+            commit = tree_commit(self.tree)
         else:
             ref, content = self.resolve(self.data['inet_repository'], version['ref'])
+            commit = content[:COMMIT_DIGITS]
         media = self.local_media(self.tree if from_tree else None)
         # A local media checkout can change without a commit, so only builds from git exports are cached.
         refs = tree_hash(os.path.join(api, REFS_DIR)) if api else ''
@@ -645,7 +653,8 @@ class Builder:
             shutil.rmtree(outdir, ignore_errors=True)
             env = self.environment(mode='version', version=label, parts=','.join(run_parts),
                                    version_parts=','.join(parts), inet_root=inet_root, media_root=media_root,
-                                   pdfs=','.join(self.pdf_parts(parts)), api_version=api_label, api_docs=api)
+                                   pdfs=','.join(self.pdf_parts(parts)), api_version=api_label, api_docs=api,
+                                   api_same_tree='1' if api_label == label else '0', commit=commit)
             self.sphinx(work, outdir, self.doctrees(name), env,
                         jobs='1' if run_parts[0] in SEPARATE_PARTS else None)
             if 'api' in run_parts:
@@ -700,7 +709,8 @@ class Builder:
             shutil.rmtree(cached, ignore_errors=True)
             env = self.environment(mode='shared', parts=','.join(parts), inet_root=self.tree, media_root=media_root,
                                    manuals_version=manuals_label, manuals_docs=manuals, api_version=api_label,
-                                   api_docs=api)
+                                   api_docs=api, api_same_tree='1' if api_label == self.dev_label else '0',
+                                   commit=tree_commit(self.tree))
             self.sphinx(work, cached, self.doctrees(name), env)
             if key:
                 with open(stamp, 'w') as f:
@@ -712,7 +722,7 @@ class Builder:
 
     def build_site(self):
         log('building the site pages')
-        self.sphinx(SITE, self.out, self.doctrees('_site'), self.environment(mode='site'))
+        self.sphinx(SITE, self.out, self.doctrees('_site'), self.environment(mode='site', commit=tree_commit(TREE)))
         with open(os.path.join(self.out, '.nojekyll'), 'w'):
             pass
         for path, target in SITE_REDIRECTS.items():
@@ -824,8 +834,7 @@ def main():
                         help=f'build only these parts: site (the website pages), {",".join(SHARED_PARTS)} '
                              f'(built once, from the INET tree), and of each version {",".join(PARTS)} '
                              '(default: all)')
-    parser.add_argument('--pdf', action='store_true', help=f'also build PDFs of the {", ".join(PDF_MANUALS)} '
-                                                           '(needs the -pdf image)')
+    parser.add_argument('--pdf', action='store_true', help=f'also build PDFs of the {", ".join(PDF_MANUALS)}')
     parser.add_argument('--sample', action='store_true',
                         help='build only a sample of the NED reference (about 20 types), the showcases and the '
                              'tutorials: a small site for working on the site itself')

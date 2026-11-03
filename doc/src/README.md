@@ -12,8 +12,13 @@ own tree (`dev`) is built locally only, where they link to it.
   sources; `../../showcases`, `../../tutorials`: the showcases and tutorials
 - `site/`: the website pages; news posts are the dated `YYYY-MM-DD-*.rst` files
 - `conf.py`, `_ext/`, `_static/`, `global.rst`: the Sphinx configuration
-- `omnetpp_immaterial`: the extension of `sphinx_immaterial` that gives the OMNeT++ sites their look; it is part of
-  the doc-builder image (omnetpp-dev `doc/src/site/doc-builder`), and `_static/inet.css` styles it for this site
+- the Sphinx extensions of the doc-builder image ([omnetpp/doc-builder](https://github.com/omnetpp/doc-builder), described in its `image/README.md`),
+  which `conf.py` and `_ext/` build on: `omnetpp_immaterial`, the extension of `sphinx_immaterial` that gives the
+  OMNeT++ sites their look (`_static/inet.css` styles it for this site), `omnetpp_lexers`, the highlighting of the
+  `ned`, `msg`, `ini` and `fp` code blocks, `omnetpp_neddoc`, the `:ned:` and `:msg:` roles and the diagrams of
+  the NED reference (`conf.py` points the builds without a reference of their own to that of another build), and
+  `omnetpp_media`, the `video`, `audio`, `youtube` and `vimeo` directives (`_ext/inetsite/media.py` links the
+  files of the media repository)
 - `build`, `tools/build.py`: the build; `versions.toml`: the published versions; `.doc-builder-image`: the
   container image the build runs in
 
@@ -27,8 +32,8 @@ Building locally
 ----------------
 
 Requires podman, or docker with `ENGINE=docker`. With `ENGINE=none`, the build runs without a container (needs the
-Python packages of the doc-builder image, `omnetpp_immaterial` among them, `opp_docgen` and graphviz). Run from
-anywhere:
+Python packages of the doc-builder image, its `omnetpp_*` extensions among them, `opp_docgen` and graphviz, and for
+`--pdf` TeX Live with `latexmk`). Run from anywhere:
 
     doc/src/build                          # the site pages and the docs of this tree as "dev"
     doc/src/build --serve                  # the same, then served at http://localhost:8000/
@@ -56,7 +61,7 @@ instead, i.e. `dev` in a local build.
 the rest in full; combine it with `--only` to leave parts out. Its builds are cached apart from the full ones.
 
 `--pdf` also builds the User's, Developer's and Migration Guides as PDFs (`docs/<label>/inet-<manual>.pdf`),
-in the `-pdf` variant of the image, which adds TeX Live. `releng/makedist` uses it for the release tarball.
+with the TeX Live of the doc-builder image. `releng/makedist` uses it for the release tarball.
 
 The output goes to `doc/site/`. The cache in `doc/src/_build/` keeps the Sphinx environments, so rebuilds
 are incremental, and versions built from git are only rebuilt when their commit, the media repository or
@@ -97,9 +102,10 @@ Setting up the automatic build
 
 One-time settings, by a repository admin:
 
-1. The doc-builder image (`ghcr.io/omnetpp/doc-builder`, built from omnetpp-dev `doc/src/site/doc-builder`)
-   must be public on GHCR. `.doc-builder-image` names the tag the site is built with (the cached builds follow
-   the content of the image it names); its `-pdf` variant (same tag plus `-pdf`) must exist too.
+1. The doc-builder image (`ghcr.io/omnetpp/doc-builder`, built from [omnetpp/doc-builder](https://github.com/omnetpp/doc-builder))
+   must be public on GHCR. `.doc-builder-image` names the tag the site is built with: the moving major tag
+   (`:v1`), as for the `omnetpp/doc-builder@v1` action, so compatible releases of the image are picked up without a
+   change here (the cached builds follow the content of the image it names).
 2. Settings → Pages → Build and deployment → Source: **GitHub Actions**.
 3. Settings → Environments → `github-pages` → Deployment branches and tags: allow `website`.
 4. Settings → Pages → Custom domain: `inet.omnetpp.org` (a domain can be used by one repository only, so

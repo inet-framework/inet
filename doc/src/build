@@ -3,9 +3,8 @@
 # Builds inet.omnetpp.org (or parts of it) in the doc-builder container; see README.md and `./build --help`.
 #
 # Env:  ENGINE   podman (default), docker, or none to run tools/build.py directly
-#                (inside a container, or with Sphinx, opp_docgen and graphviz installed)
+#                (inside a container, or with Sphinx, opp_docgen and graphviz installed, and for --pdf TeX Live)
 #       IMAGE    the doc-builder image (default: the one named in .doc-builder-image)
-#       PDF_IMAGE  the image used with --pdf (default: $IMAGE-pdf, its variant with TeX Live)
 #
 set -euo pipefail
 
@@ -13,9 +12,6 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 IMAGE="${IMAGE:-$(tr -d '[:space:]' < "$HERE/.doc-builder-image")}"
 ENGINE="${ENGINE:-podman}"
-for arg in "$@"; do
-    if [ "$arg" = --pdf ]; then IMAGE="${PDF_IMAGE:-$IMAGE-pdf}"; fi
-done
 
 if [ "$ENGINE" = none ] || [ -f /.dockerenv ] || [ -f /run/.containerenv ]; then
     export INETSITE_IMAGE="${INETSITE_IMAGE:-$IMAGE}"
