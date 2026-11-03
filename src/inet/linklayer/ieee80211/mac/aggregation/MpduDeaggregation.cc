@@ -22,12 +22,14 @@ bool MpduDeaggregation::visitSubframes(const Packet *packet, B offset, B length,
         return true;
     int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
     Packet aggregate("mpdu-aggregate", packet->peekDataAt(offset, length, flags));
+    bool complete = true;
     // IEEE Std 802.11-2024, 9.7.1: HT uses a 12-bit MPDU length and four-octet subframe alignment.
     // The final HT subframe has no alignment padding.
     while (aggregate.getDataLength() > b(0)) {
         if (aggregate.getDataLength() < B(4))
             return false;
         B position = length - B(aggregate.getDataLength());
+        // Recovery can enter a typed MPDU. Interpret its candidate delimiter bytes explicitly.
         const auto& delimiter = aggregate.popAtFront<Ieee80211MpduSubframeHeader>(B(4),
                 Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED |
                 Chunk::PF_ALLOW_REINTERPRETATION);
@@ -35,8 +37,11 @@ bool MpduDeaggregation::visitSubframes(const Packet *packet, B offset, B length,
                 delimiter->getLength() >= 0 && delimiter->getLength() <= 4095 &&
                 B(delimiter->getLength()) <= aggregate.getDataLength();
         visitDelimiter(delimiter, position, valid);
-        if (!valid)
-            return false;
+        if (!valid) {
+            // IEEE Std 802.11-2024, informative Annex O.2: examine candidates four octets apart.
+            complete = false;
+            continue;
+        }
         B memberLength(delimiter->getLength());
         if (memberLength == B(0))
             continue;
@@ -51,7 +56,7 @@ bool MpduDeaggregation::visitSubframes(const Packet *packet, B offset, B length,
         if (aggregate.getDataLength() == b(0))
             return false; // HT has no final alignment padding.
     }
-    return true;
+    return complete;
 }
 
 std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFrame)
