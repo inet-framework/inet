@@ -1,0 +1,3 @@
+MrpRelay sends a multicast frame neither back nor out of ports that do not forward
+
+In a switch with hasMrp, MrpRelay sent a frame to a multicast address that has forwarding table entries, for example statically configured ones, to every port that the entries list: also back out of the port it came from, and out of ring ports that MRP blocks. Now it skips both, as Ieee8021dRelay does.
