@@ -1,0 +1,102 @@
+%description:
+Check bounded chunk traversal without a production caller.
+Cover lengths, alignment, truncation, final padding, and delimiter error flags.
+
+%includes:
+#include <tuple>
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+static void appendMember(Packet& packet, int length)
+{
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(length);
+    packet.insertAtBack(delimiter);
+    if (length)
+        packet.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(length, 0)));
+}
+
+// These tuples record callbacks for assertions. Production traversal stores no layout.
+static auto inspect(const Packet *packet, B offset, B length)
+{
+    std::vector<std::tuple<bool, B, B, bool>> chunks;
+    bool complete = MpduDeaggregation::visitSubframes(packet, offset, length,
+            [&](const auto& delimiter, B position, bool valid) {
+                chunks.emplace_back(true, position, B(delimiter->getChunkLength()), valid);
+            },
+            [&](const auto& mpdu, B position) {
+                chunks.emplace_back(false, position, B(mpdu->getChunkLength()), true);
+            });
+    return std::make_pair(complete, chunks);
+}
+
+%activity:
+for (int length : {0, 1, 2, 3, 4, 4095}) {
+    Packet packet("layout");
+    appendMember(packet, 0);
+    appendMember(packet, length);
+    if (length) {
+        int padding = (4 - length % 4) % 4;
+        if (padding)
+            packet.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(padding, 0)));
+        appendMember(packet, 20);
+    }
+    auto result = inspect(&packet, B(0), B(packet.getDataLength()));
+    ASSERT(result.first);
+    ASSERT(result.second.size() == (length ? 5 : 2));
+    ASSERT(std::get<0>(result.second.front()));
+    for (const auto& chunk : result.second)
+        ASSERT(std::get<1>(chunk) + std::get<2>(chunk) <= packet.getDataLength());
+    auto bytes = packet.peekAllAsBytes()->getBytes();
+    Packet independent("wire", makeShared<BytesChunk>(bytes));
+    ASSERT(inspect(&independent, B(0), B(bytes.size())) == result);
+    if (length) {
+        bytes.pop_back();
+        Packet truncated("truncated", makeShared<BytesChunk>(bytes));
+        ASSERT(!inspect(&truncated, B(0), B(bytes.size())).first);
+    }
+}
+auto incorrectDelimiter = makeShared<Ieee80211MpduSubframeHeader>();
+incorrectDelimiter->setLength(0);
+incorrectDelimiter->markIncorrect();
+Packet incorrect("incorrect-delimiter", incorrectDelimiter);
+appendMember(incorrect, 20);
+auto incorrectResult = inspect(&incorrect, B(0), B(incorrect.getDataLength()));
+ASSERT(!incorrectResult.first && !std::get<3>(incorrectResult.second.front()));
+for (int byte : {2, 3}) {
+    Packet good("good");
+    appendMember(good, 20);
+    auto bytes = good.peekAllAsBytes()->getBytes();
+    bytes[byte] ^= 1;
+    Packet bad("bad", makeShared<BytesChunk>(bytes));
+    auto result = inspect(&bad, B(0), B(bytes.size()));
+    ASSERT(!result.first && !std::get<3>(result.second.front()));
+}
+Packet finalPadding("final-padding");
+appendMember(finalPadding, 1);
+finalPadding.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(3, 0)));
+ASSERT(!inspect(&finalPadding, B(0), B(finalPadding.getDataLength())).first);
+auto overrun = makeShared<Ieee80211MpduSubframeHeader>();
+overrun->setLength(4095);
+Packet missingMember("missing-member", overrun);
+auto refused = inspect(&missingMember, B(0), B(4));
+ASSERT(!refused.first && refused.second.size() == 1 && !std::get<3>(refused.second.front()));
+for (int size : {0, 1, 2, 3}) {
+    Packet shortInput("short", makeShared<BytesChunk>(std::vector<uint8_t>(size, 0)));
+    ASSERT(inspect(&shortInput, B(0), B(size)).second.empty());
+}
+auto tooLong = makeShared<Ieee80211MpduSubframeHeader>();
+tooLong->setLength(4096);
+Packet overflow("overflow", tooLong);
+bool refusedEncoding = false;
+try { overflow.peekAllAsBytes(); }
+catch (const cRuntimeError&) { refusedEncoding = true; }
+ASSERT(refusedEncoding);
+EV << "MPDU traversal checks passed\n";
+
+%contains: stdout
+MPDU traversal checks passed
