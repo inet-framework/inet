@@ -58,22 +58,18 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
 {
     EV_DEBUG << "Deaggregating A-MPDU " << *aggregatedFrame << " into multiple packets.\n";
     std::vector<Packet *> *frames = new std::vector<Packet *>();
-    int paddingLength = 0;
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
-    while (aggregatedFrame->getDataLength() > b(0)) {
-        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + B(paddingLength == 4 ? 0 : paddingLength));
-        const auto& mpduSubframeHeader = aggregatedFrame->popAtFront<Ieee80211MpduSubframeHeader>();
-        const auto& mpdu = aggregatedFrame->peekDataAt(b(0), B(mpduSubframeHeader->getLength()));
-        paddingLength = 4 - (mpduSubframeHeader->getChunkLength() + mpdu->getChunkLength()).get<B>() % 4;
-        aggregatedFrame->setFrontOffset(aggregatedFrame->getFrontOffset() + mpdu->getChunkLength());
-        auto frame = new Packet();
-        frame->setName(tokenizer.nextToken());
-        frame->insertAtBack(mpdu);
-        frame->getRegionTags().copyTags(aggregatedFrame->getRegionTags(), aggregatedFrame->getFrontOffset() - frame->getDataLength(), frame->getFrontOffset(), frame->getDataLength());
-        EV_TRACE << "Created " << *frame << " from A-MPDU.\n";
-        // TODO check CRC?
-        frames->push_back(frame);
-    }
+    visitSubframes(aggregatedFrame, B(0), B(aggregatedFrame->getDataLength()),
+            [](const auto&, B, bool) {},
+            [&](const auto& mpdu, B offset) {
+                auto frame = new Packet();
+                frame->setName(tokenizer.hasMoreTokens() ? tokenizer.nextToken() : aggregatedFrame->getName());
+                frame->insertAtBack(mpdu);
+                frame->getRegionTags().copyTags(aggregatedFrame->getRegionTags(),
+                        aggregatedFrame->getFrontOffset() + offset, frame->getFrontOffset(), mpdu->getChunkLength());
+                EV_TRACE << "Created " << *frame << " from A-MPDU.\n";
+                frames->push_back(frame);
+            });
     delete aggregatedFrame;
     EV_TRACE << "Created " << frames->size() << " packets from A-MPDU.\n";
     return frames;
