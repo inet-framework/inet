@@ -1,0 +1,3 @@
+The packet printer shows IEEE 802.1Q tags as S-tags and C-tags
+
+The packet printer, which writes the info column of the packet log of Qtenv and packet descriptions in the log, has a printer for the IEEE 802.1Q tags in EPD form. It prints a tag as "S-tag pcp = 2, dei = false, vid = 81" or "C-tag pcp = 0, dei = false, vid = 42", so the two tags of an IEEE 802.1ad frame can be told apart. Before, both tags were printed as "(UNIMPLEMENTED IEEE 802.1Q S-TAG)" or "(UNIMPLEMENTED IEEE 802.1Q C-TAG)" followed by the fields of the tag header.

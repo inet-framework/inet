@@ -1,0 +1,60 @@
+%description:
+Tests the protocol printer of the IEEE 802.1Q tags in EPD form: the same tag
+header is printed as an S-tag or a C-tag depending only on the protocol, and
+the packet printer shows both tags of an IEEE 802.1ad frame in its info column.
+
+%includes:
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/printer/PacketPrinter.h"
+#include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagEpdProtocolPrinter.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%activity:
+
+auto header = makeShared<Ieee8021qTagEpdHeader>();
+header->setPcp(5);
+header->setDei(true);
+header->setVid(42);
+header->setTypeOrLength(ETHERTYPE_IPv4);
+header->markImmutable();
+Ieee8021qTagEpdProtocolPrinter tagPrinter;
+for (auto protocol : {&Protocol::ieee8021qSTag, &Protocol::ieee8021qCTag}) {
+    ProtocolPrinter::Context context;
+    tagPrinter.print(header, protocol, nullptr, context);
+    std::cout << protocol->getName() << ": " << context.infoColumn.str() << std::endl;
+}
+
+// an ethernetmac frame with an S-tag (VID 81) over a C-tag (VID 42)
+Packet frame("stag81ctag42");
+auto macHeader = makeShared<EthernetMacHeader>();
+macHeader->setTypeOrLength(ETHERTYPE_8021ad_S_TAG);
+frame.insertAtBack(macHeader);
+auto sTag = makeShared<Ieee8021qTagEpdHeader>();
+sTag->setPcp(2);
+sTag->setVid(81);
+sTag->setTypeOrLength(ETHERTYPE_8021Q_TAG);
+frame.insertAtBack(sTag);
+auto cTag = makeShared<Ieee8021qTagEpdHeader>();
+cTag->setVid(42);
+cTag->setTypeOrLength(ETHERTYPE_UNKNOWN);
+frame.insertAtBack(cTag);
+frame.insertAtBack(makeShared<ByteCountChunk>(B(46)));
+frame.insertAtBack(makeShared<EthernetFcs>());
+frame.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+cMessagePrinter::Options options;
+options.enabledTags.insert("Show all info");
+std::cout << "frame: " << PacketPrinter().printPacketToString(&frame, &options, "%i") << std::endl;
+
+%contains: stdout
+ieee8021qstag: S-tag pcp = 5, dei = true, vid = 42
+ieee8021qctag: C-tag pcp = 5, dei = true, vid = 42
+
+%contains-regex: stdout
+frame: .*S-tag pcp = 2, dei = false, vid = 81 \| C-tag pcp = 0, dei = false, vid = 42
