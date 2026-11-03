@@ -95,6 +95,7 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     cMessage *triggeredUpdateTimer = nullptr; // scheduled when there are pending changes
     cMessage *startupTimer = nullptr; // timer for delayed startup
     cMessage *shutdownTimer = nullptr; // scheduled at shutdown
+    cMessage *expiryTimer = nullptr; // scheduled when the next learned route expires or is purged
     // parameters
     Mode mode = static_cast<Mode>(-1);
     int ripUdpPort = -1; // UDP port RIP routers (usually 520)
@@ -133,6 +134,8 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     virtual void stopRIPRouting();
 
     virtual RipRoute *importRoute(IRoute *route, RipRoute::RouteType type, int metric = 1, uint16_t routeTag = 0);
+    // the version of a message: 1 for RIPng (RFC 2080 section 2.1), 2 for RIP (RFC 2453 section 4)
+    short getMessageVersion() const { return mode == RIPng ? 1 : 2; }
     virtual void sendRIPRequest(const RipNetworkInterface& ripInterface);
 
     virtual void processRequest(Packet *pk);
@@ -145,6 +148,7 @@ class INET_API Rip : public RoutingProtocolBase, protected cListener
     virtual void addRoute(const L3Address& dest, int prefixLength, const NetworkInterface *ie, const L3Address& nextHop, int metric, uint16_t routeTag, const L3Address& from);
 
     virtual void checkExpiredRoutes();
+    virtual void rescheduleExpiryTimer();
     virtual void invalidateRoute(RipRoute *route);
     virtual RouteVector::iterator purgeRoute(RipRoute *route);
 
