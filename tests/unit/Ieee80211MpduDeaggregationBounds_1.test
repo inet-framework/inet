@@ -1,0 +1,169 @@
+%description:
+Malformed A-MPDU delimiter and padding lengths are rejected without consuming
+the caller-owned aggregate.  Zero-length delimiters are treated as padding,
+while valid single- and multi-MPDU aggregates still deaggregate normally.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
+
+%global:
+using namespace inet;
+using namespace inet::ieee80211;
+
+static Ptr<Ieee80211MpduSubframeHeader> makeDelimiter(int length)
+{
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(length);
+    return delimiter;
+}
+
+static void appendPayload(Packet *packet, const std::vector<uint8_t>& bytes)
+{
+    packet->insertAtBack(makeShared<BytesChunk>(bytes));
+}
+
+static void appendPadding(Packet *packet, int length)
+{
+    if (length > 0)
+        appendPayload(packet, std::vector<uint8_t>(length, 0));
+}
+
+static int paddingLength(int mpduLength)
+{
+    return (4 - mpduLength % 4) % 4;
+}
+
+static Packet *makePacket()
+{
+    return new Packet("ampdu");
+}
+
+%activity:
+MpduDeaggregation deaggregation;
+
+auto expectMalformed = [&](const char *name, Packet *packet) {
+    const auto beforeFrontOffset = packet->getFrontOffset();
+    const auto beforeBackOffset = packet->getBackOffset();
+    const auto beforeLength = packet->getDataLength();
+    const auto beforeContent = packet->peekAll();
+    try {
+        auto frames = deaggregation.deaggregateFrame(packet);
+        if (frames != nullptr) {
+            for (auto frame : *frames)
+                delete frame;
+            delete frames;
+        }
+        ASSERT(frames == nullptr);
+    }
+    catch (const cRuntimeError&) {
+        delete packet;
+        throw;
+    }
+    ASSERT(packet->getDataLength() == beforeLength);
+    ASSERT(packet->getFrontOffset() == beforeFrontOffset);
+    ASSERT(packet->getBackOffset() == beforeBackOffset);
+    ASSERT(packet->peekAll()->containsSameData(*beforeContent));
+    delete packet;
+    EV_INFO << name << " rejected without consuming the aggregate.\n";
+};
+
+// A delimiter is four octets; only three are available.
+{
+    auto packet = makePacket();
+    appendPayload(packet, std::vector<uint8_t>(3, 0));
+    expectMalformed("truncated delimiter", packet);
+}
+
+// The declared MPDU length exceeds the bytes remaining after the delimiter.
+{
+    auto packet = makePacket();
+    packet->insertAtBack(makeDelimiter(5));
+    appendPayload(packet, std::vector<uint8_t>(2, 0));
+    expectMalformed("overlong MPDU", packet);
+}
+
+// Negative and 12-bit-overflow delimiter lengths are malformed.
+for (int length : {-1, 4096}) {
+    auto packet = makePacket();
+    packet->insertAtBack(makeDelimiter(length));
+    expectMalformed(length < 0 ? "negative delimiter length" : "4096-byte delimiter length", packet);
+}
+
+// A first MPDU requires padding before a next delimiter, but only one padding
+// octet is present and the next delimiter is absent.
+{
+    const int length = 2;
+    auto packet = makePacket();
+    packet->insertAtBack(makeDelimiter(length));
+    appendPayload(packet, std::vector<uint8_t>(length, 0));
+    appendPadding(packet, paddingLength(length) - 1);
+    expectMalformed("truncated padding and next delimiter", packet);
+}
+
+// A valid first MPDU must not be returned when the second delimiter is malformed.
+{
+    const int firstLength = 3;
+    auto packet = makePacket();
+    packet->insertAtBack(makeDelimiter(firstLength));
+    appendPayload(packet, std::vector<uint8_t>(firstLength, 1));
+    appendPadding(packet, paddingLength(firstLength));
+    packet->insertAtBack(makeDelimiter(4));
+    appendPayload(packet, std::vector<uint8_t>(1, 2));
+    expectMalformed("valid first and malformed second MPDU", packet);
+}
+
+// A zero-length delimiter occupies four octets and is skipped as padding.
+{
+    auto packet = makePacket();
+    packet->insertAtBack(makeDelimiter(0));
+    packet->insertAtBack(makeDelimiter(2));
+    appendPayload(packet, std::vector<uint8_t>{7, 8});
+    auto frames = deaggregation.deaggregateFrame(packet);
+    ASSERT(frames != nullptr);
+    ASSERT(frames->size() == 1);
+    ASSERT(frames->at(0)->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({7, 8}));
+    delete frames->at(0);
+    delete frames;
+}
+
+// A valid single MPDU is still returned and consumes its aggregate.
+{
+    const int length = 5;
+    auto packet = makePacket();
+    packet->insertAtBack(makeDelimiter(length));
+    appendPayload(packet, std::vector<uint8_t>{1, 2, 3, 4, 5});
+    auto frames = deaggregation.deaggregateFrame(packet);
+    ASSERT(frames != nullptr);
+    ASSERT(frames->size() == 1);
+    ASSERT(frames->at(0)->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({1, 2, 3, 4, 5}));
+    delete frames->at(0);
+    delete frames;
+}
+
+// A valid multi-MPDU aggregate preserves both payloads and inter-MPDU padding.
+{
+    const int firstLength = 3;
+    const int secondLength = 4;
+    auto packet = makePacket();
+    packet->insertAtBack(makeDelimiter(firstLength));
+    appendPayload(packet, std::vector<uint8_t>{9, 10, 11});
+    appendPadding(packet, paddingLength(firstLength));
+    packet->insertAtBack(makeDelimiter(secondLength));
+    appendPayload(packet, std::vector<uint8_t>{12, 13, 14, 15});
+    auto frames = deaggregation.deaggregateFrame(packet);
+    ASSERT(frames != nullptr);
+    ASSERT(frames->size() == 2);
+    ASSERT(frames->at(0)->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({9, 10, 11}));
+    ASSERT(frames->at(1)->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({12, 13, 14, 15}));
+    for (auto frame : *frames)
+        delete frame;
+    delete frames;
+}
+
+EV << "A-MPDU malformed lengths are rejected without partial deaggregation.\n";
+
+%contains: stdout
+A-MPDU malformed lengths are rejected without partial deaggregation.
