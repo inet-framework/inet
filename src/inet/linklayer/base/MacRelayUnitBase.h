@@ -42,6 +42,12 @@ class INET_API MacRelayUnitBase : public LayeredProtocolBase
      * addresses and tag fields it was received with.
      */
     virtual Packet *createForwardedPacket(const Packet *incomingPacket) const;
+    /**
+     * Makes a packet from the upper layer that requests a VLAN tag go down
+     * through the 802.1Q layer that inserts the tag: the C-tag first, and the
+     * S-tag around it.
+     */
+    virtual void addVlanTagEncapsulationProtocols(Packet *packet) const;
     virtual void broadcastPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *incomingInterface);
     virtual void sendPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *outgoingInterface);
     virtual void updatePeerAddress(NetworkInterface *incomingInterface, MacAddress sourceAddress, unsigned int vlanId);

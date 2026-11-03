@@ -92,6 +92,21 @@ Packet *MacRelayUnitBase::createForwardedPacket(const Packet *incomingPacket) co
     return outgoingPacket;
 }
 
+void MacRelayUnitBase::addVlanTagEncapsulationProtocols(Packet *packet) const
+{
+    bool hasCVlanReq = packet->findTag<CVlanReq>() != nullptr;
+    bool hasSVlanReq = packet->findTag<SVlanReq>() != nullptr;
+    if (!hasCVlanReq && !hasSVlanReq)
+        return;
+    // the dispatch request that addressed this module gives way to the first
+    // protocol of the encapsulation request when the packet is sent
+    packet->removeTagIfPresent<DispatchProtocolReq>();
+    if (hasSVlanReq)
+        ensureEncapsulationProtocolReq(packet, &Protocol::ieee8021qSTag, true, true);
+    if (hasCVlanReq)
+        ensureEncapsulationProtocolReq(packet, &Protocol::ieee8021qCTag, true, true);
+}
+
 void MacRelayUnitBase::broadcastPacket(Packet *outgoingPacket, const MacAddress& destinationAddress, NetworkInterface *incomingInterface)
 {
     if (incomingInterface == nullptr)
