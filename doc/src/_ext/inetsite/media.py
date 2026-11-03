@@ -3,11 +3,13 @@
 Video and audio files are not part of the generated site: they live in the inet-framework/media repository,
 which is served separately (see INETSITE_MEDIA_URL). INET documents refer to them through the committed
 `doc/media` symlinks that point into the media checkout, so a relative path is resolved through those
-symlinks and turned into a URL on the media site.
+symlinks and turned into a URL on the media site. A few small files are committed into INET itself; they
+are copied into the site.
 """
 
 import html
 import os
+import pathlib
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
@@ -40,6 +42,11 @@ class MediaDirective(Directive):
         media_root = os.path.realpath(cfg.media_root) if cfg.media_root else None
         if media_root and path.startswith(media_root + os.sep):
             return cfg.media_url + '/' + os.path.relpath(path, media_root).replace(os.sep, '/')
+        if os.path.isfile(path):
+            # Files committed next to the document are published the same way as :download: targets.
+            rel_path, _ = env.relfn2path(uri, env.docname)
+            dest = env.dlfiles.add_file(env.docname, pathlib.Path(rel_path))
+            return '../' * env.docname.count('/') + '_downloads/' + dest
         logger.warning('media file is not in the media repository: %s', uri, location=(env.docname, self.lineno))
         return uri
 
