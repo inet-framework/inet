@@ -1,0 +1,82 @@
+%description:
+Tests how the EtherType fields of the Ethernet MAC header and the IEEE 802.1Q
+tag headers are printed: an EtherType in hex with the name of its protocol, an
+EtherType without a protocol in hex only, and a length in decimal. The
+dissection of an IEEE 802.1ad frame shows in front of each tag which tag
+follows.
+
+%includes:
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/common/packet/dissector/PacketDissector.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%activity:
+
+for (int typeOrLength : {(int)ETHERTYPE_IPv4, (int)ETHERTYPE_8021Q_TAG, (int)ETHERTYPE_8021ad_S_TAG, 0x8892, 46, 1500, 0x600}) {
+    auto macHeader = makeShared<EthernetMacHeader>();
+    macHeader->setTypeOrLength(typeOrLength);
+    std::cout << "EthernetMacHeader: " << macHeader->str() << std::endl;
+}
+
+auto typeOrLengthField = makeShared<EthernetTypeOrLengthField>();
+typeOrLengthField->setTypeOrLength(ETHERTYPE_IPv6);
+std::cout << "EthernetTypeOrLengthField: " << typeOrLengthField->str() << std::endl;
+
+auto epdHeader = makeShared<Ieee8021qTagEpdHeader>();
+epdHeader->setVid(42);
+epdHeader->setTypeOrLength(ETHERTYPE_8021Q_TAG);
+std::cout << "Ieee8021qTagEpdHeader: " << epdHeader->str() << std::endl;
+
+auto tpidHeader = makeShared<Ieee8021qTagTpidHeader>();
+tpidHeader->setTpid(ETHERTYPE_8021ad_S_TAG);
+tpidHeader->setVid(81);
+std::cout << "Ieee8021qTagTpidHeader: " << tpidHeader->str() << std::endl;
+
+// an ethernetmac frame with an S-tag (VID 81) over a C-tag (VID 42)
+Packet frame("stag81ctag42");
+auto macHeader = makeShared<EthernetMacHeader>();
+macHeader->setTypeOrLength(ETHERTYPE_8021ad_S_TAG);
+frame.insertAtBack(macHeader);
+auto sTag = makeShared<Ieee8021qTagEpdHeader>();
+sTag->setVid(81);
+sTag->setTypeOrLength(ETHERTYPE_8021Q_TAG);
+frame.insertAtBack(sTag);
+auto cTag = makeShared<Ieee8021qTagEpdHeader>();
+cTag->setVid(42);
+cTag->setTypeOrLength(ETHERTYPE_UNKNOWN);
+frame.insertAtBack(cTag);
+frame.insertAtBack(makeShared<ByteCountChunk>(B(46)));
+auto fcs = makeShared<EthernetFcs>();
+frame.insertAtBack(fcs);
+frame.addTag<PacketProtocolTag>()->setProtocol(&Protocol::ethernetMac);
+// the dissection that the packet inspector of Qtenv shows
+PacketDissector::ChunkBuilder builder;
+PacketDissector(ProtocolDissectorRegistry::getInstance(), builder).dissectPacket(&frame);
+auto sequence = dynamicPtrCast<const SequenceChunk>(builder.getContent());
+for (const auto& chunk : sequence->getChunks())
+    if (dynamicPtrCast<const EthernetMacHeader>(chunk) || dynamicPtrCast<const Ieee8021qTagEpdHeader>(chunk))
+        std::cout << "dissection: " << chunk->getClassName() << " " << chunk->str() << std::endl;
+
+%contains: stdout
+EthernetMacHeader: dest = 00-00-00-00-00-00, src = 00-00-00-00-00-00, typeOrLength = 0x0800 (IPv4)
+EthernetMacHeader: dest = 00-00-00-00-00-00, src = 00-00-00-00-00-00, typeOrLength = 0x8100 (IEEE 802.1Q C-TAG)
+EthernetMacHeader: dest = 00-00-00-00-00-00, src = 00-00-00-00-00-00, typeOrLength = 0x88a8 (IEEE 802.1Q S-TAG)
+EthernetMacHeader: dest = 00-00-00-00-00-00, src = 00-00-00-00-00-00, typeOrLength = 0x8892
+EthernetMacHeader: dest = 00-00-00-00-00-00, src = 00-00-00-00-00-00, typeOrLength = 46 (length)
+EthernetMacHeader: dest = 00-00-00-00-00-00, src = 00-00-00-00-00-00, typeOrLength = 1500 (length)
+EthernetMacHeader: dest = 00-00-00-00-00-00, src = 00-00-00-00-00-00, typeOrLength = 0x0600
+EthernetTypeOrLengthField: typeOrLength = 0x86dd (IPv6)
+Ieee8021qTagEpdHeader: pcp = 0, dei = false, vid = 42, typeOrLength = 0x8100 (IEEE 802.1Q C-TAG)
+Ieee8021qTagTpidHeader: tpid = 0x88a8 (IEEE 802.1Q S-TAG), pcp = 0, dei = false, vid = 81
+dissection: inet::EthernetMacHeader dest = 00-00-00-00-00-00, src = 00-00-00-00-00-00, typeOrLength = 0x88a8 (IEEE 802.1Q S-TAG)
+dissection: inet::Ieee8021qTagEpdHeader pcp = 0, dei = false, vid = 81, typeOrLength = 0x8100 (IEEE 802.1Q C-TAG)
+dissection: inet::Ieee8021qTagEpdHeader pcp = 0, dei = false, vid = 42, typeOrLength = 0x86f0 (Unknown)

@@ -1,0 +1,3 @@
+EtherType fields are shown in hex with the name of their protocol
+
+The packet inspector of Qtenv, the log and every other printout of a chunk show the typeOrLength field of EthernetMacHeader, EthernetTypeOrLengthField and Ieee8021qTagEpdHeader, and the tpid field of Ieee8021qTagTpidHeader, as an EtherType in hex followed by the name of its protocol, for example 0x88a8 (IEEE 802.1Q S-TAG) instead of 34984. In a frame with an S-tag and a C-tag, the header in front of each tag now says which tag follows. A typeOrLength value that is a length is shown as a decimal number, for example 46 (length), and an EtherType of no INET protocol in hex only. The value of the fields is the same: packet filter expressions such as ethernetmac.typeOrLength == 0x8100 do not change.

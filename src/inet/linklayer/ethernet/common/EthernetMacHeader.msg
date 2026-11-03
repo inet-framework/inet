@@ -50,7 +50,7 @@ class EthernetMacAddressFields extends FieldsChunk
 class EthernetTypeOrLengthField extends FieldsChunk
 {
     chunkLength = B(2);
-    uint16_t typeOrLength; // This two-octet field takes one of two meanings, depending on its numeric value. For numerical evaluation,
+    uint16_t typeOrLength @toString(typeOrLengthToString($)); // This two-octet field takes one of two meanings, depending on its numeric value. For numerical evaluation,
                            // the first octet is the most significant octet of this field.
                            // a) If the value of this field is less than or equal to 1500 decimal (05DC hexadecimal), then the Length/
                            //    Type field indicates the number of MAC client data octets contained in the subsequent MAC Client
@@ -77,7 +77,7 @@ class EthernetTypeOrLengthField extends FieldsChunk
 class EthernetMacHeader extends EthernetMacAddressFields
 {
     chunkLength = B(14); // B(6) + B(6) + B(2)
-    uint16_t typeOrLength; // This two-octet field takes one of two meanings, depending on its numeric value. For numerical evaluation,
+    uint16_t typeOrLength @toString(typeOrLengthToString($)); // This two-octet field takes one of two meanings, depending on its numeric value. For numerical evaluation,
                            // the first octet is the most significant octet of this field.
                            // a) If the value of this field is less than or equal to 1500 decimal (05DC hexadecimal), then the Length/
                            //    Type field indicates the number of MAC client data octets contained in the subsequent MAC Client
