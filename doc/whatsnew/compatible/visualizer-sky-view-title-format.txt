@@ -1,0 +1,3 @@
+Sky view plot titles have a format
+
+The new titleFormat parameter of GeoSkyViewCanvasVisualizer selects the text of the title above each sky plot, the same way as labelFormat selects the label text of other visualizers. Its directives are %n (the observer node's full name), %N (its display name, or the full name if none is set) and %p (its full path). The default "%N" gives the title that this release introduces with the fix "Sky view plots name their observer": the display name of the observer node, or its full name if none is set. Simulation results do not change.
