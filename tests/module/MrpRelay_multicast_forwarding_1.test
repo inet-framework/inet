@@ -10,11 +10,7 @@ eth0 (the port of the sender h1), eth1 (h2) and eth3 for the multicast address
 that h1 sends to. h3 is not listed. Every host has a sink for that address.
 
 h2 must receive all 10 frames. h1 must not receive its frames back, eth3 must
-not send them to eth4, and h3 must receive nothing. The failure is declared
-expected until MrpRelay skips both the incoming port and the ports that do not
-forward.
-
-%# expected-result: FAIL
+not send them to eth4, and h3 must receive nothing.
 
 %file: test.ned
 

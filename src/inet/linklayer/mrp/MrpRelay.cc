@@ -130,9 +130,8 @@ void MrpRelay::handleLowerPacket(Packet *incomingPacket)
                 if (destinationAddress != MacAddress::CFM_CCM_MULTICAST_ADDRESS || getCcmLevel(incomingPacket) > 0) {
                     for (auto outgoingInterfaceId : outgoingInterfaceIds) {
                         auto outgoingInterface = interfaceTable->getInterfaceById(outgoingInterfaceId);
-                        if (interfaceInd != nullptr
-                                && outgoingInterfaceId == incomingInterfaceId
-                                && !isForwardingInterface(outgoingInterface))
+                        if (outgoingInterfaceId == incomingInterfaceId
+                                || !isForwardingInterface(outgoingInterface))
                             EV_DETAIL << "Ignoring outgoing interface because it is the same as incoming interface or currently not forwarding"
                                       << EV_FIELD(destinationAddress)
                                       << EV_FIELD(incomingInterface)
