@@ -120,15 +120,11 @@ Results
 Here are the results of the transfer via the lossy link. As a reference, you can
 listen to the original audio file by clicking the play button below:
 
-.. raw:: html
-
-   <p><audio controls> <source src="media/Stereotype_News.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio></p>
+.. audio:: media/Stereotype_News.mp3
 
 Here is the received audio file:
 
-.. raw:: html
-
-   <p><audio controls> <source src="media/received-mininet.wav" type="audio/wav">Your browser does not support the audio tag.</audio></p>
+.. audio:: media/received-mininet.wav
 
 The quality of the received sound is degraded compared to the original, due to the loss and jitter of the link.
 

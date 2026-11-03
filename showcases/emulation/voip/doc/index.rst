@@ -304,15 +304,11 @@ Let's look at results obtained from running the loopback-based configuration
 with a lossy link. As a reference, you can listen to the original audio file by
 clicking the play button below:
 
-.. raw:: html
-
-   <p><audio controls> <source src="media/Stereotype_News.mp3" type="audio/mpeg">Your browser does not support the audio tag.</audio></p>
+.. audio:: media/Stereotype_News.mp3
 
 Here is the received audio file:
 
-.. raw:: html
-
-   <p><audio controls> <source src="media/received.wav" type="audio/wav">Your browser does not support the audio tag.</audio></p>
+.. audio:: media/received.wav
 
 The quality of the received sound is degraded compared to the original. The sender creates
 and sends audio packets every 20ms, but when they go through the host OS
