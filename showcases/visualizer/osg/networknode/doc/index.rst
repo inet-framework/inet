@@ -25,7 +25,7 @@ In INET simulations, :ned:`NetworkNodeVisualizer` module (included in the
 network as part of :ned:`IntegratedVisualizer`) is responsible for
 visualizing network nodes. :ned:`NetworkNodeVisualizer` includes two
 submodules: :ned:`NetworkNodeCanvasVisualizer`, which is responsible for
-visualizing nodes on the 2D canvas, and :ned:`NetworkNodeOsgVisualizer`,
+visualizing nodes on the 2D canvas, and ``NetworkNodeOsgVisualizer``,
 which visualizes nodes in 3D scenes.
 Both visualizer modules operate on all network nodes by default, but you can narrow
 the list of nodes to be displayed by using the :par:`nodeFilter` parameter.
@@ -61,7 +61,7 @@ In addition, :ned:`NetworkNodeCanvasVisualizer` lets you use an arbitrary image
 Visualization on a 3D scene
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:ned:`NetworkNodeOsgVisualizer` is responsible for displaying nodes on a 3D
+``NetworkNodeOsgVisualizer`` is responsible for displaying nodes on a 3D
 scene. (Note that :ned:`IntegratedVisualizer`'s ``osgVisualizer`` submodule
 type must be set to ``"IntegratedOsgVisualizer"`` to visualize nodes in 3D.)
 OMNeT++'s 3D visualization is based on the open-source OpenSceneGraph (OSG) and osgEarth
@@ -156,7 +156,7 @@ Default 3D view
 ~~~~~~~~~~~~~~~
 
 The OSG-based 3D view can be enabled by adding any visualizer module
-that uses it. In our case, we add a :ned:`NetworkNodeOsgVisualizer`
+that uses it. In our case, we add a ``NetworkNodeOsgVisualizer``
 by enabling it in :ned:`IntegratedVisualizer`.
 
 .. literalinclude:: ../omnetpp.ini
@@ -236,7 +236,7 @@ More Information
 This example only demonstrates the key features of network node
 visualization. For more information, refer to the NED documentation of
 :ned:`NetworkNodeVisualizer`, :ned:`NetworkNodeCanvasVisualizer`, and
-:ned:`NetworkNodeOsgVisualizer`.
+``NetworkNodeOsgVisualizer``.
 
 
 Try It Yourself

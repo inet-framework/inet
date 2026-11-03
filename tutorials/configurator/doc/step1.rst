@@ -14,7 +14,7 @@ filling routing tables for now -- it will be covered in later steps.
 The network
 -----------
 
-The network we want to configure is :ned:`ConfiguratorA`, defined in
+The network we want to configure is ``ConfiguratorA``, defined in
 ``ConfiguratorA.ned``. It looks like
 this:
 

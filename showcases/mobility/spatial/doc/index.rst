@@ -40,7 +40,7 @@ you won't be able to switch to the 3D view using the globe icon on the Qtenv too
 The model
 ---------
 
-The simulations use the :ned:`SpatialMobilityShowcase` network. It contains a
+The simulations use the ``SpatialMobilityShowcase`` network. It contains a
 configurable number of mobile nodes (hosts) and an :ned:`IntegratedVisualizer` module.
 
 .. figure:: media/Playground2D.png
@@ -62,7 +62,7 @@ Additional settings (not shown above) stretch the rendered scene a little larger
 than the constraint area of the mobility models to enhance visual appearance.
 
 Further settings enable various effects in the mobility visualization. Note, however, that
-at the time of writing, not all features are implemented in the :ned:`MobilityOsgVisualizer`
+at the time of writing, not all features are implemented in the ``MobilityOsgVisualizer``
 (practically, only trail visualization is).
 
 When simulations are run, the scene looks like the following in the 3D view:

@@ -24,7 +24,7 @@ The model
 
 First, we need to represent obstacles. In INET, obstacles are managed as
 part of the :ned:`PhysicalEnvironment` module, so we need to add an
-instance to the :ned:`WirelessB` network:
+instance to the ``WirelessB`` network:
 
 
 

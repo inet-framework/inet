@@ -24,7 +24,7 @@ for automatic route configuration instead of the default hop count.
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the :ned:`ConfiguratorD` network, defined in
+This step uses the ``ConfiguratorD`` network, defined in
 :download:`ConfiguratorD.ned <../ConfiguratorD.ned>`. The network
 looks like this:
 

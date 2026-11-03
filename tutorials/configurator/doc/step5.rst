@@ -14,7 +14,7 @@ This step consists of two parts:
 Part A - Overriding routes to a specific host
 ---------------------------------------------
 
-Both parts in this step use the :ned:`ConfiguratorA` network (displayed
+Both parts in this step use the ``ConfiguratorA`` network (displayed
 below), just as in the previous steps. In this part, we will override the
 routes going from the subnet of ``router0`` to ``host7``. With the
 automatic configuration, packets from ``router0``'s subnet would go

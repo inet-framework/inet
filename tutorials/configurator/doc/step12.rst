@@ -11,7 +11,7 @@ error rate metrics in a mixed wired/wireless network.
 The model
 ---------
 
-This step uses the :ned:`ConfiguratorE` network, defined in
+This step uses the ``ConfiguratorE`` network, defined in
 :download:`ConfiguratorE.ned <../ConfiguratorE.ned>`. The network
 looks like this:
 

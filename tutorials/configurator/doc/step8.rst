@@ -32,14 +32,14 @@ same wireless network.
 Configuration
 ~~~~~~~~~~~~~
 
-This step uses the :ned:`ConfiguratorC` network defined in
+This step uses the ``ConfiguratorC`` network defined in
 :download:`ConfiguratorC.ned <../ConfiguratorC.ned>`. The network is
 displayed on the following image.
 
 .. figure:: media/step8network.png
    :width: 100%
 
-The :ned:`ConfiguratorC` network extends :ned:`ConfiguratorB` by adding two
+The ``ConfiguratorC`` network extends ``ConfiguratorB`` by adding two
 wireless LANs, ``area1lan3`` and ``area3lan3``. The additional LANs
 consist of an :ned:`AccessPoint` and three ``WirelessHosts``.
 

@@ -15,7 +15,7 @@ The model
 
 We need to add three more hosts. This could be done by copying and
 editing the network used in the previous steps, but instead, we extend
-:ned:`WirelessA` into :ned:`WirelessB` using the inheritance feature of NED:
+``WirelessA`` into ``WirelessB`` using the inheritance feature of NED:
 
 
 

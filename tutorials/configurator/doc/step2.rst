@@ -12,7 +12,7 @@ assignment for the rest of the network.
 The model
 ---------
 
-This step uses the :ned:`ConfiguratorA` network from the previous step. We
+This step uses the ``ConfiguratorA`` network from the previous step. We
 will assign the 10.0.0.50 address to ``host1``, and 10.0.0.100 to
 ``host3``. The configurator will automatically assign addresses to the
 rest of the nodes.

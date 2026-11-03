@@ -22,7 +22,7 @@ demonstrating various features of the visualization.
 About the Visualizer
 --------------------
 
-The map can be displayed by including a :ned:`SceneOsgEarthVisualizer`
+The map can be displayed by including a ``SceneOsgEarthVisualizer``
 module in the network. It can display the map in the 3D view by using
 osgEarth, thus any part of the world can be inserted (provided there is
 a source for the map data). The use of the map requires an Internet
@@ -50,10 +50,10 @@ The network contains an :ned:`IntegratedCanvasVisualizer` and an
    :language: ini
 
 By default, the type of the scene visualizer module in
-:ned:`IntegratedCanvasVisualizer` is :ned:`SceneOsgVisualizer`. Inserting the map
-requires the :ned:`SceneOsgEarthVisualizer` module, thus, the default OSG
-scene visualizer is replaced. The :ned:`SceneOsgEarthVisualizer`
-provides the same functionality as :ned:`SceneOsgVisualizer` and adds
+:ned:`IntegratedCanvasVisualizer` is ``SceneOsgVisualizer``. Inserting the map
+requires the ``SceneOsgEarthVisualizer`` module, thus, the default OSG
+scene visualizer is replaced. The ``SceneOsgEarthVisualizer``
+provides the same functionality as ``SceneOsgVisualizer`` and adds
 support for the osgEarth map.
 
 To display the map, the visualizer requires a ``.earth`` file. This is an
@@ -201,7 +201,7 @@ Further Information
 -------------------
 
 For further information about the visualizer, refer to the NED documentation of
-:ned:`SceneOsgEarthVisualizer` and :ned:`OsgGeographicCoordinateSystem`.
+``SceneOsgEarthVisualizer`` and :ned:`OsgGeographicCoordinateSystem`.
 
 
 Try It Yourself

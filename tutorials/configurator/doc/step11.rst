@@ -24,7 +24,7 @@ the XML configuration for subsequent simulation runs.
 Configuration
 ~~~~~~~~~~~~~
 
-Both parts in this step use the :ned:`ConfiguratorA` network defined in
+Both parts in this step use the ``ConfiguratorA`` network defined in
 :download:`ConfiguratorA.ned <../ConfiguratorA.ned>`:
 
 .. figure:: media/step4network.png

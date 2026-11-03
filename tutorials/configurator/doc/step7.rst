@@ -27,7 +27,7 @@ serve as a baseline to compare with.
 Configuration
 ~~~~~~~~~~~~~
 
-All three parts in this step use the :ned:`ConfiguratorB` network defined
+All three parts in this step use the ``ConfiguratorB`` network defined
 in :download:`ConfiguratorB.ned <../ConfiguratorB.ned>`. The network
 looks like this:
 

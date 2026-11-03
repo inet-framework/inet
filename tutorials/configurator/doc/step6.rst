@@ -46,7 +46,7 @@ Configuration
 ~~~~~~~~~~~~~
 
 The configuration for this step extends Step 4, thus, it uses the
-:ned:`ConfiguratorA` network. The configuration in omnetpp.ini is the
+``ConfiguratorA`` network. The configuration in omnetpp.ini is the
 following:
 
 .. literalinclude:: ../omnetpp.ini

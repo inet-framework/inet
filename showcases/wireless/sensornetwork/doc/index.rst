@@ -141,7 +141,7 @@ To run the example simulations, choose the :ned:`BMac`, :ned:`LMac`, and
 Most of the configuration keys in the .ini file are shared between the
 three simulations (they are defined in the ``General`` configuration),
 except for the MAC protocol-specific settings. All three simulations
-will use the same network, :ned:`SensorNetworkShowcaseA`, defined in
+will use the same network, ``SensorNetworkShowcaseA``, defined in
 :download:`SensorNetworkShowcase.ned <../SensorNetworkShowcase.ned>`.
 
 .. figure:: media/network.png
@@ -468,7 +468,7 @@ Measuring power consumption
       :start-at: PowerBase???
       :end-at: energyStorageType
 
-   The power configs will use the same network as the statistic configs, :ned:`SensorNetworkShowcaseB`
+   The power configs will use the same network as the statistic configs, ``SensorNetworkShowcaseB``
    defined in :download:[SensorNetworkShowcase.ned](../SensorNetworkShowcase.ned). The simulations
    will be run for 100s. Vector recording is turned off, because we are not interested in how energy
    levels change over time, we only require the last value of the `residualEnergyCapacity` statistic.

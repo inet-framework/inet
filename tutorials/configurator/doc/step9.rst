@@ -12,7 +12,7 @@ configurator, and they get addresses with DHCP.
 The model
 ---------
 
-This step uses the :ned:`ConfiguratorC` network, defined in
+This step uses the ``ConfiguratorC`` network, defined in
 :download:`ConfiguratorC.ned <../ConfiguratorC.ned>`.
 
 .. figure:: media/step8network.png

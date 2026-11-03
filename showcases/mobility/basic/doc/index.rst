@@ -44,7 +44,7 @@ contains a more in-depth treatment of mobility models.
 The Model
 ---------
 
-All simulations use the :ned:`BasicMobilityShowcase` network.
+All simulations use the ``BasicMobilityShowcase`` network.
 The size of the scene is 400x400x0 meters. It contains a configurable
 number of hosts and an :ned:`IntegratedCanvasVisualizer` module to
 visualize aspects of mobility. The following image shows the layout of the network:

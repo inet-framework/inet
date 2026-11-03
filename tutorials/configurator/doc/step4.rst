@@ -12,7 +12,7 @@ The model
 ---------
 
 This step uses the same network as the previous steps,
-:ned:`ConfiguratorA`. The configuration for this step in omnetpp.ini is the
+``ConfiguratorA``. The configuration for this step in omnetpp.ini is the
 following:
 
 .. literalinclude:: ../omnetpp.ini
