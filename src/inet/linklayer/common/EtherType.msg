@@ -44,4 +44,9 @@ enum EtherType
 cplusplus {{
     inline bool isEth2Type(int typeOrLength)  { return typeOrLength >= 0x600 || typeOrLength == 0; }  // typeOrLength is type
     inline bool isIeee8023Length(int typeOrLength)  { return typeOrLength > 0 && typeOrLength < 0x600; }  // typeOrLength is length
+
+    // Renders an EtherType as hex, followed by the name of its protocol if it has one, e.g. "0x88a8 (IEEE 802.1Q S-TAG)"
+    INET_API std::string etherTypeToString(int etherType);
+    // Renders a type as etherTypeToString() does, and a length as a decimal number, e.g. "46 (length)"
+    INET_API std::string typeOrLengthToString(int typeOrLength);
 }}
