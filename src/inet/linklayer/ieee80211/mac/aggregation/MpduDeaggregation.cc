@@ -63,6 +63,8 @@ std::vector<Packet *> *MpduDeaggregation::deaggregateFrame(Packet *aggregatedFra
 {
     EV_DEBUG << "Deaggregating A-MPDU " << *aggregatedFrame << " into multiple packets.\n";
     std::vector<Packet *> *frames = new std::vector<Packet *>();
+    // Extraction alone grants no MAC acceptance, including after delimiter recovery.
+    // The caller must check delimiter validity, PHY outcomes, member FCS, and MAC conditions.
     cStringTokenizer tokenizer(aggregatedFrame->getName(), "+");
     visitSubframes(aggregatedFrame, B(0), B(aggregatedFrame->getDataLength()),
             [](const auto&, B, bool) {},
