@@ -1,0 +1,97 @@
+%description:
+
+Tests that MrpRelay forwards a multicast frame that has entries in the
+forwarding table only to the listed ports that are forwarding, and never back
+to the port it came from.
+
+The switch has hasMrp with MRP disabled, so its ring ports, eth3 and eth4,
+looped to each other, do not forward. A static forwarding table entry lists
+eth0 (the port of the sender h1), eth1 (h2) and eth3 for the multicast address
+that h1 sends to. h3 is not listed. Every host has a sink for that address.
+
+h2 must receive all 10 frames. h1 must not receive its frames back, eth3 must
+not send them to eth4, and h3 must receive nothing. The failure is declared
+expected until MrpRelay skips both the incoming port and the ports that do not
+forward.
+
+%# expected-result: FAIL
+
+%file: test.ned
+
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.StandardHost;
+
+network MrpRelayMulticastTestNetwork
+{
+    submodules:
+        h1: StandardHost;
+        h2: StandardHost;
+        h3: StandardHost;
+        switch: EthernetSwitch {
+            gates:
+                ethg[5];
+        }
+    connections:
+        h1.ethg++ <--> Eth100M <--> switch.ethg[0];
+        h2.ethg++ <--> Eth100M <--> switch.ethg[1];
+        h3.ethg++ <--> Eth100M <--> switch.ethg[2];
+        switch.ethg[3] <--> Eth100M <--> switch.ethg[4];
+}
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src
+network = MrpRelayMulticastTestNetwork
+sim-time-limit = 9.5ms
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+record-vector-results = false
+**.cmdenv-log-level = off
+
+*.h*.hasIpv4 = false
+*.h*.hasIpv6 = false
+*.h*.hasTcp = false
+*.h*.hasUdp = false
+*.h*.numLoInterfaces = 0
+*.*.eth[*].typename = "LayeredEthernetInterface"
+*.*.eth[*].bitrate = 100Mbps
+*.h*.ethernet.typename = "EthernetLayer"
+*.h*.ethernet.hasSocketSupport = true
+
+*.switch.hasMrp = true
+*.switch.mrp.ringPort1 = 3
+*.switch.mrp.ringPort2 = 4
+*.switch.mrp.uuid0 = 1
+*.switch.mrp.uuid1 = 1
+*.switch.macTable.forwardingTable = [{address: "01-00-5E-00-00-01", interface: "eth0"}, \
+                                     {address: "01-00-5E-00-00-01", interface: "eth1"}, \
+                                     {address: "01-00-5E-00-00-01", interface: "eth3"}]
+
+*.h1.numApps = 2
+*.h*.numApps = 1
+*.h*.app[0].typename = "EthernetSinkApp"
+*.h*.app[0].io.interface = "eth0"
+*.h*.app[0].io.localAddress = "01-00-5E-00-00-01"
+*.h*.app[0].io.steal = true
+*.h1.app[1].typename = "EthernetSourceApp"
+*.h1.app[1].source.packetLength = 100B
+*.h1.app[1].source.productionInterval = 1ms
+*.h1.app[1].io.interface = "eth0"
+*.h1.app[1].io.remoteAddress = "01-00-5E-00-00-01"
+
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: results/General-#0.sca
+scalar MrpRelayMulticastTestNetwork.h2.eth[0].macLayer.fcsChecker incomingPackets:count 10
+%contains: results/General-#0.sca
+scalar MrpRelayMulticastTestNetwork.h1.eth[0].macLayer.fcsChecker incomingPackets:count 0
+%contains: results/General-#0.sca
+scalar MrpRelayMulticastTestNetwork.h3.eth[0].macLayer.fcsChecker incomingPackets:count 0
+%contains: results/General-#0.sca
+scalar MrpRelayMulticastTestNetwork.switch.eth[4].macLayer.fcsChecker incomingPackets:count 0
+%contains: results/General-#0.sca
+scalar MrpRelayMulticastTestNetwork.h2.app[0].io packetReceived:count 10
+%contains: results/General-#0.sca
+scalar MrpRelayMulticastTestNetwork.h1.app[0].io packetReceived:count 0
