@@ -1,0 +1,3 @@
+The classic MAC relays send packets of their upper layer with the VLAN tag they request
+
+In a switch with an 802.1Q layer, Ieee8021dRelay (the default relay of EthernetSwitch) and MrpRelay sent a packet from their upper layer, for example from an application of the switch, untagged, even if it requested a C-tag or an S-tag. The request was dropped without an error. Now such a packet goes down through the 802.1Q layer, which inserts the requested tags, the S-tag around the C-tag; a switch without an 802.1Q layer for a requested tag stops with an error. None of INET's own protocols above a relay requests a tag, so no existing simulation changes.

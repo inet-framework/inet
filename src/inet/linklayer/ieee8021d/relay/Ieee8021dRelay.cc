@@ -154,6 +154,7 @@ void Ieee8021dRelay::handleLowerPacket(Packet *incomingPacket)
 void Ieee8021dRelay::handleUpperPacket(Packet *packet)
 {
     EV_INFO << "Processing upper packet" << EV_FIELD(packet) << EV_ENDL;
+    addVlanTagEncapsulationProtocols(packet);
     auto macAddressReq = packet->getTag<MacAddressReq>();
     auto destinationAddress = macAddressReq->getDestAddress();
     unsigned int vlanId = 0;

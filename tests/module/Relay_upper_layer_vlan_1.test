@@ -15,11 +15,8 @@ for VID 42 in switchA and switchB, and an S-tag request for VID 42 in switchC.
 The sink on the other port of the switch must receive the frame with the
 requested tag and the EtherType 0x88B5 behind it.
 
-The relays send the packet to EthernetLayer directly, past the tag inserter of
-the 802.1Q layer, so all three sinks receive it untagged. The failure is declared
-expected until the relays send such packets through the 802.1Q layer.
-
-%# expected-result: FAIL
+The relays send the packet down through the 802.1Q layer, whose tag inserter
+inserts the requested tag.
 
 %file: UpperLayerVlanFrames.cc
 
