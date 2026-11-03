@@ -10,7 +10,7 @@ Master contains the merged explicit Compressed Block Ack implementation from PR 
 
 The PHY plan supplies aggregate reception before the MAC feature uses it. Its first gate proves deterministic member outcomes and includes the shared NIST/Yans implementation. It also preserves default HT operation and reception without an error model. Its second gate extends the NIST/Yans and compatibility evidence. The MAC feature can reach deterministic integration between those gates.
 
-The series defines PHY P0 through P4 and gates D1 and D2. The final execution record states verification and its limits. VHT identity, bounded inspection, deaggregation use, and HT-SIG representation have separate commit boundaries. P3 checks NIST/Yans probabilities and seeded outcomes. P4 supplies ordinary controls. MAC aggregate receipt and implicit Block Ack remain pending.
+The ten-commit series supplies PHY P0 through P4 and gates D1 and D2. The [final execution record](ieee80211-ampdu-phy-execution.md) states verification and its limits. VHT identity, bounded inspection, deaggregation use, and HT-SIG representation have separate commit boundaries. P3 checks NIST/Yans probabilities and seeded outcomes. P4 supplies ordinary controls. MAC aggregate receipt and implicit Block Ack remain pending.
 
 The merge prerequisite is satisfied on the integrated master base. MAC step A0 must compare the contracts and record a feature-off baseline before MAC implementation.
 
@@ -47,7 +47,7 @@ The radio already assigns that 48-bit header length. P0 records its current valu
 
 Correct bytes alone do not establish rejection of an invalid received header. P1 also defines one stateless HT-SIG validator. P2 applies it before member outcomes and before radio decapsulation trusts HT Length. Invalid CRC or unsupported fields cause HEADER failure without delimiter or member draws. The current header-failure paths prevent receipt updates, delivery, and responses. [HT-SIG receive validation](ieee80211-ampdu-phy-reception.md#ht-sig-receive-validation).
 
-A separate bounds check refuses modeled PSDU content shorter than a valid header's HT Length. HEADER retains success and the decoded Aggregation property. DATA reports failure without range outcomes or draws, and MAC refuses the content before header or trailer peeks. Decapsulation skips length-based trailer removal. This case proves bounds safety for malformed input. It establishes no physical carrier-loss behavior or acceptance of a received prefix.
+A separate bounds check refuses modeled PSDU content shorter than a valid header's HT Length. HEADER retains success and the decoded Aggregation property. DATA reports failure without chunk error flags or draws, and MAC refuses the content before header or trailer peeks. Decapsulation skips length-based trailer removal. This case proves bounds safety for malformed input. It establishes no physical carrier-loss behavior or acceptance of a received prefix.
 
 The diagram shows two members. Nonfinal HT subframes need alignment padding of zero to three octets. The final HT subframe has no alignment padding. Extra zero-length delimiters can provide the minimum MPDU start spacing that the receiver requires.
 
@@ -70,7 +70,7 @@ Each complete HT member must fit the 4095-octet delimiter limit. The whole aggre
 
 The first transmit profile uses packet-level `Ieee80211Radio`, scalar or dimensional reception, HT mixed format, 20 MHz, and long GI. Aggregate transmission requires fixed DATA rates and no HCF rate-control submodule. Each aggregate serves one recipient and TID under an accepted immediate Compressed agreement. Compressed responses retain the 64-bit bitmap. Multiple peers and agreements can coexist; each retains separate state. [Supported profile](ieee80211-ampdu-implicit-blockack.md#first-supported-profile).
 
-Receive support also covers advertised HT20 short-GI modes at the permitted MCS and NSS values. Before the MIB update, the MAC supplies its exact mode set, effective channel widths, and NSS limit for receiver validation. The check covers advertised modes; unsupported catalog modes outside those limits do not cause rejection. A peer can select an advertised short-GI receive mode even when the local aggregate transmitter uses long GI. The new transmit policy remains limited to long GI. [Required receive coverage](ieee80211-ampdu-phy-reception.md#42-optional-role-and-shared-implementation).
+Receive support covers HT20 long GI and short GI within the current radio limits. The new transmit policy remains limited to long GI. [PHY receive contract](ieee80211-ampdu-phy-reception.md#42-generic-data-corruption).
 
 HCF coordinates eligibility and the exchange. Management and the MIB supply local and peer capabilities. The proposed HT policy selects members within those capabilities and the agreement's transmit window. The policy cannot grant an agreement or bypass a PHY limit.
 
@@ -89,11 +89,11 @@ flowchart TD
 
 The transmit feature requires an explicit policy choice. The default policy continues to select no A-MPDU. A receiver must recognize supported received aggregates even when its own transmitter uses the default policy. Absent peer HT state retains S5's Normal Ack fallback.
 
-The WLAN receiver checks role presence at PHY initialization. The MAC requests exact coverage validation later, before its MIB update at link-layer initialization. Absent roles and incomplete advertised coverage cause failure before management sends capability information. These checks apply even when local transmit aggregation remains disabled. Non-HT custom models retain ordinary MPDU reception without that role. [Early compatibility checks](ieee80211-ampdu-phy-reception.md#44-model-detail-and-diagnostics).
+Generic DATA corruption accepts chunk content without MAC format knowledge. The common base uses BER; the WLAN base uses its existing DATA success calculation. An unavailable probability causes a runtime error. No separate MAC capability validation applies.
 
-HT length exponent zero still advertises 8191 octets; it cannot disable aggregate reception. A model that exposes the role but lacks advertised short-GI support therefore fails initialization. A one-antenna configuration must pass when the model supports every advertised mode. The catalog can contain unsupported modes for more spatial streams. The validation adds no second capability store or independent filter.
+Generic DATA corruption accepts chunk content without MAC format knowledge. The common base uses BER; the WLAN base uses its existing DATA success calculation. An unavailable probability causes a runtime error. No separate MAC capability validation applies.
 
-BerTable remains outside the HT aggregate profile. Its current initializer rejects HT operation strings before the new role check. This delivery adds no aggregate role to BerTable. The migration guide directs supported HT configurations to NIST or Yans. The PHY fixture compares a non-HT parent control and verifies the current HT refusal separately from the custom-model role diagnostic. [Compatibility decision and checks](ieee80211-ampdu-phy-reception.md#5-affected-components-and-compatibility).
+BerTable retains its current HT configuration limit. The generic DATA operation adds no aggregation role. NIST and Yans calculate chunk probabilities through their existing PHY calculations.
 
 An absent error model retains the current error-free abstraction after PHY acquisition, possibility, attempt, and SNIR checks. Successful common checks permit physical success for bounded delimiter and member ranges without new error draws. Delimiter, FCS, address, and agreement checks still control MAC acceptance. This case adds no replacement module or interface requirement.
 
@@ -196,7 +196,7 @@ flowchart TD
     END -->|No| SILENT["Send no Block Ack"]
 ```
 
-The cache keeps separate entries for each receiver, transmission, and signal part. PREAMBLE preserves the current per-part checks without early HEADER or DATA calculation. HEADER reuses PREAMBLE before its own header calculation. DATA owns bounded range outcomes or structural refusal after successful header reception. A WHOLE query derives its summary from those entries without another error draw. Aggregate success queries must use those same entries.
+The cache keeps separate entries for each receiver, transmission, and signal part. PREAMBLE preserves the current per-part checks without early HEADER or DATA calculation. HEADER reuses PREAMBLE before its own header calculation. DATA owns bounded chunk error flags or structural refusal after successful header reception. A WHOLE query derives its summary from those entries without another error draw. Aggregate success queries must use those same entries.
 
 In separate-part mode, PREAMBLE or HEADER failure aborts the attempted reception before a container reaches MAC. Existing radio state notifications let HCF invalidate its physical history. Whole-signal mode can supply a failure container that MAC rejects before header or trailer parsing. Both paths prevent acceptance, responses, and range draws. The design preserves their existing event boundaries.
 
@@ -208,9 +208,9 @@ With a present error model, aggregate results retain `ErrorRateInd` with all thr
 
 The tag contract permits `NaN` for unknown probabilities. P0 must audit readers, filters, and recorders that can receive aggregate metadata before P2 implements this contract. A reachable incompatibility blocks that implementation until the PHY plan records its resolution. Tag omission requires evidence that all affected consumers accept absence. The PHY fixture must verify the identified consumer paths before D1 closes.
 
-The [PHY plan](ieee80211-ampdu-phy-reception.md#42-optional-role-and-shared-implementation) defines an optional WLAN role for per-range probabilities and a pure mode-support query. A shared WLAN base implementation reuses the current length-based calculations for NIST, Yans, and compatible custom subclasses. P2 supplies this implementation and the MAC validation call before it enables the HT compatibility checks. The receiver checks the exact MAC capability inputs without a probability call or random draw. It calls the probability operations only for aggregates. An absent model follows the explicit error-free case.
+The [PHY plan](ieee80211-ampdu-phy-reception.md#42-generic-data-corruption) defines generic DATA corruption through the existing error-model interface. Error models sample chunk flags from PHY conditions and bit lengths. The receiver caches the returned chunks. MAC code interprets delimiters and member correctness. Raw byte input has one DATA outcome because byte conversion removes the original boundaries.
 
-Deterministic tests supply probabilities of zero or one through the same role. The real receiver still produces and caches the outcomes. Those tests establish receiver integration and selective recovery. They do not establish the full NIST/Yans profile.
+Generic DATA corruption accepts chunk content without MAC format knowledge. The common base uses BER; the WLAN base uses its existing DATA success calculation. An unavailable probability causes a runtime error. No separate MAC capability validation applies.
 
 The shared NIST/Yans implementation uses independent delimiter and MPDU outcomes under the current scalar SNIR reduction. This is a packet-level abstraction. It does not model correlated FEC errors or reconstruct interference within each MPDU. D2 extends the evidence for that implementation before completion of the documented profile.
 
@@ -351,7 +351,7 @@ PHY checks also prove HT-SIG golden bytes and independent decode, PREAMBLE query
 
 The proposed MAC checks reject aggregate transmit opt-in with AARF. Proposed response checks separate observable mismatches and retired callbacks from indistinguishable valid frames inside an active interval. MAC FCS acceptance remains pending.
 
-Completed PHY checks reject absent aggregate roles and incomplete advertised receive-mode coverage before the MIB update. The PHY controls preserve ordinary HT reception with NIST, Yans, and an absent error model. Aggregate checks without an error model retain common PHY checks without new error draws. The PHY execution record states the direct evidence and its limits.
+Generic DATA corruption accepts chunk content without MAC format knowledge. The common base uses BER; the WLAN base uses its existing DATA success calculation. An unavailable probability causes a runtime error. No separate MAC capability validation applies.
 
 A fixture peer supplies a valid HT20 short-GI aggregate through the real radio. D1 and A2 verify copied PHY indications without MAC receipt or response requirements. After A4 supplies member validation, A5 verifies MAC receipt and one Compressed response after SIFS. A6 verifies production capability negotiation with the local aggregate transmit policy at long GI. This receive case does not establish short-GI selection from production transmit queues. [Receive acceptance cases](ieee80211-ampdu-implicit-blockack.md#proposed-direct-checks).
 
@@ -367,7 +367,7 @@ The first version excludes these larger features:
 - Reverse direction, mixed control/data aggregates, adaptive aggregate transmission, new rate-control algorithms, and general MAC stop/start recovery.
 - Bit-level FEC behavior, correlated error accuracy, errors confined to alignment padding, and a guaranteed performance gain.
 
-Custom data services, MPDU policies, Tx/Rx modules, response policies, and response-rate selectors can need interface updates. The DATA rate-control API remains unchanged; aggregate transmit opt-in requires its HCF submodule to be absent. Present custom HT models need the optional PHY role with coverage of advertised receive modes. This includes configurations that previously used only ordinary MPDUs. Non-HT custom reception and operation without an error model remain available without that role. The implementation must document those obligations.
+Generic DATA corruption accepts chunk content without MAC format knowledge. The common base uses BER; the WLAN base uses its existing DATA success calculation. An unavailable probability causes a runtime error. No separate MAC capability validation applies.
 
 The design reuses the public Packet API and proposes no edit to its sealed implementation. Related feature branches remain separate integration work. [Compatibility and scope](ieee80211-ampdu-implicit-blockack.md#5-affected-components-and-compatibility).
 
