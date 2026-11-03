@@ -1,0 +1,207 @@
+%description:
+
+Tests that the classic relays send a packet from their upper layer that
+requests a VLAN tag through the 802.1Q layer of the switch, so that it leaves
+the switch tagged. In a switch, the upper layer of the relay is where STP/RSTP,
+MRP and the applications of the switch send their packets from.
+
+Three independent switches have an 802.1Q layer: switchA with Ieee8021dRelay,
+the default relay of EthernetSwitch, switchB with MrpRelay (hasMrp, MRP
+disabled, so its ring ports, looped to each other, do not forward), and switchC
+with Ieee8021dRelay and an 802.1Q layer for S-tags (IEEE 802.1ad). An
+application of each switch sends a broadcast packet with EtherType 0x88B5
+(IEEE 802 Local Experimental EtherType 1) to the relay, with a C-tag request
+for VID 42 in switchA and switchB, and an S-tag request for VID 42 in switchC.
+The sink on the other port of the switch must receive the frame with the
+requested tag and the EtherType 0x88B5 behind it.
+
+The relays send the packet to EthernetLayer directly, past the tag inserter of
+the 802.1Q layer, so all three sinks receive it untagged. The failure is declared
+expected until the relays send such packets through the 802.1Q layer.
+
+%# expected-result: FAIL
+
+%file: UpperLayerVlanFrames.cc
+
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/linklayer/common/EtherTypeTag_m.h"
+#include "inet/linklayer/common/EtherType_m.h"
+#include "inet/linklayer/common/MacAddressTag_m.h"
+#include "inet/linklayer/common/VlanTag_m.h"
+#include "inet/linklayer/ethernet/common/EthernetMacHeader_m.h"
+#include "inet/linklayer/ieee8021q/Ieee8021qTagHeader_m.h"
+#include "inet/queueing/base/PassivePacketSinkBase.h"
+
+using namespace inet;
+
+namespace Relay_upper_layer_vlan_1 {
+
+// Sends one broadcast packet with EtherType 0x88B5 and a request for a C-tag
+// or S-tag of VID 42 to the relay of its switch, as an upper-layer protocol
+// of the relay
+class UpperLayerVlanSource : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override
+    {
+        scheduleAt(SimTime(1, SIMTIME_US), new cMessage("send"));
+    }
+
+    virtual void handleMessage(cMessage *msg) override
+    {
+        if (!msg->isSelfMessage()) {
+            delete msg;
+            return;
+        }
+        delete msg;
+        auto packet = new Packet("upper", makeShared<BytesChunk>(std::vector<uint8_t>(46, 0x5A)));
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::unknown);
+        packet->addTag<EtherTypeReq>()->setEtherType(0x88B5);
+        packet->addTag<MacAddressReq>()->setDestAddress(MacAddress::BROADCAST_ADDRESS);
+        if (!strcmp(par("vlanTagType").stringValue(), "s"))
+            packet->addTag<SVlanReq>()->setVlanId(42);
+        else
+            packet->addTag<CVlanReq>()->setVlanId(42);
+        auto dispatchProtocolReq = packet->addTag<DispatchProtocolReq>();
+        dispatchProtocolReq->setProtocol(&Protocol::ethernetMac);
+        dispatchProtocolReq->setServicePrimitive(SP_REQUEST);
+        send(packet, "socketOut");
+    }
+};
+
+Define_Module(UpperLayerVlanSource);
+
+// Prints the MAC header and the 802.1Q tag of each frame that its network
+// interface receives
+class UpperLayerVlanSink : public queueing::PassivePacketSinkBase
+{
+  public:
+    virtual void pushPacket(Packet *packet, const cGate *gate) override
+    {
+        Enter_Method("pushPacket");
+        take(packet);
+        const auto& macHeader = packet->peekAtFront<EthernetMacHeader>();
+        std::cout << getParentModule()->getFullName() << " received " << packet->getName() << ": typeOrLength=0x" << std::hex << macHeader->getTypeOrLength() << std::dec;
+        if (macHeader->getTypeOrLength() == ETHERTYPE_8021Q_TAG || macHeader->getTypeOrLength() == ETHERTYPE_8021ad_S_TAG) {
+            const auto& tagHeader = packet->peekDataAt<Ieee8021qTagEpdHeader>(macHeader->getChunkLength());
+            std::cout << " vid=" << tagHeader->getVid() << " typeOrLength=0x" << std::hex << tagHeader->getTypeOrLength() << std::dec;
+        }
+        std::cout << " length=" << packet->getDataLength() << std::endl;
+        delete packet;
+    }
+};
+
+Define_Module(UpperLayerVlanSink);
+
+} // namespace Relay_upper_layer_vlan_1
+
+%file: test.ned
+
+import inet.applications.contract.IApp;
+import inet.linklayer.ethernet.modular.LayeredEthernetInterface;
+import inet.networklayer.common.InterfaceTable;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.queueing.base.PacketSinkBase;
+
+simple UpperLayerVlanSource like IApp
+{
+    parameters:
+        @class(UpperLayerVlanSource);
+        string vlanTagType @enum("c","s") = default("c");
+    gates:
+        input socketIn;
+        output socketOut;
+}
+
+simple UpperLayerVlanSink extends PacketSinkBase
+{
+    parameters:
+        @class(UpperLayerVlanSink);
+    gates:
+        input in;
+}
+
+module SinkNode
+{
+    parameters:
+        @networkNode;
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+    gates:
+        inout ethg;
+    submodules:
+        interfaceTable: InterfaceTable;
+        eth: LayeredEthernetInterface {
+            bitrate = 100Mbps;
+        }
+        sink: UpperLayerVlanSink;
+    connections allowunconnected:
+        eth.upperLayerOut --> sink.in;
+        eth.phys <--> ethg;
+}
+
+network Test
+{
+    submodules:
+        sinkA: SinkNode;
+        switchA: EthernetSwitch {
+            gates:
+                ethg[1];
+        }
+        sinkB: SinkNode;
+        switchB: EthernetSwitch {
+            gates:
+                ethg[3];
+        }
+        sinkC: SinkNode;
+        switchC: EthernetSwitch {
+            gates:
+                ethg[1];
+        }
+    connections:
+        sinkA.ethg <--> Eth100M <--> switchA.ethg[0];
+        sinkB.ethg <--> Eth100M <--> switchB.ethg[0];
+        switchB.ethg[1] <--> Eth100M <--> switchB.ethg[2];
+        sinkC.ethg <--> Eth100M <--> switchC.ethg[0];
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 1ms
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+record-vector-results = false
+**.cmdenv-log-level = off
+
+*.switch?.ethernet.typename = "EthernetLayer"
+*.switch?.ieee8021q.typename = "Ieee8021qProtocol"
+*.switch?.eth[*].typename = "LayeredEthernetInterface"
+*.switch?.eth[*].bitrate = 100Mbps
+*.switch?.numApps = 1
+*.switch?.app[0].typename = "UpperLayerVlanSource"
+
+*.switchA.llc.typename = ""
+*.switchC.llc.typename = ""
+*.switchC.ieee8021q.vlanTagType = "s"
+*.switchC.bridging.vlanTagType = "s"
+*.switchC.app[0].vlanTagType = "s"
+
+*.switchB.hasMrp = true
+*.switchB.mrp.ringPort1 = 1
+*.switchB.mrp.ringPort2 = 2
+*.switchB.mrp.uuid0 = 1
+*.switchB.mrp.uuid1 = 1
+
+%subst: /\x1B\[[0-9;]*m//
+
+%contains: stdout
+sinkA received upper: typeOrLength=0x8100 vid=42 typeOrLength=0x88b5 length=68 B
+%contains: stdout
+sinkB received upper: typeOrLength=0x8100 vid=42 typeOrLength=0x88b5 length=68 B
+%contains: stdout
+sinkC received upper: typeOrLength=0x88a8 vid=42 typeOrLength=0x88b5 length=68 B
