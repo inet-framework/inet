@@ -26,11 +26,12 @@ const ChunkSerializer *ChunkSerializerRegistry::getSerializer(const std::type_in
 {
     auto it = serializers.find(typeInfo);
     if (it != serializers.end()) {
+        const ChunkSerializer *serializer = it->second;
         if (usedRecorder != nullptr)
             usedRecorder->insert(opp_typename(typeInfo));
         if (usedSerializerClassRecorder != nullptr)
-            usedSerializerClassRecorder->insert(opp_typename(typeid(*it->second)));
-        return it->second;
+            usedSerializerClassRecorder->insert(opp_typename(typeid(*serializer)));
+        return serializer;
     }
     else
         throw cRuntimeError("Cannot find serializer for %s", opp_typename(typeInfo));
