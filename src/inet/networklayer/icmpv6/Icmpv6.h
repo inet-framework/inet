@@ -13,6 +13,7 @@
 #include "inet/common/lifecycle/ModuleOperations.h"
 #include "inet/common/packet/Message.h"
 #include "inet/common/packet/Packet.h"
+#include "inet/networklayer/common/L3Address.h"
 #include "inet/networklayer/contract/INetfilter.h"
 #include "inet/networklayer/icmpv6/Icmpv6Header_m.h"
 #include "inet/common/checksum/ChecksumMode_m.h"
@@ -50,6 +51,12 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
      */
     virtual void sendErrorMessage(Packet *datagram, Icmpv6Type type, int code, int mtu = 0);
 
+    /**
+     * Checks the checksum of a received ICMPv6 message. The source and destination
+     * addresses that RFC 4443 Section 2.3 puts into the pseudo-header are taken from the
+     * packet's L3AddressInd tag; a packet that has no such tag, as one being dissected on
+     * its own does, is accepted unless its checksum is declared incorrect.
+     */
     static bool verifyChecksum(const Packet *packet);
 
   protected:
@@ -106,11 +113,18 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
   public:
     /**
      * Sets the checksum mode on the header and, for the declared modes, the recognizable
-     * placeholder value. In CHECKSUM_COMPUTED mode it only zeroes the field; the value is
-     * filled in by datagramPostRoutingHook(), after routing.
+     * placeholder value. In CHECKSUM_COMPUTED mode it only zeroes the field: the RFC 4443
+     * checksum covers an IPv6 pseudo-header, so it cannot be computed before Ipv6 has
+     * chosen the source address. The value is filled in by datagramPostRoutingHook().
      */
     static void insertChecksum(ChecksumMode checksumMode, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);
     void insertChecksum(const Ptr<Icmpv6Header>& icmpHeader, Packet *packet) { insertChecksum(checksumMode, icmpHeader, packet); }
+
+    /**
+     * Sets the checksum on a message whose source and destination addresses are already
+     * known, computing it over the RFC 4443 pseudo-header in CHECKSUM_COMPUTED mode.
+     */
+    static void insertChecksum(ChecksumMode checksumMode, const L3Address& srcAddress, const L3Address& destAddress, const Ptr<Icmpv6Header>& icmpHeader, Packet *packet);
 
     // Fills in the checksum of an outgoing ICMPv6 message, at the point where the source
     // and destination addresses the datagram is sent with are settled.
@@ -122,10 +136,11 @@ class INET_API Icmpv6 : public OperationalBase, public DefaultProtocolRegistrati
 
   protected:
     /**
-     * Computes the checksum of an ICMPv6 message: the one's complement sum over the
-     * message, whose checksum field must be zero.
+     * Computes the RFC 4443 Section 2.3 checksum: the one's complement sum over an IPv6
+     * pseudo-header (source address, destination address, upper-layer packet length, next
+     * header 58) followed by the ICMPv6 message, whose checksum field must be zero.
      */
-    static uint16_t computeChecksum(const Ptr<const Icmpv6Header>& icmpHeader, const Ptr<const Chunk>& icmpData);
+    static uint16_t computeChecksum(const L3Address& srcAddress, const L3Address& destAddress, const Ptr<const Icmpv6Header>& icmpHeader, const Ptr<const Chunk>& icmpData);
 
     ChecksumMode checksumMode = CHECKSUM_MODE_UNDEFINED;
     typedef std::map<long, int> PingMap;
