@@ -50,6 +50,7 @@ class CompletionDriver : public cSimpleModule, public cListener, public ITx::ICa
     int completions = 0;
     bool completed = false;
     void initialize() override { scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("start")); }
+    void frameTransmissionStarted(Packet *) override {}
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
         callbacks++;
         ASSERT(!tx->hasTransmission());

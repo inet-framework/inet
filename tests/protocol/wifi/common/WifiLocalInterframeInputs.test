@@ -139,6 +139,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
     bool completed = false;
     int ackCompletions = 0;
     simtime_t ackEnd;
+    void frameTransmissionStarted(Packet *) override {}
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
         ackCompletions++;
         ackEnd = simTime();

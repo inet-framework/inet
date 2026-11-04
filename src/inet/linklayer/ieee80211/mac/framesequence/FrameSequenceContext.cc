@@ -6,16 +6,38 @@
 
 
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceContext.h"
+#include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceStep.h"
 
 namespace inet {
 namespace ieee80211 {
 
 using namespace inet::physicallayer;
 
+AmpduTransmitStep::AmpduTransmitStep(std::shared_ptr<PreparedDataTransmission> prepared, simtime_t ifs) :
+    TransmitStep(nullptr, ifs), prepared(std::move(prepared))
+{
+}
+
+Packet *AmpduTransmitStep::getFrameToTransmit()
+{
+    return prepared->envelope.get();
+}
+
 PreparedDataTransmission::~PreparedDataTransmission()
 {
     if (rtsPrediction)
         drop(rtsPrediction.get());
+    if (envelope)
+        drop(envelope.get());
+}
+
+void PreparedDataTransmission::setEnvelope(Packet *packet)
+{
+    if (envelope)
+        drop(envelope.get());
+    envelope.reset(packet);
+    if (envelope)
+        take(envelope.get());
 }
 
 void PreparedDataTransmission::setRtsPrediction(Packet *packet)

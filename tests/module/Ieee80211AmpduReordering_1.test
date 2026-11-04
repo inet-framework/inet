@@ -249,6 +249,7 @@ class ReorderPhysicalDriver : public cSimpleModule, public cListener, public ITx
         delete packet;
     }
   public:
+    void frameTransmissionStarted(Packet *) override {}
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>& header) override {
         ASSERT(header && header->getType() == ST_CTS);
         unrelatedCompletions++;
