@@ -52,7 +52,7 @@ class Ieee80211Mib;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::IAggregateCallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
 {
   private:
     BlockAckVariant blockAckVariant = BlockAckVariant::BASIC;
@@ -60,6 +60,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool validateBlockAckRequest(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& bar) const;
 
   public:
+    Packet *prepareAggregateTransmission() override;
+    void aggregateTransmissionCancelled() override;
+    void frameTransmissionStarted(Packet *packet) override;
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
@@ -149,10 +152,12 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     simtime_t computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     simtime_t computeBlockAckExchangeDuration(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& header, simtime_t ppduDuration);
     DataPreparationResult prepareDataTransmission(FrameSequenceContext *context);
+    bool prepareAggregateData(FrameSequenceContext *context, const PreparedDataTransmission& selected);
+    void processAggregateOutcome(const Ptr<const Ieee80211CompressedBlockAck>& response);
     bool validatePreparedData(const PreparedDataTransmission& prepared, simtime_t start) const;
     simtime_t computePreparedDataCost(const PreparedDataTransmission& prepared, bool protect) const;
     bool canAdmitPreparedData(const FrameSequenceContext *context, const PreparedDataTransmission& prepared,
-            simtime_t ifs, bool protect) const;
+            simtime_t ifs, bool protect, simtime_t elapsedIfs = 0) const;
     bool isInitialDataException(const FrameSequenceContext *context, const PreparedDataTransmission& prepared) const;
     simtime_t forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header,
             TxopProcedure *txop, InProgressFrames *frames, simtime_t completionTime);

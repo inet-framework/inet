@@ -1,0 +1,45 @@
+%description:
+The shared Compressed response validator accepts a zero bitmap at sequence wrap.
+It rejects mismatched addresses, TID, profile, fragment fields, bitmap width, and wire length.
+The aggregate frame sequence supplies its actual peer and TID to this validator.
+These helper checks supplement the real receive-window fixture.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/framesequence/PrimitiveFrameSequences.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+const MacAddress local("02:00:00:00:00:01");
+const MacAddress peer("02:00:00:00:00:02");
+const MacAddress other("02:00:00:00:00:03");
+for (int scenario = 0; scenario < 12; scenario++) {
+    auto header = makeShared<Ieee80211CompressedBlockAck>();
+    header->setReceiverAddress(scenario == 1 ? other : local);
+    header->setTransmitterAddress(scenario == 2 ? other : peer);
+    header->setTidInfo(scenario == 3 ? 2 : 5);
+    header->setStartingSequenceNumber(SequenceNumberCyclic(4095));
+    header->setBlockAckBitmap(BitVector(0, scenario == 7 ? 63 : scenario == 8 ? 65 : 64));
+    if (scenario == 4) header->setMultiTid(true);
+    if (scenario == 5) header->setCompressedBitmap(false);
+    if (scenario == 6) header->setFragmentNumber(1);
+    if (scenario == 9) header->setChunkLength(B(27));
+    Packet packet("response", header);
+    if (scenario != 10)
+        packet.insertAtBack(makeShared<Ieee80211MacTrailer>());
+    if (scenario == 11)
+        packet.insertAtBack(makeShared<ByteCountChunk>(B(1)));
+    ASSERT(isValidCompressedBlockAck(&packet, local, peer, 5) == (scenario == 0));
+}
+auto basic = makeShared<Ieee80211BasicBlockAck>();
+basic->setReceiverAddress(local);
+basic->setTransmitterAddress(peer);
+basic->setTidInfo(5);
+Packet wrongProfile("basic", basic);
+wrongProfile.insertAtBack(makeShared<Ieee80211MacTrailer>());
+ASSERT(!isValidCompressedBlockAck(&wrongProfile, local, peer, 5));
+EV << "Compressed response validation boundaries passed.\n";
+
+%contains: stdout
+Compressed response validation boundaries passed.

@@ -21,6 +21,8 @@ class INET_API IOriginatorQoSAckPolicy
 {
   public:
     virtual ~IOriginatorQoSAckPolicy() {}
+    virtual void setProbeEligibility(std::function<bool(InProgressFrames *, Tid)> predicate) = 0;
+    virtual simtime_t getImplicitBlockAckTimeout(const physicallayer::IIeee80211Mode *responseMode) const = 0;
 
     virtual bool isAckNeeded(const Ptr<const Ieee80211MgmtHeader>& header) const = 0;
     virtual AckPolicy computeAckPolicy(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, OriginatorBlockAckAgreement *agreement) const = 0;

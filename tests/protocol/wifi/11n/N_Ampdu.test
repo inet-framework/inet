@@ -1,16 +1,11 @@
-%# expected-result: FAIL
 %description:
-Expected failure by explicit maintainer decision: defer this nontrivial repair to future work.
-Repair requires production QoS aggregation selection, transmission, receive integration, and Block Ack progress.
-Evidence and deferred-repair decision: doc/project/evidence/model/wifi/results.md#deferred-repair-expectations.
-This declaration records unresolved work, not supported behavior.
-
-Observe an HT A-MPDU subframe. Aggregation construction exists, but the production
-originator invocation is commented out and the default policy never aggregates.
+Observe an HT A-MPDU through production association and fixed-rate Compressed Block Ack.
+Require an implicit response and exactly sixty upper deliveries through the AP.
 
 %file: N_Ampdu.cc
 
 #include "ProtocolTest.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 
 namespace inet {
 namespace protocoltest {
@@ -18,8 +13,18 @@ namespace protocoltest {
 Define_ProtocolTest(wifi_11n_ampdu)
 {
     return ProtocolTest("wifi_11n_ampdu")
+        .meanwhile(exactlyTimes(60, on("sta2.udp").signal("packetSentToUpper").within(1.5)))
+        .meanwhile(atLeastTimes(1, on("sta1.wlan[0].mac").signal("packetReceivedFromLower")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.packet && dynamicPtrCast<const ieee80211::Ieee80211CompressedBlockAck>(
+                          c.event.packet->peekAtFront<Chunk>()) != nullptr;
+                  })
+                  .describe("an implicit Compressed Block Ack response").within(1.5)))
         .once(on("sta1.wlan[0].mac").signal("packetSentToLower")
-                  .filterPacket("Ieee80211MpduSubframeHeader.length >= 0")
+                  .filterEvent([](const MatchContext& c) {
+                      return c.event.packet && dynamicPtrCast<const ieee80211::Ieee80211MpduSubframeHeader>(
+                          c.event.packet->peekAtFront<Chunk>()) != nullptr;
+                  })
                   .describe("a frame containing an A-MPDU subframe header").within(2.0));
 }
 
@@ -30,16 +35,32 @@ Define_ProtocolTest(wifi_11n_ampdu)
 
 [General]
 *.tester.testName = "wifi_11n_ampdu"
-*.sta*.wlan[*].mac.hcf.isBlockAckSupported = true
-**.wlan[*].mac.hcf.blockAckVariant = "basic"
-*.ap.wlan[*].mac.hcf.isBlockAckSupported = true
-*.sta1.app[0].sendInterval = 0.1ms
-include ../../ini/_n.ini
+**.wlan[*].mac.hcf.isBlockAckSupported = true
+**.wlan[*].mac.hcf.blockAckVariant = "compressed"
+**.wlan[*].mac.hcf.rateControl.typename = ""
+**.wlan[*].mac.hcf.rateSelection.dataFrameBitrate = 65Mbps
+**.wlan[*].mac.hcf.rateSelection.controlFrameBitrate = 6Mbps
+**.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
+**.hcf.originatorMacDataService.msduAggregationPolicy.typename = ""
+**.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 10000B
+**.wlan[*].mac.fcsMode = "computed"
+**.checksumMode = "computed"
+**.txopProcedure.txopLimit = 0s
+*.sta1.app[0].messageLength = 1200B
+*.sta1.app[0].sendInterval = 20us
+*.sta1.app[0].stopTime = 1.00119s
+*.radioMedium.propagation.typename = "ConstantTimePropagation"
+*.radioMedium.propagation.propagationTime = 0s
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
 **.wlan[*].radio.receiver.energyDetection = -105dBm
+**.wlan[*].radio.receiver.sensitivity = -105dBm
+**.wlan[*].radio.receiver.snirThreshold = 0dB
 **.hcf.originatorMacDataService.fragmentationPolicy.fragmentationThreshold = 10000B
-**.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
-**.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = 100
+include ../../ini/_n.ini
 include ../../ini/_base.ini
 
 %contains: stdout
 PROTOCOLTEST wifi_11n_ampdu: PASS
+
+%contains: stdout
+WifiInfraNetwork.sta2.app[0]: received 60 packets
