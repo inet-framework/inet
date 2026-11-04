@@ -7,6 +7,8 @@
 
 #include "inet/linklayer/ieee80211/mac/Rx.h"
 
+#include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/ProtocolTag_m.h"
@@ -144,6 +146,76 @@ bool Rx::lowerFrameReceived(Packet *packet)
             contention->corruptedFrameReceived();
         return false;
     }
+}
+
+AmpduReception Rx::lowerAggregateReceived(Packet *packet)
+{
+    Enter_Method("lowerAggregateReceived");
+    take(packet);
+    AmpduReception result;
+    auto indication = packet->findTag<Ieee80211AmpduInd>();
+    auto topology = std::make_shared<AmpduTopology>();
+    result.topology = topology;
+    if (indication && indication->getHeaderSuccessful() && indication->getAggregation() && indication->getContentComplete()) {
+        topology->length = B(packet->getDataLength());
+        bool first = true;
+        B parsedEnd(0);
+        bool complete = MpduDeaggregation::visitSubframes(packet, B(0), topology->length,
+                [&](const auto&, B offset, bool valid) {
+                    topology->delimiters.push_back({offset, valid});
+                    parsedEnd = offset + B(4);
+                    if (!valid)
+                        first = false;
+                },
+                [&](const Ptr<const Chunk>& mpdu, B offset) {
+                    B length(mpdu->getChunkLength());
+                    parsedEnd = offset + length;
+                    topology->members.push_back({offset, {}, first});
+                    first = false;
+                    auto member = std::make_unique<Packet>(packet->getName(), mpdu);
+                    member->getRegionTags().copyTags(packet->getRegionTags(), packet->getFrontOffset() + offset,
+                            member->getFrontOffset(), length);
+                    member->copyTags(*packet);
+                    member->removeTagIfPresent<Ieee80211AmpduInd>();
+                    // Chunk flags retain the cached PHY outcome before every FCS mode.
+                    bool correct = length >= B(4) && mpdu->isCorrect() &&
+                            member->hasAtBack<Ieee80211MacTrailer>(B(4)) &&
+                            isFcsOk(member.get()) && member->hasAtFront<Ieee80211MacHeader>();
+                    if (!correct) {
+                        PacketDropDetails details;
+                        details.setReason(INCORRECTLY_RECEIVED);
+                        emit(packetDroppedSignal, member.get(), &details);
+                        return;
+                    }
+                    result.anyCorrect = true;
+                    const auto& header = member->peekAtFront<Ieee80211MacHeader>();
+                    if (header->getReceiverAddress() != address)
+                        setOrExtendNav(header->getDurationField());
+                    if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+                        if (data->getSequenceNumber().isSpecified())
+                            topology->members.back().sequence = data->getSequenceNumber();
+                    }
+                    result.members.push_back({std::move(member), offset});
+                });
+        if (!complete && parsedEnd < topology->length)
+            topology->delimiters.push_back({parsedEnd, false});
+    }
+    Ptr<const Ieee80211MacHeader> header;
+    if (result.anyCorrect) {
+        header = result.members.front().packet->peekAtFront<Ieee80211MacHeader>();
+        if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+            topology->transmitter = data->getTransmitterAddress();
+            topology->receiver = data->getReceiverAddress();
+            topology->tid = data->getTid();
+        }
+    }
+    attachInterframeResult(packet, result.anyCorrect, header, topology);
+    // IEEE Std 802.11-2024, 10.3.2.3.7: any correct MPDU excludes EIFS for this PPDU.
+    if (!result.anyCorrect) {
+        for (auto contention : contentions)
+            contention->corruptedFrameReceived();
+    }
+    return result;
 }
 
 void Rx::frameTransmitted(simtime_t durationField)
@@ -300,6 +372,7 @@ void Rx::invalidateInterframeHistory()
     invalidateFutureInterframeHistory();
     completedReception.reset();
     ambiguityEnd = -1;
+    transmittedBlockAckAggregate.reset();
 }
 
 void Rx::observeReceptionStart(const IReception *reception)
@@ -338,49 +411,60 @@ void Rx::observeReceptionEnd(const IReception *reception)
     }
 }
 
-bool Rx::isCompletedAck(const ITransmission *transmission) const
+Ptr<const Ieee80211MacHeader> Rx::getTransmittedMacHeader(const ITransmission *transmission) const
 {
     auto packet = transmission ? transmission->getPacket() : nullptr;
     if (!packet || !packet->findTag<PacketProtocolTag>() || packet->getDataLength() <= b(0))
-        return false;
+        return nullptr;
     auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
     if (protocol != &Protocol::ieee80211FhssPhy && protocol != &Protocol::ieee80211IrPhy &&
             protocol != &Protocol::ieee80211DsssPhy && protocol != &Protocol::ieee80211HrDsssPhy &&
             protocol != &Protocol::ieee80211OfdmPhy && protocol != &Protocol::ieee80211ErpOfdmPhy &&
             protocol != &Protocol::ieee80211HtPhy && protocol != &Protocol::ieee80211VhtPhy)
-        return false;
+        return nullptr;
     // Optional evidence must not turn an unsupported representation into a MAC error.
     try {
         int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
         auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet, b(-1), flags);
         if (!phy->isCorrect() || phy->isIncomplete() || phy->isImproperlyRepresented() ||
                 phy->getChunkLength() <= b(0) || phy->getChunkLength() + LENGTH_ACK > packet->getDataLength())
-            return false;
+            return nullptr;
         auto mac = packet->peekAt<Ieee80211MacHeader>(phy->getChunkLength(), b(-1), flags);
-        return mac->isCorrect() && !mac->isIncomplete() && !mac->isImproperlyRepresented() && mac->getType() == ST_ACK;
+        return mac->isCorrect() && !mac->isIncomplete() && !mac->isImproperlyRepresented() ? mac : nullptr;
     }
     catch (const cRuntimeError&) {
-        return false;
+        return nullptr;
     }
 }
 
-void Rx::attachInterframeResult(Packet *packet, bool accepted)
+bool Rx::isCompletedAck(const ITransmission *transmission) const
+{
+    auto header = getTransmittedMacHeader(transmission);
+    return header && header->getType() == ST_ACK;
+}
+
+void Rx::attachInterframeResult(Packet *packet, bool accepted,
+        const Ptr<const Ieee80211MacHeader>& acceptedHeader, std::shared_ptr<const AmpduTopology> topology)
 {
     discardExpiredReception();
     auto time = packet->findTag<SignalTimeInd>();
     if (!time || time->getStartTime() < SIMTIME_ZERO || time->getEndTime() <= time->getStartTime()) {
         invalidateFutureInterframeHistory();
-        if (accepted)
-            packet->addTagIfAbsent<Ieee80211InterframeInd>()->setRelated(false);
+        if (accepted) {
+            auto interval = packet->addTagIfAbsent<Ieee80211InterframeInd>();
+            interval->setRelated(false);
+            interval->setBlockAckContext({});
+        }
         return;
     }
     bool related = false;
+    BlockAckReceiveContext context;
     if (completedReception && completedReception->start == time->getStartTime() &&
             completedReception->end == time->getEndTime()) {
         auto evidence = std::move(*completedReception);
         completedReception.reset();
         if (accepted) {
-            auto header = packet->peekAtFront<Ieee80211MacHeader>();
+            auto header = acceptedHeader ? acceptedHeader : packet->peekAtFront<Ieee80211MacHeader>();
             auto twoAddress = dynamicPtrCast<const Ieee80211TwoAddressHeader>(header);
             auto indication = packet->findTag<Ieee80211ModeInd>();
             bool ht = indication && indication->getMode() &&
@@ -400,6 +484,11 @@ void Rx::attachInterframeResult(Packet *packet, bool accepted)
                         correctedGap <= evidence.rifs + evidence.rifs / 10;
                 }
             }
+            if (related && evidence.preceding) {
+                context.previousAggregate = evidence.preceding->aggregate;
+                context.followsAggregate = bool(context.previousAggregate);
+                context.followsIndividual = !context.followsAggregate;
+            }
             if (evidence.mayBecomePredecessor) {
                 PrecedingFrame preceding{evidence.end, false};
                 preceding.ht = ht;
@@ -409,12 +498,18 @@ void Rx::attachInterframeResult(Packet *packet, bool accepted)
                 auto dataOrMgmt = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header);
                 preceding.noSifsResponse = recipientAckPolicy && (dataOrMgmt ? !recipientAckPolicy->isAckNeeded(dataOrMgmt) :
                     !dynamicPtrCast<const Ieee80211RtsFrame>(header) && !dynamicPtrCast<const Ieee80211BlockAckReq>(header));
+                preceding.aggregate = topology;
+                if (topology)
+                    preceding.noSifsResponse = false;
                 precedingFrame = preceding;
             }
         }
     }
-    if (accepted)
-        packet->addTagIfAbsent<Ieee80211InterframeInd>()->setRelated(related);
+    if (accepted) {
+        auto interval = packet->addTagIfAbsent<Ieee80211InterframeInd>();
+        interval->setRelated(related);
+        interval->setBlockAckContext(context);
+    }
 }
 
 void Rx::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details)
@@ -426,16 +521,29 @@ void Rx::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, c
             observeReceptionStart(check_and_cast<const IReception *>(obj));
         else if (signalID == receptionEndedSignal)
             observeReceptionEnd(check_and_cast<const IReception *>(obj));
-        else if (signalID == transmissionStartedSignal)
+        else if (signalID == transmissionStartedSignal) {
+            auto header = getTransmittedMacHeader(dynamic_cast<const ITransmission *>(obj));
+            auto blockAck = dynamicPtrCast<const Ieee80211CompressedBlockAck>(header);
+            auto topology = precedingFrame ? precedingFrame->aggregate : transmittedBlockAckAggregate;
+            transmittedBlockAckAggregate = blockAck && topology &&
+                    blockAck->getReceiverAddress() == topology->transmitter && blockAck->getTidInfo() == topology->tid ?
+                    topology : nullptr;
             invalidateFutureInterframeHistory();
+        }
         else if (signalID == transmissionEndedSignal) {
             invalidateFutureInterframeHistory();
             if (isCompletedAck(dynamic_cast<const ITransmission *>(obj)))
                 precedingFrame = PrecedingFrame{simTime(), true};
+            else if (transmittedBlockAckAggregate) {
+                precedingFrame = PrecedingFrame{simTime(), false};
+                precedingFrame->aggregate = std::move(transmittedBlockAckAggregate);
+            }
+            transmittedBlockAckAggregate.reset();
         }
     }
     if (signalID == modesetChangedSignal) {
         invalidateFutureInterframeHistory();
+        transmittedBlockAckAggregate.reset();
         ModeSetListener::receiveSignal(source, signalID, obj, details);
     }
 }
@@ -451,8 +559,15 @@ void Rx::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value,
     else if (signalID == IRadio::radioModeChangedSignal) {
         if (value == IRadio::RADIO_MODE_OFF)
             invalidateInterframeHistory();
-        else if (value == IRadio::RADIO_MODE_SLEEP || value == IRadio::RADIO_MODE_TRANSMITTER)
+        else if (value == IRadio::RADIO_MODE_TRANSMITTER) {
+            // The radio changes mode before it reports the actual response transmission.
+            transmittedBlockAckAggregate = precedingFrame ? precedingFrame->aggregate : nullptr;
             invalidateFutureInterframeHistory();
+        }
+        else if (value == IRadio::RADIO_MODE_SLEEP) {
+            transmittedBlockAckAggregate.reset();
+            invalidateFutureInterframeHistory();
+        }
     }
 }
 
