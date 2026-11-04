@@ -50,6 +50,21 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
     ASSERT(this->txCallback == nullptr);
     this->txCallback = txCallback;
     this->updateLocalNav = updateLocalNav;
+    finalizeMpdu(packet);
+    this->frame = packet->dup();
+    ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
+    if (ifs == 0) {
+        // do directly what handleMessage() would do
+        transmitting = true;
+        mac->sendDownFrame(frame->dup());
+    }
+    else
+        scheduleAfter(ifs, endIfsTimer);
+}
+
+void Tx::finalizeMpdu(Packet *packet)
+{
+    Enter_Method("finalizeMpdu");
     auto macAddressInd = packet->addTagIfAbsent<MacAddressInd>();
     const auto& updatedHeader = packet->removeAtFront<Ieee80211MacHeader>();
     if (auto oneAddressHeader = dynamicPtrCast<Ieee80211OneAddressHeader>(updatedHeader)) {
@@ -72,15 +87,6 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         delete[] buffer;
     }
     packet->insertAtBack(updatedTrailer);
-    this->frame = packet->dup();
-    ASSERT(!endIfsTimer->isScheduled() && !transmitting); // we are idle
-    if (ifs == 0) {
-        // do directly what handleMessage() would do
-        transmitting = true;
-        mac->sendDownFrame(frame->dup());
-    }
-    else
-        scheduleAfter(ifs, endIfsTimer);
 }
 
 void Tx::radioTransmissionFinished()

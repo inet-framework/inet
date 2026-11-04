@@ -56,6 +56,7 @@ class INET_API ITx
      */
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool updateLocalNav, ICallback *callback) = 0;
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ICallback *callback) = 0;
+    virtual void finalizeMpdu(Packet *packet) = 0;
     /**
      * The query returns true while Tx retains an accepted frame,
      * including any wait before transmission and the transmission itself.
