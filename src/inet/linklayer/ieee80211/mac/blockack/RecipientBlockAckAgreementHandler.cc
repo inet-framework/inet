@@ -37,7 +37,7 @@ void RecipientBlockAckAgreementHandler::scheduleInactivityTimer(IBlockAckAgreeme
 void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee80211DataHeader>& qosHeader, IBlockAckAgreementHandlerCallback *callback)
 {
     // IEEE Std 802.11-2024, 11.5.4: matching Block Ack-policy DATA refreshes inactivity, including a duplicate.
-    if (qosHeader->getAckPolicy() == AckPolicy::BLOCK_ACK) { // TODO + Implicit Block Ack
+    if (qosHeader->getAckPolicy() == AckPolicy::BLOCK_ACK) {
         Tid tid = qosHeader->getTid();
         MacAddress originatorAddr = qosHeader->getTransmitterAddress();
         auto agreement = getAgreement(tid, originatorAddr);
@@ -45,6 +45,17 @@ void RecipientBlockAckAgreementHandler::qosFrameReceived(const Ptr<const Ieee802
             agreement->calculateExpirationTime();
             scheduleInactivityTimer(callback);
         }
+    }
+}
+
+void RecipientBlockAckAgreementHandler::implicitBlockAckRequested(const Ptr<const Ieee80211DataHeader>& qosHeader,
+        IBlockAckAgreementHandlerCallback *callback)
+{
+    // IEEE Std 802.11-2024, 11.5.4: valid Implicit BAR DATA also refreshes inactivity, including duplicates.
+    auto agreement = getAgreement(qosHeader->getTid(), qosHeader->getTransmitterAddress());
+    if (agreement && agreement->getVariant() == BlockAckVariant::COMPRESSED && qosHeader->getAckPolicy() == NORMAL_ACK) {
+        agreement->calculateExpirationTime();
+        scheduleInactivityTimer(callback);
     }
 }
 

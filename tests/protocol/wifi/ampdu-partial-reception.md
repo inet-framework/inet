@@ -1,8 +1,8 @@
-# PHY P2: Preserve partial outcomes at the MAC boundary
+# Preserve partial PHY outcomes before member extraction
 
 This document belongs to PHY P2, **ieee80211: add+change: retain partial HT A-MPDU PHY outcomes**. Its protocol test is [WifiHtAmpduPartialReception.test](common/WifiHtAmpduPartialReception.test). The [PHY plan](../../../plan/pending/ieee80211-ampdu-phy-reception.md) defines the receiver contract and later MAC work.
 
-Before this commit, the receiver samples the aggregate as one packet. It cannot retain a failed member beside successful members. Rx can also inspect an aggregate container as a standalone MAC frame. After this commit, cached PHY decisions retain chunks with error flags. The result packet preserves those flags. Rx rejects the container before standalone FCS or MAC header checks.
+The PHY prerequisite retains cached outcomes in chunk flags. Before MAC integration, Rx rejects the complete aggregate before standalone frame checks. After MAC integration, a separate Rx method extracts members and checks their FCS. The fixture therefore observes the envelope before extraction. This change preserves the PHY assertions and the independent CTS control.
 
 ## Requirement and model boundary
 
@@ -16,13 +16,13 @@ The fixture uses a production scalar transmitter, medium, receiver, MAC, and Rx.
 
 At 1 ms, the driver submits members of 100, 101, and 102 octets. Three alignment octets follow the 101-octet member. The complete PSDU contains 318 octets. The driver selects HT MCS 0 and the run's GI before production radio encapsulation.
 
-At the production Rx drop signal, the observer checks the intact PSDU length and clear container bit-error flag. The indication must report a successful header and complete content. Chunk flags supply the error outcomes. Their offsets are 0, 4, 104, 108, 212, and 216 octets. For typed input, each selected chunk must be incorrect exactly when its length equals the configured failed length. Raw input marks the entire DATA view incorrect. The test uses a distinct padding chunk to preserve the typed boundaries.
+An Rx subclass emits an observation signal before it calls production aggregate reception. The observer checks the intact PSDU length and clear container bit-error flag at that signal. The indication must report a successful header and complete content. Chunk flags supply the error outcomes at offsets 0, 4, 104, 108, 212, and 216 octets. For typed input, each selected chunk must be incorrect exactly when its length equals the configured failed length. Raw input marks the complete DATA view incorrect.
 
-The observer reads the indication through OMNeT++ descriptors, which expose generated fields by name. The fixture therefore uses the generic corruption API from the preparation commit. It compiles on the receiver commit's parent without the new indication class. A missing indication fails at runtime. The observer reads each field without a change to protocol state. No conditional check accepts missing data.
+The observer reads common indication fields through OMNeT++ descriptors. A missing indication fails at runtime. The observer changes no protocol state. The amended fixture requires the aggregate Rx method from MAC integration. It supplies no execution result for that method's parent.
 
-Rx must reject that container once through its normal drop path. At 2 ms, the driver submits an independent CTS with computed FCS and a 50-microsecond Duration field. The observer requires one 50-microsecond NAV update after the aggregate drop. This control proves that the ordinary acceptance path remains usable after the rejection.
+Production Rx must accept no member because these zero-filled members have no valid MAC FCS. At 2 ms, the driver submits an independent CTS with computed FCS and a 50-microsecond Duration field. The observer requires one 50-microsecond NAV update after the aggregate observation. This control checks ordinary reception after the aggregate.
 
-The protocol tester requires `testHtAmpduPartial` followed by `testHtAmpduControl`. These events occur only after their assertions pass. A missing aggregate, missing drop, wrong outcome, or missing control result cannot pass through an empty observation.
+The protocol tester requires `testHtAmpduPartial` followed by `testHtAmpduControl`. These events occur only after their assertions pass. A missing aggregate, wrong outcome, or missing control result cannot pass through an empty observation.
 
 The four loss patterns combine with both GIs, typed and raw-byte transmission, and whole-signal and separate-part reception. These combinations produce 32 runs. Every run uses seed zero and ends at 4 ms. The deterministic probabilities require no extra seeds. The existing module fixture separately retains dimensional-radio, DCF, malformed-input, and cached-query controls.
 
@@ -35,16 +35,17 @@ sequenceDiagram
     participant Tester as Protocol tester
     Driver->>Tx: Three-member HT aggregate
     Tx->>Receiver: One PPDU through the medium
-    Receiver->>Receiver: Retain every delimiter and MPDU outcome
-    Receiver->>Rx: Intact container and copied ranges
-    Rx->>Tester: Drop with verified partial outcomes
+    Receiver->>Receiver: Retain cached chunk outcomes
+    Receiver->>Rx: Intact content with chunk error flags
+    Rx->>Tester: Observation after envelope assertions
+    Rx->>Rx: Extract members; reject invalid MAC content
     Driver->>Tx: Independent CTS with computed FCS
     Tx->>Receiver: Ordinary PPDU
     Receiver->>Rx: Decoded CTS
     Rx->>Tester: Verified NAV update
 ```
 
-The parent lacks the copied range indication and the aggregate-safe Rx boundary. Its whole-packet result cannot satisfy these assertions. This commit must retain the six outcomes and complete the later CTS control for every loss pattern. No expected-failure marker suppresses either requirement.
+The amended fixture preserves the prerequisite's PHY assertions at the new aggregate Rx entry. Its parent result remains unverified. The comparison below describes an earlier fixture and source range.
 
 ## Verification and limits
 
@@ -55,6 +56,6 @@ make MODE=debug -j8
 opp_run_protocol_tests -p inet -m debug -w '^tests/protocol/wifi$' -f 'WifiHtAmpduPartialReception\.test$' --no-concurrent
 ```
 
-The installed runner can require the temporary compatible descriptor described in the [execution record](../../../plan/pending/ieee80211-ampdu-phy-execution.md). The expected result is 32 successful runs and `PROTOCOLTEST wifi_ht_ampdu_partial_reception: PASS`. The [comparison record](ampdu-partial-reception-comparison.md) reports the parent and commit executions with identical fixture bytes.
+The installed runner can require the temporary compatible descriptor described in the [execution record](../../../plan/pending/ieee80211-ampdu-phy-execution.md). The expected result is 32 successful runs and `PROTOCOLTEST wifi_ht_ampdu_partial_reception: PASS`. The [comparison record](ampdu-partial-reception-comparison.md) reports historical executions of an earlier fixture.
 
-This fixture verifies PHY outcomes at the current MAC boundary. It does not verify member acceptance, upper delivery, implicit Block Ack, or correlated FEC errors. The diagram follows the actual send, receive, drop, and NAV sequence. Diagram rendering remains unverified when no Mermaid renderer is available.
+This fixture checks PHY outcomes before member extraction and checks rejection of invalid MAC content. It does not prove valid member acceptance, upper delivery, implicit Block Ack, or correlated FEC errors. The diagram describes the test sequence. Diagram rendering remains unverified.

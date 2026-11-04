@@ -55,7 +55,7 @@ Packet *RecipientQosMacDataService::defragment(Packet *mgmtFragment)
         return nullptr;
 }
 
-std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, bool interframe)
+std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, bool interframe, const BlockAckReceiveContext *context)
 {
     Enter_Method("dataFrameReceived");
     take(dataPacket);
@@ -88,7 +88,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     }
     BlockAckReordering::ReleasedFrames frames = {{dataHeader->getSequenceNumber().get(), {dataPacket}}};
     if (blockAckReordering && agreement)
-        frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe, hadCompressedReceipt, reportDuplicate);
+        frames = blockAckReordering->processReceivedQoSFrame(agreement, dataPacket, dataHeader, interframe, hadCompressedReceipt, reportDuplicate, context);
     std::vector<Packet *> defragmentedFrames;
     if (basicReassembly) { // FIXME defragmentation
         for (auto it : frames) {
