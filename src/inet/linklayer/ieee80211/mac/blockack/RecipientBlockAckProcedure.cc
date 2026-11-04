@@ -74,21 +74,27 @@ const Ptr<Ieee80211BlockAck> RecipientBlockAckProcedure::buildBlockAck(const Ptr
         return blockAck;
     }
     else if (auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
-        ASSERT(agreement != nullptr);
-        auto blockAck = makeShared<Ieee80211CompressedBlockAck>();
-        auto record = agreement->getBlockAckRecord();
-        auto start = record->getWindowStart();
-        BitVector bitmap(0, 64);
-        for (int i = 0; i < 64; i++)
-            bitmap.setBit(i, record->getCompressedAckState(start + i));
-        blockAck->setBlockAckBitmap(bitmap);
-        blockAck->setReceiverAddress(compressed->getTransmitterAddress());
-        blockAck->setStartingSequenceNumber(start);
-        blockAck->setTidInfo(compressed->getTidInfo());
-        return blockAck;
+        return buildCompressedBlockAck(compressed->getTransmitterAddress(), compressed->getTidInfo(), agreement);
     }
     else
         throw cRuntimeError("Unsupported Block Ack Request");
+}
+
+Ptr<Ieee80211CompressedBlockAck> RecipientBlockAckProcedure::buildCompressedBlockAck(MacAddress peer, Tid tid,
+        RecipientBlockAckAgreement *agreement)
+{
+    ASSERT(agreement != nullptr);
+    auto blockAck = makeShared<Ieee80211CompressedBlockAck>();
+    auto record = agreement->getBlockAckRecord();
+    auto start = record->getWindowStart();
+    BitVector bitmap(0, 64);
+    for (int i = 0; i < 64; i++)
+        bitmap.setBit(i, record->getCompressedAckState(start + i));
+    blockAck->setBlockAckBitmap(bitmap);
+    blockAck->setReceiverAddress(peer);
+    blockAck->setStartingSequenceNumber(start);
+    blockAck->setTidInfo(tid);
+    return blockAck;
 }
 
 } /* namespace ieee80211 */

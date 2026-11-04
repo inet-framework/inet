@@ -26,6 +26,7 @@ class INET_API RecipientBlockAckProcedure : public IRecipientBlockAckProcedure
     virtual const Ptr<Ieee80211BlockAck> buildBlockAck(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, RecipientBlockAckAgreement *agreement);
 
   public:
+    Ptr<Ieee80211CompressedBlockAck> buildCompressedBlockAck(MacAddress peer, Tid tid, RecipientBlockAckAgreement *agreement) override;
     virtual void processReceivedBlockAckReq(Packet *blockAckPacket, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, IRecipientQosAckPolicy *ackPolicy, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, IProcedureCallback *callback) override;
     virtual void processTransmittedBlockAck(const Ptr<const Ieee80211BlockAck>& blockAck) override;
 };
