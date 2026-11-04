@@ -1,0 +1,3 @@
+The modular relay of BridgingLayer stops with an error in a node with STP or RSTP
+
+RelayInterfaceSelector, the relay of BridgingLayer, ignores the port states that STP and RSTP set, and it still does. A switch with hasStp = true and bridging.typename = "BridgingLayer" therefore forwarded frames on blocked ports too, and a network with a loop flooded frames around it, without an error. Now such a switch stops with an error when it sends its first frame, which names the interface and asks for Ieee8021dRelay. A switch with MRP and BridgingLayer already stopped at initialization, because Mrp needs MrpRelay.

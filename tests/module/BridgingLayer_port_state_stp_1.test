@@ -1,0 +1,41 @@
+%description:
+
+Tests that the modular relay of BridgingLayer stops with an error in a switch
+with STP. BridgingLayer ignores the port states that STP sets, so the switch
+would forward frames on blocked ports, and a network with a loop would flood
+frames around it. The network is two switches connected by two links.
+
+%file: test.ned
+
+import inet.linklayer.configurator.common.L2NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+
+network TestNetwork
+{
+    submodules:
+        l2NetworkConfigurator: L2NetworkConfigurator;
+        switch1: EthernetSwitch {
+            hasStp = true;
+        }
+        switch2: EthernetSwitch {
+            hasStp = true;
+        }
+    connections:
+        switch1.ethg++ <--> Eth100M <--> switch2.ethg++;
+        switch1.ethg++ <--> Eth100M <--> switch2.ethg++;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = TestNetwork
+ned-path = .;../../../../src
+sim-time-limit = 10s
+*.switch*.llc.typename = "Ieee8022Llc"
+*.switch1.bridging.typename = "BridgingLayer"
+
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > port-state-error.out || true
+%contains: port-state-error.out
+Interface 'eth0' has an STP/RSTP port state, which this module ignores, so it would also forward frames on blocked ports; use Ieee8021dRelay as the relay of a node with STP or RSTP

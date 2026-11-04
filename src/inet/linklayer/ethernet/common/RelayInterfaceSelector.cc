@@ -13,6 +13,10 @@
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/common/VlanTag_m.h"
 
+#ifdef INET_WITH_IEEE8021D
+#include "inet/linklayer/ieee8021d/common/Ieee8021dInterfaceData.h"
+#endif
+
 namespace inet {
 
 Define_Module(RelayInterfaceSelector);
@@ -114,6 +118,7 @@ void RelayInterfaceSelector::broadcastPacket(Packet *outgoingPacket, const MacAd
 
 void RelayInterfaceSelector::sendPacket(Packet *packet, const MacAddress& destinationAddress, NetworkInterface *outgoingInterface)
 {
+    checkNoPortState(outgoingInterface);
     EV_INFO << "Sending packet to peer" << EV_FIELD(destinationAddress) << EV_FIELD(outgoingInterface) << EV_FIELD(packet) << EV_ENDL;
     packet->addTagIfAbsent<DirectionTag>()->setDirection(DIRECTION_OUTBOUND);
     packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(outgoingInterface->getInterfaceId());
@@ -121,6 +126,14 @@ void RelayInterfaceSelector::sendPacket(Packet *packet, const MacAddress& destin
         ensureEncapsulationProtocolReq(packet, outgoingInterfaceProtocol, true, false);
     setDispatchProtocol(packet);
     pushOrSendPacket(packet, outputGate, consumer);
+}
+
+void RelayInterfaceSelector::checkNoPortState(const NetworkInterface *networkInterface) const
+{
+#ifdef INET_WITH_IEEE8021D
+    if (networkInterface->findProtocolData<Ieee8021dInterfaceData>() != nullptr)
+        throw cRuntimeError("Interface '%s' has an STP/RSTP port state, which this module ignores, so it would also forward frames on blocked ports; use Ieee8021dRelay as the relay of a node with STP or RSTP", networkInterface->getInterfaceName());
+#endif
 }
 
 } // namespace inet

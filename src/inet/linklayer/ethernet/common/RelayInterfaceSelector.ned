@@ -17,6 +17,10 @@ import inet.queueing.contract.IPacketFlow;
 // in an ~InterfaceReq. The packet may be duplicated if multiple interfaces
 // are found.
 //
+// This module ignores the port states of STP and RSTP, so it stops with an
+// error when it sends a packet on an interface that has one. A node with STP
+// or RSTP needs ~Ieee8021dRelay as its relay.
+//
 simple RelayInterfaceSelector extends PacketPusherBase like IPacketFlow
 {
     parameters:
