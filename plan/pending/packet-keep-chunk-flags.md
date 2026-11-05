@@ -1,6 +1,6 @@
 # Implementation plan: chunk flags in parts, conversions, and merges
 
-> **Kind:** procedure · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan procedure](../../doc/project/guide/write-an-implementation-plan.md), [Packet design](../../doc/project/design/packet-anatomy.md), [sealing.md](../../doc/project/rule/sealing.md)
+> **Kind:** procedure · **Status:** done · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan procedure](../../doc/project/guide/write-an-implementation-plan.md), [Packet design](../../doc/project/design/packet-anatomy.md), [sealing.md](../../doc/project/rule/sealing.md)
 
 Checkout and revision: worktree `inet-packet-keep-chunk-flags`, branch `topic/packet-keep-chunk-flags`, base `origin/master` at `cc574d9154`. The checkout has no other local changes.
 
@@ -97,7 +97,7 @@ These commits change the packet API. They do not change a protocol. Thus protoco
 
 **C4** (done) adds the protected function `Chunk::copyOwnFlags()`, which returns a part, or a copy of it with the own flags of the chunk. The overrides of the three mark functions of `SequenceChunk`, the peek cases 2.1 and 3 of `SliceChunk`, and the slice insertion of `SequenceChunk` call it. A new function `testIncorrectContainer()` marks a slice and a sequence incorrect. It peeks parts of them, simplifies them, and inserts them into another sequence. Each result is incorrect. Before C4, these checks fail.
 
-**C5** records the executed results, the audit, and the remaining gaps. **C6** moves this plan to `plan/done/` without a content change.
+**C5** (done) records the executed results, the audit, and the remaining gaps in section 9. **C6** moves this plan to `plan/done/` without a content change.
 
 ## 7. Verification methods and expected results
 
@@ -122,3 +122,27 @@ The packet test checks A1 to A6 on each commit. The other suites check that the 
 - **D2, the improper representation flag in conversions (found in C2):** the incomplete and incorrect flags describe the data, so a conversion keeps them. The improper representation flag describes one representation of the data. For example, an improperly represented Radiotap header serializes to its original bytes, which are a proper representation. Thus a conversion does not copy that flag, and the deserializer of the result decides it. A part of a raw chunk (C1) keeps the flag, because it has the same representation, as a `SliceChunk` already does.
 
 The approval covers draft 1 of this plan, the commits C0 to C6, and the sealed files that they name.
+
+## 9. Results
+
+Status: done on the local branch `topic/packet-keep-chunk-flags`, not merged and not pushed. The branch `topic/physicallayer-content-errors` stands on it.
+
+| Commit | Subject |
+| --- | --- |
+| `e9bacebd5d` | `plan: add: keep chunk flags in parts, conversions, and merges` |
+| `74b55c09ec` | `packet: fix: keep the flags in a part of a raw chunk` |
+| `ab28986659` | `packet: fix: keep the flags of the converted range` |
+| `17f37347fd` | `packet: fix: do not merge chunks with different flags` |
+| `b6346a50fd` | `packet: fix: give the flags of a slice or a sequence to its parts` |
+
+Executed checks, all in debug mode, with `omnetpp-6.x` and the commands of section 7:
+
+- `tests/packet`: passes on C1 to C4. Each new test function fails on the base library at its first check: `testIncorrectPart()` at the flags of a part, `testIncorrectConversion()` at the flag of a converted header, `testIncorrectMerge()` at the bit error of the packet, `testIncorrectContainer()` at the first element of a flagged sequence.
+- Unit suite: 148 PASS on C1, C2, C3, and C4. The first form of C2 failed `Ieee80211RadiotapHeaderSerializer_1.test`, which led to decision D2.
+- Module suite on C4: 823 PASS.
+- Protocol suite on C4: 765 PASS, 306 expected skips, 47 expected failures, and 67 unexpected failures. The base `cc574d9154` gives the same 67 unexpected failures, test by test (RIP, ND, MLD and IGMP standards tests, and `WifiBlockAckDataRetry`).
+- Fingerprint suite on C4: 1767 PASS. `examples/ipv6/mipv6 -c Handover` fails with the same values on the base. The 22 errors are configurations that need disabled features (lwIP, VoIP streams, Z3) and one Ethernet setup.
+- Each commit builds alone in a detached worktree.
+- The re-audit of the changed sealed files is `audit/subsystem/common-packet-chunk-flags.md`: the architecture and naming gates give the same output as on master. The series gates pass.
+
+Gaps: `check-cpp.sh` and the release build did not run. `check-source-seals.sh` reports the sealed files, as it must; a pull request needs the protected approval of SR-PR-APPROVAL.
