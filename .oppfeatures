@@ -337,7 +337,7 @@
         name = "Ethernet examples"
         description = "Examples for Ethernet."
         requires = "Ethernet Ieee8021d Ieee8021q Ieee8022 Ipv4 Loopback PhysicalLayerWiredCommon Ppp ProtocolElement Queueing TcpCommon TcpInet Udp VirtualInterface VisualizationCanvas"
-        recommended = ""
+        recommended = "PingApplication"
         labels = ""
         nedPackages = "
                        inet.examples.ethernet
