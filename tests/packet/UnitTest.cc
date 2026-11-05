@@ -495,6 +495,59 @@ static void testIncorrectConversion()
     ASSERT(hasNoFlags(sequenceChunk2->peek<BytesChunk>(B(5), B(10))));
 }
 
+static void testIncorrectMerge()
+{
+    // 1. a correct and an incorrect chunk of the same raw type stay separate in a packet
+    std::vector<std::pair<Ptr<const Chunk>, Ptr<Chunk>>> pairs = {
+        { makeShared<BitCountChunk>(b(80)), makeShared<BitCountChunk>(b(80)) },
+        { makeShared<BitsChunk>(std::vector<bool>(80, true)), makeShared<BitsChunk>(std::vector<bool>(80, true)) },
+        { makeShared<ByteCountChunk>(B(10)), makeShared<ByteCountChunk>(B(10)) },
+        { makeShared<BytesChunk>(makeVector(10)), makeShared<BytesChunk>(makeVector(10)) }
+    };
+    for (auto& pair : pairs) {
+        constPtrCast<Chunk>(pair.first)->markImmutable();
+        pair.second->markIncorrect();
+        pair.second->markImmutable();
+        Packet packet1;
+        packet1.insertAtBack(pair.first);
+        packet1.insertAtBack(pair.second);
+        ASSERT(packet1.hasBitError());
+        ASSERT(packet1.peekAt(b(0), b(80))->isCorrect());
+        ASSERT(packet1.peekAt(b(80), b(80), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+        // 2. two chunks with equal flags still merge
+        Packet packet2;
+        packet2.insertAtBack(pair.first);
+        packet2.insertAtBack(pair.first);
+        ASSERT(packet2.peekAll()->getChunkType() == pair.first->getChunkType());
+    }
+    // 3. a queue and a buffer keep a correct and an incorrect chunk separate
+    auto bytesChunk1 = makeShared<BytesChunk>(makeVector(10));
+    bytesChunk1->markIncorrect();
+    bytesChunk1->markImmutable();
+    ChunkQueue queue1;
+    queue1.push(makeImmutableBytesChunk(makeVector(10)));
+    queue1.push(bytesChunk1);
+    ASSERT(queue1.pop(B(10))->isCorrect());
+    ASSERT(queue1.pop(B(10), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ChunkBuffer buffer1;
+    buffer1.replace(B(0), makeImmutableBytesChunk(makeVector(10)));
+    buffer1.replace(B(10), bytesChunk1);
+    ASSERT(buffer1.getNumRegions() == 1);
+    ASSERT(buffer1.getRegionData(0)->peek(B(0), B(10))->isCorrect());
+    ASSERT(buffer1.getRegionData(0)->peek(B(10), B(10), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    // 4. two adjacent slices of one source with different flags stay separate
+    const auto& source = makeImmutableApplicationHeader(42);
+    auto sliceChunk1 = makeShared<SliceChunk>(source, B(0), B(5));
+    sliceChunk1->markImmutable();
+    auto sliceChunk2 = makeShared<SliceChunk>(source, B(5), B(5));
+    sliceChunk2->markIncorrect();
+    sliceChunk2->markImmutable();
+    auto sequenceChunk1 = makeShared<SequenceChunk>();
+    sequenceChunk1->insertAtBack(sliceChunk1);
+    sequenceChunk1->insertAtBack(sliceChunk2);
+    ASSERT(sequenceChunk1->getChunks().size() == 2);
+}
+
 static void testEmpty()
 {
     // 1. peeking an empty packet is an error
@@ -2282,6 +2335,7 @@ void UnitTest::initialize()
     testImproperlyRepresented();
     testIncorrectPart();
     testIncorrectConversion();
+    testIncorrectMerge();
     testEmpty();
     testHeader();
     testTrailer();

@@ -126,7 +126,7 @@ bool SliceChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
     if (chunk->getChunkType() == CT_SLICE) {
         const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
-        return this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length;
+        return this->chunk == otherSliceChunk->chunk && offset == otherSliceChunk->offset + otherSliceChunk->length && hasSameFlags(*chunk);
     }
     else
         return false;
@@ -136,7 +136,7 @@ bool SliceChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
 {
     if (chunk->getChunkType() == CT_SLICE) {
         const auto& otherSliceChunk = staticPtrCast<const SliceChunk>(chunk);
-        return this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset;
+        return this->chunk == otherSliceChunk->chunk && offset + length == otherSliceChunk->offset && hasSameFlags(*chunk);
     }
     else
         return false;

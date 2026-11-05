@@ -108,17 +108,17 @@ bool ByteCountChunk::containsSameData(const Chunk& other) const
 
 bool ByteCountChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
-    return chunk->getChunkType() == CT_BYTECOUNT && this->data == staticPtrCast<const ByteCountChunk>(chunk)->data;
+    return chunk->getChunkType() == CT_BYTECOUNT && this->data == staticPtrCast<const ByteCountChunk>(chunk)->data && hasSameFlags(*chunk);
 }
 
 bool ByteCountChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
 {
-    return chunk->getChunkType() == CT_BYTECOUNT && this->data == staticPtrCast<const ByteCountChunk>(chunk)->data;
+    return chunk->getChunkType() == CT_BYTECOUNT && this->data == staticPtrCast<const ByteCountChunk>(chunk)->data && hasSameFlags(*chunk);
 }
 
 bool ByteCountChunk::canInsertAt(const Ptr<const Chunk>& chunk, b offset) const
 {
-    return chunk->getChunkType() == CT_BYTECOUNT && this->data == staticPtrCast<const ByteCountChunk>(chunk)->data;
+    return chunk->getChunkType() == CT_BYTECOUNT && this->data == staticPtrCast<const ByteCountChunk>(chunk)->data && hasSameFlags(*chunk);
 }
 
 void ByteCountChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)

@@ -387,6 +387,17 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     }
 
     /**
+     * Returns true if the provided chunk is incomplete, incorrect, and improperly
+     * represented exactly where this chunk is. Chunks with different flags do
+     * not merge, because the merged chunk would lose a flag or give it to the
+     * data of the other chunk.
+     */
+    bool hasSameFlags(const Chunk& chunk) const {
+        return isIncomplete() == chunk.isIncomplete() && isIncorrect() == chunk.isIncorrect() &&
+               isImproperlyRepresented() == chunk.isImproperlyRepresented();
+    }
+
+    /**
      * Marks the provided conversion result incomplete or incorrect if the
      * converted part of this chunk, which starts at the provided offset, is.
      * These flags describe the data, so the result keeps them. The improper

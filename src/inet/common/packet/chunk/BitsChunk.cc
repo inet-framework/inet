@@ -108,17 +108,17 @@ bool BitsChunk::containsSameData(const Chunk& other) const
 
 bool BitsChunk::canInsertAtFront(const Ptr<const Chunk>& chunk) const
 {
-    return chunk->getChunkType() == CT_BITS;
+    return chunk->getChunkType() == CT_BITS && hasSameFlags(*chunk);
 }
 
 bool BitsChunk::canInsertAtBack(const Ptr<const Chunk>& chunk) const
 {
-    return chunk->getChunkType() == CT_BITS;
+    return chunk->getChunkType() == CT_BITS && hasSameFlags(*chunk);
 }
 
 bool BitsChunk::canInsertAt(const Ptr<const Chunk>& chunk, b offset) const
 {
-    return chunk->getChunkType() == CT_BITS;
+    return chunk->getChunkType() == CT_BITS && hasSameFlags(*chunk);
 }
 
 void BitsChunk::doInsertAtFront(const Ptr<const Chunk>& chunk)
