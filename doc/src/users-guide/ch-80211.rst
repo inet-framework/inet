@@ -642,16 +642,32 @@ default policy is :ned:`BasicMsduAggregationPolicy` with these parameters:
 -  :par:`aggregationLengthThreshold`: the smallest aggregated payload that
    makes an A-MSDU. The default, ``-1``, means no check.
 
-Set ``msduAggregationPolicy.typename = ""`` to turn aggregation off. A-MSDU
-aggregation needs packets in the queue; it has an effect only when the
-traffic source is faster than the channel. A-MPDU aggregation is not
-available: the ``mpduAggregationPolicy`` slot exists, but the default policy
-never aggregates, and the MAC does not build A-MPDU frames.
+Set ``msduAggregationPolicy.typename = ""`` to turn A-MSDU aggregation off. A-MSDU aggregation needs packets in the queue. The default MPDU policy leaves A-MPDU transmission disabled. The MAC can receive HT aggregates under an eligible Compressed Block Ack agreement. Local aggregate transmission remains unavailable.
 
 .. code-block:: ini
 
    **.wlan[*].mac.qosStation = true
    **.wlan[*].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = 3000
+
+.. _ug:sec:80211:htampdu:
+
+HT aggregate reception and implicit Block Ack
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Configure an HT QoS station with Compressed Block Ack support. An accepted immediate Compressed Block Ack agreement must exist for the peer and TID before the recipient accepts aggregate DATA.
+
+.. code-block:: ini
+
+   **.wlan[*].opMode = "n(mixed-2.4Ghz)"
+   **.wlan[*].mac.qosStation = true
+   **.wlan[*].mac.hcf.isBlockAckSupported = true
+   **.wlan[*].mac.hcf.blockAckVariant = "compressed"
+
+The receiver checks each member against its cached PHY outcome and FCS. One incorrect member does not invalidate a correct neighbor. The recipient records accepted members and sends one Compressed Block Ack after SIFS. Delimiter history and physical interval facts control reorder release.
+
+The receiver accepts HT20 long-GI aggregates and advertised HT20 short-GI aggregates. Both peers must select compatible Block Ack profiles because ADDBA does not negotiate the profile selector. An active Basic agreement causes a diagnostic for implicit Compressed DATA. DATA without an eligible agreement creates no receipt state or response.
+
+These changes add recipient support. They do not enable local aggregate transmission.
 
 .. _ug:sec:80211:ack:
 
