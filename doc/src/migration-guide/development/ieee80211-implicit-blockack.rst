@@ -1,15 +1,17 @@
 IEEE 802.11 implicit Block Ack extension points
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The default MPDU policy leaves aggregate transmission disabled. ``HtMpduAggregationPolicy`` supplies selection for independent HT20 long-GI members with fixed DATA rates. Local aggregate transmission remains unavailable. Custom MPDU policies implement ``isEnabled()`` and ``selectFrames()``. The caller supplies receiver limits and one retained DATA mode. A policy returns borrowed member references without queue extraction or state changes.
+The default MPDU policy remains disabled. ``HtMpduAggregationPolicy`` enables independent HT20 long-GI members with fixed DATA rates. Custom MPDU policies implement ``isEnabled()`` and ``selectFrames()``. The caller supplies negotiated receiver limits and one retained DATA mode. A policy returns borrowed member references without queue extraction or state changes.
 
 Custom QoS data services implement batch preparation, validation, commitment, and construction through ``IOriginatorQosMacDataService``. Each new member owns one reversible preview. The batch borrows canonical members from the in-progress queue. Commitment validates every queued source before the first extraction. Failed preparation preserves sequence state and independent deadlines.
 
 ``IRx::lowerAggregateReceived()`` returns separately owned correct members and immutable delimiter history. The caller retains the envelope. Custom recipient services pass ``BlockAckReceiveContext`` to the reorder owner. This context supplies physical interval and delimiter facts; it does not replace receipt state. Custom agreement handlers implement ``implicitBlockAckRequested()`` to refresh inactivity for valid implicit DATA.
 
-Every custom rate selector implements ``computeCompressedBlockAckResponseMode()`` for implicit callers. A selector without this capability must throw a diagnostic from its concrete override. Explicit Compressed BAR and implicit DATA share this rate calculation without a fabricated BAR.
+Custom Tx implementations support ``transmitAggregate()``, ``cancelPendingAggregate()``, and ``finalizeMpdu()``. The aggregate callback validates and commits members at actual submission after the existing IFS timer. Cancellation removes a delayed request before exchange-context disposal. Aggregate completion supplies a null MAC header because the envelope has no outer MAC header or FCS. Every Tx callback implements ``frameTransmissionStarted()`` for an actual-submission notification. A concrete callback can use an empty override when submission requires no state change.
 
-Custom recipient procedures construct a Compressed response directly from peer, TID, and current agreement state. Local aggregate transmission remains unavailable. Custom Tx implementations need no aggregate submission operation at this boundary.
+Custom QoS ACK policies accept probe eligibility through existing EDCA classification. They also supply the implicit Block Ack receive-start timeout from the actual response mode. Every custom rate selector implements ``computeCompressedBlockAckResponseMode()`` for implicit callers. A selector without this capability must throw a diagnostic from its concrete override. Explicit Compressed BAR and implicit DATA share this rate calculation without a fabricated BAR.
+
+Custom recipient procedures construct a Compressed response directly from peer, TID, and current agreement state. ``FrameTransmissionDetails`` adds ``FRAME_TRANSMISSION_STATUS_UNACKNOWLEDGED`` for unsuccessful aggregate member attempts. A probe supplies no second DATA attempt outcome. Existing packet-drop signals retain terminal disposal observations.
 
 IEEE 802.11 HT aggregate construction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
