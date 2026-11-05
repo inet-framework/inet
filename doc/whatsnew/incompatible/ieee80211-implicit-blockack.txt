@@ -1,0 +1,7 @@
+IEEE 802.11 HT aggregate preparation
+
+HT capability exchange now retains the peer receiver's minimum MPDU start spacing. The MIB parameter htMinimumMpduStartSpacing selects the encoded local receiver limit from zero through seven. Zero preserves the default with no spacing restriction.
+
+The HT aggregate builder checks receiver byte limits, spacing, PPDU duration, and L-SIG length. It retains each source Packet. The QoS service can prepare independent members before it extracts queued sources. Each member retains its sequence number and deadline. Failed preparation preserves queued sources.
+
+Custom aggregation policies, aggregate builders, and QoS data services require the migration changes. The default MPDU policy leaves aggregation disabled. Local aggregate transmission and implicit Block Ack responses remain unavailable at this boundary. Rx refuses failed aggregate containers before standalone MAC access.
