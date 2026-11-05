@@ -1,8 +1,14 @@
 # Wi-Fi protocol tests — expectation audit
 
-> **Kind:** report · **Status:** snapshot 2026-09-17 · **Seal:** none · **Owns:** — · **Stands on:** [failure classification](../../../guide/derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected), [testing rules](../../../rule/testing.md)
+> **Kind:** report · **Status:** snapshot 2026-10-18 with September history · **Seal:** none · **Owns:** — · **Stands on:** [failure classification](../../../guide/derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected), [testing rules](../../../rule/testing.md)
 
 Raw artifacts linked under `audit/` are local, Git-ignored evidence and are not included in the branch. The observations, classifications, and follow-up work are recorded below.
+
+## HT aggregate update, 2026-10-18
+
+`N_Ampdu` now uses the supported HT20 aggregate profile with fixed rates and Compressed Block Ack. Its production exchange observes an aggregate and an implicit response. It requires exactly 60 UDP deliveries and independently checks 60 application receipts. The maintainer explicitly approves removal of this test's expected-failure marker after the focused pass. The [Implicit Block Ack execution record](../../../../../plan/pending/ieee80211-ampdu-implicit-blockack-execution.md) supplies the source identity, commands, and final evidence.
+
+`Ac_Ampdu` retains its expected failure because VHT aggregates remain outside this profile. HT transmission from an `ac` interface does not establish VHT aggregate support. All other deferred declarations retain their existing scope. The sections below retain the September snapshot and its historical counts.
 
 ## Deferred-repair expectations
 
