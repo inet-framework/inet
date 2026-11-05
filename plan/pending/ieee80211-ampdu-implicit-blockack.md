@@ -1,5 +1,7 @@
 # Implementation plan: A-MPDU with implicit Compressed Block Ack
 
+The rebase on 2026-11-04 uses `work/ieee80211-ampdu-implicit-blockack` at `c136f222f30fab53144b438e28ff9bc3b7107c28`. It preserves chunk-based PHY outcomes and Rx ownership of interframe evidence. Historical results in the execution record describe the earlier base. Only the final rebased commit receives new build and test execution. Intermediate results remain unverified.
+
 > **Kind:** procedure · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [PHY prerequisite plan](ieee80211-ampdu-phy-reception.md), [S5 execution record](../done/ieee80211-compressed-blockack-s5-execution.md), [implementation plan procedure](../../doc/project/guide/write-an-implementation-plan.md), [IEEE 802.11 rules](../../doc/project/domain/ieee80211.md)
 
 Checkout: `/home/user/omnetpp_ws/inet-ieee80211-ampdu-implicit-blockack`, branch `work/ieee80211-ampdu-implicit-blockack`. The implementation base is `master` at `f5612791b773bc83f654dbfdefa26e243f756c86`.
@@ -9,6 +11,10 @@ Master contains the merged explicit Compressed Block Ack implementation from PR 
 This plan defines PSDU-based RTS selection, recovery before DATA submission, and a boolean probe requirement with a derived access category. The PHY plan supplies the reception prerequisites.
 
 The project plan procedure remains a draft; this document uses its structure without an additional approval requirement.
+
+A1 is complete on the separately approved base `56b75c959af104b5db931bef022bdfe5578eead9`. The user authorizes A1 before the prerequisite merges on 2026-10-18. The later request `Execute stages A2-A7` extends that authority on the same base. A2 through A7 are complete within the recorded profile and verification limits. The user subsequently authorizes commit, push, and PR creation.
+
+The [execution record](ieee80211-ampdu-implicit-blockack-execution.md) states the changes, evidence, and limits. This exception does not close A0. Expected-result changes, commits, and publication retain their separate authority requirements.
 
 This feature plan consumes the [PHY prerequisite plan](ieee80211-ampdu-phy-reception.md). That plan owns aggregate representation, bounded delimiter parsing, cached partial reception, and error-model integration. This plan owns member selection, MAC reception, mandatory release, implicit responses, and recovery.
 
@@ -393,7 +399,7 @@ The proposed transmit configuration is:
 **.mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "HtMpduAggregationPolicy"
 ```
 
-`HtMpduAggregationPolicy` does not exist yet. The fixed rate above selects HT MCS 0 with one spatial stream under the required HT20 long-GI configuration. These settings also require compatible modes, usable peer HT state, and accepted agreements. The example must configure those conditions explicitly. The initial policy adds no local count or byte cap. It derives those limits from the agreement, peer, and PHY.
+`HtMpduAggregationPolicy` implements this opt-in profile. The fixed rate above selects HT MCS 0 with one spatial stream under the required HT20 long-GI configuration. These settings also require compatible modes, usable peer HT state, and accepted agreements. The example configures those conditions explicitly. The initial policy adds no local count or byte cap. It derives those limits from the agreement, peer, and PHY.
 
 Custom data services, MPDU policies, Tx/Rx modules, response policies, and response-rate selectors can need interface updates. The migration guide must list each changed method and distinguish unsupported capability from an empty valid result. It must cover aggregate start, cancellation, member finalization, and the complete receive outcome. The DATA rate-control API remains unchanged; aggregate transmit opt-in requires its HCF submodule to be absent. Current `BasicMpduAggregationPolicy` configurations retain their rate-control behavior. The PHY plan owns error-model migration and preserves operation without an error model.
 
@@ -422,7 +428,7 @@ The PHY plan defines two gates. D1 proves cached aggregate reception with determ
 
 A1 and A3 can supply reviewed preparation changes before the complete feature exists. A5 and A6 establish deterministic integration after A4. They do not establish NIST/Yans support. The final feature claim requires A7. Dependencies describe delivery order; they assign no concurrent agents.
 
-The following subjects identify the future commits. Each entry uses the purpose, components, behavior, and dependencies in its step above. Section 5 identifies the affected source files. Section 7 defines the test scenarios. Each behavior commit must add the named reviewer document beside its protocol tests under `tests/protocol/wifi/`.
+The following subjects identify the target base’s proposed delivery structure. The original MAC implementation uses nine commits instead. Each entry uses the purpose, components, behavior, and dependencies in its step above. Section 5 identifies the affected source files. Section 7 defines the test scenarios. Each behavior commit must add the named reviewer document beside its protocol tests under `tests/protocol/wifi/`.
 
 | Commit ID | Proposed subject | Tests and reviewer document |
 | --- | --- | --- |
@@ -443,11 +449,11 @@ Each future A1 through A6 behavior commit must include its direct protocol tests
 
 ### Proposed direct checks
 
-The seven fixtures below belong to this feature plan and remain proposed. The [PHY plan](ieee80211-ampdu-phy-reception.md#7-verification-methods-and-expected-results) separately lists its unit, module, and protocol fixtures. Those fixtures check wire fields, bounded inspection, deaggregation, cached reception, ordinary controls, and the current MAC rejection boundary. The [PHY execution record](ieee80211-ampdu-phy-execution.md) states observed PHY results and their limits. That evidence does not establish MAC feature completion.
+The fixture table below states the original acceptance requirements. The execution record identifies the implemented fixtures and historical results. The [PHY plan](ieee80211-ampdu-phy-reception.md#7-verification-methods-and-expected-results) separately lists its unit, module, and protocol fixtures. Those fixtures check wire fields, bounded inspection, deaggregation, cached reception, ordinary controls, and the current MAC rejection boundary. The [PHY execution record](ieee80211-ampdu-phy-execution.md) states observed PHY results and their limits. That evidence does not establish MAC feature completion.
 
 Fixed causal cases use seed 0. Injected agreements or deterministic error models establish only the stated boundary. Infrastructure cases separately prove production negotiation. [Appendix B](#appendix-b-verification-commands-and-campaigns) contains commands, campaign bounds, and evidence requirements.
 
-| Proposed fixture and category | Trigger and production boundary | Required observation |
+| Fixture and category | Trigger and production boundary | Required observation |
 | --- | --- | --- |
 | `Ieee80211AmpduCapabilities_1.test`, module. | Full and simplified management with asymmetric receive limits. Include an absent aggregate role, a role without advertised short-GI support, and an absent error model. Use exact MAC inputs with a one-antenna limit and catalog modes outside that limit. | Exponents 0–3 and spacing values 0–7 reach the correct directional consumer; reset removes old peer limits. Absent roles fail before advertisement; incomplete coverage fails before the MIB changes local HT capability. Unsupported unadvertised modes do not cause rejection. An absent model retains valid HT initialization and negotiation. Compatible models retain advertised HT20 short-GI support. |
 | `Ieee80211AmpduPreparation_1.test`, module. | Production queues, HT policy, fixed DATA rates, batch preparation, and commitment. Include internal collision survivors and aggregate transmit opt-in with AARF. | Source identities, sequence wrap, independent deadlines, count/window/byte limits, and refusal before extraction. Numbered, unsent members keep their allocation and first-DATA Retry value. Internal collision terminal disposal still affects its selected frame only. Batch reduction retains one rate decision. AARF fails initialization with and without fixed-rate overrides. |

@@ -1,16 +1,18 @@
 # A-MPDU with implicit Compressed Block Ack: plan summary
 
+The rebase on 2026-11-04 uses `work/ieee80211-ampdu-implicit-blockack` at `c136f222f30fab53144b438e28ff9bc3b7107c28`. It preserves chunk-based PHY outcomes and Rx ownership of interframe evidence. Historical results in the execution record describe the earlier base. Only the final rebased commit receives new build and test execution. Intermediate results remain unverified.
+
 > **Kind:** reference · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [feature plan](ieee80211-ampdu-implicit-blockack.md), [PHY plan](ieee80211-ampdu-phy-reception.md)
 
-This plan proposes several independently acknowledged MPDUs in one HT transmission. The recipient sends one Compressed Block Ack after the transmission ends. The aggregate requests that response without a separate BAR. The originator retries only the MPDUs that remain unacknowledged.
+This feature supplies several independently acknowledged MPDUs in one HT transmission. The recipient sends one Compressed Block Ack after the transmission ends. The aggregate requests that response without a separate BAR. The originator retries only the MPDUs that remain unacknowledged.
 
-This summary describes the [feature plan](ieee80211-ampdu-implicit-blockack.md) and [PHY plan](ieee80211-ampdu-phy-reception.md). Both plans use `master` at `f5612791b773bc83f654dbfdefa26e243f756c86`. The MAC feature remains proposed. The diagrams describe the design, not executed simulation traces.
+This summary describes the [feature plan](ieee80211-ampdu-implicit-blockack.md) and [PHY plan](ieee80211-ampdu-phy-reception.md). Both plans use `master` at `f5612791b773bc83f654dbfdefa26e243f756c86`. This branch contains the MAC feature from the original nine-commit series. The diagrams describe the design, not executed simulation traces.
 
 Master contains the merged explicit Compressed Block Ack implementation from PR #1345. Rx supplies local interframe observations. The radio supplies metadata for Radiotap. The PHY topic must preserve these contracts. Only the final commit receives build and test execution.
 
 The PHY plan supplies aggregate reception before the MAC feature uses it. Its first gate proves deterministic member outcomes and includes the shared NIST/Yans implementation. It also preserves default HT operation and reception without an error model. Its second gate extends the NIST/Yans and compatibility evidence. The MAC feature can reach deterministic integration between those gates.
 
-The ten-commit series supplies PHY P0 through P4 and gates D1 and D2. The [final execution record](ieee80211-ampdu-phy-execution.md) states verification and its limits. VHT identity, bounded inspection, deaggregation use, and HT-SIG representation have separate commit boundaries. P3 checks NIST/Yans probabilities and seeded outcomes. P4 supplies ordinary controls. MAC aggregate receipt and implicit Block Ack remain pending.
+The ten-commit series supplies PHY P0 through P4 and gates D1 and D2. The [final execution record](ieee80211-ampdu-phy-execution.md) states verification and its limits. VHT identity, bounded inspection, deaggregation use, and HT-SIG representation have separate commit boundaries. P3 checks NIST/Yans probabilities and seeded outcomes. P4 supplies ordinary controls. The MAC feature adds aggregate receipt and implicit Block Ack on this PHY base.
 
 The merge prerequisite is satisfied on the integrated master base. MAC step A0 must compare the contracts and record a feature-off baseline before MAC implementation.
 
@@ -337,7 +339,9 @@ flowchart TD
     D2 --> A7
 ```
 
-The two plans now contain ten fixtures across unit, module, and protocol tests. The PHY plan owns three implemented fixtures; the feature plan owns seven proposed fixtures. P4 adds the parent-compatible ordinary reception fixture. The complete feature still needs source ownership, reorder release, exchanges, recovery, timing, and production negotiation checks. Current Basic, explicit Compressed, lifetime, reset, and disabled-feature checks provide regression coverage. Compatible configurations with disabled transmit aggregation must preserve current frame sequences and random draws. [Verification methods](ieee80211-ampdu-implicit-blockack.md#7-verification-methods-and-expected-results).
+The implementation supplies the planned module and protocol fixtures. Additional fixtures isolate PHY refusal, actual submission, response-window recovery, response validation, capability encoding, construction, and cyclic sequence arithmetic. The [execution record](ieee80211-ampdu-implicit-blockack-execution.md) maps these checks to their boundaries. The PHY plan also retains its ordinary reception comparison with the parent.
+
+Basic, explicit Compressed, lifetime, reset, and disabled-feature checks provide regression controls. Physical fixtures check reorder release, exchanges, recovery, timing, and production negotiation. Compatible configurations with disabled transmit aggregation must preserve current frame sequences and random draws. [Verification methods](ieee80211-ampdu-implicit-blockack.md#7-verification-methods-and-expected-results).
 
 Direct exchange assertions must prove one DATA PPDU, one response after SIFS, correct receipt bits, selective retry, and exactly-once upper delivery. Physical reception tests must produce the partial results through the real receiver. An injected bitmap cannot prove that PHY integration. Fingerprints can detect a changed trajectory; they cannot replace these assertions.
 
