@@ -5,6 +5,12 @@ The default MPDU policy leaves aggregate transmission disabled. ``HtMpduAggregat
 
 Custom QoS data services implement batch preparation, validation, commitment, and construction through ``IOriginatorQosMacDataService``. Each new member owns one reversible preview. The batch borrows canonical members from the in-progress queue. Commitment validates every queued source before the first extraction. Failed preparation preserves sequence state and independent deadlines.
 
+``IRx::lowerAggregateReceived()`` returns separately owned correct members and immutable delimiter history. The caller retains the envelope. Custom recipient services pass ``BlockAckReceiveContext`` to the reorder owner. This context supplies physical interval and delimiter facts; it does not replace receipt state. Custom agreement handlers implement ``implicitBlockAckRequested()`` to refresh inactivity for valid implicit DATA.
+
+Every custom rate selector implements ``computeCompressedBlockAckResponseMode()`` for implicit callers. A selector without this capability must throw a diagnostic from its concrete override. Explicit Compressed BAR and implicit DATA share this rate calculation without a fabricated BAR.
+
+Custom recipient procedures construct a Compressed response directly from peer, TID, and current agreement state. Local aggregate transmission remains unavailable. Custom Tx implementations need no aggregate submission operation at this boundary.
+
 IEEE 802.11 HT aggregate construction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -14,4 +20,4 @@ Custom ``IMpduAggregation`` implementations must supply two HT operations. ``com
 
 The existing pointer overload retains its consuming contract. The supplied builder copies region tags from each source's data range to the member's position. It inserts alignment padding and zero-length delimiters between members as necessary. The final member has no padding. A singleton retains its delimiter, so HT-SIG byte conversion preserves its aggregate identity. These construction operations do not enable aggregate selection or implicit Block Ack responses.
 
-The default ``Rx`` refuses aggregate containers before standalone FCS or MAC header checks. Custom receive modules must keep these containers separate from standalone frame parsing. Member acceptance and implicit responses remain unavailable at this boundary.
+The default ``Rx`` sends aggregate containers through a separate member-validation path before standalone FCS or MAC header checks. A failed common header or incomplete content prevents member acceptance. Custom receive modules must keep aggregate containers separate from standalone frame parsing until they implement member acceptance. MPDU deaggregation can extract bounded recovered members from incomplete content. Extraction alone grants no MAC acceptance.
