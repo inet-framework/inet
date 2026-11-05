@@ -23,7 +23,7 @@ const Ptr<const Chunk> ReorderBuffer::popAvailableData(b length)
         auto data = regions[0].data;
         b dataLength = data->getChunkLength();
         if (length != b(-1)) {
-            data = data->peek(Chunk::ForwardIterator(b(0)), length);
+            data = data->peek(Chunk::ForwardIterator(b(0)), length, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
             dataLength = length;
         }
         clear(expectedOffset, dataLength);

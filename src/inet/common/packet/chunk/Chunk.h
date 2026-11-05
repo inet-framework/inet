@@ -372,6 +372,20 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     //@{
     virtual void handleChange();
 
+    /**
+     * Marks this mutable chunk incomplete, incorrect, or improperly represented
+     * if the provided chunk is. A part or a conversion of a chunk has the flags
+     * of that chunk, because a flag does not tell which part has the problem.
+     */
+    void copyFlags(const Chunk& chunk) {
+        if (chunk.isIncomplete())
+            markIncomplete();
+        if (chunk.isIncorrect())
+            markIncorrect();
+        if (chunk.isImproperlyRepresented())
+            markImproperlyRepresented();
+    }
+
     virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     virtual void doInsertAt(const Ptr<const Chunk>& chunk, b offset) { throw cRuntimeError("Invalid operation"); }

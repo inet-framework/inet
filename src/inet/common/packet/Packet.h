@@ -962,9 +962,9 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
         const auto& oldChunk = peekAt<T>(offset, length, flags);
         b chunkLength = oldChunk->getChunkLength();
         b frontLength = offset;
-        const auto& frontPart = frontLength > b(0) ? peekAt(b(0), frontLength) : nullptr;
+        const auto& frontPart = frontLength > b(0) ? peekAt(b(0), frontLength, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED) : nullptr;
         b backLength = totalLength - offset - chunkLength;
-        const auto& backPart = backLength > b(0) ? peekAt(totalLength - backLength, backLength) : nullptr;
+        const auto& backPart = backLength > b(0) ? peekAt(totalLength - backLength, backLength, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED) : nullptr;
         content = makeShared<EmptyChunk>();
         const auto& result = makeExclusivelyOwnedMutableChunk(oldChunk);
         CHUNK_CHECK_USAGE(chunkLength == chunk->getChunkLength(), "length is different");
@@ -1157,13 +1157,13 @@ class INET_API Packet : public cPacket, public IPrintableObject, public ITaggedO
         if (mutableChunk != chunk) {
             const auto& sequenceChunk = makeShared<SequenceChunk>();
             if (frontLength > b(0)) {
-                const auto& frontPart = peekAt(b(0), frontLength);
+                const auto& frontPart = peekAt(b(0), frontLength, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
                 sequenceChunk->insertAtBack(frontPart);
             }
             mutableChunk->markImmutable();
             sequenceChunk->insertAtBack(mutableChunk);
             if (backLength > b(0)) {
-                const auto& backPart = peekAt(totalLength - backLength, backLength);
+                const auto& backPart = peekAt(totalLength - backLength, backLength, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
                 sequenceChunk->insertAtBack(backPart);
             }
             sequenceChunk->markImmutable();

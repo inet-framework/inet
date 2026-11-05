@@ -39,7 +39,7 @@ void ChunkQueue::remove(b length)
         content = newContent;
     }
     else
-        content = content->peek(length, content->getChunkLength() - length);
+        content = content->peek(length, content->getChunkLength() - length, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     content->seekIterator(iterator, iterator.getPosition() - length);
     CHUNK_CHECK_IMPLEMENTATION(isIteratorConsistent(iterator));
 }
@@ -115,7 +115,7 @@ std::string ChunkQueue::str() const
     if (iterator.getPosition() == b(0))
         stream << content;
     else
-        stream << content->peek(iterator);
+        stream << content->peek(iterator, Chunk::unspecifiedLength, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     return stream.str();
 }
 

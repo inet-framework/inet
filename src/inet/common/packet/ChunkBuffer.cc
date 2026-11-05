@@ -55,8 +55,8 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
             }
             else if (oldRegion.getStartOffset() < newRegion.getStartOffset() && newRegion.getEndOffset() < oldRegion.getEndOffset()) {
                 // new splits old into two parts
-                Region previousRegion(oldRegion.getStartOffset(), oldRegion.data->peek(b(0), newRegion.getStartOffset() - oldRegion.getStartOffset()));
-                Region nextRegion(newRegion.getEndOffset(), oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset()));
+                Region previousRegion(oldRegion.getStartOffset(), oldRegion.data->peek(b(0), newRegion.getStartOffset() - oldRegion.getStartOffset(), Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED));
+                Region nextRegion(newRegion.getEndOffset(), oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset(), Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED));
                 oldRegion.offset = nextRegion.offset;
                 oldRegion.data = nextRegion.data;
                 regions.insert(it, previousRegion);
@@ -64,11 +64,11 @@ void ChunkBuffer::sliceRegions(Region& newRegion)
             }
             else if (oldRegion.getEndOffset() <= newRegion.getEndOffset()) {
                 // new cuts end of old
-                oldRegion.data = oldRegion.data->peek(b(0), newRegion.getStartOffset() - oldRegion.getStartOffset());
+                oldRegion.data = oldRegion.data->peek(b(0), newRegion.getStartOffset() - oldRegion.getStartOffset(), Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
             }
             else if (newRegion.getStartOffset() <= oldRegion.getStartOffset()) {
                 // new cuts beginning of old
-                oldRegion.data = oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset());
+                oldRegion.data = oldRegion.data->peek(newRegion.getEndOffset() - oldRegion.getStartOffset(), oldRegion.getEndOffset() - newRegion.getEndOffset(), Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
                 oldRegion.offset = newRegion.getEndOffset();
             }
             else

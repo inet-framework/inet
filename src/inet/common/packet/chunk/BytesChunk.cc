@@ -64,6 +64,7 @@ const Ptr<Chunk> BytesChunk::peekUnchecked(PeekPredicate predicate, PeekConverte
             B endOffset = iterator.getPosition() + (length < b(0) ? std::min(-length, chunkLength - iterator.getPosition()) : length);
             auto chunk = makeShared<BytesChunk>(std::vector<uint8_t>(bytes.begin() + startOffset.get<B>(), bytes.begin() + endOffset.get<B>()));
             chunk->regionTags.copyTags(regionTags, iterator.getPosition(), b(0), chunk->getChunkLength());
+            chunk->copyFlags(*this);
             chunk->markImmutable();
             return chunk;
         }

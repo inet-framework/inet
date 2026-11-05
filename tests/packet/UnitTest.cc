@@ -369,6 +369,90 @@ static void testImproperlyRepresented()
     ASSERT(ipHeader2->isImproperlyRepresented());
 }
 
+static const Ptr<Chunk> makeFlaggedChunk(const Ptr<Chunk>& chunk)
+{
+    chunk->markIncomplete();
+    chunk->markIncorrect();
+    chunk->markImproperlyRepresented();
+    chunk->markImmutable();
+    return chunk;
+}
+
+static bool hasAllFlags(const Ptr<const Chunk>& chunk)
+{
+    return chunk->isIncomplete() && chunk->isIncorrect() && chunk->isImproperlyRepresented();
+}
+
+static bool hasNoFlags(const Ptr<const Chunk>& chunk)
+{
+    return chunk->isComplete() && chunk->isCorrect() && chunk->isProperlyRepresented();
+}
+
+static void testIncorrectPart()
+{
+    int allowFlags = Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+    // 1. a front, middle, and back part of a flagged raw chunk has the flags of the chunk
+    std::vector<Ptr<const Chunk>> rawChunks = {
+        makeFlaggedChunk(makeShared<BitCountChunk>(b(80))),
+        makeFlaggedChunk(makeShared<BitsChunk>(std::vector<bool>(80, true))),
+        makeFlaggedChunk(makeShared<ByteCountChunk>(B(10))),
+        makeFlaggedChunk(makeShared<BytesChunk>(makeVector(10)))
+    };
+    for (const auto& rawChunk : rawChunks) {
+        for (b offset : {b(0), b(24), b(56)}) {
+            const auto& part = rawChunk->peek(offset, b(24), allowFlags);
+            ASSERT(part->getChunkType() == rawChunk->getChunkType());
+            ASSERT(hasAllFlags(part));
+        }
+    }
+    // 2. a part of a clean raw chunk stays clean
+    ASSERT(hasNoFlags(makeImmutableBytesChunk(makeVector(10))->peek(B(2), B(4))));
+    ASSERT(hasNoFlags(makeImmutableByteCountChunk(B(10))->peek(B(2), B(4))));
+    // 3. an erasure inside a flagged chunk keeps the flags of both remaining parts
+    auto bytesChunk1 = makeShared<BytesChunk>(makeVector(10));
+    bytesChunk1->markIncorrect();
+    bytesChunk1->markImmutable();
+    Packet packet1;
+    packet1.insertAtBack(makeImmutableByteCountChunk(B(10)));
+    packet1.insertAtBack(bytesChunk1);
+    packet1.eraseAt(B(12), B(2));
+    ASSERT(packet1.getTotalLength() == B(18));
+    ASSERT(packet1.peekAt(B(0), B(10))->isCorrect());
+    ASSERT(packet1.peekAt(B(10), B(2), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(packet1.peekAt(B(12), B(6), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    // 4. a sequence that inserts a slice of a sequence keeps the flags of the parts
+    auto sequenceChunk1 = makeShared<SequenceChunk>();
+    sequenceChunk1->insertAtBack(makeImmutableByteCountChunk(B(5)));
+    sequenceChunk1->insertAtBack(bytesChunk1);
+    sequenceChunk1->markImmutable();
+    auto sliceChunk1 = makeShared<SliceChunk>(sequenceChunk1, B(3), B(6));
+    sliceChunk1->markImmutable();
+    auto sequenceChunk2 = makeShared<SequenceChunk>();
+    sequenceChunk2->insertAtBack(sliceChunk1);
+    sequenceChunk2->markImmutable();
+    ASSERT(sequenceChunk2->getChunkLength() == B(6));
+    ASSERT(sequenceChunk2->peek(B(0), B(2))->isCorrect());
+    ASSERT(sequenceChunk2->peek(B(2), B(4), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    // 5. a queue pops a part of a flagged chunk
+    ChunkQueue queue1;
+    queue1.push(bytesChunk1);
+    ASSERT(queue1.pop(B(4), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(queue1.pop(B(6), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    // 6. a buffer replaces the middle of a flagged chunk and keeps the flags of the remaining parts
+    ChunkBuffer buffer1;
+    buffer1.replace(B(0), bytesChunk1);
+    buffer1.replace(B(4), makeImmutableByteCountChunk(B(2)));
+    ASSERT(buffer1.getNumRegions() == 1);
+    const auto& data1 = buffer1.getRegionData(0);
+    ASSERT(data1->peek(B(0), B(4), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(data1->peek(B(4), B(2))->isCorrect());
+    ASSERT(data1->peek(B(6), B(4), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    // 7. a reorder buffer gives a part of a flagged chunk
+    ReorderBuffer buffer2(B(0));
+    buffer2.replace(B(0), bytesChunk1);
+    ASSERT(buffer2.popAvailableData(B(4))->isIncorrect());
+}
+
 static void testEmpty()
 {
     // 1. peeking an empty packet is an error
@@ -2154,6 +2238,7 @@ void UnitTest::initialize()
     testIncorrect();
     testProperlyRepresented();
     testImproperlyRepresented();
+    testIncorrectPart();
     testEmpty();
     testHeader();
     testTrailer();

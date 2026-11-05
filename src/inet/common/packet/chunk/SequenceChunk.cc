@@ -259,11 +259,11 @@ void SequenceChunk::doInsertSliceChunkAtFront(const Ptr<const SliceChunk>& slice
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertChunkAtFront(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
-                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin)));
+                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin, PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED)));
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin)));
+                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin, PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED)));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin)));
+                doInsertChunkAtFront(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin, PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED)));
             // otherwise the element chunk is out of the slice, therefore it's ignored
         }
     }
@@ -319,11 +319,11 @@ void SequenceChunk::doInsertSliceChunkAtBack(const Ptr<const SliceChunk>& sliceC
             if (sliceChunkBegin <= chunkBegin && chunkEnd <= sliceChunkEnd)
                 doInsertChunkAtBack(elementChunk);
             else if (chunkBegin < sliceChunkBegin && sliceChunkEnd < chunkEnd)
-                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin)));
+                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, sliceChunkEnd - sliceChunkBegin, PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED)));
             else if (chunkBegin < sliceChunkBegin && sliceChunkBegin < chunkEnd)
-                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin)));
+                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(sliceChunkBegin - chunkBegin, chunkEnd - sliceChunkBegin, PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED)));
             else if (chunkBegin < sliceChunkEnd && sliceChunkEnd < chunkEnd)
-                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin)));
+                doInsertChunkAtBack(staticPtrCast<const Chunk>(elementChunk->peek(b(0), sliceChunkEnd - chunkBegin, PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED)));
             // otherwise the element chunk is out of the slice, therefore it's ignored
             offset += elementChunk->getChunkLength();
         }
@@ -361,7 +361,7 @@ void SequenceChunk::doRemoveAtFront(b length)
                 break;
         }
         else {
-            *it = chunk->peek(length, chunkLength - length);
+            *it = chunk->peek(length, chunkLength - length, PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED);
             break;
         }
     }
@@ -381,7 +381,7 @@ void SequenceChunk::doRemoveAtBack(b length)
                 break;
         }
         else {
-            *it = chunk->peek(b(0), chunkLength - length);
+            *it = chunk->peek(b(0), chunkLength - length, PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED);
             break;
         }
     }

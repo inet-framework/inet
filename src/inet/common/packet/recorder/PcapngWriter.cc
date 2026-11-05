@@ -306,7 +306,7 @@ void PcapngWriter::writePacket(simtime_t stime, const Packet *packet, b frontOff
     b originalLength = packet->getDataLength() - frontOffset - backOffset;
     b capturedLength = snaplen == 0 ? originalLength : std::min(originalLength, b(B(snaplen)));
     if (capturedLength != b(0)) {
-        auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength);
+        auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
         const auto& bytes = data->getBytes();
         writeEnhancedPacketBlock(pcapngInterfaceId, stime, bytes.data(), bytes.size(), originalLength.get<B>(), options);
     }

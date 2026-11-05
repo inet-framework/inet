@@ -273,9 +273,9 @@ void Packet::eraseAt(b offset, b length)
         regionTags.moveTags(offset + length, content->getChunkLength() - offset - length, -length);
         auto sequenceChunk = makeShared<SequenceChunk>();
         if (offset != b(0))
-            sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(b(0), 0), offset));
+            sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(b(0), 0), offset, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED));
         if (offset != totalLength)
-            sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(offset + length, -1), totalLength - offset - length));
+            sequenceChunk->insertAtBack(content->peek(Chunk::ForwardIterator(offset + length, -1), totalLength - offset - length, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED));
         sequenceChunk->markImmutable();
         content = sequenceChunk;
     }

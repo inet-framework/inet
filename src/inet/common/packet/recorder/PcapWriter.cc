@@ -125,7 +125,7 @@ void PcapWriter::writePacket(simtime_t stime, const Packet *packet, b frontOffse
     }
     b capturedLength = packet->getDataLength() - frontOffset - backOffset;
     if (capturedLength != b(0)) {
-        auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength);
+        auto data = packet->peekDataAt<BytesChunk>(frontOffset, capturedLength, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
         auto bytes = data->getBytes();
         for (size_t i = 0; i < bytes.size(); i++) {
             buf[i] = bytes[i];
