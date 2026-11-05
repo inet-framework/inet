@@ -137,6 +137,22 @@ const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<C
     return result;
 }
 
+void Chunk::copyConvertedFlags(const Ptr<Chunk>& result, b offset) const
+{
+    auto resultType = result->getChunkType();
+    if (resultType == CT_EMPTY || resultType == CT_SLICE || resultType == CT_SEQUENCE)
+        return;
+    if (isComplete() && isCorrect())
+        return;
+    // the converted part of a sequence can cover only some of its elements
+    const auto& part = getChunkType() == CT_SEQUENCE ? peek(offset, result->getChunkLength(), PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED) : nullptr;
+    const Chunk& source = part != nullptr ? *part : *this;
+    if (source.isIncomplete())
+        result->markIncomplete();
+    if (source.isIncorrect())
+        result->markIncorrect();
+}
+
 void Chunk::moveIterator(Iterator& iterator, b length) const
 {
     auto position = iterator.getPosition() + length;

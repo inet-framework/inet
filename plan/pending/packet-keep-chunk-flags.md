@@ -19,7 +19,7 @@ The plan of the branch `topic/physicallayer-content-errors` gives a received pac
 The intended behavior:
 
 1. A chunk that a peek returns has the flags of every chunk that it covers.
-2. The result of a conversion has the flags of the converted range.
+2. The result of a conversion is incomplete or incorrect if the converted range is.
 3. Two chunks with different flags do not merge.
 
 ## 2. Current implementation and evidence
@@ -41,7 +41,7 @@ The commit `packet: fix: keep the fill byte when splitting a BitCountChunk or By
 ## 3. Scope and acceptance criteria
 
 1. **A1:** A part of a flagged `BitCountChunk`, `BitsChunk`, `ByteCountChunk`, or `BytesChunk` has the flags of the chunk.
-2. **A2:** A conversion result has the flags of the converted range. For a `SequenceChunk` source, the flags come from the elements that the range covers, and from the sequence itself.
+2. **A2:** A conversion result is incomplete or incorrect if the converted range is. For a `SequenceChunk` source, the flags come from the elements that the range covers. The deserializer of the result alone decides whether the result is improperly represented (D2).
 3. **A3:** Two chunks with different flags do not merge, for all five callers.
 4. **A4:** A slice or a sequence with its own flags gives those flags to each part that a peek or an insertion takes from it.
 5. **A5:** A clean chunk keeps its current representation. A peek, a merge, and a conversion of clean chunks do the same work as now, plus one integer test.
@@ -57,7 +57,7 @@ Position-exact error flags, for example as region tags, are outside this plan.
 The changes follow the places where the code already copies region tags:
 
 - **Parts of raw chunks:** case 3 of the four raw types copies the three flags to the new chunk before it becomes immutable.
-- **Conversions:** `Chunk::convertChunk()` adds the flags of the converted range to the result before it becomes immutable. A clean source needs no further work. For a `SequenceChunk` source, it reads the elements that overlap the range.
+- **Conversions:** every conversion goes through `Chunk::peekConverted()`. Before the result becomes immutable, the new function `copyConvertedFlags()` marks it incomplete or incorrect if the converted range is. A clean source needs no further work. For a `SequenceChunk` source, it reads a peek of the range, which covers only the overlapping elements. A slice or a sequence result reports the flags of its content and needs no mark; this also prevents a recursion.
 - **Merges:** a new protected non-virtual function of `Chunk` compares `isIncorrect()`, `isIncomplete()`, and `isImproperlyRepresented()` of two chunks. The `canInsertAt*()` functions of the four raw types and of `SliceChunk` call it. The virtual functions of `SliceChunk` include the flags of its source, so the comparison is also correct for slices.
 - **Containers:** `SequenceChunk` overrides `markIncorrect()`, `markIncomplete()`, and `markImproperlyRepresented()`. The override replaces each element with a flagged copy. A sequence thus never has its own flags, and its peeks and insertions need no change. A `SliceChunk` shares its source, so it keeps its own flags. Its peek cases 2.1 and 3 then return a flagged copy of the result. `SequenceChunk::doInsertSliceChunkAtFront()` and `doInsertSliceChunkAtBack()` give the flags of the slice to the parts that they insert.
 - **Internal peeks:** the peeks of row 6 in section 2 pass `PF_ALLOW_INCOMPLETE | PF_ALLOW_INCORRECT | PF_ALLOW_IMPROPERLY_REPRESENTED`, as `Chunk::simplify()` does. `PF_ALLOW_ALL` is not usable, because it contains `PF_ALLOW_EMPTY`, which a typed peek refuses.
@@ -91,7 +91,7 @@ These commits change the packet API. They do not change a protocol. Thus protoco
 
 **C1** (done) adds the protected function `Chunk::copyFlags()`, which marks a chunk with the flags of another chunk, as `regionTags.copyTags()` does for region tags. Case 3 of `BitCountChunk.cc`, `BitsChunk.cc`, `ByteCountChunk.cc`, and `BytesChunk.cc` calls it. C1 adds the three error allowances to the internal peeks of row 6 in section 2. A new function `testIncorrectPart()` in `tests/packet/UnitTest.cc` marks each raw type incorrect, incomplete, and improperly represented. It peeks a front part, a middle part, and a back part. Each part must have the flags. It also erases the middle of a flagged chunk in a packet, inserts a slice of a sequence into a sequence, pops parts from a `ChunkQueue`, replaces the middle of a flagged chunk in a `ChunkBuffer`, and pops a part from a `ReorderBuffer`. These operations must not throw, and the parts must keep their flags. A `ChunkBuffer` joins consecutive regions into one region, so the test reads the parts of that region. Before C1, the flag checks fail.
 
-**C2** changes `Chunk::convertChunk()`. A new function `testIncorrectConversion()` converts a flagged `BytesChunk` to a typed header and back, and a flagged typed header to bytes. It converts a range of a sequence that covers only a correct element, and a range that covers a flagged element. Only the second result has the flag. Before C2, the flag checks fail.
+**C2** (done) adds `Chunk::copyConvertedFlags()` and calls it in `Chunk::peekConverted()`. A new function `testIncorrectConversion()` converts an incorrect `BytesChunk` to a typed header, and a flagged typed header to bytes and to bits. It converts an improperly represented header to bytes, which stay proper. It converts a range of a sequence that covers only a correct element, and ranges that cover a flagged element. Only the second kind of result has the flag. Before C2, the first flag check fails. The first form of C2 also copied the improper representation flag. `Ieee80211RadiotapHeaderSerializer_1.test` then failed, because the bytes of an improperly represented Radiotap header are its original bytes (D2).
 
 **C3** adds the comparison function to `Chunk.h` and calls it in the `canInsertAt*()` functions of the four raw types and `SliceChunk`. A new function `testIncorrectMerge()` inserts a correct and an incorrect chunk of each raw type into a packet, a `ChunkQueue`, and a `ChunkBuffer`. The two chunks stay separate. `Packet::hasBitError()` is true, and a peek of each chunk gives its own flag. Two chunks with equal flags still merge. Before C3, the separate-chunk checks fail.
 
@@ -119,5 +119,6 @@ The packet test checks A1 to A6 on each commit. The other suites check that the 
 - **R1:** a consumer outside the packet API can peek a part of flagged content without `PF_ALLOW_INCORRECT`. The full test suites show such cases. Each case gets a repair or an explanation.
 - **R2:** a `SequenceChunk` with many elements makes `markIncorrect()` copy every element. The PHY marks single chunks, not sequences, so this cost is rare.
 - **D1, conservative flags:** a part of a flagged chunk has the flag, although the error can be in another part. Recommended, because a flag has no position.
+- **D2, the improper representation flag in conversions (found in C2):** the incomplete and incorrect flags describe the data, so a conversion keeps them. The improper representation flag describes one representation of the data. For example, an improperly represented Radiotap header serializes to its original bytes, which are a proper representation. Thus a conversion does not copy that flag, and the deserializer of the result decides it. A part of a raw chunk (C1) keeps the flag, because it has the same representation, as a `SliceChunk` already does.
 
 The approval covers draft 1 of this plan, the commits C0 to C6, and the sealed files that they name.

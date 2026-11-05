@@ -386,6 +386,16 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
             markImproperlyRepresented();
     }
 
+    /**
+     * Marks the provided conversion result incomplete or incorrect if the
+     * converted part of this chunk, which starts at the provided offset, is.
+     * These flags describe the data, so the result keeps them. The improper
+     * representation flag describes a representation, so the deserializer of
+     * the result decides it. A slice or a sequence result needs no mark,
+     * because it reports the flags of its content.
+     */
+    void copyConvertedFlags(const Ptr<Chunk>& result, b offset) const;
+
     virtual void doInsertAtFront(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     virtual void doInsertAtBack(const Ptr<const Chunk>& chunk) { throw cRuntimeError("Invalid operation"); }
     virtual void doInsertAt(const Ptr<const Chunk>& chunk, b offset) { throw cRuntimeError("Invalid operation"); }
@@ -412,6 +422,7 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
         CHUNK_CHECK_USAGE(iterator.isForward() || length >= b(0), "chunk conversion using backward iterator with undefined length is invalid");
         auto offset = iterator.isForward() ? iterator.getPosition() : getChunkLength() - iterator.getPosition() - length;
         const auto& chunk = T::convertChunk(typeid(T), const_cast<Chunk *>(this)->shared_from_this(), offset, length, flags);
+        copyConvertedFlags(chunk, offset);
         chunk->markImmutable();
         return staticPtrCast<T>(chunk);
     }

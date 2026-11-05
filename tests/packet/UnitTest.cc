@@ -453,6 +453,48 @@ static void testIncorrectPart()
     ASSERT(buffer2.popAvailableData(B(4))->isIncorrect());
 }
 
+static void testIncorrectConversion()
+{
+    int allowFlags = Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+    // 1. a typed header from flagged bytes has the flags of the bytes
+    auto bytesChunk1 = staticPtrCast<BytesChunk>(makeImmutableApplicationHeader(42)->peek<BytesChunk>(B(0), B(10))->dupShared());
+    bytesChunk1->markIncorrect();
+    bytesChunk1->markImmutable();
+    const auto& applicationHeader1 = bytesChunk1->peek<ApplicationHeader>(B(0), B(10), Chunk::PF_ALLOW_INCORRECT);
+    ASSERT(applicationHeader1->isIncorrect());
+    ASSERT(applicationHeader1->getSomeData() == 42);
+    // 2. bytes and bits from a flagged typed header are incomplete and incorrect as the header is
+    auto applicationHeader2 = makeShared<ApplicationHeader>();
+    applicationHeader2->setSomeData(42);
+    makeFlaggedChunk(applicationHeader2);
+    for (const auto& converted : {staticPtrCast<const Chunk>(applicationHeader2->peek<BytesChunk>(B(0), B(10), allowFlags)),
+                                  staticPtrCast<const Chunk>(applicationHeader2->peek<BitsChunk>(b(0), b(80), allowFlags))})
+        ASSERT(converted->isIncomplete() && converted->isIncorrect());
+    // 3. the improper representation of a header does not pass to its bytes, because they are its original bytes
+    auto applicationHeader3 = makeShared<ApplicationHeader>();
+    applicationHeader3->setSomeData(42);
+    applicationHeader3->markImproperlyRepresented();
+    applicationHeader3->markImmutable();
+    ASSERT(hasNoFlags(applicationHeader3->peek<BytesChunk>(B(0), B(10), allowFlags)));
+    // 4. a conversion of a range of a sequence has the flags of the elements that the range covers
+    auto bytesChunk2 = makeShared<BytesChunk>(makeVector(10));
+    bytesChunk2->markIncorrect();
+    bytesChunk2->markImmutable();
+    auto sequenceChunk1 = makeShared<SequenceChunk>();
+    sequenceChunk1->insertAtBack(makeImmutableByteCountChunk(B(10)));
+    sequenceChunk1->insertAtBack(bytesChunk2);
+    sequenceChunk1->markImmutable();
+    ASSERT(sequenceChunk1->peek<BytesChunk>(B(0), B(8))->isCorrect());
+    ASSERT(sequenceChunk1->peek<BytesChunk>(B(5), B(10), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(sequenceChunk1->peek<BytesChunk>(B(12), B(6), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    // 5. a conversion of clean content stays clean
+    auto sequenceChunk2 = makeShared<SequenceChunk>();
+    sequenceChunk2->insertAtBack(makeImmutableByteCountChunk(B(10)));
+    sequenceChunk2->insertAtBack(makeImmutableApplicationHeader(42));
+    sequenceChunk2->markImmutable();
+    ASSERT(hasNoFlags(sequenceChunk2->peek<BytesChunk>(B(5), B(10))));
+}
+
 static void testEmpty()
 {
     // 1. peeking an empty packet is an error
@@ -2239,6 +2281,7 @@ void UnitTest::initialize()
     testProperlyRepresented();
     testImproperlyRepresented();
     testIncorrectPart();
+    testIncorrectConversion();
     testEmpty();
     testHeader();
     testTrailer();
