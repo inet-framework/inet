@@ -387,6 +387,14 @@ class INET_API Chunk : public cObject, public SharedBase<Chunk>, public IPrintab
     }
 
     /**
+     * Returns the provided part of this chunk, or a copy of it that also has the
+     * own flags of this chunk. A slice or a sequence can have flags of its own
+     * beside the flags of the chunks that it holds, and each part that a peek or
+     * an insertion takes from it must keep them.
+     */
+    const Ptr<Chunk> copyOwnFlags(const Ptr<Chunk>& part) const;
+
+    /**
      * Returns true if the provided chunk is incomplete, incorrect, and improperly
      * represented exactly where this chunk is. Chunks with different flags do
      * not merge, because the merged chunk would lose a flag or give it to the

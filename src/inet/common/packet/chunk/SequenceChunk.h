@@ -90,6 +90,12 @@ class INET_API SequenceChunk : public Chunk
 
     virtual bool isProperlyRepresented() const override { return !isImproperlyRepresented(); }
     virtual bool isImproperlyRepresented() const override;
+
+    // The mark functions also mark each element, because a peek or an insertion
+    // can take an element out of the sequence.
+    virtual void markIncomplete() override;
+    virtual void markIncorrect() override;
+    virtual void markImproperlyRepresented() override;
     //@}
 
     /** @name Iteration related functions */

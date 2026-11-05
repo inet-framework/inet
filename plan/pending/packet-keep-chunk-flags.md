@@ -95,7 +95,7 @@ These commits change the packet API. They do not change a protocol. Thus protoco
 
 **C3** (done) adds the comparison function `Chunk::hasSameFlags()` to `Chunk.h` and calls it in the `canInsertAt*()` functions of the four raw types and `SliceChunk`. A new function `testIncorrectMerge()` inserts a correct and an incorrect chunk of each raw type into a packet. The two chunks stay separate: `Packet::hasBitError()` is true, and a peek of each chunk gives its own flag. Two chunks with equal flags still merge. It also checks a `ChunkQueue`, a `ChunkBuffer`, and two adjacent slices of one source with different flags. Before C3, the first check fails, because the merge keeps only the flags of the correct chunk.
 
-**C4** adds the overrides of `SequenceChunk`, the flagged copies in the peek cases 2.1 and 3 of `SliceChunk`, and the flags in the slice insertion of `SequenceChunk`. A new function `testIncorrectContainer()` marks a slice and a sequence incorrect. It peeks parts of them, simplifies them, and inserts them into another sequence. Each result is incorrect. Before C4, these checks fail.
+**C4** (done) adds the protected function `Chunk::copyOwnFlags()`, which returns a part, or a copy of it with the own flags of the chunk. The overrides of the three mark functions of `SequenceChunk`, the peek cases 2.1 and 3 of `SliceChunk`, and the slice insertion of `SequenceChunk` call it. A new function `testIncorrectContainer()` marks a slice and a sequence incorrect. It peeks parts of them, simplifies them, and inserts them into another sequence. Each result is incorrect. Before C4, these checks fail.
 
 **C5** records the executed results, the audit, and the remaining gaps. **C6** moves this plan to `plan/done/` without a content change.
 

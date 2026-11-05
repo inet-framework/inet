@@ -548,6 +548,49 @@ static void testIncorrectMerge()
     ASSERT(sequenceChunk1->getChunks().size() == 2);
 }
 
+static void testIncorrectContainer()
+{
+    int allowFlags = Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+    // 1. a flagged sequence gives its flags to each part
+    auto sequenceChunk1 = makeShared<SequenceChunk>();
+    sequenceChunk1->insertAtBack(makeImmutableByteCountChunk(B(10)));
+    sequenceChunk1->insertAtBack(makeImmutableApplicationHeader(42));
+    makeFlaggedChunk(sequenceChunk1);
+    ASSERT(hasAllFlags(sequenceChunk1));
+    ASSERT(hasAllFlags(sequenceChunk1->peek(B(0), B(10), allowFlags)));
+    ASSERT(hasAllFlags(sequenceChunk1->peek(B(10), B(10), allowFlags)));
+    ASSERT(hasAllFlags(sequenceChunk1->peek(B(2), B(4), allowFlags)));
+    // 2. a sequence that inserts a flagged sequence keeps the flags of its parts
+    auto sequenceChunk2 = makeShared<SequenceChunk>();
+    sequenceChunk2->insertAtBack(makeImmutableBytesChunk(makeVector(10)));
+    sequenceChunk2->insertAtBack(sequenceChunk1);
+    sequenceChunk2->markImmutable();
+    ASSERT(sequenceChunk2->peek(B(0), B(10))->isCorrect());
+    ASSERT(hasAllFlags(sequenceChunk2->peek(B(10), B(10), allowFlags)));
+    ASSERT(hasAllFlags(sequenceChunk2->peek(B(20), B(10), allowFlags)));
+    // 3. a flagged slice gives its flags to its parts and to its simplification
+    auto sliceChunk1 = makeShared<SliceChunk>(makeImmutableByteCountChunk(B(10)), B(0), B(10));
+    makeFlaggedChunk(sliceChunk1);
+    ASSERT(hasAllFlags(sliceChunk1->simplify()));
+    ASSERT(hasAllFlags(sliceChunk1->peek(B(2), B(4), allowFlags)));
+    // 4. a sequence that inserts a flagged slice of a clean sequence keeps the flags of the parts
+    auto sequenceChunk3 = makeShared<SequenceChunk>();
+    sequenceChunk3->insertAtBack(makeImmutableByteCountChunk(B(10)));
+    sequenceChunk3->insertAtBack(makeImmutableApplicationHeader(42));
+    sequenceChunk3->markImmutable();
+    auto sliceChunk2 = makeShared<SliceChunk>(sequenceChunk3, B(5), B(10));
+    sliceChunk2->markIncorrect();
+    sliceChunk2->markImmutable();
+    auto sequenceChunk4 = makeShared<SequenceChunk>();
+    sequenceChunk4->insertAtBack(sliceChunk2);
+    sequenceChunk4->markImmutable();
+    ASSERT(sequenceChunk4->peek(B(0), B(5), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    ASSERT(sequenceChunk4->peek(B(5), B(5), Chunk::PF_ALLOW_INCORRECT)->isIncorrect());
+    // 5. a clean sequence and a clean slice keep clean parts
+    ASSERT(hasNoFlags(sequenceChunk3->peek(B(2), B(4))));
+    ASSERT(hasNoFlags(makeShared<SliceChunk>(sequenceChunk3, B(0), B(20))->simplify()));
+}
+
 static void testEmpty()
 {
     // 1. peeking an empty packet is an error
@@ -2336,6 +2379,7 @@ void UnitTest::initialize()
     testIncorrectPart();
     testIncorrectConversion();
     testIncorrectMerge();
+    testIncorrectContainer();
     testEmpty();
     testHeader();
     testTrailer();

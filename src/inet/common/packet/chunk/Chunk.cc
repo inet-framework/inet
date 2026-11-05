@@ -137,6 +137,26 @@ const Ptr<Chunk> Chunk::convertChunk(const std::type_info& typeInfo, const Ptr<C
     return result;
 }
 
+const Ptr<Chunk> Chunk::copyOwnFlags(const Ptr<Chunk>& part) const
+{
+    if (part == nullptr || part->getChunkType() == CT_EMPTY)
+        return part;
+    bool incomplete = (flags & CF_INCOMPLETE) && part->isComplete();
+    bool incorrect = (flags & CF_INCORRECT) && part->isCorrect();
+    bool improperlyRepresented = (flags & CF_IMPROPERLY_REPRESENTED) && part->isProperlyRepresented();
+    if (!incomplete && !incorrect && !improperlyRepresented)
+        return part;
+    const auto& flaggedPart = part->dupShared();
+    if (incomplete)
+        flaggedPart->markIncomplete();
+    if (incorrect)
+        flaggedPart->markIncorrect();
+    if (improperlyRepresented)
+        flaggedPart->markImproperlyRepresented();
+    flaggedPart->markImmutable();
+    return flaggedPart;
+}
+
 void Chunk::copyConvertedFlags(const Ptr<Chunk>& result, b offset) const
 {
     auto resultType = result->getChunkType();
