@@ -430,14 +430,13 @@ timer policies, supported packet-processing operations and recorded statistics.
 Use normal OMNeT++ result-recording configuration to inspect the recovery signals.
 
 The implementation follows the 2017 functions with the CBdb-2021 forward-boundary
-correction, including the loss
-counter increment when a zero bit leaves history. Initial zero bits can therefore
-be counted as losses after reset. This module does not implement latent error
-detection, MRA, the management tables, or amendment requirements beyond that
-correction and does not claim
-full IEEE 802.1CB conformance. See ``showcases/tsn/framereplication/vectorrecovery``
-for an example and the ``VectorSequenceRecovery`` C++ class for reuse of the
-packet-independent algorithm by other modules.
+correction, including the loss counter increment when a zero bit leaves history.
+Initial zero bits can therefore be counted as losses after reset. This module does
+not implement latent error detection, MRA, the management tables, or amendment
+requirements beyond that correction and does not claim full IEEE 802.1CB
+conformance. See ``showcases/tsn/framereplication/vectorrecovery`` for an example
+and the ``VectorSequenceRecovery`` C++ class for reuse of the packet-independent
+algorithm by other modules.
 
 .. _ug:sec:tsn:framepreemption:
 
