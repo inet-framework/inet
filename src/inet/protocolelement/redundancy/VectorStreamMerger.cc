@@ -217,7 +217,7 @@ void VectorStreamMerger::processPacket(Packet *packet)
 void VectorStreamMerger::handlePacketFiltered(Packet *packet, bool matches)
 {
     // Commit recovery once, before packet tags are changed or the packet is dropped.
-    // The legacy StreamMerger hook maintains its separate list-based history.
+    // This replaces the hook of StreamMerger, so its list of accepted sequence numbers stays empty.
     processRecovery(packet, matches);
 }
 
