@@ -83,6 +83,8 @@ void Hcf::initialize(int stage)
         }
     }
     else if (stage == INITSTAGE_LAST) {
+        if (check_and_cast<IOriginatorQosMacDataService *>(originatorDataService)->hasAMpduAggregation() && dataAndMgmtRateControl)
+            throw cRuntimeError("HT A-MPDU transmission requires fixed DATA rates without a rate-control submodule");
         if (par("isBlockAckSupported").boolValue()) {
             EV_INFO << "Block Ack profile: " << (blockAckVariant == BlockAckVariant::BASIC ? "basic" : "compressed") << endl;
             if (blockAckVariant == BlockAckVariant::COMPRESSED) {

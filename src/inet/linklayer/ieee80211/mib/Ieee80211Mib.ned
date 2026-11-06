@@ -25,6 +25,7 @@ simple Ieee80211Mib extends SimpleModule
         @signal[rateStateChanged](type=bool);
         // Model-backed subset of IEEE Std 802.11-2024 HT capability/operation state; not a full Annex C MIB.
         int htMaxAmpduLengthExponent = default(0); // maximum received A-MPDU length exponent (0..3)
+        int htMinimumMpduStartSpacing = default(0); // encoded receiver limit: 0=no restriction, 1=0.25us, 2=0.5us, 3=1us, 4=2us, 5=4us, 6=8us, 7=16us
         int htSecondaryChannelOffset = default(0); // BSS operation policy: 0=20 MHz, 1=40 MHz above, 3=40 MHz below; bounded by the mode set
         int htProtectionMode = default(0); // 0=none, 1=nonmember, 2=20 MHz, 3=non-HT mixed
         displayStringTextFormat = default("Address: {address}{ssidStr}\n{modeStr}{stationTypeStr}{qosStr}{associatedStr}");

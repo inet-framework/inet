@@ -1,3 +1,3 @@
 IEEE 802.11 bounded MPDU deaggregation
 
-MPDU deaggregation extracts complete members directly from chunk traversal. It stops at an invalid or overlong delimiter before an out-of-bounds request. Extraction alone grants no PHY success, FCS acceptance, or MAC delivery permission.
+MPDU deaggregation extracts complete members directly from chunk traversal. An invalid or overlong delimiter triggers a search for later valid delimiters at four-octet intervals. Recovery crosses typed MPDU headers and retains later complete members. Extraction alone grants no PHY success, FCS acceptance, or MAC delivery permission.
