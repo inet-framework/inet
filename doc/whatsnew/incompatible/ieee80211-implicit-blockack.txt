@@ -1,0 +1,9 @@
+IEEE 802.11 HT A-MPDU and implicit Compressed Block Ack
+
+HtMpduAggregationPolicy enables HT20 mixed-format A-MPDU transmission after an accepted Compressed agreement. The default policy leaves aggregation disabled. The first transmit profile requires long GI and fixed DATA rates without rate control. The receiver also accepts advertised HT20 short-GI aggregates. The htampdu example supplies scalar, dimensional, and zero-TXOP configurations.
+
+Each member retains its sequence number, retry state, and independent deadline. HCF commits new members after the IFS interval at actual DATA submission. The complete PSDU length controls RTS protection and exchange admission. Partial PHY loss permits separate member acceptance and one implicit response after SIFS. One correct member prevents EIFS, including overheard DATA and DATA without an agreement.
+
+Missing or invalid implicit responses cause one contention failure and one pending explicit BAR probe. Probe submission consumes that flag. Probe failure permits DATA retry without another probe until a later DATA attempt. This INET policy exposes lost recipient agreement state under continuous traffic. It adds probe airtime and channel access delay. Valid zero-bit responses do not arm a probe.
+
+Custom aggregation policies, QoS data services, Rx, Tx, recipient services, ACK policies, and response procedures require the migration changes. NIST and Yans retain cached PHY outcomes in chunk flags. Adaptive aggregate rates, HT40 transmit aggregation, VHT aggregates, nested A-MSDUs, and correlated FEC errors remain outside this profile. These changes can alter affected exchange order, delivery times, and simulation results.

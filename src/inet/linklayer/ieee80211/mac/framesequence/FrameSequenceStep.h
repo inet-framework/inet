@@ -8,10 +8,14 @@
 #ifndef __INET_FRAMESEQUENCESTEP_H
 #define __INET_FRAMESEQUENCESTEP_H
 
+#include <memory>
+
 #include "inet/linklayer/ieee80211/mac/contract/IFrameSequence.h"
 
 namespace inet {
 namespace ieee80211 {
+
+struct PreparedDataTransmission;
 
 class INET_API TransmitStep : public ITransmitStep
 {
@@ -51,6 +55,15 @@ class INET_API RtsTransmitStep : public TransmitStep
     {}
 
     virtual const Packet *getProtectedFrame() { return protectedFrame; }
+};
+
+class INET_API AmpduTransmitStep : public TransmitStep
+{
+    std::shared_ptr<PreparedDataTransmission> prepared;
+  public:
+    AmpduTransmitStep(std::shared_ptr<PreparedDataTransmission> prepared, simtime_t ifs);
+    Packet *getFrameToTransmit() override;
+    const PreparedDataTransmission *getPreparedData() const { return prepared.get(); }
 };
 
 class INET_API ReceiveStep : public IReceiveStep

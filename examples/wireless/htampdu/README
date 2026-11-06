@@ -1,0 +1,13 @@
+This example selects HT A-MPDU transmission with implicit Compressed Block Ack.
+
+The source sends UDP traffic through an AP to the destination. Production management establishes peer HT capabilities and Block Ack agreements. HCF selects independent MPDUs from the queue after agreement acceptance. Each aggregate receives one Compressed Block Ack response. The originator retains unacknowledged members for selective retry with their original deadlines.
+
+Run the default configuration from this directory:
+
+    inet -u Cmdenv -c General
+
+The ZeroTxop configuration permits one aggregate DATA PPDU per channel grant. The Dimensional configuration selects the dimensional PHY. The default configuration uses the scalar PHY. These runs demonstrate the configured mechanism; they do not supply throughput validation.
+
+HtMpduAggregationPolicy requires fixed DATA rates without a rate-control submodule. This example selects HT mixed format, 20 MHz, one spatial stream, and long GI. The receiver also accepts advertised HT20 short-GI aggregates. A-MSDU nesting, adaptive aggregate rates, HT40 aggregate transmission, VHT aggregates, Multi-TID Block Ack, and correlated FEC errors remain outside this profile.
+
+NIST and Yans use cached delimiter and MPDU outcomes. A failed member does not invalidate every other member. The MAC still validates delimiters, FCS, addresses, and agreement state before receipt. After an absent or invalid implicit response, the originator submits at most one explicit BAR probe before its next DATA attempt. This probe is an INET recovery policy.

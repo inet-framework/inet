@@ -10,6 +10,36 @@
 namespace inet {
 namespace ieee80211 {
 
+bool isValidCompressedBlockAck(Packet *packet, MacAddress local, MacAddress peer, Tid tid)
+{
+    auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(packet->peekAtFront<Ieee80211MacHeader>());
+    return response && response->getReceiverAddress() == local && response->getTransmitterAddress() == peer &&
+        response->getTidInfo() == tid && !response->getMultiTid() && response->getCompressedBitmap() &&
+        response->getFragmentNumber() == 0 && response->getStartingSequenceNumber().isSpecified() &&
+        response->getBlockAckBitmap().getSize() == 64 &&
+        response->getChunkLength() == LENGTH_COMPRESSED_BLOCKACK - B(4) && packet->getDataLength() == LENGTH_COMPRESSED_BLOCKACK;
+}
+
+IFrameSequenceStep *AmpduBlockAckFs::prepareStep(FrameSequenceContext *context)
+{
+    auto prepared = context->getQoSContext()->preparedData.get();
+    if (step == 0)
+        return new AmpduTransmitStep(context->getQoSContext()->preparedData, context->getIfs());
+    if (step == 1)
+        return new ReceiveStep(context->getQoSContext()->ackPolicy->getImplicitBlockAckTimeout(prepared->ackMode));
+    return nullptr;
+}
+
+bool AmpduBlockAckFs::completeStep(FrameSequenceContext *context)
+{
+    if (step++ == 0)
+        return true;
+    auto prepared = context->getQoSContext()->preparedData.get();
+    auto receive = check_and_cast<IReceiveStep *>(context->getLastStep());
+    return !prepared->cancelled && isValidCompressedBlockAck(receive->getReceivedFrame(),
+        prepared->limits.transmitter, prepared->limits.receiver, prepared->limits.tid);
+}
+
 // TODO remove isForUs checks it's already done in framesequencehandler
 
 void SelfCtsFs::startSequence(FrameSequenceContext *context, int firstStep)
@@ -467,14 +497,8 @@ bool BlockAckReqBlockAckFs::completeStep(FrameSequenceContext *context)
             auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(request);
             auto response = dynamicPtrCast<const Ieee80211CompressedBlockAck>(receivedHeader);
             // IEEE Std 802.11-2024, 9.3.1.8.2: this profile supports the 64-bit bitmap without dynamic fragmentation.
-            return context->isForUs(receivedHeader) && compressed && response &&
-                response->getReceiverAddress() == compressed->getTransmitterAddress() &&
-                response->getTransmitterAddress() == compressed->getReceiverAddress() &&
-                response->getTidInfo() == compressed->getTidInfo() &&
-                !response->getMultiTid() && response->getCompressedBitmap() && response->getFragmentNumber() == 0 &&
-                response->getStartingSequenceNumber().isSpecified() && response->getBlockAckBitmap().getSize() == 64 &&
-                response->getChunkLength() == LENGTH_COMPRESSED_BLOCKACK - B(4) &&
-                receivedPacket->getDataLength() == LENGTH_COMPRESSED_BLOCKACK;
+            return compressed && isValidCompressedBlockAck(receivedPacket, compressed->getTransmitterAddress(),
+                compressed->getReceiverAddress(), compressed->getTidInfo());
         }
         default:
             throw cRuntimeError("Unknown step");
