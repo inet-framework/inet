@@ -28,6 +28,7 @@ void SceneVsgVisualizerBase::initializeScene()
         throw cRuntimeError("3D canvas scene at '%s' has been already initialized", visualizationTargetModule->getFullPath().c_str());
     else {
         auto topLevelScene = inet::vsg::TopLevelScene::create();
+        topLevelSceneHolder = topLevelScene;
         canvas->setScene(topLevelScene);
         const char *clearColor = par("clearColor");
         if (*clearColor != '\0')
