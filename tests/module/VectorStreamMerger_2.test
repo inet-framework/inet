@@ -1,0 +1,153 @@
+%description:
+Pull integration and counters, including duplicate filtering on provider notifications,
+multiple side-effect-free peeks at an accepted packet, delayed gap acceptance,
+and individual recovery timer reloads on numbered discards but not queries.
+
+%file: Driver.cc
+#include "inet/protocolelement/redundancy/VectorStreamMerger.h"
+#include "inet/queueing/queue/PacketQueue.h"
+#include "inet/common/SequenceNumberTag_m.h"
+#include "inet/protocolelement/redundancy/StreamTag_m.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+using namespace inet;
+using namespace inet::queueing;
+namespace VectorStreamMerger_2 {
+class ObservedMerger : public VectorStreamMerger
+{
+  public:
+    bool wouldForward(const Packet *packet) const { return matchesPacket(packet); }
+    void checkCounters(int64_t passed, int64_t discarded, int64_t rogue, int64_t outOfOrder, int64_t resets) {
+        Enter_Method("checkCounters");
+        if (passedPackets != passed || discardedPackets != discarded || roguePackets != rogue ||
+            outOfOrderPackets != outOfOrder || recoveryResets != resets)
+            throw cRuntimeError("Unexpected recovery counters");
+    }
+};
+Define_Module(ObservedMerger);
+
+class Driver : public cSimpleModule
+{
+  public:
+    Driver() : cSimpleModule(65536) {}
+  protected:
+    virtual void activity() override {
+        auto queue = check_and_cast<PacketQueue *>(getParentModule()->getSubmodule("queue"));
+        auto pullMerger = check_and_cast<ObservedMerger *>(getParentModule()->getSubmodule("pullMerger"));
+        auto ordinary = check_and_cast<ObservedMerger *>(getParentModule()->getSubmodule("ordinary"));
+        auto individual = check_and_cast<ObservedMerger *>(getParentModule()->getSubmodule("individual"));
+        auto noTimeout = check_and_cast<ObservedMerger *>(getParentModule()->getSubmodule("noTimeout"));
+        auto packet = [](const char *stream, int sequence) {
+            auto p = new Packet("frame", makeShared<ByteCountChunk>(B(10)));
+            p->addTag<StreamInd>()->setStreamName(stream);
+            p->addTag<SequenceNumberInd>()->setSequenceNumber(sequence);
+            return p;
+        };
+        auto enqueue = [&](const char *stream, int sequence) {
+            queue->pushPacket(packet(stream, sequence), queue->gate("in"));
+        };
+        auto pull = [&](int expectedSequence) {
+            auto peek = pullMerger->canPullPacket(pullMerger->gate("out"));
+            if (peek == nullptr || pullMerger->canPullPacket(pullMerger->gate("out")) != peek)
+                throw cRuntimeError("Peek changed an accepted packet");
+            auto p = pullMerger->pullPacket(pullMerger->gate("out"));
+            if (p != peek || p->getTag<SequenceNumberInd>()->getSequenceNumber() != expectedSequence ||
+                strcmp(p->getTag<StreamInd>()->getStreamName(), "merged"))
+                throw cRuntimeError("Unexpected pulled packet");
+            take(p);
+            delete p;
+        };
+        enqueue("a", 10);
+        // Merely peeking must leave first-frame acceptance and counters intact.
+        pullMerger->canPullPacket(pullMerger->gate("out"));
+        pullMerger->checkCounters(0, 0, 0, 0, 1);
+        pull(10);
+        enqueue("b", 10);
+        enqueue("b", 12);
+        enqueue("a", 11);
+        // Provider notification consumes the duplicate; peeks must change no state.
+        pullMerger->checkCounters(1, 1, 0, 0, 1);
+        pullMerger->canPullPacket(pullMerger->gate("out"));
+        pullMerger->checkCounters(1, 1, 0, 0, 1);
+        pull(12);
+        pull(11);
+        enqueue("a", 17); // +historyLength is accepted by 802.1CBdb-2021.
+        pull(17);
+        enqueue("a", 23); // Beyond the inclusive forward boundary => rogue.
+        if (pullMerger->canPullPacket(pullMerger->gate("out")) != nullptr)
+            throw cRuntimeError("Rogue packet was available to pull");
+        pullMerger->checkCounters(4, 1, 1, 3, 1);
+        std::cout << "pull operations and counters passed\n";
+
+        ordinary->pushPacket(packet("a", 10), ordinary->gate("in"));
+        individual->pushPacket(packet("a", 10), individual->gate("in"));
+        noTimeout->pushPacket(packet("a", 10), noTimeout->gate("in"));
+        wait(0.015);
+        ordinary->pushPacket(packet("a", 10), ordinary->gate("in"));
+        individual->pushPacket(packet("a", 10), individual->gate("in"));
+        wait(0.005);
+        ordinary->pushPacket(packet("a", 10), ordinary->gate("in"));
+        ordinary->checkCounters(2, 1, 0, 0, 2);
+        auto probe = packet("a", 10);
+        for (int i = 0; i < 3; i++) {
+            if (!individual->canPushPacket(probe, individual->gate("in")) || individual->wouldForward(probe)) {
+                delete probe;
+                throw cRuntimeError("Individual timer was not reloaded by the duplicate");
+            }
+        }
+        delete probe;
+        individual->checkCounters(1, 1, 0, 0, 1);
+        wait(0.015);
+        // Peeking at t=20ms must not move this expiry from t=35ms to t=40ms.
+        individual->pushPacket(packet("a", 10), individual->gate("in"));
+        individual->checkCounters(2, 1, 0, 0, 2);
+        noTimeout->pushPacket(packet("a", 10), noTimeout->gate("in"));
+        noTimeout->checkCounters(1, 1, 0, 0, 1);
+        std::cout << "individual recovery and query timers passed\n";
+    }
+};
+Define_Module(Driver);
+class Sink : public cSimpleModule
+{
+  protected:
+    virtual void handleMessage(cMessage *message) override { delete message; }
+};
+Define_Module(Sink);
+}
+
+%file: TestNetwork.ned
+import inet.protocolelement.redundancy.VectorStreamMerger;
+import inet.queueing.queue.PacketQueue;
+simple ObservedMerger extends VectorStreamMerger { @class(::VectorStreamMerger_2::ObservedMerger); }
+simple Driver { @class(::VectorStreamMerger_2::Driver); }
+simple Sink { @class(::VectorStreamMerger_2::Sink); gates: input in; }
+network TestNetwork {
+    submodules:
+        driver: Driver;
+        queue: PacketQueue;
+        pullMerger: ObservedMerger { parameters: mapping = {a: "merged", b: "merged"}; }
+        ordinary: ObservedMerger { parameters: mapping = {a: ""}; }
+        individual: ObservedMerger { parameters: mapping = {a: ""}; individualRecovery = true; }
+        noTimeout: ObservedMerger { parameters: mapping = {a: ""}; resetTimeout = 0ms; }
+        ordinarySink: Sink;
+        individualSink: Sink;
+        noTimeoutSink: Sink;
+    connections allowunconnected:
+        queue.out --> pullMerger.in;
+        ordinary.out --> ordinarySink.in;
+        individual.out --> individualSink.in;
+        noTimeout.out --> noTimeoutSink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src
+network = TestNetwork
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+**.historyLength = 5
+**.resetTimeout = 20ms
+sim-time-limit = 36ms
+
+%contains: stdout
+pull operations and counters passed
+individual recovery and query timers passed

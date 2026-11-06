@@ -1,0 +1,88 @@
+%description:
+IEEE 802.1CB-2017 7.4.3.4 and 10.4.1.9: rejected tagless frames neither consume first-number acceptance nor postpone reset.
+The frame trace is a declared input. Production VectorStreamMerger receives it through its gate.
+The protocol observer verifies all input contents/times and the exact output order and cardinality.
+See vector-recovery.md, VRA-2, for the requirement, before/after behavior and limits.
+
+%includes:
+#include "ProtocolTest.h"
+#include "FrameSource.h"
+
+%global:
+using namespace inet;
+using namespace inet::protocoltest;
+using namespace inet::frertest;
+
+Define_ProtocolTestProgram()
+{
+    ProtocolTest test("vector_recovery_tagless_reject");
+    test.meanwhile(exactlyTimes(4, on("merger").signal("packetPushedIn").within(0.06)));
+    test.meanwhile(exactlyTimes(2, on("merger").signal("packetPushedOut").within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "taglessFirst"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "taglessFirst", "a", -1, 1000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "firstNumbered"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "firstNumbered", "a", 50000, 2000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "taglessNearTimeout"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "taglessNearTimeout", "b", -1, 11000);
+        }).within(0.06)));
+    test.meanwhile(exactlyTimes(1, on("merger").signal("packetPushedIn")
+        .filterEvent([](const MatchContext& c) { return !strcmp(c.event.packet->getName(), "afterTimeout"); })
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "afterTimeout", "a", 0, 12000);
+        }).within(0.06)));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "firstNumbered", "merged", 50000, 2000);
+        }).within(0.06));
+    test.once(on("merger").signal("packetPushedOut").first()
+        .assertEvent([](const MatchContext& c) {
+            return frameMatches(c.event.packet, c.event.time, "afterTimeout", "merged", 0, 12000);
+        }).within(0.06));
+    return test;
+}
+
+%activity:
+// The framework attaches its observer to the network after initialization.
+
+%file: test.ned
+import inet.protocolelement.redundancy.VectorStreamMerger;
+import inet.queueing.sink.PassivePacketSink;
+simple FrameSource {
+    parameters:
+        @class(::inet::frertest::FrameSource);
+        object frames;
+    gates:
+        output out;
+}
+network VectorRecoveryNet {
+    submodules:
+        source: FrameSource;
+        merger: VectorStreamMerger;
+        sink: PassivePacketSink;
+    connections:
+        source.out --> merger.in;
+        merger.out --> sink.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = VectorRecoveryNet
+sim-time-limit = 70ms
+seed-set = 0
+cmdenv-event-banners = false
+**.cmdenv-log-level = off
+*.merger.historyLength = 5
+*.merger.mapping = {a: "merged", b: "merged"}
+*.merger.resetTimeout = 10ms
+*.source.frames = ["1000,a,-1,taglessFirst", "2000,a,50000,firstNumbered", "11000,b,-1,taglessNearTimeout", "12000,a,0,afterTimeout"]
+
+%contains: stdout
+PROTOCOLTEST vector_recovery_tagless_reject: PASS

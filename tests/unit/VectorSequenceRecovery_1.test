@@ -1,0 +1,122 @@
+%description:
+IEEE 802.1CB-2017 7.4.3.3, 7.4.3.4 and 7.4.3.6: first frame, pure
+queries, duplicate elimination, delayed gaps, asymmetric amended window endpoints, modular
+wraparound, half-space ambiguity, reset and the original loss accounting.
+The forward boundary includes IEEE 802.1CBdb-2021 maintenance item 0257.
+
+%includes:
+#include "inet/protocolelement/redundancy/VectorSequenceRecovery.h"
+#include <stdexcept>
+using namespace inet;
+
+%activity:
+using Recovery = VectorSequenceRecovery;
+auto check = [](bool condition) {
+    if (!condition)
+        throw std::runtime_error("Vector sequence recovery assertion failed");
+};
+
+Recovery recovery(5);
+check(recovery.classify(100) == Recovery::ACCEPT);
+check(recovery.classify(100) == Recovery::ACCEPT);
+check(recovery.process(100).decision == Recovery::ACCEPT);
+check(recovery.process(100).decision == Recovery::DUPLICATE);
+check(recovery.process(102).decision == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.classify(101) == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.classify(101) == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.process(101).decision == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.process(101).decision == Recovery::DUPLICATE);
+check(recovery.process(106).decision == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.process(101).decision == Recovery::ROGUE);
+check(recovery.classify(112) == Recovery::ROGUE);
+check(recovery.classify(111) == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.process(105).decision == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.process(105).decision == Recovery::DUPLICATE);
+check(recovery.process(107).decision == Recovery::ACCEPT);
+std::cout << "history and endpoints passed\n";
+
+// Independent expected classification for every 16-bit number relative to a
+// single received frame. Include references on both sides of wraparound.
+for (int reference : {0, 1, 32767, 32768, 65534, 65535}) {
+    recovery.reset();
+    check(recovery.process(reference).decision == Recovery::ACCEPT);
+    for (int sequence = 0; sequence < 65536; sequence++) {
+        int forward = (sequence + 65536 - reference) % 65536;
+        int backward = (reference + 65536 - sequence) % 65536;
+        auto expected = sequence == reference ? Recovery::DUPLICATE :
+            forward == 1 ? Recovery::ACCEPT :
+            forward <= 5 || backward < 5 ? Recovery::ACCEPT_OUT_OF_ORDER : Recovery::ROGUE;
+        check(recovery.classify(sequence) == expected);
+    }
+}
+recovery.reset();
+check(recovery.process(65534).decision == Recovery::ACCEPT);
+check(recovery.process(0).decision == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.process(65535).decision == Recovery::ACCEPT_OUT_OF_ORDER);
+check(recovery.process(65534).decision == Recovery::DUPLICATE);
+check(recovery.process(1).decision == Recovery::ACCEPT);
+check(recovery.process(32769).decision == Recovery::ROGUE);
+std::cout << "wraparound and full-space classification passed\n";
+
+// Fill the whole history first, then leave a gap and move it out of history.
+Recovery losses(3);
+losses.process(10);
+losses.process(11);
+losses.process(12);
+check(losses.process(14).lostPackets == 0);
+check(losses.process(15).lostPackets == 0);
+check(losses.process(16).lostPackets == 1); // Unseen 13 leaves the window.
+check(losses.process(13).decision == Recovery::ROGUE);
+
+// The original 2017 function also counts zeros introduced by reset.
+losses.reset();
+losses.process(100);
+check(losses.process(101).lostPackets == 1);
+check(losses.process(102).lostPackets == 1);
+check(losses.process(103).lostPackets == 0);
+losses.reset();
+check(losses.process(50000).decision == Recovery::ACCEPT);
+std::cout << "reset and loss accounting passed\n";
+
+Recovery minimum(2);
+minimum.process(0);
+check(minimum.process(3).decision == Recovery::ROGUE);
+auto fullJump = minimum.process(2);
+check(fullJump.decision == Recovery::ACCEPT_OUT_OF_ORDER && fullJump.lostPackets == 1);
+check(minimum.process(0).decision == Recovery::ROGUE);
+check(minimum.process(1).decision == Recovery::ACCEPT_OUT_OF_ORDER);
+check(minimum.process(2).decision == Recovery::DUPLICATE);
+// A full-length jump must evict all old bits, preserve gaps, and wrap correctly.
+Recovery amended(5);
+amended.process(65534);
+auto endpoint = amended.process(3);
+check(endpoint.decision == Recovery::ACCEPT_OUT_OF_ORDER && endpoint.lostPackets == 4);
+check(amended.process(65534).decision == Recovery::ROGUE);
+for (int gap : {65535, 0, 1, 2}) {
+    check(amended.process(gap).decision == Recovery::ACCEPT_OUT_OF_ORDER);
+    check(amended.process(gap).decision == Recovery::DUPLICATE);
+}
+check(amended.process(4).lostPackets == 0);
+Recovery maximum(32768);
+maximum.process(0);
+check(maximum.classify(32767) == Recovery::ACCEPT_OUT_OF_ORDER);
+check(maximum.classify(32768) == Recovery::ROGUE);
+auto largeGap = maximum.process(32767);
+check(largeGap.decision == Recovery::ACCEPT_OUT_OF_ORDER);
+check(largeGap.lostPackets == 32767);
+check(maximum.process(0).decision == Recovery::DUPLICATE);
+check(maximum.process(32768).decision == Recovery::ACCEPT);
+check(maximum.process(0).decision == Recovery::ROGUE);
+for (int invalid : {-1, 0, 1, 32769}) {
+    bool rejected = false;
+    try { Recovery invalidRecovery(invalid); }
+    catch (std::invalid_argument&) { rejected = true; }
+    check(rejected);
+}
+std::cout << "configuration validation passed\n";
+
+%contains: stdout
+history and endpoints passed
+wraparound and full-space classification passed
+reset and loss accounting passed
+configuration validation passed

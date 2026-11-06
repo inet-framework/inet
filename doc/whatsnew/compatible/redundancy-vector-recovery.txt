@@ -1,0 +1,5 @@
+Configurable vector recovery for replicated streams
+
+VectorStreamMerger adds sequence-position history, modular sequence comparison, duplicate and rogue rejection, reset timeouts, optional tagless acceptance and individual member-stream recovery. It implements the documented IEEE 802.1CB-2017 base vector-recovery behavior with the IEEE 802.1CBdb-2021 forward-window boundary correction. Select it in place of StreamMerger through the merger typename parameter. Existing StreamMerger behavior and defaults are unchanged.
+
+The module requires complete frames and does not provide latent error detection, MRA or the standard management interfaces. Unit, module and protocol tests and a failure/wraparound showcase accompany the implementation.

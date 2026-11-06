@@ -377,6 +377,68 @@ parameter called :par:`hasStreamRedundancy` which can be used to enable frame
 replication in the network node architecture. Of course, these modules can also
 be used in other ways.
 
+Vector Sequence Recovery
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The default :ned:`StreamMerger` remembers a finite list of received sequence
+numbers. To use the Vector Recovery Algorithm from IEEE Std 802.1CB-2017,
+select :ned:`VectorStreamMerger` in the existing stream relay layer:
+
+.. code-block:: ini
+
+   *.*.bridging.streamRelay.merger.typename = "VectorStreamMerger"
+   *.*.bridging.streamRelay.merger.historyLength = 32
+   *.*.bridging.streamRelay.merger.resetTimeout = 100ms
+   *.*.bridging.streamRelay.merger.ticksPerSecond = 1000
+
+Existing merger mappings still apply. Inputs mapped to the same output stream
+share recovery state, and must use sequence numbers from the same generation
+instance. Separate output stream names have separate history and timers. Mapping
+to an empty output name removes the stream and sequence indication tags after
+recovery. Mutable mappings retain state for existing output names, discard state
+for removed names, and initialize new output names.
+
+When several independently numbered compound streams must all have their tags
+removed at one destination, give them separate recovery instance names using
+``recoveryMapping``. For example:
+
+.. code-block:: ini
+
+   *.destination.bridging.streamRelay.merger.mapping = {a1: "", b1: "", a2: "", b2: ""}
+   *.destination.bridging.streamRelay.merger.recoveryMapping = {a1: "flow1", b1: "flow1", a2: "flow2", b2: "flow2"}
+
+Recovery state is then shared by ``a1`` and ``b1``, and separately by ``a2`` and
+``b2``, even though all four outputs remove tags. Without an explicit entry in
+``recoveryMapping``, the output stream name remains the recovery instance name.
+Mutable changes retain existing instance names and initialize new ones.
+
+The recovery history tracks consecutive sequence-number positions, including
+unreceived gaps, rather than a list of accepted packet numbers. An unseen frame
+within the recovery window is forwarded immediately and can arrive out of order.
+A frame outside the window is rejected even when it has never been received.
+Choose a window that covers the path-delay difference and expected sequence gaps.
+
+A reset lets the next numbered frame establish a new sequence start. This helps
+when a sender restarts, but also means that a delayed duplicate arriving after
+reset can be accepted. Choose the timeout according to the stream's silence and
+restart behavior. For individual member-stream recovery, use separate recovery
+instances before recovery across the merged streams.
+
+The :ned:`VectorStreamMerger` NED reference is the authoritative description of
+parameter defaults and ranges, the exact acceptance interval, tagless handling,
+timer policies, supported packet-processing operations and recorded statistics.
+Use normal OMNeT++ result-recording configuration to inspect the recovery signals.
+
+The implementation follows the 2017 functions with the CBdb-2021 forward-boundary
+correction, including the loss
+counter increment when a zero bit leaves history. Initial zero bits can therefore
+be counted as losses after reset. This module does not implement latent error
+detection, MRA, the management tables, or amendment requirements beyond that
+correction and does not claim
+full IEEE 802.1CB conformance. See ``showcases/tsn/framereplication/vectorrecovery``
+for an example and the ``VectorSequenceRecovery`` C++ class for reuse of the
+packet-independent algorithm by other modules.
+
 .. _ug:sec:tsn:framepreemption:
 
 Frame Preemption
