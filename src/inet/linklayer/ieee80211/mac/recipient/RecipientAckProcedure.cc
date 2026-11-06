@@ -5,6 +5,7 @@
 //
 
 
+#include "inet/linklayer/ieee80211/mac/Ieee80211Duration.h"
 #include "inet/linklayer/ieee80211/mac/recipient/RecipientAckProcedure.h"
 
 namespace inet {
@@ -18,6 +19,7 @@ void RecipientAckProcedure::processReceivedFrame(Packet *packet, const Ptr<const
     if (ackPolicy->isAckNeeded(dataOrMgmtHeader)) {
         auto ackFrame = buildAck(dataOrMgmtHeader);
         auto duration = ackPolicy->computeAckDurationField(packet, dataOrMgmtHeader);
+        duration = normalizeIeee80211Duration(duration);
         ackFrame->setDurationField(duration);
         auto ackPacket = new Packet("WlanAck", ackFrame);
         EV_DEBUG << "Duration for " << ackFrame->getName() << " is set to " << duration << " s.\n";
