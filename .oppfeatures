@@ -1761,10 +1761,10 @@
                        data link layer and network layer communications, and more.
                        This is the VulkanSceneGraph-based counterpart to the OpenSceneGraph
                        (VisualizationOsg) 3D visualizer; it requires OMNeT++ built with VSG
-                       support (WITH_VSG=yes). Since OMNeT++'s c3DSceneNode became
-                       backend-neutral, VisualizationOsg and VisualizationVsg may be enabled
-                       together (in an OMNeT++ built with both WITH_OSG and WITH_VSG); each
-                       scene renders on the backend its visualizer creates."
+                       support (WITH_VSG=yes). OMNeT++ keeps one canvas
+                       per 3D backend (cOsgCanvas, cVsgCanvas), so VisualizationOsg and
+                       VisualizationVsg may be enabled together (in an OMNeT++ built with
+                       both WITH_OSG and WITH_VSG)."
         initiallyEnabled = "false"
         requires = "PhysicalEnvironment VisualizationCommon"
         recommended = ""

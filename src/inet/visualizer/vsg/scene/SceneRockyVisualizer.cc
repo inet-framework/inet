@@ -20,6 +20,7 @@
 #include <rocky/SRS.h>
 #include <rocky/TMSElevationLayer.h>
 #include <rocky/TMSImageLayer.h>
+#include <rocky/vsg/ViewDependentState.h>
 
 #ifndef ROCKY_RESOURCE_PATH
 #define ROCKY_RESOURCE_PATH ""   // set by src/makefrag to the Rocky install's share/rocky
@@ -27,7 +28,7 @@
 
 #include "inet/common/InitStages.h"
 #include "inet/visualizer/vsg/util/VsgScene.h"
-#include <omnetpp/cvsgscenenode.h>   // omnetpp::cVsgSceneNode (the render hook)
+#include <omnetpp/cvsgcanvas.h>
 
 namespace inet {
 
@@ -37,7 +38,7 @@ Define_Module(SceneRockyVisualizer);
 
 SceneRockyVisualizer::~SceneRockyVisualizer()
 {
-    // The cVsgSceneNode (owned by the parent module, which outlives this submodule) still holds
+    // The cVsgCanvas (owned by the parent module, which outlives this submodule) still holds
     // callbacks that capture `this`; flip the shared flag so they stop touching freed memory.
     if (alive)
         *alive = false;
@@ -62,27 +63,25 @@ void SceneRockyVisualizer::initialize(int stage)
             setenv("ROCKY_FILE_PATH", ROCKY_RESOURCE_PATH, 0);
         // A map fills the ground but not the sky; give the empty area above the horizon a sky
         // colour instead of the default backdrop so the map doesn't look cut off at the horizon.
-        visualizationTargetModule->getOsgCanvas()->setClearColor(cFigure::Color(135, 206, 235));
+        auto canvas = visualizationTargetModule->getVsgCanvas();
+        canvas->setClearColor(cFigure::Color(135, 206, 235));
         // A map is best seen from above: start the camera looking straight down. Wheel zoom only
         // changes distance (not tilt), so the view stays top-down — you always look at the global
         // map instead of across it at the horizon, which avoids the map appearing to clip away.
-        visualizationTargetModule->getOsgCanvas()->setCameraManipulatorType(cOsgCanvas::CAM_OVERVIEW);
+        canvas->setCameraManipulatorType(cVsgCanvas::CAM_OVERVIEW);
     }
     else if (stage == INITSTAGE_LAST) {
         // Attach to the backend's render hook: build the map when the viewer becomes available
         // (and rebuild if it is recreated, e.g. on resize), and pump Rocky's per-frame update().
-        auto sceneNode = visualizationTargetModule->getOsgCanvas()->getSceneNode();
-        if (sceneNode == nullptr)
-            throw cRuntimeError("SceneRockyVisualizer: no 3D scene on the canvas (is the VSG 3D backend active?)");
-        if (sceneNode->getBackendType() == omnetpp::c3DSceneNode::BACKEND_VSG) {
-            auto vsgSceneNode = static_cast<omnetpp::cVsgSceneNode *>(sceneNode);
-            // capture the shared 'alive' flag so the callbacks no-op after this module is destroyed
-            auto flag = alive;
-            vsgSceneNode->onViewerChanged = [this, flag](vsg::ref_ptr<vsg::Viewer> viewer) { if (*flag) setupRockyMap(viewer); };
-            vsgSceneNode->perFrameCallbacks.push_back([this, flag]() { if (*flag && context != nullptr) context->update(); });
-        }
-        else
-            throw cRuntimeError("SceneRockyVisualizer requires the VSG 3D backend");
+        auto canvas = visualizationTargetModule->getVsgCanvas();
+        // Rocky's shaders read their per-view uniforms through its own ViewDependentState.
+        canvas->setOnViewCreated([](::vsg::View *view) {
+            view->viewDependentState = rocky::ViewDependentStateEx::create(::vsg::ref_ptr<::vsg::View>(view));
+        });
+        // capture the shared 'alive' flag so the callbacks no-op after this module is destroyed
+        auto flag = alive;
+        canvas->setOnViewerChanged([this, flag](::vsg::Viewer *viewer) { if (*flag) setupRockyMap(::vsg::ref_ptr<::vsg::Viewer>(viewer)); });
+        canvas->addPerFrameCallback([this, flag]() { if (*flag && context != nullptr) context->update(); });
     }
 }
 

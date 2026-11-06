@@ -60,7 +60,7 @@ class INET_API SimulationScene : public Inherit<Group, SimulationScene>
 
 /**
  * This class is used for the topmost node in the VSG node hierarchy. The scene
- * root held by the cOsgCanvas (wrapped in an omnetpp::c3DSceneNode) is a
+ * root held by the module's cVsgCanvas is a
  * TopLevelScene instance.
  */
 class INET_API TopLevelScene : public Inherit<Group, TopLevelScene>

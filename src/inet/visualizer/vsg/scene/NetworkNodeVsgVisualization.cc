@@ -11,6 +11,8 @@
 
 #include <algorithm>
 
+#include <omnetpp/vsgutil.h>
+
 #include "inet/visualizer/vsg/util/VsgUtils.h"
 
 namespace inet {
@@ -42,7 +44,7 @@ NetworkNodeVsgVisualization::NetworkNodeVsgVisualization(cModule *networkNode, b
         iconBillboard->refDistance = inet::vsg::LABEL_AUTOSCALE_REF_DISTANCE;
         iconBillboard->subgraphRequiresLocalFrustum = false;
         iconBillboard->screenOffset = ::vsg::dvec3(0, iconSize / 2, 0);  // icon bottom sits at the node base
-        iconBillboard->setValue("omnetpp.object", (int64_t)(intptr_t)(cObject *)networkNode); // selectable
+        omnetpp::setVsgObjectTag(iconBillboard, networkNode); // selectable
         iconBillboard->addChild(inet::vsg::createTexturedQuad(iconImage, iconSize));
         group->addChild(iconBillboard);
         size = ::vsg::dvec3(iconSize, 0, iconSize);
@@ -53,7 +55,7 @@ NetworkNodeVsgVisualization::NetworkNodeVsgVisualization(cModule *networkNode, b
         cFigure::Color color("#4080C0");
         // sit the marker ON the ground (bottom at z=0) rather than centered on the ground plane
         auto box = inet::vsg::createBox(Coord(0, 0, markerSize / 2), Coord(markerSize, markerSize, markerSize), color);
-        box->setValue("omnetpp.object", (int64_t)(intptr_t)(cObject *)networkNode); // selectable: click -> select module
+        omnetpp::setVsgObjectTag(box, networkNode); // selectable: click -> select module
         group->addChild(box);
         size = ::vsg::dvec3(markerSize, 0, markerSize);
         labelPivot = ::vsg::dvec3(0, 0, markerSize + 2);  // labels anchor at the box top (world)
