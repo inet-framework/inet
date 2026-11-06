@@ -125,15 +125,15 @@ The approval covers draft 1 of this plan, the commits C0 to C6, and the sealed f
 
 ## 9. Results
 
-Status: done on the local branch `topic/packet-keep-chunk-flags`, not merged and not pushed. The branch `topic/physicallayer-content-errors` stands on it.
+Status: landed on the local `master` by a fast-forward on 2026-11-06, on top of `c286cbdb39`, and not pushed. The branch `topic/physicallayer-content-errors` stands on the commits before the rebase, which hold the same changes.
 
 | Commit | Subject |
 | --- | --- |
-| `e9bacebd5d` | `plan: add: keep chunk flags in parts, conversions, and merges` |
-| `74b55c09ec` | `packet: fix: keep the flags in a part of a raw chunk` |
-| `ab28986659` | `packet: fix: keep the flags of the converted range` |
-| `17f37347fd` | `packet: fix: do not merge chunks with different flags` |
-| `b6346a50fd` | `packet: fix: give the flags of a slice or a sequence to its parts` |
+| `3c4b31aa23` | `plan: add: keep chunk flags in parts, conversions, and merges` |
+| `84c76ff386` | `packet: fix: keep the flags in a part of a raw chunk` |
+| `283e1a4326` | `packet: fix: keep the flags of the converted range` |
+| `cc1a42150b` | `packet: fix: do not merge chunks with different flags` |
+| `9716c2eb6e` | `packet: fix: give the flags of a slice or a sequence to its parts` |
 
 Executed checks, all in debug mode, with `omnetpp-6.x` and the commands of section 7:
 
@@ -144,5 +144,7 @@ Executed checks, all in debug mode, with `omnetpp-6.x` and the commands of secti
 - Fingerprint suite on C4: 1767 PASS. `examples/ipv6/mipv6 -c Handover` fails with the same values on the base. The 22 errors are configurations that need disabled features (lwIP, VoIP streams, Z3) and one Ethernet setup.
 - Each commit builds alone in a detached worktree.
 - The re-audit of the changed sealed files is `audit/subsystem/common-packet-chunk-flags.md`: the architecture and naming gates give the same output as on master. The series gates pass.
+
+The branch was rebased onto `c286cbdb39` before the landing; the 6 new commits of master change IPv6, ICMPv6, queueing, and the build. On the rebased tree, the packet test passes, the unit suite gives 148 PASS, the module suite 826 PASS, the protocol suite the same 67 unexpected failures as before, test by test, and the fingerprint suite 1767 PASS with the same failure of `examples/ipv6/mipv6 -c Handover`. The series gates pass.
 
 Gaps: `check-cpp.sh` and the release build did not run. `check-source-seals.sh` reports the sealed files, as it must; a pull request needs the protected approval of SR-PR-APPROVAL.
