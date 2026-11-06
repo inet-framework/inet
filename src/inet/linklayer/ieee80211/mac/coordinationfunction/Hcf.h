@@ -39,6 +39,7 @@
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
+#include "inet/linklayer/ieee80211/mac/contract/AmpduReception.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -182,7 +183,10 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     bool isProfileAllowed(MacAddress peer, bool originator) const;
 
     // Recipient
-    virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool interframe = false);
+    virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool interframe = false,
+            const BlockAckReceiveContext *context = nullptr);
+    void sendImplicitBlockAck(Packet *envelope, const Ptr<const Ieee80211DataHeader>& header,
+            RecipientBlockAckAgreement *agreement);
     virtual void recipientProcessReceivedControlFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
     virtual void recipientProcessReceivedManagementFrame(const Ptr<const Ieee80211MgmtHeader>& header);
     virtual void recipientProcessTransmittedControlResponseFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header);
@@ -232,6 +236,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     // ICoordinationFunction
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header) override;
     virtual void processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
+    virtual void processLowerAggregate(Packet *packet, AmpduReception reception);
     virtual void corruptedFrameReceived() override;
 };
 

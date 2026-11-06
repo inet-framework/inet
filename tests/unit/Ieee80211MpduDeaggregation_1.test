@@ -5,6 +5,7 @@ Cover lengths, alignment, truncation, final padding, and delimiter error flags.
 %includes:
 #include <tuple>
 #include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/MpduDeaggregation.h"
 
 using namespace inet;
@@ -96,6 +97,65 @@ bool refusedEncoding = false;
 try { overflow.peekAllAsBytes(); }
 catch (const cRuntimeError&) { refusedEncoding = true; }
 ASSERT(refusedEncoding);
+Packet recovery("recovery", makeShared<BytesChunk>(std::vector<uint8_t>{0, 0, 0, 0}));
+appendMember(recovery, 20);
+auto recovered = inspect(&recovery, B(0), B(recovery.getDataLength()));
+ASSERT(!recovered.first && recovered.second.size() == 3);
+ASSERT(!std::get<3>(recovered.second[0]) && std::get<1>(recovered.second[1]) == B(4));
+for (int prefixLength : {0, 6}) {
+    Packet typed("typed-recovery");
+    if (prefixLength)
+        typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(prefixLength, 0)));
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(2000);
+    typed.insertAtBack(delimiter);
+    auto member = makeShared<Ieee80211DataHeader>();
+    member->setSequenceNumber(SequenceNumberCyclic(0));
+    typed.insertAtBack(member);
+    typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(100 - member->getChunkLength().get<B>(), 0)));
+    appendMember(typed, 20);
+    auto bytes = typed.peekAllAsBytes()->getBytes();
+    Packet independent("byte-recovery", makeShared<BytesChunk>(bytes));
+    auto typedResult = inspect(&typed, B(prefixLength), B(128));
+    auto byteResult = inspect(&independent, B(prefixLength), B(128));
+    ASSERT(!typedResult.first && typedResult == byteResult);
+    const auto& last = typedResult.second.back();
+    ASSERT(!std::get<0>(last) && std::get<3>(last) && std::get<1>(last) == B(108) && std::get<2>(last) == B(20));
+}
+ASSERT(!std::get<0>(incorrectResult.second.back()) && std::get<3>(incorrectResult.second.back()));
+Packet originalRaw("original-raw");
+appendMember(originalRaw, 20);
+appendMember(originalRaw, 20);
+auto rawBytes = originalRaw.peekAllAsBytes()->getBytes();
+auto failedBytes = makeShared<BytesChunk>(rawBytes);
+failedBytes->markIncorrect();
+Packet failedRaw("failed-raw", failedBytes);
+for (int front : {0, 4}) {
+    failedRaw.setFrontOffset(B(front));
+    auto result = inspect(&failedRaw, B(0), B(failedRaw.getDataLength()));
+    ASSERT(!result.first);
+    for (const auto& entry : result.second)
+        ASSERT(std::get<0>(entry) && !std::get<3>(entry));
+}
+Packet mixed("mixed", failedBytes);
+appendMember(mixed, 20);
+auto mixedResult = inspect(&mixed, B(0), B(mixed.getDataLength()));
+ASSERT(!mixedResult.first);
+ASSERT(!std::get<0>(mixedResult.second.back()) && std::get<1>(mixedResult.second.back()) == B(52));
+auto badRegion = makeShared<BytesChunk>(std::vector<uint8_t>(rawBytes.begin() + 4, rawBytes.begin() + 28));
+badRegion->markIncorrect();
+auto regions = makeShared<SequenceChunk>();
+regions->setChunks({makeShared<BytesChunk>(std::vector<uint8_t>(rawBytes.begin(), rawBytes.begin() + 4)),
+        badRegion, makeShared<BytesChunk>(std::vector<uint8_t>(rawBytes.begin() + 28, rawBytes.end()))});
+Packet crossing("crossing", regions);
+int failedMembers = 0;
+bool complete = MpduDeaggregation::visitSubframes(&crossing, B(0), B(48),
+        [](const auto&, B, bool) {},
+        [&](const auto& mpdu, B offset) {
+            ASSERT(offset == B(4) && mpdu->isIncorrect());
+            failedMembers++;
+        });
+ASSERT(!complete && failedMembers == 1);
 EV << "MPDU traversal checks passed\n";
 
 %contains: stdout
