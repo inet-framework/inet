@@ -15,7 +15,7 @@
 #include "inet/visualizer/vsg/util/VsgScene.h"
 #include "inet/visualizer/vsg/util/VsgUtils.h"
 
-#include <omnetpp/cvsgscenenode.h>   // omnetpp::create3DSceneNode
+#include <omnetpp/cvsgcanvas.h>
 
 namespace inet {
 
@@ -23,33 +23,34 @@ namespace visualizer {
 
 void SceneVsgVisualizerBase::initializeScene()
 {
-    auto osgCanvas = visualizationTargetModule->getOsgCanvas();
-    if (osgCanvas->getSceneNode() != nullptr)
+    auto canvas = visualizationTargetModule->getVsgCanvas();
+    if (canvas->getScene() != nullptr)
         throw cRuntimeError("3D canvas scene at '%s' has been already initialized", visualizationTargetModule->getFullPath().c_str());
     else {
         auto topLevelScene = inet::vsg::TopLevelScene::create();
-        osgCanvas->setSceneNode(omnetpp::create3DSceneNode(topLevelScene));
+        topLevelSceneHolder = topLevelScene;
+        canvas->setScene(topLevelScene);
         const char *clearColor = par("clearColor");
         if (*clearColor != '\0')
-            osgCanvas->setClearColor(cFigure::Color(clearColor));
-        osgCanvas->setZNear(par("zNear"));
-        osgCanvas->setZFar(par("zFar"));
-        osgCanvas->setFieldOfViewAngle(par("fieldOfView"));
+            canvas->setClearColor(cFigure::Color(clearColor));
+        canvas->setZNear(par("zNear"));
+        canvas->setZFar(par("zFar"));
+        canvas->setFieldOfViewAngle(par("fieldOfView"));
         const char *cameraManipulatorString = par("cameraManipulator");
-        cOsgCanvas::CameraManipulatorType cameraManipulator;
+        cVsgCanvas::CameraManipulatorType cameraManipulator;
         if (!strcmp(cameraManipulatorString, "auto"))
-            cameraManipulator = cOsgCanvas::CAM_AUTO;
+            cameraManipulator = cVsgCanvas::CAM_AUTO;
         else if (!strcmp(cameraManipulatorString, "trackball"))
-            cameraManipulator = cOsgCanvas::CAM_TRACKBALL;
+            cameraManipulator = cVsgCanvas::CAM_TRACKBALL;
         else if (!strcmp(cameraManipulatorString, "terrain"))
-            cameraManipulator = cOsgCanvas::CAM_TERRAIN;
+            cameraManipulator = cVsgCanvas::CAM_TERRAIN;
         else if (!strcmp(cameraManipulatorString, "overview"))
-            cameraManipulator = cOsgCanvas::CAM_OVERVIEW;
+            cameraManipulator = cVsgCanvas::CAM_OVERVIEW;
         else if (!strcmp(cameraManipulatorString, "earth"))
-            cameraManipulator = cOsgCanvas::CAM_EARTH;
+            cameraManipulator = cVsgCanvas::CAM_EARTH;
         else
             throw cRuntimeError("Unknown camera manipulator: '%s'", cameraManipulatorString);
-        osgCanvas->setCameraManipulatorType(cameraManipulator);
+        canvas->setCameraManipulatorType(cameraManipulator);
     }
 }
 

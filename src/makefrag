@@ -91,6 +91,8 @@ ifeq ($(WITH_VISUALIZATIONVSG), enabled)
   ifeq ($(WITH_VSG), yes)
     CFLAGS += $(VSG_CFLAGS)
     OMNETPP_LIBS += $(VSG_LIBS)
+    # VsgUtils.cc loads models through vsgXchange, which OMNeT++'s VSG_LIBS does not link
+    OMNETPP_LIBS += -lvsgXchange
     ifeq ($(HAVE_ROCKY), yes)
       $(info Rocky found under $(ROCKY_ROOT) -- building RockyGround and SceneRockyVisualizer)
       # -DWITH_ROCKY here (rather than via the generated opp_defines.h) keeps the macro and the

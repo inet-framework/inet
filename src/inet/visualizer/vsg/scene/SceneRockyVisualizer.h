@@ -32,7 +32,7 @@ namespace visualizer {
  * VSG successor to osgEarth). Unlike the OSG plugin, which pages terrain from the
  * OSG viewer's own frame loop, Rocky needs the live vsg::Viewer (to build a
  * VSGContext) and an explicit per-frame update() to page/compile tiles; both are
- * obtained through the cVsgSceneNode render hook the backend publishes. Rocky's
+ * obtained through the cVsgCanvas render hooks. Rocky's
  * geocentric (ECEF) map is transformed into the scene's local ENU frame, anchored
  * at the geographic origin of an IGeographicCoordinateSystem, so it sits under the
  * network nodes. See SceneRockyVisualizer.ned.
@@ -46,7 +46,7 @@ class INET_API SceneRockyVisualizer : public SceneVsgVisualizer
     rocky::VSGContext context = nullptr;
     vsg::ref_ptr<rocky::MapNode> mapNode;
     vsg::ref_ptr<vsg::MatrixTransform> mapTransform; // ECEF->ENU wrapper currently in the scene
-    // The callbacks registered on the (parent-owned, longer-lived) cVsgSceneNode capture `this`;
+    // The callbacks registered on the (parent-owned, longer-lived) cVsgCanvas capture `this`;
     // this shared flag lets them no-op after the visualizer is destroyed instead of using freed
     // memory (submodules are destroyed before their parent, so the scene node outlives us).
     std::shared_ptr<bool> alive;

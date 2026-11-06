@@ -9,6 +9,8 @@
 
 #include <algorithm>
 
+#include <omnetpp/vsgutil.h>
+
 #include "inet/common/ModuleAccess.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/visualizer/vsg/util/VsgScene.h"
@@ -60,7 +62,7 @@ RadioVisualizerBase::RadioVisualization *RadioVsgVisualizer::createRadioVisualiz
     }
 
     // Picking tag so clicking the marker identifies the radio module.
-    group->setValue("omnetpp.object", (int64_t)(intptr_t)(cObject *)module);
+    omnetpp::setVsgObjectTag(group, module);
 
     return new RadioVsgVisualization(group, module->getId());
 }

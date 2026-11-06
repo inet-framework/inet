@@ -11,7 +11,7 @@
 #include "inet/visualizer/vsg/util/VsgScene.h"
 #include "inet/visualizer/vsg/util/VsgUtils.h"
 
-#include <omnetpp/cvsgscenenode.h>   // omnetpp::getVsgRoot
+#include <omnetpp/cvsgcanvas.h>
 
 namespace inet {
 
@@ -38,8 +38,7 @@ void SceneVsgVisualizer::initialize(int stage)
 void SceneVsgVisualizer::initializeScene()
 {
     SceneVsgVisualizerBase::initializeScene();
-    auto sceneNode = visualizationTargetModule->getOsgCanvas()->getSceneNode();
-    auto topLevelScene = dynamic_cast<inet::vsg::TopLevelScene *>(omnetpp::getVsgRoot(sceneNode).get());
+    auto topLevelScene = dynamic_cast<inet::vsg::TopLevelScene *>(visualizationTargetModule->getVsgCanvas()->getScene());
     if (topLevelScene == nullptr)
         throw cRuntimeError("Cannot find the VSG top level scene");
     topLevelScene->addChild(inet::vsg::SimulationScene::create());
@@ -51,10 +50,10 @@ void SceneVsgVisualizer::initializeViewpoint()
     auto center = boundingSphere.first;
     auto radius = boundingSphere.second;
     double cameraDistanceFactor = par("cameraDistanceFactor");
-    auto eye = cOsgCanvas::Vec3d(center.x + cameraDistanceFactor * radius, center.y + cameraDistanceFactor * radius, center.z + cameraDistanceFactor * radius);
-    auto viewpointCenter = cOsgCanvas::Vec3d(center.x, center.y, center.z);
-    auto osgCanvas = visualizationTargetModule->getOsgCanvas();
-    osgCanvas->setGenericViewpoint(cOsgCanvas::Viewpoint(eye, viewpointCenter, cOsgCanvas::Vec3d(0, 0, 1)));
+    auto eye = cVsgCanvas::Vec3d(center.x + cameraDistanceFactor * radius, center.y + cameraDistanceFactor * radius, center.z + cameraDistanceFactor * radius);
+    auto viewpointCenter = cVsgCanvas::Vec3d(center.x, center.y, center.z);
+    auto canvas = visualizationTargetModule->getVsgCanvas();
+    canvas->setGenericViewpoint(cVsgCanvas::Viewpoint(eye, viewpointCenter, cVsgCanvas::Vec3d(0, 0, 1)));
 }
 
 } // namespace visualizer

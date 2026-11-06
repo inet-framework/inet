@@ -7,7 +7,7 @@
 
 #include "inet/visualizer/vsg/util/VsgScene.h"
 
-#include <omnetpp/cvsgscenenode.h>   // omnetpp::c3DSceneNode / create3DSceneNode
+#include <omnetpp/cvsgcanvas.h>
 
 namespace inet {
 
@@ -27,12 +27,8 @@ SimulationScene *TopLevelScene::getSimulationScene()
 
 SimulationScene *TopLevelScene::getSimulationScene(cModule *module)
 {
-    auto osgCanvas = module->getOsgCanvas();
-    // Under WITH_VSG the cOsgCanvas scene is an opaque omnetpp::c3DSceneNode that
-    // wraps the VSG scene-root group; recover our TopLevelScene from its root.
-    auto sceneNode = osgCanvas->getSceneNode();
-    ::vsg::ref_ptr<Group> root = omnetpp::getVsgRoot(sceneNode);   // null / wrong-backend safe
-    auto topLevelScene = root ? dynamic_cast<TopLevelScene *>(root.get()) : nullptr;
+    auto canvas = module->getVsgCanvas();
+    auto topLevelScene = dynamic_cast<TopLevelScene *>(canvas->getScene());
     if (topLevelScene != nullptr)
         return topLevelScene->getSimulationScene();
     else {
@@ -40,11 +36,11 @@ SimulationScene *TopLevelScene::getSimulationScene(cModule *module)
         auto newTopLevelScene = TopLevelScene::create();
         newTopLevelScene->addChild(simulationScene);
         // NOTE: these are the default values when there's no SceneVsgVisualizer
-        osgCanvas->setSceneNode(omnetpp::create3DSceneNode(newTopLevelScene));
-        osgCanvas->setClearColor(cFigure::Color("#FFFFFF"));
-        osgCanvas->setZNear(0.1);
-        osgCanvas->setZFar(100000);
-        osgCanvas->setCameraManipulatorType(cOsgCanvas::CAM_TERRAIN);
+        canvas->setScene(newTopLevelScene);
+        canvas->setClearColor(cFigure::Color("#FFFFFF"));
+        canvas->setZNear(0.1);
+        canvas->setZFar(100000);
+        canvas->setCameraManipulatorType(cVsgCanvas::CAM_TERRAIN);
         return simulationScene;
     }
 }
