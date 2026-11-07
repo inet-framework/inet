@@ -1,0 +1,243 @@
+%description:
+Tests that the mobile node accepts one Home Test per return routability
+exchange, so the correspondent node receives one Binding Update.
+
+The network is a copy of tests/module/lib/Mipv6Network.ned in which the link
+between the home agent and R_2 has a 0.3 s delay instead of 0.1 us. A Home
+Test Init and its Home Test cross that link four times, so the Home Test
+arrives about 1.2 s after the Home Test Init, later than the 1 s
+retransmission interval. The mobile node therefore retransmits the Home Test
+Init, and two Home Tests arrive for one exchange. The retransmission carries a
+new cookie (RFC 6275 Section 11.8), so the answer to the first transmission
+does not match the cookie in the Binding Update List and is ignored (RFC 6275
+Section 11.6.2).
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.ipv6.Router6;
+import inet.node.wireless.AccessPoint;
+import inet.node.mipv6.CorrespondentNode6;
+import inet.node.mipv6.HomeAgent6;
+import inet.node.mipv6.WirelessHost6;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+
+
+channel fiberline extends ned.DatarateChannel
+{
+    parameters:
+        delay = 1us;
+        datarate = 512Mbps;
+}
+
+channel slowline extends ned.DatarateChannel
+{
+    parameters:
+        delay = 0.3s;
+        datarate = 100Mbps;
+}
+
+channel ethernetline extends ned.DatarateChannel
+{
+    parameters:
+        delay = 0.1us;
+        datarate = 100Mbps;
+}
+
+network Mipv6SlowHomePathNetwork
+{
+    parameters:
+        int total_mn;
+        int total_cn;
+        **.mgmt.numChannels = 5;
+
+        @display("bgb=799,698");
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator {
+            parameters:
+                @display("p=100,100;is=s");
+        }
+        ipv6Configurator: Ipv6NetworkConfigurator {
+            parameters:
+                @display("p=100,150;is=s");
+        }
+        radioMedium: Ieee80211ScalarRadioMedium {
+            parameters:
+                @display("p=100,200;is=s");
+        }
+        Home_Agent: HomeAgent6 {
+            parameters:
+                @display("p=249,229;i=abstract/router");
+        }
+        R_1: Router6 {
+            parameters:
+                @display("p=566,227");
+        }
+        R_2: Router6 {
+            parameters:
+                @display("p=406,355");
+        }
+        MN[total_mn]: WirelessHost6 {
+            parameters:
+                @display("p=220,404");
+        }
+        CN[total_cn]: CorrespondentNode6 {
+            @display("p=405,595,r,50");
+        }
+        AP_Home: AccessPoint {
+            parameters:
+                @display("p=249,172;i=device/accesspoint_s");
+        }
+        AP_1: AccessPoint {
+            parameters:
+                @display("p=566,172;i=device/accesspoint_s");
+        }
+        switch: EthernetSwitch {
+            parameters:
+                @display("p=405,467;i=device/hub_s");
+        }
+
+    connections allowunconnected:
+        R_1.ethg++ <--> ethernetline <--> R_2.ethg++;
+
+        Home_Agent.ethg++ <--> slowline <--> R_2.ethg++;
+
+        for i=0..total_cn-1 {
+            CN[i].ethg++ <--> ethernetline <--> switch.ethg++;
+        }
+
+        switch.ethg++ <--> ethernetline <--> R_2.ethg++;
+
+        AP_Home.ethg++ <--> ethernetline <--> Home_Agent.ethg++;
+
+        AP_1.ethg++ <--> ethernetline <--> R_1.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+**.mipv6.cmdenv-log-level = trace
+**.app[*].cmdenv-log-level = trace
+**.cmdenv-log-level = off
+cmdenv-event-banners = false
+ned-path = .;../../../../src
+network = Mipv6SlowHomePathNetwork
+sim-time-limit = 90s
+cpu-time-limit = 120s
+seed-set = 1
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+num-rngs = 3
+**.mobility.rng-0 = 2
+
+# number of MNs and CNs
+*.total_mn = 1
+*.total_cn = 1
+
+**.neighbourDiscovery.minIntervalBetweenRAs = 3s
+**.neighbourDiscovery.maxIntervalBetweenRAs = 7s
+**.neighbourDiscovery.detectL2Movement = false   # legacy: detect movement from periodic RAs only
+
+# channel physical parameters
+*.radioMedium.mediumLimitCache.maxTransmissionPower = 2.0mW
+*.radioMedium.mediumLimitCache.minReceptionPower = -82dBm
+*.radioMedium.mediumLimitCache.minInterferencePower = -82dBm
+
+# access point
+**.wlan*.mgmt.numAuthSteps = 4
+
+# ALL APs common parameters
+**.AP*.wlan*.mgmt.beaconInterval = 0.1s
+
+# Access Point parameters
+**.AP_Home.wlan*.mgmt.ssid = "HOME"
+**.AP_Home.wlan*.address = "10:AA:00:00:00:01"
+**.AP_Home.eth[0].address = "10:AE:00:00:00:02"
+**.AP_Home.eth[0].duplexMode = true
+
+**.AP_1.wlan*.mgmt.ssid = "AP1"
+**.AP_1.wlan*.address = "10:AA:00:00:A1:01"
+**.AP_1.eth[0].address = "10:AE:00:00:A1:02"
+**.AP_1.eth[0].duplexMode = true
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+
+**.MN[0].mobility.typename = "RectangleMobility"
+**.MN[0].mobility.constraintAreaMinX = 180m
+**.MN[0].mobility.constraintAreaMinY = 170m
+**.MN[0].mobility.constraintAreaMaxX = 630m
+**.MN[0].mobility.constraintAreaMaxY = 180m
+**.MN[0].mobility.startPos = 0
+**.MN[0].mobility.speed = 5mps
+**.MN*.mobility.updateInterval = 0.1s
+
+**.MN*.numApps = 0
+**.CN*.numApps = 1
+**.CN*.app[*].typename = "PingApp"
+**.CN[0].app[0].destAddr = "aaaa:0:66:0:8aa:ff:fe00:8"
+**.CN*.app[0].packetSize = 56B
+**.CN*.app[*].sendInterval = 2s
+**.CN*.app[0].hopLimit = 32
+**.CN[0].app[0].count = 3
+**.CN[0].app[0].startTime = 71s
+**.CN*.app[0].printPing = true
+
+# ip settings
+**.forwarding = false
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+**.eth*.duplexMode = true
+
+# analog model
+**.analogModel.ignorePartialInterference = true
+
+# wireless channels
+**.AP_Home.wlan*.radio.channelNumber = 1
+**.AP_1.wlan*.radio.channelNumber = 2
+**.MN*.wlan*.radio.channelNumber = 0
+
+# wireless configuration
+**.wlan*.agent.activeScan = true
+**.wlan*.agent.defaultSsid = ""
+**.wlan*.agent.channelsToScan = "1 2"
+**.wlan*.agent.probeDelay = 0.1s
+**.wlan*.agent.minChannelTime = 0.15s
+**.wlan*.agent.maxChannelTime = 0.3s
+**.wlan*.agent.authenticationTimeout = 5s
+**.wlan*.agent.associationTimeout = 5s
+
+# nic settings
+**.wlan*.bitrate = 2Mbps
+**.wlan*.mac.dcf.channelAccess.cwMin = 7
+**.radio.transmitter.power = 2.0mW
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMaxX = 850m
+**.constraintAreaMaxY = 850m
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%subst: /^\([^)]*\)//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Mipv6SlowHomePathNetwork.MN[0].ipv6.mipv6: Message recognised as HOME TEST (HoT)
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Mipv6SlowHomePathNetwork.MN[0].ipv6.mipv6: Invalid HoT: Cookie value different from the stored one.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: echo "binding updates at CN: $(grep -c "CN\[0\].ipv6.mipv6: Message recognised as BINDING UPDATE (BU)" test.out)." > cn_binding_updates.out
+%contains: cn_binding_updates.out
+binding updates at CN: 1.
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
