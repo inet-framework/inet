@@ -128,6 +128,11 @@ void GateScheduleConfiguratorBase::addPorts(Input& input) const
             auto linkOut = findLinkOut(node, networkInterface->getNodeOutputGateId());
             if (linkOut != nullptr) {
                 auto remoteNode = check_and_cast<Node *>(linkOut->getLinkOutRemoteNode());
+                // the interface at the other end is not in the interface table of the remote node, so the link has no other port
+                if (link == nullptr || link->destinationInterface == nullptr) {
+                    EV_WARN << "Skipping link without destination interface" << EV_FIELD(networkInterface) << EV_FIELD(remoteNode, remoteNode->module) << EV_ENDL;
+                    continue;
+                }
                 port->endNode = *std::find_if(input.networkNodes.begin(), input.networkNodes.end(), [&] (const auto& networkNode) {
                     return networkNode->module == remoteNode->module;
                 });
@@ -212,9 +217,12 @@ void GateScheduleConfiguratorBase::addFlows(Input& input) const
                                         auto endNodeName = pathFragment->get(m + 1).stdstringValue();
                                         auto index = endNodeName.find('.');
                                         endNodeName = index != std::string::npos ? endNodeName.substr(0, index) : endNodeName;
-                                        auto outputPort = *std::find_if(startNode->ports.begin(), startNode->ports.end(), [&] (const auto& port) {
-                                            return port->endNode->module->getFullName() == endNodeName && (interfaceName == "" || interfaceName == check_and_cast<NetworkInterface *>(port->module)->getInterfaceName());
+                                        auto outputPortIt = std::find_if(startNode->ports.begin(), startNode->ports.end(), [&] (const auto& port) {
+                                            return port->endNode != nullptr && port->endNode->module->getFullName() == endNodeName && (interfaceName == "" || interfaceName == check_and_cast<NetworkInterface *>(port->module)->getInterfaceName());
                                         });
+                                        if (outputPortIt == startNode->ports.end())
+                                            throw cRuntimeError("Cannot find an output port with a connected destination interface from node '%s' to node '%s' on the path of a flow", nodeName.c_str(), endNodeName.c_str());
+                                        auto outputPort = *outputPortIt;
                                         path->outputPorts.push_back(outputPort);
                                         path->inputPorts.push_back(outputPort->otherPort);
                                     }
