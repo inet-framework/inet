@@ -1,0 +1,76 @@
+%description:
+Tests the dielectric loss of DielectricObstacleLoss: one transmission crosses a
+single slab of concrete (resistivity 100 Ohm m, relative permittivity 4.5) that is
+0.2 m thick, at two frequencies. Reflection loss is switched off.
+
+The loss is a power factor. A plane wave in a lossy dielectric loses power as
+exp(-2 alpha z) with alpha = k sqrt((sqrt(1 + tan(delta)^2) - 1) / 2), where k is the
+wave number of the lossless material (c / sqrt(4.5) is the speed in the slab) and
+tan(delta) = 1 / (2 pi f rho eps_r eps_0). Expected values:
+
+  2.4 GHz: tan(delta) = 0.01664, k = 106.70 1/m, loss 1.542 dB
+  10 MHz:  tan(delta) = 3.994,   k = 0.4446 1/m, loss 0.964 dB
+
+The code before the repair used exp(-2 atan(tan(delta)) k z), which gives 3.085 dB
+at 2.4 GHz, twice the exponent of the power decay, and 1.024 dB at 10 MHz.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.environment.common.PhysicalEnvironment;
+import inet.physicallayer.wireless.common.medium.RadioMedium;
+import inet.test.unittest.lib.ObstacleLossTest;
+
+network ObstacleLossTestNetwork
+{
+    submodules:
+        physicalEnvironment: PhysicalEnvironment;
+        radioMedium: RadioMedium;
+        test: ObstacleLossTest;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%file: environment.xml
+<environment>
+    <object position="min 4.9 -5 -5" orientation="0 0 0" shape="cuboid 0.2 10 10" material="concrete"/>
+</environment>
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+network = ObstacleLossTestNetwork
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+cmdenv-event-banners = false
+cmdenv-log-prefix = "%l %C: "
+**.cmdenv-log-level = INFO
+
+*.physicalEnvironment.spaceMinX = -10m
+*.physicalEnvironment.spaceMinY = -10m
+*.physicalEnvironment.spaceMinZ = -10m
+*.physicalEnvironment.spaceMaxX = 20m
+*.physicalEnvironment.spaceMaxY = 10m
+*.physicalEnvironment.spaceMaxZ = 10m
+*.physicalEnvironment.config = xmldoc("environment.xml")
+*.radioMedium.backgroundNoise.power = -100dBm
+*.radioMedium.obstacleLoss.typename = "DielectricObstacleLoss"
+*.radioMedium.obstacleLoss.enableReflectionLoss = false
+
+*.test.frequencies = "2.4e9 1e7"
+*.test.txX = 0m
+*.test.txY = 0m
+*.test.txZ = 0m
+*.test.rxX = 10m
+*.test.rxY = 0m
+*.test.rxZ = 0m
+%#--------------------------------------------------------------------------------------------------------------
+%extraargs: -s
+%subst: /\n<!> No more events, simulation completed.*?\n//
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "obstacle loss at" test.out > filtered.out
+%#--------------------------------------------------------------------------------------------------------------
+%contains: filtered.out
+INFO (ObstacleLossTest)ObstacleLossTestNetwork.test: obstacle loss at 2.4e+09 Hz: 1.542 dB
+INFO (ObstacleLossTest)ObstacleLossTestNetwork.test: obstacle loss at 1e+07 Hz: 0.964 dB
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
