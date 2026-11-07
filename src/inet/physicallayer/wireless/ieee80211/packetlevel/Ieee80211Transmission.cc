@@ -7,6 +7,8 @@
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
 namespace inet {
 
 namespace physicallayer {
@@ -16,6 +18,27 @@ Ieee80211Transmission::Ieee80211Transmission(const IRadio *transmitter, const Pa
     mode(mode),
     channel(channel)
 {
+}
+
+b Ieee80211Transmission::getHeaderLength() const
+{
+    return mode->getHeaderMode()->getLength();
+}
+
+b Ieee80211Transmission::getDataLength() const
+{
+    auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(getPacket());
+    return b(mode->getDataMode()->getCompleteLength(B(phyHeader->getLengthField())));
+}
+
+const IModulation *Ieee80211Transmission::getHeaderModulation() const
+{
+    return mode->getHeaderMode()->getModulation();
+}
+
+const IModulation *Ieee80211Transmission::getDataModulation() const
+{
+    return mode->getDataMode()->getModulation();
 }
 
 std::ostream& Ieee80211Transmission::printToStream(std::ostream& stream, int level, int evFlags) const
