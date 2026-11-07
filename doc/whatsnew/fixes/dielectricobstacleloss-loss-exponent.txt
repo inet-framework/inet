@@ -1,0 +1,5 @@
+DielectricObstacleLoss computes the dielectric loss of a plane wave
+
+DielectricObstacleLoss attenuated the power of a signal that crosses an obstacle by twice as many dB as the power decay of a plane wave in a low-loss material: a 0.2 m concrete wall at 2.4 GHz took 3.085 dB instead of 1.542 dB. The loss is now exp(-2 alpha z) with the attenuation constant alpha = k sqrt((sqrt(1 + tan(delta)^2) - 1) / 2), which also holds for a large loss tangent. A material with resistivity 0 blocks the signal.
+
+For a loss tangent below 0.1, which is the case for the INET materials at microwave frequencies, the dielectric loss in dB is half of the former value. It is smaller than before up to a loss tangent of about 4.6 and larger above it. This changes the results and the fingerprints of simulations that use DielectricObstacleLoss with enableDielectricLoss on, as the examples obstacle and objectcache and the showcases wireless/ratecontrol, visualizer/canvas/ieee80211 and visualizer/canvas/spectrum do.
