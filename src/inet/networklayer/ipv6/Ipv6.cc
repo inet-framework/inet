@@ -531,7 +531,15 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
     // next hop is not directly reachable by the source and redirects cause a storm.
     if (sendRedirects && rt->isRouter() && !fromHL && fromIE && interfaceId == fromIE->getInterfaceId()) {
         Ipv6Address pktSrcAddr = ipv6Header->getSrcAddress();
-        if (nextHop != pktSrcAddr && !pktSrcAddr.isUnspecified() && !pktSrcAddr.isMulticast()) {
+        // The same section requires that "the Source Address field of the packet
+        // identifies a neighbor": a source reached through another router on this link
+        // cannot use a better first hop on it. On-link is decided as next-hop
+        // determination decides it (RFC 4861 Section 5.2): a link-local source, or a
+        // longest prefix match that gives an on-link route out of the arrival interface.
+        const Ipv6Route *srcRoute = pktSrcAddr.isLinkLocal() ? nullptr : rt->doLongestPrefixMatch(pktSrcAddr);
+        bool srcIsNeighbour = pktSrcAddr.isLinkLocal() ||
+                (srcRoute && srcRoute->getNextHop().isUnspecified() && srcRoute->getInterface() == fromIE);
+        if (nextHop != pktSrcAddr && !pktSrcAddr.isUnspecified() && !pktSrcAddr.isMulticast() && srcIsNeighbour) {
             NetworkInterface *outIe = ift->getInterfaceById(interfaceId);
             nd->sendRedirect(packet, nextHop, destAddress, outIe);
         }

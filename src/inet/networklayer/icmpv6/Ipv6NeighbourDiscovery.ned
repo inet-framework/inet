@@ -37,6 +37,8 @@ simple Ipv6NeighbourDiscovery extends SimpleModule
         double baseReachableTime @unit(s) = default(30s); // RFC 4861 Section 10: base value for computing random ReachableTime
         volatile double routerBootupTime @unit(s) = default(uniform(0s, 0.3s)); // random startup delay before a router assigns its link-local address; routers boot faster than hosts so that RAs are available by the time hosts solicit
         volatile double hostBootupTime @unit(s) = default(uniform(0.4s, 1s)); // random startup delay before a host assigns its link-local address
+        double redirectRate @unit(Hz) = default(10Hz); // RFC 4861 Section 8.2 requires a router to limit the rate of the Redirects it sends; this is the average rate N of the token bucket RFC 4443 Section 2.4 (f) recommends, whose example defaults are N=10/s and B=10
+        int redirectBurst = default(10); // the burst size B of that token bucket: the number of Redirects that may be sent back to back
         @display("i=block/network");
         @signal[startDad](type=long); // Emits value=1
         @signal[dadCompleted](type=long); // Emits value=1
