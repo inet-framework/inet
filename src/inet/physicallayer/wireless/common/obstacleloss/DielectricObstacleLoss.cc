@@ -53,12 +53,19 @@ std::ostream& DielectricObstacleLoss::printToStream(std::ostream& stream, int le
 double DielectricObstacleLoss::computeDielectricLoss(const IMaterial *material, Hz frequency, m distance) const
 {
     // NOTE: based on http://en.wikipedia.org/wiki/Dielectric_loss
-    double lossTangent = material->getDielectricLossTangent(frequency);
+    // The result is a power factor. The field amplitude of a plane wave decays as exp(-alpha z), so the power decays
+    // as exp(-2 alpha z), where alpha = k * sqrt((sqrt(1 + tan(delta)^2) - 1) / 2) and k is the wave number of the
+    // lossless material. For a small loss tangent alpha is k * tan(delta) / 2, which gives the exp(-k z tan(delta))
+    // of the cited page.
+    double t = material->getDielectricLossTangent(frequency);
     mps propagationSpeed = material->getPropagationSpeed();
-    double delta = atan(lossTangent);
     auto k = 2 * M_PI * frequency / propagationSpeed; // unit is 1/m
     m z = distance;
-    double factor = std::exp(-2 * delta * (k * z).get<unit>());
+    // for a small loss tangent sqrt(1 + t^2) - 1 is written as t^2 / (sqrt(1 + t^2) + 1) to keep the precision;
+    // the plain form for a large one also covers resistivity 0 (infinite loss tangent): the factor is 0
+    double rootMinusOne = t < 1 ? t * t / (std::sqrt(1 + t * t) + 1) : std::sqrt(1 + t * t) - 1;
+    double alphaZ = std::sqrt(rootMinusOne / 2) * (k * z).get<unit>();
+    double factor = std::exp(-2 * alphaZ);
     ASSERT(0 <= factor && factor <= 1);
     return factor;
 }
