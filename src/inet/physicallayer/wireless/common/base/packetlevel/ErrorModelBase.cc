@@ -141,7 +141,17 @@ Packet *ErrorModelBase::computeCorruptedPacket(const Packet *packet, double ber)
 Packet *ErrorModelBase::computeCorruptedPacket(const ISnir *snir) const
 {
     auto transmittedPacket = snir->getReception()->getTransmission()->getPacket();
-    auto ber = computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE);
+    double ber = NaN;
+    if (corruptionMode == CorruptionMode::CM_UNDEFINED)
+        throw cRuntimeError("Error model %s did not initialize its corruption mode, its initialize() must call ErrorModelBase::initialize()", getClassName());
+    if (corruptionMode != CorruptionMode::CM_PACKET) {
+        // chunk, byte and bit corruption flip parts of the packet with the bit error rate
+        ber = computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_WHOLE);
+        if (std::isnan(ber))
+            throw cRuntimeError("Error model %s cannot provide a bit error rate for corruptionMode = \"%s\"; use corruptionMode = \"packet\" or an error model that computes a bit error rate", getClassName(), par("corruptionMode").stringValue());
+        if (!(ber > 0.0))
+            throw cRuntimeError("Error model %s lost a packet but returned a bit error rate of %g, with which corruptionMode = \"%s\" cannot corrupt it", getClassName(), ber, par("corruptionMode").stringValue());
+    }
     auto receivedPacket = computeCorruptedPacket(transmittedPacket, ber);
     receivedPacket->clearTags();
     receivedPacket->addTag<PacketProtocolTag>()->setProtocol(transmittedPacket->getTag<PacketProtocolTag>()->getProtocol());
