@@ -51,8 +51,21 @@ Box SceneVisualizerBase::getSceneBounds()
     for (int id = 0; id <= getSimulation()->getLastComponentId(); id++) {
         auto mobility = dynamic_cast<IMobility *>(getSimulation()->getModule(id));
         if (mobility != nullptr) {
-            min = mobility->getConstraintAreaMin().min(min);
-            max = mobility->getConstraintAreaMax().max(max);
+            // the constraint area is infinite by default, only its finite sides can bound the scene
+            auto constraintAreaMin = mobility->getConstraintAreaMin();
+            auto constraintAreaMax = mobility->getConstraintAreaMax();
+            if (!std::isfinite(constraintAreaMin.x)) constraintAreaMin.x = min.x;
+            if (!std::isfinite(constraintAreaMin.y)) constraintAreaMin.y = min.y;
+            if (!std::isfinite(constraintAreaMin.z)) constraintAreaMin.z = min.z;
+            if (!std::isfinite(constraintAreaMax.x)) constraintAreaMax.x = max.x;
+            if (!std::isfinite(constraintAreaMax.y)) constraintAreaMax.y = max.y;
+            if (!std::isfinite(constraintAreaMax.z)) constraintAreaMax.z = max.z;
+            min = constraintAreaMin.min(min);
+            max = constraintAreaMax.max(max);
+            // the node must be inside the scene even if it has no (finite) constraint area
+            auto position = mobility->getCurrentPosition();
+            min = position.min(min);
+            max = position.max(max);
         }
     }
     min = sceneMin.min(min);
