@@ -362,6 +362,12 @@ Ipv6InterfaceData::AddressType Ipv6InterfaceData::getAddressType(int i) const
     return addresses[i].addrType;
 }
 
+simtime_t Ipv6InterfaceData::getAddressExpiryTime(int i) const
+{
+    ASSERT(i >= 0 && i < (int)addresses.size());
+    return addresses[i].expiryTime;
+}
+
 Ipv6InterfaceData::AddressType Ipv6InterfaceData::getAddressType(const Ipv6Address& addr) const
 {
     return getAddressType(findAddress(addr));
