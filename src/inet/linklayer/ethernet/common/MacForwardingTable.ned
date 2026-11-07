@@ -13,7 +13,9 @@ import inet.linklayer.contract.IMacForwardingTable;
 //
 // Handles the mapping between ports and MAC addresses.
 //
-// Entries are deleted if their age exceeds a certain limit.
+// Learned entries are deleted if their age exceeds the agingTime parameter.
+// Entries from the forwardingTable and forwardingTableFile parameters are
+// static: they do not age, and learning does not overwrite them.
 //
 // If needed, address tables can be pre-loaded from text files at the beginning
 // of the simulation; this is controlled by the `forwardingTableFile` module parameter.

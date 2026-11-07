@@ -160,7 +160,7 @@ void MacForwardingTable::setUnicastAddressForwardingInterface(int interfaceId, c
     ForwardingTableKey key(vid, address);
     auto it = forwardingTable.find(key);
     if (it == forwardingTable.end())
-        forwardingTable[key] = AddressEntry(vid, interfaceId, -1);
+        forwardingTable[key] = AddressEntry(vid, interfaceId, SimTime::getMaxTime());
     else {
         it->second.interfaceId = interfaceId;
         it->second.insertionTime = SimTime::getMaxTime();
@@ -351,10 +351,7 @@ void MacForwardingTable::readForwardingTable(const char *fileName)
         if (macAddress.isMulticast()) {
             addMulticastAddressForwardingInterface(interfaceId, macAddress, vlanId);
         } else {
-            // Create an entry with address and interfaceId and insert into table
-            AddressEntry entry(vlanId, interfaceId, 0);
-            ForwardingTableKey key(vlanId, macAddress);
-            forwardingTable[key] = entry;
+            setUnicastAddressForwardingInterface(interfaceId, macAddress, vlanId);
         }
     }
     fclose(fp);
