@@ -9,6 +9,7 @@
 #define __INET_IEEE80211TRANSMISSION_H
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/TransmissionBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IFlatTransmission.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
@@ -17,7 +18,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211Transmission : public TransmissionBase
+class INET_API Ieee80211Transmission : public TransmissionBase, public IFlatTransmission
 {
   protected:
     const IIeee80211Mode *mode;
@@ -30,6 +31,12 @@ class INET_API Ieee80211Transmission : public TransmissionBase
 
     virtual const IIeee80211Mode *getMode() const { return mode; }
     virtual const Ieee80211Channel *getChannel() const { return channel; }
+
+    // The lengths come from the mode and the PHY header (scalar and dimensional transmissions have no bit model).
+    virtual b getHeaderLength() const override;
+    virtual b getDataLength() const override;
+    virtual const IModulation *getHeaderModulation() const override;
+    virtual const IModulation *getDataModulation() const override;
 };
 
 } // namespace physicallayer

@@ -67,6 +67,8 @@ bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening,
         return true;
     else {
         double packetErrorRate = errorModel->computePacketErrorRate(snir, part);
+        if (std::isnan(packetErrorRate))
+            throw cRuntimeError("Error model %s cannot provide the packet error rate that the reception decision requires", check_and_cast<const cObject *>(errorModel)->getClassName());
         if (packetErrorRate == 0.0)
             return true;
         else if (packetErrorRate == 1.0)

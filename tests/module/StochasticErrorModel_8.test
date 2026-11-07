@@ -1,0 +1,20 @@
+%description:
+StochasticErrorModel: packetErrorRate = 1, corruptionMode = chunk.
+
+packetErrorRate = 1 and corruptionMode = "chunk": every frame is lost, and the bit error rate that is needed to corrupt them is 1 (each chunk is corrupted).
+Two ad-hoc IEEE 802.11 hosts, 20 m apart, ERP (g) at 24 Mbit/s (OFDM, 16-QAM data, BPSK header), multicast frames, so that there are no acknowledgements or retransmissions. Every frame has 40 header bits (the SIGNAL field of the mode) and 8528 data bits (1064 byte PSDU, 6 tail and 10 padding bits).
+The sink receives no UDP packet.
+The run must end without an error. The error rates that the sink's radio records from the ErrorRateInd tags, and the rates of the whole frame, of its header and of its data that the error model returns (recorded by the StochasticErrorModelProbe), must equal, to a relative precision of 1e-6, the values of the closure that the NED documentation of StochasticErrorModel gives (computed independently of the C++ code).
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+**.radio.receiver.errorModel.packetErrorRate = 1
+**.radio.receiver.errorModel.corruptionMode = "chunk"
+include ../../lib/stochastic-errormodel-80211.ini
+
+%postrun-command: awk -v lo=0 -v hi=0 -v rate="packetErrorRate=1 bitErrorRate=1 symbolErrorRate=1" -v want="bitErrorRate.DATA=1 bitErrorRate.HEADER=1 bitErrorRate.WHOLE=1 packetErrorRate.DATA=1 packetErrorRate.HEADER=1 packetErrorRate.WHOLE=1 symbolErrorRate.DATA=1 symbolErrorRate.HEADER=1 symbolErrorRate.WHOLE=1" -f ../../lib/stochastic-errormodel.awk results/*.sca > verdict.out
+%contains: verdict.out
+verdict=PASS
+%not-contains: test.out
+<!> Error

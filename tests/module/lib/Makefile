@@ -27,6 +27,7 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cc, .msg and .sm files
 OBJS = \
+    $O/ConstantRatesErrorModel.o \
     $O/EthTestApp.o \
     $O/Ieee8021qPcpTest.o \
     $O/IGMPTester.o \
@@ -37,6 +38,7 @@ OBJS = \
     $O/PolyhedronTest.o \
     $O/QQ.o \
     $O/RoutingTableLogger.o \
+    $O/StochasticErrorModelProbe.o \
     $O/TcpTestClient.o \
     $O/TCPTester.o \
     $O/TestIGMP.o \
