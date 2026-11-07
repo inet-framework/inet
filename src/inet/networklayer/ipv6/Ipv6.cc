@@ -525,6 +525,28 @@ void Ipv6::routePacket(Packet *packet, const NetworkInterface *destIE, const Net
             return;
     // don't raise error if sent to ND or ICMP!
 
+    // RFC 4291 Section 2.5.6, RFC 4007 Section 9: a datagram with a link-local source
+    // must not leave the link it arrived on. Without a zone model, the link is the
+    // arrival interface; a datagram sent back through it stays in its source's zone.
+    if (!fromHL && fromIE && interfaceId != fromIE->getInterfaceId() && ipv6Header->getSrcAddress().isLinkLocal()) {
+        EV_INFO << "source address is link-local and the datagram would leave its link, dropping\n";
+        numDropped++;
+        PacketDropDetails details;
+        details.setReason(OTHER_PACKET_DROP);
+        emit(packetDroppedSignal, packet, &details);
+        // RFC 4443 Section 2.4 (e.2): no ICMPv6 error message about a Redirect
+        bool isRedirect = false;
+        if (ipv6Header->getProtocolId() == IP_PROT_IPv6_ICMP) {
+            const auto& icmpHeader = packet->peekDataAt<Icmpv6Header>(ipv6Header->getChunkLength());
+            isRedirect = icmpHeader->getType() == ICMPv6_REDIRECT;
+        }
+        if (isRedirect)
+            delete packet;
+        else
+            sendIcmpError(packet, ICMPv6_DESTINATION_UNREACHABLE, BEYOND_SCOPE_OF_SOURCE);
+        return;
+    }
+
     // RFC 4861 Section 8.2: a router sends a Redirect if it is forwarding a
     // packet back out on the same interface it arrived on, to a different next-hop.
     // Disabled (sendRedirects=false) on wireless multi-hop/ad-hoc networks, where the
