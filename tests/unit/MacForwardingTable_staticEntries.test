@@ -1,0 +1,94 @@
+%description:
+Tests that the static entries of MacForwardingTable do not age out. A static
+entry is one that the forwardingTable parameter, the forwardingTableFile
+parameter, or setUnicastAddressForwardingInterface() creates. Static entries
+must survive the agingTime (120 s by default) whether the key is new or already
+has an entry. A learned entry is not static, so it must still age out.
+
+%includes:
+#include "inet/linklayer/ethernet/common/MacForwardingTable.h"
+#include "inet/networklayer/common/NetworkInterface.h"
+
+using namespace omnetpp;
+using namespace inet;
+
+%file: TestNetwork.ned
+
+import inet.linklayer.ethernet.common.MacForwardingTable;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.ethernet.basic.EthernetInterface;
+import ned.DatarateChannel;
+
+module TestNode
+{
+    @networkNode;
+    submodules:
+        interfaceTable: InterfaceTable;
+        eth0: EthernetInterface;
+        eth1: EthernetInterface;
+        macTable: MacForwardingTable {
+            interfaceTableModule = "^.interfaceTable";
+        }
+    connections allowunconnected:
+        // the link only satisfies the interfaces; no frame is sent
+        eth0.phys <--> DatarateChannel { datarate = 100Mbps; } <--> eth1.phys;
+}
+
+network TestNetwork
+{
+    submodules:
+        test: Test;
+        node: TestNode;
+}
+
+%file: forwardingTable.txt
+# vlan  address            interface
+0       0A-AA-00-00-00-05  eth1
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = TestNetwork
+
+*.node.macTable.forwardingTable = [{address: "0A-AA-00-00-00-04", interface: "eth0"}]
+*.node.macTable.forwardingTableFile = "forwardingTable.txt"
+*.node.eth*.interfaceTableModule = "^.interfaceTable"
+
+%activity:
+
+auto table = check_and_cast<MacForwardingTable *>(getSimulation()->getSystemModule()->getModuleByPath("node.macTable"));
+
+MacAddress newStatic("0A-AA-00-00-00-01");
+MacAddress overwrittenStatic("0A-AA-00-00-00-02");
+MacAddress learned("0A-AA-00-00-00-03");
+MacAddress parameterEntry("0A-AA-00-00-00-04");
+MacAddress fileEntry("0A-AA-00-00-00-05");
+int eth0Id = check_and_cast<NetworkInterface *>(getSimulation()->getSystemModule()->getModuleByPath("node.eth0"))->getInterfaceId();
+int eth1Id = check_and_cast<NetworkInterface *>(getSimulation()->getSystemModule()->getModuleByPath("node.eth1"))->getInterfaceId();
+
+table->setUnicastAddressForwardingInterface(11, newStatic, 0);
+table->setUnicastAddressForwardingInterface(12, overwrittenStatic, 0);
+table->setUnicastAddressForwardingInterface(13, overwrittenStatic, 0);
+table->learnUnicastAddressForwardingInterface(14, learned, 0);
+
+for (double t : { 1.0, 119.5, 121.0, 600.0 }) {
+    wait(t - simTime().dbl());
+    // look up first: Enter_Method logs a line in debug builds, which must not split the output line
+    auto lookup = [&] (const MacAddress& address) { return table->getUnicastAddressForwardingInterface(address, 0); };
+    int newStaticId = lookup(newStatic), overwrittenId = lookup(overwrittenStatic), learnedId = lookup(learned);
+    int parameterId = lookup(parameterEntry), fileId = lookup(fileEntry);
+    std::cout << "t=" << simTime() << ": new static " << newStaticId
+              << ", overwritten static " << overwrittenId
+              << ", learned " << learnedId
+              << ", parameter " << (parameterId == eth0Id ? "eth0" : "lost")
+              << ", file " << (fileId == eth1Id ? "eth1" : "lost") << std::endl;
+}
+
+%contains: stdout
+t=1: new static 11, overwritten static 13, learned 14, parameter eth0, file eth1
+%contains: stdout
+t=119.5: new static 11, overwritten static 13, learned 14, parameter eth0, file eth1
+%contains: stdout
+t=121: new static 11, overwritten static 13, learned -1, parameter eth0, file eth1
+%contains: stdout
+t=600: new static 11, overwritten static 13, learned -1, parameter eth0, file eth1
