@@ -205,6 +205,13 @@ class INET_API Ipv6 : public OperationalBase, public NetfilterBase, public INetw
     virtual void decapsulate(Packet *packet);
 
     /**
+     * Applies RFC 6040 Section 4.2 to a datagram just decapsulated from an
+     * IPv6-in-IPv6 packet whose outer ECN field was outerEcn. Returns false if
+     * the datagram must be dropped.
+     */
+    virtual bool propagateTunnelEcn(Packet *packet, int outerEcn);
+
+    /**
      * Last hoplimit check, then send datagram on the given interface.
      */
     virtual void sendDatagramToOutput(Packet *packet, const NetworkInterface *destIE, const MacAddress& macAddr);
