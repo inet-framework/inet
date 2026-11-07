@@ -1,0 +1,72 @@
+%description:
+
+Checks that a gate schedule configurator accepts a network that has a network
+interface without a datarate. The interface of the PPP link of the host named
+extra has datarate 0 because the channel of the link has none. The guard band of
+that interface is the MTU divided by the datarate, which is infinite and cannot
+be converted to simulation time. The configurator still schedules the stream
+between client and server.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networks.base.TsnNetworkBase;
+import inet.node.ethernet.EthernetLink;
+import inet.node.inet.StandardHost;
+import inet.node.tsn.TsnDevice;
+import inet.node.tsn.TsnSwitch;
+
+network GateScheduleConfigurator_1 extends TsnNetworkBase
+{
+    parameters:
+        *.eth[*].bitrate = default(100Mbps);
+    submodules:
+        client: TsnDevice { numPppInterfaces = 1; }
+        switch: TsnSwitch;
+        server: TsnDevice;
+        extra: StandardHost { numPppInterfaces = 1; }
+    connections:
+        client.ethg++ <--> EthernetLink <--> switch.ethg++;
+        switch.ethg++ <--> EthernetLink <--> server.ethg++;
+        client.pppg++ <--> { delay = 1ms; datarate = 0bps; } <--> extra.pppg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = GateScheduleConfigurator_1
+sim-time-limit = 1ms
+cmdenv-express-mode = false
+
+*.client.numApps = 1
+*.client.app[*].typename = "UdpSourceApp"
+*.client.app[0].display-name = "video"
+*.client.app[0].io.destAddress = "server"
+*.client.app[0].io.destPort = 1000
+*.client.app[0].source.packetLength = 500B
+*.client.app[0].source.productionInterval = 250us
+*.server.numApps = 1
+*.server.app[*].typename = "UdpSinkApp"
+*.server.app[0].io.localPort = 1000
+
+*.client.hasOutgoingStreams = true
+*.client.bridging.streamIdentifier.identifier.mapping = [{stream: "video", packetFilter: expr(udp.destPort == 1000)}]
+*.client.bridging.streamCoder.encoder.mapping = [{stream: "video", pcp: 4}]
+*.switch.hasIncomingStreams = true
+*.switch.hasOutgoingStreams = true
+*.switch.bridging.streamCoder.decoder.mapping = [{pcp: 4, stream: "video"}]
+*.switch.bridging.streamCoder.encoder.mapping = [{stream: "video", pcp: 4}]
+*.server.hasIncomingStreams = true
+*.switch.hasEgressTrafficShaping = true
+*.switch.eth[*].macLayer.queue.numTrafficClasses = 2
+
+*.gateScheduleConfigurator.typename = "EagerGateScheduleConfigurator"
+*.gateScheduleConfigurator.gateCycleDuration = 1ms
+*.gateScheduleConfigurator.configuration =
+   [{pcp: 4, gateIndex: 1, application: "app[0]", source: "client", destination: "server", packetLength: 500B + 58B, packetInterval: 250us, maxLatency: 500us}]
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+Simulation time limit reached
+%#--------------------------------------------------------------------------------------------------------------
