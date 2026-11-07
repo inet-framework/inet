@@ -110,7 +110,9 @@ void GateScheduleConfiguratorBase::addPorts(Input& input) const
                 if (channel != nullptr)
                     port->propagationTime = channel->getDelay();
                 port->maxPacketLength = B(interface->networkInterface->getMtu());
-                port->guardBand = (port->maxPacketLength / port->datarate).get<s>();
+                // an interface without a bitrate (e.g. cellular or tunnel) has no guard band: it stays -1
+                if (port->datarate > bps(0))
+                    port->guardBand = (port->maxPacketLength / port->datarate).get<s>();
                 port->maxCycleTime = gateCycleDuration;
                 port->maxSlotDuration = gateCycleDuration;
                 port->cutthroughSwitchingEnabled = true; // TODO: extract from network interface!
