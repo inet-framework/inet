@@ -75,6 +75,7 @@ class INET_API Pmipv6 : public OperationalBase, protected cListener
         int homeNetworkPrefixLength = 0;
         Ipv6Address servingMagAddress; // the Proxy care-of address (serving MAG)
         unsigned int sequenceNumber = 0;
+        uint64_t timestamp = 0;        // Timestamp option of the most recently accepted Proxy Binding Update
         simtime_t expiry;
         int tunnelInterfaceId = -1;    // LMA's tunnel to the serving MAG
         Ipv6Route *downlinkRoute = nullptr; // home network prefix -> tunnel
