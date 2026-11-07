@@ -124,8 +124,10 @@ std::pair<Coord, double> SceneVsgVisualizerBase::getNetworkBoundingSphere()
     for (cModule::SubmoduleIterator it(visualizationSubjectModule); !it.end(); it++) {
         auto networkNode = *it;
         if (isNetworkNode(networkNode)) {
-            if (auto visualization = networkNodeVisualizer->findNetworkNodeVisualization(networkNode)) {
-                Coord p = visualization->getPosition();
+            if (networkNodeVisualizer->findNetworkNodeVisualization(networkNode)) {
+                // not visualization->getPosition(): until the first refreshDisplay() that is
+                // the display string position in pixels, not the mobility position in metres
+                Coord p = getPosition(networkNode);
                 if (nodeCount == 0) { minPos = p; maxPos = p; }
                 else {
                     minPos = Coord(std::min(minPos.x, p.x), std::min(minPos.y, p.y), std::min(minPos.z, p.z));
@@ -138,7 +140,11 @@ std::pair<Coord, double> SceneVsgVisualizerBase::getNetworkBoundingSphere()
     if (nodeCount == 0)
         return { Coord::ZERO, 100.0 };
     Coord center = (minPos + maxPos) / 2;
-    double radius = std::max(100.0, (maxPos - minPos).length() / 2);
+    // like the OSG visualizer, use a fixed radius only for a single node (or coincident nodes),
+    // so that a small network is not framed from a distance meant for a large one
+    double radius = (maxPos - minPos).length() / 2;
+    if (nodeCount == 1 || radius < 1.0)
+        radius = 100.0;
     return { center, radius };
 }
 
