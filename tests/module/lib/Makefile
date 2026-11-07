@@ -37,6 +37,7 @@ OBJS = \
     $O/PolyhedronTest.o \
     $O/QQ.o \
     $O/RoutingTableLogger.o \
+    $O/StochasticErrorModelProbe.o \
     $O/TcpTestClient.o \
     $O/TCPTester.o \
     $O/TestIGMP.o \

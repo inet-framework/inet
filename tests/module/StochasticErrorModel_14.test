@@ -1,0 +1,19 @@
+%description:
+StochasticErrorModel: packetErrorRate only, APSK radio.
+
+packetErrorRate = 0.3.
+Two APSK hosts (CsmaCaInterface, ApskRadio, 100 Mbit/s, scalar), 20 m apart, unicast UDP packets without MAC acknowledgements. The modulation is 64-QAM (6 bits per symbol) for the header and the data. Every frame has 64 header bits and 8396 data bits (the MAC frame).
+Each frame is received with probability 1 - PER = 0.7000, so that the number of packets the sink receives is binomial with mean 350.0 and standard deviation 10.2; the test requires it to be within 4 standard deviations of the mean, [310, 390] (a correct model misses that with probability of about 6e-5, and the run is deterministic).
+The run must end without an error. The error rates that the sink's radio records from the ErrorRateInd tags, and the rates of the whole frame, of its header and of its data that the error model returns (recorded by the StochasticErrorModelProbe), must equal, to a relative precision of 1e-6, the values of the closure that the NED documentation of StochasticErrorModel gives (computed independently of the C++ code).
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+**.radio.receiver.errorModel.packetErrorRate = 0.3
+include ../../lib/stochastic-errormodel-apsk.ini
+
+%postrun-command: awk -v lo=310 -v hi=390 -v rate="packetErrorRate=0.29999999999999999 bitErrorRate=4.2159270130959214e-05 symbolErrorRate=0.00025292896122353081" -v want="bitErrorRate.DATA=4.2159270130959214e-05 bitErrorRate.HEADER=4.2159270130959214e-05 bitErrorRate.WHOLE=4.2159270130959214e-05 packetErrorRate.DATA=0.29810867439583921 packetErrorRate.HEADER=0.0026946131618493796 packetErrorRate.WHOLE=0.29999999999999999 symbolErrorRate.DATA=0.00025292896122353081 symbolErrorRate.HEADER=0.00025292896122353081 symbolErrorRate.WHOLE=0.00025292896122353081" -f ../../lib/stochastic-errormodel.awk results/*.sca > verdict.out
+%contains: verdict.out
+verdict=PASS
+%not-contains: test.out
+<!> Error
