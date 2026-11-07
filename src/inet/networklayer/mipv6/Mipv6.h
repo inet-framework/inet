@@ -310,6 +310,15 @@ class INET_API Mipv6 : public OperationalBase, public IIpv6ExtensionHeaderHandle
 //    void sendMobilityMessageToIPv6Module(cMessage *msg, const Ipv6Address& destAddr, simtime_t sendTime = 0); // overloaded for use at CN - CB
 
     /**
+     * Returns the next hop toward destAddr through the given interface: destAddr itself
+     * for a link-local destination or when the longest matching route through that
+     * interface is on-link, otherwise that route's next hop. Returns the unspecified
+     * address for a multicast destination and when no route through the interface
+     * matches.
+     */
+    Ipv6Address getNextHopOnInterface(const Ipv6Address& destAddr, int interfaceId) const;
+
+    /**
      * Process a BU - only applicable to HAs and CNs.
      */
     void processBUMessage(Packet *inPacket, const Ptr<const BindingUpdate>& bu);
