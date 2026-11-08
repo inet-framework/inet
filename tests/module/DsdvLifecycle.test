@@ -37,7 +37,7 @@ class DsdvKernelProbe : public Dsdv
     uint64_t beforeStop = 0;
     uint64_t beforeCrash = 0;
     Ipv4Address destination = Ipv4Address("10.0.0.3");
-    std::vector<simtime_t> times = {.1,1.1,1.2,2.5,2.600001,3,3.5,3.500001,4.1,5.1,6.1,7.1};
+    std::vector<simtime_t> times = {.1,1.1,1.2,2.5,2.600001,3,3.5,3.500001,3.6,3.600001,4.1,5.1,6.1,7.1};
     void inject(bool withDestination) {
         auto header=makeShared<DsdvHeader>();
         header->setSender(Ipv4Address("10.0.0.2"));
@@ -97,14 +97,23 @@ class DsdvKernelProbe : public Dsdv
                 ASSERT(table.getRouteEntries().at(destination).advertised.sequence==11);
                 beforeStop=table.getSelf().current.sequence;
                 break;
-            case 8: assertNoTimers(); break;
+            case 8:
+                routingInterface->setState(NetworkInterface::DOWN);
+                routingInterface->setState(NetworkInterface::UP);
+                routingInterface->setCarrier(true);
+                break;
             case 9:
+                ASSERT(active && socket.isOpen());
+                beforeStop=table.getSelf().current.sequence;
+                break;
+            case 10: assertNoTimers(); break;
+            case 11:
                 ASSERT(active && table.getSelf().current.sequence==beforeStop+2);
                 ASSERT(table.getRouteEntries().at(destination).current.sequence==11);
                 beforeCrash=table.getSelf().current.sequence;
                 break;
-            case 10: assertNoTimers(); break;
-            case 11:
+            case 12: assertNoTimers(); break;
+            case 13:
                 ASSERT(active && table.getSelf().current.sequence==beforeCrash+2);
                 ASSERT(table.getRouteEntries().at(destination).current.sequence==11);
                 std::cout << "DSDV lifecycle PASS: tie refresh, independent expiry, interface recovery, stop/crash/restart\n";
