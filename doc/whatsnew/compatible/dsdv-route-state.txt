@@ -1,3 +1,0 @@
-DSDV route and wire state foundation
-
-DSDV development includes an independently specified IPv4 route-state and versioned UDP wire foundation, with arithmetic, selection and encoding checks. The profile follows Perkins/Bhagwat (SIGCOMM 1994); its modeling choices and evidence are recorded under doc/project/evidence/model/dsdv/.
