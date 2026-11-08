@@ -252,3 +252,87 @@ No new source exception or baseline approval is required. No external simulator
 or excluded DSDV algorithm was consulted. The tests and declared profile bound
 the conformance claim; global repository cleanup and unavailable tooling remain
 outside this implementation's scope.
+
+## MANET showcase migration (2026-11-08)
+
+The subsequent showcase review found an obsolete `Hello` visualization filter,
+hello-only documentation with removed parameter names, and a legacy `tplx`
+expectation. The user's subsequent "Proceed" authorized correcting this DSDV
+showcase and its affected expectations. The selection is exclusively
+`showcases/routing/manet`, `omnetpp.ini`, `Dsdv`, run/seed 0, 100 seconds.
+
+The DSDV configuration now selects packets named `DSDV` in its green control
+visualizer. Its documentation describes the UDP `routingApp`, full dumps and
+incrementals, settling, separate neighbor/destination expiry and retained sequence
+floors. It uses current literalinclude markers and the actual 0.5-second ping
+period. Existing videos are explicitly historical; they were not re-recorded.
+Configuration inspection confirms local ARP and no configurator or interface
+routes that bypass DSDV. An ordinary debug run completed with 200 pings sent,
+65 replies, and source counters of 83 full dumps, 128 incrementals, 463 accepted
+updates and zero rejected updates. These are observations of one seed, not
+performance claims.
+
+Three expectations were migrated from the former implementation to the UDP host
+profile introduced by already-published commit `4a434ab8ac`. Its transport,
+dissemination and route-expiry behavior deliberately changes event and packet
+trajectories. The visualization filter alone does not cause those changes.
+The independent correctness checks recorded above justify the model; these hashes
+only establish reproducibility. No other configuration, run, limit or metadata
+was rewritten.
+
+| Ingredient | Previous | Current | Recheck |
+| --- | --- | --- | --- |
+| `tplx` | `84f0-9aea` | `c75a-49fb` | PASS |
+| `~tND` | `cdce-1d3c` | `bda7-8bee` | PASS |
+| `~tNl` | `bdad-9a28` | `00fb-77c9` | PASS |
+| `tyf` | `0fca-2874` | unchanged | Incomplete: visual harness hangs |
+
+Candidate values were calculated through `update_correct_fingerprints` against
+temporary copies of the JSON store. Final checks used the native Python runner,
+from the repository root after `source .envrc` and activation of
+`/tmp/dsdv-python/bin/activate`:
+
+```python
+from inet.simulation.project import get_simulation_project
+from inet.test.fingerprint.task import run_fingerprint_tests
+for ingredient in ['tplx', '~tND', '~tNl']:
+    result = run_fingerprint_tests(
+        simulation_project=get_simulation_project('inet'), mode='debug',
+        build=False, concurrent=False,
+        working_directory_filter=r'^showcases/routing/manet$',
+        ini_file_filter=r'^omnetpp.ini$', config_filter=r'^Dsdv$',
+        run_number_filter=r'^0$', ingredients_list=[ingredient],
+        sim_time_limit='100s')
+    assert len(result.results) == 1
+    assert result.results[0].result == 'PASS'
+```
+
+Observed: three executed PASS results, exit 0. Checking the ingredients together
+instead exposes an existing runner `NameError` in `FingerprintTestGroupTask.run`;
+the individual checks avoid that path without modifying the runner.
+Log: `/tmp/dsdv-showcase-review/fingerprint-final.log`.
+
+The exact `tyf` fake-GUI run fails to finish in both debug and release, remaining
+inside a callback beyond its CPU limit. Short 1-second visual runs finish.
+Inspection of OMNeT++ `cmdenv/fakegui.cc` identifies a possible zero-step loop
+when a positive simulation-time interval divided by three frames rounds to zero.
+This cause is a hypothesis: LLDB and GDB both failed while processing debug
+information, so local variable values were not established. The existing visual
+expectation remains untouched; no passing visual regression is claimed.
+Logs and command: `/tmp/dsdv-showcase-review/visual-release.log`,
+`visual-fingerprint-gdb.log`, and `visual-fingerprint-command.json` in that folder.
+
+A temporary real `PacketFilter` unit case passed, verifying the old filter excludes
+DSDV, the new filter includes it, and ping traffic remains separate. A scoped
+Sphinx HTML build with the project's real configuration and theme exited 0 with
+no literalinclude errors. Its four warnings concern missing external legacy
+images (`networkA.png`, `aodvlog3.png`, `networkB.png`, `positions.png`). The build
+used Sphinx 8.2.3 and docutils 0.21.2; newer docutils is incompatible with the
+checkout's doxylink extension. Artifacts: `/tmp/dsdv-showcase-review/filter-test.log`,
+`sphinx-build.log` and `docs-html/doc/index.html`.
+
+Final debug and release compilation both exited 0. Source/document seals passed;
+project-wide architecture, naming and interface gates retain the previously
+reported unrelated findings. Logs are `/tmp/dsdv-showcase-review/build-*-final.log`
+and `gate-*.log`. The user's `AGENTS.md` and concurrent DSDV WATCH/stream-formatting
+source edits were preserved and excluded from this showcase change.
