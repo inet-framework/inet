@@ -69,11 +69,21 @@ DSDV (Destination-Sequenced Distance-Vector Routing) is a table-driven
 routing scheme for ad hoc mobile networks based on the Bellman-Ford
 algorithm.
 
-The :ned:`Dsdv` module type implements DSDV. It is currently a partial
-implementation.
+The :ned:`Dsdv` module implements the IPv4 host-routing profile of
+Perkins and Bhagwat (SIGCOMM 1994), with hop counts on one bidirectional ad hoc
+interface. Forwarding changes take effect immediately; finite route
+advertisements may wait for settling. Periodic full dumps repair lost updates.
+The model uses its own versioned UDP format and retains withdrawn destination
+sequence floors for the remainder of the run.
 
-:ned:`DsdvRouter` is a :ned:`ManetRouter` with the routing module type
-set to :ned:`Dsdv`.
+:ned:`DsdvRouter` extends :ned:`AdhocHost` with the routing controller attached
+through UDP. Custom :ned:`ManetRouter` nodes select it in ``routingApp``;
+ordinary hosts may place it in ``app[]``. Use local ARP, enable IPv4 forwarding
+and avoid configurator-supplied multihop routes when studying routing behavior.
+The example under ``examples/dsdv`` demonstrates a deterministic mobile line.
+IPv6, prefix/default advertisements and multiple active interfaces are outside
+the supported profile. Restarting the same module preserves sequence floors;
+destroying and recreating it requires persistent state outside this model.
 
 .. _ug:sec:adhocrouting:dymo:
 

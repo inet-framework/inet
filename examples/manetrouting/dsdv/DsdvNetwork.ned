@@ -41,7 +41,6 @@ network DsdvNetwork
         }
         host[numHosts]: DsdvRouter {
             parameters:
-                dsdv.netmask = "255.255.0.0";
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
     connections allowunconnected:

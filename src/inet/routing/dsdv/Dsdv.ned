@@ -1,44 +1,48 @@
-//
-// Copyright (C) 2009 by Alfonso Ariza, Malaga University
-//
 // SPDX-License-Identifier: LGPL-3.0-or-later
-//
-
-
 package inet.routing.dsdv;
 
-import inet.common.SimpleModule;
-import inet.routing.contract.IManetRouting;
+import inet.applications.contract.IApp;
 
-//
-// Implements Destination-Sequenced Distance Vector.
-//
-// The host using this routing algorithm is required to have a SINGLE interface
-// which has "wlan" in its name.
-//
-// NOTE:
-//  - This is a fairly incomplete implementation of the originally published DSDV
-//    algorithm. It does not implement full routing table dumps, hello message forwarding,
-//    there is no logic that sends out full updates if the size of the incremental update reaches
-//    the network unit size.
-//
-// WARNING: This is a partial / unfinished implementation.
-//
-simple Dsdv extends SimpleModule like IManetRouting
+// Perkins/Bhagwat (SIGCOMM 1994), network-layer host-routing profile.
+// One bidirectional ad hoc IPv4 interface; finite-run sequence numbers.
+// This versioned UDP model profile is not an external interoperability format.
+simple Dsdv like IApp
 {
     parameters:
-        @class(Dsdv);
-        @display("i=block/routing");
-        string interfaceTableModule;   // The path to the InterfaceTable module
-        string routingTableModule;
-        double helloInterval @unit(s) = default(5s);  // How often hello messages should be sent out
-        string netmask = default("255.255.0.0");  // Netmask for the ad-hoc network
-        double maxVariance = default(1); // This is the maximum of a random value to determine when the first hello message will be sent out
-        double routeLifetime @unit(s) = default(5s);  // The expiry time of the routing entries
-        bool manetPurgeRoutingTables = default(true);
-        volatile double broadcastDelay @unit(s) = default(uniform(0s,0.01s));
+        @class(dsdv::Dsdv);
+        @display("i=block/network2");
+        @lifecycleSupport;
+        string interfaceTableModule = default(absPath("^.interfaceTable"));
+        string routingTableModule = default(absPath("^.ipv4.routingTable"));
+        string interface = default("wlan0"); // Exactly one active non-loopback interface is supported
+        int controlPort = default(26999); // Unprivileged UDP port, 1024..65535
+        double fullDumpInterval @unit(s) = default(5s); // Positive periodic interval
+        double periodicJitter @unit(s) = default(500ms); // Uniform [0,J], nonnegative
+        double neighborTimeout @unit(s) = default(20s); // Positive sender liveness timeout
+        double routeTimeout @unit(s) = default(25s); // Positive per-destination freshness timeout
+        double settlingCap @unit(s) = default(1s); // Positive maximum finite-change delay
+        int payloadBudget @unit(B) = default(1400B); // UDP payload; also limited by interface MTU minus 28B
+        @signal[updateAccepted](type=long);
+        @signal[updateRejected](type=long);
+        @signal[routeInstalled](type=long);
+        @signal[routeWithdrawn](type=long);
+        @signal[invalidationReason](type=string);
+        @signal[controlBytes](type=long);
+        @signal[controlPacketSent](type=long);
+        @signal[triggeredSend](type=long);
+        @signal[fullDumpSent](type=long);
+        @signal[incrementalSent](type=long);
+        @signal[settlingDelay](type=simtime_t);
+        @statistic[updateAccepted](record=count);
+        @statistic[updateRejected](record=count);
+        @statistic[routeInstalled](record=count);
+        @statistic[routeWithdrawn](record=count);
+        @statistic[controlBytes](record=sum);
+        @statistic[controlPacketSent](record=count);
+        @statistic[fullDumpSent](record=count);
+        @statistic[incrementalSent](record=count);
+        @statistic[settlingDelay](record=vector);
     gates:
-        input ipIn;
-        output ipOut;
+        input socketIn;
+        output socketOut;
 }
-

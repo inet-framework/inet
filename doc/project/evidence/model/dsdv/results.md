@@ -40,3 +40,40 @@ fresh library was linked were setup errors, not behavioral evidence.
 
 Scoped architecture and naming checks both exited 0. Production UDP integration,
 kernel scheduling, lifecycle, release and feature-off checks remain pending.
+
+## Production attachment and forwarding
+
+After `make -j4 MODE=debug` (exit 0), run:
+
+```
+inet_run_protocol_tests -p inet -m debug --no-build -w dsdv \
+  -f 'DsdvForwarding\.test$' --no-concurrent \
+  --log-file /tmp/dsdv-forwarding-runner.log
+```
+
+Observed **1 PASS**, no expected failure; configuration General, run/seed 0,
+10 seconds. `tests/protocol/dsdv/work/DsdvForwarding/test.out` records 284
+accepted updates, 8 line replies, 8 pair replies, zero disabled-line replies
+and both intermediate IPv4 ingress paths. The verifier checks every converged
+line route's owner, /32 prefix, MANET source, hop count and adjacent next hop.
+The isolated node has no owned learned route. The disabled line has no route
+to its remote endpoint. Local ARP is used; connected and configurator routes
+are disabled. Payload capacity is three entries, exercising split full dumps.
+
+Fixture corrections: explicit C++ namespace, assigned sink port, /24 static
+interface allocation (the configurator reserves network/broadcast addresses),
+and `initFromDisplayString=false` to honor configured coordinates. The observer
+uses IPv4 ingress signals: this checkout's IPv4 egress path does not emit its
+declared `packetSentToLower` signal. No core change was made for that gap.
+Exact-start radio checks are disabled to permit the required startup collisions.
+
+The adapter uses `RoutingProtocolBase`'s inherited `NUM_INIT_STAGES`, UDP callback
+ownership, `InterfaceReq` and `FragmentationReq`, and generic route APIs with
+`getSource()==this`. A real interface-down test found the need for
+`Enter_Method_Silent()` in the signal handler; the adapter includes it.
+
+Only after design freeze were external old example/showcase parameter
+references inspected for migration. The removed `dsdv.netmask` override and
+the showcase's IP-level attachment were updated. No old algorithm, serializer,
+tests or behavior served as an oracle. Legacy wire classes remain compiled but
+the new adapter never creates or consumes them as its native representation.
