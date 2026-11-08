@@ -252,7 +252,7 @@
         name = "DSDV routing"
         description = "Destination-Sequenced Distance Vector routing."
         initiallyEnabled = "true"
-        requires = "Ipv4"
+        requires = "Ipv4 Udp"
         recommended = "Ieee80211"
         labels = ""
         nedPackages = "
