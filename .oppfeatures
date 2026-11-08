@@ -263,6 +263,32 @@
         compileFlags = "-DINET_WITH_DSDV"
         linkerFlags = ""
         />
+    <feature
+        id = "DsdvExamples"
+        name = "DSDV examples"
+        description = "Deterministic IPv4 DSDV static and mobile line examples."
+        initiallyEnabled = "true"
+        requires = "Dsdv AckingMac GenericRadio Ipv4 Loopback Mobility PhysicalLayerWirelessCommon PingApplication Queueing Udp"
+        recommended = ""
+        labels = "routing"
+        nedPackages = "inet.examples.dsdv"
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id = "DsdvTests"
+        name = "DSDV tests"
+        description = "Independent DSDV state, kernel and forwarding fixtures."
+        initiallyEnabled = "true"
+        requires = "DsdvExamples"
+        recommended = ""
+        labels = "routing"
+        nedPackages = ""
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
      <feature
         id = "Dymo"
         name = "DYMO routing"

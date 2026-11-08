@@ -1,5 +1,17 @@
 [
  {
+  "working_directory": "examples/dsdv",
+  "ini_file": "omnetpp.ini",
+  "config": "Mobile",
+  "run_number": 0,
+  "sim_time_limit": "32s",
+  "test_result": "PASS",
+  "ingredients": "tplx",
+  "fingerprint": "2bf5-fcd0",
+  "timestamp": 1794247372.1665733,
+  "itervars": ""
+ },
+ {
   "working_directory": "examples/adhoc/hostautoconf",
   "ini_file": "omnetpp.ini",
   "config": "General",

@@ -1,6 +1,15 @@
 # Implement DSDV from scratch
 
-Status: **implementation in progress**, 2026-11-08. Authorized by the request to implement and push.
+Status: **implemented and validated**, 2026-11-08. Authorized by the request to implement and push.
+
+Completed: independent catalog and paper-table oracle; versioned wire tooling;
+state owner; UDP/IPv4 adapter; expiry, recovery and lifecycle; incrementals and
+settling; deterministic mobile example; eight passing correctness tests and a
+passing new fingerprint. Debug/release, feature-off and isolated-feature builds
+passed. Same-seed and recorder/logging-neutrality checks matched. Current evidence,
+commands and the pre-existing global-gate/missing-tool gaps are recorded in
+`doc/project/evidence/model/dsdv/results.md`. Nonvisual expectations travel with
+their causal controller and timing changes; visual references remain unchanged.
 
 Implementation discovery: the state owner is a `DsdvTable` member of the routing
 module. Selection, clocks and dissemination are implemented and tested together
@@ -325,9 +334,9 @@ repeatability and observer neutrality. Follow the focused and before-push sequen
 [run-the-gates](../../doc/project/guide/run-the-gates.md), including debug/release compilation,
 architecture/naming checks and feature-off compilation.
 
-No algorithm tests, build, or simulation have run for this planning task. Concrete new test filenames,
-runner filters and numerical timer defaults will be established with the specification and fixtures;
-they are proposed work, not existing coverage. The project map and `doc/project/guide/` search expose
+At planning freeze no algorithm tests, build, or simulation had run. Concrete new test filenames,
+runner filters and numerical timer defaults were subsequently established with the specification
+and fixtures; current execution evidence is in the model results. The project map and `doc/project/guide/` search expose
 no dedicated implementation-plan procedure or mandatory plan approval template; this draft uses
 `plan/pending/` and the current contribution/protocol/test routes.
 
@@ -339,5 +348,7 @@ The source seal registry currently covers `common/packet/`; use its public API w
 Any later recorded-expectation changes need their exact scope and reason reviewed under
 [baseline rules](../../doc/project/rule/testing.md#tr-baseline-deliberate).
 
-This task writes the plan only. It neither changes production code nor establishes implementation
-correctness or compatibility with existing DSDV scenarios.
+The planning-only authorization has been superseded by the explicit implementation
+request. The implemented profile and its measured support are maintained in the
+model evidence, not inferred from the intent recorded in this plan. Existing
+scenario trajectories are intentionally not claimed compatible with the new model.
