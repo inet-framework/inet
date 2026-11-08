@@ -1,0 +1,180 @@
+%description:
+DSDV kernel and lifecycle checks. Inject a complete callback-level datagram at
+the exact neighbor expiry timestamp with normal delivery priority: refresh wins.
+Keep the sender live while omitting the destination: destination expiry wins.
+Exercise actual interface state signals, node shutdown, crash and restart.
+
+%file: test.ned
+import inet.routing.dsdv.Dsdv;
+import inet.node.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+import inet.common.scenario.ScenarioManager;
+simple DsdvKernelProbe extends Dsdv { parameters: @class(DsdvKernelProbe); }
+network DsdvLifecycleNetwork
+{
+    submodules:
+        radioMedium: UnitDiskRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        scenarioManager: ScenarioManager;
+        host: AdhocHost;
+}
+
+%file: Probe.cc
+#include "inet/routing/dsdv/Dsdv.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/transportlayer/common/L4PortTag_m.h"
+using namespace inet;
+using namespace inet::dsdv;
+namespace DsdvLifecycle {
+
+class DsdvKernelProbe : public Dsdv
+{
+    cMessage *probeTimer = nullptr;
+    int step = 0;
+    uint64_t beforeOutage = 0;
+    uint64_t beforeStop = 0;
+    uint64_t beforeCrash = 0;
+    Ipv4Address destination = Ipv4Address("10.0.0.3");
+    std::vector<simtime_t> times = {.1,1.1,1.2,2.5,2.600001,3,3.5,3.500001,4.1,5.1,6.1,7.1};
+    void inject(bool withDestination) {
+        auto header=makeShared<DsdvHeader>();
+        header->setSender(Ipv4Address("10.0.0.2"));
+        header->setChunkLength(B(withDestination?32:16));
+        header->setEntriesArraySize(withDestination?1:0);
+        if (withDestination) {
+            DsdvEntry entry; entry.destination=destination; entry.sequence=10; entry.metric=1;
+            header->setEntries(0,entry);
+        }
+        auto packet=new Packet("controlled update",header);
+        packet->addTag<InterfaceInd>()->setInterfaceId(routingInterface->getInterfaceId());
+        packet->addTag<L3AddressInd>()->setSrcAddress(Ipv4Address("10.0.0.2"));
+        packet->addTag<L4PortInd>()->setSrcPort(controlPort);
+        socketDataArrived(&socket,packet);
+    }
+    void assertNoTimers() {
+        ASSERT(!active && !periodicTimer->isScheduled() && !advertisementTimer->isScheduled() && !expiryTimer->isScheduled());
+        for (int i=0;i<routingTable->getNumRoutes();i++) ASSERT(routingTable->getRoute(i)->getSource()!=this);
+    }
+    void probe() {
+        switch (step) {
+            case 0: inject(true); break;
+            case 1:
+                ASSERT(expiryTimer->isScheduled() && expiryTimer->getArrivalTime()==simTime());
+                inject(true);
+                ASSERT(table.getRouteEntries().at(destination).current.metric==2);
+                ASSERT(expiryTimer->getArrivalTime()==SimTime(2.1));
+                break;
+            case 2: {
+                inject(false);
+                auto route=routingTable->createRoute(); route->setDestination(Ipv4Address("10.9.0.1"));
+                route->setPrefixLength(32); route->setInterface(routingInterface);
+                route->setNextHop(Ipv4Address("10.0.0.2")); route->setSourceType(IRoute::MANUAL);
+                routingTable->addRoute(route);
+                break;
+            }
+            case 3: inject(false); break;
+            case 4:
+                ASSERT(table.getRouteEntries().at(destination).current.sequence==11);
+                ASSERT(!DsdvTable::isFinite(table.getRouteEntries().at(destination).current));
+                beforeOutage=table.getSelf().current.sequence;
+                break;
+            case 5:
+                routingInterface->setState(NetworkInterface::DOWN);
+                assertNoTimers();
+                ASSERT(routingTable->findBestMatchingRoute(Ipv4Address("10.9.0.1"))!=nullptr);
+                break;
+            case 6:
+                routingInterface->setState(NetworkInterface::UP);
+                routingInterface->setCarrier(true);
+                ASSERT(active && table.getSelf().current.sequence==beforeOutage+2);
+                inject(false); // Valid empty input must not cancel the mandatory recovery dump.
+                ASSERT(startupDump && advertisementTimer->isScheduled() && advertisementTimer->getArrivalTime()==simTime());
+                break;
+            case 7:
+                ASSERT(!startupDump && table.getRouteEntries().at(destination).hasAdvertised);
+                ASSERT(table.getRouteEntries().at(destination).advertised.sequence==11);
+                beforeStop=table.getSelf().current.sequence;
+                break;
+            case 8: assertNoTimers(); break;
+            case 9:
+                ASSERT(active && table.getSelf().current.sequence==beforeStop+2);
+                ASSERT(table.getRouteEntries().at(destination).current.sequence==11);
+                beforeCrash=table.getSelf().current.sequence;
+                break;
+            case 10: assertNoTimers(); break;
+            case 11:
+                ASSERT(active && table.getSelf().current.sequence==beforeCrash+2);
+                ASSERT(table.getRouteEntries().at(destination).current.sequence==11);
+                std::cout << "DSDV lifecycle PASS: tie refresh, independent expiry, interface recovery, stop/crash/restart\n";
+                break;
+        }
+        if (++step < int(times.size())) scheduleAt(times[step],probeTimer);
+    }
+  protected:
+    void initialize(int stage) override {
+        Dsdv::initialize(stage);
+        if (stage==INITSTAGE_LAST) {
+            probeTimer=new cMessage("probeTimer");
+            probeTimer->setSchedulingPriority(0);
+            scheduleAt(times[0],probeTimer);
+        }
+    }
+    void handleMessageWhenUp(cMessage *message) override {
+        if (message==probeTimer) probe(); else Dsdv::handleMessageWhenUp(message);
+    }
+    void handleMessageWhenDown(cMessage *message) override {
+        if (message==probeTimer) probe(); else Dsdv::handleMessageWhenDown(message);
+    }
+    void finish() override { ASSERT(step==int(times.size())); }
+  public:
+    ~DsdvKernelProbe() override { cancelAndDelete(probeTimer); }
+};
+Define_Module(DsdvKernelProbe);
+}
+
+%inifile: omnetpp.ini
+[General]
+network = DsdvLifecycleNetwork
+sim-time-limit = 8s
+seed-set = 0
+cmdenv-express-mode = true
+record-vector-results = false
+**.scalar-recording = false
+**.vector-recording = false
+*.host.hasStatus = true
+*.host.numApps = 1
+*.host.app[0].typename = "DsdvKernelProbe"
+*.host.app[0].fullDumpInterval = 100s
+*.host.app[0].periodicJitter = 0s
+*.host.app[0].neighborTimeout = 1s
+*.host.app[0].routeTimeout = 1.5s
+*.host.app[0].settlingCap = 1s
+*.host.ipv4.routingTable.netmaskRoutes = ""
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='host' names='wlan0' address='10.0.0.1' netmask='255.255.255.0'/></config>")
+*.scenarioManager.script = xml("<scenario><shutdown t='4' module='host'/><startup t='5' module='host'/><crash t='6' module='host'/><startup t='7' module='host'/></scenario>")
+*.host.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.updateFromDisplayString = false
+**.mobility.initialX = 100m
+**.mobility.initialY = 100m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 110m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.headerLength = 20B
+
+%contains: stdout
+DSDV lifecycle PASS: tie refresh, independent expiry, interface recovery, stop/crash/restart

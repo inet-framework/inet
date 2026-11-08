@@ -77,3 +77,23 @@ references inspected for migration. The removed `dsdv.netmask` override and
 the showcase's IP-level attachment were updated. No old algorithm, serializer,
 tests or behavior served as an oracle. Legacy wire classes remain compiled but
 the new adapter never creates or consumes them as its native representation.
+
+## Lifecycle and kernel expiry
+
+```
+inet_run_module_tests -p inet -m debug --no-build \
+  -f 'DsdvLifecycle\.test$' --no-concurrent \
+  --log-file /tmp/dsdv-lifecycle-runner.log
+```
+
+Observed **1 PASS**, General/run/seed 0, eight seconds, fresh debug adapter.
+Artifacts: `tests/module/work/DsdvLifecycle/`. The test injects datagrams at the
+production UDP callback boundary; it does not claim radio or UDP delivery.
+Actual kernel events establish that a normal-priority refresh at the exact
+neighbor expiry timestamp cancels that expiry. Destination expiry still occurs
+when later valid packets omit that destination. An unrelated manual route
+survives DSDV's interface-down cleanup. All three protocol timers are canceled.
+Carrier and UP state together restore operation without a module restart.
+The recovery startup view repeats a withdrawal already advertised before the
+outage. ScenarioManager then performs real node shutdown/startup and
+crash/startup; retained floors and self-sequence advances are asserted separately.
