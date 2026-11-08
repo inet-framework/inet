@@ -1,6 +1,6 @@
 # DSDV results
 
-> **Kind:** report · **Status:** draft · **Seal:** none · **Owns:** — · **Stands on:** [checks](../../protocol/dsdv/checks.md)
+> **Kind:** report · **Status:** current · **Seal:** none · **Owns:** — · **Stands on:** [checks](../../protocol/dsdv/checks.md)
 
 At specification freeze no test had run. The plan supplies the implementation contract; the source
 owner is `src/inet/routing/dsdv/`, using public packet, UDP, lifecycle, interface
@@ -146,3 +146,109 @@ case. The adapter reports `invalidationReason=remoteWithdrawal` when removing
 the corresponding owned IPv4 projection; malformed and ignored packets do not
 emit this transition. Debug and release rebuilds and that focused case passed
 (`/tmp/dsdv-observability-*-build.log`, `/tmp/dsdv-observability-test.log`).
+
+The final startup audit tests valid empty input immediately after interface-up,
+before its startup advertisement callback. This exposed a cancellation path:
+ordinary advertisement rescheduling could see no triggered obligations and
+cancel the mandatory startup full dump. `scheduleTimers()` now preserves that
+dump until its callback submits it. Both modes rebuilt and the expanded
+lifecycle case passed; logs: `/tmp/dsdv-startup-{debug,release}-build.log` and
+`/tmp/dsdv-startup-test.log`.
+
+## Mobile example, isolation and repeatability
+
+`DsdvMobile.test` runs `examples/dsdv` configuration Mobile, run/seed 0, for
+32 seconds through `DsdvRouter`'s production attachment. It exports the recorded
+`pingRxSeq:vector` using `opp_scavetool export -F CSV-R` with an exact module/name
+filter. Replies occur before t=8, none in [12,22], and replies resume after t=26.
+The run records 57 requests and 24 replies; this is a delivery check, not a
+throughput or loss-performance claim. Artifacts are in
+`tests/protocol/dsdv/work/DsdvMobile/`, including `simulation.log`,
+`mobile.vec`, `mobile.sca`, and `replies.csv`.
+
+Feature profiles were saved outside the tree and restored after each campaign:
+
+```
+opp_featuretool disable -f Dsdv
+make -j8 MODE=debug
+# Verify nm -D -C src/libINET_dbg.so contains no inet::dsdv:: symbols.
+opp_featuretool disable -f all
+opp_featuretool enable -r DsdvExamples
+make -j8 MODE=debug
+```
+
+Both builds exited 0. The isolated profile enables 12 required features and
+disables AODV, DYMO, GPSR and the other routing implementations. Running the
+mobile check's extracted `run.py` against that library also exited 0 and passed
+all three delivery windows. Logs: `/tmp/dsdv-feature-off-build.log`,
+`/tmp/dsdv-isolated-build.log`, `/tmp/dsdv-isolated-features.log`,
+`/tmp/dsdv-isolated-mobile.log`; isolated artifacts: `/tmp/dsdv-minimal-run/`.
+The restored full profile then rebuilt in debug and release successfully.
+
+A first-time Mobile/32s/run-0 `tplx` fingerprint is `2bf5-fcd0`. It is a new row
+for a new example; no existing recorded expectation was changed. Two same-seed
+runs match it. Disabling scalar/vector recorders and changing logging to
+non-express/off also matches it. Logs: `/tmp/dsdv-fingerprint-discovery.log`,
+`/tmp/dsdv-repeat2.log`, `/tmp/dsdv-observer-neutrality.log`. Old DSDV trajectory
+expectations were neither used as correctness oracles nor regenerated.
+
+## Final focused verification
+
+Working directory is the repository root, with `source .envrc` and
+`source /tmp/dsdv-python/bin/activate`. This checkout exposes native `inet_run_*`
+runners; the packaged skill's `opp_run_*`/`--load` interface is absent. The local
+runner's help and implementation were checked before selecting these commands.
+
+```
+make -j8 MODE=debug
+make -j8 MODE=release
+inet_run_unit_tests -p inet -m debug --no-build \
+  -f 'Dsdv(Foundation|Dissemination|Graph|PaperTables)\.test$' --no-concurrent \
+  --log-file /tmp/dsdv-final-unit-runner.log
+inet_run_module_tests -p inet -m debug --no-build \
+  -f 'Dsdv(Lifecycle|Scheduling)\.test$' --no-concurrent \
+  --log-file /tmp/dsdv-final-module-runner.log
+inet_run_protocol_tests -p inet -m debug --no-build -w dsdv \
+  -f 'Dsdv(Forwarding|Mobile)\.test$' --no-concurrent \
+  --log-file /tmp/dsdv-final-protocol-runner.log
+inet_run_fingerprint_tests -p inet -m debug --no-build \
+  -w '^examples/dsdv$' -c '^Mobile$' -r '^0$' --no-concurrent \
+  --log-file /tmp/dsdv-final-fingerprint-runner.log
+```
+
+Observed: **4 unit PASS, 2 module PASS, 2 protocol PASS, 1 fingerprint PASS**;
+no expected failures or zero-case selections. All commands and both builds
+exited 0. Raw runner output is in the matching `/tmp/dsdv-final-*.log` files;
+generated test artifacts remain under their respective `work/Dsdv*/` directories.
+The eight correctness checks use General/run/seed 0 except the Mobile example,
+which uses Mobile/run/seed 0. No seed range or performance uncertainty is claimed.
+
+## Project gates and capability gaps
+
+| Gate | Status | Scope and interpretation |
+| --- | --- | --- |
+| Debug and release compilation | PASS | Fresh libraries in both modes |
+| Scoped architecture and naming | PASS | New DSDV source/module subtree |
+| Commit and classification checks | PASS | `origin/master..HEAD`; required trailers retained |
+| Source seals | PASS | No sealed source changed |
+| Document seal index | PASS | No stale index or changed sealed unit |
+| Global architecture | existing findings | Unchanged infrastructure/protocol coupling candidates, including ledgered AV-ORG cases; no DSDV hit |
+| Global naming | existing findings | Unchanged plural/underscore directories and assets; no DSDV declaration hit |
+| Global interfaces | existing findings | 13 existing `I<Stem>` violations outside DSDV; ledger holds known contract cases |
+| C++ lint | NOT_RUN | `clang-tidy` is absent; checker exits 2 |
+| Skill-suite package checks from local AGENTS.md | NOT_RUN | This is an INET checkout; `scripts/validate_skill_suite.py`, `scripts/package_skill_suite.py` and `tests/skill-suite/` are absent |
+
+Global gate logs are `/tmp/dsdv-gate-{architecture,naming,interfaces,commits,
+classification,source-seals,seals,cpp}.log`. Skill package/deployment commands
+were attempted using a new temporary deployment directory outside the repository;
+their missing-infrastructure diagnostics are in `/tmp/dsdv-skill-*.log`. These
+are capability gaps, not passing checks or DSDV behavior failures. Existing
+unrelated violations and the user's pre-existing `AGENTS.md` edit were preserved.
+
+The self-audit retraced packet ownership, numeric bounds, timer priority,
+initialization stages, stop/crash/restart, route ownership, interface recovery,
+feature dependencies, wire length accounting and observational neutrality.
+No new source exception or baseline approval is required. No external simulator
+or excluded DSDV algorithm was consulted. The tests and declared profile bound
+the conformance claim; global repository cleanup and unavailable tooling remain
+outside this implementation's scope.
