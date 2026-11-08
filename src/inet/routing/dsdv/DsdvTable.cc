@@ -7,6 +7,19 @@
 namespace inet {
 namespace dsdv {
 
+std::ostream& operator<<(std::ostream& stream, const DsdvTable::RouteEntry& record)
+{
+    stream << "destination=" << record.current.destination << " successor=" << record.successor
+           << " sequence=" << record.current.sequence << " metric=" << record.current.metric
+           << " refreshed=" << record.refreshed << " changed=" << record.changed
+           << " firstAcceptance=" << record.firstAcceptance << " lastImprovement=" << record.lastImprovement
+           << " estimate=" << record.estimate << " deadline=" << record.deadline
+           << " hasSample=" << record.hasSample << " hasAdvertised=" << record.hasAdvertised;
+    if (record.hasAdvertised)
+        stream << " advertisedSequence=" << record.advertised.sequence << " advertisedMetric=" << record.advertised.metric;
+    return stream;
+}
+
 bool DsdvTable::isHost(Ipv4Address address)
 {
     uint32_t value = address.getInt();
