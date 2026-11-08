@@ -29,6 +29,35 @@ static DsdvEntry advertised(const DsdvTable::Advertisement& a, int destination)
 }
 
 %activity:
+// Stable sequences can reduce the estimate to zero; deferred changes still wait 10ms.
+DsdvTable minimum; minimum.configure(Ipv4Address("10.0.0.1"),1,10,12); minimum.start(0);
+minimum.receive(h(2,{e(4,2,1)}),0);
+minimum.prepare(true,10,0);
+for (int i = 1; i <= 32; i++)
+    minimum.receive(h(2,{e(4,2 + 2 * i,1)}), SimTime(i, SIMTIME_MS));
+ASSERT(minimum.getRouteEntries().at(Ipv4Address("10.0.0.4")).estimate == SIMTIME_ZERO);
+minimum.prepare(true,10,SimTime(32, SIMTIME_MS));
+minimum.receive(h(3,{e(4,68,3)}), SimTime(40, SIMTIME_MS));
+ASSERT(minimum.nextAdvertisement(SimTime(40, SIMTIME_MS)) == SimTime(50, SIMTIME_MS));
+// Neither a full dump nor a later improvement bypasses or slides the deadline.
+ASSERT(advertised(minimum.prepare(true,10,SimTime(41, SIMTIME_MS)),4).sequence == 66);
+minimum.receive(h(2,{e(4,68,1)}), SimTime(42, SIMTIME_MS));
+ASSERT(minimum.nextAdvertisement(SimTime(42, SIMTIME_MS)) == SimTime(50, SIMTIME_MS));
+ASSERT(advertised(minimum.prepare(false,10,SimTime(50, SIMTIME_MS)),4).sequence == 68);
+// Urgent withdrawals bypass the minimum.
+minimum.receive(h(2,{e(4,69,UINT32_MAX)}), SimTime(51, SIMTIME_MS));
+ASSERT(minimum.nextAdvertisement(SimTime(51, SIMTIME_MS)) == SimTime(51, SIMTIME_MS));
+// An explicitly configured minimum is honored, including minimum == cap.
+DsdvTable custom; custom.configure(Ipv4Address("10.0.0.1"),.02,10,12,.02); custom.start(0);
+custom.receive(h(2,{e(4,2,1)}),0); custom.prepare(true,10,0);
+custom.receive(h(3,{e(4,4,3)}),SimTime(1, SIMTIME_MS));
+ASSERT(custom.nextAdvertisement(SimTime(1, SIMTIME_MS)) == SimTime(21, SIMTIME_MS));
+for (simtime_t invalid : {SIMTIME_ZERO, SimTime(-1, SIMTIME_MS), SimTime(1001, SIMTIME_MS)}) {
+    bool rejected = false;
+    try { DsdvTable bad; bad.configure(Ipv4Address("10.0.0.1"),1,10,12,invalid); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
 // Several arrivals before an urgent callback coalesce to the current record.
 DsdvTable coalesced; coalesced.configure(Ipv4Address("10.0.0.1"),1,10,12); coalesced.start(0);
 coalesced.prepare(true,10,0);

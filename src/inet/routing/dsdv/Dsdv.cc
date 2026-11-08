@@ -37,7 +37,8 @@ void Dsdv::initialize(int stage)
         jitter = par("periodicJitter");
         if (controlPort < 1024 || controlPort > UINT16_MAX || period <= SIMTIME_ZERO || jitter < SIMTIME_ZERO ||
                 par("neighborTimeout").doubleValue() <= 0 || par("routeTimeout").doubleValue() <= 0 ||
-                par("settlingCap").doubleValue() <= 0)
+                par("settlingCap").doubleValue() <= 0 || par("minSettlingDelay").doubleValue() <= 0 ||
+                par("minSettlingDelay").doubleValue() > par("settlingCap").doubleValue())
             throw cRuntimeError("Invalid DSDV control port or timer parameters");
         periodicTimer = new cMessage("periodicTimer");
         advertisementTimer = new cMessage("advertisementTimer");
@@ -106,7 +107,7 @@ void Dsdv::start()
     if (active || !interfaceUsable())
         return;
     auto address = routingInterface->getProtocolData<Ipv4InterfaceData>()->getIPAddress();
-    table.configure(address, par("settlingCap"), par("neighborTimeout"), par("routeTimeout"));
+    table.configure(address, par("settlingCap"), par("neighborTimeout"), par("routeTimeout"), par("minSettlingDelay"));
     int budget = std::min(par("payloadBudget").intValue(), int64_t(routingInterface->getMtu() - 28));
     if (budget < DsdvTable::HEADER_BYTES + DsdvTable::ENTRY_BYTES)
         throw cRuntimeError("DSDV payload budget/MTU cannot hold one entry plus IPv4/UDP overhead");

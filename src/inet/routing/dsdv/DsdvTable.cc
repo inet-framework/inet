@@ -66,14 +66,17 @@ bool DsdvTable::equal(const DsdvEntry& a, const DsdvEntry& b)
     return a.destination == b.destination && a.sequence == b.sequence && a.metric == b.metric;
 }
 
-void DsdvTable::configure(Ipv4Address address, simtime_t settlingCap, simtime_t neighborAge, simtime_t routeAge)
+void DsdvTable::configure(Ipv4Address address, simtime_t settlingCap, simtime_t neighborAge, simtime_t routeAge,
+        simtime_t minSettlingDelay)
 {
-    if (!isHost(address) || settlingCap <= SIMTIME_ZERO || neighborAge <= SIMTIME_ZERO || routeAge <= SIMTIME_ZERO)
-        throw cRuntimeError("DSDV requires a unicast IPv4 address and positive settling/expiry intervals");
+    if (!isHost(address) || settlingCap <= SIMTIME_ZERO || neighborAge <= SIMTIME_ZERO || routeAge <= SIMTIME_ZERO ||
+            minSettlingDelay <= SIMTIME_ZERO || minSettlingDelay > settlingCap)
+        throw cRuntimeError("DSDV requires a unicast IPv4 address, positive settling/expiry intervals, and minimum settling delay <= cap");
     if (!self.isUnspecified() && self != address)
         throw cRuntimeError("DSDV address changes require persistent state migration and are unsupported");
     self = address;
     cap = settlingCap;
+    this->minSettlingDelay = minSettlingDelay;
     neighborTimeout = neighborAge;
     routeTimeout = routeAge;
 }
@@ -164,7 +167,7 @@ void DsdvTable::install(const DsdvEntry& entry, Ipv4Address sender, simtime_t no
     if (urgent)
         makeUrgent(record);
     else if (pathChanged && record.deadline < SIMTIME_ZERO)
-        record.deadline = now + std::min(cap, record.estimate * 2);
+        record.deadline = now + std::min(cap, std::max(minSettlingDelay, record.estimate * 2));
 }
 
 void DsdvTable::receive(const DsdvHeader& header, simtime_t now)

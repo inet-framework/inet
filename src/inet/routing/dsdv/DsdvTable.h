@@ -45,6 +45,7 @@ class INET_API DsdvTable
   protected:
     Ipv4Address self;
     simtime_t cap;
+    simtime_t minSettlingDelay;
     simtime_t neighborTimeout;
     simtime_t routeTimeout;
     std::map<Ipv4Address, RouteEntry> routeEntries;
@@ -63,7 +64,8 @@ class INET_API DsdvTable
     static bool isFinite(const DsdvEntry& entry) { return entry.metric != INFINITY_METRIC; }
     static bool equal(const DsdvEntry& a, const DsdvEntry& b);
 
-    void configure(Ipv4Address address, simtime_t settlingCap, simtime_t neighborAge, simtime_t routeAge);
+    void configure(Ipv4Address address, simtime_t settlingCap, simtime_t neighborAge, simtime_t routeAge,
+            simtime_t minSettlingDelay = SimTime(10, SIMTIME_MS));
     void start(simtime_t now);
     void suspend(simtime_t now);
     void advanceSelf();

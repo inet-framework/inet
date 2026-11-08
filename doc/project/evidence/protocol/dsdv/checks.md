@@ -31,6 +31,12 @@ These procedures precede implementation. Metrics below include the receiving hop
   metric/successor changes after the cap are immediate. Other changes wait
   at most one cap while the interface remains usable. Sequence-only updates
   create no trigger and appear in a subsequent periodic dump.
+* **minimum settling:** Drive the estimate to zero with successive sequences
+  without improvements. A deferred metric/successor change still waits 10 ms
+  with the default minimum. A full dump preserves the preceding advertisement;
+  later improvements do not slide the deadline. A withdrawal remains immediate.
+  Check a custom minimum equal to the cap, and reject nonpositive minima or
+  a minimum above the cap.
 * **periodic:** Advance the self sequence by two per update, not per fragment.
   Lose simultaneous startup dumps; later randomized periodic dumps converge.
 * **encoding:** Check independent network-order bytes for a fixed header and
