@@ -27,6 +27,7 @@ network DsdvForwardingNetwork
 #include "inet/common/ModuleAccess.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
+#include "inet/networklayer/arp/ipv4/ArpPacket_m.h"
 #include "inet/common/packet/Packet.h"
 #include "inet/common/ProtocolTag_m.h"
 using namespace inet;
@@ -39,6 +40,7 @@ class DsdvForwardingObserver : public SimpleModule, public cListener
     int disabledReplies = 0;
     std::set<std::string> traversed;
     int controls = 0;
+    int nextHopArpRequests = 0;
   protected:
     int numInitStages() const override { return NUM_INIT_STAGES; }
     void initialize(int stage) override {
@@ -46,6 +48,7 @@ class DsdvForwardingObserver : public SimpleModule, public cListener
             getParentModule()->subscribe("pingRxSeq",this);
             getParentModule()->subscribe("updateAccepted",this);
             getParentModule()->subscribe("packetReceivedFromLower",this);
+            getParentModule()->subscribe("arpRequestSent",this);
         }
     }
     void receiveSignal(cComponent *source,simsignal_t signal,intval_t,cObject *) override {
@@ -55,9 +58,14 @@ class DsdvForwardingObserver : public SimpleModule, public cListener
         else if (path.find(".pair[0].")!=std::string::npos) pairReplies++;
         else if (path.find(".disabled[0].")!=std::string::npos) disabledReplies++;
     }
-    void receiveSignal(cComponent *source,simsignal_t,cObject *value,cObject *) override {
+    void receiveSignal(cComponent *source,simsignal_t signal,cObject *value,cObject *) override {
         auto packet=dynamic_cast<Packet *>(value);
         std::string path=source->getFullPath();
+        if (packet && signal==registerSignal("arpRequestSent") && path.find(".line[0].ipv4.arp")!=std::string::npos) {
+            ASSERT(packet->peekAtFront<ArpPacket>()->getDestIpAddress()==Ipv4Address("10.0.0.2"));
+            nextHopArpRequests++;
+            return;
+        }
         if (!packet || (path.find(".line[1].ipv4.ip") == std::string::npos &&
                 path.find(".line[2].ipv4.ip") == std::string::npos)) return;
         auto protocol=packet->findTag<PacketProtocolTag>();
@@ -72,6 +80,7 @@ class DsdvForwardingObserver : public SimpleModule, public cListener
                   << " intermediate=" << traversed.size() << "\n";
         ASSERT(controls > 0 && lineReplies > 0 && pairReplies > 0 && disabledReplies == 0);
         ASSERT(traversed.size()==2);
+        ASSERT(nextHopArpRequests>0);
         for (int source=0;source<4;source++) {
             auto node=getParentModule()->getSubmodule("line",source);
             auto table=check_and_cast<IRoutingTable *>(node->getSubmodule("ipv4")->getSubmodule("routingTable"));

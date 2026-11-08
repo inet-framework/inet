@@ -97,3 +97,52 @@ Carrier and UP state together restore operation without a module restart.
 The recovery startup view repeats a withdrawal already advertised before the
 outage. ScenarioManager then performs real node shutdown/startup and
 crash/startup; retained floors and self-sequence advances are asserted separately.
+
+## Kernel dissemination
+
+```
+inet_run_module_tests -p inet -m debug --no-build \
+  -f 'Dsdv(Lifecycle|Scheduling)\.test$' --no-concurrent \
+  --log-file /tmp/dsdv-module-runner.log
+```
+
+Observed **2 PASS**, no expected failures, General/run/seed 0. The scheduling
+case runs for two seconds. Raw output: `/tmp/dsdv-module.log`; artifacts:
+`tests/module/work/DsdvScheduling/` and `DsdvLifecycle/`. Scheduling injects at
+the production callback boundary and inspects actual IPv4 projections, pending
+event timestamps, advertised state and emitted submission signals. It establishes
+full-dump damping, a non-sliding .45-second deadline despite successive metric
+and sequence updates, baseline-equal corrective submission, correction during
+settling, sequence-only silence, periodic promotion and three synchronous
+datagrams on required-entry overflow at capacity two. Invalid version and
+duplicate destination packets leave both route freshness and expiry scheduling
+unchanged. Pure optional-sequence overflow is separately covered by the unit case.
+
+The state self-audit added an urgent-coalescing case: a newer finite change
+arriving before an already obligatory send must inherit that urgency. The
+foundation's required set now makes the current record eligible immediately;
+its unit check verifies that no old advertisement or later deadline survives.
+
+The additional `DsdvPaperTables.test` unit case passed (General/run/seed 0)
+through the same debug unit runner with filter `DsdvPaperTables\.test$`.
+It reconstructs the literal sequences, metrics and next hops from the original
+paper's §4 Tables 1–4, including MH1's change from sequence 406/metric 2 through
+MH2 to sequence 516/metric 3 through MH6. The versioned profile carries sender
+identity in its header rather than reserving a sender-first entry. The original
+PDF table images were inspected independently; generated artifact directory:
+`tests/unit/work/DsdvPaperTables/`, log `/tmp/dsdv-paper-test.log`.
+
+Final lifecycle expansion also performs down/up/carrier restoration within one
+kernel event, then asserts that the rebound UDP socket is open. This passed;
+the actual dispatcher/provider ordering did not exhibit a delayed-close race,
+so no extra socket-generation state or shutdown mechanism was introduced.
+The forwarding case additionally observes the source's real ARP request and
+asserts that it resolves adjacent next hop 10.0.0.2, not endpoint 10.0.0.4.
+Both expanded tests passed against the restored fresh debug library; logs:
+`/tmp/dsdv-flap-test.log` and `/tmp/dsdv-forwarding-arp.log`.
+
+The final signal audit added a received odd-sequence withdrawal to the scheduling
+case. The adapter reports `invalidationReason=remoteWithdrawal` when removing
+the corresponding owned IPv4 projection; malformed and ignored packets do not
+emit this transition. Debug and release rebuilds and that focused case passed
+(`/tmp/dsdv-observability-*-build.log`, `/tmp/dsdv-observability-test.log`).
