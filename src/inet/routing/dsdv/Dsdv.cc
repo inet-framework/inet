@@ -48,6 +48,25 @@ void Dsdv::initialize(int stage)
         periodicTimer->setSchedulingPriority(30);
         socket.setOutputGate(gate("socketOut"));
         socket.setCallback(this);
+        WATCH(active);
+        WATCH(startupDump);
+        WATCH(capacity);
+        WATCH_EXPR("selfAddress", active ? table.getSelf().current.destination : Ipv4Address::UNSPECIFIED_ADDRESS);
+        WATCH_EXPR("selfSequence", active ? table.getSelf().current.sequence : uint64_t(0));
+        WATCH_EXPR("numDestinations", table.getRouteEntries().size());
+        WATCH_EXPR("numFiniteRoutes", std::count_if(table.getRouteEntries().begin(), table.getRouteEntries().end(),
+                [this](const auto& item) {
+                    return active && item.first != table.getSelf().current.destination && DsdvTable::isFinite(item.second.current);
+                }));
+        WATCH_EXPR("numNeighbors", table.getNeighbors().size());
+        WATCH_EXPR("numPendingAdvertisements", table.getMustSend().size());
+        WATCH_EXPR("routeEntries", table.getRouteEntries());
+        WATCH_EXPR("neighbors", table.getNeighbors());
+        WATCH_EXPR("fullDumpBaseline", table.getBaseline());
+        WATCH_EXPR("mustSend", table.getMustSend());
+        WATCH_EXPR("nextPeriodicDump", periodicTimer->isScheduled() ? periodicTimer->getArrivalTime() : SimTime::getMaxTime());
+        WATCH_EXPR("nextAdvertisement", advertisementTimer->isScheduled() ? advertisementTimer->getArrivalTime() : SimTime::getMaxTime());
+        WATCH_EXPR("nextExpiry", expiryTimer->isScheduled() ? expiryTimer->getArrivalTime() : SimTime::getMaxTime());
         auto group = ProtocolGroup::getUdpProtocolGroup();
         auto existing = group->findProtocol(controlPort);
         if (existing && existing != &dsdvProtocol)

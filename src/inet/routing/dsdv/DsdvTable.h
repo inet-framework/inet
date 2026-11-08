@@ -4,6 +4,7 @@
 
 #include <climits>
 #include <map>
+#include <ostream>
 #include <set>
 #include <vector>
 
@@ -73,8 +74,13 @@ class INET_API DsdvTable
     simtime_t nextAdvertisement(simtime_t now) const;
     Advertisement prepare(bool full, size_t capacity, simtime_t now);
     const std::map<Ipv4Address, RouteEntry>& getRouteEntries() const { return routeEntries; }
+    const std::map<Ipv4Address, simtime_t>& getNeighbors() const { return neighbors; }
+    const std::map<Ipv4Address, DsdvEntry>& getBaseline() const { return baseline; }
+    const std::set<Ipv4Address>& getMustSend() const { return mustSend; }
     const RouteEntry& getSelf() const { return routeEntries.at(self); }
 };
+
+INET_API std::ostream& operator<<(std::ostream& stream, const DsdvTable::RouteEntry& record);
 
 } // namespace dsdv
 } // namespace inet
