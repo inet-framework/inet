@@ -21,6 +21,7 @@ simple Dsdv like IApp
         double neighborTimeout @unit(s) = default(20s); // Positive sender liveness timeout
         double routeTimeout @unit(s) = default(25s); // Positive per-destination freshness timeout
         double settlingCap @unit(s) = default(1s); // Positive maximum finite-change delay
+        double minSettlingDelay @unit(s) = default(10ms); // Positive minimum deferred-change delay, at most settlingCap
         int payloadBudget @unit(B) = default(1400B); // UDP payload; also limited by interface MTU minus 28B
         @signal[updateAccepted](type=long);
         @signal[updateRejected](type=long);

@@ -73,6 +73,10 @@ The :ned:`Dsdv` module implements the IPv4 host-routing profile of
 Perkins and Bhagwat (SIGCOMM 1994), with hop counts on one bidirectional ad hoc
 interface. Forwarding changes take effect immediately; finite route
 advertisements may wait for settling. Periodic full dumps repair lost updates.
+New settling deadlines are at least ``minSettlingDelay`` (default 10 ms) and
+at most ``settlingCap`` into the future. Later updates retain the existing
+deadline. The minimum must be positive and no greater than the cap;
+urgent advertisements bypass this delay.
 The model uses its own versioned UDP format and retains withdrawn destination
 sequence floors for the remainder of the run.
 
