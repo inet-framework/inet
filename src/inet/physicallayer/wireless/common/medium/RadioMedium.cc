@@ -728,14 +728,9 @@ bool RadioMedium::isReceptionAttempted(const IRadio *receiver, const ITransmissi
 
 bool RadioMedium::isReceptionSuccessful(const IRadio *receiver, const ITransmission *transmission, IRadioSignal::SignalPart part) const
 {
-    const IReception *reception = getReception(receiver, transmission);
+    // the cached decision keeps the random draws of the receiver: a later query of the same part draws no number
     const IListening *listening = getListening(receiver, transmission);
-    // TODO why compute?
-    const IInterference *interference = computeInterference(receiver, listening, transmission);
-    const ISnir *snir = getSNIR(receiver, transmission);
-    bool isReceptionSuccessful = receiver->getReceiver()->computeIsReceptionSuccessful(listening, reception, part, interference, snir);
-    delete interference;
-    return isReceptionSuccessful;
+    return getReceptionDecision(receiver, listening, transmission, part)->isReceptionSuccessful();
 }
 
 void RadioMedium::sendToAllRadios(IRadio *transmitter, const IWirelessSignal *signal)
