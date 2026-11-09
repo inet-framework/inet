@@ -109,6 +109,76 @@ Scoped architecture, commit-format/classification checks for the preparation com
 format, seal-index and diff-whitespace checks passed. Scoped naming reports the pre-existing
 unchanged `AodvControlPackets.msg` umbrella filename as a mechanical candidate.
 
-Release compilation, the complete before-push gate set, feature-isolated builds, IPv6 runtime
+Full release compilation subsequently passed on the freshness source, exit 0, with log
+`/tmp/inet-aodv-release-build.log`. The complete before-push gate set, feature-isolated builds, IPv6 runtime
 compatibility, fingerprints, diagram rendering and the remaining behavioral plan stages are not
 established by this record. No existing baseline was changed.
+
+## Lifetime stage
+
+Immediate parent: `67bb7ba7b5cc7768c4c0efef08c990217bf475f2`, AODV source tree
+`5d9a9a632488be44ed84a3ca86023b8c3636d7c4`. Corrected source tree:
+`0244022aa958decc01702b71e36e73337a4d89e0`. The parent and corrected runs use unchanged
+fixture inputs, fresh debug libraries and the same environment as above. The parent source was
+restored and rebuilt for a final comparison after fixture corrections. Separate checkout and
+feature-profile validation remain pending.
+
+| New protocol case | Parent | Corrected |
+| --- | --- | --- |
+| Rfc3561ReverseLifetime | FAIL at 100.1 s, no independent reverse expiry extension | PASS, active after old expiry and inactive after the refreshed deadline, sequence retained |
+| Rfc3561ReverseLifetimeLong | FAIL at 100.1 s, newer path shortens an existing later deadline | PASS, later deadline retained and eventually observed by expiry processing |
+| Rfc3561GratuitousReply | FAIL at 100.15 s, absolute expiry advertised as duration | PASS, remaining whole-millisecond duration and real recipient expiry equal to reception plus duration |
+| Rfc3561SubmillisecondReply | FAIL at 100.1 s, zero-lifetime reply emitted | PASS, no reply and normal request forwarding |
+| Rfc3561MillisecondReply | PASS | PASS, 1999 us advertises 1 ms, control |
+| Rfc3561MaximumLifetimeReply | PASS | PASS, exact UINT32_MAX millisecond field, control |
+| Rfc3561OversizedLifetimeReply | FAIL at 100.1 s, unrepresentable advertisement emitted | PASS, no reply and normal request forwarding |
+
+Four new module tests, `AodvAdvertisementLifetimeInvalid_1.test` through `_4.test`, all fail on
+the parent because it completes initialization and reaches the 10 ms limit instead of rejecting
+the invalid duration. On the corrected library all four pass by observing simulation exit 1,
+the field-specific initialization diagnostic and no undisposed-object output. They cover below-one-
+millisecond and oversized destination and Hello durations. Their other configured time relationships
+are valid. These are initialization rejection tests, not expected-failure markers.
+
+Exact focused commands, from the checkout root:
+
+```sh
+# Parent source, after restoring the immediate parent's Aodv.cc and Aodv.h:
+make -C src -j8 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561(ReverseLifetime(Long)?|GratuitousReply|SubmillisecondReply|MillisecondReply|MaximumLifetimeReply|OversizedLifetimeReply)\.test$' \
+  --no-build --no-concurrent --log-file /tmp/inet-aodv-lifetime-parent-final-runner.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f 'AodvAdvertisementLifetimeInvalid_[1-4]\.test$' --no-build --no-concurrent
+
+# Corrected source, with fresh matching debug/release libraries:
+make -C src -j4 MODE=debug
+make -C src -j4 MODE=release
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561.*\.test$' --no-build --no-concurrent \
+  --log-file /tmp/inet-aodv-lifetime-fixed-runner.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV(SimpleTest(_2)?|ShortestPath|LifecycleTest)|AodvAdvertisementLifetimeInvalid_[1-4])\.test$' \
+  --no-build --no-concurrent
+```
+
+Parent protocol selection: exit 1, five intended assertion failures and two controls passing.
+Parent module selection: exit 1, all four missing required initialization rejection. Corrected
+protocol selection: exit 0, 16 passes. Corrected module selection: exit 0, eight passes, including
+the four existing integration controls. Debug and release builds pass, exit 0. No baseline changed.
+
+Logs: `/tmp/inet-aodv-lifetime-parent-final-build.log`,
+`/tmp/inet-aodv-lifetime-parent-final.log`, `/tmp/inet-aodv-parameter-parent-final.log`,
+`/tmp/inet-aodv-lifetime-debug-build-final.log`, `/tmp/inet-aodv-lifetime-release-build-final.log`,
+`/tmp/inet-aodv-lifetime-fixed.log`, `/tmp/inet-aodv-lifetime-module-fixed.log`.
+Parent outputs and fixture snapshot: `/tmp/inet-aodv-lifetime-parent-evidence-final/`.
+
+Initial boundary-fixture attempts used absolute packet offsets despite a popped MAC header and
+hit the radio medium's simultaneous-transmission guard. Those setup failures are excluded from
+the table. Corrected fixtures use offsets relative to packet data and an explicit deterministic
+medium profile. Exact boundary durations are constructed from integer microseconds.
+
+The [reviewer document](../../../../../tests/protocol/aodv/route-lifetimes.md) explains the packet
+replay, route-state setup, each parent comparison and coverage limits. The migration note records
+the newly rejected configuration values. Full discovery, attribution, transit, reboot, interface,
+subnet and repair coverage remains pending in the plan.
