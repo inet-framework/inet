@@ -50,6 +50,8 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | 8, partial | 2026-11-09 | selected corrections | AODV-F-ERROR, outgoing capacity | Two 256-record parent failures become passes; one- and 255-record controls already pass. Four capacity cases and two adjacent admission controls pass after fresh debug/release builds. |
 
+| 9, partial | 2026-11-09 | selected corrections | AODV-F-LINK, Hello observations | 16 protocol and two module parent runtime failures become passes, with ten protocol parent controls. Combined scope: 112 protocol and 53 module passes. |
+
 ## Selected feature evidence
 
 | Feature | Evidence | Limit |
@@ -60,4 +62,5 @@ The exit criterion of level 1 has three parts, and all three hold:
 | AODV-F-DISCOVERY, timing/bounds | Five wire timing controls and 35 parameter cases pass. | Selected ring, backoff, jitter and configuration boundaries. See [reviewer document](../../../../../tests/protocol/aodv/discovery-timing.md). |
 | AODV-F-LINK, validation/attribution | 21 protocol and three module cases pass, including concurrent ACKs, exact ties, real failed replies/data, quarantine and route replacement. | Direct AckingMac and independent nonaggregating DCF. Ethernet/UDP supplies the exact ACK-order controls. Hello loss, restart reset and broader metadata profiles remain pending. See [reviewer document](../../../../../tests/protocol/aodv/link-validation.md). |
 | AODV-F-ERROR, transit and precursor handling | 25 protocol and three module cases pass, including N preservation, independent ownership, prefix ambiguity and actual-send budget windows. | IPv4 scripted UDP/IP. Prefix identity uses public record setup; real subnet learning, partitioning and lifecycle coverage remain assigned. See [reviewer document](../../../../../tests/protocol/aodv/transit-errors.md). |
+| AODV-F-LINK, Hello observation | 26 protocol and two real three-node module cases pass, including incoming/outgoing distinctions, original-source independence, metadata loss, exact ties and validation failure. | IPv4 AckingMac, independent DCF and Ethernet profiles. Restart reset, selected interfaces and IPv6 runtime remain pending. See [reviewer document](../../../../../tests/protocol/aodv/hello-liveness.md). |
 | Other selected features | Not yet established by this correction stage. | Recovery, interface, subnet and repair stages remain assigned in the plan. |
