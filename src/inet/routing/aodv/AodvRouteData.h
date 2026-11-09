@@ -18,8 +18,11 @@ namespace aodv {
 
 class INET_API AodvRouteData : public cObject
 {
+  public:
+    using Precursor = std::pair<L3Address, int>;
+
   protected:
-    std::set<L3Address> precursorList;
+    std::set<Precursor> precursorList;
     bool active;
     bool repariable;
     bool beingRepaired;
@@ -53,8 +56,8 @@ class INET_API AodvRouteData : public cObject
     void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
     bool isActive() const { return active; }
     void setIsActive(bool active) { this->active = active; }
-    void addPrecursor(const L3Address& precursorAddr) { precursorList.insert(precursorAddr); }
-    const std::set<L3Address>& getPrecursorList() const { return precursorList; }
+    void addPrecursor(const L3Address& address, int interfaceId) { precursorList.emplace(address, interfaceId); }
+    const std::set<Precursor>& getPrecursorList() const { return precursorList; }
     virtual std::string str() const;
 };
 

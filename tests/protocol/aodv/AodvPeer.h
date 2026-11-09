@@ -500,7 +500,8 @@ class AodvDataSource : public SimpleModule
             auto packet = new AodvTrackedPacket(name.c_str(), makeShared<ByteCountChunk>(B(10)));
             auto interfaces = check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"));
             if (hasPar("nextHop") && !par("nextHop").stdstringValue().empty()) {
-                packet->addTag<InterfaceReq>()->setInterfaceId(interfaces->findInterfaceByName("wlan0")->getInterfaceId());
+                const char *name = hasPar("outputInterface") ? par("outputInterface").stringValue() : "wlan0";
+                packet->addTag<InterfaceReq>()->setInterfaceId(interfaces->findInterfaceByName(name)->getInterfaceId());
                 packet->addTag<NextHopAddressReq>()->setNextHopAddress(L3AddressResolver().resolve(par("nextHop")));
             }
             if (hasPar("incompatibleIndex") && index == par("incompatibleIndex").intValue()) {
