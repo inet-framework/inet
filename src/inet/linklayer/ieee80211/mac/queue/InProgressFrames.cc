@@ -69,6 +69,15 @@ bool InProgressFrames::isEligibleToTransmit(Packet *packet)
         ackHandler->isEligibleToTransmit(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
 }
 
+std::vector<Packet *> InProgressFrames::getEligibleFrames()
+{
+    std::vector<Packet *> eligible;
+    for (auto packet : inProgressFrames)
+        if (isEligibleToTransmit(packet))
+            eligible.push_back(packet);
+    return eligible;
+}
+
 void InProgressFrames::ensureHasFrameToTransmit()
 {
     if (!hasEligibleFrameToTransmit()) {

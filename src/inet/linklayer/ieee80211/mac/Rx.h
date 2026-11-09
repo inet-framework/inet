@@ -55,6 +55,7 @@ class INET_API Rx : public ModeSetListener, public IRx
         MacAddress receiver;
         bool noSifsResponse = false;
         simtime_t extension = -1;
+        std::shared_ptr<const AmpduTopology> aggregate;
     };
     struct ReceptionEvidence {
         simtime_t start;
@@ -68,6 +69,7 @@ class INET_API Rx : public ModeSetListener, public IRx
     };
     opp_component_ptr<cModule> networkInterface;
     std::optional<PrecedingFrame> precedingFrame;
+    std::shared_ptr<const AmpduTopology> transmittedBlockAckAggregate;
     std::optional<ReceptionEvidence> activeReception;
     std::optional<ReceptionEvidence> completedReception;
     simtime_t ambiguityEnd = -1;
@@ -87,7 +89,10 @@ class INET_API Rx : public ModeSetListener, public IRx
     void observeReceptionStart(const physicallayer::IReception *reception);
     void observeReceptionEnd(const physicallayer::IReception *reception);
     bool isCompletedAck(const physicallayer::ITransmission *transmission) const;
-    void attachInterframeResult(Packet *packet, bool accepted);
+    Ptr<const Ieee80211MacHeader> getTransmittedMacHeader(const physicallayer::ITransmission *transmission) const;
+    void attachInterframeResult(Packet *packet, bool accepted,
+            const Ptr<const Ieee80211MacHeader>& header = nullptr,
+            std::shared_ptr<const AmpduTopology> topology = nullptr);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, intval_t value, cObject *details) override;
 
@@ -102,6 +107,7 @@ class INET_API Rx : public ModeSetListener, public IRx
     virtual void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart part) override;
     virtual bool lowerFrameReceived(Packet *packet) override;
     virtual void invalidateInterframeHistory() override;
+    virtual AmpduReception lowerAggregateReceived(Packet *packet) override;
     virtual void frameTransmitted(simtime_t durationField) override;
     virtual simtime_t getTxnavRemaining() const override;
     virtual void successfulFrameTransmitted(simtime_t ppduEnd, simtime_t durationField) override;

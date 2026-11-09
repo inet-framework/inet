@@ -1,0 +1,137 @@
+%description:
+Check the VHT header class at actual transmission start through a production scalar radio.
+An ordinary PSDU uses VHT MCS 0 and 20 MHz with an existing catalog mode for each GI.
+Two seed-zero runs select long GI and short GI without byte conversion.
+
+%extraargs: -r 0..1
+
+%file: WifiVhtHeaderIdentity.cc
+#include "ProtocolTest.h"
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ITransmission.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211PhyHeader_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::protocoltest;
+
+class WifiVhtHeaderIdentityDriver : public cSimpleModule, public cListener
+{
+    const IIeee80211Mode *selected = nullptr;
+    bool checked = false;
+  protected:
+    void initialize() override {
+        getModuleByPath("^.sender.radio")->subscribe(transmissionStartedSignal, this);
+        scheduleAt(SimTime(1, SIMTIME_MS), new cMessage("send"));
+    }
+    void handleMessage(cMessage *message) override {
+        delete message;
+        auto modes = Ieee80211ModeSet::getModeSet("ac");
+        bool shortGi = par("shortGi").boolValue();
+        int numSpatialStreams = shortGi ? 2 : 1;
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto mode = modes->getMode(i);
+            if (mode->getVhtMcsIndex() == 0 && mode->getDataMode()->getBandwidth() == MHz(20) &&
+                    mode->getDataMode()->getNumberOfSpatialStreams() == numSpatialStreams && mode->isVhtShortGuardInterval() == shortGi) {
+                selected = mode;
+                break;
+            }
+        }
+        ASSERT(selected != nullptr);
+        auto packet = new Packet("ordinary-psdu", makeShared<BytesChunk>(std::vector<uint8_t>(100, 0)));
+        packet->addTag<Ieee80211ModeReq>()->setMode(selected);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        send(packet, "radioOut");
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        ASSERT(signal == transmissionStartedSignal && !checked && selected != nullptr);
+        const auto packet = check_and_cast<const ITransmission *>(object)->getPacket();
+        const auto header = packet->peekAtFront<Ieee80211PhyHeader>();
+        ASSERT(dynamicPtrCast<const Ieee80211VhtPhyHeader>(header) != nullptr);
+        ASSERT(dynamicPtrCast<const Ieee80211HtPhyHeader>(header) == nullptr);
+        ASSERT(header->getChunkLength() == selected->getHeaderMode()->getLength());
+        checked = true;
+        emit(registerSignal("testVhtHeaderIdentity"), 1L);
+    }
+    using cListener::finish;
+    void finish() override { ASSERT(checked); }
+};
+Define_Module(WifiVhtHeaderIdentityDriver);
+
+Define_ProtocolTest(wifi_vht_header_identity) {
+    return ProtocolTest("wifi_vht_header_identity")
+        .once(on("driver").signal("testVhtHeaderIdentity").assertValue(1).within(0.01));
+}
+
+%file: test.ned
+import inet.protocoltest.ProtocolTester;
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium;
+simple WifiVhtHeaderIdentityDriver {
+    parameters:
+        @class(::WifiVhtHeaderIdentityDriver);
+        bool shortGi;
+        @signal[testVhtHeaderIdentity](type=long);
+    gates: output radioOut;
+}
+module WifiVhtHeaderIdentitySender {
+    parameters: @networkNode;
+    gates: input upperLayerIn; input radioIn @directIn;
+    submodules:
+        mobility: StationaryMobility;
+        radio: Ieee80211ScalarRadio;
+    connections allowunconnected:
+        upperLayerIn --> radio.upperLayerIn;
+        radioIn --> radio.radioIn;
+}
+network Test {
+    submodules:
+        radioMedium: Ieee80211ScalarRadioMedium;
+        tester: ProtocolTester;
+        driver: WifiVhtHeaderIdentityDriver;
+        sender: WifiVhtHeaderIdentitySender;
+    connections: driver.radioOut --> sender.upperLayerIn;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+sim-time-limit = 2ms
+seed-set = 0
+*.tester.testName = "wifi_vht_header_identity"
+*.tester.stateSignals = "testVhtHeaderIdentity"
+*.driver.shortGi = ${shortGi=false,true}
+*.sender.radio.opMode = "ac"
+*.sender.radio.bandName = "5 GHz (mapped 20 MHz)"
+*.sender.radio.channelNumber = 0
+*.sender.radio.centerFrequency = 5.18GHz
+*.sender.radio.bandwidth = 20MHz
+*.sender.radio.transmitter.bitrate = -1bps
+*.sender.radio.initialRadioMode = "transmitter"
+*.sender.radio.sendRawBytes = false
+*.sender.radio.antenna.numAntennas = 2
+*.sender.radio.antenna.mobilityModule = "^.^.mobility"
+**.vector-recording = false
+**.mobility.initFromDisplayString = false
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+
+%contains: stdout
+PROTOCOLTEST wifi_vht_header_identity: PASS
+%contains: stdout
+Run statistics: total 2, successful 2
+%not-contains: stdout
+PROTOCOLTEST wifi_vht_header_identity: FAIL

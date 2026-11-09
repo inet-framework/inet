@@ -136,6 +136,16 @@ class Ieee80211HtAssociationChecker : public SimpleModule, public cListener
         // cannot operate a primary/secondary compound channel and must not
         // advertise that width.
         ASSERT(staMib->localHtCapabilities.shortGi20);
+        ASSERT(staMib->localHtCapabilities.minimumMpduStartSpacing == 1);
+        ASSERT(apMib->localHtCapabilities.minimumMpduStartSpacing == 7);
+        const auto& apLimits = apMib->findPeerHtState(staAddress)->negotiatedCapabilities;
+        const auto& staLimits = staMib->findPeerHtState(apMib->address)->negotiatedCapabilities;
+        ASSERT(apLimits.localTxPeerRx.receiverMinimumMpduStartSpacing == 1);
+        ASSERT(apLimits.localRxPeerTx.receiverMinimumMpduStartSpacing == 7);
+        ASSERT(staLimits.localTxPeerRx.receiverMinimumMpduStartSpacing == 7);
+        ASSERT(staLimits.localRxPeerTx.receiverMinimumMpduStartSpacing == 1);
+        ASSERT(apLimits.localTxPeerRx.receiverMaxAmpduLengthExponent == 1);
+        ASSERT(staLimits.localTxPeerRx.receiverMaxAmpduLengthExponent == 3);
         ASSERT(!staMib->localHtCapabilities.shortGi40);
         ASSERT(apMib->localHtCapabilities.shortGi20);
         ASSERT(!apMib->localHtCapabilities.shortGi40);
@@ -231,6 +241,10 @@ record-scalar-results = false
 **.mobility.initialZ = 0m
 
 **.wlan[*].opMode = "n(mixed-2.4Ghz)"
+*.ap.wlan[0].mib.htMinimumMpduStartSpacing = 7
+*.sta.wlan[0].mib.htMinimumMpduStartSpacing = 1
+*.ap.wlan[0].mib.htMaxAmpduLengthExponent = 3
+*.sta.wlan[0].mib.htMaxAmpduLengthExponent = 1
 **.wlan[*].bitrate = 65Mbps
 *.sta.wlan[0].radio.channelNumber = 6
 **.wlan[*].radio.bandName = "2.4 GHz"
