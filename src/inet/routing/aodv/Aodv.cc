@@ -27,6 +27,8 @@
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
 #ifdef INET_WITH_IPv6
+#include "inet/networklayer/icmpv6/Ipv6NdMessage_m.h"
+#include "inet/networklayer/ipv6/Ipv6Header_m.h"
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 #endif // ifdef INET_WITH_IPv6
 
@@ -265,6 +267,18 @@ bool Aodv::isControlPacket(const Packet *packet) const
     } finder;
     std::unique_ptr<Packet> inspection(packet->dup());
     try {
+#ifdef INET_WITH_IPv6
+        // ND configures a directly attached link before an AODV route exists.
+        // In particular, queuing a unicast NA behind discovery deadlocks ND.
+        // Inspect the typed header before generic transport dissection. Like
+        // reserved AODV UDP traffic, incomplete link control is never data demand.
+        if (usingIpv6) {
+            auto header = dynamicPtrCast<const Ipv6Header>(findNetworkProtocolHeader(inspection.get()));
+            if (header && header->getProtocolId() == IP_PROT_IPv6_ICMP &&
+                    inspection->peekDataAt<Ipv6NdMessage>(header->getChunkLength(), b(-1), Chunk::PF_ALLOW_NULLPTR | Chunk::PF_ALLOW_INCOMPLETE))
+                return true;
+        }
+#endif
         PacketDissector(ProtocolDissectorRegistry::getInstance(), finder).dissectPacket(inspection.get());
         auto datagram = finder.getChunk();
         if (!datagram)
