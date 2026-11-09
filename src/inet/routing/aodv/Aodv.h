@@ -72,7 +72,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     ModuleRefByPar<IInterfaceTable> interfaceTable;
     ModuleRefByPar<INetfilter> networkProtocol;
     UdpSocket socket;
-    NetworkInterface *interface;
+    NetworkInterface *interface = nullptr;
     bool usingIpv6 = false;
     long numSent = 0;
     long numReceived = 0;
@@ -113,7 +113,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     // state
     unsigned int rreqId = 0; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
     uint32_t sequenceNum = 0; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
-    enum class SearchPhase { SEND_DELAY, READY, WAIT_REPLY };
+    enum class SearchPhase { RECOVERY_WAIT, SEND_DELAY, READY, WAIT_REPLY };
     struct Search {
         SearchPhase phase = SearchPhase::SEND_DELAY;
         cMessage *timer = nullptr;
@@ -155,9 +155,13 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     cMessage *rrepAckTimer = nullptr; // timer to wait for RREP-ACKs (RREP-ACK timeout)
     cMessage *blacklistTimer = nullptr; // timer to clean the blacklist out
     cMessage *neighborTimer = nullptr;
+    cMessage *recoveryTimer = nullptr;
 
     // lifecycle
-    simtime_t rebootTime; // the last time when the node rebooted
+    bool hasStarted = false;
+    bool recovering = false;
+    simtime_t recoveryDeadline;
+    uint64_t operationalGeneration = 0;
 
     // internal
     std::map<L3Address, std::deque<Packet *>> delayedPackets; // borrowed from IP
@@ -190,7 +194,11 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void observeIncoming(const Packet *packet);
     void disableHelloObservation(int interfaceId);
     void handleNeighborTimer();
+    void handleRecoveryTimer();
+    void extendRecovery();
+    bool isLocalGatewayDestination(const L3Address& destination) const;
     void sendPreparedControl(Packet *packet);
+    bool canSendControl(AodvControlPacketType type) const;
     bool resolvePreviousHop(const Packet *packet, Link& link) const;
     void refreshSourceRoute(Packet *packet);
     void queueRouteError(const std::vector<UnreachableNode>& nodes, const std::set<Link>& recipients, bool noDelete, simtime_t delay);

@@ -52,6 +52,8 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | 9, partial | 2026-11-09 | selected corrections | AODV-F-LINK, Hello observations | 16 protocol and two module parent runtime failures become passes, with ten protocol parent controls. Combined scope: 112 protocol and 53 module passes. |
 
+| 10, partial | 2026-11-09 | selected corrections | AODV-F-RECOVERY, lifecycle ownership | 24 protocol and five module parent runtime failures become passes, with four protocol/two module controls. Final combined scope: 140 protocol and 60 module passes; native removal order preserves existing expectations. |
+
 ## Selected feature evidence
 
 | Feature | Evidence | Limit |
@@ -63,4 +65,5 @@ The exit criterion of level 1 has three parts, and all three hold:
 | AODV-F-LINK, validation/attribution | 21 protocol and three module cases pass, including concurrent ACKs, exact ties, real failed replies/data, quarantine and route replacement. | Direct AckingMac and independent nonaggregating DCF. Ethernet/UDP supplies the exact ACK-order controls. Hello loss, restart reset and broader metadata profiles remain pending. See [reviewer document](../../../../../tests/protocol/aodv/link-validation.md). |
 | AODV-F-ERROR, transit and precursor handling | 25 protocol and three module cases pass, including N preservation, independent ownership, prefix ambiguity and actual-send budget windows. | IPv4 scripted UDP/IP. Prefix identity uses public record setup; real subnet learning, partitioning and lifecycle coverage remain assigned. See [reviewer document](../../../../../tests/protocol/aodv/transit-errors.md). |
 | AODV-F-LINK, Hello observation | 26 protocol and two real three-node module cases pass, including incoming/outgoing distinctions, original-source independence, metadata loss, exact ties and validation failure. | IPv4 AckingMac, independent DCF and Ethernet profiles. Restart reset, selected interfaces and IPv6 runtime remain pending. See [reviewer document](../../../../../tests/protocol/aodv/hello-liveness.md). |
-| Other selected features | Not yet established by this correction stage. | Recovery, interface, subnet and repair stages remain assigned in the plan. |
+| AODV-F-RECOVERY | 28 protocol and seven module cases pass, including exact deadline orders, zero-time/double restart, control bypass, queue phases and reentrant cleanup. | IPv4 public lifecycle operations and owning IP adapters. Bounded IPv6 runtime and later interface/repair lifecycle integration remain pending. See [reviewer document](../../../../../tests/protocol/aodv/reboot-recovery.md). |
+| Other selected features | Not yet established by this correction stage. | Interface, subnet and repair stages remain assigned in the plan. |

@@ -534,3 +534,59 @@ priority. Direct AckingMac, independent nonaggregating DCF and Ethernet establis
 profiles; there is no concrete-interface whitelist. Restart reset, selected-interface operation,
 subnet learning, IPv6 runtime compatibility and repair remain pending. No existing expectation,
 baseline or wire layout changes and no conformance level is raised.
+
+## Restart recovery and lifecycle, 2026-11-09
+
+Immediate parent: `05c0a2c2f8`. The same 28 recovery protocol fixtures give four parent passes and
+24 runtime failures: 23 intended assertions and the repeated-start UDP port collision. Seven new
+module cases give two parent controls and five runtime failures. Corrected final selections pass
+140 protocol and 60 module cases, including all four existing integration expectations. Fresh
+debug/release builds precede these final executions.
+
+[reboot-recovery.md](../../../../../tests/protocol/aodv/reboot-recovery.md) maps each named fixture
+to its stimulus, production path, parent observation and additional corrected assertions. The four
+protocol controls are DelayedControl, DelayedError, QueueCrash and DownInit. The two module controls
+are QueueCrash and DownInit. Early delivery masks the parent's later reentrant-release path; the
+corrected reentrant fixture directly exercises the operational-generation guard after real IP
+reinjection and whole-node disposal of the remaining originals.
+
+The first recovery attempts corrected fixture assumptions: no-reply exhaustion needs an explicit
+zero additional retry count; a reverse route needs fresh input after it naturally expires during
+the hold; enabled Hello requires activeRouteTimeout strictly greater than its loss interval.
+A later test-only IPv4Address/L3Address comparison prevented some new fixtures from compiling.
+Those setup/build outcomes are excluded from the final behavioral comparison.
+
+A full intermediate run passed 140 protocol cases but found one existing lifecycle expectation
+failure: deleting owned routes in reverse order changed the ordered route-recorder output at
+shutdown. Preserve the routing table's native deletion order. The final fresh-library rerun passes
+140 protocol and 60 module cases with no expectation or baseline modification.
+
+Commands from the corresponding checkout root:
+
+```sh
+# Isolated parent:
+make -C src -j4 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv -f 'Rfc3561RebootRecovery.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-recovery-parent-corrected.log
+opp_run_module_tests --load . -p inet -m debug -f 'AodvRebootRecovery.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-recovery-parent-modules-corrected.log
+# Corrected checkout:
+make -C src -j4 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv -f 'Rfc3561.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-recovery-all-protocol-order.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV(SimpleTest(_2)?|ShortestPath|LifecycleTest)|Aodv(GatewayQueues|TransitFailure.*|TransitError.*|HelloForwarded.*|RebootRecovery.*|AdvertisementLifetimeInvalid_[1-4]|ParameterValidation.*))\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-recovery-all-modules-order.log
+make -C src -j4 MODE=release
+```
+
+Parent comparisons exit 1 with the classified runtime outcomes. Final corrected selections and
+builds exit 0. Each test log has a -runner.log companion. Final build logs:
+ /tmp/aodv-recovery-order-build.log, /tmp/aodv-recovery-order-release.log and
+ /tmp/aodv-recovery-parent-build.log. The isolated parent uses the unchanged-object reuse procedure
+recorded earlier.
+
+This establishes the selected IPv4 lifecycle profiles, including both exact extension/wake-up
+orders, reset attribution/Hello/validation state, down-at-initialization, zero-time restart and
+reentrant packet disposal. Explicit multi-interface operation, subnet learning, bounded IPv6
+runtime compatibility and repair remain pending. No whole-protocol conformance level is raised.
