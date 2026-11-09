@@ -1,5 +1,72 @@
 # AODV correction execution record
 
+## Bounded local repair (stage 11)
+
+Immediate parent `497d3cb7e5` and corrected source ran identical General/run 0/seed
+0 fixtures with fresh matching debug libraries. The isolated parent's 39 protocol
+cases give eight passing controls and 31 runtime failures. Eleven module cases
+give eleven failures: two missing parameter rejections and nine runtime failures.
+Most enabled IPv4 parents fail first at missing repair ownership. SecondFailure
+fails its first-success check. Native IPv6 parents stop earlier because ND cannot
+finish while AODV queues the unicast advertisement. These first failures are
+separated from later corrected-path observations in
+[local-repair.md](../../../../../tests/protocol/aodv/local-repair.md).
+
+Corrected focused scope passes all 39 protocol cases and 12 module cases, including
+the initial native IPv6 discovery/freshness control. Fresh debug and release builds
+succeed. The isolated IPv4-only feature build also succeeds after copying the
+current AODV C++/NED inputs: Aodv and Ipv4 are enabled, Ipv6 is disabled with its
+dependent features. Its initial build used the root Makefile to generate features.h;
+an earlier direct src-only build without that generated header is excluded.
+
+```sh
+make -C src -j4 MODE=debug
+make -C src -j4 MODE=release
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561LocalRepair.*\.test$' --no-build --no-concurrent
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AodvLocalRepair|AodvIpv6Repair|AodvIpv6Compatibility).*\.test$' \
+  --no-build --no-concurrent
+```
+
+Build logs: `/tmp/aodv-repair-build-first.log`, `/tmp/aodv-repair-nd3-build.log`,
+`/tmp/aodv-repair-release.log`, `/tmp/aodv-ipv4-build-corrected.log` and
+`/tmp/aodv-ipv4-final-aodv-build.log`. Focused logs:
+`/tmp/aodv-repair-all-owners.log`, `/tmp/aodv-repair-modules-owners.log`,
+`/tmp/aodv-repair-parent-final.log` and `/tmp/aodv-repair-parent-modules-final.log`.
+The 39-case corrected selection uses the final owning IPv4 adapter, requiring
+every received transit original destroyed and the native IP hook queue empty.
+Source packet counters alone are not claimed as transit-queue disposal proof.
+
+Fixture corrections excluded from reproduction: initially checking a retained
+record after ordinary deletion; expecting a jittered notification before its
+declared send time; using one script node as both source and local destination
+(replaced by a real third source); unbound UDP delivery producing unrelated ICMP
+traffic (a sink is now bound); counting a returned control packet as data; allowing
+normal idle expiry after successful one-hop recovery; missing hook overrides,
+an incorrect unregister signature and colliding Define_Module line expansions.
+The module rejection cases use the native stderr diagnostics.
+
+Native IPv6 setup uses the explicit global node configurator, zero boot/DAD delay,
+stable one-hop addresses and disabled MANET redirects. The scripted source supplies
+its output at local-out so native ND resolves unicast. A probe establishes the failed
+neighbor's ND entry before radio loss. Existing IPv6 local-out reinjection can emit
+link broadcast; observations are deduplicated by tree identity, while repaired
+transit must use the alternate resolved MAC. Native IPv6 initial RREQ/ACK plus
+repair RREP/RERR custom encoding checks pass. The first ND-classification attempt
+through generic dissection encountered an incomplete chunk; direct typed-header
+inspection on the copy avoids treating link control as data demand. Raw bounded
+diagnostics are `/tmp/aodv-repair-ipv6-source-diagnostic.out` and
+`/tmp/aodv-repair-ipv6-nd-diagnostic.out`.
+
+The final combined selections pass 223/223 protocol and 89/89 module cases, exit
+0, including the four unchanged legacy integration controls. Logs are
+`/tmp/aodv-repair-all-protocol.log` and `/tmp/aodv-repair-all-modules.log`.
+No existing expectation, fingerprint, dependency store or baseline was updated.
+Broader
+native IPv6 rate/restart/three-node liveness and final submission gates remain
+assigned; this checkpoint is not a completion claim for the entire plan.
+
 ## Received subnet routes (stage 10)
 
 Immediate parent `9fd380a795` was built in the isolated comparison worktree,

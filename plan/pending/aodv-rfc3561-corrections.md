@@ -1060,7 +1060,7 @@ code action and coverage limits. Proposed assignments, beside `tests/protocol/ao
 | 8 | `reboot-recovery.md` | 28 RebootRecovery protocol variants and seven module cases; 140 protocol and 60 module cases pass with existing expectations unchanged |
 | 9 | `selected-interfaces.md` | 18 Interfaces protocol cases, 12 startup-validation module cases and four live module controls; isolated-parent causal comparison recorded in model results |
 | 10 | `subnet-routes.md` | 26 Subnet variants and a native downstream module case cover normalized wire learning, independent counters, cached/forwarded prefixes, actual output, learned error relays, RERR ambiguity, ICMP member errors, retained recovery authority, sustained-demand blocking and the Hello-router limitation |
-| 11 | `local-repair.md` | LocalRepair, with LocalRepairLifecycle and Ipv6Compatibility module coverage |
+| 11 | `local-repair.md` | 39 LocalRepair protocol variants, eleven repair module cases and initial native IPv6 compatibility; final IPv6 rate/restart/three-node Hello coverage and submission gates remain in progress |
 
 Fixture names in this table are prefixed `Rfc3561` and suffixed `.test` unless written in full.
 The §7 matrix supplies the exact conditions and required observations. Future documents and

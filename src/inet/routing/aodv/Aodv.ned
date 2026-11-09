@@ -36,7 +36,7 @@ simple Aodv extends SimpleModule like IApp
         string networkProtocolModule = default("^.ipv4.ip");
         bool askGratuitousRREP = default(false); // See RFC 3561: 6.6.3
         bool useHelloMessages = default(false); // See RFC 3561: 6.9
-        bool useLocalRepair = default(false); // See RFC 3561: 6.12 *not implemented yet*
+        bool useLocalRepair = default(false); // Bounded transit-only local repair, RFC 3561 section 6.12
         bool destinationOnlyFlag = default(false); // See RFC 3561: 5.1
         int udpPort = default(654);
         string interface @mutable = default("wlan0"); // Primary interface, applied at start
@@ -69,6 +69,7 @@ simple Aodv extends SimpleModule like IApp
         int ttlIncrement = default(2); // Specifies the value by which the TTL will be incremented each time a RREQ is retransmitted
         int ttlThreshold = default(7); // The maximum value of TTL over which NET_DIAMETER value will be used to broadcast any RREQ
         int localAddTTL = default(2); // It is used by the formula which calculates the initial TTL of the RREQ for a local repair
+        int maxRepairTTL = default(int(0.3 * netDiameter)); // Maximum pre-break distance eligible for local repair; zero disables eligibility
 
         double myRouteTimeout @unit(s) = default(max(2 * activeRouteTimeout, 2 * pathDiscoveryTime)); // Destination RREP lifetime, at least twice PATH_DISCOVERY_TIME
         double deletePeriod @unit(s) = default(5 * max(activeRouteTimeout, helloInterval)); // The time after which an expired route is deleted

@@ -84,6 +84,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     unsigned int aodvUDPPort = 0;
     bool askGratuitousRREP = false;
     bool useHelloMessages = false;
+    bool useLocalRepair = false;
     bool destinationOnlyFlag = false;
     simtime_t maxJitter;
     simtime_t activeRouteTimeout;
@@ -96,6 +97,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     unsigned int ttlIncrement = 0;
     unsigned int ttlThreshold = 0;
     unsigned int localAddTTL = 0;
+    unsigned int maxRepairTTL = 0;
     unsigned int allowedHelloLoss = 0;
     simtime_t nodeTraversalTime;
     cPar *jitterPar = nullptr;
@@ -118,14 +120,21 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     enum class SearchPhase { RECOVERY_WAIT, SEND_DELAY, READY, WAIT_REPLY };
     using RouteKey = std::pair<L3Address, int>;
     struct Search {
+        enum class Purpose { ORIGINATING, LOCAL_REPAIR };
+        Purpose purpose = Purpose::ORIGINATING;
         SearchPhase phase = SearchPhase::SEND_DELAY;
         cMessage *timer = nullptr;
         unsigned int ttl = 0;
         unsigned int networkAttempts = 0;
         RouteKey retainedKey;
+        L3Address wireTarget;
+        unsigned int oldHopCount = 0;
+        simtime_t deadline;
+        std::set<AodvRouteData::Precursor> precursors;
     };
-    std::map<L3Address, Search> searches;
-    std::deque<L3Address> readySearches;
+    std::map<RouteKey, Search> searches;
+    std::deque<RouteKey> readySearches;
+    std::map<RouteKey, simtime_t> repairableDeadlines;
     simtime_t rateEpoch;
     int64_t rateWindow = 0;
     std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime; // maps RREQ id to its arriving time
@@ -169,7 +178,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     // internal
     std::map<L3Address, std::deque<Packet *>> delayedPackets; // borrowed from IP
-    std::map<L3Address, L3Address> queueOwners; // actual destination -> search destination
+    std::map<L3Address, RouteKey> queueOwners; // actual destination -> exact search prefix
     IRoute *defaultGatewayRoute = nullptr;  // Pointer to default gateway route (0.0.0.0/0)
 
   protected:
@@ -180,12 +189,17 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     /* Route Discovery */
     void startRouteDiscovery(const L3Address& target, unsigned int timeToLive = 0);
     bool hasOngoingRouteDiscovery(const L3Address& destAddr);
-    void cancelRouteDiscovery(const L3Address& destAddr);
+    void cancelRouteDiscovery(const RouteKey& key);
 
   private:
     IRoute *findExactRoute(const L3Address& destination, int prefixLength = -1) const;
     IRoute *findRetainedRoute(const L3Address& destination, bool knownOnly = false) const;
     void updateSearchAuthorities();
+    RouteKey routeKey(const IRoute *route) const;
+    bool repairAllowed(Packet *packet, IRoute *route, unsigned int& ttl);
+    void startRepair(IRoute *route, const L3Address& target, unsigned int ttl);
+    bool queueForRepair(Packet *packet, bool local);
+    void finishRepair(const RouteKey& key, bool success);
     void expireRouteIfDue(IRoute *route);
     void refreshNeighbor(const L3Address& sender, NetworkInterface *ingress);
     IRoute *selectDataRoute(const L3Address& destination);
@@ -213,11 +227,11 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void queueRouteError(const std::vector<UnreachableNode>& nodes, const std::set<Link>& recipients, bool noDelete, simtime_t delay);
     void sendRouteError(RerrSend *message);
     void releaseEligiblePackets();
-    void scheduleSearch(const L3Address& target);
+    void scheduleSearch(const RouteKey& key);
     void handleSearchTimer(cMessage *timer);
     void drainReadySearches();
     void refreshRateWindow();
-    void eraseSearch(const L3Address& target);
+    void eraseSearch(const RouteKey& key);
     static simtime_t quantizeAdvertisementLifetime(simtime_t duration);
     simtime_t samplePeriodicJitter();
 
@@ -260,7 +274,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     /* General functions to handle route errors */
     void sendRERRWhenNoRouteToForward(Packet *packet);
-    void handleLinkBreakSendRERR(const Link& link);
+    void handleLinkBreakSendRERR(const Link& link, IRoute *repairRoute = nullptr);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /* Netfilter hooks */
