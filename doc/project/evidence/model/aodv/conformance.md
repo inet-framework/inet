@@ -28,6 +28,31 @@ scenarios and limits. Independent ACK state, link attribution, timer/queue sched
 selected interfaces, subnet routing and local repair remain assigned in the implementation plan.
 The historical survey below is preserved as its original read-only evidence.
 
+## Discovery ownership correction
+
+The discovery stage adds an actual-destination FIFO with an explicit search owner, so gateway
+completion and exhaustion reach every dependent packet. Every live originating search has either
+a scheduled phase timer or a ready admission served by the counter timer. IDs, sequences and
+request budget are charged at actual send. Route selection is repeated before a wake-up can send,
+fail or release data. Controlled output constraints dispose of only the incompatible packet.
+
+The supported IPv4/IPv6 tables enumerate routes in their native lookup order. A connected subnet
+on the selected ad hoc interface is treated as address scope, not independent evidence of MANET
+reachability. Explicit static and other-protocol routes remain eligible. This decision preserves
+discovery in configurations whose interface netmask installs a connected route even when static
+route generation is disabled.
+
+RFC 3561 section 6.3 recommends an application Destination Unreachable indication on exhaustion.
+The existing INetfilter disposal API supplies deletion only. This correction retains that API and
+records the recommendation as unmet, rather than inventing a transport callback. Destructor-count
+fixtures require terminal disposal and no spurious application error. Selected executions and
+the separate-parent comparison are recorded in results.md and discovery-ownership.md.
+
+This stage establishes queue ownership and the scheduler's basic progress. Parameter bounds,
+complete timing coverage, link attribution, reboot, selected interfaces, aggregate completion
+and local repair remain assigned to subsequent stages. The search key is a full-width address
+until exact-prefix repair ownership is introduced in its assigned stage.
+
 ## Historical survey
 
 Read record — no build, no run in the 2026-09-23 survey:

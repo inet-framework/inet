@@ -7,6 +7,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/networklayer/common/HopLimitTag_m.h"
 #include "inet/networklayer/common/L3AddressTag_m.h"
+#include "inet/networklayer/common/L3AddressResolver.h"
 #include "inet/networklayer/common/NextHopAddressTag_m.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
 #include "inet/networklayer/contract/IRoutingTable.h"
@@ -19,6 +20,23 @@
 
 using namespace inet;
 using namespace inet::aodv;
+
+struct AodvDataCounters {
+    inline static int created = 0;
+    inline static int destroyed = 0;
+    inline static int errors = 0;
+};
+
+class AodvTrackedPacket : public Packet
+{
+  public:
+    AodvTrackedPacket(const char *name, const Ptr<const Chunk>& data) : Packet(name, data) {
+        AodvDataCounters::created++;
+    }
+    ~AodvTrackedPacket() { AodvDataCounters::destroyed++; }
+    // Lower-layer inspection/transmission copies do not own the original IP obligation.
+    Packet *dup() const override { return new Packet(*this); }
+};
 
 // A scripted wire peer. It never invokes Aodv handlers or reproduces route selection.
 class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListener
@@ -461,16 +479,38 @@ class AodvDataSource : public SimpleModule
             socket.setOutputGate(gate("socketOut"));
             socket.bind(12345);
             timer = new cMessage("data");
-            scheduleAt(0.16, timer);
+            scheduleAt(hasPar("emitTime") ? par("emitTime").doubleValue() : 0.16, timer);
         }
     }
     void handleMessage(cMessage *message) override {
         if (message != timer) {
+            if (dynamic_cast<Indication *>(message))
+                AodvDataCounters::errors++;
             delete message;
             return;
         }
-        auto packet = new Packet("queued-data", makeShared<ByteCountChunk>(B(10)));
-        socket.sendTo(packet, Ipv4Address("10.0.0.99"), 12345);
+        std::string targets = hasPar("destinations") ? par("destinations").stdstringValue() : "10.0.0.99";
+        cStringTokenizer tokenizer(targets.c_str());
+        int index = 0;
+        while (tokenizer.hasMoreTokens()) {
+            auto destination = L3AddressResolver().resolve(tokenizer.nextToken());
+            std::string name = "queued-data-" + std::to_string(index);
+            auto packet = new AodvTrackedPacket(name.c_str(), makeShared<ByteCountChunk>(B(10)));
+            auto interfaces = check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"));
+            if (hasPar("nextHop") && !par("nextHop").stdstringValue().empty()) {
+                packet->addTag<InterfaceReq>()->setInterfaceId(interfaces->findInterfaceByName("wlan0")->getInterfaceId());
+                packet->addTag<NextHopAddressReq>()->setNextHopAddress(L3AddressResolver().resolve(par("nextHop")));
+            }
+            if (hasPar("incompatibleIndex") && index == par("incompatibleIndex").intValue()) {
+                bool nextHopConstraint = hasPar("constrainNextHop") && par("constrainNextHop").boolValue();
+                auto selected = interfaces->findInterfaceByName(nextHopConstraint ? "wlan0" : "wlan1");
+                packet->addTagIfAbsent<InterfaceReq>()->setInterfaceId(selected->getInterfaceId());
+                if (nextHopConstraint)
+                    packet->addTagIfAbsent<NextHopAddressReq>()->setNextHopAddress(Ipv4Address("10.0.0.3"));
+            }
+            socket.sendTo(packet, destination, 12345);
+            index++;
+        }
     }
   public:
     ~AodvDataSource() { cancelAndDelete(timer); }

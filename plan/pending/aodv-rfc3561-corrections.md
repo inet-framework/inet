@@ -6,6 +6,13 @@ Status: **implementation in progress**. Written 2026-11-08 for
 `/home/miguel/workspace/inet-dsdv`, with source inspected at
 `6d1604c54b4837107eb4ab1e86422807e46fc17c`.
 
+Execution tracking, 2026-11-09: preparation, freshness, lifetimes and discovery ownership are
+implemented with recorded parent comparisons. The ownership stage includes basic TTL/backoff
+progression because it replaces the old timer/retry stores together. The next stage retains
+timing assertions, parameter arithmetic and defaults. Source-derived eligibility refinement:
+connected routes on the selected MANET interface define address scope, not multihop reachability;
+explicit independent routes remain eligible. See model results and discovery-ownership.md.
+
 This plan covers route freshness and lifetimes, discovery progress, neighbor validation, transit
 failure, reboot recovery, selected interfaces, received subnet routes and opt-in local repair.
 The acceptance matrix in §7 defines the correction and compatibility scope without relying on a

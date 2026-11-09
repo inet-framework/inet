@@ -57,6 +57,17 @@ destinations within the ad hoc network.
 
 The :ned:`Aodv` module type implements AODV, based on RFC 3561.
 
+Discoveries that exceed the request rate limit wait for the next one-second
+window. Packets retain FIFO order for each destination. External destinations
+may share one gateway discovery, whose success or failure completes all its
+dependent queues. A queued packet with a caller-selected interface or next hop
+incompatible with the discovered path is dropped individually.
+
+Discovery exhaustion disposes of queued packets through IP. It does not generate
+an application Destination Unreachable indication. Applications retain their
+own timeout/error handling. Ordinary transit data without a route follows the
+route-error/drop path instead of starting an originating discovery.
+
 Route selection uses 32-bit serial sequence ordering. An older control message
 cannot replace newer route information. Values separated by exactly half the
 sequence range are treated as ambiguous and do not establish freshness.

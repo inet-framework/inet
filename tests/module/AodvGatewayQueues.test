@@ -1,0 +1,102 @@
+%description:
+RFC 3561 sections 6.5 and 6.6.1: a UDP/IP request reaches the real AODV module,
+creates a reverse host route and elicits a reply. Route freshness regression.
+
+%file: Peer.cc
+#include "../../../protocol/aodv/AodvDiscoveryPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvDiscoveryPeer like IApp
+{
+    parameters:
+        string scenario = default("RateLimit");
+        @class(::AodvDiscoveryPeer);
+        double startTime @unit(s) = default(1.2s);
+        int incompatibleIndex = default(-1);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvDataSource like IApp
+{
+    parameters:
+        @class(::AodvDataSource);
+        string destinations = default("10.0.0.99 10.0.0.98");
+        double emitTime @unit(s) = default(0.16s);
+        int incompatibleIndex = default(-1);
+        bool constrainNextHop = default(false);
+        string nextHop = default("");
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 2.2s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' address='10.0.0.2' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.peer.app[0].scenario = "GatewayFailure"
+*.dut.aodv.rreqRatelimit = 1
+*.radioMedium.sameTransmissionStartTimeCheck = "ignore"
+*.dut.aodv.gatewayAddress = "10.0.0.2"
+*.dut.app[0].destinations = "192.0.2.1 198.51.100.1"
+*.dut.aodv.netDiameter = 2
+*.dut.aodv.ttlStart = 2
+*.dut.aodv.ttlThreshold = 2
+*.dut.aodv.ttlIncrement = 1
+*.dut.aodv.rreqRetries = 0
+*.dut.aodv.nodeTraversalTime = 0.01s
+*.dut.numApps = 1
+*.peer.forwarding = false
+*.dut.app[0].typename = "AodvDataSource"
+*.peer.numApps = 2
+*.peer.app[1].typename = "UdpSink"
+*.peer.app[1].localPort = 12345
+*.peer.app[0].typename = "AodvDiscoveryPeer"
+**.arp.typename = "GlobalArp"
+**.wlan[0].typename = "AckingWirelessInterface"
+**.wlan[0].radio.typename = "GenericUnitDiskRadio"
+**.wlan[0].bitrate = 1Mbps
+**.wlan[0].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[0].radio.transmitter.headerLength = 4b
+**.wlan[0].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV GatewayFailure: PASS
+
+

@@ -9,6 +9,7 @@
 #define __INET_AODV_H
 
 #include <map>
+#include <deque>
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/networklayer/contract/IInterfaceTable.h"
@@ -111,14 +112,24 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     // state
     unsigned int rreqId = 0; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
     uint32_t sequenceNum = 0; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
-    std::map<L3Address, WaitForRrep *> waitForRREPTimers; // timeout for Route Replies
+    enum class SearchPhase { SEND_DELAY, READY, WAIT_REPLY };
+    struct Search {
+        SearchPhase phase = SearchPhase::SEND_DELAY;
+        cMessage *timer = nullptr;
+        unsigned int ttl = 0;
+        unsigned int networkAttempts = 0;
+    };
+    std::map<L3Address, Search> searches;
+    std::deque<L3Address> readySearches;
+    simtime_t rateEpoch;
+    int64_t rateWindow = 0;
     std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime; // maps RREQ id to its arriving time
     L3Address failedNextHop; // next hop to the destination who failed to send us RREP-ACK
     std::map<L3Address, simtime_t> blacklist; // we don't accept RREQs from blacklisted nodes
     unsigned int rerrCount = 0; // num of originated RERR in the last second
     unsigned int rreqCount = 0; // num of originated RREQ in the last second
     simtime_t lastBroadcastTime; // the last time when any control packet was broadcasted
-    std::map<L3Address, unsigned int> addressToRreqRetries; // number of re-discovery attempts per address
+
 
     // self messages
     cMessage *helloMsgTimer = nullptr; // timer to send hello messages (only if the feature is enabled)
@@ -131,7 +142,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     simtime_t rebootTime; // the last time when the node rebooted
 
     // internal
-    std::multimap<L3Address, Packet *> targetAddressToDelayedPackets; // queue for the datagrams we have no route for
+    std::map<L3Address, std::deque<Packet *>> delayedPackets; // borrowed from IP
+    std::map<L3Address, L3Address> queueOwners; // actual destination -> search destination
     IRoute *defaultGatewayRoute = nullptr;  // Pointer to default gateway route (0.0.0.0/0)
 
   protected:
@@ -141,7 +153,6 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     /* Route Discovery */
     void startRouteDiscovery(const L3Address& target, unsigned int timeToLive = 0);
-    void completeRouteDiscovery(const L3Address& target);
     bool hasOngoingRouteDiscovery(const L3Address& destAddr);
     void cancelRouteDiscovery(const L3Address& destAddr);
 
@@ -149,6 +160,15 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     IRoute *findExactRoute(const L3Address& destination) const;
     void expireRouteIfDue(IRoute *route);
     void refreshNeighbor(const L3Address& sender);
+    IRoute *selectDataRoute(const L3Address& destination);
+    bool prepareDataPacket(Packet *packet, IRoute *route);
+    bool isControlPacket(const Packet *packet) const;
+    void releaseEligiblePackets();
+    void scheduleSearch(const L3Address& target);
+    void handleSearchTimer(cMessage *timer);
+    void drainReadySearches();
+    void refreshRateWindow();
+    void eraseSearch(const L3Address& target);
     static simtime_t quantizeAdvertisementLifetime(simtime_t duration);
 
   protected:
@@ -175,7 +195,6 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void handleRREPACK(const Ptr<const RrepAck>& rrepACK, const L3Address& neighborAddr);
 
     /* Control Packet sender methods */
-    void sendRREQ(const Ptr<Rreq>& rreq, const L3Address& destAddr, unsigned int timeToLive);
     void sendRREPACK(const Ptr<RrepAck>& rrepACK, const L3Address& destAddr);
     void sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive);
     void sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsigned int timeToLive);
@@ -188,7 +207,6 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void handleRREPACKTimer();
     void handleBlackListTimer();
     void sendHelloMessagesIfNeeded();
-    void handleWaitForRREP(WaitForRrep *rrepTimer);
 
     /* General functions to handle route errors */
     void sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr);
@@ -196,19 +214,19 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
     /* Netfilter hooks */
-    Result ensureRouteForDatagram(Packet *datagram);
-    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
+    Result ensureRouteForDatagram(Packet *datagram, bool local);
+    virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram, false); }
     virtual Result datagramForwardHook(Packet *datagram) override;
     virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
     virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
-    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram, true); }
     void delayDatagram(Packet *datagram);
 
     /* Helper functions */
     L3Address getSelfIPAddress() const;
     void sendAODVPacket(const Ptr<AodvControlPacket>& packet, const L3Address& destAddr, unsigned int timeToLive, double delay);
     void processPacket(Packet *pk);
-    void clearState();
+    void clearState(bool disposeQueued = true);
     void checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType);
     bool isExternalAddress(const L3Address& destAddr) const;
     void createDefaultGatewayRoute();
