@@ -61,7 +61,7 @@ simple Aodv extends SimpleModule like IApp
         int netDiameter = default(35); // The maximum possible number of hops between two nodes in the network
         double nodeTraversalTime @unit(s) = default(0.04s); // An estimation of the average one-hop traversal time
         int rerrRatelimit = default(10); // Maximum number of RERR messages that the AODV may originate in 1s.
-        int rreqRetries = default(2); // Specifies the number of times AODV will repeat an expanded ring search for a destination
+        int rreqRetries = default(2); // Additional network-wide RREQ attempts after the first, with exponential backoff
         int rreqRatelimit = default(10); // Maximum number of RREQ messages that the AODV may originate in 1s.
         int timeoutBuffer = default(2); // Plus time to wait for a delayed RREP (due to congestion) (to omit this buffer set it to 0)
         int ttlStart = default(2); // Specifies the TTL value when initiating a route request
@@ -69,9 +69,11 @@ simple Aodv extends SimpleModule like IApp
         int ttlThreshold = default(7); // The maximum value of TTL over which NET_DIAMETER value will be used to broadcast any RREQ
         int localAddTTL = default(2); // It is used by the formula which calculates the initial TTL of the RREQ for a local repair
 
-        double myRouteTimeout @unit(s) = default(2 * activeRouteTimeout); // The value of the lifetime field that a destination node places in RREPs
+        double myRouteTimeout @unit(s) = default(max(2 * activeRouteTimeout, 2 * pathDiscoveryTime)); // Destination RREP lifetime, at least twice PATH_DISCOVERY_TIME
         double deletePeriod @unit(s) = default(5 * max(activeRouteTimeout, helloInterval)); // The time after which an expired route is deleted
-        double blacklistTimeout @unit(s) = default(rreqRetries * netTraversalTime); // The time after which a blacklisted node is removed from the blacklist
+        // Conservative bound for an unthrottled search, including a retained-hop initial ring,
+        // expanding rings, all network-wide attempts and bounded broadcast jitter.
+        double blacklistTimeout @unit(s) = default(max(2 * nodeTraversalTime * (netDiameter + timeoutBuffer), (1 + floor((ttlThreshold - 1) / ttlIncrement)) * 2 * nodeTraversalTime * (ttlThreshold + timeoutBuffer)) + netTraversalTime * (pow(2, rreqRetries + 1) - 1) + (2 + floor((ttlThreshold - 1) / ttlIncrement) + rreqRetries) * maxJitter);
         double netTraversalTime @unit(s) = default(2 * nodeTraversalTime * netDiameter); // An estimation of the traversal time for the complete network
         double nextHopWait @unit(s) = default(nodeTraversalTime + 0.01s); // Timeout for a RREP-ACK
         double pathDiscoveryTime @unit(s) = default(2 * netTraversalTime); // Buffer timeout for each broadcasted RREQ message

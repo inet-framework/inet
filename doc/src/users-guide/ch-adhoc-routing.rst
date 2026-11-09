@@ -57,6 +57,15 @@ destinations within the ad hoc network.
 
 The :ned:`Aodv` module type implements AODV, based on RFC 3561.
 
+Discovery uses increasing ring TTLs through the configured threshold, then
+network-wide requests with exponential reply waits. ``rreqRetries`` counts
+additional network-wide attempts. Each reply wait starts at actual send,
+after jitter and rate admission. TTLs, rates, durations and sampled jitter are
+validated before use. The destination reply lifetime defaults to at least
+twice the path-discovery interval. The default blacklist duration bounds the
+configured search without rate-limit queueing. Explicit positive blacklist
+overrides remain supported.
+
 Discoveries that exceed the request rate limit wait for the next one-second
 window. Packets retain FIFO order for each destination. External destinations
 may share one gateway discovery, whose success or failure completes all its

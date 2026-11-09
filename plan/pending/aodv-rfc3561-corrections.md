@@ -13,6 +13,12 @@ timing assertions, parameter arithmetic and defaults. Source-derived eligibility
 connected routes on the selected MANET interface define address scope, not multihop reachability;
 explicit independent routes remain eligible. See model results and discovery-ownership.md.
 
+Timing/bounds stage: five wire timing cases pass on both the ownership parent and the correction.
+Thirty-five parameter cases pass on the correction, with existing rejection diagnostics and
+passing parent controls distinguished from missing checks/default defects. Combined scope is
+36 protocol and 45 module passes. Stages 5 through 11 and final cross-stage verification remain
+pending. No publication or completion claim is made by the intermediate commits.
+
 This plan covers route freshness and lifetimes, discovery progress, neighbor validation, transit
 failure, reboot recovery, selected interfaces, received subnet routes and opt-in local repair.
 The acceptance matrix in §7 defines the correction and compatibility scope without relying on a

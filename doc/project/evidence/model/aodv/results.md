@@ -240,3 +240,68 @@ state was replaced as one ownership change. The next stage supplies distinguishi
 checked parameter arithmetic and corrected defaults. Link attribution, detailed RERR semantics,
 recovery, interfaces, subnet profiles and local repair remain pending. These runs do not establish
 IPv6 compatibility or a higher whole-protocol conformance level.
+
+## Discovery timing and bounds stage, 2026-11-09
+
+Immediate parent: `ec0c7b08be`, rebuilt in the isolated parent checkout. Default feature selection,
+debug mode, seed 0. The five new Rfc3561DiscoveryTiming fixtures pass on both revisions. They
+provide added coverage for ring TTLs, retained-hop starts, diameter clamping, zero additional
+retries, actual-send IDs/sequences and full waits with/without 30 ms jitter. The immediately
+preceding ownership commit already supplies this behavior. These are passing parent controls.
+
+Thirty new module cases require configuration/sample rejection and five require acceptance.
+All 35 pass on the correction. On the parent, two pass and 33 fail their required diagnostic or
+parameter assertion. Classify these failures by cause rather than counting them all as defects:
+
+| Parent outcome | Cases | Interpretation |
+| --- | --- | --- |
+| Initializes normally despite invalid input | 23 rejection cases | Newly enforced bounds. Duration_activeRouteTimeout uses an independent valid 12-second advertisement override to expose its own missing positivity check. |
+| Already rejects through another check | RetriesNegative, BufferNegative, HelloLossZero, Duration_helloInterval, Port, TraversalOverflow | Six diagnostic controls. They do not establish missing invalid-input rejection. |
+| Already rejects the sampled jitter correctly | JitterSample | Passing parent control. |
+| Wrong derived blacklist default | Default, ZeroRetries, RetainedBound, Boundaries | Four failed public-parameter assertions. Default also checks the corrected destination lifetime after the blacklist assertion. |
+| Preserves explicit positive blacklist | Override | Passing parent control. |
+
+The [reviewer document](../../../../../tests/protocol/aodv/discovery-timing.md) lists all 35 module
+suffixes, five wire schedules, exact inputs, assertions and limitations. The fatal runtime
+JitterSample case checks the diagnostic only: throwing from the IP hook before queue registration
+can expose the framework's in-progress datagram as undisposed. This run does not establish
+clean stop/crash ownership. Initialization rejection cases prohibit undisposed-object output.
+
+Corrected combined scope: 36 protocol passes and 45 module passes, including all preceding
+cases and four existing AODV integration controls. Matching debug and release links pass.
+The isolated parent's final module run reports two passes and 33 expected-observation failures;
+Duration_activeRouteTimeout is additionally rerun with its final isolated input and reaches normal
+initialization. All five final timing fixtures pass on the parent. No baseline changed.
+
+Commands from the corresponding checkout root:
+
+```sh
+make -C src -j4 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561DiscoveryTiming.*\.test$' --no-build --no-concurrent \
+  --log-file /tmp/aodv-timing-parent-final.log
+opp_run_module_tests --load . -p inet -m debug -f 'AodvParameterValidation.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-parameters-parent-final.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f 'AodvParameterValidationDuration_activeRouteTimeout\.test$' --no-build --no-concurrent \
+  --log-file /tmp/aodv-parameters-parent-active.log
+
+# Corrected checkout:
+opp_run_protocol_tests --load . -p inet -m debug -w aodv -f 'Rfc3561.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-timing-all-protocol.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV(SimpleTest(_2)?|ShortestPath|LifecycleTest)|Aodv(GatewayQueues|TransitFailure|AdvertisementLifetimeInvalid_[1-4]|ParameterValidation.*))\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-timing-all-modules.log
+make -C src -j4 MODE=release
+```
+
+Parent timing exits 0, parent module comparisons exit 1, corrected selections and builds exit 0.
+Runner stdout has a `-runner.log` companion for each named log. Build logs:
+`/tmp/aodv-timing-parent-build.log`, `/tmp/aodv-timing-build-final.log`, `/tmp/aodv-timing-release.log`.
+Generated parent outputs remain under the isolated checkout's tests/protocol and tests/module work
+directories. Initial test development caught an integer-parameter conversion error, a suppressed
+EV_INFO success marker and duplicate INI entries in timing profiles. Those setup/development
+attempts are excluded from the final comparisons; the fixed fixtures retain their intended assertions.
+
+Full link validation/attribution, error propagation, Hello loss, recovery, interfaces, subnet and
+repair acceptance cases remain pending. No whole-protocol conformance level is raised.

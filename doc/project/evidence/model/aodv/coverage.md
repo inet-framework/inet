@@ -43,6 +43,7 @@ The exit criterion of level 1 has three parts, and all three hold:
 | 2, partial | 2026-11-09 | selected corrections | AODV-F-FRESHNESS, selected RREQ/RREP/Hello/RERR host-route cases | eight parent assertion failures become passes, with a passing preparation control and arithmetic unit test. See [results.md](results.md). Broader plan rows remain pending. |
 | 3, partial | 2026-11-09 | selected corrections | AODV-F-LIFETIME, reverse refresh and advertisement duration | five protocol parent failures and four missing configuration rejections become passes. Two protocol parents remain passing controls. Combined selection: 16 protocol and eight module passes. |
 | 4, partial | 2026-11-09 | selected corrections | AODV-F-DISCOVERY, phase ownership, queue release and exhaustion | 15 protocol and two module parent assertion failures become passes. Combined selection: 31 protocol and ten module passes. See discovery-ownership.md and results.md for limits. |
+| 5, partial | 2026-11-09 | selected corrections | AODV-F-DISCOVERY, wire timing and parameter bounds | Five protocol parent controls pass unchanged. Of 35 module cases, 23 expose missing bounds, four expose defaults, six change existing rejection diagnostics and two already pass. Corrected combined scope: 36 protocol and 45 module passes. |
 
 ## Selected feature evidence
 
