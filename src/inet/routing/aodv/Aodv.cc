@@ -574,6 +574,7 @@ void Aodv::eraseSearch(const L3Address& target)
 
 void Aodv::releaseEligiblePackets()
 {
+    updateSearchAuthorities();
     if (recovering || operationalState != OPERATING)
         return;
     auto generation = operationalGeneration;
@@ -638,7 +639,8 @@ void Aodv::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned i
             !isSelectedInterface(destRoute->getInterface()))
         return;
     const L3Address& nextHop = destRoute->getNextHopAsGeneric();
-    if (auto advertised = findExactRoute(rrep->getDestAddr()))
+    if (auto advertised = findExactRoute(rrep->getDestAddr().getPrefix(rrep->getPrefixSize() ? rrep->getPrefixSize() : addressType->getMaxPrefixLength()),
+            rrep->getPrefixSize() ? rrep->getPrefixSize() : addressType->getMaxPrefixLength()))
         check_and_cast<AodvRouteData *>(advertised->getProtocolData())->addPrecursor(nextHop, destRoute->getInterface()->getInterfaceId());
 
     // The node we received the Route Request for is our neighbor,
@@ -703,6 +705,10 @@ const Ptr<Rreq> Aodv::createRREQ(const L3Address& destAddr)
     // Destination only flag (D) indicates that only the
     // destination may respond to this RREQ.
     rreqPacket->setDestOnlyFlag(destinationOnlyFlag);
+    auto authority = findRetainedRoute(destAddr, true);
+    if (rreqPacket->getUnknownSeqNumFlag() && authority &&
+            authority->getPrefixLength() < addressType->getMaxPrefixLength())
+        rreqPacket->setDestOnlyFlag(true); // aggregate counters cannot be expressed as host floors
 
     // Before broadcasting the RREQ, the originating node buffers the RREQ
     // ID and the Originator IP address (its own address) of the RREQ for
@@ -770,6 +776,7 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
             return nullptr;
         rrep->setLifeTime(remaining);
         rrep->setDestSeqNum(destRouteData->getDestSeqNum());
+        rrep->setPrefixSize(destRoute->getPrefixLength() == addressType->getMaxPrefixLength() ? 0 : destRoute->getPrefixLength());
 
         // The intermediate node updates the forward route entry by placing the
         // last hop node (from which it received the RREQ, as indicated by the
@@ -847,9 +854,13 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr, Networ
         }
 
         // RFC 3561 section 6.7. An aliased previous hop must not preempt reply selection.
-        if (sourceAddr != rrep->getDestAddr())
+        int prefix = !usingIpv6 && rrep->getPrefixSize() ? rrep->getPrefixSize() : addressType->getMaxPrefixLength();
+        if (prefix <= 0 || prefix > addressType->getMaxPrefixLength())
+            return;
+        auto normalized = rrep->getDestAddr().getPrefix(prefix);
+        if (sourceAddr != rrep->getDestAddr() || prefix != addressType->getMaxPrefixLength())
             refreshNeighbor(sourceAddr, ingress);
-        IRoute *destRoute = findExactRoute(rrep->getDestAddr());
+        IRoute *destRoute = findExactRoute(normalized, prefix);
         expireRouteIfDue(destRoute);
         auto data = destRoute ? check_and_cast<AodvRouteData *>(destRoute->getProtocolData()) : nullptr;
         uint32_t sequence = rrep->getDestSeqNum();
@@ -864,8 +875,8 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr, Networ
         if (destRoute)
             updateRoutingTable(destRoute, sourceAddr, hops, true, sequence, true, simTime() + rrep->getLifeTime(), ingress);
         else
-            destRoute = createRoute(rrep->getDestAddr(), sourceAddr, hops, true, sequence, true,
-                    simTime() + rrep->getLifeTime(), ingress);
+            destRoute = createRoute(normalized, sourceAddr, hops, true, sequence, true,
+                    simTime() + rrep->getLifeTime(), ingress, prefix);
         data = check_and_cast<AodvRouteData *>(destRoute->getProtocolData());
 
         if (isLocalAodvAddress(rrep->getOriginatorAddr())) {
@@ -897,15 +908,41 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr, Networ
     releaseEligiblePackets();
 }
 
-IRoute *Aodv::findExactRoute(const L3Address& destination) const
+IRoute *Aodv::findExactRoute(const L3Address& destination, int prefixLength) const
 {
+    if (prefixLength < 0)
+        prefixLength = addressType->getMaxPrefixLength();
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         auto route = routingTable->getRoute(i);
         if (route->getSource() == this && route->getDestinationAsGeneric() == destination &&
-                route->getPrefixLength() == addressType->getMaxPrefixLength())
+                route->getPrefixLength() == prefixLength)
             return route;
     }
     return nullptr;
+}
+
+IRoute *Aodv::findRetainedRoute(const L3Address& destination, bool knownOnly) const
+{
+    IRoute *selected = nullptr;
+    for (int i = 0; i < routingTable->getNumRoutes(); i++) {
+        auto route = routingTable->getRoute(i);
+        if (route->getSource() != this || route == defaultGatewayRoute || route->getPrefixLength() == 0 ||
+                !destination.matches(route->getDestinationAsGeneric(), route->getPrefixLength()))
+            continue;
+        auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+        if ((!knownOnly || data->hasValidDestNum()) &&
+                (!selected || route->getPrefixLength() > selected->getPrefixLength()))
+            selected = route;
+    }
+    return selected;
+}
+
+void Aodv::updateSearchAuthorities()
+{
+    for (auto& entry : searches) {
+        auto route = findRetainedRoute(entry.first, true);
+        entry.second.retainedKey = route ? RouteKey(route->getDestinationAsGeneric(), route->getPrefixLength()) : RouteKey();
+    }
 }
 
 void Aodv::expireRouteIfDue(IRoute *route)
@@ -1069,7 +1106,10 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
         reverseData->setLifeTime(std::max(reverseData->getLifeTime(), lifetime));
         scheduleExpungeRoutes();
 
-        auto destination = findExactRoute(rreq->getDestAddr());
+        auto hostDestination = findExactRoute(rreq->getDestAddr());
+        auto destination = selectDataRoute(rreq->getDestAddr());
+        if (!destination || destination->getSource() != this || destination == defaultGatewayRoute)
+            destination = hostDestination;
         expireRouteIfDue(destination);
         auto destinationData = destination ? check_and_cast<AodvRouteData *>(destination->getProtocolData()) : nullptr;
         if (isLocalAodvAddress(rreq->getDestAddr())) {
@@ -1078,8 +1118,9 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
                 sendRREP(reply, rreq->getOriginatorAddr(), 255);
             return;
         }
+        bool aggregate = destination && destination->getPrefixLength() < addressType->getMaxPrefixLength();
         bool known = destinationData && destinationData->hasValidDestNum();
-        bool fresh = known && (rreq->getUnknownSeqNumFlag() ||
+        bool fresh = known && (!aggregate || rreq->getUnknownSeqNumFlag()) && (rreq->getUnknownSeqNumFlag() ||
             AodvSequence::isAtLeast(destinationData->getDestSeqNum(), rreq->getDestSeqNum()));
         if (!recovering && fresh && destinationData->isActive() && !rreq->getDestOnlyFlag() &&
                 !destination->getNextHopAsGeneric().isUnspecified() && destination->getNextHopAsGeneric() != sourceAddr)
@@ -1097,10 +1138,11 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
         }
         if (timeToLive > 0 && !recovering) {
             // RFC 3561 section 6.5. Unknown placeholders are not serial operands.
-            if (known) {
+            auto hostData = hostDestination ? check_and_cast<AodvRouteData *>(hostDestination->getProtocolData()) : nullptr;
+            if (hostData && hostData->hasValidDestNum()) {
                 if (rreq->getUnknownSeqNumFlag() ||
-                        AodvSequence::isNewer(destinationData->getDestSeqNum(), rreq->getDestSeqNum()))
-                    rreq->setDestSeqNum(destinationData->getDestSeqNum());
+                        AodvSequence::isNewer(hostData->getDestSeqNum(), rreq->getDestSeqNum()))
+                    rreq->setDestSeqNum(hostData->getDestSeqNum());
                 rreq->setUnknownSeqNumFlag(false);
             }
             forwardRREQ(rreq, timeToLive);
@@ -1112,15 +1154,17 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
 
 IRoute *Aodv::createRoute(const L3Address& destAddr, const L3Address& nextHop,
         unsigned int hopCount, bool hasValidDestNum, uint32_t destSeqNum,
-        bool isActive, simtime_t lifeTime, NetworkInterface *nextHopInterface)
+        bool isActive, simtime_t lifeTime, NetworkInterface *nextHopInterface, int prefixLength)
 {
     // create a new route
     IRoute *newRoute = routingTable->createRoute();
 
     // adding generic fields
-    newRoute->setDestination(destAddr);
+    if (prefixLength < 0)
+        prefixLength = addressType->getMaxPrefixLength();
+    newRoute->setDestination(destAddr.getPrefix(prefixLength));
     newRoute->setNextHop(nextHop);
-    newRoute->setPrefixLength(addressType->getMaxPrefixLength()); // TODO
+    newRoute->setPrefixLength(prefixLength);
     newRoute->setMetric(hopCount);
     newRoute->setInterface(nextHopInterface ? nextHopInterface : interface);
     newRoute->setSourceType(IRoute::AODV);
@@ -1528,9 +1572,11 @@ void Aodv::sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsigned
 {
     EV_INFO << "Sending gratuitous Route Reply to " << destAddr << endl;
 
-    IRoute *destRoute = findExactRoute(destAddr);
+    IRoute *destRoute = selectDataRoute(destAddr);
+    if (!destRoute || destRoute->getSource() != this)
+        return;
     expireRouteIfDue(destRoute);
-    if (!destRoute || !check_and_cast<AodvRouteData *>(destRoute->getProtocolData())->isActive() ||
+    if (!check_and_cast<AodvRouteData *>(destRoute->getProtocolData())->isActive() ||
             !isSelectedInterface(destRoute->getInterface()))
         return;
     const L3Address& nextHop = destRoute->getNextHopAsGeneric();
@@ -1631,6 +1677,7 @@ void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage, NetworkInterface *i
 
 void Aodv::expungeRoutes()
 {
+    updateSearchAuthorities();
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
         if (route->getSource() == this) {
@@ -1649,7 +1696,10 @@ void Aodv::expungeRoutes()
                 else {
                     // Any routing table entry waiting for a RREP SHOULD NOT be expunged
                     // before (current_time + 2 * NET_TRAVERSAL_TIME).
-                    if (hasOngoingRouteDiscovery(route->getDestinationAsGeneric()) || queueOwners.count(route->getDestinationAsGeneric())) {
+                    bool retained = false;
+                    for (const auto& entry : searches)
+                        retained |= entry.second.retainedKey == RouteKey(route->getDestinationAsGeneric(), route->getPrefixLength());
+                    if (retained || hasOngoingRouteDiscovery(route->getDestinationAsGeneric()) || queueOwners.count(route->getDestinationAsGeneric())) {
                         EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive, but we are waiting for a RREP to this destination, so we extend its lifetime with 2 * NET_TRAVERSAL_TIME" << endl;
                         routeData->setLifeTime(simTime() + 2 * netTraversalTime);
                     }
@@ -1658,6 +1708,7 @@ void Aodv::expungeRoutes()
                         if (route == defaultGatewayRoute)
                             defaultGatewayRoute = nullptr;
                         routingTable->deleteRoute(route);
+                        i--;
                     }
                 }
             }

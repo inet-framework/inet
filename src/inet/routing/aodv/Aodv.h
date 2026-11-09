@@ -116,11 +116,13 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     unsigned int rreqId = 0; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
     uint32_t sequenceNum = 0; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
     enum class SearchPhase { RECOVERY_WAIT, SEND_DELAY, READY, WAIT_REPLY };
+    using RouteKey = std::pair<L3Address, int>;
     struct Search {
         SearchPhase phase = SearchPhase::SEND_DELAY;
         cMessage *timer = nullptr;
         unsigned int ttl = 0;
         unsigned int networkAttempts = 0;
+        RouteKey retainedKey;
     };
     std::map<L3Address, Search> searches;
     std::deque<L3Address> readySearches;
@@ -181,7 +183,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void cancelRouteDiscovery(const L3Address& destAddr);
 
   private:
-    IRoute *findExactRoute(const L3Address& destination) const;
+    IRoute *findExactRoute(const L3Address& destination, int prefixLength = -1) const;
+    IRoute *findRetainedRoute(const L3Address& destination, bool knownOnly = false) const;
+    void updateSearchAuthorities();
     void expireRouteIfDue(IRoute *route);
     void refreshNeighbor(const L3Address& sender, NetworkInterface *ingress);
     IRoute *selectDataRoute(const L3Address& destination);
@@ -220,7 +224,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
   protected:
     /* Routing Table management */
     void updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, uint32_t destSeqNum, bool isActive, simtime_t lifeTime, NetworkInterface *nextHopInterface = nullptr);
-    IRoute *createRoute(const L3Address& destAddr, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, uint32_t destSeqNum, bool isActive, simtime_t lifeTime, NetworkInterface *nextHopInterface = nullptr);
+    IRoute *createRoute(const L3Address& destAddr, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, uint32_t destSeqNum, bool isActive, simtime_t lifeTime, NetworkInterface *nextHopInterface = nullptr, int prefixLength = -1);
     bool updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetime);
     void scheduleExpungeRoutes();
     void expungeRoutes();

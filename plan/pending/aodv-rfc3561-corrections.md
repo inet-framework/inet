@@ -1059,7 +1059,7 @@ code action and coverage limits. Proposed assignments, beside `tests/protocol/ao
 | 7 | `hello-liveness.md` | 26 HelloLoss variants and two real three-node forwarding module cases; 112 protocol and 53 module cases pass; restart reset remains row 8 |
 | 8 | `reboot-recovery.md` | 28 RebootRecovery protocol variants and seven module cases; 140 protocol and 60 module cases pass with existing expectations unchanged |
 | 9 | `selected-interfaces.md` | 18 Interfaces protocol cases, 12 startup-validation module cases and four live module controls; isolated-parent causal comparison recorded in model results |
-| 10 | `subnet-routes.md` | SubnetReply, NoDeleteError |
+| 10 | `subnet-routes.md` | 26 Subnet variants and a native downstream module case cover normalized wire learning, independent counters, cached/forwarded prefixes, actual output, learned RERR relays, RERR ambiguity, ICMP member errors, retained recovery authority, sustained-demand blocking and the Hello-router limitation |
 | 11 | `local-repair.md` | LocalRepair, with LocalRepairLifecycle and Ipv6Compatibility module coverage |
 
 Fixture names in this table are prefixed `Rfc3561` and suffixed `.test` unless written in full.
