@@ -127,7 +127,7 @@ void AckingMac::handleUpperPacket(Packet *packet)
 
 void AckingMac::handleLowerPacket(Packet *packet)
 {
-    auto macHeader = packet->peekAtFront<AckingMacHeader>();
+    // check the errors first: the header itself can be incorrect
     if (packet->hasBitError()) {
         EV << "Received frame '" << packet->getName() << "' contains bit errors or collision, dropping it\n";
         PacketDropDetails details;
@@ -137,6 +137,7 @@ void AckingMac::handleLowerPacket(Packet *packet)
         return;
     }
 
+    auto macHeader = packet->peekAtFront<AckingMacHeader>();
     if (!dropFrameNotForUs(packet)) {
         // send Ack if needed
         auto dest = macHeader->getDest();
