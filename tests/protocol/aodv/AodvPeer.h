@@ -43,6 +43,7 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
 {
   protected:
     UdpSocket socket;
+    int controlPort = 654;
     cMessage *timer = nullptr;
     int step = 0;
     int replies = 0;
@@ -70,7 +71,8 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
             return;
         socket.setOutputGate(gate("socketOut"));
         socket.setCallback(this);
-        socket.bind(654);
+        controlPort = hasPar("controlPort") ? par("controlPort").intValue() : 654;
+        socket.bind(controlPort);
         socket.setBroadcast(true);
         routes = check_and_cast<IRoutingTable *>(getModuleByPath("^.^.dut.ipv4.routingTable"));
         getModuleByPath("^.ipv4.ip")->subscribe(packetReceivedFromLowerSignal, this);
@@ -96,7 +98,7 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
         packet->addTag<L3AddressReq>()->setSrcAddress(selected->getNetworkAddress());
         packet->addTag<HopLimitReq>()->setHopLimit(10);
         packet->addTag<NextHopAddressReq>()->setNextHopAddress(target);
-        socket.sendTo(packet, target, 654);
+        socket.sendTo(packet, target, controlPort);
     }
     void request(uint32_t sequence, uint32_t originatorSequence = 1, bool unknown = false) {
         auto request = makeShared<Rreq>();
@@ -477,7 +479,7 @@ class AodvDataSource : public SimpleModule
     void initialize(int stage) override {
         if (stage == INITSTAGE_APPLICATION_LAYER) {
             socket.setOutputGate(gate("socketOut"));
-            socket.bind(12345);
+            socket.bind(hasPar("localPort") ? par("localPort").intValue() : 12345);
             timer = new cMessage("data");
             scheduleAt(hasPar("emitTime") ? par("emitTime").doubleValue() : 0.16, timer);
         }

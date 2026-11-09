@@ -305,3 +305,78 @@ attempts are excluded from the final comparisons; the fixed fixtures retain thei
 
 Full link validation/attribution, error propagation, Hello loss, recovery, interfaces, subnet and
 repair acceptance cases remain pending. No whole-protocol conformance level is raised.
+
+## Link validation and attribution stage, 2026-11-09
+
+Immediate parent: `f8baeb3233`, freshly rebuilt and linked in the isolated parent checkout.
+Default features, debug mode, seed 0. The correction has 21 new protocol fixtures: 12 ReplyAck
+variants, seven FailedLink variants and two ControlIngress variants. The exact inputs and causal
+comparisons are in [link-validation.md](../../../../../tests/protocol/aodv/link-validation.md).
+
+The 19-case ReplyAck/FailedLink parent scope compiles and reports two passes and 17 intended runtime
+assertion failures. Both exact-deadline cases already pass and remain controls. The two additional
+ingress cases compile and fail their absent-route/reply assertion on the same parent. The three
+module cases compile and fail the corresponding replacement/metadata assertion. These are actual
+behavior failures, not fixture build errors. In ExpiredNeighbor the parent preserves D but misses
+invalidation of the dependent N route; the other replacement cases catch invalidation of D itself.
+
+Corrected complete scope: **57 protocol passes and 48 module passes**, including the four unchanged
+existing integration controls. Fresh matching debug and release links pass. No existing fixture
+expectation, simulation fingerprint or baseline is changed.
+
+The DCF case uses independent mode, non-QoS DCF, fixed 1 Mbps, no aggregation and no fragmentation.
+It observes a real retry-limit failure and asserts retained InterfaceReq/MacAddressReq, receiver
+MAC, Retry and both DS bits on the failed frame. The AckingMac counterpart learns replacement
+state through real UDP control while the original packet is in flight. Missing-output, absent
+binding, ambiguous MAC and rebinding cases skip peer-specific actions. ExpiredNeighbor verifies
+that the stable binding remains usable after both neighbor route records have been deleted.
+
+The no-A reply case exposed a raw-chunk peek using Packet's unspecified-length convention. It
+returned an incomplete header, preventing the failed gratuitous reply from being identified.
+Bounding the peek by the UDP payload fixes that classification. Port 60654 repeats the real
+failure/blacklist observation without a global UDP dissector registration. The saved diagnostic
+trace is `/tmp/aodv-classifier-debug-test.out`; it is development evidence, not a passing run.
+
+An initial outgoing policy requested ACKs on every forwarded reply. The expanded integration
+selection caught simultaneous-transmission guard failures in three existing simulations. That
+policy was removed. The final source retains the established cleared-A forwarded-reply policy,
+while acknowledging every received A flag and blacklisting confirmed RREP failures independently
+of A. All four existing integration controls then pass unchanged. Initial socket-port collisions,
+an incompatible timing-helper signature and the cable-only ACK-order experiment are excluded from
+the final comparisons. Their replacement fixtures preserve the intended assertions.
+
+Commands from the corresponding checkout root:
+
+```sh
+# Isolated parent:
+make -C src -j4 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561(ReplyAck|FailedLink).*\.test$' --no-build --no-concurrent \
+  --log-file /tmp/aodv-link-parent-final-with-port.log
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561ControlIngress.*\.test$' --no-build --no-concurrent \
+  --log-file /tmp/aodv-control-ingress-parent.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f 'AodvTransitFailure(InFlight|Dcf|Metadata)\.test$' --no-build --no-concurrent \
+  --log-file /tmp/aodv-link-modules-parent-final.log
+
+# Corrected checkout:
+make -C src -j4 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv -f 'Rfc3561.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-link-all-protocol-guard.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV(SimpleTest(_2)?|ShortestPath|LifecycleTest)|Aodv(GatewayQueues|TransitFailure.*|AdvertisementLifetimeInvalid_[1-4]|ParameterValidation.*))\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-link-all-modules-guard.log
+make -C src -j4 MODE=release
+```
+
+Parent comparisons exit 1 with the explicitly classified outcomes above. Corrected selections
+and builds exit 0. Each named log has a `-runner.log` stdout companion. Build logs:
+`/tmp/aodv-link-parent-build.log`, `/tmp/aodv-link-build-guard-final.log`,
+`/tmp/aodv-link-release-guard.log`. The isolated parent uses the unchanged-object reuse procedure
+already recorded in the ownership stage. Generated outputs are transient and runners clear their
+work directories, so the named logs retain the comparison record.
+
+This establishes the selected IPv4 link and metadata profiles. Complete precursor/RERR semantics,
+Hello observation deadlines, restart cleanup, selected-interface operation, subnet rules, IPv6
+compatibility and local repair remain pending. No whole-protocol conformance level is raised.
