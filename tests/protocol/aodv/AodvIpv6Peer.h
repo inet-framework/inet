@@ -60,7 +60,7 @@ class AodvIpv6Peer : public AodvPeer
         if (step == 3) {
             ASSERT(hostRoute() && check_and_cast<AodvRouteData *>(hostRoute()->getProtocolData())->isActive());
             ASSERT(check_and_cast<AodvRouteData *>(hostRoute()->getProtocolData())->getDestSeqNum() == 0);
-            ASSERT(emittedData == 1 && requests == 1);
+            ASSERT(emittedData == 1 && requests == 1 && acknowledgments == 4);
             std::cout << "AODV IPv6 Basic: PASS\n";
         }
         step++;

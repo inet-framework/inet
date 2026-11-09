@@ -8,8 +8,8 @@ The historical survey below records the documentation claims inspected on 2026-0
 
 The freshness stage has direct IPv4 UDP/IP evidence in [results.md](results.md), including eight
 distinguishing parent failures followed by corrected passes. It covers selected host-route cases
-and one-datagram discovery completion. IPv6 runtime behavior and the remaining plan stages are
-still unverified by this effort.
+and one-datagram discovery completion. Subsequent sections record the additional discovery and
+link corrections. IPv6 runtime compatibility remains pending.
 
 | Question | Model decision |
 | --- | --- |
@@ -24,8 +24,8 @@ still unverified by this effort.
 | Configured advertisement duration | Reject an unencodable destination or Hello duration during initialization, including when Hello transmission is disabled. |
 
 The [reviewer document](../../../../../tests/protocol/aodv/route-freshness.md) describes the tested
-scenarios and limits. Independent ACK state, link attribution, timer/queue scheduling, reboot,
-selected interfaces, subnet routing and local repair remain assigned in the implementation plan.
+freshness scenarios and limits. Subsequent correction sections extend that scope. Hello loss,
+reboot, selected interfaces, subnet routing and local repair remain assigned in the plan.
 The historical survey below is preserved as its original read-only evidence.
 
 ## Discovery ownership correction
@@ -48,8 +48,8 @@ records the recommendation as unmet, rather than inventing a transport callback.
 fixtures require terminal disposal and no spurious application error. Selected executions and
 the separate-parent comparison are recorded in results.md and discovery-ownership.md.
 
-This stage establishes queue ownership and the scheduler's basic progress. Parameter bounds,
-complete timing coverage, link attribution, reboot, selected interfaces, aggregate completion
+This stage established queue ownership and basic scheduler progress. The following sections
+extend timing and link coverage. Reboot, selected interfaces, aggregate completion
 and local repair remain assigned to subsequent stages. The search key is a full-width address
 until exact-prefix repair ownership is introduced in its assigned stage.
 
@@ -69,6 +69,42 @@ overrides are supported. The new migration note lists configurations that must b
 
 The bounded IPv4 executions and the six already-rejected parameter controls are separated in
 results.md. No added IPv6 feature or local-repair validation claim follows from these tests.
+
+## Link validation correction
+
+An A-flagged RREP produces a one-hop ACK on its ingress interface independently of advertised
+route acceptance, including final-originator, stale, direct-inactive and zero-lifetime cases.
+ACKs clear only the matching outstanding neighbor/interface validation. Repeated sends retain
+the first deadline. ACK processing never reactivates a route or removes an existing blacklist.
+At an exact deadline, normal simulation event order decides the outcome. The two calibrated
+Ethernet/UDP fixtures observe both orders without changing a private timer's priority.
+
+Pending validation begins at actual control send. Confirmed RREP failure blacklists that
+attempted link even without A, removes its pending validation and leaves other links independent.
+Locally generated direct replies retain the existing ACK-request rule. Forwarded replies retain
+their cleared-A policy, preserving the established default traffic pattern. MAC failure feedback
+supplies the confirmed-failure outcome independently of whether that reply requests an ACK.
+
+Stable interface-qualified IP/MAC bindings are learned only from one-hop control. They survive
+route expiry and deletion. Rebinding or a shared MAC quarantines all affected MAC associations
+until restart. Failure attribution reads retained output tags from the borrowed failed packet;
+it never looks up that packet's final destination to guess its attempted next hop. Only owned
+current routes still using the identified link are invalidated. Missing/unknown ingress metadata
+ignores control; missing or ambiguous failed-link attribution skips peer-specific handling with
+a diagnostic. Interface lookup for invalid metadata is nonthrowing.
+
+The direct AckingMac and independent nonaggregating DCF tests establish immediate-peer meaning
+and retained tags in those paths. The DCF failure asserts Retry, receiver address and both DS
+bits in the actual failed frame. These are tested profiles, not a concrete-interface whitelist.
+Infrastructure/WDS, aggregation and custom metadata semantics need their own evidence. The
+per-interface Hello observation contract and restart cleanup are assigned to later stages.
+
+The classifier inspects a temporary copy using the existing generic packet dissector, stops at
+UDP, and bounds the raw control peek by its payload length. A known different UDP port takes a
+metadata-only fast path. A reserved control that fails later parsing is still excluded from data
+admission. Default port 654 and custom port 60654 have direct failure/blacklist evidence without
+changing global protocol registrations or wire formats. See link-validation.md and results.md
+for the individual parent comparisons and their limits.
 
 ## Historical survey
 

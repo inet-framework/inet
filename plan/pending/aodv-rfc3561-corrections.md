@@ -16,8 +16,15 @@ explicit independent routes remain eligible. See model results and discovery-own
 Timing/bounds stage: five wire timing cases pass on both the ownership parent and the correction.
 Thirty-five parameter cases pass on the correction, with existing rejection diagnostics and
 passing parent controls distinguished from missing checks/default defects. Combined scope is
-36 protocol and 45 module passes. Stages 5 through 11 and final cross-stage verification remain
-pending. No publication or completion claim is made by the intermediate commits.
+36 protocol and 45 module passes.
+
+Link validation stage: 21 new protocol cases distinguish 19 parent runtime failures and two
+passing exact-deadline controls. Three module variants reproduce failed-path replacement and
+metadata handling. The final source preserves the established forwarded-RREP RREP-ACK request policy,
+while sending RREP-ACKs for received A flags independently and blacklisting actual RREP failures with or
+without A. Combined scope is 57 protocol and 48 module passes with unchanged existing expectations.
+Stages 6 through 11 and final cross-stage verification remain pending. No publication or completion
+claim is made by the intermediate commits.
 
 This plan covers route freshness and lifetimes, discovery progress, neighbor validation, transit
 failure, reboot recovery, selected interfaces, received subnet routes and opt-in local repair.
@@ -1044,9 +1051,9 @@ code action and coverage limits. Proposed assignments, beside `tests/protocol/ao
 | 1 | `fixture-controls.md` | `Rfc3561Control.test`, a passing UDP/IP RREQ/RREP and reverse-route control |
 | 2 | `route-freshness.md` | SequenceFreshness, ReverseRoute, ReplyAcceptance, NeighborSequence, DestinationSequence, RequestFloors, HelloAcceptance, ErrorFreshness |
 | 3 | `route-lifetimes.md` | ReverseLifetime, ReverseLifetimeLong, GratuitousReply, SubmillisecondReply, MillisecondReply, MaximumLifetimeReply, OversizedLifetimeReply, with `tests/module/AodvAdvertisementLifetimeInvalid_1.test` through `_4.test` |
-| 4a | `discovery-ownership.md` | ReplyAcceptance, RequestRateLimit, with GatewayQueues module coverage |
-| 4b | `discovery-timing.md` | DiscoveryTiming, with ParameterValidation module coverage |
-| 5 | `link-validation.md` | ReplyAck, with TransitFailure module coverage |
+| 4a | `discovery-ownership.md` | RateLimit, DeferredReply, ReplyDuringJitter, IndependentRoute, NeighborCompletion, DiscoveryExhaustion, GatewayQueues, GatewayFailure, OutputInterface/OutputNextHop position variants and TransitAdmission, with GatewayQueues/TransitFailure module coverage |
+| 4b | `discovery-timing.md` | DiscoveryTiming variants, with ParameterValidation module variants |
+| 5 | `link-validation.md` | ReplyAck, FailedLink and ControlIngress variants, with TransitFailureInFlight, TransitFailureDcf and TransitFailureMetadata module coverage |
 | 6 | `transit-errors.md` | NoDeleteError, with TransitFailure module coverage |
 | 6b | `error-capacity.md` | ErrorCapacity |
 | 7 | `hello-liveness.md` | HelloLoss, NeighborSequence |

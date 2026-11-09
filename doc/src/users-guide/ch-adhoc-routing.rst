@@ -80,7 +80,20 @@ route-error/drop path instead of starting an originating discovery.
 Route selection uses 32-bit serial sequence ordering. An older control message
 cannot replace newer route information. Values separated by exactly half the
 sequence range are treated as ambiguous and do not establish freshness.
-Rejected replies do not forward their advertised path or release queued data.
+A rejected advertised path is neither forwarded nor used to complete a search.
+An independent previous-hop update can still release that neighbor's queued data.
+
+A-flagged replies receive a one-hop acknowledgment on their ingress interface,
+including stale replies and replies reaching the original requester. Validation
+deadlines belong to a neighbor/interface pair, and later replies do not postpone
+an outstanding deadline. Unsolicited or late ACKs do not reactivate routes.
+
+Failed transmissions are attributed from retained output interface/MAC tags
+and stable IP/MAC bindings learned from one-hop control. A route that changed
+while a packet was in flight remains intact if it no longer uses the failed
+link. Missing, changed or ambiguous metadata is diagnosed and supplies no peer
+to invalidate. Bindings remain usable after route expiry, and are cleared on
+stop/crash. Custom interfaces must preserve the same immediate-peer contract.
 
 RFC 3561 sections 6.1 and 6.6.1 give conflicting descriptions of destination
 sequence updates. This model follows the freshness rule of section 6.1: the
