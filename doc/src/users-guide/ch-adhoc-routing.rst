@@ -115,6 +115,28 @@ errors remain permitted. On expiry, a usable learned route releases held data
 without an unnecessary request. Stop/crash removes this instance's routes and
 cancels pending work before a later restart.
 
+``interface`` remains the primary address and legacy link selection. The optional
+``interfaces`` parameter selects multiple IPv4 links with a whitespace-separated
+list of exact names, for example ``"wlan0 wlan1"``. The list must include the
+primary; an empty value selects only that primary interface. Selected interfaces
+must be up, nonloopback and addressed at actual startup, with distinct local
+IPv4 addresses. Each selected local address answers requests using the shared
+node sequence. Discovery copies use each link's IP source while preserving the
+primary originator identity and one logical request/rate charge.
+
+Unicast replies, data and errors follow the learned next-hop interface. Hello
+source and advertised address belong to their outgoing interface, with separate
+broadcast suppression and neighbor observations per link. Control received on an
+unselected interface is ignored; legitimate data can still traverse an external
+gateway interface. Every selected IPv4 subnet contributes to internal address
+scope, and a gateway's default adapter follows its learned outgoing interface.
+
+Selection changes apply at the next start. Stop, reconfigure and start is the
+supported way to change interfaces or addresses. For AckingWirelessInterface
+profiles that must receive immediately after restart, set the radio's
+``initialRadioMode`` to ``receiver`` or ``transceiver``; its default ``off`` can
+otherwise wait for a local transmission to activate reception.
+
 RFC 3561 sections 6.1 and 6.6.1 give conflicting descriptions of destination
 sequence updates. This model follows the freshness rule of section 6.1: the
 destination adopts a known fresher requested sequence before replying, without

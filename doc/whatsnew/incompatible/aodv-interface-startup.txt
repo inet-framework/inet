@@ -1,0 +1,3 @@
+AODV validates interfaces when it starts
+
+Selected interfaces must be up, nonloopback and addressed when AODV actually starts. Explicit selections must contain the primary, use distinct IPv4 addresses and list exact unique names. Stop, reconfigure and start applies a changed selection; live removal or address reassignment is unsupported.

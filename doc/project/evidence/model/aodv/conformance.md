@@ -177,6 +177,29 @@ without dereferencing remaining packets already disposed by IP. Destructor clean
 cross-module calls. The selected IPv4 lifecycle cases and limits are in reboot-recovery.md and
 results.md; IPv6 runtime compatibility, explicit selected interfaces and repair remain pending.
 
+## Selected-interface correction
+
+An optional explicit IPv4 interface set retains one primary originator identity, RREQ-ID stream
+and node sequence. Physical discovery copies share a logical attempt/rate charge. Selected
+secondary addresses answer requests and self-originator checks cover the entire selected set.
+Ingress and owned next-hop interfaces determine unicast output and qualified precursor delivery.
+An unrelated manual forwarding route cannot replace the owned reverse control path.
+
+Selection validation occurs at actual start, including a node initialized down. Mutable selection
+parameters apply at the next start; live interface removal/address reassignment is unsupported.
+Explicit selection is IPv4-only and requires unique exact names, primary membership, usable
+nonloopback interfaces and distinct local IPv4 addresses. Empty keeps the legacy primary path.
+
+Hello output and actual-send broadcast suppression are per interface; exactly one elapsed interval
+permits a Hello. Missing sender MAC disables only its identified selected interface, while missing
+ingress identity cancels observation across the selected set conservatively. Control from a known
+unselected link has no AODV state effect. Legitimate external data forwarding remains available.
+The generic routing-table factory creates the gateway adapter, which follows its learned interface.
+
+The selected-interfaces.md reviewer document records wire assertions, real learned precursor fan-out,
+startup rejection cases, external data controls and a radio startup-mode fixture diagnostic. Native
+IPv6 runtime compatibility and subnet/repair integration remain assigned to later stages.
+
 ## Historical survey
 
 Read record — no build, no run in the 2026-09-23 survey:
