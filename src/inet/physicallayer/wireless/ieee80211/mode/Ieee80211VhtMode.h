@@ -285,7 +285,7 @@ class INET_API Ieee80211VhtMode : public Ieee80211ModeBase
     virtual int getMpduMaxLength() const override { return 65535; } // in octets
     virtual BandMode getCenterFrequencyMode() const { return centerFrequencyMode; }
 
-    virtual const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + dataMode->getDuration(dataBitLength); }
+    virtual const simtime_t getDuration(b dataBitLength) const override { return preambleMode->getDuration() + getHeaderMode()->getDuration() + dataMode->getDuration(dataBitLength); }
 };
 
 // A specification of the high-throughput (HT) physical layer (PHY)
