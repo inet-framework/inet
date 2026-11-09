@@ -121,7 +121,11 @@ bool Rx::lowerFrameReceived(Packet *packet)
     Enter_Method("lowerFrameReceived(\"%s\")", packet->getName());
     take(packet);
 
-    bool isFrameOk = isFcsOk(packet);
+    // A failed HT header supplies no decoded Aggregation property. Refuse its container before MAC peeks.
+    // Aggregate containers use the separate member acceptance path.
+    auto aggregate = packet->findTag<Ieee80211AmpduInd>();
+    bool isFrameOk = !(aggregate && (!aggregate->getHeaderSuccessful() || !aggregate->getContentComplete() ||
+            aggregate->getAggregation())) && isFcsOk(packet);
     attachInterframeResult(packet, isFrameOk);
     if (isFrameOk) {
         EV_INFO << "Received frame from PHY: " << packet << endl;

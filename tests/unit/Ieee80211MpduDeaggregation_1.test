@@ -96,6 +96,32 @@ bool refusedEncoding = false;
 try { overflow.peekAllAsBytes(); }
 catch (const cRuntimeError&) { refusedEncoding = true; }
 ASSERT(refusedEncoding);
+Packet recovery("recovery", makeShared<BytesChunk>(std::vector<uint8_t>{0, 0, 0, 0}));
+appendMember(recovery, 20);
+auto recovered = inspect(&recovery, B(0), B(recovery.getDataLength()));
+ASSERT(!recovered.first && recovered.second.size() == 3);
+ASSERT(!std::get<3>(recovered.second[0]) && std::get<1>(recovered.second[1]) == B(4));
+for (int prefixLength : {0, 6}) {
+    Packet typed("typed-recovery");
+    if (prefixLength)
+        typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(prefixLength, 0)));
+    auto delimiter = makeShared<Ieee80211MpduSubframeHeader>();
+    delimiter->setLength(2000);
+    typed.insertAtBack(delimiter);
+    auto member = makeShared<Ieee80211DataHeader>();
+    member->setSequenceNumber(SequenceNumberCyclic(0));
+    typed.insertAtBack(member);
+    typed.insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(100 - member->getChunkLength().get<B>(), 0)));
+    appendMember(typed, 20);
+    auto bytes = typed.peekAllAsBytes()->getBytes();
+    Packet independent("byte-recovery", makeShared<BytesChunk>(bytes));
+    auto typedResult = inspect(&typed, B(prefixLength), B(128));
+    auto byteResult = inspect(&independent, B(prefixLength), B(128));
+    ASSERT(!typedResult.first && typedResult == byteResult);
+    const auto& last = typedResult.second.back();
+    ASSERT(!std::get<0>(last) && std::get<3>(last) && std::get<1>(last) == B(108) && std::get<2>(last) == B(20));
+}
+ASSERT(!std::get<0>(incorrectResult.second.back()) && std::get<3>(incorrectResult.second.back()));
 EV << "MPDU traversal checks passed\n";
 
 %contains: stdout
