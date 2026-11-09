@@ -1,0 +1,3 @@
+A late interferer with separate reception parts
+
+With separateReceptionParts = true, the radio medium computed the interference, noise, and SNIR of a reception at the end of the preamble or the header, and kept them for the rest of the reception. A transmission that started later did not count, so a strong interferer over the end of the data did not cause a bit error. The radio medium now computes these values again when a new transmission overlaps the reception. The default mode, without separate reception parts, does not change.
