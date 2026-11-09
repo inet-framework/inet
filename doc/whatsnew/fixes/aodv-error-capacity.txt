@@ -1,0 +1,3 @@
+AODV partitions outgoing route errors
+
+AODV splits route errors into groups of at most 255 destinations, preserving all counters and admitting every required precursor/interface copy of each group for one rate-limit charge.

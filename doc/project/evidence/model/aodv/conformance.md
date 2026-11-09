@@ -130,6 +130,15 @@ capacity and complete lifecycle behavior remain separate subsequent stages.
 The 25 protocol and three module cases, parent distinctions and limits are recorded in
 results.md and the transit-errors.md reviewer document.
 
+## Route-error capacity correction
+
+Outgoing lists are split into groups of at most 255 records before header construction and
+admission. Each group preserves its counters and gets one actual-send budget decision for every
+required precursor/interface copy. Full local invalidation precedes all partition decisions.
+The One/Maximum controls and Partition/Budget distinctions serialize and decode emitted headers;
+two-interface precursor state is supplied through the public table to isolate this mechanism.
+Selected-interface learning remains stage 9 work. The wire layout is unchanged.
+
 ## Historical survey
 
 Read record — no build, no run in the 2026-09-23 survey:
