@@ -139,6 +139,26 @@ The One/Maximum controls and Partition/Budget distinctions serialize and decode 
 two-interface precursor state is supplied through the public table to isolate this mechanism.
 Selected-interface learning remains stage 9 work. The wire layout is unchanged.
 
+## Hello observation correction
+
+Neighbor/interface observation deadlines are separate from route-use lifetimes. A positive
+attributable Hello arms its sender; incoming traffic refreshes an already armed immediate
+sender using stable interface/MAC bindings. Data alone never arms one. Outgoing traffic cannot
+postpone loss. Route-sequence acceptance remains independent, so stale positive Hello information
+can refresh link observation while leaving fresher route state untouched.
+
+Missing or unstable immediate-sender metadata disables observation for the whole selected
+interface until restart and cancels its deadlines. Later valid traffic does not re-enable it.
+At expiry, pending validation on that link is resolved as failed and the ordinary current-link
+fan-out runs. Records without eligible precursors do not cause an error flood. Exact deadline
+refresh/metadata races follow simulation event order, without production priority changes.
+
+The IPv4 profiles include AckingMac, independent nonaggregating DCF and Ethernet, plus two real
+three-node forwarding cases asserting IP source S and immediate sender N. The shared hook also
+serves IPv6, whose runtime compatibility remains pending. No concrete-interface whitelist is used.
+See hello-liveness.md and results.md for controls, causal parent failures and limits. Restart
+reset and selected-interface integration remain subsequent stages.
+
 ## Historical survey
 
 Read record — no build, no run in the 2026-09-23 survey:

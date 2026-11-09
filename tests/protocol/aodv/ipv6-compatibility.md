@@ -19,6 +19,7 @@ sequenceDiagram
 | Incoming | Send a native multicast RREQ for the node. Require reverse state and a self reply. Without group membership the socket receives no request. |
 | RateLimit | Queue two destinations under one request per second. Require both data deliveries, separate request IDs and matching ACKs after actual admission. |
 | DeferredReply | Learn a READY destination before admission. Require two data deliveries after one request, matching ACKs and no obsolete later send. |
+| HelloForwarding | Forward five real IPv6 packets from S through N. Preserve IP source S and MAC source N, keep N live, then invalidate it and its dependent route after attributable traffic ceases. |
 
 Each named case has protocol and module variants with prefixes Rfc3561Ipv6 and AodvIpv6. They use General/run 0/seed 0 and public routes or wire observations, never direct AODV handlers.
 

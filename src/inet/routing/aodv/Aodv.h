@@ -137,6 +137,8 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     using MacLink = std::pair<int, MacAddress>;
     std::map<Link, simtime_t> pendingAcks;
     std::map<Link, simtime_t> blacklist;
+    std::map<Link, simtime_t> neighborDeadlines;
+    std::set<int> disabledHelloObservation;
     std::map<Link, MacAddress> neighborBindings;
     std::map<MacLink, Link> inverseBindings;
     std::set<MacLink> unusableBindings;
@@ -152,6 +154,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     cMessage *counterTimer = nullptr; // timer to set rrerCount = rreqCount = 0 in each second
     cMessage *rrepAckTimer = nullptr; // timer to wait for RREP-ACKs (RREP-ACK timeout)
     cMessage *blacklistTimer = nullptr; // timer to clean the blacklist out
+    cMessage *neighborTimer = nullptr;
 
     // lifecycle
     simtime_t rebootTime; // the last time when the node rebooted
@@ -184,6 +187,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void diagnoseAttribution(int interfaceId);
     void scheduleLinkTimer(cMessage *timer, const std::map<Link, simtime_t>& deadlines);
     void failLinkValidation(const Link& link, bool replyFailed);
+    void observeIncoming(const Packet *packet);
+    void disableHelloObservation(int interfaceId);
+    void handleNeighborTimer();
     void sendPreparedControl(Packet *packet);
     bool resolvePreviousHop(const Packet *packet, Link& link) const;
     void refreshSourceRoute(Packet *packet);

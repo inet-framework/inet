@@ -95,6 +95,16 @@ link. Missing, changed or ambiguous metadata is diagnosed and supplies no peer
 to invalidate. Bindings remain usable after route expiry, and are cleared on
 stop/crash. Custom interfaces must preserve the same immediate-peer contract.
 
+With Hello messages enabled, a positive attributable Hello arms a separate
+neighbor-loss deadline. Incoming IP traffic refreshes the learned immediate
+sender identified by interface and source MAC, regardless of the original IP
+source. Outgoing traffic extends route leases without postponing neighbor loss.
+Data alone does not arm a new deadline. Missing sender metadata, rebinding or
+an ambiguous MAC cancels this detector on the affected interface until restart.
+Hello exchange and attributable MAC failure feedback remain available. Direct
+AckingMac, independent nonaggregating 802.11 and Ethernet provide tested metadata
+profiles; bridged and aggregated paths require their own attribution evidence.
+
 RFC 3561 sections 6.1 and 6.6.1 give conflicting descriptions of destination
 sequence updates. This model follows the freshness rule of section 6.1: the
 destination adopts a known fresher requested sequence before replying, without

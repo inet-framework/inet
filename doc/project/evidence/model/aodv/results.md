@@ -480,3 +480,57 @@ Its public two-interface precursor setup deliberately isolates this concern befo
 selected-interface learning. See [error-capacity.md](../../../../../tests/protocol/aodv/error-capacity.md).
 No wire format, existing expectation or baseline is changed. Hello, recovery, selected interfaces,
 subnet learning, IPv6 and repair remain pending.
+
+## Hello observations and loss, 2026-11-09
+
+Immediate parent: `381667c9d0`. The same 26 HelloLoss protocol cases give 10 parent passes and
+16 intended runtime assertion failures. Both real three-node forwarding module cases fail the
+parent's S-inactive assertion. The corrected combined selection passes 112 protocol cases and
+53 selected module cases, including the four unchanged integration expectations. Debug and release
+libraries were rebuilt after the production changes.
+
+Individual stimuli, parent distinctions and production paths are in
+[hello-liveness.md](../../../../../tests/protocol/aodv/hello-liveness.md). Silent, Outgoing,
+NoPrecursor, UnknownSender, EthernetSilent, DcfSilent and the two timeout-first cases find the
+parent's route still active at 0.35 s. Data, OtherControl, StaleHello, DcfData, EthernetData and
+EthernetRefreshFirst find it still active at 0.6 s. Source finds S still active despite its silence.
+Validation observes an extra reply after a late ACK, rather than the required loss-induced
+blacklist. Metadata failure, no-arm, zero-duration, disabled-Hello and metadata-first exact-tie
+cases are passing parent controls.
+
+The 23-case preliminary comparison excluded the two later ingress-metadata controls and validation
+case. Final evidence uses the complete 26-case helper. Early attempts omitted nonlocal-source
+permission in the scripted replay or the mutable annotation on the test delivery-time parameter.
+Those setup outcomes are excluded. The module cases use an actual separate source, an Ethernet
+hop to N, then a wireless forwarded hop to the DUT; they assert original IP source S and MAC sender N.
+
+Commands from the corresponding checkout root:
+
+```sh
+# Isolated parent:
+make -C src -j4 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv -f 'Rfc3561HelloLoss.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-hello-parent-complete.log
+opp_run_module_tests --load . -p inet -m debug -f 'AodvHelloForwarded.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-hello-parent-modules.log
+# Corrected checkout:
+make -C src -j4 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv -f 'Rfc3561.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-hello-all-protocol.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV(SimpleTest(_2)?|ShortestPath|LifecycleTest)|Aodv(GatewayQueues|TransitFailure.*|TransitError.*|HelloForwarded.*|AdvertisementLifetimeInvalid_[1-4]|ParameterValidation.*))\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-hello-all-modules.log
+make -C src -j4 MODE=release
+```
+
+Parent comparisons exit 1 with the classified runtime assertions; corrected selections and builds
+exit 0. Each test log has a -runner.log companion. Build logs: /tmp/aodv-hello-build.log,
+ /tmp/aodv-hello-parent-build.log and /tmp/aodv-hello-release.log. The separate parent retains the
+previously documented unchanged-object reuse procedure.
+
+The exact-time Ethernet cases use measured serialization and a test adapter that owns incoming
+packets before hooks. They select event insertion order without changing a production timer's
+priority. Direct AckingMac, independent nonaggregating DCF and Ethernet establish bounded metadata
+profiles; there is no concrete-interface whitelist. Restart reset, selected-interface operation,
+subnet learning, IPv6 runtime compatibility and repair remain pending. No existing expectation,
+baseline or wire layout changes and no conformance level is raised.

@@ -122,8 +122,10 @@ void Aodv::initialize(int stage)
         counterTimer = new cMessage("CounterTimer");
         rrepAckTimer = new cMessage("RrepAckTimer");
         blacklistTimer = new cMessage("BlackListTimer");
-        if (useHelloMessages)
+        if (useHelloMessages) {
             helloMsgTimer = new cMessage("HelloMsgTimer");
+            neighborTimer = new cMessage("NeighborTimer");
+        }
         if (quantizeAdvertisementLifetime(myRouteTimeout) == SIMTIME_ZERO)
             throw cRuntimeError("AODV myRouteTimeout must fit 1..UINT32_MAX milliseconds");
         if (helloInterval.raw() > SimTime::getMaxTime().raw() / allowedHelloLoss ||
@@ -177,6 +179,8 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
             handleRREPACKTimer();
         else if (msg == blacklistTimer)
             handleBlackListTimer();
+        else if (msg == neighborTimer)
+            handleNeighborTimer();
         else if (msg->getKind() == KIND_DELAYEDSEND) {
             delayedSends.erase(msg);
             if (auto error = dynamic_cast<RerrSend *>(msg))
@@ -223,8 +227,10 @@ void Aodv::processPacket(Packet *packet)
     auto indication = packet->findTag<InterfaceInd>();
     auto ingress = indication ? interfaceTable->findInterfaceById(indication->getInterfaceId()) : nullptr;
     if (!ingress || ingress != interface) {
-        if (!ingress)
+        if (!ingress) {
             diagnoseAttribution(-1);
+            disableHelloObservation(interface->getInterfaceId());
+        }
         delete packet;
         return;
     }
@@ -234,8 +240,13 @@ void Aodv::processPacket(Packet *packet)
         delete packet;
         return;
     }
-    if (auto mac = packet->findTag<MacAddressInd>())
+    if (auto mac = packet->findTag<MacAddressInd>()) {
+        if (mac->getSrcAddress().isUnspecified() || mac->getSrcAddress().isBroadcast() || mac->getSrcAddress().isMulticast())
+            disableHelloObservation(ingress->getInterfaceId());
         learnBinding({sourceAddr, ingress->getInterfaceId()}, mac->getSrcAddress());
+    }
+    else
+        disableHelloObservation(ingress->getInterfaceId());
     // KLUDGE I added this -1 after TTL decrement has been moved in Ipv4
     int receivedTTL = packet->getTag<HopLimitInd>()->getHopLimit();
     unsigned int arrivalPacketTTL = receivedTTL > 0 ? receivedTTL - 1 : 0;
@@ -394,6 +405,8 @@ bool Aodv::prepareDataPacket(Packet *packet, IRoute *route)
 
 INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool local)
 {
+    if (!local)
+        observeIncoming(datagram);
     const auto& header = getNetworkProtocolHeader(datagram);
     auto destination = header->getDestinationAddress();
     if (destination.isBroadcast() || destination.isMulticast() || routingTable->isLocalAddress(destination) ||
@@ -1311,6 +1324,10 @@ void Aodv::clearState(bool disposeQueued)
     inverseBindings.clear();
     unusableBindings.clear();
     attributionWarnings.clear();
+    neighborDeadlines.clear();
+    disabledHelloObservation.clear();
+    if (neighborTimer)
+        cancelEvent(neighborTimer);
     if (helloMsgTimer)
         cancelEvent(helloMsgTimer);
     if (expungeTimer)
@@ -1426,6 +1443,13 @@ void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage, NetworkInterface *i
     if (helloMessage->getLifeTime() <= SIMTIME_ZERO)
         return;
     auto sender = helloMessage->getDestAddr();
+    Link link(sender, ingress->getInterfaceId());
+    auto binding = neighborBindings.find(link);
+    if (useHelloMessages && !disabledHelloObservation.count(link.second) && binding != neighborBindings.end() &&
+            !unusableBindings.count({link.second, binding->second})) {
+        neighborDeadlines[link] = simTime() + allowedHelloLoss * helloInterval;
+        scheduleLinkTimer(neighborTimer, neighborDeadlines);
+    }
     auto route = findExactRoute(sender);
     expireRouteIfDue(route);
     auto data = route ? check_and_cast<AodvRouteData *>(route->getProtocolData()) : nullptr;
@@ -1704,6 +1728,69 @@ void Aodv::diagnoseAttribution(int interfaceId)
                 << ". Peer-specific failure handling requires unique ingress IP/MAC bindings and retained output tags." << endl;
 }
 
+void Aodv::disableHelloObservation(int interfaceId)
+{
+    if (!useHelloMessages || !disabledHelloObservation.insert(interfaceId).second)
+        return;
+    EV_WARN << "AODV Hello loss detection disabled on interface " << interfaceId
+            << " until restart: immediate sender attribution is unavailable or unstable." << endl;
+    for (auto it = neighborDeadlines.begin(); it != neighborDeadlines.end();)
+        if (it->first.second == interfaceId)
+            it = neighborDeadlines.erase(it);
+        else
+            ++it;
+    scheduleLinkTimer(neighborTimer, neighborDeadlines);
+}
+
+void Aodv::observeIncoming(const Packet *packet)
+{
+    if (!useHelloMessages)
+        return;
+    auto indication = packet->findTag<InterfaceInd>();
+    auto ingress = indication ? interfaceTable->findInterfaceById(indication->getInterfaceId()) : nullptr;
+    if (!ingress) {
+        disableHelloObservation(interface->getInterfaceId());
+        return;
+    }
+    if (ingress != interface || disabledHelloObservation.count(ingress->getInterfaceId()))
+        return;
+    auto mac = packet->findTag<MacAddressInd>();
+    if (!mac || mac->getSrcAddress().isUnspecified() || mac->getSrcAddress().isBroadcast() || mac->getSrcAddress().isMulticast()) {
+        disableHelloObservation(ingress->getInterfaceId());
+        return;
+    }
+    MacLink key(ingress->getInterfaceId(), mac->getSrcAddress());
+    if (unusableBindings.count(key)) {
+        disableHelloObservation(ingress->getInterfaceId());
+        return;
+    }
+    auto binding = inverseBindings.find(key);
+    if (binding == inverseBindings.end())
+        return; // valid metadata from an unlearned sender cannot arm a deadline
+    auto armed = neighborDeadlines.find(binding->second);
+    if (armed != neighborDeadlines.end()) {
+        armed->second = simTime() + allowedHelloLoss * helloInterval;
+        scheduleLinkTimer(neighborTimer, neighborDeadlines);
+    }
+}
+
+void Aodv::handleNeighborTimer()
+{
+    std::vector<Link> lost;
+    for (auto it = neighborDeadlines.begin(); it != neighborDeadlines.end();)
+        if (it->second <= simTime()) {
+            lost.push_back(it->first);
+            it = neighborDeadlines.erase(it);
+        }
+        else
+            ++it;
+    scheduleLinkTimer(neighborTimer, neighborDeadlines);
+    for (const auto& link : lost) {
+        failLinkValidation(link, false);
+        handleLinkBreakSendRERR(link);
+    }
+}
+
 void Aodv::learnBinding(const Link& link, const MacAddress& mac)
 {
     if (mac.isUnspecified() || mac.isBroadcast() || mac.isMulticast())
@@ -1715,10 +1802,12 @@ void Aodv::learnBinding(const Link& link, const MacAddress& mac)
         unusableBindings.insert({link.second, old->second});
         unusableBindings.insert(key);
         diagnoseAttribution(link.second);
+        disableHelloObservation(link.second);
     }
     if (inverse != inverseBindings.end() && inverse->second != link) {
         unusableBindings.insert(key);
         diagnoseAttribution(link.second);
+        disableHelloObservation(link.second);
     }
     neighborBindings.emplace(link, mac);
     inverseBindings.emplace(key, link);
@@ -1855,6 +1944,7 @@ Aodv::~Aodv()
     delete counterTimer;
     delete rrepAckTimer;
     delete blacklistTimer;
+    delete neighborTimer;
 }
 
 } // namespace aodv
