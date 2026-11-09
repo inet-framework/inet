@@ -1,0 +1,3 @@
+AODV route freshness and reply acceptance
+
+AODV now compares sequence numbers across wraparound, preserves newer route information when stale control messages arrive, and retains known neighbor sequence information. A rejected reply no longer releases buffered data or propagates an obsolete path. Destination replies adopt a known fresher requested sequence under the documented interpretation of RFC 3561 sections 6.1 and 6.6.1. These corrections can change routes, delivery outcomes and packet traces in simulations with delayed control traffic or sequence wraparound.

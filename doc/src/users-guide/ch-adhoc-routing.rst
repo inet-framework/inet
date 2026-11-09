@@ -57,6 +57,17 @@ destinations within the ad hoc network.
 
 The :ned:`Aodv` module type implements AODV, based on RFC 3561.
 
+Route selection uses 32-bit serial sequence ordering. An older control message
+cannot replace newer route information. Values separated by exactly half the
+sequence range are treated as ambiguous and do not establish freshness.
+Rejected replies do not forward their advertised path or release queued data.
+
+RFC 3561 sections 6.1 and 6.6.1 give conflicting descriptions of destination
+sequence updates. This model follows the freshness rule of section 6.1: the
+destination adopts a known fresher requested sequence before replying, without
+an additional unconditional increment. An unknown requested sequence does not
+advance the destination's sequence.
+
 :ned:`AodvRouter` is a :ned:`ManetRouter` with the routing module type
 set to :ned:`Aodv`.
 
