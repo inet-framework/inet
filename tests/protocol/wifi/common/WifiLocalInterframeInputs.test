@@ -98,12 +98,24 @@ class LocalInputRx : public Rx {
     }
     bool lowerFrameReceived(Packet *packet) override {
         auto time = packet->findTag<SignalTimeInd>();
+        if (!time) {
+            BlockAckReceiveContext stale;
+            stale.previousAggregate = std::make_shared<AmpduTopology>();
+            stale.followsAggregate = true;
+            auto interval = packet->addTagIfAbsent<Ieee80211InterframeInd>();
+            interval->setRelated(true);
+            interval->setBlockAckContext(stale);
+        }
         auto start = time ? time->getStartTime() : SimTime(-1);
         auto end = time ? time->getEndTime() : SimTime(-1);
         bool ok = Rx::lowerFrameReceived(packet);
         if (ok) {
             accepted++;
             related = packet->getTag<Ieee80211InterframeInd>()->getRelated();
+            if (!time) {
+                const auto& context = packet->getTag<Ieee80211InterframeInd>()->getBlockAckContext();
+                ASSERT(!related && !context.previousAggregate && !context.followsAggregate);
+            }
             relations.push_back(related);
             eligible.push_back(precedingFrame.has_value());
             lastStart = start;
@@ -127,6 +139,7 @@ class LocalInputDriver : public cSimpleModule, public cListener, public ITx::ICa
     bool completed = false;
     int ackCompletions = 0;
     simtime_t ackEnd;
+    void frameTransmissionStarted(Packet *) override {}
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {
         ackCompletions++;
         ackEnd = simTime();

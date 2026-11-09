@@ -61,6 +61,7 @@ class LifecycleBarStimulus : public cSimpleModule, public ITx::ICallback
             check_and_cast<LifecycleBarMac *>(network->getSubmodule("sta1")->getSubmodule("wlan", 0)->getSubmodule("mac"))->testBarOutstanding = true;
         sender->sendTestBar(peer, tid, this);
     }
+    void frameTransmissionStarted(Packet *) override {}
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
 };
 Define_Module(LifecycleBarStimulus);

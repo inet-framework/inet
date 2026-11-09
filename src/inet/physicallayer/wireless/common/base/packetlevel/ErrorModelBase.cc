@@ -56,6 +56,37 @@ bool ErrorModelBase::hasProbabilisticError(b length, double ber) const
     return dblrand() < 1 - std::pow((1 - ber), length.get());
 }
 
+double ErrorModelBase::computeChunkSuccessRate(const ISnir *snir, b bitLength) const
+{
+    double ber = computeBitErrorRate(snir, IRadioSignal::SIGNAL_PART_DATA);
+    if (!(ber >= 0 && ber <= 1))
+        throw cRuntimeError("DATA chunk corruption requires a valid bit error rate");
+    return std::pow(1 - ber, bitLength.get());
+}
+
+Ptr<const Chunk> ErrorModelBase::computeReceivedData(const ISnir *snir, const Ptr<const Chunk>& data) const
+{
+    Enter_Method("computeReceivedData");
+    Packet source("transmitted-data", data);
+    Packet received("received-data");
+    b offset(0);
+    while (auto chunk = source.peekAt(offset, b(-1), Chunk::PF_ALLOW_ALL | Chunk::PF_ALLOW_NULLPTR)) {
+        double probability = computeChunkSuccessRate(snir, chunk->getChunkLength());
+        if (!(probability >= 0 && probability <= 1))
+            throw cRuntimeError("Invalid DATA chunk success probability: %g", probability);
+        bool successful = probability == 1 || (probability != 0 && dblrand() > 1 - probability);
+        if (!successful) {
+            auto corruptedChunk = chunk->dupShared();
+            corruptedChunk->markIncorrect();
+            received.insertAtBack(corruptedChunk);
+        }
+        else
+            received.insertAtBack(chunk);
+        offset += chunk->getChunkLength();
+    }
+    return received.peekAll(Chunk::PF_ALLOW_ALL);
+}
+
 Packet *ErrorModelBase::corruptBits(const Packet *packet, double ber, bool& isCorrupted) const
 {
     std::vector<bool> corruptedBits;

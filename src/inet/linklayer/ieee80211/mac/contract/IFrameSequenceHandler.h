@@ -46,6 +46,7 @@ class INET_API IFrameSequenceHandler
     virtual void startFrameSequence(IFrameSequence *frameSequence, FrameSequenceContext *context, ICallback *callback) = 0;
     virtual void processResponse(Packet *frame) = 0;
     virtual void transmissionComplete() = 0;
+    virtual void transmissionCancelled() = 0;
     virtual bool isSequenceRunning() = 0;
     virtual void handleStartRxTimeout() = 0;
     // End a response wait after recipient processing. The sequence suppresses failure for retired DATA or management frames.

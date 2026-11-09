@@ -145,49 +145,53 @@ const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet 
         return getPeerCompatibleResponseMode(blockAckReq, mode, role);
     }
     else if (dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
-        auto received = getMode(packet, blockAckReq);
-        auto referenceRate = received->getNonHtReferenceRate();
-        auto receivedClass = received->getModulationClass();
-        bool highThroughput = receivedClass == IIeee80211Mode::ModulationClass::HT || receivedClass == IIeee80211Mode::ModulationClass::VHT;
-        if (!std::isfinite(referenceRate.get()))
-            throw cRuntimeError("Compressed Block Ack has no non-HT reference rate for the BAR mode");
-        const Ieee80211RateSet *basic = mib ? &mib->getBssRateSet().basic : nullptr;
-        auto matchesClass = [received, receivedClass, highThroughput](const IIeee80211Mode *candidate) {
-            auto modulation = candidate->getModulationClass();
-            return highThroughput ? modulation == IIeee80211Mode::ModulationClass::OFDM || modulation == IIeee80211Mode::ModulationClass::ERP_OFDM :
-                modulation == receivedClass && candidate->getLegacyPreambleType() == received->getLegacyPreambleType();
-        };
-        const IIeee80211Mode *primary = nullptr;
-        // IEEE Std 802.11-2024, 10.6.6.5.2: prefer a qualifying BSS basic rate, then a mandatory rate.
-        for (bool useBasic : {true, false}) {
-            if (useBasic && (!basic || !basic->known))
-                continue; // INET fallback for unknown BSS state uses the mandatory rate set.
-            for (int i = 0; i < modeSet->getNumModes(); i++) {
-                auto candidate = modeSet->getMode(i);
-                auto rate = candidate->getDataMode()->getNetBitrate();
-                bool eligible = useBasic ? basic->legacyRates.count(rate) != 0 : modeSet->isMandatory(i);
-                if (eligible && matchesClass(candidate) && rate <= referenceRate &&
-                    (!primary || rate > primary->getDataMode()->getNetBitrate()))
-                    primary = candidate;
-            }
-            if (primary)
-                break;
-        }
-        if (!primary)
-            throw cRuntimeError("Compressed Block Ack has no legal non-HT response mode");
-        if (!responseBlockAckFrameMode || responseBlockAckFrameMode == primary)
-            return primary;
-        auto alternate = responseBlockAckFrameMode;
-        auto rate = alternate->getDataMode()->getNetBitrate();
-        bool basicOrMandatory = (basic && basic->known && basic->legacyRates.count(rate)) || modeSet->getIsMandatory(alternate);
-        // IEEE Std 802.11-2024, 10.6.6.5.4: an alternate preserves modulation and actual response duration.
-        if (!matchesClass(alternate) || alternate->getModulationClass() != primary->getModulationClass() || !basicOrMandatory ||
-            alternate->getDuration(LENGTH_COMPRESSED_BLOCKACK) != primary->getDuration(LENGTH_COMPRESSED_BLOCKACK))
-            throw cRuntimeError("responseBlockAckFrameBitrate is not a legal alternate Compressed Block Ack response rate");
-        return alternate;
+        return computeCompressedBlockAckResponseMode(getMode(packet, blockAckReq));
     }
     else
         throw cRuntimeError("Unknown BlockAckReq frame type");
+}
+
+const IIeee80211Mode *QosRateSelection::computeCompressedBlockAckResponseMode(const IIeee80211Mode *received)
+{
+    auto referenceRate = received->getNonHtReferenceRate();
+    auto receivedClass = received->getModulationClass();
+    bool highThroughput = receivedClass == IIeee80211Mode::ModulationClass::HT || receivedClass == IIeee80211Mode::ModulationClass::VHT;
+    if (!std::isfinite(referenceRate.get()))
+        throw cRuntimeError("Compressed Block Ack has no non-HT reference rate for the BAR mode");
+    const Ieee80211RateSet *basic = mib ? &mib->getBssRateSet().basic : nullptr;
+    auto matchesClass = [received, receivedClass, highThroughput](const IIeee80211Mode *candidate) {
+        auto modulation = candidate->getModulationClass();
+        return highThroughput ? modulation == IIeee80211Mode::ModulationClass::OFDM || modulation == IIeee80211Mode::ModulationClass::ERP_OFDM :
+            modulation == receivedClass && candidate->getLegacyPreambleType() == received->getLegacyPreambleType();
+    };
+    const IIeee80211Mode *primary = nullptr;
+    // IEEE Std 802.11-2024, 10.6.6.5.2: prefer a qualifying BSS basic rate, then a mandatory rate.
+    for (bool useBasic : {true, false}) {
+        if (useBasic && (!basic || !basic->known))
+            continue; // INET fallback for unknown BSS state uses the mandatory rate set.
+        for (int i = 0; i < modeSet->getNumModes(); i++) {
+            auto candidate = modeSet->getMode(i);
+            auto rate = candidate->getDataMode()->getNetBitrate();
+            bool eligible = useBasic ? basic->legacyRates.count(rate) != 0 : modeSet->isMandatory(i);
+            if (eligible && matchesClass(candidate) && rate <= referenceRate &&
+                (!primary || rate > primary->getDataMode()->getNetBitrate()))
+                primary = candidate;
+        }
+        if (primary)
+            break;
+    }
+    if (!primary)
+        throw cRuntimeError("Compressed Block Ack has no legal non-HT response mode");
+    if (!responseBlockAckFrameMode || responseBlockAckFrameMode == primary)
+        return primary;
+    auto alternate = responseBlockAckFrameMode;
+    auto rate = alternate->getDataMode()->getNetBitrate();
+    bool basicOrMandatory = (basic && basic->known && basic->legacyRates.count(rate)) || modeSet->getIsMandatory(alternate);
+    // IEEE Std 802.11-2024, 10.6.6.5.4: an alternate preserves modulation and actual response duration.
+    if (!matchesClass(alternate) || alternate->getModulationClass() != primary->getModulationClass() || !basicOrMandatory ||
+        alternate->getDuration(LENGTH_COMPRESSED_BLOCKACK) != primary->getDuration(LENGTH_COMPRESSED_BLOCKACK))
+        throw cRuntimeError("responseBlockAckFrameBitrate is not a legal alternate Compressed Block Ack response rate");
+    return alternate;
 }
 
 const IIeee80211Mode *QosRateSelection::computeCompressedBlockAckReqMode(Packet *packet,

@@ -112,6 +112,9 @@ class ProtectionRateSelection : public IQosRateSelection {
     const physicallayer::IIeee80211Mode *computeCompressedBlockAckReqMode(Packet *packet, const Ptr<const Ieee80211CompressedBlockAckReq>& header, bool startsTxop) override {
         return delegate->computeCompressedBlockAckReqMode(packet, header, startsTxop);
     }
+    const physicallayer::IIeee80211Mode *computeCompressedBlockAckResponseMode(const physicallayer::IIeee80211Mode *mode) override {
+        return delegate->computeCompressedBlockAckResponseMode(mode);
+    }
 };
 
 class ProtectionHcf : public Hcf {
