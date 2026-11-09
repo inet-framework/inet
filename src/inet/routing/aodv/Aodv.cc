@@ -1241,6 +1241,8 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
     socket.setCallback(this);
     socket.bind(L3Address(), aodvUDPPort);
     socket.setBroadcast(true);
+    if (usingIpv6)
+        socket.joinMulticastGroup(addressType->getBroadcastAddress(), interface->getInterfaceId());
 
     // RFC 5148:
     // Jitter SHOULD be applied by reducing this delay by a random amount, so that

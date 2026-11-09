@@ -1,26 +1,25 @@
-# Native IPv6 neighbor discovery
+# Native IPv6 compatibility
 
-Native ND is link control. A unicast neighbor advertisement cannot wait behind
-the AODV search it must enable. Inspect the typed IPv6/ND header on a packet copy
-before generic transport dissection and let ND pass independently of data routing.
+These single-interface fixtures use real IPv6, UDP, neighbor discovery and AckingMac. Control encoding is unchanged. Explicit interface selection and received subnet routes are separate IPv4 features.
+
+AODV joins its existing ff01::1 control group at every socket start. Typed neighbor-discovery messages pass independently of data searches, so an advertisement cannot wait for the route it must establish.
 
 ```mermaid
 sequenceDiagram
     participant P as IPv6 peer
-    participant D as DUT IPv6 and AODV
-    P->>D: Resolve the DUT for an initial unicast UDP probe
-    D->>P: Native neighbor advertisement, no AODV route required
-    P->>D: Deliver UDP probe before ordinary discovery begins
+    participant A as AODV node
+    A->>A: Join control multicast group
+    P->>A: Native multicast route request
+    A->>P: Unicast reply
+    Note over A: ND bypasses data discovery
 ```
 
-AodvIpv6Compatibility sends that probe at 0.01 seconds and requires delivery by
-0.08, before ordinary discovery at 0.16. The peer has a normal manual route; the
-DUT has not learned an AODV peer route. On the parent, an unexpected AODV request
-appears during this ND exchange and the fixture fails. With ND admission the
-probe arrives and the later discovery/freshness/encoding assertions also pass.
-The basic fixture without the initial probe passed both versions and is a control.
+| Case | Input, mechanism and required observation |
+| --- | --- |
+| Incoming | Send a native multicast RREQ for the node. Require reverse state and a self reply. Without group membership the socket receives no request. |
 
-The initial fixture deliberately makes no ACK-count claim. Link validation adds
-the four-ACK assertion in its own PR. Multicast socket membership and its separate
-Incoming fixture enter in the following commit. Neither wire encoding nor the
-single-interface IPv6 profile changes. Exact split execution is in the PR evidence.
+Each named case has protocol and module variants with prefixes Rfc3561Ipv6 and AodvIpv6. They use General/run 0/seed 0 and public routes or wire observations, never direct AODV handlers.
+
+The original combined-series parent comparisons remain recorded in the model results. Fresh execution of the split revisions is recorded in the split verification log and PR description. Passing controls are not claimed as newly reproduced defects. Local repair coverage belongs to the later repair PR. No IPv6 feature-parity or exhaustive conformance claim follows.
+
+The native basic fixture first sends one unicast UDP probe from the peer to the node at 0.01 seconds, before normal discovery starts at 0.16 seconds. Native ND must deliver it by 0.08 seconds without starting AODV discovery for a neighbor advertisement. The peer has an ordinary manual route; the DUT has not learned an AODV peer route. This exercises link control independently of AODV reply learning. At this stage ACK count is deliberately unasserted; the four-ACK check enters with link validation.
