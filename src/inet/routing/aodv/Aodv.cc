@@ -23,7 +23,6 @@
 #include "inet/networklayer/ipv4/IcmpHeader.h"
 #include "inet/networklayer/ipv4/Ipv4Header_m.h"
 #include "inet/networklayer/ipv4/Ipv4InterfaceData.h"
-#include "inet/networklayer/ipv4/Ipv4Route.h"
 #include "inet/transportlayer/common/L4PortTag_m.h"
 #include "inet/transportlayer/contract/udp/UdpCommand_m.h"
 
@@ -46,7 +45,7 @@ void Aodv::initialize(int stage)
     RoutingProtocolBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {
-        lastBroadcastTime = SIMTIME_ZERO;
+        lastBroadcastTimes.clear();
         recoveryDeadline = SIMTIME_ZERO;
         rreqId = sequenceNum = 0;
         rreqCount = rerrCount = 0;
@@ -146,15 +145,10 @@ void Aodv::initialize(int stage)
         WATCH(sequenceNum);
         WATCH(rreqCount);
         WATCH(rerrCount);
-        WATCH(lastBroadcastTime);
+        WATCH_MAP(lastBroadcastTimes);
         WATCH(recovering);
         WATCH(recoveryDeadline);
         WATCH_EXPR("numRoutes", routingTable->getNumRoutes());
-    }
-    else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
-        interface = interfaceTable->findInterfaceByName(par("interface"));
-        if (!interface)
-            throw cRuntimeError("Unknown network interface in parameter 'interface': '%s'", par("interface").stringValue());
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         networkProtocol->registerHook(0, this);
@@ -237,10 +231,11 @@ void Aodv::processPacket(Packet *packet)
 {
     auto indication = packet->findTag<InterfaceInd>();
     auto ingress = indication ? interfaceTable->findInterfaceById(indication->getInterfaceId()) : nullptr;
-    if (!ingress || ingress != interface) {
+    if (!isSelectedInterface(ingress)) {
         if (!ingress) {
             diagnoseAttribution(-1);
-            disableHelloObservation(interface->getInterfaceId());
+            for (auto selected : selectedInterfaces)
+                disableHelloObservation(selected->getInterfaceId());
         }
         delete packet;
         return;
@@ -369,7 +364,7 @@ IRoute *Aodv::selectDataRoute(const L3Address& destination)
         if (route->getSource() != this) {
             // A connected MANET subnet describes address scope, not reachability.
             auto type = route->getSourceType();
-            if (iface == interface && (type == IRoute::IFACENETMASK ||
+            if (isSelectedInterface(iface) && (type == IRoute::IFACENETMASK ||
                     type == IRoute::OWN_ADV_PREFIX || type == IRoute::ROUTER_ADVERTISEMENT))
                 continue;
             return route;
@@ -637,7 +632,11 @@ void Aodv::sendRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned i
     // corresponding destination node is updated by adding to it
     // the next hop node to which the RREP is forwarded.
 
-    IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
+    IRoute *destRoute = findExactRoute(destAddr);
+    expireRouteIfDue(destRoute);
+    if (!destRoute || !check_and_cast<AodvRouteData *>(destRoute->getProtocolData())->isActive() ||
+            !isSelectedInterface(destRoute->getInterface()))
+        return;
     const L3Address& nextHop = destRoute->getNextHopAsGeneric();
     if (auto advertised = findExactRoute(rrep->getDestAddr()))
         check_and_cast<AodvRouteData *>(advertised->getProtocolData())->addPrecursor(nextHop, destRoute->getInterface()->getInterfaceId());
@@ -716,7 +715,7 @@ const Ptr<Rreq> Aodv::createRREQ(const L3Address& destAddr)
     return rreqPacket;
 }
 
-const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& lastHopAddr)
+const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& lastHopAddr, NetworkInterface *ingress)
 {
     auto rrep = makeShared<Rrep>(); // TODO "AODV-RREP");
     rrep->setPacketType(usingIpv6 ? RREP_IPv6 : RREP);
@@ -737,7 +736,7 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
     // if it is an intermediate node with an fresh enough route to the destination
     // (see section 6.6.2).
 
-    if (rreq->getDestAddr() == getSelfIPAddress()) { // node is itself the requested destination
+    if (isLocalAodvAddress(rreq->getDestAddr())) { // node is itself the requested destination
         // 6.6.1. Route Reply Generation by the Destination
 
         // Model interpretation of RFC 3561 sections 6.1 and 6.6.1: adopt a known
@@ -777,7 +776,7 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
         // source IP address field in the IP header) into the precursor list for
         // the forward route entry -- i.e., the entry for the Destination IP
         // Address.
-        destRouteData->addPrecursor(lastHopAddr, originatorRoute->getInterface()->getInterfaceId());
+        destRouteData->addPrecursor(lastHopAddr, ingress->getInterfaceId());
 
         // The intermediate node also updates its route table entry
         // for the node originating the RREQ by placing the next hop towards the
@@ -869,7 +868,7 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr, Networ
                     simTime() + rrep->getLifeTime(), ingress);
         data = check_and_cast<AodvRouteData *>(destRoute->getProtocolData());
 
-        if (getSelfIPAddress() == rrep->getOriginatorAddr()) {
+        if (isLocalAodvAddress(rrep->getOriginatorAddr())) {
             if (!gatewayAddress.isUnspecified() && rrep->getDestAddr() == gatewayAddress) {
                 if (!defaultGatewayRoute)
                     createDefaultGatewayRoute();
@@ -975,12 +974,19 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     auto type = aodvPacket->getPacketType();
     if (!canSendControl(type))
         return;
+    if (!output && (destAddr.isBroadcast() || destAddr.isMulticast())) {
+        for (auto selected : selectedInterfaces)
+            sendAODVPacket(aodvPacket, destAddr, timeToLive, delay, selected);
+        return;
+    }
+    if (!output)
+        output = interface;
+    if (!isSelectedInterface(output) || !output->isUp())
+        return;
 
     const char *className = aodvPacket->getClassName();
     Packet *packet = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className, aodvPacket);
 
-    if (!output)
-        output = interface;
     int interfaceId = output->getInterfaceId();
     packet->addTag<InterfaceReq>()->setInterfaceId(interfaceId);
     packet->addTag<HopLimitReq>()->setHopLimit(timeToLive);
@@ -1034,7 +1040,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
         // RFC 3561 sections 6.2 and 6.5. Only the originator transition owns an aliased record.
         if (sourceAddr != rreq->getOriginatorAddr())
             refreshNeighbor(sourceAddr, ingress);
-        if (rreq->getOriginatorAddr() == getSelfIPAddress())
+        if (isLocalAodvAddress(rreq->getOriginatorAddr()))
             return;
         RreqIdentifier identifier(rreq->getOriginatorAddr(), rreq->getRreqId());
         auto previous = rreqsArrivalTime.find(identifier);
@@ -1056,7 +1062,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
             reverse = createRoute(rreq->getOriginatorAddr(), sourceAddr, hops, true, sequence, true, lifetime, ingress);
         else if (!reverseData->hasValidDestNum() || AodvSequence::isNewer(sequence, reverseData->getDestSeqNum()) ||
                 (sequence == reverseData->getDestSeqNum() && hops < unsigned(reverse->getMetric())))
-            updateRoutingTable(reverse, sourceAddr, hops, true, sequence, true, lifetime);
+            updateRoutingTable(reverse, sourceAddr, hops, true, sequence, true, lifetime, ingress);
 
         // RFC 3561 section 6.5. Lifetime refresh is independent of path selection.
         reverseData = check_and_cast<AodvRouteData *>(reverse->getProtocolData());
@@ -1066,8 +1072,8 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
         auto destination = findExactRoute(rreq->getDestAddr());
         expireRouteIfDue(destination);
         auto destinationData = destination ? check_and_cast<AodvRouteData *>(destination->getProtocolData()) : nullptr;
-        if (rreq->getDestAddr() == getSelfIPAddress()) {
-            auto reply = createRREP(rreq, destination, reverse, sourceAddr);
+        if (isLocalAodvAddress(rreq->getDestAddr())) {
+            auto reply = createRREP(rreq, destination, reverse, sourceAddr, ingress);
             if (!recovering)
                 sendRREP(reply, rreq->getOriginatorAddr(), 255);
             return;
@@ -1078,7 +1084,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
         if (!recovering && fresh && destinationData->isActive() && !rreq->getDestOnlyFlag() &&
                 !destination->getNextHopAsGeneric().isUnspecified() && destination->getNextHopAsGeneric() != sourceAddr)
         {
-            auto reply = createRREP(rreq, destination, reverse, sourceAddr);
+            auto reply = createRREP(rreq, destination, reverse, sourceAddr, ingress);
             if (reply) {
                 sendRREP(reply, rreq->getOriginatorAddr(), 255);
                 if (rreq->getGratuitousRREPFlag()) {
@@ -1296,7 +1302,7 @@ void Aodv::sendRouteError(RerrSend *message)
     std::vector<std::pair<Link, NetworkInterface *>> outputs;
     for (const auto& recipient : message->recipients) {
         auto output = interfaceTable->findInterfaceById(recipient.second);
-        if (output && output->isUp())
+        if (isSelectedInterface(output) && output->isUp())
             outputs.emplace_back(recipient, output);
     }
     refreshRateWindow();
@@ -1309,6 +1315,63 @@ void Aodv::sendRouteError(RerrSend *message)
             break;
         sendAODVPacket(message->header, output.first.first, 1, 0, output.second);
     }
+}
+
+void Aodv::configureInterfaces()
+{
+    interface = interfaceTable->findInterfaceByName(par("interface"));
+    if (!interface)
+        throw cRuntimeError("Unknown network interface in parameter 'interface': '%s'", par("interface").stringValue());
+    auto names = cStringTokenizer(par("interfaces")).asVector();
+    bool explicitSelection = !names.empty();
+    selectedInterfaces.clear();
+    std::set<std::string> selectedNames;
+    if (!explicitSelection)
+        selectedInterfaces.push_back(interface);
+    else {
+        for (const auto& name : names) {
+            if (!selectedNames.insert(name).second)
+                throw cRuntimeError("AODV interfaces contains duplicate name '%s'", name.c_str());
+            auto selected = interfaceTable->findInterfaceByName(name.c_str());
+            if (!selected)
+                throw cRuntimeError("AODV interfaces contains unknown interface '%s'", name.c_str());
+            selectedInterfaces.push_back(selected);
+        }
+        if (!isSelectedInterface(interface))
+            throw cRuntimeError("AODV interfaces must include the primary interface");
+    }
+    auto primary = interface->getNetworkAddress();
+    if (primary.isUnspecified() || primary.isBroadcast() || primary.isMulticast())
+        throw cRuntimeError("AODV selected interface requires a usable unicast address");
+    if (explicitSelection && primary.getType() != L3Address::IPv4)
+        throw cRuntimeError("AODV explicit interfaces selection supports IPv4 only");
+    std::set<L3Address> addresses;
+    for (auto selected : selectedInterfaces) {
+        if (selected->isLoopback())
+            throw cRuntimeError("AODV selected interface must not be loopback");
+        if (!selected->isUp())
+            throw cRuntimeError("AODV selected interface must be up");
+        auto address = selected->getNetworkAddress();
+        if (address.isUnspecified() || address.isBroadcast() || address.isMulticast())
+            throw cRuntimeError("AODV selected interface requires a usable unicast address");
+        if (address.getType() != primary.getType())
+            throw cRuntimeError("AODV selected interfaces must use one address family");
+        if (!addresses.insert(address).second)
+            throw cRuntimeError("AODV selected interfaces must have distinct IPv4 addresses");
+    }
+}
+
+bool Aodv::isSelectedInterface(const NetworkInterface *candidate) const
+{
+    return candidate && std::find(selectedInterfaces.begin(), selectedInterfaces.end(), candidate) != selectedInterfaces.end();
+}
+
+bool Aodv::isLocalAodvAddress(const L3Address& address) const
+{
+    for (auto selected : selectedInterfaces)
+        if (selected->getNetworkAddress() == address)
+            return true;
+    return false;
 }
 
 bool Aodv::isLocalGatewayDestination(const L3Address& destination) const
@@ -1343,7 +1406,7 @@ void Aodv::handleRecoveryTimer()
 
 void Aodv::handleStartOperation(LifecycleOperation *operation)
 {
-    // initialize variables that require INITSTAGE_ROUTING stage here to support starting the node in DOWN sate
+    configureInterfaces(); // addresses and interface state are required only at actual start
     addressType = getSelfIPAddress().getAddressType();
     usingIpv6 = (getSelfIPAddress().getType() == L3Address::IPv6);
 
@@ -1391,7 +1454,7 @@ void Aodv::clearState(bool disposeQueued)
 {
     operationalGeneration++;
     recovering = false;
-    lastBroadcastTime = SIMTIME_ZERO;
+    lastBroadcastTimes.clear();
     if (recoveryTimer)
         cancelEvent(recoveryTimer);
     for (auto message : delayedSends)
@@ -1465,7 +1528,11 @@ void Aodv::sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsigned
 {
     EV_INFO << "Sending gratuitous Route Reply to " << destAddr << endl;
 
-    IRoute *destRoute = routingTable->findBestMatchingRoute(destAddr);
+    IRoute *destRoute = findExactRoute(destAddr);
+    expireRouteIfDue(destRoute);
+    if (!destRoute || !check_and_cast<AodvRouteData *>(destRoute->getProtocolData())->isActive() ||
+            !isSelectedInterface(destRoute->getInterface()))
+        return;
     const L3Address& nextHop = destRoute->getNextHopAsGeneric();
 
     if (auto advertised = findExactRoute(grrep->getDestAddr()))
@@ -1473,7 +1540,7 @@ void Aodv::sendGRREP(const Ptr<Rrep>& grrep, const L3Address& destAddr, unsigned
     sendAODVPacket(grrep, nextHop, timeToLive, 0, destRoute->getInterface());
 }
 
-const Ptr<Rrep> Aodv::createHelloMessage()
+const Ptr<Rrep> Aodv::createHelloMessage(NetworkInterface *output)
 {
     // called a Hello message, with the RREP
     // message fields set as follows:
@@ -1490,7 +1557,7 @@ const Ptr<Rrep> Aodv::createHelloMessage()
     helloMessage->setPacketType(usingIpv6 ? RREP_IPv6 : RREP);
     helloMessage->setChunkLength(usingIpv6 ? B(44) : B(20));
 
-    helloMessage->setDestAddr(getSelfIPAddress());
+    helloMessage->setDestAddr((output ? output : interface)->getNetworkAddress());
     helloMessage->setDestSeqNum(sequenceNum);
     helloMessage->setHopCount(0);
     helloMessage->setLifeTime(quantizeAdvertisementLifetime(allowedHelloLoss * helloInterval));
@@ -1501,32 +1568,27 @@ const Ptr<Rrep> Aodv::createHelloMessage()
 void Aodv::sendHelloMessagesIfNeeded()
 {
     ASSERT(useHelloMessages);
-    // Every HELLO_INTERVAL milliseconds, the node checks whether it has
-    // sent a broadcast (e.g., a RREQ or an appropriate layer 2 message)
-    // within the last HELLO_INTERVAL.  If it has not, it MAY broadcast
-    // a RREP with TTL = 1
-
-    // A node SHOULD only use hello messages if it is part of an
-    // active route.
-    bool hasActiveRoute = false;
-
-    for (int i = 0; i < routingTable->getNumRoutes(); i++) {
-        IRoute *route = routingTable->getRoute(i);
-        if (route->getSource() == this) {
-            AodvRouteData *routeData = check_and_cast<AodvRouteData *>(route->getProtocolData());
-            if (routeData->isActive()) {
-                hasActiveRoute = true;
-                break;
+    if (!recovering)
+        for (auto output : selectedInterfaces) {
+            if (!output->isUp())
+                continue;
+            bool hasActiveRoute = false;
+            for (int i = 0; i < routingTable->getNumRoutes(); i++) {
+                auto route = routingTable->getRoute(i);
+                if (route->getSource() != this)
+                    continue;
+                expireRouteIfDue(route);
+                auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+                if (!data->isActive())
+                    continue;
+                hasActiveRoute |= route->getInterface() == output;
+                for (const auto& precursor : data->getPrecursorList())
+                    hasActiveRoute |= precursor.second == output->getInterfaceId();
             }
+            auto last = lastBroadcastTimes.find(output->getInterfaceId());
+            if (hasActiveRoute && (last == lastBroadcastTimes.end() || simTime() - last->second >= helloInterval))
+                sendAODVPacket(createHelloMessage(output), addressType->getBroadcastAddress(), 1, 0, output);
         }
-    }
-
-    if (!recovering && hasActiveRoute && (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > helloInterval)) {
-        EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
-        auto helloMessage = createHelloMessage();
-        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
-    }
-
     scheduleAfter(helloInterval - samplePeriodicJitter(), helloMsgTimer);
 }
 
@@ -1766,13 +1828,14 @@ void Aodv::sendPreparedControl(Packet *packet)
 {
     auto control = packet->peekAtFront<AodvControlPacket>();
     auto type = control->getPacketType();
-    if (!canSendControl(type)) {
+    auto output = interfaceTable->findInterfaceById(packet->getTag<InterfaceReq>()->getInterfaceId());
+    if (!canSendControl(type) || !isSelectedInterface(output) || !output->isUp()) {
         delete packet;
         return;
     }
     auto destination = packet->getTag<L3AddressReq>()->getDestAddress();
     if (destination.isBroadcast() || destination.isMulticast())
-        lastBroadcastTime = simTime();
+        lastBroadcastTimes[packet->getTag<InterfaceReq>()->getInterfaceId()] = simTime();
     if (auto reply = dynamicPtrCast<const Rrep>(control)) {
         if (reply->getAckRequiredFlag()) {
             Link link(packet->getTag<L3AddressReq>()->getDestAddress(), packet->getTag<InterfaceReq>()->getInterfaceId());
@@ -1863,10 +1926,11 @@ void Aodv::observeIncoming(const Packet *packet)
     auto indication = packet->findTag<InterfaceInd>();
     auto ingress = indication ? interfaceTable->findInterfaceById(indication->getInterfaceId()) : nullptr;
     if (!ingress) {
-        disableHelloObservation(interface->getInterfaceId());
+        for (auto selected : selectedInterfaces)
+            disableHelloObservation(selected->getInterfaceId());
         return;
     }
-    if (ingress != interface || disabledHelloObservation.count(ingress->getInterfaceId()))
+    if (!isSelectedInterface(ingress) || disabledHelloObservation.count(ingress->getInterfaceId()))
         return;
     auto mac = packet->findTag<MacAddressInd>();
     if (!mac || mac->getSrcAddress().isUnspecified() || mac->getSrcAddress().isBroadcast() || mac->getSrcAddress().isMulticast()) {
@@ -1935,7 +1999,7 @@ bool Aodv::resolveFailedLink(const Packet *packet, Link& link)
     auto output = packet->findTag<InterfaceReq>();
     auto destination = packet->findTag<MacAddressReq>();
     int interfaceId = output ? output->getInterfaceId() : -1;
-    if (output && interfaceId != interface->getInterfaceId())
+    if (output && !isSelectedInterface(interfaceTable->findInterfaceById(interfaceId)))
         return false;
     if (!output || !destination || destination->getDestAddress().isUnspecified() ||
             destination->getDestAddress().isBroadcast() || destination->getDestAddress().isMulticast()) {
@@ -1966,12 +2030,11 @@ bool Aodv::isExternalAddress(const L3Address& address) const
     switch (address.getType()) {
 #ifdef INET_WITH_IPv4
         case L3Address::IPv4:
-            if (auto ipv4Data = interface->findProtocolData<Ipv4InterfaceData>()) {
-                Ipv4Address ipv4Addr = ipv4Data->getIPAddress();
-                Ipv4Address netmask = ipv4Data->getNetmask();
-                return !Ipv4Address::maskedAddrAreEqual(address.toIpv4(), ipv4Addr, netmask);
-            }
-            break;
+            for (auto selected : selectedInterfaces)
+                if (auto ipv4Data = selected->findProtocolData<Ipv4InterfaceData>())
+                    if (Ipv4Address::maskedAddrAreEqual(address.toIpv4(), ipv4Data->getIPAddress(), ipv4Data->getNetmask()))
+                        return false;
+            return true;
 #endif // ifdef INET_WITH_IPv4
 
 #ifdef INET_WITH_IPv6
@@ -1997,12 +2060,11 @@ void Aodv::createDefaultGatewayRoute()
 {
     ASSERT(defaultGatewayRoute == nullptr);
 
-    // Create inactive default route (0.0.0.0/0)
-    Ipv4Route *route = new Ipv4Route();
-    route->setDestination(Ipv4Address::UNSPECIFIED_ADDRESS);
-    route->setNetmask(Ipv4Address::UNSPECIFIED_ADDRESS);  // /0 netmask
-    route->setGateway(Ipv4Address::UNSPECIFIED_ADDRESS);  // No next hop initially
-    route->setInterface(interfaceTable->findInterfaceByName(par("interface")));
+    auto route = routingTable->createRoute();
+    route->setDestination(addressType->getUnspecifiedAddress());
+    route->setPrefixLength(0);
+    route->setNextHop(addressType->getUnspecifiedAddress());
+    route->setInterface(interface);
     route->setSourceType(IRoute::AODV);
     route->setSource(this);
     route->setMetric(0);
@@ -2038,6 +2100,7 @@ void Aodv::updateGatewayRoute()
             // Activate default route using gateway route info
             defaultGatewayRoute->setNextHop(gatewayRoute->getNextHopAsGeneric());
             defaultGatewayRoute->setMetric(gatewayRoute->getMetric() + 1);
+            defaultGatewayRoute->setInterface(gatewayRoute->getInterface());
             defaultRouteData->setIsActive(true);
             defaultRouteData->setLifeTime(gatewayRouteData->getLifeTime());
 
@@ -2047,7 +2110,7 @@ void Aodv::updateGatewayRoute()
         // No route to gateway, deactivate default route
         if (defaultRouteData->isActive()) {
             defaultRouteData->setIsActive(false);
-            defaultGatewayRoute->setNextHop(L3Address());
+            defaultGatewayRoute->setNextHop(addressType->getUnspecifiedAddress());
             EV_INFO << "Default gateway route deactivated - no route to gateway" << endl;
         }
     }

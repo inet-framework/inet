@@ -10,6 +10,7 @@
 
 #include <map>
 #include <deque>
+#include <vector>
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/linklayer/common/MacAddress.h"
@@ -73,6 +74,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     ModuleRefByPar<INetfilter> networkProtocol;
     UdpSocket socket;
     NetworkInterface *interface = nullptr;
+    std::vector<NetworkInterface *> selectedInterfaces;
     bool usingIpv6 = false;
     long numSent = 0;
     long numReceived = 0;
@@ -145,7 +147,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     std::set<int> attributionWarnings;
     unsigned int rerrCount = 0; // num of originated RERR in the last second
     unsigned int rreqCount = 0; // num of originated RREQ in the last second
-    simtime_t lastBroadcastTime; // the last time when any control packet was broadcasted
+    std::map<int, simtime_t> lastBroadcastTimes;
 
 
     // self messages
@@ -199,6 +201,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     bool isLocalGatewayDestination(const L3Address& destination) const;
     void sendPreparedControl(Packet *packet);
     bool canSendControl(AodvControlPacketType type) const;
+    void configureInterfaces();
+    bool isSelectedInterface(const NetworkInterface *candidate) const;
+    bool isLocalAodvAddress(const L3Address& address) const;
     bool resolvePreviousHop(const Packet *packet, Link& link) const;
     void refreshSourceRoute(Packet *packet);
     void queueRouteError(const std::vector<UnreachableNode>& nodes, const std::set<Link>& recipients, bool noDelete, simtime_t delay);
@@ -222,9 +227,9 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
 
     /* Control packet creators */
     const Ptr<RrepAck> createRREPACK();
-    const Ptr<Rrep> createHelloMessage();
+    const Ptr<Rrep> createHelloMessage(NetworkInterface *output = nullptr);
     const Ptr<Rreq> createRREQ(const L3Address& destAddr);
-    const Ptr<Rrep> createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr);
+    const Ptr<Rrep> createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRoute *originatorRoute, const L3Address& sourceAddr, NetworkInterface *ingress);
     const Ptr<Rrep> createGratuitousRREP(const Ptr<Rreq>& rreq, IRoute *originatorRoute);
     const Ptr<Rerr> createRERR(const std::vector<UnreachableNode>& unreachableNodes);
 

@@ -1,5 +1,50 @@
 # AODV correction execution record
 
+## Selected interfaces (stage 9)
+
+Parent `14013e9c8a` and corrected source used identical General/run 0/seed 0
+fixtures with fresh matching debug libraries. The isolated parent checkout reused
+unchanged generated files/objects, then rebuilt AODV and relinked; this was an
+incremental build, not a clean build.
+
+The 18 Interfaces protocol cases produced five parent passes and 13 runtime
+assertion failures. The 16 Interfaces module cases produced three parent passes
+and 13 failures: eleven missing startup rejections, DownStart and Reconfigure.
+The final fixtures explicitly configure receiver mode for radio restart and wait
+for asynchronous shutdown completion. Setup attempts preceding those corrections
+are excluded. See [selected-interfaces.md](../../../../../tests/protocol/aodv/selected-interfaces.md)
+for each causal comparison and the saved radio diagnostic.
+
+Commands from the appropriate checkout root:
+
+```sh
+make -C src -j4 MODE=debug
+make -C src -j4 MODE=release
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561Interfaces.*\.test$' --no-build --no-concurrent
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV(SimpleTest(_2)?|ShortestPath|LifecycleTest)|AodvInterfaces).*\.test$' \
+  --no-build --no-concurrent
+```
+
+Logs: `/tmp/aodv-interfaces-parent-final-profile.log`,
+`/tmp/aodv-interfaces-parent-modules-profile.log`,
+`/tmp/aodv-interfaces-neighbor-protocol.log` and
+`/tmp/aodv-interfaces-neighbor-modules.log`. Before the final neighbor-observation
+ordering correction, the complete selection gave 158 protocol passes and 72/76
+module passes. Four unchanged legacy route-event expectations exposed suppression
+before the separate previous-hop refresh. Restoring that independent observation
+preserves suppression and the original route-event timing. No baseline is edited.
+
+The added profile is IPv4 only. Explicit IPv6 selection rejection is a configuration
+check, not native IPv6 runtime evidence. Native IPv6 compatibility remains assigned
+to the final shared-state checks. External-interface controls pass on both sources.
+
+Final ordering-corrected selection: 18/18 protocol cases and 20/20 module cases
+(16 new cases plus all four unchanged integration controls), exit 0. Fresh debug
+and release builds succeed; final release log is
+`/tmp/aodv-interfaces-neighbor-release.log`.
+
 > **Kind:** report · **Status:** snapshot 2026-11-09 · **Seal:** none · **Owns:** — · **Stands on:** [coverage.md](coverage.md), [correction decisions](conformance.md#selected-correction-decisions-2026-11-09)
 
 This record covers the selected freshness corrections implemented so far. The full correction plan remains

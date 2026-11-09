@@ -39,7 +39,8 @@ simple Aodv extends SimpleModule like IApp
         bool useLocalRepair = default(false); // See RFC 3561: 6.12 *not implemented yet*
         bool destinationOnlyFlag = default(false); // See RFC 3561: 5.1
         int udpPort = default(654);
-        string interface = default("wlan0"); // The interface to be used for the AODV routing
+        string interface @mutable = default("wlan0"); // Primary interface, applied at start
+        string interfaces @mutable = default(""); // Whitespace-separated exact IPv4 interface names including interface; empty selects only interface; applied at start
         string gatewayAddress = default(""); // The address of the external gateway (external traffic routed here by default)
 
         double maxPeriodicJitter @unit(s) = default(helloInterval / 4); // It MUST NOT be negative; it MUST NOT be greater than MESSAGE_INTERVAL/2; it SHOULD NOT be greater than MESSAGE_INTERVAL/4.

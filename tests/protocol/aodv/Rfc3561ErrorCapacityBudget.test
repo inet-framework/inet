@@ -70,6 +70,7 @@ cmdenv-express-mode = true
 *.dut.aodv.rerrRatelimit = 1
 *.dut.wlan[0].mac.ackTimeout = 0.1s
 *.dut.numWlanInterfaces = 2
+*.dut.aodv.interfaces = "wlan0 wlan1"
 *.peer.app[0].scenario = "ErrorCapacityBudget"
 *.peer.app[0].count = 256
 *.peer.app[0].limited = true
