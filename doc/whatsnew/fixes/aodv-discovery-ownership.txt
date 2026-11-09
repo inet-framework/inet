@@ -1,0 +1,3 @@
+AODV keeps discovery and data queues under one owner
+
+AODV now keeps rate-limited discoveries pending, cancels requests when a route becomes available during jitter, and releases or drops every destination queue sharing a gateway search. Queued packets preserve FIFO order and caller output constraints. Transit data without a route follows error/drop handling instead of originating discovery.

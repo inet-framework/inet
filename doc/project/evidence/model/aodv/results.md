@@ -182,3 +182,61 @@ The [reviewer document](../../../../../tests/protocol/aodv/route-lifetimes.md) e
 replay, route-state setup, each parent comparison and coverage limits. The migration note records
 the newly rejected configuration values. Full discovery, attribution, transit, reboot, interface,
 subnet and repair coverage remains pending in the plan.
+
+## Discovery ownership stage, 2026-11-09
+
+Immediate parent: `be0ba1067d`. Corrected source is the discovery-ownership commit following that
+parent. Default feature selection, debug protocol/module executions, deterministic seed 0.
+
+The 15 new protocol fixtures listed in [discovery-ownership.md](../../../../../tests/protocol/aodv/discovery-ownership.md)
+all compile on the parent and fail their intended runtime assertions. The parent emits on the
+wrong interface/MAC in each of the six constrained-output positions. RateLimit, DeferredReply,
+ReplyDuringJitter, IndependentRoute, NeighborCompletion and GatewayQueues fail required data
+delivery. DiscoveryExhaustion observes only one request instead of two. GatewayFailure leaves
+originals undestroyed. TransitAdmission observes originating discovery instead of RERR/drop.
+Both new module fixtures fail the corresponding runtime assertion on the same parent.
+
+The exact same fixtures pass with the corrected library. Combined protocol scope is 31 passes:
+the preceding 16 controls/corrections and 15 new cases. Combined module scope is ten passes:
+four existing AODV controls, four advertisement-duration rejections and two new cases.
+Fresh matching debug and release links pass. No expected output or fingerprint baseline changed.
+
+The final parent comparison uses `/home/miguel/workspace/inet-aodv-parent`, detached at the immediate
+parent, with copied identical fixtures. Its Aodv translation unit was rebuilt from the parent's
+tracked source and the library relinked. Unchanged translation-unit objects and generated message
+files were copied from the already built checkout to avoid recompiling the rest of INET. The
+source difference is restricted to Aodv.cc/Aodv.h, and no other source includes Aodv.h. This is an
+incremental build with verified unchanged object reuse, not a clean build. An earlier full parent
+build attempt was stopped and its partial objects superseded before the recorded execution.
+
+Commands from each checkout root:
+
+```sh
+make -C src -j6 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561(RateLimit|GatewayQueues|ReplyDuringJitter|DiscoveryExhaustion|IndependentRoute|DeferredReply|GatewayFailure|NeighborCompletion|Output.*|TransitAdmission)\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-discovery-parent-isolated.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f 'Aodv(GatewayQueues|TransitFailure)\.test$' --no-build --no-concurrent \
+  --log-file /tmp/aodv-discovery-parent-modules.log
+
+# Corrected checkout, after the matching debug build:
+opp_run_protocol_tests --load . -p inet -m debug -w aodv -f 'Rfc3561.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-discovery-final.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV(SimpleTest(_2)?|ShortestPath|LifecycleTest)|Aodv(GatewayQueues|TransitFailure|AdvertisementLifetimeInvalid_[1-4]))\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-discovery-modules.log
+make -C src -j4 MODE=release
+```
+
+Parent commands exit 1 with 15 and two intentional assertion failures. Corrected commands exit 0
+with 31 and ten passes. Logs are the named `/tmp` files, with `-runner.log` companions. Build logs:
+`/tmp/aodv-discovery-build-final.log`, `/tmp/aodv-discovery-release.log`, and
+`/tmp/aodv-discovery-parent-isolated-incremental-build.log`. Generated parent output remains in the
+isolated checkout; the earlier eight-case reproduction is saved in `/tmp/aodv-discovery-parent-evidence/`.
+
+Basic ring/backoff progression moved with the search record because the old WaitForRrep retry
+state was replaced as one ownership change. The next stage supplies distinguishing timing cases,
+checked parameter arithmetic and corrected defaults. Link attribution, detailed RERR semantics,
+recovery, interfaces, subnet profiles and local repair remain pending. These runs do not establish
+IPv6 compatibility or a higher whole-protocol conformance level.

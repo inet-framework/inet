@@ -42,6 +42,7 @@ The exit criterion of level 1 has three parts, and all three hold:
 | 1 | 2026-09-23 | **1, reached** | RFC 3561 and RFC 5148 downloaded; the standards map; the claims of the model | no run; no obsolete claim; one claim (local repair) reads as a refusal but is a claim by the guide's own rule, because the switch already exists |
 | 2, partial | 2026-11-09 | selected corrections | AODV-F-FRESHNESS, selected RREQ/RREP/Hello/RERR host-route cases | eight parent assertion failures become passes, with a passing preparation control and arithmetic unit test. See [results.md](results.md). Broader plan rows remain pending. |
 | 3, partial | 2026-11-09 | selected corrections | AODV-F-LIFETIME, reverse refresh and advertisement duration | five protocol parent failures and four missing configuration rejections become passes. Two protocol parents remain passing controls. Combined selection: 16 protocol and eight module passes. |
+| 4, partial | 2026-11-09 | selected corrections | AODV-F-DISCOVERY, phase ownership, queue release and exhaustion | 15 protocol and two module parent assertion failures become passes. Combined selection: 31 protocol and ten module passes. See discovery-ownership.md and results.md for limits. |
 
 ## Selected feature evidence
 
@@ -49,4 +50,5 @@ The exit criterion of level 1 has three parts, and all three hold:
 | --- | --- | --- |
 | AODV-F-FRESHNESS | Eight IPv4 UDP/IP regression cases and the request/reply control pass after correction. | Selected host-route scenarios only. See [reviewer document](../../../../../tests/protocol/aodv/route-freshness.md) for individual assertions. |
 | AODV-F-LIFETIME | Seven protocol cases and four configuration rejection cases pass, including recipient expiry and exact millisecond boundaries. | Controlled IPv4 replay and route-state injection. No independent serialized-byte oracle. See [reviewer document](../../../../../tests/protocol/aodv/route-lifetimes.md). |
+| AODV-F-DISCOVERY, ownership | 15 protocol and two module cases pass, covering finite rate-limited demand, direct-neighbor completion, shared gateway owners, terminal disposal and output constraints. | Deterministic IPv4 AckingWirelessInterface. Timing bounds, IPv6 and later recovery/repair profiles remain pending. See [reviewer document](../../../../../tests/protocol/aodv/discovery-ownership.md). |
 | Other selected features | Not yet established by this correction stage. | Scheduling, attribution, recovery, interface, subnet and repair stages remain assigned in the plan. |
