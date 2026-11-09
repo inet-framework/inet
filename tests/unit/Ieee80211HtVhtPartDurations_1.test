@@ -1,0 +1,40 @@
+%description:
+Check the part durations of the IEEE 802.11 HT and VHT modes, without a
+network. Ieee80211Transmitter computes the data duration as the total duration
+minus the preamble duration and the header duration. For every HT and VHT mode
+of the "n(mixed-2.4Ghz)" and "ac" mode sets, and for a short and a long PSDU,
+that difference must be the duration of the data symbols plus the signal
+extension: the HT-SIG or VHT-SIG-A field is the header part, and the preamble
+does not contain it.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+int numChecked = 0;
+for (const char *name : {"n(mixed-2.4Ghz)", "ac"}) {
+    auto modeSet = Ieee80211ModeSet::getModeSet(name);
+    for (int i = 0; i < modeSet->getNumModes(); i++) {
+        auto mode = modeSet->getMode(i);
+        if (dynamic_cast<const Ieee80211HtMode *>(mode) == nullptr && dynamic_cast<const Ieee80211VhtMode *>(mode) == nullptr)
+            continue;
+        for (B length : {B(28), B(1500)}) {
+            simtime_t dataDuration = mode->getDuration(length) - mode->getPreambleMode()->getDuration() - mode->getHeaderMode()->getDuration();
+            simtime_t expectedDataDuration = mode->getDataMode()->getDuration(length) + mode->getSignalExtensionTime();
+            if (dataDuration != expectedDataDuration)
+                EV << "mismatch: " << name << " " << mode->getName() << " " << length << ": data duration " << dataDuration << " instead of " << expectedDataDuration << "\n";
+            numChecked++;
+        }
+    }
+}
+EV << "checked the data duration of " << numChecked << " mode and length pairs\n";
+
+%contains-regex: stdout
+checked the data duration of [1-9][0-9]* mode and length pairs
+%not-contains: stdout
+mismatch:

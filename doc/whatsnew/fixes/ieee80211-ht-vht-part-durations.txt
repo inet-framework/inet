@@ -1,0 +1,3 @@
+The part durations of HT and VHT transmissions
+
+The preamble duration of an HT or VHT transmission included the HT-SIG or VHT-SIG-A field, which is also the header part of the transmission. The data part of every HT and VHT transmission was thus 8 us too short, and a short VHT frame had a negative data duration. The preamble no longer includes the signal field. The total duration of a transmission does not change.

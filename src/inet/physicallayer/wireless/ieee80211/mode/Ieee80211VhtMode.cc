@@ -249,9 +249,10 @@ unsigned int Ieee80211VhtPreambleMode::computeNumberOfHTLongTrainings(unsigned i
 
 const simtime_t Ieee80211VhtPreambleMode::getDuration() const
 {
-    // 21.3.4 Mathematical description of signals
+    // 21.3.4 Mathematical description of signals; the VHT-SIG-A field is the header
+    // part of the transmission, so the preamble does not contain it
     simtime_t sumOfHTLTFs = getSecondAndSubsequentHTLongTrainingFielDuration() * numberOfHTLongTrainings;
-    return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + getLSIGDuration() + getVHTSignalFieldA() + getVHTShortTrainingFieldDuration() + sumOfHTLTFs + getVHTSignalFieldB();
+    return getNonHTShortTrainingSequenceDuration() + getNonHTLongTrainingFieldDuration() + getLSIGDuration() + getVHTShortTrainingFieldDuration() + sumOfHTLTFs + getVHTSignalFieldB();
 }
 
 bps Ieee80211VhtSignalMode::computeGrossBitrate() const
