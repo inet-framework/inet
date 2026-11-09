@@ -82,6 +82,10 @@ void Aodv::initialize(int stage)
         blacklistTimer = new cMessage("BlackListTimer");
         if (useHelloMessages)
             helloMsgTimer = new cMessage("HelloMsgTimer");
+        if (quantizeAdvertisementLifetime(myRouteTimeout) == SIMTIME_ZERO)
+            throw cRuntimeError("AODV myRouteTimeout must fit 1..UINT32_MAX milliseconds");
+        if (quantizeAdvertisementLifetime(allowedHelloLoss * helloInterval) == SIMTIME_ZERO)
+            throw cRuntimeError("AODV allowedHelloLoss * helloInterval must fit 1..UINT32_MAX milliseconds");
         WATCH(numSent);
         WATCH(numReceived);
         WATCH(usingIpv6);
@@ -533,7 +537,7 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
 
         // The destination node copies the value MY_ROUTE_TIMEOUT
         // into the Lifetime field of the RREP.
-        rrep->setLifeTime(myRouteTimeout.trunc(SIMTIME_MS));
+        rrep->setLifeTime(quantizeAdvertisementLifetime(myRouteTimeout));
     }
     else { // intermediate node
         // 6.6.2. Route Reply Generation by an Intermediate Node
@@ -542,6 +546,11 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
         // the Destination Sequence Number field in the RREP message.
         AodvRouteData *destRouteData = check_and_cast<AodvRouteData *>(destRoute->getProtocolData());
         AodvRouteData *originatorRouteData = check_and_cast<AodvRouteData *>(originatorRoute->getProtocolData());
+        // RFC 3561 section 6.6.2. Suppressed advertisements create no precursor obligation.
+        auto remaining = quantizeAdvertisementLifetime(destRouteData->getLifeTime() - simTime());
+        if (remaining == SIMTIME_ZERO)
+            return nullptr;
+        rrep->setLifeTime(remaining);
         rrep->setDestSeqNum(destRouteData->getDestSeqNum());
 
         // The intermediate node updates the forward route entry by placing the
@@ -564,11 +573,6 @@ const Ptr<Rrep> Aodv::createRREP(const Ptr<Rreq>& rreq, IRoute *destRoute, IRout
         // Hop Count field in the RREP.
 
         rrep->setHopCount(destRoute->getMetric());
-
-        // The Lifetime field of the RREP is calculated by subtracting the
-        // current time from the expiration time in its route table entry.
-
-        rrep->setLifeTime((destRouteData->getLifeTime() - simTime()).trunc(SIMTIME_MS));
     }
 
     return rrep;
@@ -604,7 +608,10 @@ const Ptr<Rrep> Aodv::createGratuitousRREP(const Ptr<Rreq>& rreq, IRoute *origin
     grrep->setDestAddr(rreq->getOriginatorAddr());
     grrep->setDestSeqNum(rreq->getOriginatorSeqNum());
     grrep->setOriginatorAddr(rreq->getDestAddr());
-    grrep->setLifeTime(routeData->getLifeTime());
+    auto remaining = quantizeAdvertisementLifetime(routeData->getLifeTime() - simTime());
+    if (remaining == SIMTIME_ZERO)
+        return nullptr;
+    grrep->setLifeTime(remaining);
     return grrep;
 }
 
@@ -708,6 +715,16 @@ void Aodv::refreshNeighbor(const L3Address& sender)
     }
 }
 
+simtime_t Aodv::quantizeAdvertisementLifetime(simtime_t duration)
+{
+    if (duration <= SIMTIME_ZERO)
+        return SIMTIME_ZERO;
+    // RFC 3561 section 5.2 encodes a relative duration in uint32 milliseconds.
+    if (duration.inUnit(SIMTIME_MS) > UINT32_MAX)
+        return SIMTIME_ZERO;
+    return duration.trunc(SIMTIME_MS);
+}
+
 void Aodv::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned int hopCount, bool hasValidDestNum, uint32_t destSeqNum, bool isActive, simtime_t lifeTime)
 {
     EV_DETAIL << "Updating existing route: " << route << endl;
@@ -795,11 +812,18 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
     auto reverseData = reverse ? check_and_cast<AodvRouteData *>(reverse->getProtocolData()) : nullptr;
     uint32_t sequence = rreq->getOriginatorSeqNum();
     simtime_t lifetime = std::max(simTime(), simTime() + 2 * netTraversalTime - 2 * hops * nodeTraversalTime);
+    if (reverseData)
+        lifetime = std::max(lifetime, reverseData->getLifeTime());
     if (!reverse)
         reverse = createRoute(rreq->getOriginatorAddr(), sourceAddr, hops, true, sequence, true, lifetime);
     else if (!reverseData->hasValidDestNum() || AodvSequence::isNewer(sequence, reverseData->getDestSeqNum()) ||
             (sequence == reverseData->getDestSeqNum() && hops < unsigned(reverse->getMetric())))
         updateRoutingTable(reverse, sourceAddr, hops, true, sequence, true, lifetime);
+
+    // RFC 3561 section 6.5. Lifetime refresh is independent of path selection.
+    reverseData = check_and_cast<AodvRouteData *>(reverse->getProtocolData());
+    reverseData->setLifeTime(std::max(reverseData->getLifeTime(), lifetime));
+    scheduleExpungeRoutes();
 
     auto destination = findExactRoute(rreq->getDestAddr());
     expireRouteIfDue(destination);
@@ -814,10 +838,16 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
     if (fresh && destinationData->isActive() && !rreq->getDestOnlyFlag() &&
             !destination->getNextHopAsGeneric().isUnspecified() && destination->getNextHopAsGeneric() != sourceAddr)
     {
-        sendRREP(createRREP(rreq, destination, reverse, sourceAddr), rreq->getOriginatorAddr(), 255);
-        if (rreq->getGratuitousRREPFlag())
-            sendGRREP(createGratuitousRREP(rreq, reverse), rreq->getDestAddr(), 100);
-        return;
+        auto reply = createRREP(rreq, destination, reverse, sourceAddr);
+        if (reply) {
+            sendRREP(reply, rreq->getOriginatorAddr(), 255);
+            if (rreq->getGratuitousRREPFlag()) {
+                auto gratuitousReply = createGratuitousRREP(rreq, reverse);
+                if (gratuitousReply)
+                    sendGRREP(gratuitousReply, rreq->getDestAddr(), 100);
+            }
+            return;
+        }
     }
     if (timeToLive > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
         // RFC 3561 section 6.5. Unknown placeholders are not serial operands.
@@ -1223,7 +1253,7 @@ const Ptr<Rrep> Aodv::createHelloMessage()
     helloMessage->setDestAddr(getSelfIPAddress());
     helloMessage->setDestSeqNum(sequenceNum);
     helloMessage->setHopCount(0);
-    helloMessage->setLifeTime(allowedHelloLoss * helloInterval);
+    helloMessage->setLifeTime(quantizeAdvertisementLifetime(allowedHelloLoss * helloInterval));
 
     return helloMessage;
 }
@@ -1472,6 +1502,7 @@ bool Aodv::updateValidRouteLifeTime(const L3Address& destAddr, simtime_t lifetim
             simtime_t newLifeTime = std::max(routeData->getLifeTime(), lifetime);
             EV_DETAIL << "Updating " << route << " lifetime to " << newLifeTime << endl;
             routeData->setLifeTime(newLifeTime);
+            scheduleExpungeRoutes();
             return true;
         }
     }

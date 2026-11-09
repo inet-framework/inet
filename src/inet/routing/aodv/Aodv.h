@@ -149,6 +149,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     IRoute *findExactRoute(const L3Address& destination) const;
     void expireRouteIfDue(IRoute *route);
     void refreshNeighbor(const L3Address& sender);
+    static simtime_t quantizeAdvertisementLifetime(simtime_t duration);
 
   protected:
     /* Routing Table management */

@@ -1030,7 +1030,7 @@ code action and coverage limits. Proposed assignments, beside `tests/protocol/ao
 | --- | --- | --- |
 | 1 | `fixture-controls.md` | `Rfc3561Control.test`, a passing UDP/IP RREQ/RREP and reverse-route control |
 | 2 | `route-freshness.md` | SequenceFreshness, ReverseRoute, ReplyAcceptance, NeighborSequence, DestinationSequence, RequestFloors, HelloAcceptance, ErrorFreshness |
-| 3 | `route-lifetimes.md` | ReverseLifetime, GratuitousReply |
+| 3 | `route-lifetimes.md` | ReverseLifetime, ReverseLifetimeLong, GratuitousReply, SubmillisecondReply, MillisecondReply, MaximumLifetimeReply, OversizedLifetimeReply, with `tests/module/AodvAdvertisementLifetimeInvalid_1.test` through `_4.test` |
 | 4a | `discovery-ownership.md` | ReplyAcceptance, RequestRateLimit, with GatewayQueues module coverage |
 | 4b | `discovery-timing.md` | DiscoveryTiming, with ParameterValidation module coverage |
 | 5 | `link-validation.md` | ReplyAck, with TransitFailure module coverage |

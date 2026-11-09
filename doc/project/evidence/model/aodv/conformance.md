@@ -19,6 +19,9 @@ still unverified by this effort.
 | Sender aliases advertised originator/destination | Evaluate the message-specific transition before any generic neighbor refresh can change that record. Stale advertised information cannot reactivate it. |
 | Ordinary RREP acceptance | Forward or complete its matching discovery only after accepting its destination update. Equal sequence can reactivate an inactive route with a longer metric. |
 | Hello acceptance | Require a positive advertised lifetime and the sender's own destination address. Preserve fresher known state. Active-route expiry and inactive retention deadlines remain distinct. |
+| Reverse-route lifetime | Apply the RFC §6.5 maximum independently of path improvement, preserving a later existing deadline on replacement as well. |
+| Advertisement duration | Use expiry minus current time for route-derived replies, truncated downward to whole milliseconds. Suppress a cached/gratuitous advertisement outside the positive uint32 millisecond range. |
+| Configured advertisement duration | Reject an unencodable destination or Hello duration during initialization, including when Hello transmission is disabled. |
 
 The [reviewer document](../../../../../tests/protocol/aodv/route-freshness.md) describes the tested
 scenarios and limits. Independent ACK state, link attribution, timer/queue scheduling, reboot,
