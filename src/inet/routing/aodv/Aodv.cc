@@ -1136,6 +1136,7 @@ void Aodv::handleLinkBreakSendRERR(const Link& link)
 
 const Ptr<Rerr> Aodv::createRERR(const std::vector<UnreachableNode>& unreachableNodes)
 {
+    ASSERT(!unreachableNodes.empty() && unreachableNodes.size() <= 255);
     auto rerr = makeShared<Rerr>(); // TODO "AODV-RERR");
     rerr->setPacketType(usingIpv6 ? RERR_IPv6 : RERR);
 
@@ -1214,14 +1215,18 @@ void Aodv::queueRouteError(const std::vector<UnreachableNode>& nodes, const std:
         return;
     if (delay < SIMTIME_ZERO || delay > maxJitter)
         throw cRuntimeError("AODV jitter must be between zero and maxJitter");
-    auto header = createRERR(nodes);
-    header->setNoDeleteFlag(noDelete);
-    auto message = new RerrSend(header, recipients);
-    if (delay == SIMTIME_ZERO)
-        sendRouteError(message);
-    else {
-        delayedSends.insert(message);
-        scheduleAfter(delay, message);
+    // DestCount is one byte. Partition before admission, preserving every counter.
+    for (size_t offset = 0; offset < nodes.size(); offset += 255) {
+        auto end = std::min(nodes.size(), offset + 255);
+        auto header = createRERR(std::vector<UnreachableNode>(nodes.begin() + offset, nodes.begin() + end));
+        header->setNoDeleteFlag(noDelete);
+        auto message = new RerrSend(header, recipients);
+        if (delay == SIMTIME_ZERO)
+            sendRouteError(message);
+        else {
+            delayedSends.insert(message);
+            scheduleAfter(delay, message);
+        }
     }
 }
 

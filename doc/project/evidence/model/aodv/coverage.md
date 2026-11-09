@@ -48,6 +48,8 @@ The exit criterion of level 1 has three parts, and all three hold:
 
 | 7, partial | 2026-11-09 | selected corrections | AODV-F-ERROR, transit and precursor handling | 18 protocol and two module parent runtime failures become passes; seven protocol and one module parent controls remain passing. Combined scope: 82 protocol and 51 module passes. |
 
+| 8, partial | 2026-11-09 | selected corrections | AODV-F-ERROR, outgoing capacity | Two 256-record parent failures become passes; one- and 255-record controls already pass. Four capacity cases and two adjacent admission controls pass after fresh debug/release builds. |
+
 ## Selected feature evidence
 
 | Feature | Evidence | Limit |

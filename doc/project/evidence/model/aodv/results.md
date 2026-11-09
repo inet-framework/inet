@@ -444,3 +444,39 @@ A final guard also rejects quarantined inverse bindings when attributing a previ
 recipient. After fresh debug/release builds, the 25 error cases and two ambiguous/rebinding
 failed-link controls pass (27 total). Logs: /tmp/aodv-errors-binding-guard-protocol.log and its
 -runner.log companion; build logs use the same stem with -build.log and -release.log.
+
+## Route-error capacity, 2026-11-09
+
+Immediate parent: `5e143cc73e`. Rfc3561ErrorCapacityOne and Maximum already pass; Partition and
+Budget reach the intended runtime count-octet assertion with a 256-record header. After partitioning,
+all four pass. The adjacent NoDeleteErrorFanoutBudget and TransitBudgetCrossing cases also pass.
+Both modes build successfully. These are additional focused checks after the stage-6 combined
+82-protocol/51-module selection; they do not replace the final full selection.
+
+Commands from the implementation checkout root:
+
+```sh
+# Before mutation, with the current debug library:
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561ErrorCapacity.*\.test$' --no-build --no-concurrent \
+  --log-file /tmp/aodv-capacity-parent-final-guard.log
+# After mutation:
+make -C src -j4 MODE=debug
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561(ErrorCapacity.*|NoDeleteError(FanoutBudget|TransitBudgetCrossing))\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-capacity-current.log
+make -C src -j4 MODE=release
+```
+
+Parent comparison exits 1 with two controls passing and two classified assertion failures.
+The corrected six-case selection and builds exit 0. Each test log has a -runner.log companion;
+build logs are /tmp/aodv-capacity-build.log and /tmp/aodv-capacity-release.log. Earlier attempts
+omitted a suitable jitter bound, overlapped two radios on one medium, or assigned the same subnet
+to distinct media. Those setup failures are excluded from the final comparison.
+
+The fixture serializes and decodes actual emitted headers, checks unique destinations and
+unchanged counters, and checks all local invalidations even when the second partition is suppressed.
+Its public two-interface precursor setup deliberately isolates this concern before stage 9's
+selected-interface learning. See [error-capacity.md](../../../../../tests/protocol/aodv/error-capacity.md).
+No wire format, existing expectation or baseline is changed. Hello, recovery, selected interfaces,
+subnet learning, IPv6 and repair remain pending.
