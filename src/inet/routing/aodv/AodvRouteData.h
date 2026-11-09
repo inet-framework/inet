@@ -8,6 +8,7 @@
 #ifndef __INET_AODVROUTEDATA_H
 #define __INET_AODVROUTEDATA_H
 
+#include <cstdint>
 #include <set>
 
 #include "inet/networklayer/common/L3Address.h"
@@ -23,7 +24,7 @@ class INET_API AodvRouteData : public cObject
     bool repariable;
     bool beingRepaired;
     bool validDestNum;
-    unsigned int destSeqNum;
+    uint32_t destSeqNum;
     simtime_t lifeTime; // expiration or deletion time of the route
 
   public:
@@ -40,8 +41,8 @@ class INET_API AodvRouteData : public cObject
 
     virtual ~AodvRouteData() {}
 
-    unsigned int getDestSeqNum() const { return destSeqNum; }
-    void setDestSeqNum(unsigned int destSeqNum) { this->destSeqNum = destSeqNum; }
+    uint32_t getDestSeqNum() const { return destSeqNum; }
+    void setDestSeqNum(uint32_t destSeqNum) { this->destSeqNum = destSeqNum; }
     bool hasValidDestNum() const { return validDestNum; }
     void setHasValidDestNum(bool hasValidDestNum) { this->validDestNum = hasValidDestNum; }
     bool isBeingRepaired() const { return beingRepaired; }

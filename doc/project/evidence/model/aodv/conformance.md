@@ -1,10 +1,33 @@
 # AODV — model claims
 
-> **Kind:** report · **Status:** snapshot 2026-09-23 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/aodv/standards.md), [coverage.md](coverage.md)
+> **Kind:** report · **Status:** snapshot 2026-11-09 · **Seal:** none · **Owns:** — · **Stands on:** [standards.md](../../protocol/aodv/standards.md), [coverage.md](coverage.md)
 
-Step 8 artifact of the standards test workflow, part 1 only. A level 1 pass records what the model intends: which standards it claims to implement, mapped onto the standards map. Part 2, the conformance matrix, needs the feature map and the verdicts of a level 2 pass.
+The historical survey below records the documentation claims inspected on 2026-09-23. Selected implementation decisions and direct regression evidence from the 2026-11-09 correction effort are appended separately. They do not establish complete RFC conformance or a higher achieved level.
 
-Read record — no build, no run:
+## Selected correction decisions, 2026-11-09
+
+The freshness stage has direct IPv4 UDP/IP evidence in [results.md](results.md), including eight
+distinguishing parent failures followed by corrected passes. It covers selected host-route cases
+and one-datagram discovery completion. IPv6 runtime behavior and the remaining plan stages are
+still unverified by this effort.
+
+| Question | Model decision |
+| --- | --- |
+| Exactly half the 32-bit sequence range | Neither direction establishes freshness. Unknown numeric placeholders are excluded from comparisons. |
+| RFC 3561 §§6.1/6.6.1 destination update ambiguity | Adopt a known fresher requested destination sequence under §6.1, without an extra unconditional increment. An unknown request cannot advance it. |
+| Protocol state lookup | Use an exact owned host record when selecting host sequence information and direct-neighbor state. Forwarding and subnet support are separate plan stages. |
+| Sender aliases advertised originator/destination | Evaluate the message-specific transition before any generic neighbor refresh can change that record. Stale advertised information cannot reactivate it. |
+| Ordinary RREP acceptance | Forward or complete its matching discovery only after accepting its destination update. Equal sequence can reactivate an inactive route with a longer metric. |
+| Hello acceptance | Require a positive advertised lifetime and the sender's own destination address. Preserve fresher known state. Active-route expiry and inactive retention deadlines remain distinct. |
+
+The [reviewer document](../../../../../tests/protocol/aodv/route-freshness.md) describes the tested
+scenarios and limits. Independent ACK state, link attribution, timer/queue scheduling, reboot,
+selected interfaces, subnet routing and local repair remain assigned in the implementation plan.
+The historical survey below is preserved as its original read-only evidence.
+
+## Historical survey
+
+Read record — no build, no run in the 2026-09-23 survey:
 
 - Date: 2026-09-23
 - INET: branch `topic/standards-tests-wave0`, commit `e360ca980e`, tree clean
