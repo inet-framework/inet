@@ -6,6 +6,26 @@ The historical survey below records the documentation claims inspected on 2026-0
 
 ## Selected correction decisions, 2026-11-09
 
+### Received subnet profile
+
+IPv4 RREP prefix zero means a host; nonzero means the normalized advertised
+prefix. Freshness and precursor state belong to that exact prefix. No counter
+comparison crosses prefixes, even if the advertising router is shared. An
+inactive known more-specific record blocks a covering aggregate for that target;
+an unknown placeholder does not. The same selection and explicit output tags
+serve new data and queued completion, respecting active non-AODV precedence.
+
+The model interprets a known RREQ floor as host knowledge only. Retained aggregate
+history produces U=1,D=1 and numeric zero, while retaining its counter locally.
+Relays promote exact-host floors only. A cached aggregate can answer U=1,D=0,
+preserving the requested member address and nonzero prefix. Peers exporting
+aggregate counters in RREQ floors are outside this bounded profile. Same-prefix
+operation assumes consistent subnet counter semantics and stable unambiguous
+RERR identity; ambiguity is skipped conservatively. Authoritative subnet-router
+election/advertisement and live handover between independent subnet counters are
+unsupported. Continued demand can retain known host blocking indefinitely;
+quiescence permits normal deletion. See [subnet-routes.md](../../../../../tests/protocol/aodv/subnet-routes.md).
+
 The freshness stage has direct IPv4 UDP/IP evidence in [results.md](results.md), including eight
 distinguishing parent failures followed by corrected passes. It covers selected host-route cases
 and one-datagram discovery completion. Subsequent sections record the additional discovery and

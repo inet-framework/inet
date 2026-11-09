@@ -1,0 +1,85 @@
+%description:
+RFC 3561 sections 5.2, 6 and 7: received subnet routes and independent prefix state.
+
+%file: Peer.cc
+#include "../../AodvSubnetPeer.h"
+
+%file: test.ned
+import inet.applications.contract.IApp;
+import inet.node.inet.AdhocHost;
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvSubnetPeer like IApp
+{
+    parameters:
+        string scenario = default("Control");
+        @class(::AodvSubnetPeer);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+simple AodvSubnetSource like IApp
+{
+    parameters:
+        double emitTime @unit(s) = default(10s);
+        @class(::AodvSubnetSource);
+    gates:
+        input socketIn;
+        output socketOut;
+}
+network AodvTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        peer: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvTest
+ned-path = .;../../../../../src;../../../lib
+sim-time-limit = 1s
+seed-set = 0
+cmdenv-express-mode = true
+**.vector-recording = false
+*.configurator.addStaticRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.addSubnetRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/><interface hosts='peer' names='wlan0' address='10.0.0.2' netmask='255.255.255.0'/><interface hosts='peer' names='wlan1' address='10.0.0.3' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+*.dut.aodv.useHelloMessages = false
+*.dut.aodv.deletePeriod = 0.3s
+*.dut.aodv.activeRouteTimeout = 0.1s
+*.dut.wlan[*].radio.initialRadioMode = "receiver"
+*.peer.app[0].scenario = "RecoveryAuthority"
+*.dut.numApps = 1
+*.peer.forwarding = false
+*.dut.app[0].typename = "AodvSubnetSource"
+*.peer.numWlanInterfaces = 2
+*.peer.numApps = 1
+*.peer.app[0].typename = "AodvSubnetPeer"
+**.arp.typename = "GlobalArp"
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].bitrate = 1Mbps
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+
+%contains: stdout
+AODV Subnet RecoveryAuthority: PASS

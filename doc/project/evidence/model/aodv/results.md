@@ -1,5 +1,56 @@
 # AODV correction execution record
 
+## Received subnet routes (stage 10)
+
+Immediate parent `9fd380a795` was built in the isolated comparison worktree,
+then ran the identical 24-case Subnet selection: 24 runtime assertion failures.
+Most fail first because nonzero-prefix replies remain host records. Their later
+assertions are corrected-path coverage, not separately reproduced parent defects.
+Two additional protocol cases, Downstream and HelloBlock, also fail runtime
+assertions on that parent. The native downstream module repetition fails its
+missing-prefix assertion. See [subnet-routes.md](../../../../../tests/protocol/aodv/subnet-routes.md)
+for each scenario, owner, production path and limit.
+
+Fresh corrected debug/release builds pass. The complete then-current selection
+passes 182 protocol cases, followed by passing Downstream and HelloBlock cases:
+184 observed protocol passes across these selections. The final module selection
+passes all 77 cases, including the unchanged four integration controls. No existing
+expectation or fingerprint changes. General, run 0, seed 0; fixed-position IPv4
+AckingMac/UnitDisk with zero jitter. The HelloBlock MAC timeout is explicitly 5 ms.
+
+```sh
+make -C src -j4 MODE=debug
+make -C src -j4 MODE=release
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561.*\.test$' --no-build --no-concurrent
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561Subnet(Downstream|HelloBlock)\.test$' --no-build --no-concurrent
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV|Aodv(?!Ipv6)).*\.test$' --no-build --no-concurrent
+```
+
+Saved logs: `/tmp/aodv-subnet-final-build.log`, `/tmp/aodv-subnet-release.log`,
+`/tmp/aodv-subnet-combined.log`, `/tmp/aodv-subnet-downstream-protocol.log`,
+`/tmp/aodv-subnet-hello-block2.log`, `/tmp/aodv-subnet-modules-final.log`,
+`/tmp/aodv-subnet-parent-complete.log`, `/tmp/aodv-subnet-parent-last.log` and
+`/tmp/aodv-subnet-downstream-parent.log`.
+
+Setup corrections excluded from reproduction: a missing test-only tag include,
+cross-module emission without Enter_Method/take (replaced by a public source API),
+Cmdenv express-mode output requiring stdout, an incorrect checksum enum spelling,
+too-short configured retention relative to activeRouteTimeout, an unscheduled
+public placeholder deadline, and an unregistered unused source in the downstream
+fixture. Sustained initially allowed quiescence between demands, correctly permitting
+deletion; 10 ms demand now covers multiple searches and retention intervals, then
+intentional quiescence verifies ordinary deletion. HelloBlock initially checked
+before the default 100 ms MAC timeout; its declared 5 ms timeout supplies the
+intended failed-transmission event before checking invalidation.
+
+The seeded unknown-host cases are supplemental public table setup. Aggregate
+learning, errors, independent counters, queue release, native downstream AODV
+and actual next-hop MAC observations use production paths. Native IPv6 fixture
+development and the isolated IPv4-only build remain separate final-stage checks.
+
 ## Selected interfaces (stage 9)
 
 Parent `14013e9c8a` and corrected source used identical General/run 0/seed 0

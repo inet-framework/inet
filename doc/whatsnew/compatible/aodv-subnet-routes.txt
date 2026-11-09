@@ -1,0 +1,3 @@
+AODV receives IPv4 subnet routes
+
+Nonzero-prefix route replies now install normalized subnet routes, preserve their independent sequence history, and can serve other eligible members. Cached and forwarded replies retain the prefix. Known retained host records conservatively block aggregate substitution for that host.

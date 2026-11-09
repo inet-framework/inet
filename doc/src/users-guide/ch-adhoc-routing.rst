@@ -57,6 +57,24 @@ destinations within the ad hoc network.
 
 The :ned:`Aodv` module type implements AODV, based on RFC 3561.
 
+Received IPv4 RREPs with a nonzero prefix install a normalized subnet route;
+zero retains host-route semantics. Other eligible members can use the subnet.
+Sequence numbers belong to exact prefixes, so a known inactive host record
+blocks a covering subnet for that host until fresh host information arrives or
+ordinary retention ends. Continuing demand can keep that host record indefinitely.
+An inactive unknown placeholder does not impose that block. Active manual routes
+retain their forwarding precedence.
+
+This subnet profile interprets a known RREQ sequence floor as host knowledge.
+Retained aggregate history instead requests an authoritative answer with U and D
+set, retaining its sequence locally. A cached aggregate answers only U=1,D=0
+and retains its nonzero prefix. Peers using aggregate counters as RREQ floors,
+authoritative subnet-router election/advertisement and live transitions between
+independent subnet counters are outside this profile. RERR identity requires a
+stable unambiguous prefix per peer/interface/wire address; ambiguous entries are
+skipped conservatively, including inactive candidates. A quoted ICMP Host
+Unreachable for one member does not invalidate the aggregate.
+
 Discovery uses increasing ring TTLs through the configured threshold, then
 network-wide requests with exponential reply waits. ``rreqRetries`` counts
 additional network-wide attempts. Each reply wait starts at actual send,
