@@ -59,7 +59,12 @@ class AodvIpv6Peer : public AodvPeer
             ASSERT(output.getData().size() == 48 && decoded && decoded->getOriginatorAddr() == dut && decoded->getDestAddr() == destination);
             requests++; offer(0xfffffffeu);
         }
-        if (dynamicPtrCast<const RrepAck>(h)) { ASSERT(h->getPacketType() == RREPACK_IPv6 && output.getData().size() == 2); acknowledgments++; }
+        if (dynamicPtrCast<const RrepAck>(h)) {
+            auto decoded = dynamicPtrCast<const RrepAck>(serializer.deserializeFields(input, typeid(RrepAck)));
+            ASSERT(h->getPacketType() == RREPACK_IPv6 && output.getData().size() == 2);
+            ASSERT(decoded && decoded->getPacketType() == RREPACK_IPv6);
+            acknowledgments++;
+        }
         delete p;
     }
     void receiveSignal(cComponent *, simsignal_t, cObject *v, cObject *) override {

@@ -6,6 +6,16 @@ The historical survey below records the documentation claims inspected on 2026-0
 
 ## Selected correction decisions, 2026-11-09
 
+### Final native IPv6 compatibility profile
+
+The single selected IPv6 interface joins the existing control multicast group on
+every start. Native request reception, rate deferral, pre-admission completion,
+stop/crash/restart and three-node Hello/data attribution have direct paired
+coverage. Native ND activity renews an armed neighbor deadline just like data.
+See [ipv6-compatibility.md](../../../../../tests/protocol/aodv/ipv6-compatibility.md)
+and [results.md](results.md). Earlier stage-specific pending statements below
+describe the coverage available at those stages, not the final branch.
+
 ### Bounded local repair
 
 The optional mode is implemented with default false. One transit-only repair
@@ -30,8 +40,8 @@ are link control and cannot wait behind AODV route discovery. The existing IPv6
 pinned local-out link-broadcast behavior remains visible in the bounded fixture;
 actual repaired transit uses its resolved alternate next-hop MAC. This stage does
 not extend explicit interface selection or received subnet routing to IPv6. The
-remaining IPv6 rate/restart and three-node observation checks are still assigned
-to the final compatibility stage. See [local-repair.md](../../../../../tests/protocol/aodv/local-repair.md).
+final IPv6 rate/restart and three-node observation checks are documented above.
+See [local-repair.md](../../../../../tests/protocol/aodv/local-repair.md).
 
 ### Received subnet profile
 
