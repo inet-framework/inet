@@ -15,6 +15,7 @@
 #include "inet/routing/aodv/AodvControlPackets_m.h"
 #include "inet/routing/aodv/AodvRouteData.h"
 #include "inet/transportlayer/contract/udp/UdpSocket.h"
+#include "inet/transportlayer/udp/UdpHeader_m.h"
 
 using namespace inet;
 using namespace inet::aodv;
@@ -32,6 +33,14 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
     uint32_t forwardedSequence = 0;
     bool forwardedUnknown = false;
     int emittedData = 0;
+    int requestInterfaceIndex = 0;
+    simtime_t replyLifetime;
+    simtime_t expectedExpiry;
+    simtime_t gratuitousLifetime;
+    simtime_t recipientReception;
+    cComponent *recipientIp = nullptr;
+    cComponent *dutIp = nullptr;
+    bool setRemainingOnRequest = false;
     IRoutingTable *routes = nullptr;
     L3Address peer = Ipv4Address("10.0.0.2");
     L3Address destination = Ipv4Address("10.0.0.99");
@@ -47,16 +56,29 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
         socket.setBroadcast(true);
         routes = check_and_cast<IRoutingTable *>(getModuleByPath("^.^.dut.ipv4.routingTable"));
         getModuleByPath("^.ipv4.ip")->subscribe(packetReceivedFromLowerSignal, this);
+        auto scenario = par("scenario").stdstringValue();
+        if (scenario == "GratuitousReply") {
+            recipientIp = getModuleByPath("^.^.receiver.ipv4.ip");
+            recipientIp->subscribe(packetReceivedFromLowerSignal, this);
+        }
+        if (scenario == "Quantization") {
+            dutIp = getModuleByPath("^.^.dut.ipv4.ip");
+            dutIp->subscribe(packetReceivedFromLowerSignal, this);
+        }
         timer = new cMessage("script");
-        scheduleAt(0.1, timer);
+        scheduleAt(hasPar("startTime") ? par("startTime").doubleValue() : 0.1, timer);
     }
-    void transmit(const Ptr<AodvControlPacket>& control) {
+    void transmit(const Ptr<AodvControlPacket>& control, int interfaceIndex = 0,
+            L3Address target = L3Address()) {
         auto packet = new Packet("scripted-aodv", control);
         auto interfaces = check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"));
-        packet->addTag<InterfaceReq>()->setInterfaceId(interfaces->findInterfaceByName("wlan0")->getInterfaceId());
+        auto selected = interfaces->findInterfaceByName(("wlan" + std::to_string(interfaceIndex)).c_str());
+        target = target.isUnspecified() ? dut : target;
+        packet->addTag<InterfaceReq>()->setInterfaceId(selected->getInterfaceId());
+        packet->addTag<L3AddressReq>()->setSrcAddress(selected->getNetworkAddress());
         packet->addTag<HopLimitReq>()->setHopLimit(10);
-        packet->addTag<NextHopAddressReq>()->setNextHopAddress(dut);
-        socket.sendTo(packet, dut, 654);
+        packet->addTag<NextHopAddressReq>()->setNextHopAddress(target);
+        socket.sendTo(packet, target, 654);
     }
     void request(uint32_t sequence, uint32_t originatorSequence = 1, bool unknown = false) {
         auto request = makeShared<Rreq>();
@@ -81,18 +103,20 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
         reply->setHopCount(hops);
         transmit(reply);
     }
-    void requestFloor(const L3Address& target, bool unknown, uint32_t sequence) {
+    void requestFloor(const L3Address& target, bool unknown, uint32_t sequence,
+            bool destinationOnly = true, bool gratuitous = false, uint32_t originatorSequence = 1) {
         auto request = makeShared<Rreq>();
         request->setPacketType(RREQ);
         request->setChunkLength(B(24));
         request->setOriginatorAddr(Ipv4Address("10.0.0.50"));
-        request->setOriginatorSeqNum(1);
+        request->setOriginatorSeqNum(originatorSequence);
         request->setRreqId(step + 1);
         request->setDestAddr(target);
         request->setDestSeqNum(sequence);
         request->setUnknownSeqNumFlag(unknown);
-        request->setDestOnlyFlag(true);
-        transmit(request);
+        request->setDestOnlyFlag(destinationOnly);
+        request->setGratuitousRREPFlag(gratuitous);
+        transmit(request, requestInterfaceIndex);
     }
     void hello(uint32_t sequence, simtime_t lifetime) {
         auto message = makeShared<Rrep>();
@@ -165,7 +189,84 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
         ASSERT(route->getNextHopAsGeneric() == peer && unsigned(route->getMetric()) == hops);
     }
     void runScenario(const std::string& scenario) {
-        if (scenario == "SequenceFreshness") {
+        if (scenario == "ReverseLifetime" || scenario == "ReverseLifetimeLong") {
+            destination = Ipv4Address("10.0.0.50");
+            bool longerExisting = scenario == "ReverseLifetimeLong";
+            uint32_t expectedSequence = longerExisting ? 41 : 40;
+            if (step == 0)
+                reply(40, longerExisting ? 10 : 0.2);
+            else if (step == 1) {
+                expectedExpiry = check_and_cast<AodvRouteData *>(findRoute(destination)->getProtocolData())->getLifeTime();
+                requestFloor(Ipv4Address("10.0.0.99"), true, 0, true, false, longerExisting ? 41 : 1);
+            }
+            else if (step == 2) {
+                checkSequence(destination, expectedSequence);
+                auto expiry = check_and_cast<AodvRouteData *>(findRoute(destination)->getProtocolData())->getLifeTime();
+                if (longerExisting)
+                    ASSERT(expiry == expectedExpiry);
+                else
+                    ASSERT(expiry > simTime() + 5);
+                expectedExpiry = expiry;
+                step++;
+                scheduleAfter(0.3, timer);
+                return;
+            }
+            else if (step == 3) {
+                checkSequence(destination, expectedSequence);
+                step++;
+                scheduleAt(expectedExpiry + SimTime(1, SIMTIME_MS), timer);
+                return;
+            }
+            else {
+                checkSequence(destination, expectedSequence, false);
+                return pass(scenario);
+            }
+        }
+        else if (scenario == "GratuitousReply") {
+            requestInterfaceIndex = 1;
+            if (step == 0) {
+                destination = Ipv4Address("10.0.0.50");
+                reply(1);
+            }
+            else if (step == 1) {
+                destination = Ipv4Address("10.0.0.99");
+                reply(50, 5, 1);
+            }
+            else if (step == 2)
+                requestFloor(destination, true, 0, false, true);
+            else {
+                ASSERT(gratuitousLifetime > 4 && gratuitousLifetime < 5);
+                ASSERT(gratuitousLifetime == gratuitousLifetime.trunc(SIMTIME_MS));
+                ASSERT(recipientReception > 0);
+                auto table = check_and_cast<IRoutingTable *>(getModuleByPath("^.^.receiver.ipv4.routingTable"));
+                auto route = table->findBestMatchingRoute(Ipv4Address("10.0.0.50"));
+                ASSERT(route && route->getSourceType() == IRoute::AODV);
+                auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+                ASSERT(data->isActive() && data->getLifeTime() == recipientReception + gratuitousLifetime);
+                return pass(scenario);
+            }
+        }
+        else if (scenario == "Quantization") {
+            requestInterfaceIndex = 1;
+            if (step == 0)
+                reply(10, 5, 1);
+            else if (step == 1) {
+                setRemainingOnRequest = true;
+                requestFloor(destination, true, 0, false);
+            }
+            else {
+                simtime_t duration(par("advertisedMicroseconds").intValue(), SIMTIME_US);
+                auto milliseconds = duration.inUnit(SIMTIME_MS);
+                if (milliseconds > 0 && milliseconds <= UINT32_MAX) {
+                    ASSERT(replies == 1 && replySequence == 10);
+                    ASSERT(replyLifetime == duration.trunc(SIMTIME_MS));
+                }
+                else
+                    ASSERT(replies == 0 && forwardedRequests >= 1);
+                return pass(scenario);
+            }
+        }
+        else if (scenario == "SequenceFreshness") {
             const uint32_t input[] = {0xfffffffeu, 0xffffffffu, 0, 0xffffffffu,
                 0x7fffffffu, 0x80000000u, 0, 0x7fffffffu, 0x80000000u};
             const uint32_t expected[] = {0xfffffffeu, 0xffffffffu, 0, 0,
@@ -289,10 +390,21 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
         if (auto reply = dynamicPtrCast<const Rrep>(control)) {
             replies++;
             replySequence = reply->getDestSeqNum();
+            replyLifetime = reply->getLifeTime();
+            if (par("scenario").stdstringValue() == "GratuitousReply" &&
+                    reply->getDestAddr() == Ipv4Address("10.0.0.50") &&
+                    reply->getOriginatorAddr() == Ipv4Address("10.0.0.99")) {
+                gratuitousLifetime = reply->getLifeTime();
+                // Reinject the captured advertisement as wire input to a real receiver.
+                transmit(dynamicPtrCast<AodvControlPacket>(control->dupShared()), 0, Ipv4Address("10.0.0.99"));
+            }
             if (reply->getAckRequiredFlag()) {
                 auto ack = makeShared<RrepAck>();
                 ack->setPacketType(RREPACK);
-                transmit(ack);
+                auto interfaces = check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"));
+                int ingress = packet->getTag<InterfaceInd>()->getInterfaceId();
+                int output = ingress == interfaces->findInterfaceByName("wlan0")->getInterfaceId() ? 0 : 1;
+                transmit(ack, output);
             }
         }
         else if (auto request = dynamicPtrCast<const Rreq>(control)) {
@@ -306,9 +418,25 @@ class AodvPeer : public SimpleModule, public UdpSocket::ICallback, public cListe
     }
     void socketErrorArrived(UdpSocket *, Indication *indication) override { delete indication; }
     void socketClosed(UdpSocket *) override {}
-    void receiveSignal(cComponent *, simsignal_t, cObject *value, cObject *) override {
+    void receiveSignal(cComponent *source, simsignal_t, cObject *value, cObject *) override {
         Enter_Method("observeData");
         auto packet = dynamic_cast<Packet *>(value);
+        if (source == dutIp && setRemainingOnRequest) {
+            auto ip = packet->peekAtFront<Ipv4Header>();
+            auto udp = packet->peekDataAt<UdpHeader>(ip->getChunkLength());
+            auto control = packet->peekDataAt<AodvControlPacket>(ip->getChunkLength() + udp->getChunkLength());
+            ASSERT(control->getPacketType() == RREQ);
+            auto route = findRoute(destination);
+            ASSERT(route);
+            simtime_t remaining(par("advertisedMicroseconds").intValue(), SIMTIME_US);
+            check_and_cast<AodvRouteData *>(route->getProtocolData())->setLifeTime(simTime() + remaining);
+            setRemainingOnRequest = false;
+            return;
+        }
+        if (source == recipientIp) {
+            recipientReception = simTime();
+            return;
+        }
         if (packet && packet->peekAtFront<Ipv4Header>()->getDestAddress() == destination.toIpv4())
             emittedData++;
     }
