@@ -6,6 +6,43 @@ The historical survey below records the documentation claims inspected on 2026-0
 
 ## Selected correction decisions, 2026-11-09
 
+### Final native IPv6 compatibility profile
+
+The single selected IPv6 interface joins the existing control multicast group on
+every start. Native request reception, rate deferral, pre-admission completion,
+stop/crash/restart and three-node Hello/data attribution have direct paired
+coverage. Native ND activity renews an armed neighbor deadline just like data.
+See [ipv6-compatibility.md](../../../../../tests/protocol/aodv/ipv6-compatibility.md)
+and [results.md](results.md). Earlier stage-specific pending statements below
+describe the coverage available at those stages, not the final branch.
+
+### Bounded local repair
+
+The optional mode is implemented with default false. One transit-only repair
+owns an exact route key, its original wire target, old metric, saved precursors
+and fixed total deadline. maxRepairTTL defaults to floor(0.3*netDiameter), with
+zero disabling eligibility. Missing reverse distance and excessive computed TTL
+decline repair. The chosen local policy is one attempt with a reply wait from
+actual send and a creation-time pathDiscoveryTime bound over jitter/rate delay.
+Member arrivals do not change purpose or deadlines. Existing originating searches
+take precedence over new repair for their retained prefix.
+
+Independent member recovery releases its own FIFO without finishing a different
+prefix owner. An empty owner retains its notification obligation. A committed
+matching-prefix update finishes the owner before callbacks, including one-hop,
+RREQ-originator and Hello host updates. A longer path sends N while staying active;
+timeout disposes remaining members and reports the stored counter without another
+increment. Other eligible failed-link records have independent deferred flags and
+deadlines. These are model choices within RFC 3561 section 6.12's optional search.
+
+Native IPv6 host repair has direct success/failure runtime coverage. ND messages
+are link control and cannot wait behind AODV route discovery. The existing IPv6
+pinned local-out link-broadcast behavior remains visible in the bounded fixture;
+actual repaired transit uses its resolved alternate next-hop MAC. This stage does
+not extend explicit interface selection or received subnet routing to IPv6. The
+final IPv6 rate/restart and three-node observation checks are documented above.
+See [local-repair.md](../../../../../tests/protocol/aodv/local-repair.md).
+
 ### Received subnet profile
 
 IPv4 RREP prefix zero means a host; nonzero means the normalized advertised

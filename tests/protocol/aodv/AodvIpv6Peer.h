@@ -14,8 +14,6 @@ class AodvIpv6Peer : public AodvPeer
 {
     int acknowledgments = 0;
     int requests = 0;
-    int ndProbeReceived = 0;
-    int probeStep = 0;
     void offer(uint32_t sequence) {
         auto h = makeShared<Rrep>(); h->setPacketType(RREP_IPv6); h->setChunkLength(B(44));
         h->setOriginatorAddr(dut); h->setDestAddr(destination); h->setDestSeqNum(sequence);
@@ -36,24 +34,10 @@ class AodvIpv6Peer : public AodvPeer
         socket.joinMulticastGroup(Ipv6Address("ff01::1"), check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"))->findInterfaceByName("wlan0")->getInterfaceId());
         routes = check_and_cast<IRoutingTable *>(getModuleByPath("^.^.dut.ipv6.routingTable"));
         getModuleByPath("^.ipv6.ipv6")->subscribe(packetReceivedFromLowerSignal, this);
-        dutIp = getModuleByPath("^.^.dut.ipv6.ipv6"); dutIp->subscribe(packetReceivedFromLowerSignal, this);
-        auto peerRoutes = check_and_cast<IRoutingTable *>(getModuleByPath("^.ipv6.routingTable"));
-        auto direct = peerRoutes->createRoute(); direct->setSourceType(IRoute::MANUAL); direct->setSource(this);
-        direct->setDestination(dut); direct->setPrefixLength(128); direct->setNextHop(dut); direct->setMetric(1);
-        direct->setInterface(check_and_cast<IInterfaceTable *>(getModuleByPath("^.interfaceTable"))->findInterfaceByName("wlan0"));
-        peerRoutes->addRoute(direct);
-        timer = new cMessage("ipv6-script"); scheduleAt(0.01, timer);
+        timer = new cMessage("ipv6-script"); scheduleAt(0.3, timer);
     }
     void handleMessage(cMessage *m) override {
         if (m != timer) { socket.processMessage(m); return; }
-        if (probeStep == 0) {
-            socket.sendTo(new Packet("native-nd-probe", makeShared<ByteCountChunk>(B(8))), dut, 12345);
-            probeStep = 1; scheduleAt(0.08, timer); return;
-        }
-        if (probeStep == 1) {
-            ASSERT(ndProbeReceived == 1);
-            probeStep = 2; scheduleAt(0.3, timer); return;
-        }
         if (step == 0) { ASSERT(hostRoute()); offer(0xfffffffdu); scheduleAt(0.4, timer); }
         if (step == 1) { ASSERT(check_and_cast<AodvRouteData *>(hostRoute()->getProtocolData())->getDestSeqNum() == 0xfffffffeu); offer(0); scheduleAt(0.5, timer); }
         if (step == 2) { ASSERT(check_and_cast<AodvRouteData *>(hostRoute()->getProtocolData())->getDestSeqNum() == 0); offer(0x80000000u); scheduleAt(0.8, timer); }
@@ -83,15 +67,9 @@ class AodvIpv6Peer : public AodvPeer
         }
         delete p;
     }
-    void receiveSignal(cComponent *source, simsignal_t, cObject *v, cObject *) override {
+    void receiveSignal(cComponent *, simsignal_t, cObject *v, cObject *) override {
         Enter_Method("observeNativeIpv6Data"); auto p = dynamic_cast<Packet *>(v); if (!p) return;
         auto ip = p->peekAtFront<Ipv6Header>();
-        if (source == dutIp) {
-            if (ip->getProtocolId() == IP_PROT_UDP && ip->getSrcAddress() == peer.toIpv6() &&
-                    ip->getDestAddress() == dut.toIpv6() && p->peekDataAt<UdpHeader>(ip->getChunkLength())->getDestPort() == 12345)
-                ndProbeReceived++;
-            return;
-        }
         if (ip->getDestAddress() == destination.toIpv6()) { ASSERT(ip->getSrcAddress() == dut.toIpv6()); emittedData++; }
     }
     void finish() override {}

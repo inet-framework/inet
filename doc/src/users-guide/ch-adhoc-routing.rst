@@ -75,6 +75,28 @@ stable unambiguous prefix per peer/interface/wire address; ambiguous entries are
 skipped conservatively, including inactive candidates. A quoted ICMP Host
 Unreachable for one member does not invalidate the aggregate.
 
+``useLocalRepair=true`` enables bounded repair for eligible failed transit paths;
+the default is false. ``maxRepairTTL`` defaults to ``floor(0.3*netDiameter)`` and
+accepts zero through ``netDiameter``. Zero disables eligibility. Repair requires
+the old path and an active reverse distance. Its initial TTL is the larger of
+the old distance and half the source distance rounded up, plus ``localAddTTL``.
+An unavailable distance or TTL above ``netDiameter``/255 declines repair.
+
+Each exact route prefix gets one attempt with shared jitter/rate admission, a
+reply wait from actual send, and a total creation-time bound of
+``pathDiscoveryTime``. The MAC-owned failed packet is never retransmitted;
+subsequent traffic can join repair. Existing originating searches keep their
+purpose. A longer repaired path sends N and remains active. Failure disposes all
+attached queues and notifies precursors without incrementing again. Independent
+host recovery can release one aggregate member while its prefix repair and
+notification deadline remain alive.
+
+Legacy single-interface IPv6 uses the shared discovery and host-repair state
+with its existing custom control encoding. IPv6 neighbor discovery passes
+independently of AODV data discovery. Disable IPv6 ``sendRedirects`` for a MANET
+whose next hop is not directly reachable by the original source. Explicit
+interface selection and received subnet routes are the IPv4 profiles above.
+
 Discovery uses increasing ring TTLs through the configured threshold, then
 network-wide requests with exponential reply waits. ``rreqRetries`` counts
 additional network-wide attempts. Each reply wait starts at actual send,

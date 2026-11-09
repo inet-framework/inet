@@ -1,5 +1,211 @@
 # AODV correction execution record
 
+## Submission validation
+
+Final integrated source passes **231/231 protocol cases**, **97/97 module
+cases** (93 `Aodv*` plus all four unchanged `AODV*` integration controls), and
+the serial-arithmetic unit test. All runners use fresh matching debug artifacts,
+General/run 0/seed 0 for the authored deterministic fixtures, and exit 0. The
+additional native IPv6 ACK decoding repetition also passes. Debug and release
+compilation and the isolated IPv4-only AODV debug feature build succeed.
+
+```sh
+make -j4 MODE=debug
+make -j4 MODE=release
+opp_run_protocol_tests --load . -p inet -m debug -w aodv --no-build --no-concurrent
+opp_run_module_tests --load . -p inet -m debug -f 'Aodv.*\.test$' --no-build --no-concurrent
+opp_run_module_tests --load . -p inet -m debug -f 'AODV.*\.test$' --no-build --no-concurrent
+opp_run_unit_tests --load . -p inet -m debug -f 'AodvSequence\.test$' --no-build --no-concurrent
+```
+
+Working directory is `/home/miguel/workspace/inet-aodv`; the feature build is in
+`/home/miguel/workspace/inet-aodv-ipv4`, with Ipv6 and its dependent features
+disabled and Aodv/Ipv4 enabled. Feature build inputs are the identical final
+AODV C++/NED files. Build logs: `/tmp/aodv-final-{debug,release}-build.log`,
+`/tmp/aodv-final-ipv4-build.log`; test logs: `/tmp/aodv-final-{protocol,modules,legacy-modules,unit}.log`.
+
+Scoped AODV architecture and source/document seal checks pass. Full-tree
+architecture and interface outputs are byte-identical to the pinned upstream
+base; naming has the same existing candidates and passes modified NED
+declarations. The full documentation link check retains the base's 181 missing
+local standards links, with no added failures. No exception ledger change is
+needed for these pre-existing results. C++ lint is not verified because
+clang-tidy and a compilation database are unavailable. Mermaid rendering is not
+verified because no renderer is installed; diagram text and event order were
+checked against the fixture assertions. This is an author review, not an
+independent review. The local semantic checklist is `/tmp/aodv-semantic-review.md`.
+Example fingerprint comparisons are explicitly reported below as mismatches,
+not passing correctness evidence or approved baseline changes.
+
+## Final native IPv6 compatibility (stage 12)
+
+Eight identical General/run 0/seed 0 cases ran in each category with fresh
+matching debug libraries. Immediate parent `edecd5e6ce` has six passing controls
+and two runtime failures per category: Incoming and IncomingRestart receive no
+multicast request reply. The correction joins the existing IPv6 control group
+on every socket start. Corrected native module cases pass; the full protocol
+selection below includes the same eight cases. The three-node Hello fixture
+observes actual Ethernet-to-wireless forwarding, retains IP source S and MAC
+source N, and measures loss from the last attributable incoming frame, including
+native ND. Its final quiet-period assertion is at 0.95 seconds. Initial assertions
+that equated final data and final neighbor reception are excluded fixture errors.
+The initial discovery/freshness fixture also decodes the native two-byte ACK;
+RREQ/RREP/RERR round trips are retained.
+
+```sh
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561Ipv6(Incoming|IncomingRestart|RateLimit|DeferredReply|Restart|CrashReady|StopQueued|HelloForwarding).test$' \
+  --no-build --no-concurrent
+opp_run_module_tests --load . -p inet -m debug \
+  -f 'AodvIpv6(Incoming|IncomingRestart|RateLimit|DeferredReply|Restart|CrashReady|StopQueued|HelloForwarding).test$' \
+  --no-build --no-concurrent
+```
+
+Parent logs: `/tmp/aodv-ipv6-parent-{protocol,modules}-final2.log`. Corrected
+combined selections use `/tmp/aodv-final-{protocol,modules}.log` and the four
+uppercase legacy controls in `/tmp/aodv-final-legacy-modules.log`. ACK decode
+repetition: `/tmp/aodv-final-ipv6-encoding.log`. The per-case assertions and
+limitations are in [ipv6-compatibility.md](../../../../../tests/protocol/aodv/ipv6-compatibility.md).
+
+## Final example fingerprint comparison
+
+The dependency inventory maps changed AODV files to `inet.routing.aodv`,
+`inet.node.aodv` and the Aodv feature. Five existing examples cover direct and
+multihop discovery, lifecycle and external gateway routing. Both sides use debug,
+run 0, seed 0, the stored 100-second limit and exactly `tplx`, `~tNl`, `~tND`.
+Base `7ec0d4d3f3` passes all 15 comparisons. The corrected source gives two passes
+and 13 mismatches, with zero simulation execution errors:
+
+| Configuration | tplx | ~tNl | ~tND |
+| --- | --- | --- | --- |
+| ShortestPath | mismatch | pass | mismatch |
+| SimpleLifecycle | mismatch | mismatch | mismatch |
+| SimpleRREQ | mismatch | pass | mismatch |
+| SimpleRREQ2 | mismatch | mismatch | mismatch |
+| StaticExternal | mismatch | mismatch | mismatch |
+
+Bounded, paired four-second debug traces locate the first actual RREQ at the same
+time and with the same wire fields, but dispatched by `aodv-search` instead of
+`aodv-send-jitter`. The first destination RREP has the same counter and event/time
+on both sides, while its lifetime changes from 6 to 11.2 seconds under the new
+minimum `myRouteTimeout=2*pathDiscoveryTime` default. SimpleRREQ's reply is event
+50 at 3.202491266542; SimpleRREQ2 and SimpleLifecycle are event 67 at
+3.202491396656; ShortestPath is event 106 at 3.203137018857; StaticExternal is
+event 46 at 2.00640562485. This directly explains an early event/control-byte
+divergence. Later full-100-second trajectories, including the three ~tNl
+mismatches, were not fully causally aligned. Direct assertion tests establish
+the corrected contracts; these fingerprints remain mismatches for review.
+
+The active `inet.opp` supplies the library/NED/features, stores and ingredient
+defaults. For bounded metadata collection, `/tmp/aodv-fingerprint-{base,current}.opp`
+are copies with only `root_folder` set to the respective absolute worktree and
+`ini_file_folders` restricted to `["examples/aodv"]`. All other settings remain
+unchanged. This avoids collecting unrelated project configurations before the
+working-directory filter is applied.
+
+```sh
+opp_run_fingerprint_tests --load /tmp/aodv-fingerprint-current.opp \
+  -p inet -m debug -w '^examples/aodv$' \
+  -c '^(SimpleRREQ|SimpleRREQ2|SimpleLifecycle|ShortestPath|StaticExternal)$' \
+  -r '^0$' --no-build --no-concurrent \
+  --result-file /tmp/aodv-fingerprint-submission.json \
+  --log-file /tmp/aodv-fingerprint-submission.log
+```
+
+Current exit 1 is the comparison failure, not a simulation error; base exit 0.
+The final rerun reproduces the earlier corrected fingerprint values exactly.
+Base artifacts: `/tmp/aodv-fingerprint-base.json`,
+`/tmp/aodv-fingerprint-base-final{,-runner}.log`. Current artifacts:
+`/tmp/aodv-fingerprint-submission{.json,.log,-runner.log}`. Paired traces:
+`/tmp/aodv-fingerprint-{base,current}-simple-corrected.out` and
+`/tmp/aodv-fingerprint-{base,current}-{SimpleRREQ2,SimpleLifecycle,ShortestPath,StaticExternal}-diagnostic.out`.
+The first launcher attempts lacked the worktree-specific `INET_ROOT` and failed
+network lookup; they are excluded setup errors. Correct diagnostic runs set
+`INET_ROOT` to their own worktree and use `../../bin/inet --debug -u Cmdenv
+-c <configuration> -r 0 --sim-time-limit=4s --cmdenv-express-mode=false
+--cmdenv-log-level=debug` from `examples/aodv`.
+
+The shared adapter produces `/tmp/aodv-fingerprint-normalized.json`, schema v1,
+runner opp_repl, 15 executed comparisons, status FAIL, flaky false, changed result
+observed/expected true and baseline approval false. Its input is a mechanically
+flattened 15-leaf summary from the runner JSON: the raw nested console summary
+otherwise makes this adapter count only the last three-leaf group. The raw JSON
+remains authoritative. The resolved runner is
+`/home/miguel/omnetpp-6.4.0aipre2/.venv/bin/opp_run_fingerprint_tests`.
+
+No stored expectation or dependency inventory changes. SHA256:
+`tests/fingerprint/store.json` = `ff4a94299a5665485527e88d8998e138718dac7c7be232a1fbf6a97349e45587`;
+`tests/dependency.json` = `9a827858c2949b68893b14214326cffcf6d6a568994e7e27706aa1b82680a28f`.
+Historical tested revisions map to the submitted, source-identical revisions in
+[verification-revisions.md](verification-revisions.md).
+
+## Bounded local repair (stage 11)
+
+Immediate parent `497d3cb7e5` and corrected source ran identical General/run 0/seed
+0 fixtures with fresh matching debug libraries. The isolated parent's 39 protocol
+cases give eight passing controls and 31 runtime failures. Eleven module cases
+give eleven failures: two missing parameter rejections and nine runtime failures.
+Most enabled IPv4 parents fail first at missing repair ownership. SecondFailure
+fails its first-success check. Native IPv6 parents stop earlier because ND cannot
+finish while AODV queues the unicast advertisement. These first failures are
+separated from later corrected-path observations in
+[local-repair.md](../../../../../tests/protocol/aodv/local-repair.md).
+
+Corrected focused scope passes all 39 protocol cases and 12 module cases, including
+the initial native IPv6 discovery/freshness control. Fresh debug and release builds
+succeed. The isolated IPv4-only feature build also succeeds after copying the
+current AODV C++/NED inputs: Aodv and Ipv4 are enabled, Ipv6 is disabled with its
+dependent features. Its initial build used the root Makefile to generate features.h;
+an earlier direct src-only build without that generated header is excluded.
+
+```sh
+make -C src -j4 MODE=debug
+make -C src -j4 MODE=release
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561LocalRepair.*\.test$' --no-build --no-concurrent
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AodvLocalRepair|AodvIpv6Repair|AodvIpv6Compatibility).*\.test$' \
+  --no-build --no-concurrent
+```
+
+Build logs: `/tmp/aodv-repair-build-first.log`, `/tmp/aodv-repair-nd3-build.log`,
+`/tmp/aodv-repair-release.log`, `/tmp/aodv-ipv4-build-corrected.log` and
+`/tmp/aodv-ipv4-final-aodv-build.log`. Focused logs:
+`/tmp/aodv-repair-all-owners.log`, `/tmp/aodv-repair-modules-owners.log`,
+`/tmp/aodv-repair-parent-final.log` and `/tmp/aodv-repair-parent-modules-final.log`.
+The 39-case corrected selection uses the final owning IPv4 adapter, requiring
+every received transit original destroyed and the native IP hook queue empty.
+Source packet counters alone are not claimed as transit-queue disposal proof.
+
+Fixture corrections excluded from reproduction: initially checking a retained
+record after ordinary deletion; expecting a jittered notification before its
+declared send time; using one script node as both source and local destination
+(replaced by a real third source); unbound UDP delivery producing unrelated ICMP
+traffic (a sink is now bound); counting a returned control packet as data; allowing
+normal idle expiry after successful one-hop recovery; missing hook overrides,
+an incorrect unregister signature and colliding Define_Module line expansions.
+The module rejection cases use the native stderr diagnostics.
+
+Native IPv6 setup uses the explicit global node configurator, zero boot/DAD delay,
+stable one-hop addresses and disabled MANET redirects. The scripted source supplies
+its output at local-out so native ND resolves unicast. A probe establishes the failed
+neighbor's ND entry before radio loss. Existing IPv6 local-out reinjection can emit
+link broadcast; observations are deduplicated by tree identity, while repaired
+transit must use the alternate resolved MAC. Native IPv6 initial RREQ/ACK plus
+repair RREP/RERR custom encoding checks pass. The first ND-classification attempt
+through generic dissection encountered an incomplete chunk; direct typed-header
+inspection on the copy avoids treating link control as data demand. Raw bounded
+diagnostics are `/tmp/aodv-repair-ipv6-source-diagnostic.out` and
+`/tmp/aodv-repair-ipv6-nd-diagnostic.out`.
+
+The final combined selections pass 223/223 protocol and 89/89 module cases, exit
+0, including the four unchanged legacy integration controls. Logs are
+`/tmp/aodv-repair-all-protocol.log` and `/tmp/aodv-repair-all-modules.log`.
+No existing expectation, fingerprint, dependency store or baseline was updated.
+Broader
+native IPv6 rate/restart/three-node liveness and final submission gates remain
+assigned; this checkpoint is not a completion claim for the entire plan.
+
 ## Received subnet routes (stage 10)
 
 Immediate parent `9fd380a795` was built in the isolated comparison worktree,

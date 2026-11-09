@@ -92,6 +92,10 @@ void Aodv::initialize(int stage)
         aodvUDPPort = par("udpPort");
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
+        useLocalRepair = par("useLocalRepair");
+        if (par("maxRepairTTL").intValue() < 0 || par("maxRepairTTL").intValue() > par("netDiameter").intValue())
+            throw cRuntimeError("AODV maxRepairTTL must be in 0..netDiameter");
+        maxRepairTTL = par("maxRepairTTL");
         destinationOnlyFlag = par("destinationOnlyFlag");
         activeRouteTimeout = par("activeRouteTimeout");
         helloInterval = par("helloInterval");
@@ -404,6 +408,12 @@ bool Aodv::prepareDataPacket(Packet *packet, IRoute *route)
         updateValidRouteLifeTime(nextHop, simTime() + activeRouteTimeout);
         if (route == defaultGatewayRoute)
             updateValidRouteLifeTime(gatewayAddress, simTime() + activeRouteTimeout);
+        if (packet->findTag<InterfaceInd>()) {
+            refreshSourceRoute(packet);
+            Link previous;
+            if (resolvePreviousHop(packet, previous))
+                data->addPrecursor(previous.first, previous.second);
+        }
         scheduleExpungeRoutes();
     }
     return true;
@@ -436,7 +446,7 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool lo
             return DROP;
         }
         delayDatagram(datagram);
-        queueOwners[destination] = target;
+        queueOwners[destination] = RouteKey(target, addressType->getMaxPrefixLength());
         if (!hasOngoingRouteDiscovery(target))
             startRouteDiscovery(target);
         return QUEUE;
@@ -455,12 +465,14 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool lo
         }
         return ACCEPT;
     }
+    if (queueForRepair(datagram, local))
+        return QUEUE;
     if (!local) {
         sendRERRWhenNoRouteToForward(datagram);
         return DROP;
     }
     delayDatagram(datagram);
-    queueOwners[destination] = target;
+    queueOwners[destination] = RouteKey(target, addressType->getMaxPrefixLength());
     if (!hasOngoingRouteDiscovery(target)) {
         auto retained = findExactRoute(target);
         startRouteDiscovery(target, retained ? std::min(netDiameter, unsigned(retained->getMetric()) + ttlIncrement) : ttlStart);
@@ -474,20 +486,22 @@ Aodv::Aodv()
 
 bool Aodv::hasOngoingRouteDiscovery(const L3Address& target)
 {
-    return searches.find(target) != searches.end();
+    return searches.find(RouteKey(target, addressType->getMaxPrefixLength())) != searches.end();
 }
 
 void Aodv::startRouteDiscovery(const L3Address& target, unsigned timeToLive)
 {
     ASSERT(!hasOngoingRouteDiscovery(target));
-    auto& search = searches[target];
+    RouteKey key(target, addressType->getMaxPrefixLength());
+    auto& search = searches[key];
+    search.wireTarget = target;
     search.timer = new cMessage("aodv-search", KIND_SEARCH);
-    search.timer->setContextPointer(const_cast<L3Address *>(&searches.find(target)->first));
+    search.timer->setContextPointer(const_cast<RouteKey *>(&searches.find(key)->first));
     search.ttl = timeToLive ? std::min(timeToLive, netDiameter) : ttlStart;
-    scheduleSearch(target);
+    scheduleSearch(key);
 }
 
-void Aodv::scheduleSearch(const L3Address& target)
+void Aodv::scheduleSearch(const RouteKey& target)
 {
     auto& search = searches.at(target);
     if (recovering) {
@@ -498,7 +512,10 @@ void Aodv::scheduleSearch(const L3Address& target)
     simtime_t jitter = *jitterPar;
     if (jitter < SIMTIME_ZERO || jitter > maxJitter)
         throw cRuntimeError("AODV jitter must be between zero and maxJitter");
-    scheduleAfter(jitter, search.timer);
+    auto wake = simTime() + jitter;
+    if (search.purpose == Search::Purpose::LOCAL_REPAIR)
+        wake = std::min(wake, search.deadline);
+    scheduleAt(wake, search.timer);
 }
 
 void Aodv::refreshRateWindow()
@@ -512,12 +529,17 @@ void Aodv::refreshRateWindow()
 
 void Aodv::handleSearchTimer(cMessage *timer)
 {
-    auto target = *static_cast<L3Address *>(timer->getContextPointer());
+    auto target = *static_cast<RouteKey *>(timer->getContextPointer());
     releaseEligiblePackets();
     auto it = searches.find(target);
     if (it == searches.end())
         return;
     auto& search = it->second;
+    if (search.purpose == Search::Purpose::LOCAL_REPAIR &&
+            (simTime() >= search.deadline || search.phase == SearchPhase::WAIT_REPLY)) {
+        cancelRouteDiscovery(target);
+        return;
+    }
     if (recovering) {
         search.phase = SearchPhase::RECOVERY_WAIT;
         return;
@@ -533,6 +555,8 @@ void Aodv::handleSearchTimer(cMessage *timer)
     else {
         search.phase = SearchPhase::READY;
         readySearches.push_back(target);
+        if (search.purpose == Search::Purpose::LOCAL_REPAIR)
+            scheduleAt(search.deadline, search.timer); // total bound also owns rate-starved READY
         drainReadySearches();
     }
 }
@@ -549,20 +573,33 @@ void Aodv::drainReadySearches()
         if (it == searches.end() || it->second.phase != SearchPhase::READY)
             continue;
         auto& search = it->second;
-        auto request = createRREQ(target); // IDs and sequence numbers belong to actual sends
+        if (search.purpose == Search::Purpose::LOCAL_REPAIR && simTime() >= search.deadline) {
+            cancelRouteDiscovery(target);
+            continue;
+        }
+        auto request = createRREQ(search.wireTarget); // IDs and sequence numbers belong to actual sends
+        if (search.purpose == Search::Purpose::LOCAL_REPAIR) {
+            auto route = findExactRoute(target.first, target.second);
+            auto data = route ? check_and_cast<AodvRouteData *>(route->getProtocolData()) : nullptr;
+            bool host = target.second == addressType->getMaxPrefixLength();
+            request->setUnknownSeqNumFlag(!host || !data || !data->hasValidDestNum());
+            request->setDestSeqNum(host && data && data->hasValidDestNum() ? data->getDestSeqNum() : 0);
+            request->setDestOnlyFlag(!host || destinationOnlyFlag);
+        }
         rreqCount++;
         simtime_t wait = 2 * nodeTraversalTime * (double(search.ttl) + timeoutBuffer);
-        if (search.ttl == netDiameter) {
+        if (search.purpose == Search::Purpose::ORIGINATING && search.ttl == netDiameter) {
             wait = netTraversalTime * std::pow(2.0, search.networkAttempts);
             search.networkAttempts++;
         }
         search.phase = SearchPhase::WAIT_REPLY;
-        scheduleAfter(wait, search.timer);
+        cancelEvent(search.timer);
+        scheduleAt(search.purpose == Search::Purpose::LOCAL_REPAIR ? std::min(simTime() + wait, search.deadline) : simTime() + wait, search.timer);
         sendAODVPacket(request, addressType->getBroadcastAddress(), search.ttl, 0);
     }
 }
 
-void Aodv::eraseSearch(const L3Address& target)
+void Aodv::eraseSearch(const RouteKey& target)
 {
     auto it = searches.find(target);
     if (it != searches.end()) {
@@ -588,16 +625,43 @@ void Aodv::releaseEligiblePackets()
         else
             ++it;
     }
-    std::vector<L3Address> completed;
+    std::vector<RouteKey> completed;
     for (const auto& search : searches) {
+        if (search.second.purpose == Search::Purpose::LOCAL_REPAIR) {
+            auto route = findExactRoute(search.first.first, search.first.second);
+            expireRouteIfDue(route);
+            if (route && check_and_cast<AodvRouteData *>(route->getProtocolData())->isActive() &&
+                    route->getInterface() && route->getInterface()->isUp() && !route->getNextHopAsGeneric().isUnspecified())
+                completed.push_back(search.first);
+            continue;
+        }
         bool ownsQueue = false;
         for (const auto& owner : queueOwners)
             ownsQueue |= owner.second == search.first;
         if (!ownsQueue)
             completed.push_back(search.first);
     }
-    for (const auto& target : completed)
-        eraseSearch(target);
+    for (const auto& target : completed) {
+        // A repair is terminal even if newly retained more-specific state blocks a member.
+        for (auto owner = queueOwners.begin(); owner != queueOwners.end();) {
+            if (owner->second == target) {
+                auto fifo = delayedPackets.find(owner->first);
+                if (fifo != delayedPackets.end()) {
+                    released.emplace_back(fifo->first, std::move(fifo->second));
+                    delayedPackets.erase(fifo);
+                }
+                owner = queueOwners.erase(owner);
+            }
+            else
+                ++owner;
+        }
+        if (searches.at(target).purpose == Search::Purpose::LOCAL_REPAIR)
+            finishRepair(target, true);
+        else
+            eraseSearch(target);
+        if (generation != operationalGeneration || operationalState != OPERATING)
+            return;
+    }
     // Detach every owner before calling IP: reinjection may reenter this module.
     for (const auto& fifo : released)
         for (auto packet : fifo.second) {
@@ -940,9 +1004,136 @@ IRoute *Aodv::findRetainedRoute(const L3Address& destination, bool knownOnly) co
 void Aodv::updateSearchAuthorities()
 {
     for (auto& entry : searches) {
-        auto route = findRetainedRoute(entry.first, true);
+        if (entry.second.purpose == Search::Purpose::LOCAL_REPAIR)
+            continue;
+        auto route = findRetainedRoute(entry.second.wireTarget, true);
         entry.second.retainedKey = route ? RouteKey(route->getDestinationAsGeneric(), route->getPrefixLength()) : RouteKey();
     }
+}
+
+Aodv::RouteKey Aodv::routeKey(const IRoute *route) const
+{
+    return {route->getDestinationAsGeneric(), route->getPrefixLength()};
+}
+
+bool Aodv::repairAllowed(Packet *packet, IRoute *route, unsigned int& ttl)
+{
+    if (!useLocalRepair || recovering || !route || route->getSource() != this || route == defaultGatewayRoute ||
+            route->getPrefixLength() == 0 || maxRepairTTL == 0 || route->getMetric() <= 0 ||
+            unsigned(route->getMetric()) > maxRepairTTL || classifyDatagram(packet) != DatagramKind::DATA)
+        return false;
+    auto header = getNetworkProtocolHeader(packet);
+    if (routingTable->isLocalAddress(header->getSourceAddress()) || header->getSourceAddress().isUnspecified() ||
+            header->getDestinationAddress().isBroadcast() || header->getDestinationAddress().isMulticast())
+        return false;
+    updateSearchAuthorities();
+    auto key = routeKey(route);
+    for (const auto& entry : searches) {
+        if (entry.second.purpose != Search::Purpose::ORIGINATING)
+            continue;
+        auto dependency = findRetainedRoute(entry.second.wireTarget, true);
+        if (!dependency)
+            dependency = findRetainedRoute(entry.second.wireTarget);
+        if (entry.first == key || (dependency && routeKey(dependency) == key))
+            return false;
+    }
+    auto reverse = selectDataRoute(header->getSourceAddress());
+    if (!reverse || reverse->getSource() != this || reverse->getMetric() <= 0)
+        return false;
+    uint64_t computed = std::max(uint64_t(route->getMetric()), (uint64_t(reverse->getMetric()) + 1) / 2) + localAddTTL;
+    if (computed > netDiameter || computed > 255)
+        return false;
+    ttl = computed;
+    return true;
+}
+
+void Aodv::startRepair(IRoute *route, const L3Address& target, unsigned int ttl)
+{
+    auto key = routeKey(route);
+    ASSERT(!searches.count(key));
+    auto& search = searches[key];
+    search.purpose = Search::Purpose::LOCAL_REPAIR;
+    search.retainedKey = key;
+    search.wireTarget = target;
+    search.oldHopCount = route->getMetric();
+    search.ttl = ttl;
+    search.deadline = simTime() + pathDiscoveryTime;
+    auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+    search.precursors = data->getPrecursorList();
+    search.precursors.erase({route->getNextHopAsGeneric(), route->getInterface()->getInterfaceId()});
+    data->setIsBeingRepaired(true);
+    data->setIsRepariable(true);
+    repairableDeadlines.erase(key);
+    search.timer = new cMessage("aodv-local-repair", KIND_SEARCH);
+    search.timer->setContextPointer(const_cast<RouteKey *>(&searches.find(key)->first));
+    scheduleSearch(key);
+    scheduleExpungeRoutes();
+}
+
+bool Aodv::queueForRepair(Packet *packet, bool local)
+{
+    if (!useLocalRepair)
+        return false;
+    auto destination = getNetworkProtocolHeader(packet)->getDestinationAddress();
+    auto owner = queueOwners.find(destination);
+    RouteKey key;
+    IRoute *route = nullptr;
+    if (owner != queueOwners.end()) {
+        auto search = searches.find(owner->second);
+        if (search == searches.end() || search->second.purpose != Search::Purpose::LOCAL_REPAIR)
+            return false;
+        key = owner->second;
+        route = findExactRoute(key.first, key.second);
+    }
+    else {
+        route = findRetainedRoute(destination, true);
+        if (!route)
+            route = findRetainedRoute(destination);
+        if (!route)
+            return false;
+        key = routeKey(route);
+        auto search = searches.find(key);
+        if (search == searches.end()) {
+            auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+            auto until = repairableDeadlines.find(key);
+            unsigned int ttl;
+            if (local || !data->isRepariable() || until == repairableDeadlines.end() || until->second <= simTime() ||
+                    !repairAllowed(packet, route, ttl))
+                return false;
+            startRepair(route, destination, ttl);
+        }
+        else if (search->second.purpose != Search::Purpose::LOCAL_REPAIR)
+            return false;
+    }
+    Link previous;
+    if (!local && route && resolvePreviousHop(packet, previous)) {
+        check_and_cast<AodvRouteData *>(route->getProtocolData())->addPrecursor(previous.first, previous.second);
+        searches.at(key).precursors.insert(previous);
+    }
+    delayDatagram(packet);
+    queueOwners[destination] = key;
+    return true;
+}
+
+void Aodv::finishRepair(const RouteKey& key, bool success)
+{
+    auto search = searches.find(key);
+    ASSERT(search != searches.end() && search->second.purpose == Search::Purpose::LOCAL_REPAIR);
+    auto route = findExactRoute(key.first, key.second);
+    auto recipients = search->second.precursors;
+    bool notify = !success || (route && unsigned(route->getMetric()) > search->second.oldHopCount);
+    UnreachableNode node; node.addr = key.first; node.seqNum = 0;
+    if (route) {
+        auto data = check_and_cast<AodvRouteData *>(route->getProtocolData());
+        data->setIsBeingRepaired(false);
+        data->setIsRepariable(false);
+        node.seqNum = data->hasValidDestNum() ? data->getDestSeqNum() : 0;
+    }
+    repairableDeadlines.erase(key);
+    eraseSearch(key); // detach before notifications or IP callbacks
+    if (notify)
+        queueRouteError({node}, recipients, success, *jitterPar);
+    scheduleExpungeRoutes();
 }
 
 void Aodv::expireRouteIfDue(IRoute *route)
@@ -1204,10 +1395,17 @@ void Aodv::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obje
     if (!resolveFailedLink(packet, link))
         return;
     failLinkValidation(link, classifyDatagram(packet) == DatagramKind::REPLY);
-    handleLinkBreakSendRERR(link);
+    auto route = selectDataRoute(header->getDestinationAddress());
+    unsigned int ttl;
+    bool repair = route && route->getSource() == this && route->getNextHopAsGeneric() == link.first &&
+        route->getInterface()->getInterfaceId() == link.second && !searches.count(routeKey(route)) && repairAllowed(packet, route, ttl);
+    auto generation = operationalGeneration;
+    handleLinkBreakSendRERR(link, repair ? route : nullptr);
+    if (repair && generation == operationalGeneration && operationalState == OPERATING)
+        startRepair(route, header->getDestinationAddress(), ttl);
 }
 
-void Aodv::handleLinkBreakSendRERR(const Link& link)
+void Aodv::handleLinkBreakSendRERR(const Link& link, IRoute *repairRoute)
 {
     std::vector<UnreachableNode> unreachable;
     std::set<Link> recipients;
@@ -1224,6 +1422,12 @@ void Aodv::handleLinkBreakSendRERR(const Link& link)
             data->setDestSeqNum(data->getDestSeqNum() + 1);
         data->setIsActive(false);
         data->setLifeTime(simTime() + deletePeriod);
+        if (repairRoute && route->getMetric() > 0 && unsigned(route->getMetric()) <= maxRepairTTL) {
+            data->setIsRepariable(true);
+            if (route != repairRoute)
+                repairableDeadlines[routeKey(route)] = simTime() + activeRouteTimeout;
+            continue;
+        }
         bool notify = false;
         for (const auto& precursor : data->getPrecursorList())
             if (precursor != link) {
@@ -1440,7 +1644,7 @@ void Aodv::handleRecoveryTimer()
     releaseEligiblePackets();
     if (generation != operationalGeneration || operationalState != OPERATING)
         return;
-    std::vector<L3Address> waiting;
+    std::vector<RouteKey> waiting;
     for (const auto& search : searches)
         if (search.second.phase == SearchPhase::RECOVERY_WAIT)
             waiting.push_back(search.first);
@@ -1508,6 +1712,7 @@ void Aodv::clearState(bool disposeQueued)
     for (auto& search : searches)
         cancelAndDelete(search.second.timer);
     searches.clear();
+    repairableDeadlines.clear();
     readySearches.clear();
     auto queues = std::move(delayedPackets);
     delayedPackets.clear();
@@ -1678,6 +1883,15 @@ void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage, NetworkInterface *i
 void Aodv::expungeRoutes()
 {
     updateSearchAuthorities();
+    for (auto it = repairableDeadlines.begin(); it != repairableDeadlines.end();) {
+        if (it->second <= simTime()) {
+            if (auto route = findExactRoute(it->first.first, it->first.second))
+                check_and_cast<AodvRouteData *>(route->getProtocolData())->setIsRepariable(false);
+            it = repairableDeadlines.erase(it);
+        }
+        else
+            ++it;
+    }
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
         if (route->getSource() == this) {
@@ -1720,6 +1934,8 @@ void Aodv::expungeRoutes()
 void Aodv::scheduleExpungeRoutes()
 {
     simtime_t nextExpungeTime = SimTime::getMaxTime();
+    for (const auto& entry : repairableDeadlines)
+        nextExpungeTime = std::min(nextExpungeTime, entry.second);
     for (int i = 0; i < routingTable->getNumRoutes(); i++) {
         IRoute *route = routingTable->getRoute(i);
 
@@ -1820,7 +2036,7 @@ void Aodv::sendRERRWhenNoRouteToForward(Packet *packet)
     queueRouteError({node}, recipients, false, *jitterPar);
 }
 
-void Aodv::cancelRouteDiscovery(const L3Address& target)
+void Aodv::cancelRouteDiscovery(const RouteKey& target)
 {
     std::vector<Packet *> dropped;
     for (auto it = queueOwners.begin(); it != queueOwners.end();) {
@@ -1835,7 +2051,11 @@ void Aodv::cancelRouteDiscovery(const L3Address& target)
         else
             ++it;
     }
-    eraseSearch(target);
+    auto search = searches.find(target);
+    if (search != searches.end() && search->second.purpose == Search::Purpose::LOCAL_REPAIR)
+        finishRepair(target, false);
+    else
+        eraseSearch(target);
     for (auto packet : dropped)
         networkProtocol->dropQueuedDatagram(packet);
 }

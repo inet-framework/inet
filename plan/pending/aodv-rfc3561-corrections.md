@@ -1037,6 +1037,17 @@ series. Full RFC conformance is not a claim of this bounded repair.
 
 ### Implementation tracking (2026-11-09)
 
+The twelve implementation stages below are complete. Final integrated validation
+passes 231 protocol cases, 97 module cases and the serial-arithmetic unit test;
+debug/release and IPv4-only AODV debug feature builds succeed. Selected example
+fingerprints have 13 mismatches and two passes against unchanged stored values;
+the pinned base passes all 15. Exact commands, causal evidence, mechanical gate
+results and bounded coverage limits are in
+[model results](../../doc/project/evidence/model/aodv/results.md). Rendering and
+C++ lint availability limits are recorded there. This completion statement does
+not claim exhaustive RFC conformance. The historical planning review below
+describes the pre-implementation state.
+
 The user authorized implementation, commit, push and an upstream PR. Work proceeds on
 `fix/aodv-rfc3561` in `/home/miguel/workspace/inet-aodv`, based on upstream master
 `7ec0d4d3f3e0e0e1357e2449b0bdcbb6ef0e1ce4`. The original DSDV checkout is preserved.
@@ -1060,7 +1071,8 @@ code action and coverage limits. Proposed assignments, beside `tests/protocol/ao
 | 8 | `reboot-recovery.md` | 28 RebootRecovery protocol variants and seven module cases; 140 protocol and 60 module cases pass with existing expectations unchanged |
 | 9 | `selected-interfaces.md` | 18 Interfaces protocol cases, 12 startup-validation module cases and four live module controls; isolated-parent causal comparison recorded in model results |
 | 10 | `subnet-routes.md` | 26 Subnet variants and a native downstream module case cover normalized wire learning, independent counters, cached/forwarded prefixes, actual output, learned RERR relays, RERR ambiguity, ICMP member errors, retained recovery authority, sustained-demand blocking and the Hello-router limitation |
-| 11 | `local-repair.md` | LocalRepair, with LocalRepairLifecycle and Ipv6Compatibility module coverage |
+| 11 | `local-repair.md` | 39 LocalRepair protocol variants, eleven repair module cases and initial native IPv6 compatibility |
+| 12 | `ipv6-compatibility.md` | Eight native protocol and eight module cases finish multicast reception, rate deferral, stop/crash/restart and three-node Hello/data observation; final builds, regression results and submission checks are recorded in model results |
 
 Fixture names in this table are prefixed `Rfc3561` and suffixed `.test` unless written in full.
 The §7 matrix supplies the exact conditions and required observations. Future documents and

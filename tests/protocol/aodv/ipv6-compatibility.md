@@ -1,34 +1,75 @@
 # Native IPv6 compatibility
 
-These single-interface fixtures use real IPv6, UDP, neighbor discovery and AckingMac. Control encoding is unchanged. Explicit interface selection and received subnet routes are separate IPv4 features.
+These fixtures exercise the existing single-interface IPv6 profile through native
+IPv6, UDP, neighbor discovery and AckingMac. They preserve the custom IPv6 control
+encoding. Explicit multi-interface selection and received subnet routes remain
+IPv4 features; these checks do not claim IPv6 feature parity or RFC conformance.
 
-AODV joins its existing ff01::1 control group at every socket start. Typed neighbor-discovery messages pass independently of data searches, so an advertisement cannot wait for the route it must establish.
+## Receive defect and correction
+
+`Incoming` sends a multicast RREQ for the DUT itself. The immediate parent
+`edecd5e6ce` enables UDP broadcast but does not join the IPv6 control multicast
+group. Its UDP socket never receives the request, so no reply arrives. Joining
+the address type's existing broadcast group (`ff01::1`) on every start fixes both
+initial reception and reception after restart. No control type or serializer is
+changed.
 
 ```mermaid
 sequenceDiagram
-    participant P as IPv6 peer
-    participant A as AODV node
-    A->>A: Join control multicast group
-    P->>A: Native multicast route request
-    A->>P: Unicast reply
-    Note over A: ND bypasses data discovery
+    participant P as IPv6 wire peer
+    participant U as DUT UDP socket
+    participant A as AODV
+    A->>U: Bind port 654 and join ff01::1 on selected interface
+    P->>U: Multicast RREQ for DUT
+    U->>A: Deliver request with ingress metadata
+    A->>P: Unicast destination RREP
+    Note over U,A: Stop/crash clears socket state; start joins again
 ```
 
-| Case | Input, mechanism and required observation |
-| --- | --- |
-| Incoming | Send a native multicast RREQ for the node. Require reverse state and a self reply. Without group membership the socket receives no request. |
-| RateLimit | Queue two destinations under one request per second. Require both data deliveries, separate request IDs and matching ACKs after actual admission. |
-| DeferredReply | Learn a READY destination before admission. Require two data deliveries after one request, matching ACKs and no obsolete later send. |
-| HelloForwarding | Forward five real IPv6 packets from S through N. Preserve IP source S and MAC source N, keep N live, then invalidate it and its dependent route after attributable traffic ceases. |
-| IncomingRestart | Receive before restart, learn during recovery without replying, then receive multicast again after the hold with the restored sequence floor. |
-| Restart | Hold new local demand after restart, learn/ACK its route, and release only after the hold without redundant discovery. |
-| CrashReady | Crash with waiting and READY searches, dispose the old originals, then accept fresh demand without a ghost retry. |
-| StopQueued | Repeat queued-obligation cleanup through asynchronous stop and restart. |
+## Case assertions
 
-Each named case has protocol and module variants with prefixes Rfc3561Ipv6 and AodvIpv6. They use General/run 0/seed 0 and public routes or wire observations, never direct AODV handlers.
+Each basename below has both `Rfc3561Ipv6<Name>.test` in this protocol suite and
+`AodvIpv6<Name>.test` in the module suite. All use General/run 0/seed 0.
 
-AodvIpv6Compatibility additionally exercises serial freshness and RREQ/ACK decoding. Its ACK assertions require the link-validation correction, so this control is introduced with that correction.
+| Name | Conditions and required observation | Immediate parent |
+| --- | --- | --- |
+| Incoming | Native multicast request reaches the DUT; reverse state and one self reply appear. | Runtime failure: missing reply. |
+| IncomingRestart | Crash/start, learn during recovery, then receive multicast again; two replies, later sequence floor 50. | Runtime failure: missing initial reply. |
+| RateLimit | Two local destinations with one RREQ per second; second request waits for budget, both queues release. | Passing control. |
+| DeferredReply | Reply for a READY search before budget admission releases data and cancels the obsolete send. | Passing control. |
+| Restart | Data during restart hold learns a route but cannot leave until the hold ends; no redundant discovery. | Passing control. |
+| CrashReady | Crash disposes an admitted search and a READY search; new demand after restart has no ghost retry. | Passing control. |
+| StopQueued | Asynchronous stop disposes the same queued obligations; start accepts fresh traffic. | Passing control. |
+| HelloForwarding | Five packets from S arrive via N with IP source S and MAC source N; N and its dependent route stay active, then expire after all attributable traffic stops. | Passing control. |
 
-The original combined-series parent comparisons remain recorded in the model results. Fresh execution of the split revisions is recorded in the split verification log and PR description. Passing controls are not claimed as newly reproduced defects. Local repair coverage belongs to the later repair PR. No IPv6 feature-parity or exhaustive conformance claim follows.
+The last case uses three real nodes:
 
-The native basic fixture first sends one unicast UDP probe from the peer to the node at 0.01 seconds, before normal discovery starts at 0.16 seconds. Native ND must deliver it by 0.08 seconds without starting AODV discovery for a neighbor advertisement. The peer has an ordinary manual route; the DUT has not learned an AODV peer route. This exercises link control independently of AODV reply learning. The basic fixture also requires four matching ACKs after the link-validation correction.
+```mermaid
+flowchart LR
+    S["S: IPv6 source, Ethernet only"] -->|"native Ethernet and ND"| N["N: IPv6 forwarding router"]
+    N -->|"AckingMac; IP source S, MAC source N"| D["DUT: AODV and UDP sink"]
+    N -.->|"one initial Hello, then data and native ND"| D
+```
+
+S sends at 0.18 through 0.58 seconds. At 0.7 seconds all five packets have
+arrived and both learned routes are active, well beyond the initial Hello's
+0.2-second observation interval. The observer records every frame from N;
+native Router Solicitations count as valid incoming activity too. At 0.95 seconds
+the last such reception is more than 0.2 seconds old: N advances 20 to 21 and the
+dependent destination advances 100 to 101. S gains no AODV neighbor record. There
+are no discovery requests or error floods without precursors. The peer's periodic
+router advertisements are disabled through public interface configuration.
+
+Initial fixture checks that equated the final data reception with the final
+neighbor reception failed because a native Router Solicitation arrived later.
+That is legitimate liveness evidence, so the final assertions measure actual
+incoming activity rather than suppress neighbor discovery.
+
+The earlier `AodvIpv6Compatibility.test` covers native discovery, stale/wrapping
+and half-range replies, ACKs and data. Native repair success/timeout cases in
+[local-repair.md](local-repair.md) cover RREQ/RREP/RERR encoding and alternate
+next-hop forwarding. These tests inspect actual packet fields and public route
+state; they do not invoke AODV handlers or copy its selection algorithm.
+
+Exact commands, paired results and broader regressions are recorded in
+[the model results](../../../doc/project/evidence/model/aodv/results.md).
