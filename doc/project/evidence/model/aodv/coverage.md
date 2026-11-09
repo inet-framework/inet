@@ -46,6 +46,8 @@ The exit criterion of level 1 has three parts, and all three hold:
 | 5, partial | 2026-11-09 | selected corrections | AODV-F-DISCOVERY, wire timing and parameter bounds | Five protocol parent controls pass unchanged. Of 35 module cases, 23 expose missing bounds, four expose defaults, six change existing rejection diagnostics and two already pass. Corrected combined scope: 36 protocol and 45 module passes. |
 | 6, partial | 2026-11-09 | selected corrections | AODV-F-LINK, ACK obligations and actual failed-link attribution | 19 protocol and three module parent runtime failures become passes. Two exact-deadline protocol cases already pass. Corrected combined scope: 57 protocol and 48 module passes, with all existing expectations unchanged. |
 
+| 7, partial | 2026-11-09 | selected corrections | AODV-F-ERROR, transit and precursor handling | 18 protocol and two module parent runtime failures become passes; seven protocol and one module parent controls remain passing. Combined scope: 82 protocol and 51 module passes. |
+
 ## Selected feature evidence
 
 | Feature | Evidence | Limit |
@@ -55,4 +57,5 @@ The exit criterion of level 1 has three parts, and all three hold:
 | AODV-F-DISCOVERY, ownership | 15 protocol and two module cases pass, covering finite rate-limited demand, direct-neighbor completion, shared gateway owners, terminal disposal and output constraints. | Deterministic IPv4 AckingWirelessInterface. IPv6 and later recovery/repair profiles remain pending. See [reviewer document](../../../../../tests/protocol/aodv/discovery-ownership.md). |
 | AODV-F-DISCOVERY, timing/bounds | Five wire timing controls and 35 parameter cases pass. | Selected ring, backoff, jitter and configuration boundaries. See [reviewer document](../../../../../tests/protocol/aodv/discovery-timing.md). |
 | AODV-F-LINK, validation/attribution | 21 protocol and three module cases pass, including concurrent ACKs, exact ties, real failed replies/data, quarantine and route replacement. | Direct AckingMac and independent nonaggregating DCF. Ethernet/UDP supplies the exact ACK-order controls. Hello loss, restart reset and broader metadata profiles remain pending. See [reviewer document](../../../../../tests/protocol/aodv/link-validation.md). |
-| Other selected features | Not yet established by this correction stage. | Scheduling, attribution, recovery, interface, subnet and repair stages remain assigned in the plan. |
+| AODV-F-ERROR, transit and precursor handling | 25 protocol and three module cases pass, including N preservation, independent ownership, prefix ambiguity and actual-send budget windows. | IPv4 scripted UDP/IP. Prefix identity uses public record setup; real subnet learning, partitioning and lifecycle coverage remain assigned. See [reviewer document](../../../../../tests/protocol/aodv/transit-errors.md). |
+| Other selected features | Not yet established by this correction stage. | Recovery, interface, subnet and repair stages remain assigned in the plan. |

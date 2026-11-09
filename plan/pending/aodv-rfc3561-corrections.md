@@ -1054,7 +1054,7 @@ code action and coverage limits. Proposed assignments, beside `tests/protocol/ao
 | 4a | `discovery-ownership.md` | RateLimit, DeferredReply, ReplyDuringJitter, IndependentRoute, NeighborCompletion, DiscoveryExhaustion, GatewayQueues, GatewayFailure, OutputInterface/OutputNextHop position variants and TransitAdmission, with GatewayQueues/TransitFailure module coverage |
 | 4b | `discovery-timing.md` | DiscoveryTiming variants, with ParameterValidation module variants |
 | 5 | `link-validation.md` | ReplyAck, FailedLink and ControlIngress variants, with TransitFailureInFlight, TransitFailureDcf and TransitFailureMetadata module coverage |
-| 6 | `transit-errors.md` | NoDeleteError, with TransitFailure module coverage |
+| 6 | `transit-errors.md` | NoDeleteError variants and TransitError module cases; 82 protocol and 51 module cases pass; see model results for parent comparison and limits |
 | 6b | `error-capacity.md` | ErrorCapacity |
 | 7 | `hello-liveness.md` | HelloLoss, NeighborSequence |
 | 8 | `reboot-recovery.md` | ReplyAcceptance and ReplyAck recovery cases, with RebootRecovery module coverage |

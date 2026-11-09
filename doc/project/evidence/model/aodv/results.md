@@ -380,3 +380,67 @@ work directories, so the named logs retain the comparison record.
 This establishes the selected IPv4 link and metadata profiles. Complete precursor/RERR semantics,
 Hello observation deadlines, restart cleanup, selected-interface operation, subnet rules, IPv6
 compatibility and local repair remain pending. No whole-protocol conformance level is raised.
+
+## Transit errors and precursor delivery, 2026-11-09
+
+Immediate parent: `335030555e`. The same 25 new protocol fixtures compile and execute on that
+parent: seven pass as controls and 18 reach the intended runtime assertions. The corrected
+selection passes all 25, and the combined protocol selection passes all 82. Three new module
+cases give one parent pass (owned forwarding), two parent runtime failures (known transit
+retention and foreign-route forwarding), and three corrected passes. The full selected module
+scope passes 51 cases, including all four unchanged AODV integration expectations.
+
+| Protocol suffixes, prefix Rfc3561NoDeleteError | Parent observation and correction |
+| --- | --- |
+| NoDelete | Ordinary invalidation changes the snapshot; preserve every route field for N. |
+| NoDeleteStale, NoDeleteHalf, NoDeleteInactive | Missing permitted relay fails the single-notification assertion; process N without ordinary freshness/activity filtering. |
+| NoPrecursorNotification | Parent invalidates the snapshot despite N; preserve it without relay. |
+| OrdinaryError | Broadcast copies fail the single precursor-delivery assertion; send the qualified precursor copy. |
+| TransitKnown, TransitBudget, TransitUnknown, TransitAggregate, TransitBlockedHost | Parent leaves the previous deletion deadline unchanged at PREROUTING; apply case-(ii) mutation and retention before budget admission. These cases additionally check wrap, unknown placeholder preservation, error identity and independent aggregate preservation. |
+| TransitAbsent | Broadcast copies fail the intended one-recipient message count; use the attributable immediate sender without creating a route. |
+| TransitUnknownHostAggregate, ForeignForward | Parent's second forwarding lookup generates an erroneous RERR; use the already prepared route and preserve independent route state. |
+| PrefixAmbiguous, PrefixInactiveWitness | Parent mutates /24 despite the competing /25 identity; resolve ambiguity before freshness/activity. |
+| FanoutBudget | Parent broadcasts multiple received copies instead of two intended unicast recipients; deliver every qualified copy for one charge, suppressing the second logical error. |
+| TransitBudgetCrossing | Parent charges at arrival and yields only one distinct IP identifier; admit after jitter in each actual send window. |
+| StaleError, HalfError, OtherHop, NoPrecursorError, ForeignError, PrefixUnique, OwnedForward | Passing parent controls retained unchanged. |
+
+The fixture corrections preceding this final comparison removed an assumed IP drop signal,
+disabled forwarding on the observational peer, and checked the actual two-hop advertised route.
+Initial fixture/setup outcomes in `/tmp/aodv-errors-parent-initial.log` are not behavioral evidence.
+The final fixture checks local retained state before message counts, making its retention
+failure independent of the parent's extra broadcast copies.
+
+Commands from the corresponding checkout root:
+
+```sh
+make -C src -j4 MODE=debug
+# Isolated parent:
+opp_run_protocol_tests --load . -p inet -m debug -w aodv \
+  -f 'Rfc3561NoDeleteError.*\.test$' --no-build --no-concurrent \
+  --log-file /tmp/aodv-errors-parent-final.log
+opp_run_module_tests --load . -p inet -m debug -f 'AodvTransitError.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-errors-parent-modules.log
+# Corrected checkout:
+opp_run_protocol_tests --load . -p inet -m debug -w aodv -f 'Rfc3561.*\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-errors-all-protocol.log
+opp_run_module_tests --load . -p inet -m debug \
+  -f '(AODV(SimpleTest(_2)?|ShortestPath|LifecycleTest)|Aodv(GatewayQueues|TransitFailure.*|TransitError.*|AdvertisementLifetimeInvalid_[1-4]|ParameterValidation.*))\.test$' \
+  --no-build --no-concurrent --log-file /tmp/aodv-errors-all-modules.log
+make -C src -j4 MODE=release
+```
+
+Each log has a `-runner.log` companion. Parent comparisons exit 1 with the classified assertions;
+corrected selections and builds exit 0. Build logs: `/tmp/aodv-errors-build.log`,
+`/tmp/aodv-errors-parent-build.log`, `/tmp/aodv-errors-release.log`. The isolated parent uses the
+previously documented unchanged-object reuse procedure. Existing expectations and baselines
+are unchanged.
+
+See [transit-errors.md](../../../../../tests/protocol/aodv/transit-errors.md) for the production
+path, observations, delayed-message ownership and fixture limits. The prefix cases use public
+record setup; real subnet learning is stage 10. RERR partitioning, Hello observation deadlines,
+reboot, selected interfaces, IPv6 and local repair remain pending. No conformance level is raised.
+
+A final guard also rejects quarantined inverse bindings when attributing a previous-hop error
+recipient. After fresh debug/release builds, the 25 error cases and two ambiguous/rebinding
+failed-link controls pass (27 total). Logs: /tmp/aodv-errors-binding-guard-protocol.log and its
+-runner.log companion; build logs use the same stem with -build.log and -release.log.

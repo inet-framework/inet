@@ -125,7 +125,15 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     simtime_t rateEpoch;
     int64_t rateWindow = 0;
     std::map<RreqIdentifier, simtime_t, RreqIdentifierCompare> rreqsArrivalTime; // maps RREQ id to its arriving time
-    using Link = std::pair<L3Address, int>;
+    using Link = AodvRouteData::Precursor;
+    class RerrSend : public cMessage {
+      public:
+        Ptr<Rerr> header;
+        std::set<Link> recipients;
+        RerrSend(const Ptr<Rerr>& header, const std::set<Link>& recipients) :
+            cMessage("aodv-error-jitter", 100), header(header), recipients(recipients) {}
+    };
+    std::set<cMessage *> delayedSends;
     using MacLink = std::pair<int, MacAddress>;
     std::map<Link, simtime_t> pendingAcks;
     std::map<Link, simtime_t> blacklist;
@@ -177,6 +185,10 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void scheduleLinkTimer(cMessage *timer, const std::map<Link, simtime_t>& deadlines);
     void failLinkValidation(const Link& link, bool replyFailed);
     void sendPreparedControl(Packet *packet);
+    bool resolvePreviousHop(const Packet *packet, Link& link) const;
+    void refreshSourceRoute(Packet *packet);
+    void queueRouteError(const std::vector<UnreachableNode>& nodes, const std::set<Link>& recipients, bool noDelete, simtime_t delay);
+    void sendRouteError(RerrSend *message);
     void releaseEligiblePackets();
     void scheduleSearch(const L3Address& target);
     void handleSearchTimer(cMessage *timer);
@@ -224,7 +236,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void sendHelloMessagesIfNeeded();
 
     /* General functions to handle route errors */
-    void sendRERRWhenNoRouteToForward(const L3Address& unreachableAddr);
+    void sendRERRWhenNoRouteToForward(Packet *packet);
     void handleLinkBreakSendRERR(const Link& link);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj, cObject *details) override;
 
@@ -233,7 +245,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     virtual Result datagramPreRoutingHook(Packet *datagram) override { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram, false); }
     virtual Result datagramForwardHook(Packet *datagram) override;
     virtual Result datagramPostRoutingHook(Packet *datagram) override { return ACCEPT; }
-    virtual Result datagramLocalInHook(Packet *datagram) override { return ACCEPT; }
+    virtual Result datagramLocalInHook(Packet *datagram) override;
     virtual Result datagramLocalOutHook(Packet *datagram) override { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram, true); }
     void delayDatagram(Packet *datagram);
 

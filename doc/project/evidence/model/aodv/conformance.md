@@ -106,6 +106,30 @@ admission. Default port 654 and custom port 60654 have direct failure/blacklist 
 changing global protocol registrations or wire formats. See link-validation.md and results.md
 for the individual parent comparisons and their limits.
 
+## Transit-error correction
+
+The applicable retained record owns both the address and counter in a failed-data RERR. A
+prefix failure reports the canonical prefix, while a known inactive host blocks and retains
+its own independent counter domain. Case-(ii) data failures increment known counters once per
+failed packet and refresh deletion even when the send budget is exhausted. Unknown placeholders
+remain unchanged and appear as zero on the wire. Received ordinary errors copy applicable
+nonstale information; N notifications preserve every route field, including inactive state.
+
+RERR identity resolution includes inactive records before any freshness check. Several owned
+prefix lengths for the same wire address and sender/interface suppress that entry. Full error
+coverage assumes a fixed prefix identity for that tuple throughout the run; a delayed error
+cannot be disambiguated after tuple reassignment. There is no history registry or wire extension.
+
+Precursors carry interface IDs. One admitted logical error delivers every required usable
+precursor/interface copy for one budget charge at actual send after jitter. Local invalidation
+precedes that decision. Ordinary transit failure can add the attributable immediate sender;
+without attribution or another precursor it uses the primary broadcast fallback. An unrelated
+manual route remains eligible for forwarding and immune to AODV error mutation. Outgoing list
+capacity and complete lifecycle behavior remain separate subsequent stages.
+
+The 25 protocol and three module cases, parent distinctions and limits are recorded in
+results.md and the transit-errors.md reviewer document.
+
 ## Historical survey
 
 Read record — no build, no run in the 2026-09-23 survey:
