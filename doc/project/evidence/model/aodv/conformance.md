@@ -53,6 +53,23 @@ complete timing coverage, link attribution, reboot, selected interfaces, aggrega
 and local repair remain assigned to subsequent stages. The search key is a full-width address
 until exact-prefix repair ownership is introduced in its assigned stage.
 
+## Discovery timing correction
+
+The five timing fixtures observe actual UDP RREQ TTLs, IDs and reception intervals. They pass on
+the ownership-stage parent and remain added coverage. Reply waiting begins at actual send,
+network-wide waits double, and zero additional retries permit one network-wide attempt.
+
+Initialization now enforces the plan's positive durations/rates, TTL order, representable search
+arithmetic, retention and advertisement minima. Jitter samples are checked when used. The default
+destination lifetime is max(2*activeRouteTimeout, 2*pathDiscoveryTime). The blacklist default bounds
+an unthrottled search, including a retained-hop initial ring, threshold rings, exponential waits
+and declared maximum jitter. This conservative formula is a model decision rather than an RFC
+equality. Rate-limit workload can extend discovery beyond that bound. Positive explicit blacklist
+overrides are supported. The new migration note lists configurations that must be corrected.
+
+The bounded IPv4 executions and the six already-rejected parameter controls are separated in
+results.md. No added IPv6 feature or local-repair validation claim follows from these tests.
+
 ## Historical survey
 
 Read record — no build, no run in the 2026-09-23 survey:

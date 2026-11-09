@@ -52,6 +52,41 @@ void Aodv::initialize(int stage)
         interfaceTable.reference(this, "interfaceTableModule", true);
         networkProtocol.reference(this, "networkProtocolModule", true);
 
+        for (auto name : {"ttlStart", "ttlThreshold", "netDiameter", "ttlIncrement", "rreqRatelimit", "rerrRatelimit", "allowedHelloLoss"})
+            if (par(name).intValue() <= 0 || par(name).intValue() > UINT32_MAX)
+                throw cRuntimeError("AODV %s must be a positive uint32 integer", name);
+        for (auto name : {"rreqRetries", "timeoutBuffer", "localAddTTL"})
+            if (par(name).intValue() < 0 || par(name).intValue() > UINT32_MAX)
+                throw cRuntimeError("AODV %s must be a nonnegative uint32 integer", name);
+        if (par("ttlStart").intValue() > par("ttlThreshold").intValue() ||
+                par("ttlThreshold").intValue() > par("netDiameter").intValue() ||
+                par("netDiameter").intValue() > 255 || par("ttlIncrement").intValue() > 255)
+            throw cRuntimeError("AODV TTL parameters require 1 <= ttlStart <= ttlThreshold <= netDiameter <= 255 and ttlIncrement <= 255");
+        if (par("udpPort").intValue() < 1 || par("udpPort").intValue() > 65535)
+            throw cRuntimeError("AODV udpPort must be in 1..65535");
+        double maximumTime = SimTime::getMaxTime().dbl();
+        for (auto name : {"nodeTraversalTime", "activeRouteTimeout", "helloInterval", "deletePeriod", "pathDiscoveryTime", "nextHopWait", "netTraversalTime", "myRouteTimeout", "blacklistTimeout"}) {
+            double duration = par(name).doubleValue();
+            if (!std::isfinite(duration) || duration <= 0 || duration > maximumTime)
+                throw cRuntimeError("AODV %s must be positive and representable in simulation time", name);
+        }
+        double jitterBound = par("maxJitter").doubleValue();
+        double periodicBound = par("maxPeriodicJitter").doubleValue();
+        if (!std::isfinite(jitterBound) || jitterBound < 0 || jitterBound > maximumTime)
+            throw cRuntimeError("AODV maxJitter must be nonnegative and representable in simulation time");
+        if (!std::isfinite(periodicBound) || periodicBound < 0 || periodicBound > par("helloInterval").doubleValue() / 2)
+            throw cRuntimeError("AODV maxPeriodicJitter must be between zero and helloInterval/2");
+        double rings = 1 + std::floor((double(par("ttlThreshold").intValue()) - 1) / double(par("ttlIncrement").intValue()));
+        double retries = double(par("rreqRetries").intValue());
+        double traversal = par("nodeTraversalTime").doubleValue();
+        double buffer = double(par("timeoutBuffer").intValue());
+        double searchBound = std::max(2 * traversal * (double(par("netDiameter").intValue()) + buffer),
+            rings * 2 * traversal * (double(par("ttlThreshold").intValue()) + buffer)) +
+            par("netTraversalTime").doubleValue() * (std::pow(2, retries + 1) - 1) +
+            (rings + retries + 1) * jitterBound;
+        if (!std::isfinite(searchBound) || searchBound > maximumTime)
+            throw cRuntimeError("AODV rreqRetries/search durations exceed representable simulation time");
+
         aodvUDPPort = par("udpPort");
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
@@ -88,8 +123,15 @@ void Aodv::initialize(int stage)
             helloMsgTimer = new cMessage("HelloMsgTimer");
         if (quantizeAdvertisementLifetime(myRouteTimeout) == SIMTIME_ZERO)
             throw cRuntimeError("AODV myRouteTimeout must fit 1..UINT32_MAX milliseconds");
-        if (quantizeAdvertisementLifetime(allowedHelloLoss * helloInterval) == SIMTIME_ZERO)
+        if (helloInterval.raw() > SimTime::getMaxTime().raw() / allowedHelloLoss ||
+                quantizeAdvertisementLifetime(allowedHelloLoss * helloInterval) == SIMTIME_ZERO)
             throw cRuntimeError("AODV allowedHelloLoss * helloInterval must fit 1..UINT32_MAX milliseconds");
+        if (pathDiscoveryTime > SimTime::getMaxTime() / 2 || myRouteTimeout < 2 * pathDiscoveryTime)
+            throw cRuntimeError("AODV myRouteTimeout must be at least 2 * pathDiscoveryTime");
+        if (useHelloMessages && activeRouteTimeout <= allowedHelloLoss * helloInterval)
+            throw cRuntimeError("AODV activeRouteTimeout must exceed allowedHelloLoss * helloInterval when Hello is enabled");
+        if (deletePeriod < activeRouteTimeout || (useHelloMessages && deletePeriod < allowedHelloLoss * helloInterval))
+            throw cRuntimeError("AODV deletePeriod must cover activeRouteTimeout and the enabled Hello-loss interval");
         WATCH(numSent);
         WATCH(numReceived);
         WATCH(usingIpv6);
@@ -409,7 +451,7 @@ void Aodv::drainReadySearches()
         auto& search = it->second;
         auto request = createRREQ(target); // IDs and sequence numbers belong to actual sends
         rreqCount++;
-        simtime_t wait = 2 * nodeTraversalTime * (search.ttl + timeoutBuffer);
+        simtime_t wait = 2 * nodeTraversalTime * (double(search.ttl) + timeoutBuffer);
         if (search.ttl == netDiameter) {
             wait = netTraversalTime * std::pow(2.0, search.networkAttempts);
             search.networkAttempts++;
@@ -1191,7 +1233,7 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
     // the delay between consecutive transmissions of messages of the same type is
     // equal to (MESSAGE_INTERVAL - jitter), where jitter is the random value.
     if (useHelloMessages)
-        scheduleAfter(helloInterval - *periodicJitter, helloMsgTimer);
+        scheduleAfter(helloInterval - samplePeriodicJitter(), helloMsgTimer);
 
     scheduleAfter(1, counterTimer);
 }
@@ -1317,7 +1359,15 @@ void Aodv::sendHelloMessagesIfNeeded()
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
     }
 
-    scheduleAfter(helloInterval - *periodicJitter, helloMsgTimer);
+    scheduleAfter(helloInterval - samplePeriodicJitter(), helloMsgTimer);
+}
+
+simtime_t Aodv::samplePeriodicJitter()
+{
+    simtime_t sample = *periodicJitter;
+    if (sample < SIMTIME_ZERO || sample > SimTime(par("maxPeriodicJitter")))
+        throw cRuntimeError("AODV periodicJitter must be between zero and maxPeriodicJitter");
+    return sample;
 }
 
 void Aodv::handleHelloMessage(const Ptr<Rrep>& helloMessage)

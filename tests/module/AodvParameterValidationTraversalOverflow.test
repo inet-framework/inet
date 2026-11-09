@@ -1,0 +1,63 @@
+%description:
+AODV parameter bounds and derived search defaults. See discovery-timing.md.
+
+%file: Probe.cc
+#include "../../AodvParameterProbe.h"
+
+%file: test.ned
+import inet.node.aodv.AodvRouter;
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.physicallayer.wireless.common.medium.UnitDiskRadioMedium;
+simple AodvParameterProbe
+{
+    parameters:
+        double expectedBlacklist @unit(s) = default(-1s);
+        double expectedMyRoute @unit(s) = default(-1s);
+        @class(::AodvParameterProbe);
+}
+network AodvParameterTest
+{
+    submodules:
+        configurator: Ipv4NetworkConfigurator;
+        radioMedium: UnitDiskRadioMedium;
+        dut: AodvRouter;
+        probe: AodvParameterProbe;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = AodvParameterTest
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 10ms
+seed-set = 0
+cmdenv-express-mode = true
+*.configurator.addStaticRoutes = false
+*.configurator.config = xml("<config><interface hosts='dut' address='10.0.0.1' netmask='255.255.255.0'/></config>")
+*.dut.aodv.jitter = 0s
+*.dut.aodv.periodicJitter = 0s
+**.wlan[*].typename = "AckingWirelessInterface"
+**.wlan[*].radio.typename = "GenericUnitDiskRadio"
+**.wlan[*].radio.transmitter.analogModel.communicationRange = 100m
+**.wlan[*].radio.transmitter.headerLength = 4b
+**.wlan[*].mac.headerLength = 20B
+**.wlan[*].bitrate = 1Mbps
+**.mobility.typename = "StationaryMobility"
+**.mobility.initFromDisplayString = false
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxX = 100m
+**.mobility.constraintAreaMaxY = 100m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initialX = 10m
+**.mobility.initialY = 10m
+**.mobility.initialZ = 0m
+*.dut.aodv.netTraversalTime = 1000000000000s
+*.dut.aodv.pathDiscoveryTime = 1s
+
+%exitcode: 1
+%contains: test.err
+AODV netTraversalTime must be positive and representable
+%not-contains: test.out
+undisposed object:
+

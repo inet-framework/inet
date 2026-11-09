@@ -170,6 +170,7 @@ class INET_API Aodv : public RoutingProtocolBase, public NetfilterBase::HookBase
     void refreshRateWindow();
     void eraseSearch(const L3Address& target);
     static simtime_t quantizeAdvertisementLifetime(simtime_t duration);
+    simtime_t samplePeriodicJitter();
 
   protected:
     /* Routing Table management */
