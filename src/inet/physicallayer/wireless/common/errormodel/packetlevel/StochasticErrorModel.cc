@@ -22,6 +22,7 @@ StochasticErrorModel::StochasticErrorModel() :
 
 void StochasticErrorModel::initialize(int stage)
 {
+    ErrorModelBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         packetErrorRate = par("packetErrorRate");
         bitErrorRate = par("bitErrorRate");

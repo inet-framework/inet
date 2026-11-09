@@ -9,6 +9,7 @@
 
 #include "inet/physicallayer/wireless/ieee80211/mode/IIeee80211Mode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211NistErrorModel.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
 namespace inet {
@@ -29,6 +30,7 @@ Ieee80211BerTableErrorModel::~Ieee80211BerTableErrorModel()
 
 void Ieee80211BerTableErrorModel::initialize(int stage)
 {
+    ErrorModelBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         std::string fname = getEnvir()->getConfig()->substituteVariables(par("berTableFile"));
         if (fname.empty())
@@ -57,10 +59,10 @@ double Ieee80211BerTableErrorModel::computePacketErrorRate(const ISnir *snir, IR
 {
     Enter_Method("computePacketErrorRate");
     auto transmission = check_and_cast<const Ieee80211Transmission *>(snir->getReception()->getTransmission());
-    auto bitModel = transmission->getBitModel();
     bps bitrate = transmission->getMode()->getDataMode()->getNetBitrate();
-    b dataLength = bitModel->getDataLength();
-    return berTableFile->getPer(bitrate.get<bps>(), getScalarSnir(snir), dataLength.get<B>());
+    // a packet-level transmission has no bit model: the PHY header gives the length of the PSDU
+    B dataLength = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket())->getLengthField();
+    return berTableFile->getPer(bitrate.get<bps>(), getScalarSnir(snir), dataLength.get());
 }
 
 double Ieee80211BerTableErrorModel::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const

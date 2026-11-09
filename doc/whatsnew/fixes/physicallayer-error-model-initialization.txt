@@ -1,0 +1,3 @@
+The stochastic and BER table error models initialize their base
+
+StochasticErrorModel and Ieee80211BerTableErrorModel did not initialize ErrorModelBase, so their corruption mode, SNIR mode, and SNIR offset stayed undefined, and a failed reception stopped the simulation with "Unknown corruption mode". The BER table model also read the data length from a bit model that packet-level IEEE 802.11 transmissions do not have, so each reception crashed. Both models now initialize their base, and the BER table model reads the length of the PSDU from the PHY header.
