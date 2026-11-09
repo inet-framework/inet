@@ -47,7 +47,7 @@ void Aodv::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL) {
         lastBroadcastTime = SIMTIME_ZERO;
-        rebootTime = SIMTIME_ZERO;
+        recoveryDeadline = SIMTIME_ZERO;
         rreqId = sequenceNum = 0;
         rreqCount = rerrCount = 0;
         host = getContainingNode(this);
@@ -122,6 +122,7 @@ void Aodv::initialize(int stage)
         counterTimer = new cMessage("CounterTimer");
         rrepAckTimer = new cMessage("RrepAckTimer");
         blacklistTimer = new cMessage("BlackListTimer");
+        recoveryTimer = new cMessage("RecoveryTimer");
         if (useHelloMessages) {
             helloMsgTimer = new cMessage("HelloMsgTimer");
             neighborTimer = new cMessage("NeighborTimer");
@@ -146,7 +147,8 @@ void Aodv::initialize(int stage)
         WATCH(rreqCount);
         WATCH(rerrCount);
         WATCH(lastBroadcastTime);
-        WATCH(rebootTime);
+        WATCH(recovering);
+        WATCH(recoveryDeadline);
         WATCH_EXPR("numRoutes", routingTable->getNumRoutes());
     }
     else if (stage == INITSTAGE_ROUTER_ID_ASSIGNMENT) {
@@ -170,9 +172,14 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
         else if (msg == expungeTimer)
             expungeRoutes();
         else if (msg == counterTimer) {
+            auto generation = operationalGeneration;
             refreshRateWindow();
             releaseEligiblePackets();
+            if (generation != operationalGeneration || operationalState != OPERATING)
+                return;
             drainReadySearches();
+            if (generation != operationalGeneration || operationalState != OPERATING)
+                return;
             scheduleAt(rateEpoch + SimTime(rateWindow + 1), counterTimer);
         }
         else if (msg == rrepAckTimer)
@@ -181,6 +188,8 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
             handleBlackListTimer();
         else if (msg == neighborTimer)
             handleNeighborTimer();
+        else if (msg == recoveryTimer)
+            handleRecoveryTimer();
         else if (msg->getKind() == KIND_DELAYEDSEND) {
             delayedSends.erase(msg);
             if (auto error = dynamic_cast<RerrSend *>(msg))
@@ -194,8 +203,10 @@ void Aodv::handleMessageWhenUp(cMessage *msg)
         else
             throw cRuntimeError("Unknown self message");
     }
-    else
+    else if (socket.belongsToSocket(msg))
         socket.processMessage(msg);
+    else
+        delete msg; // an indication from the socket of a previous operational interval
 }
 
 void Aodv::checkIpVersionAndPacketTypeCompatibility(AodvControlPacketType packetType)
@@ -405,6 +416,8 @@ bool Aodv::prepareDataPacket(Packet *packet, IRoute *route)
 
 INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool local)
 {
+    if (operationalState != OPERATING)
+        return DROP;
     if (!local)
         observeIncoming(datagram);
     const auto& header = getNetworkProtocolHeader(datagram);
@@ -417,12 +430,24 @@ INetfilter::IHook::Result Aodv::ensureRouteForDatagram(Packet *datagram, bool lo
     if (hasExternalGateway && isExternalAddress(destination)) {
         if (gatewayAddress.isUnspecified())
             gatewayAddress = L3AddressResolver().resolve(par("gatewayAddress"));
-        if (getSelfIPAddress() == gatewayAddress)
-            return ACCEPT;
-        if (!defaultGatewayRoute)
+        if (getSelfIPAddress() != gatewayAddress && !defaultGatewayRoute)
             createDefaultGatewayRoute();
         target = gatewayAddress;
     }
+    if (recovering) {
+        if (!local) {
+            extendRecovery();
+            sendRERRWhenNoRouteToForward(datagram);
+            return DROP;
+        }
+        delayDatagram(datagram);
+        queueOwners[destination] = target;
+        if (!hasOngoingRouteDiscovery(target))
+            startRouteDiscovery(target);
+        return QUEUE;
+    }
+    if (isLocalGatewayDestination(destination))
+        return ACCEPT;
     releaseEligiblePackets(); // an older FIFO must not be overtaken by this arrival
     if (auto route = selectDataRoute(destination)) {
         if (!prepareDataPacket(datagram, route))
@@ -470,6 +495,10 @@ void Aodv::startRouteDiscovery(const L3Address& target, unsigned timeToLive)
 void Aodv::scheduleSearch(const L3Address& target)
 {
     auto& search = searches.at(target);
+    if (recovering) {
+        search.phase = SearchPhase::RECOVERY_WAIT; // the shared recovery timer owns its wake-up
+        return;
+    }
     search.phase = SearchPhase::SEND_DELAY;
     simtime_t jitter = *jitterPar;
     if (jitter < SIMTIME_ZERO || jitter > maxJitter)
@@ -494,6 +523,10 @@ void Aodv::handleSearchTimer(cMessage *timer)
     if (it == searches.end())
         return;
     auto& search = it->second;
+    if (recovering) {
+        search.phase = SearchPhase::RECOVERY_WAIT;
+        return;
+    }
     if (search.phase == SearchPhase::WAIT_REPLY) {
         if (search.ttl == netDiameter && search.networkAttempts >= rreqRetries + 1) {
             cancelRouteDiscovery(target);
@@ -511,6 +544,8 @@ void Aodv::handleSearchTimer(cMessage *timer)
 
 void Aodv::drainReadySearches()
 {
+    if (recovering)
+        return;
     refreshRateWindow();
     while (!readySearches.empty() && rreqCount < rreqRatelimit) {
         auto target = readySearches.front();
@@ -544,9 +579,12 @@ void Aodv::eraseSearch(const L3Address& target)
 
 void Aodv::releaseEligiblePackets()
 {
+    if (recovering || operationalState != OPERATING)
+        return;
+    auto generation = operationalGeneration;
     std::vector<std::pair<L3Address, std::deque<Packet *>>> released;
     for (auto it = delayedPackets.begin(); it != delayedPackets.end();) {
-        if (selectDataRoute(it->first)) {
+        if (isLocalGatewayDestination(it->first) || selectDataRoute(it->first)) {
             released.emplace_back(it->first, std::move(it->second));
             queueOwners.erase(it->first);
             it = delayedPackets.erase(it);
@@ -567,7 +605,13 @@ void Aodv::releaseEligiblePackets()
     // Detach every owner before calling IP: reinjection may reenter this module.
     for (const auto& fifo : released)
         for (auto packet : fifo.second) {
-            if (operationalState == OPERATING && prepareDataPacket(packet, selectDataRoute(fifo.first)))
+            // A lifecycle callback may have disposed of the remaining borrowed IP packets.
+            if (generation != operationalGeneration || operationalState != OPERATING)
+                return;
+            auto route = selectDataRoute(fifo.first);
+            if (generation != operationalGeneration || operationalState != OPERATING)
+                return;
+            if (isLocalGatewayDestination(fifo.first) || prepareDataPacket(packet, route))
                 networkProtocol->reinjectQueuedDatagram(packet);
             else
                 networkProtocol->dropQueuedDatagram(packet);
@@ -840,7 +884,7 @@ void Aodv::handleRREP(const Ptr<Rrep>& rrep, const L3Address& sourceAddr, Networ
         if (!reverseData || !reverseData->isActive())
             return;
         updateValidRouteLifeTime(rrep->getOriginatorAddr(), simTime() + activeRouteTimeout);
-        if (simTime() > rebootTime + deletePeriod || rebootTime == 0) {
+        if (!recovering) {
             auto nextHop = reverse->getNextHopAsGeneric();
             int outputId = reverse->getInterface()->getInterfaceId();
             data->addPrecursor(nextHop, outputId);
@@ -928,6 +972,9 @@ void Aodv::updateRoutingTable(IRoute *route, const L3Address& nextHop, unsigned 
 void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Address& destAddr, unsigned int timeToLive, double delay, NetworkInterface *output)
 {
     ASSERT(timeToLive != 0);
+    auto type = aodvPacket->getPacketType();
+    if (!canSendControl(type))
+        return;
 
     const char *className = aodvPacket->getClassName();
     Packet *packet = new Packet(!strncmp("inet::", className, 6) ? className + 6 : className, aodvPacket);
@@ -943,9 +990,6 @@ void Aodv::sendAODVPacket(const Ptr<AodvControlPacket>& aodvPacket, const L3Addr
     if (!destAddr.isBroadcast() && !destAddr.isMulticast())
         packet->addTag<NextHopAddressReq>()->setNextHopAddress(destAddr);
     packet->addTag<L4PortReq>()->setDestPort(aodvUDPPort);
-
-    if (destAddr.isBroadcast())
-        lastBroadcastTime = simTime();
 
     numSent++;
     if (delay == 0)
@@ -1023,13 +1067,15 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
         expireRouteIfDue(destination);
         auto destinationData = destination ? check_and_cast<AodvRouteData *>(destination->getProtocolData()) : nullptr;
         if (rreq->getDestAddr() == getSelfIPAddress()) {
-            sendRREP(createRREP(rreq, destination, reverse, sourceAddr), rreq->getOriginatorAddr(), 255);
+            auto reply = createRREP(rreq, destination, reverse, sourceAddr);
+            if (!recovering)
+                sendRREP(reply, rreq->getOriginatorAddr(), 255);
             return;
         }
         bool known = destinationData && destinationData->hasValidDestNum();
         bool fresh = known && (rreq->getUnknownSeqNumFlag() ||
             AodvSequence::isAtLeast(destinationData->getDestSeqNum(), rreq->getDestSeqNum()));
-        if (fresh && destinationData->isActive() && !rreq->getDestOnlyFlag() &&
+        if (!recovering && fresh && destinationData->isActive() && !rreq->getDestOnlyFlag() &&
                 !destination->getNextHopAsGeneric().isUnspecified() && destination->getNextHopAsGeneric() != sourceAddr)
         {
             auto reply = createRREP(rreq, destination, reverse, sourceAddr);
@@ -1043,7 +1089,7 @@ void Aodv::handleRREQ(const Ptr<Rreq>& rreq, const L3Address& sourceAddr, unsign
                 return;
             }
         }
-        if (timeToLive > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0)) {
+        if (timeToLive > 0 && !recovering) {
             // RFC 3561 section 6.5. Unknown placeholders are not serial operands.
             if (known) {
                 if (rreq->getUnknownSeqNumFlag() ||
@@ -1245,6 +1291,7 @@ void Aodv::queueRouteError(const std::vector<UnreachableNode>& nodes, const std:
 
 void Aodv::sendRouteError(RerrSend *message)
 {
+    auto generation = operationalGeneration;
     std::unique_ptr<RerrSend> owner(message);
     std::vector<std::pair<Link, NetworkInterface *>> outputs;
     for (const auto& recipient : message->recipients) {
@@ -1257,8 +1304,41 @@ void Aodv::sendRouteError(RerrSend *message)
         return;
     // All interface-qualified copies belong to one logical error emission.
     rerrCount++;
-    for (const auto& output : outputs)
+    for (const auto& output : outputs) {
+        if (generation != operationalGeneration || operationalState != OPERATING)
+            break;
         sendAODVPacket(message->header, output.first.first, 1, 0, output.second);
+    }
+}
+
+bool Aodv::isLocalGatewayDestination(const L3Address& destination) const
+{
+    return hasExternalGateway && !gatewayAddress.isUnspecified() && getSelfIPAddress() == gatewayAddress && isExternalAddress(destination);
+}
+
+void Aodv::extendRecovery()
+{
+    recoveryDeadline = simTime() + deletePeriod;
+    rescheduleAt(recoveryDeadline, recoveryTimer);
+}
+
+void Aodv::handleRecoveryTimer()
+{
+    if (simTime() < recoveryDeadline) {
+        scheduleAt(recoveryDeadline, recoveryTimer);
+        return;
+    }
+    recovering = false;
+    auto generation = operationalGeneration;
+    releaseEligiblePackets();
+    if (generation != operationalGeneration || operationalState != OPERATING)
+        return;
+    std::vector<L3Address> waiting;
+    for (const auto& search : searches)
+        if (search.second.phase == SearchPhase::RECOVERY_WAIT)
+            waiting.push_back(search.first);
+    for (const auto& target : waiting)
+        scheduleSearch(target);
 }
 
 void Aodv::handleStartOperation(LifecycleOperation *operation)
@@ -1267,7 +1347,14 @@ void Aodv::handleStartOperation(LifecycleOperation *operation)
     addressType = getSelfIPAddress().getAddressType();
     usingIpv6 = (getSelfIPAddress().getType() == L3Address::IPv6);
 
-    rebootTime = simTime();
+    operationalGeneration++;
+    recovering = hasStarted;
+    recoveryDeadline = recovering ? simTime() + deletePeriod : simTime();
+    if (hasStarted)
+        socket = UdpSocket(); // stale indications retain the old socket ID
+    hasStarted = true;
+    if (recovering)
+        scheduleAt(recoveryDeadline, recoveryTimer);
     rateEpoch = simTime();
     rateWindow = 0;
 
@@ -1302,6 +1389,11 @@ void Aodv::handleCrashOperation(LifecycleOperation *operation)
 
 void Aodv::clearState(bool disposeQueued)
 {
+    operationalGeneration++;
+    recovering = false;
+    lastBroadcastTime = SIMTIME_ZERO;
+    if (recoveryTimer)
+        cancelEvent(recoveryTimer);
     for (auto message : delayedSends)
         cancelAndDelete(message);
     delayedSends.clear();
@@ -1339,6 +1431,14 @@ void Aodv::clearState(bool disposeQueued)
     if (rrepAckTimer)
         cancelEvent(rrepAckTimer);
     defaultGatewayRoute = nullptr;
+    if (disposeQueued)
+        for (int i = 0; i < routingTable->getNumRoutes();) {
+            auto route = routingTable->getRoute(i);
+            if (route->getSource() == this)
+                routingTable->deleteRoute(route);
+            else
+                i++;
+        }
 }
 
 void Aodv::forwardRREP(const Ptr<Rrep>& rrep, const L3Address& destAddr, unsigned int timeToLive, NetworkInterface *output)
@@ -1421,7 +1521,7 @@ void Aodv::sendHelloMessagesIfNeeded()
         }
     }
 
-    if (hasActiveRoute && (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > helloInterval)) {
+    if (!recovering && hasActiveRoute && (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > helloInterval)) {
         EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
         auto helloMessage = createHelloMessage();
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, 0);
@@ -1656,9 +1756,23 @@ void Aodv::sendRREPACK(const Ptr<RrepAck>& reply, const L3Address& destination, 
     sendAODVPacket(reply, destination, 1, 0, output);
 }
 
+bool Aodv::canSendControl(AodvControlPacketType type) const
+{
+    return operationalState == OPERATING && (!recovering ||
+        type == RERR || type == RERR_IPv6 || type == RREPACK || type == RREPACK_IPv6);
+}
+
 void Aodv::sendPreparedControl(Packet *packet)
 {
     auto control = packet->peekAtFront<AodvControlPacket>();
+    auto type = control->getPacketType();
+    if (!canSendControl(type)) {
+        delete packet;
+        return;
+    }
+    auto destination = packet->getTag<L3AddressReq>()->getDestAddress();
+    if (destination.isBroadcast() || destination.isMulticast())
+        lastBroadcastTime = simTime();
     if (auto reply = dynamicPtrCast<const Rrep>(control)) {
         if (reply->getAckRequiredFlag()) {
             Link link(packet->getTag<L3AddressReq>()->getDestAddress(), packet->getTag<InterfaceReq>()->getInterfaceId());
@@ -1776,6 +1890,7 @@ void Aodv::observeIncoming(const Packet *packet)
 
 void Aodv::handleNeighborTimer()
 {
+    auto generation = operationalGeneration;
     std::vector<Link> lost;
     for (auto it = neighborDeadlines.begin(); it != neighborDeadlines.end();)
         if (it->second <= simTime()) {
@@ -1786,6 +1901,8 @@ void Aodv::handleNeighborTimer()
             ++it;
     scheduleLinkTimer(neighborTimer, neighborDeadlines);
     for (const auto& link : lost) {
+        if (generation != operationalGeneration || operationalState != OPERATING)
+            return;
         failLinkValidation(link, false);
         handleLinkBreakSendRERR(link);
     }
@@ -1945,6 +2062,7 @@ Aodv::~Aodv()
     delete rrepAckTimer;
     delete blacklistTimer;
     delete neighborTimer;
+    delete recoveryTimer;
 }
 
 } // namespace aodv

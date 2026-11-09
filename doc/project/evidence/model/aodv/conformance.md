@@ -159,6 +159,24 @@ serves IPv6, whose runtime compatibility remains pending. No concrete-interface 
 See hello-liveness.md and results.md for controls, causal parent failures and limits. Restart
 reset and selected-interface integration remain subsequent stages.
 
+## Recovery and lifecycle correction
+
+Initial startup is distinct from restart even at time zero. Restart holds local demand in a
+deferred discovery phase served by one recovery timer, before any active-route completion.
+Transit data extends that timer and follows the permitted error/drop path. Accepted control
+can restore state during the hold. One-hop ACK and RERR output remain permitted; other control
+advertisements and originating discovery wait. A fresh self-directed request may restore the
+shared node sequence without advertising it early. At expiry, recheck the route before any RREQ.
+Exact deadline extension/wake-up order follows normal simulation event insertion order.
+
+Stop/crash clears owned state/events and only this instance's routes. IP owns queued packet
+disposal; its identity-based drop API tolerates whole-node ordering that has already removed an
+obligation. A new socket identity prevents late close indications from affecting the restarted
+socket. Operational generation checks stop a detached release batch after lifecycle reentry,
+without dereferencing remaining packets already disposed by IP. Destructor cleanup has no
+cross-module calls. The selected IPv4 lifecycle cases and limits are in reboot-recovery.md and
+results.md; IPv6 runtime compatibility, explicit selected interfaces and repair remain pending.
+
 ## Historical survey
 
 Read record — no build, no run in the 2026-09-23 survey:

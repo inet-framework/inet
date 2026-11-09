@@ -1057,7 +1057,7 @@ code action and coverage limits. Proposed assignments, beside `tests/protocol/ao
 | 6 | `transit-errors.md` | NoDeleteError variants and TransitError module cases; 82 protocol and 51 module cases pass; see model results for parent comparison and limits |
 | 6b | `error-capacity.md` | ErrorCapacity One/Maximum/Partition/Budget; all four and two adjacent admission controls pass; see model results |
 | 7 | `hello-liveness.md` | 26 HelloLoss variants and two real three-node forwarding module cases; 112 protocol and 53 module cases pass; restart reset remains row 8 |
-| 8 | `reboot-recovery.md` | ReplyAcceptance and ReplyAck recovery cases, with RebootRecovery module coverage |
+| 8 | `reboot-recovery.md` | 28 RebootRecovery protocol variants and seven module cases; 140 protocol and 60 module cases pass with existing expectations unchanged |
 | 9 | `selected-interfaces.md` | Interfaces |
 | 10 | `subnet-routes.md` | SubnetReply, NoDeleteError |
 | 11 | `local-repair.md` | LocalRepair, with LocalRepairLifecycle and Ipv6Compatibility module coverage |

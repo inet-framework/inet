@@ -105,6 +105,16 @@ Hello exchange and attributable MAC failure feedback remain available. Direct
 AckingMac, independent nonaggregating 802.11 and Ethernet provide tested metadata
 profiles; bridged and aggregated paths require their own attribution evidence.
 
+Restart begins a recovery interval of ``deletePeriod``, including when the
+restart occurs at simulation time zero. Initial startup, including a node
+initialized down, has no reboot hold. Local data waits while incoming controls
+can restore route information. Transit data is dropped with the applicable
+route error and moves the recovery deadline to its arrival plus ``deletePeriod``.
+Route replies, discovery and Hello advertisements wait; one-hop ACKs and route
+errors remain permitted. On expiry, a usable learned route releases held data
+without an unnecessary request. Stop/crash removes this instance's routes and
+cancels pending work before a later restart.
+
 RFC 3561 sections 6.1 and 6.6.1 give conflicting descriptions of destination
 sequence updates. This model follows the freshness rule of section 6.1: the
 destination adopts a known fresher requested sequence before replying, without

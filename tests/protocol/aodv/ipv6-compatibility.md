@@ -20,6 +20,10 @@ sequenceDiagram
 | RateLimit | Queue two destinations under one request per second. Require both data deliveries, separate request IDs and matching ACKs after actual admission. |
 | DeferredReply | Learn a READY destination before admission. Require two data deliveries after one request, matching ACKs and no obsolete later send. |
 | HelloForwarding | Forward five real IPv6 packets from S through N. Preserve IP source S and MAC source N, keep N live, then invalidate it and its dependent route after attributable traffic ceases. |
+| IncomingRestart | Receive before restart, learn during recovery without replying, then receive multicast again after the hold with the restored sequence floor. |
+| Restart | Hold new local demand after restart, learn/ACK its route, and release only after the hold without redundant discovery. |
+| CrashReady | Crash with waiting and READY searches, dispose the old originals, then accept fresh demand without a ghost retry. |
+| StopQueued | Repeat queued-obligation cleanup through asynchronous stop and restart. |
 
 Each named case has protocol and module variants with prefixes Rfc3561Ipv6 and AodvIpv6. They use General/run 0/seed 0 and public routes or wire observations, never direct AODV handlers.
 
