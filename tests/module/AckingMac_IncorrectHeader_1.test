@@ -1,0 +1,145 @@
+%description:
+AckingMac receives a frame with an incorrect MAC header chunk. Sender 1 sends one
+UDP packet to the receiver, and sender 2 starts to transmit close to the
+receiver at 60 us, after the 48 us of the PHY header and during the MAC header,
+so the SNIR of the reception is far below the threshold of the receiver. The
+error model uses the chunk corruption mode, which marks the MAC header chunk of
+the failed frame incorrect.
+AckingMac must drop the frame as incorrectly received, and the simulation must
+not stop. A listener prints each frame that the MAC drops, with the flag of its
+MAC header.
+
+%file: test.cc
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/linklayer/acking/AckingMacHeader_m.h"
+
+namespace AckingMac_IncorrectHeader_1 {
+
+using namespace inet;
+
+// Prints each frame that the MAC drops, with the flag of its MAC header.
+class DropPrinter : public cSimpleModule, public cListener
+{
+  protected:
+    virtual void initialize() override
+    {
+        getModuleByPath(par("macModule"))->subscribe(packetDroppedSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        auto packet = check_and_cast<Packet *>(object);
+        const auto& macHeader = packet->peekAtFront<AckingMacHeader>(b(-1), Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+        std::cout << "dropped " << packet->getName() << " with " << (macHeader->isCorrect() ? "a correct" : "an incorrect") << " MAC header" << std::endl;
+    }
+};
+
+Define_Module(DropPrinter);
+
+} // namespace AckingMac_IncorrectHeader_1
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
+
+simple DropPrinter
+{
+    parameters:
+        string macModule;
+        @class(DropPrinter);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        hostSender1: WirelessHost;
+        hostSender2: WirelessHost;
+        hostReceiver: WirelessHost;
+        printer: DropPrinter;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 4300us
+ned-path = .;../../../../src
+
+*.printer.macModule = "hostReceiver.wlan[0].mac"
+
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobility.typename = "StationaryMobility"
+*.hostSender1.mobility.initialX = 200m
+*.hostReceiver.mobility.initialX = 400m
+*.hostSender2.mobility.initialX = 450m
+
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
+
+# nic
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radio.typename = "ApskScalarRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.modulation = "BPSK"
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 96b
+*.host*.wlan[*].radio.centerFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -85dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+*.host*.wlan[*].radio.transmitter.power = 10mW
+
+*.host*.wlan[*].radio.receiver.errorModel.corruptionMode = "chunk"
+
+# sender 1 sends one packet to the receiver
+*.hostSender1.numApps = 1
+*.hostSender1.app[0].typename = "UdpBasicApp"
+*.hostSender1.app[0].destAddresses = "hostReceiver"
+*.hostSender1.app[0].destPort = 1000
+*.hostSender1.app[0].messageLength = 1000B
+*.hostSender1.app[0].startTime = 0s
+*.hostSender1.app[0].stopTime = 1us
+*.hostSender1.app[0].sendInterval = 1s
+
+# sender 2 interferes during the MAC header
+*.hostSender2.numApps = 1
+*.hostSender2.app[0].typename = "UdpBasicApp"
+*.hostSender2.app[0].destAddresses = "hostSender1"
+*.hostSender2.app[0].destPort = 1000
+*.hostSender2.app[0].messageLength = 1000B
+*.hostSender2.app[0].startTime = 60us
+*.hostSender2.app[0].stopTime = 61us
+*.hostSender2.app[0].sendInterval = 1s
+
+*.hostReceiver.numApps = 1
+*.hostReceiver.app[0].typename = "UdpSink"
+*.hostReceiver.app[0].localPort = 1000
+
+%contains: stdout
+dropped UdpBasicAppData-0 with an incorrect MAC header
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

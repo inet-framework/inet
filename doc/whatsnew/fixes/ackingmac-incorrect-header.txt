@@ -1,0 +1,3 @@
+AckingMac drops a frame with an incorrect MAC header
+
+AckingMac read the MAC header of a received frame before it checked the bit error. If the error model marked the MAC header chunk incorrect, for example in the chunk corruption mode, the simulation stopped with "Returning an incorrect chunk is not allowed". AckingMac now checks the bit error first and drops the frame as incorrectly received, as the other wireless MACs do.
