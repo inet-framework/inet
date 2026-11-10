@@ -112,9 +112,15 @@ Exercise mandatory standalone reception in actual non-HT PPDUs, both advertised 
 
 Establish the selected immediate Compressed Block Ack agreement, aggregate multiple MPDUs and lose a selected member at the receive PSDU boundary. Inspect delimiter integrity, individual FCS decisions and the matching Block Ack bits. Retransmit eligible missing members without changing sequence identities or redelivering accepted members. Repeat with a lost Block Ack, BAR recovery, nested A-MSDU and whole-PPDU loss. Teardown and reestablish the peer while recovery is pending; retired constituents must not reappear.
 
+Count actual Block Ack transmissions separately from BAR transmissions. During an unrelated response wait, valid overheard traffic updates NAV without producing an addressed response; bad-FCS traffic does neither. Addressed accepted members produce one response. Exercise actual sequence-number wrap, peer closure during transmission, response wait and accepted SIFS wait, and expiry of the last live original after genuine BAR attempts. Verify cleanup precedes terminal notification and preserves unrelated peer/TID progress. Distinguish DATA retry exhaustion from BAR-wait exhaustion; BAR-only recovery supplies no additional payload metric samples.
+
+The [H3 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-h3-ampdu.md) maps these checks to 128 actual aggregate-exchange configurations, including synchronous peer closure from sample, terminal and drop callbacks. [The model ledger](../../model/wifi/hwmp-coverage.md#h3-native-a-mpdu-and-selective-recovery) records the complete limits, metric/path, capture and retained-control evidence, the focused adapter rerun and outstanding final C9 checks.
+
 ## WIFI-CHECK-AGGREGATION-LIMITS
 
 Set negotiated byte, MPDU count, duration and spacing bounds to exact boundaries. Verify the complete PPDU and response fit the selected admission limit before extraction/sequence commitment. Exercise a smaller retry A-MPDU, expiry while awaiting recovery and incompatible aggregation permissions. Distinguish an A-MSDU's all-constituents deadline from a plain MPDU's deadline; do not remove one constituent from a still-valid committed A-MSDU on retry. Decode serialized bytes independently; a typed aggregate object alone does not prove valid framing.
+
+For VHT, distinguish content end, structural pre-EOF end and full padded PSDU extent. Verify exact fill without allocating another raw DATA symbol, including the 1560/1589/1590-byte rounding counterexample. Exercise the declared model interpretation at cap8191: content8191/prefix8192 accepted, content8192/prefix8192 rejected, and extra EOF0 spacing cannot be treated as final alignment. Keep that policy verdict separate from normative source facts. Include EOF1 Normal-Ack single-member transport as well as EOF0 Block-Ack aggregation.
 
 ## WIFI-CHECK-POWER-MODES
 

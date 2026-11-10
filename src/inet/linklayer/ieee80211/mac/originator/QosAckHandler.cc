@@ -90,6 +90,19 @@ void QosAckHandler::processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader
     }
 }
 
+void QosAckHandler::processTransmittedAmpduMember(const Ptr<const Ieee80211DataHeader>& header)
+{
+    auto id = std::make_pair(header->getReceiverAddress(), std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), 0)));
+    ackStatuses[id] = Status::WAITING_FOR_BLOCK_ACK;
+}
+
+void QosAckHandler::processUnansweredAmpduMember(const Ptr<const Ieee80211DataHeader>& header)
+{
+    auto id = std::make_pair(header->getReceiverAddress(), std::make_pair(header->getTid(), SequenceControlField(header->getSequenceNumber().get(), 0)));
+    if (getQoSDataAckStatus(id) == Status::WAITING_FOR_BLOCK_ACK || getQoSDataAckStatus(id) == Status::BLOCK_ACK_NOT_ARRIVED)
+        ackStatuses[id] = Status::BLOCK_ACK_NOT_YET_REQUESTED;
+}
+
 void QosAckHandler::dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
     if (dataOrMgmtHeader->getType() == ST_DATA_WITH_QOS) {

@@ -37,6 +37,10 @@ enum class DataPreparationResult { LEGACY, READY, DEFERRED };
 struct INET_API PreparedDataTransmission : public cObject
 {
     std::unique_ptr<PreparedQosData> preparation;
+    std::vector<std::unique_ptr<PreparedQosData>> memberPreparations;
+    std::vector<Packet *> members; // Nonempty only for an implicit-BAR A-MPDU, including one-member recovery.
+    std::unique_ptr<Packet> psdu;
+    simtime_t blockAckTimeout = -1;
     Packet *frame = nullptr; // Borrowed from preparation, or from InProgressFrames after commitment.
     const physicallayer::Ieee80211ModeSet *modeSet = nullptr;
     const physicallayer::IIeee80211Mode *dataMode = nullptr;

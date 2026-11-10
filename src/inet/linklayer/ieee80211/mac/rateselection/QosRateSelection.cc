@@ -172,13 +172,13 @@ const IIeee80211Mode *QosRateSelection::computeResponseCtsFrameMode(Packet *pack
 // rate is defined to be the same rate and modulation class as the BlockAckReq frame, and the STA
 // shall transmit the Basic BlockAck frame at the primary rate.
 //
-const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, ResponseQueryRole role)
+const IIeee80211Mode *QosRateSelection::computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211TwoAddressHeader>& blockAckReq, ResponseQueryRole role)
 {
     if (dynamicPtrCast<const Ieee80211BasicBlockAckReq>(blockAckReq)) {
         auto mode = responseBlockAckFrameMode ? responseBlockAckFrameMode : getMode(packet, blockAckReq);
         return getPeerCompatibleResponseMode(blockAckReq, mode, role);
     }
-    else if (dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq)) {
+    else if (dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(blockAckReq) || dynamicPtrCast<const Ieee80211DataHeader>(blockAckReq)) {
         auto received = getMode(packet, blockAckReq);
         auto referenceRate = received->getNonHtReferenceRate();
         auto receivedClass = received->getModulationClass();

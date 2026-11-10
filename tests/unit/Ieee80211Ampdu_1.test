@@ -1,0 +1,149 @@
+%description:
+Literal HT/VHT multi-MPDU delimiter layout, atomic structural rejection,
+spacing delimiters and one-member EOF0 recovery independent of member FCS.
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
+#include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+using namespace inet;
+using namespace inet::ieee80211;
+
+%activity:
+// IEEE 802.11-2024, 9.7.1/9.7.2. Independent delimiter oracle:
+// length64 EOF0=00 04 13 4e, zero-length EOF1=01 00 79 4e.
+std::vector<uint8_t> literal;
+for (int i=0;i<2;i++) {
+    literal.insert(literal.end(),{0x00,0x04,0x13,0x4e});
+    literal.insert(literal.end(),64,uint8_t(0x30+i));
+}
+Packet raw("two",makeShared<BytesChunk>(literal));
+Ieee80211AmpduLayout layout;
+ASSERT(findAmpdu(&raw,B(0),B(136),false,layout) && layout.members.size() == 2);
+ASSERT(layout.members[0].offset == B(4) && layout.members[1].offset == B(72) && layout.preEofLength == B(136));
+ASSERT(findAmpdu(&raw,B(0),B(136),true,layout));
+// Independent CRC8 literals over the received reserved bits; receive ignores
+// B1 and HT's B2/B3 without changing the CRC-protected sixteen-bit word.
+for (auto delimiter : std::vector<std::vector<uint8_t>>{{0x02,0x04,0xc9,0x4e},{0x04,0x04,0x66,0x4e},
+        {0x08,0x04,0xf9,0x4e},{0x0e,0x04,0x56,0x4e}}) {
+    auto bytes = literal;
+    std::copy(delimiter.begin(),delimiter.end(),bytes.begin());
+    Packet reserved("reserved-ignore",makeShared<BytesChunk>(bytes));
+    ASSERT(findAmpdu(&reserved,B(0),B(136),false,layout) && layout.members.front().length == B(64));
+}
+// Independent CRC32(60 zero octets)=0x04128908, emitted least-significant octet first.
+std::vector<uint8_t> fcsBytes(60,0);
+fcsBytes.insert(fcsBytes.end(),{0x08,0x89,0x12,0x04});
+Packet fcs("literal-FCS",makeShared<BytesChunk>(fcsBytes));
+ASSERT(isAmpduMemberFcsOk(&fcs,B(0),B(64)));
+fcsBytes[0] ^= 1;
+Packet badFcs("bad-literal-FCS",makeShared<BytesChunk>(fcsBytes));
+ASSERT(!isAmpduMemberFcsOk(&badFcs,B(0),B(64)));
+for (int cut=0;cut<136;cut++) {
+    Packet truncated("truncated",makeShared<BytesChunk>(std::vector<uint8_t>(literal.begin(),literal.begin()+cut)));
+    ASSERT(!findAmpdu(&truncated,B(0),B(136),false,layout) && layout.members.empty());
+}
+for (int byte : {70,71}) {
+    auto bad = literal; bad[byte] ^= 1;
+    Packet packet("bad-second",makeShared<BytesChunk>(bad));
+    ASSERT(!findAmpdu(&packet,B(0),B(bad.size()),false,layout) && layout.members.empty());
+}
+auto eof = literal; eof.insert(eof.end(),{0x01,0x00,0x79,0x4e,0,0,0});
+Packet padded("EOF-padding",makeShared<BytesChunk>(eof));
+ASSERT(findAmpdu(&padded,B(0),B(eof.size()),true,layout) && layout.preEofLength == B(136));
+ASSERT(!findAmpdu(&padded,B(0),B(eof.size()),false,layout));
+eof.insert(eof.end()-3,{0x00,0x00,0x14,0x4e});
+Packet afterEof("spacing-after-EOF",makeShared<BytesChunk>(eof));
+ASSERT(!findAmpdu(&afterEof,B(0),B(eof.size()),true,layout) && layout.members.empty());
+Packet one("one-retry",makeShared<BytesChunk>(std::vector<uint8_t>(literal.begin(),literal.begin()+68)));
+ASSERT(findAmpdu(&one,B(0),B(68),true,layout) && layout.members.size() == 1);
+auto trailingSpacing = std::vector<uint8_t>(literal.begin(),literal.begin()+68);
+trailingSpacing.insert(trailingSpacing.end(),{0x00,0x00,0x14,0x4e});
+for (bool vht : {false,true}) {
+    Packet tail("trailing-spacing",makeShared<BytesChunk>(trailingSpacing));
+    ASSERT(findAmpdu(&tail,B(0),B(72),vht,layout) && layout.contentEnd == B(72) && layout.preEofLength == B(72));
+}
+trailingSpacing.insert(trailingSpacing.end(),{0x51,0x52,0x53});
+Packet tail("trailing-spacing-octets",makeShared<BytesChunk>(trailingSpacing));
+ASSERT(findAmpdu(&tail,B(0),B(75),true,layout) && layout.contentEnd == B(72) && layout.preEofLength == B(72));
+auto singleOrdering = std::vector<uint8_t>(literal.begin(),literal.begin()+68);
+singleOrdering[0] = 0x01; singleOrdering[2] = 0x7e; // VHT EOF1 length64 literal.
+singleOrdering.insert(singleOrdering.end(),{0x00,0x00,0x14,0x4e,0x01,0x00,0x79,0x4e});
+Packet singleAfterSpacing("single-spacing-after-EOF1",makeShared<BytesChunk>(singleOrdering));
+ASSERT(!findAmpdu(&singleAfterSpacing,B(0),B(singleOrdering.size()),true,layout,true));
+std::vector<std::unique_ptr<Packet>> owned;
+owned.emplace_back(new Packet("first",makeShared<BytesChunk>(std::vector<uint8_t>(5,0xa1))));
+owned.emplace_back(new Packet("second",makeShared<BytesChunk>(std::vector<uint8_t>(6,0xa2))));
+std::vector<Packet *> members = {owned[0].get(),owned[1].get()};
+for (bool vht : {false,true}) {
+    std::unique_ptr<Packet> built(buildAmpdu(members,vht));
+    ASSERT(built->getDataLength() == B(22)); // Final VHT fill belongs to the selected-mode padding step.
+    ASSERT(findAmpdu(built.get(),B(0),B(built->getDataLength()),vht,layout));
+    ASSERT(layout.members[0].length == B(5) && layout.members[1].offset == B(16));
+    std::unique_ptr<Packet> spaced(buildAmpdu(members,vht,B(24)));
+    ASSERT(findAmpdu(spaced.get(),B(0),B(spaced->getDataLength()),vht,layout));
+    ASSERT(layout.members[1].delimiterOffset == B(24));
+    ASSERT(owned[0]->getDataLength() == B(5) && owned[1]->getDataLength() == B(6));
+}
+const physicallayer::IIeee80211Mode *mode = nullptr;
+auto modes = physicallayer::Ieee80211ModeSet::getModeSet("ac-complete");
+for (int i=0;i<modes->getNumModes();i++) {
+    auto candidate = modes->getMode(i);
+    if (candidate->getVhtMcsIndex() == 7 && candidate->getDataMode()->getBandwidth() == MHz(20)
+            && candidate->getDataMode()->getNumberOfSpatialStreams() == 1 && candidate->isVhtShortGuardInterval()) mode = candidate;
+}
+ASSERT(mode && getVhtPsduCapacity(B(1560),mode) == B(1589));
+for (int i=0;i<modes->getNumModes();i++) {
+    auto candidate = modes->getMode(i);
+    if (candidate->getHtMcsIndex() != 7 || candidate->getDataMode()->getBandwidth() != MHz(20)) continue;
+    // Equation10-12 independent oracle:4us*65Mbps/8=32.5 ->33;
+    // SGI72.222...Mbps needs37, then delimiter spacing rounds to36/40.
+    B required = minimumAmpduStartDistance(5,candidate);
+    ASSERT(required == B(candidate->isHtShortGuardInterval() ? 37 : 33));
+    Packet small("small",makeShared<BytesChunk>(std::vector<uint8_t>(4,0)));
+    std::unique_ptr<Packet> spaced(buildAmpdu({&small,&small},false,required));
+    ASSERT(findAmpdu(spaced.get(),B(0),B(spaced->getDataLength()),false,layout));
+    ASSERT(layout.members[1].delimiterOffset == B(candidate->isHtShortGuardInterval() ? 40 : 36));
+}
+ASSERT(mode->getDuration(B(1560)) == mode->getDuration(B(1590)));
+ASSERT(mode->getDataMode()->getDuration(B(1560)) < mode->getDataMode()->getDuration(B(1590)));
+owned[0].reset(new Packet("first64",makeShared<BytesChunk>(std::vector<uint8_t>(64,0xa1))));
+owned[1].reset(new Packet("second1488",makeShared<BytesChunk>(std::vector<uint8_t>(1488,0xa2))));
+members = {owned[0].get(),owned[1].get()};
+std::unique_ptr<Packet> capacity(buildAmpdu(members,true));
+ASSERT(capacity->getDataLength() == B(1560));
+padVhtPsdu(capacity.get(),mode);
+ASSERT(capacity->getDataLength() == B(1589));
+ASSERT(findAmpdu(capacity.get(),B(0),B(1589),true,layout) && layout.preEofLength == B(1560));
+ASSERT(isVhtPsduWithinCapacity(B(1589),layout,mode) && !isVhtPsduWithinCapacity(B(1590),layout,mode));
+for (int length : {8119,8120}) {
+    owned[1].reset(new Packet("edge",makeShared<BytesChunk>(std::vector<uint8_t>(length,0xa2))));
+    members = {owned[0].get(),owned[1].get()};
+    std::unique_ptr<Packet> edge(buildAmpdu(members,true));
+    padVhtPsdu(edge.get(),mode);
+    ASSERT(findAmpdu(edge.get(),B(0),B(edge->getDataLength()),true,layout));
+    ASSERT(layout.contentEnd == B(length+72));
+    ASSERT(isAmpduWithinLengthLimit(layout,B(8191),true) == (length == 8119));
+}
+Packet spacingContent("spacing-content",makeShared<BytesChunk>(std::vector<uint8_t>(8184,0x33)));
+std::unique_ptr<Packet> spacingEdge(buildAmpdu({&spacingContent},true));
+auto spacing = makeShared<Ieee80211MpduSubframeHeader>();
+spacing->setVht(true); spacing->setLength(0); spacing->setEof(false);
+spacingEdge->insertAtBack(spacing);
+auto endPadding = makeShared<Ieee80211MpduSubframeHeader>();
+endPadding->setVht(true); endPadding->setLength(0); endPadding->setEof(true);
+spacingEdge->insertAtBack(endPadding);
+padVhtPsdu(spacingEdge.get(),mode);
+ASSERT(findAmpdu(spacingEdge.get(),B(0),B(spacingEdge->getDataLength()),true,layout));
+ASSERT(layout.contentEnd == B(8192) && layout.preEofLength == B(8192));
+ASSERT(!isAmpduWithinLengthLimit(layout,B(8191),true));
+for (bool request : {false,true}) for (bool response : {false,true}) {
+    OriginatorBlockAckAgreement agreement(MacAddress("02:00:00:00:00:02"),0,SequenceNumberCyclic(0),64,request,false);
+    agreement.setIsAddbaResponseReceived(true);
+    agreement.setResponseAMsduSupported(response);
+    ASSERT(agreement.isAMsduPermitted() == response);
+}
+EV << "A-MPDU literal structure, EOF0 recovery, spacing and atomic rejection verified.\n";
+
+%contains: stdout
+A-MPDU literal structure, EOF0 recovery, spacing and atomic rejection verified.

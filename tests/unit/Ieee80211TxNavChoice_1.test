@@ -25,6 +25,7 @@ class NavRx : public IRx {
     void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart) override {}
     bool lowerFrameReceived(Packet *) override { return false; }
     bool prepareReceivedFrame(Packet *) override { return true; }
+    bool prepareReceivedAmpdu(const Packet *, Ieee80211AmpduLayout&, std::vector<std::unique_ptr<Packet>>&) override { return false; }
 };
 
 class ForwardingTx : public Tx {

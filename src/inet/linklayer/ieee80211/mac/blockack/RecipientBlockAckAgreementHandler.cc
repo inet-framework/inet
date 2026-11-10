@@ -127,6 +127,7 @@ void RecipientBlockAckAgreementHandler::updateAgreement(const Ptr<const Ieee8021
     auto it = blockAckAgreements.find(id);
     if (it != blockAckAgreements.end()) {
         RecipientBlockAckAgreement *agreement = it->second;
+        agreement->setAMsduPermitted(addbaResponse->getAMsduSupported());
         agreement->addbaResposneSent();
     }
 }

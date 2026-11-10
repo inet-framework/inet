@@ -78,11 +78,19 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
 {
     Enter_Method("computeAggregateFrames");
     ASSERT(!queue->isEmpty());
+    std::vector<Packet *> candidates;
+    for (int i=0;i<queue->getNumPackets();i++)
+        candidates.push_back(queue->getPacket(i));
+    return computeAggregateFrames(candidates);
+}
+
+std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(const std::vector<Packet *>& candidates)
+{
+    Enter_Method("computeAggregateFrames");
     b aMsduLength = b(0);
     Ptr<const Ieee80211DataHeader> firstHeader = nullptr;
     auto frames = new std::vector<Packet *>();
-    for (int i = 0; i < queue->getNumPackets(); i++) {
-        auto dataPacket = queue->getPacket(i);
+    for (auto dataPacket : candidates) {
         const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
         if (dataHeader == nullptr)
             break;

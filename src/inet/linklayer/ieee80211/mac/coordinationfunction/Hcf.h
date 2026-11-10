@@ -9,6 +9,7 @@
 #define __INET_HCF_H
 
 #include <optional>
+#include "inet/common/ModuleRefByPar.h"
 
 #include "inet/linklayer/ieee80211/mac/channelaccess/Edca.h"
 #include "inet/linklayer/ieee80211/mac/channelaccess/Hcca.h"
@@ -40,12 +41,14 @@
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkTiming.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkMetric.h"
 
 namespace inet {
 namespace ieee80211 {
 
 class Ieee80211Mac;
 class Ieee80211Mib;
+class AggregateTransmitStep;
 
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
@@ -59,6 +62,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
   public:
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t meshDataAttemptCompletedSignal;
+    static simsignal_t meshTerminalRecoverySignal;
     static simsignal_t meshPayloadTransmittedSignal;
     void discardPendingMeshSources();
     static simsignal_t secondaryChannelAccessDeferredSignal;
@@ -68,6 +72,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
   protected:
     Ieee80211Mac *mac = nullptr;
     Ieee80211Mib *mib = nullptr;
+    ModuleRefByPar<IMeshLinkMetric> meshLinkMetric;
     IRateControl *dataAndMgmtRateControl = nullptr;
 
     cMessage *startRxTimer = nullptr;
@@ -149,6 +154,14 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     static simtime_t encodeDuration(simtime_t duration, bool holder);
     simtime_t computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     DataPreparationResult prepareDataTransmission(FrameSequenceContext *context);
+    bool prepareAmpdu(FrameSequenceContext *context, Packet *candidate, OriginatorBlockAckAgreement *agreement);
+    bool canAdmitAmpdu(const FrameSequenceContext *context, const PreparedDataTransmission& prepared,
+        const Packet *psdu, simtime_t ifs) const;
+    bool transmitAmpdu(AggregateTransmitStep *step, simtime_t ifs);
+    void completeAmpduAttempt(AggregateTransmitStep *step, const Ptr<const Ieee80211CompressedBlockAck>& response, bool expired);
+    void retireExhaustedData(Edcaf *owner, const std::vector<Packet *>& exhausted, Packet *exchange);
+    void processReceivedAmpdu(Packet *packet);
+    void processReceivedAmpduContents(Packet *packet);
     bool validatePreparedData(const PreparedDataTransmission& prepared, simtime_t start) const;
     simtime_t computePreparedDataCost(const PreparedDataTransmission& prepared, bool protect) const;
     bool canAdmitPreparedData(const FrameSequenceContext *context, const PreparedDataTransmission& prepared,
@@ -186,6 +199,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     void firstDataDiscarded(const Ptr<const Ieee80211DataHeader>& header);
     bool dispatchAgreementAction(const Ptr<const Ieee80211MgmtHeader>& header);
     bool isProfileAllowed(MacAddress peer, bool originator) const;
+    bool hasMeshAmpduAgreement(MacAddress peer, Tid tid) const;
+    void resetMeshAggregation(MacAddress peer);
 
     // Recipient
     virtual void recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool interframe = false);
@@ -232,6 +247,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::string getFrameSequenceInfo() const;
 
   public:
+    void receiveAmpdu(Packet *packet) { Enter_Method("receiveAmpdu"); processReceivedAmpdu(packet); }
     virtual MeshLinkTiming getMeshLinkTiming(MacAddress peer) override;
     MeshLinkTiming previewMeshLinkTiming(MacAddress peer, const Ieee80211RateSetState& rates,
         const Ieee80211PeerPhyCapabilities& capabilities) override;

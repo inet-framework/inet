@@ -1,0 +1,7 @@
+Fill VHT PSDUs within the allocated DATA symbols
+
+VHT single-member and multiple-member PSDUs now fill the existing raw DATA-symbol capacity with fitting final alignment, EOF padding delimiters and trailing octets. Capacity checks use the raw data-mode duration, since whole-PPDU short-GI rounding can hide an extra symbol. Removing unconditional final alignment also corrects boundary airtime, such as a 58-byte single member that needs 48 rather than 52 microseconds. HT/VHT PHY SIG serialization remains a model abstraction.
+
+The shared A-MSDU permission query now uses the recipient's ADDBA response bit. Delimiter receive decoding ignores reserved bits while checking CRC over the original received word, and malformed legacy deaggregation no longer releases a valid-looking prefix.
+
+Native mesh body errors are handled after ordinary MAC acknowledgment bookkeeping, consistently for standalone MPDUs and A-MPDUs. Reconstructed aggregate members retain their receiving mesh header role through observers and recipient service, and truncated Mesh Control bodies remain opaque to packet dissection. Overheard valid aggregate members update NAV; another received aggregate cannot leave a consumed local response timer holding channel access indefinitely.

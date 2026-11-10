@@ -18,6 +18,7 @@
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mac/contract/IContention.h"
 #include "inet/linklayer/ieee80211/mac/contract/ITx.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -157,6 +158,43 @@ bool Rx::prepareReceivedFrame(Packet *packet)
     }
     // singleMpdu describes the received PPDU. Radio has already validated and
     // removed its envelope before capture; the remaining member includes FCS.
+    return true;
+}
+
+bool Rx::prepareReceivedAmpdu(const Packet *packet, Ieee80211AmpduLayout& layout,
+        std::vector<std::unique_ptr<Packet>>& members)
+{
+    Enter_Method("prepareReceivedAmpdu");
+    members.clear();
+    layout = {};
+    auto actual = packet->findTag<Ieee80211ModeInd>();
+    if (!actual || !actual->getTxVector().ampdu || packet->hasBitError())
+        return false;
+    constexpr int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+    auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet, b(-1), flags);
+    bool vht = actual->getTxVector().format == Ieee80211TxVector::VHT;
+    Ieee80211AmpduLayout validated;
+    if (!phy->isCorrect() || !phy->isComplete() || !phy->isProperlyRepresented()
+            || !findAmpdu(packet, phy->getChunkLength(), phy->getLengthField(), vht, validated)
+            || (vht && !isVhtPsduWithinCapacity(phy->getLengthField(), validated, actual->getMode())))
+        return false;
+    std::vector<std::unique_ptr<Packet>> prepared;
+    for (const auto& item : validated.members) {
+        auto offset = phy->getChunkLength()+item.offset;
+        auto trailer = packet->peekDataAt<Ieee80211MacTrailer>(offset+item.length-B(4), B(4), flags);
+        bool correct = trailer->getFcsMode() == FCS_DECLARED_CORRECT ||
+            (trailer->getFcsMode() == FCS_COMPUTED && isAmpduMemberFcsOk(packet, offset, item.length));
+        if (!correct)
+            continue;
+        std::string name = std::string(packet->getName()) + "[" + std::to_string(item.delimiterOffset.get<B>()) + "]";
+        auto member = std::make_unique<Packet>(name.c_str(), packet->peekDataAt(offset,item.length));
+        member->copyTags(*packet);
+        member->copyRegionTags(*packet,packet->getFrontOffset()+offset,b(0),item.length);
+        member->addTagIfAbsent<PacketProtocolTag>()->set(&Protocol::ieee80211Mac);
+        prepared.push_back(std::move(member));
+    }
+    layout = std::move(validated);
+    members = std::move(prepared);
     return true;
 }
 

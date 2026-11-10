@@ -24,6 +24,9 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/common/checksum/Checksum.h"
 
 namespace inet {
 namespace protocoltest {
@@ -155,6 +158,48 @@ inline void setRetryBit(Packet *frame)
     frame->insertAtFront(header);
     for (auto it = prefix.rbegin(); it != prefix.rend(); ++it)
         frame->insertAtFront(*it);
+}
+
+// Actual received PSDU seam, before radio decapsulation. The receiver-derived
+// vector supplies the format; a member fault keeps all delimiters/PHY metadata
+// intact and deliberately leaves its member FCS stale.
+inline bool corruptReceivedAmpduMember(Packet *packet, size_t index, bool corruptHeader = false)
+{
+    auto actual = packet->findTag<Ieee80211ModeInd>();
+    if (!actual || !actual->getTxVector().ampdu) return false;
+    auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+    ieee80211::Ieee80211AmpduLayout layout;
+    if (!ieee80211::findAmpdu(packet,phy->getChunkLength(),phy->getLengthField(),
+            actual->getTxVector().format == Ieee80211TxVector::VHT,layout) || index >= layout.members.size()) return false;
+    auto member = layout.members[index];
+    auto offset = phy->getChunkLength()+member.offset;
+    auto bytes = packet->peekDataAt<BytesChunk>(offset,member.length)->getBytes();
+    if (corruptHeader) {
+        bytes[0] = 0xff; bytes[1] = 0xff;
+        for (size_t i=4;i<std::min(size_t(24),bytes.size()-4);i++) bytes[i] = 0xa5;
+    }
+    else
+        bytes.back() ^= 0x80;
+    packet->replaceDataAt(makeShared<BytesChunk>(bytes),offset,member.length);
+    return true;
+}
+
+inline bool rewriteReceivedCompressedBa(Packet *packet, bool wrongTid)
+{
+    auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+    Packet member("faulted-BA",packet->peekDataAt(phy->getChunkLength(),phy->getLengthField()));
+    auto header = member.removeAtFront<ieee80211::Ieee80211CompressedBlockAck>();
+    if (wrongTid) header->setTidInfo((header->getTidInfo()+1)%16);
+    else header->setBlockAckBitmap(BitVector(0,64));
+    member.insertAtFront(header);
+    member.removeAtBack<ieee80211::Ieee80211MacTrailer>(B(4));
+    auto bytes = member.peekDataAsBytes()->getBytes();
+    auto trailer = makeShared<ieee80211::Ieee80211MacTrailer>();
+    trailer->setFcsMode(FCS_COMPUTED);
+    trailer->setFcs(ethernetFcs(bytes.data(),bytes.size()));
+    member.insertAtBack(trailer);
+    packet->replaceDataAt(member.peekData(),phy->getChunkLength(),phy->getLengthField());
+    return true;
 }
 
 } // namespace protocoltest

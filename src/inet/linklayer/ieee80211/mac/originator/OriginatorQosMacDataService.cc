@@ -107,12 +107,95 @@ std::unique_ptr<PreparedQosData> OriginatorQosMacDataService::prepareFrame(queue
     return result;
 }
 
+std::vector<std::unique_ptr<PreparedQosData>> OriginatorQosMacDataService::prepareFrames(
+        queueing::IPacketQueue *queue, bool allowMsduAggregation, int maxMembers, B memberLimit)
+{
+    Enter_Method("prepareFrames");
+    if (expireFrames)
+        expireFrames();
+    std::vector<std::unique_ptr<PreparedQosData>> result;
+    if (!aMpduAggregationPolicy || maxMembers < 1)
+        return result;
+    std::vector<Packet *> remaining;
+    Ptr<const Ieee80211DataHeader> first;
+    for (int i=0;i<queue->getNumPackets();i++) {
+        auto packet = queue->getPacket(i);
+        if (extractionEligible && !extractionEligible(packet))
+            continue;
+        auto header = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        if (!header || header->getType() != ST_DATA_WITH_QOS)
+            break;
+        if (!first)
+            first = header;
+        if (header->getReceiverAddress() != first->getReceiverAddress() || header->getTid() != first->getTid())
+            break;
+        remaining.push_back(packet);
+    }
+    while (!remaining.empty() && result.size() < size_t(maxMembers)) {
+        auto preparation = std::make_unique<PreparedQosData>();
+        preparation->queue = queue;
+        std::vector<Packet *> sources{remaining.front()};
+        if (allowMsduAggregation && aMsduAggregationPolicy && (!aMsduPermitted || aMsduPermitted(remaining.front()))) {
+            std::unique_ptr<std::vector<Packet *>> group(aMsduAggregationPolicy->computeAggregateFrames(remaining));
+            bool valid = group && group->size() > 1 && group->size() <= remaining.size();
+            if (valid)
+                for (size_t i=0;i<group->size();i++)
+                    valid &= group->at(i) == remaining[i] && (!aMsduPermitted || aMsduPermitted(group->at(i)));
+            if (valid) {
+                std::vector<Packet *> copies;
+                for (auto packet : *group)
+                    copies.push_back(packet->dup());
+                std::unique_ptr<Packet> preview(aMsduAggregation->aggregateFrames(&copies));
+                if (preview->getDataLength() <= memberLimit && (!aMsduPermitted || aMsduPermitted(preview.get()))) {
+                    sources = *group;
+                    preparation->aggregate = true;
+                    preparation->setPacket(preview.release());
+                }
+            }
+        }
+        if (!preparation->packet)
+            preparation->setPacket(remaining.front()->dup());
+        if (preparation->packet->getDataLength() > memberLimit)
+            break;
+        for (auto source : sources)
+            preparation->sourceIds.push_back(source->getId());
+        preparation->sequenceOffset = result.size();
+        auto header = preparation->packet->removeAtFront<Ieee80211DataHeader>();
+        header->setSequenceNumber(getNextSequenceNumber(header->getReceiverAddress(),header->getTid()) + preparation->sequenceOffset);
+        preparation->packet->insertAtFront(header);
+        result.push_back(std::move(preparation));
+        remaining.erase(remaining.begin(),remaining.begin()+sources.size());
+    }
+    std::vector<Packet *> candidates;
+    for (const auto& preparation : result)
+        candidates.push_back(preparation->packet.get());
+    auto selected = selectAmpduFrames(candidates);
+    // Selection is an ordered prefix. No extraction or identity is consumed.
+    result.resize(selected.size());
+    return result;
+}
+
+std::vector<Packet *> OriginatorQosMacDataService::selectAmpduFrames(const std::vector<Packet *>& candidates)
+{
+    Enter_Method("selectAmpduFrames");
+    if (!aMpduAggregationPolicy || candidates.empty())
+        return {};
+    auto input = candidates;
+    std::unique_ptr<std::vector<Packet *>> selected(aMpduAggregationPolicy->computeAggregateFrames(&input));
+    if (!selected || selected->empty() || selected->size() > candidates.size())
+        return {};
+    for (size_t i=0;i<selected->size();i++)
+        if (selected->at(i) != candidates[i])
+            throw cRuntimeError("MPDU aggregation policy must return an ordered candidate prefix");
+    return *selected;
+}
+
 bool OriginatorQosMacDataService::isPreparationValid(const PreparedQosData& preparation, simtime_t start) const
 {
     if (!preparation.packet || !preparation.queue || preparation.sourceIds.empty())
         return false;
     auto header = preparation.packet->peekAtFront<Ieee80211DataHeader>();
-    if (header->getSequenceNumber() != getNextSequenceNumber(header->getReceiverAddress(), header->getTid()))
+    if (header->getSequenceNumber() != getNextSequenceNumber(header->getReceiverAddress(), header->getTid()) + preparation.sequenceOffset)
         return false;
     for (auto id : preparation.sourceIds) {
         Packet *source = nullptr;
@@ -129,6 +212,15 @@ bool OriginatorQosMacDataService::isPreparationValid(const PreparedQosData& prep
             return false;
     }
     return true;
+}
+
+Packet *OriginatorQosMacDataService::buildAmpdu(const std::vector<Packet *>& members, const MpduAggregationParameters& parameters)
+{
+    Enter_Method("buildAmpdu");
+    ASSERT(aMpduAggregation && !members.empty());
+    std::vector<Packet *> copies;
+    for (auto member : members) copies.push_back(member->dup());
+    return aMpduAggregation->aggregateFrames(&copies,parameters);
 }
 
 Packet *OriginatorQosMacDataService::commitPreparedFrame(PreparedQosData& preparation)

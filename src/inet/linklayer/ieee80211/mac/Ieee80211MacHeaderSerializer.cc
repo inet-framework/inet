@@ -173,7 +173,9 @@ const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserializeFields(Memory
     mpduSubframe->setVht(delimiter & 0xD);
     auto crc = stream.readByte();
     auto signature = stream.readByte();
-    if (crc != computeMpduDelimiterCrc(delimiter) || signature != 0x4E || (delimiter & 2))
+    // Reserved B1 is zero on transmit and ignored on receive (2024 9.2.2).
+    // The CRC still protects the actual received sixteen bits.
+    if (crc != computeMpduDelimiterCrc(delimiter) || signature != 0x4E)
         mpduSubframe->markIncorrect();
     return mpduSubframe;
 }

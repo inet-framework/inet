@@ -434,6 +434,8 @@ class MeshHighPhyMetricDriver : public cSimpleModule, public cListener
 };
 Define_Module(MeshHighPhyMetricDriver);
 
+#include "mesh/MeshAmpduMetricSupport.h"
+
 namespace inet::protocoltest {
 Define_ProtocolTest(mesh_airtime_metric) {
     auto test = ProtocolTest("mesh_airtime_metric");
@@ -459,12 +461,23 @@ Define_ProtocolTest(mesh_high_phy_airtime_metric) {
         .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.015).drop())
         .once(on("driver").signal("highMetricComplete").assertValue(1).within(0.06));
 }
+Define_ProtocolTest(mesh_ampdu_airtime_metric) {
+    auto injected = std::make_shared<bool>(false);
+    return ProtocolTest("mesh_ampdu_airtime_metric")
+        .meanwhile(tap("radioMedium").from("station[0]").to("station[1]").mutate([injected](Packet *packet) {
+            auto actual = packet->findTag<Ieee80211ModeInd>();
+            if (*injected || !actual || !actual->getTxVector().ampdu || std::string(packet->getName()).find("metric-aggregate") == std::string::npos) return;
+            ASSERT(corruptReceivedAmpduMember(packet,1)); *injected = true;
+        }).within(0.16))
+        .once(on("driver").signal("aggregateMetricComplete").assertValue(1).within(0.16));
+}
 }
 
 %file: test.ned
 import inet.protocoltest.wifi.MeshPairNetwork;
 import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
 import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 module MetricHcf extends Hcf { parameters: @class(::MetricHcf); }
 simple MetricManagement extends Ieee80211MgmtMesh { parameters: @class(::MetricManagement); @lifecycleSupport; }
@@ -476,20 +489,30 @@ network HtTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDr
 network VhtTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver; }
 network HtAmsduTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver { aggregation = true; } }
 network VhtAmsduTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver { aggregation = true; } }
+module MeshMetricHoldMac extends Ieee80211MeshMac { parameters: @class(::MeshMetricHoldMac); }
+simple MeshAmpduMetricDriver { parameters: bool releaseHold @mutable = default(false); @class(::MeshAmpduMetricDriver); @signal[aggregateMetricComplete](type=long); }
+network HtAmpduTest extends MeshPairNetwork { submodules: driver: MeshAmpduMetricDriver; }
+network VhtAmpduTest extends MeshPairNetwork { submodules: driver: MeshAmpduMetricDriver; }
 
 %inifile: test.ini
 [General]
-network = ${metricNetwork=Test,HtTest,VhtTest,HtAmsduTest,VhtAmsduTest}
+network = ${metricNetwork=Test,HtTest,VhtTest,HtAmsduTest,VhtAmsduTest,HtAmpduTest,VhtAmpduTest}
+constraint = ${aggregateMetricId} == 2 || "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest"
 cmdenv-express-mode = true
 **.cmdenv-log-level = warn
 *.numStations = "${metricNetwork}" == "Test" ? 6 : 2
+*.station[0..1].wlan[0].pathSelectionMetricId = "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? ${aggregateMetricId=1,2} : ("${metricNetwork}" == "Test" ? 1 : 2)
 *.station[*].mobility.initialX = 20m
-*.station[*].wlan[0].phyProfile = "${metricNetwork}" == "Test" ? "ofdm" : ("${metricNetwork}" == "HtTest" || "${metricNetwork}" == "HtAmsduTest" ? "ht" : "vht")
+*.station[*].wlan[0].phyProfile = "${metricNetwork}" == "Test" ? "ofdm" : ("${metricNetwork}" == "HtTest" || "${metricNetwork}" == "HtAmsduTest" || "${metricNetwork}" == "HtAmpduTest" ? "ht" : "vht")
 *.station[*].wlan[0].radio.typename = "${metricNetwork}" == "Test" ? "Ieee80211ScalarRadio" : "Ieee80211DimensionalRadio"
 *.station[*].wlan[0].radio.bandName = "${metricNetwork}" == "Test" ? "5 GHz (20 MHz)" : "5 GHz (mapped 20 MHz)"
 *.station[*].wlan[0].pathSelection.typename = "${metricNetwork}" == "Test" ? "MeshFixturePaths" : "Hwmp"
-*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "${metricNetwork}" == "Test" ? "auto" : ("${metricNetwork}" == "HtTest" || "${metricNetwork}" == "HtAmsduTest" ? "ht" : "vht")
-*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "${metricNetwork}" == "HtAmsduTest" || "${metricNetwork}" == "VhtAmsduTest" ? "BasicMsduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "${metricNetwork}" == "Test" ? "auto" : ("${metricNetwork}" == "HtTest" || "${metricNetwork}" == "HtAmsduTest" || "${metricNetwork}" == "HtAmpduTest" ? "ht" : "vht")
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "${metricNetwork}" == "HtAmsduTest" || "${metricNetwork}" == "VhtAmsduTest" || "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? "BasicMsduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = 100
+*.station[*].wlan[0].mac.hcf.isBlockAckSupported = "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? "BasicMpduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 0s
 *.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs = "${metricNetwork}" == "Test" ? -1 : 7
 *.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = "${metricNetwork}" == "Test" ? -1 : 1
 *.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = "${metricNetwork}" == "Test" ? nan Hz : 20MHz
@@ -500,6 +523,7 @@ cmdenv-express-mode = true
 *.station[*].wlan[0].mgmt.holdingTimeout = 5ms
 *.station[*].wlan[0].mac.fcsMode = "computed"
 *.station[*].wlan[0].mac.hcf.typename = "MetricHcf"
+*.station[*].wlan[0].mac.typename = "${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? "MeshMetricHoldMac" : "Ieee80211MeshMac"
 *.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].recoveryProcedure.shortRetryLimit = 1
 *.station[*].wlan[0].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = 3
 *.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].cwMin = 0
@@ -515,10 +539,10 @@ cmdenv-express-mode = true
 *.radioMedium.typename = "${metricNetwork}" == "Test" ? "Ieee80211ScalarTapRadioMedium" : "HighMetricMedium"
 *.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
 *.radioMedium.backgroundNoise.power = "${metricNetwork}" == "Test" ? -110dBm : nan W
-*.tester.testName = "${metricNetwork}" == "Test" ? "mesh_airtime_metric" : "mesh_high_phy_airtime_metric"
+*.tester.testName = "${metricNetwork}" == "Test" ? "mesh_airtime_metric" : ("${metricNetwork}" == "HtAmpduTest" || "${metricNetwork}" == "VhtAmpduTest" ? "mesh_ampdu_airtime_metric" : "mesh_high_phy_airtime_metric")
 include ../../ini/_mesh.ini
 
-%extraargs: -r 0..4
+%extraargs: -r 0..8
 %contains: stdout
 PROTOCOLTEST mesh_airtime_metric: PASS
 
@@ -530,3 +554,9 @@ PROTOCOLTEST mesh_airtime_metric: FAIL
 
 %not-contains: stdout
 PROTOCOLTEST mesh_high_phy_airtime_metric: FAIL
+
+%contains-regex: stdout
+PROTOCOLTEST mesh_ampdu_airtime_metric: PASS.*PROTOCOLTEST mesh_ampdu_airtime_metric: PASS.*PROTOCOLTEST mesh_ampdu_airtime_metric: PASS.*PROTOCOLTEST mesh_ampdu_airtime_metric: PASS
+
+%not-contains: stdout
+PROTOCOLTEST mesh_ampdu_airtime_metric: FAIL

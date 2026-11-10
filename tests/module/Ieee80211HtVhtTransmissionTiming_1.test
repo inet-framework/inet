@@ -1,13 +1,15 @@
 %description:
 Transmit actual HT and VHT short-GI 49-symbol PPDUs through packet-level radios.
-The PSDU/APEP is1560bytes: raw DATA176.4us, transmitted residual180us,
-whole HT216us/VHT220us. Verify the real medium departure and receiver delivery.
+The HT PSDU/VHT APEP is1560bytes: raw DATA176.4us, transmitted residual180us,
+whole HT216us/VHT220us. VHT fills its1589-byte PSDU capacity. An additional
+58-byte member needs62bytes without impossible alignment that would add a symbol.
 
 %file: test.cc
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/common/checksum/Checksum.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
@@ -37,19 +39,27 @@ class TimingProbe : public cSimpleModule, public cListener
         ASSERT(selected[0] && selected[1]);
         scheduleAt(SimTime(1,SIMTIME_MS),new cMessage("HT",0));
         scheduleAt(SimTime(2,SIMTIME_MS),new cMessage("VHT",1));
-        scheduleAt(SimTime(3,SIMTIME_MS),new cMessage("check",2));
+        scheduleAt(SimTime(3,SIMTIME_MS),new cMessage("single-alignment-edge",2));
+        scheduleAt(SimTime(4,SIMTIME_MS),new cMessage("check",3));
     }
     void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
         auto tx = check_and_cast<const Ieee80211Transmission *>(object);
         int family = tx->getMode()->getVhtMcsIndex() >= 0;
+        bool boundary = std::string(tx->getPacket()->getName()) == "VHT-alignment-edge";
         ASSERT(tx->getMode() == selected[family]);
         auto header = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(tx->getPacket());
-        ASSERT(header->getLengthField() == B(1560));
-        ASSERT(tx->getMode()->getDataMode()->getDuration(B(1560)) == SimTime(176400,SIMTIME_NS));
+        ASSERT(header->getLengthField() == B(boundary ? 62 : family ? 1589 : 1560));
+        B durationInput(boundary ? 62 : 1560);
+        ASSERT(tx->getMode()->getDataMode()->getDuration(durationInput) == SimTime(boundary ? 7200 : 176400,SIMTIME_NS));
+        if (family) {
+            Ieee80211SingleMpduLayout layout;
+            ASSERT(findSingleMpdu(tx->getPacket(),header->getChunkLength(),header->getLengthField(),layout));
+            ASSERT(layout.preEofLength == durationInput);
+        }
         ASSERT(tx->getHeaderDuration() == SimTime(8,SIMTIME_US));
         ASSERT(tx->getPreambleDuration() == SimTime(family ? 32 : 28,SIMTIME_US));
-        ASSERT(tx->getDataDuration() == SimTime(180,SIMTIME_US));
-        ASSERT(tx->getEndTime()-tx->getStartTime() == SimTime(family ? 220 : 216,SIMTIME_US));
+        ASSERT(tx->getDataDuration() == SimTime(boundary ? 8 : 180,SIMTIME_US));
+        ASSERT(tx->getEndTime()-tx->getStartTime() == SimTime(boundary ? 48 : family ? 220 : 216,SIMTIME_US));
         ASSERT(tx->getTxVector().singleMpdu == bool(family));
         departures++;
     }
@@ -58,23 +68,26 @@ class TimingProbe : public cSimpleModule, public cListener
             auto packet = check_and_cast<Packet *>(message);
             ASSERT(!packet->hasBitError());
             int family = packet->getTag<Ieee80211ModeInd>()->getMode()->getVhtMcsIndex() >= 0;
-            ASSERT(packet->getDataLength() == B(family ? 1556 : 1560));
+            bool boundary = std::string(packet->getName()) == "VHT-alignment-edge";
+            ASSERT(packet->getDataLength() == B(boundary ? 58 : family ? 1556 : 1560));
             deliveries++; delete packet; return;
         }
         int family = message->getKind(); delete message;
-        if (family == 2) {
-            ASSERT(departures == 2 && deliveries == 2);
+        if (family == 3) {
+            ASSERT(departures == 3 && deliveries == 3);
             EV << "Actual HT/VHT49-symbol short-GI transmission timing verified.\n";
             endSimulation(); return;
         }
+        bool boundary = family == 2;
+        if (boundary) family = 1;
         auto header = makeShared<Ieee80211DataHeader>();
         header->setType(ST_DATA_WITH_QOS); header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
         header->setChunkLength(B(26));
         header->setSequenceNumber(SequenceNumberCyclic(family));
         header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
         header->setAddress3(MacAddress("02:00:00:00:00:02")); header->setDurationField(SIMTIME_ZERO);
-        auto packet = new Packet(family ? "VHT49symbols" : "HT49symbols",header);
-        int memberLength = family ? 1556 : 1560; // VHT adds one4-byte delimiter, with no suffix padding.
+        auto packet = new Packet(boundary ? "VHT-alignment-edge" : family ? "VHT49symbols" : "HT49symbols",header);
+        int memberLength = boundary ? 58 : family ? 1556 : 1560;
         packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(memberLength-header->getChunkLength().get<B>()-4,0x5a)));
         auto bytes = packet->peekAllAsBytes()->getBytes();
         auto fcs = makeShared<Ieee80211MacTrailer>(); fcs->setFcsMode(FCS_COMPUTED);
@@ -110,7 +123,7 @@ network Test {
 [General]
 network = Test
 ned-path = .;../../../../src
-sim-time-limit = 4ms
+sim-time-limit = 5ms
 seed-set = 0
 **.vector-recording = false
 **.scalar-recording = false

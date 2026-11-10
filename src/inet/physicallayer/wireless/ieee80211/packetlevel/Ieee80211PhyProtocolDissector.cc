@@ -45,7 +45,15 @@ void Ieee80211PhyProtocolDissector::dissect(Packet *packet, const Protocol *prot
     auto request = packet->findTag<physicallayer::Ieee80211ModeReq>();
     auto indication = packet->findTag<physicallayer::Ieee80211ModeInd>();
     bool single = indication ? indication->getTxVector().singleMpdu : request && request->getTxVector().singleMpdu;
-    if (single) {
+    bool aggregate = indication ? indication->getTxVector().ampdu : request && request->getTxVector().ampdu;
+    if (aggregate) {
+        // The generic recorder has one interval only. Keep a multi-member
+        // PSDU opaque rather than merging MAC intervals across delimiter gaps.
+        // The opt-in WLAN recorder publishes individual validated-layout copies.
+        if (packet->getDataLength() != b(0))
+            callback.visitChunk(packet->popAtFront(packet->getDataLength()),protocolTag);
+    }
+    else if (single) {
         ieee80211::Ieee80211SingleMpduLayout layout;
         if (!ieee80211::findSingleMpdu(packet, b(0), B(packet->getDataLength()), layout)) {
             callback.markIncorrect();

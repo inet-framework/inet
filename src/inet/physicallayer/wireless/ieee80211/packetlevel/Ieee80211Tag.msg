@@ -23,6 +23,7 @@ struct Ieee80211TxVector
     int format @getter(getFormat);
     Hz bandwidth;
     bool singleMpdu;
+    bool ampdu;
 }
 
 //

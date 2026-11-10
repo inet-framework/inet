@@ -5,6 +5,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/linklayer/ieee80211/mesh/AirtimeLinkMetric.h"
 #include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
@@ -186,6 +187,7 @@ class MeshPhyDriver : public cSimpleModule, public cListener
         ASSERT(par("vht").boolValue() ? mode->getVhtMcsIndex() == 7 : mode->getHtMcsIndex() == 8*nss-1);
         auto bytes = packet->peekDataAt<BytesChunk>(phy->getChunkLength(), phy->getLengthField())->getBytes();
         size_t offset = 0, memberLength = bytes.size();
+        B durationInput(bytes.size());
         if (par("vht")) {
             ASSERT(dynamicPtrCast<const Ieee80211VhtPhyHeader>(phy));
             ASSERT(vector.singleMpdu && vector.format == Ieee80211TxVector::Format::VHT);
@@ -193,13 +195,16 @@ class MeshPhyDriver : public cSimpleModule, public cListener
             ASSERT((word & 3) == 1 && bytes[3] == 0x4E);
             memberLength = (word >> 4) | ((word & 12) << 10);
             offset = 4;
-            ASSERT(bytes.size() == 4 + memberLength + (4-memberLength%4)%4);
+            ASSERT(bytes.size() == size_t(getSingleMpduPsduLength(B(memberLength),mode).get<B>()));
+            Ieee80211SingleMpduLayout layout;
+            ASSERT(findSingleMpdu(packet,phy->getChunkLength(),phy->getLengthField(),layout));
+            durationInput = layout.preEofLength;
         }
         else ASSERT(!vector.singleMpdu && vector.format == Ieee80211TxVector::Format::HT_MIXED);
         ASSERT(memberLength >= 4);
         auto fcs = independentMeshFcs(bytes,offset,memberLength-4);
         for (int byte = 0; byte < 4; byte++) ASSERT(bytes[offset+memberLength-4+byte] == ((fcs>>(8*byte))&255));
-        ASSERT(transmission->getDuration() == mode->getDuration(B(bytes.size())));
+        ASSERT(transmission->getDuration() == mode->getDuration(durationInput));
         MeshMemberCaptureAudit audit;
         std::unique_ptr<Packet> captured(packet->dup());
         PacketDissector(ProtocolDissectorRegistry::getInstance(),audit).dissectPacket(captured.get());

@@ -209,6 +209,13 @@ void Ieee80211Mac::handleUpperPacket(Packet *packet)
 
 void Ieee80211Mac::handleLowerPacket(Packet *packet)
 {
+    auto mode = packet->findTag<Ieee80211ModeInd>();
+    if (mode && mode->getTxVector().ampdu) {
+        // A multi-member body is still PHY-wrapped. Unsupported MAC roles
+        // must not reinterpret its first delimiter as a bare MAC header.
+        if (mib->qos) hcf->receiveAmpdu(packet); else delete packet;
+        return;
+    }
     if (rx->lowerFrameReceived(packet)) {
         auto header = packet->peekAtFront<Ieee80211MacHeader>();
         processLowerFrame(packet, header);
@@ -388,7 +395,8 @@ void Ieee80211Mac::sendDownFrame(Packet *frame)
     Enter_Method("sendDownFrame(\"%s\")", frame->getName());
     take(frame);
     configureRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+    auto mode = frame->findTag<Ieee80211ModeReq>();
+    frame->addTagIfAbsent<PacketProtocolTag>()->setProtocol(mode && mode->getTxVector().ampdu ? &Protocol::unknown : &Protocol::ieee80211Mac);
     sendDown(frame);
 }
 

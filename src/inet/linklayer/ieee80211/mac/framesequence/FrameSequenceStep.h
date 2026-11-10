@@ -53,6 +53,17 @@ class INET_API RtsTransmitStep : public TransmitStep
     virtual const Packet *getProtectedFrame() { return protectedFrame; }
 };
 
+/** Owns the transmitted PSDU, borrowing the ordered originals until the
+ * sequence releases all references through InProgressFrames. */
+class INET_API AggregateTransmitStep : public TransmitStep
+{
+  public:
+    std::vector<Packet *> members;
+    simtime_t responseTimeout;
+    AggregateTransmitStep(Packet *psdu, std::vector<Packet *> members, simtime_t ifs, simtime_t timeout) :
+        TransmitStep(psdu, ifs, true), members(std::move(members)), responseTimeout(timeout) {}
+};
+
 class INET_API ReceiveStep : public IReceiveStep
 {
   protected:

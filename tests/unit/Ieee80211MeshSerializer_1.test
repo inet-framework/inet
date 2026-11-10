@@ -97,6 +97,7 @@ class DataDissectionAudit : public ProtocolDissector::ICallback
     int meshControls = 0;
     bool incorrect = false;
     b payloadLength = b(0);
+    std::vector<uint8_t> payloadBytes;
     const Protocol *payloadProtocol = nullptr;
     void startProtocolDataUnit(const Protocol *) override {}
     void endProtocolDataUnit(const Protocol *) override {}
@@ -108,6 +109,8 @@ class DataDissectionAudit : public ProtocolDissector::ICallback
     void dissectPacket(Packet *packet, const Protocol *protocol) override {
         payloadLength += packet->getDataLength();
         payloadProtocol = protocol;
+        auto bytes = packet->peekDataAsBytes()->getBytes();
+        payloadBytes.insert(payloadBytes.end(),bytes.begin(),bytes.end());
         packet->popAtFront(packet->getDataLength());
     }
 };
@@ -408,12 +411,14 @@ for (const auto& body : {std::vector<uint8_t>{0,5,4,3,2,1,0xaa,0xaa},
     DataDissectionAudit audit;
     ProtocolDissectorRegistry::getInstance().getProtocolDissector(&Protocol::ieee80211Mac)
         ->dissect(&context, &Protocol::ieee80211Mac, audit);
-    ASSERT(audit.meshControls == 1);
+    ASSERT(audit.meshControls == (body.size() < 6 ? 0 : 1));
     ASSERT(audit.incorrect == (body.front() != 0));
     if (body.front() != 0)
         ASSERT(audit.payloadProtocol == nullptr);
     else
         ASSERT(audit.payloadLength == B(2));
+    if (body.size() < 6)
+        ASSERT(audit.incorrect && audit.payloadProtocol == nullptr && audit.payloadLength == B(body.size()) && audit.payloadBytes == body);
 }
 
 const std::vector<uint8_t> reservedMeshHeaderBytes = {

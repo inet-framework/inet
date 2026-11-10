@@ -14,6 +14,7 @@
 #include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211AmpduObservationTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
@@ -43,6 +44,17 @@ const Protocol *Ieee80211MacProtocolDissector::computeLlcProtocol(Packet *packet
 
 void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *protocol, ICallback& callback) const
 {
+    if (packet->hasBitError() && packet->findTag<ieee80211::Ieee80211AmpduObservationTag>()) {
+        // Recorder observation context never authorizes production decoding.
+        // Corrupt FC/header bytes remain exact, opaque MAC/FCS bytes even for
+        // verbose printing or field filtering; no fabricated header is needed.
+        callback.startProtocolDataUnit(protocol);
+        callback.markIncorrect();
+        if (packet->getDataLength() != b(0))
+            callback.visitChunk(packet->popAtFront(packet->getDataLength()),protocol);
+        callback.endProtocolDataUnit(protocol);
+        return;
+    }
     // Pop the FCS trailer before the header so that a header whose length is only
     // bounded by the end of the frame -- an Ieee80211ActionFrameOther, which stores the
     // unmodelled action body up to the FCS -- does not read into the FCS.
@@ -125,10 +137,14 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
             bool invalidMeshControl = false;
             if (auto mesh = dynamicPtrCast<const ieee80211::Ieee80211MeshDataHeader>(dataHeader)) {
                 if (mesh->getMeshControlPresent()) {
-                    auto control = packet->popAtFront<ieee80211::Ieee80211MeshControl>(b(-1),
-                            Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
-                    callback.visitChunk(control, &Protocol::ieee80211Mac);
-                    invalidMeshControl = control->isIncorrect() || control->isIncomplete();
+                    if (packet->getDataLength() < B(6))
+                        invalidMeshControl = true;
+                    else {
+                        auto control = packet->popAtFront<ieee80211::Ieee80211MeshControl>(b(-1),
+                                Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+                        callback.visitChunk(control, &Protocol::ieee80211Mac);
+                        invalidMeshControl = control->isIncorrect() || control->isIncomplete();
+                    }
                     if (invalidMeshControl)
                         callback.markIncorrect();
                 }

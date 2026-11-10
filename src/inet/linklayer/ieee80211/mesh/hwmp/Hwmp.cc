@@ -90,6 +90,7 @@ void Hwmp::handleStartOperation(LifecycleOperation *)
     paths.clear(); selfPrecursors.clear(); seen.clear();
     mib->subscribe(Ieee80211Mib::meshPeerChangedSignal,this);
     hcf->subscribe(Hcf::meshDataAttemptCompletedSignal,this);
+    hcf->subscribe(Hcf::meshTerminalRecoverySignal,this);
     if (rootMode != NO_ROOT)
         scheduleAfter(rootMode == RANN ? rannInterval : rootInterval,rootOriginTimer);
 }
@@ -100,6 +101,8 @@ void Hwmp::unsubscribeFailureNotifications()
         mib->unsubscribe(Ieee80211Mib::meshPeerChangedSignal,this);
     if (hcf && hcf->isSubscribed(Hcf::meshDataAttemptCompletedSignal,this))
         hcf->unsubscribe(Hcf::meshDataAttemptCompletedSignal,this);
+    if (hcf && hcf->isSubscribed(Hcf::meshTerminalRecoverySignal,this))
+        hcf->unsubscribe(Hcf::meshTerminalRecoverySignal,this);
 }
 
 void Hwmp::receiveSignal(cComponent *, simsignal_t signal, bool value, cObject *details)
@@ -118,6 +121,11 @@ void Hwmp::receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *d
         auto attempt = check_and_cast<MeshDataAttempt *>(details);
         if (!attempt->acknowledged && attempt->terminalTimeout && mib->isMeshPeerEstablished(attempt->peer))
             invalidatePeer(attempt->peer,false);
+    }
+    else if (operationalState == OPERATING && signal == Hcf::meshTerminalRecoverySignal) {
+        auto recovery = check_and_cast<MeshTerminalRecovery *>(details);
+        if (mib->isMeshPeerEstablished(recovery->peer))
+            invalidatePeer(recovery->peer,false);
     }
 }
 

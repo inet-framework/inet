@@ -18,6 +18,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/radiotap/Ieee80211RadiotapHeaderSerializer.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211AmpduObservationTag_m.h"
 
 namespace inet {
 
@@ -172,6 +173,13 @@ Ptr<Ieee80211RadiotapHeader> Ieee80211RadiotapPcapRecorderHelper::createHeader(c
         header->setChannelFlags(channelFlags);
     }
     header->setFlags(flags);
+    if (auto aggregate = packet->findTag<ieee80211::Ieee80211AmpduObservationTag>()) {
+        present |= 1 << RADIOTAP_AMPDU_STATUS;
+        header->setAmpduReference(aggregate->getReference());
+        header->setAmpduFlags(RADIOTAP_AMPDU_LAST_KNOWN | RADIOTAP_AMPDU_DELIMITER_CRC_KNOWN | RADIOTAP_AMPDU_EOF_KNOWN
+            | (aggregate->getMemberIndex()+1 == aggregate->getMemberCount() ? RADIOTAP_AMPDU_IS_LAST : 0));
+        header->setAmpduDelimiterCrc(aggregate->getDelimiterCrc());
+    }
     header->setPresent(present);
     header->setChunkLength(computeIeee80211RadiotapHeaderLength(present));
     return header;

@@ -12,6 +12,7 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mac/contract/IOriginatorMacDataService.h"
+#include "inet/linklayer/ieee80211/mac/contract/IMpduAggregation.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -23,6 +24,7 @@ struct INET_API PreparedQosData : public cObject
     queueing::IPacketQueue *queue = nullptr;
     std::vector<int64_t> sourceIds;
     bool aggregate = false;
+    int sequenceOffset = 0; // Reversible position among fresh same-peer/TID MPDUs.
 
     ~PreparedQosData() override;
     void setPacket(Packet *value);
@@ -39,8 +41,15 @@ class INET_API IOriginatorQosMacDataService : public IOriginatorMacDataService
     virtual Packet *peekEligibleFrame(queueing::IPacketQueue *queue) const = 0;
     virtual SequenceNumberCyclic getNextSequenceNumber(MacAddress peer, Tid tid) const = 0;
     virtual bool hasAMsduAggregation() const = 0;
+    virtual bool hasAMpduAggregation() const = 0;
     // These QoS DATA methods separate reversible preparation from extraction and sequence assignment.
     virtual std::unique_ptr<PreparedQosData> prepareFrame(queueing::IPacketQueue *queue, bool allowAggregation) = 0;
+    virtual std::vector<std::unique_ptr<PreparedQosData>> prepareFrames(queueing::IPacketQueue *queue,
+        bool allowMsduAggregation, int maxMembers, B memberLimit) = 0;
+    // Applies the configured policy to ordered borrowed MPDU candidates.
+    virtual std::vector<Packet *> selectAmpduFrames(const std::vector<Packet *>& candidates) = 0;
+    // Borrows retained originals/previews and returns an owned encoded copy.
+    virtual Packet *buildAmpdu(const std::vector<Packet *>& members, const MpduAggregationParameters& parameters) = 0;
     virtual bool isPreparationValid(const PreparedQosData& preparation, simtime_t start) const = 0;
     // Success transfers the preview to the caller. Failure retains the preview and all queued sources.
     virtual Packet *commitPreparedFrame(PreparedQosData& preparation) = 0;

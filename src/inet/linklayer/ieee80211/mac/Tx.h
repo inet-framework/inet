@@ -27,6 +27,7 @@ class INET_API Tx : public SimpleModule, public ITx
     Ieee80211Mac *mac = nullptr;
     IRx *rx = nullptr;
     Packet *frame = nullptr;
+    Ptr<const Ieee80211MacHeader> completionHeader;
     cMessage *endIfsTimer = nullptr;
     bool transmitting = false;
     bool updateLocalNav = false;
@@ -35,6 +36,7 @@ class INET_API Tx : public SimpleModule, public ITx
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
+    void finalizeMpdu(Packet *packet);
 
   public:
     Tx() {}

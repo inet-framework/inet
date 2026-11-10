@@ -6,21 +6,29 @@
 #include "inet/common/packet/Packet.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Ampdu.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211TxVector.h"
 
 namespace inet::ieee80211 {
 
-/** One payload member transport (2024 9.7.1,10.12.6--10.12.8), without H3's aggregation engine. */
+/** EOF1 single-member Normal-Ack transport (2024 9.7.1,10.12.6--10.12.8),
+ * distinct from an EOF0 aggregate exchange that currently contains one member. */
 struct INET_API Ieee80211SingleMpduLayout
 {
     B memberOffset = B(4);
     B memberLength = B(0);
     B suffixLength = B(0);
+    B preEofLength = B(0);
 };
 
-inline B getSingleMpduPsduLength(B length)
+inline B getSingleMpduApepLength(B length)
 {
-    return B(4) + length + B((4 - length.get<B>() % 4) % 4);
+    return B(4) + length;
+}
+
+inline B getSingleMpduPsduLength(B length, const physicallayer::IIeee80211Mode *mode)
+{
+    return getVhtPsduCapacity(getSingleMpduApepLength(length),mode);
 }
 
 inline physicallayer::Ieee80211TxVector getMpduTxVector(const physicallayer::IIeee80211Mode *mode,
@@ -36,19 +44,15 @@ inline simtime_t computeMpduPpduDuration(const physicallayer::IIeee80211Mode *mo
 {
     auto vector = getMpduTxVector(mode, packet->peekAtFront<Ieee80211MacHeader>());
     B length(packet->getDataLength());
-    return mode->getDuration(vector.singleMpdu ? getSingleMpduPsduLength(length) : length);
+    return mode->getDuration(vector.singleMpdu ? getSingleMpduApepLength(length) : length);
 }
 
 inline bool findSingleMpdu(const Packet *packet, b offset, B length, Ieee80211SingleMpduLayout& layout)
 {
-    if (offset < B(0) || length < B(4) || offset + length > packet->getDataLength())
+    Ieee80211AmpduLayout aggregate;
+    if (!findAmpdu(packet,offset,length,true,aggregate,true) || aggregate.members.size() != 1)
         return false;
-    constexpr int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
-    auto delimiter = packet->peekDataAt<Ieee80211MpduSubframeHeader>(offset, B(4), flags | Chunk::PF_ALLOW_REINTERPRETATION);
-    if (!delimiter->isCorrect() || !delimiter->isComplete() || !delimiter->getEof()
-            || delimiter->getLength() < 4 || B(delimiter->getLength()) > length - B(4))
-        return false;
-    B member(delimiter->getLength());
+    B member = aggregate.members.front().length;
     // Before any MAC observer can see this interval, establish its complete
     // type-dependent header, excluding the member FCS. A valid delimiter can
     // otherwise expose an empty or truncated QoS/four-address MAC header.
@@ -59,26 +63,13 @@ inline bool findSingleMpdu(const Packet *packet, b offset, B length, Ieee80211Si
     auto header = dynamicPtrCast<Ieee80211MacHeader>(Chunk::deserialize(input, typeid(Ieee80211MacHeader)));
     if (!header || !header->isCorrect() || !header->isComplete())
         return false;
-    B cursor = B(4) + member;
-    // Final alignment, followed optionally by EOF padding delimiters and up to3 trailing octets.
-    if (cursor < length) {
-        B padding((4 - member.get<B>() % 4) % 4);
-        if (padding > length - cursor)
-            return false;
-        cursor += padding;
-        while (length - cursor >= B(4)) {
-            auto eof = packet->peekDataAt<Ieee80211MpduSubframeHeader>(offset + cursor, B(4), flags | Chunk::PF_ALLOW_REINTERPRETATION);
-            if (!eof->isCorrect() || !eof->isComplete() || !eof->getEof() || eof->getLength() != 0)
-                return false;
-            cursor += B(4);
-        }
-    }
     layout.memberLength = member;
     layout.suffixLength = length - B(4) - member;
+    layout.preEofLength = aggregate.preEofLength;
     return true;
 }
 
-inline void wrapSingleMpdu(Packet *packet)
+inline void wrapSingleMpdu(Packet *packet, const physicallayer::IIeee80211Mode *mode)
 {
     B member(packet->getDataLength());
     if (member < B(4) || member > B(16383))
@@ -88,9 +79,7 @@ inline void wrapSingleMpdu(Packet *packet)
     delimiter->setEof(true);
     delimiter->setLength(member.get<B>());
     packet->insertAtFront(delimiter);
-    B padding = getSingleMpduPsduLength(member) - B(4) - member;
-    if (padding != B(0))
-        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(padding.get<B>(), 0)));
+    padVhtPsdu(packet,mode);
 }
 
 } // namespace inet::ieee80211

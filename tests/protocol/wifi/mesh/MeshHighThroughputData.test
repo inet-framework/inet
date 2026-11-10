@@ -659,7 +659,7 @@ Define_ProtocolTest(mesh_high_throughput_data) {
                 auto fcs = independentMeshFcs(member,0,headerLength);
                 for (int i=0;i<4;i++) member[headerLength+i] = (fcs>>(8*i))&255;
                 Packet shortMember("delimiter-valid-short-member",makeShared<BytesChunk>(member));
-                wrapSingleMpdu(&shortMember);
+                wrapSingleMpdu(&shortMember,packet->getTag<Ieee80211ModeInd>()->getMode());
                 bytes = shortMember.peekAllAsBytes()->getBytes();
             }
             phy->setLengthField(B(bytes.size()));

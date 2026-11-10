@@ -34,7 +34,7 @@ class INET_API IQosRateSelection
     // PREDICT checks localRxPeerTx; RESPOND checks localTxPeerRx.
     virtual const physicallayer::IIeee80211Mode *computeResponseCtsFrameMode(Packet *packet, const Ptr<const Ieee80211RtsFrame>& rtsFrame, ResponseQueryRole role) = 0;
     virtual const physicallayer::IIeee80211Mode *computeResponseAckFrameMode(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader, ResponseQueryRole role) = 0;
-    virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211BlockAckReq>& blockAckReq, ResponseQueryRole role) = 0;
+    virtual const physicallayer::IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *packet, const Ptr<const Ieee80211TwoAddressHeader>& blockAckReq, ResponseQueryRole role) = 0;
     // HCF derives startsTxop from the current frame sequence before this query.
     virtual const physicallayer::IIeee80211Mode *computeCompressedBlockAckReqMode(Packet *packet,
             const Ptr<const Ieee80211CompressedBlockAckReq>& blockAckReq, bool startsTxop) = 0;

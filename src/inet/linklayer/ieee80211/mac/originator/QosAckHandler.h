@@ -65,6 +65,8 @@ class INET_API QosAckHandler : public SimpleModule, public IAckHandler
     virtual void processTransmittedDataOrMgmtFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& header);
     virtual void processTransmittedBlockAckReq(const Ptr<const Ieee80211BlockAckReq>& blockAckReq, const OriginatorBlockAckAgreement *agreement);
     virtual void processFailedFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
+    void processTransmittedAmpduMember(const Ptr<const Ieee80211DataHeader>& header);
+    void processUnansweredAmpduMember(const Ptr<const Ieee80211DataHeader>& header);
     virtual void dropFrame(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader);
     virtual void dropFrames(std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>> seqAndFragNums);
 

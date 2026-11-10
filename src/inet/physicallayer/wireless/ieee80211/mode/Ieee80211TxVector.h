@@ -14,6 +14,7 @@ struct INET_API Ieee80211TxVector
     Format format = Format::NON_HT;
     Hz bandwidth = Hz(NaN);
     bool singleMpdu = false;
+    bool ampdu = false; // Actual HT aggregate indication or VHT EOF0 Block Ack transport.
 
     Ieee80211TxVector() = default;
     explicit Ieee80211TxVector(const IIeee80211Mode *mode) : mode(mode) {
@@ -26,8 +27,10 @@ struct INET_API Ieee80211TxVector
     int getFormat() const { return static_cast<int>(format); }
     Hz getBandwidth() const { return bandwidth; }
     bool getSingleMpdu() const { return singleMpdu; }
+    bool getAmpdu() const { return ampdu; }
     bool operator==(const Ieee80211TxVector& other) const {
-        return mode == other.mode && format == other.format && bandwidth == other.bandwidth && singleMpdu == other.singleMpdu;
+        return mode == other.mode && format == other.format && bandwidth == other.bandwidth
+            && singleMpdu == other.singleMpdu && ampdu == other.ampdu;
     }
     bool operator!=(const Ieee80211TxVector& other) const { return !(*this == other); }
 };

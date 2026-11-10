@@ -1,0 +1,219 @@
+%description:
+Production native aggregation limits and nested payload count over real HWMP
+paths. Distinguish negotiated aggregate content, complete PHY PSDU and member
+limits; include a legal VHT PSDU larger than65535 octets.
+
+%file: MeshAggregationLimits.cc
+#include "mesh/MeshPhySupport.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
+#include "mesh/MeshAmpduLimitRadio.h"
+
+class MeshLimitsDriver : public cSimpleModule, public cListener
+{
+    int delivered = 0, ppdus = 0, transmittedMembers = 0, nestedMembers = 0, counts = 0;
+    int expectedPayloads = 0;
+    int uncommittedDrops = 0;
+    std::set<uint32_t> identities;
+    bool sawLarge = false;
+    std::vector<B> contentLengths;
+    double expectedN = 1;
+    int scenario() const { return par("scenario"); }
+    bool vht() const { return meshMib(0)->getLocalMeshPhyCapabilities().vhtPresent; }
+    void source(const char *name, int destination, int length) {
+        sendDirect(phyMsdu(name,meshMib(destination)->address,length-7),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+    }
+  protected:
+    void initialize() override {
+        for (auto signal : {packetSentToUpperSignal,transmissionEndedSignal,packetDroppedSignal,Hcf::meshPayloadTransmittedSignal,Hcf::meshTerminalRecoverySignal})
+            getSimulation()->getSystemModule()->subscribe(signal,this);
+        for (int time : {1,10,50,70,100,220}) scheduleAt(SimTime(time,SIMTIME_MS),new cMessage("limits",time));
+    }
+    void handleMessage(cMessage *message) override {
+        int step = message->getKind(); delete message;
+        if (step == 1000) {
+            ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getPayloadEstimate(meshMib(1)->address) == expectedN);
+            return;
+        }
+        if (step == 1) meshManagement(0)->openPeer(meshMib(1)->address);
+        if (step == 10) meshManagement(1)->openPeer(meshMib(2)->address);
+        if (step == 50) source("discover-C",2,7);
+        if (step == 70) source("discover-B",1,7);
+        if (step == 100) {
+            auto paths = check_and_cast<IMeshPathSelection *>(meshInterface(0)->getSubmodule("pathSelection"));
+            ASSERT(paths->findPath(meshMib(1)->address) && paths->findPath(meshMib(2)->address));
+            source("setup-prime",1,2304); // Different endpoint prevents an A-MSDU before ADDBA.
+            std::vector<int> sizes;
+            if (scenario() == 0) sizes.assign(vht() ? 33 : 20,2304);
+            if (scenario() == 1) sizes = {1500,1500,1500};
+            if (scenario() == 2 || scenario() == 3 || scenario() == 10) sizes = {7,7,7,120};
+            if (scenario() == 4 || scenario() == 5 || scenario() == 11 || scenario() == 12) sizes = {2304,2304,2304,scenario() == 5 ? 1090 : 1089};
+            if (scenario() == 6 || scenario() == 7) sizes = {2304,scenario() == 6 ? 1715 : 1716};
+            if (scenario() == 8 || scenario() == 9) sizes = {2304,scenario() == 8 ? 1515 : 1516};
+            if (scenario() >= 13) sizes.assign(scenario() == 14 ? 3 : 2,2304);
+            expectedPayloads = sizes.size();
+            for (size_t i=0;i<sizes.size();i++) source(("limit-data"+std::to_string(i)).c_str(),2,sizes[i]);
+        }
+        if (step == 220) {
+            if (scenario() == 15) {
+                ASSERT(delivered == 0 && ppdus == 0 && counts == 0 && uncommittedDrops == 2);
+                ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address) == 0);
+                emit(registerSignal("meshLimitsComplete"),1L); return;
+            }
+            ASSERT(delivered == expectedPayloads && ppdus >= 1 && counts == ppdus);
+            if (scenario() == 0) {
+                ASSERT(ppdus == 1 && transmittedMembers == expectedPayloads && nestedMembers == 0);
+                ASSERT(sawLarge == vht());
+            }
+            if (scenario() == 1) ASSERT(nestedMembers == 0 && transmittedMembers == 3);
+            if (scenario() == 2) ASSERT(ppdus == 1 && transmittedMembers == 2 && nestedMembers == 1);
+            if (scenario() == 3) ASSERT(ppdus == 1 && transmittedMembers == 4 && nestedMembers == 0);
+            if (scenario() == 4) ASSERT(ppdus == 1 && contentLengths.front() == B(8191));
+            if (scenario() == 5) ASSERT(ppdus == 2 && transmittedMembers == 4 && contentLengths.front() < B(8191));
+            if (scenario() == 6) ASSERT(nestedMembers == (vht() ? 0 : 1));
+            if (scenario() == 7) ASSERT(nestedMembers == 0);
+            if (scenario() == 8) ASSERT(nestedMembers == 1);
+            if (scenario() == 9) ASSERT(nestedMembers == (vht() ? 0 : 1));
+            if (scenario() == 10) {
+                ASSERT(ppdus == 2 && transmittedMembers == 3 && nestedMembers == 1 && expectedN == 85.0/64);
+                ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address) == 7.0/64);
+            }
+            if (scenario() == 11 || scenario() == 12) ASSERT(ppdus == 2 && transmittedMembers == 8 && nestedMembers == 0);
+            if (scenario() == 13 || scenario() == 14) {
+                ASSERT(ppdus == expectedPayloads && transmittedMembers == expectedPayloads && nestedMembers == 0);
+                ASSERT(identities.size() == size_t(expectedPayloads) && *identities.rbegin()-*identities.begin()+1 == expectedPayloads);
+            }
+            emit(registerSignal("meshLimitsComplete"),1L);
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        Enter_Method_Silent();
+        if (signal == Hcf::meshTerminalRecoverySignal) ASSERT(false);
+        auto packet = dynamic_cast<const Packet *>(object);
+        auto transmission = signal == transmissionEndedSignal ? check_and_cast<const Ieee80211Transmission *>(object) : nullptr;
+        if (transmission) packet = transmission->getPacket();
+        if (!packet || std::string(packet->getName()).find("limit-data") == std::string::npos) return;
+        if (signal == packetDroppedSignal && scenario() == 15 && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) {
+            ASSERT(packet->getTag<Ieee80211MeshAggregationTag>()->getPendingSourceIdentity());
+            ASSERT(!packet->peekAtFront<Ieee80211DataHeader>()->getSequenceNumber().isSpecified()); uncommittedDrops++;
+        }
+        if (signal == packetSentToUpperSignal && source == meshInterface(2)->getSubmodule("mac")) delivered++;
+        if (signal == Hcf::meshPayloadTransmittedSignal && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) {
+            auto count = check_and_cast<MeshPayloadTransmission *>(details);
+            expectedN = expectedN*0.875 + count->msduCount*0.125;
+            if (scenario() == 2 || scenario() == 3) ASSERT(count->msduCount == 4);
+            if (scenario() == 0) ASSERT(count->msduCount == expectedPayloads);
+            if (scenario() == 10) ASSERT(count->msduCount == (counts == 0 ? 4 : 1));
+            counts++;
+            scheduleAt(simTime()+SimTime(1,SIMTIME_NS),new cMessage("count-owner",1000));
+        }
+        if (transmission && source == meshInterface(0)->getSubmodule("radio")) {
+            auto actual = packet->getTag<Ieee80211ModeReq>();
+            ASSERT(actual->getTxVector().ampdu && !actual->getTxVector().singleMpdu);
+            auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+            Ieee80211AmpduLayout layout;
+            ASSERT(findAmpdu(packet,phy->getChunkLength(),phy->getLengthField(),vht(),layout));
+            ASSERT(transmission->getEndTime()-transmission->getStartTime() == actual->getMode()->getDuration(vht() ? layout.preEofLength : layout.psduLength));
+            ASSERT(transmission->getEndTime()-transmission->getStartTime() <= SimTime(5484,SIMTIME_US));
+            if (scenario() == 13) ASSERT(actual->getMode()->getDuration(B(4702)) > SimTime(5484,SIMTIME_US));
+            if (scenario() == 14) {
+                auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+                ASSERT(transmission->getEndTime()-transmission->getStartTime()+actual->getMode()->getSifsTime()
+                    + timing.ackMode->getDuration(LENGTH_COMPRESSED_BLOCKACK) <= SimTime(300,SIMTIME_US));
+            }
+            ASSERT(layout.contentEnd <= B(scenario() == 0 ? (vht() ? 131071 : 65535) : 8191));
+            sawLarge |= phy->getLengthField() > B(65535);
+            contentLengths.push_back(layout.contentEnd);
+            ppdus++; transmittedMembers += layout.members.size();
+            for (const auto& item : layout.members) {
+                ASSERT(item.length <= B(vht() ? 3895 : 4095));
+                Packet member("member",packet->peekDataAt(phy->getChunkLength()+item.offset,item.length));
+                auto header = member.peekAtFront<Ieee80211MeshDataHeader>();
+                if (!header->getAMsduPresent()) identities.insert(member.peekDataAt<Ieee80211MeshControl>(header->getChunkLength(),B(6))->getSequenceNumber());
+                ASSERT(isAmpduMemberFcsOk(&member,B(0),item.length));
+                if (header->getAMsduPresent()) {
+                    std::vector<Ieee80211MeshAmsduPart> parts;
+                    ASSERT(parseMeshAmsdu(&member,header,parts)); nestedMembers++;
+                    if (scenario() == 2 || scenario() == 10) ASSERT(parts.size() == 3);
+                    if (scenario() == 6 && !vht()) ASSERT(item.length == B(4095));
+                    if (scenario() == 8 && vht()) ASSERT(item.length == B(3895));
+                }
+            }
+        }
+    }
+};
+Define_Module(MeshLimitsDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_aggregation_limits) {
+    auto test = ProtocolTest("mesh_aggregation_limits");
+    if (getSimulation()->getSystemModule()->getSubmodule("driver")->par("scenario").intValue() == 10) {
+        auto injected = std::make_shared<bool>(false);
+        test.intercept(tap("radioMedium").from("station[0]").to("station[1]").mutate([injected](Packet *packet) {
+            auto actual = packet->findTag<Ieee80211ModeInd>();
+            if (*injected || !actual || !actual->getTxVector().ampdu || std::string(packet->getName()).find("limit-data") == std::string::npos) return;
+            ASSERT(corruptReceivedAmpduMember(packet,1)); *injected = true;
+        }).describe("nested three-MSDU member succeeds, plain member alone retries in EOF0 PPDU"));
+    }
+    test.once(on("driver").signal("meshLimitsComplete").assertValue(1).within(0.23));
+    return test;
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadio;
+module MeshLimitsMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+module MeshAmpduLimitRadio extends Ieee80211DimensionalRadio { parameters: @class(::MeshAmpduLimitRadio); }
+simple MeshLimitsDriver { parameters: int scenario; @class(::MeshLimitsDriver); @signal[meshLimitsComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: MeshLimitsDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+sim-time-limit = 240ms
+*.numStations = 3
+*.driver.scenario = ${scenario=0..15}
+*.radioMedium.typename = "MeshLimitsMedium"
+*.radioMedium.mediumLimitCache.maxTransmissionDuration = 30ms
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+*.station[*].wlan[0].phyProfile = ${phy="ht","vht"}
+*.station[*].wlan[0].pathSelectionMetricId = ${metric=1,2}
+*.station[*].wlan[0].radio.typename = "MeshAmpduLimitRadio"
+*.station[*].wlan[0].radio.bandName = "5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].radio.bandwidth = ${phy} == "vht" ? 80MHz : 40MHz
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mib.htMaxAmpduLengthExponent = ${scenario} == 0 ? 3 : 0
+*.station[*].wlan[0].mib.meshVhtMaxAmpduLengthExponent = ${scenario} == 0 ? 4 : 0
+*.station[*].wlan[0].mib.meshMaxAmsduLength = 7935
+*.station[*].wlan[0].mac.hcf.isBlockAckSupported = true
+*.station[*].wlan[0].mac.hcf.blockAckVariant = "compressed"
+*.station[*].wlan[0].mac.hcf.originatorAckPolicy.maxBlockAckPolicyFrameLength = 12000B
+*.station[*].wlan[0].mac.hcf.originatorBlockAckAgreementPolicy.aMsduSupported = false
+*.station[*].wlan[0].mac.hcf.recipientBlockAckAgreementPolicy.aMsduSupported = ${scenario} != 3
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "BasicMpduAggregationPolicy"
+*.station[0].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "${scenario}" == "0" || "${scenario}" == "4" || "${scenario}" == "5" || "${scenario}" == "11" || "${scenario}" == "12" || "${scenario}" == "13" || "${scenario}" == "14" || "${scenario}" == "15" ? "" : "BasicMsduAggregationPolicy"
+*.station[0].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = ${scenario} == 1 ? 5000 : (${scenario} == 2 || ${scenario} == 3 || ${scenario} == 10 ? 100 : (${scenario} == 6 ? 4059 : (${scenario} == 7 ? 4060 : (${scenario} == 8 ? 3859 : 3860))))
+*.station[0].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = ${scenario} == 1 ? 3 : 2
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = ${phy}
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs = ${scenario} == 13 ? 0 : 7
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = "long"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = ${scenario} == 13 ? 20MHz : (${scenario} >= 14 ? 40MHz : (${phy} == "vht" ? 80MHz : 40MHz))
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = ${scenario} == 14 ? 300us : (${scenario} == 15 ? 32us : 0s)
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].msduLifetime = ${scenario} == 15 ? 5ms : 512ms
+*.tester.testName = "mesh_aggregation_limits"
+include ../../ini/_mesh.ini
+
+%extraargs: -r 0..63
+%contains: stdout
+PROTOCOLTEST mesh_aggregation_limits: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_aggregation_limits: FAIL

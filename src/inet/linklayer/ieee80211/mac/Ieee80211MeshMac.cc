@@ -15,6 +15,7 @@
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/IIeee80211ChannelAccess.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -43,9 +44,13 @@ void Ieee80211MeshMac::initialize(int stage)
         auto service = hcf->getSubmodule("originatorMacDataService");
         auto rts = check_and_cast<IRtsPolicy *>(hcf->getSubmodule("rtsPolicy"));
         if (hcf->getSubmodule("rateControl") || service->getSubmodule("fragmentationPolicy")
-                || (!high && service->getSubmodule("msduAggregationPolicy")) || service->getSubmodule("mpduAggregationPolicy")
-                || hcf->par("isBlockAckSupported").boolValue() || rts->getRtsThreshold() <= (high ? 65535 : modeSet->getMode(0)->getMpduMaxLength()))
-            throw cRuntimeError("Mesh requires fixed rates, no fragmentation/multi-MPDU/Block Ack, HT/VHT for A-MSDU, and RTS disabled");
+                || (!high && (service->getSubmodule("msduAggregationPolicy") || service->getSubmodule("mpduAggregationPolicy")
+                    || hcf->par("isBlockAckSupported").boolValue()))
+                || rts->getRtsThreshold() <= (high ? 65535 : modeSet->getMode(0)->getMpduMaxLength()))
+            throw cRuntimeError("Mesh requires fixed rates, no fragmentation, HT/VHT for aggregation/Block Ack, and RTS disabled");
+        if (service->getSubmodule("mpduAggregationPolicy") && (!hcf->par("isBlockAckSupported").boolValue()
+                || strcmp(hcf->par("blockAckVariant").stringValue(), "compressed") != 0))
+            throw cRuntimeError("Mesh A-MPDU requires immediate Compressed Block Ack");
     }
 }
 
@@ -136,6 +141,11 @@ void Ieee80211MeshMac::handleLowerMessage(cMessage *message)
     // Supply the known interface role before LayeredProtocolBase emits the
     // received-packet observation. Address roles and QoS bit 8 alone are ambiguous.
     if (auto packet = dynamic_cast<Packet *>(message)) {
+        auto mode = packet->findTag<physicallayer::Ieee80211ModeInd>();
+        if (mode && mode->getTxVector().ampdu) {
+            hcf->receiveAmpdu(packet);
+            return;
+        }
         if (!rx->prepareReceivedFrame(packet)) {
             Ieee80211Mac::handleLowerPacket(packet);
             return;

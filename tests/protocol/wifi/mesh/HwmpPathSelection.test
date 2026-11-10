@@ -7,6 +7,7 @@ all received controls and DATA use the real MAC/radio and computed FCS.
 
 %file: HwmpPathSelection.cc
 #include "mesh/HwmpTestSupport.h"
+#include "mesh/MeshPhySupport.h"
 
 class HwmpPathDriver : public cSimpleModule, public cListener, public ITx::ICallback
 {
@@ -163,6 +164,7 @@ class HwmpPathDriver : public cSimpleModule, public cListener, public ITx::ICall
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
 };
 Define_Module(HwmpPathDriver);
+#include "mesh/MeshAggregationPathSupport.h"
 namespace inet::protocoltest {
 Define_ProtocolTest(hwmp_paths) {
     return ProtocolTest("hwmp_paths")
@@ -174,16 +176,30 @@ Define_ProtocolTest(hwmp_paths) {
         .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.02).drop())
         .once(on("driver").signal("hwmpPathComplete").assertValue(1).within(0.23));
 }
+Define_ProtocolTest(hwmp_aggregation_paths) {
+    return ProtocolTest("hwmp_aggregation_paths")
+        // The four admitted peer links form the diamond. Nonpeer controls are
+        // discarded by production admission while ordinary carrier sensing
+        // remains visible; removing RF arrivals would invent hidden-node loss.
+        .once(on("driver").signal("hwmpAggregationPathComplete").assertValue(1).within(0.21));
+}
 }
 
 %file: test.ned
 import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 simple HwmpPathDriver { parameters: @class(::HwmpPathDriver); @signal[primeMetric](type=long); @signal[hwmpPathComplete](type=long); }
 network Test extends MeshPairNetwork { submodules: driver: HwmpPathDriver; }
+module MeshRankingMac extends Ieee80211MeshMac { parameters: @class(::MeshRankingMac); }
+module RankingMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+simple MeshAggregationPathDriver { parameters: @class(::MeshAggregationPathDriver); @signal[hwmpAggregationPathComplete](type=long); }
+network HtAggregateTest extends MeshPairNetwork { submodules: driver: MeshAggregationPathDriver; }
+network VhtAggregateTest extends MeshPairNetwork { submodules: driver: MeshAggregationPathDriver; }
 
 %inifile: test.ini
 [General]
-network = Test
+network = ${pathNetwork=Test,HtAggregateTest,VhtAggregateTest}
 cmdenv-express-mode = true
 **.cmdenv-log-level = warn
 *.numStations = 4
@@ -193,13 +209,41 @@ cmdenv-express-mode = true
 *.station[*].wlan[0].mgmt.autoPeer = false
 *.station[*].wlan[0].mac.fcsMode = "computed"
 *.station[*].wlan[0].pathSelectionMetricId = ${metricId=1,2}
-*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = {"Test.station[1].wlan[0]":6Mbps,"Test.station[2].wlan[0]":24Mbps}
-*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
-*.tester.testName = "hwmp_paths"
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = "${pathNetwork}" == "Test" ? {"Test.station[1].wlan[0]":6Mbps,"Test.station[2].wlan[0]":24Mbps} : {}
+*.station[*].wlan[0].phyProfile = "${pathNetwork}" == "Test" ? "ofdm" : ("${pathNetwork}" == "HtAggregateTest" ? "ht" : "vht")
+*.station[*].wlan[0].radio.typename = "${pathNetwork}" == "Test" ? "Ieee80211ScalarRadio" : "Ieee80211DimensionalRadio"
+*.station[*].wlan[0].radio.bandName = "${pathNetwork}" == "Test" ? "5 GHz (20 MHz)" : "5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].radio.bandwidth = "${pathNetwork}" == "Test" ? 20MHz : 40MHz
+*.station[*].wlan[0].mac.typename = "${pathNetwork}" == "Test" ? "Ieee80211MeshMac" : "MeshRankingMac"
+*.station[*].wlan[0].mac.hcf.isBlockAckSupported = "${pathNetwork}" != "Test"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "${pathNetwork}" == "Test" ? "" : "BasicMpduAggregationPolicy"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "${pathNetwork}" == "Test" ? "auto" : ("${pathNetwork}" == "HtAggregateTest" ? "ht" : "vht")
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs = "${pathNetwork}" == "Test" ? -1 : 7
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = "${pathNetwork}" == "Test" ? "auto" : "long"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = "${pathNetwork}" == "Test" ? -1 : 1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = "${pathNetwork}" == "Test" ? nan Hz : 20MHz
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = 0s
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].contention.backoffOptimization = "${pathNetwork}" == "Test"
+# Legal VO AIFSN15 staggers C's unacknowledged PREQ behind the first
+# branch's PREP/ACK, instead of relying on a lucky broadcast collision draw.
+*.station[2].wlan[0].mac.hcf.edca.edcaf[3].aifsn = "${pathNetwork}" == "Test" ? 2 : 15
+*.station[*].wlan[0].pathSelection.activePathTimeout = "${pathNetwork}" == "Test" ? 5.12s : 20.48ms
+*.station[*].wlan[0].pathSelection.preqMinInterval = "${pathNetwork}" == "Test" ? 102.4ms : 1ms
+*.station[*].wlan[0].pathSelection.netDiameterTraversalTime = "${pathNetwork}" == "Test" ? 512ms : 5ms
+*.radioMedium.typename = "${pathNetwork}" == "Test" ? "Ieee80211ScalarTapRadioMedium" : "RankingMedium"
+*.radioMedium.backgroundNoise.power = "${pathNetwork}" == "Test" ? -110dBm : nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+*.tester.testName = "${pathNetwork}" == "Test" ? "hwmp_paths" : "hwmp_aggregation_paths"
 include ../../ini/_mesh.ini
 
-%extraargs: -r 0..1
+%extraargs: -r 0..5
 %contains: stdout
 PROTOCOLTEST hwmp_paths: PASS
 %not-contains: stdout
 PROTOCOLTEST hwmp_paths: FAIL
+
+%contains-regex: stdout
+PROTOCOLTEST hwmp_aggregation_paths: PASS.*PROTOCOLTEST hwmp_aggregation_paths: PASS.*PROTOCOLTEST hwmp_aggregation_paths: PASS.*PROTOCOLTEST hwmp_aggregation_paths: PASS
+
+%not-contains: stdout
+PROTOCOLTEST hwmp_aggregation_paths: FAIL

@@ -6,6 +6,7 @@
 
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmitter.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
 
 #include "inet/mobility/contract/IMobility.h"
 #include "inet/physicallayer/wireless/common/analogmodel/scalar/ScalarTransmitterAnalogModel.h"
@@ -140,10 +141,11 @@ Ieee80211TxVector Ieee80211Transmitter::computeTransmissionVector(const Packet *
     auto vector = request ? request->getTxVector() : Ieee80211TxVector(computeTransmissionMode(packet));
     if (!vector.mode || !modeSet->containsMode(vector.mode))
         throw cRuntimeError("Invalid IEEE80211 transmit vector mode");
-    if ((vector.singleMpdu && vector.format != Ieee80211TxVector::Format::VHT)
+    if ((vector.singleMpdu && (vector.format != Ieee80211TxVector::Format::VHT || vector.ampdu))
+            || (vector.ampdu && vector.format != Ieee80211TxVector::Format::HT_MIXED && vector.format != Ieee80211TxVector::Format::VHT)
             || (vector.format != Ieee80211TxVector::Format::NON_HT_DUPLICATE
                 && vector.format != Ieee80211TxVector(vector.mode).format)
-            || (channel && channel->hasAllocation() && vector.mode->getVhtMcsIndex() >= 0 && !vector.singleMpdu))
+            || (channel && channel->hasAllocation() && vector.mode->getVhtMcsIndex() >= 0 && !vector.singleMpdu && !vector.ampdu))
         throw cRuntimeError("IEEE80211 PPDU format/PSDU framing disagrees with the actual PHY mode");
     if (vector.format == Ieee80211TxVector::Format::NON_HT_DUPLICATE) {
         if (!channel || !channel->hasAllocation() || vector.mode->getHtMcsIndex() >= 0 || vector.mode->getVhtMcsIndex() >= 0
@@ -180,7 +182,23 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     Hz transmissionCenter = transmissionChannel->hasAllocation() ? transmissionChannel->getCenterFrequency(transmissionBandwidth) : centerFrequency;
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
-    const simtime_t duration = transmissionMode->getDuration(B(phyHeader->getLengthField()));
+    B durationLength = phyHeader->getLengthField();
+    if (vector.ampdu) {
+        ieee80211::Ieee80211AmpduLayout layout;
+        bool vht = vector.format == Ieee80211TxVector::VHT;
+        if (!ieee80211::findAmpdu(packet,phyHeader->getChunkLength(),phyHeader->getLengthField(),vht,layout)
+                || (vht && !ieee80211::isVhtPsduWithinCapacity(phyHeader->getLengthField(),layout,transmissionMode)))
+            throw cRuntimeError("Cannot transmit an invalid A-MPDU PSDU");
+        if (vht)
+            durationLength = layout.preEofLength;
+    }
+    else if (vector.singleMpdu) {
+        ieee80211::Ieee80211SingleMpduLayout layout;
+        if (!ieee80211::findSingleMpdu(packet,phyHeader->getChunkLength(),phyHeader->getLengthField(),layout))
+            throw cRuntimeError("Cannot transmit an invalid VHT single-member PSDU");
+        durationLength = layout.preEofLength;
+    }
+    const simtime_t duration = transmissionMode->getDuration(durationLength);
     const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord& startPosition = mobility->getCurrentPosition();

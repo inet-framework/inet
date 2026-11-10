@@ -7,7 +7,8 @@ import inet.linklayer.ieee80211.mesh.AirtimeLinkMetric;
 
 // Open QoS mesh with native forwarding and optional contiguous5GHz HT/VHT PHY.
 // Native source A-MSDU is available through the MSDU aggregation policy.
-// Multiple-MPDU aggregation and power save require their own procedures.
+// Immediate Compressed Block Ack enables optional native A-MPDU; power save
+// remains outside the always-awake profile.
 module Ieee80211MeshInterface extends Ieee80211Interface
 {
     parameters:
@@ -28,9 +29,10 @@ module Ieee80211MeshInterface extends Ieee80211Interface
         mac.phyProfile = this.phyProfile;
         mgmt.pathSelectionMetricId = this.pathSelectionMetricId;
         mac.qosStation = true;
-        mac.hcf.isBlockAckSupported = false;
+        mac.hcf.isBlockAckSupported = default(false);
+        mac.hcf.meshLinkMetricModule = "^.^.linkMetric";
         mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = default("");
-        mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "";
+        mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = default("");
         mac.hcf.originatorMacDataService.fragmentationPolicy.typename = "";
         mac.hcf.rtsPolicy.rtsThreshold = default(65536B);
     submodules:

@@ -29,6 +29,7 @@ class INET_API BasicMsduAggregationPolicy : public IMsduAggregationPolicy, publi
 
   public:
     virtual std::vector<Packet *> *computeAggregateFrames(queueing::IPacketQueue *queue) override;
+    std::vector<Packet *> *computeAggregateFrames(const std::vector<Packet *>& candidates) override;
 };
 
 } /* namespace ieee80211 */

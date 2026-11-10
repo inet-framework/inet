@@ -393,7 +393,16 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
     // single-member envelope only on this outgoing radio-owned copy, before
     // computing the PHY Length field, tail, padding and actual transmission.
     if (vector.singleMpdu)
-        ieee80211::wrapSingleMpdu(packet);
+        ieee80211::wrapSingleMpdu(packet,mode);
+    else if (vector.ampdu) {
+        ieee80211::Ieee80211AmpduLayout layout;
+        bool vht = vector.format == Ieee80211TxVector::VHT;
+        if (!ieee80211::findAmpdu(packet,b(0),B(packet->getDataLength()),vht,layout)
+                || (vht && !ieee80211::isVhtPsduWithinCapacity(B(packet->getDataLength()),layout,mode)))
+            throw cRuntimeError("Invalid outgoing A-MPDU structure or VHT padding capacity");
+        if (vht)
+            ieee80211::padVhtPsdu(packet,mode);
+    }
     // ERP reuses OFDM's SIGNAL mode objects, whose factory creates a base
     // OFDM header. Preserve the selected PHY family when constructing the PPDU.
     auto phyHeader = contiguousAllocation && mode->getVhtMcsIndex() >= 0 ?
@@ -441,11 +450,37 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
     auto vector = packet->getTag<Ieee80211ModeInd>()->getTxVector();
+    if (vector.ampdu) {
+        // Keep the matching PHY envelope through receptionEnded/capture. Rx
+        // validates every member before producing any bare MAC observation.
+        auto header = peekIeee80211PhyHeaderAtFront(packet,b(-1),Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+        ieee80211::Ieee80211AmpduLayout aggregate;
+        bool vht = vector.format == Ieee80211TxVector::VHT;
+        bool valid = header->isCorrect() && header->isComplete() && header->isProperlyRepresented() && verifyFcs(header)
+            && ieee80211::findAmpdu(packet,header->getChunkLength(),header->getLengthField(),vht,aggregate)
+            && (!vht || ieee80211::isVhtPsduWithinCapacity(header->getLengthField(),aggregate,mode));
+        if (!valid)
+            packet->setBitError(true);
+        auto indication = packet->getTagForUpdate<Ieee80211ModeInd>();
+        indication->setSignalExtensionDuration(-1);
+        if (valid) {
+            auto time = packet->findTag<SignalTimeInd>();
+            B durationLength = vht ? aggregate.preEofLength : header->getLengthField();
+            if (time && time->getEndTime() > time->getStartTime()) {
+                auto nominal = mode->getSignalExtensionTime();
+                auto extension = time->getEndTime()-time->getStartTime()-mode->getDuration(durationLength)+nominal;
+                if (extension == SIMTIME_ZERO || extension == nominal)
+                    indication->setSignalExtensionDuration(extension);
+            }
+        }
+        return;
+    }
     ieee80211::Ieee80211SingleMpduLayout layout;
     if (vector.singleMpdu) {
         auto header = peekIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
         if (!header->isCorrect() || !header->isComplete()
-                || !ieee80211::findSingleMpdu(packet, header->getChunkLength(), header->getLengthField(), layout)) {
+                || !ieee80211::findSingleMpdu(packet, header->getChunkLength(), header->getLengthField(), layout)
+                || mode->getDataMode()->getDuration(header->getLengthField()) != mode->getDataMode()->getDuration(layout.preEofLength)) {
             packet->setBitError(true);
             return; // Radio::endReception still owns/sends this matching PHY-wrapped packet.
         }
@@ -460,7 +495,8 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
             !phyHeader->isIncomplete() && !phyHeader->isImproperlyRepresented() && verifyFcs(phyHeader)) {
         auto nominalExtension = mode->getSignalExtensionTime();
         auto receivedDuration = time->getEndTime() - time->getStartTime();
-        auto actualExtension = receivedDuration - mode->getDuration(B(phyHeader->getLengthField())) + nominalExtension;
+        auto durationLength = vector.singleMpdu ? layout.preEofLength : phyHeader->getLengthField();
+        auto actualExtension = receivedDuration - mode->getDuration(B(durationLength)) + nominalExtension;
         // The packet-level representation supports zero or the nominal signal extension.
         if (actualExtension == SIMTIME_ZERO || actualExtension == nominalExtension)
             indication->setSignalExtensionDuration(actualExtension);

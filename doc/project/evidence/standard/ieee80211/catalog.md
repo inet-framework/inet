@@ -254,11 +254,23 @@ Delimiter CRC processing consumes protected bits B0 through B15 in transmission 
 
 Sources: `ieee80211-2024:clause:9.7.2`/Figure 9-1332, PDF 1842–1843, source span `7666563:7668709`; `ieee80211-2024:clause:9.2.2`, PDF 657–658, `3049211:3052920`. Strength: normative CRC initialization, complementation and bit order. Observation: literal CRC octets independently derived from the original register diagram.
 
+Reserved delimiter B1 is transmitted zero and ignored on reception; HT also ignores its reserved high-length bits B2/B3 and interprets only the twelve low length bits. CRC still protects the received sixteen bits, including reserved values. B0 is the defined EOF/Tag field in the 2024 format, not reserved: HT transmission sets it zero under10.12.7. For selected non-HE VHT, no EOF0 subframe may follow any EOF1 subframe, including an EOF1 payload S-MPDU. Valid zero-length EOF0 subframes may themselves end the VHT pre-EOF portion without a later payload/EOF1 delimiter; their bytes still count toward that portion's limit.
+
+Sources: `ieee80211-2024:clause:9.2.2` continuation, PDF 659, span `3052920:3058243`; Table 9-659, span `7661283:7664971`; `ieee80211-2024:clause:10.12.6`, span `8237064:8242052`; `ieee80211-2024:clause:10.12.7`, PDF 1981, span `8242052:8244436`. Strength: reserved-field handling and transmit/order requirements. Observation: independent valid-CRC reserved-bit and delimiter-order fixtures. Receiver rejection of an HT EOF/Tag1 frame is the selected profile's validity policy rather than an additional explicit receiver-drop requirement.
+
 ### IEEE80211-2024-MESH-AGGREGATION-LIMITS
 
 Respect the peer maximum aggregate length and the 4095-byte HT member limit. For VHT maximum aggregate exponent greater than three, the corresponding HT maximum exponent is three; otherwise they are equal. Honor the peer minimum MPDU spacing, adding zero-length delimiters as needed. VHT single-MPDU operation follows nonaggregate acknowledgment rules: Normal Ack can receive an immediate ACK without a Block Ack agreement, and Implicit BAR is forbidden.
 
 Sources: `ieee80211-2024:clause:10.12.2`, PDF 1976–1977, source span `8220478:8226847`; `ieee80211-2024:clause:10.12.3`, PDF 1977–1978, source span `8226847:8229672`; `ieee80211-2024:clause:10.12.8`, PDF 1982, source span `8244436:8245258`. Strength: shall. Observation: negotiated limits, delimiters, timing and responses.
+
+Minimum MPDU start distance is an integer octet distance at least tMMSS times the selected net PHY DATA rate divided by eight. Use the selected GI's rate, not coded gross rate, a long-GI reference or whole-PPDU throughput. Consecutive delimiter-start and MPDU-start distances are equal; include complete MPDU/FCS, alignment and the next delimiter. Add zero-length spacing delimiters in four-byte units until the ceiling is met. Source:10.12.3 Eq10-12, span `8226847:8229672`; Table 9-225 spacing codes, span `4984834:4986280`. Strength: minimum-distance rule. Observation: actual member start offsets and independent long/short-GI examples.
+
+VHT timing distinguishes APEP_LENGTH from full PSDU_LENGTH. Construction submits its pre-padding APEP length for timing, obtains symbol capacity, then fills exactly PSDU_LENGTH with final-subframe alignment, zero-length EOF1 delimiters and trailing 0–3 octets. Alignment/trailing values are unspecified. These bytes must fit the already allocated raw DATA symbols; rounded whole-PPDU duration alone cannot prove that fit. The wire pre-EOF prefix structurally includes final-subframe alignment, while the procedural TX APEP snapshot can precede it; RX APEP is SIG-B Length multiplied by four.
+
+Sources: `ieee80211-2024:clause:10.12.6`, span `8237064:8242052`; Figure 9-1327, span `7658257:7660513`; `ieee80211-2024:clause:21.4.3`, Eq21-111/112, span `15278503:15283577`; Table 21-1, PDF 3557, span `14829435:14834212`; `ieee80211-2024:clause:21.3.8.3.6`/Table 21-14, Eq21-46, span `15064458:15067777`. Original ceiling visually checked. Strength: normative construction/timing/parameter definitions. Observation: separate prefix/full extents, exact padding and raw symbol capacity.
+
+The size wording has a boundary tension: 10.12.2/Table 9-313 binds capability to structural pre-EOF length, but construction and SIG-B rounding can turn a request of 8191 into a prefix/RX indication of 8192. No retrieved sentence expressly grants a capability-plus-alignment exception or requires rejection of that over-cap indication. The selected interpretation belongs in the model ledger, rather than being attributed as an unambiguous IEEE allowance. Table 9-313's exact size entry is PDF 1296, span `5610808:5615987`.
 
 ### IEEE80211-2024-MESH-BLOCK-ACK-RECOVERY
 
