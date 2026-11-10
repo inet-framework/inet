@@ -73,10 +73,22 @@ inline bool isManagementAction(const PacketEvent& event, uint8_t category, uint8
 {
     if (!event.packet)
         return false;
+    if (auto mesh = event.packet->peekAtFront<ieee80211::Ieee80211MeshActionFrame>(b(-1), Chunk::PF_ALLOW_NULLPTR))
+        return mesh->getCategory() == category && mesh->getMeshAction() == action;
     auto header = event.packet->peekAtFront<ieee80211::Ieee80211ActionFrameOther>(b(-1), Chunk::PF_ALLOW_NULLPTR);
     return header && header->getType() == ieee80211::ST_ACTION &&
            header->getCategory() == category && header->getActionBodyArraySize() >= 2 &&
            header->getActionBody(0) == category && header->getActionBody(1) == action;
+}
+
+inline Ptr<const ieee80211::Ieee80211HwmpFrame> hwmpBody(const PacketEvent& event)
+{
+    if (!event.packet)
+        return nullptr;
+    auto header = event.packet->peekAtFront<ieee80211::Ieee80211MeshActionFrame>(b(-1), Chunk::PF_ALLOW_NULLPTR);
+    return header ? event.packet->peekAt<ieee80211::Ieee80211HwmpFrame>(header->getChunkLength(),
+            event.packet->getDataLength() - header->getChunkLength() - B(4),
+            Chunk::PF_ALLOW_NULLPTR | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE) : nullptr;
 }
 
 // --- per-PHY-family predicates (the dynamic_cast is what the string engine cannot do) ---

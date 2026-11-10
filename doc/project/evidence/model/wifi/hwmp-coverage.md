@@ -10,7 +10,7 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 
 | Check suffix (`WIFI-CHECK-`) | Planned protocol test | Commit | Reviewer document | Verdict |
 | --- | --- | --- | --- | --- |
-| WIRE | MeshWireFormats.test | C2 | hwmp-c2-wire.md | NOT_RUN |
+| WIRE | MeshWireFormats.test | C2 | hwmp-c2-wire.md | PASS at codec boundary; live consumers remain later checks |
 | PEERING | MeshPeering.test | C3 | hwmp-c3-peering.md | NOT_RUN |
 | PEERING-FAILURE | MeshPeeringFailure.test | C3 | hwmp-c3-peering.md | NOT_RUN |
 | BEACON-TIMING | MeshBeaconTiming.test | C3 | hwmp-c3-peering.md | NOT_RUN |
@@ -40,7 +40,7 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | POWER-RECOVERY | MeshPowerSaveRecovery.test | P3 | hwmp-p3-service-periods.md | NOT_RUN |
 | POWER-HT-VHT | MeshPowerSaveHtVht.test | P3 | hwmp-p3-service-periods.md | NOT_RUN |
 
-Supplementary planned cases are `tests/unit/Ieee80211MeshSerializer_1.test`, `tests/unit/Ieee80211AirtimeMetric_1.test` and `tests/module/Ieee80211MeshLifecycle_1.test`. Unit arithmetic and codec assertions supplement the production-path checks; lifecycle tests establish isolated owner cleanup, not safe whole-NIC restart. All are `NOT_RUN` at C1.
+Supplementary cases are `tests/unit/Ieee80211MeshSerializer_1.test` (PASS at C2), and the planned `tests/unit/Ieee80211AirtimeMetric_1.test` and `tests/module/Ieee80211MeshLifecycle_1.test` (NOT_RUN). Unit arithmetic and codec assertions supplement the production-path checks; lifecycle tests establish isolated owner cleanup, not safe whole-NIC restart.
 
 ## Model decisions
 
@@ -80,12 +80,20 @@ The source PDF was used for mathematical grouping in the airtime formula, mesh A
 | Stage | State | Evidence |
 | --- | --- | --- |
 | C1 requirements/check transcription | COMPLETE | 34 catalog entries mapped to features, 29 checks mapped to proposed tests; independent standards extraction and scoped links checked |
-| Initial debug library build | IN_PROGRESS | `make MODE=debug -j8`, raw log `/tmp/inet-mesh-initial-build.log` |
-| Protocol behavior | NOT_RUN | Planned check-to-test map above |
+| Initial debug library build | PASS | `make MODE=debug -j8`, raw log `/tmp/inet-mesh-initial-build.log`; C2 edits require the subsequent fresh build |
+| C2 matching debug library | PASS | `/tmp/inet-mesh-c2-complete-build.log` |
+| C2 direct units | PASS, 3/3 | Mesh, legacy management and MPDU-delimiter serializers; `/tmp/inet-mesh-c2-unit-complete.log` |
+| C2 boundary protocol fixture | PASS, 1/1 | `/tmp/inet-mesh-c2-protocol-complete.log`; no claim of live peering/forwarding |
+| Live mesh protocol behavior | NOT_RUN | Planned remaining check-to-test map above |
 | Release compilation | NOT_RUN | Required before push |
-| Legacy controls/fingerprints | NOT_RUN | Explicit selected controls in the plan; baseline unchanged |
+| C2 legacy protocol controls | 4/5 test files PASS; one preexisting unexpected failure | Raw Block Ack retry run 0 has protocol deadline failure, run 1 has runtime abort; immediate parent reproduces both at identical time/event |
+| Legacy fingerprints | NOT_RUN | Explicit selected configurations in the plan; baseline unchanged |
 | Feature-disabled compilation | NOT_RUN | Required by C9 |
 | Examples and capture decode | NOT_RUN | Required by C10 |
 | Upstream PR | NOT_CREATED | Publication follows implementation and verification |
+
+C2 verification ran from this checkout on `8a76ae140f` plus the C2 changes, in debug mode. The unit selector was `Ieee80211(MeshSerializer|MgmtFrameSerializer|MpduSubframeHeaderSerializer)_1\.test$`; the protocol suite selector was `^tests/protocol/wifi$` with file selector `/mesh/MeshWireFormats\.test$`. Both used the installed runners with `--load . -p inet -m debug --no-build` after a fresh matching build. The mesh protocol fixture fixes run 0 and seed 0. Independent review found no remaining actionable source issue. Mermaid diagrams rendered with Mermaid 10.9.3 and Firefox headless and were visually inspected.
+
+The legacy selector was `/common/(WifiAssociation|WifiDataDelivery|WifiDuplicateWithRetry|WifiBlockAckDuplicateAddba|WifiBlockAckDataRetry)\.test$`. Its four passing test files are distinct from `WifiBlockAckDataRetry`: retained raw output shows a run-0 protocol deadline failure at event 3708/time 1.023764276562 s, followed by a run-1 simultaneous-transmission runtime error at event 2639/time 1.014105463846 s. A successful simulation-run summary does not override a printed protocol failure. Raw unit, boundary-protocol and failing legacy artifacts are retained under `/tmp/inet-mesh-c2-raw/` and copied under `audit/hwmp-implementation/c2-raw/`. Independent immediate-parent reproduction at `8a76ae140f` built and loaded its own debug libraries with identical feature state, fixture and seed, and reproduced both failures at identical event numbers and simulation times. The failed legacy control therefore predates C2; it remains a failed control. Parent evidence is `/tmp/inet-mesh-c1-parent-evidence.md`. No expectation or fingerprint was changed.
 
 The supplied `AGENTS.md` asks for skill-suite scripts, but this checkout has no `scripts/` directory. Those package checks do not exist here; no skill package or deployment is changed. Use the active checkout's documented INET gates for this work.

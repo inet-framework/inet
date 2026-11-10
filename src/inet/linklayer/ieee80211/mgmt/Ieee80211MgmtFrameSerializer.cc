@@ -14,6 +14,7 @@
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211BeaconInterval.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrameSerializer.h"
 
 namespace inet {
 
@@ -427,6 +428,19 @@ static void readHtOperationElement(MemoryInputStream& stream, int length, const 
 
 static void readHtElements(MemoryInputStream& stream, const Ptr<Ieee80211MgmtFrame>& frame, unsigned int allowedElements, int modelledElementCount)
 {
+    // TIM remains opaque for legacy management. Mesh beacons can place it before
+    // Mesh ID/Configuration, so identify the mesh profile before decoding it.
+    bool meshElementsAllowed = false;
+    MemoryInputStream probe(stream.getData(), stream.getLength(), stream.getPosition());
+    while (probe.getRemainingLength() >= B(2)) {
+        auto id = probe.readByte();
+        auto length = B(probe.readByte());
+        if (probe.getRemainingLength() < length)
+            break;
+        if (id == 113 || id == 114)
+            meshElementsAllowed = true;
+        probe.seek(probe.getPosition() + length);
+    }
     while (stream.getRemainingLength() != b(0)) {
         if (stream.getRemainingLength() < B(2)) {
             frame->markIncorrect();
@@ -500,6 +514,13 @@ static void readHtElements(MemoryInputStream& stream, const Ptr<Ieee80211MgmtFra
                 if (!wasPresent && frame->getHtOperationPresent())
                     modelledElementCount++;
             }
+        }
+        else if (meshElementsAllowed && Ieee80211MeshFrameSerializer::isMeshElement(elementId)) {
+            auto end = stream.getPosition() + declaredBodyLength;
+            if (!Ieee80211MeshFrameSerializer::readElement(stream, elementId, length, *frame))
+                frame->markIncorrect();
+            stream.seek(end);
+            modelledElementCount++;
         }
         else
             readUnmodelledElement(stream, frame, elementId, length, modelledElementCount);
@@ -829,6 +850,7 @@ void Ieee80211MgmtFrameSerializer::serializeFields(MemoryOutputStream& stream, c
     }
     else
         throw cRuntimeError("Cannot serialize frame");
+    Ieee80211MeshFrameSerializer::writeElements(stream, *staticPtrCast<const Ieee80211MgmtFrame>(chunk), [&]() { elements.beginModelledElement(); });
     elements.finish();
 }
 

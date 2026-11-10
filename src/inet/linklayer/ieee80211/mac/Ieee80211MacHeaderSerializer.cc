@@ -9,6 +9,7 @@
 
 #include "inet/common/checksum/Checksum.h"
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
 namespace inet {
 
@@ -97,6 +98,7 @@ namespace ieee80211 {
 Register_Serializer(Ieee80211MacHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataOrMgmtHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211DataHeader, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211MeshDataHeader, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211MgmtHeader, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211AckFrame, Ieee80211MacHeaderSerializer);
@@ -112,6 +114,7 @@ Register_Serializer(Ieee80211MultiTidBlockAck, Ieee80211MacHeaderSerializer);
 
 Register_Serializer(Ieee80211ActionFrame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211ActionFrameOther, Ieee80211MacHeaderSerializer);
+Register_Serializer(Ieee80211MeshActionFrame, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211AddbaRequest, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211AddbaResponse, Ieee80211MacHeaderSerializer);
 Register_Serializer(Ieee80211Delba, Ieee80211MacHeaderSerializer);
@@ -194,13 +197,14 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
             stream.writeMacAddress(dataHeader->getAddress4());
         if (macHeader->getSubType() & 0x08) {
             // IEEE Std 802.11-2024, Table 9-10. Modeling simplification: no Queue
-            // Size report; the second octet remains zero (no TXOP duration request
-            // or AP PS buffer state).
+            // Size report, TXOP duration request or AP PS buffer state. Mesh data
+            // uses bit 8 for Mesh Control Present (9.2.4.5.10).
             stream.writeByte((dataHeader->getTid() & 0x0F) |
                     (dataHeader->getEosp() ? 0x10 : 0) |
                     ((dataHeader->getAckPolicy() & 3) << 5) |
                     (dataHeader->getAMsduPresent() ? 0x80 : 0));
-            stream.writeByte(0);
+            stream.writeByte(dynamicPtrCast<const Ieee80211MeshDataHeader>(dataHeader)
+                    ? dataHeader->getQosControlHigh() & 7 : dataHeader->getQosControlHigh());
         }
         if (stream.getLength() - startPos != dataHeader->getChunkLength())
             throw cRuntimeError("Cannot serialize the Ieee80211DataHeader: chunkLength is %d B, does not match the %d B of serialized fields",
@@ -238,6 +242,13 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
                     break;
                 }
                 auto actionFrame = dynamicPtrCast<const Ieee80211ActionFrame>(chunk);
+                if (auto meshAction = dynamicPtrCast<const Ieee80211MeshActionFrame>(chunk)) {
+                    stream.writeByte(meshAction->getCategory());
+                    stream.writeByte(meshAction->getMeshAction());
+                    if (stream.getLength() - startPos != meshAction->getChunkLength())
+                        throw cRuntimeError("Mesh action header must be 26 octets");
+                    break;
+                }
                 switch (actionFrame->getCategory()) {
                     case 3: {
                         stream.writeByte(actionFrame->getCategory());
@@ -427,7 +438,7 @@ void Ieee80211MacHeaderSerializer::serializeFields(MemoryOutputStream& stream, c
     }
 }
 
-const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info&) const
+const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const
 {
     auto macHeader = makeShared<Ieee80211MacHeader>();
     uint8_t subType = stream.readUint4();
@@ -450,7 +461,8 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
     // variants -- not just plain Data (ST_DATA) and QoS-Data (ST_DATA_WITH_QOS),
     // which previously fell through to the default case and were marked incorrect.
     if (macHeader->getFrameType() == 2) {
-        auto dataHeader = makeShared<Ieee80211DataHeader>();
+        Ptr<Ieee80211DataHeader> dataHeader = typeInfo == typeid(Ieee80211MeshDataHeader)
+                ? staticPtrCast<Ieee80211DataHeader>(makeShared<Ieee80211MeshDataHeader>()) : makeShared<Ieee80211DataHeader>();
         copyBasicFields(dataHeader, macHeader);
         dataHeader->setDurationField(SimTime(stream.readUint16Le(), SIMTIME_US));
         dataHeader->setReceiverAddress(stream.readMacAddress());
@@ -469,7 +481,9 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
             dataHeader->setEosp((qosControl & 0x10) != 0);
             dataHeader->setAckPolicy(static_cast<AckPolicy>((qosControl >> 5) & 3));
             dataHeader->setAMsduPresent((qosControl & 0x80) != 0);
-            stream.readByte();
+            dataHeader->setQosControlHigh(stream.readByte());
+            if (typeInfo == typeid(Ieee80211MeshDataHeader))
+                dataHeader->setQosControlHigh(dataHeader->getQosControlHigh() & 7);
         }
         return dataHeader;
     }
@@ -522,6 +536,20 @@ const Ptr<Chunk> Ieee80211MacHeaderSerializer::deserializeFields(MemoryInputStre
             // here is exactly the action body.
             auto actionBodyPosition = stream.getPosition();
             actionFrame->setCategory(stream.readByte());
+            if ((actionFrame->getCategory() == MESH_ACTION || actionFrame->getCategory() == MESH_SELF_PROTECTED_ACTION)
+                    && stream.getRemainingLength() >= B(1)) {
+                auto meshActionPosition = stream.getPosition();
+                auto action = stream.readByte();
+                if ((actionFrame->getCategory() == MESH_ACTION && action <= MESH_HWMP_PATH_SELECTION)
+                        || (actionFrame->getCategory() == MESH_SELF_PROTECTED_ACTION && action >= MESH_PEERING_OPEN && action <= MESH_PEERING_CLOSE)) {
+                    auto mesh = makeShared<Ieee80211MeshActionFrame>();
+                    copyBasicFields(mesh, macHeader);
+                    copyActionFrameFields(mesh, actionFrame);
+                    mesh->setMeshAction(action);
+                    return mesh;
+                }
+                stream.seek(meshActionPosition);
+            }
             if (actionFrame->getCategory() == 3) {
                 uint8_t blockAckAction = stream.readByte();
                 switch (blockAckAction) {

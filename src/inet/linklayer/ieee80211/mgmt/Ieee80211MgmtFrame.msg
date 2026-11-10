@@ -11,6 +11,7 @@
 import inet.common.INETDefs;
 import inet.common.packet.chunk.Chunk;
 import inet.linklayer.ieee80211.mac.Ieee80211Frame;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MeshFrame;
 import inet.linklayer.common.MacAddress;
 
 namespace inet::ieee80211;
@@ -180,7 +181,7 @@ struct Ieee80211HtOperationElement
 //
 // Frame body base class used to hide various frame body types
 //
-class Ieee80211MgmtFrame extends FieldsChunk
+class Ieee80211MgmtFrame extends Ieee80211MeshFrame
 {
     bool extendedSupportedRatesPresent;
     Ieee80211ExtendedSupportedRatesElement extendedSupportedRates;

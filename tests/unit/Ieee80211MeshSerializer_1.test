@@ -1,0 +1,417 @@
+%description:
+IEEE Std 802.11-2024 mesh wire formats: independent literal octet fixtures for
+PREQ/PREP/PERR/RANN, Link Metric Report, peering Open/Confirm/Close, TIM, awake
+window and Mesh Control. Decode fresh byte chunks, then compare separately
+constructed typed frames with those fixtures. Length/count mutations must mark
+the entire body invalid without reading the following element. Reserved bits and
+unknown optional elements do not reject otherwise valid bodies.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/MemoryInputStream.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+
+%global:
+template<typename T>
+static Ptr<const T> decode(const std::vector<uint8_t>& bytes)
+{
+    if (bytes.empty()) {
+        MemoryInputStream input(bytes);
+        return dynamicPtrCast<T>(Chunk::deserialize(input, typeid(T)));
+    }
+    Packet input("wire", makeShared<BytesChunk>(bytes));
+    auto result = input.popAtFront<T>(B(bytes.size()), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+    ASSERT(input.getDataLength() == b(0));
+    return result;
+}
+
+template<typename T>
+static void encoding(const Ptr<T>& frame, const std::vector<uint8_t>& expected)
+{
+    frame->setChunkLength(B(expected.size()));
+    Packet output("typed", frame);
+    ASSERT(output.peekAllAsBytes()->getBytes() == expected);
+}
+
+// 9.4.2.111/Figure 9-602: fixed PREQ portion 26, target tuple 11 octets.
+static const std::vector<uint8_t> preq = {
+    0x82,0x25, 0,1,4, 4,3,2,1, 2,0,0,0,0,1, 8,7,6,5,
+    0x10,0,0,0, 0x20,0,0,0, 1, 5, 2,0,0,0,0,3, 12,11,10,9};
+static const std::vector<uint8_t> prep = {
+    0x83,0x1f, 0,2,3, 2,0,0,0,0,3, 12,11,10,9, 0x10,0,0,0,
+    0x20,0,0,0, 2,0,0,0,0,1, 8,7,6,5};
+static const std::vector<uint8_t> perr = {
+    0x84,0x0f, 5,1, 0, 2,0,0,0,0,3, 12,11,10,9, 0x3f,0};
+static const std::vector<uint8_t> rann = {
+    0x7e,0x15, 0,1,4, 2,0,0,0,0,1, 4,3,2,1, 0x10,0,0,0, 0x20,0,0,0};
+
+static Ptr<Ieee80211HwmpFrame> makePreq()
+{
+    auto frame = makeShared<Ieee80211HwmpFrame>();
+    HwmpPreq p;
+    p.setHopCount(1);
+    p.setTtl(4);
+    p.setDiscoveryId(0x01020304);
+    p.setOriginator(MacAddress("02:00:00:00:00:01"));
+    p.setOriginatorSequenceNumber(0x05060708);
+    p.setLifetime(0x10);
+    p.setMetric(0x20);
+    p.setTargetsArraySize(1);
+    HwmpPreqTarget t;
+    t.flags = 5;
+    t.address = MacAddress("02:00:00:00:00:03");
+    t.sequenceNumber = 0x090a0b0c;
+    p.setTargets(0, t);
+    frame->setPreqsArraySize(1);
+    frame->setPreqs(0, p);
+    return frame;
+}
+
+template<typename T>
+static void setPeering(const Ptr<T>& frame, bool confirm, bool close, bool peerId = true)
+{
+    frame->setMeshIdPresent(true);
+    frame->setMeshIdArraySize(1);
+    frame->setMeshId(0, 'm');
+    if (!close)
+        frame->setMeshConfigurationPresent(true);
+    MeshPeering p;
+    p.localLinkId = 0x1234;
+    p.peerLinkIdPresent = (confirm || close) && peerId;
+    p.peerLinkId = 0x5678;
+    p.reasonCodePresent = close;
+    p.reasonCode = 52;
+    frame->setMeshPeeringPresent(true);
+    frame->setMeshPeering(p);
+}
+
+class DataDissectionAudit : public ProtocolDissector::ICallback
+{
+  public:
+    int meshControls = 0;
+    bool incorrect = false;
+    b payloadLength = b(0);
+    const Protocol *payloadProtocol = nullptr;
+    void startProtocolDataUnit(const Protocol *) override {}
+    void endProtocolDataUnit(const Protocol *) override {}
+    void markIncorrect() override { incorrect = true; }
+    void visitChunk(const Ptr<const Chunk>& chunk, const Protocol *) override {
+        if (dynamicPtrCast<const Ieee80211MeshControl>(chunk))
+            meshControls++;
+    }
+    void dissectPacket(Packet *packet, const Protocol *protocol) override {
+        payloadLength += packet->getDataLength();
+        payloadProtocol = protocol;
+        packet->popAtFront(packet->getDataLength());
+    }
+};
+
+%activity:
+auto a = decode<Ieee80211HwmpFrame>(preq);
+ASSERT(a->isCorrect() && a->isComplete());
+ASSERT(a->getPreqsArraySize() == 1);
+ASSERT(a->getPreqs(0).getDiscoveryId() == 0x01020304);
+ASSERT(a->getPreqs(0).getOriginatorSequenceNumber() == 0x05060708);
+ASSERT(a->getPreqs(0).getTargets(0).flags == 5);
+ASSERT(a->getPreqs(0).getTargets(0).sequenceNumber == 0x090a0b0c);
+encoding(makePreq(), preq);
+
+auto b = decode<Ieee80211HwmpFrame>(prep);
+ASSERT(b->isCorrect() && b->getPrepsArraySize() == 1);
+ASSERT(b->getPreps(0).targetSequenceNumber == 0x090a0b0c);
+auto prepFrame = makeShared<Ieee80211HwmpFrame>();
+HwmpPrep q;
+q.hopCount = 2;
+q.ttl = 3;
+q.target = MacAddress("02:00:00:00:00:03");
+q.targetSequenceNumber = 0x090a0b0c;
+q.lifetime = 0x10;
+q.metric = 0x20;
+q.originator = MacAddress("02:00:00:00:00:01");
+q.originatorSequenceNumber = 0x05060708;
+prepFrame->setPrepsArraySize(1);
+prepFrame->setPreps(0, q);
+encoding(prepFrame, prep);
+
+auto c = decode<Ieee80211HwmpFrame>(perr);
+ASSERT(c->isCorrect() && c->getPerrsArraySize() == 1);
+ASSERT(c->getPerrs(0).getDestinations(0).reasonCode == 63);
+auto perrFrame = makeShared<Ieee80211HwmpFrame>();
+HwmpPerr e;
+e.setTtl(5);
+e.setDestinationsArraySize(1);
+HwmpPerrDestination destination;
+destination.address = MacAddress("02:00:00:00:00:03");
+destination.sequenceNumber = 0x090a0b0c;
+destination.reasonCode = 63;
+e.setDestinations(0, destination);
+perrFrame->setPerrsArraySize(1);
+perrFrame->setPerrs(0, e);
+encoding(perrFrame, perr);
+
+auto d = decode<Ieee80211HwmpFrame>(rann);
+ASSERT(d->isCorrect() && d->getRannsArraySize() == 1);
+ASSERT(d->getRanns(0).interval == 16);
+auto rannFrame = makeShared<Ieee80211HwmpFrame>();
+HwmpRann r;
+r.hopCount = 1;
+r.ttl = 4;
+r.root = MacAddress("02:00:00:00:00:01");
+r.sequenceNumber = 0x01020304;
+r.interval = 16;
+r.metric = 32;
+rannFrame->setRannsArraySize(1);
+rannFrame->setRanns(0, r);
+encoding(rannFrame, rann);
+
+std::vector<uint8_t> combined = preq;
+for (const auto& element : {prep, perr, rann})
+    combined.insert(combined.end(), element.begin(), element.end());
+auto all = decode<Ieee80211HwmpFrame>(combined);
+ASSERT(all->isCorrect() && all->getPreqsArraySize() == 1 && all->getPrepsArraySize() == 1);
+ASSERT(all->getPerrsArraySize() == 1 && all->getRannsArraySize() == 1);
+auto twoTargets = preq;
+twoTargets[1] = 48;
+twoTargets[27] = 2;
+twoTargets.insert(twoTargets.end(), preq.begin() + 28, preq.end());
+ASSERT(decode<Ieee80211HwmpFrame>(twoTargets)->getPreqs(0).getTargetsArraySize() == 2);
+auto twoDestinations = perr;
+twoDestinations[1] = 28;
+twoDestinations[3] = 2;
+twoDestinations.insert(twoDestinations.end(), perr.begin() + 4, perr.end());
+ASSERT(decode<Ieee80211HwmpFrame>(twoDestinations)->getPerrs(0).getDestinationsArraySize() == 2);
+
+// Address extensions are structurally decoded; endpoint-only consumers reject
+// their use in subsequent live peering/forwarding tests.
+auto extendedPreq = preq;
+extendedPreq[1] += 6;
+extendedPreq[2] = 0x40;
+extendedPreq.insert(extendedPreq.begin() + 19, {2,0,0,0,0,9});
+ASSERT(decode<Ieee80211HwmpFrame>(extendedPreq)->isCorrect());
+auto extendedPrep = prep;
+extendedPrep[1] += 6;
+extendedPrep[2] = 0x40;
+extendedPrep.insert(extendedPrep.begin() + 15, {2,0,0,0,0,9});
+ASSERT(decode<Ieee80211HwmpFrame>(extendedPrep)->isCorrect());
+auto extendedPerr = perr;
+extendedPerr[1] += 6;
+extendedPerr[4] = 0x40;
+extendedPerr.insert(extendedPerr.begin() + 15, {2,0,0,0,0,9});
+ASSERT(decode<Ieee80211HwmpFrame>(extendedPerr)->isCorrect());
+
+for (const auto& valid : {preq, prep, perr, rann, extendedPreq, extendedPrep, extendedPerr}) {
+    for (size_t cut = 0; cut < valid.size(); cut++) {
+        std::vector<uint8_t> truncated(valid.begin(), valid.begin() + cut);
+        ASSERT(decode<Ieee80211HwmpFrame>(truncated)->isIncorrect());
+    }
+    auto tooLong = valid;
+    tooLong[1]++;
+    ASSERT(decode<Ieee80211HwmpFrame>(tooLong)->isIncomplete());
+}
+for (int count : {0, 2, 21, 255}) {
+    auto bad = preq;
+    bad[27] = count;
+    ASSERT(decode<Ieee80211HwmpFrame>(bad)->isIncorrect());
+}
+auto badPrefix = preq;
+badPrefix.insert(badPrefix.end(), {0x83,0x1f,0});
+ASSERT(decode<Ieee80211HwmpFrame>(badPrefix)->isIncorrect());
+auto reserved = preq;
+reserved[2] = 0xb8; // reserved flags ignored
+reserved[28] |= 0xfa;
+ASSERT(decode<Ieee80211HwmpFrame>(reserved)->isCorrect());
+auto optional = rann;
+optional.insert(optional.begin(), {0xdd,3,1,2,3});
+ASSERT(decode<Ieee80211HwmpFrame>(optional)->isCorrect());
+
+const std::vector<uint8_t> metricBytes = {0x73,5,1,0x44,0x33,0x22,0x11};
+auto report = decode<Ieee80211MeshLinkMetricFrame>(metricBytes);
+ASSERT(report->isCorrect() && report->getRequest() && report->getMetric() == 0x11223344);
+auto metricFrame = makeShared<Ieee80211MeshLinkMetricFrame>();
+metricFrame->setRequest(true);
+metricFrame->setMetric(0x11223344);
+encoding(metricFrame, metricBytes);
+
+const std::vector<uint8_t> openBytes = {
+    0,0, 1,1,0x8c, 0x72,1,'m', 0x71,7,1,1,0,1,0,0,9, 0x75,4,0,0,0x34,0x12};
+auto open = decode<Ieee80211MeshPeeringOpenFrame>(openBytes);
+ASSERT(open->isCorrect() && open->getMeshPeering().localLinkId == 0x1234);
+auto openFrame = makeShared<Ieee80211MeshPeeringOpenFrame>();
+setPeering(openFrame, false, false);
+openFrame->setSupportedRatesArraySize(1);
+openFrame->setSupportedRates(0, 0x8c);
+encoding(openFrame, openBytes);
+auto epdBytes = openBytes;
+epdBytes[1] = 0x20;
+epdBytes[4] = MESH_EPD_MEMBERSHIP_SELECTOR;
+auto epd = decode<Ieee80211MeshPeeringOpenFrame>(epdBytes);
+ASSERT(epd->isCorrect() && (epd->getCapabilityInformation() & MESH_EPD_CAPABILITY));
+ASSERT(epd->getSupportedRates(0) == MESH_EPD_MEMBERSHIP_SELECTOR);
+auto connectedBytes = openBytes;
+connectedBytes[14] = 2;
+connectedBytes[15] = 0x80; // Figure 9-577: Connected to AS is formationInfo bit 7.
+auto connected = decode<Ieee80211MeshPeeringOpenFrame>(connectedBytes);
+ASSERT(connected->isCorrect() && connected->getMeshConfiguration().formationInfo == 0x80);
+auto connectedFrame = makeShared<Ieee80211MeshPeeringOpenFrame>();
+setPeering(connectedFrame, false, false);
+connectedFrame->setSupportedRatesArraySize(1);
+connectedFrame->setSupportedRates(0, 0x8c);
+MeshConfiguration connectedConfig;
+connectedConfig.authenticationId = 2;
+connectedConfig.formationInfo = 0x80;
+connectedFrame->setMeshConfiguration(connectedConfig);
+encoding(connectedFrame, connectedBytes);
+const std::vector<uint8_t> confirmBytes = {
+    0,0, 0x23,0xc0, 1,1,0x8c, 0x72,1,'m', 0x71,7,1,1,0,1,0,0,9, 0x75,6,0,0,0x34,0x12,0x78,0x56};
+auto confirm = decode<Ieee80211MeshPeeringConfirmFrame>(confirmBytes);
+ASSERT(confirm->isCorrect() && confirm->getAssociationId() == 35);
+ASSERT(confirm->getMeshPeering().peerLinkId == 0x5678);
+auto confirmFrame = makeShared<Ieee80211MeshPeeringConfirmFrame>();
+setPeering(confirmFrame, true, false);
+confirmFrame->setAssociationId(35);
+confirmFrame->setSupportedRatesArraySize(1);
+confirmFrame->setSupportedRates(0, 0x8c);
+encoding(confirmFrame, confirmBytes);
+const std::vector<uint8_t> closeBytes = {0x72,1,'m', 0x75,8,0,0,0x34,0x12,0x78,0x56,52,0};
+auto close = decode<Ieee80211MeshPeeringCloseFrame>(closeBytes);
+ASSERT(close->isCorrect() && close->getMeshPeering().reasonCode == 52);
+auto closeFrame = makeShared<Ieee80211MeshPeeringCloseFrame>();
+setPeering(closeFrame, false, true);
+encoding(closeFrame, closeBytes);
+const std::vector<uint8_t> closeWithoutPeerBytes = {0x72,1,'m', 0x75,6,0,0,0x34,0x12,52,0};
+ASSERT(decode<Ieee80211MeshPeeringCloseFrame>(closeWithoutPeerBytes)->isCorrect());
+
+for (int ae : {0,1,2}) {
+    std::vector<uint8_t> bytes = {uint8_t(ae),5,4,3,2,1};
+    if (ae >= 1)
+        bytes.insert(bytes.end(), {2,0,0,0,0,9});
+    if (ae == 2)
+        bytes.insert(bytes.end(), {2,0,0,0,0,10});
+    auto control = decode<Ieee80211MeshControl>(bytes);
+    ASSERT(control->isCorrect() && control->getSequenceNumber() == 0x01020304);
+    ASSERT(control->getChunkLength() == B(6 + 6 * ae));
+    auto typed = makeShared<Ieee80211MeshControl>();
+    typed->setAddressExtensionMode(ae);
+    typed->setTtl(5);
+    typed->setSequenceNumber(0x01020304);
+    typed->setAddress4(MacAddress("02:00:00:00:00:09"));
+    typed->setAddress5(MacAddress("02:00:00:00:00:09"));
+    typed->setAddress6(MacAddress("02:00:00:00:00:0a"));
+    encoding(typed, bytes);
+    for (size_t cut = 0; cut < bytes.size(); cut++)
+        ASSERT(decode<Ieee80211MeshControl>({bytes.begin(), bytes.begin() + cut})->isIncomplete());
+}
+ASSERT(decode<Ieee80211MeshControl>({3,5,4,3,2,1})->isIncorrect());
+ASSERT(decode<Ieee80211MeshControl>({0xfc,5,4,3,2,1})->isCorrect());
+
+// Beacon fixed prefix + SSID/rates + TIM + Mesh ID/Configuration + Awake Window.
+const std::vector<uint8_t> beaconBytes = {
+    0,0,0,0,0,0,0,0, 100,0, 0,0, 0,0, 1,1,0x8c,
+    5,4,0,1,0,0, 0x72,1,'m', 0x71,7,1,2,0,1,0,0,9, 0x77,2,10,0};
+auto beacon = decode<Ieee80211BeaconFrame>(beaconBytes);
+ASSERT(beacon->isCorrect() && beacon->getTimPresent());
+ASSERT(beacon->getMeshConfiguration().pathSelectionMetricId == 2);
+ASSERT(beacon->getMeshAwakeWindow() == 10);
+auto beaconFrame = makeShared<Ieee80211BeaconFrame>();
+beaconFrame->setHasTimestamp(true);
+beaconFrame->setTimestamp(0);
+beaconFrame->setBeaconInterval(SimTime(102400, SIMTIME_US));
+Ieee80211SupportedRatesElement rates;
+rates.numRates = 1;
+rates.basicRate[0] = true;
+rates.rate[0] = 6;
+beaconFrame->setSupportedRates(rates);
+beaconFrame->setMeshIdPresent(true);
+beaconFrame->setMeshIdArraySize(1);
+beaconFrame->setMeshId(0, 'm');
+MeshConfiguration config;
+config.pathSelectionMetricId = 2;
+beaconFrame->setMeshConfigurationPresent(true);
+beaconFrame->setMeshConfiguration(config);
+beaconFrame->setTimPresent(true);
+MeshTim tim;
+tim.partialVirtualBitmap[0] = 0;
+beaconFrame->setTim(tim);
+beaconFrame->setMeshAwakeWindowPresent(true);
+beaconFrame->setMeshAwakeWindow(10);
+encoding(beaconFrame, beaconBytes);
+auto malformedBeaconBody = beaconBytes;
+malformedBeaconBody[27] = 6; // Mesh Configuration requires seven octets.
+std::vector<uint8_t> malformedBeacon = {
+    0x80,0,0,0, 0xff,0xff,0xff,0xff,0xff,0xff, 2,0,0,0,0,1,
+    0xff,0xff,0xff,0xff,0xff,0xff, 0,0};
+malformedBeacon.insert(malformedBeacon.end(), malformedBeaconBody.begin(), malformedBeaconBody.end());
+malformedBeacon.insert(malformedBeacon.end(), {0,0,0,0});
+Packet malformedBeaconPacket("malformed-mesh-beacon", makeShared<BytesChunk>(malformedBeacon));
+DataDissectionAudit beaconAudit;
+ProtocolDissectorRegistry::getInstance().getProtocolDissector(&Protocol::ieee80211Mac)
+    ->dissect(&malformedBeaconPacket, &Protocol::ieee80211Mac, beaconAudit);
+ASSERT(beaconAudit.incorrect);
+
+// Table 9-10 gives high QoS bits different meanings outside mesh. Even WDS
+// address roles cannot supply the missing BSS context. Preserve the byte and
+// leave every payload octet to its original dissector.
+for (int roles : {0,1,2,3}) {
+    std::vector<uint8_t> headerBytes = {
+        0x88,uint8_t(roles),0,0, 2,0,0,0,0,2, 2,0,0,0,0,1,
+        2,0,0,0,0,3, 0,0};
+    if (roles == 3)
+        headerBytes.insert(headerBytes.end(), {2,0,0,0,0,4});
+    headerBytes.insert(headerBytes.end(), {0,0xa5});
+    auto ordinary = decode<Ieee80211DataHeader>(headerBytes);
+    ASSERT(ordinary->getQosControlHigh() == 0xa5);
+    ASSERT(dynamicPtrCast<const Ieee80211MeshDataHeader>(ordinary) == nullptr);
+    auto rebuilt = makeShared<Ieee80211DataHeader>(*ordinary);
+    encoding(rebuilt, headerBytes);
+    auto bytes = headerBytes;
+    bytes.insert(bytes.end(), {0,5,4,3,2,1,0xaa,0xaa, 0,0,0,0});
+    Packet raw("nonmesh-qos", makeShared<BytesChunk>(bytes));
+    DataDissectionAudit audit;
+    ProtocolDissectorRegistry::getInstance().getProtocolDissector(&Protocol::ieee80211Mac)
+        ->dissect(&raw, &Protocol::ieee80211Mac, audit);
+    ASSERT(!audit.incorrect && audit.meshControls == 0 && audit.payloadLength == B(8));
+}
+
+for (const auto& body : {std::vector<uint8_t>{0,5,4,3,2,1,0xaa,0xaa},
+        std::vector<uint8_t>{3,5,4,3,2,1}, std::vector<uint8_t>{1}}) {
+    const std::vector<uint8_t> headerBytes = {
+        0x88,3,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1,
+        2,0,0,0,0,3, 0,0, 2,0,0,0,0,4, 0,1};
+    auto meshHeader = decode<Ieee80211MeshDataHeader>(headerBytes);
+    ASSERT(meshHeader->getMeshControlPresent());
+    Packet context("explicit-mesh-context", meshHeader);
+    auto bytes = body;
+    bytes.insert(bytes.end(), {0,0,0,0});
+    context.insertAtBack(makeShared<BytesChunk>(bytes));
+    DataDissectionAudit audit;
+    ProtocolDissectorRegistry::getInstance().getProtocolDissector(&Protocol::ieee80211Mac)
+        ->dissect(&context, &Protocol::ieee80211Mac, audit);
+    ASSERT(audit.meshControls == 1);
+    ASSERT(audit.incorrect == (body.front() != 0));
+    if (body.front() != 0)
+        ASSERT(audit.payloadProtocol == nullptr);
+    else
+        ASSERT(audit.payloadLength == B(2));
+}
+
+const std::vector<uint8_t> reservedMeshHeaderBytes = {
+    0x88,3,0,0, 2,0,0,0,0,2, 2,0,0,0,0,1,
+    2,0,0,0,0,3, 0,0, 2,0,0,0,0,4, 0,0xf9};
+auto reservedMeshHeader = decode<Ieee80211MeshDataHeader>(reservedMeshHeaderBytes);
+ASSERT(reservedMeshHeader->isCorrect() && reservedMeshHeader->getQosControlHigh() == 1);
+auto cleanMeshHeader = makeShared<Ieee80211MeshDataHeader>(*reservedMeshHeader);
+cleanMeshHeader->setQosControlHigh(0xf9);
+auto cleanMeshHeaderBytes = reservedMeshHeaderBytes;
+cleanMeshHeaderBytes.back() = 1;
+encoding(cleanMeshHeader, cleanMeshHeaderBytes);
+
+EV << "Mesh independent byte fixtures and malformed boundaries passed.\n";
+
+%contains: stdout
+Mesh independent byte fixtures and malformed boundaries passed.
