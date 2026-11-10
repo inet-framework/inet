@@ -53,13 +53,16 @@ struct Ieee80211HtCapabilities
     bool shortGi20 = false;
     bool shortGi40 = false;
     int maxAmpduLengthExponent = 0;
+    int maxAmsduLength = 3839;
+    int minimumMpduStartSpacing = 0;
 
     bool operator==(const Ieee80211HtCapabilities& other) const {
         return supportedChannelWidths == other.supportedChannelWidths && rxMcsSupported == other.rxMcsSupported &&
                 txMcsSetDefined == other.txMcsSetDefined && txRxMcsSetNotEqual == other.txRxMcsSetNotEqual &&
                 txMaxNss == other.txMaxNss && txUnequalModulation == other.txUnequalModulation &&
                 txMcsNss.maxMcsPerNss == other.txMcsNss.maxMcsPerNss && ldpc == other.ldpc && greenfield == other.greenfield &&
-                shortGi20 == other.shortGi20 && shortGi40 == other.shortGi40 && maxAmpduLengthExponent == other.maxAmpduLengthExponent;
+                shortGi20 == other.shortGi20 && shortGi40 == other.shortGi40 && maxAmpduLengthExponent == other.maxAmpduLengthExponent
+                && maxAmsduLength == other.maxAmsduLength && minimumMpduStartSpacing == other.minimumMpduStartSpacing;
     }
 };
 

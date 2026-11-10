@@ -59,6 +59,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
   public:
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t meshDataAttemptCompletedSignal;
+    static simsignal_t secondaryChannelAccessDeferredSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
 
@@ -229,6 +230,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     virtual MeshLinkTiming getMeshLinkTiming(MacAddress peer) override;
+    MeshLinkTiming previewMeshLinkTiming(MacAddress peer, const Ieee80211RateSetState& rates,
+        const Ieee80211PeerPhyCapabilities& capabilities) override;
     virtual ~Hcf();
     void resetPeer(MacAddress peer);
 

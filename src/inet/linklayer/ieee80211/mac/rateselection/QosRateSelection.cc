@@ -30,7 +30,39 @@ void QosRateSelection::initialize(int stage)
         double multicastFrameBitrate = par("multicastFrameBitrate");
         multicastFrameMode = (multicastFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(multicastFrameBitrate));
         double dataFrameBitrate = par("dataFrameBitrate");
-        dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"));
+        std::string family = par("dataFramePhyFamily").stdstringValue();
+        std::string guard = par("dataFrameGuardInterval").stdstringValue();
+        int mcs = par("dataFrameMcs");
+        if (family != "auto" && family != "ht" && family != "vht")
+            throw cRuntimeError("Unknown dataFramePhyFamily");
+        if (guard != "auto" && guard != "long" && guard != "short")
+            throw cRuntimeError("Unknown dataFrameGuardInterval");
+        if (mcs >= 0) {
+            Hz width = Hz(par("dataFrameBandwidth"));
+            int nss = par("dataFrameNumSpatialStreams");
+            if (family == "auto" || guard == "auto" || std::isnan(width.get()) || (family == "vht" && nss < 1))
+                throw cRuntimeError("Explicit MCS requires family/width/GI and VHT NSS");
+            if (family == "ht" && (mcs > 31 || (nss != -1 && nss != mcs / 8 + 1)))
+                throw cRuntimeError("HT MCS and configured NSS disagree");
+            for (int i = 0; i < modeSet->getNumModes(); i++) {
+                auto candidate = modeSet->getMode(i);
+                bool shortGi = family == "ht" ? candidate->isHtShortGuardInterval() : candidate->isVhtShortGuardInterval();
+                int index = family == "ht" ? candidate->getHtMcsIndex() : candidate->getVhtMcsIndex();
+                if (index == mcs && candidate->getDataMode()->getBandwidth() == width && shortGi == (guard == "short")
+                        && (nss == -1 || candidate->getDataMode()->getNumberOfSpatialStreams() == nss)) {
+                    if (dataFrameMode)
+                        throw cRuntimeError("Explicit PHY tuple is ambiguous in the configured catalog");
+                    dataFrameMode = candidate;
+                }
+            }
+            if (!dataFrameMode || (dataFrameBitrate != -1 && dataFrameMode->getDataMode()->getNetBitrate() != bps(dataFrameBitrate)))
+                throw cRuntimeError("Explicit PHY tuple is absent or conflicts with dataFrameBitrate");
+        }
+        else {
+            if (mcs != -1 || family != "auto" || guard != "auto")
+                throw cRuntimeError("Family/GI constraints require an explicit MCS");
+            dataFrameMode = (dataFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(dataFrameBitrate), Hz(par("dataFrameBandwidth")), par("dataFrameNumSpatialStreams"));
+        }
         double mgmtFrameBitrate = par("mgmtFrameBitrate");
         mgmtFrameMode = (mgmtFrameBitrate == -1) ? nullptr : modeSet->getMode(bps(mgmtFrameBitrate));
         double controlFrameBitrate = par("controlFrameBitrate");
@@ -98,6 +130,8 @@ const IIeee80211Mode *QosRateSelection::computeResponseAckFrameMode(Packet *pack
 {
     // TODO BSSBasicRateSet, alternate rate
     auto mode = getMode(packet, dataOrMgmtHeader);
+    if (mib && mib->mode == Ieee80211Mib::MESH && mib->getLocalMeshPhyCapabilities().htPresent)
+        return selectMeshAckMode(mode, mib->getLocalRateSet());
     ASSERT(modeSet->containsMode(mode));
     const IIeee80211Mode *responseMode;
     if (!responseAckFrameMode) {
@@ -230,6 +264,25 @@ const IIeee80211Mode *QosRateSelection::computeCompressedBlockAckReqMode(Packet 
 
 const IIeee80211Mode *QosRateSelection::computeDataOrMgmtFrameMode(const Ptr<const Ieee80211DataOrMgmtHeader>& dataOrMgmtHeader)
 {
+    if (mib && mib->mode == Ieee80211Mib::MESH && mib->getLocalMeshPhyCapabilities().htPresent) {
+        if (dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) || dataOrMgmtHeader->getReceiverAddress().isMulticast()) {
+            const IIeee80211Mode *selected = dynamicPtrCast<const Ieee80211MgmtHeader>(dataOrMgmtHeader) ? mgmtFrameMode : multicastFrameMode;
+            if (selected && (selected->getHtMcsIndex() >= 0 || selected->getVhtMcsIndex() >= 0
+                    || mib->getLocalRateSet().basic.legacyRates.count(selected->getDataMode()->getNetBitrate()) == 0))
+                throw cRuntimeError("Mesh management/group traffic requires a primary20 legacy basic mode");
+            if (!selected)
+                for (auto candidate : modeSet->getLegacyOperationalModes())
+                    if (mib->getLocalRateSet().basic.legacyRates.count(candidate->getDataMode()->getNetBitrate())
+                            && (!selected || candidate->getDataMode()->getNetBitrate() > selected->getDataMode()->getNetBitrate()))
+                        selected = candidate;
+            if (!selected) throw cRuntimeError("Mesh has no common legacy basic mode");
+            return selected;
+        }
+        auto peer = dataOrMgmtHeader->getReceiverAddress();
+        auto phy = mib->findMeshPeerPhyCapabilities(peer);
+        auto rates = mib->findPeerRateSet(peer);
+        return computeMeshPeerModes(peer, rates ? *rates : mib->getLocalRateSet(), phy ? *phy : Ieee80211PeerPhyCapabilities{}).first;
+    }
     // Per-receiver override for originated unicast data frames (see dataFrameBitratePerReceiver).
     // Wins over the interface-wide dataFrameMode / rate control; group-addressed and management
     // frames are left to the existing rules below.
@@ -380,6 +433,68 @@ const IIeee80211Mode *QosRateSelection::getPeerCompatibleMode(const MacAddress& 
     if (mode == nullptr || peerAddress.isMulticast() || !mib || mode->getHtMcsIndex() < 0)
         return mode;
     return selectPeerCompatibleMode(modeSet, mib->findPeerHtState(peerAddress), mode, peerAddress);
+}
+
+const IIeee80211Mode *QosRateSelection::selectMeshAckMode(const IIeee80211Mode *eliciting, const Ieee80211RateSetState& rates) const
+{
+    auto reference = eliciting->getNonHtReferenceRate();
+    if (std::isnan(reference.get()))
+        reference = eliciting->getDataMode()->getNetBitrate();
+    const IIeee80211Mode *selected = nullptr;
+    for (auto candidate : modeSet->getLegacyOperationalModes()) {
+        auto rate = candidate->getDataMode()->getNetBitrate();
+        if (rate <= reference && rates.basic.legacyRates.count(rate) && rates.supported.legacyRates.count(rate)
+                && (!selected || rate > selected->getDataMode()->getNetBitrate()))
+            selected = candidate;
+    }
+    if (!selected)
+        for (auto candidate : modeSet->getLegacyOperationalModes())
+            if (modeSet->getIsMandatory(candidate) && candidate->getDataMode()->getNetBitrate() <= reference
+                    && (!selected || candidate->getDataMode()->getNetBitrate() > selected->getDataMode()->getNetBitrate()))
+                selected = candidate;
+    if (responseAckFrameMode) {
+        auto explicitRate = responseAckFrameMode->getDataMode()->getNetBitrate();
+        if (responseAckFrameMode->getHtMcsIndex() >= 0 || responseAckFrameMode->getVhtMcsIndex() >= 0
+                || explicitRate > reference || rates.basic.legacyRates.count(explicitRate) == 0)
+            throw cRuntimeError("Fixed ACK rate is not a legal mesh non-HT basic response");
+        selected = responseAckFrameMode;
+    }
+    if (!selected)
+        throw cRuntimeError("No legal mesh non-HT ACK response rate");
+    return selected;
+}
+
+std::pair<const IIeee80211Mode *, const IIeee80211Mode *> QosRateSelection::computeMeshPeerModes(MacAddress peer,
+        const Ieee80211RateSetState& rates, const Ieee80211PeerPhyCapabilities& capabilities)
+{
+    ensurePerReceiverModesResolved();
+    auto it = perReceiverDataFrameMode.find(peer);
+    auto requested = it != perReceiverDataFrameMode.end() ? it->second : dataFrameMode;
+    bool fixed = requested != nullptr;
+    if (!requested)
+        requested = mib->getLocalMeshPhyCapabilities().htPresent ? modeSet->getFastestMode() : fastestMandatoryMode;
+    auto selected = selectMeshPeerCompatibleMode(modeSet, mib->getLocalMeshPhyCapabilities(), &capabilities, requested, fixed, peer,
+        mib->isMeshShortGuardIntervalTransmissionEnabled());
+    if (selected->getHtMcsIndex() < 0 && selected->getVhtMcsIndex() < 0
+            && (!rates.supported.known || rates.supported.legacyRates.count(selected->getDataMode()->getNetBitrate()) == 0))
+        throw cRuntimeError("Configured fixed legacy rate is unsupported by mesh peer %s", peer.str().c_str());
+    return {selected, selectMeshAckMode(selected, rates)};
+}
+
+Ieee80211TxVector QosRateSelection::computeResponseTxVector(Packet *packet, const IIeee80211Mode *mode, ResponseQueryRole role) const
+{
+    Ieee80211TxVector response(mode);
+    if (!mib || mib->mode != Ieee80211Mib::MESH || !mib->getLocalMeshPhyCapabilities().htPresent)
+        return response;
+    auto indication = packet->findTag<Ieee80211ModeInd>();
+    auto request = packet->findTag<Ieee80211ModeReq>();
+    auto eliciting = role == ResponseQueryRole::RESPOND && indication ? indication->getTxVector()
+        : request ? request->getTxVector() : Ieee80211TxVector();
+    if (eliciting.bandwidth > MHz(20)) {
+        response.format = Ieee80211TxVector::Format::NON_HT_DUPLICATE;
+        response.bandwidth = eliciting.bandwidth;
+    }
+    return response;
 }
 
 } /* namespace ieee80211 */

@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtMesh.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211HtMgmtElements.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211VhtMgmtElements.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/IIeee80211ChannelAccess.h"
 
 #include <algorithm>
 #include <limits>
@@ -42,6 +45,7 @@ void Ieee80211MgmtMesh::initialize(int stage)
     Ieee80211MgmtBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         linkMetric.reference(this,"linkMetricModule",true);
+        linkTiming.reference(this,"linkTimingModule",true);
         pathSelection.reference(this,"pathSelectionModule",false);
         mib->mode = Ieee80211Mib::MESH;
         MeshConfiguration configuration;
@@ -75,8 +79,8 @@ void Ieee80211MgmtMesh::initialize(int stage)
         WATCH(nextTbttTsf);
         WATCH_EXPR("peerStates", describePeers());
     }
-    if (stage == INITSTAGE_LAST && (!modeSet || modeSet->isHtOperationSupported()))
-        throw cRuntimeError("Open mesh peering currently requires the OFDM reference profile");
+    if (stage == INITSTAGE_LAST && !modeSet)
+        throw cRuntimeError("Open mesh peering requires a prepared PHY catalog");
 }
 
 void Ieee80211MgmtMesh::start()
@@ -271,14 +275,66 @@ bool Ieee80211MgmtMesh::compatibleRates(const Ieee80211RateSetState& rates) cons
     return true;
 }
 
+bool Ieee80211MgmtMesh::decodePeerPhy(const Ieee80211MeshFrame& body, Ieee80211PeerPhyCapabilities& phy) const
+{
+    const auto& local = mib->getLocalMeshPhyCapabilities();
+    if (body.getHtCapabilitiesPresent() != body.getHtOperationPresent()
+            || body.getVhtCapabilitiesPresent() != body.getVhtOperationPresent()
+            || body.getHtCapabilitiesPresent() != local.htPresent || body.getVhtCapabilitiesPresent() != local.vhtPresent)
+        return false;
+    if (!local.htPresent)
+        return true;
+    auto physical = dynamic_cast<const physicallayer::IIeee80211ChannelAccess *>(myIface->getSubmodule("radio"));
+    if (!physical || !physical->hasContiguousAllocation())
+        return false;
+    try {
+        phy.ht = makeHtCapabilities(body.getHtCapabilities());
+        phy.htOperation = makeHtOperation(physical->getOperatingChannel()->getBand(), body.getHtOperation());
+        if (phy.htOperation.primaryChannel != local.htOperation.primaryChannel
+                || phy.htOperation.operatingChannelWidth != local.htOperation.operatingChannelWidth
+                || phy.htOperation.secondaryChannelOffset != local.htOperation.secondaryChannelOffset
+                || phy.htOperation.protectionMode != Ieee80211HtProtectionMode::NO_PROTECTION
+                || phy.htOperation.basicMcsSupported != local.htOperation.basicMcsSupported
+                || !supportsBasicHtMcsSet(phy.ht, local.htOperation)
+                || (local.htOperation.operatingChannelWidth == MHz(40)
+                    && (!phy.ht.supportedChannelWidths.count(MHz(40)) || body.getHtOperation().obssNonHtStasPresent)))
+            return false;
+        phy.htPresent = true;
+        if (local.vhtPresent) {
+            phy.vht = makeVhtCapabilities(body.getVhtCapabilities());
+            const auto& wire = body.getVhtOperation();
+            const auto& operation = local.vhtOperation;
+            auto expected = makeVhtOperationElement(operation);
+            if (wire.channelWidth != expected.channelWidth || wire.centerFrequencySegment0 != expected.centerFrequencySegment0
+                    || wire.centerFrequencySegment1 != expected.centerFrequencySegment1 || wire.basicMcsMap != expected.basicMcsMap
+                    || !supportsBasicVhtMcs(phy.vht, operation.basicMcsMap)
+                    || (operation.width == MHz(160) && !phy.vht.width160)
+                    || body.getHtOperation().channelCenterFrequencySegment2 != 0)
+                return false;
+            phy.vhtOperation = operation;
+            phy.vhtPresent = true;
+        }
+        return true;
+    }
+    catch (const cRuntimeError&) {
+        return false; // A malformed/unsupported advertisement never mutates committed state.
+    }
+}
+
 Ieee80211RateSetState Ieee80211MgmtMesh::readPeeringRates(const Ieee80211MeshPeeringOpenFrame& body) const
 {
     Ieee80211RateSetState rates;
     rates.supported.known = rates.operational.known = rates.basic.known = true;
     auto add = [&](uint8_t encoded) {
         auto value = encoded & 0x7F;
-        if (value == 0 || (encoded & 0x80 && value >= 122)) {
-            rates.basic.known = false; // EPD/HT/VHT/HE membership is outside this stage.
+        if ((encoded & 0x80) && value >= 122) {
+            const auto& local = mib->getLocalMeshPhyCapabilities();
+            if (!((value == 127 && local.htPresent) || (value == 126 && local.vhtPresent)))
+                rates.basic.known = false;
+            return; // Table9-131 requirement selectors are not legacy rates.
+        }
+        if (value == 0) {
+            rates.basic.known = false;
             return;
         }
         auto rate = Mbps(value * 0.5);
@@ -313,10 +369,16 @@ void Ieee80211MgmtMesh::processBeacon(Packet *packet, const Ptr<const Ieee80211M
         && !(body->getCapabilityInformation() & (MESH_EPD_CAPABILITY | 3));
     auto rates = makeRateSet(body->getSupportedRates(), body->getExtendedSupportedRatesPresent(), body->getExtendedSupportedRates());
     compatible &= compatibleRates(rates);
-    auto hasSelector = [](const auto& element) {
+    Ieee80211PeerPhyCapabilities phy;
+    compatible &= decodePeerPhy(*body, phy);
+    auto hasSelector = [&](const auto& element) {
         for (int i = 0; i < element.numRates; i++)
-            if (element.basicRate[i] && element.rate[i] >= 61)
-                return true;
+            if (element.basicRate[i] && element.rate[i] >= 61) {
+                int selector = int(element.rate[i] * 2);
+                const auto& local = mib->getLocalMeshPhyCapabilities();
+                if (!((selector == 127 && local.htPresent) || (selector == 126 && local.vhtPresent)))
+                    return true;
+            }
         return false;
     };
     compatible &= !hasSelector(body->getSupportedRates())
@@ -406,12 +468,13 @@ void Ieee80211MgmtMesh::setState(MacAddress address, Peer& peer, PeerState state
         linkMetric->resetPeer(address);
     peer.state = state;
     if (state == ESTAB && !wasEstablished)
-        mib->establishMeshPeer(address, peer.rates);
+        mib->establishMeshPeer(address, peer.rates, peer.phy);
     if (state == IDLE) {
         cancelEvent(peer.timer);
         peer.localLinkId = peer.localAid = peer.peerAid = 0;
         peer.peerLinkId.reset();
         peer.rates = {};
+        peer.phy = {};
         peer.retries = 0;
     }
     if (wasEstablished && state != ESTAB)
@@ -567,8 +630,7 @@ void Ieee80211MgmtMesh::processPeering(Packet *packet, const Ptr<const Ieee80211
         dropManagementFrame(packet);
         return;
     }
-    auto& peer = requirePeer(address);
-    if (peer.peerLinkId && *peer.peerLinkId != peering.localLinkId) {
+    if (it != peers.end() && it->second.peerLinkId && *it->second.peerLinkId != peering.localLinkId) {
         dropManagementFrame(packet);
         return;
     }
@@ -585,12 +647,26 @@ void Ieee80211MgmtMesh::processPeering(Packet *packet, const Ptr<const Ieee80211
     auto rates = readPeeringRates(*open);
     bool compatible = matchesProfile(*body) && compatibleRates(rates)
         && !(open->getCapabilityInformation() & MESH_EPD_CAPABILITY);
-    if (compatible && !linkMetric->supportsPeerRates(address,rates)) {
+    Ieee80211PeerPhyCapabilities phy;
+    compatible &= decodePeerPhy(*body, phy);
+    std::optional<MeshLinkTiming> candidateTiming;
+    if (compatible && mib->getMeshPhyProfile() != "ofdm") {
+        try {
+            candidateTiming = linkTiming->previewMeshLinkTiming(address, rates, phy);
+        }
+        catch (const cRuntimeError& error) {
+            EV_WARN << "Rejecting incompatible fixed mesh PHY: " << error.what() << endl;
+            dropManagementFrame(packet);
+            return;
+        }
+    }
+    if (compatible && mib->getMeshPhyProfile() == "ofdm" && !linkMetric->supportsPeerRates(address,rates)) {
         // Supported-profile policy: retain a committed relationship unchanged
         // rather than publish rates that invalidate its configured fixed PHY.
         dropManagementFrame(packet);
         return;
     }
+    auto& peer = requirePeer(address);
     if (!compatible) {
         if (!peer.peerLinkId)
             peer.peerLinkId = peering.localLinkId;
@@ -615,10 +691,16 @@ void Ieee80211MgmtMesh::processPeering(Packet *packet, const Ptr<const Ieee80211
         return;
     }
     peer.peerLinkId = peering.localLinkId;
-    bool changedEstablishedRates = peer.state == ESTAB && peer.rates != rates;
+    bool changedEstablishedRates = peer.state == ESTAB && (peer.rates != rates || peer.phy != phy);
+    if (candidateTiming && changedEstablishedRates) {
+        auto current = linkTiming->getMeshLinkTiming(address);
+        if (current.dataMode != candidateTiming->dataMode || current.ackMode != candidateTiming->ackMode)
+            linkMetric->resetPeer(address);
+    }
     peer.rates = rates;
+    peer.phy = phy;
     if (changedEstablishedRates)
-        mib->establishMeshPeer(address,rates);
+        mib->establishMeshPeer(address,rates,phy);
     if (action == MESH_PEERING_OPEN && peer.localAid == 0)
         peer.localAid = allocateAid();
     if (action == MESH_PEERING_CONFIRM) {
@@ -642,10 +724,29 @@ void Ieee80211MgmtMesh::setMeshElements(const Ptr<Ieee80211MeshFrame>& body) con
         count += entry.second.state == ESTAB;
     configuration.formationInfo = std::min(size_t(63), count) << 1;
     body->setMeshConfiguration(configuration);
+    if (dynamicPtrCast<const Ieee80211MeshPeeringCloseFrame>(body))
+        return;
+    const auto& phy = mib->getLocalMeshPhyCapabilities();
+    if (phy.htPresent) {
+        body->setHtCapabilitiesPresent(true);
+        body->setHtCapabilities(makeHtCapabilitiesElement(phy.ht));
+        body->setHtOperationPresent(true);
+        auto radio = dynamic_cast<const physicallayer::IIeee80211ChannelAccess *>(myIface->getSubmodule("radio"));
+        body->setHtOperation(makeHtOperationElement(radio->getOperatingChannel()->getBand(), phy.htOperation));
+    }
+    if (phy.vhtPresent) {
+        body->setVhtCapabilitiesPresent(true);
+        body->setVhtCapabilities(makeVhtCapabilitiesElement(phy.vht));
+        body->setVhtOperationPresent(true);
+        body->setVhtOperation(makeVhtOperationElement(phy.vhtOperation));
+    }
 }
 
 void Ieee80211MgmtMesh::sendBody(const Ptr<Ieee80211MeshFrame>& body, Ieee80211FrameType subtype, MacAddress destination)
 {
+    body->setChunkLength(body->getChunkLength() + B((body->getHtCapabilitiesPresent() ? 28 : 0)
+        + (body->getHtOperationPresent() ? 24 : 0) + (body->getVhtCapabilitiesPresent() ? 14 : 0)
+        + (body->getVhtOperationPresent() ? 7 : 0)));
     auto packet = new Packet(body->getClassName(), body);
     packet->addTag<MacAddressReq>()->setDestAddress(destination);
     packet->addTag<Ieee80211SubtypeReq>()->setSubtype(subtype);

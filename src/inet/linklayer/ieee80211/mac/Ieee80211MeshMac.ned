@@ -8,5 +8,6 @@ module Ieee80211MeshMac extends Ieee80211Mac
     parameters:
         @class(Ieee80211MeshMac);
         string meshManagementModule = default("^.mgmt");
+        string phyProfile @enum("ofdm","ht","vht") = default("ofdm");
         qosStation = true;
 }

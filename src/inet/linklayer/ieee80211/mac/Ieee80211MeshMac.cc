@@ -13,6 +13,7 @@
 #include "inet/linklayer/common/UserPriorityTag_m.h"
 #include "inet/linklayer/common/InterfaceTag_m.h"
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/IIeee80211ChannelAccess.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -24,19 +25,26 @@ void Ieee80211MeshMac::initialize(int stage)
     Ieee80211Mac::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         meshManagement.reference(this, "meshManagementModule", true);
-    if (stage == INITSTAGE_LAST && (!mib->qos || mib->mode != Ieee80211Mib::MESH || modeSet->isHtOperationSupported()))
-        throw cRuntimeError("This mesh stage requires an OFDM QoS mesh interface");
+    if (stage == INITSTAGE_LINK_LAYER) {
+        auto physical = dynamic_cast<const physicallayer::IIeee80211ChannelAccess *>(radio.get());
+        mib->configureMeshPhyCapabilities(par("phyProfile").stdstringValue(), modeSet,
+            physical ? physical->getOperatingChannel() : nullptr,
+            std::min(radio->getAntenna()->getNumAntennas(), modeSet->getMaximumNumberOfSpatialStreams()));
+    }
+    if (stage == INITSTAGE_LAST && (!mib->qos || mib->mode != Ieee80211Mib::MESH))
+        throw cRuntimeError("Mesh requires a QoS mesh interface");
     if (stage == INITSTAGE_LAST) {
         auto radioModule = check_and_cast<cModule *>(radio.get());
-        if (strcmp(par("modeSet").stringValue(), "a") != 0
+        bool high = mib->getMeshPhyProfile() != "ofdm";
+        if (strcmp(par("modeSet").stringValue(), high ? "ac-complete" : "a") != 0
                 || (radioModule->hasPar("bandName") && strcmp(radioModule->par("bandName").stringValue(), "5.9 GHz") == 0))
-            throw cRuntimeError("The OFDM mesh reference profile requires 802.11a outside EPD-required 5.9 GHz channels");
+            throw cRuntimeError("Mesh requires its selected5GHz OFDM or HT/VHT catalog outside EPD-required channels");
         auto service = hcf->getSubmodule("originatorMacDataService");
         auto rts = check_and_cast<IRtsPolicy *>(hcf->getSubmodule("rtsPolicy"));
         if (hcf->getSubmodule("rateControl") || service->getSubmodule("fragmentationPolicy")
                 || service->getSubmodule("msduAggregationPolicy") || service->getSubmodule("mpduAggregationPolicy")
-                || hcf->par("isBlockAckSupported").boolValue() || rts->getRtsThreshold() <= modeSet->getMode(0)->getMpduMaxLength())
-            throw cRuntimeError("The OFDM mesh profile requires fixed rates, no fragmentation/aggregation/Block Ack, and RTS disabled");
+                || hcf->par("isBlockAckSupported").boolValue() || rts->getRtsThreshold() <= (high ? 65535 : modeSet->getMode(0)->getMpduMaxLength()))
+            throw cRuntimeError("Mesh requires fixed rates, no fragmentation/A-MSDU/multi-MPDU/Block Ack, and RTS disabled");
     }
 }
 
@@ -95,8 +103,14 @@ void Ieee80211MeshMac::handleUpperPacket(Packet *packet)
 void Ieee80211MeshMac::sendMeshData(Packet *packet)
 {
     Enter_Method("sendMeshData");
+    auto header = packet->peekAtFront<Ieee80211DataHeader>();
+    if (mib->getLocalMeshPhyCapabilities().htPresent
+            && packet->getDataLength() - header->getChunkLength() - B(10) > B(2304)) {
+        unsupportedData(packet);
+        return;
+    }
     packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
-    processUpperFrame(packet, packet->peekAtFront<Ieee80211DataHeader>());
+    processUpperFrame(packet, header);
 }
 
 void Ieee80211MeshMac::deliverMeshMsdu(Packet *packet, MacAddress source, MacAddress destination, int tid)
@@ -117,6 +131,10 @@ void Ieee80211MeshMac::handleLowerMessage(cMessage *message)
     // Supply the known interface role before LayeredProtocolBase emits the
     // received-packet observation. Address roles and QoS bit 8 alone are ambiguous.
     if (auto packet = dynamic_cast<Packet *>(message)) {
+        if (!rx->prepareReceivedFrame(packet)) {
+            Ieee80211Mac::handleLowerPacket(packet);
+            return;
+        }
         auto first = packet->peekAtFront<Chunk>();
         auto data = dynamicPtrCast<const Ieee80211DataHeader>(first);
         // Inspect only fixed Frame Control bits for a raw input. Parsing a
@@ -144,7 +162,12 @@ void Ieee80211MeshMac::sendUpFrame(Packet *packet)
     auto header = packet->peekAtFront<Ieee80211MacHeader>();
     if (header->getFrameType() != 0) {
         auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
-        if (data && isDataReceptionSupported(data))
+        bool oversizedNative = data && mib->getMeshPhyProfile() != "ofdm" && !data->getAMsduPresent()
+            && packet->getDataLength() > data->getChunkLength() + B(6 + 2304 + 4);
+        // Ordinary MAC admission/ACK has completed. Reject an unsupported
+        // native MSDU before forwarding, LLC delivery or mesh-state refresh.
+        // A-MSDU limits belong to its separate aggregation consumer.
+        if (data && isDataReceptionSupported(data) && !oversizedNative)
             ds->processDataFrame(packet, data);
         else
             unsupportedData(packet);

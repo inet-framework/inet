@@ -29,6 +29,7 @@ module Ieee80211Radio extends FlatRadioBase
         // The mapped subset has channel centers 36, 40, 44, and 48; it permits HT40 pairs 36/40 and 44/48.
         string bandName @enum("2.4 GHz", "5 GHz", "5 GHz (20 MHz)", "5 GHz (mapped 20 MHz)", "5 GHz (40 MHz)", "5 GHz (80 MHz)", "5 GHz (160 MHz)", "5.9 GHz") = default("2.4 GHz"); // Band name
         int channelNumber = default(0);                                 // Initial channel number within the band (TODO this is offset by 1)
+        bool contiguousChannelAllocation = default(false); // Opt-in primary-anchored mapped5GHz allocation; bandwidth is its maximum width
         string fcsMode @enum("declared","computed") = default("declared");
         transmitter.typename = default("Ieee80211Transmitter");
         receiver.typename = default("Ieee80211Receiver");
@@ -48,5 +49,6 @@ module Ieee80211Radio extends FlatRadioBase
         *.channelNumber = this.channelNumber;
         @class(Ieee80211Radio);
         @signal[radioChannelChanged](type=long); // Band-local index; Ieee80211RadioChannelChangedDetails carries the band
+        @signal[primaryCcaChanged](type=bool); // True=busy; completed primary20 physical CCA fact, only with contiguous allocation
         @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
 }

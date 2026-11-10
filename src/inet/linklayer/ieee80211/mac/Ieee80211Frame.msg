@@ -291,6 +291,8 @@ class Ieee80211MpduSubframeHeader extends FieldsChunk
 {
     chunkLength = LENGTH_A_MPDU_SUBFRAME_HEADER;
     int length;
+    bool eof = false;
+    bool vht = false;
 }
 
 //

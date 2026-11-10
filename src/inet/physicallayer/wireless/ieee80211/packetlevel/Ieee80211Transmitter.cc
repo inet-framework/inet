@@ -69,6 +69,16 @@ const Ieee80211Channel *Ieee80211Transmitter::computeTransmissionChannel(const P
     transmissionChannel = channelReq != nullptr ? channelReq->getChannel() : channel;
     if (transmissionChannel == nullptr)
         throw cRuntimeError("Transmission channel is undefined");
+    if (channel && channel->hasAllocation()) {
+        // The fixed allocation belongs to the radio for its entire lifetime.
+        // A packet request may select that value, but cannot introduce a
+        // different allocation or a shorter-lived pointer into indications.
+        if (!transmissionChannel->hasAllocation() || transmissionChannel->getBand() != channel->getBand()
+                || transmissionChannel->getChannelNumber() != channel->getChannelNumber()
+                || transmissionChannel->getAllocationWidth() != channel->getAllocationWidth())
+            throw cRuntimeError("Per-packet channel request differs from the fixed contiguous allocation");
+        return channel;
+    }
     return transmissionChannel;
 }
 
@@ -120,7 +130,31 @@ bool Ieee80211Transmitter::isHtChannelWidthSupported(Hz channelWidth) const
     // The packet-level PHY currently represents only the primary channel.
     // Until a primary/secondary compound channel determines the analog-model
     // center frequency, advertising a 40 MHz HT width would be false.
-    return channelWidth == MHz(20) && modeSet != nullptr && modeSet->getHtSupportedChannelWidths().count(channelWidth) != 0;
+    return (channelWidth == MHz(20) || (channel && channel->hasAllocation() && channelWidth <= channel->getAllocationWidth()))
+        && modeSet != nullptr && modeSet->getHtSupportedChannelWidths().count(channelWidth) != 0;
+}
+
+Ieee80211TxVector Ieee80211Transmitter::computeTransmissionVector(const Packet *packet) const
+{
+    auto request = packet->findTag<Ieee80211ModeReq>();
+    auto vector = request ? request->getTxVector() : Ieee80211TxVector(computeTransmissionMode(packet));
+    if (!vector.mode || !modeSet->containsMode(vector.mode))
+        throw cRuntimeError("Invalid IEEE80211 transmit vector mode");
+    if ((vector.singleMpdu && vector.format != Ieee80211TxVector::Format::VHT)
+            || (vector.format != Ieee80211TxVector::Format::NON_HT_DUPLICATE
+                && vector.format != Ieee80211TxVector(vector.mode).format)
+            || (channel && channel->hasAllocation() && vector.mode->getVhtMcsIndex() >= 0 && !vector.singleMpdu))
+        throw cRuntimeError("IEEE80211 PPDU format/PSDU framing disagrees with the actual PHY mode");
+    if (vector.format == Ieee80211TxVector::Format::NON_HT_DUPLICATE) {
+        if (!channel || !channel->hasAllocation() || vector.mode->getHtMcsIndex() >= 0 || vector.mode->getVhtMcsIndex() >= 0
+                || vector.mode->getDataMode()->getBandwidth() != MHz(20) || vector.bandwidth <= MHz(20))
+            throw cRuntimeError("Invalid non-HT duplicate transmit vector");
+    }
+    else if (vector.bandwidth != vector.mode->getDataMode()->getBandwidth())
+        throw cRuntimeError("IEEE80211 occupied width disagrees with the selected mode");
+    if (channel && channel->hasAllocation())
+        channel->getCenterChannel(vector.bandwidth); // validates the selected nested width
+    return vector;
 }
 
 std::ostream& Ieee80211Transmitter::printToStream(std::ostream& stream, int level, int evFlags) const
@@ -141,7 +175,9 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const IIeee80211Mode *transmissionMode = computeTransmissionMode(packet);
     const Ieee80211Channel *transmissionChannel = computeTransmissionChannel(packet);
     W transmissionPower = computeTransmissionPower(packet);
-    Hz transmissionBandwidth = transmissionMode->getDataMode()->getBandwidth();
+    auto vector = computeTransmissionVector(packet);
+    Hz transmissionBandwidth = vector.bandwidth;
+    Hz transmissionCenter = transmissionChannel->hasAllocation() ? transmissionChannel->getCenterFrequency(transmissionBandwidth) : centerFrequency;
     if (transmissionMode->getDataMode()->getNumberOfSpatialStreams() > transmitter->getAntenna()->getNumAntennas())
         throw cRuntimeError("Number of spatial streams is higher than the number of antennas");
     const simtime_t duration = transmissionMode->getDuration(B(phyHeader->getLengthField()));
@@ -154,8 +190,10 @@ const ITransmission *Ieee80211Transmitter::createTransmission(const IRadio *tran
     const simtime_t preambleDuration = transmissionMode->getPreambleMode()->getDuration();
     const simtime_t headerDuration = transmissionMode->getHeaderMode()->getDuration();
     const simtime_t dataDuration = duration - headerDuration - preambleDuration;
-    auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, centerFrequency, transmissionBandwidth, transmissionPower);
-    return new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
+    auto analogModel = getAnalogModel()->createAnalogModel(preambleDuration, headerDuration, dataDuration, transmissionCenter, transmissionBandwidth, transmissionPower);
+    auto transmission = new Ieee80211Transmission(transmitter, packet, startTime, endTime, preambleDuration, headerDuration, dataDuration, startPosition, endPosition, startOrientation, endOrientation, nullptr, nullptr, nullptr, nullptr, analogModel, transmissionMode, transmissionChannel);
+    transmission->setTxVector(vector);
+    return transmission;
 }
 
 } // namespace physicallayer

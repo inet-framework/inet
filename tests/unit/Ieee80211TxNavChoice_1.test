@@ -24,6 +24,7 @@ class NavRx : public IRx {
     void transmissionStateChanged(physicallayer::IRadio::TransmissionState) override {}
     void receivedSignalPartChanged(physicallayer::IRadioSignal::SignalPart) override {}
     bool lowerFrameReceived(Packet *) override { return false; }
+    bool prepareReceivedFrame(Packet *) override { return true; }
 };
 
 class ForwardingTx : public Tx {

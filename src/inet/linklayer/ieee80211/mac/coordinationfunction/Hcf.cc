@@ -8,6 +8,8 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 #include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/IIeee80211ChannelAccess.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
@@ -33,6 +35,7 @@ namespace inet {
 namespace ieee80211 {
 
 simsignal_t Hcf::meshDataAttemptCompletedSignal = cComponent::registerSignal("meshDataAttemptCompleted");
+simsignal_t Hcf::secondaryChannelAccessDeferredSignal = cComponent::registerSignal("secondaryChannelAccessDeferred");
 
 MeshLinkTiming Hcf::getMeshLinkTiming(MacAddress peer)
 {
@@ -59,6 +62,16 @@ MeshLinkTiming Hcf::getMeshLinkTiming(MacAddress peer)
 }
 
 using namespace inet::physicallayer;
+
+MeshLinkTiming Hcf::previewMeshLinkTiming(MacAddress peer, const Ieee80211RateSetState& rates,
+        const Ieee80211PeerPhyCapabilities& capabilities)
+{
+    Enter_Method("previewMeshLinkTiming");
+    auto modes = rateSelection->computeMeshPeerModes(peer, rates, capabilities);
+    auto overhead = edca->getEdcaf(AC_BE)->getInitialContentionDelay() + modes.first->getPreambleMode()->getDuration()
+        + modes.first->getHeaderMode()->getDuration() + modes.first->getSifsTime() + modes.second->getDuration(LENGTH_ACK);
+    return {modes.first->getDataMode()->getNetBitrate(), overhead, modes.first, modes.second};
+}
 
 simsignal_t Hcf::edcaCollisionDetectedSignal = cComponent::registerSignal("edcaCollisionDetected");
 simsignal_t Hcf::blockAckAgreementAddedSignal = cComponent::registerSignal("blockAckAgreementAdded");
@@ -1041,6 +1054,20 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
             mac->sendDownPendingRadioConfigMsg();
             return;
         }
+        auto physical = dynamic_cast<const IIeee80211ChannelAccess *>(getContainingNicModule(this)->getSubmodule("radio"));
+        if (physical && physical->hasContiguousAllocation()) {
+            auto candidate = edcaf->getInProgressFrames()->peekFrameToTransmit();
+            auto header = candidate->peekAtFront<Ieee80211MacHeader>();
+            auto mode = rateSelection->computeMode(candidate, header, edcaf->getTxopProcedure());
+            if (!physical->areSecondaryChannelsIdle(mode->getDataMode()->getBandwidth())) {
+                // 2024 Table10-17: fixed width unavailable, preserveCW/retry and recontend.
+                edcaf->getTxopProcedure()->endTxop();
+                edcaf->releaseChannel(this);
+                emit(secondaryChannelAccessDeferredSignal, mode->getDataMode()->getBandwidth().get());
+                updateContention();
+                return;
+            }
+        }
         // Preserve same-time collision accounting before the shared contention gate changes.
         rx->setContentionBlocked(true);
         startFrameSequence(ac);
@@ -1831,7 +1858,7 @@ simtime_t Hcf::estimateZeroLimitExchange(Packet *packet, const Ptr<const Ieee802
         // Rate queries retain their existing effects. The local copy isolates only frame changes.
         auto mode = rateSelection->computeMode(predicted.get(), protectedHeader, txop);
         setFrameMode(predicted.get(), protectedHeader, mode);
-        auto protectedDuration = mode->getDuration(predicted->getDataLength());
+        auto protectedDuration = computeMpduPpduDuration(mode, predicted.get());
         auto ctsDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
         return ppduDuration + sifs + ctsDuration + sifs +
             estimateZeroLimitExchange(predicted.get(), protectedHeader, txop, protectedDuration);
@@ -1873,11 +1900,11 @@ bool Hcf::isInitialDataException(const FrameSequenceContext *context, const Prep
 simtime_t Hcf::computePreparedDataCost(const PreparedDataTransmission& prepared, bool protect) const
 {
     auto sifs = modeSet->getSifsTime();
-    auto cost = prepared.dataMode->getDuration(prepared.frame->getDataLength());
+    auto cost = computeMpduPpduDuration(prepared.dataMode, prepared.frame);
     if (prepared.ackMode)
         cost += sifs + prepared.ackMode->getDuration(LENGTH_ACK);
     if (protect)
-        cost += prepared.rtsMode->getDuration(prepared.rtsPrediction->getDataLength()) +
+        cost += computeMpduPpduDuration(prepared.rtsMode, prepared.rtsPrediction.get()) +
             sifs + prepared.ctsMode->getDuration(LENGTH_CTS) + sifs;
     return cost;
 }
@@ -1935,7 +1962,11 @@ bool Hcf::validatePreparedData(const PreparedDataTransmission& prepared, simtime
         !isFrameEligible(prepared.frame, true) || edca->getLifetimeHandler()->isExpired(prepared.frame, start))
         return false;
     auto peer = mib->findPeerHtState(header->getReceiverAddress());
-    if (!isPeerCompatibleMode(modeSet, peer, prepared.dataMode) ||
+    bool dataModeAllowed = mib->mode == Ieee80211Mib::MESH ?
+        isMeshPeerCompatibleMode(modeSet, mib->getLocalMeshPhyCapabilities(),
+            mib->findMeshPeerPhyCapabilities(header->getReceiverAddress()), prepared.dataMode,
+            mib->isMeshShortGuardIntervalTransmissionEnabled()) : isPeerCompatibleMode(modeSet, peer, prepared.dataMode);
+    if (!dataModeAllowed ||
         (prepared.rtsMode && !isPeerCompatibleMode(modeSet, peer, prepared.rtsMode)))
         return false;
     if (originatorAckPolicy->computeAckPolicy(prepared.frame, header, agreement) != header->getAckPolicy())
@@ -2049,7 +2080,7 @@ simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const
     setFrameMode(forecast.get(), nextHeader, dataMode);
     auto sifs = modeSet->getSifsTime();
     auto responseDuration = computeImmediateResponseDuration(forecast.get(), nextHeader);
-    auto completeCost = dataMode->getDuration(forecast->getDataLength());
+    auto completeCost = computeMpduPpduDuration(dataMode, forecast.get());
     if (recipientAckPolicy->isAckNeeded(nextHeader))
         completeCost += sifs + responseDuration;
     auto protectionCost = completeCost;
@@ -2061,7 +2092,7 @@ simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const
         setFrameMode(&rts, rtsHeader, rtsMode);
         auto ctsDuration = rateSelection->computeResponseCtsFrameMode(&rts, rtsHeader, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
         // The field estimates the next holder frame and its response, not its whole protected exchange.
-        protectionCost = rtsMode->getDuration(rts.getDataLength()) + sifs + ctsDuration;
+        protectionCost = computeMpduPpduDuration(rtsMode, &rts) + sifs + ctsDuration;
         completeCost += protectionCost + sifs;
     }
     return completionTime + sifs + completeCost <= txop->getStart() + txop->getLimit() ?
@@ -2124,6 +2155,18 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             compressedBar ? rateSelection->computeCompressedBlockAckReqMode(packet, compressedBar, context->getNumSteps() == 1) :
             dataAfterCts ? packet->getTag<Ieee80211ModeReq>()->getMode() : rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
+        auto physical = dynamic_cast<const IIeee80211ChannelAccess *>(getContainingNicModule(this)->getSubmodule("radio"));
+        if (physical && physical->hasContiguousAllocation()) {
+            for (int i = context->getNumSteps() - 2; i >= 0; i--) {
+                auto previous = dynamic_cast<TransmitStep *>(context->getStep(i));
+                if (previous && previous->getPpduEnd() >= SIMTIME_ZERO) {
+                    auto prior = previous->getFrameToTransmit()->findTag<Ieee80211ModeReq>();
+                    if (prior && mode->getDataMode()->getBandwidth() > prior->getTxVector().bandwidth)
+                        return false; // End/recontend instead of widening after a narrower holder PPDU.
+                    break;
+                }
+            }
+        }
         if (auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(header)) {
             auto basic = dynamicPtrCast<const Ieee80211BasicBlockAckReq>(bar);
             auto compressed = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(bar);
@@ -2134,7 +2177,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 return false;
             auto response = rateSelection->computeResponseBlockAckFrameMode(packet, bar, ResponseQueryRole::PREDICT)->getDuration(
                 compressed ? LENGTH_COMPRESSED_BLOCKACK : LENGTH_BASIC_BLOCKACK);
-            auto cost = mode->getDuration(packet->getDataLength()) + modeSet->getSifsTime() + response;
+            auto cost = computeMpduPpduDuration(mode, packet) + modeSet->getSifsTime() + response;
             // IEEE Std 802.11-2024, 10.23.2.8 and 10.23.2.9: a later BAR must fit both bounds.
             if (context->getNumSteps() > 1 &&
                 ((txop->getLimit() > 0 && ifs + cost > txop->getRemaining()) ||
@@ -2151,7 +2194,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                     rtsStep ? computePreparedDataCost(*prepared, false) : SIMTIME_ZERO, true), true);
             }
             else {
-                auto ppduDuration = mode->getDuration(packet->getDataLength());
+                auto ppduDuration = computeMpduPpduDuration(mode, packet);
                 auto projectedStart = simTime() + ifs;
                 auto reservation = std::max(SIMTIME_ZERO, txop->getReservationEnd() - projectedStart);
                 auto remaining = std::max(SIMTIME_ZERO, txop->getStart() + txop->getLimit() - projectedStart);
@@ -2169,7 +2212,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         else if (scopedSingle) {
             auto sifs = modeSet->getSifsTime();
-            auto cost = mode->getDuration(packet->getDataLength());
+            auto cost = computeMpduPpduDuration(mode, packet);
             simtime_t responseDuration = SIMTIME_ZERO;
             simtime_t nextFrameDuration = SIMTIME_ZERO;
             bool finalFrame = true;
@@ -2183,7 +2226,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
                 auto dataMode = rateSelection->computeMode(protectedPacket, protectedHeader, txop);
                 setFrameMode(protectedPacket, protectedHeader, dataMode);
                 responseDuration = rateSelection->computeResponseCtsFrameMode(packet, rts, ResponseQueryRole::PREDICT)->getDuration(LENGTH_CTS);
-                nextFrameDuration = dataMode->getDuration(protectedPacket->getDataLength());
+                nextFrameDuration = computeMpduPpduDuration(dataMode, protectedPacket);
                 auto ackDuration = computeImmediateResponseDuration(protectedPacket, protectedHeader);
                 if (recipientAckPolicy->isAckNeeded(protectedHeader))
                     nextFrameDuration += sifs + ackDuration;
@@ -2238,7 +2281,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         else if (txop->getProtectionMechanism() == TxopProcedure::ProtectionMechanism::MULTIPLE_PROTECTION) {
             header = packet->peekAtFront<Ieee80211MacHeader>();
-            auto ppduDuration = mode->getDuration(packet->getDataLength());
+            auto ppduDuration = computeMpduPpduDuration(mode, packet);
             auto projectedStart = simTime() + ifs;
             auto reservation = std::max(SIMTIME_ZERO, txop->getReservationEnd() - projectedStart);
             auto remaining = std::max(SIMTIME_ZERO, txop->getStart() + txop->getLimit() - projectedStart);
@@ -2299,6 +2342,8 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     else
         throw cRuntimeError("Unknown received frame type");
     setFrameMode(responsePacket, responseHeader, responseMode);
+    responsePacket->getTagForUpdate<Ieee80211ModeReq>()->setTxVector(
+        rateSelection->computeResponseTxVector(receivedPacket, responseMode, ResponseQueryRole::RESPOND));
     RateSelection::emitDatarateSelected(this, responseHeader, responseMode);
     EV_DEBUG << "Datarate for " << responsePacket->getName() << " is set to " << responseMode->getDataMode()->getNetBitrate() << ".\n";
     auto updated = responsePacket->removeAtFront<Ieee80211MacHeader>();
@@ -2364,7 +2409,7 @@ void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHead
 void Hcf::setFrameMode(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, const IIeee80211Mode *mode) const
 {
     ASSERT(mode != nullptr);
-    packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
+    packet->addTagIfAbsent<Ieee80211ModeReq>()->setTxVector(getMpduTxVector(mode, header));
 }
 
 bool Hcf::isReceptionInProgress()

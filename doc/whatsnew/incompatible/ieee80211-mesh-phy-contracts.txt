@@ -1,0 +1,3 @@
+IEEE 802.11 transport contracts carry the actual PHY vector
+
+Custom IRx, IQosRateSelection and IMeshLinkTiming implementations must implement the new transport-admission, response-vector and candidate-timing queries. Mode request and indication tags retain their mode accessors and now also expose PPDU format, occupied bandwidth and single-member framing. See the development migration guide for the ownership and response-selection requirements.

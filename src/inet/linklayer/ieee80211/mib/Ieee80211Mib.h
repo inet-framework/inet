@@ -11,6 +11,8 @@
 #include "inet/common/SimpleModule.h"
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
+#include "inet/linklayer/ieee80211/mib/Ieee80211VhtCapabilities.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211RateSet.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
@@ -26,7 +28,7 @@ namespace ieee80211 {
 class INET_API Ieee80211Mib : public SimpleModule
 {
   public:
-    // Emitted after a committed rate, HT capability, or channel-operation change.
+    // Emitted after a committed rate, HT/VHT capability, or channel-operation change.
     // The value is true. There are no details or ownership transfers.
     static simsignal_t rateStateChangedSignal;
     // Committed mesh eligibility; details identify the peer, listeners query current state.
@@ -104,6 +106,11 @@ class INET_API Ieee80211Mib : public SimpleModule
     std::map<MacAddress, Ieee80211RateSetState> peerRateSets;
     std::string meshId;
     MeshConfiguration meshConfiguration;
+    std::string meshPhyProfile = "ofdm";
+    bool meshShortGuardIntervalTransmissionEnabled = true;
+    Ieee80211PeerPhyCapabilities localMeshPhy;
+    std::map<MacAddress, Ieee80211PeerPhyCapabilities> meshPeerPhy;
+    std::string describeMeshPhy() const;
     bool updateBssAndPeerRateSets(const Ieee80211RateSetState& bssRateSet,
             const MacAddress& peerAddress, const Ieee80211RateSetState& peerRateSet);
     bool updatePeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities,
@@ -163,6 +170,13 @@ class INET_API Ieee80211Mib : public SimpleModule
     const MeshConfiguration& getMeshConfiguration() const { return meshConfiguration; }
     bool isMeshPeerEstablished(MacAddress peer) const;
     void establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates);
+    void establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates, const Ieee80211PeerPhyCapabilities& phy);
+    void configureMeshPhyCapabilities(const std::string& profile, const physicallayer::Ieee80211ModeSet *modes,
+            const physicallayer::Ieee80211Channel *channel, int spatialStreams);
+    const std::string& getMeshPhyProfile() const { return meshPhyProfile; }
+    bool isMeshShortGuardIntervalTransmissionEnabled() const { return meshShortGuardIntervalTransmissionEnabled; }
+    const Ieee80211PeerPhyCapabilities& getLocalMeshPhyCapabilities() const { return localMeshPhy; }
+    const Ieee80211PeerPhyCapabilities *findMeshPeerPhyCapabilities(MacAddress peer) const;
     // Withdrawal is silent. The management owner publishes after its metric
     // and MAC cleanup completes, using the returned local changed result.
     bool withdrawMeshPeer(MacAddress peer);

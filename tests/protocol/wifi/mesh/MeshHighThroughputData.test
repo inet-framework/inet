@@ -1,0 +1,749 @@
+%description:
+Live high-throughput mesh admission rejects missing/inconsistent capabilities,
+basic sets, malformed VHT bytes and unsupported requirements, then establishes
+from a following valid exchange. Received HT/VHT membership requirements are
+recognized without requiring their transmission. Narrow VHT DATA in an80MHz
+allocation uses real HWMP and the default metric2 with computed member FCS.
+
+%file: MeshHighThroughputData.cc
+#include "mesh/MeshPhySupport.h"
+#include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
+#include "inet/physicallayer/wireless/noise/NoiseSource.h"
+
+class MeshPulseNoise : public NoiseSource
+{
+  public:
+    void pulse() { Enter_Method("pulse"); cancelEvent(sleepTimer); startTransmission(); }
+};
+Define_Module(MeshPulseNoise);
+
+class MeshAdmissionManagement : public Ieee80211MgmtMesh
+{
+    int advertisedRxCeiling = -1;
+  protected:
+    void sendDown(Packet *packet) override {
+        if (advertisedRxCeiling >= 0 && dynamicPtrCast<const Ieee80211MeshPeeringOpenFrame>(packet->peekAtFront<Chunk>())) {
+            auto body = packet->removeAtFront<Ieee80211MeshPeeringOpenFrame>();
+            auto capability = body->getVhtCapabilities();
+            capability.rxMcsMap = (capability.rxMcsMap & 0xfffc) | (advertisedRxCeiling-7);
+            body->setVhtCapabilities(capability); packet->insertAtFront(body);
+        }
+        Ieee80211MgmtMesh::sendDown(packet);
+    }
+  public:
+    void advertise(MacAddress peer, int ceiling) {
+        Enter_Method("advertise"); advertisedRxCeiling = ceiling;
+        sendPeering(peer,MESH_PEERING_OPEN); advertisedRxCeiling = -1;
+    }
+};
+Define_Module(MeshAdmissionManagement);
+
+// Exercise the production parameter parser without installing a second selector
+// in HCF. The probe borrows the same immutable catalog as the live interface.
+class MeshTupleConfigurationProbe : public QosRateSelection
+{
+  public:
+    void validateConfiguration() {
+        modeSet = Ieee80211ModeSet::getModeSet("ac-complete");
+        initialize(INITSTAGE_LINK_LAYER);
+    }
+};
+Define_Module(MeshTupleConfigurationProbe);
+
+class InvalidPsduCaptureAudit : public ProtocolDissector::ICallback
+{
+  public:
+    int macIntervals = 0;
+    bool incorrect = false;
+    void startProtocolDataUnit(const Protocol *) override {}
+    void endProtocolDataUnit(const Protocol *) override {}
+    void markIncorrect() override { incorrect = true; }
+    void visitChunk(const Ptr<const Chunk>&, const Protocol *) override {}
+    void dissectPacket(Packet *, const Protocol *protocol) override { if (protocol == &Protocol::ieee80211Mac) macIntervals++; }
+};
+
+class MeshPhyAdmissionDriver : public cSimpleModule, public cListener, public ITx::ICallback
+{
+    int delivered = 0;
+    int discarded = 0;
+    int invalidPsdus = 0, invalidDrops = 0, validMacObservations = 0;
+    int receivedCaptureRecords = 0;
+    int secondaryDeferrals = 0, dataAttempts = 0, failedDataAttempts = 0;
+    simtime_t secondaryEnd = -1;
+    const Ieee80211Channel *retainedChannel = nullptr;
+    int runtimeRefusals = 0, wakeBoundaries = 0;
+    bool capabilityUpdateStarted = false;
+    int capabilityPublications = 0, candidateDiscards = 0;
+    std::optional<Ieee80211PeerPhyCapabilities> previousCapabilities;
+    const IIeee80211Mode *previousMode = nullptr;
+    simtime_t elicitingEnd = -1;
+    int responseBypasses = 0;
+    int familyDataObservations = 0, oversizedDiscards = 0, oversizedTransmissions = 0;
+    int metricAdvertisements = 0;
+    int nativeAccepted = 0, nativeDiscards = 0, nativeAcks = 0, nativeAttempts = 0, nativeCompletions = 0;
+    simtime_t nativeReceptionEnd = -1, sourcePathExpiry = -1, selfPrecursorExpiry = -1;
+    bool nativeLimitCase() const { return par("fault").intValue() == 30 || par("fault").intValue() == 31; }
+    int sequenceOrdinal = 0, narrowSequence = -1, wideSequence = -1, wideDelivered = 0;
+    simtime_t narrowAckEnd = -1, wideStart = -1;
+    int widthAdmissionHolds = 0, switchChecks = 0, switchingSnapshots = 0;
+    bool grownHold = false;
+    int grownCw = -1;
+    const Packet *heldRetry = nullptr;
+    MeshLinkTiming timingBeforeFailure;
+    Edcaf *sourceBe() { return check_and_cast<Edcaf *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")->getSubmodule("edca")->getSubmodule("edcaf",1)); }
+    bool capabilityCase() const { return par("fault").intValue() >= 19 && par("fault").intValue() <= 21; }
+    Ieee80211Radio *sourceRadio() { return check_and_cast<Ieee80211Radio *>(meshInterface(0)->getSubmodule("radio")); }
+    MeshPulseNoise *noise() { return check_and_cast<MeshPulseNoise *>(getParentModule()->getSubmodule("noise")); }
+    IMeshPathSelection *destinationPaths() { return check_and_cast<IMeshPathSelection *>(meshInterface(1)->getSubmodule("pathSelection")); }
+    void sendNativeLimit() {
+        int length = par("fault").intValue() == 30 ? 2304 : 2305;
+        std::vector<uint8_t> bytes = {0x88,3,0,0};
+        auto address = [&](MacAddress value) { for (int i=0;i<6;i++) bytes.push_back(value.getAddressByte(i)); };
+        address(meshMib(1)->address); address(meshMib(0)->address); address(meshMib(1)->address);
+        bytes.insert(bytes.end(),{0,0x4b}); // MAC sequence1200,fragment0
+        address(meshMib(0)->address); bytes.insert(bytes.end(),{0,1}); // TID0,MeshControlPresent
+        bytes.insert(bytes.end(),{0,3,0x78,0x56,0x34,0x12}); // AE0,TTL3,independent mesh sequence
+        std::vector<uint8_t> msdu(length,0xab); msdu[0] = msdu[1] = 0x7e; msdu[2] = 3;
+        bytes.insert(bytes.end(),msdu.begin(),msdu.end());
+        auto fcs = independentMeshFcs(bytes,0,bytes.size());
+        for (int i=0;i<4;i++) bytes.push_back((fcs>>(8*i))&255);
+        auto packet = new Packet("native-limit-wire",makeShared<BytesChunk>(bytes));
+        auto header = packet->peekAtFront<Ieee80211MeshDataHeader>();
+        auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+        packet->addTag<Ieee80211ModeReq>()->setTxVector(getMpduTxVector(timing.dataMode,header));
+        auto tx = check_and_cast<ITx *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("tx"));
+        ASSERT(!tx->hasTransmission());
+        tx->transmitFrame(packet,header,false,this); delete packet;
+    }
+    bool positive() const { int fault = par("fault"); return fault == 9 || fault == 10 || (fault >= 12 && fault != 15); }
+    void checkConfigurationDiagnostics() {
+        auto parent = meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf");
+        for (int invalid = 0; invalid < 7; invalid++) {
+            auto probe = check_and_cast<MeshTupleConfigurationProbe *>(cModuleType::get("MeshTupleConfigurationProbe")->create("configurationProbe",parent));
+            probe->par("rateControlModule").setStringValue("");
+            probe->par("dataFramePhyFamily").setStringValue(invalid == 0 ? "auto" : invalid == 3 ? "ht" : "vht");
+            probe->par("dataFrameMcs").setIntValue(invalid == 3 ? 15 : invalid == 5 ? 9 : 0);
+            probe->par("dataFrameGuardInterval").setStringValue(invalid == 1 ? "auto" : "long");
+            probe->par("dataFrameBandwidth").setDoubleValue(invalid == 2 ? NAN : 20e6);
+            probe->par("dataFrameNumSpatialStreams").setIntValue(invalid == 4 ? -1 : 1);
+            if (invalid == 6) probe->par("dataFrameBitrate").setDoubleValue(54e6);
+            probe->finalizeParameters();
+            bool refused = false;
+            try { probe->validateConfiguration(); }
+            catch (const cRuntimeError& e) {
+                refused = true;
+                ASSERT(std::string(e.what()).find("MCS") != std::string::npos || std::string(e.what()).find("tuple") != std::string::npos);
+            }
+            ASSERT(refused);
+            probe->deleteModule();
+        }
+        // Device capability is distinct from operating width. An unadvertised
+        // optional160 capability cannot authorize a160MHz operating allocation.
+        auto mib = check_and_cast<Ieee80211Mib *>(cModuleType::get("inet.linklayer.ieee80211.mib.Ieee80211Mib")->create("capabilityProbe",meshInterface(0)));
+        mib->finalizeParameters();
+        auto modes = Ieee80211ModeSet::getModeSet("ac-complete");
+        mib->updateLocalHtCapabilities(modes,{MHz(20),MHz(40)},1);
+        mib->setPrimaryChannel(0,sourceRadio()->getOperatingChannel()->getBand());
+        Ieee80211Channel wide(sourceRadio()->getOperatingChannel()->getBand(),0,MHz(160));
+        bool refused = false;
+        try { mib->configureMeshPhyCapabilities("vht",modes,&wide,1); }
+        catch (const cRuntimeError& e) { refused = true; ASSERT(std::string(e.what()).find("160MHz") != std::string::npos); }
+        ASSERT(refused);
+        mib->deleteModule();
+        mib = check_and_cast<Ieee80211Mib *>(cModuleType::get("inet.linklayer.ieee80211.mib.Ieee80211Mib")->create("capabilityProbe",meshInterface(0)));
+        mib->par("meshVht160MhzCapable").setBoolValue(true);
+        mib->finalizeParameters();
+        mib->updateLocalHtCapabilities(modes,{MHz(20),MHz(40)},1);
+        mib->setPrimaryChannel(0,sourceRadio()->getOperatingChannel()->getBand());
+        mib->configureMeshPhyCapabilities("vht",modes,sourceRadio()->getOperatingChannel(),1);
+        ASSERT(mib->getLocalMeshPhyCapabilities().vht.width160 && mib->getLocalMeshPhyCapabilities().vhtOperation.width == MHz(80));
+        mib->deleteModule();
+    }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        network->subscribe(packetSentToUpperSignal, this);
+        network->subscribe(registerSignal("meshManagementDiscarded"), this);
+        network->subscribe(receptionEndedSignal, this);
+        network->subscribe(packetReceivedFromLowerSignal, this);
+        network->subscribe(packetDroppedSignal, this);
+        network->subscribe(IRadioMedium::signalArrivalEndedSignal, this);
+        network->subscribe(transmissionStartedSignal, this);
+        network->subscribe(Hcf::meshDataAttemptCompletedSignal, this);
+        network->subscribe(registerSignal("secondaryChannelAccessDeferred"), this);
+        network->subscribe(registerSignal("rateStateChanged"),this);
+        network->subscribe(registerSignal("packetRecorded"),this);
+        network->subscribe(IFrameSequenceHandler::frameSequenceStartedSignal,this);
+        network->subscribe(IFrameSequenceHandler::frameSequenceFinishedSignal,this);
+        for (int i = 0; i < 4; i++) scheduleAt(SimTime(i == 0 ? 1 : i == 1 ? 50 : i == 2 ? 75 : 125,SIMTIME_MS),new cMessage("step",i));
+        if (par("fault").intValue() == 17) {
+            scheduleAt(SimTime(90,SIMTIME_MS),new cMessage("prime",5));
+            scheduleAt(SimTime(99990,SIMTIME_US),new cMessage("secondary-pulse",6));
+            scheduleAt(SimTime(100050,SIMTIME_US),new cMessage("held",7));
+        }
+        if (par("fault").intValue() == 18) {
+            scheduleAt(SimTime(110,SIMTIME_MS),new cMessage("sleep-fixed-allocation",11));
+            scheduleAt(SimTime(111,SIMTIME_MS),new cMessage("wake-fixed-allocation",12));
+        }
+        if (capabilityCase()) {
+            scheduleAt(SimTime(110,SIMTIME_MS),new cMessage("save-estimate",15));
+            scheduleAt(SimTime(114,SIMTIME_MS),new cMessage("candidate-capability",16));
+            scheduleAt(SimTime(117,SIMTIME_MS),new cMessage("verify-capability-commit",17));
+            scheduleAt(SimTime(118,SIMTIME_MS),new cMessage("data-after-capability",4));
+        }
+        if (nativeLimitCase()) {
+            scheduleAt(SimTime(110,SIMTIME_MS),new cMessage("raw-native-boundary",20));
+            scheduleAt(SimTime(117,SIMTIME_MS),new cMessage("raw-native-result",21));
+            scheduleAt(SimTime(120,SIMTIME_MS),new cMessage("ordinary-after-native-boundary",4));
+        }
+        if (par("fault").intValue() == 28) {
+            scheduleAt(SimTime(10,SIMTIME_MS),new cMessage("open-wide-peer",19));
+            scheduleAt(SimTime(80,SIMTIME_MS),new cMessage("prime-narrow-path",5));
+            scheduleAt(SimTime(85,SIMTIME_MS),new cMessage("prime-wide-path",18));
+        }
+        if (par("fault").intValue() == 32) {
+            scheduleAt(SimTime(110,SIMTIME_MS),new cMessage("switch-to-transceiver",22));
+            scheduleAt(SimTime(111,SIMTIME_MS),new cMessage("switch-to-receiver",27));
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, intval_t, cObject *) override {
+        if (signal == registerSignal("meshManagementDiscarded")) {
+            if (source == meshManagement(0) || source == meshManagement(1)) discarded++;
+            if (source == meshManagement(0) && capabilityUpdateStarted) candidateDiscards++;
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, double, cObject *) override {
+        if (signal == registerSignal("secondaryChannelAccessDeferred") && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) secondaryDeferrals++;
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *) override {
+        if (source == meshMib(0) && signal == registerSignal("rateStateChanged") && value && capabilityUpdateStarted) {
+            capabilityPublications++;
+            ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
+            ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address)
+                == (par("fault").intValue() == 21 ? 0 : 7.0/64));
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        auto packet = dynamic_cast<Packet *>(object);
+        if (signal == IFrameSequenceHandler::frameSequenceStartedSignal && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) { sequenceOrdinal++; return; }
+        if (signal == IFrameSequenceHandler::frameSequenceFinishedSignal && par("fault").intValue() == 28 && narrowSequence >= 0 && wideStart < SIMTIME_ZERO
+                && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) {
+            auto frames = check_and_cast<InProgressFrames *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")->getSubmodule("edca")->getSubmodule("edcaf",2)->getSubmodule("inProgressFrames"));
+            for (int i=0;i<frames->getLength();i++) {
+                auto frame = frames->getFrames(i);
+                if (std::string(frame->getName()) == "txop-wide" && frame->findTag<Ieee80211ModeReq>() && frame->getTag<Ieee80211ModeReq>()->getTxVector().bandwidth == MHz(80)) widthAdmissionHolds++;
+            }
+            return;
+        }
+        if (signal == registerSignal("packetRecorded")) {
+            if (source == getParentModule()->getSubmodule("station",1)->getSubmodule("pcapRecorder",0)
+                    && packet && std::string(packet->getName()) == "valid-after-phy-admission") receivedCaptureRecords++;
+            return;
+        }
+        if (signal == IRadioMedium::signalArrivalEndedSignal && (par("fault").intValue() == 17 || par("fault").intValue() == 33)) {
+            Enter_Method_Silent();
+            auto reception = check_and_cast<const IReception *>(object);
+            if (reception->getReceiverRadio() == sourceRadio() && reception->getTransmission()->getTransmitterRadio() == noise()) {
+                secondaryEnd = simTime();
+                scheduleAt(secondaryEnd+SimTime(25,SIMTIME_US)-SimTime::fromRaw(1),new cMessage("before-pifs",8));
+                scheduleAt(secondaryEnd+SimTime(25,SIMTIME_US),new cMessage("at-pifs",9));
+            }
+            return;
+        }
+        if (signal == transmissionStartedSignal) {
+            auto transmission = dynamic_cast<const Ieee80211Transmission *>(object);
+            if (transmission && source == sourceRadio()) {
+                auto name = std::string(transmission->getPacket()->getName());
+                if (capabilityCase() && name == "valid-after-phy-admission" && simTime() >= SimTime(117,SIMTIME_MS)) {
+                    auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+                    ASSERT(transmission->getMode() == timing.dataMode);
+                    ASSERT((transmission->getMode() != previousMode) == (par("fault").intValue() == 21));
+                }
+                if (par("fault").intValue() == 28 && (name == "valid-after-phy-admission" || name == "txop-wide")) {
+                    auto width = transmission->getTxVector().bandwidth;
+                    if (name == "valid-after-phy-admission") { ASSERT(width == MHz(20)); narrowSequence = sequenceOrdinal; }
+                    else {
+                        ASSERT(width == MHz(80) && narrowAckEnd >= SIMTIME_ZERO && simTime() >= narrowAckEnd+SimTime(34,SIMTIME_US));
+                        wideSequence = sequenceOrdinal; wideStart = simTime();
+                        auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+                        ASSERT(!transmission->getPacket()->peekDataAt<Ieee80211MeshDataHeader>(phy->getChunkLength()+B(4))->getRetry());
+                    }
+                }
+                if (!transmission->getTxVector().singleMpdu) {
+                    auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+                    auto header = transmission->getPacket()->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength());
+                    if (header->getType() == ST_BEACON) {
+                        auto body = transmission->getPacket()->peekDataAt<Ieee80211BeaconFrame>(phy->getChunkLength()+header->getChunkLength());
+                        ASSERT(body->getMeshConfiguration().pathSelectionMetricId == 2); metricAdvertisements++;
+                    }
+                }
+                if (name == "oversized-native-source") oversizedTransmissions++;
+                if (name == "valid-after-phy-admission" && (par("fault").intValue() == 24 || par("fault").intValue() == 25 || par("fault").intValue() == 27 || par("fault").intValue() == 29)) {
+                    auto mode = transmission->getMode();
+                    int fault = par("fault");
+                    ASSERT(fault == 24 || fault == 27 ? mode->getHtMcsIndex() == 0 : fault == 29 ? mode->getVhtMcsIndex() == 0 : mode->getDataMode()->getNetBitrate() == Mbps(24));
+                    ASSERT(mode->getDataMode()->getNetBitrate() < Mbps(54) && transmission->getTxVector().bandwidth == MHz(20));
+                    ASSERT(transmission->getTxVector().singleMpdu == (fault == 29));
+                    familyDataObservations++;
+                }
+            }
+            if (nativeLimitCase() && nativeReceptionEnd >= SIMTIME_ZERO && source == meshInterface(1)->getSubmodule("radio") && transmission) {
+                auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+                auto header = transmission->getPacket()->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength());
+                if (header->getType() == ST_ACK && simTime() == nativeReceptionEnd+SimTime(16,SIMTIME_US)) nativeAcks++;
+            }
+            if (par("fault").intValue() == 22 && elicitingEnd >= SIMTIME_ZERO && source == meshInterface(1)->getSubmodule("radio") && transmission) {
+                auto phy = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+                auto header = transmission->getPacket()->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength());
+                if (header->getType() == ST_ACK) {
+                    ASSERT(simTime() == elicitingEnd+SimTime(16,SIMTIME_US));
+                    ASSERT(!check_and_cast<Ieee80211Radio *>(source)->areSecondaryChannelsIdle(MHz(80)));
+                    ASSERT(transmission->getTxVector().format == Ieee80211TxVector::NON_HT_DUPLICATE && transmission->getTxVector().bandwidth == MHz(80));
+                    responseBypasses++;
+                }
+            }
+            if ((par("fault").intValue() == 17 || grownHold) && source == sourceRadio() && transmission
+                    && std::string(transmission->getPacket()->getName()) == "valid-after-phy-admission")
+                ASSERT(secondaryEnd >= SIMTIME_ZERO && simTime() >= secondaryEnd+SimTime(25,SIMTIME_US));
+            return;
+        }
+        if (signal == Hcf::meshDataAttemptCompletedSignal) {
+            if (packet && std::string(packet->getName()) == "native-limit-wire") nativeAttempts++;
+            if (packet && std::string(packet->getName()) == "valid-after-phy-admission") {
+                auto outcome = check_and_cast<MeshDataAttempt *>(details);
+                ASSERT(!outcome->terminalTimeout);
+                if (!outcome->acknowledged) {
+                    ASSERT((par("fault").intValue() >= 12 && par("fault").intValue() <= 14) || capabilityCase() || par("fault").intValue() == 33);
+                    failedDataAttempts++;
+                    if (par("fault").intValue() == 33) {
+                        Enter_Method_Silent();
+                        grownHold = true; grownCw = sourceBe()->getCw(); ASSERT(grownCw > 0);
+                        auto frames = check_and_cast<InProgressFrames *>(sourceBe()->getSubmodule("inProgressFrames"));
+                        ASSERT(frames->getLength() == 1); heldRetry = frames->getFrames(0);
+                        timingBeforeFailure = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+                        noise()->pulse();
+                        scheduleAt(simTime()+SimTime(90,SIMTIME_US),new cMessage("grown-cw-hold",32));
+                    }
+                }
+                dataAttempts++;
+            }
+            return;
+        }
+        // Radio's receptionEnded details carry the still-PHY-wrapped invalid
+        // packet before sendUp and before any MAC observer can see it.
+        if (signal == receptionEndedSignal) {
+            packet = dynamic_cast<Packet *>(details);
+            if (par("fault").intValue() == 28 && source == sourceRadio() && packet && narrowSequence >= 0 && wideStart < SIMTIME_ZERO
+                    && packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_ACK) narrowAckEnd = simTime();
+            if (source == meshInterface(1)->getSubmodule("radio") && packet && std::string(packet->getName()) == "native-limit-wire") {
+                ASSERT(!packet->hasBitError() && packet->getTag<PacketProtocolTag>()->getProtocol() == &Protocol::ieee80211Mac);
+                nativeReceptionEnd = simTime();
+            }
+            if (source == meshInterface(1)->getSubmodule("radio") && packet
+                    && std::string(packet->getName()) == "valid-after-phy-admission" && packet->hasBitError()) {
+                auto protocol = packet->getTag<PacketProtocolTag>()->getProtocol();
+                ASSERT(protocol == &Protocol::ieee80211VhtPhy);
+                ASSERT(dynamicPtrCast<const Ieee80211VhtPhyHeader>(packet->peekAtFront<Chunk>()));
+                std::unique_ptr<Packet> capture(packet->dup());
+                InvalidPsduCaptureAudit audit;
+                ProtocolDissectorRegistry::getInstance().getProtocolDissector(protocol)->dissect(capture.get(),protocol,audit);
+                ASSERT(audit.incorrect && audit.macIntervals == 0);
+                invalidPsdus++;
+            }
+            if (source == meshInterface(1)->getSubmodule("radio") && packet
+                    && std::string(packet->getName()) == "valid-after-phy-admission" && !packet->hasBitError()) {
+                retainedChannel = packet->getTag<Ieee80211ChannelInd>()->getChannel();
+                if (par("fault").intValue() == 22) {
+                    Enter_Method_Silent();
+                    elicitingEnd = simTime();
+                    scheduleAt(simTime()+SimTime(4,SIMTIME_US),new cMessage("secondary-before-required-ack",6));
+                }
+            }
+            return;
+        }
+        if (packet && std::string(packet->getName()) == "valid-after-phy-admission") {
+            if (signal == packetDroppedSignal && source == meshInterface(1)->getSubmodule("mac")->getSubmodule("rx")) {
+                ASSERT(packet->hasBitError()); invalidDrops++;
+            }
+            if (signal == packetReceivedFromLowerSignal && source == meshInterface(1)->getSubmodule("mac")) {
+                ASSERT(!packet->hasBitError()); validMacObservations++;
+            }
+        }
+        if (signal == packetDroppedSignal && source == meshInterface(0)->getSubmodule("mac") && packet
+                && std::string(packet->getName()) == "oversized-native-source") oversizedDiscards++;
+        if (packet && std::string(packet->getName()) == "native-limit-wire") {
+            if (signal == packetDroppedSignal && source == meshInterface(1)->getSubmodule("mac")) nativeDiscards++;
+            if (signal == packetSentToUpperSignal && source == meshInterface(1)->getSubmodule("mac")) {
+                ASSERT(packet->getDataLength() == B(2304)); nativeAccepted++;
+            }
+        }
+        if (par("fault").intValue() == 28 && signal == packetSentToUpperSignal && source == meshInterface(2)->getSubmodule("mac")
+                && packet && std::string(packet->getName()) == "txop-wide") wideDelivered++;
+        if (signal == packetSentToUpperSignal && source == meshInterface(1)->getSubmodule("mac") && packet
+                && std::string(packet->getName()) == "valid-after-phy-admission") delivered++;
+    }
+    void handleMessage(cMessage *message) override {
+        int step = message->getKind(); delete message;
+        if (par("fault").intValue() == 15 && step > 1) return;
+        if (step == 0) {
+            if (par("fault").intValue() == 0) checkConfigurationDiagnostics();
+            meshManagement(0)->openPeer(meshMib(1)->address);
+        }
+        if (step == 1) {
+            ASSERT(meshMib(0)->getMeshConfiguration().pathSelectionMetricId == 2);
+            ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address) == positive());
+            ASSERT(meshMib(1)->isMeshPeerEstablished(meshMib(0)->address) == positive());
+            if (!positive()) {
+                ASSERT(discarded > 0);
+                ASSERT(meshMib(1)->findMeshPeerPhyCapabilities(meshMib(0)->address) == nullptr);
+            }
+            if (par("fault").intValue() == 15) { emit(registerSignal("meshPhyAdmissionComplete"),1L); return; }
+            if (par("fault").intValue() == 16) {
+                ASSERT(meshMib(0)->getLocalMeshPhyCapabilities().vht.shortGi80);
+                ASSERT(!meshMib(0)->isMeshShortGuardIntervalTransmissionEnabled());
+            }
+            meshManagement(0)->closePeer(meshMib(1)->address);
+            meshManagement(1)->closePeer(meshMib(0)->address);
+        }
+        if (step == 2) {
+            meshManagement(0)->openPeer(meshMib(1)->address);
+            scheduleAt(SimTime(100,SIMTIME_MS), new cMessage("data",4));
+        }
+        if (step == 4) {
+            ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
+            ASSERT(meshMib(1)->isMeshPeerEstablished(meshMib(0)->address));
+            if ((capabilityCase() || par("fault").intValue() == 33) && simTime() == SimTime(100,SIMTIME_MS)) emit(registerSignal("highPhyMetricSeedStart"),1L);
+            auto ordinary = phyMsdu("valid-after-phy-admission",meshMib(1)->address);
+            if (par("fault").intValue() == 28) ordinary->getTagForUpdate<UserPriorityReq>()->setUserPriority(5);
+            sendDirect(ordinary,meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+            if (par("fault").intValue() == 28) {
+                auto wide = phyMsdu("txop-wide",meshMib(2)->address); wide->getTagForUpdate<UserPriorityReq>()->setUserPriority(5);
+                sendDirect(wide,meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+            }
+            if (par("fault").intValue() == 26) {
+                auto oversized = phyMsdu("oversized-native-source",meshMib(1)->address);
+                oversized->removeAtFront<BytesChunk>(oversized->getDataLength());
+                std::vector<uint8_t> bytes(2305,0xab); bytes[0] = bytes[1] = 0x7e; bytes[2] = 3;
+                oversized->insertAtBack(makeShared<BytesChunk>(bytes));
+                sendDirect(oversized,meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+            }
+        }
+        if (step == 5) sendDirect(phyMsdu("prime-wide-path",meshMib(1)->address),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+        if (step == 18) sendDirect(phyMsdu("prime-peer-two",meshMib(2)->address),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+        if (step == 19) meshManagement(0)->openPeer(meshMib(2)->address);
+        if (step == 6) noise()->pulse();
+        if (step == 7) {
+            ASSERT(!sourceRadio()->isPrimaryChannelBusy() && !sourceRadio()->areSecondaryChannelsIdle(MHz(80)));
+            ASSERT(sourceRadio()->getReceptionState() == IRadio::RECEPTION_STATE_BUSY);
+            auto edca = meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")->getSubmodule("edca");
+            auto access = check_and_cast<Edcaf *>(edca->getSubmodule("edcaf",1));
+            auto pending = check_and_cast<queueing::IPacketQueue *>(access->getSubmodule("pendingQueue"));
+            ASSERT(secondaryDeferrals > 0 && access->getCw() == 0 && pending->getNumPackets() == 1);
+            ASSERT(!pending->getPacket(0)->peekAtFront<Ieee80211DataHeader>()->getRetry());
+            ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address) == 0);
+            ASSERT(dataAttempts == 0);
+        }
+        if (step == 8) ASSERT(!sourceRadio()->areSecondaryChannelsIdle(MHz(80)));
+        if (step == 9) ASSERT(sourceRadio()->areSecondaryChannelsIdle(MHz(80)));
+        if (step == 11) {
+            auto canonical = sourceRadio()->getOperatingChannel();
+            ASSERT(retainedChannel == canonical);
+            sourceRadio()->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+            ASSERT(!sourceRadio()->areSecondaryChannelsIdle(MHz(80)));
+            sourceRadio()->setChannel(new Ieee80211Channel(*canonical));
+            ASSERT(sourceRadio()->getOperatingChannel() == canonical);
+            try { sourceRadio()->setChannel(new Ieee80211Channel(canonical->getBand(),1,MHz(80))); }
+            catch (const cRuntimeError&) { runtimeRefusals++; }
+            try { sourceRadio()->setBandwidth(MHz(40)); } catch (const cRuntimeError&) { runtimeRefusals++; }
+            try { sourceRadio()->setCenterFrequency(MHz(5190)); } catch (const cRuntimeError&) { runtimeRefusals++; }
+            try { sourceRadio()->setModeSet(Ieee80211ModeSet::getModeSet("a")); } catch (const cRuntimeError&) { runtimeRefusals++; }
+            sourceRadio()->setRadioMode(IRadio::RADIO_MODE_OFF);
+            try { sourceRadio()->setChannelNumber(1); } catch (const cRuntimeError&) { runtimeRefusals++; }
+            ASSERT(retainedChannel == sourceRadio()->getOperatingChannel() && retainedChannel->getPrimaryChannel() == 36);
+        }
+        if (step == 12) {
+            sourceRadio()->setRadioMode(IRadio::RADIO_MODE_TRANSCEIVER);
+            ASSERT(!sourceRadio()->areSecondaryChannelsIdle(MHz(80)));
+            scheduleAt(simTime()+SimTime(25,SIMTIME_US)-SimTime::fromRaw(1),new cMessage("wake-before-pifs",13));
+            scheduleAt(simTime()+SimTime(25,SIMTIME_US),new cMessage("wake-at-pifs",14));
+        }
+        if (step == 13) { ASSERT(!sourceRadio()->areSecondaryChannelsIdle(MHz(80))); wakeBoundaries++; }
+        if (step == 14) { ASSERT(sourceRadio()->areSecondaryChannelsIdle(MHz(80))); wakeBoundaries++; }
+        if (step == 15) {
+            auto estimate = check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"));
+            ASSERT(estimate->getErrorEstimate(meshMib(1)->address) == 7.0/64 && delivered == 1);
+            previousCapabilities = *meshMib(0)->findMeshPeerPhyCapabilities(meshMib(1)->address);
+            previousMode = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address).dataMode;
+        }
+        if (step == 16) {
+            capabilityUpdateStarted = true;
+            check_and_cast<MeshAdmissionManagement *>(meshManagement(1))->advertise(meshMib(0)->address,par("fault").intValue() == 20 ? 7 : 8);
+        }
+        if (step == 17) {
+            ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
+            auto committed = meshMib(0)->findMeshPeerPhyCapabilities(meshMib(1)->address);
+            auto mode = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address).dataMode;
+            ASSERT(committed && previousCapabilities && previousMode);
+            ASSERT((mode != previousMode) == (par("fault").intValue() == 21));
+            if (par("fault").intValue() == 20) {
+                ASSERT(*committed == *previousCapabilities && capabilityPublications == 0 && candidateDiscards > 0);
+            }
+            else ASSERT(committed->vht.rxMcs[0] == 8 && capabilityPublications == 1);
+            ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address)
+                == (par("fault").intValue() == 21 ? 0 : 7.0/64));
+        }
+        if (step == 20) {
+            auto path = destinationPaths()->findPath(meshMib(0)->address);
+            ASSERT(path);
+            sourcePathExpiry = path->expiry;
+            selfPrecursorExpiry = destinationPaths()->getPrecursorExpiry(meshMib(1)->address,meshMib(0)->address);
+            sendNativeLimit();
+        }
+        if (step == 21) {
+            ASSERT(nativeCompletions == 1 && nativeAcks == 1 && nativeAttempts == 0);
+            ASSERT(nativeAccepted == (par("fault").intValue() == 30 ? 1 : 0));
+            ASSERT(nativeDiscards == (par("fault").intValue() == 31 ? 1 : 0));
+            if (par("fault").intValue() == 31) {
+                ASSERT(destinationPaths()->findPath(meshMib(0)->address)->expiry == sourcePathExpiry);
+                ASSERT(destinationPaths()->getPrecursorExpiry(meshMib(1)->address,meshMib(0)->address) == selfPrecursorExpiry);
+            }
+        }
+        if (step == 22 || step == 27) {
+            ASSERT(sourceRadio()->areSecondaryChannelsIdle(MHz(80)));
+            ASSERT(sourceRadio()->getRadioMode() == (step == 22 ? IRadio::RADIO_MODE_RECEIVER : IRadio::RADIO_MODE_TRANSCEIVER));
+            sourceRadio()->setRadioMode(step == 22 ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
+            ASSERT(sourceRadio()->getRadioMode() == IRadio::RADIO_MODE_SWITCHING && sourceRadio()->isPrimaryChannelBusy() && !sourceRadio()->areSecondaryChannelsIdle(MHz(80)));
+            switchingSnapshots++;
+            scheduleAt(simTime()+SimTime(50,SIMTIME_US),new cMessage("switch-midpoint",step+1));
+            scheduleAt(simTime()+SimTime(100,SIMTIME_US)+SimTime::fromRaw(1),new cMessage("switch-complete",step+2));
+            scheduleAt(simTime()+SimTime(125,SIMTIME_US)-SimTime(1,SIMTIME_NS),new cMessage("switch-before-pifs",step+3));
+            scheduleAt(simTime()+SimTime(125,SIMTIME_US),new cMessage("switch-at-pifs",step+4));
+        }
+        if (step == 23 || step == 28) { ASSERT(sourceRadio()->isPrimaryChannelBusy() && !sourceRadio()->areSecondaryChannelsIdle(MHz(80))); switchingSnapshots++; }
+        if (step == 24 || step == 29) { ASSERT(!sourceRadio()->isPrimaryChannelBusy() && !sourceRadio()->areSecondaryChannelsIdle(MHz(80))); switchChecks++; }
+        if (step == 25 || step == 30) { ASSERT(!sourceRadio()->areSecondaryChannelsIdle(MHz(80))); switchChecks++; }
+        if (step == 26 || step == 31) { ASSERT(sourceRadio()->areSecondaryChannelsIdle(MHz(80))); switchChecks++; }
+        if (step == 32) {
+            auto frames = check_and_cast<InProgressFrames *>(sourceBe()->getSubmodule("inProgressFrames"));
+            ASSERT(sourceBe()->getCw() == grownCw && grownCw > 0 && frames->getLength() == 1 && frames->getFrames(0) == heldRetry);
+            ASSERT(secondaryDeferrals > 0 && dataAttempts == 1 && failedDataAttempts == 1);
+            auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+            ASSERT(timing.overhead == timingBeforeFailure.overhead && timing.dataMode == timingBeforeFailure.dataMode);
+            ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address) == 1.0/8);
+        }
+        if (step == 3) {
+            ASSERT(delivered == (capabilityCase() || nativeLimitCase() ? 2 : 1));
+            std::cout << "boundaries fault=" << par("fault").intValue() << " invalid=" << invalidPsdus << " drops=" << invalidDrops << " valid=" << validMacObservations << std::endl;
+            if (par("fault").intValue() >= 12 && par("fault").intValue() <= 14)
+                ASSERT(invalidPsdus == 1 && invalidDrops == 1 && validMacObservations >= 1 && receivedCaptureRecords == 1 && dataAttempts == 2 && failedDataAttempts == 1);
+            if (par("fault").intValue() == 17) ASSERT(secondaryDeferrals > 0 && dataAttempts == 1 && secondaryEnd >= SIMTIME_ZERO);
+            if (par("fault").intValue() == 18) ASSERT(runtimeRefusals == 5 && wakeBoundaries == 2 && retainedChannel == sourceRadio()->getOperatingChannel());
+            if (capabilityCase()) {
+                ASSERT(failedDataAttempts == 1 && dataAttempts == 3);
+                ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address)
+                    == (par("fault").intValue() == 21 ? 0 : 49.0/512));
+            }
+            if (par("fault").intValue() == 22) ASSERT(responseBypasses == 1 && failedDataAttempts == 0 && dataAttempts == 1);
+            if (par("fault").intValue() == 23) ASSERT(invalidPsdus == 0 && validMacObservations == 1 && dataAttempts == 1);
+            if (par("fault").intValue() == 24 || par("fault").intValue() == 25 || par("fault").intValue() == 27 || par("fault").intValue() == 29) ASSERT(familyDataObservations == 1 && failedDataAttempts == 0);
+            if (par("fault").intValue() == 26) ASSERT(oversizedDiscards == 1 && oversizedTransmissions == 0 && dataAttempts == 1);
+            if (par("fault").intValue() == 24 || par("fault").intValue() == 25 || par("fault").intValue() == 27 || par("fault").intValue() == 29) {
+                auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+                ASSERT(metricAdvertisements > 0 && meshMib(0)->getMeshConfiguration().pathSelectionMetricId == 2);
+                int expected = par("fault").intValue() == 25 ? 44834 : par("fault").intValue() == 29 ? 140331 : 139931;
+                ASSERT(timing.rate < Mbps(54) && check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getMetric(meshMib(1)->address) == uint32_t(expected));
+            }
+            if (nativeLimitCase()) {
+                ASSERT(dataAttempts == 2 && failedDataAttempts == 0 && nativeAttempts == 0);
+                ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address) == 0);
+            }
+            if (par("fault").intValue() == 28) {
+                ASSERT(narrowSequence >= 0 && wideSequence > narrowSequence && wideDelivered == 1 && wideStart >= SIMTIME_ZERO && widthAdmissionHolds == 1);
+                ASSERT(failedDataAttempts == 0);
+                ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(2)->address) == 0);
+            }
+            if (par("fault").intValue() == 32) ASSERT(switchChecks == 6 && switchingSnapshots == 4);
+            if (par("fault").intValue() == 33) {
+                ASSERT(grownCw > 0 && secondaryDeferrals > 0 && dataAttempts == 2 && failedDataAttempts == 1 && sourceBe()->getCw() == 0);
+                ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address) == 7.0/64);
+            }
+            emit(registerSignal("meshPhyAdmissionComplete"),1L);
+        }
+    }
+  public:
+    void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>&) override { ASSERT(std::string(packet->getName()) == "native-limit-wire"); nativeCompletions++; }
+    using cListener::finish;
+};
+Define_Module(MeshPhyAdmissionDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_high_throughput_data) {
+    auto test = ProtocolTest("mesh_high_throughput_data");
+    test.intercept(tap("radioMedium").from("station[0]").to("station[1]")
+        .filterPacket("ieee80211mac.type == 13 && ieee80211mac.category == 15 && (ieee80211mac.meshAction == 1 || ieee80211mac.meshAction == 2)")
+        .within(0.049).mutate([](Packet *packet) {
+            int fault = getSimulation()->getSystemModule()->getSubmodule("driver")->par("fault");
+            mutateMeshOpen(packet,[fault](Ieee80211MeshPeeringOpenFrame& body) {
+                auto length = body.getChunkLength();
+                if (fault == 0) { body.setHtCapabilitiesPresent(false); body.setHtOperationPresent(false); length -= B(52); }
+                if (fault == 1) { body.setVhtCapabilitiesPresent(false); body.setVhtOperationPresent(false); length -= B(21); }
+                if (fault == 2 || fault == 4) {
+                    auto op = body.getHtOperation();
+                    if (fault == 2) op.primaryChannel += 4;
+                    else op.basicMcsSupported[8] = !op.basicMcsSupported[8];
+                    body.setHtOperation(op);
+                }
+                if (fault == 3 || fault == 5) {
+                    auto op = body.getVhtOperation();
+                    if (fault == 3) op.centerFrequencySegment0++;
+                    else op.basicMcsMap = 0xfffd;
+                    body.setVhtOperation(op);
+                }
+                if (fault == 6) body.setSupportedRates(0,body.getSupportedRates(0) & 0x7f);
+                if (fault == 8) { auto c = body.getMeshConfiguration(); c.pathSelectionMetricId = 1; body.setMeshConfiguration(c); }
+                if (fault >= 9 && fault <= 11) {
+                    size_t n = body.getExtendedSupportedRatesArraySize();
+                    body.setExtendedSupportedRatesArraySize(n+1);
+                    body.setExtendedSupportedRates(n,fault == 9 ? 0xff : fault == 10 ? 0xfe : 0xfc);
+                    length += B(n == 0 ? 3 : 1);
+                }
+                body.setChunkLength(length);
+            });
+            if (fault == 7) {
+                std::vector<Ptr<Chunk>> prefix;
+                while (!dynamicPtrCast<const Ieee80211MacHeader>(packet->peekAtFront<Chunk>()))
+                    prefix.push_back(packet->removeAtFront<Chunk>(packet->peekAtFront<Chunk>()->getChunkLength()));
+                auto header = packet->removeAtFront<Ieee80211MeshActionFrame>();
+                auto body = packet->removeAtFront<Ieee80211MeshPeeringOpenFrame>();
+                auto trailer = packet->removeAtFront<Ieee80211MacTrailer>(B(4));
+                Packet serialized("malformed-vht-body",body);
+                auto bytes = serialized.peekAllAsBytes()->getBytes();
+                size_t pos = header->getMeshAction() == MESH_PEERING_CONFIRM ? 4 : 2;
+                while (pos+2 < bytes.size() && bytes[pos] != 191) pos += 2+bytes[pos+1];
+                ASSERT(pos+14 <= bytes.size() && bytes[pos] == 191);
+                bytes[pos+1] = 11;
+                auto raw = makeShared<BytesChunk>(bytes);
+                Packet mac("valid-fcs-malformed-vht",header); mac.insertAtBack(raw);
+                auto macBytes = mac.peekAllAsBytes()->getBytes();
+                trailer->setFcsMode(FCS_COMPUTED); trailer->setFcs(ethernetFcs(macBytes.data(),macBytes.size()));
+                packet->insertAtFront(trailer); packet->insertAtFront(raw); packet->insertAtFront(header);
+                for (auto it=prefix.rbegin();it!=prefix.rend();++it) packet->insertAtFront(*it);
+            }
+        }).describe("invalid capability admission has valid computed MAC FCS; later exchange is unchanged"));
+    test.intercept(tap("radioMedium").from("station[0]").to("station[1]")
+        .filterPacket("ieee80211mac.type == 40").nth(1).mutate([](Packet *packet) {
+            int fault = getSimulation()->getSystemModule()->getSubmodule("driver")->par("fault");
+            if ((fault < 12 || fault > 14) && fault != 23) return;
+            auto phy = packet->removeAtFront<Ieee80211VhtPhyHeader>();
+            auto bytes = packet->popAtFront<BytesChunk>(phy->getLengthField())->getBytes();
+            if (fault == 14) bytes[2] ^= 0x80; // invalid delimiterCRC; memberFCS stays intact
+            else if (fault != 23) {
+                int headerLength = fault == 12 ? 0 : 31;
+                std::vector<uint8_t> member(headerLength+4,0);
+                if (headerLength) { member[0] = 0x88; member[1] = 3; }
+                auto fcs = independentMeshFcs(member,0,headerLength);
+                for (int i=0;i<4;i++) member[headerLength+i] = (fcs>>(8*i))&255;
+                Packet shortMember("delimiter-valid-short-member",makeShared<BytesChunk>(member));
+                wrapSingleMpdu(&shortMember);
+                bytes = shortMember.peekAllAsBytes()->getBytes();
+            }
+            phy->setLengthField(B(bytes.size()));
+            packet->insertAtFront(makeShared<BytesChunk>(bytes)); packet->insertAtFront(phy);
+        }).describe("one malformed raw VHT PSDU remains opaque through capture and drops before bareMAC; retry succeeds"));
+    int fault = getSimulation()->getSystemModule()->getSubmodule("driver")->par("fault");
+    if ((fault >= 19 && fault <= 21) || fault == 33) {
+        test.once(on("driver").signal("highPhyMetricSeedStart").assertValue(1).within(0.11));
+        test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.01).drop());
+    }
+    return test.once(on("driver").signal("meshPhyAdmissionComplete").assertValue(1).within(0.13));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+import inet.physicallayer.wireless.noise.NoiseSource;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+simple MeshAdmissionManagement extends Ieee80211MgmtMesh { parameters: @class(::MeshAdmissionManagement); }
+simple MeshTupleConfigurationProbe extends inet.linklayer.ieee80211.mac.rateselection.QosRateSelection { parameters: @class(::MeshTupleConfigurationProbe); }
+simple MeshPhyAdmissionDriver {
+    parameters:
+        @class(::MeshPhyAdmissionDriver);
+        int fault;
+        @signal[meshPhyAdmissionComplete](type=long);
+        @signal[highPhyMetricSeedStart](type=long);
+}
+module MeshDimensionalTapMedium extends Ieee80211DimensionalRadioMedium {
+    parameters: @class(::inet::protocoltest::TapRadioMedium);
+}
+module MeshPulseNoise extends NoiseSource { parameters: @class(::MeshPulseNoise); }
+network Test extends MeshPairNetwork { submodules: driver: MeshPhyAdmissionDriver; noise: MeshPulseNoise; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+sim-time-limit = 130ms
+*.numStations = ${fault} == 28 ? 3 : 2
+*.station[*].numPcapRecorders = 1
+*.station[*].pcapRecorder[*].helpers = "inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper"
+*.station[*].pcapRecorder[*].fileFormat = "pcap"
+*.station[0].pcapRecorder[0].pcapFile = "results/h1-${runnumber}-0.pcap"
+*.station[1].pcapRecorder[0].pcapFile = "results/h1-${runnumber}-1.pcap"
+*.driver.fault = ${fault=0..33}
+*.radioMedium.typename = "MeshDimensionalTapMedium"
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+*.station[*].wlan[0].phyProfile = ${fault} == 27 ? "ht" : "vht"
+*.station[*].wlan[0].radio.typename = "Ieee80211DimensionalRadio"
+*.station[*].wlan[0].radio.bandName = "5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].radio.bandwidth = ${fault} == 27 ? 20MHz : 80MHz
+*.station[*].wlan[0].radio.channelNumber = 0
+*.station[0].wlan[0].radio.switchingTimes = ${fault} == 32 ? "ns 0 0 0 0 0 0 0 0 0 0 0 0 0 0 100000 0 0 0 0 0 0 0 100000 0 0" : "ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mgmt.typename = "MeshAdmissionManagement"
+*.station[*].wlan[0].mgmt.retryTimeout = 5ms
+*.station[*].wlan[0].mgmt.confirmTimeout = 5ms
+*.station[*].wlan[0].mgmt.holdingTimeout = 5ms
+*.station[*].wlan[0].mgmt.maxRetries = 1
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = ${fault} == 21 || ${fault} == 25 || ${fault} == 28 ? "auto" : (${fault} == 24 || ${fault} == 27 ? "ht" : "vht")
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameMcs = ${fault} == 21 || ${fault} == 25 || ${fault} == 28 ? -1 : (${fault} == 20 ? 8 : (${fault} == 24 || ${fault} == 27 || ${fault} == 29 ? 0 : 7))
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = ${fault} == 25 ? 24Mbps : -1bps
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = ${fault} == 27 ? "ht" : "vht"
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameMcs = 7
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = 20MHz
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = "long"
+*.station[0].wlan[0].mib.meshShortGuardIntervalTransmissionEnabled = ${fault} != 15 && ${fault} != 16
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = ${fault} == 28 ? nan Hz : (${fault} == 15 || ${fault} == 17 || ${fault} == 22 || ${fault} == 33 ? 80MHz : 20MHz)
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = ${fault} == 28 ? {"Test.station[1].wlan[0]":65Mbps,"Test.station[2].wlan[0]":351Mbps} : {}
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = ${fault} == 21 || ${fault} == 25 || ${fault} == 28 ? "auto" : (${fault} == 15 || ${fault} == 17 || ${fault} == 22 || ${fault} == 33 ? "short" : "long")
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].cwMin = 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].cwMax = ${fault} == 33 ? 7 : 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2].cwMin = 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2].cwMax = 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2].contention.backoffOptimization = false
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2].txopProcedure.txopLimit = 1ms
+*.noise.radioMediumModule = "radioMedium"
+*.noise.sleepInterval = 1s
+*.noise.mobility.initFromDisplayString = false
+*.noise.mobility.initialX = 20m
+*.noise.mobility.initialY = 20m
+*.noise.mobility.initialZ = 0m
+*.noise.transmitter.duration = 160us
+*.noise.transmitter.centerFrequency = 5200MHz
+*.noise.transmitter.bandwidth = 20MHz
+*.noise.transmitter.power = 100mW
+*.noise.transmitter.signalAnalogRepresentation = "dimensional"
+*.tester.testName = "mesh_high_throughput_data"
+include ../../ini/_mesh.ini
+
+%extraargs: -r 0..33
+%contains: stdout
+PROTOCOLTEST mesh_high_throughput_data: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_high_throughput_data: FAIL

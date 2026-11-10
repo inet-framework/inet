@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrameSerializer.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211CapabilityElements.h"
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
@@ -226,7 +227,8 @@ void writeHwmpElements(MemoryOutputStream& s, const Ieee80211HwmpFrame& frame)
 
 bool Ieee80211MeshFrameSerializer::isMeshElement(uint8_t id)
 {
-    return id == TIM || id == CONFIGURATION || id == MESH_ID || id == PEERING || id == AWAKE_WINDOW;
+    return id == TIM || id == CONFIGURATION || id == MESH_ID || id == PEERING || id == AWAKE_WINDOW
+        || id == 45 || id == 61 || id == 191 || id == 192;
 }
 
 bool Ieee80211MeshFrameSerializer::readElement(MemoryInputStream& stream, uint8_t id, uint8_t length, Ieee80211MeshFrame& frame, int peeringAction)
@@ -234,6 +236,10 @@ bool Ieee80211MeshFrameSerializer::readElement(MemoryInputStream& stream, uint8_
     // The containing decoder has already checked Length against remaining bytes.
     if (!require(stream, B(length), frame))
         return false;
+    if (id == 45) { readHtCapabilitiesElement(stream, length, frame); return frame.isCorrect(); }
+    if (id == 61) { readHtOperationElement(stream, length, frame, true); return frame.isCorrect(); }
+    if (id == 191 || id == 192)
+        return readVhtElement(stream, id, length, frame);
     if (id == MESH_ID) {
         if (length > 32 || frame.getMeshIdPresent())
             return false;
@@ -319,8 +325,17 @@ bool Ieee80211MeshFrameSerializer::readElement(MemoryInputStream& stream, uint8_
     return true;
 }
 
-void Ieee80211MeshFrameSerializer::writeElements(MemoryOutputStream& s, const Ieee80211MeshFrame& frame, const std::function<void()>& beforeElement)
+void Ieee80211MeshFrameSerializer::writeElements(MemoryOutputStream& s, const Ieee80211MeshFrame& frame, const std::function<void()>& beforeElement, bool includeHt)
 {
+    if (includeHt && frame.getHtCapabilitiesPresent()) {
+        if (beforeElement) beforeElement();
+        writeHtCapabilitiesElement(s, frame.getHtCapabilities());
+    }
+    if (includeHt && frame.getHtOperationPresent()) {
+        if (beforeElement) beforeElement();
+        writeHtOperationElement(s, frame.getHtOperation(), true);
+    }
+    writeVhtElements(s, frame, beforeElement);
     auto header = [&](uint8_t id, size_t length) {
         if (beforeElement)
             beforeElement();

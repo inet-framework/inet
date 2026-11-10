@@ -82,13 +82,23 @@ Use each root mechanism separately with two simultaneous nonroot discoveries. Ex
 
 Pair compatible and incompatible HT mesh stations. Vary basic MCS, receive bandwidth, spatial streams and GI support. Observe advertised and committed directional intersections, legal fixed PHY tuples and rejection of incompatible basic sets. A local HT catalog entry alone must not authorize transmission to an ineligible peer. Unsupported mesh capabilities remain unadvertised.
 
+Treat membership selectors separately from capability and basic-set equality. Decode received `FF` as an HT requirement and `FE` as a VHT requirement, admitting only locally supported requirements in an otherwise valid peer profile. Reject unsupported/unknown requirements and inspect both rate elements. Under the selected non-AP omission policy, absence of transmitted HT/VHT selectors is legal and does not waive typed basic-set checks.
+
+Exercise actual 20/40-MHz geometry and primary-anchored narrower transmission. Keep contention on primary CCA and test secondary-only occupancy separately: a fixed-width hold preserves CW, packet ownership and retry/error state, then resumes without another packet arrival. Check the required idle boundary and reject unsupported protection conditions. Configured catalog membership alone is not radio support.
+
 ## WIFI-CHECK-VHT-NEGOTIATION
 
 Repeat negotiation with VHT basic MCS/NSS and receive limits across the selected widths and streams. Inspect actual data PPDUs, including VHT single-MPDU delimiter/EOF bytes. Assert legal directional choices and explicit rejection of unsupported combinations. Also check mesh-wide metric equality when comparing ID-1 and ID-2 profiles.
 
+At operating20, assert the mandatory device20/40/80 baseline independently of Operation fields. Optional160 advertisement requires real support and its baseline; operating160 without it is refused. Exercise width-specific peer Rx SGI bits separately from local Tx activation, including advertised Rx SGI with Tx disabled and a conflicting fixed-short request. Preserve both guard intervals in the legal tuple matrix.
+
+For 20/40/80/160 MHz, distinguish operation center segments from the actual PHY center and verify primary-anchored narrowing. Include both primary halves of the selected contiguous 160-MHz block, invalid pairs/subblocks and capability boundaries. Independently check delimiter length high/low bit placement, CRC, signature, member FCS and EOF instead of relying only on round trips. State the configured allocation's external regulatory/DFS/startup-selection assumptions.
+
 ## WIFI-CHECK-HIGH-THROUGHPUT-DATA
 
 Deliver unicast and group traffic through a relay using each selected HT/VHT profile. Inspect negotiated mode, width, MCS, NSS, GI and acknowledgment form on each hop. Verify capture reconstruction and exactly-once upper delivery. Group traffic uses its selected legal unacknowledged format. A profile's advertised capability must correspond to an exercised production path.
+
+Check same-width non-HT duplicate ACK/Block Ack responses to wider DATA, with the legal basic/reference response rate and per-copy duration. Distinguish occupied bandwidth from decoding bandwidth. Under the selected primary-copy decoding policy, secondary-only disjoint interference must leave decoded primary-copy SNIR/error/delivery unchanged, while primary interference changes it; another receiver must still observe full-width transmitted interference and split power. Check that ending a narrow holder exchange does not silently authorize wider DATA in the same unprotected TXOP. Preserve the scalar 20-MHz reference and legacy controls separately from dimensional wider-channel evidence.
 
 ## WIFI-CHECK-AMSDU
 

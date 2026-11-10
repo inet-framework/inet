@@ -9,6 +9,9 @@
 namespace inet {
 namespace ieee80211 {
 
+struct Ieee80211RateSetState;
+struct Ieee80211PeerPhyCapabilities;
+
 struct INET_API MeshLinkTiming
 {
     units::values::bps rate;
@@ -23,6 +26,8 @@ class INET_API IMeshLinkTiming
   public:
     virtual ~IMeshLinkTiming() = default;
     virtual MeshLinkTiming getMeshLinkTiming(MacAddress peer) = 0;
+    virtual MeshLinkTiming previewMeshLinkTiming(MacAddress peer, const Ieee80211RateSetState& rates,
+        const Ieee80211PeerPhyCapabilities& capabilities) = 0;
 };
 
 } // namespace ieee80211

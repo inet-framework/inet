@@ -25,9 +25,9 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | ROOT-PREQ | HwmpProactivePreq.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
 | RANN | HwmpRann.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
 | ROOT-COEXISTENCE | HwmpRootCoexistence.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
-| HT-NEGOTIATION | MeshHtNegotiation.test | H1 | hwmp-h1-ht-vht.md | NOT_RUN |
-| VHT-NEGOTIATION | MeshVhtNegotiation.test | H1 | hwmp-h1-ht-vht.md | NOT_RUN |
-| HIGH-THROUGHPUT-DATA | MeshHighThroughputData.test | H1 | hwmp-h1-ht-vht.md | NOT_RUN |
+| HT-NEGOTIATION | MeshHtNegotiation.test | H1 | hwmp-h1-ht-vht.md | PASS, 16 configurations |
+| VHT-NEGOTIATION | MeshVhtNegotiation.test | H1 | hwmp-h1-ht-vht.md | PASS, 64 configurations |
+| HIGH-THROUGHPUT-DATA | MeshHighThroughputData.test | H1 | hwmp-h1-ht-vht.md | PASS, 34 configurations |
 | AMSDU | MeshAmsdu.test | H2 | hwmp-h2-amsdu.md | NOT_RUN |
 | AMPDU-BLOCK-ACK | MeshAmpduBlockAck.test | H3 | hwmp-h3-ampdu.md | NOT_RUN |
 | AGGREGATION-LIMITS | MeshAggregationLimits.test | H3 | hwmp-h3-ampdu.md | NOT_RUN |
@@ -52,6 +52,17 @@ These are selected modeling policies, not requirements attributed to IEEE. The [
 | --- | --- | --- |
 | Profile | Open, one fixed channel, one interface, endpoints only, LLC/SNAP, EPD disabled | Bounded mesh profile; neither portals nor proxy addressing is claimed |
 | PHY | Fixed legal per-peer tuple; RTS, fragmentation and adaptive rate control disabled | Enables reproducible directional airtime and capability checks |
+| Wider channelization | Bounded contiguous 5-GHz allocations using primary channels 36–64, explicit 40-MHz pairs, 80-MHz centers 42/58 and 160-MHz center 50 | Narrower PPDUs use the configured primary hierarchy; legacy catalog indices retain their existing meaning |
+| Wider analog model | Dimensional radio/medium; retain scalar 20-MHz OFDM reference | Off-center partial interference must be modeled rather than ignored |
+| Duplicate response decoding | Decode the primary 20-MHz copy, preserving split power and full-width occupied interference | No diversity combining or best-copy selection; decoded SNIR/power and occupied width describe different facts |
+| Fixed-width access | Primary CCA for contention, required secondary idle history before wider TXOP admission | Unavailable width defers/recontends with current CW and no retry/error sample; no dynamic narrowing |
+| Wider environment | Externally permitted/available allocation, regulatory/DFS/startup selection satisfied and compatible unprotected neighborhood | No radar, country policy, startup channel-selection or incompatible-OBSS protection mechanism is claimed |
+| Wider CCA visibility | Disable listening/MAC-address delivery filters and retain interference-range coverage | Idle history requires relevant energy start/end observations; startup/wake/unobserved intervals reset history rather than granting credit |
+| VHT operation signaling | Modern contiguous signaling with uniform NSS support across widths | Deprecated width-2 and extended-NSS unequal-across-width encodings are outside the selected profile |
+| Fixed tuple input | Optional family/MCS/GI with existing data bandwidth/NSS/bitrate; reject ambiguous or conflicting explicit tuples | Uses authoritative catalog entries without invented VHT mode names; defaults preserve old selection |
+| HT/VHT membership selectors | Omit on transmit under the non-AP permission; accept supported received requirements subject to profile/basic sets | Selectors express membership requirements, not capability flags or selector-list equality |
+| VHT device capability | Mandatory device20/40/80 baseline independent of operation; optional160 capability defaults disabled | Capability cannot exceed physical catalog support; current allocation separately bounds transmissions |
+| Short GI activation | Width-specific peer Rx support plus independent local Tx enablement | Advertising local Rx SGI does not enable local Tx SGI |
 | Metric selection | ID 1 for OFDM; ID 2 default for HT/VHT; explicit ID 1 comparison allowed mesh-wide | Follows high-rate recommendation without changing metric ID per peer |
 | Pending MSDUs | Shared capacity 64 packets and 256 KiB; five-second per-packet wait; drop new on overflow | Bounds memory and waiting; count existing LLC payload bytes before adding mesh encapsulation |
 | Duplicate retention | One second; seed locally originated group identity | Bounded duplicate history, not infinite duplicate exclusion |
@@ -109,9 +120,11 @@ The source PDF was used for mathematical grouping in the airtime formula, mesh A
 | C8 proactive roots and coexistence | PASS, 3/3 new files, six metric-ID runs | All fifteen mesh files pass; retained known legacy failure; five units and two modules pass |
 | H0 shared interference-observation query | PASS, 8/8 module files | New real-arrival fixture passes all six configurations with post-signal energy and normal teardown checks |
 | H0a complete VHT catalog | PASS, 7/7 units; compatibility outcomes unchanged | Isolated H0-based candidate; thirteen protocol files give ten passes and three declared failures matching the parent |
-| Remaining live mesh behavior | NOT_RUN | HT/VHT and power save remain future stages |
+| H1 negotiated HT/VHT transport | PASS, 18/18 mesh files | Final 36-file protocol union retains exact parent compatibility failures; 19 units and 11 module files pass |
+| Remaining live mesh behavior | NOT_RUN | Mesh aggregation and power save remain future stages |
 | C5 committed release compilation checkpoint | PASS | Isolated clean `7264369846`, matching release dependencies; no warning/error |
 | C8 committed release compilation checkpoint | PASS | Isolated clean `9820b39bdc`, matching release dependencies; no warning/error |
+| H0 committed release compilation checkpoint | PASS | Isolated clean `a7c505aa68`, matching dependencies and new API symbol; no warning/error |
 | Release compilation | NOT_RUN | Required before push |
 | C2 legacy protocol controls | 4/5 test files PASS; one preexisting unexpected failure | Raw Block Ack retry run 0 has protocol deadline failure, run 1 has runtime abort; immediate parent reproduces both at identical time/event |
 | Parent legacy fingerprints | PASS, 19 simulations / 56 checks | Native stored budgets, all expected PASS; baseline unchanged |
@@ -202,6 +215,8 @@ The fresh matching debug build passed (`/home/miguel/inet-mesh-h0-build-final.lo
 
 The API promises relevant modeled arrival visibility after initialization while receiving/transceiving; it does not promise decoding success, analog accuracy or observation during other modes. External providers and subclasses changing delivery/filter semantics must supply a valid answer, returning false when unsure. The parent lacks the query, so an absent-method compilation is setup evidence rather than a runtime failure. Scoped architecture, source-seal, release/migration format and whitespace checks pass. Independent final review confirms the archived sources/results and has no remaining finding. H1's consumer is still unimplemented; no baseline or expected result was changed.
 
+An isolated clean worktree at committed H0 `a7c505aa68` completed `make MODE=release -j4 LN='ln -sf'`, exit 0, without compiler warnings/errors. Matching release dependencies and the new query symbol were verified; library SHA256 is `95c670ec1e7c3b8050bd83fba0ad5cb0a8cb103f9837c6b872d614e95ad91fdf`. C8 release provenance/binary and the identified C7 debug output were preserved. Features and the fingerprint store remained unchanged, and no simulation or feature change ran. Records use `/home/miguel/inet-mesh-h0-release-checkpoint*`, with audit copies. This is an intermediate compilation check, not final combined-tree validation.
+
 ## H0a complete VHT catalog
 
 The opt-in `ac-complete` catalog retains the legacy non-VHT entries and expands each legal VHT tuple into both guard intervals. The independent grid oracle excludes all ten invalid width/NSS/MCS combinations and verifies mandatory flags, cache identity, timing and the unchanged legacy signature. No mesh profile selects the catalog in this preparation.
@@ -209,3 +224,21 @@ The opt-in `ac-complete` catalog retains the legacy non-VHT entries and expands 
 Standalone candidate `ef9dcf42f545bbe41203a0f1d44d6b9801a86d06`, based on H0 `a7c505aa68`, passed a fresh debug build and seven unit files selected by `Ieee80211(CompleteVhtModeSet|HtModeSet|HtModeCache|VhtModeQueries|HtVhtPartDurations|NonHtReferenceRate|VhtHtCapabilities)_1\.test$`. Its thirteen retained HT/VHT protocol files execute fifteen simulations: ten files pass and three retain their declared failures. The failure assertions match the parent exactly: `N_Ampdu` at 2 s/event 149187, `Ac_Ampdu` at 2 s/event 161849, and `Ac_VhtIe` at 2.5 s/event 48880. Termination events occur two events later. No expected result was changed.
 
 The final source candidate `8953a6fd49e2f600ea8f2bf6a2afd20db94cc72c` differs only by adding clause 21.1.1 to a comment. Independent review checked that exact delta and cleared the preparation, with 16 general and seven WLAN checks passing and the remaining checks inapplicable. A refreshed debug build and all seven units also pass on that final source, with a byte-identical library. The original protocol comparison remains attributed to its original candidate. Reconciliation uses `/home/miguel/inet-mesh-h0a-final-citation-*`; the standalone record, loader proofs and raw results use `/home/miguel/inet-mesh-h0a-standalone-*`. Debug library SHA256 is `96a4dd9f459a10b13e90b08a96a8e67b9172f767ce09405cd291e2a3a6120148`. Features, release output and fingerprint-store hashes remained unchanged. This evidence establishes catalog preparation, not H1 negotiation, channel access or final combined-tree validation.
+
+## H1 negotiated HT/VHT transport
+
+H1 uses the opt-in complete catalog through the existing interface mode authority. Typed directional capabilities, fixed tuple validation and candidate timing are committed before publication; only an effective DATA/ACK tuple change resets the error estimate. Device width capability, operating allocation and local Tx SGI activation remain separate. The radio owns complete immutable channel geometry, primary CCA, secondary-idle history and the single-member envelope. Valid incoming members reach capture/MAC with zero-offset MAC tags and FCS intact; malformed envelopes remain consistently PHY-wrapped and opaque until corruption handling. These owners and the full case mapping are explained in the [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-h1-ht-vht.md).
+
+The frozen checkpoint is based on `3ff5d570869262cedf14797f3629b4ab2888105b`. Its 56-input manifest SHA256 is `b28f1c2dfcce128715e2d33b6de903d29a8fcc6c7b3c8b33663a331b00c20cee` and matching debug library SHA256 is `de0a5ac9968d120b2c0a699f6dbc7918afb0b7556d37e09397cddbb2de64bba7`. Build/source records use `/home/miguel/inet-mesh-h1-source-checkpoint*`. Independent verification confirms those inputs, current/pinned library, feature state and fingerprint store remain unchanged.
+
+The deduplicated final protocol union selects 36 files and prepares 156 simulations. All eighteen mesh files pass: 135 mesh simulations, including HT16, VHT64, boundary34 and the three-run airtime fixture. The file results are 32 PASS, three declared FAIL and one known unexpected Block Ack retry failure. Independent raw comparison confirms the same three declared assertion reasons/times/events as H0 and both retry-control failures as C1. Assertion events are distinct from their later termination events. Exact selectors, generated sources, logs and 1344 file hashes are retained under `/home/miguel/inet-mesh-h1-raw/protocol-final/`; the log is `/home/miguel/inet-mesh-h1-protocol-final.log`.
+
+Nineteen focused unit files pass across eighteen initial passes and a separate repaired `TxNavChoice` mock rerun. The initial mock compile error is retained; the only repair adds the required inert interface method, preserving its NAV assertions. Its three completion-ownership warnings are retained baseline warnings also present at C8. Eleven module files pass 29 native simulations without ownership warnings, including the three-round 80-MHz primary-copy reception test. Original normalizer false positives on zero-failure summaries are preserved alongside authoritative adjudications. The complete unit/module record is `/home/miguel/inet-mesh-h1-final-verification/record.json`.
+
+Independent final capture audits check all 160 positive matrix PCAPs, 2880 exact MAC CRC32 values, 320 DATA records, actual tuple/channel metadata and all four member-length residues. A separate final boundary audit checks twelve captures and 367 CRCs, including opaque malformed reception versus valid retry and correctly captured policy-rejected oversized input. These records use `/home/miguel/inet-mesh-h1-final-positive-pcap-audit/` and `/home/miguel/inet-mesh-h1-faulted-capture-final-audit.json`. They establish bare-MAC capture boundaries and member FCS, without claiming delimiter CRC bytes are present in PCAP.
+
+Two direct full-network initialization probes reject scalar or listening-filtered high-profile media before on-air traffic, using the frozen library; a missing-relative-INI setup attempt is retained separately. A subsequent assertion extension checks actual post-capability-update PPDUs in all 34 boundary configurations with unchanged stimuli and production inputs. Exact records are `/home/miguel/inet-mesh-h1-initialization-refusals/record-final.json` and `/home/miguel/inet-mesh-h1-raw/boundary-actual-tuple-final/`. Development-only failures and snapshots remain separately attributed.
+
+Scoped architecture, changed NED/MSG naming, whitespace and source-protection checks pass. The interface scan retains only the unchanged `ITransmitStep`/`IReceiveStep` baseline findings in the MAC contract subtree; mesh and new PHY interfaces pass. All three reviewer diagrams rendered and were visually inspected. No sealed source, expected result or fingerprint baseline was changed. Full mesh aggregation, power save and C9 combined-tree release/feature-disabled/fingerprint verification remain pending; this checkpoint does not claim external interoperability or real MIMO accuracy.
+
+Independent final review closed F1–F4: canonical channel requests, malformed envelope admission, switching observation history and grown-CW preservation. It verified all 56 production inputs, the matching library, all 1344 protocol archive hashes and 191 final-boundary hashes, and returned 35 PASS, 11 N/A, no flags/questions, with the later C9 fingerprint gate explicitly unverified. No source-protection approval or exception-ledger entry remains unresolved for H1.

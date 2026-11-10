@@ -9,15 +9,34 @@ import inet.common.TagBase;
 import inet.physicallayer.wireless.ieee80211.mode.IIeee80211Mode;
 import inet.physicallayer.wireless.ieee80211.mode.Ieee80211Channel;
 
+cplusplus {{
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211TxVector.h"
+}}
+
 namespace inet::physicallayer;
+
+struct Ieee80211TxVector
+{
+    @existingClass;
+    @descriptor(readonly);
+    IIeee80211Mode *mode;
+    int format @getter(getFormat);
+    Hz bandwidth;
+    bool singleMpdu;
+}
 
 //
 // This is an abstract base class that should not be directly added as a tag.
 //
 class Ieee80211ModeTagBase extends TagBase
 {
-    const IIeee80211Mode *mode; // IEEE 802.11 transmission mode
+    Ieee80211TxVector txVector;
 }
+
+cplusplus(Ieee80211ModeTagBase) {{
+    const IIeee80211Mode *getMode() const { return getTxVector().mode; }
+    void setMode(const IIeee80211Mode *mode) { setTxVector(Ieee80211TxVector(mode)); }
+}}
 
 //
 // This request determines the IEEE 802.11 mode that should be used to transmit the packet.

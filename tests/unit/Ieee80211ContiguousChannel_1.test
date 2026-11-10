@@ -1,0 +1,43 @@
+%description:
+IEEE2024 AnnexE/TableE-4 bounded allocations, primary hierarchy and modern160
+PHY center geometry. Independent literal rows distinguish every primary.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
+using namespace inet;
+using namespace inet::physicallayer;
+using namespace inet::units::values;
+
+%activity:
+const int primary[] = {36,40,44,48,52,56,60,64};
+const int center40[] = {38,38,46,46,54,54,62,62};
+const int center80[] = {42,42,42,42,58,58,58,58};
+auto band = &Ieee80211CompliantBands::band5GHzMapped20MHz;
+for (int index = 0; index < 8; index++) {
+    Ieee80211Channel channel(band,index,MHz(160));
+    ASSERT(channel.getChannelNumber() == index && channel.getPrimaryChannel() == primary[index]);
+    ASSERT(channel.getCenterChannel(MHz(20)) == primary[index]);
+    ASSERT(channel.getCenterChannel(MHz(40)) == center40[index]);
+    ASSERT(channel.getCenterChannel(MHz(80)) == center80[index]);
+    ASSERT(channel.getCenterChannel(MHz(160)) == 50);
+    ASSERT(channel.getCenterFrequency(MHz(160)) == MHz(5250));
+    ASSERT(channel.getCenterFrequency(MHz(20)) == MHz(5000+5*primary[index]));
+    ASSERT(!channel.containsPrimaryAllocation(MHz(5000+5*primary[index])+MHz(20),MHz(20)));
+    ASSERT(!channel.containsPrimaryAllocation(MHz(5230),MHz(80)));
+    Ieee80211Channel copied(channel);
+    ASSERT(copied.hasAllocation() && copied.getCenterChannel(MHz(80)) == center80[index]);
+    Ieee80211Channel narrow(band,index,MHz(40));
+    ASSERT(!narrow.containsPrimaryAllocation(MHz(5210),MHz(80)));
+}
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(40),1));
+ASSERT(!band->isHt40OperationSupported(band->getChannelIndex(44),3));
+for (int width : {0,10,60,320}) {
+    bool rejected = false;
+    try { Ieee80211Channel bad(band,0,MHz(width)); }
+    catch (const cRuntimeError&) { rejected = true; }
+    ASSERT(rejected);
+}
+EV << "Contiguous channel literal geometry passed.\n";
+
+%contains: stdout
+Contiguous channel literal geometry passed.

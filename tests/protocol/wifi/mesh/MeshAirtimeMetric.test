@@ -4,7 +4,7 @@ IDs. DroppedACK retry EWMA, terminal timeout, internal collision exclusion,
 reports, compatible rate updates, peer retirement and receive interruption.
 
 %file: MeshAirtimeMetric.cc
-#include "mesh/MeshForwardingSupport.h"
+#include "mesh/MeshPhySupport.h"
 #include "inet/linklayer/ieee80211/mesh/AirtimeLinkMetric.h"
 #include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
 #include "inet/common/lifecycle/LifecycleController.h"
@@ -356,6 +356,63 @@ class MeshMetricDriver : public cSimpleModule, public cListener, public Lifecycl
 };
 Define_Module(MeshMetricDriver);
 
+class MeshHighPhyMetricDriver : public cSimpleModule, public cListener
+{
+    std::vector<bool> attempts;
+    int delivered = 0;
+    AirtimeLinkMetric *metric(int station) { return check_and_cast<AirtimeLinkMetric *>(meshInterface(station)->getSubmodule("linkMetric")); }
+    uint32_t nominal() const { return meshMib(0)->getMeshPhyProfile() == "ht" ? 31654 : 32054; }
+  protected:
+    void initialize() override {
+        getParentModule()->subscribe(Hcf::meshDataAttemptCompletedSignal,this);
+        getParentModule()->subscribe(packetSentToUpperSignal,this);
+        for (int i=0;i<5;i++) scheduleAt(SimTime(i == 0 ? 1 : i == 1 ? 50 : i == 2 ? 75 : i == 3 ? 80 : 100,SIMTIME_MS),new cMessage("high-metric",i));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        auto packet = dynamic_cast<Packet *>(object);
+        if (!packet || std::string(packet->getName()) != "high-metric-forward") return;
+        if (signal == packetSentToUpperSignal && source == meshInterface(1)->getSubmodule("mac")) delivered++;
+        if (signal == Hcf::meshDataAttemptCompletedSignal) {
+            auto attempt = check_and_cast<MeshDataAttempt *>(details);
+            ASSERT(attempt->mode->getDataMode()->getNetBitrate() == Mbps(65));
+            ASSERT(!attempt->terminalTimeout);
+            attempts.push_back(attempt->acknowledged);
+            if (!attempt->acknowledged) {
+                Enter_Method_Silent();
+                scheduleAt(simTime()+SimTime::fromRaw(1),new cMessage("first-error-estimate",5));
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        int step = message->getKind(); delete message;
+        if (step == 0) meshManagement(0)->openPeer(meshMib(1)->address);
+        if (step == 1) {
+            ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
+            auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+            ASSERT(timing.overhead == SimTime(meshMib(0)->getMeshPhyProfile() == "ht" ? 190500 : 194500,SIMTIME_NS));
+            ASSERT(timing.rate == Mbps(65));
+            ASSERT(meshMib(0)->getMeshConfiguration().pathSelectionMetricId == 2 && metric(0)->getMetric(meshMib(1)->address) == nominal());
+            emit(registerSignal("highMetricStart"),1L);
+            sendDirect(phyMsdu("high-metric-forward",meshMib(1)->address),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+        }
+        if (step == 2) {
+            ASSERT(attempts == std::vector<bool>({false,true}) && delivered == 1);
+            ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 7.0/64);
+            ASSERT(metric(1)->getErrorEstimate(meshMib(0)->address) == 0 && metric(1)->getMetric(meshMib(0)->address) == nominal());
+            ASSERT(metric(0)->getMetric(meshMib(1)->address) == (meshMib(0)->getMeshPhyProfile() == "ht" ? 35541 : 35990));
+        }
+        if (step == 3) sendDirect(phyMsdu("high-metric-reverse",meshMib(0)->address),meshInterface(1)->getSubmodule("llc")->gate("lowerLayerOut"));
+        if (step == 4) {
+            ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 7.0/64 && metric(1)->getErrorEstimate(meshMib(0)->address) == 0);
+            emit(registerSignal("highMetricComplete"),1L);
+        }
+        if (step == 5) ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 1.0/8);
+    }
+  public:
+    using cListener::finish;
+};
+Define_Module(MeshHighPhyMetricDriver);
+
 namespace inet::protocoltest {
 Define_ProtocolTest(mesh_airtime_metric) {
     auto test = ProtocolTest("mesh_airtime_metric");
@@ -375,25 +432,44 @@ Define_ProtocolTest(mesh_airtime_metric) {
     test.once(on("driver").signal("meshMetricComplete").assertValue(1).within(0.04));
     return test;
 }
+Define_ProtocolTest(mesh_high_phy_airtime_metric) {
+    return ProtocolTest("mesh_high_phy_airtime_metric")
+        .once(on("driver").signal("highMetricStart").assertValue(1).within(0.06))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.015).drop())
+        .once(on("driver").signal("highMetricComplete").assertValue(1).within(0.06));
+}
 }
 
 %file: test.ned
 import inet.protocoltest.wifi.MeshPairNetwork;
 import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
 import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
 module MetricHcf extends Hcf { parameters: @class(::MetricHcf); }
 simple MetricManagement extends Ieee80211MgmtMesh { parameters: @class(::MetricManagement); @lifecycleSupport; }
 simple MeshMetricDriver { parameters: @class(::MeshMetricDriver); @signal[metricStart](type=long); @signal[metricEwmaComplete](type=long); @signal[metricExhaustStart](type=long); @signal[metricCorruptStart](type=long); @signal[metricInterruptStart](type=long); @signal[metricCorruptTimeoutStart](type=long); @signal[meshMetricComplete](type=long); }
 network Test extends MeshPairNetwork { submodules: driver: MeshMetricDriver; }
+simple MeshHighPhyMetricDriver { parameters: @class(::MeshHighPhyMetricDriver); @signal[highMetricStart](type=long); @signal[highMetricComplete](type=long); }
+module HighMetricMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+network HtTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver; }
+network VhtTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver; }
 
 %inifile: test.ini
 [General]
-network = Test
+network = ${metricNetwork=Test,HtTest,VhtTest}
 cmdenv-express-mode = true
 **.cmdenv-log-level = warn
-*.numStations = 6
+*.numStations = "${metricNetwork}" == "Test" ? 6 : 2
 *.station[*].mobility.initialX = 20m
-*.station[*].wlan[0].pathSelection.typename = "MeshFixturePaths"
+*.station[*].wlan[0].phyProfile = "${metricNetwork}" == "Test" ? "ofdm" : ("${metricNetwork}" == "HtTest" ? "ht" : "vht")
+*.station[*].wlan[0].radio.typename = "${metricNetwork}" == "Test" ? "Ieee80211ScalarRadio" : "Ieee80211DimensionalRadio"
+*.station[*].wlan[0].radio.bandName = "${metricNetwork}" == "Test" ? "5 GHz (20 MHz)" : "5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].pathSelection.typename = "${metricNetwork}" == "Test" ? "MeshFixturePaths" : "Hwmp"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "${metricNetwork}" == "Test" ? "auto" : ("${metricNetwork}" == "HtTest" ? "ht" : "vht")
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs = "${metricNetwork}" == "Test" ? -1 : 7
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = "${metricNetwork}" == "Test" ? -1 : 1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = "${metricNetwork}" == "Test" ? nan Hz : 20MHz
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = "${metricNetwork}" == "Test" ? "auto" : "long"
 *.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
 *.station[*].wlan[0].mgmt.typename = "MetricManagement"
 *.station[*].wlan[0].mgmt.autoPeer = false
@@ -412,11 +488,21 @@ cmdenv-express-mode = true
 *.station[4].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = 18Mbps
 *.station[2..3].wlan[0].radio.channelNumber = 3
 *.station[4..5].wlan[0].radio.channelNumber = 6
-*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
-*.tester.testName = "mesh_airtime_metric"
+*.radioMedium.typename = "${metricNetwork}" == "Test" ? "Ieee80211ScalarTapRadioMedium" : "HighMetricMedium"
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+*.radioMedium.backgroundNoise.power = "${metricNetwork}" == "Test" ? -110dBm : nan W
+*.tester.testName = "${metricNetwork}" == "Test" ? "mesh_airtime_metric" : "mesh_high_phy_airtime_metric"
 include ../../ini/_mesh.ini
 
+%extraargs: -r 0..2
 %contains: stdout
 PROTOCOLTEST mesh_airtime_metric: PASS
+
+%contains-regex: stdout
+PROTOCOLTEST mesh_high_phy_airtime_metric: PASS.*PROTOCOLTEST mesh_high_phy_airtime_metric: PASS
+
 %not-contains: stdout
 PROTOCOLTEST mesh_airtime_metric: FAIL
+
+%not-contains: stdout
+PROTOCOLTEST mesh_high_phy_airtime_metric: FAIL

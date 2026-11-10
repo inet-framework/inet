@@ -14,6 +14,7 @@ simple Ieee80211MgmtMesh extends SimpleModule like IIeee80211Mgmt
         string mibModule;
         string macModule;
         string linkMetricModule = default("^.linkMetric");
+        string linkTimingModule = default("^.mac.hcf");
         string pathSelectionModule = default("^.pathSelection");
         string meshId = default("inet-mesh");
         int pathSelectionMetricId = default(1); // mesh-wide fixed ID, 1 or 2

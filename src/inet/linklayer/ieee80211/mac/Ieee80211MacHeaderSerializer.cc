@@ -146,9 +146,10 @@ void Ieee80211MpduSubframeHeaderSerializer::serializeFields(MemoryOutputStream& 
     auto mpduSubframe = dynamicPtrCast<const Ieee80211MpduSubframeHeader>(chunk);
     // IEEE Std 802.11-2024, 9.7.1, Figures 9-1329/9-1330: HT length occupies B4-B15.
     int length = mpduSubframe->getLength();
-    if (length < 0 || length > 0xFFF)
-        throw cRuntimeError("HT MPDU delimiter length is outside the 12-bit range: %d", length);
-    uint16_t delimiter = length << 4;
+    if (length < 0 || length > (mpduSubframe->getVht() ? 0x3FFF : 0xFFF) || (!mpduSubframe->getVht() && mpduSubframe->getEof()))
+        throw cRuntimeError("MPDU delimiter length/EOF is outside the selected format: %d", length);
+    // 2024 Table9-659: the high length bits are B2--B3, not contiguous with B4--B15.
+    uint16_t delimiter = ((length & 0xFFF) << 4) | ((length >> 12) << 2) | mpduSubframe->getEof();
     stream.writeUint16Le(delimiter);
     stream.writeByte(computeMpduDelimiterCrc(delimiter));
     stream.writeByte(0x4E);
@@ -158,10 +159,12 @@ const Ptr<Chunk> Ieee80211MpduSubframeHeaderSerializer::deserializeFields(Memory
 {
     auto mpduSubframe = makeShared<Ieee80211MpduSubframeHeader>();
     auto delimiter = stream.readUint16Le();
-    mpduSubframe->setLength(delimiter >> 4);
+    mpduSubframe->setLength((delimiter >> 4) | ((delimiter & 0xC) << 10));
+    mpduSubframe->setEof(delimiter & 1);
+    mpduSubframe->setVht(delimiter & 0xD);
     auto crc = stream.readByte();
     auto signature = stream.readByte();
-    if (crc != computeMpduDelimiterCrc(delimiter) || signature != 0x4E)
+    if (crc != computeMpduDelimiterCrc(delimiter) || signature != 0x4E || (delimiter & 2))
         mpduSubframe->markIncorrect();
     return mpduSubframe;
 }

@@ -100,10 +100,11 @@ bool AirtimeLinkMetric::supportsPeerRates(MacAddress peer, const Ieee80211RateSe
 {
     Enter_Method("supportsPeerRates");
     auto nominal = timing->getMeshLinkTiming(peer);
-    // The C5 fixed OFDM selector returns the same catalog tuple independently
-    // of optional peer rates. Reject a candidate that cannot use it; never adapt.
+    // HT/VHT payload MCS support lives in the committed directional capability
+    // record. The rates-only query still checks its legacy ACK dependency.
+    bool high = nominal.dataMode->getHtMcsIndex() >= 0 || nominal.dataMode->getVhtMcsIndex() >= 0;
     return rates.supported.known && rates.operational.known
-        && rates.supported.legacyRates.count(nominal.rate) && rates.operational.legacyRates.count(nominal.rate)
+        && (high || (rates.supported.legacyRates.count(nominal.rate) && rates.operational.legacyRates.count(nominal.rate)))
         && rates.supported.legacyRates.count(nominal.ackMode->getDataMode()->getNetBitrate());
 }
 

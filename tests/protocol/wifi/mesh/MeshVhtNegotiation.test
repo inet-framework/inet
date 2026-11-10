@@ -1,0 +1,81 @@
+%description:
+Live VHT mesh peering and bidirectional DATA through HWMP and actual dimensional
+radios. VHT20/40/80/160, both primary halves, long/short GI, one/two streams and both metric IDs. The reverse
+direction retains one stream. Assert receiver-derived vectors, actual analog
+centers, same-width duplicate ACKs, member bytes/FCS and admitted peer facts.
+
+%file: MeshVhtNegotiation.cc
+#include "mesh/MeshPhySupport.h"
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_vht_negotiation) {
+    return ProtocolTest("mesh_vht_negotiation").once(on("driver").signal("meshPhyComplete").assertValue(1).within(0.13));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple MeshPhyDriver {
+    parameters:
+        @class(::MeshPhyDriver);
+        int dataWidth;
+        int primary = default(0);
+        int streams;
+        bool shortGi;
+        bool reverseShortGi = default(shortGi);
+        int extraBytes = default(0);
+        bool vht = default(false);
+        @signal[meshPhyComplete](type=long);
+}
+network Test extends MeshPairNetwork { submodules: driver: MeshPhyDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+sim-time-limit = 130ms
+*.numStations = 2
+*.station[*].numPcapRecorders = 1
+*.station[*].pcapRecorder[*].helpers = "inet::physicallayer::Ieee80211RadiotapPcapRecorderHelper"
+*.station[*].pcapRecorder[*].fileFormat = "pcap"
+*.station[0].pcapRecorder[0].pcapFile = "results/h1-${runnumber}-0.pcap"
+*.station[1].pcapRecorder[0].pcapFile = "results/h1-${runnumber}-1.pcap"
+*.radioMedium.typename = "Ieee80211DimensionalRadioMedium"
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+*.driver.dataWidth = ${width=20,40,80,160}
+*.driver.vht = true
+*.driver.primary = ${primary=0,5}
+*.driver.streams = ${streams=1,2}
+*.driver.shortGi = ${shortGi=false,true}
+*.driver.extraBytes = 2*(${streams}-1)+(${shortGi} ? 1 : 0)
+*.station[*].wlan[0].pathSelectionMetricId = ${metric=1,2}
+*.station[*].wlan[0].phyProfile = "vht"
+*.station[*].wlan[0].radio.typename = "Ieee80211DimensionalRadio"
+*.station[*].wlan[0].radio.bandName = "5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].radio.bandwidth = ${width}*1MHz
+*.station[*].wlan[0].radio.channelNumber = ${primary}
+*.station[*].wlan[0].radio.antenna.numAntennas = 2
+*.station[0].wlan[0].mib.meshTxSpatialStreams = ${streams}
+*.station[0].wlan[0].mib.meshRxSpatialStreams = 1
+*.station[1].wlan[0].mib.meshTxSpatialStreams = 1
+*.station[1].wlan[0].mib.meshRxSpatialStreams = ${streams}
+*.station[*].wlan[0].mib.meshVht160MhzCapable = ${width} == 160
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "vht"
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameMcs = 7
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameMcs = 7
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = ${streams}
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = ${width}*1MHz
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = ${shortGi} ? "short" : "long"
+*.tester.testName = "mesh_vht_negotiation"
+include ../../ini/_mesh.ini
+
+%extraargs: -r 0..63
+%contains: stdout
+PROTOCOLTEST mesh_vht_negotiation: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_vht_negotiation: FAIL

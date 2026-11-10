@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mgmt/IMeshManagement.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkMetric.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkTiming.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPathSelection.h"
 
 namespace inet {
@@ -34,6 +35,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
         int retries = 0;
         cMessage *timer = nullptr;
         Ieee80211RateSetState rates;
+        Ieee80211PeerPhyCapabilities phy;
     };
     struct Neighbor {
         bool offsetValid = false;
@@ -41,6 +43,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     };
     std::map<MacAddress, Peer> peers;
     ModuleRefByPar<IMeshLinkMetric> linkMetric;
+    ModuleRefByPar<IMeshLinkTiming> linkTiming;
     ModuleRefByPar<IMeshPathSelection> pathSelection;
     std::map<MacAddress, Neighbor> neighbors;
     cMessage *beaconTimer = nullptr;
@@ -81,6 +84,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     void updateNeighborTiming(Packet *packet, const Ptr<const Ieee80211BeaconFrame>& body, MacAddress peer);
     bool matchesProfile(const Ieee80211MeshFrame& body) const;
     bool compatibleRates(const Ieee80211RateSetState& rates) const;
+    bool decodePeerPhy(const Ieee80211MeshFrame& body, Ieee80211PeerPhyCapabilities& phy) const;
     Ieee80211RateSetState readPeeringRates(const Ieee80211MeshPeeringOpenFrame& body) const;
     Peer& requirePeer(MacAddress address);
     void createInstance(Peer& peer);

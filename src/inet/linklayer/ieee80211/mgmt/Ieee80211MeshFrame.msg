@@ -3,6 +3,7 @@
 //
 
 import inet.linklayer.ieee80211.mac.Ieee80211Frame;
+import inet.linklayer.ieee80211.mgmt.Ieee80211HtCapabilitiesElement;
 
 namespace inet::ieee80211;
 
@@ -79,6 +80,14 @@ struct MeshTim
 // Defaults add no bytes to existing non-mesh frames.
 class Ieee80211MeshFrame extends FieldsChunk
 {
+    bool htCapabilitiesPresent = false;
+    Ieee80211HtCapabilitiesElement htCapabilities;
+    bool htOperationPresent = false;
+    Ieee80211HtOperationElement htOperation;
+    bool vhtCapabilitiesPresent = false;
+    Ieee80211VhtCapabilitiesElement vhtCapabilities;
+    bool vhtOperationPresent = false;
+    Ieee80211VhtOperationElement vhtOperation;
     bool meshIdPresent = false;
     uint8_t meshId[];
     bool meshConfigurationPresent = false;

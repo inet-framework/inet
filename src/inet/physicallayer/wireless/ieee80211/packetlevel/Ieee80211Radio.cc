@@ -6,6 +6,9 @@
 
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
+#include "inet/physicallayer/wireless/common/analogmodel/dimensional/DimensionalMediumAnalogModel.h"
+#include "inet/physicallayer/wireless/common/radio/packetlevel/BandListening.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211RadioChannelChangedDetails.h"
 
 #include "inet/common/packet/chunk/BitCountChunk.h"
@@ -34,6 +37,7 @@ namespace physicallayer {
 Define_Module(Ieee80211Radio);
 
 simsignal_t Ieee80211Radio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
+simsignal_t Ieee80211Radio::primaryCcaChangedSignal = cComponent::registerSignal("primaryCcaChanged");
 
 Ieee80211Radio::Ieee80211Radio() :
     FlatRadioBase()
@@ -59,6 +63,17 @@ void Ieee80211Radio::initialize(int stage)
                 Ieee80211RadioChannelChangedDetails details(channel->getBand());
                 emit(radioChannelChangedSignal, channel->getChannelNumber(), &details);
             }
+        }
+        if (par("contiguousChannelAllocation")) {
+            if (!medium->supportsInterferenceObservation() || !dynamic_cast<const DimensionalMediumAnalogModel *>(medium->getAnalogModel()))
+                throw cRuntimeError("Contiguous IEEE80211 operation requires dimensional interference observation without listening/address/communication-range filtering");
+            auto tx = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
+            auto current = tx->getChannel();
+            auto allocation = new Ieee80211Channel(current->getBand(), current->getChannelNumber(), Hz(par("bandwidth")));
+            setChannel(allocation);
+            contiguousAllocation = true;
+            WATCH(primaryBusy);
+            WATCH(secondaryIdleSince);
         }
     }
 }
@@ -91,8 +106,32 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
     FlatRadioBase::handleUpperCommand(message);
 }
 
+void Ieee80211Radio::setRadioMode(RadioMode newRadioMode)
+{
+    if (!contiguousAllocation) {
+        FlatRadioBase::setRadioMode(newRadioMode);
+        return;
+    }
+    Enter_Method("setRadioMode");
+    // Keep base validation, mode notifications and switch-timer ordering. Its
+    // positive-delay start does not call updateTransceiverState(), so retire
+    // the observation history here rather than carrying quiet time through
+    // an unobserved receptive-to-receptive switching interval. Queries already
+    // derive immediate unavailability from the authoritative SWITCHING mode.
+    FlatRadioBase::setRadioMode(newRadioMode);
+    if (radioMode == RADIO_MODE_SWITCHING) {
+        secondaryIdleSince.fill(-1);
+        if (!primaryBusy) {
+            primaryBusy = true;
+            emit(primaryCcaChangedSignal,true);
+        }
+    }
+}
+
 void Ieee80211Radio::setModeSet(const Ieee80211ModeSet *modeSet)
 {
+    if (contiguousAllocation && modeSet != check_and_cast<const Ieee80211Transmitter *>(transmitter)->getModeSet())
+        throw cRuntimeError("Changing the catalog of a fixed contiguous allocation is unsupported");
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setModeSet(modeSet);
@@ -113,6 +152,8 @@ void Ieee80211Radio::setMode(const IIeee80211Mode *mode)
 
 void Ieee80211Radio::setBand(const IIeee80211Band *band)
 {
+    if (contiguousAllocation && band != getOperatingChannel()->getBand())
+        throw cRuntimeError("Reconfiguration of an active contiguous allocation is unsupported");
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setBand(band);
@@ -129,12 +170,24 @@ void Ieee80211Radio::setBand(const IIeee80211Band *band)
 
 void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
 {
+    if (contiguousAllocation) {
+        auto current = getOperatingChannel();
+        bool same = channel && channel->getBand() == current->getBand() && channel->getChannelNumber() == current->getChannelNumber()
+            && channel->hasAllocation() && channel->getAllocationWidth() == current->getAllocationWidth();
+        // setChannel transfers ownership to the radio. Preserve the canonical
+        // allocation referenced by retained indications, including during sleep/off.
+        if (channel != current)
+            delete channel;
+        if (!same)
+            throw cRuntimeError("Reconfiguration of a fixed contiguous allocation is unsupported");
+        return;
+    }
     ASSERT(channel != nullptr);
     ASSERT(channel->getBand() != nullptr);
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setChannel(channel);
-    ieee80211Receiver->setChannel(new Ieee80211Channel(channel->getBand(), channel->getChannelNumber()));
+    ieee80211Receiver->setChannel(new Ieee80211Channel(*channel));
     EV << "Changing radio channel to " << channel->getChannelNumber() << endl;
     abandonAttemptedReceptions();
     Ieee80211RadioChannelChangedDetails details(channel->getBand());
@@ -144,6 +197,8 @@ void Ieee80211Radio::setChannel(const Ieee80211Channel *channel)
 
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 {
+    if (contiguousAllocation && newChannelNumber != getOperatingChannel()->getChannelNumber())
+        throw cRuntimeError("Reconfiguration of an active contiguous allocation is unsupported");
     Ieee80211Transmitter *ieee80211Transmitter = const_cast<Ieee80211Transmitter *>(check_and_cast<const Ieee80211Transmitter *>(transmitter));
     Ieee80211Receiver *ieee80211Receiver = const_cast<Ieee80211Receiver *>(check_and_cast<const Ieee80211Receiver *>(receiver));
     ieee80211Transmitter->setChannelNumber(newChannelNumber);
@@ -153,6 +208,79 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     Ieee80211RadioChannelChangedDetails details(ieee80211Transmitter->getChannel()->getBand());
     emit(radioChannelChangedSignal, newChannelNumber, &details);
     emit(listeningChangedSignal, 0);
+}
+
+const Ieee80211Channel *Ieee80211Radio::getOperatingChannel() const
+{
+    return check_and_cast<const Ieee80211Transmitter *>(transmitter)->getChannel();
+}
+
+void Ieee80211Radio::setBandwidth(Hz width)
+{
+    if (!contiguousAllocation)
+        FlatRadioBase::setBandwidth(width);
+    else if (width != getOperatingChannel()->getAllocationWidth())
+        throw cRuntimeError("Reconfiguration of a fixed contiguous allocation is unsupported");
+}
+
+void Ieee80211Radio::setCenterFrequency(Hz center)
+{
+    if (!contiguousAllocation)
+        FlatRadioBase::setCenterFrequency(center);
+    else if (center != getOperatingChannel()->getCenterFrequency())
+        throw cRuntimeError("Reconfiguration of a fixed contiguous allocation is unsupported");
+}
+
+bool Ieee80211Radio::isBandBusy(Hz center, Hz width) const
+{
+    auto position = antenna->getMobility()->getCurrentPosition();
+    BandListening listening(this, simTime(), simTime() + SimTime::fromRaw(1), position, position, center, width);
+    auto decision = medium->listenOnMedium(this, &listening);
+    bool busy = decision->isListeningPossible();
+    delete decision;
+    return busy;
+}
+
+void Ieee80211Radio::updateTransceiverState()
+{
+    bool previous = primaryBusy;
+    if (contiguousAllocation) {
+        auto channel = getOperatingChannel();
+        bool observing = radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER;
+        primaryBusy = !observing || isBandBusy(channel->getCenterFrequency(MHz(20)), MHz(20));
+        for (int index = 0; index < 3; index++) {
+            Hz width = MHz(40 * (1 << index));
+            if (!observing || width > channel->getAllocationWidth())
+                secondaryIdleSince[index] = -1;
+            else {
+                Hz center = 2.0 * channel->getCenterFrequency(width) - channel->getCenterFrequency(width / 2);
+                if (isBandBusy(center, width / 2))
+                    secondaryIdleSince[index] = -1;
+                else if (secondaryIdleSince[index] < SIMTIME_ZERO)
+                    secondaryIdleSince[index] = simTime();
+            }
+        }
+    }
+    FlatRadioBase::updateTransceiverState();
+    if (contiguousAllocation && primaryBusy != previous)
+        emit(primaryCcaChangedSignal, primaryBusy);
+}
+
+bool Ieee80211Radio::areSecondaryChannelsIdle(Hz width) const
+{
+    if (!contiguousAllocation)
+        return width == MHz(20);
+    if (radioMode != RADIO_MODE_RECEIVER && radioMode != RADIO_MODE_TRANSCEIVER)
+        return false;
+    if (width > getOperatingChannel()->getAllocationWidth())
+        return false;
+    auto modeSet = check_and_cast<const Ieee80211Transmitter *>(transmitter)->getModeSet();
+    // 2024 10.23.2.5/Table10-17: the selected5GHz fixed-width profile requires PIFS.
+    auto required = modeSet->getSifsTime() + modeSet->getSlotTime();
+    for (int index = 0; MHz(40 * (1 << index)) <= width && index < 3; index++)
+        if (secondaryIdleSince[index] < SIMTIME_ZERO || simTime() - secondaryIdleSince[index] < required)
+            return false;
+    return true;
 }
 
 void Ieee80211Radio::insertFcs(const Ptr<Ieee80211PhyHeader>& phyHeader) const
@@ -257,12 +385,19 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
     // compute all values before a new empty tag can hide the default of the transmitter
     auto transmissionChannel = ieee80211Transmitter->computeTransmissionChannel(packet);
     auto transmissionPower = ieee80211Transmitter->computeTransmissionPower(packet);
-    packet->addTagIfAbsent<Ieee80211ModeReq>()->setMode(mode);
+    auto vector = ieee80211Transmitter->computeTransmissionVector(packet);
+    packet->addTagIfAbsent<Ieee80211ModeReq>()->setTxVector(vector);
     packet->addTagIfAbsent<Ieee80211ChannelReq>()->setChannel(transmissionChannel);
     packet->addTagIfAbsent<SignalPowerReq>()->setPower(transmissionPower);
+    // The MAC and Tx completion retain a bare, final-FCS member. Form its
+    // single-member envelope only on this outgoing radio-owned copy, before
+    // computing the PHY Length field, tail, padding and actual transmission.
+    if (vector.singleMpdu)
+        ieee80211::wrapSingleMpdu(packet);
     // ERP reuses OFDM's SIGNAL mode objects, whose factory creates a base
     // OFDM header. Preserve the selected PHY family when constructing the PPDU.
-    auto phyHeader = dynamic_cast<const Ieee80211ErpOfdmMode *>(mode) != nullptr ?
+    auto phyHeader = contiguousAllocation && mode->getVhtMcsIndex() >= 0 ?
+            staticPtrCast<Ieee80211PhyHeader>(makeShared<Ieee80211VhtPhyHeader>()) : dynamic_cast<const Ieee80211ErpOfdmMode *>(mode) != nullptr ?
             staticPtrCast<Ieee80211PhyHeader>(makeShared<Ieee80211ErpOfdmPhyHeader>()) : mode->getHeaderMode()->createHeader();
     phyHeader->setChunkLength(b(mode->getHeaderMode()->getLength()));
     phyHeader->setLengthField(B(packet->getDataLength()));
@@ -299,12 +434,22 @@ void Ieee80211Radio::encapsulate(Packet *packet) const
         protocol = &Protocol::ieee80211VhtPhy;
     else
         throw cRuntimeError("Invalid IEEE 802.11 PHY header type.");
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(protocol);
+    packet->addTagIfAbsent<PacketProtocolTag>()->set(protocol);
 }
 
 void Ieee80211Radio::decapsulate(Packet *packet) const
 {
     auto mode = packet->getTag<Ieee80211ModeInd>()->getMode();
+    auto vector = packet->getTag<Ieee80211ModeInd>()->getTxVector();
+    ieee80211::Ieee80211SingleMpduLayout layout;
+    if (vector.singleMpdu) {
+        auto header = peekIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+        if (!header->isCorrect() || !header->isComplete()
+                || !ieee80211::findSingleMpdu(packet, header->getChunkLength(), header->getLengthField(), layout)) {
+            packet->setBitError(true);
+            return; // Radio::endReception still owns/sends this matching PHY-wrapped packet.
+        }
+    }
     const auto& phyHeader = popIeee80211PhyHeaderAtFront(packet, b(-1), Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
     if (phyHeader->isIncorrect() || phyHeader->isIncomplete() || phyHeader->isImproperlyRepresented() || !verifyFcs(phyHeader))
         packet->setBitError(true);
@@ -330,7 +475,12 @@ void Ieee80211Radio::decapsulate(Packet *packet) const
     auto paddingLength = mode->getDataMode()->getPaddingLength(B(phyHeader->getLengthField()));
     if (tailLength + paddingLength != b(0))
         packet->popAtBack(tailLength + paddingLength, Chunk::PF_ALLOW_INCORRECT);
-    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+    if (vector.singleMpdu) {
+        packet->popAtFront(layout.memberOffset);
+        if (layout.suffixLength != B(0))
+            packet->popAtBack(layout.suffixLength);
+    }
+    packet->addTagIfAbsent<PacketProtocolTag>()->set(&Protocol::ieee80211Mac);
 }
 
 const Ptr<const Ieee80211PhyHeader> Ieee80211Radio::popIeee80211PhyHeaderAtFront(Packet *packet, b length, int flags)

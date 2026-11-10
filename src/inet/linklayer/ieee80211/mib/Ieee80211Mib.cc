@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 #include <algorithm>
+#include <sstream>
 
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Band.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
@@ -47,12 +48,24 @@ bool Ieee80211Mib::isMeshPeerEstablished(MacAddress peer) const
 
 void Ieee80211Mib::establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates)
 {
+    establishMeshPeer(peer, rates, {});
+}
+
+void Ieee80211Mib::establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates, const Ieee80211PeerPhyCapabilities& phy)
+{
     Enter_Method("establishMeshPeer");
     validateIeee80211RateSetState(rates, "mesh peer rates");
     auto previous = peerRateSets.find(peer);
-    if (previous != peerRateSets.end() && previous->second == rates)
+    auto previousPhy = meshPeerPhy.find(peer);
+    if (previous != peerRateSets.end() && previous->second == rates
+            && previousPhy != meshPeerPhy.end() && previousPhy->second == phy)
         return;
     peerRateSets[peer] = rates;
+    meshPeerPhy[peer] = phy;
+    if (phy.htPresent)
+        updatePeerHtCapabilities(peer, phy.ht, phy.htOperation);
+    else
+        peerHtStates.erase(peer);
     MeshPeerChange details(peer);
     emit(rateStateChangedSignal, true);
     emit(meshPeerChangedSignal, true, &details);
@@ -61,7 +74,140 @@ void Ieee80211Mib::establishMeshPeer(MacAddress peer, const Ieee80211RateSetStat
 bool Ieee80211Mib::withdrawMeshPeer(MacAddress peer)
 {
     Enter_Method("withdrawMeshPeer");
+    meshPeerPhy.erase(peer);
+    peerHtStates.erase(peer);
     return peerRateSets.erase(peer) != 0;
+}
+
+const Ieee80211PeerPhyCapabilities *Ieee80211Mib::findMeshPeerPhyCapabilities(MacAddress peer) const
+{
+    auto it = meshPeerPhy.find(peer);
+    return it == meshPeerPhy.end() ? nullptr : &it->second;
+}
+
+void Ieee80211Mib::configureMeshPhyCapabilities(const std::string& profile, const physicallayer::Ieee80211ModeSet *modes,
+        const physicallayer::Ieee80211Channel *channel, int spatialStreams)
+{
+    Enter_Method("configureMeshPhyCapabilities");
+    meshShortGuardIntervalTransmissionEnabled = par("meshShortGuardIntervalTransmissionEnabled");
+    if (profile != "ofdm" && profile != "ht" && profile != "vht")
+        throw cRuntimeError("mesh phyProfile must be ofdm, ht or vht");
+    meshPhyProfile = profile;
+    localMeshPhy = {};
+    if (profile == "ofdm")
+        return;
+    if (!channel || !channel->hasAllocation() || !modes || !modes->isHtOperationSupported())
+        throw cRuntimeError("HT/VHT mesh requires a configured contiguous5GHz allocation and capable catalog");
+    int rx = par("meshRxSpatialStreams"), tx = par("meshTxSpatialStreams");
+    rx = rx == -1 ? spatialStreams : rx;
+    tx = tx == -1 ? spatialStreams : tx;
+    if (rx < 1 || tx < 1 || rx > spatialStreams || tx > spatialStreams)
+        throw cRuntimeError("Mesh stream ceilings exceed the antenna/catalog capability");
+    int rxMcs = par("meshHtRxMaxMcs"), txMcs = par("meshHtTxMaxMcs");
+    if (rxMcs < 0 || rxMcs > 7 || txMcs < 0 || txMcs > 7)
+        throw cRuntimeError("HT per-stream MCS ceilings must be0..7");
+    auto& ht = localMeshPhy.ht;
+    ht = localHtCapabilities;
+    // Device capability and the current operating allocation are separate.
+    // In particular, a VHT device operating at20MHz still supports HT40 and
+    // the mandatory long-GI VHT20/40/80 tuples (2024,21.1.1).
+    ht.supportedChannelWidths = modes->getHtSupportedChannelWidths();
+    for (int mcs = 0; mcs < 77; mcs++)
+        ht.rxMcsSupported[mcs] = ht.rxMcsSupported[mcs] && mcs < rx * 8 && mcs % 8 <= rxMcs;
+    ht.txMcsNss.maxMcsPerNss.fill(-1);
+    for (int nss = 0; nss < std::min(tx, 4); nss++)
+        ht.txMcsNss.maxMcsPerNss[nss] = txMcs;
+    ht.txMcsSetDefined = true;
+    ht.txRxMcsSetNotEqual = rx != tx || rxMcs != txMcs;
+    ht.txMaxNss = ht.txRxMcsSetNotEqual ? std::min(tx, 4) : 0;
+    ht.shortGi20 = modes->isHtShortGuardIntervalSupported(MHz(20)) && par("meshShortGuardInterval").boolValue();
+    ht.shortGi40 = modes->isHtShortGuardIntervalSupported(MHz(40)) && par("meshShortGuardInterval").boolValue();
+    ht.maxAmsduLength = par("meshMaxAmsduLength");
+    ht.minimumMpduStartSpacing = par("meshMinimumMpduStartSpacing");
+    if ((ht.maxAmsduLength != 3839 && ht.maxAmsduLength != 7935) || ht.minimumMpduStartSpacing < 0 || ht.minimumMpduStartSpacing > 7)
+        throw cRuntimeError("Invalid mesh HT aggregation capability limits");
+    auto& operation = localMeshPhy.htOperation;
+    operation = htOperation;
+    // HT operation stores a band index; the existing IE adapter maps it to
+    // the IEEE channel number exactly once at the wire boundary.
+    operation.primaryChannel = channel->getChannelNumber();
+    operation.operatingChannelWidth = channel->getAllocationWidth() >= MHz(40) ? MHz(40) : MHz(20);
+    operation.secondaryChannelOffset = operation.operatingChannelWidth == MHz(20) ? 0 :
+        channel->getCenterChannel(MHz(40)) > channel->getPrimaryChannel() ? 1 : 3;
+    operation.rifsMode = false;
+    if (operation.protectionMode != Ieee80211HtProtectionMode::NO_PROTECTION)
+        throw cRuntimeError("Protected HT/VHT mesh operation is outside the selected profile");
+    for (int mcs = 0; mcs < 77; mcs++)
+        if (operation.basicMcsSupported[mcs] && (!ht.rxMcsSupported[mcs] || ht.txMcsNss.maxMcsPerNss[mcs / 8] < mcs % 8))
+            throw cRuntimeError("Local mesh PHY cannot support its HT basic MCS set");
+    localMeshPhy.htPresent = true;
+    localHtCapabilities = ht;
+    htOperation = operation;
+    if (profile == "vht") {
+        auto& v = localMeshPhy.vht;
+        v.width160 = par("meshVht160MhzCapable");
+        if (channel->getAllocationWidth() == MHz(160) && !v.width160)
+            throw cRuntimeError("Operating160MHz requires the optional VHT160MHz device capability");
+        Hz deviceWidth = v.width160 ? Hz(MHz(160)) : Hz(MHz(80));
+        for (auto width : {MHz(20),MHz(40),MHz(80),MHz(160)}) {
+            if (width > deviceWidth) continue;
+            for (int mcs=0;mcs<8;mcs++) {
+                bool found = false;
+                for (int i=0;i<modes->getNumModes();i++) {
+                    auto mode = modes->getMode(i);
+                    found |= mode->getVhtMcsIndex() == mcs && mode->getDataMode()->getNumberOfSpatialStreams() == 1
+                        && mode->getDataMode()->getBandwidth() == width && !mode->isVhtShortGuardInterval();
+                }
+                if (!found) throw cRuntimeError("VHT device capability lacks mandatory long-GI NSS1/MCS0..7 at%gMHz",width.get());
+            }
+        }
+        auto readMap = [&](const char *name, std::array<int, 8>& map, int streams) {
+            auto configured = check_and_cast<cValueArray *>(par(name).objectValue());
+            if (configured->size() != 0 && configured->size() != 8)
+                throw cRuntimeError("%s must be empty or contain8 MCS ceilings", name);
+            for (int i = 0; i < modes->getNumModes(); i++) {
+                auto mode = modes->getMode(i);
+                int mcs = mode->getVhtMcsIndex(), nss = mode->getDataMode()->getNumberOfSpatialStreams();
+                if (mcs >= 0 && nss <= streams && mode->getDataMode()->getBandwidth() <= deviceWidth)
+                    map[nss - 1] = std::max(map[nss - 1], mcs);
+            }
+            if (configured->size())
+                for (int nss = 0; nss < 8; nss++) {
+                    int ceiling = configured->get(nss).intValue();
+                    if (ceiling != -1 && ceiling != 7 && ceiling != 8 && ceiling != 9)
+                        throw cRuntimeError("VHT map ceilings must be-1,7,8,9");
+                    if (ceiling > map[nss])
+                        throw cRuntimeError("VHT configured ceiling exceeds actual catalog/antenna/width support");
+                    map[nss] = ceiling;
+                }
+        };
+        readMap("meshVhtRxMcsMap", v.rxMcs, rx);
+        readMap("meshVhtTxMcsMap", v.txMcs, tx);
+        if (v.rxMcs[0] < 7 || v.txMcs[0] < 7)
+            throw cRuntimeError("VHT device MCS maps must support the mandatory first spatial stream");
+        for (int i = 0; i < modes->getNumModes(); i++) {
+            auto mode = modes->getMode(i);
+            if (mode->getVhtMcsIndex() >= 0 && mode->isVhtShortGuardInterval() && par("meshShortGuardInterval").boolValue()) {
+                v.shortGi80 |= mode->getDataMode()->getBandwidth() == MHz(80);
+                v.shortGi160 |= v.width160 && mode->getDataMode()->getBandwidth() == MHz(160);
+            }
+        }
+        v.maxMpduLength = par("meshVhtMaxMpduLength");
+        v.maxAmpduLengthExponent = par("meshVhtMaxAmpduLengthExponent");
+        if ((v.maxMpduLength != 3895 && v.maxMpduLength != 7991 && v.maxMpduLength != 11454)
+                || v.maxAmpduLengthExponent < 0 || v.maxAmpduLengthExponent > 7)
+            throw cRuntimeError("Invalid VHT receive size limits");
+        auto& op = localMeshPhy.vhtOperation;
+        op.width = channel->getAllocationWidth();
+        op.center0 = channel->getCenterChannel(op.width == MHz(160) ? Hz(MHz(80)) : op.width);
+        op.center1 = op.width == MHz(160) ? channel->getCenterChannel(MHz(160)) : 0;
+        int basic = par("meshVhtBasicMcsMap");
+        if (basic < 0 || basic > 65535 || !supportsBasicVhtMcs(v, basic))
+            throw cRuntimeError("Local mesh PHY cannot support its VHT basic MCS/NSS set");
+        op.basicMcsMap = basic;
+        localMeshPhy.vhtPresent = true;
+    }
+    emit(rateStateChangedSignal, true);
 }
 
 void Ieee80211Mib::publishMeshPeerRemoval(MacAddress peer)
@@ -90,6 +236,9 @@ void Ieee80211Mib::initialize(int stage)
         WATCH(bssAccessPointData.associationIds);
         WATCH(associationIdReservations);
         WATCH(meshId);
+        WATCH(meshPhyProfile);
+        WATCH(meshShortGuardIntervalTransmissionEnabled);
+        WATCH_EXPR("meshPhyCapabilities", describeMeshPhy());
         WATCH_EXPR("meshPeerCount", mode == MESH ? peerRateSets.size() : 0);
         WATCH_EXPR("meshMetricId", int(meshConfiguration.pathSelectionMetricId));
         WATCH_EXPR("modeStr", getModeStr(mode));
@@ -100,6 +249,34 @@ void Ieee80211Mib::initialize(int stage)
         WATCH_EXPR("associatedStr", bssStationData.stationType == STATION ? (bssStationData.isAssociated ? "\nAssociated" : "\nNot associated") : "");
         WATCH_EXPR("primaryChannel", primaryChannelAvailable ? std::to_string(htOperation.primaryChannel) : "unavailable");
     }
+}
+
+std::string Ieee80211Mib::describeMeshPhy() const
+{
+    std::ostringstream stream;
+    auto describe = [&](const Ieee80211PeerPhyCapabilities& phy) {
+        stream << " HT=" << phy.htPresent << " VHT=" << phy.vhtPresent;
+        if (phy.htPresent) {
+            stream << " HT-RxMCS=";
+            for (int mcs = 0; mcs < 77; mcs++) if (phy.ht.rxMcsSupported[mcs]) stream << mcs << ',';
+            stream << " HT-TxCeilings=";
+            for (int ceiling : phy.ht.txMcsNss.maxMcsPerNss) stream << ceiling << ',';
+            stream << " HT-width=" << phy.htOperation.operatingChannelWidth << " A-MSDU=" << phy.ht.maxAmsduLength
+                << " A-MPDU-exponent=" << phy.ht.maxAmpduLengthExponent << " spacing=" << phy.ht.minimumMpduStartSpacing;
+        }
+        if (phy.vhtPresent) {
+            stream << " VHT-Rx=";
+            for (int ceiling : phy.vht.rxMcs) stream << ceiling << ',';
+            stream << " VHT-Tx=";
+            for (int ceiling : phy.vht.txMcs) stream << ceiling << ',';
+            stream << " width=" << phy.vhtOperation.width << " CCFS=" << int(phy.vhtOperation.center0) << ',' << int(phy.vhtOperation.center1)
+                << " maxMPDU=" << phy.vht.maxMpduLength << " A-MPDU-exponent=" << phy.vht.maxAmpduLengthExponent;
+        }
+        stream << '\n';
+    };
+    stream << "local"; describe(localMeshPhy);
+    for (const auto& [peer, phy] : meshPeerPhy) { stream << peer; describe(phy); }
+    return stream.str();
 }
 
 int Ieee80211Mib::requirePrimaryChannel() const
