@@ -33,6 +33,13 @@ void Ieee80211Mib::configureMeshProfile(const std::string& id, const MeshConfigu
     meshConfiguration = configuration;
 }
 
+void Ieee80211Mib::setMeshForwarding(bool enabled)
+{
+    Enter_Method("setMeshForwarding");
+    // IEEE Std 802.11-2024, 9.4.2.96.8: advertise the configured dot11MeshForwarding.
+    meshConfiguration.capability = (meshConfiguration.capability & ~8) | (enabled ? 8 : 0);
+}
+
 bool Ieee80211Mib::isMeshPeerEstablished(MacAddress peer) const
 {
     return mode == MESH && peerRateSets.count(peer) != 0;

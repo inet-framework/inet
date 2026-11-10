@@ -22,11 +22,11 @@ Give neighboring stations controlled TSF offsets and beacon phases. Delay channe
 
 ## WIFI-CHECK-FORWARDING
 
-Use a line A–B–C with no A–C radio reachability and eligible paths/peerings. Send an MSDU from A to C. Observe new hop addresses at B with preserved mesh source/destination, payload and mesh sequence; C delivers once and B does not deliver transit unicast upward. Repeat at TTL 0/1 boundaries, with stale duplicates, unsupported AE, nonpeer input and missing precursor admission. Invalid traffic must not acquire a usable forwarding path.
+Use a line A–B–C with no A–C radio reachability and eligible paths/peerings. Send an MSDU from A to C. Observe new hop addresses at B with preserved mesh source/destination, payload and mesh sequence; C delivers once and B does not deliver transit unicast upward. A final-destination TTL-one frame is delivered without a transit decrement; a transit TTL-one frame cannot propagate. Reject invalid incoming wire TTL zero. Repeat with stale duplicates, unsupported AE, nonpeer input and missing precursor admission. Invalid traffic must not acquire a usable forwarding path.
 
 ## WIFI-CHECK-GROUP-FORWARDING
 
-Use a cycle with a branch and send native group traffic, including ARP-like payload. Assert local group delivery, bounded forwarding, decremented TTL and suppression of looped-back source traffic. Retransmission duplicates must not produce repeat delivery. Mesh sequence wrap, per-hop MAC retry sequence and HWMP sequence remain separate. Repeat with a sleeping peer when power save is selected.
+Use a cycle with a branch and send native group traffic, including ARP-like payload. Assert local group delivery, bounded forwarding, decremented TTL and suppression of looped-back source traffic. Incoming TTL one decrements to zero but still permits local delivery without onward forwarding; incoming wire TTL zero is invalid and rejected. Retransmission duplicates must not produce repeat delivery. Mesh sequence wrap, per-hop MAC retry sequence and HWMP sequence remain separate. Repeat with a sleeping peer when power save is selected.
 
 ## WIFI-CHECK-AIRTIME
 

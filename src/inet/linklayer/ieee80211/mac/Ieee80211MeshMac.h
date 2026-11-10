@@ -5,11 +5,12 @@
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
 #include "inet/linklayer/ieee80211/mgmt/IMeshManagement.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshDataMac.h"
 
 namespace inet {
 namespace ieee80211 {
 
-class INET_API Ieee80211MeshMac : public Ieee80211Mac
+class INET_API Ieee80211MeshMac : public Ieee80211Mac, public IMeshDataMac
 {
   protected:
     ModuleRefByPar<IMeshManagement> meshManagement;
@@ -21,6 +22,8 @@ class INET_API Ieee80211MeshMac : public Ieee80211Mac
 
   public:
     virtual void sendUpFrame(Packet *packet) override;
+    virtual void sendMeshData(Packet *packet) override;
+    virtual void deliverMeshMsdu(Packet *packet, MacAddress source, MacAddress destination, int tid) override;
     virtual void prepareFrameTransmission(Packet *packet, simtime_t ifs,
             const physicallayer::IIeee80211Mode *mode) override;
     virtual void frameTransmissionComplete(const Packet *packet) override;

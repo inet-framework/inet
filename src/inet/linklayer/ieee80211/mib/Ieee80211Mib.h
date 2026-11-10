@@ -157,6 +157,8 @@ class INET_API Ieee80211Mib : public SimpleModule
     void removePeerRateSet(const MacAddress& address);
     void clearPeerRateSets();
     void configureMeshProfile(const std::string& id, const MeshConfiguration& configuration);
+    void setMeshForwarding(bool enabled);
+    bool isMeshForwarding() const { return (meshConfiguration.capability & 8) != 0; }
     const std::string& getMeshId() const { return meshId; }
     const MeshConfiguration& getMeshConfiguration() const { return meshConfiguration; }
     bool isMeshPeerEstablished(MacAddress peer) const;

@@ -17,6 +17,14 @@ namespace ieee80211 {
 void FrameSequenceHandler::interruptFrameSequence()
 {
     ASSERT(isSequenceRunning());
+    if (auto transmit = dynamic_cast<ITransmitStep *>(context->getLastStep())) {
+        auto frame = transmit->getFrameToTransmit();
+        ASSERT(dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(frame->peekAtFront<Ieee80211MacHeader>()));
+        ASSERT(!context->getInProgressFrames()->containsFrame(frame));
+        context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
+        finishFrameSequence();
+        return;
+    }
     ASSERT(dynamic_cast<IReceiveStep *>(context->getLastStep()));
     context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
     auto outgoing = check_and_cast<ITransmitStep *>(context->getStepBeforeLast())->getFrameToTransmit();

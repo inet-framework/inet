@@ -9,6 +9,10 @@
 #include "inet/linklayer/ieee80211/mac/contract/IRtsPolicy.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshForwarding.h"
+#include "inet/linklayer/common/UserPriorityTag_m.h"
+#include "inet/linklayer/common/InterfaceTag_m.h"
+#include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -85,7 +89,27 @@ void Ieee80211MeshMac::unsupportedData(Packet *packet)
 
 void Ieee80211MeshMac::handleUpperPacket(Packet *packet)
 {
-    unsupportedData(packet);
+    check_and_cast<IMeshForwarding *>(ds.get())->processSourceMsdu(packet);
+}
+
+void Ieee80211MeshMac::sendMeshData(Packet *packet)
+{
+    Enter_Method("sendMeshData");
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+    processUpperFrame(packet, packet->peekAtFront<Ieee80211DataHeader>());
+}
+
+void Ieee80211MeshMac::deliverMeshMsdu(Packet *packet, MacAddress source, MacAddress destination, int tid)
+{
+    Enter_Method("deliverMeshMsdu");
+    take(packet);
+    packet->addTagIfAbsent<PacketProtocolTag>()->setProtocol(llc->getProtocol());
+    auto addresses = packet->addTagIfAbsent<MacAddressInd>();
+    addresses->setSrcAddress(source);
+    addresses->setDestAddress(destination);
+    packet->addTagIfAbsent<UserPriorityInd>()->setUserPriority(tid);
+    packet->addTagIfAbsent<InterfaceInd>()->setInterfaceId(networkInterface->getInterfaceId());
+    sendUp(packet);
 }
 
 void Ieee80211MeshMac::handleLowerMessage(cMessage *message)
@@ -119,7 +143,11 @@ void Ieee80211MeshMac::sendUpFrame(Packet *packet)
     take(packet);
     auto header = packet->peekAtFront<Ieee80211MacHeader>();
     if (header->getFrameType() != 0) {
-        unsupportedData(packet);
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        if (data && isDataReceptionSupported(data))
+            ds->processDataFrame(packet, data);
+        else
+            unsupportedData(packet);
         return;
     }
     packet->popAtBack<Ieee80211MacTrailer>(B(4));
@@ -148,9 +176,11 @@ bool Ieee80211MeshMac::isFrameTransmissionEligible(const Packet *packet, simtime
     return !meshManagement->isBeaconPending() && plannedStart < meshManagement->getNextTbtt();
 }
 
-bool Ieee80211MeshMac::isDataReceptionSupported(const Ptr<const Ieee80211DataHeader>&) const
+bool Ieee80211MeshMac::isDataReceptionSupported(const Ptr<const Ieee80211DataHeader>& header) const
 {
-    return false;
+    auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
+    return mesh && header->getType() == ST_DATA_WITH_QOS && mesh->getMeshControlPresent()
+        && !header->getMoreFragments() && header->getFragmentNumber() == 0 && !header->getAMsduPresent();
 }
 
 } // namespace ieee80211

@@ -1,0 +1,190 @@
+%description:
+Native three-address group forwarding in a four-station ring. Mesh duplicate
+identity prevents loops and source re-delivery; exhausted TTL still permits
+local delivery. Nonpeer and closed-peer frames use the same live receive path.
+
+%file: MeshGroupForwarding.cc
+#include "mesh/MeshForwardingSupport.h"
+
+class MeshGroupDriver : public cSimpleModule, public cListener, public ITx::ICallback
+{
+    int delivery[4] = {};
+    int nativeTransmissions = 0;
+    int noProviderDiscards = 0;
+    int disabledTransitDiscards = 0;
+    int disabledLocalDeliveries = 0;
+    int disabledAdvertisements = 0;
+    MacAddress group = MacAddress("01:00:5e:00:00:01");
+    void inject(int ttl, int sequence) {
+        auto header = makeShared<Ieee80211MeshDataHeader>();
+        header->setChunkLength(B(26)); header->setType(ST_DATA_WITH_QOS);
+        header->setDurationField(SIMTIME_ZERO);
+        header->setFromDS(true); header->setMeshControlPresent(true);
+        header->setReceiverAddress(group); header->setTransmitterAddress(meshMib(0)->address);
+        header->setAddress3(meshMib(0)->address); header->setSequenceNumber(SequenceNumberCyclic(600 + sequence));
+        auto control = makeShared<Ieee80211MeshControl>(); control->setTtl(ttl); control->setSequenceNumber(sequence);
+        auto packet = new Packet("injected-group", header);
+        if (ttl)
+            packet->insertAtBack(control);
+        else
+            packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0,0,uint8_t(sequence),0,0,0}));
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0x42,0x42,3,0xde,0xad,0xbe,0xef}));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<Ieee80211ModeReq>()->setMode(&Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz);
+        check_and_cast<ITx *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("tx"))->transmitFrame(packet, header, false, this);
+        delete packet;
+    }
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+  protected:
+    void initialize() override {
+        getSimulation()->getSystemModule()->subscribe(registerSignal("packetSentToUpper"),this);
+        getSimulation()->getSystemModule()->subscribe(registerSignal("packetSentToLower"),this);
+        getSimulation()->getSystemModule()->subscribe(registerSignal("packetDropped"),this);
+        const int times[] = {1,5,50,70,80,90,100,120,145,165};
+        for (int i = 0; i < 10; i++) scheduleAt(SimTime(times[i],SIMTIME_MS),new cMessage("group-case",i));
+        scheduleAt(SimTime(55,SIMTIME_MS),new cMessage("no-provider",200));
+        scheduleAt(SimTime(105,SIMTIME_MS),new cMessage("disabled-local",201));
+        scheduleAt(SimTime(110,SIMTIME_MS),new cMessage("disabled-transit",202));
+        scheduleAt(SimTime(115,SIMTIME_MS),new cMessage("disabled-check",203));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        if (signal == registerSignal("packetDropped")) {
+            if (source == meshInterface(0)->getSubmodule("mac")->getSubmodule("ds") && std::string(packet->getName()) == "no-provider-unicast") noProviderDiscards++;
+            if (source == meshInterface(2)->getSubmodule("mac")->getSubmodule("ds") && std::string(packet->getName()) == "disabled-transit") disabledTransitDiscards++;
+            return;
+        }
+        for (int i = 0; i < 4; i++) if (source == meshInterface(i)->getSubmodule("mac")) {
+            if (signal == registerSignal("packetSentToUpper")) {
+                if (std::string(packet->getName()) == "disabled-local") {
+                    ASSERT(i == 2 && packet->getTag<MacAddressInd>()->getSrcAddress() == meshMib(1)->address);
+                    disabledLocalDeliveries++; return;
+                }
+                ASSERT(i != 0);
+                auto addresses = packet->getTag<MacAddressInd>();
+                ASSERT(addresses->getSrcAddress() == meshMib(0)->address && addresses->getDestAddress() == group);
+                ASSERT(packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0x42,0x42,3,0xde,0xad,0xbe,0xef}));
+                delivery[i]++;
+            }
+            if (signal == registerSignal("packetSentToLower")) {
+                ASSERT(std::string(packet->getName()) != "no-provider-unicast");
+                ASSERT(i != 2 || std::string(packet->getName()) != "disabled-transit");
+                auto header = dynamicPtrCast<const Ieee80211MgmtHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+                if (i == 2 && header) {
+                    auto body = dynamicPtrCast<const Ieee80211MeshFrame>(packet->peekDataAt<Chunk>(header->getChunkLength()));
+                    if (body && body->getMeshConfigurationPresent()) {
+                        ASSERT((body->getMeshConfiguration().capability & 8) == 0);
+                        disabledAdvertisements++;
+                    }
+                }
+            }
+            if (signal == registerSignal("packetSentToLower") && packet->getName() == std::string("native-group")) {
+                auto header = packet->peekAtFront<Ieee80211MeshDataHeader>();
+                ASSERT(header->getFromDS() && !header->getToDS() && header->getMeshControlPresent());
+                ASSERT(header->getReceiverAddress() == group && header->getTransmitterAddress() == meshMib(i)->address);
+                ASSERT(header->getAddress3() == meshMib(0)->address && header->getChunkLength() == B(26));
+                auto control = packet->peekAt<Ieee80211MeshControl>(B(26));
+                ASSERT(control->getSequenceNumber() == 0 && control->getAddressExtensionMode() == 0);
+                ASSERT(control->getTtl() == (i == 0 ? 3 : i == 2 ? 1 : 2));
+                ASSERT(packet->getDataLength() == B(43)); nativeTransmissions++;
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        switch (message->getKind()) {
+            case 0: inject(3,900); break;
+            case 1:
+                meshManagement(0)->openPeer(meshMib(1)->address);
+                for (int i = 1; i < 4; i++) scheduleAt(SimTime(5+5*i,SIMTIME_MS),new cMessage("stagger-open",100+i));
+                break;
+            case 2:
+                for (int i = 0; i < 4; i++) {
+                    ASSERT(meshMib(i)->isMeshPeerEstablished(meshMib((i+1)%4)->address));
+                }
+                sendDirect(fixtureMsdu("native-group",group),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+                break;
+            case 3:
+                ASSERT(delivery[0] == 0 && delivery[1] == 1 && delivery[2] == 1 && delivery[3] == 1);
+                ASSERT(nativeTransmissions == 3 && noProviderDiscards == 1); inject(3,0); break;
+            case 4: inject(1,1); break;
+            case 5: inject(0,2); break;
+            case 6:
+                ASSERT(delivery[0] == 0 && delivery[1] == 2 && delivery[2] == 1 && delivery[3] == 2);
+                break;
+            case 7:
+                meshManagement(0)->closePeer(meshMib(1)->address);
+                meshManagement(0)->closePeer(meshMib(3)->address);
+                break;
+            case 8: inject(3,901); break;
+            case 9:
+                ASSERT(delivery[0] == 0 && delivery[1] == 2 && delivery[2] == 1 && delivery[3] == 2);
+                ASSERT(disabledAdvertisements > 0 && disabledLocalDeliveries == 1 && disabledTransitDiscards == 1);
+                emit(registerSignal("meshGroupComplete"),1L); break;
+            case 200:
+                sendDirect(fixtureMsdu("no-provider-unicast",meshMib(2)->address),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+                break;
+            case 201:
+                fixturePath(1,2,2,SimTime(500,SIMTIME_MS)); fixturePrecursor(2,2,1,SimTime(500,SIMTIME_MS));
+                sendDirect(fixtureMsdu("disabled-local",meshMib(2)->address),meshInterface(1)->getSubmodule("llc")->gate("lowerLayerOut"));
+                break;
+            case 202:
+                fixturePath(1,3,2,SimTime(500,SIMTIME_MS)); fixturePath(2,3,3,SimTime(500,SIMTIME_MS));
+                fixturePrecursor(2,3,1,SimTime(500,SIMTIME_MS));
+                sendDirect(fixtureMsdu("disabled-transit",meshMib(3)->address),meshInterface(1)->getSubmodule("llc")->gate("lowerLayerOut"));
+                break;
+            case 203:
+                ASSERT(disabledLocalDeliveries == 1 && disabledTransitDiscards == 1); break;
+            default:
+                int i = message->getKind()-100;
+                meshManagement(i)->openPeer(meshMib((i+1)%4)->address);
+                break;
+        }
+        delete message;
+    }
+};
+Define_Module(MeshGroupDriver);
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_group_forwarding) {
+    return ProtocolTest("mesh_group_forwarding")
+        .intercept(tap("radioMedium").from("station[0]").to("station[2]").drop())
+        .intercept(tap("radioMedium").from("station[2]").to("station[0]").drop())
+        .intercept(tap("radioMedium").from("station[1]").to("station[3]").drop())
+        .intercept(tap("radioMedium").from("station[3]").to("station[1]").drop())
+        .intercept(tap("radioMedium").filterPacket("ieee80211mac.type == 40").mutate(reconstructMeshMpdu))
+        .once(on("driver").signal("meshGroupComplete").assertValue(1).within(0.18));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple MeshGroupDriver { parameters: @class(::MeshGroupDriver); @signal[meshGroupComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: MeshGroupDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = 4
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mac.ds.initialTtl = 3
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[1..2].wlan[0].pathSelection.typename = "MeshFixturePaths"
+*.station[2].wlan[0].mac.ds.forwarding = false
+# Separate the hidden relay transmissions using legal configured EDCA waits.
+*.station[3].wlan[0].mac.hcf.edca.edcaf[1].cwMin = 0
+*.station[3].wlan[0].mac.hcf.edca.edcaf[1].cwMax = 0
+*.station[1].wlan[0].mac.hcf.edca.edcaf[1].cwMin = 0
+*.station[1].wlan[0].mac.hcf.edca.edcaf[1].cwMax = 0
+*.station[3].wlan[0].mac.hcf.edca.edcaf[1].aifsn = 15
+*.station[3].wlan[0].mac.hcf.edca.edcaf[1].contention.backoffOptimization = false
+*.tester.testName = "mesh_group_forwarding"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_group_forwarding: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_group_forwarding: FAIL

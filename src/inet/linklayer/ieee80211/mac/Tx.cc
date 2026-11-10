@@ -83,6 +83,19 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         scheduleAfter(ifs, endIfsTimer);
 }
 
+bool Tx::cancelPendingTransmission(ITx::ICallback *callback)
+{
+    Enter_Method("cancelPendingTransmission");
+    if (callback != txCallback || transmitting || !endIfsTimer->isScheduled())
+        return false;
+    cancelEvent(endIfsTimer);
+    delete frame;
+    frame = nullptr;
+    txCallback = nullptr;
+    updateLocalNav = false;
+    return true;
+}
+
 void Tx::radioTransmissionFinished()
 {
     Enter_Method("radioTransmissionFinished");

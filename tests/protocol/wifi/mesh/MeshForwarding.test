@@ -1,0 +1,173 @@
+%description:
+Native individually addressed mesh forwarding through production MAC/radios.
+Endpoint identity, precursor admission, expiry, finalTTL1 delivery and byte
+reconstruction are checked separately from per-hop ACK and mesh duplicates.
+
+%file: MeshForwarding.cc
+#include "mesh/MeshForwardingSupport.h"
+#include "mesh/MeshTeardownCases.h"
+
+class MeshForwardingDriver : public cSimpleModule, public cListener, public ITx::ICallback
+{
+    int delivered = 0;
+    int forwarded = 0;
+    int sourceTransmissions = 0;
+    int rejected = 0;
+    void source(const char *name, int tid = 0) {
+        sendDirect(fixtureMsdu(name, meshMib(2)->address, tid), meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+    }
+    void inject(const char *name, uint32_t sequence, int ttl = 2, int ae = 0, bool fragment = false, bool aggregate = false, bool retry = false, int macSequence = -1) {
+        auto header = makeShared<Ieee80211MeshDataHeader>();
+        header->setChunkLength(B(32)); header->setType(ST_DATA_WITH_QOS);
+        header->setDurationField(SIMTIME_ZERO);
+        header->setToDS(true); header->setFromDS(true); header->setMeshControlPresent(true);
+        header->setTransmitterAddress(meshMib(0)->address); header->setReceiverAddress(meshMib(1)->address);
+        header->setAddress3(meshMib(2)->address); header->setAddress4(meshMib(0)->address);
+        header->setSequenceNumber(SequenceNumberCyclic(macSequence < 0 ? sequence : macSequence));
+        header->setRetry(retry);
+        header->setFragmentNumber(fragment ? 1 : 0); header->setAMsduPresent(aggregate);
+        auto control = makeShared<Ieee80211MeshControl>();
+        control->setTtl(ttl); control->setSequenceNumber(sequence); control->setAddressExtensionMode(ae);
+        if (ae) control->setChunkLength(B(12));
+        auto packet = new Packet(name, header); packet->insertAtBack(control);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0x42,0x42,3,0xde,0xad,0xbe,0xef}));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<Ieee80211ModeReq>()->setMode(&Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz);
+        check_and_cast<ITx *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("tx"))->transmitFrame(packet, header, false, this);
+        delete packet;
+    }
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        network->subscribe(registerSignal("packetSentToUpper"), this);
+        network->subscribe(registerSignal("packetSentToLower"), this);
+        network->subscribe(registerSignal("packetDropped"), this);
+        for (int kind = 0; kind < 15; kind++)
+            scheduleAt(SimTime(kind == 0 ? 1 : kind == 1 ? 5 : 50 + 10 * kind, SIMTIME_MS), new cMessage("forwarding-case", kind));
+        scheduleAt(SimTime(85,SIMTIME_MS),new cMessage("mac-retry-duplicate",20));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object);
+        if (!packet) return;
+        if (simTime() >= SimTime(195,SIMTIME_MS)) return;
+        if (signal == registerSignal("packetDropped") && source == meshInterface(1)->getSubmodule("mac")->getSubmodule("ds"))
+            rejected++;
+        if (signal == registerSignal("packetSentToUpper")) {
+            for (int i = 0; i < 3; i++) if (source == meshInterface(i)->getSubmodule("mac")) {
+                ASSERT(i == 2);
+                auto addresses = packet->getTag<MacAddressInd>();
+                ASSERT(addresses->getSrcAddress() == meshMib(0)->address && addresses->getDestAddress() == meshMib(2)->address);
+                ASSERT(packet->peekDataAsBytes()->getBytes() == std::vector<uint8_t>({0x42,0x42,3,0xde,0xad,0xbe,0xef}));
+                delivered++;
+            }
+        }
+        if (signal != registerSignal("packetSentToLower")) return;
+        for (int i = 0; i < 2; i++) if (source == meshInterface(i)->getSubmodule("mac")) {
+            auto header = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+            if (!header || packet->getName() != std::string("native-data")) return;
+            auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
+            ASSERT(mesh && mesh->getMeshControlPresent() && header->getToDS() && header->getFromDS());
+            ASSERT(header->getAddress3() == meshMib(2)->address && header->getAddress4() == meshMib(0)->address);
+            ASSERT(header->getTransmitterAddress() == meshMib(i)->address && header->getReceiverAddress() == meshMib(i+1)->address);
+            ASSERT(header->getChunkLength() == B(32) && packet->getDataLength() == B(49));
+            auto control = packet->peekAt<Ieee80211MeshControl>(B(32));
+            ASSERT(control->getTtl() == 2-i && control->getSequenceNumber() == 0);
+            auto bytes = packet->peekAllAsBytes()->getBytes();
+            ASSERT(bytes[32] == 0 && bytes[33] == 2-i && bytes[34] == 0 && bytes[35] == 0 && bytes[36] == 0 && bytes[37] == 0);
+            if (i == 0) sourceTransmissions++; else forwarded++;
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        int kind = message->getKind();
+        if (kind == 0) inject("nonpeer", 700);
+        if (kind == 1) { meshManagement(0)->openPeer(meshMib(1)->address); meshManagement(1)->openPeer(meshMib(2)->address); }
+        if (kind == 2) {
+            ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address) && meshMib(1)->isMeshPeerEstablished(meshMib(2)->address));
+            auto expiry = SimTime(500, SIMTIME_MS);
+            fixturePath(0,2,1,expiry); fixturePath(1,2,2,expiry); fixturePath(1,0,0,expiry); fixturePath(2,0,1,expiry);
+            fixturePrecursor(1,2,0,expiry); fixturePrecursor(2,2,1,expiry);
+            fixturePrecursor(1,0,2,SimTime(75,SIMTIME_MS));
+            source("native-data");
+        }
+        if (kind == 3) {
+            ASSERT(delivered == 1 && forwarded == 1 && sourceTransmissions == 1);
+            auto relay = fixturePaths(1);
+            auto receivedAt = relay->pathRefreshTimes.at(meshMib(2)->address);
+            ASSERT(receivedAt > SimTime(70,SIMTIME_MS));
+            ASSERT(relay->pathRefreshTimes.at(meshMib(0)->address) == receivedAt);
+            ASSERT(relay->findPath(meshMib(2)->address)->expiry == receivedAt + relay->lifetime);
+            ASSERT(relay->findPath(meshMib(0)->address)->expiry == receivedAt + relay->lifetime);
+            ASSERT(relay->getPrecursorExpiry(meshMib(2)->address,meshMib(0)->address) == SimTime(500,SIMTIME_MS));
+            ASSERT(relay->getPrecursorExpiry(meshMib(0)->address,meshMib(2)->address) == receivedAt + relay->lifetime);
+            auto final = fixturePaths(2);
+            ASSERT(final->findPath(meshMib(0)->address)->expiry == final->pathRefreshTimes.at(meshMib(0)->address) + final->lifetime);
+            ASSERT(final->getPrecursorExpiry(meshMib(2)->address,meshMib(1)->address) == SimTime(500,SIMTIME_MS));
+            inject("mesh-duplicate", 0,2,0,false,false,false,800);
+        }
+        if (kind == 4) { fixturePrecursor(1,2,0,simTime()); inject("expired-precursor", 701); }
+        if (kind == 5) { fixturePrecursor(1,2,0,SimTime(500,SIMTIME_MS)); fixturePath(1,2,2,simTime()); inject("expired-path",702); }
+        if (kind == 6) { fixturePath(1,2,2,SimTime(500,SIMTIME_MS)); inject("unsupported-ae",703,2,1); }
+        if (kind == 7) inject("unsupported-fragment",704,2,0,true);
+        if (kind == 8) inject("unsupported-aggregate",705,2,0,false,true);
+        if (kind == 9) { fixturePrecursor(2,2,1,simTime()); inject("expired-final-precursor",706); }
+        if (kind == 10) { ASSERT(delivered == 1 && rejected >= 4); meshManagement(0)->closePeer(meshMib(1)->address); }
+        if (kind == 11) inject("closed-peer",707);
+        if (kind == 12) {
+            ASSERT(delivered == 1);
+            ASSERT(meshManagement(0)->getPeerState(meshMib(1)->address) == Ieee80211MgmtMesh::IDLE);
+            ASSERT(meshManagement(1)->getPeerState(meshMib(0)->address) == Ieee80211MgmtMesh::IDLE);
+            meshManagement(0)->openPeer(meshMib(1)->address);
+        }
+        if (kind == 13) { fixturePrecursor(2,2,1,SimTime(500,SIMTIME_MS)); source("fresh-after-repeer"); }
+        if (kind == 14) {
+            if (delivered != 2) throw cRuntimeError("Fresh delivery count %d, source peer state %d, relay peer state %d",delivered,
+                meshManagement(0)->getPeerState(meshMib(1)->address),meshManagement(1)->getPeerState(meshMib(0)->address));
+            emit(registerSignal("meshForwardingComplete"),1L);
+        }
+        if (kind == 20) inject("mac-retry-duplicate",730,2,0,false,false,true,800);
+        delete message;
+    }
+};
+Define_Module(MeshForwardingDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_forwarding) {
+    return ProtocolTest("mesh_forwarding")
+        .intercept(tap("radioMedium").from("station[0]").to("station[2]").drop())
+        .intercept(tap("radioMedium").from("station[2]").to("station[0]").drop())
+        .intercept(tap("radioMedium").filterPacket("ieee80211mac.type == 40").mutate(reconstructMeshMpdu))
+        .once(on("driver").signal("meshForwardingComplete").assertValue(1).within(0.2))
+        .once(on("teardown").signal("meshTeardownComplete").assertValue(1).within(0.1));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple MeshForwardingDriver { parameters: @class(::MeshForwardingDriver); @signal[meshForwardingComplete](type=long); }
+simple MeshTeardownDriver { parameters: @class(::MeshTeardownDriver); @signal[meshTeardownComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: MeshForwardingDriver; teardown: MeshTeardownDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = 3
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].pathSelection.typename = "MeshFixturePaths"
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mgmt.holdingTimeout = 5ms
+*.station[*].wlan[0].mac.ds.initialTtl = 2
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[1].wlan[0].mac.hcf.edca.edcaf[3].cwMin = 0
+*.station[1].wlan[0].mac.hcf.edca.edcaf[3].cwMax = 0
+*.tester.testName = "mesh_forwarding"
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_forwarding: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_forwarding: FAIL

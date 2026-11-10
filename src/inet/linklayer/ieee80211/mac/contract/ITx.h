@@ -65,6 +65,11 @@ class INET_API ITx
      * For example, an accepted ACK with a SIFS delay keeps this query true until transmission ends.
      */
     [[nodiscard]] virtual bool hasTransmission() const = 0;
+    /** Cancel only this callback's accepted IFS wait, before a PPDU starts.
+     * Disposes the retained copy without completion, NAV or PHY callbacks.
+     * Returns false for another callback, an idle Tx, or an on-air PPDU.
+     */
+    virtual bool cancelPendingTransmission(ICallback *callback) = 0;
     virtual void radioTransmissionFinished() = 0;
 };
 

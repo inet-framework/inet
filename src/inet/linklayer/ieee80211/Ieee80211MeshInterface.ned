@@ -2,8 +2,10 @@
 
 package inet.linklayer.ieee80211;
 
-// Open, single-channel QoS mesh composition. This stage establishes OFDM peer
-// links; HT/VHT, forwarding and power save require their respective additions.
+import inet.linklayer.ieee80211.mesh.contract.IMeshPathSelection;
+
+// Open, single-channel QoS mesh with native OFDM forwarding. Individual traffic
+// uses an optional path provider; HT/VHT, aggregation and power save are separate.
 module Ieee80211MeshInterface extends Ieee80211Interface
 {
     parameters:
@@ -14,6 +16,7 @@ module Ieee80211MeshInterface extends Ieee80211Interface
         agent.typename = "";
         mgmt.typename = default("Ieee80211MgmtMesh");
         mac.typename = default("Ieee80211MeshMac");
+        mac.ds.typename = default("MeshForwarding");
         radio.bandName = default("5 GHz (20 MHz)");
         radio.bandwidth = default(20MHz);
         radio.receiver.bandwidth = default(20MHz);
@@ -25,4 +28,9 @@ module Ieee80211MeshInterface extends Ieee80211Interface
         mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "";
         mac.hcf.originatorMacDataService.fragmentationPolicy.typename = "";
         mac.hcf.rtsPolicy.rtsThreshold = default(65536B);
+    submodules:
+        pathSelection: <default("")> like IMeshPathSelection if typename != "" {
+            parameters:
+                @display("p=100,200");
+        }
 }

@@ -812,6 +812,34 @@ void Hcf::resetPeer(MacAddress peer)
 {
     Enter_Method("resetPeer");
     rx->invalidateInterframeHistory();
+    if (mib->mode == Ieee80211Mib::MESH) {
+        bool previous = handlingAgreementAction;
+        handlingAgreementAction = true;
+        for (int tid = 0; tid < 16; tid++)
+            discardAgreementData(peer, tid, true);
+        recipientDataService->clearPeer(peer);
+        // Queue removal defers destruction while the sequence still borrows DATA.
+        // Finish only after every discard loop has returned, never in a drop callback.
+        if (frameSequenceHandler->isSequenceRunning()) {
+            auto context = frameSequenceHandler->getContext();
+            auto last = context->getLastStep();
+            auto transmit = dynamic_cast<ITransmitStep *>(last);
+            if (!transmit && dynamic_cast<IReceiveStep *>(last))
+                transmit = dynamic_cast<ITransmitStep *>(context->getStepBeforeLast());
+            if (transmit) {
+                auto frame = transmit->getFrameToTransmit();
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(frame->peekAtFront<Ieee80211MacHeader>());
+                if (data && data->getReceiverAddress() == peer && !context->getInProgressFrames()->containsFrame(frame)) {
+                    if (dynamic_cast<IReceiveStep *>(last) || tx->cancelPendingTransmission(this))
+                        frameSequenceHandler->interruptFrameSequence();
+                }
+            }
+        }
+        handlingAgreementAction = previous;
+        updateContention();
+        if (!originatorBlockAckAgreementHandler)
+            return;
+    }
     if (!originatorBlockAckAgreementHandler)
         return;
     bool previous = handlingAgreementAction;

@@ -74,7 +74,7 @@ The following transition checks use the event/action names of 14.5. An unlisted 
 
 ### IEEE80211-2024-MESH-WIRE
 
-Mesh Control carries its flags, Mesh TTL and mesh sequence number, followed by the address extensions selected by AE. HWMP Mesh Path Selection actions carry the RANN, PREQ, PREP and PERR elements with their specified field widths, element lengths, target counts and optional fields. Reserved transmit fields are zero; unknown optional information and reserved receive fields follow their specified receive semantics, rather than a blanket rejection rule.
+Mesh Control carries its flags, nonzero on-air Mesh TTL and mesh sequence number, followed by the address extensions selected by AE. A received group TTL of one can decrement to zero during local processing; that is distinct from an invalid received wire value of zero. HWMP Mesh Path Selection actions carry the RANN, PREQ, PREP and PERR elements with their specified field widths, element lengths, target counts and optional fields. Reserved transmit fields are zero; unknown optional information and reserved receive fields follow their specified receive semantics, rather than a blanket rejection rule.
 
 Sources: `ieee80211-2024:clause:9.2.4.8.3`, PDF 707–708; `ieee80211-2024:clause:9.4.2.110`–`9.4.2.113`, PDF 1222–1227; `ieee80211-2024:clause:9.6.16.3`, PDF 1773. Strength: normative format. Observation: encoding.
 
