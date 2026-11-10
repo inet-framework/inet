@@ -4,6 +4,7 @@
 
 #include "mesh/MeshTestSupport.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPathSelection.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshForwarding.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211MeshMac.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/framesequence/FrameSequenceHandler.h"
@@ -45,6 +46,13 @@ class MeshFixturePaths : public cSimpleModule, public IMeshPathSelection
         auto& expiry = precursors[{destination, precursor}];
         expiry = std::max(expiry, simTime() + lifetime);
     }
+    void startDiscovery(MacAddress destination) override {
+        Enter_Method("startDiscovery");
+        // This fixture provides only explicitly installed paths, never discovery.
+        check_and_cast<IMeshForwarding *>(getParentModule()->getSubmodule("mac")->getSubmodule("ds"))->discoveryFailed(destination);
+    }
+    void cancelDiscovery(MacAddress) override {}
+    void processHwmp(const Ptr<const Ieee80211HwmpFrame>&, MacAddress, MacAddress) override {}
 };
 Define_Module(MeshFixturePaths);
 

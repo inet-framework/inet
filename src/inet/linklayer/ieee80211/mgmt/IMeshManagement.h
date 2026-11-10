@@ -4,6 +4,7 @@
 #define __INET_IMESHMANAGEMENT_H
 
 #include "inet/common/INETDefs.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
 namespace inet {
 class Packet;
@@ -20,6 +21,7 @@ class INET_API IMeshManagement
     virtual bool isBeaconPending() const = 0;
     virtual bool isMeshManagementActive() const = 0;
     virtual simtime_t getNextTbtt() const = 0;
+    virtual void sendHwmp(const Ptr<Ieee80211HwmpFrame>& body, MacAddress receiver) = 0;
 };
 
 } // namespace ieee80211

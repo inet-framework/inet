@@ -8,6 +8,7 @@
 #include "inet/linklayer/ieee80211/mgmt/IMeshManagement.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkMetric.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshPathSelection.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -40,6 +41,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     };
     std::map<MacAddress, Peer> peers;
     ModuleRefByPar<IMeshLinkMetric> linkMetric;
+    ModuleRefByPar<IMeshPathSelection> pathSelection;
     std::map<MacAddress, Neighbor> neighbors;
     cMessage *beaconTimer = nullptr;
     simtime_t beaconInterval;
@@ -64,6 +66,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     virtual void initialize(int stage) override;
     virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
+    void handleMessageWhenDown(cMessage *message) override;
     virtual void handleTimer(cMessage *message) override;
     virtual void handleCommand(int kind, cObject *control) override;
     virtual void start() override;
@@ -73,6 +76,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     void processBeacon(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool response);
     void processPeering(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header);
     void processLinkMetric(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header);
+    void processHwmpFrame(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header);
     void processProbeRequest(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header);
     void updateNeighborTiming(Packet *packet, const Ptr<const Ieee80211BeaconFrame>& body, MacAddress peer);
     bool matchesProfile(const Ieee80211MeshFrame& body) const;
@@ -111,6 +115,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     virtual void prepareManagementTransmission(Packet *packet, simtime_t ifs,
             const physicallayer::IIeee80211Mode *mode) override;
     virtual void managementTransmissionComplete(const Packet *packet) override;
+    virtual void sendHwmp(const Ptr<Ieee80211HwmpFrame>& body, MacAddress receiver) override;
     virtual bool isBeaconPending() const override { return pendingBeaconTreeId >= 0; }
     virtual bool isMeshManagementActive() const override { return operationalState == OPERATING; }
     void openPeer(MacAddress peer);

@@ -6,7 +6,7 @@ import inet.linklayer.ieee80211.mesh.contract.IMeshPathSelection;
 import inet.linklayer.ieee80211.mesh.AirtimeLinkMetric;
 
 // Open, single-channel QoS mesh with native OFDM forwarding. Individual traffic
-// uses an optional path provider; HT/VHT, aggregation and power save are separate.
+// uses on-demand HWMP by default; HT/VHT, aggregation and power save are separate.
 module Ieee80211MeshInterface extends Ieee80211Interface
 {
     parameters:
@@ -34,7 +34,7 @@ module Ieee80211MeshInterface extends Ieee80211Interface
             parameters:
                 @display("p=100,100");
         }
-        pathSelection: <default("")> like IMeshPathSelection if typename != "" {
+        pathSelection: <default("Hwmp")> like IMeshPathSelection if typename != "" {
             parameters:
                 @display("p=100,200");
         }

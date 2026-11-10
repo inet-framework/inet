@@ -1,0 +1,205 @@
+%description:
+Live diamond HWMP with both metric encodings, directional loss/rate costs,
+serial freshness, equal-SN metric selection, wrap/half-range, saturation,
+PREQ TO/USN/multitarget guards, PREP validation-only admission, and expiry.
+Control fault suppression occurs after production HWMP handoff observation;
+all received controls and DATA use the real MAC/radio and computed FCS.
+
+%file: HwmpPathSelection.cc
+#include "mesh/HwmpTestSupport.h"
+
+class HwmpPathDriver : public cSimpleModule, public cListener, public ITx::ICallback
+{
+    MacAddress wrap = MacAddress("02:00:00:00:20:01");
+    MacAddress validation = MacAddress("02:00:00:00:20:02");
+    MacAddress expired = MacAddress("02:00:00:00:20:03");
+    MacAddress unknown = MacAddress("02:00:00:00:20:04");
+    MacAddress origin(int n) { return MacAddress((std::string("02:00:00:00:21:")+(n < 10 ? "0" : "")+std::to_string(n)).c_str()); }
+    int preqs = 0, preps = 0, delivered = 0;
+    int beforePreqs = 0, beforePreps = 0;
+    bool guardUsn = false, guardMulti = false, guardTtl = false;
+    std::optional<Hwmp::PathInfo> saved;
+    simtime_t savedSelf;
+    void control(int transmitter, MacAddress target, uint32_t sn, uint32_t metric = 0, int hops = 0, int lifetime = 1000) {
+        auto prep = testPrep(target,meshMib(0)->address,sn,metric,lifetime); prep.hopCount = hops;
+        sendHwmpTest(transmitter,testBody(prep),meshMib(0)->address);
+    }
+    void request(int n, uint8_t flags, uint32_t requested, int ttl = 2) {
+        auto preq = testPreq(origin(n),meshMib(3)->address,n,100,flags); preq.setTtl(ttl);
+        auto entry = preq.getTargets(0); entry.sequenceNumber = requested; preq.setTargets(0,entry);
+        sendHwmpTest(1,testBody(preq),meshMib(0)->address);
+    }
+    void injectExpiredSource() {
+        auto header = makeShared<Ieee80211MeshDataHeader>(); header->setType(ST_DATA_WITH_QOS); header->setChunkLength(B(32));
+        header->setDurationField(SIMTIME_ZERO); header->setToDS(true); header->setFromDS(true); header->setMeshControlPresent(true);
+        header->setReceiverAddress(meshMib(0)->address); header->setTransmitterAddress(meshMib(1)->address);
+        header->setAddress3(meshMib(0)->address); header->setAddress4(expired); header->setSequenceNumber(SequenceNumberCyclic(1000));
+        auto control = makeShared<Ieee80211MeshControl>(); control->setTtl(1); control->setSequenceNumber(800);
+        auto packet = new Packet("expired-source-data",header); packet->insertAtBack(control);
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>{0x42,0x42,3,0xde,0xad,0xbe,0xef}));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<Ieee80211ModeReq>()->setMode(&Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz);
+        check_and_cast<ITx *>(meshInterface(1)->getSubmodule("mac")->getSubmodule("tx"))->transmitFrame(packet,header,false,this); delete packet;
+    }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        network->subscribe(registerSignal("hwmpTestHandoff"),this); network->subscribe(registerSignal("packetSentToUpper"),this);
+        for (int i = 0; i < 53; i++) scheduleAt(SimTime(5+5*i,SIMTIME_MS),new cMessage("path-case",i));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        if (signal == registerSignal("packetSentToUpper") && source == meshInterface(0)->getSubmodule("mac") && std::string(packet->getName()) == "expired-source-data") delivered++;
+        if (signal != registerSignal("hwmpTestHandoff") || source != meshManagement(0)) return;
+        auto body = packet->peekAtFront<Ieee80211HwmpFrame>(); preqs += body->getPreqsArraySize(); preps += body->getPrepsArraySize();
+        for (size_t i = 0; i < body->getPrepsArraySize(); i++) {
+            auto prep = body->getPreps(i); ASSERT(prep.hopCount == 0);
+            if (guardUsn || guardMulti) ASSERT(prep.lifetime == 100);
+        }
+        for (size_t i = 0; i < body->getPreqsArraySize(); i++) {
+            const auto& preq = body->getPreqs(i);
+            if (guardUsn) { ASSERT(preq.getTtl() == 1); ASSERT(preq.getTargets(0).flags&1); ASSERT(preq.getTargets(0).sequenceNumber == 0); }
+            if (guardMulti) {
+                ASSERT(preq.getTargetsArraySize() == 2 && preq.getTargets(0).address == meshMib(3)->address && (preq.getTargets(0).flags&1));
+                ASSERT(preq.getTargets(1).address == unknown && preq.getDiscoveryId() == 90);
+            }
+            ASSERT(!guardTtl);
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        int k = message->getKind(); auto destination = meshMib(3)->address;
+        if (k >= 100) {
+            ASSERT(hwmp(0)->findPath(expired).has_value() == (k == 100)); delete message; return;
+        }
+        switch (k) {
+            case 0: meshManagement(0)->openPeer(meshMib(1)->address); break;
+            case 1: meshManagement(0)->openPeer(meshMib(2)->address); break;
+            case 2: meshManagement(1)->openPeer(destination); break;
+            case 3: meshManagement(2)->openPeer(destination); break;
+            case 7: emit(registerSignal("primeMetric"),1L); break;
+            case 8: sendDirect(fixtureMsdu("metric-prime",meshMib(1)->address),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut")); break;
+            case 11:
+                ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address) && meshMib(0)->isMeshPeerEstablished(meshMib(2)->address));
+                ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(meshMib(1)->address) == 7.0/64);
+                ASSERT(outgoingMetric(0,1) > outgoingMetric(0,2));
+                check_and_cast<HwmpTestManagement *>(meshManagement(0))->suppressHwmp(true);
+                control(1,destination,100,1000); break;
+            case 12: ASSERT(hwmp(0)->getPathInfo(destination)->metric == 1000+outgoingMetric(0,1)); control(1,destination,101,2000); break;
+            case 13: ASSERT(*hwmp(0)->getPathInfo(destination)->sequence == 101); saved = hwmp(0)->getPathInfo(destination); control(2,destination,100); break;
+            case 14: ASSERT(saved == hwmp(0)->getPathInfo(destination)); control(2,destination,101,0,1); break;
+            case 15: ASSERT(hwmp(0)->getPathInfo(destination)->nextHop == meshMib(2)->address && hwmp(0)->getPathInfo(destination)->hops == 2); saved = hwmp(0)->getPathInfo(destination); control(1,destination,101+0x80000000U); break;
+            case 16: ASSERT(saved == hwmp(0)->getPathInfo(destination)); control(1,destination,102,UINT32_MAX); break;
+            case 17: ASSERT(hwmp(0)->getPathInfo(destination)->metric == UINT32_MAX); control(1,destination,103,500); break;
+            case 18: ASSERT(hwmp(0)->getPathInfo(destination)->hops == 1); control(2,destination,103,0,1,5); break;
+            case 19:
+                ASSERT(hwmp(0)->getPathInfo(destination)->nextHop == meshMib(2)->address && hwmp(0)->getPathInfo(destination)->hops == 2);
+                ASSERT(hwmp(0)->getPathInfo(destination)->expiry > SimTime(1)); control(1,wrap,UINT32_MAX-1); break;
+            case 20: control(2,wrap,1); break;
+            case 21: ASSERT(*hwmp(0)->getPathInfo(wrap)->sequence == 1); saved = hwmp(0)->getPathInfo(wrap); control(1,wrap,UINT32_MAX); break;
+            case 22: ASSERT(saved == hwmp(0)->getPathInfo(wrap)); {
+                auto preq = testPreq(validation,unknown,70,20,5); preq.setMetric(10); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 23:
+                saved = hwmp(0)->getPathInfo(validation); ASSERT(saved && !saved->validated);
+                beforePreqs = preqs; beforePreps = preps; savedSelf = hwmp(0)->getPrecursorExpiry(meshMib(0)->address,meshMib(2)->address);
+                control(2,validation,20,UINT32_MAX,4,2000); break;
+            case 24: {
+                auto current = hwmp(0)->getPathInfo(validation); ASSERT(current && current->validated);
+                auto expected = *saved; expected.validated = true; ASSERT(*current == expected);
+                ASSERT(preqs == beforePreqs && preps == beforePreps);
+                ASSERT(hwmp(0)->getPrecursorExpiry(meshMib(0)->address,meshMib(2)->address) > savedSelf);
+                beforePreqs = preqs; beforePreps = preps; guardUsn = true; request(1,4,UINT32_MAX); break;
+            }
+            case 25: ASSERT(preps == beforePreps+1 && preqs == beforePreqs+1); guardUsn = false; beforePreqs = preqs; beforePreps = preps; request(2,5,UINT32_MAX); break;
+            case 26: ASSERT(preps == beforePreps && preqs == beforePreqs+1); beforePreps = preps; request(3,0,103); break;
+            case 27: ASSERT(preps == beforePreps+1); beforePreps = preps; request(4,1,103); break;
+            case 28: ASSERT(preps == beforePreps); beforePreqs = preqs; request(4,4,UINT32_MAX); break;
+            case 29: ASSERT(preqs == beforePreqs && preps == beforePreps); request(5,5,0); break;
+            case 30: beforePreqs = preqs; beforePreps = preps; request(5,4,0); break;
+            case 31: ASSERT(preqs == beforePreqs && preps == beforePreps); {
+                auto preq = testPreq(origin(5),destination,55,100,4); preq.setMetric(UINT32_MAX); preq.setTtl(2); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 32: ASSERT(preqs == beforePreqs+1 && preps == beforePreps); {
+                beforePreqs = preqs; beforePreps = preps;
+                auto preq = testPreq(origin(5),destination,56,100,0); preq.setMetric(UINT32_MAX); preq.setTtl(2);
+                auto entry = preq.getTargets(0); entry.sequenceNumber = 103; preq.setTargets(0,entry); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 33: ASSERT(preqs == beforePreqs+1 && preps == beforePreps+1); {
+                beforePreqs = preqs; beforePreps = preps; guardMulti = true;
+                auto preq = testPreq(origin(9),meshMib(0)->address,90,90); preq.setTargetsArraySize(3);
+                HwmpPreqTarget t; t.flags = 4; t.address = destination; preq.setTargets(1,t); t.address = unknown; preq.setTargets(2,t);
+                sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 34: ASSERT(preqs == beforePreqs+1 && preps == beforePreps+2); guardMulti = false; beforePreqs = preqs; beforePreps = preps; guardTtl = true; {
+                auto preq = testPreq(origin(8),meshMib(0)->address,91,91,5); preq.setTtl(1); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 35: ASSERT(preqs == beforePreqs && preps == beforePreps+1); guardTtl = false; control(1,expired,10,0,0,5); break;
+            case 36:
+                ASSERT(hwmp(0)->findPath(expired)); saved = hwmp(0)->getPathInfo(expired);
+                for (int i = 0; i < 3; i++) { auto boundary = new cMessage("path-expiry-boundary",100+i); boundary->setSchedulingPriority(-1); scheduleAt(saved->expiry+SimTime(i-1,SIMTIME_NS),boundary); }
+                break;
+            case 37: ASSERT(!hwmp(0)->findPath(expired) && !hwmp(0)->getPathInfo(expired)->validated); control(1,expired,9,0,0,1000); break;
+            case 38: ASSERT(!hwmp(0)->findPath(expired) && *hwmp(0)->getPathInfo(expired)->sequence == 10); injectExpiredSource(); break;
+            case 39:
+                ASSERT(delivered == 1 && hwmp(0)->getPathInfo(expired)->expiry > SimTime(5));
+                ASSERT(!hwmp(0)->getPathInfo(expired)->validated && !hwmp(0)->findPath(expired)); control(1,expired,11); break;
+            case 40: ASSERT(hwmp(0)->findPath(expired)); saved = hwmp(0)->getPathInfo(meshMib(0)->address); beforePreqs = hwmp(0)->getSequenceNumber(); control(1,meshMib(0)->address,9999); break;
+            case 41: ASSERT(!hwmp(0)->getPathInfo(meshMib(0)->address) && hwmp(0)->getSequenceNumber() == uint32_t(beforePreqs)); {
+                auto preq = testPreq(meshMib(0)->address,unknown,999,9999); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 42: ASSERT(hwmp(0)->getSequenceNumber() == uint32_t(beforePreqs)); {
+                auto preq = testPreq(origin(10),unknown,100,1); preq.setTtl(0); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 43: ASSERT(!hwmp(0)->getPathInfo(origin(10))); {
+                auto preq = testPreq(origin(11),unknown,101,1); preq.setFlags(2); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 44: ASSERT(!hwmp(0)->getPathInfo(origin(11))); {
+                beforePreqs = preqs; auto preq = testPreq(origin(12),destination,102,1,5); preq.setFlags(2); sendHwmpTest(1,testBody(preq),meshMib(0)->address); break;
+            }
+            case 45: ASSERT(hwmp(0)->getPathInfo(origin(12)) && preqs == beforePreqs+1); emit(registerSignal("hwmpPathComplete"),1L); break;
+        }
+        delete message;
+    }
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+};
+Define_Module(HwmpPathDriver);
+namespace inet::protocoltest {
+Define_ProtocolTest(hwmp_paths) {
+    return ProtocolTest("hwmp_paths")
+        .intercept(tap("radioMedium").from("station[0]").to("station[3]").drop())
+        .intercept(tap("radioMedium").from("station[3]").to("station[0]").drop())
+        .intercept(tap("radioMedium").from("station[1]").to("station[2]").drop())
+        .intercept(tap("radioMedium").from("station[2]").to("station[1]").drop())
+        .once(on("driver").signal("primeMetric").assertValue(1).within(0.05))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.02).drop())
+        .once(on("driver").signal("hwmpPathComplete").assertValue(1).within(0.23));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple HwmpPathDriver { parameters: @class(::HwmpPathDriver); @signal[primeMetric](type=long); @signal[hwmpPathComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: HwmpPathDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = 4
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.typename = "HwmpTestManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[*].wlan[0].pathSelectionMetricId = ${metricId=1,2}
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameBitratePerReceiver = {"Test.station[1].wlan[0]":6Mbps,"Test.station[2].wlan[0]":24Mbps}
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "hwmp_paths"
+include ../../ini/_mesh.ini
+
+%extraargs: -r 0..1
+%contains: stdout
+PROTOCOLTEST hwmp_paths: PASS
+%not-contains: stdout
+PROTOCOLTEST hwmp_paths: FAIL

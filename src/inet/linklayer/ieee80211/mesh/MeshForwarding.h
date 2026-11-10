@@ -2,6 +2,8 @@
 #ifndef __INET_MESHFORWARDING_H
 #define __INET_MESHFORWARDING_H
 
+#include <list>
+
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
@@ -24,6 +26,13 @@ class INET_API MeshForwarding : public OperationalBase, public IMeshForwarding
     int initialTtl = 0;
     int cacheCapacity = 0;
     simtime_t cacheLifetime;
+    struct Pending { Packet *packet; MacAddress destination; simtime_t expiry; };
+    std::list<Pending> pending;
+    b pendingBytes = b(0);
+    int maxPendingPackets = 0;
+    b maxPendingBytes;
+    simtime_t maxPendingWait;
+    cMessage *pendingExpiryTimer = nullptr;
 
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
@@ -37,10 +46,22 @@ class INET_API MeshForwarding : public OperationalBase, public IMeshForwarding
     std::optional<MeshPath> findPath(MacAddress destination) const;
     void discard(Packet *packet);
     void deliver(Packet *packet, MacAddress source, MacAddress destination, int tid);
+    void sendResolved(Packet *packet, MacAddress destination, const std::optional<MeshPath>& path);
+    void expirePending();
+    void scheduleExpiry();
+    void clearPending();
+    bool hasPending(MacAddress destination) const;
+    Pending removePending(std::list<Pending>::iterator it);
 
   public:
+    virtual ~MeshForwarding();
     virtual void processSourceMsdu(Packet *packet) override;
     virtual void processDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override;
+    virtual void pathAvailable(MacAddress destination) override;
+    virtual void discoveryFailed(MacAddress destination) override;
+    virtual bool hasPendingSource(MacAddress destination) override;
+    int getNumPendingPackets() const { return pending.size(); }
+    b getPendingBytes() const { return pendingBytes; }
 };
 
 } // namespace ieee80211

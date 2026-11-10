@@ -1,0 +1,205 @@
+%description:
+Bounded shared source queue, byte/count inclusive limits, independent retry
+budgets, handoff pacing, exact packet deadlines, retained target min interval,
+bounded received-identity history, isolated HWMP/forwarding restart identities,
+and management-down refusal. Real radio controls provide the normal paths;
+exact deadline checks enter the production typed HWMP receive contract.
+
+%file: HwmpDiscoveryLimits.cc
+#include "mesh/HwmpTestSupport.h"
+#include "inet/common/lifecycle/LifecycleController.h"
+
+class HwmpLimitDriver : public cSimpleModule, public cListener, public LifecycleController
+{
+    MacAddress d(int n) { return MacAddress((std::string("02:00:00:00:30:")+(n < 10 ? "0" : "")+std::to_string(n)).c_str()); }
+    std::map<std::pair<int,MacAddress>,std::vector<std::pair<simtime_t,HwmpPreq>>> attempts;
+    std::map<std::string,int> discarded, transmitted;
+    int delivered = 0, groupDeliveries = 0, lateManagementDiscards = 0;
+    int expiryBoundaryCancellations = 0;
+    std::vector<uint32_t> groupSequences;
+    uint32_t beforeStopSequence = 0, beforeDownSequence = 0;
+    uint32_t beforeStopId = 0;
+    void source(int station, MacAddress destination, const char *name, int bytes = 7) {
+        auto packet = fixtureMsdu(name,destination);
+        if (bytes != 7) { packet->popAtFront(packet->getDataLength()); packet->insertAtFront(makeShared<BytesChunk>(std::vector<uint8_t>(bytes,0))); }
+        sendDirect(packet,meshInterface(station)->getSubmodule("llc")->gate("lowerLayerOut"));
+    }
+    template<typename Operation> void lifecycle(cModule *module) {
+        auto operation = new Operation(); LifecycleOperation::StringMap parameters;
+        operation->initialize(module,parameters); ASSERT(initiateOperation(operation));
+    }
+    void receivedAtDeadline(MacAddress destination) {
+        auto prep = testPrep(destination,meshMib(0)->address,1,0,1000);
+        hwmp(0)->processHwmp(testBody(prep),meshMib(1)->address,meshMib(0)->address);
+    }
+    size_t count(int station, MacAddress target) { return attempts[{station,target}].size(); }
+    void seenControl(MacAddress origin, uint32_t id, int lifetime = 10) {
+        auto preq = testPreq(origin,d(9),id,1,5); preq.setTtl(1); preq.setLifetime(lifetime);
+        sendHwmpTest(3,testBody(preq),meshMib(2)->address);
+    }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        for (auto name : {"hwmpTestHandoff","packetDropped","packetSentToLower","packetSentToUpper"}) network->subscribe(registerSignal(name),this);
+        network->subscribe(registerSignal("meshManagementDiscarded"),this);
+        network->subscribe(registerSignal("hwmpDiscoveryChanged"),this);
+        const double times[] = {5,50,60,61,81,82,91.999999,92,94,99,100,105,108,110.5,115,119,120,120.5,125,125.999999,126,130,138,140,150,160,165,170,172,175,180,181,181.000001,185,212.000001,215,230,240,265,280};
+        for (int i = 0; i < 40; i++) scheduleAt(SimTime(times[i]/1000),new cMessage("limit-case",i));
+        scheduleAt(SimTime(261999999,SIMTIME_NS),new cMessage("before-deadline-reply",100));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *details) override {
+        if (source == hwmp(0) && signal == Hwmp::discoveryChangedSignal && simTime() == SimTime(126,SIMTIME_MS)) {
+            auto change = check_and_cast<Hwmp::DiscoveryChange *>(details);
+            if (change->destination == d(1)) {
+                ASSERT(!value && meshForwarding(0)->getNumPendingPackets() == 0);
+                expiryBoundaryCancellations++;
+            }
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, long, cObject *) override {
+        if (source == meshManagement(4) && signal == registerSignal("meshManagementDiscarded") && !meshManagement(4)->isMeshManagementActive()) lateManagementDiscards++;
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        if (signal == registerSignal("packetDropped") && (source == meshForwarding(0) || source == meshForwarding(2) || source == meshForwarding(4))) discarded[packet->getName()]++;
+        if (signal == registerSignal("packetSentToUpper") && source == meshInterface(5)->getSubmodule("mac")) {
+            if (std::string(packet->getName()) == "restart-unicast" || std::string(packet->getName()) == "management-recovered") delivered++;
+            if (std::string(packet->getName()) == "persistent-group") groupDeliveries++;
+        }
+        for (int station : {0,2,4}) {
+            if (signal == registerSignal("packetSentToLower") && source == meshInterface(station)->getSubmodule("mac")) {
+                if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>())) {
+                    transmitted[packet->getName()]++;
+                    if (std::string(packet->getName()) == "persistent-group") {
+                        auto header = packet->peekAtFront<Ieee80211MeshDataHeader>();
+                        groupSequences.push_back(packet->peekDataAt<Ieee80211MeshControl>(header->getChunkLength())->getSequenceNumber());
+                    }
+                }
+            }
+            if (signal != registerSignal("hwmpTestHandoff") || source != meshManagement(station)) continue;
+            auto body = packet->peekAtFront<Ieee80211HwmpFrame>();
+            for (size_t i = 0; i < body->getPreqsArraySize(); i++) {
+                const auto& preq = body->getPreqs(i); if (preq.getOriginator() != meshMib(station)->address) continue;
+                auto& history = attempts[{station,preq.getTargets(0).address}];
+                if (!history.empty()) {
+                    ASSERT(preq.getDiscoveryId() != history.back().second.getDiscoveryId());
+                    ASSERT(Hwmp::isNewer(preq.getOriginatorSequenceNumber(),history.back().second.getOriginatorSequenceNumber()));
+                    ASSERT(simTime()-history.back().first >= (station == 0 ? SimTime(50,SIMTIME_MS) : SimTime(10,SIMTIME_MS)));
+                }
+                history.push_back({simTime(),preq});
+            }
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->getKind() == 100) { receivedAtDeadline(d(6)); delete message; return; }
+        switch (message->getKind()) {
+            case 0: for (int s : {0,2,4}) meshManagement(s)->openPeer(meshMib(s+1)->address); break;
+            case 1: for (int s : {0,2,4}) ASSERT(meshMib(s)->isMeshPeerEstablished(meshMib(s+1)->address)); break;
+            case 2:
+                source(0,d(1),"short-first"); source(0,d(1),"short-second"); source(2,d(1),"capacity-a"); source(2,d(2),"capacity-b"); source(2,d(3),"capacity-overflow"); source(4,d(1),"advance-a"); break;
+            case 3:
+                ASSERT(meshForwarding(2)->getNumPendingPackets() == 2 && meshForwarding(2)->getPendingBytes() == B(14));
+                ASSERT(discarded["capacity-overflow"] == 1 && count(2,d(3)) == 0 && !hwmp(2)->isDiscoveryActive(d(3))); break;
+            case 4:
+                for (int n : {1,2}) { ASSERT(count(2,d(n)) == 2 && !hwmp(2)->isDiscoveryActive(d(n))); ASSERT((attempts[{2,d(n)}][1].first-attempts[{2,d(n)}][0].first == SimTime(10,SIMTIME_MS))); }
+                ASSERT(meshForwarding(2)->getNumPendingPackets() == 0 && meshForwarding(2)->getPendingBytes() == b(0));
+                ASSERT(discarded["capacity-a"] == 1 && discarded["capacity-b"] == 1); source(4,d(2),"advance-b"); break;
+            case 5: source(2,d(4),"byte-overflow",22); source(2,d(1),"fresh-budget"); break;
+            case 6: ASSERT(meshForwarding(0)->getNumPendingPackets() == 2 && meshForwarding(0)->getPendingBytes() == B(14) && count(0,d(1)) == 1); break;
+            case 7:
+                ASSERT(!meshForwarding(0)->hasPendingSource(d(1)) && !hwmp(0)->isDiscoveryActive(d(1)) && count(0,d(1)) == 1); lifecycle<ModuleStopOperation>(hwmp(0)); break;
+            case 8: lifecycle<ModuleStartOperation>(hwmp(0)); source(0,d(1),"coincident-expiry"); break;
+            case 9: ASSERT(hwmp(0)->isDiscoveryActive(d(1)) && hwmp(0)->getDiscoveryAttempts(d(1)) == 0 && hwmp(0)->getDiscoveryDeadline(d(1)) == SimTime(110,SIMTIME_MS)); break;
+            case 10: seenControl(d(6),1); break;
+            case 11: ASSERT(hwmp(2)->getSeenIdentityCount() == 1); seenControl(d(7),2); source(4,d(3),"advance-c"); break;
+            case 12: ASSERT(!hwmp(2)->getPathInfo(d(7))); seenControl(d(6),1); break;
+            case 13: ASSERT(count(0,d(1)) == 2 && hwmp(0)->getDiscoveryAttempts(d(1)) == 1); break;
+            case 14: seenControl(d(7),2); break;
+            case 15: ASSERT(!hwmp(2)->getPathInfo(d(7))); break;
+            case 16:
+                seenControl(d(7),2); beforeStopSequence = hwmp(4)->getSequenceNumber();
+                beforeStopId = attempts[{4,d(3)}].back().second.getDiscoveryId(); ASSERT(beforeStopSequence > 2);
+                lifecycle<ModuleStopOperation>(hwmp(4)); ASSERT(meshForwarding(4)->getNumPendingPackets() == 0 && discarded["advance-c"] == 1); break;
+            case 17: ASSERT(!hwmp(4)->isDiscoveryActive(d(3)) && !hwmp(4)->getPathInfo(d(3))); break;
+            case 18: ASSERT(hwmp(2)->getPathInfo(d(7)) && hwmp(2)->getSeenIdentityCount() == 1); lifecycle<ModuleStartOperation>(hwmp(4)); break;
+            case 19: ASSERT(meshForwarding(0)->getNumPendingPackets() == 1); break;
+            case 20: ASSERT(count(0,d(1)) == 2); break;
+            case 21: ASSERT(expiryBoundaryCancellations == 1 && meshForwarding(0)->getNumPendingPackets() == 0 && count(0,d(1)) == 2); source(4,meshMib(5)->address,"restart-unicast"); break;
+            case 22:
+                ASSERT(delivered == 1 && hwmp(4)->getSequenceNumber() > beforeStopSequence);
+                ASSERT((attempts[{4,meshMib(5)->address}].back().second.getDiscoveryId() > beforeStopId));
+                ASSERT(meshMib(4)->isMeshPeerEstablished(meshMib(5)->address)); break;
+            case 23: source(0,d(4),"at-deadline"); break;
+            case 24: source(4,MacAddress("01:00:5e:00:00:05"),"persistent-group"); break;
+            case 25: ASSERT(groupDeliveries == 1); lifecycle<ModuleStopOperation>(meshForwarding(4)); break;
+            case 26: lifecycle<ModuleStartOperation>(meshForwarding(4)); break;
+            case 27: source(4,MacAddress("01:00:5e:00:00:05"),"persistent-group"); break;
+            case 28: receivedAtDeadline(d(4)); break;
+            case 29: ASSERT(groupDeliveries == 2 && groupSequences.size() == 2 && groupSequences[1] == groupSequences[0]+1); break;
+            case 30: emit(registerSignal("managementDown"),1L); source(0,d(5),"after-deadline"); lifecycle<ModuleStopOperation>(meshManagement(4)); meshManagement(5)->closePeer(meshMib(4)->address); break;
+            case 31: beforeDownSequence = hwmp(4)->getSequenceNumber(); source(4,d(8),"management-down"); break;
+            case 32: ASSERT(hwmp(4)->getSequenceNumber() == beforeDownSequence && count(4,d(8)) == 0 && !hwmp(4)->isDiscoveryActive(d(8)) && hwmp(4)->getDiscoveryDeadline(d(8)) == SIMTIME_ZERO); ASSERT(discarded["management-down"] == 1 && meshForwarding(4)->getNumPendingPackets() == 0); break;
+            case 33: ASSERT(lateManagementDiscards > 0); lifecycle<ModuleStartOperation>(meshManagement(4)); break;
+            case 34: receivedAtDeadline(d(5)); break;
+            case 35:
+                ASSERT(transmitted["coincident-expiry"] == 0 && discarded["coincident-expiry"] == 1 && transmitted["at-deadline"] == 0 && transmitted["after-deadline"] == 0);
+                ASSERT(discarded["short-first"] == 1 && discarded["at-deadline"] == 1 && discarded["after-deadline"] == 1);
+                ASSERT(count(2,d(1)) == 4 && meshForwarding(2)->getNumPendingPackets() == 0 && discarded["byte-overflow"] == 1 && count(2,d(4)) == 0); break;
+            case 36: ASSERT(meshManagement(5)->getPeerState(meshMib(4)->address) == Ieee80211MgmtMesh::IDLE); meshManagement(4)->openPeer(meshMib(5)->address); source(0,d(6),"before-deadline"); break;
+            case 37: source(4,meshMib(5)->address,"management-recovered"); break;
+            case 38: ASSERT(delivered == 2 && meshMib(4)->isMeshPeerEstablished(meshMib(5)->address) && transmitted["before-deadline"] == 1); break;
+            case 39: ASSERT(meshForwarding(0)->getNumPendingPackets() == 0 && meshForwarding(0)->getPendingBytes() == b(0)); emit(registerSignal("hwmpLimitsComplete"),1L); break;
+        }
+        delete message;
+    }
+};
+Define_Module(HwmpLimitDriver);
+namespace inet::protocoltest {
+Define_ProtocolTest(hwmp_limits) {
+    return ProtocolTest("hwmp_limits")
+        .once(on("driver").signal("managementDown").assertValue(1).within(0.181))
+        .once(on("driver").signal("hwmpLimitsComplete").assertValue(1).within(0.11));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple HwmpLimitDriver { parameters: @class(::HwmpLimitDriver); @signal[managementDown](type=long); @signal[hwmpLimitsComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: HwmpLimitDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = 6
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.typename = "HwmpTestManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[0].wlan[0].mac.ds.maxPendingPackets = 2
+*.station[0].wlan[0].mac.ds.maxPendingBytes = 14B
+*.station[0].wlan[0].mac.ds.maxPendingWait = 32ms
+*.station[0].wlan[0].pathSelection.preqMinInterval = 50ms
+*.station[0].wlan[0].pathSelection.netDiameterTraversalTime = 8ms
+*.station[2..3].wlan[0].radio.channelNumber = 3
+*.station[2].wlan[0].mac.ds.maxPendingPackets = 2
+*.station[2].wlan[0].mac.ds.maxPendingBytes = 21B
+*.station[2].wlan[0].mac.ds.maxPendingWait = 200ms
+*.station[2].wlan[0].pathSelection.maxPreqRetries = 1
+*.station[2].wlan[0].pathSelection.preqMinInterval = 10ms
+*.station[2].wlan[0].pathSelection.netDiameterTraversalTime = 5ms
+*.station[2].wlan[0].pathSelection.seenIdentityCapacity = 1
+*.station[4..5].wlan[0].radio.channelNumber = 6
+*.station[4].wlan[0].pathSelection.maxPreqRetries = 1
+*.station[4].wlan[0].pathSelection.preqMinInterval = 10ms
+*.station[4].wlan[0].pathSelection.netDiameterTraversalTime = 5ms
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "hwmp_limits"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST hwmp_limits: PASS
+%not-contains: stdout
+PROTOCOLTEST hwmp_limits: FAIL

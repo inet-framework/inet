@@ -124,13 +124,13 @@ Source: `ieee80211-2024:clause:14.9.3`, PDF 3224. Strength: normative exchange. 
 
 ### IEEE80211-2024-MESH-SEQUENCE
 
-A station increments its own HWMP sequence number before discovery. A target answering a PREQ updates its own number to one more than the circular maximum of its current number and the requested target number. Other destinations' sequence history changes from received protocol information, except the specified next-hop failure increment. Comparisons use circular modulo-2^32 arithmetic.
+A station increments its own HWMP sequence number before discovery. A target answering a PREQ updates its own number to one more than the circular maximum of its current number and the known requested target number. USN=1 makes the requested target-sequence field reserved, so its bytes do not supply a sequence baseline. Other destinations' sequence history changes from received protocol information, except the specified next-hop failure increment. Comparisons use circular modulo-2^32 arithmetic; an exact half-range pair does not supply a unique circular maximum under these rules.
 
-Source: `ieee80211-2024:clause:14.11.8.3`, PDF 3233–3234. Strength: shall. Observation: wire and path state.
+Sources: `ieee80211-2024:clause:14.11.8.3`, PDF 3233–3234; Figure 9-605, PDF 1225, source span `5340357:5341739`. Strength: shall, with the stated half-range source ambiguity. Observation: wire and path state.
 
 ### IEEE80211-2024-MESH-PATH-UPDATE
 
-PREQ establishes reverse information toward the originator; PREP establishes information toward its target. A fresher sequence number wins; equal sequence information replaces a path when its updated metric is better. Add the receiving station's outgoing cost toward the transmitter. PREP transmission validates the path toward its originator and PREP reception validates the path toward its target. Expiry or an unusable next hop invalidates the corresponding forwarding information.
+PREQ establishes reverse information toward the originator; PREP establishes information toward its target. A fresher sequence number wins; equal sequence information replaces a path when its updated metric is better. Add the receiving station's outgoing cost toward the transmitter. A created direct-neighbor record has unknown sequence; refreshing it retains its sequence. Lifetime updates retain the later of the existing deadline and the received lifetime added to now. PREQ alone does not validate a new reverse path: PREP transmission validates the path toward its originator and PREP reception validates the path toward its target. Expiry or an unusable next hop invalidates the corresponding forwarding information.
 
 Sources: `ieee80211-2024:clause:14.11.8.4`, `ieee80211-2024:table:14-9`, `ieee80211-2024:table:14-10`, PDF 3234–3235. Strength: shall. Observation: path state and wire.
 
@@ -150,7 +150,7 @@ The receipt guard in 14.11.9.4.3 compares the target sequence in its second alte
 
 ### IEEE80211-2024-MESH-PREP-CASES
 
-An intermediate reply requires TO=0, active forwarding information for the target, retained target sequence at least the requested sequence and nonzero lifetime. It uses retained target sequence/metric but copies the triggering PREQ lifetime. A target reply uses metric zero and its updated target sequence; its lifetime also comes from the PREQ. Propagation increments hop count, decrements TTL and adds outgoing-to-transmitter cost. Propagating a PREP adds the next hop toward the originator to the target's precursors and the next hop toward the target to the originator's precursors, with the applicable forwarding lifetimes. Intermediate PREQ replies establish the corresponding precursor relationships.
+An intermediate reply requires TO=0, active forwarding information for the target and nonzero lifetime. With USN=0 its retained target sequence must be at least the requested sequence; USN=1 imposes no requested-sequence freshness floor because that field is reserved. It uses retained target sequence/metric but copies the triggering PREQ lifetime. A target reply uses metric zero and its updated target sequence; its lifetime also comes from the PREQ. Propagation increments hop count, decrements TTL and adds outgoing-to-transmitter cost. Propagating a PREP adds the next hop toward the originator to the target's precursors and the next hop toward the target to the originator's precursors, with the applicable forwarding lifetimes. Intermediate PREQ replies establish the corresponding precursor relationships.
 
 Sources: `ieee80211-2024:clause:14.11.10.3`, PDF 3246–3247, source span `13657925:13659777`; Tables 14-18–14-20, PDF 3247–3249, source span `13659777:13666300`; `ieee80211-2024:clause:14.11.10.4.3`, PDF 3249–3250; `ieee80211-2024:clause:14.11.9.4.3`, PDF 3245–3246. Strength: shall within the corresponding case. Observation: wire and precursor state.
 

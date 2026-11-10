@@ -17,9 +17,9 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | FORWARDING | MeshForwarding.test | C4 | hwmp-c4-forwarding.md | PASS with fixture path provider |
 | GROUP-FORWARDING | MeshGroupForwarding.test | C4 | hwmp-c4-forwarding.md | PASS |
 | AIRTIME | MeshAirtimeMetric.test | C5, H2, H3, P3 | hwmp-c5-airtime.md | PASS for unaggregated OFDM; aggregation/high-throughput extensions remain later stages |
-| DISCOVERY | HwmpDiscovery.test | C6 | hwmp-c6-discovery.md | NOT_RUN |
-| PATH-SELECTION | HwmpPathSelection.test | C6 | hwmp-c6-discovery.md | NOT_RUN |
-| DISCOVERY-LIMITS | HwmpDiscoveryLimits.test | C6 | hwmp-c6-discovery.md | NOT_RUN |
+| DISCOVERY | HwmpDiscovery.test | C6 | hwmp-c6-discovery.md | PASS with production HWMP and both metric IDs |
+| PATH-SELECTION | HwmpPathSelection.test | C6 | hwmp-c6-discovery.md | PASS, separate ID-1/ID-2 runs |
+| DISCOVERY-LIMITS | HwmpDiscoveryLimits.test | C6 | hwmp-c6-discovery.md | PASS |
 | PATH-ERROR | HwmpPathError.test | C7 | hwmp-c7-errors.md | NOT_RUN |
 | REDISCOVERY | HwmpRediscovery.test | C7 | hwmp-c7-errors.md | NOT_RUN |
 | ROOT-PREQ | HwmpProactivePreq.test | C8 | hwmp-c8-roots.md | NOT_RUN |
@@ -55,6 +55,11 @@ These are selected modeling policies, not requirements attributed to IEEE. The [
 | Duplicate retention | One second; seed locally originated group identity | Bounded duplicate history, not infinite duplicate exclusion |
 | Transit A-MSDU | Preserve constituent list and mesh forwarding-unit identity; do not split/merge transit units | Conservative endpoint-profile policy, avoiding unprovided identity rewriting rules |
 | Sequence comparison | Unsigned difference strictly between zero and 2^31 is newer; exact half-range unordered | Avoids signed overflow and chooses an explicit resolution of ambiguous serial ordering |
+| Target reply sequence | Known requested sequence is the increment baseline only if serial-newer; otherwise use own sequence | Resolves the unordered half-range locally; USN=1 reserved bytes never supply a baseline |
+| Received PREQ identities | Received-Lifetime retention, capacity 4096; drop new identity before mutation when full | Bounds history without silently evicting an unexpired identity; no infinite duplicate-history guarantee |
+| HWMP pacing anchor | Successful ownership handoff to management | Type-3 service request has no confirmation; this does not guarantee actual PPDU spacing after contention or sleep buffering |
+| Self-destination admission | Admit reverse next hop on target PREP generation and actual transmitter on accepted local-originator PREP reception | Derived integration bookkeeping for required final-destination admission, including validation-only replies; no learned route to self |
+| Reflected control | Reject received PREQ.originator=self and PREP.target=self before learning | Explicit no-self-learning policy, preserving node-owned sequence authority; normal target/reply cases remain supported |
 | Encoded cost | Ceiling conversion; finite clamp to [1, UINT32_MAX]; wide saturating path addition | Prevents cost wraparound from favoring a prohibitively expensive path |
 | Error samples | Per-direction `ef = 7/8 * ef + 1/8 * sample`, initially zero | Actual unicast payload ACK success=0 or on-air ACK timeout=1, each attempt separately; excludes holds/internal collision/group/management/QoS Null |
 | Error approximation | Use traffic samples to estimate nominal-frame corruption | Assumes size-independent frame-error probability; not a claim of measurement for every size |
@@ -65,7 +70,7 @@ These are selected modeling policies, not requirements attributed to IEEE. The [
 | Estimate reset | Peer closure or accepted PHY tuple change resets ef/n; aggregation permission change resets n only | Samples belong to the current relationship and transmission profile |
 | Deep-sleep maintenance | Every ten local beacon periods, listen to established peer with lowest MAC address; invalid reference holds awake for reacquisition | Standard leaves deep-sleep synchronization algorithm local |
 | Mode transition trigger | Explicit peer policy; lower-activity commitment follows acknowledged exchange | Requested mode differs from effective mode while confirmation is pending |
-| Supported lifecycle | Isolated mesh owner cleanup/restart; operational topology failure | Existing whole-NIC MAC child cleanup does not establish safe node stop/start |
+| Supported lifecycle | Isolated mesh owner cleanup/restart; operational topology failure; preserve node-owned sequences and required pacing history | Clear volatile paths, pending queues and samples; existing whole-NIC MAC child cleanup does not establish safe node stop/start |
 
 The independent arithmetic control uses O=100 microseconds, r=100 Mb/s, ef=0 and Bt=8192 bits. Expected ID-1 cost is 18; expected ID-2 costs are 18192 at n=1 and 10692 at n=4. A three-MSDU PPDU updates n from 1 to 5/4. An initial failed attempt updates ef to 1/8; its successful retry updates ef to 7/64. These examples define test oracles; they are not executed test results.
 
@@ -87,7 +92,9 @@ The source PDF was used for mathematical grouping in the airtime formula, mesh A
 | C3 peering and timing | PASS, 3/3 | Fresh debug build, live peering/fault/timing fixtures; raw `/tmp/inet-mesh-c3-raw/` |
 | C4 native forwarding and peer retirement | PASS, 2/2 | Fixture path provider, actual radio data and three retirement boundaries |
 | C5 directional airtime and reporting | PASS, 1/1 new protocol; 5/5 units; 2/2 modules | Actual OFDM DATA/ACK outcomes, both metric IDs, retry/retirement boundaries and cleanup-complete publication |
-| Remaining live mesh behavior | NOT_RUN | HWMP, HT/VHT and power save remain future stages |
+| C6 reactive HWMP and pending source queues | PASS, 3/3 new files (4 runs) | Production discovery, directional selection, bounded queues/retries, exact deadlines and isolated-owner lifecycle |
+| Remaining live mesh behavior | NOT_RUN | Path errors, proactive roots, HT/VHT and power save remain future stages |
+| C5 committed release compilation checkpoint | PASS | Isolated clean `7264369846`, matching release dependencies; no warning/error |
 | Release compilation | NOT_RUN | Required before push |
 | C2 legacy protocol controls | 4/5 test files PASS; one preexisting unexpected failure | Raw Block Ack retry run 0 has protocol deadline failure, run 1 has runtime abort; immediate parent reproduces both at identical time/event |
 | Parent legacy fingerprints | PASS, 19 simulations / 56 checks | Native stored budgets, all expected PASS; baseline unchanged |
@@ -132,3 +139,13 @@ Execution, normalized and per-case records are `/tmp/inet-mesh-c4-checkpoint-fin
 C5 ran on `03489ad1f9` plus its working diff after a fresh matching `make MODE=debug -j4`, exit 0. The new General/run-0/seed-0 production fixture passed with both metric IDs: actual DATA/ACK attempts drive the directional EWMA and encoded costs, terminal timeout flags, local metric replies, accepted optional-rate updates and rejected fixed-mode incompatibility. Strengthened cases check collision-only exhaustion, TTL/pre-transmission drops, retired callbacks, both corrupt-response timing outcomes, Close interruption, fresh re-peering and isolated management stop with queued data. A test-only transparent recipient-service proxy verifies that the real recipient cleanup returns before the synchronous closed-peer observer runs; no production telemetry was added.
 
 The final protocol selection passed all seven mesh files and five of six legacy controls. `WifiBlockAckDataRetry` retained its independently reproduced run-0 protocol failure and run-1 runtime error at the same event/time boundaries; it remains a failed control. All five selected units passed, including both-ID arithmetic, below-one aggregation rejection, rounding and saturation; the two frame-sequence/Rx completion module controls also passed. Exact selectors, raw artifacts and boundaries are recorded in the [C5 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c5-airtime.md). Final logs are `/tmp/inet-mesh-c5-final-{build,protocol,unit,module}.log`, with retained raw artifacts under `/tmp/inet-mesh-c5-raw/`. Scoped architecture, release-note format and whitespace checks passed. Three reviewer diagrams rendered and were visually inspected under `audit/hwmp-implementation/diagrams-c5/`. This establishes the selected unaggregated OFDM estimator/reporting policy; production HWMP and aggregation remain subsequent stages.
+
+An isolated clean worktree at committed C5 `7264369846` also completed `make MODE=release -j4`, exit 0, with matching release OMNeT++ dependencies and no compiler warning/error. Features and the baseline store remained unchanged; no simulations ran. Records are `/tmp/inet-mesh-c5-release-checkpoint.md` and `/tmp/inet-mesh-c5-release-checkpoint-record.json`, with the build log beside them and copies under `audit/hwmp-implementation/`. This intermediate compilation checkpoint does not replace the final combined-tree release build.
+
+## C6 reactive discovery execution
+
+C6 ran on `7264369846` plus its working diff after a fresh matching debug build. All three new protocol files passed; path selection executes separate ID-1 and ID-2 runs. They exercise actual three-station control/data exchange, both PREQ- and PREP-driven pending reverse release, asymmetric directional costs, freshness/wrap/half-range/saturation, flags and multiple targets, unsupported/malformed/nonpeer admission, bounded shared queues, retry budgets, exact expiry and preserved identities/pacing across isolated restarts. The [C6 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c6-discovery.md) explains each oracle and the model policies separately from IEEE requirements.
+
+The final 16-file protocol batch passed all ten mesh files and five of six legacy controls. `WifiBlockAckDataRetry` retained both exact parent failure boundaries. Five selected units and two frame-sequence/Rx module controls passed. Initial expanded-fixture failures were corrected oracles: later DATA changed the cost estimate after control receipt, and a purported worse metric was actually cheaper in ID-2 units. The late-Close failure at 180.04 ms/event 1714 was a real isolated-management-down defect; the narrow mesh down-input discard fixed it, and the final fixture keeps that delivery reachable rather than isolating the radio.
+
+Raw final fixtures/logs are under `/tmp/inet-mesh-c6-raw/{protocol-final,unit-final,module-final}/`; build and category logs use `/tmp/inet-mesh-c6-*`. Scoped architecture, changed NED/MSG naming, source-seal, release/migration format and whitespace checks passed. Existing broader naming/interface findings remain explicitly outside those scoped passes. All three diagrams rendered with Mermaid 10.9.3 and Firefox and were visually inspected under `audit/hwmp-implementation/diagrams-c6/`. No baseline, declared expectation, source seal or exception ledger was changed. Final combined-tree compilation/fingerprints remain separate gates; path-error/proactive/high-throughput/power-save claims remain pending their stages.

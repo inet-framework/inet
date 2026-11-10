@@ -2,6 +2,8 @@
 
 #include "inet/linklayer/ieee80211/mesh/MeshForwarding.h"
 
+#include <algorithm>
+
 #include "inet/linklayer/common/MacAddressTag_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 #include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
@@ -25,18 +27,131 @@ void MeshForwarding::initialize(int stage)
         initialTtl = par("initialTtl");
         cacheCapacity = par("duplicateCacheCapacity");
         cacheLifetime = par("duplicateCacheLifetime");
+        maxPendingPackets = par("maxPendingPackets");
+        maxPendingBytes = B(par("maxPendingBytes").intValue());
+        maxPendingWait = par("maxPendingWait");
+        if (maxPendingPackets < 1 || maxPendingBytes <= b(0) || maxPendingWait <= SIMTIME_ZERO)
+            throw cRuntimeError("Invalid pending mesh source queue policy");
+        pendingExpiryTimer = new cMessage("meshPendingExpiry");
+        pendingExpiryTimer->setSchedulingPriority(1);
         mib->setMeshForwarding(par("forwarding"));
         if (initialTtl < 1 || initialTtl > 255 || cacheCapacity < 1 || cacheLifetime <= SIMTIME_ZERO)
             throw cRuntimeError("Invalid mesh TTL or duplicate-cache policy");
         WATCH(nextSequence);
         WATCH_EXPR("duplicateCacheSize", recentFrames.size());
+        WATCH_EXPR("pendingPackets", pending.size());
+        WATCH(pendingBytes);
     }
 }
 
-void MeshForwarding::handleMessageWhenUp(cMessage *) { throw cRuntimeError("Mesh forwarding uses direct frame contracts"); }
-void MeshForwarding::handleStartOperation(LifecycleOperation *) { recentFrames.clear(); nextSequence = 0; }
-void MeshForwarding::handleStopOperation(LifecycleOperation *) { recentFrames.clear(); }
-void MeshForwarding::handleCrashOperation(LifecycleOperation *) { recentFrames.clear(); }
+void MeshForwarding::handleMessageWhenUp(cMessage *message)
+{
+    if (message != pendingExpiryTimer)
+        throw cRuntimeError("Unknown mesh forwarding timer");
+    expirePending();
+}
+void MeshForwarding::handleStartOperation(LifecycleOperation *) { recentFrames.clear(); }
+void MeshForwarding::handleStopOperation(LifecycleOperation *) { clearPending(); recentFrames.clear(); }
+void MeshForwarding::handleCrashOperation(LifecycleOperation *) { clearPending(); recentFrames.clear(); }
+
+MeshForwarding::~MeshForwarding()
+{
+    cancelAndDelete(pendingExpiryTimer);
+    for (const auto& entry : pending)
+        delete entry.packet;
+}
+
+bool MeshForwarding::hasPending(MacAddress destination) const
+{
+    return std::any_of(pending.begin(),pending.end(),[&](const Pending& entry) { return entry.destination == destination; });
+}
+
+MeshForwarding::Pending MeshForwarding::removePending(std::list<Pending>::iterator it)
+{
+    auto entry = *it;
+    pendingBytes -= entry.packet->getDataLength();
+    pending.erase(it);
+    return entry;
+}
+
+void MeshForwarding::scheduleExpiry()
+{
+    cancelEvent(pendingExpiryTimer);
+    if (pending.empty() || operationalState != OPERATING)
+        return;
+    auto deadline = pending.front().expiry;
+    for (const auto& entry : pending)
+        deadline = std::min(deadline,entry.expiry);
+    scheduleAt(deadline,pendingExpiryTimer);
+}
+
+void MeshForwarding::expirePending()
+{
+    while (true) {
+        auto it = std::find_if(pending.begin(),pending.end(),[&](const Pending& entry) { return simTime() >= entry.expiry; });
+        if (it == pending.end())
+            break;
+        auto entry = removePending(it);
+        if (!hasPending(entry.destination) && pathSelection)
+            pathSelection->cancelDiscovery(entry.destination);
+        discard(entry.packet);
+    }
+    scheduleExpiry();
+}
+
+void MeshForwarding::clearPending()
+{
+    cancelEvent(pendingExpiryTimer);
+    std::set<MacAddress> destinations;
+    auto owned = std::move(pending);
+    pending.clear();
+    pendingBytes = b(0);
+    for (const auto& entry : owned) {
+        destinations.insert(entry.destination);
+        delete entry.packet;
+    }
+    if (pathSelection)
+        for (auto destination : destinations)
+            pathSelection->cancelDiscovery(destination);
+}
+
+void MeshForwarding::pathAvailable(MacAddress destination)
+{
+    Enter_Method("pathAvailable");
+    if (operationalState != OPERATING)
+        return;
+    expirePending();
+    while (hasPending(destination)) {
+        auto path = findPath(destination);
+        if (!path)
+            break;
+        auto it = std::find_if(pending.begin(),pending.end(),[&](const Pending& entry) { return entry.destination == destination; });
+        auto entry = removePending(it);
+        if (!hasPending(destination))
+            pathSelection->cancelDiscovery(destination);
+        sendResolved(entry.packet,destination,path);
+    }
+    scheduleExpiry();
+}
+
+void MeshForwarding::discoveryFailed(MacAddress destination)
+{
+    Enter_Method("discoveryFailed");
+    while (hasPending(destination)) {
+        auto it = std::find_if(pending.begin(),pending.end(),[&](const Pending& entry) { return entry.destination == destination; });
+        auto entry = removePending(it);
+        discard(entry.packet);
+    }
+    scheduleExpiry();
+}
+
+bool MeshForwarding::hasPendingSource(MacAddress destination)
+{
+    Enter_Method("hasPendingSource");
+    if (operationalState != OPERATING) return false;
+    expirePending();
+    return hasPending(destination);
+}
 
 void MeshForwarding::discard(Packet *packet)
 {
@@ -82,8 +197,26 @@ void MeshForwarding::processSourceMsdu(Packet *packet)
     take(packet);
     if (operationalState != OPERATING) { discard(packet); return; }
     auto destination = packet->getTag<MacAddressReq>()->getDestAddress();
+    if (destination.isUnspecified()) { discard(packet); return; }
+    expirePending();
+    if (!destination.isMulticast() && hasPending(destination))
+        pathAvailable(destination);
     auto path = destination.isMulticast() ? std::nullopt : findPath(destination);
-    if (destination.isUnspecified() || (!destination.isMulticast() && !path)) { discard(packet); return; }
+    if (!destination.isMulticast() && !path) {
+        if (!pathSelection || pending.size() >= size_t(maxPendingPackets) || packet->getDataLength() > maxPendingBytes-pendingBytes) {
+            discard(packet); return;
+        }
+        pending.push_back({packet,destination,simTime()+maxPendingWait});
+        pendingBytes += packet->getDataLength();
+        scheduleExpiry();
+        pathSelection->startDiscovery(destination);
+        return;
+    }
+    sendResolved(packet,destination,path);
+}
+
+void MeshForwarding::sendResolved(Packet *packet, MacAddress destination, const std::optional<MeshPath>& path)
+{
     packet->addTagIfAbsent<LlcProtocolTag>()->setProtocol(packet->getTag<PacketProtocolTag>()->getProtocol());
     auto header = makeShared<Ieee80211MeshDataHeader>();
     header->setType(ST_DATA_WITH_QOS);

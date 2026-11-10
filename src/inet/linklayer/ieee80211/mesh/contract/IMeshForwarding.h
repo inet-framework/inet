@@ -12,6 +12,10 @@ class INET_API IMeshForwarding : public IDs
   public:
     // Takes ownership of an LLC MSDU before MAC encapsulation.
     virtual void processSourceMsdu(Packet *packet) = 0;
+    virtual void pathAvailable(MacAddress destination) = 0;
+    virtual void discoveryFailed(MacAddress destination) = 0;
+    // Expires due source packets before reporting discovery eligibility.
+    virtual bool hasPendingSource(MacAddress destination) = 0;
 };
 
 } // namespace ieee80211

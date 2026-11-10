@@ -172,6 +172,7 @@ cmdenv-express-mode = true
 *.station[*].wlan[0].mac.ds.initialTtl = 3
 *.station[*].wlan[0].mac.fcsMode = "computed"
 *.station[1..2].wlan[0].pathSelection.typename = "MeshFixturePaths"
+*.station[*].wlan[0].pathSelection.typename = ""
 *.station[2].wlan[0].mac.ds.forwarding = false
 # Separate the hidden relay transmissions using legal configured EDCA waits.
 *.station[3].wlan[0].mac.hcf.edca.edcaf[1].cwMin = 0

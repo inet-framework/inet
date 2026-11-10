@@ -42,6 +42,7 @@ void Ieee80211MgmtMesh::initialize(int stage)
     Ieee80211MgmtBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         linkMetric.reference(this,"linkMetricModule",true);
+        pathSelection.reference(this,"pathSelectionModule",false);
         mib->mode = Ieee80211Mib::MESH;
         MeshConfiguration configuration;
         if (par("pathSelectionMetricId").intValue() != 1 && par("pathSelectionMetricId").intValue() != 2)
@@ -137,6 +138,15 @@ void Ieee80211MgmtMesh::handleMessageWhenUp(cMessage *message)
         Ieee80211MgmtBase::handleMessageWhenUp(message);
 }
 
+void Ieee80211MgmtMesh::handleMessageWhenDown(cMessage *message)
+{
+    auto packet = dynamic_cast<Packet *>(message);
+    if (!message->isSelfMessage() && packet && message->arrivedOn("macIn"))
+        dropManagementFrame(packet);
+    else
+        Ieee80211MgmtBase::handleMessageWhenDown(message);
+}
+
 void Ieee80211MgmtMesh::dropManagementFrame(Packet *packet)
 {
     emit(meshManagementDiscardedSignal, 1L);
@@ -152,8 +162,10 @@ void Ieee80211MgmtMesh::processManagement(Packet *packet)
             processPeering(packet, action);
         else if (action->getCategory() == MESH_ACTION && action->getMeshAction() == MESH_LINK_METRIC_REPORT)
             processLinkMetric(packet, action);
+        else if (action->getCategory() == MESH_ACTION && action->getMeshAction() == MESH_HWMP_PATH_SELECTION)
+            processHwmpFrame(packet, action);
         else
-            dropManagementFrame(packet); // HWMP arrives in C6.
+            dropManagementFrame(packet);
     }
     else if (header->getType() == ST_BEACON || header->getType() == ST_PROBERESPONSE)
         processBeacon(packet, header, header->getType() == ST_PROBERESPONSE);
@@ -183,6 +195,28 @@ void Ieee80211MgmtMesh::handleTimer(cMessage *message)
         }
     }
     throw cRuntimeError("Unknown mesh management timer");
+}
+
+void Ieee80211MgmtMesh::sendHwmp(const Ptr<Ieee80211HwmpFrame>& body, MacAddress receiver)
+{
+    Enter_Method("sendHwmp");
+    if (isMeshManagementActive())
+        sendBody(body,ST_ACTION,receiver);
+}
+
+void Ieee80211MgmtMesh::processHwmpFrame(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header)
+{
+    if (!pathSelection || !mib->isMeshPeerEstablished(header->getTransmitterAddress()) || packet->getDataLength() == b(0)) {
+        dropManagementFrame(packet);
+        return;
+    }
+    auto body = packet->peekAtFront<Ieee80211HwmpFrame>(packet->getDataLength(),Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+    if (body->isIncorrect() || body->isIncomplete()) {
+        dropManagementFrame(packet);
+        return;
+    }
+    pathSelection->processHwmp(body,header->getTransmitterAddress(),header->getReceiverAddress());
+    delete packet;
 }
 
 void Ieee80211MgmtMesh::processLinkMetric(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header)

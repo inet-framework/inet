@@ -18,6 +18,9 @@ simple MeshForwarding extends SimpleModule like IDs
         bool forwarding = default(true); // dot11MeshForwarding
         int duplicateCacheCapacity = default(4096); // local bounded retention policy
         double duplicateCacheLifetime @unit(s) = default(1s); // local retention policy
+        int maxPendingPackets = default(64); // shared unresolved source queue, drop new
+        int maxPendingBytes @unit(B) = default(256KiB);
+        double maxPendingWait @unit(s) = default(5s); // individual exclusive packet deadline
         @signal[packetDropped];
         @display("i=block/routing");
 }

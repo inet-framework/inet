@@ -5,6 +5,7 @@
 
 #include <optional>
 #include "inet/linklayer/common/MacAddress.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -27,6 +28,9 @@ class INET_API IMeshPathSelection
     virtual simtime_t getPrecursorExpiry(MacAddress destination, MacAddress precursor) const = 0;
     virtual void refreshPath(MacAddress destination) = 0;
     virtual void refreshPrecursor(MacAddress destination, MacAddress precursor) = 0;
+    virtual void startDiscovery(MacAddress destination) = 0;
+    virtual void cancelDiscovery(MacAddress destination) = 0;
+    virtual void processHwmp(const Ptr<const Ieee80211HwmpFrame>& body, MacAddress transmitter, MacAddress receiver) = 0;
 };
 
 } // namespace ieee80211
