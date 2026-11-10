@@ -241,10 +241,13 @@ bool Rx::isFcsOk(Packet *packet) const
 void Rx::recomputeMediumFree()
 {
     bool oldContentionFree = contentionFree;
-    // note: the duration of mode switching (rx-to-tx or tx-to-rx) should also count as busy
-    auto physical = dynamic_cast<const IIeee80211ChannelAccess *>(getContainingNicModule(this)->getSubmodule("radio"));
+    auto radio = check_and_cast<const IRadio *>(getContainingNicModule(this)->getSubmodule("radio"));
+    auto physical = dynamic_cast<const IIeee80211ChannelAccess *>(radio);
     bool physicalIdle = physical && physical->hasContiguousAllocation() ? !physical->isPrimaryChannelBusy() : receptionState == IRadio::RECEPTION_STATE_IDLE;
-    mediumFree = physicalIdle && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED && !endNavTimer->isScheduled();
+    auto mode = radio->getRadioMode();
+    bool receptive = (mode == IRadio::RADIO_MODE_RECEIVER && transmissionState == IRadio::TRANSMISSION_STATE_UNDEFINED) ||
+        (mode == IRadio::RADIO_MODE_TRANSCEIVER && transmissionState == IRadio::TRANSMISSION_STATE_IDLE);
+    mediumFree = physicalIdle && receptive && !endNavTimer->isScheduled();
     // IEEE Std 802.11-2024, 10.23.2.2: active TXNAV excludes local contention.
     contentionFree = mediumFree && getTxnavRemaining() == 0 && !contentionBlocked;
     if (contentionFree != oldContentionFree) {
@@ -507,6 +510,7 @@ void Rx::receiveSignal(cComponent *source, simsignal_t signalID, intval_t value,
             invalidateInterframeHistory();
         else if (value == IRadio::RADIO_MODE_SLEEP || value == IRadio::RADIO_MODE_TRANSMITTER)
             invalidateFutureInterframeHistory();
+        recomputeMediumFree();
     }
 }
 
