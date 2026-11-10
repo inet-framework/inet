@@ -7,6 +7,7 @@
 
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/errormodel/Ieee80211ErrorModelBase.h"
 
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
 
@@ -25,7 +26,7 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadio
     auto mode = transmission->getMode();
     auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
     auto headerLength = mode->getHeaderMode()->getLength();
-    auto dataLength = b(mode->getDataMode()->getCompleteLength(B(phyHeader->getLengthField())));
+    auto dataLength = computeDataLength(mode, phyHeader->getLengthField());
     // TODO check header length and data length for OFDM (signal) field
     double headerSuccessRate = getHeaderSuccessRate(mode, headerLength.get<b>(), getScalarSnir(snir));
     double dataSuccessRate = getDataSuccessRate(mode, dataLength.get<b>(), getScalarSnir(snir));
@@ -40,6 +41,38 @@ double Ieee80211ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadio
             return 1.0 - dataSuccessRate;
         default:
             throw cRuntimeError("Unknown signal part: '%s'", IRadioSignal::getSignalPartName(part));
+    }
+}
+
+b Ieee80211ErrorModelBase::computeDataLength(const IIeee80211Mode *mode, B psduLength) const
+{
+    auto dataLength = b(mode->getDataMode()->getCompleteLength(psduLength));
+    // the SERVICE field of an OFDM mode precedes the PSDU in the DATA part
+    if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode))
+        dataLength += ofdmMode->getHeaderMode()->getServiceFieldLength();
+    return dataLength;
+}
+
+double Ieee80211ErrorModelBase::computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const
+{
+    Enter_Method("computeBitErrorRate");
+    checkRegionPart(part);
+    auto transmission = check_and_cast<const Ieee80211Transmission *>(snir->getReception()->getTransmission());
+    auto mode = transmission->getMode();
+    auto phyHeader = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(transmission->getPacket());
+    double scalarSnir = getScalarSnir(snir, startTime, endTime);
+    if (part == IRadioSignal::SIGNAL_PART_HEADER) {
+        // each bit of the PHY header chunk has its share of the success rate of the header
+        double headerSuccessRate = getHeaderSuccessRate(mode, mode->getHeaderMode()->getLength().get<b>(), scalarSnir);
+        return -std::expm1(std::log(headerSuccessRate) / phyHeader->getChunkLength().get<b>());
+    }
+    else {
+        // each bit of the PSDU has its share of the bits that the rate of the data part counts:
+        // the PSDU, and the SERVICE, tail, and pad bits
+        double bitSuccessRate = getDataSuccessRate(mode, 1, scalarSnir);
+        double countedLength = computeDataLength(mode, phyHeader->getLengthField()).get<b>();
+        double psduLength = b(phyHeader->getLengthField()).get<b>();
+        return -std::expm1(std::log(bitSuccessRate) * countedLength / psduLength);
     }
 }
 

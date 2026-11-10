@@ -241,7 +241,7 @@ double Ieee80211YansErrorModel::getDataSuccessRate(const IIeee80211Mode *mode, u
     if (auto ofdmMode = dynamic_cast<const Ieee80211OfdmMode *>(mode))
         successRate = getOFDMAndERPOFDMChunkSuccessRate(ofdmMode->getDataMode()->getModulation()->getSubcarrierModulation(),
                                                         ofdmMode->getDataMode()->getCode()->getConvolutionalCode(),
-                                                        bitLength + ofdmMode->getHeaderMode()->getServiceFieldLength().get<b>(),
+                                                        bitLength,
                                                         ofdmMode->getDataMode()->getGrossBitrate(),
                                                         ofdmMode->getHeaderMode()->getBandwidth(),
                                                         snr);
