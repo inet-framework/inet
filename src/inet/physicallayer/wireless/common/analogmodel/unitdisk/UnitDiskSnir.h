@@ -26,6 +26,10 @@ class INET_API UnitDiskSnir : public SnirBase
     virtual double getMin() const override { return isInfinite ? INFINITY : 0; }
     virtual double getMax() const override { return isInfinite ? INFINITY : 0; }
     virtual double getMean() const override { return isInfinite ? INFINITY : 0; }
+
+    virtual double getMin(simtime_t startTime, simtime_t endTime) const override { return getMin(); }
+    virtual double getMax(simtime_t startTime, simtime_t endTime) const override { return getMax(); }
+    virtual double getMean(simtime_t startTime, simtime_t endTime) const override { return getMean(); }
 };
 
 } // namespace physicallayer

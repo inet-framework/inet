@@ -28,109 +28,112 @@ std::ostream& DimensionalSnir::printToStream(std::ostream& stream, int level, in
     return SnirBase::printToStream(stream, level);
 }
 
-double DimensionalSnir::computeMin() const
+Interval<simsec, Hz> DimensionalSnir::computeInterval(simtime_t startTime, simtime_t endTime) const
 {
-    // TODO factor out common part
-    const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
-    EV_TRACE << "Reception power begin " << endl;
-    EV_TRACE << *dimensionalReception->getPower() << endl;
-    EV_TRACE << "Reception power end" << endl;
-    auto noisePower = dimensionalNoise->getPower();
-    auto receptionPower = dimensionalReception->getPower();
-    auto snir = receptionPower->divide(noisePower);
-    simsec startTime = simsec(reception->getStartTime());
-    simsec endTime = simsec(reception->getEndTime());
     Hz centerFrequency = dimensionalReception->getCenterFrequency();
     Hz bandwidth = dimensionalReception->getBandwidth();
-    Point<simsec, Hz> startPoint(startTime, centerFrequency - bandwidth / 2);
-    Point<simsec, Hz> endPoint(endTime, centerFrequency + bandwidth / 2);
+    Point<simsec, Hz> startPoint(simsec(startTime), centerFrequency - bandwidth / 2);
+    Point<simsec, Hz> endPoint(simsec(endTime), centerFrequency + bandwidth / 2);
+    // an interval of one point of time gives the SNIR at that time
+    bool isPoint = startTime == endTime;
+    return Interval<simsec, Hz>(startPoint, endPoint, 0b11, isPoint ? 0b10 : 0b00, isPoint ? 0b10 : 0b00);
+}
+
+double DimensionalSnir::computeMin(simtime_t startTime, simtime_t endTime) const
+{
     EV_TRACE << "SNIR begin " << endl;
-    EV_TRACE << *snir << endl;
+    EV_TRACE << *getSnir() << endl;
     EV_TRACE << "SNIR end" << endl;
-    double minSNIR = snir->getMin(Interval<simsec, Hz>(startPoint, endPoint, 0b11, 0b00, 0b00));
-    EV_DEBUG << "Computing minimum SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(minSNIR) << endl;
+    double minSNIR = getSnir()->getMin(computeInterval(startTime, endTime));
+    EV_DEBUG << "Computing minimum SNIR" << EV_FIELD(startTime) << EV_FIELD(endTime) << EV_FIELD(minSNIR) << endl;
     return minSNIR;
 }
 
-double DimensionalSnir::computeMax() const
+double DimensionalSnir::computeMax(simtime_t startTime, simtime_t endTime) const
 {
-    // TODO factor out common part
-    const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
-    EV_DEBUG << "Reception power begin " << endl;
-    EV_DEBUG << *dimensionalReception->getPower() << endl;
-    EV_DEBUG << "Reception power end" << endl;
-    auto noisePower = dimensionalNoise->getPower();
-    auto receptionPower = dimensionalReception->getPower();
-    auto snir = receptionPower->divide(noisePower);
-    auto startTime = simsec(reception->getStartTime());
-    auto endTime = simsec(reception->getEndTime());
-    Hz centerFrequency = dimensionalReception->getCenterFrequency();
-    Hz bandwidth = dimensionalReception->getBandwidth();
-    Point<simsec, Hz> startPoint(startTime, centerFrequency - bandwidth / 2);
-    Point<simsec, Hz> endPoint(endTime, centerFrequency + bandwidth / 2);
-    EV_TRACE << "SNIR begin " << endl;
-    EV_TRACE << *snir << endl;
-    EV_TRACE << "SNIR end" << endl;
-    double maxSNIR = snir->getMax(Interval<simsec, Hz>(startPoint, endPoint, 0b11, 0b00, 0b00));
-    EV_DEBUG << "Computing maximum SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(maxSNIR) << endl;
+    double maxSNIR = getSnir()->getMax(computeInterval(startTime, endTime));
+    EV_DEBUG << "Computing maximum SNIR" << EV_FIELD(startTime) << EV_FIELD(endTime) << EV_FIELD(maxSNIR) << endl;
     return maxSNIR;
 }
 
-double DimensionalSnir::computeMean() const
+double DimensionalSnir::computeMean(simtime_t startTime, simtime_t endTime) const
 {
-    // TODO factor out common part
-    const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
-    EV_TRACE << "Reception power begin " << endl;
-    EV_TRACE << *dimensionalReception->getPower() << endl;
-    EV_TRACE << "Reception power end" << endl;
-    auto noisePower = dimensionalNoise->getPower();
-    auto receptionPower = dimensionalReception->getPower();
-    auto snir = receptionPower->divide(noisePower);
-    auto startTime = simsec(reception->getStartTime());
-    auto endTime = simsec(reception->getEndTime());
-    Hz centerFrequency = dimensionalReception->getCenterFrequency();
-    Hz bandwidth = dimensionalReception->getBandwidth();
-    Point<simsec, Hz> startPoint(startTime, centerFrequency - bandwidth / 2);
-    Point<simsec, Hz> endPoint(endTime, centerFrequency + bandwidth / 2);
-    EV_TRACE << "SNIR begin " << endl;
-    EV_TRACE << *snir << endl;
-    EV_TRACE << "SNIR end" << endl;
-    double meanSNIR = snir->getMean(Interval<simsec, Hz>(startPoint, endPoint, 0b11, 0b00, 0b00));
-    EV_DEBUG << "Computing mean SNIR" << EV_FIELD(startPoint) << EV_FIELD(endPoint) << EV_FIELD(meanSNIR) << endl;
+    double meanSNIR = getSnir()->getMean(computeInterval(startTime, endTime));
+    EV_DEBUG << "Computing mean SNIR" << EV_FIELD(startTime) << EV_FIELD(endTime) << EV_FIELD(meanSNIR) << endl;
     return meanSNIR;
+}
+
+void DimensionalSnir::updateLastInterval(simtime_t startTime, simtime_t endTime) const
+{
+    if (startTime != lastStartTime || endTime != lastEndTime) {
+        lastStartTime = startTime;
+        lastEndTime = endTime;
+        lastMinSNIR = NaN;
+        lastMaxSNIR = NaN;
+        lastMeanSNIR = NaN;
+    }
+}
+
+double DimensionalSnir::getMin(simtime_t startTime, simtime_t endTime) const
+{
+    if (isWholeReception(startTime, endTime))
+        return getMin();
+    updateLastInterval(startTime, endTime);
+    if (std::isnan(lastMinSNIR))
+        lastMinSNIR = computeMin(startTime, endTime);
+    return lastMinSNIR;
+}
+
+double DimensionalSnir::getMax(simtime_t startTime, simtime_t endTime) const
+{
+    if (isWholeReception(startTime, endTime))
+        return getMax();
+    updateLastInterval(startTime, endTime);
+    if (std::isnan(lastMaxSNIR))
+        lastMaxSNIR = computeMax(startTime, endTime);
+    return lastMaxSNIR;
+}
+
+double DimensionalSnir::getMean(simtime_t startTime, simtime_t endTime) const
+{
+    if (isWholeReception(startTime, endTime))
+        return getMean();
+    updateLastInterval(startTime, endTime);
+    if (std::isnan(lastMeanSNIR))
+        lastMeanSNIR = computeMean(startTime, endTime);
+    return lastMeanSNIR;
 }
 
 double DimensionalSnir::getMin() const
 {
     if (std::isnan(minSNIR))
-        minSNIR = computeMin();
+        minSNIR = computeMin(reception->getStartTime(), reception->getEndTime());
     return minSNIR;
 }
 
 double DimensionalSnir::getMax() const
 {
     if (std::isnan(maxSNIR))
-        maxSNIR = computeMax();
+        maxSNIR = computeMax(reception->getStartTime(), reception->getEndTime());
     return maxSNIR;
 }
 
 double DimensionalSnir::getMean() const
 {
     if (std::isnan(meanSNIR))
-        meanSNIR = computeMean();
+        meanSNIR = computeMean(reception->getStartTime(), reception->getEndTime());
     return meanSNIR;
 }
 
 const Ptr<const IFunction<double, Domain<simsec, Hz>>> DimensionalSnir::getSnir() const
 {
-    const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
-    auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
-    auto noisePower = dimensionalNoise->getPower();
-    auto receptionPower = dimensionalReception->getPower();
-    return receptionPower->divide(noisePower);
+    if (snir == nullptr) {
+        const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
+        auto dimensionalReception = check_and_cast<const DimensionalReceptionAnalogModel *>(reception->getAnalogModel());
+        snir = dimensionalReception->getPower()->divide(dimensionalNoise->getPower());
+    }
+    return snir;
 }
 
 } // namespace physicallayer
