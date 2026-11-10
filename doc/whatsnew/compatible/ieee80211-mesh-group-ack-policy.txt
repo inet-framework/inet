@@ -1,0 +1,3 @@
+Native mesh group DATA acknowledgment policy
+
+Native mesh group QoS DATA now advertises No Ack before FCS construction, including local and relayed traffic with power saving disabled. Multicast transmission already omits response waits; this corrects the transmitted policy field without changing that exchange or rejecting a received group frame solely for advertising Normal Ack.

@@ -126,6 +126,8 @@ Source: `ieee80211-2024:clause:10.37.3.2`, PDF 2146–2147, source span `8950174
 
 ### IEEE80211-2024-MESH-GROUP
 
+Native non-GCR group QoS DATA transmits No Ack policy1 (QoS Control B5=1, B6=0). Independently, a received group-addressed frame never receives an ACK or Block Ack, including when its received policy is0; the cited rule does not mandate discard solely for that field value. Sources: Table9-13, PDF677, span `3124619:3131039`; `ieee80211-2024:clause:10.3.2.11`, span `7922099:7924087`. Strength: transmitted policy and received response requirements. Observation: actual source and relay frame fields with ordinary group delivery.
+
 A native source group frame uses Address 1=group, Address 2=transmitter, Address 3=mesh source and AE=0. Reception rejects nonpeer input and duplicates. Decrement TTL on reception: zero prevents propagation but still permits local upper delivery. Nonzero TTL permits propagation when forwarding is enabled, changing Address 2 to the forwarding station. Forwarding disabled prevents multihop propagation. Duplicate identity is mesh source and mesh sequence, independently of same-peer MAC duplicate detection.
 
 Sources: `ieee80211-2024:clause:10.37.4.1`, PDF 2147–2148, source span `8955316:8957690`; `ieee80211-2024:clause:10.37.4.2`, PDF 2148, source span `8957690:8961133`; `ieee80211-2024:clause:10.37.6`, PDF 2150, source span `8967167:8968220`; `ieee80211-2024:clause:10.37.7`, PDF 2150, source span `8968220:8968877`. Strength: shall within enabled forwarding. Observation: addresses, duplicate identity, TTL and local/transit delivery.

@@ -197,6 +197,13 @@ void Ieee80211MeshMac::prepareFrameTransmission(Packet *packet, simtime_t ifs,
         const physicallayer::IIeee80211Mode *mode)
 {
     meshManagement->prepareManagementTransmission(packet, ifs, mode);
+    auto header = dynamicPtrCast<const Ieee80211MeshDataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+    if (header && header->getType() == ST_DATA_WITH_QOS && header->getReceiverAddress().isMulticast()) {
+        // IEEE Std 802.11-2024, Table 9-13: non-GCR group QoS DATA uses No Ack.
+        auto writableHeader = packet->removeAtFront<Ieee80211MeshDataHeader>();
+        writableHeader->setAckPolicy(NO_ACK);
+        packet->insertAtFront(writableHeader);
+    }
 }
 
 void Ieee80211MeshMac::frameTransmissionComplete(const Packet *packet)

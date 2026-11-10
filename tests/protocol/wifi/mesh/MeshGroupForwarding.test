@@ -10,6 +10,7 @@ class MeshGroupDriver : public cSimpleModule, public cListener, public ITx::ICal
 {
     int delivery[4] = {};
     int nativeTransmissions = 0;
+    int noAckSource = 0, noAckRelays = 0;
     int noProviderDiscards = 0;
     int disabledTransitDiscards = 0;
     int disabledLocalDeliveries = 0;
@@ -80,6 +81,8 @@ class MeshGroupDriver : public cSimpleModule, public cListener, public ITx::ICal
             }
             if (signal == registerSignal("packetSentToLower") && packet->getName() == std::string("native-group")) {
                 auto header = packet->peekAtFront<Ieee80211MeshDataHeader>();
+                ASSERT(header->getAckPolicy() == NO_ACK);
+                if (i == 0) noAckSource++; else noAckRelays++;
                 ASSERT(header->getFromDS() && !header->getToDS() && header->getMeshControlPresent());
                 ASSERT(header->getReceiverAddress() == group && header->getTransmitterAddress() == meshMib(i)->address);
                 ASSERT(header->getAddress3() == meshMib(0)->address && header->getChunkLength() == B(26));
@@ -105,7 +108,7 @@ class MeshGroupDriver : public cSimpleModule, public cListener, public ITx::ICal
                 break;
             case 3:
                 ASSERT(delivery[0] == 0 && delivery[1] == 1 && delivery[2] == 1 && delivery[3] == 1);
-                ASSERT(nativeTransmissions == 3 && noProviderDiscards == 1); inject(3,0); break;
+                ASSERT(nativeTransmissions == 3 && noAckSource == 1 && noAckRelays == 2 && noProviderDiscards == 1); inject(3,0); break;
             case 4: inject(1,1); break;
             case 5: inject(0,2); break;
             case 6:
