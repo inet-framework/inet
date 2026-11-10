@@ -3,6 +3,7 @@
 #define INET_HWMP_H
 
 #include <sstream>
+#include <tuple>
 
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/OperationalBase.h"
@@ -61,6 +62,7 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
     };
     static simsignal_t pathUpdatedSignal;
     static simsignal_t discoveryChangedSignal;
+    static simsignal_t rootUpdatedSignal;
 
   protected:
     ModuleRefByPar<Ieee80211Mib> mib;
@@ -74,6 +76,7 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
     struct Discovery {
         cMessage *timer = nullptr;
         std::optional<int> attempts; // absent while idle; timer object and minimum-interval history remain
+        std::optional<simtime_t> sourceDue;
         std::optional<simtime_t> lastSent;
     };
     std::map<MacAddress,Discovery> discoveries;
@@ -96,6 +99,83 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
         simtime_t expiry;
     };
     std::vector<PendingError> pendingErrors;
+    enum RootMode { NO_ROOT = 0, PREQ_NO_PREP = 2, PREQ_WITH_PREP = 3, RANN = 4 };
+    RootMode rootMode = NO_ROOT;
+    simtime_t rootInterval;
+    simtime_t rannInterval; // one station-wide mutable MIB scalar
+    simtime_t confirmationInterval;
+    simtime_t activePathToRootTimeout;
+  public:
+    struct Root {
+        std::optional<HwmpPreq> invitation;
+        bool responseSent = false;
+        bool responseRequired = false;
+        std::optional<HwmpRann> announcement;
+        MacAddress transmitter;
+        uint32_t metric = UINT32_MAX;
+        std::optional<simtime_t> confirmationRequested;
+        std::optional<simtime_t> propagationRequested;
+        std::optional<simtime_t> lastPropagation;
+        bool operator==(const Root& other) const {
+            auto preqKey = [](const HwmpPreq& p) { return std::make_tuple(p.getFlags(),p.getHopCount(),p.getTtl(),p.getDiscoveryId(),p.getOriginatorSequenceNumber(),p.getLifetime(),p.getMetric()); };
+            auto rannKey = [](const HwmpRann& r) { return std::make_tuple(r.flags,r.hopCount,r.ttl,r.root,r.sequenceNumber,r.interval,r.metric); };
+            bool sameInvitation = invitation.has_value() == other.invitation.has_value() && (!invitation || preqKey(*invitation) == preqKey(*other.invitation));
+            bool sameAnnouncement = announcement.has_value() == other.announcement.has_value() && (!announcement || rannKey(*announcement) == rannKey(*other.announcement));
+            return sameInvitation && sameAnnouncement && responseSent == other.responseSent && responseRequired == other.responseRequired
+                && transmitter == other.transmitter && metric == other.metric && confirmationRequested == other.confirmationRequested
+                && propagationRequested == other.propagationRequested && lastPropagation == other.lastPropagation;
+        }
+        friend std::ostream& operator<<(std::ostream& out, const Root& root) {
+            out << "invitation=";
+            if (root.invitation) out << root.invitation->getOriginatorSequenceNumber() << ":" << root.invitation->getDiscoveryId() << " lifetimeTU=" << root.invitation->getLifetime();
+            else out << "none";
+            out << " responseSent=" << root.responseSent << " responseRequired=" << root.responseRequired << " RANN=";
+            if (root.announcement) out << root.announcement->sequenceNumber << " hops=" << int(root.announcement->hopCount) << " ttl=" << int(root.announcement->ttl)
+                << " wireIntervalTU=" << root.announcement->interval << " metric=" << root.metric << " transmitter=" << root.transmitter;
+            else out << "none";
+            if (root.confirmationRequested) out << " confirmationRequested=" << *root.confirmationRequested;
+            if (root.propagationRequested) out << " propagationRequested=" << *root.propagationRequested;
+            if (root.lastPropagation) out << " lastPropagation=" << *root.lastPropagation;
+            return out;
+        }
+    };
+    struct RootGlobals {
+        simtime_t interval;
+        std::optional<simtime_t> rootPreq, ownRann, rannAction, confirmationAction;
+        bool localRannPending = false;
+        bool operator==(const RootGlobals& other) const {
+            return std::tie(interval,rootPreq,ownRann,rannAction,confirmationAction,localRannPending)
+                == std::tie(other.interval,other.rootPreq,other.ownRann,other.rannAction,other.confirmationAction,other.localRannPending);
+        }
+    };
+    class RootChange : public cObject {
+      public:
+        const MacAddress address;
+        const std::optional<Root> root;
+        const RootGlobals globals;
+        const std::optional<simtime_t> lastTargetPreq;
+        const std::optional<simtime_t> confirmationNotBefore;
+        RootChange(MacAddress address, const std::optional<Root>& root, const RootGlobals& globals,
+                std::optional<simtime_t> lastTargetPreq, std::optional<simtime_t> confirmationNotBefore) :
+            address(address), root(root), globals(globals), lastTargetPreq(lastTargetPreq), confirmationNotBefore(confirmationNotBefore) {}
+    };
+
+  protected:
+    struct RootObservation {
+        std::map<MacAddress,Root> roots;
+        std::map<MacAddress,std::optional<simtime_t>> targetPreqs;
+        std::map<MacAddress,bool> usable;
+        RootGlobals globals;
+    };
+    std::map<MacAddress,Root> roots;
+    cMessage *rootOriginTimer = nullptr;
+    cMessage *rootWorkTimer = nullptr;
+    bool localRannPending = false;
+    bool rootWorkDeferred = false; // synchronous control/batch transaction, never a deferred event
+    std::optional<simtime_t> lastRootPreq;
+    std::optional<simtime_t> lastOwnRann;
+    std::optional<simtime_t> lastRannAction;
+    std::optional<simtime_t> lastConfirmationAction;
 
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
@@ -106,6 +186,24 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
     void receivePerr(const HwmpPerr& perr, MacAddress transmitter);
     void queueErrors(const std::vector<PendingError>& errors);
     void sendPendingErrors();
+    void originateRoot();
+    void processRootWork(std::optional<RootObservation> before = std::nullopt);
+    RootObservation observeRootState() const;
+    void publishRootChanges(const RootObservation& before);
+    void scheduleRootOrigin();
+    void schedulePreqWork(MacAddress destination);
+    simtime_t confirmationDue(MacAddress destination) const;
+    bool confirmationNeeded(MacAddress destination) const;
+    void receiveRann(const HwmpRann& rann, MacAddress transmitter);
+    void sendProactivePrep(MacAddress root);
+    void clearRootWork();
+    B rootBatchBudget() const;
+    std::string describeRootWork() const;
+    void sendRootConfirmations();
+    void sendRanns();
+    bool sourceAttemptEligible(MacAddress destination);
+    void recordPreqHandoff(MacAddress destination, bool sourceAttempt, bool publish = true);
+    void sendSourcePreq(MacAddress destination);
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
@@ -142,6 +240,7 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
     virtual void cancelDiscovery(MacAddress destination) override;
     virtual void processHwmp(const Ptr<const Ieee80211HwmpFrame>& body, MacAddress transmitter, MacAddress receiver) override;
     void reportUnknownTransit(MacAddress transmitter, MacAddress destination) override;
+    void sourcePathNeeded(MacAddress destination) override;
     // Read-only stored-state snapshots for model inspection and diagnostic tools.
     // Route usability still belongs to findPath(), including exclusive expiry.
     std::optional<PathInfo> getPathInfo(MacAddress destination) const;

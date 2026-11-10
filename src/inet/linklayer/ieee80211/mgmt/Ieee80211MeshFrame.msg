@@ -17,6 +17,9 @@ cplusplus {{
 // IEEE Std 802.11-2024, 9.4.1.4/Figure 9-140 and 9.4.2.3/Table 9-131.
 constexpr uint16_t MESH_EPD_CAPABILITY = 1 << 13;
 constexpr uint8_t MESH_EPD_MEMBERSHIP_SELECTOR = 0x80 | 124;
+// IEEE Std 802.11-2024, 9.2.4.8.1/Table9-34 and9.3.3.1:
+// non-HT management Frame Body2304 octets minus Category/MeshAction2.
+const B MAX_MESH_ACTION_BODY_LENGTH = B(2302);
 }}
 
 enum MeshActionCategory

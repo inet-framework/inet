@@ -68,15 +68,15 @@ Establish an initial path in a diamond, remove its connectivity while keeping st
 
 ## WIFI-CHECK-ROOT-PREQ
 
-Enable one proactive-PREQ root with on-demand discovery still available. Observe root PREQ propagation, its proactive flags and reply cases, then send traffic toward the root and between nonroot endpoints. Assert valid root paths and correct independent on-demand state. Change only the root mode in the matching control to distinguish proactive behavior from ordinary discovery.
+Enable one proactive-PREQ root with on-demand discovery still available. Observe root PREQ propagation, its proactive flags and reply cases, then send traffic toward the root and between nonroot endpoints. Assert valid root paths and correct independent on-demand state. For flag zero, generate later local-source demand and require its proactive reply before DATA. Exercise sustained refresh and idle-then-leaf-only traffic under the declared proactive-response sequence interpretation, without an ordinary leaf discovery supplying the sequence advancement. Change only the root mode in the matching control to distinguish proactive behavior from ordinary discovery.
 
 ## WIFI-CHECK-RANN
 
-Enable one RANN root. Observe announcements, specified propagation delay and individual root-confirmation PREQ/PREP addressing. Suppress the confirming reply: an announcement alone must not become a completed bidirectional path. Send equal-sequence announcements with lower, equal and higher metrics; equal metric remains eligible under the RANN rule. Restore confirmations and require normal delivery.
+Enable one RANN root. Observe announcements, path/forwarding/TTL/interval-gated propagation and individual root-confirmation PREQ/PREP addressing, without adding an unsupported random forwarding delay. Suppress the confirming reply: an announcement alone must not become a completed bidirectional path. Send equal-sequence announcements with lower, equal and higher metrics; equal metric remains eligible under the RANN rule. Change the received Interval and check the shared scalar, own origination timing/advertisement, and preservation of each forwarded wire value. Restore confirmations and require normal delivery.
 
 ## WIFI-CHECK-ROOT-COEXISTENCE
 
-Use each root mechanism separately with two simultaneous nonroot discoveries. Exercise root refresh/maintenance deadlines, lost confirmations and stale root information. One destination's discovery or cancellation must not consume another's retry budget or cancel the root procedure. Root reachability must not turn a root into an unconfigured mesh gate.
+Use each root mechanism separately with two simultaneous nonroot discoveries. Exercise root refresh/maintenance deadlines, lost confirmations and stale root information. One destination's discovery or cancellation must not consume another's retry budget or cancel the root procedure. Check station-wide RANN/confirmation Action pacing, common-Address-1 batching, fair distinct receivers and management-body limits. Source retry spacing still applies when a confirmation also serves a source attempt. Root reachability must not turn a root into an unconfigured mesh gate.
 
 ## WIFI-CHECK-HT-NEGOTIATION
 

@@ -78,6 +78,10 @@ Mesh Control carries its flags, nonzero on-air Mesh TTL and mesh sequence number
 
 Sources: `ieee80211-2024:clause:9.2.4.8.3`, PDF 707–708; `ieee80211-2024:clause:9.4.2.110`–`9.4.2.113`, PDF 1222–1227; `ieee80211-2024:clause:9.6.16.3`, PDF 1773. Strength: normative format. Observation: encoding.
 
+An unsecured non-HT management Frame Body is at most 2304 octets, including the Action Category and action code. A 24-octet MAC header and four-octet FCS therefore permit at most 2332 octets for the complete selected Action MPDU, independently of a larger PHY length field. Multiple HWMP elements may share one Action when their intended Address 1 is the same; the complete body remains bounded.
+
+Sources: `ieee80211-2024:clause:9.2.4.8.1`, PDF 702, source span `3232286:3233967`; `ieee80211-2024:table:9-34`, PDF 703, `3233967:3244113`; `ieee80211-2024:clause:9.3.3.1`, PDF 777, `3539210:3540794`; `ieee80211-2024:clause:14.11.7`, PDF 3231–3232, `13601356:13607065`. Strength: normative length and common-recipient constraints. Observation: complete Action length and Address 1.
+
 ### IEEE80211-2024-MESH-FORWARD
 
 Forwarding preserves mesh endpoint identity while changing hop addresses. Mesh TTL bounds propagation and mesh sequence identity supports duplicate detection. Individually addressed transit traffic is forwarded toward the mesh destination; group-addressed traffic is delivered and propagated subject to the applicable forwarding and duplicate rules. Mesh sequence identity and per-hop MAC retransmission identity are different fields.
@@ -168,15 +172,19 @@ Sources: `ieee80211-2024:clause:14.11.7`, `ieee80211-2024:table:14-14`, PDF 3231
 
 ### IEEE80211-2024-MESH-ROOT-PREQ
 
-Root modes two and three periodically originate PREQ at the root interval, targeting broadcast with TO=1, USN=1 and target sequence zero. They use hop zero, metric zero, incremented root sequence, new Discovery ID and active-path-to-root lifetime. Mode three sets Proactive PREP; mode two clears it. A receiver sends a proactive PREP when the flag is set, or when it needs a bidirectional root path under the flag-zero case. The proactive PREP targets the responding station itself, uses its current own sequence and metric zero, and copies the root originator fields and lifetime. It is not an ordinary self-target reply that increments the target sequence.
+Root modes two and three periodically originate PREQ at the root interval, targeting broadcast with TO=1, USN=1 and target sequence zero. They use hop zero, metric zero, incremented root sequence, new Discovery ID and active-path-to-root lifetime. Mode three sets Proactive PREP; mode two clears it. A receiver sends a proactive PREP when the flag is set, or when it needs a bidirectional root path under the flag-zero case. The proactive PREP targets the responding station itself, uses its current own sequence and metric zero, and copies the root originator fields and lifetime. Table 14-21 does not explicitly repeat Table 14-18's qualification about the target-response sequence update; the application of 14.11.8.3 to this broadcast-response case is ambiguous, rather than a stated prohibition on a preceding local update.
 
 Sources: `ieee80211-2024:clause:14.11.4.2`, PDF 3229–3230, source span `13595166:13597902`; `ieee80211-2024:table:14-13`, PDF 3239–3240, source span `13632749:13636271`; `ieee80211-2024:table:14-21`, PDF 3249, source span `13666300:13667819`. Strength: shall within selected root mode and reply condition. Observation: fields and proactive paths.
 
+The flag-zero condition is not restricted to the PREQ reception callback: local-source data can later require the bidirectional root path before DATA transmission. Informative S.7.3/S.7.5 describe that later trigger and the local Proactive PREP Sent state. Source: Case D of `ieee80211-2024:clause:14.11.10.3`; informative S.7.3/S.7.5, PDF 5912–5913, source spans `24495350:24496429`, `24497202:24498141`.
+
 ### IEEE80211-2024-MESH-RANN-PROPAGATION
 
-Propagating a RANN requires validated forwarding information to the root, forwarding enabled, TTL greater than one, and at least the RANN interval since the previous RANN transmission. Increment hop count, decrement TTL, add outgoing-to-transmitter metric and preserve the announcement's interval and root sequence. Acceptance updates the RANN interval from the received field. An accepted announcement lacking validated root forwarding information cannot immediately propagate under this case.
+Propagating a RANN requires validated forwarding information to the root, forwarding enabled, TTL greater than one, and the RANN sending-interval gate. Increment hop count, decrement TTL, add outgoing-to-transmitter metric and preserve the announcement's root sequence and Interval field. Acceptance updates the shared RANN-interval MIB scalar from the received field. Own RANN origination uses that current scalar for timing and advertisement. An accepted announcement lacking validated root forwarding information cannot immediately propagate; the retrieved procedure specifies no additional random forwarding delay.
 
 Sources: `ieee80211-2024:clause:14.11.12.3`, `ieee80211-2024:table:14-26`, `ieee80211-2024:table:14-27`, PDF 3256, source span `13688771:13690742`; `ieee80211-2024:clause:14.11.12.4.3`, PDF 3257. Strength: shall within the propagation case. Observation: root path validation, timing and wire.
+
+The RANN and root-confirmation minimum intervals constrain Action frames sent by the station across roots. Per-root histories do not create separate station-wide transmission allowances. Case D's periodic confirmation condition refers to the last locally originated PREQ to that root without restricting it to a previous individual confirmation; forwarding somebody else's PREQ is distinct. Sources: C.3 `dot11MeshHWMPrannInterval`, source span `22451916:22452489`; C.3 `dot11MeshHWMPconfirmationInterval`, `22454037:22455056`; Case D after Table 14-13, PDF 3240, `13632749:13636271`. Strength: minimum intervals and root-specific trigger. Observation: Action counts, root targets and timing.
 
 ## Synchronization
 

@@ -22,9 +22,9 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | DISCOVERY-LIMITS | HwmpDiscoveryLimits.test | C6 | hwmp-c6-discovery.md | PASS |
 | PATH-ERROR | HwmpPathError.test | C7 | hwmp-c7-errors.md | PASS |
 | REDISCOVERY | HwmpRediscovery.test | C7 | hwmp-c7-errors.md | PASS with actual terminal DATA failure and alternate relay |
-| ROOT-PREQ | HwmpProactivePreq.test | C8 | hwmp-c8-roots.md | NOT_RUN |
-| RANN | HwmpRann.test | C8 | hwmp-c8-roots.md | NOT_RUN |
-| ROOT-COEXISTENCE | HwmpRootCoexistence.test | C8 | hwmp-c8-roots.md | NOT_RUN |
+| ROOT-PREQ | HwmpProactivePreq.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
+| RANN | HwmpRann.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
+| ROOT-COEXISTENCE | HwmpRootCoexistence.test | C8 | hwmp-c8-roots.md | PASS, both metric-ID runs |
 | HT-NEGOTIATION | MeshHtNegotiation.test | H1 | hwmp-h1-ht-vht.md | NOT_RUN |
 | VHT-NEGOTIATION | MeshVhtNegotiation.test | H1 | hwmp-h1-ht-vht.md | NOT_RUN |
 | HIGH-THROUGHPUT-DATA | MeshHighThroughputData.test | H1 | hwmp-h1-ht-vht.md | NOT_RUN |
@@ -63,6 +63,13 @@ These are selected modeling policies, not requirements attributed to IEEE. The [
 | PERR reason interpretation | Nonzero NO-FORWARDING accepts equal/newer after stale rejection; DESTINATION-UNREACHABLE requires newer | Explicit reading of the source's conjunction structure; zero is special only for NO-FORWARDING |
 | Deferred PERRs | One node-global handoff interval; exact semantic-key deduplication and recipient/TTL grouping, at most 19 distinct destinations/action | Immediate invalidation is separate; no deferred re-increment or per-recipient rate-limit bypass |
 | Deferred PERR retention | Snapshot precursor expiry for path errors; established transmitter dependency for unknown transit; prune unsent obsolete errors on repair | Values retain no packet ownership; management inactivity/owner cleanup clears volatile notifications while pacing history survives |
+| Proactive PREP sequence | Increment the local sequence before each locally generated proactive PREP; forwarded PREPs retain their sequence | Explicit interpretation of 14.11.8.3 with Table 14-21, whose broadcast-response update is ambiguous; preserves fresh reverse information without an equal-sequence lifetime exception |
+| Flag-zero root invitation | Retain the latest applicable invitation and reply when local source demand exists, in either event order | A successful local response handoff suppresses repetition for that invitation; this is not knowledge of the root's cache |
+| Root interval authority | Accepted RANN Interval updates one shared current scalar in wire order; own advertisements use it and forwarded announcements retain their received value | Configuration supplies the initial value; confirmation interval remains separate |
+| Root Action pacing | One station-wide RANN gate and one station-wide confirmation gate, alongside per-target PREQ history | Batch only equal actual receivers, with deterministic scheduling between receivers; no per-root bypass |
+| Root confirmation and source work | One per-target procedure with independent purposes; a confirmation counts as a source attempt only when source work is due | Source cancellation or expiry cannot cancel independent root confirmation or consume extra source attempts |
+| RANN waiting | Wait for usable forwarding information, forwarding/TTL eligibility and sending interval only | No additional random forwarding delay is selected; RANN alone does not establish a usable data path |
+| Mesh Action packing | At most 2302 encoded HWMP IE bytes after Category and Action | The selected non-HT management body limit is 2304 bytes including those two fields; PHY length limits are an additional bound |
 | Encoded cost | Ceiling conversion; finite clamp to [1, UINT32_MAX]; wide saturating path addition | Prevents cost wraparound from favoring a prohibitively expensive path |
 | Error samples | Per-direction `ef = 7/8 * ef + 1/8 * sample`, initially zero | Actual unicast payload ACK success=0 or on-air ACK timeout=1, each attempt separately; excludes holds/internal collision/group/management/QoS Null |
 | Error approximation | Use traffic samples to estimate nominal-frame corruption | Assumes size-independent frame-error probability; not a claim of measurement for every size |
@@ -97,12 +104,14 @@ The source PDF was used for mathematical grouping in the airtime formula, mesh A
 | C5 directional airtime and reporting | PASS, 1/1 new protocol; 5/5 units; 2/2 modules | Actual OFDM DATA/ACK outcomes, both metric IDs, retry/retirement boundaries and cleanup-complete publication |
 | C6 reactive HWMP and pending source queues | PASS, 3/3 new files (4 runs) | Production discovery, directional selection, bounded queues/retries, exact deadlines and isolated-owner lifecycle |
 | C7 path errors and rediscovery | PASS, 2/2 new files | Terminal DATA/peer-close causes, reason-specific PERRs, global pacing and alternate-path delivery |
-| Remaining live mesh behavior | NOT_RUN | Proactive roots, HT/VHT and power save remain future stages |
+| C8 proactive roots and coexistence | PASS, 3/3 new files, six metric-ID runs | All fifteen mesh files pass; retained known legacy failure; five units and two modules pass |
+| Remaining live mesh behavior | NOT_RUN | HT/VHT and power save remain future stages |
 | C5 committed release compilation checkpoint | PASS | Isolated clean `7264369846`, matching release dependencies; no warning/error |
 | Release compilation | NOT_RUN | Required before push |
 | C2 legacy protocol controls | 4/5 test files PASS; one preexisting unexpected failure | Raw Block Ack retry run 0 has protocol deadline failure, run 1 has runtime abort; immediate parent reproduces both at identical time/event |
 | Parent legacy fingerprints | PASS, 19 simulations / 56 checks | Native stored budgets, all expected PASS; baseline unchanged |
 | C4 committed legacy fingerprint checkpoint | PASS, 19 simulations / 56 checks | All calculated values byte-identical to C1; final combined tree remains to be checked |
+| C7 committed legacy fingerprint checkpoint | PASS, 19 simulations / 56 checks | All calculated values byte-identical to C1 after documented build-storage recovery |
 | Final-tree legacy fingerprints | NOT_RUN | Same exact scope still required on the final combined tree |
 | Feature-disabled compilation | NOT_RUN | Required by C9 |
 | Examples and capture decode | NOT_RUN | Required by C10 |
@@ -161,3 +170,19 @@ C7 ran on `ed1b774a4f` plus its working diff with a fresh matching debug build. 
 Additional passing cases cover closed/re-peered precursor admission, expired deferred dependencies, exact duplicates versus differing semantic values, immediate repair pruning, stop/restart pacing, inactive management, rejected-response recovery, internal-collision retry exhaustion and unknown-transit exclusions. High-cardinality records are created through valid control processing; the fixture does not claim twenty-five additional live radio endpoints. The [C7 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c7-errors.md) records setup, assertions, interpretation boundaries and exact selectors.
 
 The final batch passed all twelve mesh files and five of six legacy controls (17/18 files). The remaining Block Ack retry control retained both exact parent failures. Five units and two modules passed. Logs are `/tmp/inet-mesh-c7-{build-final,protocol-final,unit-final,module-final}.log`; raw generated fixtures/output are under `/tmp/inet-mesh-c7-raw/{protocol-final,unit-final,module-final}/`. Scoped architecture/naming/seal, release/migration format and whitespace checks passed; independent review found no actionable issue. All three diagrams rendered and were visually inspected under `audit/hwmp-implementation/diagrams-c7/`. Final combined-tree gates, L1 mechanical lint corrections and later mechanisms remain pending. No expectation or baseline was rewritten.
+
+## C7 committed trajectory checkpoint
+
+A clean isolated worktree at `95fe1da335` ran the same 19 native simulations/56 fingerprint checks as C1 and C4, serially with unchanged stored limits, features and baseline store. All simulations reached their native limits; all checks passed, exit 0, and all 56 calculated values were byte-identical to C1. First difference is null. Runtime was 787.553 seconds.
+
+The initial debug link failed with SIGBUS because the 16-GiB `/tmp` filesystem was full; no simulation ran against that output or the retained C4 library. Relocating 7,177 task-owned output entries to the larger filesystem preserved bytes, modes, timestamps and source paths. A supported `LN='ln -sf'` install override handled the cross-filesystem library link. Fresh relink and explicit loader verification established the matching C7 debug library before the successful campaign. Retained release output remained identified as C5.
+
+Records are `/tmp/inet-mesh-c7-checkpoint-fingerprint-execution.md`, `/tmp/inet-mesh-c7-checkpoint-fingerprint-comparison-record.json` and `/tmp/inet-mesh-c7-checkpoint-fingerprint-normalized.json`, with raw segments under `/tmp/inet-mesh-c7-checkpoint-fingerprint-raw/` and copies under `audit/hwmp-implementation/`. This pre-HT/VHT checkpoint is additional trajectory evidence; final combined-tree validation remains required.
+
+## C8 proactive-root execution
+
+C8 ran on `95fe1da335` plus its working diff after a fresh matching debug build. All three new fixtures pass with metric ID 1/run 0 and metric ID 2/run 1. The proactive fixture includes source demand both before and after a flag-zero invitation, sustained flag-one refresh, idle leaf-only traffic and completed root-state observation. The RANN fixture checks held-confirmation propagation, individually addressed confirmation without an existing path, source expiry while confirmation continues, interval boundaries, directional costs, pacing history across isolated restart and inactive-management pause/recovery. Coexistence checks two actual roots, ordinary discovery, shared source/confirmation spacing, receiver-compatible batching, the 2302-byte bound, pressure spills, fair recipient progress and independent expiry. Synthetic root records are pressure inputs, not additional live radio endpoints.
+
+The final batch passed all fifteen mesh files and five of six legacy controls (20/21 files). `WifiBlockAckDataRetry` retains the exact independently reproduced parent failures: run-0 step-2 deadline at 1.023764276562 s/event 3708 and run-1 exact-start abort at 1.014105463846 s/event 2639. Five units and two module controls pass. Exact selectors and explanation are in the [C8 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c8-roots.md). Logs are `/home/miguel/inet-mesh-c8-{build-final,protocol-final,unit-final,module-final}.log`, with generated fixtures, support snapshots and output under `/home/miguel/inet-mesh-c8-raw/{protocol-final,unit-final,module-final}/`. Copies are retained under `audit/hwmp-implementation/`.
+
+Earlier RANN failures were fixture assumptions about injected-control ownership and a fresh restart interval. Coexistence setup needed to hold an intermediate reply and put specific INI intervals before wildcard settings. These corrections changed no production behavior or expected result. Independent final review is clear, including the source-demand/observation corrections, fixture oracles and inactive-management case. Scoped architecture, changed NED/MSG naming, source-seal, release/migration format and whitespace checks pass. All three diagrams rendered and were visually inspected, and scoped local links/anchors passed. Final combined-tree compilation/fingerprints and later high-throughput/power-save stages remain separate requirements. No baseline or expected failure was rewritten.

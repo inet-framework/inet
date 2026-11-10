@@ -54,6 +54,7 @@ class MeshFixturePaths : public cSimpleModule, public IMeshPathSelection
     void cancelDiscovery(MacAddress) override {}
     void processHwmp(const Ptr<const Ieee80211HwmpFrame>&, MacAddress, MacAddress) override {}
     void reportUnknownTransit(MacAddress, MacAddress) override {}
+    void sourcePathNeeded(MacAddress) override {}
 };
 Define_Module(MeshFixturePaths);
 

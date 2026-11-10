@@ -1,0 +1,3 @@
+Mesh path providers receive explicit local source demand
+
+External IMeshPathSelection implementations must implement sourcePathNeeded(destination). Forwarding calls it for valid individual source traffic before path lookup, queue draining and transmission; no packet ownership is transferred. The development migration guide describes synchronous readiness and proactive response behavior.

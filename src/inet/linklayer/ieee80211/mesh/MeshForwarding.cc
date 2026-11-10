@@ -198,6 +198,8 @@ void MeshForwarding::processSourceMsdu(Packet *packet)
     if (operationalState != OPERATING) { discard(packet); return; }
     auto destination = packet->getTag<MacAddressReq>()->getDestAddress();
     if (destination.isUnspecified()) { discard(packet); return; }
+    if (!destination.isMulticast() && pathSelection)
+        pathSelection->sourcePathNeeded(destination);
     expirePending();
     if (!destination.isMulticast() && hasPending(destination))
         pathAvailable(destination);

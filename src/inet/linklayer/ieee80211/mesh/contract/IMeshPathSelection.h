@@ -32,6 +32,7 @@ class INET_API IMeshPathSelection
     virtual void cancelDiscovery(MacAddress destination) = 0;
     virtual void processHwmp(const Ptr<const Ieee80211HwmpFrame>& body, MacAddress transmitter, MacAddress receiver) = 0;
     virtual void reportUnknownTransit(MacAddress transmitter, MacAddress destination) = 0;
+    virtual void sourcePathNeeded(MacAddress destination) = 0;
 };
 
 } // namespace ieee80211
