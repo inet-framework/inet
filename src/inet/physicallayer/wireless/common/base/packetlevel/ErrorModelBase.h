@@ -41,6 +41,8 @@ class INET_API ErrorModelBase : public Module, public IErrorModel
     virtual void initialize(int stage) override;
 
     virtual double getScalarSnir(const ISnir *snir) const;
+    virtual double getScalarSnir(const ISnir *snir, simtime_t startTime, simtime_t endTime) const;
+    virtual void checkRegionPart(IRadioSignal::SignalPart part) const;
     virtual bool hasProbabilisticError(b length, double ber) const;
 
     virtual Packet *corruptBits(const Packet *packet, double ber, bool& isCorrupted) const;
@@ -50,6 +52,10 @@ class INET_API ErrorModelBase : public Module, public IErrorModel
 
     virtual Packet *computeCorruptedPacket(const Packet *packet, double ber) const;
     virtual Packet *computeCorruptedPacket(const ISnir *snir) const override;
+
+  public:
+    using IErrorModel::computePacketErrorRate;
+    virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const override;
 };
 
 } // namespace physicallayer

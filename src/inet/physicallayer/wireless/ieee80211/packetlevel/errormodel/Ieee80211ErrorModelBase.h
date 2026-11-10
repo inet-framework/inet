@@ -24,6 +24,13 @@ class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
     double sirImpossible = 0.1;
 
   protected:
+    /**
+     * Returns the number of bits that the error rate of the data part counts:
+     * the PSDU of the provided length with the tail and pad bits, and the
+     * SERVICE bits.
+     */
+    virtual b computeDataLength(const IIeee80211Mode *mode, B psduLength) const;
+
     virtual double getHeaderSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snir) const = 0;
     virtual double getDataSuccessRate(const IIeee80211Mode *mode, unsigned int bitLength, double snir) const = 0;
 
@@ -38,7 +45,9 @@ class INET_API Ieee80211ErrorModelBase : public ErrorModelBase
     Ieee80211ErrorModelBase();
 
     virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
+    using ErrorModelBase::computePacketErrorRate;
     virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
+    virtual double computeBitErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const override;
     virtual double computeSymbolErrorRate(const ISnir *snir, IRadioSignal::SignalPart part) const override;
 };
 
