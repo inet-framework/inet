@@ -59,23 +59,63 @@ const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IList
     return new ListeningDecision(listening, isListeningPossible);
 }
 
-bool FlatReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
+const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
-    if (!SnirReceiverBase::computeIsReceptionSuccessful(listening, reception, part, interference, snir))
-        return false;
-    else if (!errorModel)
-        return true;
-    else {
-        double packetErrorRate = errorModel->computePacketErrorRate(snir, part);
-        if (packetErrorRate == 0.0)
-            return true;
-        else if (packetErrorRate == 1.0)
-            return false;
-        else {
-            ASSERT(0.0 < packetErrorRate && packetErrorRate < 1.0);
-            return dblrand() > packetErrorRate;
+    if (errorModel == nullptr)
+        return NarrowbandReceiverBase::computeReceptionDecision(listening, reception, part, interference, snir);
+    bool isReceptionPossible = computeIsReceptionPossible(listening, reception, part);
+    bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, part, interference);
+    bool isReceptionSuccessful = false;
+    // a decision draws only for a reception that the receiver attempts
+    if (isReceptionAttempted) {
+        auto radio = reception->getReceiverRadio();
+        auto medium = radio->getMedium();
+        auto transmission = reception->getTransmission();
+        // the preamble has no regions and no error rate: only its SNIR decides
+        auto isPreambleSuccessful = [&] {
+            simtime_t startTime = reception->getStartTime(IRadioSignal::SIGNAL_PART_PREAMBLE);
+            simtime_t endTime = reception->getEndTime(IRadioSignal::SIGNAL_PART_PREAMBLE);
+            return startTime == endTime || computeIsReceptionSuccessful(listening, reception, IRadioSignal::SIGNAL_PART_PREAMBLE, interference, snir, startTime, endTime);
+        };
+        // each part needs the part before it; the radio medium keeps the decision of each part
+        switch (part) {
+            case IRadioSignal::SIGNAL_PART_PREAMBLE:
+                isReceptionSuccessful = isPreambleSuccessful();
+                break;
+            case IRadioSignal::SIGNAL_PART_HEADER:
+                isReceptionSuccessful = isPreambleSuccessful() && computeIsPartSuccessful(listening, reception, part, interference, snir);
+                break;
+            case IRadioSignal::SIGNAL_PART_DATA:
+                isReceptionSuccessful = medium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_HEADER)->isReceptionSuccessful() &&
+                                        computeIsPartSuccessful(listening, reception, part, interference, snir);
+                break;
+            case IRadioSignal::SIGNAL_PART_WHOLE:
+                isReceptionSuccessful = medium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_DATA)->isReceptionSuccessful();
+                break;
+            default:
+                throw cRuntimeError("Unknown signal part: '%s'", IRadioSignal::getSignalPartName(part));
         }
     }
+    return new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
+}
+
+bool FlatReceiverBase::computeIsPartSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
+{
+    auto range = computePartRange(reception->getTransmission(), part);
+    // without the complete part in the packet, the receiver cannot decode the part
+    if (!range)
+        return false;
+    // a part without bits has no region
+    if (range->length == b(0))
+        return true;
+    auto [startTime, endTime] = computeRegionInterval(reception, part, b(0), range->length, range->length);
+    // the SNIR threshold is a condition, and the error rate is a probability
+    if (!computeIsReceptionSuccessful(listening, reception, part, interference, snir, startTime, endTime))
+        return false;
+    double errorRate = errorModel->computePacketErrorRate(snir, part, range->length, startTime, endTime);
+    if (!(0 <= errorRate && errorRate <= 1))
+        throw cRuntimeError("Invalid error rate of a region: %g", errorRate);
+    return errorRate == 0 || (errorRate != 1 && dblrand() > errorRate);
 }
 
 const IReceptionResult *FlatReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const

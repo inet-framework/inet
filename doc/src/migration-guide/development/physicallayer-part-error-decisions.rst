@@ -54,3 +54,26 @@ implementation of :cpp:`FlatReceiverBase` throws an error.
 :cpp:`computeRegionInterval()` gives the time in which the transmitter sends a
 range of the bits of a part; a receiver can override it for a time map that is
 not in proportion to the bits.
+
+Decisions of the Header and the Data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:cpp:`FlatReceiverBase` with an error model now overrides
+:cpp:`computeReceptionDecision()`. The decision of the header and the decision
+of the data each check the SNIR threshold and draw against the region error
+rate of the error model, both with the SNIR of the time of the part. The
+decision of the data reads the decision of the header from the radio medium,
+and the decision of the whole signal reads the decision of the data. A receiver
+that derives from :cpp:`FlatReceiverBase` and has an error model must override
+:cpp:`computePartRange()`; without the override, the first reception stops
+with an error.
+
+:cpp:`FlatReceiverBase::computeIsReceptionSuccessful()` no longer exists. For
+a flat receiver, the method of :cpp:`SnirReceiverBase` answers only the SNIR
+threshold of the whole reception, and the decision is the authority. A
+receiver that changes the threshold check overrides the overload of
+:cpp:`SnirReceiverBase::computeIsReceptionSuccessful()` with the time interval.
+A receiver that changes the decision of a part overrides the protected
+:cpp:`computeIsPartSuccessful()`. Code that computes a reception result outside
+the radio medium, as the network configurator does, must give its own decision
+of the whole signal to :cpp:`computeReceptionResult()`.

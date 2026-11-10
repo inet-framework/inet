@@ -29,7 +29,6 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
     virtual void initialize(int stage) override;
 
     using NarrowbandReceiverBase::computeIsReceptionPossible;
-    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
 
     virtual Packet *computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const override;
 
@@ -65,6 +64,15 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
      * bits.
      */
     virtual std::pair<simtime_t, simtime_t> computeRegionInterval(const IReception *reception, IRadioSignal::SignalPart part, b offset, b length, b partLength) const;
+
+    /**
+     * Decides each region of the header part or the data part one time, and
+     * returns true if no region failed. A region fails if the reception of its
+     * time interval is not successful, that is, its SNIR is not above the
+     * threshold, or else if one draw against its error rate fails. Both use the
+     * SNIR of the time of the region. The region is the whole part.
+     */
+    virtual bool computeIsPartSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const;
     //@}
 
   public:
@@ -75,6 +83,7 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
     virtual W getMinReceptionPower() const override { return sensitivity; }
 
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const override;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
     virtual const IReceptionResult *computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 
     virtual const IErrorModel *getErrorModel() const { return errorModel; }
