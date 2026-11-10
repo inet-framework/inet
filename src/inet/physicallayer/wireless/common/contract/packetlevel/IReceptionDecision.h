@@ -8,6 +8,7 @@
 #ifndef __INET_IRECEPTIONDECISION_H
 #define __INET_IRECEPTIONDECISION_H
 
+#include "inet/physicallayer/wireless/common/contract/packetlevel/ErrorRegion.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
 
 namespace inet {
@@ -49,6 +50,15 @@ class INET_API IReceptionDecision : public virtual IPrintableObject
      * Returns whether the reception was completely successful or not.
      */
     virtual bool isReceptionSuccessful() const = 0;
+
+    /**
+     * Returns the regions of the transmitted packet that this decision found
+     * erroneous, in packet order. The list is empty if the decision is
+     * successful, if the receiver does not decide regions, or if the failed
+     * bits have no place in the packet; the decision is then not successful
+     * as a whole.
+     */
+    virtual const std::vector<ErrorRegion>& getErrorRegions() const = 0;
 };
 
 } // namespace physicallayer

@@ -1,0 +1,3 @@
+Failed regions of a reception decision
+
+IReceptionDecision has a new pure virtual function, getErrorRegions(). It returns the regions of the transmitted packet that the decision found erroneous, as ErrorRegion values with the offset, the length, and the bit error rate of each region. ReceptionDecision takes the regions as an optional constructor argument. No receiver gives regions yet, so no result changes. An IReceptionDecision implementation outside INET must add the function.
