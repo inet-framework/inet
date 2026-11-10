@@ -1,0 +1,3 @@
+Opt-in VHT catalog with both guard intervals
+
+The new ac-complete operation mode provides long and short guard intervals for every modeled legal VHT width, stream count and MCS combination. It retains the existing HT modes, legacy Supported Rates and timing reference. Select it through Ieee80211Interface.opMode so the MAC and radio use the same catalog; capability and operating-channel admission still determine which entries a station may use. Existing ac and all default selections remain unchanged.
