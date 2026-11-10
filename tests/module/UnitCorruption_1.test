@@ -1,0 +1,192 @@
+%description:
+Check the corruption of the units of a failed region in the error model base.
+The test needs a network, because the error model draws from the random
+number generator of its module. Each of the n units of a failed region has an
+error with the unit rate p, and a failed region flips at least one unit. The
+unit rate 1 flips every unit without a draw, and the unit rate 0 flips exactly
+one unit. For other rates, the flips stay in the region, and over 10000 samples
+the mean number of flips is within 2 % of n p / (1 - (1 - p)^n). This holds also
+for 8000 units with the unit rate 0.005, where the probability of at least one
+error rounds to 1: about 40 units flip, not all of them. In the byte and bit
+modes, a failed region becomes a raw chunk with the flipped units, marked
+incorrect; the flips follow the bit error rate of the region, and a region that
+is not whole bytes uses bits in the byte mode. The transmitted packet stays
+unchanged.
+
+%file: test.cc
+#include <cmath>
+#include <set>
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BitCountChunk.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/physicallayer/wireless/common/errormodel/packetlevel/StochasticErrorModel.h"
+
+namespace UnitCorruption_1 {
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+// Gives the test access to the unit corruption.
+class TestErrorModel : public StochasticErrorModel
+{
+  public:
+    using ErrorModelBase::corruptUnits;
+};
+
+Define_Module(TestErrorModel);
+
+// the class, the length, and the flag of each chunk of the packet
+static std::string describe(const Packet *packet)
+{
+    const auto& content = packet->peekAll(Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+    std::deque<Ptr<const Chunk>> chunks;
+    if (content->getChunkType() == Chunk::CT_SEQUENCE)
+        chunks = staticPtrCast<const SequenceChunk>(content)->getChunks();
+    else
+        chunks.push_back(content);
+    std::string result;
+    for (const auto& chunk : chunks)
+        result += std::string(chunk->getClassName()) + " " + std::to_string(chunk->getChunkLength().get<b>()) + "b" + (chunk->isCorrect() ? " correct, " : " incorrect, ");
+    return result;
+}
+
+// Runs the checks after the initialization of the error models.
+class UnitCorruptionTester : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(0, new cMessage("check")); }
+    virtual void handleMessage(cMessage *msg) override
+    {
+        delete msg;
+        auto byteModel = check_and_cast<TestErrorModel *>(getModuleByPath("^.byteModel"));
+        auto bitModel = check_and_cast<TestErrorModel *>(getModuleByPath("^.bitModel"));
+        cRNG *rng = bitModel->getRNG(0);
+        // 1. the unit rate 1 flips every unit without a draw
+        {
+            std::vector<int> flips;
+            auto numbersDrawn = rng->getNumbersDrawn();
+            bitModel->corruptUnits(100, 1, [&] (int i) { flips.push_back(i); });
+            ASSERT(flips.size() == 100 && rng->getNumbersDrawn() == numbersDrawn);
+        }
+        // 2. the unit rate 0 flips exactly one unit
+        for (int k = 0; k < 100; k++) {
+            std::vector<int> flips;
+            bitModel->corruptUnits(100, 0, [&] (int i) { flips.push_back(i); });
+            ASSERT(flips.size() == 1 && 0 <= flips[0] && flips[0] < 100);
+        }
+        // 3. other rates flip at least one unit inside the region, with the expected mean
+        for (auto [n, p] : std::vector<std::pair<int, double>>{{100, 0.007}, {1000, 0.0046}, {8, 1.25e-7}, {8000, 0.005}}) {
+            double expectedMean = n * p / -std::expm1(n * std::log1p(-p));
+            double sum = 0;
+            int maxCount = 0;
+            for (int k = 0; k < 10000; k++) {
+                std::set<int> flips;
+                int count = 0;
+                bitModel->corruptUnits(n, p, [&] (int i) { ASSERT(0 <= i && i < n); flips.insert(i); count++; });
+                ASSERT(count >= 1 && (int)flips.size() == count);
+                sum += count;
+                maxCount = std::max(maxCount, count);
+            }
+            double mean = sum / 10000;
+            std::cout << "n = " << n << ", unit rate = " << p << ": mean flips " << mean << ", expected " << expectedMean << ", maximum " << maxCount << std::endl;
+            ASSERT(std::fabs(mean - expectedMean) < 0.02 * expectedMean);
+            ASSERT(n < 1000 || maxCount < n / 10);
+        }
+        // 4. the byte and bit modes give raw chunks with flipped units
+        int flags = Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+        auto packet = new Packet("transmitted");
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10), 0x00));
+        packet->insertAtBack(makeShared<ByteCountChunk>(B(10), 0x11));
+        auto transmittedBytes = packet->peekAllAsBytes()->getBytes();
+        std::vector<ErrorRegion> regions = {{B(10), B(10), 1}};
+        for (auto model : {byteModel, bitModel}) {
+            auto corrupted = model->computeCorruptedPacket(packet, regions);
+            std::cout << model->getName() << ": " << describe(corrupted) << std::endl;
+            auto bytes = corrupted->peekAllAsBytes(flags)->getBytes();
+            for (int i = 0; i < 20; i++)
+                ASSERT(bytes[i] == (i < 10 ? 0x00 : 0xEE));
+            delete corrupted;
+        }
+        ASSERT(packet->peekAllAsBytes()->getBytes() == transmittedBytes);
+        delete packet;
+        // 5. a region that is not whole bytes uses bits in the byte mode
+        auto bitPacket = new Packet("transmitted");
+        bitPacket->insertAtBack(makeShared<ByteCountChunk>(B(1), 0x00));
+        bitPacket->insertAtBack(makeShared<BitCountChunk>(b(4)));
+        auto corrupted = byteModel->computeCorruptedPacket(bitPacket, {{B(1), b(4), 1}});
+        std::cout << "byteModel, 4 bits: " << describe(corrupted) << std::endl;
+        delete corrupted;
+        delete bitPacket;
+        // 6. the flips of a long region follow its bit error rate
+        auto longPacket = new Packet("transmitted");
+        longPacket->insertAtBack(makeShared<ByteCountChunk>(B(1000), 0x00));
+        for (auto model : {byteModel, bitModel}) {
+            auto corrupted = model->computeCorruptedPacket(longPacket, {{B(0), B(1000), 0.005}});
+            auto bytes = corrupted->peekAllAsBytes(flags)->getBytes();
+            int numChangedBytes = 0;
+            for (auto byte : bytes)
+                numChangedBytes += byte != 0x00 ? 1 : 0;
+            ASSERT(1 <= numChangedBytes && numChangedBytes < 100);
+            delete corrupted;
+        }
+        delete longPacket;
+        std::cout << "unit corruption checks passed" << std::endl;
+    }
+};
+
+Define_Module(UnitCorruptionTester);
+
+} // namespace UnitCorruption_1
+
+%file: test.ned
+
+import inet.physicallayer.wireless.common.errormodel.packetlevel.StochasticErrorModel;
+
+module TestErrorModel extends StochasticErrorModel
+{
+    parameters:
+        @class(TestErrorModel);
+}
+
+simple UnitCorruptionTester
+{
+    @class(UnitCorruptionTester);
+}
+
+network Test
+{
+    submodules:
+        byteModel: TestErrorModel {
+            corruptionMode = "byte";
+        }
+        bitModel: TestErrorModel {
+            corruptionMode = "bit";
+        }
+        tester: UnitCorruptionTester;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+byteModel: inet::ByteCountChunk 80b correct, inet::BytesChunk 80b incorrect,
+%contains: stdout
+bitModel: inet::ByteCountChunk 80b correct, inet::BitsChunk 80b incorrect,
+%contains: stdout
+byteModel, 4 bits: inet::ByteCountChunk 8b correct, inet::BitsChunk 4b incorrect,
+%contains: stdout
+unit corruption checks passed
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

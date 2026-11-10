@@ -512,14 +512,14 @@ Verification: the fingerprints must keep all values.
 
 ### Q2
 
-Status: open. Purpose and scope: the error model side of the region decisions, without a caller. The enum `CorruptionMode` moves to `IErrorModel`, and `IErrorModel` gets `getCorruptionMode()` and `computeCorruptedPacket(packet, regions)`. `ErrorModelBase` gives a packet-level bit error in the `packet` mode, an incorrect copy of each failed chunk in the `chunk` mode, and flipped bytes or bits in the `byte` and `bit` modes, through the protected `computeCorruptedChunk()` and `corruptUnits()` (sections 4.5 and D11, D13). The old `computeCorruptedPacket(snir)` stays until Q3. Release note and the migration guide section.
+Status: done. Purpose and scope: the error model side of the region decisions, without a caller. The enum `CorruptionMode` moves to `IErrorModel`, and `IErrorModel` gets `getCorruptionMode()` and `computeCorruptedPacket(packet, regions)`. `ErrorModelBase` gives a packet-level bit error in the `packet` mode, an incorrect copy of each failed chunk in the `chunk` mode, and flipped bytes or bits in the `byte` and `bit` modes, through the protected `computeCorruptedChunk()` and `corruptUnits()` (sections 4.5 and D11, D13). The old `computeCorruptedPacket(snir)` stays until Q3. Release note and the migration guide section.
 
 Verification: a new unit test `tests/unit/RegionCorruption_1.test` checks that `computeCorruptedPacket()` in the `chunk` mode marks exactly the chunks of the given regions, that the content between the regions keeps its bytes and flags, and that the `packet` mode only sets the packet-level bit error. A new module test `tests/module/UnitCorruption_1.test` runs `corruptUnits()` in a small network of two error models and a tester, because the error model draws from the random number generator of its module:
 
 - With the unit rate 1, every unit flips and nothing is drawn.
 - With the unit rate 0, exactly one unit flips.
 - With other rates, each sample flips at least one unit, and the positions stay in the region.
-- Over 10000 samples, the mean number of flips is within 2 % of n·p / (1 − (1 − p)^n). One case has 8000 units and p = 0.005, where the region rate rounds to 1.
+- Over 10000 samples, the mean number of flips is within 2 % of n·p / (1 − (1 − p)^n). One case has 8000 units and p = 0.005, where the region rate rounds to 1. It gives a mean of 39.94 flips, where 40 is expected, and at most 64 flips in one sample.
 - In the byte and bit modes, a failed region becomes a raw chunk with the flipped units, marked incorrect; a region that is not whole bytes uses bits in the byte mode; the input stays unchanged.
 
 The fingerprints must keep all values.

@@ -1,0 +1,72 @@
+%description:
+Check the corrupted packet of the error model base in the chunk corruption
+mode, without a network or a reception. The transmitted packet has five chunks
+with different fill bytes, and the transmitter sent the last one incorrect. The
+second and the fourth chunks are failed regions. The result marks exactly these
+two chunks incorrect, keeps the bytes of all chunks, and keeps the flag of the
+last chunk. In the packet mode, the result only has a packet-level bit error.
+The transmitted packet stays unchanged.
+
+%includes:
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/ByteCountChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/physicallayer/wireless/common/errormodel/packetlevel/StochasticErrorModel.h"
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+%global:
+class ModeModel : public StochasticErrorModel
+{
+  public:
+    ModeModel(CorruptionMode mode) { corruptionMode = mode; }
+};
+
+// the length and the flag of each chunk of the packet
+static std::string describe(const Packet *packet)
+{
+    const auto& content = packet->peekAll(Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+    std::deque<Ptr<const Chunk>> chunks;
+    if (content->getChunkType() == Chunk::CT_SEQUENCE)
+        chunks = staticPtrCast<const SequenceChunk>(content)->getChunks();
+    else
+        chunks.push_back(content);
+    std::string result;
+    for (const auto& chunk : chunks)
+        result += std::to_string(B(chunk->getChunkLength()).get<B>()) + (chunk->isCorrect() ? "c " : "i ");
+    return result;
+}
+
+%activity:
+auto packet = new Packet("transmitted");
+for (int i = 0; i < 5; i++) {
+    auto chunk = makeShared<ByteCountChunk>(B(10 * (i + 1)), i + 1);
+    if (i == 4)
+        chunk->markIncorrect();
+    packet->insertAtBack(chunk);
+}
+ModeModel model(ErrorModelBase::CorruptionMode::CM_CHUNK);
+// the second chunk at 10 B and the fourth chunk at 60 B failed
+std::vector<ErrorRegion> regions = {{B(10), B(20), 0.5}, {B(60), B(40), 1}};
+auto corrupted = model.computeCorruptedPacket(packet, regions);
+EV << "transmitted: " << describe(packet) << "\n";
+EV << "corrupted: " << describe(corrupted) << "\n";
+int flags = Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+ASSERT(corrupted->getTotalLength() == packet->getTotalLength());
+ASSERT(corrupted->peekAllAsBytes(flags)->getBytes() == packet->peekAllAsBytes(flags)->getBytes());
+ASSERT(!corrupted->cPacket::hasBitError());
+delete corrupted;
+// the packet mode marks the whole packet and keeps the content
+ModeModel packetModel(ErrorModelBase::CorruptionMode::CM_PACKET);
+corrupted = packetModel.computeCorruptedPacket(packet, regions);
+EV << "packet mode: " << describe(corrupted) << (corrupted->cPacket::hasBitError() ? "with" : "without") << " a packet-level bit error\n";
+delete corrupted;
+delete packet;
+
+%contains: stdout
+transmitted: 10c 20c 30c 40c 50i
+%contains: stdout
+corrupted: 10c 20i 30c 40i 50i
+%contains: stdout
+packet mode: 10c 20c 30c 40c 50i with a packet-level bit error
