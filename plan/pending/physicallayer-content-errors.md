@@ -506,7 +506,7 @@ Status: done. P4 records the executed results of pull requests 1 and 2 in sectio
 
 ### Q1 (pull request 3)
 
-Status: open. Purpose and scope: `ErrorRegion` in its own header, `IReceptionDecision::getErrorRegions()`, the regions of `ReceptionDecision`, and the overload `ReceiverBase::computeReceivedPacket(snir, decisions)`, which `computeReceptionResult()` calls and which gives the same packet as before. No decision has a region yet. Release note and the migration guide section.
+Status: done. Purpose and scope: `ErrorRegion` in its own header, `IReceptionDecision::getErrorRegions()`, the regions of `ReceptionDecision`, and the overload `ReceiverBase::computeReceivedPacket(snir, decisions)`, which `computeReceptionResult()` calls and which gives the same packet as before. No decision has a region yet. Release note and the migration guide section.
 
 Verification: the fingerprints must keep all values.
 
