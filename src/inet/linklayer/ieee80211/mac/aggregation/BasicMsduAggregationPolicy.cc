@@ -78,19 +78,24 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
 {
     Enter_Method("computeAggregateFrames");
     ASSERT(!queue->isEmpty());
-    std::vector<Packet *> candidates;
-    for (int i=0;i<queue->getNumPackets();i++)
-        candidates.push_back(queue->getPacket(i));
-    return computeAggregateFrames(candidates);
+    return collectAggregateFrames(queue->getNumPackets(), [queue](size_t index) { return queue->getPacket(index); });
 }
 
 std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(const std::vector<Packet *>& candidates)
 {
     Enter_Method("computeAggregateFrames");
+    return collectAggregateFrames(candidates.size(), [&candidates](size_t index) { return candidates[index]; });
+}
+
+std::vector<Packet *> *BasicMsduAggregationPolicy::collectAggregateFrames(size_t count, const std::function<Packet *(size_t)>& getCandidate)
+{
     b aMsduLength = b(0);
     Ptr<const Ieee80211DataHeader> firstHeader = nullptr;
     auto frames = new std::vector<Packet *>();
-    for (auto dataPacket : candidates) {
+    // Indexed queue access may walk from the front. Do not inspect a tail that
+    // cannot participate once this ordered prefix reaches its first rejection.
+    for (size_t i = 0; i < count; i++) {
+        auto dataPacket = getCandidate(i);
         const auto& dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(dataPacket->peekAtFront<Ieee80211DataOrMgmtHeader>());
         if (dataHeader == nullptr)
             break;
