@@ -58,21 +58,19 @@ void Ieee80211Mib::establishMeshPeer(MacAddress peer, const Ieee80211RateSetStat
     emit(meshPeerChangedSignal, true, &details);
 }
 
-void Ieee80211Mib::removeMeshPeer(MacAddress peer)
+bool Ieee80211Mib::withdrawMeshPeer(MacAddress peer)
 {
-    Enter_Method("removeMeshPeer");
-    if (peerRateSets.erase(peer)) {
-        MeshPeerChange details(peer);
-        emit(rateStateChangedSignal, true);
-        emit(meshPeerChangedSignal, false, &details);
-    }
+    Enter_Method("withdrawMeshPeer");
+    return peerRateSets.erase(peer) != 0;
 }
 
-void Ieee80211Mib::clearMeshPeers()
+void Ieee80211Mib::publishMeshPeerRemoval(MacAddress peer)
 {
-    Enter_Method("clearMeshPeers");
-    while (!peerRateSets.empty())
-        removeMeshPeer(peerRateSets.begin()->first);
+    Enter_Method("publishMeshPeerRemoval");
+    ASSERT(!isMeshPeerEstablished(peer));
+    MeshPeerChange details(peer);
+    emit(rateStateChangedSignal, true);
+    emit(meshPeerChangedSignal, false, &details);
 }
 
 void Ieee80211Mib::initialize(int stage)

@@ -2,7 +2,7 @@
 
 package inet.linklayer.ieee80211.mac;
 
-// MAC boundary for the open mesh profile. Mesh data support is added separately.
+// MAC boundary for open mesh management and native endpoint data forwarding.
 module Ieee80211MeshMac extends Ieee80211Mac
 {
     parameters:

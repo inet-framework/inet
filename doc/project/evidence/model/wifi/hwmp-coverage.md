@@ -16,7 +16,7 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | BEACON-TIMING | MeshBeaconTiming.test | C3 | hwmp-c3-peering.md | PASS |
 | FORWARDING | MeshForwarding.test | C4 | hwmp-c4-forwarding.md | PASS with fixture path provider |
 | GROUP-FORWARDING | MeshGroupForwarding.test | C4 | hwmp-c4-forwarding.md | PASS |
-| AIRTIME | MeshAirtimeMetric.test | C5, H2, H3, P3 | hwmp-c5-airtime.md | NOT_RUN |
+| AIRTIME | MeshAirtimeMetric.test | C5, H2, H3, P3 | hwmp-c5-airtime.md | PASS for unaggregated OFDM; aggregation/high-throughput extensions remain later stages |
 | DISCOVERY | HwmpDiscovery.test | C6 | hwmp-c6-discovery.md | NOT_RUN |
 | PATH-SELECTION | HwmpPathSelection.test | C6 | hwmp-c6-discovery.md | NOT_RUN |
 | DISCOVERY-LIMITS | HwmpDiscoveryLimits.test | C6 | hwmp-c6-discovery.md | NOT_RUN |
@@ -40,7 +40,7 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | POWER-RECOVERY | MeshPowerSaveRecovery.test | P3 | hwmp-p3-service-periods.md | NOT_RUN |
 | POWER-HT-VHT | MeshPowerSaveHtVht.test | P3 | hwmp-p3-service-periods.md | NOT_RUN |
 
-Supplementary cases are `tests/unit/Ieee80211MeshSerializer_1.test` (PASS at C2), and the planned `tests/unit/Ieee80211AirtimeMetric_1.test` and `tests/module/Ieee80211MeshLifecycle_1.test` (NOT_RUN). Unit arithmetic and codec assertions supplement the production-path checks; lifecycle tests establish isolated owner cleanup, not safe whole-NIC restart.
+Supplementary cases are `tests/unit/Ieee80211MeshSerializer_1.test` (PASS at C2), `tests/unit/Ieee80211AirtimeMetric_1.test` (PASS at C5), and the planned `tests/module/Ieee80211MeshLifecycle_1.test` (NOT_RUN). Unit arithmetic and codec assertions supplement the production-path checks; lifecycle tests establish isolated owner cleanup, not safe whole-NIC restart.
 
 ## Model decisions
 
@@ -86,10 +86,12 @@ The source PDF was used for mathematical grouping in the airtime formula, mesh A
 | C2 boundary protocol fixture | PASS, 1/1 | `/tmp/inet-mesh-c2-protocol-complete.log`; no claim of live peering/forwarding |
 | C3 peering and timing | PASS, 3/3 | Fresh debug build, live peering/fault/timing fixtures; raw `/tmp/inet-mesh-c3-raw/` |
 | C4 native forwarding and peer retirement | PASS, 2/2 | Fixture path provider, actual radio data and three retirement boundaries |
-| Remaining live mesh behavior | NOT_RUN | Metric, HWMP, HT/VHT, power save remain future stages |
+| C5 directional airtime and reporting | PASS, 1/1 new protocol; 5/5 units; 2/2 modules | Actual OFDM DATA/ACK outcomes, both metric IDs, retry/retirement boundaries and cleanup-complete publication |
+| Remaining live mesh behavior | NOT_RUN | HWMP, HT/VHT and power save remain future stages |
 | Release compilation | NOT_RUN | Required before push |
 | C2 legacy protocol controls | 4/5 test files PASS; one preexisting unexpected failure | Raw Block Ack retry run 0 has protocol deadline failure, run 1 has runtime abort; immediate parent reproduces both at identical time/event |
 | Parent legacy fingerprints | PASS, 19 simulations / 56 checks | Native stored budgets, all expected PASS; baseline unchanged |
+| C4 committed legacy fingerprint checkpoint | PASS, 19 simulations / 56 checks | All calculated values byte-identical to C1; final combined tree remains to be checked |
 | Final-tree legacy fingerprints | NOT_RUN | Same exact scope still required on the final combined tree |
 | Feature-disabled compilation | NOT_RUN | Required by C9 |
 | Examples and capture decode | NOT_RUN | Required by C10 |
@@ -118,3 +120,15 @@ The protocol suite selector is `^tests/protocol/wifi$`, with file selector `/(me
 The isolated C1 parent `8a76ae140f` completed 19 simulations and 56 fingerprint checks, exit 0, with no execution error or mismatch. Selection was `-w '^(examples/adhoc/qos|examples/wireless/qos|showcases/wireless/(aggregation|blockack)|showcases/routing/manet)$' -r '^0$'`, using local `--load . -p inet -m debug --no-build --no-concurrent`. All run/seed values are zero. The native stored limits are 10 seconds for the nine QoS runs, one second for the seven aggregation/Block Ack showcase runs, and 100 seconds for the three MANET runs. Ingredients are `tplx`, `~tNl`, `~tND`, except Gpsr has no stored `~tND`; no selected key has multiple time limits. The stored limits differ from some INI defaults and were preserved exactly.
 
 The campaign ran for 829.414 seconds after selection; CPU allowance remained 600 seconds per simulation. Parent source and store hashes remained unchanged. Exact tuples and calculated/stored fingerprints are retained in `/tmp/inet-mesh-c1-native-fingerprint-comparison-record.json`; execution and normalized records are `/tmp/inet-mesh-c1-native-fingerprint-execution.md` and `/tmp/inet-mesh-c1-native-fingerprint-normalized.json`, with raw logs under `/tmp/inet-mesh-c1-native-fingerprint-raw/`. This is the parent reference for a later identical final-tree comparison; it neither proves mesh correctness nor clears the separate failing protocol control.
+
+## C4 committed trajectory checkpoint
+
+An isolated clean worktree at `03489ad1f9272adc65df67a7f2deea56456964a2` completed an incremental debug build and the identical serial native campaign above. All 19 simulations reached their stored limits and all 56 checks passed, exit 0, in 823.375 seconds. Joining the exact case/run/limit/ingredient keys against the preserved C1 reference found 56 byte-identical calculated fingerprint values, zero differences and no first divergent case. Feature state and the baseline store remained unchanged; the active in-progress C5 tree was not used.
+
+Execution, normalized and per-case records are `/tmp/inet-mesh-c4-checkpoint-fingerprint-execution.md`, `/tmp/inet-mesh-c4-checkpoint-fingerprint-normalized.json` and `/tmp/inet-mesh-c4-checkpoint-fingerprint-comparison-record.json`; raw logs are under `/tmp/inet-mesh-c4-checkpoint-fingerprint-raw/`. Copies are retained under `audit/hwmp-implementation/`. This intermediate trajectory check does not replace final-tree verification or establish mesh protocol correctness.
+
+## C5 directional airtime execution
+
+C5 ran on `03489ad1f9` plus its working diff after a fresh matching `make MODE=debug -j4`, exit 0. The new General/run-0/seed-0 production fixture passed with both metric IDs: actual DATA/ACK attempts drive the directional EWMA and encoded costs, terminal timeout flags, local metric replies, accepted optional-rate updates and rejected fixed-mode incompatibility. Strengthened cases check collision-only exhaustion, TTL/pre-transmission drops, retired callbacks, both corrupt-response timing outcomes, Close interruption, fresh re-peering and isolated management stop with queued data. A test-only transparent recipient-service proxy verifies that the real recipient cleanup returns before the synchronous closed-peer observer runs; no production telemetry was added.
+
+The final protocol selection passed all seven mesh files and five of six legacy controls. `WifiBlockAckDataRetry` retained its independently reproduced run-0 protocol failure and run-1 runtime error at the same event/time boundaries; it remains a failed control. All five selected units passed, including both-ID arithmetic, below-one aggregation rejection, rounding and saturation; the two frame-sequence/Rx completion module controls also passed. Exact selectors, raw artifacts and boundaries are recorded in the [C5 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c5-airtime.md). Final logs are `/tmp/inet-mesh-c5-final-{build,protocol,unit,module}.log`, with retained raw artifacts under `/tmp/inet-mesh-c5-raw/`. Scoped architecture, release-note format and whitespace checks passed. Three reviewer diagrams rendered and were visually inspected under `audit/hwmp-implementation/diagrams-c5/`. This establishes the selected unaggregated OFDM estimator/reporting policy; production HWMP and aggregation remain subsequent stages.

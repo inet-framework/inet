@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mgmt/IMeshManagement.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtBase.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkMetric.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -38,6 +39,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
         int64_t offset = 0; // microseconds, neighbor TSF minus local TSF
     };
     std::map<MacAddress, Peer> peers;
+    ModuleRefByPar<IMeshLinkMetric> linkMetric;
     std::map<MacAddress, Neighbor> neighbors;
     cMessage *beaconTimer = nullptr;
     simtime_t beaconInterval;
@@ -70,6 +72,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     void processManagement(Packet *packet);
     void processBeacon(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool response);
     void processPeering(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header);
+    void processLinkMetric(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header);
     void processProbeRequest(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header);
     void updateNeighborTiming(Packet *packet, const Ptr<const Ieee80211BeaconFrame>& body, MacAddress peer);
     bool matchesProfile(const Ieee80211MeshFrame& body) const;
@@ -78,6 +81,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     Peer& requirePeer(MacAddress address);
     void createInstance(Peer& peer);
     void setState(MacAddress address, Peer& peer, PeerState state);
+    void retirePeer(MacAddress address);
     void event(MacAddress address, Event event, uint16_t reason = 0);
     void arm(Peer& peer, simtime_t timeout);
     uint16_t allocateAid() const;

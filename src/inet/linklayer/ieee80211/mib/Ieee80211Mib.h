@@ -163,8 +163,10 @@ class INET_API Ieee80211Mib : public SimpleModule
     const MeshConfiguration& getMeshConfiguration() const { return meshConfiguration; }
     bool isMeshPeerEstablished(MacAddress peer) const;
     void establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates);
-    void removeMeshPeer(MacAddress peer);
-    void clearMeshPeers();
+    // Withdrawal is silent. The management owner publishes after its metric
+    // and MAC cleanup completes, using the returned local changed result.
+    bool withdrawMeshPeer(MacAddress peer);
+    void publishMeshPeerRemoval(MacAddress peer);
 };
 
 } // namespace ieee80211

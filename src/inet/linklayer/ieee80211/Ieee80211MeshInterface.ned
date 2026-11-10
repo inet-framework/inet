@@ -3,6 +3,7 @@
 package inet.linklayer.ieee80211;
 
 import inet.linklayer.ieee80211.mesh.contract.IMeshPathSelection;
+import inet.linklayer.ieee80211.mesh.AirtimeLinkMetric;
 
 // Open, single-channel QoS mesh with native OFDM forwarding. Individual traffic
 // uses an optional path provider; HT/VHT, aggregation and power save are separate.
@@ -29,6 +30,10 @@ module Ieee80211MeshInterface extends Ieee80211Interface
         mac.hcf.originatorMacDataService.fragmentationPolicy.typename = "";
         mac.hcf.rtsPolicy.rtsThreshold = default(65536B);
     submodules:
+        linkMetric: AirtimeLinkMetric {
+            parameters:
+                @display("p=100,100");
+        }
         pathSelection: <default("")> like IMeshPathSelection if typename != "" {
             parameters:
                 @display("p=100,200");

@@ -39,6 +39,7 @@
 #include "inet/linklayer/ieee80211/mac/protectionmechanism/SingleProtectionMechanism.h"
 #include "inet/linklayer/ieee80211/mac/queue/InProgressFrames.h"
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkTiming.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -49,7 +50,7 @@ class Ieee80211Mib;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener, public IMeshLinkTiming
 {
   private:
     BlockAckVariant blockAckVariant = BlockAckVariant::BASIC;
@@ -57,6 +58,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     static simsignal_t edcaCollisionDetectedSignal;
+    static simsignal_t meshDataAttemptCompletedSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
 
@@ -226,6 +228,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::string getFrameSequenceInfo() const;
 
   public:
+    virtual MeshLinkTiming getMeshLinkTiming(MacAddress peer) override;
     virtual ~Hcf();
     void resetPeer(MacAddress peer);
 

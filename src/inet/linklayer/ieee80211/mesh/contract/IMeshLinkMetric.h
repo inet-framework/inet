@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+#ifndef __INET_IMESHLINKMETRIC_H
+#define __INET_IMESHLINKMETRIC_H
+
+#include "inet/linklayer/common/MacAddress.h"
+
+namespace inet {
+namespace ieee80211 {
+
+struct Ieee80211RateSetState;
+
+/** Outgoing directional cost; the selected metric identifier belongs to the MIB. */
+class INET_API IMeshLinkMetric
+{
+  public:
+    virtual ~IMeshLinkMetric() = default;
+    virtual uint32_t getMetric(MacAddress peer) = 0;
+    virtual void resetPeer(MacAddress peer) = 0;
+    virtual bool supportsPeerRates(MacAddress peer, const Ieee80211RateSetState& rates) = 0;
+};
+
+} // namespace ieee80211
+} // namespace inet
+#endif

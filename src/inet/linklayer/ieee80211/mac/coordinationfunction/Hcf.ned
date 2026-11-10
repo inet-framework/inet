@@ -41,6 +41,7 @@ module Hcf extends Module like IHcf
         *.*.originatorMacDataServiceModule = "^.^.originatorMacDataService";
 
         @class(Hcf);
+        @signal[meshDataAttemptCompleted](type=inet::Packet); // details: MeshDataAttempt, one real DATA ACK or timeout
         displayStringTextFormat = default("{frameSequenceInfo}");
         @display("i=block/layer");
         @signal[packetSentToPeer](type=inet::Packet);

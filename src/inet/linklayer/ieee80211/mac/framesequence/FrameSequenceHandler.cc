@@ -43,6 +43,7 @@ void FrameSequenceHandler::handleStartRxTimeout()
     auto lastStep = context->getLastStep();
     switch (lastStep->getType()) {
         case IFrameSequenceStep::Type::RECEIVE:
+            lastStep->setCompletion(IFrameSequenceStep::Completion::EXPIRED);
             abortFrameSequence();
             break;
         case IFrameSequenceStep::Type::TRANSMIT:

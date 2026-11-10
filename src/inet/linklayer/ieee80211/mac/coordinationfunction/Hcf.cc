@@ -7,6 +7,7 @@
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
+#include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
@@ -30,6 +31,32 @@
 
 namespace inet {
 namespace ieee80211 {
+
+simsignal_t Hcf::meshDataAttemptCompletedSignal = cComponent::registerSignal("meshDataAttemptCompleted");
+
+MeshLinkTiming Hcf::getMeshLinkTiming(MacAddress peer)
+{
+    Enter_Method("getMeshLinkTiming");
+    auto header = makeShared<Ieee80211MeshDataHeader>();
+    header->setType(ST_DATA_WITH_QOS);
+    header->setChunkLength(B(32));
+    header->setToDS(true);
+    header->setFromDS(true);
+    header->setMeshControlPresent(true);
+    header->setReceiverAddress(peer);
+    header->setTransmitterAddress(mib->address);
+    header->setAddress3(peer);
+    header->setAddress4(mib->address);
+    Packet nominal("nominal-mesh-metric", header);
+    nominal.insertAtBack(makeShared<ByteCountChunk>(B(1024 + 6 + 4)));
+    auto mode = rateSelection->computeMode(&nominal,header,edca->getEdcaf(AC_BE)->getTxopProcedure());
+    nominal.addTagIfAbsent<physicallayer::Ieee80211ModeReq>()->setMode(mode);
+    auto ackMode = rateSelection->computeResponseAckFrameMode(&nominal,header,ResponseQueryRole::PREDICT);
+    auto overhead = edca->getEdcaf(AC_BE)->getInitialContentionDelay()
+        + mode->getPreambleMode()->getDuration() + mode->getHeaderMode()->getDuration()
+        + mode->getSifsTime() + ackMode->getDuration(LENGTH_ACK);
+    return {mode->getDataMode()->getNetBitrate(), overhead, mode, ackMode};
+}
 
 using namespace inet::physicallayer;
 
@@ -1530,6 +1557,18 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             EV_INFO << "Data frame transmission failed\n";
             edcaf->getRecoveryProcedure()->dataFrameTransmissionFailed(failedPacket, dataHeader);
             retryLimitReached = edcaf->getRecoveryProcedure()->isRetryLimitReached(failedPacket, dataHeader);
+            auto context = frameSequenceHandler->getContext();
+            auto receive = dynamic_cast<IReceiveStep *>(context->getLastStep());
+            auto transmit = receive ? dynamic_cast<TransmitStep *>(context->getStepBeforeLast()) : nullptr;
+            // Only the actual receive-timeout owner marks EXPIRED. An interrupted
+            // empty receive wait or a rejected response is not an error sample.
+            if (mib->mode == Ieee80211Mib::MESH && dataHeader->getType() == ST_DATA_WITH_QOS
+                    && !dataHeader->getReceiverAddress().isMulticast() && receive
+                    && receive->getCompletion() == IFrameSequenceStep::Completion::EXPIRED && !receive->getReceivedFrame()
+                    && transmit && transmit->getFrameToTransmit() == failedPacket && transmit->getPpduEnd() >= SIMTIME_ZERO) {
+                MeshDataAttempt attempt(dataHeader->getReceiverAddress(),failedPacket->getTag<Ieee80211ModeReq>()->getMode(),false,retryLimitReached);
+                emit(meshDataAttemptCompletedSignal,failedPacket,&attempt);
+            }
             if (dataAndMgmtRateControl) {
                 int retryCount = edcaf->getRecoveryProcedure()->getRetryCount(failedPacket, dataHeader);
                 dataAndMgmtRateControl->frameTransmitted(failedPacket, retryCount, false, retryLimitReached);
@@ -1630,6 +1669,11 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
                 dataAndMgmtRateControl->frameTransmitted(lastTransmittedPacket, retryCount, true, false);
             }
             edcaf->getRecoveryProcedure()->ackFrameReceived(lastTransmittedPacket, dataHeader);
+            if (mib->mode == Ieee80211Mib::MESH && dataHeader->getType() == ST_DATA_WITH_QOS
+                    && !dataHeader->getReceiverAddress().isMulticast()) {
+                MeshDataAttempt attempt(dataHeader->getReceiverAddress(),lastTransmittedPacket->getTag<Ieee80211ModeReq>()->getMode(),true,false);
+                emit(meshDataAttemptCompletedSignal,lastTransmittedPacket,&attempt);
+            }
         }
         else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
             if (dataAndMgmtRateControl) {
@@ -2348,7 +2392,10 @@ void Hcf::corruptedFrameReceived()
 {
     Enter_Method("corruptedFrameReceived");
     if (frameSequenceHandler->isSequenceRunning() && !startRxTimer->isScheduled()) {
-        frameSequenceHandler->handleStartRxTimeout();
+        if (mib->mode == Ieee80211Mib::MESH)
+            frameSequenceHandler->interruptFrameSequence();
+        else
+            frameSequenceHandler->handleStartRxTimeout();
     }
     else
         EV_DEBUG << "Ignoring received corrupt frame.\n";

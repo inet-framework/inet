@@ -41,6 +41,7 @@ void Ieee80211MgmtMesh::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
+        linkMetric.reference(this,"linkMetricModule",true);
         mib->mode = Ieee80211Mib::MESH;
         MeshConfiguration configuration;
         if (par("pathSelectionMetricId").intValue() != 1 && par("pathSelectionMetricId").intValue() != 2)
@@ -100,14 +101,9 @@ void Ieee80211MgmtMesh::stop()
     cancelEvent(beaconTimer);
     pendingBeaconTreeId = -1;
     for (auto& entry : peers) {
-        cancelEvent(entry.second.timer);
-        entry.second.state = IDLE;
-        entry.second.localLinkId = entry.second.localAid = entry.second.peerAid = 0;
-        entry.second.peerLinkId.reset();
-        entry.second.rates = {};
-        entry.second.retries = 0;
+        if (entry.second.state != IDLE)
+            setState(entry.first,entry.second,IDLE);
     }
-    mib->clearMeshPeers();
     neighbors.clear();
     if (myIface->isSubscribed(modesetChangedSignal, this))
         myIface->unsubscribe(modesetChangedSignal, this);
@@ -154,8 +150,10 @@ void Ieee80211MgmtMesh::processManagement(Packet *packet)
     if (auto action = dynamicPtrCast<const Ieee80211MeshActionFrame>(header)) {
         if (action->getCategory() == MESH_SELF_PROTECTED_ACTION)
             processPeering(packet, action);
+        else if (action->getCategory() == MESH_ACTION && action->getMeshAction() == MESH_LINK_METRIC_REPORT)
+            processLinkMetric(packet, action);
         else
-            dropManagementFrame(packet); // HWMP and metric consumers arrive in C5/C6.
+            dropManagementFrame(packet); // HWMP arrives in C6.
     }
     else if (header->getType() == ST_BEACON || header->getType() == ST_PROBERESPONSE)
         processBeacon(packet, header, header->getType() == ST_PROBERESPONSE);
@@ -185,6 +183,30 @@ void Ieee80211MgmtMesh::handleTimer(cMessage *message)
         }
     }
     throw cRuntimeError("Unknown mesh management timer");
+}
+
+void Ieee80211MgmtMesh::processLinkMetric(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header)
+{
+    if (!mib->isMeshPeerEstablished(header->getTransmitterAddress()) || header->getReceiverAddress() != mib->address
+            || packet->getDataLength() == b(0)) {
+        dropManagementFrame(packet);
+        return;
+    }
+    auto report = packet->peekAtFront<Ieee80211MeshLinkMetricFrame>(packet->getDataLength(),
+        Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
+    if (report->isIncorrect() || report->isIncomplete()) {
+        dropManagementFrame(packet);
+        return;
+    }
+    if (report->getRequest()) {
+        // IEEE Std 802.11-2024, 14.9.3: reply with this station's outgoing cost.
+        auto reply = makeShared<Ieee80211MeshLinkMetricFrame>();
+        reply->setMetric(linkMetric->getMetric(header->getTransmitterAddress()));
+        reply->setChunkLength(B(7));
+        sendBody(reply,ST_ACTION,header->getTransmitterAddress());
+    }
+    // Local policy permitted by14.9.3: remote reports do not replace local samples.
+    delete packet;
 }
 
 bool Ieee80211MgmtMesh::matchesProfile(const Ieee80211MeshFrame& body) const
@@ -346,13 +368,11 @@ void Ieee80211MgmtMesh::arm(Peer& peer, simtime_t timeout)
 void Ieee80211MgmtMesh::setState(MacAddress address, Peer& peer, PeerState state)
 {
     bool wasEstablished = peer.state == ESTAB;
+    if (peer.state != state && state == ESTAB)
+        linkMetric->resetPeer(address);
     peer.state = state;
     if (state == ESTAB && !wasEstablished)
         mib->establishMeshPeer(address, peer.rates);
-    if (wasEstablished && state != ESTAB) {
-        mib->removeMeshPeer(address);
-        resetPeerAssociationContext(address);
-    }
     if (state == IDLE) {
         cancelEvent(peer.timer);
         peer.localLinkId = peer.localAid = peer.peerAid = 0;
@@ -360,8 +380,19 @@ void Ieee80211MgmtMesh::setState(MacAddress address, Peer& peer, PeerState state
         peer.rates = {};
         peer.retries = 0;
     }
+    if (wasEstablished && state != ESTAB)
+        retirePeer(address);
     Ieee80211Mib::MeshPeerChange details(address);
     emit(meshPeeringStateChangedSignal, long(state), &details);
+}
+
+void Ieee80211MgmtMesh::retirePeer(MacAddress address)
+{
+    bool changed = mib->withdrawMeshPeer(address);
+    linkMetric->resetPeer(address);
+    resetPeerAssociationContext(address);
+    if (changed)
+        mib->publishMeshPeerRemoval(address);
 }
 
 void Ieee80211MgmtMesh::openPeer(MacAddress address)
@@ -520,6 +551,12 @@ void Ieee80211MgmtMesh::processPeering(Packet *packet, const Ptr<const Ieee80211
     auto rates = readPeeringRates(*open);
     bool compatible = matchesProfile(*body) && compatibleRates(rates)
         && !(open->getCapabilityInformation() & MESH_EPD_CAPABILITY);
+    if (compatible && !linkMetric->supportsPeerRates(address,rates)) {
+        // Supported-profile policy: retain a committed relationship unchanged
+        // rather than publish rates that invalidate its configured fixed PHY.
+        dropManagementFrame(packet);
+        return;
+    }
     if (!compatible) {
         if (!peer.peerLinkId)
             peer.peerLinkId = peering.localLinkId;
@@ -544,7 +581,10 @@ void Ieee80211MgmtMesh::processPeering(Packet *packet, const Ptr<const Ieee80211
         return;
     }
     peer.peerLinkId = peering.localLinkId;
+    bool changedEstablishedRates = peer.state == ESTAB && peer.rates != rates;
     peer.rates = rates;
+    if (changedEstablishedRates)
+        mib->establishMeshPeer(address,rates);
     if (action == MESH_PEERING_OPEN && peer.localAid == 0)
         peer.localAid = allocateAid();
     if (action == MESH_PEERING_CONFIRM) {
