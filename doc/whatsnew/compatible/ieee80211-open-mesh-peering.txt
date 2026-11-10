@@ -1,0 +1,3 @@
+Open IEEE 802.11 mesh peering and beacon timing
+
+The optional Ieee80211MeshInterface supports unsecured mesh discovery and peer-link establishment with legacy OFDM. It checks mesh profiles and basic rates, manages peer-link timers and identifiers, and transmits mesh beacons with TSF timestamps, DTIM information and clock slowing. Unsupported PHY and MAC feature combinations are rejected during initialization. Mesh data delivery and HWMP routing are added separately.

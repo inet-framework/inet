@@ -66,6 +66,14 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
         else if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
             callback.dissectPacket(packet, nullptr);
         else if (dataHeader->getAMsduPresent()) {
+            if (dynamicPtrCast<const ieee80211::Ieee80211MeshDataHeader>(dataHeader)) {
+                // Mesh subframes have a distinct layout (9.3.2.2.3). Keep the
+                // unsupported body opaque until the mesh A-MSDU codec is present.
+                callback.dissectPacket(packet, nullptr);
+                callback.visitChunk(trailer, &Protocol::ieee80211Mac);
+                callback.endProtocolDataUnit(&Protocol::ieee80211Mac);
+                return;
+            }
             auto originalTrailerPopOffset = packet->getBackOffset();
             int paddingLength = 0;
             while (packet->getDataLength() > B(0)) {

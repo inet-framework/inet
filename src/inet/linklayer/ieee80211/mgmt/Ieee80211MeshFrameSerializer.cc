@@ -410,6 +410,9 @@ void Ieee80211MeshFrameSerializer::serializeFields(MemoryOutputStream& s, const 
         s.writeByte(report->getRequest() ? 1 : 0);
         s.writeUint32Le(report->getMetric());
     }
+    auto mesh = staticPtrCast<const Ieee80211MeshFrame>(chunk);
+    for (size_t i = 0; i < mesh->getOpaqueMeshElementsArraySize(); i++)
+        s.writeByte(mesh->getOpaqueMeshElements(i));
     if (s.getLength() != chunk->getChunkLength())
         throw cRuntimeError("Mesh body chunkLength does not match its serialized length");
 }
@@ -501,6 +504,14 @@ const Ptr<Chunk> Ieee80211MeshFrameSerializer::deserializeFields(MemoryInputStre
             hwmp->setUnmodelledElements(index++, length);
             for (auto byte : bytes)
                 hwmp->setUnmodelledElements(index++, byte);
+        }
+        else {
+            size_t index = frame->getOpaqueMeshElementsArraySize();
+            frame->setOpaqueMeshElementsArraySize(index + 2 + length);
+            frame->setOpaqueMeshElements(index++, id);
+            frame->setOpaqueMeshElements(index++, length);
+            for (auto byte : bytes)
+                frame->setOpaqueMeshElements(index++, byte);
         }
         // Unknown optional elements and reserved bits are ignored on reception.
         if (!valid)

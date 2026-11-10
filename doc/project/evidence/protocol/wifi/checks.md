@@ -10,7 +10,7 @@ Construct literal byte fixtures from the mesh element and action layouts, indepe
 
 ## WIFI-CHECK-PEERING
 
-Start compatible neighbors with no peering. Observe discovery, Open/Confirm and establishment, including local/peer link IDs and assigned AIDs. Exercise both Open-first and Confirm-first ordering, duplicate Open/Confirm and simultaneous opens. Eligibility starts only after establishment. Repeat with a mismatch in each of the seven profile parameters and with incompatible basic sets; no relationship may establish. Confirm advertised TIM/DTIM and required awake-window fields even when no traffic is buffered.
+Start compatible neighbors with no peering. Observe discovery, Open/Confirm and establishment, including local/peer link IDs and assigned AIDs. Check Address 3 equals the transmitter for the selected beacons, probe responses and peering actions; Probe Requests use their wildcard/intended-recipient exception. Exercise both Open-first and Confirm-first ordering, duplicate Open/Confirm and simultaneous opens. Eligibility starts only after establishment. Repeat with a mismatch in each of the seven profile parameters and with incompatible basic sets; no relationship may establish. Confirm advertised TIM/DTIM and required awake-window fields even when no traffic is buffered.
 
 ## WIFI-CHECK-PEERING-FAILURE
 

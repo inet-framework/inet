@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
 #include "inet/common/ModuleAccess.h"
 #include "inet/common/Simsignals.h"
@@ -421,6 +422,8 @@ bool Hcf::hasObsoleteActionInFlight(MacAddress peer, Tid tid, bool originator) c
 
 bool Hcf::isFrameEligible(const Packet *packet, bool numbered) const
 {
+    if (!mac->isFrameTransmissionEligible(packet, simTime()))
+        return false;
     if (obsoleteActions.count(packet->getId()))
         return false;
     auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
@@ -877,20 +880,28 @@ void Hcf::processLowerFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>&
     auto action = dynamicPtrCast<const Ieee80211ActionFrame>(header);
     bool blockAckAction = dynamicPtrCast<const Ieee80211AddbaRequest>(header) ||
         dynamicPtrCast<const Ieee80211AddbaResponse>(header) || dynamicPtrCast<const Ieee80211Delba>(header);
-    if (action && blockAckAction && isForUs(header) && edcaf && frameSequenceHandler->isSequenceRunning() &&
+    bool meshManagement = mib->mode == Ieee80211Mib::MESH &&
+        (dynamicPtrCast<const Ieee80211MeshActionFrame>(header) || header->getType() == ST_BEACON
+            || header->getType() == ST_PROBEREQUEST || header->getType() == ST_PROBERESPONSE);
+    if (((action && blockAckAction) || meshManagement) && isForUs(header) && edcaf && frameSequenceHandler->isSequenceRunning() &&
         dynamic_cast<IReceiveStep *>(frameSequenceHandler->getContext()->getLastStep())) {
         handlingAgreementAction = true;
         emit(packetReceivedFromPeerSignal, packet);
         std::unique_ptr<Packet> responseSource(packet->dup());
-        auto accepted = recipientDataService->managementFrameReceived(packet, action);
+        auto managementHeader = staticPtrCast<const Ieee80211MgmtHeader>(header);
+        auto accepted = recipientDataService->managementFrameReceived(packet, managementHeader);
         for (auto frame : accepted) {
             take(frame);
-            dispatchAgreementAction(frame->peekAtFront<Ieee80211MgmtHeader>());
+            if (!meshManagement)
+                dispatchAgreementAction(frame->peekAtFront<Ieee80211MgmtHeader>());
         }
         frameSequenceHandler->interruptFrameSequence();
-        recipientAckProcedure->processReceivedFrame(responseSource.get(), action, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
-        for (auto frame : accepted)
-            delete frame;
+        recipientAckProcedure->processReceivedFrame(responseSource.get(), managementHeader, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
+        if (meshManagement)
+            sendUp(accepted);
+        else
+            for (auto frame : accepted)
+                delete frame;
         handlingAgreementAction = false;
         updateAgreementProcedures();
         updateContention();
@@ -1174,6 +1185,10 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
+        if (!mac->isDataReceptionSupported(dataHeader)) {
+            mac->sendUpFrame(packet);
+            return;
+        }
         if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler)
             recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this);
         sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler, interframe));
@@ -1183,7 +1198,9 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         for (auto frame : accepted) {
             take(frame);
             auto completeHeader = frame->peekAtFront<Ieee80211MgmtHeader>();
-            if (dynamicPtrCast<const Ieee80211ActionFrame>(completeHeader)) {
+            if (dynamicPtrCast<const Ieee80211MeshActionFrame>(completeHeader) && mib->mode == Ieee80211Mib::MESH)
+                sendUp({frame});
+            else if (dynamicPtrCast<const Ieee80211ActionFrame>(completeHeader)) {
                 recipientProcessReceivedManagementFrame(completeHeader);
                 delete frame;
             }
@@ -1297,6 +1314,7 @@ bool Hcf::dispatchAgreementAction(const Ptr<const Ieee80211MgmtHeader>& header)
 void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");
+    mac->frameTransmissionComplete(packet);
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         auto step = check_and_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
@@ -1996,7 +2014,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             !(preparedStep && prepared->preparation) &&
             !channelOwner->getInProgressFrames()->containsFrame(packet))
             return false;
-        if (!isFrameEligible(packet, true))
+        if (!isFrameEligible(packet, true) || !mac->isFrameTransmissionEligible(packet, simTime() + ifs))
             return false;
         if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             auto status = channelOwner->getAckHandler()->getQoSDataAckStatus(dataHeader);
@@ -2174,6 +2192,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         }
         RateSelection::emitDatarateSelected(this, header, mode);
         EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
+        mac->prepareFrameTransmission(packet, ifs, mode);
         tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
         if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             if (originatorBlockAckAgreementHandler) {

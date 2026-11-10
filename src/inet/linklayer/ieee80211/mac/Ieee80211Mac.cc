@@ -401,6 +401,24 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
     }
 }
 
+void Ieee80211Mac::prepareFrameTransmission(Packet *, simtime_t, const IIeee80211Mode *)
+{
+}
+
+void Ieee80211Mac::frameTransmissionComplete(const Packet *)
+{
+}
+
+bool Ieee80211Mac::isFrameTransmissionEligible(const Packet *, simtime_t) const
+{
+    return true;
+}
+
+bool Ieee80211Mac::isDataReceptionSupported(const Ptr<const Ieee80211DataHeader>&) const
+{
+    return true;
+}
+
 void Ieee80211Mac::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header)
 {
     Enter_Method("processUpperFrame(\"%s\")", packet->getName());

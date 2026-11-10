@@ -86,6 +86,7 @@ class Ieee80211MeshFrame extends FieldsChunk
     MeshTim tim;
     bool meshAwakeWindowPresent = false;
     uint16_t meshAwakeWindow = 0; // TUs
+    uint8_t opaqueMeshElements[]; // complete optional action IEs; retained for profile/security admission
 }
 
 struct HwmpPreqTarget

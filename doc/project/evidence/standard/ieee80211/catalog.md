@@ -18,6 +18,8 @@ All seven profile parameters must match: Mesh ID, path protocol, path metric, co
 
 Source: `ieee80211-2024:clause:14.3.3`, PDF 3193; EPD indication: `ieee80211-2024:clause:11.51`, PDF 2930. Strength: shall, with should for explicit closure. Observation: wire and peer state.
 
+For the selected mesh beacons, probe responses and peering actions, Address 3 is the transmitter address. A Probe Request instead uses the wildcard BSSID or the intended recipient's MAC address; a mesh recipient does not use that field to filter received Probe Requests. Sources: `ieee80211-2024:clause:9.3.3.1` addressing rule c)1)/c)4)v), continuation extracted under `ieee80211-2024:figure:9-128`, PDF 777–779; `ieee80211-2024:clause:9.2.4.3.4`, PDF 671–672. Strength: normative address construction and receive rule. Observation: emitted management headers.
+
 ### IEEE80211-2024-MESH-BASIC-SETS
 
 Peering compatibility includes identical applicable configuration/basic sets: the basic rate set and, when used, the HT basic MCS set and VHT basic MCS/NSS set.

@@ -107,6 +107,11 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
     virtual void sendUpFrame(Packet *frame);
     virtual void sendDownFrame(Packet *frame);
     virtual void sendDownPendingRadioConfigMsg();
+    virtual void prepareFrameTransmission(Packet *packet, simtime_t ifs,
+            const physicallayer::IIeee80211Mode *mode);
+    virtual void frameTransmissionComplete(const Packet *packet);
+    virtual bool isFrameTransmissionEligible(const Packet *packet, simtime_t plannedStart) const;
+    virtual bool isDataReceptionSupported(const Ptr<const Ieee80211DataHeader>& header) const;
     virtual void resetPeerAssociationContext(const MacAddress& peer) override;
 
     virtual void processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);

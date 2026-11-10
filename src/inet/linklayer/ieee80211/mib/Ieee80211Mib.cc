@@ -19,6 +19,54 @@ namespace ieee80211 {
 Define_Module(Ieee80211Mib);
 
 simsignal_t Ieee80211Mib::rateStateChangedSignal = cComponent::registerSignal("rateStateChanged");
+simsignal_t Ieee80211Mib::meshPeerChangedSignal = cComponent::registerSignal("meshPeerChanged");
+
+void Ieee80211Mib::configureMeshProfile(const std::string& id, const MeshConfiguration& configuration)
+{
+    Enter_Method("configureMeshProfile");
+    if (id.empty() || id.size() > 32 || configuration.pathSelectionProtocolId != 1
+            || (configuration.pathSelectionMetricId != 1 && configuration.pathSelectionMetricId != 2)
+            || configuration.congestionControlId != 0 || configuration.synchronizationId != 1
+            || configuration.authenticationId != 0)
+        throw cRuntimeError("Unsupported open mesh profile");
+    meshId = id;
+    meshConfiguration = configuration;
+}
+
+bool Ieee80211Mib::isMeshPeerEstablished(MacAddress peer) const
+{
+    return mode == MESH && peerRateSets.count(peer) != 0;
+}
+
+void Ieee80211Mib::establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates)
+{
+    Enter_Method("establishMeshPeer");
+    validateIeee80211RateSetState(rates, "mesh peer rates");
+    auto previous = peerRateSets.find(peer);
+    if (previous != peerRateSets.end() && previous->second == rates)
+        return;
+    peerRateSets[peer] = rates;
+    MeshPeerChange details(peer);
+    emit(rateStateChangedSignal, true);
+    emit(meshPeerChangedSignal, true, &details);
+}
+
+void Ieee80211Mib::removeMeshPeer(MacAddress peer)
+{
+    Enter_Method("removeMeshPeer");
+    if (peerRateSets.erase(peer)) {
+        MeshPeerChange details(peer);
+        emit(rateStateChangedSignal, true);
+        emit(meshPeerChangedSignal, false, &details);
+    }
+}
+
+void Ieee80211Mib::clearMeshPeers()
+{
+    Enter_Method("clearMeshPeers");
+    while (!peerRateSets.empty())
+        removeMeshPeer(peerRateSets.begin()->first);
+}
 
 void Ieee80211Mib::initialize(int stage)
 {
@@ -36,6 +84,9 @@ void Ieee80211Mib::initialize(int stage)
         WATCH(bssAccessPointData.stations);
         WATCH(bssAccessPointData.associationIds);
         WATCH(associationIdReservations);
+        WATCH(meshId);
+        WATCH_EXPR("meshPeerCount", mode == MESH ? peerRateSets.size() : 0);
+        WATCH_EXPR("meshMetricId", int(meshConfiguration.pathSelectionMetricId));
         WATCH_EXPR("modeStr", getModeStr(mode));
         WATCH_EXPR("stationTypeStr", getStationTypeStr(bssStationData.stationType));
         WATCH_EXPR("qosStr", qos ? ", QoS" : ", Non-QoS");

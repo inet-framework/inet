@@ -1,0 +1,374 @@
+%description:
+Production open-mesh peering fault and timer cases at run0/seed0. Radio taps
+corrupt one peering element, remove an Open until a Confirm arrives first,
+remove all replies through retry exhaustion, and mismatch every profile selector,
+EPD capability/membership and basic rates. A late Confirm cannot leave HOLDING;
+Close and exact retry/holding boundaries have direct local-state assertions.
+
+%file: MeshPeeringFailure.cc
+#include "mesh/MeshTestSupport.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Mac.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::protocoltest;
+
+class MeshFailureManagement : public Ieee80211MgmtMesh
+{
+    uint8_t securityElement = 0;
+  protected:
+    void sendDown(Packet *packet) override {
+        if (securityElement && dynamicPtrCast<const Ieee80211MeshPeeringOpenFrame>(packet->peekAtFront<Chunk>())) {
+            auto body = packet->removeAtFront<Ieee80211MeshPeeringOpenFrame>();
+            int length = securityElement == 139 ? 68 : 16;
+            body->setOpaqueMeshElementsArraySize(2 + length);
+            body->setOpaqueMeshElements(0, securityElement);
+            body->setOpaqueMeshElements(1, length);
+            body->setChunkLength(body->getChunkLength() + B(2 + length));
+            packet->insertAtFront(body);
+        }
+        Ieee80211MgmtMesh::sendDown(packet);
+    }
+  public:
+    void resendConfirm(MacAddress peer) { Enter_Method("resendConfirm"); sendPeering(peer, MESH_PEERING_CONFIRM); }
+    void setSecurityElement(uint8_t id) { securityElement = id; }
+};
+Define_Module(MeshFailureManagement);
+
+class MeshFailureDriver : public cSimpleModule, public cListener, public ITx::ICallback
+{
+    int step = 0;
+    bool crossedSent = false;
+    bool crossedOpenReceived = false;
+    bool crossedEstablished = false;
+    int malformedDiscards = 0;
+    int unsupportedAggregateDiscards = 0;
+    int unsupportedFragmentDiscards = 0;
+    void sendUnsupportedData(bool aggregate) {
+        auto header = makeShared<Ieee80211MeshDataHeader>();
+        header->setChunkLength(B(32));
+        header->setFromDS(true);
+        header->setToDS(true);
+        header->setTid(0);
+        header->setReceiverAddress(meshMib(1)->address);
+        header->setTransmitterAddress(meshMib(0)->address);
+        header->setAddress3(meshMib(1)->address);
+        header->setAddress4(meshMib(0)->address);
+        header->setMeshControlPresent(true);
+        header->setAMsduPresent(aggregate);
+        header->setSequenceNumber(SequenceNumberCyclic(aggregate ? 500 : 501));
+        if (!aggregate)
+            header->setFragmentNumber(1);
+        auto packet = new Packet("unsupported-mesh-reception", header);
+        // Mesh A-MSDU Length=1 is little endian. A legacy decoder would read256.
+        std::vector<uint8_t> bytes = {2,0,0,0,0,2, 2,0,0,0,0,1, 1,0, 0,1,0,0,0,0, 0xaa};
+        packet->insertAtBack(makeShared<BytesChunk>(bytes));
+        packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+        packet->addTag<Ieee80211ModeReq>()->setMode(&Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz);
+        auto transmitter = check_and_cast<ITx *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("tx"));
+        transmitter->transmitFrame(packet, header, false, this);
+        delete packet;
+    }
+    void receiveConfirmAtDeadline() {
+        auto sender = meshManagement(29);
+        auto receiver = meshManagement(28);
+        auto senderAddress = meshMib(29)->address;
+        auto receiverAddress = meshMib(28)->address;
+        auto body = makeShared<Ieee80211MeshPeeringConfirmFrame>();
+        body->setAssociationId(sender->getLocalAid(receiverAddress));
+        body->setCapabilityInformation(1 << 9);
+        body->setSupportedRatesArraySize(8);
+        const uint8_t rates[] = {0x8c,18,0x98,36,0xb0,72,96,108};
+        for (int i = 0; i < 8; i++)
+            body->setSupportedRates(i, rates[i]);
+        const auto& id = meshMib(28)->getMeshId();
+        body->setMeshIdPresent(true);
+        body->setMeshIdArraySize(id.size());
+        for (size_t i = 0; i < id.size(); i++)
+            body->setMeshId(i, id[i]);
+        body->setMeshConfigurationPresent(true);
+        body->setMeshConfiguration(meshMib(28)->getMeshConfiguration());
+        MeshPeering peering;
+        peering.localLinkId = sender->getLocalLinkId(receiverAddress);
+        peering.peerLinkIdPresent = true;
+        peering.peerLinkId = receiver->getLocalLinkId(senderAddress);
+        body->setMeshPeeringPresent(true);
+        body->setMeshPeering(peering);
+        body->setChunkLength(B(4 + 10 + 2 + id.size() + 9 + 8));
+        auto header = makeShared<Ieee80211MeshActionFrame>();
+        header->setCategory(MESH_SELF_PROTECTED_ACTION);
+        header->setMeshAction(MESH_PEERING_CONFIRM);
+        header->setReceiverAddress(receiverAddress);
+        header->setTransmitterAddress(senderAddress);
+        header->setAddress3(senderAddress);
+        header->setDurationField(SIMTIME_ZERO);
+        header->setSequenceNumber(SequenceNumberCyclic(1000));
+        Packet encoded("deadline-confirm", header);
+        encoded.insertAtBack(body);
+        auto bytes = encoded.peekAllAsBytes()->getBytes();
+        auto trailer = makeShared<Ieee80211MacTrailer>();
+        trailer->setFcsMode(FCS_COMPUTED);
+        trailer->setFcs(ethernetFcs(bytes.data(), bytes.size()));
+        encoded.insertAtBack(trailer);
+        auto raw = new Packet("deadline-confirm-bytes", makeShared<BytesChunk>(encoded.peekAllAsBytes()->getBytes()));
+        raw->addTag<Ieee80211ModeInd>()->setMode(&Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz);
+        auto time = raw->addTag<SignalTimeInd>();
+        time->setStartTime(simTime() - Ieee80211OfdmCompliantModes::ofdmMode6MbpsCS20MHz.getDuration(raw->getDataLength()));
+        time->setEndTime(simTime());
+        sendDirect(raw, meshInterface(28)->getSubmodule("radio")->gate("upperLayerOut"));
+    }
+  protected:
+    void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
+    void initialize() override {
+        getSimulation()->getSystemModule()->subscribe(registerSignal("meshPeeringStateChanged"), this);
+        getSimulation()->getSystemModule()->subscribe(registerSignal("meshManagementDiscarded"), this);
+        getSimulation()->getSystemModule()->subscribe(registerSignal("packetDropped"), this);
+        getSimulation()->getSystemModule()->subscribe(registerSignal("packetSentToLower"), this);
+        for (int i = 0; i < 32; i += 2) {
+            auto start = new cMessage("open", 100 + i);
+            auto time = (i == 4 || i == 28 || i == 30) ? SimTime(5, SIMTIME_MS) : SimTime(6 + 2 * i, SIMTIME_MS);
+            scheduleAt(time, start);
+        }
+        scheduleAt(SimTime(5, SIMTIME_MS) + SimTime(1, SIMTIME_NS), new cMessage("case"));
+        scheduleAt(SimTime(2, SIMTIME_MS), new cMessage("aggregate", 20));
+        scheduleAt(SimTime(3, SIMTIME_MS), new cMessage("fragment", 21));
+        scheduleAt(SimTime(45, SIMTIME_MS), new cMessage("exact-receive", 22));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        auto packet = dynamic_cast<Packet *>(object);
+        if (signal == registerSignal("packetSentToLower") && packet && strcmp(source->getName(), "mac") == 0) {
+            auto header = dynamicPtrCast<const Ieee80211MgmtHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+            if (header)
+                ASSERT(header->getAddress3() == header->getTransmitterAddress());
+        }
+        if (signal == registerSignal("packetDropped") && source == meshInterface(1)->getSubmodule("mac")
+                && packet && packet->peekAtFront<Ieee80211MacHeader>()->getFrameType() == 2) {
+            auto data = packet->peekAtFront<Ieee80211DataHeader>();
+            if (data->getAMsduPresent())
+                unsupportedAggregateDiscards++;
+            if (data->getFragmentNumber() == 1)
+                unsupportedFragmentDiscards++;
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *) override {
+        if (source == meshManagement(0) && signal == registerSignal("meshPeeringStateChanged")) {
+            if (value == Ieee80211MgmtMesh::OPN_SNT)
+                crossedSent = true;
+            if (value == Ieee80211MgmtMesh::OPN_RCVD && crossedSent)
+                crossedOpenReceived = true;
+            if (value == Ieee80211MgmtMesh::ESTAB && crossedOpenReceived)
+                crossedEstablished = true;
+        }
+        if (source == meshManagement(31) && signal == registerSignal("meshManagementDiscarded"))
+            malformedDiscards++;
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->getKind() == 22) {
+            receiveConfirmAtDeadline();
+            delete message;
+            return;
+        }
+        if (message->getKind() == 20 || message->getKind() == 21) {
+            sendUnsupportedData(message->getKind() == 20);
+            delete message;
+            return;
+        }
+        if (message->getKind() >= 100) {
+            int i = message->getKind() - 100;
+            if (i == 24 || i == 26)
+                check_and_cast<MeshFailureManagement *>(meshManagement(i))->setSecurityElement(i == 24 ? 139 : 140);
+            meshManagement(i)->openPeer(meshMib(i + 1)->address);
+            if (i == 0) {
+                meshManagement(1)->openPeer(meshMib(0)->address);
+                ASSERT(meshManagement(0)->getPeerState(meshMib(1)->address) == Ieee80211MgmtMesh::OPN_SNT);
+                ASSERT(meshManagement(1)->getPeerState(meshMib(0)->address) == Ieee80211MgmtMesh::OPN_SNT);
+            }
+            delete message;
+            return;
+        }
+        auto first = meshManagement(4);
+        auto unreachable = meshMib(5)->address;
+        if (step == 0) {
+            Hz previous(0);
+            for (int i = 0; i < 32; i += 2) {
+                auto band = meshListeningBand(i);
+                ASSERT(band.second == MHz(20) && meshListeningBand(i + 1) == band);
+                if (i)
+                    ASSERT(band.first - previous == MHz(40));
+                previous = band.first;
+            }
+            ASSERT(first->getPeerDeadline(unreachable) == SimTime(45, SIMTIME_MS));
+            scheduleAt(SimTime(30, SIMTIME_MS), message);
+        }
+        else if (step == 1) {
+            ASSERT(unsupportedAggregateDiscards >= 1 && unsupportedFragmentDiscards >= 1);
+            ASSERT(malformedDiscards > 0 && !meshMib(31)->isMeshPeerEstablished(meshMib(30)->address));
+            ASSERT(meshManagement(2)->getPeerState(meshMib(3)->address) == Ieee80211MgmtMesh::CNF_RCVD);
+            ASSERT(!meshMib(2)->isMeshPeerEstablished(meshMib(3)->address));
+            ASSERT(first->getPeerState(unreachable) == Ieee80211MgmtMesh::OPN_SNT);
+            scheduleAt(SimTime(45, SIMTIME_MS) - SimTime(1, SIMTIME_NS), message);
+        }
+        else if (step == 2) {
+            ASSERT(first->getPeerDeadline(unreachable) == SimTime(45, SIMTIME_MS));
+            message->setSchedulingPriority(2);
+            scheduleAt(SimTime(45, SIMTIME_MS), message);
+        }
+        else if (step == 3) {
+            ASSERT(first->getPeerDeadline(unreachable) == SimTime(85, SIMTIME_MS));
+            ASSERT(meshManagement(28)->getPeerState(meshMib(29)->address) == Ieee80211MgmtMesh::CNF_RCVD);
+            ASSERT(meshManagement(28)->getPeerDeadline(meshMib(29)->address) == SimTime(85, SIMTIME_MS));
+            scheduleAt(SimTime(125, SIMTIME_MS), message);
+        }
+        else if (step == 4) {
+            ASSERT(first->getPeerState(unreachable) == Ieee80211MgmtMesh::HOLDING);
+            ASSERT(first->getPeerDeadline(unreachable) == SimTime(165, SIMTIME_MS));
+            scheduleAt(SimTime(130, SIMTIME_MS), message);
+        }
+        else if (step == 5) {
+            check_and_cast<MeshFailureManagement *>(meshManagement(5))->resendConfirm(meshMib(4)->address);
+            scheduleAt(SimTime(140, SIMTIME_MS), message);
+        }
+        else if (step == 6) {
+            ASSERT(first->getPeerState(unreachable) == Ieee80211MgmtMesh::HOLDING);
+            ASSERT(first->getPeerDeadline(unreachable) == SimTime(165, SIMTIME_MS));
+            scheduleAt(SimTime(165, SIMTIME_MS) - SimTime(1, SIMTIME_NS), message);
+        }
+        else if (step == 7) {
+            ASSERT(first->getPeerState(unreachable) == Ieee80211MgmtMesh::HOLDING);
+            scheduleAt(SimTime(165, SIMTIME_MS), message);
+        }
+        else if (step == 8) {
+            ASSERT(first->getPeerState(unreachable) == Ieee80211MgmtMesh::IDLE);
+            ASSERT(first->getLocalLinkId(unreachable) == 0);
+            for (int i : {0,2,30}) {
+                ASSERT(meshMib(i)->isMeshPeerEstablished(meshMib(i + 1)->address));
+                ASSERT(meshMib(i + 1)->isMeshPeerEstablished(meshMib(i)->address));
+            }
+            ASSERT(crossedEstablished);
+            for (int i = 6; i < 24; i += 2) {
+                ASSERT(!meshMib(i)->isMeshPeerEstablished(meshMib(i + 1)->address));
+                ASSERT(!meshMib(i + 1)->isMeshPeerEstablished(meshMib(i)->address));
+            }
+            meshManagement(0)->closePeer(meshMib(1)->address);
+            scheduleAt(SimTime(220, SIMTIME_MS), message);
+        }
+        else {
+            ASSERT(meshManagement(0)->getPeerState(meshMib(1)->address) == Ieee80211MgmtMesh::IDLE);
+            ASSERT(meshManagement(1)->getPeerState(meshMib(0)->address) == Ieee80211MgmtMesh::IDLE);
+            ASSERT(!meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
+            for (int i : {24,26})
+                ASSERT(meshManagement(i + 1)->getPeerState(meshMib(i)->address) == Ieee80211MgmtMesh::IDLE);
+            emit(registerSignal("meshFailureCasesComplete"), 1L);
+            delete message;
+        }
+        step++;
+    }
+};
+Define_Module(MeshFailureDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_peering_failure)
+{
+    const char *open = "ieee80211mac.type == 13 && ieee80211mac.category == 15 && ieee80211mac.meshAction == 1";
+    ProtocolTest test("mesh_peering_failure");
+    test.intercept(tap("radioMedium").from("station[30]").to("station[31]").filterPacket(open)
+        .nth(1).mutate(truncateMeshPeeringElement).describe("malformed body is discarded before a valid retry"));
+    test.intercept(tap("radioMedium").from("station[0]").to("station[1]")
+        .filterPacket("ieee80211mac.type == 40").mutate([](Packet *packet) {
+            std::vector<Ptr<Chunk>> prefix;
+            while (!dynamicPtrCast<const Ieee80211MacHeader>(packet->peekAtFront<Chunk>()))
+                prefix.push_back(packet->removeAtFront<Chunk>(packet->peekAtFront<Chunk>()->getChunkLength()));
+            auto header = packet->removeAtFront<Ieee80211MeshDataHeader>();
+            Packet encoded("raw-mesh-header", header);
+            packet->insertAtFront(makeShared<BytesChunk>(encoded.peekAllAsBytes()->getBytes()));
+            for (auto it = prefix.rbegin(); it != prefix.rend(); ++it)
+                packet->insertAtFront(*it);
+        }).describe("unsupported mesh DATA arrives with reconstructed MAC bytes"));
+    test.intercept(tap("radioMedium").from("station[3]").to("station[2]").filterPacket(open)
+        .within(0.02).drop().describe("Open is lost while Confirm can arrive first"));
+    test.intercept(tap("radioMedium").to("station[4]")
+        .filterPacket("ieee80211mac.type == 13 && ieee80211mac.category == 15")
+        .within(0.128).drop().describe("no peering reply before retry exhaustion"));
+    test.intercept(tap("radioMedium").to("station[28]")
+        .filterPacket("ieee80211mac.type == 13 && ieee80211mac.category == 15")
+        .within(0.06).drop().describe("controlled raw Confirm is the first peer reply at the exact retry deadline"));
+    for (int fault = 0; fault < 9; fault++) {
+        std::string sender = "station[" + std::to_string(6 + 2 * fault) + "]";
+        std::string receiver = "station[" + std::to_string(7 + 2 * fault) + "]";
+        test.intercept(tap("radioMedium").from(sender.c_str()).to(receiver.c_str()).filterPacket(open)
+            .mutate([fault](Packet *packet) {
+                mutateMeshOpen(packet, [fault](Ieee80211MeshPeeringOpenFrame& body) {
+                    auto configuration = body.getMeshConfiguration();
+                    switch (fault) {
+                        case 0: configuration.pathSelectionProtocolId = 2; break;
+                        case 1: configuration.pathSelectionMetricId = 2; break;
+                        case 2: configuration.congestionControlId = 1; break;
+                        case 3: configuration.synchronizationId = 2; break;
+                        case 4: configuration.authenticationId = 1; break;
+                        case 5: body.setMeshId(0, 'X'); break;
+                        case 6: body.setCapabilityInformation(body.getCapabilityInformation() | MESH_EPD_CAPABILITY); break;
+                        case 7: body.setSupportedRates(0, MESH_EPD_MEMBERSHIP_SELECTOR); break;
+                        case 8: body.setSupportedRates(0, body.getSupportedRates(0) & 0x7f); break;
+                    }
+                    body.setMeshConfiguration(configuration);
+                });
+            }).describe("incompatible mesh configuration cannot commit a peer"));
+    }
+    return test.meanwhile(atLeastTimes(1, on("station[0].wlan[0].mac").signal("packetSentToLower")
+        .filterEvent([](const MatchContext& c) { return isManagementAction(c.event, MESH_SELF_PROTECTED_ACTION, MESH_PEERING_CLOSE); })
+        .assertEvent([](const MatchContext& c) {
+            auto body = managementBody<Ieee80211MeshPeeringCloseFrame>(c.event);
+            return body && body->getMeshPeering().reasonCode == RC_MESH_PEERING_CANCELLED;
+        }).describe("local cancellation sends Close reason52").within(0.23)))
+        .once(on("driver").signal("meshFailureCasesComplete").assertValue(1)
+        .describe("reordered, malformed, incompatible, timeout and Close cases satisfy the production FSM").within(0.23));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+simple MeshFailureManagement extends Ieee80211MgmtMesh { parameters: @class(::MeshFailureManagement); }
+simple MeshFailureDriver {
+    parameters:
+        @class(::MeshFailureDriver);
+        @signal[meshFailureCasesComplete](type=long);
+}
+network Test extends MeshPairNetwork { submodules: driver: MeshFailureDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = 32
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].mgmt.typename = "MeshFailureManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[*].wlan[0].radio.bandName = "5 GHz"
+*.station[0..1].wlan[0].radio.channelNumber = 0
+*.station[2..3].wlan[0].radio.channelNumber = 8
+*.station[4..5].wlan[0].radio.channelNumber = 16
+*.station[6..7].wlan[0].radio.channelNumber = 24
+*.station[8..9].wlan[0].radio.channelNumber = 32
+*.station[10..11].wlan[0].radio.channelNumber = 40
+*.station[12..13].wlan[0].radio.channelNumber = 48
+*.station[14..15].wlan[0].radio.channelNumber = 56
+*.station[16..17].wlan[0].radio.channelNumber = 64
+*.station[18..19].wlan[0].radio.channelNumber = 72
+*.station[20..21].wlan[0].radio.channelNumber = 80
+*.station[22..23].wlan[0].radio.channelNumber = 88
+*.station[24..25].wlan[0].radio.channelNumber = 96
+*.station[26..27].wlan[0].radio.channelNumber = 104
+*.station[28..29].wlan[0].radio.channelNumber = 112
+*.station[30..31].wlan[0].radio.channelNumber = 120
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "mesh_peering_failure"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_peering_failure: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_peering_failure: FAIL

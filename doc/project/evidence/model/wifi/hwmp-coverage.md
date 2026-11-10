@@ -11,9 +11,9 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | Check suffix (`WIFI-CHECK-`) | Planned protocol test | Commit | Reviewer document | Verdict |
 | --- | --- | --- | --- | --- |
 | WIRE | MeshWireFormats.test | C2 | hwmp-c2-wire.md | PASS at codec boundary; live consumers remain later checks |
-| PEERING | MeshPeering.test | C3 | hwmp-c3-peering.md | NOT_RUN |
-| PEERING-FAILURE | MeshPeeringFailure.test | C3 | hwmp-c3-peering.md | NOT_RUN |
-| BEACON-TIMING | MeshBeaconTiming.test | C3 | hwmp-c3-peering.md | NOT_RUN |
+| PEERING | MeshPeering.test | C3 | hwmp-c3-peering.md | PASS for selected OFDM profiles |
+| PEERING-FAILURE | MeshPeeringFailure.test | C3 | hwmp-c3-peering.md | PASS |
+| BEACON-TIMING | MeshBeaconTiming.test | C3 | hwmp-c3-peering.md | PASS |
 | FORWARDING | MeshForwarding.test | C4 | hwmp-c4-forwarding.md | NOT_RUN |
 | GROUP-FORWARDING | MeshGroupForwarding.test | C4 | hwmp-c4-forwarding.md | NOT_RUN |
 | AIRTIME | MeshAirtimeMetric.test | C5, H2, H3, P3 | hwmp-c5-airtime.md | NOT_RUN |
@@ -84,7 +84,8 @@ The source PDF was used for mathematical grouping in the airtime formula, mesh A
 | C2 matching debug library | PASS | `/tmp/inet-mesh-c2-complete-build.log` |
 | C2 direct units | PASS, 3/3 | Mesh, legacy management and MPDU-delimiter serializers; `/tmp/inet-mesh-c2-unit-complete.log` |
 | C2 boundary protocol fixture | PASS, 1/1 | `/tmp/inet-mesh-c2-protocol-complete.log`; no claim of live peering/forwarding |
-| Live mesh protocol behavior | NOT_RUN | Planned remaining check-to-test map above |
+| C3 peering and timing | PASS, 3/3 | Fresh debug build, live peering/fault/timing fixtures; raw `/tmp/inet-mesh-c3-raw/` |
+| Remaining live mesh behavior | NOT_RUN | Forwarding, HWMP, HT/VHT, power save remain future stages |
 | Release compilation | NOT_RUN | Required before push |
 | C2 legacy protocol controls | 4/5 test files PASS; one preexisting unexpected failure | Raw Block Ack retry run 0 has protocol deadline failure, run 1 has runtime abort; immediate parent reproduces both at identical time/event |
 | Legacy fingerprints | NOT_RUN | Explicit selected configurations in the plan; baseline unchanged |
@@ -97,3 +98,9 @@ C2 verification ran from this checkout on `8a76ae140f` plus the C2 changes, in d
 The legacy selector was `/common/(WifiAssociation|WifiDataDelivery|WifiDuplicateWithRetry|WifiBlockAckDuplicateAddba|WifiBlockAckDataRetry)\.test$`. Its four passing test files are distinct from `WifiBlockAckDataRetry`: retained raw output shows a run-0 protocol deadline failure at event 3708/time 1.023764276562 s, followed by a run-1 simultaneous-transmission runtime error at event 2639/time 1.014105463846 s. A successful simulation-run summary does not override a printed protocol failure. Raw unit, boundary-protocol and failing legacy artifacts are retained under `/tmp/inet-mesh-c2-raw/` and copied under `audit/hwmp-implementation/c2-raw/`. Independent immediate-parent reproduction at `8a76ae140f` built and loaded its own debug libraries with identical feature state, fixture and seed, and reproduced both failures at identical event numbers and simulation times. The failed legacy control therefore predates C2; it remains a failed control. Parent evidence is `/tmp/inet-mesh-c1-parent-evidence.md`. No expectation or fingerprint was changed.
 
 The supplied `AGENTS.md` asks for skill-suite scripts, but this checkout has no `scripts/` directory. Those package checks do not exist here; no skill package or deployment is changed. Use the active checkout's documented INET gates for this work.
+
+## C3 peering and timing execution
+
+C3 ran on source `320e19d47c` plus the C3 diff after `make MODE=debug -j4`, exit 0. `opp_run_protocol_tests --load . -p inet -m debug --no-build -w '^tests/protocol/wifi$'` selected `/(mesh/(MeshPeering|MeshPeeringFailure|MeshBeaconTiming|MeshWireFormats)|common/(WifiAssociation|WifiDataDelivery|WifiDuplicateWithRetry|WifiBlockAckDuplicateAddba|WifiBlockAckDataRetry)|11n/N_Amsdu)\.test$`. Nine files passed and the known Block Ack retry control failed at the same two parent event/time boundaries. All four mesh files passed. The three C3 fixtures use General/run 0/seed 0; their [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c3-peering.md) explains the stimuli, deterministic channel separation, timing oracles and scope. After correcting Address 3 in two controlled management stimuli, the two affected fixtures passed again. Codec units also passed 3/3 with the C2 selector.
+
+Retained logs are `/tmp/inet-mesh-c3-final-build.log`, `/tmp/inet-mesh-c3-complete-protocol.log`, `/tmp/inet-mesh-c3-unit.log` and the final fixture logs listed in the reviewer document. Raw outputs are under `/tmp/inet-mesh-c3-raw/{complete-protocol,fixture-final,unit}/`. Three reviewer diagrams rendered with Mermaid 10.9.3 and Firefox and were visually inspected; screenshots are under `audit/hwmp-implementation/diagrams-c3/`. Scoped architecture and release-note checks passed. The global interface gate reports 16 preexisting classes, including unchanged `ITransmitStep` and `IReceiveStep`; no violation is introduced by `IMeshManagement`. Whole-scope naming reports 32 legacy candidates and no new mesh candidate. Global final gates and native fingerprint comparisons remain NOT_RUN for the final combined tree.

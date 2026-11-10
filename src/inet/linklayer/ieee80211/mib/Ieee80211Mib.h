@@ -12,6 +12,7 @@
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211HtCapabilities.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211RateSet.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
 namespace inet {
 
@@ -28,6 +29,13 @@ class INET_API Ieee80211Mib : public SimpleModule
     // Emitted after a committed rate, HT capability, or channel-operation change.
     // The value is true. There are no details or ownership transfers.
     static simsignal_t rateStateChangedSignal;
+    // Committed mesh eligibility; details identify the peer, listeners query current state.
+    static simsignal_t meshPeerChangedSignal;
+    class INET_API MeshPeerChange : public cObject {
+      public:
+        MacAddress peer;
+        explicit MeshPeerChange(MacAddress peer) : peer(peer) {}
+    };
 
     enum Mode {
         INFRASTRUCTURE,
@@ -94,6 +102,8 @@ class INET_API Ieee80211Mib : public SimpleModule
     Ieee80211RateSetState localRateSet;
     Ieee80211RateSetState bssRateSet;
     std::map<MacAddress, Ieee80211RateSetState> peerRateSets;
+    std::string meshId;
+    MeshConfiguration meshConfiguration;
     bool updateBssAndPeerRateSets(const Ieee80211RateSetState& bssRateSet,
             const MacAddress& peerAddress, const Ieee80211RateSetState& peerRateSet);
     bool updatePeerHtCapabilities(const MacAddress& address, const Ieee80211HtCapabilities& capabilities,
@@ -146,6 +156,13 @@ class INET_API Ieee80211Mib : public SimpleModule
     void clearBssRateSet();
     void removePeerRateSet(const MacAddress& address);
     void clearPeerRateSets();
+    void configureMeshProfile(const std::string& id, const MeshConfiguration& configuration);
+    const std::string& getMeshId() const { return meshId; }
+    const MeshConfiguration& getMeshConfiguration() const { return meshConfiguration; }
+    bool isMeshPeerEstablished(MacAddress peer) const;
+    void establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates);
+    void removeMeshPeer(MacAddress peer);
+    void clearMeshPeers();
 };
 
 } // namespace ieee80211

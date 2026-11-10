@@ -247,6 +247,22 @@ setPeering(openFrame, false, false);
 openFrame->setSupportedRatesArraySize(1);
 openFrame->setSupportedRates(0, 0x8c);
 encoding(openFrame, openBytes);
+for (uint8_t element : {uint8_t(139), uint8_t(140)}) {
+    auto securityBytes = openBytes;
+    securityBytes.insert(securityBytes.end(), {element,1,0});
+    auto security = decode<Ieee80211MeshPeeringOpenFrame>(securityBytes);
+    ASSERT(security->isCorrect() && security->getOpaqueMeshElementsArraySize() == 3);
+    ASSERT(security->getOpaqueMeshElements(0) == element);
+    auto reconstructed = makeShared<Ieee80211MeshPeeringOpenFrame>();
+    setPeering(reconstructed, false, false);
+    reconstructed->setSupportedRatesArraySize(1);
+    reconstructed->setSupportedRates(0, 0x8c);
+    reconstructed->setOpaqueMeshElementsArraySize(3);
+    reconstructed->setOpaqueMeshElements(0, element);
+    reconstructed->setOpaqueMeshElements(1, 1);
+    reconstructed->setOpaqueMeshElements(2, 0);
+    encoding(reconstructed, securityBytes);
+}
 auto epdBytes = openBytes;
 epdBytes[1] = 0x20;
 epdBytes[4] = MESH_EPD_MEMBERSHIP_SELECTOR;
