@@ -1,0 +1,3 @@
+Cancellable Wi-Fi transmission starts
+
+ITx adds resumePendingTransmission(), and ITx::ICallback adds prepareTransmissionStart() and transmissionCancelled(). Tx can retain its existing copy through a MAC-controlled readiness wait, with cancellation reported before any PPDU starts. Existing MACs retain immediate legacy behavior. External providers and callbacks must implement the new methods; see the migration guide for ownership and cancellation rules.

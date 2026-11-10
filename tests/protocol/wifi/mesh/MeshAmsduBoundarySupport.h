@@ -483,6 +483,8 @@ class MeshAmsduBoundaryDriver : public cSimpleModule, public cListener, public I
     }
   public:
     bool holdsRetry() const { return holdCandidate; }
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override { rawCompletions++; }
     using cListener::finish;
 };

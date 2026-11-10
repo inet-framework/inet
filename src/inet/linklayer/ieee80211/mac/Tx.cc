@@ -36,7 +36,7 @@ void Tx::initialize(int stage)
         endIfsTimer = new cMessage("endIFS");
         rx = dynamic_cast<IRx *>(findModuleByPath(par("rxModule")));
         WATCH(transmitting);
-        WATCH_EXPR("txState", endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : "IDLE");
+        WATCH_EXPR("txState", endIfsTimer != nullptr && endIfsTimer->isScheduled() ? "WAIT_IFS" : transmitting ? "TRANSMIT" : frame ? "WAIT_READY" : "IDLE");
         WATCH_EXPR("txFramePrefix", frame ? std::string(frame->getName()) + "\n" : "");
     }
 }
@@ -78,7 +78,14 @@ void Tx::transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& head
         completionHeader = nullptr;
     }
     this->frame = packet->dup();
+    admittedStart = simTime() + ifs;
     ASSERT(!endIfsTimer->isScheduled() && !transmitting);
+    if (mac->defersTransmissionStart()) {
+        if (ifs > 0)
+            scheduleAt(admittedStart, endIfsTimer);
+        mac->requestTransmissionReadiness();
+        return;
+    }
     if (ifs == 0) {
         transmitting = true;
         mac->sendDownFrame(frame->dup());
@@ -116,15 +123,61 @@ void Tx::finalizeMpdu(Packet *packet)
 bool Tx::cancelPendingTransmission(ITx::ICallback *callback)
 {
     Enter_Method("cancelPendingTransmission");
-    if (callback != txCallback || transmitting || !endIfsTimer->isScheduled())
+    if (callback != txCallback || !frame || transmitting)
         return false;
-    cancelEvent(endIfsTimer);
-    delete frame;
+    if (endIfsTimer->isScheduled()) cancelEvent(endIfsTimer);
+    auto old = frame;
     frame = nullptr;
     txCallback = nullptr;
     updateLocalNav = false;
     completionHeader = nullptr;
+    admittedStart = -1;
+    delete old;
     return true;
+}
+
+void Tx::cancelUnstartedTransmission()
+{
+    ASSERT(frame && txCallback && !transmitting);
+    if (endIfsTimer->isScheduled()) cancelEvent(endIfsTimer);
+    std::unique_ptr<Packet> old(frame);
+    auto callback = txCallback;
+    frame = nullptr;
+    txCallback = nullptr;
+    completionHeader = nullptr;
+    updateLocalNav = false;
+    admittedStart = -1;
+    // The callback may finish/delete the sequence and submit another frame.
+    callback->transmissionCancelled(old.get());
+}
+
+void Tx::resumePendingTransmission()
+{
+    Enter_Method("resumePendingTransmission");
+    if (!frame || !txCallback || transmitting || simTime() < admittedStart)
+        return;
+    if (simTime() > admittedStart) {
+        cancelUnstartedTransmission();
+        return;
+    }
+    if (!mac->isTransmissionReady()) {
+        // An equal-now physical completion must run before readiness exists.
+        // Its mode notification schedules the continuation; never poll here.
+        if (!mac->isRadioReadyForTransmission(admittedStart))
+            cancelUnstartedTransmission();
+        return;
+    }
+    auto callback = txCallback;
+    auto id = frame->getId();
+    bool accepted = callback->prepareTransmissionStart(frame, admittedStart);
+    if (!frame || frame->getId() != id || txCallback != callback)
+        return;
+    if (!accepted) {
+        cancelUnstartedTransmission();
+        return;
+    }
+    transmitting = true;
+    mac->sendDownFrame(frame->dup());
 }
 
 void Tx::radioTransmissionFinished()
@@ -144,6 +197,7 @@ void Tx::radioTransmissionFinished()
         txCallback = nullptr;
         updateLocalNav = false;
         completionHeader = nullptr;
+        admittedStart = -1;
         tmpTxCallback->transmissionComplete(tmpFrame, header);
         delete tmpFrame;
         if (completedUpdateLocalNav)
@@ -155,6 +209,10 @@ void Tx::handleMessage(cMessage *msg)
 {
     if (msg == endIfsTimer) {
         EV_DETAIL << "Tx: endIfsTimer expired\n";
+        if (mac->defersTransmissionStart()) {
+            mac->requestTransmissionReadiness();
+            return;
+        }
         transmitting = true;
         mac->sendDownFrame(frame->dup());
     }

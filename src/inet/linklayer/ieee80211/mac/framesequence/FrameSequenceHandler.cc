@@ -14,6 +14,14 @@
 namespace inet {
 namespace ieee80211 {
 
+void FrameSequenceHandler::cancelPendingTransmission()
+{
+    ASSERT(isSequenceRunning());
+    ASSERT(dynamic_cast<ITransmitStep *>(context->getLastStep()));
+    context->getLastStep()->setCompletion(IFrameSequenceStep::Completion::REJECTED);
+    finishFrameSequence();
+}
+
 void FrameSequenceHandler::interruptFrameSequence()
 {
     ASSERT(isSequenceRunning());

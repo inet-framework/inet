@@ -161,6 +161,8 @@ class HwmpPathDriver : public cSimpleModule, public cListener, public ITx::ICall
         }
         delete message;
     }
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
 };
 Define_Module(HwmpPathDriver);

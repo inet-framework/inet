@@ -119,6 +119,8 @@ class MeshFailureDriver : public cSimpleModule, public cListener, public ITx::IC
         sendDirect(raw, meshInterface(28)->getSubmodule("radio")->gate("upperLayerOut"));
     }
   protected:
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
     void initialize() override {
         getSimulation()->getSystemModule()->subscribe(registerSignal("meshPeeringStateChanged"), this);

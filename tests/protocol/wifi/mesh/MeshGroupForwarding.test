@@ -35,6 +35,8 @@ class MeshGroupDriver : public cSimpleModule, public cListener, public ITx::ICal
         check_and_cast<ITx *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("tx"))->transmitFrame(packet, header, false, this);
         delete packet;
     }
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
   protected:
     void initialize() override {

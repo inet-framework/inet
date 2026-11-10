@@ -15,8 +15,8 @@ namespace inet {
 namespace ieee80211 {
 
 /**
- * Abstract interface for unconditionally transmitting a frame immediately
- * or after waiting for a specified inter-frame space (usually SIFS).
+ * Transmits immediately or after an inter-frame space. A MAC may opt into
+ * final-start admission while Tx retains the same cancellable copy.
  */
 class INET_API ITx
 {
@@ -25,6 +25,10 @@ class INET_API ITx
       public:
         virtual ~ICallback() {}
 
+        // Final pre-air admission. The retained copy is borrowed only for this call.
+        virtual bool prepareTransmissionStart(const Packet *packet, simtime_t start) = 0;
+        // Tx detaches its registration before notification; no PPDU was started.
+        virtual void transmissionCancelled(const Packet *packet) = 0;
         virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) = 0;
     };
 
@@ -65,11 +69,13 @@ class INET_API ITx
      * For example, an accepted ACK with a SIFS delay keeps this query true until transmission ends.
      */
     [[nodiscard]] virtual bool hasTransmission() const = 0;
-    /** Cancel only this callback's accepted IFS wait, before a PPDU starts.
+    /** Cancel only this callback's accepted pre-air wait, before a PPDU starts.
      * Disposes the retained copy without completion, NAV or PHY callbacks.
      * Returns false for another callback, an idle Tx, or an on-air PPDU.
      */
     virtual bool cancelPendingTransmission(ICallback *callback) = 0;
+    // Reconsider the existing copy after a deferred radio-readiness notification.
+    virtual void resumePendingTransmission() = 0;
     virtual void radioTransmissionFinished() = 0;
 };
 

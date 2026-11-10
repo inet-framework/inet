@@ -1676,6 +1676,21 @@ bool Hcf::dispatchAgreementAction(const Ptr<const Ieee80211MgmtHeader>& header)
     return false;
 }
 
+void Hcf::transmissionCancelled(const Packet *packet)
+{
+    Enter_Method("transmissionCancelled");
+    if (frameSequenceHandler->isSequenceRunning()) {
+        auto step = dynamic_cast<ITransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
+        if (step && step->getFrameToTransmit()->getTreeId() == packet->getTreeId()) {
+            frameSequenceHandler->cancelPendingTransmission();
+            return;
+        }
+    }
+    // This response has no owning originator TRANSMIT step. In particular,
+    // do not finish an unrelated RECEIVE step while disposing its copy.
+    mac->sendDownPendingRadioConfigMsg();
+}
+
 void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header)
 {
     Enter_Method("transmissionComplete");

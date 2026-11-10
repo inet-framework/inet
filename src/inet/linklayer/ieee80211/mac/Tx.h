@@ -31,12 +31,14 @@ class INET_API Tx : public SimpleModule, public ITx
     cMessage *endIfsTimer = nullptr;
     bool transmitting = false;
     bool updateLocalNav = false;
+    simtime_t admittedStart = -1;
 
   protected:
     virtual int numInitStages() const override { return NUM_INIT_STAGES; }
     virtual void initialize(int stage) override;
     virtual void handleMessage(cMessage *msg) override;
     void finalizeMpdu(Packet *packet);
+    void cancelUnstartedTransmission();
 
   public:
     Tx() {}
@@ -46,6 +48,7 @@ class INET_API Tx : public SimpleModule, public ITx
     virtual void transmitFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, simtime_t ifs, bool updateLocalNav, ITx::ICallback *txCallback) override;
     [[nodiscard]] bool hasTransmission() const override { return txCallback != nullptr; }
     virtual bool cancelPendingTransmission(ITx::ICallback *callback) override;
+    void resumePendingTransmission() override;
     virtual void radioTransmissionFinished() override;
 };
 

@@ -244,6 +244,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void channelGranted(IChannelAccess *channelAccess) override;
 
     // ITx::ICallback
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *packet) override;
     virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 
     // IProcedureCallback

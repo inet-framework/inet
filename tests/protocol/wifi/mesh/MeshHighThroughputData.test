@@ -586,6 +586,8 @@ class MeshPhyAdmissionDriver : public cSimpleModule, public cListener, public IT
         }
     }
   public:
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>&) override { ASSERT(std::string(packet->getName()) == "native-limit-wire"); nativeCompletions++; }
     using cListener::finish;
 };

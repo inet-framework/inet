@@ -106,6 +106,8 @@ class MeshMetricDriver : public cSimpleModule, public cListener, public Lifecycl
     int count(int pair, const char *name) {
         int result = 0; for (const auto& sample : samples[pair]) result += sample.name == name; return result;
     }
+    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    void transmissionCancelled(const Packet *) override { ASSERT(false); }
     void transmissionComplete(Packet *, const Ptr<const Ieee80211MacHeader>&) override {}
     void injectExhaustedTtl() {
         fixturePath(1,2,0,SimTime(1)); fixturePath(1,0,0,SimTime(1)); fixturePrecursor(1,2,0,SimTime(1));
