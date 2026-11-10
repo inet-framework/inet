@@ -98,6 +98,20 @@ Packet *FlatReceiverBase::computeReceivedPacket(const ISnir *snir, bool isRecept
         return errorModel->computeCorruptedPacket(snir);
 }
 
+std::optional<FlatReceiverBase::PartRange> FlatReceiverBase::computePartRange(const ITransmission *transmission, IRadioSignal::SignalPart part) const
+{
+    throw cRuntimeError("%s does not name the bits of the signal parts, which the error decisions of the signal regions need", getClassName());
+}
+
+std::pair<simtime_t, simtime_t> FlatReceiverBase::computeRegionInterval(const IReception *reception, IRadioSignal::SignalPart part, b offset, b length, b partLength) const
+{
+    simtime_t partStartTime = reception->getStartTime(part);
+    simtime_t partDuration = reception->getEndTime(part) - partStartTime;
+    simtime_t startTime = partStartTime + partDuration * (offset.get<b>() / (double)partLength.get<b>());
+    simtime_t endTime = partStartTime + partDuration * ((offset + length).get<b>() / (double)partLength.get<b>());
+    return {startTime, endTime};
+}
+
 } // namespace physicallayer
 } // namespace inet
 

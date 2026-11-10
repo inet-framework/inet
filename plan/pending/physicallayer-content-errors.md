@@ -483,7 +483,7 @@ Verification:
 
 ### P2
 
-Status: open. Purpose and scope: `FlatReceiverBase::PartRange`, `computePartRange()`, which refuses by default, and `computeRegionInterval()`, without a caller. The part ranges of `ApskReceiver` (the header and the data with the padding), `Ieee802154NarrowbandReceiver` (a header that the packet does not hold, and the whole packet as the data), and `Ieee80211Receiver` (the PHY header chunk, and the PSDU that the length field gives; a PSDU longer than the remaining content gives no value). A part without bits has no region. The migration guide section.
+Status: done. Purpose and scope: `FlatReceiverBase::PartRange`, `computePartRange()`, which refuses by default, and `computeRegionInterval()`, without a caller. The part ranges of `ApskReceiver` (the header and the data with the padding), `Ieee802154NarrowbandReceiver` (a header that the packet does not hold, and the whole packet as the data), and `Ieee80211Receiver` (the PHY header chunk, and the PSDU that the length field gives; a PSDU longer than the remaining content gives no value). A part without bits has no region. The migration guide section.
 
 Verification: the fingerprints must keep all values. The module tests of P3 check the ranges and the region times.
 
