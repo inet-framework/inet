@@ -1,0 +1,144 @@
+%description:
+Transmit actual HT and VHT short-GI 49-symbol PPDUs through packet-level radios.
+The PSDU/APEP is1560bytes: raw DATA176.4us, transmitted residual180us,
+whole HT216us/VHT220us. Verify the real medium departure and receiver delivery.
+
+%file: test.cc
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/checksum/Checksum.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+namespace Ieee80211HtVhtTransmissionTiming_1 {
+class TimingProbe : public cSimpleModule, public cListener
+{
+    opp_component_ptr<cModule> medium;
+    int departures = 0, deliveries = 0;
+    const IIeee80211Mode *selected[2] = {};
+  protected:
+    using cListener::receiveSignal;
+    void initialize() override {
+        medium = getParentModule()->getSubmodule("radioMedium");
+        medium->subscribe(IRadioMedium::signalDepartureStartedSignal,this);
+        auto modes = Ieee80211ModeSet::getModeSet("ac-complete");
+        for (int i=0;i<modes->getNumModes();i++) {
+            auto mode = modes->getMode(i);
+            if (mode->getDataMode()->getBandwidth() == MHz(20) && mode->getDataMode()->getNumberOfSpatialStreams() == 1) {
+                if (mode->getHtMcsIndex() == 7 && mode->isHtShortGuardInterval()) selected[0] = mode;
+                if (mode->getVhtMcsIndex() == 7 && mode->isVhtShortGuardInterval()) selected[1] = mode;
+            }
+        }
+        ASSERT(selected[0] && selected[1]);
+        scheduleAt(SimTime(1,SIMTIME_MS),new cMessage("HT",0));
+        scheduleAt(SimTime(2,SIMTIME_MS),new cMessage("VHT",1));
+        scheduleAt(SimTime(3,SIMTIME_MS),new cMessage("check",2));
+    }
+    void receiveSignal(cComponent *, simsignal_t, cObject *object, cObject *) override {
+        auto tx = check_and_cast<const Ieee80211Transmission *>(object);
+        int family = tx->getMode()->getVhtMcsIndex() >= 0;
+        ASSERT(tx->getMode() == selected[family]);
+        auto header = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(tx->getPacket());
+        ASSERT(header->getLengthField() == B(1560));
+        ASSERT(tx->getMode()->getDataMode()->getDuration(B(1560)) == SimTime(176400,SIMTIME_NS));
+        ASSERT(tx->getHeaderDuration() == SimTime(8,SIMTIME_US));
+        ASSERT(tx->getPreambleDuration() == SimTime(family ? 32 : 28,SIMTIME_US));
+        ASSERT(tx->getDataDuration() == SimTime(180,SIMTIME_US));
+        ASSERT(tx->getEndTime()-tx->getStartTime() == SimTime(family ? 220 : 216,SIMTIME_US));
+        ASSERT(tx->getTxVector().singleMpdu == bool(family));
+        departures++;
+    }
+    void handleMessage(cMessage *message) override {
+        if (!message->isSelfMessage()) {
+            auto packet = check_and_cast<Packet *>(message);
+            ASSERT(!packet->hasBitError());
+            int family = packet->getTag<Ieee80211ModeInd>()->getMode()->getVhtMcsIndex() >= 0;
+            ASSERT(packet->getDataLength() == B(family ? 1556 : 1560));
+            deliveries++; delete packet; return;
+        }
+        int family = message->getKind(); delete message;
+        if (family == 2) {
+            ASSERT(departures == 2 && deliveries == 2);
+            EV << "Actual HT/VHT49-symbol short-GI transmission timing verified.\n";
+            endSimulation(); return;
+        }
+        auto header = makeShared<Ieee80211DataHeader>();
+        header->setType(ST_DATA_WITH_QOS); header->setReceiverAddress(MacAddress::BROADCAST_ADDRESS);
+        header->setChunkLength(B(26));
+        header->setSequenceNumber(SequenceNumberCyclic(family));
+        header->setTransmitterAddress(MacAddress("02:00:00:00:00:01"));
+        header->setAddress3(MacAddress("02:00:00:00:00:02")); header->setDurationField(SIMTIME_ZERO);
+        auto packet = new Packet(family ? "VHT49symbols" : "HT49symbols",header);
+        int memberLength = family ? 1556 : 1560; // VHT adds one4-byte delimiter, with no suffix padding.
+        packet->insertAtBack(makeShared<BytesChunk>(std::vector<uint8_t>(memberLength-header->getChunkLength().get<B>()-4,0x5a)));
+        auto bytes = packet->peekAllAsBytes()->getBytes();
+        auto fcs = makeShared<Ieee80211MacTrailer>(); fcs->setFcsMode(FCS_COMPUTED);
+        fcs->setFcs(ethernetFcs(bytes.data(),bytes.size())); packet->insertAtBack(fcs);
+        Ieee80211TxVector vector(selected[family]); vector.singleMpdu = family;
+        packet->addTag<Ieee80211ModeReq>()->setTxVector(vector);
+        packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
+        send(packet,"out");
+    }
+    ~TimingProbe() override { if (medium) medium->unsubscribe(IRadioMedium::signalDepartureStartedSignal,this); }
+};
+Define_Module(TimingProbe);
+}
+
+%file: test.ned
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadio;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+module TimingNode {
+    gates: input down; output up;
+    submodules:
+        mobility: StationaryMobility;
+        radio: Ieee80211DimensionalRadio { parameters: antenna.mobilityModule = absPath("^.mobility"); }
+    connections allowunconnected: down --> radio.upperLayerIn; radio.upperLayerOut --> up;
+}
+simple TimingProbe { parameters: @class(TimingProbe); gates: output out; input in; }
+network Test {
+    submodules: radioMedium: Ieee80211DimensionalRadioMedium; a: TimingNode; b: TimingNode; probe: TimingProbe;
+    connections allowunconnected: probe.out --> a.down; b.up --> probe.in;
+}
+
+%inifile: omnetpp.ini
+[General]
+network = Test
+ned-path = .;../../../../src
+sim-time-limit = 4ms
+seed-set = 0
+**.vector-recording = false
+**.scalar-recording = false
+*.a.radio.initialRadioMode = "transmitter"
+*.b.radio.initialRadioMode = "receiver"
+**.radio.contiguousChannelAllocation = true
+**.radio.opMode = "ac-complete"
+**.radio.bandName = "5 GHz (mapped 20 MHz)"
+**.radio.channelNumber = 0
+**.radio.bandwidth = 20MHz
+**.radio.fcsMode = "computed"
+**.radio.transmitter.power = 20mW
+**.radio.transmitter.bitrate = 6Mbps
+**.radio.transmitter.bandwidth = 20MHz
+**.radio.receiver.bandwidth = 20MHz
+**.radio.receiver.sensitivity = -100dBm
+**.radio.receiver.energyDetection = -100dBm
+**.radio.receiver.snirThreshold = 4dB
+*.radioMedium.listeningFilter = false
+*.radioMedium.macAddressFilter = false
+*.radioMedium.rangeFilter = ""
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 20m
+**.mobility.initialZ = 0m
+*.a.mobility.initialX = 20m
+*.b.mobility.initialX = 30m
+
+%contains: stdout
+Actual HT/VHT49-symbol short-GI transmission timing verified.

@@ -1,0 +1,69 @@
+%description:
+Independent IEEE 802.11-2024 literal HT/VHT duration and encoder goldens.
+Distinguish raw short DATA symbols, whole mixed/VHT rounding, fixed signaling,
+HT greenfield and the 2.4GHz extension. No transmitter equation is copied here.
+
+%includes:
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211ModeSet.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211HtMode.h"
+#include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211VhtMode.h"
+using namespace inet;
+using namespace inet::physicallayer;
+
+%activity:
+struct Golden { bool vht; int width, mcs, nss, bytes, encoders, longUs, shortUs; };
+// IEEE 802.11-2024, 19.4.3 Eq19-90/91/92, 21.4.3 Eq21-109/110/111,
+// and HT BCC 19.3.11.4/Table19-32. These literals were derived independently.
+const Golden goldens[] = {
+    {false,20,7,1,1,1,40,40}, {false,20,7,1,1560,1,232,216},
+    {false,20,7,1,1602,1,236,216}, {false,20,7,1,1623,1,240,220},
+    {false,40,15,2,132,1,44,44}, {false,40,15,2,1347,1,80,76},
+    {false,40,23,3,402,2,60,60}, {true,20,7,1,1560,1,236,220},
+    {true,20,7,1,1602,1,240,220}, {true,80,7,1,1602,1,84,80},
+    {true,80,9,2,7000,2,116,112}
+};
+auto modes = Ieee80211ModeSet::getModeSet("ac-complete");
+auto find = [&](const Golden& golden, bool shortGi) {
+    const IIeee80211Mode *result = nullptr;
+    for (int i=0;i<modes->getNumModes();i++) {
+        auto mode = modes->getMode(i);
+        int index = golden.vht ? mode->getVhtMcsIndex() : mode->getHtMcsIndex();
+        bool gi = golden.vht ? mode->isVhtShortGuardInterval() : mode->isHtShortGuardInterval();
+        if (index == golden.mcs && gi == shortGi && mode->getDataMode()->getBandwidth() == MHz(golden.width)
+                && mode->getDataMode()->getNumberOfSpatialStreams() == golden.nss) {
+            ASSERT(!result); result = mode;
+        }
+    }
+    ASSERT(result); return result;
+};
+int mismatches = 0;
+auto check = [&](const char *what, simtime_t actual, simtime_t expected) {
+    if (actual != expected) { EV << "timing mismatch " << what << ": " << actual << " expected " << expected << "\n"; mismatches++; }
+};
+for (const auto& golden : goldens) for (bool shortGi : {false,true}) {
+    auto mode = find(golden,shortGi);
+    EV << (golden.vht ? "VHT" : "HT") << " width=" << golden.width << " MCS=" << golden.mcs
+        << " NSS=" << golden.nss << " bytes=" << golden.bytes << " SGI=" << shortGi << "\n";
+    check("whole PPDU",mode->getDuration(B(golden.bytes)),SimTime(shortGi ? golden.shortUs : golden.longUs,SIMTIME_US));
+    int encoders = golden.vht ? check_and_cast<const Ieee80211VhtDataMode *>(mode->getDataMode())->getTailFieldLength().get<b>()/6
+        : check_and_cast<const Ieee80211HtDataMode *>(mode->getDataMode())->getTailFieldLength().get<b>()/6;
+    if (encoders != golden.encoders) { EV << "encoder mismatch " << encoders << " expected " << golden.encoders << "\n"; mismatches++; }
+    check("fixed signal",mode->getHeaderMode()->getDuration(),SimTime(8,SIMTIME_US));
+    if (golden.bytes == 1560 && shortGi) {
+        check("raw 49-symbol DATA",mode->getDataMode()->getDuration(B(1560)),SimTime(176400,SIMTIME_NS));
+        check("rounded DATA residual",mode->getDuration(B(1560))-mode->getPreambleMode()->getDuration()-mode->getHeaderMode()->getDuration(),SimTime(180,SIMTIME_US));
+    }
+}
+auto green = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs7BW20MHz,
+    Ieee80211HtMode::BAND_5GHZ,Ieee80211HtPreambleMode::HT_PREAMBLE_GREENFIELD,Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+check("greenfield raw one symbol",green->getDataMode()->getDuration(B(1)),SimTime(3600,SIMTIME_NS));
+check("greenfield whole unrounded",green->getDuration(B(1)),SimTime(27600,SIMTIME_NS));
+auto band24 = Ieee80211HtCompliantModes::getCompliantMode(&Ieee80211HtmcsTable::htMcs7BW20MHz,
+    Ieee80211HtMode::BAND_2_4GHZ,Ieee80211HtPreambleMode::HT_PREAMBLE_MIXED,Ieee80211HtModeBase::HT_GUARD_INTERVAL_SHORT);
+check("2.4GHz extension outside rounding",band24->getDuration(B(1560)),SimTime(222,SIMTIME_US));
+check("2.4GHz extension",band24->getSignalExtensionTime(),SimTime(6,SIMTIME_US));
+ASSERT(mismatches == 0);
+EV << "HT/VHT independent duration and encoder goldens verified.\n";
+
+%contains: stdout
+HT/VHT independent duration and encoder goldens verified.
