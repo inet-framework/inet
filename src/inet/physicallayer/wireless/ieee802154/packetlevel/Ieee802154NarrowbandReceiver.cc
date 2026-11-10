@@ -45,6 +45,28 @@ std::ostream& Ieee802154NarrowbandReceiver::printToStream(std::ostream& stream, 
     return FlatReceiverBase::printToStream(stream, level);
 }
 
+std::optional<FlatReceiverBase::PartRange> Ieee802154NarrowbandReceiver::computePartRange(const ITransmission *transmission, IRadioSignal::SignalPart part) const
+{
+    auto ieee802154Transmission = check_and_cast<const Ieee802154Transmission *>(transmission);
+    PartRange range;
+    if (part == IRadioSignal::SIGNAL_PART_HEADER) {
+        // the radio sends the header bits, but the packet holds no header chunk
+        range.isInPacket = false;
+        range.offset = b(0);
+        range.length = ieee802154Transmission->getHeaderLength();
+    }
+    else if (part == IRadioSignal::SIGNAL_PART_DATA) {
+        range.isInPacket = true;
+        range.offset = b(0);
+        range.length = ieee802154Transmission->getDataLength();
+        if (range.length > transmission->getPacket()->getTotalLength())
+            return std::nullopt;
+    }
+    else
+        throw cRuntimeError("Only the header part and the data part have regions, not the %s part", IRadioSignal::getSignalPartName(part));
+    return range;
+}
+
 } // namespace physicallayer
 
 } // namespace inet

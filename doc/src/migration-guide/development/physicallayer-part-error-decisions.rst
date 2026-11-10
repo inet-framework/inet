@@ -35,3 +35,22 @@ mode, :cpp:`computeDataLength()` now adds the SERVICE bits before the call,
 and :cpp:`getDataSuccessRate()` no longer adds them. The success rate must be a
 power of the number of bits, because the region rates call the method for one
 bit.
+
+Bits of the Signal Parts
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A receiver that derives from :cpp:`FlatReceiverBase` names the bits of its
+header part and its data part:
+
+.. code-block:: c++
+
+   virtual std::optional<PartRange> computePartRange(const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
+
+:cpp:`PartRange` gives the number of bits of the part, whether the transmitted
+packet holds them as content, and their offset in the packet. A header that the
+radio does not represent as a chunk has ``isInPacket = false``. The method
+returns no value if the packet does not hold the complete part. The
+implementation of :cpp:`FlatReceiverBase` throws an error.
+:cpp:`computeRegionInterval()` gives the time in which the transmitter sends a
+range of the bits of a part; a receiver can override it for a time map that is
+not in proportion to the bits.
