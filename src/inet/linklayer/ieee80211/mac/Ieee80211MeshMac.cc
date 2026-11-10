@@ -25,8 +25,10 @@ Define_Module(Ieee80211MeshMac);
 void Ieee80211MeshMac::initialize(int stage)
 {
     Ieee80211Mac::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
+    if (stage == INITSTAGE_LOCAL) {
         meshManagement.reference(this, "meshManagementModule", true);
+        meshPowerSave.reference(this, "meshPowerSaveModule", false);
+    }
     if (stage == INITSTAGE_LINK_LAYER) {
         auto physical = dynamic_cast<const physicallayer::IIeee80211ChannelAccess *>(radio.get());
         mib->configureMeshPhyCapabilities(par("phyProfile").stdstringValue(), modeSet,
@@ -112,6 +114,7 @@ void Ieee80211MeshMac::handleUpperPacket(Packet *packet)
 void Ieee80211MeshMac::sendMeshData(Packet *packet)
 {
     Enter_Method("sendMeshData");
+    take(packet); // The direct handoff consumes ownership, including refusal.
     auto header = packet->peekAtFront<Ieee80211DataHeader>();
     if (mib->getLocalMeshPhyCapabilities().htPresent
             && !header->getAMsduPresent()
@@ -176,6 +179,21 @@ void Ieee80211MeshMac::sendUpFrame(Packet *packet)
     take(packet);
     auto header = packet->peekAtFront<Ieee80211MacHeader>();
     if (header->getFrameType() != 0) {
+        auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
+        if (header->getType() == ST_QOS_NULL && (!mesh || !isDataReceptionSupported(mesh)
+                || packet->getDataLength() != mesh->getChunkLength() + B(4)
+                || !mesh->getFromDS() || mesh->getToDS() == mesh->getReceiverAddress().isMulticast())) {
+            unsupportedData(packet);
+            return;
+        }
+        if (mesh && meshPowerSave && meshPowerSave->isEnabled())
+            meshPowerSave->receivePowerFields(packet, mesh);
+        if (header->getType() == ST_QOS_NULL) {
+            // Ordinary MAC ACK has completed. Null has no payload identity or
+            // LLC body; peer learning and physical ACK are separate contracts.
+            delete packet;
+            return;
+        }
         auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
         bool oversizedNative = data && mib->getMeshPhyProfile() != "ofdm" && !data->getAMsduPresent()
             && packet->getDataLength() > data->getChunkLength() + B(6 + 2304 + 4);
@@ -197,18 +215,29 @@ void Ieee80211MeshMac::prepareFrameTransmission(Packet *packet, simtime_t ifs,
         const physicallayer::IIeee80211Mode *mode)
 {
     meshManagement->prepareManagementTransmission(packet, ifs, mode);
-    auto header = dynamicPtrCast<const Ieee80211MeshDataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
-    if (header && header->getType() == ST_DATA_WITH_QOS && header->getReceiverAddress().isMulticast()) {
-        // IEEE Std 802.11-2024, Table 9-13: non-GCR group QoS DATA uses No Ack.
-        auto writableHeader = packet->removeAtFront<Ieee80211MeshDataHeader>();
-        writableHeader->setAckPolicy(NO_ACK);
-        packet->insertAtFront(writableHeader);
-    }
 }
 
 void Ieee80211MeshMac::frameTransmissionComplete(const Packet *packet)
 {
     meshManagement->managementTransmissionComplete(packet);
+}
+
+void Ieee80211MeshMac::prepareFrameContent(Packet *packet, const std::set<int64_t>& deliveryUnit)
+{
+    meshManagement->prepareManagementContent(packet);
+    auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+    if (mesh && mesh->getReceiverAddress().isMulticast()
+            && (mesh->getType() == ST_DATA_WITH_QOS || mesh->getType() == ST_QOS_NULL)
+            && mesh->getAckPolicy() != NO_ACK) {
+        // IEEE Std 802.11-2024, Table 9-13: selected non-GCR group
+        // transmission requests no acknowledgment. Canonicalize local and
+        // relayed headers before FCS, independently of power-save activation.
+        auto updated = packet->removeAtFront<Ieee80211MeshDataHeader>();
+        updated->setAckPolicy(NO_ACK);
+        packet->insertAtFront(updated);
+    }
+    if (meshPowerSave && meshPowerSave->isEnabled())
+        meshPowerSave->prepareTransmission(packet, deliveryUnit);
 }
 
 void Ieee80211MeshMac::finalizeDataFrame(Packet *packet)
@@ -241,12 +270,16 @@ bool Ieee80211MeshMac::isFrameTransmissionEligible(const Packet *packet, simtime
         return false;
     if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_BEACON)
         return true;
+    if (meshPowerSave && !meshPowerSave->isTransmissionEligible(packet, plannedStart))
+        return false;
     return !meshManagement->isBeaconPending() && plannedStart < meshManagement->getNextTbtt();
 }
 
 bool Ieee80211MeshMac::isDataReceptionSupported(const Ptr<const Ieee80211DataHeader>& header) const
 {
     auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
+    if (mesh && header->getType() == ST_QOS_NULL)
+        return !mesh->getMeshControlPresent() && !mesh->getAMsduPresent() && !mesh->getMoreFragments() && mesh->getFragmentNumber() == 0;
     return mesh && header->getType() == ST_DATA_WITH_QOS && mesh->getMeshControlPresent()
         && !header->getMoreFragments() && header->getFragmentNumber() == 0
         && (!header->getAMsduPresent() || (mib->getLocalMeshPhyCapabilities().htPresent && header->getToDS() && header->getFromDS()));

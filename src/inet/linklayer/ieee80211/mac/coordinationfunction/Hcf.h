@@ -42,6 +42,8 @@
 #include "inet/linklayer/ieee80211/mac/recipient/CtsProcedure.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkTiming.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkMetric.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshPowerSave.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshPowerBuffer.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -53,7 +55,7 @@ class AggregateTransmitStep;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener, public IMeshLinkTiming
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener, public IMeshLinkTiming, public IMeshPowerBuffer
 {
   private:
     BlockAckVariant blockAckVariant = BlockAckVariant::BASIC;
@@ -65,6 +67,9 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     static simsignal_t meshTerminalRecoverySignal;
     static simsignal_t meshPayloadTransmittedSignal;
     void discardPendingMeshSources();
+    std::vector<MeshBufferedFrame> getMeshBufferedFrames() const override;
+    void meshPowerEligibilityChanged() override;
+    void withdrawMeshPowerControl(int64_t packetId) override;
     static simsignal_t secondaryChannelAccessDeferredSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
@@ -73,6 +78,10 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     Ieee80211Mac *mac = nullptr;
     Ieee80211Mib *mib = nullptr;
     ModuleRefByPar<IMeshLinkMetric> meshLinkMetric;
+    ModuleRefByPar<IMeshPowerSave> meshPowerSave;
+    void notifyOriginalAcknowledged(const Packet *packet);
+    void notifyOriginalsAcknowledged(InProgressFrames *frames,
+        const std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>>& acknowledged);
     IRateControl *dataAndMgmtRateControl = nullptr;
 
     cMessage *startRxTimer = nullptr;

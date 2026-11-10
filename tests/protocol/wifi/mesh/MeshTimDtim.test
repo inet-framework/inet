@@ -1,0 +1,281 @@
+%description:
+Physically awake policy proof with real mesh peering, HWMP paths and radio
+transmissions. Sleep buffering feeds the reporting STA's TIM, and buffered
+group DATA completes before a higher-priority individual unit after DTIM.
+
+%file: MeshTimDtim.cc
+#include "mesh/MeshForwardingSupport.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPowerSave.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Transmission.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
+
+using namespace inet::physicallayer;
+#include "mesh/MeshPowerTimingSupport.h"
+
+class TimPowerFixture : public MeshPowerSave
+{
+  protected:
+    bool isActivationSupported() const override { return true; }
+  public:
+    int groupsCompleted = 0;
+    void opportunity(MacAddress peer, simtime_t end) { Enter_Method("opportunity"); openAwakeOpportunity(peer,end); }
+    void groupTransmissionComplete(const Packet *packet) override {
+        if (std::string(packet->getName()).find("tim-group") != std::string::npos) ++groupsCompleted;
+        MeshPowerSave::groupTransmissionComplete(packet);
+    }
+};
+Define_Module(TimPowerFixture);
+
+class TimManagementFixture : public Ieee80211MgmtMesh
+{
+  protected:
+    void sendDown(Packet *packet) override {
+        if (dynamicPtrCast<const Ieee80211MeshPeeringConfirmFrame>(packet->peekAtFront<Chunk>())) {
+            // Test AID allocation policy: advertise a real high AID in Confirm,
+            // and retain exactly that value in the reporting management owner.
+            auto receiver = packet->getTag<MacAddressReq>()->getDestAddress();
+            if (getParentModule() == meshInterface(0)) {
+                auto aid = receiver == meshMib(1)->address ? 1025 : 1;
+                auto body = packet->removeAtFront<Ieee80211MeshPeeringConfirmFrame>();
+                body->setAssociationId(aid);
+                peers.at(receiver).localAid = aid;
+                packet->insertAtFront(body);
+            }
+        }
+        Ieee80211MgmtMesh::sendDown(packet);
+    }
+  public:
+    void queueReport(MacAddress peer) {
+        Enter_Method("queueReport");
+        auto body = makeShared<Ieee80211MeshLinkMetricFrame>();
+        body->setRequest(false); body->setMetric(7); body->setChunkLength(B(7));
+        sendBody(body,ST_ACTION,peer);
+    }
+};
+Define_Module(TimManagementFixture);
+
+class TimMacFixture : public Ieee80211MeshMac
+{
+  public:
+    bool holdBeacon = false;
+    bool holdData = false;
+    bool holdThird = false;
+    bool holdGroups = false;
+    bool holdRetry = false;
+    simtime_t lastPreparedIfs;
+    bool isFrameTransmissionEligible(const Packet *packet, simtime_t start) const override {
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (holdRetry && std::string(packet->getName()) == "tim-retained-retry") return false;
+        if (holdGroups && header->getType() == ST_DATA_WITH_QOS && header->getReceiverAddress().isMulticast()) return false;
+        if (holdBeacon && packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_BEACON) return false;
+        if (holdData && packet->peekAtFront<Ieee80211MacHeader>()->getType()==ST_DATA_WITH_QOS) return false;
+        if (holdThird && std::string(packet->getName())=="freeze-third")return false;
+        return Ieee80211MeshMac::isFrameTransmissionEligible(packet,start);
+    }
+    void prepareFrameTransmission(Packet *packet,simtime_t ifs,const IIeee80211Mode *mode) override{
+        Ieee80211MeshMac::prepareFrameTransmission(packet,ifs,mode);
+        if(std::string(packet->getName())=="freeze-second"){
+            lastPreparedIfs=ifs;emit(registerSignal("freezePrepared"),packet);
+        }
+    }
+};
+Define_Module(TimMacFixture);
+
+class TimDriver : public cSimpleModule, public cListener
+{
+    bool ready = false;
+    bool dtimSeen = false;
+    int groupsSent = 0;
+    int eligibleSent = 0;
+    int sleepingSent = 0;
+    int reportsSent = 0;
+    bool highBitmap = false;
+    bool emptyBitmap = false;
+    bool largeDuration = false;
+    TimPowerFixture *power(int s) { return check_and_cast<TimPowerFixture *>(meshInterface(s)->getSubmodule("powerSavePolicy")); }
+    Hcf *hcf() { return check_and_cast<Hcf *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")); }
+    TimMacFixture *mac() { return check_and_cast<TimMacFixture *>(meshInterface(0)->getSubmodule("mac")); }
+    void at(int ms,int kind) { scheduleAt(SimTime(ms,SIMTIME_MS),new cMessage("tim-step",kind)); }
+    void source(const char *name, int dest, int tid=0) {
+        auto address=dest==-2?MacAddress("01-00-5E-00-00-01") : dest<0?MacAddress::BROADCAST_ADDRESS : meshMib(dest)->address;
+        sendDirect(fixtureMsdu(name,address,tid),
+            meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+    }
+    bool aidSet(const MeshTim& tim, int aid) {
+        int byte = aid/8-(tim.bitmapControl&254);
+        return byte>=0 && byte<tim.bitmapLength && (tim.partialVirtualBitmap[byte]&(1<<(aid%8)));
+    }
+    void initialize() override {
+        meshInterface(0)->getSubmodule("mac")->subscribe(registerSignal("packetSentToLower"),this);
+        meshManagement(0)->subscribe(Ieee80211MgmtMesh::meshBeaconTransmissionEndSignal,this);
+        meshInterface(0)->getSubmodule("radio")->subscribe(registerSignal("transmissionStarted"),this);
+        at(50,0); at(70,1); at(80,2); at(102,3); at(103,4); at(150,5); at(180,6); at(260,7);
+    }
+    void receiveSignal(cComponent *, simsignal_t, double, cObject *) override {
+        Enter_Method_Silent();
+        if (ready && !dtimSeen && simTime()>SimTime(100,SIMTIME_MS)) {
+            dtimSeen = true;
+        }
+    }
+    void receiveSignal(cComponent *, simsignal_t signal, cObject *object, cObject *) override {
+        Enter_Method_Silent();
+        if(signal==registerSignal("transmissionStarted")){
+            if(ready&&simTime()>SimTime(103,SIMTIME_MS)&&simTime()<SimTime(104,SIMTIME_MS)){
+                auto transmission=check_and_cast<const Ieee80211Transmission *>(object);
+                auto packet=transmission->getPacket();
+                auto phy=Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+                auto header=packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength());
+                if(header->getType()==ST_BEACON){
+                    ASSERT(check_and_cast<TimHcfFixture *>(hcf())->sawLargeTimBeforeRate());
+                    ASSERT(transmission->getEndTime()-transmission->getStartTime()==SimTime(304,SIMTIME_US));
+                    largeDuration=true;
+                }
+            }
+            return;
+        }
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        auto name = std::string(packet->getName());
+        if (name.find("tim-group") != std::string::npos) {
+            auto data = packet->peekAtFront<Ieee80211DataHeader>();
+            ASSERT(data->getAckPolicy() == NO_ACK);
+            ASSERT(data->getMoreData() == (groupsSent == 0));
+            ++groupsSent;
+        }
+        if (name.find("tim-eligible-vo") != std::string::npos) {
+            ASSERT(power(0)->groupsCompleted == 2); ++eligibleSent;
+        }
+        if (name.find("tim-sleeping") != std::string::npos) { ASSERT(simTime()>=SimTime(150,SIMTIME_MS)); ++sleepingSent; }
+        if (header->getType() == ST_ACTION && header->getReceiverAddress() == meshMib(1)->address && ready)
+            ++reportsSent;
+        if (header->getType() == ST_BEACON && ready) {
+            auto body = packet->peekDataAt<Ieee80211BeaconFrame>(header->getChunkLength());
+            const auto& tim = body->getTim();
+            if (simTime()<SimTime(140,SIMTIME_MS)) {
+                ASSERT(aidSet(tim,1025));
+                ASSERT(aidSet(tim,1)&&tim.bitmapLength==129);
+                ASSERT(tim.bitmapControl&1);
+                highBitmap = true;
+                ASSERT(body->getMeshAwakeWindowPresent());
+            }
+            else if (simTime()>SimTime(200,SIMTIME_MS)) {
+                ASSERT(!aidSet(tim,1025) && !(tim.bitmapControl&1)); emptyBitmap=true;
+            }
+        }
+    }
+    void handleMessage(cMessage *event) override {
+        int kind=event->getKind(); delete event;
+        if (kind==0) {
+            ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
+            ASSERT(meshManagement(0)->getLocalAid(meshMib(1)->address)==1025);
+            ASSERT(meshManagement(1)->getPeerAid(meshMib(0)->address)==1025);
+            source("tim-training",1); source("tim-training-c",2);
+        }
+        else if (kind==1) power(1)->requestMode(meshMib(0)->address,MeshPowerMode::DEEP_SLEEP);
+        else if (kind==2) {
+            ASSERT(meshMib(0)->findMeshPeerPowerState(meshMib(1)->address)->remote==MeshPowerMode::DEEP_SLEEP);
+            ready=true;
+            source("tim-sleeping",1);
+            check_and_cast<TimManagementFixture *>(meshManagement(0))->queueReport(meshMib(1)->address);
+            source("tim-group-1",-1); source("tim-group-2",-2);
+        }
+        else if (kind==3) mac()->holdBeacon=true;
+        else if (kind==4) {
+            ASSERT(meshManagement(0)->isBeaconPending());
+            ASSERT(hcf()->getMeshBufferedFrames().size()>=5); // includes held timing unit once
+            source("tim-eligible-vo",2,6);
+            scheduleAt(simTime()+SimTime(1,SIMTIME_NS),new cMessage("eligible-unit-arrived",8));
+        }
+        else if(kind==8){
+            ASSERT(hcf()->getMeshBufferedFrames().size()>=6);
+            mac()->holdBeacon=false; hcf()->meshPowerEligibilityChanged();
+        }
+        else if (kind==5) {
+            ASSERT(groupsSent==2 && eligibleSent==1 && sleepingSent==0 && reportsSent==0);
+            power(0)->opportunity(meshMib(1)->address,SimTime(175,SIMTIME_MS));
+        }
+        else if (kind==6) { ASSERT(sleepingSent>=1 && reportsSent==1); }
+        else {
+            ASSERT(highBitmap && emptyBitmap && dtimSeen && largeDuration && power(0)->groupsCompleted==2);
+            emit(registerSignal("timComplete"),1L);
+        }
+    }
+};
+Define_Module(TimDriver);
+
+#include "mesh/MeshPowerBufferSupport.h"
+#include "mesh/MeshPowerFreezeSupport.h"
+#include "mesh/MeshPowerConditionalTimSupport.h"
+#include "mesh/MeshPowerGroupExpirySupport.h"
+#include "mesh/MeshPowerRetryTimSupport.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_tim_dtim) {
+    return ProtocolTest("mesh_tim_dtim").once(on("driver").signal("timComplete").assertValue(1).within(5.3));
+}
+Define_ProtocolTest(mesh_tim_retry) {
+    return ProtocolTest("mesh_tim_retry")
+        .once(on("driver").signal("retryStart").assertValue(1).within(0.09))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 29").nth(1).within(0.005).drop())
+        .once(on("driver").signal("timComplete").assertValue(1).within(0.2));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mesh.MeshPowerSave;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+simple TimPowerFixture extends MeshPowerSave { parameters: @class(::TimPowerFixture); }
+simple TimManagementFixture extends Ieee80211MgmtMesh { parameters: @class(::TimManagementFixture); }
+module TimMacFixture extends Ieee80211MeshMac { parameters: @class(::TimMacFixture); }
+module TimHcfFixture extends Hcf { parameters: @class(::TimHcfFixture); }
+simple TimDriver { parameters: @class(::TimDriver); @signal[timComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: TimDriver; }
+simple PowerBufferDriver { parameters: int scenario; @class(::PowerBufferDriver); @signal[timComplete](type=long); }
+network CapacityTest extends MeshPairNetwork { submodules: driver: PowerBufferDriver { scenario=1; } }
+network ByteCapacityTest extends MeshPairNetwork { submodules: driver: PowerBufferDriver { scenario=2; } }
+network ControlWaitTest extends MeshPairNetwork { submodules: driver: PowerBufferDriver { scenario=3; } }
+simple PowerFreezeDriver { parameters: @class(::PowerFreezeDriver); @signal[timComplete](type=long); }
+network FreezeTest extends MeshPairNetwork { submodules: driver: PowerFreezeDriver; }
+simple ConditionalTimDriver { parameters: @class(::ConditionalTimDriver); @signal[timComplete](type=long); }
+network ConditionalTimTest extends MeshPairNetwork { submodules: driver: ConditionalTimDriver; }
+simple GroupExpiryDriver { parameters: @class(::GroupExpiryDriver); @signal[timComplete](type=long); }
+network GroupExpiryTest extends MeshPairNetwork { submodules: driver: GroupExpiryDriver; }
+simple RetryTimDriver { parameters: @class(::RetryTimDriver); @signal[retryStart](type=long); @signal[timComplete](type=long); }
+network RetryTimTest extends MeshPairNetwork { submodules: driver: RetryTimDriver; }
+
+%inifile: test.ini
+[General]
+network=${timNetwork=Test,CapacityTest,ByteCapacityTest,ControlWaitTest,FreezeTest,ConditionalTimTest,GroupExpiryTest,RetryTimTest}
+sim-time-limit="${timNetwork}" == "ControlWaitTest" ? 5.3s : 300ms
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+*.numStations=3
+*.radioMedium.typename="${timNetwork}" == "RetryTimTest" ? "inet.protocoltest.Ieee80211ScalarTapRadioMedium" : "inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211ScalarRadioMedium"
+*.station[*].wlan[0].powerSave=true
+*.station[*].wlan[0].powerSavePolicy.typename="TimPowerFixture"
+*.station[*].wlan[0].mgmt.typename="TimManagementFixture"
+*.station[*].wlan[0].mac.typename="TimMacFixture"
+*.station[*].wlan[0].mac.hcf.typename="TimHcfFixture"
+*.station[0].wlan[0].mac.hcf.rateSelection.mgmtFrameBitrate=6Mbps
+*.station[*].wlan[0].mac.hcf.edca.edcaf[3].txopProcedure.protectionMechanism="${timNetwork}" == "FreezeTest" ? "multiple" : "single"
+*.station[*].wlan[0].mac.hcf.edca.edcaf[3].msduLifetime="${timNetwork}" == "FreezeTest" ? 20ms : 512ms
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].msduLifetime=("${timNetwork}" == "Test" || "${timNetwork}" == "ConditionalTimTest" || "${timNetwork}" == "RetryTimTest") ? 512ms : ("${timNetwork}" == "GroupExpiryTest" ? 30ms : 20ms)
+*.station[0].wlan[0].mgmt.dtimPeriod="${timNetwork}" == "ConditionalTimTest" ? 2 : 1
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].pendingQueue.dataCapacity="${timNetwork}" == "ByteCapacityTest" ? 98B : 256KiB
+*.station[1].wlan[0].mgmt.initialTsf=25.6ms
+*.station[2].wlan[0].mgmt.initialTsf=51.2ms
+*.station[*].wlan[0].llc.typename="MeshFixtureLlc"
+**.fcsMode="computed"
+*.tester.testName="${timNetwork}" == "RetryTimTest" ? "mesh_tim_retry" : "mesh_tim_dtim"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_tim_dtim: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_tim_dtim: FAIL

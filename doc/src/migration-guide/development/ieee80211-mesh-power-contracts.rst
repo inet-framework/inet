@@ -1,0 +1,12 @@
+Mesh power policy contracts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Implementations of ``IMeshManagement`` must implement ``getLocalLinkId()``, ``getPeerLinkId()`` and ``getLocalAid()`` from their existing peering state. Return zero when no corresponding assignment exists. Do not introduce a second peer generation or AID table for these queries.
+
+``prepareManagementContent(Packet *)`` refreshes variable-length TIM and conditional Awake Window content before mode, length and admission calculations. The MAC's new default-inert ``prepareFrameContent()`` hook invokes it. Retain fixed-size timestamp insertion in the later ``prepareManagementTransmission()`` hook. Take inventory snapshots while every retained original still has its complete header; an accepted Tx IFS copy freezes content until completion.
+
+The optional ``IMeshPowerBuffer`` role returns copied descriptors of pending and live in-progress originals across every AC, regardless of eligibility. Exclude resolved acknowledgments, exact-deadline expiry, logically retired objects, previews and outgoing copies. HCF keeps packet and lifetime ownership. ``IMeshPowerSave`` calls never transfer ownership of notification arguments. ACK facts occur after acknowledgment-state resolution but before logical removal; retirement facts occur after logical erase and before destruction. On-air supersession preserves borrowed storage and the exchange until real completion, and must not leave the old indication eligible for retry.
+
+Production activation is gated until complete mesh service periods are implemented. Existing mesh configurations remain disabled by default; a physically awake test policy may explicitly supply bounded opportunities without claiming radio sleep support.
+
+``QosAckHandler::Key`` now includes a native mesh Null namespace discriminator inside its receiver/Sequence Control key. External subclasses that directly construct or inspect this protected key must use ``getMgmtOrNonQoSAckKey(header)`` and update any key-dependent overrides. Rebuild dependent libraries. Ordinary management/non-QoS and QoS DATA namespaces retain their behavior. The recovery owner separately reserves a private, non-wire key namespace for mesh Null, preventing a fixed SNS5 Sequence Control value from consuming or disposing DATA retry/BAR state. The native Null producer selects zero; received nonzero values remain legal and are not rewritten.

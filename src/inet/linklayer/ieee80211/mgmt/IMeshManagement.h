@@ -21,6 +21,10 @@ class INET_API IMeshManagement
     virtual bool isBeaconPending() const = 0;
     virtual bool isMeshManagementActive() const = 0;
     virtual simtime_t getNextTbtt() const = 0;
+    virtual uint16_t getLocalLinkId(MacAddress peer) const = 0;
+    virtual uint16_t getPeerLinkId(MacAddress peer) const = 0;
+    virtual uint16_t getLocalAid(MacAddress peer) const = 0;
+    virtual void prepareManagementContent(Packet *packet) = 0;
     virtual void sendHwmp(const Ptr<Ieee80211HwmpFrame>& body, MacAddress receiver) = 0;
 };
 

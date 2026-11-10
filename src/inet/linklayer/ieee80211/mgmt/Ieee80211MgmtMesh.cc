@@ -47,6 +47,7 @@ void Ieee80211MgmtMesh::initialize(int stage)
         linkMetric.reference(this,"linkMetricModule",true);
         linkTiming.reference(this,"linkTimingModule",true);
         pathSelection.reference(this,"pathSelectionModule",false);
+        meshPowerSave.reference(this,"meshPowerSaveModule",false);
         mib->mode = Ieee80211Mib::MESH;
         MeshConfiguration configuration;
         if (par("pathSelectionMetricId").intValue() != 1 && par("pathSelectionMetricId").intValue() != 2)
@@ -486,6 +487,8 @@ void Ieee80211MgmtMesh::setState(MacAddress address, Peer& peer, PeerState state
 void Ieee80211MgmtMesh::retirePeer(MacAddress address)
 {
     bool changed = mib->withdrawMeshPeer(address);
+    if (meshPowerSave)
+        meshPowerSave->peerRemoved(address);
     linkMetric->resetPeer(address);
     resetPeerAssociationContext(address);
     if (changed)
@@ -884,6 +887,34 @@ void Ieee80211MgmtMesh::prepareManagementTransmission(Packet *packet, simtime_t 
     packet->insertAtFront(fixed);
 }
 
+void Ieee80211MgmtMesh::prepareManagementContent(Packet *packet)
+{
+    Enter_Method("prepareManagementContent");
+    if (!isMeshManagementActive() || !meshPowerSave || !meshPowerSave->isEnabled()) return;
+    auto header = packet->peekAtFront<Ieee80211MacHeader>();
+    if (header->getType() != ST_BEACON && header->getType() != ST_PROBERESPONSE) return;
+    // Inventory is a query over complete retained originals. Take its snapshot
+    // before temporarily removing this original's header/body for mutation.
+    auto original = packet->peekDataAt<Ieee80211BeaconFrame>(header->getChunkLength());
+    auto tim = meshPowerSave->getTim(original->getTim().dtimCount, original->getTim().dtimPeriod, {packet->getId()});
+    auto fixed = packet->removeAtFront<Ieee80211MgmtHeader>();
+    auto body = packet->removeAtFront<Ieee80211BeaconFrame>();
+    auto configuration = body->getMeshConfiguration();
+    configuration.capability = (configuration.capability & ~64) | (mib->getMeshGroupPowerSaveLevel() ? 64 : 0);
+    body->setMeshConfiguration(configuration);
+    if (fixed->getType() == ST_BEACON) {
+        auto oldTim = body->getTim();
+        auto oldLength = B(5 + oldTim.bitmapLength + (body->getMeshAwakeWindowPresent() ? 4 : 0));
+        body->setTim(tim);
+        bool window = meshPowerSave->needsAwakeWindow(tim);
+        body->setMeshAwakeWindowPresent(window);
+        body->setMeshAwakeWindow(window ? awakeWindow : 0);
+        body->setChunkLength(body->getChunkLength() - oldLength + B(5 + tim.bitmapLength + (window ? 4 : 0)));
+    }
+    packet->insertAtFront(body);
+    packet->insertAtFront(fixed);
+}
+
 void Ieee80211MgmtMesh::managementTransmissionComplete(const Packet *packet)
 {
     Enter_Method("managementTransmissionComplete");
@@ -892,6 +923,9 @@ void Ieee80211MgmtMesh::managementTransmissionComplete(const Packet *packet)
     if (packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_BEACON) {
         if (packet->getTreeId() == pendingBeaconTreeId)
             pendingBeaconTreeId = -1;
+        auto beacon = packet->peekDataAt<Ieee80211BeaconFrame>(B(24));
+        if (meshPowerSave && meshPowerSave->isEnabled() && beacon->getTim().dtimCount == 0)
+            meshPowerSave->dtimTransmissionComplete();
         emit(meshBeaconTransmissionEndSignal, simTime().dbl());
     }
 }

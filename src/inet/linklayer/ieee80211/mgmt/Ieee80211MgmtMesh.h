@@ -10,6 +10,7 @@
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkMetric.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshLinkTiming.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPathSelection.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshPowerSave.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -45,6 +46,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     ModuleRefByPar<IMeshLinkMetric> linkMetric;
     ModuleRefByPar<IMeshLinkTiming> linkTiming;
     ModuleRefByPar<IMeshPathSelection> pathSelection;
+    ModuleRefByPar<IMeshPowerSave> meshPowerSave;
     std::map<MacAddress, Neighbor> neighbors;
     cMessage *beaconTimer = nullptr;
     simtime_t beaconInterval;
@@ -125,9 +127,10 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     void openPeer(MacAddress peer);
     void closePeer(MacAddress peer);
     PeerState getPeerState(MacAddress peer) const;
-    uint16_t getLocalLinkId(MacAddress peer) const;
-    uint16_t getPeerLinkId(MacAddress peer) const;
-    uint16_t getLocalAid(MacAddress peer) const;
+    uint16_t getLocalLinkId(MacAddress peer) const override;
+    uint16_t getPeerLinkId(MacAddress peer) const override;
+    uint16_t getLocalAid(MacAddress peer) const override;
+    void prepareManagementContent(Packet *packet) override;
     uint16_t getPeerAid(MacAddress peer) const;
     simtime_t getPeerDeadline(MacAddress peer) const;
     bool getNeighborOffset(MacAddress peer, int64_t& offset) const;

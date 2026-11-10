@@ -84,6 +84,7 @@ enum Ieee80211FrameType
     // data (CFPOLL/CFACK subtypes omitted):
     ST_DATA = 0x20;
     ST_DATA_WITH_QOS = 0x28;
+    ST_QOS_NULL = 0x2c;
     //Feedback frame for multicast tramsmission
     ST_LBMS_REQUEST = 0x30;
     ST_LBMS_REPORT = 0x31;
@@ -123,8 +124,8 @@ class Ieee80211MacHeader extends FieldsChunk
     bool fromDS;
     bool moreFragments;
     bool retry;
-    bool powerMgmt = false; // unused
-    bool moreData = false; // unused
+    bool powerMgmt = false; // Power Management field, interpreted by the receiving role
+    bool moreData = false; // Buffered delivery indication
     bool protectedFrame = false; // unused
     bool order = false; // unused
     simtime_t durationField = -1; // "duration" in the Duration/ID field (-1=no duration)
@@ -229,6 +230,10 @@ class Ieee80211MeshDataHeader extends Ieee80211DataHeader
 cplusplus(Ieee80211MeshDataHeader) {{
     bool getMeshControlPresent() const { return (getQosControlHigh() & 1) != 0; }
     void setMeshControlPresent(bool value) { setQosControlHigh((getQosControlHigh() & ~1) | value); }
+    bool getMeshPowerSaveLevel() const { return (getQosControlHigh() & 2) != 0; }
+    void setMeshPowerSaveLevel(bool value) { setQosControlHigh((getQosControlHigh() & ~2) | (value ? 2 : 0)); }
+    bool getRspi() const { return (getQosControlHigh() & 4) != 0; }
+    void setRspi(bool value) { setQosControlHigh((getQosControlHigh() & ~4) | (value ? 4 : 0)); }
 }}
 
 // IEEE Std 802.11-2024, 9.2.4.8.3. Located in the frame body, not the MAC header.

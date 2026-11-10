@@ -126,9 +126,15 @@ For VHT, distinguish content end, structural pre-EOF end and full padded PSDU ex
 
 Request different modes toward two peers. Observe PM/PSL signaling and each endpoint's local effective mode. Lose the ACK of a lower-activity transition and require that the transmitter does not adopt the lower activity. Exercise individual and group higher-activity indications, including one receiver missing a group indication. Verify derived nonpeer mode and ensure one active-mode peering prevents local doze.
 
+Independently reconstruct native QoS Null: 36-byte individual and 30-byte group MPDUs without HT Control/security, empty bodies and no Mesh Control, LLC delivery, mesh-MSDU sequence or payload metric sample. Keep ordinary MAC acknowledgment separate from control acceptance. Ignore reserved received PSL when PM=0 and RSPI in group traffic. Supersede a pending lower mode with higher activity, including an old indication already on air; its late ACK/drop cannot lower the new state. Repeat across peer closure/re-peering. Expire a queued Null through the selected control-wait owner, require exactly one transition cancellation and later fresh progress, and forbid expiry-induced payload failure/PERR.
+
+Issue a newer policy request synchronously from a committed-mode observer. The newer request must supersede the outer indication before handoff, including individual/group combinations. All group state changes precede their notifications, so an outer loop cannot overwrite a newer request for a later peer. Retire displaced originals once and preserve the current request's identity.
+
 ## WIFI-CHECK-TIM-DTIM
 
 Buffer traffic for two assigned peer AIDs and for the group. Decode partial bitmap offset/AIDs and DTIM count/period. After the DTIM's actual transmission, require all buffered group traffic before individually addressed traffic and correct More Data termination. Keep an unacknowledged retry pending and require its TIM indication until acknowledgment, expiry or teardown. Awake-peer traffic behind sleeping-peer traffic must progress, and a newly eligible peer must resume queued traffic without requiring a new packet arrival.
+
+Use all-AC pending and live in-progress originals, excluding dropped borrowed storage and deadlines at or before now even before the expiry timer fires. Do not count previews or PSDU copies. Exercise exact packet/byte capacity and drop-new overflow. Put group BE against unicast VO and release their shared barrier only after actual group completion/drop/expiry. Hold a beacon while a high-AID bitmap grows and verify refreshed content changes admitted airtime; once an IFS attempt is accepted, later inventory changes must not alter that outgoing snapshot. The current timing frame is not its own buffered group delivery obligation. P1 proves these policies with physically awake radios; P2/P3 separately establish actual doze and service-period retrieval.
 
 ## WIFI-CHECK-AWAKE-WINDOW
 

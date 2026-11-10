@@ -33,6 +33,7 @@ class INET_API InProgressFrames : public SimpleModule
     std::vector<Packet *> inProgressFrames;
     std::vector<Packet *> droppedFrames;
     std::function<bool(Packet *)> transmissionEligible;
+    std::function<void(const Packet *)> originalRetired;
 
   protected:
     virtual void initialize(int stage) override;
@@ -45,6 +46,7 @@ class INET_API InProgressFrames : public SimpleModule
     virtual ~InProgressFrames();
     void setLifetimeHandler(EdcaTransmitLifetimeHandler *handler) { lifetimeHandler = handler; }
     void setTransmissionEligibility(std::function<bool(Packet *)> predicate) { transmissionEligible = predicate; }
+    void setOriginalRetiredCallback(std::function<void(const Packet *)> callback) { originalRetired = callback; }
     bool hasEligibleInProgressFrames() { return hasEligibleFrameToTransmit(); }
 
     virtual std::string str() const override;

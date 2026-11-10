@@ -111,6 +111,7 @@ void Hcf::initialize(int stage)
         mac = check_and_cast<Ieee80211Mac *>(getContainingNicModule(this)->getSubmodule("mac"));
         mib = check_and_cast<Ieee80211Mib *>(mac->getModuleByPath(mac->par("mibModule")));
         meshLinkMetric.reference(this, "meshLinkMetricModule", false);
+        meshPowerSave.reference(this, "meshPowerSaveModule", false);
         startRxTimer = new cMessage("startRxTimeout");
         inactivityTimer = new cMessage("blockAckInactivityTimer");
         dataLifetimeTimer = new cMessage("dataLifetimeTimer");
@@ -180,6 +181,10 @@ void Hcf::initialize(int stage)
             auto frames = edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
             frames->setLifetimeHandler(lifetimeHandler);
             frames->setTransmissionEligibility([this](Packet *packet) { return isFrameEligible(packet, true); });
+            frames->setOriginalRetiredCallback([this](const Packet *packet) {
+                if (meshPowerSave && meshPowerSave->isEnabled())
+                    meshPowerSave->originalRetired(packet);
+            });
             frames->subscribe(InProgressFrames::packetDequeuedSignal, this);
         }
     }
@@ -195,6 +200,112 @@ std::string Hcf::getFrameSequenceInfo() const
         history = "..." + history;
     }
     return "Fs: " + history;
+}
+
+std::vector<MeshBufferedFrame> Hcf::getMeshBufferedFrames() const
+{
+    std::vector<MeshBufferedFrame> result;
+    auto lifetime = edca->getLifetimeHandler();
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ++ac) {
+        auto owner = edca->getEdcaf(static_cast<AccessCategory>(ac));
+        auto append = [&](Packet *packet, bool numbered) {
+            auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+            auto deadline = lifetime->getDeadline(packet);
+            if (deadline <= simTime()) return;
+            if (numbered) {
+                auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+                auto status = data && data->getType() == ST_DATA_WITH_QOS ? owner->getAckHandler()->getQoSDataAckStatus(data) :
+                    owner->getAckHandler()->getMgmtOrNonQoSAckStatus(header);
+                if (status == QosAckHandler::Status::NORMAL_ACK_ARRIVED || status == QosAckHandler::Status::BLOCK_ACK_ARRIVED_ACKED)
+                    return;
+            }
+            auto type = header->getType();
+            auto kind = type == ST_BEACON || type == ST_PROBERESPONSE ? MeshBufferedFrame::Kind::TIMING :
+                type == ST_QOS_NULL ? MeshBufferedFrame::Kind::POWER_CONTROL :
+                header->getFrameType() == 0 ? MeshBufferedFrame::Kind::MANAGEMENT : MeshBufferedFrame::Kind::PAYLOAD;
+            result.push_back({packet->getId(), header->getReceiverAddress(), packet->getDataLength(), deadline, ac, kind});
+        };
+        auto queue = owner->getPendingQueue();
+        for (int i = 0; i < queue->getNumPackets(); ++i) append(queue->getPacket(i), false);
+        auto frames = owner->getInProgressFrames();
+        for (int i = 0; i < frames->getLength(); ++i) append(frames->getFrames(i), true);
+    }
+    return result;
+}
+
+void Hcf::meshPowerEligibilityChanged()
+{
+    Enter_Method("meshPowerEligibilityChanged");
+    if (!finishingSequence)
+        updateContention();
+}
+
+void Hcf::withdrawMeshPowerControl(int64_t id)
+{
+    Enter_Method("withdrawMeshPowerControl");
+    bool previous = handlingAgreementAction;
+    handlingAgreementAction = true;
+    bool cancelled = false;
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ++ac) {
+        auto owner = edca->getEdcaf(static_cast<AccessCategory>(ac));
+        auto queue = owner->getPendingQueue();
+        for (int i = 0; i < queue->getNumPackets(); ++i) {
+            auto packet = queue->getPacket(i);
+            if (packet->getId() != id) continue;
+            queue->removePacket(packet);
+            take(packet);
+            edca->getLifetimeHandler()->forgetFrame(id);
+            if (meshPowerSave) meshPowerSave->originalRetired(packet);
+            delete packet;
+            break;
+        }
+        auto frames = owner->getInProgressFrames();
+        for (int i = 0; i < frames->getLength(); ++i) {
+            auto packet = frames->getFrames(i);
+            if (packet->getId() != id) continue;
+            if (frameSequenceHandler->isSequenceRunning()) {
+                auto last = frameSequenceHandler->getContext()->getLastStep();
+                auto transmit = dynamic_cast<ITransmitStep *>(last);
+                if (transmit && transmit->getFrameToTransmit() == packet) {
+                    cancelled = tx->cancelPendingTransmission(this);
+                    // Failure means the PPDU may already be on air. Retire
+                    // logical membership, but retain deferred storage and the
+                    // running context until its real completion, as resetPeer.
+                }
+            }
+            auto header = packet->peekAtFront<Ieee80211DataHeader>();
+            owner->getAckHandler()->dropFrame(header);
+            owner->getRecoveryProcedure()->dropFrame(header);
+            frames->dropFrame(packet);
+            break;
+        }
+    }
+    if (cancelled && frameSequenceHandler->isSequenceRunning()) {
+        frameSequenceHandler->interruptFrameSequence();
+    }
+    handlingAgreementAction = previous;
+    if (!previous && !finishingSequence) updateContention();
+}
+
+void Hcf::notifyOriginalAcknowledged(const Packet *packet)
+{
+    if (meshPowerSave && meshPowerSave->isEnabled())
+        meshPowerSave->originalAcknowledged(packet);
+}
+
+void Hcf::notifyOriginalsAcknowledged(InProgressFrames *frames,
+        const std::set<std::pair<MacAddress, std::pair<Tid, SequenceControlField>>>& acknowledged)
+{
+    if (!meshPowerSave || !meshPowerSave->isEnabled()) return;
+    std::vector<Packet *> originals;
+    for (int i = 0; i < frames->getLength(); ++i) originals.push_back(frames->getFrames(i));
+    for (auto packet : originals) {
+        if (!frames->containsFrame(packet)) continue;
+        auto data = packet->peekAtFront<Ieee80211DataHeader>();
+        if (data->getType() == ST_DATA_WITH_QOS && acknowledged.count({data->getReceiverAddress(),
+                {data->getTid(), SequenceControlField(data->getSequenceNumber().get(), data->getFragmentNumber())}}))
+            notifyOriginalAcknowledged(packet);
+    }
 }
 
 void Hcf::scheduleDataLifetimeTimer()
@@ -257,25 +368,28 @@ void Hcf::expireDataFrames(bool preserveSequence)
         // A drop notification can retire another due frame through its queue owner.
         if (packet == nullptr)
             continue;
-        auto header = packet->peekAtFront<Ieee80211DataHeader>();
-        auto edcaf = edca->getEdcaf(edca->classifyFrame(header));
+        auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        auto edcaf = edca->getEdcaf(data ? edca->classifyFrame(data) : AC_VO);
         auto frames = edcaf->getInProgressFrames();
         bool inProgress = frames->containsFrame(packet);
         if (inProgress) {
             edcaf->getAckHandler()->dropFrame(header);
-            edcaf->getRecoveryProcedure()->dropFrame(header);
+            if (data) edcaf->getRecoveryProcedure()->dropFrame(data);
+            else edcaf->getMgmtAndNonQoSRecoveryProcedure()->dropFrame(packet, header);
             frames->dropFrame(packet);
         }
         else {
             edcaf->getPendingQueue()->removePacket(packet);
             take(packet);
             handler->forgetFrame(packet->getId());
+            if (meshPowerSave && meshPowerSave->isEnabled()) meshPowerSave->originalRetired(packet);
         }
         PacketDropDetails details;
         details.setReason(LIFETIME_EXPIRED);
         emit(packetDroppedSignal, packet, &details);
-        if (inProgress)
-            firstDataDiscarded(header);
+        if (inProgress && data)
+            firstDataDiscarded(data);
         if (!inProgress)
             delete packet;
     }
@@ -377,6 +491,20 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         throw cRuntimeError("Unknown message type");
     EV_INFO << "The upper frame has been classified as a " << printAccessCategory(ac) << " frame." << endl;
     auto pendingQueue = edca->getEdcaf(ac)->getPendingQueue();
+    if (meshPowerSave && meshPowerSave->isEnabled()) {
+        // Drop NEW before the priority queue can evict an older delivery unit.
+        if ((pendingQueue->getMaxNumPackets() >= 0 && pendingQueue->getNumPackets() >= pendingQueue->getMaxNumPackets())
+                || (pendingQueue->getMaxTotalLength() >= b(0) && pendingQueue->getTotalLength() + packet->getDataLength() > pendingQueue->getMaxTotalLength())) {
+            meshPowerSave->originalRetired(packet);
+            PacketDropDetails details;
+            details.setReason(QUEUE_OVERFLOW);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+            return;
+        }
+        if (header->getFrameType() == 0 || header->getType() == ST_QOS_NULL)
+            edca->getLifetimeHandler()->registerFragments({packet}, simTime() + SimTime(5, SIMTIME_S));
+    }
     if (header->getType() == ST_DATA_WITH_QOS)
         edca->getLifetimeHandler()->registerFrame(packet, ac);
     pendingQueue->enqueuePacket(packet);
@@ -576,6 +704,7 @@ void Hcf::discardPendingMeshSources()
             queue->removePacket(packet);
             take(packet);
             edca->getLifetimeHandler()->forgetFrame(packet->getId());
+            if (meshPowerSave && meshPowerSave->isEnabled()) meshPowerSave->originalRetired(packet);
             PacketDropDetails details;
             details.setReason(OTHER_PACKET_DROP);
             emit(packetDroppedSignal, packet, &details);
@@ -602,6 +731,7 @@ void Hcf::discardMeshAggregate(Edcaf *owner, Packet *packet)
         owner->getPendingQueue()->removePacket(packet);
         take(packet);
         edca->getLifetimeHandler()->forgetFrame(packet->getId());
+        if (meshPowerSave && meshPowerSave->isEnabled()) meshPowerSave->originalRetired(packet);
     }
     PacketDropDetails details;
     details.setReason(OTHER_PACKET_DROP);
@@ -638,7 +768,7 @@ bool Hcf::hasNumberedData(MacAddress peer, Tid tid) const
         auto frames = edca->getEdcaf(static_cast<AccessCategory>(ac))->getInProgressFrames();
         for (int i = 0; i < frames->getLength(); i++) {
             auto data = dynamicPtrCast<const Ieee80211DataHeader>(frames->getFrames(i)->peekAtFront<Ieee80211MacHeader>());
-            if (data && data->getReceiverAddress() == peer && data->getTid() == tid)
+            if (data && data->getType() == ST_DATA_WITH_QOS && data->getReceiverAddress() == peer && data->getTid() == tid)
                 return true;
         }
     }
@@ -750,7 +880,7 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
         auto prepared = frameSequenceHandler->getContext()->getQoSContext()->preparedData.get();
         if (prepared) {
             auto header = prepared->frame->peekAtFront<Ieee80211DataHeader>();
-            if (header->getReceiverAddress() == peer && header->getTid() == tid)
+            if (header->getType() == ST_DATA_WITH_QOS && header->getReceiverAddress() == peer && header->getTid() == tid)
                 prepared->cancelled = true;
         }
     }
@@ -761,6 +891,8 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
         for (int i = 0; i < frames->getLength(); i++) {
             auto packet = frames->getFrames(i);
             auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+            if (!data || data->getType() != ST_DATA_WITH_QOS)
+                continue; // SNS5 Null and management are independent of BA DATA disposal.
             bool transmitted = data && edcaf->getAckHandler()->getQoSDataAckStatus(data) != QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED;
             if (data && frameSequenceHandler->isSequenceRunning()) {
                 auto context = frameSequenceHandler->getContext();
@@ -794,13 +926,14 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
             for (int i = 0; i < queue->getNumPackets(); i++) {
                 auto packet = queue->getPacket(i);
                 auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
-                if (data && data->getReceiverAddress() == peer && data->getTid() == tid)
+                if (data && data->getType() == ST_DATA_WITH_QOS && data->getReceiverAddress() == peer && data->getTid() == tid)
                     discard.push_back(packet);
             }
             for (auto packet : discard) {
                 queue->removePacket(packet);
                 take(packet);
                 edca->getLifetimeHandler()->forgetFrame(packet->getId());
+                if (meshPowerSave && meshPowerSave->isEnabled()) meshPowerSave->originalRetired(packet);
                 PacketDropDetails details;
                 details.setReason(OTHER_PACKET_DROP);
                 emit(packetDroppedSignal, packet, &details);
@@ -814,7 +947,7 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
 
 void Hcf::firstDataDiscarded(const Ptr<const Ieee80211DataHeader>& header)
 {
-    if (!originatorBlockAckAgreementHandler)
+    if (!originatorBlockAckAgreementHandler || header->getType() == ST_QOS_NULL)
         return;
     auto agreement = originatorBlockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid());
     if (agreement && agreement->getIsAddbaResponseReceived() && !agreement->getFirstDataTransmitted() &&
@@ -851,6 +984,8 @@ void Hcf::invalidateActions(MacAddress peer, Tid tid, bool originator)
         for (auto packet : removed) {
             queue->removePacket(packet);
             take(packet);
+            edca->getLifetimeHandler()->forgetFrame(packet->getId());
+            if (meshPowerSave && meshPowerSave->isEnabled()) meshPowerSave->originalRetired(packet);
             obsoleteActions.erase(packet->getId());
             delete packet;
         }
@@ -1194,6 +1329,8 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
         auto physical = dynamic_cast<const IIeee80211ChannelAccess *>(getContainingNicModule(this)->getSubmodule("radio"));
         if (physical && physical->hasContiguousAllocation()) {
             auto candidate = edcaf->getInProgressFrames()->peekFrameToTransmit();
+            if (candidate)
+                mac->prepareFrameContent(candidate, {candidate->getId()});
             // A standalone recovery BAR can own contention without eligible
             // DATA; its selected non-HT mode uses only the primary channel.
             auto header = candidate ? candidate->peekAtFront<Ieee80211MacHeader>() : nullptr;
@@ -1349,6 +1486,10 @@ void Hcf::frameSequenceFinished()
         throw cRuntimeError("Frame sequence finished but channel owner not found!");
     obsoleteActions.clear();
     finishingSequence = false;
+    // The final group completion can release a different AC's buffered
+    // individual traffic. Reuse the queue owner's contention boundary.
+    if (meshPowerSave && meshPowerSave->isEnabled())
+        updateContention();
 }
 
 void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool interframe)
@@ -1407,7 +1548,8 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
     if (auto dataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(header))
         recipientAckProcedure->processReceivedFrame(packet, dataOrMgmtHeader, check_and_cast<IRecipientAckPolicy *>(recipientAckPolicy), this);
     if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-        if (!mac->isDataReceptionSupported(dataHeader)) {
+        if (!mac->isDataReceptionSupported(dataHeader) ||
+                (mib->mode == Ieee80211Mib::MESH && dataHeader->getType() == ST_QOS_NULL)) {
             mac->sendUpFrame(packet);
             return;
         }
@@ -1683,6 +1825,8 @@ void Hcf::originatorProcessTransmittedFrame(Packet *packet)
     if (edcaf) {
         AccessCategory ac = edcaf->getAccessCategory();
         if (transmittedHeader->getReceiverAddress().isMulticast()) {
+            if (meshPowerSave && meshPowerSave->isEnabled())
+                meshPowerSave->groupTransmissionComplete(packet);
             if (dynamicPtrCast<const Ieee80211MgmtHeader>(transmittedHeader))
                 edcaf->getMgmtAndNonQoSRecoveryProcedure()->multicastFrameTransmitted(edcaf->getStationRetryCounters());
             else
@@ -1707,7 +1851,7 @@ void Hcf::originatorProcessTransmittedDataFrame(Packet *packet, const Ptr<const 
 {
     auto edcaf = edca->getEdcaf(ac);
     edcaf->getAckHandler()->processTransmittedDataOrMgmtFrame(dataHeader);
-    if (originatorBlockAckAgreementHandler)
+    if (originatorBlockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS)
         originatorBlockAckAgreementHandler->processTransmittedDataFrame(packet, dataHeader, originatorBlockAckAgreementPolicy, this);
     if (originatorBlockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS &&
         !dataHeader->getReceiverAddress().isMulticast() && isProfileAllowed(dataHeader->getReceiverAddress(), true) &&
@@ -1821,7 +1965,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
                 for (int i = 0; i < frames->getLength(); i++) {
                     auto original = frames->getFrames(i);
                     auto data = dynamicPtrCast<const Ieee80211DataHeader>(original->peekAtFront<Ieee80211MacHeader>());
-                    if (data && data->getReceiverAddress() == compressed->getReceiverAddress() && data->getTid() == compressed->getTidInfo()
+                    if (data && data->getType() == ST_DATA_WITH_QOS && data->getReceiverAddress() == compressed->getReceiverAddress() && data->getTid() == compressed->getTidInfo()
                             && !edca->getLifetimeHandler()->isExpired(original)) {
                         live.insert(original->getId());
                         covered.push_back(original);
@@ -1958,7 +2102,9 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
             throw cRuntimeError("Unknown frame"); // TODO qos, nonqos frame
         auto lastTransmittedDataOrMgmtHeader = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(lastTransmittedHeader);
         edcaf->getAckHandler()->processReceivedAck(ackFrame, lastTransmittedDataOrMgmtHeader);
-        edcaf->getInProgressFrames()->dropFrame(lastTransmittedPacket);
+        notifyOriginalAcknowledged(lastTransmittedPacket);
+        if (edcaf->getInProgressFrames()->containsFrame(lastTransmittedPacket))
+            edcaf->getInProgressFrames()->dropFrame(lastTransmittedPacket);
         advanceOriginatorWindows();
         edcaf->getAckHandler()->dropFrame(lastTransmittedDataOrMgmtHeader);
         if (dynamicPtrCast<const Ieee80211MgmtHeader>(lastTransmittedHeader)) {
@@ -1987,6 +2133,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         EV_TRACE << "It has acknowledged the following frames:" << std::endl;
         for (auto it : ackedSeqAndFragNums)
             EV_TRACE << "   sequenceNumber = " << it.second.second.getSequenceNumber() << ", fragmentNumber = " << (int)it.second.second.getFragmentNumber() << std::endl;
+        notifyOriginalsAcknowledged(edcaf->getInProgressFrames(), ackedSeqAndFragNums);
         edcaf->getInProgressFrames()->dropFrames(ackedSeqAndFragNums);
         advanceOriginatorWindows();
         edcaf->getAckHandler()->dropFrames(ackedSeqAndFragNums);
@@ -2322,6 +2469,7 @@ void Hcf::completeAmpduAttempt(AggregateTransmitStep *step, const Ptr<const Ieee
         owner->getRecoveryProcedure()->blockAckFrameReceived();
         auto acked = owner->getAckHandler()->processReceivedCompressedBlockAck(response, agreement);
         originatorBlockAckAgreementHandler->processReceivedBlockAck(response, this);
+        notifyOriginalsAcknowledged(owner->getInProgressFrames(), acked);
         owner->getInProgressFrames()->dropFrames(acked);
         owner->getAckHandler()->dropFrames(acked);
         advanceOriginatorWindows();
@@ -2582,6 +2730,11 @@ bool Hcf::prepareAmpdu(FrameSequenceContext *context, Packet *candidate, Origina
     prepared->blockAckTimeout = originatorAckPolicy->getBlockAckTimeout(responsePrediction.get(),
         responsePrediction->peekAtFront<Ieee80211DataHeader>());
     while (!prepared->members.empty()) {
+        std::set<int64_t> deliveryUnit;
+        for (auto member : prepared->members) deliveryUnit.insert(member->getId());
+        for (const auto& member : prepared->memberPreparations)
+            deliveryUnit.insert(member->sourceIds.begin(), member->sourceIds.end());
+        for (auto member : prepared->members) mac->prepareFrameContent(member, deliveryUnit);
         prepared->psdu.reset(service->buildAmpdu(prepared->members, {vht,
             minimumAmpduStartDistance(capabilities->ht.minimumMpduStartSpacing, prepared->dataMode)}));
         take(prepared->psdu.get());
@@ -2649,7 +2802,10 @@ bool Hcf::transmitAmpdu(AggregateTransmitStep *step, simtime_t ifs)
     step->members = committed;
     prepared->members = committed;
     prepared->frame = committed.front();
+    std::set<int64_t> deliveryUnit;
+    for (auto member : committed) deliveryUnit.insert(member->getId());
     for (auto member : committed) {
+        mac->prepareFrameContent(member, deliveryUnit);
         auto updated = member->removeAtFront<Ieee80211DataHeader>();
         auto status = owner->getAckHandler()->getQoSDataAckStatus(updated);
         updated->setRetry(status != QosAckHandler::Status::FRAME_NOT_YET_TRANSMITTED);
@@ -2724,6 +2880,10 @@ DataPreparationResult Hcf::prepareDataTransmission(FrameSequenceContext *context
     if (selected->getReceiverAddress() != header->getReceiverAddress() || selected->getTid() != header->getTid())
         return DataPreparationResult::DEFERRED;
     auto txop = context->getQoSContext()->txopProcedure;
+    std::set<int64_t> deliveryUnit{prepared->frame->getId()};
+    if (prepared->preparation)
+        deliveryUnit.insert(prepared->preparation->sourceIds.begin(), prepared->preparation->sourceIds.end());
+    mac->prepareFrameContent(prepared->frame, deliveryUnit);
     prepared->dataMode = rateSelection->computeMode(prepared->frame,
         prepared->frame->peekAtFront<Ieee80211DataHeader>(), txop);
     const IIeee80211Mode *selectedRtsMode = nullptr;
@@ -2769,6 +2929,9 @@ DataPreparationResult Hcf::prepareDataTransmission(FrameSequenceContext *context
         if (!prepared->preparation)
             return DataPreparationResult::DEFERRED;
         prepared->frame = prepared->preparation->packet.get();
+        deliveryUnit = {prepared->frame->getId()};
+        deliveryUnit.insert(prepared->preparation->sourceIds.begin(), prepared->preparation->sourceIds.end());
+        mac->prepareFrameContent(prepared->frame, deliveryUnit);
     }
 }
 
@@ -2782,6 +2945,7 @@ simtime_t Hcf::forecastSingleProtectionSuccessor(Packet *packet, const Ptr<const
     if (!candidate || candidate->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress().isMulticast())
         return SIMTIME_ZERO;
     std::unique_ptr<Packet> forecast(candidate->dup());
+    mac->prepareFrameContent(forecast.get(), {candidate->getId()});
     auto nextHeader = forecast->peekAtFront<Ieee80211DataOrMgmtHeader>();
     if (auto data = dynamicPtrCast<const Ieee80211DataHeader>(nextHeader)) {
         auto policy = originatorAckPolicy->computeAckPolicy(forecast.get(), data, nullptr);
@@ -2836,8 +3000,14 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             return false;
         if (!isFrameEligible(packet, true) || !mac->isFrameTransmissionEligible(packet, simTime() + ifs))
             return false;
+        // Variable TIM and QoS power fields must precede every mode/length
+        // admission. The accepted IFS copy freezes this snapshot afterwards.
+        if (!preparedStep)
+            mac->prepareFrameContent(packet, {packet->getId()});
+        header = packet->peekAtFront<Ieee80211MacHeader>();
         if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-            auto status = channelOwner->getAckHandler()->getQoSDataAckStatus(dataHeader);
+            auto status = dataHeader->getType() == ST_DATA_WITH_QOS ? channelOwner->getAckHandler()->getQoSDataAckStatus(dataHeader) :
+                channelOwner->getAckHandler()->getMgmtOrNonQoSAckStatus(dataHeader);
             if (dataHeader->getType() == ST_DATA_WITH_QOS &&
                 (status == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED || status == QosAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED)) {
                 // IEEE Std 802.11-2024, 9.2.4.1.6: DATA after a failed Block Ack exchange is a retransmission.
@@ -3034,7 +3204,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         mac->prepareFrameTransmission(packet, ifs, mode);
         tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
         if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
-            if (originatorBlockAckAgreementHandler) {
+            if (originatorBlockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS) {
                 auto agreement = originatorBlockAckAgreementHandler->getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());
                 if (agreement && agreement->getIsAddbaResponseReceived())
                     agreement->recordTransmittedData(packet->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());

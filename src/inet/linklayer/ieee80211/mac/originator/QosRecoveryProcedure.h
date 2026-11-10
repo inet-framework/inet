@@ -28,6 +28,9 @@ namespace ieee80211 {
  */
 class INET_API QosRecoveryProcedure : public SimpleModule, public IRecoveryProcedure
 {
+  private:
+    // Private retry-key namespace, never a wire TID or a BA agreement TID.
+    static constexpr Tid MESH_NULL_RETRY_NAMESPACE = -1;
 
   protected:
     ICwCalculator *cwCalculator = nullptr;

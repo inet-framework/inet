@@ -432,7 +432,10 @@ std::vector<Packet *> *OriginatorQosMacDataService::extractFramesToTransmit(queu
             assignSequenceNumber(header);
             packet->insertAtFront(header);
         }
-        if (dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211DataOrMgmtHeader>()))
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211DataOrMgmtHeader>());
+        // Native SNS5 Null is control, independent of DATA allocation/window
+        // ordering as well as wire sequence and mesh-MSDU identity.
+        if (data && !(data->getType() == ST_QOS_NULL && dynamicPtrCast<const Ieee80211MeshDataHeader>(data)))
             packet->addTagIfAbsent<Ieee80211DataSequenceTag>()->setAllocationIndex(nextDataAllocationIndex++);
         if (finalizeSourceFrame)
             finalizeSourceFrame(packet);

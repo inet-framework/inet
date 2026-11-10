@@ -16,6 +16,7 @@ simple Ieee80211MgmtMesh extends SimpleModule like IIeee80211Mgmt
         string linkMetricModule = default("^.linkMetric");
         string linkTimingModule = default("^.mac.hcf");
         string pathSelectionModule = default("^.pathSelection");
+        string meshPowerSaveModule = default("^.powerSavePolicy");
         string meshId = default("inet-mesh");
         int pathSelectionMetricId = default(1); // mesh-wide fixed ID, 1 or 2
         double beaconInterval @unit(s) = default(102.4ms); // whole TUs, 1..65535

@@ -132,7 +132,11 @@ void QosRecoveryProcedure::incrementStationLrc()
 QosRecoveryProcedure::RetryKey QosRecoveryProcedure::getRetryKey(const Ptr<const Ieee80211DataHeader>& header) const
 {
     // IEEE Std 802.11-2024, 10.23.2.12.1: disposal resolves only this DATA's retry state.
-    return {header->getReceiverAddress(), {header->getTid(),
+    // Null uses SNS5 rather than DATA SNS2 (Table 10-5), and its fixed SC
+    // must not alias an independently retained DATA retry/covered original.
+    auto tid = header->getType() == ST_QOS_NULL && dynamicPtrCast<const Ieee80211MeshDataHeader>(header) ?
+        MESH_NULL_RETRY_NAMESPACE : header->getTid();
+    return {header->getReceiverAddress(), {tid,
         SequenceControlField(header->getSequenceNumber().get(), header->getFragmentNumber())}};
 }
 
@@ -233,11 +237,13 @@ void QosRecoveryProcedure::retryLimitReached(Packet *packet, const Ptr<const Iee
 void QosRecoveryProcedure::dropFrame(const Ptr<const Ieee80211DataHeader>& header)
 {
     auto id = getRetryKey(header);
-    auto procedure = blockAckRecoveries.find({header->getReceiverAddress(), header->getTid()});
-    if (procedure != blockAckRecoveries.end()) {
-        for (auto it = procedure->second.covered.begin(); it != procedure->second.covered.end();)
-            if (!(it->second < id) && !(id < it->second)) it = procedure->second.covered.erase(it); else ++it;
-        if (procedure->second.covered.empty()) blockAckRecoveries.erase(procedure);
+    if (id.second.first != MESH_NULL_RETRY_NAMESPACE) {
+        auto procedure = blockAckRecoveries.find({header->getReceiverAddress(), header->getTid()});
+        if (procedure != blockAckRecoveries.end()) {
+            for (auto it = procedure->second.covered.begin(); it != procedure->second.covered.end();)
+                if (!(it->second < id) && !(id < it->second)) it = procedure->second.covered.erase(it); else ++it;
+            if (procedure->second.covered.empty()) blockAckRecoveries.erase(procedure);
+        }
     }
     // RTS failure can leave an SRC entry even when the protected DATA uses an LRC entry.
     shortRetryCounter.erase(id);

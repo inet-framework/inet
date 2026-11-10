@@ -15,6 +15,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211Channel.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211RateSet.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPowerMode.h"
 
 namespace inet {
 
@@ -33,6 +34,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     static simsignal_t rateStateChangedSignal;
     // Committed mesh eligibility; details identify the peer, listeners query current state.
     static simsignal_t meshPeerChangedSignal;
+    static simsignal_t meshPowerModeChangedSignal;
     class INET_API MeshPeerChange : public cObject {
       public:
         MacAddress peer;
@@ -110,6 +112,7 @@ class INET_API Ieee80211Mib : public SimpleModule
     bool meshShortGuardIntervalTransmissionEnabled = true;
     Ieee80211PeerPhyCapabilities localMeshPhy;
     std::map<MacAddress, Ieee80211PeerPhyCapabilities> meshPeerPhy;
+    std::map<MacAddress, MeshPeerPowerState> meshPeerPower;
     std::string describeMeshPhy() const;
     bool updateBssAndPeerRateSets(const Ieee80211RateSetState& bssRateSet,
             const MacAddress& peerAddress, const Ieee80211RateSetState& peerRateSet);
@@ -169,6 +172,13 @@ class INET_API Ieee80211Mib : public SimpleModule
     const std::string& getMeshId() const { return meshId; }
     const MeshConfiguration& getMeshConfiguration() const { return meshConfiguration; }
     bool isMeshPeerEstablished(MacAddress peer) const;
+    const std::map<MacAddress, MeshPeerPowerState>& getMeshPeerPowerStates() const { return meshPeerPower; }
+    const MeshPeerPowerState *findMeshPeerPowerState(MacAddress peer) const;
+    void commitMeshLocalPowerMode(MacAddress peer, MeshPowerMode mode);
+    void commitMeshLocalActiveForAllPeers();
+    void commitMeshRemotePowerMode(MacAddress peer, MeshPowerMode mode);
+    MeshPowerMode getMeshNonpeerPowerMode() const;
+    bool getMeshGroupPowerSaveLevel() const;
     void establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates);
     void establishMeshPeer(MacAddress peer, const Ieee80211RateSetState& rates, const Ieee80211PeerPhyCapabilities& phy);
     void configureMeshPhyCapabilities(const std::string& profile, const physicallayer::Ieee80211ModeSet *modes,

@@ -1,0 +1,330 @@
+%description:
+Physically awake mesh power policy: a lost transition ACK separates requested,
+locally committed and remotely learned modes. Native bodyless QoS Null uses
+the real HCF/radio/ACK path and raw reconstructed MAC bytes on reception.
+
+%file: MeshPowerModes.cc
+#include "mesh/MeshPhySupport.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPowerSave.h"
+#include "inet/linklayer/ieee80211/mesh/AirtimeLinkMetric.h"
+#include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
+#include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
+#include "inet/linklayer/ieee80211/mac/Ieee80211MeshMac.h"
+#include "inet/linklayer/ieee80211/mesh/MeshForwarding.h"
+
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::protocoltest;
+
+class AwakePowerFixture : public MeshPowerSave
+{
+  protected:
+    bool isActivationSupported() const override { return true; }
+  public:
+    void opportunity(MacAddress peer, simtime_t end) { Enter_Method("opportunity"); openAwakeOpportunity(peer, end); }
+};
+Define_Module(AwakePowerFixture);
+
+class PowerForwardingFixture : public MeshForwarding
+{
+  public:
+    uint32_t nextIdentity() const { return nextSequence; }
+};
+Define_Module(PowerForwardingFixture);
+
+class PowerManagementFixture : public Ieee80211MgmtMesh
+{
+  public:
+    void queueBeacon() { Enter_Method("queueBeacon"); sendBeacon(); }
+    void queueReport(MacAddress peer) {
+        Enter_Method("queueReport");
+        auto body=makeShared<Ieee80211MeshLinkMetricFrame>();
+        body->setRequest(false);body->setMetric(7);body->setChunkLength(B(7));
+        sendBody(body,ST_ACTION,peer);
+    }
+};
+Define_Module(PowerManagementFixture);
+
+#include "mesh/MeshPowerTransitionSupport.h"
+#include "mesh/MeshPowerFallbackSupport.h"
+#include "mesh/MeshPowerOriginalFactsSupport.h"
+#include "mesh/MeshPowerCollisionSupport.h"
+#include "mesh/MeshPowerReentrantSupport.h"
+
+class PowerModeDriver : public cSimpleModule, public cListener
+{
+    int nullTransmissions = 0;
+    int payloadSamples = 0;
+    bool remoteBeforeLocal = false;
+    bool ackInventoryResolved = false;
+    bool allLightBeacon = false;
+    int groupAcks = 0;
+    AwakePowerFixture *power(int station) { return check_and_cast<AwakePowerFixture *>(meshInterface(station)->getSubmodule("powerSavePolicy")); }
+    void at(int ms, int kind) { auto event = new cMessage("power-check", kind); scheduleAt(SimTime(ms,SIMTIME_MS),event); }
+    MeshPowerMode local(int peer) { return meshMib(0)->findMeshPeerPowerState(meshMib(peer)->address)->local; }
+    void initialize() override {
+        meshInterface(0)->getSubmodule("mac")->subscribe(registerSignal("packetSentToLower"),this);
+        meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")->subscribe(Hcf::meshDataAttemptCompletedSignal,this);
+        meshMib(1)->subscribe(Ieee80211Mib::meshPowerModeChangedSignal,this);
+        meshMib(0)->subscribe(Ieee80211Mib::meshPowerModeChangedSignal,this);
+        getParentModule()->subscribe(registerSignal("packetSentToUpper"),this);
+        getParentModule()->subscribe(registerSignal("transmissionStarted"),this);
+        at(100,0); at(110,1); at(115,10); at(120,2); at(130,3); at(140,4); at(150,5);
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, long, cObject *) override {
+        if (source == meshMib(0) && local(1) == MeshPowerMode::LIGHT_SLEEP) {
+            auto owner=check_and_cast<Hcf *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"));
+            for (const auto& frame : owner->getMeshBufferedFrames())
+                ASSERT(frame.kind != MeshBufferedFrame::Kind::POWER_CONTROL || frame.receiver != meshMib(1)->address);
+            ackInventoryResolved=true;
+        }
+        if (meshMib(1)->findMeshPeerPowerState(meshMib(0)->address)->remote == MeshPowerMode::LIGHT_SLEEP
+                && local(1) == MeshPowerMode::ACTIVE)
+            remoteBeforeLocal = true;
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *) override {
+        if (signal == Hcf::meshDataAttemptCompletedSignal) { ++payloadSamples; return; }
+        if (signal==registerSignal("transmissionStarted")) {
+            if (simTime()>=SimTime(130,SIMTIME_MS)&&simTime()<SimTime(131,SIMTIME_MS)&&source!=meshInterface(0)->getSubmodule("radio")) {
+                auto packet=check_and_cast<const Ieee80211Transmission *>(object)->getPacket();
+                auto phy=Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet);
+                if(packet->peekDataAt<Ieee80211MacHeader>(phy->getChunkLength())->getType()==ST_ACK)++groupAcks;
+            }
+            return;
+        }
+        auto packet = dynamic_cast<Packet *>(object);
+        if (!packet) return;
+        if (signal == registerSignal("packetSentToUpper")) {
+            for (int station=0;station<3;++station)
+                if (source==meshInterface(station)->getSubmodule("mac"))
+                    ASSERT(std::string(packet->getName()).find("mesh-power-mode") == std::string::npos);
+            return;
+        }
+        auto header = packet->peekAtFront<Ieee80211MacHeader>();
+        if (header->getType()==ST_BEACON && simTime()>=SimTime(115,SIMTIME_MS) && simTime()<SimTime(116,SIMTIME_MS)) {
+            auto body=packet->peekDataAt<Ieee80211BeaconFrame>(header->getChunkLength());
+            ASSERT(header->getPowerMgmt() && !(body->getMeshConfiguration().capability&64));
+            allLightBeacon=true;
+        }
+        if (header->getType() != ST_QOS_NULL) return;
+        ++nullTransmissions;
+        auto null = packet->peekAtFront<Ieee80211MeshDataHeader>();
+        ASSERT(packet->getDataLength() == (null->getReceiverAddress().isMulticast() ? B(30) : B(36)));
+        ASSERT(!null->getMeshControlPresent() && !null->getAMsduPresent() && !null->getRspi() && null->getEosp());
+        ASSERT(null->getTid() == 0);
+        ASSERT(null->getSequenceNumber().get() == 0);
+        ASSERT(null->getAckPolicy() == (null->getReceiverAddress().isMulticast() ? NO_ACK : NORMAL_ACK));
+    }
+    void handleMessage(cMessage *event) override {
+        int kind = event->getKind(); delete event;
+        auto b = meshMib(1)->address, c = meshMib(2)->address;
+        if (kind == 0) {
+            ASSERT(meshMib(0)->isMeshPeerEstablished(b) && meshMib(0)->isMeshPeerEstablished(c));
+            emit(registerSignal("powerStart"),1L);
+            power(0)->requestMode(b,MeshPowerMode::LIGHT_SLEEP);
+            ASSERT(local(1) == MeshPowerMode::ACTIVE);
+            ASSERT(power(0)->getRequestedMode(b) == MeshPowerMode::LIGHT_SLEEP);
+        }
+        else if (kind == 1) {
+            ASSERT(remoteBeforeLocal && ackInventoryResolved && nullTransmissions >= 2);
+            ASSERT(local(1) == MeshPowerMode::LIGHT_SLEEP && local(2) == MeshPowerMode::ACTIVE);
+            ASSERT(meshMib(0)->getMeshNonpeerPowerMode() == MeshPowerMode::DEEP_SLEEP);
+            ASSERT(!meshMib(0)->getMeshGroupPowerSaveLevel());
+            power(0)->requestMode(c,MeshPowerMode::LIGHT_SLEEP);
+        }
+        else if (kind==10) {
+            ASSERT(local(1)==MeshPowerMode::LIGHT_SLEEP && local(2)==MeshPowerMode::LIGHT_SLEEP);
+            ASSERT(meshMib(0)->getMeshNonpeerPowerMode()==MeshPowerMode::DEEP_SLEEP && !meshMib(0)->getMeshGroupPowerSaveLevel());
+            check_and_cast<PowerManagementFixture *>(meshManagement(0))->queueBeacon();
+            power(0)->requestMode(c,MeshPowerMode::DEEP_SLEEP);
+        }
+        else if (kind == 2) {
+            ASSERT(local(2) == MeshPowerMode::DEEP_SLEEP);
+            ASSERT(meshMib(0)->getMeshGroupPowerSaveLevel());
+            ASSERT(meshMib(0)->getMeshConfiguration().capability & 64);
+            power(0)->requestMode(b,MeshPowerMode::ACTIVE);
+            ASSERT(local(1) == MeshPowerMode::ACTIVE);
+        }
+        else if (kind == 3) {
+            emit(registerSignal("groupStart"),1L);
+            power(0)->requestActiveForAllPeers();
+            ASSERT(local(1) == MeshPowerMode::ACTIVE && local(2) == MeshPowerMode::ACTIVE);
+            ASSERT(meshMib(0)->getMeshNonpeerPowerMode() == MeshPowerMode::ACTIVE);
+            ASSERT(!meshMib(0)->getMeshGroupPowerSaveLevel());
+        }
+        else if (kind == 4) {
+            ASSERT(meshMib(1)->findMeshPeerPowerState(meshMib(0)->address)->remote == MeshPowerMode::ACTIVE);
+            // Only C loses the group indication; local commitment remains
+            // ACTIVE while C retains its last individually learned DEEP mode.
+            ASSERT(meshMib(2)->findMeshPeerPowerState(meshMib(0)->address)->remote == MeshPowerMode::DEEP_SLEEP);
+            power(0)->requestMode(c,MeshPowerMode::ACTIVE);
+        }
+        else {
+            ASSERT(meshMib(2)->findMeshPeerPowerState(meshMib(0)->address)->remote == MeshPowerMode::ACTIVE);
+            ASSERT(payloadSamples == 0 && allLightBeacon && groupAcks==0);
+            ASSERT(check_and_cast<PowerForwardingFixture *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("ds"))->nextIdentity()==0);
+            ASSERT(check_and_cast<AirtimeLinkMetric *>(meshInterface(0)->getSubmodule("linkMetric"))->getErrorEstimate(b) == 0);
+            emit(registerSignal("powerComplete"),1L);
+        }
+    }
+};
+Define_Module(PowerModeDriver);
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_power_reentrant) {
+    return ProtocolTest("mesh_power_reentrant").once(on("driver").signal("powerComplete").assertValue(1).within(0.1));
+}
+Define_ProtocolTest(mesh_power_reentrant_withdraw) {
+    return ProtocolTest("mesh_power_reentrant_withdraw")
+        .once(on("driver").signal("powerStart").assertValue(1).within(0.08))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 29").nth(1).within(0.005).drop())
+        .once(on("driver").signal("powerComplete").assertValue(1).within(0.02));
+}
+Define_ProtocolTest(mesh_power_modes) {
+    return ProtocolTest("mesh_power_modes")
+        .once(on("driver").signal("powerStart").assertValue(1).within(0.11))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 29").nth(1).within(0.01).drop())
+        .once(on("driver").signal("powerComplete").assertValue(1).within(5.3));
+}
+Define_ProtocolTest(mesh_power_group_loss) {
+    return ProtocolTest("mesh_power_group_loss")
+        .once(on("driver").signal("powerStart").assertValue(1).within(0.11))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 29").nth(1).within(0.01).drop())
+        .meanwhile(tap("radioMedium").from("station[0]").to("station[1]")
+            .filterPacket("ieee80211mac.type == 44").mutate([](Packet *packet) {
+                std::vector<Ptr<Chunk>> prefix;
+                while (!dynamicPtrCast<const Ieee80211MacHeader>(packet->peekAtFront<Chunk>()))
+                    prefix.push_back(packet->removeAtFront<Chunk>(packet->peekAtFront<Chunk>()->getChunkLength()));
+                auto header = packet->peekAtFront<Ieee80211DataHeader>();
+                auto length = header->getChunkLength() + B(4);
+                auto bytes = packet->peekAtFront<BytesChunk>(length)->getBytes();
+                if (header->getReceiverAddress().isMulticast()) {
+                    // A valid-FCS received group PM=0/PSL=1 indication is
+                    // ACTIVE; group RSPI and reserved bits are ignored.
+                    bytes[25] |= 0xfe;
+                    bytes[24] &= ~0x60; // Received group Normal Ack still cannot elicit ACK.
+                    uint32_t crc=0xffffffff;
+                    for (size_t i=0;i<bytes.size()-4;++i) {
+                        crc^=bytes[i];
+                        for (int b=0;b<8;++b) crc=(crc>>1)^((crc&1)?0xedb88320:0);
+                    }
+                    crc=~crc;
+                    for (int b=0;b<4;++b) bytes[bytes.size()-4+b]=(crc>>(8*b))&255;
+                }
+                packet->popAtFront(length); packet->insertAtFront(makeShared<BytesChunk>(bytes));
+                for (auto it=prefix.rbegin();it!=prefix.rend();++it) packet->insertAtFront(*it);
+            }).within(0.05))
+        .once(on("driver").signal("groupStart").assertValue(1).within(0.04))
+        .meanwhile(tap("radioMedium").from("station[0]").to("station[2]")
+            .filterPacket("ieee80211mac.type == 44").nth(1).within(0.005).drop())
+        .once(on("driver").signal("powerComplete").assertValue(1).within(5.3));
+}
+Define_ProtocolTest(mesh_power_original_ack) {
+    return ProtocolTest("mesh_power_original_ack")
+        .once(on("driver").signal("nullStart").assertValue(1).within(0.08))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.001).drop())
+        .once(on("driver").signal("powerComplete").assertValue(1).within(0.1));
+}
+Define_ProtocolTest(mesh_power_original_bar) {
+    return ProtocolTest("mesh_power_original_bar")
+        .once(on("driver").signal("nullStart").assertValue(1).within(0.08))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.001).drop())
+        .once(on("driver").signal("powerStart").assertValue(1).within(0.01))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 25").nth(1).within(0.04).drop())
+        .once(on("driver").signal("powerComplete").assertValue(1).within(0.1));
+}
+Define_ProtocolTest(mesh_power_collision) {
+    return ProtocolTest("mesh_power_collision")
+        .once(on("driver").signal("powerStart").assertValue(1).within(0.11))
+        .meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29").within(0.006).drop())
+        .once(on("driver").signal("powerComplete").assertValue(1).within(0.05));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mesh.MeshPowerSave;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.linklayer.ieee80211.mesh.MeshForwarding;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+simple AwakePowerFixture extends MeshPowerSave { parameters: @class(::AwakePowerFixture); }
+simple PowerFactsFixture extends AwakePowerFixture { parameters: @class(::PowerFactsFixture); }
+simple PowerForwardingFixture extends MeshForwarding { parameters: @class(::PowerForwardingFixture); }
+simple PowerManagementFixture extends Ieee80211MgmtMesh { parameters: @class(::PowerManagementFixture); }
+module PowerHoldMac extends Ieee80211MeshMac { parameters: @class(::PowerHoldMac); }
+simple PowerSupersessionDriver { parameters: int scenario; @class(::PowerSupersessionDriver); @signal[powerStart](type=long); @signal[powerComplete](type=long); }
+simple PowerModeDriver { parameters: @class(::PowerModeDriver); @signal[powerStart](type=long); @signal[powerComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: PowerModeDriver; }
+network QueuedTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=0; } }
+network RetryTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=1; } }
+network OnAirTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=2; } }
+network CloseTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=3; } }
+network ExpiryTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=4; } }
+network PendingTrafficTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=5; } }
+network StopTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=6; } }
+network CrashTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=7; } }
+network DeleteTest extends MeshPairNetwork { submodules: driver: PowerSupersessionDriver { scenario=8; } }
+simple PowerFallbackDriver { parameters: @class(::PowerFallbackDriver); @signal[powerStart](type=long); @signal[powerComplete](type=long); }
+module PowerHighMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+network FallbackTest extends MeshPairNetwork { submodules: driver: PowerFallbackDriver; }
+simple PowerOriginalFactsDriver { parameters: bool lostBlockAck; @class(::PowerOriginalFactsDriver); @signal[nullStart](type=long); @signal[powerStart](type=long); @signal[powerComplete](type=long); }
+network OriginalAckTest extends MeshPairNetwork { submodules: driver: PowerOriginalFactsDriver { lostBlockAck=false; } }
+network OriginalBarTest extends MeshPairNetwork { submodules: driver: PowerOriginalFactsDriver { lostBlockAck=true; } }
+simple PowerCollisionDriver { parameters: @class(::PowerCollisionDriver); @signal[powerStart](type=long); @signal[powerComplete](type=long); }
+network CollisionTest extends MeshPairNetwork { submodules: driver: PowerCollisionDriver; }
+simple PowerReentrantDriver { parameters: int scenario; @class(::PowerReentrantDriver); @signal[powerStart](type=long); @signal[powerComplete](type=long); }
+network ReentrantTest extends MeshPairNetwork { submodules: driver: PowerReentrantDriver { scenario=0; } }
+network ReentrantGroupIndividualTest extends MeshPairNetwork { submodules: driver: PowerReentrantDriver { scenario=1; } }
+network ReentrantIndividualGroupTest extends MeshPairNetwork { submodules: driver: PowerReentrantDriver { scenario=2; } }
+network ReentrantGroupGroupTest extends MeshPairNetwork { submodules: driver: PowerReentrantDriver { scenario=3; } }
+network ReentrantWithdrawalTest extends MeshPairNetwork { submodules: driver: PowerReentrantDriver { scenario=4; } }
+
+%inifile: test.ini
+[General]
+network = ${powerNetwork=Test,QueuedTest,RetryTest,OnAirTest,CloseTest,ExpiryTest,FallbackTest,PendingTrafficTest,OriginalAckTest,OriginalBarTest,StopTest,CrashTest,DeleteTest,CollisionTest,ReentrantTest,ReentrantGroupIndividualTest,ReentrantIndividualGroupTest,ReentrantGroupGroupTest,ReentrantWithdrawalTest}
+sim-time-limit = "${powerNetwork}" == "ExpiryTest" ? 5.3s : 300ms
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+*.numStations = 3
+*.radioMedium.typename = "${powerNetwork}" == "FallbackTest" || "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? "PowerHighMedium" : "Ieee80211ScalarTapRadioMedium"
+*.station[*].wlan[0].phyProfile = "${powerNetwork}" == "FallbackTest" || "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? "ht" : "ofdm"
+*.station[*].wlan[0].radio.typename = "${powerNetwork}" == "FallbackTest" || "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? "Ieee80211DimensionalRadio" : "Ieee80211ScalarRadio"
+*.station[*].wlan[0].radio.bandName = "${powerNetwork}" == "FallbackTest" || "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? "5 GHz (mapped 20 MHz)" : "5 GHz (20 MHz)"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "${powerNetwork}" == "FallbackTest" || "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? "ht" : "auto"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs = "${powerNetwork}" == "FallbackTest" ? 0 : ("${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? 7 : -1)
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = "${powerNetwork}" == "FallbackTest" || "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? 20MHz : nan Hz
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = "${powerNetwork}" == "FallbackTest" || "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? "long" : "auto"
+*.station[*].wlan[0].mac.hcf.isBlockAckSupported = "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest"
+*.station[*].wlan[0].mac.hcf.blockAckVariant = "compressed"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? "BasicMpduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = "${powerNetwork}" == "FallbackTest" ? 1504us : 0s
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "${powerNetwork}" == "FallbackTest" ? "BasicMsduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = 2
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].powerSave = true
+*.station[*].wlan[0].powerSavePolicy.typename = "${powerNetwork}" == "OriginalAckTest" || "${powerNetwork}" == "OriginalBarTest" ? "PowerFactsFixture" : "AwakePowerFixture"
+*.station[*].wlan[0].mac.typename = "PowerHoldMac"
+*.station[*].wlan[0].mac.ds.typename = "PowerForwardingFixture"
+*.station[*].wlan[0].mgmt.typename = "PowerManagementFixture"
+*.station[*].wlan[0].mgmt.autoPeer = "${powerNetwork}" == "Test"
+*.station[1].wlan[0].mgmt.initialTsf = 25.6ms
+*.station[2].wlan[0].mgmt.initialTsf = 51.2ms
+**.fcsMode = "computed"
+*.tester.testName = "${powerNetwork}" == "Test" ? "mesh_power_group_loss" : ("${powerNetwork}" == "ReentrantWithdrawalTest" ? "mesh_power_reentrant_withdraw" : (("${powerNetwork}" == "ReentrantTest" || "${powerNetwork}" == "ReentrantGroupIndividualTest" || "${powerNetwork}" == "ReentrantIndividualGroupTest" || "${powerNetwork}" == "ReentrantGroupGroupTest") ? "mesh_power_reentrant" : ("${powerNetwork}" == "OriginalAckTest" ? "mesh_power_original_ack" : ("${powerNetwork}" == "OriginalBarTest" ? "mesh_power_original_bar" : ("${powerNetwork}" == "CollisionTest" ? "mesh_power_collision" : "mesh_power_modes")))))
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_power_modes: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_power_modes: FAIL
+%contains: stdout
+PROTOCOLTEST mesh_power_original_ack: PASS
+%contains: stdout
+PROTOCOLTEST mesh_power_original_bar: PASS
+%contains: stdout
+PROTOCOLTEST mesh_power_collision: PASS

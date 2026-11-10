@@ -110,6 +110,9 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
     virtual void prepareFrameTransmission(Packet *packet, simtime_t ifs,
             const physicallayer::IIeee80211Mode *mode);
     virtual void frameTransmissionComplete(const Packet *packet);
+    // Variable management content is finalized before mode/length admission.
+    // The late preparation hook above owns fixed-size timestamp insertion.
+    virtual void prepareFrameContent(Packet *packet, const std::set<int64_t>& deliveryUnit) {}
     // Called once when a local source forwarding unit is committed, never on preview.
     virtual void finalizeDataFrame(Packet *packet) {}
     virtual bool isFrameTransmissionEligible(const Packet *packet, simtime_t plannedStart) const;

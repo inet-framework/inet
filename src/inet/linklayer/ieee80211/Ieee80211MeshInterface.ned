@@ -4,6 +4,7 @@ package inet.linklayer.ieee80211;
 
 import inet.linklayer.ieee80211.mesh.contract.IMeshPathSelection;
 import inet.linklayer.ieee80211.mesh.AirtimeLinkMetric;
+import inet.linklayer.ieee80211.mesh.contract.IMeshPowerSave;
 
 // Open QoS mesh with native forwarding and optional contiguous5GHz HT/VHT PHY.
 // Native source A-MSDU is available through the MSDU aggregation policy.
@@ -13,6 +14,7 @@ module Ieee80211MeshInterface extends Ieee80211Interface
 {
     parameters:
         string meshId = default("inet-mesh");
+        bool powerSave = default(false); // Activation requires the complete service-period engine.
         string phyProfile @enum("ofdm","ht","vht") = default("ofdm");
         int pathSelectionMetricId = default(phyProfile == "ofdm" ? 1 : 2); // profile choice, independent of negotiated instantaneous rate
         opMode = default(phyProfile == "ofdm" ? "a" : "ac-complete");
@@ -31,11 +33,19 @@ module Ieee80211MeshInterface extends Ieee80211Interface
         mac.qosStation = true;
         mac.hcf.isBlockAckSupported = default(false);
         mac.hcf.meshLinkMetricModule = "^.^.linkMetric";
+        mac.hcf.meshPowerSaveModule = "^.^.powerSavePolicy";
+        mac.hcf.edca.edcaf[*].pendingQueue.packetCapacity = default(powerSave ? 64 : 100);
+        mac.hcf.edca.edcaf[*].pendingQueue.dataCapacity = default(powerSave ? 256KiB : -1b);
         mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = default("");
         mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = default("");
         mac.hcf.originatorMacDataService.fragmentationPolicy.typename = "";
         mac.hcf.rtsPolicy.rtsThreshold = default(65536B);
     submodules:
+        powerSavePolicy: <default("MeshPowerSave")> like IMeshPowerSave {
+            parameters:
+                enabled = parent.powerSave;
+                @display("p=100,300");
+        }
         linkMetric: AirtimeLinkMetric {
             parameters:
                 @display("p=100,100");

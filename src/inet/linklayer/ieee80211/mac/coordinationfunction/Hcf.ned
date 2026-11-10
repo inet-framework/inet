@@ -35,6 +35,7 @@ module Hcf extends Module like IHcf
         string txModule;
         string mibModule = default("^.^.mib");
         string meshLinkMetricModule = default(""); // Optional typed owner of aggregation-dependent airtime estimate.
+        string meshPowerSaveModule = default(""); // Optional power-mode policy; HCF retains originals.
 
         *.rateSelectionModule = "^.rateSelection";
         *.rxModule = "^." + this.rxModule;

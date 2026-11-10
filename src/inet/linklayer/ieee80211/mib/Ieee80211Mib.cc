@@ -21,6 +21,75 @@ Define_Module(Ieee80211Mib);
 
 simsignal_t Ieee80211Mib::rateStateChangedSignal = cComponent::registerSignal("rateStateChanged");
 simsignal_t Ieee80211Mib::meshPeerChangedSignal = cComponent::registerSignal("meshPeerChanged");
+simsignal_t Ieee80211Mib::meshPowerModeChangedSignal = cComponent::registerSignal("meshPowerModeChanged");
+
+const MeshPeerPowerState *Ieee80211Mib::findMeshPeerPowerState(MacAddress peer) const
+{
+    auto it = meshPeerPower.find(peer);
+    return it == meshPeerPower.end() ? nullptr : &it->second;
+}
+
+MeshPowerMode Ieee80211Mib::getMeshNonpeerPowerMode() const
+{
+    // IEEE Std 802.11-2024, 14.15.3.1: even local light sleep makes
+    // nonpeer operation deep sleep; the group PSL has a different predicate.
+    for (const auto& entry : meshPeerPower)
+        if (entry.second.local != MeshPowerMode::ACTIVE)
+            return MeshPowerMode::DEEP_SLEEP;
+    return MeshPowerMode::ACTIVE;
+}
+
+bool Ieee80211Mib::getMeshGroupPowerSaveLevel() const
+{
+    for (const auto& entry : meshPeerPower)
+        if (entry.second.local == MeshPowerMode::DEEP_SLEEP)
+            return true;
+    return false;
+}
+
+void Ieee80211Mib::commitMeshLocalPowerMode(MacAddress peer, MeshPowerMode mode)
+{
+    Enter_Method("commitMeshLocalPowerMode");
+    auto it = meshPeerPower.find(peer);
+    if (it == meshPeerPower.end() || it->second.local == mode)
+        return;
+    it->second.local = mode;
+    meshConfiguration.capability = (meshConfiguration.capability & ~64) | (getMeshGroupPowerSaveLevel() ? 64 : 0);
+    MeshPeerChange details(peer);
+    emit(meshPowerModeChangedSignal, long(mode), &details);
+}
+
+void Ieee80211Mib::commitMeshRemotePowerMode(MacAddress peer, MeshPowerMode mode)
+{
+    Enter_Method("commitMeshRemotePowerMode");
+    auto it = meshPeerPower.find(peer);
+    if (it == meshPeerPower.end() || it->second.remote == mode)
+        return;
+    it->second.remote = mode;
+    MeshPeerChange details(peer);
+    emit(meshPowerModeChangedSignal, long(mode), &details);
+}
+
+void Ieee80211Mib::commitMeshLocalActiveForAllPeers()
+{
+    Enter_Method("commitMeshLocalActiveForAllPeers");
+    std::vector<MacAddress> changed;
+    for (auto& entry : meshPeerPower)
+        if (entry.second.local != MeshPowerMode::ACTIVE) {
+            entry.second.local = MeshPowerMode::ACTIVE;
+            changed.push_back(entry.first);
+        }
+    meshConfiguration.capability &= ~64;
+    // Every observer sees the complete batch. Nested commands may replace
+    // individual state, so do not perform more batch writes after publication.
+    for (auto peer : changed) {
+        auto current = meshPeerPower.find(peer);
+        if (current != meshPeerPower.end() && current->second.local == MeshPowerMode::ACTIVE) {
+            MeshPeerChange details(peer);
+            emit(meshPowerModeChangedSignal, long(MeshPowerMode::ACTIVE), &details);
+        }
+    }
+}
 
 void Ieee80211Mib::configureMeshProfile(const std::string& id, const MeshConfiguration& configuration)
 {
@@ -61,6 +130,7 @@ void Ieee80211Mib::establishMeshPeer(MacAddress peer, const Ieee80211RateSetStat
             && previousPhy != meshPeerPhy.end() && previousPhy->second == phy)
         return;
     peerRateSets[peer] = rates;
+    meshPeerPower.try_emplace(peer);
     meshPeerPhy[peer] = phy;
     if (phy.htPresent)
         updatePeerHtCapabilities(peer, phy.ht, phy.htOperation);
@@ -75,6 +145,8 @@ bool Ieee80211Mib::withdrawMeshPeer(MacAddress peer)
 {
     Enter_Method("withdrawMeshPeer");
     meshPeerPhy.erase(peer);
+    meshPeerPower.erase(peer);
+    meshConfiguration.capability = (meshConfiguration.capability & ~64) | (getMeshGroupPowerSaveLevel() ? 64 : 0);
     peerHtStates.erase(peer);
     return peerRateSets.erase(peer) != 0;
 }
@@ -236,6 +308,7 @@ void Ieee80211Mib::initialize(int stage)
         WATCH(bssAccessPointData.associationIds);
         WATCH(associationIdReservations);
         WATCH(meshId);
+        WATCH_MAP(meshPeerPower);
         WATCH(meshPhyProfile);
         WATCH(meshShortGuardIntervalTransmissionEnabled);
         WATCH_EXPR("meshPhyCapabilities", describeMeshPhy());
