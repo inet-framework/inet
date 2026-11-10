@@ -22,6 +22,14 @@ class INET_API SnirBase : public virtual ISnir
     const IReception *reception;
     const INoise *noise;
 
+  protected:
+    /**
+     * Returns true if the interval is the whole reception. The subclasses
+     * keep the values of the whole reception, so an interval getter can
+     * return them.
+     */
+    bool isWholeReception(simtime_t startTime, simtime_t endTime) const { return startTime == reception->getStartTime() && endTime == reception->getEndTime(); }
+
   public:
     SnirBase(const IReception *reception, const INoise *noise);
 

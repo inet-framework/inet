@@ -1,0 +1,220 @@
+%description:
+The SNIR and the threshold check of a time interval of a reception. Sender 1
+sends one UDP packet to the receiver at a high SNIR. Sender 2 starts to transmit
+close to the receiver about 3500 us after the start of the reception, so the
+SNIR of the end of the frame is below the threshold of the receiver. At the end
+of the reception, a listener prints the minimum, the maximum, and the mean SNIR
+of some intervals, and the threshold check of the receiver for each of them:
+
+- "before": an interval that ends before the interferer starts.
+- "across": an interval that contains the start of the interferer.
+- "inside": an interval after the start of the interferer.
+- two intervals of one point of time, before and after that start.
+- "whole": the limits of the reception; the values must be equal to the values
+  of the functions without an interval.
+
+Run 0 uses the scalar analog model, and run 1 the dimensional analog model.
+Run 2 uses the scalar analog model and the mean SNIR for the threshold check,
+so the interval across the start of the interferer passes the check.
+
+%file: test.cc
+#include <iomanip>
+#include <sstream>
+
+#include "inet/common/INETMath.h"
+#include "inet/common/Simsignals.h"
+#include "inet/physicallayer/wireless/common/base/packetlevel/SnirReceiverBase.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
+
+namespace SnirInterval_1 {
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+// Prints the SNIR and the threshold check of some intervals of each reception of the radio.
+class SnirIntervalPrinter : public cSimpleModule, public cListener
+{
+  protected:
+    // the lines of one reception, which the listener prints together
+    std::stringstream stream;
+
+  protected:
+    virtual void initialize() override
+    {
+        getModuleByPath(par("radioModule"))->subscribe(receptionEndedSignal, this);
+    }
+
+    void print(const char *name, const IReception *reception, simtime_t startTime, simtime_t endTime)
+    {
+        auto radio = reception->getReceiverRadio();
+        auto medium = radio->getMedium();
+        auto transmission = reception->getTransmission();
+        auto snir = medium->getSNIR(radio, transmission);
+        auto receiver = check_and_cast<const SnirReceiverBase *>(radio->getReceiver());
+        bool isSuccessful = receiver->computeIsReceptionSuccessful(medium->getListening(radio, transmission), reception, IRadioSignal::SIGNAL_PART_WHOLE, medium->getInterference(radio, transmission), snir, startTime, endTime);
+        stream << par("label").stdstringValue() << ": " << name << std::fixed << std::setprecision(2)
+               << ": min = " << math::fraction2dB(snir->getMin(startTime, endTime)) << " dB"
+               << ", max = " << math::fraction2dB(snir->getMax(startTime, endTime)) << " dB"
+               << ", mean = " << math::fraction2dB(snir->getMean(startTime, endTime)) << " dB"
+               << ", the check " << (isSuccessful ? "passes" : "fails") << std::endl;
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        auto reception = check_and_cast<const IReception *>(object);
+        simtime_t startTime = reception->getStartTime();
+        simtime_t endTime = reception->getEndTime();
+        print("before", reception, startTime, startTime + SimTime(1000, SIMTIME_US));
+        print("across", reception, startTime + SimTime(3000, SIMTIME_US), startTime + SimTime(4000, SIMTIME_US));
+        print("inside", reception, startTime + SimTime(3800, SIMTIME_US), startTime + SimTime(4000, SIMTIME_US));
+        print("point before", reception, startTime + SimTime(1000, SIMTIME_US), startTime + SimTime(1000, SIMTIME_US));
+        print("point inside", reception, startTime + SimTime(3900, SIMTIME_US), startTime + SimTime(3900, SIMTIME_US));
+        print("whole", reception, startTime, endTime);
+        auto radio = reception->getReceiverRadio();
+        auto snir = radio->getMedium()->getSNIR(radio, reception->getTransmission());
+        bool isEqual = snir->getMin(startTime, endTime) == snir->getMin() && snir->getMax(startTime, endTime) == snir->getMax() && snir->getMean(startTime, endTime) == snir->getMean();
+        stream << par("label").stdstringValue() << ": whole is " << (isEqual ? "equal" : "not equal") << " to the values without an interval" << std::endl;
+        std::cout << stream.str();
+        stream.str("");
+    }
+};
+
+Define_Module(SnirIntervalPrinter);
+
+} // namespace SnirInterval_1
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.common.contract.packetlevel.IRadioMedium;
+
+simple SnirIntervalPrinter
+{
+    parameters:
+        string radioModule;
+        string label;
+        @class(SnirIntervalPrinter);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: <> like IRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        hostSender1: WirelessHost;
+        hostSender2: WirelessHost;
+        hostReceiver: WirelessHost;
+        printer: SnirIntervalPrinter;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 4300us
+ned-path = .;../../../../src
+
+*.printer.radioModule = "hostReceiver.wlan[0].radio"
+*.printer.label = "run ${run=0..2}"
+
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobility.typename = "StationaryMobility"
+*.hostSender1.mobility.initialX = 200m
+*.hostReceiver.mobility.initialX = 400m
+*.hostSender2.mobility.initialX = 450m
+
+# the variants of the runs
+*.radioMedium.typename = ${medium="ScalarRadioMedium", "DimensionalRadioMedium", "ScalarRadioMedium" ! run}
+*.host*.wlan[*].radio.typename = ${radio="ApskScalarRadio", "ApskDimensionalRadio", "ApskScalarRadio" ! run}
+*.host*.wlan[*].radio.receiver.snirThresholdMode = ${mode="min", "min", "mean" ! run}
+
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
+
+# nic
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.modulation = "BPSK"
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 96b
+*.host*.wlan[*].radio.centerFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -85dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+*.host*.wlan[*].radio.transmitter.power = 10mW
+
+# sender 1 sends one packet to the receiver
+*.hostSender1.numApps = 1
+*.hostSender1.app[0].typename = "UdpBasicApp"
+*.hostSender1.app[0].destAddresses = "hostReceiver"
+*.hostSender1.app[0].destPort = 1000
+*.hostSender1.app[0].messageLength = 1000B
+*.hostSender1.app[0].startTime = 0s
+*.hostSender1.app[0].stopTime = 1us
+*.hostSender1.app[0].sendInterval = 1s
+
+# sender 2 interferes late in the data
+*.hostSender2.numApps = 1
+*.hostSender2.app[0].typename = "UdpBasicApp"
+*.hostSender2.app[0].destAddresses = "hostSender1"
+*.hostSender2.app[0].destPort = 1000
+*.hostSender2.app[0].messageLength = 1000B
+*.hostSender2.app[0].startTime = 3500us
+*.hostSender2.app[0].stopTime = 3501us
+*.hostSender2.app[0].sendInterval = 1s
+
+*.hostReceiver.numApps = 1
+*.hostReceiver.app[0].typename = "UdpSink"
+*.hostReceiver.app[0].localPort = 1000
+
+%extraargs: -r 0..2
+
+%contains: stdout
+run 0: before: min = 33.93 dB, max = 33.93 dB, mean = 33.93 dB, the check passes
+run 0: across: min = -12.04 dB, max = 33.93 dB, mean = 30.91 dB, the check fails
+run 0: inside: min = -12.04 dB, max = -12.04 dB, mean = -12.04 dB, the check fails
+run 0: point before: min = 33.93 dB, max = 33.93 dB, mean = 33.93 dB, the check passes
+run 0: point inside: min = -12.04 dB, max = -12.04 dB, mean = -12.04 dB, the check fails
+run 0: whole: min = -12.04 dB, max = 33.93 dB, mean = 33.13 dB, the check fails
+run 0: whole is equal to the values without an interval
+
+%contains: stdout
+run 1: before: min = 33.93 dB, max = 33.93 dB, mean = 33.93 dB, the check passes
+run 1: across: min = -12.04 dB, max = 33.93 dB, mean = 30.91 dB, the check fails
+run 1: inside: min = -12.04 dB, max = -12.04 dB, mean = -12.04 dB, the check fails
+run 1: point before: min = 33.93 dB, max = 33.93 dB, mean = 33.93 dB, the check passes
+run 1: point inside: min = -12.04 dB, max = -12.04 dB, mean = -12.04 dB, the check fails
+run 1: whole: min = -12.04 dB, max = 33.93 dB, mean = 33.13 dB, the check fails
+run 1: whole is equal to the values without an interval
+
+%contains: stdout
+run 2: before: min = 33.93 dB, max = 33.93 dB, mean = 33.93 dB, the check passes
+run 2: across: min = -12.04 dB, max = 33.93 dB, mean = 30.91 dB, the check passes
+run 2: inside: min = -12.04 dB, max = -12.04 dB, mean = -12.04 dB, the check fails
+run 2: point before: min = 33.93 dB, max = 33.93 dB, mean = 33.93 dB, the check passes
+run 2: point inside: min = -12.04 dB, max = -12.04 dB, mean = -12.04 dB, the check fails
+run 2: whole: min = -12.04 dB, max = 33.93 dB, mean = 33.13 dB, the check passes
+run 2: whole is equal to the values without an interval
+
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------

@@ -37,6 +37,15 @@ class INET_API SnirReceiverBase : public ReceiverBase
     virtual double getSnirThreshold() const { return snirThreshold; }
 
     virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const override;
+
+    /**
+     * Returns true if the reception of the provided time interval of the signal
+     * part is successful: the SNIR of the interval is above the threshold,
+     * according to the threshold mode. The function without the interval asks
+     * for the whole reception. A model of a part of the signal, for example of a
+     * chunk of the data, asks for the time of that part.
+     */
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir, simtime_t startTime, simtime_t endTime) const;
 };
 
 } // namespace physicallayer

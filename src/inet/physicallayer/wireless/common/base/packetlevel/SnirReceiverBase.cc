@@ -38,13 +38,18 @@ std::ostream& SnirReceiverBase::printToStream(std::ostream& stream, int level, i
 
 bool SnirReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
 {
+    return computeIsReceptionSuccessful(listening, reception, part, interference, snir, reception->getStartTime(), reception->getEndTime());
+}
+
+bool SnirReceiverBase::computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir, simtime_t startTime, simtime_t endTime) const
+{
     if (snirThresholdMode == SnirThresholdMode::STM_MIN) {
-        double minSnir = snir->getMin();
+        double minSnir = snir->getMin(startTime, endTime);
         ASSERT(0.0 <= minSnir);
         return minSnir > snirThreshold;
     }
     else if (snirThresholdMode == SnirThresholdMode::STM_MEAN) {
-        double meanSnir = snir->getMean();
+        double meanSnir = snir->getMean(startTime, endTime);
         ASSERT(0.0 <= meanSnir);
         return meanSnir > snirThreshold;
     }

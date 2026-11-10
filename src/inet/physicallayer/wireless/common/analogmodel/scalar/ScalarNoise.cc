@@ -29,7 +29,8 @@ W ScalarNoise::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
     math::Point<simtime_t> startPoint(startTime);
     math::Point<simtime_t> endPoint(endTime);
-    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b1, 0b0);
+    // an interval of one point gives the power at that time
+    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b1, startTime == endTime ? 0b1 : 0b0);
     return powerFunction->getMin(interval);
 }
 
@@ -37,7 +38,8 @@ W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
     math::Point<simtime_t> startPoint(startTime);
     math::Point<simtime_t> endPoint(endTime);
-    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b1, 0b0);
+    // an interval of one point gives the power at that time
+    math::Interval<simtime_t> interval(startPoint, endPoint, 0b1, 0b1, startTime == endTime ? 0b1 : 0b0);
     return powerFunction->getMax(interval);
 }
 
