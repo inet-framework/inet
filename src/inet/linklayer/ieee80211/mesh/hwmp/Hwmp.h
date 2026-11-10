@@ -16,7 +16,9 @@
 namespace inet {
 namespace ieee80211 {
 
-class INET_API Hwmp : public OperationalBase, public IMeshPathSelection
+class Hcf;
+
+class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPathSelection
 {
   public:
     struct PathInfo {
@@ -65,6 +67,7 @@ class INET_API Hwmp : public OperationalBase, public IMeshPathSelection
     ModuleRefByPar<IMeshManagement> management;
     ModuleRefByPar<IMeshLinkMetric> linkMetric;
     ModuleRefByPar<IMeshForwarding> forwarding;
+    ModuleRefByPar<Hcf> hcf;
     std::map<MacAddress,PathInfo> paths;
     std::map<MacAddress,simtime_t> selfPrecursors;
     std::map<std::pair<MacAddress,uint32_t>,simtime_t> seen;
@@ -83,9 +86,26 @@ class INET_API Hwmp : public OperationalBase, public IMeshPathSelection
     int initialTtl = 0;
     int seenCapacity = 0;
     cMessage *pathExpiryTimer = nullptr;
+    cMessage *perrTimer = nullptr;
+    simtime_t perrMinInterval;
+    std::optional<simtime_t> lastPerrHandoff;
+    struct PendingError {
+        MacAddress recipient;
+        uint8_t ttl = 0;
+        HwmpPerrDestination destination;
+        simtime_t expiry;
+    };
+    std::vector<PendingError> pendingErrors;
 
     virtual void initialize(int stage) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
+    void receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *details) override;
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    void unsubscribeFailureNotifications();
+    void invalidatePeer(MacAddress peer, bool closed);
+    void receivePerr(const HwmpPerr& perr, MacAddress transmitter);
+    void queueErrors(const std::vector<PendingError>& errors);
+    void sendPendingErrors();
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
     virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
@@ -121,6 +141,7 @@ class INET_API Hwmp : public OperationalBase, public IMeshPathSelection
     virtual void startDiscovery(MacAddress destination) override;
     virtual void cancelDiscovery(MacAddress destination) override;
     virtual void processHwmp(const Ptr<const Ieee80211HwmpFrame>& body, MacAddress transmitter, MacAddress receiver) override;
+    void reportUnknownTransit(MacAddress transmitter, MacAddress destination) override;
     // Read-only stored-state snapshots for model inspection and diagnostic tools.
     // Route usability still belongs to findPath(), including exclusive expiry.
     std::optional<PathInfo> getPathInfo(MacAddress destination) const;

@@ -1,0 +1,3 @@
+Path-selection providers receive an unknown-transit notification
+
+External IMeshPathSelection implementations must implement reportUnknownTransit(transmitter, destination). Forwarding invokes this typed method only for an otherwise admissible native transit unicast that has no usable path; it transfers no packet ownership. The development migration guide describes the distinction from source discovery and invalid precursor admission.

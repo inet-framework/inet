@@ -5,6 +5,7 @@
 #include "inet/linklayer/ieee80211/mesh/hwmp/Hwmp.h"
 #include "inet/linklayer/ieee80211/mesh/MeshForwarding.h"
 #include "inet/linklayer/ieee80211/mesh/AirtimeLinkMetric.h"
+#include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 
 class HwmpTestManagement : public Ieee80211MgmtMesh
 {
@@ -63,5 +64,19 @@ inline void sendHwmpTest(int station, const Ptr<Ieee80211HwmpFrame>& body, MacAd
 inline HwmpPrep testPrep(MacAddress target, MacAddress originator, uint32_t sequence, uint32_t metric = 0, int lifetime = 100) {
     HwmpPrep prep; prep.target = target; prep.originator = originator; prep.targetSequenceNumber = sequence;
     prep.metric = metric; prep.ttl = 8; prep.lifetime = lifetime; return prep;
+}
+inline Ptr<Ieee80211HwmpFrame> testBody(const std::vector<HwmpPerrDestination>& destinations, uint8_t ttl = 8) {
+    auto body = makeShared<Ieee80211HwmpFrame>();
+    for (size_t offset = 0; offset < destinations.size(); offset += 19) {
+        HwmpPerr perr; perr.setTtl(ttl); auto count = std::min(size_t(19),destinations.size()-offset); perr.setDestinationsArraySize(count);
+        for (size_t i = 0; i < count; i++) perr.setDestinations(i,destinations[offset+i]);
+        auto index = body->getPerrsArraySize(); body->setPerrsArraySize(index+1); body->setPerrs(index,perr);
+    }
+    size_t bytes = 4*body->getPerrsArraySize()+13*destinations.size();
+    for (const auto& entry : destinations) if (entry.flags&64) bytes += 6;
+    body->setChunkLength(B(bytes)); return body;
+}
+inline HwmpPerrDestination testError(MacAddress destination, uint32_t sn, uint16_t reason = RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION) {
+    HwmpPerrDestination entry; entry.address = destination; entry.sequenceNumber = sn; entry.reasonCode = reason; return entry;
 }
 #endif

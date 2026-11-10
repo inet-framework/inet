@@ -1,0 +1,178 @@
+%description:
+Production HWMP A-B-C plus A-D-C and unrelated A-E. Actual terminal DATA ACK
+failure invalidates B-selected routes once and sends a PERR to A. Later traffic
+discovers D; stale PREP cannot revive the broken path. Peer Close while DATA is
+on air retires queued data without a second terminal/error outcome. Internal
+collision-only exhaustion and source queue drops preserve the unrelated route.
+
+%file: HwmpRediscovery.cc
+#include "mesh/HwmpErrorSupport.h"
+#include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
+class RediscoveryDriver : public cSimpleModule, public cListener
+{
+    int delivered[5] = {};
+    int perrs[5] = {};
+    int preqs = 0, terminal = 0, retiredTerminal = 0, collisions = 0, queueDrops = 0;
+    int collisionDrops = 0, collisionAttemptFacts = 0, collisionTerminalFacts = 0;
+    int rejected = 0, rejectedSuccess = 0, rejectedTerminal = 0;
+    const FrameSequenceContext *active = nullptr;
+    bool closeScheduled = false;
+    uint32_t brokenSequence = 0, closedSequence = 0;
+    std::optional<Hwmp::PathInfo> unrelated;
+    void source(int station, int destination, const char *name, int tid = 0) { sourceHwmp(this,station,meshMib(destination)->address,name,tid); }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        for (auto signal : {"packetSentToUpper","packetSentToLower","hwmpTestHandoff","meshDataAttemptCompleted","packetDropped","edcaCollisionDetected","frameSequenceStarted","frameSequenceFinished","contentionWindowChanged"}) network->subscribe(registerSignal(signal),this);
+        const int times[] = {5,10,15,20,25,50,60,75,80,95,120,130,140,170,175,185,200,215,220,240,250,270};
+        for (int i = 0; i < 22; i++) scheduleAt(SimTime(times[i],SIMTIME_MS),new cMessage("rediscovery-case",i));
+        scheduleAt(SimTime(76,SIMTIME_MS),new cMessage("arm-rejection",101));
+        scheduleAt(SimTime(77,SIMTIME_MS),new cMessage("rejected-data",102));
+        scheduleAt(SimTime(90,SIMTIME_MS),new cMessage("check-rejection",103));
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, long, cObject *) override {
+        if (signal == registerSignal("edcaCollisionDetected") && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) collisions++;
+        if (signal == registerSignal("contentionWindowChanged") && active && active->getNumSteps() >= 2) {
+            auto receive = dynamic_cast<IReceiveStep *>(active->getLastStep()); auto transmit = dynamic_cast<TransmitStep *>(active->getStepBeforeLast());
+            if (receive && transmit && std::string(transmit->getFrameToTransmit()->getName()) == "rejected-response"
+                    && receive->getCompletion() == IFrameSequenceStep::Completion::REJECTED && !receive->getReceivedFrame()) rejected++;
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, uintval_t, cObject *) override {
+        if (signal == registerSignal("edcaCollisionDetected") && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) collisions++;
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        Enter_Method_Silent();
+        if (source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) {
+            if (signal == registerSignal("frameSequenceStarted")) active = check_and_cast<FrameSequenceContext *>(object);
+            if (signal == registerSignal("frameSequenceFinished")) active = nullptr;
+        }
+        auto packet = dynamic_cast<Packet *>(object); if (!packet) return;
+        if (signal == Hcf::meshDataAttemptCompletedSignal) {
+            auto attempt = check_and_cast<MeshDataAttempt *>(details);
+            if (std::string(packet->getName()) == "collision") { collisionAttemptFacts++; collisionTerminalFacts += attempt->terminalTimeout; }
+            if (std::string(packet->getName()) == "rejected-response") { rejectedSuccess += attempt->acknowledged; rejectedTerminal += attempt->terminalTimeout; }
+            if (!attempt->acknowledged && attempt->terminalTimeout) {
+                if (source == meshInterface(1)->getSubmodule("mac")->getSubmodule("hcf")) terminal++;
+                if (std::string(packet->getName()).find("retired") != std::string::npos || std::string(packet->getName()) == "close-pending") retiredTerminal++;
+            }
+        }
+        if (signal == registerSignal("packetDropped") && std::string(packet->getName()) == "queue-overflow") queueDrops++;
+        if (signal == registerSignal("packetDropped") && std::string(packet->getName()) == "collision"
+                && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) {
+            ASSERT(check_and_cast<PacketDropDetails *>(details)->getReason() == RETRY_LIMIT_REACHED); collisionDrops++;
+        }
+        for (int i = 0; i < 5; i++) {
+            if (signal == registerSignal("packetSentToUpper") && source == meshInterface(i)->getSubmodule("mac")) delivered[i]++;
+            if (signal == registerSignal("hwmpTestHandoff") && source == meshManagement(i)) {
+                auto body = packet->peekAtFront<Ieee80211HwmpFrame>();
+                if (i == 0 && body->getPreqsArraySize() && body->getPreqs(0).getTargets(0).address == meshMib(2)->address) preqs++;
+                for (size_t j = 0; j < body->getPerrsArraySize(); j++) {
+                    auto perr = body->getPerrs(j); perrs[i]++;
+                    ASSERT(perr.getDestinationsArraySize() == 1 && perr.getDestinations(0).address == meshMib(2)->address);
+                    ASSERT(perr.getDestinations(0).reasonCode == RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE);
+                    if (i == 1) ASSERT(perr.getDestinations(0).sequenceNumber == brokenSequence+1);
+                    if (i == 3) ASSERT(perr.getDestinations(0).sequenceNumber == closedSequence+1);
+                }
+            }
+        }
+        if (source == meshInterface(3)->getSubmodule("mac") && signal == registerSignal("packetSentToLower") && std::string(packet->getName()) == "close-pending" && !closeScheduled) {
+            closeScheduled = true; closedSequence = *hwmp(3)->getPathInfo(meshMib(2)->address)->sequence;
+            sourceHwmp(this,3,meshMib(2)->address,"retired-be",0); sourceHwmp(this,3,meshMib(2)->address,"retired-vo",7);
+            scheduleAt(simTime()+SimTime(1,SIMTIME_US),new cMessage("close-onair",100));
+        }
+    }
+    void handleMessage(cMessage *message) override {
+        if (message->getKind() == 100) { meshManagement(3)->closePeer(meshMib(2)->address); delete message; return; }
+        if (message->getKind() == 101) { emit(registerSignal("rejectResponse"),1L); delete message; return; }
+        if (message->getKind() == 102) { source(0,4,"rejected-response"); delete message; return; }
+        if (message->getKind() == 103) { ASSERT(rejected > 0 && rejectedSuccess == 1 && rejectedTerminal == 0 && hwmp(0)->findPath(meshMib(4)->address)); delete message; return; }
+        switch (message->getKind()) {
+            case 0: meshManagement(0)->openPeer(meshMib(1)->address); break;
+            case 1: meshManagement(1)->openPeer(meshMib(2)->address); break;
+            case 2: meshManagement(0)->openPeer(meshMib(3)->address); break;
+            case 3: meshManagement(3)->openPeer(meshMib(2)->address); break;
+            case 4: meshManagement(0)->openPeer(meshMib(4)->address); break;
+            case 5:
+                ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(3)->address) && meshMib(3)->isMeshPeerEstablished(meshMib(2)->address));
+                check_and_cast<HwmpTestManagement *>(meshManagement(3))->suppressHwmp(true); source(0,4,"unrelated"); break;
+            case 6: source(0,2,"initial"); break;
+            case 7:
+                ASSERT(delivered[2] == 1 && delivered[4] == 1 && hwmp(0)->getPathInfo(meshMib(2)->address)->nextHop == meshMib(1)->address);
+                unrelated = hwmp(0)->getPathInfo(meshMib(4)->address); brokenSequence = *hwmp(1)->getPathInfo(meshMib(2)->address)->sequence; break;
+            case 8: emit(registerSignal("breakMeshLink"),1L); break;
+            case 9: source(0,2,"broken-data"); break;
+            case 10: {
+                ASSERT(terminal == 1 && perrs[1] == 1 && !hwmp(0)->findPath(meshMib(2)->address) && !hwmp(1)->findPath(meshMib(2)->address));
+                auto prep = testPrep(meshMib(2)->address,meshMib(0)->address,brokenSequence,0,1000); sendHwmpTest(1,testBody(prep),meshMib(0)->address); break;
+            }
+            case 11:
+                ASSERT(!hwmp(0)->findPath(meshMib(2)->address) && *hwmp(0)->getPathInfo(meshMib(2)->address)->sequence == brokenSequence+1);
+                check_and_cast<HwmpTestManagement *>(meshManagement(3))->suppressHwmp(false); break;
+            case 12: source(0,2,"repaired"); break;
+            case 13:
+                ASSERT(delivered[2] == 2 && preqs == 2 && hwmp(0)->getPathInfo(meshMib(2)->address)->nextHop == meshMib(3)->address);
+                ASSERT(hwmp(0)->findPath(meshMib(4)->address) && hwmp(0)->getPathInfo(meshMib(4)->address)->sequence == unrelated->sequence);
+                source(0,4,"collision",7); source(0,4,"collision",5); break;
+            case 14: sourceHwmp(this,0,MacAddress("02:00:00:00:40:01"),"pending-only"); sourceHwmp(this,0,MacAddress("02:00:00:00:40:02"),"queue-overflow"); break;
+            case 15: ASSERT(collisions >= 1 && collisionDrops == 1 && collisionAttemptFacts == 1 && collisionTerminalFacts == 0 && queueDrops == 1 && hwmp(0)->findPath(meshMib(4)->address)); break;
+            case 16: source(0,2,"close-pending"); break;
+            case 17:
+                ASSERT(closeScheduled && perrs[3] == 1 && retiredTerminal == 0 && !hwmp(0)->findPath(meshMib(2)->address));
+                ASSERT(*hwmp(3)->getPathInfo(meshMib(2)->address)->sequence == closedSequence+1); break;
+            case 18: meshManagement(1)->closePeer(meshMib(2)->address); break;
+            case 19: ASSERT(perrs[1] == 1 && *hwmp(1)->getPathInfo(meshMib(2)->address)->sequence == brokenSequence+1); break;
+            case 20: source(0,4,"unrelated-after"); break;
+            case 21: ASSERT(delivered[4] >= 3 && retiredTerminal == 0 && hwmp(0)->findPath(meshMib(4)->address)); emit(registerSignal("rediscoveryComplete"),1L); break;
+        }
+        delete message;
+    }
+};
+Define_Module(RediscoveryDriver);
+namespace inet::protocoltest {
+Define_ProtocolTest(hwmp_rediscovery) {
+    auto test = ProtocolTest("hwmp_rediscovery");
+    for (auto pair : {std::pair<int,int>{0,2},{1,3},{1,4},{2,4},{3,4}}) {
+        test.intercept(tap("radioMedium").from(("station["+std::to_string(pair.first)+"]").c_str()).to(("station["+std::to_string(pair.second)+"]").c_str()).drop());
+        test.intercept(tap("radioMedium").from(("station["+std::to_string(pair.second)+"]").c_str()).to(("station["+std::to_string(pair.first)+"]").c_str()).drop());
+    }
+    test.once(on("driver").signal("rejectResponse").assertValue(1).within(0.077));
+    test.meanwhile(tap("radioMedium").from("station[4]").to("station[0]").filterPacket("ieee80211mac.type == 29").nth(1).within(0.01).corrupt());
+    test.once(on("driver").signal("breakMeshLink").assertValue(1).within(0.01));
+    test.meanwhile(tap("radioMedium").from("station[1]").to("station[2]").within(0.2).drop());
+    test.meanwhile(tap("radioMedium").from("station[2]").to("station[1]").within(0.2).drop());
+    test.once(on("driver").signal("rediscoveryComplete").assertValue(1).within(0.2)); return test;
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+simple RediscoveryDriver { parameters: @class(::RediscoveryDriver); @signal[rejectResponse](type=long); @signal[breakMeshLink](type=long); @signal[rediscoveryComplete](type=long); }
+network Test extends MeshPairNetwork { submodules: driver: RediscoveryDriver; }
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+*.numStations = 5
+*.station[*].mobility.initialX = 20m
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.typename = "HwmpTestManagement"
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[0].wlan[0].mac.ds.maxPendingPackets = 1
+*.station[0].wlan[0].mac.ds.maxPendingWait = 50ms
+*.station[1].wlan[0].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit = 2
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].recoveryProcedure.shortRetryLimit = 1
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].cwMin = 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].cwMax = 0
+*.station[0].wlan[0].mac.hcf.edca.edcaf[2..3].aifsn = 2
+*.radioMedium.typename = "Ieee80211ScalarTapRadioMedium"
+*.tester.testName = "hwmp_rediscovery"
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST hwmp_rediscovery: PASS
+%not-contains: stdout
+PROTOCOLTEST hwmp_rediscovery: FAIL

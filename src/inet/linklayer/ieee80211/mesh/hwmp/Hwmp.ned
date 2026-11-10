@@ -3,7 +3,7 @@ package inet.linklayer.ieee80211.mesh.hwmp;
 import inet.common.SimpleModule;
 import inet.linklayer.ieee80211.mesh.contract.IMeshPathSelection;
 
-// Native on-demand HWMP. Root procedures and path-error signaling are separate.
+// Native on-demand HWMP with path-error maintenance. Root procedures are separate.
 simple Hwmp extends SimpleModule like IMeshPathSelection
 {
     parameters:
@@ -13,7 +13,9 @@ simple Hwmp extends SimpleModule like IMeshPathSelection
         string managementModule = default("^.mgmt");
         string metricModule = default("^.linkMetric");
         string forwardingModule = default("^.mac.ds");
+        string hcfModule = default("^.mac.hcf");
         double preqMinInterval @unit(s) = default(102.4ms); // dot11MeshHWMPpreqMinInterval,100TU
+        double perrMinInterval @unit(s) = default(102.4ms); // dot11MeshHWMPperrMinInterval,100TU
         double netDiameterTraversalTime @unit(s) = default(512ms); //500TU
         double activePathTimeout @unit(s) = default(5.12s); //5000TU
         int maxPreqRetries = default(3); // dot11MeshHWMPmaxPREQretries

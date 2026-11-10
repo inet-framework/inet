@@ -272,8 +272,13 @@ void MeshForwarding::processDataFrame(Packet *packet, const Ptr<const Ieee80211D
     auto destination = group ? header->getReceiverAddress() : header->getAddress3();
     if (source.isUnspecified() || source.isMulticast() || destination.isUnspecified() || (!group && destination.isMulticast())) { discard(packet); return; }
     auto path = group || destination == mib->address ? std::nullopt : findPath(destination);
+    if (!group && destination != mib->address && !path) {
+        if (pathSelection)
+            pathSelection->reportUnknownTransit(header->getTransmitterAddress(),destination);
+        discard(packet); return;
+    }
     // IEEE Std 802.11-2024, 10.37.3.2: even a final destination requires a live precursor.
-    if (!group && (!pathSelection || (destination != mib->address && !path)
+    if (!group && (!pathSelection
             || simTime() >= pathSelection->getPrecursorExpiry(destination, header->getTransmitterAddress()))) {
         discard(packet); return;
     }

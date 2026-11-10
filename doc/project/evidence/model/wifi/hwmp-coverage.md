@@ -20,8 +20,8 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | DISCOVERY | HwmpDiscovery.test | C6 | hwmp-c6-discovery.md | PASS with production HWMP and both metric IDs |
 | PATH-SELECTION | HwmpPathSelection.test | C6 | hwmp-c6-discovery.md | PASS, separate ID-1/ID-2 runs |
 | DISCOVERY-LIMITS | HwmpDiscoveryLimits.test | C6 | hwmp-c6-discovery.md | PASS |
-| PATH-ERROR | HwmpPathError.test | C7 | hwmp-c7-errors.md | NOT_RUN |
-| REDISCOVERY | HwmpRediscovery.test | C7 | hwmp-c7-errors.md | NOT_RUN |
+| PATH-ERROR | HwmpPathError.test | C7 | hwmp-c7-errors.md | PASS |
+| REDISCOVERY | HwmpRediscovery.test | C7 | hwmp-c7-errors.md | PASS with actual terminal DATA failure and alternate relay |
 | ROOT-PREQ | HwmpProactivePreq.test | C8 | hwmp-c8-roots.md | NOT_RUN |
 | RANN | HwmpRann.test | C8 | hwmp-c8-roots.md | NOT_RUN |
 | ROOT-COEXISTENCE | HwmpRootCoexistence.test | C8 | hwmp-c8-roots.md | NOT_RUN |
@@ -60,6 +60,9 @@ These are selected modeling policies, not requirements attributed to IEEE. The [
 | HWMP pacing anchor | Successful ownership handoff to management | Type-3 service request has no confirmation; this does not guarantee actual PPDU spacing after contention or sleep buffering |
 | Self-destination admission | Admit reverse next hop on target PREP generation and actual transmitter on accepted local-originator PREP reception | Derived integration bookkeeping for required final-destination admission, including validation-only replies; no learned route to self |
 | Reflected control | Reject received PREQ.originator=self and PREP.target=self before learning | Explicit no-self-learning policy, preserving node-owned sequence authority; normal target/reply cases remain supported |
+| PERR reason interpretation | Nonzero NO-FORWARDING accepts equal/newer after stale rejection; DESTINATION-UNREACHABLE requires newer | Explicit reading of the source's conjunction structure; zero is special only for NO-FORWARDING |
+| Deferred PERRs | One node-global handoff interval; exact semantic-key deduplication and recipient/TTL grouping, at most 19 distinct destinations/action | Immediate invalidation is separate; no deferred re-increment or per-recipient rate-limit bypass |
+| Deferred PERR retention | Snapshot precursor expiry for path errors; established transmitter dependency for unknown transit; prune unsent obsolete errors on repair | Values retain no packet ownership; management inactivity/owner cleanup clears volatile notifications while pacing history survives |
 | Encoded cost | Ceiling conversion; finite clamp to [1, UINT32_MAX]; wide saturating path addition | Prevents cost wraparound from favoring a prohibitively expensive path |
 | Error samples | Per-direction `ef = 7/8 * ef + 1/8 * sample`, initially zero | Actual unicast payload ACK success=0 or on-air ACK timeout=1, each attempt separately; excludes holds/internal collision/group/management/QoS Null |
 | Error approximation | Use traffic samples to estimate nominal-frame corruption | Assumes size-independent frame-error probability; not a claim of measurement for every size |
@@ -93,7 +96,8 @@ The source PDF was used for mathematical grouping in the airtime formula, mesh A
 | C4 native forwarding and peer retirement | PASS, 2/2 | Fixture path provider, actual radio data and three retirement boundaries |
 | C5 directional airtime and reporting | PASS, 1/1 new protocol; 5/5 units; 2/2 modules | Actual OFDM DATA/ACK outcomes, both metric IDs, retry/retirement boundaries and cleanup-complete publication |
 | C6 reactive HWMP and pending source queues | PASS, 3/3 new files (4 runs) | Production discovery, directional selection, bounded queues/retries, exact deadlines and isolated-owner lifecycle |
-| Remaining live mesh behavior | NOT_RUN | Path errors, proactive roots, HT/VHT and power save remain future stages |
+| C7 path errors and rediscovery | PASS, 2/2 new files | Terminal DATA/peer-close causes, reason-specific PERRs, global pacing and alternate-path delivery |
+| Remaining live mesh behavior | NOT_RUN | Proactive roots, HT/VHT and power save remain future stages |
 | C5 committed release compilation checkpoint | PASS | Isolated clean `7264369846`, matching release dependencies; no warning/error |
 | Release compilation | NOT_RUN | Required before push |
 | C2 legacy protocol controls | 4/5 test files PASS; one preexisting unexpected failure | Raw Block Ack retry run 0 has protocol deadline failure, run 1 has runtime abort; immediate parent reproduces both at identical time/event |
@@ -149,3 +153,11 @@ C6 ran on `7264369846` plus its working diff after a fresh matching debug build.
 The final 16-file protocol batch passed all ten mesh files and five of six legacy controls. `WifiBlockAckDataRetry` retained both exact parent failure boundaries. Five selected units and two frame-sequence/Rx module controls passed. Initial expanded-fixture failures were corrected oracles: later DATA changed the cost estimate after control receipt, and a purported worse metric was actually cheaper in ID-2 units. The late-Close failure at 180.04 ms/event 1714 was a real isolated-management-down defect; the narrow mesh down-input discard fixed it, and the final fixture keeps that delivery reachable rather than isolating the radio.
 
 Raw final fixtures/logs are under `/tmp/inet-mesh-c6-raw/{protocol-final,unit-final,module-final}/`; build and category logs use `/tmp/inet-mesh-c6-*`. Scoped architecture, changed NED/MSG naming, source-seal, release/migration format and whitespace checks passed. Existing broader naming/interface findings remain explicitly outside those scoped passes. All three diagrams rendered with Mermaid 10.9.3 and Firefox and were visually inspected under `audit/hwmp-implementation/diagrams-c6/`. No baseline, declared expectation, source seal or exception ledger was changed. Final combined-tree compilation/fingerprints remain separate gates; path-error/proactive/high-throughput/power-save claims remain pending their stages.
+
+## C7 path-error execution
+
+C7 ran on `ed1b774a4f` plus its working diff with a fresh matching debug build. Both new fixtures passed. Actual terminal DATA acknowledgment failure invalidates the selected B–C path once, sends the required error and enables later A–D–C discovery/delivery while an unrelated route remains usable. Separate on-air peer closure retires queued originals without a second terminal failure. The receive-table fixture covers each reason/sequence/next-hop/TTL case, whole-body external rejection, forwarding-disabled behavior, pressure splitting 25 destinations into 19+6, another recipient's ten destinations, and the global default handoff interval.
+
+Additional passing cases cover closed/re-peered precursor admission, expired deferred dependencies, exact duplicates versus differing semantic values, immediate repair pruning, stop/restart pacing, inactive management, rejected-response recovery, internal-collision retry exhaustion and unknown-transit exclusions. High-cardinality records are created through valid control processing; the fixture does not claim twenty-five additional live radio endpoints. The [C7 reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-c7-errors.md) records setup, assertions, interpretation boundaries and exact selectors.
+
+The final batch passed all twelve mesh files and five of six legacy controls (17/18 files). The remaining Block Ack retry control retained both exact parent failures. Five units and two modules passed. Logs are `/tmp/inet-mesh-c7-{build-final,protocol-final,unit-final,module-final}.log`; raw generated fixtures/output are under `/tmp/inet-mesh-c7-raw/{protocol-final,unit-final,module-final}/`. Scoped architecture/naming/seal, release/migration format and whitespace checks passed; independent review found no actionable issue. All three diagrams rendered and were visually inspected under `audit/hwmp-implementation/diagrams-c7/`. Final combined-tree gates, L1 mechanical lint corrections and later mechanisms remain pending. No expectation or baseline was rewritten.
