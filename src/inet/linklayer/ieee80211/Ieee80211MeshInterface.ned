@@ -6,7 +6,8 @@ import inet.linklayer.ieee80211.mesh.contract.IMeshPathSelection;
 import inet.linklayer.ieee80211.mesh.AirtimeLinkMetric;
 
 // Open QoS mesh with native forwarding and optional contiguous5GHz HT/VHT PHY.
-// A-MSDU/multiple-MPDU aggregation and power save require their own procedures.
+// Native source A-MSDU is available through the MSDU aggregation policy.
+// Multiple-MPDU aggregation and power save require their own procedures.
 module Ieee80211MeshInterface extends Ieee80211Interface
 {
     parameters:
@@ -28,7 +29,7 @@ module Ieee80211MeshInterface extends Ieee80211Interface
         mgmt.pathSelectionMetricId = this.pathSelectionMetricId;
         mac.qosStation = true;
         mac.hcf.isBlockAckSupported = false;
-        mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "";
+        mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = default("");
         mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename = "";
         mac.hcf.originatorMacDataService.fragmentationPolicy.typename = "";
         mac.hcf.rtsPolicy.rtsThreshold = default(65536B);

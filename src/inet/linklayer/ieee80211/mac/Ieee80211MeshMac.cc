@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "inet/linklayer/ieee80211/mac/Ieee80211MeshMac.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
 
 #include "inet/common/ProtocolTag_m.h"
 #include "inet/common/packet/chunk/BytesChunk.h"
@@ -42,9 +43,9 @@ void Ieee80211MeshMac::initialize(int stage)
         auto service = hcf->getSubmodule("originatorMacDataService");
         auto rts = check_and_cast<IRtsPolicy *>(hcf->getSubmodule("rtsPolicy"));
         if (hcf->getSubmodule("rateControl") || service->getSubmodule("fragmentationPolicy")
-                || service->getSubmodule("msduAggregationPolicy") || service->getSubmodule("mpduAggregationPolicy")
+                || (!high && service->getSubmodule("msduAggregationPolicy")) || service->getSubmodule("mpduAggregationPolicy")
                 || hcf->par("isBlockAckSupported").boolValue() || rts->getRtsThreshold() <= (high ? 65535 : modeSet->getMode(0)->getMpduMaxLength()))
-            throw cRuntimeError("Mesh requires fixed rates, no fragmentation/A-MSDU/multi-MPDU/Block Ack, and RTS disabled");
+            throw cRuntimeError("Mesh requires fixed rates, no fragmentation/multi-MPDU/Block Ack, HT/VHT for A-MSDU, and RTS disabled");
     }
 }
 
@@ -97,7 +98,10 @@ void Ieee80211MeshMac::unsupportedData(Packet *packet)
 
 void Ieee80211MeshMac::handleUpperPacket(Packet *packet)
 {
-    check_and_cast<IMeshForwarding *>(ds.get())->processSourceMsdu(packet);
+    if (auto forwarding = dynamic_cast<IMeshForwarding *>(ds.getNullable()))
+        forwarding->processSourceMsdu(packet);
+    else
+        unsupportedData(packet);
 }
 
 void Ieee80211MeshMac::sendMeshData(Packet *packet)
@@ -105,6 +109,7 @@ void Ieee80211MeshMac::sendMeshData(Packet *packet)
     Enter_Method("sendMeshData");
     auto header = packet->peekAtFront<Ieee80211DataHeader>();
     if (mib->getLocalMeshPhyCapabilities().htPresent
+            && !header->getAMsduPresent()
             && packet->getDataLength() - header->getChunkLength() - B(10) > B(2304)) {
         unsupportedData(packet);
         return;
@@ -167,8 +172,8 @@ void Ieee80211MeshMac::sendUpFrame(Packet *packet)
         // Ordinary MAC admission/ACK has completed. Reject an unsupported
         // native MSDU before forwarding, LLC delivery or mesh-state refresh.
         // A-MSDU limits belong to its separate aggregation consumer.
-        if (data && isDataReceptionSupported(data) && !oversizedNative)
-            ds->processDataFrame(packet, data);
+        if (data && isDataReceptionSupported(data) && !oversizedNative && ds.getNullable())
+            ds.getNullable()->processDataFrame(packet, data);
         else
             unsupportedData(packet);
         return;
@@ -189,8 +194,31 @@ void Ieee80211MeshMac::frameTransmissionComplete(const Packet *packet)
     meshManagement->managementTransmissionComplete(packet);
 }
 
+void Ieee80211MeshMac::finalizeDataFrame(Packet *packet)
+{
+    auto source = packet->findTag<Ieee80211MeshAggregationTag>();
+    if (!source || !source->getPendingSourceIdentity())
+        return; // Committed/transit work needs no allocator, including after provider removal.
+    auto forwarding = dynamic_cast<IMeshForwarding *>(ds.getNullable());
+    if (!forwarding)
+        throw cRuntimeError("Cannot commit a pending mesh source without its allocator");
+    forwarding->finalizeSourceFrame(packet);
+}
+
+void Ieee80211MeshMac::discardPendingMeshSources()
+{
+    Enter_Method("discardPendingMeshSources");
+    check_and_cast<Hcf *>(getSubmodule("hcf"))->discardPendingMeshSources();
+}
+
 bool Ieee80211MeshMac::isFrameTransmissionEligible(const Packet *packet, simtime_t plannedStart) const
 {
+    auto source = packet->findTag<Ieee80211MeshAggregationTag>();
+    if (source && source->getPendingSourceIdentity()) {
+        auto forwarding = dynamic_cast<IMeshForwarding *>(ds.getNullable());
+        if (!forwarding || !forwarding->isSourceActive())
+            return false;
+    }
     // IEEE Std 802.11-2024, 14.14.3.1: pending traffic waits behind the TBTT beacon.
     if (!meshManagement->isMeshManagementActive())
         return false;
@@ -203,7 +231,8 @@ bool Ieee80211MeshMac::isDataReceptionSupported(const Ptr<const Ieee80211DataHea
 {
     auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
     return mesh && header->getType() == ST_DATA_WITH_QOS && mesh->getMeshControlPresent()
-        && !header->getMoreFragments() && header->getFragmentNumber() == 0 && !header->getAMsduPresent();
+        && !header->getMoreFragments() && header->getFragmentNumber() == 0
+        && (!header->getAMsduPresent() || (mib->getLocalMeshPhyCapabilities().htPresent && header->getToDS() && header->getFromDS()));
 }
 
 } // namespace ieee80211

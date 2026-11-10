@@ -16,6 +16,8 @@ class INET_API IMeshLinkMetric
     virtual ~IMeshLinkMetric() = default;
     virtual uint32_t getMetric(MacAddress peer) = 0;
     virtual void resetPeer(MacAddress peer) = 0;
+    // Aggregation eligibility/limits changed without a PHY/error-estimator reset.
+    virtual void resetAggregation(MacAddress peer) = 0;
     virtual bool supportsPeerRates(MacAddress peer, const Ieee80211RateSetState& rates) = 0;
 };
 

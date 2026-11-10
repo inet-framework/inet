@@ -8,6 +8,9 @@
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 #include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/IIeee80211ChannelAccess.h"
 
@@ -74,6 +77,7 @@ MeshLinkTiming Hcf::previewMeshLinkTiming(MacAddress peer, const Ieee80211RateSe
 }
 
 simsignal_t Hcf::edcaCollisionDetectedSignal = cComponent::registerSignal("edcaCollisionDetected");
+simsignal_t Hcf::meshPayloadTransmittedSignal = cComponent::registerSignal("meshPayloadTransmitted");
 simsignal_t Hcf::blockAckAgreementAddedSignal = cComponent::registerSignal("blockAckAgreementAdded");
 simsignal_t Hcf::blockAckAgreementDeletedSignal = cComponent::registerSignal("blockAckAgreementDeleted");
 
@@ -144,6 +148,8 @@ void Hcf::initialize(int stage)
         check_and_cast<OriginatorQosMacDataService *>(originatorDataService)->setEligibility(
             [this](const Packet *packet) { return isFrameEligible(packet, false); },
             [this](Packet *packet) { return isAMsduPermitted(packet); });
+        check_and_cast<OriginatorQosMacDataService *>(originatorDataService)->setSourceFinalization(
+            [this](Packet *packet) { mac->finalizeDataFrame(packet); });
         check_and_cast<IOriginatorQosMacDataService *>(originatorDataService)->setFragmentationPermission([this](Packet *packet) {
             auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
             if (blockAckVariant != BlockAckVariant::COMPRESSED || !data || data->getType() != ST_DATA_WITH_QOS || !originatorBlockAckAgreementHandler)
@@ -485,10 +491,85 @@ bool Hcf::isFrameEligible(const Packet *packet, bool numbered) const
 bool Hcf::isAMsduPermitted(Packet *packet) const
 {
     auto data = dynamicPtrCast<const Ieee80211DataHeader>(packet->peekAtFront<Ieee80211MacHeader>());
-    if (!data || !originatorBlockAckAgreementHandler)
+    if (!data)
+        return true;
+    if (mib->mode == Ieee80211Mib::MESH) {
+        auto peer = mib->findMeshPeerPhyCapabilities(data->getReceiverAddress());
+        if (!mib->getLocalMeshPhyCapabilities().htPresent || !peer || !peer->htPresent || data->getReceiverAddress().isMulticast())
+            return false;
+        auto mode = rateSelection->computeMode(packet, data, edca->getEdcaf(edca->classifyFrame(data))->getTxopProcedure());
+        // Local selected-profile policy: aggregate transport uses actual HT/VHT.
+        if (mode->getHtMcsIndex() < 0 && mode->getVhtMcsIndex() < 0)
+            return false;
+        if (data->getAMsduPresent()) {
+            std::vector<Ieee80211MeshAmsduPart> parts;
+            if (!parseMeshAmsdu(packet, dynamicPtrCast<const Ieee80211MeshDataHeader>(data), parts)
+                    || !meshAmsduFitsTransport(packet, dynamicPtrCast<const Ieee80211MeshDataHeader>(data), *peer, mode))
+                return false;
+        }
+    }
+    if (!originatorBlockAckAgreementHandler)
         return true;
     auto agreement = originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid());
     return !agreement || !agreement->getIsAddbaResponseReceived() || agreement->isAMsduPermitted();
+}
+
+void Hcf::discardPendingMeshSources()
+{
+    Enter_Method("discardPendingMeshSources");
+    bool previous = handlingAgreementAction;
+    handlingAgreementAction = true;
+    if (frameSequenceHandler->isSequenceRunning()) {
+        auto prepared = frameSequenceHandler->getContext()->getQoSContext()->preparedData.get();
+        auto source = prepared ? prepared->frame->findTag<Ieee80211MeshAggregationTag>() : nullptr;
+        if (source && source->getPendingSourceIdentity())
+            prepared->cancelled = true;
+    }
+    for (int ac = 0; ac < AC_NUMCATEGORIES; ac++) {
+        auto queue = edca->getEdcaf(static_cast<AccessCategory>(ac))->getPendingQueue();
+        std::vector<Packet *> pending;
+        for (int i = 0; i < queue->getNumPackets(); i++) {
+            auto packet = queue->getPacket(i);
+            auto source = packet->findTag<Ieee80211MeshAggregationTag>();
+            if (source && source->getPendingSourceIdentity()) pending.push_back(packet);
+        }
+        for (auto packet : pending) {
+            queue->removePacket(packet);
+            take(packet);
+            edca->getLifetimeHandler()->forgetFrame(packet->getId());
+            PacketDropDetails details;
+            details.setReason(OTHER_PACKET_DROP);
+            emit(packetDroppedSignal, packet, &details);
+            delete packet;
+        }
+    }
+    handlingAgreementAction = previous;
+    if (!previous)
+        updateContention();
+}
+
+void Hcf::discardMeshAggregate(Edcaf *owner, Packet *packet)
+{
+    bool previous = handlingAgreementAction;
+    handlingAgreementAction = true;
+    auto header = packet->peekAtFront<Ieee80211DataHeader>();
+    bool inProgress = owner->getInProgressFrames()->containsFrame(packet);
+    if (inProgress) {
+        owner->getAckHandler()->dropFrame(header);
+        owner->getRecoveryProcedure()->dropFrame(header);
+        owner->getInProgressFrames()->dropFrame(packet);
+    }
+    else {
+        owner->getPendingQueue()->removePacket(packet);
+        take(packet);
+        edca->getLifetimeHandler()->forgetFrame(packet->getId());
+    }
+    PacketDropDetails details;
+    details.setReason(OTHER_PACKET_DROP);
+    emit(packetDroppedSignal, packet, &details);
+    if (!inProgress)
+        delete packet;
+    handlingAgreementAction = previous;
 }
 
 bool Hcf::hasQueuedData(MacAddress peer, Tid tid) const
@@ -1079,7 +1160,8 @@ void Hcf::channelGranted(IChannelAccess *channelAccess)
 FrameSequenceContext *Hcf::buildContext(AccessCategory ac)
 {
     auto edcaf = edca->getEdcaf(ac);
-    auto qosContext = new QoSContext(originatorAckPolicy, originatorBlockAckProcedure, originatorBlockAckAgreementHandler, edcaf->getTxopProcedure(), blockAckVariant);
+    auto qosContext = new QoSContext(originatorAckPolicy, originatorBlockAckProcedure, originatorBlockAckAgreementHandler, edcaf->getTxopProcedure(), blockAckVariant,
+        mib->mode == Ieee80211Mib::MESH && mib->getLocalMeshPhyCapabilities().htPresent);
     qosContext->prepareData = [this](FrameSequenceContext *context) { return prepareDataTransmission(context); };
     return new FrameSequenceContext(mac->getAddress(), modeSet, edcaf->getInProgressFrames(), rtsProcedure, rtsPolicy, nullptr, qosContext);
 }
@@ -1401,6 +1483,20 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
     if (edcaf) {
         auto step = check_and_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
         step->setPpduEnd(simTime());
+        auto original = step->getFrameToTransmit();
+        auto data = dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
+        if (mib->mode == Ieee80211Mib::MESH && data && data->getType() == ST_DATA_WITH_QOS
+                && !data->getReceiverAddress().isMulticast() && mib->isMeshPeerEstablished(data->getReceiverAddress())
+                && edcaf->getInProgressFrames()->containsFrame(original)) {
+            auto metadata = packet->findTag<Ieee80211MeshAggregationTag>();
+            if (metadata && metadata->getPendingSourceIdentity())
+                throw cRuntimeError("Uncommitted mesh identity reached actual PPDU completion");
+            auto retained = original->addTagIfAbsent<Ieee80211MeshAggregationTag>();
+            if (retained->getInitialMpduLength() < 0)
+                retained->setInitialMpduLength(packet->getDataLength().get<B>());
+            MeshPayloadTransmission payload(data->getReceiverAddress(), metadata ? metadata->getMsduCount() : 1);
+            emit(meshPayloadTransmittedSignal, packet, &payload);
+        }
         edcaf->getTxopProcedure()->recordTransmittedDuration(header->getDurationField());
         frameSequenceHandler->transmissionComplete();
     }
@@ -1886,6 +1982,18 @@ bool Hcf::isInitialDataException(const FrameSequenceContext *context, const Prep
     // IEEE Std 802.11-2024, 10.23.2.9: the same-size single-MPDU retry exception also permits an A-MSDU.
     // Committed Compressed MPDUs retain their payload and length throughout retry; this path forms no A-MPDU.
     bool committedRetry = !prepared.preparation && header->getRetry();
+    if (mib->mode == Ieee80211Mib::MESH) {
+        auto metadata = prepared.frame->findTag<Ieee80211MeshAggregationTag>();
+        committedRetry = committedRetry && metadata && metadata->getInitialMpduLength() == prepared.frame->getDataLength().get<B>();
+        if (committedRetry) {
+            auto status = edca->getChannelOwner()->getAckHandler()->getQoSDataAckStatus(header);
+            committedRetry = status == QosAckHandler::Status::NORMAL_ACK_NOT_ARRIVED
+                || status == QosAckHandler::Status::BLOCK_ACK_NOT_ARRIVED || status == QosAckHandler::Status::BLOCK_ACK_ARRIVED_UNACKED;
+        }
+        // 10.23.2.9: a fresh plain-MSDU overrun requires a Block Ack agreement.
+        if (!committedRetry && !prepared.agreement)
+            return false;
+    }
     if (!committedRetry && (header->getAMsduPresent() || header->getRetry()))
         return false;
     for (int i = 0; i < context->getNumSteps(); i++) {
@@ -1948,10 +2056,13 @@ bool Hcf::validatePreparedData(const PreparedDataTransmission& prepared, simtime
     if (prepared.cancelled || prepared.modeSet != modeSet)
         return false;
     auto header = prepared.frame->peekAtFront<Ieee80211DataHeader>();
+    if (header->getAMsduPresent() && !isAMsduPermitted(prepared.frame))
+        return false;
     auto agreement = originatorBlockAckAgreementHandler ?
         originatorBlockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid()) : nullptr;
-    if (agreement != prepared.agreement || !agreement || !agreement->getIsAddbaResponseReceived() ||
-        !isProfileAllowed(header->getReceiverAddress(), true))
+    bool normalMesh = mib->mode == Ieee80211Mib::MESH && mib->getLocalMeshPhyCapabilities().htPresent && !prepared.agreement;
+    if (agreement != prepared.agreement || (normalMesh ? !mib->isMeshPeerEstablished(header->getReceiverAddress()) :
+            (!agreement || !agreement->getIsAddbaResponseReceived() || !isProfileAllowed(header->getReceiverAddress(), true))))
         return false;
     auto service = check_and_cast<IOriginatorQosMacDataService *>(originatorDataService);
     if (prepared.preparation) {
@@ -1984,16 +2095,23 @@ bool Hcf::validatePreparedData(const PreparedDataTransmission& prepared, simtime
 DataPreparationResult Hcf::prepareDataTransmission(FrameSequenceContext *context)
 {
     Enter_Method("prepareDataTransmission");
-    if (blockAckVariant != BlockAckVariant::COMPRESSED || !originatorBlockAckAgreementHandler)
+    bool normalMesh = context->getQoSContext()->prepareNormalAckData;
+    if (!normalMesh && (blockAckVariant != BlockAckVariant::COMPRESSED || !originatorBlockAckAgreementHandler))
         return DataPreparationResult::LEGACY;
     auto frames = context->getInProgressFrames();
     auto candidate = frames->peekFrameToTransmit();
     auto header = candidate ? dynamicPtrCast<const Ieee80211DataHeader>(candidate->peekAtFront<Ieee80211MacHeader>()) : nullptr;
     if (!header || header->getType() != ST_DATA_WITH_QOS || header->getReceiverAddress().isMulticast())
         return DataPreparationResult::LEGACY;
-    auto agreement = originatorBlockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid());
-    if (!agreement || !agreement->getIsAddbaResponseReceived())
-        return DataPreparationResult::LEGACY;
+    auto agreement = originatorBlockAckAgreementHandler ? originatorBlockAckAgreementHandler->getAgreement(header->getReceiverAddress(), header->getTid()) : nullptr;
+    if (!agreement || !agreement->getIsAddbaResponseReceived()) {
+        if (!normalMesh) return DataPreparationResult::LEGACY;
+        agreement = nullptr;
+    }
+    if (normalMesh && header->getAMsduPresent() && !isAMsduPermitted(candidate)) {
+        discardMeshAggregate(edca->getChannelOwner(), candidate);
+        return DataPreparationResult::DEFERRED;
+    }
     auto prepared = std::make_unique<PreparedDataTransmission>();
     prepared->modeSet = modeSet;
     prepared->agreement = agreement;
@@ -2155,6 +2273,13 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
             compressedBar ? rateSelection->computeCompressedBlockAckReqMode(packet, compressedBar, context->getNumSteps() == 1) :
             dataAfterCts ? packet->getTag<Ieee80211ModeReq>()->getMode() : rateSelection->computeMode(packet, header, txop);
         setFrameMode(packet, header, mode);
+        if (mib->mode == Ieee80211Mib::MESH && dynamicPtrCast<const Ieee80211MeshDataHeader>(header)
+                && staticPtrCast<const Ieee80211DataHeader>(header)->getAMsduPresent() && !isAMsduPermitted(packet)) {
+            if (!(preparedStep && prepared->preparation)) {
+                discardMeshAggregate(channelOwner, packet);
+            }
+            return false;
+        }
         auto physical = dynamic_cast<const IIeee80211ChannelAccess *>(getContainingNicModule(this)->getSubmodule("radio"));
         if (physical && physical->hasContiguousAllocation()) {
             for (int i = context->getNumSteps() - 2; i >= 0; i--) {

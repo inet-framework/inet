@@ -5,6 +5,7 @@
 #include <limits>
 #include "inet/linklayer/ieee80211/mac/coordinationfunction/Hcf.h"
 #include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -18,6 +19,7 @@ void AirtimeLinkMetric::initialize(int stage)
         timing.reference(this,"hcfModule",true);
         mib.reference(this,"mibModule",true);
         WATCH_MAP(errorEstimates);
+        WATCH_MAP(payloadEstimates);
     }
 }
 
@@ -25,7 +27,9 @@ void AirtimeLinkMetric::handleMessageWhenUp(cMessage *) { throw cRuntimeError("A
 void AirtimeLinkMetric::handleStartOperation(LifecycleOperation *)
 {
     errorEstimates.clear();
+    payloadEstimates.clear();
     check_and_cast<cModule *>(timing.get())->subscribe(Hcf::meshDataAttemptCompletedSignal,this);
+    check_and_cast<cModule *>(timing.get())->subscribe(Hcf::meshPayloadTransmittedSignal,this);
 }
 
 void AirtimeLinkMetric::unsubscribeAttemptNotifications()
@@ -34,17 +38,31 @@ void AirtimeLinkMetric::unsubscribeAttemptNotifications()
         auto module = check_and_cast<cModule *>(timing.get());
         if (module->isSubscribed(Hcf::meshDataAttemptCompletedSignal,this))
             module->unsubscribe(Hcf::meshDataAttemptCompletedSignal,this);
+        if (module->isSubscribed(Hcf::meshPayloadTransmittedSignal,this))
+            module->unsubscribe(Hcf::meshPayloadTransmittedSignal,this);
     }
 }
 
 AirtimeLinkMetric::~AirtimeLinkMetric() { unsubscribeAttemptNotifications(); }
-void AirtimeLinkMetric::handleStopOperation(LifecycleOperation *) { unsubscribeAttemptNotifications(); errorEstimates.clear(); }
-void AirtimeLinkMetric::handleCrashOperation(LifecycleOperation *) { unsubscribeAttemptNotifications(); errorEstimates.clear(); }
+void AirtimeLinkMetric::handleStopOperation(LifecycleOperation *) { unsubscribeAttemptNotifications(); errorEstimates.clear(); payloadEstimates.clear(); }
+void AirtimeLinkMetric::handleCrashOperation(LifecycleOperation *) { unsubscribeAttemptNotifications(); errorEstimates.clear(); payloadEstimates.clear(); }
 
 void AirtimeLinkMetric::receiveSignal(cComponent *, simsignal_t signal, cObject *, cObject *details)
 {
     Enter_Method_Silent();
-    if (signal != Hcf::meshDataAttemptCompletedSignal || operationalState != OPERATING)
+    if (operationalState != OPERATING)
+        return;
+    if (signal == Hcf::meshPayloadTransmittedSignal) {
+        auto payload = check_and_cast<MeshPayloadTransmission *>(details);
+        if (payload->msduCount < 1)
+            throw cRuntimeError("Completed payload PPDU has no MSDUs");
+        if (mib->isMeshPeerEstablished(payload->peer)) {
+            auto updated = getPayloadEstimate(payload->peer) * 0.875 + payload->msduCount * 0.125;
+            payloadEstimates[payload->peer] = updated;
+        }
+        return;
+    }
+    if (signal != Hcf::meshDataAttemptCompletedSignal)
         return;
     auto attempt = check_and_cast<MeshDataAttempt *>(details);
     if (mib->isMeshPeerEstablished(attempt->peer)) {
@@ -60,10 +78,23 @@ double AirtimeLinkMetric::getErrorEstimate(MacAddress peer) const
     return it == errorEstimates.end() ? 0 : it->second;
 }
 
+double AirtimeLinkMetric::getPayloadEstimate(MacAddress peer) const
+{
+    auto it = payloadEstimates.find(peer);
+    return it == payloadEstimates.end() ? 1 : it->second;
+}
+
+void AirtimeLinkMetric::resetAggregation(MacAddress peer)
+{
+    Enter_Method("resetAggregation");
+    payloadEstimates.erase(peer);
+}
+
 void AirtimeLinkMetric::resetPeer(MacAddress peer)
 {
     Enter_Method("resetPeer");
     errorEstimates.erase(peer);
+    payloadEstimates.erase(peer);
 }
 
 uint32_t AirtimeLinkMetric::computeMetric(int metricId, simtime_t overhead, bps rate, double error, double n)
@@ -93,7 +124,7 @@ uint32_t AirtimeLinkMetric::getMetric(MacAddress peer)
     if (operationalState != OPERATING || !mib->isMeshPeerEstablished(peer))
         return UINT32_MAX;
     auto nominal = timing->getMeshLinkTiming(peer);
-    return computeMetric(mib->getMeshConfiguration().pathSelectionMetricId,nominal.overhead,nominal.rate,getErrorEstimate(peer));
+    return computeMetric(mib->getMeshConfiguration().pathSelectionMetricId,nominal.overhead,nominal.rate,getErrorEstimate(peer),getPayloadEstimate(peer));
 }
 
 bool AirtimeLinkMetric::supportsPeerRates(MacAddress peer, const Ieee80211RateSetState& rates)

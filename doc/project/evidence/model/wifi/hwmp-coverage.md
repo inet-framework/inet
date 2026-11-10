@@ -16,7 +16,7 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | BEACON-TIMING | MeshBeaconTiming.test | C3 | hwmp-c3-peering.md | PASS |
 | FORWARDING | MeshForwarding.test | C4 | hwmp-c4-forwarding.md | PASS with fixture path provider |
 | GROUP-FORWARDING | MeshGroupForwarding.test | C4 | hwmp-c4-forwarding.md | PASS |
-| AIRTIME | MeshAirtimeMetric.test | C5, H2, H3, P3 | hwmp-c5-airtime.md | PASS for unaggregated OFDM; aggregation/high-throughput extensions remain later stages |
+| AIRTIME | MeshAirtimeMetric.test | C5, H2, H3, P3 | hwmp-c5-airtime.md; hwmp-h2-amsdu.md | PASS for OFDM and standalone HT/VHT A-MSDU; A-MPDU and sleep remain later stages |
 | DISCOVERY | HwmpDiscovery.test | C6 | hwmp-c6-discovery.md | PASS with production HWMP and both metric IDs |
 | PATH-SELECTION | HwmpPathSelection.test | C6 | hwmp-c6-discovery.md | PASS, separate ID-1/ID-2 runs |
 | DISCOVERY-LIMITS | HwmpDiscoveryLimits.test | C6 | hwmp-c6-discovery.md | PASS |
@@ -28,7 +28,7 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | HT-NEGOTIATION | MeshHtNegotiation.test | H1 | hwmp-h1-ht-vht.md | PASS, 16 configurations |
 | VHT-NEGOTIATION | MeshVhtNegotiation.test | H1 | hwmp-h1-ht-vht.md | PASS, 64 configurations |
 | HIGH-THROUGHPUT-DATA | MeshHighThroughputData.test | H1 | hwmp-h1-ht-vht.md | PASS, 34 configurations |
-| AMSDU | MeshAmsdu.test | H2 | hwmp-h2-amsdu.md | NOT_RUN |
+| AMSDU | MeshAmsdu.test | H2 | hwmp-h2-amsdu.md | PASS, 104 configurations |
 | AMPDU-BLOCK-ACK | MeshAmpduBlockAck.test | H3 | hwmp-h3-ampdu.md | NOT_RUN |
 | AGGREGATION-LIMITS | MeshAggregationLimits.test | H3 | hwmp-h3-ampdu.md | NOT_RUN |
 | POWER-MODES | MeshPowerModes.test | P1 | hwmp-p1-power-modes.md | NOT_RUN |
@@ -67,6 +67,7 @@ These are selected modeling policies, not requirements attributed to IEEE. The [
 | Pending MSDUs | Shared capacity 64 packets and 256 KiB; five-second per-packet wait; drop new on overflow | Bounds memory and waiting; count existing LLC payload bytes before adding mesh encapsulation |
 | Duplicate retention | One second; seed locally originated group identity | Bounded duplicate history, not infinite duplicate exclusion |
 | Transit A-MSDU | Preserve constituent list and mesh forwarding-unit identity; do not split/merge transit units | Conservative endpoint-profile policy, avoiding unprovided identity rewriting rules |
+| Local A-MSDU formation | Form only from uncommitted local HT/VHT sources; retain lower-family plain DATA and mandatory standalone non-HT reception | Local transmit policy is separate from required receive support |
 | Sequence comparison | Unsigned difference strictly between zero and 2^31 is newer; exact half-range unordered | Avoids signed overflow and chooses an explicit resolution of ambiguous serial ordering |
 | Target reply sequence | Known requested sequence is the increment baseline only if serial-newer; otherwise use own sequence | Resolves the unordered half-range locally; USN=1 reserved bytes never supply a baseline |
 | Received PREQ identities | Received-Lifetime retention, capacity 4096; drop new identity before mutation when full | Bounds history without silently evicting an unexpired identity; no infinite duplicate-history guarantee |
@@ -242,3 +243,15 @@ Two direct full-network initialization probes reject scalar or listening-filtere
 Scoped architecture, changed NED/MSG naming, whitespace and source-protection checks pass. The interface scan retains only the unchanged `ITransmitStep`/`IReceiveStep` baseline findings in the MAC contract subtree; mesh and new PHY interfaces pass. All three reviewer diagrams rendered and were visually inspected. No sealed source, expected result or fingerprint baseline was changed. Full mesh aggregation, power save and C9 combined-tree release/feature-disabled/fingerprint verification remain pending; this checkpoint does not claim external interoperability or real MIMO accuracy.
 
 Independent final review closed F1–F4: canonical channel requests, malformed envelope admission, switching observation history and grown-CW preservation. It verified all 56 production inputs, the matching library, all 1344 protocol archive hashes and 191 final-boundary hashes, and returned 35 PASS, 11 N/A, no flags/questions, with the later C9 fingerprint gate explicitly unverified. No source-protection approval or exception-ledger entry remains unresolved for H1.
+
+## H2 native mesh A-MSDU
+
+The [reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-h2-amsdu.md) maps all 26 scenarios, each crossed with HT/VHT and metric IDs 1/2. Formation commits one forwarding-unit identity only after complete admission. The recipient validates the complete aggregate before state mutation, admits one mesh identity and delivers every local sibling. Transit retains the whole unit and reconstructs its payload count locally. Lifetimes preserve the last constituent deadline and immutable retry body. HCF records actual completed-PPDU payload counts independently of acknowledgment outcomes. Pending local identities retire through MAC ownership on forwarding-owner stop, crash or isolated deletion.
+
+The final source checkpoint is based on H1 `139c8e1bac44f6a79ca0350b32d88b8b033d5f1c`, with 30-input manifest `39167ad900eecc30e1f0011c8951ea177f23b34b0e0865bcb962de3459a36d90` and debug library `e1ed30eb8c9c035b70eb9c6e457559809cf2d612fa1f9ef99e58826dab6090b3`. Records use `/home/miguel/inet-mesh-h2-unlimited-source-checkpoint/`. A mesh-only unlimited-size sentinel defect was reproduced on the preceding library and corrected without weakening negotiated bounds; the final upper-tier case exercises the documented setting.
+
+The final deduplicated 37-file protocol union executes 262 simulations: 257 protocol PASS, four assertion FAIL and one runtime abort. File verdicts are 33 PASS, three declared FAIL and the known unexpected Block Ack retry failure. All 104 A-MSDU, 34 high-throughput boundary and five airtime configurations pass. The three declared assertion events remain 149187/161849/48880 at 2/2/2.5 seconds. Both retry-control failures retain their parent time/event boundaries. No expectation was changed. Exact inputs and 1718 hashed artifacts use `/home/miguel/inet-mesh-h2-raw/protocol-final/`; earlier failed fixture and development snapshots remain separate.
+
+Final matching-library verification passes 23 unit files and 21 module files, including 108 module simulations; both runners exit zero. The repaired single-protection mock delegates the two H1 interface additions without changing its assertions. All 30 production hashes, 44 test hashes, current/pinned library, features and fingerprint store remain unchanged. The record is `/home/miguel/inet-mesh-h2-unlimited-final-verification/record.json`. This is an assertion-pass result, not ownership-clean validation: the retained TxNavChoice fixture has three previously parent-proven ownership warnings, FrameSequence reports 34 undisposed objects, and two lifetime fixtures report 22/20 ownership warnings. Static source comparison localizes the latter to unchanged receiver sinks; matching parent runtime attribution for those warnings and FrameSequence remains unexecuted and is a C9 obligation.
+
+Scoped architecture, four changed NED/MSG declarations, source protection, mesh interfaces, document links and whitespace checks pass. The MAC interface scan retains only its two unchanged IFrameSequence body findings. All three reviewer diagrams rendered and were visually inspected, including transit TTL validation before duplicate recording. Independent final review clears F1–F3 and returns 34 PASS, 12 N/A, no flags/questions, with the C9 fingerprint gate explicitly unverified. It verified all 30 source inputs, 44 unit/module test hashes and 1718 protocol archive hashes. No new exception or unresolved approval remains. H3, mesh power save and C9 combined-tree verification remain unexecuted. Separately identified shared HT/VHT timing defects require a following shared PHY correction; H2 does not claim to repair them.

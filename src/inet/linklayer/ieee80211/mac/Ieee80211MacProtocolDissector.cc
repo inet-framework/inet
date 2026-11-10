@@ -13,6 +13,7 @@
 #include "inet/linklayer/ieee802/Ieee802EpdHeader_m.h"
 #include "inet/linklayer/ieee80211/llc/LlcProtocolTag_m.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 #include "inet/linklayer/ieee8022/Ieee8022LlcHeader_m.h"
@@ -66,9 +67,37 @@ void Ieee80211MacProtocolDissector::dissect(Packet *packet, const Protocol *prot
         else if (dataHeader->getMoreFragments() || dataHeader->getFragmentNumber() != 0)
             callback.dissectPacket(packet, nullptr);
         else if (dataHeader->getAMsduPresent()) {
-            if (dynamicPtrCast<const ieee80211::Ieee80211MeshDataHeader>(dataHeader)) {
-                // Mesh subframes have a distinct layout (9.3.2.2.3). Keep the
-                // unsupported body opaque until the mesh A-MSDU codec is present.
+            if (auto mesh = dynamicPtrCast<const ieee80211::Ieee80211MeshDataHeader>(dataHeader)) {
+                std::unique_ptr<Packet> complete(packet->dup());
+                complete->setFrontOffset(packet->getFrontOffset() - header->getChunkLength());
+                complete->setBackOffset(packet->getBackOffset() + B(4));
+                std::vector<ieee80211::Ieee80211MeshAmsduPart> parts;
+                if (!ieee80211::parseMeshAmsdu(complete.get(), mesh, parts)) {
+                    callback.markIncorrect();
+                    callback.dissectPacket(packet, nullptr);
+                }
+                else {
+                    auto bodyEnd = packet->getBackOffset();
+                    for (const auto& part : parts) {
+                        if (packet->getFrontOffset() < complete->getFrontOffset() + part.controlOffset - B(14))
+                            callback.visitChunk(packet->popAtFront(complete->getFrontOffset() + part.controlOffset - B(14) - packet->getFrontOffset()), &Protocol::ieee80211Mac);
+                        callback.visitChunk(packet->popAtFront<ieee80211::Ieee80211MeshMsduSubframeHeader>(B(14)), &Protocol::ieee80211Mac);
+                        callback.visitChunk(packet->popAtFront<ieee80211::Ieee80211MeshControl>(B(6)), &Protocol::ieee80211Mac);
+                        auto end = packet->getFrontOffset() + part.payloadLength;
+                        packet->setBackOffset(end);
+                        if (part.payloadLength != B(0))
+                            callback.dissectPacket(packet, part.payloadLength >= B(3) ? computeLlcProtocol(packet) : nullptr);
+                        packet->setBackOffset(bodyEnd);
+                        packet->setFrontOffset(end);
+                    }
+                }
+                callback.visitChunk(trailer, &Protocol::ieee80211Mac);
+                callback.endProtocolDataUnit(&Protocol::ieee80211Mac);
+                return;
+            }
+            if (dataHeader->getToDS() && dataHeader->getFromDS()) {
+                // Raw four-address A-MSDU has no interface-role context here.
+                // Preserve its whole MAC interval without guessing Basic versus Mesh.
                 callback.dissectPacket(packet, nullptr);
                 callback.visitChunk(trailer, &Protocol::ieee80211Mac);
                 callback.endProtocolDataUnit(&Protocol::ieee80211Mac);

@@ -105,7 +105,7 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
     if (aMsduDeaggregation) {
         for (auto defragmentedFrame : defragmentedFrames) {
             auto defragmentedHeader = defragmentedFrame->peekAtFront<Ieee80211DataHeader>();
-            if (defragmentedHeader->getAMsduPresent()) {
+            if (defragmentedHeader->getAMsduPresent() && !dynamicPtrCast<const Ieee80211MeshDataHeader>(defragmentedHeader)) {
                 emit(packetDeaggregatedSignal, defragmentedFrame);
                 auto subframes = aMsduDeaggregation->deaggregateFrame(defragmentedFrame);
                 for (auto subframe : *subframes)

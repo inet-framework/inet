@@ -42,6 +42,7 @@ module Hcf extends Module like IHcf
 
         @class(Hcf);
         @signal[meshDataAttemptCompleted](type=inet::Packet); // details: MeshDataAttempt, one real DATA ACK or timeout
+        @signal[meshPayloadTransmitted](type=inet::Packet); // details: MeshPayloadTransmission, one completed payload PPDU
         @signal[secondaryChannelAccessDeferred](type=double; unit=Hz); // completed fixed-width admission refusal; CW/retry and queued packet retained
         displayStringTextFormat = default("{frameSequenceInfo}");
         @display("i=block/layer");

@@ -5,6 +5,7 @@ reports, compatible rate updates, peer retirement and receive interruption.
 
 %file: MeshAirtimeMetric.cc
 #include "mesh/MeshPhySupport.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
 #include "inet/linklayer/ieee80211/mesh/AirtimeLinkMetric.h"
 #include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
 #include "inet/common/lifecycle/LifecycleController.h"
@@ -360,17 +361,27 @@ class MeshHighPhyMetricDriver : public cSimpleModule, public cListener
 {
     std::vector<bool> attempts;
     int delivered = 0;
+    int payloadCompletions = 0;
+    bool aggregation() const { return par("aggregation"); }
     AirtimeLinkMetric *metric(int station) { return check_and_cast<AirtimeLinkMetric *>(meshInterface(station)->getSubmodule("linkMetric")); }
     uint32_t nominal() const { return meshMib(0)->getMeshPhyProfile() == "ht" ? 31654 : 32054; }
   protected:
     void initialize() override {
         getParentModule()->subscribe(Hcf::meshDataAttemptCompletedSignal,this);
+        getParentModule()->subscribe(Hcf::meshPayloadTransmittedSignal,this);
         getParentModule()->subscribe(packetSentToUpperSignal,this);
         for (int i=0;i<5;i++) scheduleAt(SimTime(i == 0 ? 1 : i == 1 ? 50 : i == 2 ? 75 : i == 3 ? 80 : 100,SIMTIME_MS),new cMessage("high-metric",i));
     }
     void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
         auto packet = dynamic_cast<Packet *>(object);
-        if (!packet || std::string(packet->getName()) != "high-metric-forward") return;
+        if (!packet || std::string(packet->getName()).find("high-metric-forward") == std::string::npos) return;
+        if (signal == Hcf::meshPayloadTransmittedSignal) {
+            auto payload = check_and_cast<MeshPayloadTransmission *>(details);
+            ASSERT(payload->msduCount == (aggregation() ? 3 : 1));
+            payloadCompletions++;
+            Enter_Method_Silent();
+            scheduleAt(simTime()+SimTime::fromRaw(1),new cMessage("completed-payload-before-ack",6));
+        }
         if (signal == packetSentToUpperSignal && source == meshInterface(1)->getSubmodule("mac")) delivered++;
         if (signal == Hcf::meshDataAttemptCompletedSignal) {
             auto attempt = check_and_cast<MeshDataAttempt *>(details);
@@ -393,13 +404,17 @@ class MeshHighPhyMetricDriver : public cSimpleModule, public cListener
             ASSERT(timing.rate == Mbps(65));
             ASSERT(meshMib(0)->getMeshConfiguration().pathSelectionMetricId == 2 && metric(0)->getMetric(meshMib(1)->address) == nominal());
             emit(registerSignal("highMetricStart"),1L);
-            sendDirect(phyMsdu("high-metric-forward",meshMib(1)->address),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+            for (int i=0;i<(aggregation() ? 3 : 1);i++)
+                sendDirect(phyMsdu(("high-metric-forward"+std::to_string(i)).c_str(),meshMib(1)->address),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
         }
         if (step == 2) {
-            ASSERT(attempts == std::vector<bool>({false,true}) && delivered == 1);
+            ASSERT(attempts == std::vector<bool>({false,true}) && delivered == (aggregation() ? 3 : 1) && payloadCompletions == 2);
+            ASSERT(metric(0)->getPayloadEstimate(meshMib(1)->address) == (aggregation() ? 47.0/32 : 1));
             ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 7.0/64);
             ASSERT(metric(1)->getErrorEstimate(meshMib(0)->address) == 0 && metric(1)->getMetric(meshMib(0)->address) == nominal());
-            ASSERT(metric(0)->getMetric(meshMib(1)->address) == (meshMib(0)->getMeshPhyProfile() == "ht" ? 35541 : 35990));
+            ASSERT(metric(0)->getMetric(meshMib(1)->address) == (aggregation()
+                ? (meshMib(0)->getMeshPhyProfile() == "ht" ? 28714 : 29020)
+                : (meshMib(0)->getMeshPhyProfile() == "ht" ? 35541 : 35990)));
         }
         if (step == 3) sendDirect(phyMsdu("high-metric-reverse",meshMib(0)->address),meshInterface(1)->getSubmodule("llc")->gate("lowerLayerOut"));
         if (step == 4) {
@@ -407,6 +422,12 @@ class MeshHighPhyMetricDriver : public cSimpleModule, public cListener
             emit(registerSignal("highMetricComplete"),1L);
         }
         if (step == 5) ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 1.0/8);
+        if (step == 6) {
+            ASSERT(payloadCompletions == 1 || payloadCompletions == 2);
+            ASSERT(metric(0)->getPayloadEstimate(meshMib(1)->address) == (aggregation() ? (payloadCompletions == 1 ? 5.0/4 : 47.0/32) : 1));
+            ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == (payloadCompletions == 1 ? 0 : 1.0/8));
+            ASSERT(metric(1)->getPayloadEstimate(meshMib(0)->address) == 1);
+        }
     }
   public:
     using cListener::finish;
@@ -449,23 +470,26 @@ module MetricHcf extends Hcf { parameters: @class(::MetricHcf); }
 simple MetricManagement extends Ieee80211MgmtMesh { parameters: @class(::MetricManagement); @lifecycleSupport; }
 simple MeshMetricDriver { parameters: @class(::MeshMetricDriver); @signal[metricStart](type=long); @signal[metricEwmaComplete](type=long); @signal[metricExhaustStart](type=long); @signal[metricCorruptStart](type=long); @signal[metricInterruptStart](type=long); @signal[metricCorruptTimeoutStart](type=long); @signal[meshMetricComplete](type=long); }
 network Test extends MeshPairNetwork { submodules: driver: MeshMetricDriver; }
-simple MeshHighPhyMetricDriver { parameters: @class(::MeshHighPhyMetricDriver); @signal[highMetricStart](type=long); @signal[highMetricComplete](type=long); }
+simple MeshHighPhyMetricDriver { parameters: @class(::MeshHighPhyMetricDriver); bool aggregation = default(false); @signal[highMetricStart](type=long); @signal[highMetricComplete](type=long); }
 module HighMetricMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
 network HtTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver; }
 network VhtTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver; }
+network HtAmsduTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver { aggregation = true; } }
+network VhtAmsduTest extends MeshPairNetwork { submodules: driver: MeshHighPhyMetricDriver { aggregation = true; } }
 
 %inifile: test.ini
 [General]
-network = ${metricNetwork=Test,HtTest,VhtTest}
+network = ${metricNetwork=Test,HtTest,VhtTest,HtAmsduTest,VhtAmsduTest}
 cmdenv-express-mode = true
 **.cmdenv-log-level = warn
 *.numStations = "${metricNetwork}" == "Test" ? 6 : 2
 *.station[*].mobility.initialX = 20m
-*.station[*].wlan[0].phyProfile = "${metricNetwork}" == "Test" ? "ofdm" : ("${metricNetwork}" == "HtTest" ? "ht" : "vht")
+*.station[*].wlan[0].phyProfile = "${metricNetwork}" == "Test" ? "ofdm" : ("${metricNetwork}" == "HtTest" || "${metricNetwork}" == "HtAmsduTest" ? "ht" : "vht")
 *.station[*].wlan[0].radio.typename = "${metricNetwork}" == "Test" ? "Ieee80211ScalarRadio" : "Ieee80211DimensionalRadio"
 *.station[*].wlan[0].radio.bandName = "${metricNetwork}" == "Test" ? "5 GHz (20 MHz)" : "5 GHz (mapped 20 MHz)"
 *.station[*].wlan[0].pathSelection.typename = "${metricNetwork}" == "Test" ? "MeshFixturePaths" : "Hwmp"
-*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "${metricNetwork}" == "Test" ? "auto" : ("${metricNetwork}" == "HtTest" ? "ht" : "vht")
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = "${metricNetwork}" == "Test" ? "auto" : ("${metricNetwork}" == "HtTest" || "${metricNetwork}" == "HtAmsduTest" ? "ht" : "vht")
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "${metricNetwork}" == "HtAmsduTest" || "${metricNetwork}" == "VhtAmsduTest" ? "BasicMsduAggregationPolicy" : ""
 *.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs = "${metricNetwork}" == "Test" ? -1 : 7
 *.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = "${metricNetwork}" == "Test" ? -1 : 1
 *.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = "${metricNetwork}" == "Test" ? nan Hz : 20MHz
@@ -494,12 +518,12 @@ cmdenv-express-mode = true
 *.tester.testName = "${metricNetwork}" == "Test" ? "mesh_airtime_metric" : "mesh_high_phy_airtime_metric"
 include ../../ini/_mesh.ini
 
-%extraargs: -r 0..2
+%extraargs: -r 0..4
 %contains: stdout
 PROTOCOLTEST mesh_airtime_metric: PASS
 
 %contains-regex: stdout
-PROTOCOLTEST mesh_high_phy_airtime_metric: PASS.*PROTOCOLTEST mesh_high_phy_airtime_metric: PASS
+PROTOCOLTEST mesh_high_phy_airtime_metric: PASS.*PROTOCOLTEST mesh_high_phy_airtime_metric: PASS.*PROTOCOLTEST mesh_high_phy_airtime_metric: PASS.*PROTOCOLTEST mesh_high_phy_airtime_metric: PASS
 
 %not-contains: stdout
 PROTOCOLTEST mesh_airtime_metric: FAIL

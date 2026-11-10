@@ -222,6 +222,14 @@ Each mesh A-MSDU subframe contains mesh destination, mesh source, Length and its
 
 Sources: `ieee80211-2024:clause:9.3.2.2.3`, `ieee80211-2024:figure:9-124`, PDF 775. Strength: normative format. Observation: encoding and constituent delivery.
 
+An HT-capable receiver accepts valid standalone Normal-Ack A-MSDUs even in non-HT PPDUs; local formation policy and ADDBA permission do not gate that mandatory reception. The HT advertised A-MSDU body tiers are 3839/7935 bytes. A non-HT OFDM PSDU is limited to 4095 bytes, independently of that advertisement. The HT A-MPDU member limit of 4095 bytes applies to nested transport, not standalone HT A-MSDUs. VHT uses its advertised MPDU limit. Each constituent MSDU is at most 2304 bytes. Selected HT-mixed and VHT PPDUs are limited to 5484 microseconds; response airtime is a separate exchange cost.
+
+Sources: `ieee80211-2024:clause:10.11`, PDF 1971–1976, span `8200504:8219198`; Table 9-224, span `4976790:4983600`; Table 17-24, span `14152347:14155438`; `ieee80211-2024:clause:10.12.2`, span `8220478:8226847`; Table 9-34, span `3256895:3261950`; Table 21-28, span `15284295:15285984`. Strength: mandatory reception and transport limits. Observation: independently reconstructed bytes and actual PHY/exchange admission.
+
+A zero TXOP limit permits one forwarding unit. A fresh A-MSDU must fit a positive exchange budget. The initial plain-MSDU overrun exception requires a Block Ack agreement. A genuine same-size MPDU retransmission, including an A-MSDU, may overrun only as the sole Data/Management frame in that TXOP, outside a multiple-MPDU aggregate and DL-MU-MIMO. Merely committing an identity or setting Retry does not establish prior transmission; PHY, peer and lifetime limits still apply.
+
+Source: `ieee80211-2024:clause:10.23.2.9`, PDF 2012–2014, span `8369680:8378130`. Strength: conditional TXOP rules. Observation: actual first transmission, unchanged retry size, exchange budget and no-fit queue behavior.
+
 ### IEEE80211-2024-MESH-AMSDU-IDENTITY
 
 Native mesh A-MSDU subframes share the same individual mesh source, including applicable outer source fields. Individual-address aggregates share the same individual mesh destination, including the applicable outer destination field; group-address aggregates use the outer group destination. The modulo-2^32 mesh sequence counter starts at zero and increments once for each new nonaggregated MSDU, A-MSDU or multihop MMPDU. Duplicate rejection concerns the entire received MSDU/A-MSDU/MMPDU identity, rather than treating sibling subframes of one A-MSDU as new duplicates. An existing A-MSDU expires when all its constituent MSDU lifetime timers have expired, permitting an older constituent to remain in that still-valid aggregate.

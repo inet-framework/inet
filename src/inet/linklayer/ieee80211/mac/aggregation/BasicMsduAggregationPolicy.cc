@@ -6,6 +6,7 @@
 
 
 #include "inet/linklayer/ieee80211/mac/aggregation/BasicMsduAggregationPolicy.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -30,6 +31,23 @@ bool BasicMsduAggregationPolicy::isEligible(Packet *packet, const Ptr<const Ieee
 {
     // Only QoS data frames have a TID.
     if (qOsCheck && header->getType() != ST_DATA_WITH_QOS)
+        return false;
+
+    if (auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(header)) {
+        auto pending = packet->findTag<Ieee80211MeshAggregationTag>();
+        auto first = dynamicPtrCast<const Ieee80211MeshDataHeader>(testHeader);
+        if (!pending || !pending->getPendingSourceIdentity() || !first || header->getAMsduPresent()
+                || !header->getToDS() || !header->getFromDS() || !mesh->getMeshControlPresent()
+                || header->getReceiverAddress().isMulticast() || header->getMoreFragments() || header->getFragmentNumber() != 0
+                || first->getAddress3() != header->getAddress3() || first->getAddress4() != header->getAddress4()
+                || first->getTid() != header->getTid() || first->getReceiverAddress() != header->getReceiverAddress()
+                || first->getTransmitterAddress() != header->getTransmitterAddress())
+            return false;
+        b aligned = B((aMsduLength.get<B>() + 3) / 4 * 4);
+        b length = packet->getDataLength() - header->getChunkLength() - trailer->getChunkLength() + B(14);
+        return maxAMsduSize == B(-1) || aligned + length <= maxAMsduSize;
+    }
+    if (dynamicPtrCast<const Ieee80211MeshDataHeader>(testHeader))
         return false;
 
     // The maximum MPDU length that can be transported using A-MPDU aggregation is 4095 octets. An
@@ -77,6 +95,8 @@ std::vector<Packet *> *BasicMsduAggregationPolicy::computeAggregateFrames(queuei
         }
         EV_TRACE << "Queued " << *dataPacket << " is eligible for A-MSDU aggregation.\n";
         frames->push_back(dataPacket);
+        if (dynamicPtrCast<const Ieee80211MeshDataHeader>(dataHeader) && aMsduLength != b(0))
+            aMsduLength = B((aMsduLength.get<B>() + 3) / 4 * 4);
         aMsduLength += dataPacket->getDataLength() - dataHeader->getChunkLength() - dataTrailer->getChunkLength() + b(LENGTH_A_MSDU_SUBFRAME_HEADER); // sum of MSDU lengths + subframe header
     }
     if (frames->size() <= 1 || !isAggregationPossible(frames->size(), aMsduLength.get<B>())) {

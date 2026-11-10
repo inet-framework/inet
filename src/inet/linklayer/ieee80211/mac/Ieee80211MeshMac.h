@@ -27,6 +27,8 @@ class INET_API Ieee80211MeshMac : public Ieee80211Mac, public IMeshDataMac
     virtual void prepareFrameTransmission(Packet *packet, simtime_t ifs,
             const physicallayer::IIeee80211Mode *mode) override;
     virtual void frameTransmissionComplete(const Packet *packet) override;
+    void finalizeDataFrame(Packet *packet) override;
+    void discardPendingMeshSources() override;
     virtual bool isFrameTransmissionEligible(const Packet *packet, simtime_t plannedStart) const override;
     virtual bool isDataReceptionSupported(const Ptr<const Ieee80211DataHeader>& header) const override;
 };

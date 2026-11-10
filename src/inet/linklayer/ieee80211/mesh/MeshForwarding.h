@@ -35,6 +35,7 @@ class INET_API MeshForwarding : public OperationalBase, public IMeshForwarding
     cMessage *pendingExpiryTimer = nullptr;
 
     virtual void initialize(int stage) override;
+    void preDelete(cComponent *root) override;
     virtual void handleMessageWhenUp(cMessage *message) override;
     virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
@@ -56,6 +57,8 @@ class INET_API MeshForwarding : public OperationalBase, public IMeshForwarding
   public:
     virtual ~MeshForwarding();
     virtual void processSourceMsdu(Packet *packet) override;
+    void finalizeSourceFrame(Packet *packet) override;
+    bool isSourceActive() const override { return operationalState == OPERATING; }
     virtual void processDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override;
     virtual void pathAvailable(MacAddress destination) override;
     virtual void discoveryFailed(MacAddress destination) override;

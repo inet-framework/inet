@@ -58,6 +58,14 @@ Define_Module(SingleRx);
 class SingleRateSelection : public IQosRateSelection {
   public:
     IQosRateSelection *delegate = nullptr;
+    std::pair<const physicallayer::IIeee80211Mode *, const physicallayer::IIeee80211Mode *> computeMeshPeerModes(
+            MacAddress peer, const Ieee80211RateSetState& rates, const Ieee80211PeerPhyCapabilities& capabilities) override {
+        return delegate->computeMeshPeerModes(peer, rates, capabilities);
+    }
+    physicallayer::Ieee80211TxVector computeResponseTxVector(Packet *packet,
+            const physicallayer::IIeee80211Mode *mode, ResponseQueryRole role) const override {
+        return delegate->computeResponseTxVector(packet, mode, role);
+    }
     const physicallayer::IIeee80211Mode *dataMode = nullptr;
     int dataQueries = 0;
     std::vector<const physicallayer::IIeee80211Mode *> ackInputs;

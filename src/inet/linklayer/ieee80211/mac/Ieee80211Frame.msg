@@ -287,6 +287,12 @@ class Ieee80211MsduSubframeHeader extends FieldsChunk
     int length;
 }
 
+// IEEE Std 802.11-2024, Figure 9-124: the following Mesh Control is separate.
+// Unlike Basic A-MSDU, the MSDU Length is little-endian and excludes Mesh Control.
+class Ieee80211MeshMsduSubframeHeader extends Ieee80211MsduSubframeHeader
+{
+}
+
 class Ieee80211MpduSubframeHeader extends FieldsChunk
 {
     chunkLength = LENGTH_A_MPDU_SUBFRAME_HEADER;

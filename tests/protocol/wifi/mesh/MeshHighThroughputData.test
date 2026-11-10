@@ -9,6 +9,7 @@ allocation uses real HWMP and the default metric2 with computed member FCS.
 #include "mesh/MeshPhySupport.h"
 #include "inet/common/packet/dissector/ProtocolDissectorRegistry.h"
 #include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211Psdu.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
 #include "inet/physicallayer/wireless/noise/NoiseSource.h"
 
 class MeshPulseNoise : public NoiseSource
@@ -233,6 +234,19 @@ class MeshPhyAdmissionDriver : public cSimpleModule, public cListener, public IT
             for (int i=0;i<frames->getLength();i++) {
                 auto frame = frames->getFrames(i);
                 if (std::string(frame->getName()) == "txop-wide" && frame->findTag<Ieee80211ModeReq>() && frame->getTag<Ieee80211ModeReq>()->getTxVector().bandwidth == MHz(80)) widthAdmissionHolds++;
+            }
+            // Reversible Normal-Ack preparation leaves a never-admitted source
+            // queued, without committing an identity, rather than extracting it.
+            auto owner = check_and_cast<Edcaf *>(frames->getParentModule());
+            auto queue = owner->getPendingQueue();
+            for (int i=0;i<queue->getNumPackets();i++) {
+                auto frame = queue->getPacket(i);
+                if (std::string(frame->getName()) == "txop-wide") {
+                    ASSERT(frame->getTag<Ieee80211MeshAggregationTag>()->getPendingSourceIdentity());
+                    auto timing = check_and_cast<IMeshLinkTiming *>(source)->getMeshLinkTiming(meshMib(2)->address);
+                    ASSERT(timing.dataMode->getDataMode()->getBandwidth() == MHz(80));
+                    widthAdmissionHolds++;
+                }
             }
             return;
         }

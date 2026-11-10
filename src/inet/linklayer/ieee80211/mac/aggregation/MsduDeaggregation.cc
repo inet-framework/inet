@@ -6,6 +6,8 @@
 
 
 #include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
 
 namespace inet {
 namespace ieee80211 {
@@ -45,6 +47,33 @@ std::vector<Packet *> *MsduDeaggregation::deaggregateFrame(Packet *aggregatedFra
 {
     EV_DEBUG << "Deaggregating A-MSDU " << *aggregatedFrame << " into multiple packets.\n";
     std::vector<Packet *> *frames = new std::vector<Packet *>();
+    if (auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(aggregatedFrame->peekAtFront<Ieee80211DataHeader>())) {
+        std::vector<Ieee80211MeshAmsduPart> parts;
+        if (parseMeshAmsdu(aggregatedFrame, mesh, parts)) {
+            cStringTokenizer names(aggregatedFrame->getName(), "+");
+            for (const auto& part : parts) {
+                const char *name = names.nextToken();
+                auto frame = new Packet(name ? name : "mesh-msdu");
+                frame->copyTags(*aggregatedFrame);
+                auto header = staticPtrCast<Ieee80211MeshDataHeader>(mesh->dupShared());
+                header->setAMsduPresent(false);
+                frame->insertAtBack(header);
+                frame->insertAtBack(part.control);
+                if (part.payloadLength != B(0))
+                    frame->insertAtBack(aggregatedFrame->peekDataAt(part.payloadOffset, part.payloadLength));
+                frame->copyRegionTags(*aggregatedFrame, aggregatedFrame->getFrontOffset() + part.payloadOffset,
+                    header->getChunkLength() + B(6), part.payloadLength);
+                frame->insertAtBack(makeShared<Ieee80211MacTrailer>());
+                auto metadata = frame->addTagIfAbsent<Ieee80211MeshAggregationTag>();
+                metadata->setPendingSourceIdentity(false);
+                metadata->setMsduCount(1);
+                metadata->setInitialMpduLength(-1);
+                frames->push_back(frame);
+            }
+        }
+        delete aggregatedFrame;
+        return frames;
+    }
     const auto& amsduHeader = aggregatedFrame->popAtFront<Ieee80211DataHeader>();
     aggregatedFrame->popAtBack<Ieee80211MacTrailer>(B(4));
     int tid = amsduHeader->getTid();

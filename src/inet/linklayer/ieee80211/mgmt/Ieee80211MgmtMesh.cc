@@ -696,6 +696,9 @@ void Ieee80211MgmtMesh::processPeering(Packet *packet, const Ptr<const Ieee80211
         auto current = linkTiming->getMeshLinkTiming(address);
         if (current.dataMode != candidateTiming->dataMode || current.ackMode != candidateTiming->ackMode)
             linkMetric->resetPeer(address);
+        else if (peer.phy.htPresent != phy.htPresent || peer.phy.vhtPresent != phy.vhtPresent
+                || peer.phy.ht.maxAmsduLength != phy.ht.maxAmsduLength || peer.phy.vht.maxMpduLength != phy.vht.maxMpduLength)
+            linkMetric->resetAggregation(address);
     }
     peer.rates = rates;
     peer.phy = phy;

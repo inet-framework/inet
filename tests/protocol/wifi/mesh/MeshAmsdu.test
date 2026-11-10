@@ -1,0 +1,268 @@
+%description:
+Native Mesh A-MSDU formation and intact transit through real A-B-C HWMP paths,
+both HT/VHT and metric IDs. Reconstructed PSDUs reach generic radio capture
+before explicit MeshMac context. One lost ACK causes one immutable retry,
+one MAC duplicate rejection and no repeated sibling delivery at the destination.
+
+%file: MeshAmsdu.cc
+#include "mesh/MeshPhySupport.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
+#include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
+#include "inet/linklayer/ieee80211/mesh/MeshForwarding.h"
+
+class MeshAmsduForwardingProbe : public MeshForwarding
+{
+  protected:
+    void preDelete(cComponent *root) override {
+        MeshForwarding::preDelete(root);
+        if (root == this) emit(registerSignal("meshAmsduAllocatorRemoved"),long(nextSequence));
+    }
+  public:
+    uint32_t nextSourceSequence() const { return nextSequence; }
+};
+Define_Module(MeshAmsduForwardingProbe);
+
+class MeshAmsduDriver : public cSimpleModule, public cListener
+{
+    int delivered = 0, aggregateTx[3] = {}, countEvents[3] = {}, radioRaw = 0;
+    int failures = 0, acknowledgments = 0;
+    std::vector<uint8_t> firstSourceBody;
+    std::set<std::string> siblings;
+    MeshAmsduForwardingProbe *forwarder(int i) { return check_and_cast<MeshAmsduForwardingProbe *>(meshInterface(i)->getSubmodule("mac")->getSubmodule("ds")); }
+    AirtimeLinkMetric *metric(int i) { return check_and_cast<AirtimeLinkMetric *>(meshInterface(i)->getSubmodule("linkMetric")); }
+    bool batch(const Packet *packet) { return std::string(packet->getName()).find("sibling") != std::string::npos; }
+    void source(const char *name, int length) {
+        sendDirect(phyMsdu(name,meshMib(2)->address,length-7),meshInterface(0)->getSubmodule("llc")->gate("lowerLayerOut"));
+    }
+  protected:
+    void initialize() override {
+        auto network = getSimulation()->getSystemModule();
+        for (auto signal : {packetSentToUpperSignal,packetSentToLowerSignal,receptionEndedSignal,Hcf::meshPayloadTransmittedSignal,Hcf::meshDataAttemptCompletedSignal})
+            network->subscribe(signal,this);
+        for (auto time : {1,10,50,100,140}) scheduleAt(SimTime(time,SIMTIME_MS),new cMessage("amsdu-case",time));
+    }
+    void handleMessage(cMessage *message) override {
+        int step = message->getKind(); delete message;
+        if (step == 1) meshManagement(0)->openPeer(meshMib(1)->address);
+        if (step == 10) meshManagement(1)->openPeer(meshMib(2)->address);
+        if (step == 50) {
+            ASSERT(!meshMib(0)->isMeshPeerEstablished(meshMib(2)->address));
+            source("prime",7);
+        }
+        if (step == 100) {
+            ASSERT(forwarder(0)->nextSourceSequence() == 1);
+            emit(registerSignal("meshAmsduSeedStart"),1L);
+            for (int i=0;i<3;i++) source(("sibling"+std::to_string(i)).c_str(),7+i);
+        }
+        if (step == 140) {
+            ASSERT(delivered == 3 && siblings.size() == 3 && aggregateTx[0] == 2 && aggregateTx[1] == 1);
+            ASSERT(failures == 1 && acknowledgments == 1 && countEvents[0] == 2 && countEvents[1] == 1 && radioRaw >= 3);
+            ASSERT(forwarder(0)->nextSourceSequence() == 2 && forwarder(1)->nextSourceSequence() == 0);
+            ASSERT(metric(0)->getPayloadEstimate(meshMib(1)->address) == 47.0/32);
+            ASSERT(metric(1)->getPayloadEstimate(meshMib(2)->address) == 5.0/4);
+            ASSERT(metric(1)->getPayloadEstimate(meshMib(0)->address) == 1);
+            ASSERT(metric(0)->getErrorEstimate(meshMib(1)->address) == 7.0/64);
+            auto timing = check_and_cast<IMeshLinkTiming *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf"))->getMeshLinkTiming(meshMib(1)->address);
+            auto id = meshMib(0)->getMeshConfiguration().pathSelectionMetricId;
+            ASSERT(metric(0)->getMetric(meshMib(1)->address) == AirtimeLinkMetric::computeMetric(id,timing.overhead,timing.rate,7.0/64,47.0/32));
+            emit(registerSignal("meshAmsduComplete"),1L);
+        }
+    }
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override {
+        auto packet = dynamic_cast<Packet *>(object);
+        if (signal == receptionEndedSignal) {
+            packet = dynamic_cast<Packet *>(details);
+            if (!packet || !batch(packet) || packet->hasBitError()) return;
+            auto raw = packet->peekAtFront<Ieee80211DataHeader>();
+            ASSERT(raw->getAMsduPresent() && raw->getToDS() && raw->getFromDS());
+            ASSERT(!dynamicPtrCast<const Ieee80211MeshDataHeader>(raw));
+            MeshMemberCaptureAudit audit;
+            std::unique_ptr<Packet> copy(packet->dup());
+            PacketDissector(ProtocolDissectorRegistry::getInstance(),audit).dissectPacket(copy.get());
+            ASSERT(!audit.incorrect && audit.intervals == 1 && audit.member.size() == size_t(packet->getDataLength().get<B>()));
+            ASSERT(independentMeshFcs(audit.member,0,audit.member.size()-4) ==
+                uint32_t(audit.member[audit.member.size()-4] | audit.member[audit.member.size()-3]<<8 | audit.member[audit.member.size()-2]<<16 | uint32_t(audit.member.back())<<24));
+            radioRaw++;
+            return;
+        }
+        if (!packet || !batch(packet)) return;
+        if ((signal == packetSentToUpperSignal || signal == packetSentToLowerSignal)
+                && source != meshInterface(0)->getSubmodule("mac") && source != meshInterface(1)->getSubmodule("mac") && source != meshInterface(2)->getSubmodule("mac"))
+            return;
+        if (signal == packetSentToUpperSignal) {
+            ASSERT(source == meshInterface(2)->getSubmodule("mac"));
+            ASSERT(siblings.insert(packet->getName()).second);
+            delivered++;
+        }
+        if (signal == packetSentToLowerSignal) {
+            int from = source == meshInterface(0)->getSubmodule("mac") ? 0 : source == meshInterface(1)->getSubmodule("mac") ? 1 : 2;
+            auto header = packet->peekAtFront<Ieee80211MeshDataHeader>();
+            std::vector<Ieee80211MeshAmsduPart> parts;
+            ASSERT(parseMeshAmsdu(packet,header,parts) && parts.size() == 3);
+            ASSERT(header->getAddress3() == meshMib(2)->address && header->getAddress4() == meshMib(0)->address);
+            ASSERT(header->getReceiverAddress() == meshMib(from+1)->address);
+            ASSERT(parts[0].control->getSequenceNumber() == 1);
+            for (int i=0;i<3;i++) {
+                ASSERT(parts[i].payloadLength == B(7+i) && parts[i].control->getTtl() == 31-from);
+                auto raw = packet->peekDataAsBytes()->getBytes();
+                auto lengthOffset = parts[i].controlOffset.get<B>()-2;
+                ASSERT(raw[lengthOffset] == 7+i && raw[lengthOffset+1] == 0);
+            }
+            auto raw = packet->peekDataAsBytes()->getBytes();
+            ASSERT((raw[30]&0x80) && (raw[31]&1) && raw[32] == meshMib(2)->address.getAddressByte(0));
+            std::vector<uint8_t> body(raw.begin()+32,raw.end()-4);
+            if (from == 0) {
+                if (firstSourceBody.empty()) firstSourceBody = body;
+                else ASSERT(firstSourceBody == body && header->getRetry());
+            }
+            aggregateTx[from]++;
+        }
+        if (signal == Hcf::meshPayloadTransmittedSignal) {
+            auto payload = check_and_cast<MeshPayloadTransmission *>(details);
+            ASSERT(payload->msduCount == 3);
+            int from = source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf") ? 0 : 1;
+            countEvents[from]++;
+        }
+        if (signal == Hcf::meshDataAttemptCompletedSignal && source == meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")) {
+            auto attempt = check_and_cast<MeshDataAttempt *>(details);
+            ASSERT(!attempt->terminalTimeout);
+            if (attempt->acknowledged) acknowledgments++; else failures++;
+        }
+    }
+};
+Define_Module(MeshAmsduDriver);
+
+#include "mesh/MeshAmsduBoundarySupport.h"
+
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_amsdu) {
+    auto test = ProtocolTest("mesh_amsdu");
+    test.intercept(tap("radioMedium").filterPacket("ieee80211mac.type == 40").mutate([](Packet *packet) {
+        auto header = Ieee80211Radio::popIeee80211PhyHeaderAtFront(packet);
+        auto raw = packet->popAtFront<BytesChunk>(header->getLengthField());
+        packet->insertAtFront(raw); packet->insertAtFront(header);
+    }).describe("reconstruct actual PSDU bytes before radio capture and explicit MeshMac role"));
+    test.once(on("driver").signal("meshAmsduSeedStart").assertValue(1).within(0.11));
+    int scenario = getSimulation()->getSystemModule()->getSubmodule("driver")->par("scenario");
+    if (scenario == 0 || scenario == 20 || scenario == 22 || scenario == 24)
+        test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29")
+            .nth(1).within(0.01).drop().describe("first aggregate ACK loss counts one completed PPDU and one timeout"));
+    if (scenario == 12)
+        test.meanwhile(tap("radioMedium").from("station[1]").to("station[0]").filterPacket("ieee80211mac.type == 29")
+            .within(0.035).drop().describe("retain the complete unit until its latest constituent deadline"));
+    return test.once(on("driver").signal("meshAmsduComplete").assertValue(1).within(0.2));
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mesh.MeshForwarding;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.linklayer.ieee80211.mgmt.Ieee80211MgmtMesh;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+import inet.physicallayer.wireless.noise.NoiseSource;
+module MeshAmsduTapMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+simple MeshAmsduForwardingProbe extends MeshForwarding { parameters: @class(::MeshAmsduForwardingProbe); @signal[meshAmsduAllocatorRemoved](type=long); }
+module MeshAmsduHcfProbe extends Hcf { parameters: @class(::MeshAmsduHcfProbe); }
+module MeshAmsduMacProbe extends Ieee80211MeshMac { parameters: @class(::MeshAmsduMacProbe); }
+simple MeshAmsduManagement extends Ieee80211MgmtMesh { parameters: @class(::MeshAmsduManagement); }
+moduleinterface IMeshAmsduDriver { parameters: int scenario; }
+simple MeshAmsduDriver like IMeshAmsduDriver { parameters: @class(::MeshAmsduDriver); int scenario; @signal[meshAmsduComplete](type=long); @signal[meshAmsduSeedStart](type=long); }
+simple MeshAmsduBoundaryDriver extends MeshAmsduDriver { parameters: @class(::MeshAmsduBoundaryDriver); }
+module MeshAmsduNoise extends NoiseSource { parameters: @class(::MeshAmsduNoise); }
+network Test extends MeshPairNetwork {
+    parameters: int scenario;
+    submodules:
+        driver: <default(scenario == 0 ? "MeshAmsduDriver" : "MeshAmsduBoundaryDriver")> like IMeshAmsduDriver;
+        formationNoise: MeshAmsduNoise;
+        retryNoise: MeshAmsduNoise;
+}
+
+%inifile: test.ini
+[General]
+network = Test
+cmdenv-express-mode = true
+**.cmdenv-log-level = warn
+sim-time-limit = 200ms
+*.driver.scenario = ${scenario=0..25}
+*.scenario = ${scenario}
+*.numStations = 3
+*.radioMedium.typename = "MeshAmsduTapMedium"
+*.radioMedium.mediumLimitCache.maxTransmissionDuration = 30ms
+*.radioMedium.backgroundNoise.power = nan W
+*.radioMedium.backgroundNoise.powerSpectralDensity = -130dBmWpMHz
+*.station[*].wlan[0].phyProfile = ${phy="ht","vht"}
+*.station[*].wlan[0].pathSelectionMetricId = ${metric=1,2}
+*.station[*].wlan[0].radio.typename = "Ieee80211DimensionalRadio"
+*.station[*].wlan[0].radio.bandName = "5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].radio.bandwidth = ${scenario} == 22 ? 20MHz : 40MHz
+*.station[*].wlan[0].mgmt.autoPeer = false
+*.station[*].wlan[0].mgmt.typename = "MeshAmsduManagement"
+*.station[*].wlan[0].mac.typename = "MeshAmsduMacProbe"
+*.station[*].wlan[0].mac.fcsMode = "computed"
+*.station[*].wlan[0].llc.typename = "MeshFixtureLlc"
+*.station[*].wlan[0].mac.ds.typename = "MeshAmsduForwardingProbe"
+*.station[*].wlan[0].mac.hcf.typename = "MeshAmsduHcfProbe"
+*.station[0].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "${scenario}" == "11" ? "" : "BasicMsduAggregationPolicy"
+*.station[1].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "BasicMsduAggregationPolicy"
+*.station[2].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename = "${scenario}" == "7" ? "" : "BasicMsduAggregationPolicy"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize = ${scenario} == 1 ? -1 : 12000
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.subframeNumThreshold = ${scenario} == 16 || ${scenario} == 17 ? 3 : -1
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.aggregationLengthThreshold = ${scenario} == 18 ? 4000 : -1
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = ${scenario} == 22 ? 220us : (${scenario} == 16 ? 94us : (${scenario} == 21 ? 32us : 0s))
+*.station[*].wlan[0].mac.hcf.edca.edcaf[1].txopProcedure.txopLimit = ${scenario} == 16 ? 94us : (${scenario} == 21 ? 32us : 0s)
+*.station[0..1].wlan[0].mib.meshMaxAmsduLength = ${scenario} == 1 || ${scenario} == 9 || ${scenario} == 20 ? 7935 : 3839
+*.station[2].wlan[0].mib.meshMaxAmsduLength = ${scenario} == 1 || ${scenario} == 7 ? 7935 : 3839
+*.station[0..1].wlan[0].mib.meshVhtMaxMpduLength = ${scenario} == 1 || ${scenario} == 9 || ${scenario} == 20 ? 7991 : 3895
+*.station[2].wlan[0].mib.meshVhtMaxMpduLength = ${scenario} == 1 ? 7991 : 3895
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = ${scenario} == 10 ? "auto" : ${phy}
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameMcs = ${scenario} == 10 ? -1 : 7
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = ${scenario} == 10 ? "auto" : "long"
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = ${scenario} == 10 ? -1 : 1
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameBitrate = ${scenario} == 10 ? 24Mbps : -1bps
+*.station[1].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = ${scenario} == 11 ? 40MHz : 20MHz
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = (${scenario} >= 12 && ${scenario} <= 15) || ${scenario} == 24 || ${scenario} == 25 ? 40MHz : 20MHz
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].msduLifetime = ${scenario} == 12 || ${scenario} == 13 || ${scenario} == 21 ? 20ms : 512ms
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].recoveryProcedure.shortRetryLimit = 100
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].recoveryProcedure.longRetryLimit = 100
+*.station[0].wlan[0].mac.hcf.edca.edcaf[1].contention.backoffOptimization = false
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = ${scenario} == 22 ? "auto" : ${phy}
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily = ${phy}
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameMcs = ${scenario} == 22 ? -1 : 7
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFrameMcs = 7
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = ${scenario} == 22 ? "auto" : "long"
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval = "long"
+*.station[0..1].wlan[0].radio.antenna.numAntennas = ${scenario} == 22 ? 2 : 1
+*.station[0].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = ${scenario} == 22 ? -1 : 1
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams = 1
+*.station[2].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth = 20MHz
+*.formationNoise.transmitter.signalAnalogRepresentation = "dimensional"
+*.retryNoise.transmitter.signalAnalogRepresentation = "dimensional"
+*.formationNoise.transmitter.centerFrequency = 5200MHz
+*.retryNoise.transmitter.centerFrequency = 5200MHz
+*.formationNoise.transmitter.bandwidth = 20MHz
+*.retryNoise.transmitter.bandwidth = 20MHz
+*.formationNoise.transmitter.power = 1mW
+*.retryNoise.transmitter.power = 1mW
+*.formationNoise.transmitter.duration = 9ms
+*.retryNoise.transmitter.duration = 20ms
+*.formationNoise.sleepInterval = 100s
+*.retryNoise.sleepInterval = 100s
+*.formationNoise.mobility.initialX = 20m
+*.retryNoise.mobility.initialX = 20m
+*.formationNoise.mobility.initFromDisplayString = false
+*.retryNoise.mobility.initFromDisplayString = false
+*.formationNoise.mobility.initialY = 20m
+*.retryNoise.mobility.initialY = 20m
+*.formationNoise.mobility.initialZ = 0m
+*.retryNoise.mobility.initialZ = 0m
+*.tester.testName = "mesh_amsdu"
+include ../../ini/_mesh.ini
+
+%extraargs: -r 0..103
+%contains: stdout
+PROTOCOLTEST mesh_amsdu: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_amsdu: FAIL

@@ -54,12 +54,13 @@ struct INET_API PreparedDataTransmission : public cObject
 class INET_API QoSContext
 {
   public:
-    QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure, BlockAckVariant variant = BlockAckVariant::BASIC) :
+    QoSContext(IOriginatorQoSAckPolicy *ackPolicy, IOriginatorBlockAckProcedure *blockAckProcedure, IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler, TxopProcedure *txopProcedure, BlockAckVariant variant = BlockAckVariant::BASIC, bool prepareNormalAckData = false) :
         ackPolicy(ackPolicy),
         blockAckProcedure(blockAckProcedure),
         blockAckAgreementHandler(blockAckAgreementHandler),
         txopProcedure(txopProcedure),
-        blockAckVariant(variant)
+        blockAckVariant(variant),
+        prepareNormalAckData(prepareNormalAckData)
     {}
 
     IOriginatorQoSAckPolicy *ackPolicy = nullptr;
@@ -67,6 +68,7 @@ class INET_API QoSContext
     IOriginatorBlockAckAgreementHandler *blockAckAgreementHandler = nullptr;
     TxopProcedure *txopProcedure = nullptr;
     const BlockAckVariant blockAckVariant;
+    const bool prepareNormalAckData;
     std::function<DataPreparationResult(FrameSequenceContext *)> prepareData;
     std::unique_ptr<PreparedDataTransmission> preparedData;
 };

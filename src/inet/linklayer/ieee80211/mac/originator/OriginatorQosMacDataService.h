@@ -44,6 +44,7 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     std::function<bool(const Packet *)> extractionEligible;
     std::function<bool(Packet *)> aMsduPermitted;
     std::function<bool(Packet *)> fragmentationPermitted;
+    std::function<void(Packet *)> finalizeSourceFrame;
     int64_t nextDataAllocationIndex = 0;
 
   protected:
@@ -52,9 +53,11 @@ class INET_API OriginatorQosMacDataService : public IOriginatorQosMacDataService
     virtual void assignSequenceNumber(const Ptr<Ieee80211DataOrMgmtHeader>& header);
     virtual std::vector<Packet *> *fragmentIfNeeded(Packet *frame);
     virtual Packet *aMsduAggregateIfNeeded(queueing::IPacketQueue *pendingQueue, Packet *selected);
+    std::vector<Packet *> *selectAggregationSources(queueing::IPacketQueue *queue, Packet *selected);
     virtual Packet *aMpduAggregateIfNeeded(std::vector<Packet *> *fragments);
 
   public:
+    void setSourceFinalization(std::function<void(Packet *)> finalize) { finalizeSourceFrame = finalize; }
     virtual void setFragmentationPermission(std::function<bool(Packet *)> permission) override { fragmentationPermitted = permission; }
     void setEligibility(std::function<bool(const Packet *)> eligible, std::function<bool(Packet *)> permission) {
         extractionEligible = eligible;

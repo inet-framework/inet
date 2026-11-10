@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "inet/linklayer/ieee80211/mesh/MeshForwarding.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/Ieee80211MeshAmsdu.h"
+#include "inet/linklayer/ieee80211/mac/aggregation/MsduDeaggregation.h"
+#include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshAggregationTag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
 #include <algorithm>
 
@@ -51,8 +55,24 @@ void MeshForwarding::handleMessageWhenUp(cMessage *message)
     expirePending();
 }
 void MeshForwarding::handleStartOperation(LifecycleOperation *) { recentFrames.clear(); }
-void MeshForwarding::handleStopOperation(LifecycleOperation *) { clearPending(); recentFrames.clear(); }
-void MeshForwarding::handleCrashOperation(LifecycleOperation *) { clearPending(); recentFrames.clear(); }
+void MeshForwarding::handleStopOperation(LifecycleOperation *) { clearPending(); recentFrames.clear(); mac->discardPendingMeshSources(); }
+void MeshForwarding::handleCrashOperation(LifecycleOperation *) { clearPending(); recentFrames.clear(); mac->discardPendingMeshSources(); }
+
+void MeshForwarding::preDelete(cComponent *root)
+{
+    if (root == this) {
+        Enter_Method_Silent();
+        // Isolated provider removal leaves MAC/HCF alive. Withdraw eligibility
+        // before callbacks, using the existing lifecycle state rather than a flag.
+        setOperationalState(NOT_OPERATING);
+        clearPending();
+        recentFrames.clear();
+        if (auto owner = mac.getNullable())
+            owner->discardPendingMeshSources();
+    }
+    // Whole-subtree teardown must not call sibling modules from a destructor.
+    OperationalBase::preDelete(root);
+}
 
 MeshForwarding::~MeshForwarding()
 {
@@ -235,13 +255,53 @@ void MeshForwarding::sendResolved(Packet *packet, MacAddress destination, const 
         header->setTid(priority->getUserPriority());
     auto control = makeShared<Ieee80211MeshControl>();
     control->setTtl(initialTtl);
-    control->setSequenceNumber(nextSequence++); // modulo-2^32, independent of hop MAC sequencing
-    if (destination.isMulticast())
+    // Unicast local sources remain distinguishable from committed transit until
+    // the originator commits its final plain or aggregate forwarding unit.
+    if (!destination.isMulticast()) {
+        auto metadata = packet->addTagIfAbsent<Ieee80211MeshAggregationTag>();
+        metadata->setPendingSourceIdentity(true);
+        metadata->setMsduCount(1);
+        metadata->setInitialMpduLength(-1);
+    }
+    else {
+        control->setSequenceNumber(nextSequence++);
         remember(mib->address, control->getSequenceNumber());
+    }
     packet->insertAtFront(control);
     packet->insertAtFront(header);
     packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
     mac->sendMeshData(packet);
+}
+
+void MeshForwarding::finalizeSourceFrame(Packet *packet)
+{
+    Enter_Method("finalizeSourceFrame");
+    auto pending = packet->findTag<Ieee80211MeshAggregationTag>();
+    if (!pending || !pending->getPendingSourceIdentity())
+        return;
+    if (!isSourceActive())
+        throw cRuntimeError("Cannot commit a local source identity while mesh forwarding is down");
+    auto header = packet->peekAtFront<Ieee80211MeshDataHeader>();
+    std::vector<Ieee80211MeshAmsduPart> parts;
+    if (header->getAMsduPresent() && !parseMeshAmsdu(packet, header, parts))
+        throw cRuntimeError("Cannot commit an invalid locally formed mesh A-MSDU");
+    uint32_t sequence = nextSequence++; // 2024 9.2.4.8.3: one value per forwarding unit.
+    if (header->getAMsduPresent()) {
+        for (const auto& part : parts) {
+            auto control = packet->removeDataAt<Ieee80211MeshControl>(part.controlOffset, B(6));
+            control->setSequenceNumber(sequence);
+            packet->insertDataAt(control, part.controlOffset);
+        }
+    }
+    else {
+        auto control = packet->removeDataAt<Ieee80211MeshControl>(header->getChunkLength(), B(6));
+        control->setSequenceNumber(sequence);
+        packet->insertDataAt(control, header->getChunkLength());
+    }
+    auto metadata = packet->getTagForUpdate<Ieee80211MeshAggregationTag>();
+    metadata->setPendingSourceIdentity(false);
+    metadata->setMsduCount(header->getAMsduPresent() ? parts.size() : 1);
+    metadata->setInitialMpduLength(-1);
 }
 
 void MeshForwarding::deliver(Packet *packet, MacAddress source, MacAddress destination, int tid)
@@ -260,13 +320,22 @@ void MeshForwarding::processDataFrame(Packet *packet, const Ptr<const Ieee80211D
     auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
     if (operationalState != OPERATING || !mesh || !mib->isMeshPeerEstablished(header->getTransmitterAddress())
             || header->getType() != ST_DATA_WITH_QOS || !mesh->getMeshControlPresent()
-            || header->getMoreFragments() || header->getFragmentNumber() != 0 || header->getAMsduPresent()
+            || header->getMoreFragments() || header->getFragmentNumber() != 0
             || !header->getFromDS() || header->getToDS() == header->getReceiverAddress().isMulticast()) {
         discard(packet); return;
     }
     auto remaining = packet->getDataLength() - header->getChunkLength() - B(4);
     if (remaining < B(6)) { discard(packet); return; }
-    auto control = packet->peekDataAt<Ieee80211MeshControl>(header->getChunkLength(), b(-1),
+    std::vector<Ieee80211MeshAmsduPart> parts;
+    if (header->getAMsduPresent()) {
+        auto actual = packet->findTag<physicallayer::Ieee80211ModeInd>();
+        if (!actual || !parseMeshAmsdu(packet, mesh, parts)
+                || !meshAmsduFitsTransport(packet, mesh, mib->getLocalMeshPhyCapabilities(), actual->getMode())) {
+            discard(packet); return;
+        }
+    }
+    auto control = header->getAMsduPresent() ? parts.front().control :
+        packet->peekDataAt<Ieee80211MeshControl>(header->getChunkLength(), b(-1),
             Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE);
     if (control->isIncorrect() || control->isIncomplete() || control->getAddressExtensionMode() != 0 || control->getTtl() == 0) { discard(packet); return; }
     bool group = header->getReceiverAddress().isMulticast();
@@ -284,12 +353,23 @@ void MeshForwarding::processDataFrame(Packet *packet, const Ptr<const Ieee80211D
             || simTime() >= pathSelection->getPrecursorExpiry(destination, header->getTransmitterAddress()))) {
         discard(packet); return;
     }
+    if (header->getAMsduPresent() && destination != mib->address) {
+        for (const auto& part : parts)
+            if (part.control->getTtl() <= 1) { discard(packet); return; }
+    }
     if (!remember(source, control->getSequenceNumber())) { discard(packet); return; }
     if (!group) {
         pathSelection->refreshPath(source);
         pathSelection->refreshPrecursor(destination, header->getTransmitterAddress());
         if (destination == mib->address) {
-            deliver(packet, source, destination, header->getTid());
+            if (header->getAMsduPresent()) {
+                MsduDeaggregation decoder;
+                std::unique_ptr<std::vector<Packet *>> siblings(decoder.deaggregateFrame(packet));
+                for (auto sibling : *siblings)
+                    deliver(sibling, source, destination, header->getTid());
+            }
+            else
+                deliver(packet, source, destination, header->getTid());
             return; // final delivery does not decrement Mesh TTL
         }
         pathSelection->refreshPath(destination);
@@ -302,14 +382,27 @@ void MeshForwarding::processDataFrame(Packet *packet, const Ptr<const Ieee80211D
         auto forwarded = packet->dup();
         forwarded->trim(); // discard popped PHY history before the next hop computes FCS
         auto outgoing = forwarded->removeAtFront<Ieee80211MeshDataHeader>();
-        auto outgoingControl = forwarded->removeAtFront<Ieee80211MeshControl>();
         outgoing->setTransmitterAddress(mib->address);
         outgoing->setRetry(false);
         if (!group)
             outgoing->setReceiverAddress(path->nextHop);
-        outgoingControl->setTtl(ttl);
-        forwarded->insertAtFront(outgoingControl);
         forwarded->insertAtFront(outgoing);
+        if (header->getAMsduPresent()) {
+            for (const auto& part : parts) {
+                auto outgoingControl = forwarded->removeDataAt<Ieee80211MeshControl>(part.controlOffset, B(6));
+                outgoingControl->setTtl(part.control->getTtl() - 1);
+                forwarded->insertDataAt(outgoingControl, part.controlOffset);
+            }
+            auto metadata = forwarded->addTagIfAbsent<Ieee80211MeshAggregationTag>();
+            metadata->setPendingSourceIdentity(false);
+            metadata->setMsduCount(parts.size());
+            metadata->setInitialMpduLength(-1);
+        }
+        else {
+            auto outgoingControl = forwarded->removeDataAt<Ieee80211MeshControl>(outgoing->getChunkLength(), B(6));
+            outgoingControl->setTtl(ttl);
+            forwarded->insertDataAt(outgoingControl, outgoing->getChunkLength());
+        }
         mac->sendMeshData(forwarded);
     }
     if (group)

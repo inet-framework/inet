@@ -59,6 +59,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
   public:
     static simsignal_t edcaCollisionDetectedSignal;
     static simsignal_t meshDataAttemptCompletedSignal;
+    static simsignal_t meshPayloadTransmittedSignal;
+    void discardPendingMeshSources();
     static simsignal_t secondaryChannelAccessDeferredSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
@@ -167,6 +169,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::set<const Packet *> getReferencedDataFrames() const;
     bool isFrameEligible(const Packet *packet, bool numbered) const;
     bool isAMsduPermitted(Packet *packet) const;
+    void discardMeshAggregate(Edcaf *owner, Packet *packet);
     bool hasQueuedData(MacAddress peer, Tid tid) const;
     bool hasNumberedData(MacAddress peer, Tid tid) const;
     bool hasObsoleteActionInFlight(MacAddress peer, Tid tid, bool originator) const;
