@@ -1,6 +1,6 @@
 # Implementation plan: error decisions and corruption in packet-level radio reception
 
-> **Kind:** procedure · **Status:** approved · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan procedure](../../doc/project/guide/write-an-implementation-plan.md), [IEEE 802.11 rules](../../doc/project/domain/ieee80211.md), [Packet design](../../doc/project/design/packet-anatomy.md)
+> **Kind:** procedure · **Status:** done · **Seal:** none · **Owns:** — · **Stands on:** [implementation plan procedure](../../doc/project/guide/write-an-implementation-plan.md), [IEEE 802.11 rules](../../doc/project/domain/ieee80211.md), [Packet design](../../doc/project/design/packet-anatomy.md)
 
 Checkout and revision: each pull request of section 6 has its own worktree, with the name of its branch: `inet-physicallayer-snir-interval`, `inet-physicallayer-part-error-decisions`, and `inet-physicallayer-content-errors`. The base is `master` at `91219b0fa7`. The last worktree still holds the implementation of draft 3 (PR #1443, head `b703ae8ccf`).
 
@@ -540,7 +540,7 @@ Implementation facts: Q3 moves 9 fingerprints, of the `ChunkCorruptionMode`, `By
 
 ### Q4 and Q5
 
-Q4 records the executed results, the design facts, and the gaps. Q5 moves the plan to `plan/done/` without a content change ([PR-SPLIT-MOVE](../../doc/project/rule/pull-request.md#pr-split-move)).
+Status: done. Q4 records the executed results, the design facts, and the gaps. Q5 moves the plan to `plan/done/` without a content change ([PR-SPLIT-MOVE](../../doc/project/rule/pull-request.md#pr-split-move)).
 
 ## 7. Verification methods and expected results
 
@@ -607,7 +607,7 @@ The earlier approval covered draft 3, the commits C0 to C7 of that draft, and th
 
 ## 9. Results
 
-Status: pull requests 1 and 2 are done on their branches, not merged. Pull request 3 is open. Master `91219b0fa7` contains the four repairs #1445 to #1448.
+Status: the three pull requests are done on their branches, not merged. Master `91219b0fa7` contains the four repairs #1445 to #1448.
 
 **Pull request 1, `topic/physicallayer-snir-interval` (S1).** All runs use OMNeT++ 6.x on master `91219b0fa7`:
 
@@ -628,15 +628,26 @@ Status: pull requests 1 and 2 are done on their branches, not merged. Pull reque
 - E2 (D22), a hidden interferer over the last third of each ERP-OFDM frame at 54 Mbps, with six interferer powers: with the default `"min"` SNIR modes, master and P3 give the same counts in all runs. With the `"mean"` modes, P3 loses more frames, for example 45.9 % against 11.9 % with the strongest interferer, because the SNIR of the preamble and the header no longer raises the mean SNIR of the data. The release note of P3 tells this.
 - `check-pull-request.sh` passes with the description; its one note asks about the two kinds of fingerprint runs of P3, and the P3 message answers it. The other gates give the results of pull request 1.
 
-Facts found during pull requests 1 and 2:
+**Pull request 3, `topic/physicallayer-content-errors` (Q1 to Q5, #1443).** It stands on P4:
+
+- Each commit builds alone without warnings. The fingerprint suite on Q2 gives 1767 PASS, so Q1 and Q2 move no fingerprint.
+- On Q3, the debug and release builds have no warnings. The unit suite gives 155 PASS and the module suite 849 PASS, with `RegionCorruption_1`, `UnitCorruption_1`, the two `ContentErrors` tests, and `ConcurrentRadio_7`. The protocol suite gives the same 67 unexpected failures as master. The fingerprint suite gives 1767 PASS with the updated store.
+- Q3 moves 9 fingerprints: the three of each of `ChunkCorruptionMode`, `ByteCorruptionMode`, and `BitCorruptionMode` of `examples/wireless/corruptionmode`. The full run before the update moved only these.
+- `UnitCorruption_1`: a region of 8000 units with the unit rate 0.005 gets a mean of 39.94 flips over 10000 samples, where 40 is expected, and at most 64. `ContentErrors_ApskScalarRadio_1`: under the interferer, 980 of 1000 bytes and 2981 of 8000 bits differ from the transmitted content. So the defect of draft 3, which flipped all units, is gone.
+- Statistics and charts in the copy of the GitHub job, on the statistics and media commits of pull request 2: with Q3, only the three statistical tests of the same configurations fail. The branch `topic/physicallayer-content-errors` of the statistics repository updates them in `1cd8ff4`, and then they pass. The chart suite gives the 19 failures of master, so no chart moves. The commit is local (R3).
+- `check-pull-request.sh` passes; its one note is the note of P3. The other gates give the results of pull request 1.
+
+Facts found during the three pull requests:
 
 - `ErrorModelBase` must compute the region rate in the numerical form of the whole-part rates, 1 − (1 − BER)^length. A form that keeps very small rates above 0 draws a number where master draws none, and moves fingerprints without a change of a probability.
 - When the header rate is exactly 0, the data draws the same random number against the same rate as the whole signal on master. Thus most IEEE 802.11 configurations keep their fingerprints.
 - The attempted flag of a decision depends on the time of the query: for the frame of an interferer, a query at the end of its arrival gives true, when the receiver no longer receives the first frame. A test of a reception without an attempt must ask at the start of the arrival.
 - `StochasticErrorModel` needs all three of its rates, because the receiver reports the bit and symbol error rates of each reception (F5).
 - Tests must not run in a worktree while a suite runs there: the single runs replace the log and the work folders of the suite.
+- A test that keeps a reference to the content of a chunk must keep the chunk too: `peekAt<BytesChunk>(...)->getBytes()` returns a reference into a chunk that the statement destroys.
+- The content error tests of draft 3 pass on Q3 without a change of their expected flags and draws.
 
-**The implementation of draft 3.** PR #1443 holds it at `b703ae8ccf`, which the reference `refs/backup/physicallayer-content-errors-pr1443-v4` keeps. The record of its checks is in the plan of that commit. In short: each commit built alone; the unit, module, and protocol suites gave the results of master with the new tests; the behavior commit moved 217 fingerprints, 141 statistics baselines, and 6 charts. The earlier references `-draft2`, `-draft3`, and `-pr1443-v1` to `-pr1443-v3` stay until the landing. The statistics commit `e8f63b9` for #1446 is on the statistics master. The statistics commits `07c613c` and `155109b` and the chart commit `96688de` of draft 3 are local and stale (R7).
+**The implementation of draft 3.** PR #1443 held it at `b703ae8ccf`, which the reference `refs/backup/physicallayer-content-errors-pr1443-v4` keeps. The record of its checks is in the plan of that commit. In short: each commit built alone; the unit, module, and protocol suites gave the results of master with the new tests; the behavior commit moved 217 fingerprints, 141 statistics baselines, and 6 charts. The earlier references `-draft2`, `-draft3`, and `-pr1443-v1` to `-pr1443-v3` stay until the landing. The statistics commit `e8f63b9` for #1446 is on the statistics master. The local statistics and chart commits of draft 3 were stale (R7), and their branches are removed.
 
 **The review of 2026-11-10.** Two reviews read the source of draft 3. Their findings, and the place of each repair:
 
