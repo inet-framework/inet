@@ -8,6 +8,7 @@
 #ifndef __INET_IRADIO_H
 #define __INET_IRADIO_H
 
+#include <optional>
 #include <vector>
 
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IWirelessSignal.h"
@@ -119,6 +120,16 @@ class INET_API IRadio : public IPhysicalLayer, public virtual IPrintableObject
         RADIO_MODE_SWITCHING // this radio mode must be the very last
     };
 
+    struct RadioModeTransition {
+        RadioMode targetMode;
+        simtime_t endTime; // Absolute completion deadline, not a remaining duration.
+    };
+
+    struct RadioModeState {
+        RadioMode mode;
+        std::optional<RadioModeTransition> transition;
+    };
+
     /**
      * This enumeration specifies the reception state of the radio. This also
      * determines the state of the radio medium.
@@ -200,6 +211,24 @@ class INET_API IRadio : public IPhysicalLayer, public virtual IPrintableObject
      * with the last radioModeChangedSignal.
      */
     virtual RadioMode getRadioMode() const = 0;
+
+    /**
+     * Returns the effective initialized switching duration between stable modes
+     * OFF through TRANSCEIVER. An idempotent request takes zero time.
+     * Unavailable (including unsupported providers, uninitialized timing, or
+     * invalid endpoints such as SWITCHING) is distinct from a zero duration.
+     */
+    virtual std::optional<simtime_t> getRadioModeSwitchingTime(RadioMode from, RadioMode to) const = 0;
+
+    /**
+     * Returns copied mode and optional active target/absolute deadline, or
+     * unavailable if this observation is unsupported, uninitialized or transiently
+     * incomplete. A transition ending now remains active until its event runs.
+     * Existing mode signals are synchronous and need not follow timer insertion
+     * or transceiver-state updates; consumers defer before acting on them.
+     * This snapshot does not assert transmission or reception readiness.
+     */
+    virtual std::optional<RadioModeState> getRadioModeState() const = 0;
 
     /**
      * Changes the current radio mode. The actual change may take zero or more time.
