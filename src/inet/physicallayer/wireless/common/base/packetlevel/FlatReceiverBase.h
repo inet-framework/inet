@@ -30,7 +30,7 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
 
     using NarrowbandReceiverBase::computeIsReceptionPossible;
 
-    virtual Packet *computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const override;
+    virtual Packet *computeReceivedPacket(const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const override;
 
     /** @name Regions of the signal parts */
     //@{
@@ -70,9 +70,12 @@ class INET_API FlatReceiverBase : public NarrowbandReceiverBase
      * returns true if no region failed. A region fails if the reception of its
      * time interval is not successful, that is, its SNIR is not above the
      * threshold, or else if one draw against its error rate fails. Both use the
-     * SNIR of the time of the region. The region is the whole part.
+     * SNIR of the time of the region. A region is the whole part in the packet
+     * corruption mode, and one chunk of the part in the other modes; a part that
+     * the packet does not hold is one region. The function adds the failed
+     * regions that the packet holds to errorRegions.
      */
-    virtual bool computeIsPartSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const;
+    virtual bool computeIsPartSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir, std::vector<ErrorRegion>& errorRegions) const;
     //@}
 
   public:

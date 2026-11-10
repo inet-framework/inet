@@ -35,15 +35,6 @@ class INET_API ErrorModelBase : public Module, public IErrorModel
     virtual double getScalarSnir(const ISnir *snir) const;
     virtual double getScalarSnir(const ISnir *snir, simtime_t startTime, simtime_t endTime) const;
     virtual void checkRegionPart(IRadioSignal::SignalPart part) const;
-    virtual bool hasProbabilisticError(b length, double ber) const;
-
-    virtual Packet *corruptBits(const Packet *packet, double ber, bool& isCorrupted) const;
-    virtual Packet *corruptBytes(const Packet *packet, double ber, bool& isCorrupted) const;
-    virtual Packet *corruptChunks(const Packet *packet, double ber, bool& isCorrupted) const;
-    virtual Packet *corruptPacket(const Packet *packet, bool& isCorrupted) const;
-
-    virtual Packet *computeCorruptedPacket(const Packet *packet, double ber) const;
-    virtual Packet *computeCorruptedPacket(const ISnir *snir) const override;
 
     /**
      * Returns the received form of a failed region of the packet in the

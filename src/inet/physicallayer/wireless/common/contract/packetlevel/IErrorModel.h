@@ -40,8 +40,6 @@ class INET_API IErrorModel : public virtual IPrintableObject
      */
     virtual CorruptionMode getCorruptionMode() const = 0;
 
-    virtual Packet *computeCorruptedPacket(const ISnir *snir) const = 0;
-
     /**
      * Returns the received packet that contains the provided failed regions of
      * the transmitted packet, in the representation of the corruption mode.

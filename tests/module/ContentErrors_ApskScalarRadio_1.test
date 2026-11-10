@@ -1,0 +1,354 @@
+%description:
+Content errors of the chunk corruption mode with ApskScalarRadio. Sender 1 sends
+one UDP packet to the receiver at a high SNIR. In the runs with interference,
+sender 2 starts to transmit close to the receiver, either during the last part
+of the data or during the header. A listener prints the flag of each chunk of the
+received frame and the number of random draws of the receiver, which uses its
+own random number generator.
+
+Run 0, packet mode, late interference: the frame has a packet-level bit error.
+Run 1, chunk mode, late interference: the chunks before the interference stay
+correct, the chunk under it is incorrect, and the frame has no packet-level bit
+error.
+Run 2, the same with separate reception parts: the same flags and draws.
+Run 3, chunk mode, interference over the header: the header fails, the frame
+has a packet-level bit error, and the data keeps its transmitted flags.
+Runs 4 and 5, chunk mode without interference, with an error model that gives
+the rates 0, 1, and 0.5 to the regions in turn, without and with separate
+reception parts: a region with the rate 1 is incorrect without a draw, and only
+a region with the rate 0.5 draws a number.
+Runs 6 and 7, packet mode without interference, with an error model that gives
+the rate 0 to the header and the rate 0.5 to the data, without and with separate
+reception parts: the header and the data are one region each, only the data
+draws a number, and the data passes its draw.
+Runs 8 and 9, byte and bit modes, late interference: the decisions are those of
+run 1, the chunk under the interference becomes a raw chunk with flipped bytes
+or bits, marked incorrect, and the other chunks stay typed and correct. The
+flips follow the bit error rate of the chunk under the interference, so some
+units keep their values. The corruption draws in the generator of the error
+model, not of the receiver.
+
+%file: ContentErrors.cc
+#include "inet/common/Simsignals.h"
+#include "inet/common/packet/Packet.h"
+#include "inet/common/packet/chunk/BitsChunk.h"
+#include "inet/common/packet/chunk/BytesChunk.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
+#include "inet/physicallayer/wireless/apsk/packetlevel/errormodel/ApskErrorModel.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IRadio.h"
+#include "inet/physicallayer/wireless/common/contract/packetlevel/IReception.h"
+
+namespace ContentErrors_ApskScalarRadio_1 {
+
+using namespace inet;
+using namespace inet::physicallayer;
+
+// Prints the flags of the chunks of each frame that the radio receives.
+class ContentFlagPrinter : public cSimpleModule, public cListener
+{
+  protected:
+    using cListener::finish;
+
+    virtual void initialize() override
+    {
+        getModuleByPath(par("radioModule"))->subscribe(receptionEndedSignal, this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        auto packet = check_and_cast<Packet *>(details);
+        // the packet-level flag, without the flags of the content
+        std::cout << par("label").stdstringValue() << ": " << packet->getName() << (packet->cPacket::hasBitError() ? " has a packet-level bit error" : " has no packet-level bit error") << std::endl;
+        const auto& content = packet->peekAll(Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+        std::deque<Ptr<const Chunk>> chunks;
+        if (content->getChunkType() == Chunk::CT_SEQUENCE)
+            chunks = staticPtrCast<const SequenceChunk>(content)->getChunks();
+        else
+            chunks.push_back(content);
+        // the units of each raw chunk that differ from the transmitted content
+        int flags = Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+        auto transmittedPacket = check_and_cast<const IReception *>(object)->getTransmission()->getPacket();
+        b offset = b(0);
+        for (const auto& chunk : chunks) {
+            std::cout << par("label").stdstringValue() << ":   " << chunk->getClassName() << " " << chunk->getChunkLength() << (chunk->isCorrect() ? " correct" : " incorrect");
+            if (auto bytesChunk = dynamicPtrCast<const BytesChunk>(chunk)) {
+                const auto& bytes = bytesChunk->getBytes();
+                const auto& transmittedChunk = transmittedPacket->peekAt<BytesChunk>(offset, chunk->getChunkLength(), flags);
+                const auto& transmittedBytes = transmittedChunk->getBytes();
+                int numDifferent = 0;
+                for (size_t i = 0; i < bytes.size(); i++)
+                    numDifferent += bytes[i] != transmittedBytes[i] ? 1 : 0;
+                std::cout << ", " << numDifferent << " of " << bytes.size() << " bytes differ";
+            }
+            else if (auto bitsChunk = dynamicPtrCast<const BitsChunk>(chunk)) {
+                const auto& bits = bitsChunk->getBits();
+                const auto& transmittedChunk = transmittedPacket->peekAt<BitsChunk>(offset, chunk->getChunkLength(), flags);
+                const auto& transmittedBits = transmittedChunk->getBits();
+                int numDifferent = 0;
+                for (size_t i = 0; i < bits.size(); i++)
+                    numDifferent += bits[i] != transmittedBits[i] ? 1 : 0;
+                std::cout << ", " << numDifferent << " of " << bits.size() << " bits differ";
+            }
+            std::cout << std::endl;
+            offset += chunk->getChunkLength();
+        }
+    }
+
+    virtual void finish() override
+    {
+        std::cout << par("label").stdstringValue() << ": receiver draws " << getModuleByPath(par("receiverModule"))->getRNG(0)->getNumbersDrawn() << std::endl;
+    }
+};
+
+Define_Module(ContentFlagPrinter);
+
+// Gives the rates 0, 1, and 0.5 to the regions in turn.
+class CyclingRateErrorModel : public ApskErrorModel
+{
+  protected:
+    mutable int numRegions = 0;
+
+  public:
+    using ApskErrorModel::computePacketErrorRate;
+    virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const override
+    {
+        static const double rates[] = {0, 1, 0.5};
+        return rates[numRegions++ % 3];
+    }
+};
+
+Define_Module(CyclingRateErrorModel);
+
+// Gives the rate 0 to the header regions and the rate 0.5 to the data regions.
+class HalfDataRateErrorModel : public ApskErrorModel
+{
+  public:
+    using ApskErrorModel::computePacketErrorRate;
+    virtual double computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const override
+    {
+        return part == IRadioSignal::SIGNAL_PART_HEADER ? 0 : 0.5;
+    }
+};
+
+Define_Module(HalfDataRateErrorModel);
+
+} // namespace ContentErrors_ApskScalarRadio_1
+
+%file: test.ned
+
+import inet.networklayer.configurator.ipv4.Ipv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.physicallayer.wireless.apsk.packetlevel.errormodel.ApskErrorModel;
+import inet.physicallayer.wireless.common.medium.ScalarRadioMedium;
+
+simple ContentFlagPrinter
+{
+    parameters:
+        string radioModule;
+        string receiverModule;
+        string label;
+        @class(ContentFlagPrinter);
+}
+
+module CyclingRateErrorModel extends ApskErrorModel
+{
+    parameters:
+        @class(CyclingRateErrorModel);
+}
+
+module HalfDataRateErrorModel extends ApskErrorModel
+{
+    parameters:
+        @class(HalfDataRateErrorModel);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: ScalarRadioMedium;
+        configurator: Ipv4NetworkConfigurator;
+        hostSender1: WirelessHost;
+        hostSender2: WirelessHost;
+        hostReceiver: WirelessHost;
+        printer: ContentFlagPrinter;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 4300us
+ned-path = .;../../../../src
+num-rngs = 2
+*.hostReceiver.wlan[0].radio.receiver.rng-0 = 1
+
+*.printer.radioModule = "hostReceiver.wlan[0].radio"
+*.printer.receiverModule = "hostReceiver.wlan[0].radio.receiver"
+*.printer.label = "run ${run=0..9}"
+
+**.arp.typename = "GlobalArp"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobility.typename = "StationaryMobility"
+*.hostSender1.mobility.initialX = 200m
+*.hostReceiver.mobility.initialX = 400m
+*.hostSender2.mobility.initialX = 450m
+
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
+
+# nic
+*.host*.wlan[*].typename = "AckingWirelessInterface"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radio.typename = "ApskScalarRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.modulation = "BPSK"
+*.host*.wlan[*].radio.transmitter.preambleDuration = 0s
+*.host*.wlan[*].radio.transmitter.headerLength = 96b
+*.host*.wlan[*].radio.centerFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -85dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+*.host*.wlan[*].radio.transmitter.power = 10mW
+
+# the variants of the runs
+*.host*.wlan[*].radio.receiver.errorModel.corruptionMode = ${mode="packet", "chunk", "chunk", "chunk", "chunk", "chunk", "packet", "packet", "byte", "bit" ! run}
+*.host*.wlan[*].radio.separateReceptionParts = ${parts=false, false, true, false, false, true, false, true, false, false ! run}
+*.hostReceiver.wlan[*].radio.receiver.errorModel.typename = ${model="ApskErrorModel", "ApskErrorModel", "ApskErrorModel", "ApskErrorModel", "CyclingRateErrorModel", "CyclingRateErrorModel", "HalfDataRateErrorModel", "HalfDataRateErrorModel", "ApskErrorModel", "ApskErrorModel" ! run}
+
+# sender 1 sends one packet to the receiver
+*.hostSender1.numApps = 1
+*.hostSender1.app[0].typename = "UdpBasicApp"
+*.hostSender1.app[0].destAddresses = "hostReceiver"
+*.hostSender1.app[0].destPort = 1000
+*.hostSender1.app[0].messageLength = 1000B
+*.hostSender1.app[0].startTime = 0s
+*.hostSender1.app[0].stopTime = 1us
+*.hostSender1.app[0].sendInterval = 1s
+
+# sender 2 interferes: late in the data, over the header, or not at all
+*.hostSender2.numApps = 1
+*.hostSender2.app[0].typename = "UdpBasicApp"
+*.hostSender2.app[0].destAddresses = "hostSender1"
+*.hostSender2.app[0].destPort = 1000
+*.hostSender2.app[0].messageLength = 1000B
+*.hostSender2.app[0].startTime = ${interference=3500us, 3500us, 3500us, 20us, 1s, 1s, 1s, 1s, 3500us, 3500us ! run}
+*.hostSender2.app[0].stopTime = ${interference} + 1us
+*.hostSender2.app[0].sendInterval = 1s
+
+*.hostReceiver.numApps = 1
+*.hostReceiver.app[0].typename = "UdpSink"
+*.hostReceiver.app[0].localPort = 1000
+
+%extraargs: -r 0..9
+
+%contains: stdout
+run 0: UdpBasicAppData-0 has a packet-level bit error
+run 0:   inet::ApskPhyHeader 12 B correct
+run 0:   inet::AckingMacHeader 10 B correct
+run 0:   inet::Ipv4Header 20 B correct
+run 0:   inet::UdpHeader 8 B correct
+run 0:   inet::ApplicationPacket 1000 B correct
+%contains: stdout
+run 0: receiver draws 0
+%contains: stdout
+run 1: UdpBasicAppData-0 has no packet-level bit error
+run 1:   inet::ApskPhyHeader 12 B correct
+run 1:   inet::AckingMacHeader 10 B correct
+run 1:   inet::Ipv4Header 20 B correct
+run 1:   inet::UdpHeader 8 B correct
+run 1:   inet::ApplicationPacket 1000 B incorrect
+%contains: stdout
+run 1: receiver draws 0
+%contains: stdout
+run 2: UdpBasicAppData-0 has no packet-level bit error
+run 2:   inet::ApskPhyHeader 12 B correct
+run 2:   inet::AckingMacHeader 10 B correct
+run 2:   inet::Ipv4Header 20 B correct
+run 2:   inet::UdpHeader 8 B correct
+run 2:   inet::ApplicationPacket 1000 B incorrect
+%contains: stdout
+run 2: receiver draws 0
+%contains: stdout
+run 3: UdpBasicAppData-0 has a packet-level bit error
+run 3:   inet::ApskPhyHeader 12 B correct
+run 3:   inet::AckingMacHeader 10 B correct
+run 3:   inet::Ipv4Header 20 B correct
+run 3:   inet::UdpHeader 8 B correct
+run 3:   inet::ApplicationPacket 1000 B correct
+%contains: stdout
+run 3: receiver draws 0
+%contains: stdout
+run 4: UdpBasicAppData-0 has no packet-level bit error
+run 4:   inet::ApskPhyHeader 12 B correct
+run 4:   inet::AckingMacHeader 10 B incorrect
+run 4:   inet::Ipv4Header 20 B incorrect
+run 4:   inet::UdpHeader 8 B correct
+run 4:   inet::ApplicationPacket 1000 B incorrect
+%contains: stdout
+run 4: receiver draws 1
+%contains: stdout
+run 5: UdpBasicAppData-0 has no packet-level bit error
+run 5:   inet::ApskPhyHeader 12 B correct
+run 5:   inet::AckingMacHeader 10 B incorrect
+run 5:   inet::Ipv4Header 20 B incorrect
+run 5:   inet::UdpHeader 8 B correct
+run 5:   inet::ApplicationPacket 1000 B incorrect
+%contains: stdout
+run 5: receiver draws 1
+%contains: stdout
+run 6: UdpBasicAppData-0 has no packet-level bit error
+run 6:   inet::ApskPhyHeader 12 B correct
+run 6:   inet::AckingMacHeader 10 B correct
+run 6:   inet::Ipv4Header 20 B correct
+run 6:   inet::UdpHeader 8 B correct
+run 6:   inet::ApplicationPacket 1000 B correct
+%contains: stdout
+run 6: receiver draws 1
+%contains: stdout
+run 7: UdpBasicAppData-0 has no packet-level bit error
+run 7:   inet::ApskPhyHeader 12 B correct
+run 7:   inet::AckingMacHeader 10 B correct
+run 7:   inet::Ipv4Header 20 B correct
+run 7:   inet::UdpHeader 8 B correct
+run 7:   inet::ApplicationPacket 1000 B correct
+%contains: stdout
+run 7: receiver draws 1
+%contains: stdout
+run 8: UdpBasicAppData-0 has no packet-level bit error
+run 8:   inet::ApskPhyHeader 12 B correct
+run 8:   inet::AckingMacHeader 10 B correct
+run 8:   inet::Ipv4Header 20 B correct
+run 8:   inet::UdpHeader 8 B correct
+run 8:   inet::BytesChunk 1000 B incorrect, 980 of 1000 bytes differ
+%contains: stdout
+run 8: receiver draws 0
+%contains: stdout
+run 9: UdpBasicAppData-0 has no packet-level bit error
+run 9:   inet::ApskPhyHeader 12 B correct
+run 9:   inet::AckingMacHeader 10 B correct
+run 9:   inet::Ipv4Header 20 B correct
+run 9:   inet::UdpHeader 8 B correct
+run 9:   inet::BitsChunk 1000 B incorrect, 2981 of 8000 bits differ
+%contains: stdout
+run 9: receiver draws 0
+
+%not-contains: stdout
+it doesn't own
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
