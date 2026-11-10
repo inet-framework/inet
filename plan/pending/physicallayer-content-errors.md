@@ -502,7 +502,7 @@ Implementation facts: `ErrorModelBase` computes the region rate as 1 − (1 − 
 
 ### P4
 
-P4 records the executed results of pull request 2 in section 9. The plan stays in `plan/pending/`.
+Status: done. P4 records the executed results of pull requests 1 and 2 in section 9. The plan stays in `plan/pending/`.
 
 ### Q1 (pull request 3)
 
@@ -559,7 +559,7 @@ The statistical and chart suites run in the copy of the GitHub job on P3 and Q3.
 The statistical comparison checks that P3 keeps the distributions (D22). It runs one time, with release builds of master and of P3 in the copy of the GitHub job, and its files stay outside the repository:
 
 - **E1, no interference:** one transmitter sends 20000 broadcast UDP packets of 100 bytes to one receiver, at a distance that gives a loss ratio of about 30 %. The runs: IEEE 802.11 ERP-OFDM at 6 Mbps and at 54 Mbps with the NIST model, HR/DSSS at 11 Mbps, and `ApskScalarRadio`. Expected: the loss ratio of P3 is equal to the loss ratio of master within three standard deviations of the binomial distribution.
-- **E2, an interferer over the end of each frame:** a hidden transmitter overlaps the last third of each frame. Expected: the loss ratios differ, because the header and the first part of the data no longer see the SNIR of the end. The record gives both ratios.
+- **E2, an interferer over the end of each frame:** a hidden transmitter overlaps the last third of each frame. Expected: with the `"min"` SNIR modes, the loss ratios are equal, because the minimum SNIR of the data is the minimum SNIR of the whole signal. With the `"mean"` modes, they differ, because the data no longer sees the SNIR of the preamble and the header. The record gives both ratios.
 
 ## 8. Risks, unresolved decisions, and approval scope
 
@@ -605,7 +605,34 @@ The earlier approval covered draft 3, the commits C0 to C7 of that draft, and th
 
 ## 9. Results
 
-Status: draft 4 is not implemented. Master `91219b0fa7` contains the four repairs #1445 to #1448.
+Status: pull requests 1 and 2 are done on their branches, not merged. Pull request 3 is open. Master `91219b0fa7` contains the four repairs #1445 to #1448.
+
+**Pull request 1, `topic/physicallayer-snir-interval` (S1).** All runs use OMNeT++ 6.x on master `91219b0fa7`:
+
+- The debug and release builds have no warnings. The unit suite gives 153 PASS, and the module suite 842 PASS with `SnirInterval_1`.
+- The protocol suite gives the same 67 unexpected failures as master, test by test. The fingerprint suite gives 1767 PASS, so S1 moves no fingerprint; `examples/ipv6/mipv6 -c Handover` fails as on master, and 22 configurations need features that the build does not have.
+- `SnirInterval_1` gives 33.93 dB before the interferer and −12.04 dB under it, which agree with a calculation by hand. Without the rule for an interval of one point, those intervals give an infinite minimum and a mean that is not a number.
+- `check-pull-request.sh` passes with the description. `check-source-seals.sh`, `check-architecture.sh`, and `check-naming.sh` pass, and `check-interfaces.sh` reports the same 16 old violations as master.
+
+**Pull request 2, `topic/physicallayer-part-error-decisions` (P0 to P4).** It stands on S1:
+
+- Each commit builds alone without warnings. The fingerprint suite on P2 gives 1767 PASS, so P1 and P2 move no fingerprint; this checks the SERVICE move.
+- On P3, the debug and release builds have no warnings. The unit suite gives 154 PASS and the module suite 845 PASS, with `RegionErrorRates_1`, `RegionErrorRates_2`, and the two `PartErrorDecisions` tests. The protocol suite gives the same 67 unexpected failures as master. The fingerprint suite gives 1767 PASS with the updated store.
+- A13: `RegionErrorRates_2` finds no difference for APSK, the stochastic model with `packetErrorRate`, IEEE 802.15.4, and IEEE 802.11 with DSSS, HR/DSSS, ERP-OFDM, HT, and VHT modes and the NIST, Yans, and BER table models. So the DATA formula holds for all these modes (R6).
+- P3 moves 147 fingerprints of 49 configurations: 135 of 45 wireless configurations with a flat radio and an error model, and the 12 of the four configurations of `examples/wireless/corruptionmode`. The update tool also changed the three entries of `examples/ipv6/mipv6 -c Handover`, which fails on master; the store keeps their old values.
+- Statistics and charts in the copy of the GitHub job (ubuntu 24.04, clang 16, release build, OMNeT++ `omnetpp-6.x` `66ab32fb91`, opp_repl `github_ci` `39e15bc`), with the rule D17. With P3, 141 statistical tests fail that pass on master: 97 change only in the cache counters of the radio medium, and 44 change their trajectory, all of them with moved fingerprints. The branch `topic/physicallayer-part-error-decisions` of the statistics repository updates them in `71f398c` and `8d75f17`. Then the suite gives 845 PASS and the same 81 unexpected failures as master. 6 charts fail that pass on master: two of coexistence, one of ieee802154, two of power, and BMac of sensornetwork. The same branch of the media repository updates them in `0c0005b`, and then the chart suite gives the 19 failures of master. These commits are local (R3).
+- Not updated (D17): the fingerprints of `showcases/visualizer/canvas/networkpathactivity -c ChangingPaths`, `showcases/visualizer/canvas/spectrum -c PowerDensityMap`, and `tutorials/configurator -c Step9` move with P3, but their statistical tests already fail on master.
+- E1 (D22), master against P3, 20000 broadcast packets in each run, a sweep of the distance for ERP-OFDM at 6 Mbps and 54 Mbps, HR/DSSS at 11 Mbps, and `ApskScalarRadio`: 58 of the 84 runs have a loss ratio between 0.5 % and 99.5 %. Their z values have the mean −0.01 and the standard deviation 0.80; the largest is 2.48, and one is above 2. At 54 Mbps, master and P3 give the same counts in all runs, because the header rate is exactly 0. So P3 keeps the loss ratios.
+- E2 (D22), a hidden interferer over the last third of each ERP-OFDM frame at 54 Mbps, with six interferer powers: with the default `"min"` SNIR modes, master and P3 give the same counts in all runs. With the `"mean"` modes, P3 loses more frames, for example 45.9 % against 11.9 % with the strongest interferer, because the SNIR of the preamble and the header no longer raises the mean SNIR of the data. The release note of P3 tells this.
+- `check-pull-request.sh` passes with the description; its one note asks about the two kinds of fingerprint runs of P3, and the P3 message answers it. The other gates give the results of pull request 1.
+
+Facts found during pull requests 1 and 2:
+
+- `ErrorModelBase` must compute the region rate in the numerical form of the whole-part rates, 1 − (1 − BER)^length. A form that keeps very small rates above 0 draws a number where master draws none, and moves fingerprints without a change of a probability.
+- When the header rate is exactly 0, the data draws the same random number against the same rate as the whole signal on master. Thus most IEEE 802.11 configurations keep their fingerprints.
+- The attempted flag of a decision depends on the time of the query: for the frame of an interferer, a query at the end of its arrival gives true, when the receiver no longer receives the first frame. A test of a reception without an attempt must ask at the start of the arrival.
+- `StochasticErrorModel` needs all three of its rates, because the receiver reports the bit and symbol error rates of each reception (F5).
+- Tests must not run in a worktree while a suite runs there: the single runs replace the log and the work folders of the suite.
 
 **The implementation of draft 3.** PR #1443 holds it at `b703ae8ccf`, which the reference `refs/backup/physicallayer-content-errors-pr1443-v4` keeps. The record of its checks is in the plan of that commit. In short: each commit built alone; the unit, module, and protocol suites gave the results of master with the new tests; the behavior commit moved 217 fingerprints, 141 statistics baselines, and 6 charts. The earlier references `-draft2`, `-draft3`, and `-pr1443-v1` to `-pr1443-v3` stay until the landing. The statistics commit `e8f63b9` for #1446 is on the statistics master. The statistics commits `07c613c` and `155109b` and the chart commit `96688de` of draft 3 are local and stale (R7).
 
