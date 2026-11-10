@@ -489,14 +489,16 @@ Verification: the fingerprints must keep all values. The module tests of P3 chec
 
 ### P3
 
-Status: open. Purpose and scope: `FlatReceiverBase::computeReceptionDecision()` with the chain of the parts and `computeIsPartSuccessful()` (section 4.5), with one region for each part in all four modes. The decision draws only for an attempted reception. Remove the override of `computeIsReceptionSuccessful()` with its error-model draw. The corruption of a failed reception stays as on master until Q3. Update all fingerprints that move. Release note `doc/whatsnew/incompatible/physicallayer-part-error-decisions.txt`, the users guide paragraph, and the migration guide section.
+Status: done. Purpose and scope: `FlatReceiverBase::computeReceptionDecision()` with the chain of the parts and `computeIsPartSuccessful()` (section 4.5), with one region for each part in all four modes. The decision draws only for an attempted reception. Remove the override of `computeIsReceptionSuccessful()` with its error-model draw. The corruption of a failed reception stays as on master until Q3. Update all fingerprints that move. Release note `doc/whatsnew/incompatible/physicallayer-part-error-decisions.txt`, the users guide paragraph, and the migration guide section.
 
 Verification:
 
-- A new module test `tests/module/PartErrorDecisions_ApskScalarRadio_1.test` sends one UDP packet with `ApskScalarRadio` and prints the decisions and the draws of the receiver. Its runs: late interference, with and without separate parts; interference over the header; an error model with the rate 0 for the header and 0.5 for the data, without and with separate parts; and a reception that the receiver does not attempt, which must draw nothing.
-- A new module test `tests/module/PartErrorDecisions_Ieee80211Radio_1.test` sends a PSDU without a MAC, so that no backoff or retry changes the timing. It runs ERP-OFDM, HT, and HR/DSSS modes, the NIST, Yans, and BER table models, and the dimensional radio.
+- A new module test `tests/module/PartErrorDecisions_ApskScalarRadio_1.test` sends one UDP packet with `ApskScalarRadio` and prints the decisions and the draws of the receiver. Its runs: late interference, with and without separate parts; interference over the header; an error model with the rate 0 for the header and 0.5 for the data, without and with separate parts; and a reception that the receiver does not attempt, which must draw nothing. For the last run, the listener asks for the decision of the second frame when its arrival starts, because the attempted flag depends on the time of the query.
+- A new module test `tests/module/PartErrorDecisions_Ieee80211Radio_1.test` sends a PSDU without a MAC, so that no backoff or retry changes the timing. It runs ERP-OFDM, HT, and HR/DSSS modes, the NIST, Yans, and BER table models, and the dimensional radio with late interference, and ERP-OFDM without interference and with interference from the header on.
 - The full fingerprint run shows which configurations move. Each moved configuration must be a wireless configuration with errors in the reception, or a configuration of `examples/wireless/corruptionmode`.
 - The statistical comparison of section 7 (D22).
+
+Implementation facts: `ErrorModelBase` computes the region rate as 1 − (1 − BER)^length in the numerical form of the whole-part rates, so a very small bit error rate gives exactly 0 and draws no number, as on master. When the header rate is exactly 0, the data draws the same random number against the same rate as the whole signal on master. Thus most IEEE 802.11 configurations keep their fingerprints, and P3 moves 147 fingerprints of 49 configurations, where draft 3 moved 217 of 78.
 
 ### P4
 
