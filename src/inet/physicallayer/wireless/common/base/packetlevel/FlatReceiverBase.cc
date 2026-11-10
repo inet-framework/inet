@@ -7,6 +7,8 @@
 
 #include "inet/physicallayer/wireless/common/base/packetlevel/FlatReceiverBase.h"
 
+#include "inet/common/ProtocolTag_m.h"
+#include "inet/common/packet/chunk/SequenceChunk.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/ApskModulationBase.h"
 #include "inet/physicallayer/wireless/common/base/packetlevel/NarrowbandNoiseBase.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/IRadioMedium.h"
@@ -66,6 +68,7 @@ const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IList
     bool isReceptionPossible = computeIsReceptionPossible(listening, reception, part);
     bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(listening, reception, part, interference);
     bool isReceptionSuccessful = false;
+    std::vector<ErrorRegion> errorRegions;
     // a decision draws only for a reception that the receiver attempts
     if (isReceptionAttempted) {
         auto radio = reception->getReceiverRadio();
@@ -83,39 +86,75 @@ const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IList
                 isReceptionSuccessful = isPreambleSuccessful();
                 break;
             case IRadioSignal::SIGNAL_PART_HEADER:
-                isReceptionSuccessful = isPreambleSuccessful() && computeIsPartSuccessful(listening, reception, part, interference, snir);
+                isReceptionSuccessful = isPreambleSuccessful() && computeIsPartSuccessful(listening, reception, part, interference, snir, errorRegions);
                 break;
             case IRadioSignal::SIGNAL_PART_DATA:
                 isReceptionSuccessful = medium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_HEADER)->isReceptionSuccessful() &&
-                                        computeIsPartSuccessful(listening, reception, part, interference, snir);
+                                        computeIsPartSuccessful(listening, reception, part, interference, snir, errorRegions);
                 break;
-            case IRadioSignal::SIGNAL_PART_WHOLE:
-                isReceptionSuccessful = medium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_DATA)->isReceptionSuccessful();
+            case IRadioSignal::SIGNAL_PART_WHOLE: {
+                // the whole signal keeps the failed regions of the data, which the received packet gets
+                auto dataDecision = medium->getReceptionDecision(radio, listening, transmission, IRadioSignal::SIGNAL_PART_DATA);
+                isReceptionSuccessful = dataDecision->isReceptionSuccessful();
+                errorRegions = dataDecision->getErrorRegions();
                 break;
+            }
             default:
                 throw cRuntimeError("Unknown signal part: '%s'", IRadioSignal::getSignalPartName(part));
         }
     }
-    return new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
+    return new ReceptionDecision(reception, part, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful, errorRegions);
 }
 
-bool FlatReceiverBase::computeIsPartSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir) const
+bool FlatReceiverBase::computeIsPartSuccessful(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part, const IInterference *interference, const ISnir *snir, std::vector<ErrorRegion>& errorRegions) const
 {
-    auto range = computePartRange(reception->getTransmission(), part);
+    auto transmission = reception->getTransmission();
+    auto range = computePartRange(transmission, part);
     // without the complete part in the packet, the receiver cannot decode the part
     if (!range)
         return false;
     // a part without bits has no region
     if (range->length == b(0))
         return true;
-    auto [startTime, endTime] = computeRegionInterval(reception, part, b(0), range->length, range->length);
-    // the SNIR threshold is a condition, and the error rate is a probability
-    if (!computeIsReceptionSuccessful(listening, reception, part, interference, snir, startTime, endTime))
-        return false;
-    double errorRate = errorModel->computePacketErrorRate(snir, part, range->length, startTime, endTime);
-    if (!(0 <= errorRate && errorRate <= 1))
-        throw cRuntimeError("Invalid error rate of a region: %g", errorRate);
-    return errorRate == 0 || (errorRate != 1 && dblrand() > errorRate);
+    // a part that the packet does not hold is one region, the packet mode has one
+    // region for each part, and the other modes have one region for each chunk
+    std::vector<std::pair<b, b>> regions;
+    if (!range->isInPacket || errorModel->getCorruptionMode() == IErrorModel::CorruptionMode::CM_PACKET)
+        regions.push_back({range->offset, range->length});
+    else {
+        const auto& content = transmission->getPacket()->peekAt(range->offset, range->length, Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED);
+        b offset = range->offset;
+        auto addRegion = [&] (const Ptr<const Chunk>& chunk) {
+            regions.push_back({offset, chunk->getChunkLength()});
+            offset += chunk->getChunkLength();
+        };
+        if (content->getChunkType() == Chunk::CT_SEQUENCE) {
+            for (const auto& chunk : staticPtrCast<const SequenceChunk>(content)->getChunks())
+                addRegion(chunk);
+        }
+        else
+            addRegion(content);
+    }
+    bool isSuccessful = true;
+    for (const auto& region : regions) {
+        b offset = region.first;
+        b length = region.second;
+        auto [startTime, endTime] = computeRegionInterval(reception, part, offset - range->offset, length, range->length);
+        // the SNIR threshold is a condition, and the error rate is a probability
+        bool isFailed = !computeIsReceptionSuccessful(listening, reception, part, interference, snir, startTime, endTime);
+        if (!isFailed) {
+            double errorRate = errorModel->computePacketErrorRate(snir, part, length, startTime, endTime);
+            if (!(0 <= errorRate && errorRate <= 1))
+                throw cRuntimeError("Invalid error rate of a region: %g", errorRate);
+            isFailed = errorRate != 0 && (errorRate == 1 || !(dblrand() > errorRate));
+        }
+        if (isFailed) {
+            isSuccessful = false;
+            if (range->isInPacket)
+                errorRegions.push_back({offset, length, errorModel->computeBitErrorRate(snir, part, length, startTime, endTime)});
+        }
+    }
+    return isSuccessful;
 }
 
 const IReceptionResult *FlatReceiverBase::computeReceptionResult(const IListening *listening, const IReception *reception, const IInterference *interference, const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
@@ -130,12 +169,19 @@ const IReceptionResult *FlatReceiverBase::computeReceptionResult(const IListenin
     return receptionResult;
 }
 
-Packet *FlatReceiverBase::computeReceivedPacket(const ISnir *snir, bool isReceptionSuccessful) const
+Packet *FlatReceiverBase::computeReceivedPacket(const ISnir *snir, const std::vector<const IReceptionDecision *> *decisions) const
 {
-    if (errorModel == nullptr || isReceptionSuccessful)
-        return ReceiverBase::computeReceivedPacket(snir, isReceptionSuccessful);
-    else
-        return errorModel->computeCorruptedPacket(snir);
+    // the decision of the whole signal keeps the failed regions that the received packet gets
+    for (auto decision : *decisions) {
+        if (decision->getSignalPart() == IRadioSignal::SIGNAL_PART_WHOLE && !decision->getErrorRegions().empty()) {
+            auto transmittedPacket = snir->getReception()->getTransmission()->getPacket();
+            auto receivedPacket = errorModel->computeCorruptedPacket(transmittedPacket, decision->getErrorRegions());
+            receivedPacket->clearTags();
+            receivedPacket->addTag<PacketProtocolTag>()->setProtocol(transmittedPacket->getTag<PacketProtocolTag>()->getProtocol());
+            return receivedPacket;
+        }
+    }
+    return NarrowbandReceiverBase::computeReceivedPacket(snir, decisions);
 }
 
 std::optional<FlatReceiverBase::PartRange> FlatReceiverBase::computePartRange(const ITransmission *transmission, IRadioSignal::SignalPart part) const
