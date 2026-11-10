@@ -1,0 +1,3 @@
+Corruption of failed signal regions
+
+IErrorModel has two new pure virtual functions. getCorruptionMode() gives the corruption mode, and a second computeCorruptedPacket() gives the received packet with the failed regions that the error decisions of a receiver found: a packet-level bit error in the packet mode, an incorrect copy of each failed chunk in the chunk mode, and flipped bytes or bits in the byte and bit modes. The flipped units follow the bit error rate of the region, at least one unit is flipped, and the raw chunk is marked incorrect. ErrorModelBase implements both functions. The enum CorruptionMode moves from ErrorModelBase to IErrorModel. An IErrorModel implementation outside INET must add the two functions.
