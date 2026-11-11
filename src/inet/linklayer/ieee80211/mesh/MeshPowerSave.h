@@ -10,12 +10,13 @@
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPowerSave.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPowerBuffer.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshDataMac.h"
+#include "inet/linklayer/ieee80211/mesh/contract/IMeshRadioControl.h"
 #include "inet/linklayer/ieee80211/mgmt/IMeshManagement.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
 namespace inet::ieee80211 {
 
-/** IEEE 802.11-2024, 14.15: peer mode policy, independent of physical doze. */
+/** IEEE 802.11-2024, 14.15: peer modes and awake obligations. */
 class INET_API MeshPowerSave : public OperationalBase, public IMeshPowerSave
 {
   protected:
@@ -23,6 +24,7 @@ class INET_API MeshPowerSave : public OperationalBase, public IMeshPowerSave
     ModuleRefByPar<IMeshManagement> management;
     ModuleRefByPar<IMeshPowerBuffer> buffers;
     ModuleRefByPar<IMeshDataMac> mac;
+    ModuleRefByPar<IMeshRadioControl> radioControl;
     bool enabled = false;
     struct Transition {
         MeshPowerMode mode;
@@ -36,6 +38,25 @@ class INET_API MeshPowerSave : public OperationalBase, public IMeshPowerSave
     std::map<MacAddress, Transition> transitions;
     std::map<MacAddress, simtime_t> awakeUntil;
     bool deliveringGroups = false;
+    cMessage *boundaryTimer = nullptr;
+    simtime_t wakeMargin;
+    simtime_t ownAwEnd;
+    simtime_t postAwEnd;
+    simtime_t advertisedAw;
+    std::optional<simtime_t> groupIdleSince;
+    uint64_t maintenanceOrdinal = 0;
+    bool ownRendezvous = false;
+    bool awakeRequired = true;
+    struct PeerWakeState {
+        bool rendezvous = false;
+        bool groupBuffered = false;
+        bool individualBuffered = false;
+        friend std::ostream& operator<<(std::ostream& out, const PeerWakeState& state) {
+            return out << "rendezvous=" << state.rendezvous << ", group=" << state.groupBuffered
+                << ", individual=" << state.individualBuffered;
+        }
+    };
+    std::map<MacAddress, PeerWakeState> peerWake;
 
     void initialize(int stage) override;
     void preDelete(cComponent *root) override;
@@ -57,6 +78,8 @@ class INET_API MeshPowerSave : public OperationalBase, public IMeshPowerSave
     void clearPolicy();
 
   public:
+    static simsignal_t meshAwakeRequirementChangedSignal;
+    ~MeshPowerSave() override;
     bool isEnabled() const override { return enabled && operationalState == OPERATING; }
     void requestMode(MacAddress peer, MeshPowerMode mode) override;
     void requestActiveForAllPeers() override;
@@ -71,6 +94,15 @@ class INET_API MeshPowerSave : public OperationalBase, public IMeshPowerSave
     MeshTim getTim(uint8_t dtimCount, uint8_t dtimPeriod, const std::set<int64_t>& deliveryUnit) const override;
     bool needsAwakeWindow(const MeshTim& tim) const override;
     void dtimTransmissionComplete() override;
+    void reviewAwakeState() override;
+    bool requiresAwake() const override { return !isEnabled() || awakeRequired; }
+    void radioObservationChanged() override;
+    void managementTimingChanged() override;
+    void timingTransmissionComplete(simtime_t window) override;
+    void timingTransmissionRetired() override;
+    void beaconReceived(MacAddress peer, bool groupBuffered, bool individualBuffered, simtime_t window) override;
+    void groupFrameReceived(MacAddress peer, bool moreData) override;
+    void ppduTransmissionComplete(const Packet *packet, simtime_t start) override;
 };
 
 } // namespace inet::ieee80211

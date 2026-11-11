@@ -110,6 +110,7 @@ class INET_API Ieee80211Mac : public MacProtocolBase, public IIeee80211Mac
     virtual void prepareFrameTransmission(Packet *packet, simtime_t ifs,
             const physicallayer::IIeee80211Mode *mode);
     virtual void frameTransmissionComplete(const Packet *packet);
+    virtual void frameTransmissionComplete(const Packet *packet, simtime_t start) { frameTransmissionComplete(packet); }
     // Concrete legacy defaults preserve immediate Tx submission outside mesh doze.
     virtual bool defersTransmissionStart() const { return false; }
     virtual bool isTransmissionReady() const { return true; }

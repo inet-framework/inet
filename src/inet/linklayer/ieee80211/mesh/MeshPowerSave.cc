@@ -7,6 +7,12 @@
 namespace inet::ieee80211 {
 
 Define_Module(MeshPowerSave);
+simsignal_t MeshPowerSave::meshAwakeRequirementChangedSignal = cComponent::registerSignal("meshAwakeRequirementChanged");
+
+MeshPowerSave::~MeshPowerSave()
+{
+    cancelAndDelete(boundaryTimer);
+}
 
 void MeshPowerSave::initialize(int stage)
 {
@@ -17,15 +23,26 @@ void MeshPowerSave::initialize(int stage)
         management.reference(this, "managementModule", true);
         buffers.reference(this, "hcfModule", true);
         mac.reference(this, "macModule", true);
+        radioControl.reference(this, "macModule", true);
+        wakeMargin = par("wakeMargin");
+        if (wakeMargin < 0) throw cRuntimeError("Mesh wakeMargin must be nonnegative");
+        boundaryTimer = new cMessage("meshAwakeBoundary");
         WATCH(deliveringGroups);
         WATCH_MAP(transitions);
         WATCH_MAP(awakeUntil);
+        WATCH(awakeRequired);
+        WATCH(ownRendezvous);
+        WATCH(ownAwEnd);
+        WATCH(postAwEnd);
+        WATCH(maintenanceOrdinal);
+        WATCH_MAP(peerWake);
     }
 }
 
-void MeshPowerSave::handleMessageWhenUp(cMessage *)
+void MeshPowerSave::handleMessageWhenUp(cMessage *message)
 {
-    throw cRuntimeError("MeshPowerSave uses typed policy calls; it owns no wake scheduler");
+    if (message != boundaryTimer) throw cRuntimeError("Unknown mesh awake boundary");
+    radioControl->requestRadioReview();
 }
 
 void MeshPowerSave::preDelete(cComponent *root)
@@ -45,14 +62,23 @@ void MeshPowerSave::handleStartOperation(LifecycleOperation *)
     transitions.clear();
     awakeUntil.clear();
     deliveringGroups = false;
+    if (enabled) radioControl->requestRadioReview();
 }
 
 void MeshPowerSave::clearPolicy()
 {
+    cancelEvent(boundaryTimer);
+    ownAwEnd = postAwEnd = advertisedAw = SIMTIME_ZERO;
+    groupIdleSince.reset();
+    maintenanceOrdinal = 0;
+    ownRendezvous = false;
+    awakeRequired = true;
+    peerWake.clear();
     auto old = transitions;
     transitions.clear();
     awakeUntil.clear();
     deliveringGroups = false;
+    if (auto owner = radioControl.getNullable()) owner->requestRadioReview();
     for (const auto& entry : old)
         if (auto owner = buffers.getNullable())
             owner->withdrawMeshPowerControl(entry.second.originalId);
@@ -174,6 +200,7 @@ void MeshPowerSave::originalAcknowledged(const Packet *packet)
     auto mode = pending->second.mode;
     transitions.erase(pending);
     mib->commitMeshLocalPowerMode(peer, mode);
+    radioControl->requestRadioReview();
 }
 
 void MeshPowerSave::originalRetired(const Packet *packet)
@@ -186,6 +213,7 @@ void MeshPowerSave::originalRetired(const Packet *packet)
         }
     if (deliveringGroups && !hasBufferedGroup({}))
         deliveringGroups = false;
+    if (isEnabled()) radioControl->requestRadioReview();
 }
 
 void MeshPowerSave::peerRemoved(MacAddress peer)
@@ -195,6 +223,8 @@ void MeshPowerSave::peerRemoved(MacAddress peer)
     int64_t id = pending == transitions.end() ? -1 : pending->second.originalId;
     transitions.erase(peer);
     awakeUntil.erase(peer);
+    peerWake.erase(peer);
+    radioControl->requestRadioReview();
     if (id != -1)
         buffers->withdrawMeshPowerControl(id);
 }
@@ -219,7 +249,14 @@ bool MeshPowerSave::isTransmissionEligible(const Packet *packet, simtime_t start
 {
     if (!isEnabled()) return true;
     auto header = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(packet->peekAtFront<Ieee80211MacHeader>());
-    if (!header) return true; // Required ACK/BA/BAR responses keep their MAC owner.
+    if (!header) {
+        auto bar = dynamicPtrCast<const Ieee80211BlockAckReq>(packet->peekAtFront<Ieee80211MacHeader>());
+        if (!bar) return true; // Immediate recipient ACK/BA responses keep their MAC owner.
+        auto state = mib->findMeshPeerPowerState(bar->getReceiverAddress());
+        auto opportunity = awakeUntil.find(bar->getReceiverAddress());
+        return !state || state->remote == MeshPowerMode::ACTIVE
+            || (opportunity != awakeUntil.end() && start < opportunity->second);
+    }
     auto type = header->getType();
     if (type == ST_BEACON || type == ST_PROBERESPONSE || type == ST_QOS_NULL)
         return true;
@@ -237,6 +274,7 @@ void MeshPowerSave::openAwakeOpportunity(MacAddress peer, simtime_t end)
 {
     awakeUntil[peer] = end;
     buffers->meshPowerEligibilityChanged();
+    radioControl->requestRadioReview();
 }
 
 void MeshPowerSave::prepareTransmission(Packet *packet, const std::set<int64_t>& deliveryUnit)
@@ -284,6 +322,7 @@ void MeshPowerSave::receivePowerFields(const Packet *, const Ptr<const Ieee80211
     if (!header->getReceiverAddress().isMulticast() || int(mode) < int(state->remote))
         mib->commitMeshRemotePowerMode(peer, mode);
     buffers->meshPowerEligibilityChanged();
+    radioControl->requestRadioReview();
 }
 
 MeshTim MeshPowerSave::getTim(uint8_t count, uint8_t period, const std::set<int64_t>& exclude) const
@@ -296,7 +335,7 @@ MeshTim MeshPowerSave::getTim(uint8_t count, uint8_t period, const std::set<int6
     bool group = false;
     for (const auto& frame : buffers->getMeshBufferedFrames()) {
         if (exclude.count(frame.id) || frame.deadline <= simTime() || frame.kind == MeshBufferedFrame::Kind::TIMING
-                || frame.kind == MeshBufferedFrame::Kind::POWER_CONTROL)
+                || frame.kind == MeshBufferedFrame::Kind::POWER_CONTROL || frame.kind == MeshBufferedFrame::Kind::PROBE_RESPONSE)
             continue;
         if (frame.receiver.isMulticast()) { group = true; continue; }
         auto aid = management->getLocalAid(frame.receiver);
@@ -327,6 +366,7 @@ void MeshPowerSave::dtimTransmissionComplete()
     Enter_Method("dtimTransmissionComplete");
     if (isEnabled()) deliveringGroups = hasBufferedGroup({});
     buffers->meshPowerEligibilityChanged();
+    radioControl->requestRadioReview();
 }
 
 void MeshPowerSave::groupTransmissionComplete(const Packet *packet)
@@ -336,6 +376,197 @@ void MeshPowerSave::groupTransmissionComplete(const Packet *packet)
     if (current != transitions.end() && current->second.originalId == packet->getId())
         transitions.erase(current);
     if (deliveringGroups && !hasBufferedGroup({packet->getId()})) deliveringGroups = false;
+    radioControl->requestRadioReview();
+}
+
+void MeshPowerSave::managementTimingChanged()
+{
+    Enter_Method("managementTimingChanged");
+    if (isEnabled()) radioControl->requestRadioReview();
+}
+
+void MeshPowerSave::radioObservationChanged()
+{
+    Enter_Method("radioObservationChanged");
+    // Preserve intervening busy/nonreceptive observations even when their
+    // same-time continuations coalesce. This does not command the radio inline.
+    if (!radioControl->isMeshPhyIdle()) groupIdleSince.reset();
+}
+
+void MeshPowerSave::timingTransmissionComplete(simtime_t window)
+{
+    Enter_Method("timingTransmissionComplete");
+    if (!isEnabled()) return;
+    ownRendezvous = false;
+    if (window > 0) {
+        advertisedAw = window;
+        ownAwEnd = std::max(ownAwEnd, simTime() + window);
+    }
+    radioControl->requestRadioReview();
+}
+
+void MeshPowerSave::timingTransmissionRetired()
+{
+    Enter_Method("timingTransmissionRetired");
+    ownRendezvous = false;
+    if (isEnabled()) radioControl->requestRadioReview();
+}
+
+void MeshPowerSave::beaconReceived(MacAddress peer, bool group, bool individual, simtime_t window)
+{
+    Enter_Method("beaconReceived");
+    if (!isEnabled() || !mib->isMeshPeerEstablished(peer)) return;
+    auto& wake = peerWake[peer];
+    wake.rendezvous = false;
+    wake.groupBuffered = group;
+    wake.individualBuffered = individual;
+    if (window > 0) {
+        awakeUntil[peer] = std::max(awakeUntil[peer], simTime() + window);
+        buffers->meshPowerEligibilityChanged();
+    }
+    auto schedule = management->getMeshWakeSchedule();
+    const auto& peers = mib->getMeshPeerPowerStates();
+    auto wakeTime = radioControl->getMeshRadioSwitchingTime(physicallayer::IRadio::RADIO_MODE_SLEEP,
+        physicallayer::IRadio::RADIO_MODE_TRANSCEIVER);
+    if (!peers.empty() && peer == peers.begin()->first && maintenanceOrdinal
+            && management->getPeerTbtt(peer, simTime())
+            && wakeTime && (maintenanceOrdinal < schedule.ordinal
+                || simTime() >= management->getOwnTbtt(maintenanceOrdinal)
+                    - *wakeTime - wakeMargin - SimTime::fromRaw(1))) {
+        // Keep the selected ten-local-period cadence anchored to its existing
+        // ordinal. A long wake lead can accept a reference before that ordinal;
+        // compare before subtracting the unsigned next-beacon counters.
+        auto elapsed = schedule.ordinal > maintenanceOrdinal ? schedule.ordinal - maintenanceOrdinal : uint64_t(0);
+        maintenanceOrdinal += (elapsed / 10 + 1) * 10;
+    }
+    if (group) groupIdleSince.reset();
+    radioControl->requestRadioReview();
+}
+
+void MeshPowerSave::groupFrameReceived(MacAddress peer, bool moreData)
+{
+    Enter_Method("groupFrameReceived");
+    if (!isEnabled() || !mib->isMeshPeerEstablished(peer)) return;
+    peerWake[peer].groupBuffered = moreData;
+    radioControl->requestRadioReview();
+}
+
+void MeshPowerSave::ppduTransmissionComplete(const Packet *packet, simtime_t start)
+{
+    Enter_Method("ppduTransmissionComplete");
+    if (!isEnabled()) return;
+    auto protocol = packet->findTag<PacketProtocolTag>();
+    if (protocol && protocol->getProtocol() == &Protocol::unknown) return; // Individual A-MPDU.
+    auto header = packet->peekAtFront<Ieee80211MacHeader>();
+    // IEEE Std 802.11-2024, 14.15.6 extends the awake window itself. The
+    // selected recurrence includes its timed PostAW extension, qualifies by
+    // actual START, and adds the nominal advertised duration at completion.
+    // Pending DTIM delivery is a separate awake obligation, not a timed AW.
+    auto activeWindowEnd = std::max(ownAwEnd, postAwEnd);
+    if (header->getReceiverAddress().isMulticast() && header->getType() != ST_BEACON
+            && header->getType() != ST_PROBERESPONSE && start >= 0 && start < activeWindowEnd)
+        postAwEnd = std::max(postAwEnd, simTime() + advertisedAw);
+    radioControl->requestRadioReview();
+}
+
+void MeshPowerSave::reviewAwakeState()
+{
+    Enter_Method("reviewAwakeState");
+    if (!isEnabled()) return;
+    using Radio = physicallayer::IRadio;
+    auto wakeTime = radioControl->getMeshRadioSwitchingTime(Radio::RADIO_MODE_SLEEP, Radio::RADIO_MODE_TRANSCEIVER);
+    auto sleepTime = radioControl->getMeshRadioSwitchingTime(Radio::RADIO_MODE_TRANSCEIVER, Radio::RADIO_MODE_SLEEP);
+    if (!wakeTime || !sleepTime)
+        throw cRuntimeError("Mesh doze requires initialized public radio transition observations");
+    auto now = simTime();
+    auto tick = SimTime::fromRaw(1);
+    auto lead = *wakeTime + wakeMargin + tick;
+    auto schedule = management->getMeshWakeSchedule();
+    auto oldBoundary = boundaryTimer->isScheduled() ? boundaryTimer->getArrivalTime() : SimTime::getMaxTime();
+    auto next = SimTime::getMaxTime();
+    bool awake = schedule.peeringPending || schedule.beaconPending || radioControl->hasMeshRadioActivity()
+        || !transitions.empty() || mib->getMeshNonpeerPowerMode() == MeshPowerMode::ACTIVE;
+    auto boundary = [&](simtime_t time) { if (time > now) next = std::min(next, time); };
+    if (schedule.nextTbtt >= now) {
+        auto wakeAt = schedule.nextTbtt - lead;
+        if (now >= wakeAt) ownRendezvous = true;
+        else boundary(wakeAt);
+    }
+    awake |= ownRendezvous;
+    for (auto end : {ownAwEnd, postAwEnd}) {
+        awake |= now < end;
+        boundary(end);
+    }
+    for (const auto& entry : awakeUntil) {
+        awake |= now < entry.second;
+        boundary(entry.second);
+    }
+    // A BU that is currently eligible can initiate a transmission. Sleeping-
+    // peer BUs without an opportunity remain buffered and do not prevent doze.
+    for (const auto& frame : buffers->getMeshBufferedFrames()) {
+        if (frame.deadline <= now || frame.kind == MeshBufferedFrame::Kind::TIMING) continue;
+        if (frame.kind == MeshBufferedFrame::Kind::PROBE_RESPONSE) {
+            awake = true; // Timing response waits for its own actual admission, not a peer AW.
+            continue;
+        }
+        if (frame.receiver.isMulticast()) awake |= !hasSleepingPeer() || deliveringGroups;
+        else {
+            auto state = mib->findMeshPeerPowerState(frame.receiver);
+            auto opportunity = awakeUntil.find(frame.receiver);
+            awake |= !state || state->remote == MeshPowerMode::ACTIVE
+                || (opportunity != awakeUntil.end() && now < opportunity->second)
+                || frame.kind == MeshBufferedFrame::Kind::POWER_CONTROL;
+        }
+    }
+    const auto& peers = mib->getMeshPeerPowerStates();
+    if (!maintenanceOrdinal) maintenanceOrdinal = schedule.ordinal + 10;
+    // The ordinal denotes the NEXT scheduled beacon, not a period already
+    // reached. A strictly later ordinal proves the target TBTT has passed;
+    // equality still requires management's absolute target and wake lead.
+    bool maintenanceDue = maintenanceOrdinal < schedule.ordinal
+        || now >= management->getOwnTbtt(maintenanceOrdinal) - lead;
+    if (!maintenanceDue && !peers.empty()) boundary(management->getOwnTbtt(maintenanceOrdinal) - lead);
+    for (const auto& entry : peers) {
+        auto& wake = peerWake[entry.first];
+        awake |= entry.second.local == MeshPowerMode::ACTIVE;
+        if (entry.second.local == MeshPowerMode::ACTIVE) wake.individualBuffered = false;
+        bool required = entry.second.local == MeshPowerMode::LIGHT_SLEEP
+            || (maintenanceDue && entry.first == peers.begin()->first);
+        if (entry.second.local == MeshPowerMode::DEEP_SLEEP && entry.first == peers.begin()->first
+                && !management->getPeerTbtt(entry.first, now + tick))
+            awake = true; // Keep reacquiring an invalid selected deep reference.
+        if (required) {
+            auto tbtt = management->getPeerTbtt(entry.first, now + tick);
+            if (!tbtt) awake = true; // Reacquire an absent/invalid reference while awake.
+            else if (now >= *tbtt - lead) wake.rendezvous = true;
+            else boundary(*tbtt - lead);
+        }
+        awake |= wake.rendezvous || wake.individualBuffered;
+    }
+    // IEEE Std 802.11-2024, 14.15.5: continuous PHY CCA idle, independent
+    // of NAV/TXNAV and of the user's configured VI TXOP limit.
+    bool groupWaiting = false;
+    for (const auto& entry : peerWake) groupWaiting |= entry.second.groupBuffered;
+    if (groupWaiting && radioControl->isMeshPhyIdle()) {
+        if (!groupIdleSince) groupIdleSince = now;
+        auto end = *groupIdleSince + buffers->getGroupDeliveryIdleTime();
+        if (now >= end) {
+            for (auto& entry : peerWake) entry.second.groupBuffered = false;
+            groupIdleSince.reset();
+        }
+        else { awake = true; boundary(end); }
+    }
+    else {
+        groupIdleSince.reset();
+        awake |= groupWaiting;
+    }
+    // A sleep/wake round trip must leave a positive useful sleep interval.
+    if (next != SimTime::getMaxTime() && now + *sleepTime >= next) awake = true;
+    cancelEvent(boundaryTimer);
+    if (next != SimTime::getMaxTime()) scheduleAt(next, boundaryTimer);
+    bool changed = awakeRequired != awake || oldBoundary != next;
+    awakeRequired = awake;
+    if (changed) emit(meshAwakeRequirementChangedSignal, awakeRequired);
 }
 
 } // namespace inet::ieee80211

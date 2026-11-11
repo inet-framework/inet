@@ -9,7 +9,7 @@ namespace inet::ieee80211 {
 
 struct INET_API MeshBufferedFrame
 {
-    enum class Kind { PAYLOAD = 0, MANAGEMENT = 1, POWER_CONTROL = 2, TIMING = 3 };
+    enum class Kind { PAYLOAD = 0, MANAGEMENT = 1, POWER_CONTROL = 2, TIMING = 3, PROBE_RESPONSE = 4 };
     int64_t id;
     MacAddress receiver;
     b length;
@@ -28,6 +28,7 @@ class INET_API IMeshPowerBuffer
     // Retire logical membership of an indication. On-air storage remains
     // borrowed until real completion; its PPDU is never cancelled.
     virtual void withdrawMeshPowerControl(int64_t packetId) = 0;
+    virtual simtime_t getGroupDeliveryIdleTime() const = 0;
 };
 
 } // namespace inet::ieee80211

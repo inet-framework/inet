@@ -19,6 +19,8 @@ class TimPowerFixture : public MeshPowerSave
   protected:
     bool isActivationSupported() const override { return true; }
   public:
+    void reviewAwakeState() override {} // P1 tests buffering without physical doze.
+    void beaconReceived(MacAddress, bool, bool, simtime_t) override {} // Preserve P1's explicit opportunity clock.
     int groupsCompleted = 0;
     void opportunity(MacAddress peer, simtime_t end) { Enter_Method("opportunity"); openAwakeOpportunity(peer,end); }
     void groupTransmissionComplete(const Packet *packet) override {

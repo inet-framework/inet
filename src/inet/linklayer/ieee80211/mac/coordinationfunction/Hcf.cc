@@ -220,7 +220,8 @@ std::vector<MeshBufferedFrame> Hcf::getMeshBufferedFrames() const
                     return;
             }
             auto type = header->getType();
-            auto kind = type == ST_BEACON || type == ST_PROBERESPONSE ? MeshBufferedFrame::Kind::TIMING :
+            auto kind = type == ST_BEACON ? MeshBufferedFrame::Kind::TIMING :
+                type == ST_PROBERESPONSE ? MeshBufferedFrame::Kind::PROBE_RESPONSE :
                 type == ST_QOS_NULL ? MeshBufferedFrame::Kind::POWER_CONTROL :
                 header->getFrameType() == 0 ? MeshBufferedFrame::Kind::MANAGEMENT : MeshBufferedFrame::Kind::PAYLOAD;
             result.push_back({packet->getId(), header->getReceiverAddress(), packet->getDataLength(), deadline, ac, kind});
@@ -238,6 +239,11 @@ void Hcf::meshPowerEligibilityChanged()
     Enter_Method("meshPowerEligibilityChanged");
     if (!finishingSequence)
         updateContention();
+}
+
+simtime_t Hcf::getGroupDeliveryIdleTime() const
+{
+    return edca->getEdcaf(AC_VI)->getTxopProcedure()->getDefaultTxopLimit(AC_VI);
 }
 
 void Hcf::withdrawMeshPowerControl(int64_t id)
@@ -897,6 +903,9 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
             if (data && frameSequenceHandler->isSequenceRunning()) {
                 auto context = frameSequenceHandler->getContext();
                 for (int j = 0; j < context->getNumSteps(); j++) {
+                    auto actual = dynamic_cast<TransmitStep *>(context->getStep(j));
+                    if (mac->defersTransmissionStart() && (!actual || actual->getPpduStart() < 0))
+                        continue; // Retained pre-air context membership is not transmission evidence.
                     if (auto aggregate = dynamic_cast<AggregateTransmitStep *>(context->getStep(j)))
                         transmitted |= std::find(aggregate->members.begin(), aggregate->members.end(), packet) != aggregate->members.end();
                     else if (auto step = dynamic_cast<ITransmitStep *>(context->getStep(j)))
@@ -1490,6 +1499,7 @@ void Hcf::frameSequenceFinished()
     // individual traffic. Reuse the queue owner's contention boundary.
     if (meshPowerSave && meshPowerSave->isEnabled())
         updateContention();
+    mac->requestTransmissionReadiness();
 }
 
 void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, bool interframe)
@@ -1676,6 +1686,60 @@ bool Hcf::dispatchAgreementAction(const Ptr<const Ieee80211MgmtHeader>& header)
     return false;
 }
 
+bool Hcf::prepareTransmissionStart(const Packet *packet, simtime_t start)
+{
+    Enter_Method("prepareTransmissionStart");
+    if (!mac->defersTransmissionStart()) return true;
+    if (start != simTime() || !mac->isTransmissionReady()) return false;
+    if (!frameSequenceHandler->isSequenceRunning()) return true; // Recipient response.
+    auto context = frameSequenceHandler->getContext();
+    auto step = dynamic_cast<TransmitStep *>(context->getLastStep());
+    if (!step || step->getFrameToTransmit()->getTreeId() != packet->getTreeId())
+        return true; // A recipient response cannot resolve an unrelated originator wait.
+    auto frames = context->getInProgressFrames();
+    auto owner = edca->getChannelOwner();
+    if (!owner) return false;
+    auto aggregate = dynamic_cast<AggregateTransmitStep *>(step);
+    std::vector<Packet *> originals = aggregate ? aggregate->members : std::vector<Packet *>{step->getFrameToTransmit()};
+    for (auto original : originals) {
+        // BAR/RTS copies are context-owned; DATA/MMPDU originals must still be
+        // logically live before any header or lifetime dereference.
+        bool live = frames->containsFrame(original);
+        if (!live && (aggregate || !step->ownsFrame())) return false;
+        if (!aggregate && !dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(original->peekAtFront<Ieee80211MacHeader>())) {
+            if (!mac->isFrameTransmissionEligible(original, start)) return false;
+            if (auto bar = dynamicPtrCast<const Ieee80211CompressedBlockAckReq>(original->peekAtFront<Ieee80211MacHeader>())) {
+                auto agreement = originatorBlockAckAgreementHandler->getAgreement(bar->getReceiverAddress(), bar->getTidInfo());
+                if (!agreement || !owner->getRecoveryProcedure()->hasBlockAckRecovery(bar->getReceiverAddress(), bar->getTidInfo()))
+                    return false;
+            }
+            continue;
+        }
+        if (!live) return false;
+        if (edca->getLifetimeHandler()->isExpired(original, start)
+                || !mac->isFrameTransmissionEligible(original, start) || !isFrameEligible(original, true))
+            return false;
+    }
+    // No publication occurs between these actual-attempt updates and Tx's
+    // immediate handoff. Refusal above leaves retry/metric/window state alone.
+    step->setPpduStart(start);
+    for (auto original : originals) {
+        auto data = dynamicPtrCast<const Ieee80211DataHeader>(original->peekAtFront<Ieee80211MacHeader>());
+        if (data && data->getType() == ST_DATA_WITH_QOS && originatorBlockAckAgreementHandler) {
+            auto agreement = originatorBlockAckAgreementHandler->getAgreement(data->getReceiverAddress(), data->getTid());
+            if (agreement && agreement->getIsAddbaResponseReceived())
+                agreement->recordTransmittedData(original->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
+        }
+        auto action = ownedActions.find(original->getId());
+        if (action != ownedActions.end()) {
+            action->second.attempted = true;
+            if (action->second.kind == OwnedAction::REQUEST)
+                originatorBlockAckAgreementHandler->markRequestAttempted(action->second.peer, action->second.tid);
+        }
+    }
+    return true;
+}
+
 void Hcf::transmissionCancelled(const Packet *packet)
 {
     Enter_Method("transmissionCancelled");
@@ -1698,6 +1762,7 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
         auto step = dynamic_cast<AggregateTransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
         if (step) {
             step->setPpduEnd(simTime());
+            mac->frameTransmissionComplete(packet, step->getPpduStart());
             auto owner = edca->getChannelOwner();
             int msdus = 0;
             for (auto original : step->members) {
@@ -1718,7 +1783,9 @@ void Hcf::transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeade
             return;
         }
     }
-    mac->frameTransmissionComplete(packet);
+    auto completedStep = frameSequenceHandler->isSequenceRunning()
+        ? dynamic_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep()) : nullptr;
+    mac->frameTransmissionComplete(packet, completedStep ? completedStep->getPpduStart() : simtime_t(-1));
     auto edcaf = edca->getChannelOwner();
     if (edcaf) {
         auto step = check_and_cast<TransmitStep *>(frameSequenceHandler->getContext()->getLastStep());
@@ -2828,7 +2895,8 @@ bool Hcf::transmitAmpdu(AggregateTransmitStep *step, simtime_t ifs)
         updated->setDurationField(encodeDuration(responseDuration, true));
         member->insertAtFront(updated);
         setFrameMode(member, updated, mode);
-        agreement->recordTransmittedData(member->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
+        if (!mac->defersTransmissionStart())
+            agreement->recordTransmittedData(member->getTag<Ieee80211DataSequenceTag>()->getAllocationIndex());
     }
     auto capabilities = mib->findMeshPeerPhyCapabilities(header->getReceiverAddress());
     std::unique_ptr<Packet> psdu(service->buildAmpdu(committed, {vht,
@@ -3218,6 +3286,7 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         EV_DEBUG << "Datarate for " << packet->getName() << " is set to " << mode->getDataMode()->getNetBitrate() << ".\n";
         mac->prepareFrameTransmission(packet, ifs, mode);
         tx->transmitFrame(packet, packet->peekAtFront<Ieee80211MacHeader>(), ifs, false, this);
+        if (mac->defersTransmissionStart()) return true; // Rejection can synchronously dispose the context.
         if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(header)) {
             if (originatorBlockAckAgreementHandler && dataHeader->getType() == ST_DATA_WITH_QOS) {
                 auto agreement = originatorBlockAckAgreementHandler->getAgreement(dataHeader->getReceiverAddress(), dataHeader->getTid());

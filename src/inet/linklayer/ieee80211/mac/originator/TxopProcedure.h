@@ -46,6 +46,7 @@ class INET_API TxopProcedure : public ModeSetListener
     virtual ProtectionMechanism selectProtectionMechanism(AccessCategory ac) const;
 
   public:
+    simtime_t getDefaultTxopLimit(AccessCategory ac);
     virtual void startTxop(AccessCategory ac);
     virtual void endTxop();
 

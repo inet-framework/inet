@@ -302,21 +302,23 @@ Every mesh beacon carries a TIM. Bits use the AIDs assigned by the reporting sta
 
 Sources: `ieee80211-2024:clause:14.15.4`, `ieee80211-2024:clause:14.15.5`, PDF 3280–3281; `ieee80211-2024:clause:9.4.2.5`. Strength: shall. Observation: TIM bytes, frame order and receiver awake state.
 
+An indicated-group receiver's idle completion uses continuous PHY CCA-IDLE for GroupDeliveryIdleTime, the PHY-default AC_VI TXOP from Table9-194. Busy or nonreceptive intervals invalidate that idle evidence; elapsed time since beacon receipt is insufficient. Received group More Data0 is separate completion evidence. This receiver condition differs from the transmitter's PostAwakeDuration extension below. Source:14.15.5, PDF3280–3281, span13786897:13788615. Observation: interruption and restart of physical-idle evidence, independent of virtual NAV/TXNAV and configured VI overrides.
+
 For individually addressed mesh frames to a light/deep-sleep peer, More Data reports additional BUs remaining for that peer; otherwise it is0 in the selected non-DMG/non-S1G profile. Group More Data reports additional group BUs, without that peer-sleep condition. A BU is an MSDU, intact A-MSDU or bufferable MMPDU; an A-MPDU is not one BU. The retrieved clauses do not specify the snapshot time or whether other MPDUs already selected for the same PPDU count as additional work. Same-EOSP/QoS compatibility does not impose one common More Data value. The selected same-PPDU exclusion is therefore an explicit model snapshot policy, preserving each member's BU identity, rather than an unambiguous whole-PPDU standard requirement.
 
 Sources: `ieee80211-2024:clause:9.2.4.1.8`, PDF666–667, span `3082931:3089998`; BU definition in3.2, PDF289, span `1460502:1460738`; `10.12.1`, span `8219229:8220478`; TIM14.15.4, span `13786122:13786897`. Strength: explicit More Data and BU rules, with an identified snapshot ambiguity. Observation: actual field values for sleeping versus active recipients, group-only inventory and final selected aggregate membership.
 
 ### IEEE80211-2024-MESH-AWAKE-WINDOW
 
-An advertised mesh awake window begins at the actual end of the beacon or probe-response transmission. The element is mandatory in DTIM beacons and in sleeping-mode beacons indicating buffered peer traffic. Group transmission extends awake time by PostAwakeDuration, equal to the window duration, after the group frame. The transmitting station remains awake through all its group traffic and the final extension.
+An advertised local mesh awake window begins at the actual end of the beacon or probe-response transmission. The element is mandatory in DTIM beacons and in sleeping-mode beacons indicating buffered peer traffic. Group transmission during an active window extends the window by PostAwakeDuration, equal to its advertised duration and following the group frame. The transmitting station remains awake until all its group traffic has been transmitted and PostAwakeDuration has expired. Completion of the DTIM group-delivery sequence is also a separate doze condition in14.15.8.6. These are transmitter obligations; receiver group waiting uses14.15.5's separate More Data/continuous-idle rules above. The clause provides no explicit recurrence formula or original-window-only exclusion; the model ledger must identify its selected timing interpretation.
 
-Source: `ieee80211-2024:clause:14.15.6`, PDF 3281. Strength: shall. Observation: advertised durations and actual radio timing.
+Source: `ieee80211-2024:clause:14.15.6`, PDF3281, span13788615:13790889. Strength: shall. Observation: advertised durations and actual transmitter radio timing.
 
 ### IEEE80211-2024-MESH-WAKE-DOZE
 
 A nonpeer-deep-sleep station wakes before each own TBTT and stays through its beacon, awake window and group delivery. Light sleep also wakes before every corresponding peer TBTT; indicated individual traffic initiates a trigger with RSPI=1, and indicated group traffic holds it awake through completion or the specified idle time. Deep-sleep synchronization maintenance is a local choice. Doze requires all peer modes sleeping, no ongoing MPSP, no pending peering/authentication/passive-scan transaction, expired own awake window and completed DTIM group delivery.
 
-Sources: `ieee80211-2024:clause:14.15.8.3`–`14.15.8.6`, PDF 3282–3283. Strength: shall for wake obligations, may for doze after all conditions. Observation: radio state and transactions.
+Sources: `ieee80211-2024:clause:14.15.8.3`–`14.15.8.6`, PDF3282–3283; spans13796440:13798224,13798224:13799712,13799712:13800454,13800454:13801359. Strength: shall for wake obligations, may for doze after all conditions, with deep synchronization method outside the standard. Observation: radio state and transactions.
 
 ### IEEE80211-2024-MESH-MPSP
 

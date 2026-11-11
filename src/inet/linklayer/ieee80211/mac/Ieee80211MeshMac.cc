@@ -16,11 +16,17 @@
 #include "inet/linklayer/ieee80211/llc/IIeee80211Llc.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/IIeee80211ChannelAccess.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
+#include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
 namespace inet {
 namespace ieee80211 {
 
 Define_Module(Ieee80211MeshMac);
+
+Ieee80211MeshMac::~Ieee80211MeshMac()
+{
+    cancelAndDelete(radioReview);
+}
 
 void Ieee80211MeshMac::initialize(int stage)
 {
@@ -28,6 +34,9 @@ void Ieee80211MeshMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         meshManagement.reference(this, "meshManagementModule", true);
         meshPowerSave.reference(this, "meshPowerSaveModule", false);
+        radioReview = new cMessage("meshRadioReview");
+        WATCH(powerManaged);
+        WATCH(awakeIntent);
     }
     if (stage == INITSTAGE_LINK_LAYER) {
         auto physical = dynamic_cast<const physicallayer::IIeee80211ChannelAccess *>(radio.get());
@@ -38,6 +47,8 @@ void Ieee80211MeshMac::initialize(int stage)
     if (stage == INITSTAGE_LAST && (!mib->qos || mib->mode != Ieee80211Mib::MESH))
         throw cRuntimeError("Mesh requires a QoS mesh interface");
     if (stage == INITSTAGE_LAST) {
+        check_and_cast<cModule *>(radio.get())->subscribe(physicallayer::Ieee80211Radio::primaryCcaChangedSignal, this);
+        requestRadioReview(); // Public radio timing is consumed after all initialization stages.
         auto radioModule = check_and_cast<cModule *>(radio.get());
         bool high = mib->getMeshPhyProfile() != "ofdm";
         if (strcmp(par("modeSet").stringValue(), high ? "ac-complete" : "a") != 0
@@ -92,6 +103,7 @@ void Ieee80211MeshMac::handleMgmtPacket(Packet *packet)
     header->setAddress3(subtype == ST_PROBEREQUEST ? header->getReceiverAddress() : mib->address);
     packet->insertAtFront(header);
     packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
+    requestRadioReview();
     processUpperFrame(packet, header);
 }
 
@@ -115,6 +127,7 @@ void Ieee80211MeshMac::sendMeshData(Packet *packet)
 {
     Enter_Method("sendMeshData");
     take(packet); // The direct handoff consumes ownership, including refusal.
+    requestRadioReview();
     auto header = packet->peekAtFront<Ieee80211DataHeader>();
     if (mib->getLocalMeshPhyCapabilities().htPresent
             && !header->getAMsduPresent()
@@ -178,6 +191,9 @@ void Ieee80211MeshMac::sendUpFrame(Packet *packet)
     Enter_Method("sendUpFrame");
     take(packet);
     auto header = packet->peekAtFront<Ieee80211MacHeader>();
+    if (header->getReceiverAddress().isMulticast() && meshPowerSave && meshPowerSave->isEnabled())
+        if (auto addresses = dynamicPtrCast<const Ieee80211TwoAddressHeader>(header))
+            meshPowerSave->groupFrameReceived(addresses->getTransmitterAddress(), header->getMoreData());
     if (header->getFrameType() != 0) {
         auto mesh = dynamicPtrCast<const Ieee80211MeshDataHeader>(header);
         if (header->getType() == ST_QOS_NULL && (!mesh || !isDataReceptionSupported(mesh)
@@ -222,6 +238,15 @@ void Ieee80211MeshMac::frameTransmissionComplete(const Packet *packet)
     meshManagement->managementTransmissionComplete(packet);
 }
 
+void Ieee80211MeshMac::frameTransmissionComplete(const Packet *packet, simtime_t start)
+{
+    auto mode = packet->findTag<physicallayer::Ieee80211ModeReq>();
+    if (!mode || !mode->getTxVector().ampdu) frameTransmissionComplete(packet);
+    if (meshPowerSave && meshPowerSave->isEnabled())
+        meshPowerSave->ppduTransmissionComplete(packet, start);
+    requestRadioReview();
+}
+
 void Ieee80211MeshMac::prepareFrameContent(Packet *packet, const std::set<int64_t>& deliveryUnit)
 {
     meshManagement->prepareManagementContent(packet);
@@ -259,6 +284,7 @@ void Ieee80211MeshMac::discardPendingMeshSources()
 
 bool Ieee80211MeshMac::isFrameTransmissionEligible(const Packet *packet, simtime_t plannedStart) const
 {
+    if (defersTransmissionStart() && !isRadioReadyForTransmission(plannedStart)) return false;
     auto source = packet->findTag<Ieee80211MeshAggregationTag>();
     if (source && source->getPendingSourceIdentity()) {
         auto forwarding = dynamic_cast<IMeshForwarding *>(ds.getNullable());
@@ -283,6 +309,132 @@ bool Ieee80211MeshMac::isDataReceptionSupported(const Ptr<const Ieee80211DataHea
     return mesh && header->getType() == ST_DATA_WITH_QOS && mesh->getMeshControlPresent()
         && !header->getMoreFragments() && header->getFragmentNumber() == 0
         && (!header->getAMsduPresent() || (mib->getLocalMeshPhyCapabilities().htPresent && header->getToDS() && header->getFromDS()));
+}
+
+bool Ieee80211MeshMac::defersTransmissionStart() const
+{
+    return powerManaged || (meshPowerSave && meshPowerSave->isEnabled());
+}
+
+bool Ieee80211MeshMac::isTransmissionReady() const
+{
+    if (!defersTransmissionStart()) return true;
+    auto state = radio->getRadioModeState();
+    return state && !state->transition && state->mode == physicallayer::IRadio::RADIO_MODE_TRANSCEIVER
+        && radio->getTransmissionState() == physicallayer::IRadio::TRANSMISSION_STATE_IDLE
+        && radio->getReceptionState() != physicallayer::IRadio::RECEPTION_STATE_RECEIVING;
+}
+
+bool Ieee80211MeshMac::isRadioReadyForTransmission(simtime_t start) const
+{
+    if (!defersTransmissionStart()) return true;
+    if (start < simTime()) return false;
+    auto state = radio->getRadioModeState();
+    if (!state) return false;
+    using Radio = physicallayer::IRadio;
+    if (state->transition)
+        return state->transition->targetMode == Radio::RADIO_MODE_TRANSCEIVER && state->transition->endTime <= start;
+    if (state->mode == Radio::RADIO_MODE_TRANSCEIVER)
+        return start > simTime() || isTransmissionReady();
+    auto duration = radio->getRadioModeSwitchingTime(state->mode, Radio::RADIO_MODE_TRANSCEIVER);
+    return duration && simTime() + *duration <= start;
+}
+
+std::optional<physicallayer::IRadio::RadioModeState> Ieee80211MeshMac::getMeshRadioState() const
+{
+    return radio->getRadioModeState();
+}
+
+std::optional<simtime_t> Ieee80211MeshMac::getMeshRadioSwitchingTime(
+        physicallayer::IRadio::RadioMode from, physicallayer::IRadio::RadioMode to) const
+{
+    return radio->getRadioModeSwitchingTime(from, to);
+}
+
+bool Ieee80211MeshMac::hasMeshRadioActivity() const
+{
+    return tx->hasTransmission() || hcf->hasActiveExchange()
+        || radio->getReceptionState() == physicallayer::IRadio::RECEPTION_STATE_RECEIVING
+        || radio->getTransmissionState() == physicallayer::IRadio::TRANSMISSION_STATE_TRANSMITTING;
+}
+
+bool Ieee80211MeshMac::isMeshPhyIdle() const
+{
+    using Radio = physicallayer::IRadio;
+    auto mode = radio->getRadioMode();
+    if (mode != Radio::RADIO_MODE_RECEIVER && mode != Radio::RADIO_MODE_TRANSCEIVER) return false;
+    if (radio->getTransmissionState() == Radio::TRANSMISSION_STATE_TRANSMITTING) return false;
+    auto channel = dynamic_cast<const physicallayer::IIeee80211ChannelAccess *>(radio.get());
+    return channel && channel->hasContiguousAllocation() ? !channel->isPrimaryChannelBusy()
+        : radio->getReceptionState() == Radio::RECEPTION_STATE_IDLE;
+}
+
+void Ieee80211MeshMac::requestRadioReview()
+{
+    Enter_Method("requestRadioReview");
+    if (radioReview && defersTransmissionStart() && operationalState == OPERATING && !radioReview->isScheduled())
+        scheduleAt(simTime(), radioReview);
+}
+
+void Ieee80211MeshMac::handleSelfMessage(cMessage *message)
+{
+    if (message == radioReview) reviewRadioState();
+    else Ieee80211Mac::handleSelfMessage(message);
+}
+
+void Ieee80211MeshMac::reviewRadioState()
+{
+    if (meshPowerSave && meshPowerSave->isEnabled()) {
+        powerManaged = true;
+        meshPowerSave->reviewAwakeState();
+    }
+    if (!powerManaged || radioReview->isScheduled()) return;
+    awakeIntent = !meshPowerSave || meshPowerSave->requiresAwake() || tx->hasTransmission() || hcf->hasActiveExchange();
+    auto state = radio->getRadioModeState();
+    if (!state || state->transition) return; // Completion==now still waits for its actual publication.
+    auto target = awakeIntent ? physicallayer::IRadio::RADIO_MODE_TRANSCEIVER : physicallayer::IRadio::RADIO_MODE_SLEEP;
+    if (state->mode != target) {
+        radio->setRadioMode(target); // Only this deferred continuation issues policy commands.
+        return;
+    }
+    if (isTransmissionReady()) tx->resumePendingTransmission();
+    hcf->meshPowerEligibilityChanged();
+}
+
+void Ieee80211MeshMac::configureRadioMode(physicallayer::IRadio::RadioMode mode)
+{
+    if (defersTransmissionStart()) requestRadioReview();
+    else Ieee80211Mac::configureRadioMode(mode);
+}
+
+void Ieee80211MeshMac::receiveSignal(cComponent *source, simsignal_t signal, intval_t value, cObject *details)
+{
+    if (meshPowerSave && meshPowerSave->isEnabled()) meshPowerSave->radioObservationChanged();
+    Ieee80211Mac::receiveSignal(source, signal, value, details);
+    if (defersTransmissionStart()) requestRadioReview();
+}
+
+void Ieee80211MeshMac::receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *details)
+{
+    receiveSignal(source, signal, static_cast<intval_t>(value), details);
+}
+
+void Ieee80211MeshMac::handleStartOperation(LifecycleOperation *operation)
+{
+    Ieee80211Mac::handleStartOperation(operation);
+    requestRadioReview();
+}
+
+void Ieee80211MeshMac::handleStopOperation(LifecycleOperation *operation)
+{
+    cancelEvent(radioReview);
+    Ieee80211Mac::handleStopOperation(operation);
+}
+
+void Ieee80211MeshMac::handleCrashOperation(LifecycleOperation *operation)
+{
+    cancelEvent(radioReview);
+    Ieee80211Mac::handleCrashOperation(operation);
 }
 
 } // namespace ieee80211

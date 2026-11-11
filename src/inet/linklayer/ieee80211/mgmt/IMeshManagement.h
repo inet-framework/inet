@@ -3,6 +3,8 @@
 #ifndef __INET_IMESHMANAGEMENT_H
 #define __INET_IMESHMANAGEMENT_H
 
+#include <optional>
+
 #include "inet/common/INETDefs.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
@@ -10,6 +12,15 @@ namespace inet {
 class Packet;
 namespace physicallayer { class IIeee80211Mode; }
 namespace ieee80211 {
+
+struct INET_API MeshWakeSchedule
+{
+    simtime_t nextTbtt;
+    simtime_t beaconInterval;
+    uint64_t ordinal = 0;
+    bool beaconPending = false;
+    bool peeringPending = false;
+};
 
 class INET_API IMeshManagement
 {
@@ -21,6 +32,9 @@ class INET_API IMeshManagement
     virtual bool isBeaconPending() const = 0;
     virtual bool isMeshManagementActive() const = 0;
     virtual simtime_t getNextTbtt() const = 0;
+    virtual MeshWakeSchedule getMeshWakeSchedule() const = 0;
+    virtual std::optional<simtime_t> getPeerTbtt(MacAddress peer, simtime_t notBefore) const = 0;
+    virtual simtime_t getOwnTbtt(uint64_t ordinal) const = 0;
     virtual uint16_t getLocalLinkId(MacAddress peer) const = 0;
     virtual uint16_t getPeerLinkId(MacAddress peer) const = 0;
     virtual uint16_t getLocalAid(MacAddress peer) const = 0;

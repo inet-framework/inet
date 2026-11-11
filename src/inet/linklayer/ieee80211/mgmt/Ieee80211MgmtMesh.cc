@@ -122,8 +122,11 @@ void Ieee80211MgmtMesh::receiveSignal(cComponent *source, simsignal_t signal, cO
     if (signal == packetDroppedSignal) {
         Enter_Method("beacon packet drop");
         auto packet = dynamic_cast<Packet *>(object);
-        if (isMeshManagementActive() && packet && packet->getTreeId() == pendingBeaconTreeId)
+        bool currentBeacon = isMeshManagementActive() && packet && packet->getTreeId() == pendingBeaconTreeId;
+        if (currentBeacon)
             pendingBeaconTreeId = -1;
+        if (currentBeacon && meshPowerSave && meshPowerSave->isEnabled())
+            meshPowerSave->timingTransmissionRetired();
     }
     else
         Ieee80211MgmtBase::receiveSignal(source, signal, object, details);
@@ -389,6 +392,16 @@ void Ieee80211MgmtMesh::processBeacon(Packet *packet, const Ptr<const Ieee80211M
         return;
     }
     updateNeighborTiming(packet, body, peer);
+    if (meshPowerSave && meshPowerSave->isEnabled() && mib->isMeshPeerEstablished(peer)) {
+        auto tim = body->getTim();
+        auto aid = getPeerAid(peer); // Assigned by the reporting peer, not our local AID.
+        int byte = aid / 8 - (tim.bitmapControl & 0xfe);
+        bool individual = body->getTimPresent() && aid && byte >= 0 && byte < tim.bitmapLength
+            && (tim.partialVirtualBitmap[byte] & (1 << (aid % 8)));
+        meshPowerSave->beaconReceived(peer,
+            body->getTimPresent() && tim.dtimCount == 0 && (tim.bitmapControl & 1), individual,
+            body->getMeshAwakeWindowPresent() ? SimTime(int64_t(body->getMeshAwakeWindow()) * 1024, SIMTIME_US) : SIMTIME_ZERO);
+    }
     if (autoPeer && getPeerState(peer) == IDLE && (body->getMeshConfiguration().capability & 1))
         openPeer(peer);
     delete packet;
@@ -482,6 +495,8 @@ void Ieee80211MgmtMesh::setState(MacAddress address, Peer& peer, PeerState state
         retirePeer(address);
     Ieee80211Mib::MeshPeerChange details(address);
     emit(meshPeeringStateChangedSignal, long(state), &details);
+    if (meshPowerSave && meshPowerSave->isEnabled())
+        meshPowerSave->managementTimingChanged();
 }
 
 void Ieee80211MgmtMesh::retirePeer(MacAddress address)
@@ -853,6 +868,8 @@ void Ieee80211MgmtMesh::scheduleNextBeacon()
     auto pauseRemaining = std::max(SIMTIME_ZERO, lastSlowingStart + lastSlowingDuration - simTime());
     auto localNow = tsfAt(simTime());
     scheduleAt(simTime() + pauseRemaining + std::max(SIMTIME_ZERO, nextTbttTsf - localNow), beaconTimer);
+    if (meshPowerSave && meshPowerSave->isEnabled())
+        meshPowerSave->managementTimingChanged();
 }
 
 void Ieee80211MgmtMesh::applyClockSlowing()
@@ -911,6 +928,12 @@ void Ieee80211MgmtMesh::prepareManagementContent(Packet *packet)
         body->setMeshAwakeWindow(window ? awakeWindow : 0);
         body->setChunkLength(body->getChunkLength() - oldLength + B(5 + tim.bitmapLength + (window ? 4 : 0)));
     }
+    else {
+        auto oldLength = body->getMeshAwakeWindowPresent() ? B(4) : B(0);
+        body->setMeshAwakeWindowPresent(true);
+        body->setMeshAwakeWindow(awakeWindow);
+        body->setChunkLength(body->getChunkLength() - oldLength + B(4));
+    }
     packet->insertAtFront(body);
     packet->insertAtFront(fixed);
 }
@@ -928,6 +951,13 @@ void Ieee80211MgmtMesh::managementTransmissionComplete(const Packet *packet)
             meshPowerSave->dtimTransmissionComplete();
         emit(meshBeaconTransmissionEndSignal, simTime().dbl());
     }
+    auto type = packet->peekAtFront<Ieee80211MacHeader>()->getType();
+    if (meshPowerSave && meshPowerSave->isEnabled() && (type == ST_BEACON || type == ST_PROBERESPONSE)) {
+        auto body = packet->peekDataAt<Ieee80211BeaconFrame>(B(24));
+        // IEEE Std 802.11-2024, 14.15.6: the advertised AW starts at actual TX end.
+        meshPowerSave->timingTransmissionComplete(body->getMeshAwakeWindowPresent()
+            ? SimTime(int64_t(body->getMeshAwakeWindow()) * 1024, SIMTIME_US) : SIMTIME_ZERO);
+    }
 }
 
 void Ieee80211MgmtMesh::updateNeighborTiming(Packet *packet, const Ptr<const Ieee80211BeaconFrame>& body, MacAddress address)
@@ -940,6 +970,7 @@ void Ieee80211MgmtMesh::updateNeighborTiming(Packet *packet, const Ptr<const Iee
     if (!time || !ofdm)
         return;
     auto& neighbor = neighbors[address];
+    neighbor.beaconInterval = body->getBeaconInterval();
     if (body->getMeshConfiguration().capability & (1 << 5)) {
         neighbor.offsetValid = false;
         return;
@@ -1004,6 +1035,49 @@ bool Ieee80211MgmtMesh::getNeighborOffset(MacAddress address, int64_t& offset) c
 simtime_t Ieee80211MgmtMesh::getNextTbtt() const
 {
     return beaconTimer && beaconTimer->isScheduled() ? beaconTimer->getArrivalTime() : SIMTIME_ZERO;
+}
+
+MeshWakeSchedule Ieee80211MgmtMesh::getMeshWakeSchedule() const
+{
+    MeshWakeSchedule result;
+    result.nextTbtt = getNextTbtt();
+    result.beaconInterval = beaconInterval;
+    result.ordinal = beaconNumber;
+    result.beaconPending = isBeaconPending();
+    for (const auto& entry : peers)
+        result.peeringPending |= entry.second.state != IDLE && entry.second.state != ESTAB;
+    return result;
+}
+
+simtime_t Ieee80211MgmtMesh::getOwnTbtt(uint64_t ordinal) const
+{
+    auto target = nextTbttTsf;
+    if (ordinal > beaconNumber)
+        target += beaconInterval * (ordinal - beaconNumber);
+    auto pause = std::max(SIMTIME_ZERO, lastSlowingStart + lastSlowingDuration - simTime());
+    return simTime() + pause + std::max(SIMTIME_ZERO, target - tsfAt(simTime()));
+}
+
+std::optional<simtime_t> Ieee80211MgmtMesh::getPeerTbtt(MacAddress peer, simtime_t notBefore) const
+{
+    auto it = neighbors.find(peer);
+    if (it == neighbors.end() || !it->second.offsetValid || it->second.beaconInterval <= 0)
+        return {};
+    auto maximum = SimTime::getMaxTime().inUnit(SIMTIME_US);
+    if (it->second.offset > maximum || it->second.offset < -maximum)
+        return {};
+    auto offset = SimTime(it->second.offset, SIMTIME_US);
+    auto local = tsfAt(notBefore);
+    if ((offset > 0 && local > SimTime::getMaxTime() - offset) || (offset < 0 && local < -offset))
+        return {};
+    auto peerNow = local + offset;
+    auto interval = it->second.beaconInterval;
+    int64_t ordinal = peerNow.raw() / interval.raw() + (peerNow.raw() % interval.raw() != 0);
+    if (ordinal > SimTime::getMaxTime().raw() / interval.raw())
+        return {};
+    auto target = SimTime::fromRaw(ordinal * interval.raw()) - offset;
+    auto pause = std::max(SIMTIME_ZERO, lastSlowingStart + lastSlowingDuration - simTime());
+    return simTime() + pause + std::max(SIMTIME_ZERO, target - tsfAt(simTime()));
 }
 
 std::string Ieee80211MgmtMesh::describePeers() const

@@ -22,6 +22,8 @@ class AwakePowerFixture : public MeshPowerSave
   protected:
     bool isActivationSupported() const override { return true; }
   public:
+    void reviewAwakeState() override {} // P1 deliberately supplies physically awake opportunities.
+    void beaconReceived(MacAddress, bool, bool, simtime_t) override {} // Opportunities remain explicit in this P1 fixture.
     void opportunity(MacAddress peer, simtime_t end) { Enter_Method("opportunity"); openAwakeOpportunity(peer, end); }
 };
 Define_Module(AwakePowerFixture);

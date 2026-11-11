@@ -70,6 +70,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     std::vector<MeshBufferedFrame> getMeshBufferedFrames() const override;
     void meshPowerEligibilityChanged() override;
     void withdrawMeshPowerControl(int64_t packetId) override;
+    simtime_t getGroupDeliveryIdleTime() const override;
+    bool hasActiveExchange() const { return frameSequenceHandler && frameSequenceHandler->isSequenceRunning(); }
     static simsignal_t secondaryChannelAccessDeferredSignal;
     static simsignal_t blockAckAgreementAddedSignal;
     static simsignal_t blockAckAgreementDeletedSignal;
@@ -244,7 +246,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void channelGranted(IChannelAccess *channelAccess) override;
 
     // ITx::ICallback
-    bool prepareTransmissionStart(const Packet *, simtime_t) override { return true; }
+    bool prepareTransmissionStart(const Packet *packet, simtime_t start) override;
     void transmissionCancelled(const Packet *packet) override;
     virtual void transmissionComplete(Packet *packet, const Ptr<const Ieee80211MacHeader>& header) override;
 

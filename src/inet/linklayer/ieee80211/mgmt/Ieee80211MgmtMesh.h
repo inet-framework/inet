@@ -41,6 +41,7 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     struct Neighbor {
         bool offsetValid = false;
         int64_t offset = 0; // microseconds, neighbor TSF minus local TSF
+        simtime_t beaconInterval;
     };
     std::map<MacAddress, Peer> peers;
     ModuleRefByPar<IMeshLinkMetric> linkMetric;
@@ -136,6 +137,9 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     bool getNeighborOffset(MacAddress peer, int64_t& offset) const;
     uint64_t getTsfAt(simtime_t time) const;
     virtual simtime_t getNextTbtt() const override;
+    MeshWakeSchedule getMeshWakeSchedule() const override;
+    std::optional<simtime_t> getPeerTbtt(MacAddress peer, simtime_t notBefore) const override;
+    simtime_t getOwnTbtt(uint64_t ordinal) const override;
     simtime_t getPendingClockDrift() const { return maxClockDrift; }
 };
 

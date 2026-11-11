@@ -140,6 +140,10 @@ Use all-AC pending and live in-progress originals, excluding dropped borrowed st
 
 Delay beacon/probe access and compare the advertised window with actual transmission end. Probe just before and exactly at its deadline. An exchange already admitted holds the radio awake through its required response; it does not authorize a later exchange after the window. Transmit group data and assert PostAwakeDuration and completion/idle obligations. Overlap obligations from different peers and require doze only after all permit it.
 
+Keep transmitter and receiver conditions distinct: an own-window group transmission extends the transmitter's awake deadline from actual group completion by its own advertised window duration. An indicated-group receiver uses More Data0 or continuous physical CCA-IDLE for the PHY-default AC_VI TXOP, independently of configured VI overrides or virtual NAV. Interrupt that idle evidence with actual busy/nonreceptive intervals and require a fresh complete idle interval before the idle alternative can permit doze.
+
+Check the declared recurrence for group traffic starting during an already extended window, with just-before and exact-deadline boundaries. Independently retain announced DTIM group delivery after both timed window ends: remaining group frames must stay eligible and hold the transmitter awake until the sequence drains. Do not strand that sequence by treating an expired timer as permission to sleep.
+
 ## WIFI-CHECK-LIGHT-SLEEP
 
 Use nonzero radio switching time and controlled peer TBTTs. Verify RX readiness before every corresponding peer beacon. TIM individual indication causes RSPI=1 trigger; group indication holds the receiver awake through completion/idle timeout. Show actual sleep intervals, no transmission outside a permitted opportunity, and no link-error samples or PERR from expected holds. Pending peering/probe transactions and exchanges prevent premature sleep.

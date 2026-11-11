@@ -28,6 +28,15 @@ class INET_API IMeshPowerSave
     virtual MeshTim getTim(uint8_t dtimCount, uint8_t dtimPeriod, const std::set<int64_t>& deliveryUnit) const = 0;
     virtual bool needsAwakeWindow(const MeshTim& tim) const = 0;
     virtual void dtimTransmissionComplete() = 0;
+    virtual void reviewAwakeState() = 0;
+    virtual bool requiresAwake() const = 0;
+    virtual void radioObservationChanged() = 0;
+    virtual void managementTimingChanged() = 0;
+    virtual void timingTransmissionComplete(simtime_t advertisedWindow) = 0;
+    virtual void timingTransmissionRetired() = 0;
+    virtual void beaconReceived(MacAddress peer, bool groupBuffered, bool individualBuffered, simtime_t window) = 0;
+    virtual void groupFrameReceived(MacAddress peer, bool moreData) = 0;
+    virtual void ppduTransmissionComplete(const Packet *packet, simtime_t start) = 0;
 };
 
 } // namespace inet::ieee80211
