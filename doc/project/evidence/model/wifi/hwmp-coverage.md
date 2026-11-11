@@ -717,3 +717,71 @@ upstream or C9 references exactly. Record
 retains the own-build/source/loader proof; no adapter correction or main-branch
 rewrite is required. The remaining C10 changes are examples/documentation
 and test evidence, with final publication reconciliation recorded separately.
+
+## Ordinary-host profiles and user documentation (C10)
+
+Fourteen named configurations use ordinary StandardHost nodes, production
+automatic peering/HWMP/power policy and ScenarioManager, with no custom example
+library or test subclasses. IPv4 endpoints share one subnet, dynamic ARP and
+direct interface routes; IP forwarding is disabled everywhere. Root-level
+production recorders supply separate transmit and good-receive radiotap
+captures, including split native aggregate members. Existing WirelessExamples
+dependencies already cover the package; no feature flag is added.
+
+All fourteen final configurations run in debug, run0/seed0, on the frozen
+model71e21 and finish normally at their declared time limits. Final record
+`/home/miguel/inet-mesh-final-c10-analysis/final-record.json` (SHA
+`cc1f621cf7bf6c5b60db5ab1f26c64fe29a78d84e72ed048b388aa8b968c26fc`)
+and final evidence manifest (SHA
+`3821ca3258a2fbf7ef4c7bb3afe60e583e3be99a6a857bd143b73b49ff1d9916`)
+retain the complete input/command/source/library/feature/store chain, 195 raw
+artifact hashes, 116 original analysis hashes and 122 final-manifest entries.
+Those manifests overlap and are not 433 unique artifacts. Independent review
+redecodes all 88 captures and verifies all 11,280 captured member FCS records;
+no direct endpoint good reception occurs. All final runs have empty warning,
+ownership and undisposed diagnostics.
+
+| Final profiles | Actual bounded result |
+| --- | --- |
+| LineOfdm / DiamondOfdm | 10/10 each; native relay preserves IP TTL32 while mesh TTL31 becomes30. The diamond's ten source DATA frames choose the lower-airtime branch. |
+| FailureAlternate | 60 sent/59 received. IPID21 makes seven relay2 attempts at4.100327120–4.106573120s, reaches the terminal drop at4.106623120268s, and produces one PERR transmission at4.106724120s. Source DATA through relay1 resumes at7.272941032s; recovery is not claimed immediate. |
+| RootPreq / RootRann | 10/10 each, with actual proactive PREQ or RANN relay and unicast confirmation exchanges. |
+| HtNested / VhtNested / both Metric1 controls | 24/24 each; actual three-MPDU/six-MSDU nested PPDUs and positive compressed Block Ack. HT/VHT default metric2 and explicit metric1 signaling are checked separately. |
+| LightRelay / DeepRelay | 10/10 each before ACTIVE restoration at4s; initial ARP is generated while the relay is actually asleep and later group-relayed. Lower-mode Null/peer reception/ACK and subsequent radio sleep are independently correlated. |
+| DtimGroup | 10/10 unicast plus one broadcast UDP received once at each of the two sinks. Actual DTIM group bits, group release, More Data and No Ack policy are checked. |
+| SleepingHtNested / SleepingVhtNested | 24/24 each; source ending PPDUs contain two A-MSDU MPDUs/four MSDUs with EOSP and matching positive compressed Block Ack. |
+
+The exact controlled HT source state is also observed through the public
+`getServicePeriods()` getter before OWNER retirement at1.308272753286s/event2727:
+peer0A-AA-00-00-00-02, ending=true, cap7, spent0, cohort/started{2247,2250},
+retired empty and pending CONFIRMED. The real HCF acknowledgment stack reports
+two acknowledged members. Record
+`/home/miguel/inet-mesh-c10-mpsp-state-view-attempt2/inspection-record.json` is described in
+the local `c10-mpsp-state-view.md` report; its original SHA is
+`078da60c4cfd4ebe966bad5f55dd993e1b4c4c981c245c1a62e4bc5c8886aef6`.
+This private process is deliberately stopped after inspection, not counted as
+a fifteenth completed example or a VHT internal-state snapshot. Its earlier
+debug-on-errors trap occurred before an intentional caught exception; it is
+preserved without attributing a production fault or NED-root causality.
+
+Earlier configuration probes remain distinct. Hidden diamond branches caused
+overlapping ARP group transmissions and zero delivery; the final geometry
+lets the branches hear one another. The initial failure configuration's
+coincidence-guard abort is retained; its explicit warning setting remains,
+with zero such warnings in the final run. A directed UDP broadcast originally
+failed IPv4's unspecified-interface policy, so the group example explicitly
+enables local limited broadcast without enabling IP forwarding. DEEP's missed
+group PREQ is a legitimate skipped peer-beacon case under14.15.5/14.15.8:
+the final example keeps endpoints ACTIVE and places reverse discovery inside
+the relay's own awake window. It demonstrates that chosen rendezvous, not
+guaranteed reception of every peer's group transmission. The original Q0
+prototype is feasibility evidence only and is not relabeled final validation.
+
+The user guide and example README describe fixed PHY/profile selection, metric
+units/estimators/reset rules, finite queues/lifetimes, peer-mode commands,
+DEEP timing policy and the separate meaning of mesh power save versus HT
+SMPS/APSD. They retain open/fixed-channel/native-endpoint and lifecycle limits,
+without IPv6, external interoperability or battery-life-accuracy claims.
+Two existing NED edits change descriptions only. Four PR and two README
+Mermaid diagrams are locally rendered and independently viewed; their blocks
+match the rendered artifacts, with no clipping, render errors or semicolons.

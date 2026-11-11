@@ -8,13 +8,13 @@ import inet.linklayer.ieee80211.mesh.contract.IMeshPowerSave;
 
 // Open QoS mesh with native forwarding and optional contiguous5GHz HT/VHT PHY.
 // Native source A-MSDU is available through the MSDU aggregation policy.
-// Immediate Compressed Block Ack enables optional native A-MPDU; power save
-// remains outside the always-awake profile.
+// Immediate Compressed Block Ack enables optional native A-MPDU. Optional mesh
+// power save adds beacon rendezvous and directional peer service periods.
 module Ieee80211MeshInterface extends Ieee80211Interface
 {
     parameters:
         string meshId = default("inet-mesh");
-        bool powerSave = default(false); // Activation requires the complete service-period engine.
+        bool powerSave = default(false); // Enable peer power-mode and service-period coordination
         string phyProfile @enum("ofdm","ht","vht") = default("ofdm");
         int pathSelectionMetricId = default(phyProfile == "ofdm" ? 1 : 2); // profile choice, independent of negotiated instantaneous rate
         opMode = default(phyProfile == "ofdm" ? "a" : "ac-complete");

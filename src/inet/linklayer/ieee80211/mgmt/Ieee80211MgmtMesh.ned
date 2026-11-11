@@ -5,7 +5,8 @@ package inet.linklayer.ieee80211.mgmt;
 import inet.common.SimpleModule;
 
 // IEEE Std 802.11-2024 open mesh peering and neighbor-offset synchronization.
-// Always awake OFDM profile; this component does not provide mesh forwarding.
+// OFDM/HT/VHT peer capabilities and beacon timing. MeshForwarding owns relaying;
+// the optional MeshPowerSave owner coordinates radio awake requirements.
 simple Ieee80211MgmtMesh extends SimpleModule like IIeee80211Mgmt
 {
     parameters:
