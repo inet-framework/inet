@@ -611,3 +611,109 @@ pinned library and makes no historical live-map claim. The earlier record's
 loader wording is preserved and corrected. Final C9 includes the signal test:
 29 unit, 33 module and 53
 protocol files. Execution of that full final union remains separately recorded.
+
+## Final lifecycle and compatibility validation (C9)
+
+The final debug model is
+`71e21e67a46ca90a9f0142dff2fcce424eb4219229495b9273b6b44185d951ea`.
+Checkpoint `/home/miguel/inet-mesh-final-c9-checkpoint/record.json` (SHA
+`39d858d2479043ffd7b786cbe3bda6ff65bc919cff6cb67dfb6ef3d182fa63b8`)
+pins 173 source, 115 selected fixture, 100 support and four feature inputs,
+with matching current/copied inputs and current/pinned libraries. The two
+already-authored C10 NED description edits are comments only; removing
+comments yields the same interpreted declarations as the parent. There is
+no C9 production change or baseline replacement.
+
+New isolated lifecycle coverage exercises four real owners (management,
+forwarding, HWMP and metric) under stop, crash and deletion, using controlled
+dependencies without initializing real HCF/Tx/radio. It preserves intentional
+history and timer objects rather than demanding every map be empty. Three
+new LightSleep cases prove an armed future boundary and queued MAC review
+before policy teardown, harmless continuation, preserved committed MIB state
+and fresh restart. Original cases12–14 retain their timing. A new peer case
+uses actual management retirement/re-peering and a genuine production-stamped
+BA at the API boundary: an old stamp cannot confirm a replacement ending
+role or change the independent peer. This is not a late RF response. Existing
+HT/VHT aggregate closures now inspect committed PHY/rate/power views and their
+retirement while preserving another peer. None claims whole-NIC restart.
+
+The same final model passes 29 unit files/29 native runs and 33 module
+files/168 runs. Record
+`/home/miguel/inet-mesh-final-c9-unit-module/record.json` (SHA
+`eb1809f184dbd84b7344632b25794350ee51d35af7cbdceca07c146b9991b4e7`)
+retains 1,477 checked artifacts. Retained native inputs, observations and
+diagnostics match P2/R3 exactly; the twelve lifecycle cases and signal case
+pass separately. All 62 executables have pinned-library loader proofs and
+at least one passive live mapping, not 197 separate captures. The 49 ownership
+warnings, 34 undisposed objects and 11 module compiler warnings are inherited;
+unit compiler warnings and new-fixture runtime hygiene are empty.
+
+The full 53-file protocol union starts all 713 native runs: 708 PASS,
+four retained assertion failures and one retained abort, runner exit1.
+Record `/home/miguel/inet-mesh-final-c9-protocol/record.json` (SHA
+`bad69a535360bb699e1d154329b5cd5c1e28c300522397a23b7c56069a5c01c2`)
+retains 2,978 artifacts. The exact comparison record
+`/home/miguel/inet-mesh-final-c9-protocol-comparison.json` (SHA
+`810293715c612ca02099da4708dd28eb491341b457ffc1ca7b81794c1c2858d2`)
+finds no differences in retained configuration/run/scenario, assertions,
+end boundaries, ordered diagnostics or stderr against eight corrected P3,
+44 unaffected original P3 and the S0 references. Light0–15 and Peer0–46
+match; appended Light16–18 and Peer47 pass. All 53 loader queries resolve the
+matching model/support libraries and support hashes match before/after.
+Seed0 comes from effective INI authority, not a fabricated printed run field.
+
+The retained failures are `N_Ampdu` (2s/event149187), `Ac_Ampdu`
+(2s/event161849), `Ac_VhtIe` (2.5s/event48880), and
+`WifiBlockAckDataRetry` run0 (deadline at1.023764276562s/event3708).
+The latter's run1 retains the exact-time transmission error at
+1.014105463846s/event2639 and its teardown diagnostic. These remain failures;
+neither declarations, expectations nor time budgets are changed.
+
+Native legacy trajectory validation completes all 19 simulations at their
+original1/10/100s limits, run0/seed0 and CPU limit600s, with all 56 ingredient
+checks PASS. Reconciliation
+`/home/miguel/inet-mesh-final-native-v3-reconciliation/record.json` (SHA
+`aecd3180fb74c7e6f37865a703f99d3a325a751b21b94c23df78a906c705ebcc`)
+matches both stored fingerprints and C1 actual fingerprints, parameters,
+completion times/events and diagnostics. No field difference or extraction
+gap remains. Eighteen SDK command displays differ only in independent option
+order; literal quoted values are retained without shlex reconstruction.
+Passive process/model proof covers seven late simulations, not the earlier
+twelve. The inner runner exits0 with no post-input drift. The outer tool
+session subsequently reports143 after the completed records/stdout; its cause
+is unassigned and preserved separately, without calling it a simulation
+failure or a clean outer-session exit. Earlier interrupted campaigns retain
+their original identities and are not relabeled completed execution.
+
+Fresh main release compilation also passes, including a dependency-aware
+rebuild/relink after S1. Release checkpoint
+`/home/miguel/inet-mesh-final-release-checkpoint/record.json` (SHA
+`5f22f5b6d67c7ab0f79fb022442b753bb0d58957e8be800e1cad7cc971ac06a0`)
+pins library `98e1ee11255d3960ab2222f08a8e7312dd999bd7facb6c972cb1a0b4dfc7f194`.
+This is compilation evidence, not a release-mode behavioral campaign.
+
+In an isolated checkout, disabling Ieee80211 removes its 17-feature dependent
+closure: fourteen formerly enabled features and three already disabled.
+The disabled release build succeeds with its macro absent. After restoring
+the exact original feature state/modes, enabled debug and release builds
+succeed. Record `/home/miguel/inet-mesh-final-feature-boundary-record/record.json`
+(SHA `4f69fe20128d859d4feb00be8fa4d6e4d7f329bf6ca40334550aa2d3ba63329f`)
+retains 110 checked artifacts and all interruption/restoration evidence.
+The off build uses L1; both S1 changes are inside its excluded packages.
+Restored builds use S1 and dependency-verified distinct-inode COW copies of
+1,713 matching objects per mode, then compile all twenty differing generated
+translation units and relink locally. They are qualified incremental builds,
+not independent full recompilations. No disabled-mode simulation runs and
+the main feature state remains unchanged.
+
+An isolated uncommitted merge of S1 with upstream
+`7adc565ce98ced794011bd50c7113b7859f47a3b` also builds and passes the directly
+affected three module files/five native runs. Upstream `SnirInterval_1` uses
+run0–2/seed0–2; the topic duplicate-primary-copy and HT/VHT timing cases use
+run0/seed0. Actual observations, end boundaries and diagnostics match their
+upstream or C9 references exactly. Record
+`/home/miguel/inet-mesh-upstream-integration-evidence/merged-candidate/record.json`
+(SHA `b8648feed5724ecdd3092a54b5516a5e873f1c5fc0d939337bbab18ad8eb37dc`)
+retains the own-build/source/loader proof; no adapter correction or main-branch
+rewrite is required. The remaining C10 changes are examples/documentation
+and test evidence, with final publication reconciliation recorded separately.

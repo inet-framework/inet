@@ -21,6 +21,9 @@ class DozePowerFixture : public MeshPowerSave
     simtime_t ownWindowEnd() const { return ownAwEnd; }
     simtime_t postWindowEnd() const { return postAwEnd; }
     bool awaitingOwnBeacon() const { return ownRendezvous; }
+    std::optional<simtime_t> boundaryDeadline() const {
+        return boundaryTimer->isScheduled() ? std::optional<simtime_t>(boundaryTimer->getArrivalTime()) : std::nullopt;
+    }
     void opportunity(MacAddress peer,simtime_t end) { Enter_Method("opportunity"); openAwakeOpportunity(peer,end); }
     simtime_t opportunityEnd(MacAddress peer) const {
         auto found=awakeUntil.find(peer);

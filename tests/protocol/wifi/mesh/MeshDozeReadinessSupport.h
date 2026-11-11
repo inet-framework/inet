@@ -91,8 +91,16 @@ Define_Module(ManagedHcfFixture);
 
 class ManagedMacFixture : public Ieee80211MeshMac
 {
+  protected:
+    void handleSelfMessage(cMessage *message) override {
+        if (message == radioReview) reviewDispatches++;
+        Ieee80211MeshMac::handleSelfMessage(message);
+    }
   public:
     bool armed = false, holdTarget = false, armBar = false;
+    int reviewDispatches = 0;
+    bool reviewPending() const { return radioReview && radioReview->isScheduled(); }
+    int64_t reviewId() const { return radioReview ? radioReview->getId() : -1; }
     bool isFrameTransmissionEligible(const Packet *packet, simtime_t time) const override {
         if (holdTarget && std::string(packet->getName()).find("managed-target")==0) return false;
         return Ieee80211MeshMac::isFrameTransmissionEligible(packet,time);
@@ -359,15 +367,20 @@ Define_Module(ManagedDriver);
 class NaturalPolicyDriver : public cSimpleModule, public cListener, public LifecycleController
 {
     int actual=0, delivered=0, samples=0;
+    int oldReviewCount=0;
+    int64_t oldReviewId=-1;
+    simtime_t oldBoundary=-1;
     IRadio *radio(int i) const { return check_and_cast<IRadio *>(meshInterface(i)->getSubmodule("radio")); }
     DozePowerFixture *power(int i) const { return check_and_cast<DozePowerFixture *>(meshInterface(i)->getSubmodule("powerSavePolicy")); }
+    ManagedMacFixture *mac() const { return check_and_cast<ManagedMacFixture *>(meshInterface(0)->getSubmodule("mac")); }
     void at(int ms,int kind) { scheduleAt(SimTime(ms,SIMTIME_MS),new cMessage("natural-policy-check",kind)); }
+    void at(simtime_t time,int kind) { scheduleAt(time,new cMessage("natural-policy-check",kind)); }
   protected:
     void initialize() override {
         for (auto signal : {transmissionStartedSignal,packetSentToUpperSignal,Hcf::meshDataAttemptCompletedSignal})
             getSimulation()->getSystemModule()->subscribe(signal,this);
         at(1,0); at(60,1); at(65,2); at(130,3); at(150,4); at(151,5);
-        at(160,6); at(165,7); at(180,8); at(300,9);
+        if (par("scenario").intValue() < 16) { at(160,6); at(165,7); at(180,8); at(300,9); }
     }
     void receiveSignal(cComponent *sourceModule,simsignal_t signal,cObject *object,cObject *details) override {
         if (signal==transmissionStartedSignal) {
@@ -402,12 +415,20 @@ class NaturalPolicyDriver : public cSimpleModule, public cListener, public Lifec
         }
         else if (kind==4) {
             ASSERT(radio(0)->getRadioMode()==IRadio::RADIO_MODE_SLEEP);
-            if (scenario==14) power(0)->deleteModule();
+            if (scenario>=16) {
+                auto boundary=power(0)->boundaryDeadline();
+                ASSERT(boundary && *boundary>simTime()); oldBoundary=*boundary;
+                mac()->requestRadioReview();
+                ASSERT(mac()->reviewPending()); oldReviewId=mac()->reviewId(); oldReviewCount=mac()->reviewDispatches;
+            }
+            if (scenario==14 || scenario==18) power(0)->deleteModule();
             else {
-                auto operation=scenario==13 ? static_cast<LifecycleOperation *>(new ModuleCrashOperation())
+                auto operation=(scenario==13 || scenario==17) ? static_cast<LifecycleOperation *>(new ModuleCrashOperation())
                     : static_cast<LifecycleOperation *>(new ModuleStopOperation());
                 LifecycleOperation::StringMap parameters; operation->initialize(power(0),parameters); ASSERT(initiateOperation(operation));
+                if (scenario>=16) ASSERT(!power(0)->boundaryDeadline());
             }
+            if (scenario>=16) at(oldBoundary+SimTime(1,SIMTIME_MS),10);
         }
         else if (kind==5) {
             auto state=radio(0)->getRadioModeState();
@@ -415,6 +436,11 @@ class NaturalPolicyDriver : public cSimpleModule, public cListener, public Lifec
             ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
             ASSERT(meshMib(0)->findMeshPeerPowerState(meshMib(1)->address)->local==MeshPowerMode::LIGHT_SLEEP);
             ASSERT(actual==0 && samples==0);
+            if (scenario>=16) {
+                ASSERT(mac()->reviewId()==oldReviewId && mac()->reviewDispatches>oldReviewCount);
+                if (scenario!=18) ASSERT(!power(0)->isEnabled() && !power(0)->boundaryDeadline());
+                else ASSERT(!meshInterface(0)->getSubmodule("powerSavePolicy"));
+            }
         }
         else if (kind==6) power(1)->requestMode(meshMib(0)->address,MeshPowerMode::ACTIVE);
         else if (kind==7 && scenario!=14) {
@@ -430,6 +456,29 @@ class NaturalPolicyDriver : public cSimpleModule, public cListener, public Lifec
         else if (kind==9) {
             ASSERT(actual==1 && delivered==1 && samples==1);
             emit(registerSignal("dozeComplete"),1L);
+        }
+        else if (kind==10) {
+            ASSERT(scenario>=16 && simTime()>oldBoundary && mac()->reviewId()==oldReviewId);
+            ASSERT(meshMib(0)->findMeshPeerPowerState(meshMib(1)->address)->local==MeshPowerMode::LIGHT_SLEEP);
+            if (scenario!=18) {
+                ASSERT(!power(0)->isEnabled() && !power(0)->boundaryDeadline());
+                auto operation=new ModuleStartOperation(); LifecycleOperation::StringMap parameters;
+                operation->initialize(power(0),parameters); ASSERT(initiateOperation(operation));
+                at(simTime()+SimTime(1,SIMTIME_MS),11);
+            }
+            else at(simTime()+SimTime(1,SIMTIME_MS),12);
+        }
+        else if (kind==11) {
+            auto boundary=power(0)->boundaryDeadline();
+            ASSERT(power(0)->isEnabled() && boundary && *boundary>simTime() && *boundary!=oldBoundary);
+            ASSERT(meshMib(0)->findMeshPeerPowerState(meshMib(1)->address)->local==MeshPowerMode::LIGHT_SLEEP);
+            at(simTime(),12);
+        }
+        else if (kind==12) {
+            power(1)->requestMode(meshMib(0)->address,MeshPowerMode::ACTIVE);
+            if (scenario!=18) power(0)->requestMode(meshMib(1)->address,MeshPowerMode::ACTIVE);
+            at(simTime()+SimTime(20,SIMTIME_MS),8);
+            at(simTime()+SimTime(80,SIMTIME_MS),9);
         }
     }
 };

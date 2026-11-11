@@ -6,8 +6,24 @@ class MeshAmpduClosureDriver : public cSimpleModule, public cListener
 {
     bool closed = false, armed = false;
     int oldPpdus = 0, bars = 0, terminal = 0, oldSamples = 0, lateSamples = 0, expiredOriginals = 0, otherDelivered = 0, freshDelivered = 0;
+    uint16_t oldLink = 0, otherLink = 0;
+    std::optional<Ieee80211RateSetState> otherRates;
+    std::optional<Ieee80211PeerPhyCapabilities> otherPhy;
     MeshAmpduHcf *hcf() const { return check_and_cast<MeshAmpduHcf *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("hcf")); }
     int scenario() const { return par("scenario"); }
+    void requirePeerViews(int peer) const {
+        auto address = meshMib(peer)->address;
+        auto phy = meshMib(0)->findMeshPeerPhyCapabilities(address);
+        ASSERT(meshMib(0)->isMeshPeerEstablished(address) && meshMib(0)->findPeerRateSet(address)
+            && meshMib(0)->findPeerHtState(address) && meshMib(0)->findMeshPeerPowerState(address));
+        ASSERT(phy && phy->htPresent && phy->vhtPresent == (meshInterface(0)->par("phyProfile").stdstringValue() == "vht"));
+    }
+    void requireOtherViews() const {
+        requirePeerViews(3);
+        ASSERT(otherRates && otherPhy && *meshMib(0)->findPeerRateSet(meshMib(3)->address) == *otherRates
+            && *meshMib(0)->findMeshPeerPhyCapabilities(meshMib(3)->address) == *otherPhy
+            && meshManagement(0)->getLocalLinkId(meshMib(3)->address) == otherLink);
+    }
     void source(const char *name, int destination, int length, int tid = 0) {
         auto packet = phyMsdu(name,meshMib(destination)->address,length-7);
         packet->getTagForUpdate<UserPriorityReq>()->setUserPriority(tid);
@@ -33,6 +49,11 @@ class MeshAmpduClosureDriver : public cSimpleModule, public cListener
         }
         if (step == 1000) {
             ASSERT(!closed && hcf()->pending(meshMib(3)->address,1) == 1);
+            requirePeerViews(1); requirePeerViews(3);
+            oldLink = meshManagement(0)->getLocalLinkId(meshMib(1)->address);
+            otherLink = meshManagement(0)->getLocalLinkId(meshMib(3)->address);
+            otherRates = *meshMib(0)->findPeerRateSet(meshMib(3)->address);
+            otherPhy = *meshMib(0)->findMeshPeerPhyCapabilities(meshMib(3)->address);
             auto radio = check_and_cast<IRadio *>(meshInterface(0)->getSubmodule("radio"));
             auto tx = check_and_cast<ITx *>(meshInterface(0)->getSubmodule("mac")->getSubmodule("tx"));
             if (scenario() == 40) ASSERT(radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING);
@@ -40,6 +61,11 @@ class MeshAmpduClosureDriver : public cSimpleModule, public cListener
             if (scenario() == 42) ASSERT(tx->hasTransmission() && radio->getTransmissionState() != IRadio::TRANSMISSION_STATE_TRANSMITTING);
             closed = true;
             meshManagement(0)->closePeer(meshMib(1)->address);
+            ASSERT(!meshMib(0)->findPeerRateSet(meshMib(1)->address)
+                && !meshMib(0)->findMeshPeerPhyCapabilities(meshMib(1)->address)
+                && !meshMib(0)->findPeerHtState(meshMib(1)->address)
+                && !meshMib(0)->findMeshPeerPowerState(meshMib(1)->address));
+            requireOtherViews();
             ASSERT(hcf()->numbered(meshMib(1)->address,0) == 0 && hcf()->pending(meshMib(1)->address,0) == 0);
             ASSERT(!hcf()->recovering(meshMib(1)->address,0) && hcf()->pending(meshMib(3)->address,1) == 1);
             par("releaseUnrelated").setBoolValue(true); hcf()->resumeContention();
@@ -53,6 +79,11 @@ class MeshAmpduClosureDriver : public cSimpleModule, public cListener
         if (step == 140 && scenario() != 43) {
             ASSERT(closed && meshManagement(0)->getPeerState(meshMib(1)->address) == Ieee80211MgmtMesh::IDLE);
             ASSERT(meshManagement(1)->getPeerState(meshMib(0)->address) == Ieee80211MgmtMesh::IDLE);
+            ASSERT(!meshMib(0)->findPeerRateSet(meshMib(1)->address)
+                && !meshMib(0)->findMeshPeerPhyCapabilities(meshMib(1)->address)
+                && !meshMib(0)->findPeerHtState(meshMib(1)->address)
+                && !meshMib(0)->findMeshPeerPowerState(meshMib(1)->address));
+            requireOtherViews();
             meshManagement(0)->openPeer(meshMib(1)->address);
         }
         if (step == 170) {
@@ -60,6 +91,10 @@ class MeshAmpduClosureDriver : public cSimpleModule, public cListener
             std::cout << "relay peer states=" << meshManagement(1)->getPeerState(meshMib(2)->address)
                 << "/" << meshManagement(2)->getPeerState(meshMib(1)->address) << endl;
             ASSERT(meshMib(0)->isMeshPeerEstablished(meshMib(1)->address));
+            if (scenario() != 43) {
+                requirePeerViews(1); requireOtherViews();
+                ASSERT(meshManagement(0)->getLocalLinkId(meshMib(1)->address) != oldLink);
+            }
             source("closure-fresh",2,11);
         }
         if (step == 210) {

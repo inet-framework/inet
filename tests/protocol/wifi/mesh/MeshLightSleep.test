@@ -35,7 +35,7 @@ simple ManagedTxFixture extends Tx { parameters: @class(::ManagedTxFixture); }
 network Test extends MeshPairNetwork {
     parameters:
         int scenario;
-        string driverType = scenario < 2 ? "DozeDriver" : (scenario>=12 && scenario<=14 ? "NaturalPolicyDriver" : "ManagedDriver");
+        string driverType = scenario < 2 ? "DozeDriver" : ((scenario>=12 && scenario<=14) || scenario>=16 ? "NaturalPolicyDriver" : "ManagedDriver");
     submodules: driver: <driverType> like IDozeDriver;
 }
 
@@ -43,7 +43,7 @@ network Test extends MeshPairNetwork {
 [General]
 network=Test
 sim-time-limit=400ms
-*.scenario=${scenario=0..15}
+*.scenario=${scenario=0..18}
 *.driver.scenario=${scenario}
 *.driver.zeroDelay=${scenario}==1 || ${scenario}==3
 *.numStations=2
