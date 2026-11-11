@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef __INET_IMESHDATAMAC_H
-#define __INET_IMESHDATAMAC_H
+#ifndef INET_IMESHDATAMAC_H
+#define INET_IMESHDATAMAC_H
 
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/common/MacAddress.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 class INET_API IMeshDataMac
 {
@@ -21,6 +20,5 @@ class INET_API IMeshDataMac
     virtual void deliverMeshMsdu(Packet *packet, MacAddress source, MacAddress destination, int tid) = 0;
 };
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211
 #endif

@@ -1,21 +1,20 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef __INET_IEEE80211MESHFRAMESERIALIZER_H
-#define __INET_IEEE80211MESHFRAMESERIALIZER_H
+#ifndef INET_IEEE80211MESHFRAMESERIALIZER_H
+#define INET_IEEE80211MESHFRAMESERIALIZER_H
 
 #include <functional>
 
 #include "inet/common/packet/serializer/FieldsChunkSerializer.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 class INET_API Ieee80211MeshFrameSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+    void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 
   public:
     // Shared with the existing beacon/probe codec. The caller has checked the IE boundary.
@@ -27,11 +26,10 @@ class INET_API Ieee80211MeshFrameSerializer : public FieldsChunkSerializer
 class INET_API Ieee80211MeshControlSerializer : public FieldsChunkSerializer
 {
   protected:
-    virtual void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
-    virtual const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
+    void serializeFields(MemoryOutputStream& stream, const Ptr<const Chunk>& chunk) const override;
+    const Ptr<Chunk> deserializeFields(MemoryInputStream& stream, const std::type_info& typeInfo) const override;
 };
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211
 
 #endif

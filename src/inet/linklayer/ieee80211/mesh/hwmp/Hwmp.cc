@@ -9,8 +9,7 @@
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MgmtFrame_m.h"
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 Define_Module(Hwmp);
 simsignal_t Hwmp::pathUpdatedSignal = registerSignal("hwmpPathUpdated");
@@ -1066,5 +1065,4 @@ void Hwmp::sendPendingErrors()
     if (operationalState == OPERATING && !pendingErrors.empty()) scheduleAt(*lastPerrHandoff+perrMinInterval,perrTimer);
 }
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211

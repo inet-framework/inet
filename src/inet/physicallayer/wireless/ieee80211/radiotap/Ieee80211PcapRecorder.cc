@@ -27,8 +27,8 @@ void Ieee80211PcapRecorder::recordPacket(const cPacket *message, Direction direc
         PcapRecorder::recordPacket(message,direction,source);
         return;
     }
-    constexpr int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
-    auto header = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet,b(-1),flags);
+    constexpr int PEEK_FLAGS = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE | Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED;
+    auto header = Ieee80211Radio::peekIeee80211PhyHeaderAtFront(packet,b(-1),PEEK_FLAGS);
     ieee80211::Ieee80211AmpduLayout layout;
     if (!header->isCorrect() || !header->isComplete() || !header->isProperlyRepresented()
             || !ieee80211::findAmpdu(packet,header->getChunkLength(),header->getLengthField(),vector.format == Ieee80211TxVector::VHT,layout))

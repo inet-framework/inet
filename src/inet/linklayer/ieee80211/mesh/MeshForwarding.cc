@@ -16,8 +16,7 @@
 #include "inet/common/Simsignals.h"
 #include "inet/common/Simsignals_m.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 Define_Module(MeshForwarding);
 
@@ -411,5 +410,4 @@ void MeshForwarding::processDataFrame(Packet *packet, const Ptr<const Ieee80211D
         discard(packet);
 }
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211

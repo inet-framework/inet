@@ -14,8 +14,7 @@
 #include "inet/linklayer/ieee80211/mgmt/IMeshManagement.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 class Hcf;
 
@@ -177,8 +176,8 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
     std::optional<simtime_t> lastRannAction;
     std::optional<simtime_t> lastConfirmationAction;
 
-    virtual void initialize(int stage) override;
-    virtual void handleMessageWhenUp(cMessage *message) override;
+    void initialize(int stage) override;
+    void handleMessageWhenUp(cMessage *message) override;
     void receiveSignal(cComponent *source, simsignal_t signal, bool value, cObject *details) override;
     void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
     void unsubscribeFailureNotifications();
@@ -204,12 +203,12 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
     bool sourceAttemptEligible(MacAddress destination);
     void recordPreqHandoff(MacAddress destination, bool sourceAttempt, bool publish = true);
     void sendSourcePreq(MacAddress destination);
-    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
-    virtual void handleStartOperation(LifecycleOperation *operation) override;
-    virtual void handleStopOperation(LifecycleOperation *operation) override;
-    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    void handleStartOperation(LifecycleOperation *operation) override;
+    void handleStopOperation(LifecycleOperation *operation) override;
+    void handleCrashOperation(LifecycleOperation *operation) override;
     void stopDiscoveries();
     void attemptDiscovery(MacAddress destination);
     void expireSeen();
@@ -229,16 +228,16 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
     void sendPrep(const HwmpPrep& prep, MacAddress receiver);
 
   public:
-    virtual ~Hwmp();
+    ~Hwmp() override;
     static bool isNewer(uint32_t a, uint32_t b) { auto delta = uint32_t(a-b); return delta != 0 && delta < 0x80000000U; }
     static uint32_t addMetric(uint32_t a, uint32_t b) { return UINT32_MAX-a < b ? UINT32_MAX : a+b; }
-    virtual std::optional<MeshPath> findPath(MacAddress destination) const override;
-    virtual simtime_t getPrecursorExpiry(MacAddress destination, MacAddress precursor) const override;
-    virtual void refreshPath(MacAddress destination) override;
-    virtual void refreshPrecursor(MacAddress destination, MacAddress precursor) override;
-    virtual void startDiscovery(MacAddress destination) override;
-    virtual void cancelDiscovery(MacAddress destination) override;
-    virtual void processHwmp(const Ptr<const Ieee80211HwmpFrame>& body, MacAddress transmitter, MacAddress receiver) override;
+    std::optional<MeshPath> findPath(MacAddress destination) const override;
+    simtime_t getPrecursorExpiry(MacAddress destination, MacAddress precursor) const override;
+    void refreshPath(MacAddress destination) override;
+    void refreshPrecursor(MacAddress destination, MacAddress precursor) override;
+    void startDiscovery(MacAddress destination) override;
+    void cancelDiscovery(MacAddress destination) override;
+    void processHwmp(const Ptr<const Ieee80211HwmpFrame>& body, MacAddress transmitter, MacAddress receiver) override;
     void reportUnknownTransit(MacAddress transmitter, MacAddress destination) override;
     void sourcePathNeeded(MacAddress destination) override;
     // Read-only stored-state snapshots for model inspection and diagnostic tools.
@@ -251,6 +250,5 @@ class INET_API Hwmp : public OperationalBase, public cListener, public IMeshPath
     size_t getSeenIdentityCount() const;
 };
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211
 #endif

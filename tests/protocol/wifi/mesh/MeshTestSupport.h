@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef __INET_PROTOCOLTEST_MESHTESTSUPPORT_H
-#define __INET_PROTOCOLTEST_MESHTESTSUPPORT_H
+#ifndef INET_PROTOCOLTEST_MESHTESTSUPPORT_H
+#define INET_PROTOCOLTEST_MESHTESTSUPPORT_H
 
 #include "WifiTestSupport.h"
 #include "inet/common/packet/chunk/BytesChunk.h"

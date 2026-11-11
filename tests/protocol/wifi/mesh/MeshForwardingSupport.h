@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef __INET_TEST_MESHFORWARDINGSUPPORT_H
-#define __INET_TEST_MESHFORWARDINGSUPPORT_H
+#ifndef INET_TEST_MESHFORWARDINGSUPPORT_H
+#define INET_TEST_MESHFORWARDINGSUPPORT_H
 
 #include "mesh/MeshTestSupport.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPathSelection.h"

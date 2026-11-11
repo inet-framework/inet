@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef __INET_IMESHMANAGEMENT_H
-#define __INET_IMESHMANAGEMENT_H
+#ifndef INET_IMESHMANAGEMENT_H
+#define INET_IMESHMANAGEMENT_H
 
 #include <optional>
 

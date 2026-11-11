@@ -7,8 +7,7 @@
 #include "inet/linklayer/ieee80211/mesh/MeshDataAttempt.h"
 #include "inet/linklayer/ieee80211/mesh/MeshPayloadTransmission.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 Define_Module(AirtimeLinkMetric);
 
@@ -139,5 +138,4 @@ bool AirtimeLinkMetric::supportsPeerRates(MacAddress peer, const Ieee80211RateSe
         && rates.supported.legacyRates.count(nominal.ackMode->getDataMode()->getNetBitrate());
 }
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211

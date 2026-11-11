@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef __INET_IEEE80211MGMTMESH_H
-#define __INET_IEEE80211MGMTMESH_H
+#ifndef INET_IEEE80211MGMTMESH_H
+#define INET_IEEE80211MGMTMESH_H
 
 #include <optional>
 
@@ -12,8 +12,7 @@
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPathSelection.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPowerSave.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagement
 {
@@ -69,15 +68,15 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     int64_t pendingBeaconTreeId = -1;
     bool autoPeer = true;
 
-    virtual void initialize(int stage) override;
-    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
-    virtual void handleMessageWhenUp(cMessage *message) override;
+    void initialize(int stage) override;
+    void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override;
+    void handleMessageWhenUp(cMessage *message) override;
     void handleMessageWhenDown(cMessage *message) override;
-    virtual void handleTimer(cMessage *message) override;
-    virtual void handleCommand(int kind, cObject *control) override;
-    virtual void start() override;
-    virtual void stop() override;
-    virtual void dropManagementFrame(Packet *packet) override;
+    void handleTimer(cMessage *message) override;
+    void handleCommand(int kind, cObject *control) override;
+    void start() override;
+    void stop() override;
+    void dropManagementFrame(Packet *packet) override;
     void processManagement(Packet *packet);
     void processBeacon(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header, bool response);
     void processPeering(Packet *packet, const Ptr<const Ieee80211MeshActionFrame>& header);
@@ -106,25 +105,25 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     std::string describePeers() const;
 
     // Infrastructure-only subtypes are unsupported in this mesh profile.
-    virtual void handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
-    virtual void handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
-    virtual void handleAssociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
-    virtual void handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
-    virtual void handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
-    virtual void handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
-    virtual void handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
-    virtual void handleBeaconFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
-    virtual void handleProbeRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
-    virtual void handleProbeResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    void handleAuthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
+    void handleDeauthenticationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
+    void handleAssociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
+    void handleAssociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
+    void handleReassociationRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
+    void handleReassociationResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
+    void handleDisassociationFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>&) override;
+    void handleBeaconFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    void handleProbeRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
+    void handleProbeResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) override;
 
   public:
-    virtual ~Ieee80211MgmtMesh();
-    virtual void prepareManagementTransmission(Packet *packet, simtime_t ifs,
+    ~Ieee80211MgmtMesh() override;
+    void prepareManagementTransmission(Packet *packet, simtime_t ifs,
             const physicallayer::IIeee80211Mode *mode) override;
-    virtual void managementTransmissionComplete(const Packet *packet) override;
-    virtual void sendHwmp(const Ptr<Ieee80211HwmpFrame>& body, MacAddress receiver) override;
-    virtual bool isBeaconPending() const override { return pendingBeaconTreeId >= 0; }
-    virtual bool isMeshManagementActive() const override { return operationalState == OPERATING; }
+    void managementTransmissionComplete(const Packet *packet) override;
+    void sendHwmp(const Ptr<Ieee80211HwmpFrame>& body, MacAddress receiver) override;
+    bool isBeaconPending() const override { return pendingBeaconTreeId >= 0; }
+    bool isMeshManagementActive() const override { return operationalState == OPERATING; }
     void openPeer(MacAddress peer);
     void closePeer(MacAddress peer);
     PeerState getPeerState(MacAddress peer) const;
@@ -136,14 +135,13 @@ class INET_API Ieee80211MgmtMesh : public Ieee80211MgmtBase, public IMeshManagem
     simtime_t getPeerDeadline(MacAddress peer) const;
     bool getNeighborOffset(MacAddress peer, int64_t& offset) const;
     uint64_t getTsfAt(simtime_t time) const;
-    virtual simtime_t getNextTbtt() const override;
+    simtime_t getNextTbtt() const override;
     MeshWakeSchedule getMeshWakeSchedule() const override;
     std::optional<simtime_t> getPeerTbtt(MacAddress peer, simtime_t notBefore) const override;
     simtime_t getOwnTbtt(uint64_t ordinal) const override;
     simtime_t getPendingClockDrift() const { return maxClockDrift; }
 };
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211
 
 #endif

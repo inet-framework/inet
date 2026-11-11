@@ -540,3 +540,37 @@ matching current and pinned libraries. The parent lacks the scriptable role;
 that source-level capability gap is not presented as a runtime parent failure.
 See [the reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-s0-policy-control.md).
 Final combined validation and production examples remain separate stages.
+
+## New-source C++ cleanup (L1)
+
+A mechanical pass normalizes 15 new header guards, concatenates 18 namespace
+blocks, removes 81 redundant `virtual` specifiers, adds four destructor
+`override` annotations and renames three local scalar constants. The exact
+26-file transformation excludes existing declarations apart from two introduced
+by this series, generated source and the sealed packet subsystem. Independent
+reconstruction finds no unrelated algorithm or ownership change.
+
+The fresh final debug model is
+`343941e4f100d918aa4957671182443861e9b8d0ce158e0974747bb9401e7e1a`.
+Its A-MPDU and mesh serializer units pass two native runs; the real A-MPDU
+capture module passes all 12. Native inputs, assertion artifacts, end boundaries
+and diagnostics match the retained controls. Earlier broader L1 controls
+(eight unit and 25 module runs) pass on intermediate model cf399; they are
+not relabeled final-model runs. C9 reruns the full final union.
+
+Record `/home/miguel/inet-mesh-l1-dev/record.json` (SHA
+`d00521353bf740972a5d6f2e1e668adc2c895f58616a65a50ec7446092dace99`)
+retains 513 checked artifacts. Exported function/type/vtable/layout signatures
+remain unchanged. One dynamically visible weak function-local constant symbol
+changes spelling in a helper first introduced by this unpublished series;
+this bounded implementation-symbol change is accepted and explicitly recorded.
+The full symbol sets are therefore not identical.
+
+Compiler-matched clang-tidy covers all eight new translation units and the
+two existing owners with new declarations. A follow-up verifies removal of
+the three constant-naming findings. The output remains not clean: inherited
+Tx/Hcf declarations and other recommendations remain visible. Independent
+source triage checks all 18 optional-access sites, bounded serializer products,
+exception paths, intentional `strcmp` use and API-result/order recommendations
+without finding an additional supported runtime defect. No speculative catch,
+new suppression, weakened configuration or baseline replacement is introduced.

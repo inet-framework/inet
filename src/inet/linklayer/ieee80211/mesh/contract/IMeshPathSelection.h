@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef __INET_IMESHPATHSELECTION_H
-#define __INET_IMESHPATHSELECTION_H
+#ifndef INET_IMESHPATHSELECTION_H
+#define INET_IMESHPATHSELECTION_H
 
 #include <optional>
 #include "inet/linklayer/common/MacAddress.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 struct INET_API MeshPath
 {
@@ -35,6 +34,5 @@ class INET_API IMeshPathSelection
     virtual void sourcePathNeeded(MacAddress destination) = 0;
 };
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211
 #endif

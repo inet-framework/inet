@@ -265,7 +265,7 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
   public:
     void receiveAmpdu(Packet *packet) { Enter_Method("receiveAmpdu"); processReceivedAmpdu(packet); }
-    virtual MeshLinkTiming getMeshLinkTiming(MacAddress peer) override;
+    MeshLinkTiming getMeshLinkTiming(MacAddress peer) override;
     MeshLinkTiming previewMeshLinkTiming(MacAddress peer, const Ieee80211RateSetState& rates,
         const Ieee80211PeerPhyCapabilities& capabilities) override;
     virtual ~Hcf();

@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef __INET_IMESHLINKMETRIC_H
-#define __INET_IMESHLINKMETRIC_H
+#ifndef INET_IMESHLINKMETRIC_H
+#define INET_IMESHLINKMETRIC_H
 
 #include "inet/linklayer/common/MacAddress.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 struct Ieee80211RateSetState;
 
@@ -21,6 +20,5 @@ class INET_API IMeshLinkMetric
     virtual bool supportsPeerRates(MacAddress peer, const Ieee80211RateSetState& rates) = 0;
 };
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211
 #endif

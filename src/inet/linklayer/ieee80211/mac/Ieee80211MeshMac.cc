@@ -18,8 +18,7 @@
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Radio.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 Define_Module(Ieee80211MeshMac);
 
@@ -438,5 +437,4 @@ void Ieee80211MeshMac::handleCrashOperation(LifecycleOperation *operation)
     Ieee80211Mac::handleCrashOperation(operation);
 }
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211

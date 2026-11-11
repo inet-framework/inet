@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef __INET_MESHFORWARDING_H
-#define __INET_MESHFORWARDING_H
+#ifndef INET_MESHFORWARDING_H
+#define INET_MESHFORWARDING_H
 
 #include <list>
 
@@ -12,8 +12,7 @@
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPathSelection.h"
 #include "inet/linklayer/ieee80211/mib/Ieee80211Mib.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 class INET_API MeshForwarding : public OperationalBase, public IMeshForwarding
 {
@@ -34,15 +33,15 @@ class INET_API MeshForwarding : public OperationalBase, public IMeshForwarding
     simtime_t maxPendingWait;
     cMessage *pendingExpiryTimer = nullptr;
 
-    virtual void initialize(int stage) override;
+    void initialize(int stage) override;
     void preDelete(cComponent *root) override;
-    virtual void handleMessageWhenUp(cMessage *message) override;
-    virtual bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
-    virtual bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
-    virtual bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
-    virtual void handleStartOperation(LifecycleOperation *operation) override;
-    virtual void handleStopOperation(LifecycleOperation *operation) override;
-    virtual void handleCrashOperation(LifecycleOperation *operation) override;
+    void handleMessageWhenUp(cMessage *message) override;
+    bool isInitializeStage(int stage) const override { return stage == INITSTAGE_LINK_LAYER; }
+    bool isModuleStartStage(int stage) const override { return stage == ModuleStartOperation::STAGE_LINK_LAYER; }
+    bool isModuleStopStage(int stage) const override { return stage == ModuleStopOperation::STAGE_LINK_LAYER; }
+    void handleStartOperation(LifecycleOperation *operation) override;
+    void handleStopOperation(LifecycleOperation *operation) override;
+    void handleCrashOperation(LifecycleOperation *operation) override;
     bool remember(MacAddress source, uint32_t sequence);
     std::optional<MeshPath> findPath(MacAddress destination) const;
     void discard(Packet *packet);
@@ -55,18 +54,17 @@ class INET_API MeshForwarding : public OperationalBase, public IMeshForwarding
     Pending removePending(std::list<Pending>::iterator it);
 
   public:
-    virtual ~MeshForwarding();
-    virtual void processSourceMsdu(Packet *packet) override;
+    ~MeshForwarding() override;
+    void processSourceMsdu(Packet *packet) override;
     void finalizeSourceFrame(Packet *packet) override;
     bool isSourceActive() const override { return operationalState == OPERATING; }
-    virtual void processDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override;
-    virtual void pathAvailable(MacAddress destination) override;
-    virtual void discoveryFailed(MacAddress destination) override;
-    virtual bool hasPendingSource(MacAddress destination) override;
+    void processDataFrame(Packet *packet, const Ptr<const Ieee80211DataHeader>& header) override;
+    void pathAvailable(MacAddress destination) override;
+    void discoveryFailed(MacAddress destination) override;
+    bool hasPendingSource(MacAddress destination) override;
     int getNumPendingPackets() const { return pending.size(); }
     b getPendingBytes() const { return pendingBytes; }
 };
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211
 #endif

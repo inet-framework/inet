@@ -5,8 +5,7 @@
 
 #include "inet/common/packet/serializer/ChunkSerializerRegistry.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 Register_Serializer(Ieee80211MeshControl, Ieee80211MeshControlSerializer);
 Register_Serializer(Ieee80211HwmpFrame, Ieee80211MeshFrameSerializer);
@@ -593,5 +592,4 @@ const Ptr<Chunk> Ieee80211MeshControlSerializer::deserializeFields(MemoryInputSt
     return control;
 }
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211

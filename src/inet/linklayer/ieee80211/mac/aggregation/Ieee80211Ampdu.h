@@ -28,11 +28,11 @@ struct INET_API Ieee80211AmpduLayout
 
 inline B minimumAmpduStartDistance(int code, const physicallayer::IIeee80211Mode *mode)
 {
-    static constexpr double microseconds[] = {0, 0.25, 0.5, 1, 2, 4, 8, 16};
+    static constexpr double MINIMUM_SPACING_MICROSECONDS[] = {0, 0.25, 0.5, 1, 2, 4, 8, 16};
     if (code < 0 || code > 7 || !mode)
         throw cRuntimeError("Invalid minimum MPDU start spacing or selected mode");
     // IEEE Std 802.11-2024, 10.12.3, Equation (10-12): selected-GI NET rate.
-    return B(int64_t(std::ceil(microseconds[code] * mode->getDataMode()->getNetBitrate().get()/8e6)));
+    return B(int64_t(std::ceil(MINIMUM_SPACING_MICROSECONDS[code] * mode->getDataMode()->getNetBitrate().get()/8e6)));
 }
 
 inline bool isAmpduMemberFcsOk(const Packet *packet, b offset, B length)
@@ -62,7 +62,7 @@ inline bool findAmpdu(const Packet *packet, b offset, B length, bool vht, Ieee80
     B cursor(0);
     bool eofPadding = false;
     bool eofSeen = false;
-    constexpr int flags = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE |
+    constexpr int PEEK_FLAGS = Chunk::PF_ALLOW_INCORRECT | Chunk::PF_ALLOW_INCOMPLETE |
         Chunk::PF_ALLOW_IMPROPERLY_REPRESENTED | Chunk::PF_ALLOW_REINTERPRETATION;
     while (cursor < length) {
         if (length - cursor < B(4)) {
@@ -75,7 +75,7 @@ inline bool findAmpdu(const Packet *packet, b offset, B length, bool vht, Ieee80
             cursor = length; // VHT permits up to three final octets.
             break;
         }
-        auto delimiter = packet->peekDataAt<Ieee80211MpduSubframeHeader>(offset + cursor,B(4),flags);
+        auto delimiter = packet->peekDataAt<Ieee80211MpduSubframeHeader>(offset + cursor,B(4),PEEK_FLAGS);
         // HT reserves high length bits B2--B3; the shared decoder retains them
         // for VHT, so interpret them only with the receiver-derived format.
         int memberLength = vht ? delimiter->getLength() : delimiter->getLength() & 0xFFF;

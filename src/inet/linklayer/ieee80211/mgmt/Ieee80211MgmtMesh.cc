@@ -19,8 +19,7 @@
 #include "inet/physicallayer/wireless/ieee80211/mode/Ieee80211OfdmMode.h"
 #include "inet/physicallayer/wireless/ieee80211/packetlevel/Ieee80211Tag_m.h"
 
-namespace inet {
-namespace ieee80211 {
+namespace inet::ieee80211 {
 
 using namespace physicallayer;
 
@@ -1100,5 +1099,4 @@ void Ieee80211MgmtMesh::handleBeaconFrame(Packet *packet, const Ptr<const Ieee80
 void Ieee80211MgmtMesh::handleProbeRequestFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) { processProbeRequest(packet, header); }
 void Ieee80211MgmtMesh::handleProbeResponseFrame(Packet *packet, const Ptr<const Ieee80211MgmtHeader>& header) { processBeacon(packet, header, true); }
 
-} // namespace ieee80211
-} // namespace inet
+} // namespace inet::ieee80211

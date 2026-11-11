@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-#ifndef __INET_TEST_MESHTEARDOWNCASES_H
-#define __INET_TEST_MESHTEARDOWNCASES_H
+#ifndef INET_TEST_MESHTEARDOWNCASES_H
+#define INET_TEST_MESHTEARDOWNCASES_H
 
 class MeshTeardownDriver : public cSimpleModule, public cListener
 {
