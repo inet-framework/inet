@@ -163,6 +163,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
     virtual void sendUp(const std::vector<Packet *>& completeFrames);
     // Concrete inert consumer. Extensions observe each member before reorder release.
     void recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211DataHeader>& header, bool duplicate) override;
+    std::vector<MeshPowerTxMember> meshPowerMembers(const std::vector<Packet *>& packets, QosRecoveryProcedure *recovery) const;
+    void notifyPowerResolution(const MeshPowerResolution& result);
     FrameSequenceContext *buildContext(AccessCategory ac);
     static simtime_t encodeDuration(simtime_t duration, bool holder);
     simtime_t computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);

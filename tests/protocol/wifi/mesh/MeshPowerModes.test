@@ -22,6 +22,14 @@ class AwakePowerFixture : public MeshPowerSave
   protected:
     bool isActivationSupported() const override { return true; }
   public:
+    // Isolate P1's manual opportunities from the subsequently added MPSP engine.
+    void reviewServicePeriods() override {}
+    bool isTransmissionEligible(const Packet *packet, simtime_t start) const override {
+        return packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_QOS_NULL || MeshPowerSave::isTransmissionEligible(packet, start);
+    }
+    bool canTransmitSet(const std::vector<MeshPowerTxMember>&, simtime_t) const override { return true; }
+    bool authorizeTransmissionStart(const std::vector<MeshPowerTxMember>&, simtime_t) override { return true; }
+    void recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211MeshDataHeader>& header, bool) override { receivePowerFields(packet, header); }
     void reviewAwakeState() override {} // P1 deliberately supplies physically awake opportunities.
     void beaconReceived(MacAddress, bool, bool, simtime_t) override {} // Opportunities remain explicit in this P1 fixture.
     void opportunity(MacAddress peer, simtime_t end) { Enter_Method("opportunity"); openAwakeOpportunity(peer, end); }

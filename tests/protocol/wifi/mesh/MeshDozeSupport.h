@@ -10,6 +10,14 @@ class DozePowerFixture : public MeshPowerSave
   protected:
     bool isActivationSupported() const override { return true; } // Explicit pre-P3 test profile, no MPSP engine.
   public:
+    // P2 exercises its physical coordinator using explicit opportunities only.
+    void reviewServicePeriods() override {}
+    bool isTransmissionEligible(const Packet *packet, simtime_t start) const override {
+        return packet->peekAtFront<Ieee80211MacHeader>()->getType() == ST_QOS_NULL || MeshPowerSave::isTransmissionEligible(packet, start);
+    }
+    bool canTransmitSet(const std::vector<MeshPowerTxMember>&, simtime_t) const override { return true; }
+    bool authorizeTransmissionStart(const std::vector<MeshPowerTxMember>&, simtime_t) override { return true; }
+    void recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211MeshDataHeader>& header, bool) override { receivePowerFields(packet, header); }
     simtime_t ownWindowEnd() const { return ownAwEnd; }
     simtime_t postWindowEnd() const { return postAwEnd; }
     bool awaitingOwnBeacon() const { return ownRendezvous; }

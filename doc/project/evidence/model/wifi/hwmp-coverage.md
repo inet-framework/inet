@@ -36,9 +36,16 @@ Protocol test paths below are relative to `tests/protocol/wifi/mesh/`. Reviewer 
 | AWAKE-WINDOW | MeshAwakeWindow.test | P2 | hwmp-p2-doze.md | PASS, 10 native cases; full P2 reconciliation below |
 | LIGHT-SLEEP | MeshLightSleep.test | P2 | hwmp-p2-doze.md | PASS, 16 native cases; service periods remain P3 |
 | DEEP-SLEEP | MeshDeepSleep.test | P2 | hwmp-p2-doze.md | PASS, 4 native cases including early-reference cadence |
-| SERVICE-PERIOD | MeshPeerServicePeriod.test | P3 | hwmp-p3-service-periods.md | NOT_RUN |
-| POWER-RECOVERY | MeshPowerSaveRecovery.test | P3 | hwmp-p3-service-periods.md | NOT_RUN |
-| POWER-HT-VHT | MeshPowerSaveHtVht.test | P3 | hwmp-p3-service-periods.md | NOT_RUN |
+| SERVICE-PERIOD | MeshPeerServicePeriod.test | P3 | hwmp-p3-service-periods.md | PASS, 47 native cases on the corrected P3 model, including actual awake-window crossing and group mode indication |
+| POWER-RECOVERY | MeshPowerSaveRecovery.test | P3 | hwmp-p3-service-periods.md | PASS, 20 native cases covering retry accounting, collision notification order, supersession, disposal, DELBA and lower-cap fallback |
+| POWER-HT-VHT | MeshPowerSaveHtVht.test | P3 | hwmp-p3-service-periods.md | PASS, 29 native cases including rooted sleeping-relay delivery, genuine DATA terminal/PERR feedback and bounded expiry |
+
+The first frozen P3 retained protocol campaign failed in four earlier-stage
+power fixtures. Its immutable failed record and the corrected eight-file
+campaign remain separate; see the P3 evidence below. The corrected scope
+passes153 native runs. The other44 historical files retain their recorded
+model and five known failure outcomes. This is a mixed-model composition;
+the complete same-model final union remains C9 work.
 
 Supplementary cases are `tests/unit/Ieee80211MeshSerializer_1.test` (PASS at C2), `tests/unit/Ieee80211AirtimeMetric_1.test` (PASS at C5), and the planned `tests/module/Ieee80211MeshLifecycle_1.test` (NOT_RUN). Unit arithmetic and codec assertions supplement the production-path checks; lifecycle tests establish isolated owner cleanup, not safe whole-NIC restart.
 
@@ -107,7 +114,16 @@ These are selected modeling policies, not requirements attributed to IEEE. The [
 | Native QoS Null endpoints | Individual A3=peer/A4=local transmitter; group A3=local transmitter | Direct-link completion of underdescribed payload-free endpoint fields, without multihop meaning or a Null-specific normative endpoint claim |
 | Mesh QoS Null sequence | Fixed SNS5 sequence zero and fragment zero; do not advance the shared management/non-QoS counter | Table10-5 permits any SNS5 value; fixed zero needs no new counter. Preserve ordinary/nonmesh assignment and raw nonzero receive values; Null bypasses receiver-cache duplicate detection |
 | Group Null power level | Use the same any-deep-local-peering PSL predicate as group mesh DATA and Mesh Configuration | Consistent integration of the permitted group Null indication; the explicit group-PSL formula names mesh DATA. PM separately follows nonpeer mode, so all-light peerings produce PM1/PSL0 |
+| Group mode-control admission | Admit the selected group QoS Null independently of buffered group MSDU/MMPDU delivery | Payload-free POWER_CONTROL remains excluded from TIM/group-BU accounting and requests No Ack. Its actual completion clears the matching command. The exception preserves ordinary group DATA/MMPDU DTIM gating and individual Null permissions |
 | Aggregate More Data snapshot | Exclude BUs in the final selected PPDU when computing additional buffered work; retain each member's BU identity | The standard does not settle same-PPDU sibling counting. This transmission snapshot is model policy, not treating an A-MPDU as one BU; current intact A-MSDU constituents form one BU, and rejected/unselected previews remain buffered |
+| MPSP trigger control | Apply eligible native DATA/Null RSPI/EOSP to current directional roles independently of payload duplicate delivery | Ongoing directions remain single; eligible closed directions may freshly initiate even on Retry1. No historical Null epoch/cache or blanket stale-retry claim; P3 implementation verification remains pending |
+| MPSP initiation time | Use receiver-derived `SignalTimeInd` PPDU start against existing own AW/PostAW deadlines; send admission uses the actual start against the peer's advertised window | Selected temporal boundary for the standard's initiation cases. Completion after the window does not invalidate a qualifying start. Missing reception timing grants no own-window exception; independent ACTIVE/LIGHT conditions still apply. An opposite period's awake hold alone grants no new direction |
+| MPSP endpoint proof | Receiver initiates from accepted trigger; sender confirms successful trigger from its own matching acknowledgment. Recipient termination waits for actual local ACK/positive-BA transmission; owner termination waits for its matching received acknowledgment | Nonserialized copied proof stays with the existing response copy. Cancelled-before-air differs from sent-but-lost; neither endpoint queries remote ACK knowledge |
+| MPSP missing-ACK default | `missingAckRetryLimit = 7`, range0..100, bounded by existing ordinary limits | Seven is model policy, not an IEEE default. Ordinary initial-inclusive attempt limits/history remain authoritative and can stop earlier |
+| MPSP ending allowance | Freeze actual ending originals at first ending air; each original's first actual EOSP1 in the episode is initial, even after earlier EOSP0 or retained Retry1; share subsequent ending retransmission slots | Conservative multi-member bookkeeping and EOSP0→1 initialization are model policy. Preserve ordinary history. Complete-set reversible admission and atomic actual-start charging prevent two ending retries using one slot; holds/BAR/previews charge zero |
+| MPSP ending fallback and failure | One initial ending Null for an OPEN-empty period; at most one replacement for authoritative payload expiry in a still-live ending episode, inheriting its remaining allowance | An allowed replacement initial may occur at remainder0; no second control after ending-control failure. Known ordinary exhaustion, control supersession and non-expiry whole-cohort disposal retire FAILED without fallback. Failure is not confirmation, payload resurrection or a synthetic PERR |
+| MPSP retrieval requests | Consume a request when it opens/joins the recipient period; preserve later independent TIM/rendezvous requests across its termination | Remaining individual MoreData1 knowledge alone neither holds awake nor immediately rearms retrieval. Existing beacon/period lifetimes supply the distinction without another timer or epoch |
+| MPSP trigger rejection | Keep the current failed trigger intent quiescent until a genuinely fresh rendezvous/TIM or distinct external request | Prevents same-time enqueue/drop/review loops under synchronous drop-NEW/expiry. Capacity alone or self-generated control notifications do not rearm; register before submission and preserve reentrant replacement by ID/peer-instance check |
 | Supported lifecycle | Isolated mesh owner cleanup/restart; operational topology failure; preserve node-owned sequences and required pacing history | Clear volatile paths, pending queues and samples; existing whole-NIC MAC child cleanup does not establish safe node stop/start |
 
 The independent arithmetic control uses O=100 microseconds, r=100 Mb/s, ef=0 and Bt=8192 bits. Expected ID-1 cost is 18; expected ID-2 costs are 18192 at n=1 and 10692 at n=4. A three-MSDU PPDU updates n from 1 to 5/4. An initial failed attempt updates ef to 1/8; its successful retry updates ef to 7/64. These examples define test oracles; they are not executed test results.
@@ -405,3 +421,91 @@ The newly selected duplicate unit emits four ownership warnings when its fixture
 Six directly mapped protocol files pass all 143 native runs, runner exit zero: Ac_BlockAck (3), N_CompressedBa (1), WifiDataDelivery (1), WifiDuplicateWithRetry (1), MeshAirtimeMetric (9) and MeshAmpduBlockAck (128). Record `/home/miguel/inet-mesh-r3-final-protocol/record.json` (SHA `648f8628f0102947f2eddc67d7a786142e34d96f6b9b74eab9d58a846d21e7f5`) preserves 729 artifact hashes and six loader proofs. All six P2 count/assertion/termination/stderr/diagnostic comparisons match; the separate `native-tuple-comparison.json` (SHA `2aa52a528a57949fe025c310b5333771f5420a8759fa088a9bd2a383007ec86f`) verifies all 143 configuration/run/iteration/seed-zero tuples and unchanged shared seed authorities. Runtime stderr/ownership/undisposed counts are zero for this selection; three existing Radio::sendUp compiler warnings remain. All frozen inputs, model, features and stored fingerprints stay unchanged.
 
 Independent review reconciles source, direct evidence, focused unit/module controls, parent hygiene attribution and all protocol records. Commit metadata gates are recorded separately. The parent has no callback API, so inability to compile this new observer there is capability absence, not a demonstrated parent runtime failure. Full combined C9 verification and P3 service-period behavior remain separate. No expectation, baseline or time budget is replaced.
+
+## P3 directional mesh service periods
+
+MeshPowerSave owns one current OWNER and RECIPIENT per established peer,
+provisional trigger correlation and a bounded ending cohort. HCF retains
+selection, original lifetime, ordinary recovery, ACK/BA/BAR and actual-start
+ownership. Receiver initiation follows accepted eligible control; the sender
+confirms from its own acknowledgment. Ending instead requires actual local
+response transmission at the recipient and a matching received acknowledgment
+at the owner. Cancelled-before-air and transmitted-but-lost responses remain
+different outcomes. Accepted duplicate/out-of-order payload still carries
+current-period control before upper delivery.
+
+Fresh initiation distinguishes physical awake knowledge from the standard's
+mode/window cases. The selected temporal boundary uses receiver-derived PPDU
+start, preserving a valid frame that completes after its awake window. An
+opposite period alone does not grant a new DEEP-to-DEEP direction. The first
+actual EOSP1 starts freeze the cohort; earlier EOSP0 attempts do not consume
+ending retries. Reversible admission charges nothing, actual repeats share the
+declared allowance, and ordinary retry/lifetime history persists. A bounded
+expiry fallback inherits spent allowance, including a lower cap; matching
+acknowledgment wins before cap-only failure. Local ACTIVE withdraws obsolete
+recipient roles before synchronous mode publication. Group QoS Null remains
+an independent No Ack control, not a buffered group payload or TIM bit.
+
+The corrected debug model is
+`6836d9ea0ab0a1d55c0da7ce3b68cd6b3edc970d6892229d440dd2cdd287d228`.
+Checkpoint `/home/miguel/inet-mesh-p3-corrected-production-checkpoint/record.json`
+(SHA `0aa6a248b52ce18b647c2d9af9c83c0565ba27d89a7f56c723ccfe22d504baaf`)
+pins 167 source inputs, 112 fixtures, 99 support inputs and four feature files,
+with copied input snapshots and matching current/pinned libraries. The fresh
+debug build passes. No source, fixture, feature or fingerprint-store drift
+occurred during the corrected campaigns.
+
+The original full 52-file campaign on model 25e10e4f remains a failure: it starts
+667 of 705 requested runs, with 658 passes, four known assertion failures and
+five aborts. Four new power-fixture aborts skip 38 later runs. Record
+`/home/miguel/inet-mesh-p3-final-protocol/record.json` (SHA
+`b2c7c06eaba941f65b4dde515fc9ea21a4a78084a88d7a4bee3c02cff66a0467`)
+and 2,783 archived artifacts remain unchanged. Private exact-model diagnosis
+shows that intermediate P1/P2 fixtures omitted their earlier mode-only Null
+admission seam. Completing three test-policy overrides preserves the original
+assertions, times, ACK commitment and all non-Null production decisions.
+The More Data failure follows the same blocked mode announcement, not an
+incorrect final-PPDU exclusion. A separate production group-mode regression
+is reproduced and corrected: with the same executable, the old model leaves
+its broadcast command queued without air at 1.4s; the corrected model actually
+transmits, completes and updates the receiver. That causal record is
+`/home/miguel/inet-mesh-p3-group-dev/record.json` (SHA
+`ff5704809e50bd3b9cd0e48539bda26aadde144e3b312aae5eaea33d40f9cb54`).
+
+The corrected eight-file protocol campaign passes all 153 native runs, exit 0:
+47 peer, 20 recovery, 29 HT/VHT and the 57 retained P1/P2 power cases. Runtime
+stderr, ownership and undisposed diagnostics are empty. Record
+`/home/miguel/inet-mesh-p3-corrected-protocol/record.json` (SHA
+`a380aaf3830c39ce0428062fec2c68cec8d6551a11c07c40646007a93cda9baf`)
+retains 712 artifact hashes and eight loader proofs. Protocol support-library
+hashes match before and after. The five P1/P2 files exactly match their prior
+native inputs, outcomes, end times/events, generated assertions and hygiene.
+The 20 recovery and 29 HT/VHT cases match their preceding controls. Peer39 ends at the
+same 0.26s with event 496 rather than 480; association with the newly admitted
+group indication is an inference, while the separate new Peer46 case proves
+its actual air directly. API-only RSPI/deadline checks, controlled collision
+and discard-owner calls, source-only capability-downgrade reachability and
+the structurally excluded unchanged-deadline IFS race are explicitly bounded
+in the reviewer document.
+
+Static include/configuration and disabled-policy analysis excludes the other
+44 files from this small correction. Their 142 unchanged closure inputs and
+fixtures are verified; their historical model 25e10e4f results cover 553 runs:
+548 passes, four known assertion failures and one known abort. All 23 nonmesh
+P2 comparisons and six R3 controls match. The composition record
+`/home/miguel/inet-mesh-p3-corrected-protocol/composition.json` (SHA
+`b0b92fc8ae86517b4df2561ede6683846ee44cde98c4a383e4c59dad8423c5db`)
+therefore covers 52 files/706 runs with 701 passes and five known failure
+outcomes, using explicitly different model identities. This is not a
+same-model 52-file execution; C9 must run the full final union again.
+
+On the corrected model, 29 unit files/29 runs and 31 module files/155 runs pass,
+both exits 0. Record `/home/miguel/inet-mesh-p3-corrected-retained-final/record.json`
+(SHA `3ce9a278a76d665b272bd611b8a34f5481c564ea8d5e568833fda1ce975b6ead`)
+retains 1,447 artifact hashes, all 60 pinned-library loader checks and at least
+one passive live mapping per executable. Native inputs, end boundaries and
+ordered diagnostics exactly match P2/R3: 49 ownership warnings, 34 undisposed
+objects and 11 module compiler warnings are inherited. No global hygiene-clean
+claim is made. Release/feature-disabled builds, combined lifecycle and native
+fingerprint comparisons, examples and upstream integration remain later work.
+No expected result, baseline or time budget is replaced.

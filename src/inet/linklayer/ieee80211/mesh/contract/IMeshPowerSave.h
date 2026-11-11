@@ -2,12 +2,62 @@
 #ifndef INET_IMESHPOWERSAVE_H
 #define INET_IMESHPOWERSAVE_H
 
+#include <optional>
+#include <map>
+#include <set>
+#include <vector>
 #include "inet/common/packet/Packet.h"
 #include "inet/linklayer/ieee80211/mesh/MeshPowerMode.h"
 #include "inet/linklayer/ieee80211/mac/Ieee80211Frame_m.h"
 #include "inet/linklayer/ieee80211/mgmt/Ieee80211MeshFrame_m.h"
 
 namespace inet::ieee80211 {
+
+enum class MeshPeriodDirection { OWNER = 0, RECIPIENT = 1 };
+enum class MeshPeriodOutcome { CONFIRMED = 0, FAILED = 1, WITHDRAWN = 2 };
+enum class MeshPowerCause {
+    RESPONSE = 0, RESPONSE_EXPIRED = 1, RESPONSE_REJECTED = 2, BAR_PENDING = 3,
+    BAR_RESPONSE = 4, BAR_EXHAUSTED = 5, EXPIRED = 6, WITHDRAWN = 7,
+    AGREEMENT_DISPOSAL = 8, ORDINARY_LIMIT = 9
+};
+
+struct INET_API MeshPowerTxMember
+{
+    int64_t id = -1;
+    MacAddress peer;
+    int type = ST_DATA;
+    Tid tid = 0;
+    bool rspi = false;
+    bool eosp = false;
+    int ordinaryLimit = 0;
+};
+
+struct INET_API MeshPowerResolution
+{
+    MacAddress peer;
+    Tid tid = 0;
+    std::set<int64_t> originals;
+    MeshPowerCause cause = MeshPowerCause::RESPONSE;
+    std::map<int64_t, MeshPowerCause> retired;
+    std::optional<bool> barPending; // Unset: a cause-only batch does not resolve recovery.
+};
+
+struct INET_API MeshPowerBaWindow
+{
+    SequenceNumberCyclic start;
+    int size = 0;
+};
+
+/** Copied view of current state, never a historical trigger identity. */
+struct INET_API MeshServicePeriodView
+{
+    MacAddress peer;
+    MeshPeriodDirection direction;
+    bool ending = false;
+    int cap = 0;
+    int spent = 0;
+    std::set<int64_t> cohort;
+};
 
 /** Mesh power policy. MAC queues, timers and packet ownership stay with HCF. */
 class INET_API IMeshPowerSave
@@ -37,6 +87,15 @@ class INET_API IMeshPowerSave
     virtual void beaconReceived(MacAddress peer, bool groupBuffered, bool individualBuffered, simtime_t window) = 0;
     virtual void groupFrameReceived(MacAddress peer, bool moreData) = 0;
     virtual void ppduTransmissionComplete(const Packet *packet, simtime_t start) = 0;
+    virtual void reviewServicePeriods() = 0;
+    virtual void recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211MeshDataHeader>& header, bool duplicate) = 0;
+    virtual bool canTransmitSet(const std::vector<MeshPowerTxMember>& members, simtime_t start) const = 0;
+    virtual bool authorizeTransmissionStart(const std::vector<MeshPowerTxMember>& members, simtime_t start) = 0;
+    virtual void transmissionResolved(const MeshPowerResolution& result) = 0;
+    virtual void prepareRecipientResponse(Packet *response, const Packet *eliciting,
+            const Ptr<const Ieee80211MacHeader>& header, const std::optional<MeshPowerBaWindow>& window) = 0;
+    virtual void recipientResponseComplete(const Packet *response) = 0;
+    virtual void recipientAgreementRetired(MacAddress peer, Tid tid) = 0;
 };
 
 } // namespace inet::ieee80211

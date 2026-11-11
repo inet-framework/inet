@@ -202,8 +202,8 @@ void Ieee80211MeshMac::sendUpFrame(Packet *packet)
             unsupportedData(packet);
             return;
         }
-        if (mesh && meshPowerSave && meshPowerSave->isEnabled())
-            meshPowerSave->receivePowerFields(packet, mesh);
+        if (header->getType() == ST_QOS_NULL && mesh && meshPowerSave && meshPowerSave->isEnabled())
+            meshPowerSave->recipientMemberReceived(packet, mesh, false);
         if (header->getType() == ST_QOS_NULL) {
             // Ordinary MAC ACK has completed. Null has no payload identity or
             // LLC body; peer learning and physical ACK are separate contracts.
@@ -386,7 +386,8 @@ void Ieee80211MeshMac::reviewRadioState()
 {
     if (meshPowerSave && meshPowerSave->isEnabled()) {
         powerManaged = true;
-        meshPowerSave->reviewAwakeState();
+        meshPowerSave->reviewServicePeriods();
+        if (meshPowerSave && meshPowerSave->isEnabled()) meshPowerSave->reviewAwakeState();
     }
     if (!powerManaged || radioReview->isScheduled()) return;
     awakeIntent = !meshPowerSave || meshPowerSave->requiresAwake() || tx->hasTransmission() || hcf->hasActiveExchange();
@@ -397,7 +398,7 @@ void Ieee80211MeshMac::reviewRadioState()
         radio->setRadioMode(target); // Only this deferred continuation issues policy commands.
         return;
     }
-    if (isTransmissionReady()) tx->resumePendingTransmission();
+    tx->resumePendingTransmission(); // Tx also owns cancellation of an unavailable or late start.
     hcf->meshPowerEligibilityChanged();
 }
 

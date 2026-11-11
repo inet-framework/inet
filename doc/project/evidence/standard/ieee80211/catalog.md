@@ -324,6 +324,16 @@ Sources: `ieee80211-2024:clause:14.15.8.3`–`14.15.8.6`, PDF3282–3283; spans1
 
 A trigger's RSPI/EOSP combination establishes directional ownership as follows. A direction whose recipient is in active mode is excluded. Participants stay awake throughout service periods, which may span TXOPs. Successful termination requires the owner's terminating frame to be acknowledged; enqueue or an unconfirmed transmission is insufficient. A missing termination acknowledgment requires at least one retransmission subject to retry and lifetime limits; the missing-ACK cap is the minimum of MaxRetryLimit and MeshSTAMissingAckRetryLimit.
 
+A peer trigger is native mesh QoS Data or QoS Null requiring immediate acknowledgment. Receiver eligibility is expressed through receipt; sender initiation requires successful trigger transmission, locally known through the matching acknowledgment. Termination instead requires acknowledged EOSP1 from the owner: receiving EOSP is insufficient if its ACK/Block Ack is cancelled before transmission. Actual local response transmission and matching received acknowledgment are distinct endpoint observations, without an ACK-of-ACK requirement. One acknowledged EOSP member suffices even if another member is missing.
+
+The initiation cases are a sleeping receiver's own mesh awake window, a local ACTIVE receiver, or a trigger received from a LIGHT peer. Being physically awake for an opposite-direction period does not replace those conditions. Existing-period control and termination remain significant after the initial awake window ends. The model chooses the receiver-derived PPDU start as the temporal boundary for receipt during an awake window; that callback convention is separate from the normative eligibility cases.
+
+Payload duplicate filtering and upper delivery do not remove current-period EOSP significance. The informative termination note permits further retransmission of an unacknowledged original in a later period. QoS Null permits any SNS5 sequence value and is excluded from receive-cache duplicate filtering; the retrieved rules define no historical trigger epoch or blanket Retry1 rejection after closure. Current-state initiation bookkeeping where such identity is unavailable is a model interpretation, not a new sequence requirement.
+
+The cap permits an initial transmission plus up to N actual retransmissions, subject to earlier ordinary retry/lifetime limits. The missing-ACK MIB range is 0..100 with no normative default; shared multi-member allowance and failed-period retirement are not prescribed bookkeeping algorithms. MoreData0 is not an EOSP termination prerequisite. After acknowledged termination, individual buffered knowledge alone is not a doze exclusion under 14.15.8.6; other ongoing periods, transactions, awake windows and group delivery remain independent obligations.
+
+The ending-recovery condition refers to a missing acknowledgment for a frame already sent with EOSP1. An earlier EOSP0 transmission does not by itself establish that ending failure, and ordinary MAC Retry1 alone does not identify a consumed mesh termination retry. Exact EOSP0→1 counter initialization is unspecified; treating first EOSP1 as the initial terminating attempt is a supported model resolution while preserving ordinary retry/lifetime history.
+
 | RSPI | EOSP | Trigger transmitter owns | Trigger receiver owns |
 | --- | --- | --- | --- |
 | 0 | 0 | yes | no |
@@ -331,4 +341,4 @@ A trigger's RSPI/EOSP combination establishes directional ownership as follows. 
 | 1 | 0 | yes | yes |
 | 1 | 1 | no | yes |
 
-Sources: `ieee80211-2024:clause:14.15.9.1`–`14.15.9.4`, `ieee80211-2024:table:14-33`, PDF 3283–3285. Strength: shall in the selected power-save mechanism. Observation: trigger/ACK exchanges and each endpoint's local directional state.
+Sources: `ieee80211-2024:clause:14.15.9.1`–`14.15.9.4`, `ieee80211-2024:table:14-33`, PDF 3283–3285, spans 13801401:13809036; 14.15.6 PDF 3281 span 13788615:13790889; 14.15.8.3/.4/.6 PDF 3282–3283 spans 13796440:13799712/13800454:13801359; 10.3.2.11/Figure 10-12 continuation PDF 1906–1909 spans 7922099:7936526; Tables 10-5/10-6 PDF 1917–1920 spans 7966845:7976900/7982293:7986752; Annex C.3 PDF 5314 span 22432594:22433338. Strength: shall in the selected mechanism, except the explicitly informative next-period retry note and unspecified model bookkeeping. Observation: trigger/ACK exchanges and each endpoint's local directional state.

@@ -1,0 +1,153 @@
+%description:
+Actual HT/VHT A-MPDU ending exchanges with the public service-period engine,
+both airtime metric profiles and independent per-MPDU acknowledgment samples.
+The real management setup establishes compressed BA; no agreement injection.
+
+%file: MeshPowerSaveHtVht.cc
+#include "mesh/MeshServicePeriodSupport.h"
+#include "mesh/MeshEndingResponseSupport.h"
+#include "mesh/MeshSelectivePeriodSupport.h"
+#include "mesh/MeshPeriodReorderSupport.h"
+#include "mesh/MeshServiceRelaySupport.h"
+namespace inet::protocoltest {
+Define_ProtocolTest(mesh_power_save_ht_vht) {
+    ProtocolTest test("mesh_power_save_ht_vht");
+    int profile=getSimulation()->getSystemModule()->par("profileCase");
+    if (profile>=10 && profile<22) {
+        auto fault=std::make_shared<bool>(false);
+        test.intercept(tap("radioMedium").from("station[0]").to("station[1]").mutate([fault](Packet *packet) {
+            auto actual=packet->findTag<Ieee80211ModeInd>();
+            if (*fault || !actual || !actual->getTxVector().ampdu || std::string(packet->getName()).find("service-payload")!=0) return;
+            ASSERT(corruptReceivedAmpduMember(packet,2)); *fault=true;
+        }).describe("one actual received ending MPDU has bad FCS; other EOSP bits remain positive"));
+    }
+    if (profile>=18 && profile<22) test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+        .filterPacket("ieee80211mac.type == 25").nth(2).drop()
+        .describe("lose the complete acknowledgment of the later one-member ending EOF0 PPDU"));
+    if (profile>=22 && profile<24) {
+        auto reordered=std::make_shared<int>(0);
+        test.intercept(tap("radioMedium").from("station[0]").to("station[1]").mutate([reordered](Packet *packet) {
+            auto actual=packet->findTag<Ieee80211ModeInd>();
+            if (*reordered>=2 || !actual || !actual->getTxVector().ampdu || std::string(packet->getName()).find("service-payload")!=0) return;
+            permuteReceivedPeriodMembers(packet,*reordered==1); (*reordered)++;
+        }).describe("valid member order2,0,1 then1,0,2 exercises reorder and last-SC duplicate without changing MPDU/FCS"));
+        test.intercept(tap("radioMedium").from("station[1]").to("station[0]")
+            .filterPacket("ieee80211mac.type == 25").nth(1).mutate([](Packet *packet) { ASSERT(rewriteReceivedCompressedBa(packet,false)); })
+            .describe("sender receives zero firstBA while recipient actually acknowledged all members"));
+    }
+    test.once(on("driver").signal("serviceComplete").assertValue(1).within(1.6));
+    return test;
+}
+Define_ProtocolTest(mesh_ending_response) {
+    ProtocolTest test("mesh_ending_response");
+    test.once(on("driver").signal("stampComplete").assertValue(1).within(0.4));
+    return test;
+}
+Define_ProtocolTest(mesh_service_relay) {
+    ProtocolTest test("mesh_service_relay");
+    if (getSimulation()->getSystemModule()->par("profileCase").intValue()==27) {
+        test.once(on("driver").signal("relayDataStarted").assertValue(1).within(1.5));
+        test.meanwhile(tap("radioMedium").from("station[2]").to("station[1]")
+            .filterPacket("ieee80211mac.type == 29").fromNth(1).drop()
+            .describe("lose actual relay DATA acknowledgments until ordinary retry exhaustion"));
+    }
+    test.once(on("driver").signal("serviceComplete").assertValue(1).within(2.5));
+    return test;
+}
+}
+
+%file: test.ned
+import inet.protocoltest.wifi.MeshPairNetwork;
+import inet.linklayer.ieee80211.mac.Ieee80211MeshMac;
+import inet.linklayer.ieee80211.mac.coordinationfunction.Hcf;
+import inet.linklayer.ieee80211.mac.Tx;
+import inet.linklayer.ieee80211.mesh.MeshPowerSave;
+import inet.physicallayer.wireless.ieee80211.packetlevel.Ieee80211DimensionalRadioMedium;
+module PeriodMedium extends Ieee80211DimensionalRadioMedium { parameters: @class(::inet::protocoltest::TapRadioMedium); }
+module EndingResponseHcf extends Hcf { parameters: @class(::EndingResponseHcf); }
+module SelectiveDeadlineHcf extends Hcf { parameters: @class(::SelectiveDeadlineHcf); }
+module RelayExpiryHcf extends Hcf { parameters: @class(::RelayExpiryHcf); }
+module EndingResponseMac extends Ieee80211MeshMac { parameters: @class(::EndingResponseMac); }
+module SelectiveRecoveryMac extends Ieee80211MeshMac { parameters: @class(::SelectiveRecoveryMac); }
+module PeriodReorderMac extends Ieee80211MeshMac { parameters: @class(::PeriodReorderMac); }
+simple EndingResponseTx extends Tx { parameters: @class(::EndingResponseTx); @signal[stampDisposition](type=object); }
+simple StampPowerObserver extends MeshPowerSave { parameters: @class(::StampPowerObserver); }
+simple SelectivePowerObserver extends MeshPowerSave { parameters: @class(::SelectivePowerObserver); }
+simple ReorderPowerObserver extends MeshPowerSave { parameters: @class(::ReorderPowerObserver); @signal[periodMember](type=object); @signal[reorderRecipientOpened](type=long); }
+moduleinterface IProfileDriver { parameters: int scenario; bool nested; }
+simple ServicePeriodDriver like IProfileDriver { parameters: int scenario=0; bool nested; bool verifyMetric=true; int payloadCount=nested ? 6 : 3; int expectedMpdus=3; bool expectAggregate=true; @class(::ServicePeriodDriver); @signal[serviceComplete](type=long); }
+simple SelectivePeriodDriver like IProfileDriver { parameters: int scenario=0; bool nested; bool lostBa=parent.profileCase>=18; bool releaseReverse @mutable = !lostBa; bool verifyMetric=true; int payloadCount=nested ? 6 : 3; int expectedMpdus=4; int expectedFailures=lostBa ? 2 : 1; int expectedPpdus=2; string expectedSampleOrder=lostBa ? "1100" : "1101"; bool expectAggregate=true; @class(::SelectivePeriodDriver); @signal[serviceComplete](type=long); }
+simple PeriodReorderDriver like IProfileDriver { parameters: int scenario=0; bool nested=false; bool verifyMetric=true; int payloadCount=3; int expectedMpdus=6; int expectedFailures=3; int expectedPpdus=2; string expectedSampleOrder="000111"; bool expectAggregate=true; bool holdRetries @mutable = false; @class(::PeriodReorderDriver); @signal[serviceComplete](type=long); }
+simple ServiceRelayDriver like IProfileDriver { parameters: int scenario=parent.profileCase-24; bool nested=false; @class(::ServiceRelayDriver); @signal[serviceComplete](type=long); @signal[relayDataStarted](type=long); }
+simple EndingResponseDriver like IProfileDriver { parameters: int scenario=0; bool nested=false; bool cancelResponse=parent.profileCase==9; @class(::EndingResponseDriver); @signal[stampComplete](type=long); }
+network Test extends MeshPairNetwork {
+    parameters: int profileCase; string driverType=profileCase>=24 ? "ServiceRelayDriver" : (profileCase<8 ? "ServicePeriodDriver" : (profileCase<10 ? "EndingResponseDriver" : (profileCase<22 ? "SelectivePeriodDriver" : "PeriodReorderDriver")));
+    submodules: driver: <driverType> like IProfileDriver;
+}
+
+%inifile: test.ini
+[General]
+network=Test
+sim-time-limit=${profileCase}>=24 ? 2500ms : 1600ms
+*.numStations=${profileCase}>=24 ? 3 : 2
+*.profileCase=${profileCase=0..28}
+*.driver.nested=(${profileCase}>=4 && ${profileCase}<8) || (${profileCase}>=14 && ${profileCase}<18) || (${profileCase}>=20 && ${profileCase}<22)
+*.radioMedium.typename="PeriodMedium"
+*.station[*].wlan[0].powerSave=true
+*.station[*].wlan[0].powerSavePolicy.typename="${profileCase}"=="24" || ${profileCase}>=25 ? "MeshPowerSave" : ("${profileCase}"=="8" || "${profileCase}"=="9" ? "StampPowerObserver" : (${profileCase}>=10 ? (${profileCase}>=22 ? "ReorderPowerObserver" : "SelectivePowerObserver") : "MeshPowerSave"))
+*.station[*].wlan[0].phyProfile="${profileCase}"=="0" || ${profileCase}>=24 || (${profileCase}<10 ? ${profileCase}%4<2 : (${profileCase}<18 ? (${profileCase}-10)%4<2 : ${profileCase}%2==0)) ? "ht" : "vht"
+*.station[*].wlan[0].pathSelectionMetricId=${profileCase}==8 || ${profileCase}==9 || ${profileCase}>=18 ? 2 : ${profileCase}%2+1
+*.station[*].wlan[0].powerSavePolicy.missingAckRetryLimit=${profileCase}>=18 && ${profileCase}<22 ? 0 : 7
+*.station[*].wlan[0].pathSelection.typename="${profileCase}"=="8" || (${profileCase}>=9 && ${profileCase}<24) ? "MeshFixturePaths" : "Hwmp"
+*.station[*].wlan[0].radio.typename="Ieee80211DimensionalRadio"
+*.station[*].wlan[0].radio.bandName="5 GHz (mapped 20 MHz)"
+*.station[*].wlan[0].llc.typename="MeshFixtureLlc"
+*.station[*].wlan[0].mgmt.autoPeer=false
+*.station[*].wlan[0].mac.typename="${profileCase}"=="24" || ${profileCase}>=25 ? "Ieee80211MeshMac" : ("${profileCase}"=="8" || ${profileCase}>=9 ? (${profileCase}>=18 ? (${profileCase}>=22 ? "PeriodReorderMac" : "SelectiveRecoveryMac") : "EndingResponseMac") : "Ieee80211MeshMac")
+*.station[*].wlan[0].mac.hcf.typename="${profileCase}"=="28" ? "RelayExpiryHcf" : (${profileCase}==8 || ${profileCase}==9 ? "EndingResponseHcf" : (${profileCase}>=10 && ${profileCase}<24 ? "SelectiveDeadlineHcf" : "Hcf"))
+*.station[*].wlan[0].mac.tx.typename="${profileCase}"=="8" || "${profileCase}"=="9" ? "EndingResponseTx" : "Tx"
+*.station[1].wlan[0].mgmt.initialTsf=25.6ms
+*.station[2].wlan[0].mgmt.initialTsf=51.2ms
+*.station[0].mobility.initialX=${profileCase}>=24 ? 0m : 20m
+*.station[1].mobility.initialX=${profileCase}>=24 ? 75m : 30m
+*.station[2].mobility.initialX=${profileCase}>=24 ? 150m : 40m
+*.station[*].wlan[0].radio.transmitter.power=${profileCase}>=24 ? 1mW : 100mW
+*.station[*].wlan[0].radio.receiver.energyDetection=-85dBm
+*.station[0].wlan[0].pathSelection.rootMode=${profileCase}==25 ? 3 : (${profileCase}==26 ? 4 : 0)
+*.station[*].wlan[0].pathSelection.rootInterval=409.6ms
+*.station[*].wlan[0].pathSelection.rannInterval=409.6ms
+*.station[*].wlan[0].pathSelection.confirmationInterval=102.4ms
+*.station[*].wlan[0].pathSelection.netDiameterTraversalTime=512ms
+*.station[*].wlan[0].mac.ds.maxPendingWait=${profileCase}>=24 ? 3s : 5s
+*.station[*].wlan[0].mac.hcf.rtsPolicy.rtsThreshold=65536B
+*.station[*].wlan[0].mac.hcf.edca.edcaf[*].recoveryProcedure.shortRetryLimit=${profileCase}==27 ? 2 : 7
+*.station[*].wlan[0].mac.hcf.isBlockAckSupported=true
+*.station[*].wlan[0].mac.hcf.blockAckVariant="compressed"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.mpduAggregationPolicy.typename="BasicMpduAggregationPolicy"
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.typename="${profileCase}"=="4" || ${profileCase}>=5 && ${profileCase}<8 || ${profileCase}>=14 && ${profileCase}<18 || ${profileCase}>=20 && ${profileCase}<22 ? "BasicMsduAggregationPolicy" : ""
+*.station[*].wlan[0].mac.hcf.originatorMacDataService.msduAggregationPolicy.maxAMsduSize=60
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFramePhyFamily="${profileCase}"=="0" || ${profileCase}>=24 || (${profileCase}<10 ? ${profileCase}%4<2 : (${profileCase}<18 ? (${profileCase}-10)%4<2 : ${profileCase}%2==0)) ? "ht" : "vht"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameMcs=7
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameGuardInterval="long"
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBandwidth=20MHz
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameNumSpatialStreams=1
+*.station[*].wlan[0].mac.hcf.rateSelection.dataFrameBitrate=-1bps
+*.station[*].wlan[0].radio.switchingTimes="ms 0 0 0 0 0  0 0 0 0 0.2  0 0 0 0 0  0 0 0 0 0  0 0.1 0 0 0"
+**.fcsMode="computed"
+*.tester.testName="${profileCase}"=="24" || ${profileCase}>=25 ? "mesh_service_relay" : ("${profileCase}"=="8" || "${profileCase}"=="9" ? "mesh_ending_response" : "mesh_power_save_ht_vht")
+cmdenv-express-mode=true
+**.cmdenv-log-level=warn
+include ../../ini/_mesh.ini
+
+%contains: stdout
+PROTOCOLTEST mesh_power_save_ht_vht: PASS
+%contains: stdout
+PROTOCOLTEST mesh_ending_response: PASS
+%contains: stdout
+PROTOCOLTEST mesh_service_relay: PASS
+%not-contains: stdout
+PROTOCOLTEST mesh_power_save_ht_vht: FAIL
+%not-contains: stdout
+PROTOCOLTEST mesh_ending_response: FAIL
+%not-contains: stdout
+PROTOCOLTEST mesh_service_relay: FAIL

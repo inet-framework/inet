@@ -252,12 +252,16 @@ void Hcf::withdrawMeshPowerControl(int64_t id)
     bool previous = handlingAgreementAction;
     handlingAgreementAction = true;
     bool cancelled = false;
+    MeshPowerResolution resolution;
+    resolution.cause = MeshPowerCause::WITHDRAWN;
     for (int ac = 0; ac < AC_NUMCATEGORIES; ++ac) {
         auto owner = edca->getEdcaf(static_cast<AccessCategory>(ac));
         auto queue = owner->getPendingQueue();
         for (int i = 0; i < queue->getNumPackets(); ++i) {
             auto packet = queue->getPacket(i);
             if (packet->getId() != id) continue;
+            resolution.peer = packet->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress();
+            resolution.retired[id] = MeshPowerCause::WITHDRAWN;
             queue->removePacket(packet);
             take(packet);
             edca->getLifetimeHandler()->forgetFrame(id);
@@ -269,6 +273,8 @@ void Hcf::withdrawMeshPowerControl(int64_t id)
         for (int i = 0; i < frames->getLength(); ++i) {
             auto packet = frames->getFrames(i);
             if (packet->getId() != id) continue;
+            resolution.peer = packet->peekAtFront<Ieee80211MacHeader>()->getReceiverAddress();
+            resolution.retired[id] = MeshPowerCause::WITHDRAWN;
             if (frameSequenceHandler->isSequenceRunning()) {
                 auto last = frameSequenceHandler->getContext()->getLastStep();
                 auto transmit = dynamic_cast<ITransmitStep *>(last);
@@ -290,6 +296,7 @@ void Hcf::withdrawMeshPowerControl(int64_t id)
         frameSequenceHandler->interruptFrameSequence();
     }
     handlingAgreementAction = previous;
+    if (!resolution.retired.empty()) notifyPowerResolution(resolution);
     if (!previous && !finishingSequence) updateContention();
 }
 
@@ -369,6 +376,7 @@ void Hcf::expireDataFrames(bool preserveSequence)
         for (auto packet : getReferencedDataFrames())
             referenced.insert(packet->getId());
     }
+    std::map<MacAddress, MeshPowerResolution> resolutions;
     for (auto id : handler->getExpiredFrameIds(referenced)) {
         auto packet = handler->findFrame(id);
         // A drop notification can retire another due frame through its queue owner.
@@ -376,6 +384,10 @@ void Hcf::expireDataFrames(bool preserveSequence)
             continue;
         auto header = packet->peekAtFront<Ieee80211DataOrMgmtHeader>();
         auto data = dynamicPtrCast<const Ieee80211DataHeader>(header);
+        auto& resolution = resolutions[header->getReceiverAddress()];
+        resolution.peer = header->getReceiverAddress();
+        resolution.cause = MeshPowerCause::EXPIRED;
+        resolution.retired[id] = MeshPowerCause::EXPIRED;
         auto edcaf = edca->getEdcaf(data ? edca->classifyFrame(data) : AC_VO);
         auto frames = edcaf->getInProgressFrames();
         bool inProgress = frames->containsFrame(packet);
@@ -407,6 +419,7 @@ void Hcf::expireDataFrames(bool preserveSequence)
     }
     scheduleDataLifetimeTimer();
     advanceOriginatorWindows();
+    for (const auto& entry : resolutions) notifyPowerResolution(entry.second);
 }
 
 void Hcf::forEachChild(cVisitor *v)
@@ -501,11 +514,16 @@ void Hcf::processUpperFrame(Packet *packet, const Ptr<const Ieee80211DataOrMgmtH
         // Drop NEW before the priority queue can evict an older delivery unit.
         if ((pendingQueue->getMaxNumPackets() >= 0 && pendingQueue->getNumPackets() >= pendingQueue->getMaxNumPackets())
                 || (pendingQueue->getMaxTotalLength() >= b(0) && pendingQueue->getTotalLength() + packet->getDataLength() > pendingQueue->getMaxTotalLength())) {
+            MeshPowerResolution resolution;
+            resolution.peer = header->getReceiverAddress();
+            resolution.cause = MeshPowerCause::WITHDRAWN;
+            resolution.retired[packet->getId()] = MeshPowerCause::WITHDRAWN;
             meshPowerSave->originalRetired(packet);
             PacketDropDetails details;
             details.setReason(QUEUE_OVERFLOW);
             emit(packetDroppedSignal, packet, &details);
             delete packet;
+            notifyPowerResolution(resolution);
             return;
         }
         if (header->getFrameType() == 0 || header->getType() == ST_QOS_NULL)
@@ -727,6 +745,11 @@ void Hcf::discardMeshAggregate(Edcaf *owner, Packet *packet)
     bool previous = handlingAgreementAction;
     handlingAgreementAction = true;
     auto header = packet->peekAtFront<Ieee80211DataHeader>();
+    MeshPowerResolution resolution;
+    resolution.peer = header->getReceiverAddress();
+    resolution.tid = header->getTid();
+    resolution.cause = MeshPowerCause::AGREEMENT_DISPOSAL;
+    resolution.retired[packet->getId()] = MeshPowerCause::AGREEMENT_DISPOSAL;
     bool inProgress = owner->getInProgressFrames()->containsFrame(packet);
     if (inProgress) {
         owner->getAckHandler()->dropFrame(header);
@@ -745,6 +768,7 @@ void Hcf::discardMeshAggregate(Edcaf *owner, Packet *packet)
     if (!inProgress)
         delete packet;
     handlingAgreementAction = previous;
+    notifyPowerResolution(resolution);
 }
 
 bool Hcf::hasQueuedData(MacAddress peer, Tid tid) const
@@ -880,6 +904,10 @@ void Hcf::completeTransfers()
 
 void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highestTransmittedDataIndex)
 {
+    MeshPowerResolution resolution;
+    resolution.peer = peer;
+    resolution.tid = tid;
+    resolution.cause = MeshPowerCause::AGREEMENT_DISPOSAL;
     for (int ac = 0; ac < AC_NUMCATEGORIES; ac++)
         edca->getEdcaf(static_cast<AccessCategory>(ac))->getRecoveryProcedure()->cancelBlockAckRecovery(peer, tid);
     if (frameSequenceHandler->isSequenceRunning()) {
@@ -921,6 +949,8 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
                 discard.push_back(packet);
         }
         for (auto packet : discard) {
+            if (!frames->containsFrame(packet)) continue;
+            resolution.retired[packet->getId()] = MeshPowerCause::AGREEMENT_DISPOSAL;
             auto data = packet->peekAtFront<Ieee80211DataHeader>();
             edcaf->getAckHandler()->dropFrame(data);
             edcaf->getRecoveryProcedure()->dropFrame(data);
@@ -939,6 +969,7 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
                     discard.push_back(packet);
             }
             for (auto packet : discard) {
+                resolution.retired[packet->getId()] = MeshPowerCause::AGREEMENT_DISPOSAL;
                 queue->removePacket(packet);
                 take(packet);
                 edca->getLifetimeHandler()->forgetFrame(packet->getId());
@@ -952,6 +983,7 @@ void Hcf::discardAgreementData(MacAddress peer, Tid tid, bool all, int64_t highe
         if (!frameSequenceHandler->isSequenceRunning() || frameSequenceHandler->getContext()->getInProgressFrames() != frames)
             frames->clearDroppedFrames();
     }
+    notifyPowerResolution(resolution);
 }
 
 void Hcf::firstDataDiscarded(const Ptr<const Ieee80211DataHeader>& header)
@@ -1040,6 +1072,7 @@ void Hcf::retireAgreement(MacAddress peer, Tid tid, bool originator, bool associ
         auto agreement = recipientBlockAckAgreementHandler->detachAgreement(peer, tid);
         invalidateActions(peer, tid, originator);
         if (agreement) {
+            if (meshPowerSave && meshPowerSave->isEnabled()) meshPowerSave->recipientAgreementRetired(peer, tid);
             sendUp(recipientDataService->retireAgreement(agreement, associationReset));
             emit(blockAckAgreementDeletedSignal, agreement);
             delete agreement;
@@ -1439,6 +1472,10 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
             else ; // TODO + NonQoSDataFrame
             edcaf->getInProgressFrames()->dropFrame(internallyCollidedFrame);
             edcaf->getAckHandler()->dropFrame(internallyCollidedHeader);
+            MeshPowerResolution resolution;
+            resolution.peer = internallyCollidedHeader->getReceiverAddress();
+            resolution.cause = MeshPowerCause::ORDINARY_LIMIT;
+            resolution.retired[internallyCollidedFrame->getId()] = MeshPowerCause::ORDINARY_LIMIT;
             PacketDropDetails details;
             details.setReason(RETRY_LIMIT_REACHED);
             details.setLimit(-1); // TODO
@@ -1451,6 +1488,9 @@ void Hcf::handleInternalCollision(std::vector<Edcaf *> internallyCollidedEdcafs)
             }
             else if (auto dataHeader = dynamicPtrCast<const Ieee80211DataHeader>(internallyCollidedHeader))
                 firstDataDiscarded(dataHeader);
+            // Power outcome listeners may synchronously close the peer and
+            // release dropped originals; publish after their last use above.
+            notifyPowerResolution(resolution);
             if (hasFrameToTransmit(ac))
                 edcaf->requestChannel(this);
         }
@@ -1722,6 +1762,9 @@ bool Hcf::prepareTransmissionStart(const Packet *packet, simtime_t start)
     }
     // No publication occurs between these actual-attempt updates and Tx's
     // immediate handoff. Refusal above leaves retry/metric/window state alone.
+    if (meshPowerSave && meshPowerSave->isEnabled()
+            && !meshPowerSave->authorizeTransmissionStart(meshPowerMembers(originals, owner->getRecoveryProcedure()), start))
+        return false;
     step->setPpduStart(start);
     for (auto original : originals) {
         auto data = dynamicPtrCast<const Ieee80211DataHeader>(original->peekAtFront<Ieee80211MacHeader>());
@@ -2056,6 +2099,11 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
                 auto receive = dynamic_cast<IReceiveStep *>(frameSequenceHandler->getContext()->getLastStep());
                 auto transmit = receive ? dynamic_cast<TransmitStep *>(frameSequenceHandler->getContext()->getStepBeforeLast()) : nullptr;
                 std::set<int64_t> terminal;
+                MeshPowerResolution resolution;
+                resolution.peer = compressed->getReceiverAddress();
+                resolution.tid = compressed->getTidInfo();
+                resolution.originals = live;
+                resolution.cause = MeshPowerCause::BAR_PENDING;
                 if (receive && receive->getCompletion() == IFrameSequenceStep::Completion::EXPIRED && transmit
                         && transmit->getPpduEnd() >= SIMTIME_ZERO && transmit->getFrameToTransmit() == failedPacket)
                     terminal = edcaf->getRecoveryProcedure()->blockAckRecoveryExpired(compressed->getReceiverAddress(), compressed->getTidInfo(), live);
@@ -2064,6 +2112,7 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
                         continue; // A preceding synchronous drop may retire the peer.
                     auto data = original->peekAtFront<Ieee80211DataHeader>();
                     if (terminal.count(original->getId())) {
+                        resolution.retired[original->getId()] = MeshPowerCause::ORDINARY_LIMIT;
                         edcaf->getAckHandler()->dropFrame(data);
                         edcaf->getRecoveryProcedure()->dropFrame(data);
                         frames->dropFrame(original);
@@ -2075,6 +2124,9 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
                         edcaf->getAckHandler()->processUnansweredAmpduMember(data);
                 }
                 advanceOriginatorWindows();
+                resolution.barPending = edcaf->getRecoveryProcedure()->hasBlockAckRecovery(resolution.peer, resolution.tid);
+                resolution.cause = terminal.empty() ? MeshPowerCause::BAR_PENDING : MeshPowerCause::BAR_EXHAUSTED;
+                notifyPowerResolution(resolution);
                 if (!terminal.empty() && mib->isMeshPeerEstablished(compressed->getReceiverAddress())) {
                     MeshTerminalRecovery fact(compressed->getReceiverAddress(), compressed->getTidInfo(), terminal.size(), MeshTerminalRecovery::BAR_WAIT_LIMIT);
                     emit(meshTerminalRecoverySignal, failedPacket, &fact);
@@ -2110,6 +2162,13 @@ void Hcf::originatorProcessFailedFrame(Packet *failedPacket)
             h->setRetry(true);
             failedPacket->insertAtFront(h);
         }
+        MeshPowerResolution resolution;
+        resolution.peer = failedHeader->getReceiverAddress();
+        resolution.originals.insert(failedPacket->getId());
+        resolution.cause = receive && receive->getCompletion() == IFrameSequenceStep::Completion::EXPIRED
+            ? MeshPowerCause::RESPONSE_EXPIRED : MeshPowerCause::RESPONSE_REJECTED;
+        if (retryLimitReached) resolution.retired[failedPacket->getId()] = MeshPowerCause::ORDINARY_LIMIT;
+        notifyPowerResolution(resolution);
     }
     else
         throw cRuntimeError("Hcca is unimplemented!");
@@ -2206,6 +2265,12 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
         if (!agreement)
             return;
         auto recovered = edcaf->getRecoveryProcedure()->finishBlockAckRecovery(blockAck->getTransmitterAddress(), tid);
+        MeshPowerResolution resolution;
+        resolution.peer = blockAck->getTransmitterAddress();
+        resolution.tid = tid;
+        resolution.originals = recovered;
+        resolution.cause = MeshPowerCause::BAR_RESPONSE;
+        resolution.barPending = false;
         EV_INFO << "BlockAck has arrived" << std::endl;
         edcaf->getRecoveryProcedure()->blockAckFrameReceived();
         auto ackedSeqAndFragNums = compressed ? edcaf->getAckHandler()->processReceivedCompressedBlockAck(compressed, agreement) :
@@ -2230,6 +2295,7 @@ void Hcf::originatorProcessReceivedControlFrame(Packet *packet, const Ptr<const 
                 exhausted.push_back(original);
         }
         retireExhaustedData(edcaf,exhausted,packet);
+        notifyPowerResolution(resolution);
         completeTransfers();
     }
     else if (dynamicPtrCast<const Ieee80211RtsFrame>(header))
@@ -2289,6 +2355,32 @@ bool Hcf::hasFrameToTransmit()
 
 void Hcf::recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211DataHeader>& header, bool duplicate)
 {
+    if (mib->mode == Ieee80211Mib::MESH && meshPowerSave && meshPowerSave->isEnabled())
+        if (auto native = dynamicPtrCast<const Ieee80211MeshDataHeader>(header))
+            meshPowerSave->recipientMemberReceived(packet, native, duplicate);
+}
+
+std::vector<MeshPowerTxMember> Hcf::meshPowerMembers(const std::vector<Packet *>& packets, QosRecoveryProcedure *recovery) const
+{
+    std::vector<MeshPowerTxMember> result;
+    for (auto packet : packets) {
+        auto header = dynamicPtrCast<const Ieee80211DataOrMgmtHeader>(packet->peekAtFront<Ieee80211MacHeader>());
+        if (!header) continue; // BAR/RTS/recipient responses are not DATA retries.
+        MeshPowerTxMember fact;
+        fact.id = packet->getId(); fact.peer = header->getReceiverAddress(); fact.type = header->getType();
+        fact.ordinaryLimit = recovery->getShortRetryLimit(); // Selected native members are below the no-RTS threshold.
+        if (auto data = dynamicPtrCast<const Ieee80211MeshDataHeader>(header)) {
+            fact.tid = data->getTid(); fact.rspi = data->getRspi(); fact.eosp = data->getEosp();
+        }
+        result.push_back(fact);
+    }
+    return result;
+}
+
+void Hcf::notifyPowerResolution(const MeshPowerResolution& result)
+{
+    if (mib->mode == Ieee80211Mib::MESH && meshPowerSave && meshPowerSave->isEnabled())
+        meshPowerSave->transmissionResolved(result);
 }
 
 void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
@@ -2415,6 +2507,9 @@ simtime_t Hcf::computePreparedDataCost(const PreparedDataTransmission& prepared,
 bool Hcf::canAdmitPreparedData(const FrameSequenceContext *context, const PreparedDataTransmission& prepared,
         simtime_t ifs, bool protect) const
 {
+    if (meshPowerSave && meshPowerSave->isEnabled() &&
+            !meshPowerSave->canTransmitSet(meshPowerMembers({prepared.frame}, edca->getChannelOwner()->getRecoveryProcedure()), simTime()+ifs))
+        return false;
     auto txop = context->getQoSContext()->txopProcedure;
     auto cost = computePreparedDataCost(prepared, protect);
     int previousData = 0;
@@ -2495,12 +2590,17 @@ void Hcf::retireExhaustedData(Edcaf *owner, const std::vector<Packet *>& exhaust
     MacAddress peer = first->getReceiverAddress();
     Tid tid = first->getTid();
     int retired = 0;
+    MeshPowerResolution resolution;
+    resolution.peer = peer;
+    resolution.tid = tid;
+    resolution.cause = MeshPowerCause::ORDINARY_LIMIT;
     for (auto original : exhausted) {
         if (!owner->getInProgressFrames()->containsFrame(original) || edca->getLifetimeHandler()->isExpired(original)) continue;
         auto data = original->peekAtFront<Ieee80211DataHeader>();
         owner->getAckHandler()->dropFrame(data);
         owner->getRecoveryProcedure()->retryLimitReached(original,data);
         if (!owner->getInProgressFrames()->containsFrame(original)) continue;
+        resolution.retired[original->getId()] = MeshPowerCause::ORDINARY_LIMIT;
         owner->getInProgressFrames()->dropFrame(original);
         PacketDropDetails details;
         details.setReason(RETRY_LIMIT_REACHED);
@@ -2508,6 +2608,7 @@ void Hcf::retireExhaustedData(Edcaf *owner, const std::vector<Packet *>& exhaust
         retired++;
     }
     advanceOriginatorWindows();
+    notifyPowerResolution(resolution);
     if (retired && mib->isMeshPeerEstablished(peer)) {
         MeshTerminalRecovery fact(peer,tid,retired,MeshTerminalRecovery::DATA_RETRY_LIMIT);
         emit(meshTerminalRecoverySignal,exchange,&fact);
@@ -2524,6 +2625,12 @@ void Hcf::completeAmpduAttempt(AggregateTransmitStep *step, const Ptr<const Ieee
     if (!agreement || !mib->isMeshPeerEstablished(first->getReceiverAddress()))
         return;
     std::vector<Packet *> exhausted;
+    MeshPowerResolution resolution;
+    resolution.peer = first->getReceiverAddress();
+    resolution.tid = first->getTid();
+    resolution.cause = response ? MeshPowerCause::RESPONSE : MeshPowerCause::BAR_PENDING;
+    if (response) resolution.barPending = false;
+    for (auto original : step->members) resolution.originals.insert(original->getId());
     for (auto original : step->members) {
         if (!owner->getInProgressFrames()->containsFrame(original))
             continue;
@@ -2560,6 +2667,7 @@ void Hcf::completeAmpduAttempt(AggregateTransmitStep *step, const Ptr<const Ieee
         owner->getAckHandler()->dropFrames(acked);
         advanceOriginatorWindows();
         retireExhaustedData(owner,exhausted,step->getFrameToTransmit());
+        notifyPowerResolution(resolution);
         completeTransfers();
     }
     else {
@@ -2570,6 +2678,8 @@ void Hcf::completeAmpduAttempt(AggregateTransmitStep *step, const Ptr<const Ieee
             if (owner->getInProgressFrames()->containsFrame(original)) live.push_back(original);
         if (!live.empty())
             owner->getRecoveryProcedure()->beginBlockAckRecovery(first->getReceiverAddress(), first->getTid(), live);
+        resolution.barPending = !live.empty();
+        notifyPowerResolution(resolution);
     }
 }
 
@@ -2719,6 +2829,9 @@ bool Hcf::canAdmitAmpdu(const FrameSequenceContext *context, const PreparedDataT
     auto agreement = originatorBlockAckAgreementHandler->getAgreement(first->getReceiverAddress(), first->getTid());
     auto receiver = mib->findMeshPeerPhyCapabilities(first->getReceiverAddress());
     auto owner = edca->getChannelOwner();
+    if (meshPowerSave && meshPowerSave->isEnabled()
+            && !meshPowerSave->canTransmitSet(meshPowerMembers(prepared.members, owner->getRecoveryProcedure()), simTime()+ifs))
+        return false;
     auto mode = prepared.dataMode;
     bool vht = mode->getVhtMcsIndex() >= 0;
     if (!agreement || agreement != prepared.agreement || !agreement->getIsAddbaResponseReceived() || !receiver
@@ -3119,6 +3232,9 @@ bool Hcf::transmitFrame(Packet *packet, simtime_t ifs)
         // IEEE Std 802.11-2024, 10.23.2.12.1: a delayed start cannot exceed DATA lifetime.
         if (lifetimeHandler->isExpired(data, simTime() + ifs))
             return false;
+        if (meshPowerSave && meshPowerSave->isEnabled()
+                && !meshPowerSave->canTransmitSet(meshPowerMembers({packet}, channelOwner->getRecoveryProcedure()), simTime()+ifs))
+            return false;
         auto txop = channelOwner->getTxopProcedure();
         bool scopedSingle = txop->getProtectionMechanism() == TxopProcedure::SINGLE_PROTECTION && !par("isBlockAckSupported").boolValue();
         Packet *retainedPacket = packet;
@@ -3341,6 +3457,14 @@ void Hcf::transmitControlResponseFrame(Packet *responsePacket, const Ptr<const I
     auto updated = responsePacket->removeAtFront<Ieee80211MacHeader>();
     updated->setDurationField(encodeDuration(updated->getDurationField(), false));
     responsePacket->insertAtFront(updated);
+    if (mib->mode == Ieee80211Mib::MESH && meshPowerSave && meshPowerSave->isEnabled()) {
+        std::optional<MeshPowerBaWindow> window;
+        if (auto ba = dynamicPtrCast<const Ieee80211CompressedBlockAck>(updated)) {
+            auto agreement = recipientBlockAckAgreementHandler->getAgreement(ba->getTidInfo(), ba->getReceiverAddress());
+            if (agreement) window = MeshPowerBaWindow{agreement->getBlockAckRecord()->getWindowStart(), agreement->getBufferSize()};
+        }
+        meshPowerSave->prepareRecipientResponse(responsePacket, receivedPacket, receivedHeader, window);
+    }
     tx->transmitFrame(responsePacket, responsePacket->peekAtFront<Ieee80211MacHeader>(), modeSet->getSifsTime(), false, this);
     delete responsePacket;
 }
@@ -3358,6 +3482,8 @@ void Hcf::recipientProcessTransmittedControlResponseFrame(Packet *packet, const 
         recipientAckProcedure->processTransmittedAck(ackFrame);
     else
         throw cRuntimeError("Unknown control response frame");
+    if (mib->mode == Ieee80211Mib::MESH && meshPowerSave && meshPowerSave->isEnabled())
+        meshPowerSave->recipientResponseComplete(packet);
 }
 
 void Hcf::processMgmtFrame(Packet *mgmtPacket, const Ptr<const Ieee80211MgmtHeader>& mgmtHeader)
