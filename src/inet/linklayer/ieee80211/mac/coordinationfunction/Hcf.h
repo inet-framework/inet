@@ -55,7 +55,7 @@ class AggregateTransmitStep;
 /**
  * Implements IEEE 802.11 Hybrid Coordination Function.
  */
-class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener, public IMeshLinkTiming, public IMeshPowerBuffer
+class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler::ICallback, public IChannelAccess::ICallback, public ITx::ICallback, public IRecipientQosMacDataService::ICallback, public IProcedureCallback, public IBlockAckAgreementHandlerCallback, public ModeSetListener, public IMeshLinkTiming, public IMeshPowerBuffer
 {
   private:
     BlockAckVariant blockAckVariant = BlockAckVariant::BASIC;
@@ -161,6 +161,8 @@ class INET_API Hcf : public ICoordinationFunction, public IFrameSequenceHandler:
 
     // Tests can consume received frames here without an upper protocol stack.
     virtual void sendUp(const std::vector<Packet *>& completeFrames);
+    // Concrete inert consumer. Extensions observe each member before reorder release.
+    void recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211DataHeader>& header, bool duplicate) override;
     FrameSequenceContext *buildContext(AccessCategory ac);
     static simtime_t encodeDuration(simtime_t duration, bool holder);
     simtime_t computeImmediateResponseDuration(Packet *packet, const Ptr<const Ieee80211DataOrMgmtHeader>& header);

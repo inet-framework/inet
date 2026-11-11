@@ -1565,7 +1565,7 @@ void Hcf::recipientProcessReceivedFrame(Packet *packet, const Ptr<const Ieee8021
         }
         if (dataHeader->getType() == ST_DATA_WITH_QOS && recipientBlockAckAgreementHandler)
             recipientBlockAckAgreementHandler->qosFrameReceived(dataHeader, this);
-        sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler, interframe));
+        sendUp(recipientDataService->dataFrameReceived(packet, dataHeader, recipientBlockAckAgreementHandler, this, interframe));
     }
     else if (auto mgmtHeader = dynamicPtrCast<const Ieee80211MgmtHeader>(header)) {
         auto accepted = recipientDataService->managementFrameReceived(packet, mgmtHeader);
@@ -2287,6 +2287,10 @@ bool Hcf::hasFrameToTransmit()
         throw cRuntimeError("Hcca is unimplemented");
 }
 
+void Hcf::recipientMemberReceived(const Packet *packet, const Ptr<const Ieee80211DataHeader>& header, bool duplicate)
+{
+}
+
 void Hcf::sendUp(const std::vector<Packet *>& completeFrames)
 {
     for (auto frame : completeFrames)
@@ -2685,13 +2689,21 @@ void Hcf::processReceivedAmpduContents(Packet *packet)
             continue;
         }
         recipientBlockAckAgreementHandler->qosFrameReceived(data, this);
-        for (auto frame : recipientDataService->dataFrameReceived(member.release(), data, recipientBlockAckAgreementHandler, false)) {
+        for (auto frame : recipientDataService->dataFrameReceived(member.release(), data, recipientBlockAckAgreementHandler, this, false)) {
             take(frame);
             completed.emplace_back(frame);
         }
+        // The observer may withdraw the peer/agreement, including on the last
+        // member. Adopt every returned packet before abandoning this response.
+        if (!mib->isMeshPeerEstablished(header->getTransmitterAddress()) ||
+                recipientBlockAckAgreementHandler->getAgreement(header->getTid(), header->getTransmitterAddress()) != agreement)
+            return;
     }
     // All accepted members are recorded before the one implicit BAR response.
     auto responseMode = rateSelection->computeResponseBlockAckFrameMode(eliciting.get(), header, ResponseQueryRole::RESPOND);
+    if (!mib->isMeshPeerEstablished(header->getTransmitterAddress()) ||
+            recipientBlockAckAgreementHandler->getAgreement(header->getTid(), header->getTransmitterAddress()) != agreement)
+        return;
     auto duration = std::max(SIMTIME_ZERO, header->getDurationField()-modeSet->getSifsTime()-responseMode->getDuration(LENGTH_COMPRESSED_BLOCKACK));
     recipientBlockAckProcedure->processReceivedAmpdu(eliciting.get(), header, agreement, duration, this);
     for (auto& frame : completed)

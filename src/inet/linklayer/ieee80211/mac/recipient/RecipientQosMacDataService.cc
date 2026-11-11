@@ -53,7 +53,8 @@ Packet *RecipientQosMacDataService::defragment(Packet *mgmtFragment)
         return nullptr;
 }
 
-std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader, IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, bool interframe)
+std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *dataPacket, const Ptr<const Ieee80211DataHeader>& dataHeader,
+        IRecipientBlockAckAgreementHandler *blockAckAgreementHandler, ICallback *callback, bool interframe)
 {
     Enter_Method("dataFrameReceived");
     take(dataPacket);
@@ -67,7 +68,10 @@ std::vector<Packet *> RecipientQosMacDataService::dataFrameReceived(Packet *data
         }
     }
     // TODO A-MPDU Deaggregation, MPDU Header+FCS Validation, Address1 Filtering, Duplicate Removal, MPDU Decryption
-    if (duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader)) {
+    bool duplicate = duplicateRemoval && duplicateRemoval->isDuplicate(dataHeader);
+    if (callback)
+        callback->recipientMemberReceived(dataPacket, dataHeader, duplicate);
+    if (duplicate) {
         EV_WARN << "Dropping duplicate packet " << *dataPacket << ".\n";
         PacketDropDetails details;
         details.setReason(DUPLICATE_DETECTED);

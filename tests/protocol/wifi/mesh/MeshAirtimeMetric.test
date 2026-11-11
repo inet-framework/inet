@@ -51,8 +51,8 @@ class RecipientClearProbe : public IRecipientQosMacDataService
     explicit RecipientClearProbe(IRecipientQosMacDataService *delegate) : delegate(delegate) {}
     void clearPeer(MacAddress peer) override { delegate->clearPeer(peer); completed[peer]++; }
     std::vector<Packet *> retireAgreement(RecipientBlockAckAgreement *agreement, bool reset) override { return delegate->retireAgreement(agreement,reset); }
-    std::vector<Packet *> dataFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, IRecipientBlockAckAgreementHandler *agreements, bool interframe) override {
-        return delegate->dataFrameReceived(packet,header,agreements,interframe);
+    std::vector<Packet *> dataFrameReceived(Packet *packet, const Ptr<const Ieee80211DataHeader>& header, IRecipientBlockAckAgreementHandler *agreements, ICallback *callback, bool interframe) override {
+        return delegate->dataFrameReceived(packet,header,agreements,callback,interframe);
     }
     std::vector<Packet *> controlFrameReceived(Packet *packet, const Ptr<const Ieee80211MacHeader>& header, IRecipientBlockAckAgreementHandler *agreements) override {
         return delegate->controlFrameReceived(packet,header,agreements);
