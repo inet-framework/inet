@@ -509,3 +509,34 @@ objects and 11 module compiler warnings are inherited. No global hygiene-clean
 claim is made. Release/feature-disabled builds, combined lifecycle and native
 fingerprint comparisons, examples and upstream integration remain later work.
 No expected result, baseline or time budget is replaced.
+
+## Scenario power-policy control (S0)
+
+The existing power owner now implements ordinary ScenarioManager dispatch for
+`set-mesh-power-mode`. It validates the literal individual peer address, mode,
+enabled/operational owner and established peering before requesting a transition.
+This is configuration integration, with no additional IEEE wire requirement.
+ScenarioManager owns scheduling; the existing policy owns transition completion.
+Lower activity still requires a real acknowledgment. No requested policy is
+automatically reapplied after re-peering.
+
+The fresh debug model is
+`085be6bbfc4bd58b4469d21e6e658c229c3bdbbab91c45d9dba52a630e668a3a`.
+The three new `MeshPowerPolicyControl` cases pass through ordinary dispatch,
+covering acknowledged LIGHT and DEEP requests, lost ACK without false local
+commitment, and subsequent ACTIVE requests. Direct parser rejection checks are
+separately identified; they establish validation before mutation, not dispatcher
+coverage. Retained `MeshPowerModes` (19) and `MeshPeerServicePeriod` (47) cases
+also pass: 69 native passes, exit 0, empty runtime stderr and hygiene diagnostics.
+Both retained controls match corrected P3 native inputs and observations.
+
+Record `/home/miguel/inet-mesh-s0-dev/record.json` (SHA
+`ab0e3b82f6f006e02ae54467bad8b2967d6afbaf18e9f95f7ab571582aeec57f`)
+retains 461 checked artifacts. Checkpoint
+`/home/miguel/inet-mesh-s0-production-checkpoint/record.json` (SHA
+`4bee8cf95d0f63f8c06cd159fe7076e82bcb3821127b7b99bc984cff53e8e23a`)
+freezes 173 source, three fixture, 99 support and four feature inputs, with
+matching current and pinned libraries. The parent lacks the scriptable role;
+that source-level capability gap is not presented as a runtime parent failure.
+See [the reviewer document](../../../../../tests/protocol/wifi/mesh/hwmp-s0-policy-control.md).
+Final combined validation and production examples remain separate stages.

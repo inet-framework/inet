@@ -7,6 +7,7 @@
 #include "inet/common/ModuleRefByPar.h"
 #include "inet/common/lifecycle/OperationalBase.h"
 #include "inet/common/lifecycle/ModuleOperations.h"
+#include "inet/common/scenario/IScriptable.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPowerSave.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshPowerBuffer.h"
 #include "inet/linklayer/ieee80211/mesh/contract/IMeshDataMac.h"
@@ -17,7 +18,7 @@
 namespace inet::ieee80211 {
 
 /** IEEE 802.11-2024, 14.15: peer modes and awake obligations. */
-class INET_API MeshPowerSave : public OperationalBase, public IMeshPowerSave
+class INET_API MeshPowerSave : public OperationalBase, public IMeshPowerSave, public IScriptable
 {
   protected:
     ModuleRefByPar<Ieee80211Mib> mib;
@@ -134,6 +135,7 @@ class INET_API MeshPowerSave : public OperationalBase, public IMeshPowerSave
     };
     ~MeshPowerSave() override;
     bool isEnabled() const override { return enabled && operationalState == OPERATING; }
+    void processCommand(const cXMLElement& node) override;
     void requestMode(MacAddress peer, MeshPowerMode mode) override;
     void requestActiveForAllPeers() override;
     MeshPowerMode getRequestedMode(MacAddress peer) const override;

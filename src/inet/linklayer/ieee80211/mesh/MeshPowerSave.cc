@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include "inet/common/ProtocolTag_m.h"
+#include "inet/common/XMLUtils.h"
 #include "inet/linklayer/ieee80211/mac/contract/Ieee80211MeshPowerResponseTag_m.h"
 #include "inet/linklayer/ieee80211/mac/blockack/OriginatorBlockAckAgreement.h"
 #include "inet/physicallayer/wireless/common/contract/packetlevel/SignalTag_m.h"
@@ -560,6 +561,28 @@ Packet *MeshPowerSave::makeModeIndication(MacAddress receiver, MeshPowerMode mod
     packet->insertAtBack(makeShared<Ieee80211MacTrailer>());
     packet->addTag<PacketProtocolTag>()->setProtocol(&Protocol::ieee80211Mac);
     return packet;
+}
+
+void MeshPowerSave::processCommand(const cXMLElement& node)
+{
+    Enter_Method("processCommand");
+    if (strcmp(node.getTagName(), "set-mesh-power-mode"))
+        throw cRuntimeError("Unsupported mesh power command '%s'", node.getTagName());
+    const char *peerText = xmlutils::getMandatoryFilledAttribute(node, "peer");
+    const char *modeText = xmlutils::getMandatoryFilledAttribute(node, "mode");
+    MacAddress peer;
+    if (!peer.tryParse(peerText) || peer.isUnspecified() || peer.isMulticast())
+        throw cRuntimeError("Invalid individual mesh peer address '%s'", peerText);
+    MeshPowerMode mode;
+    if (!strcmp(modeText, "active")) mode = MeshPowerMode::ACTIVE;
+    else if (!strcmp(modeText, "light-sleep")) mode = MeshPowerMode::LIGHT_SLEEP;
+    else if (!strcmp(modeText, "deep-sleep")) mode = MeshPowerMode::DEEP_SLEEP;
+    else throw cRuntimeError("Unknown mesh power mode '%s'", modeText);
+    if (!isEnabled())
+        throw cRuntimeError("Mesh power policy is disabled or not operating");
+    if (!mib->isMeshPeerEstablished(peer))
+        throw cRuntimeError("Mesh peer %s is not established", peer.str().c_str());
+    requestMode(peer, mode);
 }
 
 void MeshPowerSave::requestMode(MacAddress peer, MeshPowerMode mode)
