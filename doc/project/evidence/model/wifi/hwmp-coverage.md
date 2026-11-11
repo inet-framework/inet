@@ -574,3 +574,40 @@ source triage checks all 18 optional-access sites, bounded serializer products,
 exception paths, intentional `strcmp` use and API-result/order recommendations
 without finding an additional supported runtime defect. No speculative catch,
 new suppression, weakened configuration or baseline replacement is introduced.
+
+## Checked service-period notification type (S1)
+
+An ordinary LIGHT example with normal signal checking aborts on its first
+period outcome at 1.204019501037s/event1941: `type=object` is not a registered
+OMNeT++ class name. The earlier protocol runner disables signal checking, so
+its passing exchanges do not cover this metadata contract. A provisional
+generic `cObject` declaration also fails in the direct checked module probe.
+Both failures and their raw diagnostics remain preserved.
+
+The existing nested `PeriodOutcome` is now registered through
+`Register_Abstract_Class`, matching `IArp::Notification`, and its qualified
+class name is declared in NED. There is no new constructor, payload/state,
+callback ordering or ownership change. The actual class restriction remains
+enabled; unrelated objects are rejected before listener delivery.
+
+Fresh debug model
+`71e21e67a46ca90a9f0142dff2fcce424eb4219229495b9273b6b44185d951ea`
+passes the new module test, General/run0/seed0: all six direction/outcome
+combinations reach the listener, an unrelated object does not, and the prior
+signal-check setting is restored. This creates the real production NED
+component without initializing its dependencies and proves metadata/delivery,
+not RF or lifecycle behavior. The unchanged ordinary LIGHT workload also
+finishes at 6s/event8453 and delivers all ten messages with normal checking.
+Its inherited INI sections and scenario script match the original failed
+workload; this is independent production-path confirmation.
+
+Record `/home/miguel/inet-mesh-s1-final-evidence/record.json` (SHA
+`bd8f48db9e957626e4740dc20c9ed3338d42f4fa4128b5fcf2201c85e6af26b7`)
+retains 46 artifact hashes and links the fresh build and full source/library
+freeze. The module has empty stderr and clean runtime hygiene. Immediate
+post-run loader output was observed only in the author's tool transcript;
+the transparent post-hoc archive-resolution annex identifies its private
+pinned library and makes no historical live-map claim. The earlier record's
+loader wording is preserved and corrected. Final C9 includes the signal test:
+29 unit, 33 module and 53
+protocol files. Execution of that full final union remains separately recorded.

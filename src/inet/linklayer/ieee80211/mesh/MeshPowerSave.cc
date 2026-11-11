@@ -11,6 +11,7 @@
 namespace inet::ieee80211 {
 
 Define_Module(MeshPowerSave);
+Register_Abstract_Class(MeshPowerSave::PeriodOutcome);
 simsignal_t MeshPowerSave::meshAwakeRequirementChangedSignal = cComponent::registerSignal("meshAwakeRequirementChanged");
 simsignal_t MeshPowerSave::meshServicePeriodOutcomeSignal = cComponent::registerSignal("meshServicePeriodOutcome");
 

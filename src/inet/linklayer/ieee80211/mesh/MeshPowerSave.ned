@@ -19,6 +19,6 @@ simple MeshPowerSave extends SimpleModule like IMeshPowerSave
         string macModule = default("^.mac");
         string hcfModule = default("^.mac.hcf");
         @signal[meshAwakeRequirementChanged](type=bool);
-        @signal[meshServicePeriodOutcome](type=object);
+        @signal[meshServicePeriodOutcome](type=inet::ieee80211::MeshPowerSave::PeriodOutcome);
         @display("i=block/control");
 }
