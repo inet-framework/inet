@@ -1,0 +1,115 @@
+%description:
+
+A StationaryMobility node keeps its position when a GeoMapCanvasVisualizer installs its
+map projection in INITSTAGE_LAST. The node is placed by latitude and longitude in an
+Earth-centered, Earth-fixed (ECEF) scene, and it writes its icon position into the
+display string before the map projection exists. The fake GUI of Cmdenv calls
+refreshDisplay(), which must not read that icon position back through the map projection:
+updateFromDisplayString takes over only a changed p tag, such as a drag. A second node
+is dragged at t=1s: the checker writes its p tag as the Shift-drag of Qtenv does, and the
+next refreshDisplay() moves the node to the map pixel of Vienna (339.6, 428.3).
+
+%file: test.ned
+
+import inet.common.geometry.common.Wgs84EcefGeographicCoordinateSystem;
+import inet.mobility.contract.IMobility;
+import inet.visualizer.canvas.scene.GeoMapCanvasVisualizer;
+
+module MapNode
+{
+    parameters:
+        @networkNode;
+    submodules:
+        mobility: <default("StationaryMobility")> like IMobility;
+}
+
+simple MobilityChecker
+{
+    @class(::inet::MobilityChecker);
+}
+
+network Test
+{
+    submodules:
+        coordinateSystem: Wgs84EcefGeographicCoordinateSystem;
+        map: GeoMapCanvasVisualizer;
+        checker: MobilityChecker;
+        node: MapNode;
+        draggedNode: MapNode;
+}
+
+%file: MobilityChecker.cc
+
+#include <iomanip>
+
+#include "inet/mobility/contract/IMobility.h"
+
+namespace inet {
+
+class MobilityChecker : public cSimpleModule
+{
+  protected:
+    virtual void initialize() override { scheduleAt(1, new cMessage("check")); }
+    virtual void handleMessage(cMessage *message) override
+    {
+        delete message;
+        // drag the icon to the map pixel of Vienna, as the Shift-drag of Qtenv writes the p tag
+        cDisplayString& displayString = getModuleByPath("^.draggedNode")->getDisplayString();
+        displayString.setTagArg("p", 0, std::to_string(339.6).c_str());
+        displayString.setTagArg("p", 1, std::to_string(428.3).c_str());
+    }
+    virtual void printPosition(const char *name)
+    {
+        auto mobility = check_and_cast<IMobility *>(getModuleByPath((std::string("^.") + name + ".mobility").c_str()));
+        auto position = mobility->getCurrentPosition();
+        EV_INFO << name << " position: " << std::fixed << std::setprecision(1) << position.x << " " << position.y << " " << position.z << endl;
+    }
+    virtual void finish() override
+    {
+        printPosition("node");
+        printPosition("draggedNode");
+    }
+};
+
+Define_Module(MobilityChecker);
+
+} // namespace inet
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 2s
+ned-path = .;../../../../src
+cmdenv-express-mode = false
+cmdenv-fake-gui = true
+**.cmdenv-log-level = info
+
+*.map.minLatitude = 37deg
+*.map.maxLatitude = 73deg
+*.map.minLongitude = -13.8deg
+*.map.maxLongitude = 44.3deg
+*.map.mapWidth = 654
+*.map.mapHeight = 622
+*.map.mapImage = "maps/europe-er"
+*.*ode.mobility.coordinateSystemModule = "^.^.coordinateSystem"
+*.*ode.mobility.initFromDisplayString = false
+*.node.mobility.initialLatitude = 47.4979deg
+*.node.mobility.initialLongitude = 19.0402deg
+*.draggedNode.mobility.initialLatitude = 48.8566deg
+*.draggedNode.mobility.initialLongitude = 2.3522deg
+
+%#--------------------------------------------------------------------------------------------------------------
+%# remove colorizing
+%subst: /\x1B\[[0-9;]*m//
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+node position: 4080854.9 1408354.5 4679340.0
+%#--------------------------------------------------------------------------------------------------------------
+%contains: test.out
+draggedNode position: 4085649.9 1200098.2 4732538.1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
