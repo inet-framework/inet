@@ -207,11 +207,11 @@ Each entry is one future commit. INET work is on the branch `topic/baseline-upda
 
 | Id | Repository | Proposed subject | Depends on | Verification |
 | --- | --- | --- | --- | --- |
-| O1 | opp_repl | test: check out the pinned commit of a baseline repository | none | New command: clone or fetch, check out `ref` by SHA, print the commit. The two tests print the baseline commit and report a checkout that is not at the pin. Self-tests with two local repositories. |
+| O1 | opp_repl | test: check out the pinned commit of a baseline repository | none | New command: clone or fetch, check out `ref` by SHA, print the commit. The two tests log the baseline commit and give a warning for a checkout that is not at the pin. Self-tests with two local repositories. |
 | O2 | opp_repl | test: check the attribution of a baseline change | O1 | New command for V2: build the commits in worktrees, run the moved tests, apply the reduction. Check with the pilot. |
 | O3 | opp_ci | executor: fetch the pinned baseline commit by its SHA | none | Today the code runs `git fetch origin`, which does not get a commit that only a pull request holds. Check with a pin on a pull request head. |
 | C1 | INET | plan: add: baseline updates in pull requests | none | — |
-| C2 | INET | tests: change: pin the commits of the statistics and media repositories | O1 | `inet.opp` and the two workflows. The push run on `master` prints the two pins and gives the failures of the run before it. |
+| C2 | INET | build: change: pin the commits of the statistics and media repositories | O1 | `inet.opp` and the two workflows. The push run on `master` prints the two pins and gives the failures of the run before it. |
 | C3 | INET | doc: change: rules for a baseline in another repository | none | The three rule documents of section 6. `check-seals.sh` and `check-links.sh` pass. |
 | C4 | INET | doc: change: procedure for a statistical or chart baseline | C3 | The guides of section 6. `check-links.sh` passes. |
 | C5 | INET | enforcement: add: gate for the baseline pins and records | C2, C3 | `check-baselines.sh`, `check_baselines.py`, `baseline_summary.py`, `test_check_baselines.py`; the `chart` obligation and the pin in `check-classification.sh`; the gate in `check_pull_request.py`. Unit tests with small repositories: one case that passes and one that fails for each of B1 to B5. |
@@ -232,6 +232,24 @@ C1 to C6, O1 to O3 and the pilot do not depend on the catch-up. C7 to C9 wait fo
 - change one line of the reduction (V2);
 - add a baseline file whose values did not move (B4);
 - pin a commit that is only local (B3).
+
+## Progress
+
+All branches have the name `topic/baseline-updates-in-pull-requests`. All branches are local, and nothing is pushed.
+
+- [x] O1: opp_repl `9f11f80`, 2026-11-12.
+- [x] O3: opp_ci `09bb0b0`, 2026-11-12.
+- [x] C1: INET `b2f26dc036`, 2026-11-12.
+- [x] C2: INET `878a1f28a7`, 2026-11-12.
+- [ ] O2, C3 to C11, S1 and S2.
+
+## Results of the implementation
+
+- **O1.** The command is `opp_checkout_test_baselines [KIND ...]`. The Python functions are `checkout_test_baselines` and `checkout_test_baseline`. For a full hash, the command fetches only when the clone does not have the commit. A checkout that is at the pin stays on its branch. git stops a checkout that would overwrite a local change, and the command never uses force. The tests do not print the baseline commit, which the first text of this plan said. They log the commit at the `INFO` level, and they give a warning when the checkout is not at the pin or does not exist. The CI log gets the commit from the command. The step adds 17 self tests; the complete self tests give 94 tests with the result OK.
+- **O3.** The two checkout paths of opp_ci fetch a full hash by the hash. The step also repairs a second defect: with a branch name as `ref`, a clone that the worker used again stayed at its first commit. Without the change, the new tests of the pull request head and of the moved branch fail. Four other tests of opp_ci fail on the base commit too (`test_remote_cli`, `test_worker_log_shipping`); this step did not touch them.
+- **C2.** The subject has the area `build`, as the earlier workflow commits have. Check with the real project: the command cloned `media` from GitHub and checked out the pin in 19 s. On 2026-11-12 the two pins are equal to the heads of the two baseline masters. The series gates pass for C1 and C2.
+- **Not verified:** a run of the two changed workflows on GitHub. That run is possible only after the push.
+- **Order for the push.** The INET workflows install `opp_repl@github_ci`. Thus O1 must be on `github_ci` before C2 is on INET `master`, or the two workflows stop at an unknown command. The three opp_repl branches (`main`, `github_ci`, `opp_ci`) stay at the same commit. The opp_ci service gets O3 with a push and a restart.
 
 ## Decisions
 
