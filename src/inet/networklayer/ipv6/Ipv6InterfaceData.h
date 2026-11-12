@@ -431,6 +431,10 @@ class INET_API Ipv6InterfaceData : public InterfaceProtocolData
   protected:
     int findAddress(const Ipv6Address& addr) const;
     void choosePreferredAddress();
+    void joinSolicitedNodeMulticastGroup(const Ipv6Address& addr);
+    void leaveSolicitedNodeMulticastGroup(const Ipv6Address& addr);
+    void leaveExpiredSolicitedNodeMulticastGroups(const Ipv6AddressVector& expired);
+    bool isSolicitedNodeGroupOwner(const Ipv6Address& addr) const;
     void changed1(int fieldId) { changed(interfaceIpv6ConfigChangedSignal, fieldId); }
     HostMulticastData *getHostData() { if (!hostMcastData) hostMcastData = new HostMulticastData(); return hostMcastData; }
     const HostMulticastData *getHostData() const { return const_cast<Ipv6InterfaceData *>(this)->getHostData(); }

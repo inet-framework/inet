@@ -1,0 +1,105 @@
+%description:
+Tests that a node joins the solicited-node multicast group of every address
+assigned to an interface, and announces the membership with a Multicast
+Listener Report before it probes the address.
+
+RFC 4861 Section 7.2.1 requires a node to join the solicited-node multicast
+address corresponding to each of the IP addresses assigned to an interface,
+and to join and leave as addresses are added and removed. RFC 4862 Section
+5.4.2 requires the join to happen before the first Duplicate Address
+Detection probe of a tentative address, because with an MLD-snooping switch
+"no multicast reception will be available until the MLD report is sent".
+
+A router and a host obtain their addresses by Stateless Address
+Autoconfiguration, with Multicast Listener Discovery enabled so that each
+join becomes a packet. The host's interface identifier is fixed by its MAC
+address, so its link-local address is fe80::8aa:ff:fe00:2 and the
+solicited-node group of that address is ff02::1:ff00:2.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6FlatNetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network SolicitedNodeJoinNetwork
+{
+    types:
+        channel ethline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
+        }
+    submodules:
+        configurator: Ipv6FlatNetworkConfigurator;
+        router: Router6;
+        host: StandardHost6;
+    connections:
+        host.ethg++ <--> ethline <--> router.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src
+network = SolicitedNodeJoinNetwork
+sim-time-limit = 5s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+# Multicast Listener Discovery makes every join visible as a packet.
+**.ipv6.hasMld = true
+
+# One probe per address is enough, and keeps the log short.
+**.neighbourDiscovery.dupAddrDetectTransmits = 1
+
+# Ethernet NIC configuration
+**.eth[*].queue.typename = "EthernetQosQueue"
+**.eth[*].queue.dataQueue.typename = "DropTailQueue"
+**.eth[*].queue.dataQueue.packetCapacity = 10
+
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%#
+%# The host announces the solicited-node group of its link-local address.
+%#
+%contains: stdout
+SolicitedNodeJoinNetwork.host.ipv6.mld: Mldv1: sending Multicast Listener Report for group=ff02::1:ff00:2 on iface=eth0
+
+%#
+%# The report precedes the host's own first Duplicate Address Detection probe
+%# (RFC 4862 Section 5.4.2). Both greps are anchored on the host, so the
+%# router's earlier probe cannot satisfy the ordering; grep -n keeps the file
+%# order, so an ordered match over the two line numbers is enough.
+%#
+%postrun-command: grep -n "host\.ipv6\.mld: .*Report for group=ff02::1:ff00:2\|host\.ipv6\.neighbourDiscovery: .*INITIATING DUPLICATE ADDRESS" test.out | head -2 > order.out || true
+%contains-regex: order.out
+[0-9]+:.*host\.ipv6\.mld: .*Report for group=ff02::1:ff00:2.*\n[0-9]+:.*host\.ipv6\.neighbourDiscovery: .*INITIATING DUPLICATE ADDRESS
+
+%#
+%# The host holds two addresses -- the link-local one and the global one it
+%# forms from the router's prefix -- and probes both, so it runs Duplicate
+%# Address Detection twice.
+%#
+%postrun-command: grep -c "host\.ipv6\.neighbourDiscovery: .*INITIATING DUPLICATE ADDRESS" test.out > dadcount.out || true
+%contains: dadcount.out
+2
+
+%#
+%# Both addresses carry the same interface identifier, so both map to the same
+%# solicited-node group and the second join finds the group already joined.
+%# RFC 4861 Section 7.2.1 requires exactly that: "multiple unicast addresses
+%# may map into the same solicited-node multicast address". The second join
+%# changes no state and emits no further report, so two addresses produce one
+%# report, not two.
+%#
+%postrun-command: grep -c "host\.ipv6\.mld: .*sending Multicast Listener Report for group=ff02::1:ff00:2" test.out > joincount.out || true
+%contains: joincount.out
+1
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
