@@ -1,0 +1,61 @@
+%description:
+Tests that Ipv6NetworkConfigurator rejects two explicit addresses in one /64 on
+different links.
+
+    h1 -- r -- h2
+
+h1 gets the explicit address 2001:db8:1:1::1 and h2 gets 2001:db8:1:1::2, but
+h1 and h2 are on different links. With no prefix template, each address fixes
+the prefix of its link, so both links would get 2001:db8:1:1::/64.
+
+Expected: network initialization stops with an error that names an interface on
+each link.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ipv6.Router6;
+import inet.node.ipv6.StandardHost6;
+import ned.DatarateChannel;
+
+network DuplicateAddressPrefixTest6
+{
+    types:
+        channel ethernetline extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+        }
+    submodules:
+        h1: StandardHost6;
+        r: Router6;
+        h2: StandardHost6;
+        configurator: Ipv6NetworkConfigurator;
+    connections:
+        h1.ethg++ <--> ethernetline <--> r.ethg++;
+        r.ethg++ <--> ethernetline <--> h2.ethg++;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = DuplicateAddressPrefixTest6
+sim-time-limit = 1s
+cmdenv-express-mode = false
+ned-path = .;../../../../src
+
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+*.configurator.config = xml("<config>\
+    <interface hosts='h1' address='2001:db8:1:1::1'/>\
+    <interface hosts='h2' address='2001:db8:1:1::2'/>\
+    </config>")
+
+%#--------------------------------------------------------------------------------------------------------------
+%exitcode: 1
+%postrun-command: grep '<!>' test.out test.err > duplicate-address-prefix-error.out || true
+%contains-regex: duplicate-address-prefix-error.out
+The link of DuplicateAddressPrefixTest6\.h1\.eth0 and the link of DuplicateAddressPrefixTest6\.h2\.eth0 both get the prefix 2001:db8:1:1::/64, but each link needs a unique prefix
+%#--------------------------------------------------------------------------------------------------------------
