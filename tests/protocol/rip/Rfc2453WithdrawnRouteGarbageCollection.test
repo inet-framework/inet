@@ -15,16 +15,6 @@ layer.
 The link between host A1 and R1 goes down at 100 s by a disconnect of both directions from the
 scenario manager.
 
-Defect: R2 keeps the withdrawn route for as long as its next hop repeats the withdrawal.
-Rip::processResponse refreshes the time of the last update of a route with every entry from its
-next hop, metric 16 included (src/inet/routing/rip/Rip.cc:688-689), and Rip::checkExpiredRoutes
-purges a route at that time plus the timeout plus the garbage-collection time, 300 s
-(Rip.cc:909-918), not 120 s after the deletion. R1 repeats the withdrawal without end (see
-Rfc2453LostNetworkGarbageCollection.test), so the route never leaves the updates of R2; without
-the repetitions it would still stay 300 s. RFC 2453 section 3.9.2: "If the metric was already
-infinity, then a new deletion process is not started." Observations 1 to 3 hold; observation 4
-fails. This test FAILS, and the failure is deliberately NOT declared expected. See results.md.
-
 %includes:
 #include "ProtocolTest.h"
 #include "RipChecks.h"

@@ -73,6 +73,10 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
     typedef std::vector<Ipv6Route *> RouteList;
     RouteList routeList;
 
+    // the routes of the configuration whose interface is down or has no carrier;
+    // they return to routeList when the interface is up and has a carrier again
+    RouteList suspendedRoutes;
+
     // Multicast route array, sorted by prefixLength desc, origin asc, group, metric asc
     typedef std::vector<Ipv6MulticastRoute *> MulticastRouteVector;
     MulticastRouteVector multicastRoutes;
@@ -331,6 +335,19 @@ class INET_API Ipv6RoutingTable : public SimpleModule, public IRoutingTable, pro
      * Deletes the routes that are using the specified interface.
      */
     virtual void deleteInterfaceRoutes(const NetworkInterface *entry);
+
+    /**
+     * Removes the routes that are using the specified interface, which went down or lost its
+     * carrier. The routes of the configuration (MANUAL and OWN_ADV_PREFIX) are kept aside for
+     * restoreInterfaceRoutes(); the other routes are deleted.
+     */
+    virtual void suspendInterfaceRoutes(const NetworkInterface *entry);
+
+    /**
+     * Adds again the routes that suspendInterfaceRoutes() kept aside for the specified interface,
+     * unless the table already holds an equal route.
+     */
+    virtual void restoreInterfaceRoutes(const NetworkInterface *entry);
 
     /**
      * Return the number of routes.
