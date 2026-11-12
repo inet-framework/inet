@@ -29,7 +29,9 @@ network CellularNetwork
         int numColumns = default(int(ceil(sqrt(numSites)))); // Number of sites in a row of the grid
         double width @unit(m) = default(interSiteDistance * (numColumns + (numSites > numColumns ? 0.5 : 0))); // Width of the area
         double height @unit(m) = default(interSiteDistance * 0.866 * ceil(numSites / numColumns)); // Height of the area
-        @display("bgb=$width,$height");
+        double canvasWidth = default(dropUnit(width)); // Width of the area in meters, without the unit, for the display string
+        double canvasHeight = default(dropUnit(height)); // Height of the area in meters, without the unit, for the display string
+        @display("bgb=$canvasWidth,$canvasHeight");
     submodules:
         radioMedium: CellularRadioMedium {
             @display("p=50,50");
