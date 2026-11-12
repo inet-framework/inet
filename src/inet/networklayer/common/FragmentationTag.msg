@@ -15,4 +15,5 @@ namespace inet;
 class FragmentationReq extends TagBase
 {
     bool dontFragment = false;   // "don't fragment" bit
+    int mtu = -1;                // the largest packet that a fragment may be, in bytes, if smaller than the MTU of the outgoing interface; -1 means none (used by Ipv6)
 }

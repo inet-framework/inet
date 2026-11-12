@@ -33,6 +33,7 @@ class INET_API Ipv6Tunnel : public LayeredProtocolBase
 
     Ipv6Address source; // tunnel entry point (an address of this node)
     Ipv6Address destination; // tunnel exit point
+    int tunnelPathMtu = -1; // Path MTU to the exit point: the tunnel mtu plus the tunnel header
 
     int upperLayerInGateId = -1;
     int upperLayerOutGateId = -1;
