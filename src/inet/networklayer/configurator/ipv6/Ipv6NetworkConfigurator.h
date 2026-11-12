@@ -152,6 +152,14 @@ class INET_API Ipv6NetworkConfigurator : public L3NetworkConfiguratorBase, publi
      */
     virtual void addStaticRoutes(Topology& topology, cXMLElement *autorouteElement);
 
+    /**
+     * Returns the metric of the on-link (direct) route through the given
+     * interface: the interface's `@metric` attribute, or 0 when it has none.
+     * This mirrors Ipv4NetworkConfigurator, where the interface metric becomes
+     * the metric of the interface's directly connected route.
+     */
+    int getDirectRouteMetric(const InterfaceInfo *interfaceInfo) const { return interfaceInfo->metric != -1 ? interfaceInfo->metric : 0; }
+
     void ensureConfigurationComputed(Topology& topology);
     void configureInterface(InterfaceInfo *interfaceInfo);
     void configureRoutingTable(Node *node);
