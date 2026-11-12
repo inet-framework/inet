@@ -1,0 +1,50 @@
+%description:
+A Basic BlockAck response must clamp a negative calculated Duration to zero
+before it reaches the model header or serializer (IEEE 802.11-2024, 9.2.5.1).
+
+%includes:
+#include "inet/linklayer/ieee80211/mac/recipient/RecipientQosAckPolicy.h"
+using namespace inet;
+using namespace inet::ieee80211;
+using namespace inet::physicallayer;
+
+%global:
+class FixedBlockAckRate : public IQosRateSelection
+{
+  public:
+    const IIeee80211Mode *mode = Ieee80211ModeSet::getModeSet("a")->getMode(Mbps(24));
+    virtual const IIeee80211Mode *computeResponseBlockAckFrameMode(Packet *, const Ptr<const Ieee80211BlockAckReq>&) override { return mode; }
+    virtual const IIeee80211Mode *computeResponseCtsFrameMode(Packet *, const Ptr<const Ieee80211RtsFrame>&) override { throw cRuntimeError("unexpected CTS lookup"); }
+    virtual const IIeee80211Mode *computeResponseAckFrameMode(Packet *, const Ptr<const Ieee80211DataOrMgmtHeader>&) override { throw cRuntimeError("unexpected ACK lookup"); }
+    virtual const IIeee80211Mode *computeMode(Packet *, const Ptr<const Ieee80211MacHeader>&, TxopProcedure *) override { throw cRuntimeError("unexpected data lookup"); }
+};
+class BlockAckDurationPolicy : public RecipientQosAckPolicy
+{
+  public:
+    void configure(IQosRateSelection *selection) {
+        rateSelection = selection;
+        modeSet = const_cast<Ieee80211ModeSet *>(Ieee80211ModeSet::getModeSet("a"));
+    }
+};
+
+%activity:
+FixedBlockAckRate rate;
+BlockAckDurationPolicy policy;
+policy.configure(&rate);
+Packet packet("BAR");
+const auto elapsed = Ieee80211ModeSet::getModeSet("a")->getSifsTime() + rate.mode->getDuration(LENGTH_BASIC_BLOCKACK);
+for (auto duration : {SIMTIME_ZERO, elapsed - SimTime(1, SIMTIME_US), elapsed, elapsed + SimTime(37, SIMTIME_US)}) {
+    auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+    bar->setDurationField(duration);
+    auto actual = policy.computeBasicBlockAckDurationField(&packet, bar);
+    ASSERT(actual == (duration <= elapsed ? SIMTIME_ZERO : SimTime(37, SIMTIME_US)));
+}
+for (int special : {32768, 65535}) {
+    auto bar = makeShared<Ieee80211BasicBlockAckReq>();
+    bar->setDurationField(SimTime(special, SIMTIME_US));
+    ASSERT(policy.computeBasicBlockAckDurationField(&packet, bar) == SIMTIME_ZERO);
+}
+EV << "BlockAck duration is zero for insufficient reservations and preserves positive residuals.\n";
+
+%contains: stdout
+BlockAck duration is zero for insufficient reservations and preserves positive residuals.
