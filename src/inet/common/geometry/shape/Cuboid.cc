@@ -52,7 +52,7 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
         }
         else {
             intersection2 = p1 + direction * tF;
-            normal2 = -direction.getSign().getMultipliedElementwise(t2.getYzx().getStep(t2).getMultipliedElementwise(t2.getZxy().getStep(t2)));
+            normal2 = direction.getSign().getMultipliedElementwise(t2.getStep(t2.getYzx()).getMultipliedElementwise(t2.getStep(t2.getZxy())));
         }
         return true;
     }
