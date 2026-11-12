@@ -1,0 +1,5 @@
+The default Router Lifetime follows MaxRtrAdvInterval
+
+RFC 4861 gives the Router Lifetime of a Router Advertisement the default 3 * MaxRtrAdvInterval. INET computed it once, from the built-in MaxRtrAdvInterval of 600 s, so every router advertised 1800 s, whatever interval the maxIntervalBetweenRAs parameter of Ipv6NeighbourDiscovery or the maxRtrAdvInterval attribute of Ipv6NetworkConfigurator configured. The default is now computed from the configured MaxRtrAdvInterval, rounded up to whole seconds, so a Mobile IPv6 interval of 0.07 s advertises 1 s and not 0 s, which would mean "not a default router". An explicit advDefaultLifetime is unchanged.
+
+A host now lets the default route that it learned from such a router expire after the shorter lifetime, and then reaches the router through default router selection. Results change in simulations that set a Router Advertisement interval, such as examples/ipv6/mipv6, mipv6roaming, pmipv6 and the IPv6 configurations of examples/manetrouting/dymo. To keep the old value, set **.routingTable.advDefaultLifetime = 1800s.

@@ -8,6 +8,7 @@
 #include "inet/networklayer/ipv6/Ipv6InterfaceData.h"
 
 #include <algorithm>
+#include <cmath>
 #include <sstream>
 
 #include "inet/common/stlutils.h"
@@ -215,14 +216,20 @@ Ipv6InterfaceData::Ipv6InterfaceData()
     rtrVars.advReachableTime = IPv6_DEFAULT_ADV_REACHABLE_TIME;
     rtrVars.advRetransTimer = IPv6_DEFAULT_ADV_RETRANS_TIMER;
     rtrVars.advCurHopLimit = IPv6_DEFAULT_ADVCURHOPLIMIT;
-    rtrVars.advDefaultLifetime = 3 * rtrVars.maxRtrAdvInterval;
+    rtrVars.advDefaultLifetime = -1; // default: 3 * MaxRtrAdvInterval, see getAdvDefaultLifetime()
 
     rtrVars.advHomeAgentFlag = false;
+}
 
-#if USE_MOBILITY
-    if (rtrVars.advDefaultLifetime < 1)
-        rtrVars.advDefaultLifetime = 1;
-#endif // if USE_MOBILITY
+simtime_t Ipv6InterfaceData::getAdvDefaultLifetime() const
+{
+    if (rtrVars.advDefaultLifetime >= SIMTIME_ZERO)
+        return rtrVars.advDefaultLifetime;
+    // RFC 4861 6.2.1: the default is 3 * MaxRtrAdvInterval. Round up to whole
+    // seconds: the Router Lifetime field counts seconds, and truncating a
+    // sub-second value (RFC 6275 7.5 allows MaxRtrAdvInterval down to 0.07 s)
+    // would give 0, which means "not a default router".
+    return SimTime(std::ceil((3 * rtrVars.maxRtrAdvInterval).dbl()));
 }
 
 Ipv6InterfaceData::~Ipv6InterfaceData()
