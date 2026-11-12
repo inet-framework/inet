@@ -1,0 +1,90 @@
+%description:
+Tests that a router does not put a global address in the Target Address of an
+ICMPv6 Redirect (RFC 4861 Section 4.5 and 8.2: when the target is a router,
+"that router's link-local address MUST be used").
+
+Topology: hostA, r1 and r2 on one switch; hostB behind r2. hostA's route to
+hostB goes via r1, and r1's route goes via r2, named by its global address
+2001:db8:2::3, back out the interface the echo requests arrived on. The
+link-local address of r2 is not known to r1, so r1 sends no Redirect and
+keeps forwarding.
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+import inet.networklayer.configurator.ipv6.Ipv6NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.EthernetSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
+network RedirectTargetNotLinkLocal
+{
+    submodules:
+        configurator: Ipv6NetworkConfigurator;
+        hostA: StandardHost;
+        sw: EthernetSwitch;
+        r1: Router;
+        r2: Router;
+        hostB: StandardHost;
+    connections:
+        hostA.ethg++ <--> Eth100M <--> sw.ethg++;
+        r1.ethg++ <--> Eth100M <--> sw.ethg++;
+        r2.ethg++ <--> Eth100M <--> sw.ethg++;
+        r2.ethg++ <--> Eth100M <--> hostB.ethg++;
+}
+%#--------------------------------------------------------------------------------------------------------------
+%file: redirect.xml
+<config>
+  <interface hosts="hostA" names="eth0" address="2001:db8:2::10"/>
+  <interface hosts="r1"    names="eth0" address="2001:db8:2::2"/>
+  <interface hosts="r2"    names="eth0" address="2001:db8:2::3"/>
+  <interface hosts="r2"    names="eth1" address="2001:db8:4::1"/>
+  <interface hosts="hostB" names="eth0" address="2001:db8:4::2"/>
+
+  <route hosts="hostA" destination="2001:db8:4::" prefixLength="64" gateway="2001:db8:2::2" interface="eth0"/>
+  <route hosts="r1"    destination="2001:db8:4::" prefixLength="64" gateway="2001:db8:2::3" interface="eth0"/>
+  <route hosts="hostB" destination="2001:db8:2::" prefixLength="64" gateway="2001:db8:4::1" interface="eth0"/>
+</config>
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+[General]
+record-vector-results = false
+ned-path = ../../../../src;.
+network = RedirectTargetNotLinkLocal
+sim-time-limit = 3s
+cmdenv-express-mode = false
+cmdenv-log-prefix = "%C: "
+
+**.hasIpv4 = false
+**.hasIpv6 = true
+**.ipv6.configurator.networkConfiguratorModule = "configurator"
+**.ipv6.neighbourDiscovery.dupAddrDetectTransmits = 0
+*.configurator.addStaticRoutes = true
+*.configurator.addRemoteRoutes = false
+*.configurator.addDefaultRoutes = false
+*.configurator.config = xmldoc("redirect.xml")
+*.r1.ipv6.routingTable.routes = xml("<routingTable><local node='r1'><interface name='eth0' AdvSendAdvertisements='off'/></local></routingTable>")
+*.r2.ipv6.routingTable.routes = xml("<routingTable><local node='r2'><interface name='eth0' AdvSendAdvertisements='off'/><interface name='eth1' AdvSendAdvertisements='off'/></local></routingTable>")
+
+*.hostA.numApps = 1
+*.hostA.app[0].typename = "PingApp"
+*.hostA.app[0].destAddr = "2001:db8:4::2"
+*.hostA.app[0].startTime = 2s
+*.hostA.app[0].stopTime = 2.5s
+*.hostA.app[0].sendInterval = 50ms
+%#--------------------------------------------------------------------------------------------------------------
+%subst: /omnetpp:://
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RedirectTargetNotLinkLocal.r1.ipv6.neighbourDiscovery: Not sending ICMPv6 Redirect to 2001:db8:2::10: the target 2001:db8:2::3 is neither the destination 2001:db8:4::2 nor a link-local address
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+use 2001:db8:2::3 as next hop for 2001:db8:4::2
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+RedirectTargetNotLinkLocal.hostB.ipv6.ipv6: ICMPv6 packet: passing it to ICMPv6 module
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command: grep "undisposed object:" test.out > test_undisposed.out || true
+%not-contains: test_undisposed.out
+undisposed object: (
+%#--------------------------------------------------------------------------------------------------------------
