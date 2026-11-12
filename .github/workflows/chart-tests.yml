@@ -61,8 +61,10 @@ jobs:
           ccache -cCz
           echo "::endgroup::"
 
-          echo "::group::Cloning inet media repository"
-          git clone https://github.com/inet-framework/media.git
+          echo "::group::Checking out the inet media repository"
+          # inet.opp pins the commit of the media repository that this INET commit passes with;
+          # the command prints the commit
+          opp_checkout_test_baselines --load $INET_ROOT -p inet chart
           echo "::endgroup::"
 
           echo "::group::Running chart tests"

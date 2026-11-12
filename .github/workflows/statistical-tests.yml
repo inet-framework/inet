@@ -56,8 +56,10 @@ jobs:
 
           source $GITHUB_WORKSPACE/inet/_scripts/github/build-inet.sh
 
-          echo "::group::Cloning inet statistical results"
-          git clone https://github.com/inet-framework/statistics.git
+          echo "::group::Checking out the inet statistical results"
+          # inet.opp pins the commit of the statistics repository that this INET commit passes
+          # with; the command prints the commit
+          opp_checkout_test_baselines --load $INET_ROOT -p inet statistical
           echo "::endgroup::"
 
           echo "::group::Running statistical tests"
