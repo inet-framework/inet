@@ -1,0 +1,8 @@
+An ICMPv6 Parameter Problem message can carry its Pointer
+
+Icmpv6::sendErrorMessage takes the Pointer field of an Internet Control
+Message Protocol for IPv6 (ICMPv6) Parameter Problem message as a new last
+argument, defaulted to 0, and Icmpv6::createParamProblemMsg takes it as a
+second argument. The field was always 0 before. A subclass of Icmpv6 that
+overrides either method must add the argument to keep overriding it; see the
+migration guide.
