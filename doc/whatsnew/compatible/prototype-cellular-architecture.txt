@@ -1,0 +1,5 @@
+A prototype of a cellular network on the radio medium
+
+The new package inet.prototype.cellular is a dummy LTE/NR cellular model for INET developers. It shows how a cellular system with carrier aggregation maps onto the radio medium: one radio per component carrier under one MAC entity, one transmission per allocation, a power spectral density with one cell per OFDM symbol and PRB of the carrier, panel antennas that the radios of a band share, and delivery to the intended receiver only. The physics, the scheduling and the error model are trivial on purpose; the structure of the transmissions and of the events is realistic, so the radio medium can be measured and optimized against it.
+
+The example networks and a benchmark script are in examples/prototype/cellular. The README there lists the places where the prototype works around a missing feature of the radio medium.
