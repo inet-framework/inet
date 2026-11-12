@@ -1,0 +1,125 @@
+%description:
+The cellular architecture prototype (inet.prototype.cellular) with carrier
+aggregation: one base station sector and two UEs, each with a TDD carrier
+(3.5 GHz, 30 kHz, slot pattern DU) and an FDD carrier (2.14 GHz downlink,
+1.95 GHz uplink, 15 kHz). A listener prints every transport block that a MAC
+receives. The output shows that:
+
+- each UE receives only its own downlink transport blocks, on both carriers;
+- the sector receives the uplink transport blocks of both UEs in the same
+  slot, which needs concurrent receptions;
+- the first transport blocks use MCS 0, and the later ones the MCS of the SNIR
+  report of the link.
+
+%file: test.cc
+#include <iomanip>
+#include <sstream>
+
+#include "inet/common/packet/Packet.h"
+#include "inet/prototype/cellular/TransportBlockHeader_m.h"
+
+namespace CellularPrototype_1 {
+
+using namespace inet;
+using namespace inet::cellular;
+
+// Prints the transport blocks that the MACs of the network receive, at the end of the run, so
+// that the log does not interleave with them.
+class TransportBlockPrinter : public cSimpleModule, public cListener
+{
+  protected:
+    std::stringstream stream;
+
+  protected:
+    virtual void finish() override
+    {
+        std::cout << stream.str();
+    }
+
+    virtual void initialize() override
+    {
+        getSimulation()->getSystemModule()->subscribe("transportBlockReceived", this);
+        getSimulation()->getSystemModule()->subscribe("transportBlockFailed", this);
+    }
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object, cObject *details) override
+    {
+        auto packet = check_and_cast<Packet *>(object);
+        const auto& header = packet->peekAtFront<TransportBlockHeader>(b(-1), Chunk::PF_ALLOW_INCORRECT);
+        auto receiver = check_and_cast<cModule *>(source)->getParentModule();
+        stream << std::fixed << std::setprecision(6) << simTime().dbl() << ": " << receiver->getFullPath()
+                  << " receives " << packet->getName() << " of ue " << header->getUeIndex()
+                  << " on carrier " << header->getCarrierIndex() << ", mcs " << header->getMcs()
+                  << (packet->hasBitError() ? ", incorrect" : ", correct") << std::endl;
+    }
+};
+
+Define_Module(TransportBlockPrinter);
+
+} // namespace CellularPrototype_1
+
+%file: test.ned
+
+import inet.prototype.cellular.CellularRadioMedium;
+import inet.prototype.cellular.Gnb;
+import inet.prototype.cellular.IdealControlChannel;
+import inet.prototype.cellular.Ue;
+
+simple TransportBlockPrinter
+{
+    parameters:
+        @class(TransportBlockPrinter);
+}
+
+network Test
+{
+    submodules:
+        radioMedium: CellularRadioMedium;
+        controlChannel: IdealControlChannel;
+        gnb: Gnb;
+        ue[2]: Ue;
+        printer: TransportBlockPrinter;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+record-vector-results = false
+network = Test
+sim-time-limit = 1.99ms
+ned-path = .;../../../../src
+
+**.radioMedium.pathLoss.alpha = 3
+*.gnb.numSectors = 1
+*.gnb.numCarriers = 2
+*.ue[*].numCarriers = 2
+*.gnb.sector[0].mac.tddPattern = "DU"
+*.gnb.sector[0].mac.scheduledUesPerSlot = 2
+*.gnb.sector[0].panel[0].numBeams = 4
+
+**.mobility.initFromDisplayString = false
+*.gnb.mobility.initialX = 0m
+*.gnb.mobility.initialY = 0m
+*.gnb.mobility.initialZ = 25m
+*.ue[*].mobility.initialX = 100m
+*.ue[0].mobility.initialY = -20m
+*.ue[1].mobility.initialY = 20m
+*.ue[*].mobility.initialZ = 1.5m
+
+**.radio[0].downlinkFrequency = 3.5GHz
+**.radio[0].subcarrierSpacing = 30kHz
+**.radio[0].numPrbs = 24
+**.radio[1].downlinkFrequency = 2.14GHz
+**.radio[1].uplinkFrequency = 1.95GHz
+**.radio[1].subcarrierSpacing = 15kHz
+**.radio[1].numPrbs = 12
+
+%contains: stdout
+0.000500: Test.ue[0] receives DL-TB of ue 0 on carrier 0, mcs 0, correct
+0.000500: Test.ue[1] receives DL-TB of ue 1 on carrier 0, mcs 0, correct
+0.001000: Test.gnb.sector[0] receives UL-TB of ue 0 on carrier 0, mcs 0, correct
+0.001000: Test.gnb.sector[0] receives UL-TB of ue 1 on carrier 0, mcs 0, correct
+0.001000: Test.ue[0] receives DL-TB of ue 0 on carrier 1, mcs 0, correct
+0.001000: Test.ue[1] receives DL-TB of ue 1 on carrier 1, mcs 0, correct
+0.001500: Test.ue[0] receives DL-TB of ue 0 on carrier 0, mcs 27, correct
+0.001500: Test.ue[1] receives DL-TB of ue 1 on carrier 0, mcs 27, correct
