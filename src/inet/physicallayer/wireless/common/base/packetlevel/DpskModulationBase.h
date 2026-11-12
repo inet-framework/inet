@@ -26,6 +26,7 @@ class INET_API DpskModulationBase : public IModulation
     double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { throw cRuntimeError("Unimplemented!"); }
 
     unsigned int getConstellationSize() const { return constellationSize; }
+    virtual unsigned int getBitsPerSymbol() const override;
 };
 
 } // namespace physicallayer

@@ -31,6 +31,9 @@ class INET_API Ieee80211OfdmModulation : public IModulation
     virtual double calculateBER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateBER(snir, bandwidth, bitrate); }
     virtual double calculateSER(double snir, Hz bandwidth, bps bitrate) const override { return subcarrierModulation->calculateSER(snir, bandwidth, bitrate); }
 
+    // the bits of a symbol of the subcarrier modulation (not of an OFDM symbol)
+    virtual unsigned int getBitsPerSymbol() const override { return subcarrierModulation->getBitsPerSymbol(); }
+
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;
 };
 

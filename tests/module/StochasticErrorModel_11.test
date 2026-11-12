@@ -1,0 +1,19 @@
+%description:
+StochasticErrorModel: symbolErrorRate only, modulation without bits per symbol.
+
+symbolErrorRate = 1e-4 with 802.11b at 11 Mbit/s, whose CCK data modulation has no number of bits per symbol. The packet error rate cannot be computed from the symbol error rate, so that the run stops at the first frame with an error that names the modulation.
+Two ad-hoc IEEE 802.11 hosts, 20 m apart, multicast frames.
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+*.*.wlan[*].opMode = "b"
+*.*.wlan[*].bitrate = 11Mbps
+**.radio.receiver.errorModel.typename = "StochasticErrorModel"
+**.radio.receiver.errorModel.symbolErrorRate = 0.0001
+include ../../lib/stochastic-errormodel-80211.ini
+
+%exitcode: 1
+%postrun-command: grep -h '<!>' test.out test.err > errors.out || true
+%contains: errors.out
+The symbolErrorRate parameter is set, but the modulation of the DATA part of the inet::physicallayer::Ieee80211Transmission (modulation not specified) has no number of bits per symbol

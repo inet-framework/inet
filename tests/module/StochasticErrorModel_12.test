@@ -1,0 +1,17 @@
+%description:
+StochasticErrorModel: parameter out of range.
+
+packetErrorRate = 1.5 is not a probability, which the error model rejects when it is initialized.
+Two ad-hoc IEEE 802.11 hosts, 20 m apart, multicast frames.
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+**.radio.receiver.errorModel.typename = "StochasticErrorModel"
+**.radio.receiver.errorModel.packetErrorRate = 1.5
+include ../../lib/stochastic-errormodel-80211.ini
+
+%exitcode: 1
+%postrun-command: grep -h '<!>' test.out test.err > errors.out || true
+%contains: errors.out
+Parameter 'packetErrorRate' must be a probability in the range [0, 1] or NaN, got 1.5
