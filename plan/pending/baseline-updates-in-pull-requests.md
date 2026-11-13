@@ -1,6 +1,6 @@
 # Baseline updates in pull requests
 
-**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. On 2026-11-13 the user also settled D12 and approved a copy of the CI job for the attribution run. On 2026-11-13 the user approved the rest of the steps ("Ok, continue"). C7 to C9 can land only after the catch-up makes `master` green, so they are on the stacked branch `topic/baseline-tests-on-pull-requests`.
+**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. On 2026-11-13 the user also settled D12 and approved a copy of the CI job for the attribution run. On 2026-11-13 the user approved the rest of the steps ("Ok, continue"). C7 to C9 can land only after the catch-up makes `master` green, so they are on the stacked branch `topic/baseline-tests-on-pull-requests`. On 2026-11-13 the user asked to land the first branch and to delay the deploy keys; the first branch is on `master`, and the stacked branch waits for a green `master`.
 
 ## Goal
 
@@ -264,7 +264,8 @@ All branches have the name `topic/baseline-updates-in-pull-requests`. All branch
 - [x] C10: INET `67731d2e46`, 2026-11-13.
 - [x] Fix: INET `55f297abc5`, the chart images when git cannot read the work tree, 2026-11-13.
 - [x] C7: INET `ff1d003a01`, C8: `5487bdb77f`, C9: `e8f3b14038`, on the stacked branch `topic/baseline-tests-on-pull-requests`, 2026-11-13.
-- [ ] Landing, in the order of the section below.
+- [x] Landing steps 1 to 5, 2026-11-13: opp_repl `155ac50` on `main`, `github_ci` and `opp_ci`; opp_ci `09bb0b0` on `main`, worker restarted; `statistics` `f76ce96` and `media` `6e835bc` on `master`; INET `master` at `55f297abc5`.
+- [ ] Landing steps 6 and 7.
 - [ ] C11, after the landing.
 
 ## Results of the implementation
@@ -346,6 +347,14 @@ The runs are in the job copy, with the tool of O2a. The logs are in `evidence/at
 5. After the INET push, `check-baseline-masters.yml` moves the two baseline masters to the README commits. Without the deploy keys (D9), a maintainer runs the two commands of its log.
 6. After the catch-up makes `master` green: the stacked branch `topic/baseline-tests-on-pull-requests`, then the sweep of C9, then the required checks (D11).
 7. C11: record the landing, and move the plan to `plan/done`.
+
+### The landing of the first branch, 2026-11-13
+
+- **No remote branch had moved** since the start of the work, so no rebase was necessary. The 95 opp_repl self tests passed on `155ac50` before its push.
+- **opp_ci.** The worker `opp_ci-worker@levy` had no running job, and it restarted with a new environment of `uv`.
+- **The baseline masters moved by hand**, because the user delayed the deploy keys (D9). The README commits went to the two masters by a fast-forward before the INET push. Thus INET `master` pinned commits that were already on the masters.
+- **GitHub, INET `55f297abc5`:** `Check: baseline masters` passes: both masters are at their pins. The statistical run checks out `statistics` at `f76ce96` and the chart run checks out `media` at `6e835bc`, as their logs show. Both give the summary of the run of `7adc565ce9`: 81 unexpected statistical results (72 FAIL, 9 ERROR) and 19 failed charts, and the lists of these tests are equal. The new pins change no result.
+- **The session of the catch-up** got a message with these facts: its landing (D5 of that plan) must set the two pins, and its chain must descend from the README commits for a fast-forward of the masters.
 
 ## Decisions
 
