@@ -542,6 +542,17 @@ class ResultRuleTest(GateTestCase):
 
 
 class BaselineSummaryTest(unittest.TestCase):
+    def test_the_chart_images_of_a_work_tree_that_git_cannot_read(self):
+        # a worktree in a container has a .git file that names a repository outside the container
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / ".git").write_text("gitdir: /nonexistent/repository/.git/worktrees/inet\n")
+            (root / "showcases/a/doc").mkdir(parents=True)
+            (root / "showcases/a/A.anf").write_text('<property name="image_export_filename" value="chart"/>\n')
+            os.symlink("../../../media/showcases/a/doc", root / "showcases/a/doc/media")
+            entry = {"folder": "media", "read_folder": "doc/media"}
+            self.assertEqual(baseline_summary.chart_images_in_work_tree(entry, cwd=folder), {"showcases/a/doc/chart.png"})
+
     def test_read_scalars_reads_a_quoted_name_and_the_run_attributes(self):
         rows = baseline_summary.read_scalars(sca())
         self.assertEqual(rows[("Net.host", "packets sent")], 10.0)

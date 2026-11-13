@@ -174,7 +174,15 @@ def chart_image_folders_at(commit, entry, cwd=None):
 def chart_images_in_work_tree(entry, cwd=None):
     """The chart images of the analysis files of the INET work tree, with the files that are not committed."""
     root = cwd or "."
-    paths = subprocess.run(["git", "ls-files", "-co", "--exclude-standard", "*.anf"], cwd=cwd, capture_output=True, text=True).stdout.split("\n")
+    out = subprocess.run(["git", "ls-files", "-co", "--exclude-standard", "*.anf"], cwd=cwd, capture_output=True, text=True)
+    if out.returncode == 0:
+        paths = out.stdout.split("\n")
+    else:
+        # git cannot read the work tree, for example a worktree in a container that has only its files
+        paths = []
+        for folder, folders, names in os.walk(root):
+            folders[:] = [name for name in folders if name not in (".git", "out", entry.get("folder") or ".")]
+            paths += [os.path.relpath(os.path.join(folder, name), root) for name in names if name.endswith(".anf")]
     analysis_files = {}
     for path in paths:
         if path and os.path.exists(os.path.join(root, path)):
