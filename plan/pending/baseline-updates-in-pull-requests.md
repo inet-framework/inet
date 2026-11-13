@@ -1,6 +1,6 @@
 # Baseline updates in pull requests
 
-**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. Each later step needs a new approval.
+**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. C7 to C11, S1 and S2 need a new approval. D12 is new and open.
 
 ## Goal
 
@@ -94,16 +94,22 @@ physicallayer: update the statistics of the wireless simulations with errors
 how much, and why the INET change causes that move.>
 
 Moved results:
-  tests: 44 (showcases/wireless 30, examples/wireless 14)
-  rows: 1203 changed, 12 added, 0 removed
-  - packetErrorRate:* in **.radio.receiver: 620 rows, -3.1 % to +0.4 %
+  tests: 141 changed, 0 added, 0 removed
+  rows of the changed tests: 138836 changed, 9 added, 9 removed
+  folders: examples/wireless 54, showcases/wireless 25, ...
+  groups of the changed tests, by the names of their moved rows:
+  - 95 test(s): interference cache hit, reception cache hit, ...
+  - 44 test(s): more than 12 names each
+  - 1 test(s): reception decision cache hit
+  names of the moved rows:
+  - queueLength:timeavg: 908 changed, -100 % to +3.34e+04 %
   - ...
 
 INET-Subject: physicallayer: change: decide the header and the data of a reception separately
-Attribution: reverse attribution/part-error-decisions.patch
+Attribution: commit
 ```
 
-- **Summary.** A tool makes the `Moved results:` block from the difference of the two baseline commits. The gate computes the block again and compares. Thus the summary is always true. For `media`, the block lists each changed, added and removed chart.
+- **Summary.** A tool makes the `Moved results:` block from the difference of the two baseline commits. The gate computes the block again and compares. Thus the summary is always true. The block puts the tests whose moved rows have the same names into one group, because tests that move in different ways usually need different explanations (a result of the pilot). For `media`, the block lists each changed, added and removed chart.
 - **Analysis.** Prose by the author. Each group of the summary needs its explanation (`TR-BASELINE-PROVENANCE`). For a chart, the text says how the picture changes and why.
 - **`INET-Subject:`** is the exact subject of the cause commit. A SHA is not possible, because the SHA changes when the pull request lands (F14). A re-record for a cause that is already on `master` uses `INET-Commit: <sha>`, as the catch-up plan does.
 - **`Attribution:`** has one of the values of section 3.
@@ -212,10 +218,10 @@ Each entry is one future commit. INET work is on the branch `topic/baseline-upda
 | O3 | opp_ci | executor: fetch the pinned baseline commit by its SHA | none | Today the code runs `git fetch origin`, which does not get a commit that only a pull request holds. Check with a pin on a pull request head. |
 | C1 | INET | plan: add: baseline updates in pull requests | none | — |
 | C2 | INET | build: change: pin the commits of the statistics and media repositories | O1 | `inet.opp` and the two workflows. The push run on `master` prints the two pins and gives the failures of the run before it. |
-| C3 | INET | doc: change: rules for a baseline in another repository | none | The three rule documents of section 6. `check-seals.sh` and `check-links.sh` pass. |
+| C3 | INET | doc: add: rules for a baseline in another repository | C5a | The three rule documents of section 6. `check-seals.sh` and `check-links.sh` pass. |
 | C4 | INET | doc: change: procedure for a statistical or chart baseline | C3 | The guides of section 6. `check-links.sh` passes. |
-| C5 | INET | enforcement: add: gate for the baseline pins and records | C2, C3 | `check-baselines.sh`, `check_baselines.py`, `baseline_summary.py`, `test_check_baselines.py`; the `chart` obligation and the pin in `check-classification.sh`; the gate in `check_pull_request.py`. Unit tests with small repositories: one case that passes and one that fails for each of B1 to B5. |
-| C6 | INET | enforcement: add: write the new baseline pins after a rebase | C5 | `baseline_pins.py rebase`, with a unit test on a series of three commits and two pin moves. |
+| C5 | INET | C5a: doc: add: gate for the baseline pins and records. C5b: doc: change: the classification gate knows the chart obligation and a pin that moves. C5c: doc: change: the pull-request audit runs the baseline gate | C2; C5b and C5c after C3 | `check-baselines.sh`, `check_baselines.py`, `baseline_summary.py`, `baseline_pins.py`, `test_check_baselines.py`; the `chart` obligation and the pin in `check-classification.sh`; the gate in `check_pull_request.py`. Unit tests with small repositories: one case that passes and one that fails for each of B1 to B5. |
+| C6 | INET | doc: add: write the new baseline pins of a series after a rebase | C5a | `baseline_pins.py rebase`, with unit tests on small repositories. |
 | C7 | INET | ci: add: statistical and chart tests on pull requests | C2, green `master` | `pull_request` trigger, the path job, the candidate artifact, the job summary. Check on the pilot pull request. |
 | C8 | INET | ci: add: check of the attribution of a baseline change | O2, C7 | New workflow for V2. Check on the pilot: a correct reduction passes, and a changed reduction fails. |
 | C9 | INET | ci: add: sweep of the baseline tests over the open pull requests | C7 | Start it for three pull request numbers, then for `open`. |
@@ -241,7 +247,15 @@ All branches have the name `topic/baseline-updates-in-pull-requests`. All branch
 - [x] O3: opp_ci `09bb0b0`, 2026-11-12.
 - [x] C1: INET `b2f26dc036`, 2026-11-12.
 - [x] C2: INET `878a1f28a7`, 2026-11-12.
-- [ ] O2, C3 to C11, S1 and S2.
+- [x] C5a: INET `01035cb42b`, 2026-11-13.
+- [x] C3: INET `9788533835`, 2026-11-13.
+- [x] C5b: INET `f79688dc83`, 2026-11-13.
+- [x] C5c: INET `0ecef6c178`, 2026-11-13.
+- [x] C6: INET `f97ff1f7ed`, 2026-11-13.
+- [x] C4: INET `59a8ebff3f`, 2026-11-13.
+- [x] Pilot, part 1: the gate on a copy of #1452, 2026-11-13. The branches `topic/baseline-pilot-pr1452` are in INET, `statistics` and `media`.
+- [ ] O2, and the pilot, part 2: the run that proves the attribution.
+- [ ] C7 to C11, S1 and S2.
 
 ## Results of the implementation
 
@@ -250,6 +264,28 @@ All branches have the name `topic/baseline-updates-in-pull-requests`. All branch
 - **C2.** The subject has the area `build`, as the earlier workflow commits have. Check with the real project: the command cloned `media` from GitHub and checked out the pin in 19 s. On 2026-11-12 the two pins are equal to the heads of the two baseline masters. The series gates pass for C1 and C2.
 - **Not verified:** a run of the two changed workflows on GitHub. That run is possible only after the push.
 - **Order for the push.** The INET workflows install `opp_repl@github_ci`. Thus O1 must be on `github_ci` before C2 is on INET `master`, or the two workflows stop at an unknown command. The three opp_repl branches (`main`, `github_ci`, `opp_ci`) stay at the same commit. The opp_ci service gets O3 with a push and a restart.
+
+### The second group of steps, 2026-11-13
+
+- **Order and names.** The gate commit C5a comes before the rules C3, because the rule documents link to the gate files, and a link must not point to a file of a later commit. Two small commits then turn the gate on: C5b for the classification gate, C5c for the pull-request audit. The subjects have the area `doc`, as all files of `doc/project/enforcement` have.
+- **C5.** Three tools: `baseline_pins.py` reads the pins of a commit with the `ast` module and never runs `inet.opp`; `baseline_summary.py` reads `.sca` files and computes the block; `check_baselines.py` is the gate. The gate takes the repository of a baseline from the base of the range, so a series cannot send the gate to another repository. With `--baseline-repository` it reads a local clone, and it says that such a run does not prove B3. The gate prints the record of each baseline commit for the reviewer.
+- **C3.** Three new rules: `TR-BASELINE-PIN`, `TR-BASELINE-PARENT`, `TR-BASELINE-ATTRIBUTION`. The rule for the source of the candidates (D10) is a paragraph of `TR-BASELINE-DELIBERATE`. The index of the seal list counts the new rules.
+- **C6.** The command makes each commit again with git objects only. It replaces the pins of the parent and of the commit by the pins of the new head before the merge; thus a pin gives no conflict. A subagent wrote the tests and found one defect: each new message got one more empty line. The command now copies the raw message.
+- **Checks.** 291 unit tests of the enforcement folder pass; 97 of them are new. A deliberate break of the gate in five places and of the rebase command in four places made the tests fail each time. The audit `check-pull-request.sh --base master` passes for the 10 commits of the branch, with 4 notes. `check-seals.sh` passes. `check-links.sh` finds no broken link in the rule, guide and enforcement documents.
+- **Not changed:** `design/test-anatomy.md` does not have the chart test as a category. This plan did not add it.
+
+### The pilot, part 1
+
+The pilot is a copy of #1452 on the branch `topic/baseline-pilot-pr1452`: this branch, the five commits of #1452, and the two pins in the cause commit. The baseline commits have the values of the old topic branches and a new message in the record format. All pilot branches are local.
+
+- **The form `commit` fits #1452.** The cause commit changes 79 source lines in 2 files, so the gate gives a note and no failure. The two commits before it prepare (155 and 120 source lines) and move no pin. This is the series of `PR-SPLIT-PREPARE`.
+- **D6 needed a squash.** #1452 had two `statistics` commits for one cause commit. The pilot has one, with two groups in its analysis.
+- **The first block hid a group.** The 490 rows of the cache counters were not in the 20 most frequent names of 138,836 rows. The block now has the groups of tests, and the gate gives a note when the tests move in more than one way.
+- **The groups found two faults of the records.** My first pilot text said that `showcases/wireless/throughput` does not move; the group of one test shows that one of its rows moves. And `examples/communicationcache` `ReferenceCommunicationCache` computes 27 % more receptions and 20 % more interferences; no message of #1452 explains that move. This is an open point of #1452, not of this plan.
+- **The charts have a move that the old message did not name.** In `showcases/wireless/coexistence`, the bar "Wifi + WPAN coexistence" goes down by 4.7 % for Wifi and by 6.8 % for WPAN. The release note of the cause commit gives the reason: the showcase uses the "mean" SNIR mode. The old message of the `media` commit said only that the random trajectory changes. The rule to say how a picture changes found this.
+- **A changed baseline message moves the pin.** The pilot needed a new series two times by hand, and one of them went wrong. With `baseline_pins.py rebase`, one command moved the five commits to a new base and wrote the new pin. The result is equal to the old series apart from the pin line.
+- **Results of the gate.** With the local clones, the gate passes the pilot in 3 s, with three notes. Against GitHub, the gate fails the pilot in 5 s, as it must: the two baseline commits are only local.
+- **Not done: part 2.** No run proved the attribution. That run needs the command of O2 and a copy of the CI job with builds of two INET commits.
 
 ## Decisions
 
@@ -265,6 +301,7 @@ All branches have the name `topic/baseline-updates-in-pull-requests`. All branch
 | D8 | Open pull requests of other authors | No exception for the date. The sweep posts a commit status. A comment on each red pull request, with a link to the guide, needs the approval of the user before it is sent. | open |
 | D9 | The move of the baseline masters | A job on each push to INET `master`, with a deploy key for each baseline repository. The user must make the keys. Alternative: the maintainer pushes by hand, and the job only checks. | open |
 | D10 | The source of the candidates | The artifact of the CI run, or the local copy of the CI job. Values from a developer machine are not permitted. | settled, user 2026-11-12 |
+| D12 | A commit of a baseline repository that moves no test result | Facts: `media` holds 1,074 files, and the chart test has 229 charts. The other files are documentation media: network images and 179 videos. By their subjects, 7 of the last 14 commits on `media` `master` change documentation media or a repository setting. `statistics` gets a README in step S1. The gate of C5 reads each file of `media` as a chart, and a pin moves only to a direct child with a record. Thus a documentation image needs a record and an attribution today. Proposal: a pin can move over commits that change no result file; at most one commit of the step changes result files, and only that commit needs the record. A result file is a `.sca` file, or an image that a chart of an analysis file in the INET tree exports; the gate reads the chart names from the `.anf` files of the cause commit. Then the `media` pin also names the documentation media that an INET commit goes with. Alternative: keep the gate as it is, and give each `media` commit a record; a new image has the form `first-record`. | open |
 | D11 | Required checks on GitHub | After the sweep: the two tests, the attribution check and `Check: pull request` become required for a merge. The user sets this in the repository. | open |
 
 ## Limits
