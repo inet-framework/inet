@@ -186,6 +186,15 @@ or samples depending on the lowest simulated physical domain where the
 real decoding starts. The error model is optional (if omitted, all
 receptions are considered successful).
 
+A flat receiver with an error model decides the header and the data of a
+reception separately. A part fails if its SNIR is not above the SNIR threshold
+of the receiver, or else if one random draw against its error rate fails. Both
+use the SNIR of the time of that part, so interference that starts during the
+data does not change the decision of the header. The preamble needs only the
+SNIR threshold, and the data needs a successful header. At a constant SNIR, the
+probability of a successful reception is the same as with one decision of the
+whole signal.
+
 The following list provides some examples:
 
 -  :ned:`StochasticErrorModel`: simplistic error model with constant

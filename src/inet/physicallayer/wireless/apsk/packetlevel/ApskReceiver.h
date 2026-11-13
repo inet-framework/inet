@@ -19,6 +19,7 @@ class INET_API ApskReceiver : public FlatReceiverBase
   protected:
     virtual bool computeIsReceptionPossible(const IListening *listening, const ITransmission *transmission) const override;
     virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception, IRadioSignal::SignalPart part) const override;
+    virtual std::optional<PartRange> computePartRange(const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
 
   public:
     virtual std::ostream& printToStream(std::ostream& stream, int level, int evFlags = 0) const override;

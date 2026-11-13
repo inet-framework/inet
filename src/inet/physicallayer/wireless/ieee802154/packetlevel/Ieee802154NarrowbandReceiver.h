@@ -19,6 +19,9 @@ class INET_API Ieee802154NarrowbandReceiver : public FlatReceiverBase
   protected:
     W minInterferencePower;
 
+  protected:
+    virtual std::optional<PartRange> computePartRange(const ITransmission *transmission, IRadioSignal::SignalPart part) const override;
+
   public:
     Ieee802154NarrowbandReceiver();
 

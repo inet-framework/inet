@@ -50,6 +50,33 @@ double ErrorModelBase::getScalarSnir(const ISnir *snir) const
     return scalarSnir * snirOffset;
 }
 
+double ErrorModelBase::getScalarSnir(const ISnir *snir, simtime_t startTime, simtime_t endTime) const
+{
+    double scalarSnir;
+    if (snirMode == SnirMode::SM_MIN)
+        scalarSnir = snir->getMin(startTime, endTime);
+    else if (snirMode == SnirMode::SM_MEAN)
+        scalarSnir = snir->getMean(startTime, endTime);
+    else
+        throw cRuntimeError("Unknown SNIR mode");
+    return scalarSnir * snirOffset;
+}
+
+void ErrorModelBase::checkRegionPart(IRadioSignal::SignalPart part) const
+{
+    if (part != IRadioSignal::SIGNAL_PART_HEADER && part != IRadioSignal::SIGNAL_PART_DATA)
+        throw cRuntimeError("Only the header part and the data part have regions, not the %s part", IRadioSignal::getSignalPartName(part));
+}
+
+double ErrorModelBase::computePacketErrorRate(const ISnir *snir, IRadioSignal::SignalPart part, b length, simtime_t startTime, simtime_t endTime) const
+{
+    Enter_Method("computePacketErrorRate");
+    // the bits of a region have independent errors with the bit error rate of the region; this form
+    // gives exactly 0 for a very small bit error rate, as the rates of the whole signal do
+    double bitErrorRate = computeBitErrorRate(snir, part, length, startTime, endTime);
+    return 1.0 - std::pow(1.0 - bitErrorRate, length.get<b>());
+}
+
 bool ErrorModelBase::hasProbabilisticError(b length, double ber) const
 {
     ASSERT(0.0 < ber && ber <= 1.0);
