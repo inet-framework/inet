@@ -1,6 +1,6 @@
 # Baseline updates in pull requests
 
-**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. C7 to C11, S1 and S2 need a new approval. D12 is new and open.
+**Status:** in progress. Written 2026-11-12 from `master` at `7adc565ce9` (equal to `origin/master`). The user settled D1 to D7 and D10 on 2026-11-12. D8, D9 and D11 are open; their steps come later. Approval: on 2026-11-12 the user approved the start of the steps O1, O3, C1 and C2. On 2026-11-13 the user approved the steps that do not depend on the catch-up: C3 to C6, O2 and the pilot. On 2026-11-13 the user also settled D12 and approved a copy of the CI job for the attribution run. C7 to C11, S1 and S2 need a new approval.
 
 ## Goal
 
@@ -214,7 +214,7 @@ Each entry is one future commit. INET work is on the branch `topic/baseline-upda
 | Id | Repository | Proposed subject | Depends on | Verification |
 | --- | --- | --- | --- | --- |
 | O1 | opp_repl | test: check out the pinned commit of a baseline repository | none | New command: clone or fetch, check out `ref` by SHA, print the commit. The two tests log the baseline commit and give a warning for a checkout that is not at the pin. Self-tests with two local repositories. |
-| O2 | opp_repl | test: check the attribution of a baseline change | O1 | New command for V2: build the commits in worktrees, run the moved tests, apply the reduction. Check with the pilot. |
+| O2 | INET | O2a: doc: add: the attribution run of a baseline change. O2b: doc: change: the rules and guides name the attribution run | C5a | `check-baseline-attribution.sh` and `baseline_attribution.py`, with unit tests on small repositories and fake commands; the pilot runs in a copy of the CI job. |
 | O3 | opp_ci | executor: fetch the pinned baseline commit by its SHA | none | Today the code runs `git fetch origin`, which does not get a commit that only a pull request holds. Check with a pin on a pull request head. |
 | C1 | INET | plan: add: baseline updates in pull requests | none | — |
 | C2 | INET | build: change: pin the commits of the statistics and media repositories | O1 | `inet.opp` and the two workflows. The push run on `master` prints the two pins and gives the failures of the run before it. |
@@ -254,7 +254,11 @@ All branches have the name `topic/baseline-updates-in-pull-requests`. All branch
 - [x] C6: INET `f97ff1f7ed`, 2026-11-13.
 - [x] C4: INET `59a8ebff3f`, 2026-11-13.
 - [x] Pilot, part 1: the gate on a copy of #1452, 2026-11-13. The branches `topic/baseline-pilot-pr1452` are in INET, `statistics` and `media`.
-- [ ] O2, and the pilot, part 2: the run that proves the attribution.
+- [x] O1b: opp_repl `155ac50`, 2026-11-13.
+- [x] D12: INET `0a6d0310bd`, 2026-11-13.
+- [x] O2a: INET `4019646d74`, 2026-11-13.
+- [x] O2b: INET `09a147878c`, 2026-11-13.
+- [x] Pilot, part 2: the attribution runs, 2026-11-13.
 - [ ] C7 to C11, S1 and S2.
 
 ## Results of the implementation
@@ -285,7 +289,30 @@ The pilot is a copy of #1452 on the branch `topic/baseline-pilot-pr1452`: this b
 - **The charts have a move that the old message did not name.** In `showcases/wireless/coexistence`, the bar "Wifi + WPAN coexistence" goes down by 4.7 % for Wifi and by 6.8 % for WPAN. The release note of the cause commit gives the reason: the showcase uses the "mean" SNIR mode. The old message of the `media` commit said only that the random trajectory changes. The rule to say how a picture changes found this.
 - **A changed baseline message moves the pin.** The pilot needed a new series two times by hand, and one of them went wrong. With `baseline_pins.py rebase`, one command moved the five commits to a new base and wrote the new pin. The result is equal to the old series apart from the pin line.
 - **Results of the gate.** With the local clones, the gate passes the pilot in 3 s, with three notes. Against GitHub, the gate fails the pilot in 5 s, as it must: the two baseline commits are only local.
-- **Not done: part 2.** No run proved the attribution. That run needs the command of O2 and a copy of the CI job with builds of two INET commits.
+- **Part 2 is below.**
+
+### The third group of steps, 2026-11-13
+
+- **D12.** Of the 1,074 files of `media`, 219 are chart images: the charts of the analysis files export them, and each one exists in `media`. `baseline_summary.py` finds them from the `.anf` files and the `doc/media` links of an INET commit. The gate uses the charts of the cause commit and of its parent, so a chart that the commit removes is a result too. A pin moves forward over one or more commits with no merge, and at most one of them changes results. The check of `CR-OBL-INERT` for a pin moved from the classification gate to the baseline gate, because only the baseline gate knows if a pin passes a result. The rebase command gives a pin move as many new commits as it had before.
+- **O2 is in INET, not in opp_repl.** The run needs the record format, the result filter and the code of the gate. opp_repl gives only the commands that the run calls. The build, checkout and test commands are options, so the same tool runs in CI and in a copy of the CI job.
+- **O1b.** A container saw a baseline checkout that git could not read (a worktree whose repository is outside the container). The baseline report of the tests stopped the test with an error. It now gives a warning, and the test runs.
+- **Tests.** 356 unit tests of the enforcement folder pass. Subagents wrote the new tests; a deliberate break of the new code in ten places made the tests fail each time.
+- **The job copy** is `~/workspace/ghci-baseline-updates-in-pull-requests`. It takes the built OMNeT++ (`66ab32fb91`), the Python environment and the compiler cache of `ghci-statistical`, and it has its own clones of `statistics` and `media`. The container gets 12 cores, and opp_repl comes from its worktree on this branch. An incremental INET build needs 6 to 45 s.
+
+### The pilot, part 2
+
+The runs are in the job copy, with the tool of O2a. The logs are in `evidence/attribution-*` of the job copy.
+
+| Variant | Attribution | Runs | Result | Time |
+| --- | --- | --- | --- | --- |
+| `topic/baseline-pilot-pr1452` | `commit` | parent, commit | PASS: 141 statistical tests and 11 charts in each run | 142 s |
+| `topic/baseline-pilot-pr1452-reverse` | `reverse`, the complete revert of the source change (79 lines) | parent, commit, reverse reduction | PASS in the three runs | 265 s |
+| `topic/baseline-pilot-pr1452-false` | `reverse`, a patch that only adds a comment line | parent, commit, reverse reduction | FAIL in the reduction run: 141 statistical tests and 6 of 11 charts fail | 285 s |
+
+- **The run finds what the gate cannot see.** The gate passed the false variant: the patch applies and is small. Only the run shows that the patch does not give the old results.
+- **The tests of a run are counted.** A cross-check by hand gave the same counts: at the cause commit with the old pins, the 141 statistical tests and 6 charts fail; with the new pins they pass.
+- **Limit.** The reverse reduction of the pilot is the complete revert, so it proves the mechanism and not a small cause. #1452 has the form `commit` (79 source lines, a note), and that form needs no reduction.
+- **Charts.** The chart test runs all the charts of a folder, so a chart run can select more charts than the baseline commit moves. The tool accepts more charts, but not fewer. A failed chart leaves its `-new.png` and `-diff.png` in the `media` checkout; the next checkout is not stopped by them.
 
 ## Decisions
 
@@ -301,7 +328,7 @@ The pilot is a copy of #1452 on the branch `topic/baseline-pilot-pr1452`: this b
 | D8 | Open pull requests of other authors | No exception for the date. The sweep posts a commit status. A comment on each red pull request, with a link to the guide, needs the approval of the user before it is sent. | open |
 | D9 | The move of the baseline masters | A job on each push to INET `master`, with a deploy key for each baseline repository. The user must make the keys. Alternative: the maintainer pushes by hand, and the job only checks. | open |
 | D10 | The source of the candidates | The artifact of the CI run, or the local copy of the CI job. Values from a developer machine are not permitted. | settled, user 2026-11-12 |
-| D12 | A commit of a baseline repository that moves no test result | Facts: `media` holds 1,074 files, and the chart test has 229 charts. The other files are documentation media: network images and 179 videos. By their subjects, 7 of the last 14 commits on `media` `master` change documentation media or a repository setting. `statistics` gets a README in step S1. The gate of C5 reads each file of `media` as a chart, and a pin moves only to a direct child with a record. Thus a documentation image needs a record and an attribution today. Proposal: a pin can move over commits that change no result file; at most one commit of the step changes result files, and only that commit needs the record. A result file is a `.sca` file, or an image that a chart of an analysis file in the INET tree exports; the gate reads the chart names from the `.anf` files of the cause commit. Then the `media` pin also names the documentation media that an INET commit goes with. Alternative: keep the gate as it is, and give each `media` commit a record; a new image has the form `first-record`. | open |
+| D12 | A commit of a baseline repository that moves no test result | Facts: `media` holds 1,074 files, and the chart test has 229 charts. The other files are documentation media: network images and 179 videos. By their subjects, 7 of the last 14 commits on `media` `master` change documentation media or a repository setting. `statistics` gets a README in step S1. The gate of C5 reads each file of `media` as a chart, and a pin moves only to a direct child with a record. Thus a documentation image needs a record and an attribution today. Proposal: a pin can move over commits that change no result file; at most one commit of the step changes result files, and only that commit needs the record. A result file is a `.sca` file, or an image that a chart of an analysis file in the INET tree exports; the gate reads the chart names from the `.anf` files of the cause commit. Then the `media` pin also names the documentation media that an INET commit goes with. Alternative: keep the gate as it is, and give each `media` commit a record; a new image has the form `first-record`. | settled, user 2026-11-13 |
 | D11 | Required checks on GitHub | After the sweep: the two tests, the attribution check and `Check: pull request` become required for a merge. The user sets this in the repository. | open |
 
 ## Limits
