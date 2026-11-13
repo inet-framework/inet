@@ -4,11 +4,51 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
     # nothing
 
+permissions:
+  contents: read
+
 jobs:
+  changes:
+    name: Paths that can change a result
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.paths.outputs.relevant }}
+    steps:
+      - name: Select the paths of the pull request
+        id: paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # a push and a run by hand test the branch; a pull request runs the tests only when it
+          # changes a path that can change a statistical result, and else the check passes
+          if [ -z "$NUMBER" ]; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          paths='^(src|examples|showcases|tutorials|tests/networks|tests/validation|python|_scripts|bin)/'
+          paths+='|^(inet\.opp|\.oppfeatures|\.oppfeaturestate\.default|Makefile|setenv)$'
+          paths+='|^\.github/workflows/statistical-tests\.yml$|^doc/project/enforcement/baseline_'
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$NUMBER/files" --jq '.[].filename' > "$RUNNER_TEMP/files.txt"
+          if grep -qE "$paths" "$RUNNER_TEMP/files.txt"; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+            echo "No path of the pull request can change a statistical result; the tests do not run." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   statistical-tests:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     # runs-on: [self-hosted, linux]
     strategy:
@@ -24,6 +64,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           path: inet
+          persist-credentials: false
       - run: mkdir -p /home/runner/work/ccache
       - uses: actions/cache/restore@v5
         with:
@@ -64,11 +105,44 @@ jobs:
 
           echo "::group::Running statistical tests"
           # INET's inet.opp gives the baseline folder (statistics) and run 0 of each config
-          opp_run_statistical_tests --load $INET_ROOT -p inet -m $MODE
+          set +e
+          opp_run_statistical_tests --load $INET_ROOT -p inet -m $MODE --result-file "$RUNNER_TEMP/statistical.json"
+          status=$?
+          set -e
           echo "::endgroup::"
+
+          if [ "$status" -ne 0 ]; then
+            echo "::group::Making the candidate baseline files"
+            # the candidates are evidence for the author, not a baseline: see doc/project/guide/change-a-baseline.md
+            cd $INET_ROOT
+            python3 _scripts/github/baseline-candidates.py statistical "$RUNNER_TEMP/statistical.json" "$GITHUB_WORKSPACE/candidates" \
+              --update "opp_update_statistical_test_results --load $INET_ROOT -p inet -m $MODE" > "$RUNNER_TEMP/candidates.txt" 2>&1 || true
+            cat "$RUNNER_TEMP/candidates.txt"
+            echo "::endgroup::"
+            {
+              echo "## The statistical tests fail"
+              echo
+              echo "If the change moves these results on purpose, the artifact \`statistical-candidates\` holds the new files, recorded"
+              echo "in this CI environment, with \`moved-results.txt\` and \`environment.txt\`. Leave out the files of the tests"
+              echo "that fail at the parent commit too, commit the rest to the baseline repository with the record, and move"
+              echo "the pin in the commit that causes the change. The procedure is in doc/project/guide/change-a-baseline.md."
+              echo
+              echo '```'
+              sed -E 's/\x1b\[[0-9;]*m//g' "$RUNNER_TEMP/candidates.txt" | grep -E '^(error|warning)|need a candidate|candidate file' || true
+              cat "$GITHUB_WORKSPACE/candidates/moved-results.txt" 2>/dev/null || true
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          exit "$status"
       - uses: actions/upload-artifact@v7
         if: always() # even if the test failed, of course
         with:
           name: statistical-test-results
           path: ${{ github.workspace }}/inet/statistics/**/*.diff
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: statistical-candidates
+          path: ${{ github.workspace }}/candidates
           if-no-files-found: ignore
