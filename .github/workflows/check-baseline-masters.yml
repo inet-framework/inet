@@ -3,9 +3,10 @@ name: "Check: baseline masters"
 # The master branch of each baseline repository (statistics, media) is the commit that inet.opp of
 # INET master pins (TR-BASELINE-PIN in doc/project/rule/testing.md). After each push to master, this
 # workflow moves a baseline master that is behind its pin by a fast-forward, with the deploy key of
-# that repository in the secret STATISTICS_DEPLOY_KEY or MEDIA_DEPLOY_KEY. The push is never forced.
-# Without the key, or when a master is ahead of its pin or on another line, the job fails and its log
-# says what to do. A run by hand on another branch only checks.
+# that repository in the secret STATISTICS_DEPLOY_KEY or MEDIA_DEPLOY_KEY of the environment
+# baseline-masters. The push is never forced. Without the key, or when a master is ahead of its pin or
+# on another line, the job fails and its log says what to do. Only master can use the environment, so
+# GitHub rejects a run on another branch.
 
 on:
   push:
@@ -25,6 +26,7 @@ jobs:
   baseline-masters:
     name: Baseline masters at the pins
     runs-on: ubuntu-latest
+    environment: baseline-masters
     steps:
       - uses: actions/checkout@v6
         with:
