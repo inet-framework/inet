@@ -161,7 +161,7 @@ doc/project/enforcement/check-baseline-attribution.sh run origin/master..HEAD \
     --baseline-repository statistical=statistics --baseline-repository chart=media
 ```
 
-The tool runs the moved tests at the parent with the old pins, and at the cause commit with the new pins. For a reduction, it also runs them with the patch. A run that selects other tests than the moved tests fails. `run` checks out and builds each commit in the work tree, so use a checkout for this purpose only, such as the local copy of the CI job; its options `--build`, `--checkout`, `--statistical` and `--chart` take the commands of that copy. Put the result lines of the tool into the description of the pull request.
+The tool runs the moved tests at the parent with the old pins, and at the cause commit with the new pins. For a reduction, it also runs them with the patch. A run that selects other tests than the moved tests fails. `run` checks out and builds each commit in the work tree, so use a checkout for this purpose only, such as the local copy of the CI job; its options `--build`, `--checkout`, `--statistical` and `--chart` take the commands of that copy. The check `Check: baseline attribution` does the same runs for each pull request, and its job summary holds the result. A run in the copy of the CI job gives the result before the push.
 
 ### Push and link
 
