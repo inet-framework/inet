@@ -32,7 +32,7 @@ Keep the working directory, exact build and test commands, configuration, run an
 
 A dry run previews selection; it supplies no executed-test evidence. Report a zero-case selection as not run. Distinguish observed passes, declared expected failures, unexpected outcomes and setup errors even when the runner exits successfully. For protocol expectations, use the failure classes in [derive-tests-from-a-standard.md](derive-tests-from-a-standard.md#the-class-of-a-failure-and-when-to-declare-it-expected).
 
-Statistical comparisons also record the baseline repository revision and local changes. For a base-versus-feature comparison, use the same baseline revision and environment on both sides; advancing the baseline during the comparison changes the experiment. Diagnose missing baselines separately from changed simulation results. Changes to recorded expectations follow [change-a-baseline.md](change-a-baseline.md).
+Statistical and chart comparisons read the checkouts `statistics` and `media`. `opp_checkout_test_baselines` puts them at the commits that `inet.opp` pins, and a test gives a warning when a checkout is not at its pin. Statistical comparisons also record the baseline repository revision and local changes. For a base-versus-feature comparison, use the same baseline revision and environment on both sides; advancing the baseline during the comparison changes the experiment. Diagnose missing baselines separately from changed simulation results. Changes to recorded expectations follow [change-a-baseline.md](change-a-baseline.md).
 
 ## Before every push
 
@@ -46,6 +46,8 @@ make -j$(nproc) MODE=debug && make -j$(nproc) MODE=release
 doc/project/enforcement/check-architecture.sh
 doc/project/enforcement/check-naming.sh --base origin/master
 doc/project/enforcement/check-pull-request.sh --base origin/master  # the series gates, as CI runs them
+# when the series moves a baseline pin, before the baseline branch is pushed:
+doc/project/enforcement/check-baselines.sh origin/master..HEAD --baseline-repository statistical=statistics --baseline-repository chart=media
 doc/project/enforcement/check-interfaces.sh                # every I<Stem> class holds no body
 doc/project/enforcement/check-source-seals.sh --base origin/master
 

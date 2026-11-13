@@ -38,11 +38,11 @@ Keep the working directory, exact build and test commands, build mode, configura
 
 ## 7. Reconcile, do not re-litigate
 
-Record only a genuinely new deviation, as an `AV-*` row in [audit/architecture-exceptions.md](../audit/architecture-exceptions.md) or an `NV-*` row in [audit/naming-exceptions.md](../audit/naming-exceptions.md). A deviation that a ledger already holds is known, not a finding. A fingerprint baseline changes only with explicit approval and a reviewable explanation of its exact scope, cause and correctness — see [change-a-baseline.md](change-a-baseline.md).
+Record only a genuinely new deviation, as an `AV-*` row in [audit/architecture-exceptions.md](../audit/architecture-exceptions.md) or an `NV-*` row in [audit/naming-exceptions.md](../audit/naming-exceptions.md). A deviation that a ledger already holds is known, not a finding. A fingerprint baseline changes only with explicit approval and a reviewable explanation of its exact scope, cause and correctness — see [change-a-baseline.md](change-a-baseline.md). The same holds for a statistical and a chart baseline, which are in other repositories: the same guide says how their pins, their records and their attributions work.
 
 ## 8. Submit a reviewable change
 
-Divide the work into commits by concern: each part that can stand alone in a commit of its own, the whitespace and mechanical sweeps apart from the logic, the shared-component change before the model that needs it, the regenerated baselines inside the commit that moves them. Start each message with the answers to the [reviewer's questions](../rule/pull-request.md#the-reviewers-questions), in proportion to the change. Every rule for this step is in [pull-request.md](../rule/pull-request.md).
+Divide the work into commits by concern: each part that can stand alone in a commit of its own, the whitespace and mechanical sweeps apart from the logic, the shared-component change before the model that needs it, the regenerated baselines inside the commit that moves them, and the pin of a baseline in another repository inside that commit too. Start each message with the answers to the [reviewer's questions](../rule/pull-request.md#the-reviewers-questions), in proportion to the change. Every rule for this step is in [pull-request.md](../rule/pull-request.md).
 
 ## 9. Sealing last
 

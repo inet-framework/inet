@@ -10,7 +10,8 @@ A small pull request can answer in one or two sentences, and a pull request of o
 can reuse that commit's message. Headings are optional.
 
 Then list the commits in the order to read them, and end with the evidence: the tests that ran,
-the baselines that moved, and what is not verified.
+the baselines that moved, and what is not verified. For a statistical or chart baseline, name the
+branch or the pull request in the statistics or media repository.
 
 The rules are in doc/project/rule/pull-request.md (PR-REQ-STORY).
 -->
