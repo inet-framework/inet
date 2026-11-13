@@ -11,7 +11,8 @@
 #   CR-SCOPE-AREA    — the claimed area matches the paths the commit touches
 #   CR-DEPTH-ONE     — one commit reaches one depth level
 #   CR-DEPTH-DIRECTION — note: a mixed direction asks whether its parts can stand alone
-#   CR-OBL-INERT     — a commit below the behavior level moves no recorded expectation
+#   CR-OBL-INERT     — a commit below the behavior level moves no recorded expectation, in the tree or
+#                      by the pin of a baseline repository
 #
 # Usage (from the INET repository root):
 #   doc/project/enforcement/check-classification.sh origin/master..HEAD
@@ -30,7 +31,7 @@ note() { echo "  note: $1"; }
 
 DEPTHS="comment format location name refactor behavior"
 DIRS="add change remove"
-OBLS="fingerprint statistical expected test whatsnew migration"
+OBLS="fingerprint statistical chart expected test whatsnew migration"
 AREAS="src tests doc examples build plan"
 # The rule entered the tree on this day, in 3e741f4773, and it does not reach back: a commit
 # authored before it has no trailer for an honest reason. The author date is the one a rebase keeps.
@@ -166,6 +167,11 @@ while read -r sha; do
   case "$kind" in *behavior*) continue ;; esac
   n=$(git show --name-only --format='' "$sha" | grep -cE 'tests/(fingerprint|statistical)/.*\.(csv|json|sca)$')
   [ "$n" -gt 0 ] && { flag "${sha:0:9} claims '$kind' and moves $n recorded expectation(s)"; ok=0; }
+  # the statistical and chart baselines are in other repositories; a commit moves them with a pin
+  if git show --name-only --format='' "$sha" | grep -qx 'inet.opp'; then
+    pins=$(python3 "$(dirname "$0")/baseline_pins.py" moved "$sha" 2>/dev/null)
+    [ -n "$pins" ] && { flag "${sha:0:9} claims '$kind' and moves the pin of a baseline: $pins"; ok=0; }
+  fi
 done <<< "$COMMITS"
 [ "$ok" -eq 1 ] && echo "  ok"
 
